@@ -1,0 +1,10 @@
+{
+    "directionalLight": {
+        "direction": [
+            0.0,
+            -1.0,
+            0.0
+        ],
+        "intensity": 0.9900000095367432
+    }
+}
