@@ -20,7 +20,7 @@ public:
 
 	static LightCommon* GetInstance();
 
-	void Initialize();
+	void Initialize(DirectXCommon* dxCommon);
 
 	void Finalize();
 
@@ -42,6 +42,8 @@ private:
 
 	
 private:
+	DirectXCommon* dxCommon_ = nullptr;
+
 	const uint32_t kNumMaxInstance = 10;
 
 

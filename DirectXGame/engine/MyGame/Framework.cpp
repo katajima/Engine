@@ -65,7 +65,7 @@ void Framework::Initialize()
 
 	//ライト
 	lightCommon = LightCommon::GetInstance();
-	lightCommon->Initialize();
+	lightCommon->Initialize(dxCommon.get());
 
 	// テクスチャマネージャ
 	TextureManager::GetInstance()->Initialize(dxCommon.get());

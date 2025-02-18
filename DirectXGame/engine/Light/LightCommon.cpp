@@ -11,10 +11,12 @@ LightCommon* LightCommon::GetInstance()
 	return instance;
 }
 
-void LightCommon::Initialize()
+void LightCommon::Initialize(DirectXCommon* dxCommon)
 {
+	dxCommon_ = dxCommon;
+
 	//平行光源用のリソースを作る
-	directionalLightResource = Object3dCommon::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(DirectionalLight));
+	directionalLightResource = dxCommon_->CreateBufferResource(sizeof(DirectionalLight));
 	directionalLightData = nullptr;
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 	//今回は赤を書き込んで見る //白
@@ -30,7 +32,7 @@ void LightCommon::Initialize()
 	directionalLightData->groundNormal = { 0.0f,1.0f,0.0f };
 
 
-	pointLightResource = Object3dCommon::GetInstance()->GetDxCommon()->CreateBufferResource((sizeof(PointLight) * kNumMaxInstance));
+	pointLightResource = dxCommon_->CreateBufferResource((sizeof(PointLight) * kNumMaxInstance));
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
 
@@ -47,7 +49,7 @@ void LightCommon::Initialize()
 	pointLightData[1].lig = 0.2f;
 
 	//平行光源用のリソースを作る
-	spotLightResource = Object3dCommon::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(SpotLight) * kNumMaxInstance);
+	spotLightResource = dxCommon_->CreateBufferResource(sizeof(SpotLight) * kNumMaxInstance);
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
 	//今回は赤を書き込んで見る //白
 
@@ -70,13 +72,13 @@ void LightCommon::Finalize()
 void LightCommon::DrawLight()
 {
 	////------平行光源用------////
-	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
 	////------ポイントライト用------////
-	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
 
 	////------スポットライト用------////
-	Object3dCommon::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 
 }
 
