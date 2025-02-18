@@ -1,17 +1,17 @@
 #include "LightCommon.h"
 #include "imgui.h"
 
-LightCommon* LightCommon::instance = nullptr;
+LightManager* LightManager::instance = nullptr;
 
-LightCommon* LightCommon::GetInstance()
+LightManager* LightManager::GetInstance()
 {
 	if (instance == nullptr) {
-		instance = new LightCommon;
+		instance = new LightManager;
 	}
 	return instance;
 }
 
-void LightCommon::Initialize(DirectXCommon* dxCommon)
+void LightManager::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
@@ -69,13 +69,13 @@ void LightCommon::Initialize(DirectXCommon* dxCommon)
 	
 }
 
-void LightCommon::Finalize()
+void LightManager::Finalize()
 {
 	delete instance;
 	instance = nullptr;
 }
 
-void LightCommon::DrawLight()
+void LightManager::DrawLight()
 {
 	////------平行光源用------////
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
@@ -88,34 +88,13 @@ void LightCommon::DrawLight()
 
 }
 
-void LightCommon::SetLineCamera(Camera* camera)
+void LightManager::SetLineCamera(Camera* camera)
 {
 	
 }
 
-void LightCommon::Update()
+void LightManager::Update()
 {
-
-	//// 各タイプのライト用バッファの作成
-	//const size_t pointLightBufferSize = m_lights.size() * sizeof(PointLight); // PointLight用
-	//const size_t directionalLightBufferSize = m_lights.size() * sizeof(DirectionalLight); // DirectionalLight用
-	//const size_t spotLightBufferSize = m_lights.size() * sizeof(SpotLight); // SpotLight用
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource> pointLightBuffer, directionalLightBuffer, spotLightBuffer;
-
-	//dxCommon_->CreateBufferResource(pointLightBufferSize, &pointLightBuffer);
-	//dxCommon_->CreateBufferResource(directionalLightBufferSize, &directionalLightBuffer);
-	//spotLightResource = dxCommon_->CreateBufferResource(spotLightBufferSize, &spotLightResource);
-
-	/*PointLight* pointLightData = nullptr;
-	DirectionalLight* directionalLightData = nullptr;
-	SpotLight* spotLightData = nullptr;*/
-
-	// Mapリソースを取得
-	/*pointLightBuffer->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
-	directionalLightBuffer->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
-	spotLightBuffer->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));*/
-
 	size_t pointLightIndex = 0;
 	size_t directionalLightIndex = 0;
 	size_t spotLightIndex = 0;
@@ -243,14 +222,14 @@ void LightCommon::Update()
 
 }
 
-void LightCommon::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr)
+void LightManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr)
 {
 	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	parameter.Descriptor.ShaderRegister = registr;
 }
 
-void LightCommon::ApplyGlobalVariables()
+void LightManager::ApplyGlobalVariables()
 {
 	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 
@@ -281,7 +260,7 @@ void LightCommon::ApplyGlobalVariables()
 }
 
 
-void LightCommon::DrawLightLine() {
+void LightManager::DrawLightLine() {
 	
 }
 

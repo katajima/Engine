@@ -127,7 +127,7 @@ void Ocean::Draw()
 {
 	OceanManager::GetInstance()->DrawCommonSetting();
 
-	LightCommon::GetInstance()->DrawLight();
+	LightManager::GetInstance()->DrawLight();
 
 	OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(7, waveResource->GetGPUVirtualAddress());
 

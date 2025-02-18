@@ -100,7 +100,7 @@ protected:
 	
 	ParticleEmitter* emitter = nullptr;
 
-	LightCommon* lightCommon = nullptr;
+	LightManager* lightCommon = nullptr;
 
 	RenderingCommon* renderingCommon = nullptr;
 

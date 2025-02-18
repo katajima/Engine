@@ -15,12 +15,12 @@
 
 #include"Lights.h"
 
-class LightCommon
+class LightManager
 {
 public:
-	static LightCommon* instance;
+	static LightManager* instance;
 
-	static LightCommon* GetInstance();
+	static LightManager* GetInstance();
 
 	void Initialize(DirectXCommon* dxCommon);
 

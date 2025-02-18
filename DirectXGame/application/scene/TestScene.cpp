@@ -107,11 +107,11 @@ void TestScene::Initialize()
 	pointLightData.intensity = 100.0f;
 	pointLightData.lig = 0.2f;
 	pointLightData.isLight = true;
-	std::shared_ptr<PointLight> point = std::make_shared<PointLight>();;
+	point = std::make_shared<PointLight>();;
 
 	point->point = pointLightData;
 
-	LightCommon::GetInstance()->AddLight(point);
+	LightManager::GetInstance()->AddLight(point);
 
 	LineCommon::GetInstance()->
 
@@ -158,10 +158,11 @@ void TestScene::Update()
 
 
 	camera->UpdateMatrix();
-	LightCommon::GetInstance()->SetLineCamera(camera.get());
+	LightManager::GetInstance()->SetLineCamera(camera.get());
 
 #ifdef _DEBUG
 	ImGui::Begin("sprite");
+	//ImGui::DragFloat4("point", &point->point.color.x, 0.1f);
 	ImGui::End();
 
 
