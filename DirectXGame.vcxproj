@@ -135,6 +135,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\effect\Thunder\ThunderManager.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Trail\TrailEffect.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Trail\TrailEffectManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Light\Lights.cpp" />
     <ClCompile Include="DirectXGame\engine\Line\Line.cpp" />
     <ClCompile Include="DirectXGame\engine\Line\LineCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\audio\Audio.cpp" />
@@ -372,6 +373,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\effect\Thunder\ThunderManager.h" />
     <ClInclude Include="DirectXGame\engine\effect\Trail\TrailEffect.h" />
     <ClInclude Include="DirectXGame\engine\effect\Trail\TrailEffectManager.h" />
+    <ClInclude Include="DirectXGame\engine\Light\Lights.h" />
     <ClInclude Include="DirectXGame\engine\Material\Material.h" />
     <ClInclude Include="DirectXGame\engine\math\Easing.h" />
     <ClInclude Include="DirectXGame\engine\math\ProbabilityUtils.h" />

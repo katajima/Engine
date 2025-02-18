@@ -4,7 +4,7 @@
 
 
 
-struct DirectionalLight {
+struct DirectionalLightData {
 	Vector4 color; //!< ライトの色
 	Vector3 direction; //!< ライトの向き
 	float intensity; //!< 輝度
@@ -18,7 +18,7 @@ struct DirectionalLight {
 	Vector3 groundNormal; // 地面法線方向
 };
 
-struct PointLight {
+struct PointLightData {
 	Vector4 color; //ライト色
 	Vector3 position;// ライト位置
 	float intensity; // 輝度
@@ -29,7 +29,7 @@ struct PointLight {
 	//float padding[1]; // パディング
 };
 
-struct SpotLight
+struct SpotLightData
 {
 	Vector4 color; //ライト色
 	Vector3 position; // ライト位置

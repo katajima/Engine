@@ -99,6 +99,21 @@ void TestScene::Initialize()
 	emitterEnemy_->SetIsBounce(true);
 	emitterEnemy_->SetSizeMinMax(Vector3{0.1f,0.1f,0.1f},{ 0.2f,0.2f,0.2f });
 
+	PointLightData pointLightData;
+
+	pointLightData.color = { 1.0f,1.0f,1.0f,1.0f };
+	pointLightData.position = { 0.0f,-1.0f,-10.0f };
+	pointLightData.radius = 100.0f;
+	pointLightData.intensity = 100.0f;
+	pointLightData.lig = 0.2f;
+	pointLightData.isLight = true;
+	std::shared_ptr<PointLight> point = std::make_shared<PointLight>();;
+
+	point->point = pointLightData;
+
+	LightCommon::GetInstance()->AddLight(point);
+
+	LineCommon::GetInstance()->
 
 	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 

@@ -13,6 +13,8 @@
 
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
+#include"Lights.h"
+
 class LightCommon
 {
 public:
@@ -32,9 +34,14 @@ public:
 
 	void Update();
 
-	//DirectionalLight GetDirectionalLight(int index) {return directionalLightData[index];}
-	//PointLight GetPointLight(int index) {return pointLightData[index];}
+	void AddLight(std::shared_ptr<Lights> light) {
+		m_lights.push_back(light);
+	}
 
+	const std::vector<std::shared_ptr<Lights>>& GetLights() const {
+		return m_lights;
+	}
+	
 	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr);
 
 private:
@@ -42,23 +49,25 @@ private:
 
 	
 private:
+	std::vector<std::shared_ptr<Lights>> m_lights;
+
 	DirectXCommon* dxCommon_ = nullptr;
 
 	const uint32_t kNumMaxInstance = 10;
 
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> directionalLightResource;
-	DirectionalLight* directionalLightData = nullptr;
+	DirectionalLightData* directionalLightData = nullptr;
 
 	
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> pointLightResource;
-	PointLight* pointLightData;
+	PointLightData* pointLightData;
 	const int pointMax = 3;
 
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> spotLightResource;
-	SpotLight* spotLightData = nullptr;
+	SpotLightData* spotLightData = nullptr;
 	const int spotMax = 3;
 
 
