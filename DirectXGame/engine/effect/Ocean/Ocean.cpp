@@ -81,6 +81,8 @@ void Ocean::Initialize(Vector2 renge)
 	waveData->time = 0;
 	waveData->noiseScale = 1.0f;
 	waveData->noiseStrength = 1.0f;
+	waveData->octaves = 1;
+	waveData->roughness = 1.0f;
 
 	//transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,10.0f,0.0f} };
@@ -97,11 +99,13 @@ void Ocean::Update()
 
 	if (ImGui::CollapsingHeader("Ocean")) {
 
-		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.1f);
-		ImGui::DragFloat("frequency", &waveData->frequency, 0.1f);
-		ImGui::DragFloat("speed", &waveData->speed, 0.1f);
-		ImGui::DragFloat("noiseScale", &waveData->noiseScale, 0.1f);
-		ImGui::DragFloat("noiseStrength", &waveData->noiseStrength, 0.1f);
+		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.01f);
+		ImGui::DragFloat("frequency", &waveData->frequency, 0.01f);
+		ImGui::DragFloat("speed", &waveData->speed, 0.01f);
+		ImGui::DragFloat("noiseScale", &waveData->noiseScale, 0.01f);
+		ImGui::DragFloat("noiseStrength", &waveData->noiseStrength, 0.01f);
+		ImGui::DragInt("octaves", &waveData->octaves);
+		ImGui::DragFloat("roughness", &waveData->roughness, 0.01f);
 		
 	}
 	ImGui::End();

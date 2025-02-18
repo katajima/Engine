@@ -64,7 +64,9 @@ private:
 		float time; // 現在の時間（アニメーション用）
 		float noiseScale; // ノイズのスケール
 		float noiseStrength; // ノイズの強度
-		float pad[2];
+		int octaves; // フラクタルノイズのオクターブ数
+		float roughness; // 各オクターブの影響度
+		//float pad[2];
 	};
 	Microsoft::WRL::ComPtr < ID3D12Resource> waveResource;
 
