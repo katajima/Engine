@@ -9,6 +9,7 @@
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/base/DirectXCommon.h"
 #include "DirectXGame/engine/Mesh/Mesh.h"
+#include "DirectXGame/engine/struct/Light.h"
 
 
 class LineCommon
@@ -29,6 +30,8 @@ public:
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
 	void AddLine(Vector3 pos ,Vector3 pos2);
+
+	void AddPointLightLine(PointLightData data);
 
 	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat);
 	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
@@ -83,13 +86,7 @@ private:
 	Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;
 	MaterialData* materialData;
 
-	//Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-	//uint32_t instanceCount; // インスタンス数
-	//LineGPU* instanceData; // インスタンシングデータを書き込むためのポインタ
-	//std::vector<LineGPU> line_;
-	//D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU;
-	//D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU;
-	//uint32_t srvIndex;
+	
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> viewResource;
 	Matrix4x4* cameraWVP;

@@ -122,99 +122,96 @@ void LightManager::Update()
 		}
 	}
 
-	//// 転送後はリソースをアンマップ
-	//pointLightBuffer->Unmap(0, nullptr);
-	//directionalLightBuffer->Unmap(0, nullptr);
-	//spotLightBuffer->Unmap(0, nullptr);
+
 	
 #ifdef _DEBUG
-	ImGui::Begin("engine");
+	//ImGui::Begin("engine");
 
-	if (ImGui::CollapsingHeader("Light")) {
+	//if (ImGui::CollapsingHeader("Light")) {
 
-		//if (ImGui::CollapsingHeader("DirectionalLight")) {
-			if (ImGui::BeginTabBar("directionalLightData"))
-			{
-				if (ImGui::BeginTabItem("directionalLightData"))
-				{
-					bool is = directionalLightData->isLight;
-					ImGui::Checkbox("isLighting", &is);
-					directionalLightData->isLight = is;
-					ImGui::DragFloat3("direction", &directionalLightData->direction.x, 0.1f);
-					directionalLightData->direction = Normalize(directionalLightData->direction);
-					ImGui::DragFloat("intensity", &directionalLightData->intensity, 0.1f);
-					if (0 >= directionalLightData->intensity)
-						directionalLightData->intensity = 0;
-					ImGui::DragFloat("lig", &directionalLightData->lig, 0.1f);
-					ImGui::ColorEdit3("groundColor", &directionalLightData->groundColor.x);
-					ImGui::ColorEdit3("skyColor", &directionalLightData->skyColor.x);
+	//	//if (ImGui::CollapsingHeader("DirectionalLight")) {
+	//		if (ImGui::BeginTabBar("directionalLightData"))
+	//		{
+	//			if (ImGui::BeginTabItem("directionalLightData"))
+	//			{
+	//				bool is = directionalLightData->isLight;
+	//				ImGui::Checkbox("isLighting", &is);
+	//				directionalLightData->isLight = is;
+	//				ImGui::DragFloat3("direction", &directionalLightData->direction.x, 0.1f);
+	//				directionalLightData->direction = Normalize(directionalLightData->direction);
+	//				ImGui::DragFloat("intensity", &directionalLightData->intensity, 0.1f);
+	//				if (0 >= directionalLightData->intensity)
+	//					directionalLightData->intensity = 0;
+	//				ImGui::DragFloat("lig", &directionalLightData->lig, 0.1f);
+	//				ImGui::ColorEdit3("groundColor", &directionalLightData->groundColor.x);
+	//				ImGui::ColorEdit3("skyColor", &directionalLightData->skyColor.x);
 
-					ImGui::ColorEdit4("color", &directionalLightData->color.x);
-					ImGui::EndTabItem();
+	//				ImGui::ColorEdit4("color", &directionalLightData->color.x);
+	//				ImGui::EndTabItem();
 
-					if (ImGui::Button("save")) {
-						
-						GlobalVariables* globalVariables = GlobalVariables::GetInstance();
-						const char* gropName = "directionalLight";
-						globalVariables->saveFile(gropName);
-					}
-				}
-			}
-		//}
-		ImGui::EndTabBar();
-		if (ImGui::BeginTabBar("pointLightData"))
-		{
-			for (int i = 0; i < 2; i++) {
-				std::string str = "light" + std::to_string(i);
-				if (ImGui::BeginTabItem(str.c_str())) {
-					bool is = pointLightData[i].isLight;
-					ImGui::Checkbox("isLighting", &is);
-					pointLightData[i].isLight = is;
-					ImGui::DragFloat3("position", &pointLightData[i].position.x, 0.1f);
-					ImGui::DragFloat("intensity", &pointLightData[i].intensity, 0.1f);
-					if (0 >= pointLightData[i].intensity)
-						pointLightData[i].intensity = 0;
-					ImGui::DragFloat("decay", &pointLightData[i].decay, 0.1f);
-					ImGui::DragFloat("radius", &pointLightData[i].radius, 0.1f);
-					ImGui::DragFloat("lig", &pointLightData[i].lig, 0.1f);
+	//				if (ImGui::Button("save")) {
+	//					
+	//					GlobalVariables* globalVariables = GlobalVariables::GetInstance();
+	//					const char* gropName = "directionalLight";
+	//					globalVariables->saveFile(gropName);
+	//				}
+	//			}
+	//		}
+	//	//}
+	//	ImGui::EndTabBar();
+	//	if (ImGui::BeginTabBar("pointLightData"))
+	//	{
+	//		for (int i = 0; i < 2; i++) {
+	//			std::string str = "light" + std::to_string(i);
+	//			if (ImGui::BeginTabItem(str.c_str())) {
+	//				bool is = pointLightData[i].isLight;
+	//				ImGui::Checkbox("isLighting", &is);
+	//				pointLightData[i].isLight = is;
+	//				ImGui::DragFloat3("position", &pointLightData[i].position.x, 0.1f);
+	//				ImGui::DragFloat("intensity", &pointLightData[i].intensity, 0.1f);
+	//				if (0 >= pointLightData[i].intensity)
+	//					pointLightData[i].intensity = 0;
+	//				ImGui::DragFloat("decay", &pointLightData[i].decay, 0.1f);
+	//				ImGui::DragFloat("radius", &pointLightData[i].radius, 0.1f);
+	//				ImGui::DragFloat("lig", &pointLightData[i].lig, 0.1f);
 
-					ImGui::ColorEdit4("color", &pointLightData[i].color.x);
-					ImGui::EndTabItem();
-				}
-			}
-		}
-		ImGui::EndTabBar();
-		if (ImGui::BeginTabBar("spotLightData"))
-		{
-			for (int i = 0; i < spotMax; i++) {
-				std::string str = "light" + std::to_string(i);
-				if (ImGui::BeginTabItem(str.c_str())) {
-					bool is = spotLightData[i].isLight;
-					ImGui::Checkbox("isLighting", &is);
-					spotLightData[i].isLight = is;
+	//				ImGui::ColorEdit4("color", &pointLightData[i].color.x);
+	//				ImGui::EndTabItem();
+	//			}
+	//		}
+	//	}
+	//	ImGui::EndTabBar();
+	//	if (ImGui::BeginTabBar("spotLightData"))
+	//	{
+	//		for (int i = 0; i < spotMax; i++) {
+	//			std::string str = "light" + std::to_string(i);
+	//			if (ImGui::BeginTabItem(str.c_str())) {
+	//				bool is = spotLightData[i].isLight;
+	//				ImGui::Checkbox("isLighting", &is);
+	//				spotLightData[i].isLight = is;
 
-					ImGui::DragFloat3("position", &spotLightData[i].position.x, 0.1f);
-					
-					ImGui::DragFloat3("direction", &spotLightData[i].direction.x, 0.1f);
-					spotLightData[i].direction = Normalize(spotLightData[i].direction);
-					
-					ImGui::DragFloat("intensity", &spotLightData[i].intensity, 0.1f);
-					if (0 >= spotLightData[i].intensity)
-						spotLightData[i].intensity = 0;
-					ImGui::DragFloat("distance", &spotLightData[i].distance, 0.1f);
-					
-					ImGui::DragFloat("decay", &spotLightData[i].decay, 0.1f);
-					ImGui::DragFloat("cosFalloffStart", &spotLightData[i].cosFalloffStart, 0.1f);
-					ImGui::DragFloat("cosAngle", &spotLightData[i].cosAngle, 0.01f);
+	//				ImGui::DragFloat3("position", &spotLightData[i].position.x, 0.1f);
+	//				
+	//				ImGui::DragFloat3("direction", &spotLightData[i].direction.x, 0.1f);
+	//				spotLightData[i].direction = Normalize(spotLightData[i].direction);
+	//				
+	//				ImGui::DragFloat("intensity", &spotLightData[i].intensity, 0.1f);
+	//				if (0 >= spotLightData[i].intensity)
+	//					spotLightData[i].intensity = 0;
+	//				ImGui::DragFloat("distance", &spotLightData[i].distance, 0.1f);
+	//				
+	//				ImGui::DragFloat("decay", &spotLightData[i].decay, 0.1f);
+	//				ImGui::DragFloat("cosFalloffStart", &spotLightData[i].cosFalloffStart, 0.1f);
+	//				ImGui::DragFloat("cosAngle", &spotLightData[i].cosAngle, 0.01f);
 
-					ImGui::ColorEdit4("color", &spotLightData[i].color.x);
-					ImGui::EndTabItem();
-				}
-			}
-		}
-		ImGui::EndTabBar();
-	}
-	ImGui::End();
+	//				ImGui::ColorEdit4("color", &spotLightData[i].color.x);
+	//				ImGui::EndTabItem();
+	//			}
+	//		}
+	//	}
+	//	ImGui::EndTabBar();
+	//}
+	//ImGui::End();
 
 	
 #endif

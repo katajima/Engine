@@ -107,6 +107,7 @@ void TestScene::Initialize()
 	pointLightData.intensity = 100.0f;
 	pointLightData.lig = 0.2f;
 	pointLightData.isLight = true;
+	pointLightData.decay = 1.0f;
 	point = std::make_shared<PointLight>();;
 
 	point->point = pointLightData;
@@ -209,6 +210,21 @@ void TestScene::Update()
 
 
 	}
+	if (ImGui::CollapsingHeader("Light")) {
+		bool is = point->point.isLight;
+		ImGui::Checkbox("isLighting", &is);
+		point->point.isLight = is;
+		ImGui::DragFloat3("position", &point->point.position.x, 0.1f);
+		ImGui::DragFloat("intensity", &point->point.intensity, 0.1f);
+		if (0 >= point->point.intensity)
+			point->point.intensity = 0;
+		ImGui::DragFloat("decay", &point->point.decay, 0.1f);
+		ImGui::DragFloat("radius", &point->point.radius, 0.1f);
+		ImGui::DragFloat("lig", &point->point.lig, 0.1f);
+
+		ImGui::ColorEdit4("color", &point->point.color.x);
+	}
+
 
 	ImGui::End();
 
@@ -217,6 +233,8 @@ void TestScene::Update()
 	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_);
 	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_,mm.GetModel()->modelData.cachedLineIndices_);
 	//LineCommon::GetInstance()->AddLineMesh(mm2.GetMesh(0), mm2.worldtransform_.worldMat_,mm2.GetModel()->modelData.cachedLineIndices_);
+	LineCommon::GetInstance()->AddPointLightLine(point->point);
+
 
 #endif // _DEBUG
 	

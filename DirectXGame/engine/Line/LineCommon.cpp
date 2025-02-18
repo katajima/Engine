@@ -69,6 +69,58 @@ void LineCommon::AddLine(Vector3 pos, Vector3 pos2)
 	
 }
 
+void LineCommon::AddPointLightLine(PointLightData data)
+{
+	constexpr int segments = 16; // 1つの円を構成するセグメント数
+	const float radius = data.radius; // ポイントライトの届く距離
+
+	Vector3 center = data.position;
+
+	// 3つの軸 (XY, XZ, YZ) に円を描画
+	for (int axis = 0; axis < 3; ++axis) {
+		for (int i = 0; i < segments; ++i) {
+			float theta1 = (2.0f * static_cast<float>(M_PI) * i) / segments;
+			float theta2 = (2.0f * static_cast<float>(M_PI) * (i + 1)) / segments;
+
+			Vector3 p1, p2;
+
+			// XY平面
+			if (axis == 0) {
+				p1 = Vector3(radius * cosf(theta1), radius * sinf(theta1), 0.0f);
+				p2 = Vector3(radius * cosf(theta2), radius * sinf(theta2), 0.0f);
+			}
+			// XZ平面
+			else if (axis == 1) {
+				p1 = Vector3(radius * cosf(theta1), 0.0f, radius * sinf(theta1));
+				p2 = Vector3(radius * cosf(theta2), 0.0f, radius * sinf(theta2));
+			}
+			// YZ平面
+			else {
+				p1 = Vector3(0.0f, radius * cosf(theta1), radius * sinf(theta1));
+				p2 = Vector3(0.0f, radius * cosf(theta2), radius * sinf(theta2));
+			}
+
+			// 中心座標をオフセット
+			p1 += center;
+			p2 += center;
+
+			Vector4 p1_v4 = { p1.x,p1.y,p1.z,1 };
+			Vector4 p2_v4 = { p2.x,p2.y,p2.z,1 };
+
+
+			// 頂点を追加
+			mesh_->verticesline.push_back({ p1_v4 });
+			mesh_->verticesline.push_back({ p2_v4 });
+
+			// インデックスを追加
+			mesh_->indices.push_back(lineNum_);
+			mesh_->indices.push_back(lineNum_ + 1);
+
+			lineNum_ += 2;
+		}
+	}
+}
+
 void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
 {
 
