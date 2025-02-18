@@ -80,7 +80,7 @@ private:
 	std::unique_ptr < Ocean> ocean_ = nullptr;
 	
 	//std::unique_ptr<Sprite> sprite2_ = nullptr;
-
+	std::shared_ptr<PointLight> point;
 };
 
 

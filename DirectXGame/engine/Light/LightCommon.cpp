@@ -1,38 +1,38 @@
 #include "LightCommon.h"
 #include "imgui.h"
 
-LightCommon* LightCommon::instance = nullptr;
+LightManager* LightManager::instance = nullptr;
 
-LightCommon* LightCommon::GetInstance()
+LightManager* LightManager::GetInstance()
 {
 	if (instance == nullptr) {
-		instance = new LightCommon;
+		instance = new LightManager;
 	}
 	return instance;
 }
 
-void LightCommon::Initialize(DirectXCommon* dxCommon)
+void LightManager::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
 	//平行光源用のリソースを作る
-	directionalLightResource = dxCommon_->CreateBufferResource(sizeof(DirectionalLight));
+	directionalLightResource = dxCommon_->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 	
-	//今回は赤を書き込んで見る //白
-	directionalLightData[0] = DirectionalLight({1.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,0.0f}, 1.0f);
-	directionalLightData[0].lig = 0.2f;
-	directionalLightData[0].isLight = true;
-						
-	// 半球ライト		 
-	directionalLightData[0].groundColor = { 0.7f,0.5f,0.3f };
-	directionalLightData[0].skyColor = { 0.15f,0.7f,0.95f };
-	directionalLightData[0].groundColor = { 1.0f,1.0f,1.0f };
-	directionalLightData[0].skyColor = { 1.0f,1.0f,1.0f };
-	directionalLightData[0].groundNormal = { 0.0f,1.0f,0.0f };
+	////今回は赤を書き込んで見る //白
+	//directionalLightData[0] = DirectionalLightData({1.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,0.0f}, 1.0f);
+	//directionalLightData[0].lig = 0.2f;
+	//directionalLightData[0].isLight = true;
+	//					
+	//// 半球ライト		 
+	//directionalLightData[0].groundColor = { 0.7f,0.5f,0.3f };
+	//directionalLightData[0].skyColor = { 0.15f,0.7f,0.95f };
+	//directionalLightData[0].groundColor = { 1.0f,1.0f,1.0f };
+	//directionalLightData[0].skyColor = { 1.0f,1.0f,1.0f };
+	//directionalLightData[0].groundNormal = { 0.0f,1.0f,0.0f };
 
 
-	pointLightResource = dxCommon_->CreateBufferResource((sizeof(PointLight) * kNumMaxInstance));
+	pointLightResource = dxCommon_->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
 
@@ -55,27 +55,27 @@ void LightCommon::Initialize(DirectXCommon* dxCommon)
 
 
 	//平行光源用のリソースを作る
-	spotLightResource = dxCommon_->CreateBufferResource(sizeof(SpotLight) * kNumMaxInstance);
+	spotLightResource = dxCommon_->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
 	//今回は赤を書き込んで見る //白
 
-	for (int i = 0; i < spotMax; i++) {
-		spotLightData[i] = SpotLight({1.0f,1.0f,1.0f,1.0f}, {2.0f,1.25f,0.0f}, 10.0f, Normalize({-1.0f,-1.0f,0.0f}), 10.0f, 2.0f, std::cos(std::numbers::pi_v<float> / 3.0f), 1.0f);
+	/*for (int i = 0; i < spotMax; i++) {
+		spotLightData[i] = SpotLightData({1.0f,1.0f,1.0f,1.0f}, {2.0f,1.25f,0.0f}, 10.0f, Normalize({-1.0f,-1.0f,0.0f}), 10.0f, 2.0f, std::cos(std::numbers::pi_v<float> / 3.0f), 1.0f);
 		spotLightData[i].position = Vector3(10 * float(i), 0, 10);
 		spotLightData[i].intensity = 50.0f;
 		spotLightData[i].isLight = true;
-	}
+	}*/
 
 	
 }
 
-void LightCommon::Finalize()
+void LightManager::Finalize()
 {
 	delete instance;
 	instance = nullptr;
 }
 
-void LightCommon::DrawLight()
+void LightManager::DrawLight()
 {
 	////------平行光源用------////
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
@@ -88,13 +88,44 @@ void LightCommon::DrawLight()
 
 }
 
-void LightCommon::SetLineCamera(Camera* camera)
+void LightManager::SetLineCamera(Camera* camera)
 {
 	
 }
 
-void LightCommon::Update()
+void LightManager::Update()
 {
+	size_t pointLightIndex = 0;
+	size_t directionalLightIndex = 0;
+	size_t spotLightIndex = 0;
+
+	// m_lightsからライトデータを取得して各バッファに格納
+	for (const auto& light : m_lights)
+	{
+		if (light->GetType() == Lights::Type::Point)
+		{
+			// LightsクラスからPointLightDataをコピー
+			static_cast<PointLight*>(light.get())->SetLightData(&pointLightData[pointLightIndex]);
+			++pointLightIndex;
+		}
+		else if (light->GetType() == Lights::Type::Directional)
+		{
+			// LightsクラスからDirectionalLightDataをコピー
+			static_cast<DirectionalLight*>(light.get())->SetLightData(&directionalLightData[directionalLightIndex]);
+			++directionalLightIndex;
+		}
+		else if (light->GetType() == Lights::Type::Spot)
+		{
+			// LightsクラスからSpotLightDataをコピー
+			static_cast<SpotLight*>(light.get())->SetLightData(&spotLightData[spotLightIndex]);
+			++spotLightIndex;
+		}
+	}
+
+	//// 転送後はリソースをアンマップ
+	//pointLightBuffer->Unmap(0, nullptr);
+	//directionalLightBuffer->Unmap(0, nullptr);
+	//spotLightBuffer->Unmap(0, nullptr);
 	
 #ifdef _DEBUG
 	ImGui::Begin("engine");
@@ -189,18 +220,16 @@ void LightCommon::Update()
 #endif
 
 
-	
-
 }
 
-void LightCommon::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr)
+void LightManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr)
 {
 	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	parameter.Descriptor.ShaderRegister = registr;
 }
 
-void LightCommon::ApplyGlobalVariables()
+void LightManager::ApplyGlobalVariables()
 {
 	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 
@@ -231,7 +260,7 @@ void LightCommon::ApplyGlobalVariables()
 }
 
 
-void LightCommon::DrawLightLine() {
+void LightManager::DrawLightLine() {
 	
 }
 

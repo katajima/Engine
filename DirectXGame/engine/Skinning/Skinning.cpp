@@ -130,16 +130,16 @@ void SkinningConmmon::CreateRootSignature()
 	TextureManager::SetRootParameter(rootParameters[2], descriptorRange[0]);
 
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
-	LightCommon::SetRootParameter(rootParameters[3], 1);
+	LightManager::SetRootParameter(rootParameters[3], 1);
 
 	// カメラデータ (b2) をピクセルシェーダで使用する
 	CameraCommon::SetRootParameter(rootParameters[4], 2);
 
 	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	LightCommon::SetRootParameter(rootParameters[5], 3);
+	LightManager::SetRootParameter(rootParameters[5], 3);
 
 	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	LightCommon::SetRootParameter(rootParameters[6], 4);
+	LightManager::SetRootParameter(rootParameters[6], 4);
 
 	// 法線マップデータ (t1) をピクセルシェーダで使用する 
 	TextureManager::SetRootParameter(rootParameters[7], descriptorRangeNormalmap[0]);
