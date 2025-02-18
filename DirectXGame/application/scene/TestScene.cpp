@@ -113,7 +113,7 @@ void TestScene::Initialize()
 
 	LightManager::GetInstance()->AddLight(point);
 
-	LineCommon::GetInstance()->
+	//LineCommon::GetInstance()->
 
 	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 
