@@ -98,12 +98,18 @@ void MyGame::Update()
 
 void MyGame::Draw()
 {
-	// 描画前処理
-	SrvManager::GetInstance()->PreDraw();
+	///
+	//dxCommon->CreateRenderTexture();
+
+	// 描画設定
+	//RenderingCommon::GetInstance()->DrawCommonSetting();
 
 	//dxCommon->PreDrawOffscreen();
 
 	dxCommon->PreDrawSwap();
+
+	// 描画前処理
+	SrvManager::GetInstance()->PreDraw();
 
 	//////////////---------3Dモデル-------------///////////////
 
@@ -120,10 +126,7 @@ void MyGame::Draw()
 	//// 2Dオブジェクトの描画準備
 	SceneManager::GetInstance()->Draw2D();
 	
-	///
-	//dxCommon->CreateRenderTexture();
-	//RenderingCommon::GetInstance()->DrawCommonSetting();
-
+	
 
 	//描画後処理
 	//dxCommon->PostDrawOffscreen();

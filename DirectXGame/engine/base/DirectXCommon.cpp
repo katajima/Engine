@@ -56,6 +56,8 @@ void DirectXCommon::PreDrawOffscreen() {
 }
 
 void DirectXCommon::PostDrawOffscreen() {
+	
+
 	TransitionResourceState(renderTextureResource_.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,  // 現在の状態
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);  // 次の状態 (ピクセルシェーダー用)
@@ -703,6 +705,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateRenderTextureResourc
 	resourceDesc.SampleDesc.Count = 1; // サンプリングカウント。1固定
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; // 2次元
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET; // RenderTargetとして使う通知
+	//resourceDesc.Flags = D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE; // RenderTargetとして使う通知
 
 	D3D12_HEAP_PROPERTIES heapProperties{};
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT; // 当然VRAM上に作る
@@ -730,16 +733,16 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateRenderTextureResourc
 }
 
 void DirectXCommon::CreateRenderTexture() {
-	//const Vector4 kRenderTargetClearValue{ 1.0f, 0.0f, 0.0f, 1.0f };
-	//renderTextureResource_ = CreateRenderTextureResource(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
-	//device->CreateRenderTargetView(renderTextureResource_.Get(), &rtvTexDesc, rtvTexHandle);
+	const Vector4 kRenderTargetClearValue{ 1.0f, 0.0f, 0.0f, 1.0f };
+	renderTextureResource_ = CreateRenderTextureResource(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
+	device->CreateRenderTargetView(renderTextureResource_.Get(), &rtvTexDesc, rtvTexHandle);
 	
 	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
 	renderTextureSrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	renderTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	renderTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	renderTextureSrvDesc.Texture2D.MipLevels = 1;
-	//index = SrvManager::GetInstance()->Allocate();
+	index = SrvManager::GetInstance()->Allocate();
 
 	device->CreateShaderResourceView(
 		renderTextureResource_.Get(), &renderTextureSrvDesc, SrvManager::GetInstance()->GetCPUDescriptorHandle(index));

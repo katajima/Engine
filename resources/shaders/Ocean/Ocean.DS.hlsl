@@ -8,11 +8,13 @@ struct WaveParameters
     float time; // 現在の時間
     float noiseScale; // ノイズのスケール
     float noiseStrength; // ノイズの強度
+    int octaves; // フラクタルノイズのオクターブ数
+    float roughness; // 各オクターブの影響度
 };
 
 ConstantBuffer<WaveParameters> gWaveParameters : register(b5);
 
-// 擬似ノイズ関数（ハッシュベース）
+// --- 擬似ノイズ関数（ハッシュベース） ---
 float Hash(float2 p)
 {
     float3 p3 = frac(float3(p.xyx) * 0.1031);
@@ -20,7 +22,7 @@ float Hash(float2 p)
     return frac((p3.x + p3.y) * p3.z);
 }
 
-// ノイズ関数（滑らかな変化を作る）
+// --- Perlin風ノイズ ---
 float PerlinNoise(float2 uv)
 {
     float2 i = floor(uv);
@@ -34,6 +36,26 @@ float PerlinNoise(float2 uv)
     float2 u = f * f * (3.0 - 2.0 * f); // スムージング
 
     return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
+}
+
+// --- フラクタルノイズ（Fbm） ---
+float FractalNoise(float2 uv)
+{
+    float amplitude = 1.0;
+    float total = 0.0;
+    float maxValue = 0.0; // 正規化用
+    float frequency = 1.0;
+
+    for (int i = 0; i < gWaveParameters.octaves; i++)
+    {
+        total += PerlinNoise(uv * frequency) * amplitude;
+        maxValue += amplitude;
+
+        amplitude *= gWaveParameters.roughness; // ラフネスで振幅を調整
+        frequency *= 2.0; // 周波数を倍増
+    }
+
+    return total / maxValue; // 正規化
 }
 
 [domain("quad")]
@@ -51,14 +73,14 @@ DS_OUTPUT main(
         patch[3].vPosition * domain.x * domain.y + // 右下
         patch[2].vPosition * (1.0f - domain.x) * domain.y; // 左下
 
-    // ベースの波の影響
+    // --- 通常の波 + フラクタルノイズ ---
     float wave = gWaveParameters.amplitude * (
         cos(gWaveParameters.frequency * WorldPosition.y - gWaveParameters.speed * gWaveParameters.time) +
         sin(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time)
     );
 
-    // ノイズを加えた波の変動
-    float noise = gWaveParameters.noiseStrength * PerlinNoise(WorldPosition.xy * gWaveParameters.noiseScale + gWaveParameters.time);
+    // フラクタルノイズを追加
+    float noise = gWaveParameters.noiseStrength * FractalNoise(WorldPosition.xy * gWaveParameters.noiseScale + gWaveParameters.time);
 
     // Z軸に適用
     WorldPosition.z += wave + noise;
@@ -78,9 +100,9 @@ DS_OUTPUT main(
                cos(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time)
     );
 
-    // ノイズの勾配も法線に影響を与える
-    float noiseDX = gWaveParameters.noiseStrength * (PerlinNoise((WorldPosition.xy + float2(0.01, 0)) * gWaveParameters.noiseScale) - noise);
-    float noiseDY = gWaveParameters.noiseStrength * (PerlinNoise((WorldPosition.xy + float2(0, 0.01)) * gWaveParameters.noiseScale) - noise);
+    // フラクタルノイズの勾配を追加
+    float noiseDX = gWaveParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0.01, 0)) * gWaveParameters.noiseScale) - noise);
+    float noiseDY = gWaveParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0, 0.01)) * gWaveParameters.noiseScale) - noise);
 
     float dZ = 1.0; // Z軸方向の基準（波をZ軸に適用しているため）
 
