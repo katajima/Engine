@@ -66,7 +66,7 @@ void LineCommon::AddLine(Vector3 start, Vector3 end, Vector4 color)
 	lineNum_ += 2;
 }
 
-void LineCommon::AddPointLightLine(PointLightData data)
+void LineCommon::AddLightLine(PointLightData data)
 {
 	constexpr int segments = 16; // 1つの円を構成するセグメント数
 	const float radius = data.radius; // ポイントライトの届く距離
@@ -127,6 +127,44 @@ void LineCommon::AddPointLightLine(PointLightData data)
 	AddLine(xStart, xEnd, lineColor); // X軸
 	AddLine(yStart, yEnd, lineColor); // Y軸
 	AddLine(zStart, zEnd, lineColor); // Z軸
+}
+
+void LineCommon::AddLightLine(SpotLightData data)
+{
+	constexpr int segments = 16; // スポットライトの円を構成するセグメント数
+	const float distance = data.distance; // スポットライトの届く最大距離
+	Vector3 center = data.position; // スポットライトの位置
+	Vector4 lineColor = data.color; // ライトの色をそのまま使用
+
+	// ライトの方向を正規化
+	Vector3 dir = Normalize(data.direction);
+
+	// スポットライトの最大開き角（cosAngleを使って角度を求める）
+	float angle = acosf(data.cosAngle); // ラジアン
+	float radius = tanf(angle) * distance; // スポット先端の半径
+
+	// スポットライトの先端の位置（中心）
+	Vector3 tip = center + dir * distance;
+
+	// XYZ 軸に沿ったスポットの形状ラインを描画（スポット軸ライン）
+	AddLine(center, tip, lineColor);
+
+	// スポットライトの広がりを示す円を描画
+	for (int i = 0; i < segments; ++i)
+	{
+		float theta1 = (2.0f * static_cast<float>(M_PI) * i) / segments;
+		float theta2 = (2.0f * static_cast<float>(M_PI) * (i + 1)) / segments;
+
+		// 円の頂点を求める（スポットの先端部分の円周上の点）
+		Vector3 p1 = tip + GetPerpendicularVector(dir) * (radius * cosf(theta1)) + GetUpVector(dir) * (radius * sinf(theta1));
+		Vector3 p2 = tip + GetPerpendicularVector(dir) * (radius * cosf(theta2)) + GetUpVector(dir) * (radius * sinf(theta2));
+
+		// 円周のラインを描画
+		AddLine(p1, p2, lineColor);
+
+		// スポットライトの中心から先端の円周の点へのライン
+		AddLine(center, p1, lineColor);
+	}
 }
 
 

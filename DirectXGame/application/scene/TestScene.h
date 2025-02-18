@@ -81,6 +81,9 @@ private:
 	
 	//std::unique_ptr<Sprite> sprite2_ = nullptr;
 	std::shared_ptr<PointLight> point;
+
+	std::shared_ptr<SpotLight> spot;
+
 };
 
 

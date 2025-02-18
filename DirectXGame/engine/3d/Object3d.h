@@ -17,6 +17,7 @@
 using namespace Microsoft::WRL;
 
 class Object3dCommon;
+class SkinningConmmon;
 
 class Object3d
 {
@@ -100,6 +101,7 @@ private:
 	bool flag = true;
 	
 	Object3dCommon* object3dCommon_;
+	SkinningConmmon* skinningConmmon_;
 
 public:
 	// モデル

@@ -30,6 +30,7 @@ void Object3d::Initialize()
 	//Collider::Initialize();
 
 	object3dCommon_ = Object3dCommon::GetInstance();
+	skinningConmmon_ = SkinningConmmon::GetInstance();
 
 	transfomation = std::make_unique<Transfomation>();
 
@@ -242,28 +243,28 @@ void Object3d::ObjectTypeDiscrimination(ObjectType type)
 	switch (type)
 	{
 	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_BACK);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_BACK);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_BACK:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
 		break;
 	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_NONE:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_NONE);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_NONE);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_NONE:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
 		break;
 	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_NONE:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		Object3dCommon::GetInstance()->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
 		break;
 	default:
 		break;
@@ -277,28 +278,28 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 	switch (type)
 	{
 	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_BACK:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
 		break;
 	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_NONE:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_NONE:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
 		break;
 	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_NONE:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
 		break;
 	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
 		break;
 	default:
 		break;

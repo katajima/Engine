@@ -29,7 +29,7 @@ void TestScene::Initialize()
 
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize({100,100});
+	ocean_->Initialize({ 100,100 });
 	ocean_->SetCamera(camera.get());
 	ocean_->transform.rotate.x = DegreesToRadians(90);
 	ocean_->material->color.a = 0.99f;
@@ -48,7 +48,7 @@ void TestScene::Initialize()
 	mm2.worldtransform_.scale_ = { 10,10,10 };
 	mm2.SetCamera(camera.get());
 
-	
+
 	tail.Initialize();
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
@@ -58,7 +58,7 @@ void TestScene::Initialize()
 	multiy.SetModel("multiMaterial.gltf");
 	multiy.SetCamera(camera.get());
 	multiy.worldtransform_.scale_ = { 10,10,10 };
-	
+
 
 
 
@@ -67,29 +67,29 @@ void TestScene::Initialize()
 
 	trans_.Initialize();
 	trans_.translate_ = { 0,10,0 };
-	
+
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize("emitter","cc",ParticleManager::EmitType::kRandom);
+	emitter_->Initialize("emitter", "cc", ParticleManager::EmitType::kRandom);
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
-	emitter_->SetRotateMinMax(-Vector3{1.0f,1.0f,1.0f}, { 1.0f,1.0f,1.0f });
+	emitter_->SetRotateMinMax(-Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
 	emitter_->SetPos({ 0,10,0 });
-	emitter_->SetVelocityMinMax({ -10,5,0 } ,{ 0, 10, 0 });
+	emitter_->SetVelocityMinMax({ -10,5,0 }, { 0, 10, 0 });
 	emitter_->SetLifeTimeMinMax(1.0f, 2.0f);
 	/*emitter_->SetUsebillboard(false);*/
 	emitter_->SetIsGravity(true);
 	emitter_->SetIsAlpha(true);
 
 	emitterEnemy_ = std::make_unique<ParticleEmitter>();
-	emitterEnemy_->Initialize("emitterPrimi","primi",ParticleManager::EmitType::kRandom);
+	emitterEnemy_->Initialize("emitterPrimi", "primi", ParticleManager::EmitType::kRandom);
 	emitterEnemy_->GetFrequency() = 1.1f;
 	emitterEnemy_->SetCount(1);
 	emitterEnemy_->SetParent(mm.worldtransform_);
 	emitterEnemy_->SetPos({ 0,50,0 });
-	emitterEnemy_->SetVelocityMinMax({ -0,20,-5 } ,{ 5, 20, 5 });
-	emitterEnemy_->SetRotateMinMax(-DegreesToRadians(Vector3{90,90,90}), DegreesToRadians(Vector3{ 90,90,90 }));
-	emitterEnemy_->SetRotateVelocityMinMax(-Vector3{0.1f,0.1f,0.1f},{0.1f,0.1f,0.1f});
+	emitterEnemy_->SetVelocityMinMax({ -0,20,-5 }, { 5, 20, 5 });
+	emitterEnemy_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	emitterEnemy_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
 	emitterEnemy_->SetLifeTimeMinMax(5, 10);
 	emitterEnemy_->SetIsGravity(true);
 	emitterEnemy_->SetUsebillboard(false);
@@ -97,28 +97,39 @@ void TestScene::Initialize()
 	emitterEnemy_->SetIsLifeTimeScale(true);
 	emitterEnemy_->SetIsRotateVelocity(true);
 	emitterEnemy_->SetIsBounce(true);
-	emitterEnemy_->SetSizeMinMax(Vector3{0.1f,0.1f,0.1f},{ 0.2f,0.2f,0.2f });
+	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
 
 	PointLightData pointLightData;
 
 	pointLightData.color = { 1.0f,1.0f,1.0f,1.0f };
 	pointLightData.position = { 0.0f,-1.0f,-10.0f };
-	pointLightData.radius = 100.0f;
-	pointLightData.intensity = 100.0f;
+	pointLightData.radius = 10.0f;
+	pointLightData.intensity = 10.0f;
 	pointLightData.lig = 0.2f;
 	pointLightData.isLight = true;
 	pointLightData.decay = 1.0f;
-	point = std::make_shared<PointLight>();;
+	point = std::make_shared<PointLight>();
 
 	point->point = pointLightData;
 
 	LightManager::GetInstance()->AddLight(point);
 
-	//LineCommon::GetInstance()->
+	SpotLightData spotLightData;
+
+	spotLightData = SpotLightData({ 1.0f,1.0f,1.0f,1.0f }, { 2.0f,1.25f,0.0f }, 10.0f, Normalize({ -1.0f,-1.0f,0.0f }), 10.0f, 2.0f, std::cos(std::numbers::pi_v<float> / 3.0f), 1.0f);
+	spotLightData.position = Vector3(10, 0, 10);
+	spotLightData.intensity = 50.0f;
+	spotLightData.isLight = true;
+	spotLightData.decay = 1.0f;
+
+	spot = std::make_shared<SpotLight>();
+
+	spot->spot = spotLightData;
+	LightManager::GetInstance()->AddLight(spot);
 
 	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 
-	
+
 }
 
 void TestScene::Finalize()
@@ -127,12 +138,12 @@ void TestScene::Finalize()
 
 void TestScene::Update()
 {
-	
 
-	
+
+
 	ocean_->Update();
 
-	
+
 
 	emitter_->Update();
 	emitterEnemy_->Update();
@@ -159,29 +170,26 @@ void TestScene::Update()
 
 
 	camera->UpdateMatrix();
-	LightManager::GetInstance()->SetLineCamera(camera.get());
-
+	
 #ifdef _DEBUG
-	ImGui::Begin("sprite");
-	//ImGui::DragFloat4("point", &point->point.color.x, 0.1f);
-	ImGui::End();
+
 
 
 
 
 	ImGui::Begin("trans");
-	ImGui::DragFloat3("translate",&emitter_->transform_.translate_.x,0.1f);
-	ImGui::DragFloat3("rotate",&emitter_->transform_.rotate_.x,0.1f);
+	ImGui::DragFloat3("translate", &emitter_->transform_.translate_.x, 0.1f);
+	ImGui::DragFloat3("rotate", &emitter_->transform_.rotate_.x, 0.1f);
 	ImGui::End();
 	ImGui::Begin("engine");
-	
-	
+
+
 	if (ImGui::CollapsingHeader("Gizmos")) {
 		ImGuiManager::GetInstance()->RenderGizmo2(mm, *camera.get(), "buil");
 		ImGuiManager::GetInstance()->RenderGizmo2(mm2, *camera.get(), "buil2");
 		ImGuiManager::GetInstance()->RenderGizmo2(tail, *camera.get(), "tail");
 		ImGuiManager::GetInstance()->RenderGizmo2(multiy, *camera.get(), "multiy");
-		
+
 	}
 	if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
@@ -210,20 +218,41 @@ void TestScene::Update()
 
 
 	}
-	if (ImGui::CollapsingHeader("Light")) {
-		bool is = point->point.isLight;
-		ImGui::Checkbox("isLighting", &is);
-		point->point.isLight = is;
-		ImGui::DragFloat3("position", &point->point.position.x, 0.1f);
-		ImGui::DragFloat("intensity", &point->point.intensity, 0.1f);
-		if (0 >= point->point.intensity)
-			point->point.intensity = 0;
-		ImGui::DragFloat("decay", &point->point.decay, 0.1f);
-		ImGui::DragFloat("radius", &point->point.radius, 0.1f);
-		ImGui::DragFloat("lig", &point->point.lig, 0.1f);
+	//if (ImGui::CollapsingHeader("Light")) {
+	//	/*bool is = point->point.isLight;
+	//	ImGui::Checkbox("isLighting", &is);
+	//	point->point.isLight = is;
+	//	ImGui::DragFloat3("position", &point->point.position.x, 0.1f);
+	//	ImGui::DragFloat("intensity", &point->point.intensity, 0.1f);
+	//	if (0 >= point->point.intensity)
+	//		point->point.intensity = 0;
+	//	ImGui::DragFloat("decay", &point->point.decay, 0.1f);
+	//	ImGui::DragFloat("radius", &point->point.radius, 0.1f);
+	//	ImGui::DragFloat("lig", &point->point.lig, 0.1f);
 
-		ImGui::ColorEdit4("color", &point->point.color.x);
-	}
+	//	ImGui::ColorEdit4("color", &point->point.color.x);*/
+
+
+	//	bool is = spot->spot.isLight;
+	//	ImGui::Checkbox("isLighting", &is);
+	//	spot->spot.isLight = is;
+
+	//	ImGui::DragFloat3("position", &spot->spot.position.x, 0.1f);
+
+	//	ImGui::DragFloat3("direction", &spot->spot.direction.x, 0.1f);
+	//	spot->spot.direction = Normalize(spot->spot.direction);
+
+	//	ImGui::DragFloat("intensity", &spot->spot.intensity, 0.1f);
+	//	if (0 >= spot->spot.intensity)
+	//		spot->spot.intensity = 0;
+	//	ImGui::DragFloat("distance", &spot->spot.distance, 0.1f);
+
+	//	ImGui::DragFloat("decay", &spot->spot.decay, 0.1f);
+	//	ImGui::DragFloat("cosFalloffStart", &spot->spot.cosFalloffStart, 0.1f);
+	//	ImGui::DragFloat("cosAngle", &spot->spot.cosAngle, 0.01f);
+
+	//	ImGui::ColorEdit4("color", &spot->spot.color.x);
+	//}
 
 
 	ImGui::End();
@@ -233,11 +262,11 @@ void TestScene::Update()
 	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_);
 	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_,mm.GetModel()->modelData.cachedLineIndices_);
 	//LineCommon::GetInstance()->AddLineMesh(mm2.GetMesh(0), mm2.worldtransform_.worldMat_,mm2.GetModel()->modelData.cachedLineIndices_);
-	LineCommon::GetInstance()->AddPointLightLine(point->point);
+	
 
 
 #endif // _DEBUG
-	
+
 	mm.UpdateSkinning();
 	//mm2.Update();
 	//mm2.UpdateSkinning();
@@ -256,7 +285,7 @@ void TestScene::Draw3D()
 
 	//multiy.Draw();
 
-	ocean_->Draw();
+	//ocean_->Draw();
 }
 
 void TestScene::Draw2D()
@@ -264,7 +293,7 @@ void TestScene::Draw2D()
 
 	for (int i = 0; i < sprite_.size(); i++) {
 		sprite_[i]->UpdateAmimetion(0.05f);
-		
+
 	}
 	sprite_[0]->Draw();
 	sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
@@ -272,9 +301,9 @@ void TestScene::Draw2D()
 	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
 
 
-	
 
-	
+
+
 
 }
 

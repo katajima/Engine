@@ -1,5 +1,6 @@
 #include "LightCommon.h"
 #include "imgui.h"
+#include "DirectXGame/engine/Line/LineCommon.h"
 
 LightManager* LightManager::instance = nullptr;
 
@@ -19,54 +20,13 @@ void LightManager::Initialize(DirectXCommon* dxCommon)
 	directionalLightResource = dxCommon_->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 	
-	////今回は赤を書き込んで見る //白
-	//directionalLightData[0] = DirectionalLightData({1.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,0.0f}, 1.0f);
-	//directionalLightData[0].lig = 0.2f;
-	//directionalLightData[0].isLight = true;
-	//					
-	//// 半球ライト		 
-	//directionalLightData[0].groundColor = { 0.7f,0.5f,0.3f };
-	//directionalLightData[0].skyColor = { 0.15f,0.7f,0.95f };
-	//directionalLightData[0].groundColor = { 1.0f,1.0f,1.0f };
-	//directionalLightData[0].skyColor = { 1.0f,1.0f,1.0f };
-	//directionalLightData[0].groundNormal = { 0.0f,1.0f,0.0f };
-
-
+	// ポイントライト用のリソース
 	pointLightResource = dxCommon_->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
-
-	
-
-
-	////今回は赤を書き込んで見る //白
-	//pointLightData[0] = PointLight({1.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,-10.0f});
-	//pointLightData[0].radius = 10.0f;
-	//pointLightData[0].intensity = 10.0f;
-	//pointLightData[0].lig = 0.2f;
-	//pointLightData[0].isLight = true;
-	//pointLightData[1] = PointLight({0.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,10.0f});
-	//pointLightData[1].radius = 10.0f;
-	//pointLightData[1].intensity = 5.0f;
-	//pointLightData[1].isLight = true;
-	//pointLightData[1].lig = 0.2f;
-
-
-
-
-	//平行光源用のリソースを作る
+	//スポットライト用のリソースを作る
 	spotLightResource = dxCommon_->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
-	//今回は赤を書き込んで見る //白
-
-	/*for (int i = 0; i < spotMax; i++) {
-		spotLightData[i] = SpotLightData({1.0f,1.0f,1.0f,1.0f}, {2.0f,1.25f,0.0f}, 10.0f, Normalize({-1.0f,-1.0f,0.0f}), 10.0f, 2.0f, std::cos(std::numbers::pi_v<float> / 3.0f), 1.0f);
-		spotLightData[i].position = Vector3(10 * float(i), 0, 10);
-		spotLightData[i].intensity = 50.0f;
-		spotLightData[i].isLight = true;
-	}*/
-
-	
 }
 
 void LightManager::Finalize()
@@ -88,135 +48,108 @@ void LightManager::DrawLight()
 
 }
 
-void LightManager::SetLineCamera(Camera* camera)
-{
-	
-}
+
 
 void LightManager::Update()
 {
-	size_t pointLightIndex = 0;
-	size_t directionalLightIndex = 0;
-	size_t spotLightIndex = 0;
+    size_t pointLightIndex = 0;
+    size_t directionalLightIndex = 0;
+    size_t spotLightIndex = 0;
 
-	// m_lightsからライトデータを取得して各バッファに格納
-	for (const auto& light : m_lights)
-	{
-		if (light->GetType() == Lights::Type::Point)
-		{
-			// LightsクラスからPointLightDataをコピー
-			static_cast<PointLight*>(light.get())->SetLightData(&pointLightData[pointLightIndex]);
-			++pointLightIndex;
-		}
-		else if (light->GetType() == Lights::Type::Directional)
-		{
-			// LightsクラスからDirectionalLightDataをコピー
-			static_cast<DirectionalLight*>(light.get())->SetLightData(&directionalLightData[directionalLightIndex]);
-			++directionalLightIndex;
-		}
-		else if (light->GetType() == Lights::Type::Spot)
-		{
-			// LightsクラスからSpotLightDataをコピー
-			static_cast<SpotLight*>(light.get())->SetLightData(&spotLightData[spotLightIndex]);
-			++spotLightIndex;
-		}
-	}
+    // m_lightsからライトデータを取得して各バッファに格納
+    for (const auto& light : m_lights)
+    {
+        
+        if (light->GetType() == Lights::Type::Point)
+        {
+            static_cast<PointLight*>(light.get())->SetLightData(&pointLightData[pointLightIndex]);
+            LineCommon::GetInstance()->AddLightLine(pointLightData[pointLightIndex]);
+           
+            ++pointLightIndex;
+        }
+        else if (light->GetType() == Lights::Type::Directional)
+        {
+            static_cast<DirectionalLight*>(light.get())->SetLightData(&directionalLightData[directionalLightIndex]);
+            ++directionalLightIndex;
+        }
+        else if (light->GetType() == Lights::Type::Spot)
+        {
+            static_cast<SpotLight*>(light.get())->SetLightData(&spotLightData[spotLightIndex]);
+            LineCommon::GetInstance()->AddLightLine(spotLightData[spotLightIndex]);
+            ++spotLightIndex;
+        }
+    }
 
-
-	
 #ifdef _DEBUG
-	//ImGui::Begin("engine");
+    ImGui::Begin("engine");
 
-	//if (ImGui::CollapsingHeader("Light")) {
+    if (ImGui::CollapsingHeader("Light Manager")) {
+        // Directional Light UI
+        if (ImGui::TreeNode("Directional Lights")) {
+            for (size_t i = 0; i < directionalLightIndex; i++) {
+                std::string label = "Directional " + std::to_string(i);
+                if (ImGui::TreeNode(label.c_str())) {
+                    bool is = static_cast<bool>(directionalLightData[i].isLight);
+                    ImGui::Checkbox("Enable", &is);
+                    directionalLightData[i].isLight = static_cast<int32_t>(is);
+                    ImGui::DragFloat3("Direction", &directionalLightData[i].direction.x, 0.1f);
+                    directionalLightData[i].direction = Normalize(directionalLightData[i].direction);
+                    ImGui::DragFloat("Intensity", &directionalLightData[i].intensity, 0.1f, 0.0f, 10.0f);
+                    ImGui::ColorEdit3("Color", &directionalLightData[i].color.x);
 
-	//	//if (ImGui::CollapsingHeader("DirectionalLight")) {
-	//		if (ImGui::BeginTabBar("directionalLightData"))
-	//		{
-	//			if (ImGui::BeginTabItem("directionalLightData"))
-	//			{
-	//				bool is = directionalLightData->isLight;
-	//				ImGui::Checkbox("isLighting", &is);
-	//				directionalLightData->isLight = is;
-	//				ImGui::DragFloat3("direction", &directionalLightData->direction.x, 0.1f);
-	//				directionalLightData->direction = Normalize(directionalLightData->direction);
-	//				ImGui::DragFloat("intensity", &directionalLightData->intensity, 0.1f);
-	//				if (0 >= directionalLightData->intensity)
-	//					directionalLightData->intensity = 0;
-	//				ImGui::DragFloat("lig", &directionalLightData->lig, 0.1f);
-	//				ImGui::ColorEdit3("groundColor", &directionalLightData->groundColor.x);
-	//				ImGui::ColorEdit3("skyColor", &directionalLightData->skyColor.x);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
 
-	//				ImGui::ColorEdit4("color", &directionalLightData->color.x);
-	//				ImGui::EndTabItem();
+        // Point Light UI
+        if (ImGui::TreeNode("Point Lights")) {
+            for (size_t i = 0; i < pointLightIndex; i++) {
+                std::string label = "Point " + std::to_string(i);
+                if (ImGui::TreeNode(label.c_str())) {
+                    bool is = static_cast<bool>(pointLightData[i].isLight);
+                    ImGui::Checkbox("Enable", &is);
+                    pointLightData[i].isLight = static_cast<int32_t>(is);
+                    ImGui::DragFloat3("Position", &pointLightData[i].position.x, 0.1f);
+                    ImGui::DragFloat("Intensity", &pointLightData[i].intensity, 0.1f, 0.0f, 10.0f);
+                    ImGui::DragFloat("Decay", &pointLightData[i].decay, 0.1f);
+                    ImGui::DragFloat("Radius", &pointLightData[i].radius, 0.1f);
+                    ImGui::ColorEdit3("Color", &pointLightData[i].color.x);
 
-	//				if (ImGui::Button("save")) {
-	//					
-	//					GlobalVariables* globalVariables = GlobalVariables::GetInstance();
-	//					const char* gropName = "directionalLight";
-	//					globalVariables->saveFile(gropName);
-	//				}
-	//			}
-	//		}
-	//	//}
-	//	ImGui::EndTabBar();
-	//	if (ImGui::BeginTabBar("pointLightData"))
-	//	{
-	//		for (int i = 0; i < 2; i++) {
-	//			std::string str = "light" + std::to_string(i);
-	//			if (ImGui::BeginTabItem(str.c_str())) {
-	//				bool is = pointLightData[i].isLight;
-	//				ImGui::Checkbox("isLighting", &is);
-	//				pointLightData[i].isLight = is;
-	//				ImGui::DragFloat3("position", &pointLightData[i].position.x, 0.1f);
-	//				ImGui::DragFloat("intensity", &pointLightData[i].intensity, 0.1f);
-	//				if (0 >= pointLightData[i].intensity)
-	//					pointLightData[i].intensity = 0;
-	//				ImGui::DragFloat("decay", &pointLightData[i].decay, 0.1f);
-	//				ImGui::DragFloat("radius", &pointLightData[i].radius, 0.1f);
-	//				ImGui::DragFloat("lig", &pointLightData[i].lig, 0.1f);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
 
-	//				ImGui::ColorEdit4("color", &pointLightData[i].color.x);
-	//				ImGui::EndTabItem();
-	//			}
-	//		}
-	//	}
-	//	ImGui::EndTabBar();
-	//	if (ImGui::BeginTabBar("spotLightData"))
-	//	{
-	//		for (int i = 0; i < spotMax; i++) {
-	//			std::string str = "light" + std::to_string(i);
-	//			if (ImGui::BeginTabItem(str.c_str())) {
-	//				bool is = spotLightData[i].isLight;
-	//				ImGui::Checkbox("isLighting", &is);
-	//				spotLightData[i].isLight = is;
+        // Spot Light UI
+        if (ImGui::TreeNode("Spot Lights")) {
+            for (size_t i = 0; i < spotLightIndex; i++) {
+                std::string label = "Spot " + std::to_string(i);
+                if (ImGui::TreeNode(label.c_str())) {
+                    bool is = static_cast<bool>(spotLightData[i].isLight);
+                    ImGui::Checkbox("Enable", &is);
+                    spotLightData[i].isLight = static_cast<int32_t>(is);
+                    ImGui::DragFloat3("Position", &spotLightData[i].position.x, 0.1f);
+                    ImGui::DragFloat3("Direction", &spotLightData[i].direction.x, 0.1f);
+                    spotLightData[i].direction = Normalize(spotLightData[i].direction);
+                    ImGui::DragFloat("Intensity", &spotLightData[i].intensity, 0.1f, 0.0f, 10.0f);
+                    ImGui::DragFloat("Distance", &spotLightData[i].distance, 0.1f);
+                    ImGui::DragFloat("Decay", &spotLightData[i].decay, 0.1f);
+                    ImGui::DragFloat("Falloff Start", &spotLightData[i].cosFalloffStart, 0.1f);
+                    ImGui::DragFloat("Cos Angle", &spotLightData[i].cosAngle, 0.01f);
+                    ImGui::ColorEdit3("Color", &spotLightData[i].color.x);
 
-	//				ImGui::DragFloat3("position", &spotLightData[i].position.x, 0.1f);
-	//				
-	//				ImGui::DragFloat3("direction", &spotLightData[i].direction.x, 0.1f);
-	//				spotLightData[i].direction = Normalize(spotLightData[i].direction);
-	//				
-	//				ImGui::DragFloat("intensity", &spotLightData[i].intensity, 0.1f);
-	//				if (0 >= spotLightData[i].intensity)
-	//					spotLightData[i].intensity = 0;
-	//				ImGui::DragFloat("distance", &spotLightData[i].distance, 0.1f);
-	//				
-	//				ImGui::DragFloat("decay", &spotLightData[i].decay, 0.1f);
-	//				ImGui::DragFloat("cosFalloffStart", &spotLightData[i].cosFalloffStart, 0.1f);
-	//				ImGui::DragFloat("cosAngle", &spotLightData[i].cosAngle, 0.01f);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+    }
 
-	//				ImGui::ColorEdit4("color", &spotLightData[i].color.x);
-	//				ImGui::EndTabItem();
-	//			}
-	//		}
-	//	}
-	//	ImGui::EndTabBar();
-	//}
-	//ImGui::End();
-
-	
+    ImGui::End();
 #endif
-
-
 }
 
 void LightManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr)
@@ -257,8 +190,6 @@ void LightManager::ApplyGlobalVariables()
 }
 
 
-void LightManager::DrawLightLine() {
-	
-}
+
 
 

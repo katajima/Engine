@@ -265,32 +265,6 @@ void Object3dCommon::Blob(DirectXCommon* dxCommon, D3D12_ROOT_SIGNATURE_DESC des
 	assert(SUCCEEDED(hr));
 }
 
-Microsoft::WRL::ComPtr<ID3D12RootSignature> Object3dCommon::Blob2(DirectXCommon* dxCommon, D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
-{
-	//HRESULT hr;
-	//// descriptionSignature が正しく設定されているか確認
-	//if (descriptionSignature.pParameters == nullptr || descriptionSignature.NumParameters == 0)
-	//{
-	//	Logger::Log("descriptionSignature is not properly set.");
-	//	assert(false);
-	//	return {};
-	//}
-	////シリアライズにしてバイナリする
-	//hr = D3D12SerializeRootSignature(&descriptionSignature,
-	//	D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	//if (FAILED(hr)) {
-	//	Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-
-	//	assert(false);
-	//}
-	////バイナリを元に生成
-	//hr = dxCommon->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
-	//	signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-	//assert(SUCCEEDED(hr));
-
-	return rootSignature;
-}
-
 void Object3dCommon::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& _rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& _graphicsPipelineState, D3D12_RASTERIZER_DESC rasterizerDesc, D3D12_BLEND_DESC blendDesc)
 {
 	HRESULT hr;

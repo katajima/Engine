@@ -502,8 +502,7 @@ void GamePlayScene::Update()
 
 	player_->SetCamera(camera.get());
 
-	LightManager::GetInstance()->SetLineCamera(camera.get());
-
+	
 	CheckAllCollisions();
 }
 
