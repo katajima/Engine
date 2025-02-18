@@ -9,15 +9,18 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 {
     HS_CONSTANT_DATA_OUTPUT Output;
 
-    // 各辺のテッセレーション係数を設定（ここでは例として15を設定）
-    Output.EdgeTessFactor[0] = 1000000.0f; // 辺0
-    Output.EdgeTessFactor[1] = 1000000.0f; // 辺1
-    Output.EdgeTessFactor[2] = 1000000.0f; // 辺2
-    Output.EdgeTessFactor[3] = 1000000.0f; // 辺3
+  // DirectXの上限値（通常64）を考慮
+    const float MAX_TESS_FACTOR = 64.0f;
 
-    // 内部テッセレーション係数を設定（ここでは例として15を設定）
-    Output.InsideTessFactor[0] = 1000000.0f; // 内部テッセレーション係数1
-    Output.InsideTessFactor[1] = 1000000.0f; // 内部テッセレーション係数2
+    // 各辺のテッセレーション係数
+    Output.EdgeTessFactor[0] = MAX_TESS_FACTOR; // 辺0
+    Output.EdgeTessFactor[1] = MAX_TESS_FACTOR; // 辺1
+    Output.EdgeTessFactor[2] = MAX_TESS_FACTOR; // 辺2
+    Output.EdgeTessFactor[3] = MAX_TESS_FACTOR; // 辺3
+
+    // 内部テッセレーション係数
+    Output.InsideTessFactor[0] = MAX_TESS_FACTOR; // 内部1
+    Output.InsideTessFactor[1] = MAX_TESS_FACTOR; // 内部2
 
     return Output;
 }

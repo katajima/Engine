@@ -51,6 +51,7 @@ void Model::InitializeAnime(ModelCommon* modelCommon, const std::string& directo
 
 	modelData = LoadOdjFileAssimpAmime(dire, filename);
 
+	GenerateMeshLine(modelData.mesh[0]->indices);
 
 	animation = LoadAnimationFile(dire, filename);
 
@@ -66,9 +67,7 @@ void Model::InitializeAnime(ModelCommon* modelCommon, const std::string& directo
 		material->LoadTex();
 	};
 
-	if (filename == "Kick.gltf") {
-		modelData.mesh[0]->indices;
-	}
+	
 }
 
 #pragma endregion // 初期化
@@ -129,12 +128,41 @@ Model::ModelData Model::LoadMesh(const aiScene* _scene)
 	return {};
 }
 
+void Model::GenerateMeshLine(const std::vector<uint32_t>& indices)
+{
+	if (indices.empty() || indices.size() % 3 != 0) {
+		// indicesが空 or 不正なサイズなら処理をスキップ
+		std::cerr << "Error: Invalid indices size (" << indices.size() << ")" << std::endl;
+		return;
+	}
+
+	std::unordered_map<uint64_t, bool> edgeMap;
+
+	for (size_t i = 0; i < indices.size(); i += 3) {
+		for (int j = 0; j < 3; ++j) {
+			uint32_t v0 = indices[i + j];
+			uint32_t v1 = indices[i + (j + 1) % 3];
+
+			if (v0 > v1) std::swap(v0, v1);
+			uint64_t edgeKey = (static_cast<uint64_t>(v0) << 32) | v1;
+
+			if (edgeMap.find(edgeKey) == edgeMap.end()) {
+				edgeMap[edgeKey] = true;
+				modelData.cachedLineIndices_.push_back(v0);
+				modelData.cachedLineIndices_.push_back(v1);
+			}
+		}
+	}
+}
+
 Model::ModelData Model::LoadOdjFileAssimp(const std::string& directoryPath, const std::string& filename, const Vector2 texScale) {
 	////必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData
 
 	Assimp::Importer importer;
 	std::string filePach = directoryPath + "/" + filename;
+
+	modelData.name = filePach;
 	const aiScene* scene = importer.ReadFile(filePach.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
 	assert(scene->HasMeshes()); //メッシュがないのは対応しない
 	if (!scene) {
@@ -255,6 +283,7 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 
 
 	//modelData.mesh = std::make_unique<Mesh>();
+	modelData.name = filePach;
 
 	const aiScene* scene = importer.ReadFile(filePach.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
 	assert(scene->HasMeshes()); //メッシュがないのは対応しない
@@ -272,6 +301,8 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 		Vector3 min = { 100 };
 		Vector3 max = { -100 };
 		pMesh->vertices.resize(mesh->mNumVertices);
+		pMesh->verticesline.resize(mesh->mNumVertices);
+
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
@@ -281,10 +312,11 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
 			pMesh->vertices[vertexIndex].texcoord = { texcoord.x,texcoord.y };
 
-
+			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
 			min = Min(min, pMesh->vertices[vertexIndex].position.xyz());
 			max = Max(max, pMesh->vertices[vertexIndex].position.xyz());
 		}
+		
 		pMesh->SetMin(min);
 		pMesh->SetMax(max);
 
@@ -293,10 +325,11 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 			assert(face.mNumIndices == 3); // 三角形のみサポート
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
-
 				pMesh->indices.push_back(vertexIndex);
 			}
 		}
+		
+
 
 
 		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
@@ -394,6 +427,7 @@ Node Model::ReadNode(aiNode* node) {
 	}
 	return result;
 }
+
 
 Animation Model::LoadAnimationFile(const std::string& directoryPath, const std::string& filename)
 {

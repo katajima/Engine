@@ -60,7 +60,7 @@ void Primitive::Update()
 
 	line_->SetCamera(camera_);
 	line_->SetTransform(transform);
-	line_->Update();
+	//line_->Update();
 }
 
 
@@ -449,8 +449,8 @@ void Primitive::Draw()
 
 		PrimitiveCommon::GetInstance()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 	}
-	if (isLine_)
-		line_->DrawMeshLine(mesh.get());
+	//if (isLine_);
+		//line_->DrawMeshLine(mesh.get());
 }
 
 

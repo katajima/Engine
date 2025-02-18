@@ -1,5 +1,10 @@
 #include "Skinning.h"
 
+#include "DirectXGame/engine/Transfomation/Transfomation.h"
+#include "DirectXGame/engine/Material/Material.h"
+#include "DirectXGame/engine/Light/LightCommon.h"
+#include "DirectXGame/engine/Camera/CameraCommon.h"
+#include "DirectXGame/engine/base/TextureManager.h"
 
 SkinningConmmon* SkinningConmmon::instance = nullptr;
 
@@ -24,23 +29,50 @@ void SkinningConmmon::Finalize()
 	instance = nullptr;
 }
 
-void SkinningConmmon::DrawCommonSetting()
+void SkinningConmmon::DrawCommonSetting(PSOType type)
 {
-	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
-
-	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	
+	switch (type)
+	{
+	case SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
+		break;
+	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
+		break;
+	case SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
+		break;
+	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
+		break;
+	case SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
+		break;
+	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
+		break;
+	case SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
+		break;
+	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
+		break;
+	default:
+		break;
+	}
 }
 
 void SkinningConmmon::CreateRootSignature()
 {
-	HRESULT hr;
-
+	
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0; // 0から始まる
 	descriptorRange[0].NumDescriptors = 1; // 数は1つ
@@ -89,59 +121,34 @@ void SkinningConmmon::CreateRootSignature()
 	D3D12_ROOT_PARAMETER rootParameters[11] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;   // CBVを使う　// b0のbと一致する
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; //PixelShaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
+	Material::SetRootParameter(rootParameters[0], 0);
 
-	// マテリアルデータ (b0) を頂点シェーダで使用する
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;   // CBVを使う　// b0のbと一致する
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; //VertexShaderで使う
-	rootParameters[1].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
+	// トランスフォームデータ (b0) を頂点シェーダで使用する
+	Transfomation::SetRootParameter(rootParameters[1], 0);
 
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う           
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange; // Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Tableで利用する数 
+	TextureManager::SetRootParameter(rootParameters[2], descriptorRange[0]);
 
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[3].Descriptor.ShaderRegister = 1;
+	LightCommon::SetRootParameter(rootParameters[3], 1);
 
 	// カメラデータ (b2) をピクセルシェーダで使用する
-	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[4].Descriptor.ShaderRegister = 2;
+	CameraCommon::SetRootParameter(rootParameters[4], 2);
 
 	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[5].Descriptor.ShaderRegister = 3;
+	LightCommon::SetRootParameter(rootParameters[5], 3);
 
 	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[6].Descriptor.ShaderRegister = 4;
+	LightCommon::SetRootParameter(rootParameters[6], 4);
 
 	// 法線マップデータ (t1) をピクセルシェーダで使用する 
-	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[7].DescriptorTable.pDescriptorRanges = descriptorRangeNormalmap;
-	rootParameters[7].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeNormalmap);
+	TextureManager::SetRootParameter(rootParameters[7], descriptorRangeNormalmap[0]);
 
 	// 法線マップデータ (t2) をピクセルシェーダで使用する 
-	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[8].DescriptorTable.pDescriptorRanges = descriptorRangeSpecualrmap;
-	rootParameters[8].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeSpecualrmap);
+	TextureManager::SetRootParameter(rootParameters[8], descriptorRangeSpecualrmap[0]);
 
-	// 法線マップデータ (t3) をピクセルシェーダで使用する 
-	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[9].DescriptorTable.pDescriptorRanges = descriptorRangeAoMap;
-	rootParameters[9].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeAoMap);
-
+	// 法線マップデータ (t2) をピクセルシェーダで使用する 
+	TextureManager::SetRootParameter(rootParameters[9], descriptorRangeAoMap[0]);
 	// スキニング (t4)
 	rootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
@@ -163,37 +170,113 @@ void SkinningConmmon::CreateRootSignature()
 	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX; // ありったけのMipmapを使う
 	staticSamplers[0].ShaderRegister = 0; //レジスタ番号0を使う
 	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
+
+
+	descriptionSignature.pStaticSamplers = staticSamplers;
+	descriptionSignature.NumStaticSamplers = _countof(staticSamplers);
+
+	Blob(dxCommon_, descriptionSignature, rootSignature[0]);
+
+
+	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT; // バイリニアフィルタ
+	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // 0～1の範囲外をリピート
+	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較しない
+	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX; // ありったけのMipmapを使う
+	staticSamplers[0].ShaderRegister = 0; //レジスタ番号0を使う
+	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
 	descriptionSignature.pStaticSamplers = staticSamplers;
 	descriptionSignature.NumStaticSamplers = _countof(staticSamplers);
 
 
+	Blob(dxCommon_, descriptionSignature, rootSignature[1]);
+
+}
+
+void SkinningConmmon::CreateGraphicsPipeline()
+{
+	CreateRootSignature();
+
+
+
+#pragma region BlendState
+
+	// BlendState(ブレンドステート)の設定
+	D3D12_BLEND_DESC blendDesc{};
+	//すべての色要素を書き込む
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+
+#pragma endregion //BlendState(ブレンドステート)
+
+	// RasterizerState(ラスタライザステート)の設定
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+
+	//裏面(時計回り)を表示しない
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+
+	//三角形の中を塗りつぶす
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+
+	GraphicsPipelineState(rootSignature[0], graphicsPipelineState[0], rasterizerDesc, blendDesc);
+	GraphicsPipelineState(rootSignature[1], graphicsPipelineState[1], rasterizerDesc, blendDesc);
+	//三角形の中を塗りつぶす
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	GraphicsPipelineState(rootSignature[0], graphicsPipelineState[2], rasterizerDesc, blendDesc);
+	GraphicsPipelineState(rootSignature[1], graphicsPipelineState[3], rasterizerDesc, blendDesc);
+
+
+	//三角形の中を塗りつぶす
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+
+	GraphicsPipelineState(rootSignature[0], graphicsPipelineState[4], rasterizerDesc, blendDesc);
+	GraphicsPipelineState(rootSignature[1], graphicsPipelineState[5], rasterizerDesc, blendDesc);
+	//三角形の中を塗りつぶす
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	GraphicsPipelineState(rootSignature[0], graphicsPipelineState[6], rasterizerDesc, blendDesc);
+	GraphicsPipelineState(rootSignature[1], graphicsPipelineState[7], rasterizerDesc, blendDesc);
+
+	
+}
+
+void SkinningConmmon::Blob(DirectXCommon* dxCommon, D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
+{
+	HRESULT hr;
+	// descriptionSignature が正しく設定されているか確認
+	if (descriptionSignature.pParameters == nullptr || descriptionSignature.NumParameters == 0)
+	{
+		Logger::Log("descriptionSignature is not properly set.");
+		assert(false);
+		return;
+	}
 	//シリアライズにしてバイナリする
 	Microsoft::WRL::ComPtr < ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr < ID3DBlob> errorBlob = nullptr;
-
 	hr = D3D12SerializeRootSignature(&descriptionSignature,
 		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-
 	if (FAILED(hr)) {
 		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
 
 		assert(false);
 	}
-
 	//バイナリを元に生成
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
+	hr = dxCommon->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
 		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-
 	assert(SUCCEEDED(hr));
 }
 
-void SkinningConmmon::CreateGraphicsPipeline()
+void SkinningConmmon::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& graphicsPipelineState, D3D12_RASTERIZER_DESC rasterizerDesc, D3D12_BLEND_DESC blendDesc)
 {
 	HRESULT hr;
-	CreateRootSignature();
-
-
 	// InputLayout(インプットレイアウト)
 	// VectorShaderへ渡す頂点データがどのようなものかを指定するオブジェクト
 
@@ -248,43 +331,6 @@ void SkinningConmmon::CreateGraphicsPipeline()
 #pragma endregion //InputLayout(インプットレイアウト)
 
 
-	// BlendState(ブレンドステート)の設定
-	// PixeiShaderからの出力をどのように書き込むかを設定する
-	//半透明処理はここの設定により制御され、書き込む色要素を決めることができる
-
-
-#pragma region BlendState
-
-
-	D3D12_BLEND_DESC blendDesc{};
-	//すべての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-
-#pragma endregion //BlendState(ブレンドステート)
-
-
-	// RasterizerState(ラスタライザステート)の設定
-	// 三角形の内部をピクセルに分解して、PixelShaderを起動することで、この処理の設定
-
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
-
-	//裏面(時計回り)を表示しない
-	// カリングしない(裏面も表示させる)
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-
-	//三角形の中を塗りつぶす
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-
-	//rasterizerDesc.DepthBias = 1; 
-	//rasterizerDesc.DepthBiasClamp = 0.0f; 
-	//rasterizerDesc.SlopeScaledDepthBias = 1.0f;
 
 	// Shaderをコンパイルする
 	Microsoft::WRL::ComPtr < IDxcBlob> vertexShaderBlob = dxCommon_->CompileShader(L"resources/shaders/Skining/SkinningObject3d.VS.hlsl",

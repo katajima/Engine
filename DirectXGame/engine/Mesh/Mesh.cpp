@@ -49,8 +49,8 @@ void Mesh::InitializeLine(DirectXCommon* dxcommon)
 	vertexBufferView.SizeInBytes = UINT(sizeof(LineVertexData) * verticesline.size());
 	vertexBufferView.StrideInBytes = sizeof(LineVertexData);
 
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, verticesline.data(), sizeof(LineVertexData) * verticesline.size());
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&lineVertexData));
+	std::memcpy(lineVertexData, verticesline.data(), vertexBufferView.SizeInBytes);
 
 
 	// インデクスリソース
@@ -62,7 +62,7 @@ void Mesh::InitializeLine(DirectXCommon* dxcommon)
 
 	indexData = nullptr;
 	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	std::memcpy(indexData, indices.data(), sizeof(uint32_t) * indices.size());
+	std::memcpy(indexData, indices.data(), indexBufferView.SizeInBytes);
 
 }
 
@@ -191,6 +191,13 @@ void Mesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv)
 	dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView);
 }
 
+void Mesh::Clear()
+{
+	indices.clear();
+	vertices.clear();
+	verticesline.clear();
+}
+
 void Mesh::GenerateIndices2()
 {
 
@@ -260,6 +267,36 @@ void Mesh::SetTriangleImGui(const Mesh& mesh, const std::string name, const Vect
 	
 	ImGui::End();
 
+}
+
+#include <unordered_map>
+#include <vector>
+
+void Mesh::MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum)
+{
+	//lineIndices.clear();
+	//lineIndices.reserve(indices.size() * 2); // 事前にメモリ確保（最大2倍のライン数を想定）
+
+	// エッジの重複管理用マップ
+	std::unordered_map<uint64_t, bool> edgeMap;
+
+	for (size_t i = 0; i < indices.size(); i += 3) {
+		for (int j = 0; j < 3; ++j) {
+			uint32_t v0 = indices[i + j] + lineNum;
+			uint32_t v1 = indices[i + (j + 1) % 3] + lineNum;
+
+			// 一意なキーを作成（小さい方を前にする）
+			if (v0 > v1) std::swap(v0, v1);
+			uint64_t edgeKey = (static_cast<uint64_t>(v0) << 32) | v1;
+
+			// まだ登録されていないエッジなら追加
+			if (edgeMap.find(edgeKey) == edgeMap.end()) {
+				edgeMap[edgeKey] = true;
+				lineIndices.push_back(v0);
+				lineIndices.push_back(v1);
+			}
+		}
+	}
 }
 
 

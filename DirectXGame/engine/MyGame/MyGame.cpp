@@ -51,6 +51,7 @@ void MyGame::Finalize()
 
 void MyGame::Update()
 {
+	LineCommon::GetInstance()->LineClear();
 	// ImGuiの受付開始
 	imguiManager->Begin();
 
@@ -86,6 +87,9 @@ void MyGame::Update()
 	SceneManager::GetInstance()->Update();
 	
 	ParticleManager::GetInstance()->Update();
+
+	LineCommon::GetInstance()->Update();
+	
 	//particleManager_->Update();
 	
 	// ImGuiの受付終了
@@ -110,8 +114,9 @@ void MyGame::Draw()
 
 	ParticleManager::GetInstance()->Draw();
 
-	//particleManager_->Draw();
+	LineCommon::GetInstance()->Draw();
 
+	
 	//// 2Dオブジェクトの描画準備
 	SceneManager::GetInstance()->Draw2D();
 	
@@ -155,23 +160,23 @@ void MyGame::InitializeResource()
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/text/max.png");
 
 
-	ModelManager::GetInstance()->LoadModel("multiMaterial.gltf", "multiMaterial");
+	ModelManager::GetInstance()->LoadModelAmime("multiMaterial.gltf", "multiMaterial");
 
-	ModelManager::GetInstance()->LoadModel("multiMaterial.obj", "multiMaterial");
-	ModelManager::GetInstance()->LoadModel("a.obj");
+	ModelManager::GetInstance()->LoadModelAmime("multiMaterial.obj", "multiMaterial");
+	ModelManager::GetInstance()->LoadModelAmime("a.obj");
 	
 
-	//ModelManager::GetInstance()->LoadModelAmime("walk.gltf", "human");
+	ModelManager::GetInstance()->LoadModelAmime("walk.gltf", "human");
 	//ModelManager::GetInstance()->LoadModelAmime("Women.gltf", "Women");
 	//ModelManager::GetInstance()->LoadModelAmime("Man.gltf", "Man");
 	//ModelManager::GetInstance()->LoadModelAmime("Man.gltf", "Man");
 	//ModelManager::GetInstance()->LoadModelAmime("Hand.gltf", "Hand");
-	//ModelManager::GetInstance()->LoadModelAmime("iku.gltf", "iku");
+	ModelManager::GetInstance()->LoadModelAmime("iku.gltf", "iku");
 	//ModelManager::GetInstance()->LoadModelAmime("Kick.gltf", "Kick");
 
 
 
-	ModelManager::GetInstance()->LoadModel("player_bullet.obj", "player_bullet");
+	ModelManager::GetInstance()->LoadModelAmime("player_bullet.obj", "player_bullet");
 	ModelManager::GetInstance()->LoadModelAmime("Sword.obj", "Sword");
 	ModelManager::GetInstance()->LoadModelAmime("plane.obj", "plane");
 	//ModelManager::GetInstance()->LoadModelAmime("sneakWalk.gltf", "human");
@@ -196,7 +201,7 @@ void MyGame::InitializeResource()
 
 
 	ModelManager::GetInstance()->LoadModel("rail.obj","rail");
-	ModelManager::GetInstance()->LoadModel("building.obj","building");
+	ModelManager::GetInstance()->LoadModelAmime("building.obj","building");
 	ModelManager::GetInstance()->LoadModel("Sphere.obj","sphere");
 	ModelManager::GetInstance()->LoadModel("Sphere2.obj","sphere");
 	ModelManager::GetInstance()->LoadModel("Sphere3.obj","sphere");

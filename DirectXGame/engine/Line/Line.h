@@ -18,18 +18,14 @@ class LineDraw
 public:
 	void Initialize();
 
-	void Update();
-
-	void Draw3D(const Vector3& p1, const Vector3& p2, const Vector4& color);
+	void AddLine(Vector2 pos, Vector2 pos2);
 
 	void SetCamera(Camera* camera) { this->camera = camera; }
 
-	void SetMatrix(const Matrix4x4& mat) { mat_ = mat; };
+	//void SetMatrix(const Matrix4x4& mat) { mat_ = mat; };
 	void SetTransform(const Transform tra) { transform = tra; };
 
-	void DrawMeshLine(Mesh* mesh);
-
-	void DrawCapselLine(const Vector3& torans ,const Capsule& capsure);
+	
 
 private:
 	Camera* camera = nullptr;
@@ -37,28 +33,28 @@ private:
 	LineCommon* lineCommon_ = nullptr;
 
 	std::unique_ptr<Mesh> mesh_;
-
+	//std::vector<>
 	
-	//マテリアルデータ
-	struct Material {
-		Vector4 color;
-	};
-	// 座標変換行列データ
-	struct TransfomationMatrix
-	{
-		Matrix4x4 WVP;
-		Matrix4x4 World;
-	};
-	Matrix4x4 mat_;
+	////マテリアルデータ
+	//struct Material {
+	//	Vector4 color;
+	//};
+	//// 座標変換行列データ
+	//struct TransfomationMatrix
+	//{
+	//	Matrix4x4 WVP;
+	//	Matrix4x4 World;
+	//};
+	//Matrix4x4 mat_;
 
-	
-	Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;
-	Material* materialData;
+	//
+	//Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;
+	//Material* materialData;
 
-	
+	//
 
-	TransfomationMatrix* transfomationMatrixData;
-	Microsoft::WRL::ComPtr < ID3D12Resource> transformationMatrixResource;
+	//TransfomationMatrix* transfomationMatrixData;
+	//Microsoft::WRL::ComPtr < ID3D12Resource> transformationMatrixResource;
 
 	Transform cameraTransform;
 

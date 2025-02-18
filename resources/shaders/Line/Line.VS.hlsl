@@ -1,25 +1,25 @@
-#include"Line.hlsli"
+#include "Line.hlsli"
 
+//StructuredBuffer<LineGPU> gLine : register(t0);
 
-struct TransformationMatrix
+struct Camera
 {
-    float32_t4x4 WVP;
-    float32_t4x4 World;
+    float4x4 worldViewProjMatrix; // ワールド・ビュー・プロジェクション行列
 };
-ConstantBuffer<TransformationMatrix> gTransformationMatrix : register(b0);
+ConstantBuffer<Camera> gCamera : register(b0);
 
- 
 struct VertexShaderInput
 {
-    float32_t4 position : POSITION0;
+    float4 position : POSITION0;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
-    
-    output.position = mul(input.position, gTransformationMatrix.WVP);
- 
-    
+
+  
+    // ワールド・ビュー・プロジェクション行列を適用
+    output.position = mul(input.position, gCamera.worldViewProjMatrix);
+
     return output;
 }

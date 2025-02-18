@@ -234,8 +234,9 @@ static void InitializeDrawLineSkeleton(const std::vector<Joint>& joints, std::ve
 	if (lines.size() < joints.size()) {
 		lines.resize(joints.size());
 		for (size_t i = 0; i < joints.size(); ++i) {
-			lines[i] = std::make_unique<LineDraw>();
-			lines[i]->Initialize();
+			
+		//	lines[i] = std::make_unique<LineDraw>();
+			//lines[i]->Initialize();
 		}
 	}
 }
@@ -248,9 +249,9 @@ static void UpdateLineSkeleton(const std::vector<Joint>& joints, std::vector<std
 		if (joint.parent.has_value()) { // 親ジョイントが存在する場合のみ描画
 			// LineDraw インスタンスを使用して親子間を描画
 			if (lines[joint.index]) {
-				lines[joint.index]->SetCamera(camera);
+				//lines[joint.index]->SetCamera(camera);
 
-				lines[joint.index]->Update();
+				//lines[joint.index]->Update();
 			}
 		}
 	}
@@ -286,22 +287,10 @@ static void DrawSkeleton(const std::vector<Joint>& joints, std::vector<std::uniq
 			const Vector3& childPosition = joint.skeletonSpaceMatrix.GetWorldPosition() * scale;
 
 
-			if (lines[joint.index]) {
-				Vector3 offsetParentPosition = Add(parentPosition, pos);
-				Vector3 offsetChildPosition = Add(childPosition, pos);
-
-				
-				// 深さに基づいて色を決定（白から黒へのグラデーション）
-				float depthFactor = static_cast<float>(depths[joint.index]) / static_cast<float>(maxDepth);
-				Vector4 color = { depthFactor, 1.0f, 1.0f, 1.0f }; // グラデーション (黒 → 白)
-
-				// 線を描画
-				lines[joint.index]->Draw3D(
-					offsetParentPosition,
-					offsetChildPosition,
-					color
-				);
-			}
+			Vector3 offsetParentPosition = Add(parentPosition, pos);
+			Vector3 offsetChildPosition = Add(childPosition, pos);
+			LineCommon::GetInstance()->AddLine(offsetParentPosition, offsetChildPosition);
+			
 		}
 	}
 

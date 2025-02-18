@@ -87,6 +87,7 @@ private:
 
 	//
 	void ObjectTypeDiscrimination(ObjectType type);
+	void ObjectSkinTypeDiscrimination(ObjectType type);
 
 
 private:

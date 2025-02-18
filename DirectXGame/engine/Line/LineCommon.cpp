@@ -1,5 +1,8 @@
 #include "LineCommon.h"
 #include "combaseapi.h"
+#include "DirectXGame/engine/base/SrvManager.h"
+#include "DirectXGame/engine/Material/Material.h"
+
 
 LineCommon* LineCommon::instance = nullptr;
 
@@ -23,6 +26,98 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 
 	CreateGraphicsPipeline();
+
+	
+	// マテリアル
+	materialResource = dxCommon_->CreateBufferResource(sizeof(Material));
+	// 書き込むためのアドレスを取得
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
+	//今回は赤を書き込んで見る //白
+	*materialData = MaterialData({ 1.0f, 1.0f, 1.0f, 1.0f }); //RGBA
+
+
+
+	viewResource = dxCommon_->CreateBufferResource(sizeof(Matrix4x4));
+	viewResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraWVP));
+
+	*cameraWVP = MakeIdentity4x4();
+
+	
+	mesh_ = std::make_unique<Mesh>();
+	mesh_->verticesline.push_back({ 0,0,0,0 });
+	mesh_->verticesline.push_back({ 0,0,0,0 });
+	mesh_->indices.push_back({ 0 });
+	mesh_->indices.push_back({ 1 });
+	mesh_->InitializeLine(LineCommon::GetInstance()->GetDxCommon());
+
+	mesh_->verticesline.clear();
+	mesh_->indices.clear();
+}
+
+void LineCommon::AddLine(Vector3 pos, Vector3 pos2)
+{
+	mesh_->verticesline.push_back({pos.x,pos.y,pos.z,1});
+	mesh_->verticesline.push_back({pos2.x,pos2.y,pos2.z,1});
+
+	//lineNum_++;
+	mesh_->indices.push_back(lineNum_);
+	lineNum_++;
+	mesh_->indices.push_back(lineNum_);
+	lineNum_++;
+
+	
+}
+
+void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
+{
+
+
+
+	for (size_t i = 0; i < mesh->verticesline.size(); i++) {
+		// ワールド行列を適用して変換
+		Vector4 pos = mesh->verticesline[i].position;
+		Vector4 worldPos = Transforms(pos, worldMat);
+
+		mesh_->verticesline.push_back({ worldPos.x, worldPos.y, worldPos.z, 1 });
+	}
+
+	Mesh::MeshLine(mesh->indices,mesh_->indices, lineNum_);
+
+
+	// インデックスオフセットを更新
+	lineNum_ += static_cast<uint32_t>(mesh_->indices.size());
+}
+
+void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices)
+{
+
+
+	for (size_t i = 0; i < mesh->verticesline.size(); i++) {
+		// ワールド行列を適用して変換
+		Vector4 pos = mesh->verticesline[i].position;
+		Vector4 worldPos = Transforms(pos, worldMat);
+
+		mesh_->verticesline.push_back({ worldPos.x, worldPos.y, worldPos.z, 1 });
+	}
+
+	for (size_t i = 0; i < cachedLineIndices.size(); i++) {
+		mesh_->indices.push_back(cachedLineIndices[i + lineNum_]);
+	}
+	
+
+	// インデックスオフセットを更新
+	lineNum_ += static_cast<uint32_t>(mesh_->indices.size());
+}
+
+void LineCommon::Update()
+{
+	mesh_->UpdateLineVertexBuffer();
+	mesh_->UpdateIndexBuffer();
+
+	if (camera_ && cameraWVP) {
+		*cameraWVP = camera_->viewProjectionMatrix_;  // データをコピー
+	}
 }
 
 void LineCommon::DrawCommonSetting()
@@ -33,85 +128,65 @@ void LineCommon::DrawCommonSetting()
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+}
+
+void LineCommon::Draw()
+{
+	DrawCommonSetting();
+
+	auto commandList = dxCommon_->GetCommandList();
+
+	// SRV (インスタンシングデータ) をルートパラメータ [0] に設定
+	commandList->SetGraphicsRootConstantBufferView(1, materialResource->GetGPUVirtualAddress());
+
+	// ビューデータ
+	commandList->SetGraphicsRootConstantBufferView(0, viewResource->GetGPUVirtualAddress());
+
+
+	mesh_->GetCommandList();
+
+	
+	//commandList->DrawInstanced(UINT(mesh_->verticesline.size()), 1, 0, 0);
+	commandList->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
+
+}
+
+void LineCommon::LineClear()
+{
+	lineNum_ = 0;
+	mesh_->Clear();
 }
 
 void LineCommon::CreateRootSignature()
 {
 	HRESULT hr;
 
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0; // 0から始まる
-	descriptorRange[0].NumDescriptors = 1; // 数は1つ
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
-	// Roosignature(ルートシグネチャ)作成
-	//ShaderとResorceをどのように関連付けるかを示したオブジェクト
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};  // 2つのパラメーターを使う
+	// [1] は SRV (インスタンシングデータ用)
 
-	
+	CameraCommon::SetRootParameterVertex(rootParameters[0], 0);
 
-	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
+	// マテリアルデータ (b0) をピクセルシェーダで使用する
+	Material::SetRootParameter(rootParameters[1], 1);
 
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;   // CBVを使う　// b0のbと一致する
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; //PixelShaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
-
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;   // CBVを使う　// b0のbと一致する
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; //VertexShaderで使う
-	rootParameters[1].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
-
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う           
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange; // Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Tableで利用する数 
-
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // CBVを使う           
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[3].Descriptor.ShaderRegister = 1; //レジスタ番号1を使う
-
-
-	//Roosignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 	descriptionSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	descriptionSignature.pParameters = rootParameters;   // ルートパラメータ配列へのポインタ
-	descriptionSignature.NumParameters = _countof(rootParameters);  //配列の長さ
+	descriptionSignature.pParameters = rootParameters;
+	descriptionSignature.NumParameters = _countof(rootParameters);
 
-
-	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // バイリニアフィルタ
-	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // 0～1の範囲外をリピート
-	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較しない
-	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX; // ありったけのMipmapを使う
-	staticSamplers[0].ShaderRegister = 0; //レジスタ番号0を使う
-	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	descriptionSignature.pStaticSamplers = staticSamplers;
-	descriptionSignature.NumStaticSamplers = _countof(staticSamplers);
-
-
-	//シリアライズにしてバイナリする
-	Microsoft::WRL::ComPtr < ID3DBlob> signatureBlob = nullptr;
-	Microsoft::WRL::ComPtr < ID3DBlob> errorBlob = nullptr;
-
-	hr = D3D12SerializeRootSignature(&descriptionSignature,
-		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-
+	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
+	hr = D3D12SerializeRootSignature(&descriptionSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
 	if (FAILED(hr)) {
 		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-
 		assert(false);
 	}
 
-	//バイナリを元に生成
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
-		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-
+	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 }
+
 
 void LineCommon::CreateGraphicsPipeline()
 {
@@ -131,7 +206,7 @@ void LineCommon::CreateGraphicsPipeline()
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	
+
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;

@@ -99,9 +99,6 @@ void ParticleManager::Update()
 			ParticleGroup& group = pair.second;
 			group.instanceCount = 0; // 描画すべきインスタンスのカウント
 
-			for (size_t i = 0; i < 24; i += 2) {
-				group.line_[i]->Update();
-			}
 
 			if (ImGui::BeginTabBar("Particles"))
 			{
@@ -356,7 +353,7 @@ void ParticleManager::Draw()
 
 		group.material->GetCommandListTexture(2);
 
-		commandList->SetGraphicsRootConstantBufferView(0, group.resource->GetGPUVirtualAddress());
+		//commandList->SetGraphicsRootConstantBufferView(0, group.resource->GetGPUVirtualAddress());
 		
 		// インスタンシングデータのSRVのDescriptorTableを設定
 		commandList->SetGraphicsRootDescriptorTable(1, group.instancingSrvHandleGPU);
@@ -595,10 +592,10 @@ void ParticleManager::DrawAABB()
 #ifdef _DEBUG
 			// ライン描画
 			Vector4 color = { 1, 1, 1, 1 }; // 白色
-			for (size_t i = 0; i < 24; i += 2) {
-				group.line_.emplace_back(std::make_unique<LineDraw>());
-				group.line_[i]->Draw3D(Add(lines[i], group.emiter.worldtransform.worldMat_.GetWorldPosition()), Add(lines[i + 1], group.emiter.worldtransform.worldMat_.GetWorldPosition()), color);
-			}
+			//for (size_t i = 0; i < 24; i += 2) {
+			//	group.line_.emplace_back(std::make_unique<LineDraw>());
+			//	group.line_[i]->Draw3D(Add(lines[i], group.emiter.worldtransform.worldMat_.GetWorldPosition()), Add(lines[i + 1], group.emiter.worldtransform.worldMat_.GetWorldPosition()), color);
+			//}
 #endif // _DEBUG
 		}
 	}
