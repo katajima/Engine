@@ -40,11 +40,9 @@ public:
 private:
 	void ApplyGlobalVariables();
 
-	void DrawLineWithLines(const Vector3& center, const Vector3& extent,
-		std::vector<std::unique_ptr<LineDraw>>& lines);
-
+	
 private:
-	const uint32_t kNumMaxInstance = 1000;
+	const uint32_t kNumMaxInstance = 10;
 
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> directionalLightResource;
