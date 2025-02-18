@@ -32,8 +32,8 @@ public:
 
 	void Update();
 
-	DirectionalLight GetDirectionalLight(int index) {return directionalLightData[index];}
-	PointLight GetPointLight(int index) {return pointLightData[index];}
+	//DirectionalLight GetDirectionalLight(int index) {return directionalLightData[index];}
+	//PointLight GetPointLight(int index) {return pointLightData[index];}
 
 	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr);
 
@@ -53,7 +53,7 @@ private:
 	
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> pointLightResource;
-	PointLight* pointLightData = nullptr;
+	PointLight* pointLightData;
 	const int pointMax = 3;
 
 
@@ -62,8 +62,6 @@ private:
 	const int spotMax = 3;
 
 
-	std::vector<std::unique_ptr<LineDraw>> pointLightLines_;
-	std::vector<std::unique_ptr<LineDraw>> spotLightLines_; 
 	bool isLine = false;
 
 };

@@ -17,36 +17,42 @@ void LightCommon::Initialize(DirectXCommon* dxCommon)
 
 	//平行光源用のリソースを作る
 	directionalLightResource = dxCommon_->CreateBufferResource(sizeof(DirectionalLight));
-	directionalLightData = nullptr;
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
+	
 	//今回は赤を書き込んで見る //白
-	*directionalLightData = DirectionalLight({ 1.0f,1.0f,1.0f,1.0f }, { 0.0f,-1.0f,0.0f }, 1.0f);
-	directionalLightData->lig = 0.2f;
-	directionalLightData->isLight = true;
-
-	// 半球ライト
-	directionalLightData->groundColor = { 0.7f,0.5f,0.3f };
-	directionalLightData->skyColor = { 0.15f,0.7f,0.95f };
-	directionalLightData->groundColor = { 1.0f,1.0f,1.0f };
-	directionalLightData->skyColor = { 1.0f,1.0f,1.0f };
-	directionalLightData->groundNormal = { 0.0f,1.0f,0.0f };
+	directionalLightData[0] = DirectionalLight({1.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,0.0f}, 1.0f);
+	directionalLightData[0].lig = 0.2f;
+	directionalLightData[0].isLight = true;
+						
+	// 半球ライト		 
+	directionalLightData[0].groundColor = { 0.7f,0.5f,0.3f };
+	directionalLightData[0].skyColor = { 0.15f,0.7f,0.95f };
+	directionalLightData[0].groundColor = { 1.0f,1.0f,1.0f };
+	directionalLightData[0].skyColor = { 1.0f,1.0f,1.0f };
+	directionalLightData[0].groundNormal = { 0.0f,1.0f,0.0f };
 
 
 	pointLightResource = dxCommon_->CreateBufferResource((sizeof(PointLight) * kNumMaxInstance));
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
 
-	//今回は赤を書き込んで見る //白
-	pointLightData[0] = PointLight({1.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,-10.0f});
-	pointLightData[0].radius = 10.0f;
-	pointLightData[0].intensity = 10.0f;
-	pointLightData[0].lig = 0.2f;
-	pointLightData[0].isLight = true;
-	pointLightData[1] = PointLight({0.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,10.0f});
-	pointLightData[1].radius = 10.0f;
-	pointLightData[1].intensity = 5.0f;
-	pointLightData[1].isLight = true;
-	pointLightData[1].lig = 0.2f;
+	
+
+
+	////今回は赤を書き込んで見る //白
+	//pointLightData[0] = PointLight({1.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,-10.0f});
+	//pointLightData[0].radius = 10.0f;
+	//pointLightData[0].intensity = 10.0f;
+	//pointLightData[0].lig = 0.2f;
+	//pointLightData[0].isLight = true;
+	//pointLightData[1] = PointLight({0.0f,1.0f,1.0f,1.0f}, {0.0f,-1.0f,10.0f});
+	//pointLightData[1].radius = 10.0f;
+	//pointLightData[1].intensity = 5.0f;
+	//pointLightData[1].isLight = true;
+	//pointLightData[1].lig = 0.2f;
+
+
+
 
 	//平行光源用のリソースを作る
 	spotLightResource = dxCommon_->CreateBufferResource(sizeof(SpotLight) * kNumMaxInstance);
@@ -84,18 +90,12 @@ void LightCommon::DrawLight()
 
 void LightCommon::SetLineCamera(Camera* camera)
 {
-	for (int i = 0; i < pointLightLines_.size(); i++) {
-		pointLightLines_[i]->SetCamera(camera);
-	}
-	for (int i = 0; i < spotLightLines_.size(); i++) {
-		spotLightLines_[i]->SetCamera(camera);
-	}
+	
 }
 
 void LightCommon::Update()
 {
-		
-
+	
 #ifdef _DEBUG
 	ImGui::Begin("engine");
 
@@ -185,12 +185,7 @@ void LightCommon::Update()
 	}
 	ImGui::End();
 
-	for (int i = 0; i < spotLightLines_.size(); i++) {
-		//spotLightLines_[i]->Update();
-	}
-	for (int i = 0; i < pointLightLines_.size(); i++) {
-		//pointLightLines_[i]->Update();
-	}
+	
 #endif
 
 
