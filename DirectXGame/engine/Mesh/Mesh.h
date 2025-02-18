@@ -26,6 +26,7 @@ public:
 	};
 	struct LineVertexData {
 	Vector4 position;
+	Vector4 color;    // 色
 	};
 
 	

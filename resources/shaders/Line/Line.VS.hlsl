@@ -11,6 +11,7 @@ ConstantBuffer<Camera> gCamera : register(b0);
 struct VertexShaderInput
 {
     float4 position : POSITION0;
+    float4 color : COLOR;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
@@ -20,6 +21,7 @@ VertexShaderOutput main(VertexShaderInput input)
   
     // ワールド・ビュー・プロジェクション行列を適用
     output.position = mul(input.position, gCamera.worldViewProjMatrix);
-
+    output.color = input.color; // そのままピクセルシェーダーへ渡す
+    
     return output;
 }

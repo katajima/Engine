@@ -55,18 +55,15 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	mesh_->indices.clear();
 }
 
-void LineCommon::AddLine(Vector3 pos, Vector3 pos2)
+void LineCommon::AddLine(Vector3 start, Vector3 end, Vector4 color)
 {
-	mesh_->verticesline.push_back({pos.x,pos.y,pos.z,1});
-	mesh_->verticesline.push_back({pos2.x,pos2.y,pos2.z,1});
+	mesh_->verticesline.push_back({ { start.x, start.y, start.z, 1.0f }, color });
+	mesh_->verticesline.push_back({ { end.x, end.y, end.z, 1.0f }, color });
 
-	//lineNum_++;
 	mesh_->indices.push_back(lineNum_);
-	lineNum_++;
-	mesh_->indices.push_back(lineNum_);
-	lineNum_++;
+	mesh_->indices.push_back(lineNum_ + 1);
 
-	
+	lineNum_ += 2;
 }
 
 void LineCommon::AddPointLightLine(PointLightData data)
@@ -75,6 +72,7 @@ void LineCommon::AddPointLightLine(PointLightData data)
 	const float radius = data.radius; // ポイントライトの届く距離
 
 	Vector3 center = data.position;
+	Vector4 lineColor = data.color; // ライトの色をそのまま使用
 
 	// 3つの軸 (XY, XZ, YZ) に円を描画
 	for (int axis = 0; axis < 3; ++axis) {
@@ -84,18 +82,15 @@ void LineCommon::AddPointLightLine(PointLightData data)
 
 			Vector3 p1, p2;
 
-			// XY平面
-			if (axis == 0) {
+			if (axis == 0) { // XY平面
 				p1 = Vector3(radius * cosf(theta1), radius * sinf(theta1), 0.0f);
 				p2 = Vector3(radius * cosf(theta2), radius * sinf(theta2), 0.0f);
 			}
-			// XZ平面
-			else if (axis == 1) {
+			else if (axis == 1) { // XZ平面
 				p1 = Vector3(radius * cosf(theta1), 0.0f, radius * sinf(theta1));
 				p2 = Vector3(radius * cosf(theta2), 0.0f, radius * sinf(theta2));
 			}
-			// YZ平面
-			else {
+			else { // YZ平面
 				p1 = Vector3(0.0f, radius * cosf(theta1), radius * sinf(theta1));
 				p2 = Vector3(0.0f, radius * cosf(theta2), radius * sinf(theta2));
 			}
@@ -104,13 +99,9 @@ void LineCommon::AddPointLightLine(PointLightData data)
 			p1 += center;
 			p2 += center;
 
-			Vector4 p1_v4 = { p1.x,p1.y,p1.z,1 };
-			Vector4 p2_v4 = { p2.x,p2.y,p2.z,1 };
-
-
 			// 頂点を追加
-			mesh_->verticesline.push_back({ p1_v4 });
-			mesh_->verticesline.push_back({ p2_v4 });
+			mesh_->verticesline.push_back({ { p1.x, p1.y, p1.z, 1.0f }, lineColor });
+			mesh_->verticesline.push_back({ { p2.x, p2.y, p2.z, 1.0f }, lineColor });
 
 			// インデックスを追加
 			mesh_->indices.push_back(lineNum_);
@@ -119,7 +110,25 @@ void LineCommon::AddPointLightLine(PointLightData data)
 			lineNum_ += 2;
 		}
 	}
+
+	// XYZ 軸方向に intensity の強さを反映したラインを追加
+	Vector3 intensityVectorX = { data.intensity, 0.0f, 0.0f };
+	Vector3 intensityVectorY = { 0.0f, data.intensity, 0.0f };
+	Vector3 intensityVectorZ = { 0.0f, 0.0f, data.intensity };
+
+	Vector3 xStart = center - intensityVectorX;
+	Vector3 xEnd = center + intensityVectorX;
+	Vector3 yStart = center - intensityVectorY;
+	Vector3 yEnd = center + intensityVectorY;
+	Vector3 zStart = center - intensityVectorZ;
+	Vector3 zEnd = center + intensityVectorZ;
+
+	// 各軸のラインを描画
+	AddLine(xStart, xEnd, lineColor); // X軸
+	AddLine(yStart, yEnd, lineColor); // Y軸
+	AddLine(zStart, zEnd, lineColor); // Z軸
 }
+
 
 void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
 {
@@ -253,11 +262,15 @@ void LineCommon::CreateGraphicsPipeline()
 #pragma region InputLayout
 
 
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[1] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs[1].SemanticName = "COLOR";
+	inputElementDescs[1].SemanticIndex = 0;
+	inputElementDescs[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};

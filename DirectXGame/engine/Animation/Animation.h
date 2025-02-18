@@ -289,7 +289,7 @@ static void DrawSkeleton(const std::vector<Joint>& joints, std::vector<std::uniq
 
 			Vector3 offsetParentPosition = Add(parentPosition, pos);
 			Vector3 offsetChildPosition = Add(childPosition, pos);
-			LineCommon::GetInstance()->AddLine(offsetParentPosition, offsetChildPosition);
+			LineCommon::GetInstance()->AddLine(offsetParentPosition, offsetChildPosition, {1,1,1,1});
 			
 		}
 	}

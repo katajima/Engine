@@ -29,7 +29,7 @@ public:
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	void AddLine(Vector3 pos ,Vector3 pos2);
+	void AddLine(Vector3 start, Vector3 end, Vector4 color);
 
 	void AddPointLightLine(PointLightData data);
 
