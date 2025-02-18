@@ -1,5 +1,4 @@
 #include "Ocean.hlsli"
-
 // 波のパラメータ
 struct WaveParameters
 {
@@ -7,9 +6,35 @@ struct WaveParameters
     float frequency; // 波の周波数
     float speed; // 波の速度
     float time; // 現在の時間
+    float noiseScale; // ノイズのスケール
+    float noiseStrength; // ノイズの強度
 };
 
 ConstantBuffer<WaveParameters> gWaveParameters : register(b5);
+
+// 擬似ノイズ関数（ハッシュベース）
+float Hash(float2 p)
+{
+    float3 p3 = frac(float3(p.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return frac((p3.x + p3.y) * p3.z);
+}
+
+// ノイズ関数（滑らかな変化を作る）
+float PerlinNoise(float2 uv)
+{
+    float2 i = floor(uv);
+    float2 f = frac(uv);
+
+    float a = Hash(i);
+    float b = Hash(i + float2(1.0, 0.0));
+    float c = Hash(i + float2(0.0, 1.0));
+    float d = Hash(i + float2(1.0, 1.0));
+
+    float2 u = f * f * (3.0 - 2.0 * f); // スムージング
+
+    return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
+}
 
 [domain("quad")]
 DS_OUTPUT main(
@@ -26,11 +51,17 @@ DS_OUTPUT main(
         patch[3].vPosition * domain.x * domain.y + // 右下
         patch[2].vPosition * (1.0f - domain.x) * domain.y; // 左下
 
-    // 波の影響をZ軸に加える（Y軸を基準に）
-    WorldPosition.z += gWaveParameters.amplitude * (
+    // ベースの波の影響
+    float wave = gWaveParameters.amplitude * (
         cos(gWaveParameters.frequency * WorldPosition.y - gWaveParameters.speed * gWaveParameters.time) +
         sin(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time)
     );
+
+    // ノイズを加えた波の変動
+    float noise = gWaveParameters.noiseStrength * PerlinNoise(WorldPosition.xy * gWaveParameters.noiseScale + gWaveParameters.time);
+
+    // Z軸に適用
+    WorldPosition.z += wave + noise;
 
     // ワールド座標を保存
     Output.vWorldPos = WorldPosition;
@@ -47,11 +78,15 @@ DS_OUTPUT main(
                cos(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time)
     );
 
+    // ノイズの勾配も法線に影響を与える
+    float noiseDX = gWaveParameters.noiseStrength * (PerlinNoise((WorldPosition.xy + float2(0.01, 0)) * gWaveParameters.noiseScale) - noise);
+    float noiseDY = gWaveParameters.noiseStrength * (PerlinNoise((WorldPosition.xy + float2(0, 0.01)) * gWaveParameters.noiseScale) - noise);
+
     float dZ = 1.0; // Z軸方向の基準（波をZ軸に適用しているため）
 
     // 正しい接線ベクトル
-    float3 tangent = normalize(float3(1.0, dX, 0.0)); // X方向の変化
-    float3 bitangent = normalize(float3(0.0, dY, dZ)); // Y方向の変化
+    float3 tangent = normalize(float3(1.0, dX + noiseDX, 0.0)); // X方向の変化
+    float3 bitangent = normalize(float3(0.0, dY + noiseDY, dZ)); // Y方向の変化
 
     // 法線を計算（tangent × bitangent）
     Output.vNormal = normalize(cross(tangent, bitangent));

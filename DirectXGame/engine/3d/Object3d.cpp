@@ -155,7 +155,8 @@ void Object3d::Draw(ObjectType type)
 
 void Object3d::DrawSkinning(ObjectType type)
 {
-	ObjectTypeDiscrimination(type);
+	ObjectSkinTypeDiscrimination(type);
+
 
 	DrawSetting();
 
@@ -167,9 +168,6 @@ void Object3d::DrawSkinning(ObjectType type)
 
 void Object3d::DrawLine()
 {
-	LineCommon::GetInstance()->DrawCommonSetting();
-
-
 	DrawSkeleton(model->skeleton.joints, model->line_,worldtransform_.translate_,worldtransform_.scale_);
 }
 
@@ -272,6 +270,39 @@ void Object3d::ObjectTypeDiscrimination(ObjectType type)
 	}
 
 
+}
+
+void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
+{
+	switch (type)
+	{
+	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK);
+		break;
+	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
+		break;
+	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_BACK:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
+		break;
+	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_BACK:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
+		break;
+	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_NONE:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE);
+		break;
+	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_NONE:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
+		break;
+	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_NONE:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
+		break;
+	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE:
+		SkinningConmmon::GetInstance()->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+		break;
+	default:
+		break;
+	}
 }
 
 #pragma endregion // 描画系

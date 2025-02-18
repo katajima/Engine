@@ -218,10 +218,10 @@ void LightCommon::Update()
 	ImGui::End();
 
 	for (int i = 0; i < spotLightLines_.size(); i++) {
-		spotLightLines_[i]->Update();
+		//spotLightLines_[i]->Update();
 	}
 	for (int i = 0; i < pointLightLines_.size(); i++) {
-		pointLightLines_[i]->Update();
+		//pointLightLines_[i]->Update();
 	}
 #endif
 
@@ -314,8 +314,8 @@ void LightCommon::DrawLineWithLines(const Vector3& center, const Vector3& extent
 	};
 
 	// 描画
-	Vector4 color = { 1, 1, 0, 1 }; // 白色
-	for (size_t i = 0; i < requiredLines; ++i) {
-		lines[i]->Draw3D(positions[i * 2], positions[i * 2 + 1], color);
-	}
+	//Vector4 color = { 1, 1, 0, 1 }; // 白色
+	//for (size_t i = 0; i < requiredLines; ++i) {
+	//	lines[i]->Draw3D(positions[i * 2], positions[i * 2 + 1], color);
+	//}
 }

@@ -11,6 +11,7 @@
 using namespace Microsoft::WRL;
 #include<d3d12.h>
 #include<dxgi1_6.h>
+#include "set"
 
 //#include "DirectXGame/engine/base/ImGuiManager.h"
 
@@ -65,6 +66,7 @@ public:
 	void GetCommandList();
 	void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv);
 
+	void Clear();
 
 	// インデクスデータ生成
 	void GenerateIndices2();
@@ -87,6 +89,9 @@ public:
 
 	static void SetTriangleImGui(const Mesh& mesh,const std::string name, const Vector3& worldPos = {});
 
+
+	static void MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum);
+	
 public:
 	std::vector<VertexData> vertices;
 	std::vector<LineVertexData> verticesline;
@@ -113,6 +118,7 @@ private:
 	Microsoft::WRL::ComPtr < ID3D12Resource> indexResource;
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
+	LineVertexData* lineVertexData = nullptr;
 
 	//バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
@@ -123,5 +129,7 @@ private:
 	Vector3 min_;
 	Vector3 max_;
 
+
+	const size_t maxLine_ = 100000;
 };
 

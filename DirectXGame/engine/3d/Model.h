@@ -40,7 +40,9 @@ public:
 		bool isAssimp;
 		uint32_t skinningSrvindex;
 		std::vector <std::unique_ptr<Mesh>> mesh;
+		std::vector<uint32_t> cachedLineIndices_;
 		std::vector < std::unique_ptr<Material>> material;
+		std::string name;
 	};
 	std::vector<std::unique_ptr <LineDraw>> line_;
 
@@ -70,10 +72,15 @@ public:
 	void MoveVertices(const Vector3& offset);
 
 	static Node ReadNode(aiNode* node);
+
+	static void MeshLine(std::string name,std::vector<uint32_t> index,uint32_t lineNum = {});
+
 private:
 
 	ModelData LoadMesh(const aiScene* _scene);
 
+	void GenerateMeshLine(const std::vector<uint32_t>& indices);
+	const std::vector<uint32_t>& GetCachedLineIndices() const { return modelData.cachedLineIndices_; }
 
 public:
 

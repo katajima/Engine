@@ -79,6 +79,8 @@ void Ocean::Initialize(Vector2 renge)
 	waveData->frequency = 2.0f;
 	waveData->speed = 1.0f;
 	waveData->time = 0;
+	waveData->noiseScale = 1.0f;
+	waveData->noiseStrength = 1.0f;
 
 	//transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,10.0f,0.0f} };
@@ -87,10 +89,21 @@ void Ocean::Initialize(Vector2 renge)
 void Ocean::Update()
 {
 #ifdef _DEBUG
-	ImGui::Begin("Ocean");
-	ImGui::DragFloat("amplitude", &waveData->amplitude, 0.1f);
-	ImGui::DragFloat("frequency", &waveData->frequency, 0.1f);
-	ImGui::DragFloat("speed", &waveData->speed, 0.1f);
+
+
+
+	ImGui::Begin("engine");
+
+
+	if (ImGui::CollapsingHeader("Ocean")) {
+
+		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.1f);
+		ImGui::DragFloat("frequency", &waveData->frequency, 0.1f);
+		ImGui::DragFloat("speed", &waveData->speed, 0.1f);
+		ImGui::DragFloat("noiseScale", &waveData->noiseScale, 0.1f);
+		ImGui::DragFloat("noiseStrength", &waveData->noiseStrength, 0.1f);
+		
+	}
 	ImGui::End();
 #endif // _DEBUG
 

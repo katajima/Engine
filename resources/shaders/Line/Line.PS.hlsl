@@ -4,7 +4,7 @@ struct Material
 {
     float4 color;
 };
-ConstantBuffer<Material> gMaterial : register(b0);
+ConstantBuffer<Material> gMaterial : register(b1);
 
 ////------PixelShader------////
 struct PixelShaderOutput

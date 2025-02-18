@@ -36,12 +36,14 @@ void TestScene::Initialize()
 
 	// 列車オブジェクトを unique_ptr で作成
 	mm.Initialize();
-	mm.SetModel("building.obj");
+	//mm.SetModel("building.obj");
+	mm.SetModel("iku.gltf");
 	mm.worldtransform_.translate_ = { 30,1,1 };
-	//mm.worldtransform_.scale_ = { 10,10,10 };
+	mm.worldtransform_.scale_ = { 10,10,10 };
 	mm.SetCamera(camera.get());
 	mm2.Initialize();
-	mm2.SetModel("AnimatedCube.gltf");
+	mm2.SetModel("walk.gltf");
+	//mm2.SetModel("AnimatedCube.gltf");
 	mm2.worldtransform_.translate_ = { -30,10,1 };
 	mm2.worldtransform_.scale_ = { 10,10,10 };
 	mm2.SetCamera(camera.get());
@@ -96,6 +98,11 @@ void TestScene::Initialize()
 	emitterEnemy_->SetIsRotateVelocity(true);
 	emitterEnemy_->SetIsBounce(true);
 	emitterEnemy_->SetSizeMinMax(Vector3{0.1f,0.1f,0.1f},{ 0.2f,0.2f,0.2f });
+
+
+	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
+
+	
 }
 
 void TestScene::Finalize()
@@ -188,21 +195,32 @@ void TestScene::Update()
 	}
 
 	ImGui::End();
+
+	//LineCommon::GetInstance()->AddLine({ 0,0,0 }, { 0,100,0 });
+	//LineCommon::GetInstance()->AddLine({ 10,10,0 }, { 10,100,0 });
+	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_);
+	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_,mm.GetModel()->modelData.cachedLineIndices_);
+	//LineCommon::GetInstance()->AddLineMesh(mm2.GetMesh(0), mm2.worldtransform_.worldMat_,mm2.GetModel()->modelData.cachedLineIndices_);
+
 #endif // _DEBUG
 	
-	mm.Update();
-	mm2.UpdateAnimation();
+	mm.UpdateSkinning();
+	//mm2.Update();
+	//mm2.UpdateSkinning();
 	tail.Update();
-	multiy.Update();
+	//multiy.Update();
 }
 
 void TestScene::Draw3D()
 {
 	tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	mm2.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+	mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+	//mm.DrawLine();
 
-	multiy.Draw();
+	//mm2.DrawSkinning(Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK);
+
+	//multiy.Draw();
 
 	ocean_->Draw();
 }

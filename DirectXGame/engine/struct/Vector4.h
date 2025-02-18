@@ -30,6 +30,10 @@ struct Vector4 final {
 	Vector4 operator*(const Vector4& other) const {
 		return Vector4{ x * other.x, y * other.y, z * other.z,w * other.w };
 	}
+	// * 演算子のオーバーロード
+	Vector4 operator*(const float& other) const {
+		return Vector4{ x * other, y * other, z * other,w * 1 };
+	}
 	//
 	Vector4 operator+(const Vector3& other) const {
 		return Vector4{ x + other.x, y + other.y, z + other.z,w};
@@ -44,3 +48,5 @@ struct Vector4 final {
 	}*/
 
 };
+
+//Vector4 
