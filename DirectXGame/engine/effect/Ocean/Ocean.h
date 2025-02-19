@@ -58,19 +58,25 @@ public:
 
 private:
 	struct WaveParameters {
+		Vector2 waveDirection; // 波の方向
 		float amplitude; // 波の振幅
 		float frequency; // 波の周波数
 		float speed; // 波の速度
 		float time; // 現在の時間（アニメーション用）
+		int flag;   // 波が起きるのか
+		float pad[1];
+	};
+	Microsoft::WRL::ComPtr < ID3D12Resource> waveResource;
+	WaveParameters *waveData;
+
+	struct NoiseData {
 		float noiseScale; // ノイズのスケール
 		float noiseStrength; // ノイズの強度
 		int octaves; // フラクタルノイズのオクターブ数
 		float roughness; // 各オクターブの影響度
-		//float pad[2];
 	};
-	Microsoft::WRL::ComPtr < ID3D12Resource> waveResource;
-
-	WaveParameters *waveData;
+	Microsoft::WRL::ComPtr < ID3D12Resource> noiseResource;
+	NoiseData* noiseData;
 
 
 	// 頂点データ

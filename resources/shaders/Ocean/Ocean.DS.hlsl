@@ -1,18 +1,36 @@
 #include "Ocean.hlsli"
+
 // 波のパラメータ
-struct WaveParameters
+struct WaveParameter
 {
+    float2 waveDirection; // 波の進行方向（単位ベクトル）
     float amplitude; // 波の振幅
     float frequency; // 波の周波数
     float speed; // 波の速度
     float time; // 現在の時間
+    int flag; // 波があるのか
+};
+
+static const int MaxWave = 3;
+
+// 複数の波を管理する構造体
+struct WaveParameters
+{
+    WaveParameter waveParameters[MaxWave];
+};
+
+ConstantBuffer<WaveParameters> gWaveParameters : register(b5);
+
+// ノイズのパラメータ
+struct NoiseParameters
+{
     float noiseScale; // ノイズのスケール
     float noiseStrength; // ノイズの強度
     int octaves; // フラクタルノイズのオクターブ数
     float roughness; // 各オクターブの影響度
 };
 
-ConstantBuffer<WaveParameters> gWaveParameters : register(b5);
+ConstantBuffer<NoiseParameters> gNoiseParameters : register(b6);
 
 // --- 擬似ノイズ関数（ハッシュベース） ---
 float Hash(float2 p)
@@ -43,16 +61,16 @@ float FractalNoise(float2 uv)
 {
     float amplitude = 1.0;
     float total = 0.0;
-    float maxValue = 0.0; // 正規化用
+    float maxValue = 0.0;
     float frequency = 1.0;
 
-    for (int i = 0; i < gWaveParameters.octaves; i++)
+    for (int i = 0; i < gNoiseParameters.octaves; i++)
     {
         total += PerlinNoise(uv * frequency) * amplitude;
         maxValue += amplitude;
 
-        amplitude *= gWaveParameters.roughness; // ラフネスで振幅を調整
-        frequency *= 2.0; // 周波数を倍増
+        amplitude *= gNoiseParameters.roughness;
+        frequency *= 2.0;
     }
 
     return total / maxValue; // 正規化
@@ -68,22 +86,34 @@ DS_OUTPUT main(
 
     // 四辺形のバリセントリック座標を使って位置を補間
     float3 WorldPosition =
-        patch[0].vPosition * (1.0f - domain.x - domain.y + domain.x * domain.y) + // 左上
-        patch[1].vPosition * domain.x * (1.0f - domain.y) + // 右上
-        patch[3].vPosition * domain.x * domain.y + // 右下
-        patch[2].vPosition * (1.0f - domain.x) * domain.y; // 左下
+        patch[0].vPosition * (1.0f - domain.x - domain.y + domain.x * domain.y) +
+        patch[1].vPosition * domain.x * (1.0f - domain.y) +
+        patch[3].vPosition * domain.x * domain.y +
+        patch[2].vPosition * (1.0f - domain.x) * domain.y;
 
-    // --- 通常の波 + フラクタルノイズ ---
-    float wave = gWaveParameters.amplitude * (
-        cos(gWaveParameters.frequency * WorldPosition.y - gWaveParameters.speed * gWaveParameters.time) +
-        sin(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time)
-    );
+    // 波の影響を加算
+    float waveSum = 0.0;
+    for (uint i = 0; i < MaxWave; i++)
+    {
+        if (!gWaveParameters.waveParameters[i].flag)
+        {
+            continue;
+        }
+        
+        WaveParameter wave = gWaveParameters.waveParameters[i];
+
+        // 各波の位相計算
+        float wavePhase = dot(WorldPosition.xy, wave.waveDirection);
+        waveSum += wave.amplitude * (
+            cos(wave.frequency * (wavePhase) - wave.speed * wave.time) +
+            sin(wave.frequency * (wavePhase + WorldPosition.y) - wave.speed * wave.time));
+    }
 
     // フラクタルノイズを追加
-    float noise = gWaveParameters.noiseStrength * FractalNoise(WorldPosition.xy * gWaveParameters.noiseScale + gWaveParameters.time);
+    float noise = gNoiseParameters.noiseStrength * FractalNoise(WorldPosition.xy * gNoiseParameters.noiseScale + gWaveParameters.waveParameters[0].time);
 
-    // Z軸に適用
-    WorldPosition.z += wave + noise;
+    // Z軸に波とノイズを適用
+    WorldPosition.z += waveSum + noise;
 
     // ワールド座標を保存
     Output.vWorldPos = WorldPosition;
@@ -91,30 +121,41 @@ DS_OUTPUT main(
     // スクリーン座標に変換
     Output.vPosition = mul(float4(WorldPosition, 1.0), gTransformationMatrix.WVP);
 
-    // --- 法線の再計算 ---
-    float dX = -gWaveParameters.amplitude * gWaveParameters.frequency *
-               sin(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time);
-    
-    float dY = -gWaveParameters.amplitude * gWaveParameters.frequency * (
-               sin(gWaveParameters.frequency * WorldPosition.y - gWaveParameters.speed * gWaveParameters.time) +
-               cos(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time)
-    );
+    // 法線の計算
+    float dX = 0.0, dY = 0.0, noiseDX = 0.0, noiseDY = 0.0;
 
-    // フラクタルノイズの勾配を追加
-    float noiseDX = gWaveParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0.01, 0)) * gWaveParameters.noiseScale) - noise);
-    float noiseDY = gWaveParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0, 0.01)) * gWaveParameters.noiseScale) - noise);
+    for (uint j = 0; j < MaxWave; j++)
+    {
+        if (!gWaveParameters.waveParameters[j].flag)
+        {
+            continue;
+        }
+        
+        WaveParameter wave = gWaveParameters.waveParameters[j];
+        
+        dX += -wave.amplitude * wave.frequency *
+              sin(wave.frequency * (WorldPosition.x + WorldPosition.y) - wave.speed * wave.time);
+        
+        dY += -wave.amplitude * wave.frequency * (
+              sin(wave.frequency * WorldPosition.y - wave.speed * wave.time) +
+              cos(wave.frequency * (WorldPosition.x + WorldPosition.y) - wave.speed * wave.time));
+        
+        // ノイズの影響を追加
+        noiseDX += gNoiseParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0.01, 0)) * gNoiseParameters.noiseScale) - noise);
+        noiseDY += gNoiseParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0, 0.01)) * gNoiseParameters.noiseScale) - noise);
+    }
 
-    float dZ = 1.0; // Z軸方向の基準（波をZ軸に適用しているため）
+    float dZ = 1.0;
 
     // 正しい接線ベクトル
-    float3 tangent = normalize(float3(1.0, dX + noiseDX, 0.0)); // X方向の変化
-    float3 bitangent = normalize(float3(0.0, dY + noiseDY, dZ)); // Y方向の変化
+    float3 tangent = normalize(float3(1.0, dX + noiseDX, 0.0));
+    float3 bitangent = normalize(float3(0.0, dY + noiseDY, dZ));
 
     // 法線を計算（tangent × bitangent）
     Output.vNormal = normalize(cross(tangent, bitangent));
 
     // テクスチャ座標の計算
-    Output.texcoord = WorldPosition.xy; // 仮にX, Y 座標をテクスチャ座標に使う
+    Output.texcoord = WorldPosition.xy;
 
     return Output;
 }
