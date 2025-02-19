@@ -62,7 +62,7 @@ void OceanManager::CreateRootSignature()
 
 	// RootParameter作成。複数指定できるのではい
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[9] = {};
+	D3D12_ROOT_PARAMETER rootParameters[10] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
 	Material::SetRootParameter(rootParameters[0],0);
@@ -90,15 +90,19 @@ void OceanManager::CreateRootSignature()
 
 
 
-	// スポットライトデータ (b5) をバーテックスシェーダで使用する
+	// ウェーブデータ (b5) をバーテックスシェーダで使用する
 	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
 	rootParameters[7].Descriptor.ShaderRegister = 5;
+	// ノイズデータ (b6) をバーテックスシェーダで使用する
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
+	rootParameters[8].Descriptor.ShaderRegister = 6;
 
 	// マテリアルデータ (b0) を頂点シェーダで使用する
-	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN; // 両方で使う
-	rootParameters[8].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド
+	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN; // 両方で使う
+	rootParameters[9].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド
 
 
 

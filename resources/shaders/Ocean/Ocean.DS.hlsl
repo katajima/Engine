@@ -7,15 +7,22 @@ struct WaveParameters
     float frequency; // 波の周波数
     float speed; // 波の速度
     float time; // 現在の時間
+   
+};
+ConstantBuffer<WaveParameters> gWaveParameters : register(b5);
+
+
+// ノイズのパラメータ
+struct NoiseParameters
+{
     float noiseScale; // ノイズのスケール
     float noiseStrength; // ノイズの強度
     int octaves; // フラクタルノイズのオクターブ数
-    float roughness; // 各オクターブの影響度
+    float roughness; // 各オクターブの影響度 
 };
+ConstantBuffer<NoiseParameters> gNoiseParameters : register(b6);
 
 
-
-ConstantBuffer<WaveParameters> gWaveParameters : register(b5);
 
 // --- 擬似ノイズ関数（ハッシュベース） ---
 float Hash(float2 p)
@@ -49,12 +56,12 @@ float FractalNoise(float2 uv)
     float maxValue = 0.0; // 正規化用
     float frequency = 1.0;
 
-    for (int i = 0; i < gWaveParameters.octaves; i++)
+    for (int i = 0; i < gNoiseParameters.octaves; i++)
     {
         total += PerlinNoise(uv * frequency) * amplitude;
         maxValue += amplitude;
 
-        amplitude *= gWaveParameters.roughness; // ラフネスで振幅を調整
+        amplitude *= gNoiseParameters.roughness; // ラフネスで振幅を調整
         frequency *= 2.0; // 周波数を倍増
     }
 
@@ -83,7 +90,7 @@ DS_OUTPUT main(
     sin(gWaveParameters.frequency * (wavePhase + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time));
 
     // フラクタルノイズを追加
-    float noise = gWaveParameters.noiseStrength * FractalNoise(WorldPosition.xy * gWaveParameters.noiseScale + gWaveParameters.time);
+    float noise = gNoiseParameters.noiseStrength * FractalNoise(WorldPosition.xy * gNoiseParameters.noiseScale + gWaveParameters.time);
 
     // Z軸に適用
     WorldPosition.z += wave + noise;
@@ -104,8 +111,8 @@ DS_OUTPUT main(
     );
 
     // フラクタルノイズの勾配を追加
-    float noiseDX = gWaveParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0.01, 0)) * gWaveParameters.noiseScale) - noise);
-    float noiseDY = gWaveParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0, 0.01)) * gWaveParameters.noiseScale) - noise);
+    float noiseDX = gNoiseParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0.01, 0)) * gNoiseParameters.noiseScale) - noise);
+    float noiseDY = gNoiseParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0, 0.01)) * gNoiseParameters.noiseScale) - noise);
 
     float dZ = 1.0; // Z軸方向の基準（波をZ軸に適用しているため）
 

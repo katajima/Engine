@@ -41,18 +41,24 @@ void Ocean::Initialize(Vector2 renge)
 	material->color = { 0,0,1,1.0f };
 
 
-	waveResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WaveParameters));
+	waveResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WaveParameters) * 3);
 	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));
 
 	waveData->amplitude = 1.0f;
 	waveData->frequency = 2.0f;
 	waveData->speed = 1.0f;
 	waveData->time = 0;
-	waveData->noiseScale = 1.0f;
-	waveData->noiseStrength = 1.0f;
-	waveData->octaves = 1;
-	waveData->roughness = 1.0f;
 	waveData->waveDirection = { 0,1 };
+	
+
+	noiseResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(NoiseData));
+	noiseResource->Map(0, nullptr, reinterpret_cast<void**>(&noiseData));
+
+	noiseData->noiseScale = 1.0f;
+	noiseData->noiseStrength = 1.0f;
+	noiseData->octaves = 1;
+	noiseData->roughness = 1.0f;
+
 	//transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,10.0f,0.0f} };
 }
@@ -67,13 +73,24 @@ void Ocean::Update()
 
 
 	if (ImGui::CollapsingHeader("Ocean")) {
-
+		ImGui::Text("SRT");
+		ImGui::Separator();
 		ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
 		ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
 		ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
 		ImGui::Separator();
 		ImGui::Text("material");
+		ImGui::Separator();
 		ImGui::ColorEdit4("color", &material->color.r);
+		ImGui::Separator();
+		ImGui::Text("noiseData");
+		ImGui::Separator();
+		ImGui::DragFloat("noiseScale", &noiseData->noiseScale, 0.01f);
+		ImGui::DragFloat("noiseStrength", &noiseData->noiseStrength, 0.01f);
+		ImGui::DragInt("octaves", &noiseData->octaves);
+		ImGui::DragFloat("roughness", &noiseData->roughness, 0.01f);
+
+
 
 		ImGui::Separator();
 		ImGui::Text("waveData");
@@ -81,12 +98,11 @@ void Ocean::Update()
 		ImGui::DragFloat2("waveDirection", &waveData->waveDirection.x, 0.1f);
 		waveData->waveDirection = Normalize(waveData->waveDirection);
 		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.01f);
-		ImGui::DragFloat("frequency", &waveData->frequency, 0.01f);
 		ImGui::DragFloat("speed", &waveData->speed, 0.01f);
-		ImGui::DragFloat("noiseScale", &waveData->noiseScale, 0.01f);
-		ImGui::DragFloat("noiseStrength", &waveData->noiseStrength, 0.01f);
-		ImGui::DragInt("octaves", &waveData->octaves);
-		ImGui::DragFloat("roughness", &waveData->roughness, 0.01f);
+		ImGui::DragFloat("frequency", &waveData->frequency, 0.01f);
+
+
+		
 		
 	}
 	ImGui::End();
@@ -95,7 +111,7 @@ void Ocean::Update()
 
 
 	waveData->time += 1.0f / 60.0f;
-
+	
 	// ワールド行列の計算
 	mat_ = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 	
@@ -111,9 +127,10 @@ void Ocean::Draw()
 	LightManager::GetInstance()->DrawLight();
 
 	OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(7, waveResource->GetGPUVirtualAddress());
+	OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(8, noiseResource->GetGPUVirtualAddress());
 
 	transfomation->GetCommandList(1);
-	transfomation->GetCommandList(8);
+	transfomation->GetCommandList(9);
 
 	camera->GetCommandList(4);
 
