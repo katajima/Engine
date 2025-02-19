@@ -50,10 +50,70 @@ void Camera::GetCommandList(int index)
 void Camera::UpdateMatrix() {
 
 #ifdef _DEBUG
-	ImGui::Begin("camera");
-	ImGui::DragFloat("debugShakeTime", &debugShakeTime_, 0.01f);
-	ImGui::DragFloat3("debugShakeDirectionRange", &debugShakeDirectionRange_.x, 0.1f);
+
+	ImGui::Begin("engine");
+	if (ImGui::CollapsingHeader("Camera")) {
+		ImGui::DragFloat("debugShakeTime", &debugShakeTime_, 0.01f);
+		ImGui::DragFloat3("debugShakeDirectionRange", &debugShakeDirectionRange_.x, 0.1f);
+
+		ImGui::DragFloat3("Translate", &transform_.translate.x, 0.1f);
+		ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
+		if (ImGui::Button("cameraPos")) {
+			transform_.translate = { 0,20,-175 };
+			transform_.rotate = { 0,0,0 };
+		}
+		if (ImGui::Button("cameraPos2")) {
+			transform_.translate = { -30,10,-140 };
+			transform_.rotate = { 0,0,0 };
+		}
+		if (ImGui::Button("cameraPos3")) {
+			transform_.translate = { 0,500,0 };
+			transform_.rotate = { DegreesToRadians(90),0,0 };
+		}
+		if (ImGui::Button("cameraPos4")) {
+			transform_.translate = { 0,60,-220 };
+			transform_.rotate = { DegreesToRadians(10),0,0 };
+		}
+		if (ImGui::Button("cameraPos5")) {
+			transform_.translate = { 0,60,220 };
+			transform_.rotate = { DegreesToRadians(10),DegreesToRadians(180),0 };
+		}
+	}
 	ImGui::End();
+
+
+
+	if (Input::GetInstance()->IsPushKey(DIK_LSHIFT) || Input::GetInstance()->IsPushKey(DIK_RSHIFT)) {
+		speed = 10.0f;
+	}
+	else if (Input::GetInstance()->IsPushKey(DIK_LALT) || Input::GetInstance()->IsPushKey(DIK_RALT)) {
+		speed = 0.1f;
+	}
+	else {
+		speed = 1.0f;
+	}
+
+	float sp = move * speed;
+
+	if (Input::GetInstance()->IsPushKey(DIK_A)) {
+		transform_.translate.x -= sp;
+	}
+	if (Input::GetInstance()->IsPushKey(DIK_D)) {
+		transform_.translate.x += sp;
+	}
+	if (Input::GetInstance()->IsPushKey(DIK_W)) {
+		transform_.translate.z += sp;
+	}
+	if (Input::GetInstance()->IsPushKey(DIK_S)) {
+		transform_.translate.z -= sp;
+	}
+	if (Input::GetInstance()->IsPushKey(DIK_UP)) {
+		transform_.translate.y += sp;
+	}
+	if (Input::GetInstance()->IsPushKey(DIK_DOWN)) {
+		transform_.translate.y -= sp;
+	}
+
 
 	if (Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
 		SetShake(debugShakeTime_, debugShakeDirectionRange_);

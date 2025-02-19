@@ -89,8 +89,7 @@ private:
 		std::vector<VertexData> indicesPos;
 		MaterialData material;
 	};
-	//ModelData modeldata; //LoadOdjFile("resources", "fence.obj");
-
+	
 	struct Renge {
 		Vector2 renge;
 	};

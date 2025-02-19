@@ -81,6 +81,11 @@ private:
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> resource;
 
+
+	float move = 0.3f;
+
+	float speed = 1.0f;
+
 };
 
 

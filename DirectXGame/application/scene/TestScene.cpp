@@ -69,7 +69,7 @@ void TestScene::Initialize()
 	trans_.translate_ = { 0,10,0 };
 
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize("emitter", "primi");
+	emitter_->Initialize("emitter", "cc");
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
@@ -152,34 +152,12 @@ void TestScene::Finalize()
 void TestScene::Update()
 {
 
-	if (Input::GetInstance()->IsPushKey(DIK_A)) {
-		camera->transform_.translate.x -= 0.3f;
-	}
-	if (Input::GetInstance()->IsPushKey(DIK_D)) {
-		camera->transform_.translate.x += 0.3f;
-	}
-	if (Input::GetInstance()->IsPushKey(DIK_W)) {
-		camera->transform_.translate.z += 0.3f;
-	}
-	if (Input::GetInstance()->IsPushKey(DIK_S)) {
-		camera->transform_.translate.z -= 0.3f;
-	}
-	if (Input::GetInstance()->IsPushKey(DIK_UP)) {
-		camera->transform_.translate.y += 0.3f;
-	}
-	if (Input::GetInstance()->IsPushKey(DIK_DOWN)) {
-		camera->transform_.translate.y -= 0.3f;
-	}
+	
 
 
 	camera->UpdateMatrix();
 	
 #ifdef _DEBUG
-
-	ImGui::Begin("trans");
-	ImGui::DragFloat3("translate", &emitter_->transform_.translate_.x, 0.1f);
-	ImGui::DragFloat3("rotate", &emitter_->transform_.rotate_.x, 0.1f);
-	ImGui::End();
 	ImGui::Begin("engine");
 
 
@@ -188,33 +166,6 @@ void TestScene::Update()
 		ImGuiManager::GetInstance()->RenderGizmo2(mm2, *camera.get(), "buil2");
 		ImGuiManager::GetInstance()->RenderGizmo2(tail, *camera.get(), "tail");
 		ImGuiManager::GetInstance()->RenderGizmo2(multiy, *camera.get(), "multiy");
-
-	}
-	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
-		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);
-		ImGui::Checkbox("flag", &flag);
-		if (ImGui::Button("cameraPos")) {
-			camera->transform_.translate = { 0,20,-175 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos2")) {
-			camera->transform_.translate = { -30,10,-140 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos3")) {
-			camera->transform_.translate = { 0,500,0 };
-			camera->transform_.rotate = { DegreesToRadians(90),0,0 };
-		}
-		if (ImGui::Button("cameraPos4")) {
-			camera->transform_.translate = { 0,60,-220 };
-			camera->transform_.rotate = { DegreesToRadians(10),0,0 };
-		}
-		if (ImGui::Button("cameraPos5")) {
-			camera->transform_.translate = { 0,60,220 };
-			camera->transform_.rotate = { DegreesToRadians(10),DegreesToRadians(180),0 };
-		}
-
 
 	}
 	

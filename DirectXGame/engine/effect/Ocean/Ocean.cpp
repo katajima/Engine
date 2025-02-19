@@ -28,37 +28,6 @@ void Ocean::Initialize(Vector2 renge)
 
 
 
-	//vertexResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(VertexData) * modeldata.vertices.size());
-
-	//// リソースの先頭のアドレスを作成する
-	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modeldata.vertices.size());
-	//vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//std::memcpy(vertexData, modeldata.vertices.data(), sizeof(VertexData) * modeldata.vertices.size());
-
-	////index用のあれやこれを作る
-	//indexResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
-
-	//
-	//// リソースの先頭のアドレスから使う
-	//indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-
-	//// 使用するリソースのサイズはインデック6つ分のサイズ
-	//indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
-
-	//// インデックはuint32_tとする
-	//indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-
-
-	//// インデックリソースにデータを書き込む
-	//indexData = nullptr;
-	//indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	//indexData[0] = 0;		indexData[1] = 1;		indexData[2] = 2;
-	//indexData[3] = 1;		indexData[4] = 3;		indexData[5] = 2;
-
-
 
 	
 	transfomation = std::make_unique<Transfomation>();
@@ -100,6 +69,15 @@ void Ocean::Update()
 	if (ImGui::CollapsingHeader("Ocean")) {
 
 		ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
+		ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
+		ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
+		ImGui::Separator();
+		ImGui::Text("material");
+		ImGui::ColorEdit4("color", &material->color.r);
+
+		ImGui::Separator();
+		ImGui::Text("waveData");
+		ImGui::Separator();
 		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.01f);
 		ImGui::DragFloat("frequency", &waveData->frequency, 0.01f);
 		ImGui::DragFloat("speed", &waveData->speed, 0.01f);
