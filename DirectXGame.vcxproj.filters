@@ -323,6 +323,7 @@
     <FxCompile Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl" />
     <FxCompile Include="resources\shaders\Trail\Trail.VS.hlsl" />
     <FxCompile Include="resources\shaders\Trail\Trail.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
