@@ -54,12 +54,12 @@ void Ocean::Initialize(Vector2 renge)
 	waveResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WaveParameters) * 3);
 	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));
 
-	waveData->amplitude = 1.0f;
-	waveData->frequency = 2.0f;
-	waveData->speed = 1.0f;
-	waveData->time = 0;
-	waveData->waveDirection = { 0,1 };
-	
+	waveData[0].amplitude = 1.0f;
+	waveData[0].frequency = 2.0f;
+	waveData[0].speed = 1.0f;
+	waveData[0].time = 0;
+	waveData[0].waveDirection = { 0,1 };
+	waveData[0].flag = true;
 
 	
 
@@ -99,11 +99,31 @@ void Ocean::Update()
 		ImGui::Separator();
 		ImGui::Text("waveData");
 		ImGui::Separator();
-		ImGui::DragFloat2("waveDirection", &waveData->waveDirection.x, 0.1f);
-		waveData->waveDirection = Normalize(waveData->waveDirection);
-		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.01f);
-		ImGui::DragFloat("speed", &waveData->speed, 0.01f);
-		ImGui::DragFloat("frequency", &waveData->frequency, 0.01f);
+
+		ImGui::Checkbox("Enable", reinterpret_cast<bool*>(&waveData[0].flag));
+		ImGui::DragFloat2("waveDirection", &waveData[0].waveDirection.x, 0.1f);
+		waveData[0].waveDirection = Normalize(waveData[0].waveDirection);
+		ImGui::DragFloat("amplitude", &waveData[0].amplitude, 0.01f);
+		ImGui::DragFloat("speed", &waveData[0].speed, 0.01f);
+		ImGui::DragFloat("frequency", &waveData[0].frequency, 0.01f);
+
+		ImGui::Separator();
+
+		ImGui::Checkbox("Enable1", reinterpret_cast<bool*>(&waveData[1].flag));
+		ImGui::DragFloat2("waveDirection1", &waveData[1].waveDirection.x, 0.1f);
+		waveData[1].waveDirection = Normalize(waveData[1].waveDirection);
+		ImGui::DragFloat("amplitude1", &waveData[1].amplitude, 0.01f);
+		ImGui::DragFloat("speed1", &waveData[1].speed, 0.01f);
+		ImGui::DragFloat("frequency1", &waveData[1].frequency, 0.01f);
+
+		ImGui::Separator();
+
+		ImGui::Checkbox("Enable2", reinterpret_cast<bool*>(&waveData[2].flag));
+		ImGui::DragFloat2("waveDirection2", &waveData[2].waveDirection.x, 0.1f);
+		waveData[2].waveDirection = Normalize(waveData[2].waveDirection);
+		ImGui::DragFloat("amplitude2", &waveData[2].amplitude, 0.01f);
+		ImGui::DragFloat("speed2", &waveData[2].speed, 0.01f);
+		ImGui::DragFloat("frequency2", &waveData[2].frequency, 0.01f);
 
 
 		

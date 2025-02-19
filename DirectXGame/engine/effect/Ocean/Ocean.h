@@ -63,7 +63,8 @@ private:
 		float frequency; // 波の周波数
 		float speed; // 波の速度
 		float time; // 現在の時間（アニメーション用）
-		float pad[2];
+		int flag;   // 波が起きるのか
+		float pad[1];
 	};
 	Microsoft::WRL::ComPtr < ID3D12Resource> waveResource;
 	WaveParameters *waveData;
