@@ -52,7 +52,7 @@ void Ocean::Initialize(Vector2 renge)
 	waveData->noiseStrength = 1.0f;
 	waveData->octaves = 1;
 	waveData->roughness = 1.0f;
-
+	waveData->waveDirection = { 0,1 };
 	//transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,10.0f,0.0f} };
 }
@@ -78,6 +78,8 @@ void Ocean::Update()
 		ImGui::Separator();
 		ImGui::Text("waveData");
 		ImGui::Separator();
+		ImGui::DragFloat2("waveDirection", &waveData->waveDirection.x, 0.1f);
+		waveData->waveDirection = Normalize(waveData->waveDirection);
 		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.01f);
 		ImGui::DragFloat("frequency", &waveData->frequency, 0.01f);
 		ImGui::DragFloat("speed", &waveData->speed, 0.01f);

@@ -101,4 +101,16 @@ static Vector2 Min(const Vector2& v1, const Vector2& v2) {
 	return result;
 }
 
+static Vector2 Normalize(const Vector2& v) {
+	Vector2 result{};
+	float length;
 
+	length = sqrtf((v.x * v.x) + (v.y * v.y) );
+
+	if (length != 0.0f) {
+		result.x = v.x / length;
+		result.y = v.y / length;
+	};
+
+	return result;
+};

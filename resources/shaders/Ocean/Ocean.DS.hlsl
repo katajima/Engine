@@ -2,6 +2,7 @@
 // 波のパラメータ
 struct WaveParameters
 {
+    float2 waveDirection; // 波の進行方向（単位ベクトル）
     float amplitude; // 波の振幅
     float frequency; // 波の周波数
     float speed; // 波の速度
@@ -11,6 +12,8 @@ struct WaveParameters
     int octaves; // フラクタルノイズのオクターブ数
     float roughness; // 各オクターブの影響度
 };
+
+
 
 ConstantBuffer<WaveParameters> gWaveParameters : register(b5);
 
@@ -74,10 +77,10 @@ DS_OUTPUT main(
         patch[2].vPosition * (1.0f - domain.x) * domain.y; // 左下
 
     // --- 通常の波 + フラクタルノイズ ---
+    float wavePhase = dot(WorldPosition.xy, gWaveParameters.waveDirection);
     float wave = gWaveParameters.amplitude * (
-        cos(gWaveParameters.frequency * WorldPosition.y - gWaveParameters.speed * gWaveParameters.time) +
-        sin(gWaveParameters.frequency * (WorldPosition.x + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time)
-    );
+    cos(gWaveParameters.frequency * (wavePhase) - gWaveParameters.speed * gWaveParameters.time) +
+    sin(gWaveParameters.frequency * (wavePhase + WorldPosition.y) - gWaveParameters.speed * gWaveParameters.time));
 
     // フラクタルノイズを追加
     float noise = gWaveParameters.noiseStrength * FractalNoise(WorldPosition.xy * gWaveParameters.noiseScale + gWaveParameters.time);

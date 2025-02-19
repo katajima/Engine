@@ -58,6 +58,7 @@ public:
 
 private:
 	struct WaveParameters {
+		Vector2 waveDirection; // 波の方向
 		float amplitude; // 波の振幅
 		float frequency; // 波の周波数
 		float speed; // 波の速度
@@ -66,7 +67,7 @@ private:
 		float noiseStrength; // ノイズの強度
 		int octaves; // フラクタルノイズのオクターブ数
 		float roughness; // 各オクターブの影響度
-		//float pad[2];
+		float pad[2];
 	};
 	Microsoft::WRL::ComPtr < ID3D12Resource> waveResource;
 

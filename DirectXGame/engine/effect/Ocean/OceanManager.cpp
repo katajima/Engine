@@ -2,6 +2,13 @@
 #include "DirectXGame/engine/base/TextureManager.h"
 #include "imgui.h"
 
+
+#include "DirectXGame/engine/Transfomation/Transfomation.h"
+#include "DirectXGame/engine/Material/Material.h"
+#include "DirectXGame/engine/Light/LightCommon.h"
+#include "DirectXGame/engine/Camera/CameraCommon.h"
+#include "DirectXGame/engine/base/TextureManager.h"
+
 OceanManager* OceanManager::instance = nullptr;
 OceanManager* OceanManager::GetInstance()
 {
@@ -58,40 +65,30 @@ void OceanManager::CreateRootSignature()
 	D3D12_ROOT_PARAMETER rootParameters[9] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;   // CBVを使う　// b0のbと一致する
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; //PixelShaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
+	Material::SetRootParameter(rootParameters[0],0);
 
 	// マテリアルデータ (b0) を頂点シェーダで使用する
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // 両方で使う
-	rootParameters[1].Descriptor.ShaderRegister = 0;    // レジスタ番号0とバインド
+	Transfomation::SetRootParameter(rootParameters[1],0);
+
 
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う           
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange; // Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Tableで利用する数 
+	TextureManager::SetRootParameter(rootParameters[2], descriptorRange[0]);
 
+	
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[3].Descriptor.ShaderRegister = 1;
+	LightManager::SetRootParameter(rootParameters[3],1);
+
 
 	// カメラデータ (b2) をピクセルシェーダで使用する
-	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[4].Descriptor.ShaderRegister = 2;
+	CameraCommon::SetRootParameter(rootParameters[4], 2);
 
 	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[5].Descriptor.ShaderRegister = 3;
+	LightManager::SetRootParameter(rootParameters[5], 3);
 
 	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[6].Descriptor.ShaderRegister = 4;
+	LightManager::SetRootParameter(rootParameters[6], 4);
+
+
 
 	// スポットライトデータ (b5) をバーテックスシェーダで使用する
 	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
