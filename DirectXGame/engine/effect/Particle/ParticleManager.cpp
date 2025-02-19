@@ -85,54 +85,6 @@ void ParticleManager::Update()
 		{0.0f, 23.0f, 10.0f}
 	};
 
-#ifdef _DEBUG
-	ImGui::Begin("engine");
-
-
-	if (ImGui::CollapsingHeader("Particle")) {
-
-
-
-		// 全パーティクルグループに対する処理
-		for (auto& pair : particleGroups) // 各パーティクルグループに対して
-		{
-			ParticleGroup& group = pair.second;
-			group.instanceCount = 0; // 描画すべきインスタンスのカウント
-
-			if (ImGui::TreeNode(group.name.c_str())) {
-				ImGui::SeparatorText("Emitter");
-
-				ImGui::Checkbox("usebillboard", &group.usebillboard);
-				ImGui::Checkbox("isAlpha", &group.isAlpha);
-				ImGui::Checkbox("isLine", &group.isLine);
-				ImGui::Separator(); // 水平線を引く
-				ImGui::DragFloat3("center", &group.emiter.worldtransform.translate_.x, 0.1f);
-				ImGui::DragFloat3("renge.max", &group.emiter.renge.max.x, 0.1f);
-				ImGui::DragFloat3("renge.min", &group.emiter.renge.min.x, 0.1f);
-				ImGui::Separator(); // 水平線を引く
-				ImGui::DragFloat3("rotate.max", &group.emiter.rotate.max.x, 0.1f);
-				ImGui::DragFloat3("rotate.min", &group.emiter.rotate.min.x, 0.1f);
-				ImGui::DragFloat3("size.max", &group.emiter.size.max.x, 0.1f);
-				ImGui::DragFloat3("size.min", &group.emiter.size.min.x, 0.1f);
-				ImGui::DragFloat3("velocity.max", &group.emiter.velocity.max.x, 0.1f);
-				ImGui::DragFloat3("velocity.min", &group.emiter.velocity.min.x, 0.1f);
-				ImGui::DragFloat("lifeTime.max", &group.emiter.lifeTime.max, 0.1f);
-				ImGui::DragFloat("lifeTime.min", &group.emiter.lifeTime.min, 0.1f);
-
-				ImGui::DragFloat("count", &group.emiter.count, 1.0f);
-
-				ImGui::Separator(); // 水平線を引く
-				ImGui::ColorEdit4("colorMax", &group.emiter.color.max.x);
-				ImGui::ColorEdit4("colorMin", &group.emiter.color.min.x);
-				ImGui::TreePop();
-			}
-
-			
-		}
-	}
-	ImGui::End();
-#endif
-
 
 
 
@@ -164,10 +116,7 @@ void ParticleManager::Update()
 			}
 
 			if (group.instanceCount < kNumMaxInstance) {
-				// 場の影響を計算 (加速)
-				if (upDataWind && IsCollision(acceleraionField.area, particleIterator->transform.translate)) {
-					particleIterator->velocity = Add(particleIterator->velocity, Multiply(MyGame::GameTime(), acceleraionField.acceleration));
-				}
+				
 
 				if (group.isGravity) { // 重力
 					particleIterator->velocity.y -= kGravitationalAcceleration * MyGame::GameTime();

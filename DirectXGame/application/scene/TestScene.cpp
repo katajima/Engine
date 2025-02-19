@@ -69,7 +69,7 @@ void TestScene::Initialize()
 	trans_.translate_ = { 0,10,0 };
 
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize("emitter", "cc");
+	emitter_->Initialize("emitter", "primi");
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
@@ -83,9 +83,9 @@ void TestScene::Initialize()
 
 	emitterEnemy_ = std::make_unique<ParticleEmitter>();
 	emitterEnemy_->Initialize("emitterPrimi", "primi");
-	emitterEnemy_->GetFrequency() = 1.1f;
+	emitterEnemy_->GetFrequency() = 0.1f;
 	emitterEnemy_->SetCount(1);
-	emitterEnemy_->SetParent(mm.worldtransform_);
+	//emitterEnemy_->SetParent(mm.worldtransform_);
 	emitterEnemy_->SetPos({ 0,50,0 });
 	emitterEnemy_->SetVelocityMinMax({ -0,20,-5 }, { 5, 20, 5 });
 	emitterEnemy_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -152,11 +152,6 @@ void TestScene::Finalize()
 void TestScene::Update()
 {
 
-
-
-	
-
-
 	if (Input::GetInstance()->IsPushKey(DIK_A)) {
 		camera->transform_.translate.x -= 0.3f;
 	}
@@ -180,10 +175,6 @@ void TestScene::Update()
 	camera->UpdateMatrix();
 	
 #ifdef _DEBUG
-
-
-
-
 
 	ImGui::Begin("trans");
 	ImGui::DragFloat3("translate", &emitter_->transform_.translate_.x, 0.1f);
@@ -227,8 +218,6 @@ void TestScene::Update()
 
 	}
 	
-
-
 	ImGui::End();
 
 	

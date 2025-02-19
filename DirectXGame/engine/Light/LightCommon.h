@@ -28,10 +28,6 @@ public:
 
 	void DrawLight();
 
-	void DrawLightLine();
-
-	void SetLineCamera(Camera* camera);
-
 	void Update();
 
 	void AddLight(std::shared_ptr<Lights> light) {

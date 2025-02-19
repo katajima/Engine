@@ -25,7 +25,7 @@ public:
 	// count: パーティクルの最大生成数を指定する値。frequency: パーティクルの発射間隔を秒単位で指定する値。frequencyTime: 現在の発射間隔の経過時間を追跡する値。
 	//ParticleEmitter(std::string name,Transform transform, uint32_t count, float frequency, float frequencyTime);
 
-	void Initialize(std::string emitName, std::string particleName);
+	void Initialize(std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
 
 	void Update();
 
@@ -74,9 +74,12 @@ public: // ゲッター兼セッター
 	void SetVelocityMinMax(Vector3 min, Vector3 max) { emitter_.velocity.min = min;emitter_.velocity.max = max; } // 速度
 
 	void SetRotateVelocityMinMax(Vector3 min, Vector3 max) { emitter_.rotateVelocity.min = min;emitter_.rotateVelocity.max = max; } // 速度
+private: // エミッタ可視化
+	
+	void DrawEmitterLine();
+	
+	void EmitMinMax();
 
-	
-	
 private:
 	ParticleManager::EmitType emitType_ = ParticleManager::EmitType::kRandom; // 出現方法
 	EmitSpawnShapeType spawnShapeType_ = EmitSpawnShapeType::kAABB; // 出現形状

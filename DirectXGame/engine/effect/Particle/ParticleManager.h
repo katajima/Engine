@@ -91,8 +91,6 @@ public:
 	// エミッター構造体
 	struct Emiter
 	{
-		//Vector3 center;
-		//Matrix4x4 mat;
 		// ランダム用
 		MaxMin<Vector3> renge;     //出現位置 (Vector3の範囲)
 		MaxMin<Vector4> color;     // 色 (Vector3の範囲)
@@ -123,11 +121,7 @@ public:
 		Transform strtTransform;
 		Vector3 rotateVelocity;
 	};
-	struct AcceleraionField {
-		Vector3 acceleration;
-		AABB area;
-	};
-
+	
 	struct ParticleGroup
 	{
 		std::string name; // 名前
@@ -248,8 +242,7 @@ private:
 	bool upDataWind = false;
 	uint32_t numInstance{};
 
-	AcceleraionField acceleraionField{};
-	
+
 	Camera* camera_ = nullptr;
 
 	

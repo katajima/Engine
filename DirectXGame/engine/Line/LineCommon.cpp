@@ -209,6 +209,50 @@ void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<
 	lineNum_ += static_cast<uint32_t>(mesh_->indices.size());
 }
 
+void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
+{
+	// AABB の最小・最大範囲をワールド座標に適用
+	Vector3 min = aabb.min + pos;
+	Vector3 max = aabb.max + pos;
+
+	// AABB の 8 頂点を計算
+	Vector3 vertices[8] = {
+		{min.x, min.y, min.z}, {max.x, min.y, min.z},
+		{min.x, max.y, min.z}, {max.x, max.y, min.z},
+		{min.x, min.y, max.z}, {max.x, min.y, max.z},
+		{min.x, max.y, max.z}, {max.x, max.y, max.z},
+	};
+
+	// AABB のエッジ（ラインを構成するインデックス）
+	int edges[12][2] = {
+		{0, 1}, {1, 3}, {3, 2}, {2, 0}, // 前面
+		{4, 5}, {5, 7}, {7, 6}, {6, 4}, // 背面
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // 前後を結ぶ
+	};
+
+	// ラインの色（固定値または動的変更可能）
+	Vector4 lineColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色（必要なら引数に追加）
+
+	// 頂点とラインを追加
+	for (int i = 0; i < 12; ++i)
+	{
+		int idx1 = edges[i][0];
+		int idx2 = edges[i][1];
+
+		// 頂点を追加
+		mesh_->verticesline.push_back({ { vertices[idx1].x, vertices[idx1].y, vertices[idx1].z, 1.0f }, lineColor });
+		mesh_->verticesline.push_back({ { vertices[idx2].x, vertices[idx2].y, vertices[idx2].z, 1.0f }, lineColor });
+
+		// インデックスを追加
+		mesh_->indices.push_back(lineNum_);
+		mesh_->indices.push_back(lineNum_ + 1);
+
+		lineNum_ += 2;
+	}
+}
+
+
+
 void LineCommon::Update()
 {
 	mesh_->UpdateLineVertexBuffer();

@@ -38,6 +38,8 @@ public:
 	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat);
 	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
 	
+	void AddLineAABB(AABB aabb, Vector3 pos);
+
 	void Update();
 
 	void DrawCommonSetting();
