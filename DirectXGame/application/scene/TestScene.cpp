@@ -69,7 +69,7 @@ void TestScene::Initialize()
 	trans_.translate_ = { 0,10,0 };
 
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize("emitter", "cc", ParticleManager::EmitType::kRandom);
+	emitter_->Initialize("emitter", "cc");
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
@@ -82,7 +82,7 @@ void TestScene::Initialize()
 	emitter_->SetIsAlpha(true);
 
 	emitterEnemy_ = std::make_unique<ParticleEmitter>();
-	emitterEnemy_->Initialize("emitterPrimi", "primi", ParticleManager::EmitType::kRandom);
+	emitterEnemy_->Initialize("emitterPrimi", "primi");
 	emitterEnemy_->GetFrequency() = 1.1f;
 	emitterEnemy_->SetCount(1);
 	emitterEnemy_->SetParent(mm.worldtransform_);
@@ -129,7 +129,20 @@ void TestScene::Initialize()
 
 	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 
+	DirectionalLightData directionalLightData{};
+	directionalLightData.color = { 1,1,1,1 };
+	directionalLightData.direction = { 0,-1,0 };
+	directionalLightData.intensity = 2.0f;
+	directionalLightData.isLight = true;
 
+
+
+	directional = std::make_shared<DirectionalLight>();
+	directional->directional = directionalLightData;
+
+	LightManager::GetInstance()->AddLight(directional);
+
+	
 }
 
 void TestScene::Finalize()
@@ -141,12 +154,7 @@ void TestScene::Update()
 
 
 
-	ocean_->Update();
-
-
-
-	emitter_->Update();
-	emitterEnemy_->Update();
+	
 
 
 	if (Input::GetInstance()->IsPushKey(DIK_A)) {
@@ -223,15 +231,12 @@ void TestScene::Update()
 
 	ImGui::End();
 
-	//LineCommon::GetInstance()->AddLine({ 0,0,0 }, { 0,100,0 });
-	//LineCommon::GetInstance()->AddLine({ 10,10,0 }, { 10,100,0 });
-	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_);
-	//LineCommon::GetInstance()->AddLineMesh(mm.GetMesh(0), mm.worldtransform_.worldMat_,mm.GetModel()->modelData.cachedLineIndices_);
-	//LineCommon::GetInstance()->AddLineMesh(mm2.GetMesh(0), mm2.worldtransform_.worldMat_,mm2.GetModel()->modelData.cachedLineIndices_);
 	
-
-
 #endif // _DEBUG
+	
+	ocean_->Update();
+	emitter_->Update();
+	emitterEnemy_->Update();
 
 	mm.UpdateSkinning();
 	//mm2.Update();
@@ -243,7 +248,7 @@ void TestScene::Update()
 void TestScene::Draw3D()
 {
 	tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 	mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
 	//mm.DrawLine();
 
@@ -251,20 +256,20 @@ void TestScene::Draw3D()
 
 	//multiy.Draw();
 
-	//ocean_->Draw();
+	ocean_->Draw();
 }
 
 void TestScene::Draw2D()
 {
 
-	for (int i = 0; i < sprite_.size(); i++) {
-		sprite_[i]->UpdateAmimetion(0.05f);
+	//for (int i = 0; i < sprite_.size(); i++) {
+	//	//sprite_[i]->UpdateAmimetion(0.05f);
 
-	}
-	sprite_[0]->Draw();
+	//}
+	/*sprite_[0]->Draw();
 	sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
 	sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
-	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
+	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);*/
 
 
 

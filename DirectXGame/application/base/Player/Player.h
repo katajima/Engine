@@ -332,7 +332,6 @@ private:
 	Vector3 velocity_ = {};
 	
 	
-	ParticleManager::Constant slash;
 	
 	// 浮遊ギミック媒介変数
 	float floatingParameter_ = 0.0f;

@@ -20,15 +20,11 @@
 //	//transform_ = transform;
 //}
 
-void ParticleEmitter::Initialize(std::string emitName, std::string particleName, ParticleManager::EmitType type)
+void ParticleEmitter::Initialize(std::string emitName, std::string particleName)
 {
-	// name: パーティクルエミッターの名前を示す文字列。
-	// transform: パーティクルエミッターの位置、回転、スケールなどを表す構造体。	
-	// count: パーティクルの最大生成数を指定する値。
-	// frequency: パーティクルの発射間隔を秒単位で指定する値。
-	// frequencyTime: 現在の発射間隔の経過時間を追跡する値。
+	
 
-	emitType_ = type;
+	emitType_ = ParticleManager::EmitType::kRandom;
 
 	emitName_ = emitName;
 	particleName_ = particleName;
@@ -67,10 +63,10 @@ void ParticleEmitter::Update()
 {
 
 
-	
+
 
 	ParticleManager::ParticleGroup& particleGroup = ParticleManager::GetInstance()->GetParticleGroups(particleName_);
-	
+
 	transform_.Update();
 	emitter_.worldtransform = transform_;
 	particleGroup.emiter.worldtransform = emitter_.worldtransform;
@@ -79,20 +75,20 @@ void ParticleEmitter::Update()
 
 
 	frequencyTime_ += MyGame::GameTime();
-		if (frequency_ <= frequencyTime_) {
-			Emit();
-			frequencyTime_ -= frequency_;
-		}
-	
+	if (frequency_ <= frequencyTime_) {
+		Emit();
+		frequencyTime_ -= frequency_;
+	}
+
 
 	// 寿命が尽きたパーティクルを削除する処理
 	particleGroup.particle.remove_if([](const ParticleManager::Particle& p)
 		{
 			return p.currentTime >= p.lifeTime;
 		});
-	
 
-	
+
+
 }
 
 void ParticleEmitter::Emit()
@@ -106,19 +102,13 @@ void ParticleEmitter::Emit()
 
 	if (emitType_ == ParticleManager::EmitType::kRandom) {
 		ParticleManager::GetInstance()->GetParticleGroups(particleName_).emiter = emitter_;
-		ParticleManager::GetInstance()->Emit(particleName_, "rand", emitType_);
-	}
-	if (emitType_ == ParticleManager::EmitType::kConstant) {
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).emiter = emitter_;
-		ParticleManager::GetInstance()->Emit(particleName_, "rand", emitType_);
+		ParticleManager::GetInstance()->Emit(particleName_, emitType_);
 	}
 }
 
 void ParticleEmitter::SetParent(WorldTransform& parent)
 {
-	transform_.parent_ =  &parent;
-	//emitter_.worldtransform.parent_ = &parent;
-	//ParticleManager::GetInstance()->GetParticleGroups(particleName_).emiter.worldtransform.parent_ = &parent;
+	transform_.parent_ = &parent;
 }
 
 void ParticleEmitter::SetIsAll(bool billboard, bool alpha, bool gravity, bool isLifeTimeScale, bool rotateVelocity)

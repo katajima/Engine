@@ -59,13 +59,12 @@ struct ModelData
 class ParticleManager
 {
 public:
-	
+
 
 	// 
 	enum class EmitType
 	{
 		kRandom,   // ランダム
-		kConstant, // 定数
 	};
 	enum class RasterizerType
 	{
@@ -86,18 +85,7 @@ public:
 		T min;
 		T max;
 	};
-	struct Constant {
-		Vector3 centar;
-		Vector4 color;
-		Vector3 size;
-		Vector3 rotate;
-		float lifeTime;
-		Vector3 velocity;
-		int count;
 
-		MaxMin<Vector3> renge;
-		MaxMin<Vector3> velocityRenge;  // 速度 (Vector3の範囲)
-	};
 
 
 	// エミッター構造体
@@ -118,17 +106,13 @@ public:
 		WorldTransform worldtransform;
 		bool isEmit = false;
 
-		// 定数用
-		Constant cons;
 
 
-
-		
 		float count;
 	};
 
 	struct Particle
-	{	
+	{
 		Transform transform;
 		Vector3 velocity;
 		Vector3 acceleration;
@@ -156,10 +140,8 @@ public:
 		ParticleForGPU* instanceData; // インスタンシングデータを書き込むためのポインタ
 		D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU;
 		D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU;
-		//Model* model;
 		Mesh* mesh;
 		Emiter emiter;
-		std::vector < std::unique_ptr <LineDraw>> line_;
 		bool usebillboard = true;
 		bool isAlpha = false;
 		bool isLine = true;
@@ -167,13 +149,13 @@ public:
 		bool isLifeTimeScale_ = false;
 		bool isRotateVelocity = false;
 		bool isBounce = false;
-		EmitType emitType = EmitType::kRandom; 
+		EmitType emitType = EmitType::kRandom;
 		RasterizerType rasteType;
 		BlendType blendType;
 	};
 
-	
-	
+
+
 #pragma endregion // 構造体
 
 public:
@@ -190,41 +172,31 @@ public:
 	void Draw();
 	// 終了
 	void Finalize();
-
-	void DrawCommonSetting(RasterizerType rasteType,BlendType blendType);
+	// 描画準備
+	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
 	// パーティクルの発生
-	void Emit(const std::string name,const std::string emitName, EmitType type);
-	void Emit(const std::string name,const std::string emitName, const Constant& cons);
+	void Emit(const std::string name, EmitType type);
 
+	// パーティクルグループ取得
 	std::unordered_map<std::string, ParticleGroup>& GetParticleGroups()
 	{
 		return particleGroups;
 	}
+	// パーティクルグループ取得
 	ParticleGroup& GetParticleGroups(const std::string name)
 	{
 		return particleGroups[name];
 	}
 
 
+	// パーティクルグループ作り(モデル)
+	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+	// パーティクルグループ作り(プリミティブ)
+	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 
-	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model,bool flag = false, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
-
-	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, bool flag = false, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
-
+	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
-
-	void DrawAABB();
-
-	void SetPos(const std::string name,const Vector3& position);
-	
-	
-	void SetObject(const std::string name, WorldTransform& obj);
-private: //セット系
-
-	void SetPos();
-
-
 
 private:
 	// ルートシグネチャの作成
@@ -238,13 +210,7 @@ private:
 	// ランダム
 	void RandParticle(const std::string name);
 
-	// 定数
-	void ConstantParticle(const std::string name, const Constant& cons);
-	// 定数
-	void ConstantParticle2(const std::string name, const Constant& cons);
-
-
-private:
+	// PSO
 	void GraphicsPipelineState(Microsoft::WRL::ComPtr < ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr < ID3D12PipelineState>& graphicsPipelineState
 		, D3D12_RASTERIZER_DESC rasterizerDesc, D3D12_BLEND_DESC blendDesc);
 
@@ -265,9 +231,9 @@ private:
 	SrvManager* srvManager_ = nullptr;
 
 
-	
 
-	
+
+
 
 	std::mt19937 randomEngine_;
 
@@ -280,14 +246,14 @@ private:
 	bool usebillboard = true;
 	bool upData = true;
 	bool upDataWind = false;
-	uint32_t numInstance;
+	uint32_t numInstance{};
 
-	AcceleraionField acceleraionField;
+	AcceleraionField acceleraionField{};
 	
 	Camera* camera_ = nullptr;
 
 	
-	Transform transform;
+	Transform transform{};
 
 
 	const float kGravitationalAcceleration = 9.8f;

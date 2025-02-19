@@ -61,20 +61,11 @@ void Player::BehaviorAttackUpdate()
 
 	SetAttackCombo(workAttack);
 	
-	slash.centar = { 0,7,0 };
-	slash.rotate = { 0,0,0 };
-	slash.size = { 0.3f,0.3f,0.3f };
-	slash.count = 10;
-	slash.lifeTime = 1.0f;
-	
 	float k = 2.5f;
 	Vector3 move(0, 0, k);
 	// 速度ベクトルを自機の向きに合わせて回転させる
 	move = TransformNormal(move, weapon_->GetObject3D().worldtransform_.worldMat_);
 
-	slash.velocity = move;
-	slash.renge = { -Vector3{0.1f,0.2f,0.1f},Vector3{0.1f,0.2f,0.1f} };
-	ParticleManager::GetInstance()->Emit("Slash", "const", slash);
 }
 
 void Player::BehaviorDieInitialize()

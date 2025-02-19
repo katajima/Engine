@@ -88,10 +88,8 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
 
 	//particleManager_ = ParticleManager::GetInstance();
-	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", ModelManager::GetInstance()->FindModel("plane.obj"), camera_);
-	ParticleManager::GetInstance()->SetPos("dust", { 0,0,0 });
-	ParticleManager::GetInstance()->SetObject("dust", objectBase_.worldtransform_);
-
+	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", ModelManager::GetInstance()->FindModel("plane.obj"));
+	
 	
 	
 
@@ -448,18 +446,6 @@ void Player::Move()
 	}
 	if (behavior_ == Behavior::kRoot || behavior_ == Behavior::kDie) {
 		
-	}
-	if (isMove) {
-		ParticleManager::Constant cons{};
-		cons.centar = { 0,-0.5f,0 };
-		cons.rotate = { 0,0,0 };
-		cons.size = { 0.3f,0.3f,0.3f };
-		cons.count = 2;
-		cons.lifeTime = 0.3f;
-		cons.velocity = -velocity_;// Multiply(-velocity_, 10);
-		cons.color = { 0.824f, 0.706f, 0.549f,0.5f };
-		cons.renge = { -Vector3{1.4f,0.1f,1.4f},Vector3{1.4f,0.1f,1.4f} };
-		ParticleManager::GetInstance()->Emit("cc", "const", cons);
 	}
 	
 }

@@ -187,8 +187,7 @@ void Player::AttackTypeInit(int comboIndex)
 		switch (workAttack.type)
 		{
 		case AttackType::kNormal:
-			slash.color = { 1,0,0,1 };
-
+			
 			
 			if (comboIndex == 0) {
 				weapon_->SetRad(2.5f);
@@ -212,8 +211,7 @@ void Player::AttackTypeInit(int comboIndex)
 			}
 			break;
 		case AttackType::kJamp:
-			slash.color = { 0,1,0,1 };
-
+			
 
 			weapon_->SetRad(5.5f);
 
@@ -240,8 +238,7 @@ void Player::AttackTypeInit(int comboIndex)
 			
 			break;
 		case AttackType::kDash:
-			slash.color = { 0,0,1,1 };
-
+			
 			weapon_->SetRad(3.0f);
 
 			workAttack.attackAll.max_t = 0.3f;

@@ -98,7 +98,7 @@ private:
 	DirectXCommon* dxCommon_;
 	std::unique_ptr<Mesh> mesh_;
 	//std::unique_ptr<Mate>
-	const uint32_t kNumMaxInstance = 100000;
+	const uint32_t kNumMaxInstance = 200000;
 	
 	//マテリアルデータ
 	struct MaterialData {
