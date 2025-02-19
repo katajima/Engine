@@ -41,6 +41,16 @@ void Ocean::Initialize(Vector2 renge)
 	material->color = { 0,0,1,1.0f };
 
 
+	noiseResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(NoiseData));
+	noiseResource->Map(0, nullptr, reinterpret_cast<void**>(&noiseData));
+
+	noiseData->noiseScale = 1.0f;
+	noiseData->noiseStrength = 1.0f;
+	noiseData->octaves = 1;
+	noiseData->roughness = 1.0f;
+
+
+
 	waveResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WaveParameters) * 3);
 	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));
 
@@ -51,13 +61,7 @@ void Ocean::Initialize(Vector2 renge)
 	waveData->waveDirection = { 0,1 };
 	
 
-	noiseResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(NoiseData));
-	noiseResource->Map(0, nullptr, reinterpret_cast<void**>(&noiseData));
-
-	noiseData->noiseScale = 1.0f;
-	noiseData->noiseStrength = 1.0f;
-	noiseData->octaves = 1;
-	noiseData->roughness = 1.0f;
+	
 
 	//transform変数を作る
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,10.0f,0.0f} };
