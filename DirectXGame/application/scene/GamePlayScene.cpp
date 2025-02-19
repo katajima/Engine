@@ -50,30 +50,7 @@ void GamePlayScene::Initialize()
 	sky.worldtransform_.scale_ = { 10,10,10 };
 	sky.model->modelData.material[0]->enableLighting_ = false;
 
-	//particleManager_ = ParticleManager::GetInstance();
-	ParticleManager::GetInstance()->CreateParticleGroup("cc", "resources/Texture/Image.png", ModelManager::GetInstance()->FindModel("plane.obj"),true);
-	ParticleManager::GetInstance()->SetPos("cc", { 0,0,0 });
-	ParticleManager::GetInstance()->SetObject("cc", player_->GetObject3D().worldtransform_);
-	
-	ParticleManager::GetInstance()->CreateParticleGroup("Slash", "resources/Texture/aa.png", ModelManager::GetInstance()->FindModel("plane.obj"));
-	ParticleManager::GetInstance()->SetPos("Slash", { 0,0,0 });
-	ParticleManager::GetInstance()->SetObject("Slash", player_->GetWeapon()->GetObject3D().worldtransform_);
-	
-	
 
-	for (int i = 0; i < 10; i++) {
-		std::string strin = std::to_string(i) + "bullet";
-		ParticleManager::GetInstance()->CreateParticleGroup(strin, "resources/Texture/aa.png", ModelManager::GetInstance()->FindModel("plane.obj"),true);
-		ParticleManager::GetInstance()->SetPos(strin, { 0,0,0 });
-
-		strin = std::to_string(i) + "exp";
-		ParticleManager::GetInstance()->CreateParticleGroup(strin, "resources/Texture/aa.png", ModelManager::GetInstance()->FindModel("plane.obj"),true);
-		ParticleManager::GetInstance()->SetPos(strin, { 0,0,0 });
-		
-		strin = std::to_string(i) + "exp2";
-		ParticleManager::GetInstance()->CreateParticleGroup(strin, "resources/Texture/aa.png", ModelManager::GetInstance()->FindModel("plane.obj"),true);
-		ParticleManager::GetInstance()->SetPos(strin, { 0,0,0 });
-	}
 	
 
 	// 衝突マネージャの生成
@@ -82,8 +59,7 @@ void GamePlayScene::Initialize()
 
 	InitializeResources();
 
-	//ApplyGlobalVariables();
-
+	
 
 	LoadLevelData();
 }
@@ -216,7 +192,7 @@ void GamePlayScene::InitializeResources()
 	numpos[0] = { xpos + (50 * 2),100 };
 
 	emit_ = std::make_unique<ParticleEmitter>();
-	emit_->Initialize("groundRtttight", "dustt", ParticleManager::EmitType::kRandom);
+	emit_->Initialize("groundRtttight", "dustt");
 	emit_->GetFrequency() = 0.5f;
 	emit_->SetCount(200);
 	emit_->SetPos({ 200,40,200 });

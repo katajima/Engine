@@ -236,18 +236,7 @@ void Enemy::HitMotion()
 
 void Enemy::Emit()
 {
-	dame.centar = { 0,0,0 };
-	dame.rotate = { 0,0,0 };
-	dame.size = { 0.5f,0.5f,0.5f };
-	dame.count = 10;
-	dame.lifeTime = 5;
-
-
-	dame.velocity = velocity_;
-	dame.renge = { -Vector3{0.1f,0.2f,0.1f},Vector3{0.1f,0.2f,0.1f} };
-	dame.color = { 0,1,1,1 };
-	//ParticleManager::GetInstance()->Emit("dame", "const", dame);
-
+	
 	starEmit_->Update();
 
 	int dirac = rand() % 2;
@@ -329,7 +318,7 @@ void Enemy::InitParticle()
 
 
 	groundRightEmit_ = std::make_unique<ParticleEmitter>();
-	groundRightEmit_->Initialize("groundRight", "enemyGround", ParticleManager::EmitType::kRandom);
+	groundRightEmit_->Initialize("groundRight", "enemyGround");
 	groundRightEmit_->GetFrequency() = 0.15f;
 	groundRightEmit_->SetCount(1);
 	groundRightEmit_->SetParent(object_.worldtransform_);
@@ -341,7 +330,7 @@ void Enemy::InitParticle()
 	groundRightEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 
 	groundLeftEmit_ = std::make_unique<ParticleEmitter>();
-	groundLeftEmit_->Initialize("groundLeft", "enemyGround", ParticleManager::EmitType::kRandom);
+	groundLeftEmit_->Initialize("groundLeft", "enemyGround");
 	groundLeftEmit_->GetFrequency() = 0.15f;
 	groundLeftEmit_->SetCount(1);
 	groundLeftEmit_->SetParent(object_.worldtransform_);
@@ -353,7 +342,7 @@ void Enemy::InitParticle()
 	groundLeftEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 
 	dustEmit_ = std::make_unique<ParticleEmitter>();
-	dustEmit_->Initialize("dust", "enemyGround", ParticleManager::EmitType::kRandom);
+	dustEmit_->Initialize("dust", "enemyGround");
 	dustEmit_->GetFrequency() = 0.25f;
 	dustEmit_->SetCount(3);
 	dustEmit_->SetParent(object_.worldtransform_);
@@ -366,7 +355,7 @@ void Enemy::InitParticle()
 	dustEmit_->SetColorMinMax({ 0.1f, 0.1f, 0.1f }, { 0.12f, 0.12f, 0.12f });
 
 	starEmit_ = std::make_unique<ParticleEmitter>();
-	starEmit_->Initialize("dust", "hitStar", ParticleManager::EmitType::kRandom);
+	starEmit_->Initialize("dust", "hitStar");
 	starEmit_->GetFrequency() = 0.0f;
 	starEmit_->SetCount(1);
 	starEmit_->SetParent(object_.worldtransform_);
@@ -380,7 +369,7 @@ void Enemy::InitParticle()
 	starEmit_->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
 
 	traiEmit_ = std::make_unique<ParticleEmitter>();
-	traiEmit_->Initialize("dust", "hitTrai", ParticleManager::EmitType::kRandom);
+	traiEmit_->Initialize("dust", "hitTrai");
 	traiEmit_->GetFrequency() = 0.0f;
 	traiEmit_->SetCount(5);
 	traiEmit_->SetParent(object_.worldtransform_);
@@ -395,7 +384,7 @@ void Enemy::InitParticle()
 	traiEmit_->SetRengeMinMax(Vector3{-5,-5,-5},Vector3{5,5,5});
 
 	hitEmit_ = std::make_unique<ParticleEmitter>();
-	hitEmit_->Initialize("dust", "hit", ParticleManager::EmitType::kRandom);
+	hitEmit_->Initialize("dust", "hit");
 	hitEmit_->GetFrequency() = 0.0f;
 	hitEmit_->SetCount(10);
 	hitEmit_->SetParent(object_.worldtransform_);

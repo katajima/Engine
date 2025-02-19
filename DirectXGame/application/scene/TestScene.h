@@ -60,8 +60,6 @@ private:
 	Vector3 cameraDebugR;
 	bool flag = false;
 
-	ParticleManager::Constant cons;
-
 	Object3d mm;
 	Object3d mm2;
 	Object3d tail;
@@ -83,6 +81,8 @@ private:
 	std::shared_ptr<PointLight> point;
 
 	std::shared_ptr<SpotLight> spot;
+
+	std::shared_ptr<DirectionalLight> directional;
 
 };
 

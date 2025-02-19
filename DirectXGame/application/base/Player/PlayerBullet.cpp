@@ -39,35 +39,6 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 	
 	
 
-	bullet.centar = { 0,0.0,0 };
-	bullet.rotate = { 0,0,0 };
-	bullet.size = { 1.3f,1.3f,1.3f };
-	bullet.count = 1;
-	bullet.lifeTime = 2;
-	bullet.velocity = Multiply(-velocity_, 1);
-	bullet.color = { 0.3f, 0.3f, 0.3f,0.5f };
-	bullet.renge = { -Vector3{0.2f,0.2f,0.2f},Vector3{0.2f,0.2f,0.2f} };
-
-	exp.centar = { 0,0.0,0 };
-	exp.rotate = { 0,0,0 };
-	exp.size = { 3.3f,3.3f,3.3f };
-	exp.count = 100;
-	exp.lifeTime = 5;
-	exp.velocity = Multiply(-velocity_, 1);
-	exp.color = { 0.5f, 0.5f, 0.5f,1.0f };
-	exp.renge = { -Vector3{1.2f,1.2f,1.2f},Vector3{1.2f,1.2f,1.2f} };
-
-
-
-	strin = std::to_string(index_) + "bullet";
-	ParticleManager::GetInstance()->SetObject(strin, object_.worldtransform_);
-	
-	strin = std::to_string(index_) + "exp";
-	ParticleManager::GetInstance()->SetObject(strin, object_.worldtransform_);
-	
-	strin2 = std::to_string(index_) + "exp2";
-	ParticleManager::GetInstance()->SetObject(strin2, object_.worldtransform_);
-	
 
 	trailEffect_ = std::make_unique<TrailEffect>();
 	trailEffect_->Initialize("resources/Texture/Image.png", 0.1f,{1.00f,1.00f,1.00f,0.9f});
@@ -159,30 +130,14 @@ void PlayerBullet::Update()
 		}
 	}
 
-	bullet.velocity = Multiply(-velocity_, 0.5f);
-
+	
 	if (countTrail >= 5) {
 		bool flag_ =true ;
 		trailEffect_->Update(flag_, objectStr_, objectEnd_);
 	}
 
 
-	ParticleManager::GetInstance()->Emit(strin, "const", bullet);
 	
-	if (!isAlive_) {
-		exp.velocity = { 0.0f,0.0f,0.0f };
-		exp.velocityRenge = { {-6,0,-6},{6,6,6} };
-		exp.count = 100;
-		exp.lifeTime = 5;
-		exp.color = { 0.5f, 0.5f, 0.5f,1.0f };
-		
-		ParticleManager::GetInstance()->Emit(strin, "const2", exp);
-	
-		exp.count = 30;
-		exp.lifeTime = 4;
-		exp.color = { 0.2f, 0.2f, 0.2f,1.0f };
-		ParticleManager::GetInstance()->Emit(strin2, "const2", exp);
-	}
 
 	
 	// Y軸周り角度(θy)

@@ -99,6 +99,7 @@ void Ocean::Update()
 
 	if (ImGui::CollapsingHeader("Ocean")) {
 
+		ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
 		ImGui::DragFloat("amplitude", &waveData->amplitude, 0.01f);
 		ImGui::DragFloat("frequency", &waveData->frequency, 0.01f);
 		ImGui::DragFloat("speed", &waveData->speed, 0.01f);

@@ -67,9 +67,7 @@ private:
 	
 	//ParticleManager* particleManager_;
 	ParticleEmitter* emitter_;
-	ParticleManager::Constant bullet;
-	ParticleManager::Constant exp;
-
+	
 	std::string strin;
 	std::string strin2;
 

@@ -38,6 +38,8 @@ public:
 	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat);
 	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
 	
+	void AddLineAABB(AABB aabb, Vector3 pos);
+
 	void Update();
 
 	void DrawCommonSetting();
@@ -98,7 +100,7 @@ private:
 	DirectXCommon* dxCommon_;
 	std::unique_ptr<Mesh> mesh_;
 	//std::unique_ptr<Mate>
-	const uint32_t kNumMaxInstance = 100000;
+	const uint32_t kNumMaxInstance = 200000;
 	
 	//マテリアルデータ
 	struct MaterialData {

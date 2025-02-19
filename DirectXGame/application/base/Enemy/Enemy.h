@@ -128,8 +128,6 @@ private:
 	Vector3 velocity_;
 
 	
-	ParticleManager::Constant dame;
-
 
 	std::unique_ptr<Sprite> icon_lockOn;
 	std::unique_ptr<Sprite> hpBer_;
