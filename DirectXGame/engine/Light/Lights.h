@@ -15,15 +15,16 @@ public:
 
     virtual ~Lights() {}
 
-    // ライトのタイプに基づいて異なるデータ
     Type GetType() const { return m_type; }
 
-    // ライトデータをシェーダに送るための仮想関数
+    // ライトデータをシェーダに送る
     virtual void SetLightData(void* data) const = 0;
+
+    // GPU バッファから取得したデータを反映する
+    virtual void UpdateFromData(const void* data) = 0;
 
 protected:
     Type m_type;
-
 };
 
 
@@ -31,13 +32,15 @@ class PointLight : public Lights {
 public:
     PointLightData point;
 
-   
     PointLight()
         : Lights(Type::Point), point() {}
 
     void SetLightData(void* data) const override {
-        // PointLightDataをデータにコピーする処理
         *static_cast<PointLightData*>(data) = point;
+    }
+
+    void UpdateFromData(const void* data) override {
+        point = *static_cast<const PointLightData*>(data);
     }
 };
 
@@ -49,8 +52,11 @@ public:
         : Lights(Type::Directional), directional() {}
 
     void SetLightData(void* data) const override {
-        // DirectionalLightDataをデータにコピーする処理
         *static_cast<DirectionalLightData*>(data) = directional;
+    }
+
+    void UpdateFromData(const void* data) override {
+        directional = *static_cast<const DirectionalLightData*>(data);
     }
 };
 
@@ -62,8 +68,10 @@ public:
         : Lights(Type::Spot), spot() {}
 
     void SetLightData(void* data) const override {
-        // SpotLightDataをデータにコピーする処理
         *static_cast<SpotLightData*>(data) = spot;
     }
-};
 
+    void UpdateFromData(const void* data) override {
+        spot = *static_cast<const SpotLightData*>(data);
+    }
+};

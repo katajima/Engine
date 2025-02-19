@@ -218,41 +218,7 @@ void TestScene::Update()
 
 
 	}
-	//if (ImGui::CollapsingHeader("Light")) {
-	//	/*bool is = point->point.isLight;
-	//	ImGui::Checkbox("isLighting", &is);
-	//	point->point.isLight = is;
-	//	ImGui::DragFloat3("position", &point->point.position.x, 0.1f);
-	//	ImGui::DragFloat("intensity", &point->point.intensity, 0.1f);
-	//	if (0 >= point->point.intensity)
-	//		point->point.intensity = 0;
-	//	ImGui::DragFloat("decay", &point->point.decay, 0.1f);
-	//	ImGui::DragFloat("radius", &point->point.radius, 0.1f);
-	//	ImGui::DragFloat("lig", &point->point.lig, 0.1f);
-
-	//	ImGui::ColorEdit4("color", &point->point.color.x);*/
-
-
-	//	bool is = spot->spot.isLight;
-	//	ImGui::Checkbox("isLighting", &is);
-	//	spot->spot.isLight = is;
-
-	//	ImGui::DragFloat3("position", &spot->spot.position.x, 0.1f);
-
-	//	ImGui::DragFloat3("direction", &spot->spot.direction.x, 0.1f);
-	//	spot->spot.direction = Normalize(spot->spot.direction);
-
-	//	ImGui::DragFloat("intensity", &spot->spot.intensity, 0.1f);
-	//	if (0 >= spot->spot.intensity)
-	//		spot->spot.intensity = 0;
-	//	ImGui::DragFloat("distance", &spot->spot.distance, 0.1f);
-
-	//	ImGui::DragFloat("decay", &spot->spot.decay, 0.1f);
-	//	ImGui::DragFloat("cosFalloffStart", &spot->spot.cosFalloffStart, 0.1f);
-	//	ImGui::DragFloat("cosAngle", &spot->spot.cosAngle, 0.01f);
-
-	//	ImGui::ColorEdit4("color", &spot->spot.color.x);
-	//}
+	
 
 
 	ImGui::End();
