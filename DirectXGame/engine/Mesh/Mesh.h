@@ -18,7 +18,9 @@ using namespace Microsoft::WRL;
 class Mesh
 {
 public:	
-	
+	struct SkyBoxVertexData {
+		Vector4 position;
+	};
 	struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
@@ -55,6 +57,9 @@ public:
 	
 	// ライン用
 	void InitializeLine(DirectXCommon* dxcommon);
+
+	// スカイボックス用
+	void InitializeSkyBox(DirectXCommon* dxcommon);
 
 	void UpdateVertexBuffer();
 
@@ -94,7 +99,9 @@ public:
 	static void MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum);
 	
 public:
+	std::vector<SkyBoxVertexData> verticesskyBox;
 	std::vector<VertexData> vertices;
+
 	std::vector<LineVertexData> verticesline;
 	std::vector<uint32_t> indices; // 追加：インデックスデータ
 	std::vector<float> verticesTimer; // 追加：インデックスデータ
@@ -120,6 +127,7 @@ private:
 	// バッファリソース内のデータを指すポインタ
 	VertexData* vertexData = nullptr;
 	LineVertexData* lineVertexData = nullptr;
+	SkyBoxVertexData* skyBoxVertexData = nullptr;
 
 	//バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;

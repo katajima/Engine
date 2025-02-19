@@ -111,6 +111,8 @@ void MyGame::Draw()
 	// 描画前処理
 	SrvManager::GetInstance()->PreDraw();
 
+	SkyBoxCommon::GetInstance()->DrawCommonSetting();
+
 	//////////////---------3Dモデル-------------///////////////
 
 	
@@ -161,6 +163,7 @@ void MyGame::InitializeResource()
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/dust.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/hit.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/text/max.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Texture/rostock_laage_airport_4k.dds");
 
 
 	ModelManager::GetInstance()->LoadModelAmime("multiMaterial.gltf", "multiMaterial");

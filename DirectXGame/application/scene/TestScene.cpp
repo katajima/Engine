@@ -1,5 +1,6 @@
 #include"TestScene.h"
 //#include"DirectXGame/engine/struct/Quaternion.h"
+#include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 
 void TestScene::Initialize()
 {
@@ -142,7 +143,7 @@ void TestScene::Initialize()
 
 	LightManager::GetInstance()->AddLight(directional);
 
-	
+
 }
 
 void TestScene::Finalize()
@@ -151,9 +152,7 @@ void TestScene::Finalize()
 
 void TestScene::Update()
 {
-
 	
-
 
 	camera->UpdateMatrix();
 	
@@ -175,28 +174,34 @@ void TestScene::Update()
 #endif // _DEBUG
 	
 	ocean_->Update();
-	emitter_->Update();
-	emitterEnemy_->Update();
+	/*emitter_->Update();
+	emitterEnemy_->Update();*/
 
 	mm.UpdateSkinning();
 	//mm2.Update();
 	//mm2.UpdateSkinning();
 	tail.Update();
 	//multiy.Update();
+
+
+
+	SkyBoxCommon::GetInstance()->SetCamara(camera.get());
+	SkyBoxCommon::GetInstance()->Update();
+
 }
 
 void TestScene::Draw3D()
 {
 	tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
-	//mm.DrawLine();
+	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+	////mm.DrawLine();
 
-	//mm2.DrawSkinning(Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK);
+	////mm2.DrawSkinning(Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK);
 
-	//multiy.Draw();
+	////multiy.Draw();
 
-	ocean_->Draw();
+	//ocean_->Draw();
 }
 
 void TestScene::Draw2D()

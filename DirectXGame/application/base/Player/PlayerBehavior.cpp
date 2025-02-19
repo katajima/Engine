@@ -1,6 +1,6 @@
 #include"Player.h"
-#include "Enemy/Enemy.h"
 
+#include"DirectXGame/application/base/Enemy/Enemy.h"
 
 void Player::BehaviorRootInitialize()
 {

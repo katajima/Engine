@@ -28,6 +28,7 @@
 
 #include"DirectXGame/engine/base/ImGuiManager.h"
 #include"DirectXGame/engine/Camera/CameraCommon.h"
+#include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 
 #include"DirectXGame/engine/audio/Audio.h"
 #include"DirectXGame/engine/base/StringUtility.h"
@@ -107,6 +108,8 @@ protected:
 	SkinningConmmon* skinningCommon = nullptr;
 
 	PrimitiveCommon* primitiveCommon = nullptr;
+
+	SkyBoxCommon* skyBoxCommon = nullptr;
 	// シーンファクトリー
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 };

@@ -1,5 +1,6 @@
 #include "Player.h"
-#include "Enemy/Enemy.h"
+#include"DirectXGame/application/base/Enemy/Enemy.h"
+
 
 #include "assert.h"
 

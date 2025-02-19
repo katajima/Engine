@@ -288,6 +288,12 @@
     <ClCompile Include="DirectXGame\engine\Light\Lights.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -301,6 +307,7 @@
     <None Include="resources\shaders\Skining\SkinningObject3d.hlsli" />
     <None Include="resources\shaders\Object3D\Light.hlsli" />
     <None Include="resources\shaders\Trail\Trail.hlsli" />
+    <None Include="resources\shaders\SkyBox\SkyBox.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl" />
@@ -324,6 +331,8 @@
     <FxCompile Include="resources\shaders\Trail\Trail.VS.hlsl" />
     <FxCompile Include="resources\shaders\Trail\Trail.PS.hlsl" />
     <FxCompile Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
+    <FxCompile Include="resources\shaders\SkyBox\SkyBox.VS.hlsl" />
+    <FxCompile Include="resources\shaders\SkyBox\SkyBox.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -579,6 +588,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Light\Lights.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

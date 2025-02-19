@@ -66,6 +66,10 @@ void Framework::Initialize()
 	//ライト
 	lightCommon = LightManager::GetInstance();
 	lightCommon->Initialize(dxCommon.get());
+	
+	// スカイボックス
+	skyBoxCommon = SkyBoxCommon::GetInstance();
+	skyBoxCommon->Initialize(dxCommon.get());
 
 	// テクスチャマネージャ
 	TextureManager::GetInstance()->Initialize(dxCommon.get());
@@ -102,6 +106,8 @@ void Framework::Finalize()
 	lightCommon->Finalize();
 
 	renderingCommon->Finalize();
+
+	skyBoxCommon->Finalize();
 }
 
 void Framework::Update()
