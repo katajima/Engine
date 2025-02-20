@@ -4,7 +4,12 @@
 #include"DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include"DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Camera/Camera.h"
+
+
+
+
 
 class SkyBoxCommon
 {
@@ -33,15 +38,12 @@ private:
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
 
-	void Blob(DirectXCommon* dxCommon, D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr < ID3D12RootSignature>& rootSignature);
-
-	void GraphicsPipelineState(Microsoft::WRL::ComPtr < ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr < ID3D12PipelineState>& graphicsPipelineState
-		, D3D12_RASTERIZER_DESC rasterizerDesc, D3D12_BLEND_DESC blendDesc);
-
 private:// メンバ変数
 	Camera* camara_;
 	
 	DirectXCommon* dxCommon_;
+
+	std::unique_ptr<PSOManager> psoManager_;
 
 	//ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};

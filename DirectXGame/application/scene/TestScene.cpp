@@ -201,7 +201,7 @@ void TestScene::Draw3D()
 
 	////multiy.Draw();
 
-	//ocean_->Draw();
+	ocean_->Draw();
 }
 
 void TestScene::Draw2D()

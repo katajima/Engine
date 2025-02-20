@@ -27,7 +27,6 @@ void OceanManager::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
