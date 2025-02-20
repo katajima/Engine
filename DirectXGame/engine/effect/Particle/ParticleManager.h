@@ -28,6 +28,7 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Primitive/Primitive.h"
 #include "../../3d/Object3d.h"
+#include"DirectXGame/engine/PSO/PSOManager.h"
 
 
 struct ParticleForGPU
@@ -204,10 +205,6 @@ private:
 	// ランダム
 	void RandParticle(const std::string name);
 
-	// PSO
-	void GraphicsPipelineState(Microsoft::WRL::ComPtr < ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr < ID3D12PipelineState>& graphicsPipelineState
-		, D3D12_RASTERIZER_DESC rasterizerDesc, D3D12_BLEND_DESC blendDesc);
-
 	void BlendAdd();
 
 	void BlendSubtract();
@@ -226,8 +223,7 @@ private:
 
 
 
-
-
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
 	std::mt19937 randomEngine_;
 

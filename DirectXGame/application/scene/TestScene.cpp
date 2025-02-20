@@ -174,8 +174,8 @@ void TestScene::Update()
 #endif // _DEBUG
 	
 	ocean_->Update();
-	/*emitter_->Update();
-	emitterEnemy_->Update();*/
+	emitter_->Update();
+	emitterEnemy_->Update();
 
 	mm.UpdateSkinning();
 	//mm2.Update();
