@@ -15,25 +15,6 @@
 class PSOManager
 {
 public:
-	//enum ShaderType 
-	//{
-	//	SHADER_VERTEX = 1,
-	//	SHADER_HULL = 2,
-	//	SHADER_DOMAIN = 3,
-	//	SHADER_GEOMETRY = 4,
-	//	SHADER_PIXEL = 5,
-	//	SHADER_AMPLIFICATION = 6,
-	//	SHADER_MESH = 7
-	//};
-	//enum RootParameterType 
-	//{
-	//	TYPE_CBV,
-	//	TYPE_SRV,
-	//	TYPE_UAV,
-	//	TYPE_DESCRIPTOR_TABLE,
-	//};
-
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
