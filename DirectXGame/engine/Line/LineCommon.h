@@ -10,7 +10,7 @@
 #include "DirectXGame/engine/base/DirectXCommon.h"
 #include "DirectXGame/engine/Mesh/Mesh.h"
 #include "DirectXGame/engine/struct/Light.h"
-
+#include "DirectXGame/engine/PSO/PSOManager.h"
 
 class LineCommon
 {
@@ -89,7 +89,7 @@ private:
 
 private:
 	static LineCommon* instance;
-
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 	Camera* camera_ = nullptr;
 
 	// ルートシグネチャ

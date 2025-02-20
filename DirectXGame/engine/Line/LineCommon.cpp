@@ -25,9 +25,15 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
+
+	psoManager_ = std::make_unique<PSOManager>();
+	psoManager_->Initialize(dxCommon_);
+
 	CreateGraphicsPipeline();
 
 	
+
+
 	// マテリアル
 	materialResource = dxCommon_->CreateBufferResource(sizeof(Material));
 	// 書き込むためのアドレスを取得
@@ -49,7 +55,7 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->indices.push_back({ 0 });
 	mesh_->indices.push_back({ 1 });
-	mesh_->InitializeLine(LineCommon::GetInstance()->GetDxCommon());
+	mesh_->InitializeLine(dxCommon_);
 
 	mesh_->verticesline.clear();
 	mesh_->indices.clear();
@@ -289,10 +295,10 @@ void LineCommon::Draw()
 
 	mesh_->GetCommandList();
 
-	
-	//commandList->DrawInstanced(UINT(mesh_->verticesline.size()), 1, 0, 0);
-	commandList->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
-
+	if (mesh_->indices.size() != 0) {
+		//commandList->DrawInstanced(UINT(mesh_->verticesline.size()), 1, 0, 0);
+		commandList->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
+	}
 }
 
 void LineCommon::LineClear()
@@ -303,74 +309,25 @@ void LineCommon::LineClear()
 
 void LineCommon::CreateRootSignature()
 {
-	HRESULT hr;
-
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};  // 2つのパラメーターを使う
-	// [1] は SRV (インスタンシングデータ用)
 
-	CameraCommon::SetRootParameterVertex(rootParameters[0], 0);
-
+	// カメラデータ
+	psoManager_->SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	Material::SetRootParameter(rootParameters[1], 1);
+	psoManager_->SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
-	descriptionSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	descriptionSignature.pParameters = rootParameters;
-	descriptionSignature.NumParameters = _countof(rootParameters);
-
-	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&descriptionSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-		assert(false);
-	}
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-	assert(SUCCEEDED(hr));
+	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters),nullptr,0);
 }
 
 
 void LineCommon::CreateGraphicsPipeline()
 {
-	HRESULT hr;
 	CreateRootSignature();
-
-
-	// InputLayout(インプットレイアウト)
-	// VectorShaderへ渡す頂点データがどのようなものかを指定するオブジェクト
-
-
-#pragma region InputLayout
-
-
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
-	inputElementDescs[0].SemanticName = "POSITION";
-	inputElementDescs[0].SemanticIndex = 0;
-	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs[1].SemanticName = "COLOR";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = _countof(inputElementDescs);
-
-
-#pragma endregion //InputLayout(インプットレイアウト)
-
-
-	// BlendState(ブレンドステート)の設定
-	// PixeiShaderからの出力をどのように書き込むかを設定する
-	//半透明処理はここの設定により制御され、書き込む色要素を決めることができる
 
 
 #pragma region BlendState
 
-
+	// BlendState(ブレンドステート)の設定
 	D3D12_BLEND_DESC blendDesc{};
 	//すべての色要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
@@ -384,62 +341,17 @@ void LineCommon::CreateGraphicsPipeline()
 
 #pragma endregion //BlendState(ブレンドステート)
 
-
 	// RasterizerState(ラスタライザステート)の設定
-	// 三角形の内部をピクセルに分解して、PixelShaderを起動することで、この処理の設定
-
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
-
-	//裏面(時計回り)を表示しない
-	// カリングしない(裏面も表示させる)
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-
-	//三角形の中を塗りつぶす
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 
 
-	// Shaderをコンパイルする
-	Microsoft::WRL::ComPtr < IDxcBlob> vertexShaderBlob = dxCommon_->CompileShader(L"resources/shaders/Line/Line.VS.hlsl",
-		L"vs_6_0");
-
-	assert(vertexShaderBlob != nullptr);
-
-	Microsoft::WRL::ComPtr < IDxcBlob> pixelShaderBlob = dxCommon_->CompileShader(L"resources/shaders/Line/Line.PS.hlsl",
-		L"ps_6_0");
-
-	assert(pixelShaderBlob != nullptr);
+	// インプットレイアウト
+	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	psoManager_->AddInputElementDesc("COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 
-	// PSOを作成する
-
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-
-	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();// RootSignature
-
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;// InputLayout
-
-	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),
-	vertexShaderBlob->GetBufferSize() }; // VertexShader
-
-	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
-	pixelShaderBlob->GetBufferSize() }; // PixelShader
-
-	graphicsPipelineStateDesc.BlendState = blendDesc; //BlendState
-
-	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;// RasterizerState
-
-	//書き込むRTVの情報
-	graphicsPipelineStateDesc.NumRenderTargets = 1;
-	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-
-	//利用するトロポジ(形状)のタイプ。線形
-	graphicsPipelineStateDesc.PrimitiveTopologyType =
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-
-	//どのように画面に色を打ち込むかの設定(気にしなくて良い)
-	graphicsPipelineStateDesc.SampleDesc.Count = 1;
-	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-
+	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Line/Line.VS.hlsl";
+	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Line/Line.PS.hlsl";
 
 
 	//DepthStencilStateの設定を行う
@@ -452,15 +364,5 @@ void LineCommon::CreateGraphicsPipeline()
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 
-	// DepthStencilの設定
-	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
-	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-
-	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
-		IID_PPV_ARGS(&graphicsPipelineState));
-
-	assert(SUCCEEDED(hr));
-
-
+	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState, blendDesc, depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 }
