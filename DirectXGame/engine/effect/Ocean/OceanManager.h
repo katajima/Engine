@@ -17,6 +17,8 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
 #include"DirectXGame/engine/base/SrvManager.h"
+#include"DirectXGame/engine/PSO/PSOManager.h"
+
 #include<random>
 #include<numbers>
 
@@ -55,6 +57,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
 
 	DirectXCommon* dxCommon_;
+
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+
 };
 
 

@@ -88,9 +88,9 @@ void MyGame::Update()
 	
 	ParticleManager::GetInstance()->Update();
 
+#ifdef _DEBUG
 	LineCommon::GetInstance()->Update();
-	
-	//particleManager_->Update();
+#endif // _DEBUG
 	
 	// ImGuiの受付終了
 	imguiManager->End();
@@ -122,7 +122,11 @@ void MyGame::Draw()
 
 	ParticleManager::GetInstance()->Draw();
 
+#ifdef _DEBUG
 	LineCommon::GetInstance()->Draw();
+#endif // _DEBUG
+
+	
 
 	
 	//// 2Dオブジェクトの描画準備
@@ -146,6 +150,7 @@ void MyGame::InitializeResource()
 
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/Image.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Texture/aa.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/aa2.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/aaa.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/aaaa.png");

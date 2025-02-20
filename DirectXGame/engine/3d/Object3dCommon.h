@@ -1,6 +1,10 @@
 #pragma once
 #include "DirectXGame/engine/base/DirectXCommon.h"
 #include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/PSO/PSOManager.h"
+
+
+
 
 class Object3dCommon
 {
@@ -43,16 +47,12 @@ private:
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
-
-	void Blob(DirectXCommon* dxCommon  ,D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr < ID3D12RootSignature>& rootSignature);
-	
-	void GraphicsPipelineState(Microsoft::WRL::ComPtr < ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr < ID3D12PipelineState>& graphicsPipelineState
-		, D3D12_RASTERIZER_DESC rasterizerDesc, D3D12_BLEND_DESC blendDesc);
-
 private:// メンバ変数
 	DirectXCommon* dxCommon_;
 
 	Camera* defaultCamera = nullptr;
+
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
 	//ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};

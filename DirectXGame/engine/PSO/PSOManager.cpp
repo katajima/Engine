@@ -106,9 +106,10 @@ void PSOManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIP
 
 void PSOManager::SetDescriptorRenge(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rengeType)
 {
-	descriptorRange.BaseShaderRegister = ShaderRegister; // 0から始まる
+	descriptorRange.BaseShaderRegister = ShaderRegister; //
+	descriptorRange.RegisterSpace = 0; // レジスタスペース (通常は0) 
 	descriptorRange.NumDescriptors = numDescriptors; // 数は1つ
-	descriptorRange.RangeType = rengeType; // SRVを使う
+	descriptorRange.RangeType = rengeType; 
 	descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 }
 

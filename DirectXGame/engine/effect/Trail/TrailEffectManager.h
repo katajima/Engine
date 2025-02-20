@@ -11,6 +11,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/PSO/PSOManager.h"
 
 class TrailEffectManager
 {
@@ -34,6 +35,7 @@ private:
 
 private:
 	DirectXCommon* dxCommon_;
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
 	//ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};

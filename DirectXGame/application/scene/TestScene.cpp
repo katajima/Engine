@@ -174,8 +174,8 @@ void TestScene::Update()
 #endif // _DEBUG
 	
 	ocean_->Update();
-	/*emitter_->Update();
-	emitterEnemy_->Update();*/
+	emitter_->Update();
+	emitterEnemy_->Update();
 
 	mm.UpdateSkinning();
 	//mm2.Update();
@@ -207,14 +207,14 @@ void TestScene::Draw3D()
 void TestScene::Draw2D()
 {
 
-	//for (int i = 0; i < sprite_.size(); i++) {
-	//	//sprite_[i]->UpdateAmimetion(0.05f);
+	for (int i = 0; i < sprite_.size(); i++) {
+		sprite_[i]->UpdateAmimetion(0.05f);
 
-	//}
-	/*sprite_[0]->Draw();
+	}
+	sprite_[0]->Draw();
 	sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
 	sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
-	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);*/
+	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
 
 
 
