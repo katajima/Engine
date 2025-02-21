@@ -140,7 +140,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\effect\Trail\TrailEffect.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Trail\TrailEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Light\Lights.cpp" />
-    <ClCompile Include="DirectXGame\engine\Line\Line.cpp" />
     <ClCompile Include="DirectXGame\engine\Line\LineCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\audio\Audio.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp" />
@@ -416,7 +415,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\scene\BaseScene.h" />
     <ClInclude Include="DirectXGame\application\scene\GamePlayScene.h" />
     <ClInclude Include="DirectXGame\application\scene\TitleScene.h" />
-    <ClInclude Include="DirectXGame\engine\Line\Line.h" />
     <ClInclude Include="DirectXGame\engine\Line\LineCommon.h" />
     <ClInclude Include="DirectXGame\engine\audio\Audio.h" />
     <ClInclude Include="DirectXGame\engine\Camera\Camera.h" />
@@ -430,7 +428,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\MyGame\MyGame.h" />
     <ClInclude Include="DirectXGame\engine\scene\SceneManager.h" />
     <ClInclude Include="DirectXGame\engine\Skinning\Skinning.h" />
-    <ClInclude Include="DirectXGame\engine\struct\DeltaTime.h" />
     <ClInclude Include="DirectXGame\engine\struct\Light.h" />
     <ClInclude Include="DirectXGame\engine\struct\Material.h" />
     <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h" />

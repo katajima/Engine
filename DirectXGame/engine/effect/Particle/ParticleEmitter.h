@@ -17,8 +17,16 @@ public:
 		kAABB,		// AABB
 		kOBB,		// OBB
 		kSphere,	// Sphere
-		kSegment,		// Line
-		kLine,			// スプライン
+
+		//////// ライン
+
+		kSegmentLine,		// セグメントライン
+		kCornerLine,		// こーなーライン
+
+
+
+
+		kSpline,			// スプライン
 	};
 
 public:
@@ -31,6 +39,9 @@ public:
 
 	void Emit();
 public: // ゲッター兼セッター
+
+
+	void AddControlPoints(const Vector3& pos) { emitter_.controlPoints.push_back(pos); }
 
 	float& GetFrequency() { return frequency_; };//発生数
 
@@ -96,6 +107,7 @@ private:
 	bool isAlpha = false; // 透明度
 	bool isBounce = false; // 透明度
 
+	bool isEmit= false; // 透明度
 
 public:
 	WorldTransform transform_;

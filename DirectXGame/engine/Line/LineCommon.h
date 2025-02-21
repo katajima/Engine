@@ -11,10 +11,13 @@
 #include "DirectXGame/engine/Mesh/Mesh.h"
 #include "DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
+#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 
 class LineCommon
 {
 public:
+
+
 
 public:
 	static LineCommon* GetInstance();
@@ -39,6 +42,10 @@ public:
 	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
 	
 	void AddLineAABB(AABB aabb, Vector3 pos);
+
+	void AddLineCorner(CornerSegment corner,WorldTransform pos);
+
+	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos);
 
 	void Update();
 

@@ -8,7 +8,6 @@
 #include<vector>
 #include<format>
 #include"DirectXGame/engine/3d/Object3dCommon.h"
-#include"DirectXGame/engine/Line/Line.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"

@@ -21,7 +21,6 @@
 
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
 
-#include "DirectXGame/engine/struct/DeltaTime.h"
 
 #include "DirectXGame/engine/MyGame/MyGame.h"
 

@@ -15,7 +15,7 @@
 #include"DirectXGame/engine/Mesh/Mesh.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
-#include"DirectXGame/engine/Line/Line.h"
+
 
 #include "DirectXGame/engine/collider/Collider.h"
 
@@ -375,7 +375,6 @@ private:
 	// カメラ
 	Camera* camera_ = nullptr;
 
-	std::unique_ptr <LineDraw> line_;
 	bool isLine_ = false;
 
 	std::unique_ptr<Mesh> mesh;

@@ -54,7 +54,7 @@
 #include"Framework.h"
 
 #include "DirectXGame/application/scene/SceneFactory.h"
-#include "DirectXGame/engine/struct/DeltaTime.h"
+
 
 
 class  MyGame : public Framework

@@ -69,6 +69,14 @@ struct Segment
 		return end - origin;
 	}
 };
+
+struct CornerSegment {
+	Vector3 center;
+	int segment;
+	float radius;
+};
+
+
 //三角形
 struct Triangle
 {
@@ -100,6 +108,7 @@ struct Spring
 	float stiffness;     // 剛性。バネ定数k
 	float dampingCoefficient; // 減衰係数
 };
+
 struct Ball {
 	Vector3 position;		//位置
 	Vector3 veloctiy;		//速度
@@ -108,6 +117,7 @@ struct Ball {
 	float radius;			//半径
 	unsigned int color;		//色
 };
+
 struct Pendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ
@@ -115,6 +125,7 @@ struct Pendulum {
 	float angularVelocity;		// 角度ω
 	float angularAcceleration;	// 角加速度
 };
+
 struct ConicalPendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ

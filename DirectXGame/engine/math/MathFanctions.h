@@ -11,6 +11,15 @@
 
 
 #pragma region Math
+
+template<typename T>
+static T Clamp(T value, T min, T max)
+{
+	if (value < min) return min;
+	if (value > max) return max;
+	return value;
+}
+
 static float LerpShortAngle(float a, float b, float t) {
 	// 角度差分を求める
 	float diff = b - a;
@@ -80,6 +89,9 @@ Matrix4x4 MakeRotateXMatrix(float rotate);
 Matrix4x4 MakeRotateYMatrix(float rotate);
 //回転行列Z
 Matrix4x4 MakeRotateZMatrix(float rotate);
+// XYZ
+Matrix4x4 MakeRotateXYZ(Vector3 rotate);
+
 //逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
 //転置行列
@@ -100,9 +112,9 @@ bool IsCollision(const AABB& aabb, const Vector3& point);
 
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 // スプライン曲線
-Vector3 CatmullRom(const Vector3& p0, const Vector3 p1, const Vector3 p2, const Vector3 p3, float t);
+Vector3 CatmullRom(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
 // スプライン曲線
-Vector3 CatmullRom(std::vector<Vector3> controlPoints, float t);
+Vector3 CatmullRom(const std::vector<Vector3>& controlPoints, float t);
 // カーブ上の点を取得 (Catmull-Rom)
 Vector3 CatmullRom2(const std::vector<Vector3>& controlPoints, float t);
 

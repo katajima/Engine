@@ -61,8 +61,6 @@ void Model::InitializeAnime(ModelCommon* modelCommon, const std::string& directo
 
 	ApplyAnimation(skeleton, animation, animationTime);
 
-	InitializeDrawLineSkeleton(skeleton.joints, line_);
-
 	for (auto& material : modelData.material) {
 		material->LoadTex();
 	};

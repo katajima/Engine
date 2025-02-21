@@ -14,7 +14,6 @@
 #include<format>
 #include<span>
 
-#include"DirectXGame/engine/Line/Line.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 
 #include"imgui.h"
@@ -229,33 +228,7 @@ static void ImGuiNode(const std::vector<Node>& nodes) {
 
 
 
-static void InitializeDrawLineSkeleton(const std::vector<Joint>& joints, std::vector<std::unique_ptr<LineDraw>>& lines) {
-	// `lines` ベクターがジョイント数に応じて初期化されているか確認
-	if (lines.size() < joints.size()) {
-		lines.resize(joints.size());
-		for (size_t i = 0; i < joints.size(); ++i) {
-			
-		//	lines[i] = std::make_unique<LineDraw>();
-			//lines[i]->Initialize();
-		}
-	}
-}
 
-static void UpdateLineSkeleton(const std::vector<Joint>& joints, std::vector<std::unique_ptr<LineDraw>>& lines, Camera* camera) {
-
-
-	// 親子関係に基づいてラインを描画
-	for (const Joint& joint : joints) {
-		if (joint.parent.has_value()) { // 親ジョイントが存在する場合のみ描画
-			// LineDraw インスタンスを使用して親子間を描画
-			if (lines[joint.index]) {
-				//lines[joint.index]->SetCamera(camera);
-
-				//lines[joint.index]->Update();
-			}
-		}
-	}
-}
 
 // ジョイントの深さを計算する関数
 static int CalculateDepth(const std::vector<Joint>& joints, int index) {
@@ -267,7 +240,7 @@ static int CalculateDepth(const std::vector<Joint>& joints, int index) {
 }
 
 // スケルトンの描画
-static void DrawSkeleton(const std::vector<Joint>& joints, std::vector<std::unique_ptr<LineDraw>>& lines, const Vector3& pos, const Vector3& scale) {
+static void DrawSkeleton(const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale) {
 	// ジョイントごとの深さを計算して保存
 	std::vector<int> depths(joints.size(), 0);
 	int maxDepth = 0;

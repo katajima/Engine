@@ -40,8 +40,7 @@ void Primitive::Initialize(ShapeType type, const std::string& tex, const Color c
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	mat_.Identity();
 
-	line_ = std::make_unique<LineDraw>();
-	line_->Initialize();
+	
 
 }
 
@@ -58,9 +57,6 @@ void Primitive::Update()
 
 	transfomation->Update(camera_, mat_);
 
-	line_->SetCamera(camera_);
-	line_->SetTransform(transform);
-	//line_->Update();
 }
 
 

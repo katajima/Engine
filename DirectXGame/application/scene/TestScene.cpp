@@ -69,18 +69,26 @@ void TestScene::Initialize()
 	trans_.Initialize();
 	trans_.translate_ = { 0,10,0 };
 
+	
+
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize("emitter", "cc");
+	emitter_->Initialize("emitter", "cc", ParticleEmitter::EmitSpawnShapeType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
 	emitter_->SetRotateMinMax(-Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
 	emitter_->SetPos({ 0,10,0 });
-	emitter_->SetVelocityMinMax({ -10,5,0 }, { 0, 10, 0 });
+	emitter_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	emitter_->SetLifeTimeMinMax(1.0f, 2.0f);
 	/*emitter_->SetUsebillboard(false);*/
 	emitter_->SetIsGravity(true);
 	emitter_->SetIsAlpha(true);
+	emitter_->AddControlPoints(Vector3{ 0,0,0 });
+	emitter_->AddControlPoints(Vector3{ 10,10,0 });
+	emitter_->AddControlPoints(Vector3{ 20,20,0 });
+	emitter_->AddControlPoints(Vector3{ 30,30,0 });
+
+
 
 	emitterEnemy_ = std::make_unique<ParticleEmitter>();
 	emitterEnemy_->Initialize("emitterPrimi", "primi");
