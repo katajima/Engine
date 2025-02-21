@@ -2,7 +2,6 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/Animation/Animation.h"
-#include"DirectXGame/engine/Line/Line.h"
 #include"DirectXGame/engine/Mesh/Mesh.h"
 #include"DirectXGame/engine/Material/Material.h"
 
@@ -44,8 +43,7 @@ public:
 		std::vector < std::unique_ptr<Material>> material;
 		std::string name;
 	};
-	std::vector<std::unique_ptr <LineDraw>> line_;
-
+	
 	// アニメーション
 	Animation animation;
 	float animationTime = 0.0f;

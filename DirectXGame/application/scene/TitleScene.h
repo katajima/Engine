@@ -13,7 +13,7 @@
 #include"DirectXGame/engine/base/ImGuiManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-#include"DirectXGame/engine/Line/Line.h"
+
 
 class TitleScene : public BaseScene
 {

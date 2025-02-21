@@ -22,7 +22,6 @@
 #include"DirectXGame/engine/base/ImGuiManager.h"
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
-#include"DirectXGame/engine/Line/Line.h"
 
 
 void Object3d::Initialize()
@@ -86,9 +85,7 @@ void Object3d::UpdateSkinning()
 			// スキニング更新
 			UpdateSkinCluster(model->skinCluster, model->skeleton);
 
-			// ボーンのライン描画
-			UpdateLineSkeleton(model->skeleton.joints, model->line_, camera);
-
+			
 			// Imguiの表示
 			//ImGuiJoint(model->skeleton.joints);
 			
@@ -169,7 +166,7 @@ void Object3d::DrawSkinning(ObjectType type)
 
 void Object3d::DrawLine()
 {
-	DrawSkeleton(model->skeleton.joints, model->line_,worldtransform_.translate_,worldtransform_.scale_);
+	DrawSkeleton(model->skeleton.joints,worldtransform_.translate_,worldtransform_.scale_);
 }
 
 Vector2 Object3d::GetScreenPosition()

@@ -119,7 +119,7 @@ void ParticleManager::Update()
 			}
 
 			if (group.instanceCount < kNumMaxInstance) {
-				
+
 
 				if (group.isGravity) { // 重力
 					particleIterator->velocity.y -= kGravitationalAcceleration * MyGame::GameTime();
@@ -175,8 +175,8 @@ void ParticleManager::Update()
 					// アルファ値を計算
 					float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
 
-					group.instanceData[group.instanceCount].color.w = alpha; //(std::max)((1.0f - alpha),0.0f);
-					//group.instanceData[group.instanceCount].color.w = (std::max)((group.w),0.0f);
+					group.instanceData[group.instanceCount].color.w = alpha;
+
 				}
 
 				// インスタンス数をカウント
@@ -303,12 +303,13 @@ void ParticleManager::Draw()
 	}
 }
 
-void ParticleManager::Emit(const std::string name, EmitType type)
+void ParticleManager::Emit(const std::string name, EmitType type, SpawnType spawnType)
 {
 	// パーティクルグループが登録済みであることを確認
 	assert(particleGroups.contains(name) && "Error: Particle group with this name is not registered.");
 
-	RandParticle(name);
+
+	RandParticle(name, spawnType);
 }
 
 void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType, BlendType blendType)
@@ -454,11 +455,31 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 
 
-void ParticleManager::RandParticle(const std::string name)
+void ParticleManager::RandParticle(const std::string name, SpawnType spawnType)
 {
 
 
-	ParticleGroup& particleGroup = particleGroups[name];
+	if (SpawnType::kAABB == spawnType) {
+		AABBEmit(particleGroups[name]);
+	}
+	else if (SpawnType::kSegmentLine == spawnType) {
+		LineEmit(particleGroups[name]);
+	}
+	else if (SpawnType::kSpline == spawnType) {
+		SplineEmit(particleGroups[name]);
+	}
+	else if (SpawnType::kCornerLine == spawnType) {
+		CornerLineEmit(particleGroups[name]);
+	}
+
+}
+
+#pragma region EmitType
+
+
+
+void ParticleManager::AABBEmit(ParticleGroup& particleGroup)
+{
 
 	// 出る位置
 	std::uniform_real_distribution<float> distributionX(particleGroup.emiter.renge.min.x, particleGroup.emiter.renge.max.x);
@@ -547,6 +568,336 @@ void ParticleManager::RandParticle(const std::string name)
 		particleGroup.particle.push_back(newParticle);
 	}
 }
+
+void ParticleManager::LineEmit(ParticleGroup& particleGroup)
+{
+	// 発生セグメントの設定
+	Segment segment_;
+	segment_.origin = particleGroup.emiter.renge.min;  // 始点
+	segment_.end = particleGroup.emiter.renge.max;    // 終点
+
+
+
+	// 方向
+	std::uniform_real_distribution<float> distributionVeloX(particleGroup.emiter.velocity.min.x, particleGroup.emiter.velocity.max.x);
+	std::uniform_real_distribution<float> distributionVeloY(particleGroup.emiter.velocity.min.y, particleGroup.emiter.velocity.max.y);
+	std::uniform_real_distribution<float> distributionVeloZ(particleGroup.emiter.velocity.min.z, particleGroup.emiter.velocity.max.z);
+
+	// 色RGBA
+	std::uniform_real_distribution<float> distColorR(particleGroup.emiter.color.min.x, particleGroup.emiter.color.max.x);
+	std::uniform_real_distribution<float> distColorG(particleGroup.emiter.color.min.y, particleGroup.emiter.color.max.y);
+	std::uniform_real_distribution<float> distColorB(particleGroup.emiter.color.min.z, particleGroup.emiter.color.max.z);
+	std::uniform_real_distribution<float> distColorA(particleGroup.emiter.color.min.w, particleGroup.emiter.color.max.w);
+
+	// 時間
+	std::uniform_real_distribution<float> distTime(particleGroup.emiter.lifeTime.min, particleGroup.emiter.lifeTime.max);
+
+	// 回転
+	std::uniform_real_distribution<float> distributionRotateX(particleGroup.emiter.rotate.min.x, particleGroup.emiter.rotate.max.x);
+	std::uniform_real_distribution<float> distributionRotateY(particleGroup.emiter.rotate.min.y, particleGroup.emiter.rotate.max.y);
+	std::uniform_real_distribution<float> distributionRotateZ(particleGroup.emiter.rotate.min.z, particleGroup.emiter.rotate.max.z);
+
+	// スケール
+	std::uniform_real_distribution<float> distributionSizeX(particleGroup.emiter.size.min.x, particleGroup.emiter.size.max.x);
+	std::uniform_real_distribution<float> distributionSizeY(particleGroup.emiter.size.min.y, particleGroup.emiter.size.max.y);
+	std::uniform_real_distribution<float> distributionSizeZ(particleGroup.emiter.size.min.z, particleGroup.emiter.size.max.z);
+
+	// 回転速度
+	std::uniform_real_distribution<float> distributionRotateVelocityX(particleGroup.emiter.rotateVelocity.min.x, particleGroup.emiter.rotateVelocity.max.x);
+	std::uniform_real_distribution<float> distributionRotateVelocityY(particleGroup.emiter.rotateVelocity.min.y, particleGroup.emiter.rotateVelocity.max.y);
+	std::uniform_real_distribution<float> distributionRotateVelocityZ(particleGroup.emiter.rotateVelocity.min.z, particleGroup.emiter.rotateVelocity.max.z);
+
+
+	// 0.0 〜 1.0 のランダム値 (線分上の位置を決める)
+	std::uniform_real_distribution<float> distributionT(0.0f, 1.0f);
+	float t_2 = 0;
+	Vector3 position{};
+
+	// パーティクル
+	for (uint32_t t = 0; t < particleGroup.emiter.count; ++t) {
+		Particle newParticle;
+		// パーティクルの初期化 (必要に応じて詳細を設定)
+		newParticle.transform.scale =
+		{
+			distributionSizeX(randomEngine_),
+			distributionSizeY(randomEngine_),
+			distributionSizeZ(randomEngine_)
+		};
+		newParticle.transform.rotate =
+		{
+			distributionRotateX(randomEngine_),
+			distributionRotateY(randomEngine_),
+			distributionRotateZ(randomEngine_)
+		};
+
+		t_2 = distributionT(randomEngine_);
+		position.x = (1.0f - t_2) * segment_.origin.x + t_2 * segment_.end.x;
+		position.y = (1.0f - t_2) * segment_.origin.y + t_2 * segment_.end.y;
+		position.z = (1.0f - t_2) * segment_.origin.z + t_2 * segment_.end.z;
+		newParticle.transform.translate = particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition() + position;
+
+		newParticle.color =
+		{
+			distColorR(randomEngine_),
+			distColorG(randomEngine_),
+			distColorB(randomEngine_),
+			1.0f
+		};
+		newParticle.rotateVelocity = {
+			distributionRotateVelocityX(randomEngine_),
+			distributionRotateVelocityY(randomEngine_),
+			distributionRotateVelocityZ(randomEngine_)
+		};
+
+		newParticle.lifeTime = distTime(randomEngine_);
+		newParticle.currentTime = 0;
+
+		// 初期値
+		newParticle.strtTransform = newParticle.transform;
+
+		//速度
+		newParticle.velocity =
+		{
+			distributionVeloX(randomEngine_),
+			distributionVeloY(randomEngine_),
+			distributionVeloZ(randomEngine_)
+		};
+		// パーティクルをグループに追加
+		particleGroup.particle.push_back(newParticle);
+	}
+}
+
+void ParticleManager::CornerLineEmit(ParticleGroup& particleGroup)
+{
+	
+
+	// 頂点を計算
+	std::vector<Vector3> vertices;
+	float angleStep = DirectX::XM_2PI / particleGroup.emiter.corner.segment; // 360° を segment 分割
+
+	// 回転行列を作成
+	Matrix4x4 rotationMatrix = MakeRotateXYZ(particleGroup.emiter.worldtransform.rotate_);
+	for (int i = 0; i < particleGroup.emiter.corner.segment; ++i)
+	{
+		float angle = i * angleStep; // 各頂点の角度
+		Vector3 localVertex;
+		localVertex.x = cos(angle) * particleGroup.emiter.corner.radius;
+		localVertex.y = 0.0f;
+		localVertex.z = sin(angle) * particleGroup.emiter.corner.radius;
+
+		// 回転を適用
+		Vector3 rotatedVertex = rotationMatrix.Transform(localVertex);
+
+		// ワールド座標へ変換
+		Vector3 worldVertex = rotatedVertex;
+		vertices.push_back(worldVertex);
+	}
+
+	
+	// 各辺の上にパーティクルを発生
+	std::uniform_real_distribution<float> distributionT(0.0f, 1.0f);
+
+
+
+	// 出る位置
+	std::uniform_real_distribution<float> distributionX(particleGroup.emiter.renge.min.x, particleGroup.emiter.renge.max.x);
+	std::uniform_real_distribution<float> distributionY(particleGroup.emiter.renge.min.y, particleGroup.emiter.renge.max.y);
+	std::uniform_real_distribution<float> distributionZ(particleGroup.emiter.renge.min.z, particleGroup.emiter.renge.max.z);
+
+	// 方向
+	std::uniform_real_distribution<float> distributionVeloX(particleGroup.emiter.velocity.min.x, particleGroup.emiter.velocity.max.x);
+	std::uniform_real_distribution<float> distributionVeloY(particleGroup.emiter.velocity.min.y, particleGroup.emiter.velocity.max.y);
+	std::uniform_real_distribution<float> distributionVeloZ(particleGroup.emiter.velocity.min.z, particleGroup.emiter.velocity.max.z);
+
+	// 色RGBA
+	std::uniform_real_distribution<float> distColorR(particleGroup.emiter.color.min.x, particleGroup.emiter.color.max.x);
+	std::uniform_real_distribution<float> distColorG(particleGroup.emiter.color.min.y, particleGroup.emiter.color.max.y);
+	std::uniform_real_distribution<float> distColorB(particleGroup.emiter.color.min.z, particleGroup.emiter.color.max.z);
+	std::uniform_real_distribution<float> distColorA(particleGroup.emiter.color.min.w, particleGroup.emiter.color.max.w);
+
+	// 時間
+	std::uniform_real_distribution<float> distTime(particleGroup.emiter.lifeTime.min, particleGroup.emiter.lifeTime.max);
+
+	// 回転
+	std::uniform_real_distribution<float> distributionRotateX(particleGroup.emiter.rotate.min.x, particleGroup.emiter.rotate.max.x);
+	std::uniform_real_distribution<float> distributionRotateY(particleGroup.emiter.rotate.min.y, particleGroup.emiter.rotate.max.y);
+	std::uniform_real_distribution<float> distributionRotateZ(particleGroup.emiter.rotate.min.z, particleGroup.emiter.rotate.max.z);
+
+	// スケール
+	std::uniform_real_distribution<float> distributionSizeX(particleGroup.emiter.size.min.x, particleGroup.emiter.size.max.x);
+	std::uniform_real_distribution<float> distributionSizeY(particleGroup.emiter.size.min.y, particleGroup.emiter.size.max.y);
+	std::uniform_real_distribution<float> distributionSizeZ(particleGroup.emiter.size.min.z, particleGroup.emiter.size.max.z);
+
+	// 回転速度
+	std::uniform_real_distribution<float> distributionRotateVelocityX(particleGroup.emiter.rotateVelocity.min.x, particleGroup.emiter.rotateVelocity.max.x);
+	std::uniform_real_distribution<float> distributionRotateVelocityY(particleGroup.emiter.rotateVelocity.min.y, particleGroup.emiter.rotateVelocity.max.y);
+	std::uniform_real_distribution<float> distributionRotateVelocityZ(particleGroup.emiter.rotateVelocity.min.z, particleGroup.emiter.rotateVelocity.max.z);
+
+
+	// パーティクル
+	for (uint32_t t = 0; t < particleGroup.emiter.count; ++t) {
+
+		for (int i = 0; i < particleGroup.emiter.corner.segment; ++i)
+		{
+			Particle newParticle;
+
+			// パーティクルの初期化 (必要に応じて詳細を設定)
+			newParticle.transform.scale =
+			{
+				distributionSizeX(randomEngine_),
+				distributionSizeY(randomEngine_),
+				distributionSizeZ(randomEngine_)
+			};
+			newParticle.transform.rotate =
+			{
+				distributionRotateX(randomEngine_),
+				distributionRotateY(randomEngine_),
+				distributionRotateZ(randomEngine_)
+			};
+			newParticle.color =
+			{
+				distColorR(randomEngine_),
+				distColorG(randomEngine_),
+				distColorB(randomEngine_),
+				1.0f
+			};
+			newParticle.rotateVelocity = {
+				distributionRotateVelocityX(randomEngine_),
+				distributionRotateVelocityY(randomEngine_),
+				distributionRotateVelocityZ(randomEngine_)
+			};
+
+			newParticle.lifeTime = distTime(randomEngine_);
+			newParticle.currentTime = 0;
+
+			// 初期値
+			newParticle.strtTransform = newParticle.transform;
+
+			//速度
+			newParticle.velocity =
+			{
+				distributionVeloX(randomEngine_),
+				distributionVeloY(randomEngine_),
+				distributionVeloZ(randomEngine_)
+			};
+
+
+			// 隣接する2点（N角形の1辺）
+			Vector3 start = vertices[i];
+			Vector3 end = vertices[(i + 1) % particleGroup.emiter.corner.segment]; // ループするように処理
+
+			// 線分上のランダムな位置を求める
+			float t = distributionT(randomEngine_);
+			Vector3 position;
+			position.x = (1.0f - t) * start.x + t * end.x;
+			position.y = (1.0f - t) * start.y + t * end.y;
+			position.z = (1.0f - t) * start.z + t * end.z;
+
+
+
+			newParticle.transform.translate = position + particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition();
+			particleGroup.particle.push_back(newParticle);
+		}
+	}
+}
+
+void ParticleManager::SplineEmit(ParticleGroup& particleGroup)
+{
+	
+	// 各辺の上にパーティクルを発生
+	std::uniform_real_distribution<float> distributionT(0.0f, 1.0f);
+
+
+	if (particleGroup.emiter.controlPoints.size() < 4) {
+		return;
+	}
+
+	
+
+	
+	// 方向
+	std::uniform_real_distribution<float> distributionVeloX(particleGroup.emiter.velocity.min.x, particleGroup.emiter.velocity.max.x);
+	std::uniform_real_distribution<float> distributionVeloY(particleGroup.emiter.velocity.min.y, particleGroup.emiter.velocity.max.y);
+	std::uniform_real_distribution<float> distributionVeloZ(particleGroup.emiter.velocity.min.z, particleGroup.emiter.velocity.max.z);
+
+	// 色RGBA
+	std::uniform_real_distribution<float> distColorR(particleGroup.emiter.color.min.x, particleGroup.emiter.color.max.x);
+	std::uniform_real_distribution<float> distColorG(particleGroup.emiter.color.min.y, particleGroup.emiter.color.max.y);
+	std::uniform_real_distribution<float> distColorB(particleGroup.emiter.color.min.z, particleGroup.emiter.color.max.z);
+	std::uniform_real_distribution<float> distColorA(particleGroup.emiter.color.min.w, particleGroup.emiter.color.max.w);
+
+	// 時間
+	std::uniform_real_distribution<float> distTime(particleGroup.emiter.lifeTime.min, particleGroup.emiter.lifeTime.max);
+
+	// 回転
+	std::uniform_real_distribution<float> distributionRotateX(particleGroup.emiter.rotate.min.x, particleGroup.emiter.rotate.max.x);
+	std::uniform_real_distribution<float> distributionRotateY(particleGroup.emiter.rotate.min.y, particleGroup.emiter.rotate.max.y);
+	std::uniform_real_distribution<float> distributionRotateZ(particleGroup.emiter.rotate.min.z, particleGroup.emiter.rotate.max.z);
+
+	// スケール
+	std::uniform_real_distribution<float> distributionSizeX(particleGroup.emiter.size.min.x, particleGroup.emiter.size.max.x);
+	std::uniform_real_distribution<float> distributionSizeY(particleGroup.emiter.size.min.y, particleGroup.emiter.size.max.y);
+	std::uniform_real_distribution<float> distributionSizeZ(particleGroup.emiter.size.min.z, particleGroup.emiter.size.max.z);
+
+	// 回転速度
+	std::uniform_real_distribution<float> distributionRotateVelocityX(particleGroup.emiter.rotateVelocity.min.x, particleGroup.emiter.rotateVelocity.max.x);
+	std::uniform_real_distribution<float> distributionRotateVelocityY(particleGroup.emiter.rotateVelocity.min.y, particleGroup.emiter.rotateVelocity.max.y);
+	std::uniform_real_distribution<float> distributionRotateVelocityZ(particleGroup.emiter.rotateVelocity.min.z, particleGroup.emiter.rotateVelocity.max.z);
+
+
+	// パーティクル
+	for (uint32_t t = 0; t < particleGroup.emiter.count; ++t) {
+		Particle newParticle;
+		// パーティクルの初期化 (必要に応じて詳細を設定)
+		newParticle.transform.scale =
+		{
+			distributionSizeX(randomEngine_),
+			distributionSizeY(randomEngine_),
+			distributionSizeZ(randomEngine_)
+		};
+		newParticle.transform.rotate =
+		{
+			distributionRotateX(randomEngine_),
+			distributionRotateY(randomEngine_),
+			distributionRotateZ(randomEngine_)
+		};
+		Vector3 pos = CatmullRom(particleGroup.emiter.controlPoints, distributionT(randomEngine_));
+
+		newParticle.transform.translate = pos + particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition();
+		
+		newParticle.color =
+		{
+			distColorR(randomEngine_),
+			distColorG(randomEngine_),
+			distColorB(randomEngine_),
+			1.0f
+		};
+		newParticle.rotateVelocity = {
+			distributionRotateVelocityX(randomEngine_),
+			distributionRotateVelocityY(randomEngine_),
+			distributionRotateVelocityZ(randomEngine_)
+		};
+
+		newParticle.lifeTime = distTime(randomEngine_);
+		newParticle.currentTime = 0;
+
+		// 初期値
+		newParticle.strtTransform = newParticle.transform;
+
+		//速度
+		newParticle.velocity =
+		{
+			distributionVeloX(randomEngine_),
+			distributionVeloY(randomEngine_),
+			distributionVeloZ(randomEngine_)
+		};
+		// パーティクルをグループに追加
+		particleGroup.particle.push_back(newParticle);
+	}
+}
+
+#pragma endregion
+
 
 #pragma region PSO
 

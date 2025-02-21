@@ -7,7 +7,6 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/Line/Line.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/3d/Object3dCommon.h"
 #include"DirectXGame/engine/3d/ModelCommon.h"

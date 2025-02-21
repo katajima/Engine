@@ -15,7 +15,6 @@
 #include"DirectXGame/engine/base/ImGuiManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-#include"DirectXGame/engine/Line/Line.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Trail/TrailEffect.h"
 

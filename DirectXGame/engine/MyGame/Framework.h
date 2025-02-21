@@ -34,7 +34,6 @@
 #include"DirectXGame/engine/base/StringUtility.h"
 #include"DirectXGame/engine/base/Logger.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
-#include"DirectXGame/engine/Line/Line.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
 #include "DirectXGame/engine/base/RenderingCommon.h"

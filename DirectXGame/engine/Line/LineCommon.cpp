@@ -257,6 +257,65 @@ void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
 	}
 }
 
+void LineCommon::AddLineCorner(CornerSegment corner, WorldTransform pos)
+{
+	std::vector<Vector3> vertices;
+	float angleStep = DirectX::XM_2PI / corner.segment; // 360° を segment 分割
+
+	// 回転行列を作成
+	Matrix4x4 rotationMatrix =  MakeRotateXYZ(pos.rotate_);
+
+	// 頂点を計算
+	for (int i = 0; i < corner.segment; ++i)
+	{
+		float angle = i * angleStep; // 各頂点の角度
+
+		// ローカル座標で円を作成
+		Vector3 localVertex;
+		localVertex.x = cos(angle) * corner.radius;
+		localVertex.y = 0.0f;
+		localVertex.z = sin(angle) * corner.radius;
+
+		// 回転を適用
+		Vector3 rotatedVertex = rotationMatrix.Transform(localVertex);
+
+		// 平行移動を適用 (ワールド座標へ変換)
+		Vector3 worldVertex = rotatedVertex + pos.translate_;
+		vertices.push_back(worldVertex);
+	}
+
+	// 各辺をラインで描画
+	Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色のライン
+	for (int i = 0; i < corner.segment; ++i)
+	{
+		Vector3 start = vertices[i];
+		Vector3 end = vertices[(i + 1) % corner.segment]; // ループするように処理
+
+		AddLine(start, end, color);
+	}
+}
+
+void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform pos)
+{
+	int SPLIT = static_cast<int>(4 * controlPoints.size());
+
+	Vector3 splineStr{};
+	Vector3 splineEnd{};
+	//ライン
+	for (int index = 0; index < SPLIT; index++) {
+		float t0 = index / float(SPLIT);
+		float t1 = (index + 1) / float(SPLIT);
+
+		splineStr = CatmullRom(controlPoints, t0) + pos.translate_;
+		splineEnd = CatmullRom(controlPoints, t1) + pos.translate_;
+
+
+		AddLine(splineStr, splineEnd,{1,1,1,1});
+	}
+
+}
+
+
 
 
 void LineCommon::Update()

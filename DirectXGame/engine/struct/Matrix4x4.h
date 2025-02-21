@@ -65,7 +65,13 @@ public:
 		return worldPos;
 	};
 
-
+    Vector3 Transform(Vector3 vec) const {
+        return {
+            vec.x * m[0][0] + vec.y * m[1][0] + vec.z * m[2][0] + m[3][0], // X成分
+            vec.x * m[0][1] + vec.y * m[1][1] + vec.z * m[2][1] + m[3][1], // Y成分
+            vec.x * m[0][2] + vec.y * m[1][2] + vec.z * m[2][2] + m[3][2]  // Z成分
+        };
+    }
 
 private:
 

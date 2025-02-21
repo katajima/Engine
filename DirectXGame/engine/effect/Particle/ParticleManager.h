@@ -23,7 +23,6 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object3dCommon.h"
 #include "DirectXGame/engine/3d/Model.h"
-#include"DirectXGame/engine/Line/Line.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Primitive/Primitive.h"
@@ -63,6 +62,18 @@ public:
 
 
 	// 
+	enum class SpawnType // 出現形状
+	{
+		kAABB,		// AABB
+		kOBB,		// OBB
+		kSphere,	// Sphere
+
+
+
+		kSegmentLine,		// Line
+		kCornerLine,        // コーナーライン
+		kSpline,			// スプライン
+	};
 	enum class EmitType
 	{
 		kRandom,   // ランダム
@@ -101,6 +112,8 @@ public:
 		MaxMin<float> lifeTime;    // 生存時間 (floatの範囲)
 		MaxMin<Vector3> velocity;  // 速度 (Vector3の範囲)
 
+		CornerSegment corner;
+		std::vector<Vector3> controlPoints; // 各ポジション
 
 		WorldTransform worldtransform;
 		bool isEmit = false;
@@ -122,7 +135,7 @@ public:
 		Transform strtTransform;
 		Vector3 rotateVelocity;
 	};
-	
+
 	struct ParticleGroup
 	{
 		std::string name; // 名前
@@ -171,7 +184,7 @@ public:
 	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
 	// パーティクルの発生
-	void Emit(const std::string name, EmitType type);
+	void Emit(const std::string name, EmitType type, SpawnType spawnType);
 
 	// パーティクルグループ取得
 	std::unordered_map<std::string, ParticleGroup>& GetParticleGroups()
@@ -203,13 +216,25 @@ private:
 	void LimitMaxMin();
 
 	// ランダム
-	void RandParticle(const std::string name);
+	void RandParticle(const std::string name, SpawnType spawnType);
+
+	
 
 	void BlendAdd();
 
 	void BlendSubtract();
 
 	void BlendMuliply();
+
+private: // エミッタ種類
+	void AABBEmit(ParticleGroup& particleGroup);
+
+	void LineEmit(ParticleGroup& particleGroup);
+
+	void CornerLineEmit(ParticleGroup& particleGroup);
+
+	void SplineEmit(ParticleGroup& particleGroup);
+
 
 private:
 	static ParticleManager* instance;
@@ -241,7 +266,7 @@ private:
 
 	Camera* camera_ = nullptr;
 
-	
+
 	Transform transform{};
 
 
@@ -253,7 +278,7 @@ private:
 	//// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[6];
 
-	
+
 
 	D3D12_BLEND_DESC blendDesc{};
 	D3D12_RASTERIZER_DESC rasterizerDesc{};

@@ -330,6 +330,13 @@ Matrix4x4 MakeRotateZMatrix(float rotate) {
 
 	return result;
 }
+Matrix4x4 MakeRotateXYZ(Vector3 rotate)
+{
+	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
+	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
+	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
+	return Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
+}
 //逆行列
 Matrix4x4 Inverse(const Matrix4x4& m) {
 	Matrix4x4 result{};
@@ -1375,72 +1382,70 @@ bool IsPointInsideAABB(const Vector3& point, const AABB& aabb) {
 
 
 
-Vector3 CatmullRom(const Vector3& p0, const Vector3 p1, const Vector3 p2, const Vector3 p3, float t) {
-
-	const float s = 0.5f;
+Vector3 CatmullRom(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t) {
+	const float s = 0.5f; // Catmull-Rom スプラインのスケール
 
 	float t2 = t * t;  // tの2乗
 	float t3 = t2 * t; // tの3乗
 
-	Vector3 pt{};
-	Vector3 e3{};
-	Vector3 e2{};
-	Vector3 e1{};
-	Vector3 e0{};
-	//
-	e3.x = (((-p0.x) + (3 * p1.x) + (-3 * p2.x) + (p3.x)));
-	e3.y = (((-p0.y) + (3 * p1.y) + (-3 * p2.y) + (p3.y)));
-	e3.z = (((-p0.z) + (3 * p1.z) + (-3 * p2.z) + (p3.z)));
-	//
-	e2.x = (((2 * p0.x) + (-5 * p1.x) + (4 * p2.x) + (-p3.x)));
-	e2.y = (((2 * p0.y) + (-5 * p1.y) + (4 * p2.y) + (-p3.y)));
-	e2.z = (((2 * p0.z) + (-5 * p1.z) + (4 * p2.z) + (-p3.z)));
-	//
-	e1 = Subtract(p2, p0);
-	//
-	e0 = Multiply(p1, 2);
+	// 係数の計算
+	Vector3 e3 = {
+		(-p0.x + 3 * p1.x - 3 * p2.x + p3.x),
+		(-p0.y + 3 * p1.y - 3 * p2.y + p3.y),
+		(-p0.z + 3 * p1.z - 3 * p2.z + p3.z)
+	};
 
-	pt.x = (e3.x * t3 + e2.x * t2 + e1.x * t + e0.x) * s;
-	pt.y = (e3.y * t3 + e2.y * t2 + e1.y * t + e0.y) * s;
-	pt.z = (e3.z * t3 + e2.z * t2 + e1.z * t + e0.z) * s;
+	Vector3 e2 = {
+		(2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x),
+		(2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y),
+		(2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z)
+	};
+
+	Vector3 e1 = {
+		(-p0.x + p2.x),
+		(-p0.y + p2.y),
+		(-p0.z + p2.z)
+	};
+
+	Vector3 e0 = {
+		(2 * p1.x),
+		(2 * p1.y),
+		(2 * p1.z)
+	};
+
+	// Catmull-Rom 補間計算
+	Vector3 pt = {
+		(e3.x * t3 + e2.x * t2 + e1.x * t + e0.x) * s,
+		(e3.y * t3 + e2.y * t2 + e1.y * t + e0.y) * s,
+		(e3.z * t3 + e2.z * t2 + e1.z * t + e0.z) * s
+	};
 
 	return pt;
 }
 
-Vector3 CatmullRom(std::vector<Vector3> points, float t) {
+
+Vector3 CatmullRom(const std::vector<Vector3>& points, float t) {
 	assert(points.size() >= 4 && "制御点は4点以上必要です");
 
-	// 区間数は制御点の数-1
+	// 区間数（`N-1` の計算）
 	size_t division = points.size() - 1;
-	// 1区間分の長さ　(全体を1.0とした場合)
-	float areaWhidth = 1.0f / division;
+	if (division == 0) return points[0]; // 例外ケース処理
 
-	// 区間分の始点を0.0f,終点を1.0fとしたときにの現在位置
-	float t_2 = std::fmod(t, areaWhidth) * division;
-	// 下限(0,0f)と上限(1.0f)の範囲に収める
-	t_2 = Clamp(t_2, 0.0f, 1.0f);
+	// 1区間の長さ（全体を1.0とした場合）
+	float areaWidth = 1.0f / division;
 
-	// 区間番号
-	size_t index = static_cast<size_t>(t / areaWhidth);
-	// 区間番号が上限を超えないように収める
-	if (index >= division) {
-		index = division - 1;
-	}
-	// 4頂点分のインデックス
-	size_t index0 = index - 1;
+	// `t` を `areaWidth` で割り、区間番号を取得
+	size_t index = static_cast<size_t>(t / areaWidth);
+	index = Clamp(index, static_cast<size_t>(0), division - 1);
+
+	// 各点のインデックス
+	size_t index0 = (index == 0) ? 0 : index - 1;
 	size_t index1 = index;
 	size_t index2 = index + 1;
 	size_t index3 = index + 2;
 
-	// 最初の区間のp0はp1を重複使用する
-	if (index == 0) {
-		index0 = index1;
-	}
-
-	// 最後の区間のp3はp2を重複使用する
-	if (index3 >= points.size()) {
-		index3 = index2;
-	}
+	// `index3` の制限 (最後の区間では p3 = p2)
+	if (index3 >= points.size()) index3 = points.size() - 1;
 
 	// 4点の座標
 	const Vector3& p0 = points[index0];
@@ -1448,10 +1453,15 @@ Vector3 CatmullRom(std::vector<Vector3> points, float t) {
 	const Vector3& p2 = points[index2];
 	const Vector3& p3 = points[index3];
 
+	// 区間内の `t` を正規化
+	float t_2 = static_cast<float>(t - index * areaWidth) / areaWidth;
+	t_2 = Clamp(t_2, 0.0f, 1.0f);
 
-	// 4点を指定してCatmull-Rom補間
+	// 4点を指定して Catmull-Rom 補間
 	return CatmullRom(p0, p1, p2, p3, t_2);
 }
+
+
 
 // カーブ上の点を取得 (Catmull-Rom)
 Vector3 CatmullRom2(const std::vector<Vector3>& controlPoints, float t) {
