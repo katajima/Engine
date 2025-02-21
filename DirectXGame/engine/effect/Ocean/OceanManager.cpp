@@ -138,7 +138,6 @@ void OceanManager::CreateGraphicsPipeline()
 	psoManager_->shderFile_.domain.filePach = L"resources/shaders/Ocean/Ocean.DS.hlsl";
 	psoManager_->shderFile_.hull.filePach = L"resources/shaders/Ocean/Ocean.HS.hlsl";
 
-
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH);
