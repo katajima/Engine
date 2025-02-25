@@ -99,20 +99,34 @@ void Model::Draw()
 
 void Model::DrawSkinning()
 {
+	auto commandList = modelCommon_->GetDxCommon()->GetCommandList();
+
 	for (auto& mesh : modelData.mesh)
 	{
+		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		uavDesc.Buffer.FirstElement = 0;
+		uavDesc.Buffer.NumElements = static_cast<UINT>(mesh->vertices.size());
+		uavDesc.Buffer.CounterOffsetInBytes = 0;
+		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+		uavDesc.Buffer.StructureByteStride = sizeof(Mesh::VertexData);
+		// 
+		//modelCommon_->GetDxCommon()->GetDevice()->CreateUnorderedAccessView();
+
+
 
 		modelData.material[mesh->meshIndex]->GetCommandListMaterial(0);
 
 		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
 
 
-		modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(10, SrvManager::GetInstance()->GetGPUDescriptorHandle(modelData.skinningSrvindex));
+		commandList->SetGraphicsRootDescriptorTable(10, SrvManager::GetInstance()->GetGPUDescriptorHandle(modelData.skinningSrvindex));
 
 		mesh->GetCommandList(skinCluster.influenceBufferView);
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-		modelCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 
 	}
 }
