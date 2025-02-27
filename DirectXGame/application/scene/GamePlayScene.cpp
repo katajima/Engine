@@ -202,6 +202,23 @@ void GamePlayScene::InitializeResources()
 	emit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.2f,0.2f,0.2f });
 	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 	emit_->SetRengeMinMax({-400,-100,-400}, { 400,100,400 });
+
+
+
+	DirectionalLightData directionalLightData{};
+	directionalLightData.color = { 1,1,1,1 };
+	directionalLightData.direction = { 0,-1,0 };
+	directionalLightData.intensity = 2.0f;
+	directionalLightData.isLight = true;
+
+
+
+	directional = std::make_shared<DirectionalLight>();
+	directional->directional = directionalLightData;
+
+	LightManager::GetInstance()->AddLight(directional);
+
+
 }
 // 
 void GamePlayScene::LoadLevelData()

@@ -3,6 +3,7 @@
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/Camera/DebugCamera.h"
 #include"DirectXGame/engine/3d/Object3d.h"
 #include "DirectXGame/engine/base/TextureManager.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -51,6 +52,7 @@ private:
 
 	// カメラ
 	std::unique_ptr < Camera> camera;
+	std::unique_ptr < DebugCamera> debugCamera;
 	Vector3 cameraR;
 	Vector3 cameraT;
 
