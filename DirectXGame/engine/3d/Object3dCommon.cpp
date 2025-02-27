@@ -8,6 +8,8 @@
 
 Object3dCommon* Object3dCommon::instance = nullptr;
 
+
+
 Object3dCommon* Object3dCommon::GetInstance()
 {
 	if (instance == nullptr) {

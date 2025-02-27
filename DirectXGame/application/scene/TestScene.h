@@ -39,46 +39,82 @@ public:
 
 	void Draw2D() override;
 
-private:
-private:
+private: // 各初期化
 
-	void InitializeResources();
+	void InitializeObject3D();
+
+	void InitializeObject2D();
+
+	void InitializeParticle();
+
+	void InitializeLight();
+
 	void InitializeCamera();
+private:
+	// 振るまい(シーンの部屋)
+	enum class SceneBehavior {
+		kSceneRoom01,   
+		kSceneRoom02,   
+		kSceneRoom03,   
+		kSceneRoom04,   
+		kSceneRoom05,   
+		kSceneRoom06,   
+		kSceneRoom07,   
+		kSceneRoom08,   
+		kSceneRoom09,   
+		kSceneRoom10,   
+	};
+
+	//振るまい
+	SceneBehavior behavior_ = SceneBehavior::kSceneRoom01;
+	// 次の振るまいリクエスト
+	std::optional<SceneBehavior> behaviorRequest_ = std::nullopt;
 private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
+	ImGuiManager* imGuiManager = nullptr;
 
 
-
-	// カメラ
+	/// <summary>
+	/// カメラ
+	/// </summary>
+	
 	std::unique_ptr < Camera> camera;
 	std::unique_ptr < DebugCamera> debugCamera;
-	Vector3 cameraR;
-	Vector3 cameraT;
+	
+	bool isDebugCamera = false;
 
-
-	Vector3 cameraDebugT;
-	Vector3 cameraDebugR;
-	bool flag = false;
+	/// <summary>
+	/// 3Dオブジェクト
+	/// </summary>
 
 	Object3d mm;
 	Object3d mm2;
 	Object3d tail;
-
 	Object3d multiy;
 
+	// オーシャンシェーダー
+	std::unique_ptr < Ocean> ocean_ = nullptr;
+
+	/// <summary>
+	/// スプライト
+	/// </summary>
 	
-	WorldTransform trans_;
+	std::vector<std::unique_ptr<Sprite>> sprite_;
+
+
+	/// <summary>
+	/// パーティクルエミッタ
+	/// </summary>
 
 	std::unique_ptr<ParticleEmitter> emitter_  =nullptr;
 
 	std::unique_ptr<ParticleEmitter> emitterEnemy_  =nullptr;
 
-	std::vector<std::unique_ptr<Sprite>> sprite_;
-	
-	std::unique_ptr < Ocean> ocean_ = nullptr;
-	
-	//std::unique_ptr<Sprite> sprite2_ = nullptr;
+	/// <summary>
+	/// ライト
+	/// </summary>
+
 	std::shared_ptr<PointLight> point;
 
 	std::shared_ptr<SpotLight> spot;

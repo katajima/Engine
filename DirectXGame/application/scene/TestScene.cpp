@@ -8,26 +8,118 @@ void TestScene::Initialize()
 	audio_ = Audio::GetInstance();
 	// 入力初期化
 	input_ = Input::GetInstance();
+	// ImGui初期化
+	imGuiManager = ImGuiManager::GetInstance();
 
-	// カメラ
+
+	// カメラの初期化
 	InitializeCamera();
-	// リソース
-	InitializeResources();
 
-	for (int i = 0; i < 4; i++)
-	{
-		auto sprite = std::make_unique<Sprite>();
+	// 2Dオブジェクトの初期化
+	InitializeObject3D();
 
-		sprite->Initialize("resources/Texture/uvChecker.png", false);
-		sprite->SetTextureSize({ 64,64 });
-		sprite->SetSize({ 128,128 });
-		sprite->SetAnimeSize({ 64,64 });
-		sprite->SetMaxAnimeNum({ 8,8 });
-		sprite->SetPosition({ static_cast<float>(i) * (128 + 10) ,0 });
+	// 2Dオブジェクトの初期化
+	InitializeObject2D();
 
-		sprite_.push_back(std::move(sprite));
+	// パーティクルの初期化
+	InitializeParticle();
+
+	// ライトの初期化
+	InitializeLight();
+
+}
+
+void TestScene::Finalize()
+{
+
+}
+
+void TestScene::Update()
+{
+
+
+#ifdef _DEBUG
+	ImGui::Begin("engine");
+	ImGui::Checkbox("debugCamera", &isDebugCamera);
+
+	
+
+
+	if (isDebugCamera) {
+		debugCamera->Update();
+
+		camera->viewMatrix_ = debugCamera->GetViewProjection().viewMatrix_;
+		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
+		camera->transform_ = debugCamera->GetViewProjection().transform_;
+	}
+	else {
+
 	}
 
+
+	ImGui::End();
+
+
+#endif // _DEBUG
+
+	camera->UpdateMatrix();
+
+
+
+	ocean_->Update();
+	emitter_->Update();
+	emitterEnemy_->Update();
+
+	mm.UpdateSkinning();
+	mm2.Update();
+	mm2.UpdateSkinning();
+	tail.Update();
+	multiy.Update();
+
+
+
+	SkyBoxCommon::GetInstance()->SetCamara(camera.get());
+	SkyBoxCommon::GetInstance()->Update();
+
+}
+
+void TestScene::Draw3D()
+{
+	tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+	////mm.DrawLine();
+
+	////mm2.DrawSkinning(Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK);
+
+	////multiy.Draw();
+
+	ocean_->Draw();
+}
+
+void TestScene::Draw2D()
+{
+
+	for (int i = 0; i < sprite_.size(); i++) {
+		sprite_[i]->UpdateAmimetion(0.05f);
+
+	}
+	sprite_[0]->Draw();
+	sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
+	sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
+	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
+
+}
+
+
+#pragma region Initialize
+
+/// <summary>
+/// 3Dオブジェクトの初期化
+/// </summary>
+void TestScene::InitializeObject3D()
+{
+	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
 	ocean_->Initialize({ 100,100 });
@@ -59,16 +151,34 @@ void TestScene::Initialize()
 	multiy.SetModel("multiMaterial.gltf");
 	multiy.SetCamera(camera.get());
 	multiy.worldtransform_.scale_ = { 10,10,10 };
+}
 
+/// <summary>
+/// スプライトの初期化
+/// </summary>
+void TestScene::InitializeObject2D()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		auto sprite = std::make_unique<Sprite>();
 
+		sprite->Initialize("resources/Texture/uvChecker.png", false);
+		sprite->SetTextureSize({ 64,64 });
+		sprite->SetSize({ 128,128 });
+		sprite->SetAnimeSize({ 64,64 });
+		sprite->SetMaxAnimeNum({ 8,8 });
+		sprite->SetPosition({ static_cast<float>(i) * (128 + 10) ,0 });
 
+		sprite_.push_back(std::move(sprite));
+	}
+}
 
+/// <summary>
+/// パーティクルの初期化
+/// </summary>
+void TestScene::InitializeParticle()
+{
 	ParticleManager::GetInstance()->SetCamera(camera.get());
-
-
-	trans_.Initialize();
-	trans_.translate_ = { 0,10,0 };
-
 
 
 	emitter_ = std::make_unique<ParticleEmitter>();
@@ -90,6 +200,8 @@ void TestScene::Initialize()
 
 
 
+
+
 	emitterEnemy_ = std::make_unique<ParticleEmitter>();
 	emitterEnemy_->Initialize("emitterPrimi", "primi");
 	emitterEnemy_->GetFrequency() = 0.1f;
@@ -107,7 +219,13 @@ void TestScene::Initialize()
 	emitterEnemy_->SetIsRotateVelocity(true);
 	emitterEnemy_->SetIsBounce(true);
 	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
+}
 
+/// <summary>
+///  ライトの初期化
+/// </summary>
+void TestScene::InitializeLight()
+{
 	PointLightData pointLightData;
 
 	pointLightData.color = { 1.0f,1.0f,1.0f,1.0f };
@@ -150,108 +268,11 @@ void TestScene::Initialize()
 	directional->directional = directionalLightData;
 
 	LightManager::GetInstance()->AddLight(directional);
-
-
 }
 
-void TestScene::Finalize()
-{
-}
-
-void TestScene::Update()
-{
-
-
-#ifdef _DEBUG
-	ImGui::Begin("engine");
-	ImGui::Checkbox("debugCamera", &flag);
-
-	if (ImGui::CollapsingHeader("Gizmos")) {
-		ImGuiManager::GetInstance()->RenderGizmo2(mm, *camera.get(), "buil");
-		ImGuiManager::GetInstance()->RenderGizmo2(mm2, *camera.get(), "buil2");
-		ImGuiManager::GetInstance()->RenderGizmo2(tail, *camera.get(), "tail");
-		ImGuiManager::GetInstance()->RenderGizmo2(multiy, *camera.get(), "multiy");
-
-	}
-
-
-	if (flag) {
-		debugCamera->Update();
-
-		camera->viewMatrix_ = debugCamera->GetViewProjection().viewMatrix_;
-		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
-		camera->transform_ = debugCamera->GetViewProjection().transform_;
-	}
-	else {
-
-	}
-
-
-	ImGui::End();
-
-
-#endif // _DEBUG
-
-	camera->UpdateMatrix();
-
-
-
-	ocean_->Update();
-	emitter_->Update();
-	emitterEnemy_->Update();
-
-	mm.UpdateSkinning();
-	//mm2.Update();
-	//mm2.UpdateSkinning();
-	tail.Update();
-	//multiy.Update();
-
-
-
-	SkyBoxCommon::GetInstance()->SetCamara(camera.get());
-	SkyBoxCommon::GetInstance()->Update();
-
-}
-
-void TestScene::Draw3D()
-{
-	tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
-	////mm.DrawLine();
-
-	////mm2.DrawSkinning(Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK);
-
-	////multiy.Draw();
-
-	ocean_->Draw();
-}
-
-void TestScene::Draw2D()
-{
-
-	for (int i = 0; i < sprite_.size(); i++) {
-		sprite_[i]->UpdateAmimetion(0.05f);
-
-	}
-	sprite_[0]->Draw();
-	sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
-	sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
-	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
-
-
-
-
-
-
-}
-
-void TestScene::InitializeResources()
-{
-	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
-}
-
+/// <summary>
+/// カメラの初期化 
+/// </summary>
 void TestScene::InitializeCamera()
 {
 	camera = std::make_unique <Camera>();
@@ -261,8 +282,6 @@ void TestScene::InitializeCamera()
 
 	debugCamera = std::make_unique<DebugCamera>();
 	debugCamera->Initialize();
-	//debugCamera->
-
-	cameraT.y = 1.0f;
 }
 
+#pragma endregion 各初期化

@@ -50,7 +50,7 @@ public:
 	void Draw();
 
 	// ギズモの使用例
-	void RenderGizmo2(Object3d& obj, const Camera& camera, const char* name);
+	void RenderGizmo2(WorldTransform& obj, const Camera& camera, const char* name);
 
 	void SetCustomColorScheme();
 
