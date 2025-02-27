@@ -101,6 +101,8 @@ private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 
+	std::shared_ptr<DirectionalLight> directional;
+
 	
 	// カメラ
 	std::unique_ptr < Camera> camera;

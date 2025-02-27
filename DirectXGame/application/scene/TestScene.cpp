@@ -69,7 +69,7 @@ void TestScene::Initialize()
 	trans_.Initialize();
 	trans_.translate_ = { 0,10,0 };
 
-	
+
 
 	emitter_ = std::make_unique<ParticleEmitter>();
 	emitter_->Initialize("emitter", "cc", ParticleEmitter::EmitSpawnShapeType::kSpline);
@@ -160,13 +160,11 @@ void TestScene::Finalize()
 
 void TestScene::Update()
 {
-	
 
-	camera->UpdateMatrix();
-	
+
 #ifdef _DEBUG
 	ImGui::Begin("engine");
-
+	ImGui::Checkbox("debugCamera", &flag);
 
 	if (ImGui::CollapsingHeader("Gizmos")) {
 		ImGuiManager::GetInstance()->RenderGizmo2(mm, *camera.get(), "buil");
@@ -175,12 +173,29 @@ void TestScene::Update()
 		ImGuiManager::GetInstance()->RenderGizmo2(multiy, *camera.get(), "multiy");
 
 	}
-	
+
+
+	if (flag) {
+		debugCamera->Update();
+
+		camera->viewMatrix_ = debugCamera->GetViewProjection().viewMatrix_;
+		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
+		camera->transform_ = debugCamera->GetViewProjection().transform_;
+	}
+	else {
+
+	}
+
+
 	ImGui::End();
 
-	
+
 #endif // _DEBUG
-	
+
+	camera->UpdateMatrix();
+
+
+
 	ocean_->Update();
 	emitter_->Update();
 	emitterEnemy_->Update();
@@ -244,6 +259,9 @@ void TestScene::InitializeCamera()
 	camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };
 
+	debugCamera = std::make_unique<DebugCamera>();
+	debugCamera->Initialize();
+	//debugCamera->
 
 	cameraT.y = 1.0f;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/base/DirectXCommon.h"
 #include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/PSO/PSOManager.h"
 
 class SkinningConmmon
 {
@@ -54,6 +55,8 @@ private:
 private:// メンバ変数
 	DirectXCommon* dxCommon_;
 
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+
 	Camera* defaultCamera = nullptr;
 
 	//ルートシグネチャデスク
@@ -63,6 +66,8 @@ private:// メンバ変数
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
 
-
+	//ルートシグネチャ
+	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeRootSignature;
+	
 };
 
