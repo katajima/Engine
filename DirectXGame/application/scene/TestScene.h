@@ -53,10 +53,10 @@ private: // 各初期化
 private:
 	// 振るまい(シーンの部屋)
 	enum class SceneBehavior {
-		kSceneRoom01,   
-		kSceneRoom02,   
-		kSceneRoom03,   
-		kSceneRoom04,   
+		kSceneRoom01,   // 海、スカイボックス、スプライト
+		kSceneRoom02,   // パーティクル
+		kSceneRoom03,   // マルチマテリアルやマルチメッシュ
+		kSceneRoom04,   // スキニング用
 		kSceneRoom05,   
 		kSceneRoom06,   
 		kSceneRoom07,   
@@ -69,6 +69,31 @@ private:
 	SceneBehavior behavior_ = SceneBehavior::kSceneRoom01;
 	// 次の振るまいリクエスト
 	std::optional<SceneBehavior> behaviorRequest_ = std::nullopt;
+
+private:
+
+	// 各ルーム初期化
+	void InitializeRoom01();
+	void InitializeRoom02();
+	void InitializeRoom03();
+	void InitializeRoom04();
+	void InitializeRoom05();
+	void InitializeRoom06();
+	void InitializeRoom07();
+	void InitializeRoom08();
+	void InitializeRoom09();
+	void InitializeRoom10();
+
+	// 更新
+	void UpdateRoom01();
+	void UpdateRoom02();
+	void UpdateRoom03();
+	void UpdateRoom04();
+	void UpdateRoom05();
+
+	// 部屋切り替え
+	void SwitchRoom();
+
 private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
@@ -88,8 +113,8 @@ private:
 	/// 3Dオブジェクト
 	/// </summary>
 
-	Object3d mm;
-	Object3d mm2;
+	Object3d skinningObject;
+	Object3d skinningObject2;
 	Object3d tail;
 	Object3d multiy;
 
