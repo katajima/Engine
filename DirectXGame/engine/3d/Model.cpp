@@ -103,14 +103,14 @@ void Model::DrawSkinning()
 
 	for (auto& mesh : modelData.mesh)
 	{
-		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+		/*D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
 		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
 		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 		uavDesc.Buffer.FirstElement = 0;
 		uavDesc.Buffer.NumElements = static_cast<UINT>(mesh->vertices.size());
 		uavDesc.Buffer.CounterOffsetInBytes = 0;
 		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-		uavDesc.Buffer.StructureByteStride = sizeof(Mesh::VertexData);
+		uavDesc.Buffer.StructureByteStride = sizeof(Mesh::VertexData);*/
 		// 
 		//modelCommon_->GetDxCommon()->GetDevice()->CreateUnorderedAccessView();
 

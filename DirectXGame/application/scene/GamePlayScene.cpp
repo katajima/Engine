@@ -358,9 +358,6 @@ void GamePlayScene::CheckAllCollisions()
 void GamePlayScene::UpdateImGui()
 {
 
-
-
-
 #ifdef _DEBUG
 	if (Input::GetInstance()->IsTriggerKey(DIK_P)) {
 		// シーン切り替え

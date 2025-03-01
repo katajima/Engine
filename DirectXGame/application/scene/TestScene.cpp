@@ -8,12 +8,266 @@ void TestScene::Initialize()
 	audio_ = Audio::GetInstance();
 	// 入力初期化
 	input_ = Input::GetInstance();
+	// ImGui初期化
+	imGuiManager = ImGuiManager::GetInstance();
 
-	// カメラ
+
+	// カメラの初期化
 	InitializeCamera();
-	// リソース
-	InitializeResources();
 
+	// 2Dオブジェクトの初期化
+	InitializeObject3D();
+
+	// 2Dオブジェクトの初期化
+	InitializeObject2D();
+
+	// パーティクルの初期化
+	InitializeParticle();
+
+	// ライトの初期化
+	InitializeLight();
+
+}
+
+void TestScene::Finalize()
+{
+
+}
+
+void TestScene::Update()
+{
+	SwitchRoom(); // 部屋切り替え
+
+#ifdef _DEBUG
+	ImGui::Begin("engine");
+	ImGui::Checkbox("debugCamera", &isDebugCamera);
+
+	
+
+
+	if (isDebugCamera) {
+		debugCamera->Update();
+
+		camera->viewMatrix_ = debugCamera->GetViewProjection().viewMatrix_;
+		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
+		camera->transform_ = debugCamera->GetViewProjection().transform_;
+	}
+	else {
+
+	}
+
+
+	ImGui::End();
+
+
+#endif // _DEBUG
+
+	camera->UpdateMatrix();
+
+
+	if (behaviorRequest_) {
+
+		// ふるまいを変更する
+		behavior_ = behaviorRequest_.value();
+		// 各ふるまいごとの初期化を実行
+		switch (behavior_)
+		{
+		case TestScene::SceneBehavior::kSceneRoom01:
+			InitializeRoom01();
+			break;
+		case TestScene::SceneBehavior::kSceneRoom02:
+			InitializeRoom02();
+			break;
+		case TestScene::SceneBehavior::kSceneRoom03:
+			InitializeRoom03();
+			break;
+		case TestScene::SceneBehavior::kSceneRoom04:
+			InitializeRoom04();
+			break;
+		case TestScene::SceneBehavior::kSceneRoom05:
+			InitializeRoom05();
+			break;
+		case TestScene::SceneBehavior::kSceneRoom06:
+			break;
+		case TestScene::SceneBehavior::kSceneRoom07:
+			break;
+		case TestScene::SceneBehavior::kSceneRoom08:
+			break;
+		case TestScene::SceneBehavior::kSceneRoom09:
+			break;
+		case TestScene::SceneBehavior::kSceneRoom10:
+			break;
+		default:
+			break;
+		}
+
+		// ふるまいリクエストリセット
+		behaviorRequest_ = std::nullopt;
+	}
+
+
+	switch (behavior_)
+	{
+	case TestScene::SceneBehavior::kSceneRoom01:
+		UpdateRoom01();
+		break;
+	case TestScene::SceneBehavior::kSceneRoom02:
+		UpdateRoom02();
+		break;
+	case TestScene::SceneBehavior::kSceneRoom03:
+		UpdateRoom03();
+		break;
+	case TestScene::SceneBehavior::kSceneRoom04:
+		UpdateRoom04();
+		break;
+	case TestScene::SceneBehavior::kSceneRoom05:
+		UpdateRoom05();
+		break;
+	case TestScene::SceneBehavior::kSceneRoom06:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom07:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom08:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom09:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom10:
+		break;
+	default:
+		break;
+	}
+
+	tail.Update();
+}
+
+void TestScene::Draw3D()
+{
+	switch (behavior_)
+	{
+	case TestScene::SceneBehavior::kSceneRoom01:
+		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		ocean_->Draw();
+		break;
+	case TestScene::SceneBehavior::kSceneRoom02:
+		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		break;
+	case TestScene::SceneBehavior::kSceneRoom03:
+		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		
+		multiy.Draw();
+		break;
+	case TestScene::SceneBehavior::kSceneRoom04:
+		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		
+		skinningObject.Draw();
+		skinningObject2.Draw();
+		
+		break;
+	case TestScene::SceneBehavior::kSceneRoom05:
+		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		break;
+	case TestScene::SceneBehavior::kSceneRoom06:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom07:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom08:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom09:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom10:
+		break;
+	default:
+		break;
+	}
+
+	
+	
+}
+
+void TestScene::Draw2D()
+{
+	switch (behavior_)
+	{
+	case TestScene::SceneBehavior::kSceneRoom01:
+		for (int i = 0; i < sprite_.size(); i++) {
+			sprite_[i]->UpdateAmimetion(0.05f);
+		}
+		sprite_[0]->Draw();
+		sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
+		sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
+		sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
+		break;
+	case TestScene::SceneBehavior::kSceneRoom02:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom03:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom04:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom05:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom06:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom07:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom08:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom09:
+		break;
+	case TestScene::SceneBehavior::kSceneRoom10:
+		break;
+	default:
+		break;
+	}
+
+
+}
+
+
+#pragma region Initialize
+
+/// <summary>
+/// 3Dオブジェクトの初期化
+/// </summary>
+void TestScene::InitializeObject3D()
+{
+	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+
+	ocean_ = std::make_unique<Ocean>();
+	ocean_->Initialize({ 100,100 });
+	ocean_->SetCamera(camera.get());
+	ocean_->transform.rotate.x = DegreesToRadians(90);
+	ocean_->material->color.a = 0.99f;
+
+	skinningObject.Initialize();
+	skinningObject.SetModel("iku.gltf");
+	skinningObject.worldtransform_.translate_ = { 30,1,1 };
+	skinningObject.worldtransform_.scale_ = { 10,10,10 };
+	skinningObject.SetCamera(camera.get());
+	
+	
+	skinningObject2.Initialize();
+	skinningObject2.SetModel("walk.gltf");
+	skinningObject2.worldtransform_.translate_ = { -30,10,1 };
+	skinningObject2.worldtransform_.scale_ = { 10,10,10 };
+	skinningObject2.SetCamera(camera.get());
+
+
+	tail.Initialize();
+	tail.SetModel("renga.gltf");
+	tail.SetCamera(camera.get());
+	tail.model->modelData.material[0]->shininess_ = 1000.0f;
+
+	multiy.Initialize();
+	multiy.SetModel("multiMaterial.gltf");
+	multiy.SetCamera(camera.get());
+	multiy.worldtransform_.scale_ = { 10,10,10 };
+}
+
+/// <summary>
+/// スプライトの初期化
+/// </summary>
+void TestScene::InitializeObject2D()
+{
 	for (int i = 0; i < 4; i++)
 	{
 		auto sprite = std::make_unique<Sprite>();
@@ -27,48 +281,14 @@ void TestScene::Initialize()
 
 		sprite_.push_back(std::move(sprite));
 	}
+}
 
-
-	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize({ 100,100 });
-	ocean_->SetCamera(camera.get());
-	ocean_->transform.rotate.x = DegreesToRadians(90);
-	ocean_->material->color.a = 0.99f;
-
-	// 列車オブジェクトを unique_ptr で作成
-	mm.Initialize();
-	//mm.SetModel("building.obj");
-	mm.SetModel("iku.gltf");
-	mm.worldtransform_.translate_ = { 30,1,1 };
-	mm.worldtransform_.scale_ = { 10,10,10 };
-	mm.SetCamera(camera.get());
-	mm2.Initialize();
-	mm2.SetModel("walk.gltf");
-	//mm2.SetModel("AnimatedCube.gltf");
-	mm2.worldtransform_.translate_ = { -30,10,1 };
-	mm2.worldtransform_.scale_ = { 10,10,10 };
-	mm2.SetCamera(camera.get());
-
-
-	tail.Initialize();
-	tail.SetModel("renga.gltf");
-	tail.SetCamera(camera.get());
-	tail.model->modelData.material[0]->shininess_ = 1000.0f;
-
-	multiy.Initialize();
-	multiy.SetModel("multiMaterial.gltf");
-	multiy.SetCamera(camera.get());
-	multiy.worldtransform_.scale_ = { 10,10,10 };
-
-
-
-
+/// <summary>
+/// パーティクルの初期化
+/// </summary>
+void TestScene::InitializeParticle()
+{
 	ParticleManager::GetInstance()->SetCamera(camera.get());
-
-
-	trans_.Initialize();
-	trans_.translate_ = { 0,10,0 };
-
 
 
 	emitter_ = std::make_unique<ParticleEmitter>();
@@ -90,6 +310,8 @@ void TestScene::Initialize()
 
 
 
+
+
 	emitterEnemy_ = std::make_unique<ParticleEmitter>();
 	emitterEnemy_->Initialize("emitterPrimi", "primi");
 	emitterEnemy_->GetFrequency() = 0.1f;
@@ -107,7 +329,13 @@ void TestScene::Initialize()
 	emitterEnemy_->SetIsRotateVelocity(true);
 	emitterEnemy_->SetIsBounce(true);
 	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
+}
 
+/// <summary>
+///  ライトの初期化
+/// </summary>
+void TestScene::InitializeLight()
+{
 	PointLightData pointLightData;
 
 	pointLightData.color = { 1.0f,1.0f,1.0f,1.0f };
@@ -150,108 +378,11 @@ void TestScene::Initialize()
 	directional->directional = directionalLightData;
 
 	LightManager::GetInstance()->AddLight(directional);
-
-
 }
 
-void TestScene::Finalize()
-{
-}
-
-void TestScene::Update()
-{
-
-
-#ifdef _DEBUG
-	ImGui::Begin("engine");
-	ImGui::Checkbox("debugCamera", &flag);
-
-	if (ImGui::CollapsingHeader("Gizmos")) {
-		ImGuiManager::GetInstance()->RenderGizmo2(mm, *camera.get(), "buil");
-		ImGuiManager::GetInstance()->RenderGizmo2(mm2, *camera.get(), "buil2");
-		ImGuiManager::GetInstance()->RenderGizmo2(tail, *camera.get(), "tail");
-		ImGuiManager::GetInstance()->RenderGizmo2(multiy, *camera.get(), "multiy");
-
-	}
-
-
-	if (flag) {
-		debugCamera->Update();
-
-		camera->viewMatrix_ = debugCamera->GetViewProjection().viewMatrix_;
-		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
-		camera->transform_ = debugCamera->GetViewProjection().transform_;
-	}
-	else {
-
-	}
-
-
-	ImGui::End();
-
-
-#endif // _DEBUG
-
-	camera->UpdateMatrix();
-
-
-
-	ocean_->Update();
-	emitter_->Update();
-	emitterEnemy_->Update();
-
-	mm.UpdateSkinning();
-	//mm2.Update();
-	//mm2.UpdateSkinning();
-	tail.Update();
-	//multiy.Update();
-
-
-
-	SkyBoxCommon::GetInstance()->SetCamara(camera.get());
-	SkyBoxCommon::GetInstance()->Update();
-
-}
-
-void TestScene::Draw3D()
-{
-	tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-	//mm.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE);
-	////mm.DrawLine();
-
-	////mm2.DrawSkinning(Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK);
-
-	////multiy.Draw();
-
-	ocean_->Draw();
-}
-
-void TestScene::Draw2D()
-{
-
-	for (int i = 0; i < sprite_.size(); i++) {
-		sprite_[i]->UpdateAmimetion(0.05f);
-
-	}
-	sprite_[0]->Draw();
-	sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
-	sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
-	sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
-
-
-
-
-
-
-}
-
-void TestScene::InitializeResources()
-{
-	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
-}
-
+/// <summary>
+/// カメラの初期化 
+/// </summary>
 void TestScene::InitializeCamera()
 {
 	camera = std::make_unique <Camera>();
@@ -261,8 +392,109 @@ void TestScene::InitializeCamera()
 
 	debugCamera = std::make_unique<DebugCamera>();
 	debugCamera->Initialize();
-	//debugCamera->
-
-	cameraT.y = 1.0f;
 }
+
+#pragma endregion 各初期化
+
+#pragma region 各シーン初期化
+
+void TestScene::InitializeRoom01()
+{
+}
+
+void TestScene::InitializeRoom02()
+{
+}
+
+void TestScene::InitializeRoom03()
+{
+}
+
+void TestScene::InitializeRoom04()
+{
+}
+
+void TestScene::InitializeRoom05()
+{
+}
+
+#pragma endregion 
+
+#pragma region 各シーン更新
+
+void TestScene::UpdateRoom01()
+{
+	ocean_->Update();
+
+	SkyBoxCommon::GetInstance()->SetCamara(camera.get());
+	SkyBoxCommon::GetInstance()->Update();
+}
+
+void TestScene::UpdateRoom02()
+{
+	emitter_->Update();
+	emitterEnemy_->Update();
+}
+
+void TestScene::UpdateRoom03()
+{
+	multiy.Update();
+}
+
+void TestScene::UpdateRoom04()
+{
+	skinningObject.UpdateSkinning();
+	skinningObject2.UpdateSkinning();
+}
+
+void TestScene::UpdateRoom05()
+{
+
+}
+
+void TestScene::SwitchRoom()
+{
+#ifdef _DEBUG
+	ImGui::Begin("engine");
+	if (ImGui::CollapsingHeader("SceneRoom")) {
+		if (ImGui::Button("Room01")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom01;
+		}
+		if (ImGui::Button("Room02")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom02;
+		}
+		if (ImGui::Button("Room03")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom03;
+		}
+		if (ImGui::Button("Room04")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom04;
+		}
+		if (ImGui::Button("Room05")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom05;
+		}
+
+	}
+	ImGui::End();
+#endif // _DEBUG
+
+	if (input_->IsTriggerKey(DIK_1)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom01;
+	}
+	if (input_->IsTriggerKey(DIK_2)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom02;
+	}
+	if (input_->IsTriggerKey(DIK_3)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom03;
+	}
+	if (input_->IsTriggerKey(DIK_4)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom04;
+	}
+	if (input_->IsTriggerKey(DIK_5)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom05;
+	}
+
+}
+
+
+#pragma endregion 
 

@@ -384,6 +384,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Enemy.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Player\BasePlayerState.h" />

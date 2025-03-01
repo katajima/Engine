@@ -19,7 +19,6 @@
 
 #include <iostream>
 
-#include"DirectXGame/engine/base/ImGuiManager.h"
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 
@@ -30,6 +29,10 @@ void Object3d::Initialize()
 
 	object3dCommon_ = Object3dCommon::GetInstance();
 	skinningConmmon_ = SkinningConmmon::GetInstance();
+	imGuiManager_ = ImGuiManager::GetInstance();
+
+	name = "object" + std::to_string(object3dCommon_->count);
+
 
 	transfomation = std::make_unique<Transfomation>();
 
@@ -38,12 +41,25 @@ void Object3d::Initialize()
 	worldtransform_.Initialize();
 	worldtransform_.translate_.x = {0.00000001f};
 
+	object3dCommon_->count++;
 }
 
 #pragma region Update
 
 void Object3d::Update()
 {
+#ifdef _DEBUG
+	ImGui::Begin("engine");
+
+	//if (ImGui::CollapsingHeader("Gizmos")) {
+		imGuiManager_->RenderGizmo2(worldtransform_, *camera, name.c_str());
+	//}
+	ImGui::End();
+
+#endif // _DEBUG
+
+
+
 	Matrix4x4 localMatrix = MakeIdentity4x4();
 	// モデルが存在する場合
 	if (model) {

@@ -9,6 +9,7 @@
 class Object3dCommon
 {
 public:
+	
 	enum class PSOType {
 
 		UvInterpolation_MODE_SOLID_BACK,
@@ -42,6 +43,8 @@ public:
 		defaultCamera;
 		return defaultCamera; }
 
+
+	int32_t count = 0;
 private:
 	// ルートシグネチャの作成
 	void CreateRootSignature();

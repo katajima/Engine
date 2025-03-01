@@ -336,12 +336,6 @@ private:
 	float floatingParameter_ = 0.0f;
 	float attackParameter_;
 
-	// 浮遊サイクル<frame>
-	//int floatingPeriod = 120;
-
-	// 浮遊の振幅<m>
-	//float floatingAmplitude = 1.0f;
-	
 	
 	float speed;
 

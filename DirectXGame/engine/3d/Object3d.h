@@ -18,6 +18,7 @@ using namespace Microsoft::WRL;
 
 class Object3dCommon;
 class SkinningConmmon;
+class ImGuiManager;
 
 class Object3d
 {
@@ -54,10 +55,12 @@ public:
 	// setter
 	 void SetModel(Model* model) { this->model = model; }
 	 Model* GetModel() const { return model; }
-	// void SetModelData(Model::ModelData modeldata);
-
+	
 	 void SetModel(const std::string& filePath);
 	void SetCamera(Camera* camera) { this->camera = camera; }
+	void SetName(const std::string& name) { this->name = name; }
+
+
 	Vector3 GetWorldPosition() const {
 		// ワールド座標を入れる
 		Vector3 worldPos;
@@ -102,6 +105,7 @@ private:
 	
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;
+	ImGuiManager* imGuiManager_;
 
 public:
 	// モデル
@@ -109,11 +113,7 @@ public:
 	
 	WorldTransform worldtransform_;
 
-
-	// 親となるワールド変換へのポインタ
-	//const Object3d* parent_ = nullptr;
-
-
+	std::string name = "";
 };
 
 
