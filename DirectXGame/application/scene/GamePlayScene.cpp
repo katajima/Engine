@@ -37,17 +37,32 @@ void GamePlayScene::Initialize()
 		enemys_.push_back(std::move(enemy));
 	}
 
-	 
+	ocean_ = std::make_unique<Ocean>();
+	ocean_->Initialize({ 10000,10000 });
+	ocean_->SetCamera(camera.get());
+	ocean_->transform.rotate.x = DegreesToRadians(90);
+	ocean_->transform.translate.y = -10;
+	ocean_->material->color = { 0,0,0.57f,1 };
+	ocean_->material->color.a = 0.95f;
+	
 
-	tail.Initialize();
-	tail.SetModel("coast.gltf");
-	tail.SetCamera(camera.get());
-	tail.worldtransform_.scale_ = { 10,10,10 };
+	tail = std::make_unique<Object3d>();
+	tail->Initialize();
+	tail->SetModel("renga.gltf");
+	tail->SetCamera(camera.get());
+	tail->worldtransform_.scale_ = { 4,4,4 };
+
+	tail2 = std::make_unique<Object3d>();
+	tail2->Initialize();
+	tail2->SetModel("black.obj");
+	tail2->SetCamera(camera.get());
+	tail2->worldtransform_.scale_ = { 104,104,104 };
+	tail2->worldtransform_.translate_.y = -20;
 
 	sky.Initialize();
 	sky.SetModel("skydome.obj");
 	sky.SetCamera(camera.get());
-	sky.worldtransform_.scale_ = { 10,10,10 };
+	sky.worldtransform_.scale_ = { 100,100,100 };
 	sky.model->modelData.material[0]->enableLighting_ = false;
 
 
@@ -416,6 +431,7 @@ void GamePlayScene::UpdateImGui()
 	}
 	Vector2 pos = player_->GetObject3D().GetScreenPosition();
 	ImGui::Begin("engine");
+	ImGui::Checkbox("flag", &flag);
 	ImGui::DragFloat2("screenpos", &pos.x, 0.1f);
 	ImGui::End();
 
@@ -512,21 +528,21 @@ void GamePlayScene::Update()
 		camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
 		camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
 
-		
+
+		ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
 		// 必要に応じて行列を更新
 		//camera->UpdateMatrix();
 	}
 	else {
 #ifdef _DEBUG
 #endif // _DEBUG
-		camera->transform_.rotate = cameraDebugR;
-		camera->transform_.translate = cameraDebugT;
+
+		ParticleManager::GetInstance()->SetCamera(camera.get());
 		camera->UpdateMatrix();
 	}
 
 
 
-	ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
 
 
 	
@@ -534,13 +550,16 @@ void GamePlayScene::Update()
 
 
 	// タイル
-	tail.Update();
+	tail->Update();
+	tail2->Update();
 	sky.Update();
 	for (int i = 0; i < warehouseObject.size(); i++) {
 		warehouseObject[i]->Update();
 	}
 
-	moveLimitEmitter_->Update();
+	ocean_->Update();
+
+	//moveLimitEmitter_->Update();
 	emit_->Update();
 	// デバック表示用にワールドトランスフォームを更新
 	collisionManager_->UpdateWorldTransform();
@@ -599,7 +618,11 @@ void GamePlayScene::Finalize()
 void GamePlayScene::Draw3D()
 {
 	sky.Draw();
-	tail.Draw(); 
+	
+	
+	
+	tail->Draw(); 
+	tail2->Draw(); 
 	for (int i = 0; i < warehouseObject.size(); i++) {
 		warehouseObject[i]->Draw();
 	}
@@ -618,8 +641,12 @@ void GamePlayScene::Draw3D()
 	// パーティクル
 	player_->DrawP();
 
+	
 	ParticleManager::GetInstance()->GetInstance()->Draw();
 	//ParticleManager::GetInstance()->GetInstance()->DrawAABB();
+
+	
+	ocean_->Draw();
 
 
 	// 当たり判定の表示

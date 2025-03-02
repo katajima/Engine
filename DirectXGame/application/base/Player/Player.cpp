@@ -222,14 +222,14 @@ void Player::Update()
 	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
 		objectBase_.worldtransform_.translate_.x = moveLimit;
 	}
-	if (objectBase_.worldtransform_.translate_.x < -moveLimit) {
-		objectBase_.worldtransform_.translate_.x = -moveLimit;
+	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
 	}
-	if (objectBase_.worldtransform_.translate_.z > moveLimit) {
-		objectBase_.worldtransform_.translate_.z = moveLimit;
+	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
 	}
-	if (objectBase_.worldtransform_.translate_.z < -moveLimit) {
-		objectBase_.worldtransform_.translate_.z = -moveLimit;
+	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
 	}
 
 	if (hp <= 0) {

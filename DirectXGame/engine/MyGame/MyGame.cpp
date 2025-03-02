@@ -196,8 +196,8 @@ void MyGame::InitializeResource()
 	//ModelManager::GetInstance()->LoadModelAmime("sneakWalk.gltf", "human");
 	ModelManager::GetInstance()->LoadModelAmime("AnimatedCube.gltf", "AnimatedCube");
 
-	ModelManager::GetInstance()->LoadModel("grass.obj", "grass");
-	ModelManager::GetInstance()->LoadModel("grass.gltf", "grass2");
+	//ModelManager::GetInstance()->LoadModel("grass.obj", "grass");
+	//ModelManager::GetInstance()->LoadModel("grass.gltf", "grass2");
 	ModelManager::GetInstance()->LoadModel("Ground.obj", "Ground");
 	ModelManager::GetInstance()->LoadModel("stair.obj");
 
@@ -226,6 +226,7 @@ void MyGame::InitializeResource()
 	/// </summary>
 	ModelManager::GetInstance()->LoadModel("renga.gltf", "renga", { 10,10 });
 	ModelManager::GetInstance()->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
+	ModelManager::GetInstance()->LoadModel("black.obj", "terrain/black", { 10,10 });
 
 
 

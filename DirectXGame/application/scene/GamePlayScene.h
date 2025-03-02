@@ -16,7 +16,7 @@
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/base/LevelData.h"
 
-
+#include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/application/base/Enemy/Enemy.h"
 #include"DirectXGame/application/base/Player/Player.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
@@ -122,6 +122,9 @@ private:
 
 	std::vector < std::unique_ptr<Object3d>> warehouseObject;
 	
+
+	// オーシャンシェーダー
+	std::unique_ptr < Ocean> ocean_ = nullptr;
 	
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
@@ -136,7 +139,8 @@ private:
 	ParticleManager* particleManager_;
 
 
-	Object3d tail;
+	std::unique_ptr < Object3d> tail;
+	std::unique_ptr < Object3d> tail2;
 	Object3d sky;
 
 	TrailEffect* trailEffect_;

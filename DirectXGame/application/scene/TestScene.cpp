@@ -15,7 +15,7 @@ void TestScene::Initialize()
 	// カメラの初期化
 	InitializeCamera();
 
-	// 2Dオブジェクトの初期化
+	// 3Dオブジェクトの初期化
 	InitializeObject3D();
 
 	// 2Dオブジェクトの初期化
