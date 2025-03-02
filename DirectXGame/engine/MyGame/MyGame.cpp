@@ -198,7 +198,6 @@ void MyGame::InitializeResource()
 
 	ModelManager::GetInstance()->LoadModel("grass.obj", "grass");
 	ModelManager::GetInstance()->LoadModel("grass.gltf", "grass2");
-	ModelManager::GetInstance()->LoadModel("renga.gltf", "renga",{10,10});
 	ModelManager::GetInstance()->LoadModel("Ground.obj", "Ground");
 	ModelManager::GetInstance()->LoadModel("stair.obj");
 
@@ -215,21 +214,34 @@ void MyGame::InitializeResource()
 
 
 	ModelManager::GetInstance()->LoadModel("rail.obj","rail");
-	ModelManager::GetInstance()->LoadModelAmime("building.obj","building");
 	ModelManager::GetInstance()->LoadModel("Sphere.obj","sphere");
 	ModelManager::GetInstance()->LoadModel("Sphere2.obj","sphere");
 	ModelManager::GetInstance()->LoadModel("Sphere3.obj","sphere");
 	ModelManager::GetInstance()->LoadModel("skydome.obj", "skydome");
 
 
+	
+	/// <summary>
+	/// 地形
+	/// </summary>
+	ModelManager::GetInstance()->LoadModel("renga.gltf", "renga", { 10,10 });
+	ModelManager::GetInstance()->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
 
 
 
 	/// <summary>
+	/// 建物
+	/// </summary>
+	ModelManager::GetInstance()->LoadModelAmime("building.obj", "buildingAll/building"); // ビル
+	ModelManager::GetInstance()->LoadModelAmime("warehouse.gltf", "buildingAll/warehouse"); // 倉庫
+
+	
+	
+	/// <summary>
 	/// 敵
 	/// </summary>
 
-	ModelManager::GetInstance()->LoadModel("enemy.obj","enemy"); // 的
+	ModelManager::GetInstance()->LoadModel("enemy.obj","enemyAll/enemy"); // 的
 	ModelManager::GetInstance()->LoadModel("enemy2.obj","enemyAll/enemy2"); // 本体
 	ModelManager::GetInstance()->LoadModel("enemyTire.obj","enemyAll/tire"); // タイヤ
 	ModelManager::GetInstance()->LoadModel("enemyDuct.obj","enemyAll/duct"); // ダクト

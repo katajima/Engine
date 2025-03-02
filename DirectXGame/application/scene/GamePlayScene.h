@@ -117,9 +117,11 @@ private:
 	Object3d cameraObj_;
 
 	// 建物オブジェクト
-	std::vector<std::unique_ptr<Object3d>> buildingObject;
-	std::vector<Vector3> buildingPos;
 
+	std::vector<Vector3> warePos;
+
+	std::vector < std::unique_ptr<Object3d>> warehouseObject;
+	
 	
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;

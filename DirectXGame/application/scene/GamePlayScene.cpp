@@ -40,7 +40,7 @@ void GamePlayScene::Initialize()
 	 
 
 	tail.Initialize();
-	tail.SetModel("renga.gltf");
+	tail.SetModel("coast.gltf");
 	tail.SetCamera(camera.get());
 	tail.worldtransform_.scale_ = { 10,10,10 };
 
@@ -51,7 +51,31 @@ void GamePlayScene::Initialize()
 	sky.model->modelData.material[0]->enableLighting_ = false;
 
 
-	
+	warePos.push_back({ 300,0,-200 });
+	warePos.push_back({ 300,0,-100 });
+	warePos.push_back({ 300,0,0 });
+	warePos.push_back({ 300,0,100 });
+	warePos.push_back({ 300,0,200 });
+
+	for (int i = 0; i < warePos.size(); i++) {
+		auto obj = std::make_unique<Object3d>();
+		obj->Initialize();
+		obj->SetModel("warehouse.gltf");
+		obj->SetCamera(camera.get());
+		obj->worldtransform_.scale_ = { 2, 2, 2 };		
+		obj->worldtransform_.translate_ = warePos[i];
+		obj->worldtransform_.rotate_.y = DegreesToRadians(90);
+		
+		
+		warehouseObject.push_back(std::move(obj));
+	}
+
+	//warehouseObject = std::make_unique<Object3d>();
+	//warehouseObject->Initialize();
+	//warehouseObject->SetModel("warehouse.gltf");
+	//warehouseObject->SetCamera(camera.get());
+	//warehouseObject->worldtransform_.scale_ = { 2,2,2 };
+	//warehouseObject->worldtransform_.translate_ = { 300,0,50 };
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
@@ -512,6 +536,10 @@ void GamePlayScene::Update()
 	// タイル
 	tail.Update();
 	sky.Update();
+	for (int i = 0; i < warehouseObject.size(); i++) {
+		warehouseObject[i]->Update();
+	}
+
 	moveLimitEmitter_->Update();
 	emit_->Update();
 	// デバック表示用にワールドトランスフォームを更新
@@ -571,7 +599,10 @@ void GamePlayScene::Finalize()
 void GamePlayScene::Draw3D()
 {
 	sky.Draw();
-	tail.Draw();
+	tail.Draw(); 
+	for (int i = 0; i < warehouseObject.size(); i++) {
+		warehouseObject[i]->Draw();
+	}
 
 	////3Dオブジェクトの描画
 

@@ -87,7 +87,7 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 	mExplosionSmokeEmitter_->Initialize("emitterSmoke", "explosionSmoke", ParticleEmitter::EmitSpawnShapeType::kAABB);
 	mExplosionSmokeEmitter_->SetParent(object_.worldtransform_);
 	mExplosionSmokeEmitter_->GetFrequency() = 0.00f;
-	mExplosionSmokeEmitter_->SetCount(100);
+	mExplosionSmokeEmitter_->SetCount(50);
 	mExplosionSmokeEmitter_->SetLifeTimeMinMax(2.0f, 2.0f);
 	mExplosionSmokeEmitter_->SetIsAlpha(true);
 	mExplosionSmokeEmitter_->SetIsEmit(false);
@@ -202,9 +202,7 @@ void PlayerBullet::Update()
 
 
 	mExplosionSmokeEmitter_->Update();
-	//mExplosionSmokeEmitter_->Update();
-	//mExplosionSmokeEmitter_->Update();
-
+	
 	objectStr_.Update();
 	objectEnd_.Update();
 	object_.Update();
