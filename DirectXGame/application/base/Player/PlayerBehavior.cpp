@@ -4,6 +4,7 @@
 
 void Player::BehaviorRootInitialize()
 {
+	dashEmitter_->SetIsEmit(false);
 	workAttack.parameter = 0;
 	
 	flag33 = false;
@@ -11,6 +12,8 @@ void Player::BehaviorRootInitialize()
 
 void Player::BehaviorRootUpdate()
 {
+	
+
 	AttackKey();
 
 
@@ -70,6 +73,7 @@ void Player::BehaviorAttackUpdate()
 
 void Player::BehaviorDieInitialize()
 {
+	dashEmitter_->SetIsEmit(false);
 	specialAttack.phese = 0;
 	specialAttack.specialGauge = 0;
 }

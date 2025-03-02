@@ -28,6 +28,16 @@ struct AttackInput
 };
 
 
+// 攻撃モーション
+struct AttackMotion
+{
+    Vector3 rotate;            // 回転
+    Vector3 scale;             // 拡縮 
+    Vector3 translate;         // 位置 
+
+    Vector3 roll; // 回転量(フレーム)
+};
+
 // 攻撃内部データ
 struct AttackData {
     std::string name;        // 技名
@@ -41,15 +51,7 @@ struct AttackData {
     AttackMotion motion;     // 攻撃モーション
 };
 
-// 攻撃モーション
-struct AttackMotion
-{
-    Vector3 rotate;            // 回転
-    Vector3 scale;             // 拡縮 
-    Vector3 translate;         // 位置 
 
-    Vector3 roll; // 回転量(フレーム)
-};
 
 
 // 攻撃技

@@ -14,8 +14,8 @@ void MyGame::Initialize()
 	// シーンマネージャーに最初のシーンをセット
 	SceneManager::GetInstance()->SetSceneFactory(sceneFactory_.get());
 	
-	SceneManager::GetInstance()->ChangeScene("TEST");
-	//SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+	//SceneManager::GetInstance()->ChangeScene("TEST");
+	SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
 	
 	//Camera::GetInstance();
 	// リソース初期化
@@ -123,7 +123,9 @@ void MyGame::Draw()
 	ParticleManager::GetInstance()->Draw();
 
 #ifdef _DEBUG
-	LineCommon::GetInstance()->Draw();
+	if (!SceneManager::GetInstance()->IsNowScene("GAMEPLAY")) {
+		LineCommon::GetInstance()->Draw();
+	}
 #endif // _DEBUG
 
 	
@@ -255,6 +257,13 @@ void MyGame::InitializeResource()
 	ParticleManager::GetInstance()->CreateParticleGroup("primi", "resources/Texture/uvChecker.png", primi.get());
 
 	ParticleManager::GetInstance()->CreateParticleGroup("primiCylinder", "resources/Texture/uvChecker.png", primiPlane.get());
+	
+	ParticleManager::BlendType::MODE_MUlLIPLY;
+
+	ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/Texture/aa.png", ModelManager::GetInstance()->FindModel("plane.obj"));
+	ParticleManager::GetInstance()->CreateParticleGroup("explosionSmoke", "resources/Texture/aa.png", ModelManager::GetInstance()->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	
+	ParticleManager::GetInstance()->CreateParticleGroup("dashEmit", "resources/Texture/aa.png", ModelManager::GetInstance()->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 
 }
 

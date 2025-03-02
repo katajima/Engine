@@ -294,6 +294,9 @@ private:  // パラメータ
 	bool isInvincible = false;
 private:
 	Camera* camera_ = nullptr;
+
+	// オブジェクト3D
+
 	Object3d objectBase_;
 	// 本体
 	Object3d objectBody_;
@@ -321,11 +324,18 @@ private:
 	// シリアルナンバー
 	uint32_t serialNumber = 0;
 
+
+	
+	// スプライト
+
 	std::unique_ptr<Sprite> HpBer_;
 	std::unique_ptr<Sprite> SpecailBer_;
 	std::unique_ptr<Sprite> textMax_;
 	std::unique_ptr<Sprite> textRB_;
 	bool isTextRB_ = false;
+
+
+
 
 	// 速度
 	Vector3 velocity_ = {};
@@ -342,8 +352,15 @@ private:
 	std::vector<Enemy*> lockedOnEnemies;
 
 
+	// エフェクト
+
 	std::unique_ptr<TrailEffect> trailEffect_;
 	bool flag33;
+
+
+	std::unique_ptr<ParticleEmitter> dashEmitter_ = nullptr;
+
+
 };
 
 

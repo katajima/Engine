@@ -62,6 +62,8 @@ void GamePlayScene::Initialize()
 	
 
 	LoadLevelData();
+
+	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 }
 
 

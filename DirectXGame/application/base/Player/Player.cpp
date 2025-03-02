@@ -96,7 +96,8 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 	
 
-	
+
+
 	HpBer_ = std::make_unique<Sprite>();
 	HpBer_->Initialize("resources/Texture/Image.png");
 	HpBer_->SetSize({ 50,-float(hp) });
@@ -133,10 +134,29 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	trailEffect_->SetObject(&weapon_->GetObject3D());
 	
 	flag33 = false;
+
+
+
+	dashEmitter_ = std::make_unique <ParticleEmitter>();
+	dashEmitter_->Initialize("dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
+	dashEmitter_->GetFrequency() = 0.1f;
+	dashEmitter_->SetCount(5);
+	dashEmitter_->SetLifeTimeMinMax(0.5f, 0.5f);
+	dashEmitter_->SetIsAlpha(true);
+	dashEmitter_->SetIsEmit(false);
+	dashEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
+	dashEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
+	dashEmitter_->SetSizeMinMax(Vector3{ 5.0f,5.0f,5.0f }, { 5.0f,5.0f,5.0f });
+	dashEmitter_->SetVelocityMinMax(-Vector3{ 5,5,5 }, Vector3{ 5,5,5 });
+	dashEmitter_->SetCorner(16,3.0f);
+	dashEmitter_->transform_.rotate_.x = DegreesToRadians(90);
+
 }
 
 void Player::Update()
 {
+	dashEmitter_->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
 	trailEffect_->Update(flag33, weaponStr, weaponEnd);
 
 	if (isAlive) {
@@ -263,6 +283,8 @@ void Player::Update()
 
 	Gravity();
 	
+	dashEmitter_->Update();
+
 	objectBase_.Update();
 	objectBody_.Update();
 	weapon_->Update();

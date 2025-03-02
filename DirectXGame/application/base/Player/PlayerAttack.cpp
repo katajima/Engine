@@ -265,6 +265,7 @@ void Player::AttackTypes()
 		}
 		else if (workAttack.key.IsDashAttack) {
 			workAttack.typeRequest_ = AttackType::kDash;
+			dashEmitter_->SetIsEmit(true);
 		}
 		else if (workAttack.key.IsJampAttack) {
 			workAttack.typeRequest_ = AttackType::kJamp;

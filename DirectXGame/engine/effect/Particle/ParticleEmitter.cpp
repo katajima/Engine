@@ -105,7 +105,7 @@ void ParticleEmitter::Update()
 		ImGui::DragFloat("lifeTime.max", &emitter_.lifeTime.max, 0.1f);
 		ImGui::DragFloat("lifeTime.min", &emitter_.lifeTime.min, 0.1f);
 
-		ImGui::DragFloat("count", &emitter_.count, 1.0f);
+		ImGui::DragInt("count", &emitter_.count, 1.0f);
 
 		if (spawnShapeType_ == EmitSpawnShapeType::kCornerLine) {
 			ImGui::Separator();
@@ -168,7 +168,9 @@ void ParticleEmitter::Update()
 
 	frequencyTime_ += MyGame::GameTime();
 	if (frequency_ <= frequencyTime_) {
-		Emit();
+		if (isEmit) {
+			Emit();
+		}
 		frequencyTime_ -= frequency_;
 	}
 
@@ -193,7 +195,7 @@ void ParticleEmitter::Emit()
 
 		if (emitType_ == ParticleManager::EmitType::kRandom) {
 			ParticleManager::GetInstance()->GetParticleGroups(particleName_).emiter = emitter_;
-
+			
 
 			if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
 				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kAABB);

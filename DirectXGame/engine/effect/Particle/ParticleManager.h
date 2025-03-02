@@ -120,7 +120,7 @@ public:
 
 
 
-		float count;
+		int count;
 	};
 
 	struct Particle
