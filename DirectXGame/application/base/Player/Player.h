@@ -29,6 +29,7 @@
 ///</summary>
 
 class Enemy;
+class FollowCamera;
 
 class Player : public Collider {
 public:
@@ -278,13 +279,20 @@ public:
 
 	void SetHitTime() { workAttack.hitTime = 1.5f; }
 
+
+
+	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
+
+
 	// 弾リストを取得
 	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() const { return playerBullet_; }
 
 private:
+	FollowCamera* followCamera_;
+	
+	Camera* camera_ = nullptr;
 
-	//DeltaTime deltaTime_;
-
+	std::vector<Enemy*> lockedOnEnemies;
 private:  // パラメータ
 	
 	uint32_t maxHp = 100;
@@ -293,7 +301,7 @@ private:  // パラメータ
 	float damage_ = 0;
 	bool isInvincible = false;
 private:
-	Camera* camera_ = nullptr;
+	
 
 	// オブジェクト3D
 
@@ -307,6 +315,10 @@ private:
 	// ミサイル発射位置
 	Object3d injectionLeftObj_;
 	Object3d injectionRightObj_;
+
+	Vector3 injectionLeftPos_{ -2.5f,1.0f,-1.5f };
+	Vector3 injectionRightPos_{ 2.5,1.0f,-1.5f };
+
 
 
 
@@ -340,7 +352,7 @@ private:
 	// 速度
 	Vector3 velocity_ = {};
 	
-	
+	float moveLimit = 200;
 	
 	// 浮遊ギミック媒介変数
 	float floatingParameter_ = 0.0f;
@@ -349,7 +361,7 @@ private:
 	
 	float speed;
 
-	std::vector<Enemy*> lockedOnEnemies;
+	
 
 
 	// エフェクト

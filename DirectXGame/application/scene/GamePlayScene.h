@@ -164,5 +164,6 @@ private:
 
 	std::unique_ptr<ParticleEmitter> emit_;
 
+	std::unique_ptr<ParticleEmitter> moveLimitEmitter_ = nullptr;
 };
 

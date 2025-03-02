@@ -24,7 +24,7 @@ void GamePlayScene::Initialize()
 	followCamera_->SetTarget(&player_->GetObject3D());
 
 	player_->SetCamera(camera.get());
-
+	player_->SetFollowCamera(followCamera_.get());
 	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 
 
@@ -207,12 +207,37 @@ void GamePlayScene::InitializeResources()
 
 
 
+
+	moveLimitEmitter_ = std::make_unique <ParticleEmitter>();
+	moveLimitEmitter_->Initialize("dash", "moveLimit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	moveLimitEmitter_->GetFrequency() = 0.5f;
+	moveLimitEmitter_->SetCount(100);
+	moveLimitEmitter_->SetLifeTimeMinMax(0.5f, 0.5f);
+	//moveLimitEmitter_->SetIsAlpha(true);
+	//moveLimitEmitter_->SetIsEmit(false);
+	moveLimitEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
+	moveLimitEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
+	moveLimitEmitter_->SetSizeMinMax(Vector3{ 1.1f,1.1f,1.1f }, { 1.1f,1.1f,1.1f });
+	moveLimitEmitter_->SetVelocityMinMax({}, {});
+	moveLimitEmitter_->SetPos({ 0,10,0 });
+	moveLimitEmitter_->SetCorner(4, 300);
+	moveLimitEmitter_->transform_.rotate_.y = DegreesToRadians(45);
+
+
+
+
+
+
+
+
+
+
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
 	directionalLightData.intensity = 2.0f;
 	directionalLightData.isLight = true;
-
+	directionalLightData.lig = 0.1f;
 
 
 	directional = std::make_shared<DirectionalLight>();
@@ -487,6 +512,7 @@ void GamePlayScene::Update()
 	// タイル
 	tail.Update();
 	sky.Update();
+	moveLimitEmitter_->Update();
 	emit_->Update();
 	// デバック表示用にワールドトランスフォームを更新
 	collisionManager_->UpdateWorldTransform();
@@ -573,7 +599,7 @@ void GamePlayScene::Draw3D()
 // 2D描画
 void GamePlayScene::Draw2D()
 {
-	player_->Draw2D();
+	
 
 
 	//////////////--------スプライト-----------///////////////////
@@ -621,7 +647,7 @@ void GamePlayScene::Draw2D()
 		enemys_[i]->Draw2D();
 	}
 
-
+	player_->Draw2D();
 
 	if (!player_->GetAlive()) {
 		sceneCount++;

@@ -142,6 +142,11 @@ private:
 	std::unique_ptr<ParticleEmitter> hitEmit_ = nullptr;
 	std::unique_ptr<ParticleEmitter> dustEmit_ = nullptr;
 
+	std::unique_ptr<ParticleEmitter> tireEmit_ = nullptr; // タイヤ
+	std::unique_ptr<ParticleEmitter> ductEmit_ = nullptr; // ダクト
+	std::unique_ptr<ParticleEmitter> plankEmit_ = nullptr; // 鋼板
+	std::unique_ptr<ParticleEmitter> gearEmit_ = nullptr; // 歯車
+
 	float hitStopTimer;
 	float kHitStopTimer;
 	float timeSpeed_ = 1.0f;

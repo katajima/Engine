@@ -1,6 +1,6 @@
 #include "Player.h"
 #include"DirectXGame/application/base/Enemy/Enemy.h"
-
+#include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
 
 #include "assert.h"
 
@@ -43,7 +43,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	injectionLeftObj_.SetCamera(camera_);
 	injectionLeftObj_.SetModel("AnimatedCube.gltf");
 	injectionLeftObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	injectionLeftObj_.worldtransform_.translate_ = { -2.5f,1.0f,-1.5f };
+	injectionLeftObj_.worldtransform_.translate_ = injectionLeftPos_;
 
 	injectionLeftObj_.worldtransform_.scale_= { 0.75f,1.25f,1.0f };
 
@@ -52,7 +52,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	injectionRightObj_.SetCamera(camera_);
 	injectionRightObj_.SetModel("AnimatedCube.gltf");
 	injectionRightObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	injectionRightObj_.worldtransform_.translate_ = { 2.5,1.0f,-1.5f };
+	injectionRightObj_.worldtransform_.translate_ = injectionRightPos_;
 
 	injectionRightObj_.worldtransform_.scale_ = { 0.75f,1.25f,1.0f };
 
@@ -140,16 +140,17 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	dashEmitter_ = std::make_unique <ParticleEmitter>();
 	dashEmitter_->Initialize("dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
 	dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
-	dashEmitter_->GetFrequency() = 0.1f;
+	dashEmitter_->GetFrequency() = 0.05f;
 	dashEmitter_->SetCount(5);
-	dashEmitter_->SetLifeTimeMinMax(0.5f, 0.5f);
+	dashEmitter_->SetLifeTimeMinMax(0.1f, 0.1f);
 	dashEmitter_->SetIsAlpha(true);
 	dashEmitter_->SetIsEmit(false);
 	dashEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
 	dashEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
-	dashEmitter_->SetSizeMinMax(Vector3{ 5.0f,5.0f,5.0f }, { 5.0f,5.0f,5.0f });
-	dashEmitter_->SetVelocityMinMax(-Vector3{ 5,5,5 }, Vector3{ 5,5,5 });
-	dashEmitter_->SetCorner(16,3.0f);
+	dashEmitter_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	dashEmitter_->SetVelocityMinMax({},{});
+	dashEmitter_->SetPos({0,7,0});
+	dashEmitter_->SetCorner(16,0.5f);
 	dashEmitter_->transform_.rotate_.x = DegreesToRadians(90);
 
 }
@@ -218,17 +219,17 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	if (objectBase_.worldtransform_.translate_.x > 200) {
-		objectBase_.worldtransform_.translate_.x = 200;
+	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
+		objectBase_.worldtransform_.translate_.x = moveLimit;
 	}
-	if (objectBase_.worldtransform_.translate_.x < -200) {
-		objectBase_.worldtransform_.translate_.x = -200;
+	if (objectBase_.worldtransform_.translate_.x < -moveLimit) {
+		objectBase_.worldtransform_.translate_.x = -moveLimit;
 	}
-	if (objectBase_.worldtransform_.translate_.z > 200) {
-		objectBase_.worldtransform_.translate_.z = 200;
+	if (objectBase_.worldtransform_.translate_.z > moveLimit) {
+		objectBase_.worldtransform_.translate_.z = moveLimit;
 	}
-	if (objectBase_.worldtransform_.translate_.z < -200) {
-		objectBase_.worldtransform_.translate_.z = -200;
+	if (objectBase_.worldtransform_.translate_.z < -moveLimit) {
+		objectBase_.worldtransform_.translate_.z = -moveLimit;
 	}
 
 	if (hp <= 0) {
@@ -270,12 +271,7 @@ void Player::Update()
 	ImGui::Checkbox("frag", &flag33);
 	int ii = (int)trailEffect_->mesh->vertices.size();
 	ImGui::InputInt("vertice", &ii);
-	//for (int i = 0; i < trailEffect_->mesh->vertices.size(); i++) {
-	//	//char* str =  std::to_string(i);
-
-	//	ImGui::InputFloat3("pos", &trailEffect_->mesh->vertices[i].position.x);
-	//	ImGui::InputFloat2("tex", &trailEffect_->mesh->vertices[i].texcoord.x);
-	//}
+	
 	
 	ImGui::End();
 #endif // _DEBUG
@@ -345,6 +341,8 @@ void Player::DrawP()
 
 void Player::Draw2D()
 {
+
+	HpBer_->SetPosition({ 100,650 });
 	HpBer_->SetSize({ 50,-float(hp) * 2 });
 	HpBer_->Update();
 	HpBer_->Draw();

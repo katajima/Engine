@@ -188,7 +188,7 @@ void Player::AttackTypeInit(int comboIndex)
 		{
 		case AttackType::kNormal:
 			
-			
+		
 			if (comboIndex == 0) {
 				weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
@@ -238,7 +238,7 @@ void Player::AttackTypeInit(int comboIndex)
 			
 			break;
 		case AttackType::kDash:
-			
+			dashEmitter_->SetIsEmit(true);
 			weapon_->SetRad(3.0f);
 
 			workAttack.attackAll.max_t = 0.3f;
@@ -265,7 +265,6 @@ void Player::AttackTypes()
 		}
 		else if (workAttack.key.IsDashAttack) {
 			workAttack.typeRequest_ = AttackType::kDash;
-			dashEmitter_->SetIsEmit(true);
 		}
 		else if (workAttack.key.IsJampAttack) {
 			workAttack.typeRequest_ = AttackType::kJamp;
