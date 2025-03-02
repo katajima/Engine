@@ -15,6 +15,13 @@ struct Camera
 };
 ConstantBuffer<Camera> gCamera : register(b2);
 
+struct TransformationMatrix
+{
+    float32_t4x4 WVP;
+    float32_t4x4 World;
+    float32_t4x4 WorldInverseTranspose;
+};
+ConstantBuffer<TransformationMatrix> gTransformationMatrix : register(b5);
 
 ////------PixelShader------////
 struct PixelShaderOutput
@@ -32,13 +39,13 @@ PixelShaderOutput main(PixelShaderInput input)
     
     
     float3 normal = input.normal;
-    float3 tangent =float3(0, 0, 0);
-    float3 biNormal = float3(0, 0, 0);
+    float3 tangent = input.tangent;
+    float3 biNormal = input.biNormal;
     if (gMaterial.useNormalMap)
     {
-        tangent = normalize(mul((float3) input.worldPosition, (float3) input.tangent));
-        biNormal = normalize(mul((float3) input.worldPosition, (float3) input.biNormal));
-        normal = normalize(mul((float3) input.worldPosition, (float3) input.normal));
+        normal = normalize(mul((float3x3) gTransformationMatrix.WorldInverseTranspose, input.normal));
+        tangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent));
+        biNormal = normalize(cross(normal, tangent)); // バイノーマルを再計算
     }
     
     if (gMaterial.enableLighting != 0) // Lightingする場合
@@ -47,10 +54,11 @@ PixelShaderOutput main(PixelShaderInput input)
         float amdientPower = 0;
         if (gMaterial.useNormalMap)
         {
-            float3 localNormal = g_Normalmap.Sample(sSampler, input.texcoord).xyz;
-        // タンジェントスペース
-            localNormal = (localNormal - 0.5f) * 2.0f;
-            normal = input.tangent * localNormal.x + input.biNormal * localNormal.y + input.transformedNormal * localNormal.z;
+            float3 localNormal = g_Normalmap.Sample(sSampler, input.texcoord).xyz * 2.0f - 1.0f;
+
+    // TBN行列（タンジェント・バイノーマル・ノーマル）でワールド空間の法線を計算
+            float3x3 TBN = float3x3(input.tangent, input.biNormal, input.normal);
+            normal = normalize(mul(localNormal, TBN));
         }
         
             

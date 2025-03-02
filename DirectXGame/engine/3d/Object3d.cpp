@@ -249,6 +249,7 @@ void Object3d::DrawSetting()
 	LightManager::GetInstance()->DrawLight();
 
 	transfomation->GetCommandList(1);
+	transfomation->GetCommandList(10);
 
 	camera->GetCommandList(4);
 }
