@@ -28,8 +28,16 @@ struct Transform {
 
 //AABB
 struct AABB {
-	Vector3 min; //!< 最小点
-	Vector3 max; //!< 最大点
+	Vector3 min_; //!< 最小点
+	Vector3 max_; //!< 最大点
+
+	AABB(Vector3 min = Vector3(), Vector3 max = Vector3()) : min_(min), max_(max) {}
+
+	bool intersects(const AABB& other) const {
+		return (min_.x <= other.max_.x && max_.x >= other.min_.x &&
+			min_.y <= other.max_.y && max_.y >= other.min_.y &&
+			min_.z <= other.max_.z && max_.z >= other.min_.z);
+	}
 };
 
 
@@ -81,6 +89,7 @@ struct CornerSegment {
 struct Triangle
 {
 	Vector3 vertices[3]; // !頂点
+	AABB bounds;
 
 	// +=オペレーターのオーバーロード 
 	Triangle& operator+=(const Vector3& offset) { 
@@ -98,6 +107,12 @@ struct Triangle
 		return result;
 	}
 
+	
+
+	Triangle(Vector3 v0, Vector3 v1, Vector3 v2) : vertices{ v0, v1, v2 } {
+		bounds.min_ = Min(Min(v0, v1), v2);
+		bounds.max_ = Max(Max(v0, v1), v2);
+	}
 };
 
 //ばね

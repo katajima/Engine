@@ -218,8 +218,8 @@ void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<
 void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
 {
 	// AABB の最小・最大範囲をワールド座標に適用
-	Vector3 min = aabb.min + pos;
-	Vector3 max = aabb.max + pos;
+	Vector3 min = aabb.min_ + pos;
+	Vector3 max = aabb.max_ + pos;
 
 	// AABB の 8 頂点を計算
 	Vector3 vertices[8] = {

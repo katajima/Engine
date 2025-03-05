@@ -450,7 +450,7 @@ void TestScene::UpdateRoom04()
 
 void TestScene::UpdateRoom05()
 {
-	LineCommon::GetInstance()->AddGrid(1000,1000,2,{1,1,1,1});
+	LineCommon::GetInstance()->AddGrid(1000,1000,10,{1,1,1,1});
 }
 
 void TestScene::SwitchRoom()

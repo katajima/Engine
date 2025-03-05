@@ -132,7 +132,11 @@ struct Vector3 final {
 		return { x = other.x,y = other.y,z = other.z };
 	}*/
 
+	
+
 };
+
+
 
 static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
 	Vector3 temp;

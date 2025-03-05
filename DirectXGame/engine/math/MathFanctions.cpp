@@ -630,9 +630,9 @@ Vector4 Transforms(const Vector4& vec, const Matrix4x4& mat)
 	};
 }
 bool IsCollision(const AABB& aabb, const Vector3& point) {
-	return (point.x >= aabb.min.x && point.x <= aabb.max.x) &&
-		(point.y >= aabb.min.y && point.y <= aabb.max.y) &&
-		(point.z >= aabb.min.z && point.z <= aabb.max.z);
+	return (point.x >= aabb.min_.x && point.x <= aabb.max_.x) &&
+		(point.y >= aabb.min_.y && point.y <= aabb.max_.y) &&
+		(point.z >= aabb.min_.z && point.z <= aabb.max_.z);
 }
 
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
@@ -695,9 +695,9 @@ Vector3 ClosestPoint(const Vector3& point, const Segment& segment)
 Vector3 ClosestPointAABBSphere(const Sphere& sphere, const AABB& aabb)
 {
 	Vector3 closestPoint;
-	closestPoint.x = Clamp(sphere.center.x, aabb.min.x, aabb.max.x);
-	closestPoint.y = Clamp(sphere.center.y, aabb.min.y, aabb.max.y);
-	closestPoint.z = Clamp(sphere.center.z, aabb.min.z, aabb.max.z);
+	closestPoint.x = Clamp(sphere.center.x, aabb.min_.x, aabb.max_.x);
+	closestPoint.y = Clamp(sphere.center.y, aabb.min_.y, aabb.max_.y);
+	closestPoint.z = Clamp(sphere.center.z, aabb.min_.z, aabb.max_.z);
 
 	return closestPoint;
 }
@@ -908,9 +908,9 @@ bool IsCollision(const Triangle& triangle, const Capsule& capsule)
 //
 bool IsCollision(const AABB& aabb1, const AABB& aabb2)
 {
-	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
-		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
-		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) {
+	if ((aabb1.min_.x <= aabb2.max_.x && aabb1.max_.x >= aabb2.min_.x) &&
+		(aabb1.min_.y <= aabb2.max_.y && aabb1.max_.y >= aabb2.min_.y) &&
+		(aabb1.min_.z <= aabb2.max_.z && aabb1.max_.z >= aabb2.min_.z)) {
 
 		return true;
 	}
@@ -954,25 +954,25 @@ bool IsCollision(const AABB& aabb, const Segment& segment)
 
 	// 特異点チェック: 線分が軸に平行である場合
 	if (std::abs(dotX) < 1e-6) {
-		if (segment.origin.x < aabb.min.x || segment.origin.x > aabb.max.x) return false;
+		if (segment.origin.x < aabb.min_.x || segment.origin.x > aabb.max_.x) return false;
 	}
 	if (std::abs(dotY) < 1e-6) {
-		if (segment.origin.y < aabb.min.y || segment.origin.y > aabb.max.y) return false;
+		if (segment.origin.y < aabb.min_.y || segment.origin.y > aabb.max_.y) return false;
 	}
 	if (std::abs(dotZ) < 1e-6) {
-		if (segment.origin.z < aabb.min.z || segment.origin.z > aabb.max.z) return false;
+		if (segment.origin.z < aabb.min_.z || segment.origin.z > aabb.max_.z) return false;
 	}
 
 
 	Vector3 tMin, tMax;
 
-	tMin.x = (aabb.min.x - Dot(segment.origin, planeX1.normal)) / dotX;
-	tMin.y = (aabb.min.y - Dot(segment.origin, planeY1.normal)) / dotY;
-	tMin.z = (aabb.min.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
+	tMin.x = (aabb.min_.x - Dot(segment.origin, planeX1.normal)) / dotX;
+	tMin.y = (aabb.min_.y - Dot(segment.origin, planeY1.normal)) / dotY;
+	tMin.z = (aabb.min_.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
 
-	tMax.x = (aabb.max.x - Dot(segment.origin, planeX1.normal)) / dotX;
-	tMax.y = (aabb.max.y - Dot(segment.origin, planeY1.normal)) / dotY;
-	tMax.z = (aabb.max.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
+	tMax.x = (aabb.max_.x - Dot(segment.origin, planeX1.normal)) / dotX;
+	tMax.y = (aabb.max_.y - Dot(segment.origin, planeY1.normal)) / dotY;
+	tMax.z = (aabb.max_.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
 
 
 	Vector3 tNear, tFar;
@@ -1375,9 +1375,9 @@ float SegmentClosestDistanceSq(const Segment& seg0, const Segment& seg1) {
 }
 
 bool IsPointInsideAABB(const Vector3& point, const AABB& aabb) {
-	return (point.x >= aabb.min.x && point.x <= aabb.max.x) &&
-		(point.y >= aabb.min.y && point.y <= aabb.max.y) &&
-		(point.z >= aabb.min.z && point.z <= aabb.max.z);
+	return (point.x >= aabb.min_.x && point.x <= aabb.max_.x) &&
+		(point.y >= aabb.min_.y && point.y <= aabb.max_.y) &&
+		(point.z >= aabb.min_.z && point.z <= aabb.max_.z);
 }
 
 

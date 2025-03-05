@@ -198,7 +198,7 @@ Model::ModelData Model::LoadOdjFileAssimp(const std::string& directoryPath, cons
 			aiFace& face = mesh->mFaces[faceIndex];
 			assert(face.mNumIndices == 3); // 三角形のみサポート
 			//Mesh::triangle
-			Triangle triangle;
+			Triangle triangle{ Vector3{},Vector3{},Vector3{} };
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
 				aiVector3D& position = mesh->mVertices[vertexIndex];
