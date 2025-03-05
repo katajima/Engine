@@ -44,22 +44,36 @@ void Ocean::Initialize(Vector2 renge)
 	noiseResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(NoiseData));
 	noiseResource->Map(0, nullptr, reinterpret_cast<void**>(&noiseData));
 
-	noiseData->noiseScale = 1.0f;
+	noiseData->noiseScale = 10.0f;
 	noiseData->noiseStrength = 1.0f;
-	noiseData->octaves = 1;
-	noiseData->roughness = 1.0f;
+	noiseData->octaves = 37;
+	noiseData->roughness = 10.0f;
 
 
 
 	waveResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WaveParameters) * 3);
 	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));
 
-	waveData[0].amplitude = 1.0f;
-	waveData[0].frequency = 2.0f;
+	waveData[0].amplitude = 1.500f;
+	waveData[0].frequency = 3.340f;
 	waveData[0].speed = 1.0f;
 	waveData[0].time = 0;
 	waveData[0].waveDirection = { 0,1 };
 	waveData[0].flag = true;
+	
+	waveData[1].amplitude = 1.0f;
+	waveData[1].frequency = 2.0f;
+	waveData[1].speed = 1.0f;
+	waveData[1].time = 0;
+	waveData[1].waveDirection = { 0.5f,0.5f };
+	waveData[1].flag = true;
+	
+	waveData[2].amplitude = 0.5f;
+	waveData[2].frequency = 2.0f;
+	waveData[2].speed = 1.0f;
+	waveData[2].time = 0;
+	waveData[2].waveDirection = { 0,1 };
+	waveData[2].flag = true;
 
 	
 

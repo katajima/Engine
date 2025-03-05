@@ -4,6 +4,7 @@
 
 void Player::BehaviorRootInitialize()
 {
+	dashEmitter_->SetIsEmit(false);
 	workAttack.parameter = 0;
 	
 	flag33 = false;
@@ -11,6 +12,8 @@ void Player::BehaviorRootInitialize()
 
 void Player::BehaviorRootUpdate()
 {
+	
+
 	AttackKey();
 
 
@@ -41,6 +44,8 @@ void Player::BehaviorAttackInitialize()
 	workAttack.attackAll.max_t = 1;
 	workAttack.comboIndex = 0;
 	
+
+	dashEmitter_->SetIsEmit(false);
 	AttackTypes();
 
 	AttackTypeInit(workAttack.comboIndex);
@@ -50,7 +55,6 @@ void Player::BehaviorAttackInitialize()
 
 void Player::BehaviorAttackUpdate()
 {
-	
 	AttackKey();
 
 	AttackTypes();
@@ -70,6 +74,7 @@ void Player::BehaviorAttackUpdate()
 
 void Player::BehaviorDieInitialize()
 {
+	dashEmitter_->SetIsEmit(false);
 	specialAttack.phese = 0;
 	specialAttack.specialGauge = 0;
 }
@@ -104,6 +109,8 @@ void Player::BehaviorDieUpdate()
 		//Move();
 		specialAttack.time += MyGame::GameTime();
 		time = int(specialAttack.time * 60);
+		injectionLeftObj_.worldtransform_.translate_.y = injectionLeftPos_.y;
+		injectionRightObj_.worldtransform_.translate_.y = injectionRightPos_.y;
 		if (time % 10 == 0) {
 			specialAttack.clock *= -1;
 			while (index_b < lockedOnEnemies.size())
@@ -111,12 +118,15 @@ void Player::BehaviorDieUpdate()
 				auto bullet = std::make_unique<PlayerBullet>();
 				bullet->SetIndex(index_b);
 				if (specialAttack.clock == 1) {
-					camera_->GetInstance().SetShake(1.3f,{0.2f,0.2f,0.2f});
+					followCamera_->GetViewProjection().SetShake(1.3f, {0.2f,0.2f,0.2f});
+
 					bullet->Initialize(injectionLeftObj_.GetWorldPosition(), camera_);
+					injectionLeftObj_.worldtransform_.translate_.y -= 0.5f;
 				}
 				else {
-					camera_->GetInstance().SetShake(1.3f, { 0.2f,0.2f,0.2f });
+					followCamera_->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
 					bullet->Initialize(injectionRightObj_.GetWorldPosition(), camera_);
+					injectionRightObj_.worldtransform_.translate_.y -= 0.5f;
 				}
 				bullet->SetEnemy(lockedOnEnemies[index_b]);
 				bullet->SetPlayer(this);

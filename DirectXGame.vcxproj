@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Enemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\BasePlayerState.cpp" />
@@ -385,6 +386,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\AttackManager.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Enemy.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Player\BasePlayerState.h" />

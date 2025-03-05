@@ -113,6 +113,7 @@ float3 DirectionalLightFunc(PixelShaderInput input,float4 textureColor, float3 t
     float3 diffuse = { 0, 0, 0 };
     float3 specular = { 0, 0, 0 };
         
+    float3 directionalLig = { 0, 0, 0 };
     if (gDirectionalLight.enableLighting)
     {
        
@@ -179,14 +180,14 @@ float3 DirectionalLightFunc(PixelShaderInput input,float4 textureColor, float3 t
         {
                // directionalLig *= float3(amdientPower, amdientPower, amdientPower);
         }
-            //directionalLig.x += gDirectionalLight.ilg;
-            //directionalLig.y += gDirectionalLight.ilg;
-            //directionalLig.z += gDirectionalLight.ilg;
+        directionalLig.x += gDirectionalLight.ilg;
+        directionalLig.y += gDirectionalLight.ilg;
+        directionalLig.z += gDirectionalLight.ilg;
     
             //directionalLig += hemiLight;
     }
     
-    return diffuse + specular;
+    return diffuse + specular + directionalLig;
 };
 
 float3 PointLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, float3 normal)

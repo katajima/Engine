@@ -15,7 +15,7 @@ void TestScene::Initialize()
 	// カメラの初期化
 	InitializeCamera();
 
-	// 2Dオブジェクトの初期化
+	// 3Dオブジェクトの初期化
 	InitializeObject3D();
 
 	// 2Dオブジェクトの初期化
@@ -147,6 +147,7 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		ocean_->Draw();
+		SkyBoxCommon::GetInstance()->DrawCommonSetting();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -164,7 +165,7 @@ void TestScene::Draw3D()
 		
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
 		break;
@@ -449,7 +450,7 @@ void TestScene::UpdateRoom04()
 
 void TestScene::UpdateRoom05()
 {
-
+	LineCommon::GetInstance()->AddGrid(1000,1000,2,{1,1,1,1});
 }
 
 void TestScene::SwitchRoom()

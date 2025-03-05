@@ -28,5 +28,7 @@ public:
 private:
 	// シーンマネージャ(借りてくる)
 	SceneManager* sceneManager_ = nullptr;
+
+	//std::string sceneName = "";
 };
 

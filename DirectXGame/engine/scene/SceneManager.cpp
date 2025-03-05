@@ -67,6 +67,6 @@ void SceneManager::ChangeScene(const std::string& sceneName)
 
 	//次のシーンを生成
 	nextScene_ = sceneFactory_->CreateScene(sceneName);
-
+	this->sceneName = sceneName;
 
 }

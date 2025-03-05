@@ -93,7 +93,7 @@ void Object3dCommon::CreateRootSignature()
 	psoManager_->SetDescriptorRenge(descriptorRange[3],3,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[10] = {};
+	D3D12_ROOT_PARAMETER rootParameters[11] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -115,6 +115,8 @@ void Object3dCommon::CreateRootSignature()
 	psoManager_->SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t3) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
+	//トランスフォームデータ (b5) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(rootParameters[10],5,D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定

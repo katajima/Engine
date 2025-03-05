@@ -1,5 +1,8 @@
 #pragma once
-
+#include <cmath>
+#include <math.h>
+#include <iostream>
+#include <algorithm>
 
 struct Vector2 final {
 	float x, y;

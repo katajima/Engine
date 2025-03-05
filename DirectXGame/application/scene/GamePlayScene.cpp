@@ -24,7 +24,7 @@ void GamePlayScene::Initialize()
 	followCamera_->SetTarget(&player_->GetObject3D());
 
 	player_->SetCamera(camera.get());
-
+	player_->SetFollowCamera(followCamera_.get());
 	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 
 
@@ -37,21 +37,60 @@ void GamePlayScene::Initialize()
 		enemys_.push_back(std::move(enemy));
 	}
 
-	 
+	ocean_ = std::make_unique<Ocean>();
+	ocean_->Initialize({ 10000,10000 });
+	ocean_->SetCamera(camera.get());
+	ocean_->transform.rotate.x = DegreesToRadians(90);
+	ocean_->transform.translate.y = -10;
+	ocean_->material->color = { 0,0,0.57f,1 };
+	ocean_->material->color.a = 0.95f;
+	
 
-	tail.Initialize();
-	tail.SetModel("renga.gltf");
-	tail.SetCamera(camera.get());
-	tail.worldtransform_.scale_ = { 10,10,10 };
+	tail = std::make_unique<Object3d>();
+	tail->Initialize();
+	tail->SetModel("renga.gltf");
+	tail->SetCamera(camera.get());
+	tail->worldtransform_.scale_ = { 4,4,4 };
+
+	tail2 = std::make_unique<Object3d>();
+	tail2->Initialize();
+	tail2->SetModel("black.obj");
+	tail2->SetCamera(camera.get());
+	tail2->worldtransform_.scale_ = { 104,104,104 };
+	tail2->worldtransform_.translate_.y = -20;
 
 	sky.Initialize();
 	sky.SetModel("skydome.obj");
 	sky.SetCamera(camera.get());
-	sky.worldtransform_.scale_ = { 10,10,10 };
+	sky.worldtransform_.scale_ = { 100,100,100 };
 	sky.model->modelData.material[0]->enableLighting_ = false;
 
 
-	
+	warePos.push_back({ 300,0,-200 });
+	warePos.push_back({ 300,0,-100 });
+	warePos.push_back({ 300,0,0 });
+	warePos.push_back({ 300,0,100 });
+	warePos.push_back({ 300,0,200 });
+
+	for (int i = 0; i < warePos.size(); i++) {
+		auto obj = std::make_unique<Object3d>();
+		obj->Initialize();
+		obj->SetModel("warehouse.gltf");
+		obj->SetCamera(camera.get());
+		obj->worldtransform_.scale_ = { 2, 2, 2 };		
+		obj->worldtransform_.translate_ = warePos[i];
+		obj->worldtransform_.rotate_.y = DegreesToRadians(90);
+		
+		
+		warehouseObject.push_back(std::move(obj));
+	}
+
+	//warehouseObject = std::make_unique<Object3d>();
+	//warehouseObject->Initialize();
+	//warehouseObject->SetModel("warehouse.gltf");
+	//warehouseObject->SetCamera(camera.get());
+	//warehouseObject->worldtransform_.scale_ = { 2,2,2 };
+	//warehouseObject->worldtransform_.translate_ = { 300,0,50 };
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
@@ -62,6 +101,8 @@ void GamePlayScene::Initialize()
 	
 
 	LoadLevelData();
+
+	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 }
 
 
@@ -205,12 +246,37 @@ void GamePlayScene::InitializeResources()
 
 
 
+
+	moveLimitEmitter_ = std::make_unique <ParticleEmitter>();
+	moveLimitEmitter_->Initialize("dash", "moveLimit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	moveLimitEmitter_->GetFrequency() = 0.5f;
+	moveLimitEmitter_->SetCount(100);
+	moveLimitEmitter_->SetLifeTimeMinMax(0.5f, 0.5f);
+	//moveLimitEmitter_->SetIsAlpha(true);
+	//moveLimitEmitter_->SetIsEmit(false);
+	moveLimitEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
+	moveLimitEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
+	moveLimitEmitter_->SetSizeMinMax(Vector3{ 1.1f,1.1f,1.1f }, { 1.1f,1.1f,1.1f });
+	moveLimitEmitter_->SetVelocityMinMax({}, {});
+	moveLimitEmitter_->SetPos({ 0,10,0 });
+	moveLimitEmitter_->SetCorner(4, 300);
+	moveLimitEmitter_->transform_.rotate_.y = DegreesToRadians(45);
+
+
+
+
+
+
+
+
+
+
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
 	directionalLightData.intensity = 2.0f;
 	directionalLightData.isLight = true;
-
+	directionalLightData.lig = 0.1f;
 
 
 	directional = std::make_shared<DirectionalLight>();
@@ -365,6 +431,7 @@ void GamePlayScene::UpdateImGui()
 	}
 	Vector2 pos = player_->GetObject3D().GetScreenPosition();
 	ImGui::Begin("engine");
+	ImGui::Checkbox("flag", &flag);
 	ImGui::DragFloat2("screenpos", &pos.x, 0.1f);
 	ImGui::End();
 
@@ -461,21 +528,21 @@ void GamePlayScene::Update()
 		camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
 		camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
 
-		
+
+		ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
 		// 必要に応じて行列を更新
 		//camera->UpdateMatrix();
 	}
 	else {
 #ifdef _DEBUG
 #endif // _DEBUG
-		camera->transform_.rotate = cameraDebugR;
-		camera->transform_.translate = cameraDebugT;
+
+		ParticleManager::GetInstance()->SetCamera(camera.get());
 		camera->UpdateMatrix();
 	}
 
 
 
-	ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
 
 
 	
@@ -483,8 +550,16 @@ void GamePlayScene::Update()
 
 
 	// タイル
-	tail.Update();
+	tail->Update();
+	tail2->Update();
 	sky.Update();
+	for (int i = 0; i < warehouseObject.size(); i++) {
+		warehouseObject[i]->Update();
+	}
+
+	ocean_->Update();
+
+	//moveLimitEmitter_->Update();
 	emit_->Update();
 	// デバック表示用にワールドトランスフォームを更新
 	collisionManager_->UpdateWorldTransform();
@@ -543,7 +618,14 @@ void GamePlayScene::Finalize()
 void GamePlayScene::Draw3D()
 {
 	sky.Draw();
-	tail.Draw();
+	
+	
+	
+	tail->Draw(); 
+	tail2->Draw(); 
+	for (int i = 0; i < warehouseObject.size(); i++) {
+		warehouseObject[i]->Draw();
+	}
 
 	////3Dオブジェクトの描画
 
@@ -559,8 +641,12 @@ void GamePlayScene::Draw3D()
 	// パーティクル
 	player_->DrawP();
 
+	
 	ParticleManager::GetInstance()->GetInstance()->Draw();
 	//ParticleManager::GetInstance()->GetInstance()->DrawAABB();
+
+	
+	ocean_->Draw();
 
 
 	// 当たり判定の表示
@@ -571,7 +657,7 @@ void GamePlayScene::Draw3D()
 // 2D描画
 void GamePlayScene::Draw2D()
 {
-	player_->Draw2D();
+	
 
 
 	//////////////--------スプライト-----------///////////////////
@@ -619,7 +705,7 @@ void GamePlayScene::Draw2D()
 		enemys_[i]->Draw2D();
 	}
 
-
+	player_->Draw2D();
 
 	if (!player_->GetAlive()) {
 		sceneCount++;

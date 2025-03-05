@@ -317,6 +317,32 @@ void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform po
 
 
 
+void LineCommon::AddGrid(float xRange, float zRange, float interval, Vector4 color)
+{
+	if (interval <= 0.0f) return;
+
+	// X軸の中心線（赤）
+	AddLine(Vector3(-xRange, 0.0f, 0.0f), Vector3(xRange, 0.0f, 0.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+	// Z軸の中心線（赤）
+	AddLine(Vector3(0.0f, 0.0f, -zRange), Vector3(0.0f, 0.0f, zRange), Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	// X軸方向のグリッド線
+	for (float x = -xRange; x <= xRange; x += interval)
+	{
+		if (x == 0.0f) continue; // 中心線は既に描画済み
+		Vector4 lineColor = (fmodf(fabs(x), 10.0f) < 0.01f) ? Vector4(0.0f, 0.0f, 1.0f, 1.0f) : color;
+		AddLine(Vector3(x, 0.0f, -zRange), Vector3(x, 0.0f, zRange), lineColor);
+	}
+
+	// Z軸方向のグリッド線
+	for (float z = -zRange; z <= zRange; z += interval)
+	{
+		if (z == 0.0f) continue; // 中心線は既に描画済み
+		Vector4 lineColor = (fmodf(fabs(z), 10.0f) < 0.01f) ? Vector4(0.0f, 0.0f, 1.0f, 1.0f) : color;
+		AddLine(Vector3(-xRange, 0.0f, z), Vector3(xRange, 0.0f, z), lineColor);
+	}
+}
+
 
 void LineCommon::Update()
 {

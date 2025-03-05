@@ -65,9 +65,11 @@ private:
 	const Camera* camera_ = nullptr;
 	Player* player_;
 	
-	//ParticleManager* particleManager_;
-	ParticleEmitter* emitter_;
+	// ミサイル煙エミッター
+	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter_ = nullptr;
 	
+	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter_ = nullptr;
+
 	std::string strin;
 	std::string strin2;
 

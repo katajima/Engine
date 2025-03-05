@@ -45,17 +45,19 @@ public: // ゲッター兼セッター
 
 	float& GetFrequency() { return frequency_; };//発生数
 
-	uint32_t& GetCount() { return count_; };// 発生頻度
+	int& GetCount() { return emitter_.count; };// 発生頻度
 
 
 	
 	void SetParent(WorldTransform& parent);// 親子付け
 
-	void SetCount(uint32_t count) { count_ = count; }; // 出現数
+	void SetCount(int count) { emitter_.count = count; }; // 出現数
 
 	void SetFrequency(float frequency) { frequency_ = frequency_; } // 頻度
 
 	void SetPos(Vector3 pos) { transform_.translate_ = pos; } // 位置
+
+	void SetIsEmit(bool is) { isEmit = is; } // 出すか
 
 	void SetIsGravity(bool is) { isGravity = is; } // 重力
 
@@ -71,8 +73,10 @@ public: // ゲッター兼セッター
 
 	void SetIsAll(bool billboard, bool alpha, bool gravity, bool isLifeTimeScale, bool rotateVelocity);
 
+	void SetCorner(int segment, float rad) { emitter_.corner.radius = rad; emitter_.corner.segment = segment; }
+
 	// ランダム用
-	void SetRengeMinMax(Vector3 min, Vector3 max) { emitter_.renge.min = min; emitter_.renge.max; }; // 範囲
+	void SetRengeMinMax(Vector3 min, Vector3 max) { emitter_.renge.min = min; emitter_.renge.max = max; }; // 範囲
 
 	void SetColorMinMax(Vector4 min, Vector4 max) { emitter_.color.min = min;emitter_.color.max = max; } // カラー
 
@@ -107,12 +111,13 @@ private:
 	bool isAlpha = false; // 透明度
 	bool isBounce = false; // 透明度
 
-	bool isEmit= false; // 透明度
+	bool isEmit= true; // 出すか
 
+	
 public:
 	WorldTransform transform_;
 private:
-	uint32_t count_;			// < 発生数
+	//uint32_t count_;			// < 発生数
 	float frequency_;		// < 発生頻度
 	float frequencyTime_;	// < 頻度用時刻
 

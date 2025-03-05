@@ -29,12 +29,19 @@ public:
 	/// <param name="sceneName"></param>
 	void ChangeScene(const std::string& sceneName);
 
+	bool IsNowScene(std::string name) const {
+		if (sceneName == name) {
+			return true;
+		}
+		return false; 
+	};
+
 private:
 	// 今のシーン(実行中シーン)
 	BaseScene* scene_ = nullptr;
 	// 次のシーン
 	BaseScene* nextScene_ = nullptr;
-
+	std::string sceneName = "";
 	// シーンファクトリー (借りてくる)
 	AbstractSceneFactory* sceneFactory_ = nullptr;
 };

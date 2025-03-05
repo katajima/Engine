@@ -25,7 +25,7 @@ VertexShaderOutput main(VertexShaderInput input)
     
     output.position = mul(input.position, gTransformationMatrix.WVP);
     output.texcoord = input.texcoord;
-    output.normal = normalize(mul(input.normal, (float32_t3x3)gTransformationMatrix.WorldInverseTranspose));
+    output.normal = normalize(mul(input.normal, (float3x3)gTransformationMatrix.WorldInverseTranspose));
     output.worldPosition = mul(input.position, gTransformationMatrix.World).xyz;
     // 頂点シェーダでの法線、接ベクトル、従ベクトルの変換 
     output.biNormal = normalize(mul((float3x3) gTransformationMatrix.World, (float3) input.biNormal));

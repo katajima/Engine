@@ -517,7 +517,7 @@ void ParticleManager::AABBEmit(ParticleGroup& particleGroup)
 
 
 	// パーティクル
-	for (uint32_t t = 0; t < particleGroup.emiter.count; ++t) {
+	for (int t = 0; t < particleGroup.emiter.count; ++t) {
 		Particle newParticle;
 		// パーティクルの初期化 (必要に応じて詳細を設定)
 		newParticle.transform.scale =
@@ -614,7 +614,7 @@ void ParticleManager::LineEmit(ParticleGroup& particleGroup)
 	Vector3 position{};
 
 	// パーティクル
-	for (uint32_t t = 0; t < particleGroup.emiter.count; ++t) {
+	for (int t = 0; t < particleGroup.emiter.count; ++t) {
 		Particle newParticle;
 		// パーティクルの初期化 (必要に応じて詳細を設定)
 		newParticle.transform.scale =
@@ -735,7 +735,7 @@ void ParticleManager::CornerLineEmit(ParticleGroup& particleGroup)
 
 
 	// パーティクル
-	for (uint32_t t = 0; t < particleGroup.emiter.count; ++t) {
+	for (int t = 0; t < particleGroup.emiter.count; ++t) {
 
 		for (int i = 0; i < particleGroup.emiter.corner.segment; ++i)
 		{
@@ -846,7 +846,7 @@ void ParticleManager::SplineEmit(ParticleGroup& particleGroup)
 
 
 	// パーティクル
-	for (uint32_t t = 0; t < particleGroup.emiter.count; ++t) {
+	for (int t = 0; t < particleGroup.emiter.count; ++t) {
 		Particle newParticle;
 		// パーティクルの初期化 (必要に応じて詳細を設定)
 		newParticle.transform.scale =
@@ -894,6 +894,11 @@ void ParticleManager::SplineEmit(ParticleGroup& particleGroup)
 		// パーティクルをグループに追加
 		particleGroup.particle.push_back(newParticle);
 	}
+}
+
+void ParticleManager::SphereEmit(ParticleGroup& particleGroup)
+{
+
 }
 
 #pragma endregion
@@ -1001,17 +1006,19 @@ void ParticleManager::BlendSubtract()
 
 void ParticleManager::BlendMuliply()
 {
-	// 乗算ブレンドの設定
+	
+	// 加算ブレンドの設定
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	// 通常のカラー（RGB）乗算
-	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ZERO;      // 影響なし
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_SRC_COLOR; // 乗算（DestColor * SrcColor）
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	// アルファブレンドの設定（乗算に影響しない場合はそのまま）
+	// 通常のカラー（RGB）加算
+	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;      // ソースカラーをそのまま
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;     // デスティネーションカラーをそのまま
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;    // 加算（SrcColor + DestColor）
+	// アルファブレンドの設定
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
 
 }
 
