@@ -50,6 +50,11 @@ private: // 各初期化
 	void InitializeLight();
 
 	void InitializeCamera();
+
+private:
+
+	
+
 private:
 	// 振るまい(シーンの部屋)
 	enum class SceneBehavior {
@@ -57,7 +62,7 @@ private:
 		kSceneRoom02,   // パーティクル
 		kSceneRoom03,   // マルチマテリアルやマルチメッシュ
 		kSceneRoom04,   // スキニング用
-		kSceneRoom05,   
+		kSceneRoom05,   // 当たり判定系
 		kSceneRoom06,   
 		kSceneRoom07,   
 		kSceneRoom08,   

@@ -146,6 +146,7 @@ private:
 	std::unique_ptr<ParticleEmitter> ductEmit_ = nullptr; // ダクト
 	std::unique_ptr<ParticleEmitter> plankEmit_ = nullptr; // 鋼板
 	std::unique_ptr<ParticleEmitter> gearEmit_ = nullptr; // 歯車
+	std::unique_ptr<ParticleEmitter> fenceEmit_ = nullptr; // 柵
 
 	float hitStopTimer;
 	float kHitStopTimer;

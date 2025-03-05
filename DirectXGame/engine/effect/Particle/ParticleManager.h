@@ -113,6 +113,7 @@ public:
 		MaxMin<Vector3> velocity;  // 速度 (Vector3の範囲)
 
 		CornerSegment corner;
+		float sphereRad;
 		std::vector<Vector3> controlPoints; // 各ポジション
 
 		WorldTransform worldtransform;
@@ -227,14 +228,15 @@ private:
 	void BlendMuliply();
 
 private: // エミッタ種類
-	void AABBEmit(ParticleGroup& particleGroup);
+	void AABBEmit(ParticleGroup& particleGroup); // AABB
 
-	void LineEmit(ParticleGroup& particleGroup);
+	void LineEmit(ParticleGroup& particleGroup); // ライン
 
-	void CornerLineEmit(ParticleGroup& particleGroup);
+	void CornerLineEmit(ParticleGroup& particleGroup); // 角線
 
-	void SplineEmit(ParticleGroup& particleGroup);
+	void SplineEmit(ParticleGroup& particleGroup); // スプライン曲線
 
+	void SphereEmit(ParticleGroup& particleGroup); // 球状
 
 private:
 	static ParticleManager* instance;

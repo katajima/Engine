@@ -100,6 +100,7 @@ void Enemy::Update()
 			tireEmit_->Update();
 			plankEmit_->Update();
 			gearEmit_->Update();
+			fenceEmit_->Update();
 		}
 		isAlive_ = false;
 	}
@@ -443,6 +444,25 @@ void Enemy::InitParticle()
 	ductEmit_->SetIsBounce(true);
 	ductEmit_->SetSizeMinMax(scale, scale);
 	ductEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
+
+	// ダクト
+	fenceEmit_ = std::make_unique<ParticleEmitter>();
+	fenceEmit_->Initialize("", "enemyFence");
+	fenceEmit_->GetFrequency() = 0.0f;
+	fenceEmit_->SetCount(1);
+	fenceEmit_->SetParent(object_.worldtransform_);
+	fenceEmit_->SetPos({ 0,0,0 });
+	fenceEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
+	fenceEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	fenceEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	fenceEmit_->SetLifeTimeMinMax(3, 4);
+	fenceEmit_->SetIsGravity(true);
+	fenceEmit_->SetUsebillboard(false);
+	fenceEmit_->SetIsAlpha(true);
+	fenceEmit_->SetIsRotateVelocity(true);
+	fenceEmit_->SetIsBounce(true);
+	fenceEmit_->SetSizeMinMax(scale, scale);
+	fenceEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
 
 
 	scale = { 0.5f,0.5f,0.5f };

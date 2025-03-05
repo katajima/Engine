@@ -47,6 +47,9 @@ public:
 
 	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos);
 
+	// グリッド線
+	void AddGrid(float xRange,float zRange,float interval,Vector4 color);
+
 	void Update();
 
 	void DrawCommonSetting();

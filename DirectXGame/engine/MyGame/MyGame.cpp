@@ -14,8 +14,8 @@ void MyGame::Initialize()
 	// シーンマネージャーに最初のシーンをセット
 	SceneManager::GetInstance()->SetSceneFactory(sceneFactory_.get());
 	
-	//SceneManager::GetInstance()->ChangeScene("TEST");
-	SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+	SceneManager::GetInstance()->ChangeScene("TEST");
+	//SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
 	
 	//Camera::GetInstance();
 	// リソース初期化
@@ -111,7 +111,7 @@ void MyGame::Draw()
 	// 描画前処理
 	SrvManager::GetInstance()->PreDraw();
 
-	SkyBoxCommon::GetInstance()->DrawCommonSetting();
+	
 
 	//////////////---------3Dモデル-------------///////////////
 
@@ -248,6 +248,7 @@ void MyGame::InitializeResource()
 	ModelManager::GetInstance()->LoadModel("enemyDuct.obj","enemyAll/duct"); // ダクト
 	ModelManager::GetInstance()->LoadModel("enemyPlank.obj","enemyAll/plank"); // 鋼板
 	ModelManager::GetInstance()->LoadModel("enemyGear.obj","enemyAll/gear"); // 歯車
+	ModelManager::GetInstance()->LoadModel("enemyFence.obj","enemyAll/fence"); // 柵
 	
 
 	
@@ -305,6 +306,7 @@ void MyGame::InitializeResource()
 	ParticleManager::GetInstance()->CreateParticleGroup("enemyDuct", "resources/Texture/enemy.png", ModelManager::GetInstance()->FindModel("enemyDuct.obj")); // ダクト
 	ParticleManager::GetInstance()->CreateParticleGroup("enemyPlank", "resources/Texture/enemy.png", ModelManager::GetInstance()->FindModel("enemyPlank.obj")); // 板
 	ParticleManager::GetInstance()->CreateParticleGroup("enemyGear", "resources/Texture/enemy.png", ModelManager::GetInstance()->FindModel("enemyGear.obj")); // 歯車
+	ParticleManager::GetInstance()->CreateParticleGroup("enemyFence", "resources/Texture/enemy.png", ModelManager::GetInstance()->FindModel("enemyFence.obj")); // 柵
 
 
 }

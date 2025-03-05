@@ -896,6 +896,11 @@ void ParticleManager::SplineEmit(ParticleGroup& particleGroup)
 	}
 }
 
+void ParticleManager::SphereEmit(ParticleGroup& particleGroup)
+{
+
+}
+
 #pragma endregion
 
 

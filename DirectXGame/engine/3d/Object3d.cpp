@@ -54,7 +54,7 @@ void Object3d::Update()
 	ImGui::Begin("engine");
 
 	//if (ImGui::CollapsingHeader("Gizmos")) {
-		//imGuiManager_->RenderGizmo2(worldtransform_, *camera, name.c_str());
+		imGuiManager_->RenderGizmo2(worldtransform_, *camera, name.c_str());
 	//}
 	ImGui::End();
 
