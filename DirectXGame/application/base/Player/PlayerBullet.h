@@ -7,9 +7,9 @@
 #include"DirectXGame/engine/input/Input.h"
 #include <imgui.h>
 #include <list>
-#include "DirectXGame/engine/collider/Collider.h"
+#include "DirectXGame/engine/collider/3d/Collider.h"
 
-#include "DirectXGame/engine/collider/Collider.h"
+#include "DirectXGame/engine/collider/3d/Collider.h"
 #include"DirectXGame/engine/collider/ContactRecord.h"
 
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"

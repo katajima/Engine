@@ -25,7 +25,7 @@
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 
-#include "DirectXGame/engine/collider/CollisionManager.h"
+#include "DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
 

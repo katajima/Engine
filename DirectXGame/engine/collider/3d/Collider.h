@@ -2,7 +2,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/3d/Object3d.h"
 #include"DirectXGame/engine/Camera/Camera.h"
-#include"CollisionTypeIdDef.h"
+#include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 
 class Collider {
 public:

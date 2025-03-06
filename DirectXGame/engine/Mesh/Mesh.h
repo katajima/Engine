@@ -2,7 +2,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
 #include"DirectXGame/engine/struct/Material.h"
-#include "DirectXGame/engine/collider/ColliderFanction.h"
+#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 
 #include "vector"
 #include<wrl.h>

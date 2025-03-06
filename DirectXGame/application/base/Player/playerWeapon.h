@@ -6,7 +6,7 @@
 
 
 
-#include "DirectXGame/engine/collider/Collider.h"
+#include "DirectXGame/engine/collider/3d/Collider.h"
 #include"DirectXGame/engine/collider/ContactRecord.h"
 
 

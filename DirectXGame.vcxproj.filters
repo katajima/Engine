@@ -228,10 +228,10 @@
     <ClCompile Include="DirectXGame\engine\Skinning\Skinning.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\collider\Collider.cpp">
+    <ClCompile Include="DirectXGame\engine\collider\3d\Collider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\collider\CollisionManager.cpp">
+    <ClCompile Include="DirectXGame\engine\collider\3d\CollisionManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\collider\ContactRecord.cpp">
@@ -543,10 +543,10 @@
     <ClInclude Include="DirectXGame\engine\Skinning\Skinning.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\collider\Collider.h">
+    <ClInclude Include="DirectXGame\engine\collider\3d\Collider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\collider\CollisionManager.h">
+    <ClInclude Include="DirectXGame\engine\collider\3d\CollisionManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\collider\CollisionTypeIdDef.h">
@@ -627,10 +627,16 @@
     <ClInclude Include="DirectXGame\engine\collider\Octree\Octree.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\collider\ColliderFanction.h">
+    <ClInclude Include="DirectXGame\engine\collider\3d\ColliderFanction3D.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\math\LineCurveMath.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\collider\2d\ColliderFanction2D.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Matrix3x3.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

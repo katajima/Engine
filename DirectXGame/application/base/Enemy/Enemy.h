@@ -5,7 +5,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Matrix4x4.h"
 
-#include "DirectXGame/engine/collider/Collider.h"
+#include "DirectXGame/engine/collider/3d/Collider.h"
 #include"DirectXGame/engine/collider/ContactRecord.h"
 
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"

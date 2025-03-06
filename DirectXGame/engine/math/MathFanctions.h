@@ -46,33 +46,6 @@ float Clamp(float t, float min, float max);
 
 float Clamp3(float value, float min, float max);
 
-//移動行列
-Matrix4x4 MakeTranslateMatrix(const  Vector3& translate);
-//拡大縮小行列
-Matrix4x4 MakeScaleMatrix(const  Vector3& scale);
-//回転行列X
-Matrix4x4 MakeRotateXMatrix(float rotate);
-//回転行列Y
-Matrix4x4 MakeRotateYMatrix(float rotate);
-//回転行列Z
-Matrix4x4 MakeRotateZMatrix(float rotate);
-// XYZ
-Matrix4x4 MakeRotateXYZ(Vector3 rotate);
-
-//逆行列
-Matrix4x4 Inverse(const Matrix4x4& m);
-//転置行列
-Matrix4x4 Transpose(const Matrix4x4& m);
-//アフィン変換;
-Matrix4x4 MakeAffineMatrix(const  Vector3& scale, const  Vector3& rotate, const  Vector3& translate);
-Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
-//正射影行列
-Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
-//透視射影行列
-Matrix4x4 MakePerspectiveFovMatrix(float forY, float aspectRatio, float nearClip, float farClip);
-//ビューポート変換行列
-Matrix4x4 MakeViewportMatrix(float leht, float top, float width, float height, float minDepth, float maxDepth);
-
 //球と四角形に対する最近接点
 Vector3 ClosestPointAABBSphere(const Sphere& sphere, const AABB& aabb);
 

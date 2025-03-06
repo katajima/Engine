@@ -17,7 +17,7 @@
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
 
 
-#include "DirectXGame/engine/collider/Collider.h"
+#include "DirectXGame/engine/collider/3d/Collider.h"
 
 
 

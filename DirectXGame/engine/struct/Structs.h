@@ -4,17 +4,7 @@
 #include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Quaternion.h"
 #include "DirectXGame/engine/struct/Matrix4x4.h"
-
-
-//行列
-struct Matrix3x3
-{
-	float m[3][3];
-};
-
-
-
-
+#include "DirectXGame/engine/struct/Matrix3x3.h"
 
 
 
@@ -53,8 +43,6 @@ struct Plane {
 	float distance; //!< 距離 
 };
 
-
-
 //直線
 struct Line
 {
@@ -67,6 +55,7 @@ struct Ray
 	Vector3 origin; //!<始点
 	Vector3 diff;   //!<終点への差分ベクトル
 };
+
 //線分
 struct Segment
 {
