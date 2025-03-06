@@ -40,7 +40,8 @@ float Clamp3(float value, float min, float max) {
 	return (std::max)(min, (std::min)(value, max));
 }
 
-//
+
+// AABBと球最近接点
 Vector3 ClosestPointAABBSphere(const Sphere& sphere, const AABB& aabb)
 {
 	Vector3 closestPoint;
@@ -50,6 +51,7 @@ Vector3 ClosestPointAABBSphere(const Sphere& sphere, const AABB& aabb)
 
 	return closestPoint;
 }
+
 
 //
 Plane PlaneFromPoints(const Vector3& p1, const Vector3& p2, const Vector3& p3) {

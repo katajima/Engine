@@ -234,12 +234,9 @@ public:
 
 	// 形
 	void Initialize(ShapeType type,const std::string& tex,const Color color = { 1,1,1,1 },bool isLine = false);
-
-
+	// 更新
 	void Update();
-
-	
-
+	// 描画
 	void Draw();
 
 	void SetCamera(Camera* camera) { camera_ = camera; };

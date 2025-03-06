@@ -456,10 +456,10 @@ void Primitive::Draw()
 void Primitive::CreatePlane()
 {
 
-	mesh->vertices.push_back({ .position = {1.0f,1.0f,0.0f,1.0f} ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 左上
+	mesh->vertices.push_back({ .position = {1.0f,1.0f,0.0f,1.0f}  ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 左上
 	mesh->vertices.push_back({ .position = {-1.0f,1.0f,0.0f,1.0f} ,.texcoord = {0.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 右上
 	mesh->vertices.push_back({ .position = {1.0f,-1.0f,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
-	mesh->vertices.push_back({ .position = {-1.0f,-1.0f,0.0f,1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
+	mesh->vertices.push_back({ .position = {-1.0f,-1.0f,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
 
 	mesh->indices.push_back(0);
 	mesh->indices.push_back(2);

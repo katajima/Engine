@@ -20,6 +20,7 @@
 #include"DirectXGame/engine/effect/Trail/TrailEffect.h"
 
 #include"DirectXGame/engine/Primitive/Primitive.h"
+#include "DirectXGame/engine/2d/Primitive2D.h"
 
 class TestScene : public BaseScene
 {
@@ -132,6 +133,12 @@ private:
 	
 	std::vector<std::unique_ptr<Sprite>> sprite_;
 
+	std::unique_ptr<Primitive2D> primitive2d1_;
+	std::unique_ptr<Primitive2D> primitive2d2_;
+
+	float inRad = 50;
+	float outRad = 100;
+	int segment = 5;
 
 	/// <summary>
 	/// パーティクルエミッタ

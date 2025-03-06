@@ -119,6 +119,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
+    <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
     <ClCompile Include="DirectXGame\engine\collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.cpp" />
@@ -397,6 +398,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
+    <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
     <ClInclude Include="DirectXGame\engine\base\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />

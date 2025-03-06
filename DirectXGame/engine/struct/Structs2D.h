@@ -11,65 +11,65 @@ struct Transform2D {
 
 //Box
 struct Box {
-	Vector2 min_; //!< Å¬“_
-	Vector2 max_; //!< Å‘å“_
+	Vector2 min_; //!< æœ€å°ç‚¹
+	Vector2 max_; //!< æœ€å¤§ç‚¹
 
 	Box(Vector2 min = Vector2(), Vector2 max = Vector2()) : min_(min), max_(max) {}
 
 	bool intersects(const Box& other) const {
 		return (min_.x <= other.max_.x && max_.x >= other.min_.x &&
-			min_.y <= other.max_.y && max_.y >= other.min_.y &&);
+			min_.y <= other.max_.y && max_.y >= other.min_.y);
 	}
 };
 
 
-// ‹…
+// çƒ
 struct Sphere2D {
-	Vector2 center; //!<’†S“_
-	float radius;   //!<”¼Œa 
+	Vector2 center; //!<ä¸­å¿ƒç‚¹
+	float radius;   //!<åŠå¾„ 
 };
 
 
-// ’¼ü
+// ç›´ç·š
 struct Line2D
 {
-	Vector2 origin; //!<n“_
-	Vector2 diff;   //!<I“_‚Ö‚Ì·•ªƒxƒNƒgƒ‹
+	Vector2 origin; //!<å§‹ç‚¹
+	Vector2 diff;   //!<çµ‚ç‚¹ã¸ã®å·®åˆ†ãƒ™ã‚¯ãƒˆãƒ«
 };
-//”¼’¼ü
+//åŠç›´ç·š
 struct Ray2D
 {
-	Vector2 origin; //!<n“_
-	Vector2 diff;   //!<I“_‚Ö‚Ì·•ªƒxƒNƒgƒ‹
+	Vector2 origin; //!<å§‹ç‚¹
+	Vector2 diff;   //!<çµ‚ç‚¹ã¸ã®å·®åˆ†ãƒ™ã‚¯ãƒˆãƒ«
 };
 
-//ü•ª
+//ç·šåˆ†
 struct Segment2D
 {
 
-	Vector2 origin; //!<n“_
+	Vector2 origin; //!<å§‹ç‚¹
 	Vector2 end;
 
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Segment2D(const Vector2& o, const Vector2& e) : origin(o), end(e) {}
 
-	// ü•ª‚ÌƒxƒNƒgƒ‹
+	// ç·šåˆ†ã®ãƒ™ã‚¯ãƒˆãƒ«
 	Vector2 diff() const {
 		return end - origin;
 	}
 
-	// ü•ª‚Ì’·‚³
+	// ç·šåˆ†ã®é•·ã•
 	float length() const {
 		return diff().Length();
 	}
 
-	// ’PˆÊ•ûŒüƒxƒNƒgƒ‹
+	// å˜ä½æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«
 	Vector2 normalizedDirection() const {
 		return diff().Normalize();
 	}
 
-	// w’è‚³‚ê‚½ t (0.0 ~ 1.0) ‚ÌˆÊ’u‚Ì“_‚ğæ“¾
+	// æŒ‡å®šã•ã‚ŒãŸ t (0.0 ~ 1.0) ã®ä½ç½®ã®ç‚¹ã‚’å–å¾—
 	Vector2 pointAt(float t) const {
 		return origin + diff() * t;
 	}
@@ -81,13 +81,13 @@ struct CornerSegment2D {
 	float radius;
 };
 
-//OŠpŒ`
+//ä¸‰è§’å½¢
 struct Triangle2D
 {
-	Vector2 vertices[3]; // !’¸“_
+	Vector2 vertices[3]; // !é ‚ç‚¹
 	Box bounds;
 
-	// +=ƒIƒyƒŒ[ƒ^[‚ÌƒI[ƒo[ƒ[ƒh 
+	// +=ã‚ªãƒšãƒ¬ãƒ¼ã‚¿ãƒ¼ã®ã‚ªãƒ¼ãƒãƒ¼ãƒ­ãƒ¼ãƒ‰ 
 	Triangle2D& operator+=(const Vector2& offset) {
 		for (auto& vertex : vertices) {
 			vertex += offset;
@@ -96,7 +96,7 @@ struct Triangle2D
 	}
 
 	Triangle2D OffsetVector2(const Vector2& offset) const {
-		Triangle2D result = *this;  // ƒRƒs[‚ğì¬
+		Triangle2D result = *this;  // ã‚³ãƒ”ãƒ¼ã‚’ä½œæˆ
 		for (auto& vertex : result.vertices) {
 			vertex += offset;
 		}
@@ -111,52 +111,52 @@ struct Triangle2D
 	}
 };
 
-//‚Î‚Ë
+//ã°ã­
 struct Spring2D
 {
-	Vector2 anchor;      // ƒAƒ“ƒJ[‚ÌŒÅ’è‚³‚ê‚½’[‚ÌˆÊ’u
-	float naturalLength; // ©‘R’·
-	float stiffness;     // „«Bƒoƒl’è”k
-	float dampingCoefficient; // Œ¸ŠŒW”
+	Vector2 anchor;      // ã‚¢ãƒ³ã‚«ãƒ¼ã®å›ºå®šã•ã‚ŒãŸç«¯ã®ä½ç½®
+	float naturalLength; // è‡ªç„¶é•·
+	float stiffness;     // å‰›æ€§ã€‚ãƒãƒå®šæ•°k
+	float dampingCoefficient; // æ¸›è¡°ä¿‚æ•°
 };
 
 struct Ball2D {
-	Vector2 position;		//ˆÊ’u
-	Vector2 veloctiy;		//‘¬“x
-	Vector2 acceleration;	//‰Á‘¬“x
-	float mass;				//¿—Ê
-	float radius;			//”¼Œa
-	unsigned int color;		//F
+	Vector2 position;		//ä½ç½®
+	Vector2 veloctiy;		//é€Ÿåº¦
+	Vector2 acceleration;	//åŠ é€Ÿåº¦
+	float mass;				//è³ªé‡
+	float radius;			//åŠå¾„
+	unsigned int color;		//è‰²
 };
 
 struct Pendulum2D {
-	Vector2 anchor;				// ƒAƒ“ƒJ[ƒ|ƒCƒ“ƒg
-	float length;				// •R‚Ì’·‚³
-	float angle;				// Œ»İ‚ÌŠp“x
-	float angularVelocity;		// Šp“xƒÖ
-	float angularAcceleration;	// Šp‰Á‘¬“x
+	Vector2 anchor;				// ã‚¢ãƒ³ã‚«ãƒ¼ãƒã‚¤ãƒ³ãƒˆ
+	float length;				// ç´ã®é•·ã•
+	float angle;				// ç¾åœ¨ã®è§’åº¦
+	float angularVelocity;		// è§’åº¦Ï‰
+	float angularAcceleration;	// è§’åŠ é€Ÿåº¦
 };
 
 struct ConicalPendulum2D {
-	Vector2 anchor;				// ƒAƒ“ƒJ[ƒ|ƒCƒ“ƒg
-	float length;				// •R‚Ì’·‚³
-	float halfApexAngle;		// ‰~‚Ì’¸Šp‚Ì”¼•ª
-	float angle;				// Œ»İ‚ÌŠp“x
-	float angularVelocity;		// Šp“xƒÖ
+	Vector2 anchor;				// ã‚¢ãƒ³ã‚«ãƒ¼ãƒã‚¤ãƒ³ãƒˆ
+	float length;				// ç´ã®é•·ã•
+	float halfApexAngle;		// å††éŒã®é ‚è§’ã®åŠåˆ†
+	float angle;				// ç¾åœ¨ã®è§’åº¦
+	float angularVelocity;		// è§’åº¦Ï‰
 
 };
 
-// ƒJƒvƒZƒ‹
+// ã‚«ãƒ—ã‚»ãƒ«
 struct Capsule2D
 {
 	Segment2D segment;
 	float radius;
 
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Capsule2D(const Vector2& p0, const Vector2& p1, float r) : segment(p0, p1), radius(r) {}
 
-	// ƒJƒvƒZƒ‹‚Ì AABB ‚ğæ“¾
+	// ã‚«ãƒ—ã‚»ãƒ«ã® AABB ã‚’å–å¾—
 	Box computeAABB() const {
 		Vector2 minPoint = Min(segment.origin, segment.end) - Vector2(radius, radius);
 		Vector2 maxPoint = Max(segment.origin, segment.end) + Vector2(radius, radius);

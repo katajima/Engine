@@ -39,6 +39,22 @@ void TestScene::Update()
 	SwitchRoom(); // 部屋切り替え
 
 #ifdef _DEBUG
+	ImGui::Begin("primi2D");
+	ImGui::DragFloat2("pos",&primitive2d1_->position.x);
+	ImGui::DragFloat2("scale",&primitive2d1_->scale.x,0.1f);
+	ImGui::DragFloat("rotate", &primitive2d1_->rotation, 0.01f);
+	ImGui::DragInt("segment", &segment);
+	ImGui::DragFloat("inRad", &inRad);
+	ImGui::DragFloat("outRad", &outRad);
+	if (segment < 3) {
+		segment = 3;
+	}
+	if (inRad >= outRad) {
+		inRad = outRad;
+	}
+	primitive2d1_->SetParametar(inRad, outRad, segment);
+	ImGui::End();
+
 	ImGui::Begin("engine");
 	ImGui::Checkbox("debugCamera", &isDebugCamera);
 
@@ -197,6 +213,14 @@ void TestScene::Draw2D()
 		sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
 		sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
 		sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
+
+
+
+		primitive2d1_->Update();
+		primitive2d1_->Draw();
+
+
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		break;
@@ -282,6 +306,13 @@ void TestScene::InitializeObject2D()
 
 		sprite_.push_back(std::move(sprite));
 	}
+
+	///
+	primitive2d1_ = std::make_unique<Primitive2D>();
+	primitive2d1_->Initialize(Primitive2D::ShapeType::Ring,{1,1,1,1});
+	primitive2d1_->position = { 640,360 };
+	//primitive2d1_->rotation = DegreesToRadians(45);
+
 }
 
 /// <summary>

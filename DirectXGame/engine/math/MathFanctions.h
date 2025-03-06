@@ -1,5 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
+#include"DirectXGame/engine/struct/Structs2D.h"
 #include<vector>
 #define _USE_MATH_DEFINES
 #include <cmath>
