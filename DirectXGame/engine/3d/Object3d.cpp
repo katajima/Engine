@@ -13,7 +13,7 @@
 #include<sstream>
 #include<wrl.h>
 #include"DirectXGame/engine/base/TextureManager.h"
-#include"DirectXGame/engine/struct/Structs.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 

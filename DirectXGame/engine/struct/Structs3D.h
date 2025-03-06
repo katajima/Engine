@@ -31,7 +31,7 @@ struct AABB {
 };
 
 
-// 円
+// 球
 struct Sphere {
 	Vector3 center; //!<中心点
 	float radius;   //!<半径 
@@ -43,7 +43,7 @@ struct Plane {
 	float distance; //!< 距離 
 };
 
-//直線
+// 直線
 struct Line
 {
 	Vector3 origin; //!<始点
@@ -177,7 +177,6 @@ struct Capsule
 		return AABB(minPoint, maxPoint);
 	}
 };
-
 
 struct OBB {
 	Vector3 center;

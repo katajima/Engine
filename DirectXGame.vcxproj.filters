@@ -408,7 +408,7 @@
     <ClInclude Include="DirectXGame\engine\math\MathFanctions.h">
       <Filter>ヘッダー ファイル\engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Structs.h">
+    <ClInclude Include="DirectXGame\engine\struct\Structs3D.h">
       <Filter>ヘッダー ファイル\engine\struct</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\base\TextureManager.h">
@@ -637,6 +637,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\Matrix3x3.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Structs2D.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

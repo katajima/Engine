@@ -1,6 +1,6 @@
 #pragma once
 #include<cstdint>
-#include "Structs.h"
+#include "Structs3D.h"
 #include "string"
 #include "vector"
 #include<wrl.h>

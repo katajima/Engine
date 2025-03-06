@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 #include <wrl.h>
-#include "DirectXGame/engine/struct/Structs.h"
+#include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/base/DirectXCommon.h"
 #include "DirectXGame/engine/Mesh/Mesh.h"

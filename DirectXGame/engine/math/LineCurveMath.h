@@ -1,7 +1,6 @@
 #pragma once
 #include "DirectXGame/engine/math/MathFanctions.h"
 
-
 #pragma region 線や曲線などの汎用的な計算
 
 // ベジェ曲線

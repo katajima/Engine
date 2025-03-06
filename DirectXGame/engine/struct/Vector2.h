@@ -143,3 +143,12 @@ static Vector2 Add(const Vector2& v1, const Vector2& v2) {
 
 	return result;
 };
+
+//大きさ
+static float Length(Vector2 a) {
+	float length;
+
+	length = sqrtf(a.x * a.x + a.y * a.y);
+
+	return length;
+}

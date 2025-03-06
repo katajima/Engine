@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/struct/Structs.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 
 #include"DirectXGame/engine/math/MathFanctions.h"

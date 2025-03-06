@@ -453,6 +453,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\struct\Matrix3x3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h" />
     <ClInclude Include="DirectXGame\engine\struct\Quaternion.h" />
+    <ClInclude Include="DirectXGame\engine\struct\Structs2D.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector2.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector4.h" />
@@ -478,7 +479,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\2d\Sprite.h" />
     <ClInclude Include="DirectXGame\engine\2d\SpriteCommon.h" />
     <ClInclude Include="DirectXGame\engine\base\StringUtility.h" />
-    <ClInclude Include="DirectXGame\engine\struct\Structs.h" />
+    <ClInclude Include="DirectXGame\engine\struct\Structs3D.h" />
     <ClInclude Include="DirectXGame\engine\base\TextureManager.h" />
     <ClInclude Include="DirectXGame\engine\base\WinApp.h" />
     <ClInclude Include="DirectXGame\engine\Primitive\PrimitiveCommon.h" />

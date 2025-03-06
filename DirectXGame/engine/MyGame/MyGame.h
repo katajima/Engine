@@ -12,7 +12,7 @@
 #include<wrl.h>
 #include<vector>
 
-#include"DirectXGame/engine/struct/Structs.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/base/WinApp.h"

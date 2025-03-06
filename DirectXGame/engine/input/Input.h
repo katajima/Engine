@@ -10,7 +10,7 @@
 
 #include"DirectXGame/engine/base/WinApp.h"
 
-#include "DirectXGame/engine/struct/Structs.h"
+#include "DirectXGame/engine/struct/Structs3D.h"
 
 
 // ゲームパッド
