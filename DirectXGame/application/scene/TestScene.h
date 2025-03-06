@@ -21,6 +21,7 @@
 
 #include"DirectXGame/engine/Primitive/Primitive.h"
 #include "DirectXGame/engine/2d/Primitive2D.h"
+#include "DirectXGame/engine/collider/Octree/Octree.h"
 
 class TestScene : public BaseScene
 {
@@ -157,6 +158,11 @@ private:
 	std::shared_ptr<SpotLight> spot;
 
 	std::shared_ptr<DirectionalLight> directional;
+
+
+	///
+
+	std::unique_ptr <Octree> octree;
 
 };
 

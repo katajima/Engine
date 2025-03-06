@@ -14,6 +14,7 @@
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 
 #include"DirectXGame/engine/math/LineCurveMath.h"
+#include "DirectXGame/engine/collider/Octree/Octree.h"
 
 class LineCommon
 {
@@ -48,6 +49,8 @@ public:
 	void AddLineCorner(CornerSegment corner,WorldTransform pos);
 
 	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos);
+
+	void AddOctree(Octree octree);
 
 	// グリッド線
 	void AddGrid(float xRange,float zRange,float interval,Vector4 color);

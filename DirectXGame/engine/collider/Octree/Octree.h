@@ -3,83 +3,87 @@
 #include <iostream>
 #include "DirectXGame/engine/math/MathFanctions.h"
 
+// オクツリーのノード
+struct OctreeNode {
+    AABB bounds;  // ノードの境界
+    std::vector<Triangle> triangles;  // このノードに含まれる三角形
+    std::vector<Capsule> capsules;    // このノードに含まれるカプセル
+    OctreeNode* children[8];  // 子ノードへのポインタ（最大8個）
 
-
-class OctreeNode {
-public:
-    AABB bounds;
-    std::vector<Triangle> triangles;
-    OctreeNode* children[8] = { nullptr };
-    int maxTriangles = 4;
-    int maxDepth = 5;
-    int depth;
-
-    OctreeNode(const AABB& bounds, int depth = 0) : bounds(bounds), depth(depth) {}
-
-    ~OctreeNode() {
-        for (int i = 0; i < 8; i++) {
-            delete children[i];
-        }
-    }
-
-    void insert(const Triangle& tri) {
-        if (!bounds.intersects(tri.bounds)) return;
-
-        if (triangles.size() < maxTriangles || depth >= maxDepth) {
-            triangles.push_back(tri);
-            return;
-        }
-
-        if (children[0] == nullptr) subdivide();
-
-        for (int i = 0; i < 8; i++) {
-            if (children[i]->bounds.intersects(tri.bounds)) {
-                children[i]->insert(tri);
-            }
-        }
-    }
-
+    // オクツリーの子ノードを作成する関数
     void subdivide() {
-        Vector3 min = bounds.min_;
-        Vector3 max = bounds.max_;
-        Vector3 center = Vector3((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
+        Vector3 center = (bounds.min_ + bounds.max_) * 0.5f;
+        Vector3 halfSize = (bounds.max_ - bounds.min_) * 0.5f;
 
-        children[0] = new OctreeNode(AABB(min, center), depth + 1);
-        children[1] = new OctreeNode(AABB(Vector3(center.x, min.y, min.z), Vector3(max.x, center.y, center.z)), depth + 1);
-        children[2] = new OctreeNode(AABB(Vector3(min.x, center.y, min.z), Vector3(center.x, max.y, center.z)), depth + 1);
-        children[3] = new OctreeNode(AABB(Vector3(center.x, center.y, min.z), Vector3(max.x, max.y, center.z)), depth + 1);
-        children[4] = new OctreeNode(AABB(Vector3(min.x, min.y, center.z), Vector3(center.x, center.y, max.z)), depth + 1);
-        children[5] = new OctreeNode(AABB(Vector3(center.x, min.y, center.z), Vector3(max.x, center.y, max.z)), depth + 1);
-        children[6] = new OctreeNode(AABB(Vector3(min.x, center.y, center.z), Vector3(center.x, max.y, max.z)), depth + 1);
-        children[7] = new OctreeNode(AABB(center, max), depth + 1);
+        for (int i = 0; i < 8; ++i) {
+            // 子ノードの境界を設定
+            Vector3 minChild = center;
+            Vector3 maxChild = center;
+
+            if (i & 1) minChild.x = bounds.min_.x;
+            else maxChild.x = bounds.max_.x;
+
+            if (i & 2) minChild.y = bounds.min_.y;
+            else maxChild.y = bounds.max_.y;
+
+            if (i & 4) minChild.z = bounds.min_.z;
+            else maxChild.z = bounds.max_.z;
+
+            // 子ノードを作成
+            children[i] = new OctreeNode();
+            children[i]->bounds = AABB(minChild, maxChild);
+        }
     }
 };
 
+// オクツリーの管理クラス
 class Octree {
 public:
     OctreeNode* root;
 
     Octree(const AABB& bounds) {
-        root = new OctreeNode(bounds);
+        root = new OctreeNode();
+        root->bounds = bounds;
     }
 
-    ~Octree() {
-        delete root;
+    // オクツリーに三角形を挿入
+    void insert(const Triangle& triangle) {
+        insertTriangle(root, triangle);
     }
 
-    void insert(const Triangle& tri) {
-        root->insert(tri);
+    // オクツリーにカプセルを挿入
+    void insert(const Capsule& capsule) {
+        insertCapsule(root, capsule);
+    }
+
+private:
+    // 三角形を挿入
+    void insertTriangle(OctreeNode* node, const Triangle& triangle) {
+        // 三角形がノードの範囲内に収まっているかをチェック
+        if (!node->bounds.intersects(triangle.bounds)) return;
+
+        if (node->children[0] == nullptr) {
+            node->triangles.push_back(triangle);
+        }
+        else {
+            for (int i = 0; i < 8; ++i) {
+                insertTriangle(node->children[i], triangle);
+            }
+        }
+    }
+
+    // カプセルを挿入
+    void insertCapsule(OctreeNode* node, const Capsule& capsule) {
+        if (!node->bounds.intersects(capsule.computeAABB())) return;
+
+        if (node->children[0] == nullptr) {
+            node->capsules.push_back(capsule);
+        }
+        else {
+            for (int i = 0; i < 8; ++i) {
+                insertCapsule(node->children[i], capsule);
+            }
+        }
     }
 };
-
-// テスト用
-int main() {
-    Octree tree(AABB(Vector3(0, 0, 0), Vector3(10, 10, 10)));
-
-    tree.insert(Triangle(Vector3(1, 1, 1), Vector3(2, 2, 2), Vector3(3, 1, 2)));
-    tree.insert(Triangle(Vector3(5, 5, 5), Vector3(6, 6, 6), Vector3(7, 5, 6)));
-
-    std::cout << "オクツリーに三角形を追加しました。\n";
-    return 0;
-}
 

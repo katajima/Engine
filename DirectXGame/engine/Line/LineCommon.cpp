@@ -315,6 +315,10 @@ void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform po
 
 }
 
+void LineCommon::AddOctree(Octree octree)
+{
+}
+
 
 
 void LineCommon::AddGrid(float xRange, float zRange, float interval, Vector4 color)

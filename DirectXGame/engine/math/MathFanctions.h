@@ -89,3 +89,15 @@ static std::pair<Vector3, Vector3> ComputeCollisionVelocities(float mass1, const
 }
 
 
+static float DistancePointToPlane(const Vector3& point, const Vector3& A, const Vector3& B, const Vector3& C) {
+	// 三角形の辺ベクトル
+	Vector3 AB = B - A;
+	Vector3 AC = C - A;
+
+	// 平面の法線
+	Vector3 normal = AB.Cross(AC).Normalize();
+
+	// 点と平面の距離
+	return std::abs((point - A).Dot(normal));
+}
+

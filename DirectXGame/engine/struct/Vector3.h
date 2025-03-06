@@ -11,6 +11,14 @@
 struct Vector3 final {
 	float x, y, z;
 	
+	// 配列のようにアクセスできるオーバーロード
+	float& operator[](int index) {
+		return (&x)[index]; // x のアドレスを使って配列のようにアクセス
+	}
+
+	const float& operator[](int index) const {
+		return (&x)[index]; // const バージョン
+	}
 	
 	Vector2 xy() { return Vector2{ x,y }; }
 

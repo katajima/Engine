@@ -10,6 +10,7 @@
 // engine
 #include "DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/math/LineCurveMath.h"
+#include "DirectXGame/engine/collider/Octree/Octree.h"
 
 #pragma region IsCollision
 
@@ -414,5 +415,64 @@ static bool IsCollision(const Capsule& cap0, const Capsule& cap1)
 	float radiusSum = cap0.radius + cap1.radius;
 	return distanceSq <= radiusSum * radiusSum;
 }
+
+// 線分と三角形の辺の交差判定
+static bool LineSegmentIntersectEdge(const Segment& line, const Vector3& A, const Vector3& B) {
+	// 2D 平面上での交差判定
+	// 線分ABと線分lineが交差しているかを計算
+	Vector3 edge = B - A;
+	Vector3 segmentDir = line.end - line.origin;
+	Vector3 normal = edge.Cross(segmentDir);
+
+	if (normal.LengthSq() < 1e-6f) {
+		return false; // 平行な場合は交差しない
+	}
+
+	Vector3 intersect = A - line.origin;
+	float t = intersect.Cross(normal).Length() / normal.Length();
+	return t >= 0 && t <= 1;
+}
+
+//カプセルと三角形の衝突判定
+static bool CapsuleIntersectsTriangle(const Capsule& capsule, const Triangle& tri) {
+	// カプセルの端点と三角形の面との距離を判定
+	if (DistancePointToPlane(capsule.segment.origin, tri.vertices[0], tri.vertices[1], tri.vertices[2]) <= capsule.radius) {
+		return true;
+	}
+	if (DistancePointToPlane(capsule.segment.end, tri.vertices[0], tri.vertices[1], tri.vertices[2]) <= capsule.radius) {
+		return true;
+	}
+
+	// カプセルの軸（線分）と三角形の辺との交差を判定
+	if (LineSegmentIntersectEdge(capsule.segment, tri.vertices[0], tri.vertices[1])) {
+		return true;
+	}
+	if (LineSegmentIntersectEdge(capsule.segment, tri.vertices[1], tri.vertices[2])) {
+		return true;
+	}
+	if (LineSegmentIntersectEdge(capsule.segment, tri.vertices[2], tri.vertices[0])) {
+		return true;
+	}
+
+	return false; // 衝突していない場合
+}
+
+// AABB とカプセルの衝突判定
+static bool CapsuleIntersectsAABB(const Capsule& capsule, const AABB& box) {
+	// AABB に対するカプセルの線分の最近接点を求める
+	Vector3 closestPoint = ClosestPointSegmentAABB(capsule.segment, box);
+
+	// 最近接点とカプセルの中心軸の最近接点を求める
+	Vector3 capsuleClosestPoint = ClosestPointOnSegment(capsule.segment, closestPoint);
+
+	// 2点間の距離を計算
+	float distanceSquared = (closestPoint - capsuleClosestPoint).LengthSq();
+
+	// カプセルの半径の二乗と比較
+	return distanceSquared <= (capsule.radius * capsule.radius);
+}
+
+// カプセルとおくつりー衝突判定
+bool CapsuleIntersectsWithOctree(const Capsule& capsule, OctreeNode* node);
 
 #pragma endregion
