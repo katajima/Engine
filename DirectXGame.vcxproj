@@ -405,6 +405,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager2d.h" />
     <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h" />
+    <ClInclude Include="DirectXGame\engine\math\LineCurveMath.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h" />

@@ -9,6 +9,7 @@
 
 // engine
 #include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/LineCurveMath.h"
 
 #pragma region IsCollision
 

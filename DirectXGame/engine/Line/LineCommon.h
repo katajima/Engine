@@ -13,6 +13,8 @@
 #include "DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 
+#include"DirectXGame/engine/math/LineCurveMath.h"
+
 class LineCommon
 {
 public:
