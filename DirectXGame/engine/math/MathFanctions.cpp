@@ -1,80 +1,9 @@
 #include"MathFanctions.h"
 #include<cmath>
 #include"assert.h"
-#include <algorithm>
+
 #pragma region Math
 
-Vector3 Add(const Vector3& v1, const Vector3& v2) {
-	Vector3 result{};
-
-	result.x = v1.x + v2.x;
-	result.y = v1.y + v2.y;
-	result.z = v1.z + v2.z;
-
-
-	return result;
-};
-Vector2 Add(const Vector2& v1, const Vector2& v2) {
-	Vector2 result{};
-
-	result.x = v1.x + v2.x;
-	result.y = v1.y + v2.y;
-
-	return result;
-};
-Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2)
-{
-	Matrix4x4 result{};
-
-
-	for (int x = 0; x < 4; x++) {
-		for (int y = 0; y < 4; y++) {
-			result.m[y][x] = m1.m[y][x] + m2.m[y][x];
-		}
-	}
-
-
-	return result;
-}
-
-
-Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
-	Vector3 result{};
-
-	result.x = v1.x - v2.x;
-	result.y = v1.y - v2.y;
-	result.z = v1.z - v2.z;
-
-
-	return result;
-}
-Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2)
-{
-	Matrix4x4 result{};
-
-
-	for (int x = 0; x < 4; x++) {
-		for (int y = 0; y < 4; y++) {
-			result.m[y][x] = m1.m[y][x] - m2.m[y][x];
-		}
-	}
-
-
-	return result;
-}
-
-
-
-float Length(const Vector3& v) {
-	float result;
-
-	result = sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
-
-	return result;
-};
-float LengthSquared(const Vector3& v) {
-	return v.x * v.x + v.y * v.y + v.z * v.z;
-}
 float Length(const float& v) {
 	float result;
 
@@ -94,6 +23,7 @@ float Clamp(float t) {
 
 	return t;
 }
+
 float Clamp(float t, float min, float max) {
 
 	if (max <= t) {
@@ -105,27 +35,10 @@ float Clamp(float t, float min, float max) {
 
 	return t;
 }
+
 float Clamp3(float value, float min, float max) {
 	return (std::max)(min, (std::min)(value, max));
 }
-
-float Distance(const Vector3& point1, const Vector3& point2)
-{
-	float dx = point1.x - point2.x;
-	float dy = point1.y - point2.y;
-	float dz = point1.z - point2.z;
-	return std::sqrt(dx * dx + dy * dy +dz * dz);
-}
-// 2つの点間の距離を計算する関数
-float DistanceXZ(const Vector3& point1, const Vector3& point2) {
-	float dx = point1.x - point2.x;
-	float dz = point1.z - point2.z;
-	return std::sqrt(dx * dx + dz * dz);
-}
-
-
-
-
 
 Vector3 Bezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, float t) {
 
@@ -138,74 +51,8 @@ Vector3 Bezier(const Vector3& p0, const Vector3& p1, const Vector3& p2, float t)
 	return Lerp(p0p1, p1p2, t);
 
 }
-//単位行列
-Matrix4x4 MakeIdentity4x4() {
-	Matrix4x4 result{};
 
 
-	for (int x = 0; x < 4; x++) {
-		for (int y = 0; y < 4; y++) {
-			if (x == y) {
-				result.m[y][x] = 1.0f;
-			}
-			else {
-				result.m[y][x] = 0.0f;
-			}
-		}
-	}
-	return result;
-}
-//行列の積
-Matrix4x4 Multiply(const Matrix4x4& v1, const Matrix4x4& v2) {
-	Matrix4x4 result{};
-
-	for (int x = 0; x < 4; x++) {
-		for (int y = 0; y < 4; y++) {
-			for (int z = 0; z < 4; z++) {
-				float value1 = v1.m[y][z];
-				float value2 = v2.m[z][x];
-
-				if (value1 == 0.0f || value2 == 0.0f) {
-					result.m[y][x] += 0.0f; // ゼロを掛け算した結果はゼロ
-				}
-				else {
-					result.m[y][x] += value1 * value2;
-				}
-			}
-		}
-	}
-	return result;
-};
-// Vector3同士
-Vector3 Multiply(const Vector3& v1, const Vector3& v2) {
-	Vector3 result{};
-
-	result.x = v1.x * v2.x;
-	result.y = v1.y * v2.y;
-	result.z = v1.z * v2.z;
-
-	return result;
-}
-// floatとVector3
-Vector3 Multiply(const float& v, const Vector3& v1) {
-	Vector3 result{};
-
-	result.x = v1.x * v;
-	result.y = v1.y * v;
-	result.z = v1.z * v;
-
-	return result;
-}
-Vector3 Multiply(const Vector3& v1, const float& v2)
-{
-	Vector3 result{};
-
-	result.x = v1.x * v2;
-	result.y = v1.y * v2;
-	result.z = v1.z * v2;
-
-	return result;
-}
 //移動行列
 Matrix4x4 MakeTranslateMatrix(const  Vector3& translate) {
 	Matrix4x4 result{};
@@ -330,6 +177,7 @@ Matrix4x4 MakeRotateZMatrix(float rotate) {
 
 	return result;
 }
+//回転行列XYZ
 Matrix4x4 MakeRotateXYZ(Vector3 rotate)
 {
 	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
@@ -520,9 +368,6 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const
 	return result;
 }
 
-
-
-
 //正射影行列
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
 	Matrix4x4 result{};
@@ -620,6 +465,7 @@ Vector3 Transforms(const Vector3& vector, const Matrix4x4& matrix) {
 	result.z /= w;
 	return result;
 }
+
 Vector4 Transforms(const Vector4& vec, const Matrix4x4& mat)
 {
 	return Vector4{
@@ -629,11 +475,6 @@ Vector4 Transforms(const Vector4& vec, const Matrix4x4& mat)
 		vec.x * mat.m[0][3] + vec.y * mat.m[1][3] + vec.z * mat.m[2][3] + vec.w * mat.m[3][3]
 	};
 }
-bool IsCollision(const AABB& aabb, const Vector3& point) {
-	return (point.x >= aabb.min_.x && point.x <= aabb.max_.x) &&
-		(point.y >= aabb.min_.y && point.y <= aabb.max_.y) &&
-		(point.z >= aabb.min_.z && point.z <= aabb.max_.z);
-}
 
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 	Vector3 result{
@@ -642,24 +483,6 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 		v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1],
 		v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2],
 	};
-
-	return result;
-}
-
-
-
-Vector3 Project(const Vector3& v1, const Vector3& v2)
-{
-	Vector3 result{};
-	float v2length = Dot(v2, v2);
-
-	float dot = Dot(v1, v2);
-
-
-	result.x = dot / v2length * v2.x;
-	result.y = dot / v2length * v2.y;
-	result.z = dot / v2length * v2.z;
-
 
 	return result;
 }
@@ -701,127 +524,8 @@ Vector3 ClosestPointAABBSphere(const Sphere& sphere, const AABB& aabb)
 
 	return closestPoint;
 }
-//衝突判定(球と球)
-bool IsCollision(const Sphere& s1, const Sphere& s2)
-{
-	Vector3 result{};
-	float isDistance = false;
-
-	result.x = s2.center.x - s1.center.x;
-	result.y = s2.center.y - s1.center.y;
-	result.z = s2.center.z - s1.center.z;
-
-	float distance = Length(result);
-
-	if (distance <= s2.radius + s1.radius) {
-
-		isDistance = true;
-
-	}
-	else {
-
-		isDistance = false;
-
-	}
-
-	return isDistance;
-}
-//衝突判定(球と平面)
-bool IsCollision(const Sphere& sphere, const Plane& plane)
-{
-	Vector3 dis = Normalize(plane.normal);
-
-	float distance = Dot(sphere.center, dis) - plane.distance;
-	return std::abs(distance) < sphere.radius;
-}
-//衝突判定(線と平面)
-bool IsCollision(const Segment& segment, const Plane& plane)
-{
-	Vector3 diff = segment.diff();
 
 
-	//まず垂直判定を行うために、法線と線の内積を求める
-	float dot = Dot(plane.normal, diff);
-
-	// 垂直=平行であるので、衝突しているはずがない
-	if (dot == 0.0f) {
-		return false;
-	}
-
-	float t = (plane.distance - Dot(segment.origin, plane.normal)) / dot;
-
-	if (t >= 0.0f && t <= 1.0f) {
-		return true;
-	}
-	return false;
-}
-
-//三角形と線の衝突判定
-bool IsCollision(const Triangle& triangle, const Segment& segment) {
-	Vector3 diff = segment.diff();
-
-	// 三角形の平面を取得
-	Plane plane = PlaneFromPoints(triangle.vertices[0], triangle.vertices[1], triangle.vertices[2]);
-
-	float dot = Dot(plane.normal, diff);
-
-	// 平行チェック（浮動小数点誤差を考慮）
-	if (fabs(dot) < 1e-6f) {
-		return false;
-	}
-
-	float t = -(Dot(segment.origin, plane.normal) + plane.distance) / dot;
-
-	// tが線分の範囲 [0, 1] にない場合、衝突なし
-	if (t < 0.0f || t > 1.0f) {
-		return false;
-	}
-
-	// 衝突点を求める
-	Vector3 p = segment.origin + diff * t;
-
-	Vector3 v01 = triangle.vertices[1] - triangle.vertices[0];
-	Vector3 v12 = triangle.vertices[2] - triangle.vertices[1];
-	Vector3 v20 = triangle.vertices[0] - triangle.vertices[2];
-
-	Vector3 v0p = p - triangle.vertices[0];
-	Vector3 v1p = p - triangle.vertices[1];
-	Vector3 v2p = p - triangle.vertices[2];
-
-	Vector3 cross01 = Cross(v01, v0p);
-	Vector3 cross12 = Cross(v12, v1p);
-	Vector3 cross20 = Cross(v20, v2p);
-
-	float dot01 = Dot(cross01, plane.normal);
-	float dot12 = Dot(cross12, plane.normal);
-	float dot20 = Dot(cross20, plane.normal);
-
-	// 浮動小数点誤差に対する閾値を適用して判定
-	const float epsilon = 1e-6f;
-	if (dot01 >= -epsilon && dot12 >= -epsilon && dot20 >= -epsilon) {
-		return true;
-	}
-
-	return false;
-}
-
-//bool IsCollision(const Triangle& triangle, const Capsule& capsule) {
-//	// カプセルの軸線を取得
-//	Segment capsuleSegment = capsule.segment;
-//	float radius = capsule.radius;
-//
-//	// 三角形の最近接点を求める
-//	Vector3 closestPoint = ClosestPointSegmentTriangle(capsuleSegment, triangle);
-//
-//	// カプセルの軸線上の最近接点を求める
-//	Vector3 capsuleClosestPoint = ClosestPointSegment(capsuleSegment, closestPoint);
-//
-//	// カプセル表面との最短距離を計算
-//	float distanceSquared = LengthSquared(Subtract(closestPoint, capsuleClosestPoint));
-//
-//	// 衝突判定：距離がカプセル半径以内であれば衝突
-//	return distanceSquared <= (radius * radius);
-//}
 
 // 点と線分間の距離の二乗を求める関数
 float PointLineDistanceSquared(const Vector3& point, const Vector3& a, const Vector3& b)
@@ -874,230 +578,7 @@ float SegmentSegmentDistanceSquared(const Segment& seg1, const Segment& seg2)
 	return (closestPoint1 - closestPoint2).LengthSq();
 }
 
-// Triangle と Capsule の衝突判定関数
-bool IsCollision(const Triangle& triangle, const Capsule& capsule)
-{
-	// カプセルの半径の二乗
-	float radiusSquared = capsule.radius * capsule.radius;
 
-	// 三角形の各頂点とカプセルの線分との距離を判定
-	for (const Vector3& vertex : triangle.vertices)
-	{
-		if (PointLineDistanceSquared(vertex, capsule.segment.origin, capsule.segment.end) <= radiusSquared)
-		{
-			return true;
-		}
-	}
-
-	// 三角形のエッジとカプセルの線分の距離を判定
-	Segment edge1 = { triangle.vertices[0], triangle.vertices[1] };
-	Segment edge2 = { triangle.vertices[1], triangle.vertices[2] };
-	Segment edge3 = { triangle.vertices[2], triangle.vertices[0] };
-
-	if (SegmentSegmentDistanceSquared(capsule.segment, edge1) <= radiusSquared ||
-		SegmentSegmentDistanceSquared(capsule.segment, edge2) <= radiusSquared ||
-		SegmentSegmentDistanceSquared(capsule.segment, edge3) <= radiusSquared)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-
-//
-bool IsCollision(const AABB& aabb1, const AABB& aabb2)
-{
-	if ((aabb1.min_.x <= aabb2.max_.x && aabb1.max_.x >= aabb2.min_.x) &&
-		(aabb1.min_.y <= aabb2.max_.y && aabb1.max_.y >= aabb2.min_.y) &&
-		(aabb1.min_.z <= aabb2.max_.z && aabb1.max_.z >= aabb2.min_.z)) {
-
-		return true;
-	}
-
-	return false;
-}
-//
-bool IsCollision(const AABB& aabb, const Sphere& sphere)
-{
-	Vector3 closestPoint = ClosestPointAABBSphere(sphere, aabb);
-
-	float dist = Distance(sphere.center, closestPoint);
-
-	if (dist <= sphere.radius) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-//四角形と線の衝突判定
-bool IsCollision(const AABB& aabb, const Segment& segment)
-{
-	//点がAABB内にあるなら
-	if (IsPointInsideAABB(segment.origin, aabb) || IsPointInsideAABB(segment.end, aabb)) {
-
-		return true;
-	}
-
-	Plane planeX1, planeY1, planeZ1;
-	planeX1.normal = { 1,0,0 };
-	planeY1.normal = { 0,1,0 };
-	planeZ1.normal = { 0,0,1 };
-
-	Vector3 diff = segment.diff();
-
-	float dotX = Dot(planeX1.normal, diff);
-	float dotY = Dot(planeY1.normal, diff);
-	float dotZ = Dot(planeZ1.normal, diff);
-
-
-	// 特異点チェック: 線分が軸に平行である場合
-	if (std::abs(dotX) < 1e-6) {
-		if (segment.origin.x < aabb.min_.x || segment.origin.x > aabb.max_.x) return false;
-	}
-	if (std::abs(dotY) < 1e-6) {
-		if (segment.origin.y < aabb.min_.y || segment.origin.y > aabb.max_.y) return false;
-	}
-	if (std::abs(dotZ) < 1e-6) {
-		if (segment.origin.z < aabb.min_.z || segment.origin.z > aabb.max_.z) return false;
-	}
-
-
-	Vector3 tMin, tMax;
-
-	tMin.x = (aabb.min_.x - Dot(segment.origin, planeX1.normal)) / dotX;
-	tMin.y = (aabb.min_.y - Dot(segment.origin, planeY1.normal)) / dotY;
-	tMin.z = (aabb.min_.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
-
-	tMax.x = (aabb.max_.x - Dot(segment.origin, planeX1.normal)) / dotX;
-	tMax.y = (aabb.max_.y - Dot(segment.origin, planeY1.normal)) / dotY;
-	tMax.z = (aabb.max_.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
-
-
-	Vector3 tNear, tFar;
-
-	tNear.x = std::min(tMin.x, tMax.x);
-	tNear.y = std::min(tMin.y, tMax.y);
-	tNear.z = std::min(tMin.z, tMax.z);
-	tFar.x = std::max(tMin.x, tMax.x);
-	tFar.y = std::max(tMin.y, tMax.y);
-	tFar.z = std::max(tMin.z, tMax.z);
-
-
-	// AABBとの衝突点(貫通点)のtが小さい方
-	float tmin = std::max(std::max(tNear.x, tNear.y), tNear.z);
-
-	// AABBとの衝突点(貫通点)のtが大きい方
-	float tmax = std::min(std::min(tFar.x, tFar.y), tFar.z);
-
-	if (tmin <= tmax) {
-		return true;
-	}
-
-
-	return false;
-}
-//
-bool IsCollision(const Sphere& sphere, const Segment& segment) {
-	Vector3 m = Subtract(segment.origin, sphere.center);
-	//Vector3 segEnd = Add(segment.origin, segment.diff);
-
-	// 線分の方向ベクトル
-	Vector3 d = segment.diff();
-	float a = Dot(d, d);
-
-	// 線分の長さがゼロの場合（無効な線分）
-	if (a == 0.0f) return false;
-
-	float b = Dot(m, d);
-	float c = Dot(m, m) - sphere.radius * sphere.radius;
-
-	// 判別式の計算
-	float discriminant = b * b - a * c;
-
-	// 判別式が負の場合、衝突していない
-	if (discriminant < 0.0f) return false;
-
-	// 解の計算
-	float sqrtDiscriminant = std::sqrt(discriminant);
-	float t1 = (-b - sqrtDiscriminant) / a;
-	float t2 = (-b + sqrtDiscriminant) / a;
-
-	// 衝突が線分内（0 <= t <= 1）の場合にのみ true を返す
-	if ((t1 >= 0.0f && t1 <= 1.0f) || (t2 >= 0.0f && t2 <= 1.0f)) {
-		return true;
-	}
-
-	return false;
-}
-bool IsCollision(const OBB& obb, const Sphere& sphere)
-{
-	// OBBのローカル座標系に球の中心を変換
-	Vector3 d = sphere.center - obb.center;
-	Vector3 closestPoint = obb.center;
-
-	for (int i = 0; i < 3; ++i) {
-		float distance = Dot(d, obb.orientations[i]);
-		float clampedDistance;
-		if (i == 0) {
-			clampedDistance = std::max(-obb.size.x, std::min(distance, obb.size.x));
-		}
-		else if (i == 1) {
-			clampedDistance = std::max(-obb.size.y, std::min(distance, obb.size.y));
-		}
-		else {
-			clampedDistance = std::max(-obb.size.z, std::min(distance, obb.size.z));
-		}
-		closestPoint += obb.orientations[i] * clampedDistance;
-	}
-
-
-	// 球の中心と最近接点の距離を比較
-	float distSquared = LengthSquared(sphere.center - closestPoint);
-	return distSquared <= (sphere.radius * sphere.radius);
-}
-
-// OBB Segment
-// OBBとSegmentの衝突判定
-// OBBとSegmentの衝突判定
-bool IsCollision(const OBB& obb, const Segment& segment) {
-	// OBBの各軸に対して投影を行い、交差を確認
-	for (int i = 0; i < 3; ++i) {
-		// OBBの軸ベクトル
-		Vector3 axis = obb.orientations[i].Normalize();
-
-		// セグメントの始点・終点の投影
-		float projStart = axis.Dot(segment.origin);
-		float projEnd = axis.Dot(segment.end);
-
-		// 線分の投影範囲
-		float minSegment = std::min(projStart, projEnd);
-		float maxSegment = std::max(projStart, projEnd);
-
-		// OBBのサイズに基づく投影範囲
-		float obbCenterProjection = axis.Dot(obb.center);
-		float obbHalfSize = std::abs(obb.size.x * axis.x) +
-			std::abs(obb.size.y * axis.y) +
-			std::abs(obb.size.z * axis.z);
-		float obbMin = obbCenterProjection - obbHalfSize;
-		float obbMax = obbCenterProjection + obbHalfSize;
-
-		// 交差判定 (分離軸定理)
-		if (maxSegment < obbMin || minSegment > obbMax) {
-			return false; // 交差しない
-		}
-	}
-	return true; // 交差する
-}
-
-//
-Vector3 Perpendicular(const Vector3& vector) {
-	if (vector.x != 0.0f || vector.y != 0.0f) {
-		return { -vector.y,vector.x,0.0f };
-	}
-	return { 0.0f,-vector.z,vector.y };
-}
 //
 Plane PlaneFromPoints(const Vector3& p1, const Vector3& p2, const Vector3& p3) {
 	Plane result{};
@@ -1136,7 +617,6 @@ Vector3 Reflect(const Vector3& input, const Vector3& normal)
 	return result;
 }
 
-
 Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution)
 {
 	// まず normal が正規化されている前提だが、明示的に normalize する場合:
@@ -1148,78 +628,6 @@ Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution)
 	// 反射ベクトルの計算
 	return input - norm * scale;
 }
-
-
-// 分離軸定理による OBB vs OBB の衝突判定
-bool IsCollision(const OBB& obb0, const OBB& obb1) {
-	const Vector3* A = obb0.orientations; // OBB0の軸ベクトル
-	const Vector3* B = obb1.orientations; // OBB1の軸ベクトル
-
-	Vector3 T = obb1.center - obb0.center; // OBB0からOBB1の中心位置ベクトル
-	T = Vector3(T.Dot(A[0]), T.Dot(A[1]), T.Dot(A[2])); // OBB0の座標系に変換
-
-	constexpr float EPSILON = std::numeric_limits<float>::epsilon();
-
-	float ra, rb;
-	float R[3][3], AbsR[3][3];
-
-	// 回転行列の計算と絶対値の取得
-	for (int i = 0; i < 3; ++i) {
-		for (int j = 0; j < 3; ++j) {
-			R[i][j] = A[i].Dot(B[j]);
-			AbsR[i][j] = std::abs(R[i][j]) + EPSILON;  // 数値誤差対策
-		}
-	}
-
-	// 1. Aの各軸を分離軸としてチェック
-	for (int i = 0; i < 3; ++i) {
-		ra = obb0.size.x * std::abs(A[i].x) + obb0.size.y * std::abs(A[i].y) + obb0.size.z * std::abs(A[i].z);
-		rb = obb1.size.x * AbsR[i][0] + obb1.size.y * AbsR[i][1] + obb1.size.z * AbsR[i][2];
-
-		if (std::abs(T.Dot(A[i])) > ra + rb) return false;
-	}
-
-	// 2. Bの各軸を分離軸としてチェック
-	for (int i = 0; i < 3; ++i) {
-		ra = obb0.size.x * AbsR[0][i] + obb0.size.y * AbsR[1][i] + obb0.size.z * AbsR[2][i];
-		rb = obb1.size.x * std::abs(B[i].x) + obb1.size.y * std::abs(B[i].y) + obb1.size.z * std::abs(B[i].z);
-
-		if (std::abs(T.Dot(B[i])) > ra + rb) return false;
-	}
-
-	// 3. Aの各軸とBの各軸のクロス積（9軸）を分離軸としてチェック
-	for (int i = 0; i < 3; ++i) {
-		for (int j = 0; j < 3; ++j) {
-			ra = obb0.size.y * AbsR[(i + 1) % 3][j] + obb0.size.z * AbsR[(i + 2) % 3][j];
-			rb = obb1.size.y * AbsR[i][(j + 1) % 3] + obb1.size.z * AbsR[i][(j + 2) % 3];
-
-			float t;
-			if (i == 0) {
-				t = std::abs(T.y * R[2][j] - T.z * R[1][j]);
-			}
-			else if (i == 1) {
-				t = std::abs(T.z * R[0][j] - T.x * R[2][j]);
-			}
-			else { // i == 2
-				t = std::abs(T.x * R[1][j] - T.y * R[0][j]);
-			}
-
-			if (t > ra + rb) return false;
-		}
-	}
-
-	// すべての軸で分離がない場合、衝突あり
-	return true;
-}
-// カプセルたち
-bool IsCollision(const Capsule& cap0, const Capsule& cap1)
-{
-	float distanceSq = SegmentClosestDistanceSq(cap0.segment, cap1.segment);
-	float radiusSum = cap0.radius + cap1.radius;
-	return distanceSq <= radiusSum * radiusSum;
-}
-
-
 
 Vector3 ClosestPointSegmentTriangle(const Segment& segment, const Triangle& triangle) {
 	// 三角形の3辺を定義
@@ -1374,11 +782,7 @@ float SegmentClosestDistanceSq(const Segment& seg0, const Segment& seg1) {
 	return dP.LengthSq();
 }
 
-bool IsPointInsideAABB(const Vector3& point, const AABB& aabb) {
-	return (point.x >= aabb.min_.x && point.x <= aabb.max_.x) &&
-		(point.y >= aabb.min_.y && point.y <= aabb.max_.y) &&
-		(point.z >= aabb.min_.z && point.z <= aabb.max_.z);
-}
+
 
 
 
@@ -1487,10 +891,6 @@ Vector3 CatmullRom2(const std::vector<Vector3>& controlPoints, float t) {
 	);
 	return result;
 }
-// 2点間の距離を計算する関数
-float Distance2(const Vector3& a, const Vector3& b) {
-	return std::sqrtf(std::powf(b.x - a.x, 2) + std::powf(b.y - a.y, 2) + std::powf(b.z - a.z, 2));
-}
 
 // アーク長を計算する関数
 float CalculateArcLength(const std::vector<Vector3>& controlPoints, int numSamples) {
@@ -1500,7 +900,7 @@ float CalculateArcLength(const std::vector<Vector3>& controlPoints, int numSampl
 	for (int i = 1; i <= numSamples; ++i) {
 		float t = static_cast<float>(i) / numSamples;
 		Vector3 currPos = CatmullRom(controlPoints, t);
-		totalLength += Distance2(prevPos, currPos);
+		totalLength += Distance(prevPos, currPos);
 		prevPos = currPos;
 	}
 
@@ -1515,7 +915,7 @@ float FindTByArcLength(const std::vector<Vector3>& controlPoints, float targetLe
 	for (int i = 1; i <= numSamples; ++i) {
 		float t = static_cast<float>(i) / numSamples;
 		Vector3 currPos = CatmullRom(controlPoints, t);
-		currentLength += Distance2(prevPos, currPos);
+		currentLength += Distance(prevPos, currPos);
 
 		if (currentLength >= targetLength) {
 			return t;
@@ -1538,7 +938,7 @@ std::vector<std::pair<float, float>> CalculateArcLengths(const std::vector<Vecto
 	for (int i = 1; i <= numSamples; ++i) {
 		float t = static_cast<float>(i) / numSamples;
 		Vector3 currPos = CatmullRom(controlPoints, t);
-		totalLength += Distance2(prevPos, currPos);
+		totalLength += Distance(prevPos, currPos);
 		arcLengths.push_back({ t, totalLength });
 		prevPos = currPos;
 	}
@@ -1567,7 +967,7 @@ float Curvature(const Vector3& p0, const Vector3& p1, const Vector3& p2) {
 	Vector3 v1 = Subtract(p1, p0);
 	Vector3 v2 = Subtract(p2, p1);
 	float angle = std::acos(Dot(Normalize(v1), Normalize(v2)));
-	return angle / Distance2(p0, p1);
+	return angle / Distance(p0, p1);
 }
 
 // 曲率に基づくアダプティブサンプリング
@@ -1589,46 +989,10 @@ std::vector<float> AdaptiveSampling(const std::vector<Vector3>& controlPoints, i
 	return samplePoints;
 }
 
-const float* GetMatrixPointer(const Matrix4x4& mat)
-{
-	return &mat.m[0][0]; // 行列データの先頭要素のアドレスを返す
-}
-
-float* GetMatrix(Matrix4x4 mat) {
-	return &mat.m[0][0];  // 行列の最初の要素のポインタを返す
-}
-
 
 float DegreesToRadians(float degrees) { return float(degrees * ((float)M_PI / 180.0)); }
 
-Vector3 DegreesToRadians(Vector3 degrees) {
-	Vector3 resurt;
-
-	resurt.x = float(degrees.x * ((float)M_PI / 180.0));
-	resurt.y = float(degrees.y * ((float)M_PI / 180.0));
-	resurt.z = float(degrees.z * ((float)M_PI / 180.0));
-
-	return resurt;
-}
-
 float RadiansToDegrees(float radians) { return float(radians * (180.0 / (float)M_PI)); }
 
-Vector3 RadiansToDegrees(Vector3 radians) {
-	Vector3 resurt;
-
-	resurt.x = float(radians.x * (180.0 / (float)M_PI));
-	resurt.y = float(radians.y * (180.0 / (float)M_PI));
-	resurt.z = float(radians.z * (180.0 / (float)M_PI));
-
-	return resurt;
-}
-
-
-Vector3 GenerateRandomPosition(const Vector3& min, const Vector3& max, std::mt19937& randomEngine) {
-	std::uniform_real_distribution<float> distX(min.x, max.x);
-	std::uniform_real_distribution<float> distY(min.y, max.y);
-	std::uniform_real_distribution<float> distZ(min.z, max.z);
-	return { distX(randomEngine), distY(randomEngine), distZ(randomEngine) };
-}
 
 #pragma endregion //数学関数

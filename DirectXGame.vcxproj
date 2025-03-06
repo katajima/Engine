@@ -400,6 +400,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
     <ClInclude Include="DirectXGame\engine\base\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
+    <ClInclude Include="DirectXGame\engine\collider\ColliderFanction.h" />
     <ClInclude Include="DirectXGame\engine\collider\Octree\Octree.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager2d.h" />

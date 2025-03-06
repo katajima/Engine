@@ -73,8 +73,29 @@ struct Segment
 	
 	Vector3 origin; //!<始点
 	Vector3 end;
+	
+
+	// コンストラクタ
+	Segment(const Vector3& o, const Vector3& e) : origin(o), end(e) {}
+
+	// 線分のベクトル
 	Vector3 diff() const {
 		return end - origin;
+	}
+
+	// 線分の長さ
+	float length() const {
+		return diff().Length();
+	}
+
+	// 単位方向ベクトル
+	Vector3 normalizedDirection() const {
+		return diff().Normalize();
+	}
+
+	// 指定された t (0.0 ~ 1.0) の位置の点を取得
+	Vector3 pointAt(float t) const {
+		return origin + diff() * t;
 	}
 };
 
@@ -155,6 +176,17 @@ struct Capsule
 {
 	Segment segment;
 	float radius;
+
+
+	// コンストラクタ
+	Capsule(const Vector3& p0, const Vector3& p1, float r) : segment(p0, p1), radius(r) {}
+
+	// カプセルの AABB を取得
+	AABB computeAABB() const {
+		Vector3 minPoint = Min(segment.origin, segment.end) - Vector3(radius, radius, radius);
+		Vector3 maxPoint = Max(segment.origin, segment.end) + Vector3(radius, radius, radius);
+		return AABB(minPoint, maxPoint);
+	}
 };
 
 

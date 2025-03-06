@@ -77,7 +77,16 @@ private:
 
 };
 
- 
+static float* GetMatrix(Matrix4x4 mat) {
+    return &mat.m[0][0];  // 行列の最初の要素のポインタを返す
+}
+static const float* GetMatrixPointer(const Matrix4x4& mat)
+{
+    return &mat.m[0][0]; // 行列データの先頭要素のアドレスを返す
+}
+
+
+
 static Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
     Matrix4x4 result{};
     Vector3 u = Normalize(from); // 正規化された from ベクトル
@@ -134,5 +143,72 @@ static Vector4 Multiply(const Matrix4x4& m, const Vector4& v) {
     return result;
 }
 
+static Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2)
+{
+    Matrix4x4 result{};
 
 
+    for (int x = 0; x < 4; x++) {
+        for (int y = 0; y < 4; y++) {
+            result.m[y][x] = m1.m[y][x] + m2.m[y][x];
+        }
+    }
+
+
+    return result;
+}
+
+static Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2)
+{
+    Matrix4x4 result{};
+
+
+    for (int x = 0; x < 4; x++) {
+        for (int y = 0; y < 4; y++) {
+            result.m[y][x] = m1.m[y][x] - m2.m[y][x];
+        }
+    }
+
+
+    return result;
+}
+
+//行列の積
+static Matrix4x4 Multiply(const Matrix4x4& v1, const Matrix4x4& v2) {
+    Matrix4x4 result{};
+
+    for (int x = 0; x < 4; x++) {
+        for (int y = 0; y < 4; y++) {
+            for (int z = 0; z < 4; z++) {
+                float value1 = v1.m[y][z];
+                float value2 = v2.m[z][x];
+
+                if (value1 == 0.0f || value2 == 0.0f) {
+                    result.m[y][x] += 0.0f; // ゼロを掛け算した結果はゼロ
+                }
+                else {
+                    result.m[y][x] += value1 * value2;
+                }
+            }
+        }
+    }
+    return result;
+};
+
+//単位行列
+static Matrix4x4 MakeIdentity4x4() {
+    Matrix4x4 result{};
+
+
+    for (int x = 0; x < 4; x++) {
+        for (int y = 0; y < 4; y++) {
+            if (x == y) {
+                result.m[y][x] = 1.0f;
+            }
+            else {
+                result.m[y][x] = 0.0f;
+            }
+        }
+    }
+    return result;
+}

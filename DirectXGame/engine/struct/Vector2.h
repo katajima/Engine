@@ -37,7 +37,20 @@ struct Vector2 final {
 	Vector2 operator*(float other) const {
 		return Vector2{ x * other, y * other};
 	}
+	// + 演算子のオーバーロード
+	Vector2& operator+=(const Vector2& other) {
 
+		x += other.x;
+		y += other.y;
+		return *this;
+	}
+	// + 演算子のオーバーロード
+	Vector2& operator-=(const Vector2& other) {
+
+		x -= other.x;
+		y -= other.y;
+		return *this;
+	}
 
 
 	// 正規化
@@ -63,6 +76,10 @@ struct Vector2 final {
 
 		return result;
 	};
+	
+	float LengthSq() const {
+		return x * x + y * y;
+	}
 
 	// 内積
 	float Dot(const Vector2& other) const {
@@ -114,6 +131,15 @@ static Vector2 Normalize(const Vector2& v) {
 		result.x = v.x / length;
 		result.y = v.y / length;
 	};
+
+	return result;
+};
+
+static Vector2 Add(const Vector2& v1, const Vector2& v2) {
+	Vector2 result{};
+
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
 
 	return result;
 };

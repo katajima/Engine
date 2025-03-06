@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <limits>
 #include "Vector2.h"
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <math.h>
 
 struct Vector3 final {
 	float x, y, z;
@@ -128,16 +131,21 @@ struct Vector3 final {
 		};
 	}
 
-	/*Vector3 V3_V4(const Vector4& other) {
-		return { x = other.x,y = other.y,z = other.z };
-	}*/
-
-	
-
+	float Distance(const Vector3& other) const {
+		float dx = x - other.x;
+		float dy = y - other.y;
+		float dz = z - other.z;
+		return std::sqrt(dx * dx + dy * dy + dz * dz);
+	}
+	float DistanceXZ(const Vector3& other) const{
+		float dx = x - other.x;
+		float dz = z - other.z;
+		return std::sqrt(dx * dx + dz * dz);
+	}
 };
 
 
-
+// 補間
 static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
 	Vector3 temp;
 	t = std::clamp(t, 0.0f, 1.0f);
@@ -147,6 +155,7 @@ static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
 
 	return temp;
 }
+// 正規化
 static Vector3 Normalize(const Vector3& v) {
 	Vector3 result{};
 	float length;
@@ -161,7 +170,7 @@ static Vector3 Normalize(const Vector3& v) {
 
 	return result;
 };
-
+// 外積
 static Vector3 Cross(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -171,7 +180,7 @@ static Vector3 Cross(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 };
-
+// 内積
 static float Dot(const Vector3& v1, const Vector3& v2) {
 	float result;
 
@@ -180,7 +189,7 @@ static float Dot(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 };
-
+// 最大
 static Vector3 Max(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -191,6 +200,7 @@ static Vector3 Max(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 }
+// 最小
 static Vector3 Min(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 
@@ -201,4 +211,134 @@ static Vector3 Min(const Vector3& v1, const Vector3& v2) {
 
 	return result;
 }
+// 加算
+static Vector3 Add(const Vector3& v1, const Vector3& v2) {
+	Vector3 result{};
 
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+
+
+	return result;
+};
+// 減算
+static Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
+	Vector3 result{};
+
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	result.z = v1.z - v2.z;
+
+
+	return result;
+}
+
+// Vector3同士
+static Vector3 Multiply(const Vector3& v1, const Vector3& v2) {
+	Vector3 result{};
+
+	result.x = v1.x * v2.x;
+	result.y = v1.y * v2.y;
+	result.z = v1.z * v2.z;
+
+	return result;
+}
+// floatとVector3
+static Vector3 Multiply(const float& v, const Vector3& v1) {
+	Vector3 result{};
+
+	result.x = v1.x * v;
+	result.y = v1.y * v;
+	result.z = v1.z * v;
+
+	return result;
+}
+
+// Vector3とfloat
+static Vector3 Multiply(const Vector3& v1, const float& v2)
+{
+	Vector3 result{};
+
+	result.x = v1.x * v2;
+	result.y = v1.y * v2;
+	result.z = v1.z * v2;
+
+	return result;
+}
+
+// 長さ
+static float Length(const Vector3& v) {
+	float result;
+
+	result = sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+
+	return result;
+};
+
+static float LengthSquared(const Vector3& v) {
+	return v.x * v.x + v.y * v.y + v.z * v.z;
+}
+
+// 距離
+static float Distance(const Vector3& point1, const Vector3& point2)
+{
+	float dx = point1.x - point2.x;
+	float dy = point1.y - point2.y;
+	float dz = point1.z - point2.z;
+	return std::sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+// 2つの点間の距離を計算する関数
+static float DistanceXZ(const Vector3& point1, const Vector3& point2) {
+	float dx = point1.x - point2.x;
+	float dz = point1.z - point2.z;
+	return std::sqrt(dx * dx + dz * dz);
+}
+
+// 正射影ベクトル
+static Vector3 Project(const Vector3& v1, const Vector3& v2)
+{
+	Vector3 result{};
+	float v2length = Dot(v2, v2);
+
+	float dot = Dot(v1, v2);
+
+
+	result.x = dot / v2length * v2.x;
+	result.y = dot / v2length * v2.y;
+	result.z = dot / v2length * v2.z;
+
+
+	return result;
+}
+
+// 垂直
+static Vector3 Perpendicular(const Vector3& vector) {
+	if (vector.x != 0.0f || vector.y != 0.0f) {
+		return { -vector.y,vector.x,0.0f };
+	}
+	return { 0.0f,-vector.z,vector.y };
+}
+
+// Degree変換
+static Vector3 RadiansToDegrees(Vector3 radians) {
+	Vector3 resurt;
+
+	resurt.x = float(radians.x * (180.0 / (float)M_PI));
+	resurt.y = float(radians.y * (180.0 / (float)M_PI));
+	resurt.z = float(radians.z * (180.0 / (float)M_PI));
+
+	return resurt;
+}
+
+// radian変換
+static Vector3 DegreesToRadians(Vector3 degrees) {
+	Vector3 resurt;
+
+	resurt.x = float(degrees.x * ((float)M_PI / 180.0));
+	resurt.y = float(degrees.y * ((float)M_PI / 180.0));
+	resurt.z = float(degrees.z * ((float)M_PI / 180.0));
+
+	return resurt;
+}
