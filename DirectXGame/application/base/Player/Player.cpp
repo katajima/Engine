@@ -11,7 +11,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 	camera_ = camera;
 
-	specialAttack.max = 40;
+
 
 	// プレイヤー
 	objectBase_.Initialize();
@@ -70,23 +70,10 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	objectSha_.worldtransform_.rotate_.x = DegreesToRadians(-90);
 
 
-	weapon_ = std::make_unique<playerWeapon>();
-	weapon_->Initialize(camera);
-	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_.worldtransform_;
-	weapon_->GetObject3D().worldtransform_.translate_ = { 0,0.5f,0.5f };
-	weapon_->SetOffset({ 0,5.0f,0.5f });
-	weapon_->SetPlayer(this);
+	
 	
 
-	weaponStr.Initialize();
-	weaponStr.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
-	weaponStr.worldtransform_.translate_ = {0,weapon_->GetObject3D().GetMesh(0)->GetMax().y ,0};
-		
-
-	weaponEnd.Initialize();
-	weaponEnd.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
-	weaponEnd.worldtransform_.translate_ = { 0,weapon_->GetObject3D().GetMesh(0)->GetMin().y ,0 };
-	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
+	
 
 	//particleManager_ = ParticleManager::GetInstance();
 	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", ModelManager::GetInstance()->FindModel("plane.obj"));
@@ -104,34 +91,11 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	HpBer_->SetColor({ 0,1,0,1 });
 	HpBer_->SetPosition({ 100,650 });
 
-	SpecailBer_ = std::make_unique<Sprite>();
-	SpecailBer_->Initialize("resources/Texture/Image.png");
-	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) });
-	SpecailBer_->SetColor({ 0,0,1,1 });
-	SpecailBer_->SetPosition({ 40,650 });
-
-	textMax_ = std::make_unique<Sprite>();
-	textMax_->Initialize("resources/Texture/text/max.png");
-	//textMax_->SetSize({ 50,-float(specialAttack.specialGauge) });
-	textMax_->SetColor({ 1,0,0,1 });
-	textMax_->SetPosition({ 45,350 });
-	textMax_->SetRotation(DegreesToRadians(-30));
-	textMax_->SetAnchorPoint({0.5f,0.5f});
-	textMax_->SetSize(0.25f);
-
-	textRB_ = std::make_unique<Sprite>();
-	textRB_->Initialize("resources/Texture/icon/RB.png");
-	textRB_->SetColor({ 1,1,1,1 });
-	textRB_->SetPosition({ 1280 /2,550 });
-	textRB_->SetAnchorPoint({0.5f,0.5f});
-	textRB_->SetSize(0.02f);
 
 
-	trailEffect_ = std::make_unique<TrailEffect>();
-	"resources/Texture/uvChecker.png";
-	trailEffect_->Initialize("resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
-	trailEffect_->SetCamera(camera);
-	trailEffect_->SetObject(&weapon_->GetObject3D());
+
+
+
 	
 	flag33 = false;
 
@@ -139,7 +103,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 	dashEmitter_ = std::make_unique <ParticleEmitter>();
 	dashEmitter_->Initialize("dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
-	dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
+	//dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
 	dashEmitter_->GetFrequency() = 0.05f;
 	dashEmitter_->SetCount(5);
 	dashEmitter_->SetLifeTimeMinMax(0.1f, 0.1f);
@@ -158,54 +122,10 @@ void Player::Initialize(Vector3 position, Camera* camera)
 void Player::Update()
 {
 	dashEmitter_->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
-	trailEffect_->Update(flag33, weaponStr, weaponEnd);
 
-	if (isAlive) {
-		if (behaviorRequest_) {
-			// ふるまいを変更する
-			behavior_ = behaviorRequest_.value();
-			// 各ふるまいごとの初期化を実行
-			switch (behavior_) {
-			case Behavior::kRoot:
-			default:
-				BehaviorRootInitialize();
-				isInvincible = false;
-				break;
-			case Behavior::kAttack:
-				BehaviorAttackInitialize();
-				isInvincible = true;
-				break;
-			case Behavior::kJump:
-				break;
-			case Behavior::kDie:
-				BehaviorDieInitialize();
-				break;
-			}
-			// ふるまいリクエストリセット
-			behaviorRequest_ = std::nullopt;
-		}
-		switch (behavior_) {
-		case Behavior::kRoot: // 通常行動更新
-		default:
-			BehaviorRootUpdate();
-			break;
-		case Behavior::kAttack: // 攻撃行動更新
-			BehaviorAttackUpdate();
-			break;
-		case Behavior::kJump:
-			break;
-		case Behavior::kDie:
-			BehaviorDieUpdate();
-			break;
-		}
-	}
-	if (specialAttack.specialGauge >= specialAttack.max) {
-		specialAttack.isSpecial = true;
-		specialAttack.specialGauge = specialAttack.max;
-	}
-	else {
-		specialAttack.isSpecial = false;
-	}
+
+
+
 
 
 #ifdef _DEBUG
@@ -232,49 +152,7 @@ void Player::Update()
 		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
 	}
 
-	if (hp <= 0) {
-		isAlive = false;
-	}
-	workAttack.hitTime  -= MyGame::GameTime();
-	if (workAttack.hitTime <= 0) {
-		workAttack.hitCount = 0;
-	}
-
-
-	// 影
-	objectSha_.worldtransform_.translate_ = objectBase_.worldtransform_.translate_;
-	objectSha_.worldtransform_.translate_.y = 0.1f;
-
-	Vector3 scale{};
-	scale = std::abs((std::min)((objectSha_.worldtransform_.translate_.y + 9.0f / objectBase_.worldtransform_.translate_.y), 6.0f));
-
-	objectSha_.worldtransform_.scale_ = scale;
-
-#ifdef _DEBUG
-	ImGui::Begin("trail");
-	Vector3 min = weapon_->GetObject3D().GetMesh(0)->GetMin();
-	ImGui::InputFloat3("min", &min.x);
-	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
-	ImGui::InputFloat3("max", &max.x);
 	
-	Vector3 str =weaponStr.GetWorldPosition();
-	ImGui::InputFloat3("str", &str.x);
-	str =weaponStr.GetPreWorldPosition();
-	ImGui::InputFloat3("strpre", &str.x);
-
-
-	Vector3 end = weaponEnd.GetWorldPosition();
-	ImGui::InputFloat3("end", &end.x);
-	end = weaponEnd.GetPreWorldPosition();
-	ImGui::InputFloat3("endpre", &end.x);
-
-	ImGui::Checkbox("frag", &flag33);
-	int ii = (int)trailEffect_->mesh->vertices.size();
-	ImGui::InputInt("vertice", &ii);
-	
-	
-	ImGui::End();
-#endif // _DEBUG
 
 
 	Gravity();
@@ -283,85 +161,33 @@ void Player::Update()
 
 	objectBase_.Update();
 	objectBody_.Update();
-	weapon_->Update();
-
+	
 	injectionLeftObj_.Update();
 	injectionRightObj_.Update();
 
-	weaponStr.Update();
-	weaponEnd.Update();
-
+	
 	objectReticle_.Update();
 	objectSha_.Update();
 
-	for (const auto& bullet : playerBullet_) {
-		bullet->Update();
-	}
-
-	playerBullet_.remove_if([](const std::unique_ptr<PlayerBullet>& bullet) { return !bullet->GetAlive(); });
+	
 }
 
 void Player::Draw()
 {
-	if (isAlive) {
-		switch (behavior_) {
-		case Behavior::kRoot: // 通常行動更新
-		default:
-			break;
-		case Behavior::kAttack: // 攻撃行動更新
-			weapon_->Draw();
-			
-			break;
-		case Behavior::kJump:
-			break;
-		case Behavior::kDie:
-			injectionLeftObj_.Draw();
-			injectionRightObj_.Draw();
-			break;
-		}
 
-
-		objectBody_.Draw();
-		objectSha_.Draw();
-	}
-	
-	for (const auto& bullet : playerBullet_) {
-		bullet->Draw();
-	}
+	objectBody_.Draw();
 }
 
 void Player::DrawP()
 {
 
-	trailEffect_->Draw();
-	for (const auto& bullet : playerBullet_) {
-		bullet->DrawP();
-	}
+	
 }
 
 void Player::Draw2D()
 {
 
-	HpBer_->SetPosition({ 100,650 });
-	HpBer_->SetSize({ 50,-float(hp) * 2 });
-	HpBer_->Update();
-	HpBer_->Draw();
-
-	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) * 2 * 2.5f });
-	SpecailBer_->Update();
-	SpecailBer_->Draw();
-
-	if (specialAttack.isSpecial) {
-		
-		
-		textMax_->Update();
-		textMax_->Draw();
-	};
-
-	if (isTextRB_) {
-		textRB_->Update();
-		textRB_->Draw();
-	}
+	
 
 }
 
@@ -465,9 +291,7 @@ void Player::Move()
 
 		}
 	}
-	if (behavior_ == Behavior::kRoot || behavior_ == Behavior::kDie) {
-		
-	}
+
 	
 }
 
@@ -500,57 +324,6 @@ void Player::AddMove()
 }
 
 
-void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
-{
-
-	if (behavior_ == Behavior::kDie) {
-		if (specialAttack.phese == 0)
-		{
-			// ロックオン処理のリセットと更新
-			lockedOnEnemies.clear();
-			int i = 0;
-			bool is = true;
-
-			/*while (true)
-			{
-
-			}*/
-			for (int j = 0; j < enemys.size(); j++) {	
-				if (i >= MaxLockOn) {
-					is = false;
-					//break; // 最大ロックオン数を超えた場合
-				}
-				
-				Vector2 posEne = enemys[j]->GetObject3D().GetScreenPosition();
-				Vector2 diff = Vector2{ 640,360 } - posEne;
-				float length = diff.Length();
-
-				if (length <= 300.0f && enemys[j]->GetAlive() && is) {
-					enemys[j]->SetLockOn(true);
-					lockedOnEnemies.push_back(enemys[j].get());
-					i++;
-				}
-				else {
-					enemys[j]->SetLockOn(false);
-				}
-			}
-		}
-
-	}
-	else {
-		for (int j = 0; j < enemys.size(); j++) {
-			enemys[j]->SetLockOn(false);
-		}
-
-	}
-}
-
-
-
-void Player::ApplyGlobalVariables()
-{
-
-}
 
 
 

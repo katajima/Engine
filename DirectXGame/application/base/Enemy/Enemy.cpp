@@ -275,19 +275,7 @@ void Enemy::OnCollision(Collider* other)
 		uint32_t serialNumber = player->GetSerialNumber();
 
 		if (isAlive_) {
-			if (!player->GetInvincible()) {
-
-				// 接触履歴があれば何もせず抜ける
-				if (contactRecord_.CheckHistory(serialNumber)) {
-					return;
-				}
-
-				contactRecord_.AddHistory(serialNumber);
-
-				followCamera_->GetViewProjection().SetShake(0.1f,{1.5f,1.5f,1.5f });
-
-				player->AddDamege(10);
-			}
+			
 		}
 	}
 	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon)) {
