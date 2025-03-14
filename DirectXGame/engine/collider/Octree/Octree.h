@@ -2,49 +2,45 @@
 #include <vector>
 #include <iostream>
 #include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 
 // オクツリーのノード
 struct OctreeNode {
     AABB bounds;  // ノードの境界
     std::vector<Triangle> triangles;  // このノードに含まれる三角形
     std::vector<Capsule> capsules;    // このノードに含まれるカプセル
-    OctreeNode* children[8];  // 子ノードへのポインタ（最大8個）
+    std::vector<OctreeNode*> children; // 動的に子ノードの数を変更可能
+    int depth; // 現在のノードの深さ
+
+    // コンストラクタ
+    OctreeNode(const AABB& bounds, int depth)
+        : bounds(bounds), depth(depth) {}
 
     // オクツリーの子ノードを作成する関数
-    void subdivide() {
-        Vector3 center = (bounds.min_ + bounds.max_) * 0.5f;
-        Vector3 halfSize = (bounds.max_ - bounds.min_) * 0.5f;
+    void subdivide(int divX, int divY, int divZ, int maxDepth);
 
-        for (int i = 0; i < 8; ++i) {
-            // 子ノードの境界を設定
-            Vector3 minChild = center;
-            Vector3 maxChild = center;
-
-            if (i & 1) minChild.x = bounds.min_.x;
-            else maxChild.x = bounds.max_.x;
-
-            if (i & 2) minChild.y = bounds.min_.y;
-            else maxChild.y = bounds.max_.y;
-
-            if (i & 4) minChild.z = bounds.min_.z;
-            else maxChild.z = bounds.max_.z;
-
-            // 子ノードを作成
-            children[i] = new OctreeNode();
-            children[i]->bounds = AABB(minChild, maxChild);
-        }
-    }
+    // クリア
+    void clear();
 };
 
+
+class Mesh;
+class LineCommon;
 // オクツリーの管理クラス
 class Octree {
 public:
     OctreeNode* root;
+    int maxDepth; // 分割の最大深度
+    int divX, divY, divZ; // X, Y, Z方向の分割数
 
-    Octree(const AABB& bounds) {
-        root = new OctreeNode();
-        root->bounds = bounds;
+    // コンストラクタで最大深度と分割数を指定できるようにする
+    Octree(const AABB& bounds, int maxDepth = 4, int divX = 2, int divY = 2, int divZ = 2)
+        : maxDepth(maxDepth), divX(divX), divY(divY), divZ(divZ) {
+        root = new OctreeNode(bounds, 0);
     }
+
+
+    void insert(const Mesh& mesh);
 
     // オクツリーに三角形を挿入
     void insert(const Triangle& triangle) {
@@ -56,18 +52,38 @@ public:
         insertCapsule(root, capsule);
     }
 
+    // Octree クラス内で呼び出し用の関数を追加
+    void draw(LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));
+
+
+    // オクツリー全体でカプセルと三角形の衝突判定を行う
+    bool checkCollisions(const Capsule& capsule) {
+        // ルートノードから衝突判定を開始
+        return checkCollisionWithNode(capsule, root);
+    }
 private:
+    void drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));
+
     // 三角形を挿入
     void insertTriangle(OctreeNode* node, const Triangle& triangle) {
         // 三角形がノードの範囲内に収まっているかをチェック
         if (!node->bounds.intersects(triangle.bounds)) return;
 
-        if (node->children[0] == nullptr) {
+        // 子ノードが存在しない場合は、まず分割を試みる
+        if (node->children.empty()) {
+            if (node->depth < maxDepth) {
+                node->subdivide(divX, divY, divZ, maxDepth);
+            }
+        }
+
+        // 子ノードがない場合はこのノードに格納
+        if (node->children.empty()) {
             node->triangles.push_back(triangle);
         }
         else {
-            for (int i = 0; i < 8; ++i) {
-                insertTriangle(node->children[i], triangle);
+            // 子ノードに三角形を挿入
+            for (OctreeNode* child : node->children) {
+                insertTriangle(child, triangle);
             }
         }
     }
@@ -76,14 +92,25 @@ private:
     void insertCapsule(OctreeNode* node, const Capsule& capsule) {
         if (!node->bounds.intersects(capsule.computeAABB())) return;
 
-        if (node->children[0] == nullptr) {
+        // 子ノードが存在しない場合は、まず分割を試みる
+        if (node->children.empty()) {
+            if (node->depth < maxDepth) {
+                node->subdivide(divX, divY, divZ, maxDepth);
+            }
+        }
+
+        // 子ノードがない場合はこのノードに格納
+        if (node->children.empty()) {
             node->capsules.push_back(capsule);
         }
         else {
-            for (int i = 0; i < 8; ++i) {
-                insertCapsule(node->children[i], capsule);
+            // 子ノードにカプセルを挿入
+            for (OctreeNode* child : node->children) {
+                insertCapsule(child, capsule);
             }
         }
     }
-};
 
+    // OctreeNode 内でカプセルと三角形の衝突判定を行う
+    bool checkCollisionWithNode(const Capsule& capsule, OctreeNode* node);
+};

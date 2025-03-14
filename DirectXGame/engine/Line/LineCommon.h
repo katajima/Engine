@@ -48,9 +48,14 @@ public:
 
 	void AddLineCorner(CornerSegment corner,WorldTransform pos);
 
+	void AddLineCapsule(Capsule capsule);
+
 	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos);
 
-	void AddOctree(Octree octree);
+	
+	void AddLineTriangle(Triangle triangle, WorldTransform pos);
+
+	void AddOctree(OctreeNode* node);
 
 	// グリッド線
 	void AddGrid(float xRange,float zRange,float interval,Vector4 color);
@@ -115,7 +120,7 @@ private:
 	DirectXCommon* dxCommon_;
 	std::unique_ptr<Mesh> mesh_;
 	//std::unique_ptr<Mate>
-	const uint32_t kNumMaxInstance = 200000;
+	const uint32_t kNumMaxInstance = 300000;
 	
 	//マテリアルデータ
 	struct MaterialData {

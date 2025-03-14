@@ -152,6 +152,11 @@ void Object3d::UpdateAnimation()
 	transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
 }
 
+void Object3d::LineMesh()
+{
+	LineCommon::GetInstance()->AddLineMesh(GetMesh(0), worldtransform_.worldMat_);	
+}
+
 #pragma endregion //更新系
 
 #pragma region Draw

@@ -45,6 +45,9 @@ public:
 	// 更新(アニメーション有り)
 	void UpdateAnimation();
 	
+	// メッシュライン描画
+	void LineMesh();
+
 	// 描画通常
 	void Draw(ObjectType type = {});
 	// 描画スキニング用

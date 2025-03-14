@@ -23,6 +23,7 @@ public:
     // GPU バッファから取得したデータを反映する
     virtual void UpdateFromData(const void* data) = 0;
 
+    bool isLine = true;
 protected:
     Type m_type;
 };
@@ -31,6 +32,7 @@ protected:
 class PointLight : public Lights {
 public:
     PointLightData point;
+  
 
     PointLight()
         : Lights(Type::Point), point() {}
@@ -47,7 +49,6 @@ public:
 class DirectionalLight : public Lights {
 public:
     DirectionalLightData directional;
-
     DirectionalLight()
         : Lights(Type::Directional), directional() {}
 
@@ -63,7 +64,7 @@ public:
 class SpotLight : public Lights {
 public:
     SpotLightData spot;
-
+   
     SpotLight()
         : Lights(Type::Spot), spot() {}
 

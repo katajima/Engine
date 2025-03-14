@@ -473,6 +473,6 @@ static bool CapsuleIntersectsAABB(const Capsule& capsule, const AABB& box) {
 }
 
 // カプセルとおくつりー衝突判定
-bool CapsuleIntersectsWithOctree(const Capsule& capsule, OctreeNode* node);
+//bool CapsuleIntersectsWithOctree(const Capsule& capsule, OctreeNode* node);
 
 #pragma endregion

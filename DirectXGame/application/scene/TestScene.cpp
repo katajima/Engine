@@ -27,6 +27,9 @@ void TestScene::Initialize()
 	// ライトの初期化
 	InitializeLight();
 
+	// その他の初期化
+	InitializeOthers();
+
 }
 
 void TestScene::Finalize()
@@ -103,7 +106,8 @@ void TestScene::Update()
 		case TestScene::SceneBehavior::kSceneRoom05:
 			InitializeRoom05();
 			break;
-		case TestScene::SceneBehavior::kSceneRoom06:
+		case TestScene::SceneBehavior::kSceneRoom06: // Octtree
+			InitializeRoom06();
 			break;
 		case TestScene::SceneBehavior::kSceneRoom07:
 			break;
@@ -140,6 +144,7 @@ void TestScene::Update()
 		UpdateRoom05();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
+		UpdateRoom06();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
 		break;
@@ -184,6 +189,7 @@ void TestScene::Draw3D()
 		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
+		//stairObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
 		break;
@@ -286,6 +292,12 @@ void TestScene::InitializeObject3D()
 	multiy.SetModel("multiMaterial.gltf");
 	multiy.SetCamera(camera.get());
 	multiy.worldtransform_.scale_ = { 10,10,10 };
+
+	/// 階段
+	stairObject = std::make_unique<Object3d>();
+	stairObject->Initialize();
+	stairObject->SetModel("stair.obj");
+	stairObject->SetCamera(camera.get());
 }
 
 /// <summary>
@@ -426,6 +438,23 @@ void TestScene::InitializeCamera()
 	debugCamera->Initialize();
 }
 
+/// <summary>
+/// その他初期化
+/// </summary>
+void TestScene::InitializeOthers()
+{
+	capsule_.radius = 10;
+	capsule_.segment.origin = { 4,-5,4 };
+	capsule_.segment.end = { 4,5,4 };
+
+
+
+	octree = std::make_unique<Octree>(AABB({-100,-100,-100},{100,100,100}),0);
+	octree->root->subdivide(4,4,4,10);
+
+	octree->insert(*stairObject->GetMesh(0));// メッシュ挿入
+}
+
 #pragma endregion 各初期化
 
 #pragma region 各シーン初期化
@@ -448,6 +477,12 @@ void TestScene::InitializeRoom04()
 
 void TestScene::InitializeRoom05()
 {
+}
+
+void TestScene::InitializeRoom06()
+{
+	spot->spot.position = { -100,-100,-100 };
+	point->point.position = { -100,-100,-100 };
 }
 
 #pragma endregion 
@@ -484,6 +519,51 @@ void TestScene::UpdateRoom05()
 	LineCommon::GetInstance()->AddGrid(1000,1000,10,{1,1,1,1});
 }
 
+void TestScene::UpdateRoom06()
+{
+
+	ImGui::Begin("oc");
+	
+	ImGui::DragFloat3("div", &div_.x);
+	ImGui::DragInt("maxDepth", &maxDepth);
+	ImGui::DragInt("depth", &octree->root->depth);
+	ImGui::DragFloat3("max", &octree->root->bounds.max_.x);
+	ImGui::DragFloat3("min", &octree->root->bounds.min_.x);
+	bool isColl = octree->checkCollisions(capsule_);
+	ImGui::Checkbox("isColl", &isColl);
+	if (ImGui::Button("clear")) {
+		octree->root->clear();
+	};
+	if (ImGui::Button("Set")) {
+		int x = static_cast<int>(div_.x);
+		int y = static_cast<int>(div_.y);
+		int z = static_cast<int>(div_.z);
+
+		octree->root->subdivide(x,y,z, maxDepth);
+	}
+	ImGui::End();
+	ImGui::Begin("capsule");
+	ImGui::DragFloat("rad",&capsule_.radius,0.1f);
+	ImGui::DragFloat3("origin",&capsule_.segment.origin.x,0.1f);
+	ImGui::DragFloat3("end",&capsule_.segment.end.x,0.1f);
+	ImGui::End();
+	
+	
+
+
+
+
+	
+	
+
+
+	//stairObject->LineMesh();
+	stairObject->Update();
+	LineCommon::GetInstance()->AddLineCapsule(capsule_);
+	octree->draw(*LineCommon::GetInstance());
+
+}
+
 void TestScene::SwitchRoom()
 {
 #ifdef _DEBUG
@@ -504,6 +584,9 @@ void TestScene::SwitchRoom()
 		if (ImGui::Button("Room05")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom05;
 		}
+		if (ImGui::Button("Room06")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom06;
+		}
 
 	}
 	ImGui::End();
@@ -523,6 +606,9 @@ void TestScene::SwitchRoom()
 	}
 	if (input_->IsTriggerKey(DIK_5)) {
 		behaviorRequest_ = SceneBehavior::kSceneRoom05;
+	}
+	if (input_->IsTriggerKey(DIK_6)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom06;
 	}
 
 }

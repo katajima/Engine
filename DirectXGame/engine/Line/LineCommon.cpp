@@ -184,7 +184,8 @@ void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
 		Vector4 pos = mesh->verticesline[i].position;
 		Vector4 worldPos = Transforms(pos, worldMat);
 
-		mesh_->verticesline.push_back({ worldPos.x, worldPos.y, worldPos.z, 1 });
+		mesh_->verticesline.push_back({ { worldPos.x, worldPos.y, worldPos.z, 1 },{1,1,1,1} });
+		//mesh_->indices();
 	}
 
 	Mesh::MeshLine(mesh->indices,mesh_->indices, lineNum_);
@@ -295,6 +296,73 @@ void LineCommon::AddLineCorner(CornerSegment corner, WorldTransform pos)
 	}
 }
 
+void LineCommon::AddLineCapsule(Capsule capsule)
+{
+	const int segmentCount = 8; // 半球と円の分割数
+	const Vector3& start = capsule.segment.origin;
+	const Vector3& end = capsule.segment.end;
+	const float radius = capsule.radius;
+
+	// カプセルの軸
+	Vector3 axis = end - start;
+	if (axis.Length() < 0.0001f) return; // 長さゼロをチェック
+	axis = axis.Normalize();
+
+	// 垂直な平面を構成するベクトル
+	Vector3 up = fabs(axis.y) > 0.99f ? Vector3(1.0f, 0.0f, 0.0f) : Vector3(0.0f, 1.0f, 0.0f);
+	Vector3 side = axis.Cross(up).Normalize();
+	Vector3 forward = axis.Cross(side).Normalize();
+
+	float pi = static_cast<float>(M_PI);
+
+	// シリンダー部分の描画と球間の接続
+	for (int i = 0; i < segmentCount; ++i) {
+		float angle1 = (2 * pi / static_cast<float>(segmentCount)) * static_cast<float>(i);
+		float angle2 = (2 * pi / static_cast<float>(segmentCount)) * static_cast<float>(i + 1);
+
+		Vector3 offset1 = side * cosf(angle1) * radius + forward * sinf(angle1) * radius;
+		Vector3 offset2 = side * cosf(angle2) * radius + forward * sinf(angle2) * radius;
+
+		Vector3 off1S = start + offset1;
+		Vector3 off1E = end + offset1;
+		Vector3 off2S = start + offset2;
+		Vector3 off2E = end + offset2;
+
+		// シリンダーの縁を描画
+		AddLine(off1S, off1E, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+		AddLine(off2S, off2E, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+
+		// 球と球の間に線を引く
+		AddLine(start + offset1, start + offset2, Vector4(1.0f, 1.0f, 0.0f, 1.0f));
+		AddLine(end + offset1, end + offset2, Vector4(1.0f, 1.0f, 0.0f, 1.0f));
+	}
+
+	// 半球の描画
+	for (int i = 0; i < segmentCount; ++i) {
+		float angle1 = (pi / static_cast<float>(segmentCount)) * static_cast<float>(i);
+		float angle2 = (pi / static_cast<float>(segmentCount)) * static_cast<float>(i + 1);
+
+		for (int j = 0; j < segmentCount; ++j) {
+			float horizontalAngle1 = (2 * pi / static_cast<float>(segmentCount)) * static_cast<float>(j);
+			float horizontalAngle2 = (2 * pi / static_cast<float>(segmentCount)) * static_cast<float>(j + 1);
+
+			Vector3 offset1 = side * cosf(horizontalAngle1) * sinf(angle1) * radius + forward * sinf(horizontalAngle1) * sinf(angle1) * radius + axis * cosf(angle1) * radius;
+			Vector3 offset2 = side * cosf(horizontalAngle2) * sinf(angle1) * radius + forward * sinf(horizontalAngle2) * sinf(angle1) * radius + axis * cosf(angle1) * radius;
+			Vector3 offset3 = side * cosf(horizontalAngle1) * sinf(angle2) * radius + forward * sinf(horizontalAngle1) * sinf(angle2) * radius + axis * cosf(angle2) * radius;
+
+			AddLine(start + offset1, start + offset2, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+			AddLine(start + offset1, start + offset3, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+
+			AddLine(end - offset1, end - offset2, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+			AddLine(end - offset1, end - offset3, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+		}
+	}
+}
+
+
+
+
+
 void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform pos)
 {
 	int SPLIT = static_cast<int>(4 * controlPoints.size());
@@ -315,8 +383,46 @@ void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform po
 
 }
 
-void LineCommon::AddOctree(Octree octree)
+void LineCommon::AddLineTriangle(Triangle triangle, WorldTransform pos)
 {
+	// 三角形の3つの頂点
+	Vector3 p0 = triangle.vertices[0] + pos.worldMat_.GetWorldPosition();
+	Vector3 p1 = triangle.vertices[1] + pos.worldMat_.GetWorldPosition();
+	Vector3 p2 = triangle.vertices[2] + pos.worldMat_.GetWorldPosition();
+
+	// 頂点バッファに追加
+	//uint32_t startIndex = static_cast<uint32_t>(verticesline.size());
+
+	mesh_->verticesline.push_back({ { p0.x, p0.y, p0.z, 1.0f }, Vector4{1,1,1,1} });
+	mesh_->verticesline.push_back({ { p1.x, p1.y, p1.z, 1.0f }, Vector4{1,1,1,1} });
+	mesh_->verticesline.push_back({ { p2.x, p2.y, p2.z, 1.0f }, Vector4{1,1,1,1} });
+
+	//// インデックスバッファに線のデータを追加
+	//mesh_->indices.push_back(startIndex);     // p0 -> p1
+	//mesh_->indices.push_back(startIndex + 1);
+
+	//mesh_->indices.push_back(startIndex + 1); // p1 -> p2
+	//mesh_->indices.push_back(startIndex + 2);
+
+	//mesh_->indices.push_back(startIndex + 2); // p2 -> p0
+	//mesh_->indices.push_back(startIndex);
+}
+
+void LineCommon::AddOctree(OctreeNode* node)
+{
+	if (!node) return;
+
+	// AABB を描画
+
+	AddLineAABB(node->bounds, {0,0,0});
+	
+	// 子ノードがある場合は再帰的に描画
+	for (OctreeNode* child : node->children) {
+		if (child) {  // nullptr チェック
+			AddOctree(child);
+		}
+	}
+
 }
 
 

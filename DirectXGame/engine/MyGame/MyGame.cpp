@@ -227,6 +227,7 @@ void MyGame::InitializeResource()
 	ModelManager::GetInstance()->LoadModel("renga.gltf", "renga", { 10,10 });
 	ModelManager::GetInstance()->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
 	ModelManager::GetInstance()->LoadModel("black.obj", "terrain/black", { 10,10 });
+	ModelManager::GetInstance()->LoadModelAmime("stair.obj");
 
 
 

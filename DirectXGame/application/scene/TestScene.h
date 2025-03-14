@@ -23,6 +23,8 @@
 #include "DirectXGame/engine/2d/Primitive2D.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 
+#include "DirectXGame/engine/collider/Octree/Octree.h"
+
 class TestScene : public BaseScene
 {
 public:
@@ -43,15 +45,17 @@ public:
 
 private: // 各初期化
 
-	void InitializeObject3D();
+	void InitializeObject3D(); // オブジェクト3D
 
-	void InitializeObject2D();
+	void InitializeObject2D(); // オブジェクト2D
 
-	void InitializeParticle();
+	void InitializeParticle(); // パーティクル
 
-	void InitializeLight();
+	void InitializeLight(); // ライト
 
-	void InitializeCamera();
+	void InitializeCamera(); //かめら
+
+	void InitializeOthers(); // そのほか
 
 private:
 
@@ -97,6 +101,7 @@ private:
 	void UpdateRoom03();
 	void UpdateRoom04();
 	void UpdateRoom05();
+	void UpdateRoom06();
 
 	// 部屋切り替え
 	void SwitchRoom();
@@ -120,6 +125,7 @@ private:
 	/// 3Dオブジェクト
 	/// </summary>
 
+	std::unique_ptr<Object3d> stairObject;
 	Object3d skinningObject;
 	Object3d skinningObject2;
 	Object3d tail;
@@ -159,11 +165,16 @@ private:
 
 	std::shared_ptr<DirectionalLight> directional;
 
-
-	///
-
+	/// <summary>
+	/// その他
+	/// </summary>
+	
 	std::unique_ptr <Octree> octree;
+	Vector3 div_ = { 1,1,1 };
+	int maxDepth = { 1 };
 
+	Capsule capsule_ = Capsule{Vector3{},Vector3{},10};
+	Vector3 offset_ = { 0,0,0 };
 };
 
 

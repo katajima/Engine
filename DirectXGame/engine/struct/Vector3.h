@@ -27,11 +27,18 @@ struct Vector3 final {
 
 	// == 演算子のオーバーロード
 	bool operator==(const Vector3& other) const {
-		return x == other.x && y == other.y && z == other.z;
+		const float epsilon = 1e-6f;
+		return fabs(x - other.x) < epsilon &&
+			fabs(y - other.y) < epsilon &&
+			fabs(z - other.z) < epsilon;
 	}
+
 	// = 演算子のオーバーロード
-	Vector3 operator=(float other)  {
-		return { x = other , y = other , z = other };
+	Vector3& operator=(float other) {
+		x = other;
+		y = other;
+		z = other;
+		return *this;
 	}
 
 	// + 演算子のオーバーロード
@@ -77,7 +84,8 @@ struct Vector3 final {
 	Vector3 operator*(float other) const {
 		return Vector3{ x * other, y * other, z * other};;
 	}
-	 
+	
+
 
 	Vector3 operator-() const {
 		return Vector3{ -x,-y,-z};

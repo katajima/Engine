@@ -140,6 +140,6 @@ private:
 	Vector3 max_;
 
 
-	const size_t maxLine_ = 100000;
+	const size_t maxLine_ = 300000;
 };
 

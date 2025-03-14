@@ -214,6 +214,7 @@ Model::ModelData Model::LoadOdjFileAssimp(const std::string& directoryPath, cons
 				vertex.position.x *= -1.0f;
 				vertex.normal.x *= -1.0f;
 				pMesh->vertices.push_back(vertex);
+				pMesh->verticesline.push_back({{ vertex.position }, { 1,1,1,1 }});
 
 				triangle.vertices[element] = vertex.position.xyz();
 				
