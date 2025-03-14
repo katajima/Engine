@@ -62,7 +62,7 @@ void LightManager::Update()
         if (light->GetType() == Lights::Type::Point)
         {
             light->SetLightData(&pointLightData[pointLightIndex]);
-            LineCommon::GetInstance()->AddLightLine(pointLightData[pointLightIndex]);
+           // LineCommon::GetInstance()->AddLightLine(pointLightData[pointLightIndex]);
             ++pointLightIndex;
         }
         else if (light->GetType() == Lights::Type::Directional)
@@ -73,7 +73,7 @@ void LightManager::Update()
         else if (light->GetType() == Lights::Type::Spot)
         {
             light->SetLightData(&spotLightData[spotLightIndex]);
-            LineCommon::GetInstance()->AddLightLine(spotLightData[spotLightIndex]);
+          //  LineCommon::GetInstance()->AddLightLine(spotLightData[spotLightIndex]);
             ++spotLightIndex;
         }
     }

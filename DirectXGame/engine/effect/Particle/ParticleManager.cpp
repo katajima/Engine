@@ -572,7 +572,7 @@ void ParticleManager::AABBEmit(ParticleGroup& particleGroup)
 void ParticleManager::LineEmit(ParticleGroup& particleGroup)
 {
 	// 発生セグメントの設定
-	Segment segment_;
+	Segment segment_{ Vector3{},Vector3{} };
 	segment_.origin = particleGroup.emiter.renge.min;  // 始点
 	segment_.end = particleGroup.emiter.renge.max;    // 終点
 

@@ -13,7 +13,7 @@
 #include<sstream>
 #include<wrl.h>
 #include"DirectXGame/engine/base/TextureManager.h"
-#include"DirectXGame/engine/struct/Structs.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
@@ -150,6 +150,11 @@ void Object3d::UpdateAnimation()
 
 	// トランスフォームデータ
 	transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
+}
+
+void Object3d::LineMesh()
+{
+	LineCommon::GetInstance()->AddLineMesh(GetMesh(0), worldtransform_.worldMat_);	
 }
 
 #pragma endregion //更新系

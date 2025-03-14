@@ -4,17 +4,7 @@
 #include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Quaternion.h"
 #include "DirectXGame/engine/struct/Matrix4x4.h"
-
-
-//行列
-struct Matrix3x3
-{
-	float m[3][3];
-};
-
-
-
-
+#include "DirectXGame/engine/struct/Matrix3x3.h"
 
 
 
@@ -28,12 +18,20 @@ struct Transform {
 
 //AABB
 struct AABB {
-	Vector3 min; //!< 最小点
-	Vector3 max; //!< 最大点
+	Vector3 min_; //!< 最小点
+	Vector3 max_; //!< 最大点
+
+	AABB(Vector3 min = Vector3(), Vector3 max = Vector3()) : min_(min), max_(max) {}
+
+	bool intersects(const AABB& other) const {
+		return (min_.x <= other.max_.x && max_.x >= other.min_.x &&
+			min_.y <= other.max_.y && max_.y >= other.min_.y &&
+			min_.z <= other.max_.z && max_.z >= other.min_.z);
+	}
 };
 
 
-// 円
+// 球
 struct Sphere {
 	Vector3 center; //!<中心点
 	float radius;   //!<半径 
@@ -45,9 +43,7 @@ struct Plane {
 	float distance; //!< 距離 
 };
 
-
-
-//直線
+// 直線
 struct Line
 {
 	Vector3 origin; //!<始点
@@ -59,14 +55,36 @@ struct Ray
 	Vector3 origin; //!<始点
 	Vector3 diff;   //!<終点への差分ベクトル
 };
+
 //線分
 struct Segment
 {
 	
 	Vector3 origin; //!<始点
 	Vector3 end;
+	
+
+	// コンストラクタ
+	Segment(const Vector3& o, const Vector3& e) : origin(o), end(e) {}
+
+	// 線分のベクトル
 	Vector3 diff() const {
 		return end - origin;
+	}
+
+	// 線分の長さ
+	float length() const {
+		return diff().Length();
+	}
+
+	// 単位方向ベクトル
+	Vector3 normalizedDirection() const {
+		return diff().Normalize();
+	}
+
+	// 指定された t (0.0 ~ 1.0) の位置の点を取得
+	Vector3 pointAt(float t) const {
+		return origin + diff() * t;
 	}
 };
 
@@ -81,6 +99,7 @@ struct CornerSegment {
 struct Triangle
 {
 	Vector3 vertices[3]; // !頂点
+	AABB bounds;
 
 	// +=オペレーターのオーバーロード 
 	Triangle& operator+=(const Vector3& offset) { 
@@ -98,6 +117,12 @@ struct Triangle
 		return result;
 	}
 
+	
+
+	Triangle(Vector3 v0, Vector3 v1, Vector3 v2) : vertices{ v0, v1, v2 } {
+		bounds.min_ = Min(Min(v0, v1), v2);
+		bounds.max_ = Max(Max(v0, v1), v2);
+	}
 };
 
 //ばね
@@ -140,8 +165,18 @@ struct Capsule
 {
 	Segment segment;
 	float radius;
-};
 
+
+	// コンストラクタ
+	Capsule(const Vector3& p0, const Vector3& p1, float r) : segment(p0, p1), radius(r) {}
+
+	// カプセルの AABB を取得
+	AABB computeAABB() const {
+		Vector3 minPoint = Min(segment.origin, segment.end) - Vector3(radius, radius, radius);
+		Vector3 maxPoint = Max(segment.origin, segment.end) + Vector3(radius, radius, radius);
+		return AABB(minPoint, maxPoint);
+	}
+};
 
 struct OBB {
 	Vector3 center;

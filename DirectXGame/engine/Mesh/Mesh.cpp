@@ -35,7 +35,7 @@ void Mesh::Initialize(DirectXCommon* dxcommon)
 	indexData = nullptr;
 	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
 	std::memcpy(indexData, indices.data(), sizeof(uint32_t) * indices.size());
-	//}
+	
 }
 
 void Mesh::InitializeLine(DirectXCommon* dxcommon)
@@ -325,5 +325,7 @@ void Mesh::MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>&
 		}
 	}
 }
+
+
 
 

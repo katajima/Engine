@@ -7,7 +7,7 @@
 #include<wrl.h>
 #include "SrvManager.h"
 #include "ImGuizmo.h"
-#include"DirectXGame/engine/struct/Structs.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/3d/Object3d.h"

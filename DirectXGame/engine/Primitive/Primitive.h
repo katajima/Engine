@@ -7,7 +7,7 @@
 #include<string>
 #include<vector>
 #include<format>
-#include"DirectXGame/engine/struct/Structs.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
@@ -17,7 +17,7 @@
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
 
 
-#include "DirectXGame/engine/collider/Collider.h"
+#include "DirectXGame/engine/collider/3d/Collider.h"
 
 
 
@@ -234,12 +234,9 @@ public:
 
 	// 形
 	void Initialize(ShapeType type,const std::string& tex,const Color color = { 1,1,1,1 },bool isLine = false);
-
-
+	// 更新
 	void Update();
-
-	
-
+	// 描画
 	void Draw();
 
 	void SetCamera(Camera* camera) { camera_ = camera; };

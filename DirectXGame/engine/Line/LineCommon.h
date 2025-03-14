@@ -5,13 +5,16 @@
 #include <memory>
 #include <string>
 #include <wrl.h>
-#include "DirectXGame/engine/struct/Structs.h"
+#include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/base/DirectXCommon.h"
 #include "DirectXGame/engine/Mesh/Mesh.h"
 #include "DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+
+#include"DirectXGame/engine/math/LineCurveMath.h"
+#include "DirectXGame/engine/collider/Octree/Octree.h"
 
 class LineCommon
 {
@@ -45,7 +48,14 @@ public:
 
 	void AddLineCorner(CornerSegment corner,WorldTransform pos);
 
+	void AddLineCapsule(Capsule capsule);
+
 	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos);
+
+	
+	void AddLineTriangle(Triangle triangle, WorldTransform pos);
+
+	void AddOctree(OctreeNode* node);
 
 	// グリッド線
 	void AddGrid(float xRange,float zRange,float interval,Vector4 color);
@@ -110,7 +120,7 @@ private:
 	DirectXCommon* dxCommon_;
 	std::unique_ptr<Mesh> mesh_;
 	//std::unique_ptr<Mate>
-	const uint32_t kNumMaxInstance = 200000;
+	const uint32_t kNumMaxInstance = 300000;
 	
 	//マテリアルデータ
 	struct MaterialData {

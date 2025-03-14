@@ -194,6 +194,7 @@ static Quaternion Slerp2(const Quaternion& q0, const Quaternion& q1, float t) {
 
 }
 
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
 
 
 

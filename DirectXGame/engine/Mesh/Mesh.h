@@ -2,6 +2,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
 #include"DirectXGame/engine/struct/Material.h"
+#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 
 #include "vector"
 #include<wrl.h>
@@ -139,6 +140,6 @@ private:
 	Vector3 max_;
 
 
-	const size_t maxLine_ = 100000;
+	const size_t maxLine_ = 300000;
 };
 
