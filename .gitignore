@@ -367,5 +367,5 @@ FodyWeavers.xsd
 
 
 
-!*.obj
-!*.lib
+#!*.obj
+#!*.lib
