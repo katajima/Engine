@@ -46,6 +46,9 @@ public: // メンバ関数
 	const Vector3& GetTranslate() const { return transform_.translate; }
 
 	void SetShake(float time,Vector3 diectionRange);
+
+
+	Vector3 GetForward();
 private:
 	float shakeTime_ = 0;
 	Vector3 shakeDirectionRange_{};

@@ -21,6 +21,16 @@
 
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
+
+
+
+///
+#include "LeftArm.h"
+#include "RightArm.h"
+
+
+
+
 ///< summary>
 /// 自キャラ
 ///</summary>
@@ -56,24 +66,8 @@ public:
 
 	virtual Vector3 GetCenterPosition() const;
 
-	
-
-private: //Behavior
-
-
-
-
-public: // 攻撃関係
-	
-private: // 攻撃関係
-	
-
-	
-
-
-
 public:
-
+	Vector3 GetLeftPos() { return leftArm_->GetObject3D().worldMat_.GetWorldPosition(); }
 	
 
 private: // 移動
@@ -88,12 +82,15 @@ private: // 移動
 
 	float groundY = 2;
 
+	float kGravityAcceleration;
+
 	bool isJamp = false;
 
 	float ty = 0;
 
 	bool isMove = false;
 
+	Vector3 veloTotal_{};
 	
 public:
 	std::string strin;
@@ -134,7 +131,10 @@ private:  // パラメータ
 	uint32_t maxHp = 100;
 	int hp = 100;
 	bool isAlive = true;
-	float damage_ = 0;
+	
+
+
+
 	bool isInvincible = false;
 private:
 	
@@ -148,47 +148,24 @@ private:
 	//　レティクル
 	Object3d objectReticle_;
 	
-	// ミサイル発射位置
-	Object3d injectionLeftObj_;
-	Object3d injectionRightObj_;
-
-	Vector3 injectionLeftPos_{ -2.5f,1.0f,-1.5f };
-	Vector3 injectionRightPos_{ 2.5,1.0f,-1.5f };
+	
 
 
 
 
-	// 影
-	Object3d objectSha_;
-
-
-
+	
 	
 	// シリアルナンバー
 	uint32_t serialNumber = 0;
 
 
 	
-	// スプライト
-
-	std::unique_ptr<Sprite> HpBer_;
-	std::unique_ptr<Sprite> SpecailBer_;
-	std::unique_ptr<Sprite> textMax_;
-	std::unique_ptr<Sprite> textRB_;
-	bool isTextRB_ = false;
-
-
-
 
 	// 速度
 	Vector3 velocity_ = {};
 	
 	float moveLimit = 200;
 	
-	// 浮遊ギミック媒介変数
-	float floatingParameter_ = 0.0f;
-	float attackParameter_;
-
 	
 	float speed;
 
@@ -198,11 +175,15 @@ private:
 	// エフェクト
 
 	std::unique_ptr<TrailEffect> trailEffect_;
-	bool flag33;
-
+	
 
 	std::unique_ptr<ParticleEmitter> dashEmitter_ = nullptr;
 
+
+	// 右腕(大針)
+	std::unique_ptr<RightArm> rightArm_ = nullptr;
+	// 左腕(糸)
+	std::unique_ptr<LeftArm> leftArm_ = nullptr;
 
 };
 

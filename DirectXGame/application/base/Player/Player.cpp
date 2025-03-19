@@ -38,66 +38,38 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 
-	// 左ミサイル発射口
-	injectionLeftObj_.Initialize();
-	injectionLeftObj_.SetCamera(camera_);
-	injectionLeftObj_.SetModel("AnimatedCube.gltf");
-	injectionLeftObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	injectionLeftObj_.worldtransform_.translate_ = injectionLeftPos_;
+	// 左腕
+	leftArm_ = std::make_unique<LeftArm>();
+	leftArm_->Initialize(camera_);
+	leftArm_->GetObject3D().parent_ = &objectBody_.worldtransform_;
+	leftArm_->GetObject3D().translate_.x = -2.5f;
+	leftArm_->SetPlayer(this);
 
-	injectionLeftObj_.worldtransform_.scale_= { 0.75f,1.25f,1.0f };
-
-	// 右ミサイル発射口
-	injectionRightObj_.Initialize();
-	injectionRightObj_.SetCamera(camera_);
-	injectionRightObj_.SetModel("AnimatedCube.gltf");
-	injectionRightObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	injectionRightObj_.worldtransform_.translate_ = injectionRightPos_;
-
-	injectionRightObj_.worldtransform_.scale_ = { 0.75f,1.25f,1.0f };
+	// 右腕
+	rightArm_ = std::make_unique<RightArm>();
+	rightArm_->Initialize(camera_);
+	rightArm_->GetObject3D().parent_ = &objectBody_.worldtransform_;
+	rightArm_->GetObject3D().translate_.x = 2.5f;
 
 
 
 
-	// 影
-	objectSha_.Initialize();
-	objectSha_.SetCamera(camera_);
-	objectSha_.SetModel("plane.obj");
-	objectSha_.model->modelData.material[0]->tex_.diffuseFilePath = "resources/Texture/aa.png";
-	objectSha_.model->modelData.material[0]->color = { 0.9f,0.0f,0.0f,1 };
-	objectSha_.worldtransform_.translate_ = position;
-	objectSha_.worldtransform_.scale_ = { 4,4,4 };
-	objectSha_.worldtransform_.rotate_.x = DegreesToRadians(-90);
-
-
-	
-	
-
-	
 
 	//particleManager_ = ParticleManager::GetInstance();
 	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", ModelManager::GetInstance()->FindModel("plane.obj"));
-	
-	
-	
-
-	
-
-
-
-	HpBer_ = std::make_unique<Sprite>();
-	HpBer_->Initialize("resources/Texture/Image.png");
-	HpBer_->SetSize({ 50,-float(hp) });
-	HpBer_->SetColor({ 0,1,0,1 });
-	HpBer_->SetPosition({ 100,650 });
 
 
 
 
 
 
-	
-	flag33 = false;
+
+
+
+
+
+
+
 
 
 
@@ -112,9 +84,9 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	dashEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
 	dashEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
 	dashEmitter_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	dashEmitter_->SetVelocityMinMax({},{});
-	dashEmitter_->SetPos({0,7,0});
-	dashEmitter_->SetCorner(16,0.5f);
+	dashEmitter_->SetVelocityMinMax({}, {});
+	dashEmitter_->SetPos({ 0,7,0 });
+	dashEmitter_->SetCorner(16, 0.5f);
 	dashEmitter_->transform_.rotate_.x = DegreesToRadians(90);
 
 }
@@ -123,8 +95,9 @@ void Player::Update()
 {
 	dashEmitter_->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
 
-
-
+	//Vector3 cameraF = camera_->GetForward() * 10;
+	// ライン
+	//LineCommon::GetInstance()->AddLine(leftArm_->GetObject3D().worldMat_.GetWorldPosition(), cameraF, {1,0,0,1});
 
 
 
@@ -139,41 +112,79 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
-		objectBase_.worldtransform_.translate_.x = moveLimit;
-	}
-	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
-	}
-	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
-	}
-	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
-	}
-
-	
+	//if (objectBase_.worldtransform_.translate_.x > moveLimit) {
+	//	objectBase_.worldtransform_.translate_.x = moveLimit;
+	//}
+	//if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
+	//	objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
+	//}
+	//if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
+	//	objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
+	//}
+	//if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
+	//	objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
+	//}
 
 
-	Gravity();
-	
+
+	if (leftArm_->GetIsAttract()) {
+
+		
+		objectBase_.worldtransform_.translate_ = Lerp(leftArm_->GetAttracPosition(), leftArm_->GetThreadPosition(), leftArm_->GetAttracTime_t());
+		
+		velocity_.x = leftArm_->GetVeloctiy().x * 10.0f;
+		velocity_.z = leftArm_->GetVeloctiy().z * 10.0f;
+	}
+	else {
+		if (leftArm_->GetIsInTheMiddle()) {
+			kGravityAcceleration = 9.8f * 2.0f;
+
+			if (rightArm_->GetIsShot()) {
+				velocity_ = rightArm_->GetVeloctiy();
+			}
+		}
+		else {
+			kGravityAcceleration = 9.8f * 2.0f;
+
+			if (rightArm_->GetIsShot()) {
+				velocity_ = rightArm_->GetVeloctiy();
+			}
+			else {
+				Move();
+			}
+		}
+
+		
+
+		Gravity();
+
+		
+	}
+
+
+
+
+
+
 	dashEmitter_->Update();
 
 	objectBase_.Update();
 	objectBody_.Update();
-	
-	injectionLeftObj_.Update();
-	injectionRightObj_.Update();
 
-	
+
 	objectReticle_.Update();
-	objectSha_.Update();
 
-	
+
+	leftArm_->Update();
+	rightArm_->Update();
 }
 
 void Player::Draw()
 {
+	leftArm_->Draw();
+
+	rightArm_->Draw();
+
 
 	objectBody_.Draw();
 }
@@ -181,13 +192,13 @@ void Player::Draw()
 void Player::DrawP()
 {
 
-	
+
 }
 
 void Player::Draw2D()
 {
 
-	
+
 
 }
 
@@ -292,7 +303,7 @@ void Player::Move()
 		}
 	}
 
-	
+
 }
 
 void Player::Gravity() {
@@ -300,7 +311,7 @@ void Player::Gravity() {
 	//velocity_.y = graVelo;
 
 	// 重力加速度
-	const float kGravityAcceleration = 4.4f;
+	
 
 	// 加速度ベクトル
 	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
@@ -314,13 +325,15 @@ void Player::Gravity() {
 		objectBase_.worldtransform_.translate_.y = groundY;
 		graVelo = 0;
 		isJamp = false;
+
+		leftArm_->GetIsInTheMiddle() = false;
 	}
 }
 
 void Player::AddMove()
 {
-	if(isAlive)
-	objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
+	if (isAlive)
+		objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
 }
 
 

@@ -5,12 +5,12 @@
 
 uint32_t Enemy::nextSerialNumber = 0;
 
-Enemy::Enemy() {
-	// シリアル番号を振る
-	serialNumber = nextSerialNumber;
-	// 次の番号を1加算
-	++nextSerialNumber;
-}
+//Enemy::Enemy() {
+//	// シリアル番号を振る
+//	serialNumber = nextSerialNumber;
+//	// 次の番号を1加算
+//	++nextSerialNumber;
+//}
 
 void Enemy::Initialize(Vector3 position, float HP, Camera* camera)
 {
@@ -22,12 +22,13 @@ void Enemy::Initialize(Vector3 position, float HP, Camera* camera)
 	transBase_.translate_ = position;
 
 
-	object_.Initialize();
-	object_.SetModel("enemy2.obj");
-	object_.SetCamera(camera);
-	object_.worldtransform_.parent_ = &transBase_;
+	object_ = std::make_unique<Object3d>();
+	object_->Initialize();
+	object_->SetModel("enemy2.obj");
+	object_->SetCamera(camera);
+	object_->worldtransform_.parent_ = &transBase_;
 	//object_.worldtransform_.translate_ = position;
-	object_.worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
+	object_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
 
 
 
@@ -79,11 +80,11 @@ void Enemy::Update()
 #ifdef _DEBUG
 	ImGui::Begin("enemy");
 	{
-		Vector3 pos = object_.GetWorldPosition();
+		Vector3 pos = object_->GetWorldPosition();
 		float php = HP_;
 		bool pos3 = isAlive_;
 		ImGui::InputFloat3("tanslateW", &pos.x);
-		Vector2 pos2d = object_.GetScreenPosition();
+		Vector2 pos2d = object_->GetScreenPosition();
 		ImGui::InputFloat2("screen", &pos2d.x);
 		/*ImGui::InputFloat("hp", &php);
 		ImGui::Checkbox("isAlive", &pos3);*/
@@ -128,7 +129,7 @@ void Enemy::Update()
 		dustEmit_->Update();
 	}
 
-	object_.Update();
+	object_->Update();
 	transBase_.Update();
 	objectSha_.Update();
 
@@ -139,7 +140,7 @@ void Enemy::Draw()
 {
 	// 生きていたら
 	if (isAlive_) {
-		object_.Draw();
+		object_->Draw();
 		objectSha_.Draw();
 	}
 }
@@ -153,7 +154,7 @@ void Enemy::DrawP()
 void Enemy::Draw2D()
 {
 	if (isLockOn) {
-		icon_lockOn->SetPosition(object_.GetScreenPosition());
+		icon_lockOn->SetPosition(object_->GetScreenPosition());
 
 		icon_lockOn->Update();
 		icon_lockOn->Draw();
@@ -162,11 +163,11 @@ void Enemy::Draw2D()
 	if (isAlive_) {
 
 		backHpBer_->SetSize({ MaxHP_ ,15.0f });
-		backHpBer_->SetPosition(object_.GetScreenPosition() + Vector2{ 0,-30 });
+		backHpBer_->SetPosition(object_->GetScreenPosition() + Vector2{ 0,-30 });
 		backHpBer_->Update();
 		backHpBer_->Draw();
 
-		hpBer_->SetPosition(object_.GetScreenPosition() + Vector2{ 0,-27.5f });
+		hpBer_->SetPosition(object_->GetScreenPosition() + Vector2{ 0,-27.5f });
 		hpBer_->SetSize({ (HP_ * 0.95f),10.0f });
 		hpBer_->Update();
 		hpBer_->Draw();
@@ -195,7 +196,7 @@ void Enemy::Move() {
 	// Y軸周り角度
 	transBase_.rotate_.y = std::atan2(sub.x, sub.z);
 
-	if (Distance(player_->GetCenterPosition(), object_.GetWorldPosition()) >= 5) {
+	if (Distance(player_->GetCenterPosition(), object_->GetWorldPosition()) >= 5) {
 
 		// 移動
 		transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());
@@ -285,7 +286,7 @@ void Enemy::OnCollision(Collider* other)
 
 Vector3 Enemy::GetCenterPosition() const
 {
-	return object_.GetWorldPosition();
+	return object_->GetWorldPosition();
 }
 
 float Enemy::Timer() const
@@ -303,8 +304,8 @@ void Enemy::Shake()
 	float zShake = float(z) / static_cast<float>(10);
 
 
-	object_.worldtransform_.translate_.x = xShake;
-	object_.worldtransform_.translate_.z = zShake;
+	object_->worldtransform_.translate_.x = xShake;
+	object_->worldtransform_.translate_.z = zShake;
 
 }
 
@@ -316,7 +317,7 @@ void Enemy::InitParticle()
 	groundRightEmit_->Initialize("groundRight", "enemyGround");
 	groundRightEmit_->GetFrequency() = 0.15f;
 	groundRightEmit_->SetCount(1);
-	groundRightEmit_->SetParent(object_.worldtransform_);
+	groundRightEmit_->SetParent(object_->worldtransform_);
 	groundRightEmit_->SetPos({ -1,-0.5f,0 });
 	groundRightEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	groundRightEmit_->SetLifeTimeMinMax(0.4f, 0.7f);
@@ -328,7 +329,7 @@ void Enemy::InitParticle()
 	groundLeftEmit_->Initialize("groundLeft", "enemyGround");
 	groundLeftEmit_->GetFrequency() = 0.15f;
 	groundLeftEmit_->SetCount(1);
-	groundLeftEmit_->SetParent(object_.worldtransform_);
+	groundLeftEmit_->SetParent(object_->worldtransform_);
 	groundLeftEmit_->SetPos({ 1,-0.5f,0 });
 	groundLeftEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	groundLeftEmit_->SetLifeTimeMinMax(0.4f, 0.7f);
@@ -340,7 +341,7 @@ void Enemy::InitParticle()
 	dustEmit_->Initialize("dust", "enemyGround");
 	dustEmit_->GetFrequency() = 0.25f;
 	dustEmit_->SetCount(3);
-	dustEmit_->SetParent(object_.worldtransform_);
+	dustEmit_->SetParent(object_->worldtransform_);
 	dustEmit_->SetPos({ 0,1.1f,-0.45f });
 	dustEmit_->SetRengeMinMax({0,0,0},{0,0,0});
 	dustEmit_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
@@ -353,7 +354,7 @@ void Enemy::InitParticle()
 	starEmit_->Initialize("dust", "hitStar");
 	starEmit_->GetFrequency() = 0.0f;
 	starEmit_->SetCount(1);
-	starEmit_->SetParent(object_.worldtransform_);
+	starEmit_->SetParent(object_->worldtransform_);
 	starEmit_->SetPos({ 0,0.0f,0.0f });
 	starEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	starEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -367,7 +368,7 @@ void Enemy::InitParticle()
 	traiEmit_->Initialize("dust", "hitTrai");
 	traiEmit_->GetFrequency() = 0.0f;
 	traiEmit_->SetCount(5);
-	traiEmit_->SetParent(object_.worldtransform_);
+	traiEmit_->SetParent(object_->worldtransform_);
 	traiEmit_->SetPos({ 0,0.0f,0.0f });
 	traiEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	traiEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -382,7 +383,7 @@ void Enemy::InitParticle()
 	hitEmit_->Initialize("dust", "hit");
 	hitEmit_->GetFrequency() = 0.0f;
 	hitEmit_->SetCount(10);
-	hitEmit_->SetParent(object_.worldtransform_);
+	hitEmit_->SetParent(object_->worldtransform_);
 	hitEmit_->SetPos({ 0,0.0f,0.0f });
 	hitEmit_->SetRotateMinMax(-DegreesToRadians({ 90,90,90 }), DegreesToRadians({ 90,90,90 }));
 	hitEmit_->SetLifeTimeMinMax(0.5f, 0.6f);
@@ -399,7 +400,7 @@ void Enemy::InitParticle()
 	tireEmit_->Initialize("", "enemyTire");
 	tireEmit_->GetFrequency() = 0.0f;
 	tireEmit_->SetCount(1);
-	tireEmit_->SetParent(object_.worldtransform_);
+	tireEmit_->SetParent(object_->worldtransform_);
 	tireEmit_->SetPos({ 0,0,0 });
 	tireEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	tireEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -419,7 +420,7 @@ void Enemy::InitParticle()
 	ductEmit_->Initialize("", "enemyDuct");
 	ductEmit_->GetFrequency() = 0.0f;
 	ductEmit_->SetCount(1);
-	ductEmit_->SetParent(object_.worldtransform_);
+	ductEmit_->SetParent(object_->worldtransform_);
 	ductEmit_->SetPos({ 0,0,0 });
 	ductEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	ductEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -438,7 +439,7 @@ void Enemy::InitParticle()
 	fenceEmit_->Initialize("", "enemyFence");
 	fenceEmit_->GetFrequency() = 0.0f;
 	fenceEmit_->SetCount(1);
-	fenceEmit_->SetParent(object_.worldtransform_);
+	fenceEmit_->SetParent(object_->worldtransform_);
 	fenceEmit_->SetPos({ 0,0,0 });
 	fenceEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	fenceEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -458,7 +459,7 @@ void Enemy::InitParticle()
 	gearEmit_->Initialize("", "enemyGear");
 	gearEmit_->GetFrequency() = 0.0f;
 	gearEmit_->SetCount(5);
-	gearEmit_->SetParent(object_.worldtransform_);
+	gearEmit_->SetParent(object_->worldtransform_);
 	gearEmit_->SetPos({ 0,0,0 });
 	gearEmit_->SetVelocityMinMax({ -2,3,-2 }, { 2, 4, 2 });
 	gearEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -480,7 +481,7 @@ void Enemy::InitParticle()
 	plankEmit_->Initialize("", "enemyPlank");
 	plankEmit_->GetFrequency() = 0.0f;
 	plankEmit_->SetCount(10);
-	plankEmit_->SetParent(object_.worldtransform_);
+	plankEmit_->SetParent(object_->worldtransform_);
 	plankEmit_->SetPos({ 0,0,0 });
 	plankEmit_->SetVelocityMinMax({ -2,2,-2 }, { 2, 3, 2 });
 	plankEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -515,7 +516,7 @@ void Enemy::HitStpoTime()
 		Shake();
 	}
 	else {
-		object_.worldtransform_.translate_ = {0,0,0};
+		object_->worldtransform_.translate_ = {0,0,0};
 		timeSpeed_ = 1.0f;
 	}
 }

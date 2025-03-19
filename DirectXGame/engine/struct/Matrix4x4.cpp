@@ -262,16 +262,19 @@ Matrix4x4 MakeRotateYMatrix(float rotate) {
 
 	result.m[0][0] = std::cos(rotate);
 	result.m[0][1] = 0;
-	result.m[0][2] = -std::sin(rotate);;
+	result.m[0][2] = -std::sin(rotate);  // 右手座標系では -sin、左手座標系では +sin
 	result.m[0][3] = 0;
+
 	result.m[1][0] = 0;
 	result.m[1][1] = 1;
 	result.m[1][2] = 0;
 	result.m[1][3] = 0;
-	result.m[2][0] = std::sin(rotate);
+
+	result.m[2][0] = std::sin(rotate);  // 左手座標系での回転方向を修正
 	result.m[2][1] = 0;
 	result.m[2][2] = std::cos(rotate);
 	result.m[2][3] = 0;
+
 	result.m[3][0] = 0;
 	result.m[3][1] = 0;
 	result.m[3][2] = 0;
@@ -432,36 +435,42 @@ Matrix4x4 Transpose(const Matrix4x4& m) {
 	return result;
 }
 //アフィン変換
-Matrix4x4 MakeAffineMatrix(const  Vector3& scale, const  Vector3& rotate, const  Vector3& translate) {
+// アフィン変換（左手座標系対応）
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
 	Matrix4x4 result{};
 
+	// X, Y, Z軸それぞれの回転行列を生成
 	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
 	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
 	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
+
+	// XYZ回転行列を合成
 	Matrix4x4 rotateXYZMatrix = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
 
-
+	// スケーリングを適用
 	result.m[0][0] = scale.x * rotateXYZMatrix.m[0][0];
 	result.m[0][1] = scale.x * rotateXYZMatrix.m[0][1];
 	result.m[0][2] = scale.x * rotateXYZMatrix.m[0][2];
 	result.m[0][3] = 0;
+
 	result.m[1][0] = scale.y * rotateXYZMatrix.m[1][0];
 	result.m[1][1] = scale.y * rotateXYZMatrix.m[1][1];
 	result.m[1][2] = scale.y * rotateXYZMatrix.m[1][2];
 	result.m[1][3] = 0;
+
 	result.m[2][0] = scale.z * rotateXYZMatrix.m[2][0];
 	result.m[2][1] = scale.z * rotateXYZMatrix.m[2][1];
 	result.m[2][2] = scale.z * rotateXYZMatrix.m[2][2];
 	result.m[2][3] = 0;
+
+	// 平行移動を適用
 	result.m[3][0] = translate.x;
 	result.m[3][1] = translate.y;
 	result.m[3][2] = translate.z;
 	result.m[3][3] = 1;
 
-	//SafeMatrix(result);
-
 	return result;
-};
+}
 //正射影行列
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
 	Matrix4x4 result{};

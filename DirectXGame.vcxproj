@@ -108,9 +108,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Enemy.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Enemy\EnemyManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Player\LeftArm.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Player.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Player\RightArm.cpp" />
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
@@ -385,9 +389,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Enemy\BaseEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Enemy.h" />
+    <ClInclude Include="DirectXGame\application\base\Enemy\EnemyManager.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\LeftArm.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Player.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\RightArm.h" />
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />

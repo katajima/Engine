@@ -14,28 +14,22 @@ void GamePlayScene::Initialize()
 	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
 
 
-
-	player_ = std::make_unique<Player>();
-	player_->Initialize(Vector3(0, 2, -40), camera.get());
-
-
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize();
+
+	player_ = std::make_unique<Player>();
+	player_->Initialize(Vector3(0, 2, -40), &followCamera_->GetViewProjection());
+
+
+
 	followCamera_->SetTarget(&player_->GetObject3D());
 
-	player_->SetCamera(camera.get());
+	player_->SetCamera(&followCamera_->GetViewProjection());
 	player_->SetFollowCamera(followCamera_.get());
 	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 
 
-	for (int i = 0; i < 15; i++) {
-		auto enemy = std::make_unique<Enemy>();
-		Vector3 randPos = { float(rand() % 41 - 20),2,float(rand() % 40) };
-		enemy->Initialize(randPos, 100, camera.get());
-		enemy->SetPlayer(player_.get());
-		enemy->SetFollowCamera(followCamera_.get());
-		enemys_.push_back(std::move(enemy));
-	}
+
 
 	ocean_ = std::make_unique<Ocean>();
 	ocean_->Initialize({ 10000,10000 });
@@ -44,13 +38,13 @@ void GamePlayScene::Initialize()
 	ocean_->transform.translate.y = -10;
 	ocean_->material->color = { 0,0,0.57f,1 };
 	ocean_->material->color.a = 0.95f;
-	
+
 
 	tail = std::make_unique<Object3d>();
 	tail->Initialize();
 	tail->SetModel("renga.gltf");
 	tail->SetCamera(camera.get());
-	tail->worldtransform_.scale_ = { 4,4,4 };
+	tail->worldtransform_.scale_ = { 10,10,10 };
 
 	tail2 = std::make_unique<Object3d>();
 	tail2->Initialize();
@@ -77,20 +71,19 @@ void GamePlayScene::Initialize()
 		obj->Initialize();
 		obj->SetModel("warehouse.gltf");
 		obj->SetCamera(camera.get());
-		obj->worldtransform_.scale_ = { 2, 2, 2 };		
+		obj->worldtransform_.scale_ = { 2, 2, 2 };
 		obj->worldtransform_.translate_ = warePos[i];
 		obj->worldtransform_.rotate_.y = DegreesToRadians(90);
-		
-		
+
+
 		warehouseObject.push_back(std::move(obj));
 	}
 
-	//warehouseObject = std::make_unique<Object3d>();
-	//warehouseObject->Initialize();
-	//warehouseObject->SetModel("warehouse.gltf");
-	//warehouseObject->SetCamera(camera.get());
-	//warehouseObject->worldtransform_.scale_ = { 2,2,2 };
-	//warehouseObject->worldtransform_.translate_ = { 300,0,50 };
+	enemyManager_ = std::make_unique<EnemyManager>();
+	enemyManager_->Initialize(camera.get(), followCamera_.get(), player_.get());
+
+	//enemyManager_->AddMoveTarget(100, { 10,2,10 });
+
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
@@ -98,11 +91,11 @@ void GamePlayScene::Initialize()
 
 	InitializeResources();
 
-	
+
 
 	LoadLevelData();
 
-	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
+	LineCommon::GetInstance()->SetDefaltCamera(&followCamera_->GetViewProjection());
 }
 
 
@@ -139,7 +132,7 @@ void GamePlayScene::InitializeResources()
 	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
 
 
-	
+
 
 
 	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
@@ -148,19 +141,19 @@ void GamePlayScene::InitializeResources()
 	// グループを追加する 
 	GlobalVariables::GetInstance()->CreateGroup(gropName);
 
-	
+
 
 	emit_ = std::make_unique<ParticleEmitter>();
 	emit_->Initialize("groundRtttight", "dustt");
 	emit_->GetFrequency() = 0.5f;
 	emit_->SetCount(200);
 	emit_->SetPos({ 200,40,200 });
-	emit_->SetVelocityMinMax(-Vector3{0.2f,0.2f,0.2f }, { 0.2f, 0.2f, 0.2f });
+	emit_->SetVelocityMinMax(-Vector3{ 0.2f,0.2f,0.2f }, { 0.2f, 0.2f, 0.2f });
 	emit_->SetLifeTimeMinMax(10.4f, 10.7f);
 	emit_->SetIsAlpha(true);
 	emit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.2f,0.2f,0.2f });
 	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
-	emit_->SetRengeMinMax({-400,-100,-400}, { 400,100,400 });
+	emit_->SetRengeMinMax({ -400,-100,-400 }, { 400,100,400 });
 
 
 
@@ -302,7 +295,7 @@ void GamePlayScene::ApplyGlobalVariables()
 
 	}
 
-	
+
 
 }
 
@@ -312,14 +305,11 @@ void GamePlayScene::CheckAllCollisions()
 	collisionManager_->Reset();
 	// コライダーをリストに登録
 	collisionManager_->AddCollider(player_.get());
-	
 
-	
 
-	//// 敵全てについて
-	for (const std::unique_ptr<Enemy>& enemy : enemys_) {
-		collisionManager_->AddCollider(enemy.get());
-	}
+
+
+
 
 	// 衝突判定
 	collisionManager_->CheckAllCollisions();
@@ -345,7 +335,19 @@ void GamePlayScene::UpdateImGui()
 	ImGui::End();
 
 	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("Camera")) {
+	if (ImGui::CollapsingHeader("followCamera")) {
+		ImGui::InputFloat3("Rotate", &followCamera_->GetViewProjection().transform_.rotate.x);
+		Vector3 degree = RadiansToDegrees(followCamera_->GetViewProjection().transform_.rotate);
+		ImGui::InputFloat3("Degree", &degree.x);
+		Vector3 forward = followCamera_->GetViewProjection().GetForward();
+		ImGui::InputFloat3("forward", &forward.x);
+
+
+		LineCommon::GetInstance()->AddLine(player_->GetLeftPos(), player_->GetLeftPos() + (forward * 100), { 1,0,0,1 });
+
+	}
+
+	/*if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
 		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);
 		ImGui::Checkbox("flag", &flag);
@@ -367,16 +369,16 @@ void GamePlayScene::UpdateImGui()
 		}
 
 
-	}
+	}*/
 
-	if (ImGui::TreeNode("Test")) {
-		ImGui::Text("Camera1");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		//ImGui::TreePop();
-		ImGui::Text("Camera2");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		ImGui::TreePop();
-	}
+	//if (ImGui::TreeNode("Test")) {
+	//	ImGui::Text("Camera1");
+	//	ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
+	//	//ImGui::TreePop();
+	//	ImGui::Text("Camera2");
+	//	ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
+	//	ImGui::TreePop();
+	//}
 
 
 	ImGui::End();
@@ -423,11 +425,12 @@ void GamePlayScene::Update()
 
 	// プレイヤー
 	//if (player_->GetAlive()) {
-		player_->Update();
+	player_->Update();
 
 	//}
-	
-		
+
+	enemyManager_->Update();
+
 
 	/// レールカメラ
 	// カメラの回転を設定
@@ -454,7 +457,7 @@ void GamePlayScene::Update()
 
 
 
-	
+
 
 
 
@@ -463,20 +466,20 @@ void GamePlayScene::Update()
 	tail2->Update();
 	sky.Update();
 	for (int i = 0; i < warehouseObject.size(); i++) {
-		warehouseObject[i]->Update();
+		//	warehouseObject[i]->Update();
 	}
 
 	ocean_->Update();
 
 	//moveLimitEmitter_->Update();
-	emit_->Update();
+	//emit_->Update();
 	// デバック表示用にワールドトランスフォームを更新
 	collisionManager_->UpdateWorldTransform();
 
 
 	player_->SetCamera(camera.get());
 
-	
+
 	CheckAllCollisions();
 }
 
@@ -490,14 +493,7 @@ void GamePlayScene::BehaviorPhase1Initialize()
 
 void GamePlayScene::BehaviorPhase1Update()
 {
-	// 敵
-	count = 0;
-	for (int i = 0; i < enemys_.size(); i++) {
-		//enemys_[i]->Update();
-		if (!enemys_[i]->GetAlive()) {
-			count++;
-		}
-	}
+
 }
 
 void GamePlayScene::BehaviorPhase2Initialize()
@@ -526,36 +522,34 @@ void GamePlayScene::Finalize()
 // 3D描画
 void GamePlayScene::Draw3D()
 {
-	sky.Draw();
-	
-	
-	
-	tail->Draw(); 
-	tail2->Draw(); 
+	//sky.Draw();
+
+
+
+	tail->Draw();
+	//tail2->Draw(); 
 	for (int i = 0; i < warehouseObject.size(); i++) {
-		warehouseObject[i]->Draw();
+		//	warehouseObject[i]->Draw();
 	}
 
 	////3Dオブジェクトの描画
 
-	
+
 	player_->Draw();
 
-	// 敵
-	for (int i = 0; i < enemys_.size(); i++) {
-		//enemys_[i]->Draw();
-	}
+
+	enemyManager_->Draw();
 
 
 	// パーティクル
 	player_->DrawP();
 
-	
+
 	ParticleManager::GetInstance()->GetInstance()->Draw();
 	//ParticleManager::GetInstance()->GetInstance()->DrawAABB();
 
-	
-	ocean_->Draw();
+
+	//ocean_->Draw();
 
 
 	// 当たり判定の表示

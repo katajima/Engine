@@ -22,15 +22,8 @@ void FollowCamera::Update()
 			camera_.transform_.rotate.y += Input::GetInstance()->GetGamePadRightStick().x * kRotateSpeed;
 			camera_.transform_.rotate.x += Input::GetInstance()->GetGamePadRightStick().y * kRotateSpeed;
 
-			if (camera_.transform_.rotate.x >= DegreesToRadians(60)) {
-				camera_.transform_.rotate.x = DegreesToRadians(60);
-			}
-			
-			if (camera_.transform_.rotate.x <= DegreesToRadians(0)) {
-				camera_.transform_.rotate.x = DegreesToRadians(0);
-			}
-
-
+			// X軸の制限
+			camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(-10), DegreesToRadians(60));
 		}
 		else {
 			if (Input::GetInstance()->IsPushKey(DIK_LEFT)) {
@@ -40,13 +33,16 @@ void FollowCamera::Update()
 				camera_.transform_.rotate.y += 0.01f;
 			}
 
-			if (camera_.transform_.rotate.x >= DegreesToRadians(60)) {
-				camera_.transform_.rotate.x = DegreesToRadians(60);
-			}
+			// X軸の制限
+			camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(0), DegreesToRadians(60));
+		}
 
-			if (camera_.transform_.rotate.x <= DegreesToRadians(0)) {
-				camera_.transform_.rotate.x = DegreesToRadians(0);
-			}
+		// Y軸を -180 ～ 180 に収める
+		if (camera_.transform_.rotate.y > DegreesToRadians(180)) {
+			camera_.transform_.rotate.y -= DegreesToRadians(360);
+		}
+		if (camera_.transform_.rotate.y < DegreesToRadians(-180)) {
+			camera_.transform_.rotate.y += DegreesToRadians(360);
 		}
 
 

@@ -29,6 +29,8 @@
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
 
+#include "DirectXGame/application/base/Enemy/EnemyManager.h"
+
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 {
@@ -134,7 +136,7 @@ private:
 
 	std::unique_ptr<Player> player_;
 
-	std::vector<std::unique_ptr<Enemy>> enemys_;
+	std::unique_ptr<EnemyManager> enemyManager_ = nullptr;
 
 	ParticleManager* particleManager_;
 

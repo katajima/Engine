@@ -123,9 +123,9 @@ void MyGame::Draw()
 	ParticleManager::GetInstance()->Draw();
 
 #ifdef _DEBUG
-	if (!SceneManager::GetInstance()->IsNowScene("GAMEPLAY")) {
+	//if (!SceneManager::GetInstance()->IsNowScene("GAMEPLAY")) {
 		LineCommon::GetInstance()->Draw();
-	}
+	//}
 #endif // _DEBUG
 
 	
@@ -251,8 +251,13 @@ void MyGame::InitializeResource()
 	ModelManager::GetInstance()->LoadModel("enemyGear.obj","enemyAll/gear"); // 歯車
 	ModelManager::GetInstance()->LoadModel("enemyFence.obj","enemyAll/fence"); // 柵
 	
-
+	///
+	/// プレイヤー
+	/// 
 	
+	ModelManager::GetInstance()->LoadModel("leftArm.obj", "player/leftArm"); // 左腕
+	ModelManager::GetInstance()->LoadModel("leftNeedle.obj", "player/leftNeedle"); // 左針
+
 
 	/// <summary>
 	/// パーティクル

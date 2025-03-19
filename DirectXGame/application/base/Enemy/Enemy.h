@@ -13,27 +13,29 @@
 
 #include"DirectXGame/engine/2d/Sprite.h"
 
+#include"BaseEnemy.h"
+
 class Player;
 class FollowCamera;
 
-class Enemy : public Collider
+class Enemy : public BaseEnemy
 {
 public:
 	// デフォルトコンストラクタ
-	Enemy();
+	//Enemy();
 
 	// 初期化
-	void Initialize(Vector3 position,float HP,Camera* camera);
+	void Initialize(Vector3 position,float HP,Camera* camera) override;
 	
 	// 毎フレーム更新
-	void Update();
+	void Update() override;
 
 	// 描画
-	void Draw();
+	void Draw() override;
 	//
-	void DrawP();
+	void DrawP() override;
 
-	void Draw2D();
+	void Draw2D() override;
 
 	// 移動
 	void Move();
@@ -55,16 +57,16 @@ public:
 	bool GetAlive() const { return isAlive_; }
 
 	// 3Dオブジェクトの参照を返す（変更可能）
-	Object3d& GetObject3D() { return object_; }
+	Object3d& GetObject3D() { return *object_.get(); }
 	// 3Dオブジェクトの参照を返す（読み取り専用）
 	//const Object3d& GetObjectTrans() const { return object_; }
 
-	Vector3& GetPostion() { return object_.worldtransform_.translate_; };
+	Vector3& GetPostion() { return object_->worldtransform_.translate_; };
 	float& GetHP() { return HP_; };
 	void AddDamege(float da) { HP_ -= da; };
 
 
-	void SetPostion(Vector3 pos) { object_.worldtransform_.translate_ = pos; }
+	void SetPostion(Vector3 pos) { object_->worldtransform_.translate_ = pos; }
 	uint32_t GetSerialNumber() const { return serialNumber; }
 
 	// 衝突を検出したら呼び出されるコールバック関数
@@ -109,7 +111,7 @@ private:
 
 private:
 	// オブジェクト
-	Object3d object_;
+ std::unique_ptr<Object3d> object_;
 	Object3d objectSha_;
 
 	WorldTransform transBase_;

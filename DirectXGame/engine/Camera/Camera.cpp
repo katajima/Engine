@@ -224,4 +224,29 @@ void Camera::SetShake(float time, Vector3 directionRange) {
 	shakeDirectionRange_ = directionRange;
 }
 
+Vector3 Camera::GetForward()
+{
+	Vector3 forward{};
+	// ビュー行列の Z 軸成分（第3列）を取得
+
+	if (transform_.rotate.y < DegreesToRadians(90) && transform_.rotate.y > DegreesToRadians(-90)) {
+		forward = {
+			-viewMatrix_.m[2][0], // X成分
+			-viewMatrix_.m[2][1], // Y成分
+			viewMatrix_.m[2][2]  // Z成分 (反転)
+		};
+	}
+	else {
+		forward = {
+			-viewMatrix_.m[2][0], // X成分
+			viewMatrix_.m[2][1], // Y成分
+			viewMatrix_.m[2][2]  // Z成分 (反転)
+		};
+	}
+	// 正規化
+	forward = Normalize(forward);
+
+	return forward;
+}
+
 
