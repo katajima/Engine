@@ -36,5 +36,7 @@ private:
 	//追従対象
 	const Object3d* target_ = nullptr;
 
+	Vector3 offset_;
+
 };
 

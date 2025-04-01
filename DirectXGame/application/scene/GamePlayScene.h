@@ -115,7 +115,7 @@ private:
 	Vector3 cameraDebugR;
 	
 
-	bool flag = true;
+	bool flag = false;
 	Object3d cameraObj_;
 
 	// 建物オブジェクト
@@ -129,7 +129,7 @@ private:
 	std::unique_ptr < Ocean> ocean_ = nullptr;
 	
 	//追従カメラ
-	std::unique_ptr<FollowCamera> followCamera_;
+	//std::unique_ptr<FollowCamera> followCamera_;
 
 
 	std::vector <Object3d*> objects;

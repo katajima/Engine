@@ -90,7 +90,7 @@ public:
 
 	void Shake();
 
-	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
+	//void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
 private:
 
@@ -155,7 +155,7 @@ private:
 	float kHitStopTimer;
 	float timeSpeed_ = 1.0f;
 
-	FollowCamera* followCamera_;
+	//FollowCamera* followCamera_;
 };
 
 

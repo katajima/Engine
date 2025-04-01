@@ -14,18 +14,18 @@ void GamePlayScene::Initialize()
 	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
 
 
-	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize();
+	//followCamera_ = std::make_unique<FollowCamera>();
+	//followCamera_->Initialize();
 
 	player_ = std::make_unique<Player>();
-	player_->Initialize(Vector3(0, 2, -40), &followCamera_->GetViewProjection());
+	player_->Initialize(Vector3(0, 2, -40), camera.get());
 
 
 
-	followCamera_->SetTarget(&player_->GetObject3D());
+	//followCamera_->SetTarget(&player_->GetObject3D());
 
-	player_->SetCamera(&followCamera_->GetViewProjection());
-	player_->SetFollowCamera(followCamera_.get());
+	//player_->SetCamera(&followCamera_->GetViewProjection());
+	//player_->SetFollowCamera(followCamera_.get());
 	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 
 
@@ -80,7 +80,7 @@ void GamePlayScene::Initialize()
 	}
 
 	enemyManager_ = std::make_unique<EnemyManager>();
-	enemyManager_->Initialize(camera.get(), followCamera_.get(), player_.get());
+	enemyManager_->Initialize(camera.get(), nullptr, player_.get());
 
 	//enemyManager_->AddMoveTarget(100, { 10,2,10 });
 
@@ -95,7 +95,7 @@ void GamePlayScene::Initialize()
 
 	LoadLevelData();
 
-	LineCommon::GetInstance()->SetDefaltCamera(&followCamera_->GetViewProjection());
+	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 }
 
 
@@ -105,8 +105,8 @@ void GamePlayScene::InitializeCamera()
 	camera = std::make_unique <Camera>();
 	camera->Initialize();
 	//camera = Camera::GetInstance();
-	camera->transform_.rotate = { 0.36f,0,0 };
-	camera->transform_.translate = { 5,32.5f,-59.2f };
+	camera->transform_.rotate = { DegreesToRadians(-270),0,0};
+	camera->transform_.translate = { 0,132.5f,0 };
 
 	cameraDebugT = camera->transform_.translate;
 	cameraDebugR = camera->transform_.rotate;
@@ -114,7 +114,7 @@ void GamePlayScene::InitializeCamera()
 	cameraT.y = 1.0f;
 
 
-	flag = true;
+	//flag = true;
 #ifdef _DEBUG
 
 	//flag = false;
@@ -336,15 +336,15 @@ void GamePlayScene::UpdateImGui()
 
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("followCamera")) {
-		ImGui::InputFloat3("Rotate", &followCamera_->GetViewProjection().transform_.rotate.x);
-		Vector3 degree = RadiansToDegrees(followCamera_->GetViewProjection().transform_.rotate);
-		ImGui::InputFloat3("Degree", &degree.x);
-		Vector3 forward = followCamera_->GetViewProjection().GetForward();
-		ImGui::InputFloat3("forward", &forward.x);
+		//ImGui::DragFloat3("Rotate", &followCamera_->GetViewProjection().transform_.rotate.x,0.01f);
+		//ImGui::DragFloat3("translate", &followCamera_->GetViewProjection().transform_.translate.x);
+		//Vector3 degree = RadiansToDegrees(followCamera_->GetViewProjection().transform_.rotate);
+		//ImGui::InputFloat3("Degree", &degree.x);
+		//Vector3 forward = followCamera_->GetViewProjection().GetForward();
+		//ImGui::InputFloat3("forward", &forward.x);
 
 
-		LineCommon::GetInstance()->AddLine(player_->GetLeftPos(), player_->GetLeftPos() + (forward * 100), { 1,0,0,1 });
-
+		
 	}
 
 	/*if (ImGui::CollapsingHeader("Camera")) {
@@ -398,7 +398,8 @@ void GamePlayScene::Update()
 	UpdateImGui();
 
 
-
+	camera->transform_.translate = player_->GetObject3D().GetWorldPosition();
+	camera->transform_.translate.y = 150;
 	if (behaviorRequest_) {
 		// ふるまいを変更する
 		behavior_ = behaviorRequest_.value();
@@ -436,12 +437,12 @@ void GamePlayScene::Update()
 	// カメラの回転を設定
 	if (flag) {
 
-		followCamera_->Update();
-		camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
-		camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
+		//followCamera_->Update();
+		//camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
+		//camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
 
 
-		ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
+		//ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
 		// 必要に応じて行列を更新
 		//camera->UpdateMatrix();
 	}

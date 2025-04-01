@@ -24,11 +24,6 @@
 
 
 
-///
-#include "LeftArm.h"
-#include "RightArm.h"
-
-
 
 
 ///< summary>
@@ -67,7 +62,6 @@ public:
 	virtual Vector3 GetCenterPosition() const;
 
 public:
-	Vector3 GetLeftPos() { return leftArm_->GetObject3D().worldMat_.GetWorldPosition(); }
 	
 
 private: // 移動
@@ -180,10 +174,7 @@ private:
 	std::unique_ptr<ParticleEmitter> dashEmitter_ = nullptr;
 
 
-	// 右腕(大針)
-	std::unique_ptr<RightArm> rightArm_ = nullptr;
-	// 左腕(糸)
-	std::unique_ptr<LeftArm> leftArm_ = nullptr;
+	
 
 };
 

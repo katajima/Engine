@@ -11,7 +11,7 @@ void EnemyManager::Initialize(Camera* camera, FollowCamera* followCamera, Player
 	
 	player_ = player;
 	camera_ =  camera;
-	followCamera_ = followCamera;
+	//followCamera_ = followCamera;
 }
 
 void EnemyManager::Update()
@@ -34,7 +34,7 @@ void EnemyManager::AddMoveTarget(float hp, Vector3 pos)
 {
 	std::unique_ptr<Enemy> enemy = std::make_unique<Enemy>();
 	enemy->Initialize(pos, hp, camera_);
-	enemy->SetFollowCamera(followCamera_);
+	//enemy->SetFollowCamera(followCamera_);
 	enemy->SetPlayer(player_);
 	baseEnemy_.push_back(std::move(enemy));
 }

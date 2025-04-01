@@ -5,13 +5,14 @@ void FollowCamera::Initialize()
 	//camera_ = Camera::GetInstance();
 	camera_.Initialize();
 	camera_.farClip_ = 5000.0f;
-	camera_.transform_.rotate.x = DegreesToRadians(90);
-	camera_.transform_.rotate.x = DegreesToRadians(20);
-
+	
+	//camera_.transform_.rotate.x = DegreesToRadians(0);
+	offset_ = { 0.0f, -15.0f, 0.0f };
 }
 
 void FollowCamera::Update()
 {
+	//camera_.transform_.rotate.x = DegreesToRadians(0);
 	//追従対象がいれば
 	if (target_) {
 		
@@ -20,10 +21,10 @@ void FollowCamera::Update()
 		if (Input::GetInstance()->IsControllerConnected())
 		{
 			camera_.transform_.rotate.y += Input::GetInstance()->GetGamePadRightStick().x * kRotateSpeed;
-			camera_.transform_.rotate.x += Input::GetInstance()->GetGamePadRightStick().y * kRotateSpeed;
+			//camera_.transform_.rotate.x += Input::GetInstance()->GetGamePadRightStick().y * kRotateSpeed;
 
 			// X軸の制限
-			camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(-10), DegreesToRadians(60));
+			//camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(-10), DegreesToRadians(90));
 		}
 		else {
 			if (Input::GetInstance()->IsPushKey(DIK_LEFT)) {
@@ -34,7 +35,7 @@ void FollowCamera::Update()
 			}
 
 			// X軸の制限
-			camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(0), DegreesToRadians(60));
+			//camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(0), DegreesToRadians(60));
 		}
 
 		// Y軸を -180 ～ 180 に収める
@@ -47,7 +48,7 @@ void FollowCamera::Update()
 
 
 		// 追従対象からカメラまでのオフセット
-		Vector3 offset = { 0.0f, 5.0f, -50.0f };
+		Vector3 offset = offset_;// cc
 
 		Matrix4x4 matrix = MakeRotateYMatrix(camera_.transform_.rotate.y);
 		Matrix4x4 matrix2 = MakeRotateXMatrix(camera_.transform_.rotate.x);

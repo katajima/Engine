@@ -38,23 +38,6 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 
-	// 左腕
-	leftArm_ = std::make_unique<LeftArm>();
-	leftArm_->Initialize(camera_);
-	leftArm_->GetObject3D().parent_ = &objectBody_.worldtransform_;
-	leftArm_->GetObject3D().translate_.x = -2.5f;
-	leftArm_->SetPlayer(this);
-
-	// 右腕
-	rightArm_ = std::make_unique<RightArm>();
-	rightArm_->Initialize(camera_);
-	rightArm_->GetObject3D().parent_ = &objectBody_.worldtransform_;
-	rightArm_->GetObject3D().translate_.x = 2.5f;
-
-
-
-
-
 	//particleManager_ = ParticleManager::GetInstance();
 	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", ModelManager::GetInstance()->FindModel("plane.obj"));
 
@@ -112,54 +95,28 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	//if (objectBase_.worldtransform_.translate_.x > moveLimit) {
-	//	objectBase_.worldtransform_.translate_.x = moveLimit;
-	//}
-	//if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
-	//	objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
-	//}
-	//if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
-	//	objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
-	//}
-	//if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
-	//	objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
-	//}
-
-
-
-	if (leftArm_->GetIsAttract()) {
-
-		
-		objectBase_.worldtransform_.translate_ = Lerp(leftArm_->GetAttracPosition(), leftArm_->GetThreadPosition(), leftArm_->GetAttracTime_t());
-		
-		velocity_.x = leftArm_->GetVeloctiy().x * 10.0f;
-		velocity_.z = leftArm_->GetVeloctiy().z * 10.0f;
+	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
+		objectBase_.worldtransform_.translate_.x = moveLimit;
 	}
-	else {
-		if (leftArm_->GetIsInTheMiddle()) {
-			kGravityAcceleration = 9.8f * 2.0f;
-
-			if (rightArm_->GetIsShot()) {
-				velocity_ = rightArm_->GetVeloctiy();
-			}
-		}
-		else {
-			kGravityAcceleration = 9.8f * 2.0f;
-
-			if (rightArm_->GetIsShot()) {
-				velocity_ = rightArm_->GetVeloctiy();
-			}
-			else {
-				Move();
-			}
-		}
-
-		
-
-		Gravity();
-
-		
+	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
 	}
+	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
+	}
+	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
+	}
+
+
+
+
+	Move();
+
+	Gravity();
+
+
+
 
 
 
@@ -175,15 +132,10 @@ void Player::Update()
 	objectReticle_.Update();
 
 
-	leftArm_->Update();
-	rightArm_->Update();
 }
 
 void Player::Draw()
 {
-	leftArm_->Draw();
-
-	rightArm_->Draw();
 
 
 	objectBody_.Draw();
@@ -311,7 +263,7 @@ void Player::Gravity() {
 	//velocity_.y = graVelo;
 
 	// 重力加速度
-	
+
 
 	// 加速度ベクトル
 	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
@@ -325,8 +277,6 @@ void Player::Gravity() {
 		objectBase_.worldtransform_.translate_.y = groundY;
 		graVelo = 0;
 		isJamp = false;
-
-		leftArm_->GetIsInTheMiddle() = false;
 	}
 }
 
