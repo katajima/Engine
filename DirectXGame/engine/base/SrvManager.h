@@ -18,6 +18,7 @@ public:
 	// デスクリプタハンドル計算
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle() { return descriptorHeap->GetGPUDescriptorHandleForHeapStart(); }
 
 	// SRV生成関数(テクスチャ用)
 	// SRV生成(テクスチャ用)

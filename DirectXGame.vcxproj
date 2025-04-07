@@ -120,12 +120,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Object3dInstansManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
+    <ClCompile Include="DirectXGame\engine\collider\2d\ColliderFanction2D.cpp" />
     <ClCompile Include="DirectXGame\engine\collider\3d\ColliderFanction3D.cpp" />
     <ClCompile Include="DirectXGame\engine\collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager2d.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\UAV\UavManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\math\Random.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp" />
@@ -209,6 +212,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="resources\shaders\Object3D\Object3dInstans.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="resources\shaders\Ocean\Ocean.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -266,6 +273,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -400,6 +419,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
     <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Object3dInstansManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
     <ClInclude Include="DirectXGame\engine\base\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
@@ -410,6 +430,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager2d.h" />
     <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h" />
     <ClInclude Include="DirectXGame\engine\math\LineCurveMath.h" />
+    <ClInclude Include="DirectXGame\engine\math\Random.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h" />

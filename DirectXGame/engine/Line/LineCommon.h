@@ -35,7 +35,7 @@ public:
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	void AddLine(Vector3 start, Vector3 end, Vector4 color);
+	void AddLine(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
 
 	void AddLightLine(PointLightData data);
 

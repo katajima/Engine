@@ -5,6 +5,7 @@
 Texture2D<float4> gTexture : register(t0);
 SamplerState sSampler : register(s0);
 
+
 ////------PixelShader------////
 struct PixelShaderOutput
 {

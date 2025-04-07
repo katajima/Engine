@@ -2,6 +2,8 @@
 //#include"DirectXGame/engine/struct/Quaternion.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 
+#include "DirectXGame/engine/math/Random.h"
+
 void TestScene::Initialize()
 {
 	//オーディオの初期化
@@ -43,8 +45,8 @@ void TestScene::Update()
 
 #ifdef _DEBUG
 	ImGui::Begin("primi2D");
-	ImGui::DragFloat2("pos",&primitive2d1_->position.x);
-	ImGui::DragFloat2("scale",&primitive2d1_->scale.x,0.1f);
+	ImGui::DragFloat2("pos", &primitive2d1_->position.x);
+	ImGui::DragFloat2("scale", &primitive2d1_->scale.x, 0.1f);
 	ImGui::DragFloat("rotate", &primitive2d1_->rotation, 0.01f);
 	ImGui::DragInt("segment", &segment);
 	ImGui::DragFloat("inRad", &inRad);
@@ -61,7 +63,7 @@ void TestScene::Update()
 	ImGui::Begin("engine");
 	ImGui::Checkbox("debugCamera", &isDebugCamera);
 
-	
+
 
 
 	if (isDebugCamera) {
@@ -175,15 +177,15 @@ void TestScene::Draw3D()
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		
+
 		multiy.Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		
+
 		skinningObject.Draw();
 		skinningObject2.Draw();
-		
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
 		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -203,8 +205,8 @@ void TestScene::Draw3D()
 		break;
 	}
 
-	
-	
+
+
 }
 
 void TestScene::Draw2D()
@@ -274,8 +276,8 @@ void TestScene::InitializeObject3D()
 	skinningObject.worldtransform_.translate_ = { 30,1,1 };
 	skinningObject.worldtransform_.scale_ = { 10,10,10 };
 	skinningObject.SetCamera(camera.get());
-	
-	
+
+
 	skinningObject2.Initialize();
 	skinningObject2.SetModel("walk.gltf");
 	skinningObject2.worldtransform_.translate_ = { -30,10,1 };
@@ -298,6 +300,50 @@ void TestScene::InitializeObject3D()
 	stairObject->Initialize();
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
+
+
+	tri2d.vertices[0] = { 10,0, };
+	tri2d.vertices[1] = { 10,10, };
+	tri2d.vertices[2] = { -10,0, };
+
+	Object3dInstansManager::GetInstance()->SetCamera(camera.get());
+
+	for (int i = 0; i < 100; i++) {
+		for (int j = 0; j < 100; j++) {
+			ObjectInstans obj{};
+			obj.Initialize();
+			obj.transform.translate_.x = float(10 * i);
+			obj.transform.translate_.z = float(10 * j);
+			obj.transform.scale_ = { 1,1,1 };
+
+
+			int  randdd = Random::RandomInt32_t(0,6);
+
+			//int  randdd = rand() % 6;
+
+
+			if (randdd == 0) {
+				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/uvChecker.png", obj);
+			}
+			else if (randdd == 1) {
+				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/renga.png", obj);
+			}
+			else if (randdd == 2) {
+				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/Image.png", obj);
+			}
+			else if (randdd == 3) {
+				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/ground.png", obj);
+			}
+			else if (randdd == 4) {
+				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/grass.png", obj);
+			}
+			else {
+				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/enemy.png", obj);
+			}
+		}
+	}
+
+
 }
 
 /// <summary>
@@ -321,7 +367,7 @@ void TestScene::InitializeObject2D()
 
 	///
 	primitive2d1_ = std::make_unique<Primitive2D>();
-	primitive2d1_->Initialize(Primitive2D::ShapeType::Ring,{1,1,1,1});
+	primitive2d1_->Initialize(Primitive2D::ShapeType::Ring, { 1,1,1,1 });
 	primitive2d1_->position = { 640,360 };
 	//primitive2d1_->rotation = DegreesToRadians(45);
 
@@ -449,10 +495,14 @@ void TestScene::InitializeOthers()
 
 
 
-	octree = std::make_unique<Octree>(AABB({-100,-100,-100},{100,100,100}),0);
-	octree->root->subdivide(4,4,4,10);
+	octree = std::make_unique<Octree>(AABB({ -100,-100,-100 }, { 100,100,100 }), 0);
+	octree->root->subdivide(4, 4, 4, 10);
 
 	octree->insert(*stairObject->GetMesh(0));// メッシュ挿入
+
+
+	world.Initialize();
+
 }
 
 #pragma endregion 各初期化
@@ -512,18 +562,54 @@ void TestScene::UpdateRoom04()
 {
 	skinningObject.UpdateSkinning();
 	skinningObject2.UpdateSkinning();
+
+	triCen;
+
+	Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
+	Vector3 b = { tri2d.vertices[1].x, 5 ,tri2d.vertices[1].y };
+	Vector3 c = { tri2d.vertices[2].x, 5 ,tri2d.vertices[2].y };
+
+
+	LineCommon::GetInstance()->AddLine(a, b, { 1,1,1,1 });
+	LineCommon::GetInstance()->AddLine(b, c, { 1,1,1,1 });
+	LineCommon::GetInstance()->AddLine(c, a, { 1,1,1,1 });
+
+
+	CornerSegment corner;// = { sphere2d.center }
+	corner.center.x = sphere2d.center.x;
+	corner.center.y = 5;
+	corner.center.z = sphere2d.center.y;
+
+	corner.radius = sphere2d.radius;
+	corner.segment = 16;
+
+
+	world.translate_.x = sphere2d.center.x;
+	world.translate_.z = sphere2d.center.y;
+
+	LineCommon::GetInstance()->AddLineCorner(corner, world);
+
+	int size = Object3dInstansManager::GetInstance()->GetSize();
+
+	ImGui::Begin("objectIns");
+	ImGui::DragInt("size", &size);
+	ImGui::End();
+
+
+	object_;
+
 }
 
 void TestScene::UpdateRoom05()
 {
-	LineCommon::GetInstance()->AddGrid(1000,1000,10,{1,1,1,1});
+	LineCommon::GetInstance()->AddGrid(1000, 1000, 10, { 1,1,1,1 });
 }
 
 void TestScene::UpdateRoom06()
 {
 
 	ImGui::Begin("oc");
-	
+
 	ImGui::DragFloat3("div", &div_.x);
 	ImGui::DragInt("maxDepth", &maxDepth);
 	ImGui::DragInt("depth", &octree->root->depth);
@@ -539,22 +625,22 @@ void TestScene::UpdateRoom06()
 		int y = static_cast<int>(div_.y);
 		int z = static_cast<int>(div_.z);
 
-		octree->root->subdivide(x,y,z, maxDepth);
+		octree->root->subdivide(x, y, z, maxDepth);
 	}
 	ImGui::End();
 	ImGui::Begin("capsule");
-	ImGui::DragFloat("rad",&capsule_.radius,0.1f);
-	ImGui::DragFloat3("origin",&capsule_.segment.origin.x,0.1f);
-	ImGui::DragFloat3("end",&capsule_.segment.end.x,0.1f);
+	ImGui::DragFloat("rad", &capsule_.radius, 0.1f);
+	ImGui::DragFloat3("origin", &capsule_.segment.origin.x, 0.1f);
+	ImGui::DragFloat3("end", &capsule_.segment.end.x, 0.1f);
 	ImGui::End();
-	
-	
 
 
 
 
-	
-	
+
+
+
+
 
 
 	//stairObject->LineMesh();

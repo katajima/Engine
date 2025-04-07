@@ -37,11 +37,11 @@ public:
 
 	void DrawCommonSetting(PSOType type);
 
+	void AllDraw();
+
 	void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
 
-	Camera* GetDefaltCamera() const { 
-		defaultCamera;
-		return defaultCamera; }
+	Camera* GetDefaltCamera() const { return defaultCamera; }
 
 
 	int32_t count = 0;

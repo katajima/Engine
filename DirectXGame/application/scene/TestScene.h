@@ -18,12 +18,19 @@
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Trail/TrailEffect.h"
+#include "DirectXGame/engine/3d/Object3dInstansManager.h"
+
 
 #include"DirectXGame/engine/Primitive/Primitive.h"
 #include "DirectXGame/engine/2d/Primitive2D.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 
 #include "DirectXGame/engine/collider/Octree/Octree.h"
+
+#include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
+#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+
+
 
 class TestScene : public BaseScene
 {
@@ -175,6 +182,16 @@ private:
 
 	Capsule capsule_ = Capsule{Vector3{},Vector3{},10};
 	Vector3 offset_ = { 0,0,0 };
+
+
+	Triangle2D tri2d = { Vector2{} ,Vector2{} ,Vector2{}};
+	Vector3 triCen = {0,0,0};
+
+	Sphere2D sphere2d{};
+	WorldTransform world{};
+
+	ObjectInstans object_;
+
 };
 
 
