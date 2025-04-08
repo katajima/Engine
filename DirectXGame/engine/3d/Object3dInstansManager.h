@@ -165,7 +165,7 @@ private:
 	std::unordered_map<std::string, ObjectGroup> objectGroups;
 
 
-	const uint32_t kNumMaxInstance = 12000;
+	const uint32_t kNumMaxInstance = 20000;
 
 	uint32_t numInstance{};
 

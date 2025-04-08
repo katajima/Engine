@@ -198,7 +198,7 @@ private:
 
 	ObjectInstans object_;
 
-	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(150, 150, 10.0f);
+	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(200, 200, 3.0f);
 	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
 	AStarPathfinder pathfinder;
 

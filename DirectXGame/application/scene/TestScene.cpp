@@ -542,15 +542,15 @@ void TestScene::InitializeOthers()
 
 	map->AddObstacleFromBox(box);
 	
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 500; i++) {
 
 
 		
 		Box boxs;
-		boxs.min_.x = Random::RandomFloat(10,500);
-		boxs.min_.y = Random::RandomFloat(10,500);
-		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + 30);
-		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + 30);
+		boxs.min_.x = Random::RandomFloat(50, map->GetWidth() * map->GetCellSize());
+		boxs.min_.y = Random::RandomFloat(50, map->GetHeight() * map->GetCellSize());
+		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + map->GetCellSize()* 3);
+		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + map->GetCellSize()* 3);
 
 
 		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} },goalObject->worldtransform_.translate_)) {
@@ -575,7 +575,7 @@ void TestScene::InitializeOthers()
 
 	pathfinder.FindPath(plyerPos, goalPos, path);
 
-	map->GetCellSize();
+	
 
 	for (int i = 0; i < map->GetWidth(); i++) {
 		for (int j = 0; j < map->GetHeight(); j++) {
@@ -591,10 +591,10 @@ void TestScene::InitializeOthers()
 			// 障害物だった場合、オブジェクトを生成
 			ObjectInstans obj{};
 			obj.Initialize();
-			obj.transform.translate_.x = float(10 * i) + 5;
+			obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
 			obj.transform.translate_.y = 10;
-			obj.transform.translate_.z = float(10 * j) + 5 ;
-			obj.transform.scale_ = { 5, 5, 5 };
+			obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
+			obj.transform.scale_ = map->GetCellSize() / 2.0f;
 
 			int randdd = Random::RandomInt32_t(0, 0);
 
@@ -824,7 +824,7 @@ void TestScene::UpdateRoom07()
 
 	pathfinder.DrawPath(11.0f);
 
-	map->DrawMapChip(10.0f);
+	//map->DrawMapChip(10.0f);
 }
 
 void TestScene::SwitchRoom()
