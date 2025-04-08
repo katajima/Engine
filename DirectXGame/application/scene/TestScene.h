@@ -30,7 +30,8 @@
 #include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 
-
+#include "DirectXGame/engine/math/MapChip.h"
+#include "DirectXGame/engine/math/AStarAlgorithm.h"
 
 class TestScene : public BaseScene
 {
@@ -109,6 +110,7 @@ private:
 	void UpdateRoom04();
 	void UpdateRoom05();
 	void UpdateRoom06();
+	void UpdateRoom07();
 
 	// 部屋切り替え
 	void SwitchRoom();
@@ -137,6 +139,10 @@ private:
 	Object3d skinningObject2;
 	Object3d tail;
 	Object3d multiy;
+
+	std::unique_ptr<Object3d> playerObject;
+	std::unique_ptr<Object3d> goalObject;
+
 
 	// オーシャンシェーダー
 	std::unique_ptr < Ocean> ocean_ = nullptr;
@@ -191,6 +197,10 @@ private:
 	WorldTransform world{};
 
 	ObjectInstans object_;
+
+	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(150, 150, 10.0f);
+	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
+	AStarPathfinder pathfinder;
 
 };
 

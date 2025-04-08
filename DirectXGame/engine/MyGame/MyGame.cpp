@@ -216,6 +216,7 @@ void MyGame::InitializeResource()
 	//ModelManager::GetInstance()->LoadModel("grass.gltf", "grass2");
 	ModelManager::GetInstance()->LoadModel("Ground.obj", "Ground");
 	ModelManager::GetInstance()->LoadModel("stair.obj");
+	ModelManager::GetInstance()->LoadModel("BoxBox.obj", "BoxAABB");
 
 
 

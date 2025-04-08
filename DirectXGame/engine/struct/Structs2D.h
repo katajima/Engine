@@ -166,6 +166,7 @@ struct Capsule2D
 
 struct OBB2D {
 	Vector2 center;
-	Vector2 orientations[3];
-	Vector2 size;
+	Vector2 halfSize;    // 半サイズ（軸方向）
+	Vector2 axisX;       // 単位ベクトル：ローカルX軸
+	Vector2 axisZ;       // 単位ベクトル：ローカルZ軸
 };

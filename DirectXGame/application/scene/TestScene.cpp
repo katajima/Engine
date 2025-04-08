@@ -112,6 +112,7 @@ void TestScene::Update()
 			InitializeRoom06();
 			break;
 		case TestScene::SceneBehavior::kSceneRoom07:
+			InitializeRoom07();
 			break;
 		case TestScene::SceneBehavior::kSceneRoom08:
 			break;
@@ -149,6 +150,7 @@ void TestScene::Update()
 		UpdateRoom06();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
+		UpdateRoom07();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
 		break;
@@ -194,6 +196,13 @@ void TestScene::Draw3D()
 		//stairObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
+
+		// プレイヤー
+		playerObject->Draw();
+		
+		// ゴール
+		goalObject->Draw();
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
 		break;
@@ -306,42 +315,59 @@ void TestScene::InitializeObject3D()
 	tri2d.vertices[1] = { 10,10, };
 	tri2d.vertices[2] = { -10,0, };
 
+	// プレイヤーオブジェクト
+	playerObject = std::make_unique<Object3d>();
+	playerObject->Initialize();
+	playerObject->SetModel("teapot.obj");
+	playerObject->SetCamera(camera.get());
+	playerObject->worldtransform_.translate_ = { 10,10,10 };
+	playerObject->worldtransform_.scale_ = 3;
+
+
+	// ゴールのオブジェクト
+	goalObject = std::make_unique<Object3d>();
+	goalObject->Initialize();
+	goalObject->SetModel("Sphere.obj");
+	goalObject->SetCamera(camera.get());
+	goalObject->worldtransform_.translate_ = { 200,10,200 };
+	goalObject->worldtransform_.scale_ = 3;
+
 	Object3dInstansManager::GetInstance()->SetCamera(camera.get());
 
-	for (int i = 0; i < 100; i++) {
-		for (int j = 0; j < 100; j++) {
-			ObjectInstans obj{};
-			obj.Initialize();
-			obj.transform.translate_.x = float(10 * i);
-			obj.transform.translate_.z = float(10 * j);
-			obj.transform.scale_ = { 1,1,1 };
+	//for (int i = 0; i < 100; i++) {
+	//	for (int j = 0; j < 100; j++) {
+	//		ObjectInstans obj{};
+	//		obj.Initialize();
+	//		obj.transform.translate_.x = float(10 * i);
+	//		obj.transform.translate_.z = float(10 * j);
+	//		obj.transform.scale_ = { 1,1,1 };
 
 
-			int  randdd = Random::RandomInt32_t(0,6);
+	//		int  randdd = Random::RandomInt32_t(0,6);
 
-			//int  randdd = rand() % 6;
+	//		//int  randdd = rand() % 6;
 
 
-			if (randdd == 0) {
-				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/uvChecker.png", obj);
-			}
-			else if (randdd == 1) {
-				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/renga.png", obj);
-			}
-			else if (randdd == 2) {
-				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/Image.png", obj);
-			}
-			else if (randdd == 3) {
-				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/ground.png", obj);
-			}
-			else if (randdd == 4) {
-				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/grass.png", obj);
-			}
-			else {
-				Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/enemy.png", obj);
-			}
-		}
-	}
+	//		if (randdd == 0) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/uvChecker.png", obj);
+	//		}
+	//		else if (randdd == 1) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/renga.png", obj);
+	//		}
+	//		else if (randdd == 2) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/Image.png", obj);
+	//		}
+	//		else if (randdd == 3) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/ground.png", obj);
+	//		}
+	//		else if (randdd == 4) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/grass.png", obj);
+	//		}
+	//		else {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/enemy.png", obj);
+	//		}
+	//	}
+	//}
 
 
 }
@@ -503,6 +529,97 @@ void TestScene::InitializeOthers()
 
 	world.Initialize();
 
+	Box box;
+	box.min_ = { 20,20 };
+	box.max_ = { 30,30 };
+
+	OBB2D obb2d{};
+	obb2d.center = { 100,100 };
+	obb2d.halfSize = { 100,10 };
+	obb2d.axisZ.x = 1.0f;
+
+	map->AddObstacleFromOBB2D(obb2d);
+
+	map->AddObstacleFromBox(box);
+	
+	for (int i = 0; i < 100; i++) {
+
+
+		
+		Box boxs;
+		boxs.min_.x = Random::RandomFloat(10,500);
+		boxs.min_.y = Random::RandomFloat(10,500);
+		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + 30);
+		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + 30);
+
+
+		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} },goalObject->worldtransform_.translate_)) {
+			continue;
+		}
+
+
+		map->AddObstacleFromBox(boxs);
+	}
+
+
+
+
+
+	pathfinder.SetMap(*map);
+
+	playerObject->Update();
+	goalObject->Update();
+
+	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
+	Vector2 goalPos = goalObject->GetWorldPosition().xz();
+
+	pathfinder.FindPath(plyerPos, goalPos, path);
+
+	map->GetCellSize();
+
+	for (int i = 0; i < map->GetWidth(); i++) {
+		for (int j = 0; j < map->GetHeight(); j++) {
+
+			// マップチップの種類を取得
+			MapCellType cell = map->GetCell(i, j);
+
+			// 障害物でないならスキップ
+			if (cell != MapCellType::Obstacle) {
+				continue;
+			}
+
+			// 障害物だった場合、オブジェクトを生成
+			ObjectInstans obj{};
+			obj.Initialize();
+			obj.transform.translate_.x = float(10 * i) + 5;
+			obj.transform.translate_.y = 10;
+			obj.transform.translate_.z = float(10 * j) + 5 ;
+			obj.transform.scale_ = { 5, 5, 5 };
+
+			int randdd = Random::RandomInt32_t(0, 0);
+
+			// オブジェクトを種類ごとに配置
+			if (randdd == 0) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/uvChecker.png", obj);
+			}
+			else if (randdd == 1) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
+			}
+			else if (randdd == 2) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/Image.png", obj);
+			}
+			else if (randdd == 3) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/ground.png", obj);
+			}
+			else if (randdd == 4) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/grass.png", obj);
+			}
+			else {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/enemy.png", obj);
+			}
+		}
+	}
+
 }
 
 #pragma endregion 各初期化
@@ -533,6 +650,10 @@ void TestScene::InitializeRoom06()
 {
 	spot->spot.position = { -100,-100,-100 };
 	point->point.position = { -100,-100,-100 };
+}
+
+void TestScene::InitializeRoom07()
+{
 }
 
 #pragma endregion 
@@ -650,6 +771,62 @@ void TestScene::UpdateRoom06()
 
 }
 
+void TestScene::UpdateRoom07()
+{
+	
+	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
+	Vector2 goalPos = goalObject->GetWorldPosition().xz();
+	int playerX, playerZ;
+	int goalX, goalZ;
+
+	// ワールド座標 -> マップ座標に変換
+	bool validPlayer = map->WorldToMap(plyerPos.x, plyerPos.y, playerX, playerZ);
+	bool validGoal = map->WorldToMap(goalPos.x, goalPos.y, goalX, goalZ);
+
+	if (validPlayer && validGoal &&
+		!map->IsBlocked(playerX, playerZ) &&
+		!map->IsBlocked(goalX, goalZ))
+	{
+		pathfinder.FindPath(plyerPos, goalPos, path);
+	
+	
+		// 進行方向を取得して正規化
+		Vector2 direction = pathfinder.GetDirectionToNextNode().Normalize();
+
+		// プレイヤーの位置を更新
+		float speed = 1.0f;  // 任意の速度
+		playerObject->worldtransform_.translate_.x += direction.x * speed;
+		playerObject->worldtransform_.translate_.z += direction.y * speed;
+	}
+
+
+	
+
+
+	Vector2 sosos =  Input::GetInstance()->GetGamePadLeftStick();
+
+
+
+	goalObject->worldtransform_.translate_.x += sosos.x * 2.0f;
+	goalObject->worldtransform_.translate_.z += sosos.y * 2.0f;
+
+	
+
+
+
+
+	ImGui::Begin("dnadjas");
+	ImGui::DragFloat3("goal",&goalObject->worldtransform_.translate_.x);
+	ImGui::End();
+
+	playerObject->Update();
+	goalObject->Update();
+
+	pathfinder.DrawPath(11.0f);
+
+	map->DrawMapChip(10.0f);
+}
+
 void TestScene::SwitchRoom()
 {
 #ifdef _DEBUG
@@ -673,6 +850,9 @@ void TestScene::SwitchRoom()
 		if (ImGui::Button("Room06")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom06;
 		}
+		if (ImGui::Button("Room07")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom07;
+		}
 
 	}
 	ImGui::End();
@@ -695,6 +875,9 @@ void TestScene::SwitchRoom()
 	}
 	if (input_->IsTriggerKey(DIK_6)) {
 		behaviorRequest_ = SceneBehavior::kSceneRoom06;
+	}
+	if (input_->IsTriggerKey(DIK_7)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom07;
 	}
 
 }

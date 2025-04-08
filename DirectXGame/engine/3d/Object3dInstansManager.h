@@ -74,6 +74,12 @@ public:
 		MODE_MUlLIPLY,
 	};
 
+	enum class MeshType
+	{
+		kPrimitiv,
+		kModel,
+	};
+
 	struct Object
 	{
 		WorldTransform transform;
@@ -117,11 +123,13 @@ public:
 
 	// パーティクルグループ作り(モデル)
 	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+	// パーティクルグループ作り(モデル)
+	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, Mesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
-	void AddObject(const std::string name, const std::string texName, ObjectInstans& object);
+	void AddObject(const std::string name, const std::string texName, ObjectInstans& object, MeshType type = MeshType::kModel);
 
 	int GetSize() { return static_cast<int>(objectGroups.size()); };
 

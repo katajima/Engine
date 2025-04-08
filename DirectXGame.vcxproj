@@ -128,6 +128,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager2d.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\UAV\UavManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\math\AStarAlgorithm.cpp" />
+    <ClCompile Include="DirectXGame\engine\math\MapChip.cpp" />
     <ClCompile Include="DirectXGame\engine\math\Random.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp" />
@@ -429,7 +431,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager2d.h" />
     <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h" />
+    <ClInclude Include="DirectXGame\engine\math\AStarAlgorithm.h" />
     <ClInclude Include="DirectXGame\engine\math\LineCurveMath.h" />
+    <ClInclude Include="DirectXGame\engine\math\MapChip.h" />
     <ClInclude Include="DirectXGame\engine\math\Random.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />

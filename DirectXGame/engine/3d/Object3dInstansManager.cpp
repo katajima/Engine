@@ -204,12 +204,68 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 	objectGroup.rasteType = rasteType;
 }
 
-
-void Object3dInstansManager::AddObject(const std::string name, const std::string texName, ObjectInstans& object)
+void Object3dInstansManager::CreateObject3dGroup(const std::string name, const std::string textureFilePath, Mesh* mesh, RasterizerType rasteType, BlendType blendType)
 {
+	if (objectGroups.contains(name)) {
+		return;
+	}
 
-	CreateObject3dGroup(name, texName,ModelManager::GetInstance()->FindModel(name));
+	ObjectGroup& objectGroup = objectGroups[name];
 
+	// 名前
+	objectGroup.name = name;
+	// モデル
+	//particleGroup.model = model;
+	objectGroup.mesh = mesh;
+	objectGroup.mesh->UpdateVertexBuffer();
+	objectGroup.mesh->UpdateIndexBuffer();
+
+	
+	// マテリアル
+	//objectGroup.material = std::make_unique<Material>();
+	//objectGroup.material->Initialize(dxCommon_);
+	//objectGroup.material->tex_.diffuseFilePath = textureFilePath;
+	//objectGroup.material->LoadTex();
+
+
+	// GPUリソースの作成
+	objectGroup.resource = dxCommon_->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
+	// マッピング
+	objectGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&objectGroup.instanceData));
+	// 初期化
+	for (uint32_t i = 0; i < kNumMaxInstance; ++i) {
+		objectGroup.instanceData[i].World = MakeIdentity4x4();
+		objectGroup.instanceData[i].WVP = MakeIdentity4x4();
+		objectGroup.instanceData[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	// SRVの設定
+	// SRVインデックスの取得と設定
+	objectGroup.srvIndex = SrvManager::GetInstance()->Allocate();
+	objectGroup.instancingSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(objectGroup.srvIndex);
+	objectGroup.instancingSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(objectGroup.srvIndex);
+	SrvManager::GetInstance()->CreateSRVforStructuredBuffer(objectGroup.srvIndex, objectGroup.resource.Get(), kNumMaxInstance, sizeof(ObjectGPU));
+
+
+
+	// ブレンド
+	objectGroup.blendType = blendType;
+
+	// ラスタライザ
+	objectGroup.rasteType = rasteType;
+}
+
+
+void Object3dInstansManager::AddObject(const std::string name, const std::string texName, ObjectInstans& object, MeshType type)
+{
+	if (MeshType::kModel == type) {
+		CreateObject3dGroup(name, texName, ModelManager::GetInstance()->FindModel(name));
+
+	}
+	else {
+		//CreateObject3dGroup(name, texName);
+	}
+	
 	//Object object;
 	object.color = { 1,1,1,1 };
 	object.is = true;
@@ -277,7 +333,7 @@ void Object3dInstansManager::CreateGraphicsPipeline()
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = true;
 	// 透明オブジェクトの場合はデプス書き込みを無効化
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
