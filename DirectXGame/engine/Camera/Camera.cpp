@@ -58,6 +58,7 @@ void Camera::UpdateMatrix() {
 
 		ImGui::DragFloat3("Translate", &transform_.translate.x, 0.1f);
 		ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
+		ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
 		if (ImGui::Button("cameraPos")) {
 			transform_.translate = { 0,20,-175 };
 			transform_.rotate = { 0,0,0 };

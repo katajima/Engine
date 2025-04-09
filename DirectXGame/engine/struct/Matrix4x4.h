@@ -22,6 +22,17 @@ public:
 
 	Matrix4x4 operator*(const Matrix4x4& mat);
 
+    bool operator == (const Matrix4x4& mat) const {
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                if (m[i][j] != mat.m[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
         Matrix4x4 result;
 
@@ -124,3 +135,7 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 Matrix4x4 MakePerspectiveFovMatrix(float forY, float aspectRatio, float nearClip, float farClip);
 //ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float leht, float top, float width, float height, float minDepth, float maxDepth);
+
+
+
+Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const Vector3& translate);

@@ -57,4 +57,12 @@ static bool IsCollision(const Box& aabb1, const Box& aabb2)
 	return false;
 }
 
+bool IsCollision(const Triangle2D& triangle, const Sphere2D& sphere);
+
+bool PointInTriangle(const Vector2& pt, const Triangle2D& triangle);
+
+// 点と線分の最短距離
+float DistancePointToSegment(const Vector2& p, const Vector2& a, const Vector2& b);
+
+
 #pragma endregion

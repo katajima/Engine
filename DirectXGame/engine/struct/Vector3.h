@@ -21,6 +21,7 @@ struct Vector3 final {
 	}
 	
 	Vector2 xy() { return Vector2{ x,y }; }
+	Vector2 xz() { return Vector2{ x,z }; }
 
 
 

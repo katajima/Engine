@@ -45,6 +45,9 @@ void MyGame::Finalize()
 	ModelManager::GetInstance()->Finalize();
 	//
 	SceneManager::GetInstance()->Finalize();
+
+	Object3dInstansManager::GetInstance()->Finalize();
+
 	// 基底クラスの終了処理
 	Framework::Finalize();
 }
@@ -86,6 +89,8 @@ void MyGame::Update()
 
 	SceneManager::GetInstance()->Update();
 	
+	Object3dInstansManager::GetInstance()->Update();
+
 	ParticleManager::GetInstance()->Update();
 
 #ifdef _DEBUG
@@ -120,6 +125,10 @@ void MyGame::Draw()
 	
 	SceneManager::GetInstance()->Draw3D();
 
+	Object3dCommon::GetInstance();
+
+	Object3dInstansManager::GetInstance()->Draw();
+
 	ParticleManager::GetInstance()->Draw();
 
 #ifdef _DEBUG
@@ -152,6 +161,13 @@ void MyGame::InitializeResource()
 
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/Image.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Texture/grass.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Texture/ground.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Texture/renga.png");
+	TextureManager::GetInstance()->LoadTexture("resources/Texture/enemy.png");
+	
+
+
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/aa.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/aa2.png");
 	TextureManager::GetInstance()->LoadTexture("resources/Texture/aaa.png");
@@ -200,6 +216,7 @@ void MyGame::InitializeResource()
 	//ModelManager::GetInstance()->LoadModel("grass.gltf", "grass2");
 	ModelManager::GetInstance()->LoadModel("Ground.obj", "Ground");
 	ModelManager::GetInstance()->LoadModel("stair.obj");
+	ModelManager::GetInstance()->LoadModel("BoxBox.obj", "BoxAABB");
 
 
 
@@ -251,6 +268,9 @@ void MyGame::InitializeResource()
 	ModelManager::GetInstance()->LoadModel("enemyGear.obj","enemyAll/gear"); // 歯車
 	ModelManager::GetInstance()->LoadModel("enemyFence.obj","enemyAll/fence"); // 柵
 	
+
+
+	//Object3dInstansManager::GetInstance()->CreateObject3dGroup("");
 
 	
 

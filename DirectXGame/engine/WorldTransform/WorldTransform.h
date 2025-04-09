@@ -14,6 +14,7 @@ public:
 	Vector3 scale_ = { 1,1,1 };		// 拡縮
 	Vector3 rotate_ = {0,0,0};		// 回転
 	Vector3 translate_ = { 0,0,0 }; // 位置
+	
 
 	// マトリックス(現在)
 	Matrix4x4 worldMat_;

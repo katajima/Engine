@@ -2,6 +2,8 @@
 //#include"DirectXGame/engine/struct/Quaternion.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 
+#include "DirectXGame/engine/math/Random.h"
+
 void TestScene::Initialize()
 {
 	//オーディオの初期化
@@ -43,8 +45,8 @@ void TestScene::Update()
 
 #ifdef _DEBUG
 	ImGui::Begin("primi2D");
-	ImGui::DragFloat2("pos",&primitive2d1_->position.x);
-	ImGui::DragFloat2("scale",&primitive2d1_->scale.x,0.1f);
+	ImGui::DragFloat2("pos", &primitive2d1_->position.x);
+	ImGui::DragFloat2("scale", &primitive2d1_->scale.x, 0.1f);
 	ImGui::DragFloat("rotate", &primitive2d1_->rotation, 0.01f);
 	ImGui::DragInt("segment", &segment);
 	ImGui::DragFloat("inRad", &inRad);
@@ -61,7 +63,7 @@ void TestScene::Update()
 	ImGui::Begin("engine");
 	ImGui::Checkbox("debugCamera", &isDebugCamera);
 
-	
+
 
 
 	if (isDebugCamera) {
@@ -110,6 +112,7 @@ void TestScene::Update()
 			InitializeRoom06();
 			break;
 		case TestScene::SceneBehavior::kSceneRoom07:
+			InitializeRoom07();
 			break;
 		case TestScene::SceneBehavior::kSceneRoom08:
 			break;
@@ -147,6 +150,7 @@ void TestScene::Update()
 		UpdateRoom06();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
+		UpdateRoom07();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
 		break;
@@ -175,15 +179,15 @@ void TestScene::Draw3D()
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		
+
 		multiy.Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		
+
 		skinningObject.Draw();
 		skinningObject2.Draw();
-		
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
 		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -192,6 +196,13 @@ void TestScene::Draw3D()
 		//stairObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
+
+		// プレイヤー
+		playerObject->Draw();
+		
+		// ゴール
+		goalObject->Draw();
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
 		break;
@@ -203,8 +214,8 @@ void TestScene::Draw3D()
 		break;
 	}
 
-	
-	
+
+
 }
 
 void TestScene::Draw2D()
@@ -274,8 +285,8 @@ void TestScene::InitializeObject3D()
 	skinningObject.worldtransform_.translate_ = { 30,1,1 };
 	skinningObject.worldtransform_.scale_ = { 10,10,10 };
 	skinningObject.SetCamera(camera.get());
-	
-	
+
+
 	skinningObject2.Initialize();
 	skinningObject2.SetModel("walk.gltf");
 	skinningObject2.worldtransform_.translate_ = { -30,10,1 };
@@ -298,6 +309,67 @@ void TestScene::InitializeObject3D()
 	stairObject->Initialize();
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
+
+
+	tri2d.vertices[0] = { 10,0, };
+	tri2d.vertices[1] = { 10,10, };
+	tri2d.vertices[2] = { -10,0, };
+
+	// プレイヤーオブジェクト
+	playerObject = std::make_unique<Object3d>();
+	playerObject->Initialize();
+	playerObject->SetModel("teapot.obj");
+	playerObject->SetCamera(camera.get());
+	playerObject->worldtransform_.translate_ = { 10,10,10 };
+	playerObject->worldtransform_.scale_ = 3;
+
+
+	// ゴールのオブジェクト
+	goalObject = std::make_unique<Object3d>();
+	goalObject->Initialize();
+	goalObject->SetModel("Sphere.obj");
+	goalObject->SetCamera(camera.get());
+	goalObject->worldtransform_.translate_ = { 200,10,200 };
+	goalObject->worldtransform_.scale_ = 3;
+
+	Object3dInstansManager::GetInstance()->SetCamera(camera.get());
+
+	//for (int i = 0; i < 100; i++) {
+	//	for (int j = 0; j < 100; j++) {
+	//		ObjectInstans obj{};
+	//		obj.Initialize();
+	//		obj.transform.translate_.x = float(10 * i);
+	//		obj.transform.translate_.z = float(10 * j);
+	//		obj.transform.scale_ = { 1,1,1 };
+
+
+	//		int  randdd = Random::RandomInt32_t(0,6);
+
+	//		//int  randdd = rand() % 6;
+
+
+	//		if (randdd == 0) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/uvChecker.png", obj);
+	//		}
+	//		else if (randdd == 1) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/renga.png", obj);
+	//		}
+	//		else if (randdd == 2) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/Image.png", obj);
+	//		}
+	//		else if (randdd == 3) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/ground.png", obj);
+	//		}
+	//		else if (randdd == 4) {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/grass.png", obj);
+	//		}
+	//		else {
+	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/enemy.png", obj);
+	//		}
+	//	}
+	//}
+
+
 }
 
 /// <summary>
@@ -321,7 +393,7 @@ void TestScene::InitializeObject2D()
 
 	///
 	primitive2d1_ = std::make_unique<Primitive2D>();
-	primitive2d1_->Initialize(Primitive2D::ShapeType::Ring,{1,1,1,1});
+	primitive2d1_->Initialize(Primitive2D::ShapeType::Ring, { 1,1,1,1 });
 	primitive2d1_->position = { 640,360 };
 	//primitive2d1_->rotation = DegreesToRadians(45);
 
@@ -449,10 +521,105 @@ void TestScene::InitializeOthers()
 
 
 
-	octree = std::make_unique<Octree>(AABB({-100,-100,-100},{100,100,100}),0);
-	octree->root->subdivide(4,4,4,10);
+	octree = std::make_unique<Octree>(AABB({ -100,-100,-100 }, { 100,100,100 }), 0);
+	octree->root->subdivide(4, 4, 4, 10);
 
 	octree->insert(*stairObject->GetMesh(0));// メッシュ挿入
+
+
+	world.Initialize();
+
+	Box box;
+	box.min_ = { 20,20 };
+	box.max_ = { 30,30 };
+
+	OBB2D obb2d{};
+	obb2d.center = { 100,100 };
+	obb2d.halfSize = { 100,10 };
+	obb2d.axisZ.x = 1.0f;
+
+	map->AddObstacleFromOBB2D(obb2d);
+
+	map->AddObstacleFromBox(box);
+	
+	for (int i = 0; i < 500; i++) {
+
+
+		
+		Box boxs;
+		boxs.min_.x = Random::RandomFloat(50, map->GetWidth() * map->GetCellSize());
+		boxs.min_.y = Random::RandomFloat(50, map->GetHeight() * map->GetCellSize());
+		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + map->GetCellSize()* 3);
+		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + map->GetCellSize()* 3);
+
+
+		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} },goalObject->worldtransform_.translate_)) {
+			continue;
+		}
+
+
+		map->AddObstacleFromBox(boxs);
+	}
+
+
+
+
+
+	pathfinder.SetMap(*map);
+
+	playerObject->Update();
+	goalObject->Update();
+
+	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
+	Vector2 goalPos = goalObject->GetWorldPosition().xz();
+
+	pathfinder.FindPath(plyerPos, goalPos, path);
+
+	
+
+	for (int i = 0; i < map->GetWidth(); i++) {
+		for (int j = 0; j < map->GetHeight(); j++) {
+
+			// マップチップの種類を取得
+			MapCellType cell = map->GetCell(i, j);
+
+			// 障害物でないならスキップ
+			if (cell != MapCellType::Obstacle) {
+				continue;
+			}
+
+			// 障害物だった場合、オブジェクトを生成
+			ObjectInstans obj{};
+			obj.Initialize();
+			obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
+			obj.transform.translate_.y = 10;
+			obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
+			obj.transform.scale_ = map->GetCellSize() / 2.0f;
+
+			int randdd = Random::RandomInt32_t(0, 0);
+
+			// オブジェクトを種類ごとに配置
+			if (randdd == 0) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/uvChecker.png", obj);
+			}
+			else if (randdd == 1) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
+			}
+			else if (randdd == 2) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/Image.png", obj);
+			}
+			else if (randdd == 3) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/ground.png", obj);
+			}
+			else if (randdd == 4) {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/grass.png", obj);
+			}
+			else {
+				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/enemy.png", obj);
+			}
+		}
+	}
+
 }
 
 #pragma endregion 各初期化
@@ -485,6 +652,10 @@ void TestScene::InitializeRoom06()
 	point->point.position = { -100,-100,-100 };
 }
 
+void TestScene::InitializeRoom07()
+{
+}
+
 #pragma endregion 
 
 #pragma region 各シーン更新
@@ -512,18 +683,54 @@ void TestScene::UpdateRoom04()
 {
 	skinningObject.UpdateSkinning();
 	skinningObject2.UpdateSkinning();
+
+	triCen;
+
+	Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
+	Vector3 b = { tri2d.vertices[1].x, 5 ,tri2d.vertices[1].y };
+	Vector3 c = { tri2d.vertices[2].x, 5 ,tri2d.vertices[2].y };
+
+
+	LineCommon::GetInstance()->AddLine(a, b, { 1,1,1,1 });
+	LineCommon::GetInstance()->AddLine(b, c, { 1,1,1,1 });
+	LineCommon::GetInstance()->AddLine(c, a, { 1,1,1,1 });
+
+
+	CornerSegment corner;// = { sphere2d.center }
+	corner.center.x = sphere2d.center.x;
+	corner.center.y = 5;
+	corner.center.z = sphere2d.center.y;
+
+	corner.radius = sphere2d.radius;
+	corner.segment = 16;
+
+
+	world.translate_.x = sphere2d.center.x;
+	world.translate_.z = sphere2d.center.y;
+
+	LineCommon::GetInstance()->AddLineCorner(corner, world);
+
+	int size = Object3dInstansManager::GetInstance()->GetSize();
+
+	ImGui::Begin("objectIns");
+	ImGui::DragInt("size", &size);
+	ImGui::End();
+
+
+	object_;
+
 }
 
 void TestScene::UpdateRoom05()
 {
-	LineCommon::GetInstance()->AddGrid(1000,1000,10,{1,1,1,1});
+	LineCommon::GetInstance()->AddGrid(1000, 1000, 10, { 1,1,1,1 });
 }
 
 void TestScene::UpdateRoom06()
 {
 
 	ImGui::Begin("oc");
-	
+
 	ImGui::DragFloat3("div", &div_.x);
 	ImGui::DragInt("maxDepth", &maxDepth);
 	ImGui::DragInt("depth", &octree->root->depth);
@@ -539,22 +746,22 @@ void TestScene::UpdateRoom06()
 		int y = static_cast<int>(div_.y);
 		int z = static_cast<int>(div_.z);
 
-		octree->root->subdivide(x,y,z, maxDepth);
+		octree->root->subdivide(x, y, z, maxDepth);
 	}
 	ImGui::End();
 	ImGui::Begin("capsule");
-	ImGui::DragFloat("rad",&capsule_.radius,0.1f);
-	ImGui::DragFloat3("origin",&capsule_.segment.origin.x,0.1f);
-	ImGui::DragFloat3("end",&capsule_.segment.end.x,0.1f);
+	ImGui::DragFloat("rad", &capsule_.radius, 0.1f);
+	ImGui::DragFloat3("origin", &capsule_.segment.origin.x, 0.1f);
+	ImGui::DragFloat3("end", &capsule_.segment.end.x, 0.1f);
 	ImGui::End();
-	
-	
 
 
 
 
-	
-	
+
+
+
+
 
 
 	//stairObject->LineMesh();
@@ -562,6 +769,62 @@ void TestScene::UpdateRoom06()
 	LineCommon::GetInstance()->AddLineCapsule(capsule_);
 	octree->draw(*LineCommon::GetInstance());
 
+}
+
+void TestScene::UpdateRoom07()
+{
+	
+	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
+	Vector2 goalPos = goalObject->GetWorldPosition().xz();
+	int playerX, playerZ;
+	int goalX, goalZ;
+
+	// ワールド座標 -> マップ座標に変換
+	bool validPlayer = map->WorldToMap(plyerPos.x, plyerPos.y, playerX, playerZ);
+	bool validGoal = map->WorldToMap(goalPos.x, goalPos.y, goalX, goalZ);
+
+	if (validPlayer && validGoal &&
+		!map->IsBlocked(playerX, playerZ) &&
+		!map->IsBlocked(goalX, goalZ))
+	{
+		pathfinder.FindPath(plyerPos, goalPos, path);
+	
+	
+		// 進行方向を取得して正規化
+		Vector2 direction = pathfinder.GetDirectionToNextNode().Normalize();
+
+		// プレイヤーの位置を更新
+		float speed = 1.0f;  // 任意の速度
+		playerObject->worldtransform_.translate_.x += direction.x * speed;
+		playerObject->worldtransform_.translate_.z += direction.y * speed;
+	}
+
+
+	
+
+
+	Vector2 sosos =  Input::GetInstance()->GetGamePadLeftStick();
+
+
+
+	goalObject->worldtransform_.translate_.x += sosos.x * 2.0f;
+	goalObject->worldtransform_.translate_.z += sosos.y * 2.0f;
+
+	
+
+
+
+
+	ImGui::Begin("dnadjas");
+	ImGui::DragFloat3("goal",&goalObject->worldtransform_.translate_.x);
+	ImGui::End();
+
+	playerObject->Update();
+	goalObject->Update();
+
+	pathfinder.DrawPath(11.0f);
+
+	//map->DrawMapChip(10.0f);
 }
 
 void TestScene::SwitchRoom()
@@ -587,6 +850,9 @@ void TestScene::SwitchRoom()
 		if (ImGui::Button("Room06")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom06;
 		}
+		if (ImGui::Button("Room07")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom07;
+		}
 
 	}
 	ImGui::End();
@@ -609,6 +875,9 @@ void TestScene::SwitchRoom()
 	}
 	if (input_->IsTriggerKey(DIK_6)) {
 		behaviorRequest_ = SceneBehavior::kSceneRoom06;
+	}
+	if (input_->IsTriggerKey(DIK_7)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom07;
 	}
 
 }

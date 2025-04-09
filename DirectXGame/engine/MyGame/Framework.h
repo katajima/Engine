@@ -24,7 +24,7 @@
 //#include"DirectXGame/engine/effect/Trail/TrailEffect.h"
 #include"DirectXGame/engine/effect/Trail/TrailEffectManager.h"
 #include"DirectXGame/engine/Primitive/PrimitiveCommon.h"
-
+#include"DirectXGame/engine/3d/Object3dInstansManager.h"
 
 #include"DirectXGame/engine/base/ImGuiManager.h"
 #include"DirectXGame/engine/Camera/CameraCommon.h"
@@ -109,6 +109,9 @@ protected:
 	PrimitiveCommon* primitiveCommon = nullptr;
 
 	SkyBoxCommon* skyBoxCommon = nullptr;
+
+	Object3dInstansManager* object3dInstansManager_ = nullptr;
+
 	// シーンファクトリー
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 };

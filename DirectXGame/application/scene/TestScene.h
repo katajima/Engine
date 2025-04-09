@@ -18,12 +18,20 @@
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Trail/TrailEffect.h"
+#include "DirectXGame/engine/3d/Object3dInstansManager.h"
+
 
 #include"DirectXGame/engine/Primitive/Primitive.h"
 #include "DirectXGame/engine/2d/Primitive2D.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 
 #include "DirectXGame/engine/collider/Octree/Octree.h"
+
+#include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
+#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+
+#include "DirectXGame/engine/math/MapChip.h"
+#include "DirectXGame/engine/math/AStarAlgorithm.h"
 
 class TestScene : public BaseScene
 {
@@ -102,6 +110,7 @@ private:
 	void UpdateRoom04();
 	void UpdateRoom05();
 	void UpdateRoom06();
+	void UpdateRoom07();
 
 	// 部屋切り替え
 	void SwitchRoom();
@@ -130,6 +139,10 @@ private:
 	Object3d skinningObject2;
 	Object3d tail;
 	Object3d multiy;
+
+	std::unique_ptr<Object3d> playerObject;
+	std::unique_ptr<Object3d> goalObject;
+
 
 	// オーシャンシェーダー
 	std::unique_ptr < Ocean> ocean_ = nullptr;
@@ -175,6 +188,20 @@ private:
 
 	Capsule capsule_ = Capsule{Vector3{},Vector3{},10};
 	Vector3 offset_ = { 0,0,0 };
+
+
+	Triangle2D tri2d = { Vector2{} ,Vector2{} ,Vector2{}};
+	Vector3 triCen = {0,0,0};
+
+	Sphere2D sphere2d{};
+	WorldTransform world{};
+
+	ObjectInstans object_;
+
+	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(200, 200, 3.0f);
+	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
+	AStarPathfinder pathfinder;
+
 };
 
 

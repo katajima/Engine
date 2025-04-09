@@ -81,6 +81,11 @@ void Object3dCommon::DrawCommonSetting(PSOType type)
 
 }
 
+void Object3dCommon::AllDraw()
+{
+
+}
+
 void Object3dCommon::CreateRootSignature()
 {
 	//HRESULT hr;

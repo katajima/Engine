@@ -78,6 +78,9 @@ void Framework::Initialize()
 	ModelManager::GetInstance()->Initialize(dxCommon.get());
 
 	
+	object3dInstansManager_ = Object3dInstansManager::GetInstance();
+	object3dInstansManager_->Initialize(dxCommon.get());
+
 }
 
 void Framework::Finalize()
@@ -108,6 +111,8 @@ void Framework::Finalize()
 	renderingCommon->Finalize();
 
 	skyBoxCommon->Finalize();
+
+	//object3dInstansManager_->Finalize();
 }
 
 void Framework::Update()
