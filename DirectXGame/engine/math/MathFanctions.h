@@ -13,6 +13,12 @@
 
 #pragma region Math
 
+
+//線形補間（Linear Interpolation）を行うための関数です。線形補間は、2つの値の間を滑らかに移動するための方法
+//float Lerp(float t, float a, float b) {
+//	return a + t * (b - a);
+//}
+
 template<typename T>
 static T Clamp(T value, T min, T max)
 {
