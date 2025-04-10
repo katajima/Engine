@@ -111,10 +111,11 @@ void TestScene::Update()
 		case TestScene::SceneBehavior::kSceneRoom06: // Octtree
 			InitializeRoom06();
 			break;
-		case TestScene::SceneBehavior::kSceneRoom07:
+		case TestScene::SceneBehavior::kSceneRoom07: // 線形探索
 			InitializeRoom07();
 			break;
-		case TestScene::SceneBehavior::kSceneRoom08:
+		case TestScene::SceneBehavior::kSceneRoom08: // ノイズ
+			InitializeRoom08();
 			break;
 		case TestScene::SceneBehavior::kSceneRoom09:
 			break;
@@ -153,6 +154,7 @@ void TestScene::Update()
 		UpdateRoom07();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
+		UpdateRoom08();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom09:
 		break;
@@ -161,7 +163,7 @@ void TestScene::Update()
 	default:
 		break;
 	}
-
+	//UpdateRoom08();
 	tail.Update();
 }
 
@@ -199,7 +201,7 @@ void TestScene::Draw3D()
 
 		// プレイヤー
 		playerObject->Draw();
-		
+
 		// ゴール
 		goalObject->Draw();
 
@@ -334,40 +336,25 @@ void TestScene::InitializeObject3D()
 
 	Object3dInstansManager::GetInstance()->SetCamera(camera.get());
 
-	//for (int i = 0; i < 100; i++) {
-	//	for (int j = 0; j < 100; j++) {
-	//		ObjectInstans obj{};
-	//		obj.Initialize();
-	//		obj.transform.translate_.x = float(10 * i);
-	//		obj.transform.translate_.z = float(10 * j);
-	//		obj.transform.scale_ = { 1,1,1 };
+	
+	for (int i = 0; i < 100; i++) {
+		for (int j = 0; j < 100; j++) {
+			ObjectInstans obj{};
+			obj.Initialize();
+			obj.transform.scale_ = { 5,5,5 };
+			obj.transform.translate_.x = float(10 * i);
+			obj.transform.translate_.z = float(10 * j);
+			obj.transform.translate_.y = noise->PerlinNoise(float(i), float(j)) * obj.transform.scale_.y;
 
 
-	//		int  randdd = Random::RandomInt32_t(0,6);
-
-	//		//int  randdd = rand() % 6;
+			
 
 
-	//		if (randdd == 0) {
-	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/uvChecker.png", obj);
-	//		}
-	//		else if (randdd == 1) {
-	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/renga.png", obj);
-	//		}
-	//		else if (randdd == 2) {
-	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/Image.png", obj);
-	//		}
-	//		else if (randdd == 3) {
-	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/ground.png", obj);
-	//		}
-	//		else if (randdd == 4) {
-	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/grass.png", obj);
-	//		}
-	//		else {
-	//			Object3dInstansManager::GetInstance()->AddObject("stair.obj", "resources/Texture/enemy.png", obj);
-	//		}
-	//	}
-	//}
+			
+			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
+
+		}
+	}
 
 
 }
@@ -541,25 +528,26 @@ void TestScene::InitializeOthers()
 	map->AddObstacleFromOBB2D(obb2d);
 
 	map->AddObstacleFromBox(box);
-	
+
 	for (int i = 0; i < 500; i++) {
 
 
-		
+
 		Box boxs;
-		boxs.min_.x = Random::RandomFloat(50, map->GetWidth() * map->GetCellSize());
-		boxs.min_.y = Random::RandomFloat(50, map->GetHeight() * map->GetCellSize());
-		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + map->GetCellSize()* 3);
-		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + map->GetCellSize()* 3);
+		boxs.min_.x = Random::RandomFloat(0, map->GetWidth() * map->GetCellSize());
+		boxs.min_.y = Random::RandomFloat(0, map->GetHeight() * map->GetCellSize());
+		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + map->GetCellSize() * 3);
+		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + map->GetCellSize() * 3);
 
 
-		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} },goalObject->worldtransform_.translate_)) {
+		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} }, goalObject->worldtransform_.translate_)) {
 			continue;
 		}
 
 
 		map->AddObstacleFromBox(boxs);
 	}
+
 
 
 
@@ -575,50 +563,50 @@ void TestScene::InitializeOthers()
 
 	pathfinder.FindPath(plyerPos, goalPos, path);
 
-	
 
-	for (int i = 0; i < map->GetWidth(); i++) {
-		for (int j = 0; j < map->GetHeight(); j++) {
 
-			// マップチップの種類を取得
-			MapCellType cell = map->GetCell(i, j);
+	//for (int i = 0; i < map->GetWidth(); i++) {
+	//	for (int j = 0; j < map->GetHeight(); j++) {
 
-			// 障害物でないならスキップ
-			if (cell != MapCellType::Obstacle) {
-				continue;
-			}
+	//		// マップチップの種類を取得
+	//		MapCellType cell = map->GetCell(i, j);
 
-			// 障害物だった場合、オブジェクトを生成
-			ObjectInstans obj{};
-			obj.Initialize();
-			obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
-			obj.transform.translate_.y = 10;
-			obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
-			obj.transform.scale_ = map->GetCellSize() / 2.0f;
+	//		// 障害物でないならスキップ
+	//		if (cell != MapCellType::Obstacle) {
+	//			continue;
+	//		}
 
-			int randdd = Random::RandomInt32_t(0, 0);
+	//		// 障害物だった場合、オブジェクトを生成
+	//		ObjectInstans obj{};
+	//		obj.Initialize();
+	//		obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
+	//		obj.transform.translate_.y = 10;
+	//		obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
+	//		obj.transform.scale_ = map->GetCellSize() / 2.0f;
 
-			// オブジェクトを種類ごとに配置
-			if (randdd == 0) {
-				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/uvChecker.png", obj);
-			}
-			else if (randdd == 1) {
-				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
-			}
-			else if (randdd == 2) {
-				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/Image.png", obj);
-			}
-			else if (randdd == 3) {
-				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/ground.png", obj);
-			}
-			else if (randdd == 4) {
-				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/grass.png", obj);
-			}
-			else {
-				Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/enemy.png", obj);
-			}
-		}
-	}
+	//		int randdd = Random::RandomInt32_t(0, 0);
+
+	//		// オブジェクトを種類ごとに配置
+	//		if (randdd == 0) {
+	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/uvChecker.png", obj);
+	//		}
+	//		else if (randdd == 1) {
+	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
+	//		}
+	//		else if (randdd == 2) {
+	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/Image.png", obj);
+	//		}
+	//		else if (randdd == 3) {
+	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/ground.png", obj);
+	//		}
+	//		else if (randdd == 4) {
+	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/grass.png", obj);
+	//		}
+	//		else {
+	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/enemy.png", obj);
+	//		}
+	//	}
+	//}
 
 }
 
@@ -653,6 +641,10 @@ void TestScene::InitializeRoom06()
 }
 
 void TestScene::InitializeRoom07()
+{
+}
+
+void TestScene::InitializeRoom08()
 {
 }
 
@@ -773,7 +765,7 @@ void TestScene::UpdateRoom06()
 
 void TestScene::UpdateRoom07()
 {
-	
+
 	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
 	Vector2 goalPos = goalObject->GetWorldPosition().xz();
 	int playerX, playerZ;
@@ -788,8 +780,8 @@ void TestScene::UpdateRoom07()
 		!map->IsBlocked(goalX, goalZ))
 	{
 		pathfinder.FindPath(plyerPos, goalPos, path);
-	
-	
+
+
 		// 進行方向を取得して正規化
 		Vector2 direction = pathfinder.GetDirectionToNextNode().Normalize();
 
@@ -800,23 +792,23 @@ void TestScene::UpdateRoom07()
 	}
 
 
-	
 
 
-	Vector2 sosos =  Input::GetInstance()->GetGamePadLeftStick();
+
+	Vector2 sosos = Input::GetInstance()->GetGamePadLeftStick();
 
 
 
 	goalObject->worldtransform_.translate_.x += sosos.x * 2.0f;
 	goalObject->worldtransform_.translate_.z += sosos.y * 2.0f;
 
-	
+
 
 
 
 
 	ImGui::Begin("dnadjas");
-	ImGui::DragFloat3("goal",&goalObject->worldtransform_.translate_.x);
+	ImGui::DragFloat3("goal", &goalObject->worldtransform_.translate_.x);
 	ImGui::End();
 
 	playerObject->Update();
@@ -825,6 +817,46 @@ void TestScene::UpdateRoom07()
 	pathfinder.DrawPath(11.0f);
 
 	//map->DrawMapChip(10.0f);
+}
+
+void TestScene::UpdateRoom08()
+{
+
+	noise->ImguiParameter();
+
+
+#ifdef _DEBUG
+	ImGui::Begin("engine");
+	if (ImGui::CollapsingHeader("NoiseSet")) {
+		if (ImGui::Button("set")) {
+			Object3dInstansManager::GetInstance()->Clear("BoxBox.obj");
+
+			for (int i = 0; i < map->GetWidth(); i++) {
+				for (int j = 0; j < map->GetHeight(); j++) {
+					ObjectInstans obj{};
+					obj.Initialize();
+					obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
+					obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
+					obj.transform.scale_ = map->GetCellSize() / 2.0f;
+
+
+					float y  =  static_cast<float>(noise->PerlinNoise(float(i), float(j)) * map->GetCellSize() * 20);
+
+					obj.transform.translate_.y = static_cast<float>(y);
+
+
+					Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
+				}
+			}
+		}
+	}
+	ImGui::End();
+
+	
+#endif // _DEBUG
+
+	
+
 }
 
 void TestScene::SwitchRoom()
@@ -853,6 +885,9 @@ void TestScene::SwitchRoom()
 		if (ImGui::Button("Room07")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom07;
 		}
+		if (ImGui::Button("Room08")) {
+			behaviorRequest_ = SceneBehavior::kSceneRoom08;
+		}
 
 	}
 	ImGui::End();
@@ -878,6 +913,9 @@ void TestScene::SwitchRoom()
 	}
 	if (input_->IsTriggerKey(DIK_7)) {
 		behaviorRequest_ = SceneBehavior::kSceneRoom07;
+	}
+	if (input_->IsTriggerKey(DIK_8)) {
+		behaviorRequest_ = SceneBehavior::kSceneRoom08;
 	}
 
 }

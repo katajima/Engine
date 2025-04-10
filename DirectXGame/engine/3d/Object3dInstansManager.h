@@ -133,6 +133,7 @@ public:
 
 	int GetSize() { return static_cast<int>(objectGroups.size()); };
 
+	void Clear(const std::string name);
 
 private:
 	// ルートシグネチャの作成

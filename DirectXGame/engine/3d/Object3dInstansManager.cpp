@@ -269,8 +269,7 @@ void Object3dInstansManager::AddObject(const std::string name, const std::string
 	//Object object;
 	object.color = { 1,1,1,1 };
 	object.is = true;
-	//object.transform.Initialize();
-
+	
 
 	if (texName == "") {
 		object.texIndex = objectGroups[name].model->modelData.material[0]->tex_.diffuseIndex;
@@ -281,6 +280,11 @@ void Object3dInstansManager::AddObject(const std::string name, const std::string
 	
 
 	objectGroups[name].object.push_back(object);
+}
+
+void Object3dInstansManager::Clear(const std::string name)
+{
+	objectGroups[name].object.clear();
 }
 
 #pragma region PSO

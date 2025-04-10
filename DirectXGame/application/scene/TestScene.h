@@ -32,6 +32,8 @@
 
 #include "DirectXGame/engine/math/MapChip.h"
 #include "DirectXGame/engine/math/AStarAlgorithm.h"
+#include "DirectXGame/engine/math/Noise.h"
+
 
 class TestScene : public BaseScene
 {
@@ -111,6 +113,7 @@ private:
 	void UpdateRoom05();
 	void UpdateRoom06();
 	void UpdateRoom07();
+	void UpdateRoom08();
 
 	// 部屋切り替え
 	void SwitchRoom();
@@ -198,9 +201,12 @@ private:
 
 	ObjectInstans object_;
 
-	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(200, 200, 3.0f);
+	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(100, 100, 0.5f);
 	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
 	AStarPathfinder pathfinder;
+
+
+	std::unique_ptr<Noise> noise = std::make_unique<Noise>();
 
 };
 
