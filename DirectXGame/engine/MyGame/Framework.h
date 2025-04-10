@@ -17,6 +17,9 @@
 #include"DirectXGame/engine/Skinning/Skinning.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+#include"DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include"DirectXGame/engine/Manager/UAV/UavManager.h"
+
 
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
