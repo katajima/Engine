@@ -73,6 +73,7 @@ void SkinningConmmon::DrawCommonSetting(PSOType type)
 	}
 }
 
+
 void SkinningConmmon::CreateRootSignature()
 {
 	

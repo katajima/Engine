@@ -127,8 +127,7 @@ void MyGame::Draw()
 
 	Object3dCommon::GetInstance();
 
-	Object3dInstansManager::GetInstance()->Draw();
-
+	
 	ParticleManager::GetInstance()->Draw();
 
 #ifdef _DEBUG
@@ -196,12 +195,12 @@ void MyGame::InitializeResource()
 	ModelManager::GetInstance()->LoadModelAmime("a.obj");
 	
 
-	//ModelManager::GetInstance()->LoadModelAmime("walk.gltf", "human");
+	ModelManager::GetInstance()->LoadModelAmime("walk.gltf", "human");
 	//ModelManager::GetInstance()->LoadModelAmime("Women.gltf", "Women");
 	//ModelManager::GetInstance()->LoadModelAmime("Man.gltf", "Man");
 	//ModelManager::GetInstance()->LoadModelAmime("Man.gltf", "Man");
 	///ModelManager::GetInstance()->LoadModelAmime("Hand.gltf", "Hand");
-	//ModelManager::GetInstance()->LoadModelAmime("iku.gltf", "iku");
+	ModelManager::GetInstance()->LoadModelAmime("iku.gltf", "iku");
 	//ModelManager::GetInstance()->LoadModelAmime("Kick.gltf", "Kick");
 
 

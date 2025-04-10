@@ -163,7 +163,6 @@ void TestScene::Update()
 	default:
 		break;
 	}
-	//UpdateRoom08();
 	tail.Update();
 }
 
@@ -187,14 +186,15 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom04:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 
-		skinningObject.Draw();
-		skinningObject2.Draw();
+		skinningObject.DrawSkinning();
+		skinningObject2.DrawSkinning();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
 		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
+		
 		//stairObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
@@ -205,8 +205,15 @@ void TestScene::Draw3D()
 		// ゴール
 		goalObject->Draw();
 
+		Object3dInstansManager::GetInstance()->Update();
+		Object3dInstansManager::GetInstance()->Draw();
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
+
+		Object3dInstansManager::GetInstance()->Update();
+		Object3dInstansManager::GetInstance()->Draw();
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom09:
 		break;

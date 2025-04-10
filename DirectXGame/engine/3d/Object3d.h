@@ -92,6 +92,7 @@ private:
 	// 各コマンドリスト
 	void DrawSetting();
 
+	void DrawSettingSkin();
 	//
 	void ObjectTypeDiscrimination(ObjectType type);
 	void ObjectSkinTypeDiscrimination(ObjectType type);

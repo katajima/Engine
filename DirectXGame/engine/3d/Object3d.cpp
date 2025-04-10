@@ -84,16 +84,10 @@ void Object3d::UpdateSkinning()
 	if (model) {
 		// アニメーションの更新
 		if (model->animation.flag) {
-			//ImGui::Begin("Joint Info");
-			//ImGui::Checkbox("flagTime", &flag);
 			if (flag) {
 				model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
 			}
 			model->animationTime = std::fmod(model->animationTime, model->animation.duration);
-			//ImGui::SliderFloat("animationTime", &model->animationTime, 0.0f, model->animation.duration);
-
-			//ImGui::End();
-
 			localMatrix = model->skeleton.joints[0].skeletonSpaceMatrix;
 			
 			ApplyAnimation(model->skeleton, model->animation, model->animationTime);
@@ -103,9 +97,6 @@ void Object3d::UpdateSkinning()
 			// スキニング更新
 			UpdateSkinCluster(model->skinCluster, model->skeleton);
 
-			
-			// Imguiの表示
-			//ImGuiJoint(model->skeleton.joints);
 			
 		}
 		else {
@@ -179,7 +170,7 @@ void Object3d::DrawSkinning(ObjectType type)
 	ObjectSkinTypeDiscrimination(type);
 
 
-	DrawSetting();
+	DrawSettingSkin();
 
 	// 3Dモデルが割り当てれていれば描画する
 	if (model) {
@@ -254,7 +245,22 @@ void Object3d::DrawSetting()
 	LightManager::GetInstance()->DrawLight();
 
 	transfomation->GetCommandList(1);
+
+
+	//object3dCommon_->GetDxCommon()->GetCommandList()->Set
+	
 	transfomation->GetCommandList(10);
+
+
+
+	camera->GetCommandList(4);
+}
+
+void Object3d::DrawSettingSkin()
+{
+	LightManager::GetInstance()->DrawLight();
+
+	transfomation->GetCommandList(1);
 
 	camera->GetCommandList(4);
 }

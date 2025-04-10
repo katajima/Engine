@@ -33,6 +33,8 @@ public:
 
 	void DrawCommonSetting(PSOType type);
 
+
+
 	void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
 
 	Camera* GetDefaltCamera() const {
