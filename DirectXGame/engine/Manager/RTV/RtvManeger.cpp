@@ -98,10 +98,3 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RtvManager::CreateRenderTextureResource(D
 	return resource;
 }
 
-
-void RtvManager::PreDraw()
-{
-	// 描画用のRTVのDescriptorHeapの設定
-	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
-	command_->GetList()->SetDescriptorHeaps(1, descriptorHeaps);
-}

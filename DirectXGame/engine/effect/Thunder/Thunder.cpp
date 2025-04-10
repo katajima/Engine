@@ -21,7 +21,7 @@ void Thunder::Initialize(Vector2 renge)
 	
 
 
-	vertexResource = ThunderManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(VertexData) * modeldata.vertices.size());
+	vertexResource = ThunderManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * modeldata.vertices.size());
 
 	// リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -32,7 +32,7 @@ void Thunder::Initialize(Vector2 renge)
 	std::memcpy(vertexData, modeldata.vertices.data(), sizeof(VertexData) * modeldata.vertices.size());
 
 	//index用のあれやこれを作る
-	indexResource = ThunderManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
+	indexResource = ThunderManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * 6);
 
 	
 	// リソースの先頭のアドレスから使う
@@ -56,7 +56,7 @@ void Thunder::Initialize(Vector2 renge)
 	
 
 	//トランスフォーム
-	transformationMatrixResource = ThunderManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(TransfomationMatrixThunder));
+	transformationMatrixResource = ThunderManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(TransfomationMatrixThunder));
 
 	//書き込むためのアドレスを取得
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transfomationMatrixData));
@@ -74,7 +74,7 @@ void Thunder::Initialize(Vector2 renge)
 
 
 
-	thunderResource = ThunderManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(ThunderParameters));
+	thunderResource = ThunderManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(ThunderParameters));
 	//書き込むためのアドレスを取得
 	thunderResource->Map(0, nullptr, reinterpret_cast<void**>(&thunderParameters));
 

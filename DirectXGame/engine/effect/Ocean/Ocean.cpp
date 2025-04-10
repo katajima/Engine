@@ -41,7 +41,7 @@ void Ocean::Initialize(Vector2 renge)
 	material->color = { 0,0,1,1.0f };
 
 
-	noiseResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(NoiseData));
+	noiseResource = OceanManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(NoiseData));
 	noiseResource->Map(0, nullptr, reinterpret_cast<void**>(&noiseData));
 
 	noiseData->noiseScale = 10.0f;
@@ -51,7 +51,7 @@ void Ocean::Initialize(Vector2 renge)
 
 
 
-	waveResource = OceanManager::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WaveParameters) * 3);
+	waveResource = OceanManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(WaveParameters) * 3);
 	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));
 
 	waveData[0].amplitude = 1.500f;

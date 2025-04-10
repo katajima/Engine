@@ -23,8 +23,7 @@ void MyGame::Initialize()
 
 	// グローバル変数の読み込み
 	GlobalVariables::GetInstance()->LoadFiles();
-	//
-	dxCommon->CreateRenderTexture();
+
 }
 
 void MyGame::Finalize()
@@ -105,11 +104,12 @@ void MyGame::Draw()
 	dxCommon->GetSrvManager()->PreDraw();
 	// バックバッファの準備
 	dxCommon->PreDrawSwap();
+	
+
 	////// オフスクリーン描画
 	//dxCommon->PreDrawOffscreen(); // オフスクリーンのRTV設定
 	
 	
-	//RenderingCommon::GetInstance()->DrawCommonSetting(); // 共通のレンダリング設定
 	
 
 	
@@ -130,9 +130,8 @@ void MyGame::Draw()
 	// 2Dオブジェクトの描画
 	SceneManager::GetInstance()->Draw2D();
 
-	//dxCommon->PostDrawOffscreen(); // オフスクリーン描画後の処理
-	
-	
+	dxCommon->GetRenderTexture()->Draw();
+
 	// ImGuiの描画
 	imguiManager->Draw();
 

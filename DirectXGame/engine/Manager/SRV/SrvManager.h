@@ -21,8 +21,6 @@ public:
 	// 初期化
 	void Initialize(DXGIDevice* DXGI, Command* Command);
 
-	void Finalize();
-
 	uint32_t Allocate();
 
 	// デスクリプタハンドル計算

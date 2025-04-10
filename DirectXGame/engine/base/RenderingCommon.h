@@ -17,7 +17,7 @@ public:
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	void DrawCommonSetting();
+	void DrawCommonSetting(int index);
 
 
 

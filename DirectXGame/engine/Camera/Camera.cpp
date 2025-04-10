@@ -32,7 +32,7 @@ void Camera::Initialize()
 {
 	dxCommon_ = CameraCommon::GetInstance()->GetDxCommon();
 
-	resource = dxCommon_->CreateBufferResource(sizeof(DataGPU));
+	resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
 	//書き込むためのアドレスを取得
 	resource->Map(0, nullptr, reinterpret_cast<void**>(&data));
 

@@ -73,18 +73,13 @@ protected:
 	bool endRequst_ = false;
 	// ウィンアップ
 	
-	std::unique_ptr < WinApp> winApp;
+	std::unique_ptr <WinApp> winApp;
 	//
 	Input* input = nullptr;
 
 	// ダイレクトX
-	std::unique_ptr < DirectXCommon> dxCommon = nullptr;
-	// SRVマネージャー
-	//SrvManager* srvManager = nullptr;
-	// SRVマネージャー
-	//RtvManager* rtvManager = nullptr;
-	// SRVマネージャー
-	//UavManager* uavManager = nullptr;
+	std::unique_ptr <DirectXCommon> dxCommon = nullptr;
+
 
 
 	// ImGuiマネージャー

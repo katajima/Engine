@@ -125,6 +125,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
+    <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Command\Command.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\DXCCompiler\DXCCompiler.cpp" />

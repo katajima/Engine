@@ -1,13 +1,14 @@
 #include "Material.h"
 #include"DirectXGame/engine/base/TextureManager.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+
 
 void Material::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
-
 	// マテリアル
-	resource_ = dxCommon_->CreateBufferResource(sizeof(Material::DataGPU));
+	resource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Material::DataGPU));
 	// 書き込むためのアドレスを取得
 	resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 

@@ -363,6 +363,9 @@
     <ClCompile Include="DirectXGame\engine\Manager\DSV\DsvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

@@ -7,7 +7,6 @@ void Framework::Initialize()
 	winApp->Initialize();
 
 
-	//dxCommon = 
 	dxCommon = std::make_unique<DirectXCommon>();
 	dxCommon->Intialize(winApp.get());
 
@@ -51,10 +50,7 @@ void Framework::Initialize()
 	//
 	oceanManager_ = OceanManager::GetInstance();
 	oceanManager_->Initialize(dxCommon.get());
-	//
-	//thunderManager = ThunderManager::GetInstance();
-	//thunderManager->Initialize(dxCommon.get());
-
+	
 	trailEffectManager_ = TrailEffectManager::GetInstance();
 	trailEffectManager_->Initialize(dxCommon.get());
 

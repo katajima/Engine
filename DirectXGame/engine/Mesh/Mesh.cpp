@@ -14,7 +14,7 @@ void Mesh::Initialize(DirectXCommon* dxcommon)
 	dxCommon_ = dxcommon;
 
 	//if (vertices.size() != 0) {
-	vertexResource = dxCommon_->CreateBufferResource(sizeof(VertexData) * vertices.size());
+	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * vertices.size());
 
 	// リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -26,7 +26,7 @@ void Mesh::Initialize(DirectXCommon* dxcommon)
 	//}
 	//if (indices.size() != 0) {
 		// インデクスリソース
-	indexResource = dxCommon_->CreateBufferResource(sizeof(uint32_t) * indices.size());
+	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
@@ -42,7 +42,7 @@ void Mesh::InitializeLine(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
-	vertexResource = dxCommon_->CreateBufferResource(sizeof(LineVertexData) * verticesline.size());
+	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(LineVertexData) * verticesline.size());
 
 	// リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -54,7 +54,7 @@ void Mesh::InitializeLine(DirectXCommon* dxcommon)
 
 
 	// インデクスリソース
-	indexResource = dxCommon_->CreateBufferResource(sizeof(uint32_t) * indices.size());
+	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
@@ -70,7 +70,7 @@ void Mesh::InitializeSkyBox(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
-	vertexResource = dxCommon_->CreateBufferResource(sizeof(SkyBoxVertexData) * verticesskyBox.size());
+	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SkyBoxVertexData) * verticesskyBox.size());
 
 	// リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -82,7 +82,7 @@ void Mesh::InitializeSkyBox(DirectXCommon* dxcommon)
 
 
 	// インデクスリソース
-	indexResource = dxCommon_->CreateBufferResource(sizeof(uint32_t) * indices.size());
+	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());

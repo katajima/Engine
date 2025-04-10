@@ -6,7 +6,7 @@ void Transfomation::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 
 	//トランスフォーム
-	resource_ = dxCommon_->CreateBufferResource(sizeof(TransfomationMatrix));
+	resource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(TransfomationMatrix));
 
 	//書き込むためのアドレスを取得
 	resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));

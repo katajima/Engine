@@ -17,15 +17,15 @@ void LightManager::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 
 	//平行光源用のリソースを作る
-	directionalLightResource = dxCommon_->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
+	directionalLightResource = dxCommon_->GetDXGIDevice()->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 	
 	// ポイントライト用のリソース
-	pointLightResource = dxCommon_->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
+	pointLightResource = dxCommon_->GetDXGIDevice()->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
 	//スポットライト用のリソースを作る
-	spotLightResource = dxCommon_->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
+	spotLightResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
 }
 

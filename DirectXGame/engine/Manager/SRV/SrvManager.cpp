@@ -31,7 +31,7 @@ uint32_t SrvManager::Allocate()
 	assert(kMaxSRVCount > useIndex);
 
 	// return する番号を一旦記録
-	int index = useIndex;
+	int index = useIndex + 1;
 	// 次回のために番号を1進める
 	useIndex++;
 	// 上で記録した番号をreturn

@@ -29,6 +29,9 @@ public:
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap>CreateDescriptorHeap(
 		D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 
+	// Material用のResource作成関数
+	Microsoft::WRL::ComPtr < ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
+
 private:
 	// エラー判別
 	HRESULT hr_ = S_FALSE;

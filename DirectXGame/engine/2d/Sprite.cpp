@@ -11,9 +11,9 @@ void Sprite::Initialize(std::string textureFilePath, bool isTexLoad)
 	// 引数で受け取ってメンバ変数にする
 	this->spriteCommon_ = SpriteCommon::GetInstance();
 
-	vertexResource = spriteCommon_->GetDxCommon()->CreateBufferResource(sizeof(VertexData) * 4);
+	vertexResource = spriteCommon_->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * 4);
 
-	indexResource = spriteCommon_->GetDxCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
+	indexResource = spriteCommon_->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * 6);
 
 	//リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();

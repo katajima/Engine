@@ -36,7 +36,7 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 
 
 	// マテリアル
-	materialResource = dxCommon_->CreateBufferResource(sizeof(Material));
+	materialResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Material));
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
@@ -45,7 +45,7 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 
 
 
-	viewResource = dxCommon_->CreateBufferResource(sizeof(Matrix4x4));
+	viewResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Matrix4x4));
 	viewResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraWVP));
 
 	*cameraWVP = MakeIdentity4x4();

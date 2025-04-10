@@ -178,7 +178,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 
 
 	// GPUリソースの作成
-	objectGroup.resource = dxCommon_->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
 	// マッピング
 	objectGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&objectGroup.instanceData));
 	// 初期化
@@ -229,7 +229,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 
 
 	// GPUリソースの作成
-	objectGroup.resource = dxCommon_->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
 	// マッピング
 	objectGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&objectGroup.instanceData));
 	// 初期化

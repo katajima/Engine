@@ -508,7 +508,7 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	SkinCluster skinCluster;
 
 	// palette用のResourceを確保
-	skinCluster.paletteResource = ModelCommon::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
+	skinCluster.paletteResource = ModelCommon::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
 	WellForGPU* mappedPalette = nullptr;
 	skinCluster.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
 	std::memset(mappedPalette, 0, sizeof(WellForGPU) * skeleton.joints.size());
@@ -532,7 +532,7 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 
 
 	// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
-	skinCluster.influenceResource = ModelCommon::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
+	skinCluster.influenceResource = ModelCommon::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
 	VertexInfluence* mappedInfluence = nullptr;
 	skinCluster.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
 	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size()); // 仮埋め。weightを0にしておく。

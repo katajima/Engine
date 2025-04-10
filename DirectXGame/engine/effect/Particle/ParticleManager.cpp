@@ -357,7 +357,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 
 	// GPUリソースの作成
-	particleGroup.resource = dxCommon_->CreateBufferResource(sizeof(ParticleForGPU) * kNumMaxInstance);
+	particleGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ParticleForGPU) * kNumMaxInstance);
 	// マッピング
 	particleGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&particleGroup.instanceData));
 	// 初期化
@@ -427,7 +427,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 
 	// GPUリソースの作成
-	particleGroup.resource = dxCommon_->CreateBufferResource(sizeof(ParticleForGPU) * kNumMaxInstance);
+	particleGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ParticleForGPU) * kNumMaxInstance);
 	// マッピング
 	particleGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&particleGroup.instanceData));
 	// 初期化
