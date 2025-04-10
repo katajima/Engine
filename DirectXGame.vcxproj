@@ -64,7 +64,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manajer;$(ProjectDir)engine\Manajer\UAV;$(ProjectDir)engine\collider\3d</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -91,7 +91,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manajer;$(ProjectDir)engine\Manajer\UAV;$(ProjectDir)engine\collider\3d</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,30 +120,30 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\Object3dInstansManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
-    <ClCompile Include="DirectXGame\engine\collider\2d\ColliderFanction2D.cpp" />
-    <ClCompile Include="DirectXGame\engine\collider\3d\ColliderFanction3D.cpp" />
-    <ClCompile Include="DirectXGame\engine\collider\Octree\Octree.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager2d.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\UAV\UavManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\math\AStarAlgorithm.cpp" />
-    <ClCompile Include="DirectXGame\engine\math\MapChip.cpp" />
-    <ClCompile Include="DirectXGame\engine\math\Noise.cpp" />
-    <ClCompile Include="DirectXGame\engine\math\Random.cpp" />
+    <ClCompile Include="DirectXGame\engine\Math\AStarAlgorithm.cpp" />
+    <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp" />
+    <ClCompile Include="DirectXGame\engine\Math\Noise.cpp" />
+    <ClCompile Include="DirectXGame\engine\Math\Random.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\Animation.cpp" />
     <ClCompile Include="DirectXGame\engine\base\RenderingCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\RtvManeger.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManeger.cpp" />
     <ClCompile Include="DirectXGame\application\scene\GamePlayScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TitleScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\collider\3d\Collider.cpp" />
-    <ClCompile Include="DirectXGame\engine\collider\3d\CollisionManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\collider\ContactRecord.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\3d\Collider.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\ContactRecord.cpp" />
     <ClCompile Include="DirectXGame\engine\Color\Color.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Ocean\Ocean.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Ocean\OceanManager.cpp" />
@@ -160,7 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\base\ImGuiManager.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\SrvManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Material\Material.cpp" />
     <ClCompile Include="DirectXGame\engine\MyGame\Framework.cpp" />
     <ClCompile Include="DirectXGame\engine\MyGame\MyGame.cpp" />
@@ -183,12 +183,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\input\Input.cpp" />
     <ClCompile Include="DirectXGame\engine\base\Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DirectXGame\engine\math\MathFanctions.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\Model.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\ModelCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\ModelManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\Object3d.cpp" />
-    <ClCompile Include="DirectXGame\engine\3d\Object3dCommon.cpp" />
+    <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\Model.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelCommon.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3d.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\Sprite.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\SpriteCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\base\StringUtility.cpp" />
@@ -422,31 +422,31 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
     <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h" />
-    <ClInclude Include="DirectXGame\engine\3d\Object3dInstansManager.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
     <ClInclude Include="DirectXGame\engine\base\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
-    <ClInclude Include="DirectXGame\engine\collider\2d\ColliderFanction2D.h" />
-    <ClInclude Include="DirectXGame\engine\collider\3d\ColliderFanction3D.h" />
-    <ClInclude Include="DirectXGame\engine\collider\Octree\Octree.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager2d.h" />
     <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h" />
-    <ClInclude Include="DirectXGame\engine\math\AStarAlgorithm.h" />
-    <ClInclude Include="DirectXGame\engine\math\LineCurveMath.h" />
-    <ClInclude Include="DirectXGame\engine\math\MapChip.h" />
-    <ClInclude Include="DirectXGame\engine\math\Noise.h" />
-    <ClInclude Include="DirectXGame\engine\math\Random.h" />
+    <ClInclude Include="DirectXGame\engine\Math\AStarAlgorithm.h" />
+    <ClInclude Include="DirectXGame\engine\Math\LineCurveMath.h" />
+    <ClInclude Include="DirectXGame\engine\Math\MapChip.h" />
+    <ClInclude Include="DirectXGame\engine\Math\Noise.h" />
+    <ClInclude Include="DirectXGame\engine\Math\Random.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h" />
     <ClInclude Include="DirectXGame\engine\base\RenderingCommon.h" />
-    <ClInclude Include="DirectXGame\engine\base\RtvManeger.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManeger.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraCommon.h" />
-    <ClInclude Include="DirectXGame\engine\collider\3d\Collider.h" />
-    <ClInclude Include="DirectXGame\engine\collider\3d\CollisionManager.h" />
-    <ClInclude Include="DirectXGame\engine\collider\CollisionTypeIdDef.h" />
-    <ClInclude Include="DirectXGame\engine\collider\ContactRecord.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\Collider.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionManager.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\CollisionTypeIdDef.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\ContactRecord.h" />
     <ClInclude Include="DirectXGame\engine\Color\Color.h" />
     <ClInclude Include="DirectXGame\engine\effect\Ocean\Ocean.h" />
     <ClInclude Include="DirectXGame\engine\effect\Ocean\OceanManager.h" />
@@ -456,8 +456,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\effect\Trail\TrailEffectManager.h" />
     <ClInclude Include="DirectXGame\engine\Light\Lights.h" />
     <ClInclude Include="DirectXGame\engine\Material\Material.h" />
-    <ClInclude Include="DirectXGame\engine\math\Easing.h" />
-    <ClInclude Include="DirectXGame\engine\math\ProbabilityUtils.h" />
+    <ClInclude Include="DirectXGame\engine\Math\Easing.h" />
+    <ClInclude Include="DirectXGame\engine\Math\ProbabilityUtils.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\Mesh.h" />
     <ClInclude Include="DirectXGame\engine\Primitive\Primitive.h" />
     <ClInclude Include="DirectXGame\engine\PSO\PSOManager.h" />
@@ -473,7 +473,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\base\ImGuiManager.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager.h" />
-    <ClInclude Include="DirectXGame\engine\base\SrvManager.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h" />
     <ClInclude Include="DirectXGame\engine\MyGame\Framework.h" />
     <ClInclude Include="DirectXGame\engine\MyGame\MyGame.h" />
     <ClInclude Include="DirectXGame\engine\scene\SceneManager.h" />
@@ -500,12 +500,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="DirectXGame\engine\input\Input.h" />
     <ClInclude Include="DirectXGame\engine\base\Logger.h" />
-    <ClInclude Include="DirectXGame\engine\math\MathFanctions.h" />
-    <ClInclude Include="DirectXGame\engine\3d\Model.h" />
-    <ClInclude Include="DirectXGame\engine\3d\ModelCommon.h" />
-    <ClInclude Include="DirectXGame\engine\3d\ModelManager.h" />
-    <ClInclude Include="DirectXGame\engine\3d\Object3d.h" />
-    <ClInclude Include="DirectXGame\engine\3d\Object3dCommon.h" />
+    <ClInclude Include="DirectXGame\engine\Math\MathFanctions.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\Model.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3d.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dCommon.h" />
     <ClInclude Include="DirectXGame\engine\2d\Sprite.h" />
     <ClInclude Include="DirectXGame\engine\2d\SpriteCommon.h" />
     <ClInclude Include="DirectXGame\engine\base\StringUtility.h" />

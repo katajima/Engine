@@ -1,6 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/3d/Object3d.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 

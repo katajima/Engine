@@ -14,14 +14,24 @@ void WorldTransform::Initialize()
 
 void WorldTransform::Update()
 {
+	isChange_ = false;
 	worldPreMat_ = worldMat_;
 
-	
-
-	
-
-	worldMat_ = MakeAffineMatrix(scale_, rotate_, translate_);
-
+	if (o_scale_ != scale_) {
+		o_scale_ = scale_;
+		isChange_ = true;
+	}
+	if (o_rotate_ != rotate_) {
+		o_rotate_ = rotate_;
+		isChange_ = true;
+	}
+	if (o_translate_ != translate_) {
+		o_translate_ = translate_;
+		isChange_ = true;
+	}
+	if (isChange_) {
+		worldMat_ = MakeAffineMatrix(scale_, rotate_, translate_);
+	}
 	// 親がいれば
 	if (parent_) {
 		worldMat_ = worldMat_ * parent_->worldMat_;

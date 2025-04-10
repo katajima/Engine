@@ -4,11 +4,11 @@
 #include "DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Camera/DebugCamera.h"
-#include"DirectXGame/engine/3d/Object3d.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/base/TextureManager.h"
 #include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/audio/Audio.h"
-#include"DirectXGame/engine/3d/Object3dCommon.h"
+#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include"DirectXGame/engine/2d/SpriteCommon.h"
 #include"DirectXGame/engine/2d/Sprite.h"
@@ -18,7 +18,7 @@
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Trail/TrailEffect.h"
-#include "DirectXGame/engine/3d/Object3dInstansManager.h"
+#include "DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 
 #include"DirectXGame/engine/Primitive/Primitive.h"
@@ -201,7 +201,7 @@ private:
 
 	ObjectInstans object_;
 
-	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(100, 100, 0.5f);
+	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(200, 200, 0.5f);
 	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
 	AStarPathfinder pathfinder;
 

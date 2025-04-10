@@ -16,7 +16,8 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
-#include"DirectXGame/engine/base/SrvManager.h"
+
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include<random>
 #include<numbers>
 

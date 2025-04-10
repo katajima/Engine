@@ -44,7 +44,7 @@ void Object3dInstansManager::Update()
 		Matrix4x4 viewMatrix = camera_->GetViewMatrix();
 		Matrix4x4 viewprojection = Multiply(viewMatrix, projectionMatrix);
 
-		for (auto particleIterator = group.object.begin(); particleIterator != group.object.end(); )
+		for (auto objectIterator = group.object.begin(); objectIterator != group.object.end(); )
 		{
 			if (group.instanceCount < kNumMaxInstance) {
 
@@ -52,9 +52,9 @@ void Object3dInstansManager::Update()
 
 				// ワールド行列を計算
 				
-				particleIterator->transform.Update();
+				objectIterator->transform.Update();
 
-				Matrix4x4 worldMatrix = particleIterator->transform.worldMat_;
+				Matrix4x4 worldMatrix = objectIterator->transform.worldMat_;
 
 				// ワールドビュー射影行列を合成
 				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewprojection);
@@ -62,14 +62,14 @@ void Object3dInstansManager::Update()
 				// インスタンシング用データに情報を書き込み
 				group.instanceData[group.instanceCount].World = worldMatrix;
 				group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
-				group.instanceData[group.instanceCount].color = particleIterator->color;
-				group.instanceData[group.instanceCount].textureIndex = particleIterator->texIndex;
+				group.instanceData[group.instanceCount].color = objectIterator->color;
+				group.instanceData[group.instanceCount].textureIndex = objectIterator->texIndex;
 
 				// インスタンス数をカウント
 				++group.instanceCount;
 			}
 
-			++particleIterator;
+			++objectIterator;
 		}
 	}
 }

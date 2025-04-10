@@ -17,17 +17,19 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
-#include"DirectXGame/engine/base/SrvManager.h"
+
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object3dCommon.h"
-#include "DirectXGame/engine/3d/Model.h"
+#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
+#include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Primitive/Primitive.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
-
+#include <thread>
+#include <mutex>
 
 
 class ObjectInstans
@@ -92,7 +94,7 @@ public:
 	struct ObjectGroup
 	{
 		std::string name; // 名前
-		std::list<ObjectInstans> object;
+		std::vector<ObjectInstans> object;
 		Model* model;
 		bool flag;
 		uint32_t srvIndex;
@@ -136,6 +138,7 @@ public:
 	void Clear(const std::string name);
 
 private:
+	
 	// ルートシグネチャの作成
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
@@ -166,7 +169,7 @@ private:
 	std::unordered_map<std::string, ObjectGroup> objectGroups;
 
 
-	const uint32_t kNumMaxInstance = 20000;
+	const uint32_t kNumMaxInstance = 100000;
 
 	uint32_t numInstance{};
 

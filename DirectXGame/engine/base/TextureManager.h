@@ -13,7 +13,8 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 #include"DirectXCommon.h"
-#include"SrvManager.h"
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+
 // テクスチャマネージャー
 class TextureManager {
 public:

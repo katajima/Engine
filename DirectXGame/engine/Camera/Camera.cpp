@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include "DirectXGame/engine/base/WinApp.h"
-#include <DirectXGame/engine/3d/Object3d.h>
+#include <DirectXGame/engine/3d/Object/Object3d.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 bool Camera::isShake_ = false;

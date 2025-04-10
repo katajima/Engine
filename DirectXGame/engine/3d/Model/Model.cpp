@@ -1,6 +1,6 @@
 #include"Model.h"
 #include"ModelCommon.h"
-#include"Object3d.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/base/TextureManager.h"
 #include <iostream>
 #include"DirectXGame/engine/base/Logger.h"

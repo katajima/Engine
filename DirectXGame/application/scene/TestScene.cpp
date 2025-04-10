@@ -344,8 +344,8 @@ void TestScene::InitializeObject3D()
 	Object3dInstansManager::GetInstance()->SetCamera(camera.get());
 
 	
-	for (int i = 0; i < 100; i++) {
-		for (int j = 0; j < 100; j++) {
+	for (int i = 0; i < map->GetWidth(); i++) {
+		for (int j = 0; j < map->GetHeight(); j++) {
 			ObjectInstans obj{};
 			obj.Initialize();
 			obj.transform.scale_ = { 5,5,5 };
@@ -355,7 +355,6 @@ void TestScene::InitializeObject3D()
 
 
 			
-
 
 			
 			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
@@ -711,9 +710,7 @@ void TestScene::UpdateRoom04()
 
 	int size = Object3dInstansManager::GetInstance()->GetSize();
 
-	ImGui::Begin("objectIns");
-	ImGui::DragInt("size", &size);
-	ImGui::End();
+	
 
 
 	object_;
@@ -728,8 +725,9 @@ void TestScene::UpdateRoom05()
 void TestScene::UpdateRoom06()
 {
 
-	ImGui::Begin("oc");
+#ifdef _DEBUG
 
+	ImGui::Begin("oc");
 	ImGui::DragFloat3("div", &div_.x);
 	ImGui::DragInt("maxDepth", &maxDepth);
 	ImGui::DragInt("depth", &octree->root->depth);
@@ -753,6 +751,7 @@ void TestScene::UpdateRoom06()
 	ImGui::DragFloat3("origin", &capsule_.segment.origin.x, 0.1f);
 	ImGui::DragFloat3("end", &capsule_.segment.end.x, 0.1f);
 	ImGui::End();
+#endif // _DEBUG
 
 
 
@@ -812,11 +811,14 @@ void TestScene::UpdateRoom07()
 
 
 
-
-
+#ifdef _DEBUG
 	ImGui::Begin("dnadjas");
 	ImGui::DragFloat3("goal", &goalObject->worldtransform_.translate_.x);
 	ImGui::End();
+#endif // _DEBUG
+
+
+
 
 	playerObject->Update();
 	goalObject->Update();
@@ -850,8 +852,7 @@ void TestScene::UpdateRoom08()
 					float y  =  static_cast<float>(noise->PerlinNoise(float(i), float(j)) * map->GetCellSize() * 20);
 
 					obj.transform.translate_.y = static_cast<float>(y);
-
-
+					
 					Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
 				}
 			}

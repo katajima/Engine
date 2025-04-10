@@ -9,8 +9,8 @@
 #include<string>
 #include<vector>
 #include<format>
-#include"Model.h"
-#include"ModelManager.h"
+#include"DirectXGame/engine/3d/Model/Model.h"
+#include"DirectXGame/engine/3d/Model/ModelManager.h"
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 

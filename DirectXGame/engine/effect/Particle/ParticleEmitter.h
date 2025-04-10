@@ -2,7 +2,8 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/base/DirectXCommon.h"
-#include"DirectXGame/engine/base/SrvManager.h"
+
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include<random>
 #include<numbers>
 #include"ParticleManager.h"

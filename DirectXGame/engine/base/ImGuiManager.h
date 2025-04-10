@@ -5,12 +5,13 @@
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 #include<wrl.h>
-#include "SrvManager.h"
+
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "ImGuizmo.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/input/Input.h"
-#include "DirectXGame/engine/3d/Object3d.h"
+#include "DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 
 // 前方宣言

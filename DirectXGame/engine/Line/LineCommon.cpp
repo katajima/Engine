@@ -1,6 +1,7 @@
 #include "LineCommon.h"
 #include "combaseapi.h"
-#include "DirectXGame/engine/base/SrvManager.h"
+
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 
 

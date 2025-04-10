@@ -89,8 +89,6 @@ void MyGame::Update()
 
 	SceneManager::GetInstance()->Update();
 	
-	Object3dInstansManager::GetInstance()->Update();
-
 	ParticleManager::GetInstance()->Update();
 
 #ifdef _DEBUG
