@@ -67,12 +67,10 @@ public:
 
 	ModelData& GetModelData(){ return modelData; }
 
-	void MoveVertices(const Vector3& offset);
-
+	
 	static Node ReadNode(aiNode* node);
 
-	static void MeshLine(std::string name,std::vector<uint32_t> index,uint32_t lineNum = {});
-
+	
 private:
 
 	ModelData LoadMesh(const aiScene* _scene);
@@ -87,7 +85,7 @@ public:
 	ModelData modelData;
 private:
 	ModelCommon* modelCommon_ = nullptr;
-	
+	SrvManager* srvManager_ = nullptr;
 	
 	
 	bool useNormalMap = false;
@@ -101,14 +99,14 @@ public:
 	
 	static ModelData LoadOdjFileAssimp(const std::string& directoryPath, const std::string& filename, const Vector2 texScale = {1,1});
 	
-	static ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
+	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 
 	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
 
 	
 	
 	//
-	static SkinCluster CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData);
+	SkinCluster CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData);
 public:
 
 };

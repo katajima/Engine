@@ -27,9 +27,11 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	scissorRect_->Initialize(command_.get());// シザー
 	fence_->Initialize(DXGIDevice_.get(), command_.get()); // フェンス
 	dxcCompiler_->Initialize(); // コンパイル
+	srvManager_->Initialize(DXGIDevice_.get(), command_.get()); // SRV
+	uavManager_->Initialize(DXGIDevice_.get(), command_.get()); // UAV
+	rtvManager_->Initialize(DXGIDevice_.get(), command_.get()); // RTV
+	swapChain_->Initialize(winApp,DXGIDevice_.get(),command_.get(), rtvManager_.get()); // スワップチェーン
 	
-	rtvManager_->Initialize(this);
-	swapChain_->Initialize(winApp,DXGIDevice_.get(),command_.get(), rtvManager_.get());
 
     CreateDepthBuffer(); // 深度
     CreateDescriptorHeap(); // ディスクプリタヒープ
@@ -177,7 +179,7 @@ void DirectXCommon::CreateDescriptorHeap()
 	desriptorSizeDSV = DXGIDevice_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
-	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+	dsvDescriptorHeap = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 }
 
 void DirectXCommon::CreateDepthBuffer()
@@ -260,44 +262,6 @@ void DirectXCommon::UpdateFixFPS()
 	reference_ = std::chrono::steady_clock::now();
 
 }
-
-// DescriptorHeapの作成関数
-Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXCommon::CreateDescriptorHeap(
-	D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
-{
-	// deviceがnullptrでないことを確認
-	if (!DXGIDevice_->GetDevice())
-	{
-		// エラーハンドリング：デバイスが無効
-		throw std::runtime_error("Device is null, unable to create descriptor heap.");
-	}
-
-	// デスクリプタヒープの作成
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
-	descriptorHeapDesc.Type = heapType;
-	descriptorHeapDesc.NumDescriptors = numDescriptors;
-	// RTV/DSVの場合は、shaderVisibleを使用しない
-	if (heapType == D3D12_DESCRIPTOR_HEAP_TYPE_RTV || heapType == D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
-	{
-		descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	}
-	else
-	{
-		descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	}
-
-	// CreateDescriptorHeapを呼び出し、エラーチェック
-	HRESULT hr = DXGIDevice_->GetDevice()->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
-	if (FAILED(hr))
-	{
-		// エラーハンドリング：ヒープ作成失敗
-		throw std::runtime_error("Failed to create descriptor heap.");
-	}
-
-	return descriptorHeap;
-}
-
 
 // CPUHandle
 D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetCPUDescriptorHandle(Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index)

@@ -91,3 +91,38 @@ void DXGIDevice::Initialize()
 	}
 #endif // _DEBUG
 }
+
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DXGIDevice::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
+{
+	// deviceがnullptrでないことを確認
+	if (!device_)
+	{
+		// エラーハンドリング：デバイスが無効
+		throw std::runtime_error("Device is null, unable to create descriptor heap.");
+	}
+
+	// デスクリプタヒープの作成
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
+	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
+	descriptorHeapDesc.Type = heapType;
+	descriptorHeapDesc.NumDescriptors = numDescriptors;
+	// RTV/DSVの場合は、shaderVisibleを使用しない
+	if (heapType == D3D12_DESCRIPTOR_HEAP_TYPE_RTV || heapType == D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
+	{
+		descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	}
+	else
+	{
+		descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	}
+
+	// CreateDescriptorHeapを呼び出し、エラーチェック
+	HRESULT hr = device_->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+	if (FAILED(hr))
+	{
+		// エラーハンドリング：ヒープ作成失敗
+		throw std::runtime_error("Failed to create descriptor heap.");
+	}
+
+	return descriptorHeap;
+}

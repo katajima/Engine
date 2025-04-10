@@ -1,19 +1,23 @@
 #include "RtvManeger.h"
 #include "assert.h"
 
+#include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+#include "DirectXGame/engine/base/WinApp.h"
+
 const uint32_t RtvManager::kMaxRTVCount = 16;
 
 
 
-void RtvManager::Initialize(DirectXCommon* dxCommon)
+void RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
-	// 引数で受け取ってメンバ変数に記録する
-	this->directXCommon_ = dxCommon;
+	DXGIDevice_ = DXGI;
+	command_ = Command;
 
 	// デスクリプタヒープ
-	descriptorHeap = directXCommon_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kMaxRTVCount, false);
+	descriptorHeap = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kMaxRTVCount, false);
 	// デスクリプタ一個分のサイズを取得して記録
-	descriptorSize = directXCommon_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	descriptorSize = DXGIDevice_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
 
@@ -52,7 +56,7 @@ void RtvManager::CreateRTV(uint32_t rtvIndex, ID3D12Resource* pResource) {
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE handle = GetCPUDescriptorHandle(rtvIndex);
-	directXCommon_->GetDevice()->CreateRenderTargetView(pResource, &rtvDesc, handle);
+	DXGIDevice_->GetDevice()->CreateRenderTargetView(pResource, &rtvDesc, handle);
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> RtvManager::CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color)
@@ -82,7 +86,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RtvManager::CreateRenderTextureResource(D
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 
-	HRESULT hr = directXCommon_->GetDevice()->CreateCommittedResource(
+	HRESULT hr = DXGIDevice_->GetDevice()->CreateCommittedResource(
 		&heapProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&resourceDesc,
@@ -99,5 +103,5 @@ void RtvManager::PreDraw()
 {
 	// 描画用のRTVのDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
-	directXCommon_->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+	command_->GetList()->SetDescriptorHeaps(1, descriptorHeaps);
 }

@@ -29,6 +29,10 @@
 #include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
 
 
+#include "DirectXGame/engine/Manager/UAV/UavManager.h"
+#include "DirectXGame/engine/Manager/SRV/SrvManager.h"
+
+
 
 
 
@@ -105,9 +109,9 @@ public:
 	// バックバッファの数を取得
 	size_t GetBackBufferCount() const { return swapChain_->GetBackBufferCount(); }
 
-	// DescriptorHeapの作成関数
-	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap>CreateDescriptorHeap(
-		D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
+	//// DescriptorHeapの作成関数
+	//Microsoft::WRL::ComPtr < ID3D12DescriptorHeap>CreateDescriptorHeap(
+	//	D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 
 	// Material用のResource作成関数
 	Microsoft::WRL::ComPtr < ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
@@ -125,6 +129,7 @@ public:
 
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> GetDsvDescriptorHeap() { return dsvDescriptorHeap; }
 
+	SrvManager* GetSrvManager() { return  srvManager_.get(); }
 
 	void CreateRenderTexture();
 
@@ -143,20 +148,14 @@ private:
 	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();// コンパイル
 	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();      // スワップチェーン 
 	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();   // RTVマネージャー 
+	std::unique_ptr<UavManager> uavManager_ = std::make_unique<UavManager>();   // UAVマネージャー 
+	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();   // SRVマネージャー 
 
 
 	
-	/*Microsoft::WRL::ComPtr < IDXGISwapChain4> swapChain;
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;*/
 	Microsoft::WRL::ComPtr < ID3D12Resource> depthStencilResource;
-	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
-
-	//D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
-	//D3D12_CPU_DESCRIPTOR_HANDLE rtvTexHandle;
-
-	//D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
 	
-	//D3D12_RENDER_TARGET_VIEW_DESC rtvTexDesc_;
+	
 	
 	
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> dsvDescriptorHeap;
@@ -166,12 +165,12 @@ private:
 	uint32_t desriptorSizeRTV;
 	uint32_t desriptorSizeDSV;
 
-	//std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
+	
+
+
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
-
-	
 public:
 	// CPUHandle
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
@@ -181,8 +180,6 @@ public:
 
 
 public:
-	
-	
 	////------CompileShader------////
 	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 		//CompileShaderするShaderファイルへのパス

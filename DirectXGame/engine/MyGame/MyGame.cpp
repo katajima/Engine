@@ -35,11 +35,7 @@ void MyGame::Finalize()
 	SkinningConmmon::GetInstance()->Finalize();
 	//
 	SpriteCommon::GetInstance()->Finalize();
-	// srv
-	SrvManager::GetInstance()->Finalize();
-	// uav
-	UavManager::GetInstance()->Finalize();
-
+	
 	//
 	Audio::GetInstance()->Finalize();
 	//テクスチャマネージャーの終了
@@ -106,8 +102,7 @@ void MyGame::Draw()
 {
 	///
 	// 描画前処理
-	SrvManager::GetInstance()->PreDraw();
-	
+	dxCommon->GetSrvManager()->PreDraw();
 	// バックバッファの準備
 	dxCommon->PreDrawSwap();
 	////// オフスクリーン描画

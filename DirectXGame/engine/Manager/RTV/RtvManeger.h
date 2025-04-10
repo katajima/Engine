@@ -1,12 +1,23 @@
 #pragma once
-#include"DirectXGame/engine/base/DirectXCommon.h"
 
+// C++
+#include <cstdint>
+#include <wrl.h>
+using namespace Microsoft::WRL;
+// DirectX
+#include <d3d12.h>
+
+
+#include"DirectXGame/engine/struct/Structs3D.h"
+
+class DXGIDevice;
+class Command;
 
 // RTV管理
 class RtvManager {
 public:
     // 初期化
-    void Initialize(DirectXCommon* dxCommon);
+    void Initialize(DXGIDevice* DXGI, Command* Command);
 
    
     uint32_t Allocate();
@@ -30,10 +41,6 @@ public:
     static const uint32_t kMaxRTVCount;
 
 private:
-
-
-    DirectXCommon* directXCommon_ = nullptr;
-
     // RTV用のデスクリプタサイズ
     uint32_t descriptorSize;
     // RTV用デスクリプタヒープ
@@ -41,5 +48,9 @@ private:
 
     // 次に使用するRTVインデックス
     uint32_t useIndex = 0;
+private:
+    DXGIDevice* DXGIDevice_;
+    Command* command_;
+
 };
 

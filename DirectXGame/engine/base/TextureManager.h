@@ -40,7 +40,7 @@ public:
 	// メタデータを取得
 	const DirectX::TexMetadata& GetMataData(const std::string& filePach);
 
-	SrvManager* GetSrvManager(){ return SrvManager::GetInstance(); }
+	SrvManager* GetSrvManager(){ return srvManager_; }
 
 	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter,D3D12_DESCRIPTOR_RANGE& descriptorRange);
 

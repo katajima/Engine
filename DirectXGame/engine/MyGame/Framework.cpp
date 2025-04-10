@@ -16,18 +16,9 @@ void Framework::Initialize()
 
 	Input::GetInstance()->Intialize(winApp.get());
 	
-	// SRVマネージャの初期化
-	srvManager = SrvManager::GetInstance();
-	srvManager->Initialize(dxCommon.get());
-
 	
 
-	// UAVマネージャの初期化
-	uavManager = UavManager::GetInstance();
-	uavManager->Initialize(dxCommon.get());
 
-
-	
 	// ImGuiマネージャー
 	imguiManager = ImGuiManager::GetInstance();
 	imguiManager->Initialize(dxCommon.get());

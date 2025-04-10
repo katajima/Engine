@@ -21,7 +21,7 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon)
 	this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
 
 	dxCommon_ = dxCommon;
-
+	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_);
 
@@ -369,10 +369,10 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	particleGroup.srvIndex = SrvManager::GetInstance()->Allocate();
-	particleGroup.instancingSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(particleGroup.srvIndex);
-	particleGroup.instancingSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(particleGroup.srvIndex);
-	SrvManager::GetInstance()->CreateSRVforStructuredBuffer(particleGroup.srvIndex, particleGroup.resource.Get(), kNumMaxInstance, sizeof(ParticleForGPU));
+	particleGroup.srvIndex = srvManager_->Allocate();
+	particleGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(particleGroup.srvIndex);
+	particleGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(particleGroup.srvIndex);
+	srvManager_->CreateSRVforStructuredBuffer(particleGroup.srvIndex, particleGroup.resource.Get(), kNumMaxInstance, sizeof(ParticleForGPU));
 
 	// ブレンド
 	particleGroup.blendType = blendType;
@@ -439,10 +439,10 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	particleGroup.srvIndex = SrvManager::GetInstance()->Allocate();
-	particleGroup.instancingSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(particleGroup.srvIndex);
-	particleGroup.instancingSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(particleGroup.srvIndex);
-	SrvManager::GetInstance()->CreateSRVforStructuredBuffer(particleGroup.srvIndex, particleGroup.resource.Get(), kNumMaxInstance, sizeof(ParticleForGPU));
+	particleGroup.srvIndex = srvManager_->Allocate();
+	particleGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(particleGroup.srvIndex);
+	particleGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(particleGroup.srvIndex);
+	srvManager_->CreateSRVforStructuredBuffer(particleGroup.srvIndex, particleGroup.resource.Get(), kNumMaxInstance, sizeof(ParticleForGPU));
 
 
 

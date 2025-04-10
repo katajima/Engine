@@ -3,6 +3,8 @@
 #include "WinApp.h"
 #include <iostream>//用いるヘッダファイルが変わります。
 
+
+
 // ギズモの操作モード
 static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値は移動
 

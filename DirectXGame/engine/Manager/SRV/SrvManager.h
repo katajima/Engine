@@ -1,15 +1,25 @@
 #pragma once
 
-#include"DirectXGame/engine/base/DirectXCommon.h"
+// C++
+#include <cstdint>
+#include <wrl.h>
+using namespace Microsoft::WRL;
+// DirectX
+#include <d3d12.h>
 
+
+#include"DirectXGame/engine/struct/Structs3D.h"
+
+#include"externals/DirectXTex/DirectXTex.h"
+#include"externals/DirectXTex/d3dx12.h"
+
+class DXGIDevice;
+class Command;
 // SRV管理
 class SrvManager {
 public:
-	// シングルトンインスタンス
-	static SrvManager* GetInstance();
-
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize(DXGIDevice* DXGI, Command* Command);
 
 	void Finalize();
 
@@ -38,11 +48,7 @@ public:
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
 private:
-	static SrvManager* instance;
-
-	DirectXCommon* directXCommon_ = nullptr;
-
-
+	
 	// SRV用のデスクリプタサイズ
 	uint32_t descriptorSize;
 	// SRV用デスクリプタヒープ
@@ -51,4 +57,7 @@ private:
 	// 次に使用するSRVインデックス
 	uint32_t useIndex = 0;
 
+private:
+	DXGIDevice* DXGIDevice_;
+	Command* command_;
 };

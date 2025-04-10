@@ -24,6 +24,11 @@ public:
 	ID3D12Device* GetDevice() { return device_.Get(); };
 	// DXGIファクトリーの取得
 	IDXGIFactory7* GetFactory() { return dxgiFactory_.Get(); };
+
+	// DescriptorHeapの作成関数
+	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap>CreateDescriptorHeap(
+		D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
+
 private:
 	// エラー判別
 	HRESULT hr_ = S_FALSE;

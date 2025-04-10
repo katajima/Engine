@@ -22,6 +22,7 @@ std::string getLastPartOfPath(const std::string& path) {
 void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, const Vector2 texScale)
 {
 	modelCommon_ = ModelCommon::GetInstance();;
+	srvManager_ = modelCommon_->GetDxCommon()->GetSrvManager();
 
 	std::string dire = directorypath;
 
@@ -112,7 +113,7 @@ void Model::DrawSkinning()
 		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 		uavDesc.Buffer.StructureByteStride = sizeof(Mesh::VertexData);*/
 		// 
-		//modelCommon_->GetDxCommon()->GetDevice()->CreateUnorderedAccessView();
+		
 
 
 
@@ -121,7 +122,7 @@ void Model::DrawSkinning()
 		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
 
 
-		commandList->SetGraphicsRootDescriptorTable(10, SrvManager::GetInstance()->GetGPUDescriptorHandle(modelData.skinningSrvindex));
+		commandList->SetGraphicsRootDescriptorTable(10, modelCommon_->GetDxCommon()->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinningSrvindex));
 
 		mesh->GetCommandList(skinCluster.influenceBufferView);
 
@@ -369,7 +370,7 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 	}
 
 
-	modelData.skinningSrvindex = SrvManager::GetInstance()->Allocate();
+	modelData.skinningSrvindex = modelCommon_->GetDxCommon()->GetSrvManager()->Allocate();
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
@@ -514,8 +515,8 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
 	//skinCluster.paletteResource->Unmap(0, nullptr);
 
-	skinCluster.paletteSrvHandle.first = SrvManager::GetInstance()->GetCPUDescriptorHandle(modelData.skinningSrvindex);
-	skinCluster.paletteSrvHandle.second = SrvManager::GetInstance()->GetGPUDescriptorHandle(modelData.skinningSrvindex);
+	skinCluster.paletteSrvHandle.first = modelCommon_->GetDxCommon()->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinningSrvindex);
+	skinCluster.paletteSrvHandle.second = modelCommon_->GetDxCommon()->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinningSrvindex);
 
 	// palette用のSrvを作成。StructuredBufferでアクセスできるようにする。
 	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};

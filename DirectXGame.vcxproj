@@ -126,6 +126,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Command\Command.cpp" />
+    <ClCompile Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\DXCCompiler\DXCCompiler.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Fence\Fence.cpp" />
@@ -135,6 +136,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager2d.cpp" />
+    <ClCompile Include="DirectXGame\engine\Manager\DSV\DsvManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\UAV\UavManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\AStarAlgorithm.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp" />
@@ -439,6 +441,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h" />
     <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Command\Command.h" />
+    <ClInclude Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\DXCCompiler\DXCCompiler.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Fence\Fence.h" />
@@ -448,6 +451,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager2d.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h" />
     <ClInclude Include="DirectXGame\engine\Math\AStarAlgorithm.h" />
     <ClInclude Include="DirectXGame\engine\Math\LineCurveMath.h" />
