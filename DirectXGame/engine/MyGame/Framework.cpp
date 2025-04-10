@@ -20,6 +20,15 @@ void Framework::Initialize()
 	srvManager = SrvManager::GetInstance();
 	srvManager->Initialize(dxCommon.get());
 
+	//// RTVマネージャの初期化
+	//rtvManager = RtvManager::GetInstance();
+	//rtvManager->Initialize(dxCommon.get());
+
+	// UAVマネージャの初期化
+	uavManager = UavManager::GetInstance();
+	uavManager->Initialize(dxCommon.get());
+
+
 	
 	// ImGuiマネージャー
 	imguiManager = ImGuiManager::GetInstance();

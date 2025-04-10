@@ -22,6 +22,10 @@ public:
     // RTV生成関数
     void CreateRTV(uint32_t rtvIndex, ID3D12Resource* pResource);
 
+    Microsoft::WRL::ComPtr < ID3D12Resource> CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color);
+
+    void PreDraw();
+
     // 必要に応じて他のRTV関連の関数を追加
     // ...
 

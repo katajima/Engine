@@ -63,13 +63,6 @@ public: // メンバ関数
 		}
 	}
 
-
-	// CPUHandle
-	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCPUDescriptorHandle(uint32_t index);
-
-	// GPUHandle
-	D3D12_GPU_DESCRIPTOR_HANDLE GetRTVGPUDescriptorHandle(uint32_t index);
-
 	// CPUHandle
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCPUDescriptorHandle(uint32_t index);
 
@@ -189,24 +182,19 @@ public:
 
 	Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> GetCommandList() { return commandList; }
 
-	//Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> GetSrvDescriptorHeap() { return srvDescriptorHeap; }
-
-	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> GetRtvDescriptorHeap() { return rtvDescriptorHeap; }
-
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> GetDsvDescriptorHeap() { return dsvDescriptorHeap; }
 
-
-	Microsoft::WRL::ComPtr < ID3D12Resource> CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color);
 
 	void CreateRenderTexture();
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> GetRenderTextureResource() const { return renderTextureResource_; }
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> renderTextureResource_;
-	//Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> rtvTexDescriptorHeap;
 
 	uint32_t index;
 	
+	D3D12_RESOURCE_STATES GetCurrentResourceState(ID3D12Resource* resource);
+
 private:
 	// WindowsAPI
 	//WinApp* winApp_ = nullptr;
@@ -225,7 +213,6 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvTexHandle;
 
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> rtvDescriptorHeap;
 	
 	D3D12_RENDER_TARGET_VIEW_DESC rtvTexDesc_;
 	

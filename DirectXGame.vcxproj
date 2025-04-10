@@ -424,6 +424,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
+    <ClInclude Include="DirectXGame\engine\base\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\base\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
     <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h" />

@@ -47,8 +47,8 @@ void RenderingCommon::DrawCommonSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// ヒープをコマンドリストに設定 (CBV_SRV_UAV ヒープ)
-	ID3D12DescriptorHeap* descriptorHeaps[] = { TextureManager::GetInstance()->GetSrvManager()->GetDescriptorHeap()};
-	dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	//ID3D12DescriptorHeap* descriptorHeaps[] = { TextureManager::GetInstance()->GetSrvManager()->GetDescriptorHeap()};
+	//dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	TextureManager::GetInstance()->GetSrvManager()->SetGraphicsRootdescriptorTable(1, dxCommon_->index);
 

@@ -81,6 +81,12 @@ protected:
 	std::unique_ptr < DirectXCommon> dxCommon = nullptr;
 	// SRVマネージャー
 	SrvManager* srvManager = nullptr;
+	// SRVマネージャー
+	RtvManager* rtvManager = nullptr;
+	// SRVマネージャー
+	UavManager* uavManager = nullptr;
+
+
 	// ImGuiマネージャー
 	ImGuiManager* imguiManager;
 	// スプライトこもん
