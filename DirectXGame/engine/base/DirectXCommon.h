@@ -227,7 +227,7 @@ private:
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> rtvDescriptorHeap;
 	
-	D3D12_RENDER_TARGET_VIEW_DESC rtvTexDesc;
+	D3D12_RENDER_TARGET_VIEW_DESC rtvTexDesc_;
 	
 	
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> dsvDescriptorHeap;

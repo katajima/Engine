@@ -34,16 +34,16 @@ void DirectXCommon::Intialize(/*WinApp* winApp*/) {
 #pragma region Draw
 
 void DirectXCommon::PreDrawOffscreen() {
-	// レンダーテクスチャの状態遷移: PixelShaderResource -> RenderTarget
+	// オフスクリーン描画用の状態遷移
 	TransitionResourceState(renderTextureResource_.Get(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,  // 現在の状態
-		D3D12_RESOURCE_STATE_RENDER_TARGET);  // 遷移後の状態
-
-	
+		D3D12_RESOURCE_STATE_RENDER_TARGET);          // 遷移後の状態
 
 	// 描画先の設定
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	commandList->OMSetRenderTargets(1, &rtvTexHandle, false, &dsvHandle);
+
+
 
 	// レンダーターゲットと深度バッファをクリア
 	float clearColor[] = { 1.0f, 0.0f, 0.0f, 1.0f }; // 青っぽい色
@@ -58,9 +58,10 @@ void DirectXCommon::PreDrawOffscreen() {
 void DirectXCommon::PostDrawOffscreen() {
 	
 
+	// オフスクリーン描画後の状態遷移
 	TransitionResourceState(renderTextureResource_.Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,  // 現在の状態
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);  // 次の状態 (ピクセルシェーダー用)
+		D3D12_RESOURCE_STATE_RENDER_TARGET,          // 現在の状態
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE); // 次の状態
 
 
 }
@@ -379,7 +380,7 @@ void DirectXCommon::CreateRenderTargets()
 	D3D12_RENDER_TARGET_VIEW_DESC rtvTexDesc = {};
 	rtvTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 出力結果をSRGBに変換して書き込む
 	rtvTexDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; // 2Dテクスチャとして書き込む
-
+	rtvTexDesc_ = rtvTexDesc;
 	// ディスクリプタの先頭を取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
@@ -395,7 +396,7 @@ void DirectXCommon::CreateRenderTargets()
 
 	const Vector4 kRenderTargetClearValue{ 1.0f, 0.0f, 0.0f, 1.0f };
 	renderTextureResource_ = CreateRenderTextureResource(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
-	device->CreateRenderTargetView(renderTextureResource_.Get(), &rtvTexDesc, rtvTexHandle);
+	device->CreateRenderTargetView(renderTextureResource_.Get(), &rtvTexDesc_, rtvTexHandle);
 }
 
 
@@ -529,6 +530,7 @@ void DirectXCommon::CreateDXCCompiler()
 
 void DirectXCommon::InitializeImGui()
 {
+
 }
 
 void DirectXCommon::InitializeFixFPS()
@@ -680,7 +682,6 @@ Microsoft::WRL::ComPtr < ID3D12Resource> DirectXCommon::UploadTextureData(Micros
 	uint64_t intermediateSize = GetRequiredIntermediateSize(texture.Get(), 0, UINT(subresources.size()));
 	Microsoft::WRL::ComPtr < ID3D12Resource> intermediateResource = CreateBufferResource(intermediateSize);
 	UpdateSubresources(commandList.Get(), texture.Get(), intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
-	
 	// Textureへの転送後は利用できるよう、D3D12_RESORCE_STATE_COPYからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -735,15 +736,17 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateRenderTextureResourc
 void DirectXCommon::CreateRenderTexture() {
 	const Vector4 kRenderTargetClearValue{ 1.0f, 0.0f, 0.0f, 1.0f };
 	renderTextureResource_ = CreateRenderTextureResource(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, kRenderTargetClearValue);
-	device->CreateRenderTargetView(renderTextureResource_.Get(), &rtvTexDesc, rtvTexHandle);
+	device->CreateRenderTargetView(renderTextureResource_.Get(), &rtvTexDesc_, rtvTexHandle);
 	
 	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
 	renderTextureSrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	renderTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	renderTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	renderTextureSrvDesc.Texture2D.MipLevels = 1;
-	index = SrvManager::GetInstance()->Allocate();
-
+	
+	if (index == 0) {
+		index = SrvManager::GetInstance()->Allocate();
+	}
 	device->CreateShaderResourceView(
 		renderTextureResource_.Get(), &renderTextureSrvDesc, SrvManager::GetInstance()->GetCPUDescriptorHandle(index));
 }

@@ -24,7 +24,7 @@ void MyGame::Initialize()
 	// グローバル変数の読み込み
 	GlobalVariables::GetInstance()->LoadFiles();
 	//
-
+	dxCommon->CreateRenderTexture();
 }
 
 void MyGame::Finalize()
@@ -104,55 +104,41 @@ void MyGame::Update()
 void MyGame::Draw()
 {
 	///
-	//dxCommon->CreateRenderTexture();
-
-	// 描画設定
-	//RenderingCommon::GetInstance()->DrawCommonSetting();
-
-	//dxCommon->PreDrawOffscreen();
-
-	dxCommon->PreDrawSwap();
-
 	// 描画前処理
 	SrvManager::GetInstance()->PreDraw();
 
-	
+	// バックバッファの準備
+	dxCommon->PreDrawSwap();
 
-	//////////////---------3Dモデル-------------///////////////
-
-	
-	//// 3Dオブジェクトの描画準備
-	
+	// 3Dオブジェクトの描画
 	SceneManager::GetInstance()->Draw3D();
-
 	Object3dCommon::GetInstance();
 
-	
+	// パーティクル描画
 	ParticleManager::GetInstance()->Draw();
 
 #ifdef _DEBUG
 	if (!SceneManager::GetInstance()->IsNowScene("GAMEPLAY")) {
+		// デバッグ用のライン描画
 		LineCommon::GetInstance()->Draw();
 	}
 #endif // _DEBUG
 
-	
-
-	
-	//// 2Dオブジェクトの描画準備
+	// 2Dオブジェクトの描画
 	SceneManager::GetInstance()->Draw2D();
-	
-	
 
-	//描画後処理
-	//dxCommon->PostDrawOffscreen();
+	//// オフスクリーン描画
+	//dxCommon->PreDrawOffscreen(); // オフスクリーンのRTV設定
+	//RenderingCommon::GetInstance()->DrawCommonSetting(); // 共通のレンダリング設定
+	//dxCommon->PostDrawOffscreen(); // オフスクリーン描画後の処理
 
 	// ImGuiの描画
 	imguiManager->Draw();
 
-	//描画後処理
+	// 描画後処理
 	dxCommon->PostDrawSwap();
 }
+
 
 void MyGame::InitializeResource()
 {
