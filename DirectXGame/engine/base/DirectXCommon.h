@@ -20,6 +20,13 @@
 #include"DirectXGame/engine/struct/Structs3D.h"
 
 
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+#include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/ScissorRect/ScissorRect.h"
+#include "DirectXGame/engine/DirectX/ViewPort/ViewPort.h"
+
+
+
 struct ResourceStateTracker {
 	std::unordered_map<ID3D12Resource*, D3D12_RESOURCE_STATES> resourceStates;
 
@@ -99,7 +106,7 @@ private:
 	/// <summary>
 	/// DXGIデバイス初期化
 	/// </summary>
-	void InitializeDXGIDevice();
+	//void InitializeDXGIDevice();
 
 	/// <summary>
 	/// スワップチェーンの生成
@@ -178,9 +185,9 @@ public:
 	[[nodiscard]]
 	Microsoft::WRL::ComPtr < ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr < ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
-	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return device; }
+	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return DXGIDevice_->GetDevice(); }
 
-	Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> GetCommandList() { return commandList; }
+	Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> GetCommandList() { return command_->GetList(); }
 
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> GetDsvDescriptorHeap() { return dsvDescriptorHeap; }
 
@@ -193,18 +200,13 @@ public:
 
 	uint32_t index;
 	
-	D3D12_RESOURCE_STATES GetCurrentResourceState(ID3D12Resource* resource);
-
 private:
-	// WindowsAPI
-	//WinApp* winApp_ = nullptr;
-	// DirectX12デバイス
-	Microsoft::WRL::ComPtr<ID3D12Device> device;
-	// DXGIファクトリ
-	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
-	Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> commandList;
-	Microsoft::WRL::ComPtr < ID3D12CommandAllocator> commandAllocator;
-	Microsoft::WRL::ComPtr < ID3D12CommandQueue> commandQueue;
+	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();
+	std::unique_ptr<Command> command_ = std::make_unique<Command>();
+	std::unique_ptr<ScissorRect> scissorRect_ = std::make_unique<ScissorRect>();
+	std::unique_ptr<ViewPort> viewPort_ = std::make_unique<ViewPort>();
+
+	
 	Microsoft::WRL::ComPtr < IDXGISwapChain4> swapChain;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	Microsoft::WRL::ComPtr < ID3D12Resource> depthStencilResource;
@@ -224,8 +226,8 @@ private:
 	IDxcUtils* dxcUtils;
 	IDxcIncludeHandler* includeHandler;
 	IDxcCompiler3* dxcCompiler;
-	D3D12_VIEWPORT viewport;
-	D3D12_RECT scissorRect;
+	//D3D12_VIEWPORT viewport;
+	//D3D12_RECT scissorRect;
 	D3D12_RESOURCE_BARRIER barrier;
 	uint32_t desriptorSizeRTV;
 	uint32_t desriptorSizeDSV;
