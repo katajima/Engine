@@ -3,6 +3,7 @@
 class Command;
 class ScissorRect
 {
+public:
 	ScissorRect() = default;
 	~ScissorRect() = default;
 

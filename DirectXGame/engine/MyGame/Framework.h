@@ -82,7 +82,7 @@ protected:
 	// SRVマネージャー
 	SrvManager* srvManager = nullptr;
 	// SRVマネージャー
-	RtvManager* rtvManager = nullptr;
+	//RtvManager* rtvManager = nullptr;
 	// SRVマネージャー
 	UavManager* uavManager = nullptr;
 

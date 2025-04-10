@@ -24,25 +24,13 @@
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/ScissorRect/ScissorRect.h"
 #include "DirectXGame/engine/DirectX/ViewPort/ViewPort.h"
+#include "DirectXGame/engine/DirectX/Fence/Fence.h"
+#include "DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.h"
+#include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
 
 
 
-struct ResourceStateTracker {
-	std::unordered_map<ID3D12Resource*, D3D12_RESOURCE_STATES> resourceStates;
 
-	void SetState(ID3D12Resource* resource, D3D12_RESOURCE_STATES newState) {
-		resourceStates[resource] = newState;
-	}
-
-	D3D12_RESOURCE_STATES GetState(ID3D12Resource* resource) const {
-		auto it = resourceStates.find(resource);
-		if (it != resourceStates.end()) {
-			return it->second;
-		}
-		// デフォルトの状態を返す (必要に応じて変更)
-		return D3D12_RESOURCE_STATE_COMMON;
-	}
-};
 
 
 class RenderingCommon;
@@ -50,26 +38,7 @@ class RenderingCommon;
 class DirectXCommon
 {
 public: // メンバ関数
-	ResourceStateTracker stateTracker;
-	// 状態を遷移させる関数
-	void TransitionResourceStateTracked(ID3D12GraphicsCommandList* commandList,
-		ID3D12Resource* resource,
-		D3D12_RESOURCE_STATES newState) {
-		auto beforeState = stateTracker.GetState(resource);
-		if (beforeState != newState) {
-			D3D12_RESOURCE_BARRIER barrier = {};
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Transition.pResource = resource;
-			barrier.Transition.StateBefore = beforeState;
-			barrier.Transition.StateAfter = newState;
-			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-			commandList->ResourceBarrier(1, &barrier);
-
-			stateTracker.SetState(resource, newState);
-		}
-	}
-
+	
 	// CPUHandle
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCPUDescriptorHandle(uint32_t index);
 
@@ -77,7 +46,7 @@ public: // メンバ関数
 	D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGPUDescriptorHandle(uint32_t index);
 
 	// 初期化
-	void Intialize(/*WinApp* winApp*/);
+	void Intialize(WinApp* winApp);
 
 	// 描画前処理
 	void PreDrawOffscreen();
@@ -103,21 +72,8 @@ private:
 		D3D12_RESOURCE_STATES beforeState,
 		D3D12_RESOURCE_STATES afterState);
 
-	/// <summary>
-	/// DXGIデバイス初期化
-	/// </summary>
-	//void InitializeDXGIDevice();
-
-	/// <summary>
-	/// スワップチェーンの生成
-	/// </summary>
-	void CreateSwapChain();
-
-	/// <summary>
-	/// コマンド関連初期化
-	/// </summary>
-	void InitializeCommand();
-
+	
+	
 	/// <summary>
 	/// レンダーターゲット生成
 	/// </summary>
@@ -134,32 +90,10 @@ private:
 	void CreateDepthBuffer();
 
 	/// <summary>
-	/// フェンス生成
-	/// </summary>
-	void CreateFence();
-
-	/// <summary>
 	/// DepthStencilView(DSV)初期化
 	/// </summary>
 	void InitializeDepthStencilView();
 
-	/// <summary>
-	/// Viewportの初期化
-	/// </summary>
-	void InitializeViewport();
-
-	/// <summary>
-	/// Scissorの初期化
-	/// </summary>
-	void InitializeScissor();
-
-	/// <summary>
-	/// DXCCompilerを初期化
-	/// </summary>
-	void CreateDXCCompiler();
-
-
-	void InitializeImGui();
 
 	//FPS固定初期化
 	void InitializeFixFPS();
@@ -169,7 +103,7 @@ private:
 public:
 
 	// バックバッファの数を取得
-	size_t GetBackBufferCount() const { return backBuffers_.size(); }
+	size_t GetBackBufferCount() const { return swapChain_->GetBackBufferCount(); }
 
 	// DescriptorHeapの作成関数
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap>CreateDescriptorHeap(
@@ -194,45 +128,45 @@ public:
 
 	void CreateRenderTexture();
 
-	Microsoft::WRL::ComPtr < ID3D12Resource> GetRenderTextureResource() const { return renderTextureResource_; }
+	//Microsoft::WRL::ComPtr < ID3D12Resource> GetRenderTextureResource() const { return renderTextureResource_; }
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> renderTextureResource_;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> renderTextureResource_;
 
 	uint32_t index;
 	
 private:
-	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();
-	std::unique_ptr<Command> command_ = std::make_unique<Command>();
-	std::unique_ptr<ScissorRect> scissorRect_ = std::make_unique<ScissorRect>();
-	std::unique_ptr<ViewPort> viewPort_ = std::make_unique<ViewPort>();
+	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();   // デバイス
+	std::unique_ptr<Command> command_ = std::make_unique<Command>();            // コマンド
+	std::unique_ptr<ScissorRect> scissorRect_ = std::make_unique<ScissorRect>();// シザー
+	std::unique_ptr<ViewPort> viewPort_ = std::make_unique<ViewPort>();         // ビューポート
+	std::unique_ptr<Fence> fence_ = std::make_unique<Fence>();                  // フェンス
+	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();// コンパイル
+	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();      // スワップチェーン 
+	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();   // RTVマネージャー 
+
 
 	
-	Microsoft::WRL::ComPtr < IDXGISwapChain4> swapChain;
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+	/*Microsoft::WRL::ComPtr < IDXGISwapChain4> swapChain;
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;*/
 	Microsoft::WRL::ComPtr < ID3D12Resource> depthStencilResource;
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvTexHandle;
+	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
 
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+	//D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
+	//D3D12_CPU_DESCRIPTOR_HANDLE rtvTexHandle;
+
+	//D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
 	
-	D3D12_RENDER_TARGET_VIEW_DESC rtvTexDesc_;
+	//D3D12_RENDER_TARGET_VIEW_DESC rtvTexDesc_;
 	
 	
 	Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> dsvDescriptorHeap;
-	Microsoft::WRL::ComPtr < ID3D12Fence> fence;
-	HANDLE fenceEvent;
-	uint64_t fenceValue;
-	IDxcUtils* dxcUtils;
-	IDxcIncludeHandler* includeHandler;
-	IDxcCompiler3* dxcCompiler;
-	//D3D12_VIEWPORT viewport;
-	//D3D12_RECT scissorRect;
+	
+
 	D3D12_RESOURCE_BARRIER barrier;
 	uint32_t desriptorSizeRTV;
 	uint32_t desriptorSizeDSV;
 
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
+	//std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
@@ -247,8 +181,7 @@ public:
 
 
 public:
-	//static const uint32_t kMaxSRVCount;
-
+	
 	
 	////------CompileShader------////
 	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(

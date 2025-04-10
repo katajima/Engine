@@ -5,14 +5,10 @@
 // RTV管理
 class RtvManager {
 public:
-    // シングルトンインスタンス
-    static RtvManager* GetInstance();
-
     // 初期化
     void Initialize(DirectXCommon* dxCommon);
 
-    void Finalize();
-
+   
     uint32_t Allocate();
 
     // デスクリプタハンドル計算
@@ -34,7 +30,7 @@ public:
     static const uint32_t kMaxRTVCount;
 
 private:
-    static RtvManager* instance;
+
 
     DirectXCommon* directXCommon_ = nullptr;
 

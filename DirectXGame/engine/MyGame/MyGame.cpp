@@ -37,8 +37,6 @@ void MyGame::Finalize()
 	SpriteCommon::GetInstance()->Finalize();
 	// srv
 	SrvManager::GetInstance()->Finalize();
-	// rtv
-	RtvManager::GetInstance()->Finalize();
 	// uav
 	UavManager::GetInstance()->Finalize();
 

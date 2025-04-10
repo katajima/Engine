@@ -9,7 +9,7 @@ void Framework::Initialize()
 
 	//dxCommon = 
 	dxCommon = std::make_unique<DirectXCommon>();
-	dxCommon->Intialize();
+	dxCommon->Intialize(winApp.get());
 
 	renderingCommon = RenderingCommon::GetInstance();
 	renderingCommon->Initialize(dxCommon.get());
@@ -20,9 +20,7 @@ void Framework::Initialize()
 	srvManager = SrvManager::GetInstance();
 	srvManager->Initialize(dxCommon.get());
 
-	//// RTVマネージャの初期化
-	//rtvManager = RtvManager::GetInstance();
-	//rtvManager->Initialize(dxCommon.get());
+	
 
 	// UAVマネージャの初期化
 	uavManager = UavManager::GetInstance();

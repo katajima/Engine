@@ -3,14 +3,7 @@
 
 const uint32_t RtvManager::kMaxRTVCount = 16;
 
-RtvManager* RtvManager::instance = nullptr; 
 
-RtvManager* RtvManager::GetInstance() { 
-	if (!instance) { 
-		instance = new RtvManager();
-	} 
-	return instance; 
-}
 
 void RtvManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -23,12 +16,7 @@ void RtvManager::Initialize(DirectXCommon* dxCommon)
 	descriptorSize = directXCommon_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
-void RtvManager::Finalize()
-{
-	descriptorHeap.Reset();
-	delete instance; 
-	instance = nullptr;
-}
+
 
 uint32_t RtvManager::Allocate()
 {
