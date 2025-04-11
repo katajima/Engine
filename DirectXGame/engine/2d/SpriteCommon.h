@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/base/DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include<d3d12.h>
 #include<dxgi1_6.h>

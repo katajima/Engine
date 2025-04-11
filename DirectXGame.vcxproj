@@ -164,10 +164,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\effect\Trail\TrailEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Light\Lights.cpp" />
     <ClCompile Include="DirectXGame\engine\Line\LineCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\audio\Audio.cpp" />
+    <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\D3DResourceLeakchecker.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\DirectXCommon.cpp" />
+    <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp" />
+    <ClCompile Include="DirectXGame\engine\DirectX\Common\DirectXCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\base\ImGuiManager.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager.cpp" />
@@ -488,10 +488,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\scene\GamePlayScene.h" />
     <ClInclude Include="DirectXGame\application\scene\TitleScene.h" />
     <ClInclude Include="DirectXGame\engine\Line\LineCommon.h" />
-    <ClInclude Include="DirectXGame\engine\audio\Audio.h" />
+    <ClInclude Include="DirectXGame\engine\Audio\Audio.h" />
     <ClInclude Include="DirectXGame\engine\Camera\Camera.h" />
-    <ClInclude Include="DirectXGame\engine\base\D3DResourceLeakchecker.h" />
-    <ClInclude Include="DirectXGame\engine\base\DirectXCommon.h" />
+    <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h" />
+    <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h" />
     <ClInclude Include="DirectXGame\engine\base\ImGuiManager.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager.h" />

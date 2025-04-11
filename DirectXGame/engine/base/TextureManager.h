@@ -12,7 +12,7 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include"DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 
 // テクスチャマネージャー
@@ -22,15 +22,14 @@ public:
 	static TextureManager* GetInstance();
 	
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon/*,SrvManager* srvManager*/);
+	void Initialize(DirectXCommon* dxCommon);
 	
 	// 終了
 	void Finalize();
 
 	//DirectTexを使ってTextureを読むためのLoadTextur関数
 	void LoadTexture(const std::string& filePath);
-	//void LoadTextureStruct(const std::string& filePath);
-
+	
 	// テクスチャ番号取得
 	uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
@@ -63,12 +62,10 @@ private:
 	};
 
 	//テクスチャデータ
-	//std::vector<TextureData> textureDatas;
 	std::unordered_map<std::string, TextureData> textureDatas;
 
 	DirectXCommon* dxCommon_ = nullptr;
 	static uint32_t kSRVIndexTop;
-	//Microsoft::WRL::ComPtr <ID3D12Resource> intermediateResource;
 	
 	SrvManager* srvManager_ = nullptr;
 };

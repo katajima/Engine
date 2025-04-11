@@ -6,9 +6,9 @@
 #include<dxcapi.h>
 #include<wrl.h>
 #include <array>
-#include"Logger.h"
-#include"StringUtility.h"
-#include"WinApp.h"
+#include"DirectXGame/engine/base/Logger.h"
+#include"DirectXGame/engine/base/StringUtility.h"
+#include"DirectXGame/engine/base/WinApp.h"
 #include<chrono>
 #include <thread>
 #include<vector>

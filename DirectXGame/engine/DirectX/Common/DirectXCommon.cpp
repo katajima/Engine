@@ -11,9 +11,9 @@ using namespace Microsoft::WRL;
 
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include"TextureManager.h"
+#include "DirectXGame/engine/base/TextureManager.h"
 
-#include"RenderingCommon.h"
+#include"DirectXGame/engine/base/RenderingCommon.h"
 
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 

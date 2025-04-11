@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/base/DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 // 3Dモデル共通部分
 class ModelCommon

@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/engine/base/DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/base/TextureManager.h"
 
 class RenderingCommon

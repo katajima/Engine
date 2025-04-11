@@ -1,5 +1,5 @@
 #include"ImGuiManager.h"
-#include "DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "WinApp.h"
 #include <iostream>//用いるヘッダファイルが変わります。
 

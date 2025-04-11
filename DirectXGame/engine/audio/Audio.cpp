@@ -1,5 +1,5 @@
 #include"Audio.h"
-#include "DirectXGame/engine/base/DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/base/WinApp.h"
 
 Audio* Audio::GetInstance()

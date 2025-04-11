@@ -7,7 +7,7 @@
 #include <wrl.h>
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
-#include "DirectXGame/engine/base/DirectXCommon.h"
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Mesh/Mesh.h"
 #include "DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
