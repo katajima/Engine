@@ -89,7 +89,6 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
 
 	//particleManager_ = ParticleManager::GetInstance();
-	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", ModelManager::GetInstance()->FindModel("plane.obj"));
 	
 	
 	

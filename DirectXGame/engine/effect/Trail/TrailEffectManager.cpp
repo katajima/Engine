@@ -13,10 +13,9 @@ TrailEffectManager* TrailEffectManager::GetInstance()
 void TrailEffectManager::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
-
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	
 	CreateGraphicsPipeline();
 }
 

@@ -1,22 +1,27 @@
 #pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
+#include<dxcapi.h>
 #include<cstdint>
 #include<wrl.h>
+using namespace Microsoft::WRL;
 #include<list>
 #include<string>
 #include<vector>
 #include<format>
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+
+class Command;
+class DXGIDevice;
+class DXCCompiler;
 
 class PSOManager
 {
 public:
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
 
 
@@ -54,7 +59,9 @@ public:
 
 
 private:
-	DirectXCommon* dxCommon_;
+	Command* command_;
+	DXGIDevice* DXGIDevice_;
+	DXCCompiler* dxcCompiler_;
 
 	struct fileName {
 		std::wstring filePach;
@@ -96,6 +103,9 @@ private:
 
 public:
 	ShaderFile shderFile_;
+private:
+
+
 
 private:
 	void Blob(D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);

@@ -65,6 +65,7 @@ public:
 	// 
 	enum class SpawnType // 出現形状
 	{
+		kPoint,     // Point
 		kAABB,		// AABB
 		kOBB,		// OBB
 		kSphere,	// Sphere
@@ -229,6 +230,8 @@ private:
 	void BlendMuliply();
 
 private: // エミッタ種類
+	void PointEmit(ParticleGroup& particleGroup); // Point
+
 	void AABBEmit(ParticleGroup& particleGroup); // AABB
 
 	void LineEmit(ParticleGroup& particleGroup); // ライン

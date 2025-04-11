@@ -4,10 +4,6 @@
 
 void Primitive::Initialize(ShapeType type, const std::string& tex, const Color color, bool isLine)
 {
-	
-	//std::is_same<T,>
-
-
 	mesh = std::make_unique<Mesh>();
 
 	type_ = type;
@@ -16,7 +12,7 @@ void Primitive::Initialize(ShapeType type, const std::string& tex, const Color c
 
 	MeshInitialize();
 
-	mesh->Initialize(PrimitiveCommon::GetInstance()->GetDxCommon());
+	mesh->Initialize(PrimitiveCommon::GetInstance()->GetDxCommon()->GetModelManager()->GetModelCommon());
 
 
 	if (type == ShapeType::AnimationPlane) {

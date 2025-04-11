@@ -23,7 +23,7 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(),dxCommon_->GetDXCCompiler());
 
 	CreateGraphicsPipeline();
 }

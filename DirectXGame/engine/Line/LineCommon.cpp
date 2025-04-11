@@ -26,10 +26,9 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
-
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	
 	CreateGraphicsPipeline();
 
 	
@@ -56,7 +55,8 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->indices.push_back({ 0 });
 	mesh_->indices.push_back({ 1 });
-	mesh_->InitializeLine(dxCommon_);
+
+	mesh_->InitializeLine(dxCommon_->GetModelManager()->GetModelCommon());
 
 	mesh_->verticesline.clear();
 	mesh_->indices.clear();

@@ -1,27 +1,16 @@
 #include "ModelManager.h"
+#include"ModelCommon.h"
+#include"Model.h"
+#include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
-ModelManager* ModelManager::instance = nullptr;
-
-ModelManager* ModelManager::GetInstance()
+void ModelManager::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager)
 {
-	if (instance == nullptr) {
-		instance = new ModelManager;
-	}
-	return instance;
-}
-
-void ModelManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
-
-void ModelManager::Initialize(DirectXCommon* dxCommon)
-{
-	
-	//modelCommon = new ModelCommon;
-	modelCommon = ModelCommon::GetInstance();
-	modelCommon->Initialize(dxCommon);
+	command_ = command;
+	DXGIDevice_ = DXGIDevice;
+	srvManager_ = srvManager;
+	modelCommon_ = std::make_unique<ModelCommon>();
+	modelCommon_->Initialize(command_, DXGIDevice_, srvManager_);
 }
 
 void ModelManager::LoadModel(const std::string& filePath, const std::string& dire, const Vector2 texScale)
@@ -39,7 +28,7 @@ void ModelManager::LoadModel(const std::string& filePath, const std::string& dir
 	}
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(modelCommon, "./resources/Models", filePath, dire, texScale);
+	model->Initialize(modelCommon_.get(), "./resources/Models", filePath, dire, texScale);
 
 	// モデルをmapコンテナに格納
 	models.insert(std::make_pair(filePath, std::move(model)));
@@ -60,7 +49,7 @@ void ModelManager::LoadModelAmime(const std::string& filePath, const std::string
 	}
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->InitializeAnime(modelCommon, "./resources/Models", filePath, dire);
+	model->InitializeAnime(modelCommon_.get(), "./resources/Models", filePath, dire);
 
 	// モデルをmapコンテナに格納
 	models.insert(std::make_pair(filePath, std::move(model)));

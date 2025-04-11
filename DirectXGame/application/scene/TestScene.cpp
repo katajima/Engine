@@ -205,8 +205,8 @@ void TestScene::Draw3D()
 		// ゴール
 		goalObject->Draw();
 
-		Object3dInstansManager::GetInstance()->Update();
-		Object3dInstansManager::GetInstance()->Draw();
+		//Object3dInstansManager::GetInstance()->Update();
+		//Object3dInstansManager::GetInstance()->Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
@@ -438,6 +438,27 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->SetIsRotateVelocity(true);
 	emitterEnemy_->SetIsBounce(true);
 	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
+
+	primitvPlane_ = std::make_unique<ParticleEmitter>();
+	primitvPlane_->Initialize("primiPlane", "primiPlane", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlane_->GetFrequency() = 0.025f;
+	primitvPlane_->SetCount(40);
+	primitvPlane_->SetPos({ 0,50,0 });
+	primitvPlane_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
+	primitvPlane_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//primitvPlane_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	primitvPlane_->SetLifeTimeMinMax(1, 3);
+	//primitvPlane_->SetIsGravity(true);
+	primitvPlane_->SetUsebillboard(false);
+	primitvPlane_->SetIsAlpha(true);
+	primitvPlane_->SetIsLifeTimeScale(true);
+	primitvPlane_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f },{1.0f,1.0f,1.0f,1.0f});
+	//primitvPlane_->SetIsRotateVelocity(true);
+	//primitvPlane_->SetIsBounce(true);
+	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,2.5f,0.1f }, { 0.1f ,5.0f,0.1f });
+
+
+
 }
 
 /// <summary>
@@ -547,6 +568,9 @@ void TestScene::InitializeOthers()
 
 
 		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} }, goalObject->worldtransform_.translate_)) {
+			continue;
+		}
+		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} }, playerObject->worldtransform_.translate_)) {
 			continue;
 		}
 
@@ -664,6 +688,10 @@ void TestScene::UpdateRoom01()
 
 	SkyBoxCommon::GetInstance()->SetCamara(camera.get());
 	SkyBoxCommon::GetInstance()->Update();
+
+
+
+	primitvPlane_->Update();
 }
 
 void TestScene::UpdateRoom02()
@@ -825,7 +853,7 @@ void TestScene::UpdateRoom07()
 
 	pathfinder.DrawPath(11.0f);
 
-	//map->DrawMapChip(10.0f);
+	map->DrawMapChip(10.0f);
 }
 
 void TestScene::UpdateRoom08()

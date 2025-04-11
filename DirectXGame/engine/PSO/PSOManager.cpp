@@ -1,9 +1,14 @@
 #include "PSOManager.h"
 
-void PSOManager::Initialize(DirectXCommon* dxCommon)
-{
-	dxCommon_ = dxCommon;
+#include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+#include "DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.h"
 
+void PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler)
+{
+	command_ = command;
+	DXGIDevice_ = DXGIDevice;
+	dxcCompiler_ = dxcCompiler;
 }
 
 void PSOManager::Blob(D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
@@ -27,7 +32,7 @@ void PSOManager::Blob(D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft:
 		assert(false);
 	}
 	//バイナリを元に生成
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
+	hr = DXGIDevice_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
 		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 }
@@ -39,35 +44,35 @@ void PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsP
 
 	if (shderFile_.vertex.filePach != L"") {
 		// Shaderをコンパイルする
-		shaderBlob.VS = dxCommon_->CompileShader(shderFile_.vertex.filePach,
+		shaderBlob.VS = dxcCompiler_->CompileShader(shderFile_.vertex.filePach,
 			L"vs_6_0");
 		assert(shaderBlob.VS != nullptr);
 		graphicsPipeline.VS = { shaderBlob.VS->GetBufferPointer(),
 		shaderBlob.VS->GetBufferSize() }; // VertexShader
 	}
 	if (shderFile_.pixel.filePach != L"") {
-		shaderBlob.PS = dxCommon_->CompileShader(shderFile_.pixel.filePach,
+		shaderBlob.PS = dxcCompiler_->CompileShader(shderFile_.pixel.filePach,
 			L"ps_6_0");
 		assert(shaderBlob.PS != nullptr);
 		graphicsPipeline.PS = { shaderBlob.PS->GetBufferPointer(),
 		shaderBlob.PS->GetBufferSize() }; // PixelShader
 	}
 	if (shderFile_.domain.filePach != L"") {
-		shaderBlob.DS = dxCommon_->CompileShader(shderFile_.domain.filePach,
+		shaderBlob.DS = dxcCompiler_->CompileShader(shderFile_.domain.filePach,
 			L"ds_6_0");
 		assert(shaderBlob.DS != nullptr);
 		graphicsPipeline.DS = { shaderBlob.DS->GetBufferPointer(),
 		shaderBlob.DS->GetBufferSize() }; // DomainShader
 	}
 	if (shderFile_.hull.filePach != L"") {
-		shaderBlob.HS = dxCommon_->CompileShader(shderFile_.hull.filePach,
+		shaderBlob.HS = dxcCompiler_->CompileShader(shderFile_.hull.filePach,
 			L"hs_6_0");
 		assert(shaderBlob.HS != nullptr);
 		graphicsPipeline.HS = { shaderBlob.HS->GetBufferPointer(),
 		shaderBlob.HS->GetBufferSize() }; // HullShader
 	}
 	if (shderFile_.geometry.filePach != L"") {
-		shaderBlob.GS = dxCommon_->CompileShader(shderFile_.geometry.filePach,
+		shaderBlob.GS = dxcCompiler_->CompileShader(shderFile_.geometry.filePach,
 			L"gs_6_0");
 		assert(shaderBlob.GS != nullptr);
 		graphicsPipeline.GS = { shaderBlob.GS->GetBufferPointer(),
@@ -196,7 +201,7 @@ void PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignatur
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 
-	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
+	hr = DXGIDevice_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
 		IID_PPV_ARGS(&graphicsPipelineState));
 
 	assert(SUCCEEDED(hr));

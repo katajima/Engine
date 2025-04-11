@@ -30,7 +30,7 @@ void Primitive2D::Initialize(ShapeType type, const Color color)
 	}
 
 	// メッシュ	
-	mesh->Initialize(spriteCommon_->GetDxCommon());
+	mesh->Initialize(spriteCommon_->GetDxCommon()->GetModelManager()->GetModelCommon());
 
 	// マテリアル
 	material = std::make_unique<Material>();

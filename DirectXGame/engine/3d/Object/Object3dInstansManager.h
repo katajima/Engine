@@ -163,7 +163,7 @@ private:
 
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
-
+	ModelManager* modelManager_;
 	
 
 	std::unordered_map<std::string, ObjectGroup> objectGroups;

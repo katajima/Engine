@@ -1,4 +1,6 @@
 #include "CameraCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
 
 CameraCommon* CameraCommon::instance = nullptr;
 

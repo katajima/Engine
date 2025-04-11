@@ -22,17 +22,16 @@ void Framework::Initialize()
 	imguiManager = ImGuiManager::GetInstance();
 	imguiManager->Initialize(dxCommon.get());
 
-	// スプライト共通部の初期化
-	spriteCommon = SpriteCommon::GetInstance();
-	spriteCommon->Initialize(dxCommon.get());
 
 	// 3Dオブジェクト共通部分の初期化
 	object3dCommon = Object3dCommon::GetInstance();
 	object3dCommon->Initialize(dxCommon.get());
-	
-	// モデルコモン
-	modelCommon = std::make_unique<ModelCommon>();
-	modelCommon->Initialize(dxCommon.get());
+
+	// スプライト共通部の初期化
+	spriteCommon = SpriteCommon::GetInstance();
+	spriteCommon->Initialize(dxCommon.get());
+
+
 	
 	// カメラコモン
 	cameraCommon = CameraCommon::GetInstance();
@@ -65,13 +64,7 @@ void Framework::Initialize()
 	skyBoxCommon = SkyBoxCommon::GetInstance();
 	skyBoxCommon->Initialize(dxCommon.get());
 
-	// テクスチャマネージャ
-	TextureManager::GetInstance()->Initialize(dxCommon.get());
-	
-	// モデルマネージャ
-	ModelManager::GetInstance()->Initialize(dxCommon.get());
 
-	
 	object3dInstansManager_ = Object3dInstansManager::GetInstance();
 	object3dInstansManager_->Initialize(dxCommon.get());
 
@@ -106,7 +99,6 @@ void Framework::Finalize()
 
 	skyBoxCommon->Finalize();
 
-	//object3dInstansManager_->Finalize();
 }
 
 void Framework::Update()

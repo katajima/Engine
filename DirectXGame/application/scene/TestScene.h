@@ -171,6 +171,10 @@ private:
 
 	std::unique_ptr<ParticleEmitter> emitterEnemy_  =nullptr;
 
+	std::unique_ptr<ParticleEmitter> primitvPlane_  =nullptr;
+
+
+
 	/// <summary>
 	/// ライト
 	/// </summary>
@@ -201,7 +205,7 @@ private:
 
 	ObjectInstans object_;
 
-	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(200, 200, 0.5f);
+	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(100, 100, 5.0f);
 	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
 	AStarPathfinder pathfinder;
 

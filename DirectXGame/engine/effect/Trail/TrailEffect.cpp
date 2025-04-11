@@ -9,7 +9,8 @@ void TrailEffect::Initialize(const std::string& tex,float maxtime  ,const Color 
 
 	mesh->vertices.push_back({ 0,0,0 });
 	mesh->indices.push_back(1);
-	mesh->Initialize(TrailEffectManager::GetInstance()->GetDxCommon());
+
+	mesh->Initialize(TrailEffectManager::GetInstance()->GetDxCommon()->GetModelManager()->GetModelCommon());
 
 	mesh->indices.clear();
 	mesh->vertices.clear();

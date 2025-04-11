@@ -36,7 +36,7 @@ public:
 	ID3D12GraphicsCommandList* GetList();
 
 private:
-	// SUCCEEDEDでエラー判別君
+
 	HRESULT hr_ = S_FALSE;
 
 	// DXGI

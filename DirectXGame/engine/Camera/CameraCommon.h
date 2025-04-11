@@ -1,7 +1,9 @@
 #pragma once
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include<d3d12.h>
+#include<dxgi1_6.h>
 
 // 3Dモデル共通部分
+class DirectXCommon;
 class CameraCommon
 {
 public:

@@ -247,7 +247,6 @@ void Object3d::DrawSetting()
 	transfomation->GetCommandList(1);
 
 
-	//object3dCommon_->GetDxCommon()->GetCommandList()->Set
 	
 	transfomation->GetCommandList(10);
 
@@ -338,7 +337,8 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 void Object3d::SetModel(const std::string& filePath)
 {
 	//モデルを検索してセット
-	model = ModelManager::GetInstance()->FindModel(filePath);
+	
+	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
 }
 
 

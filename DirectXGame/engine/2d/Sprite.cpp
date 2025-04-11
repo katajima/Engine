@@ -76,7 +76,7 @@ void Sprite::Initialize(std::string textureFilePath, bool isTexLoad)
 	}
 
 	/// テクスチャ範囲指定-反映処理-
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMataData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
 	float tex_top = textureLeftTop.y / metadata.height;
@@ -108,7 +108,7 @@ void Sprite::Update()
 	}
 
 	/// テクスチャ範囲指定-反映処理-
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMataData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
 	float tex_top = textureLeftTop.y / metadata.height;
@@ -196,7 +196,7 @@ void Sprite::Draw(SpriteType type)
 void Sprite::AdjusttextureSize()
 {
 	// テクスチャメタデータを取得
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMataData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
 
 	textureSize.x = static_cast<float>(metadata.width);
 	textureSize.y = static_cast<float>(metadata.height);

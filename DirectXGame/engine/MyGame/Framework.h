@@ -82,14 +82,13 @@ protected:
 
 
 
+
 	// ImGuiマネージャー
 	ImGuiManager* imguiManager;
 	// スプライトこもん
 	SpriteCommon* spriteCommon = nullptr;
 	// オブジェクトコモン
 	Object3dCommon* object3dCommon = nullptr;
-	// モデルコモン
-	std::unique_ptr <ModelCommon> modelCommon;
 	// モデルコモン
 	CameraCommon* cameraCommon = nullptr;
 	// ラインコモン

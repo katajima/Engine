@@ -15,6 +15,7 @@ public:
 
 	enum class EmitSpawnShapeType // 出現形状
 	{
+		kPoint,
 		kAABB,		// AABB
 		kOBB,		// OBB
 		kSphere,	// Sphere

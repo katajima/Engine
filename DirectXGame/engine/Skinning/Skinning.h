@@ -57,7 +57,7 @@ private:
 private:// メンバ変数
 	DirectXCommon* dxCommon_;
 
-	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+	PSOManager* psoManager_ = nullptr;
 
 	Camera* defaultCamera = nullptr;
 

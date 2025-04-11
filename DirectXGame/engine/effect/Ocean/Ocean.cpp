@@ -22,7 +22,7 @@ void Ocean::Initialize(Vector2 renge)
 	mesh_->indices.push_back(3);
 	mesh_->indices.push_back(2);
 
-	mesh_->Initialize(OceanManager::GetInstance()->GetDxCommon());
+	mesh_->Initialize(OceanManager::GetInstance()->GetDxCommon()->GetModelManager()->GetModelCommon());
 
 
 

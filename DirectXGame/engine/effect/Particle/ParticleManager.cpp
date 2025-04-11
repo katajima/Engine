@@ -23,7 +23,7 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
 	CreateGraphicsPipeline();
 }
@@ -458,8 +458,10 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 void ParticleManager::RandParticle(const std::string name, SpawnType spawnType)
 {
 
-
-	if (SpawnType::kAABB == spawnType) {
+	if (SpawnType::kPoint == spawnType) {
+		PointEmit(particleGroups[name]);
+	}
+	else if (SpawnType::kAABB == spawnType) {
 		AABBEmit(particleGroups[name]);
 	}
 	else if (SpawnType::kSegmentLine == spawnType) {
@@ -477,6 +479,93 @@ void ParticleManager::RandParticle(const std::string name, SpawnType spawnType)
 #pragma region EmitType
 
 
+
+void ParticleManager::PointEmit(ParticleGroup& particleGroup)
+{
+	
+	
+	// 方向
+	std::uniform_real_distribution<float> distributionVeloX(particleGroup.emiter.velocity.min.x, particleGroup.emiter.velocity.max.x);
+	std::uniform_real_distribution<float> distributionVeloY(particleGroup.emiter.velocity.min.y, particleGroup.emiter.velocity.max.y);
+	std::uniform_real_distribution<float> distributionVeloZ(particleGroup.emiter.velocity.min.z, particleGroup.emiter.velocity.max.z);
+
+	// 色RGBA
+	std::uniform_real_distribution<float> distColorR(particleGroup.emiter.color.min.x, particleGroup.emiter.color.max.x);
+	std::uniform_real_distribution<float> distColorG(particleGroup.emiter.color.min.y, particleGroup.emiter.color.max.y);
+	std::uniform_real_distribution<float> distColorB(particleGroup.emiter.color.min.z, particleGroup.emiter.color.max.z);
+	std::uniform_real_distribution<float> distColorA(particleGroup.emiter.color.min.w, particleGroup.emiter.color.max.w);
+
+	// 時間
+	std::uniform_real_distribution<float> distTime(particleGroup.emiter.lifeTime.min, particleGroup.emiter.lifeTime.max);
+
+	// 回転
+	std::uniform_real_distribution<float> distributionRotateX(particleGroup.emiter.rotate.min.x, particleGroup.emiter.rotate.max.x);
+	std::uniform_real_distribution<float> distributionRotateY(particleGroup.emiter.rotate.min.y, particleGroup.emiter.rotate.max.y);
+	std::uniform_real_distribution<float> distributionRotateZ(particleGroup.emiter.rotate.min.z, particleGroup.emiter.rotate.max.z);
+
+	// スケール
+	std::uniform_real_distribution<float> distributionSizeX(particleGroup.emiter.size.min.x, particleGroup.emiter.size.max.x);
+	std::uniform_real_distribution<float> distributionSizeY(particleGroup.emiter.size.min.y, particleGroup.emiter.size.max.y);
+	std::uniform_real_distribution<float> distributionSizeZ(particleGroup.emiter.size.min.z, particleGroup.emiter.size.max.z);
+
+	// 回転速度
+	std::uniform_real_distribution<float> distributionRotateVelocityX(particleGroup.emiter.rotateVelocity.min.x, particleGroup.emiter.rotateVelocity.max.x);
+	std::uniform_real_distribution<float> distributionRotateVelocityY(particleGroup.emiter.rotateVelocity.min.y, particleGroup.emiter.rotateVelocity.max.y);
+	std::uniform_real_distribution<float> distributionRotateVelocityZ(particleGroup.emiter.rotateVelocity.min.z, particleGroup.emiter.rotateVelocity.max.z);
+
+
+	// パーティクル
+	for (int t = 0; t < particleGroup.emiter.count; ++t) {
+		Particle newParticle;
+		// パーティクルの初期化 (必要に応じて詳細を設定)
+		newParticle.transform.scale =
+		{
+			distributionSizeX(randomEngine_),
+			distributionSizeY(randomEngine_),
+			distributionSizeZ(randomEngine_)
+		};
+		newParticle.transform.rotate =
+		{
+			distributionRotateX(randomEngine_),
+			distributionRotateY(randomEngine_),
+			distributionRotateZ(randomEngine_)
+		};
+		newParticle.transform.translate =
+		{
+			particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition().x,
+			particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition().y,
+			particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition().z
+		};
+		newParticle.color =
+		{
+			distColorR(randomEngine_),
+			distColorG(randomEngine_),
+			distColorB(randomEngine_),
+			1.0f
+		};
+		newParticle.rotateVelocity = {
+			distributionRotateVelocityX(randomEngine_),
+			distributionRotateVelocityY(randomEngine_),
+			distributionRotateVelocityZ(randomEngine_)
+		};
+
+		newParticle.lifeTime = distTime(randomEngine_);
+		newParticle.currentTime = 0;
+
+		// 初期値
+		newParticle.strtTransform = newParticle.transform;
+
+		//速度
+		newParticle.velocity =
+		{
+			distributionVeloX(randomEngine_),
+			distributionVeloY(randomEngine_),
+			distributionVeloZ(randomEngine_)
+		};
+		// パーティクルをグループに追加
+		particleGroup.particle.push_back(newParticle);
+	}
+}
 
 void ParticleManager::AABBEmit(ParticleGroup& particleGroup)
 {

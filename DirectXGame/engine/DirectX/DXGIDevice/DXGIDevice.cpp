@@ -3,6 +3,9 @@
 #include<format>
 #include<cassert>
 
+#include"externals/DirectXTex/DirectXTex.h"
+#include"externals/DirectXTex/d3dx12.h"
+
 void DXGIDevice::Initialize()
 {
 #ifdef _DEBUG
@@ -161,3 +164,5 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DXGIDevice::CreateBufferResource(size_t s
 
 	return resource;
 }
+
+

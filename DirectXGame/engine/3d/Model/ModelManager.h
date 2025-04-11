@@ -11,20 +11,27 @@
 using namespace Microsoft::WRL;
 #include<vector>
 #include<map>
-#include"Model.h"
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include"ModelCommon.h"
+#include <memory>
+
+
+#include "DirectXGame/engine/struct/Structs3D.h"
+
+class Model;
+class Command;
+class DXGIDevice;
+class SrvManager;
+class ModelCommon;
 
 // テクスチャマネージャー
 class ModelManager {
 public:
-	// シングルトンインスタンスの取得
-	static ModelManager* GetInstance();
-	//
-	void Finalize();
+	ModelManager() = default;
+	~ModelManager() = default;
+	ModelManager(ModelManager&) = delete;
+	ModelManager& operator=(ModelManager&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize(Command* command, DXGIDevice* DXGIDevice ,SrvManager* srvManager);
 
 	/// <summary>
 	/// モデルファイルの読み込み
@@ -40,15 +47,14 @@ public:
 
 	const std::map<std::string, std::unique_ptr<Model>>& GetModel() const { return models; }
 
+	ModelCommon* GetModelCommon() { return modelCommon_.get(); }
+
 private:
-	static ModelManager* instance;
-
-	ModelManager() = default;
-	~ModelManager() = default;
-	ModelManager(ModelManager&) = delete;
-	ModelManager& operator=(ModelManager&) = delete;
-
 	std::map<std::string, std::unique_ptr<Model>> models;
 
-	ModelCommon* modelCommon = nullptr;
+	Command* command_;
+	DXGIDevice* DXGIDevice_;
+	SrvManager* srvManager_;
+
+	std::unique_ptr<ModelCommon> modelCommon_;
 };

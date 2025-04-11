@@ -88,12 +88,12 @@ private:
 
 	float fps = 0.0f;
 	
-	//static const DeltaTime kDeltaTime_;
 	
 	std::unique_ptr<Primitive> primi = nullptr;
 	std::unique_ptr<Primitive> primiPlane = nullptr;
 	std::unique_ptr<Primitive> primiStar = nullptr;
 	std::unique_ptr<Primitive> primiTrai = nullptr;
+	//std::unique_ptr<Primitive> primiPlane = nullptr;
 
 	
 

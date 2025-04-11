@@ -25,8 +25,9 @@ void Object3dInstansManager::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
+	modelManager_ = dxCommon_->GetModelManager();
 	CreateGraphicsPipeline();
 }
 
@@ -259,7 +260,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 void Object3dInstansManager::AddObject(const std::string name, const std::string texName, ObjectInstans& object, MeshType type)
 {
 	if (MeshType::kModel == type) {
-		CreateObject3dGroup(name, texName, ModelManager::GetInstance()->FindModel(name));
+		CreateObject3dGroup(name, texName, modelManager_->FindModel(name));
 
 	}
 	else {
@@ -275,7 +276,8 @@ void Object3dInstansManager::AddObject(const std::string name, const std::string
 		object.texIndex = objectGroups[name].model->modelData.material[0]->tex_.diffuseIndex;
 	}
 	else {
-		object.texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(texName);
+		
+		object.texIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(texName);
 	}
 	
 

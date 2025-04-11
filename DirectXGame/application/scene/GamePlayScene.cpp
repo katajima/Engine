@@ -314,7 +314,7 @@ void GamePlayScene::LoadLevelData()
 	// レベルデータ格納用インスタンスを生成 
 	LevelData* levelData = new LevelData();
 	//std::map<std::string, std::unique_ptr <Model>> models;
-	const auto& models = ModelManager::GetInstance()->GetModel();
+	const auto& models = GetDxCommon()->GetModelManager()->GetModel();
 	//models = ModelManager::GetInstance()->GetModel();
 	// "objects"の全オブジェクトを走査 
 	for (nlohmann::json& object : deserialized["objects"]) {

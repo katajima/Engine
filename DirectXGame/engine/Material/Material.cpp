@@ -3,6 +3,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
 
+
 void Material::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
@@ -35,13 +36,13 @@ void Material::GetCommandListMaterial(int index)
 void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex)
 {
 	// テクスチャのバインド
-	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(indexDiffuse, TextureManager::GetInstance()->GetSrvHandleGPU(tex_.diffuseFilePath));
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(indexDiffuse, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.diffuseFilePath));
 	if (useNormalMap_) {
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(normalIndex, TextureManager::GetInstance()->GetSrvHandleGPU(tex_.normalFilePath));
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(9, TextureManager::GetInstance()->GetSrvHandleGPU(tex_.normalFilePath));
+		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(normalIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.normalFilePath));
+		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(9, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.normalFilePath));
 	}
 	if (useSpeculerMap_) {
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(speculerIndex, TextureManager::GetInstance()->GetSrvHandleGPU(tex_.speculerFilePath));
+		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(speculerIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.speculerFilePath));
 	}
 }
 
@@ -75,9 +76,9 @@ void Material::LoadTex()
 {
 	
 	// .objの参照しているテクスチャファイル読み込み
-	TextureManager::GetInstance()->LoadTexture(tex_.diffuseFilePath);
+	dxCommon_->GetTextureManager()->LoadTexture(tex_.diffuseFilePath);
 	// 読み込んだテクスチャの番号を取得
-	tex_.diffuseIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(tex_.diffuseFilePath);
+	tex_.diffuseIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.diffuseFilePath);
 
 	if (tex_.normalFilePath == "") {
 		useNormalMap_ = false;
@@ -87,9 +88,9 @@ void Material::LoadTex()
 	}
 
 	if (useNormalMap_) {
-		TextureManager::GetInstance()->LoadTexture(tex_.normalFilePath);
+		dxCommon_->GetTextureManager()->LoadTexture(tex_.normalFilePath);
 
-		tex_.normalIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(tex_.normalFilePath);
+		tex_.normalIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.normalFilePath);
 	}
 
 
@@ -101,9 +102,9 @@ void Material::LoadTex()
 	}
 	if (useSpeculerMap_) {
 
-		TextureManager::GetInstance()->LoadTexture(tex_.speculerFilePath);
+		dxCommon_->GetTextureManager()->LoadTexture(tex_.speculerFilePath);
 
-		tex_.speculerIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(tex_.speculerFilePath);
+		tex_.speculerIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.speculerFilePath);
 	}
 
 }

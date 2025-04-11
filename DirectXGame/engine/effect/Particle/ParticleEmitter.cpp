@@ -196,8 +196,10 @@ void ParticleEmitter::Emit()
 		if (emitType_ == ParticleManager::EmitType::kRandom) {
 			ParticleManager::GetInstance()->GetParticleGroups(particleName_).emiter = emitter_;
 			
-
-			if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
+			if (spawnShapeType_ == EmitSpawnShapeType::kPoint) {
+				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kPoint);
+			}
+			else if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
 				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kAABB);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kSegmentLine) {

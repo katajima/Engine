@@ -3,7 +3,7 @@
 
 
 class SceneManager;
-
+class DirectXCommon;
 class BaseScene
 {
 public:
@@ -25,10 +25,14 @@ public:
 
 	virtual void SetSceneManader(SceneManager* sceneManager) { sceneManager_ = sceneManager; }
 
+	virtual void SetDirectXCommon(DirectXCommon* dxCommon) { directXCommon_ = dxCommon; }
+
+	virtual DirectXCommon* GetDxCommon() {return directXCommon_;}
 private:
 	// シーンマネージャ(借りてくる)
 	SceneManager* sceneManager_ = nullptr;
 
+	DirectXCommon* directXCommon_ = nullptr;
 	//std::string sceneName = "";
 };
 

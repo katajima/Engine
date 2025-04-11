@@ -2,6 +2,8 @@
 #include"BaseScene.h"
 #include"AbstractSceneFactory.h"
 
+
+class DirectXCommon;
 class SceneManager
 {
 public:
@@ -22,6 +24,10 @@ public:
 	~SceneManager();
 
 	void SetSceneFactory(AbstractSceneFactory* sceneFactory) { sceneFactory_ = sceneFactory; };
+
+	void SetDirectXCommon(DirectXCommon* directXCommon) { directXCommon_ = directXCommon; }
+
+	DirectXCommon* GetDirectXCommon() { return directXCommon_; };
 
 	/// <summary>
 	/// 次のシーン予約
@@ -44,5 +50,6 @@ private:
 	std::string sceneName = "";
 	// シーンファクトリー (借りてくる)
 	AbstractSceneFactory* sceneFactory_ = nullptr;
+	DirectXCommon* directXCommon_;
 };
 

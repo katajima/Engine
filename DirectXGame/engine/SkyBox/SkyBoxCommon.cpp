@@ -21,8 +21,8 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-	
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+
 	CreateGraphicsPipeline();
 
 
@@ -80,7 +80,7 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 		vertexOffset += 4; // 次の面に移動
 	}
 
-	mesh_->InitializeSkyBox(dxCommon_);
+	mesh_->InitializeSkyBox(dxCommon_->GetModelManager()->GetModelCommon());
 
 
 	worldtransform_.Initialize();

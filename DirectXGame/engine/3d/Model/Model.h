@@ -90,14 +90,8 @@ private:
 	
 	bool useNormalMap = false;
 	bool useSpecularMap = false;
-public:
-	//マテリアルデータを読み込む
-	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
-
-	//モデルデータ読み込み
-	static ModelData LoadOdjFile(const std::string& directoryPath, const std::string& filename);
-	
-	static ModelData LoadOdjFileAssimp(const std::string& directoryPath, const std::string& filename, const Vector2 texScale = {1,1});
+public:	
+	ModelData LoadOdjFileAssimp(const std::string& directoryPath, const std::string& filename, const Vector2 texScale = {1,1});
 	
 	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 

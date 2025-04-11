@@ -1,7 +1,11 @@
 #include"SceneManager.h"
 #include"cassert"
 
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
 SceneManager* SceneManager::instance = nullptr;
+
+
 
 SceneManager* SceneManager::GetInstance()
 {
@@ -35,6 +39,7 @@ void SceneManager::Update()
 
 		//次のシーンを初期化する
 		scene_->Initialize();
+		scene_->SetDirectXCommon(directXCommon_);
 	}
 	
 	//実行シーンを更新する
