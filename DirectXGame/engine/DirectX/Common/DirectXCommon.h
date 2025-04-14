@@ -38,9 +38,10 @@
 #include"DirectXGame/engine/base/TextureManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
+#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
+
 
 class RenderingCommon;
-
 class DirectXCommon
 {
 public: // メンバ関数
@@ -96,6 +97,7 @@ public:
 	
 	DXCCompiler* GetDXCCompiler() { return dxcCompiler_.get(); }
 
+	EffectManager* GetEffectManager(){ return effectManager_.get(); }
 
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			 // デバイス
@@ -114,6 +116,7 @@ private:
 	std::unique_ptr<RenderTexture> renderTexture_ = std::make_unique<RenderTexture>();	 // レンダーテクスチャ 
 	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();// テクスチャマネージャー 
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		 // モデルマネージャー
+	std::unique_ptr<EffectManager> effectManager_ = std::make_unique<EffectManager>();	 // エフェクトマネージャー
 	std::unique_ptr<PSOManager> psoManager_ = std::make_unique<PSOManager>();		     // PSOマネージャー
 
 

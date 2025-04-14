@@ -37,13 +37,6 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 	randPosSky.y = max_y;
 
 	
-	
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize("resources/Texture/Image.png", 0.1f,{1.00f,1.00f,1.00f,0.9f});
-	trailEffect_->SetCamera(camera);
-	
-
-
 	objectStr_.Initialize();
 	objectStr_.worldtransform_.parent_ = &object_.worldtransform_;
 	objectStr_.worldtransform_.translate_.y = object_.GetMesh(0)->GetMin().y * 1;
@@ -61,9 +54,7 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 
 
 
-	//ParticleEmitter::EmitSpawnShapeType::kSegmentLine
-
-
+	
 	ｍSmokeEmitter_ = std::make_unique <ParticleEmitter>();
 	ｍSmokeEmitter_->Initialize("emitterSmoke", "smoke", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
 	ｍSmokeEmitter_->GetFrequency() = 0.01f;
@@ -182,7 +173,7 @@ void PlayerBullet::Update()
 	
 	if (countTrail >= 5) {
 		bool flag_ =true ;
-		trailEffect_->Update(flag_, objectStr_, objectEnd_);
+		//trailEffect_->Update(flag_, objectStr_, objectEnd_);
 	}
 
 	
@@ -215,7 +206,7 @@ void PlayerBullet::Draw()
 
 void PlayerBullet::DrawP()
 {
-	trailEffect_->Draw();
+	//trailEffect_->Draw();
 }
 
 void PlayerBullet::OnCollision(Collider* other)

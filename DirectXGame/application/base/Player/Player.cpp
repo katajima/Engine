@@ -1,16 +1,16 @@
 #include "Player.h"
 #include"DirectXGame/application/base/Enemy/Enemy.h"
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
-
+#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "assert.h"
 
-void Player::Initialize(Vector3 position, Camera* camera)
+void Player::Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
 
 	camera_ = camera;
-
+	dxCommon_ = dxcommon;
 	specialAttack.max = 40;
 
 	// プレイヤー
@@ -88,14 +88,6 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	weaponEnd.worldtransform_.translate_ = { 0,weapon_->GetObject3D().GetMesh(0)->GetMin().y ,0 };
 	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
 
-	//particleManager_ = ParticleManager::GetInstance();
-	
-	
-	
-
-	
-
-
 
 	HpBer_ = std::make_unique<Sprite>();
 	HpBer_->Initialize("resources/Texture/Image.png");
@@ -111,7 +103,6 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 	textMax_ = std::make_unique<Sprite>();
 	textMax_->Initialize("resources/Texture/text/max.png");
-	//textMax_->SetSize({ 50,-float(specialAttack.specialGauge) });
 	textMax_->SetColor({ 1,0,0,1 });
 	textMax_->SetPosition({ 45,350 });
 	textMax_->SetRotation(DegreesToRadians(-30));
@@ -127,8 +118,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 	trailEffect_ = std::make_unique<TrailEffect>();
-	"resources/Texture/uvChecker.png";
-	trailEffect_->Initialize("resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
+	trailEffect_->Initialize(dxCommon_->GetEffectManager(), "resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
 	trailEffect_->SetCamera(camera);
 	trailEffect_->SetObject(&weapon_->GetObject3D());
 	

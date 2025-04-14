@@ -38,8 +38,9 @@ void SceneManager::Update()
 		scene_->SetSceneManader(this);
 
 		//次のシーンを初期化する
-		scene_->Initialize();
 		scene_->SetDirectXCommon(directXCommon_);
+		scene_->Initialize();
+		
 	}
 	
 	//実行シーンを更新する

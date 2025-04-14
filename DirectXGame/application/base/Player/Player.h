@@ -30,6 +30,7 @@
 
 class Enemy;
 class FollowCamera;
+class DirectXCommon;
 
 class Player : public Collider {
 public:
@@ -38,7 +39,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Vector3 position, Camera* camera);
+	void Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera);
 
 	///< summary>
 	/// 更新
@@ -248,7 +249,8 @@ public:
 	Object3d& GetObject3D() { return objectBase_; }
 	//Object3d& GetObjectWeapon3D() { return ; }
 
-	
+	// dxCommon
+	void SetDxCommon(DirectXCommon* dxcommon) {dxCommon_ = dxcommon;}
 
 	// カメラのビュープロジェクション
 	void SetCamera(Camera* camera) { camera_ = camera; };
@@ -372,6 +374,9 @@ private:
 
 	std::unique_ptr<ParticleEmitter> dashEmitter_ = nullptr;
 
+
+private:
+	DirectXCommon* dxCommon_;
 
 };
 

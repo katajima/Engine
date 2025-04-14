@@ -3,6 +3,8 @@
 #include <corecrt_math_defines.h>
 #include <algorithm>
 
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
 #pragma region Initialize
 
 // 初期化
@@ -16,9 +18,8 @@ void GamePlayScene::Initialize()
 
 
 	player_ = std::make_unique<Player>();
-	player_->Initialize(Vector3(0, 2, -40), camera.get());
-
-
+	player_->Initialize(GetDxCommon(),Vector3(0, 2, -40), camera.get());
+	
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize();
 	followCamera_->SetTarget(&player_->GetObject3D());

@@ -1,5 +1,7 @@
 #include "Animation.h"
 
+#include"DirectXGame/engine/Line/LineCommon.h"
+
 Skeleton CreateSkeleton(const Node& rootNode)
 {
 	Skeleton skeleton{};
@@ -113,6 +115,36 @@ void UpdateSkeleton(Skeleton& skeleton)
 			joint.skeletonSpaceMatrix = joint.localMatrix;
 		}
 	}
+}
+
+void DrawSkeleton(const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale)
+{
+	// ジョイントごとの深さを計算して保存
+	std::vector<int> depths(joints.size(), 0);
+	int maxDepth = 0;
+	for (size_t i = 0; i < joints.size(); ++i) {
+		depths[i] = CalculateDepth(joints, static_cast<int>(i));
+		maxDepth = (std::max)(maxDepth, depths[i]);
+	}
+
+
+	for (const Joint& joint : joints) {
+		if (joint.parent.has_value()) {
+			const int32_t parentIndex = joint.parent.value();
+			//const Vector3& parentPosition = joints[parentIndex].transform.translate;
+			//const Vector3& childPosition = joint.transform.translate;
+
+			const Vector3& parentPosition = joints[parentIndex].skeletonSpaceMatrix.GetWorldPosition() * scale;
+			const Vector3& childPosition = joint.skeletonSpaceMatrix.GetWorldPosition() * scale;
+
+
+			Vector3 offsetParentPosition = Add(parentPosition, pos);
+			Vector3 offsetChildPosition = Add(childPosition, pos);
+			LineCommon::GetInstance()->AddLine(offsetParentPosition, offsetChildPosition, { 1,1,1,1 });
+
+		}
+	}
+
 }
 
 

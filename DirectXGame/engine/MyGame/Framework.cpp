@@ -50,9 +50,6 @@ void Framework::Initialize()
 	oceanManager_ = OceanManager::GetInstance();
 	oceanManager_->Initialize(dxCommon.get());
 	
-	trailEffectManager_ = TrailEffectManager::GetInstance();
-	trailEffectManager_->Initialize(dxCommon.get());
-
 	primitiveCommon = PrimitiveCommon::GetInstance();
 	primitiveCommon->Initialize(dxCommon.get());
 
@@ -76,16 +73,13 @@ void Framework::Finalize()
 	winApp->Finalize();
 	
 	dxCommon->Finalize();
-	// パーティクルマネージャーの終了
-	//ParticleManager::GetInstance()->Finalize();
+
 	// ImGuiマネージャーの終了
 	imguiManager->Finalize();
 
 	particleManager_->Finalize();
 
 	oceanManager_->Finalize();
-
-	trailEffectManager_->Finalize();
 
 	primitiveCommon->Finalize();
 

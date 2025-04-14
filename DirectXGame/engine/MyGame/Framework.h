@@ -20,13 +20,11 @@
 #include"DirectXGame/engine/Manager/RTV/RtvManeger.h"
 #include"DirectXGame/engine/Manager/UAV/UavManager.h"
 
-
+#include"DirectXGame/engine/effect/Ocean/OceanManager.h"
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-#include"DirectXGame/engine/effect/Ocean/OceanManager.h"
-#include"DirectXGame/engine/effect/Thunder/ThunderManager.h"
-//#include"DirectXGame/engine/effect/Trail/TrailEffect.h"
-#include"DirectXGame/engine/effect/Trail/TrailEffectManager.h"
+
+
 #include"DirectXGame/engine/Primitive/PrimitiveCommon.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
@@ -95,10 +93,6 @@ protected:
 	LineCommon* lineCommon = nullptr;
 	// 
 	OceanManager* oceanManager_ = nullptr;
-	//
-	ThunderManager* thunderManager = nullptr;
-
-	TrailEffectManager* trailEffectManager_ = nullptr;
 
 	ParticleManager* particleManager_ = nullptr;
 	

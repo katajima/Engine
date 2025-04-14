@@ -255,11 +255,6 @@ void MyGame::InitializeResource()
 	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
 
 
-
-	//Object3dInstansManager::GetInstance()->CreateObject3dGroup("");
-
-
-
 	/// <summary>
 	/// パーティクル
 	/// </summary>

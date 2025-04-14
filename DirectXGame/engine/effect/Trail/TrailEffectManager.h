@@ -9,20 +9,14 @@
 #include<format>
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
-class TrailEffectManager
+class DirectXCommon;
+class TrailEffectCommon
 {
 public:
-	static TrailEffectManager* instance;
-	static TrailEffectManager* GetInstance();
-
-
 	void Initialize(DirectXCommon* dxcommon);
-
-	void Finalize();
 
 	void DrawCommonSetting();
 

@@ -17,6 +17,7 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 
+
 void DirectXCommon::Intialize(WinApp* winApp) {
     
     InitializeFixFPS();
@@ -38,8 +39,10 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	psoManager_->Initialize(command_.get(), DXGIDevice_.get(), dxcCompiler_.get());// PSOマネージャー
 
 	textureManager_->Initialize(command_.get(),DXGIDevice_.get(),srvManager_.get()); // テクスチャマネージャー
+
 	modelManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // モデルマネージャー
 	
+	effectManager_->Initialize(this);
 
 
 }

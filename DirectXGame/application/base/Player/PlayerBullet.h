@@ -107,7 +107,7 @@ private:
 	int index_ = 0;
 
 
-	std::unique_ptr<TrailEffect> trailEffect_;
+	//std::unique_ptr<TrailEffect> trailEffect_;
 	Object3d objectStr_;
 	Object3d objectEnd_;
 

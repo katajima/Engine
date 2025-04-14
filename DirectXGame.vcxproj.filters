@@ -141,10 +141,10 @@
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\base\ImGuiManager.cpp">
@@ -213,16 +213,10 @@
     <ClCompile Include="DirectXGame\engine\Animation\Animation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Ocean\Ocean.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Ocean\Ocean.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Ocean\OceanManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Thunder\Thunder.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Thunder\ThunderManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Ocean\OceanManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Skinning\Skinning.cpp">
@@ -261,10 +255,10 @@
     <ClCompile Include="DirectXGame\application\base\Player\PlayerBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Trail\TrailEffect.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Trail\TrailEffectManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Primitive\Primitive.cpp">
@@ -291,10 +285,10 @@
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleManager2d.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager2d.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter2d.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Manager\UAV\UavManager.cpp">
@@ -364,6 +358,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Manager\Effect\EffectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -489,10 +486,10 @@
     <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\base\ImGuiManager.h">
@@ -588,16 +585,10 @@
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Ocean\Ocean.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Ocean\Ocean.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Ocean\OceanManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Thunder\Thunder.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Thunder\ThunderManager.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Ocean\OceanManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Skinning\Skinning.h">
@@ -636,10 +627,10 @@
     <ClInclude Include="DirectXGame\application\base\Player\PlayerBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Trail\TrailEffect.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Trail\TrailEffectManager.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Primitive\Primitive.h">
@@ -666,10 +657,10 @@
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleManager2d.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager2d.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\effect\Particle\ParticleEmitter2d.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter2d.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h">
@@ -751,6 +742,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Effect\EffectManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

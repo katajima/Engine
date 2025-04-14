@@ -19,13 +19,14 @@
 #include"TrailEffectManager.h"
 
 class Object3d;
+class EffectManager;
 
 class TrailEffect
 {
 public:
 	
 
-	void Initialize(const std::string& tex, float maxtime , const Color color = {1,1,1,1});
+	void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
 
 	
 	void Update(bool& flag, const Object3d& str, const Object3d& end);
@@ -65,5 +66,9 @@ private:
 	//Object3d object_;
 
 	int timer = 0;
+
+private:
+	EffectManager* effectManager_;
+
 };
 
