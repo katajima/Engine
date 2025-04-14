@@ -25,11 +25,11 @@ void TitleScene::Update()
 {
 	if (Input::GetInstance()->IsTriggerKey(DIK_RETURN)) {
 		// シーン切り替え
-		SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+		GetSceneManager()->ChangeScene("GAMEPLAY");
 	}
 	else if (Input::GetInstance()->IsControllerConnected()) {
 		if (Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}
 	}
 

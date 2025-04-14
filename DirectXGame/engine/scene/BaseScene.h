@@ -33,6 +33,9 @@ public:
 	virtual DirectXCommon* GetDxCommon() {return directXCommon_;}
 
 	Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
+
+	SceneManager* GetSceneManager() { return sceneManager_;}
+
 private:
 	// シーンマネージャ(借りてくる)
 	SceneManager* sceneManager_ = nullptr;

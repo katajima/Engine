@@ -11,12 +11,15 @@ void MyGame::Initialize()
 
 	// 最初のシーン
 	sceneFactory_ = std::make_unique<SceneFactory>();
-	// シーンマネージャーに最初のシーンをセット
-	SceneManager::GetInstance()->SetSceneFactory(sceneFactory_.get());
-	SceneManager::GetInstance()->SetDirectXCommon(dxCommon.get());
-	SceneManager::GetInstance()->SetEntity3DManager(entity3DManager_.get());
+	// シーンマネージャー
+	sceneManager_ = std::make_unique<SceneManager>();
 
-	SceneManager::GetInstance()->ChangeScene("TEST");
+	// シーンマネージャーに最初のシーンをセット
+	sceneManager_->SetSceneFactory(sceneFactory_.get());
+	sceneManager_->SetDirectXCommon(dxCommon.get());
+	sceneManager_->SetEntity3DManager(entity3DManager_.get());
+
+	sceneManager_->ChangeScene("TEST");
 	//SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
@@ -37,7 +40,7 @@ void MyGame::Finalize()
 	//
 	Audio::GetInstance()->Finalize();
 	//
-	SceneManager::GetInstance()->Finalize();
+	//sceneManager_->Finalize();
 
 	// 基底クラスの終了処理
 	Framework::Finalize();
@@ -76,7 +79,7 @@ void MyGame::Update()
 	lightCommon->Update();
 
 
-	SceneManager::GetInstance()->Update();
+	sceneManager_->Update();
 
 	ParticleManager::GetInstance()->Update();
 
@@ -106,20 +109,20 @@ void MyGame::Draw()
 	
 
 	// 3Dオブジェクトの描画
-	SceneManager::GetInstance()->Draw3D();
+	sceneManager_->Draw3D();
 	
 	// パーティクル描画
 	ParticleManager::GetInstance()->Draw();
 
 #ifdef _DEBUG
-	if (!SceneManager::GetInstance()->IsNowScene("GAMEPLAY")) {
+	if (!sceneManager_->IsNowScene("GAMEPLAY")) {
 		// デバッグ用のライン描画
 		LineCommon::GetInstance()->Draw();
 	}
 #endif // _DEBUG
 
 	// 2Dオブジェクトの描画
-	SceneManager::GetInstance()->Draw2D();
+	sceneManager_->Draw2D();
 
 	dxCommon->GetRenderTexture()->Draw();
 

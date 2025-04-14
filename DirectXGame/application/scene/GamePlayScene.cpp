@@ -428,7 +428,7 @@ void GamePlayScene::UpdateImGui()
 #ifdef _DEBUG
 	if (Input::GetInstance()->IsTriggerKey(DIK_P)) {
 		// シーン切り替え
-		SceneManager::GetInstance()->ChangeScene("TITLE");
+		GetSceneManager()->ChangeScene("TITLE");
 	}
 	Vector2 pos = player_->GetObject3D().GetScreenPosition();
 	ImGui::Begin("engine");
@@ -727,7 +727,7 @@ void GamePlayScene::Draw2D()
 	}
 
 	if (sceneCount >= 240) {
-		SceneManager::GetInstance()->ChangeScene("TITLE");
+		GetSceneManager()->ChangeScene("TITLE");
 	}
 
 

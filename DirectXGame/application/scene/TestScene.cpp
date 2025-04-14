@@ -194,7 +194,7 @@ void TestScene::Draw3D()
 		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
-		
+
 		//stairObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
@@ -284,7 +284,7 @@ void TestScene::InitializeObject3D()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(GetEntity3DManager(),{ 100,100 });
+	ocean_->Initialize(GetEntity3DManager(), { 100,100 });
 	ocean_->SetCamera(camera.get());
 	ocean_->transform.rotate.x = DegreesToRadians(90);
 	ocean_->material->color.a = 0.99f;
@@ -343,7 +343,7 @@ void TestScene::InitializeObject3D()
 
 	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(camera.get());
 
-	
+
 	for (int i = 0; i < map->GetWidth(); i++) {
 		for (int j = 0; j < map->GetHeight(); j++) {
 			ObjectInstans obj{};
@@ -354,9 +354,9 @@ void TestScene::InitializeObject3D()
 			obj.transform.translate_.y = noise->PerlinNoise(float(i), float(j)) * obj.transform.scale_.y;
 
 
-			
 
-			
+
+
 			GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
 
 		}
@@ -452,7 +452,7 @@ void TestScene::InitializeParticle()
 	primitvPlane_->SetUsebillboard(false);
 	primitvPlane_->SetIsAlpha(true);
 	primitvPlane_->SetIsLifeTimeScale(true);
-	primitvPlane_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f },{1.0f,1.0f,1.0f,1.0f});
+	primitvPlane_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	//primitvPlane_->SetIsRotateVelocity(true);
 	//primitvPlane_->SetIsBounce(true);
 	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,2.5f,0.1f }, { 0.1f ,5.0f,0.1f });
@@ -690,12 +690,14 @@ void TestScene::UpdateRoom01()
 	GetEntity3DManager()->GetSkyBoxCommon()->Update();
 
 
-
 	primitvPlane_->Update();
 }
 
 void TestScene::UpdateRoom02()
 {
+	GetSceneManager()->ChangeScene("GAMEPLAY");
+
+
 	emitter_->Update();
 	emitterEnemy_->Update();
 }
@@ -738,7 +740,7 @@ void TestScene::UpdateRoom04()
 
 	int size = GetEntity3DManager()->GetObject3dInstansManager()->GetSize();
 
-	
+
 
 
 	object_;
@@ -877,10 +879,10 @@ void TestScene::UpdateRoom08()
 					obj.transform.scale_ = map->GetCellSize() / 2.0f;
 
 
-					float y  =  static_cast<float>(noise->PerlinNoise(float(i), float(j)) * map->GetCellSize() * 20);
+					float y = static_cast<float>(noise->PerlinNoise(float(i), float(j)) * map->GetCellSize() * 20);
 
 					obj.transform.translate_.y = static_cast<float>(y);
-					
+
 					GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
 				}
 			}
@@ -888,10 +890,10 @@ void TestScene::UpdateRoom08()
 	}
 	ImGui::End();
 
-	
+
 #endif // _DEBUG
 
-	
+
 
 }
 

@@ -3,24 +3,6 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-SceneManager* SceneManager::instance = nullptr;
-
-
-
-SceneManager* SceneManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new SceneManager;
-	}
-	return instance;
-}
-
-void SceneManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
-
 void SceneManager::Update()
 {
 	// 次のシーンの予約があるなら

@@ -8,12 +8,6 @@ class Entity3DManager;
 class SceneManager
 {
 public:
-	static SceneManager* instance;
-
-	static SceneManager* GetInstance();
-	
-	void Finalize();
-
 	void Update();
 
 	void Draw2D();

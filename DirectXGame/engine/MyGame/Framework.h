@@ -74,6 +74,10 @@ protected:
 	std::unique_ptr<Entity3DManager> entity3DManager_;
 
 
+	//
+	std::unique_ptr<SceneManager> sceneManager_;
+
+
 	// ImGuiマネージャー
 	ImGuiManager* imguiManager;
 	// スプライトこもん
