@@ -39,6 +39,7 @@ void SceneManager::Update()
 
 		//次のシーンを初期化する
 		scene_->SetDirectXCommon(directXCommon_);
+		scene_->SetEntity3DManager(entity3DManager_);
 		scene_->Initialize();
 		
 	}

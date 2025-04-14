@@ -29,14 +29,15 @@ using namespace Microsoft::WRL;
 
 
 class OceanManager;
-
+class Entity3DManager;
+class DirectXCommon;
 class Ocean
 {
 public:
 	
 
 	// 大きさ
-	void Initialize(Vector2 renge);
+	void Initialize(Entity3DManager* entity3dManager ,Vector2 renge);
 
 	void Update();
 
@@ -123,5 +124,6 @@ private:
 
 	
 	Camera* camera = nullptr;
-
+	Entity3DManager* entity3dManager_;
+	DirectXCommon* directXCommon_;
 };

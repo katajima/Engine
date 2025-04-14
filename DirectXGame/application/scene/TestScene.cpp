@@ -211,8 +211,8 @@ void TestScene::Draw3D()
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
 
-		Object3dInstansManager::GetInstance()->Update();
-		Object3dInstansManager::GetInstance()->Draw();
+		GetEntity3DManager()->GetObject3dInstansManager()->Update();
+		GetEntity3DManager()->GetObject3dInstansManager()->Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom09:
@@ -284,7 +284,7 @@ void TestScene::InitializeObject3D()
 	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize({ 100,100 });
+	ocean_->Initialize(GetEntity3DManager(),{ 100,100 });
 	ocean_->SetCamera(camera.get());
 	ocean_->transform.rotate.x = DegreesToRadians(90);
 	ocean_->material->color.a = 0.99f;
@@ -341,7 +341,7 @@ void TestScene::InitializeObject3D()
 	goalObject->worldtransform_.translate_ = { 200,10,200 };
 	goalObject->worldtransform_.scale_ = 3;
 
-	Object3dInstansManager::GetInstance()->SetCamera(camera.get());
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(camera.get());
 
 	
 	for (int i = 0; i < map->GetWidth(); i++) {
@@ -357,7 +357,7 @@ void TestScene::InitializeObject3D()
 			
 
 			
-			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
+			GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
 
 		}
 	}
@@ -736,7 +736,7 @@ void TestScene::UpdateRoom04()
 
 	LineCommon::GetInstance()->AddLineCorner(corner, world);
 
-	int size = Object3dInstansManager::GetInstance()->GetSize();
+	int size = GetEntity3DManager()->GetObject3dInstansManager()->GetSize();
 
 	
 
@@ -866,7 +866,7 @@ void TestScene::UpdateRoom08()
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("NoiseSet")) {
 		if (ImGui::Button("set")) {
-			Object3dInstansManager::GetInstance()->Clear("BoxBox.obj");
+			GetEntity3DManager()->GetObject3dInstansManager()->Clear("BoxBox.obj");
 
 			for (int i = 0; i < map->GetWidth(); i++) {
 				for (int j = 0; j < map->GetHeight(); j++) {
@@ -881,7 +881,7 @@ void TestScene::UpdateRoom08()
 
 					obj.transform.translate_.y = static_cast<float>(y);
 					
-					Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
+					GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
 				}
 			}
 		}

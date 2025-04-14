@@ -39,7 +39,7 @@ void GamePlayScene::Initialize()
 	}
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize({ 10000,10000 });
+	ocean_->Initialize(GetEntity3DManager(),{ 10000,10000 });
 	ocean_->SetCamera(camera.get());
 	ocean_->transform.rotate.x = DegreesToRadians(90);
 	ocean_->transform.translate.y = -10;

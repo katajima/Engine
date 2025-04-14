@@ -3,6 +3,7 @@
 
 
 class SceneManager;
+class Entity3DManager;
 class DirectXCommon;
 class BaseScene
 {
@@ -27,12 +28,16 @@ public:
 
 	virtual void SetDirectXCommon(DirectXCommon* dxCommon) { directXCommon_ = dxCommon; }
 
+	void SetEntity3DManager(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
+
 	virtual DirectXCommon* GetDxCommon() {return directXCommon_;}
+
+	Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
 private:
 	// シーンマネージャ(借りてくる)
 	SceneManager* sceneManager_ = nullptr;
 
 	DirectXCommon* directXCommon_ = nullptr;
-	//std::string sceneName = "";
+	Entity3DManager* entity3DManager_;
 };
 

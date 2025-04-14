@@ -4,6 +4,7 @@
 
 
 class DirectXCommon;
+class Entity3DManager;
 class SceneManager
 {
 public:
@@ -27,7 +28,11 @@ public:
 
 	void SetDirectXCommon(DirectXCommon* directXCommon) { directXCommon_ = directXCommon; }
 
+	void SetEntity3DManager(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
+
 	DirectXCommon* GetDirectXCommon() { return directXCommon_; };
+
+	Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
 
 	/// <summary>
 	/// 次のシーン予約
@@ -51,5 +56,6 @@ private:
 	// シーンファクトリー (借りてくる)
 	AbstractSceneFactory* sceneFactory_ = nullptr;
 	DirectXCommon* directXCommon_;
+	Entity3DManager* entity3DManager_;
 };
 

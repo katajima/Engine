@@ -18,7 +18,9 @@
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Trail/TrailEffect.h"
-#include "DirectXGame/engine/3d/Object/Object3dInstansManager.h"
+
+
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
 
 #include"DirectXGame/engine/Effect/Primitive/Primitive.h"

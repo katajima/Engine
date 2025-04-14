@@ -1,10 +1,15 @@
 #include "Ocean.h"
 #include "DirectXGame/engine/base/TextureManager.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "OceanManager.h"
 #include "imgui.h"
 
-void Ocean::Initialize(Vector2 renge)
+void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 {
+	entity3dManager_ = entity3dManager;
+	directXCommon_ = entity3dManager_->GetOceanManager()->GetDxCommon();
+
+
 	renge_.renge = renge;
 
 	mesh_ = std::make_unique<Mesh>();
@@ -22,7 +27,7 @@ void Ocean::Initialize(Vector2 renge)
 	mesh_->indices.push_back(3);
 	mesh_->indices.push_back(2);
 
-	mesh_->Initialize(OceanManager::GetInstance()->GetDxCommon()->GetModelManager()->GetModelCommon());
+	mesh_->Initialize(directXCommon_->GetModelManager()->GetModelCommon());
 
 
 
@@ -31,17 +36,17 @@ void Ocean::Initialize(Vector2 renge)
 
 	
 	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(OceanManager::GetInstance()->GetDxCommon());
+	transfomation->Initialize(directXCommon_);
 
 	
 	material = std::make_unique<Material>();
-	material->Initialize(OceanManager::GetInstance()->GetDxCommon());
+	material->Initialize(entity3dManager_->GetOceanManager()->GetDxCommon());
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
 	material->LoadTex();
 	material->color = { 0,0,1,1.0f };
 
 
-	noiseResource = OceanManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(NoiseData));
+	noiseResource = directXCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(NoiseData));
 	noiseResource->Map(0, nullptr, reinterpret_cast<void**>(&noiseData));
 
 	noiseData->noiseScale = 10.0f;
@@ -51,7 +56,7 @@ void Ocean::Initialize(Vector2 renge)
 
 
 
-	waveResource = OceanManager::GetInstance()->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(WaveParameters) * 3);
+	waveResource = directXCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(WaveParameters) * 3);
 	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));
 
 	waveData[0].amplitude = 1.500f;
@@ -160,12 +165,12 @@ void Ocean::Update()
 
 void Ocean::Draw()
 {
-	OceanManager::GetInstance()->DrawCommonSetting();
+	entity3dManager_->GetOceanManager()->DrawCommonSetting();
 
 	LightManager::GetInstance()->DrawLight();
 
-	OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(7, waveResource->GetGPUVirtualAddress());
-	OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(8, noiseResource->GetGPUVirtualAddress());
+	directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(7, waveResource->GetGPUVirtualAddress());
+	directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(8, noiseResource->GetGPUVirtualAddress());
 
 	transfomation->GetCommandList(1);
 	transfomation->GetCommandList(9);
@@ -189,7 +194,7 @@ void Ocean::Draw()
 	//OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
 
 
-	OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh_->vertices.size()), 1, 0, 0);
+	directXCommon_->GetCommandList()->DrawInstanced(UINT(mesh_->vertices.size()), 1, 0, 0);
 
 
 }

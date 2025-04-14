@@ -28,10 +28,6 @@ using namespace Microsoft::WRL;
 class OceanManager
 {
 public:
-	// シングルトンインスタンス
-	static OceanManager* GetInstance();
-
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
@@ -39,8 +35,7 @@ public:
 
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-	// 終了
-	void Finalize();
+
 private:
 	// ルートシグネチャの作成
 	void CreateRootSignature();
@@ -49,9 +44,6 @@ private:
 
 
 private:
-	static OceanManager* instance;
-
-
 	// ルートシグネチャ
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 	// パイプラインステートオブジェクト

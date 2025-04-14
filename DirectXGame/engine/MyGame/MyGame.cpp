@@ -14,6 +14,7 @@ void MyGame::Initialize()
 	// シーンマネージャーに最初のシーンをセット
 	SceneManager::GetInstance()->SetSceneFactory(sceneFactory_.get());
 	SceneManager::GetInstance()->SetDirectXCommon(dxCommon.get());
+	SceneManager::GetInstance()->SetEntity3DManager(entity3DManager_.get());
 
 	SceneManager::GetInstance()->ChangeScene("TEST");
 	//SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
@@ -39,8 +40,6 @@ void MyGame::Finalize()
 	Audio::GetInstance()->Finalize();
 	//
 	SceneManager::GetInstance()->Finalize();
-
-	Object3dInstansManager::GetInstance()->Finalize();
 
 	// 基底クラスの終了処理
 	Framework::Finalize();
@@ -72,8 +71,6 @@ void MyGame::Update()
 	ImGui::End();
 
 #endif // _DEBUG
-
-	//kDeltaTime_.
 
 	// グローバル変数の更新
 	GlobalVariables::GetInstance()->Update();

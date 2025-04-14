@@ -9,14 +9,7 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/base/TextureManager.h"
 
-OceanManager* OceanManager::instance = nullptr;
-OceanManager* OceanManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new OceanManager;
-	}
-	return instance;
-}
+
 void OceanManager::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
@@ -34,12 +27,6 @@ void OceanManager::DrawCommonSetting()
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 	
-}
-
-void OceanManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void OceanManager::CreateRootSignature()

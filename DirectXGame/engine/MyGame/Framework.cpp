@@ -49,9 +49,7 @@ void Framework::Initialize()
 
 	particleManager_ = ParticleManager::GetInstance();
 	particleManager_->Initialize(dxCommon.get());
-	//
-	oceanManager_ = OceanManager::GetInstance();
-	oceanManager_->Initialize(dxCommon.get());
+
 	
 	primitiveCommon = PrimitiveCommon::GetInstance();
 	primitiveCommon->Initialize(dxCommon.get());
@@ -63,10 +61,6 @@ void Framework::Initialize()
 	// スカイボックス
 	skyBoxCommon = SkyBoxCommon::GetInstance();
 	skyBoxCommon->Initialize(dxCommon.get());
-
-
-	object3dInstansManager_ = Object3dInstansManager::GetInstance();
-	object3dInstansManager_->Initialize(dxCommon.get());
 
 }
 
@@ -81,8 +75,6 @@ void Framework::Finalize()
 	imguiManager->Finalize();
 
 	particleManager_->Finalize();
-
-	oceanManager_->Finalize();
 
 	primitiveCommon->Finalize();
 

@@ -2,21 +2,7 @@
 
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-Object3dInstansManager* Object3dInstansManager::instance = nullptr;
 
-Object3dInstansManager* Object3dInstansManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new Object3dInstansManager;
-	}
-	return instance;
-}
-
-void Object3dInstansManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
 
 void Object3dInstansManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -89,7 +75,7 @@ void Object3dInstansManager::Draw()
 		}
 
 
-		Object3dInstansManager::GetInstance()->DrawCommonSetting(group.rasteType, group.blendType);
+		DrawCommonSetting(group.rasteType, group.blendType);
 
 
 		
