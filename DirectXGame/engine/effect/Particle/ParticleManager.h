@@ -1,31 +1,34 @@
 #pragma once
+
+// DirectX
+#include<d3d12.h>
+#include<dxgi1_6.h>
+#include<dxcapi.h>
+
+// C++
 #include <windows.h>
 #include<cstdint>
 #include<string>
 #include<fstream>
 #include<sstream>
 #include<wrl.h>
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<dxcapi.h>
-#include<memory>
 using namespace Microsoft::WRL;
+#include<memory>
 #include<vector>
+#include<random>
+#include<numbers>
+
+// engine
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
-
-
-#include<random>
-#include<numbers>
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Primitive/Primitive.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
-
+#include"DirectXGame/engine/WorldTransform/WorldTransform.h"
 
 struct ParticleForGPU
 {
@@ -51,7 +54,7 @@ struct ModelData
 };
 
 
-
+class Primitive;
 class DirectXCommon;
 class SrvManager;
 class ParticleManager

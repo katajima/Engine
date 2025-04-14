@@ -1,5 +1,6 @@
-#include "ParticleEmitter.h"
 
+// engine
+#include "ParticleEmitter.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 void ParticleEmitter::Initialize(std::string emitName, std::string particleName, EmitSpawnShapeType spawnType)
