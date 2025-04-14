@@ -281,7 +281,7 @@ void TestScene::Draw2D()
 /// </summary>
 void TestScene::InitializeObject3D()
 {
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
 	ocean_->Initialize(GetEntity3DManager(),{ 100,100 });
@@ -289,33 +289,33 @@ void TestScene::InitializeObject3D()
 	ocean_->transform.rotate.x = DegreesToRadians(90);
 	ocean_->material->color.a = 0.99f;
 
-	skinningObject.Initialize();
+	skinningObject.Initialize(GetEntity3DManager());
 	skinningObject.SetModel("iku.gltf");
 	skinningObject.worldtransform_.translate_ = { 30,1,1 };
 	skinningObject.worldtransform_.scale_ = { 10,10,10 };
 	skinningObject.SetCamera(camera.get());
 
 
-	skinningObject2.Initialize();
+	skinningObject2.Initialize(GetEntity3DManager());
 	skinningObject2.SetModel("walk.gltf");
 	skinningObject2.worldtransform_.translate_ = { -30,10,1 };
 	skinningObject2.worldtransform_.scale_ = { 10,10,10 };
 	skinningObject2.SetCamera(camera.get());
 
 
-	tail.Initialize();
+	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
 	tail.model->modelData.material[0]->shininess_ = 1000.0f;
 
-	multiy.Initialize();
+	multiy.Initialize(GetEntity3DManager());
 	multiy.SetModel("multiMaterial.gltf");
 	multiy.SetCamera(camera.get());
 	multiy.worldtransform_.scale_ = { 10,10,10 };
 
 	/// 階段
 	stairObject = std::make_unique<Object3d>();
-	stairObject->Initialize();
+	stairObject->Initialize(GetEntity3DManager());
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
 
@@ -326,7 +326,7 @@ void TestScene::InitializeObject3D()
 
 	// プレイヤーオブジェクト
 	playerObject = std::make_unique<Object3d>();
-	playerObject->Initialize();
+	playerObject->Initialize(GetEntity3DManager());
 	playerObject->SetModel("teapot.obj");
 	playerObject->SetCamera(camera.get());
 	playerObject->worldtransform_.translate_ = { 10,10,10 };
@@ -335,7 +335,7 @@ void TestScene::InitializeObject3D()
 
 	// ゴールのオブジェクト
 	goalObject = std::make_unique<Object3d>();
-	goalObject->Initialize();
+	goalObject->Initialize(GetEntity3DManager());
 	goalObject->SetModel("Sphere.obj");
 	goalObject->SetCamera(camera.get());
 	goalObject->worldtransform_.translate_ = { 200,10,200 };

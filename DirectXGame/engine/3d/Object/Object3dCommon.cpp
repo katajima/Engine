@@ -6,17 +6,7 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/base/TextureManager.h"
 
-Object3dCommon* Object3dCommon::instance = nullptr;
 
-
-
-Object3dCommon* Object3dCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new Object3dCommon;
-	}
-	return instance;
-}
 
 void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -26,12 +16,6 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(),dxCommon_->GetDXCCompiler());
 
 	CreateGraphicsPipeline();
-}
-
-void Object3dCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void Object3dCommon::DrawCommonSetting(PSOType type)

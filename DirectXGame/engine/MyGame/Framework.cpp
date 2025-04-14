@@ -26,9 +26,6 @@ void Framework::Initialize()
 	imguiManager->Initialize(dxCommon.get());
 
 
-	// 3Dオブジェクト共通部分の初期化
-	object3dCommon = Object3dCommon::GetInstance();
-	object3dCommon->Initialize(dxCommon.get());
 
 	// スプライト共通部の初期化
 	spriteCommon = SpriteCommon::GetInstance();

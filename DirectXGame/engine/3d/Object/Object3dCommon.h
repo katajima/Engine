@@ -23,15 +23,8 @@ public:
 		NoUvInterpolation_MODE_WIREFRAME_NONE,
 	};
 
-	static Object3dCommon* instance;
-
-	static Object3dCommon* GetInstance();
-
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
-	void Finalize();
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 

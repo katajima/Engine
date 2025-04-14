@@ -27,7 +27,7 @@
 
 
 class ModelCommon;
-
+class DirectXCommon;
 
 class Material;
 class Model
@@ -59,9 +59,9 @@ public:
 
 
 
-	void Initialize(ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "", const Vector2 texScale = {1,1});
+	void Initialize(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "", const Vector2 texScale = {1,1});
 
-	void InitializeAnime(ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "");
+	void InitializeAnime(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "");
 
 	
 	
@@ -90,7 +90,7 @@ public:
 private:
 	ModelCommon* modelCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;
-	
+	DirectXCommon* dxCommon_;
 	
 	bool useNormalMap = false;
 	bool useSpecularMap = false;

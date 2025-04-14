@@ -13,12 +13,12 @@ void GamePlayScene::Initialize()
 	// カメラ
 	InitializeCamera();
 	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 
 
 	player_ = std::make_unique<Player>();
-	player_->Initialize(GetDxCommon(),Vector3(0, 2, -40), camera.get());
+	player_->Initialize(GetDxCommon(), GetEntity3DManager(),Vector3(0, 2, -40), camera.get());
 	
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize();
@@ -32,7 +32,7 @@ void GamePlayScene::Initialize()
 	for (int i = 0; i < 15; i++) {
 		auto enemy = std::make_unique<Enemy>();
 		Vector3 randPos = { float(rand() % 41 - 20),2,float(rand() % 40) };
-		enemy->Initialize(randPos, 100, camera.get());
+		enemy->Initialize(GetEntity3DManager(),randPos, 100, camera.get());
 		enemy->SetPlayer(player_.get());
 		enemy->SetFollowCamera(followCamera_.get());
 		enemys_.push_back(std::move(enemy));
@@ -48,19 +48,19 @@ void GamePlayScene::Initialize()
 	
 
 	tail = std::make_unique<Object3d>();
-	tail->Initialize();
+	tail->Initialize(GetEntity3DManager());
 	tail->SetModel("renga.gltf");
 	tail->SetCamera(camera.get());
 	tail->worldtransform_.scale_ = { 4,4,4 };
 
 	tail2 = std::make_unique<Object3d>();
-	tail2->Initialize();
+	tail2->Initialize(GetEntity3DManager());
 	tail2->SetModel("black.obj");
 	tail2->SetCamera(camera.get());
 	tail2->worldtransform_.scale_ = { 104,104,104 };
 	tail2->worldtransform_.translate_.y = -20;
 
-	sky.Initialize();
+	sky.Initialize(GetEntity3DManager());
 	sky.SetModel("skydome.obj");
 	sky.SetCamera(camera.get());
 	sky.worldtransform_.scale_ = { 100,100,100 };
@@ -75,7 +75,7 @@ void GamePlayScene::Initialize()
 
 	for (int i = 0; i < warePos.size(); i++) {
 		auto obj = std::make_unique<Object3d>();
-		obj->Initialize();
+		obj->Initialize(GetEntity3DManager());
 		obj->SetModel("warehouse.gltf");
 		obj->SetCamera(camera.get());
 		obj->worldtransform_.scale_ = { 2, 2, 2 };		
@@ -130,14 +130,14 @@ void GamePlayScene::InitializeCamera()
 #endif // _DEBUG]
 
 
-	cameraObj_.Initialize();
+	cameraObj_.Initialize(GetEntity3DManager());
 }
 
 // 各オブジェクトやスプライトなどの初期化
 void GamePlayScene::InitializeResources()
 {
 	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 
 	for (int j = 0; j < 3; j++) {
@@ -355,7 +355,7 @@ void GamePlayScene::LoadLevelData()
 			// モデルを指定して3Dオブジェクトを生成 
 			Object3d* newObject = new Object3d();
 			//ModelManager::GetInstance()->LoadModel(objectData.fileName + ".obj");
-			newObject->Initialize();
+			newObject->Initialize(GetEntity3DManager());
 			newObject->SetModel(model);
 			newObject->SetCamera(camera.get());
 			// 座標 

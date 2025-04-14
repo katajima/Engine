@@ -16,6 +16,7 @@
 
 using namespace Microsoft::WRL;
 
+class Entity3DManager;
 class Object3dCommon;
 class SkinningConmmon;
 class ImGuiManager;
@@ -37,7 +38,7 @@ public:
 
 
 	// 初期化
-	void Initialize();
+	void Initialize(Entity3DManager* entity3DManager);
 	// 更新(アニメーション無し)
 	void Update();
 	// 更新(スキニング有り)
@@ -110,7 +111,7 @@ private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;
 	ImGuiManager* imGuiManager_;
-
+	Entity3DManager* entity3DManager_;
 public:
 	// モデル
 	Model* model = nullptr;

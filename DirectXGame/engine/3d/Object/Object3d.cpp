@@ -21,13 +21,12 @@
 
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
-
-void Object3d::Initialize()
+void Object3d::Initialize(Entity3DManager* entity3DManager)
 {
-	//Collider::Initialize();
-
-	object3dCommon_ = Object3dCommon::GetInstance();
+	entity3DManager_ = entity3DManager;
+	object3dCommon_ = entity3DManager_->GetObject3dCommon();
 	skinningConmmon_ = SkinningConmmon::GetInstance();
 	imGuiManager_ = ImGuiManager::GetInstance();
 

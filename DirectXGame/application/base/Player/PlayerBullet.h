@@ -21,14 +21,14 @@ class Enemy;
 
 class Player;
 
-
+class Entity3DManager;
 class PlayerBullet : public Collider
 {
 public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Vector3 position, Camera* camera);
+	void Initialize(Entity3DManager* entity3DManager,Vector3 position, Camera* camera);
 
 	///< summary>
 	/// 更新

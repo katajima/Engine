@@ -39,7 +39,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 
 	textureManager_->Initialize(command_.get(),DXGIDevice_.get(),srvManager_.get()); // テクスチャマネージャー
 
-	modelManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // モデルマネージャー
+	modelManager_->Initialize(this); // モデルマネージャー
 	effectManager_ = std::make_unique<EffectManager>();	 // エフェクトマネージャー
 	effectManager_->Initialize(this);
 

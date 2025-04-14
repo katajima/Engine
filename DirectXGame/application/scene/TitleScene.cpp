@@ -55,7 +55,7 @@ void TitleScene::Draw2D()
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	icon_B = std::make_unique<Sprite>();
 	icon_B->Initialize("resources/Texture/icon/B.png");
@@ -70,7 +70,7 @@ void TitleScene::InitializeResources()
 	title->SetSize(2);
 
 
-	tail.Initialize();
+	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
 	tail.worldtransform_.scale_ = { 10,10,10 };

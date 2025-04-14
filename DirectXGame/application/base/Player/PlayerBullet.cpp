@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/Enemy/Enemy.h"
 #include "Player.h"
 
-void PlayerBullet::Initialize(Vector3 position, Camera* camera)
+void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
@@ -10,7 +10,7 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 	//モデル
 
 	// プレイヤー
-	object_.Initialize();
+	object_.Initialize(entity3DManager);
 	object_.SetCamera(camera);
 	object_.SetModel("player_bullet.obj");
 	//object_.SetModel("AnimatedCube.gltf");
@@ -37,11 +37,11 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 	randPosSky.y = max_y;
 
 	
-	objectStr_.Initialize();
+	objectStr_.Initialize(entity3DManager);
 	objectStr_.worldtransform_.parent_ = &object_.worldtransform_;
 	objectStr_.worldtransform_.translate_.y = object_.GetMesh(0)->GetMin().y * 1;
 
-	objectEnd_.Initialize();
+	objectEnd_.Initialize(entity3DManager);
 	objectEnd_.worldtransform_.parent_ = &object_.worldtransform_;
 	objectEnd_.worldtransform_.translate_.y = object_.GetMesh(0)->GetMax().y * 1;
 

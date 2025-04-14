@@ -4,23 +4,23 @@
 
 void Collider::Initialize(Camera* camera) {
 
-	object.Initialize();
+	/*object.Initialize();
 	object.SetCamera(camera);
-	object.SetModel("enemy.obj");
+	object.SetModel("enemy.obj");*/
 	count++;
 }
 
 void Collider::UpdateWorldTransform() {
 
-	// ワールド座標をワールドトランスフォームに適応
-	object.worldtransform_.translate_ = GetCenterPosition();
+	//// ワールド座標をワールドトランスフォームに適応
+	//object.worldtransform_.translate_ = GetCenterPosition();
 
-	object.Update();
+	//object.Update();
 }
 
 void Collider::Draw() {
 
-	object.Draw();
+	//object.Draw();
 	
 }
 

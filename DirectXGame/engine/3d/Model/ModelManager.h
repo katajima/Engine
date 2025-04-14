@@ -23,6 +23,7 @@ class Command;
 class DXGIDevice;
 class SrvManager;
 class ModelCommon;
+class DirectXCommon;
 
 // テクスチャマネージャー
 class ModelManager {
@@ -33,7 +34,7 @@ public:
 	ModelManager& operator=(ModelManager&) = delete;
 
 	// 初期化
-	void Initialize(Command* command, DXGIDevice* DXGIDevice ,SrvManager* srvManager);
+	void Initialize(DirectXCommon* dxCommon);
 
 	/// <summary>
 	/// モデルファイルの読み込み
@@ -57,6 +58,8 @@ private:
 	Command* command_;
 	DXGIDevice* DXGIDevice_;
 	SrvManager* srvManager_;
+	DirectXCommon* dxCommon_;
 
 	std::unique_ptr<ModelCommon> modelCommon_;
+
 };

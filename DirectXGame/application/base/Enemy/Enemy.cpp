@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "DirectXGame/application/base/Player/Player.h"
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
 uint32_t Enemy::nextSerialNumber = 0;
 
@@ -12,7 +13,7 @@ Enemy::Enemy() {
 	++nextSerialNumber;
 }
 
-void Enemy::Initialize(Vector3 position, float HP, Camera* camera)
+void Enemy::Initialize(Entity3DManager* entity3DManager,Vector3 position, float HP, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
@@ -22,7 +23,7 @@ void Enemy::Initialize(Vector3 position, float HP, Camera* camera)
 	transBase_.translate_ = position;
 
 
-	object_.Initialize();
+	object_.Initialize(entity3DManager);
 	object_.SetModel("enemy2.obj");
 	object_.SetCamera(camera);
 	object_.worldtransform_.parent_ = &transBase_;
@@ -31,7 +32,7 @@ void Enemy::Initialize(Vector3 position, float HP, Camera* camera)
 
 
 
-	objectSha_.Initialize();
+	objectSha_.Initialize(entity3DManager);
 	objectSha_.SetCamera(camera);
 	objectSha_.SetModel("plane.obj");
 	objectSha_.model->modelData.material[0]->tex_.diffuseFilePath = "resources/Texture/aa.png";

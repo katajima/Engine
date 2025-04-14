@@ -6,7 +6,7 @@
 // engine
 #include"DirectXGame/engine/effect/Ocean/OceanManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
-
+#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -20,6 +20,9 @@ public:
 
 
 	Object3dInstansManager* GetObject3dInstansManager() { return object3dInstansManager_.get(); }
+
+	Object3dCommon* GetObject3dCommon() { return object3dCommon_.get(); }
+
 private:
 
 	// DirectX
@@ -30,6 +33,9 @@ private:
 
 	// インスタンシング描画
 	std::unique_ptr<Object3dInstansManager> object3dInstansManager_ = nullptr;
+
+	// オブジェクト
+	std::unique_ptr<Object3dCommon> object3dCommon_ = nullptr;
 
 };
 

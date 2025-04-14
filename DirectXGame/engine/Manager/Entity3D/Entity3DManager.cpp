@@ -11,4 +11,8 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 
 	object3dInstansManager_ = std::make_unique<Object3dInstansManager>();
 	object3dInstansManager_->Initialize(directXCommon_);
+
+
+	object3dCommon_ = std::make_unique<Object3dCommon>();
+	object3dCommon_->Initialize(directXCommon_);
 }

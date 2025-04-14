@@ -79,8 +79,7 @@ protected:
 	ImGuiManager* imguiManager;
 	// スプライトこもん
 	SpriteCommon* spriteCommon = nullptr;
-	// オブジェクトコモン
-	Object3dCommon* object3dCommon = nullptr;
+	
 	// モデルコモン
 	CameraCommon* cameraCommon = nullptr;
 	// ラインコモン

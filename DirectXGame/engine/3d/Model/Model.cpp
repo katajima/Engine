@@ -27,11 +27,11 @@ std::string getLastPartOfPath(const std::string& path) {
 
 #pragma region Initialize
 
-void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, const Vector2 texScale)
+void Model::Initialize(DirectXCommon* dxCommon,ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, const Vector2 texScale)
 {
 	modelCommon_ = modelCommon;
 	srvManager_ = modelCommon_->GetSrvManager();
-
+	dxCommon_ = dxCommon;
 	std::string dire = directorypath;
 
 	if (file != "") {
@@ -47,9 +47,10 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 
 }
 
-void Model::InitializeAnime(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
+void Model::InitializeAnime(DirectXCommon* dxCommon,ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
 {
 	modelCommon_ = modelCommon;
+	dxCommon_ = dxCommon;
 	srvManager_ = modelCommon_->GetSrvManager();
 
 	std::string dire = directorypath;
@@ -249,7 +250,7 @@ Model::ModelData Model::LoadOdjFileAssimp(const std::string& directoryPath, cons
 	
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
-		pMaterial->Initialize(Object3dCommon::GetInstance()->GetDxCommon());
+		pMaterial->Initialize(dxCommon_);
 
 		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
 			aiMaterial* material = scene->mMaterials[materialIndex];
@@ -382,7 +383,7 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 
 		//modelData.material[] = std::make_unique<Material>();
 
-		pMaterial->Initialize(Object3dCommon::GetInstance()->GetDxCommon());
+		pMaterial->Initialize(dxCommon_);
 		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
 			aiMaterial* material = scene->mMaterials[materialIndex];
 			aiString textureFilePath;

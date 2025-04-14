@@ -6,7 +6,7 @@
 
 void Object3dInstansManager::Initialize(DirectXCommon* dxCommon)
 {
-	this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
+	//this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
 
 	dxCommon_ = dxCommon;
 	srvManager_ = dxCommon_->GetSrvManager();

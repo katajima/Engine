@@ -2,14 +2,14 @@
 #include "DirectXGame/application/base/Enemy/Enemy.h"
 #include "Player.h"
 
-void playerWeapon::Initialize(Camera* camera)
+void playerWeapon::Initialize(Entity3DManager* entity3DManager,Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
 
 	
 
-	objectWeapon_.Initialize();
+	objectWeapon_.Initialize(entity3DManager);
 	objectWeapon_.SetCamera(camera);
 	objectWeapon_.SetModel("Sword.obj");
 	

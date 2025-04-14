@@ -2,25 +2,28 @@
 #include"DirectXGame/application/base/Enemy/Enemy.h"
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "assert.h"
 
-void Player::Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera)
+void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
 
+
+	entity3DManager_ = entity3DManager;
 	camera_ = camera;
 	dxCommon_ = dxcommon;
 	specialAttack.max = 40;
 
 	// プレイヤー
-	objectBase_.Initialize();
+	objectBase_.Initialize(entity3DManager);
 	objectBase_.SetCamera(camera_);
 	objectBase_.worldtransform_.translate_ = position;
 	objectBase_.Update();
 
 	// レティクル
-	objectReticle_.Initialize();
+	objectReticle_.Initialize(entity3DManager);
 	objectReticle_.SetCamera(camera_);
 	objectReticle_.SetModel("enemy.obj");
 	objectReticle_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -30,7 +33,7 @@ void Player::Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera
 	//assert(objectBase_ != nullptr);
 
 	// 体
-	objectBody_.Initialize();
+	objectBody_.Initialize(entity3DManager);
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -39,7 +42,7 @@ void Player::Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera
 
 
 	// 左ミサイル発射口
-	injectionLeftObj_.Initialize();
+	injectionLeftObj_.Initialize(entity3DManager);
 	injectionLeftObj_.SetCamera(camera_);
 	injectionLeftObj_.SetModel("AnimatedCube.gltf");
 	injectionLeftObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -48,7 +51,7 @@ void Player::Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera
 	injectionLeftObj_.worldtransform_.scale_= { 0.75f,1.25f,1.0f };
 
 	// 右ミサイル発射口
-	injectionRightObj_.Initialize();
+	injectionRightObj_.Initialize(entity3DManager);
 	injectionRightObj_.SetCamera(camera_);
 	injectionRightObj_.SetModel("AnimatedCube.gltf");
 	injectionRightObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -60,7 +63,7 @@ void Player::Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera
 
 
 	// 影
-	objectSha_.Initialize();
+	objectSha_.Initialize(entity3DManager);
 	objectSha_.SetCamera(camera_);
 	objectSha_.SetModel("plane.obj");
 	objectSha_.model->modelData.material[0]->tex_.diffuseFilePath = "resources/Texture/aa.png";
@@ -71,19 +74,19 @@ void Player::Initialize(DirectXCommon* dxcommon,Vector3 position, Camera* camera
 
 
 	weapon_ = std::make_unique<playerWeapon>();
-	weapon_->Initialize(camera);
+	weapon_->Initialize(entity3DManager,camera);
 	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_.worldtransform_;
 	weapon_->GetObject3D().worldtransform_.translate_ = { 0,0.5f,0.5f };
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
 	
 
-	weaponStr.Initialize();
+	weaponStr.Initialize(entity3DManager);
 	weaponStr.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
 	weaponStr.worldtransform_.translate_ = {0,weapon_->GetObject3D().GetMesh(0)->GetMax().y ,0};
 		
 
-	weaponEnd.Initialize();
+	weaponEnd.Initialize(entity3DManager);
 	weaponEnd.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
 	weaponEnd.worldtransform_.translate_ = { 0,weapon_->GetObject3D().GetMesh(0)->GetMin().y ,0 };
 	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };

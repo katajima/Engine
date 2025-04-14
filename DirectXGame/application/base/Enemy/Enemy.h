@@ -15,7 +15,7 @@
 
 class Player;
 class FollowCamera;
-
+class Entity3DManager;
 class Enemy : public Collider
 {
 public:
@@ -23,7 +23,7 @@ public:
 	Enemy();
 
 	// 初期化
-	void Initialize(Vector3 position,float HP,Camera* camera);
+	void Initialize(Entity3DManager* entity3DManager,Vector3 position,float HP,Camera* camera);
 	
 	// 毎フレーム更新
 	void Update();
