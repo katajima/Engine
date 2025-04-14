@@ -17,16 +17,13 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+
 #include<random>
 #include<numbers>
 #include "DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
-#include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Primitive/Primitive.h"
-#include "../../3d/Object/Object3d.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
 
@@ -56,6 +53,7 @@ struct ModelData
 
 
 class DirectXCommon;
+class SrvManager;
 class ParticleManager
 {
 public:

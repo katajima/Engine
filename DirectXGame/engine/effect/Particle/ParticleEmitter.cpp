@@ -2,24 +2,6 @@
 
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-// count: パーティクルの最大生成数を指定する値。frequency: パーティクルの発射間隔を秒単位で指定する値。frequencyTime: 現在の発射間隔の経過時間を追跡する値。
-//ParticleEmitter::ParticleEmitter(std::string name, Transform transform, uint32_t count, float frequency, float frequencyTime)
-//{
-//	// name: パーティクルエミッターの名前を示す文字列。
-//	// transform: パーティクルエミッターの位置、回転、スケールなどを表す構造体。	
-//	// count: パーティクルの最大生成数を指定する値。
-//	// frequency: パーティクルの発射間隔を秒単位で指定する値。
-//	// frequencyTime: 現在の発射間隔の経過時間を追跡する値。
-//
-//
-//
-//	//name_ = name;
-//	//count_ = count;
-//	//frequency_ = frequency;
-//	//frequencyTime_ = frequencyTime;
-//	//transform_ = transform;
-//}
-
 void ParticleEmitter::Initialize(std::string emitName, std::string particleName, EmitSpawnShapeType spawnType)
 {
 	emitter_.controlPoints.clear(); // 初期化

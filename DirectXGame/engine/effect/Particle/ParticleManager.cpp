@@ -1,10 +1,17 @@
 #include "ParticleManager.h"
 #include "DirectXGame/engine/base/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+#include"DirectXGame/engine/Line/LineCommon.h"
+//#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
+#include"DirectXGame/engine/MyGame/MyGame.h"
+//#include "DirectXGame/engine/3d/Object/Object3d.h"
+
+
 #include "imgui.h"
 
 
-#include"DirectXGame/engine/MyGame/MyGame.h"
+
 
 ParticleManager* ParticleManager::instance = nullptr;
 
@@ -19,7 +26,7 @@ ParticleManager* ParticleManager::GetInstance()
 void ParticleManager::Initialize(DirectXCommon* dxCommon)
 {
 
-	this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
+	//this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
 
 	dxCommon_ = dxCommon;
 	srvManager_ = dxCommon_->GetSrvManager();

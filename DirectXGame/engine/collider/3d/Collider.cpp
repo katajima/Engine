@@ -1,5 +1,7 @@
 #include "Collider.h"
 
+
+
 void Collider::Initialize(Camera* camera) {
 
 	object.Initialize();
