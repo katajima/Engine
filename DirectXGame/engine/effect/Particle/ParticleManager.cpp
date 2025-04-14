@@ -1,5 +1,6 @@
 #include "ParticleManager.h"
 #include "DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "imgui.h"
 
 
@@ -284,7 +285,7 @@ void ParticleManager::Draw()
 		}
 
 
-		ParticleManager::GetInstance()->DrawCommonSetting(group.rasteType, group.blendType);
+		DrawCommonSetting(group.rasteType, group.blendType);
 
 
 		group.material->GetCommandListTexture(2);

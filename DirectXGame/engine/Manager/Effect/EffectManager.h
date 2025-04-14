@@ -11,6 +11,7 @@
 #include<format>
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffectManager.h"
+//#include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
 
 class DirectXCommon;
 class EffectManager
