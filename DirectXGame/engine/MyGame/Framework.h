@@ -6,7 +6,6 @@
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
 #include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 
 #include"DirectXGame/engine/Light/LightCommon.h"
@@ -22,7 +21,7 @@
 
 #include"DirectXGame/engine/base/ImGuiManager.h"
 #include"DirectXGame/engine/Camera/CameraCommon.h"
-#include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
+
 
 #include"DirectXGame/engine/audio/Audio.h"
 

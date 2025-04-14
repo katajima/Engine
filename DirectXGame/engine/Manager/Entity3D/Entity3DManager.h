@@ -7,6 +7,7 @@
 #include"DirectXGame/engine/effect/Ocean/OceanManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
+#include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -23,6 +24,8 @@ public:
 
 	Object3dCommon* GetObject3dCommon() { return object3dCommon_.get(); }
 
+	SkyBoxCommon* GetSkyBoxCommon() { return skyBoxCommon_.get(); }
+
 private:
 
 	// DirectX
@@ -37,5 +40,8 @@ private:
 	// オブジェクト
 	std::unique_ptr<Object3dCommon> object3dCommon_ = nullptr;
 
+	// スカイボックス
+	std::unique_ptr<SkyBoxCommon> skyBoxCommon_ = nullptr;
+	
 };
 

@@ -173,7 +173,7 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		ocean_->Draw();
-		SkyBoxCommon::GetInstance()->DrawCommonSetting();
+		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -686,8 +686,8 @@ void TestScene::UpdateRoom01()
 {
 	ocean_->Update();
 
-	SkyBoxCommon::GetInstance()->SetCamara(camera.get());
-	SkyBoxCommon::GetInstance()->Update();
+	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
+	GetEntity3DManager()->GetSkyBoxCommon()->Update();
 
 
 

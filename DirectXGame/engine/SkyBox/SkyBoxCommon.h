@@ -1,5 +1,4 @@
 #pragma once
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Mesh/Mesh.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
@@ -10,21 +9,14 @@
 
 
 
-
+class DirectXCommon;
 class SkyBoxCommon
 {
 public:
-	static SkyBoxCommon* instance;
-
-	static SkyBoxCommon* GetInstance();
-
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
 	void Update();
-
-	void Finalize();
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 

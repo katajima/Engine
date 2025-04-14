@@ -1,20 +1,10 @@
 #include "SkyBoxCommon.h"
 
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
-#include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/base/TextureManager.h"
-
-SkyBoxCommon* SkyBoxCommon::instance = nullptr;
-
-SkyBoxCommon* SkyBoxCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new SkyBoxCommon;
-	}
-	return instance;
-}
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -93,12 +83,6 @@ void SkyBoxCommon::Update()
 
 	transfomation->Update(camara_,worldtransform_.worldMat_);
 
-}
-
-void SkyBoxCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void SkyBoxCommon::DrawCommonSetting()

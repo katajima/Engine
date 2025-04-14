@@ -55,10 +55,6 @@ void Framework::Initialize()
 	lightCommon = LightManager::GetInstance();
 	lightCommon->Initialize(dxCommon.get());
 	
-	// スカイボックス
-	skyBoxCommon = SkyBoxCommon::GetInstance();
-	skyBoxCommon->Initialize(dxCommon.get());
-
 }
 
 void Framework::Finalize()
@@ -67,6 +63,8 @@ void Framework::Finalize()
 	winApp->Finalize();
 	
 	dxCommon->Finalize();
+
+
 
 	// ImGuiマネージャーの終了
 	imguiManager->Finalize();
@@ -82,8 +80,6 @@ void Framework::Finalize()
 	lightCommon->Finalize();
 
 	renderingCommon->Finalize();
-
-	skyBoxCommon->Finalize();
 
 }
 
