@@ -3,7 +3,7 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
-#include "DirectXGame/engine/Primitive/Primitive.h"
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
 

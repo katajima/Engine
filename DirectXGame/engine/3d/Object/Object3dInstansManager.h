@@ -25,7 +25,7 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Primitive/Primitive.h"
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
 #include <thread>

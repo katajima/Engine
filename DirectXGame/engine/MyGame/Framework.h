@@ -25,7 +25,7 @@
 #include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 
 
-#include"DirectXGame/engine/Primitive/PrimitiveCommon.h"
+#include"DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 #include"DirectXGame/engine/base/ImGuiManager.h"

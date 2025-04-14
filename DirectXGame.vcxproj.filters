@@ -261,10 +261,10 @@
     <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Primitive\Primitive.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\Primitive.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Primitive\PrimitiveCommon.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\PSO\PSOManager.cpp">
@@ -633,10 +633,10 @@
     <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Primitive\Primitive.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\Primitive.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Primitive\PrimitiveCommon.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\PSO\PSOManager.h">

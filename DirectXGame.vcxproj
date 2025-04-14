@@ -174,7 +174,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Material\Material.cpp" />
     <ClCompile Include="DirectXGame\engine\MyGame\Framework.cpp" />
     <ClCompile Include="DirectXGame\engine\MyGame\MyGame.cpp" />
-    <ClCompile Include="DirectXGame\engine\Primitive\Primitive.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\Primitive.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\PSOManager.cpp" />
     <ClCompile Include="DirectXGame\engine\scene\SceneManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Skinning\Skinning.cpp" />
@@ -205,7 +205,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\base\TextureManager.cpp" />
     <ClCompile Include="DirectXGame\engine\base\WinApp.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\Mesh.cpp" />
-    <ClCompile Include="DirectXGame\engine\Primitive\PrimitiveCommon.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -479,7 +479,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Math\Easing.h" />
     <ClInclude Include="DirectXGame\engine\Math\ProbabilityUtils.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\Mesh.h" />
-    <ClInclude Include="DirectXGame\engine\Primitive\Primitive.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\Primitive.h" />
     <ClInclude Include="DirectXGame\engine\PSO\PSOManager.h" />
     <ClInclude Include="DirectXGame\engine\scene\AbstractSceneFactory.h" />
     <ClInclude Include="DirectXGame\engine\scene\BaseScene.h" />
@@ -532,7 +532,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\struct\Structs3D.h" />
     <ClInclude Include="DirectXGame\engine\base\TextureManager.h" />
     <ClInclude Include="DirectXGame\engine\base\WinApp.h" />
-    <ClInclude Include="DirectXGame\engine\Primitive\PrimitiveCommon.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

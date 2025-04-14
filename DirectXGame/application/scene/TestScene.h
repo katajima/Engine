@@ -21,7 +21,7 @@
 #include "DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 
-#include"DirectXGame/engine/Primitive/Primitive.h"
+#include"DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/2d/Primitive2D.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 
