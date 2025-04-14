@@ -1,15 +1,21 @@
+
+// engine
 #include"Model.h"
 #include"ModelCommon.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
+//#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/base/TextureManager.h"
-#include <iostream>
+#include "DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/base/Logger.h"
 #include"DirectXGame/engine/base/StringUtility.h"
+
+// C++
+#include <iostream>
 #include"format"
 #include<vector>
 
 
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
+
 
 std::string getLastPartOfPath(const std::string& path) {
 	size_t pos = path.find_last_of("/\\"); if (pos == std::string::npos) {

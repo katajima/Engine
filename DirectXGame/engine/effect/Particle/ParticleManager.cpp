@@ -5,7 +5,7 @@
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
-
+#include "DirectXGame/engine/Material/Material.h"
 
 
 #include "imgui.h"

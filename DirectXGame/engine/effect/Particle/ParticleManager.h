@@ -5,6 +5,10 @@
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 
+// DirectXTex
+#include"externals/DirectXTex/DirectXTex.h"
+#include"externals/DirectXTex/d3dx12.h"
+
 // C++
 #include <windows.h>
 #include<cstdint>
@@ -18,15 +22,13 @@ using namespace Microsoft::WRL;
 #include<random>
 #include<numbers>
 
+
+
 // engine
-#include"externals/DirectXTex/DirectXTex.h"
-#include"externals/DirectXTex/d3dx12.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
-#include "DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include"DirectXGame/engine/WorldTransform/WorldTransform.h"
 
@@ -53,7 +55,7 @@ struct ModelData
 	Node rootNode;
 };
 
-
+class Material;
 class Primitive;
 class DirectXCommon;
 class SrvManager;

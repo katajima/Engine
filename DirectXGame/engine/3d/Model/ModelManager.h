@@ -16,6 +16,8 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/struct/Structs3D.h"
 
+
+
 class Model;
 class Command;
 class DXGIDevice;

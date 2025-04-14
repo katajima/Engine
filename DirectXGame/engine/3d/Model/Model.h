@@ -1,10 +1,13 @@
 #pragma once
+
+// engine
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Mesh/Mesh.h"
+#include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/Material/Material.h"
 
+// C++
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -16,6 +19,7 @@
 #include <iostream>
 #include <memory>
 
+// assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -25,7 +29,7 @@
 class ModelCommon;
 
 
-
+class Material;
 class Model
 {
 public:
@@ -40,7 +44,7 @@ public:
 		uint32_t skinningSrvindex;
 		std::vector <std::unique_ptr<Mesh>> mesh;
 		std::vector<uint32_t> cachedLineIndices_;
-		std::vector < std::unique_ptr<Material>> material;
+		std::vector <std::unique_ptr<Material>> material;
 		std::string name;
 	};
 	

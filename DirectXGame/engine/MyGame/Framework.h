@@ -2,27 +2,22 @@
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/base/WinApp.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include"DirectXGame/engine/DirectX/D3DResourceLeakchecker/D3DResourceLeakchecker.h"
+
 #include"DirectXGame/engine/2d/Sprite.h"
 #include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/base/TextureManager.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
-#include"DirectXGame/engine/3d/Model/ModelManager.h"
+
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
 #include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include"DirectXGame/engine/Manager/RTV/RtvManeger.h"
-#include"DirectXGame/engine/Manager/UAV/UavManager.h"
+
 
 #include"DirectXGame/engine/effect/Ocean/OceanManager.h"
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 
 
 #include"DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
@@ -33,8 +28,7 @@
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 
 #include"DirectXGame/engine/audio/Audio.h"
-#include"DirectXGame/engine/base/StringUtility.h"
-#include"DirectXGame/engine/base/Logger.h"
+
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
@@ -96,8 +90,6 @@ protected:
 
 	ParticleManager* particleManager_ = nullptr;
 	
-	ParticleEmitter* emitter = nullptr;
-
 	LightManager* lightCommon = nullptr;
 
 	RenderingCommon* renderingCommon = nullptr;

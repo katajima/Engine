@@ -15,7 +15,6 @@ using namespace Microsoft::WRL;
 
 #include"DirectXGame/engine/base/RenderingCommon.h"
 
-#include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 
 
 void DirectXCommon::Intialize(WinApp* winApp) {
@@ -41,7 +40,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	textureManager_->Initialize(command_.get(),DXGIDevice_.get(),srvManager_.get()); // テクスチャマネージャー
 
 	modelManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // モデルマネージャー
-	
+	effectManager_ = std::make_unique<EffectManager>();	 // エフェクトマネージャー
 	effectManager_->Initialize(this);
 
 
