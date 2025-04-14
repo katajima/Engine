@@ -4,11 +4,9 @@
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-#include"DirectXGame/engine/2d/Sprite.h"
+
 #include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include"DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 
 #include"DirectXGame/engine/Light/LightCommon.h"
@@ -35,6 +33,8 @@
 #include "DirectXGame/engine/base/RenderingCommon.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"memory"
+
+#include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
 // ゲーム全体
 class Framework
@@ -72,7 +72,8 @@ protected:
 	// ダイレクトX
 	std::unique_ptr <DirectXCommon> dxCommon = nullptr;
 
-
+	// 3D全般
+	std::unique_ptr<Entity3DManager> entity3DManager_;
 
 
 	// ImGuiマネージャー

@@ -10,6 +10,9 @@ void Framework::Initialize()
 	dxCommon = std::make_unique<DirectXCommon>();
 	dxCommon->Intialize(winApp.get());
 
+	entity3DManager_ = std::make_unique<Entity3DManager>();
+	entity3DManager_->Initialize(dxCommon.get());
+
 	renderingCommon = RenderingCommon::GetInstance();
 	renderingCommon->Initialize(dxCommon.get());
 

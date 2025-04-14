@@ -183,13 +183,8 @@ void MyGame::InitializeResource()
 
 
 	modelManager->LoadModelAmime("walk.gltf", "human");
-	//modelManager->LoadModelAmime("Women.gltf", "Women");
-	//modelManager->LoadModelAmime("Man.gltf", "Man");
-	//modelManager->LoadModelAmime("Man.gltf", "Man");
-	//modelManager->LoadModelAmime("Hand.gltf", "Hand");
 	modelManager->LoadModelAmime("iku.gltf", "iku");
-	//modelManager->LoadModelAmime("Kick.gltf", "Kick");
-
+	
 
 
 	modelManager->LoadModelAmime("player_bullet.obj", "player_bullet");
@@ -198,8 +193,6 @@ void MyGame::InitializeResource()
 	//ModelManager::GetInstance()->LoadModelAmime("sneakWalk.gltf", "human");
 	modelManager->LoadModelAmime("AnimatedCube.gltf", "AnimatedCube");
 
-	//ModelManager::GetInstance()->LoadModel("grass.obj", "grass");
-	//ModelManager::GetInstance()->LoadModel("grass.gltf", "grass2");
 	modelManager->LoadModel("Ground.obj", "Ground");
 	modelManager->LoadModel("stair.obj");
 	modelManager->LoadModel("BoxBox.obj", "BoxAABB");
@@ -288,7 +281,6 @@ void MyGame::InitializeResource()
 
 	ParticleManager::GetInstance()->CreateParticleGroup("primiPlane", "resources/Texture/circle2.png", primiPlane.get());
 
-	ParticleManager::BlendType::MODE_MUlLIPLY;
 
 	ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/Texture/aa.png", modelManager->FindModel("plane.obj"));
 	ParticleManager::GetInstance()->CreateParticleGroup("explosionSmoke", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
