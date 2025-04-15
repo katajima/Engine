@@ -91,8 +91,6 @@ protected:
 
 	ParticleManager* particleManager_ = nullptr;
 	
-	LightManager* lightCommon = nullptr;
-
 	RenderingCommon* renderingCommon = nullptr;
 
 	SkinningConmmon* skinningCommon = nullptr;

@@ -479,7 +479,7 @@ void TestScene::InitializeLight()
 
 	point->point = pointLightData;
 
-	LightManager::GetInstance()->AddLight(point);
+	GetEntity3DManager()->GetLightManager()->AddLight(point);
 
 	SpotLightData spotLightData;
 
@@ -492,7 +492,7 @@ void TestScene::InitializeLight()
 	spot = std::make_shared<SpotLight>();
 
 	spot->spot = spotLightData;
-	LightManager::GetInstance()->AddLight(spot);
+	GetEntity3DManager()->GetLightManager()->AddLight(spot);
 
 	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
 
@@ -507,7 +507,8 @@ void TestScene::InitializeLight()
 	directional = std::make_shared<DirectionalLight>();
 	directional->directional = directionalLightData;
 
-	LightManager::GetInstance()->AddLight(directional);
+	GetEntity3DManager()->GetLightManager()->AddLight(directional);
+
 }
 
 /// <summary>

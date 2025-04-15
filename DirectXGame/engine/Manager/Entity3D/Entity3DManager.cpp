@@ -20,5 +20,8 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	skyBoxCommon_ = std::make_unique<SkyBoxCommon>();
 	skyBoxCommon_->Initialize(directXCommon_);
 
+	// ライト
+	lightManager_ = std::make_unique<LightManager>();
+	lightManager_->Initialize(directXCommon_);
 
 }

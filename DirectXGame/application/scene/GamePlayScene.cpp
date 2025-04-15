@@ -283,7 +283,7 @@ void GamePlayScene::InitializeResources()
 	directional = std::make_shared<DirectionalLight>();
 	directional->directional = directionalLightData;
 
-	LightManager::GetInstance()->AddLight(directional);
+	GetEntity3DManager()->GetLightManager()->AddLight(directional);
 
 
 }

@@ -50,11 +50,6 @@ void Framework::Initialize()
 	
 	primitiveCommon = PrimitiveCommon::GetInstance();
 	primitiveCommon->Initialize(dxCommon.get());
-
-	//ライト
-	lightCommon = LightManager::GetInstance();
-	lightCommon->Initialize(dxCommon.get());
-	
 }
 
 void Framework::Finalize()
@@ -76,8 +71,6 @@ void Framework::Finalize()
 	cameraCommon->Finalize();
 	
 	lineCommon->Finalize();
-
-	lightCommon->Finalize();
 
 	renderingCommon->Finalize();
 

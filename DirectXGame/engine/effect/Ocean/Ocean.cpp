@@ -167,8 +167,9 @@ void Ocean::Draw()
 {
 	entity3dManager_->GetOceanManager()->DrawCommonSetting();
 
-	LightManager::GetInstance()->DrawLight();
 
+	entity3dManager_->GetLightManager()->DrawLight();
+	
 	directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(7, waveResource->GetGPUVirtualAddress());
 	directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(8, noiseResource->GetGPUVirtualAddress());
 

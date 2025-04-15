@@ -8,6 +8,7 @@
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
+#include"DirectXGame/engine/Light/LightCommon.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -26,6 +27,8 @@ public:
 
 	SkyBoxCommon* GetSkyBoxCommon() { return skyBoxCommon_.get(); }
 
+	LightManager* GetLightManager() { return lightManager_.get(); }
+
 private:
 
 	// DirectX
@@ -43,5 +46,8 @@ private:
 	// スカイボックス
 	std::unique_ptr<SkyBoxCommon> skyBoxCommon_ = nullptr;
 	
+	// ライト
+	std::unique_ptr<LightManager> lightManager_ = nullptr;
+
 };
 

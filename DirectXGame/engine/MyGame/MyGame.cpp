@@ -76,8 +76,8 @@ void MyGame::Update()
 	// グローバル変数の更新
 	GlobalVariables::GetInstance()->Update();
 
-	lightCommon->Update();
-
+	// ライト
+	entity3DManager_->GetLightManager()->Update(); 
 
 	sceneManager_->Update();
 

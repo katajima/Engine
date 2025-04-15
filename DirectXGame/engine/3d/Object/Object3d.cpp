@@ -241,7 +241,7 @@ bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3&
 
 void Object3d::DrawSetting()
 {
-	LightManager::GetInstance()->DrawLight();
+	entity3DManager_->GetLightManager()->DrawLight();
 
 	transfomation->GetCommandList(1);
 
@@ -256,7 +256,8 @@ void Object3d::DrawSetting()
 
 void Object3d::DrawSettingSkin()
 {
-	LightManager::GetInstance()->DrawLight();
+
+	entity3DManager_->GetLightManager()->DrawLight();
 
 	transfomation->GetCommandList(1);
 

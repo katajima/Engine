@@ -2,15 +2,7 @@
 #include "imgui.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
 
-LightManager* LightManager::instance = nullptr;
 
-LightManager* LightManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new LightManager;
-	}
-	return instance;
-}
 
 void LightManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -29,11 +21,6 @@ void LightManager::Initialize(DirectXCommon* dxCommon)
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
 }
 
-void LightManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
 
 void LightManager::DrawLight()
 {
