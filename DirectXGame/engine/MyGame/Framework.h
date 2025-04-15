@@ -76,6 +76,9 @@ protected:
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> sceneManager_;
 
+	// シーンファクトリー
+	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
+
 	// スプライトこもん
 	SpriteCommon* spriteCommon = nullptr;
 	
@@ -92,9 +95,5 @@ protected:
 	
 	PrimitiveCommon* primitiveCommon = nullptr;
 
-	SkyBoxCommon* skyBoxCommon = nullptr;
-
-	// シーンファクトリー
-	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 };
 
