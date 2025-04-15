@@ -382,11 +382,11 @@ void Player::Move()
 
 
 
-	if (Input::GetInstance()->IsControllerConnected()) {
+	if (input_->IsControllerConnected()) {
 
 
-		velocity_.x = Input::GetInstance()->GetGamePadLeftStick().x;
-		velocity_.z = Input::GetInstance()->GetGamePadLeftStick().y;
+		velocity_.x = input_->GetGamePadLeftStick().x;
+		velocity_.z = input_->GetGamePadLeftStick().y;
 
 
 		if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
@@ -422,18 +422,18 @@ void Player::Move()
 	else {
 
 
-		if (Input::GetInstance()->IsPushKey(DIK_W)) {
+		if (input_->IsPushKey(DIK_W)) {
 			velocity_.z += 0.3f;
 		}
-		if (Input::GetInstance()->IsPushKey(DIK_S)) {
+		if (input_->IsPushKey(DIK_S)) {
 			velocity_.z -= 0.3f;
 
 		}
-		if (Input::GetInstance()->IsPushKey(DIK_A)) {
+		if (input_->IsPushKey(DIK_A)) {
 			velocity_.x -= 0.3f;
 
 		}
-		if (Input::GetInstance()->IsPushKey(DIK_D)) {
+		if (input_->IsPushKey(DIK_D)) {
 			velocity_.x += 0.3f;
 		}
 

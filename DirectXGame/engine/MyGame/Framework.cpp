@@ -6,20 +6,21 @@ void Framework::Initialize()
 	winApp = std::make_unique<WinApp>();
 	winApp->Initialize();
 
+	input_ = std::make_unique<Input>();
+	input_->Intialize(winApp.get());
 
 	dxCommon = std::make_unique<DirectXCommon>();
 	dxCommon->Intialize(winApp.get());
+	dxCommon->GetImGuiManager()->SetInput(input_.get());
 
 	entity3DManager_ = std::make_unique<Entity3DManager>();
 	entity3DManager_->Initialize(dxCommon.get());
 
+	entity3DManager_->GetCameraCommon()->SetInput(input_.get());
+
 	entity2DManager_ = std::make_unique<Entity2DManager>();
 	entity2DManager_->Initialize(dxCommon.get());
 
-
-
-
-	Input::GetInstance()->Intialize(winApp.get());
 
 
 
@@ -43,7 +44,7 @@ void Framework::Finalize()
 void Framework::Update()
 {
 
-	Input::GetInstance()->Update();
+	input_->Update();
 
 	
 	// Windowsのメッセージ処理

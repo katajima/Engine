@@ -1,5 +1,6 @@
 #include "DebugCamera.h"
 
+#include "DirectXGame/engine/Camera/CameraCommon.h"
 
 void DebugCamera::Initialize(CameraCommon* cameraCommon)
 {
@@ -8,7 +9,7 @@ void DebugCamera::Initialize(CameraCommon* cameraCommon)
 	//camera_.transform_.rotate.x = DegreesToRadians(90);
 	//camera_.transform_.rotate.x = DegreesToRadians(20);
 
-    input_ = Input::GetInstance();
+    input_ = cameraCommon->GetInput();
 }
 
 void DebugCamera::Update()

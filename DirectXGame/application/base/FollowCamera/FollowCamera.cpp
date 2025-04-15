@@ -1,7 +1,12 @@
 #include "FollowCamera.h"
 
+#include"DirectXGame/engine/input/Input.h"
+#include "DirectXGame/engine/Camera/CameraCommon.h"
+
 void FollowCamera::Initialize(CameraCommon* cameraCommon)
 {
+	input_ = cameraCommon->GetInput();
+
 	//camera_ = Camera::GetInstance();
 	camera_.Initialize(cameraCommon);
 	camera_.farClip_ = 5000.0f;
@@ -17,10 +22,10 @@ void FollowCamera::Update()
 		
 		const float kRotateSpeed = 0.000003f * 10000;
 
-		if (Input::GetInstance()->IsControllerConnected())
+		if (input_->IsControllerConnected())
 		{
-			camera_.transform_.rotate.y += Input::GetInstance()->GetGamePadRightStick().x * kRotateSpeed;
-			camera_.transform_.rotate.x += Input::GetInstance()->GetGamePadRightStick().y * kRotateSpeed;
+			camera_.transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
+			camera_.transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
 
 			if (camera_.transform_.rotate.x >= DegreesToRadians(60)) {
 				camera_.transform_.rotate.x = DegreesToRadians(60);
@@ -33,10 +38,10 @@ void FollowCamera::Update()
 
 		}
 		else {
-			if (Input::GetInstance()->IsPushKey(DIK_LEFT)) {
+			if (input_->IsPushKey(DIK_LEFT)) {
 				camera_.transform_.rotate.y -= 0.01f;
 			}
-			if (Input::GetInstance()->IsPushKey(DIK_RIGHT)) {
+			if (input_->IsPushKey(DIK_RIGHT)) {
 				camera_.transform_.rotate.y += 0.01f;
 			}
 

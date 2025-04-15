@@ -17,7 +17,6 @@
 // 前方宣言
 class WinApp;
 class DirectXCommon;
-
 // ImGuiの管理
 class ImGuiManager
 {
@@ -53,12 +52,16 @@ public:
 
 	void SetCustomColorScheme();
 
+	void SetInput(Input* input) { input_ = input; }
+
 private:
 
 	// DirectX基盤インスタンス（借りてくる）
 	DirectXCommon* dxCommon_ = nullptr;
 	// SRV用ヒープ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
+
+	Input* input_;
 
 	Input::FlagXYZ flag;
 

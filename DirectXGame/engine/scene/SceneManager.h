@@ -3,6 +3,7 @@
 #include"AbstractSceneFactory.h"
 
 
+class Input;
 class DirectXCommon;
 class Entity3DManager;
 class Entity2DManager;
@@ -31,6 +32,10 @@ public:
 
 	Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
 
+	void SetInput(Input* input) { input_ = input; }
+
+	Input* GetInput() { return input_; }
+
 	/// <summary>
 	/// 次のシーン予約
 	/// </summary>
@@ -55,5 +60,6 @@ private:
 	DirectXCommon* directXCommon_;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
+	Input* input_;
 };
 

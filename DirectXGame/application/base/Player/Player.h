@@ -286,6 +286,7 @@ public:
 
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
+	void SetInput(Input* input) { input_ = input; }
 
 	// 弾リストを取得
 	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() const { return playerBullet_; }
@@ -294,6 +295,8 @@ private:
 	FollowCamera* followCamera_;
 	
 	Camera* camera_ = nullptr;
+
+	Input* input_;
 
 	std::vector<Enemy*> lockedOnEnemies;
 private:  // パラメータ

@@ -7,7 +7,7 @@ void TitleScene::Initialize()
 	//オーディオの初期化
 	//audio_ = Audio::GetInstance();
 	// 入力初期化
-	input_ = Input::GetInstance();
+	input_ = GetInput();
 
 	// カメラ
 	InitializeCamera();
@@ -23,12 +23,12 @@ void TitleScene::Finalize()
 
 void TitleScene::Update()
 {
-	if (Input::GetInstance()->IsTriggerKey(DIK_RETURN)) {
+	if (input_->IsTriggerKey(DIK_RETURN)) {
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("GAMEPLAY");
 	}
-	else if (Input::GetInstance()->IsControllerConnected()) {
-		if (Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
+	else if (input_->IsControllerConnected()) {
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
 			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}
 	}

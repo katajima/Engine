@@ -10,6 +10,8 @@
 // 初期化
 void GamePlayScene::Initialize()
 {
+	input_ = GetInput();
+
 	// カメラ
 	InitializeCamera();
 	// オブジェクト3D
@@ -427,7 +429,7 @@ void GamePlayScene::UpdateImGui()
 {
 
 #ifdef _DEBUG
-	if (Input::GetInstance()->IsTriggerKey(DIK_P)) {
+	if (input_->IsTriggerKey(DIK_P)) {
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}

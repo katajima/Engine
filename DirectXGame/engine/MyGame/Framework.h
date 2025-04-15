@@ -57,8 +57,9 @@ protected:
 	// ウィンアップ
 	
 	std::unique_ptr <WinApp> winApp;
+	
 	//
-	Input* input = nullptr;
+	std::unique_ptr<Input> input_ = nullptr;
 
 	// ダイレクトX
 	std::unique_ptr <DirectXCommon> dxCommon = nullptr;

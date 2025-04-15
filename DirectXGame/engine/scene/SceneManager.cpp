@@ -20,6 +20,7 @@ void SceneManager::Update()
 		scene_->SetSceneManader(this);
 
 		//次のシーンを初期化する
+		scene_->SetInput(input_);
 		scene_->SetDirectXCommon(directXCommon_);
 		scene_->SetEntity3DManager(entity3DManager_);
 		scene_->SetEntity2DManager(entity2DManager_);

@@ -11,6 +11,7 @@ using namespace Microsoft::WRL;
 #include<dxgi1_6.h>
 
 class DirectXCommon;
+class Input;
 class CameraCommon;
 // カメラ
 class Camera
@@ -77,6 +78,8 @@ public:
 	DataGPU* data;
 private:
 	DirectXCommon* dxCommon_;
+
+	Input* input_;
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> resource;
 

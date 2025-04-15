@@ -9,7 +9,7 @@ void TestScene::Initialize()
 	//オーディオの初期化
 	//audio_ = Audio::GetInstance();
 	// 入力初期化
-	input_ = Input::GetInstance();
+	input_ = GetInput();
 	// ImGui初期化
 	imGuiManager = GetDxCommon()->GetImGuiManager();
 
@@ -834,7 +834,7 @@ void TestScene::UpdateRoom07()
 
 
 
-	Vector2 sosos = Input::GetInstance()->GetGamePadLeftStick();
+	Vector2 sosos = input_->GetGamePadLeftStick();
 
 
 

@@ -94,7 +94,7 @@ void Player::BehaviorDieUpdate()
 		Move();
 
 		if (specialAttack.time >= 0.5f) {
-			if (Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
+			if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
 				specialAttack.phese = 1;
 				specialAttack.time = 0;
 			}

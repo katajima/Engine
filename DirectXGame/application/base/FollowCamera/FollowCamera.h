@@ -3,9 +3,9 @@
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/base/ImGuiManager.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/input/Input.h"
 
 
+class Input;
 class FollowCamera
 {
 public:
@@ -29,7 +29,8 @@ public:
 	//void SetCameraRotate(Vector3& rotate) { return camera_.transform_.rotate = rotate; }
 
 private:
-
+	//
+	Input* input_;
 	// ビュープロジェクション
 	Camera camera_;
 

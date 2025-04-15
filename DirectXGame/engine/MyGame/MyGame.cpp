@@ -16,6 +16,7 @@ void MyGame::Initialize()
 
 	// シーンマネージャーに最初のシーンをセット
 	sceneManager_->SetSceneFactory(sceneFactory_.get());
+	sceneManager_->SetInput(input_.get());
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());

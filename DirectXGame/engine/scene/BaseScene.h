@@ -1,7 +1,7 @@
 #pragma once
 
 
-
+class Input;
 class SceneManager;
 class Entity3DManager;
 class Entity2DManager;
@@ -33,6 +33,8 @@ public:
 
 	void SetEntity2DManager(Entity2DManager* entity2DManager) { entity2DManager_ = entity2DManager; }
 
+	void SetInput(Input* input) { input_ = input; }
+
 	virtual DirectXCommon* GetDxCommon() {return directXCommon_;}
 
 	Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
@@ -41,6 +43,9 @@ public:
 
 	SceneManager* GetSceneManager() { return sceneManager_;}
 
+
+	Input* GetInput() { return input_; }
+
 private:
 	// シーンマネージャ(借りてくる)
 	SceneManager* sceneManager_ = nullptr;
@@ -48,5 +53,6 @@ private:
 	DirectXCommon* directXCommon_ = nullptr;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
+	Input* input_;
 };
 
