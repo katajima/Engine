@@ -132,7 +132,7 @@ struct SkinCluster {
 	/// 
 	/// </summary>
 	Microsoft::WRL::ComPtr < ID3D12Resource> inputVertexResource;
-	std::span<VertexData> mappedinputVertex;
+	D3D12_VERTEX_BUFFER_VIEW  inputVertexBufferView;
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> inputVertexSrvHandle;
 
 	
@@ -140,7 +140,7 @@ struct SkinCluster {
 	/// 
 	/// </summary>
 	Microsoft::WRL::ComPtr < ID3D12Resource> outputVertexResource;
-	std::span<VertexData> mappedoutputVertex;
+	D3D12_VERTEX_BUFFER_VIEW outputBufferView;
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> outputVertexUavHandle;
 
 

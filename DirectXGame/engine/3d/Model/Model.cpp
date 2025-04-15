@@ -380,6 +380,8 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 
 	modelData.skinning.wellSrvIndex = modelCommon_->GetSrvManager()->Allocate();
 	modelData.skinning.influencesIndex = modelCommon_->GetSrvManager()->Allocate();
+	modelData.skinning.inputVerticesIndex = modelCommon_->GetSrvManager()->Allocate();
+	modelData.skinning.outputVerticesUavIndex = modelCommon_->GetSrvManager()->Allocate();
 
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
@@ -552,6 +554,22 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 
 
 
+
+	// InputVertex用のResourceを確保。
+	skinCluster.inputVertexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * modelData.mesh[0]->vertices.size());
+	VertexInfluence* mappedinputVertex = nullptr;
+	skinCluster.inputVertexResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedinputVertex));
+	//std::memset(mappedinputVertex, 0, sizeof(VertexData) * modelData.mesh[0]->vertices.size()); // 仮埋め。weightを0にしておく。
+	
+	// InputVertex用のVB作成
+	skinCluster.inputVertexBufferView.BufferLocation = skinCluster.inputVertexResource->GetGPUVirtualAddress();
+	skinCluster.inputVertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.mesh[0]->vertices.size());
+	skinCluster.inputVertexBufferView.StrideInBytes = sizeof(VertexData);
+
+	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.inputVerticesIndex, skinCluster.inputVertexResource.Get(), UINT(modelData.mesh[0]->vertices.size()), sizeof(VertexData));
+
+	skinCluster.inputVertexSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.inputVerticesIndex);
+	skinCluster.inputVertexSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.inputVerticesIndex);
 
 
 
