@@ -3,6 +3,7 @@
 #include "DirectXGame/application/base/Player/Player.h"
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 uint32_t Enemy::nextSerialNumber = 0;
 
@@ -13,7 +14,7 @@ Enemy::Enemy() {
 	++nextSerialNumber;
 }
 
-void Enemy::Initialize(Entity3DManager* entity3DManager,Vector3 position, float HP, Camera* camera)
+void Enemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, float HP, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
@@ -51,21 +52,21 @@ void Enemy::Initialize(Entity3DManager* entity3DManager,Vector3 position, float 
 	InitParticle();
 
 	icon_lockOn = std::make_unique<Sprite>();
-	icon_lockOn->Initialize("resources/Texture/icon/LockOnW.png");
+	icon_lockOn->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/icon/LockOnW.png");
 	icon_lockOn->SetSize(0.10f);
 	icon_lockOn->SetColor({ 1,0,1,1 });
 	icon_lockOn->SetPosition({ -100,650 });
 	icon_lockOn->SetAnchorPoint({ 0.5f,0.5f });
 
 	hpBer_ = std::make_unique<Sprite>();
-	hpBer_->Initialize("resources/Texture/Image.png");
+	hpBer_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/Image.png");
 	//hpBer_->SetSize(0.10f);
 	hpBer_->SetColor({ 1,0,0,0.7f });
 	hpBer_->SetPosition({ -100,650 });
 	hpBer_->SetAnchorPoint({ 0.5f,0.0f });
 
 	backHpBer_ = std::make_unique<Sprite>();
-	backHpBer_->Initialize("resources/Texture/Image.png");
+	backHpBer_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/Image.png");
 	//backHpBer_->SetSize(0.10f);
 	backHpBer_->SetColor({ 0.1f,0.1f,0.1f,0.7f });
 	backHpBer_->SetPosition({ -100,650 });

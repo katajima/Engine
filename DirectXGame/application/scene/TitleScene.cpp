@@ -58,13 +58,13 @@ void TitleScene::InitializeResources()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	icon_B = std::make_unique<Sprite>();
-	icon_B->Initialize("resources/Texture/icon/B.png");
+	icon_B->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/B.png");
 	icon_B->SetPosition({ 640,500 });
 	icon_B->SetAnchorPoint({ 0.5f,0.5f });
 	icon_B->SetSize({200,200});
 
 	title = std::make_unique<Sprite>();
-	title->Initialize("resources/Texture/text/title.png");
+	title->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/title.png");
 	title->SetPosition({ 200,200 });
 	//title->SetAnchorPoint({ 0.5f,0.5f });
 	title->SetSize(2);

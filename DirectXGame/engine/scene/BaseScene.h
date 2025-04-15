@@ -4,6 +4,7 @@
 
 class SceneManager;
 class Entity3DManager;
+class Entity2DManager;
 class DirectXCommon;
 class BaseScene
 {
@@ -30,9 +31,13 @@ public:
 
 	void SetEntity3DManager(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
 
+	void SetEntity2DManager(Entity2DManager* entity2DManager) { entity2DManager_ = entity2DManager; }
+
 	virtual DirectXCommon* GetDxCommon() {return directXCommon_;}
 
 	Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
+
+	Entity2DManager* GetEntity2DManager() { return entity2DManager_; }
 
 	SceneManager* GetSceneManager() { return sceneManager_;}
 
@@ -42,5 +47,6 @@ private:
 
 	DirectXCommon* directXCommon_ = nullptr;
 	Entity3DManager* entity3DManager_;
+	Entity2DManager* entity2DManager_;
 };
 

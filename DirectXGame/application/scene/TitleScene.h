@@ -16,6 +16,7 @@
 
 
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
 class TitleScene : public BaseScene

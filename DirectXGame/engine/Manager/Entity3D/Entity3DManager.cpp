@@ -1,5 +1,8 @@
 #include "Entity3DManager.h"
 
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
+
 void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 {
 	directXCommon_ = directXCommon;

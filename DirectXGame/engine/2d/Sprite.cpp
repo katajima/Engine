@@ -4,12 +4,12 @@
 #include"DirectXGame/engine/base/TextureManager.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-void Sprite::Initialize(std::string textureFilePath, bool isTexLoad)
+void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, bool isTexLoad)
 {
 
 	textureFilePath_ = textureFilePath;
 	// 引数で受け取ってメンバ変数にする
-	this->spriteCommon_ = SpriteCommon::GetInstance();
+	this->spriteCommon_ = spriteCommon;
 
 	vertexResource = spriteCommon_->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * 4);
 
@@ -43,7 +43,7 @@ void Sprite::Initialize(std::string textureFilePath, bool isTexLoad)
 
 	// マテリアル
 	material = std::make_unique<Material>();
-	material->Initialize(SpriteCommon::GetInstance()->GetDxCommon());
+	material->Initialize(spriteCommon_->GetDxCommon());
 	material->tex_.diffuseFilePath = textureFilePath;
 	if (isTexLoad) {
 		material->LoadTex();
@@ -52,7 +52,7 @@ void Sprite::Initialize(std::string textureFilePath, bool isTexLoad)
 
 	// トランスフォーム
 	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(SpriteCommon::GetInstance()->GetDxCommon());
+	transfomation->Initialize(spriteCommon_->GetDxCommon());
 
 
 	transform.scale = { size.x,size.y,1.0f };
@@ -209,16 +209,16 @@ void Sprite::SpriteTypeDiscrimination(SpriteType type)
 	switch (type)
 	{
 	case Sprite::SpriteType::UvInterpolation_MODE_SOLID:
-		SpriteCommon::GetInstance()->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_SOLID);
+		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_SOLID);
 		break;
 	case Sprite::SpriteType::NoUvInterpolation_MODE_SOLID:
-		SpriteCommon::GetInstance()->DrawCommonSetting(SpriteCommon::PSOType::NoUvInterpolation_MODE_SOLID);
+		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::NoUvInterpolation_MODE_SOLID);
 		break;
 	case Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME:
-		SpriteCommon::GetInstance()->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_WIREFRAME);
+		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_WIREFRAME);
 		break;
 	case Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME:
-		SpriteCommon::GetInstance()->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_WIREFRAME);
+		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_WIREFRAME);
 		break;
 	default:
 		break;

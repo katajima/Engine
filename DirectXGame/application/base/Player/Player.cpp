@@ -3,9 +3,10 @@
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "assert.h"
 
-void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Vector3 position, Camera* camera)
+void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
@@ -93,19 +94,19 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 
 
 	HpBer_ = std::make_unique<Sprite>();
-	HpBer_->Initialize("resources/Texture/Image.png");
+	HpBer_->Initialize(entity2DManager->GetSpriteCommon() ,"resources/Texture/Image.png");
 	HpBer_->SetSize({ 50,-float(hp) });
 	HpBer_->SetColor({ 0,1,0,1 });
 	HpBer_->SetPosition({ 100,650 });
 
 	SpecailBer_ = std::make_unique<Sprite>();
-	SpecailBer_->Initialize("resources/Texture/Image.png");
+	SpecailBer_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/Image.png");
 	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) });
 	SpecailBer_->SetColor({ 0,0,1,1 });
 	SpecailBer_->SetPosition({ 40,650 });
 
 	textMax_ = std::make_unique<Sprite>();
-	textMax_->Initialize("resources/Texture/text/max.png");
+	textMax_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/text/max.png");
 	textMax_->SetColor({ 1,0,0,1 });
 	textMax_->SetPosition({ 45,350 });
 	textMax_->SetRotation(DegreesToRadians(-30));
@@ -113,7 +114,7 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	textMax_->SetSize(0.25f);
 
 	textRB_ = std::make_unique<Sprite>();
-	textRB_->Initialize("resources/Texture/icon/RB.png");
+	textRB_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/icon/RB.png");
 	textRB_->SetColor({ 1,1,1,1 });
 	textRB_->SetPosition({ 1280 /2,550 });
 	textRB_->SetAnchorPoint({0.5f,0.5f});

@@ -13,16 +13,17 @@ void Framework::Initialize()
 	entity3DManager_ = std::make_unique<Entity3DManager>();
 	entity3DManager_->Initialize(dxCommon.get());
 
+	entity2DManager_ = std::make_unique<Entity2DManager>();
+	entity2DManager_->Initialize(dxCommon.get());
+
+
+
+
+
 	renderingCommon = RenderingCommon::GetInstance();
 	renderingCommon->Initialize(dxCommon.get());
 
 	Input::GetInstance()->Intialize(winApp.get());
-	
-
-	// スプライト共通部の初期化
-	spriteCommon = SpriteCommon::GetInstance();
-	spriteCommon->Initialize(dxCommon.get());
-
 
 	lineCommon = LineCommon::GetInstance();
 	lineCommon->Initialize(dxCommon.get());

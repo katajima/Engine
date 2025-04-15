@@ -5,6 +5,7 @@
 
 class DirectXCommon;
 class Entity3DManager;
+class Entity2DManager;
 class SceneManager
 {
 public:
@@ -23,6 +24,8 @@ public:
 	void SetDirectXCommon(DirectXCommon* directXCommon) { directXCommon_ = directXCommon; }
 
 	void SetEntity3DManager(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
+
+	void SetEntity2DManager(Entity2DManager* entity2DManager) { entity2DManager_ = entity2DManager; }
 
 	DirectXCommon* GetDirectXCommon() { return directXCommon_; };
 
@@ -51,5 +54,6 @@ private:
 	AbstractSceneFactory* sceneFactory_ = nullptr;
 	DirectXCommon* directXCommon_;
 	Entity3DManager* entity3DManager_;
+	Entity2DManager* entity2DManager_;
 };
 

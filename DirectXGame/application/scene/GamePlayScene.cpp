@@ -18,7 +18,7 @@ void GamePlayScene::Initialize()
 
 
 	player_ = std::make_unique<Player>();
-	player_->Initialize(GetDxCommon(), GetEntity3DManager(),Vector3(0, 2, -40), camera.get());
+	player_->Initialize(GetDxCommon(), GetEntity3DManager(),GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
 	
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
@@ -32,7 +32,7 @@ void GamePlayScene::Initialize()
 	for (int i = 0; i < 15; i++) {
 		auto enemy = std::make_unique<Enemy>();
 		Vector3 randPos = { float(rand() % 41 - 20),2,float(rand() % 40) };
-		enemy->Initialize(GetEntity3DManager(),randPos, 100, camera.get());
+		enemy->Initialize(GetEntity3DManager(), GetEntity2DManager(), randPos, 100, camera.get());
 		enemy->SetPlayer(player_.get());
 		enemy->SetFollowCamera(followCamera_.get());
 		enemys_.push_back(std::move(enemy));
@@ -145,7 +145,7 @@ void GamePlayScene::InitializeResources()
 		for (int i = 0; i < 10; i++) {
 			numSprites[j][i] = std::make_unique<Sprite>();
 			std::string str = "resources/Texture/num/" + std::to_string(i) + ".png";
-			numSprites[j][i]->Initialize(str, false);
+			numSprites[j][i]->Initialize(GetEntity2DManager()->GetSpriteCommon(), str, false);
 			//numSprites[j][i]->SetPosition(Vector2{ float(50 * i), 100 });
 		}
 	}
@@ -154,22 +154,22 @@ void GamePlayScene::InitializeResources()
 	Vector2 scale{ 75,75 };
 
 	icon_B = std::make_unique<Sprite>();
-	icon_B->Initialize("resources/Texture/icon/B.png");
+	icon_B->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/B.png");
 	icon_B->SetPosition({ xpos,500 });
 	icon_B->SetSize(scale);
 
 	icon_Y = std::make_unique<Sprite>();
-	icon_Y->Initialize("resources/Texture/icon/Y.png");
+	icon_Y->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/Y.png");
 	icon_Y->SetPosition({ xpos,550 });
 	icon_Y->SetSize(scale);
 
 	icon_X = std::make_unique<Sprite>();
-	icon_X->Initialize("resources/Texture/icon/X.png");
+	icon_X->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/X.png");
 	icon_X->SetPosition({ xpos,600 });
 	icon_X->SetSize(scale);
 
 	icon_RT = std::make_unique<Sprite>();
-	icon_RT->Initialize("resources/Texture/icon/RB.png");
+	icon_RT->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/RB.png");
 	icon_RT->SetPosition({ xpos,450 });
 	icon_RT->SetSize(scale);
 
@@ -177,40 +177,40 @@ void GamePlayScene::InitializeResources()
 	xpos = 1120;
 
 	text_normal = std::make_unique<Sprite>();
-	text_normal->Initialize("resources/Texture/text/normalAttack.png");
+	text_normal->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/normalAttack.png");
 	text_normal->SetPosition({ xpos,520 });
 	text_normal->SetSize(scale);
 
 	text_jump = std::make_unique<Sprite>();
-	text_jump->Initialize("resources/Texture/text/JumpAttack.png");
+	text_jump->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/JumpAttack.png");
 	text_jump->SetPosition({ xpos,570 });
 	text_jump->SetSize(scale);
 
 	text_dash = std::make_unique<Sprite>();
-	text_dash->Initialize("resources/Texture/text/DashAttack.png");
+	text_dash->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/DashAttack.png");
 	text_dash->SetPosition({ xpos,620 });
 	text_dash->SetSize(scale);
 
 	text_special = std::make_unique<Sprite>();
-	text_special->Initialize("resources/Texture/text/special.png");
+	text_special->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/special.png");
 	text_special->SetPosition({ xpos,470 });
 	text_special->SetSize(scale);
 
 	scale = { 100 * 1.5f,33 * 1.5f };
 
 	text_hit = std::make_unique<Sprite>();
-	text_hit->Initialize("resources/Texture/text/Hit.png");
+	text_hit->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/Hit.png");
 	text_hit->SetPosition({ 1100,110 });
 	text_hit->SetSize(scale);
 
 	text_clera = std::make_unique<Sprite>();
-	text_clera->Initialize("resources/Texture/text/clear.png");
+	text_clera->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/clear.png");
 	text_clera->SetPosition({ 300,200 });
 	//text_clera->SetAnchorPoint({ 0.5f,0.5f });
 	text_clera->SetSize(2);
 	text_clera->SetColor({ 0,1,0,1 });
 	text_over = std::make_unique<Sprite>();
-	text_over->Initialize("resources/Texture/text/over.png");
+	text_over->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/over.png");
 	text_over->SetPosition({ 300,200 });
 	//text_over->SetAnchorPoint({ 0.5f,0.5f });
 	text_over->SetSize(2);

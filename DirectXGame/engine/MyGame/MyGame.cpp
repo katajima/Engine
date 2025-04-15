@@ -18,6 +18,7 @@ void MyGame::Initialize()
 	sceneManager_->SetSceneFactory(sceneFactory_.get());
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
+	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 
 	sceneManager_->ChangeScene("TEST");
 	//SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
@@ -33,12 +34,9 @@ void MyGame::Initialize()
 void MyGame::Finalize()
 {
 	//
-	SpriteCommon::GetInstance()->Finalize();
-	
-	//
 	Audio::GetInstance()->Finalize();
 	//
-	//sceneManager_->Finalize();
+
 
 	// 基底クラスの終了処理
 	Framework::Finalize();

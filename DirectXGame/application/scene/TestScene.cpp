@@ -370,11 +370,12 @@ void TestScene::InitializeObject3D()
 /// </summary>
 void TestScene::InitializeObject2D()
 {
+	
 	for (int i = 0; i < 4; i++)
 	{
 		auto sprite = std::make_unique<Sprite>();
 
-		sprite->Initialize("resources/Texture/uvChecker.png", false);
+		sprite->Initialize(GetEntity2DManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png", false);
 		sprite->SetTextureSize({ 64,64 });
 		sprite->SetSize({ 128,128 });
 		sprite->SetAnimeSize({ 64,64 });
@@ -386,7 +387,7 @@ void TestScene::InitializeObject2D()
 
 	///
 	primitive2d1_ = std::make_unique<Primitive2D>();
-	primitive2d1_->Initialize(Primitive2D::ShapeType::Ring, { 1,1,1,1 });
+	primitive2d1_->Initialize(GetEntity2DManager()->GetSpriteCommon(),Primitive2D::ShapeType::Ring, { 1,1,1,1 });
 	primitive2d1_->position = { 640,360 };
 	//primitive2d1_->rotation = DegreesToRadians(45);
 

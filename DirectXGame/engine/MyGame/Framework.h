@@ -4,8 +4,10 @@
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include"DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-#include"DirectXGame/engine/2d/SpriteCommon.h"
+
+
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
@@ -68,6 +70,8 @@ protected:
 	// 3D全般
 	std::unique_ptr<Entity3DManager> entity3DManager_;
 
+	// 2D全般
+	std::unique_ptr<Entity2DManager> entity2DManager_;
 
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> sceneManager_;
@@ -75,9 +79,6 @@ protected:
 	// シーンファクトリー
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 
-	// スプライトこもん
-	SpriteCommon* spriteCommon = nullptr;
-	
 	
 	// ラインコモン
 	LineCommon* lineCommon = nullptr;

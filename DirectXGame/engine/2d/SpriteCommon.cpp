@@ -1,14 +1,6 @@
 #include"SpriteCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-SpriteCommon* SpriteCommon::instance = nullptr;
-
-SpriteCommon* SpriteCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new SpriteCommon;
-	}
-	return instance;
-}
 
 void SpriteCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -19,11 +11,7 @@ void SpriteCommon::Initialize(DirectXCommon* dxCommon)
 	CreateGraphicsPipeline();
 }
 
-void SpriteCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
+
 
 void SpriteCommon::DrawCommonSetting(PSOType type)
 {

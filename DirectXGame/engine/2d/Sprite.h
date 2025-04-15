@@ -26,7 +26,7 @@ public:// メンバ関数
 
 
 	// 初期化
-	void Initialize(std::string textureFilePath, bool isTexLoad = true);
+	void Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, bool isTexLoad = true);
 	// 更新
 	void Update();
 	// アニメーション

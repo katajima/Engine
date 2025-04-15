@@ -32,6 +32,7 @@ class Enemy;
 class FollowCamera;
 class DirectXCommon;
 class Entity3DManager;
+class Entity2DManager;
 class Player : public Collider {
 public:
 
@@ -39,7 +40,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager,Vector3 position, Camera* camera);
+	void Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera);
 
 	///< summary>
 	/// 更新
