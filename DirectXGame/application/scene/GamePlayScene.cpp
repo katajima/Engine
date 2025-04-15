@@ -28,8 +28,6 @@ void GamePlayScene::Initialize()
 
 	player_->SetCamera(camera.get());
 	player_->SetFollowCamera(followCamera_.get());
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
-
 
 	for (int i = 0; i < 15; i++) {
 		auto enemy = std::make_unique<Enemy>();
@@ -97,7 +95,7 @@ void GamePlayScene::Initialize()
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
-	collisionManager_->Initialize();
+	collisionManager_->Initialize(GetGlobalVariables());
 
 	InitializeResources();
 
@@ -219,15 +217,14 @@ void GamePlayScene::InitializeResources()
 	text_over->SetColor({ 1,0,0,1 });
 
 
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 	const char* gropName = "sprite";
 
 	// グループを追加する 
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
+	GetGlobalVariables()->CreateGroup(gropName);
 
 	for (int j = 0; j < 3; j++) {
 		std::string str = "posNum" + std::to_string(j);
-		globalVariables->AddItem(gropName, str, numpos[j]);
+		GetGlobalVariables()->AddItem(gropName, str, numpos[j]);
 	}
 
 	xpos = { 950 };
@@ -375,16 +372,15 @@ void GamePlayScene::LoadLevelData()
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables()
 {
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 	const char* gropName = "sprite";
 
 
 	// グループを追加する 
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
+	GetGlobalVariables()->CreateGroup(gropName);
 	for (int j = 0; j < 3; j++) {
 		std::string str = "posNum" + std::to_string(j);
 
-		//numpos[j] = globalVariables->GetVector2Value(gropName, str);
+		//numpos[j] = GetGlobalVariables()->GetVector2Value(gropName, str);
 
 	}
 

@@ -6,6 +6,7 @@ class SceneManager;
 class Entity3DManager;
 class Entity2DManager;
 class DirectXCommon;
+class GlobalVariables;
 class BaseScene
 {
 public:
@@ -33,6 +34,8 @@ public:
 
 	void SetEntity2DManager(Entity2DManager* entity2DManager) { entity2DManager_ = entity2DManager; }
 
+	void SetGlobalVariables(GlobalVariables* globalVariables) { globalVariables_ = globalVariables; }
+
 	void SetInput(Input* input) { input_ = input; }
 
 	virtual DirectXCommon* GetDxCommon() {return directXCommon_;}
@@ -43,6 +46,7 @@ public:
 
 	SceneManager* GetSceneManager() { return sceneManager_;}
 
+	GlobalVariables* GetGlobalVariables() { return globalVariables_; }
 
 	Input* GetInput() { return input_; }
 
@@ -54,5 +58,6 @@ private:
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
 	Input* input_;
+	GlobalVariables* globalVariables_;
 };
 

@@ -5,24 +5,16 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include"DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
-
-
-
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
 
 
-
-#include"DirectXGame/engine/Camera/CameraCommon.h"
-
-
-#include"DirectXGame/engine/audio/Audio.h"
-
-#include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+
+// C++
 #include"memory"
 
 
@@ -76,7 +68,7 @@ protected:
 	// シーンファクトリー
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 
-	
+	std::unique_ptr<GlobalVariables> globalVariables_;
 
 	
 

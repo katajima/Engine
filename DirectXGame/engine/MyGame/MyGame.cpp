@@ -17,10 +17,10 @@ void MyGame::Initialize()
 	// シーンマネージャーに最初のシーンをセット
 	sceneManager_->SetSceneFactory(sceneFactory_.get());
 	sceneManager_->SetInput(input_.get());
+	sceneManager_->SetGlobalVariables(globalVariables_.get());
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-
 	sceneManager_->ChangeScene("TEST");
 	//SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
 
@@ -28,7 +28,7 @@ void MyGame::Initialize()
 	InitializeResource();
 
 	// グローバル変数の読み込み
-	GlobalVariables::GetInstance()->LoadFiles();
+	globalVariables_->LoadFiles();
 
 }
 
@@ -71,7 +71,7 @@ void MyGame::Update()
 #endif // _DEBUG
 
 	// グローバル変数の更新
-	GlobalVariables::GetInstance()->Update();
+	globalVariables_->Update();
 
 	// ライト
 	entity3DManager_->GetLightManager()->Update(); 

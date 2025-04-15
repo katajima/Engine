@@ -9,6 +9,9 @@ void Framework::Initialize()
 	input_ = std::make_unique<Input>();
 	input_->Intialize(winApp.get());
 
+	globalVariables_ = std::make_unique<GlobalVariables>();
+	
+
 	dxCommon = std::make_unique<DirectXCommon>();
 	dxCommon->Intialize(winApp.get());
 	dxCommon->GetImGuiManager()->SetInput(input_.get());

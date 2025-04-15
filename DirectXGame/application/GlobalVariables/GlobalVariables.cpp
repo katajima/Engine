@@ -2,10 +2,6 @@
 #include "Windows.h"
 #include "imgui.h"
 
-GlobalVariables* GlobalVariables::GetInstance() {
-	static GlobalVariables instance;
-	return &instance;
-}
 
 void GlobalVariables::CreateGroup(const std::string& groupName) {
 	// 指定名のオブジェクトがなければ追加する

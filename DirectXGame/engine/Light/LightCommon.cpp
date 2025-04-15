@@ -153,32 +153,7 @@ void LightManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr
 
 void LightManager::ApplyGlobalVariables()
 {
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
-
-	const char* gropName = "directionalLight";
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
 	
-	Vector3 di = globalVariables->GetVector3Value(gropName, "direction");
-	directionalLightData->direction = di.Normalize();
-	directionalLightData->intensity = globalVariables->GetFloatValue(gropName, "intensity");
-	directionalLightData->color = globalVariables->GetVector4Value(gropName, "color");
-
-	gropName = "pointlight";
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
-
-	pointLightData[0].isLight   = globalVariables->GetBoolValue(gropName,    "p1 isLight");
-	pointLightData[0].position  = globalVariables->GetVector3Value(gropName, "p1 position");
-	pointLightData[0].decay     = globalVariables->GetFloatValue(gropName,   "p1 decay");
-	pointLightData[0].radius    = globalVariables->GetFloatValue(gropName,   "p1 radius");
-	pointLightData[0].intensity = globalVariables->GetFloatValue(gropName,   "p1 intensity");
-	pointLightData[0].color     = globalVariables->GetVector4Value(gropName, "p1 color");
-	pointLightData[1].isLight   = globalVariables->GetBoolValue(gropName,    "p2 isLight");
-	pointLightData[1].position  = globalVariables->GetVector3Value(gropName, "p2 position");
-	pointLightData[1].decay     = globalVariables->GetFloatValue(gropName,   "p2 deca");
-	pointLightData[1].radius    = globalVariables->GetFloatValue(gropName,   "p2 radiu");
-	pointLightData[1].intensity = globalVariables->GetFloatValue(gropName,   "p2 intensity");
-	pointLightData[1].color     = globalVariables->GetVector4Value(gropName, "p2 color");
-
 }
 
 
