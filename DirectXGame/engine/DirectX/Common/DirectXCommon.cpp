@@ -36,6 +36,8 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	renderTexture_->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get()); // レンダーテクスチャ
 	barrier_->Initialize(command_.get(),swapChain_.get(),renderTexture_.get()); // バリア
 	psoManager_->Initialize(command_.get(), DXGIDevice_.get(), dxcCompiler_.get());// PSOマネージャー
+	renderingCommon_->Initialize(this);
+
 
 	imguiManager_->Initialize(this);
 

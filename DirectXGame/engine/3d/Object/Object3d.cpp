@@ -144,7 +144,7 @@ void Object3d::UpdateAnimation()
 
 void Object3d::LineMesh()
 {
-	LineCommon::GetInstance()->AddLineMesh(GetMesh(0), worldtransform_.worldMat_);	
+	entity3DManager_->Get3DLineCommon()->AddLineMesh(GetMesh(0), worldtransform_.worldMat_);
 }
 
 #pragma endregion //更新系

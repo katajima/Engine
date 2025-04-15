@@ -1,19 +1,14 @@
 #pragma once
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/base/TextureManager.h"
 
+#include "DirectXGame/engine/struct/Structs3D.h"
+
+class DirectXCommon;
 class RenderingCommon
 {
 public:
-	static RenderingCommon* instance;
-
-	static RenderingCommon* GetInstance();
-
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
-	void Finalize();
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 

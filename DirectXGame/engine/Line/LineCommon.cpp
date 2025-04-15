@@ -4,24 +4,6 @@
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 
-
-LineCommon* LineCommon::instance = nullptr;
-
-
-LineCommon* LineCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new LineCommon;
-	}
-	return instance;
-}
-
-void LineCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
-
 void LineCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;

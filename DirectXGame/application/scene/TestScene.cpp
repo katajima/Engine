@@ -495,8 +495,9 @@ void TestScene::InitializeLight()
 	spot->spot = spotLightData;
 	GetEntity3DManager()->GetLightManager()->AddLight(spot);
 
-	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 
+	
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
@@ -721,9 +722,9 @@ void TestScene::UpdateRoom04()
 	Vector3 c = { tri2d.vertices[2].x, 5 ,tri2d.vertices[2].y };
 
 
-	LineCommon::GetInstance()->AddLine(a, b, { 1,1,1,1 });
-	LineCommon::GetInstance()->AddLine(b, c, { 1,1,1,1 });
-	LineCommon::GetInstance()->AddLine(c, a, { 1,1,1,1 });
+	GetEntity3DManager()->Get3DLineCommon()->AddLine(a, b, { 1,1,1,1 });
+	GetEntity3DManager()->Get3DLineCommon()->AddLine(b, c, { 1,1,1,1 });
+	GetEntity3DManager()->Get3DLineCommon()->AddLine(c, a, { 1,1,1,1 });
 
 
 	CornerSegment corner;// = { sphere2d.center }
@@ -738,7 +739,7 @@ void TestScene::UpdateRoom04()
 	world.translate_.x = sphere2d.center.x;
 	world.translate_.z = sphere2d.center.y;
 
-	LineCommon::GetInstance()->AddLineCorner(corner, world);
+	GetEntity3DManager()->Get3DLineCommon()->AddLineCorner(corner, world);
 
 	int size = GetEntity3DManager()->GetObject3dInstansManager()->GetSize();
 
@@ -751,7 +752,7 @@ void TestScene::UpdateRoom04()
 
 void TestScene::UpdateRoom05()
 {
-	LineCommon::GetInstance()->AddGrid(1000, 1000, 10, { 1,1,1,1 });
+	GetEntity3DManager()->Get3DLineCommon()->AddGrid(1000, 1000, 10, { 1,1,1,1 });
 }
 
 void TestScene::UpdateRoom06()
@@ -796,8 +797,8 @@ void TestScene::UpdateRoom06()
 
 	//stairObject->LineMesh();
 	stairObject->Update();
-	LineCommon::GetInstance()->AddLineCapsule(capsule_);
-	octree->draw(*LineCommon::GetInstance());
+	GetEntity3DManager()->Get3DLineCommon()->AddLineCapsule(capsule_);
+	octree->draw(*GetEntity3DManager()->Get3DLineCommon());
 
 }
 
@@ -855,9 +856,9 @@ void TestScene::UpdateRoom07()
 	playerObject->Update();
 	goalObject->Update();
 
-	pathfinder.DrawPath(11.0f);
+	pathfinder.DrawPath(GetEntity3DManager()->Get3DLineCommon(), 11.0f);
 
-	map->DrawMapChip(10.0f);
+	map->DrawMapChip(GetEntity3DManager()->Get3DLineCommon(), 10.0f);
 }
 
 void TestScene::UpdateRoom08()

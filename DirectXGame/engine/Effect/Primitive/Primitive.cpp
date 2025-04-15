@@ -2,9 +2,11 @@
 
 #include"PrimitiveCommon.h"
 
-void Primitive::Initialize(ShapeType type, const std::string& tex, const Color color, bool isLine)
+void Primitive::Initialize(PrimitiveCommon* primitiveCommon,ShapeType type, const std::string& tex, const Color color, bool isLine)
 {
 	mesh = std::make_unique<Mesh>();
+
+	primitiveCommon_ = primitiveCommon;
 
 	type_ = type;
 
@@ -12,7 +14,7 @@ void Primitive::Initialize(ShapeType type, const std::string& tex, const Color c
 
 	MeshInitialize();
 
-	mesh->Initialize(PrimitiveCommon::GetInstance()->GetDxCommon()->GetModelManager()->GetModelCommon());
+	mesh->Initialize(primitiveCommon_->GetDxCommon()->GetModelManager()->GetModelCommon());
 
 
 	if (type == ShapeType::AnimationPlane) {
@@ -22,13 +24,13 @@ void Primitive::Initialize(ShapeType type, const std::string& tex, const Color c
 
 
 	material = std::make_unique<Material>();
-	material->Initialize(PrimitiveCommon::GetInstance()->GetDxCommon());
+	material->Initialize(primitiveCommon_->GetDxCommon());
 	material->tex_.diffuseFilePath = tex;
 
 	material->color = color;
 	transfomation = std::make_unique<Transfomation>();
 
-	transfomation->Initialize(PrimitiveCommon::GetInstance()->GetDxCommon());
+	transfomation->Initialize(primitiveCommon_->GetDxCommon());
 
 
 
@@ -423,7 +425,7 @@ void Primitive::MeshUpdateImGui()
 
 void Primitive::Draw()
 {
-	PrimitiveCommon::GetInstance()->DrawCommonSetting();
+	primitiveCommon_->DrawCommonSetting();
 	if (mesh->vertices.size() != 0) {
 
 
@@ -439,7 +441,7 @@ void Primitive::Draw()
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		//PrimitiveCommon::GetInstance()->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh->vertices.size()), 1, 0, 0);
 
-		PrimitiveCommon::GetInstance()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		primitiveCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 	}
 	//if (isLine_);
 		//line_->DrawMeshLine(mesh.get());

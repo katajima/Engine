@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 
-
+class LineCommon;
 class AStarPathfinder {
 public:
     struct Node {
@@ -39,7 +39,7 @@ public:
     // 進行方向を計算する関数
     Vector2 GetDirectionToNextNode();
 
-    void DrawPath(float yPos) const;
+    void DrawPath(LineCommon* line,float yPos) const;
 
 private:
     const MapChip* m_map;

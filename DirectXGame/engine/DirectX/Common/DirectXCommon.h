@@ -30,6 +30,7 @@
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
+#include "DirectXGame/engine/base/RenderingCommon.h"
 #include"DirectXGame/engine/base/ImGuiManager.h"
 
 
@@ -44,7 +45,6 @@
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 
 
-class RenderingCommon;
 class DirectXCommon
 {
 public: // メンバ関数
@@ -104,6 +104,8 @@ public:
 
 	ImGuiManager* GetImGuiManager() { return imguiManager_.get(); }
 
+	RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
+
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			 // デバイス
 	std::unique_ptr<Command> command_ = std::make_unique<Command>();					 // コマンド
@@ -123,6 +125,9 @@ private:
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		 // モデルマネージャー
 	std::unique_ptr<EffectManager> effectManager_;	 // エフェクトマネージャー
 	std::unique_ptr<PSOManager> psoManager_ = std::make_unique<PSOManager>();		     // PSOマネージャー
+
+	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
+
 
 	// ImGuiマネージャー
 	std::unique_ptr <ImGuiManager> imguiManager_ = std::make_unique<ImGuiManager>();

@@ -1,15 +1,5 @@
 #include "RenderingCommon.h"
-
-RenderingCommon* RenderingCommon::instance = nullptr;
-
-
-RenderingCommon* RenderingCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new RenderingCommon;
-	}
-	return instance;
-}
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -28,12 +18,6 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 	
-}
-
-void RenderingCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void RenderingCommon::DrawCommonSetting(int index)

@@ -34,6 +34,11 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	skinningCommon_ = std::make_unique<SkinningConmmon>();
 	skinningCommon_->Initialize(directXCommon_);
 
+	lineCommon_ = std::make_unique<LineCommon>();
+	lineCommon_->Initialize(directXCommon_);
 
+	// プリミティブ
+	primitiveCommon_ = std::make_unique<PrimitiveCommon>();
+	primitiveCommon_->Initialize(directXCommon_);
 
 }

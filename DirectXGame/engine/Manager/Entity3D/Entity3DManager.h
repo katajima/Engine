@@ -11,6 +11,8 @@
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
+#include"DirectXGame/engine/Line/LineCommon.h"
+#include "DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -34,6 +36,10 @@ public:
 	SkinningConmmon* GetSkinningConmmon() { return skinningCommon_.get(); }
 
 	CameraCommon* GetCameraCommon() { return cameraCommon_.get(); }
+
+	LineCommon* Get3DLineCommon() { return lineCommon_.get(); }
+
+	PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
 
 private:
 
@@ -60,6 +66,12 @@ private:
 
 	// カメラコモン
 	std::unique_ptr <CameraCommon> cameraCommon_ = nullptr;
+
+	// ラインコモン
+	std::unique_ptr <LineCommon> lineCommon_ = nullptr;
+
+	// プリミティブ
+	std::unique_ptr<PrimitiveCommon> primitiveCommon_ = nullptr;
 
 };
 

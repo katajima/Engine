@@ -44,7 +44,7 @@ void MyGame::Finalize()
 
 void MyGame::Update()
 {
-	LineCommon::GetInstance()->LineClear();
+	entity3DManager_->Get3DLineCommon()->LineClear();
 	// ImGuiの受付開始
 	dxCommon->GetImGuiManager()->Begin();
 
@@ -80,7 +80,7 @@ void MyGame::Update()
 	ParticleManager::GetInstance()->Update();
 
 #ifdef _DEBUG
-	LineCommon::GetInstance()->Update();
+	entity3DManager_->Get3DLineCommon()->Update();
 #endif // _DEBUG
 
 	// ImGuiの受付終了
@@ -113,7 +113,7 @@ void MyGame::Draw()
 #ifdef _DEBUG
 	if (!sceneManager_->IsNowScene("GAMEPLAY")) {
 		// デバッグ用のライン描画
-		LineCommon::GetInstance()->Draw();
+		entity3DManager_->Get3DLineCommon()->Draw();
 	}
 #endif // _DEBUG
 
@@ -245,16 +245,16 @@ void MyGame::InitializeResource()
 	/// </summary>
 
 	primi = std::make_unique<Primitive>();
-	primi->Initialize(Primitive::ShapeType::Torus, "resources/Texture/uvChecker.png");
+	primi->Initialize(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Torus, "resources/Texture/uvChecker.png");
 
 	primiTrai = std::make_unique<Primitive>();
-	primiTrai->Initialize(Primitive::ShapeType::Triangle, "resources/Texture/Image.png");
+	primiTrai->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Triangle, "resources/Texture/Image.png");
 
 	primiPlane = std::make_unique<Primitive>();
-	primiPlane->Initialize(Primitive::ShapeType::Plane, "resources/Texture/uvChecker.png");
+	primiPlane->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Plane, "resources/Texture/uvChecker.png");
 
 	primiStar = std::make_unique<Primitive>();
-	primiStar->Initialize(Primitive::ShapeType::Star, "resources/Texture/Image.png");
+	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Star, "resources/Texture/Image.png");
 	ShapeParameter::Star star;
 	star.innerRadius_ = 1.0f;
 	star.outerRadius_ = 7.0f;

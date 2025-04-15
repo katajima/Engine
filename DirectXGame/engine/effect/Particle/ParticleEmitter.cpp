@@ -217,20 +217,20 @@ void ParticleEmitter::DrawEmitterLine()
 	switch (spawnShapeType_)
 	{
 	case ParticleEmitter::EmitSpawnShapeType::kAABB:
-		LineCommon::GetInstance()->AddLineAABB({ emitter_.renge.min,emitter_.renge.max }, emitter_.worldtransform.translate_);
+		//LineCommon::GetInstance()->AddLineAABB({ emitter_.renge.min,emitter_.renge.max }, emitter_.worldtransform.translate_);
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kOBB:
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kSphere:
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kSegmentLine:
-		LineCommon::GetInstance()->AddLine(emitter_.renge.min + emitter_.worldtransform.translate_, emitter_.renge.max + emitter_.worldtransform.translate_, { 1,1,1,1 });
+		//LineCommon::GetInstance()->AddLine(emitter_.renge.min + emitter_.worldtransform.translate_, emitter_.renge.max + emitter_.worldtransform.translate_, { 1,1,1,1 });
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kCornerLine:
-		LineCommon::GetInstance()->AddLineCorner(emitter_.corner, emitter_.worldtransform);
+		//LineCommon::GetInstance()->AddLineCorner(emitter_.corner, emitter_.worldtransform);
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kSpline:
-		LineCommon::GetInstance()->AddSpline(emitter_.controlPoints,emitter_.worldtransform);
+		//LineCommon::GetInstance()->AddSpline(emitter_.controlPoints,emitter_.worldtransform);
 		break;
 	default:
 		break;

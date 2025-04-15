@@ -19,21 +19,13 @@ void Framework::Initialize()
 
 
 
-
-	renderingCommon = RenderingCommon::GetInstance();
-	renderingCommon->Initialize(dxCommon.get());
-
 	Input::GetInstance()->Intialize(winApp.get());
 
-	lineCommon = LineCommon::GetInstance();
-	lineCommon->Initialize(dxCommon.get());
+
 
 	particleManager_ = ParticleManager::GetInstance();
 	particleManager_->Initialize(dxCommon.get());
 
-	
-	primitiveCommon = PrimitiveCommon::GetInstance();
-	primitiveCommon->Initialize(dxCommon.get());
 }
 
 void Framework::Finalize()
@@ -42,12 +34,6 @@ void Framework::Finalize()
 	winApp->Finalize();
 	
 	particleManager_->Finalize();
-
-	primitiveCommon->Finalize();
-
-	lineCommon->Finalize();
-
-	renderingCommon->Finalize();
 
 
 	dxCommon->Finalize();

@@ -103,7 +103,7 @@ void GamePlayScene::Initialize()
 
 	LoadLevelData();
 
-	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 }
 
 

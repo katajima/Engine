@@ -13,9 +13,6 @@
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
 
 
-#include"DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
-
-
 
 #include"DirectXGame/engine/Camera/CameraCommon.h"
 
@@ -25,7 +22,6 @@
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
-#include "DirectXGame/engine/base/RenderingCommon.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"memory"
 
@@ -80,16 +76,10 @@ protected:
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 
 	
-	// ラインコモン
-	LineCommon* lineCommon = nullptr;
+
 	
 
 	ParticleManager* particleManager_ = nullptr;
-	
-	RenderingCommon* renderingCommon = nullptr;
-
-	
-	PrimitiveCommon* primitiveCommon = nullptr;
-
+		
 };
 
