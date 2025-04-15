@@ -9,6 +9,7 @@
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
+#include"DirectXGame/engine/Skinning/Skinning.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -29,6 +30,8 @@ public:
 
 	LightManager* GetLightManager() { return lightManager_.get(); }
 
+	SkinningConmmon* GetSkinningConmmon() { return skinningCommon_.get(); }
+
 private:
 
 	// DirectX
@@ -48,6 +51,10 @@ private:
 	
 	// ライト
 	std::unique_ptr<LightManager> lightManager_ = nullptr;
+
+	// スキニング
+	std::unique_ptr<SkinningConmmon> skinningCommon_ = nullptr;
+
 
 };
 

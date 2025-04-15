@@ -24,4 +24,7 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	lightManager_ = std::make_unique<LightManager>();
 	lightManager_->Initialize(directXCommon_);
 
+	// スキニング
+	skinningCommon_ = std::make_unique<SkinningConmmon>();
+	skinningCommon_->Initialize(directXCommon_);
 }

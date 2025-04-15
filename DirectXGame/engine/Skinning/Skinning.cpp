@@ -6,16 +6,6 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/base/TextureManager.h"
 
-SkinningConmmon* SkinningConmmon::instance = nullptr;
-
-SkinningConmmon* SkinningConmmon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new SkinningConmmon;
-	}
-	return instance;
-}
-
 void SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
@@ -23,12 +13,6 @@ void SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 	psoManager_ = dxCommon_->GetPSOManager();
 
 	CreateGraphicsPipeline();
-}
-
-void SkinningConmmon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void SkinningConmmon::DrawCommonSetting(PSOType type)

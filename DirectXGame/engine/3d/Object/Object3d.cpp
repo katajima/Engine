@@ -27,7 +27,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager)
 {
 	entity3DManager_ = entity3DManager;
 	object3dCommon_ = entity3DManager_->GetObject3dCommon();
-	skinningConmmon_ = SkinningConmmon::GetInstance();
+	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();
 	imGuiManager_ = ImGuiManager::GetInstance();
 
 	name = "object" + std::to_string(object3dCommon_->count);

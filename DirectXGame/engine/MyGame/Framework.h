@@ -8,8 +8,7 @@
 #include"DirectXGame/engine/2d/SpriteCommon.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 
-#include"DirectXGame/engine/Light/LightCommon.h"
-#include"DirectXGame/engine/Skinning/Skinning.h"
+
 #include"DirectXGame/engine/Camera/Camera.h"
 
 
@@ -74,7 +73,7 @@ protected:
 	std::unique_ptr<Entity3DManager> entity3DManager_;
 
 
-	//
+	// シーンマネージャー
 	std::unique_ptr<SceneManager> sceneManager_;
 
 
@@ -93,8 +92,7 @@ protected:
 	
 	RenderingCommon* renderingCommon = nullptr;
 
-	SkinningConmmon* skinningCommon = nullptr;
-
+	
 	PrimitiveCommon* primitiveCommon = nullptr;
 
 	SkyBoxCommon* skyBoxCommon = nullptr;

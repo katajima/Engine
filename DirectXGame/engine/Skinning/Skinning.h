@@ -18,16 +18,8 @@ public:
 		UvInterpolation_MODE_WIREFRAME_NONE,
 		NoUvInterpolation_MODE_WIREFRAME_NONE,
 	};
-
-	static SkinningConmmon* instance;
-
-	static SkinningConmmon* GetInstance();
-
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
-	void Finalize();
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 

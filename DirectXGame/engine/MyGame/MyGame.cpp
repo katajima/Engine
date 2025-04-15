@@ -33,8 +33,6 @@ void MyGame::Initialize()
 void MyGame::Finalize()
 {
 	//
-	SkinningConmmon::GetInstance()->Finalize();
-	//
 	SpriteCommon::GetInstance()->Finalize();
 	
 	//

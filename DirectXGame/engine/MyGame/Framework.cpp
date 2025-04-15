@@ -37,9 +37,6 @@ void Framework::Initialize()
 	cameraCommon = CameraCommon::GetInstance();
 	cameraCommon->Initialize(dxCommon.get());
 
-	skinningCommon = SkinningConmmon::GetInstance();
-	skinningCommon->Initialize(dxCommon.get());
-
 
 	lineCommon = LineCommon::GetInstance();
 	lineCommon->Initialize(dxCommon.get());
