@@ -21,14 +21,14 @@ class Enemy;
 
 class Player;
 
-
+class Entity3DManager;
 class PlayerBullet : public Collider
 {
 public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Vector3 position, Camera* camera);
+	void Initialize(Entity3DManager* entity3DManager,Vector3 position, Camera* camera);
 
 	///< summary>
 	/// 更新
@@ -107,7 +107,7 @@ private:
 	int index_ = 0;
 
 
-	std::unique_ptr<TrailEffect> trailEffect_;
+	//std::unique_ptr<TrailEffect> trailEffect_;
 	Object3d objectStr_;
 	Object3d objectEnd_;
 

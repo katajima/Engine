@@ -5,9 +5,9 @@
 void TitleScene::Initialize()
 {
 	//オーディオの初期化
-	audio_ = Audio::GetInstance();
+	//audio_ = Audio::GetInstance();
 	// 入力初期化
-	input_ = Input::GetInstance();
+	input_ = GetInput();
 
 	// カメラ
 	InitializeCamera();
@@ -23,13 +23,13 @@ void TitleScene::Finalize()
 
 void TitleScene::Update()
 {
-	if (Input::GetInstance()->IsTriggerKey(DIK_RETURN)) {
+	if (input_->IsTriggerKey(DIK_RETURN)) {
 		// シーン切り替え
-		SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+		GetSceneManager()->ChangeScene("GAMEPLAY");
 	}
-	else if (Input::GetInstance()->IsControllerConnected()) {
-		if (Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+	else if (input_->IsControllerConnected()) {
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
+			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}
 	}
 
@@ -55,22 +55,22 @@ void TitleScene::Draw2D()
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	icon_B = std::make_unique<Sprite>();
-	icon_B->Initialize("resources/Texture/icon/B.png");
+	icon_B->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/B.png");
 	icon_B->SetPosition({ 640,500 });
 	icon_B->SetAnchorPoint({ 0.5f,0.5f });
 	icon_B->SetSize({200,200});
 
 	title = std::make_unique<Sprite>();
-	title->Initialize("resources/Texture/text/title.png");
+	title->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/title.png");
 	title->SetPosition({ 200,200 });
 	//title->SetAnchorPoint({ 0.5f,0.5f });
 	title->SetSize(2);
 
 
-	tail.Initialize();
+	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
 	tail.worldtransform_.scale_ = { 10,10,10 };
@@ -80,7 +80,7 @@ void TitleScene::InitializeResources()
 void TitleScene::InitializeCamera()
 {
 	camera = std::make_unique <Camera>();
-	camera->Initialize();
+	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };
 

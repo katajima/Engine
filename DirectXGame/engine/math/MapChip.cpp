@@ -113,9 +113,8 @@ bool MapChip::WorldToMap(float worldX, float worldZ, int& mapX, int& mapZ) const
     return (mapX >= 0 && mapX < m_width && mapZ >= 0 && mapZ < m_height);
 }
 
-void MapChip::DrawMapChip(float yPos) const
+void MapChip::DrawMapChip(LineCommon* line,float yPos) const
 {
-    LineCommon* line = LineCommon::GetInstance();
 
     float size = m_cellSize;
     int width = m_width;

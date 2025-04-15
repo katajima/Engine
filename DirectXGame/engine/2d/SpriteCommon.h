@@ -1,11 +1,13 @@
 #pragma once
-#include"DirectXGame/engine/base/DirectXCommon.h"
+
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
 #include<wrl.h>
 using namespace Microsoft::WRL;
+
+class DirectXCommon;
 class SpriteCommon
 {
 public:// メンバ関数
@@ -19,14 +21,9 @@ public:// メンバ関数
 	};
 
 
-	static SpriteCommon* instance;
-
-	static SpriteCommon* GetInstance();
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
-	void Finalize();
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
@@ -42,7 +39,7 @@ private:// メンバ関数
 private:// メンバ変数
 	DirectXCommon* dxCommon_;
 
-	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+	PSOManager* psoManager_ = nullptr;
 
 	//ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};

@@ -1,20 +1,26 @@
 #pragma once
 
-#include"DirectXGame/engine/base/DirectXCommon.h"
-#include <cstdint> // 追加
 
+// C++
+#include <cstdint>
+#include <wrl.h>
+using namespace Microsoft::WRL;
+// DirectX
+#include <d3d12.h>
+
+#include"DirectXGame/engine/struct/Structs3D.h"
+
+class DXGIDevice;
+class Command;
 
 // UAV管理
 class UavManager {
 public:
-    // シングルトンインスタンス
-    static UavManager* GetInstance();
-
+    
     // 初期化
-    void Initialize(DirectXCommon* dxCommon);
+    void Initialize(DXGIDevice* DXGI, Command* Command);
 
-    void Finalize();
-
+    
     uint32_t Allocate();
 
     // デスクリプタハンドル計算
@@ -36,10 +42,6 @@ public:
     // 最大UAV数
     static const uint32_t kMaxUAVCount;
 private:
-    static UavManager* instance;
-
-    DirectXCommon* directXCommon_ = nullptr;
-
     // UAV用のデスクリプタサイズ
     uint32_t descriptorSize;
     // UAV用デスクリプタヒープ
@@ -47,4 +49,7 @@ private:
 
     // 次に使用するUAVインデックス
     uint32_t useIndex = 0;
+private:
+    DXGIDevice* DXGIDevice_;
+    Command* command_;
 };

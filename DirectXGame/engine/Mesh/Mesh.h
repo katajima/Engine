@@ -1,6 +1,5 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 
@@ -14,8 +13,7 @@ using namespace Microsoft::WRL;
 #include<dxgi1_6.h>
 #include "set"
 
-//#include "DirectXGame/engine/base/ImGuiManager.h"
-
+class ModelCommon;
 class Mesh
 {
 public:	
@@ -54,13 +52,13 @@ public:
 	}
 
 	// 通常用
-	void Initialize(DirectXCommon* dxcommon);
+	void Initialize(ModelCommon* modelCommon);
 	
 	// ライン用
-	void InitializeLine(DirectXCommon* dxcommon);
+	void InitializeLine(ModelCommon* modelCommon);
 
 	// スカイボックス用
-	void InitializeSkyBox(DirectXCommon* dxcommon);
+	void InitializeSkyBox(ModelCommon* modelCommon);
 
 	void UpdateVertexBuffer();
 
@@ -120,7 +118,7 @@ public:
 
 	MaterialData materialData_;
 private:
-	DirectXCommon* dxCommon_ = nullptr;
+	ModelCommon* modelCommon_ = nullptr;
 
 	// バッファリソース
 	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;

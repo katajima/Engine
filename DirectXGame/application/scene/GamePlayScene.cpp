@@ -3,42 +3,44 @@
 #include <corecrt_math_defines.h>
 #include <algorithm>
 
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
 #pragma region Initialize
 
 // 初期化
 void GamePlayScene::Initialize()
 {
+	input_ = GetInput();
+
 	// カメラ
 	InitializeCamera();
 	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 
 
 	player_ = std::make_unique<Player>();
-	player_->Initialize(Vector3(0, 2, -40), camera.get());
-
-
+	player_->Initialize(GetDxCommon(), GetEntity3DManager(),GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
+	
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize();
+	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 	followCamera_->SetTarget(&player_->GetObject3D());
 
+	player_->SetInput(input_);
 	player_->SetCamera(camera.get());
 	player_->SetFollowCamera(followCamera_.get());
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
-
 
 	for (int i = 0; i < 15; i++) {
 		auto enemy = std::make_unique<Enemy>();
 		Vector3 randPos = { float(rand() % 41 - 20),2,float(rand() % 40) };
-		enemy->Initialize(randPos, 100, camera.get());
+		enemy->Initialize(GetEntity3DManager(), GetEntity2DManager(), randPos, 100, camera.get());
 		enemy->SetPlayer(player_.get());
 		enemy->SetFollowCamera(followCamera_.get());
 		enemys_.push_back(std::move(enemy));
 	}
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize({ 10000,10000 });
+	ocean_->Initialize(GetEntity3DManager(),{ 10000,10000 });
 	ocean_->SetCamera(camera.get());
 	ocean_->transform.rotate.x = DegreesToRadians(90);
 	ocean_->transform.translate.y = -10;
@@ -47,19 +49,19 @@ void GamePlayScene::Initialize()
 	
 
 	tail = std::make_unique<Object3d>();
-	tail->Initialize();
+	tail->Initialize(GetEntity3DManager());
 	tail->SetModel("renga.gltf");
 	tail->SetCamera(camera.get());
 	tail->worldtransform_.scale_ = { 4,4,4 };
 
 	tail2 = std::make_unique<Object3d>();
-	tail2->Initialize();
+	tail2->Initialize(GetEntity3DManager());
 	tail2->SetModel("black.obj");
 	tail2->SetCamera(camera.get());
 	tail2->worldtransform_.scale_ = { 104,104,104 };
 	tail2->worldtransform_.translate_.y = -20;
 
-	sky.Initialize();
+	sky.Initialize(GetEntity3DManager());
 	sky.SetModel("skydome.obj");
 	sky.SetCamera(camera.get());
 	sky.worldtransform_.scale_ = { 100,100,100 };
@@ -74,7 +76,7 @@ void GamePlayScene::Initialize()
 
 	for (int i = 0; i < warePos.size(); i++) {
 		auto obj = std::make_unique<Object3d>();
-		obj->Initialize();
+		obj->Initialize(GetEntity3DManager());
 		obj->SetModel("warehouse.gltf");
 		obj->SetCamera(camera.get());
 		obj->worldtransform_.scale_ = { 2, 2, 2 };		
@@ -94,7 +96,7 @@ void GamePlayScene::Initialize()
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
-	collisionManager_->Initialize();
+	collisionManager_->Initialize(GetGlobalVariables());
 
 	InitializeResources();
 
@@ -102,7 +104,7 @@ void GamePlayScene::Initialize()
 
 	LoadLevelData();
 
-	LineCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 }
 
 
@@ -110,7 +112,8 @@ void GamePlayScene::Initialize()
 void GamePlayScene::InitializeCamera()
 {
 	camera = std::make_unique <Camera>();
-	camera->Initialize();
+	
+	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	//camera = Camera::GetInstance();
 	camera->transform_.rotate = { 0.36f,0,0 };
 	camera->transform_.translate = { 5,32.5f,-59.2f };
@@ -129,21 +132,22 @@ void GamePlayScene::InitializeCamera()
 #endif // _DEBUG]
 
 
-	cameraObj_.Initialize();
+	cameraObj_.Initialize(GetEntity3DManager());
 }
 
 // 各オブジェクトやスプライトなどの初期化
 void GamePlayScene::InitializeResources()
 {
 	// オブジェクト3D
-	Object3dCommon::GetInstance()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+	ParticleManager* particleManager = GetEntity3DManager()->GetEffectManager()->GetParticleManager();
 
 
 	for (int j = 0; j < 3; j++) {
 		for (int i = 0; i < 10; i++) {
 			numSprites[j][i] = std::make_unique<Sprite>();
 			std::string str = "resources/Texture/num/" + std::to_string(i) + ".png";
-			numSprites[j][i]->Initialize(str, false);
+			numSprites[j][i]->Initialize(GetEntity2DManager()->GetSpriteCommon(), str, false);
 			//numSprites[j][i]->SetPosition(Vector2{ float(50 * i), 100 });
 		}
 	}
@@ -152,22 +156,22 @@ void GamePlayScene::InitializeResources()
 	Vector2 scale{ 75,75 };
 
 	icon_B = std::make_unique<Sprite>();
-	icon_B->Initialize("resources/Texture/icon/B.png");
+	icon_B->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/B.png");
 	icon_B->SetPosition({ xpos,500 });
 	icon_B->SetSize(scale);
 
 	icon_Y = std::make_unique<Sprite>();
-	icon_Y->Initialize("resources/Texture/icon/Y.png");
+	icon_Y->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/Y.png");
 	icon_Y->SetPosition({ xpos,550 });
 	icon_Y->SetSize(scale);
 
 	icon_X = std::make_unique<Sprite>();
-	icon_X->Initialize("resources/Texture/icon/X.png");
+	icon_X->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/X.png");
 	icon_X->SetPosition({ xpos,600 });
 	icon_X->SetSize(scale);
 
 	icon_RT = std::make_unique<Sprite>();
-	icon_RT->Initialize("resources/Texture/icon/RB.png");
+	icon_RT->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/RB.png");
 	icon_RT->SetPosition({ xpos,450 });
 	icon_RT->SetSize(scale);
 
@@ -175,55 +179,54 @@ void GamePlayScene::InitializeResources()
 	xpos = 1120;
 
 	text_normal = std::make_unique<Sprite>();
-	text_normal->Initialize("resources/Texture/text/normalAttack.png");
+	text_normal->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/normalAttack.png");
 	text_normal->SetPosition({ xpos,520 });
 	text_normal->SetSize(scale);
 
 	text_jump = std::make_unique<Sprite>();
-	text_jump->Initialize("resources/Texture/text/JumpAttack.png");
+	text_jump->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/JumpAttack.png");
 	text_jump->SetPosition({ xpos,570 });
 	text_jump->SetSize(scale);
 
 	text_dash = std::make_unique<Sprite>();
-	text_dash->Initialize("resources/Texture/text/DashAttack.png");
+	text_dash->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/DashAttack.png");
 	text_dash->SetPosition({ xpos,620 });
 	text_dash->SetSize(scale);
 
 	text_special = std::make_unique<Sprite>();
-	text_special->Initialize("resources/Texture/text/special.png");
+	text_special->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/special.png");
 	text_special->SetPosition({ xpos,470 });
 	text_special->SetSize(scale);
 
 	scale = { 100 * 1.5f,33 * 1.5f };
 
 	text_hit = std::make_unique<Sprite>();
-	text_hit->Initialize("resources/Texture/text/Hit.png");
+	text_hit->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/Hit.png");
 	text_hit->SetPosition({ 1100,110 });
 	text_hit->SetSize(scale);
 
 	text_clera = std::make_unique<Sprite>();
-	text_clera->Initialize("resources/Texture/text/clear.png");
+	text_clera->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/clear.png");
 	text_clera->SetPosition({ 300,200 });
 	//text_clera->SetAnchorPoint({ 0.5f,0.5f });
 	text_clera->SetSize(2);
 	text_clera->SetColor({ 0,1,0,1 });
 	text_over = std::make_unique<Sprite>();
-	text_over->Initialize("resources/Texture/text/over.png");
+	text_over->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/over.png");
 	text_over->SetPosition({ 300,200 });
 	//text_over->SetAnchorPoint({ 0.5f,0.5f });
 	text_over->SetSize(2);
 	text_over->SetColor({ 1,0,0,1 });
 
 
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 	const char* gropName = "sprite";
 
 	// グループを追加する 
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
+	GetGlobalVariables()->CreateGroup(gropName);
 
 	for (int j = 0; j < 3; j++) {
 		std::string str = "posNum" + std::to_string(j);
-		globalVariables->AddItem(gropName, str, numpos[j]);
+		GetGlobalVariables()->AddItem(gropName, str, numpos[j]);
 	}
 
 	xpos = { 950 };
@@ -233,7 +236,7 @@ void GamePlayScene::InitializeResources()
 	numpos[0] = { xpos + (50 * 2),100 };
 
 	emit_ = std::make_unique<ParticleEmitter>();
-	emit_->Initialize("groundRtttight", "dustt");
+	emit_->Initialize(particleManager,"groundRtttight", "dustt");
 	emit_->GetFrequency() = 0.5f;
 	emit_->SetCount(200);
 	emit_->SetPos({ 200,40,200 });
@@ -244,11 +247,10 @@ void GamePlayScene::InitializeResources()
 	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 	emit_->SetRengeMinMax({-400,-100,-400}, { 400,100,400 });
 
-
-
+	
 
 	moveLimitEmitter_ = std::make_unique <ParticleEmitter>();
-	moveLimitEmitter_->Initialize("dash", "moveLimit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	moveLimitEmitter_->Initialize(particleManager,"dash", "moveLimit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
 	moveLimitEmitter_->GetFrequency() = 0.5f;
 	moveLimitEmitter_->SetCount(100);
 	moveLimitEmitter_->SetLifeTimeMinMax(0.5f, 0.5f);
@@ -282,7 +284,7 @@ void GamePlayScene::InitializeResources()
 	directional = std::make_shared<DirectionalLight>();
 	directional->directional = directionalLightData;
 
-	LightManager::GetInstance()->AddLight(directional);
+	GetEntity3DManager()->GetLightManager()->AddLight(directional);
 
 
 }
@@ -314,7 +316,7 @@ void GamePlayScene::LoadLevelData()
 	// レベルデータ格納用インスタンスを生成 
 	LevelData* levelData = new LevelData();
 	//std::map<std::string, std::unique_ptr <Model>> models;
-	const auto& models = ModelManager::GetInstance()->GetModel();
+	const auto& models = GetDxCommon()->GetModelManager()->GetModel();
 	//models = ModelManager::GetInstance()->GetModel();
 	// "objects"の全オブジェクトを走査 
 	for (nlohmann::json& object : deserialized["objects"]) {
@@ -354,7 +356,7 @@ void GamePlayScene::LoadLevelData()
 			// モデルを指定して3Dオブジェクトを生成 
 			Object3d* newObject = new Object3d();
 			//ModelManager::GetInstance()->LoadModel(objectData.fileName + ".obj");
-			newObject->Initialize();
+			newObject->Initialize(GetEntity3DManager());
 			newObject->SetModel(model);
 			newObject->SetCamera(camera.get());
 			// 座標 
@@ -371,16 +373,15 @@ void GamePlayScene::LoadLevelData()
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables()
 {
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 	const char* gropName = "sprite";
 
 
 	// グループを追加する 
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
+	GetGlobalVariables()->CreateGroup(gropName);
 	for (int j = 0; j < 3; j++) {
 		std::string str = "posNum" + std::to_string(j);
 
-		//numpos[j] = globalVariables->GetVector2Value(gropName, str);
+		//numpos[j] = GetGlobalVariables()->GetVector2Value(gropName, str);
 
 	}
 
@@ -425,9 +426,9 @@ void GamePlayScene::UpdateImGui()
 {
 
 #ifdef _DEBUG
-	if (Input::GetInstance()->IsTriggerKey(DIK_P)) {
+	if (input_->IsTriggerKey(DIK_P)) {
 		// シーン切り替え
-		SceneManager::GetInstance()->ChangeScene("TITLE");
+		GetSceneManager()->ChangeScene("TITLE");
 	}
 	Vector2 pos = player_->GetObject3D().GetScreenPosition();
 	ImGui::Begin("engine");
@@ -529,7 +530,7 @@ void GamePlayScene::Update()
 		camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
 
 
-		ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
+		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
 		// 必要に応じて行列を更新
 		//camera->UpdateMatrix();
 	}
@@ -537,7 +538,7 @@ void GamePlayScene::Update()
 #ifdef _DEBUG
 #endif // _DEBUG
 
-		ParticleManager::GetInstance()->SetCamera(camera.get());
+		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 		camera->UpdateMatrix();
 	}
 
@@ -642,9 +643,8 @@ void GamePlayScene::Draw3D()
 	player_->DrawP();
 
 	
-	ParticleManager::GetInstance()->GetInstance()->Draw();
-	//ParticleManager::GetInstance()->GetInstance()->DrawAABB();
-
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->Draw();
+	
 	
 	ocean_->Draw();
 
@@ -726,7 +726,7 @@ void GamePlayScene::Draw2D()
 	}
 
 	if (sceneCount >= 240) {
-		SceneManager::GetInstance()->ChangeScene("TITLE");
+		GetSceneManager()->ChangeScene("TITLE");
 	}
 
 

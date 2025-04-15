@@ -1,7 +1,6 @@
 #pragma once
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/Camera/CameraCommon.h"
 
 #include<wrl.h>
 #include<d3d12.h>
@@ -11,18 +10,19 @@ using namespace Microsoft::WRL;
 #include<d3d12.h>
 #include<dxgi1_6.h>
 
-class Object3d;
-
+class DirectXCommon;
+class Input;
+class CameraCommon;
 // カメラ
 class Camera
 {
 private:
 
 public: // メンバ関数
-	static Camera& GetInstance();
+
 	Camera();
-	//
-	void Initialize();
+
+	void Initialize(CameraCommon* cameraCommon);
 
 	void GetCommandList(int index);
 
@@ -78,6 +78,8 @@ public:
 	DataGPU* data;
 private:
 	DirectXCommon* dxCommon_;
+
+	Input* input_;
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> resource;
 

@@ -1,15 +1,5 @@
 #include "RenderingCommon.h"
-
-RenderingCommon* RenderingCommon::instance = nullptr;
-
-
-RenderingCommon* RenderingCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new RenderingCommon;
-	}
-	return instance;
-}
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -17,7 +7,7 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 
 	CreateGraphicsPipeline();
 
-	vertexResource = dxCommon_->CreateBufferResource(sizeof(VertexData) * 4);
+	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * 4);
 
 	
 	//リソースの先頭のアドレスを作成する
@@ -30,13 +20,7 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	
 }
 
-void RenderingCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
-
-void RenderingCommon::DrawCommonSetting()
+void RenderingCommon::DrawCommonSetting(int index)
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -46,13 +30,9 @@ void RenderingCommon::DrawCommonSetting()
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// ヒープをコマンドリストに設定 (CBV_SRV_UAV ヒープ)
-	ID3D12DescriptorHeap* descriptorHeaps[] = { TextureManager::GetInstance()->GetSrvManager()->GetDescriptorHeap()};
-	dxCommon_->GetCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-	TextureManager::GetInstance()->GetSrvManager()->SetGraphicsRootdescriptorTable(1, dxCommon_->index);
-
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
+
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
 	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }

@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/Enemy/Enemy.h"
 #include "Player.h"
 
-void PlayerBullet::Initialize(Vector3 position, Camera* camera)
+void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
@@ -10,7 +10,7 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 	//モデル
 
 	// プレイヤー
-	object_.Initialize();
+	object_.Initialize(entity3DManager);
 	object_.SetCamera(camera);
 	object_.SetModel("player_bullet.obj");
 	//object_.SetModel("AnimatedCube.gltf");
@@ -37,18 +37,11 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 	randPosSky.y = max_y;
 
 	
-	
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize("resources/Texture/Image.png", 0.1f,{1.00f,1.00f,1.00f,0.9f});
-	trailEffect_->SetCamera(camera);
-	
-
-
-	objectStr_.Initialize();
+	objectStr_.Initialize(entity3DManager);
 	objectStr_.worldtransform_.parent_ = &object_.worldtransform_;
 	objectStr_.worldtransform_.translate_.y = object_.GetMesh(0)->GetMin().y * 1;
 
-	objectEnd_.Initialize();
+	objectEnd_.Initialize(entity3DManager);
 	objectEnd_.worldtransform_.parent_ = &object_.worldtransform_;
 	objectEnd_.worldtransform_.translate_.y = object_.GetMesh(0)->GetMax().y * 1;
 
@@ -61,11 +54,9 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 
 
 
-	//ParticleEmitter::EmitSpawnShapeType::kSegmentLine
-
-
+	
 	ｍSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	ｍSmokeEmitter_->Initialize("emitterSmoke", "smoke", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
+	ｍSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(),"emitterSmoke", "smoke", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
 	ｍSmokeEmitter_->GetFrequency() = 0.01f;
 	ｍSmokeEmitter_->SetCount(5);
 	ｍSmokeEmitter_->SetLifeTimeMinMax(0.5f, 1.0f);
@@ -84,7 +75,7 @@ void PlayerBullet::Initialize(Vector3 position, Camera* camera)
 
 
 	mExplosionSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	mExplosionSmokeEmitter_->Initialize("emitterSmoke", "explosionSmoke", ParticleEmitter::EmitSpawnShapeType::kAABB);
+	mExplosionSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(),"emitterSmoke", "explosionSmoke", ParticleEmitter::EmitSpawnShapeType::kAABB);
 	mExplosionSmokeEmitter_->SetParent(object_.worldtransform_);
 	mExplosionSmokeEmitter_->GetFrequency() = 0.00f;
 	mExplosionSmokeEmitter_->SetCount(50);
@@ -182,7 +173,7 @@ void PlayerBullet::Update()
 	
 	if (countTrail >= 5) {
 		bool flag_ =true ;
-		trailEffect_->Update(flag_, objectStr_, objectEnd_);
+		//trailEffect_->Update(flag_, objectStr_, objectEnd_);
 	}
 
 	
@@ -215,7 +206,7 @@ void PlayerBullet::Draw()
 
 void PlayerBullet::DrawP()
 {
-	trailEffect_->Draw();
+	//trailEffect_->Draw();
 }
 
 void PlayerBullet::OnCollision(Collider* other)

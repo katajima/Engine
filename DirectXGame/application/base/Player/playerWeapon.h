@@ -12,7 +12,7 @@
 
 
 class Player;
-
+class Entity3DManager;
 class playerWeapon : public Collider
 {
 public:
@@ -20,7 +20,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Camera* camera);
+	void Initialize(Entity3DManager* entity3DManager,Camera* camera);
 
 	///< summary>
 	/// 更新

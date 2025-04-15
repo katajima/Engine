@@ -1,10 +1,13 @@
 #pragma once
+
+// engine
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Mesh/Mesh.h"
+#include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/Material/Material.h"
 
+// C++
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -16,6 +19,7 @@
 #include <iostream>
 #include <memory>
 
+// assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -23,12 +27,20 @@
 
 
 class ModelCommon;
+class DirectXCommon;
 
-
-
+class Material;
 class Model
 {
 public:
+	struct SkinningSRVUAV {
+		uint32_t wellSrvIndex; //Well
+		uint32_t inputVerticesIndex; // 入力頂点
+		uint32_t influencesIndex; // 入力インフルエンス
+		uint32_t outputVerticesUavIndex; // 計算後の頂点データ
+	};
+
+
 	//モデルデータ
 	struct ModelData
 	{
@@ -37,10 +49,10 @@ public:
 		bool isNormalmap;
 		Node rootNode;
 		bool isAssimp;
-		uint32_t skinningSrvindex;
+		SkinningSRVUAV skinning;
 		std::vector <std::unique_ptr<Mesh>> mesh;
 		std::vector<uint32_t> cachedLineIndices_;
-		std::vector < std::unique_ptr<Material>> material;
+		std::vector <std::unique_ptr<Material>> material;
 		std::string name;
 	};
 	
@@ -55,9 +67,9 @@ public:
 
 
 
-	void Initialize(ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "", const Vector2 texScale = {1,1});
+	void Initialize(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "", const Vector2 texScale = {1,1});
 
-	void InitializeAnime(ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "");
+	void InitializeAnime(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "");
 
 	
 	
@@ -67,12 +79,10 @@ public:
 
 	ModelData& GetModelData(){ return modelData; }
 
-	void MoveVertices(const Vector3& offset);
-
+	
 	static Node ReadNode(aiNode* node);
 
-	static void MeshLine(std::string name,std::vector<uint32_t> index,uint32_t lineNum = {});
-
+	
 private:
 
 	ModelData LoadMesh(const aiScene* _scene);
@@ -87,28 +97,22 @@ public:
 	ModelData modelData;
 private:
 	ModelCommon* modelCommon_ = nullptr;
-	
-	
+	SrvManager* srvManager_ = nullptr;
+	DirectXCommon* dxCommon_;
 	
 	bool useNormalMap = false;
 	bool useSpecularMap = false;
-public:
-	//マテリアルデータを読み込む
-	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
-
-	//モデルデータ読み込み
-	static ModelData LoadOdjFile(const std::string& directoryPath, const std::string& filename);
+public:	
+	ModelData LoadOdjFileAssimp(const std::string& directoryPath, const std::string& filename, const Vector2 texScale = {1,1});
 	
-	static ModelData LoadOdjFileAssimp(const std::string& directoryPath, const std::string& filename, const Vector2 texScale = {1,1});
-	
-	static ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
+	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 
 	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
 
 	
 	
 	//
-	static SkinCluster CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData);
+	SkinCluster CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData);
 public:
 
 };

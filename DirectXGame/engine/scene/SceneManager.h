@@ -2,15 +2,15 @@
 #include"BaseScene.h"
 #include"AbstractSceneFactory.h"
 
+
+class Input;
+class DirectXCommon;
+class Entity3DManager;
+class Entity2DManager;
+class GlobalVariables;
 class SceneManager
 {
 public:
-	static SceneManager* instance;
-
-	static SceneManager* GetInstance();
-	
-	void Finalize();
-
 	void Update();
 
 	void Draw2D();
@@ -22,6 +22,24 @@ public:
 	~SceneManager();
 
 	void SetSceneFactory(AbstractSceneFactory* sceneFactory) { sceneFactory_ = sceneFactory; };
+
+	void SetDirectXCommon(DirectXCommon* directXCommon) { directXCommon_ = directXCommon; }
+
+	void SetEntity3DManager(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
+
+	void SetEntity2DManager(Entity2DManager* entity2DManager) { entity2DManager_ = entity2DManager; }
+
+	void SetGlobalVariables(GlobalVariables* globalVariables) { globalVariables_ = globalVariables;}
+	
+	DirectXCommon* GetDirectXCommon() { return directXCommon_; };
+
+	Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
+
+	GlobalVariables* GetGlobalVariables() { return globalVariables_; }
+
+	void SetInput(Input* input) { input_ = input; }
+
+	Input* GetInput() { return input_; }
 
 	/// <summary>
 	/// 次のシーン予約
@@ -44,5 +62,10 @@ private:
 	std::string sceneName = "";
 	// シーンファクトリー (借りてくる)
 	AbstractSceneFactory* sceneFactory_ = nullptr;
+	DirectXCommon* directXCommon_;
+	Entity3DManager* entity3DManager_;
+	Entity2DManager* entity2DManager_;
+	Input* input_;
+	GlobalVariables* globalVariables_;
 };
 

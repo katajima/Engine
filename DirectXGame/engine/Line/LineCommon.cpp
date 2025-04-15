@@ -4,39 +4,20 @@
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 
-
-LineCommon* LineCommon::instance = nullptr;
-
-
-LineCommon* LineCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new LineCommon;
-	}
-	return instance;
-}
-
-void LineCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
-
 void LineCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
-
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	
 	CreateGraphicsPipeline();
 
 	
 
 
 	// マテリアル
-	materialResource = dxCommon_->CreateBufferResource(sizeof(Material));
+	materialResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Material));
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
@@ -45,7 +26,7 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 
 
 
-	viewResource = dxCommon_->CreateBufferResource(sizeof(Matrix4x4));
+	viewResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Matrix4x4));
 	viewResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraWVP));
 
 	*cameraWVP = MakeIdentity4x4();
@@ -56,7 +37,8 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->indices.push_back({ 0 });
 	mesh_->indices.push_back({ 1 });
-	mesh_->InitializeLine(dxCommon_);
+
+	mesh_->InitializeLine(dxCommon_->GetModelManager()->GetModelCommon());
 
 	mesh_->verticesline.clear();
 	mesh_->indices.clear();

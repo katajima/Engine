@@ -16,6 +16,7 @@ enum class MapCellType : uint8_t {
     // 必要に応じて拡張
 };
 
+class LineCommon;
 class MapChip {
 public:
     MapChip(int width, int height, float cellSize);
@@ -42,7 +43,7 @@ public:
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
 
-    void DrawMapChip(float yPos) const;
+    void DrawMapChip(LineCommon* line,float yPos) const;
 
     // セルが障害物かどうかを返す
     bool IsBlocked(int x, int z) const {

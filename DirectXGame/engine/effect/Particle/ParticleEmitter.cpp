@@ -1,27 +1,14 @@
-#include "ParticleEmitter.h"
 
+// engine
+#include "ParticleEmitter.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-// count: パーティクルの最大生成数を指定する値。frequency: パーティクルの発射間隔を秒単位で指定する値。frequencyTime: 現在の発射間隔の経過時間を追跡する値。
-//ParticleEmitter::ParticleEmitter(std::string name, Transform transform, uint32_t count, float frequency, float frequencyTime)
-//{
-//	// name: パーティクルエミッターの名前を示す文字列。
-//	// transform: パーティクルエミッターの位置、回転、スケールなどを表す構造体。	
-//	// count: パーティクルの最大生成数を指定する値。
-//	// frequency: パーティクルの発射間隔を秒単位で指定する値。
-//	// frequencyTime: 現在の発射間隔の経過時間を追跡する値。
-//
-//
-//
-//	//name_ = name;
-//	//count_ = count;
-//	//frequency_ = frequency;
-//	//frequencyTime_ = frequencyTime;
-//	//transform_ = transform;
-//}
 
-void ParticleEmitter::Initialize(std::string emitName, std::string particleName, EmitSpawnShapeType spawnType)
+
+void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitSpawnShapeType spawnType)
 {
+	particleManager_ = particleManager;
+
 	emitter_.controlPoints.clear(); // 初期化
 
 	spawnShapeType_ = spawnType;
@@ -67,7 +54,7 @@ void ParticleEmitter::Initialize(std::string emitName, std::string particleName,
 
 void ParticleEmitter::Update()
 {
-	ParticleManager::ParticleGroup& particleGroup = ParticleManager::GetInstance()->GetParticleGroups(particleName_);
+	ParticleManager::ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 
 #ifdef _DEBUG
@@ -186,28 +173,30 @@ void ParticleEmitter::Update()
 void ParticleEmitter::Emit()
 {
 	if (isEmit) {
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).usebillboard = usebillboard; // ビルボード
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isAlpha = isAlpha; // 透明度
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isGravity = isGravity; // 重力
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isLifeTimeScale_ = isLifeTimeScale_; // 重力
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isRotateVelocity = isRotateVelocity; // 回転速度
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isBounce = isBounce; // 回転速度
+		particleManager_->GetParticleGroups(particleName_).usebillboard = usebillboard; // ビルボード
+		particleManager_->GetParticleGroups(particleName_).isAlpha = isAlpha; // 透明度
+		particleManager_->GetParticleGroups(particleName_).isGravity = isGravity; // 重力
+		particleManager_->GetParticleGroups(particleName_).isLifeTimeScale_ = isLifeTimeScale_; // 重力
+		particleManager_->GetParticleGroups(particleName_).isRotateVelocity = isRotateVelocity; // 回転速度
+		particleManager_->GetParticleGroups(particleName_).isBounce = isBounce; // 回転速度
 
 		if (emitType_ == ParticleManager::EmitType::kRandom) {
-			ParticleManager::GetInstance()->GetParticleGroups(particleName_).emiter = emitter_;
+			particleManager_->GetParticleGroups(particleName_).emiter = emitter_;
 			
-
-			if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kAABB);
+			if (spawnShapeType_ == EmitSpawnShapeType::kPoint) {
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kPoint);
+			}
+			else if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kAABB);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kSegmentLine) {
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSegmentLine);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSegmentLine);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kCornerLine) {
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kCornerLine);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kCornerLine);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kSpline){
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSpline);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSpline);
 			}
 		}
 	}
@@ -232,20 +221,20 @@ void ParticleEmitter::DrawEmitterLine()
 	switch (spawnShapeType_)
 	{
 	case ParticleEmitter::EmitSpawnShapeType::kAABB:
-		LineCommon::GetInstance()->AddLineAABB({ emitter_.renge.min,emitter_.renge.max }, emitter_.worldtransform.translate_);
+		//LineCommon::GetInstance()->AddLineAABB({ emitter_.renge.min,emitter_.renge.max }, emitter_.worldtransform.translate_);
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kOBB:
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kSphere:
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kSegmentLine:
-		LineCommon::GetInstance()->AddLine(emitter_.renge.min + emitter_.worldtransform.translate_, emitter_.renge.max + emitter_.worldtransform.translate_, { 1,1,1,1 });
+		//LineCommon::GetInstance()->AddLine(emitter_.renge.min + emitter_.worldtransform.translate_, emitter_.renge.max + emitter_.worldtransform.translate_, { 1,1,1,1 });
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kCornerLine:
-		LineCommon::GetInstance()->AddLineCorner(emitter_.corner, emitter_.worldtransform);
+		//LineCommon::GetInstance()->AddLineCorner(emitter_.corner, emitter_.worldtransform);
 		break;
 	case ParticleEmitter::EmitSpawnShapeType::kSpline:
-		LineCommon::GetInstance()->AddSpline(emitter_.controlPoints,emitter_.worldtransform);
+		//LineCommon::GetInstance()->AddSpline(emitter_.controlPoints,emitter_.worldtransform);
 		break;
 	default:
 		break;

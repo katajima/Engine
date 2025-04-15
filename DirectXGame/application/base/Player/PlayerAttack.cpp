@@ -92,12 +92,12 @@ void Player::Attack()
 // 攻撃キー入力
 void Player::AttackKey()
 {
-	if (Input::GetInstance()->IsControllerConnected()) {
-		workAttack.key.IsNormalAttack = Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-		workAttack.key.IsDashAttack = Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
-		workAttack.key.IsJampAttack = Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+	if (input_->IsControllerConnected()) {
+		workAttack.key.IsNormalAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+		workAttack.key.IsDashAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
+		workAttack.key.IsJampAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
 		if (specialAttack.isSpecial) {
-			workAttack.key.IsSpecialAttack = Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 		}
 
 
@@ -109,7 +109,7 @@ void Player::AttackKey()
 
 	}
 	else {
-		workAttack.key.IsNormalAttack = Input::GetInstance()->IsTriggerKey(DIK_SPACE);
+		workAttack.key.IsNormalAttack = input_->IsTriggerKey(DIK_SPACE);
 
 		if (workAttack.key.IsAttack = workAttack.key.IsNormalAttack ||
 			workAttack.key.IsDashAttack || workAttack.key.IsJampAttack) {

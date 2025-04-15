@@ -1,17 +1,25 @@
 #pragma once
 
-#include"DirectXGame/engine/base/DirectXCommon.h"
+// C++
+#include <cstdint>
+#include <wrl.h>
+using namespace Microsoft::WRL;
+// DirectX
+#include <d3d12.h>
 
+
+#include"DirectXGame/engine/struct/Structs3D.h"
+
+#include"externals/DirectXTex/DirectXTex.h"
+#include"externals/DirectXTex/d3dx12.h"
+
+class DXGIDevice;
+class Command;
 // SRV管理
 class SrvManager {
 public:
-	// シングルトンインスタンス
-	static SrvManager* GetInstance();
-
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
-
-	void Finalize();
+	void Initialize(DXGIDevice* DXGI, Command* Command);
 
 	uint32_t Allocate();
 
@@ -27,6 +35,12 @@ public:
 	// SRV生成(Structured Buffer用)
 	void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
 
+	// UAV生成関数
+	// UAV生成(Structured Buffer用)
+	void CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
+	// UAV生成(テクスチャ用)
+	void CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResource, DXGI_FORMAT format);
+
 	void PreDraw();
 
 	// SRVセットコマンド
@@ -38,11 +52,7 @@ public:
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
 private:
-	static SrvManager* instance;
-
-	DirectXCommon* directXCommon_ = nullptr;
-
-
+	
 	// SRV用のデスクリプタサイズ
 	uint32_t descriptorSize;
 	// SRV用デスクリプタヒープ
@@ -51,4 +61,7 @@ private:
 	// 次に使用するSRVインデックス
 	uint32_t useIndex = 0;
 
+private:
+	DXGIDevice* DXGIDevice_;
+	Command* command_;
 };

@@ -1,22 +1,27 @@
 #include "TrailEffect.h"
 #include "DirectXGame/engine/3d/Object/Object3d.h"
-
+#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void TrailEffect::Initialize(const std::string& tex,float maxtime  ,const Color color)
+void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& tex,float maxtime  ,const Color color)
 {
+	effectManager_ = effectManager;
+
 	mesh = std::make_unique<Mesh>();
 
 	mesh->vertices.push_back({ 0,0,0 });
 	mesh->indices.push_back(1);
-	mesh->Initialize(TrailEffectManager::GetInstance()->GetDxCommon());
+
+
+
+	mesh->Initialize(effectManager_->GetDxCommon()->GetModelManager()->GetModelCommon());
 
 	mesh->indices.clear();
 	mesh->vertices.clear();
 	mesh->maxTime = maxtime;
 
 	material = std::make_unique<Material>();
-	material->Initialize(TrailEffectManager::GetInstance()->GetDxCommon());
+	material->Initialize(effectManager_->GetDxCommon());
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
 	material->tex_.diffuseFilePath = "resources/Texture/aa3.png";
 	material->tex_.diffuseFilePath = "resources/Texture/uvChecker.png";
@@ -26,25 +31,17 @@ void TrailEffect::Initialize(const std::string& tex,float maxtime  ,const Color 
 	material->color = color;
 	transfomation = std::make_unique<Transfomation>();
 
-	transfomation->Initialize(TrailEffectManager::GetInstance()->GetDxCommon());
+	transfomation->Initialize(effectManager_->GetDxCommon());
 
 	parentTransform_.Identity();
 
-	//parent_->mat_.Identity();
 
-	//transform変数を作る
-	//transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	mat_.Identity();
 }
 
 void TrailEffect::Update(bool& flag, const Object3d& strM, const Object3d& endM)
 {
 	material->GPUData();
-
-	// 頂点バッファの更新
-	//mesh->UpdateVertexBuffer();
-	//mesh->UpdateIndexBuffer();
-
 
 	Vector3 str = strM.GetWorldPosition();
 	Vector3 end = endM.GetWorldPosition();
@@ -68,25 +65,11 @@ void TrailEffect::Update(bool& flag, const Object3d& strM, const Object3d& endM)
 		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f} ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 右上
 		mesh->vertices.push_back({ .position = {rightBottom.x, rightBottom.y, rightBottom.z, 1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
 
-
-		/*int index = int(mesh->indices.size());
-
-		mesh->indices.push_back(0 + index);
-		mesh->indices.push_back(1 + index);
-		mesh->indices.push_back(2 + index);
-		mesh->indices.push_back(2 + index);
-		mesh->indices.push_back(1 + index);
-		mesh->indices.push_back(3 + index);*/
-
-		
-
 		// タイマーの初期化
 		for (int i = 0; i < 6; ++i) {
 			mesh->verticesTimer.push_back({ 0.0f });
 		}
-		/*for (int i = 0; i < 6; ++i) {
-			mesh->indicesTimer.push_back({ 0.0f });
-		}*/
+
 	}
 
 
@@ -94,26 +77,20 @@ void TrailEffect::Update(bool& flag, const Object3d& strM, const Object3d& endM)
 	for (size_t i = 0; i < mesh->verticesTimer.size(); ++i) {
 		mesh->verticesTimer[i] += MyGame::GameTime(); // 例としてフレーム時間を加算 (60FPSの想定)
 	}
-	//for (size_t i = 0; i < mesh->indicesTimer.size(); ++i) {
-	//	mesh->indicesTimer[i] += 0.016f; // 例としてフレーム時間を加算 (60FPSの想定)
-	//}
+
 
 	// 時間が経過した頂点を削除
 	while (!mesh->verticesTimer.empty() && mesh->verticesTimer.front() >= mesh->maxTime) {
 		mesh->vertices.erase(mesh->vertices.begin());
 		mesh->verticesTimer.erase(mesh->verticesTimer.begin());
 	}
-	/*while (!mesh->indicesTimer.empty() && mesh->indicesTimer.front() >= mesh->maxTime) {
-		mesh->indices.erase(mesh->indices.begin());
-		mesh->indicesTimer.erase(mesh->indicesTimer.begin());
-	}*/
+
 
 	
 
 	// 頂点バッファビューを更新
 	mesh->UpdateVertexBuffer();
-	//mesh->GenerateIndices2();
-	//mesh->UpdateIndexBuffer();
+
 
 
 
@@ -128,8 +105,9 @@ void TrailEffect::Draw()
 {
 	if (mesh->vertices.size() != 0) {
 		
-		TrailEffectManager::GetInstance()->DrawCommonSetting();
 
+		effectManager_->GetTrailEffectCommon()->DrawCommonSetting();
+		
 		transfomation->GetCommandList(1);
 
 		material->GetCommandListMaterial(0);
@@ -140,9 +118,8 @@ void TrailEffect::Draw()
 		mesh->GetCommandList();
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-		TrailEffectManager::GetInstance()->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh->vertices.size()), 1, 0, 0);
+		effectManager_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh->vertices.size()), 1, 0, 0);
 
-		//TrailEffect::GetInstance()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 	}
 }
 

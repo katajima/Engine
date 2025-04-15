@@ -1,35 +1,36 @@
 #pragma once
+
+// DirectX
+#include<d3d12.h>
+#include<dxgi1_6.h>
+#include<dxcapi.h>
+
+// DirectXTex
+#include"externals/DirectXTex/DirectXTex.h"
+#include"externals/DirectXTex/d3dx12.h"
+
+// C++
 #include <windows.h>
 #include<cstdint>
 #include<string>
 #include<fstream>
 #include<sstream>
 #include<wrl.h>
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<dxcapi.h>
-#include<memory>
 using namespace Microsoft::WRL;
+#include<memory>
 #include<vector>
-#include"externals/DirectXTex/DirectXTex.h"
-#include"externals/DirectXTex/d3dx12.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/struct/Material.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
-
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include<random>
 #include<numbers>
-#include "DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include "DirectXGame/engine/3d/Model/Model.h"
-#include"DirectXGame/engine/Line/LineCommon.h"
-#include "DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Primitive/Primitive.h"
-#include "../../3d/Object/Object3d.h"
-#include"DirectXGame/engine/PSO/PSOManager.h"
 
+
+
+// engine
+#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
+#include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/3d/Model/Model.h"
+#include"DirectXGame/engine/PSO/PSOManager.h"
+#include"DirectXGame/engine/WorldTransform/WorldTransform.h"
 
 struct ParticleForGPU
 {
@@ -54,9 +55,10 @@ struct ModelData
 	Node rootNode;
 };
 
-
-
-
+class Material;
+class Primitive;
+class DirectXCommon;
+class SrvManager;
 class ParticleManager
 {
 public:
@@ -65,6 +67,7 @@ public:
 	// 
 	enum class SpawnType // 出現形状
 	{
+		kPoint,     // Point
 		kAABB,		// AABB
 		kOBB,		// OBB
 		kSphere,	// Sphere
@@ -169,10 +172,10 @@ public:
 #pragma endregion // 構造体
 
 public:
-
-
-	// シングルトンインスタンス
-	static ParticleManager* GetInstance();
+	ParticleManager() = default;
+	~ParticleManager() = default;
+	ParticleManager(ParticleManager&) = delete;
+	ParticleManager& operator=(ParticleManager&) = delete;
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
@@ -180,8 +183,7 @@ public:
 	void Update();
 	// 描画
 	void Draw();
-	// 終了
-	void Finalize();
+
 	// 描画準備
 	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
@@ -229,6 +231,8 @@ private:
 	void BlendMuliply();
 
 private: // エミッタ種類
+	void PointEmit(ParticleGroup& particleGroup); // Point
+
 	void AABBEmit(ParticleGroup& particleGroup); // AABB
 
 	void LineEmit(ParticleGroup& particleGroup); // ライン
@@ -240,11 +244,7 @@ private: // エミッタ種類
 	void SphereEmit(ParticleGroup& particleGroup); // 球状
 
 private:
-	static ParticleManager* instance;
-	ParticleManager() = default;
-	~ParticleManager() = default;
-	ParticleManager(ParticleManager&) = delete;
-	ParticleManager& operator=(ParticleManager&) = delete;
+
 
 	DirectXCommon* dxCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;

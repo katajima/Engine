@@ -1,30 +1,17 @@
 #include"SpriteCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-SpriteCommon* SpriteCommon::instance = nullptr;
-
-SpriteCommon* SpriteCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new SpriteCommon;
-	}
-	return instance;
-}
 
 void SpriteCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
-	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-
+	psoManager_ = dxCommon_->GetPSOManager();
+	
 	CreateGraphicsPipeline();
 }
 
-void SpriteCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
+
 
 void SpriteCommon::DrawCommonSetting(PSOType type)
 {

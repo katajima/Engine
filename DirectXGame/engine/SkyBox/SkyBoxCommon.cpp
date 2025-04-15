@@ -1,28 +1,18 @@
 #include "SkyBoxCommon.h"
 
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
-#include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/base/TextureManager.h"
-
-SkyBoxCommon* SkyBoxCommon::instance = nullptr;
-
-SkyBoxCommon* SkyBoxCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new SkyBoxCommon;
-	}
-	return instance;
-}
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-	
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+
 	CreateGraphicsPipeline();
 
 
@@ -80,7 +70,7 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 		vertexOffset += 4; // 次の面に移動
 	}
 
-	mesh_->InitializeSkyBox(dxCommon_);
+	mesh_->InitializeSkyBox(dxCommon_->GetModelManager()->GetModelCommon());
 
 
 	worldtransform_.Initialize();
@@ -93,12 +83,6 @@ void SkyBoxCommon::Update()
 
 	transfomation->Update(camara_,worldtransform_.worldMat_);
 
-}
-
-void SkyBoxCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void SkyBoxCommon::DrawCommonSetting()

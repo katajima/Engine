@@ -1,26 +1,32 @@
 #include "Player.h"
 #include"DirectXGame/application/base/Enemy/Enemy.h"
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
-
+#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "assert.h"
 
-void Player::Initialize(Vector3 position, Camera* camera)
+void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
 
-	camera_ = camera;
 
+	entity3DManager_ = entity3DManager;
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+
+	camera_ = camera;
+	dxCommon_ = dxcommon;
 	specialAttack.max = 40;
 
 	// プレイヤー
-	objectBase_.Initialize();
+	objectBase_.Initialize(entity3DManager);
 	objectBase_.SetCamera(camera_);
 	objectBase_.worldtransform_.translate_ = position;
 	objectBase_.Update();
 
 	// レティクル
-	objectReticle_.Initialize();
+	objectReticle_.Initialize(entity3DManager);
 	objectReticle_.SetCamera(camera_);
 	objectReticle_.SetModel("enemy.obj");
 	objectReticle_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -30,7 +36,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	//assert(objectBase_ != nullptr);
 
 	// 体
-	objectBody_.Initialize();
+	objectBody_.Initialize(entity3DManager);
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -39,7 +45,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 	// 左ミサイル発射口
-	injectionLeftObj_.Initialize();
+	injectionLeftObj_.Initialize(entity3DManager);
 	injectionLeftObj_.SetCamera(camera_);
 	injectionLeftObj_.SetModel("AnimatedCube.gltf");
 	injectionLeftObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -48,7 +54,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	injectionLeftObj_.worldtransform_.scale_= { 0.75f,1.25f,1.0f };
 
 	// 右ミサイル発射口
-	injectionRightObj_.Initialize();
+	injectionRightObj_.Initialize(entity3DManager);
 	injectionRightObj_.SetCamera(camera_);
 	injectionRightObj_.SetModel("AnimatedCube.gltf");
 	injectionRightObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
@@ -60,7 +66,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 	// 影
-	objectSha_.Initialize();
+	objectSha_.Initialize(entity3DManager);
 	objectSha_.SetCamera(camera_);
 	objectSha_.SetModel("plane.obj");
 	objectSha_.model->modelData.material[0]->tex_.diffuseFilePath = "resources/Texture/aa.png";
@@ -71,48 +77,38 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 	weapon_ = std::make_unique<playerWeapon>();
-	weapon_->Initialize(camera);
+	weapon_->Initialize(entity3DManager,camera);
 	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_.worldtransform_;
 	weapon_->GetObject3D().worldtransform_.translate_ = { 0,0.5f,0.5f };
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
 	
 
-	weaponStr.Initialize();
+	weaponStr.Initialize(entity3DManager);
 	weaponStr.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
 	weaponStr.worldtransform_.translate_ = {0,weapon_->GetObject3D().GetMesh(0)->GetMax().y ,0};
 		
 
-	weaponEnd.Initialize();
+	weaponEnd.Initialize(entity3DManager);
 	weaponEnd.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
 	weaponEnd.worldtransform_.translate_ = { 0,weapon_->GetObject3D().GetMesh(0)->GetMin().y ,0 };
 	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
 
-	//particleManager_ = ParticleManager::GetInstance();
-	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", ModelManager::GetInstance()->FindModel("plane.obj"));
-	
-	
-	
-
-	
-
-
 
 	HpBer_ = std::make_unique<Sprite>();
-	HpBer_->Initialize("resources/Texture/Image.png");
+	HpBer_->Initialize(entity2DManager->GetSpriteCommon() ,"resources/Texture/Image.png");
 	HpBer_->SetSize({ 50,-float(hp) });
 	HpBer_->SetColor({ 0,1,0,1 });
 	HpBer_->SetPosition({ 100,650 });
 
 	SpecailBer_ = std::make_unique<Sprite>();
-	SpecailBer_->Initialize("resources/Texture/Image.png");
+	SpecailBer_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/Image.png");
 	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) });
 	SpecailBer_->SetColor({ 0,0,1,1 });
 	SpecailBer_->SetPosition({ 40,650 });
 
 	textMax_ = std::make_unique<Sprite>();
-	textMax_->Initialize("resources/Texture/text/max.png");
-	//textMax_->SetSize({ 50,-float(specialAttack.specialGauge) });
+	textMax_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/text/max.png");
 	textMax_->SetColor({ 1,0,0,1 });
 	textMax_->SetPosition({ 45,350 });
 	textMax_->SetRotation(DegreesToRadians(-30));
@@ -120,7 +116,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 	textMax_->SetSize(0.25f);
 
 	textRB_ = std::make_unique<Sprite>();
-	textRB_->Initialize("resources/Texture/icon/RB.png");
+	textRB_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/icon/RB.png");
 	textRB_->SetColor({ 1,1,1,1 });
 	textRB_->SetPosition({ 1280 /2,550 });
 	textRB_->SetAnchorPoint({0.5f,0.5f});
@@ -128,8 +124,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 	trailEffect_ = std::make_unique<TrailEffect>();
-	"resources/Texture/uvChecker.png";
-	trailEffect_->Initialize("resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
+	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), "resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
 	trailEffect_->SetCamera(camera);
 	trailEffect_->SetObject(&weapon_->GetObject3D());
 	
@@ -138,7 +133,7 @@ void Player::Initialize(Vector3 position, Camera* camera)
 
 
 	dashEmitter_ = std::make_unique <ParticleEmitter>();
-	dashEmitter_->Initialize("dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	dashEmitter_->Initialize(particleManager,"dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
 	dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
 	dashEmitter_->GetFrequency() = 0.05f;
 	dashEmitter_->SetCount(5);
@@ -389,11 +384,11 @@ void Player::Move()
 
 
 
-	if (Input::GetInstance()->IsControllerConnected()) {
+	if (input_->IsControllerConnected()) {
 
 
-		velocity_.x = Input::GetInstance()->GetGamePadLeftStick().x;
-		velocity_.z = Input::GetInstance()->GetGamePadLeftStick().y;
+		velocity_.x = input_->GetGamePadLeftStick().x;
+		velocity_.z = input_->GetGamePadLeftStick().y;
 
 
 		if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
@@ -429,18 +424,18 @@ void Player::Move()
 	else {
 
 
-		if (Input::GetInstance()->IsPushKey(DIK_W)) {
+		if (input_->IsPushKey(DIK_W)) {
 			velocity_.z += 0.3f;
 		}
-		if (Input::GetInstance()->IsPushKey(DIK_S)) {
+		if (input_->IsPushKey(DIK_S)) {
 			velocity_.z -= 0.3f;
 
 		}
-		if (Input::GetInstance()->IsPushKey(DIK_A)) {
+		if (input_->IsPushKey(DIK_A)) {
 			velocity_.x -= 0.3f;
 
 		}
-		if (Input::GetInstance()->IsPushKey(DIK_D)) {
+		if (input_->IsPushKey(DIK_D)) {
 			velocity_.x += 0.3f;
 		}
 

@@ -1,22 +1,29 @@
 #pragma once
 #include<d3d12.h>
 #include<dxgi1_6.h>
+#include<dxcapi.h>
 #include<cstdint>
 #include<wrl.h>
+using namespace Microsoft::WRL;
 #include<list>
 #include<string>
 #include<vector>
 #include<format>
+
+
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
 
+
+class Command;
+class DXGIDevice;
+class DXCCompiler;
 
 class PSOManager
 {
 public:
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
 
 
@@ -44,7 +51,7 @@ public:
 		, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE  topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
-	void AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format);
+	void AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format,UINT slot = 0);
 
 
 
@@ -54,7 +61,9 @@ public:
 
 
 private:
-	DirectXCommon* dxCommon_;
+	Command* command_;
+	DXGIDevice* DXGIDevice_;
+	DXCCompiler* dxcCompiler_;
 
 	struct fileName {
 		std::wstring filePach;
@@ -89,6 +98,7 @@ private:
 	std::vector<std::string> semanticNames_; // SemanticName を保持するための vector
 	std::vector<UINT> semanticIndex_;
 	std::vector<DXGI_FORMAT> semanticformat_;
+	std::vector<UINT> semanticSlot_;
 
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc_{};
 	D3D12_RASTERIZER_DESC rasterizerDesc_{};
@@ -96,6 +106,9 @@ private:
 
 public:
 	ShaderFile shderFile_;
+private:
+
+
 
 private:
 	void Blob(D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);

@@ -1,15 +1,13 @@
 #include "Camera.h"
 #include "DirectXGame/engine/base/WinApp.h"
-#include <DirectXGame/engine/3d/Object/Object3d.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/engine/Camera/CameraCommon.h"
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/input/Input.h"
 
 bool Camera::isShake_ = false;
 
-Camera& Camera::GetInstance()
-{
-	static Camera instance;
-	return instance;
-}
+
 Camera::Camera()
 
 	:transform_({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
@@ -28,11 +26,13 @@ Camera::Camera()
 
 }
 
-void Camera::Initialize()
+void Camera::Initialize(CameraCommon* cameraCommon)
 {
-	dxCommon_ = CameraCommon::GetInstance()->GetDxCommon();
+	dxCommon_ = cameraCommon->GetDxCommon();
 
-	resource = dxCommon_->CreateBufferResource(sizeof(DataGPU));
+	input_ = cameraCommon->GetInput();
+
+	resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
 	//書き込むためのアドレスを取得
 	resource->Map(0, nullptr, reinterpret_cast<void**>(&data));
 
@@ -84,10 +84,10 @@ void Camera::UpdateMatrix() {
 
 
 
-	if (Input::GetInstance()->IsPushKey(DIK_LSHIFT) || Input::GetInstance()->IsPushKey(DIK_RSHIFT)) {
+	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
 		speed = 10.0f;
 	}
-	else if (Input::GetInstance()->IsPushKey(DIK_LALT) || Input::GetInstance()->IsPushKey(DIK_RALT)) {
+	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
 		speed = 0.1f;
 	}
 	else {
@@ -96,27 +96,27 @@ void Camera::UpdateMatrix() {
 
 	float sp = move * speed;
 
-	if (Input::GetInstance()->IsPushKey(DIK_A)) {
+	if (input_->IsPushKey(DIK_A)) {
 		transform_.translate.x -= sp;
 	}
-	if (Input::GetInstance()->IsPushKey(DIK_D)) {
+	if (input_->IsPushKey(DIK_D)) {
 		transform_.translate.x += sp;
 	}
-	if (Input::GetInstance()->IsPushKey(DIK_W)) {
+	if (input_->IsPushKey(DIK_W)) {
 		transform_.translate.z += sp;
 	}
-	if (Input::GetInstance()->IsPushKey(DIK_S)) {
+	if (input_->IsPushKey(DIK_S)) {
 		transform_.translate.z -= sp;
 	}
-	if (Input::GetInstance()->IsPushKey(DIK_UP)) {
+	if (input_->IsPushKey(DIK_UP)) {
 		transform_.translate.y += sp;
 	}
-	if (Input::GetInstance()->IsPushKey(DIK_DOWN)) {
+	if (input_->IsPushKey(DIK_DOWN)) {
 		transform_.translate.y -= sp;
 	}
 
 
-	if (Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
 		SetShake(debugShakeTime_, debugShakeDirectionRange_);
 	}
 #endif // _DEBUG

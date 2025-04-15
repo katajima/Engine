@@ -21,15 +21,14 @@
 
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
-
-void Object3d::Initialize()
+void Object3d::Initialize(Entity3DManager* entity3DManager)
 {
-	//Collider::Initialize();
-
-	object3dCommon_ = Object3dCommon::GetInstance();
-	skinningConmmon_ = SkinningConmmon::GetInstance();
-	imGuiManager_ = ImGuiManager::GetInstance();
+	entity3DManager_ = entity3DManager;
+	object3dCommon_ = entity3DManager_->GetObject3dCommon();
+	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();
+	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();
 
 	name = "object" + std::to_string(object3dCommon_->count);
 
@@ -145,7 +144,7 @@ void Object3d::UpdateAnimation()
 
 void Object3d::LineMesh()
 {
-	LineCommon::GetInstance()->AddLineMesh(GetMesh(0), worldtransform_.worldMat_);	
+	entity3DManager_->Get3DLineCommon()->AddLineMesh(GetMesh(0), worldtransform_.worldMat_);
 }
 
 #pragma endregion //更新系
@@ -242,12 +241,11 @@ bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3&
 
 void Object3d::DrawSetting()
 {
-	LightManager::GetInstance()->DrawLight();
+	entity3DManager_->GetLightManager()->DrawLight();
 
 	transfomation->GetCommandList(1);
 
 
-	//object3dCommon_->GetDxCommon()->GetCommandList()->Set
 	
 	transfomation->GetCommandList(10);
 
@@ -258,7 +256,8 @@ void Object3d::DrawSetting()
 
 void Object3d::DrawSettingSkin()
 {
-	LightManager::GetInstance()->DrawLight();
+
+	entity3DManager_->GetLightManager()->DrawLight();
 
 	transfomation->GetCommandList(1);
 
@@ -302,6 +301,7 @@ void Object3d::ObjectTypeDiscrimination(ObjectType type)
 
 void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 {
+
 	switch (type)
 	{
 	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK:
@@ -331,6 +331,7 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 	default:
 		break;
 	}
+	//skinningConmmon_->DrawCompureSetting();
 }
 
 #pragma endregion // 描画系
@@ -338,7 +339,8 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 void Object3d::SetModel(const std::string& filePath)
 {
 	//モデルを検索してセット
-	model = ModelManager::GetInstance()->FindModel(filePath);
+	
+	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
 }
 
 

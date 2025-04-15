@@ -16,7 +16,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 
@@ -25,7 +25,7 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Primitive/Primitive.h"
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
 #include <thread>
@@ -109,8 +109,10 @@ public:
 	};
 
 public:
-	// シングルトンインスタンス
-	static Object3dInstansManager* GetInstance();
+	Object3dInstansManager() = default;
+	~Object3dInstansManager() = default;
+	Object3dInstansManager(Object3dInstansManager&) = delete;
+	Object3dInstansManager& operator=(Object3dInstansManager&) = delete;
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
@@ -118,8 +120,6 @@ public:
 	void Update();
 	// 描画
 	void Draw();
-	// 終了
-	void Finalize();
 	// 描画準備
 	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
@@ -151,11 +151,6 @@ private:
 	void BlendMuliply();
 
 
-	static Object3dInstansManager* instance;
-	Object3dInstansManager() = default;
-	~Object3dInstansManager() = default;
-	Object3dInstansManager(Object3dInstansManager&) = delete;
-	Object3dInstansManager& operator=(Object3dInstansManager&) = delete;
 
 	DirectXCommon* dxCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;
@@ -163,7 +158,7 @@ private:
 
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
-
+	ModelManager* modelManager_;
 	
 
 	std::unordered_map<std::string, ObjectGroup> objectGroups;

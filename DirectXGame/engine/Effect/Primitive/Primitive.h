@@ -9,7 +9,7 @@
 #include<format>
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 
 #include"DirectXGame/engine/Mesh/Mesh.h"
@@ -206,6 +206,7 @@ namespace ShapeParameter {
 	};
 }
 
+class PrimitiveCommon;
 class Primitive : public Collider
 {
 public:
@@ -233,7 +234,7 @@ public:
 	
 
 	// 形
-	void Initialize(ShapeType type,const std::string& tex,const Color color = { 1,1,1,1 },bool isLine = false);
+	void Initialize(PrimitiveCommon* primitiveCommon, ShapeType type,const std::string& tex,const Color color = { 1,1,1,1 },bool isLine = false);
 	// 更新
 	void Update();
 	// 描画
@@ -384,7 +385,7 @@ private:
 	// 図形タイプ
 	ShapeType type_;
 
-	
+	PrimitiveCommon* primitiveCommon_;
 	
 
 

@@ -6,6 +6,7 @@
 /// <summary>
 /// 衝突マネージャ
 /// </summary>
+class GlobalVariables;
 class CollisionManager {
 public:
 	// リセット
@@ -26,7 +27,7 @@ public:
 	void AddCollider(Collider* collider);
 
 	// 初期化
-	void Initialize();
+	void Initialize(GlobalVariables* globalVariables);
 
 	// ワールドトランスフォームの更新
 	void UpdateWorldTransform();
@@ -46,5 +47,6 @@ private:
 
 	bool isCollider;
 
+	GlobalVariables* globalVariables_;
 };
 

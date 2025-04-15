@@ -30,7 +30,9 @@
 
 class Enemy;
 class FollowCamera;
-
+class DirectXCommon;
+class Entity3DManager;
+class Entity2DManager;
 class Player : public Collider {
 public:
 
@@ -38,7 +40,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Vector3 position, Camera* camera);
+	void Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera);
 
 	///< summary>
 	/// 更新
@@ -248,7 +250,8 @@ public:
 	Object3d& GetObject3D() { return objectBase_; }
 	//Object3d& GetObjectWeapon3D() { return ; }
 
-	
+	// dxCommon
+	void SetDxCommon(DirectXCommon* dxcommon) {dxCommon_ = dxcommon;}
 
 	// カメラのビュープロジェクション
 	void SetCamera(Camera* camera) { camera_ = camera; };
@@ -283,6 +286,7 @@ public:
 
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
+	void SetInput(Input* input) { input_ = input; }
 
 	// 弾リストを取得
 	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() const { return playerBullet_; }
@@ -291,6 +295,8 @@ private:
 	FollowCamera* followCamera_;
 	
 	Camera* camera_ = nullptr;
+
+	Input* input_;
 
 	std::vector<Enemy*> lockedOnEnemies;
 private:  // パラメータ
@@ -373,6 +379,9 @@ private:
 	std::unique_ptr<ParticleEmitter> dashEmitter_ = nullptr;
 
 
+private:
+	DirectXCommon* dxCommon_;
+	Entity3DManager* entity3DManager_;
 };
 
 

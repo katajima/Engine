@@ -6,80 +6,28 @@ void Framework::Initialize()
 	winApp = std::make_unique<WinApp>();
 	winApp->Initialize();
 
+	// Input
+	input_ = std::make_unique<Input>();
+	input_->Intialize(winApp.get());
 
-	//dxCommon = 
+	// グローバル
+	globalVariables_ = std::make_unique<GlobalVariables>();
+	
+	// DirectX
 	dxCommon = std::make_unique<DirectXCommon>();
-	dxCommon->Intialize();
+	dxCommon->Intialize(winApp.get());
+	dxCommon->GetImGuiManager()->SetInput(input_.get());
 
-	renderingCommon = RenderingCommon::GetInstance();
-	renderingCommon->Initialize(dxCommon.get());
+	// 3D全般
+	entity3DManager_ = std::make_unique<Entity3DManager>();
+	entity3DManager_->Initialize(dxCommon.get());
+	entity3DManager_->GetCameraCommon()->SetInput(input_.get());
 
-	Input::GetInstance()->Intialize(winApp.get());
-	
-	// SRVマネージャの初期化
-	srvManager = SrvManager::GetInstance();
-	srvManager->Initialize(dxCommon.get());
-
-	
-	// ImGuiマネージャー
-	imguiManager = ImGuiManager::GetInstance();
-	imguiManager->Initialize(dxCommon.get());
-
-	// スプライト共通部の初期化
-	spriteCommon = SpriteCommon::GetInstance();
-	spriteCommon->Initialize(dxCommon.get());
-
-	// 3Dオブジェクト共通部分の初期化
-	object3dCommon = Object3dCommon::GetInstance();
-	object3dCommon->Initialize(dxCommon.get());
-	
-	// モデルコモン
-	modelCommon = std::make_unique<ModelCommon>();
-	modelCommon->Initialize(dxCommon.get());
-	
-	// カメラコモン
-	cameraCommon = CameraCommon::GetInstance();
-	cameraCommon->Initialize(dxCommon.get());
-
-	skinningCommon = SkinningConmmon::GetInstance();
-	skinningCommon->Initialize(dxCommon.get());
+	// 2D全般
+	entity2DManager_ = std::make_unique<Entity2DManager>();
+	entity2DManager_->Initialize(dxCommon.get());
 
 
-	lineCommon = LineCommon::GetInstance();
-	lineCommon->Initialize(dxCommon.get());
-
-	particleManager_ = ParticleManager::GetInstance();
-	particleManager_->Initialize(dxCommon.get());
-	//
-	oceanManager_ = OceanManager::GetInstance();
-	oceanManager_->Initialize(dxCommon.get());
-	//
-	//thunderManager = ThunderManager::GetInstance();
-	//thunderManager->Initialize(dxCommon.get());
-
-	trailEffectManager_ = TrailEffectManager::GetInstance();
-	trailEffectManager_->Initialize(dxCommon.get());
-
-	primitiveCommon = PrimitiveCommon::GetInstance();
-	primitiveCommon->Initialize(dxCommon.get());
-
-	//ライト
-	lightCommon = LightManager::GetInstance();
-	lightCommon->Initialize(dxCommon.get());
-	
-	// スカイボックス
-	skyBoxCommon = SkyBoxCommon::GetInstance();
-	skyBoxCommon->Initialize(dxCommon.get());
-
-	// テクスチャマネージャ
-	TextureManager::GetInstance()->Initialize(dxCommon.get());
-	
-	// モデルマネージャ
-	ModelManager::GetInstance()->Initialize(dxCommon.get());
-
-	
-	object3dInstansManager_ = Object3dInstansManager::GetInstance();
-	object3dInstansManager_->Initialize(dxCommon.get());
 
 }
 
@@ -88,37 +36,15 @@ void Framework::Finalize()
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	
+	// DirectX
 	dxCommon->Finalize();
-	// パーティクルマネージャーの終了
-	//ParticleManager::GetInstance()->Finalize();
-	// ImGuiマネージャーの終了
-	imguiManager->Finalize();
 
-	particleManager_->Finalize();
-
-	oceanManager_->Finalize();
-
-	trailEffectManager_->Finalize();
-
-	primitiveCommon->Finalize();
-
-	cameraCommon->Finalize();
-	
-	lineCommon->Finalize();
-
-	lightCommon->Finalize();
-
-	renderingCommon->Finalize();
-
-	skyBoxCommon->Finalize();
-
-	//object3dInstansManager_->Finalize();
 }
 
 void Framework::Update()
 {
-
-	Input::GetInstance()->Update();
+	// Input
+	input_->Update();
 
 	
 	// Windowsのメッセージ処理

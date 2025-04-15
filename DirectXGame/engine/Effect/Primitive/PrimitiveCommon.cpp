@@ -1,29 +1,14 @@
 #include "PrimitiveCommon.h"
-
-PrimitiveCommon* PrimitiveCommon::instance = nullptr;
-
-PrimitiveCommon* PrimitiveCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new PrimitiveCommon;
-	}
-	return instance;
-}
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void PrimitiveCommon::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	
 	CreateGraphicsPipeline();
-}
-
-void PrimitiveCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void PrimitiveCommon::DrawCommonSetting()

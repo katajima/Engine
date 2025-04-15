@@ -7,7 +7,7 @@
 #include <wrl.h>
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
-#include "DirectXGame/engine/base/DirectXCommon.h"
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Mesh/Mesh.h"
 #include "DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
@@ -20,19 +20,10 @@ class LineCommon
 {
 public:
 
-
-
-public:
-	static LineCommon* GetInstance();
-
-	// 終了
-	void Finalize();
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
-	//void Update
-
+	
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
 	void AddLine(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
@@ -108,7 +99,6 @@ private:
 
 
 private:
-	static LineCommon* instance;
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 	Camera* camera_ = nullptr;
 

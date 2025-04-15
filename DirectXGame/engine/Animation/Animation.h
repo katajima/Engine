@@ -14,7 +14,6 @@
 #include<format>
 #include<span>
 
-#include"DirectXGame/engine/Line/LineCommon.h"
 
 #include"imgui.h"
 
@@ -112,14 +111,25 @@ struct WellForGPU {
 struct SkinCluster {
 	std::vector<Matrix4x4> inverseBindPoseMatrices;
 
+	/// <summary>
+	/// 
+	/// </summary>
 	Microsoft::WRL::ComPtr < ID3D12Resource> influenceResource;
 	D3D12_VERTEX_BUFFER_VIEW influenceBufferView;
 	std::span<VertexInfluence> mappedInfluence;
+	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> influenceSrvHandle;
 
+	/// <summary>
+	/// 
+	/// </summary>
 	Microsoft::WRL::ComPtr < ID3D12Resource> paletteResource;
 	std::span<WellForGPU> mappedPalette;
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> paletteSrvHandle;
 
+	
+	Microsoft::WRL::ComPtr < ID3D12Resource> inputVertexResource;
+	//std::span<VertexData> mappedinputVertex;
+	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> inputVertexSrvHandle;
 };
 
 
@@ -240,34 +250,7 @@ static int CalculateDepth(const std::vector<Joint>& joints, int index) {
 }
 
 // スケルトンの描画
-static void DrawSkeleton(const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale) {
-	// ジョイントごとの深さを計算して保存
-	std::vector<int> depths(joints.size(), 0);
-	int maxDepth = 0;
-	for (size_t i = 0; i < joints.size(); ++i) {
-		depths[i] = CalculateDepth(joints, static_cast<int>(i));
-		maxDepth = (std::max)(maxDepth, depths[i]);
-	}
-
-
-	for (const Joint& joint : joints) {
-		if (joint.parent.has_value()) {
-			const int32_t parentIndex = joint.parent.value();
-			//const Vector3& parentPosition = joints[parentIndex].transform.translate;
-			//const Vector3& childPosition = joint.transform.translate;
-
-			const Vector3& parentPosition = joints[parentIndex].skeletonSpaceMatrix.GetWorldPosition() * scale;
-			const Vector3& childPosition = joint.skeletonSpaceMatrix.GetWorldPosition() * scale;
-
-
-			Vector3 offsetParentPosition = Add(parentPosition, pos);
-			Vector3 offsetChildPosition = Add(childPosition, pos);
-			LineCommon::GetInstance()->AddLine(offsetParentPosition, offsetChildPosition, {1,1,1,1});
-			
-		}
-	}
-
-}
+void DrawSkeleton(const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale);
 
 
 

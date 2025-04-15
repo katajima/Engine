@@ -61,15 +61,16 @@ void CollisionManager::AddCollider(Collider* collider) {
 	}
 }
 
-void CollisionManager::Initialize() { 
+void CollisionManager::Initialize(GlobalVariables* globalVariables) {
 
+
+	globalVariables_ = globalVariables;
 	//modelCollosion_.reset(Model::CreateFromOBJ("collision", true)); 
 
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 	const char* gropName = "CollisionManager";
 	// グループを追加する
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
-	globalVariables->AddItem(gropName, "isCollider", isCollider);
+	globalVariables_->CreateGroup(gropName);
+	globalVariables_->AddItem(gropName, "isCollider", isCollider);
 }
 
 void CollisionManager::UpdateWorldTransform() {
@@ -105,11 +106,9 @@ void CollisionManager::Draw() {
 }
 
 void CollisionManager::ApplyGlobalVariables() {
-
-	GlobalVariables* globalVariables = GlobalVariables::GetInstance();
 	const char* gropName = "CollisionManager";
 	// グループを追加する
-	GlobalVariables::GetInstance()->CreateGroup(gropName);
-	isCollider = globalVariables->GetBoolValue(gropName, "isCollider");
+	globalVariables_->CreateGroup(gropName);
+	isCollider = globalVariables_->GetBoolValue(gropName, "isCollider");
 
 }

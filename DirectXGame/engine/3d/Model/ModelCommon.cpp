@@ -1,12 +1,10 @@
 #include"ModelCommon.h"
 
-ModelCommon* ModelCommon::GetInstance()
-{
-	static ModelCommon instance;
-	return &instance;
-}
+#include "DirectXGame/engine/DirectX/Command/Command.h"
 
-void ModelCommon::Initialize(DirectXCommon* dxCommon)
+void ModelCommon::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager)
 {
-	dxCommon_ = dxCommon;
+    DXGIDevice_ = DXGIDevice;
+    command_ = command;
+    srvManager_ = srvManager;
 }

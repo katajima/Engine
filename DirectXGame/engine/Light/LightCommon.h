@@ -17,13 +17,7 @@
 class LightManager
 {
 public:
-	static LightManager* instance;
-
-	static LightManager* GetInstance();
-
 	void Initialize(DirectXCommon* dxCommon);
-
-	void Finalize();
 
 	void DrawLight();
 

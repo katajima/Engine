@@ -1,12 +1,20 @@
+
+// engine
 #include"Model.h"
 #include"ModelCommon.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
+//#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/base/TextureManager.h"
-#include <iostream>
+#include "DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/base/Logger.h"
 #include"DirectXGame/engine/base/StringUtility.h"
+
+// C++
+#include <iostream>
 #include"format"
 #include<vector>
+
+
 
 
 std::string getLastPartOfPath(const std::string& path) {
@@ -19,10 +27,11 @@ std::string getLastPartOfPath(const std::string& path) {
 
 #pragma region Initialize
 
-void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, const Vector2 texScale)
+void Model::Initialize(DirectXCommon* dxCommon,ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file, const Vector2 texScale)
 {
-	modelCommon_ = ModelCommon::GetInstance();;
-
+	modelCommon_ = modelCommon;
+	srvManager_ = modelCommon_->GetSrvManager();
+	dxCommon_ = dxCommon;
 	std::string dire = directorypath;
 
 	if (file != "") {
@@ -38,9 +47,11 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 
 }
 
-void Model::InitializeAnime(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
+void Model::InitializeAnime(DirectXCommon* dxCommon,ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
 {
-	modelCommon_ = ModelCommon::GetInstance();;
+	modelCommon_ = modelCommon;
+	dxCommon_ = dxCommon;
+	srvManager_ = modelCommon_->GetSrvManager();
 
 	std::string dire = directorypath;
 
@@ -84,22 +95,18 @@ void Model::Draw()
 		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
 		//}
 
-		// マテリアルのバインド
-		//modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-
-
+		
 
 		mesh->GetCommandList();
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-		//ModelCommon::GetInstance()->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh->vertices.size()),1,0,0);
-		ModelCommon::GetInstance()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		modelCommon_->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 	}
 }
 
 void Model::DrawSkinning()
 {
-	auto commandList = modelCommon_->GetDxCommon()->GetCommandList();
+	auto commandList = modelCommon_->GetCommand()->GetList();
 
 	for (auto& mesh : modelData.mesh)
 	{
@@ -112,7 +119,7 @@ void Model::DrawSkinning()
 		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 		uavDesc.Buffer.StructureByteStride = sizeof(Mesh::VertexData);*/
 		// 
-		//modelCommon_->GetDxCommon()->GetDevice()->CreateUnorderedAccessView();
+		
 
 
 
@@ -121,7 +128,9 @@ void Model::DrawSkinning()
 		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
 
 
-		commandList->SetGraphicsRootDescriptorTable(10, SrvManager::GetInstance()->GetGPUDescriptorHandle(modelData.skinningSrvindex));
+		
+
+		commandList->SetGraphicsRootDescriptorTable(10, skinCluster.paletteSrvHandle.second);
 
 		mesh->GetCommandList(skinCluster.influenceBufferView);
 
@@ -231,7 +240,7 @@ Model::ModelData Model::LoadOdjFileAssimp(const std::string& directoryPath, cons
 		// インデックスを生成
 		pMesh->GenerateIndices2(); // thisは省略可能
 
-		pMesh->Initialize(ModelCommon::GetInstance()->GetDxCommon());
+		pMesh->Initialize(modelCommon_);
 
 
 
@@ -243,7 +252,7 @@ Model::ModelData Model::LoadOdjFileAssimp(const std::string& directoryPath, cons
 	
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
-		pMaterial->Initialize(ModelCommon::GetInstance()->GetDxCommon());
+		pMaterial->Initialize(dxCommon_);
 
 		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
 			aiMaterial* material = scene->mMaterials[materialIndex];
@@ -363,20 +372,22 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 
 		}
 
-		pMesh->Initialize(ModelCommon::GetInstance()->GetDxCommon());
+		pMesh->Initialize(modelCommon_);
 
 		modelData.mesh.push_back(std::move(pMesh));
 	}
 
 
-	modelData.skinningSrvindex = SrvManager::GetInstance()->Allocate();
+	modelData.skinning.wellSrvIndex = modelCommon_->GetSrvManager()->Allocate();
+	modelData.skinning.influencesIndex = modelCommon_->GetSrvManager()->Allocate();
+
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
 
 		//modelData.material[] = std::make_unique<Material>();
 
-		pMaterial->Initialize(ModelCommon::GetInstance()->GetDxCommon());
+		pMaterial->Initialize(dxCommon_);
 		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
 			aiMaterial* material = scene->mMaterials[materialIndex];
 			aiString textureFilePath;
@@ -507,31 +518,22 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	SkinCluster skinCluster;
 
 	// palette用のResourceを確保
-	skinCluster.paletteResource = ModelCommon::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
+	skinCluster.paletteResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
 	WellForGPU* mappedPalette = nullptr;
 	skinCluster.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
 	std::memset(mappedPalette, 0, sizeof(WellForGPU) * skeleton.joints.size());
 	skinCluster.mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
 	//skinCluster.paletteResource->Unmap(0, nullptr);
 
-	skinCluster.paletteSrvHandle.first = SrvManager::GetInstance()->GetCPUDescriptorHandle(modelData.skinningSrvindex);
-	skinCluster.paletteSrvHandle.second = SrvManager::GetInstance()->GetGPUDescriptorHandle(modelData.skinningSrvindex);
+	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.wellSrvIndex, skinCluster.paletteResource.Get(), UINT(skeleton.joints.size()),sizeof(WellForGPU));
 
-	// palette用のSrvを作成。StructuredBufferでアクセスできるようにする。
-	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
-	paletteSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	paletteSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	paletteSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	paletteSrvDesc.Buffer.FirstElement = 0;
-	paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	paletteSrvDesc.Buffer.NumElements = UINT(skeleton.joints.size());
-	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
-	ModelCommon::GetInstance()->GetDxCommon()->GetDevice()->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
+	skinCluster.paletteSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.wellSrvIndex);
+	skinCluster.paletteSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.wellSrvIndex);
 
 
 
 	// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
-	skinCluster.influenceResource = ModelCommon::GetInstance()->GetDxCommon()->CreateBufferResource(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
+	skinCluster.influenceResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
 	VertexInfluence* mappedInfluence = nullptr;
 	skinCluster.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
 	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size()); // 仮埋め。weightを0にしておく。
@@ -542,6 +544,19 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.influenceBufferView.BufferLocation = skinCluster.influenceResource->GetGPUVirtualAddress();
 	skinCluster.influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
 	skinCluster.influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
+
+	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.influencesIndex, skinCluster.influenceResource.Get(), UINT(modelData.mesh[0]->vertices.size()), sizeof(VertexInfluence));
+
+	skinCluster.influenceSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.influencesIndex);
+	skinCluster.influenceSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.influencesIndex);
+
+
+
+
+
+
+
+
 
 	// InverseBindPoseMatrixを格納する場所を作成して、単位行列で埋める
 	skinCluster.inverseBindPoseMatrices.resize(skeleton.joints.size());

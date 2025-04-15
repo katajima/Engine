@@ -1,21 +1,7 @@
 #include"SceneManager.h"
 #include"cassert"
 
-SceneManager* SceneManager::instance = nullptr;
-
-SceneManager* SceneManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new SceneManager;
-	}
-	return instance;
-}
-
-void SceneManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void SceneManager::Update()
 {
@@ -34,7 +20,13 @@ void SceneManager::Update()
 		scene_->SetSceneManader(this);
 
 		//次のシーンを初期化する
+		scene_->SetInput(input_);
+		scene_->SetGlobalVariables(globalVariables_);
+		scene_->SetDirectXCommon(directXCommon_);
+		scene_->SetEntity3DManager(entity3DManager_);
+		scene_->SetEntity2DManager(entity2DManager_);
 		scene_->Initialize();
+		scene_->GetInput()->Update();
 	}
 	
 	//実行シーンを更新する

@@ -19,8 +19,6 @@ private:
 	using Group = std::map<std::string, Item>;
 
 public:
-	static GlobalVariables* GetInstance();
-
 	/// <summary>
 	/// グループの作成
 	/// </summary>
@@ -91,11 +89,13 @@ public:
 	/// </summary>
 	void Update();
 
-private:
+
 	GlobalVariables() = default;
 	~GlobalVariables() = default;
-	GlobalVariables(const GlobalVariables &global) = default;
+	GlobalVariables(const GlobalVariables& global) = default;
 	GlobalVariables& operator=(const GlobalVariables& global) = default;
+private:
+
 
 
 

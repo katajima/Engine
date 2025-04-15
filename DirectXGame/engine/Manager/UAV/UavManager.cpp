@@ -1,33 +1,25 @@
 #include "UavManager.h"
+#include "assert.h"
+
+#include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+#include "DirectXGame/engine/base/WinApp.h"
 
 const uint32_t UavManager::kMaxUAVCount = 512;
 
-UavManager* UavManager::instance = nullptr;
 
-UavManager* UavManager::GetInstance()
+
+void UavManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
-    if (instance == nullptr) {
-        instance = new UavManager;
-    }
-    return instance;
-}
-
-void UavManager::Initialize(DirectXCommon* dxCommon)
-{
-    this->directXCommon_ = dxCommon;
-
+    DXGIDevice_ = DXGI;
+    command_ = Command;
     // デスクリプタヒープ
-    descriptorHeap = directXCommon_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxUAVCount, true);
+    descriptorHeap = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxUAVCount, true);
     // デスクリプタ一個分のサイズを取得して記録
-    descriptorSize = directXCommon_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    descriptorSize = DXGIDevice_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
-void UavManager::Finalize()
-{
-    descriptorHeap.Reset();
-    delete instance;
-    instance = nullptr;
-}
+
 
 uint32_t UavManager::Allocate()
 {
@@ -62,7 +54,7 @@ void UavManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource*
     uavDesc.Buffer.StructureByteStride = structureByteStride;
     uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 
-    directXCommon_->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
+    DXGIDevice_->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
 }
 
 void UavManager::CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResource, DXGI_FORMAT format)
@@ -73,16 +65,16 @@ void UavManager::CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResou
     uavDesc.Texture2D.MipSlice = 0;
     uavDesc.Texture2D.PlaneSlice = 0;
 
-    directXCommon_->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
+    DXGIDevice_->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
 }
 
 void UavManager::PreDraw()
 {
     ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
-    directXCommon_->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+    command_->GetList()->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
 void UavManager::SetComputeRootDescriptorTable(UINT RootParameterIndex, uint32_t uavIndex)
 {
-    directXCommon_->GetCommandList()->SetComputeRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(uavIndex));
+    command_->GetList()->SetComputeRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(uavIndex));
 }

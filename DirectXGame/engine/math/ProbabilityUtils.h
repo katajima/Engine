@@ -131,3 +131,24 @@ static float ExpectedValue(const std::vector<float>& probabilities, int totalRol
 	// 全体の期待値を計算
 	return singleRollExpectedValue * static_cast<float>(totalRolls);
 }
+
+
+class Sequence
+{
+public:
+	// 一般項
+	static int GeneralTerm(int num, int n) {
+		return num * n;
+	}
+	// 等差数列
+	static int Arithmetic(int firstTerm, int n, int difference) {
+		return firstTerm + (n * difference);
+	}
+	// 項比数列
+	static int Geometric(int firstTerm, int n, int ratio) {
+		return firstTerm * static_cast<int>(pow(ratio, n - 1));
+	}
+	// 数列の和
+
+
+};

@@ -2,47 +2,22 @@
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/base/WinApp.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
-#include"DirectXGame/engine/base/D3DResourceLeakchecker.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/base/TextureManager.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include"DirectXGame/engine/3d/Model/Model.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include"DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
-#include"DirectXGame/engine/3d/Model/ModelManager.h"
-#include"DirectXGame/engine/Light/LightCommon.h"
-#include"DirectXGame/engine/Skinning/Skinning.h"
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include"DirectXGame/engine/Manager/RTV/RtvManeger.h"
-#include"DirectXGame/engine/Manager/UAV/UavManager.h"
-
 
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-#include"DirectXGame/engine/effect/Ocean/OceanManager.h"
-#include"DirectXGame/engine/effect/Thunder/ThunderManager.h"
-//#include"DirectXGame/engine/effect/Trail/TrailEffect.h"
-#include"DirectXGame/engine/effect/Trail/TrailEffectManager.h"
-#include"DirectXGame/engine/Primitive/PrimitiveCommon.h"
-#include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
-#include"DirectXGame/engine/base/ImGuiManager.h"
-#include"DirectXGame/engine/Camera/CameraCommon.h"
-#include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 
-#include"DirectXGame/engine/audio/Audio.h"
-#include"DirectXGame/engine/base/StringUtility.h"
-#include"DirectXGame/engine/base/Logger.h"
-#include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
-#include "DirectXGame/engine/base/RenderingCommon.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+
+// C++
 #include"memory"
+
+
 
 // ゲーム全体
 class Framework
@@ -73,50 +48,28 @@ protected:
 	bool endRequst_ = false;
 	// ウィンアップ
 	
-	std::unique_ptr < WinApp> winApp;
+	std::unique_ptr <WinApp> winApp;
+	
 	//
-	Input* input = nullptr;
+	std::unique_ptr<Input> input_ = nullptr;
 
 	// ダイレクトX
-	std::unique_ptr < DirectXCommon> dxCommon = nullptr;
-	// SRVマネージャー
-	SrvManager* srvManager = nullptr;
-	// ImGuiマネージャー
-	ImGuiManager* imguiManager;
-	// スプライトこもん
-	SpriteCommon* spriteCommon = nullptr;
-	// オブジェクトコモン
-	Object3dCommon* object3dCommon = nullptr;
-	// モデルコモン
-	std::unique_ptr <ModelCommon> modelCommon;
-	// モデルコモン
-	CameraCommon* cameraCommon = nullptr;
-	// ラインコモン
-	LineCommon* lineCommon = nullptr;
-	// 
-	OceanManager* oceanManager_ = nullptr;
-	//
-	ThunderManager* thunderManager = nullptr;
+	std::unique_ptr <DirectXCommon> dxCommon = nullptr;
 
-	TrailEffectManager* trailEffectManager_ = nullptr;
+	// 3D全般
+	std::unique_ptr<Entity3DManager> entity3DManager_;
 
-	ParticleManager* particleManager_ = nullptr;
-	
-	ParticleEmitter* emitter = nullptr;
+	// 2D全般
+	std::unique_ptr<Entity2DManager> entity2DManager_;
 
-	LightManager* lightCommon = nullptr;
-
-	RenderingCommon* renderingCommon = nullptr;
-
-	SkinningConmmon* skinningCommon = nullptr;
-
-	PrimitiveCommon* primitiveCommon = nullptr;
-
-	SkyBoxCommon* skyBoxCommon = nullptr;
-
-	Object3dInstansManager* object3dInstansManager_ = nullptr;
+	// シーンマネージャー
+	std::unique_ptr<SceneManager> sceneManager_;
 
 	// シーンファクトリー
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
+
+	// グローバル
+	std::unique_ptr<GlobalVariables> globalVariables_;
+	
 };
 

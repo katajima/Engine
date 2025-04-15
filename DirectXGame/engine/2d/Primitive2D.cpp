@@ -1,10 +1,10 @@
 #include "Primitive2D.h"
 #include "SpriteCommon.h"
 
-void Primitive2D::Initialize(ShapeType type, const Color color)
+void Primitive2D::Initialize(SpriteCommon* spriteCommon,ShapeType type, const Color color)
 {
 	type_ = type;
-	spriteCommon_ = SpriteCommon::GetInstance();
+	spriteCommon_ = spriteCommon;
 
 
 	mesh = std::make_unique<Mesh>();
@@ -30,7 +30,7 @@ void Primitive2D::Initialize(ShapeType type, const Color color)
 	}
 
 	// メッシュ	
-	mesh->Initialize(spriteCommon_->GetDxCommon());
+	mesh->Initialize(spriteCommon_->GetDxCommon()->GetModelManager()->GetModelCommon());
 
 	// マテリアル
 	material = std::make_unique<Material>();

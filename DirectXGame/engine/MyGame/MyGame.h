@@ -12,42 +12,11 @@
 #include<wrl.h>
 #include<vector>
 
-#include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/base/WinApp.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
-#include"DirectXGame/engine/base/D3DResourceLeakchecker.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/base/TextureManager.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include"DirectXGame/engine/3d/Model/Model.h"
-#include"DirectXGame/engine/3d/Model/ModelCommon.h"
-#include"DirectXGame/engine/3d/Model/ModelManager.h"
-
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
-
-#include"DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
-#include"DirectXGame/engine/audio/Audio.h"
-#include"DirectXGame/engine/base/StringUtility.h"
-#include"DirectXGame/engine/base/Logger.h"
-
-
-#include"externals/DirectXTex/DirectXTex.h"
-#include"externals/DirectXTex/d3dx12.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dxcompiler.lib")
-
-#include"DirectXGame/engine/base/StringUtility.h"
-#include"DirectXGame/engine/base/Logger.h"
 
 
 #include"externals/imgui/imgui.h"
@@ -90,13 +59,11 @@ private:
 
 	float fps = 0.0f;
 	
-	//static const DeltaTime kDeltaTime_;
 	
 	std::unique_ptr<Primitive> primi = nullptr;
 	std::unique_ptr<Primitive> primiPlane = nullptr;
 	std::unique_ptr<Primitive> primiStar = nullptr;
 	std::unique_ptr<Primitive> primiTrai = nullptr;
-
 	
 
 private:

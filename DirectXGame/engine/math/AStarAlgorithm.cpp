@@ -129,14 +129,13 @@ Vector2 AStarPathfinder::GetDirectionToNextNode() {
 	return direction;
 }
 
-void AStarPathfinder::DrawPath(float yPos) const
+void AStarPathfinder::DrawPath(LineCommon* line,float yPos) const
 {
 	// m_pathが2つ以上のノードを含んでいる場合に描画を行う
 	if (m_path.size() < 2) {
 		return;  // 経路が無い場合は何も描画しない
 	}
 
-	LineCommon* line = LineCommon::GetInstance();
 	Vector4 pathColor = Vector4(0.0f, 1.0f, 0.0f, 1.0f); // 緑色のライン
 
 	// 経路の各ノード間でラインを描画

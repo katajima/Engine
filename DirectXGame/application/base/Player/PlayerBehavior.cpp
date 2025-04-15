@@ -94,7 +94,7 @@ void Player::BehaviorDieUpdate()
 		Move();
 
 		if (specialAttack.time >= 0.5f) {
-			if (Input::GetInstance()->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
+			if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
 				specialAttack.phese = 1;
 				specialAttack.time = 0;
 			}
@@ -120,12 +120,12 @@ void Player::BehaviorDieUpdate()
 				if (specialAttack.clock == 1) {
 					followCamera_->GetViewProjection().SetShake(1.3f, {0.2f,0.2f,0.2f});
 
-					bullet->Initialize(injectionLeftObj_.GetWorldPosition(), camera_);
+					bullet->Initialize(entity3DManager_,injectionLeftObj_.GetWorldPosition(), camera_);
 					injectionLeftObj_.worldtransform_.translate_.y -= 0.5f;
 				}
 				else {
 					followCamera_->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
-					bullet->Initialize(injectionRightObj_.GetWorldPosition(), camera_);
+					bullet->Initialize(entity3DManager_,injectionRightObj_.GetWorldPosition(), camera_);
 					injectionRightObj_.worldtransform_.translate_.y -= 0.5f;
 				}
 				bullet->SetEnemy(lockedOnEnemies[index_b]);

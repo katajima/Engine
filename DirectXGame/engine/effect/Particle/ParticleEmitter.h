@@ -1,12 +1,15 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/base/DirectXCommon.h"
 
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+// C;;
 #include<random>
 #include<numbers>
+
+// engine
+#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/struct/Structs3D.h"
 #include"ParticleManager.h"
+#include"DirectXGame/engine/WorldTransform/WorldTransform.h"
+
 
 class ParticleEmitter
 {
@@ -15,6 +18,7 @@ public:
 
 	enum class EmitSpawnShapeType // 出現形状
 	{
+		kPoint,
 		kAABB,		// AABB
 		kOBB,		// OBB
 		kSphere,	// Sphere
@@ -31,10 +35,7 @@ public:
 	};
 
 public:
-	// count: パーティクルの最大生成数を指定する値。frequency: パーティクルの発射間隔を秒単位で指定する値。frequencyTime: 現在の発射間隔の経過時間を追跡する値。
-	//ParticleEmitter(std::string name,Transform transform, uint32_t count, float frequency, float frequencyTime);
-
-	void Initialize(std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
+	void Initialize(ParticleManager* particleManager,std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
 
 	void Update();
 
@@ -129,6 +130,7 @@ private:
 
 
 	ParticleManager::Emiter emitter_{};
+	ParticleManager* particleManager_;
 };
 
 

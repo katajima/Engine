@@ -2,31 +2,18 @@
 
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-Object3dInstansManager* Object3dInstansManager::instance = nullptr;
 
-Object3dInstansManager* Object3dInstansManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new Object3dInstansManager;
-	}
-	return instance;
-}
-
-void Object3dInstansManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
 
 void Object3dInstansManager::Initialize(DirectXCommon* dxCommon)
 {
-	this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
+	//this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
 
 	dxCommon_ = dxCommon;
-
+	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
+	modelManager_ = dxCommon_->GetModelManager();
 	CreateGraphicsPipeline();
 }
 
@@ -88,14 +75,14 @@ void Object3dInstansManager::Draw()
 		}
 
 
-		Object3dInstansManager::GetInstance()->DrawCommonSetting(group.rasteType, group.blendType);
+		DrawCommonSetting(group.rasteType, group.blendType);
 
 
 		
 		// インスタンシングデータのSRVのDescriptorTableを設定
 		commandList->SetGraphicsRootDescriptorTable(1, group.instancingSrvHandleGPU);
 
-		commandList->SetGraphicsRootDescriptorTable(2, SrvManager::GetInstance()->GetGPUDescriptorHandle());
+		commandList->SetGraphicsRootDescriptorTable(2, srvManager_->GetGPUDescriptorHandle());
 
 
 		group.mesh->GetCommandList();
@@ -178,7 +165,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 
 
 	// GPUリソースの作成
-	objectGroup.resource = dxCommon_->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
 	// マッピング
 	objectGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&objectGroup.instanceData));
 	// 初期化
@@ -190,10 +177,10 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = SrvManager::GetInstance()->Allocate();
-	objectGroup.instancingSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(objectGroup.srvIndex);
-	objectGroup.instancingSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(objectGroup.srvIndex);
-	SrvManager::GetInstance()->CreateSRVforStructuredBuffer(objectGroup.srvIndex, objectGroup.resource.Get(), kNumMaxInstance, sizeof(ObjectGPU));
+	objectGroup.srvIndex = srvManager_->Allocate();
+	objectGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(objectGroup.srvIndex);
+	objectGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(objectGroup.srvIndex);
+	srvManager_->CreateSRVforStructuredBuffer(objectGroup.srvIndex, objectGroup.resource.Get(), kNumMaxInstance, sizeof(ObjectGPU));
 
 
 
@@ -229,7 +216,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 
 
 	// GPUリソースの作成
-	objectGroup.resource = dxCommon_->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
+	objectGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ObjectGPU) * kNumMaxInstance);
 	// マッピング
 	objectGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&objectGroup.instanceData));
 	// 初期化
@@ -241,10 +228,10 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = SrvManager::GetInstance()->Allocate();
-	objectGroup.instancingSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(objectGroup.srvIndex);
-	objectGroup.instancingSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(objectGroup.srvIndex);
-	SrvManager::GetInstance()->CreateSRVforStructuredBuffer(objectGroup.srvIndex, objectGroup.resource.Get(), kNumMaxInstance, sizeof(ObjectGPU));
+	objectGroup.srvIndex = srvManager_->Allocate();
+	objectGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(objectGroup.srvIndex);
+	objectGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(objectGroup.srvIndex);
+	srvManager_->CreateSRVforStructuredBuffer(objectGroup.srvIndex, objectGroup.resource.Get(), kNumMaxInstance, sizeof(ObjectGPU));
 
 
 
@@ -259,7 +246,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 void Object3dInstansManager::AddObject(const std::string name, const std::string texName, ObjectInstans& object, MeshType type)
 {
 	if (MeshType::kModel == type) {
-		CreateObject3dGroup(name, texName, ModelManager::GetInstance()->FindModel(name));
+		CreateObject3dGroup(name, texName, modelManager_->FindModel(name));
 
 	}
 	else {
@@ -275,7 +262,8 @@ void Object3dInstansManager::AddObject(const std::string name, const std::string
 		object.texIndex = objectGroups[name].model->modelData.material[0]->tex_.diffuseIndex;
 	}
 	else {
-		object.texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(texName);
+		
+		object.texIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(texName);
 	}
 	
 

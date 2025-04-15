@@ -1,32 +1,17 @@
 #include "TrailEffectManager.h"
 
-TrailEffectManager* TrailEffectManager::instance = nullptr;
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-TrailEffectManager* TrailEffectManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new TrailEffectManager;
-	}
-	return instance;
-}
-
-void TrailEffectManager::Initialize(DirectXCommon* dxcommon)
+void TrailEffectCommon::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
-
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_);
-
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	
 	CreateGraphicsPipeline();
 }
 
-void TrailEffectManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
-}
-
-void TrailEffectManager::DrawCommonSetting()
+void TrailEffectCommon::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -37,7 +22,7 @@ void TrailEffectManager::DrawCommonSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void TrailEffectManager::CreateRootSignature()
+void TrailEffectCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	psoManager_->SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
@@ -63,7 +48,7 @@ void TrailEffectManager::CreateRootSignature()
 	
 }
 
-void TrailEffectManager::CreateGraphicsPipeline()
+void TrailEffectCommon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

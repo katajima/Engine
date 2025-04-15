@@ -1,16 +1,16 @@
 #include"ImGuiManager.h"
-#include "DirectXCommon.h"
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/input/Input.h"
 #include "WinApp.h"
 #include <iostream>//用いるヘッダファイルが変わります。
+
+
 
 // ギズモの操作モード
 static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値は移動
 
 
-ImGuiManager* ImGuiManager::GetInstance() {
-	static ImGuiManager instance;
-	return &instance;
-}
+
 
 void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 {
@@ -139,13 +139,13 @@ void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera& camera, const
 			if (ImGui::Button("ROTATE")) mCurrentGizmoOperation = ImGuizmo::ROTATE;
 			if (ImGui::Button("SCALE")) mCurrentGizmoOperation = ImGuizmo::SCALE;
 
-			if (Input::GetInstance()->IsTriggerKey(DIK_G)) {
+			if (input_->IsTriggerKey(DIK_G)) {
 				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 			}
-			if (Input::GetInstance()->IsTriggerKey(DIK_R)) {
+			if (input_->IsTriggerKey(DIK_R)) {
 				mCurrentGizmoOperation = ImGuizmo::ROTATE;
 			}
-			if (Input::GetInstance()->IsTriggerKey(DIK_S)) {
+			if (input_->IsTriggerKey(DIK_S)) {
 				mCurrentGizmoOperation = ImGuizmo::SCALE;
 			}
 

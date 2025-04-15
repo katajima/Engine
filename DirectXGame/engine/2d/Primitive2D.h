@@ -84,7 +84,7 @@ public:
 
 
 	// 形
-	void Initialize(ShapeType type, const Color color = { 1,1,1,1 });
+	void Initialize(SpriteCommon* spriteCommon,ShapeType type, const Color color = { 1,1,1,1 });
 
 	void Update();
 

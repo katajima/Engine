@@ -12,25 +12,27 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include"DirectXCommon.h"
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 
+
+
+class Command;
+class DXGIDevice;
+class SrvManager;
 // テクスチャマネージャー
 class TextureManager {
 public:
-	// シングルトンインスタンス
-	static TextureManager* GetInstance();
-	
+	TextureManager() = default;
+	~TextureManager() = default;
+	TextureManager(TextureManager&) = delete;
+	TextureManager& operator=(TextureManager&) = delete;
+
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon/*,SrvManager* srvManager*/);
+	void Initialize(Command* command,DXGIDevice* DXGIDevice, SrvManager* srvManager);
 	
-	// 終了
-	void Finalize();
 
 	//DirectTexを使ってTextureを読むためのLoadTextur関数
 	void LoadTexture(const std::string& filePath);
-	//void LoadTextureStruct(const std::string& filePath);
-
+	
 	// テクスチャ番号取得
 	uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
@@ -40,17 +42,19 @@ public:
 	// メタデータを取得
 	const DirectX::TexMetadata& GetMataData(const std::string& filePach);
 
-	SrvManager* GetSrvManager(){ return SrvManager::GetInstance(); }
+	SrvManager* GetSrvManager(){ return srvManager_; }
 
 	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter,D3D12_DESCRIPTOR_RANGE& descriptorRange);
 
 
+	Microsoft::WRL::ComPtr <ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
+
+	//データを転送するUploadTextureData関数を作る
+	[[nodiscard]]
+	Microsoft::WRL::ComPtr < ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr < ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
+
 private:
-	static TextureManager* instance;
-	TextureManager() = default;
-	~TextureManager() = default;
-	TextureManager(TextureManager&) = delete;
-	TextureManager& operator=(TextureManager&) = delete;
+
 
 	//テクスチャ一枚分のデータ
 	struct TextureData {
@@ -63,12 +67,14 @@ private:
 	};
 
 	//テクスチャデータ
-	//std::vector<TextureData> textureDatas;
 	std::unordered_map<std::string, TextureData> textureDatas;
 
-	DirectXCommon* dxCommon_ = nullptr;
 	static uint32_t kSRVIndexTop;
-	//Microsoft::WRL::ComPtr <ID3D12Resource> intermediateResource;
 	
+	
+private:
+	Command* command_;
+	DXGIDevice* DXGIDevice_;
 	SrvManager* srvManager_ = nullptr;
+
 };
