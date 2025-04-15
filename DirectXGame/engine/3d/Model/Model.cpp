@@ -128,7 +128,9 @@ void Model::DrawSkinning()
 		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
 
 
-		commandList->SetGraphicsRootDescriptorTable(10, modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.wellSrvIndex));
+		
+
+		commandList->SetGraphicsRootDescriptorTable(10, skinCluster.paletteSrvHandle.second);
 
 		mesh->GetCommandList(skinCluster.influenceBufferView);
 
@@ -535,7 +537,7 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 	modelCommon_->GetDXGIDevice()->GetDevice()->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
-
+	//modelCommon_->GetSrvManager()->CreateUAVforStructuredBuffer();
 
 	// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
 	skinCluster.influenceResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
