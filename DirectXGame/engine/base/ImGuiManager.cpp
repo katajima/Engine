@@ -9,10 +9,7 @@
 static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値は移動
 
 
-ImGuiManager* ImGuiManager::GetInstance() {
-	static ImGuiManager instance;
-	return &instance;
-}
+
 
 void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 {

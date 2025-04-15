@@ -37,6 +37,8 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	barrier_->Initialize(command_.get(),swapChain_.get(),renderTexture_.get()); // バリア
 	psoManager_->Initialize(command_.get(), DXGIDevice_.get(), dxcCompiler_.get());// PSOマネージャー
 
+	imguiManager_->Initialize(this);
+
 	textureManager_->Initialize(command_.get(),DXGIDevice_.get(),srvManager_.get()); // テクスチャマネージャー
 
 	modelManager_->Initialize(this); // モデルマネージャー
@@ -112,7 +114,7 @@ void DirectXCommon::PostDrawSwap() {
 
 void DirectXCommon::Finalize()
 {
-	
+	imguiManager_->Finalize();
 }
 
 void DirectXCommon::InitializeFixFPS()

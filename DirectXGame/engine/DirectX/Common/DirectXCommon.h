@@ -30,6 +30,8 @@
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
+#include"DirectXGame/engine/base/ImGuiManager.h"
+
 
 #include "DirectXGame/engine/Manager/UAV/UavManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
@@ -100,6 +102,8 @@ public:
 
 	EffectManager* GetEffectManager(){ return effectManager_.get(); }
 
+	ImGuiManager* GetImGuiManager() { return imguiManager_.get(); }
+
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			 // デバイス
 	std::unique_ptr<Command> command_ = std::make_unique<Command>();					 // コマンド
@@ -120,6 +124,8 @@ private:
 	std::unique_ptr<EffectManager> effectManager_;	 // エフェクトマネージャー
 	std::unique_ptr<PSOManager> psoManager_ = std::make_unique<PSOManager>();		     // PSOマネージャー
 
+	// ImGuiマネージャー
+	std::unique_ptr <ImGuiManager> imguiManager_ = std::make_unique<ImGuiManager>();
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;

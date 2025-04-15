@@ -18,14 +18,6 @@ void Framework::Initialize()
 
 	Input::GetInstance()->Intialize(winApp.get());
 	
-	
-
-
-	// ImGuiマネージャー
-	imguiManager = ImGuiManager::GetInstance();
-	imguiManager->Initialize(dxCommon.get());
-
-
 
 	// スプライト共通部の初期化
 	spriteCommon = SpriteCommon::GetInstance();
@@ -54,13 +46,6 @@ void Framework::Finalize()
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	
-	dxCommon->Finalize();
-
-
-
-	// ImGuiマネージャーの終了
-	imguiManager->Finalize();
-
 	particleManager_->Finalize();
 
 	primitiveCommon->Finalize();
@@ -70,6 +55,9 @@ void Framework::Finalize()
 	lineCommon->Finalize();
 
 	renderingCommon->Finalize();
+
+
+	dxCommon->Finalize();
 
 }
 

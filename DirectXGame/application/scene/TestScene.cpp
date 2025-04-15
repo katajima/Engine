@@ -11,7 +11,7 @@ void TestScene::Initialize()
 	// 入力初期化
 	input_ = Input::GetInstance();
 	// ImGui初期化
-	imGuiManager = ImGuiManager::GetInstance();
+	imGuiManager = GetDxCommon()->GetImGuiManager();
 
 
 	// カメラの初期化

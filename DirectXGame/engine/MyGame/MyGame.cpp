@@ -48,7 +48,7 @@ void MyGame::Update()
 {
 	LineCommon::GetInstance()->LineClear();
 	// ImGuiの受付開始
-	imguiManager->Begin();
+	dxCommon->GetImGuiManager()->Begin();
 
 	Framework::Update();
 
@@ -86,7 +86,7 @@ void MyGame::Update()
 #endif // _DEBUG
 
 	// ImGuiの受付終了
-	imguiManager->End();
+	dxCommon->GetImGuiManager()->End();
 }
 
 void MyGame::Draw()
@@ -125,7 +125,7 @@ void MyGame::Draw()
 	dxCommon->GetRenderTexture()->Draw();
 
 	// ImGuiの描画
-	imguiManager->Draw();
+	dxCommon->GetImGuiManager()->Draw();
 
 	// 描画後処理
 	dxCommon->PostDrawSwap();

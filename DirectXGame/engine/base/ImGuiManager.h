@@ -10,8 +10,8 @@
 #include "ImGuizmo.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/input/Input.h"
-#include "DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 
 // 前方宣言
@@ -22,8 +22,6 @@ class DirectXCommon;
 class ImGuiManager
 {
 public:
-	// インスタンス
-	static ImGuiManager* GetInstance();
 
 	/// <summary>
 	/// 初期化

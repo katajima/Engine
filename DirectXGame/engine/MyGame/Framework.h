@@ -18,7 +18,7 @@
 #include"DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
 
 
-#include"DirectXGame/engine/base/ImGuiManager.h"
+
 #include"DirectXGame/engine/Camera/CameraCommon.h"
 
 
@@ -76,9 +76,6 @@ protected:
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> sceneManager_;
 
-
-	// ImGuiマネージャー
-	ImGuiManager* imguiManager;
 	// スプライトこもん
 	SpriteCommon* spriteCommon = nullptr;
 	
