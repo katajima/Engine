@@ -93,6 +93,8 @@ void MyGame::Draw()
 	///
 	// 描画前処理
 	dxCommon->GetSrvManager()->PreDraw();
+	//dxCommon->GetUavManager()->PreDraw();
+
 	// バックバッファの準備
 	dxCommon->PreDrawSwap();
 	

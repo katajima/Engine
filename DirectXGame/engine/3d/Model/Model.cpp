@@ -128,7 +128,7 @@ void Model::DrawSkinning()
 		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
 
 
-		commandList->SetGraphicsRootDescriptorTable(10, modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinningSrvindex));
+		commandList->SetGraphicsRootDescriptorTable(10, modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.wellSrvIndex));
 
 		mesh->GetCommandList(skinCluster.influenceBufferView);
 
@@ -376,7 +376,7 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 	}
 
 
-	modelData.skinningSrvindex = modelCommon_->GetSrvManager()->Allocate();
+	modelData.skinning.wellSrvIndex = modelCommon_->GetSrvManager()->Allocate();
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
@@ -521,8 +521,8 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
 	//skinCluster.paletteResource->Unmap(0, nullptr);
 
-	skinCluster.paletteSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinningSrvindex);
-	skinCluster.paletteSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinningSrvindex);
+	skinCluster.paletteSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.wellSrvIndex);
+	skinCluster.paletteSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.wellSrvIndex);
 
 	// palette用のSrvを作成。StructuredBufferでアクセスできるようにする。
 	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};

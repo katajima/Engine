@@ -32,6 +32,9 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature,
 		D3D12_ROOT_PARAMETER* rootParameter, UINT numRootParameters,
 		D3D12_STATIC_SAMPLER_DESC* samplerDesc, UINT numSamplers);
+
+
+	void ComputePipelineState(Microsoft::WRL::ComPtr <ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr < ID3D12PipelineState>& graphicsPipelineState);
 private:
 	Command* command_;
 	DXGIDevice* DXGIDevice_;
@@ -50,7 +53,7 @@ private:
 
 	Microsoft::WRL::ComPtr < IDxcBlob> CS;
 
-
+	HRESULT hr_;
 public:
 	ShaderFile shderFile_;
 
@@ -59,5 +62,5 @@ public:
 	void Blob(D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);
 
 	
-	void SetShederGraphics(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline);
+	void SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline);
 };

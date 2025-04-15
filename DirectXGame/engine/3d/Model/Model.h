@@ -33,6 +33,14 @@ class Material;
 class Model
 {
 public:
+	struct SkinningSRVUAV {
+		uint32_t wellSrvIndex; //Well
+		uint32_t inputVerticesIndex; // 入力頂点
+		uint32_t influencesIndex; // 入力インフルエンス
+		uint32_t outputVerticesUavIndex; // 計算後の頂点データ
+	};
+
+
 	//モデルデータ
 	struct ModelData
 	{
@@ -41,7 +49,7 @@ public:
 		bool isNormalmap;
 		Node rootNode;
 		bool isAssimp;
-		uint32_t skinningSrvindex;
+		SkinningSRVUAV skinning;
 		std::vector <std::unique_ptr<Mesh>> mesh;
 		std::vector<uint32_t> cachedLineIndices_;
 		std::vector <std::unique_ptr<Material>> material;

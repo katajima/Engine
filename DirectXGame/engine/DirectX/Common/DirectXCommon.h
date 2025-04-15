@@ -85,6 +85,8 @@ public:
 
 	SrvManager* GetSrvManager() { return  srvManager_.get(); }
 
+	UavManager* GetUavManager() { return uavManager_.get(); }
+
 	RenderTexture* GetRenderTexture() { return renderTexture_.get(); }
 
 	TextureManager* GetTextureManager() { return textureManager_.get(); }

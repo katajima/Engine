@@ -47,10 +47,26 @@ void CSPSOManager::SetRootSignature(Microsoft::WRL::ComPtr<ID3D12RootSignature>&
 	descriptionSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 	descriptionSignature.pParameters = rootParameter;
 	descriptionSignature.NumParameters = numRootParameters;
-	descriptionSignature.pStaticSamplers = samplerDesc;
-	descriptionSignature.NumStaticSamplers = numSamplers;
+//	descriptionSignature.pStaticSamplers = samplerDesc;
+//  descriptionSignature.NumStaticSamplers = numSamplers;
 
 	Blob(descriptionSignature, rootSignature);
+}
+
+void CSPSOManager::ComputePipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& computePipelineState)
+{
+	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{};
+
+
+	SetShederCompute(computePipelineStateDesc);
+
+	computePipelineStateDesc.pRootSignature = rootSignature.Get();// RootSignature
+
+
+	
+	hr_ = DXGIDevice_->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc,
+		IID_PPV_ARGS(&computePipelineState));
+
 }
 
 void CSPSOManager::Blob(D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
@@ -79,7 +95,7 @@ void CSPSOManager::Blob(D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsof
 	assert(SUCCEEDED(hr));
 }
 
-void CSPSOManager::SetShederGraphics(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline)
+void CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline)
 {
 
 	if (shderFile_.commpute.filePach != L"") {
@@ -90,5 +106,8 @@ void CSPSOManager::SetShederGraphics(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphics
 		graphicsPipeline.CS = { CS->GetBufferPointer(),
 		CS->GetBufferSize() }; // VertexShader
 	}
+
+
+
 }
 

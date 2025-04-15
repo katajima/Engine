@@ -27,6 +27,8 @@ public:
 
 	void DrawCommonSetting(PSOType type);
 
+	void DrawCompureSetting();
+
 
 
 	void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
@@ -60,8 +62,14 @@ private:// メンバ変数
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
 
-	//ルートシグネチャ
+
+	//ルートシグネチャコンピュート
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeRootSignature;
 	
+	// コンピュートパイプラインステート
+	Microsoft::WRL::ComPtr < ID3D12PipelineState> computePipelineState;
+	
+
+
 };
 

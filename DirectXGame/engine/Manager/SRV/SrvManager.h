@@ -35,6 +35,12 @@ public:
 	// SRV生成(Structured Buffer用)
 	void CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
 
+	// UAV生成関数
+	// UAV生成(Structured Buffer用)
+	void CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
+	// UAV生成(テクスチャ用)
+	void CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResource, DXGI_FORMAT format);
+
 	void PreDraw();
 
 	// SRVセットコマンド

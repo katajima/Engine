@@ -60,6 +60,14 @@ void SkinningConmmon::DrawCommonSetting(PSOType type)
 	}
 }
 
+void SkinningConmmon::DrawCompureSetting()
+{
+
+	dxCommon_->GetCommandList()->SetComputeRootSignature(computeRootSignature.Get());
+	dxCommon_->GetCommandList()->SetPipelineState(computePipelineState.Get());
+
+}
+
 
 void SkinningConmmon::CreateRootSignature()
 {
@@ -129,35 +137,31 @@ void SkinningConmmon::CreateRootSignature()
 	
 
 
-	//D3D12_DESCRIPTOR_RANGE computeDescriptorRange[3] = {};
-	//psoManager_->SetDescriptorRenge(computeDescriptorRange[0], 0, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //Palette
-	//psoManager_->SetDescriptorRenge(computeDescriptorRange[1], 1, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //InputVertices
-	//psoManager_->SetDescriptorRenge(computeDescriptorRange[2], 2, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //Influence
+	D3D12_DESCRIPTOR_RANGE computeDescriptorRange[3] = {};
+	csPsoManager_->SetDescriptorRenge(computeDescriptorRange[0], 0, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //Palette
+	csPsoManager_->SetDescriptorRenge(computeDescriptorRange[1], 1, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //InputVertices
+	csPsoManager_->SetDescriptorRenge(computeDescriptorRange[2], 2, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //Influence
 
 
 
-	//D3D12_ROOT_PARAMETER computeRootParameters[5] = {};
+	D3D12_ROOT_PARAMETER computeRootParameters[5] = {};
+	csPsoManager_->SetRootParameter(computeRootParameters[0],0,D3D12_SHADER_VISIBILITY_ALL,D3D12_ROOT_PARAMETER_TYPE_CBV); // gSkinningInfomation
 
-	//psoManager_->SetRootParameter(computeRootParameters[0],0,D3D12_SHADER_VISIBILITY_ALL,D3D12_ROOT_PARAMETER_TYPE_CBV); // gSkinningInfomation
-
-	//psoManager_->SetRootParameter(computeRootParameters[1],computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);
-	//psoManager_->SetRootParameter(computeRootParameters[2],computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);
-	//psoManager_->SetRootParameter(computeRootParameters[3],computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);
-	//psoManager_->SetRootParameter(computeRootParameters[4], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_UAV); // gSkinningInfomation
+	csPsoManager_->SetRootParameter(computeRootParameters[1],computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);
+	csPsoManager_->SetRootParameter(computeRootParameters[2],computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);
+	csPsoManager_->SetRootParameter(computeRootParameters[3],computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);
+	csPsoManager_->SetRootParameter(computeRootParameters[4], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_UAV); // gSkinningInfomation
 
 
-	//
-	////HRESULT hr;
-	//// Shaderをコンパイルする
-	//Microsoft::WRL::ComPtr < IDxcBlob> CSBlob = dxCommon_->CompileShader(L"resources/shaders/Skining/Skinning.CS.hlsl", L"cs_6_0");
-	//D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStatedesc{};
-	//computePipelineStatedesc.CS = {
-	//	.pShaderBytecode = CSBlob->GetBufferPointer(),
-	//	.BytecodeLength = CSBlob->GetBufferSize()
-	//};
-	/*computePipelineStatedesc.pRootSignature = computeRootSignature.Get();
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> computePipelineState = nullptr;
-	hr = dxCommon_->GetDevice()->CreateComputePipelineState(&computePipelineStatedesc,IID_PPV_ARGS(&computePipelineState));*/
+	csPsoManager_->SetRootSignature(computeRootSignature, computeRootParameters, _countof(computeRootParameters), staticSamplers, _countof(staticSamplers));
+
+
+
+	
+
+	
+	
+
 
 }
 
@@ -227,4 +231,9 @@ void SkinningConmmon::CreateGraphicsPipeline()
 
 	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[6], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[7], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	csPsoManager_->shderFile_.commpute.filePach = L"resources/shaders/Skining/SkinningObject3d.PS.hlsl";
+
+
+
 }

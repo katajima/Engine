@@ -301,6 +301,7 @@ void Object3d::ObjectTypeDiscrimination(ObjectType type)
 
 void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 {
+
 	switch (type)
 	{
 	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK:
@@ -330,6 +331,7 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 	default:
 		break;
 	}
+	//skinningConmmon_->DrawCompureSetting();
 }
 
 #pragma endregion // 描画系
