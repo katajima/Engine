@@ -48,9 +48,6 @@ class DirectXCommon;
 class Audio
 {
 public:
-	// インスタンス
-	static Audio* GetInstance();
-
 	/// <summary>
 	/// 初期化
 	/// </summary>

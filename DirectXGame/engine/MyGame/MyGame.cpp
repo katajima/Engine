@@ -34,7 +34,7 @@ void MyGame::Initialize()
 void MyGame::Finalize()
 {
 	//
-	Audio::GetInstance()->Finalize();
+	//Audio::GetInstance()->Finalize();
 	//
 
 

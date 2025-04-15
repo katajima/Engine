@@ -7,7 +7,7 @@
 void TestScene::Initialize()
 {
 	//オーディオの初期化
-	audio_ = Audio::GetInstance();
+	//audio_ = Audio::GetInstance();
 	// 入力初期化
 	input_ = Input::GetInstance();
 	// ImGui初期化
