@@ -68,6 +68,7 @@ protected:
 	// シーンファクトリー
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 
+	// グローバル
 	std::unique_ptr<GlobalVariables> globalVariables_;
 	
 };

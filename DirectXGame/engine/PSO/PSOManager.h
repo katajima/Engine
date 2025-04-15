@@ -51,7 +51,7 @@ public:
 		, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE  topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
-	void AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format);
+	void AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format,UINT slot = 0);
 
 
 
@@ -98,6 +98,7 @@ private:
 	std::vector<std::string> semanticNames_; // SemanticName を保持するための vector
 	std::vector<UINT> semanticIndex_;
 	std::vector<DXGI_FORMAT> semanticformat_;
+	std::vector<UINT> semanticSlot_;
 
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc_{};
 	D3D12_RASTERIZER_DESC rasterizerDesc_{};

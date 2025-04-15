@@ -22,7 +22,7 @@ void MyGame::Initialize()
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->ChangeScene("TEST");
-	//SceneManager::GetInstance()->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -183,7 +183,7 @@ void MyGame::InitializeResource()
 	modelManager->LoadModelAmime("player_bullet.obj", "player_bullet");
 	modelManager->LoadModelAmime("Sword.obj", "Sword");
 	modelManager->LoadModelAmime("plane.obj", "plane");
-	//ModelManager::GetInstance()->LoadModelAmime("sneakWalk.gltf", "human");
+	//modelManager->LoadModelAmime("sneakWalk.gltf", "human");
 	modelManager->LoadModelAmime("AnimatedCube.gltf", "AnimatedCube");
 
 	modelManager->LoadModel("Ground.obj", "Ground");

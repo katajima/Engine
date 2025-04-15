@@ -160,6 +160,7 @@ void PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignatur
 		inputElementDesc_[i].Format = semanticformat_[i];
 		inputElementDesc_[i].SemanticIndex = semanticIndex_[i];
 		inputElementDesc_[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+		inputElementDesc_[i].InputSlot = semanticSlot_[i];
 	}
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
@@ -207,12 +208,13 @@ void PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignatur
 	assert(SUCCEEDED(hr));
 }
 
-void PSOManager::AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format)
+void PSOManager::AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format, UINT slot)
 {
 	// 文字列を vector に保持（ポインタが無効にならないようにする）
 	semanticNames_.push_back(semanticName);
 	semanticIndex_.push_back(semanticIndex);
 	semanticformat_.push_back(format);
+	semanticSlot_.push_back(slot);
 
 	D3D12_INPUT_ELEMENT_DESC elementDesc{};
 	inputElementDesc_.push_back(elementDesc);

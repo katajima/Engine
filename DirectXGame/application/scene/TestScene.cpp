@@ -206,8 +206,6 @@ void TestScene::Draw3D()
 		// ゴール
 		goalObject->Draw();
 
-		//Object3dInstansManager::GetInstance()->Update();
-		//Object3dInstansManager::GetInstance()->Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:

@@ -146,6 +146,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\Noise.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\Random.cpp" />
+    <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp" />
@@ -463,6 +464,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Math\MapChip.h" />
     <ClInclude Include="DirectXGame\engine\Math\Noise.h" />
     <ClInclude Include="DirectXGame\engine\Math\Random.h" />
+    <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h" />
