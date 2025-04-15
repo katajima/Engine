@@ -24,12 +24,6 @@ void Framework::Initialize()
 	spriteCommon->Initialize(dxCommon.get());
 
 
-	
-	// カメラコモン
-	cameraCommon = CameraCommon::GetInstance();
-	cameraCommon->Initialize(dxCommon.get());
-
-
 	lineCommon = LineCommon::GetInstance();
 	lineCommon->Initialize(dxCommon.get());
 
@@ -50,8 +44,6 @@ void Framework::Finalize()
 
 	primitiveCommon->Finalize();
 
-	cameraCommon->Finalize();
-	
 	lineCommon->Finalize();
 
 	renderingCommon->Finalize();

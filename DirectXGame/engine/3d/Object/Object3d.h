@@ -1,6 +1,5 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/struct/Light.h"
 #include<d3d12.h>
 #include<dxgi1_6.h>

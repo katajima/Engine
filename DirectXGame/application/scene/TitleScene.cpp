@@ -80,7 +80,7 @@ void TitleScene::InitializeResources()
 void TitleScene::InitializeCamera()
 {
 	camera = std::make_unique <Camera>();
-	camera->Initialize();
+	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };
 

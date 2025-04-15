@@ -8,10 +8,6 @@
 #include"DirectXGame/engine/2d/SpriteCommon.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 
-
-#include"DirectXGame/engine/Camera/Camera.h"
-
-
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
 
 
@@ -82,8 +78,7 @@ protected:
 	// スプライトこもん
 	SpriteCommon* spriteCommon = nullptr;
 	
-	// モデルコモン
-	CameraCommon* cameraCommon = nullptr;
+	
 	// ラインコモン
 	LineCommon* lineCommon = nullptr;
 	

@@ -1,26 +1,9 @@
 #include "CameraCommon.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-
-CameraCommon* CameraCommon::instance = nullptr;
-
-CameraCommon* CameraCommon::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new CameraCommon;
-	}
-	return instance;
-}
-
 void CameraCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
-}
-
-void CameraCommon::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void CameraCommon::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister)

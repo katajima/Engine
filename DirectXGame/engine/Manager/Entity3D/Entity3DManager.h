@@ -10,6 +10,7 @@
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
+#include "DirectXGame/engine/Camera/CameraCommon.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -31,6 +32,8 @@ public:
 	LightManager* GetLightManager() { return lightManager_.get(); }
 
 	SkinningConmmon* GetSkinningConmmon() { return skinningCommon_.get(); }
+
+	CameraCommon* GetCameraCommon() { return cameraCommon_.get(); }
 
 private:
 
@@ -55,6 +58,8 @@ private:
 	// スキニング
 	std::unique_ptr<SkinningConmmon> skinningCommon_ = nullptr;
 
+	// カメラコモン
+	std::unique_ptr <CameraCommon> cameraCommon_ = nullptr;
 
 };
 

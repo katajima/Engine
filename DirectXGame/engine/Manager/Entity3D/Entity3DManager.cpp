@@ -4,6 +4,9 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 {
 	directXCommon_ = directXCommon;
 
+	cameraCommon_ = std::make_unique<CameraCommon>();
+	cameraCommon_->Initialize(directXCommon_);
+
 	// オーシャンシェーダー
 	oceanManager_ = std::make_unique<OceanManager>();
 	oceanManager_->Initialize(directXCommon_);
@@ -27,4 +30,7 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	// スキニング
 	skinningCommon_ = std::make_unique<SkinningConmmon>();
 	skinningCommon_->Initialize(directXCommon_);
+
+
+
 }

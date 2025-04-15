@@ -5,14 +5,14 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 
-
+class CameraCommon;
 class DebugCamera
 {
 public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(CameraCommon* cameraCommon);
 
 	/// <summary>
 	/// 毎フレーム処理

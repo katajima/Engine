@@ -21,7 +21,7 @@ void GamePlayScene::Initialize()
 	player_->Initialize(GetDxCommon(), GetEntity3DManager(),Vector3(0, 2, -40), camera.get());
 	
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize();
+	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 	followCamera_->SetTarget(&player_->GetObject3D());
 
 	player_->SetCamera(camera.get());
@@ -111,7 +111,8 @@ void GamePlayScene::Initialize()
 void GamePlayScene::InitializeCamera()
 {
 	camera = std::make_unique <Camera>();
-	camera->Initialize();
+	
+	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	//camera = Camera::GetInstance();
 	camera->transform_.rotate = { 0.36f,0,0 };
 	camera->transform_.translate = { 5,32.5f,-59.2f };

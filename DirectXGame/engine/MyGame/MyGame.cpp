@@ -134,8 +134,6 @@ void MyGame::Draw()
 
 void MyGame::InitializeResource()
 {
-	ParticleManager::GetInstance()->SetCamera(&Camera::GetInstance());
-
 	TextureManager* textureManager = dxCommon->GetTextureManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
 

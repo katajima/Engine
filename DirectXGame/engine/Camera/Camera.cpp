@@ -1,15 +1,12 @@
 #include "Camera.h"
 #include "DirectXGame/engine/base/WinApp.h"
-#include <DirectXGame/engine/3d/Object/Object3d.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/engine/Camera/CameraCommon.h"
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 bool Camera::isShake_ = false;
 
-Camera& Camera::GetInstance()
-{
-	static Camera instance;
-	return instance;
-}
+
 Camera::Camera()
 
 	:transform_({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
@@ -28,9 +25,9 @@ Camera::Camera()
 
 }
 
-void Camera::Initialize()
+void Camera::Initialize(CameraCommon* cameraCommon)
 {
-	dxCommon_ = CameraCommon::GetInstance()->GetDxCommon();
+	dxCommon_ = cameraCommon->GetDxCommon();
 
 	resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
 	//書き込むためのアドレスを取得
