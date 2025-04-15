@@ -379,6 +379,8 @@ Model::ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath,
 
 
 	modelData.skinning.wellSrvIndex = modelCommon_->GetSrvManager()->Allocate();
+	modelData.skinning.influencesIndex = modelCommon_->GetSrvManager()->Allocate();
+
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
@@ -523,21 +525,12 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
 	//skinCluster.paletteResource->Unmap(0, nullptr);
 
+	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.wellSrvIndex, skinCluster.paletteResource.Get(), UINT(skeleton.joints.size()),sizeof(WellForGPU));
+
 	skinCluster.paletteSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.wellSrvIndex);
 	skinCluster.paletteSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.wellSrvIndex);
 
-	// palette用のSrvを作成。StructuredBufferでアクセスできるようにする。
-	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
-	paletteSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	paletteSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	paletteSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	paletteSrvDesc.Buffer.FirstElement = 0;
-	paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	paletteSrvDesc.Buffer.NumElements = UINT(skeleton.joints.size());
-	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
-	modelCommon_->GetDXGIDevice()->GetDevice()->CreateShaderResourceView(skinCluster.paletteResource.Get(), &paletteSrvDesc, skinCluster.paletteSrvHandle.first);
 
-	//modelCommon_->GetSrvManager()->CreateUAVforStructuredBuffer();
 
 	// influence用のResourceを確保。頂点ごとにinfluence情報を追加できるようにする
 	skinCluster.influenceResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
@@ -551,6 +544,19 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.influenceBufferView.BufferLocation = skinCluster.influenceResource->GetGPUVirtualAddress();
 	skinCluster.influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
 	skinCluster.influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
+
+	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.influencesIndex, skinCluster.influenceResource.Get(), UINT(modelData.mesh[0]->vertices.size()), sizeof(VertexInfluence));
+
+	skinCluster.influenceSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.influencesIndex);
+	skinCluster.influenceSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.influencesIndex);
+
+
+
+
+
+
+
+
 
 	// InverseBindPoseMatrixを格納する場所を作成して、単位行列で埋める
 	skinCluster.inverseBindPoseMatrices.resize(skeleton.joints.size());
