@@ -2,6 +2,8 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
+#include "DirectXGame/engine/PSO/CSPSOManager.h"
+
 
 class SkinningConmmon
 {
@@ -45,6 +47,9 @@ private:// メンバ変数
 	DirectXCommon* dxCommon_;
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+
+	std::unique_ptr<CSPSOManager> csPsoManager_ = nullptr;
+
 
 	Camera* defaultCamera = nullptr;
 

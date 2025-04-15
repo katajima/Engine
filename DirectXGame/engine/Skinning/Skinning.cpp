@@ -13,6 +13,9 @@ void SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(),dxCommon_->GetDXCCompiler());
 
+	csPsoManager_ = std::make_unique <CSPSOManager>();
+	csPsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+
 	CreateGraphicsPipeline();
 }
 
