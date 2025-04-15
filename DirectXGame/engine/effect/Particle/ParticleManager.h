@@ -38,13 +38,6 @@ struct ParticleForGPU
 	Matrix4x4 World;
 	Vector4 color;
 };
-// 頂点データ
-struct VertexData {
-
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
-};
 
 
 //モデルデータ

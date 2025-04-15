@@ -213,7 +213,7 @@ Model::ModelData Model::LoadOdjFileAssimp(const std::string& directoryPath, cons
 				aiVector3D& position = mesh->mVertices[vertexIndex];
 				aiVector3D& normal = mesh->mNormals[vertexIndex];
 				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
-				Mesh::VertexData vertex;
+				VertexData vertex;
 
 				vertex.position = { position.x,position.y,position.z,1.0f };
 				vertex.normal = { normal.x,normal.y,normal.z };

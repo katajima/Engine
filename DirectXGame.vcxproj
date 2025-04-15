@@ -513,6 +513,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\struct\Vector2.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector4.h" />
+    <ClInclude Include="DirectXGame\engine\struct\VertexDeta.h" />
     <ClInclude Include="DirectXGame\engine\Transfomation\Transfomation.h" />
     <ClInclude Include="DirectXGame\engine\WorldTransform\WorldTransform.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />

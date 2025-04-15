@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/3d/Model/ModelCommon.h"
 
 // 頂点を比較するためのオペレーター
-bool operator==(const Mesh::VertexData& v1, const Mesh::VertexData& v2) {
+bool operator==(const VertexData& v1, const VertexData& v2) {
 	return v1.position == v2.position &&
 		v1.normal == v2.normal &&
 		v1.texcoord == v2.texcoord;
@@ -233,10 +233,10 @@ void Mesh::GenerateIndices2()
 
 
 	// ハッシュマップで頂点の重複を管理
-	std::unordered_map<Mesh::VertexData, uint32_t, VertexHash> vertexMap;
+	std::unordered_map<VertexData, uint32_t, VertexHash> vertexMap;
 
 	for (size_t i = 0; i < vertices.size(); ++i) {
-		const Mesh::VertexData& vertex = vertices[i];
+		const VertexData& vertex = vertices[i];
 
 		// 既に同じ頂点が登録されているかチェック
 		auto it = vertexMap.find(vertex);

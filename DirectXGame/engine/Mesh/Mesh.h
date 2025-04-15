@@ -2,6 +2,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+#include "DirectXGame/engine/struct/VertexDeta.h"
 
 #include "vector"
 #include<wrl.h>
@@ -17,18 +18,7 @@ class ModelCommon;
 class Mesh
 {
 public:	
-	struct SkyBoxVertexData {
-		Vector4 position;
-	};
-	struct VertexData {
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
-	};
-	struct LineVertexData {
-	Vector4 position;
-	Vector4 color;    // 色
-	};
+
 
 	
 
