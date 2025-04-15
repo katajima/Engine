@@ -13,33 +13,15 @@
 
 
 
-ParticleManager* ParticleManager::instance = nullptr;
-
-ParticleManager* ParticleManager::GetInstance()
-{
-	if (instance == nullptr) {
-		instance = new ParticleManager;
-	}
-	return instance;
-}
 
 void ParticleManager::Initialize(DirectXCommon* dxCommon)
 {
-
-	//this->camera_ = Object3dCommon::GetInstance()->GetDefaltCamera();
-
 	dxCommon_ = dxCommon;
 	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
 	CreateGraphicsPipeline();
-}
-
-void ParticleManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
 }
 
 void ParticleManager::DrawCommonSetting(RasterizerType rasteType, BlendType blendType)

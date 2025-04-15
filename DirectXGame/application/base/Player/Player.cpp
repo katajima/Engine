@@ -13,6 +13,8 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 
 
 	entity3DManager_ = entity3DManager;
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+
 	camera_ = camera;
 	dxCommon_ = dxcommon;
 	specialAttack.max = 40;
@@ -131,7 +133,7 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 
 
 	dashEmitter_ = std::make_unique <ParticleEmitter>();
-	dashEmitter_->Initialize("dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	dashEmitter_->Initialize(particleManager,"dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
 	dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
 	dashEmitter_->GetFrequency() = 0.05f;
 	dashEmitter_->SetCount(5);

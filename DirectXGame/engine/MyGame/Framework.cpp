@@ -25,8 +25,6 @@ void Framework::Initialize()
 	entity2DManager_->Initialize(dxCommon.get());
 
 
-	particleManager_ = ParticleManager::GetInstance();
-	particleManager_->Initialize(dxCommon.get());
 
 }
 
@@ -35,9 +33,6 @@ void Framework::Finalize()
 	// WindowsAPIの終了処理
 	winApp->Finalize();
 	
-	particleManager_->Finalize();
-
-
 	dxCommon->Finalize();
 
 }

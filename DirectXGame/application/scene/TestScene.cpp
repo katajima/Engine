@@ -42,6 +42,7 @@ void TestScene::Finalize()
 void TestScene::Update()
 {
 	SwitchRoom(); // 部屋切り替え
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 
 #ifdef _DEBUG
 	ImGui::Begin("primi2D");
@@ -398,11 +399,11 @@ void TestScene::InitializeObject2D()
 /// </summary>
 void TestScene::InitializeParticle()
 {
-	ParticleManager::GetInstance()->SetCamera(camera.get());
-
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
+	
 
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize("emitter", "cc", ParticleEmitter::EmitSpawnShapeType::kSpline);
+	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleEmitter::EmitSpawnShapeType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
@@ -423,7 +424,7 @@ void TestScene::InitializeParticle()
 
 
 	emitterEnemy_ = std::make_unique<ParticleEmitter>();
-	emitterEnemy_->Initialize("emitterPrimi", "primi");
+	emitterEnemy_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitterPrimi", "primi");
 	emitterEnemy_->GetFrequency() = 0.1f;
 	emitterEnemy_->SetCount(1);
 	//emitterEnemy_->SetParent(mm.worldtransform_);
@@ -441,7 +442,7 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
 
 	primitvPlane_ = std::make_unique<ParticleEmitter>();
-	primitvPlane_->Initialize("primiPlane", "primiPlane", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleEmitter::EmitSpawnShapeType::kPoint);
 	primitvPlane_->GetFrequency() = 0.025f;
 	primitvPlane_->SetCount(40);
 	primitvPlane_->SetPos({ 0,50,0 });

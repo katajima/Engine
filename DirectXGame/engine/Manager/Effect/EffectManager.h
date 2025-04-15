@@ -11,7 +11,7 @@
 #include<format>
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffectManager.h"
-//#include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
+#include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
 
 class DirectXCommon;
 class EffectManager
@@ -30,14 +30,15 @@ public: // ゲッター
 	DirectXCommon* GetDxCommon() { return directXCommon_; }
 	// トレイルエフェクト用
 	TrailEffectCommon* GetTrailEffectCommon() { return trailEffectCommon_.get(); }
+	// パーティクルマネージャ
+	ParticleManager* GetParticleManager() { return particleManager_.get(); }
 
 private:
 	// トレイルエフェクト
 	std::unique_ptr<TrailEffectCommon> trailEffectCommon_;
 
 	// パーティクルマネージャー
-	//std::unique_ptr<>;
-
+	std::unique_ptr<ParticleManager> particleManager_;
 private:
 	DirectXCommon* directXCommon_;
 };

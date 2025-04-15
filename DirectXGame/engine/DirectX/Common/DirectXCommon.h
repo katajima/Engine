@@ -42,7 +42,6 @@
 #include"DirectXGame/engine/base/TextureManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
-#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 
 
 class DirectXCommon

@@ -26,6 +26,7 @@ void GamePlayScene::Initialize()
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 	followCamera_->SetTarget(&player_->GetObject3D());
 
+	player_->SetInput(input_);
 	player_->SetCamera(camera.get());
 	player_->SetFollowCamera(followCamera_.get());
 
@@ -139,6 +140,7 @@ void GamePlayScene::InitializeResources()
 {
 	// オブジェクト3D
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+	ParticleManager* particleManager = GetEntity3DManager()->GetEffectManager()->GetParticleManager();
 
 
 	for (int j = 0; j < 3; j++) {
@@ -234,7 +236,7 @@ void GamePlayScene::InitializeResources()
 	numpos[0] = { xpos + (50 * 2),100 };
 
 	emit_ = std::make_unique<ParticleEmitter>();
-	emit_->Initialize("groundRtttight", "dustt");
+	emit_->Initialize(particleManager,"groundRtttight", "dustt");
 	emit_->GetFrequency() = 0.5f;
 	emit_->SetCount(200);
 	emit_->SetPos({ 200,40,200 });
@@ -245,11 +247,10 @@ void GamePlayScene::InitializeResources()
 	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 	emit_->SetRengeMinMax({-400,-100,-400}, { 400,100,400 });
 
-
-
+	
 
 	moveLimitEmitter_ = std::make_unique <ParticleEmitter>();
-	moveLimitEmitter_->Initialize("dash", "moveLimit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	moveLimitEmitter_->Initialize(particleManager,"dash", "moveLimit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
 	moveLimitEmitter_->GetFrequency() = 0.5f;
 	moveLimitEmitter_->SetCount(100);
 	moveLimitEmitter_->SetLifeTimeMinMax(0.5f, 0.5f);
@@ -529,7 +530,7 @@ void GamePlayScene::Update()
 		camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
 
 
-		ParticleManager::GetInstance()->SetCamera(&followCamera_->GetViewProjection());
+		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
 		// 必要に応じて行列を更新
 		//camera->UpdateMatrix();
 	}
@@ -537,7 +538,7 @@ void GamePlayScene::Update()
 #ifdef _DEBUG
 #endif // _DEBUG
 
-		ParticleManager::GetInstance()->SetCamera(camera.get());
+		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 		camera->UpdateMatrix();
 	}
 
@@ -642,9 +643,8 @@ void GamePlayScene::Draw3D()
 	player_->DrawP();
 
 	
-	ParticleManager::GetInstance()->GetInstance()->Draw();
-	//ParticleManager::GetInstance()->GetInstance()->DrawAABB();
-
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->Draw();
+	
 	
 	ocean_->Draw();
 

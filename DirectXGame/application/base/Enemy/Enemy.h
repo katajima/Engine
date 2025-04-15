@@ -156,6 +156,7 @@ private:
 	float timeSpeed_ = 1.0f;
 
 	FollowCamera* followCamera_;
+	Entity3DManager* entity3DManager_;
 };
 
 

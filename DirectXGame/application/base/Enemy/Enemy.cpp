@@ -22,7 +22,7 @@ void Enemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity
 
 	transBase_.Initialize();
 	transBase_.translate_ = position;
-
+	entity3DManager_ = entity3DManager;
 
 	object_.Initialize(entity3DManager);
 	object_.SetModel("enemy2.obj");
@@ -324,10 +324,10 @@ void Enemy::Shake()
 
 void Enemy::InitParticle()
 {
-
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	groundRightEmit_ = std::make_unique<ParticleEmitter>();
-	groundRightEmit_->Initialize("groundRight", "enemyGround");
+	groundRightEmit_->Initialize(particleManager,"groundRight", "enemyGround");
 	groundRightEmit_->GetFrequency() = 0.15f;
 	groundRightEmit_->SetCount(1);
 	groundRightEmit_->SetParent(object_.worldtransform_);
@@ -339,7 +339,7 @@ void Enemy::InitParticle()
 	groundRightEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 
 	groundLeftEmit_ = std::make_unique<ParticleEmitter>();
-	groundLeftEmit_->Initialize("groundLeft", "enemyGround");
+	groundLeftEmit_->Initialize(particleManager,"groundLeft", "enemyGround");
 	groundLeftEmit_->GetFrequency() = 0.15f;
 	groundLeftEmit_->SetCount(1);
 	groundLeftEmit_->SetParent(object_.worldtransform_);
@@ -351,7 +351,7 @@ void Enemy::InitParticle()
 	groundLeftEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 
 	dustEmit_ = std::make_unique<ParticleEmitter>();
-	dustEmit_->Initialize("dust", "enemyGround");
+	dustEmit_->Initialize(particleManager,"dust", "enemyGround");
 	dustEmit_->GetFrequency() = 0.25f;
 	dustEmit_->SetCount(3);
 	dustEmit_->SetParent(object_.worldtransform_);
@@ -364,7 +364,7 @@ void Enemy::InitParticle()
 	dustEmit_->SetColorMinMax({ 0.1f, 0.1f, 0.1f }, { 0.12f, 0.12f, 0.12f });
 
 	starEmit_ = std::make_unique<ParticleEmitter>();
-	starEmit_->Initialize("dust", "hitStar");
+	starEmit_->Initialize(particleManager,"dust", "hitStar");
 	starEmit_->GetFrequency() = 0.0f;
 	starEmit_->SetCount(1);
 	starEmit_->SetParent(object_.worldtransform_);
@@ -378,7 +378,7 @@ void Enemy::InitParticle()
 	starEmit_->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
 
 	traiEmit_ = std::make_unique<ParticleEmitter>();
-	traiEmit_->Initialize("dust", "hitTrai");
+	traiEmit_->Initialize(particleManager,"dust", "hitTrai");
 	traiEmit_->GetFrequency() = 0.0f;
 	traiEmit_->SetCount(5);
 	traiEmit_->SetParent(object_.worldtransform_);
@@ -393,7 +393,7 @@ void Enemy::InitParticle()
 	traiEmit_->SetRengeMinMax(Vector3{-5,-5,-5},Vector3{5,5,5});
 
 	hitEmit_ = std::make_unique<ParticleEmitter>();
-	hitEmit_->Initialize("dust", "hit");
+	hitEmit_->Initialize(particleManager,"dust", "hit");
 	hitEmit_->GetFrequency() = 0.0f;
 	hitEmit_->SetCount(10);
 	hitEmit_->SetParent(object_.worldtransform_);
@@ -410,7 +410,7 @@ void Enemy::InitParticle()
 
 	// タイヤ
 	tireEmit_ = std::make_unique<ParticleEmitter>();
-	tireEmit_->Initialize("", "enemyTire");
+	tireEmit_->Initialize(particleManager,"", "enemyTire");
 	tireEmit_->GetFrequency() = 0.0f;
 	tireEmit_->SetCount(1);
 	tireEmit_->SetParent(object_.worldtransform_);
@@ -430,7 +430,7 @@ void Enemy::InitParticle()
 
 	// ダクト
 	ductEmit_ = std::make_unique<ParticleEmitter>();
-	ductEmit_->Initialize("", "enemyDuct");
+	ductEmit_->Initialize(particleManager,"", "enemyDuct");
 	ductEmit_->GetFrequency() = 0.0f;
 	ductEmit_->SetCount(1);
 	ductEmit_->SetParent(object_.worldtransform_);
@@ -449,7 +449,7 @@ void Enemy::InitParticle()
 
 	// ダクト
 	fenceEmit_ = std::make_unique<ParticleEmitter>();
-	fenceEmit_->Initialize("", "enemyFence");
+	fenceEmit_->Initialize(particleManager,"", "enemyFence");
 	fenceEmit_->GetFrequency() = 0.0f;
 	fenceEmit_->SetCount(1);
 	fenceEmit_->SetParent(object_.worldtransform_);
@@ -469,7 +469,7 @@ void Enemy::InitParticle()
 
 	scale = { 0.5f,0.5f,0.5f };
 	gearEmit_ = std::make_unique<ParticleEmitter>();
-	gearEmit_->Initialize("", "enemyGear");
+	gearEmit_->Initialize(particleManager,"", "enemyGear");
 	gearEmit_->GetFrequency() = 0.0f;
 	gearEmit_->SetCount(5);
 	gearEmit_->SetParent(object_.worldtransform_);
@@ -491,7 +491,7 @@ void Enemy::InitParticle()
 	scale = { 2,2,2 };
 	// 鋼板
 	plankEmit_ = std::make_unique<ParticleEmitter>();
-	plankEmit_->Initialize("", "enemyPlank");
+	plankEmit_->Initialize(particleManager,"", "enemyPlank");
 	plankEmit_->GetFrequency() = 0.0f;
 	plankEmit_->SetCount(10);
 	plankEmit_->SetParent(object_.worldtransform_);

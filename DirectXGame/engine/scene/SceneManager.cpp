@@ -26,7 +26,7 @@ void SceneManager::Update()
 		scene_->SetEntity3DManager(entity3DManager_);
 		scene_->SetEntity2DManager(entity2DManager_);
 		scene_->Initialize();
-		
+		scene_->GetInput()->Update();
 	}
 	
 	//実行シーンを更新する

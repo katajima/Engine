@@ -78,7 +78,7 @@ void MyGame::Update()
 
 	sceneManager_->Update();
 
-	ParticleManager::GetInstance()->Update();
+	entity3DManager_->GetEffectManager()->GetParticleManager()->Update();
 
 #ifdef _DEBUG
 	entity3DManager_->Get3DLineCommon()->Update();
@@ -109,7 +109,7 @@ void MyGame::Draw()
 	sceneManager_->Draw3D();
 	
 	// パーティクル描画
-	ParticleManager::GetInstance()->Draw();
+	entity3DManager_->GetEffectManager()->GetParticleManager()->Draw();
 
 #ifdef _DEBUG
 	if (!sceneManager_->IsNowScene("GAMEPLAY")) {
@@ -135,7 +135,7 @@ void MyGame::InitializeResource()
 {
 	TextureManager* textureManager = dxCommon->GetTextureManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
-
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
@@ -263,39 +263,39 @@ void MyGame::InitializeResource()
 	primiStar->SetStar(star);
 	primiStar->SetName("star");
 	primiStar->Update();
-	ParticleManager::GetInstance()->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
-	ParticleManager::GetInstance()->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, ParticleManager::BlendType::MODE_ADD);
+	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, ParticleManager::BlendType::MODE_ADD);
 
-	ParticleManager::GetInstance()->CreateParticleGroup("dustt", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
-
-
-	ParticleManager::GetInstance()->CreateParticleGroup("primi", "resources/Texture/uvChecker.png", primi.get());
-
-	ParticleManager::GetInstance()->CreateParticleGroup("primiPlane", "resources/Texture/circle2.png", primiPlane.get());
+	particleManager->CreateParticleGroup("dustt", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
 
 
-	ParticleManager::GetInstance()->CreateParticleGroup("smoke", "resources/Texture/aa.png", modelManager->FindModel("plane.obj"));
-	ParticleManager::GetInstance()->CreateParticleGroup("explosionSmoke", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("primi", "resources/Texture/uvChecker.png", primi.get());
 
-	ParticleManager::GetInstance()->CreateParticleGroup("dashEmit", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
-	ParticleManager::GetInstance()->CreateParticleGroup("moveLimit", "resources/Texture/Image.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("primiPlane", "resources/Texture/circle2.png", primiPlane.get());
+
+
+	particleManager->CreateParticleGroup("smoke", "resources/Texture/aa.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("explosionSmoke", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+
+	particleManager->CreateParticleGroup("dashEmit", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("moveLimit", "resources/Texture/Image.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 
 	// 敵関係
-	ParticleManager::GetInstance()->CreateParticleGroup("hitStar", "resources/Texture/Image.png", primiStar.get());
-	ParticleManager::GetInstance()->CreateParticleGroup("hitTrai", "resources/Texture/Image.png", primiTrai.get());
-	ParticleManager::GetInstance()->CreateParticleGroup("hit", "resources/Texture/hit.png", modelManager->FindModel("plane.obj"));
-	ParticleManager::GetInstance()->CreateParticleGroup("enemyGround", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
-	ParticleManager::GetInstance()->CreateParticleGroup("enemyDust", "resources/Texture/dust.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("hitStar", "resources/Texture/Image.png", primiStar.get());
+	particleManager->CreateParticleGroup("hitTrai", "resources/Texture/Image.png", primiTrai.get());
+	particleManager->CreateParticleGroup("hit", "resources/Texture/hit.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("enemyGround", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("enemyDust", "resources/Texture/dust.png", modelManager->FindModel("plane.obj"));
 
 	// 敵部品
-	ParticleManager::GetInstance()->CreateParticleGroup("enemyTire", "resources/Texture/enemy.png", modelManager->FindModel("enemyTire.obj")); // タイヤ
-	ParticleManager::GetInstance()->CreateParticleGroup("enemyDuct", "resources/Texture/enemy.png", modelManager->FindModel("enemyDuct.obj")); // ダクト
-	ParticleManager::GetInstance()->CreateParticleGroup("enemyPlank", "resources/Texture/enemy.png",modelManager->FindModel("enemyPlank.obj")); // 板
-	ParticleManager::GetInstance()->CreateParticleGroup("enemyGear", "resources/Texture/enemy.png", modelManager->FindModel("enemyGear.obj")); // 歯車
-	ParticleManager::GetInstance()->CreateParticleGroup("enemyFence", "resources/Texture/enemy.png",modelManager->FindModel("enemyFence.obj")); // 柵
+	particleManager->CreateParticleGroup("enemyTire", "resources/Texture/enemy.png", modelManager->FindModel("enemyTire.obj")); // タイヤ
+	particleManager->CreateParticleGroup("enemyDuct", "resources/Texture/enemy.png", modelManager->FindModel("enemyDuct.obj")); // ダクト
+	particleManager->CreateParticleGroup("enemyPlank", "resources/Texture/enemy.png",modelManager->FindModel("enemyPlank.obj")); // 板
+	particleManager->CreateParticleGroup("enemyGear", "resources/Texture/enemy.png", modelManager->FindModel("enemyGear.obj")); // 歯車
+	particleManager->CreateParticleGroup("enemyFence", "resources/Texture/enemy.png",modelManager->FindModel("enemyFence.obj")); // 柵
 
-	ParticleManager::GetInstance()->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 }
 

@@ -172,10 +172,10 @@ public:
 #pragma endregion // 構造体
 
 public:
-
-
-	// シングルトンインスタンス
-	static ParticleManager* GetInstance();
+	ParticleManager() = default;
+	~ParticleManager() = default;
+	ParticleManager(ParticleManager&) = delete;
+	ParticleManager& operator=(ParticleManager&) = delete;
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
@@ -183,8 +183,7 @@ public:
 	void Update();
 	// 描画
 	void Draw();
-	// 終了
-	void Finalize();
+
 	// 描画準備
 	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
@@ -245,11 +244,7 @@ private: // エミッタ種類
 	void SphereEmit(ParticleGroup& particleGroup); // 球状
 
 private:
-	static ParticleManager* instance;
-	ParticleManager() = default;
-	~ParticleManager() = default;
-	ParticleManager(ParticleManager&) = delete;
-	ParticleManager& operator=(ParticleManager&) = delete;
+
 
 	DirectXCommon* dxCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;

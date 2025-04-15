@@ -10,6 +10,7 @@
 #include"ParticleManager.h"
 #include"DirectXGame/engine/WorldTransform/WorldTransform.h"
 
+
 class ParticleEmitter
 {
 public:
@@ -34,7 +35,7 @@ public:
 	};
 
 public:
-	void Initialize(std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
+	void Initialize(ParticleManager* particleManager,std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
 
 	void Update();
 
@@ -129,6 +130,7 @@ private:
 
 
 	ParticleManager::Emiter emitter_{};
+	ParticleManager* particleManager_;
 };
 
 

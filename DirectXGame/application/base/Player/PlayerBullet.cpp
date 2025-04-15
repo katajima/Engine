@@ -56,7 +56,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 
 	
 	ｍSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	ｍSmokeEmitter_->Initialize("emitterSmoke", "smoke", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
+	ｍSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(),"emitterSmoke", "smoke", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
 	ｍSmokeEmitter_->GetFrequency() = 0.01f;
 	ｍSmokeEmitter_->SetCount(5);
 	ｍSmokeEmitter_->SetLifeTimeMinMax(0.5f, 1.0f);
@@ -75,7 +75,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 
 
 	mExplosionSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	mExplosionSmokeEmitter_->Initialize("emitterSmoke", "explosionSmoke", ParticleEmitter::EmitSpawnShapeType::kAABB);
+	mExplosionSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(),"emitterSmoke", "explosionSmoke", ParticleEmitter::EmitSpawnShapeType::kAABB);
 	mExplosionSmokeEmitter_->SetParent(object_.worldtransform_);
 	mExplosionSmokeEmitter_->GetFrequency() = 0.00f;
 	mExplosionSmokeEmitter_->SetCount(50);

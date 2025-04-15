@@ -69,10 +69,6 @@ protected:
 	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
 
 	std::unique_ptr<GlobalVariables> globalVariables_;
-
 	
-
-	ParticleManager* particleManager_ = nullptr;
-		
 };
 

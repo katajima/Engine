@@ -3,8 +3,12 @@
 #include "ParticleEmitter.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void ParticleEmitter::Initialize(std::string emitName, std::string particleName, EmitSpawnShapeType spawnType)
+
+
+void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitSpawnShapeType spawnType)
 {
+	particleManager_ = particleManager;
+
 	emitter_.controlPoints.clear(); // 初期化
 
 	spawnShapeType_ = spawnType;
@@ -50,7 +54,7 @@ void ParticleEmitter::Initialize(std::string emitName, std::string particleName,
 
 void ParticleEmitter::Update()
 {
-	ParticleManager::ParticleGroup& particleGroup = ParticleManager::GetInstance()->GetParticleGroups(particleName_);
+	ParticleManager::ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 
 #ifdef _DEBUG
@@ -169,30 +173,30 @@ void ParticleEmitter::Update()
 void ParticleEmitter::Emit()
 {
 	if (isEmit) {
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).usebillboard = usebillboard; // ビルボード
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isAlpha = isAlpha; // 透明度
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isGravity = isGravity; // 重力
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isLifeTimeScale_ = isLifeTimeScale_; // 重力
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isRotateVelocity = isRotateVelocity; // 回転速度
-		ParticleManager::GetInstance()->GetParticleGroups(particleName_).isBounce = isBounce; // 回転速度
+		particleManager_->GetParticleGroups(particleName_).usebillboard = usebillboard; // ビルボード
+		particleManager_->GetParticleGroups(particleName_).isAlpha = isAlpha; // 透明度
+		particleManager_->GetParticleGroups(particleName_).isGravity = isGravity; // 重力
+		particleManager_->GetParticleGroups(particleName_).isLifeTimeScale_ = isLifeTimeScale_; // 重力
+		particleManager_->GetParticleGroups(particleName_).isRotateVelocity = isRotateVelocity; // 回転速度
+		particleManager_->GetParticleGroups(particleName_).isBounce = isBounce; // 回転速度
 
 		if (emitType_ == ParticleManager::EmitType::kRandom) {
-			ParticleManager::GetInstance()->GetParticleGroups(particleName_).emiter = emitter_;
+			particleManager_->GetParticleGroups(particleName_).emiter = emitter_;
 			
 			if (spawnShapeType_ == EmitSpawnShapeType::kPoint) {
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kPoint);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kPoint);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kAABB);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kAABB);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kSegmentLine) {
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSegmentLine);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSegmentLine);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kCornerLine) {
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kCornerLine);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kCornerLine);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kSpline){
-				ParticleManager::GetInstance()->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSpline);
+				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSpline);
 			}
 		}
 	}
