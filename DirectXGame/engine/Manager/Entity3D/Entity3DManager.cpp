@@ -41,4 +41,8 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	primitiveCommon_ = std::make_unique<PrimitiveCommon>();
 	primitiveCommon_->Initialize(directXCommon_);
 
+
+	// エフェクトマネージャー
+	effectManager_ = std::make_unique<EffectManager>();
+	effectManager_->Initialize(directXCommon_);
 }

@@ -13,6 +13,7 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
+#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -40,6 +41,8 @@ public:
 	LineCommon* Get3DLineCommon() { return lineCommon_.get(); }
 
 	PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
+
+	EffectManager* GetEffectManager() { return effectManager_.get(); }
 
 private:
 
@@ -72,6 +75,9 @@ private:
 
 	// プリミティブ
 	std::unique_ptr<PrimitiveCommon> primitiveCommon_ = nullptr;
+
+	// エフェクトマネージャー
+	std::unique_ptr<EffectManager> effectManager_ = nullptr;	 // エフェクトマネージャー
 
 };
 

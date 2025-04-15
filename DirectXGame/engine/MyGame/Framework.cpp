@@ -25,8 +25,6 @@ void Framework::Initialize()
 	entity2DManager_->Initialize(dxCommon.get());
 
 
-
-
 	particleManager_ = ParticleManager::GetInstance();
 	particleManager_->Initialize(dxCommon.get());
 

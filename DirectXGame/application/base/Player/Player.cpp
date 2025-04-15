@@ -122,7 +122,7 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 
 
 	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(dxCommon_->GetEffectManager(), "resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
+	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), "resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
 	trailEffect_->SetCamera(camera);
 	trailEffect_->SetObject(&weapon_->GetObject3D());
 	

@@ -100,8 +100,6 @@ public:
 	
 	DXCCompiler* GetDXCCompiler() { return dxcCompiler_.get(); }
 
-	EffectManager* GetEffectManager(){ return effectManager_.get(); }
-
 	ImGuiManager* GetImGuiManager() { return imguiManager_.get(); }
 
 	RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
@@ -123,7 +121,6 @@ private:
 	std::unique_ptr<RenderTexture> renderTexture_ = std::make_unique<RenderTexture>();	 // レンダーテクスチャ 
 	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();// テクスチャマネージャー 
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		 // モデルマネージャー
-	std::unique_ptr<EffectManager> effectManager_;	 // エフェクトマネージャー
 	std::unique_ptr<PSOManager> psoManager_ = std::make_unique<PSOManager>();		     // PSOマネージャー
 
 	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
