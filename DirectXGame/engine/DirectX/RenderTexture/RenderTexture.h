@@ -30,6 +30,9 @@ public:
 		kSmoothing,     // スムージング
 		kGaussian,      // ガウス
 		kOitline,		// アウトライン
+		kRadialBlur,	// ラジアルブラー
+		kDissovle,      // ディゾルブ
+		kRandom,		// ランダム
 	};
 
 	RenderTexture() = default;

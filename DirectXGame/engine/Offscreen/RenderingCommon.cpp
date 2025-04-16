@@ -33,6 +33,28 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	outlineData_->weightSquared = 6.0f;
 	outlineData_->projectionInverse = Identity();
 	
+	// ラジアルブラー
+	radialBlurResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(RadialBlurGPU));
+	radialBlurResource_->Map(0, nullptr, reinterpret_cast<void**>(&radialBlurData_));
+	radialBlurData_->center = Vector2{0.5f,0.5f};
+	radialBlurData_->numSamples = 10;
+	radialBlurData_->blurWidth = 0.01f;
+	
+	//	ディゾルブ
+	dissovleResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DissovleGPU));
+	dissovleResource_->Map(0, nullptr, reinterpret_cast<void**>(&dissovleData_));
+	dissovleData_->threshold = 0.5f;
+	dissovleData_->edge = 0.03f;
+	dissovleData_->color.x = 1.0f;
+	dissovleData_->color.y = 0.4f;
+	dissovleData_->color.z = 0.3f;
+
+	
+	//	ランダム
+	randomResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(RandomGPU));
+	randomResource_->Map(0, nullptr, reinterpret_cast<void**>(&randomData_));
+	randomData_->time = 0.0f;
+	
 	CreateGraphicsPipeline();
 	
 
@@ -46,8 +68,8 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	vertexBufferView.StrideInBytes = sizeof(ScreenVertexData);
 
 
-
-
+	dxCommon_->GetTextureManager()->LoadTexture("resources/Texture/noise.jpg");
+	dissovleIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath("resources/Texture/noise.jpg");
 }
 
 void RenderingCommon::DrawCopyRender(int index)
@@ -137,6 +159,43 @@ void RenderingCommon::DrawOutlineRender(int index)
 	DrawColl();
 }
 
+void RenderingCommon::DrawRadialBlurRender(int index)
+{
+	DrawRadialBlurSetting();
+
+
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, radialBlurResource_->GetGPUVirtualAddress());
+
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
+
+	DrawColl();
+}
+
+void RenderingCommon::DrawDissovleRender(int index)
+{
+	DrawDissovleSetting();
+
+
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, dissovleResource_->GetGPUVirtualAddress());
+
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
+	
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, dissovleIndex);
+
+	DrawColl();
+}
+
+void RenderingCommon::DrawRandomRender(int index)
+{
+	DrawRandomSetting();
+
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, randomResource_->GetGPUVirtualAddress());
+
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
+
+	DrawColl();
+}
+
 void RenderingCommon::UpdateImgui(PostEffectType type)
 {
 #ifdef _DEBUG
@@ -185,7 +244,19 @@ void RenderingCommon::UpdateImgui(PostEffectType type)
 			}
 			ImGui::DragFloat("squared", &outlineData_->weightSquared, 0.1f);
 			break;
-
+		case RenderingCommon::PostEffectType::kRadialBlur:
+			ImGui::DragFloat2("scale", &radialBlurData_->center.x, 0.01f);
+			ImGui::DragFloat("blurWidth", &radialBlurData_->blurWidth, 0.01f);
+			ImGui::SliderInt("numSamples", &radialBlurData_->numSamples,1,20);
+			break;
+		case RenderingCommon::PostEffectType::kDissovle:
+			ImGui::DragFloat("threshold", &dissovleData_->threshold, 0.01f);
+			ImGui::DragFloat("edge", &dissovleData_->edge, 0.001f);
+			ImGui::ColorEdit3("color",&dissovleData_->color.x);
+			break;
+		case RenderingCommon::PostEffectType::kRandom:
+			randomData_->time += 0.01f;
+			break;
 		default:
 			break;
 		}
@@ -281,6 +352,40 @@ void RenderingCommon::DrawOutlineSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
+void RenderingCommon::DrawRadialBlurSetting()
+{
+	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(radialBlur_.rootSignature.Get());
+
+	dxCommon_->GetCommandList()->SetPipelineState(radialBlur_.graphicsPipelineState.Get()); //PSOを設定
+
+	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void RenderingCommon::DrawDissovleSetting()
+{
+	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(dissovle_.rootSignature.Get());
+
+	dxCommon_->GetCommandList()->SetPipelineState(dissovle_.graphicsPipelineState.Get()); //PSOを設定
+
+	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void RenderingCommon::DrawRandomSetting()
+{
+	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(random_.rootSignature.Get());
+
+	dxCommon_->GetCommandList()->SetPipelineState(random_.graphicsPipelineState.Get()); //PSOを設定
+
+	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+
 #pragma endregion // レンダリング種類
 
 
@@ -330,7 +435,7 @@ void RenderingCommon::CreateRootSignature()
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
-	psoManager_->SetRootSignature(smoothing_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	psoManager_->SetRootSignature(smoothing_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
 
 
 	//ガウスデータ (b0) をピクセルシェーダで使用する
@@ -338,12 +443,43 @@ void RenderingCommon::CreateRootSignature()
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
-	psoManager_->SetRootSignature(gaussian_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	psoManager_->SetRootSignature(gaussian_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
 
+
+	//ラジアルブラー (b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(smoothingRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(radialBlur_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
+
+
+	// ランダム(b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(smoothingRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(random_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
+
+
+	// ディゾルブ
+	D3D12_DESCRIPTOR_RANGE descriptorRangeDissovle[2] = {};
+	psoManager_->SetDescriptorRenge(descriptorRangeDissovle[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
+	psoManager_->SetDescriptorRenge(descriptorRangeDissovle[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
+
+	D3D12_ROOT_PARAMETER dissovleRootParameters[3] = {};
+	//　ディゾルブ(b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(dissovleRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(dissovleRootParameters[1], descriptorRangeDissovle[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t1) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(dissovleRootParameters[2], descriptorRangeDissovle[1], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(dissovle_.rootSignature, dissovleRootParameters, _countof(dissovleRootParameters), staticSamplers, _countof(staticSamplers));
 
 
 	
-	
+	// アウトライン	
 	D3D12_DESCRIPTOR_RANGE descriptorRangeOutline[2] = {};
 	psoManager_->SetDescriptorRenge(descriptorRangeOutline[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
 	psoManager_->SetDescriptorRenge(descriptorRangeOutline[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
@@ -353,7 +489,6 @@ void RenderingCommon::CreateRootSignature()
 	psoManager_->SetSampler(staticSamplersOutline[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 	psoManager_->SetSampler(staticSamplersOutline[1], 1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	// アウトライン
 	D3D12_ROOT_PARAMETER outlineRootParameters[3] = {};
 
 	psoManager_->SetRootParameter(outlineRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -363,6 +498,8 @@ void RenderingCommon::CreateRootSignature()
 	psoManager_->SetRootParameter(outlineRootParameters[2], descriptorRangeOutline[1], D3D12_SHADER_VISIBILITY_PIXEL);
 	
 	psoManager_->SetRootSignature(outline_.rootSignature, outlineRootParameters, _countof(outlineRootParameters), staticSamplersOutline, _countof(staticSamplersOutline));
+
+	
 
 }
 
@@ -432,6 +569,15 @@ void RenderingCommon::CreateGraphicsPipeline()
 
 	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Outline.PS.hlsl";
 	psoManager_->GraphicsPipelineState(outline_.rootSignature, outline_.graphicsPipelineState, blendDesc, depthStencilDesc);
+
+	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/RadialBlur.PS.hlsl";
+	psoManager_->GraphicsPipelineState(radialBlur_.rootSignature, radialBlur_.graphicsPipelineState, blendDesc, depthStencilDesc);
+
+	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Dissovle.PS.hlsl";
+	psoManager_->GraphicsPipelineState(dissovle_.rootSignature, dissovle_.graphicsPipelineState, blendDesc, depthStencilDesc);
+
+	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Random.PS.hlsl";
+	psoManager_->GraphicsPipelineState(random_.rootSignature, random_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
 
 

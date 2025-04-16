@@ -19,6 +19,9 @@ public:
 		kSmoothing,     // スムージング
 		kGaussian,      // ガウス
 		kOitline,		// アウトライン
+		kRadialBlur,	// ラジアルブラー
+		kDissovle,      // ディゾルブ
+		kRandom,		// ランダム
 	};
 
 	// 初期化
@@ -39,6 +42,12 @@ public:
 	void DrawGaussianRender(int index);
 
 	void DrawOutlineRender(int index);
+
+	void DrawRadialBlurRender(int index);
+
+	void DrawDissovleRender(int index);
+
+	void DrawRandomRender(int index);
 
 
 	void SetCamera(Camera* camera) { camera_ = camera; }
@@ -74,6 +83,15 @@ private:
 
 	// アウトライン
 	void DrawOutlineSetting();
+	
+	// ラジアルブラー
+	void DrawRadialBlurSetting();
+
+	// ディゾルブ
+	void DrawDissovleSetting();
+
+	// ランダム
+	void DrawRandomSetting();
 
 
 private:
@@ -97,6 +115,9 @@ private:
 	Rendering smoothing_;
 	Rendering gaussian_;
 	Rendering outline_;
+	Rendering radialBlur_;
+	Rendering dissovle_;
+	Rendering random_;
 
 	//バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
@@ -138,8 +159,37 @@ private:
 	OutlineGPU* outlineData_{};
 	Microsoft::WRL::ComPtr < ID3D12Resource> outlineResource_;
 
+	struct RadialBlurGPU
+	{
+		Vector2 center;
+		int numSamples;
+		float blurWidth;
+	};
+	RadialBlurGPU* radialBlurData_{};
+	Microsoft::WRL::ComPtr < ID3D12Resource> radialBlurResource_;
 
 
+	struct DissovleGPU
+	{
+		float threshold;
+		Vector3 color;
+		float edge;
+		float pad[3];
+	};
+	DissovleGPU* dissovleData_{};
+	Microsoft::WRL::ComPtr < ID3D12Resource> dissovleResource_;
+
+	uint32_t dissovleIndex = 0;
+
+
+
+	struct RandomGPU
+	{
+		float time;
+		float pad[3];
+	};
+	RandomGPU* randomData_{};
+	Microsoft::WRL::ComPtr < ID3D12Resource> randomResource_;
 };
 
 

@@ -57,6 +57,14 @@ void RenderTexture::Update(PostEffectType type)
 		break;
 	case RenderTexture::PostEffectType::kOitline:
 		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kOitline);
+	case RenderTexture::PostEffectType::kRadialBlur:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRadialBlur);
+		break;
+	case RenderTexture::PostEffectType::kDissovle:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kDissovle);
+		break;
+	case RenderTexture::PostEffectType::kRandom:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRandom);
 		break;
 	default:
 		break;
@@ -87,6 +95,14 @@ void RenderTexture::Draw(PostEffectType type)
 		break;
 	case RenderTexture::PostEffectType::kOitline:
 		renderingCommon_->DrawOutlineRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kRadialBlur:
+		renderingCommon_->DrawRadialBlurRender(srvIndex_);
+	case RenderTexture::PostEffectType::kDissovle:
+		renderingCommon_->DrawDissovleRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kRandom:
+		renderingCommon_->DrawRandomRender(srvIndex_);
 		break;
 	default:
 		renderingCommon_->DrawCopyRender(srvIndex_);

@@ -87,7 +87,7 @@ void MyGame::Update()
 #endif // _DEBUG
 	// レンダーテクスチャ
 	dxCommon->GetRenderTexture()->SetCamera(sceneManager_->GetCamara());
-	dxCommon->GetRenderTexture()->Update(RenderTexture::PostEffectType::kOitline);
+	dxCommon->GetRenderTexture()->Update(RenderTexture::PostEffectType::kRandom);
 	// ImGuiの受付終了
 	dxCommon->GetImGuiManager()->End();
 }
@@ -113,7 +113,7 @@ void MyGame::Draw()
 
 
 	// レンダーテクスチャ(コピー)
-	dxCommon->GetRenderTexture()->Draw(RenderTexture::PostEffectType::kOitline);
+	dxCommon->GetRenderTexture()->Draw(RenderTexture::PostEffectType::kRandom);
 
 	// ImGuiの描画
 	dxCommon->GetImGuiManager()->Draw();

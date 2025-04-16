@@ -422,6 +422,9 @@
     <FxCompile Include="resources\shaders\Offscreen\Smoothing.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\Gaussian.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\Outline.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
