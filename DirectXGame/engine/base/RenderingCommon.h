@@ -2,6 +2,8 @@
 #include"DirectXGame/engine/base/TextureManager.h"
 
 #include "DirectXGame/engine/struct/Structs3D.h"
+#include "DirectXGame/engine/struct/VertexDeta.h"
+#include "DirectXGame/engine/PSO/PSOManager.h"
 
 class DirectXCommon;
 class RenderingCommon
@@ -22,12 +24,9 @@ private:
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
 private:
-	//頂点データ
-	struct VertexData {
+	std::unique_ptr<PSOManager> psoManager_;
 
-		Vector4 position;
-		Vector2 texcoord;
-	};
+	
 
 	DirectXCommon* dxCommon_;
 
@@ -41,7 +40,7 @@ private:
 	//バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
-	VertexData* vertexData = nullptr;
+	ScreenVertexData* vertexData = nullptr;
 
 };
 

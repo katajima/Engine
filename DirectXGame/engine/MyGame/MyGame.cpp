@@ -94,34 +94,27 @@ void MyGame::Draw()
 	// 描画前処理
 	dxCommon->GetSrvManager()->PreDraw();
 	
-	// スワップチェーン用の描画準備
-	dxCommon->GetBarrier()->SwapPre();
-	dxCommon->PreDrawSwap();
-
 	// レンダーターゲット用の描画準備
-	//dxCommon->PreDrawOffscreen(); // オフスクリーンのRTV設定
+	dxCommon->PreDrawOffscreen(); // オフスクリーンのRTV設定
 		
-
-
 	// 3Dと2D描画
 	Draw3D2D();
 
 	// レンダーターゲット用の描画後処理
-	//dxCommon->PostDrawOffscreen();
+	dxCommon->PostDrawOffscreen();
 	
 	
-
-
+	// スワップチェーン用の描画準備
+	dxCommon->PreDrawSwap();
 
 
 	// レンダーテクスチャ(コピー)
-	// dxCommon->GetRenderTexture()->Draw();
+	dxCommon->GetRenderTexture()->Draw();
 
 	// ImGuiの描画
 	dxCommon->GetImGuiManager()->Draw();
 
-		// スワップチェーン用の描画後処理
-	dxCommon->GetBarrier()->SwapPost();
+	// スワップチェーン用の描画後処理
 	dxCommon->PostDrawSwap();
 
 }

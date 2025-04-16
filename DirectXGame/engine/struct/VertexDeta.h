@@ -17,6 +17,12 @@ struct LineVertexData {
 	Vector4 color;    // 色
 };
 
+//頂点データ
+struct ScreenVertexData {
+
+	Vector4 position;
+	Vector2 texcoord;
+};
 
 
 // カスタムハッシュ関数

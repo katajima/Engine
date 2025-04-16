@@ -17,7 +17,8 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 	renderingCommon_ = renderingCommon;
 
 
-	CreateResource(); // リソース作成
+	//CreateResource(); // リソース作成
+	CreateResourcePixel(); 
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成
 
@@ -76,6 +77,43 @@ void RenderTexture::CreateResource()
 		D3D12_HEAP_FLAG_NONE,							// Heapの特殊な設定。特になし。
 		&resourceDesc,									// リソースの設定
 		D3D12_RESOURCE_STATE_RENDER_TARGET,				// これから描画することを前提としたTextureなので、RenderTargetとして使うことから始める
+		&clearValue,									// Clear最適値、ClearRenderをこの色でクリアするようにする、最適化されているので高速である。
+		IID_PPV_ARGS(&resource_)
+	);
+	assert(SUCCEEDED(hr_));
+}
+
+void RenderTexture::CreateResourcePixel()
+{
+	// リソースの設定
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Width = UINT(WinApp::kClientWidth);					// Textureの幅
+	resourceDesc.Height = UINT(WinApp::kClientHeight);					// Textureの高さ
+	resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;				// TextureのFormat
+	resourceDesc.SampleDesc.Count = 1;									// サンプリングカウント。1固定
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;		// renderTargetとして利用可能にする
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+
+	// 利用するHeapの設定
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	// クリアカラーの設定
+	D3D12_CLEAR_VALUE clearValue;
+	clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	clearValue.Color[0] = clearColor_.x;
+	clearValue.Color[1] = clearColor_.y;
+	clearValue.Color[2] = clearColor_.z;
+	clearValue.Color[3] = clearColor_.w;
+
+	// リソースの作成
+	resource_ = nullptr;
+	hr_ = DXGIDevice_->GetDevice()->CreateCommittedResource(
+		&heapProperties,								// Heapの設定
+		D3D12_HEAP_FLAG_NONE,							// Heapの特殊な設定。特になし。
+		&resourceDesc,									// リソースの設定
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,		// これから描画することを前提としたTextureなので、RenderTargetとして使うことから始める
 		&clearValue,									// Clear最適値、ClearRenderをこの色でクリアするようにする、最適化されているので高速である。
 		IID_PPV_ARGS(&resource_)
 	);

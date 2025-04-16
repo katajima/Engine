@@ -38,9 +38,16 @@ public:
 
 	D3D12_RESOURCE_STATES GetCurrentState() const { return currentState_; }
 	void SetCurrentState(D3D12_RESOURCE_STATES state) { currentState_ = state; }
-private:
+
 	// レンダーテクスチャのリソースを作成
 	void CreateResource();
+	// 
+	// レンダーテクスチャのリソースを作成
+	void CreateResourcePixel();
+private:
+
+
+
 	// RTVを作成
 	void CreateRTV();
 	// SRVを作成

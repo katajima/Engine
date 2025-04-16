@@ -378,7 +378,7 @@
     <None Include="resources\shaders\Particle\Particle.hlsli" />
     <None Include="resources\shaders\Line\Line.hlsli" />
     <None Include="resources\shaders\Object2D\Object2D.hlsli" />
-    <None Include="resources\shaders\CopyImage\CopyImage.hlsli" />
+    <None Include="resources\shaders\Offscreen\Fullscreen.hlsli" />
     <None Include="resources\shaders\Octagrams\Octagrams.hlsli" />
     <None Include="resources\shaders\Ocean\Ocean.hlsli" />
     <None Include="resources\shaders\Thunder\Thunder.hlsli" />
@@ -395,8 +395,8 @@
     <FxCompile Include="resources\shaders\Line\Line.VS.hlsl" />
     <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
     <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
-    <FxCompile Include="resources\shaders\CopyImage\CopyImage.PS.hlsl" />
-    <FxCompile Include="resources\shaders\CopyImage\CopyImage.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
     <FxCompile Include="resources\shaders\Octagrams\Octagrams.PS.hlsl" />
     <FxCompile Include="resources\shaders\Octagrams\Octagrams.VS.hlsl" />
     <FxCompile Include="resources\shaders\Ocean\Ocean.PS.hlsl" />

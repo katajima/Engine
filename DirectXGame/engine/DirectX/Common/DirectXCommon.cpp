@@ -54,7 +54,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 void DirectXCommon::PreDrawOffscreen() {
 
 	// レンダーターゲット用バリア(描画前)
-	//barrier_->RenderPre();
+	barrier_->RenderPre();
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
@@ -77,7 +77,7 @@ void DirectXCommon::PreDrawOffscreen() {
 void DirectXCommon::PostDrawOffscreen()
 {
 	// レンダーターゲット用バリア(描画後)
-	//barrier_->RenderPost();
+	barrier_->RenderPost();
 
 }
 
@@ -85,18 +85,18 @@ void DirectXCommon::PreDrawSwap() {
 	
 
 	// スワップチェーン用バリア(描画前)
-	//barrier_->SwapPre();
+	barrier_->SwapPre();
 	
 	// 描画先のRTVとDSVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = swapChain_->GetCurrentBackBufferRTVHandle();
-	//command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
+	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+	//command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 	// 指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };  // 任意のクリアカラー（青）
 	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	//command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// コマンドを積む
 	viewPort_->SettingViewport();
@@ -106,7 +106,7 @@ void DirectXCommon::PreDrawSwap() {
 void DirectXCommon::PostDrawSwap() {
 	
 	// スワップチェーン用バリア(描画後)
-	//barrier_->SwapPost();
+	barrier_->SwapPost();
 
 	// コマンドキック
 	command_->KickCommand();
