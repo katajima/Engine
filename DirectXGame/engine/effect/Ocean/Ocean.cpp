@@ -27,7 +27,7 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 	mesh_->indices.push_back(3);
 	mesh_->indices.push_back(2);
 
-	mesh_->Initialize(directXCommon_->GetModelManager()->GetModelCommon());
+	mesh_->Initialize(directXCommon_);
 
 
 

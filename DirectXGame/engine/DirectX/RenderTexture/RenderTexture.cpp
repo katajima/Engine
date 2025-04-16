@@ -8,23 +8,26 @@
 
 #include "DirectXGame/engine/base/RenderingCommon.h"
 
-void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager)
+void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager,RenderingCommon* renderingCommon)
 {
 	DXGIDevice_ = DXGIDevice;
 	command_ = command;
 	srvManager_ = srvManager;
 	rtvManager_ = rvtManager;
+	renderingCommon_ = renderingCommon;
 
 
 	CreateResource(); // リソース作成
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成
 
+
+	resource_->SetName(L"RenderTexture");
 }
 
 void RenderTexture::Draw()
 {
-	//RenderingCommon::GetInstance()->DrawCommonSetting(srvIndex_);
+	renderingCommon_->DrawCommonSetting(srvIndex_);
 }
 
 Vector4 RenderTexture::GetClearColor() const
@@ -85,6 +88,8 @@ void RenderTexture::CreateRTV()
 	rtvIndex_ = rtvManager_->Allocate();
 	// RTVを作成
 	rtvManager_->CreateRTV(rtvIndex_, resource_.Get());
+
+	
 }
 
 void RenderTexture::CreateSRV()

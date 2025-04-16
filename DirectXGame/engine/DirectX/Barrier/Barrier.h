@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d3d12.h>
+#include <unordered_map>
 
 class Command;
 class SwapChain;
@@ -15,21 +16,30 @@ public:
 	// 
 	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture);
 
+	// レンダーターゲット用バリア(Pre)
+	void RenderPre();
 
-	void Pre();
+	// レンダーターゲット用バリア(Post)
+	void RenderPost();
 
-	void Post();
+	// スワップチェーン用バリア(Pre)
+	void SwapPre();
 
+	// スワップチェーン用バリア(Post)
+	void SwapPost();
 
 private:
-	void TransitionResourceState(ID3D12Resource* resource, D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState);
+
 private:
 
 	Command* command_;
 	SwapChain* swapChain_;
 	RenderTexture* renderTexture_;
-private:
-	D3D12_RESOURCE_BARRIER swapChainBarrier_;
 
+private:
+	D3D12_RESOURCE_STATES renderTextureState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//D3D12_RESOURCE_BARRIER  swapChainbarrier{};
+	// Resource状態の追跡マップをメンバ変数に追加（ヘッダなど）
+	//std::unordered_map<ID3D12Resource*, D3D12_RESOURCE_STATES> resourceStates;
 };
 

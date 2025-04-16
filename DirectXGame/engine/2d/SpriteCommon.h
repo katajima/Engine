@@ -39,7 +39,7 @@ private:// メンバ関数
 private:// メンバ変数
 	DirectXCommon* dxCommon_;
 
-	PSOManager* psoManager_ = nullptr;
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
 	//ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};

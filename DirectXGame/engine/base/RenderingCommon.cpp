@@ -22,18 +22,26 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 
 void RenderingCommon::DrawCommonSetting(int index)
 {
+	OutputDebugStringA("DrawInstanced() called\n");
+
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
 
+	// 状態遷移が正常かを確認
+	OutputDebugStringA(">>> Drawing with RenderTexture in RENDER_TARGET state\n");
+
+
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
-
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
+
+	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
+
+	
 	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }
 
@@ -234,7 +242,7 @@ void RenderingCommon::CreateGraphicsPipeline()
 	
 
 	// DepthStencilの設定
-	//graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
+	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	//graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 

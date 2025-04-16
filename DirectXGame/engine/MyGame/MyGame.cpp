@@ -93,23 +93,45 @@ void MyGame::Draw()
 	///
 	// 描画前処理
 	dxCommon->GetSrvManager()->PreDraw();
-	//dxCommon->GetUavManager()->PreDraw();
-
-	// バックバッファの準備
+	
+	// スワップチェーン用の描画準備
+	dxCommon->GetBarrier()->SwapPre();
 	dxCommon->PreDrawSwap();
-	
 
-	////// オフスクリーン描画
+	// レンダーターゲット用の描画準備
 	//dxCommon->PreDrawOffscreen(); // オフスクリーンのRTV設定
-	
+		
+
+
+	// 3Dと2D描画
+	Draw3D2D();
+
+	// レンダーターゲット用の描画後処理
+	//dxCommon->PostDrawOffscreen();
 	
 	
 
-	
+
+
+
+	// レンダーテクスチャ(コピー)
+	// dxCommon->GetRenderTexture()->Draw();
+
+	// ImGuiの描画
+	dxCommon->GetImGuiManager()->Draw();
+
+		// スワップチェーン用の描画後処理
+	dxCommon->GetBarrier()->SwapPost();
+	dxCommon->PostDrawSwap();
+
+}
+
+void MyGame::Draw3D2D()
+{
 
 	// 3Dオブジェクトの描画
 	sceneManager_->Draw3D();
-	
+
 	// パーティクル描画
 	entity3DManager_->GetEffectManager()->GetParticleManager()->Draw();
 
@@ -122,16 +144,7 @@ void MyGame::Draw()
 
 	// 2Dオブジェクトの描画
 	sceneManager_->Draw2D();
-
-	dxCommon->GetRenderTexture()->Draw();
-
-	// ImGuiの描画
-	dxCommon->GetImGuiManager()->Draw();
-
-	// 描画後処理
-	dxCommon->PostDrawSwap();
 }
-
 
 void MyGame::InitializeResource()
 {
@@ -300,6 +313,8 @@ void MyGame::InitializeResource()
 	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 }
+
+
 
 
 

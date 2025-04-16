@@ -14,7 +14,7 @@ void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& te
 
 
 
-	mesh->Initialize(effectManager_->GetDxCommon()->GetModelManager()->GetModelCommon());
+	mesh->Initialize(effectManager_->GetDxCommon());
 
 	mesh->indices.clear();
 	mesh->vertices.clear();

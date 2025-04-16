@@ -20,6 +20,9 @@ void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, R
 	// RTV作成
 	CreateRTV();
 
+	swapChainResources_[0]->SetName(L"SwapChainBuffer_0");
+	swapChainResources_[1]->SetName(L"SwapChainBuffer_1");
+
 }
 
 void SwapChain::Present()

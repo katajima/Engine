@@ -1,7 +1,8 @@
 #include "Mesh.h"
 
 #include "DirectXGame/engine/base/ImGuiManager.h"
-#include "DirectXGame/engine/3d/Model/ModelCommon.h"
+//#include "DirectXGame/engine/3d/Model/ModelCommon.h"
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 // 頂点を比較するためのオペレーター
 bool operator==(const VertexData& v1, const VertexData& v2) {
@@ -10,12 +11,12 @@ bool operator==(const VertexData& v1, const VertexData& v2) {
 		v1.texcoord == v2.texcoord;
 }
 
-void Mesh::Initialize(ModelCommon* modelCommon)
+void Mesh::Initialize(DirectXCommon* dxcommon)
 {
-	modelCommon_ = modelCommon;
+	dxCommon_ = dxcommon;
 
 	//if (vertices.size() != 0) {
-	vertexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * vertices.size());
+	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * vertices.size());
 
 	// リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -27,7 +28,7 @@ void Mesh::Initialize(ModelCommon* modelCommon)
 	//}
 	//if (indices.size() != 0) {
 		// インデクスリソース
-	indexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
+	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
@@ -39,11 +40,11 @@ void Mesh::Initialize(ModelCommon* modelCommon)
 	
 }
 
-void Mesh::InitializeLine(ModelCommon* modelCommon)
+void Mesh::InitializeLine(DirectXCommon* dxcommon)
 {
-	modelCommon_ = modelCommon;
+	dxCommon_ = dxcommon;
 
-	vertexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(LineVertexData) * verticesline.size());
+	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(LineVertexData) * verticesline.size());
 
 	// リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -55,7 +56,7 @@ void Mesh::InitializeLine(ModelCommon* modelCommon)
 
 
 	// インデクスリソース
-	indexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
+	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
@@ -67,11 +68,11 @@ void Mesh::InitializeLine(ModelCommon* modelCommon)
 
 }
 
-void Mesh::InitializeSkyBox(ModelCommon* modelCommon)
+void Mesh::InitializeSkyBox(DirectXCommon* dxcommon)
 {
-	modelCommon_ = modelCommon;
+	dxCommon_ = dxcommon;
 
-	vertexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SkyBoxVertexData) * verticesskyBox.size());
+	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SkyBoxVertexData) * verticesskyBox.size());
 
 	// リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -83,7 +84,7 @@ void Mesh::InitializeSkyBox(ModelCommon* modelCommon)
 
 
 	// インデクスリソース
-	indexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
+	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
@@ -106,7 +107,7 @@ void Mesh::UpdateVertexBuffer() {
 			D3D12_HEAP_PROPERTIES heapProps = {};
 			heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 			D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(requiredSize);
-			HRESULT hr = modelCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
+			HRESULT hr = dxCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
 				&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
 
 			if (FAILED(hr)) {
@@ -141,7 +142,7 @@ void Mesh::UpdateLineVertexBuffer()
 			D3D12_HEAP_PROPERTIES heapProps = {};
 			heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 			D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(requiredSize);
-			HRESULT hr = modelCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
+			HRESULT hr = dxCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
 				&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
 
 			if (FAILED(hr)) {
@@ -176,7 +177,7 @@ void Mesh::UpdateIndexBuffer()
 			D3D12_HEAP_PROPERTIES heapProps = {};
 			heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 			D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(requiredSize);
-			HRESULT hr = modelCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
+			HRESULT hr = dxCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
 				&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&indexResource));
 
 			if (FAILED(hr)) {
@@ -201,9 +202,9 @@ void Mesh::UpdateIndexBuffer()
 void Mesh::GetCommandList()
 {
 	// 頂点バッファの設定
-	modelCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+	dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 	// インデックスバッファの設定
-	modelCommon_->GetCommand()->GetList()->IASetIndexBuffer(&indexBufferView);
+	dxCommon_->GetCommand()->GetList()->IASetIndexBuffer(&indexBufferView);
 }
 
 void Mesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv)
@@ -214,9 +215,9 @@ void Mesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv)
 	};
 
 	// 頂点バッファの設定
-	modelCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
+	dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
 	// インデックスバッファの設定
-	modelCommon_->GetCommand()->GetList()->IASetIndexBuffer(&indexBufferView);
+	dxCommon_->GetCommand()->GetList()->IASetIndexBuffer(&indexBufferView);
 }
 
 void Mesh::Clear()

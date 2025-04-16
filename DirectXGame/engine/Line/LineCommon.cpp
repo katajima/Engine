@@ -38,7 +38,7 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	mesh_->indices.push_back({ 0 });
 	mesh_->indices.push_back({ 1 });
 
-	mesh_->InitializeLine(dxCommon_->GetModelManager()->GetModelCommon());
+	mesh_->InitializeLine(dxCommon_);
 
 	mesh_->verticesline.clear();
 	mesh_->indices.clear();

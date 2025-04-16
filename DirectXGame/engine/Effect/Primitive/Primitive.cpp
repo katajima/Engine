@@ -14,7 +14,7 @@ void Primitive::Initialize(PrimitiveCommon* primitiveCommon,ShapeType type, cons
 
 	MeshInitialize();
 
-	mesh->Initialize(primitiveCommon_->GetDxCommon()->GetModelManager()->GetModelCommon());
+	mesh->Initialize(primitiveCommon_->GetDxCommon());
 
 
 	if (type == ShapeType::AnimationPlane) {

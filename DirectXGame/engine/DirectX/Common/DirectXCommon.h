@@ -51,15 +51,15 @@ public: // メンバ関数
 	// 初期化
 	void Intialize(WinApp* winApp);
 
-	// 描画前処理
+	// レンダーターゲット用描画前処理
 	void PreDrawOffscreen();
-	// 描画後処理
+	// レンダーターゲット用描画後処理
 	void PostDrawOffscreen();
 
 
-	// 描画前処理
+	// スワップチェーン用描画前処理
 	void PreDrawSwap();
-	// 描画後処理
+	// スワップチェーン用描画後処理
 	void PostDrawSwap();
 
 	//終了処理
@@ -93,8 +93,6 @@ public:
 
 	ModelManager* GetModelManager() { return modelManager_.get(); }
 
-	PSOManager* GetPSOManager() { return psoManager_.get(); }
-
 	DXGIDevice* GetDXGIDevice() { return DXGIDevice_.get(); }
 
 	Command* GetCommand() { return command_.get(); }
@@ -105,25 +103,25 @@ public:
 
 	RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
 
-private:
-	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			 // デバイス
-	std::unique_ptr<Command> command_ = std::make_unique<Command>();					 // コマンド
-	std::unique_ptr<ScissorRect> scissorRect_ = std::make_unique<ScissorRect>();		 // シザー
-	std::unique_ptr<ViewPort> viewPort_ = std::make_unique<ViewPort>();					 // ビューポート
-	std::unique_ptr<Fence> fence_ = std::make_unique<Fence>();							 // フェンス
-	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();		 // コンパイル
-	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();				 // スワップチェーン 
-	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();			 // RTVマネージャー 
-	std::unique_ptr<UavManager> uavManager_ = std::make_unique<UavManager>();			 // UAVマネージャー 
-	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();			 // SRVマネージャー 
-	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			 // DRVマネージャー 
-	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		 // デプスステンシル 
-	std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					 // バリア 
-	std::unique_ptr<RenderTexture> renderTexture_ = std::make_unique<RenderTexture>();	 // レンダーテクスチャ 
-	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();// テクスチャマネージャー 
-	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		 // モデルマネージャー
-	std::unique_ptr<PSOManager> psoManager_ = std::make_unique<PSOManager>();		     // PSOマネージャー
 
+	Barrier* GetBarrier() { return barrier_.get(); }
+private:
+	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス
+	std::unique_ptr<Command> command_ = std::make_unique<Command>();					     // コマンド
+	std::unique_ptr<ScissorRect> scissorRect_ = std::make_unique<ScissorRect>();		     // シザー
+	std::unique_ptr<ViewPort> viewPort_ = std::make_unique<ViewPort>();					     // ビューポート
+	std::unique_ptr<Fence> fence_ = std::make_unique<Fence>();							     // フェンス
+	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();		     // コンパイル
+	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();				     // スワップチェーン 
+	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();			     // RTVマネージャー 
+	std::unique_ptr<UavManager> uavManager_ = std::make_unique<UavManager>();			     // UAVマネージャー 
+	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();			     // SRVマネージャー 
+	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
+	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
+	std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					     // バリア 
+	std::unique_ptr<RenderTexture> renderTexture_ = std::make_unique<RenderTexture>();	     // レンダーテクスチャ 
+	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
+	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
 
 

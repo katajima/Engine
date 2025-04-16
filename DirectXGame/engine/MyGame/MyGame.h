@@ -43,7 +43,11 @@ public:
 	// 描画
 	void Draw() override;
 
+	
 	void InitializeResource();
+
+	void Draw3D2D();
+
 
 public:
 	static float const kDeltaTime_;

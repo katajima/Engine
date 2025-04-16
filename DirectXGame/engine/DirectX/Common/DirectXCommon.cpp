@@ -33,47 +33,64 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
 	swapChain_->Initialize(winApp,DXGIDevice_.get(),command_.get(), rtvManager_.get()); // スワップチェーン
 	depthStencil_->Initialize(DXGIDevice_.get(),command_.get(),dsvManager_.get()); // デプスステンシル     
-	renderTexture_->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get()); // レンダーテクスチャ
-	barrier_->Initialize(command_.get(),swapChain_.get(),renderTexture_.get()); // バリア
-	psoManager_->Initialize(command_.get(), DXGIDevice_.get(), dxcCompiler_.get());// PSOマネージャー
+	
+	textureManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // テクスチャマネージャー
+	modelManager_->Initialize(this); // モデルマネージャー
+	
 	renderingCommon_->Initialize(this);
+	renderTexture_->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get()); // レンダーテクスチャ
+	barrier_->Initialize(command_.get(), swapChain_.get(), renderTexture_.get()); // バリア
 
+	
 
 	imguiManager_->Initialize(this);
 
-	textureManager_->Initialize(command_.get(),DXGIDevice_.get(),srvManager_.get()); // テクスチャマネージャー
-
-	modelManager_->Initialize(this); // モデルマネージャー
+	
 
 }
 
 #pragma region Draw
 
 void DirectXCommon::PreDrawOffscreen() {
+
+	// レンダーターゲット用バリア(描画前)
+	//barrier_->RenderPre();
+
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = swapChain_->GetCurrentBackBufferRTVHandle();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture_->GetRTVHandle();
 	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
+
+	renderTexture_->GetClearColor();
 	//// レンダーターゲットと深度バッファをクリア
-	float clearColor[] = { 1.0f, 0.0f, 0.0f, 1.0f }; // 任意のクリアカラー（赤）
+	float clearColor[] = { renderTexture_->GetClearColor().x, renderTexture_->GetClearColor().y,renderTexture_->GetClearColor().z, renderTexture_->GetClearColor().w }; // 任意のクリアカラー（赤）
 	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	//command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	//
 	viewPort_->SettingViewport();
 	scissorRect_->SettingScissorRect();
 }
 
+void DirectXCommon::PostDrawOffscreen()
+{
+	// レンダーターゲット用バリア(描画後)
+	//barrier_->RenderPost();
+
+}
+
 void DirectXCommon::PreDrawSwap() {
 	
-	// バリア
-	barrier_->Pre();
+
+	// スワップチェーン用バリア(描画前)
+	//barrier_->SwapPre();
 	
 	// 描画先のRTVとDSVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = swapChain_->GetCurrentBackBufferRTVHandle();
+	//command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 	// 指定した色で画面全体をクリアする
@@ -88,10 +105,10 @@ void DirectXCommon::PreDrawSwap() {
 
 void DirectXCommon::PostDrawSwap() {
 	
-	// バリア
-	barrier_->Post();
+	// スワップチェーン用バリア(描画後)
+	//barrier_->SwapPost();
 
-	// コマンド
+	// コマンドキック
 	command_->KickCommand();
 
 	// GPUに画面交換を通知
@@ -103,6 +120,7 @@ void DirectXCommon::PostDrawSwap() {
 	// FPS制限の更新
 	UpdateFixFPS();
 
+	// コマンドリセット
 	command_->ResetCommand();
 }
 

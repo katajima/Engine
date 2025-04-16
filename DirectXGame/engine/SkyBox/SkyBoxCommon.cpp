@@ -70,7 +70,7 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 		vertexOffset += 4; // 次の面に移動
 	}
 
-	mesh_->InitializeSkyBox(dxCommon_->GetModelManager()->GetModelCommon());
+	mesh_->InitializeSkyBox(dxCommon_);
 
 
 	worldtransform_.Initialize();

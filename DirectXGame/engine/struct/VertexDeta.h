@@ -16,3 +16,16 @@ struct LineVertexData {
 	Vector4 position;
 	Vector4 color;    // 色
 };
+
+
+
+// カスタムハッシュ関数
+struct VertexHash {
+	size_t operator()(const VertexData& vertex) const {
+		// 簡単なハッシュ関数（例として位置のみを使用）
+		return std::hash<float>()(vertex.position.x) ^
+			std::hash<float>()(vertex.position.y) ^
+			std::hash<float>()(vertex.position.z);
+	}
+};
+
