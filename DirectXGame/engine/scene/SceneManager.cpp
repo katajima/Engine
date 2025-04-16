@@ -26,6 +26,7 @@ void SceneManager::Update()
 		scene_->SetEntity3DManager(entity3DManager_);
 		scene_->SetEntity2DManager(entity2DManager_);
 		scene_->Initialize();
+		SetCamera(scene_->GetCamara()); // カメラ情報をもらう
 		scene_->GetInput()->Update();
 	}
 	

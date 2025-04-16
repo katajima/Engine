@@ -145,6 +145,7 @@ private:
 
 	std::unique_ptr<Object3d> playerObject;
 	std::unique_ptr<Object3d> goalObject;
+	std::unique_ptr<Object3d> taleObject;
 
 
 	// オーシャンシェーダー

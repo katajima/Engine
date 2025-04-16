@@ -4,13 +4,14 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/base/WinApp.h"
 #include "DirectXGame/engine/Manager/DSV/DsvManager.h"
+#include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 
-void DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager)
+void DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager)
 {
 	DXGIDevice_ = dxgi;
 	command_ = command;
 	dsvManager_ = dsvManager;
-
+	srvManager_ = srvManager;
 	CreateDepthStencilView();
 }
 
@@ -29,6 +30,21 @@ void DepthStencil::ClearDepthView()
 D3D12_CPU_DESCRIPTOR_HANDLE DepthStencil::GetCPUHandleDepthStencilResorce()
 {
 	return dsvManager_->GetCPUDescriptorHandle(dsvIndex_);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DepthStencil::GetCPUHandleDepthSRV()
+{
+	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
+}
+
+uint32_t DepthStencil::GetDepthSrvIndex()
+{
+	return srvIndex_;
+}
+
+ID3D12Resource* DepthStencil::GetResource()
+{
+	return depthStencilResource_.Get();
 }
 
 void DepthStencil::CreateDepthStencilView()
@@ -61,7 +77,7 @@ void DepthStencil::CreateDepthStencilView()
 		&heapProperties, // Heapの設定
 		D3D12_HEAP_FLAG_NONE, // Heapの特殊な設定。特に無し
 		&resourceDesc, // Resourceの設定
-		D3D12_RESOURCE_STATE_DEPTH_WRITE, // 深度値を書き込む状態にしておく
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, // 深度値を書き込む状態にしておく
 		&depthClearValue, // Clear最高値
 		IID_PPV_ARGS(&depthStencilResource_)); // 作成するResourceポインタへのポインタ
 	assert(SUCCEEDED(hr));
@@ -74,4 +90,12 @@ void DepthStencil::CreateDepthStencilView()
 		depthStencilResource_.Get(),
 		DXGI_FORMAT_D24_UNORM_S8_UINT
 	);
+
+
+	// SRVを作成
+	DirectX::TexMetadata matadata{};
+	matadata.format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	matadata.mipLevels = 1;
+	srvManager_->CreateSRVforTexture2D(srvIndex_, depthStencilResource_.Get(), matadata);
+
 }

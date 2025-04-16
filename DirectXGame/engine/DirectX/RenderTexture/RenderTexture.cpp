@@ -6,7 +6,10 @@
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/base/WinApp.h"
 
-#include "DirectXGame/engine/base/RenderingCommon.h"
+#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
+
+
+#include "imgui.h"
 
 void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager,RenderingCommon* renderingCommon)
 {
@@ -23,12 +26,72 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 	CreateSRV();      // SRV作成
 
 
+
+	//CreateDepthSRV();
+
 	resource_->SetName(L"RenderTexture");
 }
 
-void RenderTexture::Draw()
+void RenderTexture::Update(PostEffectType type)
 {
-	renderingCommon_->DrawCommonSetting(srvIndex_);
+	renderingCommon_->SetCamera(camera_);
+	switch (type)
+	{
+	case RenderTexture::PostEffectType::kCopy:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kCopy);
+		break;
+	case RenderTexture::PostEffectType::kGrayScale:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kGrayScale);
+		break;
+	case RenderTexture::PostEffectType::kSepia:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kSepia);
+		break;
+	case RenderTexture::PostEffectType::kVignette:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kVignette);
+		break;
+	case RenderTexture::PostEffectType::kSmoothing:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kSmoothing);
+		break;
+	case RenderTexture::PostEffectType::kGaussian:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kGaussian);
+		break;
+	case RenderTexture::PostEffectType::kOitline:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kOitline);
+		break;
+	default:
+		break;
+	}
+}
+
+void RenderTexture::Draw(PostEffectType type)
+{
+	switch (type)
+	{
+	case RenderTexture::PostEffectType::kCopy:
+		renderingCommon_->DrawCopyRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kGrayScale:
+		renderingCommon_->DrawGrayScaleRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kSepia:
+		renderingCommon_->DrawSepiaeRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kVignette:
+		renderingCommon_->DrawVignetteRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kSmoothing:
+		renderingCommon_->DrawSmoothingRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kGaussian:
+		renderingCommon_->DrawGaussianRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kOitline:
+		renderingCommon_->DrawOutlineRender(srvIndex_);
+		break;
+	default:
+		renderingCommon_->DrawCopyRender(srvIndex_);
+		break;
+	}
 }
 
 Vector4 RenderTexture::GetClearColor() const
@@ -45,6 +108,8 @@ ID3D12Resource* RenderTexture::GetResource()
 {
 	return resource_.Get();
 }
+
+
 
 void RenderTexture::CreateResource()
 {
@@ -120,6 +185,7 @@ void RenderTexture::CreateResourcePixel()
 	assert(SUCCEEDED(hr_));
 }
 
+
 void RenderTexture::CreateRTV()
 {
 	// インデックスを割り当て
@@ -129,6 +195,8 @@ void RenderTexture::CreateRTV()
 
 	
 }
+
+
 
 void RenderTexture::CreateSRV()
 {
@@ -140,3 +208,5 @@ void RenderTexture::CreateSRV()
 	matadata.mipLevels = 1;
 	srvManager_->CreateSRVforTexture2D(srvIndex_, resource_.Get(), matadata);
 }
+
+

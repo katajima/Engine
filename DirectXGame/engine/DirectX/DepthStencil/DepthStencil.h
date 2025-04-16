@@ -11,7 +11,7 @@ using namespace Microsoft::WRL;
 class DXGIDevice;
 class Command;
 class DsvManager;
-
+class SrvManager;
 class DepthStencil
 {
 public:
@@ -19,11 +19,21 @@ public:
 	~DepthStencil() = default;
 
 	// 初期化
-	void Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager);
+	void Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager);
 	// デプスをクリア
 	void ClearDepthView();
 	// デプスステンシルリソースのCPUハンドルの取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthStencilResorce();
+
+	// 
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthSRV();
+
+	uint32_t GetDepthSrvIndex();
+
+	// リソースを取得
+	ID3D12Resource* GetResource();
+
+
 private:
 	// デプスステンシルリソースの作成
 	void CreateDepthStencilView();
@@ -33,11 +43,15 @@ private:
 	// デプスステンシルリソースのインデックス
 	uint32_t dsvIndex_ = 0;
 
+	// デプスステンシルリソースのインデックス
+	uint32_t srvIndex_ = 0;
+
 
 
 	DXGIDevice* DXGIDevice_;
 	Command* command_;
 	DsvManager* dsvManager_;
+	SrvManager* srvManager_;
 
 };
 

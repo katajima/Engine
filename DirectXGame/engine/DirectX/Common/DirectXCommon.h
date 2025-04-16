@@ -30,7 +30,7 @@
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
-#include "DirectXGame/engine/base/RenderingCommon.h"
+#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include"DirectXGame/engine/base/ImGuiManager.h"
 
 
@@ -103,6 +103,7 @@ public:
 
 	RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
 
+	DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
 
 	Barrier* GetBarrier() { return barrier_.get(); }
 private:

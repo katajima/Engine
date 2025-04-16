@@ -1,5 +1,7 @@
 #include "MyGame.h"
 
+#include "DirectXGame/engine/Camera/Camera.h"
+
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
 float MyGame::hitStopTimer = 0.0f;
@@ -83,7 +85,9 @@ void MyGame::Update()
 #ifdef _DEBUG
 	entity3DManager_->Get3DLineCommon()->Update();
 #endif // _DEBUG
-
+	// レンダーテクスチャ
+	dxCommon->GetRenderTexture()->SetCamera(sceneManager_->GetCamara());
+	dxCommon->GetRenderTexture()->Update(RenderTexture::PostEffectType::kOitline);
 	// ImGuiの受付終了
 	dxCommon->GetImGuiManager()->End();
 }
@@ -109,7 +113,7 @@ void MyGame::Draw()
 
 
 	// レンダーテクスチャ(コピー)
-	dxCommon->GetRenderTexture()->Draw();
+	dxCommon->GetRenderTexture()->Draw(RenderTexture::PostEffectType::kOitline);
 
 	// ImGuiの描画
 	dxCommon->GetImGuiManager()->Draw();
@@ -224,6 +228,7 @@ void MyGame::InitializeResource()
 	modelManager->LoadModel("renga.gltf", "renga", { 10,10 });
 	modelManager->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
 	modelManager->LoadModel("black.obj", "terrain/black", { 10,10 });
+	modelManager->LoadModel("terrain.obj", "terrain/terrain");
 	modelManager->LoadModelAmime("stair.obj");
 
 

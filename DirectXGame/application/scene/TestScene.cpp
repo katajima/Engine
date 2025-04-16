@@ -164,6 +164,7 @@ void TestScene::Update()
 	default:
 		break;
 	}
+	taleObject->Update();
 	tail.Update();
 }
 
@@ -180,9 +181,9 @@ void TestScene::Draw3D()
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-
-		multiy.Draw();
+		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		taleObject->Draw();
+		//multiy.Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -318,6 +319,11 @@ void TestScene::InitializeObject3D()
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
 
+	taleObject = std::make_unique<Object3d>();
+	taleObject->Initialize(GetEntity3DManager());
+	taleObject->SetModel("terrain.obj");
+	taleObject->SetCamera(camera.get());
+	taleObject->worldtransform_.scale_ = 10.0f;
 
 	tri2d.vertices[0] = { 10,0, };
 	tri2d.vertices[1] = { 10,10, };
@@ -496,6 +502,7 @@ void TestScene::InitializeLight()
 
 	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 
+	SetCamera(camera.get());
 	
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
@@ -521,6 +528,10 @@ void TestScene::InitializeCamera()
 	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };
+	//camera->SetNearClip();
+	camera->SetFarClip(10000.0f);
+
+
 
 	debugCamera = std::make_unique<DebugCamera>();
 	debugCamera->Initialize(GetEntity3DManager()->GetCameraCommon());
@@ -706,6 +717,7 @@ void TestScene::UpdateRoom02()
 
 void TestScene::UpdateRoom03()
 {
+	taleObject->Update();
 	multiy.Update();
 }
 

@@ -6,7 +6,7 @@
 class Command;
 class SwapChain;
 class RenderTexture;
-
+class DepthStencil;
 class Barrier
 {
 public:
@@ -14,7 +14,7 @@ public:
 	~Barrier() = default;
 
 	// 
-	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture);
+	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture, DepthStencil* depthStencil);
 
 	// レンダーターゲット用バリア(Pre)
 	void RenderPre();
@@ -35,7 +35,7 @@ private:
 	Command* command_;
 	SwapChain* swapChain_;
 	RenderTexture* renderTexture_;
-
+	DepthStencil* depthStencil_;
 private:
 	D3D12_RESOURCE_STATES renderTextureState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	//D3D12_RESOURCE_BARRIER  swapChainbarrier{};

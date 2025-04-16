@@ -8,6 +8,7 @@ class DirectXCommon;
 class Entity3DManager;
 class Entity2DManager;
 class GlobalVariables;
+class Camera;
 class SceneManager
 {
 public:
@@ -41,6 +42,10 @@ public:
 
 	Input* GetInput() { return input_; }
 
+	void SetCamera(Camera* camera) { camera_ = camera; };
+
+	Camera* GetCamara() { return camera_; }
+
 	/// <summary>
 	/// 次のシーン予約
 	/// </summary>
@@ -67,5 +72,6 @@ private:
 	Entity2DManager* entity2DManager_;
 	Input* input_;
 	GlobalVariables* globalVariables_;
+	Camera* camera_;
 };
 

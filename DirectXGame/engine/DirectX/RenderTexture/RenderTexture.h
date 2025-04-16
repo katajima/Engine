@@ -18,15 +18,30 @@ class Command;
 class SrvManager;
 class RtvManager;
 class RenderingCommon;
+class Camera;
 class RenderTexture
 {
 public:
+	enum class PostEffectType {
+		kCopy,			// コピー
+		kGrayScale,		// グレースケール
+		kSepia,			// セピア
+		kVignette,      // ビネット
+		kSmoothing,     // スムージング
+		kGaussian,      // ガウス
+		kOitline,		// アウトライン
+	};
+
 	RenderTexture() = default;
 	~RenderTexture() = default;
 
 	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommon);
 
-	void Draw();
+	void Update(PostEffectType type);
+
+	void Draw(PostEffectType type);
+
+	void SetCamera(Camera* camera) {camera_ = camera;}
 
 	// クリアカラーを取得
 	Vector4 GetClearColor()const;
@@ -36,15 +51,16 @@ public:
 	ID3D12Resource* GetResource();
 
 
-	D3D12_RESOURCE_STATES GetCurrentState() const { return currentState_; }
-	void SetCurrentState(D3D12_RESOURCE_STATES state) { currentState_ = state; }
 
+private:
 	// レンダーテクスチャのリソースを作成
 	void CreateResource();
 	// 
 	// レンダーテクスチャのリソースを作成
 	void CreateResourcePixel();
-private:
+
+
+
 
 
 
@@ -64,14 +80,17 @@ private:
 	// クリアカラー(赤)
 	const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
 
-	// RenderTexture.h
-	D3D12_RESOURCE_STATES currentState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	
+
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;
 	SrvManager* srvManager_;
 	RtvManager* rtvManager_;
 	RenderingCommon* renderingCommon_;
+	Camera* camera_;
+public:
+
+
+
 };
 

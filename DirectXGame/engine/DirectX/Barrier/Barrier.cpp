@@ -3,13 +3,14 @@
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
+#include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 
-
-void Barrier::Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture)
+void Barrier::Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture, DepthStencil* depthStencil)
 {
     command_ = command;
     swapChain_ = swapChain;
     renderTexture_ = renderTexture;
+    depthStencil_ = depthStencil;
 }
 
 void Barrier::RenderPre()
@@ -27,6 +28,20 @@ void Barrier::RenderPre()
     // バリアを適用
     command_->GetList()->ResourceBarrier(1, &renderBarrier);
 
+
+     renderBarrier.Transition.pResource = depthStencil_->GetResource();
+
+    // リソースの状態を遷移させる
+    renderBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    renderBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+    renderBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+    // バリアを適用
+    command_->GetList()->ResourceBarrier(1, &renderBarrier);
+
+
+
+
     // デバッグログで状態の確認（例:状態の遷移後に再確認する）
     OutputDebugStringA(">>> RenderPre: Resource state transition complete.\n");
 }
@@ -39,6 +54,13 @@ void Barrier::RenderPost()
     renderBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
     renderBarrier.Transition.pResource = renderTexture_->GetResource();
     renderBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    renderBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE; // 戻す
+    renderBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+    command_->GetList()->ResourceBarrier(1, &renderBarrier);
+    
+    renderBarrier.Transition.pResource = depthStencil_->GetResource();
+    renderBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
     renderBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE; // 戻す
     renderBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
@@ -63,8 +85,6 @@ void Barrier::SwapPre()
 
     // TransitionBarrierを張る
     command_->GetList()->ResourceBarrier(1, &swapChainbarrier);
-
-    OutputDebugStringA("RenderPre() called\n");
 }
 
 void Barrier::SwapPost()

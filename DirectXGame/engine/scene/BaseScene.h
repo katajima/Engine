@@ -7,6 +7,7 @@ class Entity3DManager;
 class Entity2DManager;
 class DirectXCommon;
 class GlobalVariables;
+class Camera;
 class BaseScene
 {
 public:
@@ -50,6 +51,10 @@ public:
 
 	Input* GetInput() { return input_; }
 
+	void SetCamera(Camera* camera) { camera_ = camera; };
+
+	Camera* GetCamara() { return camera_; }
+
 private:
 	// シーンマネージャ(借りてくる)
 	SceneManager* sceneManager_ = nullptr;
@@ -59,5 +64,6 @@ private:
 	Entity2DManager* entity2DManager_;
 	Input* input_;
 	GlobalVariables* globalVariables_;
+	Camera* camera_;
 };
 

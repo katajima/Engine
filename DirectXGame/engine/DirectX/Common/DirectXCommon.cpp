@@ -13,7 +13,6 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/d3dx12.h"
 #include "DirectXGame/engine/base/TextureManager.h"
 
-#include"DirectXGame/engine/base/RenderingCommon.h"
 
 
 
@@ -32,14 +31,14 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	rtvManager_->Initialize(DXGIDevice_.get(), command_.get()); // RTV
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
 	swapChain_->Initialize(winApp,DXGIDevice_.get(),command_.get(), rtvManager_.get()); // スワップチェーン
-	depthStencil_->Initialize(DXGIDevice_.get(),command_.get(),dsvManager_.get()); // デプスステンシル     
+	depthStencil_->Initialize(DXGIDevice_.get(),command_.get(),dsvManager_.get(),srvManager_.get()); // デプスステンシル     
 	
 	textureManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // テクスチャマネージャー
 	modelManager_->Initialize(this); // モデルマネージャー
 	
 	renderingCommon_->Initialize(this);
 	renderTexture_->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get()); // レンダーテクスチャ
-	barrier_->Initialize(command_.get(), swapChain_.get(), renderTexture_.get()); // バリア
+	barrier_->Initialize(command_.get(), swapChain_.get(), renderTexture_.get(),depthStencil_.get()); // バリア
 
 	
 
