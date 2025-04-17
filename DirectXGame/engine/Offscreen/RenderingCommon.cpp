@@ -55,6 +55,12 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	randomResource_->Map(0, nullptr, reinterpret_cast<void**>(&randomData_));
 	randomData_->time = 0.0f;
 	
+	//	ブルーム
+	bloomResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(BloomGPU));
+	bloomResource_->Map(0, nullptr, reinterpret_cast<void**>(&bloomData_));
+	bloomData_->texelSize = { 1.0f ,1.0f};
+	bloomData_->blurRadius = 5.0f;
+	
 	CreateGraphicsPipeline();
 	
 
@@ -71,6 +77,9 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	dxCommon_->GetTextureManager()->LoadTexture("resources/Texture/noise.jpg");
 	dissovleIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath("resources/Texture/noise.jpg");
 }
+
+
+#pragma region MyRegion
 
 void RenderingCommon::DrawCopyRender(int index)
 {
@@ -179,7 +188,7 @@ void RenderingCommon::DrawDissovleRender(int index)
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, dissovleResource_->GetGPUVirtualAddress());
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
-	
+
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, dissovleIndex);
 
 	DrawColl();
@@ -195,6 +204,20 @@ void RenderingCommon::DrawRandomRender(int index)
 
 	DrawColl();
 }
+
+void RenderingCommon::DrawBloomRender(int index)
+{
+	DrawBloomSetting();
+
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, bloomResource_->GetGPUVirtualAddress());
+
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
+
+	DrawColl();
+}
+
+#pragma endregion // 描画
+
 
 void RenderingCommon::UpdateImgui(PostEffectType type)
 {
@@ -385,6 +408,17 @@ void RenderingCommon::DrawRandomSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
+void RenderingCommon::DrawBloomSetting()
+{
+	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(bloom_.rootSignature.Get());
+
+	dxCommon_->GetCommandList()->SetPipelineState(bloom_.graphicsPipelineState.Get()); //PSOを設定
+
+	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
 
 
 
@@ -417,6 +451,68 @@ void RenderingCommon::RootOutlineSetting()
 
 }
 
+void RenderingCommon::RootDissovleSetting()
+{
+	///Samplerの設定
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	psoManager_->SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+
+
+	// ディゾルブ
+	D3D12_DESCRIPTOR_RANGE descriptorRangeDissovle[2] = {};
+	psoManager_->SetDescriptorRenge(descriptorRangeDissovle[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
+	psoManager_->SetDescriptorRenge(descriptorRangeDissovle[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
+
+	D3D12_ROOT_PARAMETER dissovleRootParameters[3] = {};
+	//　ディゾルブ(b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(dissovleRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(dissovleRootParameters[1], descriptorRangeDissovle[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t1) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(dissovleRootParameters[2], descriptorRangeDissovle[1], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(dissovle_.rootSignature, dissovleRootParameters, _countof(dissovleRootParameters), staticSamplers, _countof(staticSamplers));
+
+}
+
+void RenderingCommon::RootRadialBlurSetting()
+{
+	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	psoManager_->SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+
+	///Samplerの設定
+	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
+	psoManager_->SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, PSOManager::TextureAddressMode::kCLAMP);
+
+	D3D12_ROOT_PARAMETER RootParameters[2] = {};
+	//ラジアルブラー (b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(RootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(RootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(radialBlur_.rootSignature, RootParameters, _countof(RootParameters), staticSamplersBlur, _countof(staticSamplersBlur));
+
+}
+
+void RenderingCommon::RootBloomSetting()
+{
+	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	psoManager_->SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+
+	///Samplerの設定
+	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
+	psoManager_->SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, PSOManager::TextureAddressMode::kCLAMP);
+
+	D3D12_ROOT_PARAMETER RootParameters[2] = {};
+	// ブルーム (b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(RootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(RootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(bloom_.rootSignature, RootParameters, _countof(RootParameters), staticSamplersBlur, _countof(staticSamplersBlur));
+
+}
+
 
 #pragma endregion // ルートパラメータやサンプラー設定
 
@@ -432,7 +528,6 @@ void RenderingCommon::CreateRootSignature()
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	psoManager_->SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
-
 
 
 	// RootParameter作成。複数指定できるのではい
@@ -487,38 +582,19 @@ void RenderingCommon::CreateRootSignature()
 
 	psoManager_->SetRootSignature(random_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
 
-	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
-	psoManager_->SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL,PSOManager::TextureAddressMode::kCLAMP);
 
 
-	//ラジアルブラー (b0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(smoothingRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
-
-	psoManager_->SetRootSignature(radialBlur_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplersBlur, _countof(staticSamplersBlur));
-
-
+	// ラジアルブラー
+	RootRadialBlurSetting();
 
 	// ディゾルブ
-	D3D12_DESCRIPTOR_RANGE descriptorRangeDissovle[2] = {};
-	psoManager_->SetDescriptorRenge(descriptorRangeDissovle[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
-	psoManager_->SetDescriptorRenge(descriptorRangeDissovle[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
-
-	D3D12_ROOT_PARAMETER dissovleRootParameters[3] = {};
-	//　ディゾルブ(b0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(dissovleRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(dissovleRootParameters[1], descriptorRangeDissovle[0], D3D12_SHADER_VISIBILITY_PIXEL);
-	// テクスチャデータ (t1) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(dissovleRootParameters[2], descriptorRangeDissovle[1], D3D12_SHADER_VISIBILITY_PIXEL);
-
-	psoManager_->SetRootSignature(dissovle_.rootSignature, dissovleRootParameters, _countof(dissovleRootParameters), staticSamplers, _countof(staticSamplers));
-
+	RootDissovleSetting();
 
 	// アウトライン
 	RootOutlineSetting();
+
+	// ブルーム
+	RootBloomSetting();
 
 }
 
@@ -597,6 +673,9 @@ void RenderingCommon::CreateGraphicsPipeline()
 
 	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Random.PS.hlsl";
 	psoManager_->GraphicsPipelineState(random_.rootSignature, random_.graphicsPipelineState, blendDesc, depthStencilDesc);
+
+	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Bloom.PS.hlsl";
+	psoManager_->GraphicsPipelineState(bloom_.rootSignature, bloom_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
 
 

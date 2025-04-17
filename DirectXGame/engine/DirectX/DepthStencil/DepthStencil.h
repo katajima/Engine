@@ -25,9 +25,10 @@ public:
 	// デプスステンシルリソースのCPUハンドルの取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthStencilResorce();
 
-	// 
+	// デプスSRVハンドル取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthSRV();
 
+	// デプスSRVインデックス取得
 	uint32_t GetDepthSrvIndex();
 
 	// リソースを取得
@@ -38,12 +39,11 @@ private:
 	// デプスステンシルリソースの作成
 	void CreateDepthStencilView();
 private:
-	// デプスステンシルリソース
+	// デプスステンシル用リソース
 	ComPtr<ID3D12Resource> depthStencilResource_ = nullptr;
-	// デプスステンシルリソースのインデックス
+	// デプスステンシル用リソースのDSVインデックス
 	uint32_t dsvIndex_ = 0;
-
-	// デプスステンシルリソースのインデックス
+	// デプスステンシル用リソースのSRVインデックス
 	uint32_t srvIndex_ = 0;
 
 

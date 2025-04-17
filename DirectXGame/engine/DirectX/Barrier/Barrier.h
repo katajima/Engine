@@ -30,6 +30,8 @@ public:
 
 private:
 
+	void TransitionResource(ID3D12Resource* res,D3D12_RESOURCE_STATES before,D3D12_RESOURCE_STATES after);
+
 private:
 
 	Command* command_;
@@ -37,9 +39,6 @@ private:
 	RenderTexture* renderTexture_;
 	DepthStencil* depthStencil_;
 private:
-	D3D12_RESOURCE_STATES renderTextureState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//D3D12_RESOURCE_BARRIER  swapChainbarrier{};
-	// Resource状態の追跡マップをメンバ変数に追加（ヘッダなど）
-	//std::unordered_map<ID3D12Resource*, D3D12_RESOURCE_STATES> resourceStates;
+
 };
 

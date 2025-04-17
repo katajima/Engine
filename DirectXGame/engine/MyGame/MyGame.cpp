@@ -141,7 +141,13 @@ void MyGame::Draw()
 	// レンダーターゲット用の描画後処理
 	dxCommon->PostDrawOffscreen();
 	
-	
+	//
+
+
+
+	//
+
+
 	// スワップチェーン用の描画準備
 	dxCommon->PreDrawSwap();
 

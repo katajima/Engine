@@ -33,6 +33,7 @@ public:
 		kRadialBlur,	// ラジアルブラー
 		kDissovle,      // ディゾルブ
 		kRandom,		// ランダム
+		kBloom,			// ブルーム
 	};
 
 	RenderTexture() = default;

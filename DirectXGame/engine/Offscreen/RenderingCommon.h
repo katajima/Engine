@@ -22,6 +22,7 @@ public:
 		kRadialBlur,	// ラジアルブラー
 		kDissovle,      // ディゾルブ
 		kRandom,		// ランダム
+		kBloom,			// ブルーム
 	};
 
 	// 初期化
@@ -48,6 +49,8 @@ public:
 	void DrawDissovleRender(int index);
 
 	void DrawRandomRender(int index);
+
+	void DrawBloomRender(int index);
 
 
 	void SetCamera(Camera* camera) { camera_ = camera; }
@@ -92,9 +95,21 @@ private:
 
 	// ランダム
 	void DrawRandomSetting();
+
+	// ブルーム
+	void DrawBloomSetting();
 private:
 	// アウトライン
 	void RootOutlineSetting();
+	// ディゾルブ
+	void RootDissovleSetting();
+	// ラジアルブラー
+	void RootRadialBlurSetting();
+	// ブルーム
+	void RootBloomSetting();
+
+
+
 private:
 	std::unique_ptr<PSOManager> psoManager_;
 	DirectXCommon* dxCommon_;
@@ -119,6 +134,7 @@ private:
 	Rendering radialBlur_;
 	Rendering dissovle_;
 	Rendering random_;
+	Rendering bloom_;
 
 	//バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
@@ -191,6 +207,18 @@ private:
 	};
 	RandomGPU* randomData_{};
 	Microsoft::WRL::ComPtr < ID3D12Resource> randomResource_;
+
+	struct BloomGPU
+	{
+		Vector2 texelSize;
+		float blurRadius;
+		float pad[1];
+	};
+	BloomGPU* bloomData_{};
+	Microsoft::WRL::ComPtr < ID3D12Resource> bloomResource_;
+
+
+
 };
 
 

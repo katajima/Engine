@@ -133,13 +133,6 @@ private:
 	std::chrono::steady_clock::time_point reference_;
 public:
 
-public:
-	////------CompileShader------////
-	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
-		//CompileShaderするShaderファイルへのパス
-		const std::wstring& filePach,
-		//CompileShaderに使用するProfile
-		const wchar_t* profile);
 
 };
 

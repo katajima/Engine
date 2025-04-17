@@ -67,6 +67,9 @@ void RenderTexture::Update(PostEffectType type)
 	case RenderTexture::PostEffectType::kRandom:
 		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRandom);
 		break;
+	case RenderTexture::PostEffectType::kBloom:
+		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kBloom);
+		break;
 	default:
 		break;
 	}
@@ -105,6 +108,9 @@ void RenderTexture::Draw(PostEffectType type)
 		break;
 	case RenderTexture::PostEffectType::kRandom:
 		renderingCommon_->DrawRandomRender(srvIndex_);
+		break;
+	case RenderTexture::PostEffectType::kBloom:
+		renderingCommon_->DrawBloomRender(srvIndex_);
 		break;
 	default:
 		renderingCommon_->DrawCopyRender(srvIndex_);

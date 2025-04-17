@@ -66,6 +66,7 @@ void DirectXCommon::PreDrawOffscreen() {
 	float clearColor[] = { renderTexture_->GetClearColor().x, renderTexture_->GetClearColor().y,renderTexture_->GetClearColor().z, renderTexture_->GetClearColor().w }; // 任意のクリアカラー（赤）
 	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 	command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	//command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	//
 	viewPort_->SettingViewport();
@@ -86,16 +87,13 @@ void DirectXCommon::PreDrawSwap() {
 	barrier_->SwapPre();
 	
 	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = swapChain_->GetCurrentBackBufferRTVHandle();
 	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
-	//command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
-
+	
 	// 指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };  // 任意のクリアカラー（青）
 	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	//command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
+	
 	// コマンドを積む
 	viewPort_->SettingViewport();
 	scissorRect_->SettingScissorRect();
@@ -165,7 +163,4 @@ void DirectXCommon::UpdateFixFPS()
 }
 
 
-Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileShader(const std::wstring& filePach, const wchar_t* profile)
-{
-	return dxcCompiler_->CompileShader(filePach, profile);
-};
+

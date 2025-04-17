@@ -173,9 +173,10 @@ void TestScene::Draw3D()
 	switch (behavior_)
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
+		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
+
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		ocean_->Draw();
-		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
