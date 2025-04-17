@@ -11,10 +11,10 @@ using namespace Microsoft::WRL;
 
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include "DirectXGame/engine/base/TextureManager.h"
 
 
-
+#include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include"DirectXGame/engine/scene/SceneManager.h"
 
 void DirectXCommon::Intialize(WinApp* winApp) {
     
@@ -66,8 +66,7 @@ void DirectXCommon::PreDrawOffscreen() {
 	float clearColor[] = { renderTexture_->GetClearColor().x, renderTexture_->GetClearColor().y,renderTexture_->GetClearColor().z, renderTexture_->GetClearColor().w }; // 任意のクリアカラー（赤）
 	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 	command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	//command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-
+	
 	//
 	viewPort_->SettingViewport();
 	scissorRect_->SettingScissorRect();
@@ -128,6 +127,61 @@ void DirectXCommon::PostDrawSwap() {
 void DirectXCommon::Finalize()
 {
 	imguiManager_->Finalize();
+}
+
+void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager, RenderTexture::PostEffectType type)
+{
+	///
+	// 描画前処理
+	GetSrvManager()->PreDraw();
+
+	// レンダーターゲット用の描画準備
+	PreDrawOffscreen(); // オフスクリーンのRTV設定
+
+	// 3Dと2D描画
+	Draw3D2D(sceneManager, entity3DManager);
+
+	// レンダーターゲット用の描画後処理
+	PostDrawOffscreen();
+
+	//
+
+
+
+	//
+
+
+	// スワップチェーン用の描画準備
+	PreDrawSwap();
+
+
+	// レンダーテクスチャ(コピー)
+	GetRenderTexture()->Draw(type);
+
+	// ImGuiの描画
+	GetImGuiManager()->Draw();
+
+	// スワップチェーン用の描画後処理
+	PostDrawSwap();
+}
+
+void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+{
+	// 3Dオブジェクトの描画
+	sceneManager->Draw3D();
+
+	// パーティクル描画
+	entity3DManager->GetEffectManager()->GetParticleManager()->Draw();
+
+#ifdef _DEBUG
+	if (!sceneManager->IsNowScene("GAMEPLAY")) {
+		// デバッグ用のライン描画
+		entity3DManager->Get3DLineCommon()->Draw();
+	}
+#endif // _DEBUG
+
+	// 2Dオブジェクトの描画
+	sceneManager->Draw2D();
 }
 
 void DirectXCommon::InitializeFixFPS()

@@ -128,60 +128,10 @@ void MyGame::Update()
 
 void MyGame::Draw()
 {
-	///
-	// 描画前処理
-	dxCommon->GetSrvManager()->PreDraw();
-	
-	// レンダーターゲット用の描画準備
-	dxCommon->PreDrawOffscreen(); // オフスクリーンのRTV設定
-		
-	// 3Dと2D描画
-	Draw3D2D();
-
-	// レンダーターゲット用の描画後処理
-	dxCommon->PostDrawOffscreen();
-	
-	//
-
-
-
-	//
-
-
-	// スワップチェーン用の描画準備
-	dxCommon->PreDrawSwap();
-
-
-	// レンダーテクスチャ(コピー)
-	dxCommon->GetRenderTexture()->Draw(type_);
-
-	// ImGuiの描画
-	dxCommon->GetImGuiManager()->Draw();
-
-	// スワップチェーン用の描画後処理
-	dxCommon->PostDrawSwap();
-
+	dxCommon->Draw(sceneManager_.get(),entity3DManager_.get(),type_);
 }
 
-void MyGame::Draw3D2D()
-{
 
-	// 3Dオブジェクトの描画
-	sceneManager_->Draw3D();
-
-	// パーティクル描画
-	entity3DManager_->GetEffectManager()->GetParticleManager()->Draw();
-
-#ifdef _DEBUG
-	if (!sceneManager_->IsNowScene("GAMEPLAY")) {
-		// デバッグ用のライン描画
-		entity3DManager_->Get3DLineCommon()->Draw();
-	}
-#endif // _DEBUG
-
-	// 2Dオブジェクトの描画
-	sceneManager_->Draw2D();
-}
 
 void MyGame::InitializeResource()
 {

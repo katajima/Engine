@@ -44,6 +44,8 @@
 #include "DirectXGame/engine/PSO/PSOManager.h"
 
 
+class Entity3DManager;
+class SceneManager;
 class DirectXCommon
 {
 public: // メンバ関数
@@ -65,8 +67,10 @@ public: // メンバ関数
 	//終了処理
 	void Finalize();
 
-private:
 
+	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager, RenderTexture::PostEffectType type);
+private:
+	void Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
 	//FPS固定初期化
 	void InitializeFixFPS();

@@ -25,10 +25,6 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成
 
-
-
-	//CreateDepthSRV();
-
 	resource_->SetName(L"RenderTexture");
 }
 
