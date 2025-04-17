@@ -34,18 +34,20 @@ public:
 		kDissovle,      // ディゾルブ
 		kRandom,		// ランダム
 		kBloom,			// ブルーム
+		kBloomCombin,	// 合成ブルーム
 	};
 
 	RenderTexture() = default;
 	~RenderTexture() = default;
 
-	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommon);
+	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommonm,const std::string name);
 
-	void Update(PostEffectType type);
+	void Update();
 
-	void Draw(PostEffectType type);
+	void Draw(RenderTexture* renderTexture = nullptr);
 
 	void SetCamera(Camera* camera) {camera_ = camera;}
+
 
 	// クリアカラーを取得
 	Vector4 GetClearColor()const;
@@ -73,6 +75,9 @@ private:
 	// SRVを作成
 	void CreateSRV();
 
+
+	void UpdateImgui();
+
 private:
 	HRESULT hr_ = S_FALSE;
 	// レンダーテクスチャ用リソース
@@ -84,7 +89,7 @@ private:
 	// クリアカラー(赤)
 	const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
 
-
+	std::string name_;
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;
@@ -93,7 +98,7 @@ private:
 	RenderingCommon* renderingCommon_;
 	Camera* camera_;
 public:
-
+	PostEffectType type_;
 
 
 };

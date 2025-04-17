@@ -47,6 +47,8 @@ void Barrier::SwapPost()
     TransitionResource(swapChain_->GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 }
 
+
+
 void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 {
     if (before != after)

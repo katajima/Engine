@@ -23,6 +23,7 @@ public:
 		kDissovle,      // ディゾルブ
 		kRandom,		// ランダム
 		kBloom,			// ブルーム
+		kBloomCombin,	// 合成ブルーム
 	};
 
 	// 初期化
@@ -51,6 +52,9 @@ public:
 	void DrawRandomRender(int index);
 
 	void DrawBloomRender(int index);
+
+	void DrawBloomCombinRender(int index, int indexB);
+
 
 
 	void SetCamera(Camera* camera) { camera_ = camera; }
@@ -98,6 +102,11 @@ private:
 
 	// ブルーム
 	void DrawBloomSetting();
+
+	// ブルーム合成
+	void DrawBloomCombinSetting();
+
+
 private:
 	// アウトライン
 	void RootOutlineSetting();
@@ -135,6 +144,7 @@ private:
 	Rendering dissovle_;
 	Rendering random_;
 	Rendering bloom_;
+	Rendering bloomCombin_;
 
 	//バッファリソースの使い道を補足するバッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
@@ -210,12 +220,20 @@ private:
 
 	struct BloomGPU
 	{
-		Vector2 texelSize;
-		float blurRadius;
-		float pad[1];
+		float threshold;
+		float intensity;
+		float pad[2];
 	};
 	BloomGPU* bloomData_{};
 	Microsoft::WRL::ComPtr < ID3D12Resource> bloomResource_;
+
+	/*struct BloomGPU
+	{
+		float threshold;
+		float pad[3];
+	};
+	BloomGPU* bloomData_{};
+	Microsoft::WRL::ComPtr < ID3D12Resource> bloomResource_;*/
 
 
 

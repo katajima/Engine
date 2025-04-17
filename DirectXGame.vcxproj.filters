@@ -426,6 +426,8 @@
     <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\Bloom.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">

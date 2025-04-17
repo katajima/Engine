@@ -69,66 +69,20 @@ void MyGame::Update()
 	ImGui::Text("FPS: %.2f", fps);
 	ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
 	ImGui::End();
-
-	ImGui::Begin("postEffect");
-	if (ImGui::Button("kCopy")) {
-		type_ = RenderTexture::PostEffectType::kCopy;
-	}
-	if (ImGui::Button("kDissovle")) {
-		type_ = RenderTexture::PostEffectType::kDissovle;
-	}
-	if (ImGui::Button("kGaussian")) {
-		type_ = RenderTexture::PostEffectType::kGaussian;
-	}
-	if (ImGui::Button("kGrayScale")) {
-		type_ = RenderTexture::PostEffectType::kGrayScale;
-	}
-	if (ImGui::Button("kOitline")) {
-		type_ = RenderTexture::PostEffectType::kOitline;
-	}
-	if (ImGui::Button("kRadialBlur")) {
-		type_ = RenderTexture::PostEffectType::kRadialBlur;
-	}
-	if (ImGui::Button("kRandom")) {
-		type_ = RenderTexture::PostEffectType::kRandom;
-	}
-	if (ImGui::Button("kSepia")) {
-		type_ = RenderTexture::PostEffectType::kSepia;
-	}
-	if (ImGui::Button("kSmoothing")) {
-		type_ = RenderTexture::PostEffectType::kSmoothing;
-	}
-	if (ImGui::Button("kVignette")) {
-		type_ = RenderTexture::PostEffectType::kVignette;
-	}
-	ImGui::End();
-
-
 #endif // _DEBUG
 
 	// グローバル変数の更新
 	globalVariables_->Update();
 
-	// ライト
-	entity3DManager_->GetLightManager()->Update(); 
+	dxCommon->Update(sceneManager_.get(), entity3DManager_.get());
 
-	sceneManager_->Update();
-
-	entity3DManager_->GetEffectManager()->GetParticleManager()->Update();
-
-#ifdef _DEBUG
-	entity3DManager_->Get3DLineCommon()->Update();
-#endif // _DEBUG
-	// レンダーテクスチャ
-	dxCommon->GetRenderTexture()->SetCamera(sceneManager_->GetCamara());
-	dxCommon->GetRenderTexture()->Update(type_);
 	// ImGuiの受付終了
 	dxCommon->GetImGuiManager()->End();
 }
 
 void MyGame::Draw()
 {
-	dxCommon->Draw(sceneManager_.get(),entity3DManager_.get(),type_);
+	dxCommon->Draw(sceneManager_.get(),entity3DManager_.get());
 }
 
 

@@ -25,21 +25,21 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	gaussianResource_->Map(0, nullptr, reinterpret_cast<void**>(&gaussianData_));
 	gaussianData_->num = 3;
 	gaussianData_->sigma = 2.0f;
-	
+
 	// アウトライン
 	outlineResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(OutlineGPU));
 	outlineResource_->Map(0, nullptr, reinterpret_cast<void**>(&outlineData_));
 	outlineData_->num = 3;
 	outlineData_->weightSquared = 6.0f;
 	outlineData_->projectionInverse = Identity();
-	
+
 	// ラジアルブラー
 	radialBlurResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(RadialBlurGPU));
 	radialBlurResource_->Map(0, nullptr, reinterpret_cast<void**>(&radialBlurData_));
-	radialBlurData_->center = Vector2{0.5f,0.5f};
+	radialBlurData_->center = Vector2{ 0.5f,0.5f };
 	radialBlurData_->numSamples = 10;
 	radialBlurData_->blurWidth = 0.01f;
-	
+
 	//	ディゾルブ
 	dissovleResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DissovleGPU));
 	dissovleResource_->Map(0, nullptr, reinterpret_cast<void**>(&dissovleData_));
@@ -49,20 +49,20 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	dissovleData_->color.y = 0.4f;
 	dissovleData_->color.z = 0.3f;
 
-	
+
 	//	ランダム
 	randomResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(RandomGPU));
 	randomResource_->Map(0, nullptr, reinterpret_cast<void**>(&randomData_));
 	randomData_->time = 0.0f;
-	
+
 	//	ブルーム
 	bloomResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(BloomGPU));
 	bloomResource_->Map(0, nullptr, reinterpret_cast<void**>(&bloomData_));
-	bloomData_->texelSize = { 1.0f ,1.0f};
-	bloomData_->blurRadius = 5.0f;
-	
+	bloomData_->threshold = 0.9f;
+	bloomData_->intensity = 1.0f;
+
 	CreateGraphicsPipeline();
-	
+
 
 
 	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ScreenVertexData) * 4);
@@ -216,14 +216,26 @@ void RenderingCommon::DrawBloomRender(int index)
 	DrawColl();
 }
 
+void RenderingCommon::DrawBloomCombinRender(int index, int indexB)
+{
+	DrawBloomCombinSetting();
+
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, bloomResource_->GetGPUVirtualAddress());
+
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
+
+	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, indexB);
+
+	DrawColl();
+}
+
 #pragma endregion // 描画
 
 
 void RenderingCommon::UpdateImgui(PostEffectType type)
 {
 #ifdef _DEBUG
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("PostEffect")) {
+	if (ImGui::TreeNode("postEffect")) {
 		switch (type)
 		{
 		case RenderingCommon::PostEffectType::kCopy:
@@ -237,18 +249,18 @@ void RenderingCommon::UpdateImgui(PostEffectType type)
 			ImGui::DragFloat("squared", &vignetteData_->squared, 0.01f);
 			break;
 		case RenderingCommon::PostEffectType::kSmoothing:
-			if(ImGui::Button("Filter3x3")) {
+			if (ImGui::Button("Filter3x3")) {
 				smoothingData_->num = 3;
 			}
-			if(ImGui::Button("Filter5x5")) {
+			if (ImGui::Button("Filter5x5")) {
 				smoothingData_->num = 5;
 			}
 			break;
 		case RenderingCommon::PostEffectType::kGaussian:
-			if(ImGui::Button("Filter3x3")) {
+			if (ImGui::Button("Filter3x3")) {
 				gaussianData_->num = 3;
 			}
-			if(ImGui::Button("Filter5x5")) {
+			if (ImGui::Button("Filter5x5")) {
 				gaussianData_->num = 5;
 			}
 			break;
@@ -270,21 +282,27 @@ void RenderingCommon::UpdateImgui(PostEffectType type)
 		case RenderingCommon::PostEffectType::kRadialBlur:
 			ImGui::DragFloat2("scale", &radialBlurData_->center.x, 0.01f);
 			ImGui::DragFloat("blurWidth", &radialBlurData_->blurWidth, 0.01f);
-			ImGui::SliderInt("numSamples", &radialBlurData_->numSamples,1,20);
+			ImGui::SliderInt("numSamples", &radialBlurData_->numSamples, 1, 20);
 			break;
 		case RenderingCommon::PostEffectType::kDissovle:
 			ImGui::DragFloat("threshold", &dissovleData_->threshold, 0.01f);
 			ImGui::DragFloat("edge", &dissovleData_->edge, 0.001f);
-			ImGui::ColorEdit3("color",&dissovleData_->color.x);
+			ImGui::ColorEdit3("color", &dissovleData_->color.x);
 			break;
 		case RenderingCommon::PostEffectType::kRandom:
 			randomData_->time += 0.01f;
 			break;
+		case RenderingCommon::PostEffectType::kBloom:
+			ImGui::DragFloat("threshold", &bloomData_->threshold, 0.001f);
+			break;
+		case RenderingCommon::PostEffectType::kBloomCombin:
+			ImGui::DragFloat("intensity", &bloomData_->intensity, 0.01f);
+			break;
 		default:
 			break;
 		}
+		ImGui::TreePop(); // <- 対応する TreePop を忘れずに！
 	}
-	ImGui::End();
 #endif // _DEBUG
 }
 
@@ -419,6 +437,17 @@ void RenderingCommon::DrawBloomSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
+void RenderingCommon::DrawBloomCombinSetting()
+{
+	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(bloomCombin_.rootSignature.Get());
+
+	dxCommon_->GetCommandList()->SetPipelineState(bloomCombin_.graphicsPipelineState.Get()); //PSOを設定
+
+	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
 
 
 
@@ -511,6 +540,23 @@ void RenderingCommon::RootBloomSetting()
 
 	psoManager_->SetRootSignature(bloom_.rootSignature, RootParameters, _countof(RootParameters), staticSamplersBlur, _countof(staticSamplersBlur));
 
+
+	D3D12_DESCRIPTOR_RANGE descriptorRangeCombin[2] = {};
+	psoManager_->SetDescriptorRenge(descriptorRangeCombin[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	psoManager_->SetDescriptorRenge(descriptorRangeCombin[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+
+	D3D12_ROOT_PARAMETER RootParametersCombin[3] = {};
+	// ブルーム (b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(RootParametersCombin[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(RootParametersCombin[1], descriptorRangeCombin[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t1) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(RootParametersCombin[2], descriptorRangeCombin[1], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(bloomCombin_.rootSignature, RootParametersCombin, _countof(RootParametersCombin), staticSamplersBlur, _countof(staticSamplersBlur));
+
+
+
 }
 
 
@@ -544,7 +590,7 @@ void RenderingCommon::CreateRootSignature()
 
 	psoManager_->SetRootSignature(sepia_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
-	
+
 	// ビネット
 	D3D12_ROOT_PARAMETER vinetteRootParameters[2] = {};
 	// ビネットデータ (b0) をピクセルシェーダで使用する
@@ -573,7 +619,7 @@ void RenderingCommon::CreateRootSignature()
 	psoManager_->SetRootSignature(gaussian_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
 
 
-	
+
 
 	// ランダム(b0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(smoothingRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -674,8 +720,11 @@ void RenderingCommon::CreateGraphicsPipeline()
 	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Random.PS.hlsl";
 	psoManager_->GraphicsPipelineState(random_.rootSignature, random_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Bloom.PS.hlsl";
+	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/BloomExtract.PS.hlsl";
 	psoManager_->GraphicsPipelineState(bloom_.rootSignature, bloom_.graphicsPipelineState, blendDesc, depthStencilDesc);
+
+	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/BloomCombine.PS.hlsl";
+	psoManager_->GraphicsPipelineState(bloomCombin_.rootSignature, bloomCombin_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
 
 

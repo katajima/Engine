@@ -53,23 +53,39 @@ public: // メンバ関数
 	// 初期化
 	void Intialize(WinApp* winApp);
 
-	// レンダーターゲット用描画前処理
-	void PreDrawOffscreen();
-	// レンダーターゲット用描画後処理
-	void PostDrawOffscreen();
 
-
-	// スワップチェーン用描画前処理
-	void PreDrawSwap();
-	// スワップチェーン用描画後処理
-	void PostDrawSwap();
 
 	//終了処理
 	void Finalize();
 
+	void Update(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
-	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager, RenderTexture::PostEffectType type);
+	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+
 private:
+	// レンダーテクスチャ描画前処理
+	void PreDraw(RenderTexture* renderTexture);
+	// レンダーテクスチャ描画後処理
+	void PostDraw(RenderTexture* renderTexture);
+	// 
+	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder, RenderTexture* renderTexturePixelSheder2 = nullptr);
+
+private:
+	// レンダーターゲット用描画前処理
+	void PreDrawOffscreen();
+	// レンダーターゲット用描画後処理
+	void PostDrawOffscreen();
+	// シーンの画面を書き出す
+	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+private:
+	// スワップチェーン用描画前処理
+	void PreDrawSwap();
+	// スワップチェーン用描画後処理
+	void PostDrawSwap();
+	// スワップチェーンにレンダーターゲットを渡す
+	void PassSwap(RenderTexture* renderTexture);
+private:
+	// 3D2D描画
 	void Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
 	//FPS固定初期化
@@ -91,7 +107,7 @@ public:
 
 	UavManager* GetUavManager() { return uavManager_.get(); }
 
-	RenderTexture* GetRenderTexture() { return renderTexture_.get(); }
+	//RenderTexture* GetRenderTexture() { return renderTextures_[0].get(); }
 
 	TextureManager* GetTextureManager() { return textureManager_.get(); }
 
@@ -124,7 +140,7 @@ private:
 	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
 	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
 	std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					     // バリア 
-	std::unique_ptr<RenderTexture> renderTexture_ = std::make_unique<RenderTexture>();	     // レンダーテクスチャ 
+	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;							 // レンダーテクスチャ 
 	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング

@@ -28,7 +28,12 @@ public:
 	// スワップチェーン用バリア(Post)
 	void SwapPost();
 
-private:
+	//void BarrierPre(SwapChain* swapChain, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
+	//void BarrierPre(RenderTexture* renderTexture, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
+	//void BarrierPre(DepthStencil* depthStencil, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
+
+
+public:
 
 	void TransitionResource(ID3D12Resource* res,D3D12_RESOURCE_STATES before,D3D12_RESOURCE_STATES after);
 
