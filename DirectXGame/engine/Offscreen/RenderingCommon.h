@@ -93,7 +93,8 @@ private:
 	// ランダム
 	void DrawRandomSetting();
 private:
-
+	// アウトライン
+	void RootOutlineSetting();
 private:
 	std::unique_ptr<PSOManager> psoManager_;
 	DirectXCommon* dxCommon_;

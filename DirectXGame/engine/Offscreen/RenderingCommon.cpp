@@ -386,7 +386,39 @@ void RenderingCommon::DrawRandomSetting()
 }
 
 
+
+
 #pragma endregion // レンダリング種類
+
+#pragma region MyRegion
+
+void RenderingCommon::RootOutlineSetting()
+{
+	// アウトライン	
+	D3D12_DESCRIPTOR_RANGE descriptorRangeOutline[2] = {};
+	psoManager_->SetDescriptorRenge(descriptorRangeOutline[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
+	psoManager_->SetDescriptorRenge(descriptorRangeOutline[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
+
+	///Samplerの設定
+	D3D12_STATIC_SAMPLER_DESC staticSamplersOutline[2] = {};
+	psoManager_->SetSampler(staticSamplersOutline[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
+	psoManager_->SetSampler(staticSamplersOutline[1], 1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL, PSOManager::TextureAddressMode::kCLAMP);
+
+	D3D12_ROOT_PARAMETER outlineRootParameters[3] = {};
+
+	psoManager_->SetRootParameter(outlineRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(outlineRootParameters[1], descriptorRangeOutline[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(outlineRootParameters[2], descriptorRangeOutline[1], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(outline_.rootSignature, outlineRootParameters, _countof(outlineRootParameters), staticSamplersOutline, _countof(staticSamplersOutline));
+
+
+}
+
+
+#pragma endregion // ルートパラメータやサンプラー設定
 
 
 
@@ -485,28 +517,8 @@ void RenderingCommon::CreateRootSignature()
 	psoManager_->SetRootSignature(dissovle_.rootSignature, dissovleRootParameters, _countof(dissovleRootParameters), staticSamplers, _countof(staticSamplers));
 
 
-	
-	// アウトライン	
-	D3D12_DESCRIPTOR_RANGE descriptorRangeOutline[2] = {};
-	psoManager_->SetDescriptorRenge(descriptorRangeOutline[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
-	psoManager_->SetDescriptorRenge(descriptorRangeOutline[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // Depth用
-
-	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplersOutline[2] = {};
-	psoManager_->SetSampler(staticSamplersOutline[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
-	psoManager_->SetSampler(staticSamplersOutline[1], 1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL,PSOManager::TextureAddressMode::kCLAMP);
-
-	D3D12_ROOT_PARAMETER outlineRootParameters[3] = {};
-
-	psoManager_->SetRootParameter(outlineRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(outlineRootParameters[1], descriptorRangeOutline[0], D3D12_SHADER_VISIBILITY_PIXEL);
-	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(outlineRootParameters[2], descriptorRangeOutline[1], D3D12_SHADER_VISIBILITY_PIXEL);
-	
-	psoManager_->SetRootSignature(outline_.rootSignature, outlineRootParameters, _countof(outlineRootParameters), staticSamplersOutline, _countof(staticSamplersOutline));
-
-	
+	// アウトライン
+	RootOutlineSetting();
 
 }
 
