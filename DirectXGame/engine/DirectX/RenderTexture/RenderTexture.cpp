@@ -57,6 +57,7 @@ void RenderTexture::Update(PostEffectType type)
 		break;
 	case RenderTexture::PostEffectType::kOitline:
 		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kOitline);
+		break;
 	case RenderTexture::PostEffectType::kRadialBlur:
 		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRadialBlur);
 		break;
@@ -98,6 +99,7 @@ void RenderTexture::Draw(PostEffectType type)
 		break;
 	case RenderTexture::PostEffectType::kRadialBlur:
 		renderingCommon_->DrawRadialBlurRender(srvIndex_);
+		break;
 	case RenderTexture::PostEffectType::kDissovle:
 		renderingCommon_->DrawDissovleRender(srvIndex_);
 		break;

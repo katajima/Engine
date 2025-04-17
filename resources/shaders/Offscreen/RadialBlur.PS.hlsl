@@ -27,6 +27,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     {
     // 現在のuvからぼかし距離にしたがってサンプリングを進めながらサンプリングしていく
         float2 texcoord = input.texcoord + direction * gRadialBlur.blurWidth * float(sampleIndex);
+        //texcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
         outputColor.rgb += gTexture.Sample(gSampler, texcoord).rgb;
     }
     // 平均化する

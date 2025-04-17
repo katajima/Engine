@@ -401,9 +401,9 @@ void RenderingCommon::CreateRootSignature()
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	psoManager_->SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	// 
 
-		// RootParameter作成。複数指定できるのではい
+
+	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -446,13 +446,7 @@ void RenderingCommon::CreateRootSignature()
 	psoManager_->SetRootSignature(gaussian_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
 
 
-	//ラジアルブラー (b0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(smoothingRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
-
-	psoManager_->SetRootSignature(radialBlur_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
-
+	
 
 	// ランダム(b0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(smoothingRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -460,6 +454,19 @@ void RenderingCommon::CreateRootSignature()
 	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 
 	psoManager_->SetRootSignature(random_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplers, _countof(staticSamplers));
+
+	///Samplerの設定
+	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
+	psoManager_->SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL,PSOManager::TextureAddressMode::kCLAMP);
+
+
+	//ラジアルブラー (b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(smoothingRootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(smoothingRootParameters[1], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+
+	psoManager_->SetRootSignature(radialBlur_.rootSignature, smoothingRootParameters, _countof(smoothingRootParameters), staticSamplersBlur, _countof(staticSamplersBlur));
+
 
 
 	// ディゾルブ
@@ -487,7 +494,7 @@ void RenderingCommon::CreateRootSignature()
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplersOutline[2] = {};
 	psoManager_->SetSampler(staticSamplersOutline[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
-	psoManager_->SetSampler(staticSamplersOutline[1], 1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);
+	psoManager_->SetSampler(staticSamplersOutline[1], 1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL,PSOManager::TextureAddressMode::kCLAMP);
 
 	D3D12_ROOT_PARAMETER outlineRootParameters[3] = {};
 

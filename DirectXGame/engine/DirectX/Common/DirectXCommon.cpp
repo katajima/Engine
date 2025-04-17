@@ -62,7 +62,6 @@ void DirectXCommon::PreDrawOffscreen() {
 	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 
-	renderTexture_->GetClearColor();
 	//// レンダーターゲットと深度バッファをクリア
 	float clearColor[] = { renderTexture_->GetClearColor().x, renderTexture_->GetClearColor().y,renderTexture_->GetClearColor().z, renderTexture_->GetClearColor().w }; // 任意のクリアカラー（赤）
 	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);

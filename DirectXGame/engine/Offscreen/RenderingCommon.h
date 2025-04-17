@@ -92,7 +92,7 @@ private:
 
 	// ランダム
 	void DrawRandomSetting();
-
+private:
 
 private:
 	std::unique_ptr<PSOManager> psoManager_;

@@ -69,7 +69,7 @@ private:
 	std::unique_ptr<Primitive> primiStar = nullptr;
 	std::unique_ptr<Primitive> primiTrai = nullptr;
 	
-
+	RenderTexture::PostEffectType type_ = RenderTexture::PostEffectType::kCopy;
 private:
 	// ゲーム終了フラグ
 	bool endRequst_ = false;
