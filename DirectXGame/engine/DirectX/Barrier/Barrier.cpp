@@ -13,42 +13,6 @@ void Barrier::Initialize(Command* command, SwapChain* swapChain, RenderTexture* 
     depthStencil_ = depthStencil;
 }
 
-void Barrier::RenderPre()
-{
-    // レンダーターゲット
-    TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-    // デプスステンシル
-    TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-
-}
-
-
-void Barrier::RenderPost()
-{
-    // レンダーターゲット
-    TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-    // デプスステンシル
-    TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-}
-
-void Barrier::SwapPre()
-{
-    // スワップチェーン用
-    TransitionResource(swapChain_->GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-}
-
-void Barrier::SwapPost()
-{
-    // スワップチェーン用
-    TransitionResource(swapChain_->GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-}
-
-
-
 void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 {
     if (before != after)

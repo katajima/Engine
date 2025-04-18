@@ -184,9 +184,17 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 	// ライト
 	entity3DManager->GetLightManager()->Update();
 
+	entity3DManager->GetSkyBoxCommon()->Update();
+
+
+
 	sceneManager->Update();
 
 	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
+
+	for (auto& renderTexture : renderTextures_) {
+		renderTexture->SetCamera(sceneManager->GetCamara());
+	}
 
 #ifdef _DEBUG
 	entity3DManager->Get3DLineCommon()->Update();
@@ -196,13 +204,13 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("RenderTexture")) {
 		for (auto& renderTexture : renderTextures_) {
-			renderTexture->Update();
 			renderTexture->SetCamera(sceneManager->GetCamara());
+			renderTexture->Update();
 		}
 	}
 	ImGui::End();
 #endif // _DEBUG
-	
+
 	
 
 	
@@ -270,6 +278,8 @@ void DirectXCommon::DrawRenderTexture(RenderTexture* renderTextureRenderTreget, 
 
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
+	//entity3DManager->GetSkyBoxCommon()->DrawCommonSetting();
+
 	// 3Dオブジェクトの描画
 	sceneManager->Draw3D();
 

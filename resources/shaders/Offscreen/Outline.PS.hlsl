@@ -124,9 +124,14 @@ PixelShaderOutput main(VertexShaderOutput input)
         weight = saturate(weight * gOutline.weightSquared);
         output.color.rgb = (1.0f - weight) * gTexture.Sample(gSampler, input.texcoord).rgb;
     }
-    if (gOutline.num == 2 || gOutline.num == 3)
+    if (gOutline.num == 2)
     {
         weight = saturate(weight); // 0~1‚É‚µ‚Ä‚¨‚­
+        output.color.rgb = (1.0f - weight) * gTexture.Sample(gSampler, input.texcoord).rgb;
+    }
+    if (gOutline.num == 3)
+    {
+        weight = saturate(weight * gOutline.weightSquared); // 0~1‚É‚µ‚Ä‚¨‚­
         output.color.rgb = (1.0f - weight) * gTexture.Sample(gSampler, input.texcoord).rgb;
     }
 

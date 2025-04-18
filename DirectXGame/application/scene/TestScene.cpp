@@ -170,6 +170,7 @@ void TestScene::Update()
 
 void TestScene::Draw3D()
 {
+	
 	switch (behavior_)
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
@@ -348,6 +349,7 @@ void TestScene::InitializeObject3D()
 	goalObject->worldtransform_.scale_ = 3;
 
 	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(camera.get());
+	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
 
 
 	for (int i = 0; i < map->GetWidth(); i++) {

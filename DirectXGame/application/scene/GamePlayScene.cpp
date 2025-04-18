@@ -131,6 +131,7 @@ void GamePlayScene::InitializeCamera()
 
 #endif // _DEBUG]
 
+	SetCamera(camera.get());
 
 	cameraObj_.Initialize(GetEntity3DManager());
 }

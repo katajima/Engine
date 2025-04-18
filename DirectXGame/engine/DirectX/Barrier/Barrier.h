@@ -16,23 +16,6 @@ public:
 	// 
 	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture, DepthStencil* depthStencil);
 
-	// レンダーターゲット用バリア(Pre)
-	void RenderPre();
-
-	// レンダーターゲット用バリア(Post)
-	void RenderPost();
-
-	// スワップチェーン用バリア(Pre)
-	void SwapPre();
-
-	// スワップチェーン用バリア(Post)
-	void SwapPost();
-
-	//void BarrierPre(SwapChain* swapChain, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
-	//void BarrierPre(RenderTexture* renderTexture, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
-	//void BarrierPre(DepthStencil* depthStencil, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
-
-
 public:
 
 	void TransitionResource(ID3D12Resource* res,D3D12_RESOURCE_STATES before,D3D12_RESOURCE_STATES after);
