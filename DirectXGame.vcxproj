@@ -137,6 +137,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter2d.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager2d.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\ShapeType\ShapePlane.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\DSV\DsvManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\Effect\EffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.cpp" />
@@ -530,6 +532,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter2d.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager2d.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeType\BaseShape.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeType\ShapePlane.h" />
     <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\Effect\EffectManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.h" />

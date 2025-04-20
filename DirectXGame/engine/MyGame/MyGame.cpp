@@ -123,6 +123,7 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/rostock_laage_airport_4k.dds");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
 	textureManager->LoadTexture("resources/Texture/circle2.png");
+	textureManager->LoadTexture("resources/Texture/gradationLine.png");
 
 
 	modelManager->LoadModelAmime("multiMaterial.gltf", "multiMaterial");
@@ -214,12 +215,12 @@ void MyGame::InitializeResource()
 	primiStar = std::make_unique<Primitive>();
 	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Star, "resources/Texture/Image.png");
 	ShapeParameter::Star star;
-	star.innerRadius_ = 1.0f;
-	star.outerRadius_ = 7.0f;
-	star.segments_ = 4;
+	star.innerRadius = 1.0f;
+	star.outerRadius = 7.0f;
+	star.segments = 4;
 	primiStar->SetStar(star);
 	primiStar->SetName("star");
-	primiStar->Update();
+	//primiStar->Update();
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, ParticleManager::BlendType::MODE_ADD);

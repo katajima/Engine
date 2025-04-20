@@ -176,6 +176,9 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 
+		primitivePlaneObject->Draw();
+		primitiveObject->Draw(Primitive::PsoType::kRingClamp);
+
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		ocean_->Draw();
 		break;
@@ -371,6 +374,19 @@ void TestScene::InitializeObject3D()
 	}
 
 
+	primitiveObject = std::make_unique<Primitive>();
+	primitivePlaneObject = std::make_unique<Primitive>();
+	
+
+	primitiveObject->Initialize(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Sphere, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
+	primitiveObject->SetCamera(camera.get());
+	primitiveObject->transform.translate.y = 100;
+	primitiveObject->transform.rotate.y = DegreesToRadians(180);
+	
+	primitivePlaneObject->Initialize(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Torus, "resources/Texture/uvChecker.png",{1,1,1,1},"Plane");
+	primitivePlaneObject->SetCamera(camera.get());
+	primitivePlaneObject->transform.translate.y = 80;
+	//primitivePlaneObject->transform.rotate.y = DegreesToRadians(180);
 }
 
 /// <summary>
@@ -706,6 +722,18 @@ void TestScene::UpdateRoom01()
 	GetEntity3DManager()->GetSkyBoxCommon()->Update();
 
 
+#ifdef _DEBUG
+
+	//ImGui::Begin("Primitive");
+	//ImGui::DragFloat3("translate",&primitiveObject->transform.translate.x,0.1f);
+	//ImGui::DragFloat3("rotate",&primitiveObject->transform.rotate.x,0.1f);
+	//ImGui::DragFloat3("scale",&primitiveObject->transform.scale.x,0.1f);
+	//ImGui::End();
+#endif // _DEBUG
+
+	primitiveObject->Update();
+
+	primitivePlaneObject->Update();
 	primitvPlane_->Update();
 }
 

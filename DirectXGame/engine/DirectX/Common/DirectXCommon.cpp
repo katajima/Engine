@@ -278,8 +278,7 @@ void DirectXCommon::DrawRenderTexture(RenderTexture* renderTextureRenderTreget, 
 
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
-	//entity3DManager->GetSkyBoxCommon()->DrawCommonSetting();
-
+	
 	// 3Dオブジェクトの描画
 	sceneManager->Draw3D();
 

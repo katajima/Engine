@@ -22,6 +22,7 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 	material = std::make_unique<Material>();
 	material->Initialize(dxCommon_);
 	material->tex_.diffuseFilePath = "resources/Texture/rostock_laage_airport_4k.dds";
+	material->LoadTex();
 	material->color = { 1,1,1,1};
 	material->enableLighting_ = false;
 	
