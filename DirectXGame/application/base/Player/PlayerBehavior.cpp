@@ -4,10 +4,10 @@
 
 void Player::BehaviorRootInitialize()
 {
-	dashEmitter_->SetIsEmit(false);
+	effect_->GetDashEmitter()->SetIsEmit(false);
 	workAttack.parameter = 0;
 	
-	flag33 = false;
+	effect_->SetIsTrail(false);
 }
 
 void Player::BehaviorRootUpdate()
@@ -45,7 +45,7 @@ void Player::BehaviorAttackInitialize()
 	workAttack.comboIndex = 0;
 	
 
-	dashEmitter_->SetIsEmit(false);
+	effect_->GetDashEmitter()->SetIsEmit(false);
 	AttackTypes();
 
 	AttackTypeInit(workAttack.comboIndex);
@@ -74,7 +74,7 @@ void Player::BehaviorAttackUpdate()
 
 void Player::BehaviorDieInitialize()
 {
-	dashEmitter_->SetIsEmit(false);
+	effect_->GetDashEmitter()->SetIsEmit(false);
 	specialAttack.phese = 0;
 	specialAttack.specialGauge = 0;
 }

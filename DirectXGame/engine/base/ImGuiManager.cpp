@@ -1,5 +1,6 @@
 #include"ImGuiManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/input/Input.h"
 #include "WinApp.h"
 #include <iostream>//用いるヘッダファイルが変わります。
@@ -15,19 +16,8 @@ static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値�
 void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 {
 #ifdef _DEBUG
-	HRESULT result;
-
 	dxCommon_ = dxCommon;
-
-	// デスクリプタヒープ設定
-	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	desc.NumDescriptors = 1;
-	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	// デスクリプタヒープ生成
-	result = dxCommon_->GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&srvHeap_));
-	assert(SUCCEEDED(result));
-
+	srvManager_ = dxCommon_->GetSrvManager();
 
 	// コンテキストの生成
 	ImGui::CreateContext();
@@ -38,9 +28,9 @@ void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 	ImGui_ImplWin32_Init(WinApp::GetHwnd());
 	ImGui_ImplDX12_Init(
 		dxCommon_->GetDevice().Get(), static_cast<int>(dxCommon_->GetBackBufferCount()),
-		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, srvHeap_.Get(),
-		srvHeap_->GetCPUDescriptorHandleForHeapStart(),
-		srvHeap_->GetGPUDescriptorHandleForHeapStart());
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, srvManager_->GetDescriptorHeap(),
+		srvManager_->GetCPUDescriptorHandle(0),
+		srvManager_->GetGPUDescriptorHandle(0));
 #endif // _DEBUG
 
 }
@@ -53,8 +43,6 @@ void ImGuiManager::Finalize()
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	// デスクリプタヒープを解放
-	srvHeap_.Reset();
 #endif // _DEBUG
 }
 
@@ -81,13 +69,8 @@ void ImGuiManager::End()
 void ImGuiManager::Draw()
 {
 #ifdef _DEBUG
-	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList().Get();
-
-	// デスクリプタヒープの配列をセットするコマンド
-	ID3D12DescriptorHeap* ppHeaps[] = { srvHeap_.Get() };
-	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 	// 描画コマンドを発行
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList().Get());
 #endif // _DEBUG
 }
 
@@ -212,6 +195,7 @@ void ImGuiManager::SetCustomColorScheme()
 	style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.4f, 0.5f, 1.0f, 1.0f);  // 明るい青
 	style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.1f, 0.2f, 0.6f, 1.0f);  // ダーク青
 }
+
 
 
 

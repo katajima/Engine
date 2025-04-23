@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Enemy\Enemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\BasePlayerState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Player\Effect\PlayerEffect.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Player.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerAttack.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerBehavior.cpp" />
@@ -148,6 +149,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\Noise.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\Random.cpp" />
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp" />
@@ -506,6 +508,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Enemy\Enemy.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Player\BasePlayerState.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\Effect\PlayerEffect.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Player.h" />
     <ClInclude Include="DirectXGame\application\base\Player\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Player\playerWeapon.h" />
@@ -545,6 +548,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Math\MapChip.h" />
     <ClInclude Include="DirectXGame\engine\Math\Noise.h" />
     <ClInclude Include="DirectXGame\engine\Math\Random.h" />
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h" />
     <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />

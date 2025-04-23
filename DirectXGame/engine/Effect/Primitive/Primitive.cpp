@@ -2,16 +2,9 @@
 
 #include"PrimitiveCommon.h"
 
-void Primitive::Initialize(PrimitiveCommon* primitiveCommon, ShapeType type, const std::string& tex, const Color color, const std::string& name, bool isLine)
+void Primitive::Init(const std::string& tex, const Color color, const std::string& name)
 {
 	mesh = std::make_unique<Mesh>();
-
-	primitiveCommon_ = primitiveCommon;
-
-	type_ = type;
-
-	isLine_ = isLine;
-
 	MeshInitialize();
 
 	mesh->Initialize(primitiveCommon_->GetDxCommon());
@@ -38,7 +31,6 @@ void Primitive::Initialize(PrimitiveCommon* primitiveCommon, ShapeType type, con
 	else {
 		name_ = name;
 	}
-
 }
 
 void Primitive::Update()
@@ -199,6 +191,7 @@ void Primitive::MeshUpdate()
 	}
 
 	oCube = cube;
+	oTorus = torus;
 	oCross_ = cross_;
 	oStar = star;
 	oCrescent = crescent;
@@ -224,6 +217,48 @@ void Primitive::MeshUpdateImGui()
 		ImGui::InputInt("index2", &i);
 		str = name_ + "material";
 		ImGui::DragFloat3(str.c_str(), &material->transform.scale.x, 0.01f);
+		str += "rotate";
+		ImGui::DragFloat3(str.c_str(), &material->transform.rotate.x, 0.01f);
+		//material->transform.rotate.x += 1.0f;
+
+		ImGui::Checkbox("isScaleX", &aimetion_.isScaleX);
+		ImGui::Checkbox("isScaleY", &aimetion_.isScaleY);
+		ImGui::DragFloat2("speed", &aimetion_.speed.x, 0.01f);
+		ImGui::DragFloat2("maxCount", &aimetion_.maxCount.x, 0.01f);
+		
+		ImGui::Checkbox("isRotateX", &aimetion_.isRotateX);
+		ImGui::Checkbox("isRotateY", &aimetion_.isRotateY);
+		ImGui::DragFloat2("rotateSpeed", &aimetion_.rotateSpeed.x, 0.01f);
+		ImGui::DragFloat2("maxRotate", &aimetion_.maxRotate.x, 0.01f);
+		
+		if (aimetion_.isScaleX) {
+			material->transform.scale.x += aimetion_.speed.x;
+			if (material->transform.scale.x >= aimetion_.maxCount.x) {
+				material->transform.scale.x = 0;
+			}
+
+		}
+		if (aimetion_.isScaleY) {
+			material->transform.scale.y += aimetion_.speed.y;
+			if (material->transform.scale.y >= aimetion_.maxCount.y) {
+				material->transform.scale.y = 0;
+			}
+		}
+
+		if (aimetion_.isRotateX) {
+			material->transform.rotate.x += aimetion_.rotateSpeed.x;
+			if (material->transform.rotate.x >= aimetion_.maxRotate.x) {
+				material->transform.rotate.x = 0;
+			}
+
+		}
+		if (aimetion_.isRotateY) {
+			material->transform.rotate.y += aimetion_.rotateSpeed.y;
+			if (material->transform.rotate.y >= aimetion_.maxRotate.y) {
+				material->transform.rotate.y = 0;
+			}
+		}
+
 
 		switch (type_)
 		{
@@ -390,6 +425,15 @@ void Primitive::Draw(PsoType type)
 		break;
 	case Primitive::PsoType::kRingClamp:
 		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kRingClamp);
+		break;
+	case Primitive::PsoType::kNoCull:
+		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCull);
+		break;
+	case Primitive::PsoType::kNoCullRingClamp:
+		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCullRingClamp);
+		break;
+	case Primitive::PsoType::kNoCullWireFrame:
+		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCullWireFrame);
 		break;
 	default:
 		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);

@@ -176,7 +176,7 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 
-		primitivePlaneObject->Draw();
+		primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
 		primitiveObject->Draw(Primitive::PsoType::kRingClamp);
 
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -247,8 +247,8 @@ void TestScene::Draw2D()
 
 
 
-		primitive2d1_->Update();
-		primitive2d1_->Draw();
+		//primitive2d1_->Update();
+		//primitive2d1_->Draw();
 
 
 
@@ -377,13 +377,14 @@ void TestScene::InitializeObject3D()
 	primitiveObject = std::make_unique<Primitive>();
 	primitivePlaneObject = std::make_unique<Primitive>();
 	
-
-	primitiveObject->Initialize(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Sphere, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
+	ShapeParameter::ShapeSphere sph;
+	primitiveObject->Initialize<ShapeParameter::ShapeSphere>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, sph, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
 	primitiveObject->SetCamera(camera.get());
 	primitiveObject->transform.translate.y = 100;
 	primitiveObject->transform.rotate.y = DegreesToRadians(180);
 	
-	primitivePlaneObject->Initialize(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Torus, "resources/Texture/uvChecker.png",{1,1,1,1},"Plane");
+	ShapeParameter::Torus toru;
+	primitivePlaneObject->Initialize<ShapeParameter::Torus>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Torus, toru , "resources/Texture/gradationLine.png",{1,1,1,1},"Plane");
 	primitivePlaneObject->SetCamera(camera.get());
 	primitivePlaneObject->transform.translate.y = 80;
 	//primitivePlaneObject->transform.rotate.y = DegreesToRadians(180);

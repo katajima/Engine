@@ -146,6 +146,16 @@ ID3D12Resource* RenderTexture::GetResource()
 	return resource_.Get();
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVGPUHandle()
+{
+	return srvManager_->GetGPUDescriptorHandle(srvIndex_);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVCPUHandle()
+{
+	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
+}
+
 
 
 void RenderTexture::CreateResource()

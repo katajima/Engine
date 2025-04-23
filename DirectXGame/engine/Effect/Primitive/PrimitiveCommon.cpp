@@ -28,6 +28,24 @@ void PrimitiveCommon::DrawCommonSetting(PsoType type)
 
 		dxCommon_->GetCommandList()->SetPipelineState(defaltRing_.graphicsPipelineState.Get()); //PSOを設定
 		break;
+	case PrimitiveCommon::PsoType::kNoCull:
+		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(noCull_.rootSignature.Get());
+
+		dxCommon_->GetCommandList()->SetPipelineState(noCull_.graphicsPipelineState.Get()); //PSOを設定
+		break;
+	case PrimitiveCommon::PsoType::kNoCullRingClamp:
+		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(noCullRing_.rootSignature.Get());
+
+		dxCommon_->GetCommandList()->SetPipelineState(noCullRing_.graphicsPipelineState.Get()); //PSOを設定
+		break;
+	case PrimitiveCommon::PsoType::kNoCullWireFrame:
+		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(noCullWireFrame_.rootSignature.Get());
+
+		dxCommon_->GetCommandList()->SetPipelineState(noCullWireFrame_.graphicsPipelineState.Get()); //PSOを設定
+		break;
 	default:
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(defalt_.rootSignature.Get());
@@ -61,11 +79,15 @@ void PrimitiveCommon::CreateRootSignature()
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	psoManager_->SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
 	psoManager_->SetRootSignature(defalt_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	psoManager_->SetRootSignature(noCull_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	psoManager_->SetRootSignature(noCullWireFrame_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
 
 	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 
 	psoManager_->SetRootSignature(defaltRing_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	psoManager_->SetRootSignature(noCullRing_.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+
 }
 
 void PrimitiveCommon::CreateGraphicsPipeline()
@@ -116,5 +138,14 @@ void PrimitiveCommon::CreateGraphicsPipeline()
 
 	psoManager_->GraphicsPipelineState(defalt_.rootSignature, defalt_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 	psoManager_->GraphicsPipelineState(defaltRing_.rootSignature, defaltRing_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
+
+	psoManager_->GraphicsPipelineState(noCull_.rootSignature, noCull_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(noCullRing_.rootSignature, noCullRing_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME);
+	psoManager_->GraphicsPipelineState(noCullWireFrame_.rootSignature, noCullWireFrame_.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
 
 }

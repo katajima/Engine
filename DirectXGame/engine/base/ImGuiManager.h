@@ -17,6 +17,7 @@
 // 前方宣言
 class WinApp;
 class DirectXCommon;
+class SrvManager;
 // ImGuiの管理
 class ImGuiManager
 {
@@ -54,16 +55,18 @@ public:
 
 	void SetInput(Input* input) { input_ = input; }
 
+
 private:
 
 	// DirectX基盤インスタンス（借りてくる）
 	DirectXCommon* dxCommon_ = nullptr;
-	// SRV用ヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
-
+	SrvManager* srvManager_ = nullptr;
+	
 	Input* input_;
 
 	Input::FlagXYZ flag;
+
+	uint32_t srvIndex = 0;
 
 };
 

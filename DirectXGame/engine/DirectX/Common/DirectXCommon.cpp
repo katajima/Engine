@@ -55,7 +55,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	renderTextures_.push_back(std::move(renderTextere4));
 	renderTextures_.push_back(std::move(renderTextere5));
 	
-	
+	finalRenderTexture_ = renderTextures_[4].get();
 	
 	barrier_->Initialize(command_.get(), swapChain_.get(), renderTextures_[0].get(), depthStencil_.get()); // バリア
 
@@ -162,6 +162,7 @@ void DirectXCommon::PassSwap(RenderTexture* renderTexture)
 	// レンダーテクスチャ(コピー)
 	renderTexture->Draw();
 
+	
 	// ImGuiの描画
 	GetImGuiManager()->Draw();
 
@@ -234,7 +235,9 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	DrawRenderTexture(renderTextures_[4].get(), renderTextures_[3].get() ,renderTextures_[1].get()); // コンボ
 
 	// スワップチェーン
-	PassSwap(renderTextures_[4].get());
+	PassSwap(finalRenderTexture_);
+
+
 }
 
 void DirectXCommon::PreDraw(RenderTexture* renderTexture)

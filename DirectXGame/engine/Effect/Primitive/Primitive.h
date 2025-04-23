@@ -7,6 +7,7 @@
 #include<string>
 #include<vector>
 #include<format>
+#include<variant>
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -26,13 +27,23 @@
 #include "ShapeParameter.h"
 
 
+//項目
+using ShapeParameters = std::variant<ShapeParameter::ShapePlane, ShapeParameter::ShapeTriangle, ShapeParameter::Circle, ShapeParameter::ShapeCube,
+	ShapeParameter::Star, ShapeParameter::Crescent, ShapeParameter::Ring, ShapeParameter::ShapeCross, ShapeParameter::Cylinder, ShapeParameter::ShapeArrow,
+	ShapeParameter::ShapeSphere, ShapeParameter::Tube, ShapeParameter::Pyramid, ShapeParameter::Torus>;
+
 class PrimitiveCommon;
 class Primitive
 {
 public:
+
+public:
 	enum class PsoType {
 		kDefalt,
-		kRingClamp
+		kRingClamp,
+		kNoCull,
+		kNoCullRingClamp,
+		kNoCullWireFrame,
 
 	};
 
@@ -57,10 +68,69 @@ public:
 		Torus,			// トーラス	
 		Spring          // ばね
 	};
-	
+
 
 	// 形
-	void Initialize(PrimitiveCommon* primitiveCommon, ShapeType type, const std::string& tex,const Color color = { 1,1,1,1 }, const std::string& name = "", bool isLine = false);
+	template <typename T>
+	void Initialize(PrimitiveCommon* primitiveCommon, ShapeType type, const ShapeParameters& parameter, const std::string& tex, const Color color = { 1,1,1,1 }, const std::string& name = "", bool isLine = false)
+	{
+		primitiveCommon_ = primitiveCommon;
+
+		std::visit([&](auto&& shapeParam) {
+			using ParamType = std::decay_t<decltype(shapeParam)>;
+
+			if constexpr (std::is_same_v<ParamType, ShapeParameter::ShapePlane>) {
+				plane = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::ShapeTriangle>) {
+				triangle = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Circle>) {
+				circle = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::ShapeCube>) {
+				cube = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Star>) {
+				star = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Crescent>) {
+				crescent = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Ring>) {
+				ring = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::ShapeCross>) {
+				cross_ = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Cylinder>) {
+				cylinder = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::ShapeArrow>) {
+				arrow = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::ShapeSphere>) {
+				sphere = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Tube>) {
+				tube = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Pyramid>) {
+				pyramid = shapeParam;
+			}
+			else if constexpr (std::is_same_v<ParamType, ShapeParameter::Torus>) {
+				torus = shapeParam;
+			}
+			}, parameter);
+
+		type_ = type;
+
+		isLine_ = isLine;
+
+		Init(tex,color,name);
+
+	};
+
 	// 更新
 	void Update();
 	// 描画
@@ -70,7 +140,9 @@ public:
 
 	Mesh* GetMesh() { return mesh.get(); }
 
-	
+private:
+
+	void Init(const std::string& tex, const Color color, const std::string& name);
 
 private:
 	void MeshInitialize();
@@ -79,7 +151,7 @@ private:
 
 	void MeshUpdateImGui();
 private:
-	
+
 public:
 	void SetColor(const Color& color) { material->color = color; }
 
@@ -129,14 +201,14 @@ private:
 	// 角錐
 	ShapeParameter::Pyramid pyramid;
 	ShapeParameter::Pyramid oPyramid;
-
+	// トーラス
 	ShapeParameter::Torus torus;
 	ShapeParameter::Torus oTorus;
 
-	
 
 
-	
+
+
 public: //セッター
 	void SetName(const std::string str) { name_ = str; };
 
@@ -162,12 +234,25 @@ private:
 	ShapeType type_;
 
 	PrimitiveCommon* primitiveCommon_;
+
+
+	struct UVAnimetion {
+		bool isScaleX = false;
+		bool isScaleY = false;
+		Vector2 maxCount{ 10,10 };
+		Vector2 speed{0.2f,0.2f};
+
+		bool isRotateX = false;
+		bool isRotateY = false;
+		Vector2 maxRotate{ 10,10 };
+		Vector2 rotateSpeed{0.2f,0.2f};
+
+	};
+	UVAnimetion aimetion_{};
+
+	
 	
 
-
-
-	float timer_ = 0.0f;
-	int count_ = 0;
 
 public:
 	Matrix4x4 mat_;

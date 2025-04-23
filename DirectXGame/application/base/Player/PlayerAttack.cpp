@@ -13,7 +13,8 @@ void Player::Attack()
 	{
 	case AttackType::kNormal:
 		if (workAttack.parameter >= 5.0f /60) {
-			flag33 = true;
+			effect_->SetIsTrail(true);
+			
 		}
 		if (workAttack.comboIndex == 0) {
 			if (workAttack.parameter >= 1.0f / 60) {
@@ -53,7 +54,8 @@ void Player::Attack()
 			workAttack.attackAll.max_t += MyGame::GameTime();
 		}
 		if (workAttack.parameter >= 5.0f /60) {
-			flag33 = true;
+			effect_->SetIsTrail(true);
+
 		}
 
 
@@ -75,7 +77,8 @@ void Player::Attack()
 		break;
 	case AttackType::kDash:
 		if (workAttack.parameter >= 5.0f / 60) {
-			flag33 = true;
+			effect_->SetIsTrail(true);
+
 		}
 
 
@@ -146,10 +149,12 @@ void Player::SetAttackCombo(WrokAttack& work)
 			// コンボフラグをリセット
 			work.comboNext = false;
 			work.key.IsAttack = false;
-			flag33 = false;
+			effect_->SetIsTrail(false);
+
 		}
 		else {
-			flag33 = false;
+			effect_->SetIsTrail(false);
+
 			behaviorRequest_ = Behavior::kRoot;
 		}
 	}
@@ -238,7 +243,7 @@ void Player::AttackTypeInit(int comboIndex)
 			
 			break;
 		case AttackType::kDash:
-			dashEmitter_->SetIsEmit(true);
+			effect_->GetDashEmitter()->SetIsEmit(true);
 			weapon_->SetRad(3.0f);
 
 			workAttack.attackAll.max_t = 0.3f;

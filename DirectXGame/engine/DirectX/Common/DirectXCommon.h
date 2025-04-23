@@ -62,6 +62,8 @@ public: // メンバ関数
 
 	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
+	RenderTexture* GetFinalRenderTexture() { return finalRenderTexture_; };
+
 private:
 	// レンダーテクスチャ描画前処理
 	void PreDraw(RenderTexture* renderTexture);
@@ -69,6 +71,8 @@ private:
 	void PostDraw(RenderTexture* renderTexture);
 	// 
 	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder, RenderTexture* renderTexturePixelSheder2 = nullptr);
+
+	void SetFinalRenderTexture(RenderTexture* renderTex) { finalRenderTexture_ = renderTex; };
 
 private:
 	// レンダーターゲット用描画前処理
@@ -151,6 +155,8 @@ private:
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
+
+	RenderTexture* finalRenderTexture_;
 public:
 
 

@@ -32,9 +32,6 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	objectReticle_.worldtransform_.parent_ = &objectBase_.worldtransform_;
 	objectReticle_.worldtransform_.translate_ = { 0,0,30 };
 
-	//assert(objectBody_ != nullptr);
-	//assert(objectBase_ != nullptr);
-
 	// 体
 	objectBody_.Initialize(entity3DManager);
 	objectBody_.SetCamera(camera_);
@@ -84,15 +81,7 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	weapon_->SetPlayer(this);
 	
 
-	weaponStr.Initialize(entity3DManager);
-	weaponStr.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
-	weaponStr.worldtransform_.translate_ = {0,weapon_->GetObject3D().GetMesh(0)->GetMax().y ,0};
-		
 
-	weaponEnd.Initialize(entity3DManager);
-	weaponEnd.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
-	weaponEnd.worldtransform_.translate_ = { 0,weapon_->GetObject3D().GetMesh(0)->GetMin().y ,0 };
-	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
 
 
 	HpBer_ = std::make_unique<Sprite>();
@@ -122,38 +111,24 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	textRB_->SetAnchorPoint({0.5f,0.5f});
 	textRB_->SetSize(0.02f);
 
-
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), "resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
-	trailEffect_->SetCamera(camera);
-	trailEffect_->SetObject(&weapon_->GetObject3D());
 	
-	flag33 = false;
+	/// エフェクト関係
+
+	effect_->Initialize(dxCommon_, entity3DManager_, entity2DManager, camera_);
 
 
-
-	dashEmitter_ = std::make_unique <ParticleEmitter>();
-	dashEmitter_->Initialize(particleManager,"dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
-	dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
-	dashEmitter_->GetFrequency() = 0.05f;
-	dashEmitter_->SetCount(5);
-	dashEmitter_->SetLifeTimeMinMax(0.1f, 0.1f);
-	dashEmitter_->SetIsAlpha(true);
-	dashEmitter_->SetIsEmit(false);
-	dashEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
-	dashEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
-	dashEmitter_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	dashEmitter_->SetVelocityMinMax({},{});
-	dashEmitter_->SetPos({0,7,0});
-	dashEmitter_->SetCorner(16,0.5f);
-	dashEmitter_->transform_.rotate_.x = DegreesToRadians(90);
-
+	// トレイルエフェクト
+	effect_->GetTrailEffect()->SetObject(&weapon_->GetObject3D());
+	effect_->SetTrailEffectParent(&weapon_->GetObject3D());
+	
+	// ダッシュ用エフェクト
+	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
 }
 
 void Player::Update()
 {
-	dashEmitter_->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
-	trailEffect_->Update(flag33, weaponStr, weaponEnd);
+	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
+	
 
 	if (isAlive) {
 		if (behaviorRequest_) {
@@ -252,20 +227,7 @@ void Player::Update()
 	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
 	
-	Vector3 str =weaponStr.GetWorldPosition();
-	ImGui::InputFloat3("str", &str.x);
-	str =weaponStr.GetPreWorldPosition();
-	ImGui::InputFloat3("strpre", &str.x);
 
-
-	Vector3 end = weaponEnd.GetWorldPosition();
-	ImGui::InputFloat3("end", &end.x);
-	end = weaponEnd.GetPreWorldPosition();
-	ImGui::InputFloat3("endpre", &end.x);
-
-	ImGui::Checkbox("frag", &flag33);
-	int ii = (int)trailEffect_->mesh->vertices.size();
-	ImGui::InputInt("vertice", &ii);
 	
 	
 	ImGui::End();
@@ -274,7 +236,8 @@ void Player::Update()
 
 	Gravity();
 	
-	dashEmitter_->Update();
+
+	effect_->Update();
 
 	objectBase_.Update();
 	objectBody_.Update();
@@ -283,8 +246,7 @@ void Player::Update()
 	injectionLeftObj_.Update();
 	injectionRightObj_.Update();
 
-	weaponStr.Update();
-	weaponEnd.Update();
+	
 
 	objectReticle_.Update();
 	objectSha_.Update();
@@ -328,7 +290,7 @@ void Player::Draw()
 void Player::DrawP()
 {
 
-	trailEffect_->Draw();
+	effect_->Draw();
 	for (const auto& bullet : playerBullet_) {
 		bullet->DrawP();
 	}

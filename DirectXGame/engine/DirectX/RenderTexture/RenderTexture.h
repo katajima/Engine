@@ -56,7 +56,10 @@ public:
 	// リソースを取得
 	ID3D12Resource* GetResource();
 
-
+	// SRVGPUハンドル取得
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
+	// SRVCPUハンドル取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
 
 private:
 	// レンダーテクスチャのリソースを作成

@@ -76,6 +76,15 @@ void MyGame::Update()
 
 	dxCommon->Update(sceneManager_.get(), entity3DManager_.get());
 
+
+
+	ImGui::Begin("scene");
+	float width = static_cast<float> (WinApp::GetClientWidth() / 2);
+	float height = static_cast<float> (WinApp::GetClientHeight() / 2);
+
+	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetFinalRenderTexture()->GetSRVGPUHandle().ptr);
+	ImGui::Image(imguiTexture, ImVec2(width, height));
+	ImGui::End();
 	// ImGuiの受付終了
 	dxCommon->GetImGuiManager()->End();
 }
@@ -204,23 +213,28 @@ void MyGame::InitializeResource()
 	/// </summary>
 
 	primi = std::make_unique<Primitive>();
-	primi->Initialize(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Torus, "resources/Texture/uvChecker.png");
+	ShapeParameter::Torus t;
+	primi->Initialize<ShapeParameter::Torus>(entity3DManager_->GetPrimitiveCommon(),
+		Primitive::ShapeType::Torus, 
+		t, 
+		"resources/Texture/uvChecker.png");
 
 	primiTrai = std::make_unique<Primitive>();
-	primiTrai->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Triangle, "resources/Texture/Image.png");
+	ShapeParameter::ShapeTriangle t2;
+	primiTrai->Initialize<ShapeParameter::ShapeTriangle>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Triangle, t2,"resources/Texture/Image.png");
 
 	primiPlane = std::make_unique<Primitive>();
-	primiPlane->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Plane, "resources/Texture/uvChecker.png");
+	ShapeParameter::ShapePlane shapePlane;
+	primiPlane->Initialize<ShapeParameter::ShapePlane>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
 
-	primiStar = std::make_unique<Primitive>();
-	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Star, "resources/Texture/Image.png");
+
 	ShapeParameter::Star star;
 	star.innerRadius = 1.0f;
 	star.outerRadius = 7.0f;
 	star.segments = 4;
-	primiStar->SetStar(star);
-	primiStar->SetName("star");
-	//primiStar->Update();
+	primiStar = std::make_unique<Primitive>();
+	primiStar->Initialize<ShapeParameter::Star>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Star, star, "resources/Texture/Image.png");
+	
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, ParticleManager::BlendType::MODE_ADD);

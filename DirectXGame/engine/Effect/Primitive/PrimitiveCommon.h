@@ -18,6 +18,9 @@ public:
 	enum class PsoType {
 		kDefalt,
 		kRingClamp,
+		kNoCull,
+		kNoCullRingClamp,
+		kNoCullWireFrame,
 	};
 
 	void Initialize(DirectXCommon* dxcommon);
@@ -45,6 +48,10 @@ private:
 	};
 	PrimitivePSO defalt_;
 	PrimitivePSO defaltRing_;
+	PrimitivePSO noCull_;
+	PrimitivePSO noCullRing_;
+	PrimitivePSO noCullWireFrame_;
+
 public:
 
 

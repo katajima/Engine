@@ -9,20 +9,24 @@
 #include <list>
 
 
-#include"BasePlayerState.h"
 
-#include"playerWeapon.h"
 
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 
 #include "DirectXGame/engine/collider/3d/Collider.h"
-#include "PlayerBullet.h"
+
 
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
 
 
 #include "DirectXGame/engine/MyGame/MyGame.h"
+
+
+#include"BasePlayerState.h"
+#include"playerWeapon.h"
+#include "PlayerBullet.h"
+#include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 
 ///< summary>
 /// 自キャラ
@@ -333,8 +337,7 @@ private:
 
 	std::unique_ptr<playerWeapon> weapon_;
 	
-	Object3d weaponStr;
-	Object3d weaponEnd;
+	
 
 
 	std::list<std::unique_ptr<PlayerBullet>> playerBullet_;
@@ -355,28 +358,20 @@ private:
 
 
 
+	// 移動関連
+
 	// 速度
 	Vector3 velocity_ = {};
 	
 	float moveLimit = 200;
-	
-	// 浮遊ギミック媒介変数
-	float floatingParameter_ = 0.0f;
-	float attackParameter_;
 
-	
 	float speed;
 
 	
 
 
-	// エフェクト
-
-	std::unique_ptr<TrailEffect> trailEffect_;
-	bool flag33;
-
-
-	std::unique_ptr<ParticleEmitter> dashEmitter_ = nullptr;
+	// エフェクト 
+	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
 
 
 private:

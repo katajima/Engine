@@ -30,7 +30,7 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	outlineResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(OutlineGPU));
 	outlineResource_->Map(0, nullptr, reinterpret_cast<void**>(&outlineData_));
 	outlineData_->num = 3;
-	outlineData_->weightSquared = 6.0f;
+	outlineData_->weightSquared = 0.002f;
 	outlineData_->projectionInverse = Identity();
 
 	// ラジアルブラー
