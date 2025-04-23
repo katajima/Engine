@@ -83,44 +83,16 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 
 
 
-
-	HpBer_ = std::make_unique<Sprite>();
-	HpBer_->Initialize(entity2DManager->GetSpriteCommon() ,"resources/Texture/Image.png");
-	HpBer_->SetSize({ 50,-float(hp) });
-	HpBer_->SetColor({ 0,1,0,1 });
-	HpBer_->SetPosition({ 100,650 });
-
-	SpecailBer_ = std::make_unique<Sprite>();
-	SpecailBer_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/Image.png");
-	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) });
-	SpecailBer_->SetColor({ 0,0,1,1 });
-	SpecailBer_->SetPosition({ 40,650 });
-
-	textMax_ = std::make_unique<Sprite>();
-	textMax_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/text/max.png");
-	textMax_->SetColor({ 1,0,0,1 });
-	textMax_->SetPosition({ 45,350 });
-	textMax_->SetRotation(DegreesToRadians(-30));
-	textMax_->SetAnchorPoint({0.5f,0.5f});
-	textMax_->SetSize(0.25f);
-
-	textRB_ = std::make_unique<Sprite>();
-	textRB_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/icon/RB.png");
-	textRB_->SetColor({ 1,1,1,1 });
-	textRB_->SetPosition({ 1280 /2,550 });
-	textRB_->SetAnchorPoint({0.5f,0.5f});
-	textRB_->SetSize(0.02f);
+	// UI
+	ui_->Initialize(entity2DManager);
 
 	
 	/// エフェクト関係
-
 	effect_->Initialize(dxCommon_, entity3DManager_, entity2DManager, camera_);
-
-
 	// トレイルエフェクト
 	effect_->GetTrailEffect()->SetObject(&weapon_->GetObject3D());
 	effect_->SetTrailEffectParent(&weapon_->GetObject3D());
-	
+	effect_->SetTrailParent(&weapon_->GetObject3D());
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
 }
@@ -189,18 +161,7 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
-		objectBase_.worldtransform_.translate_.x = moveLimit;
-	}
-	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
-	}
-	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
-	}
-	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
-	}
+
 
 	if (hp <= 0) {
 		isAlive = false;
@@ -233,11 +194,15 @@ void Player::Update()
 	ImGui::End();
 #endif // _DEBUG
 
-
+	// 重力
 	Gravity();
-	
+	// 移動制限
+	LimitMove();
 
+	// エフェクト
 	effect_->Update();
+	//
+
 
 	objectBase_.Update();
 	objectBody_.Update();
@@ -258,6 +223,8 @@ void Player::Update()
 	playerBullet_.remove_if([](const std::unique_ptr<PlayerBullet>& bullet) { return !bullet->GetAlive(); });
 }
 
+#pragma region Draw
+
 void Player::Draw()
 {
 	if (isAlive) {
@@ -267,7 +234,7 @@ void Player::Draw()
 			break;
 		case Behavior::kAttack: // 攻撃行動更新
 			weapon_->Draw();
-			
+
 			break;
 		case Behavior::kJump:
 			break;
@@ -281,7 +248,7 @@ void Player::Draw()
 		objectBody_.Draw();
 		objectSha_.Draw();
 	}
-	
+
 	for (const auto& bullet : playerBullet_) {
 		bullet->Draw();
 	}
@@ -298,45 +265,20 @@ void Player::DrawP()
 
 void Player::Draw2D()
 {
+	ui_->SetHPBerSize(static_cast<float>(hp));
+	ui_->SetIsTextmax(specialAttack.isSpecial);
+	ui_->SetIsTextRB(specialAttack.isSpecial);
+	ui_->SetSpecialGaugeSize(static_cast<float>(specialAttack.specialGauge));
 
-	HpBer_->SetPosition({ 100,650 });
-	HpBer_->SetSize({ 50,-float(hp) * 2 });
-	HpBer_->Update();
-	HpBer_->Draw();
-
-	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) * 2 * 2.5f });
-	SpecailBer_->Update();
-	SpecailBer_->Draw();
-
-	if (specialAttack.isSpecial) {
-		
-		
-		textMax_->Update();
-		textMax_->Draw();
-	};
-
-	if (isTextRB_) {
-		textRB_->Update();
-		textRB_->Draw();
-	}
+	ui_->Draw();
 
 }
 
-void Player::OnCollision(Collider* other)
-{
-	// 衝突判定の種別IDを取得
-	uint32_t typeID = other->GetTypeID();
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-	}
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyWeapon)) {
-	}
-}
 
-Vector3 Player::GetCenterPosition() const
-{
-	return objectBase_.GetWorldPosition();
-}
+#pragma endregion //描画関係
 
+
+#pragma region Move
 
 void Player::Move()
 {
@@ -423,9 +365,9 @@ void Player::Move()
 		}
 	}
 	if (behavior_ == Behavior::kRoot || behavior_ == Behavior::kDie) {
-		
+
 	}
-	
+
 }
 
 void Player::Gravity() {
@@ -452,10 +394,45 @@ void Player::Gravity() {
 
 void Player::AddMove()
 {
-	if(isAlive)
-	objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
+	if (isAlive)
+		objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
 }
 
+void Player::LimitMove()
+{
+	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
+		objectBase_.worldtransform_.translate_.x = moveLimit;
+	}
+	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
+	}
+	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
+	}
+	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
+	}
+}
+
+#pragma endregion //移動関係
+
+
+#pragma region MyRegion
+
+void Player::OnCollision(Collider* other)
+{
+	// 衝突判定の種別IDを取得
+	uint32_t typeID = other->GetTypeID();
+	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
+	}
+	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyWeapon)) {
+	}
+}
+
+Vector3 Player::GetCenterPosition() const
+{
+	return objectBase_.GetWorldPosition();
+}
 
 void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
 {
@@ -472,12 +449,12 @@ void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
 			{
 
 			}*/
-			for (int j = 0; j < enemys.size(); j++) {	
+			for (int j = 0; j < enemys.size(); j++) {
 				if (i >= MaxLockOn) {
 					is = false;
 					//break; // 最大ロックオン数を超えた場合
 				}
-				
+
 				Vector2 posEne = enemys[j]->GetObject3D().GetScreenPosition();
 				Vector2 diff = Vector2{ 640,360 } - posEne;
 				float length = diff.Length();
@@ -502,15 +479,9 @@ void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
 	}
 }
 
-
-
 void Player::ApplyGlobalVariables()
 {
 
 }
 
-
-
-
-
-
+#pragma endregion // そのほか

@@ -27,6 +27,8 @@
 #include"playerWeapon.h"
 #include "PlayerBullet.h"
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
+#include "DirectXGame/application/base/Player/UI/PlayerUI.h"
+
 
 ///< summary>
 /// 自キャラ
@@ -230,12 +232,14 @@ public:
 
 
 private: // 移動
-	 
+	// 移動処理
 	void Move();
-
+	// 重力
 	void Gravity();
-
+	// 移動加算
 	void AddMove();
+	// 移動制限
+	void LimitMove();
 
 	float graVelo;
 
@@ -349,13 +353,9 @@ private:
 	
 	// スプライト
 
-	std::unique_ptr<Sprite> HpBer_;
-	std::unique_ptr<Sprite> SpecailBer_;
-	std::unique_ptr<Sprite> textMax_;
-	std::unique_ptr<Sprite> textRB_;
-	bool isTextRB_ = false;
+	
 
-
+	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
 
 
 	// 移動関連

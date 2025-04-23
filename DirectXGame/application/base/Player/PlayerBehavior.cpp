@@ -85,7 +85,9 @@ void Player::BehaviorDieUpdate()
 	AttackKey();
 	int i = 0;
 	int time = 0;
-	isTextRB_ = false;
+
+	ui_->SetIsTextRB(false);
+
 	switch (specialAttack.phese)
 	{
 	case 0:
@@ -100,8 +102,7 @@ void Player::BehaviorDieUpdate()
 			}
 		}
 		index_b = 0;
-		isTextRB_ = true;
-
+		ui_->SetIsTextRB(true);
 		break;
 	case 1:
 		// 弾を発射
