@@ -81,6 +81,10 @@ public:
 	{
 		kRandom,   // ランダム
 	};
+	enum class TopBottom { // スケール変更
+		kTop,
+		kBottom,
+	};
 	enum class RasterizerType
 	{
 		MODE_SOLID_BACK,
@@ -162,8 +166,10 @@ public:
 		bool isRotateVelocity = false;
 		bool isBounce = false;
 		EmitType emitType = EmitType::kRandom;
+		TopBottom topBottom = TopBottom::kBottom;
 		RasterizerType rasteType;
 		BlendType blendType;
+		Transform uvTransformVeloctiy_{ {},{},{0,0,0} };
 	};
 
 

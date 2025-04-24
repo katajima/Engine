@@ -34,8 +34,10 @@ public:
 		kSpline,			// スプライン
 	};
 
+
+
 public:
-	void Initialize(ParticleManager* particleManager,std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
+	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
 
 	void Update();
 
@@ -50,7 +52,7 @@ public: // ゲッター兼セッター
 	int& GetCount() { return emitter_.count; };// 発生頻度
 
 
-	
+
 	void SetParent(WorldTransform& parent);// 親子付け
 
 	void SetCount(int count) { emitter_.count = count; }; // 出現数
@@ -70,9 +72,11 @@ public: // ゲッター兼セッター
 	void SetUsebillboard(bool is) { usebillboard = is; } // ビルボード
 
 	void SetIsAlpha(bool is) { isAlpha = is; } // 透明度
-	
+
 	void SetIsLifeTimeScale(bool is) { isLifeTimeScale_ = is; } // スケール変更
-	
+
+	void SetLifeTimeScaleTopBottom(ParticleManager::TopBottom topBottom) { topBottom_ = topBottom; }
+
 	void SetIsRotateVelocity(bool is) { isRotateVelocity = is; } // 回転速度
 
 	void SetIsBounce(bool is) { isBounce = is; } // 跳ねるか
@@ -81,28 +85,37 @@ public: // ゲッター兼セッター
 
 	void SetCorner(int segment, float rad) { emitter_.corner.radius = rad; emitter_.corner.segment = segment; }
 
+	void SetUvRotateVeloctiy(Vector3 rotate) { uvTransformVeloctiy_.rotate = rotate; };
+
+	void SetUvScaleVeloctiy(Vector3 scale) { uvTransformVeloctiy_.scale = scale; };
+
+	void SetUvTranslateVeloctiy(Vector3 translate) { uvTransformVeloctiy_.translate = translate; };
+
+	void SetUvTransformVeloctiy(Transform uvTransform) { uvTransformVeloctiy_ = uvTransform; }
+
 	// ランダム用
 	void SetRengeMinMax(Vector3 min, Vector3 max) { emitter_.renge.min = min; emitter_.renge.max = max; }; // 範囲
 
-	void SetColorMinMax(Vector4 min, Vector4 max) { emitter_.color.min = min;emitter_.color.max = max; } // カラー
+	void SetColorMinMax(Vector4 min, Vector4 max) { emitter_.color.min = min; emitter_.color.max = max; } // カラー
 
 	void SetSizeMinMax(Vector3 min, Vector3 max) { emitter_.size.min = min; emitter_.size.max = max; } // サイズ
 
 	void SetRotateMinMax(Vector3 min, Vector3 max) { emitter_.rotate.min = min; emitter_.rotate.max = max; } // 回転
 
-	void SetLifeTimeMinMax(float min, float max) { emitter_.lifeTime.min = min;emitter_.lifeTime.max = max; } // 生存時間
+	void SetLifeTimeMinMax(float min, float max) { emitter_.lifeTime.min = min; emitter_.lifeTime.max = max; } // 生存時間
 
-	void SetVelocityMinMax(Vector3 min, Vector3 max) { emitter_.velocity.min = min;emitter_.velocity.max = max; } // 速度
+	void SetVelocityMinMax(Vector3 min, Vector3 max) { emitter_.velocity.min = min; emitter_.velocity.max = max; } // 速度
 
-	void SetRotateVelocityMinMax(Vector3 min, Vector3 max) { emitter_.rotateVelocity.min = min;emitter_.rotateVelocity.max = max; } // 速度
+	void SetRotateVelocityMinMax(Vector3 min, Vector3 max) { emitter_.rotateVelocity.min = min; emitter_.rotateVelocity.max = max; } // 速度
 private: // エミッタ可視化
-	
+
 	void DrawEmitterLine();
-	
+
 	void EmitMinMax();
 
 private:
 	ParticleManager::EmitType emitType_ = ParticleManager::EmitType::kRandom; // 出現方法
+	ParticleManager::TopBottom topBottom_ = ParticleManager::TopBottom::kBottom; // 拡縮
 	EmitSpawnShapeType spawnShapeType_ = EmitSpawnShapeType::kAABB; // 出現形状
 
 private:
@@ -117,10 +130,15 @@ private:
 	bool isAlpha = false; // 透明度
 	bool isBounce = false; // 透明度
 
-	bool isEmit= true; // 出すか
+	bool isEmit = true; // 出すか
 
 	float alphaClipping_ = 0.5f; // αクリッピング
 	int enableLighting_ = false;
+private:
+	Transform uvTransformVeloctiy_{};
+
+
+
 public:
 	WorldTransform transform_;
 private:

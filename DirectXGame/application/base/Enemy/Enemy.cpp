@@ -362,13 +362,15 @@ void Enemy::InitParticle()
 	dustEmit_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
 	dustEmit_->SetLifeTimeMinMax(2.5f, 2.7f);
 	dustEmit_->SetAlphaClipping(0.15f);
-	dustEmit_->SetSizeMinMax(Vector3{ 1.5f,1.5f,1.5f }, { 2.0f,2.0f,2.0f });
+	dustEmit_->SetSizeMinMax(Vector3{ 1.6f,1.6f,1.6f }, { 1.8f,1.8f,1.8f });
 	dustEmit_->SetColorMinMax({ 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f });
 	dustEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	dustEmit_->SetUsebillboard(false);
 	dustEmit_->SetEnableLighting(false);
 	dustEmit_->SetIsAlpha(true);
-	dustEmit_->SetIsLifeTimeScale(false);
+	dustEmit_->SetIsLifeTimeScale(true);
+	dustEmit_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+
 
 	dustEmit2_ = std::make_unique<ParticleEmitter>();
 	dustEmit2_->Initialize(particleManager, "smokePlane02", "smokePlane02");
@@ -380,14 +382,15 @@ void Enemy::InitParticle()
 	dustEmit2_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
 	dustEmit2_->SetLifeTimeMinMax(2.5f, 2.7f);
 	dustEmit2_->SetAlphaClipping(0.15f);
-	dustEmit2_->SetSizeMinMax(Vector3{ 1.5f,1.5f,1.5f }, { 2.0f,2.0f,2.0f });
+	dustEmit2_->SetSizeMinMax(Vector3{ 1.0f,1.0f,1.0f }, { 1.5f,1.5f,1.5f });
 	dustEmit2_->SetColorMinMax({ 0.1f, 0.1f, 0.1f }, { 0.1f, 0.1f, 0.1f });
 	dustEmit2_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	dustEmit2_->SetUsebillboard(false);
 	dustEmit2_->SetEnableLighting(false);
 	dustEmit2_->SetIsAlpha(true);
-	dustEmit2_->SetIsLifeTimeScale(false);
-
+	dustEmit2_->SetIsLifeTimeScale(true);
+	dustEmit2_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	
 	dustEmit3_ = std::make_unique<ParticleEmitter>();
 	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03");
 	dustEmit3_->GetFrequency() = 0.25f;
@@ -398,13 +401,14 @@ void Enemy::InitParticle()
 	dustEmit3_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
 	dustEmit3_->SetLifeTimeMinMax(2.5f, 2.7f);
 	dustEmit3_->SetAlphaClipping(0.15f);
-	dustEmit3_->SetSizeMinMax(Vector3{ 1.5f,1.5f,1.5f }, { 2.0f,2.0f,2.0f });
+	dustEmit3_->SetSizeMinMax(Vector3{ 1.2f,1.2f,1.2f }, { 1.5f,1.5f,1.5f });
 	dustEmit3_->SetColorMinMax({ 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f });
 	dustEmit3_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	dustEmit3_->SetUsebillboard(false);
 	dustEmit3_->SetEnableLighting(false);
 	dustEmit3_->SetIsAlpha(true);
-	dustEmit3_->SetIsLifeTimeScale(false);
+	dustEmit3_->SetIsLifeTimeScale(true);
+	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
 
 
 

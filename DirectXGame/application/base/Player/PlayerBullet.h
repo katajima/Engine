@@ -61,6 +61,8 @@ public:
 
 	void SetParent(WorldTransform parent) { object_.worldtransform_.parent_ = &parent; };
 
+
+
 private:
 	const Camera* camera_ = nullptr;
 	Player* player_;
@@ -69,6 +71,10 @@ private:
 	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter_ = nullptr;
 	
 	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter_ = nullptr;
+	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter2_ = nullptr;
+	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter3_ = nullptr;
+
+
 
 	std::string strin;
 	std::string strin2;
@@ -107,9 +113,7 @@ private:
 	int index_ = 0;
 
 
-	//std::unique_ptr<TrailEffect> trailEffect_;
-	Object3d objectStr_;
-	Object3d objectEnd_;
+
 
 	int countTrail = 0;
 };

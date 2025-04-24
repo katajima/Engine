@@ -37,16 +37,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 	randPosSky.y = max_y;
 
 	
-	objectStr_.Initialize(entity3DManager);
-	objectStr_.worldtransform_.parent_ = &object_.worldtransform_;
-	objectStr_.worldtransform_.translate_.y = object_.GetMesh(0)->GetMin().y * 1;
-
-	objectEnd_.Initialize(entity3DManager);
-	objectEnd_.worldtransform_.parent_ = &object_.worldtransform_;
-	objectEnd_.worldtransform_.translate_.y = object_.GetMesh(0)->GetMax().y * 1;
-
-
-
+	
 
 
 
@@ -68,7 +59,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 
 	ｍSmokeEmitter_->SetColorMinMax({1,1,1,0.5f}, { 1,1,1,0.5f });
 	ｍSmokeEmitter_->SetRengeMinMax({-0.25f,-0.25f ,-0.25f },{ 0.25f,0.25f,0.25f});
-	ｍSmokeEmitter_->SetSizeMinMax(Vector3{ 2.0f,2.0f,2.0f }, { 2.0f,2.0f,2.0f });
+	ｍSmokeEmitter_->SetSizeMinMax(Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
 	ｍSmokeEmitter_->SetVelocityMinMax(-velocity_, -velocity_);
 	ｍSmokeEmitter_->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
 
@@ -78,11 +69,11 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 
 
 
-
+	Vector3 size = { 10,10,10 };
 
 
 	mExplosionSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	mExplosionSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(),"emitterSmoke", "explosionSmoke", ParticleEmitter::EmitSpawnShapeType::kAABB);
+	mExplosionSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "smokePlane01_1", "smokePlane01_1", ParticleEmitter::EmitSpawnShapeType::kAABB);
 	mExplosionSmokeEmitter_->SetParent(object_.worldtransform_);
 	mExplosionSmokeEmitter_->GetFrequency() = 0.00f;
 	mExplosionSmokeEmitter_->SetCount(50);
@@ -91,9 +82,48 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 	mExplosionSmokeEmitter_->SetIsEmit(false);
 	mExplosionSmokeEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
 	mExplosionSmokeEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
-	mExplosionSmokeEmitter_->SetSizeMinMax(Vector3{ 5.0f,5.0f,5.0f }, { 5.0f,5.0f,5.0f });
+	mExplosionSmokeEmitter_->SetSizeMinMax(size, size);
 	mExplosionSmokeEmitter_->SetVelocityMinMax(-Vector3{5,5,5}, Vector3{ 5,5,5 });
+	mExplosionSmokeEmitter_->SetEnableLighting(false);
+	mExplosionSmokeEmitter_->SetAlphaClipping(0.15f);
+	mExplosionSmokeEmitter_->SetIsLifeTimeScale(true);
+	mExplosionSmokeEmitter_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
 
+
+	mExplosionSmokeEmitter2_ = std::make_unique <ParticleEmitter>();
+	mExplosionSmokeEmitter2_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "smokePlane02_1", "smokePlane02_1", ParticleEmitter::EmitSpawnShapeType::kAABB);
+	mExplosionSmokeEmitter2_->SetParent(object_.worldtransform_);
+	mExplosionSmokeEmitter2_->GetFrequency() = 0.00f;
+	mExplosionSmokeEmitter2_->SetCount(50);
+	mExplosionSmokeEmitter2_->SetLifeTimeMinMax(2.0f, 2.0f);
+	mExplosionSmokeEmitter2_->SetIsAlpha(true);
+	mExplosionSmokeEmitter2_->SetIsEmit(false);
+	mExplosionSmokeEmitter2_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
+	mExplosionSmokeEmitter2_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
+	mExplosionSmokeEmitter2_->SetSizeMinMax(size, size);
+	mExplosionSmokeEmitter2_->SetVelocityMinMax(-Vector3{5,5,5}, Vector3{ 5,5,5 });
+	mExplosionSmokeEmitter2_->SetEnableLighting(false);
+	mExplosionSmokeEmitter2_->SetAlphaClipping(0.15f);
+	mExplosionSmokeEmitter2_->SetIsLifeTimeScale(true);
+	mExplosionSmokeEmitter2_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+
+
+	mExplosionSmokeEmitter3_ = std::make_unique <ParticleEmitter>();
+	mExplosionSmokeEmitter3_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "smokePlane03_1", "smokePlane03_1", ParticleEmitter::EmitSpawnShapeType::kAABB);
+	mExplosionSmokeEmitter3_->SetParent(object_.worldtransform_);
+	mExplosionSmokeEmitter3_->GetFrequency() = 0.00f;
+	mExplosionSmokeEmitter3_->SetCount(50);
+	mExplosionSmokeEmitter3_->SetLifeTimeMinMax(2.0f, 2.0f);
+	mExplosionSmokeEmitter3_->SetIsAlpha(true);
+	mExplosionSmokeEmitter3_->SetIsEmit(false);
+	mExplosionSmokeEmitter3_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
+	mExplosionSmokeEmitter3_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
+	mExplosionSmokeEmitter3_->SetSizeMinMax(size, size);
+	mExplosionSmokeEmitter3_->SetVelocityMinMax(-Vector3{5,0,5}, Vector3{ 5,5,5 });
+	mExplosionSmokeEmitter3_->SetEnableLighting(false);
+	mExplosionSmokeEmitter3_->SetAlphaClipping(0.15f);
+	mExplosionSmokeEmitter3_->SetIsLifeTimeScale(true);
+	mExplosionSmokeEmitter3_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
 
 }
 
@@ -180,7 +210,6 @@ void PlayerBullet::Update()
 	
 	if (countTrail >= 5) {
 		bool flag_ =true ;
-		//trailEffect_->Update(flag_, objectStr_, objectEnd_);
 	}
 
 	
@@ -201,8 +230,7 @@ void PlayerBullet::Update()
 
 	mExplosionSmokeEmitter_->Update();
 	
-	objectStr_.Update();
-	objectEnd_.Update();
+
 	object_.Update();
 }
 
@@ -213,7 +241,7 @@ void PlayerBullet::Draw()
 
 void PlayerBullet::DrawP()
 {
-	//trailEffect_->Draw();
+
 }
 
 void PlayerBullet::OnCollision(Collider* other)

@@ -52,6 +52,11 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	isAlpha = false;    // 透明度
 
 	isEmit = true;
+
+
+	uvTransformVeloctiy_.rotate = {0,0,0};
+	uvTransformVeloctiy_.scale = { 0,0,0 };
+	uvTransformVeloctiy_.translate = { 0,0,0 };
 }
 
 void ParticleEmitter::Update()
@@ -183,6 +188,10 @@ void ParticleEmitter::Emit()
 		particleManager_->GetParticleGroups(particleName_).isBounce = isBounce; // 回転速度
 		particleManager_->GetParticleGroups(particleName_).material->alphaClipping_ = alphaClipping_; // αクリッピング
 		particleManager_->GetParticleGroups(particleName_).material->enableLighting_ = enableLighting_; // aライト
+		particleManager_->GetParticleGroups(particleName_).topBottom = topBottom_; // 拡縮方向
+		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.scale = uvTransformVeloctiy_.scale; // UV
+		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.rotate = uvTransformVeloctiy_.rotate; // UV
+		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.translate = uvTransformVeloctiy_.translate; // UV
 
 		if (emitType_ == ParticleManager::EmitType::kRandom) {
 			particleManager_->GetParticleGroups(particleName_).emiter = emitter_;

@@ -497,13 +497,15 @@ void TestScene::InitializeParticle()
 	primitvPlaneSmoke_->SetUsebillboard(false);
 	primitvPlaneSmoke_->SetEnableLighting(false);
 	primitvPlaneSmoke_->SetIsAlpha(true);
-	primitvPlaneSmoke_->SetIsLifeTimeScale(false);
+	primitvPlaneSmoke_->SetIsLifeTimeScale(true);
+	primitvPlaneSmoke_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+
 	primitvPlaneSmoke_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	primitvPlaneSmoke_->SetIsRotateVelocity(true);
 	primitvPlaneSmoke_->SetAlphaClipping(0.25f);
 	//primitvPlaneSmoke_->SetIsBounce(true);
 	primitvPlaneSmoke_->SetSizeMinMax(Vector3{ 5.0f,5.0f,1.0f }, { 5.0f ,5.0f,1.0f });
-
+	primitvPlaneSmoke_->SetUvTransformVeloctiy({{0.0f,0,0},{},{0.0f,0.0f,0}});
 
 
 }

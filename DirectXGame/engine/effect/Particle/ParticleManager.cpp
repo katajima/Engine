@@ -117,10 +117,20 @@ void ParticleManager::Update()
 				};
 
 				if (group.isLifeTimeScale_) { // スケール
-					// アルファ値を計算
-					float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
+					float t = particleIterator->currentTime / particleIterator->lifeTime;
+					float scaling = 1.0f;
 
-					particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, alpha);
+					if (group.topBottom == TopBottom::kBottom) {
+						// 時間経過とともに小さく
+						scaling = 1.0f - t;
+						particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
+					}
+					else if (group.topBottom == TopBottom::kTop) {
+						// 時間経過とともに大きく
+						scaling = t;
+						particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
+					}
+					
 				}
 
 				if (group.isRotateVelocity) {// 回転
@@ -176,6 +186,14 @@ void ParticleManager::Update()
 
 			++particleIterator;
 		}
+
+		
+
+		group.material->transform.translate += group.uvTransformVeloctiy_.translate;
+		group.material->transform.rotate += group.uvTransformVeloctiy_.rotate;
+		group.material->transform.scale += group.uvTransformVeloctiy_.scale;
+
+
 		group.material->GPUData();
 	}
 	//}
