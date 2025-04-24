@@ -22,17 +22,20 @@ void LightManager::Initialize(DirectXCommon* dxCommon)
 }
 
 
-void LightManager::DrawLight()
+void LightManager::DrawLight(IsLight is,int dire, int point, int spot)
 {
 	////------平行光源用------////
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-
+    if (is.dire) {
+        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(dire, directionalLightResource->GetGPUVirtualAddress());
+    }
 	////------ポイントライト用------////
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
-
+    if (is.pount) {
+        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(point, pointLightResource->GetGPUVirtualAddress());
+    }
 	////------スポットライト用------////
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
-
+    if (is.spot) {
+        dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(spot, spotLightResource->GetGPUVirtualAddress());
+    }
 }
 
 

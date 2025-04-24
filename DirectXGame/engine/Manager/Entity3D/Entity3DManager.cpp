@@ -7,6 +7,10 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 {
 	directXCommon_ = directXCommon;
 
+	// ライト
+	lightManager_ = std::make_unique<LightManager>();
+	lightManager_->Initialize(directXCommon_);
+
 	cameraCommon_ = std::make_unique<CameraCommon>();
 	cameraCommon_->Initialize(directXCommon_);
 
@@ -26,9 +30,7 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	skyBoxCommon_ = std::make_unique<SkyBoxCommon>();
 	skyBoxCommon_->Initialize(directXCommon_);
 
-	// ライト
-	lightManager_ = std::make_unique<LightManager>();
-	lightManager_->Initialize(directXCommon_);
+	
 
 	// スキニング
 	skinningCommon_ = std::make_unique<SkinningConmmon>();
@@ -44,5 +46,5 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 
 	// エフェクトマネージャー
 	effectManager_ = std::make_unique<EffectManager>();
-	effectManager_->Initialize(directXCommon_);
+	effectManager_->Initialize(directXCommon_,lightManager_.get());
 }

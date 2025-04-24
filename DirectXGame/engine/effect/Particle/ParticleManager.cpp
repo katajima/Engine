@@ -6,7 +6,7 @@
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Material/Material.h"
-
+#include "DirectXGame/engine/Light/LightCommon.h"
 
 #include "imgui.h"
 
@@ -14,13 +14,13 @@
 
 
 
-void ParticleManager::Initialize(DirectXCommon* dxCommon)
+void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager)
 {
 	dxCommon_ = dxCommon;
 	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
-
+	lightManager_ = lightManager;
 	CreateGraphicsPipeline();
 }
 
@@ -89,10 +89,11 @@ void ParticleManager::Update()
 
 		Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
 		Matrix4x4 viewMatrix = camera_->GetViewMatrix();
+		Matrix4x4 cameraWorldMatrix = camera_->GetWorldMatrix();
 
 
 		Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
-		Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera_->GetWorldMatrix());
+		Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraWorldMatrix);
 		billboardMatrix.m[3][0] = 0.0f; // 平行移動成分は不要
 		billboardMatrix.m[3][1] = 0.0f;
 		billboardMatrix.m[3][2] = 0.0f;
@@ -175,6 +176,7 @@ void ParticleManager::Update()
 
 			++particleIterator;
 		}
+		group.material->GPUData();
 	}
 	//}
 }
@@ -279,6 +281,10 @@ void ParticleManager::Draw()
 
 		group.material->GetCommandListTexture(2);
 
+		group.material->GetCommandListMaterial(0);
+
+		lightManager_->DrawLight({true,false,false},3);
+
 		//commandList->SetGraphicsRootConstantBufferView(0, group.resource->GetGPUVirtualAddress());
 
 		// インスタンシングデータのSRVのDescriptorTableを設定
@@ -344,6 +350,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleGroup.material->Initialize(dxCommon_);
 	particleGroup.material->tex_.diffuseFilePath = textureFilePath;
 	particleGroup.material->LoadTex();
+	particleGroup.material->enableLighting_ = false;
 
 
 	// GPUリソースの作成
@@ -414,6 +421,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleGroup.material->Initialize(dxCommon_);
 	particleGroup.material->tex_.diffuseFilePath = textureFilePath;
 	particleGroup.material->LoadTex();
+	particleGroup.material->enableLighting_ = false;
 
 
 	// GPUリソースの作成
@@ -994,13 +1002,16 @@ void ParticleManager::CreateRootSignature()
 
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
-	// マテリアル (b4) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
+	// マテリアル (b0) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// インスタンシング(t1) をバーテックシェーダ使用する
 	psoManager_->SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	// 方向ライト (b1) をバーテックスシェーダで使用する
+	psoManager_->SetRootParameter(rootParameters[3], 1,D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV); 
+
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};

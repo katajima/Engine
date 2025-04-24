@@ -9,12 +9,12 @@ void ShapeParameter::ShapePlane::Create(Mesh* mesh)
     mesh->vertices.push_back({ .position = {width,-height,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
     mesh->vertices.push_back({ .position = {-width,-height,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
 
-    mesh->indices.push_back(0);
-    mesh->indices.push_back(2);
-    mesh->indices.push_back(1);
-    mesh->indices.push_back(1);
-    mesh->indices.push_back(2);
-    mesh->indices.push_back(3);
+	mesh->indices.push_back(0);
+	mesh->indices.push_back(1);
+	mesh->indices.push_back(2);
+	mesh->indices.push_back(2);
+	mesh->indices.push_back(1);
+	mesh->indices.push_back(3);
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();

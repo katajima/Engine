@@ -484,6 +484,27 @@ void TestScene::InitializeParticle()
 	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,2.5f,0.1f }, { 0.1f ,5.0f,0.1f });
 
 
+	primitvPlaneSmoke_ = std::make_unique<ParticleEmitter>();
+	primitvPlaneSmoke_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"smokePlane01", "smokePlane01", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlaneSmoke_->GetFrequency() = 0.025f;
+	primitvPlaneSmoke_->SetCount(3);
+	primitvPlaneSmoke_->SetPos({ 0,50,0 });
+	primitvPlaneSmoke_->SetVelocityMinMax({ 0,0,0 }, { 0, 10, 0 });
+	primitvPlaneSmoke_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//primitvPlaneSmoke_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	primitvPlaneSmoke_->SetLifeTimeMinMax(1, 3);
+	//primitvPlaneSmoke_->SetIsGravity(true);
+	primitvPlaneSmoke_->SetUsebillboard(false);
+	primitvPlaneSmoke_->SetEnableLighting(false);
+	primitvPlaneSmoke_->SetIsAlpha(true);
+	primitvPlaneSmoke_->SetIsLifeTimeScale(false);
+	primitvPlaneSmoke_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
+	primitvPlaneSmoke_->SetIsRotateVelocity(true);
+	primitvPlaneSmoke_->SetAlphaClipping(0.25f);
+	//primitvPlaneSmoke_->SetIsBounce(true);
+	primitvPlaneSmoke_->SetSizeMinMax(Vector3{ 5.0f,5.0f,1.0f }, { 5.0f ,5.0f,1.0f });
+
+
 
 }
 
@@ -740,8 +761,9 @@ void TestScene::UpdateRoom01()
 
 void TestScene::UpdateRoom02()
 {
-	GetSceneManager()->ChangeScene("GAMEPLAY");
-
+	if (input_->IsTriggerKey(DIK_P)) {
+		GetSceneManager()->ChangeScene("GAMEPLAY");
+	}
 
 	emitter_->Update();
 	emitterEnemy_->Update();
@@ -749,25 +771,39 @@ void TestScene::UpdateRoom02()
 
 void TestScene::UpdateRoom03()
 {
-	taleObject->Update();
-	multiy.Update();
+	primitvPlaneSmoke_->Update();
+	//taleObject->Update();
+	//multiy.Update();
 }
 
 void TestScene::UpdateRoom04()
 {
+	ImGui::Begin("papapa");
+	if(ImGui::Button("true")) {
+		primitvPlaneSmoke_->SetEnableLighting(true);
+	}
+	if(ImGui::Button("false")) {
+		primitvPlaneSmoke_->SetEnableLighting(false);
+	}
+	ImGui::DragFloat("clipping", &clipping_,0.01f);
+	primitvPlaneSmoke_->SetAlphaClipping(clipping_);
+	ImGui::End();
+	primitvPlaneSmoke_->Update();
+
+
 	skinningObject.UpdateSkinning();
 	skinningObject2.UpdateSkinning();
 
 	triCen;
 
-	Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
+	/*Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
 	Vector3 b = { tri2d.vertices[1].x, 5 ,tri2d.vertices[1].y };
 	Vector3 c = { tri2d.vertices[2].x, 5 ,tri2d.vertices[2].y };
 
 
 	GetEntity3DManager()->Get3DLineCommon()->AddLine(a, b, { 1,1,1,1 });
 	GetEntity3DManager()->Get3DLineCommon()->AddLine(b, c, { 1,1,1,1 });
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(c, a, { 1,1,1,1 });
+	GetEntity3DManager()->Get3DLineCommon()->AddLine(c, a, { 1,1,1,1 });*/
 
 
 	CornerSegment corner;// = { sphere2d.center }

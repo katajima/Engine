@@ -75,6 +75,7 @@ struct Material
     
     float4 color;
     int enableLighting;
+    float alphaClipping;
     float4x4 uvTransform;
     float shininess;
     int useLig;

@@ -43,6 +43,8 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	isLifeTimeAlpha_ = false;	// 透明度
 	isLifeTimeVelocity = false;// 速度
 
+	enableLighting_ = false;
+
 	isGravity = false; // 重力
 	isWind = false;  // 風
 
@@ -179,6 +181,8 @@ void ParticleEmitter::Emit()
 		particleManager_->GetParticleGroups(particleName_).isLifeTimeScale_ = isLifeTimeScale_; // 重力
 		particleManager_->GetParticleGroups(particleName_).isRotateVelocity = isRotateVelocity; // 回転速度
 		particleManager_->GetParticleGroups(particleName_).isBounce = isBounce; // 回転速度
+		particleManager_->GetParticleGroups(particleName_).material->alphaClipping_ = alphaClipping_; // αクリッピング
+		particleManager_->GetParticleGroups(particleName_).material->enableLighting_ = enableLighting_; // aライト
 
 		if (emitType_ == ParticleManager::EmitType::kRandom) {
 			particleManager_->GetParticleGroups(particleName_).emiter = emitter_;

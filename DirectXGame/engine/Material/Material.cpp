@@ -62,6 +62,8 @@ void Material::GPUData()
 		data_->useSpeculerMap = useSpeculerMap_;
 	}
 
+	data_->alphaClipping = alphaClipping_;
+
 	data_->color = color;
 	
 	data_->uvTransform = MakeAffineMatrix(transform.scale,transform.rotate,transform.translate);
@@ -101,5 +103,4 @@ void Material::LoadTex()
 
 		tex_.speculerIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.speculerFilePath);
 	}
-
 }

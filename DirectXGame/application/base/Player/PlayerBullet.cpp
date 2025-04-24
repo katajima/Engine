@@ -56,15 +56,22 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 
 	
 	ｍSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	ｍSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(),"emitterSmoke", "smoke", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
+	ｍSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "smokePlane01", "smokePlane01", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
 	ｍSmokeEmitter_->GetFrequency() = 0.01f;
 	ｍSmokeEmitter_->SetCount(5);
-	ｍSmokeEmitter_->SetLifeTimeMinMax(0.5f, 1.0f);
+	ｍSmokeEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
 	ｍSmokeEmitter_->SetIsAlpha(true);
+	ｍSmokeEmitter_->SetAlphaClipping(0.23f);
+	ｍSmokeEmitter_->SetIsLifeTimeScale(true);
+	ｍSmokeEmitter_->SetUsebillboard(false);
+	ｍSmokeEmitter_->SetEnableLighting(false);
+
 	ｍSmokeEmitter_->SetColorMinMax({1,1,1,0.5f}, { 1,1,1,0.5f });
 	ｍSmokeEmitter_->SetRengeMinMax({-0.25f,-0.25f ,-0.25f },{ 0.25f,0.25f,0.25f});
-	ｍSmokeEmitter_->SetSizeMinMax(Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
+	ｍSmokeEmitter_->SetSizeMinMax(Vector3{ 2.0f,2.0f,2.0f }, { 2.0f,2.0f,2.0f });
 	ｍSmokeEmitter_->SetVelocityMinMax(-velocity_, -velocity_);
+	ｍSmokeEmitter_->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
+
 	object_.Update();
 	ｍSmokeEmitter_->SetRengeMinMax(object_.worldtransform_.translate_, object_.worldtransform_.translate_);
 

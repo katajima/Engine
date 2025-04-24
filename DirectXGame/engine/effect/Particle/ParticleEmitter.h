@@ -59,6 +59,10 @@ public: // ゲッター兼セッター
 
 	void SetPos(Vector3 pos) { transform_.translate_ = pos; } // 位置
 
+	void SetAlphaClipping(float alpha) { alphaClipping_ = alpha; }
+
+	void SetEnableLighting(int lighting) { enableLighting_ = lighting; }
+
 	void SetIsEmit(bool is) { isEmit = is; } // 出すか
 
 	void SetIsGravity(bool is) { isGravity = is; } // 重力
@@ -115,7 +119,8 @@ private:
 
 	bool isEmit= true; // 出すか
 
-	
+	float alphaClipping_ = 0.5f; // αクリッピング
+	int enableLighting_ = false;
 public:
 	WorldTransform transform_;
 private:

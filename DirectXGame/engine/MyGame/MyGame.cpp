@@ -134,6 +134,11 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/circle2.png");
 	textureManager->LoadTexture("resources/Texture/gradationLine.png");
 
+	// 煙
+	textureManager->LoadTexture("resources/Texture/smoke/no1.png");
+	textureManager->LoadTexture("resources/Texture/smoke/no2.png");
+	textureManager->LoadTexture("resources/Texture/smoke/no3.png");
+
 
 	modelManager->LoadModelAmime("multiMaterial.gltf", "multiMaterial");
 
@@ -252,6 +257,11 @@ void MyGame::InitializeResource()
 
 	particleManager->CreateParticleGroup("dashEmit", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("moveLimit", "resources/Texture/Image.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	
+	// 煙
+	particleManager->CreateParticleGroup("smokePlane01", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane02", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane03", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 
 	// 敵関係
 	particleManager->CreateParticleGroup("hitStar", "resources/Texture/Image.png", primiStar.get());

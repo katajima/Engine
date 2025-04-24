@@ -13,6 +13,7 @@
 #include "DirectXGame/engine/Effect/Trail/TrailEffectManager.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
 
+class LightManager;
 class DirectXCommon;
 class EffectManager
 {
@@ -21,7 +22,7 @@ public:
 	~EffectManager() = default;
 
 	// 初期化
-	void Initialize(DirectXCommon* directXCommon);
+	void Initialize(DirectXCommon* directXCommon, LightManager* lightManager);
 
 
 public: // ゲッター
@@ -41,6 +42,7 @@ private:
 	std::unique_ptr<ParticleManager> particleManager_;
 private:
 	DirectXCommon* directXCommon_;
+	LightManager* lightManager_;
 };
 
 

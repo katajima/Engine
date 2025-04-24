@@ -39,6 +39,11 @@ struct ParticleForGPU
 	Vector4 color;
 };
 
+struct  ParticleMaterial
+{
+	float alphaClipping = 0.5f;
+	float pad[3];
+};
 
 //モデルデータ
 struct ModelData
@@ -48,6 +53,7 @@ struct ModelData
 	Node rootNode;
 };
 
+class LightManager;
 class Material;
 class Primitive;
 class DirectXCommon;
@@ -171,7 +177,7 @@ public:
 	ParticleManager& operator=(ParticleManager&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+	void Initialize(DirectXCommon* dxCommon, LightManager* lightManager);
 	// 更新
 	void Update();
 	// 描画
@@ -238,7 +244,7 @@ private: // エミッタ種類
 
 private:
 
-
+	LightManager* lightManager_ = nullptr;
 	DirectXCommon* dxCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;
 

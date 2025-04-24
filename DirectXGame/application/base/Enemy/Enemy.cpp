@@ -128,6 +128,8 @@ void Enemy::Update()
 
 		// 煙
 		dustEmit_->Update();
+		dustEmit2_->Update();
+		dustEmit3_->Update();
 	}
 
 	object_.Update();
@@ -351,17 +353,60 @@ void Enemy::InitParticle()
 	groundLeftEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 
 	dustEmit_ = std::make_unique<ParticleEmitter>();
-	dustEmit_->Initialize(particleManager,"dust", "enemyGround");
+	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01");
 	dustEmit_->GetFrequency() = 0.25f;
 	dustEmit_->SetCount(3);
 	dustEmit_->SetParent(object_.worldtransform_);
 	dustEmit_->SetPos({ 0,1.1f,-0.45f });
 	dustEmit_->SetRengeMinMax({0,0,0},{0,0,0});
 	dustEmit_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
-	dustEmit_->SetLifeTimeMinMax(0.5f, 0.7f);
+	dustEmit_->SetLifeTimeMinMax(2.5f, 2.7f);
+	dustEmit_->SetAlphaClipping(0.15f);
+	dustEmit_->SetSizeMinMax(Vector3{ 1.5f,1.5f,1.5f }, { 2.0f,2.0f,2.0f });
+	dustEmit_->SetColorMinMax({ 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f });
+	dustEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
+	dustEmit_->SetUsebillboard(false);
+	dustEmit_->SetEnableLighting(false);
 	dustEmit_->SetIsAlpha(true);
-	dustEmit_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
-	dustEmit_->SetColorMinMax({ 0.1f, 0.1f, 0.1f }, { 0.12f, 0.12f, 0.12f });
+	dustEmit_->SetIsLifeTimeScale(false);
+
+	dustEmit2_ = std::make_unique<ParticleEmitter>();
+	dustEmit2_->Initialize(particleManager, "smokePlane02", "smokePlane02");
+	dustEmit2_->GetFrequency() = 0.25f;
+	dustEmit2_->SetCount(3);
+	dustEmit2_->SetParent(object_.worldtransform_);
+	dustEmit2_->SetPos({ 0,1.1f,-0.45f });
+	dustEmit2_->SetRengeMinMax({0,0,0},{0,0,0});
+	dustEmit2_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
+	dustEmit2_->SetLifeTimeMinMax(2.5f, 2.7f);
+	dustEmit2_->SetAlphaClipping(0.15f);
+	dustEmit2_->SetSizeMinMax(Vector3{ 1.5f,1.5f,1.5f }, { 2.0f,2.0f,2.0f });
+	dustEmit2_->SetColorMinMax({ 0.1f, 0.1f, 0.1f }, { 0.1f, 0.1f, 0.1f });
+	dustEmit2_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
+	dustEmit2_->SetUsebillboard(false);
+	dustEmit2_->SetEnableLighting(false);
+	dustEmit2_->SetIsAlpha(true);
+	dustEmit2_->SetIsLifeTimeScale(false);
+
+	dustEmit3_ = std::make_unique<ParticleEmitter>();
+	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03");
+	dustEmit3_->GetFrequency() = 0.25f;
+	dustEmit3_->SetCount(3);
+	dustEmit3_->SetParent(object_.worldtransform_);
+	dustEmit3_->SetPos({ 0,1.1f,-0.45f });
+	dustEmit3_->SetRengeMinMax({0,0,0},{0,0,0});
+	dustEmit3_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
+	dustEmit3_->SetLifeTimeMinMax(2.5f, 2.7f);
+	dustEmit3_->SetAlphaClipping(0.15f);
+	dustEmit3_->SetSizeMinMax(Vector3{ 1.5f,1.5f,1.5f }, { 2.0f,2.0f,2.0f });
+	dustEmit3_->SetColorMinMax({ 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f });
+	dustEmit3_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
+	dustEmit3_->SetUsebillboard(false);
+	dustEmit3_->SetEnableLighting(false);
+	dustEmit3_->SetIsAlpha(true);
+	dustEmit3_->SetIsLifeTimeScale(false);
+
+
 
 	starEmit_ = std::make_unique<ParticleEmitter>();
 	starEmit_->Initialize(particleManager,"dust", "hitStar");

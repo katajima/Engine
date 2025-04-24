@@ -92,7 +92,7 @@ PixelShaderOutput main(PixelShaderInput input)
         
         output.color.a = gMaterial.color.a * textureColor.a;
 
-        if (textureColor.a <= 0.5f)
+        if (textureColor.a <= gMaterial.alphaClipping)
         {
             discard;
         }

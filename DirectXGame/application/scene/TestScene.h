@@ -177,6 +177,8 @@ private:
 
 	std::unique_ptr<ParticleEmitter> primitvPlane_  =nullptr;
 
+	std::unique_ptr<ParticleEmitter> primitvPlaneSmoke_  =nullptr;
+	float clipping_ = 0.25f;
 
 
 	/// <summary>
