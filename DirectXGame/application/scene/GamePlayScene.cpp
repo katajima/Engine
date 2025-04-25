@@ -39,60 +39,19 @@ void GamePlayScene::Initialize()
 		enemys_.push_back(std::move(enemy));
 	}
 
-	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(GetEntity3DManager(),{ 10000,10000 });
-	ocean_->SetCamera(camera.get());
-	ocean_->transform.rotate.x = DegreesToRadians(90);
-	ocean_->transform.translate.y = -10;
-	ocean_->material->color = { 0,0,0.57f,1 };
-	ocean_->material->color.a = 0.95f;
+	
 	
 
-	tail = std::make_unique<Object3d>();
-	tail->Initialize(GetEntity3DManager());
-	tail->SetModel("renga.gltf");
-	tail->SetCamera(camera.get());
-	tail->worldtransform_.scale_ = { 4,4,4 };
-
-	tail2 = std::make_unique<Object3d>();
-	tail2->Initialize(GetEntity3DManager());
-	tail2->SetModel("black.obj");
-	tail2->SetCamera(camera.get());
-	tail2->worldtransform_.scale_ = { 104,104,104 };
-	tail2->worldtransform_.translate_.y = -20;
-
-	sky.Initialize(GetEntity3DManager());
-	sky.SetModel("skydome.obj");
-	sky.SetCamera(camera.get());
-	sky.worldtransform_.scale_ = { 100,100,100 };
-	sky.model->modelData.material[0]->enableLighting_ = false;
+	
+	stage_ = std::make_unique<Stage>();
+	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
 
 
-	warePos.push_back({ 300,0,-200 });
-	warePos.push_back({ 300,0,-100 });
-	warePos.push_back({ 300,0,0 });
-	warePos.push_back({ 300,0,100 });
-	warePos.push_back({ 300,0,200 });
 
-	for (int i = 0; i < warePos.size(); i++) {
-		auto obj = std::make_unique<Object3d>();
-		obj->Initialize(GetEntity3DManager());
-		obj->SetModel("warehouse.gltf");
-		obj->SetCamera(camera.get());
-		obj->worldtransform_.scale_ = { 2, 2, 2 };		
-		obj->worldtransform_.translate_ = warePos[i];
-		obj->worldtransform_.rotate_.y = DegreesToRadians(90);
-		
-		
-		warehouseObject.push_back(std::move(obj));
-	}
 
-	//warehouseObject = std::make_unique<Object3d>();
-	//warehouseObject->Initialize();
-	//warehouseObject->SetModel("warehouse.gltf");
-	//warehouseObject->SetCamera(camera.get());
-	//warehouseObject->worldtransform_.scale_ = { 2,2,2 };
-	//warehouseObject->worldtransform_.translate_ = { 300,0,50 };
+
+	
+
 
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
@@ -102,7 +61,7 @@ void GamePlayScene::Initialize()
 
 	
 
-	LoadLevelData();
+	//LoadLevelData();
 
 	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 }
@@ -118,12 +77,6 @@ void GamePlayScene::InitializeCamera()
 	camera->transform_.rotate = { 0.36f,0,0 };
 	camera->transform_.translate = { 5,32.5f,-59.2f };
 
-	cameraDebugT = camera->transform_.translate;
-	cameraDebugR = camera->transform_.rotate;
-
-	cameraT.y = 1.0f;
-
-
 	flag = true;
 #ifdef _DEBUG
 
@@ -132,8 +85,6 @@ void GamePlayScene::InitializeCamera()
 #endif // _DEBUG]
 
 	SetCamera(camera.get());
-
-	cameraObj_.Initialize(GetEntity3DManager());
 }
 
 // 各オブジェクトやスプライトなどの初期化
@@ -551,25 +502,18 @@ void GamePlayScene::Update()
 
 
 
-	// タイル
-	tail->Update();
-	tail2->Update();
-	sky.Update();
-	for (int i = 0; i < warehouseObject.size(); i++) {
-		warehouseObject[i]->Update();
-	}
+	
+	
 
-	ocean_->Update();
-
-	//moveLimitEmitter_->Update();
-	emit_->Update();
 	// デバック表示用にワールドトランスフォームを更新
 	collisionManager_->UpdateWorldTransform();
 
 
-	player_->SetCamera(camera.get());
-
+	//player_->SetCamera(camera.get());
 	
+	// ステージ
+	stage_->Update();
+	// 当たり判定
 	CheckAllCollisions();
 }
 
@@ -619,19 +563,12 @@ void GamePlayScene::Finalize()
 // 3D描画
 void GamePlayScene::Draw3D()
 {
-	sky.Draw();
-	
-	
-	
-	tail->Draw(); 
-	tail2->Draw(); 
-	for (int i = 0; i < warehouseObject.size(); i++) {
-		warehouseObject[i]->Draw();
-	}
-
 	////3Dオブジェクトの描画
 
-	
+	// ステージ
+	stage_->Draw();
+
+	// プレイヤー
 	player_->Draw();
 
 	// 敵
@@ -639,16 +576,16 @@ void GamePlayScene::Draw3D()
 		enemys_[i]->Draw();
 	}
 
-
 	// パーティクル
 	player_->DrawP();
 
 	
+	
+	
+	// パーティクル	
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->Draw();
 	
-	
-	ocean_->Draw();
-
+	stage_->DrawP();
 
 	// 当たり判定の表示
 	collisionManager_->Draw();

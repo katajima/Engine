@@ -23,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	sceneManager_->ChangeScene("TEST");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -77,7 +77,7 @@ void MyGame::Update()
 	dxCommon->Update(sceneManager_.get(), entity3DManager_.get());
 
 
-
+#ifdef _DEBUG
 	ImGui::Begin("scene");
 	float width = static_cast<float> (WinApp::GetClientWidth() / 2);
 	float height = static_cast<float> (WinApp::GetClientHeight() / 2);
@@ -85,6 +85,7 @@ void MyGame::Update()
 	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetFinalRenderTexture()->GetSRVGPUHandle().ptr);
 	ImGui::Image(imguiTexture, ImVec2(width, height));
 	ImGui::End();
+#endif // _DEBUG
 	// ImGuiの受付終了
 	dxCommon->GetImGuiManager()->End();
 }
@@ -262,9 +263,19 @@ void MyGame::InitializeResource()
 	particleManager->CreateParticleGroup("smokePlane01", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane02", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane03", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane04", "resources/Texture/smoke/no4.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane01_1", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane02_1", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane03_1", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane01_2", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane02_2", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane03_2", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+
+	//
+	particleManager->CreateParticleGroup("hitEffect", "resources/Texture/effect.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("hitEffect2", "resources/Texture/effect2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("hitEffect3", "resources/Texture/effect3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+
 
 	// 敵関係
 	particleManager->CreateParticleGroup("hitStar", "resources/Texture/Image.png", primiStar.get());

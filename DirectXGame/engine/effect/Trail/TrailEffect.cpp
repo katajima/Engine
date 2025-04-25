@@ -101,6 +101,128 @@ void TrailEffect::Update(bool& flag, const Object3d& strM, const Object3d& endM)
 
 }
 
+void TrailEffect::Update(bool& flag, const WorldTransform& strM, const WorldTransform& endM)
+{
+	material->GPUData();
+
+	Vector3 str = strM.worldMat_.GetWorldPosition();
+	Vector3 end = endM.worldMat_.GetWorldPosition();
+	Vector3 strPre = strM.worldPreMat_.GetWorldPosition();
+	Vector3 endPre = endM.worldPreMat_.GetWorldPosition();
+
+
+
+
+	Vector3 leftTop = { str.x , str.y , str.z };
+	Vector3 leftBottom = { end.x , end.y , end.z };
+	Vector3 rightTop = { strPre.x , strPre.y , strPre.z };
+	Vector3 rightBottom = { endPre.x , endPre.y , endPre.z };
+
+
+	if (flag) {
+		mesh->vertices.push_back({ .position = {leftTop.x, leftTop.y, leftTop.z, 1.0f}, .texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 左上
+		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f}, .texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 右上
+		mesh->vertices.push_back({ .position = {leftBottom.x, leftBottom.y, leftBottom.z, 1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
+		mesh->vertices.push_back({ .position = {leftBottom.x, leftBottom.y, leftBottom.z, 1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
+		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f} ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 右上
+		mesh->vertices.push_back({ .position = {rightBottom.x, rightBottom.y, rightBottom.z, 1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
+
+		// タイマーの初期化
+		for (int i = 0; i < 6; ++i) {
+			mesh->verticesTimer.push_back({ 0.0f });
+		}
+
+	}
+
+
+	// タイマーの更新
+	for (size_t i = 0; i < mesh->verticesTimer.size(); ++i) {
+		mesh->verticesTimer[i] += MyGame::GameTime(); // 例としてフレーム時間を加算 (60FPSの想定)
+	}
+
+
+	// 時間が経過した頂点を削除
+	while (!mesh->verticesTimer.empty() && mesh->verticesTimer.front() >= mesh->maxTime) {
+		mesh->vertices.erase(mesh->vertices.begin());
+		mesh->verticesTimer.erase(mesh->verticesTimer.begin());
+	}
+
+
+
+
+	// 頂点バッファビューを更新
+	mesh->UpdateVertexBuffer();
+
+
+
+
+	parentTransform_ = MakeAffineMatrix({ 1,1,1 }, Vector3{ 0,0,0 }, { 0,0,0 });
+
+	// 位置データ
+	transfomation->Update(camera_, parentTransform_);
+}
+
+void TrailEffect::Update3(bool& flag,  Matrix4x4* strM,  Matrix4x4* endM,  Matrix4x4* strPreM,  Matrix4x4* endPreM )
+{
+	material->GPUData();
+
+	Vector3 str = strM->GetWorldPosition();
+	Vector3 end = endM->GetWorldPosition() + Vector3{ 0,1,0 };
+	Vector3 strPre = strPreM->GetWorldPosition();
+	Vector3 endPre = endPreM->GetWorldPosition() + Vector3{0,1,0};
+
+
+
+
+	Vector3 leftTop = { str.x , str.y , str.z };
+	Vector3 leftBottom = { end.x , end.y , end.z };
+	Vector3 rightTop = { strPre.x , strPre.y , strPre.z };
+	Vector3 rightBottom = { endPre.x , endPre.y , endPre.z };
+
+
+	if (flag) {
+		mesh->vertices.push_back({ .position = {leftTop.x, leftTop.y, leftTop.z, 1.0f}, .texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 左上
+		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f}, .texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 右上
+		mesh->vertices.push_back({ .position = {leftBottom.x, leftBottom.y, leftBottom.z, 1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
+		mesh->vertices.push_back({ .position = {leftBottom.x, leftBottom.y, leftBottom.z, 1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
+		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f} ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 右上
+		mesh->vertices.push_back({ .position = {rightBottom.x, rightBottom.y, rightBottom.z, 1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
+
+		// タイマーの初期化
+		for (int i = 0; i < 6; ++i) {
+			mesh->verticesTimer.push_back({ 0.0f });
+		}
+
+	}
+
+
+	// タイマーの更新
+	for (size_t i = 0; i < mesh->verticesTimer.size(); ++i) {
+		mesh->verticesTimer[i] += MyGame::GameTime(); // 例としてフレーム時間を加算 (60FPSの想定)
+	}
+
+
+	// 時間が経過した頂点を削除
+	while (!mesh->verticesTimer.empty() && mesh->verticesTimer.front() >= mesh->maxTime) {
+		mesh->vertices.erase(mesh->vertices.begin());
+		mesh->verticesTimer.erase(mesh->verticesTimer.begin());
+	}
+
+
+
+
+	// 頂点バッファビューを更新
+	mesh->UpdateVertexBuffer();
+
+
+
+
+	parentTransform_ = MakeAffineMatrix({ 1,1,1 }, Vector3{ 0,0,0 }, { 0,0,0 });
+
+	// 位置データ
+	transfomation->Update(camera_, parentTransform_);
+}
+
 void TrailEffect::Draw()
 {
 	if (mesh->vertices.size() != 0) {

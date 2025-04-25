@@ -11,12 +11,15 @@
 #include "imgui.h"
 
 
+#include <execution> // for std::execution::par
 
 
 
-void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager)
+
+void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager,EffectManager* efectManager)
 {
 	dxCommon_ = dxCommon;
+	efectManager_ = efectManager;
 	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
@@ -81,122 +84,97 @@ void ParticleManager::Update()
 
 
 
-	// 全パーティクルグループに対する処理
-	for (auto& pair : particleGroups) // 各パーティクルグループに対して
-	{
-		ParticleGroup& group = pair.second;
-		group.instanceCount = 0; // 描画すべきインスタンスのカウント
+	Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
+	Matrix4x4 viewMatrix = camera_->GetViewMatrix();
+	Matrix4x4 cameraWorldMatrix = camera_->GetWorldMatrix();
 
-		Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
-		Matrix4x4 viewMatrix = camera_->GetViewMatrix();
-		Matrix4x4 cameraWorldMatrix = camera_->GetWorldMatrix();
+	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
+	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraWorldMatrix);
+	billboardMatrix.m[3][0] = 0.0f;
+	billboardMatrix.m[3][1] = 0.0f;
+	billboardMatrix.m[3][2] = 0.0f;
 
+	float deltaTime = MyGame::GameTime(); // 毎フレーム一定時間と仮定
 
-		Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
-		Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraWorldMatrix);
-		billboardMatrix.m[3][0] = 0.0f; // 平行移動成分は不要
-		billboardMatrix.m[3][1] = 0.0f;
-		billboardMatrix.m[3][2] = 0.0f;
+	std::for_each(std::execution::par, particleGroups.begin(), particleGroups.end(),
+		[&](auto& pair) {
+			ParticleGroup& group = pair.second;
+			group.instanceCount = 0;
 
+			group.emiter.worldtransform.Update();
 
-		group.emiter.worldtransform.Update();
+			for (auto particleIterator = group.particle.begin(); particleIterator != group.particle.end(); ) {
+				
 
-		for (auto particleIterator = group.particle.begin(); particleIterator != group.particle.end(); )
-		{
-			// パーティクルの寿命をチェック
-			if (particleIterator->lifeTime <= particleIterator->currentTime) {
-				particleIterator = group.particle.erase(particleIterator);
-				continue;
-			}
-
-			if (group.instanceCount < kNumMaxInstance) {
-
-
-				if (group.isGravity) { // 重力
-					particleIterator->velocity.y -= kGravitationalAcceleration * MyGame::GameTime();
-				};
-
-				if (group.isLifeTimeScale_) { // スケール
-					float t = particleIterator->currentTime / particleIterator->lifeTime;
-					float scaling = 1.0f;
-
-					if (group.topBottom == TopBottom::kBottom) {
-						// 時間経過とともに小さく
-						scaling = 1.0f - t;
-						particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
-					}
-					else if (group.topBottom == TopBottom::kTop) {
-						// 時間経過とともに大きく
-						scaling = t;
-						particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
-					}
-					
+				if (particleIterator->lifeTime <= particleIterator->currentTime) {
+					particleIterator = group.particle.erase(particleIterator);
+					continue;
 				}
 
-				if (group.isRotateVelocity) {// 回転
-					particleIterator->transform.rotate += particleIterator->rotateVelocity;
-				}
-				// 移動処理 (速度を位置に加算)
-				particleIterator->transform.translate += particleIterator->velocity * MyGame::GameTime();
+				if (group.instanceCount < kNumMaxInstance) {
 
-				// 経過時間を加算
-				particleIterator->currentTime += MyGame::GameTime();
+					if (group.isGravity) {
+						particleIterator->velocity.y -= kGravitationalAcceleration * deltaTime;
+					}
 
-				if (group.isBounce) {
-					if (particleIterator->transform.translate.y < 0) {
+					if (group.isLifeTimeScale_) {
+						float t = particleIterator->currentTime / particleIterator->lifeTime;
+						float scaling = (group.topBottom == TopBottom::kBottom) ? (1.0f - t) : t;
+						particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
+					}
+
+					if (group.isRotateVelocity) {
+						particleIterator->transform.rotate += particleIterator->rotateVelocity;
+					}
+
+					particleIterator->transform.translate += particleIterator->velocity * deltaTime;
+					particleIterator->currentTime += deltaTime;
+
+					if (group.isBounce && particleIterator->transform.translate.y < 0) {
 						particleIterator->transform.translate.y = 0;
 						particleIterator->velocity = Reflect(particleIterator->velocity, { 0,1,0 }, 0.85f);
 					}
+
+					Matrix4x4 worldMatrix;
+					if (group.usebillboard) {
+						worldMatrix = Multiply(Multiply(MakeScaleMatrix(particleIterator->transform.scale), billboardMatrix),
+							MakeTranslateMatrix(particleIterator->transform.translate));
+					}
+					else {
+						worldMatrix = MakeAffineMatrix(particleIterator->transform.scale, particleIterator->transform.rotate, particleIterator->transform.translate);
+					}
+
+					Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+
+
+					
+
+					//if (group.useTrail_) {
+					//	particleIterator->trail_->Update3(group.useTrail_,worldMatrix, worldMatrix, particleIterator->pre, particleIterator->pre);
+					//}
+
+					group.instanceData[group.instanceCount].World = worldMatrix;
+					group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
+					group.instanceData[group.instanceCount].color = particleIterator->color;
+					particleIterator->pre = worldMatrix;
+
+					if (group.isAlpha) {
+						float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
+						group.instanceData[group.instanceCount].color.w = alpha;
+					}
+
+					++group.instanceCount;
 				}
 
-
-				// ワールド行列を計算
-				Matrix4x4 worldMatrix;
-				if (group.usebillboard) {
-					Matrix4x4 mat = group.emiter.worldtransform.worldMat_;
-
-					worldMatrix = Multiply(Multiply(MakeScaleMatrix((*particleIterator).transform.scale), billboardMatrix), MakeTranslateMatrix((*particleIterator).transform.translate));
-
-				}
-				else {
-					worldMatrix = MakeAffineMatrix(particleIterator->transform.scale, particleIterator->transform.rotate, particleIterator->transform.translate);
-
-				}
-
-				// ワールドビュー射影行列を合成
-				Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-
-				// インスタンシング用データに情報を書き込み
-				group.instanceData[group.instanceCount].World = worldMatrix;
-				group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
-				group.instanceData[group.instanceCount].color = particleIterator->color;
-
-				if (group.isAlpha) {
-
-					// アルファ値を計算
-					float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
-
-					group.instanceData[group.instanceCount].color.w = alpha;
-
-				}
-
-				// インスタンス数をカウント
-				++group.instanceCount;
+				++particleIterator;
 			}
 
-			++particleIterator;
-		}
+			group.material->transform.translate += group.uvTransformVeloctiy_.translate;
+			group.material->transform.rotate += group.uvTransformVeloctiy_.rotate;
+			group.material->transform.scale += group.uvTransformVeloctiy_.scale;
 
-		
-
-		group.material->transform.translate += group.uvTransformVeloctiy_.translate;
-		group.material->transform.rotate += group.uvTransformVeloctiy_.rotate;
-		group.material->transform.scale += group.uvTransformVeloctiy_.scale;
-
-
-		group.material->GPUData();
-	}
-	//}
+			group.material->GPUData();
+		});
 }
 
 void ParticleManager::LimitMaxMin()
@@ -578,6 +556,10 @@ void ParticleManager::PointEmit(ParticleGroup& particleGroup)
 			distributionVeloY(randomEngine_),
 			distributionVeloZ(randomEngine_)
 		};
+
+		//newParticle.trail_ = std::make_unique<TrailEffect>();
+		//newParticle.trail_->Initialize(efectManager_, particleGroup.material->tex_.diffuseFilePath,0.1f);
+
 		// パーティクルをグループに追加
 		particleGroup.particle.push_back(newParticle);
 	}

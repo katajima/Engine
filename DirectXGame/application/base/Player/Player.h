@@ -13,16 +13,11 @@
 
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-
 #include "DirectXGame/engine/collider/3d/Collider.h"
-
-
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
-
-
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-
+// プレイヤー
 #include"BasePlayerState.h"
 #include"playerWeapon.h"
 #include "PlayerBullet.h"
@@ -372,6 +367,9 @@ private:
 
 	// エフェクト 
 	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
+
+	std::unique_ptr<ParticleEmitter> mEmitter_ = nullptr;
+	std::unique_ptr<ParticleEmitter> mEmitter2_ = nullptr;
 
 
 private:

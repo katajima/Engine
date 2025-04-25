@@ -123,6 +123,7 @@ void Player::BehaviorDieUpdate()
 
 					bullet->Initialize(entity3DManager_,injectionLeftObj_.GetWorldPosition(), camera_);
 					injectionLeftObj_.worldtransform_.translate_.y -= 0.5f;
+					//mEmitter_->Update();
 				}
 				else {
 					followCamera_->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
@@ -134,6 +135,8 @@ void Player::BehaviorDieUpdate()
 				//bullet->SetParent(objectBase_.worldtransform_);
 				
 				
+			
+
 
 				playerBullet_.push_back(std::move(bullet));
 

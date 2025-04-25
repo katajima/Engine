@@ -110,6 +110,12 @@ private:
 	bool isLockOn = false;
 
 private:
+	Player* player_;
+	FollowCamera* followCamera_;
+	Entity3DManager* entity3DManager_;
+private:
+
+
 	// オブジェクト
 	Object3d object_;
 	Object3d objectSha_;
@@ -118,7 +124,7 @@ private:
 	
 	Vector3 oldPos_;
 
-	Player* player_;
+
 
 	// 生死
 	bool isAlive_ = true;
@@ -155,13 +161,13 @@ private:
 	std::unique_ptr<ParticleEmitter> plankEmit_ = nullptr; // 鋼板
 	std::unique_ptr<ParticleEmitter> gearEmit_ = nullptr; // 歯車
 	std::unique_ptr<ParticleEmitter> fenceEmit_ = nullptr; // 柵
+	
+	std::unique_ptr<ParticleEmitter> effectEmit_ = nullptr; // 
 
 	float hitStopTimer;
 	float kHitStopTimer;
 	float timeSpeed_ = 1.0f;
 
-	FollowCamera* followCamera_;
-	Entity3DManager* entity3DManager_;
 };
 
 

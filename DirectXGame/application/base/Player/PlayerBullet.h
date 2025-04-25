@@ -69,11 +69,13 @@ private:
 	
 	// ミサイル煙エミッター
 	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter_ = nullptr;
-	
+	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter2_ = nullptr;
+
+
 	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter_ = nullptr;
 	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter2_ = nullptr;
 	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter3_ = nullptr;
-
+	
 
 
 	std::string strin;

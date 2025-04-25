@@ -89,8 +89,6 @@ void Enemy::Update()
 		ImGui::InputFloat2("screen", &pos2d.x);
 		/*ImGui::InputFloat("hp", &php);
 		ImGui::Checkbox("isAlive", &pos3);*/
-
-
 	}
 	ImGui::End();
 #endif
@@ -150,8 +148,6 @@ void Enemy::Draw()
 
 void Enemy::DrawP()
 {
-	//ParticleManager::GetInstance()->GetInstance()->Draw();
-	//ParticleManager::GetInstance()->GetInstance()->DrawAABB();
 }
 
 void Enemy::Draw2D()
@@ -265,6 +261,7 @@ void Enemy::Emit()
 		traiEmit_->SetVelocityMinMax(-Vector3{ 5,0,5 }, { 5, 0, 5 });
 	}
 
+	effectEmit_->Update();
 	hitEmit_->Update();
 	traiEmit_->Update();
 }
@@ -353,7 +350,7 @@ void Enemy::InitParticle()
 	groundLeftEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 
 	dustEmit_ = std::make_unique<ParticleEmitter>();
-	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01");
+	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01_2");
 	dustEmit_->GetFrequency() = 0.25f;
 	dustEmit_->SetCount(3);
 	dustEmit_->SetParent(object_.worldtransform_);
@@ -373,15 +370,15 @@ void Enemy::InitParticle()
 
 
 	dustEmit2_ = std::make_unique<ParticleEmitter>();
-	dustEmit2_->Initialize(particleManager, "smokePlane02", "smokePlane02");
+	dustEmit2_->Initialize(particleManager, "smokePlane02", "smokePlane02_2");
 	dustEmit2_->GetFrequency() = 0.25f;
 	dustEmit2_->SetCount(3);
 	dustEmit2_->SetParent(object_.worldtransform_);
 	dustEmit2_->SetPos({ 0,1.1f,-0.45f });
 	dustEmit2_->SetRengeMinMax({0,0,0},{0,0,0});
 	dustEmit2_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
-	dustEmit2_->SetLifeTimeMinMax(2.5f, 2.7f);
-	dustEmit2_->SetAlphaClipping(0.15f);
+	dustEmit2_->SetLifeTimeMinMax(2.0f, 2.0f);
+	dustEmit2_->SetAlphaClipping(0.10f);
 	dustEmit2_->SetSizeMinMax(Vector3{ 1.0f,1.0f,1.0f }, { 1.5f,1.5f,1.5f });
 	dustEmit2_->SetColorMinMax({ 0.1f, 0.1f, 0.1f }, { 0.1f, 0.1f, 0.1f });
 	dustEmit2_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
@@ -392,7 +389,7 @@ void Enemy::InitParticle()
 	dustEmit2_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
 	
 	dustEmit3_ = std::make_unique<ParticleEmitter>();
-	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03");
+	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03_2");
 	dustEmit3_->GetFrequency() = 0.25f;
 	dustEmit3_->SetCount(3);
 	dustEmit3_->SetParent(object_.worldtransform_);
@@ -400,7 +397,7 @@ void Enemy::InitParticle()
 	dustEmit3_->SetRengeMinMax({0,0,0},{0,0,0});
 	dustEmit3_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
 	dustEmit3_->SetLifeTimeMinMax(2.5f, 2.7f);
-	dustEmit3_->SetAlphaClipping(0.15f);
+	dustEmit3_->SetAlphaClipping(0.10f);
 	dustEmit3_->SetSizeMinMax(Vector3{ 1.2f,1.2f,1.2f }, { 1.5f,1.5f,1.5f });
 	dustEmit3_->SetColorMinMax({ 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f });
 	dustEmit3_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
@@ -427,7 +424,7 @@ void Enemy::InitParticle()
 	starEmit_->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
 
 	traiEmit_ = std::make_unique<ParticleEmitter>();
-	traiEmit_->Initialize(particleManager,"dust", "hitTrai");
+	traiEmit_->Initialize(particleManager,"dust", "hitEffect");
 	traiEmit_->GetFrequency() = 0.0f;
 	traiEmit_->SetCount(5);
 	traiEmit_->SetParent(object_.worldtransform_);
@@ -437,9 +434,28 @@ void Enemy::InitParticle()
 	traiEmit_->SetLifeTimeMinMax(0.2f, 0.2f);
 	traiEmit_->SetIsAlpha(true);
 	traiEmit_->SetUsebillboard(false);
-	traiEmit_->SetSizeMinMax(Vector3{ 1.6f,1.6f,1.6f }, { 1.8f,1.8f,1.8f });
+	traiEmit_->SetSizeMinMax(Vector3{ 2.6f,2.6f,2.6f }, { 2.8f,2.8f,2.8f });
 	traiEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
 	traiEmit_->SetRengeMinMax(Vector3{-5,-5,-5},Vector3{5,5,5});
+	traiEmit_->SetAlphaClipping(0.15f);
+
+
+	effectEmit_ = std::make_unique<ParticleEmitter>();
+	effectEmit_->Initialize(particleManager,"dust", "hitEffect2", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	effectEmit_->GetFrequency() = 0.0f;
+	effectEmit_->SetCount(1);
+	effectEmit_->SetParent(object_.worldtransform_);
+	effectEmit_->SetPos({ 0,0.0f,0.0f });
+	effectEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
+	effectEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
+	effectEmit_->SetLifeTimeMinMax(0.2f, 0.3f);
+	effectEmit_->SetIsAlpha(true);
+	effectEmit_->SetUsebillboard(true);
+	effectEmit_->SetSizeMinMax({8,8,8},{ 8,8,8 });
+	effectEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
+	effectEmit_->SetRengeMinMax(Vector3{-5,-5,-5},Vector3{5,5,5});
+	effectEmit_->SetAlphaClipping(0.15f);
+
 
 	hitEmit_ = std::make_unique<ParticleEmitter>();
 	hitEmit_->Initialize(particleManager,"dust", "hit");

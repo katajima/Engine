@@ -95,6 +95,24 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	effect_->SetTrailParent(&weapon_->GetObject3D());
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
+
+
+	mEmitter_ = std::make_unique <ParticleEmitter>();
+	mEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "hitEffect3", "hitEffect3", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	mEmitter_->GetFrequency() = 0.05f;
+	mEmitter_->SetCount(1);
+	mEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
+	mEmitter_->SetIsAlpha(true);
+	mEmitter_->SetAlphaClipping(0.23f);
+	mEmitter_->SetIsLifeTimeScale(true);
+	mEmitter_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	mEmitter_->SetUsebillboard(false);
+	mEmitter_->SetEnableLighting(false);
+	mEmitter_->SetParent(injectionLeftObj_.worldtransform_);
+	mEmitter_->SetColorMinMax({ 1,0,0,1.0f }, { 1,0,0,1.0f });
+	mEmitter_->SetSizeMinMax(Vector3{ 2.0f,2.0f,2.0f }, { 2.0f,2.0f,2.0f });
+	mEmitter_->SetVelocityMinMax({}, {});
+	mEmitter_->SetRotateMinMax(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
 }
 
 void Player::Update()

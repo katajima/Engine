@@ -79,6 +79,10 @@ public:// メンバ関数
 	// ピクセル補間
 	void SetIsPixelInterpolation(bool is) { isPixelInterpolation_ = is; }
 
+	// 描画させるか
+	void SetActive(const bool& isActive) { isActive_ = isActive; }
+	bool GetActive() const { return isActive_; }
+
 
 private:
 
@@ -88,23 +92,9 @@ private:
 	void SpriteTypeDiscrimination(SpriteType type);
 
 private:
+	// スプライト用
 	SpriteCommon* spriteCommon_ = nullptr;
 
-	
-	//頂点データ
-	struct VertexData {
-
-		Vector4 position;
-		Vector2 texcoord;
-		Vector3 normal;
-	};
-	
-	
-	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-
-	Vector2 size = { 640.0f,360.0f };
-	Vector2 position = { 0.0f,0.0f };
-	float rotation = 0.0f;
 
 	// バッファリソース
 	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
@@ -118,40 +108,49 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
-	
+
 	// トランスフォーム
 	std::unique_ptr<Transfomation>transfomation = nullptr;
 	// マテリアル
 	std::unique_ptr<Material> material = nullptr;
-
-
-	
+	// テクスチャパス
+	std::string textureFilePath_;
 	//テクスチャ番号
 	uint32_t textureIndex = 0;
 
-	// アンカーポイント
-	Vector2 anchorPoint = { 0.0f,0.0f };
 
-	// 左右フリップ
-	bool isFlipX_ = false;
-	// 上下フリップ
-	bool isFlipY_ = false;
-
-	// テクスチャ左上座標
-	Vector2 textureLeftTop = { 0.0f,0.0f };
-	// テクスチャ切り出し座標
-	Vector2 textureSize = { 100.0f,100.0f };
+private:
 
 
-	std::string textureFilePath_;
+	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };	// トランスフォーム
+	Vector2 size = { 640.0f,360.0f };											// サイズ
+	Vector2 position = { 0.0f,0.0f };											// 位置
+	float rotation = 0.0f;														// 回転													
+	bool isActive_ = true;
+private:
+	
+	// アニメーション関係
 
-	//
 	Vector2 maxAnimeNum_;
 	Vector2 animeNum_;
 	float animeTime_;
 	Vector2 animeSize_;
 
-	bool isPixelInterpolation_ = true;
+	bool isPixelInterpolation_ = true;// 表示させるか
 
+
+private: // テクスチャいじいじ
+
+
+	// アンカーポイント
+	Vector2 anchorPoint = { 0.0f,0.0f };
+	// 左右フリップ
+	bool isFlipX_ = false;
+	// 上下フリップ
+	bool isFlipY_ = false;
+	// テクスチャ左上座標
+	Vector2 textureLeftTop = { 0.0f,0.0f };
+	// テクスチャ切り出し座標
+	Vector2 textureSize = { 100.0f,100.0f };
 };
 

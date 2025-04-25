@@ -173,24 +173,25 @@ void Sprite::UpdateAmimetion(float time)
 
 void Sprite::Draw(SpriteType type)
 {
-	SpriteTypeDiscrimination(type);
-	
-	material->GetCommandListMaterial(0);
+	if (isActive_) {
+		SpriteTypeDiscrimination(type);
 
-	material->GetCommandListTexture(2, 2, 2);
+		material->GetCommandListMaterial(0);
 
-
-	//vertexBufferViewSprite
-	spriteCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
-
-	spriteCommon_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);
-
-	//トランスフォームMatrixResource
-	transfomation->GetCommandList(1);
+		material->GetCommandListTexture(2, 2, 2);
 
 
-	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		//vertexBufferViewSprite
+		spriteCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
 
+		spriteCommon_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);
+
+		//トランスフォームMatrixResource
+		transfomation->GetCommandList(1);
+
+
+		spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	}
 }
 
 void Sprite::AdjusttextureSize()

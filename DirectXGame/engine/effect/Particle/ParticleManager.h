@@ -31,6 +31,7 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include"DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include"DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 struct ParticleForGPU
 {
@@ -53,11 +54,13 @@ struct ModelData
 	Node rootNode;
 };
 
+
 class LightManager;
 class Material;
 class Primitive;
 class DirectXCommon;
 class SrvManager;
+class EffectManager;
 class ParticleManager
 {
 public:
@@ -142,6 +145,8 @@ public:
 
 		Transform strtTransform;
 		Vector3 rotateVelocity;
+		Matrix4x4 pre;
+		//std::unique_ptr <TrailEffect> trail_;
 	};
 
 	struct ParticleGroup
@@ -170,6 +175,7 @@ public:
 		RasterizerType rasteType;
 		BlendType blendType;
 		Transform uvTransformVeloctiy_{ {},{},{0,0,0} };
+		//bool useTrail_ = false;
 	};
 
 
@@ -183,7 +189,7 @@ public:
 	ParticleManager& operator=(ParticleManager&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon, LightManager* lightManager);
+	void Initialize(DirectXCommon* dxCommon, LightManager* lightManager,EffectManager* efectManager);
 	// 更新
 	void Update();
 	// 描画
@@ -253,7 +259,7 @@ private:
 	LightManager* lightManager_ = nullptr;
 	DirectXCommon* dxCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;
-
+	EffectManager* efectManager_ = nullptr;
 
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;

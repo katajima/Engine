@@ -11,7 +11,7 @@ void EffectManager::Initialize(DirectXCommon* directXCommon, LightManager* light
 	trailEffectCommon_->Initialize(directXCommon_);
 
 	particleManager_ = std::make_unique<ParticleManager>();
-	particleManager_->Initialize(directXCommon_, lightManager_);
+	particleManager_->Initialize(directXCommon_, lightManager_,this);
 
 }
 

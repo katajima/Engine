@@ -28,7 +28,9 @@
 #include "DirectXGame/engine/collider/3d/CollisionManager.h"
 
 #include"DirectXGame/engine/Light/LightCommon.h"
-#include "DirectXGame/engine/effect/Trail/TrailEffect.h"
+#include "DirectXGame/application/base/Stage/Stage.h"
+
+
 
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
@@ -101,59 +103,39 @@ private:
 private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
-
-	std::shared_ptr<DirectionalLight> directional;
-
-	
+private:
 	// カメラ
 	std::unique_ptr < Camera> camera;
-	Vector3 cameraR;
-	Vector3 cameraT;
-	
-	Vector3 cameraDebugT;
-	Vector3 cameraDebugR;
-	
-
 	bool flag = true;
-	Object3d cameraObj_;
-
-	// 建物オブジェクト
-
-	std::vector<Vector3> warePos;
-
-	std::vector < std::unique_ptr<Object3d>> warehouseObject;
-	
-
-	// オーシャンシェーダー
-	std::unique_ptr < Ocean> ocean_ = nullptr;
-	
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
-
-
-	std::vector <Object3d*> objects;
-
+private:
+	// ライト
+	std::shared_ptr<DirectionalLight> directional;
+private:
+	
+	// プレイヤー
 	std::unique_ptr<Player> player_;
 
+	// エネミー
 	std::vector<std::unique_ptr<Enemy>> enemys_;
 
-	ParticleManager* particleManager_;
+	// ステージ
+	std::unique_ptr<Stage> stage_;
 
 
-	std::unique_ptr < Object3d> tail;
-	std::unique_ptr < Object3d> tail2;
-	Object3d sky;
+private:
 
-	TrailEffect* trailEffect_;
-	bool flag33;
-
-	int count = 0;
-
-	int sceneCount = 0;
-	int clock = 1;
+	// ロードデータ用
+	std::vector <Object3d*> objects;
 	// 衝突マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;
 
+	// シーン遷移用
+	int count = 0;
+	int sceneCount = 0;
+	int clock = 1;
+	
 private:
 	std::unique_ptr<Sprite> numSprites[3][10];
 	Vector2 numpos[3]{};
@@ -170,7 +152,6 @@ private:
 	std::unique_ptr<Sprite> text_over;
 
 	std::unique_ptr<ParticleEmitter> emit_;
-
 	std::unique_ptr<ParticleEmitter> moveLimitEmitter_ = nullptr;
 };
 
