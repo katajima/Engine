@@ -18,6 +18,8 @@
 
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/application/base/Enemy/Enemy.h"
+#include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
+
 #include"DirectXGame/application/base/Player/Player.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
@@ -116,6 +118,9 @@ private:
 	
 	// プレイヤー
 	std::unique_ptr<Player> player_;
+
+	// 敵マネージャ
+	std::unique_ptr<EnemyManager> enemyManager_;
 
 	// エネミー
 	std::vector<std::unique_ptr<Enemy>> enemys_;

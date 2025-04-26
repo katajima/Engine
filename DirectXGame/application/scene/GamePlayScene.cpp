@@ -18,33 +18,40 @@ void GamePlayScene::Initialize()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 
-
+	// プレイヤー
 	player_ = std::make_unique<Player>();
 	player_->Initialize(GetDxCommon(), GetEntity3DManager(),GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
 	
+	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 	followCamera_->SetTarget(&player_->GetObject3D());
 
+	// プレイヤー
 	player_->SetInput(input_);
 	player_->SetCamera(camera.get());
 	player_->SetFollowCamera(followCamera_.get());
 
+	// 敵マネージャ
+	enemyManager_ = std::make_unique<EnemyManager>();
+	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
+	enemyManager_->SetPlayer(player_.get());
+
 	for (int i = 0; i < 15; i++) {
 		auto enemy = std::make_unique<Enemy>();
 		Vector3 randPos = { float(rand() % 41 - 20),2,float(rand() % 40) };
+		randPos += Vector3{ 10000,0,10000 };
 		enemy->Initialize(GetEntity3DManager(), GetEntity2DManager(), randPos, 100, camera.get());
 		enemy->SetPlayer(player_.get());
-		enemy->SetFollowCamera(followCamera_.get());
 		enemys_.push_back(std::move(enemy));
 	}
 
 	
 	
 
-	
+	// ステージ
 	stage_ = std::make_unique<Stage>();
-	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
+	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
 
 
 
@@ -58,8 +65,6 @@ void GamePlayScene::Initialize()
 	collisionManager_->Initialize(GetGlobalVariables());
 
 	InitializeResources();
-
-	
 
 	//LoadLevelData();
 
@@ -483,6 +488,7 @@ void GamePlayScene::Update()
 
 
 		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
+		
 		// 必要に応じて行列を更新
 		//camera->UpdateMatrix();
 	}

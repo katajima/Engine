@@ -23,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	//sceneManager_->ChangeScene("TEST");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TEST");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -58,11 +58,11 @@ void MyGame::Update()
 #ifdef _DEBUG
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-	lastTime = currentTime;
-
+	
 	if (deltaTime > 0) {
 		fps = 1.0f / deltaTime;
 	}
+	lastTime = currentTime;
 
 	// FPS表示用ウィジェット
 	ImGui::Begin("engine");
@@ -185,7 +185,7 @@ void MyGame::InitializeResource()
 	/// <summary>
 	/// 地形
 	/// </summary>
-	modelManager->LoadModel("renga.gltf", "renga", { 10,10 });
+	modelManager->LoadModel("renga.gltf", "renga");
 	modelManager->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
 	modelManager->LoadModel("black.obj", "terrain/black", { 10,10 });
 	modelManager->LoadModel("terrain.obj", "terrain/terrain");

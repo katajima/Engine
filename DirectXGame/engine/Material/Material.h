@@ -30,7 +30,7 @@ public:
 	Color color;
 
 	int32_t enableLighting_ = false;
-	float shininess_;
+	float shininess_ = 64.0f;
 	int32_t useLig_ = false;
 	
 	int32_t useNormalMap_;

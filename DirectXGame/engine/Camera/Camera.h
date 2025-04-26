@@ -78,6 +78,7 @@ public:
 		Vector3 worldPosition;
 		float padding[1];
 		Vector3 normal;
+		float padding2[1];
 	};
 	DataGPU* data;
 private:

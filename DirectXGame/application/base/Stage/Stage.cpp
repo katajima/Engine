@@ -18,8 +18,12 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	tail_ = std::make_unique<Object3d>();
 	tail_->Initialize(entity3DManager_);
 	tail_->SetModel("renga.gltf");
+	//tail_->SetModel("coast.gltf");
 	tail_->SetCamera(camera);
-	tail_->worldtransform_.scale_ = { 4,4,4 };
+	tail_->worldtransform_.scale_ = { 4,1,4 };
+	tail_->model->modelData.material[0]->transform.scale = {10,10,1};
+	tail_->model->modelData.material[0]->shininess_ = 1064.0f;
+	
 
 	// 地面黒
 	tail2_ = std::make_unique<Object3d>();

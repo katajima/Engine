@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Enemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Base\EnemyManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\BasePlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Effect\PlayerEffect.cpp" />
@@ -512,6 +513,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Enemy.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Base\EnemyManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Player\BasePlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Effect\PlayerEffect.h" />

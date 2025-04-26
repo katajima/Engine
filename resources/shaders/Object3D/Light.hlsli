@@ -85,13 +85,73 @@ struct Material
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 
+
+float3 DirectionalLightFunc2(PixelShaderInput input, float4 textureColor, float3 viewDir, float3 normal)
+{
+    float3 result = float3(0, 0, 0);
+    if (gDirectionalLight.enableLighting)
+    {
+        float3 L = -normalize(gDirectionalLight.direction);
+        normal = normalize(normal); // ここで一度だけ正規化
+        viewDir = normalize(viewDir);
+
+        // After（なめらかにする）
+        float halfLambert = saturate(dot(normal, L) * 0.5f + 0.5f);
+        halfLambert = smoothstep(0.0f, 1.0f, halfLambert);
+        float3 diffuse = gMaterial.color.rgb * textureColor.rgb * halfLambert * gDirectionalLight.intensity;
+
+        float spec = 0.0f;
+        if (gMaterial.shininess >= 1.0f)
+        {
+            float3 H = normalize(viewDir + L);
+            spec = pow(saturate(dot(normal, H)), gMaterial.shininess);
+        }
+
+        float3 specular = gDirectionalLight.color.rgb * spec * gDirectionalLight.intensity;
+        //specular = float3(0,0,0);
+        result = diffuse + specular;
+    }
+    return result;
+}
+
+
+
+
+
 float Cos(float3 dire, float3 toEye, float3 normal)
 {
-    float3 halfVectorv = normalize((-dire) + toEye);
+    float3 L = -normalize(dire);
+    float3 halfVectorv = normalize(toEye + L);
     float NdotL = dot(normalize(normal), halfVectorv);
 
     return pow(NdotL * 0.5f + 0.5f, 2.0f);
 }
+
+
+float SpecularBlinn(float3 lightDir, float3 viewDir, float3 normal, float shininess)
+{
+    float3 H = normalize(-lightDir + viewDir); // ハーフベクトル
+    float NdotH = dot(normalize(normal), H);
+    return pow(saturate(NdotH), shininess);
+}
+
+
+
+float Cos3(float3 dire, float3 toEye, float3 normal)
+{
+    float NdotL = dot(normal, -dire);
+
+    return pow(NdotL * 0.5f + 0.5f, 2.0f);
+}
+
+
+
+float Cos2(float3 dire, float3 normal)
+{
+    return saturate(dot(normalize(normal), -dire));
+}
+
+
 
 float SpecularPow(float3 dire, float3 toEye, float3 normal, float shininess)
 {
@@ -101,15 +161,8 @@ float SpecularPow(float3 dire, float3 toEye, float3 normal, float shininess)
     return pow(saturate(RdotE), shininess);
 }
 
-float SpecularPow2(float3 dire, float3 toEye, float3 normal, float shininess)
-{
-    float3 reflectLight = reflect(dire, normalize(normal)); // 反射ベクトル
-    float RdotE = dot(reflectLight, toEye); // 視線ベクトルと反射ベクトルのドット積
 
-    return pow(saturate(RdotE), shininess);
-}
-
-float3 DirectionalLightFunc(PixelShaderInput input,float4 textureColor, float3 toEye, float3 normal)
+float3 DirectionalLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, float3 normal)
 {
     float3 diffuse = { 0, 0, 0 };
     float3 specular = { 0, 0, 0 };
@@ -191,10 +244,11 @@ float3 DirectionalLightFunc(PixelShaderInput input,float4 textureColor, float3 t
     return diffuse + specular + directionalLig;
 };
 
+
 float3 PointLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, float3 normal)
 {
     float3 diffusePointLight = { 0.0f, 0.0f, 0.0f };
-    float3 specularPointLight = { 0.0f, 0.0f, 0.0f };       
+    float3 specularPointLight = { 0.0f, 0.0f, 0.0f };
     for (int point_i = 0; point_i < kMaxLight; point_i++)
     {
         if (gPointLight.pointLights[point_i].enableLighting == 0)
@@ -209,7 +263,7 @@ float3 PointLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye,
             
         float cosP = Cos(pointLightDirection, toEye, normal);
             //鏡面反射
-        float specularPowP = SpecularPow2(pointLightDirection, toEye, normal, gMaterial.shininess);
+        float specularPowP = SpecularPow(pointLightDirection, toEye, normal, gMaterial.shininess);
         
             
         float distanceP = length(gPointLight.pointLights[point_i].position - input.worldPosition);
@@ -240,7 +294,7 @@ float3 SpotLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, 
 {
     float3 diffuseSpotLight = { 0.0f, 0.0f, 0.0f };
     float3 specularSpotLight = { 0.0f, 0.0f, 0.0f };
-    for (uint32_t spot_i = 0; spot_i < kMaxLight; spot_i++)
+    for (uint spot_i = 0; spot_i < kMaxLight; spot_i++)
     {
         if (gSpotLight.spotLights[spot_i].enableLighting == 0)
         {
@@ -263,7 +317,7 @@ float3 SpotLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, 
             
             
         float cosS = Cos(spotLightDirectionOnSurface, toEye, normal);
-        float specularPowS = SpecularPow2(spotLightDirectionOnSurface, toEye, normal, gMaterial.shininess);
+        float specularPowS = SpecularPow(spotLightDirectionOnSurface, toEye, normal, gMaterial.shininess);
             
              // スポットライトの拡散反射と鏡面反射の計算
         diffuseSpotLight += gSpotLight.spotLights[spot_i].color.rgb * cosS * gSpotLight.spotLights[spot_i].intensity * attenuationFactorS * falloffFactor;

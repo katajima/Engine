@@ -84,8 +84,7 @@ void TestScene::Update()
 
 #endif // _DEBUG
 
-	camera->UpdateMatrix();
-
+	
 
 	if (behaviorRequest_) {
 
@@ -166,6 +165,9 @@ void TestScene::Update()
 	}
 	taleObject->Update();
 	tail.Update();
+
+
+	camera->UpdateMatrix();
 }
 
 void TestScene::Draw3D()
@@ -176,11 +178,11 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 
-		primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
-		primitiveObject->Draw(Primitive::PsoType::kRingClamp);
+		//primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
+		//primitiveObject->Draw(Primitive::PsoType::kRingClamp);
 
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		ocean_->Draw();
+		//ocean_->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -528,7 +530,7 @@ void TestScene::InitializeLight()
 
 	point->point = pointLightData;
 
-	GetEntity3DManager()->GetLightManager()->AddLight(point);
+	//GetEntity3DManager()->GetLightManager()->AddLight(point);
 
 	SpotLightData spotLightData;
 
@@ -541,7 +543,7 @@ void TestScene::InitializeLight()
 	spot = std::make_shared<SpotLight>();
 
 	spot->spot = spotLightData;
-	GetEntity3DManager()->GetLightManager()->AddLight(spot);
+	//GetEntity3DManager()->GetLightManager()->AddLight(spot);
 
 	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 
@@ -755,10 +757,10 @@ void TestScene::UpdateRoom01()
 	//ImGui::End();
 #endif // _DEBUG
 
-	primitiveObject->Update();
+	//primitiveObject->Update();
 
-	primitivePlaneObject->Update();
-	primitvPlane_->Update();
+	//primitivePlaneObject->Update();
+	//primitvPlane_->Update();
 }
 
 void TestScene::UpdateRoom02()

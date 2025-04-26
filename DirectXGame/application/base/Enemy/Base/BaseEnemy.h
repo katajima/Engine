@@ -6,7 +6,6 @@
 
 
 class Player;
-class FollowCamera;
 class Entity3DManager;
 class Entity2DManager;
 class BaseEnemy  : public Collider {
@@ -22,9 +21,11 @@ public:
 	
 	
 public:
+	// デフォルトコンストラクタ
+	BaseEnemy();
 	
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera);
+	virtual void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
 
 	
 	// 毎フレーム更新
@@ -37,7 +38,7 @@ public:
 
 	virtual void Draw2D() = 0;
 	
-	
+	void SetPlayer(Player* player) { player_ = player; };
 	
 public: // コライダー関係
 	// 衝突を検出したら呼び出されるコールバック関数
@@ -54,4 +55,15 @@ protected:
 	// パラメータ
 	Parameters parameter_;
 
+	// 生存フラグ
+	bool isAlive_ = true;
+
+
+	// シリアルナンバー
+	uint32_t serialNumber = 0;
+	// 次のシリアルナンバー
+	static uint32_t nextSerialNumber;
+	ContactRecord contactRecord_;
+
+	Player* player_;
 };

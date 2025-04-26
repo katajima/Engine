@@ -442,6 +442,25 @@ void Player::OnCollision(Collider* other)
 	// 衝突判定の種別IDを取得
 	uint32_t typeID = other->GetTypeID();
 	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
+		if (isAlive) {
+			if (!GetInvincible()) {
+				Enemy* enemy = static_cast<Enemy*>(other);
+				uint32_t serialNumber = enemy->GetSerialNumber();
+
+				// 接触履歴があれば何もせず抜ける
+				if (contactRecord_.CheckHistory(serialNumber)) {
+					return;
+				}
+
+				contactRecord_.AddHistory(serialNumber);
+
+				
+				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
+
+
+				AddDamege(10);
+			}
+		}
 	}
 	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyWeapon)) {
 	}

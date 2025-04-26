@@ -371,7 +371,7 @@ private:
 	std::unique_ptr<ParticleEmitter> mEmitter_ = nullptr;
 	std::unique_ptr<ParticleEmitter> mEmitter2_ = nullptr;
 
-
+	ContactRecord contactRecord_;
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;

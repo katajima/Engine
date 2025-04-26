@@ -14,7 +14,6 @@
 #include"DirectXGame/engine/2d/Sprite.h"
 
 class Player;
-class FollowCamera;
 class Entity3DManager;
 class Entity2DManager;
 
@@ -74,8 +73,7 @@ public:
 
 	virtual Vector3 GetCenterPosition() const;
 
-	void SetPlayer(Player* player) { player_ = player; };
-
+	
 	void SetHit() { hit = true; };
 
 	bool GetLockOn() { return isLockOn; }
@@ -90,7 +88,9 @@ public:
 
 	void Shake();
 
-	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
+
+	void SetPlayer(Player* player) { player_ = player; };
+
 
 private:
 
@@ -111,7 +111,6 @@ private:
 
 private:
 	Player* player_;
-	FollowCamera* followCamera_;
 	Entity3DManager* entity3DManager_;
 private:
 
