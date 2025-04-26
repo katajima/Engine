@@ -8,6 +8,27 @@ void EnemyManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 
 }
 
+void EnemyManager::Update()
+{
+	for (auto& enemy : enemys_) {
+		enemy->Update();
+	}
+}
+
+void EnemyManager::Draw()
+{
+	for (auto& enemy : enemys_) {
+		enemy->Draw();
+	}
+}
+
+void EnemyManager::Draw2D()
+{
+	for (auto& enemy : enemys_) {
+		enemy->Draw2D();
+	}
+}
+
 void EnemyManager::GenerateEnemy(EnemyType type, Vector3 position)
 {
 	std::unique_ptr<BaseEnemy> enemy = std::make_unique<NormalEnemy>();

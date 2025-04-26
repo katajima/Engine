@@ -34,6 +34,16 @@ public:
 	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera);
 	void SetPlayer(Player* player) { player_ = player; };
 	
+	// 更新
+	void Update();
+
+	// 描画3D
+	void Draw();
+
+	// 描画2D
+	void Draw2D();
+
+
 
 	// 生成
 	void GenerateEnemy(EnemyType type, Vector3 position);

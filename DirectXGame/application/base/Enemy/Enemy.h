@@ -57,9 +57,7 @@ public:
 
 	// 3Dオブジェクトの参照を返す（変更可能）
 	Object3d& GetObject3D() { return object_; }
-	// 3Dオブジェクトの参照を返す（読み取り専用）
-	//const Object3d& GetObjectTrans() const { return object_; }
-
+	
 	Vector3& GetPostion() { return object_.worldtransform_.translate_; };
 	float& GetHP() { return HP_; };
 	void AddDamege(float da) { HP_ -= da; };

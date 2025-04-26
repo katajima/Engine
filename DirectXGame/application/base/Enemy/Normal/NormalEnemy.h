@@ -16,7 +16,10 @@ public:
 	//
 	void Draw2D() override;
 
-
+	void SetPlayer(Player* player) override;
+private:
+	// 移動
+	void Move();
 
 private:
 };

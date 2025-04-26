@@ -37,7 +37,9 @@ void GamePlayScene::Initialize()
 	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
 	enemyManager_->SetPlayer(player_.get());
 
-	for (int i = 0; i < 15; i++) {
+	enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, { 0,0,0 });
+
+	for (int i = 0; i < 5; i++) {
 		auto enemy = std::make_unique<Enemy>();
 		Vector3 randPos = { float(rand() % 41 - 20),2,float(rand() % 40) };
 		randPos += Vector3{ 10000,0,10000 };
@@ -541,6 +543,10 @@ void GamePlayScene::BehaviorPhase1Update()
 			count++;
 		}
 	}
+
+
+	enemyManager_->Update();
+
 }
 
 void GamePlayScene::BehaviorPhase2Initialize()
@@ -582,6 +588,8 @@ void GamePlayScene::Draw3D()
 		enemys_[i]->Draw();
 	}
 
+	enemyManager_->Draw();
+
 	// パーティクル
 	player_->DrawP();
 
@@ -602,8 +610,7 @@ void GamePlayScene::Draw3D()
 void GamePlayScene::Draw2D()
 {
 	
-
-
+	
 	//////////////--------スプライト-----------///////////////////
 	int adsbhads = player_->GetHitCount();
 	if (adsbhads >= 999) {
@@ -648,6 +655,9 @@ void GamePlayScene::Draw2D()
 	
 		enemys_[i]->Draw2D();
 	}
+
+	enemyManager_->Draw2D();
+
 
 	player_->Draw2D();
 
