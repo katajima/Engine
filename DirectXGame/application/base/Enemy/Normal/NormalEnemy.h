@@ -17,9 +17,36 @@ public:
 	void Draw2D() override;
 
 	void SetPlayer(Player* player) override;
+
+	void Emit() override;
+
 private:
 	// 移動
 	void Move();
 
+	void InitParticle();
+
+
 private:
+
+	std::unique_ptr<ParticleEmitter> groundRightEmit_ = nullptr;
+	std::unique_ptr<ParticleEmitter> groundLeftEmit_ = nullptr;
+
+	std::unique_ptr<ParticleEmitter> starEmit_ = nullptr;
+	std::unique_ptr<ParticleEmitter> traiEmit_ = nullptr;
+	std::unique_ptr<ParticleEmitter> hitEmit_ = nullptr;
+	std::unique_ptr<ParticleEmitter> dustEmit_ = nullptr;
+	std::unique_ptr<ParticleEmitter> dustEmit2_ = nullptr;
+	std::unique_ptr<ParticleEmitter> dustEmit3_ = nullptr;
+
+	std::unique_ptr<ParticleEmitter> tireEmit_ = nullptr; // タイヤ
+
+	std::unique_ptr<ParticleEmitter> ductEmit_ = nullptr; // ダクト
+
+
+	std::unique_ptr<ParticleEmitter> plankEmit_ = nullptr; // 鋼板
+	std::unique_ptr<ParticleEmitter> gearEmit_ = nullptr; // 歯車
+	std::unique_ptr<ParticleEmitter> fenceEmit_ = nullptr; // 柵
+
+	std::unique_ptr<ParticleEmitter> effectEmit_ = nullptr; // 
 };

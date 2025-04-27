@@ -1,5 +1,5 @@
 #include "Player.h"
-#include"DirectXGame/application/base/Enemy/Enemy.h"
+#include"DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
@@ -444,7 +444,7 @@ void Player::OnCollision(Collider* other)
 	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
 		if (isAlive) {
 			if (!GetInvincible()) {
-				Enemy* enemy = static_cast<Enemy*>(other);
+				BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
 				uint32_t serialNumber = enemy->GetSerialNumber();
 
 				// 接触履歴があれば何もせず抜ける
@@ -457,8 +457,6 @@ void Player::OnCollision(Collider* other)
 				
 				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
 
-
-				AddDamege(10);
 			}
 		}
 	}
@@ -471,34 +469,26 @@ Vector3 Player::GetCenterPosition() const
 	return objectBase_.GetWorldPosition();
 }
 
-void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
+void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {
 
 	if (behavior_ == Behavior::kDie) {
-		if (specialAttack.phese == 0)
-		{
-			// ロックオン処理のリセットと更新
+		if (specialAttack.phese == 0) {
 			lockedOnEnemies.clear();
 			int i = 0;
-			bool is = true;
 
-			/*while (true)
-			{
-
-			}*/
 			for (int j = 0; j < enemys.size(); j++) {
 				if (i >= MaxLockOn) {
-					is = false;
-					//break; // 最大ロックオン数を超えた場合
+					break; // 最大ロックオン数を超えたら抜ける
 				}
 
-				Vector2 posEne = enemys[j]->GetObject3D().GetScreenPosition();
+				Vector2 posEne = enemys[j]->GetObject3D()->GetScreenPosition();
 				Vector2 diff = Vector2{ 640,360 } - posEne;
 				float length = diff.Length();
 
-				if (length <= 300.0f && enemys[j]->GetAlive() && is) {
+				if (length <= 300.0f && enemys[j]->GetAlive()) {
 					enemys[j]->SetLockOn(true);
-					lockedOnEnemies.push_back(enemys[j].get());
+					lockedOnEnemies.push_back(enemys[j]);
 					i++;
 				}
 				else {
@@ -506,13 +496,11 @@ void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
 				}
 			}
 		}
-
 	}
 	else {
 		for (int j = 0; j < enemys.size(); j++) {
 			enemys[j]->SetLockOn(false);
 		}
-
 	}
 }
 

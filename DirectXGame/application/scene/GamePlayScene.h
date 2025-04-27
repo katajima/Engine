@@ -17,7 +17,6 @@
 #include"DirectXGame/engine/base/LevelData.h"
 
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include"DirectXGame/application/base/Enemy/Enemy.h"
 #include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
 
 #include"DirectXGame/application/base/Player/Player.h"
@@ -122,9 +121,7 @@ private:
 	// 敵マネージャ
 	std::unique_ptr<EnemyManager> enemyManager_;
 
-	// エネミー
-	std::vector<std::unique_ptr<Enemy>> enemys_;
-
+	
 	// ステージ
 	std::unique_ptr<Stage> stage_;
 
@@ -142,7 +139,6 @@ private:
 	int clock = 1;
 	
 private:
-	std::unique_ptr<Sprite> numSprites[3][10];
 	Vector2 numpos[3]{};
 	std::unique_ptr<Sprite> icon_X;
 	std::unique_ptr<Sprite> icon_Y;
@@ -156,7 +152,8 @@ private:
 	std::unique_ptr<Sprite> text_clera;
 	std::unique_ptr<Sprite> text_over;
 
+	std::vector<std::unique_ptr<Sprite>> sprite_;
+
 	std::unique_ptr<ParticleEmitter> emit_;
-	std::unique_ptr<ParticleEmitter> moveLimitEmitter_ = nullptr;
 };
 

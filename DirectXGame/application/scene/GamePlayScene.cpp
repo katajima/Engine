@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "DirectXGame/engine/Math/Random.h"
 
 #pragma region Initialize
 
@@ -37,17 +38,15 @@ void GamePlayScene::Initialize()
 	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
 	enemyManager_->SetPlayer(player_.get());
 
-	enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, { 0,0,0 });
+	for (int i = 0; i < 10; i++) {
 
-	for (int i = 0; i < 5; i++) {
-		auto enemy = std::make_unique<Enemy>();
-		Vector3 randPos = { float(rand() % 41 - 20),2,float(rand() % 40) };
-		randPos += Vector3{ 10000,0,10000 };
-		enemy->Initialize(GetEntity3DManager(), GetEntity2DManager(), randPos, 100, camera.get());
-		enemy->SetPlayer(player_.get());
-		enemys_.push_back(std::move(enemy));
+		Vector3 rand = Random::RandomVector3(-100,100);
+		rand.y = 2;
+		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, rand);
 	}
 
+	
+	
 	
 	
 
@@ -101,15 +100,6 @@ void GamePlayScene::InitializeResources()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 	ParticleManager* particleManager = GetEntity3DManager()->GetEffectManager()->GetParticleManager();
 
-
-	for (int j = 0; j < 3; j++) {
-		for (int i = 0; i < 10; i++) {
-			numSprites[j][i] = std::make_unique<Sprite>();
-			std::string str = "resources/Texture/num/" + std::to_string(i) + ".png";
-			numSprites[j][i]->Initialize(GetEntity2DManager()->GetSpriteCommon(), str, false);
-			//numSprites[j][i]->SetPosition(Vector2{ float(50 * i), 100 });
-		}
-	}
 
 	float xpos = 1050;
 	Vector2 scale{ 75,75 };
@@ -178,21 +168,35 @@ void GamePlayScene::InitializeResources()
 	text_over->SetColor({ 1,0,0,1 });
 
 
-	const char* gropName = "sprite";
 
-	// グループを追加する 
-	GetGlobalVariables()->CreateGroup(gropName);
+	
 
-	for (int j = 0; j < 3; j++) {
-		std::string str = "posNum" + std::to_string(j);
-		GetGlobalVariables()->AddItem(gropName, str, numpos[j]);
-	}
+
+	
+
+
 
 	xpos = { 950 };
 
 	numpos[2] = { xpos,100 };
 	numpos[1] = { xpos + (50 * 1),100 };
 	numpos[0] = { xpos + (50 * 2),100 };
+
+
+
+
+	for (int i = 0; i < 3; i++) {
+		auto sprite = std::make_unique<Sprite>();
+
+		sprite->Initialize(GetEntity2DManager()->GetSpriteCommon(), "resources/Texture/num/Number_x64y96.png", false);
+		sprite->SetTextureSize({ 64,96 });
+		sprite->SetSize({ 64 * 2 / 3, 96 * 2 /3 });
+
+		sprite->SetPosition(numpos[i]);
+
+		sprite_.push_back(std::move(sprite));
+	}
+
 
 	emit_ = std::make_unique<ParticleEmitter>();
 	emit_->Initialize(particleManager,"groundRtttight", "dustt");
@@ -206,22 +210,6 @@ void GamePlayScene::InitializeResources()
 	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 	emit_->SetRengeMinMax({-400,-100,-400}, { 400,100,400 });
 
-	
-
-	moveLimitEmitter_ = std::make_unique <ParticleEmitter>();
-	moveLimitEmitter_->Initialize(particleManager,"dash", "moveLimit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
-	moveLimitEmitter_->GetFrequency() = 0.5f;
-	moveLimitEmitter_->SetCount(100);
-	moveLimitEmitter_->SetLifeTimeMinMax(0.5f, 0.5f);
-	//moveLimitEmitter_->SetIsAlpha(true);
-	//moveLimitEmitter_->SetIsEmit(false);
-	moveLimitEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
-	moveLimitEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
-	moveLimitEmitter_->SetSizeMinMax(Vector3{ 1.1f,1.1f,1.1f }, { 1.1f,1.1f,1.1f });
-	moveLimitEmitter_->SetVelocityMinMax({}, {});
-	moveLimitEmitter_->SetPos({ 0,10,0 });
-	moveLimitEmitter_->SetCorner(4, 300);
-	moveLimitEmitter_->transform_.rotate_.y = DegreesToRadians(45);
 
 
 
@@ -332,23 +320,6 @@ void GamePlayScene::LoadLevelData()
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables()
 {
-	const char* gropName = "sprite";
-
-
-	// グループを追加する 
-	GetGlobalVariables()->CreateGroup(gropName);
-	for (int j = 0; j < 3; j++) {
-		std::string str = "posNum" + std::to_string(j);
-
-		//numpos[j] = GetGlobalVariables()->GetVector2Value(gropName, str);
-
-	}
-
-	for (int j = 0; j < 3; j++) {
-		for (int i = 0; i < 10; i++) {
-			numSprites[j][i]->SetPosition(numpos[j]);
-		}
-	}
 
 }
 
@@ -367,9 +338,8 @@ void GamePlayScene::CheckAllCollisions()
 		collisionManager_->AddCollider(bullet.get());
 	}
 
-	//// 敵全てについて
-	for (const std::unique_ptr<Enemy>& enemy : enemys_) {
-		collisionManager_->AddCollider(enemy.get());
+	for (auto enemy : enemyManager_->GetEnemys()) {
+		collisionManager_->AddCollider(enemy);
 	}
 
 	// 衝突判定
@@ -475,7 +445,7 @@ void GamePlayScene::Update()
 	// プレイヤー
 	//if (player_->GetAlive()) {
 		player_->Update();
-		player_->LockOn(enemys_);
+		player_->LockOn(enemyManager_->GetEnemys());
 	//}
 	
 		
@@ -535,15 +505,6 @@ void GamePlayScene::BehaviorPhase1Initialize()
 
 void GamePlayScene::BehaviorPhase1Update()
 {
-	// 敵
-	count = 0;
-	for (int i = 0; i < enemys_.size(); i++) {
-		enemys_[i]->Update();
-		if (!enemys_[i]->GetAlive()) {
-			count++;
-		}
-	}
-
 
 	enemyManager_->Update();
 
@@ -583,11 +544,7 @@ void GamePlayScene::Draw3D()
 	// プレイヤー
 	player_->Draw();
 
-	// 敵
-	for (int i = 0; i < enemys_.size(); i++) {
-		enemys_[i]->Draw();
-	}
-
+	
 	enemyManager_->Draw();
 
 	// パーティクル
@@ -609,8 +566,8 @@ void GamePlayScene::Draw3D()
 // 2D描画
 void GamePlayScene::Draw2D()
 {
-	
-	
+
+
 	//////////////--------スプライト-----------///////////////////
 	int adsbhads = player_->GetHitCount();
 	if (adsbhads >= 999) {
@@ -619,16 +576,19 @@ void GamePlayScene::Draw2D()
 
 	int numDigits = (adsbhads == 0) ? 1 : static_cast<int>(log10(adsbhads)) + 1;
 
-	for (int j = 0; j < numDigits; ++j) {
-		// j桁目の数字を取り出す（右から左へ）
-		int digit = (static_cast<int>(adsbhads) / static_cast<int>(pow(10, j))) % 10;
 
-		// 桁に対応する数字を描画
-		numSprites[j][digit]->SetPosition(numpos[j]);
-		numSprites[j][digit]->Update();
-		numSprites[j][digit]->Draw();
+	Vector2 texSize = { 64, 96 };
+
+	for (int i = 0; i < sprite_.size(); i++) {
+		int digit = (static_cast<int>(adsbhads) / static_cast<int>(pow(10, i))) % 10;
+		sprite_[i]->SetTextureLeftTop(Vector2((texSize.x * digit), 0));
+
+
+		sprite_[i]->Update();
+		sprite_[i]->Draw();
 	}
 
+	
 
 	icon_B->Update();
 	icon_Y->Update();
@@ -651,37 +611,39 @@ void GamePlayScene::Draw2D()
 	text_dash->Draw();
 	text_hit->Draw();
 
-	for (int i = 0; i < enemys_.size(); i++) {
 	
-		enemys_[i]->Draw2D();
-	}
-
 	enemyManager_->Draw2D();
 
 
 	player_->Draw2D();
 
-	if (!player_->GetAlive()) {
-		sceneCount++;
-		if (clock == 1) {
-			text_over->Update();
-			text_over->Draw();
-		}
-	}
-	else if (count >= enemys_.size()) {
-		sceneCount++;
-		if (clock == 1) {
-			text_clera->Update();
-			text_clera->Draw();
-		}
-	}
-	if (sceneCount % 15 == 0) {
-		clock *= -1;
-	}
 
-	if (sceneCount >= 240) {
-		GetSceneManager()->ChangeScene("TITLE");
-	}
+	
+
+
+
+
+	//if (!player_->GetAlive()) {
+	//	sceneCount++;
+	//	if (clock == 1) {
+	//		//text_over->Update();
+	//		//text_over->Draw();
+	//	}
+	//}
+	//else if (count >= enemys_.size()) {
+	//	sceneCount++;
+	//	if (clock == 1) {
+	//		//text_clera->Update();
+	//		//text_clera->Draw();
+	//	}
+	//}
+	//if (sceneCount % 15 == 0) {
+	//	clock *= -1;
+	//}
+
+	//if (sceneCount >= 240) {
+	//	//GetSceneManager()->ChangeScene("TITLE");
+	//}
 
 
 

@@ -1,5 +1,5 @@
 #include "PlayerBullet.h"
-#include "DirectXGame/application/base/Enemy/Enemy.h"
+#include "DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
 #include "Player.h"
 
 void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position, Camera* camera)
@@ -189,7 +189,7 @@ void PlayerBullet::Update()
 			count += MyGame::GameTime();
 			if (count >= max_count)
 			{
-				Vector3 pos = enemy_->GetObject3D().GetWorldPosition() - object_.GetWorldPosition();
+				Vector3 pos = enemy_->GetObject3D()->GetWorldPosition() - object_.GetWorldPosition();
 
 				Vector3 pos2 = pos;
 
@@ -198,9 +198,9 @@ void PlayerBullet::Update()
 
 				object_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
 
-				if (5 >= DistanceXZ(object_.GetWorldPosition(), enemy_->GetObject3D().GetWorldPosition())) {
+				if (5 >= DistanceXZ(object_.GetWorldPosition(), enemy_->GetObject3D()->GetWorldPosition())) {
 					phase_++;
-					posGround = enemy_->GetObject3D().GetWorldPosition();
+					posGround = enemy_->GetObject3D()->GetWorldPosition();
 					tragetPos = posGround - object_.GetWorldPosition();
 					count = 0;
 				}
@@ -269,7 +269,7 @@ void PlayerBullet::OnCollision(Collider* other)
 	uint32_t typeID = other->GetTypeID();
 	// 衝突相手が敵なら
 	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-		Enemy* enemy = static_cast<Enemy*>(other);
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
 		uint32_t serialNumber = enemy->GetSerialNumber();
 
 
@@ -284,7 +284,7 @@ void PlayerBullet::OnCollision(Collider* other)
 
 		if (enemy->GetAlive()) {
 
-			enemy->AddDamege(30);
+			enemy->AddDamage(30);
 
 			enemy->SetHit();
 

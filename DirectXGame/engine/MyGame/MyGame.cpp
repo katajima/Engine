@@ -123,6 +123,7 @@ void MyGame::InitializeResource()
 		std::string label = "resources/Texture/num/" + std::to_string(i) + ".png";
 		textureManager->LoadTexture(label);
 	}
+	textureManager->LoadTexture("resources/Texture/num/Number_x64y96.png");
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");

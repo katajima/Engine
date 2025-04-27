@@ -5,6 +5,9 @@
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 
+#include "DirectXGame/engine/Effect/Particle/ParticleEmitter.h"
+#include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
+
 
 class Player;
 class Entity3DManager;
@@ -42,8 +45,8 @@ public:
 	virtual void SetPlayer(Player* player) = 0;
 
 public:
-
-
+	// パーティクル発生
+	virtual void Emit() = 0;
 	// 生存判定
 	bool GetAlive() const { return isAlive_; }
 	// ダメージ
@@ -63,17 +66,26 @@ public:
 		hitStopTimer = time;
 		kHitStopTimer = time;
 	};
+	// ヒットした
+	void SetHit() { hit = true; };
+
+	// シリアルナンバー
+	uint32_t GetSerialNumber() const { return serialNumber; }
+
+	Object3d* GetObject3D() { return object_.get(); }
 
 protected:
 	// 時間
 	float Timer() const;
-
+	// シェイク
 	void Shake();
-
+	// ヒットストップ時間
 	void HitStpoTime();
-
-	// 
+	// ヒットモーション
 	void HitMotion();
+	// スプライト初期化
+	void Initialize2D();
+
 
 public: // コライダー関係
 	// 衝突を検出したら呼び出されるコールバック関数
@@ -115,7 +127,7 @@ protected:
 	static uint32_t nextSerialNumber;
 	ContactRecord contactRecord_;
 
-protected:
+protected: //2D
 	std::unique_ptr<Sprite> icon_lockOn;
 	std::unique_ptr<Sprite> hpBer_;
 	std::unique_ptr<Sprite> backHpBer_;

@@ -220,7 +220,7 @@ private: // 攻撃関係
 
 public:
 
-	void LockOn(std::vector <std::unique_ptr< Enemy >>& enemys);
+	void LockOn(const std::vector<BaseEnemy*>& enemys);
 
 	const int MaxLockOn = 10;
 	bool isLockOn = false;
@@ -301,7 +301,7 @@ private:
 
 	Input* input_;
 
-	std::vector<Enemy*> lockedOnEnemies;
+	std::vector<BaseEnemy*> lockedOnEnemies;
 private:  // パラメータ
 	
 	uint32_t maxHp = 100;

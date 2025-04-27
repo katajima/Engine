@@ -1,7 +1,5 @@
 #include"Player.h"
 
-#include"DirectXGame/application/base/Enemy/Enemy.h"
-
 void Player::BehaviorRootInitialize()
 {
 	effect_->GetDashEmitter()->SetIsEmit(false);

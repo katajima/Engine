@@ -47,8 +47,16 @@ public:
 
 	// 生成
 	void GenerateEnemy(EnemyType type, Vector3 position);
+
+	std::vector<BaseEnemy*> GetEnemys() {
+		std::vector<BaseEnemy*> result;
+		for (auto& enemy : enemys_) {
+			result.push_back(enemy.get());
+		}
+		return result;
+	}
 private:
-	std::list<std::unique_ptr<BaseEnemy>> enemys_;
+	std::vector<std::unique_ptr<BaseEnemy>> enemys_;
 
 
 private:

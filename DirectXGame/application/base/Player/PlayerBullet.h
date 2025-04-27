@@ -17,7 +17,7 @@
 
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
 
-class Enemy;
+class BaseEnemy;
 
 class Player;
 
@@ -44,7 +44,7 @@ public:
 
 	void SetTergetPos(const Vector3& pos) { terget = pos; }
 
-	void SetEnemy(Enemy* enemy) { enemy_ = enemy; };
+	void SetEnemy(BaseEnemy* enemy) { enemy_ = enemy; };
 
 	// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision([[maybe_unused]] Collider* other) override;
@@ -90,7 +90,7 @@ private:
 	// 速度
 	Vector3 velocity_ = {};
 
-	Enemy* enemy_ = nullptr;
+	BaseEnemy* enemy_ = nullptr;
 
 	int phase_= 0;
 

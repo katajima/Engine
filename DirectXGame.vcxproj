@@ -109,7 +109,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Enemy\Enemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Base\EnemyManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp" />
@@ -122,6 +121,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Player\playerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\UI\PlayerUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\BaseUI.cpp" />
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
@@ -511,7 +511,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackManager.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.h" />
-    <ClInclude Include="DirectXGame\application\base\Enemy\Enemy.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Base\EnemyManager.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
@@ -522,6 +521,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Player\playerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Player\UI\PlayerUI.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\Stage.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\BaseUI.h" />
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
