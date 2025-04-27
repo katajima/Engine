@@ -122,6 +122,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Player\UI\PlayerUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\BaseUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp" />
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
@@ -522,6 +523,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Player\UI\PlayerUI.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\Stage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\BaseUI.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\GameUI.h" />
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
