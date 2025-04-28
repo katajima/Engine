@@ -110,7 +110,9 @@ Vector4 Transforms(const Vector4& vec, const Matrix4x4& mat);
 // 
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 
-
+static Matrix4x4 Identity() {
+    return Matrix4x4{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
+}
 //移動行列
 Matrix4x4 MakeTranslateMatrix(const  Vector3& translate);
 //拡大縮小行列

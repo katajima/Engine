@@ -1,5 +1,5 @@
 #include "playerWeapon.h"
-#include "DirectXGame/application/base/Enemy/Enemy.h"
+#include "DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
 #include "Player.h"
 
 void playerWeapon::Initialize(Entity3DManager* entity3DManager,Camera* camera)
@@ -31,7 +31,7 @@ void playerWeapon::OnCollision(Collider* other)
 	uint32_t typeID = other->GetTypeID();
 	// 衝突相手が敵なら
 	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-		Enemy* enemy = static_cast<Enemy*>(other);
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
 		uint32_t serialNumber = enemy->GetSerialNumber();
 		
 
@@ -44,8 +44,10 @@ void playerWeapon::OnCollision(Collider* other)
 		if (player_->GetAttackType() == Player::AttackType::kJamp && player_->GetObject3D().GetWorldPosition().y <= 2) {
 
 			contactRecord_.AddHistory(serialNumber);
+
 			if (enemy->GetAlive()) {
-				enemy->AddDamege(10);
+
+				enemy->AddDamage(10);
 
 				enemy->SetHit();
 
@@ -64,7 +66,7 @@ void playerWeapon::OnCollision(Collider* other)
 			contactRecord_.AddHistory(serialNumber);
 
 			if (enemy->GetAlive()) {
-				enemy->AddDamege(10);
+				enemy->AddDamage(10);
 
 				enemy->SetHit();
 				enemy->Emit();

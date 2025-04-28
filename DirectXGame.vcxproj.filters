@@ -174,9 +174,6 @@
     <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Enemy\Enemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -195,7 +192,7 @@
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\base\RenderingCommon.cpp">
+    <ClCompile Include="DirectXGame\engine\Offscreen\RenderingCommon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManeger.cpp">
@@ -372,13 +369,46 @@
     <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\ShapeType\ShapePlane.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Player\Effect\PlayerEffect.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Player\UI\PlayerUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Enemy\Base\EnemyManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\BaseUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="resources\shaders\Particle\Particle.hlsli" />
     <None Include="resources\shaders\Line\Line.hlsli" />
     <None Include="resources\shaders\Object2D\Object2D.hlsli" />
-    <None Include="resources\shaders\CopyImage\CopyImage.hlsli" />
+    <None Include="resources\shaders\Offscreen\Fullscreen.hlsli" />
     <None Include="resources\shaders\Octagrams\Octagrams.hlsli" />
     <None Include="resources\shaders\Ocean\Ocean.hlsli" />
     <None Include="resources\shaders\Thunder\Thunder.hlsli" />
@@ -387,6 +417,7 @@
     <None Include="resources\shaders\Trail\Trail.hlsli" />
     <None Include="resources\shaders\SkyBox\SkyBox.hlsli" />
     <None Include="resources\shaders\Object3D\Object3dInstans.hlsli" />
+    <None Include="resources\shaders\Offscreen\Smoothing.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl" />
@@ -395,8 +426,8 @@
     <FxCompile Include="resources\shaders\Line\Line.VS.hlsl" />
     <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
     <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
-    <FxCompile Include="resources\shaders\CopyImage\CopyImage.PS.hlsl" />
-    <FxCompile Include="resources\shaders\CopyImage\CopyImage.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
     <FxCompile Include="resources\shaders\Octagrams\Octagrams.PS.hlsl" />
     <FxCompile Include="resources\shaders\Octagrams\Octagrams.VS.hlsl" />
     <FxCompile Include="resources\shaders\Ocean\Ocean.PS.hlsl" />
@@ -415,6 +446,18 @@
     <FxCompile Include="resources\shaders\Skining\Skinning.CS.hlsl" />
     <FxCompile Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl" />
     <FxCompile Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\GrayScale.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Sepia.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Vignette.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Smoothing.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Gaussian.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Outline.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\Bloom.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -534,9 +577,6 @@
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Enemy\Enemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -564,7 +604,7 @@
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\base\RenderingCommon.h">
+    <ClInclude Include="DirectXGame\engine\Offscreen\RenderingCommon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManeger.h">
@@ -763,6 +803,45 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\VertexDeta.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeType\BaseShape.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeType\ShapePlane.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Player\Effect\PlayerEffect.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Player\UI\PlayerUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\Stage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Enemy\Base\EnemyManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\BaseUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\GameUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

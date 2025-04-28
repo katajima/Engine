@@ -1,11 +1,12 @@
 #pragma once
 
 #include <d3d12.h>
+#include <unordered_map>
 
 class Command;
 class SwapChain;
 class RenderTexture;
-
+class DepthStencil;
 class Barrier
 {
 public:
@@ -13,23 +14,19 @@ public:
 	~Barrier() = default;
 
 	// 
-	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture);
+	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture, DepthStencil* depthStencil);
 
+public:
 
-	void Pre();
+	void TransitionResource(ID3D12Resource* res,D3D12_RESOURCE_STATES before,D3D12_RESOURCE_STATES after);
 
-	void Post();
-
-
-private:
-	void TransitionResourceState(ID3D12Resource* resource, D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState);
 private:
 
 	Command* command_;
 	SwapChain* swapChain_;
 	RenderTexture* renderTexture_;
+	DepthStencil* depthStencil_;
 private:
-	D3D12_RESOURCE_BARRIER swapChainBarrier_;
 
 };
 

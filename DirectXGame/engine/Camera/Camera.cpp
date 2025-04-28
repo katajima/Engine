@@ -164,7 +164,7 @@ void Camera::UpdateMatrix() {
 	// カメラデータの更新
 	Vector3 cameraFront(viewMatrix_.m[0][2], viewMatrix_.m[1][2], viewMatrix_.m[2][2]);
 	data->normal = Normalize(cameraFront); // 必要なら正規化
-	data->worldPosition = transform_.translate;
+	data->worldPosition = worldMatrix_.GetWorldPosition();
 }
 
 

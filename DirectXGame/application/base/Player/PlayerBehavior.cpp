@@ -1,13 +1,11 @@
 #include"Player.h"
 
-#include"DirectXGame/application/base/Enemy/Enemy.h"
-
 void Player::BehaviorRootInitialize()
 {
-	dashEmitter_->SetIsEmit(false);
+	effect_->GetDashEmitter()->SetIsEmit(false);
 	workAttack.parameter = 0;
 	
-	flag33 = false;
+	effect_->SetIsTrail(false);
 }
 
 void Player::BehaviorRootUpdate()
@@ -45,7 +43,7 @@ void Player::BehaviorAttackInitialize()
 	workAttack.comboIndex = 0;
 	
 
-	dashEmitter_->SetIsEmit(false);
+	effect_->GetDashEmitter()->SetIsEmit(false);
 	AttackTypes();
 
 	AttackTypeInit(workAttack.comboIndex);
@@ -74,7 +72,7 @@ void Player::BehaviorAttackUpdate()
 
 void Player::BehaviorDieInitialize()
 {
-	dashEmitter_->SetIsEmit(false);
+	effect_->GetDashEmitter()->SetIsEmit(false);
 	specialAttack.phese = 0;
 	specialAttack.specialGauge = 0;
 }
@@ -85,7 +83,9 @@ void Player::BehaviorDieUpdate()
 	AttackKey();
 	int i = 0;
 	int time = 0;
-	isTextRB_ = false;
+
+	ui_->SetIsTextRB(false);
+
 	switch (specialAttack.phese)
 	{
 	case 0:
@@ -100,8 +100,7 @@ void Player::BehaviorDieUpdate()
 			}
 		}
 		index_b = 0;
-		isTextRB_ = true;
-
+		ui_->SetIsTextRB(true);
 		break;
 	case 1:
 		// 弾を発射
@@ -122,6 +121,7 @@ void Player::BehaviorDieUpdate()
 
 					bullet->Initialize(entity3DManager_,injectionLeftObj_.GetWorldPosition(), camera_);
 					injectionLeftObj_.worldtransform_.translate_.y -= 0.5f;
+					//mEmitter_->Update();
 				}
 				else {
 					followCamera_->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
@@ -133,6 +133,8 @@ void Player::BehaviorDieUpdate()
 				//bullet->SetParent(objectBase_.worldtransform_);
 				
 				
+			
+
 
 				playerBullet_.push_back(std::move(bullet));
 

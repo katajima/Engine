@@ -44,6 +44,10 @@ public: // メンバ関数
 	const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix_; }
 	const Vector3& GetRotate() const { return transform_.rotate; }
 	const Vector3& GetTranslate() const { return transform_.translate; }
+	const float& GetNearZ() const { return nearClip_; }
+	const float& GetFarZ() const { return farClip_; }
+
+
 
 	void SetShake(float time,Vector3 diectionRange);
 private:
@@ -62,7 +66,7 @@ public:
 	float fovY_ = 0.45f;
 	float aspect_ = float(1280) / float(720);
 	float nearClip_ = 0.1f;
-	float farClip_ = 100.0f;
+	float farClip_ = 10000.0f;
 public:
 	Transform transform_;
 	Matrix4x4 worldMatrix_;
@@ -74,6 +78,7 @@ public:
 		Vector3 worldPosition;
 		float padding[1];
 		Vector3 normal;
+		float padding2[1];
 	};
 	DataGPU* data;
 private:

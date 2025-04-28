@@ -145,6 +145,10 @@ private:
 
 	std::unique_ptr<Object3d> playerObject;
 	std::unique_ptr<Object3d> goalObject;
+	std::unique_ptr<Object3d> taleObject;
+
+	std::unique_ptr<Primitive> primitiveObject;
+	std::unique_ptr<Primitive> primitivePlaneObject;
 
 
 	// オーシャンシェーダー
@@ -173,6 +177,8 @@ private:
 
 	std::unique_ptr<ParticleEmitter> primitvPlane_  =nullptr;
 
+	std::unique_ptr<ParticleEmitter> primitvPlaneSmoke_  =nullptr;
+	float clipping_ = 0.25f;
 
 
 	/// <summary>

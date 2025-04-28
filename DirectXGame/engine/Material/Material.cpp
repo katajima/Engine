@@ -46,12 +46,7 @@ void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int spec
 	}
 }
 
-void Material::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister)
-{
-	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;   // CBVを使う　// b0のbと一致する
-	parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; //PixelShaderで使う
-	parameter.Descriptor.ShaderRegister = ShaderRegister;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
-}
+
 
 void Material::GPUData()
 {
@@ -66,6 +61,8 @@ void Material::GPUData()
 	if (useSpeculerMap_) {
 		data_->useSpeculerMap = useSpeculerMap_;
 	}
+
+	data_->alphaClipping = alphaClipping_;
 
 	data_->color = color;
 	
@@ -106,5 +103,4 @@ void Material::LoadTex()
 
 		tex_.speculerIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.speculerFilePath);
 	}
-
 }

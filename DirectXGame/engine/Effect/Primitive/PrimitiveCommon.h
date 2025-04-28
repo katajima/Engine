@@ -15,10 +15,17 @@ class DirectXCommon;
 class PrimitiveCommon
 {
 public:
-	
+	enum class PsoType {
+		kDefalt,
+		kRingClamp,
+		kNoCull,
+		kNoCullRingClamp,
+		kNoCullWireFrame,
+	};
+
 	void Initialize(DirectXCommon* dxcommon);
 
-	void DrawCommonSetting();
+	void DrawCommonSetting(PsoType type = PsoType::kDefalt);
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 private:
@@ -32,11 +39,22 @@ private:
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-	//ルートシグネチャデスク
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
-	//ルートシグネチャ
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-	// グラフィックスパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
+	struct PrimitivePSO
+	{
+		//ルートシグネチャ
+		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
+		// グラフィックスパイプラインステート
+		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
+	};
+	PrimitivePSO defalt_;
+	PrimitivePSO defaltRing_;
+	PrimitivePSO noCull_;
+	PrimitivePSO noCullRing_;
+	PrimitivePSO noCullWireFrame_;
+
+public:
+
+
+
 };
 

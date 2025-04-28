@@ -17,16 +17,37 @@ class DXGIDevice;
 class Command;
 class SrvManager;
 class RtvManager;
-
+class RenderingCommon;
+class Camera;
 class RenderTexture
 {
 public:
+	enum class PostEffectType {
+		kCopy,			// コピー
+		kGrayScale,		// グレースケール
+		kSepia,			// セピア
+		kVignette,      // ビネット
+		kSmoothing,     // スムージング
+		kGaussian,      // ガウス
+		kOitline,		// アウトライン
+		kRadialBlur,	// ラジアルブラー
+		kDissovle,      // ディゾルブ
+		kRandom,		// ランダム
+		kBloom,			// ブルーム
+		kBloomCombin,	// 合成ブルーム
+	};
+
 	RenderTexture() = default;
 	~RenderTexture() = default;
 
-	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager);
+	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommonm,const std::string name);
 
-	void Draw();
+	void Update();
+
+	void Draw(RenderTexture* renderTexture = nullptr);
+
+	void SetCamera(Camera* camera) {camera_ = camera;}
+
 
 	// クリアカラーを取得
 	Vector4 GetClearColor()const;
@@ -34,13 +55,31 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHandle();
 	// リソースを取得
 	ID3D12Resource* GetResource();
+
+	// SRVGPUハンドル取得
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
+	// SRVCPUハンドル取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
+
 private:
 	// レンダーテクスチャのリソースを作成
 	void CreateResource();
+	// 
+	// レンダーテクスチャのリソースを作成
+	void CreateResourcePixel();
+
+
+
+
+
+
 	// RTVを作成
 	void CreateRTV();
 	// SRVを作成
 	void CreateSRV();
+
+
+	void UpdateImgui();
 
 private:
 	HRESULT hr_ = S_FALSE;
@@ -51,13 +90,19 @@ private:
 	// SRVインデックス
 	uint32_t srvIndex_ = 0;
 	// クリアカラー(赤)
-	const Vector4 clearColor_ = { 0.1f,0.0f,0.0f,1.0f };
-	
+	const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
+
+	std::string name_;
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;
 	SrvManager* srvManager_;
 	RtvManager* rtvManager_;
+	RenderingCommon* renderingCommon_;
+	Camera* camera_;
+public:
+	PostEffectType type_;
+
 
 };
 

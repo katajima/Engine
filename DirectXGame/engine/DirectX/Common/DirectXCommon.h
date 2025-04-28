@@ -30,7 +30,7 @@
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
-#include "DirectXGame/engine/base/RenderingCommon.h"
+#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include"DirectXGame/engine/base/ImGuiManager.h"
 
 
@@ -44,6 +44,8 @@
 #include "DirectXGame/engine/PSO/PSOManager.h"
 
 
+class Entity3DManager;
+class SceneManager;
 class DirectXCommon
 {
 public: // メンバ関数
@@ -51,22 +53,44 @@ public: // メンバ関数
 	// 初期化
 	void Intialize(WinApp* winApp);
 
-	// 描画前処理
-	void PreDrawOffscreen();
-	// 描画後処理
-	void PostDrawOffscreen();
 
-
-	// 描画前処理
-	void PreDrawSwap();
-	// 描画後処理
-	void PostDrawSwap();
 
 	//終了処理
 	void Finalize();
 
-private:
+	void Update(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
+	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+
+	RenderTexture* GetFinalRenderTexture() { return finalRenderTexture_; };
+
+private:
+	// レンダーテクスチャ描画前処理
+	void PreDraw(RenderTexture* renderTexture);
+	// レンダーテクスチャ描画後処理
+	void PostDraw(RenderTexture* renderTexture);
+	// 
+	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder, RenderTexture* renderTexturePixelSheder2 = nullptr);
+
+	void SetFinalRenderTexture(RenderTexture* renderTex) { finalRenderTexture_ = renderTex; };
+
+private:
+	// レンダーターゲット用描画前処理
+	void PreDrawOffscreen();
+	// レンダーターゲット用描画後処理
+	void PostDrawOffscreen();
+	// シーンの画面を書き出す
+	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+private:
+	// スワップチェーン用描画前処理
+	void PreDrawSwap();
+	// スワップチェーン用描画後処理
+	void PostDrawSwap();
+	// スワップチェーンにレンダーターゲットを渡す
+	void PassSwap(RenderTexture* renderTexture);
+private:
+	// 3D2D描画
+	void Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
 	//FPS固定初期化
 	void InitializeFixFPS();
@@ -87,13 +111,11 @@ public:
 
 	UavManager* GetUavManager() { return uavManager_.get(); }
 
-	RenderTexture* GetRenderTexture() { return renderTexture_.get(); }
+	//RenderTexture* GetRenderTexture() { return renderTextures_[0].get(); }
 
 	TextureManager* GetTextureManager() { return textureManager_.get(); }
 
 	ModelManager* GetModelManager() { return modelManager_.get(); }
-
-	PSOManager* GetPSOManager() { return psoManager_.get(); }
 
 	DXGIDevice* GetDXGIDevice() { return DXGIDevice_.get(); }
 
@@ -105,25 +127,26 @@ public:
 
 	RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
 
-private:
-	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			 // デバイス
-	std::unique_ptr<Command> command_ = std::make_unique<Command>();					 // コマンド
-	std::unique_ptr<ScissorRect> scissorRect_ = std::make_unique<ScissorRect>();		 // シザー
-	std::unique_ptr<ViewPort> viewPort_ = std::make_unique<ViewPort>();					 // ビューポート
-	std::unique_ptr<Fence> fence_ = std::make_unique<Fence>();							 // フェンス
-	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();		 // コンパイル
-	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();				 // スワップチェーン 
-	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();			 // RTVマネージャー 
-	std::unique_ptr<UavManager> uavManager_ = std::make_unique<UavManager>();			 // UAVマネージャー 
-	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();			 // SRVマネージャー 
-	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			 // DRVマネージャー 
-	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		 // デプスステンシル 
-	std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					 // バリア 
-	std::unique_ptr<RenderTexture> renderTexture_ = std::make_unique<RenderTexture>();	 // レンダーテクスチャ 
-	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();// テクスチャマネージャー 
-	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		 // モデルマネージャー
-	std::unique_ptr<PSOManager> psoManager_ = std::make_unique<PSOManager>();		     // PSOマネージャー
+	DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
 
+	Barrier* GetBarrier() { return barrier_.get(); }
+private:
+	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス
+	std::unique_ptr<Command> command_ = std::make_unique<Command>();					     // コマンド
+	std::unique_ptr<ScissorRect> scissorRect_ = std::make_unique<ScissorRect>();		     // シザー
+	std::unique_ptr<ViewPort> viewPort_ = std::make_unique<ViewPort>();					     // ビューポート
+	std::unique_ptr<Fence> fence_ = std::make_unique<Fence>();							     // フェンス
+	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();		     // コンパイル
+	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();				     // スワップチェーン 
+	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();			     // RTVマネージャー 
+	std::unique_ptr<UavManager> uavManager_ = std::make_unique<UavManager>();			     // UAVマネージャー 
+	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();			     // SRVマネージャー 
+	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
+	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
+	std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					     // バリア 
+	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;							 // レンダーテクスチャ 
+	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
+	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
 
 
@@ -132,15 +155,10 @@ private:
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
+
+	RenderTexture* finalRenderTexture_;
 public:
 
-public:
-	////------CompileShader------////
-	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
-		//CompileShaderするShaderファイルへのパス
-		const std::wstring& filePach,
-		//CompileShaderに使用するProfile
-		const wchar_t* profile);
 
 };
 

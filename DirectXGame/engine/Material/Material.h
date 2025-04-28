@@ -22,7 +22,6 @@ public:
 
 	void GetCommandListTexture(int indexDiffuse, int normalIndex = 0,int speculerIndex = 0);
 
-	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister);
 
 	void GPUData();
 	void LoadTex();
@@ -30,13 +29,13 @@ public:
 	Transform transform;
 	Color color;
 
-	int32_t enableLighting_ = true;
-	float shininess_;
+	int32_t enableLighting_ = false;
+	float shininess_ = 64.0f;
 	int32_t useLig_ = false;
 	
 	int32_t useNormalMap_;
 	int32_t useSpeculerMap_;
-
+	float alphaClipping_ = 0.5f;
 	struct Tex {
 		std::string diffuseFilePath;
 		std::string normalFilePath;
@@ -55,7 +54,8 @@ private:
 	{
 		Color color;
 		int32_t enableLighting;
-		float padding[3];
+		float alphaClipping = 0.5f;
+		float padding[2];
 		Matrix4x4 uvTransform;
 		float shininess;
 		int32_t useLig;

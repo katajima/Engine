@@ -17,9 +17,16 @@
 class LightManager
 {
 public:
+	struct IsLight {
+		bool dire;
+		bool pount;
+		bool spot;
+	};
+
+
 	void Initialize(DirectXCommon* dxCommon);
 
-	void DrawLight();
+	void DrawLight(IsLight is = {true,true,true }, int dire = 3, int point = 5, int spot = 6);
 
 	void Update();
 

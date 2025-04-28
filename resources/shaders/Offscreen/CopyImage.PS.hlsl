@@ -1,4 +1,4 @@
-#include "CopyImage.hlsli"
+#include "Fullscreen.hlsli"
 
 
 Texture2D<float4> gTexture : register(t0);
@@ -15,5 +15,6 @@ PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
     output.color = gTexture.Sample(gSampler, input.texcoord);
+    output.color.a = 1.0f;
 	return output;
 }

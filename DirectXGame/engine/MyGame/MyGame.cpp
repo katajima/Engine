@@ -1,5 +1,7 @@
 #include "MyGame.h"
 
+#include "DirectXGame/engine/Camera/Camera.h"
+
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
 float MyGame::hitStopTimer = 0.0f;
@@ -21,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	sceneManager_->ChangeScene("TEST");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -56,81 +58,43 @@ void MyGame::Update()
 #ifdef _DEBUG
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-	lastTime = currentTime;
-
+	
 	if (deltaTime > 0) {
 		fps = 1.0f / deltaTime;
 	}
+	lastTime = currentTime;
 
 	// FPS表示用ウィジェット
 	ImGui::Begin("engine");
 	ImGui::Text("FPS: %.2f", fps);
 	ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
 	ImGui::End();
-
 #endif // _DEBUG
 
 	// グローバル変数の更新
 	globalVariables_->Update();
 
-	// ライト
-	entity3DManager_->GetLightManager()->Update(); 
+	dxCommon->Update(sceneManager_.get(), entity3DManager_.get());
 
-	sceneManager_->Update();
-
-	entity3DManager_->GetEffectManager()->GetParticleManager()->Update();
 
 #ifdef _DEBUG
-	entity3DManager_->Get3DLineCommon()->Update();
-#endif // _DEBUG
+	ImGui::Begin("scene");
+	float width = static_cast<float> (WinApp::GetClientWidth() / 2);
+	float height = static_cast<float> (WinApp::GetClientHeight() / 2);
 
+	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetFinalRenderTexture()->GetSRVGPUHandle().ptr);
+	ImGui::Image(imguiTexture, ImVec2(width, height));
+	ImGui::End();
+#endif // _DEBUG
 	// ImGuiの受付終了
 	dxCommon->GetImGuiManager()->End();
 }
 
 void MyGame::Draw()
 {
-	///
-	// 描画前処理
-	dxCommon->GetSrvManager()->PreDraw();
-	//dxCommon->GetUavManager()->PreDraw();
-
-	// バックバッファの準備
-	dxCommon->PreDrawSwap();
-	
-
-	////// オフスクリーン描画
-	//dxCommon->PreDrawOffscreen(); // オフスクリーンのRTV設定
-	
-	
-	
-
-	
-
-	// 3Dオブジェクトの描画
-	sceneManager_->Draw3D();
-	
-	// パーティクル描画
-	entity3DManager_->GetEffectManager()->GetParticleManager()->Draw();
-
-#ifdef _DEBUG
-	if (!sceneManager_->IsNowScene("GAMEPLAY")) {
-		// デバッグ用のライン描画
-		entity3DManager_->Get3DLineCommon()->Draw();
-	}
-#endif // _DEBUG
-
-	// 2Dオブジェクトの描画
-	sceneManager_->Draw2D();
-
-	dxCommon->GetRenderTexture()->Draw();
-
-	// ImGuiの描画
-	dxCommon->GetImGuiManager()->Draw();
-
-	// 描画後処理
-	dxCommon->PostDrawSwap();
+	dxCommon->Draw(sceneManager_.get(),entity3DManager_.get());
 }
+
 
 
 void MyGame::InitializeResource()
@@ -159,6 +123,7 @@ void MyGame::InitializeResource()
 		std::string label = "resources/Texture/num/" + std::to_string(i) + ".png";
 		textureManager->LoadTexture(label);
 	}
+	textureManager->LoadTexture("resources/Texture/num/Number_x64y96.png");
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
@@ -169,6 +134,12 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/rostock_laage_airport_4k.dds");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
 	textureManager->LoadTexture("resources/Texture/circle2.png");
+	textureManager->LoadTexture("resources/Texture/gradationLine.png");
+
+	// 煙
+	textureManager->LoadTexture("resources/Texture/smoke/no1.png");
+	textureManager->LoadTexture("resources/Texture/smoke/no2.png");
+	textureManager->LoadTexture("resources/Texture/smoke/no3.png");
 
 
 	modelManager->LoadModelAmime("multiMaterial.gltf", "multiMaterial");
@@ -215,9 +186,10 @@ void MyGame::InitializeResource()
 	/// <summary>
 	/// 地形
 	/// </summary>
-	modelManager->LoadModel("renga.gltf", "renga", { 10,10 });
+	modelManager->LoadModel("renga.gltf", "renga");
 	modelManager->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
 	modelManager->LoadModel("black.obj", "terrain/black", { 10,10 });
+	modelManager->LoadModel("terrain.obj", "terrain/terrain");
 	modelManager->LoadModelAmime("stair.obj");
 
 
@@ -248,23 +220,28 @@ void MyGame::InitializeResource()
 	/// </summary>
 
 	primi = std::make_unique<Primitive>();
-	primi->Initialize(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Torus, "resources/Texture/uvChecker.png");
+	ShapeParameter::Torus t;
+	primi->Initialize<ShapeParameter::Torus>(entity3DManager_->GetPrimitiveCommon(),
+		Primitive::ShapeType::Torus, 
+		t, 
+		"resources/Texture/uvChecker.png");
 
 	primiTrai = std::make_unique<Primitive>();
-	primiTrai->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Triangle, "resources/Texture/Image.png");
+	ShapeParameter::ShapeTriangle t2;
+	primiTrai->Initialize<ShapeParameter::ShapeTriangle>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Triangle, t2,"resources/Texture/Image.png");
 
 	primiPlane = std::make_unique<Primitive>();
-	primiPlane->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Plane, "resources/Texture/uvChecker.png");
+	ShapeParameter::ShapePlane shapePlane;
+	primiPlane->Initialize<ShapeParameter::ShapePlane>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
 
-	primiStar = std::make_unique<Primitive>();
-	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Star, "resources/Texture/Image.png");
+
 	ShapeParameter::Star star;
-	star.innerRadius_ = 1.0f;
-	star.outerRadius_ = 7.0f;
-	star.segments_ = 4;
-	primiStar->SetStar(star);
-	primiStar->SetName("star");
-	primiStar->Update();
+	star.innerRadius = 1.0f;
+	star.outerRadius = 7.0f;
+	star.segments = 4;
+	primiStar = std::make_unique<Primitive>();
+	primiStar->Initialize<ShapeParameter::Star>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Star, star, "resources/Texture/Image.png");
+	
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, ParticleManager::BlendType::MODE_ADD);
@@ -282,6 +259,24 @@ void MyGame::InitializeResource()
 
 	particleManager->CreateParticleGroup("dashEmit", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("moveLimit", "resources/Texture/Image.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	
+	// 煙
+	particleManager->CreateParticleGroup("smokePlane01", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane02", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane03", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane04", "resources/Texture/smoke/no4.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane01_1", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane02_1", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane03_1", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane01_2", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane02_2", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("smokePlane03_2", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+
+	//
+	particleManager->CreateParticleGroup("hitEffect", "resources/Texture/effect.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("hitEffect2", "resources/Texture/effect2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("hitEffect3", "resources/Texture/effect3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+
 
 	// 敵関係
 	particleManager->CreateParticleGroup("hitStar", "resources/Texture/Image.png", primiStar.get());
@@ -300,6 +295,8 @@ void MyGame::InitializeResource()
 	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 }
+
+
 
 
 

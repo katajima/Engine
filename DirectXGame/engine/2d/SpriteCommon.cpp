@@ -6,7 +6,8 @@ void SpriteCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
-	psoManager_ = dxCommon_->GetPSOManager();
+	psoManager_ = std::make_unique<PSOManager>();
+	psoManager_->Initialize(dxCommon_->GetCommand(),dxCommon_->GetDXGIDevice(),dxCommon_->GetDXCCompiler());
 	
 	CreateGraphicsPipeline();
 }

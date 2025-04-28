@@ -1,6 +1,7 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Vector3.h"
+#include "DirectXGame/engine/struct/VertexDeta.h"
 
 #include"map"
 #include"optional"
@@ -127,9 +128,22 @@ struct SkinCluster {
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> paletteSrvHandle;
 
 	
+	/// <summary>
+	/// 
+	/// </summary>
 	Microsoft::WRL::ComPtr < ID3D12Resource> inputVertexResource;
-	//std::span<VertexData> mappedinputVertex;
+	D3D12_VERTEX_BUFFER_VIEW  inputVertexBufferView;
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> inputVertexSrvHandle;
+
+	
+	/// <summary>
+	/// 
+	/// </summary>
+	Microsoft::WRL::ComPtr < ID3D12Resource> outputVertexResource;
+	D3D12_VERTEX_BUFFER_VIEW outputBufferView;
+	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> outputVertexUavHandle;
+
+
 };
 
 

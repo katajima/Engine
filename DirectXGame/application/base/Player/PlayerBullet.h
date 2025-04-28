@@ -17,7 +17,7 @@
 
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
 
-class Enemy;
+class BaseEnemy;
 
 class Player;
 
@@ -44,7 +44,7 @@ public:
 
 	void SetTergetPos(const Vector3& pos) { terget = pos; }
 
-	void SetEnemy(Enemy* enemy) { enemy_ = enemy; };
+	void SetEnemy(BaseEnemy* enemy) { enemy_ = enemy; };
 
 	// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision([[maybe_unused]] Collider* other) override;
@@ -61,14 +61,22 @@ public:
 
 	void SetParent(WorldTransform parent) { object_.worldtransform_.parent_ = &parent; };
 
+
+
 private:
 	const Camera* camera_ = nullptr;
 	Player* player_;
 	
 	// ミサイル煙エミッター
 	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter_ = nullptr;
-	
+	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter2_ = nullptr;
+
+
 	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter_ = nullptr;
+	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter2_ = nullptr;
+	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter3_ = nullptr;
+	
+
 
 	std::string strin;
 	std::string strin2;
@@ -82,7 +90,7 @@ private:
 	// 速度
 	Vector3 velocity_ = {};
 
-	Enemy* enemy_ = nullptr;
+	BaseEnemy* enemy_ = nullptr;
 
 	int phase_= 0;
 
@@ -107,9 +115,7 @@ private:
 	int index_ = 0;
 
 
-	//std::unique_ptr<TrailEffect> trailEffect_;
-	Object3d objectStr_;
-	Object3d objectEnd_;
+
 
 	int countTrail = 0;
 };

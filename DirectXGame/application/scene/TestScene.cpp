@@ -84,8 +84,7 @@ void TestScene::Update()
 
 #endif // _DEBUG
 
-	camera->UpdateMatrix();
-
+	
 
 	if (behaviorRequest_) {
 
@@ -164,25 +163,34 @@ void TestScene::Update()
 	default:
 		break;
 	}
+	taleObject->Update();
 	tail.Update();
+
+
+	camera->UpdateMatrix();
 }
 
 void TestScene::Draw3D()
 {
+	
 	switch (behavior_)
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		ocean_->Draw();
 		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
+
+		//primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
+		//primitiveObject->Draw(Primitive::PsoType::kRingClamp);
+
+		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		//ocean_->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-
-		multiy.Draw();
+		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		taleObject->Draw();
+		//multiy.Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -241,8 +249,8 @@ void TestScene::Draw2D()
 
 
 
-		primitive2d1_->Update();
-		primitive2d1_->Draw();
+		//primitive2d1_->Update();
+		//primitive2d1_->Draw();
 
 
 
@@ -318,6 +326,11 @@ void TestScene::InitializeObject3D()
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
 
+	taleObject = std::make_unique<Object3d>();
+	taleObject->Initialize(GetEntity3DManager());
+	taleObject->SetModel("terrain.obj");
+	taleObject->SetCamera(camera.get());
+	taleObject->worldtransform_.scale_ = 10.0f;
 
 	tri2d.vertices[0] = { 10,0, };
 	tri2d.vertices[1] = { 10,10, };
@@ -341,6 +354,7 @@ void TestScene::InitializeObject3D()
 	goalObject->worldtransform_.scale_ = 3;
 
 	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(camera.get());
+	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
 
 
 	for (int i = 0; i < map->GetWidth(); i++) {
@@ -362,6 +376,20 @@ void TestScene::InitializeObject3D()
 	}
 
 
+	primitiveObject = std::make_unique<Primitive>();
+	primitivePlaneObject = std::make_unique<Primitive>();
+	
+	ShapeParameter::ShapeSphere sph;
+	primitiveObject->Initialize<ShapeParameter::ShapeSphere>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, sph, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
+	primitiveObject->SetCamera(camera.get());
+	primitiveObject->transform.translate.y = 100;
+	primitiveObject->transform.rotate.y = DegreesToRadians(180);
+	
+	ShapeParameter::Torus toru;
+	primitivePlaneObject->Initialize<ShapeParameter::Torus>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Torus, toru , "resources/Texture/gradationLine.png",{1,1,1,1},"Plane");
+	primitivePlaneObject->SetCamera(camera.get());
+	primitivePlaneObject->transform.translate.y = 80;
+	//primitivePlaneObject->transform.rotate.y = DegreesToRadians(180);
 }
 
 /// <summary>
@@ -458,6 +486,29 @@ void TestScene::InitializeParticle()
 	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,2.5f,0.1f }, { 0.1f ,5.0f,0.1f });
 
 
+	primitvPlaneSmoke_ = std::make_unique<ParticleEmitter>();
+	primitvPlaneSmoke_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"smokePlane01", "smokePlane01", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlaneSmoke_->GetFrequency() = 0.025f;
+	primitvPlaneSmoke_->SetCount(3);
+	primitvPlaneSmoke_->SetPos({ 0,50,0 });
+	primitvPlaneSmoke_->SetVelocityMinMax({ 0,0,0 }, { 0, 10, 0 });
+	primitvPlaneSmoke_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//primitvPlaneSmoke_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	primitvPlaneSmoke_->SetLifeTimeMinMax(1, 3);
+	//primitvPlaneSmoke_->SetIsGravity(true);
+	primitvPlaneSmoke_->SetUsebillboard(false);
+	primitvPlaneSmoke_->SetEnableLighting(false);
+	primitvPlaneSmoke_->SetIsAlpha(true);
+	primitvPlaneSmoke_->SetIsLifeTimeScale(true);
+	primitvPlaneSmoke_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+
+	primitvPlaneSmoke_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
+	primitvPlaneSmoke_->SetIsRotateVelocity(true);
+	primitvPlaneSmoke_->SetAlphaClipping(0.25f);
+	//primitvPlaneSmoke_->SetIsBounce(true);
+	primitvPlaneSmoke_->SetSizeMinMax(Vector3{ 5.0f,5.0f,1.0f }, { 5.0f ,5.0f,1.0f });
+	primitvPlaneSmoke_->SetUvTransformVeloctiy({{0.0f,0,0},{},{0.0f,0.0f,0}});
+
 
 }
 
@@ -479,7 +530,7 @@ void TestScene::InitializeLight()
 
 	point->point = pointLightData;
 
-	GetEntity3DManager()->GetLightManager()->AddLight(point);
+	//GetEntity3DManager()->GetLightManager()->AddLight(point);
 
 	SpotLightData spotLightData;
 
@@ -492,10 +543,11 @@ void TestScene::InitializeLight()
 	spot = std::make_shared<SpotLight>();
 
 	spot->spot = spotLightData;
-	GetEntity3DManager()->GetLightManager()->AddLight(spot);
+	//GetEntity3DManager()->GetLightManager()->AddLight(spot);
 
 	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 
+	SetCamera(camera.get());
 	
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
@@ -521,6 +573,10 @@ void TestScene::InitializeCamera()
 	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };
+	//camera->SetNearClip();
+	camera->SetFarClip(10000.0f);
+
+
 
 	debugCamera = std::make_unique<DebugCamera>();
 	debugCamera->Initialize(GetEntity3DManager()->GetCameraCommon());
@@ -692,13 +748,26 @@ void TestScene::UpdateRoom01()
 	GetEntity3DManager()->GetSkyBoxCommon()->Update();
 
 
-	primitvPlane_->Update();
+#ifdef _DEBUG
+
+	//ImGui::Begin("Primitive");
+	//ImGui::DragFloat3("translate",&primitiveObject->transform.translate.x,0.1f);
+	//ImGui::DragFloat3("rotate",&primitiveObject->transform.rotate.x,0.1f);
+	//ImGui::DragFloat3("scale",&primitiveObject->transform.scale.x,0.1f);
+	//ImGui::End();
+#endif // _DEBUG
+
+	//primitiveObject->Update();
+
+	//primitivePlaneObject->Update();
+	//primitvPlane_->Update();
 }
 
 void TestScene::UpdateRoom02()
 {
-	GetSceneManager()->ChangeScene("GAMEPLAY");
-
+	if (input_->IsTriggerKey(DIK_P)) {
+		GetSceneManager()->ChangeScene("GAMEPLAY");
+	}
 
 	emitter_->Update();
 	emitterEnemy_->Update();
@@ -706,24 +775,39 @@ void TestScene::UpdateRoom02()
 
 void TestScene::UpdateRoom03()
 {
-	multiy.Update();
+	primitvPlaneSmoke_->Update();
+	//taleObject->Update();
+	//multiy.Update();
 }
 
 void TestScene::UpdateRoom04()
 {
+	ImGui::Begin("papapa");
+	if(ImGui::Button("true")) {
+		primitvPlaneSmoke_->SetEnableLighting(true);
+	}
+	if(ImGui::Button("false")) {
+		primitvPlaneSmoke_->SetEnableLighting(false);
+	}
+	ImGui::DragFloat("clipping", &clipping_,0.01f);
+	primitvPlaneSmoke_->SetAlphaClipping(clipping_);
+	ImGui::End();
+	primitvPlaneSmoke_->Update();
+
+
 	skinningObject.UpdateSkinning();
 	skinningObject2.UpdateSkinning();
 
 	triCen;
 
-	Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
+	/*Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
 	Vector3 b = { tri2d.vertices[1].x, 5 ,tri2d.vertices[1].y };
 	Vector3 c = { tri2d.vertices[2].x, 5 ,tri2d.vertices[2].y };
 
 
 	GetEntity3DManager()->Get3DLineCommon()->AddLine(a, b, { 1,1,1,1 });
 	GetEntity3DManager()->Get3DLineCommon()->AddLine(b, c, { 1,1,1,1 });
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(c, a, { 1,1,1,1 });
+	GetEntity3DManager()->Get3DLineCommon()->AddLine(c, a, { 1,1,1,1 });*/
 
 
 	CornerSegment corner;// = { sphere2d.center }

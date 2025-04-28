@@ -9,20 +9,21 @@
 #include <list>
 
 
-#include"BasePlayerState.h"
 
-#include"playerWeapon.h"
 
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-
 #include "DirectXGame/engine/collider/3d/Collider.h"
-#include "PlayerBullet.h"
-
 #include "DirectXGame/engine/effect/Trail/TrailEffect.h"
-
-
 #include "DirectXGame/engine/MyGame/MyGame.h"
+
+// プレイヤー
+#include"BasePlayerState.h"
+#include"playerWeapon.h"
+#include "PlayerBullet.h"
+#include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
+#include "DirectXGame/application/base/Player/UI/PlayerUI.h"
+
 
 ///< summary>
 /// 自キャラ
@@ -219,19 +220,21 @@ private: // 攻撃関係
 
 public:
 
-	void LockOn(std::vector <std::unique_ptr< Enemy >>& enemys);
+	void LockOn(const std::vector<BaseEnemy*>& enemys);
 
 	const int MaxLockOn = 10;
 	bool isLockOn = false;
 
 
 private: // 移動
-	 
+	// 移動処理
 	void Move();
-
+	// 重力
 	void Gravity();
-
+	// 移動加算
 	void AddMove();
+	// 移動制限
+	void LimitMove();
 
 	float graVelo;
 
@@ -248,8 +251,7 @@ public:
 	std::string strin;
 
 	Object3d& GetObject3D() { return objectBase_; }
-	//Object3d& GetObjectWeapon3D() { return ; }
-
+	
 	// dxCommon
 	void SetDxCommon(DirectXCommon* dxcommon) {dxCommon_ = dxcommon;}
 
@@ -298,7 +300,7 @@ private:
 
 	Input* input_;
 
-	std::vector<Enemy*> lockedOnEnemies;
+	std::vector<BaseEnemy*> lockedOnEnemies;
 private:  // パラメータ
 	
 	uint32_t maxHp = 100;
@@ -333,8 +335,7 @@ private:
 
 	std::unique_ptr<playerWeapon> weapon_;
 	
-	Object3d weaponStr;
-	Object3d weaponEnd;
+	
 
 
 	std::list<std::unique_ptr<PlayerBullet>> playerBullet_;
@@ -346,39 +347,30 @@ private:
 	
 	// スプライト
 
-	std::unique_ptr<Sprite> HpBer_;
-	std::unique_ptr<Sprite> SpecailBer_;
-	std::unique_ptr<Sprite> textMax_;
-	std::unique_ptr<Sprite> textRB_;
-	bool isTextRB_ = false;
+	
+
+	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
 
 
-
+	// 移動関連
 
 	// 速度
 	Vector3 velocity_ = {};
 	
 	float moveLimit = 200;
-	
-	// 浮遊ギミック媒介変数
-	float floatingParameter_ = 0.0f;
-	float attackParameter_;
 
-	
 	float speed;
 
 	
 
 
-	// エフェクト
+	// エフェクト 
+	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
 
-	std::unique_ptr<TrailEffect> trailEffect_;
-	bool flag33;
+	std::unique_ptr<ParticleEmitter> mEmitter_ = nullptr;
+	std::unique_ptr<ParticleEmitter> mEmitter2_ = nullptr;
 
-
-	std::unique_ptr<ParticleEmitter> dashEmitter_ = nullptr;
-
-
+	ContactRecord contactRecord_;
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;

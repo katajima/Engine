@@ -1,5 +1,5 @@
 #include "Player.h"
-#include"DirectXGame/application/base/Enemy/Enemy.h"
+#include"DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/FollowCamera/FollowCamera.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
@@ -31,9 +31,6 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	objectReticle_.SetModel("enemy.obj");
 	objectReticle_.worldtransform_.parent_ = &objectBase_.worldtransform_;
 	objectReticle_.worldtransform_.translate_ = { 0,0,30 };
-
-	//assert(objectBody_ != nullptr);
-	//assert(objectBase_ != nullptr);
 
 	// 体
 	objectBody_.Initialize(entity3DManager);
@@ -84,76 +81,44 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	weapon_->SetPlayer(this);
 	
 
-	weaponStr.Initialize(entity3DManager);
-	weaponStr.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
-	weaponStr.worldtransform_.translate_ = {0,weapon_->GetObject3D().GetMesh(0)->GetMax().y ,0};
-		
-
-	weaponEnd.Initialize(entity3DManager);
-	weaponEnd.worldtransform_.parent_ = &weapon_->GetObject3D().worldtransform_;
-	weaponEnd.worldtransform_.translate_ = { 0,weapon_->GetObject3D().GetMesh(0)->GetMin().y ,0 };
-	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
 
 
-	HpBer_ = std::make_unique<Sprite>();
-	HpBer_->Initialize(entity2DManager->GetSpriteCommon() ,"resources/Texture/Image.png");
-	HpBer_->SetSize({ 50,-float(hp) });
-	HpBer_->SetColor({ 0,1,0,1 });
-	HpBer_->SetPosition({ 100,650 });
+	// UI
+	ui_->Initialize(entity2DManager);
 
-	SpecailBer_ = std::make_unique<Sprite>();
-	SpecailBer_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/Image.png");
-	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) });
-	SpecailBer_->SetColor({ 0,0,1,1 });
-	SpecailBer_->SetPosition({ 40,650 });
-
-	textMax_ = std::make_unique<Sprite>();
-	textMax_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/text/max.png");
-	textMax_->SetColor({ 1,0,0,1 });
-	textMax_->SetPosition({ 45,350 });
-	textMax_->SetRotation(DegreesToRadians(-30));
-	textMax_->SetAnchorPoint({0.5f,0.5f});
-	textMax_->SetSize(0.25f);
-
-	textRB_ = std::make_unique<Sprite>();
-	textRB_->Initialize(entity2DManager->GetSpriteCommon(),"resources/Texture/icon/RB.png");
-	textRB_->SetColor({ 1,1,1,1 });
-	textRB_->SetPosition({ 1280 /2,550 });
-	textRB_->SetAnchorPoint({0.5f,0.5f});
-	textRB_->SetSize(0.02f);
-
-
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), "resources/Texture/uvChecker.png",0.2f, Color{1,0,0,0.5f});
-	trailEffect_->SetCamera(camera);
-	trailEffect_->SetObject(&weapon_->GetObject3D());
 	
-	flag33 = false;
+	/// エフェクト関係
+	effect_->Initialize(dxCommon_, entity3DManager_, entity2DManager, camera_);
+	// トレイルエフェクト
+	effect_->GetTrailEffect()->SetObject(&weapon_->GetObject3D());
+	effect_->SetTrailEffectParent(&weapon_->GetObject3D());
+	effect_->SetTrailParent(&weapon_->GetObject3D());
+	// ダッシュ用エフェクト
+	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
 
 
-
-	dashEmitter_ = std::make_unique <ParticleEmitter>();
-	dashEmitter_->Initialize(particleManager,"dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
-	dashEmitter_->SetParent(weapon_->GetObject3D().worldtransform_);
-	dashEmitter_->GetFrequency() = 0.05f;
-	dashEmitter_->SetCount(5);
-	dashEmitter_->SetLifeTimeMinMax(0.1f, 0.1f);
-	dashEmitter_->SetIsAlpha(true);
-	dashEmitter_->SetIsEmit(false);
-	dashEmitter_->SetColorMinMax({ 0.7f,0.7f,0.7f,0.9f }, { 0.7f,0.7f,0.7f,0.9f });
-	dashEmitter_->SetRengeMinMax({ -1.25f,-1.25f ,-1.25f }, { 1.25f,1.25f,1.25f });
-	dashEmitter_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	dashEmitter_->SetVelocityMinMax({},{});
-	dashEmitter_->SetPos({0,7,0});
-	dashEmitter_->SetCorner(16,0.5f);
-	dashEmitter_->transform_.rotate_.x = DegreesToRadians(90);
-
+	mEmitter_ = std::make_unique <ParticleEmitter>();
+	mEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "hitEffect3", "hitEffect3", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	mEmitter_->GetFrequency() = 0.05f;
+	mEmitter_->SetCount(1);
+	mEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
+	mEmitter_->SetIsAlpha(true);
+	mEmitter_->SetAlphaClipping(0.23f);
+	mEmitter_->SetIsLifeTimeScale(true);
+	mEmitter_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	mEmitter_->SetUsebillboard(false);
+	mEmitter_->SetEnableLighting(false);
+	mEmitter_->SetParent(injectionLeftObj_.worldtransform_);
+	mEmitter_->SetColorMinMax({ 1,0,0,1.0f }, { 1,0,0,1.0f });
+	mEmitter_->SetSizeMinMax(Vector3{ 2.0f,2.0f,2.0f }, { 2.0f,2.0f,2.0f });
+	mEmitter_->SetVelocityMinMax({}, {});
+	mEmitter_->SetRotateMinMax(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
 }
 
 void Player::Update()
 {
-	dashEmitter_->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
-	trailEffect_->Update(flag33, weaponStr, weaponEnd);
+	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
+	
 
 	if (isAlive) {
 		if (behaviorRequest_) {
@@ -214,18 +179,7 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
-		objectBase_.worldtransform_.translate_.x = moveLimit;
-	}
-	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
-	}
-	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
-	}
-	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
-	}
+
 
 	if (hp <= 0) {
 		isAlive = false;
@@ -252,29 +206,21 @@ void Player::Update()
 	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
 	
-	Vector3 str =weaponStr.GetWorldPosition();
-	ImGui::InputFloat3("str", &str.x);
-	str =weaponStr.GetPreWorldPosition();
-	ImGui::InputFloat3("strpre", &str.x);
 
-
-	Vector3 end = weaponEnd.GetWorldPosition();
-	ImGui::InputFloat3("end", &end.x);
-	end = weaponEnd.GetPreWorldPosition();
-	ImGui::InputFloat3("endpre", &end.x);
-
-	ImGui::Checkbox("frag", &flag33);
-	int ii = (int)trailEffect_->mesh->vertices.size();
-	ImGui::InputInt("vertice", &ii);
 	
 	
 	ImGui::End();
 #endif // _DEBUG
 
-
+	// 重力
 	Gravity();
-	
-	dashEmitter_->Update();
+	// 移動制限
+	LimitMove();
+
+	// エフェクト
+	effect_->Update();
+	//
+
 
 	objectBase_.Update();
 	objectBody_.Update();
@@ -283,8 +229,7 @@ void Player::Update()
 	injectionLeftObj_.Update();
 	injectionRightObj_.Update();
 
-	weaponStr.Update();
-	weaponEnd.Update();
+	
 
 	objectReticle_.Update();
 	objectSha_.Update();
@@ -296,6 +241,8 @@ void Player::Update()
 	playerBullet_.remove_if([](const std::unique_ptr<PlayerBullet>& bullet) { return !bullet->GetAlive(); });
 }
 
+#pragma region Draw
+
 void Player::Draw()
 {
 	if (isAlive) {
@@ -305,7 +252,7 @@ void Player::Draw()
 			break;
 		case Behavior::kAttack: // 攻撃行動更新
 			weapon_->Draw();
-			
+
 			break;
 		case Behavior::kJump:
 			break;
@@ -319,7 +266,7 @@ void Player::Draw()
 		objectBody_.Draw();
 		objectSha_.Draw();
 	}
-	
+
 	for (const auto& bullet : playerBullet_) {
 		bullet->Draw();
 	}
@@ -328,7 +275,7 @@ void Player::Draw()
 void Player::DrawP()
 {
 
-	trailEffect_->Draw();
+	effect_->Draw();
 	for (const auto& bullet : playerBullet_) {
 		bullet->DrawP();
 	}
@@ -336,45 +283,20 @@ void Player::DrawP()
 
 void Player::Draw2D()
 {
+	ui_->SetHPBerSize(static_cast<float>(hp));
+	ui_->SetIsTextmax(specialAttack.isSpecial);
+	ui_->SetIsTextRB(specialAttack.isSpecial);
+	ui_->SetSpecialGaugeSize(static_cast<float>(specialAttack.specialGauge));
 
-	HpBer_->SetPosition({ 100,650 });
-	HpBer_->SetSize({ 50,-float(hp) * 2 });
-	HpBer_->Update();
-	HpBer_->Draw();
-
-	SpecailBer_->SetSize({ 50,-float(specialAttack.specialGauge) * 2 * 2.5f });
-	SpecailBer_->Update();
-	SpecailBer_->Draw();
-
-	if (specialAttack.isSpecial) {
-		
-		
-		textMax_->Update();
-		textMax_->Draw();
-	};
-
-	if (isTextRB_) {
-		textRB_->Update();
-		textRB_->Draw();
-	}
+	ui_->Draw();
 
 }
 
-void Player::OnCollision(Collider* other)
-{
-	// 衝突判定の種別IDを取得
-	uint32_t typeID = other->GetTypeID();
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-	}
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyWeapon)) {
-	}
-}
 
-Vector3 Player::GetCenterPosition() const
-{
-	return objectBase_.GetWorldPosition();
-}
+#pragma endregion //描画関係
 
+
+#pragma region Move
 
 void Player::Move()
 {
@@ -461,9 +383,9 @@ void Player::Move()
 		}
 	}
 	if (behavior_ == Behavior::kRoot || behavior_ == Behavior::kDie) {
-		
+
 	}
-	
+
 }
 
 void Player::Gravity() {
@@ -490,39 +412,83 @@ void Player::Gravity() {
 
 void Player::AddMove()
 {
-	if(isAlive)
-	objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
+	if (isAlive)
+		objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
 }
 
+void Player::LimitMove()
+{
+	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
+		objectBase_.worldtransform_.translate_.x = moveLimit;
+	}
+	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
+	}
+	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
+	}
+	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
+		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
+	}
+}
 
-void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
+#pragma endregion //移動関係
+
+
+#pragma region MyRegion
+
+void Player::OnCollision(Collider* other)
+{
+	// 衝突判定の種別IDを取得
+	uint32_t typeID = other->GetTypeID();
+	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
+		if (isAlive) {
+			if (!GetInvincible()) {
+				BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
+				uint32_t serialNumber = enemy->GetSerialNumber();
+
+				// 接触履歴があれば何もせず抜ける
+				if (contactRecord_.CheckHistory(serialNumber)) {
+					return;
+				}
+
+				contactRecord_.AddHistory(serialNumber);
+
+				
+				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
+
+			}
+		}
+	}
+	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyWeapon)) {
+	}
+}
+
+Vector3 Player::GetCenterPosition() const
+{
+	return objectBase_.GetWorldPosition();
+}
+
+void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {
 
 	if (behavior_ == Behavior::kDie) {
-		if (specialAttack.phese == 0)
-		{
-			// ロックオン処理のリセットと更新
+		if (specialAttack.phese == 0) {
 			lockedOnEnemies.clear();
 			int i = 0;
-			bool is = true;
 
-			/*while (true)
-			{
-
-			}*/
-			for (int j = 0; j < enemys.size(); j++) {	
+			for (int j = 0; j < enemys.size(); j++) {
 				if (i >= MaxLockOn) {
-					is = false;
-					//break; // 最大ロックオン数を超えた場合
+					break; // 最大ロックオン数を超えたら抜ける
 				}
-				
-				Vector2 posEne = enemys[j]->GetObject3D().GetScreenPosition();
+
+				Vector2 posEne = enemys[j]->GetObject3D()->GetScreenPosition();
 				Vector2 diff = Vector2{ 640,360 } - posEne;
 				float length = diff.Length();
 
-				if (length <= 300.0f && enemys[j]->GetAlive() && is) {
+				if (length <= 300.0f && enemys[j]->GetAlive()) {
 					enemys[j]->SetLockOn(true);
-					lockedOnEnemies.push_back(enemys[j].get());
+					lockedOnEnemies.push_back(enemys[j]);
 					i++;
 				}
 				else {
@@ -530,25 +496,17 @@ void Player::LockOn(std::vector<std::unique_ptr<Enemy>>& enemys)
 				}
 			}
 		}
-
 	}
 	else {
 		for (int j = 0; j < enemys.size(); j++) {
 			enemys[j]->SetLockOn(false);
 		}
-
 	}
 }
-
-
 
 void Player::ApplyGlobalVariables()
 {
 
 }
 
-
-
-
-
-
+#pragma endregion // そのほか

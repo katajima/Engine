@@ -15,9 +15,6 @@ public:
 	Vector3 rotate_ = {0,0,0};		// 回転
 	Vector3 translate_ = { 0,0,0 }; // 位置
 	
-	Vector3 o_scale_ = { 1,1,1 };		// 拡縮
-	Vector3 o_rotate_ = {0,0,0};		// 回転
-	Vector3 o_translate_ = { 0,0,0 }; // 位置
 	
 	
 
@@ -28,6 +25,12 @@ public:
 
 	// 親となるワールド変換へのポインタ
 	WorldTransform* parent_ = nullptr;
+
+
+private:
+	Vector3 o_scale_ = { 1,1,1 };		// 拡縮
+	Vector3 o_rotate_ = { 0,0,0 };		// 回転
+	Vector3 o_translate_ = { 0,0,0 }; // 位置
 
 private:
 

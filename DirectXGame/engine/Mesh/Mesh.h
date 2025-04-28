@@ -2,6 +2,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+#include "DirectXGame/engine/struct/VertexDeta.h"
 
 #include "vector"
 #include<wrl.h>
@@ -13,36 +14,10 @@ using namespace Microsoft::WRL;
 #include<dxgi1_6.h>
 #include "set"
 
-class ModelCommon;
+class DirectXCommon;
 class Mesh
 {
 public:	
-	struct SkyBoxVertexData {
-		Vector4 position;
-	};
-	struct VertexData {
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
-	};
-	struct LineVertexData {
-	Vector4 position;
-	Vector4 color;    // 色
-	};
-
-	
-
-
-	// カスタムハッシュ関数
-	struct VertexHash {
-		size_t operator()(const VertexData& vertex) const {
-			// 簡単なハッシュ関数（例として位置のみを使用）
-			return std::hash<float>()(vertex.position.x) ^
-				std::hash<float>()(vertex.position.y) ^
-				std::hash<float>()(vertex.position.z);
-		}
-	};
-
 	size_t operator()(const VertexData& vertex) const {
 		return std::hash<float>()(vertex.position.x) ^
 			std::hash<float>()(vertex.position.y) ^
@@ -51,14 +26,15 @@ public:
 			std::hash<float>()(vertex.texcoord.x);
 	}
 
+
 	// 通常用
-	void Initialize(ModelCommon* modelCommon);
+	void Initialize(DirectXCommon* dxcommon);
 	
 	// ライン用
-	void InitializeLine(ModelCommon* modelCommon);
+	void InitializeLine(DirectXCommon* dxcommon);
 
 	// スカイボックス用
-	void InitializeSkyBox(ModelCommon* modelCommon);
+	void InitializeSkyBox(DirectXCommon* dxcommon);
 
 	void UpdateVertexBuffer();
 
@@ -118,7 +94,9 @@ public:
 
 	MaterialData materialData_;
 private:
-	ModelCommon* modelCommon_ = nullptr;
+	//ModelCommon* modelCommon_ = nullptr;
+	DirectXCommon* dxCommon_;
+
 
 	// バッファリソース
 	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
