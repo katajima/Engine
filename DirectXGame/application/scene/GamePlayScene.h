@@ -1,9 +1,9 @@
 #pragma once
 #include"DirectXGame/engine/2d/SpriteCommon.h"
-#include "DirectXGame/engine/base/TextureManager.h"
-#include "DirectXGame/engine/input/Input.h"
-#include "DirectXGame/engine/audio/Audio.h"
-#include "DirectXGame/engine/3d/Model/ModelManager.h"
+#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/input/Input.h"
+#include"DirectXGame/engine/audio/Audio.h"
+#include"DirectXGame/engine/3d/Model/ModelManager.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
@@ -15,22 +15,17 @@
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/base/LevelData.h"
-
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
+#include"DirectXGame/engine/collider/3d/CollisionManager.h"
+#include"DirectXGame/engine/Light/LightCommon.h"
 
+// application
+#include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
 #include"DirectXGame/application/base/Player/Player.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
-
-#include "DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-
-#include "DirectXGame/engine/collider/3d/CollisionManager.h"
-
-#include"DirectXGame/engine/Light/LightCommon.h"
-#include "DirectXGame/application/base/Stage/Stage.h"
-#include "DirectXGame/application/base/UI/GameUI.h"
+#include"DirectXGame/application/base/Stage/Stage.h"
+#include"DirectXGame/application/base/UI/GameUI.h"
 
 
 // ゲームプレイシーン
@@ -49,10 +44,9 @@ public:
 	// 描画
 	void Draw3D() override;
 
-
-
-
 	void Draw2D() override;
+
+
 
 	void UpdateImGui();
 
@@ -66,20 +60,11 @@ public:
 	/// </summary>
 	void CheckAllCollisions();
 
-
-
 private:
 
 	void InitializeResources();
 	void InitializeCamera();
 
-	/// <summary>
-	//衝突判定と応答
-	/// </summary>
-	//void ChekAllCollisions();
-
-	
-	void PlaceObjectsOnCurve(const std::vector<Vector3>& controlPoints, float spacing);
 private:
 	// 振るまい
 	enum class Behavior {
@@ -121,7 +106,6 @@ private:
 	// 敵マネージャ
 	std::unique_ptr<EnemyManager> enemyManager_;
 
-	
 	// ステージ
 	std::unique_ptr<Stage> stage_;
 
@@ -140,10 +124,8 @@ private:
 	
 private:
 	
-
+	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = std::make_unique<GameUI>();
 
-	
-	std::unique_ptr<ParticleEmitter> emit_;
 };
 

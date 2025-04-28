@@ -13,7 +13,8 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
-
+#include"DirectXGame/engine/effect/Particle/ParticleManager.h"
+#include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 
 
 class DirectXCommon;
@@ -52,7 +53,9 @@ private:
 	// 建物オブジェクト位置
 	std::vector<Vector3> warePos;
 
+private:
 
+	std::unique_ptr<ParticleEmitter> emit_;
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;

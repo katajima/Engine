@@ -105,17 +105,7 @@ void GamePlayScene::InitializeResources()
 	gameUI->SetPlayer(player_.get());
 
 
-	emit_ = std::make_unique<ParticleEmitter>();
-	emit_->Initialize(particleManager,"groundRtttight", "dustt");
-	emit_->GetFrequency() = 0.5f;
-	emit_->SetCount(200);
-	emit_->SetPos({ 200,40,200 });
-	emit_->SetVelocityMinMax(-Vector3{0.2f,0.2f,0.2f }, { 0.2f, 0.2f, 0.2f });
-	emit_->SetLifeTimeMinMax(10.4f, 10.7f);
-	emit_->SetIsAlpha(true);
-	emit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.2f,0.2f,0.2f });
-	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
-	emit_->SetRengeMinMax({-400,-100,-400}, { 400,100,400 });
+
 
 
 
@@ -394,7 +384,6 @@ void GamePlayScene::Update()
 	collisionManager_->UpdateWorldTransform();
 
 
-	//player_->SetCamera(camera.get());
 	
 	// ステージ
 	stage_->Update();

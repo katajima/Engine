@@ -1,11 +1,16 @@
 #include "Stage.h"
 
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
 void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
 {
 	dxCommon_ =  dxcommon;
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+
+
 	// 空
 	sky_ = std::make_unique<Object3d>();
 	sky_->Initialize(entity3DManager_);
@@ -62,6 +67,20 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	ocean_->transform.translate.y = -10;
 	ocean_->material->color = { 0,0,0.57f,1 };
 	ocean_->material->color.a = 0.95f;
+
+
+
+	emit_ = std::make_unique<ParticleEmitter>();
+	emit_->Initialize(particleManager, "groundRtttight", "dustt");
+	emit_->GetFrequency() = 0.5f;
+	emit_->SetCount(200);
+	emit_->SetPos({ 200,40,200 });
+	emit_->SetVelocityMinMax(-Vector3{ 0.2f,0.2f,0.2f }, { 0.2f, 0.2f, 0.2f });
+	emit_->SetLifeTimeMinMax(10.4f, 10.7f);
+	emit_->SetIsAlpha(true);
+	emit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.2f,0.2f,0.2f });
+	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
+	emit_->SetRengeMinMax({ -400,-100,-400 }, { 400,100,400 });
 }
 
 void Stage::Update()
@@ -82,6 +101,9 @@ void Stage::Update()
 	// 海
 	ocean_->material->color.a = 0.75f;
 	ocean_->Update();
+
+
+	emit_->Update();
 }
 
 void Stage::Draw()

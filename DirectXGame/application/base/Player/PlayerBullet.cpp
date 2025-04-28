@@ -48,7 +48,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 	
 	ｍSmokeEmitter_ = std::make_unique <ParticleEmitter>();
 	ｍSmokeEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "smokePlane01", "smokePlane01", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
-	ｍSmokeEmitter_->GetFrequency() = 0.01f;
+	ｍSmokeEmitter_->GetFrequency() = 0.00f;
 	ｍSmokeEmitter_->SetCount(5);
 	ｍSmokeEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
 	ｍSmokeEmitter_->SetIsAlpha(true);
@@ -64,8 +64,8 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager,Vector3 position,
 	ｍSmokeEmitter_->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
 
 	ｍSmokeEmitter2_ = std::make_unique <ParticleEmitter>();
-	ｍSmokeEmitter2_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "smokePlane04", "smokePlane04", ParticleEmitter::EmitSpawnShapeType::kPoint);
-	ｍSmokeEmitter2_->GetFrequency() = 0.01f;
+	ｍSmokeEmitter2_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "smokePlane04", "smokePlane04", ParticleEmitter::EmitSpawnShapeType::kSegmentLine);
+	ｍSmokeEmitter2_->GetFrequency() = 0.00f;
 	ｍSmokeEmitter2_->SetCount(5);
 	ｍSmokeEmitter2_->SetLifeTimeMinMax(0.7f, 1.0f);
 	ｍSmokeEmitter2_->SetIsAlpha(true);

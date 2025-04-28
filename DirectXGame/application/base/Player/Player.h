@@ -251,8 +251,7 @@ public:
 	std::string strin;
 
 	Object3d& GetObject3D() { return objectBase_; }
-	//Object3d& GetObjectWeapon3D() { return ; }
-
+	
 	// dxCommon
 	void SetDxCommon(DirectXCommon* dxcommon) {dxCommon_ = dxcommon;}
 
