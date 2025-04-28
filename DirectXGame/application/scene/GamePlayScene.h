@@ -139,13 +139,11 @@ private:
 	int clock = 1;
 	
 private:
-	Vector2 numpos[3]{};
-
+	
 
 	std::unique_ptr<GameUI> gameUI = std::make_unique<GameUI>();
 
-	std::vector<std::unique_ptr<Sprite>> sprite_;
-
+	
 	std::unique_ptr<ParticleEmitter> emit_;
 };
 

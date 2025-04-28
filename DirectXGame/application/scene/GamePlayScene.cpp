@@ -105,31 +105,6 @@ void GamePlayScene::InitializeResources()
 	gameUI->SetPlayer(player_.get());
 
 
-	float xpos = 1050;
-	
-
-	xpos = { 950 };
-
-	numpos[2] = { xpos,100 };
-	numpos[1] = { xpos + (50 * 1),100 };
-	numpos[0] = { xpos + (50 * 2),100 };
-
-
-
-
-	for (int i = 0; i < 3; i++) {
-		auto sprite = std::make_unique<Sprite>();
-
-		sprite->Initialize(GetEntity2DManager()->GetSpriteCommon(), "resources/Texture/num/Number_x64y96.png", false);
-		sprite->SetTextureSize({ 64,96 });
-		sprite->SetSize({ 64 * 2 / 3, 96 * 2 /3 });
-
-		sprite->SetPosition(numpos[i]);
-
-		sprite_.push_back(std::move(sprite));
-	}
-
-
 	emit_ = std::make_unique<ParticleEmitter>();
 	emit_->Initialize(particleManager,"groundRtttight", "dustt");
 	emit_->GetFrequency() = 0.5f;
@@ -501,24 +476,7 @@ void GamePlayScene::Draw2D()
 
 
 	//////////////--------スプライト-----------///////////////////
-	int adsbhads = player_->GetHitCount();
-	if (adsbhads >= 999) {
-		adsbhads = 999;
-	}
-
-	int numDigits = (adsbhads == 0) ? 1 : static_cast<int>(log10(adsbhads)) + 1;
-
-
-	Vector2 texSize = { 64, 96 };
-
-	for (int i = 0; i < sprite_.size(); i++) {
-		int digit = (static_cast<int>(adsbhads) / static_cast<int>(pow(10, i))) % 10;
-		sprite_[i]->SetTextureLeftTop(Vector2((texSize.x * digit), 0));
-
-
-		sprite_[i]->Update();
-		sprite_[i]->Draw();
-	}
+	
 
 
 	// ゲームUI
