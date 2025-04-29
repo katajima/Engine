@@ -12,6 +12,18 @@ enum class CollisionTypeIdDef : uint32_t {
 	kEnemyWeapon2,
 };
 
+// 当たる対象選択
+struct IsCollisionType 
+{
+	int isDefault;
+	int isPlayer;
+	int isPlayerWeapon;
+	int isEnemy;
+	int isEnemyWeapon;
+	int isEnemyWeapon2;
+};
+
+
 enum class ColliderType
 {
 	Sphere,

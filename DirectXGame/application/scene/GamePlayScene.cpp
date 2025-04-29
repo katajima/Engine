@@ -57,10 +57,14 @@ void GamePlayScene::Initialize()
 
 
 
+	// 弾
+	bulletManager_ = std::make_unique<BulletManager>();
+	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
+	bulletManager_->SetPlayer(player_.get());
+
+	player_->SetBulletManager(bulletManager_.get());
 
 	
-
-
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables());
@@ -231,7 +235,7 @@ void GamePlayScene::CheckAllCollisions()
 		collisionManager_->AddCollider(player_->GetWeapon());
 	}
 
-	for (const auto& bullet : player_->GetBullets()) {
+	for (const auto& bullet : bulletManager_->GetBullets()) {
 		collisionManager_->AddCollider(bullet.get());
 	}
 
@@ -376,8 +380,8 @@ void GamePlayScene::Update()
 	
 
 
-
-	
+	// 弾マネージャ
+	bulletManager_->Update();
 	
 
 	// デバック表示用にワールドトランスフォームを更新
@@ -440,8 +444,10 @@ void GamePlayScene::Draw3D()
 	// プレイヤー
 	player_->Draw();
 
-	
 	enemyManager_->Draw();
+
+	bulletManager_->Draw();
+
 
 	// パーティクル
 	player_->DrawP();
@@ -473,6 +479,8 @@ void GamePlayScene::Draw2D()
 	
 	// 敵スプライト
 	enemyManager_->Draw2D();
+
+	bulletManager_->Draw2D();
 
 	// プレイヤースプライト
 	player_->Draw2D();

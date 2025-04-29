@@ -143,6 +143,10 @@ void NormalEnemy::Emit()
 	traiEmit_->Update();
 }
 
+void NormalEnemy::ATest()
+{
+}
+
 void NormalEnemy::Move()
 {
 	// 回転と移動量の設定

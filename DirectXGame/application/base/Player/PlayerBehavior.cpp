@@ -1,5 +1,7 @@
 #include"Player.h"
 
+#include "DirectXGame/application/base/Bullet/BulletManager.h"
+
 void Player::BehaviorRootInitialize()
 {
 	effect_->GetDashEmitter()->SetIsEmit(false);
@@ -114,30 +116,18 @@ void Player::BehaviorDieUpdate()
 			specialAttack.clock *= -1;
 			while (index_b < lockedOnEnemies.size())
 			{
-				auto bullet = std::make_unique<PlayerBullet>();
-				bullet->SetIndex(index_b);
 				if (specialAttack.clock == 1) {
 					followCamera_->GetViewProjection().SetShake(1.3f, {0.2f,0.2f,0.2f});
-
-					bullet->Initialize(entity3DManager_,injectionLeftObj_.GetWorldPosition(), camera_);
+					bulletManager_->GeneratBullet(BulletManager::BulletType::kPlayerMissile, injectionLeftObj_.GetWorldPosition(), lockedOnEnemies[index_b]);
 					injectionLeftObj_.worldtransform_.translate_.y -= 0.5f;
-					//mEmitter_->Update();
+					
 				}
 				else {
 					followCamera_->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
-					bullet->Initialize(entity3DManager_,injectionRightObj_.GetWorldPosition(), camera_);
+					bulletManager_->GeneratBullet(BulletManager::BulletType::kPlayerMissile, injectionRightObj_.GetWorldPosition(), lockedOnEnemies[index_b]);
 					injectionRightObj_.worldtransform_.translate_.y -= 0.5f;
 				}
-				bullet->SetEnemy(lockedOnEnemies[index_b]);
-				bullet->SetPlayer(this);
-				//bullet->SetParent(objectBase_.worldtransform_);
 				
-				
-			
-
-
-				playerBullet_.push_back(std::move(bullet));
-
 				
 
 				index_b++;
@@ -149,7 +139,7 @@ void Player::BehaviorDieUpdate()
 			
 		
 
-		if (lockedOnEnemies.size() <= playerBullet_.size())
+		if (lockedOnEnemies.size() <= bulletManager_->GetBullets().size())
 		{
 			specialAttack.phese = 2;
 		}

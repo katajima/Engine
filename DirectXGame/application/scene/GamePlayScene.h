@@ -26,6 +26,7 @@
 #include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
+#include"DirectXGame/application/base/Bullet/BulletManager.h"
 
 
 // ゲームプレイシーン
@@ -109,6 +110,8 @@ private:
 	// ステージ
 	std::unique_ptr<Stage> stage_;
 
+	// 弾
+	std::unique_ptr<BulletManager> bulletManager_;
 
 private:
 

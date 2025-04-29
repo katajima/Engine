@@ -20,7 +20,6 @@
 // プレイヤー
 #include"BasePlayerState.h"
 #include"playerWeapon.h"
-#include "PlayerBullet.h"
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
 
@@ -34,6 +33,8 @@ class FollowCamera;
 class DirectXCommon;
 class Entity3DManager;
 class Entity2DManager;
+class BulletManager;
+
 class Player : public Collider {
 public:
 
@@ -260,8 +261,6 @@ public:
 	
 	playerWeapon* GetWeapon() { return weapon_.get(); }
 
-	//void SetPlayer(Player* play) { weapon_->SetPlayer(this); }
-
 	Behavior GetBehavior() const { return behavior_; };
 	AttackType GetAttackType() const { return workAttack.type; };
 
@@ -284,14 +283,11 @@ public:
 
 	void SetHitTime() { workAttack.hitTime = 1.5f; }
 
-
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
 	void SetInput(Input* input) { input_ = input; }
-
-	// 弾リストを取得
-	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() const { return playerBullet_; }
 
 private:
 	FollowCamera* followCamera_;
@@ -336,10 +332,6 @@ private:
 	std::unique_ptr<playerWeapon> weapon_;
 	
 	
-
-
-	std::list<std::unique_ptr<PlayerBullet>> playerBullet_;
-
 	// シリアルナンバー
 	uint32_t serialNumber = 0;
 
@@ -374,6 +366,7 @@ private:
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;
+	BulletManager* bulletManager_;
 };
 
 

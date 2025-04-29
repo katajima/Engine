@@ -233,12 +233,6 @@ void Player::Update()
 
 	objectReticle_.Update();
 	objectSha_.Update();
-
-	for (const auto& bullet : playerBullet_) {
-		bullet->Update();
-	}
-
-	playerBullet_.remove_if([](const std::unique_ptr<PlayerBullet>& bullet) { return !bullet->GetAlive(); });
 }
 
 #pragma region Draw
@@ -266,19 +260,11 @@ void Player::Draw()
 		objectBody_.Draw();
 		objectSha_.Draw();
 	}
-
-	for (const auto& bullet : playerBullet_) {
-		bullet->Draw();
-	}
 }
 
 void Player::DrawP()
 {
-
 	effect_->Draw();
-	for (const auto& bullet : playerBullet_) {
-		bullet->DrawP();
-	}
 }
 
 void Player::Draw2D()

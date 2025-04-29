@@ -31,13 +31,14 @@ void EnemyManager::Draw2D()
 
 void EnemyManager::GenerateEnemy(EnemyType type, Vector3 position)
 {
-	std::unique_ptr<BaseEnemy> enemy = std::make_unique<NormalEnemy>();
-	
+	std::unique_ptr<BaseEnemy> enemy;
 	switch (type)
 	{
 	case EnemyManager::EnemyType::kNormal:
 		enemy = std::make_unique<NormalEnemy>();
+		//enemy->;
 
+		
 		break;
 	case EnemyManager::EnemyType::kBullet:
 		break;
@@ -50,6 +51,7 @@ void EnemyManager::GenerateEnemy(EnemyType type, Vector3 position)
 	case EnemyManager::EnemyType::kBoss:
 		break;
 	default:
+		
 		break;
 	}
 
