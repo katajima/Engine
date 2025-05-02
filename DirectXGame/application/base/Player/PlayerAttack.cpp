@@ -99,7 +99,7 @@ void Player::AttackKey()
 		workAttack.key.IsNormalAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 		workAttack.key.IsDashAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
 		workAttack.key.IsJampAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
-		if (specialAttack.isSpecial) {
+		if (bulletSpecial_->GetIsSpecial()) {
 			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 		}
 

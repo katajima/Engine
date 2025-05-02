@@ -22,7 +22,7 @@
 #include"playerWeapon.h"
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
-
+#include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
 
 ///< summary>
 /// 自キャラ
@@ -160,44 +160,27 @@ private: // 攻撃関係
 	WrokAttack workAttack{};
 	
 	
-	struct  SpecialAttack
-	{
-		int specialGauge = 0;
-		bool isSpecial = false;
-
-		// フェーズ
-		int phese = 0;
-		// 時間
-		float time = 0;
-		// 
-		int max; 
-		// クロック
-		int clock = 1;
-
-	};
-	SpecialAttack specialAttack{};
-	int index_b = 0;
-
+	
 	// コンボの数
 	static const int ComboNum = 4;
 
-	// 攻撃用定数
-	struct ConstAttack {
-		// 振りかぶり時間
-		uint32_t anticipationTime;
-		// ための時間
-		uint32_t chargeTime;
-		// 攻撃振り時間
-		uint32_t swingTime;
-		// 硬直時間
-		uint32_t recoveryTime;
-		// 振りかぶり移動速さ
-		float anticipationSpeed;
-		// ための移動速さ
-		float chargeSpeed;
-		// 攻撃振りの移動速さ
-		float swingSpeed;
-	};
+	//// 攻撃用定数
+	//struct ConstAttack {
+	//	// 振りかぶり時間
+	//	uint32_t anticipationTime;
+	//	// ための時間
+	//	uint32_t chargeTime;
+	//	// 攻撃振り時間
+	//	uint32_t swingTime;
+	//	// 硬直時間
+	//	uint32_t recoveryTime;
+	//	// 振りかぶり移動速さ
+	//	float anticipationSpeed;
+	//	// ための移動速さ
+	//	float chargeSpeed;
+	//	// 攻撃振りの移動速さ
+	//	float swingSpeed;
+	//};
 	// 攻撃再発動時間
 	float recastTime = 0;
 	const float MaxRecastTime = 1.0f;
@@ -249,15 +232,9 @@ private: // 移動
 
 	
 public:
-	std::string strin;
-
+	
 	Object3d& GetObject3D() { return objectBase_; }
 	
-	// dxCommon
-	void SetDxCommon(DirectXCommon* dxcommon) {dxCommon_ = dxcommon;}
-
-	// カメラのビュープロジェクション
-	void SetCamera(Camera* camera) { camera_ = camera; };
 	
 	playerWeapon* GetWeapon() { return weapon_.get(); }
 
@@ -270,33 +247,37 @@ public:
 	
 	void AddDamege(float da) { hp -= int(da); };
 
-	void AddSpecial(int d) { specialAttack.specialGauge += d; };
+	void AddSpecial(int d) { bulletSpecial_->AddGauge(d); };
 
 	bool GetInvincible() const { return isInvincible; }
 	
-	bool GetIsSpecial() const { return specialAttack.isSpecial; }
+	bool GetIsSpecial() const { return bulletSpecial_->GetIsSpecial(); }
 
 	int GetHitCount() const { return workAttack.hitCount; }
 
 	void AddHit() { workAttack.hitCount++; };
-	void AddSP() { specialAttack.specialGauge++; };
+	void AddSP() { bulletSpecial_->AddGauge(1); };
+
+public:
+
+	// dxCommon
+	void SetDxCommon(DirectXCommon* dxcommon) { dxCommon_ = dxcommon; }
+
+	// カメラのビュープロジェクション
+	void SetCamera(Camera* camera) { camera_ = camera; };
+
 
 	void SetHitTime() { workAttack.hitTime = 1.5f; }
 
-	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager;};
 
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
-	void SetInput(Input* input) { input_ = input; }
+	void SetInput(Input* input) {
+		input_ = input;
+		bulletSpecial_->SetInput(input);
+	};
 
-private:
-	FollowCamera* followCamera_;
-	
-	Camera* camera_ = nullptr;
-
-	Input* input_;
-
-	std::vector<BaseEnemy*> lockedOnEnemies;
 private:  // パラメータ
 	
 	uint32_t maxHp = 100;
@@ -305,7 +286,16 @@ private:  // パラメータ
 	float damage_ = 0;
 	bool isInvincible = false;
 private:
-	
+	// スペシャル攻撃
+	std::unique_ptr<BulletSpecial> bulletSpecial_;
+	//  プレイヤー用UI
+	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
+	// エフェクト 
+	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
+	// 武器
+	std::unique_ptr<playerWeapon> weapon_;
+
+
 
 	// オブジェクト3D
 
@@ -316,57 +306,30 @@ private:
 	//　レティクル
 	Object3d objectReticle_;
 	
-	// ミサイル発射位置
-	Object3d injectionLeftObj_;
-	Object3d injectionRightObj_;
-
-	Vector3 injectionLeftPos_{ -2.5f,1.0f,-1.5f };
-	Vector3 injectionRightPos_{ 2.5,1.0f,-1.5f };
-
-
-
-
-	// 影
-	Object3d objectSha_;
-
-	std::unique_ptr<playerWeapon> weapon_;
-	
-	
-	// シリアルナンバー
-	uint32_t serialNumber = 0;
-
-
-	
-	// スプライト
-
-	
-
-	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
-
 
 	// 移動関連
-
 	// 速度
 	Vector3 velocity_ = {};
-	
 	float moveLimit = 200;
-
 	float speed;
 
 	
 
 
-	// エフェクト 
-	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
-
-	std::unique_ptr<ParticleEmitter> mEmitter_ = nullptr;
-	std::unique_ptr<ParticleEmitter> mEmitter2_ = nullptr;
+	
 
 	ContactRecord contactRecord_;
+	// シリアルナンバー
+	uint32_t serialNumber = 0;
+
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;
 	BulletManager* bulletManager_;
+	FollowCamera* followCamera_;
+	Camera* camera_ = nullptr;
+	Input* input_;
+	std::vector<BaseEnemy*> lockedOnEnemies;
 };
 
 

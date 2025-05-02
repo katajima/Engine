@@ -45,6 +45,7 @@ void NormalEnemy::Update()
 			gearEmit_->Update();
 			fenceEmit_->Update();
 		}
+		isLockOn = false;
 		isAlive_ = false;
 	}
 

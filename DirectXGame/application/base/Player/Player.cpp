@@ -17,8 +17,7 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 
 	camera_ = camera;
 	dxCommon_ = dxcommon;
-	specialAttack.max = 40;
-
+	
 	// プレイヤー
 	objectBase_.Initialize(entity3DManager);
 	objectBase_.SetCamera(camera_);
@@ -40,37 +39,11 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	objectBody_.model->modelData.material[0]->shininess_ = 10000;
 
 
+	// スペシャル攻撃
+	bulletSpecial_ = std::make_unique<BulletSpecial>();
+	bulletSpecial_->Initialize(entity3DManager,entity2DManager,camera_);
+	bulletSpecial_->SetParent(&objectBase_.worldtransform_);
 
-	// 左ミサイル発射口
-	injectionLeftObj_.Initialize(entity3DManager);
-	injectionLeftObj_.SetCamera(camera_);
-	injectionLeftObj_.SetModel("AnimatedCube.gltf");
-	injectionLeftObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	injectionLeftObj_.worldtransform_.translate_ = injectionLeftPos_;
-
-	injectionLeftObj_.worldtransform_.scale_= { 0.75f,1.25f,1.0f };
-
-	// 右ミサイル発射口
-	injectionRightObj_.Initialize(entity3DManager);
-	injectionRightObj_.SetCamera(camera_);
-	injectionRightObj_.SetModel("AnimatedCube.gltf");
-	injectionRightObj_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	injectionRightObj_.worldtransform_.translate_ = injectionRightPos_;
-
-	injectionRightObj_.worldtransform_.scale_ = { 0.75f,1.25f,1.0f };
-
-
-
-
-	// 影
-	objectSha_.Initialize(entity3DManager);
-	objectSha_.SetCamera(camera_);
-	objectSha_.SetModel("plane.obj");
-	objectSha_.model->modelData.material[0]->tex_.diffuseFilePath = "resources/Texture/aa.png";
-	objectSha_.model->modelData.material[0]->color = { 0.9f,0.0f,0.0f,1 };
-	objectSha_.worldtransform_.translate_ = position;
-	objectSha_.worldtransform_.scale_ = { 4,4,4 };
-	objectSha_.worldtransform_.rotate_.x = DegreesToRadians(-90);
 
 
 	weapon_ = std::make_unique<playerWeapon>();
@@ -97,22 +70,6 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
 
 
-	mEmitter_ = std::make_unique <ParticleEmitter>();
-	mEmitter_->Initialize(entity3DManager->GetEffectManager()->GetParticleManager(), "hitEffect3", "hitEffect3", ParticleEmitter::EmitSpawnShapeType::kPoint);
-	mEmitter_->GetFrequency() = 0.05f;
-	mEmitter_->SetCount(1);
-	mEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
-	mEmitter_->SetIsAlpha(true);
-	mEmitter_->SetAlphaClipping(0.23f);
-	mEmitter_->SetIsLifeTimeScale(true);
-	mEmitter_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
-	mEmitter_->SetUsebillboard(false);
-	mEmitter_->SetEnableLighting(false);
-	mEmitter_->SetParent(injectionLeftObj_.worldtransform_);
-	mEmitter_->SetColorMinMax({ 1,0,0,1.0f }, { 1,0,0,1.0f });
-	mEmitter_->SetSizeMinMax(Vector3{ 2.0f,2.0f,2.0f }, { 2.0f,2.0f,2.0f });
-	mEmitter_->SetVelocityMinMax({}, {});
-	mEmitter_->SetRotateMinMax(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
 }
 
 void Player::Update()
@@ -159,13 +116,7 @@ void Player::Update()
 			break;
 		}
 	}
-	if (specialAttack.specialGauge >= specialAttack.max) {
-		specialAttack.isSpecial = true;
-		specialAttack.specialGauge = specialAttack.max;
-	}
-	else {
-		specialAttack.isSpecial = false;
-	}
+	
 
 
 #ifdef _DEBUG
@@ -180,7 +131,7 @@ void Player::Update()
 
 
 
-
+	bulletSpecial_->Update();
 	if (hp <= 0) {
 		isAlive = false;
 	}
@@ -190,14 +141,7 @@ void Player::Update()
 	}
 
 
-	// 影
-	objectSha_.worldtransform_.translate_ = objectBase_.worldtransform_.translate_;
-	objectSha_.worldtransform_.translate_.y = 0.1f;
-
-	Vector3 scale{};
-	scale = std::abs((std::min)((objectSha_.worldtransform_.translate_.y + 9.0f / objectBase_.worldtransform_.translate_.y), 6.0f));
-
-	objectSha_.worldtransform_.scale_ = scale;
+	
 
 #ifdef _DEBUG
 	ImGui::Begin("trail");
@@ -226,13 +170,9 @@ void Player::Update()
 	objectBody_.Update();
 	weapon_->Update();
 
-	injectionLeftObj_.Update();
-	injectionRightObj_.Update();
-
 	
 
 	objectReticle_.Update();
-	objectSha_.Update();
 }
 
 #pragma region Draw
@@ -251,14 +191,12 @@ void Player::Draw()
 		case Behavior::kJump:
 			break;
 		case Behavior::kDie:
-			injectionLeftObj_.Draw();
-			injectionRightObj_.Draw();
+			bulletSpecial_->Draw();
 			break;
 		}
 
 
 		objectBody_.Draw();
-		objectSha_.Draw();
 	}
 }
 
@@ -270,9 +208,9 @@ void Player::DrawP()
 void Player::Draw2D()
 {
 	ui_->SetHPBerSize(static_cast<float>(hp));
-	ui_->SetIsTextmax(specialAttack.isSpecial);
-	ui_->SetIsTextRB(specialAttack.isSpecial);
-	ui_->SetSpecialGaugeSize(static_cast<float>(specialAttack.specialGauge));
+	ui_->SetIsTextmax(bulletSpecial_->GetIsSpecial());
+	ui_->SetIsTextRB(bulletSpecial_->GetIsSpecial());
+	ui_->SetSpecialGaugeSize(static_cast<float>(bulletSpecial_->GetGauge()));
 
 	ui_->Draw();
 
@@ -459,7 +397,7 @@ void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {
 
 	if (behavior_ == Behavior::kDie) {
-		if (specialAttack.phese == 0) {
+		if (bulletSpecial_->GetPhese() == 0) {
 			lockedOnEnemies.clear();
 			int i = 0;
 

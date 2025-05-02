@@ -28,11 +28,11 @@ void Player::BehaviorRootUpdate()
 			behaviorRequest_ = Behavior::kAttack;
 		}
 	}
-	if (specialAttack.specialGauge >= specialAttack.max) {
+	if (bulletSpecial_->GetIsSpecial()) {
 		if (workAttack.key.IsSpecialAttack) {
 			if (recastTime >= MaxRecastTime) {
 				behaviorRequest_ = Behavior::kDie;
-				specialAttack.specialGauge = 0;
+				
 			}
 		}
 	}
@@ -75,85 +75,27 @@ void Player::BehaviorAttackUpdate()
 void Player::BehaviorDieInitialize()
 {
 	effect_->GetDashEmitter()->SetIsEmit(false);
-	specialAttack.phese = 0;
-	specialAttack.specialGauge = 0;
+	bulletSpecial_->SetPhese(0);
+	bulletSpecial_->SetGauge(0);
+
 }
 
 void Player::BehaviorDieUpdate()
 {
 	velocity_ = {};
 	AttackKey();
-	int i = 0;
 	int time = 0;
 
 	ui_->SetIsTextRB(false);
 
-	switch (specialAttack.phese)
-	{
-	case 0:
-		specialAttack.time += MyGame::GameTime();
-		// 移動
+	bulletSpecial_->InAction(followCamera_, bulletManager_, lockedOnEnemies);
+
+	if (bulletSpecial_->GetPhese() == 0) {
 		Move();
-
-		if (specialAttack.time >= 0.5f) {
-			if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
-				specialAttack.phese = 1;
-				specialAttack.time = 0;
-			}
-		}
-		index_b = 0;
 		ui_->SetIsTextRB(true);
-		break;
-	case 1:
-		// 弾を発射
-		// 移動
-		//Move();
-		specialAttack.time += MyGame::GameTime();
-		time = int(specialAttack.time * 60);
-		injectionLeftObj_.worldtransform_.translate_.y = injectionLeftPos_.y;
-		injectionRightObj_.worldtransform_.translate_.y = injectionRightPos_.y;
-		if (time % 10 == 0) {
-			specialAttack.clock *= -1;
-			while (index_b < lockedOnEnemies.size())
-			{
-				if (specialAttack.clock == 1) {
-					followCamera_->GetViewProjection().SetShake(1.3f, {0.2f,0.2f,0.2f});
-					bulletManager_->GeneratBullet(BulletManager::BulletType::kPlayerMissile, injectionLeftObj_.GetWorldPosition(), lockedOnEnemies[index_b]);
-					injectionLeftObj_.worldtransform_.translate_.y -= 0.5f;
-					
-				}
-				else {
-					followCamera_->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
-					bulletManager_->GeneratBullet(BulletManager::BulletType::kPlayerMissile, injectionRightObj_.GetWorldPosition(), lockedOnEnemies[index_b]);
-					injectionRightObj_.worldtransform_.translate_.y -= 0.5f;
-				}
-				
-				
-
-				index_b++;
-				break;
-			}
-		}
-		
-	
-			
-		
-
-		if (lockedOnEnemies.size() <= bulletManager_->GetBullets().size())
-		{
-			specialAttack.phese = 2;
-		}
-
-		break;
-	case 2:
+	}
+	if (bulletSpecial_->GetPhese() == 2) {
 		behaviorRequest_ = Behavior::kRoot;
-
-		break;
-	case 3:
-		break;
-	case 4:
-		break;
-
 	}
 
 
