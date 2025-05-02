@@ -245,7 +245,7 @@ void Player::Move()
 
 
 			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(camera_->viewMatrix_);
+			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetViewProjection().GetViewMatrix());
 
 			// カメラの向きに基づいて移動方向をワールド座標系に変換
 			Vector3 worldDirection = {
@@ -292,7 +292,7 @@ void Player::Move()
 			isMove = true;
 
 			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(camera_->viewMatrix_);
+			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetViewProjection().GetViewMatrix());
 
 			// カメラの向きに基づいて移動方向をワールド座標系に変換
 			Vector3 worldDirection = {

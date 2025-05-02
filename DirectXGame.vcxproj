@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\application\base\Player\Base\BasePlayer.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Special\BaseSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\BaseBullet.cpp" />
@@ -116,8 +117,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\BasePlayerState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Player\Base\PlayerManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Bullet\PlayerMissile.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Effect\PlayerEffect.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Player\Normal\NormalPlayer.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Player.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerAttack.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerBehavior.cpp" />
@@ -513,6 +516,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\application\base\Player\Base\BasePlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackManager.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Special\BaseSpecial.h" />
@@ -523,8 +527,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Player\BasePlayerState.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\Base\PlayerManager.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Bullet\PlayerMissile.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Effect\PlayerEffect.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\Normal\NormalPlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Player.h" />
     <ClInclude Include="DirectXGame\application\base\Player\playerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Special\BulletSpecial.h" />

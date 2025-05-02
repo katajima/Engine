@@ -27,6 +27,7 @@
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/BulletManager.h"
+#include"DirectXGame/application/base/Player/Base/PlayerManager.h"
 
 
 // ゲームプレイシーン
@@ -103,6 +104,9 @@ private:
 	
 	// プレイヤー
 	std::unique_ptr<Player> player_;
+
+	std::unique_ptr<PlayerManager> playerManager_;
+
 
 	// 敵マネージャ
 	std::unique_ptr<EnemyManager> enemyManager_;

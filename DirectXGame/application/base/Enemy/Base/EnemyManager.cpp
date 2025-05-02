@@ -5,7 +5,6 @@ void EnemyManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
 	camera_ = camera;
-
 }
 
 void EnemyManager::Update()
@@ -36,8 +35,6 @@ void EnemyManager::GenerateEnemy(EnemyType type, Vector3 position)
 	{
 	case EnemyManager::EnemyType::kNormal:
 		enemy = std::make_unique<NormalEnemy>();
-		//enemy->;
-
 		
 		break;
 	case EnemyManager::EnemyType::kBullet:

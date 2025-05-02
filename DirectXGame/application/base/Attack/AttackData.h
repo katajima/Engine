@@ -80,3 +80,21 @@ struct ComboTransition {
     AttackState next;
     bool canCancel;  // キャンセル可能か
 };
+
+//// 攻撃用定数
+    //struct ConstAttack {
+    //	// 振りかぶり時間
+    //	uint32_t anticipationTime;
+    //	// ための時間
+    //	uint32_t chargeTime;
+    //	// 攻撃振り時間
+    //	uint32_t swingTime;
+    //	// 硬直時間
+    //	uint32_t recoveryTime;
+    //	// 振りかぶり移動速さ
+    //	float anticipationSpeed;
+    //	// ための移動速さ
+    //	float chargeSpeed;
+    //	// 攻撃振りの移動速さ
+    //	float swingSpeed;
+    //};
