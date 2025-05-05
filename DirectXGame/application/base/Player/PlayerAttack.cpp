@@ -11,7 +11,7 @@ void Player::Attack()
 	float k = 0.5f;
 	switch (workAttack.type)
 	{
-	case AttackType::kNormal:
+	case AttackTypePlay::kNormal:
 		if (workAttack.parameter >= 5.0f / 60) {
 			effect_->SetIsTrail(true);
 
@@ -140,7 +140,7 @@ void Player::AttackTypeInit(int comboIndex)
 		// 各ふるまいごとの初期化を実行
 		switch (workAttack.type)
 		{
-		case AttackType::kNormal:
+		case AttackTypePlay::kNormal:
 
 
 			if (comboIndex == 0) {
@@ -175,7 +175,7 @@ void Player::AttackTypes()
 {
 	if (workAttack.key.IsAttack) {
 		if (workAttack.key.IsNormalAttack) {
-			workAttack.typeRequest_ = AttackType::kNormal;
+			workAttack.typeRequest_ = AttackTypePlay::kNormal;
 		}
 	}
 }

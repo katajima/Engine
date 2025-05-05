@@ -53,9 +53,39 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
 	
+
+	// Factory
+	playerAttackFactory_ = std::make_unique<PlayerAttackFactory>();
+
 	// 攻撃マネージャー
 	attackManager_ = std::make_unique<AttackManager>();
-	attackManager_->Initialize(input_,nullptr);
+	attackManager_->Initialize(input_, playerAttackFactory_.get());
+
+
+	// Transform 登録
+	transformMap["Player"] = &objectBase_.worldtransform_;
+	attackManager_->SetContext(input_, transformMap);
+
+	// 攻撃ノードの登録（攻撃名・次の遷移・キャンセル条件など）
+	AttackNode node{};
+	node.data.attackType = AttackType::Blow;
+	node.data.transformId = "Player";
+	node.data.activeFrames = 60.0f;
+	node.data.recoveryFrames = 10.0f;
+	node.data.startupFrames = 60.0f;
+	node.canCancelFunc = [] { return true; };
+	node.nextNodeIds = { "Punch2" };
+
+	attackManager_->RegisterAttackNode("Punch1", node);
+
+	// もう一つの攻撃も登録例
+	AttackNode node2{};
+	node2.data.attackType = AttackType::Blow;
+	node2.data.transformId = "Player";
+	node2.canCancelFunc = [] { return true; };
+	node2.nextNodeIds = {};
+
+	attackManager_->RegisterAttackNode("Punch2", node2);
 
 
 	// UI
@@ -143,7 +173,15 @@ void Player::Update()
 	}
 
 
+
 	
+	// 攻撃開始条件（例：ボタンを押したら）
+	if (input_->IsTriggerKey(DIK_Z)) {
+		attackManager_->AddAttack("Punch1");
+	}
+
+	attackManager_->Update(MyGame::GameTime());
+
 
 #ifdef _DEBUG
 	ImGui::Begin("trail");

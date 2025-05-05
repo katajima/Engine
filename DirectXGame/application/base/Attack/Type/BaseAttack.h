@@ -21,7 +21,7 @@ public:
     virtual void SetInput(Input*) {} // デフォルトは何もしない
 
     // すべてのTransformをまとめて設定
-    virtual void SetTransforms(const std::unordered_map<std::string, Transform*>& transforms) {
+    virtual void SetTransforms(const std::unordered_map<std::string, WorldTransform*>& transforms) {
         transforms_ = transforms;
     }
 
@@ -42,10 +42,10 @@ protected:
     bool isFinished_ = false;
     AttackData attackData_;
 
-    std::unordered_map<std::string, Transform*> transforms_;
+    std::unordered_map<std::string, WorldTransform*> transforms_;
 
     // 例：特定のTransformを使う
-    Transform* GetTransform(const std::string& name) const {
+    WorldTransform* GetTransform(const std::string& name) const {
         auto it = transforms_.find(name);
         return (it != transforms_.end()) ? it->second : nullptr;
     }

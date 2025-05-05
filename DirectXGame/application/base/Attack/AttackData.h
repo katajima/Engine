@@ -7,7 +7,7 @@
 #include"DirectXGame/engine/struct/Vector3.h"
 #include"DirectXGame/engine/struct/Vector4.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
-
+#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 
 // 攻撃キーInput
 struct AttackKeyFlag
@@ -50,11 +50,12 @@ enum class AttackType
 // 攻撃内部データ
 struct AttackData {
     std::string name;        // 技名
-    float damage;            // ダメージ
-    float hitNum;            // ヒット回数
-    float startupFrames;     // 発生フレーム
-    float activeFrames;      // 持続フレーム
-    float recoveryFrames;    // 硬直フレーム
+    std::string transformId;
+    float damage = 0;        // ダメージ
+    float hitNum = 0;        // ヒット回数
+    float startupFrames  = 0;// 発生フレーム
+    float activeFrames   = 0;// 持続フレーム
+    float recoveryFrames = 0;// 硬直フレーム
     bool canCancelOnHit;     // ヒット時にキャンセル可能か
     bool canCancelOnWhiff;   // 空振り時でもキャンセル可能か
     AttackMotion motion;     // 攻撃モーション

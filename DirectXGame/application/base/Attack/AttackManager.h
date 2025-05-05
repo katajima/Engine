@@ -14,9 +14,9 @@ public:
 
 	void Update(float dt);
 	void AddAttack(const std::string& attackId); // ID指定で攻撃開始
-	void RegisterAttackNode(const AttackNode& node); // 外部登録用
+	void RegisterAttackNode(const std::string& id, const AttackNode& node); // 外部登録用
 
-	void SetContext(Input* input, const std::unordered_map<std::string, Transform*>& transforms);
+	void SetContext(Input* input, const std::unordered_map<std::string, WorldTransform*>& transforms);
 
 private:
 	void TryTransition(); // コンボ遷移処理
@@ -27,7 +27,7 @@ private:
 	std::string currentAttackId_;                             // 現在の攻撃ID
 	AttackInput attackInput_; // 例えばAttackManagerに持たせる
 	Input* input_ = nullptr;
-	std::unordered_map<std::string, Transform*> transforms_;
+	std::unordered_map<std::string, WorldTransform*> transformMap_;
 
 };
 

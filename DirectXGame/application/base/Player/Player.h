@@ -23,6 +23,8 @@
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
 #include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
+#include "DirectXGame/application/base/Player/Attack/PlayerAttackFactory.h"
+
 
 #include"DirectXGame/application/base/Attack/AttackManager.h"
 
@@ -112,7 +114,7 @@ public: // 攻撃関係
 		bool IsNormalAttack; // B
 		bool IsSpecialAttack;// RT
 	};
-	enum class  AttackType
+	enum class  AttackTypePlay
 	{
 		kNone = 0,
 		kNormal, // 通常攻撃
@@ -132,9 +134,9 @@ private: // 攻撃関係
 		float parameter;
 		// 
 		//振るまい
-		AttackType type = AttackType::kNone;
+		AttackTypePlay type = AttackTypePlay::kNone;
 		// 次の振るまいリクエスト
-		std::optional<AttackType> typeRequest_ = std::nullopt;
+		std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
 		//
 		StartEnd pos; // 位置
 		// 過去位置
@@ -220,7 +222,7 @@ public:
 	playerWeapon* GetWeapon() { return weapon_.get(); }
 
 	Behavior GetBehavior() const { return behavior_; };
-	AttackType GetAttackType() const { return workAttack.type; };
+	AttackTypePlay GetAttackType() const { return workAttack.type; };
 
 	uint32_t GetSerialNumber() const { return serialNumber; }
 
@@ -276,7 +278,10 @@ private:
 	std::unique_ptr<playerWeapon> weapon_;
 	//
 	std::unique_ptr<AttackManager> attackManager_;
+	//
+	std::unique_ptr<BaseAttackFactory> playerAttackFactory_;
 
+	std::unordered_map<std::string, WorldTransform*> transformMap;
 
 	// オブジェクト3D
 
