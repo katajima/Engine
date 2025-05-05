@@ -1,18 +1,19 @@
 #include "playerWeapon.h"
 #include "DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
-#include "Player.h"
+#include "DirectXGame/application/base/Player/Player.h"
+#include "DirectXGame/application/base/Player/Base/BasePlayer.h"
 
-void playerWeapon::Initialize(Entity3DManager* entity3DManager,Camera* camera)
+void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
 
-	
+
 
 	objectWeapon_.Initialize(entity3DManager);
 	objectWeapon_.SetCamera(camera);
 	objectWeapon_.SetModel("Sword.obj");
-	
+
 }
 
 void playerWeapon::Update()
@@ -33,51 +34,30 @@ void playerWeapon::OnCollision(Collider* other)
 	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
 		uint32_t serialNumber = enemy->GetSerialNumber();
-		
+
 
 
 		// 接触履歴があれば何もせず抜ける
 		if (contactRecord_.CheckHistory(serialNumber)) {
 			return;
 		}
-		
-		if (player_->GetAttackType() == Player::AttackType::kJamp && player_->GetObject3D().GetWorldPosition().y <= 2) {
-
-			contactRecord_.AddHistory(serialNumber);
-
-			if (enemy->GetAlive()) {
-
-				enemy->AddDamage(10);
-
-				enemy->SetHit();
 
 
-				enemy->Emit();
+		contactRecord_.AddHistory(serialNumber);
 
-				enemy->hitStop(0.2f);
+		if (enemy->GetAlive()) {
+			enemy->AddDamage(10);
 
+			enemy->SetHit();
+			enemy->Emit();
 
-				player_->AddHit();
-				player_->AddSP();
-				player_->SetHitTime();
-			}
+			enemy->hitStop(0.1f);
+
+			player_->AddHit();
+			player_->AddSP();
+			player_->SetHitTime();
 		}
-		else if (player_->GetAttackType() != Player::AttackType::kJamp) {
-			contactRecord_.AddHistory(serialNumber);
 
-			if (enemy->GetAlive()) {
-				enemy->AddDamage(10);
-
-				enemy->SetHit();
-				enemy->Emit();
-
-				enemy->hitStop(0.1f);
-
-				player_->AddHit();
-				player_->AddSP();
-				player_->SetHitTime();
-			}
-		}
 	}
 }
 
@@ -97,5 +77,10 @@ void playerWeapon::ContactRecordClear()
 
 void playerWeapon::SetPlayer(Player* player)
 {
-	{ player_ = player; }
+	player_ = player;
+}
+
+void playerWeapon::SetPlayer(BasePlayer* player)
+{
+	basePlayer_ = player;
 }

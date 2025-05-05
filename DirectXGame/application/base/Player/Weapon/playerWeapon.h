@@ -10,7 +10,7 @@
 #include"DirectXGame/engine/collider/ContactRecord.h"
 
 
-
+class BasePlayer;
 class Player;
 class Entity3DManager;
 class playerWeapon : public Collider
@@ -42,7 +42,7 @@ public:
 	Object3d& GetObject3D() { return objectWeapon_; }
 
 	// カメラのビュープロジェクション
-	void SetCamera(const Camera* camera) { camera_ = camera; };
+	//void SetCamera(const Camera* camera) { camera_ = camera; };
 
 	void SetOffset(const Vector3& translation) { offset = translation; }
 
@@ -52,6 +52,8 @@ public:
 	void SetRad(float rad) { Collider::SetRadius(rad); };
 
 	void SetPlayer(Player* player);
+	
+	void SetPlayer(BasePlayer* player);
 
 private:
 	// 武器
@@ -59,6 +61,8 @@ private:
 	const Camera* camera_ = nullptr;
 	ContactRecord contactRecord_;
 	Vector3 offset;
+
 	Player* player_;
+	BasePlayer* basePlayer_;
 };
 

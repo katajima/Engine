@@ -2,10 +2,11 @@
 #include<cstdint>
 #include<string>
 #include<vector>
+#include <functional>
 #include"DirectXGame/engine/struct/Vector2.h"
 #include"DirectXGame/engine/struct/Vector3.h"
 #include"DirectXGame/engine/struct/Vector4.h"
-
+#include"DirectXGame/engine/struct/Structs3D.h"
 
 
 // 攻撃キーInput
@@ -14,9 +15,6 @@ struct AttackKeyFlag
     bool IsAttack; // 攻撃するか
 
     bool IsNormalAttack; // B
-    bool IsDashAttack;   // X
-    bool IsJampAttack;   // Y
-    bool IsSpecialAttack;// RT
 };
 
 // 攻撃インプット
@@ -38,6 +36,17 @@ struct AttackMotion
     Vector3 roll; // 回転量(フレーム)
 };
 
+// 攻撃タイプ(一振りの攻撃に対して)
+enum class AttackType
+{
+    Blow,               // 一撃
+    ConsecutiveHits,    // 連撃
+    Duration,           // 持続
+    LastBlow,           // 後に一撃
+    LastConsecutiveHits,// 後に連撃
+    Charge              // 溜め攻撃
+};
+
 // 攻撃内部データ
 struct AttackData {
     std::string name;        // 技名
@@ -49,37 +58,35 @@ struct AttackData {
     bool canCancelOnHit;     // ヒット時にキャンセル可能か
     bool canCancelOnWhiff;   // 空振り時でもキャンセル可能か
     AttackMotion motion;     // 攻撃モーション
+    AttackType attackType;   // 攻撃タイプ
+};
+
+
+
+struct AttackNode {
+    std::string id;                        // ノード識別ID
+    AttackData data;                      // 攻撃データ
+    std::vector<std::string> nextNodeIds; // 遷移可能なノードID（複数）
+    std::function<bool()> canCancelFunc;  // キャンセル条件（任意）
+
+    AttackNode() = default;
+    AttackNode(const std::string& id_, const AttackData& data_)
+        : id(id_), data(data_) {}
 };
 
 
 
 
-// 攻撃技
-enum class AttackState {
-    Idle,
-    LightAttack1,
-    LightAttack2,
-    HeavyAttack,
-    SpecialAttack
-};
-
-// 攻撃タイプ(一振りの攻撃に対して)
-enum class AttackType
-{
-    Blow,               // 一撃
-    ConsecutiveHits,    // 連撃
-    Duration,           // 持続
-    LastBlow,           // 後に一撃
-    LastConsecutiveHits,// 後に連撃
-};
 
 
 
-struct ComboTransition {
-    AttackState current;
-    AttackState next;
-    bool canCancel;  // キャンセル可能か
-};
+
+
+
+
+
+
+
 
 //// 攻撃用定数
     //struct ConstAttack {

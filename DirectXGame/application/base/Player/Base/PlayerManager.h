@@ -6,6 +6,7 @@
 #include "BasePlayer.h"
 #include "DirectXGame/application/base/Player/Normal/NormalPlayer.h"
 
+class Input;
 class DirectXCommon;
 class Entity3DManager;
 class Entity2DManager;
@@ -20,7 +21,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera);
+	void Initialize(Input* input,DirectXCommon* dxCommon,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera);
 	// 更新
 	void Update();
 
@@ -38,6 +39,8 @@ public:
 public:
 	Object3d* GetObject3D() { return player_->GetObject3D(); }
 
+	BasePlayer* GetPlayer() { return player_.get(); }
+
 private:
 	std::unique_ptr<BasePlayer> player_;
 
@@ -47,5 +50,6 @@ private:
 	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
 	Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
 	DirectXCommon* dxCommon_;
+	Input* input_;
 };
 

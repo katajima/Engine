@@ -22,7 +22,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
 
 	///< summary>
 	/// 更新
@@ -60,6 +60,9 @@ public:
 
 	virtual Vector3 GetCenterPosition() const;
 
+	// シリアルナンバー
+	uint32_t GetSerialNumber() const { return serialNumber; }
+
 protected:
 	// オブジェクト
 	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
@@ -78,10 +81,13 @@ protected:
 
 	
 protected:
+	DirectXCommon* dxCommon_;
 	FollowCamera* followCamera_;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
 	Camera* camera_ = nullptr;
+	Input* input_;
+
 private:
 
 };

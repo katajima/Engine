@@ -19,12 +19,12 @@ void GamePlayScene::Initialize()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	// プレイヤー
-	playerManager_ = std::make_unique<PlayerManager>();
+	/*playerManager_ = std::make_unique<PlayerManager>();
 	playerManager_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
-	playerManager_->SelectPlayer(PlayerManager::Type::kNormal, Vector3(0, 2, -40));
+	playerManager_->SelectPlayer(PlayerManager::Type::kNormal, Vector3(0, 2, -40));*/
 	
 	player_ = std::make_unique<Player>();
-	player_->Initialize(GetDxCommon(), GetEntity3DManager(),GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
+	player_->Initialize(input_,GetDxCommon(), GetEntity3DManager(),GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
 	
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();

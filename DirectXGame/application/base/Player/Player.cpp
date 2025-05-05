@@ -6,7 +6,7 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "assert.h"
 
-void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
+void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
@@ -53,7 +53,9 @@ void Player::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManage
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
 	
-
+	// 攻撃マネージャー
+	attackManager_ = std::make_unique<AttackManager>();
+	attackManager_->Initialize(input_);
 
 
 	// UI
@@ -313,9 +315,7 @@ void Player::Move()
 }
 
 void Player::Gravity() {
-	// 移動
-	//velocity_.y = graVelo;
-
+	
 	// 重力加速度
 	const float kGravityAcceleration = 4.4f;
 

@@ -7,87 +7,47 @@ void Player::Attack()
 	workAttack.parameter += MyGame::GameTime();
 
 	float t = static_cast<float>(workAttack.parameter) / workAttack.attackAll.max_t;
-	
+
 	float k = 0.5f;
 	switch (workAttack.type)
 	{
 	case AttackType::kNormal:
-		if (workAttack.parameter >= 5.0f /60) {
+		if (workAttack.parameter >= 5.0f / 60) {
 			effect_->SetIsTrail(true);
-			
+
 		}
 		if (workAttack.comboIndex == 0) {
 			if (workAttack.parameter >= 1.0f / 60) {
 				k = 0.1f;
-				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(8*60) * MyGame::GameTime();
-				
+				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(8 * 60) * MyGame::GameTime();
+
 			}
 		}if (workAttack.comboIndex == 1) {
 			if (workAttack.parameter >= 1.0f / 60) {
 				k = 0.3f;
-				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(8*60) * MyGame::GameTime();
+				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(8 * 60) * MyGame::GameTime();
 			}
 		}if (workAttack.comboIndex == 2) {
 			if (workAttack.parameter >= 1.0f / 60) {
 				k = 0.4f;
-				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(16*60) * MyGame::GameTime();
+				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(16 * 60) * MyGame::GameTime();
 			}
 		}if (workAttack.comboIndex == 3) {
 			if (workAttack.parameter >= 1.0f / 60) {
 				k = 1.5f;
-				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(16*60) * MyGame::GameTime();
+				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(16 * 60) * MyGame::GameTime();
 			}
 		}
 
 
 		if (workAttack.parameter <= 5.0f / 60) {
-			
+
 			Vector3 move(0, 0, k);
 			// 速度ベクトルを自機の向きに合わせて回転させる
 			move = TransformNormal(move, objectBase_.worldtransform_.worldMat_);
 
 			objectBase_.worldtransform_.translate_ += move;
 		}
-		break;
-	case AttackType::kJamp:
-		if (objectBase_.worldtransform_.translate_.y > groundY) {
-			workAttack.attackAll.max_t += MyGame::GameTime();
-		}
-		if (workAttack.parameter >= 5.0f /60) {
-			effect_->SetIsTrail(true);
-
-		}
-
-
-
-		if (graVelo <= 0) {
-			ty += MyGame::GameTime() * 4;
-			float r_t = ty / (float)workAttack.attackAll.max_t;
-			weapon_->GetObject3D().worldtransform_.rotate_.x = Easing::EaseOut(DegreesToRadians(30), DegreesToRadians(100), r_t);
-		
-		}
-		else {
-			velocity_.x = workAttack.velocity.x;
-			velocity_.z = workAttack.velocity.z;
-		}
-
-		
-		
-
-		break;
-	case AttackType::kDash:
-		if (workAttack.parameter >= 5.0f / 60) {
-			effect_->SetIsTrail(true);
-
-		}
-
-
-		
-		objectBase_.worldtransform_.translate_ = Easing::EaseOut(workAttack.pos.str, workAttack.pos.end, t);
-
-		break;
-	case AttackType::kSpecial:
-
 		break;
 	}
 }
@@ -97,27 +57,16 @@ void Player::AttackKey()
 {
 	if (input_->IsControllerConnected()) {
 		workAttack.key.IsNormalAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-		workAttack.key.IsDashAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
-		workAttack.key.IsJampAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
 		if (bulletSpecial_->GetIsSpecial()) {
 			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 		}
 
 
-		if (workAttack.key.IsAttack = workAttack.key.IsNormalAttack ||
-			workAttack.key.IsDashAttack || workAttack.key.IsJampAttack) {
+		if (workAttack.key.IsNormalAttack) {
 			workAttack.key.IsAttack = true;
 
 		}
 
-	}
-	else {
-		workAttack.key.IsNormalAttack = input_->IsTriggerKey(DIK_SPACE);
-
-		if (workAttack.key.IsAttack = workAttack.key.IsNormalAttack ||
-			workAttack.key.IsDashAttack || workAttack.key.IsJampAttack) {
-			workAttack.key.IsAttack = true;
-		}
 	}
 
 }
@@ -141,10 +90,10 @@ void Player::SetAttackCombo(WrokAttack& work)
 			// 方向
 			Move();
 			// 攻撃タイプ
-			AttackType();
+			AttackTypes();
 			// 攻撃タイプによって初期化
 			AttackTypeInit(work.comboIndex);
-			
+
 
 			// コンボフラグをリセット
 			work.comboNext = false;
@@ -192,8 +141,8 @@ void Player::AttackTypeInit(int comboIndex)
 		switch (workAttack.type)
 		{
 		case AttackType::kNormal:
-			
-		
+
+
 			if (comboIndex == 0) {
 				weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
@@ -215,46 +164,6 @@ void Player::AttackTypeInit(int comboIndex)
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			break;
-		case AttackType::kJamp:
-			
-
-			weapon_->SetRad(5.5f);
-
-			//if (comboIndex == 0) {
-				workAttack.attackAll.max_t = 0.3f;
-				ty = 0;
-				graVelo = 60.0f;
-				velocity_.y = graVelo;
-				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 20,0,0 });
-				Vector3 move(0, 0, k);
-				// 速度ベクトルを自機の向きに合わせて回転させる
-				move = TransformNormal(move, objectBase_.worldtransform_.worldMat_);
-				workAttack.velocity = move;
-			//}
-			if (comboIndex == 1) {
-				// 建築予定
-				//ヒットした敵を上にあげ五回程度切り込み
-
-
-			}
-			if (comboIndex == 2) {
-			//	behaviorRequest_ = Behavior::kRoot;
-			}
-			
-			break;
-		case AttackType::kDash:
-			effect_->GetDashEmitter()->SetIsEmit(true);
-			weapon_->SetRad(3.0f);
-
-			workAttack.attackAll.max_t = 0.3f;
-			weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({89,0,0 });
-
-			workAttack.pos.end = objectReticle_.GetWorldPosition();
-
-			break;
-		case AttackType::kSpecial:
-
-			break;
 		}
 		// ふるまいリクエストリセット
 		workAttack.typeRequest_ = std::nullopt;
@@ -267,12 +176,6 @@ void Player::AttackTypes()
 	if (workAttack.key.IsAttack) {
 		if (workAttack.key.IsNormalAttack) {
 			workAttack.typeRequest_ = AttackType::kNormal;
-		}
-		else if (workAttack.key.IsDashAttack) {
-			workAttack.typeRequest_ = AttackType::kDash;
-		}
-		else if (workAttack.key.IsJampAttack) {
-			workAttack.typeRequest_ = AttackType::kJamp;
 		}
 	}
 }

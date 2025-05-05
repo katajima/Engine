@@ -19,10 +19,12 @@
 
 // プレイヤー
 #include"BasePlayerState.h"
-#include"playerWeapon.h"
+#include"DirectXGame/application/base/Player/Weapon/playerWeapon.h"
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
 #include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
+
+#include"DirectXGame/application/base/Attack/AttackManager.h"
 
 ///< summary>
 /// 自キャラ
@@ -42,7 +44,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera);
+	void Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera);
 
 	///< summary>
 	/// 更新
@@ -108,17 +110,12 @@ public: // 攻撃関係
 		bool IsAttack; // 攻撃するか
 
 		bool IsNormalAttack; // B
-		bool IsDashAttack;   // X
-		bool IsJampAttack;   // Y
 		bool IsSpecialAttack;// RT
 	};
 	enum class  AttackType
 	{
 		kNone = 0,
 		kNormal, // 通常攻撃
-		kDash,   // ダッシュ攻撃
-		kJamp,   // ジャンプ攻撃
-		kSpecial,// 必殺技攻撃
 	};
 private: // 攻撃関係
 	struct StartEnd
@@ -267,7 +264,6 @@ private:  // パラメータ
 	uint32_t maxHp = 100;
 	int hp = 100;
 	bool isAlive = true;
-	float damage_ = 0;
 	bool isInvincible = false;
 private:
 	// スペシャル攻撃
@@ -278,7 +274,8 @@ private:
 	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
 	// 武器
 	std::unique_ptr<playerWeapon> weapon_;
-
+	//
+	std::unique_ptr<AttackManager> attackManager_;
 
 
 	// オブジェクト3D

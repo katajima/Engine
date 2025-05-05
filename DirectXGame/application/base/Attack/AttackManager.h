@@ -1,21 +1,30 @@
 #pragma once
 #include "AttackData.h"
+#include "DirectXGame/engine/input/Input.h"
 
+#include "BaseAttack.h"
+
+// 攻撃マネージャー
 class AttackManager
 {
-public: // 関数
-	void AddAttack();
+public: 
+	void Initialize(Input* input);
 
-private: // 変数
+	void Update(float dt);
+	void AddAttack(const std::string& attackId); // ID指定で攻撃開始
+	void RegisterAttackNode(const AttackNode& node); // 外部登録用
 
-	// 攻撃内部データ
-	AttackData attackData_;
+	void SetContext(Input* input, const std::unordered_map<std::string, Transform*>& transforms);
 
-	// 攻撃インプット
-	AttackInput attackInput_;
+private:
+	void TryTransition(); // コンボ遷移処理
 
-	//  
-	AttackType type;
+	std::unordered_map<std::string, AttackNode> attackNodes_; // ノードマップ
+	std::unique_ptr<BaseAttack> currentAttack_;               // 現在の攻撃
+	std::string currentAttackId_;                             // 現在の攻撃ID
+	AttackInput attackInput_; // 例えばAttackManagerに持たせる
+	Input* input_ = nullptr;
+	std::unordered_map<std::string, Transform*> transforms_;
 
 };
 

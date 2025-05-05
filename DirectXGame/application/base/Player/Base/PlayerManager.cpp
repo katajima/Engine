@@ -1,11 +1,12 @@
 #include "PlayerManager.h"
 
-void PlayerManager::Initialize(DirectXCommon* dxCommon,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
+void PlayerManager::Initialize(Input* input,DirectXCommon* dxCommon,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
 	dxCommon_ = dxCommon;
 	camera_ = camera;
+	input_ = input;
 }
 
 void PlayerManager::Update()
@@ -43,7 +44,7 @@ void PlayerManager::SelectPlayer(Type type, Vector3 position)
 	{
 	case PlayerManager::Type::kNormal:
 		player_ = std::make_unique<NormalPlayer>();
-		player_->Initialize(dxCommon_,entity3DManager_,entity2DManager_,position,camera_);
+		player_->Initialize(input_, dxCommon_,entity3DManager_,entity2DManager_,position,camera_);
 		break;
 	case PlayerManager::Type::kBullet:
 		break;

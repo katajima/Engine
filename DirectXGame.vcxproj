@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Base\BasePlayer.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Special\BaseSpecial.cpp" />
@@ -124,9 +125,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Player\Player.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerAttack.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerBehavior.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Player\playerWeapon.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Player\Weapon\playerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Special\BulletSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\UI\PlayerUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Player\Weapon\SwordWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\BaseUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp" />
@@ -516,6 +518,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\application\base\Attack\BaseAttack.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Type\AttackType.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Base\BasePlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackManager.h" />
@@ -532,9 +537,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Player\Effect\PlayerEffect.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Normal\NormalPlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Player.h" />
-    <ClInclude Include="DirectXGame\application\base\Player\playerWeapon.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\Weapon\playerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Special\BulletSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\Player\UI\PlayerUI.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\Weapon\SwordWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\Stage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\BaseUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h" />
