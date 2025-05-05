@@ -1,9 +1,9 @@
 #include "AttackManager.h"
-#include "DirectXGame/application/base/Attack/Type/AttackType.h"
 
-void AttackManager::Initialize(Input* input)
+void AttackManager::Initialize(Input* input, BaseAttackFactory* factory)
 {
 	input_ = input;
+    factory_ = factory;
 }
 
 void AttackManager::Update(float dt)
@@ -23,41 +23,17 @@ void AttackManager::Update(float dt)
 
 void AttackManager::AddAttack(const std::string& attackId)
 {
-    auto it = attackNodes_.find(attackId);
-    if (it == attackNodes_.end()) return;
+    if (!factory_) return;
 
-    const AttackData& data = it->second.data;
+    auto attack = factory_->Create(attackId);
+    if (!attack) return;
 
-    switch (data.attackType)
-    {
-    case AttackType::Blow:
-        currentAttack_ = std::make_unique<BlowAttack>();
-        break;
-    case AttackType::ConsecutiveHits:
-        currentAttack_ = std::make_unique<ConsecutiveHitsAttack>();
-        break;
-    case AttackType::Duration:
-        currentAttack_ = std::make_unique<DurationAttack>();
-        break;
-    case AttackType::LastConsecutiveHits:
-        currentAttack_ = std::make_unique<LastConsecutiveHitsAttack>();
-        break;
-    case AttackType::LastBlow:
-        currentAttack_ = std::make_unique<LastBlowAttack>();
-        break;
-    case AttackType::Charge:  // ← 追加
-        currentAttack_ = std::make_unique<ChargeAttack>();
-        break;
-    default:
-        currentAttack_ = std::make_unique<BlowAttack>();
-        break;
-    }
+    attack->SetInput(input_);
+    attack->SetTransforms(transforms_);
+    attack->SetAttackData(attackNodes_[attackId].data);
+    attack->Start();
 
-
-    currentAttack_->SetInput(input_);
-    currentAttack_->SetTransforms(transforms_); // ← マルチTransform対応
-    currentAttack_->SetAttackData(data);
-    currentAttack_->Start();
+    currentAttack_ = std::move(attack);
     currentAttackId_ = attackId;
 }
 

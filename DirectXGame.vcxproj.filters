@@ -898,10 +898,19 @@
     <ClInclude Include="DirectXGame\application\base\Player\Weapon\SwordWeapon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\BaseAttack.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttack.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Type\AttackType.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

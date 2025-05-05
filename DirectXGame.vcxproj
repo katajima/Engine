@@ -518,9 +518,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DirectXGame\application\base\Attack\BaseAttack.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Type\AttackType.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttack.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackFactory.h" />
+    <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Base\BasePlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackManager.h" />

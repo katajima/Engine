@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/BaseAttack.h"
+#include "BaseAttack.h"
 
 class BlowAttack : public BaseAttack {
 public:
@@ -57,10 +57,6 @@ private:
 };
 
 
-// DurationAttack.h
-#pragma once
-#include "BaseAttack.h"
-
 class DurationAttack : public BaseAttack {
 public:
     void Start() override {
@@ -92,10 +88,6 @@ private:
     bool hasActivated_ = false;
 };
 
-
-// LastConsecutiveHitsAttack.h
-#pragma once
-#include "BaseAttack.h"
 
 class LastConsecutiveHitsAttack : public BaseAttack {
 public:

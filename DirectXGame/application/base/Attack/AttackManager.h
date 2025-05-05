@@ -2,13 +2,15 @@
 #include "AttackData.h"
 #include "DirectXGame/engine/input/Input.h"
 
-#include "BaseAttack.h"
+#include "DirectXGame/application/base/Attack/Factory/BaseAttackFactory.h"
+
+
 
 // 攻撃マネージャー
 class AttackManager
 {
 public: 
-	void Initialize(Input* input);
+	void Initialize(Input* input, BaseAttackFactory* factory);
 
 	void Update(float dt);
 	void AddAttack(const std::string& attackId); // ID指定で攻撃開始
@@ -18,7 +20,8 @@ public:
 
 private:
 	void TryTransition(); // コンボ遷移処理
-
+	
+	BaseAttackFactory* factory_ = nullptr;					  // 
 	std::unordered_map<std::string, AttackNode> attackNodes_; // ノードマップ
 	std::unique_ptr<BaseAttack> currentAttack_;               // 現在の攻撃
 	std::string currentAttackId_;                             // 現在の攻撃ID

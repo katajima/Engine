@@ -55,7 +55,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	
 	// 攻撃マネージャー
 	attackManager_ = std::make_unique<AttackManager>();
-	attackManager_->Initialize(input_);
+	attackManager_->Initialize(input_,nullptr);
 
 
 	// UI

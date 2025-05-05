@@ -1,5 +1,6 @@
 #pragma once
-#include "AttackData.h"
+#include "DirectXGame/engine/input/Input.h"
+#include "DirectXGame/application/base/Attack/AttackData.h"
 
 class BaseAttack {
 public:
