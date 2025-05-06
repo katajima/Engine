@@ -82,6 +82,9 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	AttackNode node2{};
 	node2.data.attackType = AttackType::Blow;
 	node2.data.transformId = "Player";
+	node.data.activeFrames = 60.0f;
+	node.data.recoveryFrames = 10.0f;
+	node.data.startupFrames = 60.0f;
 	node2.canCancelFunc = [] { return true; };
 	node2.nextNodeIds = {};
 
@@ -199,7 +202,7 @@ void Player::Update()
 	// 重力
 	Gravity();
 	// 移動制限
-	LimitMove();
+	//LimitMove();
 
 	// エフェクト
 	effect_->Update();

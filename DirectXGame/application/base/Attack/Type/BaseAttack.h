@@ -2,6 +2,8 @@
 #include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 
+#include "imgui.h"
+
 class BaseAttack {
 public:
     virtual ~BaseAttack() = default;
@@ -49,7 +51,15 @@ protected:
         auto it = transforms_.find(name);
         return (it != transforms_.end()) ? it->second : nullptr;
     }
+    // 全体時間
     float GetTotalDuration() const {
         return (attackData_.startupFrames + attackData_.activeFrames + attackData_.recoveryFrames) / 60.0f;
     }
+
+    // 発生＋持続フレーム
+    float GetStartupAndActiveFrame() const { return (attackData_.startupFrames + attackData_.activeFrames) / 60.0f; };
+
+    // 発生フレーム
+    float GetStartupFrame() const { return (attackData_.startupFrames) / 60.0f;}
+
 };

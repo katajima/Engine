@@ -10,6 +10,8 @@ public:
             ApplyEffect();
             hasHit_ = true;
         }
+
+        
     }
 
     void ApplyEffect() override {

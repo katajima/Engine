@@ -13,10 +13,26 @@ public:
 
     void Update(float dt) override {
         BlowAttack::Update(dt);
-        // 上昇力を使った演出等
+        
+        ImGui::Begin("Uppe");
+        ImGui::InputFloat("timer", &timer_);
+        ImGui::InputFloat3("timer", &transforms_["Player"]->translate_.x);
+        ImGui::Checkbox("isFinished", &isFinished_);
+        ImGui::End();
 
 
-        transforms_["Player"]->translate_.x += 1;
+        if (timer_ <= GetStartupAndActiveFrame() && timer_ >= GetStartupFrame()) {
+             transforms_["Player"]->translate_.x += 0.5f;
+        }
+        else if (timer_ <= GetStartupAndActiveFrame()) {
+            transforms_["Player"]->translate_.x += 0.1f;
+        }
+        else {
+            transforms_["Player"]->translate_.x += 0.1f;
+        }
+       
+
+       
 
     }
 
