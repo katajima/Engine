@@ -178,11 +178,11 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 
-		//primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
-		//primitiveObject->Draw(Primitive::PsoType::kRingClamp);
+		primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
+		primitiveObject->Draw(Primitive::PsoType::kRingClamp);
 
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		//ocean_->Draw();
+		ocean_->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -239,13 +239,13 @@ void TestScene::Draw2D()
 	switch (behavior_)
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
-		for (int i = 0; i < sprite_.size(); i++) {
+		/*for (int i = 0; i < sprite_.size(); i++) {
 			sprite_[i]->UpdateAmimetion(0.05f);
 		}
 		sprite_[0]->Draw();
 		sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
 		sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
-		sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
+		sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);*/
 
 
 

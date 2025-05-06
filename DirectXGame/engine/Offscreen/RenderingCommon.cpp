@@ -263,6 +263,12 @@ void RenderingCommon::UpdateImgui(PostEffectType type)
 			if (ImGui::Button("Filter5x5")) {
 				gaussianData_->num = 5;
 			}
+			if (ImGui::Button("Filter7x7")) {
+				gaussianData_->num = 7;
+			}
+			if (ImGui::Button("Filter9x9")) {
+				gaussianData_->num = 9;
+			}
 			break;
 		case RenderingCommon::PostEffectType::kOitline:
 			if (ImGui::Button("0")) {
