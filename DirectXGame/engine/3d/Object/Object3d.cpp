@@ -38,7 +38,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager)
 	transfomation->Initialize(object3dCommon_->GetDxCommon());
 
 	worldtransform_.Initialize();
-	worldtransform_.translate_.x = {0.00000001f};
+	worldtransform_.translate_.x = { 0.00000001f };
 
 	object3dCommon_->count++;
 }
@@ -48,14 +48,37 @@ void Object3d::Initialize(Entity3DManager* entity3DManager)
 void Object3d::Update()
 {
 
-//	worldtransform_.worldPreMat_ = worldtransform_.worldMat_;
+	//	worldtransform_.worldPreMat_ = worldtransform_.worldMat_;
 #ifdef _DEBUG
-	ImGui::Begin("engine");
+	//if (ImGui::TreeNode("Directional Lights")) {
+	ImGui::Begin("SceneCollection");
 
-	//if (ImGui::CollapsingHeader("Gizmos")) {
-	//	imGuiManager_->RenderGizmo2(worldtransform_, *camera, name.c_str());
-	//}
+	if (ImGui::TreeNode(name.c_str())) {
+		imguiFlag_ = true;
+		ImGui::TreePop();
+	}
+	else {
+		imguiFlag_ = false;
+	}
+	//ImGui::TreePop();
+
 	ImGui::End();
+	//}
+
+
+	ImGui::Begin("Object Properties");
+	if (imguiFlag_) {
+		ImGui::DragFloat3("scale", &worldtransform_.scale_.x, 0.1f);
+		ImGui::DragFloat3("rotate", &worldtransform_.rotate_.x, 0.1f);
+		ImGui::DragFloat3("translate", &worldtransform_.translate_.x, 0.1f);
+		if (ImGui::CollapsingHeader("Gizmos")) {
+			imGuiManager_->RenderGizmo2(worldtransform_, *camera, name.c_str());
+		}
+	}
+
+	ImGui::End();
+
+
 
 #endif // _DEBUG
 
@@ -67,7 +90,7 @@ void Object3d::Update()
 		localMatrix = model->modelData.rootNode.localMatrix;
 		model->modelData.material[0]->GPUData();
 	}
-	
+
 
 
 	worldtransform_.Update();
@@ -88,7 +111,7 @@ void Object3d::UpdateSkinning()
 			}
 			model->animationTime = std::fmod(model->animationTime, model->animation.duration);
 			localMatrix = model->skeleton.joints[0].skeletonSpaceMatrix;
-			
+
 			ApplyAnimation(model->skeleton, model->animation, model->animationTime);
 			// スケルトンの更新
 			UpdateSkeleton(model->skeleton);
@@ -96,7 +119,7 @@ void Object3d::UpdateSkinning()
 			// スキニング更新
 			UpdateSkinCluster(model->skinCluster, model->skeleton);
 
-			
+
 		}
 		else {
 			localMatrix = model->modelData.rootNode.localMatrix;
@@ -122,7 +145,7 @@ void Object3d::UpdateAnimation()
 				model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
 			}
 			model->animationTime = std::fmod(model->animationTime, model->animation.duration);
-			
+
 			// 単一のジョイントの場合
 			const NodeAnimation& rootNodeAnimation = model->animation.nodeAnimations[model->modelData.rootNode.name];
 			Vector3 translate = CalculateValue(rootNodeAnimation.translate.keyframes, model->animationTime);
@@ -179,7 +202,7 @@ void Object3d::DrawSkinning(ObjectType type)
 
 void Object3d::DrawLine()
 {
-	DrawSkeleton(model->skeleton.joints,worldtransform_.translate_,worldtransform_.scale_);
+	DrawSkeleton(model->skeleton.joints, worldtransform_.translate_, worldtransform_.scale_);
 }
 
 Vector2 Object3d::GetScreenPosition()
@@ -246,7 +269,7 @@ void Object3d::DrawSetting()
 	transfomation->GetCommandList(1);
 
 
-	
+
 	transfomation->GetCommandList(10);
 
 
@@ -339,7 +362,7 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
 void Object3d::SetModel(const std::string& filePath)
 {
 	//モデルを検索してセット
-	
+
 	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
 }
 

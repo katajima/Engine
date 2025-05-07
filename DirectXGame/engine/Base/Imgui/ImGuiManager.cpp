@@ -25,7 +25,7 @@ void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 	// Imguiのスタイルを設定 黒
 	ImGui::StyleColorsDark();
 
-	
+	// ImGuiスタイル設定
 	InitImGuiStyle();
 
 	// プラットフォームとレンダラーのバックエンドを設定する
@@ -37,11 +37,8 @@ void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 		srvManager_->GetGPUDescriptorHandle(0));
 
 
-	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msgothic.ttc", 10.0f, nullptr, glyphRangesJapanese);
-
-	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
-
+	// フォント追加
+	AddFont();
 #endif // _DEBUG
 
 }
@@ -64,6 +61,10 @@ void ImGuiManager::Begin()
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+
+	// 
+	ImGuiViewport* vi = ImGui::GetMainViewport();
+	ImGui::DockSpaceOverViewport(0,vi);
 
 	ImGuizmo::BeginFrame();
 #endif // _DEBUG
@@ -187,8 +188,6 @@ void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera& camera, const
 	}
 }
 
-
-
 void ImGuiManager::SetCustomColorScheme()
 {
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -236,6 +235,13 @@ void ImGuiManager::InitImGuiStyle()
 
 	// 入力欄、チェックボックス、スライダーなどのフレーム背景色（通常時）
 	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+}
+
+void ImGuiManager::AddFont()
+{
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msgothic.ttc", 10.0f, nullptr, glyphRangesJapanese);
+	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
 }
 
 

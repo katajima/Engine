@@ -45,6 +45,11 @@ void TestScene::Update()
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 
 #ifdef _DEBUG
+
+
+	
+
+
 	ImVec2 defaultPos(100, 100); // 初期位置（画面内）
 	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
 	ImVec2 safePos = defaultPos;
@@ -61,17 +66,9 @@ void TestScene::Update()
 	ImVec2 pos = ImGui::GetWindowPos();
 	ImVec2 size = ImGui::GetWindowSize();
 	
-	// ウィンドウ外に出ないように補正
-	ImVec2 clampedPos = pos;
-	clampedPos.x = ImClamp(clampedPos.x, 0.0f, displaySize.x - size.x);
-	clampedPos.y = ImClamp(clampedPos.y, 0.0f, displaySize.y - size.y);
-
-	if (clampedPos.x != pos.x || clampedPos.y != pos.y) {
-		ImGui::SetWindowPos(clampedPos);
-	}
+	
 	// UI内容
-	ImGui::Text("これはウィンドウ外に出ないウィンドウです");
-
+	
 	ImGui::DragFloat2("pos", &primitive2d1_->position.x);
 	ImGui::DragFloat2("scale", &primitive2d1_->scale.x, 0.1f);
 	ImGui::DragFloat("rotate", &primitive2d1_->rotation, 0.01f);
@@ -107,9 +104,15 @@ void TestScene::Update()
 
 	ImGui::End();
 
+	//ImGuiWindowScope window("EEEE");
+	//ImGui::Text("Hello, world!");
+	//ImGui::Button("Click Me");
 
-	ImGui::BeginTable("テーブル");
-	ImGui::End();
+	//ImGuiWindowScope window2("EEEE2");
+	//ImGui::Text("Hello, world!");
+	//ImGui::Button("Click Me");
+
+	
 
 #endif // _DEBUG
 

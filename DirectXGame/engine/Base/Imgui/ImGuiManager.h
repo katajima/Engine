@@ -59,9 +59,16 @@ public:
 
 	void SetInput(Input* input) { input_ = input; }
 
+public:
+
+	void BiginSceneCollection();
+
 private:
 	// ImGuiスタイル
 	void InitImGuiStyle();
+	// AddFont
+	void AddFont();
+
 
 private:
 
@@ -75,6 +82,17 @@ private:
 
 	uint32_t srvIndex = 0;
 
+};
+
+class ImGuiWindowScope {
+public:
+	ImGuiWindowScope(const char* name, ImGuiWindowFlags flags = 0) {
+		ImGui::Begin(name, nullptr, flags);
+	}
+
+	~ImGuiWindowScope() {
+		ImGui::End();
+	}
 };
 
 

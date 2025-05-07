@@ -69,6 +69,10 @@ void MyGame::Update()
 	ImGui::Text("FPS: %.2f", fps);
 	ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
 	ImGui::End();
+
+	ImGui::Begin("SceneCollection");
+	ImGui::End();
+
 #endif // _DEBUG
 
 	// グローバル変数の更新
@@ -78,9 +82,9 @@ void MyGame::Update()
 
 
 #ifdef _DEBUG
-	ImGui::Begin("scene");
-	float width = static_cast<float> (WinApp::GetClientWidth() / 2);
-	float height = static_cast<float> (WinApp::GetClientHeight() / 2);
+	ImGui::Begin("GameScene");
+	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
+	float height = static_cast<float> (WinApp::GetClientHeight() / 1.5f);
 
 	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetFinalRenderTexture()->GetSRVGPUHandle().ptr);
 	ImGui::Image(imguiTexture, ImVec2(width, height));

@@ -111,6 +111,8 @@ private:
 	SkinningConmmon* skinningConmmon_;
 	ImGuiManager* imGuiManager_;
 	Entity3DManager* entity3DManager_;
+
+	bool imguiFlag_ = false;
 public:
 	// モデル
 	Model* model = nullptr;
