@@ -189,7 +189,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Common\DirectXCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\ImGuiManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp" />
@@ -213,7 +213,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="DirectXGame\engine\input\Input.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\Logger.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Logger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\Model.cpp" />
@@ -223,9 +223,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3dCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\Sprite.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\SpriteCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\StringUtility.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\TextureManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\base\WinApp.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\StringUtility.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\Texture\TextureManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Base\WinApp\WinApp.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\Mesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.cpp" />
   </ItemGroup>
@@ -553,8 +553,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
-    <ClInclude Include="DirectXGame\engine\base\LevelData.h" />
+    <ClInclude Include="DirectXGame\engine\Base\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
     <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h" />
@@ -616,7 +617,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Camera\Camera.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h" />
-    <ClInclude Include="DirectXGame\engine\base\ImGuiManager.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h" />
@@ -646,7 +647,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="DirectXGame\engine\input\Input.h" />
-    <ClInclude Include="DirectXGame\engine\base\Logger.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Logger.h" />
     <ClInclude Include="DirectXGame\engine\Math\MathFanctions.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\Model.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h" />
@@ -655,10 +656,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dCommon.h" />
     <ClInclude Include="DirectXGame\engine\2d\Sprite.h" />
     <ClInclude Include="DirectXGame\engine\2d\SpriteCommon.h" />
-    <ClInclude Include="DirectXGame\engine\base\StringUtility.h" />
+    <ClInclude Include="DirectXGame\engine\Base\StringUtility.h" />
     <ClInclude Include="DirectXGame\engine\struct\Structs3D.h" />
-    <ClInclude Include="DirectXGame\engine\base\TextureManager.h" />
-    <ClInclude Include="DirectXGame\engine\base\WinApp.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Texture\TextureManager.h" />
+    <ClInclude Include="DirectXGame\engine\Base\WinApp\WinApp.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.h" />
   </ItemGroup>
   <ItemGroup>

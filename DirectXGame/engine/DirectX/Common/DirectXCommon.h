@@ -8,7 +8,7 @@
 #include <array>
 #include"DirectXGame/engine/base/Logger.h"
 #include"DirectXGame/engine/base/StringUtility.h"
-#include"DirectXGame/engine/base/WinApp.h"
+#include"DirectXGame/engine/base/WinApp/WinApp.h"
 #include<chrono>
 #include <thread>
 #include<vector>
@@ -31,7 +31,7 @@
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 
 #include "DirectXGame/engine/Manager/UAV/UavManager.h"
@@ -39,7 +39,7 @@
 #include "DirectXGame/engine/Manager/DSV/DsvManager.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
 

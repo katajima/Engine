@@ -1,6 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/audio/Audio.h"
 #include"DirectXGame/engine/3d/Model/ModelManager.h"
@@ -11,7 +11,7 @@
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/base/LevelData.h"

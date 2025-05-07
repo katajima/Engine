@@ -1,7 +1,6 @@
 #include "Mesh.h"
 
-#include "DirectXGame/engine/base/ImGuiManager.h"
-//#include "DirectXGame/engine/3d/Model/ModelCommon.h"
+#include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 // 頂点を比較するためのオペレーター

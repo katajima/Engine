@@ -1,5 +1,5 @@
 #include "ParticleManager.h"
-#include "DirectXGame/engine/base/TextureManager.h"
+#include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include"DirectXGame/engine/Line/LineCommon.h"

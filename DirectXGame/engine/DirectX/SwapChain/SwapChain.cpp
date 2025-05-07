@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 
 void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager)

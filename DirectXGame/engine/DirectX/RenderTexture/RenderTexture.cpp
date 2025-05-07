@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 

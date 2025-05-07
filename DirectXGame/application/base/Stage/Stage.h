@@ -9,7 +9,7 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"

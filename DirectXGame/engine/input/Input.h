@@ -8,7 +8,7 @@
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"XInput.lib")
 
-#include"DirectXGame/engine/base/WinApp.h"
+#include"DirectXGame/engine/base/WinApp/WinApp.h"
 
 #include "DirectXGame/engine/struct/Structs3D.h"
 

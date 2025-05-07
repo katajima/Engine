@@ -1,6 +1,7 @@
 #pragma once
 #include"externals/imgui/imgui_impl_dx12.h"
 #include"externals/imgui/imgui_impl_win32.h"
+#include "imgui_internal.h"
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
@@ -13,6 +14,9 @@
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/Camera/Camera.h"
+
+
+
 
 // 前方宣言
 class WinApp;
@@ -55,6 +59,9 @@ public:
 
 	void SetInput(Input* input) { input_ = input; }
 
+private:
+	// ImGuiスタイル
+	void InitImGuiStyle();
 
 private:
 

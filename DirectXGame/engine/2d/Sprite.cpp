@@ -1,7 +1,7 @@
 #include"Sprite.h"
 #include"SpriteCommon.h"
 #include <iostream>
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
 void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, bool isTexLoad)

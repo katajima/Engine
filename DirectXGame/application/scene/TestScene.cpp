@@ -45,7 +45,33 @@ void TestScene::Update()
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 
 #ifdef _DEBUG
-	ImGui::Begin("primi2D");
+	ImVec2 defaultPos(100, 100); // 初期位置（画面内）
+	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+	ImVec2 safePos = defaultPos;
+
+	// ウィンドウ外に初期位置が出ないように制限
+	safePos.x = ImClamp(safePos.x, 0.0f, displaySize.x - 100.0f); // 最小100pxの幅と仮定
+	safePos.y = ImClamp(safePos.y, 0.0f, displaySize.y - 100.0f);
+
+	ImGui::SetNextWindowPos(safePos, ImGuiCond_FirstUseEver);
+
+
+	ImGui::Begin("プリミティブ");
+
+	ImVec2 pos = ImGui::GetWindowPos();
+	ImVec2 size = ImGui::GetWindowSize();
+	
+	// ウィンドウ外に出ないように補正
+	ImVec2 clampedPos = pos;
+	clampedPos.x = ImClamp(clampedPos.x, 0.0f, displaySize.x - size.x);
+	clampedPos.y = ImClamp(clampedPos.y, 0.0f, displaySize.y - size.y);
+
+	if (clampedPos.x != pos.x || clampedPos.y != pos.y) {
+		ImGui::SetWindowPos(clampedPos);
+	}
+	// UI内容
+	ImGui::Text("これはウィンドウ外に出ないウィンドウです");
+
 	ImGui::DragFloat2("pos", &primitive2d1_->position.x);
 	ImGui::DragFloat2("scale", &primitive2d1_->scale.x, 0.1f);
 	ImGui::DragFloat("rotate", &primitive2d1_->rotation, 0.01f);
@@ -81,6 +107,9 @@ void TestScene::Update()
 
 	ImGui::End();
 
+
+	ImGui::BeginTable("テーブル");
+	ImGui::End();
 
 #endif // _DEBUG
 

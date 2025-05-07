@@ -111,7 +111,7 @@
     <ClCompile Include="DirectXGame\engine\3d\Model\Model.cpp">
       <Filter>ソース ファイル\engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\base\WinApp.cpp">
+    <ClCompile Include="DirectXGame\engine\Base\WinApp\WinApp.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp">
@@ -123,16 +123,16 @@
     <ClCompile Include="DirectXGame\engine\input\Input.cpp">
       <Filter>ソース ファイル\engine\input</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\base\TextureManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Base\Texture\TextureManager.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\base\Logger.cpp">
+    <ClCompile Include="DirectXGame\engine\Base\Logger.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\base\StringUtility.cpp">
+    <ClCompile Include="DirectXGame\engine\Base\StringUtility.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp">
@@ -147,7 +147,7 @@
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\base\ImGuiManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp">
@@ -535,7 +535,7 @@
     <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\base\WinApp.h">
+    <ClInclude Include="DirectXGame\engine\Base\WinApp\WinApp.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\input\Input.h">
@@ -547,13 +547,13 @@
     <ClInclude Include="DirectXGame\engine\struct\Structs3D.h">
       <Filter>ヘッダー ファイル\engine\struct</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\base\TextureManager.h">
+    <ClInclude Include="DirectXGame\engine\Base\Texture\TextureManager.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\base\Logger.h">
+    <ClInclude Include="DirectXGame\engine\Base\Logger.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\base\StringUtility.h">
+    <ClInclude Include="DirectXGame\engine\Base\StringUtility.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h">
@@ -571,7 +571,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\base\ImGuiManager.h">
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Audio\Audio.h">
@@ -607,7 +607,7 @@
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\base\LevelData.h">
+    <ClInclude Include="DirectXGame\engine\Base\LevelData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\ImGuizmo.h">
@@ -911,6 +911,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

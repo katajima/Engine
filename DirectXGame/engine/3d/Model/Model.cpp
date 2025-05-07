@@ -4,7 +4,7 @@
 #include"ModelCommon.h"
 //#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/base/Logger.h"
 #include"DirectXGame/engine/base/StringUtility.h"

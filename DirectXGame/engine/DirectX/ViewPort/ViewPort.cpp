@@ -1,6 +1,6 @@
 #include "ViewPort.h"
 #include "DirectXGame/engine/DirectX/Command/Command.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 void ViewPort::Initialize(Command* command)
 {

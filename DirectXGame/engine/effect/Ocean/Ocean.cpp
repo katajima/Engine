@@ -1,5 +1,5 @@
 #include "Ocean.h"
-#include "DirectXGame/engine/base/TextureManager.h"
+#include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "OceanManager.h"
 #include "imgui.h"

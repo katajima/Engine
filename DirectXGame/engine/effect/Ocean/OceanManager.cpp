@@ -1,5 +1,4 @@
 #include "OceanManager.h"
-#include "DirectXGame/engine/base/TextureManager.h"
 #include "imgui.h"
 
 
@@ -7,7 +6,7 @@
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
-#include "DirectXGame/engine/base/TextureManager.h"
+#include "DirectXGame/engine/base/Texture/TextureManager.h"
 
 
 void OceanManager::Initialize(DirectXCommon* dxCommon)

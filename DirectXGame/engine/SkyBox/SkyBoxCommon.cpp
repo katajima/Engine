@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
-#include "DirectXGame/engine/base/TextureManager.h"
+#include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)

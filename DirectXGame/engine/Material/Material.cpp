@@ -1,5 +1,5 @@
 #include "Material.h"
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
 

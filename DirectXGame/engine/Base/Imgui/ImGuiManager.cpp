@@ -2,15 +2,16 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/input/Input.h"
-#include "WinApp.h"
+#include "DirectXGame/engine/Base/WinApp/WinApp.h"
 #include <iostream>//用いるヘッダファイルが変わります。
 
+// 日本語対応用
+#include "ImGuiJapaneseFont.h"
 
+#include "imgui.h"
 
 // ギズモの操作モード
 static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値は移動
-
-
 
 
 void ImGuiManager::Initialize(DirectXCommon* dxCommon)
@@ -24,6 +25,9 @@ void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 	// Imguiのスタイルを設定 黒
 	ImGui::StyleColorsDark();
 
+	
+	InitImGuiStyle();
+
 	// プラットフォームとレンダラーのバックエンドを設定する
 	ImGui_ImplWin32_Init(WinApp::GetHwnd());
 	ImGui_ImplDX12_Init(
@@ -31,6 +35,13 @@ void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, srvManager_->GetDescriptorHeap(),
 		srvManager_->GetCPUDescriptorHandle(0),
 		srvManager_->GetGPUDescriptorHandle(0));
+
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msgothic.ttc", 10.0f, nullptr, glyphRangesJapanese);
+
+	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
+
 #endif // _DEBUG
 
 }
@@ -194,6 +205,37 @@ void ImGuiManager::SetCustomColorScheme()
 	style.Colors[ImGuiCol_Header] = ImVec4(0.2f, 0.3f, 0.8f, 1.0f);  // 青
 	style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.4f, 0.5f, 1.0f, 1.0f);  // 明るい青
 	style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.1f, 0.2f, 0.6f, 1.0f);  // ダーク青
+}
+
+void ImGuiManager::InitImGuiStyle()
+{
+	
+
+	ImGuiStyle& style = ImGui::GetStyle();
+
+	// ウィンドウの背景色（通常のウィンドウ部分全体の背景）
+	style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// 折りたたみ可能なヘッダー（ツリー、カテゴリ、CollapsingHeaderなど）の背景色（通常時）
+	style.Colors[ImGuiCol_Header] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+
+	// 折りたたみ可能なヘッダーにマウスホバーしているときの背景色
+	style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.3f, 0.5f, 0.8f, 1.0f);
+
+	// 折りたたみ可能なヘッダーを押してアクティブになったときの背景色
+	style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.45f, 0.75f, 1.0f);
+
+	// ボタンの背景色（通常時）
+	style.Colors[ImGuiCol_Button] = ImVec4(1.0f, 0.271f, 0.0f, 1.0f);
+
+	// ボタンにマウスホバーしているときの背景色
+	style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.5f, 0.8f, 1.0f);
+
+	// ボタンを押しているとき（アクティブ）の背景色
+	style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.25f, 0.45f, 0.75f, 1.0f);
+
+	// 入力欄、チェックボックス、スライダーなどのフレーム背景色（通常時）
+	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
 

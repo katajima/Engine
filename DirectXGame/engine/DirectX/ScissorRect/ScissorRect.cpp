@@ -1,7 +1,7 @@
 #include "ScissorRect.h"
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 void ScissorRect::Initialize(Command* command)
 {
