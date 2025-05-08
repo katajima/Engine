@@ -429,6 +429,9 @@
     <ClCompile Include="DirectXGame\application\base\Player\Weapon\SwordWeapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -607,7 +610,7 @@
     <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\LevelData.h">
+    <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\ImGuizmo.h">
@@ -914,6 +917,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

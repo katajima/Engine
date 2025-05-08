@@ -14,7 +14,6 @@
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
-#include"DirectXGame/engine/base/LevelData.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
@@ -52,9 +51,7 @@ public:
 
 	void UpdateImGui();
 
-	// レベルデータ
-	void LoadLevelData();
-
+	
 	void ApplyGlobalVariables();
 
 	/// <summary>
@@ -119,8 +116,7 @@ private:
 
 private:
 
-	// ロードデータ用
-	std::vector <Object3d*> objects;
+	
 	// 衝突マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;
 
