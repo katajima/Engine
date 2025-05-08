@@ -35,7 +35,6 @@ public:
 
 	Camera* GetDefaltCamera() const { return defaultCamera; }
 
-
 	int32_t count = 0;
 private:
 	// ルートシグネチャの作成
@@ -56,7 +55,7 @@ private:// メンバ変数
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
 
-
+private:// メンバ変数
 	
 	
 };

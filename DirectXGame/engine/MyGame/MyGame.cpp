@@ -69,10 +69,6 @@ void MyGame::Update()
 	ImGui::Text("FPS: %.2f", fps);
 	ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
 	ImGui::End();
-
-	ImGui::Begin("SceneCollection");
-	ImGui::End();
-
 #endif // _DEBUG
 
 	// グローバル変数の更新

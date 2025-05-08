@@ -3,6 +3,8 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+
 void SceneManager::Update()
 {
 	// 次のシーンの予約があるなら
@@ -24,6 +26,7 @@ void SceneManager::Update()
 		scene_->SetGlobalVariables(globalVariables_);
 		scene_->SetDirectXCommon(directXCommon_);
 		scene_->SetEntity3DManager(entity3DManager_);
+		entity3DManager_->ObjectClean();
 		scene_->SetEntity2DManager(entity2DManager_);
 		scene_->Initialize();
 		SetCamera(scene_->GetCamara()); // カメラ情報をもらう

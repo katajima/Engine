@@ -922,6 +922,9 @@
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

@@ -6,6 +6,7 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "assert.h"
 
+
 void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);

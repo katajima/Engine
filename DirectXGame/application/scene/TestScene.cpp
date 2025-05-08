@@ -345,6 +345,7 @@ void TestScene::InitializeObject3D()
 	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
+	tail.SetName("tail");
 	tail.model->modelData.material[0]->shininess_ = 1000.0f;
 
 	multiy.Initialize(GetEntity3DManager());

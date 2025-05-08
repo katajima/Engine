@@ -579,6 +579,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\Effect\EffectManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.h" />
+    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h" />
     <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h" />
     <ClInclude Include="DirectXGame\engine\Math\AStarAlgorithm.h" />

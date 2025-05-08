@@ -12,6 +12,7 @@
 #include"DirectXGame/engine/3d/Model/ModelManager.h"
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3D.h"
 
 using namespace Microsoft::WRL;
 
@@ -61,7 +62,7 @@ public:
 	
 	 void SetModel(const std::string& filePath);
 	void SetCamera(Camera* camera) { this->camera = camera; }
-	void SetName(const std::string& name) { this->name = name; }
+	void SetName(const std::string& name) {this->name = name; }
 
 
 	Vector3 GetWorldPosition() const {
@@ -117,6 +118,8 @@ public:
 	// モデル
 	Model* model = nullptr;
 	
+	std::unique_ptr<Entity3D> entity3D_;
+
 	WorldTransform worldtransform_;
 
 	std::string name = "";

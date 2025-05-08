@@ -187,7 +187,9 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 
 	entity3DManager->GetSkyBoxCommon()->Update();
 
-
+#ifdef _DEBUG
+	entity3DManager->UpdateImgui();
+#endif // _DEBUG
 
 	sceneManager->Update();
 
@@ -198,6 +200,8 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 	}
 
 #ifdef _DEBUG
+	
+
 	entity3DManager->Get3DLineCommon()->Update();
 
 

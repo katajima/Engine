@@ -30,60 +30,32 @@ void Object3d::Initialize(Entity3DManager* entity3DManager)
 	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();
 	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();
 
-	name = "object" + std::to_string(object3dCommon_->count);
-
-
-	transfomation = std::make_unique<Transfomation>();
-
-	transfomation->Initialize(object3dCommon_->GetDxCommon());
-
 	worldtransform_.Initialize();
 	worldtransform_.translate_.x = { 0.00000001f };
 
+	entity3D_ = std::make_unique<Entity3D>();
+	entity3D_->transform_.Initialize();
+	entity3D_->transform_.translate_.x = { 0.00000001f };
+	entity3D_->transform_.parent_ = &worldtransform_;
+
+	name = "object" + std::to_string(object3dCommon_->count);
+
+	transfomation = std::make_unique<Transfomation>();
+	transfomation->Initialize(object3dCommon_->GetDxCommon());
+
+	
+
+	entity3DManager_->SetEntity3D(this);
+
 	object3dCommon_->count++;
+
 }
 
 #pragma region Update
 
 void Object3d::Update()
 {
-
-	//	worldtransform_.worldPreMat_ = worldtransform_.worldMat_;
-#ifdef _DEBUG
-	//if (ImGui::TreeNode("Directional Lights")) {
-	ImGui::Begin("SceneCollection");
-
-	if (ImGui::TreeNode(name.c_str())) {
-		imguiFlag_ = true;
-		ImGui::TreePop();
-	}
-	else {
-		imguiFlag_ = false;
-	}
-	//ImGui::TreePop();
-
-	ImGui::End();
-	//}
-
-
-	ImGui::Begin("Object Properties");
-	if (imguiFlag_) {
-		ImGui::DragFloat3("scale", &worldtransform_.scale_.x, 0.1f);
-		ImGui::DragFloat3("rotate", &worldtransform_.rotate_.x, 0.1f);
-		ImGui::DragFloat3("translate", &worldtransform_.translate_.x, 0.1f);
-		if (ImGui::CollapsingHeader("Gizmos")) {
-			imGuiManager_->RenderGizmo2(worldtransform_, *camera, name.c_str());
-		}
-	}
-
-	ImGui::End();
-
-
-
-#endif // _DEBUG
-
-
-
+	
 	Matrix4x4 localMatrix = MakeIdentity4x4();
 	// モデルが存在する場合
 	if (model) {
@@ -91,8 +63,7 @@ void Object3d::Update()
 		model->modelData.material[0]->GPUData();
 	}
 
-
-
+	
 	worldtransform_.Update();
 
 	// トランスフォームデータ
@@ -101,6 +72,7 @@ void Object3d::Update()
 
 void Object3d::UpdateSkinning()
 {
+	
 	Matrix4x4 localMatrix = MakeIdentity4x4();
 	// モデルが存在する場合
 	if (model) {
@@ -128,14 +100,16 @@ void Object3d::UpdateSkinning()
 	}
 
 
+	
 	worldtransform_.Update();
-
+	
 	// トランスフォームデータ
 	transfomation->UpdateSkinning(model, camera, localMatrix, worldtransform_.worldMat_);
 }
 
 void Object3d::UpdateAnimation()
 {
+	
 	Matrix4x4 localMatrix = MakeIdentity4x4();
 	// モデルが存在する場合
 	if (model) {
@@ -167,7 +141,7 @@ void Object3d::UpdateAnimation()
 
 void Object3d::LineMesh()
 {
-	entity3DManager_->Get3DLineCommon()->AddLineMesh(GetMesh(0), worldtransform_.worldMat_);
+	entity3DManager_->Get3DLineCommon()->AddLineMesh(GetMesh(0),worldtransform_.worldMat_);
 }
 
 #pragma endregion //更新系
@@ -180,6 +154,7 @@ void Object3d::Draw(ObjectType type)
 
 	DrawSetting();
 
+	
 	// 3Dモデルが割り当てれていれば描画する
 	if (model) {
 		model->Draw();
@@ -191,8 +166,8 @@ void Object3d::DrawSkinning(ObjectType type)
 {
 	ObjectSkinTypeDiscrimination(type);
 
-
 	DrawSettingSkin();
+
 
 	// 3Dモデルが割り当てれていれば描画する
 	if (model) {

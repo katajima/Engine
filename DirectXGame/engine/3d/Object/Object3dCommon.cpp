@@ -70,6 +70,8 @@ void Object3dCommon::AllDraw()
 
 }
 
+
+
 void Object3dCommon::CreateRootSignature()
 {
 	//HRESULT hr;

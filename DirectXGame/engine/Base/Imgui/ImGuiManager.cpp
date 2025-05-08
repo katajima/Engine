@@ -241,7 +241,25 @@ void ImGuiManager::AddFont()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msgothic.ttc", 10.0f, nullptr, glyphRangesJapanese);
+
+	
+	// アイコンフォントの範囲（Material Icons のコードポイント範囲）
+	static const ImWchar icon_ranges[] = { 0xe000, 0xf8ff + 1, 0 };  // Private Use Area
+
+
+
+	ImFontConfig icons_config;
+	icons_config.MergeMode = true;
+	icons_config.PixelSnapH = true;
+	icons_config.GlyphMinAdvanceX = 13.0f; // お好みで調整
+	icons_config.OversampleH = 1;
+	icons_config.OversampleV = 1;
+
+	io.Fonts->AddFontFromFileTTF("C:/engine/project/externals/resources/GoogleMaterialFont/MaterialIcons-Regular.ttf", 10.0f, &icons_config, icon_ranges);
 	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
+
+
+
 }
 
 
