@@ -33,11 +33,6 @@ void Object3d::Initialize(Entity3DManager* entity3DManager)
 	worldtransform_.Initialize();
 	worldtransform_.translate_.x = { 0.00000001f };
 
-	entity3D_ = std::make_unique<Entity3D>();
-	entity3D_->transform_.Initialize();
-	entity3D_->transform_.translate_.x = { 0.00000001f };
-	entity3D_->transform_.parent_ = &worldtransform_;
-
 	name = "object" + std::to_string(object3dCommon_->count);
 
 	transfomation = std::make_unique<Transfomation>();
@@ -148,7 +143,7 @@ void Object3d::LineMesh()
 
 #pragma region Draw
 
-void Object3d::Draw(ObjectType type)
+void Object3d::Draw(ObjectRasterizerType type)
 {
 	ObjectTypeDiscrimination(type);
 
@@ -162,7 +157,7 @@ void Object3d::Draw(ObjectType type)
 
 }
 
-void Object3d::DrawSkinning(ObjectType type)
+void Object3d::DrawSkinning(ObjectRasterizerType type)
 {
 	ObjectSkinTypeDiscrimination(type);
 
@@ -262,32 +257,32 @@ void Object3d::DrawSettingSkin()
 	camera->GetCommandList(4);
 }
 
-void Object3d::ObjectTypeDiscrimination(ObjectType type)
+void Object3d::ObjectTypeDiscrimination(ObjectRasterizerType type)
 {
 	switch (type)
 	{
-	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_BACK:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_BACK);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
-	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_BACK:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_BACK:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_BACK:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_BACK:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
 		break;
-	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_NONE:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_NONE:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_NONE);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_NONE:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
 		break;
-	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_NONE:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_NONE:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_NONE:
 		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
 		break;
 	default:
@@ -297,33 +292,33 @@ void Object3d::ObjectTypeDiscrimination(ObjectType type)
 
 }
 
-void Object3d::ObjectSkinTypeDiscrimination(ObjectType type)
+void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 {
 
 	switch (type)
 	{
-	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_BACK:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_BACK:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
-	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_BACK:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_BACK:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_BACK:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_BACK:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
 		break;
-	case Object3d::ObjectType::UvInterpolation_MODE_SOLID_NONE:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_NONE:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_NONE:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
 		break;
-	case Object3d::ObjectType::UvInterpolation_MODE_WIREFRAME_NONE:
+	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_NONE:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
 		break;
-	case Object3d::ObjectType::NoUvInterpolation_MODE_WIREFRAME_NONE:
+	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_NONE:
 		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
 		break;
 	default:

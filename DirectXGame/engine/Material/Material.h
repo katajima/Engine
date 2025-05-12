@@ -20,7 +20,7 @@ public:
 
 	void GetCommandListMaterial(int index);
 
-	void GetCommandListTexture(int indexDiffuse, int normalIndex = 0,int speculerIndex = 0);
+	void GetCommandListTexture(int indexDiffuse, int normalIndex = 0,int speculerIndex = 0,int environmentIndex = 0);
 
 
 	void GPUData();
@@ -35,16 +35,20 @@ public:
 	
 	int32_t useNormalMap_;
 	int32_t useSpeculerMap_;
+	int32_t useEnvironment_;
 	float alphaClipping_ = 0.5f;
 	struct Tex {
 		std::string diffuseFilePath;
 		std::string normalFilePath;
 		std::string speculerFilePath;
+		std::string environmentFilePath;
+
 
 		//テクスチャ番号
 		uint32_t diffuseIndex = 0;
 		uint32_t normalIndex = 0;
 		uint32_t speculerIndex = 0;
+		uint32_t environmentIndex = 0;
 	};
 	Tex tex_;
 

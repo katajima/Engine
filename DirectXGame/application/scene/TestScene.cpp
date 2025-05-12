@@ -210,14 +210,18 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 
+		
 		primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
 		primitiveObject->Draw(Primitive::PsoType::kRingClamp);
 
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		tail.Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+		
 		ocean_->Draw();
+
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		tail.Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
 		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
@@ -225,7 +229,7 @@ void TestScene::Draw3D()
 		//multiy.Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		tail.Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 
 		skinningObject.DrawSkinning();
 		skinningObject2.DrawSkinning();

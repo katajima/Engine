@@ -24,7 +24,7 @@ class ImGuiManager;
 class Object3d
 {
 public:
-	enum class ObjectType {
+	enum class ObjectRasterizerType {
 		UvInterpolation_MODE_SOLID_BACK,
 		NoUvInterpolation_MODE_SOLID_BACK,
 		UvInterpolation_MODE_WIREFRAME_BACK,
@@ -36,6 +36,9 @@ public:
 		NoUvInterpolation_MODE_WIREFRAME_NONE,
 	};
 
+	//enum class ObjectType {
+
+	//};
 
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager);
@@ -50,9 +53,9 @@ public:
 	void LineMesh();
 
 	// 描画通常
-	void Draw(ObjectType type = {});
+	void Draw(ObjectRasterizerType type = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 	// 描画スキニング用
-	void DrawSkinning(ObjectType type = {});
+	void DrawSkinning(ObjectRasterizerType type = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 	// 描画ライン
 	void DrawLine();
 	
@@ -73,6 +76,7 @@ public:
 		worldPos.z = worldtransform_.worldMat_.m[3][2];
 		return worldPos;
 	};
+
 	Vector3 GetPreWorldPosition() const {
 		// ワールド座標を入れる
 		Vector3 worldPos;
@@ -95,8 +99,8 @@ private:
 
 	void DrawSettingSkin();
 	//
-	void ObjectTypeDiscrimination(ObjectType type);
-	void ObjectSkinTypeDiscrimination(ObjectType type);
+	void ObjectTypeDiscrimination(ObjectRasterizerType type);
+	void ObjectSkinTypeDiscrimination(ObjectRasterizerType type);
 
 
 private:

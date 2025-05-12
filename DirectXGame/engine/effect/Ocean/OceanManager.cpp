@@ -31,13 +31,14 @@ void OceanManager::DrawCommonSetting()
 void OceanManager::CreateRootSignature()
 {
 	
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	psoManager_->SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+	psoManager_->SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
 
 	// RootParameter作成。複数指定できるのではい
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[10] = {};
+	D3D12_ROOT_PARAMETER rootParameters[11] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
@@ -72,6 +73,10 @@ void OceanManager::CreateRootSignature()
 
 	// マテリアルデータ (b0) を頂点シェーダで使用する
 	psoManager_->SetRootParameter(rootParameters[9], 0, D3D12_SHADER_VISIBILITY_DOMAIN, D3D12_ROOT_PARAMETER_TYPE_CBV);
+
+	// テクスチャデータ (t1) をピクセルシェーダで使用する
+	psoManager_->SetRootParameter(rootParameters[10], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
+
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};

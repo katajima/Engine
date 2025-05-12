@@ -42,7 +42,7 @@
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
-
+#include "DirectXGame/engine/Offscreen/PostEffectManager.h"
 
 class Entity3DManager;
 class SceneManager;
@@ -70,9 +70,9 @@ private:
 	// レンダーテクスチャ描画後処理
 	void PostDraw(RenderTexture* renderTexture);
 	// 
-	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder, RenderTexture* renderTexturePixelSheder2 = nullptr);
+	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder);
 
-	void SetFinalRenderTexture(RenderTexture* renderTex) { finalRenderTexture_ = renderTex; };
+	//void SetFinalRenderTexture(RenderTexture* renderTex) { finalRenderTexture_ = renderTex; };
 
 private:
 	// レンダーターゲット用描画前処理
@@ -130,6 +130,9 @@ public:
 	DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
 
 	Barrier* GetBarrier() { return barrier_.get(); }
+
+	PostEffectManager* GetPostEffectManager() { return postEffectManager_.get(); }
+
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス
 	std::unique_ptr<Command> command_ = std::make_unique<Command>();					     // コマンド
@@ -144,10 +147,11 @@ private:
 	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
 	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
 	std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					     // バリア 
-	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;							 // レンダーテクスチャ 
 	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
+	std::unique_ptr<PostEffectManager> postEffectManager_ = std::make_unique<PostEffectManager>(); // ポストエフェクト
+
 
 
 	// ImGuiマネージャー
@@ -156,9 +160,9 @@ private:
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
 
+	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;							 // レンダーテクスチャ 
 	RenderTexture* finalRenderTexture_;
 public:
 
 
 };
-

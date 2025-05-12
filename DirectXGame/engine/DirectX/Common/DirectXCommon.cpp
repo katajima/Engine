@@ -37,6 +37,16 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	modelManager_->Initialize(this); // モデルマネージャー
 	
 	renderingCommon_->Initialize(this);
+	barrier_->Initialize(command_.get()); // バリア
+
+	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
+	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
+
+	//postEffectManager_->AddRenderTexture("postEffect0_outline");
+	//postEffectManager_->AddRenderTexture("postEffect1_Extract");
+	//postEffectManager_->AddRenderTexture("postEffect2_Blur");
+	//postEffectManager_->AddRenderTexture("postEffect3_Comb");
+	//postEffectManager_->AddRenderTexture("postEffect4_All");
 
 
 	std::unique_ptr<RenderTexture> renderTextere = std::make_unique<RenderTexture>();
@@ -47,6 +57,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	renderTextere3->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect2_Blur"); // レンダーテクスチャ
 	std::unique_ptr<RenderTexture> renderTextere4 = std::make_unique<RenderTexture>();
 	renderTextere4->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect3_Comb"); // レンダーテクスチャ
+	renderTextere4->SetOtherSrvIndex(renderTextere2->GetSrvIndex());
 	std::unique_ptr<RenderTexture> renderTextere5 = std::make_unique<RenderTexture>();
 	renderTextere5->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect4_All"); // レンダーテクスチャ
 	renderTextures_.push_back(std::move(renderTextere));
@@ -55,10 +66,10 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	renderTextures_.push_back(std::move(renderTextere4));
 	renderTextures_.push_back(std::move(renderTextere5));
 	
+
 	finalRenderTexture_ = renderTextures_[4].get();
 	
-	barrier_->Initialize(command_.get(), swapChain_.get(), renderTextures_[0].get(), depthStencil_.get()); // バリア
-
+	
 	imguiManager_->Initialize(this);
 }
 
@@ -105,13 +116,17 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 	// 描画前処理
 	GetSrvManager()->PreDraw();
 
+	PreDrawOffscreen();
+
 	// レンダーターゲット用の描画準備
-	PreDrawOffscreen(); // オフスクリーンのRTV設定
+	//postEffectManager_->PreDrawOffscreen(); // オフスクリーンのRTV設定
 
 	// 3Dと2D描画
 	Draw3D2D(sceneManager, entity3DManager);
 
 	// レンダーターゲット用の描画後処理
+	//postEffectManager_->PostDrawOffscreen();
+
 	PostDrawOffscreen();
 }
 
@@ -195,6 +210,9 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 
 	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
 
+
+	//postEffectManager_->Update(sceneManager->GetCamara());
+
 	for (auto& renderTexture : renderTextures_) {
 		renderTexture->SetCamera(sceneManager->GetCamara());
 	}
@@ -205,7 +223,7 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 	entity3DManager->Get3DLineCommon()->Update();
 
 
-	// レンダーテクスチャ
+	//// レンダーテクスチャ
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("RenderTexture")) {
 		for (auto& renderTexture : renderTextures_) {
@@ -226,7 +244,11 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
 
-	// レンダーテクスチャ
+
+
+	//postEffectManager_->AllPostEffect();
+
+	//// レンダーテクスチャ
 	DrawRenderTexture(renderTextures_[1].get(), renderTextures_[0].get()); //Outline
 
 	// レンダーテクスチャ
@@ -236,9 +258,10 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	DrawRenderTexture(renderTextures_[3].get(), renderTextures_[2].get()); // ガウス
 
 	// レンダーテクスチャ
-	DrawRenderTexture(renderTextures_[4].get(), renderTextures_[3].get() ,renderTextures_[1].get()); // コンボ
+	DrawRenderTexture(renderTextures_[4].get(), renderTextures_[3].get()); // コンボ
 
 	// スワップチェーン
+	//PassSwap(postEffectManager_->GetEndRenderTexture());
 	PassSwap(finalRenderTexture_);
 
 
@@ -271,13 +294,13 @@ void DirectXCommon::PostDraw(RenderTexture* renderTexture)
 	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
-void DirectXCommon::DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder, RenderTexture* renderTexturePixelSheder2)
+void DirectXCommon::DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder)
 {
 	//
 	PreDraw(renderTextureRenderTreget);
 
 	// レンダーテクスチャ(コピー)
-	renderTexturePixelSheder->Draw(renderTexturePixelSheder2);
+	renderTexturePixelSheder->Draw();
 
 
 	PostDraw(renderTextureRenderTreget);

@@ -5,12 +5,9 @@
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 
-void Barrier::Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture, DepthStencil* depthStencil)
+void Barrier::Initialize(Command* command)
 {
     command_ = command;
-    swapChain_ = swapChain;
-    renderTexture_ = renderTexture;
-    depthStencil_ = depthStencil;
 }
 
 void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)

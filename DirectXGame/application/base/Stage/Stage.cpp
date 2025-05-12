@@ -109,15 +109,15 @@ void Stage::Update()
 void Stage::Draw()
 {
 	// 空
-	sky_->Draw();
+	sky_->Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 
 	// 地面
-	tail_->Draw();
-	tail2_->Draw();
+	tail_->Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+	tail2_->Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 
 	// 工場
 	for (int i = 0; i < warehouseObject_.size(); i++) {
-		warehouseObject_[i]->Draw();
+		warehouseObject_[i]->Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 	}
 
 }

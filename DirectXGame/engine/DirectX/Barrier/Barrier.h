@@ -4,9 +4,6 @@
 #include <unordered_map>
 
 class Command;
-class SwapChain;
-class RenderTexture;
-class DepthStencil;
 class Barrier
 {
 public:
@@ -14,7 +11,7 @@ public:
 	~Barrier() = default;
 
 	// 
-	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture, DepthStencil* depthStencil);
+	void Initialize(Command* command);
 
 public:
 
@@ -23,9 +20,6 @@ public:
 private:
 
 	Command* command_;
-	SwapChain* swapChain_;
-	RenderTexture* renderTexture_;
-	DepthStencil* depthStencil_;
 private:
 
 };

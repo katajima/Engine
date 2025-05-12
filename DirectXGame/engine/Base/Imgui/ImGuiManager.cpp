@@ -37,6 +37,7 @@ void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 		srvManager_->GetGPUDescriptorHandle(0));
 
 
+	
 	// フォント追加
 	AddFont();
 #endif // _DEBUG
@@ -88,7 +89,7 @@ void ImGuiManager::Draw()
 
 
 
-void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera& camera, const char* name)
+void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name)
 {
 	if (ImGui::BeginTabBar("Gizmo"))
 	{
@@ -102,8 +103,8 @@ void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera& camera, const
 
 			// ギズモを操作
 			bool isManipulated = ImGuizmo::Manipulate(
-				&camera.GetViewMatrix().m[0][0],
-				&camera.GetProjectionMatrix().m[0][0],
+				&camera->GetViewMatrix().m[0][0],
+				&camera->GetProjectionMatrix().m[0][0],
 				mCurrentGizmoOperation,
 				mCurrentGizmoMode,
 				&obj.worldMat_.m[0][0]);

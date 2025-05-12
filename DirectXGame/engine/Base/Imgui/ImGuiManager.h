@@ -8,6 +8,10 @@
 #include<wrl.h>
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+
+#define IMOGIZMO_LEFT_HANDED
+//#define IMOGIZMO_Z_UP;
+
 #include "ImGuizmo.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
@@ -53,15 +57,13 @@ public:
 	void Draw();
 
 	// ギズモの使用例
-	void RenderGizmo2(WorldTransform& obj, const Camera& camera, const char* name);
+	void RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name);
 
 	void SetCustomColorScheme();
 
 	void SetInput(Input* input) { input_ = input; }
 
 public:
-
-	void BiginSceneCollection();
 
 private:
 	// ImGuiスタイル

@@ -82,6 +82,7 @@ void MyGame::Update()
 	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
 	float height = static_cast<float> (WinApp::GetClientHeight() / 1.5f);
 
+	//ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetPostEffectManager()->GetFirstRenderTexture()->GetSRVGPUHandle().ptr);
 	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetFinalRenderTexture()->GetSRVGPUHandle().ptr);
 	ImGui::Image(imguiTexture, ImVec2(width, height));
 	ImGui::End();
@@ -131,7 +132,7 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/dust.png");
 	textureManager->LoadTexture("resources/Texture/hit.png");
 	textureManager->LoadTexture("resources/Texture/text/max.png");
-	textureManager->LoadTexture("resources/Texture/rostock_laage_airport_4k.dds");
+	//textureManager->LoadTexture("resources/Texture/rostock_laage_airport_4k.dds");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
 	textureManager->LoadTexture("resources/Texture/circle2.png");
 	textureManager->LoadTexture("resources/Texture/gradationLine.png");

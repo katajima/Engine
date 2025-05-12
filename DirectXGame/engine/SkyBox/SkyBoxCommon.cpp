@@ -22,6 +22,8 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 	material = std::make_unique<Material>();
 	material->Initialize(dxCommon_);
 	material->tex_.diffuseFilePath = "resources/Texture/rostock_laage_airport_4k.dds";
+	material->tex_.diffuseFilePath = "resources/Texture/hdr/output.dds";
+	//material->tex_.diffuseFilePath = "resources/Texture/kloofendal_48d_partly_cloudy_puresky_1k.dds";
 	material->LoadTex();
 	material->color = { 1,1,1,1};
 	material->enableLighting_ = false;
@@ -180,9 +182,10 @@ void SkyBoxCommon::CreateGraphicsPipeline()
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = true;
 	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
 
 
 	psoManager_->GraphicsPipelineState(rootSignature,graphicsPipelineState,blendDesc, depthStencilDesc);

@@ -94,7 +94,7 @@ private:
 	std::unique_ptr<PrimitiveCommon> primitiveCommon_ = nullptr;
 
 	// エフェクトマネージャー
-	std::unique_ptr<EffectManager> effectManager_ = nullptr;	 // エフェクトマネージャー
+	std::unique_ptr<EffectManager> effectManager_ = nullptr;
 
 };
 

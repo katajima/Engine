@@ -23,6 +23,7 @@ void Material::Initialize(DirectXCommon* dxcommon)
 	enableLighting_ = true;
 	useNormalMap_ = false;
 	useSpeculerMap_ = false;
+	useEnvironment_ = false;
 
 	// GPUデータ
 	GPUData();
@@ -33,7 +34,7 @@ void Material::GetCommandListMaterial(int index)
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, resource_->GetGPUVirtualAddress());
 }
 
-void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex)
+void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex, int environmentIndex)
 {
 	// テクスチャのバインド
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(indexDiffuse, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.diffuseFilePath));
@@ -43,6 +44,11 @@ void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int spec
 	}
 	if (useSpeculerMap_) {
 		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(speculerIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.speculerFilePath));
+	}
+
+	// 環境マップ
+	if (useEnvironment_) {
+		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(environmentIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.environmentFilePath));
 	}
 }
 
@@ -103,4 +109,18 @@ void Material::LoadTex()
 
 		tex_.speculerIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.speculerFilePath);
 	}
+
+	if (tex_.environmentFilePath == "") {
+		useEnvironment_ = false;
+	}
+	else {
+		useEnvironment_ = true;
+
+		dxCommon_->GetTextureManager()->LoadTexture(tex_.environmentFilePath);
+
+		tex_.environmentIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.environmentFilePath);
+	}
+
+	
+
 }

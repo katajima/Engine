@@ -55,7 +55,7 @@ public:
 
 private:
 
-
+	
 	//テクスチャ一枚分のデータ
 	struct TextureData {
 		DirectX::TexMetadata metadata;
@@ -65,6 +65,8 @@ private:
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU;
 		Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
 	};
+
+	
 
 	//テクスチャデータ
 	std::unordered_map<std::string, TextureData> textureDatas;

@@ -25,8 +25,6 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成
 
-	//resource_->SetName(L"RenderTexture");
-
 	name_ = name;
 
 	type_ = RenderTexture::PostEffectType::kCopy;
@@ -122,7 +120,7 @@ void RenderTexture::Draw(RenderTexture* renderTexture)
 		renderingCommon_->DrawBloomRender(srvIndex_);
 		break;
 	case RenderTexture::PostEffectType::kBloomCombin:
-		renderingCommon_->DrawBloomCombinRender(renderTexture->srvIndex_,srvIndex_);
+		renderingCommon_->DrawBloomCombinRender(otherSrvIndex_,srvIndex_);
 
 		break;
 	default:

@@ -17,6 +17,9 @@ struct Material
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 Texture2D<float4> gTexture : register(t0);
+
+TextureCube<float> gEnviromentTexture: register(t1);
+
 SamplerState sSampler : register(s0);
 
 static const int kMaxLight = 3;
@@ -293,6 +296,13 @@ PixelShaderOutput main(PixelShaderInput input)
         
         
         output.color.rgb = allDire + allPoint + allSpot;
+        
+        
+        float3 cameraToPosition = normalize(input.worldPosition - gCamera.worldPosition);
+        float3 reflectedVector = reflect(cameraToPosition, normalize(normal));
+        float4 environmentColor = gEnviromentTexture.Sample(sSampler, reflectedVector);
+        
+        output.color.rgb += environmentColor.rgb;
         
         
         output.color.a = gMaterial.color.a * textureColor.a;

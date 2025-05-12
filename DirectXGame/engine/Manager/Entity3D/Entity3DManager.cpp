@@ -55,8 +55,6 @@ void Entity3DManager::UpdateImgui()
 
 	std::string title = reinterpret_cast<const char*>(ICON_MD_HOME);
 
-	//StringUtility::ConvertString(ICON_MD_HOME);
-
 	title += " SceneCollection";
 	ImGui::Begin(title.c_str());
 	static int selectedIndex_ = -1;

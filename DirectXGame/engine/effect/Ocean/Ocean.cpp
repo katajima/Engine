@@ -42,6 +42,7 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 	material = std::make_unique<Material>();
 	material->Initialize(entity3dManager_->GetOceanManager()->GetDxCommon());
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
+	material->tex_.environmentFilePath = "resources/Texture/hdr/sky.dds";
 	material->LoadTex();
 	material->color = { 0,0,1,1.0f };
 
@@ -180,7 +181,7 @@ void Ocean::Draw()
 
 	material->GetCommandListMaterial(0);
 
-	material->GetCommandListTexture(2);
+	material->GetCommandListTexture(2,0,0,10);
 
 	
 	// 頂点バッファの設定
