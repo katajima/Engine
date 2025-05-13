@@ -34,7 +34,6 @@
 #include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 
-#include "DirectXGame/engine/Manager/UAV/UavManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Manager/DSV/DsvManager.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
@@ -62,7 +61,6 @@ public: // メンバ関数
 
 	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
-	RenderTexture* GetFinalRenderTexture() { return finalRenderTexture_; };
 
 private:
 	// レンダーテクスチャ描画前処理
@@ -71,8 +69,6 @@ private:
 	void PostDraw(RenderTexture* renderTexture);
 	// 
 	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder);
-
-	//void SetFinalRenderTexture(RenderTexture* renderTex) { finalRenderTexture_ = renderTex; };
 
 private:
 	// レンダーターゲット用描画前処理
@@ -109,10 +105,7 @@ public:
 
 	SrvManager* GetSrvManager() { return  srvManager_.get(); }
 
-	UavManager* GetUavManager() { return uavManager_.get(); }
-
-	//RenderTexture* GetRenderTexture() { return renderTextures_[0].get(); }
-
+	
 	TextureManager* GetTextureManager() { return textureManager_.get(); }
 
 	ModelManager* GetModelManager() { return modelManager_.get(); }
@@ -142,7 +135,6 @@ private:
 	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();		     // コンパイル
 	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();				     // スワップチェーン 
 	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();			     // RTVマネージャー 
-	std::unique_ptr<UavManager> uavManager_ = std::make_unique<UavManager>();			     // UAVマネージャー 
 	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();			     // SRVマネージャー 
 	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
 	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
@@ -150,6 +142,7 @@ private:
 	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
+
 	std::unique_ptr<PostEffectManager> postEffectManager_ = std::make_unique<PostEffectManager>(); // ポストエフェクト
 
 
@@ -160,8 +153,6 @@ private:
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
 
-	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;							 // レンダーテクスチャ 
-	RenderTexture* finalRenderTexture_;
 public:
 
 

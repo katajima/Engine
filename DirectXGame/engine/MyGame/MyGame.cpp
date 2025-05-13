@@ -82,8 +82,7 @@ void MyGame::Update()
 	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
 	float height = static_cast<float> (WinApp::GetClientHeight() / 1.5f);
 
-	//ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetPostEffectManager()->GetFirstRenderTexture()->GetSRVGPUHandle().ptr);
-	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetFinalRenderTexture()->GetSRVGPUHandle().ptr);
+	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetPostEffectManager()->GetEndRenderTexture()->GetSRVGPUHandle().ptr);
 	ImGui::Image(imguiTexture, ImVec2(width, height));
 	ImGui::End();
 #endif // _DEBUG

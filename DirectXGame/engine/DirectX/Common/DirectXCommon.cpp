@@ -27,7 +27,6 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	fence_->Initialize(DXGIDevice_.get(), command_.get()); // フェンス
 	dxcCompiler_->Initialize(); // コンパイル
 	srvManager_->Initialize(DXGIDevice_.get(), command_.get()); // SRV
-	uavManager_->Initialize(DXGIDevice_.get(), command_.get()); // UAV
 	rtvManager_->Initialize(DXGIDevice_.get(), command_.get()); // RTV
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
 	swapChain_->Initialize(winApp,DXGIDevice_.get(),command_.get(), rtvManager_.get()); // スワップチェーン
@@ -42,73 +41,16 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
 
-	//postEffectManager_->AddRenderTexture("postEffect0_outline");
-	//postEffectManager_->AddRenderTexture("postEffect1_Extract");
-	//postEffectManager_->AddRenderTexture("postEffect2_Blur");
-	//postEffectManager_->AddRenderTexture("postEffect3_Comb");
-	//postEffectManager_->AddRenderTexture("postEffect4_All");
+	postEffectManager_->AddRenderTexture("postEffect0_outline");
+	postEffectManager_->AddRenderTexture("postEffect1_Extract");
+	postEffectManager_->AddRenderTexture("postEffect2_Blur");
+	postEffectManager_->AddRenderTexture("postEffect3_Comb");
+	postEffectManager_->AddRenderTexture("postEffect4_All");
 
-
-	std::unique_ptr<RenderTexture> renderTextere = std::make_unique<RenderTexture>();
-	renderTextere->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect0_outline"); // レンダーテクスチャ
-	std::unique_ptr<RenderTexture> renderTextere2 = std::make_unique<RenderTexture>();
-	renderTextere2->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect1_Extract"); // レンダーテクスチャ
-	std::unique_ptr<RenderTexture> renderTextere3 = std::make_unique<RenderTexture>();
-	renderTextere3->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect2_Blur"); // レンダーテクスチャ
-	std::unique_ptr<RenderTexture> renderTextere4 = std::make_unique<RenderTexture>();
-	renderTextere4->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect3_Comb"); // レンダーテクスチャ
-	renderTextere4->SetOtherSrvIndex(renderTextere2->GetSrvIndex());
-	std::unique_ptr<RenderTexture> renderTextere5 = std::make_unique<RenderTexture>();
-	renderTextere5->Initialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(),"postEffect4_All"); // レンダーテクスチャ
-	renderTextures_.push_back(std::move(renderTextere));
-	renderTextures_.push_back(std::move(renderTextere2));
-	renderTextures_.push_back(std::move(renderTextere3));
-	renderTextures_.push_back(std::move(renderTextere4));
-	renderTextures_.push_back(std::move(renderTextere5));
-	
-
-	finalRenderTexture_ = renderTextures_[4].get();
-	
-	
 	imguiManager_->Initialize(this);
 }
 
 #pragma region Draw
-
-void DirectXCommon::PreDrawOffscreen() {
-
-	// レンダーターゲット
-	barrier_->TransitionResource(renderTextures_[0]->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	// デプスステンシル
-	barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-
-
-
-	//// 描画先の設定
-	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextures_[0]->GetRTVHandle();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
-
-
-	//// レンダーターゲットと深度バッファをクリア
-	float clearColor[] = { renderTextures_[0]->GetClearColor().x,  renderTextures_[0]->GetClearColor().y, renderTextures_[0]->GetClearColor().z,  renderTextures_[0]->GetClearColor().w }; // 任意のクリアカラー（赤）
-	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	
-	//
-	viewPort_->SettingViewport();
-	scissorRect_->SettingScissorRect();
-}
-
-void DirectXCommon::PostDrawOffscreen()
-{
-	// レンダーターゲット
-	barrier_->TransitionResource(renderTextures_[0]->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	// デプスステンシル
-	barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-}
 
 void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
@@ -116,18 +58,15 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 	// 描画前処理
 	GetSrvManager()->PreDraw();
 
-	PreDrawOffscreen();
-
 	// レンダーターゲット用の描画準備
-	//postEffectManager_->PreDrawOffscreen(); // オフスクリーンのRTV設定
+	postEffectManager_->PreDrawOffscreen(); // オフスクリーンのRTV設定
 
 	// 3Dと2D描画
 	Draw3D2D(sceneManager, entity3DManager);
 
 	// レンダーターゲット用の描画後処理
-	//postEffectManager_->PostDrawOffscreen();
+	postEffectManager_->PostDrawOffscreen();
 
-	PostDrawOffscreen();
 }
 
 void DirectXCommon::PreDrawSwap() {
@@ -211,27 +150,12 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
 
 
-	//postEffectManager_->Update(sceneManager->GetCamara());
-
-	for (auto& renderTexture : renderTextures_) {
-		renderTexture->SetCamera(sceneManager->GetCamara());
-	}
+	postEffectManager_->Update(sceneManager->GetCamara());
 
 #ifdef _DEBUG
 	
-
 	entity3DManager->Get3DLineCommon()->Update();
 
-
-	//// レンダーテクスチャ
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("RenderTexture")) {
-		for (auto& renderTexture : renderTextures_) {
-			renderTexture->SetCamera(sceneManager->GetCamara());
-			renderTexture->Update();
-		}
-	}
-	ImGui::End();
 #endif // _DEBUG
 
 	
@@ -244,26 +168,10 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
 
-
-
-	//postEffectManager_->AllPostEffect();
-
-	//// レンダーテクスチャ
-	DrawRenderTexture(renderTextures_[1].get(), renderTextures_[0].get()); //Outline
-
-	// レンダーテクスチャ
-	DrawRenderTexture(renderTextures_[2].get(), renderTextures_[1].get()); // 輝度
-
-	// レンダーテクスチャ
-	DrawRenderTexture(renderTextures_[3].get(), renderTextures_[2].get()); // ガウス
-
-	// レンダーテクスチャ
-	DrawRenderTexture(renderTextures_[4].get(), renderTextures_[3].get()); // コンボ
+	postEffectManager_->AllPostEffect();
 
 	// スワップチェーン
-	//PassSwap(postEffectManager_->GetEndRenderTexture());
-	PassSwap(finalRenderTexture_);
-
+	PassSwap(postEffectManager_->GetEndRenderTexture());
 
 }
 

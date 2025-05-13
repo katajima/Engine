@@ -25,6 +25,8 @@ public:
 	SwapChain() = default;
 	~SwapChain() = default;
 
+
+
 	void Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager);
 
 	// GPUに画面交換を通知

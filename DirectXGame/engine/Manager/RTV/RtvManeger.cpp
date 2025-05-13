@@ -98,3 +98,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RtvManager::CreateRenderTextureResource(D
 	return resource;
 }
 
+void RtvManager::Finalize()
+{
+	descriptorHeap.Reset();
+}
+

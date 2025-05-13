@@ -34,11 +34,12 @@ public:
 	void Update(Camera* camera);
 
 	// レンダーテクスチャ追加
-	void AddRenderTexture(std::string name);
+	void AddRenderTexture(const std::string name);
 
-	RenderTexture* GetFirstRenderTexture() {return  renderTextures_[0].get(); };
 	//
-	RenderTexture* GetEndRenderTexture() { return  renderTextures_[renderTextureIndex_ - 1].get(); };
+	RenderTexture* GetEndRenderTexture() {
+		return endRenderTexture;
+	};
 
 private:
 
@@ -57,10 +58,10 @@ private:
 	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;
 
 	// レンダーテクスチャ番号
-	uint32_t renderTextureIndex_ = 0;
+	//uint32_t renderTextureIndex_ = 0;
 
-	RenderTexture* firstRenderTexture;
-	RenderTexture* endRenderTexture;
+	//RenderTexture* firstRenderTexture = nullptr;
+	RenderTexture* endRenderTexture = nullptr;
 private:
 	bool isFirst_ = false;
 

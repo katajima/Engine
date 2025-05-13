@@ -44,7 +44,7 @@ public:
 
 	void Update();
 
-	void Draw(RenderTexture* renderTexture = nullptr);
+	void Draw();
 
 	void SetCamera(Camera* camera) {camera_ = camera;}
 

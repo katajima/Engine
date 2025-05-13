@@ -160,7 +160,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Manager\Effect\EffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\Manager\UAV\UavManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\AStarAlgorithm.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\Noise.cpp" />
@@ -581,7 +580,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h" />
     <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.h" />
-    <ClInclude Include="DirectXGame\engine\Manager\UAV\UavManager.h" />
     <ClInclude Include="DirectXGame\engine\Math\AStarAlgorithm.h" />
     <ClInclude Include="DirectXGame\engine\Math\LineCurveMath.h" />
     <ClInclude Include="DirectXGame\engine\Math\MapChip.h" />

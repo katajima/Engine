@@ -70,13 +70,8 @@ void PostEffectManager::AllPostEffect()
 	if (renderTextures_.size() == 0) return;
 
 	for (int i = 0; i < static_cast<int>(renderTextures_.size() - 1); i++) {
-
-		// レンダーテクスチャ
-		DrawRenderTexture(renderTextures_[i + 1].get(), renderTextures_[i].get()); //Outline
-
+		DrawRenderTexture(renderTextures_[i+1].get(), renderTextures_[i].get()); 
 	}
-
-
 }
 
 void PostEffectManager::Update(Camera* camera)
@@ -98,34 +93,28 @@ void PostEffectManager::Update(Camera* camera)
 #endif // _DEBUG
 }
 
-void PostEffectManager::AddRenderTexture(std::string name)
+void PostEffectManager::AddRenderTexture(const std::string name)
 {
-	std::unique_ptr<RenderTexture> renderTextere = std::make_unique<RenderTexture>();
-	renderTextere->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name); // レンダーテクスチャ
-	renderTextures_.push_back(std::move(renderTextere));
+	auto renderTexture = std::make_unique<RenderTexture>();
+	renderTexture->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name);
+	RenderTexture* current = renderTexture.get();
+	
+	renderTextures_.push_back(std::move(renderTexture));
 
-
-	if (!isFirst_) {
-		isFirst_ = true;
-		firstRenderTexture = renderTextures_[renderTextureIndex_].get();
-		endRenderTexture = renderTextures_[renderTextureIndex_].get();
-	}
-	else {
-		endRenderTexture = renderTextures_[renderTextureIndex_].get();
-	}
-	renderTextureIndex_++;
+	endRenderTexture = current;
+	
 }
 
-void PostEffectManager::DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder)
+void PostEffectManager::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* sourceRT)
 {
-	//
-	PreDraw(renderTextureRenderTreget);
+	
+	PreDraw(targetRT);
 
 	// レンダーテクスチャ(コピー)
-	renderTexturePixelSheder->Draw();
+	sourceRT->Draw();
 
 
-	PostDraw(renderTextureRenderTreget);
+	PostDraw(targetRT);
 }
 
 void PostEffectManager::PreDraw(RenderTexture* renderTexture)
@@ -136,6 +125,7 @@ void PostEffectManager::PreDraw(RenderTexture* renderTexture)
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
+	// このポストエフェクトでは深度バッファを使用しないため、DSVは設定しない
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRTVHandle();
 	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 

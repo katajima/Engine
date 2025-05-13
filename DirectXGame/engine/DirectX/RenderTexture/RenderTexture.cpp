@@ -82,7 +82,7 @@ void RenderTexture::Update()
 	
 }
 
-void RenderTexture::Draw(RenderTexture* renderTexture)
+void RenderTexture::Draw()
 {
 	switch (type_)
 	{

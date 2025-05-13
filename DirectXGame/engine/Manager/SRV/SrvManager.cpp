@@ -134,3 +134,8 @@ bool SrvManager::IsMaxTextuer()
 	}
 	return false;
 }
+
+void SrvManager::Finalize()
+{
+	descriptorHeap.Reset();
+}
