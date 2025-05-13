@@ -103,7 +103,8 @@ private:
 	};
 	Renge renge_;
 
-	
+	WorldTransform transform_;
+
 	std::unique_ptr<Transfomation>transfomation = nullptr;
 
 	// バッファリソース

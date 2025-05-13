@@ -8,6 +8,8 @@ struct Material
     
     float4 color;
     int enableLighting;
+    float alphaClipping;
+    float environmentCoefficient;
     float4x4 uvTransform;
     float shininess;
     int useLig;
@@ -245,7 +247,7 @@ PixelShaderOutput main(PixelShaderInput input)
         
         float3 diffuseSpotLight = { 0.0f, 0.0f, 0.0f };
         float3 specularSpotLight = { 0.0f, 0.0f, 0.0f };
-        for (uint32_t spot_i = 0; spot_i < kMaxLight; spot_i++)
+        for (uint spot_i = 0; spot_i < kMaxLight; spot_i++)
         {
             if (gSpotLight.spotLights[spot_i].enableLighting == 0)
             {
@@ -302,7 +304,7 @@ PixelShaderOutput main(PixelShaderInput input)
         float3 reflectedVector = reflect(cameraToPosition, normalize(normal));
         float4 environmentColor = gEnviromentTexture.Sample(sSampler, reflectedVector);
         
-        output.color.rgb += environmentColor.rgb;
+        output.color.rgb += environmentColor.rgb * gMaterial.environmentCoefficient;
         
         
         output.color.a = gMaterial.color.a * textureColor.a;

@@ -57,6 +57,7 @@ void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int spec
 void Material::GPUData()
 {
 
+	data_->environmentCoefficient = environmentCoefficient_;
 	data_->enableLighting = enableLighting_;
 	data_->shininess = shininess_;
 	data_->useLig = useLig_;

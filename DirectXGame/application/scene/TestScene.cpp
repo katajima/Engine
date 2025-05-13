@@ -50,45 +50,6 @@ void TestScene::Update()
 	
 
 
-	ImVec2 defaultPos(100, 100); // 初期位置（画面内）
-	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-	ImVec2 safePos = defaultPos;
-
-	// ウィンドウ外に初期位置が出ないように制限
-	safePos.x = ImClamp(safePos.x, 0.0f, displaySize.x - 100.0f); // 最小100pxの幅と仮定
-	safePos.y = ImClamp(safePos.y, 0.0f, displaySize.y - 100.0f);
-
-	ImGui::SetNextWindowPos(safePos, ImGuiCond_FirstUseEver);
-
-
-	ImGui::Begin("プリミティブ");
-
-	ImVec2 pos = ImGui::GetWindowPos();
-	ImVec2 size = ImGui::GetWindowSize();
-	
-	
-	// UI内容
-	
-	ImGui::DragFloat2("pos", &primitive2d1_->position.x);
-	ImGui::DragFloat2("scale", &primitive2d1_->scale.x, 0.1f);
-	ImGui::DragFloat("rotate", &primitive2d1_->rotation, 0.01f);
-	ImGui::DragInt("segment", &segment);
-	ImGui::DragFloat("inRad", &inRad);
-	ImGui::DragFloat("outRad", &outRad);
-	if (segment < 3) {
-		segment = 3;
-	}
-	if (inRad >= outRad) {
-		inRad = outRad;
-	}
-	primitive2d1_->SetParametar(inRad, outRad, segment);
-	ImGui::End();
-
-	ImGui::Begin("engine");
-	ImGui::Checkbox("debugCamera", &isDebugCamera);
-
-
-
 
 	if (isDebugCamera) {
 		debugCamera->Update();
@@ -97,26 +58,13 @@ void TestScene::Update()
 		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
 		camera->transform_ = debugCamera->GetViewProjection().transform_;
 	}
-	else {
 
-	}
-
-
-	ImGui::End();
-
-	//ImGuiWindowScope window("EEEE");
-	//ImGui::Text("Hello, world!");
-	//ImGui::Button("Click Me");
-
-	//ImGuiWindowScope window2("EEEE2");
-	//ImGui::Text("Hello, world!");
-	//ImGui::Button("Click Me");
 
 	
 
 #endif // _DEBUG
 
-	
+	primitiveObject3d->Update();
 
 	if (behaviorRequest_) {
 
@@ -210,33 +158,30 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
 
-		
-		primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
-		primitiveObject->Draw(Primitive::PsoType::kRingClamp);
-
-		tail.Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+		tail.Draw();
 		
 		ocean_->Draw();
 
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
-		tail.Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+		tail.Draw();
+
+		primitiveObject3d->Draw();
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
-		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		taleObject->Draw();
 		//multiy.Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
-		tail.Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+		tail.Draw();
 
-		skinningObject.DrawSkinning();
-		skinningObject2.DrawSkinning();
+		skinningObject.Draw();
+		skinningObject2.Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
-		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
 
@@ -327,24 +272,27 @@ void TestScene::InitializeObject3D()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(GetEntity3DManager(), { 100,100 });
+	ocean_->Initialize(GetEntity3DManager(), { 1000,1000 });
 	ocean_->SetCamera(camera.get());
 	ocean_->transform.rotate.x = DegreesToRadians(90);
 	ocean_->material->color.a = 0.99f;
 
-	skinningObject.Initialize(GetEntity3DManager());
+
+	
+
+	skinningObject.Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
 	skinningObject.SetModel("iku.gltf");
 	skinningObject.worldtransform_.translate_ = { 30,1,1 };
 	skinningObject.worldtransform_.scale_ = { 10,10,10 };
 	skinningObject.SetCamera(camera.get());
+	skinningObject.SetName("iku");
 
-
-	skinningObject2.Initialize(GetEntity3DManager());
+	skinningObject2.Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
 	skinningObject2.SetModel("walk.gltf");
 	skinningObject2.worldtransform_.translate_ = { -30,10,1 };
 	skinningObject2.worldtransform_.scale_ = { 10,10,10 };
 	skinningObject2.SetCamera(camera.get());
-
+	skinningObject2.SetName("walk");
 
 	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");
@@ -418,15 +366,19 @@ void TestScene::InitializeObject3D()
 	
 	ShapeParameter::ShapeSphere sph;
 	primitiveObject->Initialize<ShapeParameter::ShapeSphere>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, sph, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
-	primitiveObject->SetCamera(camera.get());
-	primitiveObject->transform.translate.y = 100;
-	primitiveObject->transform.rotate.y = DegreesToRadians(180);
 	
+	
+
+
+	primitiveObject3d = std::make_unique<Object3d>();
+	primitiveObject3d->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive); //primitiveObject
+	primitiveObject3d->SetPrimitive(primitiveObject.get());
+	primitiveObject3d->SetCamera(camera.get());
+	primitiveObject3d->SetName("primitiveR");
+
 	ShapeParameter::Torus toru;
 	primitivePlaneObject->Initialize<ShapeParameter::Torus>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Torus, toru , "resources/Texture/gradationLine.png",{1,1,1,1},"Plane");
-	primitivePlaneObject->SetCamera(camera.get());
-	primitivePlaneObject->transform.translate.y = 80;
-	//primitivePlaneObject->transform.rotate.y = DegreesToRadians(180);
+	
 }
 
 /// <summary>
@@ -784,20 +736,6 @@ void TestScene::UpdateRoom01()
 	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
 	GetEntity3DManager()->GetSkyBoxCommon()->Update();
 
-
-#ifdef _DEBUG
-
-	//ImGui::Begin("Primitive");
-	//ImGui::DragFloat3("translate",&primitiveObject->transform.translate.x,0.1f);
-	//ImGui::DragFloat3("rotate",&primitiveObject->transform.rotate.x,0.1f);
-	//ImGui::DragFloat3("scale",&primitiveObject->transform.scale.x,0.1f);
-	//ImGui::End();
-#endif // _DEBUG
-
-	//primitiveObject->Update();
-
-	//primitivePlaneObject->Update();
-	//primitvPlane_->Update();
 }
 
 void TestScene::UpdateRoom02()
@@ -813,8 +751,7 @@ void TestScene::UpdateRoom02()
 void TestScene::UpdateRoom03()
 {
 	primitvPlaneSmoke_->Update();
-	//taleObject->Update();
-	//multiy.Update();
+
 }
 
 void TestScene::UpdateRoom04()
@@ -832,20 +769,10 @@ void TestScene::UpdateRoom04()
 	primitvPlaneSmoke_->Update();
 
 
-	skinningObject.UpdateSkinning();
-	skinningObject2.UpdateSkinning();
+	skinningObject.Update();
+	skinningObject2.Update();
 
 	triCen;
-
-	/*Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
-	Vector3 b = { tri2d.vertices[1].x, 5 ,tri2d.vertices[1].y };
-	Vector3 c = { tri2d.vertices[2].x, 5 ,tri2d.vertices[2].y };
-
-
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(a, b, { 1,1,1,1 });
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(b, c, { 1,1,1,1 });
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(c, a, { 1,1,1,1 });*/
-
 
 	CornerSegment corner;// = { sphere2d.center }
 	corner.center.x = sphere2d.center.x;
@@ -1054,30 +981,7 @@ void TestScene::SwitchRoom()
 	ImGui::End();
 #endif // _DEBUG
 
-	if (input_->IsTriggerKey(DIK_1)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom01;
-	}
-	if (input_->IsTriggerKey(DIK_2)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom02;
-	}
-	if (input_->IsTriggerKey(DIK_3)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom03;
-	}
-	if (input_->IsTriggerKey(DIK_4)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom04;
-	}
-	if (input_->IsTriggerKey(DIK_5)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom05;
-	}
-	if (input_->IsTriggerKey(DIK_6)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom06;
-	}
-	if (input_->IsTriggerKey(DIK_7)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom07;
-	}
-	if (input_->IsTriggerKey(DIK_8)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom08;
-	}
+
 
 }
 

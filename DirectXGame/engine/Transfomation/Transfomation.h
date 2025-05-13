@@ -4,6 +4,7 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 
+
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -13,6 +14,7 @@
 #include<format>
 
 
+class Primitive;
 class Transfomation
 {
 public:
@@ -20,6 +22,8 @@ public:
 	void Initialize(DirectXCommon* dxCommon);
 	// 更新
 	void Update(Model* model, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	// 更新
+	void Update(Primitive* primitive, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
 	// 更新
 	void Update(Camera* camera,Matrix4x4& mat);
 	// 更新

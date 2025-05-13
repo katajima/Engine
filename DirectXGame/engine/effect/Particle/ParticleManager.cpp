@@ -347,7 +347,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleGroup.material->tex_.diffuseFilePath = textureFilePath;
 	particleGroup.material->LoadTex();
 	particleGroup.material->enableLighting_ = false;
-
+	particleGroup.material->useEnvironment_ = false;
 
 	// GPUリソースの作成
 	particleGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ParticleForGPU) * kNumMaxInstance);
@@ -418,6 +418,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleGroup.material->tex_.diffuseFilePath = textureFilePath;
 	particleGroup.material->LoadTex();
 	particleGroup.material->enableLighting_ = false;
+	particleGroup.material->useEnvironment_ = false;
 
 
 	// GPUリソースの作成

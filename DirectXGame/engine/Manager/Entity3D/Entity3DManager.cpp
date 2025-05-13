@@ -83,6 +83,12 @@ void Entity3DManager::UpdateImgui()
 		ImGui::DragFloat3("scale", &entity->worldtransform_.scale_.x, 0.1f);
 		ImGui::DragFloat3("rotate", &entity->worldtransform_.rotate_.x, 0.1f);
 		ImGui::DragFloat3("translate", &entity->worldtransform_.translate_.x, 0.1f);
+
+
+		if (entity->GetPrimitive()) {
+			entity->GetPrimitive()->MeshUpdateImGui();
+		}
+
 	}
 
 	ImGui::End();

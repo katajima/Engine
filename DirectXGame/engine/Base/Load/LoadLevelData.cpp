@@ -94,6 +94,6 @@ void LoadLevelData::Update()
 void LoadLevelData::Draw3D()
 {
 	for (auto& object : objects) {
-		object->Draw(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+		object->Draw();
 	}
 }

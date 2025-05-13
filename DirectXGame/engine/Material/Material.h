@@ -30,13 +30,15 @@ public:
 	Color color;
 
 	int32_t enableLighting_ = false;
+	float  environmentCoefficient_ = 0.5f;
 	float shininess_ = 64.0f;
 	int32_t useLig_ = false;
 	
-	int32_t useNormalMap_;
-	int32_t useSpeculerMap_;
-	int32_t useEnvironment_;
+	int32_t useNormalMap_ = 0;
+	int32_t useSpeculerMap_ = 0;
+	bool useEnvironment_ = 0;
 	float alphaClipping_ = 0.5f;
+
 	struct Tex {
 		std::string diffuseFilePath;
 		std::string normalFilePath;
@@ -59,7 +61,8 @@ private:
 		Color color;
 		int32_t enableLighting;
 		float alphaClipping = 0.5f;
-		float padding[2];
+		float  environmentCoefficient = 0.5f;
+		float padding[1];
 		Matrix4x4 uvTransform;
 		float shininess;
 		int32_t useLig;

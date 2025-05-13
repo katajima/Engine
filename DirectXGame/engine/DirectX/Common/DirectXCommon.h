@@ -63,18 +63,9 @@ public: // メンバ関数
 
 
 private:
-	// レンダーテクスチャ描画前処理
-	void PreDraw(RenderTexture* renderTexture);
-	// レンダーテクスチャ描画後処理
-	void PostDraw(RenderTexture* renderTexture);
-	// 
-	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder);
+
 
 private:
-	// レンダーターゲット用描画前処理
-	void PreDrawOffscreen();
-	// レンダーターゲット用描画後処理
-	void PostDrawOffscreen();
 	// シーンの画面を書き出す
 	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 private:

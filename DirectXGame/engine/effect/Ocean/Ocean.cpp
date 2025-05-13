@@ -32,7 +32,8 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 
 
 
-
+	transform_.Initialize();
+	
 
 	
 	transfomation = std::make_unique<Transfomation>();
@@ -106,6 +107,7 @@ void Ocean::Update()
 		ImGui::Text("material");
 		ImGui::Separator();
 		ImGui::ColorEdit4("color", &material->color.r);
+		ImGui::SliderFloat("environmentCoefficient", &material->environmentCoefficient_,0.0f,1.0f);
 		ImGui::Separator();
 		ImGui::Text("noiseData");
 		ImGui::Separator();
@@ -159,6 +161,8 @@ void Ocean::Update()
 	// ワールド行列の計算
 	mat_ = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 	
+	transform_.Update();
+
 	transfomation->Update(camera,mat_);
 
 	material->GPUData();

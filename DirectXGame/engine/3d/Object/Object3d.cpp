@@ -22,13 +22,16 @@
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 
-void Object3d::Initialize(Entity3DManager* entity3DManager)
+void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
 	object3dCommon_ = entity3DManager_->GetObject3dCommon();
 	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();
 	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();
+
+
 
 	worldtransform_.Initialize();
 	worldtransform_.translate_.x = { 0.00000001f };
@@ -38,10 +41,15 @@ void Object3d::Initialize(Entity3DManager* entity3DManager)
 	transfomation = std::make_unique<Transfomation>();
 	transfomation->Initialize(object3dCommon_->GetDxCommon());
 
-	
 
 	entity3DManager_->SetEntity3D(this);
 
+	// オブジェクトタイプ
+	objectType_ = objectType;
+	rasterizerType_ = rasterizerType;
+
+
+	// オブジェクト数
 	object3dCommon_->count++;
 
 }
@@ -50,130 +58,154 @@ void Object3d::Initialize(Entity3DManager* entity3DManager)
 
 void Object3d::Update()
 {
-	
 	Matrix4x4 localMatrix = MakeIdentity4x4();
-	// モデルが存在する場合
-	if (model) {
-		localMatrix = model->modelData.rootNode.localMatrix;
-		model->modelData.material[0]->GPUData();
-	}
 
-	
 	worldtransform_.Update();
 
-	// トランスフォームデータ
-	transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
-}
-
-void Object3d::UpdateSkinning()
-{
-	
-	Matrix4x4 localMatrix = MakeIdentity4x4();
-	// モデルが存在する場合
-	if (model) {
-		// アニメーションの更新
-		if (model->animation.flag) {
-			if (flag) {
-				model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
-			}
-			model->animationTime = std::fmod(model->animationTime, model->animation.duration);
-			localMatrix = model->skeleton.joints[0].skeletonSpaceMatrix;
-
-			ApplyAnimation(model->skeleton, model->animation, model->animationTime);
-			// スケルトンの更新
-			UpdateSkeleton(model->skeleton);
-
-			// スキニング更新
-			UpdateSkinCluster(model->skinCluster, model->skeleton);
-
-
-		}
-		else {
+	switch (objectType_)
+	{
+	case Object3d::ObjectType::kNormal:
+		// モデルが存在する場合
+		if (model) {
 			localMatrix = model->modelData.rootNode.localMatrix;
+			model->modelData.material[0]->GPUData();
 		}
-		model->modelData.material[0]->GPUData();
-	}
 
+		// トランスフォームデータ
+		transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
+		break;
+	case Object3d::ObjectType::kAnimation:
+		// モデルが存在する場合
+		if (model) {
+			// アニメーションの更新
+			if (model->animation.flag) {
+				if (flag) {
+					model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+				}
+				model->animationTime = std::fmod(model->animationTime, model->animation.duration);
 
-	
-	worldtransform_.Update();
-	
-	// トランスフォームデータ
-	transfomation->UpdateSkinning(model, camera, localMatrix, worldtransform_.worldMat_);
-}
-
-void Object3d::UpdateAnimation()
-{
-	
-	Matrix4x4 localMatrix = MakeIdentity4x4();
-	// モデルが存在する場合
-	if (model) {
-		// アニメーションの更新
-		if (model->animation.flag) {
-			if (flag) {
-				model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+				// 単一のジョイントの場合
+				const NodeAnimation& rootNodeAnimation = model->animation.nodeAnimations[model->modelData.rootNode.name];
+				Vector3 translate = CalculateValue(rootNodeAnimation.translate.keyframes, model->animationTime);
+				Quaternion rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, model->animationTime);
+				Vector3 scale = CalculateValue(rootNodeAnimation.scale.keyframes, model->animationTime);
+				localMatrix = MakeAffineMatrix(scale, rotate, translate);
 			}
-			model->animationTime = std::fmod(model->animationTime, model->animation.duration);
+			else {
+				localMatrix = model->modelData.rootNode.localMatrix;
+			}
+			model->modelData.material[0]->GPUData();
+		}
 
-			// 単一のジョイントの場合
-			const NodeAnimation& rootNodeAnimation = model->animation.nodeAnimations[model->modelData.rootNode.name];
-			Vector3 translate = CalculateValue(rootNodeAnimation.translate.keyframes, model->animationTime);
-			Quaternion rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, model->animationTime);
-			Vector3 scale = CalculateValue(rootNodeAnimation.scale.keyframes, model->animationTime);
-			localMatrix = MakeAffineMatrix(scale, rotate, translate);
+		// トランスフォームデータ
+		transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
+		break;
+	case Object3d::ObjectType::kSkinning:
+
+		// モデルが存在する場合
+		if (model) {
+			// アニメーションの更新
+			if (model->animation.flag) {
+				if (flag) {
+					model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+				}
+				model->animationTime = std::fmod(model->animationTime, model->animation.duration);
+				localMatrix = model->skeleton.joints[0].skeletonSpaceMatrix;
+
+				ApplyAnimation(model->skeleton, model->animation, model->animationTime);
+				// スケルトンの更新
+				UpdateSkeleton(model->skeleton);
+
+				// スキニング更新
+				UpdateSkinCluster(model->skinCluster, model->skeleton);
+
+
+			}
+			else {
+				localMatrix = model->modelData.rootNode.localMatrix;
+			}
+			model->modelData.material[0]->GPUData();
 		}
-		else {
-			localMatrix = model->modelData.rootNode.localMatrix;
+
+		// トランスフォームデータ
+		transfomation->UpdateSkinning(model, camera, localMatrix, worldtransform_.worldMat_);
+		break;
+	case ObjectType::kPrimitive:
+
+
+		if (primitive_) {
+			primitive_->Update();
+		
+			transfomation->Update(primitive_, camera, localMatrix, worldtransform_.worldMat_);
 		}
-		model->modelData.material[0]->GPUData();
+
+		
+
+		break;
+	default:
+		break;
 	}
-
-	worldtransform_.Update();
-
-	// トランスフォームデータ
-	transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
 }
-
-void Object3d::LineMesh()
-{
-	entity3DManager_->Get3DLineCommon()->AddLineMesh(GetMesh(0),worldtransform_.worldMat_);
-}
-
 #pragma endregion //更新系
 
 #pragma region Draw
 
-void Object3d::Draw(ObjectRasterizerType type)
+void Object3d::Draw()
 {
-	ObjectTypeDiscrimination(type);
+	switch (objectType_)
+	{
+	case Object3d::ObjectType::kNormal:
+		ObjectTypeDiscrimination(rasterizerType_);
 
-	DrawSetting();
+		DrawSetting();
 
-	
-	// 3Dモデルが割り当てれていれば描画する
-	if (model) {
-		model->Draw();
+
+		// 3Dモデルが割り当てれていれば描画する
+		if (model) {
+			model->Draw();
+		}
+		break;
+	case Object3d::ObjectType::kAnimation:
+		ObjectTypeDiscrimination(rasterizerType_);
+
+		DrawSetting();
+
+
+		// 3Dモデルが割り当てれていれば描画する
+		if (model) {
+			model->Draw();
+		}
+		break;
+	case Object3d::ObjectType::kSkinning:
+		ObjectSkinTypeDiscrimination(rasterizerType_);
+
+		DrawSettingSkin();
+
+
+		// 3Dモデルが割り当てれていれば描画する
+		if (model) {
+			model->DrawSkinning();
+		}
+		break;
+	case ObjectType::kPrimitive:
+
+		
+		if (primitive_) {
+
+			primitive_->DrawSetting();
+
+			transfomation->GetCommandList(1);
+
+			primitive_->Draw();
+		}
+		break;
 	}
 
+
+
+
 }
 
-void Object3d::DrawSkinning(ObjectRasterizerType type)
-{
-	ObjectSkinTypeDiscrimination(type);
-
-	DrawSettingSkin();
-
-
-	// 3Dモデルが割り当てれていれば描画する
-	if (model) {
-		model->DrawSkinning();
-	}
-}
-
-void Object3d::DrawLine()
-{
-	DrawSkeleton(model->skeleton.joints, worldtransform_.translate_, worldtransform_.scale_);
-}
 
 Vector2 Object3d::GetScreenPosition()
 {

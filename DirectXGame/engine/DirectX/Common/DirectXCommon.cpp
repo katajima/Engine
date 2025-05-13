@@ -175,45 +175,6 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 
 }
 
-void DirectXCommon::PreDraw(RenderTexture* renderTexture)
-{
-	// レンダーターゲット
-	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	
-
-	//// 描画先の設定
-	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRTVHandle();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
-
-
-	//// レンダーターゲットと深度バッファをクリア
-	float clearColor[] = { renderTexture->GetClearColor().x,  renderTexture->GetClearColor().y, renderTexture->GetClearColor().z,  renderTexture->GetClearColor().w }; // 任意のクリアカラー（赤）
-	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	
-	//
-	viewPort_->SettingViewport();
-	scissorRect_->SettingScissorRect();
-}
-
-void DirectXCommon::PostDraw(RenderTexture* renderTexture)
-{
-	// レンダーターゲット
-	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-}
-
-void DirectXCommon::DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder)
-{
-	//
-	PreDraw(renderTextureRenderTreget);
-
-	// レンダーテクスチャ(コピー)
-	renderTexturePixelSheder->Draw();
-
-
-	PostDraw(renderTextureRenderTreget);
-}
-
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
 	
