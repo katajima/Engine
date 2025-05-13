@@ -16,13 +16,9 @@ public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
-	void Update();
-
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
 	void DrawCommonSetting();
-
-	void SetCamara(Camera* camara) { camara_ = camara; };
 
 private:
 	// ルートシグネチャの作成
@@ -31,7 +27,6 @@ private:
 	void CreateGraphicsPipeline();
 
 private:// メンバ変数
-	Camera* camara_;
 	
 	DirectXCommon* dxCommon_;
 
@@ -44,11 +39,6 @@ private:// メンバ変数
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState;
 
-	// トランスフォームデータ
-	std::unique_ptr<Transfomation> transfomation = nullptr;
-	WorldTransform worldtransform_;
-	std::unique_ptr<Mesh> mesh_;
-	std::unique_ptr<Material> material;
 
 };
 

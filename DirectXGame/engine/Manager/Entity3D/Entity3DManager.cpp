@@ -80,12 +80,40 @@ void Entity3DManager::UpdateImgui()
 		auto& entity = object3d[openedIndex];
 		ImGui::Text(entity->name.c_str());
 		ImGui::Separator();
-		ImGui::DragFloat3("scale", &entity->worldtransform_.scale_.x, 0.1f);
-		ImGui::DragFloat3("rotate", &entity->worldtransform_.rotate_.x, 0.1f);
-		ImGui::DragFloat3("translate", &entity->worldtransform_.translate_.x, 0.1f);
+		std::string objectTypeName = "ObjectType : " + entity->GetObjectTypeName();
+		ImGui::Text(objectTypeName.c_str());
+		ImGui::Separator();
 
+		ImGui::Separator();
+		ImGui::Text("transform");
+		ImGui::Separator();
+		ImGui::DragFloat3("T_scale", &entity->worldtransform_.scale_.x, 0.1f);
+		ImGui::DragFloat3("T_rotate", &entity->worldtransform_.rotate_.x, 0.1f);
+		ImGui::DragFloat3("T_translate", &entity->worldtransform_.translate_.x, 0.1f);
+		ImGui::Separator();
+		ImGui::Text("material");
+		ImGui::Separator();
+		ImGui::DragFloat3("M_scale", &entity->GetMaterial(0)->transform.scale.x, 0.1f);
+		ImGui::DragFloat3("M_rotate", &entity->GetMaterial(0)->transform.rotate.x, 0.1f);
+		ImGui::DragFloat3("M_translate", &entity->GetMaterial(0)->transform.translate.x, 0.1f);
+		ImGui::ColorEdit4("color", &entity->GetMaterial(0)->color.r);
+		ImGui::SliderInt("enableLighting", &entity->GetMaterial(0)->enableLighting_, 0,1);
+		ImGui::SliderFloat("alphaClipping", &entity->GetMaterial(0)->alphaClipping_, 0,1);
+		ImGui::DragFloat("shininess", &entity->GetMaterial(0)->shininess_,0.01f);
+		ImGui::Separator();
+		ImGui::Text("mesh");
+		ImGui::Separator();
 
+		int index = static_cast<int>(entity->GetMesh(0)->vertices.size());
+		ImGui::InputInt("verticesSize", &index);
+		index = static_cast<int>(entity->GetMesh(0)->indices.size());
+		ImGui::InputInt("indicesSize", &index);
+		
+		
+
+		// プリミティブ形状なら
 		if (entity->GetPrimitive()) {
+			ImGui::Separator();
 			entity->GetPrimitive()->MeshUpdateImGui();
 		}
 

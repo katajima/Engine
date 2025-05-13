@@ -13,7 +13,7 @@
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3D.h"
-
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
 using namespace Microsoft::WRL;
 
 class Entity3DManager;
@@ -21,6 +21,8 @@ class Object3dCommon;
 class SkinningConmmon;
 class ImGuiManager;
 class Primitive;
+class SkyBox;
+class SkyBoxCommon;
 class Object3d
 {
 public:
@@ -44,6 +46,7 @@ public:
 		kAnimation,	// モデルをアニメーション描画するオブジェクト
 		kSkinning,	// モデルをスキニング描画するオブジェクト
 		kPrimitive, // プリミティブを描画するオブジェクト
+		kSkyBox,	// スカイボックスを描画するオブジェクト
 	};
 
 	// 初期化
@@ -71,6 +74,10 @@ public:
 
 	// プリミティブ形状
 	void SetPrimitive(Primitive* primitive) { primitive_ = primitive; }
+
+	// スカイボックス
+	void SetSkyBox(SkyBox* skyBox) { skyBox_ = skyBox; }
+
 
 	// ゲッター
 
@@ -112,6 +119,8 @@ public:
 	// プリミティブ取得
 	Primitive* GetPrimitive() { return primitive_; }
 
+	std::string GetObjectTypeName() { return objectTypeName; }
+
 private:
 	// 各コマンドリスト
 	void DrawSetting();
@@ -147,6 +156,9 @@ public:
 	Model* model = nullptr;
 	//
 	Primitive* primitive_ = nullptr;
+	//
+	SkyBox* skyBox_ = nullptr;
+
 
 	std::unique_ptr<Entity3D> entity3D_;
 
@@ -156,11 +168,15 @@ public:
 	// オブジェクト名前
 	std::string name = "";
 
+	// オブジェクトタイプ名前
+	std::string objectTypeName = "";
+
 private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;
 	ImGuiManager* imGuiManager_;
 	Entity3DManager* entity3DManager_;
+	SkyBoxCommon* skyBoxCommon_;
 };
 
 

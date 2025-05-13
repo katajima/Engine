@@ -139,8 +139,6 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 	// ライト
 	entity3DManager->GetLightManager()->Update();
 
-	entity3DManager->GetSkyBoxCommon()->Update();
-
 #ifdef _DEBUG
 	entity3DManager->UpdateImgui();
 #endif // _DEBUG

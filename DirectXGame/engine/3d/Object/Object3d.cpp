@@ -30,7 +30,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 	object3dCommon_ = entity3DManager_->GetObject3dCommon();
 	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();
 	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();
-
+	skyBoxCommon_ = entity3DManager_->GetSkyBoxCommon();
 
 
 	worldtransform_.Initialize();
@@ -46,6 +46,35 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 
 	// オブジェクトタイプ
 	objectType_ = objectType;
+
+	switch (objectType)
+	{
+	case Object3d::ObjectType::kNormal:
+		objectTypeName = "NormalModelObject";
+		break;
+	case Object3d::ObjectType::kAnimation:
+		objectTypeName = "AnimationModelObject";
+		break;
+	case Object3d::ObjectType::kSkinning:
+		objectTypeName = "SkinningModelObject";
+		break;
+	case Object3d::ObjectType::kPrimitive:
+		objectTypeName = "PrimitiveObject";
+		break;
+	case Object3d::ObjectType::kSkyBox:
+		objectTypeName = "SkyBoxObject";
+		break;
+	default:
+		objectTypeName = "NoObject";
+		break;
+	}
+
+
+
+
+
+
+	// 映り方
 	rasterizerType_ = rasterizerType;
 
 
@@ -142,6 +171,15 @@ void Object3d::Update()
 		
 
 		break;
+	case ObjectType::kSkyBox:
+
+		if (skyBox_) {
+			skyBox_->Update();
+
+			transfomation->Update(primitive_, camera, localMatrix, worldtransform_.worldMat_);
+		}
+
+		break;
 	default:
 		break;
 	}
@@ -197,6 +235,17 @@ void Object3d::Draw()
 			transfomation->GetCommandList(1);
 
 			primitive_->Draw();
+		}
+		break;
+
+	case ObjectType::kSkyBox:
+
+		if (skyBox_) {
+		skyBoxCommon_->DrawCommonSetting();
+
+		transfomation->GetCommandList(1);
+		
+			skyBox_->Draw();
 		}
 		break;
 	}

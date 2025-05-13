@@ -15,78 +15,9 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 
 	CreateGraphicsPipeline();
 
-
-	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(dxCommon_);
-
-	material = std::make_unique<Material>();
-	material->Initialize(dxCommon_);
-	material->tex_.diffuseFilePath = "resources/Texture/rostock_laage_airport_4k.dds";
-	material->tex_.diffuseFilePath = "resources/Texture/hdr/sky.dds";
-	//material->tex_.diffuseFilePath = "resources/Texture/kloofendal_48d_partly_cloudy_puresky_1k.dds";
-	material->LoadTex();
-	material->color = { 1,1,1,1};
-	material->enableLighting_ = false;
-	
-
-
-	mesh_ = std::make_unique<Mesh>();
-	
-	Vector3 size = Vector3{10,10,10} * 100;
-
-	// 各面の頂点座標 (1つの面に4頂点)
-	Vector4 positions[][4] = {
-		// 前面
-		{{ size.x,  size.y,  size.z, 1.0f}, {-size.x,  size.y,  size.z, 1.0f}, { size.x, -size.y,  size.z, 1.0f}, {-size.x, -size.y,  size.z, 1.0f}},
-		// 背面
-		{{ size.x,  size.y, -size.z, 1.0f}, { size.x, -size.y, -size.z, 1.0f}, {-size.x,  size.y, -size.z, 1.0f}, {-size.x, -size.y, -size.z, 1.0f}},
-		// 上面
-		{{ size.x,  size.y, -size.z, 1.0f}, {-size.x,  size.y, -size.z, 1.0f}, { size.x,  size.y,  size.z, 1.0f}, {-size.x,  size.y,  size.z, 1.0f}},
-		// 底面
-		{{ size.x, -size.y,  size.z, 1.0f}, {-size.x, -size.y,  size.z, 1.0f}, { size.x, -size.y, -size.z, 1.0f}, {-size.x, -size.y, -size.z, 1.0f}},
-		// 右側面
-		{{ size.x,  size.y, -size.z, 1.0f}, { size.x,  size.y,  size.z, 1.0f}, { size.x, -size.y, -size.z, 1.0f}, { size.x, -size.y,  size.z, 1.0f}},
-		// 左側面
-		{{-size.x,  size.y,  size.z, 1.0f}, {-size.x,  size.y, -size.z, 1.0f}, {-size.x, -size.y,  size.z, 1.0f}, {-size.x, -size.y, -size.z, 1.0f}}
-	};
-
-	// 各面のインデックスオフセット
-	int vertexOffset = 0;
-
-	for (int i = 0; i < 6; ++i) { // 6面
-		// 頂点データを追加
-		for (int j = 0; j < 4; ++j) { // 各面の4頂点
-			mesh_->verticesskyBox.push_back({
-				positions[i][j],      // 座標
-				});
-		}
-
-		// インデックスデータを追加 (2つの三角形)
-		mesh_->indices.push_back(vertexOffset + 0);
-		mesh_->indices.push_back(vertexOffset + 2);
-		mesh_->indices.push_back(vertexOffset + 1);
-
-		mesh_->indices.push_back(vertexOffset + 2);
-		mesh_->indices.push_back(vertexOffset + 3);
-		mesh_->indices.push_back(vertexOffset + 1);
-
-		vertexOffset += 4; // 次の面に移動
-	}
-
-	mesh_->InitializeSkyBox(dxCommon_);
-
-
-	worldtransform_.Initialize();
-	worldtransform_.scale_ = { 10,10,10 };
 }
 
-void SkyBoxCommon::Update()
-{
-	worldtransform_.Update();
 
-	transfomation->Update(camara_,worldtransform_.worldMat_);
-
-}
 
 void SkyBoxCommon::DrawCommonSetting()
 {
@@ -97,20 +28,6 @@ void SkyBoxCommon::DrawCommonSetting()
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	mesh_->GetCommandList();
-
-
-
-	material->GetCommandListMaterial(0);
-
-	material->GetCommandListTexture(2, 7, 8);
-
-	transfomation->GetCommandList(1);
-
-	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-	dxCommon_->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
-
 }
 
 void SkyBoxCommon::CreateRootSignature()

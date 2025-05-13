@@ -25,6 +25,8 @@
 
 
 #include"DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include"DirectXGame/engine/SkyBox/SkyBox.h"
+
 #include "DirectXGame/engine/2d/Primitive2D.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 #include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
@@ -147,9 +149,12 @@ private:
 	std::unique_ptr<Object3d> goalObject;
 	std::unique_ptr<Object3d> taleObject;
 	std::unique_ptr<Object3d> primitiveObject3d;
+	std::unique_ptr<Object3d> skyBoxObject;
 
 	std::unique_ptr<Primitive> primitiveObject;
-	std::unique_ptr<Primitive> primitivePlaneObject;
+	
+	std::unique_ptr<SkyBox> skyBox;
+
 
 
 	// オーシャンシェーダー

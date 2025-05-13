@@ -15,6 +15,7 @@ class DirectXCommon;
 class PrimitiveCommon
 {
 public:
+
 	enum class PsoType {
 		kDefalt,
 		kRingClamp,

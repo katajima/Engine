@@ -89,6 +89,41 @@ void Transfomation::Update(Primitive* primitive, Camera* camera, Matrix4x4& loca
 	data_->worldInverseTranspose = Transpose(Inverse(mat));
 }
 
+void Transfomation::Update(SkyBox* skyBox, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
+{
+	Matrix4x4 worldViewProjectionMatrix{};
+
+	if (camera) {
+		// WVP計算
+		Matrix4x4 worldViewProjectionMatrix{};
+
+		worldViewProjectionMatrix = Multiply(local, mat); // ワールド変換
+
+		worldViewProjectionMatrix = Multiply(worldViewProjectionMatrix, camera->GetViewMatrix()); // ビュー変換
+		worldViewProjectionMatrix = Multiply(worldViewProjectionMatrix, camera->GetProjectionMatrix()); // 射影変換
+
+
+
+		if (skyBox) {
+
+			data_->WVP = worldViewProjectionMatrix;
+			data_->World = Multiply(local, mat);
+
+		}
+		else {
+			data_->WVP = worldViewProjectionMatrix;
+			data_->World = mat;
+		}
+	}
+	else {
+		worldViewProjectionMatrix = mat;
+		data_->WVP = worldViewProjectionMatrix;
+		data_->World = mat;
+	}
+
+	data_->worldInverseTranspose = Transpose(Inverse(mat));
+}
+
 void Transfomation::Update(Camera* camera, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};

@@ -156,7 +156,8 @@ void TestScene::Draw3D()
 	switch (behavior_)
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
-		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
+		
+		skyBoxObject->Draw();
 
 		tail.Draw();
 		
@@ -339,8 +340,7 @@ void TestScene::InitializeObject3D()
 	goalObject->worldtransform_.scale_ = 3;
 
 	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(camera.get());
-	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
-
+	
 
 	for (int i = 0; i < map->GetWidth(); i++) {
 		for (int j = 0; j < map->GetHeight(); j++) {
@@ -362,7 +362,6 @@ void TestScene::InitializeObject3D()
 
 
 	primitiveObject = std::make_unique<Primitive>();
-	primitivePlaneObject = std::make_unique<Primitive>();
 	
 	ShapeParameter::ShapeSphere sph;
 	primitiveObject->Initialize<ShapeParameter::ShapeSphere>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, sph, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
@@ -376,8 +375,16 @@ void TestScene::InitializeObject3D()
 	primitiveObject3d->SetCamera(camera.get());
 	primitiveObject3d->SetName("primitiveR");
 
-	ShapeParameter::Torus toru;
-	primitivePlaneObject->Initialize<ShapeParameter::Torus>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Torus, toru , "resources/Texture/gradationLine.png",{1,1,1,1},"Plane");
+	skyBox = std::make_unique<SkyBox>();
+	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
+
+	skyBoxObject = std::make_unique<Object3d>();
+	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
+	skyBoxObject->SetSkyBox(skyBox.get());
+	skyBoxObject->SetCamera(camera.get());
+	skyBoxObject->worldtransform_.scale_ = {10,10,10};
+	skyBoxObject->SetName("skyBox");
+
 	
 }
 
@@ -732,9 +739,9 @@ void TestScene::InitializeRoom08()
 void TestScene::UpdateRoom01()
 {
 	ocean_->Update();
-
-	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
-	GetEntity3DManager()->GetSkyBoxCommon()->Update();
+	skyBoxObject->Update();
+	//GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
+	//GetEntity3DManager()->GetSkyBoxCommon()->Update();
 
 }
 
