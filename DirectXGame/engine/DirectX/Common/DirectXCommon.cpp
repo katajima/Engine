@@ -145,6 +145,8 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 
 	sceneManager->Update();
 
+	entity3DManager->Update();
+
 	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
 
 

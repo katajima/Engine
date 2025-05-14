@@ -30,6 +30,9 @@ public:
 	// ImGui
 	void UpdateImgui();
 
+	// 
+	void Update();
+
 	void ObjectClean();
 
 public: //セッター

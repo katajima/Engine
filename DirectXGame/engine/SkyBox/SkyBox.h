@@ -24,6 +24,9 @@ public:
 
 	void Draw();
 
+	Material* GetMaterial() { return material.get(); }
+
+	Mesh* GetMesh() { return mesh_.get(); }
 private:
 
 	std::unique_ptr<Mesh> mesh_;

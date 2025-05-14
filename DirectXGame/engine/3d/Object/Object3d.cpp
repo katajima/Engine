@@ -23,6 +23,7 @@
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 
 void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
 {
@@ -31,7 +32,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();
 	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();
 	skyBoxCommon_ = entity3DManager_->GetSkyBoxCommon();
-
+	oceanManager_ = entity3DManager_->GetOceanManager();
 
 	worldtransform_.Initialize();
 	worldtransform_.translate_.x = { 0.00000001f };
@@ -63,6 +64,9 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 		break;
 	case Object3d::ObjectType::kSkyBox:
 		objectTypeName = "SkyBoxObject";
+		break;
+	case Object3d::ObjectType::kOcean:
+		objectTypeName = "OceanObject";
 		break;
 	default:
 		objectTypeName = "NoObject";
@@ -160,25 +164,25 @@ void Object3d::Update()
 		transfomation->UpdateSkinning(model, camera, localMatrix, worldtransform_.worldMat_);
 		break;
 	case ObjectType::kPrimitive:
-
-
 		if (primitive_) {
 			primitive_->Update();
-		
+
 			transfomation->Update(primitive_, camera, localMatrix, worldtransform_.worldMat_);
 		}
-
-		
-
 		break;
 	case ObjectType::kSkyBox:
-
 		if (skyBox_) {
 			skyBox_->Update();
 
 			transfomation->Update(primitive_, camera, localMatrix, worldtransform_.worldMat_);
 		}
+		break;
+	case ObjectType::kOcean:
+		if (ocean_) {
+			ocean_->Update();
 
+			transfomation->Update(ocean_, camera, localMatrix, worldtransform_.worldMat_);
+		}
 		break;
 	default:
 		break;
@@ -227,7 +231,7 @@ void Object3d::Draw()
 		break;
 	case ObjectType::kPrimitive:
 
-		
+
 		if (primitive_) {
 
 			primitive_->DrawSetting();
@@ -241,11 +245,21 @@ void Object3d::Draw()
 	case ObjectType::kSkyBox:
 
 		if (skyBox_) {
-		skyBoxCommon_->DrawCommonSetting();
+			skyBoxCommon_->DrawCommonSetting();
 
-		transfomation->GetCommandList(1);
-		
+			transfomation->GetCommandList(1);
+
 			skyBox_->Draw();
+		}
+		break;
+	case ObjectType::kOcean:
+
+		if (ocean_) {
+			oceanManager_->DrawCommonSetting();
+
+			DrawSettingOcean();
+
+			ocean_->Draw();
 		}
 		break;
 	}
@@ -334,6 +348,19 @@ void Object3d::DrawSettingSkin()
 	entity3DManager_->GetLightManager()->DrawLight();
 
 	transfomation->GetCommandList(1);
+
+	camera->GetCommandList(4);
+}
+
+void Object3d::DrawSettingOcean()
+{
+	entity3DManager_->GetOceanManager()->DrawCommonSetting();
+
+
+	entity3DManager_->GetLightManager()->DrawLight();
+
+	transfomation->GetCommandList(1);
+	transfomation->GetCommandList(9);
 
 	camera->GetCommandList(4);
 }

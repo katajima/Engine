@@ -84,6 +84,34 @@ void Entity3DManager::UpdateImgui()
 		ImGui::Text(objectTypeName.c_str());
 		ImGui::Separator();
 
+		Material* material;
+		Mesh* mesh;
+		
+		if (entity->GetObjectType() == Object3d::ObjectType::kSkyBox) {
+			material = entity->skyBox_->GetMaterial();
+			mesh = entity->skyBox_->GetMesh();
+		}
+		else if (entity->GetObjectType() == Object3d::ObjectType::kPrimitive) {
+			material = entity->primitive_->GetMaterial();
+			mesh = entity->skyBox_->GetMesh();
+		}else if (entity->GetObjectType() == Object3d::ObjectType::kOcean) {
+			material = entity->ocean_->GetMaterial();
+			mesh = entity->ocean_->GetMesh();
+		}else{
+			if (entity->GetObjectType() == Object3d::ObjectType::kNormal) {
+				material = entity->GetMaterial(0);
+				mesh = entity->GetMesh(0);
+			}
+			else if (entity->GetObjectType() == Object3d::ObjectType::kAnimation) {
+				material = entity->GetMaterial(0);
+				mesh = entity->GetMesh(0);
+			}
+			else if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {
+				material = entity->GetMaterial(0);
+				mesh = entity->GetMesh(0);
+			}
+		}
+
 		ImGui::Separator();
 		ImGui::Text("transform");
 		ImGui::Separator();
@@ -93,20 +121,20 @@ void Entity3DManager::UpdateImgui()
 		ImGui::Separator();
 		ImGui::Text("material");
 		ImGui::Separator();
-		ImGui::DragFloat3("M_scale", &entity->GetMaterial(0)->transform.scale.x, 0.1f);
-		ImGui::DragFloat3("M_rotate", &entity->GetMaterial(0)->transform.rotate.x, 0.1f);
-		ImGui::DragFloat3("M_translate", &entity->GetMaterial(0)->transform.translate.x, 0.1f);
-		ImGui::ColorEdit4("color", &entity->GetMaterial(0)->color.r);
-		ImGui::SliderInt("enableLighting", &entity->GetMaterial(0)->enableLighting_, 0,1);
-		ImGui::SliderFloat("alphaClipping", &entity->GetMaterial(0)->alphaClipping_, 0,1);
-		ImGui::DragFloat("shininess", &entity->GetMaterial(0)->shininess_,0.01f);
+		ImGui::DragFloat3("M_scale", &material->transform.scale.x, 0.1f);
+		ImGui::DragFloat3("M_rotate", &material->transform.rotate.x, 0.1f);
+		ImGui::DragFloat3("M_translate", &material->transform.translate.x, 0.1f);
+		ImGui::ColorEdit4("color", &material->color.r);
+		ImGui::SliderInt("enableLighting", &material->enableLighting_, 0,1);
+		ImGui::SliderFloat("alphaClipping", &material->alphaClipping_, 0,1);
+		ImGui::DragFloat("shininess", &material->shininess_,0.01f);
 		ImGui::Separator();
 		ImGui::Text("mesh");
 		ImGui::Separator();
 
-		int index = static_cast<int>(entity->GetMesh(0)->vertices.size());
+		int index = static_cast<int>(mesh->vertices.size());
 		ImGui::InputInt("verticesSize", &index);
-		index = static_cast<int>(entity->GetMesh(0)->indices.size());
+		index = static_cast<int>(mesh->indices.size());
 		ImGui::InputInt("indicesSize", &index);
 		
 		
@@ -117,11 +145,25 @@ void Entity3DManager::UpdateImgui()
 			entity->GetPrimitive()->MeshUpdateImGui();
 		}
 
+		if (entity->GetOcean()) {
+			ImGui::Separator();
+			entity->GetOcean()->UpdateImgui();
+		}
+
 	}
 
 	ImGui::End();
 
 #endif // _DEBUG
+
+}
+
+void Entity3DManager::Update()
+{
+	for (auto& object : object3d) {
+		object->Update();
+	}
+
 
 }
 

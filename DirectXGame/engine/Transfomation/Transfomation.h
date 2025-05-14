@@ -16,6 +16,7 @@
 
 class Primitive;
 class SkyBox;
+class Ocean;
 class Transfomation
 {
 public:
@@ -27,6 +28,8 @@ public:
 	void Update(Primitive* primitive, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
 	// 更新
 	void Update(SkyBox* skyBox, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	// 更新
+	void Update(Ocean* ocean, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
 	// 更新
 	void Update(Camera* camera,Matrix4x4& mat);
 	// 更新

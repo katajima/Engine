@@ -14,6 +14,7 @@
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3D.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
+#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 using namespace Microsoft::WRL;
 
 class Entity3DManager;
@@ -23,6 +24,7 @@ class ImGuiManager;
 class Primitive;
 class SkyBox;
 class SkyBoxCommon;
+class OceanManager;
 class Object3d
 {
 public:
@@ -47,6 +49,7 @@ public:
 		kSkinning,	// モデルをスキニング描画するオブジェクト
 		kPrimitive, // プリミティブを描画するオブジェクト
 		kSkyBox,	// スカイボックスを描画するオブジェクト
+		kOcean,		// 波を描画するオブジェクト
 	};
 
 	// 初期化
@@ -77,6 +80,10 @@ public:
 
 	// スカイボックス
 	void SetSkyBox(SkyBox* skyBox) { skyBox_ = skyBox; }
+
+	// 波セット
+	void SetOcean(Ocean* ocean) { ocean_ = ocean; }
+
 
 
 	// ゲッター
@@ -112,14 +119,18 @@ public:
 
 	// マテリアル取得
 	Material* GetMaterial(int index) { return model->modelData.material[index].get(); }
-
+	
 	// モデル取得
 	Model* GetModel() const { return model; }
 
 	// プリミティブ取得
 	Primitive* GetPrimitive() { return primitive_; }
+	// 波取得
+	Ocean* GetOcean() { return ocean_; }
 
 	std::string GetObjectTypeName() { return objectTypeName; }
+
+	ObjectType GetObjectType() { return objectType_; }
 
 private:
 	// 各コマンドリスト
@@ -127,6 +138,9 @@ private:
 
 	// スキニング設定
 	void DrawSettingSkin();
+
+	// 波
+	void DrawSettingOcean();
 
 	//
 	void ObjectTypeDiscrimination(ObjectRasterizerType type);
@@ -154,11 +168,12 @@ private:
 public:
 	// モデル
 	Model* model = nullptr;
-	//
+	// プリミティブ
 	Primitive* primitive_ = nullptr;
-	//
+	// スカイボックス
 	SkyBox* skyBox_ = nullptr;
-
+	// 波
+	Ocean* ocean_ = nullptr;
 
 	std::unique_ptr<Entity3D> entity3D_;
 
@@ -177,6 +192,7 @@ private:
 	ImGuiManager* imGuiManager_;
 	Entity3DManager* entity3DManager_;
 	SkyBoxCommon* skyBoxCommon_;
+	OceanManager* oceanManager_;
 };
 
 

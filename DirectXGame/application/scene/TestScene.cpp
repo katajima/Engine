@@ -45,12 +45,6 @@ void TestScene::Update()
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 
 #ifdef _DEBUG
-
-
-	
-
-
-
 	if (isDebugCamera) {
 		debugCamera->Update();
 
@@ -58,13 +52,7 @@ void TestScene::Update()
 		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
 		camera->transform_ = debugCamera->GetViewProjection().transform_;
 	}
-
-
-	
-
 #endif // _DEBUG
-
-	primitiveObject3d->Update();
 
 	if (behaviorRequest_) {
 
@@ -143,10 +131,7 @@ void TestScene::Update()
 	default:
 		break;
 	}
-	taleObject->Update();
-	tail.Update();
-
-
+	
 	camera->UpdateMatrix();
 }
 
@@ -158,10 +143,11 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom01:
 		
 		skyBoxObject->Draw();
+		skyBoxObject2->Draw();
 
 		tail.Draw();
 		
-		ocean_->Draw();
+		oceanObject->Draw();
 
 
 		break;
@@ -173,7 +159,6 @@ void TestScene::Draw3D()
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
 		taleObject->Draw();
-		//multiy.Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
 		tail.Draw();
@@ -186,7 +171,6 @@ void TestScene::Draw3D()
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
 
-		//stairObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
 
@@ -273,12 +257,14 @@ void TestScene::InitializeObject3D()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(GetEntity3DManager(), { 1000,1000 });
-	ocean_->SetCamera(camera.get());
-	ocean_->transform.rotate.x = DegreesToRadians(90);
-	ocean_->material->color.a = 0.99f;
-
-
+	ocean_->Initialize(GetEntity3DManager(), { 100,100 });
+	
+	oceanObject = std::make_unique<Object3d>();
+	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kOcean);
+	oceanObject->SetCamera(camera.get());
+	oceanObject->SetOcean(ocean_.get());
+	oceanObject->worldtransform_.translate_ = { 0,10,0 };
+	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
 	
 
 	skinningObject.Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
@@ -377,6 +363,8 @@ void TestScene::InitializeObject3D()
 
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
+	skyBox2 = std::make_unique<SkyBox>();
+	skyBox2->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
 
 	skyBoxObject = std::make_unique<Object3d>();
 	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
@@ -384,6 +372,12 @@ void TestScene::InitializeObject3D()
 	skyBoxObject->SetCamera(camera.get());
 	skyBoxObject->worldtransform_.scale_ = {10,10,10};
 	skyBoxObject->SetName("skyBox");
+	skyBoxObject2 = std::make_unique<Object3d>();
+	skyBoxObject2->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
+	skyBoxObject2->SetSkyBox(skyBox2.get());
+	skyBoxObject2->SetCamera(camera.get());
+	skyBoxObject2->worldtransform_.scale_ = {1,1,1};
+	skyBoxObject2->SetName("skyBox2");
 
 	
 }
@@ -738,11 +732,6 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
-	ocean_->Update();
-	skyBoxObject->Update();
-	//GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
-	//GetEntity3DManager()->GetSkyBoxCommon()->Update();
-
 }
 
 void TestScene::UpdateRoom02()
@@ -757,8 +746,7 @@ void TestScene::UpdateRoom02()
 
 void TestScene::UpdateRoom03()
 {
-	primitvPlaneSmoke_->Update();
-
+	
 }
 
 void TestScene::UpdateRoom04()
@@ -776,11 +764,6 @@ void TestScene::UpdateRoom04()
 	primitvPlaneSmoke_->Update();
 
 
-	skinningObject.Update();
-	skinningObject2.Update();
-
-	triCen;
-
 	CornerSegment corner;// = { sphere2d.center }
 	corner.center.x = sphere2d.center.x;
 	corner.center.y = 5;
@@ -797,10 +780,6 @@ void TestScene::UpdateRoom04()
 
 	int size = GetEntity3DManager()->GetObject3dInstansManager()->GetSize();
 
-
-
-
-	object_;
 
 }
 
@@ -849,8 +828,6 @@ void TestScene::UpdateRoom06()
 
 
 
-	//stairObject->LineMesh();
-	stairObject->Update();
 	GetEntity3DManager()->Get3DLineCommon()->AddLineCapsule(capsule_);
 	octree->draw(*GetEntity3DManager()->Get3DLineCommon());
 
@@ -907,9 +884,7 @@ void TestScene::UpdateRoom07()
 
 
 
-	playerObject->Update();
-	goalObject->Update();
-
+	
 	pathfinder.DrawPath(GetEntity3DManager()->Get3DLineCommon(), 11.0f);
 
 	map->DrawMapChip(GetEntity3DManager()->Get3DLineCommon(), 10.0f);

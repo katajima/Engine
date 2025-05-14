@@ -62,11 +62,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	// 海
 	ocean_ = std::make_unique<Ocean>();
 	ocean_->Initialize(entity3DManager_, { 10000,10000 });
-	ocean_->SetCamera(camera);
-	ocean_->transform.rotate.x = DegreesToRadians(90);
-	ocean_->transform.translate.y = -10;
-	ocean_->material->color = { 0,0,0.57f,1 };
-	ocean_->material->color.a = 0.95f;
+
 
 
 
@@ -99,7 +95,6 @@ void Stage::Update()
 	}
 
 	// 海
-	ocean_->material->color.a = 0.75f;
 	ocean_->Update();
 
 

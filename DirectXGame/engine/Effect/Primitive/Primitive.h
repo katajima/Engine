@@ -138,6 +138,8 @@ public:
 
 	void DrawSetting(PsoType type = PsoType::kDefalt);
 
+	Material* GetMaterial() { return material.get(); }
+
 	Mesh* GetMesh() { return mesh.get(); }
 
 	void MeshUpdateImGui();
@@ -215,8 +217,7 @@ private:
 
 	std::unique_ptr<Mesh> mesh;
 	std::unique_ptr<Material> material;
-	//std::unique_ptr<Transfomation> transfomation = nullptr;
-
+	
 	// 名前
 	std::string name_ = "primitive";
 

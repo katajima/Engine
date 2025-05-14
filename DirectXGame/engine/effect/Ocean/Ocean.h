@@ -41,23 +41,23 @@ public:
 
 	void Update();
 
+	void UpdateImgui();
+
 	void Draw();
 
-	void SetCamera(Camera* camera) { this->camera = camera; }
+	Material* GetMaterial() { return material.get(); }
+
+	Mesh* GetMesh() { return mesh_.get(); }
+private:
 
 
-public:
+	void AddWave();
+
+private:
 	// マテリアル
 	std::unique_ptr<Material> material = nullptr;
 	// メッシュ
 	std::unique_ptr<Mesh> mesh_ = nullptr;
-
-	// マトリックス
-	Matrix4x4 mat_;
-	// 位置
-	Transform transform;
-
-
 private:
 	struct WaveParameters {
 		Vector2 waveDirection; // 波の方向
@@ -71,6 +71,8 @@ private:
 	Microsoft::WRL::ComPtr < ID3D12Resource> waveResource;
 	WaveParameters *waveData;
 
+	uint32_t index_ =  0;
+
 	struct NoiseData {
 		float noiseScale; // ノイズのスケール
 		float noiseStrength; // ノイズの強度
@@ -81,50 +83,20 @@ private:
 	NoiseData* noiseData;
 
 
-	// 頂点データ
-	struct VertexData {
 
-		Vector4 position;
-		Vector2 texcoord;
-		Vector3 normal;
-	};
-
-	//モデルデータ
-	struct ModelData
-	{
-		std::vector<VertexData> vertices;
-		std::vector<uint32_t> indices; // 追加：インデックスデータ
-		std::vector<VertexData> indicesPos;
-		MaterialData material;
-	};
 	
 	struct Renge {
 		Vector2 renge;
 	};
 	Renge renge_;
 
-	WorldTransform transform_;
+	
 
-	std::unique_ptr<Transfomation>transfomation = nullptr;
-
-	// バッファリソース
-	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
-	// バッファリソース内のデータを指すポインタ
-	VertexData* vertexData = nullptr;
-
-	//バッファリソースの使い道を補足するバッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-
-
-	Microsoft::WRL::ComPtr < ID3D12Resource> indexResource;
-	uint32_t* indexData = nullptr;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;
 
 	
-	Camera* camera = nullptr;
 	Entity3DManager* entity3dManager_;
 	DirectXCommon* directXCommon_;
 };

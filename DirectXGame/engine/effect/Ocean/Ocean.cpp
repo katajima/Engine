@@ -32,12 +32,6 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 
 
 
-	transform_.Initialize();
-	
-
-	
-	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(directXCommon_);
 
 	
 	material = std::make_unique<Material>();
@@ -58,7 +52,7 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 
 
 
-	waveResource = directXCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(WaveParameters) * 3);
+	waveResource = directXCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(WaveParameters) * 10);
 	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));
 
 	waveData[0].amplitude = 1.500f;
@@ -82,33 +76,21 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 	waveData[2].waveDirection = { 0,1 };
 	waveData[2].flag = true;
 
-	
-
-	//transform変数を作る
-	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,10.0f,0.0f} };
+	index_ = 3;
 }
 
 void Ocean::Update()
 {
+	for (size_t i = 0; i < index_; ++i) {
+		waveData[i].time += 1.0f / 60.0f;
+	}
+	material->GPUData();
+}
+
+void Ocean::UpdateImgui()
+{
 #ifdef _DEBUG
-
-
-
-	ImGui::Begin("engine");
-
-
-	if (ImGui::CollapsingHeader("Ocean")) {
-		ImGui::Text("SRT");
-		ImGui::Separator();
-		ImGui::DragFloat3("translate", &transform.translate.x, 0.01f);
-		ImGui::DragFloat3("rotate", &transform.rotate.x, 0.01f);
-		ImGui::DragFloat3("scale", &transform.scale.x, 0.01f);
-		ImGui::Separator();
-		ImGui::Text("material");
-		ImGui::Separator();
-		ImGui::ColorEdit4("color", &material->color.r);
-		ImGui::SliderFloat("environmentCoefficient", &material->environmentCoefficient_,0.0f,1.0f);
-		ImGui::Separator();
+	if (ImGui::CollapsingHeader("Wave")) {
 		ImGui::Text("noiseData");
 		ImGui::Separator();
 		ImGui::DragFloat("noiseScale", &noiseData->noiseScale, 0.01f);
@@ -118,89 +100,55 @@ void Ocean::Update()
 
 
 
+		
+
 		ImGui::Separator();
 		ImGui::Text("waveData");
 		ImGui::Separator();
-
-		ImGui::Checkbox("Enable", reinterpret_cast<bool*>(&waveData[0].flag));
-		ImGui::DragFloat2("waveDirection", &waveData[0].waveDirection.x, 0.1f);
-		waveData[0].waveDirection = Normalize(waveData[0].waveDirection);
-		ImGui::DragFloat("amplitude", &waveData[0].amplitude, 0.01f);
-		ImGui::DragFloat("speed", &waveData[0].speed, 0.01f);
-		ImGui::DragFloat("frequency", &waveData[0].frequency, 0.01f);
-
+		if (ImGui::Button("AddWave")) {
+			AddWave();
+		}
 		ImGui::Separator();
-
-		ImGui::Checkbox("Enable1", reinterpret_cast<bool*>(&waveData[1].flag));
-		ImGui::DragFloat2("waveDirection1", &waveData[1].waveDirection.x, 0.1f);
-		waveData[1].waveDirection = Normalize(waveData[1].waveDirection);
-		ImGui::DragFloat("amplitude1", &waveData[1].amplitude, 0.01f);
-		ImGui::DragFloat("speed1", &waveData[1].speed, 0.01f);
-		ImGui::DragFloat("frequency1", &waveData[1].frequency, 0.01f);
-
+		for (size_t i = 0; i < index_; ++i) {
+			std::string name = "Wave" + std::to_string(i);
+			// 強制的に一つだけ開くように設定
+			if (ImGui::TreeNode(name.c_str())) {
+				ImGui::Checkbox("Enable", reinterpret_cast<bool*>(&waveData[i].flag));
+				ImGui::DragFloat2("waveDirection", &waveData[i].waveDirection.x, 0.1f);
+				waveData[i].waveDirection = Normalize(waveData[i].waveDirection);
+				ImGui::DragFloat("amplitude", &waveData[i].amplitude, 0.01f);
+				ImGui::DragFloat("speed", &waveData[i].speed, 0.01f);
+				ImGui::DragFloat("frequency", &waveData[i].frequency, 0.01f);
+				ImGui::TreePop();
+			}
+		}
 		ImGui::Separator();
-
-		ImGui::Checkbox("Enable2", reinterpret_cast<bool*>(&waveData[2].flag));
-		ImGui::DragFloat2("waveDirection2", &waveData[2].waveDirection.x, 0.1f);
-		waveData[2].waveDirection = Normalize(waveData[2].waveDirection);
-		ImGui::DragFloat("amplitude2", &waveData[2].amplitude, 0.01f);
-		ImGui::DragFloat("speed2", &waveData[2].speed, 0.01f);
-		ImGui::DragFloat("frequency2", &waveData[2].frequency, 0.01f);
-
-
-		
-		
 	}
-	ImGui::End();
 #endif // _DEBUG
-
-
-
-	waveData->time += 1.0f / 60.0f;
-	
-	// ワールド行列の計算
-	mat_ = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	
-	transform_.Update();
-
-	transfomation->Update(camera,mat_);
-
-	material->GPUData();
 }
 
 void Ocean::Draw()
 {
-	entity3dManager_->GetOceanManager()->DrawCommonSetting();
-
-
-	entity3dManager_->GetLightManager()->DrawLight();
-	
 	directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(7, waveResource->GetGPUVirtualAddress());
 	directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(8, noiseResource->GetGPUVirtualAddress());
 
-	transfomation->GetCommandList(1);
-	transfomation->GetCommandList(9);
-
-	camera->GetCommandList(4);
-
 	material->GetCommandListMaterial(0);
-
 	material->GetCommandListTexture(2,0,0,10);
-
-	
-	// 頂点バッファの設定
-	//OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-
-	// インデックスバッファの設定
-	//OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);
 
 	mesh_->GetCommandList();
 
-	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-	//OceanManager::GetInstance()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
-
-
 	directXCommon_->GetCommandList()->DrawInstanced(UINT(mesh_->vertices.size()), 1, 0, 0);
+}
+
+void Ocean::AddWave()
+{
+	waveData[index_].amplitude = 0.5f;
+	waveData[index_].frequency = 2.0f;
+	waveData[index_].speed = 1.0f;
+	waveData[index_].time = 0;
+	waveData[index_].waveDirection = { 0,1 };
+	waveData[index_].flag = true;
 
 
+	index_++;
 }

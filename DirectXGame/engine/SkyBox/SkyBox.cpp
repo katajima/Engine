@@ -77,8 +77,6 @@ void SkyBox::Draw()
 
 	material->GetCommandListTexture(2, 7, 8);
 
-	//transfomation->GetCommandList(1);
-
 	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 	entity3DManager_->GetSkyBoxCommon()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
 }

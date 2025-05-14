@@ -11,7 +11,7 @@ struct WaveParameter
     int flag; // ”g‚ª‚ ‚é‚Ì‚©
 };
 
-static const int MaxWave = 3;
+static const int MaxWave = 10;
 
 // •¡”‚Ì”g‚ğŠÇ—‚·‚é\‘¢‘Ì
 struct WaveParameters

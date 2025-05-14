@@ -150,10 +150,14 @@ private:
 	std::unique_ptr<Object3d> taleObject;
 	std::unique_ptr<Object3d> primitiveObject3d;
 	std::unique_ptr<Object3d> skyBoxObject;
+	std::unique_ptr<Object3d> skyBoxObject2;
+	std::unique_ptr<Object3d> oceanObject;
+
 
 	std::unique_ptr<Primitive> primitiveObject;
 	
 	std::unique_ptr<SkyBox> skyBox;
+	std::unique_ptr<SkyBox> skyBox2;
 
 
 
