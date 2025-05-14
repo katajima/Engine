@@ -21,7 +21,7 @@ struct VertexInfluence
     int4 index;
 };
 StructuredBuffer<VertexInfluence> gInfluence : register(t2);
-;
+
 RWStructuredBuffer<Vertex> gOutputVertices : register(u0);
 
 struct SkinningInfomation

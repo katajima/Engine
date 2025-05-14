@@ -17,7 +17,7 @@
 
 
 #include"imgui.h"
-
+#include"DirectXGame/engine/Line/LineCommon.h"
 
 template <typename tValue>
 struct Keyframe {
@@ -109,6 +109,9 @@ struct WellForGPU {
 	Matrix4x4 skeletonSpaceInverseTransposeMatrix; // 法線用
 };
 
+struct SkinningInfomation {
+	uint32_t numVertices;
+};
 struct SkinCluster {
 	std::vector<Matrix4x4> inverseBindPoseMatrices;
 
@@ -143,7 +146,11 @@ struct SkinCluster {
 	D3D12_VERTEX_BUFFER_VIEW outputBufferView;
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> outputVertexUavHandle;
 
-
+	/// <summary>
+	/// 
+	/// </summary>
+	Microsoft::WRL::ComPtr < ID3D12Resource> skinningInfomation;
+	SkinningInfomation* skinningInfomationDeta;
 };
 
 
@@ -264,7 +271,7 @@ static int CalculateDepth(const std::vector<Joint>& joints, int index) {
 }
 
 // スケルトンの描画
-void DrawSkeleton(const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale);
+void DrawSkeleton(LineCommon* lineCommo, const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale);
 
 
 

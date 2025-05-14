@@ -485,6 +485,7 @@
     <FxCompile Include="resources\shaders\Offscreen\Bloom.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">

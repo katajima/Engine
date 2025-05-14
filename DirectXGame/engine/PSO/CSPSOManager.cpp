@@ -47,8 +47,6 @@ void CSPSOManager::SetRootSignature(Microsoft::WRL::ComPtr<ID3D12RootSignature>&
 	descriptionSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 	descriptionSignature.pParameters = rootParameter;
 	descriptionSignature.NumParameters = numRootParameters;
-//	descriptionSignature.pStaticSamplers = samplerDesc;
-//  descriptionSignature.NumStaticSamplers = numSamplers;
 
 	Blob(descriptionSignature, rootSignature);
 }
@@ -101,7 +99,7 @@ void CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsP
 	if (shderFile_.commpute.filePach != L"") {
 		// Shaderをコンパイルする
 		CS = dxcCompiler_->CompileShader(shderFile_.commpute.filePach,
-			L"vs_6_0");
+			L"cs_6_0");
 		assert(CS != nullptr);
 		graphicsPipeline.CS = { CS->GetBufferPointer(),
 		CS->GetBufferSize() }; // VertexShader

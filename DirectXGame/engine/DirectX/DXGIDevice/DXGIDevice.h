@@ -31,6 +31,9 @@ public:
 
 	// Material用のResource作成関数
 	Microsoft::WRL::ComPtr < ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
+	
+	// Material用のResource作成関数
+	Microsoft::WRL::ComPtr < ID3D12Resource> CreateBufferResourceUAV(size_t sizeInBytes);
 
 private:
 	// エラー判別

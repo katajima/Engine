@@ -36,7 +36,7 @@ void Mesh::Initialize(DirectXCommon* dxcommon)
 	indexData = nullptr;
 	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
 	std::memcpy(indexData, indices.data(), sizeof(uint32_t) * indices.size());
-	
+
 }
 
 void Mesh::InitializeLine(DirectXCommon* dxcommon)
@@ -206,11 +206,32 @@ void Mesh::GetCommandList()
 	dxCommon_->GetCommand()->GetList()->IASetIndexBuffer(&indexBufferView);
 }
 
+void Mesh::GetCommandListVertex(const D3D12_VERTEX_BUFFER_VIEW& _vertexBufferView)
+{
+	// 頂点バッファの設定
+	dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 1, &_vertexBufferView);
+	// インデックスバッファの設定
+	dxCommon_->GetCommand()->GetList()->IASetIndexBuffer(&indexBufferView);
+}
+
 void Mesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv)
 {
 	D3D12_VERTEX_BUFFER_VIEW vbvs[2] = {
 		vertexBufferView,
 		vbv
+	};
+
+	// 頂点バッファの設定
+	dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
+	// インデックスバッファの設定
+	dxCommon_->GetCommand()->GetList()->IASetIndexBuffer(&indexBufferView);
+}
+
+void Mesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv, const D3D12_VERTEX_BUFFER_VIEW& vbv2)
+{
+	D3D12_VERTEX_BUFFER_VIEW vbvs[2] = {
+		vbv,
+		vbv2
 	};
 
 	// 頂点バッファの設定
@@ -286,13 +307,13 @@ void Mesh::SetTriangleImGui(const Mesh& mesh, const std::string name, const Vect
 	for (size_t i = 0; i < mesh.triangle.size(); i++) {
 		str = "triangle" + std::to_string(i);
 		std::string str2;
-		for (size_t j = 0; j < 3;j++) {
+		for (size_t j = 0; j < 3; j++) {
 			str2 = str + "_" + std::to_string(j);
 			Vector3 tri = mesh.triangle[i].vertices[j] + worldPos;
 			ImGui::InputFloat3(str2.c_str(), &tri.x);
 		}
 	}
-	
+
 	ImGui::End();
 
 }

@@ -45,7 +45,11 @@ public:
 
 	// コマンドリスト
 	void GetCommandList();
+
+	void GetCommandListVertex(const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView);
+
 	void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv);
+	void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv,const D3D12_VERTEX_BUFFER_VIEW& vbv2);
 
 	void Clear();
 

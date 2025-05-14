@@ -146,7 +146,7 @@ void Object3d::Update()
 				// スキニング更新
 				UpdateSkinCluster(model->skinCluster, model->skeleton);
 
-
+				DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
 			}
 			else {
 				localMatrix = model->modelData.rootNode.localMatrix;
@@ -216,7 +216,6 @@ void Object3d::Draw()
 		ObjectSkinTypeDiscrimination(rasterizerType_);
 
 		DrawSettingSkin();
-
 
 		// 3Dモデルが割り当てれていれば描画する
 		if (model) {
@@ -396,6 +395,28 @@ void Object3d::ObjectTypeDiscrimination(ObjectRasterizerType type)
 
 void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 {
+	skinningConmmon_->DrawComputeSetting();
+
+
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, model->skinCluster.paletteSrvHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, model->skinCluster.inputVertexSrvHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, model->skinCluster.influenceSrvHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, model->skinCluster.outputVertexUavHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, model->skinCluster.skinningInfomation->GetGPUVirtualAddress());
+
+
+	skinningConmmon_->GetDxCommon()->GetCommandList()->Dispatch(UINT(model->modelData.mesh[0]->vertices.size() + 1023) / 1024, 1, 1);
+
+	// 初期状態を UAV 用に遷移させる
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = model->skinCluster.outputVertexResource.Get();
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	skinningConmmon_->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
+
 
 	switch (type)
 	{
@@ -426,7 +447,8 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 	default:
 		break;
 	}
-	//skinningConmmon_->DrawCompureSetting();
+	
+
 }
 
 #pragma endregion // 描画系

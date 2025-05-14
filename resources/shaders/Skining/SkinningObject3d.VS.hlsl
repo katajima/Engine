@@ -32,6 +32,7 @@ struct Skinned
     float4 position;
     float3 normal;
 };
+
 Skinned Skinning(VertexShaderInput input)
 {
     Skinned skinned;

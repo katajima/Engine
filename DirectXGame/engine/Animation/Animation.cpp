@@ -1,6 +1,6 @@
 #include "Animation.h"
 
-#include"DirectXGame/engine/Line/LineCommon.h"
+
 
 Skeleton CreateSkeleton(const Node& rootNode)
 {
@@ -117,7 +117,7 @@ void UpdateSkeleton(Skeleton& skeleton)
 	}
 }
 
-void DrawSkeleton(const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale)
+void DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale)
 {
 	// ジョイントごとの深さを計算して保存
 	std::vector<int> depths(joints.size(), 0);
@@ -140,7 +140,7 @@ void DrawSkeleton(const std::vector<Joint>& joints, const Vector3& pos, const Ve
 
 			Vector3 offsetParentPosition = Add(parentPosition, pos);
 			Vector3 offsetChildPosition = Add(childPosition, pos);
-			//LineCommon::GetInstance()->AddLine(offsetParentPosition, offsetChildPosition, { 1,1,1,1 });
+			lineCommon->AddLine(offsetParentPosition, offsetChildPosition, { 1,1,1,1 });
 
 		}
 	}

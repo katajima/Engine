@@ -96,9 +96,9 @@ void Model::Draw()
 		//}
 
 		
-
 		mesh->GetCommandList();
 
+		
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		modelCommon_->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 	}
@@ -108,36 +108,36 @@ void Model::DrawSkinning()
 {
 	auto commandList = modelCommon_->GetCommand()->GetList();
 
+	//commandList->SetGraphicsRootDescriptorTable(10, skinCluster.paletteSrvHandle.second);
+
+
 	for (auto& mesh : modelData.mesh)
 	{
-		/*D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
-		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-		uavDesc.Buffer.FirstElement = 0;
-		uavDesc.Buffer.NumElements = static_cast<UINT>(mesh->vertices.size());
-		uavDesc.Buffer.CounterOffsetInBytes = 0;
-		uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-		uavDesc.Buffer.StructureByteStride = sizeof(Mesh::VertexData);*/
-		// 
-		
-
-
 
 		modelData.material[mesh->meshIndex]->GetCommandListMaterial(0);
 
 		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
 
-
 		
-
-		commandList->SetGraphicsRootDescriptorTable(10, skinCluster.paletteSrvHandle.second);
-
-		mesh->GetCommandList(skinCluster.influenceBufferView);
+		
+		mesh->GetCommandList(skinCluster.outputBufferView);
+		//mesh->GetCommandList(skinCluster.outputBufferView,skinCluster.influenceBufferView);
+		//mesh->GetCommandList(skinCluster.influenceBufferView);
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 
 	}
+
+	// 初期状態を UAV 用に遷移させる
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = skinCluster.outputVertexResource.Get();
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	commandList->ResourceBarrier(1, &barrier);
 }
 
 #pragma endregion // 描画
@@ -525,10 +525,8 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
 	std::memset(mappedPalette, 0, sizeof(WellForGPU) * skeleton.joints.size());
 	skinCluster.mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
-	//skinCluster.paletteResource->Unmap(0, nullptr);
-
+	
 	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.wellSrvIndex, skinCluster.paletteResource.Get(), UINT(skeleton.joints.size()),sizeof(WellForGPU));
-
 	skinCluster.paletteSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.wellSrvIndex);
 	skinCluster.paletteSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.wellSrvIndex);
 
@@ -540,15 +538,13 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
 	std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size()); // 仮埋め。weightを0にしておく。
 	skinCluster.mappedInfluence = { mappedInfluence, modelData.mesh[0]->vertices.size() };
-	//skinCluster.influenceResource->Unmap(0, nullptr);
-
+	
 	// Influence用のVB作成
 	skinCluster.influenceBufferView.BufferLocation = skinCluster.influenceResource->GetGPUVirtualAddress();
 	skinCluster.influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * modelData.mesh[0]->vertices.size());
 	skinCluster.influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
 
 	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.influencesIndex, skinCluster.influenceResource.Get(), UINT(modelData.mesh[0]->vertices.size()), sizeof(VertexInfluence));
-
 	skinCluster.influenceSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.influencesIndex);
 	skinCluster.influenceSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.influencesIndex);
 
@@ -557,9 +553,9 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 
 	// InputVertex用のResourceを確保。
 	skinCluster.inputVertexResource = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * modelData.mesh[0]->vertices.size());
-	VertexInfluence* mappedinputVertex = nullptr;
+	VertexData* mappedinputVertex = nullptr;
 	skinCluster.inputVertexResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedinputVertex));
-	//std::memset(mappedinputVertex, 0, sizeof(VertexData) * modelData.mesh[0]->vertices.size()); // 仮埋め。weightを0にしておく。
+	std::memset(mappedinputVertex, 0, sizeof(VertexData) * modelData.mesh[0]->vertices.size()); // 仮埋め。weightを0にしておく。
 	
 	// InputVertex用のVB作成
 	skinCluster.inputVertexBufferView.BufferLocation = skinCluster.inputVertexResource->GetGPUVirtualAddress();
@@ -567,12 +563,43 @@ SkinCluster Model::CreateSkinCluster(const Skeleton& skeleton, const ModelData& 
 	skinCluster.inputVertexBufferView.StrideInBytes = sizeof(VertexData);
 
 	modelCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(modelData.skinning.inputVerticesIndex, skinCluster.inputVertexResource.Get(), UINT(modelData.mesh[0]->vertices.size()), sizeof(VertexData));
-
 	skinCluster.inputVertexSrvHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.inputVerticesIndex);
 	skinCluster.inputVertexSrvHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.inputVerticesIndex);
 
 
 
+
+	// outputVertex用のResourceを確保。
+
+	skinCluster.outputVertexResource = modelCommon_->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(VertexData) * modelData.mesh[0]->vertices.size());
+	VertexData* mappedOutputVertex = nullptr;
+
+	// 初期状態を UAV 用に遷移させる
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = skinCluster.outputVertexResource.Get();
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	modelCommon_->GetCommand()->GetList()->ResourceBarrier(1, &barrier);
+
+	
+	// outputVertex用のVB作成
+	skinCluster.outputBufferView.BufferLocation = skinCluster.outputVertexResource->GetGPUVirtualAddress();
+	skinCluster.outputBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.mesh[0]->vertices.size());
+	skinCluster.outputBufferView.StrideInBytes = sizeof(VertexData);
+
+	modelCommon_->GetSrvManager()->CreateUAVforStructuredBuffer(modelData.skinning.outputVerticesUavIndex, skinCluster.outputVertexResource.Get(), UINT(modelData.mesh[0]->vertices.size()), sizeof(VertexData));
+	skinCluster.outputVertexUavHandle.first = modelCommon_->GetSrvManager()->GetCPUDescriptorHandle(modelData.skinning.outputVerticesUavIndex);
+	skinCluster.outputVertexUavHandle.second = modelCommon_->GetSrvManager()->GetGPUDescriptorHandle(modelData.skinning.outputVerticesUavIndex);
+
+
+
+	// skinningInfomation
+	skinCluster.skinningInfomation = modelCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SkinningInfomation));
+	skinCluster.skinningInfomation->Map(0, nullptr, reinterpret_cast<void**>(&skinCluster.skinningInfomationDeta));
+	skinCluster.skinningInfomationDeta->numVertices = static_cast<uint32_t>(modelData.mesh[0]->vertices.size());
 
 
 

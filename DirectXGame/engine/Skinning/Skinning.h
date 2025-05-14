@@ -27,7 +27,7 @@ public:
 
 	void DrawCommonSetting(PSOType type);
 
-	void DrawCompureSetting();
+	void DrawComputeSetting();
 
 
 
