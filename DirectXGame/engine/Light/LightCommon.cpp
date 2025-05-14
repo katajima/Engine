@@ -69,7 +69,7 @@ void LightManager::Update()
 	}
 
 #ifdef _DEBUG
-	ImGui::Begin("engine");
+	ImGui::Begin("Light Properties");
 
 	if (ImGui::CollapsingHeader("Light Manager")) {
 		// Directional Light UI

@@ -52,8 +52,6 @@ public: // メンバ関数
 	// 初期化
 	void Intialize(WinApp* winApp);
 
-
-
 	//終了処理
 	void Finalize();
 
@@ -61,18 +59,10 @@ public: // メンバ関数
 
 	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
-
-private:
-
-
 private:
 	// シーンの画面を書き出す
 	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 private:
-	// スワップチェーン用描画前処理
-	void PreDrawSwap();
-	// スワップチェーン用描画後処理
-	void PostDrawSwap();
 	// スワップチェーンにレンダーターゲットを渡す
 	void PassSwap(RenderTexture* renderTexture);
 private:
@@ -136,15 +126,9 @@ private:
 
 	std::unique_ptr<PostEffectManager> postEffectManager_ = std::make_unique<PostEffectManager>(); // ポストエフェクト
 
-
-
 	// ImGuiマネージャー
 	std::unique_ptr <ImGuiManager> imguiManager_ = std::make_unique<ImGuiManager>();
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
-
-public:
-
-
 };

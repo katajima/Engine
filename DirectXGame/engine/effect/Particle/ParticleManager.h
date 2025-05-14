@@ -61,6 +61,7 @@ class Primitive;
 class DirectXCommon;
 class SrvManager;
 class EffectManager;
+class LineCommon;
 class ParticleManager
 {
 public:
@@ -212,6 +213,8 @@ public:
 		return particleGroups[name];
 	}
 
+	LineCommon* GetLineCommon() {return lineCommon_;}
+
 
 	// パーティクルグループ作り(モデル)
 	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
@@ -257,10 +260,11 @@ private: // エミッタ種類
 private:
 
 	LightManager* lightManager_ = nullptr;
+
 	DirectXCommon* dxCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;
 	EffectManager* efectManager_ = nullptr;
-
+	LineCommon* lineCommon_ = nullptr;
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 

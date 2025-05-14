@@ -45,6 +45,9 @@ void TestScene::Update()
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 
 #ifdef _DEBUG
+
+	
+
 	if (isDebugCamera) {
 		debugCamera->Update();
 
@@ -932,8 +935,15 @@ void TestScene::UpdateRoom08()
 void TestScene::SwitchRoom()
 {
 #ifdef _DEBUG
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("SceneRoom")) {
+	
+	if (!ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar)) {
+		ImGui::End();
+		return;
+	}
+	if (!ImGui::BeginMenuBar())
+		return;
+
+	if (ImGui::BeginMenu("SceneRoom")) {
 		if (ImGui::Button("Room01")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom01;
 		}
@@ -959,7 +969,9 @@ void TestScene::SwitchRoom()
 			behaviorRequest_ = SceneBehavior::kSceneRoom08;
 		}
 
+		ImGui::EndMenu();
 	}
+	ImGui::EndMenuBar();
 	ImGui::End();
 #endif // _DEBUG
 

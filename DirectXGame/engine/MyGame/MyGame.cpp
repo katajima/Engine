@@ -58,7 +58,7 @@ void MyGame::Update()
 #ifdef _DEBUG
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-	
+
 	if (deltaTime > 0) {
 		fps = 1.0f / deltaTime;
 	}
@@ -69,6 +69,8 @@ void MyGame::Update()
 	ImGui::Text("FPS: %.2f", fps);
 	ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
 	ImGui::End();
+
+
 #endif // _DEBUG
 
 	// グローバル変数の更新
@@ -92,7 +94,7 @@ void MyGame::Update()
 
 void MyGame::Draw()
 {
-	dxCommon->Draw(sceneManager_.get(),entity3DManager_.get());
+	dxCommon->Draw(sceneManager_.get(), entity3DManager_.get());
 }
 
 
@@ -150,7 +152,7 @@ void MyGame::InitializeResource()
 
 	modelManager->LoadModelAmime("walk.gltf", "human");
 	modelManager->LoadModelAmime("iku.gltf", "iku");
-	
+
 
 
 	modelManager->LoadModelAmime("player_bullet.obj", "player_bullet");
@@ -222,17 +224,17 @@ void MyGame::InitializeResource()
 	primi = std::make_unique<Primitive>();
 	ShapeParameter::Torus t;
 	primi->Initialize<ShapeParameter::Torus>(entity3DManager_->GetPrimitiveCommon(),
-		Primitive::ShapeType::Torus, 
-		t, 
+		Primitive::ShapeType::Torus,
+		t,
 		"resources/Texture/uvChecker.png");
 
 	primiTrai = std::make_unique<Primitive>();
 	ShapeParameter::ShapeTriangle t2;
-	primiTrai->Initialize<ShapeParameter::ShapeTriangle>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Triangle, t2,"resources/Texture/Image.png");
+	primiTrai->Initialize<ShapeParameter::ShapeTriangle>(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Triangle, t2, "resources/Texture/Image.png");
 
 	primiPlane = std::make_unique<Primitive>();
 	ShapeParameter::ShapePlane shapePlane;
-	primiPlane->Initialize<ShapeParameter::ShapePlane>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
+	primiPlane->Initialize<ShapeParameter::ShapePlane>(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
 
 
 	ShapeParameter::Star star;
@@ -240,8 +242,8 @@ void MyGame::InitializeResource()
 	star.outerRadius = 7.0f;
 	star.segments = 4;
 	primiStar = std::make_unique<Primitive>();
-	primiStar->Initialize<ShapeParameter::Star>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Star, star, "resources/Texture/Image.png");
-	
+	primiStar->Initialize<ShapeParameter::Star>(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Star, star, "resources/Texture/Image.png");
+
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, ParticleManager::BlendType::MODE_ADD);
@@ -259,7 +261,7 @@ void MyGame::InitializeResource()
 
 	particleManager->CreateParticleGroup("dashEmit", "resources/Texture/aa.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("moveLimit", "resources/Texture/Image.png", modelManager->FindModel("plane.obj")/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
-	
+
 	// 煙
 	particleManager->CreateParticleGroup("smokePlane01", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane02", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
@@ -288,9 +290,9 @@ void MyGame::InitializeResource()
 	// 敵部品
 	particleManager->CreateParticleGroup("enemyTire", "resources/Texture/enemy.png", modelManager->FindModel("enemyTire.obj")); // タイヤ
 	particleManager->CreateParticleGroup("enemyDuct", "resources/Texture/enemy.png", modelManager->FindModel("enemyDuct.obj")); // ダクト
-	particleManager->CreateParticleGroup("enemyPlank", "resources/Texture/enemy.png",modelManager->FindModel("enemyPlank.obj")); // 板
+	particleManager->CreateParticleGroup("enemyPlank", "resources/Texture/enemy.png", modelManager->FindModel("enemyPlank.obj")); // 板
 	particleManager->CreateParticleGroup("enemyGear", "resources/Texture/enemy.png", modelManager->FindModel("enemyGear.obj")); // 歯車
-	particleManager->CreateParticleGroup("enemyFence", "resources/Texture/enemy.png",modelManager->FindModel("enemyFence.obj")); // 柵
+	particleManager->CreateParticleGroup("enemyFence", "resources/Texture/enemy.png", modelManager->FindModel("enemyFence.obj")); // 柵
 
 	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 

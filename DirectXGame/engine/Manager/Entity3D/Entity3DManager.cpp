@@ -46,7 +46,7 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 
 	// エフェクトマネージャー
 	effectManager_ = std::make_unique<EffectManager>();
-	effectManager_->Initialize(directXCommon_,lightManager_.get());
+	effectManager_->Initialize(directXCommon_,lightManager_.get(),lineCommon_.get());
 }
 
 void Entity3DManager::UpdateImgui()
@@ -93,7 +93,7 @@ void Entity3DManager::UpdateImgui()
 		}
 		else if (entity->GetObjectType() == Object3d::ObjectType::kPrimitive) {
 			material = entity->primitive_->GetMaterial();
-			mesh = entity->skyBox_->GetMesh();
+			mesh = entity->primitive_->GetMesh();
 		}else if (entity->GetObjectType() == Object3d::ObjectType::kOcean) {
 			material = entity->ocean_->GetMaterial();
 			mesh = entity->ocean_->GetMesh();
@@ -163,8 +163,6 @@ void Entity3DManager::Update()
 	for (auto& object : object3d) {
 		object->Update();
 	}
-
-
 }
 
 void Entity3DManager::ObjectClean()

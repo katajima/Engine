@@ -12,7 +12,6 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 
-
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 
@@ -29,7 +28,6 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	srvManager_->Initialize(DXGIDevice_.get(), command_.get()); // SRV
 	rtvManager_->Initialize(DXGIDevice_.get(), command_.get()); // RTV
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
-	swapChain_->Initialize(winApp,DXGIDevice_.get(),command_.get(), rtvManager_.get()); // スワップチェーン
 	depthStencil_->Initialize(DXGIDevice_.get(),command_.get(),dsvManager_.get(),srvManager_.get()); // デプスステンシル     
 	
 	textureManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // テクスチャマネージャー
@@ -37,6 +35,10 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	
 	renderingCommon_->Initialize(this);
 	barrier_->Initialize(command_.get()); // バリア
+
+
+	swapChain_->Initialize(winApp, DXGIDevice_.get(), command_.get(), rtvManager_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get(),fence_.get()); // スワップチェーン
+
 
 	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
@@ -50,11 +52,13 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	imguiManager_->Initialize(this);
 }
 
-#pragma region Draw
+void DirectXCommon::Finalize()
+{
+	imguiManager_->Finalize();
+}
 
 void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
-	///
 	// 描画前処理
 	GetSrvManager()->PreDraw();
 
@@ -66,101 +70,24 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 
 	// レンダーターゲット用の描画後処理
 	postEffectManager_->PostDrawOffscreen();
-
-}
-
-void DirectXCommon::PreDrawSwap() {
-	
-	// スワップチェーン用
-	barrier_->TransitionResource(swapChain_->GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = swapChain_->GetCurrentBackBufferRTVHandle();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
-	
-	// 指定した色で画面全体をクリアする
-	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };  // 任意のクリアカラー（青）
-	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	
-	// コマンドを積む
-	viewPort_->SettingViewport();
-	scissorRect_->SettingScissorRect();
-}
-
-void DirectXCommon::PostDrawSwap() {
-	
-	// スワップチェーン用
-	barrier_->TransitionResource(swapChain_->GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	
-	// コマンドキック
-	command_->KickCommand();
-
-	// GPUに画面交換を通知
-	swapChain_->Present();
-
-	// フェンス
-	fence_->WaitGPU();
-
-	// FPS制限の更新
-	UpdateFixFPS();
-
-	// コマンドリセット
-	command_->ResetCommand();
 }
 
 void DirectXCommon::PassSwap(RenderTexture* renderTexture)
 {
 	// スワップチェーン用の描画準備
-	PreDrawSwap();
+	swapChain_->PreDraw();
 
 	// レンダーテクスチャ(コピー)
 	renderTexture->Draw();
-
 	
 	// ImGuiの描画
 	GetImGuiManager()->Draw();
 
 	// スワップチェーン用の描画後処理
-	PostDrawSwap();
-}
-
-
-#pragma endregion // 描画処理
-
-
-
-void DirectXCommon::Finalize()
-{
-	imguiManager_->Finalize();
-}
-
-void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3DManager)
-{
-	// ライト
-	entity3DManager->GetLightManager()->Update();
-
-#ifdef _DEBUG
-	entity3DManager->UpdateImgui();
-#endif // _DEBUG
-
-	sceneManager->Update();
-
-	entity3DManager->Update();
-
-	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
-
-
-	postEffectManager_->Update(sceneManager->GetCamara());
-
-#ifdef _DEBUG
+	swapChain_->PostDraw();
 	
-	entity3DManager->Get3DLineCommon()->Update();
-
-#endif // _DEBUG
-
-	
-
-	
+	// FPS制限の更新
+	UpdateFixFPS();
 }
 
 void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
@@ -172,12 +99,10 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 
 	// スワップチェーン
 	PassSwap(postEffectManager_->GetEndRenderTexture());
-
 }
 
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
-{
-	
+{	
 	// 3Dオブジェクトの描画
 	sceneManager->Draw3D();
 
@@ -221,8 +146,29 @@ void DirectXCommon::UpdateFixFPS()
 	}
 
 	reference_ = std::chrono::steady_clock::now();
-
 }
 
+void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+{
+	// ライト
+	entity3DManager->GetLightManager()->Update();
+
+#ifdef _DEBUG
+	entity3DManager->UpdateImgui();
+#endif // _DEBUG
+
+	sceneManager->Update();
+
+	entity3DManager->Update();
+
+	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
 
 
+	postEffectManager_->Update(sceneManager->GetCamara());
+
+#ifdef _DEBUG
+
+	entity3DManager->Get3DLineCommon()->Update();
+
+#endif // _DEBUG
+}

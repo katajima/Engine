@@ -18,7 +18,10 @@ class DXGIDevice;
 class Command;
 class WinApp;
 class RtvManager;
-
+class Barrier;
+class ScissorRect;
+class ViewPort;
+class Fence;
 class SwapChain
 {
 public:
@@ -27,7 +30,7 @@ public:
 
 
 
-	void Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager);
+	void Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence);
 
 	// GPUに画面交換を通知
 	void Present();
@@ -38,6 +41,12 @@ public:
 
 	// 
 	size_t GetBackBufferCount() const { return backBuffers_.size(); }
+
+
+	void PreDraw();
+
+	void PostDraw();
+
 private:
 	/// <summary>
 	/// スワップチェーンの生成
@@ -74,5 +83,9 @@ private:
 	Command* command_;
 	WinApp* winApp_;
 	RtvManager* rtvManager_;
+	Barrier* barrier_;
+	ScissorRect* scissorRect_;
+	ViewPort* viewPort_;
+	Fence* fence_;
 };
 

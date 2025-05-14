@@ -20,6 +20,7 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightMan
 {
 	dxCommon_ = dxCommon;
 	efectManager_ = efectManager;
+	lineCommon_ = efectManager_->GetLineCommon();
 	srvManager_ = dxCommon_->GetSrvManager();
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());

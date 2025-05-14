@@ -11,13 +11,14 @@
 #include<dxcapi.h>
 #include<fstream>
 #include<sstream>
+#include <iostream>
 #include<wrl.h>
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-#include <iostream>
+
 
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
@@ -73,18 +74,11 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 		break;
 	}
 
-
-
-
-
-
 	// 映り方
 	rasterizerType_ = rasterizerType;
 
-
 	// オブジェクト数
 	object3dCommon_->count++;
-
 }
 
 #pragma region Update
@@ -443,7 +437,3 @@ void Object3d::SetModel(const std::string& filePath)
 
 	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
 }
-
-
-
-

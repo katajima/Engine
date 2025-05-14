@@ -15,6 +15,7 @@
 
 class LightManager;
 class DirectXCommon;
+class LineCommon;
 class EffectManager
 {
 public:
@@ -22,7 +23,7 @@ public:
 	~EffectManager() = default;
 
 	// 初期化
-	void Initialize(DirectXCommon* directXCommon, LightManager* lightManager);
+	void Initialize(DirectXCommon* directXCommon, LightManager* lightManager, LineCommon* lineCommon);
 
 
 public: // ゲッター
@@ -34,6 +35,9 @@ public: // ゲッター
 	// パーティクルマネージャ
 	ParticleManager* GetParticleManager() { return particleManager_.get(); }
 
+	//
+	LineCommon* GetLineCommon() { return lineCommon_; }
+
 private:
 	// トレイルエフェクト
 	std::unique_ptr<TrailEffectCommon> trailEffectCommon_;
@@ -43,6 +47,7 @@ private:
 private:
 	DirectXCommon* directXCommon_;
 	LightManager* lightManager_;
+	LineCommon* lineCommon_;
 };
 
 

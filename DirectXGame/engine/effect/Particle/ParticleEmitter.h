@@ -10,7 +10,7 @@
 #include"ParticleManager.h"
 #include"DirectXGame/engine/WorldTransform/WorldTransform.h"
 
-
+class LineCommon;
 class ParticleEmitter
 {
 public:
@@ -154,6 +154,7 @@ private:
 
 	ParticleManager::Emiter emitter_{};
 	ParticleManager* particleManager_;
+	LineCommon* lineCommon_ = nullptr;
 };
 
 

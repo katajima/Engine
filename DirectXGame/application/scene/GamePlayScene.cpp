@@ -74,8 +74,6 @@ void GamePlayScene::Initialize()
 
 	InitializeResources();
 
-	//LoadLevelData();
-
 	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 }
 
