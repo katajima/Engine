@@ -132,6 +132,10 @@ void Entity3DManager::UpdateImgui()
 		ImGui::Text("mesh");
 		ImGui::Separator();
 
+		// メッシュ
+
+		
+
 		int index = static_cast<int>(mesh->vertices.size());
 		ImGui::InputInt("verticesSize", &index);
 		index = static_cast<int>(mesh->indices.size());
@@ -148,6 +152,21 @@ void Entity3DManager::UpdateImgui()
 		if (entity->GetOcean()) {
 			ImGui::Separator();
 			entity->GetOcean()->UpdateImgui();
+		}
+
+
+		if (entity->GetObjectType() == Object3d::ObjectType::kNormal) {
+			entity->DebugImguiModel();
+		}
+		else if (entity->GetObjectType() == Object3d::ObjectType::kAnimation) {
+			entity->DebugImguiModel();
+		}
+		else if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {
+			entity->DebugImguiModel();
+		}
+
+		if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {
+			entity->DebugImguiSkin();
 		}
 
 	}

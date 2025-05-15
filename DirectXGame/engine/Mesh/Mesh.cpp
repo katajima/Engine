@@ -14,7 +14,7 @@ void Mesh::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
-	//if (vertices.size() != 0) {
+
 	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * vertices.size());
 
 	// リソースの先頭のアドレスを作成する
@@ -24,9 +24,9 @@ void Mesh::Initialize(DirectXCommon* dxcommon)
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	std::memcpy(vertexData, vertices.data(), sizeof(VertexData) * vertices.size());
-	//}
-	//if (indices.size() != 0) {
-		// インデクスリソース
+
+
+	// インデクスリソース
 	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();

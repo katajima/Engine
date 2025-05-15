@@ -140,10 +140,10 @@ private:
 	/// </summary>
 
 	std::unique_ptr<Object3d> stairObject;
-	Object3d skinningObject;
-	Object3d skinningObject2;
+	std::unique_ptr<Object3d> skinningObject;
+	std::unique_ptr<Object3d> skinningObject2;
 	Object3d tail;
-	Object3d multiy;
+	std::unique_ptr<Object3d> multiy;
 
 	std::unique_ptr<Object3d> playerObject;
 	std::unique_ptr<Object3d> goalObject;

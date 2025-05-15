@@ -152,6 +152,7 @@ void TestScene::Draw3D()
 		
 		oceanObject->Draw();
 
+		multiy->Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
@@ -166,8 +167,8 @@ void TestScene::Draw3D()
 	case TestScene::SceneBehavior::kSceneRoom04:
 		tail.Draw();
 
-		skinningObject.Draw();
-		skinningObject2.Draw();
+		skinningObject->Draw();
+		skinningObject2->Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
@@ -270,19 +271,23 @@ void TestScene::InitializeObject3D()
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
 	
 
-	skinningObject.Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
-	skinningObject.SetModel("iku.gltf");
-	skinningObject.worldtransform_.translate_ = { 30,1,1 };
-	skinningObject.worldtransform_.scale_ = { 10,10,10 };
-	skinningObject.SetCamera(camera.get());
-	skinningObject.SetName("iku");
+	skinningObject = std::make_unique<Object3d>();
+	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
+	skinningObject->SetModel("iku.gltf");
+	skinningObject->worldtransform_.translate_ = { 30,1,1 };
+	skinningObject->worldtransform_.scale_ = { 10,10,10 };
+	skinningObject->SetCamera(camera.get());
+	skinningObject->SetName("iku");
 
-	skinningObject2.Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
-	skinningObject2.SetModel("walk.gltf");
-	skinningObject2.worldtransform_.translate_ = { -30,10,1 };
-	skinningObject2.worldtransform_.scale_ = { 10,10,10 };
-	skinningObject2.SetCamera(camera.get());
-	skinningObject2.SetName("walk");
+
+
+	skinningObject2 = std::make_unique<Object3d>();
+	skinningObject2->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
+	skinningObject2->SetModel("walk.gltf");
+	skinningObject2->worldtransform_.translate_ = { -30,10,1 };
+	skinningObject2->worldtransform_.scale_ = { 10,10,10 };
+	skinningObject2->SetCamera(camera.get());
+	skinningObject2->SetName("walk");
 
 	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");
@@ -290,10 +295,13 @@ void TestScene::InitializeObject3D()
 	tail.SetName("tail");
 	tail.model->modelData.material[0]->shininess_ = 1000.0f;
 
-	multiy.Initialize(GetEntity3DManager());
-	multiy.SetModel("multiMaterial.gltf");
-	multiy.SetCamera(camera.get());
-	multiy.worldtransform_.scale_ = { 10,10,10 };
+	multiy = std::make_unique<Object3d>();
+	multiy->Initialize(GetEntity3DManager());
+	multiy->SetModel("multiMaterial.gltf");
+	multiy->SetCamera(camera.get());
+	multiy->worldtransform_.scale_ = { 10,10,10 };
+	multiy->SetName("multiy");
+
 
 	/// 階段
 	stairObject = std::make_unique<Object3d>();

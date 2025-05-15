@@ -90,6 +90,9 @@ private:
 	void GenerateMeshLine(const std::vector<uint32_t>& indices);
 	const std::vector<uint32_t>& GetCachedLineIndices() const { return modelData.cachedLineIndices_; }
 
+
+
+
 public:
 
 

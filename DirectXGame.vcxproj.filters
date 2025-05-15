@@ -429,6 +429,9 @@
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GpuParticleManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -445,6 +448,7 @@
     <None Include="resources\shaders\SkyBox\SkyBox.hlsli" />
     <None Include="resources\shaders\Object3D\Object3dInstans.hlsli" />
     <None Include="resources\shaders\Offscreen\Smoothing.hlsli" />
+    <None Include="resources\shaders\Particle\NewParticle.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl" />
@@ -486,6 +490,8 @@
     <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
     <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\Particle.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\NewParticle.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -918,6 +924,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GpuParticleManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -77,6 +77,10 @@ public:
 
 	static void MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum);
 	
+	Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return vertexResource; };
+
+	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vertexBufferView; }
+
 public:
 	std::vector<SkyBoxVertexData> verticesskyBox;
 	std::vector<VertexData> vertices;
@@ -98,7 +102,6 @@ public:
 
 	MaterialData materialData_;
 private:
-	//ModelCommon* modelCommon_ = nullptr;
 	DirectXCommon* dxCommon_;
 
 

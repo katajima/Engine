@@ -56,6 +56,8 @@ void MyGame::Update()
 	//HitStpoTime(); // ストップ用
 
 #ifdef _DEBUG
+
+
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
@@ -65,11 +67,23 @@ void MyGame::Update()
 	lastTime = currentTime;
 
 	// FPS表示用ウィジェット
-	ImGui::Begin("engine");
-	ImGui::Text("FPS: %.2f", fps);
-	ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
-	ImGui::End();
 
+	if (!ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar)) {
+		ImGui::End();
+		return;
+	}
+	if (!ImGui::BeginMenuBar())
+		return;
+
+	if (ImGui::BeginMenu("Time")) {
+
+		ImGui::Text("FPS: %.2f", fps);
+		ImGui::DragFloat("TimeScale", &kTimeSpeed_, 0.01f);
+
+		ImGui::EndMenu();
+	}
+	ImGui::EndMenuBar();
+	ImGui::End();
 
 #endif // _DEBUG
 

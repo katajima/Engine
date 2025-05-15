@@ -134,8 +134,8 @@ struct SkinCluster {
 	/// <summary>
 	/// 
 	/// </summary>
-	Microsoft::WRL::ComPtr < ID3D12Resource> inputVertexResource;
-	D3D12_VERTEX_BUFFER_VIEW  inputVertexBufferView;
+	//Microsoft::WRL::ComPtr < ID3D12Resource> inputVertexResource;
+	//D3D12_VERTEX_BUFFER_VIEW  inputVertexBufferView;
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> inputVertexSrvHandle;
 
 	

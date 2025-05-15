@@ -132,6 +132,10 @@ public:
 
 	ObjectType GetObjectType() { return objectType_; }
 
+	void DebugImguiModel();
+
+	void DebugImguiSkin();
+
 private:
 	// 各コマンドリスト
 	void DrawSetting();
@@ -145,6 +149,9 @@ private:
 	//
 	void ObjectTypeDiscrimination(ObjectRasterizerType type);
 	void ObjectSkinTypeDiscrimination(ObjectRasterizerType type);
+
+
+
 
 
 private:
