@@ -6,6 +6,9 @@
 // メッシュ読み込み
 void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
 {
+	modelData.allMesh = std::make_unique<ModelMesh>();
+	uint32_t vertexOffset = 0;
+
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
@@ -60,6 +63,9 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 			}
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
+
+			modelData.allMesh->vertices.push_back(pMesh->vertices[vertexIndex]);
+
 			min = Min(min, pMesh->vertices[vertexIndex].position.xyz());
 			max = Max(max, pMesh->vertices[vertexIndex].position.xyz());
 		}
@@ -70,15 +76,19 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
 			aiFace& face = mesh->mFaces[faceIndex];
 			assert(face.mNumIndices == 3); // 三角形のみサポート
+			
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
 				pMesh->indices.push_back(vertexIndex);
+				modelData.allMesh->indices.push_back(vertexIndex + vertexOffset); // ★補正
 			}
 		}
+		vertexOffset += mesh->mNumVertices; // ★次メッシュの頂点オフセット更新
 		pMesh->Initialize(dxCommon);
 
 		modelData.mesh.push_back(std::move(pMesh));
 	}
+	modelData.allMesh->Initialize(dxCommon);
 }
 
 // ボーン読み込み

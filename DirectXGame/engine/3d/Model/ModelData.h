@@ -37,13 +37,14 @@ struct ModelData
 	std::string name;										// 名前
 	std::map<std::string, JointWeightData> skinClusterData;	// スキンクラスターデータ
 	bool isNormalmap;										// ノーマルマップを使っているか？
-	std::unordered_map<uint32_t, Vector3> meshOffsetMap;
+	std::unordered_map<uint32_t, Vector3> meshOffsetMap;	// オフセット位置
 	Node rootNode;											// ノードデータ
 	bool isAssimp;											// アシンプか
 	bool isAmimetion;										// アニメーションするか
 	bool isTangent;											// タンジェント
 	SkinningSRVUAV skinning;								// スキニング用のSRV、UAVのインデックス
 	std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
+	std::unique_ptr<ModelMesh> allMesh;
 	std::vector<uint32_t> cachedLineIndices_;				// ライン
 	//std::vector <std::unique_ptr<Material>> material;		// マテリアルデータ
 	Animation animation;									// アニメーション
