@@ -37,11 +37,8 @@ class Model
 {
 public:
 
-	// 初期化(アニメーション無し)
-	void Initialize(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "", const Vector2 texScale = {1,1});
-
-	// 初期化(アニメーション有)
-	void InitializeAnime(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "");
+	// 初期化
+	void Initialize(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "");
 
 	// 通常描画
 	void Draw();
@@ -60,7 +57,5 @@ private:
 	DirectXCommon* dxCommon_;
 	
 public:	
-	ModelData LoadOdjFileAssimp(const std::string& directoryPath, const std::string& filename, const Vector2 texScale = {1,1});
-	
 	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 };

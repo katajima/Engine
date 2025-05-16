@@ -23,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	//sceneManager_->ChangeScene("TEST");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TEST");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -158,22 +158,22 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/smoke/no3.png");
 
 
-	modelManager->LoadModelAmime("multiMaterial.gltf", "multiMaterial");
+	modelManager->LoadModel("multiMaterial.gltf", "multiMaterial");
 
-	modelManager->LoadModelAmime("multiMaterial.obj", "multiMaterial");
-	modelManager->LoadModelAmime("a.obj");
-
-
-	modelManager->LoadModelAmime("walk.gltf", "human");
-	modelManager->LoadModelAmime("iku.gltf", "iku");
+	modelManager->LoadModel("multiMaterial.obj", "multiMaterial");
+	modelManager->LoadModel("a.obj");
 
 
+	modelManager->LoadModel("walk.gltf", "human");
+	modelManager->LoadModel("iku.gltf", "iku");
 
-	modelManager->LoadModelAmime("player_bullet.obj", "player_bullet");
-	modelManager->LoadModelAmime("Sword.obj", "Sword");
-	modelManager->LoadModelAmime("plane.obj", "plane");
-	//modelManager->LoadModelAmime("sneakWalk.gltf", "human");
-	modelManager->LoadModelAmime("AnimatedCube.gltf", "AnimatedCube");
+
+
+	modelManager->LoadModel("player_bullet.obj", "player_bullet");
+	modelManager->LoadModel("Sword.obj", "Sword");
+	modelManager->LoadModel("plane.obj", "plane");
+	//modelManager->LoadModel("sneakWalk.gltf", "human");
+	modelManager->LoadModel("AnimatedCube.gltf", "AnimatedCube");
 
 	modelManager->LoadModel("Ground.obj", "Ground");
 	modelManager->LoadModel("stair.obj");
@@ -198,27 +198,27 @@ void MyGame::InitializeResource()
 
 
 
-	modelManager->LoadModelAmime("multiMesh.obj", "multiMesh");
+	modelManager->LoadModel("multiMesh.obj", "multiMesh");
 
 
 	/// <summary>
 	/// 地形
 	/// </summary>
-	modelManager->LoadModelAmime("renga.gltf", "renga");
+	modelManager->LoadModel("renga.gltf", "renga");
 
 
-	modelManager->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
-	modelManager->LoadModel("black.obj", "terrain/black", { 10,10 });
+	modelManager->LoadModel("coast.gltf", "terrain/coast");
+	modelManager->LoadModel("black.obj", "terrain/black");
 	modelManager->LoadModel("terrain.obj", "terrain/terrain");
-	modelManager->LoadModelAmime("stair.obj");
+	modelManager->LoadModel("stair.obj");
 
 
 
 	/// <summary>
 	/// 建物
 	/// </summary>
-	modelManager->LoadModelAmime("building.obj", "buildingAll/building"); // ビル
-	modelManager->LoadModelAmime("warehouse.gltf", "buildingAll/warehouse"); // 倉庫
+	modelManager->LoadModel("building.obj", "buildingAll/building"); // ビル
+	modelManager->LoadModel("warehouse.gltf", "buildingAll/warehouse"); // 倉庫
 
 
 
