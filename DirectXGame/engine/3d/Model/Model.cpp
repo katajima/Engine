@@ -65,15 +65,22 @@ void Model::InitializeAnime(DirectXCommon* dxCommon, ModelCommon* modelCommon, c
 	// メッシュ状にライン生成
 	CreateModel::CreateMeshLine(modelData,modelData.mesh[0]->indices);
 
-	// アニメーション生成
-	LoadModel::LoadAnimation(modelData,dire, filename);
+	if (modelData.isAmimetion) {
+		;
+		// アニメーション生成
+		LoadModel::LoadAnimation(modelData, dire, filename);
 
-	CreateModel::CreateSkeleton(modelData);
+		// スケルトン生成
+		CreateModel::CreateSkeleton(modelData);
 
-	CreateModel::CreateSkinCluster(modelData,modelCommon_);
+		// スキンクラスター生成
+		CreateModel::CreateSkinCluster(modelData, modelCommon_);
 
-	ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
+		// 
+		ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
+	}
 
+	// マテリアル読み込み
 	for (auto& material : modelData.material) {
 		material->LoadTex();
 	};

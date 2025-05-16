@@ -12,6 +12,8 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 
 
 	// プレイヤー
+
+	object_ = std::make_unique<Object3d>();
 	object_->Initialize(entity3DManager);
 	object_->SetCamera(camera);
 	object_->SetModel("player_bullet.obj");
@@ -248,7 +250,7 @@ void PlayerMissile::Update()
 
 	mExplosionSmokeEmitter_->Update();
 
-	object_->Update();
+	//object_->Update();
 }
 
 void PlayerMissile::Draw()

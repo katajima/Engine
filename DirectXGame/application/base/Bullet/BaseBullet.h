@@ -25,7 +25,7 @@ public:
 
 	// デフォルトコンストラクタ
 	BaseBullet();
-
+	~BaseBullet();
 	// 初期化
 	virtual void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
 

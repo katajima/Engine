@@ -19,14 +19,39 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 		pMesh->vertices.resize(mesh->mNumVertices);
 		pMesh->verticesline.resize(mesh->mNumVertices);
 
+		if (mesh->HasTangentsAndBitangents()) { // 追加: タンジェント・ビタンジェントの確認
+			modelData.isTangent = true;
+		}
+		else {
+			modelData.isTangent = false;
+		};
+
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+	
+			if (modelData.isTangent) {
+				aiVector3D& tangent = mesh->mTangents[vertexIndex];
+				aiVector3D& bitangent = mesh->mBitangents[vertexIndex];
+
+				Vector3 nrm = { -normal.x, normal.y, normal.z };
+				Vector3 tan = { -tangent.x, tangent.y, tangent.z };
+				Vector3 bin = { -bitangent.x, bitangent.y, bitangent.z };
+
+				// ハンドネス計算
+				float w = (Dot(Cross(nrm, tan), bin) < 0.0f) ? -1.0f : 1.0f;
+
+				pMesh->vertices[vertexIndex].tangent = { tan.x, tan.y, tan.z, w }; // ← w を追加
+			}
+			else {
+				pMesh->vertices[vertexIndex].tangent = {};
+			}
 
 			pMesh->vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
 			pMesh->vertices[vertexIndex].texcoord = { texcoord.x,texcoord.y };
+			
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
 			min = Min(min, pMesh->vertices[vertexIndex].position.xyz());
@@ -53,8 +78,18 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 // ボーン読み込み
 void LoadModel::LoadBone(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
 {
+
+
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
+
+		if (mesh->mNumBones == 0) {
+			modelData.isAmimetion = false;
+		}
+		else {
+			modelData.isAmimetion = true;
+		}
+
 		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
 			aiBone* bone = mesh->mBones[boneIndex];
 			std::string jointName = bone->mName.C_Str();
@@ -93,7 +128,6 @@ void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectX
 				aiString textureFilePaths;
 				material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePaths);
 				std::cout << "Diffuse Texture File Path: " << textureFilePaths.C_Str() << std::endl;
-				//modelData.material.textuerFilePath = directoryPath + "/" + textureFilePaths.C_Str();
 				pMaterial->tex_.diffuseFilePath = directoryPath + "/" + textureFilePaths.C_Str();
 			}
 			if (material->GetTextureCount(aiTextureType_SPECULAR) != 0) {

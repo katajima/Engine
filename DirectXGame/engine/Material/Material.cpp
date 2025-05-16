@@ -39,6 +39,7 @@ void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int spec
 	// テクスチャのバインド
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(indexDiffuse, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.diffuseFilePath));
 	if (useNormalMap_) {
+
 		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(normalIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.normalFilePath));
 		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(9, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.normalFilePath));
 	}
@@ -72,13 +73,13 @@ void Material::GPUData()
 	data_->alphaClipping = alphaClipping_;
 
 	data_->color = color;
-	
-	data_->uvTransform = MakeAffineMatrix(transform.scale,transform.rotate,transform.translate);
+
+	data_->uvTransform = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 }
 
 void Material::LoadTex()
 {
-	
+
 	// .objの参照しているテクスチャファイル読み込み
 	dxCommon_->GetTextureManager()->LoadTexture(tex_.diffuseFilePath);
 	// 読み込んだテクスチャの番号を取得
@@ -122,6 +123,6 @@ void Material::LoadTex()
 		tex_.environmentIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.environmentFilePath);
 	}
 
-	
+
 
 }

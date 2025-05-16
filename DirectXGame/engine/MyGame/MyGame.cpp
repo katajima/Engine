@@ -23,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	sceneManager_->ChangeScene("TEST");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -183,10 +183,9 @@ void MyGame::InitializeResource()
 
 	modelManager->LoadModel("plane.obj", "plane");
 	modelManager->LoadModel("axis.obj", "axis");
-	modelManager->LoadModel("multiMesh.obj", "multiMesh");
+	
 
-
-	modelManager->LoadModel("multiMaterial.obj", "multiMaterial");
+	//modelManager->LoadModelAmime("multiMaterial.obj", "multiMaterial");
 	modelManager->LoadModel("teapot.obj", "teapot");
 
 
@@ -199,10 +198,15 @@ void MyGame::InitializeResource()
 
 
 
+	modelManager->LoadModelAmime("multiMesh.obj", "multiMesh");
+
+
 	/// <summary>
 	/// 地形
 	/// </summary>
-	modelManager->LoadModel("renga.gltf", "renga");
+	modelManager->LoadModelAmime("renga.gltf", "renga");
+
+
 	modelManager->LoadModel("coast.gltf", "terrain/coast", { 10,10 });
 	modelManager->LoadModel("black.obj", "terrain/black", { 10,10 });
 	modelManager->LoadModel("terrain.obj", "terrain/terrain");

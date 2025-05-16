@@ -14,7 +14,7 @@ struct VertexShaderInput
     float4 position : POSITION0;
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
-    float3 tangent : TANGENT0;
+    float4 tangent : TANGENT0;
     float3 biNormal : BINORMAL0;
     
 };
@@ -28,7 +28,7 @@ VertexShaderOutput main(VertexShaderInput input)
     output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix.WorldInverseTranspose));
     output.worldPosition = mul(input.position, gTransformationMatrix.World).xyz;
     output.biNormal = normalize(mul((float3x3) gTransformationMatrix.World, input.biNormal));
-    output.tangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent));
+    output.tangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent.xyz));
     output.transformedNormal = normalize(mul((float3x3) gTransformationMatrix.WorldInverseTranspose, input.normal));
 
     return output;

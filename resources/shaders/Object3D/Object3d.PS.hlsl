@@ -1,4 +1,3 @@
-#include"Object3d.hlsli"
 #include"Light.hlsli"
 
 
@@ -30,7 +29,7 @@ struct PixelShaderOutput
     
 };
 
-PixelShaderOutput main(PixelShaderInput input)
+PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
     
@@ -51,12 +50,10 @@ PixelShaderOutput main(PixelShaderInput input)
         {
             float3 localNormal = g_Normalmap.Sample(sSampler, transformedUV.xy).xyz * 2.0f - 1.0f;
             
-            float3x3 TBN = transpose(float3x3(input.tangent, input.biNormal, input.normal));
+            float3x3 TBN = (float3x3(input.tangent.xyz, input.biNormal, input.normal)); // ‚Ü‚½‚Í•K—v‚È‚ç transpose
             float3 worldNormal = normalize(mul(localNormal, TBN));
 
-            
             normal = worldNormal;
-
         }
 
         float3 allDire = DirectionalLightFunc2(input, textureColor, toEye, normal);

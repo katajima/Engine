@@ -1,3 +1,5 @@
+#include"Object3d.hlsli"
+
 static const int kMaxLight = 3;
 
 // 平行光線
@@ -56,17 +58,17 @@ struct SpotLights
 ConstantBuffer<SpotLights> gSpotLight : register(b4);
 
 
-struct PixelShaderInput
-{
-    float4 position : SV_POSITION;
-    float2 texcoord : TEXCOORD0;
-    float3 normal : NORMAL0;
-    float3 worldPosition : POSITION0;
+//struct PixelShaderInput
+//{
+//    float4 position : SV_POSITION;
+//    float2 texcoord : TEXCOORD0;
+//    float3 normal : NORMAL0;
+//    float3 worldPosition : POSITION0;
     
-    float3 tangent : TANGENT0;
-    float3 biNormal : BINORMAL0;
-    float3 transformedNormal : NORMAL1; // 頂点シェーダから渡された法線 
-};
+//    float4 tangent : TANGENT0;
+//    float3 biNormal : BINORMAL0;
+//   // float3 transformedNormal : NORMAL1; // 頂点シェーダから渡された法線 
+//};
 
 
 //色など三角形の表面の材質を決定するものMaterial
@@ -86,7 +88,7 @@ struct Material
 ConstantBuffer<Material> gMaterial : register(b0);
 
 
-float3 DirectionalLightFunc2(PixelShaderInput input, float4 textureColor, float3 viewDir, float3 normal)
+float3 DirectionalLightFunc2(VertexShaderOutput input, float4 textureColor, float3 viewDir, float3 normal)
 {
     float3 result = float3(0, 0, 0);
     if (gDirectionalLight.enableLighting)
@@ -162,7 +164,7 @@ float SpecularPow(float3 dire, float3 toEye, float3 normal, float shininess)
 }
 
 
-float3 DirectionalLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, float3 normal)
+float3 DirectionalLightFunc(VertexShaderOutput input, float4 textureColor, float3 toEye, float3 normal)
 {
     float3 diffuse = { 0, 0, 0 };
     float3 specular = { 0, 0, 0 };
@@ -245,7 +247,7 @@ float3 DirectionalLightFunc(PixelShaderInput input, float4 textureColor, float3 
 };
 
 
-float3 PointLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, float3 normal)
+float3 PointLightFunc(VertexShaderOutput input, float4 textureColor, float3 toEye, float3 normal)
 {
     float3 diffusePointLight = { 0.0f, 0.0f, 0.0f };
     float3 specularPointLight = { 0.0f, 0.0f, 0.0f };
@@ -290,7 +292,7 @@ float3 PointLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye,
     return (diffusePointLight + specularPointLight);
 }
 
-float3 SpotLightFunc(PixelShaderInput input, float4 textureColor, float3 toEye, float3 normal)
+float3 SpotLightFunc(VertexShaderOutput input, float4 textureColor, float3 toEye, float3 normal)
 {
     float3 diffuseSpotLight = { 0.0f, 0.0f, 0.0f };
     float3 specularSpotLight = { 0.0f, 0.0f, 0.0f };

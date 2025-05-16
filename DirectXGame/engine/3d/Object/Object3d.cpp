@@ -182,6 +182,7 @@ void Object3d::Update()
 		break;
 	}
 }
+
 #pragma endregion //更新系
 
 #pragma region Draw

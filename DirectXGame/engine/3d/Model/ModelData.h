@@ -38,6 +38,8 @@ struct ModelData
 	// ノーマルマップを使っているか？
 	Node rootNode;											// ノードデータ
 	bool isAssimp;											// アシンプか
+	bool isAmimetion;										// アニメーションするか
+	bool isTangent;											// タンジェント
 	SkinningSRVUAV skinning;								// スキニング用のSRV、UAVのインデックス
 	std::vector <std::unique_ptr<Mesh>> mesh;				// メッシュデータ
 	std::vector<uint32_t> cachedLineIndices_;				// ライン

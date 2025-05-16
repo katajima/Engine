@@ -140,6 +140,9 @@ void Entity3DManager::UpdateImgui()
 		ImGui::InputInt("verticesSize", &index);
 		index = static_cast<int>(mesh->indices.size());
 		ImGui::InputInt("indicesSize", &index);
+		index = static_cast<int>(mesh->indices.size());
+
+		
 		
 		
 
@@ -156,12 +159,18 @@ void Entity3DManager::UpdateImgui()
 
 
 		if (entity->GetObjectType() == Object3d::ObjectType::kNormal) {
+			ImGui::InputFloat4("tangent", &mesh->vertices[0].tangent.x);
+			ImGui::InputFloat4("tangent", &mesh->vertices[1].tangent.x);
+			ImGui::InputFloat4("tangent", &mesh->vertices[2].tangent.x);
+			ImGui::InputFloat4("tangent", &mesh->vertices[3].tangent.x);
 			entity->DebugImguiModel();
 		}
 		else if (entity->GetObjectType() == Object3d::ObjectType::kAnimation) {
+			ImGui::InputFloat4("tangent", &mesh->vertices[0].tangent.x);
 			entity->DebugImguiModel();
 		}
 		else if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {
+			ImGui::InputFloat4("tangent", &mesh->vertices[0].tangent.x);
 			entity->DebugImguiModel();
 		}
 
@@ -179,8 +188,19 @@ void Entity3DManager::UpdateImgui()
 
 void Entity3DManager::Update()
 {
+
+	object3d.erase(
+		std::remove_if(object3d.begin(), object3d.end(),
+			[](Object3d* object) {
+				return object->GetIsDelete();
+			}),
+		object3d.end());
+
+
 	for (auto& object : object3d) {
-		object->Update();
+		if (object != nullptr) {
+			object->Update();
+		}
 	}
 }
 

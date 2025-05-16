@@ -136,6 +136,10 @@ public:
 
 	void DebugImguiSkin();
 
+	void IsDelete() { isDelete = true; }
+
+	bool GetIsDelete() { return isDelete; }
+
 private:
 	// 各コマンドリスト
 	void DrawSetting();
@@ -165,6 +169,9 @@ private:
 	bool flag = true;
 
 	bool imguiFlag_ = false;
+
+	//
+	bool isDelete = false;
 
 	// オブジェクトのタイプ
 	ObjectType objectType_ = ObjectType::kNormal;

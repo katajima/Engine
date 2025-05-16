@@ -119,7 +119,7 @@ void Stage::Draw()
 
 void Stage::DrawP()
 {
-	ocean_->Draw();
+//	ocean_->Draw();
 }
 
 void Stage::Draw2D()
