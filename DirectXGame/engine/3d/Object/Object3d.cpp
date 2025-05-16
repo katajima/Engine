@@ -105,17 +105,17 @@ void Object3d::Update()
 		// モデルが存在する場合
 		if (model) {
 			// アニメーションの更新
-			if (model->animation.flag) {
+			if (model->modelData.animation.flag) {
 				if (flag) {
-					model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+					model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
 				}
-				model->animationTime = std::fmod(model->animationTime, model->animation.duration);
+				model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
 
 				// 単一のジョイントの場合
-				const NodeAnimation& rootNodeAnimation = model->animation.nodeAnimations[model->modelData.rootNode.name];
-				Vector3 translate = CalculateValue(rootNodeAnimation.translate.keyframes, model->animationTime);
-				Quaternion rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, model->animationTime);
-				Vector3 scale = CalculateValue(rootNodeAnimation.scale.keyframes, model->animationTime);
+				const NodeAnimation& rootNodeAnimation = model->modelData.animation.nodeAnimations[model->modelData.rootNode.name];
+				Vector3 translate = CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
+				Quaternion rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
+				Vector3 scale = CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
 				localMatrix = MakeAffineMatrix(scale, rotate, translate);
 			}
 			else {
@@ -132,21 +132,21 @@ void Object3d::Update()
 		// モデルが存在する場合
 		if (model) {
 			// アニメーションの更新
-			if (model->animation.flag) {
+			if (model->modelData.animation.flag) {
 				if (flag) {
-					model->animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+					model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
 				}
-				model->animationTime = std::fmod(model->animationTime, model->animation.duration);
-				localMatrix = model->skeleton.joints[0].skeletonSpaceMatrix;
+				model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
+				localMatrix = model->modelData.skeleton.joints[0].skeletonSpaceMatrix;
 
-				ApplyAnimation(model->skeleton, model->animation, model->animationTime);
+				ApplyAnimation(model->modelData.skeleton, model->modelData.animation, model->modelData.animationTime);
 				// スケルトンの更新
-				UpdateSkeleton(model->skeleton);
+				UpdateSkeleton(model->modelData.skeleton);
 
 				// スキニング更新
-				UpdateSkinCluster(model->skinCluster, model->skeleton);
+				UpdateSkinCluster(model->modelData.skinCluster, model->modelData.skeleton);
 
-				DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
+				DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->modelData.skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
 			}
 			else {
 				localMatrix = model->modelData.rootNode.localMatrix;
@@ -352,7 +352,7 @@ void Object3d::DebugImguiSkin()
 		ImGui::InputInt("inputVerticesIndex", &index);
 		index = static_cast<int>(model->modelData.skinning.outputVerticesUavIndex);
 		ImGui::InputInt("outputVerticesUavIndex", &index);
-		index = static_cast<int>(model->skinCluster.skinningInfomationDeta->numVertices);
+		index = static_cast<int>(model->modelData.skinCluster.skinningInfomationDeta->numVertices);
 		ImGui::InputInt("numVertices", &index);
 
 		
@@ -438,11 +438,11 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 	skinningConmmon_->DrawComputeSetting();
 
 
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, model->skinCluster.paletteSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, model->skinCluster.inputVertexSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, model->skinCluster.influenceSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, model->skinCluster.outputVertexUavHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, model->skinCluster.skinningInfomation->GetGPUVirtualAddress());
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, model->modelData.skinCluster.paletteSrvHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, model->modelData.skinCluster.inputVertexSrvHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, model->modelData.skinCluster.influenceSrvHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, model->modelData.skinCluster.outputVertexUavHandle.second);
+	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, model->modelData.skinCluster.skinningInfomation->GetGPUVirtualAddress());
 
 
 	skinningConmmon_->GetDxCommon()->GetCommandList()->Dispatch(UINT(model->modelData.mesh[0]->vertices.size() + 1023) / 1024, 1, 1);
@@ -451,7 +451,7 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = model->skinCluster.outputVertexResource.Get();
+	barrier.Transition.pResource = model->modelData.skinCluster.outputVertexResource.Get();
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;

@@ -34,9 +34,9 @@ struct AnimationCurve
 using KeyframeVector3 = Keyframe<Vector3>;
 using KeyframeQuaternion = Keyframe<Quaternion>;
 
-
-
-
+/// <summary>
+/// ノードアニメーション
+/// </summary>
 struct NodeAnimation
 {
 	AnimationCurve<Vector3> translate;
@@ -44,6 +44,9 @@ struct NodeAnimation
 	AnimationCurve<Vector3> scale;
 };
 
+/// <summary>
+/// アニメーションデータ
+/// </summary>
 struct Animation
 {
 	float duration; // アニメーション全体の尺 (単位は秒)
@@ -53,12 +56,18 @@ struct Animation
 	bool flag = false; // アニメーションがあるかないか
 };
 
+/// <summary>
+/// Vector3トランスフォーム情報
+/// </summary>
 struct EulerTransform {
 	Vector3 scale;
 	Vector3 ratate; // Eulerでの回転
 	Vector3 translate;
 };
 
+/// <summary>
+/// Quaternionトランスフォーム情報
+/// </summary>
 struct QuaternionTransform
 {
 	Vector3 scale;
@@ -66,6 +75,9 @@ struct QuaternionTransform
 	Vector3 translate;
 };
 
+/// <summary>
+/// ジョイントデータ
+/// </summary>
 struct Joint {
 	QuaternionTransform transform; // Transform情報
 	Matrix4x4 localMatrix; // localMatrix
@@ -76,6 +88,9 @@ struct Joint {
 	std::optional<int32_t> parent; // 親JointのIndex。いなければnull
 };
 
+/// <summary>
+/// ノード
+/// </summary>
 struct  Node
 {
 	QuaternionTransform transform;
@@ -84,34 +99,58 @@ struct  Node
 	std::vector<Node> children;
 };
 
+/// <summary>
+/// スケルトン
+/// </summary>
 struct Skeleton {
 	int32_t root; // RootJointのIndex
 	std::map<std::string, int32_t> jointMap; // Joint名とIndexとの辞書
 	std::vector<Joint> joints; // 所属しているジョイント
 };
 
+/// <summary>
+/// ウェイトデータ
+/// </summary>
 struct VertexWeightData {
 	float weight;
 	uint32_t vertexIndex;
 };
+
+/// <summary>
+/// ジョイントウェイトデータ
+/// </summary>
 struct JointWeightData {
 	Matrix4x4 inverseBindPoseMatrix;
 	std::vector<VertexWeightData> vertexWeights;
 };
 
-const uint32_t kNumMaxInfluence = 4;
+/// <summary>
+/// インフルエンスデータ
+/// </summary>
+const uint32_t kNumMaxInfluence = 4; // 最大4ジョイントの影響を受ける
 struct VertexInfluence {
 	std::array<float, kNumMaxInfluence> weights;
 	std::array<int32_t, kNumMaxInfluence> jointIndices;
 };
+
+/// <summary>
+/// マトリックスパレット
+/// </summary>
 struct WellForGPU {
 	Matrix4x4 skeletonSpaceMatrix; // 位置用
 	Matrix4x4 skeletonSpaceInverseTransposeMatrix; // 法線用
 };
 
+/// <summary>
+/// スキニングの頂点数記録用
+/// </summary>
 struct SkinningInfomation {
 	uint32_t numVertices;
 };
+
+/// <summary>
+/// スキンクラスター
+/// </summary>
 struct SkinCluster {
 	std::vector<Matrix4x4> inverseBindPoseMatrices;
 
@@ -154,16 +193,6 @@ struct SkinCluster {
 };
 
 
-
-
-
-
-
-Skeleton CreateSkeleton(const Node& rootNode);
-
-int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
-
-
 void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
 
 
@@ -190,29 +219,11 @@ static void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton
 	}
 }
 
-
-
 static void ValidateTransform(Joint& joint) {
 	if (joint.transform.scale.x == 0.0f || joint.transform.scale.y == 0.0f || joint.transform.scale.z == 0.0f) {
 		//Logger::Log("Warning: Zero scale detected. Adjusting to default value.");
 		joint.transform.scale = { 1.0f, 1.0f, 1.0f }; // デフォルト値に置き換え
 	}
-}
-
-static float SafeDivide(float numerator, float denominator) {
-	// ゼロチェック
-	if (denominator == 0.0f) {
-		// デバッグ用に警告を出力
-		//Logger::Log("Warning: Division by zero detected. Returning default value.");
-		// デフォルト値を返すか、エラー処理を行う
-		return 0.0f; // または適切な値に置き換える
-	}
-	return numerator / denominator;
-}
-
-static float SafeInverse(float value) {
-	const float epsilon = 1e-6f; // 非常に小さな値
-	return (value != 0.0f) ? (1.0f / value) : (1.0f / epsilon);
 }
 
 static void ImGuiJoint(const std::vector<Joint>& joints) {
@@ -238,7 +249,6 @@ static void ImGuiJoint(const std::vector<Joint>& joints) {
 	ImGui::End();
 }
 
-
 static void ImGuiNode(const std::vector<Node>& nodes) {
 	ImGui::Begin("Node Info");
 	for (const Node& node : nodes) {
@@ -256,10 +266,6 @@ static void ImGuiNode(const std::vector<Node>& nodes) {
 	}
 	ImGui::End();
 }
-
-
-
-
 
 // ジョイントの深さを計算する関数
 static int CalculateDepth(const std::vector<Joint>& joints, int index) {

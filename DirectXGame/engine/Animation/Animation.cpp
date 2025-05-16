@@ -1,41 +1,5 @@
 #include "Animation.h"
 
-
-
-Skeleton CreateSkeleton(const Node& rootNode)
-{
-	Skeleton skeleton{};
-	skeleton.root = CreateJoint(rootNode, {}, skeleton.joints);
-
-	// 名前とindexのマッピングを行いアクセスしやすくする
-	for (const Joint& joint : skeleton.joints) {
-		skeleton.jointMap.emplace(joint.name, joint.index);
-	}
-
-	UpdateSkeleton(skeleton);
-
-	return skeleton;
-}
-
-int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
-{
-	Joint joint{};
-	joint.name = node.name;
-	joint.localMatrix = node.localMatrix;
-	joint.skeletonSpaceMatrix  = MakeIdentity4x4();
-	joint.transform = node.transform;
-	joint.index = int32_t(joints.size()); // 登録されている数をIndexに
-	joint.parent = parent;
-	joints.push_back(joint); // SkeletonのJoint列に追加
-	for (const Node& child : node.children) {
-		// 子Jointを作成し、そのIndexを登録
-		int32_t childIndex = CreateJoint(child, joint.index, joints);
-		joints[joint.index].children.push_back(childIndex);
-	}
-	// 自身のIndexを返す
-	return joint.index;
-}
-
 void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
 	
@@ -49,8 +13,6 @@ void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animat
 		}
 	}
 }
-
-
 
 Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time)
 {
@@ -131,9 +93,6 @@ void DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const
 	for (const Joint& joint : joints) {
 		if (joint.parent.has_value()) {
 			const int32_t parentIndex = joint.parent.value();
-			//const Vector3& parentPosition = joints[parentIndex].transform.translate;
-			//const Vector3& childPosition = joint.transform.translate;
-
 			const Vector3& parentPosition = joints[parentIndex].skeletonSpaceMatrix.GetWorldPosition() * scale;
 			const Vector3& childPosition = joint.skeletonSpaceMatrix.GetWorldPosition() * scale;
 
@@ -146,6 +105,3 @@ void DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const
 	}
 
 }
-
-
-

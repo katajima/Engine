@@ -46,13 +46,13 @@ struct  ParticleMaterial
 	float pad[3];
 };
 
-//モデルデータ
-struct ModelData
-{
-	std::vector<VertexData> vertices;
-	MaterialData material;
-	Node rootNode;
-};
+////モデルデータ
+//struct ModelDataParticle
+//{
+//	std::vector<VertexData> vertices;
+//	MaterialData material;
+//	Node rootNode;
+//};
 
 
 class LightManager;
