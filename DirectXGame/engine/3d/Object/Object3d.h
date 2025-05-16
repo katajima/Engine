@@ -115,7 +115,7 @@ public:
 	bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
 
 	// メッシュ取得
-	Mesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
+	ModelMesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
 
 	// マテリアル取得
 	Material* GetMaterial(int index) { return model->modelData.material[index].get(); }

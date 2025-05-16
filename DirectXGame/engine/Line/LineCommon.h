@@ -8,7 +8,7 @@
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include "DirectXGame/engine/Mesh/Mesh.h"
+#include "DirectXGame/engine/Mesh/LineMesh.h"
 #include "DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
@@ -32,8 +32,8 @@ public:
 
 	void AddLightLine(SpotLightData data);
 
-	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat);
-	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
+	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat);
+	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
 	
 	void AddLineAABB(AABB aabb, Vector3 pos);
 
@@ -108,7 +108,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
 
 	DirectXCommon* dxCommon_;
-	std::unique_ptr<Mesh> mesh_;
+	std::unique_ptr<LineMesh> mesh_;
 	//std::unique_ptr<Mate>
 	const uint32_t kNumMaxInstance = 300000;
 	

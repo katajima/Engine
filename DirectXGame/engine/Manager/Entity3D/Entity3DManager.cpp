@@ -85,7 +85,7 @@ void Entity3DManager::UpdateImgui()
 		ImGui::Separator();
 
 		Material* material;
-		Mesh* mesh;
+		BaseMesh* mesh;
 		
 		if (entity->GetObjectType() == Object3d::ObjectType::kSkyBox) {
 			material = entity->skyBox_->GetMaterial();
@@ -136,11 +136,11 @@ void Entity3DManager::UpdateImgui()
 
 		
 
-		int index = static_cast<int>(mesh->vertices.size());
-		ImGui::InputInt("verticesSize", &index);
-		index = static_cast<int>(mesh->indices.size());
-		ImGui::InputInt("indicesSize", &index);
-		index = static_cast<int>(mesh->indices.size());
+		//int index = static_cast<int>(mesh->vertices.size());
+		//ImGui::InputInt("verticesSize", &index);
+		//index = static_cast<int>(mesh->indices.size());
+		//ImGui::InputInt("indicesSize", &index);
+		//index = static_cast<int>(mesh->indices.size());
 
 		
 		
@@ -155,23 +155,6 @@ void Entity3DManager::UpdateImgui()
 		if (entity->GetOcean()) {
 			ImGui::Separator();
 			entity->GetOcean()->UpdateImgui();
-		}
-
-
-		if (entity->GetObjectType() == Object3d::ObjectType::kNormal) {
-			ImGui::InputFloat4("tangent", &mesh->vertices[0].tangent.x);
-			ImGui::InputFloat4("tangent", &mesh->vertices[1].tangent.x);
-			ImGui::InputFloat4("tangent", &mesh->vertices[2].tangent.x);
-			ImGui::InputFloat4("tangent", &mesh->vertices[3].tangent.x);
-			entity->DebugImguiModel();
-		}
-		else if (entity->GetObjectType() == Object3d::ObjectType::kAnimation) {
-			ImGui::InputFloat4("tangent", &mesh->vertices[0].tangent.x);
-			entity->DebugImguiModel();
-		}
-		else if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {
-			ImGui::InputFloat4("tangent", &mesh->vertices[0].tangent.x);
-			entity->DebugImguiModel();
 		}
 
 		if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {

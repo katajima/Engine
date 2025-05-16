@@ -743,6 +743,11 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
+	ImGui::Begin("TTTT");
+	ImGui::Text(multiy->model->modelData.material[0]->tex_.diffuseFilePath.c_str());
+	ImGui::Text(multiy->model->modelData.material[1]->tex_.diffuseFilePath.c_str());
+	ImGui::End();
+
 }
 
 void TestScene::UpdateRoom02()

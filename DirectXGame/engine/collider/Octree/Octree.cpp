@@ -1,6 +1,6 @@
 #include "Octree.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
-#include "DirectXGame/engine/Mesh/Mesh.h"
+#include "DirectXGame/engine/Mesh/Base/BaseMesh.h"
 
 
 /// <summary>
@@ -39,7 +39,7 @@ void Octree::draw(LineCommon& lineDrawer, Vector3 offset)
 /// メッシュの三角形を入れる
 /// </summary>
 /// <param name="mesh"></param>
-void Octree::insert(const Mesh& mesh) {
+void Octree::insert(const BaseMesh& mesh) {
    for (auto& triangle : mesh.triangle) {
        insertTriangle(root, triangle);
    }

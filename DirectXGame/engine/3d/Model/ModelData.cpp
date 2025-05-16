@@ -10,7 +10,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
 		assert(mesh->HasTextureCoords(0)); //TexcoordがないMeshは今回は非対応
-		std::unique_ptr<Mesh> pMesh = std::make_unique<Mesh>();
+		std::unique_ptr<ModelMesh> pMesh = std::make_unique<ModelMesh>();
 
 		pMesh->meshIndex = meshIndex;
 
@@ -30,7 +30,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
-	
+
 			if (modelData.isTangent) {
 				aiVector3D& tangent = mesh->mTangents[vertexIndex];
 				aiVector3D& bitangent = mesh->mBitangents[vertexIndex];
@@ -48,10 +48,12 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 				pMesh->vertices[vertexIndex].tangent = {};
 			}
 
-			pMesh->vertices[vertexIndex].position = { -position.x,position.y,position.z,1.0f };
+			Vector3 offset = modelData.meshOffsetMap[meshIndex];
+
+			pMesh->vertices[vertexIndex].position = { -position.x + offset.x ,position.y + offset.y,position.z + offset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
 			pMesh->vertices[vertexIndex].texcoord = { texcoord.x,texcoord.y };
-			
+
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
 			min = Min(min, pMesh->vertices[vertexIndex].position.xyz());
@@ -206,7 +208,7 @@ void LoadModel::LoadAnimation(ModelData& modelData, const std::string& directory
 	}
 }
 
-Node LoadModel::ReadNode(aiNode* node)
+Node LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& meshOffsetMap)
 {
 	Node result;
 
@@ -219,13 +221,20 @@ Node LoadModel::ReadNode(aiNode* node)
 	result.transform.translate = { -translate.x,translate.y,translate.z }; // x軸を反転
 
 	result.localMatrix = MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.translate);
-
-
 	result.name = node->mName.C_Str(); // Node名を格納
+
+	// ★追加：このノードに紐づくメッシュインデックスを記録
+	result.meshIndices.resize(node->mNumMeshes);
+	for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
+		result.meshIndices[i] = node->mMeshes[i];
+		meshOffsetMap[i] = { -translate.x, translate.y, translate.z };
+	}
+
+
 	result.children.resize(node->mNumChildren); // 子供の数だけ確保
 	for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex) {
 		// 再帰的に読んで階層構造を作っていく
-		result.children[childIndex] = ReadNode(node->mChildren[childIndex]);
+		result.children[childIndex] = ReadNode(node->mChildren[childIndex], meshOffsetMap);
 	}
 	return result;
 }
@@ -391,7 +400,7 @@ int32_t CreateModel::CreateJoint(const Node& node, const std::optional<int32_t>&
 	joints.push_back(joint); // SkeletonのJoint列に追加
 	for (const Node& child : node.children) {
 		// 子Jointを作成し、そのIndexを登録
-		int32_t childIndex =  CreateModel::CreateJoint(child, joint.index, joints);
+		int32_t childIndex = CreateModel::CreateJoint(child, joint.index, joints);
 		joints[joint.index].children.push_back(childIndex);
 	}
 	// 自身のIndexを返す

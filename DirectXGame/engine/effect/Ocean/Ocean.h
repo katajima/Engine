@@ -47,7 +47,7 @@ public:
 
 	Material* GetMaterial() { return material.get(); }
 
-	Mesh* GetMesh() { return mesh_.get(); }
+	ModelMesh* GetMesh() { return mesh_.get(); }
 private:
 
 
@@ -57,7 +57,7 @@ private:
 	// マテリアル
 	std::unique_ptr<Material> material = nullptr;
 	// メッシュ
-	std::unique_ptr<Mesh> mesh_ = nullptr;
+	std::unique_ptr<ModelMesh> mesh_ = nullptr;
 private:
 	struct WaveParameters {
 		Vector2 waveDirection; // 波の方向

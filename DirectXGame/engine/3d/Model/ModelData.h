@@ -3,7 +3,10 @@
 // engine
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
-#include"DirectXGame/engine/Mesh/Mesh.h"
+//#include"DirectXGame/engine/Mesh/Mesh.h"
+
+#include "DirectXGame/engine/Mesh/ModelMesh.h"
+
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/Material/Material.h"
 
@@ -34,14 +37,14 @@ struct ModelData
 {
 	std::string name;										// 名前
 	std::map<std::string, JointWeightData> skinClusterData;	// スキンクラスターデータ
-	bool isNormalmap;
-	// ノーマルマップを使っているか？
+	bool isNormalmap;										// ノーマルマップを使っているか？
+	std::unordered_map<uint32_t, Vector3> meshOffsetMap;
 	Node rootNode;											// ノードデータ
 	bool isAssimp;											// アシンプか
 	bool isAmimetion;										// アニメーションするか
 	bool isTangent;											// タンジェント
 	SkinningSRVUAV skinning;								// スキニング用のSRV、UAVのインデックス
-	std::vector <std::unique_ptr<Mesh>> mesh;				// メッシュデータ
+	std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 	std::vector<uint32_t> cachedLineIndices_;				// ライン
 	std::vector <std::unique_ptr<Material>> material;		// マテリアルデータ
 	Animation animation;									// アニメーション
@@ -66,7 +69,7 @@ namespace LoadModel {
 	void LoadAnimation(ModelData& modelData, const std::string& directoryPath, const std::string& filename);
 
 	// ノード読み込み
-	Node ReadNode(aiNode* node);
+	Node ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& meshOffsetMap);
 
 }
 

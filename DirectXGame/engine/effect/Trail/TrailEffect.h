@@ -12,7 +12,7 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 
-#include"DirectXGame/engine/Mesh/Mesh.h"
+#include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
 
@@ -43,9 +43,9 @@ public:
 
 	void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
 
-	Mesh* GetMesh() const { return mesh.get(); }
+	ModelMesh* GetMesh() const { return mesh.get(); }
 
-	std::unique_ptr<Mesh> mesh;
+	std::unique_ptr<ModelMesh> mesh;
 
 private:
 	struct VertexData {

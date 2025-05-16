@@ -1,6 +1,6 @@
 #include "ShapeParameter.h"
 
-void ShapeParameter::ShapePlane::Create(Mesh* mesh)
+void ShapeParameter::ShapePlane::Create(ModelMesh* mesh)
 {
     mesh->Clear();
 
@@ -20,7 +20,7 @@ void ShapeParameter::ShapePlane::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeCross::Create(Mesh* mesh)
+void ShapeParameter::ShapeCross::Create(ModelMesh* mesh)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
@@ -67,7 +67,7 @@ void ShapeParameter::ShapeCross::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeTriangle::Create(Mesh* mesh)
+void ShapeParameter::ShapeTriangle::Create(ModelMesh* mesh)
 {
 	mesh->Clear();
 
@@ -83,7 +83,7 @@ void ShapeParameter::ShapeTriangle::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Circle::Create(Mesh* mesh)
+void ShapeParameter::Circle::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -122,7 +122,7 @@ void ShapeParameter::Circle::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Star::Create(Mesh* mesh)
+void ShapeParameter::Star::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -168,7 +168,7 @@ void ShapeParameter::Star::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Crescent::Create(Mesh* mesh)
+void ShapeParameter::Crescent::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -233,7 +233,7 @@ void ShapeParameter::Crescent::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Ring::Create(Mesh* mesh)
+void ShapeParameter::Ring::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -285,7 +285,7 @@ void ShapeParameter::Ring::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeSphere::Create(Mesh* mesh)
+void ShapeParameter::ShapeSphere::Create(ModelMesh* mesh)
 {
 	if (longitudeSegments < 3) {
 		longitudeSegments = 3;
@@ -354,7 +354,7 @@ void ShapeParameter::ShapeSphere::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeArrow::Create(Mesh* mesh)
+void ShapeParameter::ShapeArrow::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -447,7 +447,7 @@ void ShapeParameter::ShapeArrow::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeCube::Create(Mesh* mesh)
+void ShapeParameter::ShapeCube::Create(ModelMesh* mesh)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
@@ -515,7 +515,7 @@ void ShapeParameter::ShapeCube::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Cylinder::Create(Mesh* mesh)
+void ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -598,7 +598,7 @@ void ShapeParameter::Cylinder::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Tube::Create(Mesh* mesh)
+void ShapeParameter::Tube::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -700,7 +700,7 @@ void ShapeParameter::Tube::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Pyramid::Create(Mesh* mesh)
+void ShapeParameter::Pyramid::Create(ModelMesh* mesh)
 {
 
 	if (segments < 3) {
@@ -756,7 +756,7 @@ void ShapeParameter::Pyramid::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Torus::Create(Mesh* mesh)
+void ShapeParameter::Torus::Create(ModelMesh* mesh)
 {
 	if (tubeSegments < 3) {
 		tubeSegments = 3;

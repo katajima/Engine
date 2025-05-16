@@ -97,6 +97,7 @@ struct  Node
 	Matrix4x4 localMatrix;
 	std::string name;
 	std::vector<Node> children;
+	std::vector<uint32_t> meshIndices; // ★追加：このノードが所有するメッシュのインデックス
 };
 
 /// <summary>

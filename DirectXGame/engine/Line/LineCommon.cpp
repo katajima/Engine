@@ -32,13 +32,13 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	*cameraWVP = MakeIdentity4x4();
 
 	
-	mesh_ = std::make_unique<Mesh>();
+	mesh_ = std::make_unique<LineMesh>();
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->indices.push_back({ 0 });
 	mesh_->indices.push_back({ 1 });
 
-	mesh_->InitializeLine(dxCommon_);
+	mesh_->Initialize(dxCommon_);
 
 	mesh_->verticesline.clear();
 	mesh_->indices.clear();
@@ -157,7 +157,7 @@ void LineCommon::AddLightLine(SpotLightData data)
 }
 
 
-void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
+void LineCommon::AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat)
 {
 
 
@@ -171,14 +171,14 @@ void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
 		//mesh_->indices();
 	}
 
-	Mesh::MeshLine(mesh->indices,mesh_->indices, lineNum_);
+	LineMesh::MeshLine(mesh->indices,mesh_->indices, lineNum_);
 
 
 	// インデックスオフセットを更新
 	lineNum_ += static_cast<uint32_t>(mesh_->indices.size());
 }
 
-void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices)
+void LineCommon::AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices)
 {
 
 
@@ -439,7 +439,7 @@ void LineCommon::AddGrid(float xRange, float zRange, float interval, Vector4 col
 
 void LineCommon::Update()
 {
-	mesh_->UpdateLineVertexBuffer();
+	mesh_->UpdateVertexBuffer();
 	mesh_->UpdateIndexBuffer();
 
 	if (camera_ && cameraWVP) {

@@ -162,7 +162,7 @@ public:
 		ParticleForGPU* instanceData; // インスタンシングデータを書き込むためのポインタ
 		D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU;
 		D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU;
-		Mesh* mesh;
+		ModelMesh* mesh;
 		Emiter emiter;
 		bool usebillboard = true;
 		bool isAlpha = false;

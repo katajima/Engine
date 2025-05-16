@@ -9,7 +9,7 @@
 #include<vector>
 #include<format>
 #include<DirectXGame/engine/Material/Material.h>
-#include<DirectXGame/engine/Mesh/Mesh.h>
+#include<DirectXGame/engine/Mesh/SkyBoxMesh.h>
 
 
 
@@ -26,10 +26,10 @@ public:
 
 	Material* GetMaterial() { return material.get(); }
 
-	Mesh* GetMesh() { return mesh_.get(); }
+	SkyBoxMesh* GetMesh() { return mesh_.get(); }
 private:
 
-	std::unique_ptr<Mesh> mesh_;
+	std::unique_ptr<SkyBoxMesh> mesh_;
 	std::unique_ptr<Material> material;
 
 private:

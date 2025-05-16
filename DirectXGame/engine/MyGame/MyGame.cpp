@@ -158,10 +158,15 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/smoke/no3.png");
 
 
-	modelManager->LoadModel("multiMaterial.gltf", "multiMaterial");
+	modelManager->LoadModel("a.obj");
 
 	modelManager->LoadModel("multiMaterial.obj", "multiMaterial");
-	modelManager->LoadModel("a.obj");
+
+	modelManager->LoadModel("multiMaterial.gltf", "multiMaterial");
+
+	modelManager->LoadModel("multiMesh.obj", "multiMesh");
+
+
 
 
 	modelManager->LoadModel("walk.gltf", "human");
@@ -198,8 +203,7 @@ void MyGame::InitializeResource()
 
 
 
-	modelManager->LoadModel("multiMesh.obj", "multiMesh");
-
+	
 
 	/// <summary>
 	/// 地形

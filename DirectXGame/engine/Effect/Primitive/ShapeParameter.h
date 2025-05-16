@@ -1,7 +1,7 @@
 #pragma once
 
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include "DirectXGame/engine/Mesh/Mesh.h"
+#include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 
 namespace ShapeParameter {
@@ -10,7 +10,7 @@ namespace ShapeParameter {
 		float width = 1.0f;
 		float height = 1.0f;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const ShapePlane& other) const {
@@ -28,7 +28,7 @@ namespace ShapeParameter {
 		Vector2 leftPos = { 1.0f,-1.0f };
 		Vector2 rightPos = { -1.0f,-1.0f };
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const ShapeTriangle& other) const {
@@ -46,7 +46,7 @@ namespace ShapeParameter {
 		float armLength = 10;
 		float armWidth = 5;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const ShapeCross& other) const {
@@ -96,7 +96,7 @@ namespace ShapeParameter {
 	{
 		Vector3 size = { 1,1,1 };
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const ShapeCube& other) const {
@@ -116,7 +116,7 @@ namespace ShapeParameter {
 		float radius = 5.0f;
 		int segments = 16;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 
 		// == オペレーター
@@ -136,7 +136,7 @@ namespace ShapeParameter {
 		float outerRadius = 5.0f;
 		int segments = 5;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const Star& other) const {
@@ -156,7 +156,7 @@ namespace ShapeParameter {
 		int segments = 16;
 		float distance = 5.0f;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const Crescent& other) const {
@@ -174,7 +174,7 @@ namespace ShapeParameter {
 		float outerRadius = 5.0f;
 		int segments = 16;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const Ring& other) const {
@@ -193,7 +193,7 @@ namespace ShapeParameter {
 		int longitudeSegments = 16;
 		bool isTopBased = false;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const ShapeSphere& other) const {
@@ -213,7 +213,7 @@ namespace ShapeParameter {
 		float headRadius = 8.0f;
 		int segments = 16;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const ShapeArrow& other) const {
@@ -234,7 +234,7 @@ namespace ShapeParameter {
 		int segments = 16;
 		bool isCover = true;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const Cylinder& other) const {
@@ -253,7 +253,7 @@ namespace ShapeParameter {
 		float height = 10.0f;
 		int segments = 16;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 
 		// == オペレーター
@@ -272,7 +272,7 @@ namespace ShapeParameter {
 		float height = 3.0f;
 		int segments = 16;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const Pyramid& other) const {
@@ -291,7 +291,7 @@ namespace ShapeParameter {
 		int segments = 16;
 		int tubeSegments = 16;
 
-		void Create(Mesh* mesh);
+		void Create(ModelMesh* mesh);
 
 		// == オペレーター
 		bool operator==(const Torus& other) const {

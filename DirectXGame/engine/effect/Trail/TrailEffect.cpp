@@ -7,7 +7,7 @@ void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& te
 {
 	effectManager_ = effectManager;
 
-	mesh = std::make_unique<Mesh>();
+	mesh = std::make_unique<ModelMesh>();
 
 	mesh->vertices.push_back({ 0,0,0 });
 	mesh->indices.push_back(1);

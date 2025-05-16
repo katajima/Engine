@@ -1,10 +1,6 @@
 #pragma once
-#include"DirectXGame/engine/Mesh/Mesh.h"
-#include"DirectXGame/engine/Material/Material.h"
-#include"DirectXGame/engine/Transfomation/Transfomation.h"
-#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+
 #include"DirectXGame/engine/PSO/PSOManager.h"
-#include "DirectXGame/engine/Camera/Camera.h"
 
 
 

@@ -18,7 +18,7 @@ void SkyBox::Initialize(Entity3DManager* entity3DManager, std::string txtueName)
 
 
 
-	mesh_ = std::make_unique<Mesh>();
+	mesh_ = std::make_unique<SkyBoxMesh>();
 
 	Vector3 size = Vector3{ 10,10,10 } *100;
 
@@ -61,7 +61,7 @@ void SkyBox::Initialize(Entity3DManager* entity3DManager, std::string txtueName)
 		vertexOffset += 4; // 次の面に移動
 	}
 
-	mesh_->InitializeSkyBox(entity3DManager_->GetSkyBoxCommon()->GetDxCommon());
+	mesh_->Initialize(entity3DManager_->GetSkyBoxCommon()->GetDxCommon());
 }
 
 void SkyBox::Update()

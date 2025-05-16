@@ -3,7 +3,7 @@
 // engine
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
-#include"DirectXGame/engine/Mesh/Mesh.h"
+#include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/Material/Material.h"
 

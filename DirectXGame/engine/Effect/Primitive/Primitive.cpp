@@ -4,7 +4,7 @@
 
 void Primitive::Init(const std::string& tex, const Color color, const std::string& name)
 {
-	mesh = std::make_unique<Mesh>();
+	mesh = std::make_unique<ModelMesh>();
 	MeshInitialize();
 
 	mesh->Initialize(primitiveCommon_->GetDxCommon());

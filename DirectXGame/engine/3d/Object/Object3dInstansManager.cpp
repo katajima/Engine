@@ -191,7 +191,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 	objectGroup.rasteType = rasteType;
 }
 
-void Object3dInstansManager::CreateObject3dGroup(const std::string name, const std::string textureFilePath, Mesh* mesh, RasterizerType rasteType, BlendType blendType)
+void Object3dInstansManager::CreateObject3dGroup(const std::string name, const std::string textureFilePath, ModelMesh* mesh, RasterizerType rasteType, BlendType blendType)
 {
 	if (objectGroups.contains(name)) {
 		return;

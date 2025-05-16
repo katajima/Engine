@@ -76,8 +76,7 @@ void SkinningConmmon::CreateRootSignature()
 	psoManager_->SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
 	psoManager_->SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
 	psoManager_->SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
-	//psoManager_->SetDescriptorRenge(descriptorRange[4], 4, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スキニング用
-
+	
 	
 
 	
@@ -115,9 +114,7 @@ void SkinningConmmon::CreateRootSignature()
 	psoManager_->SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t3) をピクセルシェーダで使用する
 	psoManager_->SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
-	//スキニング (t4) をバーテックスシェーダで使用する
-	//psoManager_->SetRootParameter(rootParameters[10],descriptorRange[4], D3D12_SHADER_VISIBILITY_VERTEX);
-
+	
 	
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};

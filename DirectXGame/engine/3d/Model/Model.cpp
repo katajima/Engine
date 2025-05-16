@@ -1,8 +1,6 @@
-
 // engine
 #include"Model.h"
 #include"ModelCommon.h"
-//#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Material/Material.h"
@@ -51,8 +49,6 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	for (auto& material : modelData.material) {
 		material->LoadTex();
 	};
-
-
 }
 
 void Model::Draw()
@@ -112,7 +108,7 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 	assert(scene->HasMeshes()); //メッシュがないのは対応しない
 
 	// ノード読み込み
-	modelData.rootNode = LoadModel::ReadNode(scene->mRootNode);
+	modelData.rootNode = LoadModel::ReadNode(scene->mRootNode,modelData.meshOffsetMap);
 
 	// メッシュ読み込み
 	LoadModel::LoadMesh(scene, modelData, dxCommon_);

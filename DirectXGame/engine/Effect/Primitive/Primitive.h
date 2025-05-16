@@ -13,16 +13,12 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 
-#include"DirectXGame/engine/Mesh/Mesh.h"
+#include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Transfomation/Transfomation.h"
 
 
 #include "DirectXGame/engine/collider/3d/Collider.h"
-
-
-#include "DirectXGame/engine/Effect/Primitive/ShapeType/ShapePlane.h"
-
 
 #include "ShapeParameter.h"
 
@@ -140,7 +136,7 @@ public:
 
 	Material* GetMaterial() { return material.get(); }
 
-	Mesh* GetMesh() { return mesh.get(); }
+	ModelMesh* GetMesh() { return mesh.get(); }
 
 	void MeshUpdateImGui();
 
@@ -215,7 +211,7 @@ public: //セッター
 private:
 	bool isLine_ = false;
 
-	std::unique_ptr<Mesh> mesh;
+	std::unique_ptr<ModelMesh> mesh;
 	std::unique_ptr<Material> material;
 	
 	// 名前

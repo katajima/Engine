@@ -12,7 +12,7 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 
 	renge_.renge = renge;
 
-	mesh_ = std::make_unique<Mesh>();
+	mesh_ = std::make_unique<ModelMesh>();
 	// 頂点データ
 	mesh_->vertices.push_back({ .position = {renge_.renge.x, 0.0f, renge_.renge.y, 1.0f} ,.texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左上
 	mesh_->vertices.push_back({ .position = {-renge_.renge.x, 0.0f, renge_.renge.y, 1.0f} ,.texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右上
