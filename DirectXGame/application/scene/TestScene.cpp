@@ -147,7 +147,7 @@ void TestScene::Draw3D()
 		
 		skyBoxObject->Draw();
 		skyBoxObject2->Draw();
-
+		
 		tail.Draw();
 		
 		oceanObject->Draw();
@@ -169,7 +169,7 @@ void TestScene::Draw3D()
 
 		skinningObject->Draw();
 		skinningObject2->Draw();
-
+		skinningObject3->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
 		break;
@@ -288,6 +288,14 @@ void TestScene::InitializeObject3D()
 	skinningObject2->worldtransform_.scale_ = { 10,10,10 };
 	skinningObject2->SetCamera(camera.get());
 	skinningObject2->SetName("walk");
+
+	skinningObject3 = std::make_unique<Object3d>();
+	skinningObject3->Initialize(GetEntity3DManager(), Object3d::ObjectType::kNormal);
+	skinningObject3->SetModel("d.gltf");
+	skinningObject3->worldtransform_.translate_ = { -30,10,1 };
+	skinningObject3->worldtransform_.scale_ = { 10,10,10 };
+	skinningObject3->SetCamera(camera.get());
+	skinningObject3->SetName("testBri");
 
 	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");

@@ -9,13 +9,13 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
-		assert(mesh->HasTextureCoords(0)); //TexcoordがないMeshは今回は非対応
+		//assert(mesh->HasTextureCoords(0)); //TexcoordがないMeshは今回は非対応
 		std::unique_ptr<ModelMesh> pMesh = std::make_unique<ModelMesh>();
 
 		pMesh->meshIndex = meshIndex;
 
-		Vector3 min = { 100 };
-		Vector3 max = { -100 };
+		Vector3 min = { 10000,10000,10000};
+		Vector3 max = { -10000,-10000,-10000 };
 		pMesh->vertices.resize(mesh->mNumVertices);
 		pMesh->verticesline.resize(mesh->mNumVertices);
 
@@ -52,8 +52,12 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 
 			pMesh->vertices[vertexIndex].position = { -position.x + offset.x ,position.y + offset.y,position.z + offset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
-			pMesh->vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-
+			if (mesh->HasTextureCoords(0)) {
+				pMesh->vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			}
+			else {
+				pMesh->vertices[vertexIndex].texcoord = {0.5f,0.5f};
+			}
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
 			min = Min(min, pMesh->vertices[vertexIndex].position.xyz());
@@ -140,6 +144,15 @@ void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectX
 			std::cout << "Mesh[" << meshIndex << "] Diffuse: " << textureFilePath.C_Str() << std::endl;
 			pMaterial->tex_.diffuseFilePath = directoryPath + "/" + textureFilePath.C_Str();
 		}
+		else {
+			// テクスチャがない → ベースカラーを取得
+			aiColor3D baseColor(1.0f, 1.0f, 1.0f); // デフォルト白
+			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor)) {
+				std::cout << "Mesh[" << meshIndex << "] BaseColor: " << baseColor.r << "," << baseColor.g << "," << baseColor.b << std::endl;
+				pMaterial->color = { baseColor.r, baseColor.g, baseColor.b, 1.0f };
+				pMaterial->tex_.diffuseFilePath = "resources/Texture/Image.png";
+			}
+		}
 
 		// Specular
 		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
@@ -161,6 +174,14 @@ void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectX
 			std::cout << "Mesh[" << meshIndex << "] Normal/Height: " << textureFilePath.C_Str() << std::endl;
 			pMaterial->tex_.normalFilePath = directoryPath + "/" + textureFilePath.C_Str();
 		}
+
+		//// テクスチャがない → ベースカラーを取得
+		//aiColor3D baseColor(1.0f, 1.0f, 1.0f); // デフォルト白
+		//if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor)) {
+		//	std::cout << "Mesh[" << meshIndex << "] BaseColor: " << baseColor.r << "," << baseColor.g << "," << baseColor.b << std::endl;
+		//	pMaterial->baseColor = { baseColor.r, baseColor.g, baseColor.b, 1.0f };
+		//	pMaterial->useColor = true;
+		//}
 
 		// モデルデータ内のメッシュへマテリアルを割り当て
 		assert(meshIndex < modelData.mesh.size());

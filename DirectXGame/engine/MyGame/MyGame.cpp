@@ -155,7 +155,9 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/smoke/no1.png");
 	textureManager->LoadTexture("resources/Texture/smoke/no2.png");
 	textureManager->LoadTexture("resources/Texture/smoke/no3.png");
-
+	
+	
+	modelManager->LoadModel("d.gltf", "glTF");
 
 	modelManager->LoadModel("a.obj");
 
@@ -164,6 +166,8 @@ void MyGame::InitializeResource()
 	modelManager->LoadModel("multiMaterial.gltf", "multiMaterial");
 
 	modelManager->LoadModel("multiMesh.obj", "multiMesh");
+
+	
 
 
 
