@@ -3,8 +3,7 @@
 // engine
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
-//#include"DirectXGame/engine/Mesh/Mesh.h"
-
+\
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 
 #include"DirectXGame/engine/struct/Material.h"
@@ -46,7 +45,7 @@ struct ModelData
 	SkinningSRVUAV skinning;								// スキニング用のSRV、UAVのインデックス
 	std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 	std::vector<uint32_t> cachedLineIndices_;				// ライン
-	std::vector <std::unique_ptr<Material>> material;		// マテリアルデータ
+	//std::vector <std::unique_ptr<Material>> material;		// マテリアルデータ
 	Animation animation;									// アニメーション
 	float animationTime = 0.0f;								// アニメーション時間
 	Skeleton skeleton;										// スケルトン

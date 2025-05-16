@@ -37,8 +37,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	objectBody_.model->modelData.material[0]->shininess_ = 10000;
-
+	
 
 	// スペシャル攻撃
 	bulletSpecial_ = std::make_unique<BulletSpecial>();
@@ -157,10 +156,10 @@ void Player::Update()
 
 #ifdef _DEBUG
 	if (isInvincible) {
-		objectBody_.model->modelData.material[0]->color = { 0,0,1,1 };
+		objectBody_.model->modelData.mesh[0]->material->color = { 0,0,1,1 };
 	}
 	else {
-		objectBody_.model->modelData.material[0]->color = { 1,1,1,1 };
+		objectBody_.model->modelData.mesh[0]->material->color = { 1,1,1,1 };
 	}
 
 #endif // _DEBUG

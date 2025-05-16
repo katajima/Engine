@@ -29,7 +29,7 @@ void NormalPlayer::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DMana
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.worldtransform_.parent_ = &object_->worldtransform_;
-	objectBody_.model->modelData.material[0]->shininess_ = 10000;
+	objectBody_.GetMaterial(0)->shininess_ = 10000;
 
 
 	// スペシャル攻撃

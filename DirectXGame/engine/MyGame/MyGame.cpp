@@ -147,7 +147,6 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/dust.png");
 	textureManager->LoadTexture("resources/Texture/hit.png");
 	textureManager->LoadTexture("resources/Texture/text/max.png");
-	//textureManager->LoadTexture("resources/Texture/rostock_laage_airport_4k.dds");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
 	textureManager->LoadTexture("resources/Texture/circle2.png");
 	textureManager->LoadTexture("resources/Texture/gradationLine.png");
@@ -190,7 +189,6 @@ void MyGame::InitializeResource()
 	modelManager->LoadModel("axis.obj", "axis");
 	
 
-	//modelManager->LoadModelAmime("multiMaterial.obj", "multiMaterial");
 	modelManager->LoadModel("teapot.obj", "teapot");
 
 

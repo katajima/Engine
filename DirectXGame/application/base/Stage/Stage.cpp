@@ -17,7 +17,8 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	sky_->SetModel("skydome.obj");
 	sky_->SetCamera(camera);
 	sky_->worldtransform_.scale_ = { 100,100,100 };
-	sky_->model->modelData.material[0]->enableLighting_ = false;
+	sky_->GetMaterial(0)->enableLighting_ = false;
+	sky_->GetMaterial(0)->enableLighting_ = false;
 
 	// 地面
 	tail_ = std::make_unique<Object3d>();
@@ -26,8 +27,8 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	//tail_->SetModel("coast.gltf");
 	tail_->SetCamera(camera);
 	tail_->worldtransform_.scale_ = { 4,1,4 };
-	tail_->model->modelData.material[0]->transform.scale = {10,10,1};
-	tail_->model->modelData.material[0]->shininess_ = 1064.0f;
+	tail_->GetMaterial(0)->transform.scale = {10,10,1};
+	tail_->GetMaterial(0)->shininess_ = 1064.0f;
 	
 
 	// 地面黒

@@ -46,8 +46,8 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	}
 
 	// マテリアル読み込み
-	for (auto& material : modelData.material) {
-		material->LoadTex();
+	for (auto& mesh : modelData.mesh) {
+		mesh->material->LoadTex();
 	};
 }
 
@@ -55,10 +55,10 @@ void Model::Draw()
 {
 	for (auto& mesh : modelData.mesh)
 	{
-		modelData.material[mesh->meshIndex]->GetCommandListMaterial(0);
+		mesh->material->GetCommandListMaterial(0);
 
-		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
-	
+		mesh->material->GetCommandListTexture(2, 7, 8);
+
 		mesh->GetCommandList();
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
@@ -73,9 +73,9 @@ void Model::DrawSkinning()
 
 	for (auto& mesh : modelData.mesh)
 	{
-		modelData.material[mesh->meshIndex]->GetCommandListMaterial(0);
+		mesh->material->GetCommandListMaterial(0);
 
-		modelData.material[mesh->meshIndex]->GetCommandListTexture(2, 7, 8);
+		mesh->material->GetCommandListTexture(2, 7, 8);
 
 		mesh->GetCommandList(modelData.skinCluster.outputBufferView, modelData.skinCluster.influenceBufferView);
 

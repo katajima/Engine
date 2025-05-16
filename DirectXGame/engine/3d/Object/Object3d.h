@@ -118,7 +118,7 @@ public:
 	ModelMesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
 
 	// マテリアル取得
-	Material* GetMaterial(int index) { return model->modelData.material[index].get(); }
+	Material* GetMaterial(int index) { return model->modelData.mesh[index]->material.get(); }
 	
 	// モデル取得
 	Model* GetModel() const { return model; }

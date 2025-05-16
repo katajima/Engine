@@ -293,7 +293,7 @@ void TestScene::InitializeObject3D()
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
 	tail.SetName("tail");
-	tail.model->modelData.material[0]->shininess_ = 1000.0f;
+	tail.GetMaterial(0)->shininess_ = 1000.0f;
 
 	multiy = std::make_unique<Object3d>();
 	multiy->Initialize(GetEntity3DManager());
@@ -744,8 +744,8 @@ void TestScene::InitializeRoom08()
 void TestScene::UpdateRoom01()
 {
 	ImGui::Begin("TTTT");
-	ImGui::Text(multiy->model->modelData.material[0]->tex_.diffuseFilePath.c_str());
-	ImGui::Text(multiy->model->modelData.material[1]->tex_.diffuseFilePath.c_str());
+	ImGui::Text(multiy->model->modelData.mesh[0]->material->tex_.diffuseFilePath.c_str());
+	ImGui::Text(multiy->model->modelData.mesh[1]->material->tex_.diffuseFilePath.c_str());
 	ImGui::End();
 
 }

@@ -259,7 +259,7 @@ void Object3dInstansManager::AddObject(const std::string name, const std::string
 	
 
 	if (texName == "") {
-		object.texIndex = objectGroups[name].model->modelData.material[0]->tex_.diffuseIndex;
+		object.texIndex = objectGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
 	}
 	else {
 		

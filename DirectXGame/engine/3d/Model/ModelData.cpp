@@ -48,11 +48,11 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 				pMesh->vertices[vertexIndex].tangent = {};
 			}
 
-			Vector3 offset = modelData.meshOffsetMap[meshIndex];
+			Vector3 offset = modelData.meshOffsetMap[(scene->mNumMeshes -1) - meshIndex];
 
 			pMesh->vertices[vertexIndex].position = { -position.x + offset.x ,position.y + offset.y,position.z + offset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
-			pMesh->vertices[vertexIndex].texcoord = { texcoord.x,texcoord.y };
+			pMesh->vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
 
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
@@ -119,39 +119,52 @@ void LoadModel::LoadBone(const aiScene* scene, ModelData& modelData, DirectXComm
 void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath)
 {
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
+		aiMesh* mesh = scene->mMeshes[meshIndex];
+		uint32_t materialIndex = mesh->mMaterialIndex;
 
-		pMaterial->Initialize(dxCommon);
-		for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
-			aiMaterial* material = scene->mMaterials[materialIndex];
-			aiString textureFilePath;
-
-			if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
-				aiString textureFilePaths;
-				material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePaths);
-				std::cout << "Diffuse Texture File Path: " << textureFilePaths.C_Str() << std::endl;
-				pMaterial->tex_.diffuseFilePath = directoryPath + "/" + textureFilePaths.C_Str();
-			}
-			if (material->GetTextureCount(aiTextureType_SPECULAR) != 0) {
-				aiString textureFilePath;
-				material->GetTexture(aiTextureType_SPECULAR, 0, &textureFilePath);
-				std::cout << "Specular Texture File Path: " << textureFilePath.C_Str() << std::endl;
-				pMaterial->tex_.speculerFilePath = directoryPath + "/" + textureFilePath.C_Str();
-			}
-			if (material->GetTextureCount(aiTextureType_HEIGHT) != 0 || material->GetTextureCount(aiTextureType_NORMALS) != 0) {
-				aiString textureFilePath;
-				if (material->GetTextureCount(aiTextureType_HEIGHT) != 0) {
-					material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath);
-				}
-				else {
-					material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath);
-				}
-				std::cout << "Normal/Height Texture File Path: " << textureFilePath.C_Str() << std::endl;
-
-				pMaterial->tex_.normalFilePath = directoryPath + "/" + textureFilePath.C_Str();
-			}
+		if (materialIndex >= scene->mNumMaterials) {
+			std::cerr << "Invalid material index: " << materialIndex << std::endl;
+			continue;
 		}
-		modelData.material.push_back(std::move(pMaterial));
+
+		aiMaterial* material = scene->mMaterials[materialIndex];
+
+		// メッシュに対するマテリアル作成
+		std::unique_ptr<Material> pMaterial = std::make_unique<Material>();
+		pMaterial->Initialize(dxCommon);
+
+		// Diffuse
+		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+			aiString textureFilePath;
+			material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
+			std::cout << "Mesh[" << meshIndex << "] Diffuse: " << textureFilePath.C_Str() << std::endl;
+			pMaterial->tex_.diffuseFilePath = directoryPath + "/" + textureFilePath.C_Str();
+		}
+
+		// Specular
+		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
+			aiString textureFilePath;
+			material->GetTexture(aiTextureType_SPECULAR, 0, &textureFilePath);
+			std::cout << "Mesh[" << meshIndex << "] Specular: " << textureFilePath.C_Str() << std::endl;
+			pMaterial->tex_.speculerFilePath = directoryPath + "/" + textureFilePath.C_Str();
+		}
+
+		// Normal / Height
+		if (material->GetTextureCount(aiTextureType_NORMALS) > 0 || material->GetTextureCount(aiTextureType_HEIGHT) > 0) {
+			aiString textureFilePath;
+			if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
+				material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath);
+			}
+			else {
+				material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath);
+			}
+			std::cout << "Mesh[" << meshIndex << "] Normal/Height: " << textureFilePath.C_Str() << std::endl;
+			pMaterial->tex_.normalFilePath = directoryPath + "/" + textureFilePath.C_Str();
+		}
+
+		// モデルデータ内のメッシュへマテリアルを割り当て
+		assert(meshIndex < modelData.mesh.size());
+		modelData.mesh[meshIndex]->material = std::move(pMaterial);
 	}
 }
 

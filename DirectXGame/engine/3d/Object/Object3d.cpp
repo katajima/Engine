@@ -95,7 +95,10 @@ void Object3d::Update()
 		// モデルが存在する場合
 		if (model) {
 			localMatrix = model->modelData.rootNode.localMatrix;
-			model->modelData.material[0]->GPUData();
+
+			for (auto& mesh : model->modelData.mesh) {
+				mesh->material->GPUData();
+			}
 		}
 
 		// トランスフォームデータ
@@ -121,7 +124,9 @@ void Object3d::Update()
 			else {
 				localMatrix = model->modelData.rootNode.localMatrix;
 			}
-			model->modelData.material[0]->GPUData();
+			for (auto& mesh : model->modelData.mesh) {
+				mesh->material->GPUData();
+			}
 		}
 
 		// トランスフォームデータ
@@ -151,7 +156,9 @@ void Object3d::Update()
 			else {
 				localMatrix = model->modelData.rootNode.localMatrix;
 			}
-			model->modelData.material[0]->GPUData();
+			for (auto& mesh : model->modelData.mesh) {
+				mesh->material->GPUData();
+			}
 		}
 
 		// トランスフォームデータ
