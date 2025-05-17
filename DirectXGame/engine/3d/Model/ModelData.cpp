@@ -1,7 +1,7 @@
 #include "ModelData.h"
-
 #include "ModelCommon.h"
 
+#pragma region Laod
 
 // メッシュ読み込み
 void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
@@ -17,7 +17,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 
 		pMesh->meshIndex = meshIndex;
 
-		Vector3 min = { 10000,10000,10000};
+		Vector3 min = { 10000,10000,10000 };
 		Vector3 max = { -10000,-10000,-10000 };
 		pMesh->vertices.resize(mesh->mNumVertices);
 		pMesh->verticesline.resize(mesh->mNumVertices);
@@ -51,7 +51,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 				pMesh->vertices[vertexIndex].tangent = {};
 			}
 
-			Vector3 offset = modelData.meshOffsetMap[(scene->mNumMeshes -1) - meshIndex];
+			Vector3 offset = modelData.meshOffsetMap[(scene->mNumMeshes - 1) - meshIndex];
 
 			pMesh->vertices[vertexIndex].position = { -position.x + offset.x ,position.y + offset.y,position.z + offset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };
@@ -59,7 +59,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 				pMesh->vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
 			}
 			else {
-				pMesh->vertices[vertexIndex].texcoord = {0.5f,0.5f};
+				pMesh->vertices[vertexIndex].texcoord = { 0.5f,0.5f };
 			}
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
@@ -76,7 +76,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
 			aiFace& face = mesh->mFaces[faceIndex];
 			assert(face.mNumIndices == 3); // 三角形のみサポート
-			
+
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
 				pMesh->indices.push_back(vertexIndex);
@@ -199,6 +199,7 @@ void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectX
 	}
 }
 
+// アニメーション読み込み
 void LoadModel::LoadAnimation(ModelData& modelData, const std::string& directoryPath, const std::string& filename)
 {
 	//Animation animation; // 今回作るアニメーション
@@ -252,6 +253,7 @@ void LoadModel::LoadAnimation(ModelData& modelData, const std::string& directory
 	}
 }
 
+// ノード読み込み
 Node LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& meshOffsetMap)
 {
 	Node result;
@@ -282,6 +284,10 @@ Node LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& me
 	}
 	return result;
 }
+
+#pragma endregion // 読み込み系
+
+#pragma region Create
 
 void CreateModel::CreateMeshLine(ModelData& modelData, const std::vector<uint32_t>& indices)
 {
@@ -450,3 +456,44 @@ int32_t CreateModel::CreateJoint(const Node& node, const std::optional<int32_t>&
 	// 自身のIndexを返す
 	return joint.index;
 }
+
+#pragma endregion // 生成系
+
+#pragma region Debug
+
+void DebugModel::ImguiSkin(ModelData& modelData)
+{
+	if (ImGui::CollapsingHeader("SkinnigData")) {
+		int index = static_cast<int>(modelData.skinning.influencesIndex);
+		ImGui::InputInt("influencesIndex", &index);
+		index = static_cast<int>(modelData.skinning.wellSrvIndex);
+		ImGui::InputInt("wellSrvIndex", &index);
+		index = static_cast<int>(modelData.skinning.inputVerticesIndex);
+		ImGui::InputInt("inputVerticesIndex", &index);
+		index = static_cast<int>(modelData.skinning.outputVerticesUavIndex);
+		ImGui::InputInt("outputVerticesUavIndex", &index);
+		index = static_cast<int>(modelData.skinCluster.skinningInfomationDeta->numVertices);
+		ImGui::InputInt("numVertices", &index);
+	}
+}
+
+void DebugModel::ImguiModel(ModelData& modelData)
+{
+	if (ImGui::CollapsingHeader("Modeldata")) {
+		if (ImGui::TreeNode("rootNode")) {
+			for (size_t i = 0; i < modelData.rootNode.children.size(); ++i) {
+				std::string name = "children" + std::to_string(i);
+				if (ImGui::TreeNode(name.c_str())) {
+					ImGui::DragFloat3("translate", &modelData.rootNode.children[i].transform.translate.x);
+					ImGui::DragFloat3("rotate", &modelData.rootNode.children[i].transform.rotate.x);
+					ImGui::DragFloat3("scale", &modelData.rootNode.children[i].transform.scale.x);
+
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+	}
+}
+
+#pragma endregion // デバッグ系

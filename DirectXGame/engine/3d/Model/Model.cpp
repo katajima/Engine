@@ -30,6 +30,7 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	// メッシュ状にライン生成
 	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->indices);
 
+	// アニメーションがあるなら
 	if (modelData.isAmimetion) {
 		;
 		// アニメーション生成

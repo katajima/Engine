@@ -330,42 +330,12 @@ bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3&
 
 void Object3d::DebugImguiModel()
 {
-	if (ImGui::CollapsingHeader("Modeldata")) {
-		if (ImGui::TreeNode("rootNode")) {
-			for (size_t i = 0; i < model->modelData.rootNode.children.size(); ++i) {
-				std::string name = "children" + std::to_string(i);
-				if (ImGui::TreeNode(name.c_str())) {
-					ImGui::DragFloat3("translate", &model->modelData.rootNode.children[i].transform.translate.x);
-					ImGui::DragFloat3("rotate", &model->modelData.rootNode.children[i].transform.rotate.x);
-					ImGui::DragFloat3("scale", &model->modelData.rootNode.children[i].transform.scale.x);
-
-					ImGui::TreePop();
-				}
-			}
-			ImGui::TreePop();
-		}
-	}
+	DebugModel::ImguiModel(model->modelData);
 }
 
 void Object3d::DebugImguiSkin()
 {
-
-	
-	if (ImGui::CollapsingHeader("SkinnigData")) {
-		int index = static_cast<int>(model->modelData.skinning.influencesIndex);
-		ImGui::InputInt("influencesIndex", &index);
-		index = static_cast<int>(model->modelData.skinning.wellSrvIndex);
-		ImGui::InputInt("wellSrvIndex", &index);
-		index = static_cast<int>(model->modelData.skinning.inputVerticesIndex);
-		ImGui::InputInt("inputVerticesIndex", &index);
-		index = static_cast<int>(model->modelData.skinning.outputVerticesUavIndex);
-		ImGui::InputInt("outputVerticesUavIndex", &index);
-		index = static_cast<int>(model->modelData.skinCluster.skinningInfomationDeta->numVertices);
-		ImGui::InputInt("numVertices", &index);
-
-		
-
-	}
+	DebugModel::ImguiSkin(model->modelData);
 }
 
 void Object3d::DrawSetting()

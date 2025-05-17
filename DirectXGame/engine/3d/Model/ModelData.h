@@ -89,6 +89,14 @@ namespace CreateModel {
 	int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 }
 
+namespace DebugModel {
+
+	// スキニングデータImguiで表示
+	void ImguiSkin(ModelData& modelData);
+
+	void ImguiModel(ModelData& modelData);
+
+}
 
 
 
