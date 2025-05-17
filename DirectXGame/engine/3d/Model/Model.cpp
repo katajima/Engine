@@ -42,7 +42,7 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 		CreateModel::CreateSkinCluster(modelData, modelCommon_);
 
 		// 
-		ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
+		Animetion::ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
 	}
 
 	// マテリアル読み込み

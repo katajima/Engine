@@ -116,9 +116,9 @@ void Object3d::Update()
 
 				// 単一のジョイントの場合
 				const NodeAnimation& rootNodeAnimation = model->modelData.animation.nodeAnimations[model->modelData.rootNode.name];
-				Vector3 translate = CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
-				Quaternion rotate = CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
-				Vector3 scale = CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
+				Vector3 translate = Animetion::CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
+				Quaternion rotate = Animetion::CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
+				Vector3 scale = Animetion::CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
 				localMatrix = MakeAffineMatrix(scale, rotate, translate);
 			}
 			else {
@@ -144,14 +144,14 @@ void Object3d::Update()
 				model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
 				localMatrix = model->modelData.skeleton.joints[0].skeletonSpaceMatrix;
 
-				ApplyAnimation(model->modelData.skeleton, model->modelData.animation, model->modelData.animationTime);
+				Animetion::ApplyAnimation(model->modelData.skeleton, model->modelData.animation, model->modelData.animationTime);
 				// スケルトンの更新
-				UpdateSkeleton(model->modelData.skeleton);
+				Animetion::UpdateSkeleton(model->modelData.skeleton);
 
 				// スキニング更新
-				UpdateSkinCluster(model->modelData.skinCluster, model->modelData.skeleton);
+				Animetion::UpdateSkinCluster(model->modelData.skinCluster, model->modelData.skeleton);
 
-				DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->modelData.skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
+				Animetion::DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->modelData.skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
 			}
 			else {
 				localMatrix = model->modelData.rootNode.localMatrix;

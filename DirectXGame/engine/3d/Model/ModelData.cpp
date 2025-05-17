@@ -319,7 +319,7 @@ void CreateModel::CreateSkeleton(ModelData& modelData)
 		modelData.skeleton.jointMap.emplace(joint.name, joint.index);
 	}
 
-	UpdateSkeleton(modelData.skeleton);
+	Animetion::UpdateSkeleton(modelData.skeleton);
 }
 
 void CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon)
