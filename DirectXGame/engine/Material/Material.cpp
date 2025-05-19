@@ -1,18 +1,14 @@
 #include "Material.h"
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
-
-
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 void Material::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
-	// マテリアル
-	resource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Material::DataGPU));
-	// 書き込むためのアドレスを取得
-	resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
+	cbResource_.CreateBuffer(dxCommon_);
 
 	transform.scale = { 1.0f,1.0f,1.0f };
 	transform.translate = { 0,0,0 };
@@ -31,7 +27,7 @@ void Material::Initialize(DirectXCommon* dxcommon)
 
 void Material::GetCommandListMaterial(int index)
 {
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, resource_->GetGPUVirtualAddress());
+	cbResource_.SetGraphicsRootConstantBufferView(0);
 }
 
 void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex, int environmentIndex)
@@ -57,24 +53,25 @@ void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int spec
 
 void Material::GPUData()
 {
+	
 
-	data_->environmentCoefficient = environmentCoefficient_;
-	data_->enableLighting = enableLighting_;
-	data_->shininess = shininess_;
-	data_->useLig = useLig_;
+	cbResource_.Data()->environmentCoefficient = environmentCoefficient_;
+	cbResource_.Data()->enableLighting = enableLighting_;
+	cbResource_.Data()->shininess = shininess_;
+	cbResource_.Data()->useLig = useLig_;
 
 	if (useNormalMap_) {
-		data_->useNormalMap = useNormalMap_;
+		cbResource_.Data()->useNormalMap = useNormalMap_;
 	}
 	if (useSpeculerMap_) {
-		data_->useSpeculerMap = useSpeculerMap_;
+		cbResource_.Data()->useSpeculerMap = useSpeculerMap_;
 	}
 
-	data_->alphaClipping = alphaClipping_;
+	cbResource_.Data()->alphaClipping = alphaClipping_;
 
-	data_->color = color;
+	cbResource_.Data()->color = color;
 
-	data_->uvTransform = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+	cbResource_.Data()->uvTransform = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 }
 
 void Material::LoadTex()

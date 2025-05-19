@@ -1,7 +1,7 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Color/Color.h"
+#include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
 #include "vector"
 #include<wrl.h>
@@ -12,6 +12,7 @@ using namespace Microsoft::WRL;
 #include<d3d12.h>
 #include<dxgi1_6.h>
 
+class DirectXCommon;
 class Material
 {
 public:
@@ -73,9 +74,8 @@ private:
 	};
 	DirectXCommon* dxCommon_ = nullptr;
 
-	Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
-	DataGPU* data_;
 
+	ConstantBuffer<Material::DataGPU> cbResource_;
 
 	// テクスチャ数
 	uint32_t texDiffuseNum = 0;

@@ -3,7 +3,7 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
-
+#include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
 #include<d3d12.h>
 #include<dxgi1_6.h>
@@ -40,20 +40,17 @@ public:
 	// データ
 	void GetCommandList(int index);
 
-	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister);
-
 	struct TransfomationMatrix
 	{
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 		Matrix4x4 worldInverseTranspose;
 	};
-	TransfomationMatrix* data_;
-
+	
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 
-	Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
+	ConstantBuffer<TransfomationMatrix> cbResource_;
 
 };
 
