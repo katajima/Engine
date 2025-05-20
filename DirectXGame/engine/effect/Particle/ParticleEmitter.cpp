@@ -43,17 +43,12 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	emitter_.corner.center = 0;
 	emitter_.corner.segment = 3;
 
-	isLifeTimeScale_ = false;	// スケール
-	isLifeTimeAlpha_ = false;	// 透明度
-	isLifeTimeVelocity = false;// 速度
-
+	isFlag.isLifeTimeScale_ = false;	// スケール
+	isFlag.isLifeTimeVelocity = false;// 速度
 	enableLighting_ = false;
-
-	isGravity = false; // 重力
-	isWind = false;  // 風
-
-	usebillboard = true;// ビルボード
-	isAlpha = false;    // 透明度
+	isFlag.isGravity = false; // 重力
+	isFlag.usebillboard = true;// ビルボード
+	isFlag.isAlpha = false;    // 透明度
 
 	isEmit = true;
 
@@ -184,12 +179,8 @@ void ParticleEmitter::Update()
 void ParticleEmitter::Emit()
 {
 	if (isEmit) {
-		particleManager_->GetParticleGroups(particleName_).usebillboard = usebillboard; // ビルボード
-		particleManager_->GetParticleGroups(particleName_).isAlpha = isAlpha; // 透明度
-		particleManager_->GetParticleGroups(particleName_).isGravity = isGravity; // 重力
-		particleManager_->GetParticleGroups(particleName_).isLifeTimeScale_ = isLifeTimeScale_; // 重力
-		particleManager_->GetParticleGroups(particleName_).isRotateVelocity = isRotateVelocity; // 回転速度
-		particleManager_->GetParticleGroups(particleName_).isBounce = isBounce; // 回転速度
+		particleManager_->GetParticleGroups(particleName_).isFlag = isFlag;
+
 		particleManager_->GetParticleGroups(particleName_).material->alphaClipping_ = alphaClipping_; // αクリッピング
 		particleManager_->GetParticleGroups(particleName_).material->enableLighting_ = enableLighting_; // aライト
 		particleManager_->GetParticleGroups(particleName_).topBottom = topBottom_; // 拡縮方向
@@ -211,11 +202,11 @@ void ParticleEmitter::SetParent(WorldTransform& parent)
 
 void ParticleEmitter::SetIsAll(bool billboard, bool alpha, bool gravity, bool isLifeTimeScale, bool rotateVelocity)
 {
-	usebillboard = billboard;
-	isAlpha = alpha;
-	isGravity = gravity;
-	isLifeTimeScale_ = isLifeTimeScale;
-	isRotateVelocity = rotateVelocity;
+	isFlag.usebillboard = billboard;
+	isFlag.isAlpha = alpha;
+	isFlag.isGravity = gravity;
+	isFlag.isLifeTimeScale_ = isLifeTimeScale;
+	isFlag.isRotateVelocity = rotateVelocity;
 }
 
 void ParticleEmitter::DrawEmitterLine()
@@ -314,4 +305,3 @@ void ParticleEmitter::EmitMinMax()
 		emitter_.lifeTime.max = 0;
 	}
 }
-

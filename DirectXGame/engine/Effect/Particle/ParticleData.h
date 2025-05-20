@@ -27,7 +27,7 @@ struct Particle
 
 	Transform strtTransform;
 	Vector3 rotateVelocity;
-	Matrix4x4 pre;
+	//Matrix4x4 pre;
 };
 
 template<typename T>
@@ -69,6 +69,20 @@ namespace ParticleData {
 		MODE_SUBTRACT,
 		MODE_MUlLIPLY,
 	};
+
+
+	struct IsFlag
+	{
+		bool usebillboard = true;								// ビルボードするか
+		bool isAlpha = false;									// 透明にしていくか
+		bool isLine = true;										// ライン描画するか
+		bool isGravity = false;									// 重力を有効にするか
+		bool isLifeTimeScale_ = false;							// ちっちゃくしていくか
+		bool isRotateVelocity = false;							// 回転するか
+		bool isLifeTimeVelocity = false;						// 速度
+		bool isBounce = false;									// 跳ねるか
+	};
+
 }
 
 
@@ -102,13 +116,7 @@ struct ParticleGroup
 	uint32_t instanceCount;									// インスタンス数
 	ModelMesh* mesh;										// メッシュ
 	Emiter emiter;											// エミッター
-	bool usebillboard = true;								// ビルボードするか
-	bool isAlpha = false;									// 透明にしていくか
-	bool isLine = true;										// ライン描画するか
-	bool isGravity = false;									// 重力を有効にするか
-	bool isLifeTimeScale_ = false;							// ちっちゃくしていくか
-	bool isRotateVelocity = false;							// 回転するか
-	bool isBounce = false;									// 跳ねるか
+	ParticleData::IsFlag isFlag;
 	ParticleData::EmitType emitType = ParticleData::EmitType::kRandom;		// エミッターでの出方
 	ParticleData::TopBottom topBottom = ParticleData::TopBottom::kBottom;	// 
 	ParticleData::RasterizerType rasteType;									// ラスタライザタイプ

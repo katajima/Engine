@@ -114,30 +114,30 @@ void ParticleManager::Update()
 
 				if (group.instanceCount < kNumMaxInstance) {
 
-					if (group.isGravity) {
+					if (group.isFlag.isGravity) {
 						particleIterator->velocity.y -= kGravitationalAcceleration * deltaTime;
 					}
 
-					if (group.isLifeTimeScale_) {
+					if (group.isFlag.isLifeTimeScale_) {
 						float t = particleIterator->currentTime / particleIterator->lifeTime;
 						float scaling = (group.topBottom == ParticleData::TopBottom::kBottom) ? (1.0f - t) : t;
 						particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
 					}
 
-					if (group.isRotateVelocity) {
+					if (group.isFlag.isRotateVelocity) {
 						particleIterator->transform.rotate += particleIterator->rotateVelocity;
 					}
 
 					particleIterator->transform.translate += particleIterator->velocity * deltaTime;
 					particleIterator->currentTime += deltaTime;
 
-					if (group.isBounce && particleIterator->transform.translate.y < 0) {
+					if (group.isFlag.isBounce && particleIterator->transform.translate.y < 0) {
 						particleIterator->transform.translate.y = 0;
 						particleIterator->velocity = Reflect(particleIterator->velocity, { 0,1,0 }, 0.85f);
 					}
 
 					Matrix4x4 worldMatrix;
-					if (group.usebillboard) {
+					if (group.isFlag.usebillboard) {
 						worldMatrix = Multiply(Multiply(MakeScaleMatrix(particleIterator->transform.scale), billboardMatrix),
 							MakeTranslateMatrix(particleIterator->transform.translate));
 					}
@@ -153,9 +153,8 @@ void ParticleManager::Update()
 					group.sbParticleResource_.Data()[group.instanceCount].World = worldMatrix;
 					group.sbParticleResource_.Data()[group.instanceCount].WVP = worldViewProjectionMatrix;
 					group.sbParticleResource_.Data()[group.instanceCount].color = particleIterator->color;
-					particleIterator->pre = worldMatrix;
-
-					if (group.isAlpha) {
+					
+					if (group.isFlag.isAlpha) {
 						float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
 						group.sbParticleResource_.Data()[group.instanceCount].color.w = alpha;
 					}
