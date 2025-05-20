@@ -270,69 +270,6 @@ void Object3d::Draw()
 
 }
 
-
-Vector2 Object3d::GetScreenPosition()
-{
-	Vector3 wPos = worldtransform_.worldMat_.GetWorldPosition();
-
-	// カメラのビュープロジェクション行列を取得
-	Matrix4x4 matViewProjection = Multiply(camera->GetViewMatrix(), camera->GetProjectionMatrix());
-
-	// ビューポート行列
-	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, 1280, 720, 0, 1);
-
-	// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
-	if (!IsInFrustum(matViewProjection, wPos)) {
-		return Vector2{ -100, -100 }; // 視錐台外にある場合、無効なスクリーン座標を返す
-	}
-
-	// ワールド座標をクリップ空間座標へ変換
-	Vector4 clipSpacePos = Transforms(Vector4(wPos.x, wPos.y, wPos.z, 1.0f), matViewProjection);
-
-	// 透視除算 (NDC へ変換)
-	if (clipSpacePos.w == 0.0f) {
-		return Vector2{ -100, -100 }; // 透視除算エラー
-	}
-	Vector3 ndcPos = {
-		clipSpacePos.x / clipSpacePos.w,
-		clipSpacePos.y / clipSpacePos.w,
-		clipSpacePos.z / clipSpacePos.w
-	};
-
-	// NDC → スクリーン座標変換
-	Vector4 screenPos = Transforms(Vector4(ndcPos.x, ndcPos.y, ndcPos.z, 1.0f), matViewport);
-
-	return Vector2{ screenPos.x, screenPos.y };
-}
-
-
-bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position)
-{
-	// クリップスペース座標を取得
-	Vector4 clipSpacePosition = Transforms(Vector4(position.x, position.y, position.z, 1.0f), viewProjectionMatrix);
-
-	// w が負の場合、カメラの後ろにあるため視錐台外
-	if (clipSpacePosition.w <= 0.0f) {
-		return false;
-	}
-
-	// 視錐台内にあるかチェック
-	if (clipSpacePosition.x < -clipSpacePosition.w || clipSpacePosition.x > clipSpacePosition.w ||
-		clipSpacePosition.y < -clipSpacePosition.w || clipSpacePosition.y > clipSpacePosition.w ||
-		clipSpacePosition.z < 0 || clipSpacePosition.z > clipSpacePosition.w)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-
-void Object3d::DebugImguiModel()
-{
-	DebugModel::ImguiModel(model->modelData);
-}
-
 void Object3d::DebugImguiSkin()
 {
 	DebugModel::ImguiSkin(model->modelData);
@@ -471,9 +408,74 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 
 #pragma endregion // 描画系
 
+#pragma region Other
+
+Vector2 Object3d::GetScreenPosition()
+{
+	Vector3 wPos = worldtransform_.worldMat_.GetWorldPosition();
+
+	// カメラのビュープロジェクション行列を取得
+	Matrix4x4 matViewProjection = Multiply(camera->GetViewMatrix(), camera->GetProjectionMatrix());
+
+	// ビューポート行列
+	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, 1280, 720, 0, 1);
+
+	// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
+	if (!IsInFrustum(matViewProjection, wPos)) {
+		return Vector2{ -100, -100 }; // 視錐台外にある場合、無効なスクリーン座標を返す
+	}
+
+	// ワールド座標をクリップ空間座標へ変換
+	Vector4 clipSpacePos = Transforms(Vector4(wPos.x, wPos.y, wPos.z, 1.0f), matViewProjection);
+
+	// 透視除算 (NDC へ変換)
+	if (clipSpacePos.w == 0.0f) {
+		return Vector2{ -100, -100 }; // 透視除算エラー
+	}
+	Vector3 ndcPos = {
+		clipSpacePos.x / clipSpacePos.w,
+		clipSpacePos.y / clipSpacePos.w,
+		clipSpacePos.z / clipSpacePos.w
+	};
+
+	// NDC → スクリーン座標変換
+	Vector4 screenPos = Transforms(Vector4(ndcPos.x, ndcPos.y, ndcPos.z, 1.0f), matViewport);
+
+	return Vector2{ screenPos.x, screenPos.y };
+}
+
+bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position)
+{
+	// クリップスペース座標を取得
+	Vector4 clipSpacePosition = Transforms(Vector4(position.x, position.y, position.z, 1.0f), viewProjectionMatrix);
+
+	// w が負の場合、カメラの後ろにあるため視錐台外
+	if (clipSpacePosition.w <= 0.0f) {
+		return false;
+	}
+
+	// 視錐台内にあるかチェック
+	if (clipSpacePosition.x < -clipSpacePosition.w || clipSpacePosition.x > clipSpacePosition.w ||
+		clipSpacePosition.y < -clipSpacePosition.w || clipSpacePosition.y > clipSpacePosition.w ||
+		clipSpacePosition.z < 0 || clipSpacePosition.z > clipSpacePosition.w)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void Object3d::DebugImguiModel()
+{
+	DebugModel::ImguiModel(model->modelData);
+}
+
 void Object3d::SetModel(const std::string& filePath)
 {
 	//モデルを検索してセット
 
 	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
 }
+
+#pragma endregion // その他
+
