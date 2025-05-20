@@ -304,7 +304,7 @@ void NormalEnemy::InitParticle()
 
 
 	effectEmit_ = std::make_unique<ParticleEmitter>();
-	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleData::SpawnType::kPoint);
 	effectEmit_->GetFrequency() = 0.0f;
 	effectEmit_->SetCount(1);
 	effectEmit_->SetParent(object_->worldtransform_);

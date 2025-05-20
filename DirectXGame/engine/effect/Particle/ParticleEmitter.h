@@ -16,28 +16,28 @@ class ParticleEmitter
 public:
 	// 
 
-	enum class EmitSpawnShapeType // 出現形状
-	{
-		kPoint,
-		kAABB,		// AABB
-		kOBB,		// OBB
-		kSphere,	// Sphere
+	//enum class EmitSpawnShapeType // 出現形状
+	//{
+	//	kPoint,
+	//	kAABB,		// AABB
+	//	kOBB,		// OBB
+	//	kSphere,	// Sphere
 
-		//////// ライン
+	//	//////// ライン
 
-		kSegmentLine,		// セグメントライン
-		kCornerLine,		// こーなーライン
-
-
+	//	kSegmentLine,		// セグメントライン
+	//	kCornerLine,		// こーなーライン
 
 
-		kSpline,			// スプライン
-	};
+
+
+	//	kSpline,			// スプライン
+	//};
 
 
 
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
+	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, ParticleData::SpawnType spawnType = ParticleData::SpawnType::kAABB);
 
 	void Update();
 
@@ -116,7 +116,7 @@ private: // エミッタ可視化
 private:
 	ParticleData::EmitType emitType_ = ParticleData::EmitType::kRandom; // 出現方法
 	ParticleData::TopBottom topBottom_ = ParticleData::TopBottom::kBottom; // 拡縮
-	EmitSpawnShapeType spawnShapeType_ = EmitSpawnShapeType::kAABB; // 出現形状
+	ParticleData::SpawnType spawnShapeType_ = ParticleData::SpawnType::kAABB; // 出現形状
 
 private:
 	bool isLifeTimeScale_ = false;	// スケール

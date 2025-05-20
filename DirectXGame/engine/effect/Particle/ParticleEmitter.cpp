@@ -5,13 +5,15 @@
 #include "DirectXGame/engine/Line/LineCommon.h"
 
 
-void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitSpawnShapeType spawnType)
+void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, ParticleData::SpawnType spawnType)
 {
 	particleManager_ = particleManager;
 
 	lineCommon_ = particleManager_->GetLineCommon();
 
 	emitter_.controlPoints.clear(); // 初期化
+
+
 
 	spawnShapeType_ = spawnType;
 	emitType_ = ParticleData::EmitType::kRandom;
@@ -196,23 +198,8 @@ void ParticleEmitter::Emit()
 		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.translate = uvTransformVeloctiy_.translate; // UV
 
 		if (emitType_ == ParticleData::EmitType::kRandom) {
-			particleManager_->GetParticleGroups(particleName_).emiter = emitter_;
-			
-			if (spawnShapeType_ == EmitSpawnShapeType::kPoint) {
-				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kPoint);
-			}
-			else if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
-				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kAABB);
-			}
-			else if (spawnShapeType_ == EmitSpawnShapeType::kSegmentLine) {
-				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kSegmentLine);
-			}
-			else if (spawnShapeType_ == EmitSpawnShapeType::kCornerLine) {
-				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kCornerLine);
-			}
-			else if (spawnShapeType_ == EmitSpawnShapeType::kSpline){
-				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kSpline);
-			}
+			particleManager_->GetParticleGroups(particleName_).emiter = emitter_;			
+			particleManager_->Emit(particleName_, emitType_, spawnShapeType_);
 		}
 	}
 }
@@ -235,20 +222,20 @@ void ParticleEmitter::DrawEmitterLine()
 {
 	switch (spawnShapeType_)
 	{
-	case ParticleEmitter::EmitSpawnShapeType::kAABB:
+	case ParticleData::SpawnType::kAABB:
 		lineCommon_->AddLineAABB({ emitter_.renge.min,emitter_.renge.max }, emitter_.worldtransform.translate_);
 		break;
-	case ParticleEmitter::EmitSpawnShapeType::kOBB:
+	case ParticleData::SpawnType::kOBB:
 		break;
-	case ParticleEmitter::EmitSpawnShapeType::kSphere:
+	case ParticleData::SpawnType::kSphere:
 		break;
-	case ParticleEmitter::EmitSpawnShapeType::kSegmentLine:
+	case ParticleData::SpawnType::kSegmentLine:
 		lineCommon_->AddLine(emitter_.renge.min + emitter_.worldtransform.translate_, emitter_.renge.max + emitter_.worldtransform.translate_, { 1,1,1,1 });
 		break;
-	case ParticleEmitter::EmitSpawnShapeType::kCornerLine:
+	case ParticleData::SpawnType::kCornerLine:
 		lineCommon_->AddLineCorner(emitter_.corner, emitter_.worldtransform);
 		break;
-	case ParticleEmitter::EmitSpawnShapeType::kSpline:
+	case ParticleData::SpawnType::kSpline:
 		lineCommon_->AddSpline(emitter_.controlPoints,emitter_.worldtransform);
 		break;
 	default:

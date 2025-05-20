@@ -438,7 +438,7 @@ void TestScene::InitializeParticle()
 	
 
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleEmitter::EmitSpawnShapeType::kSpline);
+	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleData::SpawnType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
@@ -477,7 +477,7 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
 
 	primitvPlane_ = std::make_unique<ParticleEmitter>();
-	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleData::SpawnType::kPoint);
 	primitvPlane_->GetFrequency() = 0.025f;
 	primitvPlane_->SetCount(40);
 	primitvPlane_->SetPos({ 0,50,0 });
@@ -496,7 +496,7 @@ void TestScene::InitializeParticle()
 
 
 	primitvPlaneSmoke_ = std::make_unique<ParticleEmitter>();
-	primitvPlaneSmoke_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"smokePlane01", "smokePlane01", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlaneSmoke_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"smokePlane01", "smokePlane01", ParticleData::SpawnType::kPoint);
 	primitvPlaneSmoke_->GetFrequency() = 0.025f;
 	primitvPlaneSmoke_->SetCount(3);
 	primitvPlaneSmoke_->SetPos({ 0,50,0 });

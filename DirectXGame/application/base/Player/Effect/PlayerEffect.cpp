@@ -11,7 +11,7 @@ void PlayerEffect::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3D
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	dashEmitter_ = std::make_unique <ParticleEmitter>();
-	dashEmitter_->Initialize(particleManager, "dash", "dashEmit", ParticleEmitter::EmitSpawnShapeType::kCornerLine);
+	dashEmitter_->Initialize(particleManager, "dash", "dashEmit", ParticleData::SpawnType::kCornerLine);
 	dashEmitter_->GetFrequency() = 0.05f;
 	dashEmitter_->SetCount(5);
 	dashEmitter_->SetLifeTimeMinMax(0.1f, 0.1f);

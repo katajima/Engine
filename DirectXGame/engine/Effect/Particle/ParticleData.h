@@ -30,6 +30,13 @@ struct Particle
 	Matrix4x4 pre;
 };
 
+template<typename T>
+struct MaxMin
+{
+	T min;
+	T max;
+};
+
 namespace ParticleData {
 	enum class SpawnType // 出現形状
 	{
@@ -64,12 +71,7 @@ namespace ParticleData {
 	};
 }
 
-template<typename T>
-struct MaxMin
-{
-	T min;
-	T max;
-};
+
 // エミッター構造体
 struct Emiter
 {
@@ -81,16 +83,11 @@ struct Emiter
 	MaxMin<Vector3> rotateVelocity;// 回転 (floatの範囲)
 	MaxMin<float> lifeTime;    // 生存時間 (floatの範囲)
 	MaxMin<Vector3> velocity;  // 速度 (Vector3の範囲)
-
 	CornerSegment corner;
 	float sphereRad;
 	std::vector<Vector3> controlPoints; // 各ポジション
-
 	WorldTransform worldtransform;
 	bool isEmit = false;
-
-
-
 	int count;
 };
 
