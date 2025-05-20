@@ -596,7 +596,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Fence\Fence.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.h" />
-    <ClInclude Include="DirectXGame\engine\DirectX\Resource\BufferResource.h" />
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\IndexBufferResource.h" />
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\VertexBufferResource.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\ConstantBuffer.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\StructuredBuffer.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.h" />

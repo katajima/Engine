@@ -32,13 +32,18 @@ public:
 	}
 
 	Type* Data() const { return data_; };
-	
+
 private:
 	DirectXCommon* dxCommon_;
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
 	Type* data_;
 };
+
+
+
+
+
 
 
 

@@ -944,7 +944,7 @@
     <ClInclude Include="DirectXGame\engine\Mesh\SkyBoxMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Resource\BufferResource.h">
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\VertexBufferResource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\ConstantBuffer.h">
@@ -954,6 +954,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\IndexBufferResource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

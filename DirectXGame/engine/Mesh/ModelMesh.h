@@ -1,6 +1,9 @@
 #pragma once
 #include "DirectXGame/engine/Mesh/Base/BaseMesh.h"
 
+#include "DirectXGame/engine/DirectX/Resource/VertexBufferResource.h"
+#include "DirectXGame/engine/DirectX/Resource/IndexBufferResource.h"
+
 class Material;
 class ModelMesh : public BaseMesh {
 public:
@@ -8,13 +11,27 @@ public:
 
 	void UpdateVertexBuffer();
 
+	void UpdateIndexBuffer();
+
 	void Clear();
+
+
+	void GetCommandList() ;
+
+	void GetCommandListVertex(const D3D12_VERTEX_BUFFER_VIEW& vbv);
+
+	void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv);
+	void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv, const D3D12_VERTEX_BUFFER_VIEW& vbv2);
+
+	Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return vbvResorce_.GetVertexResource(); };
+
+	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vbvResorce_.GetVertexBufferView(); }
 public:
 	std::vector<VertexData> vertices;
 	std::vector<LineVertexData> verticesline;
 
 	std::unique_ptr<Material> material;		// マテリアルデータ
 private:
-	// バッファリソース内のデータを指すポインタ
-	VertexData* vertexData = nullptr;
+	VertexBuffer<VertexData> vbvResorce_;
+	IndexBuffer<uint32_t> indexResorce_;
 };

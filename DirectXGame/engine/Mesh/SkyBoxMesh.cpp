@@ -6,25 +6,17 @@ void SkyBoxMesh::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
-	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SkyBoxVertexData) * verticesskyBox.size());
+	vbvResorce_.CreateBufferView(dxCommon_, verticesskyBox, verticesskyBox.size());
 
-	// リソースの先頭のアドレスを作成する
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	vertexBufferView.SizeInBytes = UINT(sizeof(SkyBoxVertexData) * verticesskyBox.size());
-	vertexBufferView.StrideInBytes = sizeof(SkyBoxVertexData);
+	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
 
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&skyBoxVertexData));
-	std::memcpy(skyBoxVertexData, verticesskyBox.data(), vertexBufferView.SizeInBytes);
+}
 
+void SkyBoxMesh::GetCommandList()
+{
+	// 頂点バッファの設定
+	vbvResorce_.IASetVertexBuffers();
 
-	// インデクスリソース
-	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
+	indexResorce_.IASetIndexBuffer();
 
-	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
-	indexBufferView.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマット
-
-	indexData = nullptr;
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	std::memcpy(indexData, indices.data(), indexBufferView.SizeInBytes);
 }

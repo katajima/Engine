@@ -5,6 +5,7 @@
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 #include "DirectXGame/engine/struct/VertexDeta.h"
 
+
 #include "vector"
 #include<wrl.h>
 #include<d3d12.h>
@@ -24,15 +25,8 @@ public:
 	// 通常用
 	virtual void Initialize(DirectXCommon* dxcommon) = 0;
 
-	void UpdateIndexBuffer();
+	//void UpdateIndexBuffer();
 
-	// コマンドリスト
-	void GetCommandList();
-
-	void GetCommandListVertex(const D3D12_VERTEX_BUFFER_VIEW& vbv);
-
-	void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv);
-	void GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv, const D3D12_VERTEX_BUFFER_VIEW& vbv2);
 public:
 	// 最小位置
 	Vector3 GetMin() const { return min_; }
@@ -50,21 +44,10 @@ public:
 	void SetMax(const Vector3& max) { max_ = max; }
 
 
-	Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return vertexResource; };
-
-	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vertexBufferView; }
+	
 protected:
 	DirectXCommon* dxCommon_;
 
-	// バッファリソース
-	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
-	Microsoft::WRL::ComPtr < ID3D12Resource> indexResource;
-
-	//バッファリソースの使い道を補足するバッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView;
-
-	uint32_t* indexData;
 
 	Vector3 min_;
 	Vector3 max_;

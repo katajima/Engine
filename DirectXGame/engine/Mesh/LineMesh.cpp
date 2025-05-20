@@ -6,68 +6,34 @@ void LineMesh::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
-	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(LineVertexData) * verticesline.size());
+	vbvResorce_.CreateBufferView(dxCommon_, verticesline, verticesline.size());
 
-	// リソースの先頭のアドレスを作成する
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	vertexBufferView.SizeInBytes = UINT(sizeof(LineVertexData) * verticesline.size());
-	vertexBufferView.StrideInBytes = sizeof(LineVertexData);
+	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
 
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&lineVertexData));
-	std::memcpy(lineVertexData, verticesline.data(), vertexBufferView.SizeInBytes);
-
-
-	// インデクスリソース
-	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
-
-	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
-	indexBufferView.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマット
-
-	indexData = nullptr;
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	std::memcpy(indexData, indices.data(), indexBufferView.SizeInBytes);
 }
 
 void LineMesh::UpdateVertexBuffer()
 {
-	if (vertexResource) {
-		// バッファサイズを確認
-		size_t requiredSize = sizeof(LineVertexData) * verticesline.size();
-		D3D12_RESOURCE_DESC desc = vertexResource->GetDesc();
-		if (requiredSize > desc.Width) {
-			// バッファが不足している場合、再割り当て
-			vertexResource.Reset();
+	vbvResorce_.UpdateBuffer(verticesline);
+}
 
-			D3D12_HEAP_PROPERTIES heapProps = {};
-			heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-			D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(requiredSize);
-			HRESULT hr = dxCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
-				&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
-
-			if (FAILED(hr)) {
-				// エラー処理
-				return;
-			}
-
-			// バッファビューの更新
-			vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-			vertexBufferView.SizeInBytes = UINT(requiredSize);
-			vertexBufferView.StrideInBytes = sizeof(LineVertexData);
-		}
-
-		// データのコピー
-		LineVertexData* data;
-		vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&data));
-		memcpy(data, verticesline.data(), requiredSize);
-		vertexResource->Unmap(0, nullptr);
-	}
+void LineMesh::UpdateIndexBuffer()
+{
+	indexResorce_.UpdateBuffer(indices);
 }
 
 void LineMesh::Clear()
 {
 	indices.clear();
 	verticesline.clear();
+}
+
+void LineMesh::GetCommandList()
+{
+	// 頂点バッファの設定
+	vbvResorce_.IASetVertexBuffers();
+
+	indexResorce_.IASetIndexBuffer();
 }
 
 void LineMesh::MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum)

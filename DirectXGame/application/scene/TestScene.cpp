@@ -154,6 +154,8 @@ void TestScene::Draw3D()
 
 		multiy->Draw();
 
+
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		tail.Draw();

@@ -5,63 +5,20 @@ void ModelMesh::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
+	vbvResorce_.CreateBufferView(dxCommon_, vertices, vertices.size());
 
-	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * vertices.size());
+	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
 
-	// リソースの先頭のアドレスを作成する
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * vertices.size());
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, vertices.data(), sizeof(VertexData) * vertices.size());
-
-
-	// インデクスリソース
-	indexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * indices.size());
-
-	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * indices.size());
-	indexBufferView.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマット
-
-	indexData = nullptr;
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	std::memcpy(indexData, indices.data(), sizeof(uint32_t) * indices.size());
 }
 
 void ModelMesh::UpdateVertexBuffer()
 {
-	if (vertexResource) {
-		// バッファサイズを確認
-		size_t requiredSize = sizeof(VertexData) * vertices.size();
-		D3D12_RESOURCE_DESC desc = vertexResource->GetDesc();
-		if (requiredSize > desc.Width) {
-			// バッファが不足している場合、再割り当て
-			vertexResource.Reset();
+	vbvResorce_.UpdateBuffer(vertices);
+}
 
-			D3D12_HEAP_PROPERTIES heapProps = {};
-			heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
-			D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(requiredSize);
-			HRESULT hr = dxCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
-				&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
-
-			if (FAILED(hr)) {
-				// エラー処理
-				return;
-			}
-
-			// バッファビューの更新
-			vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-			vertexBufferView.SizeInBytes = UINT(requiredSize);
-			vertexBufferView.StrideInBytes = sizeof(VertexData);
-		}
-
-		// データのコピー
-		VertexData* data;
-		vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&data));
-		memcpy(data, vertices.data(), requiredSize);
-		vertexResource->Unmap(0, nullptr);
-	}
+void ModelMesh::UpdateIndexBuffer()
+{
+	indexResorce_.UpdateBuffer(indices);
 }
 
 void ModelMesh::Clear()
@@ -69,4 +26,38 @@ void ModelMesh::Clear()
 	indices.clear();
 	vertices.clear();
 	verticesline.clear();
+}
+
+void ModelMesh::GetCommandList()
+{
+	// 頂点バッファの設定
+	vbvResorce_.IASetVertexBuffers();
+
+	indexResorce_.IASetIndexBuffer();
+
+}
+
+void ModelMesh::GetCommandListVertex(const D3D12_VERTEX_BUFFER_VIEW& vbv)
+{
+	vbvResorce_.IASetVertexBuffers(vbv);
+	
+	indexResorce_.IASetIndexBuffer();
+
+}
+
+
+void ModelMesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv)
+{
+
+	vbvResorce_.IASetVertexBuffersSlot(vbv);
+
+	indexResorce_.IASetIndexBuffer();
+
+}
+
+void ModelMesh::GetCommandList(const D3D12_VERTEX_BUFFER_VIEW& vbv, const D3D12_VERTEX_BUFFER_VIEW& vbv2)
+{
+	vbvResorce_.IASetVertexBuffersSlot(vbv,vbv2);
+	indexResorce_.IASetIndexBuffer();
+	
 }
