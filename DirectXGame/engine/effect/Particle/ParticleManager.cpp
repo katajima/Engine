@@ -28,28 +28,28 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightMan
 	CreateGraphicsPipeline();
 }
 
-void ParticleManager::DrawCommonSetting(RasterizerType rasteType, BlendType blendType)
+void ParticleManager::DrawCommonSetting(ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
 {
 	switch (blendType)
 	{
-	case ParticleManager::BlendType::MODE_ADD:
-		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
+	case ParticleData::BlendType::MODE_ADD:
+		if (rasteType == ParticleData::RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
 		}
 		else {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
 		}
 		break;
-	case ParticleManager::BlendType::MODE_SUBTRACT:
-		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
+	case ParticleData::BlendType::MODE_SUBTRACT:
+		if (rasteType == ParticleData::RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
 		}
 		else {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
 		}
 		break;
-	case ParticleManager::BlendType::MODE_MUlLIPLY:
-		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
+	case ParticleData::BlendType::MODE_MUlLIPLY:
+		if (rasteType == ParticleData::RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
 		}
 		else {
@@ -120,7 +120,7 @@ void ParticleManager::Update()
 
 					if (group.isLifeTimeScale_) {
 						float t = particleIterator->currentTime / particleIterator->lifeTime;
-						float scaling = (group.topBottom == TopBottom::kBottom) ? (1.0f - t) : t;
+						float scaling = (group.topBottom == ParticleData::TopBottom::kBottom) ? (1.0f - t) : t;
 						particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
 					}
 
@@ -148,20 +148,16 @@ void ParticleManager::Update()
 					Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
 
-					
+				
 
-					//if (group.useTrail_) {
-					//	particleIterator->trail_->Update3(group.useTrail_,worldMatrix, worldMatrix, particleIterator->pre, particleIterator->pre);
-					//}
-
-					group.instanceData[group.instanceCount].World = worldMatrix;
-					group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
-					group.instanceData[group.instanceCount].color = particleIterator->color;
+					group.sbParticleResource_.Data()[group.instanceCount].World = worldMatrix;
+					group.sbParticleResource_.Data()[group.instanceCount].WVP = worldViewProjectionMatrix;
+					group.sbParticleResource_.Data()[group.instanceCount].color = particleIterator->color;
 					particleIterator->pre = worldMatrix;
 
 					if (group.isAlpha) {
 						float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
-						group.instanceData[group.instanceCount].color.w = alpha;
+						group.sbParticleResource_.Data()[group.instanceCount].color.w = alpha;
 					}
 
 					++group.instanceCount;
@@ -176,85 +172,6 @@ void ParticleManager::Update()
 
 			group.material->GPUData();
 		});
-}
-
-void ParticleManager::LimitMaxMin()
-{
-	for (auto& pair : particleGroups) // 各パーティクルグループに対して
-	{
-		ParticleGroup& group = pair.second;
-
-		//	範囲 
-		group.emiter.renge.min.x = (std::min)(group.emiter.renge.min.x, group.emiter.renge.max.x);
-		group.emiter.renge.max.x = (std::max)(group.emiter.renge.min.x, group.emiter.renge.max.x);
-		group.emiter.renge.min.y = (std::min)(group.emiter.renge.min.y, group.emiter.renge.max.y);
-		group.emiter.renge.max.y = (std::max)(group.emiter.renge.min.y, group.emiter.renge.max.y);
-		group.emiter.renge.min.z = (std::min)(group.emiter.renge.min.z, group.emiter.renge.max.z);
-		group.emiter.renge.max.z = (std::max)(group.emiter.renge.min.z, group.emiter.renge.max.z);
-
-		// 回転
-		group.emiter.rotate.min.x = (std::min)(group.emiter.rotate.min.x, group.emiter.rotate.max.x);
-		group.emiter.rotate.max.x = (std::max)(group.emiter.rotate.min.x, group.emiter.rotate.max.x);
-		group.emiter.rotate.min.y = (std::min)(group.emiter.rotate.min.y, group.emiter.rotate.max.y);
-		group.emiter.rotate.max.y = (std::max)(group.emiter.rotate.min.y, group.emiter.rotate.max.y);
-		group.emiter.rotate.min.z = (std::min)(group.emiter.rotate.min.z, group.emiter.rotate.max.z);
-		group.emiter.rotate.max.z = (std::max)(group.emiter.rotate.min.z, group.emiter.rotate.max.z);
-
-		// 
-		group.emiter.velocity.min.x = (std::min)(group.emiter.velocity.min.x, group.emiter.velocity.max.x);
-		group.emiter.velocity.max.x = (std::max)(group.emiter.velocity.min.x, group.emiter.velocity.max.x);
-		group.emiter.velocity.min.y = (std::min)(group.emiter.velocity.min.y, group.emiter.velocity.max.y);
-		group.emiter.velocity.max.y = (std::max)(group.emiter.velocity.min.y, group.emiter.velocity.max.y);
-		group.emiter.velocity.min.z = (std::min)(group.emiter.velocity.min.z, group.emiter.velocity.max.z);
-		group.emiter.velocity.max.z = (std::max)(group.emiter.velocity.min.z, group.emiter.velocity.max.z);
-
-
-		//	サイズ 
-		group.emiter.size.min.x = (std::min)(group.emiter.size.min.x, group.emiter.size.max.x);
-		group.emiter.size.max.x = (std::max)(group.emiter.size.min.x, group.emiter.size.max.x);
-		group.emiter.size.min.y = (std::min)(group.emiter.size.min.y, group.emiter.size.max.y);
-		group.emiter.size.max.y = (std::max)(group.emiter.size.min.y, group.emiter.size.max.y);
-		group.emiter.size.min.z = (std::min)(group.emiter.size.min.z, group.emiter.size.max.z);
-		group.emiter.size.max.z = (std::max)(group.emiter.size.min.z, group.emiter.size.max.z);
-
-		if (group.emiter.size.min.x < 0) {
-			group.emiter.size.min.x = 0;
-			group.emiter.size.max.x = 0;
-		}
-		if (group.emiter.size.min.y < 0) {
-			group.emiter.size.min.y = 0;
-			group.emiter.size.max.y = 0;
-		}
-		if (group.emiter.size.min.z < 0) {
-			group.emiter.size.min.z = 0;
-			group.emiter.size.max.z = 0;
-		}
-
-
-		//　色
-		group.emiter.color.min.x = (std::min)(group.emiter.color.min.x, group.emiter.color.max.x);
-		group.emiter.color.max.x = (std::max)(group.emiter.color.min.x, group.emiter.color.max.x);
-		group.emiter.color.min.y = (std::min)(group.emiter.color.min.y, group.emiter.color.max.y);
-		group.emiter.color.max.y = (std::max)(group.emiter.color.min.y, group.emiter.color.max.y);
-		group.emiter.color.min.z = (std::min)(group.emiter.color.min.z, group.emiter.color.max.z);
-		group.emiter.color.max.z = (std::max)(group.emiter.color.min.z, group.emiter.color.max.z);
-		group.emiter.color.min.w = (std::min)(group.emiter.color.min.w, group.emiter.color.max.w);
-		group.emiter.color.max.w = (std::max)(group.emiter.color.min.w, group.emiter.color.max.w);
-
-
-		group.emiter.lifeTime.min = (std::min)(group.emiter.lifeTime.min, group.emiter.lifeTime.max);
-		group.emiter.lifeTime.max = (std::max)(group.emiter.lifeTime.min, group.emiter.lifeTime.max);
-
-
-		if (group.emiter.lifeTime.min < 0) {
-			group.emiter.lifeTime.min = 0;
-		}
-		if (group.emiter.lifeTime.max < 0) {
-			group.emiter.lifeTime.max = 0;
-		}
-	}
-
-
 }
 
 void ParticleManager::Draw()
@@ -282,11 +199,7 @@ void ParticleManager::Draw()
 
 		lightManager_->DrawLight({true,false,false},3);
 
-		//commandList->SetGraphicsRootConstantBufferView(0, group.resource->GetGPUVirtualAddress());
-
-		// インスタンシングデータのSRVのDescriptorTableを設定
-		commandList->SetGraphicsRootDescriptorTable(1, group.instancingSrvHandleGPU);
-
+		group.sbParticleResource_.SetGraphicsRootDescriptorTable(1);
 
 		group.mesh->GetCommandList();
 
@@ -296,7 +209,7 @@ void ParticleManager::Draw()
 	}
 }
 
-void ParticleManager::Emit(const std::string name, EmitType type, SpawnType spawnType)
+void ParticleManager::Emit(const std::string name, ParticleData::EmitType type, ParticleData::SpawnType spawnType)
 {
 	// パーティクルグループが登録済みであることを確認
 	assert(particleGroups.contains(name) && "Error: Particle group with this name is not registered.");
@@ -305,7 +218,7 @@ void ParticleManager::Emit(const std::string name, EmitType type, SpawnType spaw
 	RandParticle(name, spawnType);
 }
 
-void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType, BlendType blendType)
+void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
 {
 	// ランダムエンジンの初期化
 	std::random_device seedGenerator;
@@ -350,23 +263,16 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleGroup.material->enableLighting_ = false;
 	particleGroup.material->useEnvironment_ = false;
 
-	// GPUリソースの作成
-	particleGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ParticleForGPU) * kNumMaxInstance);
-	// マッピング
-	particleGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&particleGroup.instanceData));
+
+	// パーティクルリソース生成
+	particleGroup.sbParticleResource_.CreateBuffer(dxCommon_, kNumMaxInstance);
+
 	// 初期化
 	for (uint32_t i = 0; i < kNumMaxInstance; ++i) {
-		particleGroup.instanceData[i].World = MakeIdentity4x4();
-		particleGroup.instanceData[i].WVP = MakeIdentity4x4();
-		particleGroup.instanceData[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		particleGroup.sbParticleResource_.Data()[i].World = MakeIdentity4x4();
+		particleGroup.sbParticleResource_.Data()[i].WVP = MakeIdentity4x4();
+		particleGroup.sbParticleResource_.Data()[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-
-	// SRVの設定
-	// SRVインデックスの取得と設定
-	particleGroup.srvIndex = srvManager_->Allocate();
-	particleGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(particleGroup.srvIndex);
-	particleGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(particleGroup.srvIndex);
-	srvManager_->CreateSRVforStructuredBuffer(particleGroup.srvIndex, particleGroup.resource.Get(), kNumMaxInstance, sizeof(ParticleForGPU));
 
 	// ブレンド
 	particleGroup.blendType = blendType;
@@ -376,7 +282,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 }
 
-void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, RasterizerType rasteType, BlendType blendType)
+void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
 {
 	// ランダムエンジンの初期化
 	std::random_device seedGenerator;
@@ -408,7 +314,6 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	// 名前
 	particleGroup.name = name;
 	// モデル
-	//particleGroup.model = model;
 	particleGroup.mesh = primitive->GetMesh();
 	particleGroup.mesh->UpdateVertexBuffer();
 	particleGroup.mesh->UpdateIndexBuffer();
@@ -421,60 +326,40 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleGroup.material->enableLighting_ = false;
 	particleGroup.material->useEnvironment_ = false;
 
+	// パーティクルリソース生成
+	particleGroup.sbParticleResource_.CreateBuffer(dxCommon_, kNumMaxInstance);
 
-	// GPUリソースの作成
-	particleGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ParticleForGPU) * kNumMaxInstance);
-	// マッピング
-	particleGroup.resource->Map(0, nullptr, reinterpret_cast<void**>(&particleGroup.instanceData));
 	// 初期化
 	for (uint32_t i = 0; i < kNumMaxInstance; ++i) {
-		particleGroup.instanceData[i].World = MakeIdentity4x4();
-		particleGroup.instanceData[i].WVP = MakeIdentity4x4();
-		particleGroup.instanceData[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		particleGroup.sbParticleResource_.Data()[i].World = MakeIdentity4x4();
+		particleGroup.sbParticleResource_.Data()[i].WVP = MakeIdentity4x4();
+		particleGroup.sbParticleResource_.Data()[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-
-	// SRVの設定
-	// SRVインデックスの取得と設定
-	particleGroup.srvIndex = srvManager_->Allocate();
-	particleGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(particleGroup.srvIndex);
-	particleGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(particleGroup.srvIndex);
-	srvManager_->CreateSRVforStructuredBuffer(particleGroup.srvIndex, particleGroup.resource.Get(), kNumMaxInstance, sizeof(ParticleForGPU));
-
-
-
 }
 
 
-
-
-
-
-
-
-void ParticleManager::RandParticle(const std::string name, SpawnType spawnType)
+void ParticleManager::RandParticle(const std::string name, ParticleData::SpawnType spawnType)
 {
 
-	if (SpawnType::kPoint == spawnType) {
+	if (ParticleData::SpawnType::kPoint == spawnType) {
 		PointEmit(particleGroups[name]);
 	}
-	else if (SpawnType::kAABB == spawnType) {
+	else if (ParticleData::SpawnType::kAABB == spawnType) {
 		AABBEmit(particleGroups[name]);
 	}
-	else if (SpawnType::kSegmentLine == spawnType) {
+	else if (ParticleData::SpawnType::kSegmentLine == spawnType) {
 		LineEmit(particleGroups[name]);
 	}
-	else if (SpawnType::kSpline == spawnType) {
+	else if (ParticleData::SpawnType::kSpline == spawnType) {
 		SplineEmit(particleGroups[name]);
 	}
-	else if (SpawnType::kCornerLine == spawnType) {
+	else if (ParticleData::SpawnType::kCornerLine == spawnType) {
 		CornerLineEmit(particleGroups[name]);
 	}
 
 }
 
 #pragma region EmitType
-
-
 
 void ParticleManager::PointEmit(ParticleGroup& particleGroup)
 {
@@ -558,10 +443,6 @@ void ParticleManager::PointEmit(ParticleGroup& particleGroup)
 			distributionVeloY(randomEngine_),
 			distributionVeloZ(randomEngine_)
 		};
-
-		//newParticle.trail_ = std::make_unique<TrailEffect>();
-		//newParticle.trail_->Initialize(efectManager_, particleGroup.material->tex_.diffuseFilePath,0.1f);
-
 		// パーティクルをグループに追加
 		particleGroup.particle.push_back(newParticle);
 	}
@@ -992,9 +873,7 @@ void ParticleManager::SphereEmit(ParticleGroup& particleGroup)
 
 #pragma endregion
 
-
 #pragma region PSO
-
 
 void ParticleManager::CreateRootSignature()
 {
@@ -1117,4 +996,3 @@ void ParticleManager::BlendMuliply()
 #pragma endregion // ブレンド
 
 #pragma endregion // パイプライン関係
-

@@ -106,7 +106,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	mExplosionSmokeEmitter_->SetEnableLighting(false);
 	mExplosionSmokeEmitter_->SetAlphaClipping(0.15f);
 	mExplosionSmokeEmitter_->SetIsLifeTimeScale(true);
-	mExplosionSmokeEmitter_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	mExplosionSmokeEmitter_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 
 	mExplosionSmokeEmitter2_ = std::make_unique <ParticleEmitter>();
@@ -124,7 +124,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	mExplosionSmokeEmitter2_->SetEnableLighting(false);
 	mExplosionSmokeEmitter2_->SetAlphaClipping(0.15f);
 	mExplosionSmokeEmitter2_->SetIsLifeTimeScale(true);
-	mExplosionSmokeEmitter2_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	mExplosionSmokeEmitter2_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 
 	mExplosionSmokeEmitter3_ = std::make_unique <ParticleEmitter>();
@@ -142,7 +142,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	mExplosionSmokeEmitter3_->SetEnableLighting(false);
 	mExplosionSmokeEmitter3_->SetAlphaClipping(0.15f);
 	mExplosionSmokeEmitter3_->SetIsLifeTimeScale(true);
-	mExplosionSmokeEmitter3_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	mExplosionSmokeEmitter3_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 }
 

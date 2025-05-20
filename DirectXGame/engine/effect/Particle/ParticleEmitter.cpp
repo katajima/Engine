@@ -14,7 +14,7 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	emitter_.controlPoints.clear(); // 初期化
 
 	spawnShapeType_ = spawnType;
-	emitType_ = ParticleManager::EmitType::kRandom;
+	emitType_ = ParticleData::EmitType::kRandom;
 
 	emitName_ = emitName;
 	particleName_ = particleName;
@@ -63,7 +63,7 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 
 void ParticleEmitter::Update()
 {
-	ParticleManager::ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 
 #ifdef _DEBUG
@@ -173,7 +173,7 @@ void ParticleEmitter::Update()
 	DrawEmitterLine();
 
 	// 寿命が尽きたパーティクルを削除する処理
-	particleGroup.particle.remove_if([](const ParticleManager::Particle& p)
+	particleGroup.particle.remove_if([](const Particle& p)
 		{
 			return p.currentTime >= p.lifeTime;
 		});
@@ -195,23 +195,23 @@ void ParticleEmitter::Emit()
 		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.rotate = uvTransformVeloctiy_.rotate; // UV
 		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.translate = uvTransformVeloctiy_.translate; // UV
 
-		if (emitType_ == ParticleManager::EmitType::kRandom) {
+		if (emitType_ == ParticleData::EmitType::kRandom) {
 			particleManager_->GetParticleGroups(particleName_).emiter = emitter_;
 			
 			if (spawnShapeType_ == EmitSpawnShapeType::kPoint) {
-				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kPoint);
+				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kPoint);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kAABB) {
-				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kAABB);
+				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kAABB);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kSegmentLine) {
-				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSegmentLine);
+				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kSegmentLine);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kCornerLine) {
-				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kCornerLine);
+				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kCornerLine);
 			}
 			else if (spawnShapeType_ == EmitSpawnShapeType::kSpline){
-				particleManager_->Emit(particleName_, emitType_, ParticleManager::SpawnType::kSpline);
+				particleManager_->Emit(particleName_, emitType_, ParticleData::SpawnType::kSpline);
 			}
 		}
 	}

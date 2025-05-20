@@ -22,6 +22,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Material/Material.h"
+#include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
 #include<random>
 #include<numbers>
@@ -59,6 +60,7 @@ private:
 	// メッシュ
 	std::unique_ptr<ModelMesh> mesh_ = nullptr;
 private:
+	// ウェーブデータ
 	struct WaveParameters {
 		Vector2 waveDirection; // 波の方向
 		float amplitude; // 波の振幅
@@ -68,33 +70,28 @@ private:
 		int flag;   // 波が起きるのか
 		float pad[1];
 	};
-	Microsoft::WRL::ComPtr < ID3D12Resource> waveResource;
-	WaveParameters *waveData;
 
-	uint32_t index_ =  0;
+	ConstantBuffer<WaveParameters> cbWaveResource_;
 
+	// ノイズデータ
 	struct NoiseData {
 		float noiseScale; // ノイズのスケール
 		float noiseStrength; // ノイズの強度
 		int octaves; // フラクタルノイズのオクターブ数
 		float roughness; // 各オクターブの影響度
 	};
-	Microsoft::WRL::ComPtr < ID3D12Resource> noiseResource;
-	NoiseData* noiseData;
+
+	ConstantBuffer<NoiseData> cbNoiseResource_;
 
 
-
-	
+	// 幅	
 	struct Renge {
 		Vector2 renge;
 	};
 	Renge renge_;
 
-	
-
-
-
-	Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;
+	// 波の合成数
+	uint32_t index_ = 0;
 
 	
 	Entity3DManager* entity3dManager_;

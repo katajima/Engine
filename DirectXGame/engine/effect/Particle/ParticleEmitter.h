@@ -75,7 +75,7 @@ public: // ゲッター兼セッター
 
 	void SetIsLifeTimeScale(bool is) { isLifeTimeScale_ = is; } // スケール変更
 
-	void SetLifeTimeScaleTopBottom(ParticleManager::TopBottom topBottom) { topBottom_ = topBottom; }
+	void SetLifeTimeScaleTopBottom(ParticleData::TopBottom topBottom) { topBottom_ = topBottom; }
 
 	void SetIsRotateVelocity(bool is) { isRotateVelocity = is; } // 回転速度
 
@@ -114,8 +114,8 @@ private: // エミッタ可視化
 	void EmitMinMax();
 
 private:
-	ParticleManager::EmitType emitType_ = ParticleManager::EmitType::kRandom; // 出現方法
-	ParticleManager::TopBottom topBottom_ = ParticleManager::TopBottom::kBottom; // 拡縮
+	ParticleData::EmitType emitType_ = ParticleData::EmitType::kRandom; // 出現方法
+	ParticleData::TopBottom topBottom_ = ParticleData::TopBottom::kBottom; // 拡縮
 	EmitSpawnShapeType spawnShapeType_ = EmitSpawnShapeType::kAABB; // 出現形状
 
 private:
@@ -152,7 +152,8 @@ private:
 	std::string particleName_; // パーティクル名
 
 
-	ParticleManager::Emiter emitter_{};
+	Emiter emitter_{};
+
 	ParticleManager* particleManager_;
 	LineCommon* lineCommon_ = nullptr;
 };

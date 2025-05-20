@@ -7,7 +7,8 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-template<class Type>class ConstantBuffer {
+template<class Type>
+class ConstantBuffer {
 public:
 
 	void CreateBuffer(DirectXCommon* dxCommon, int num = 1)
@@ -30,7 +31,7 @@ public:
 		dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
 	}
 
-	Type* Data() { return data_; };
+	Type* Data() const { return data_; };
 	
 private:
 	DirectXCommon* dxCommon_;

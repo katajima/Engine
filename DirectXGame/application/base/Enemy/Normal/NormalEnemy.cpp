@@ -229,7 +229,7 @@ void NormalEnemy::InitParticle()
 	dustEmit_->SetEnableLighting(false);
 	dustEmit_->SetIsAlpha(true);
 	dustEmit_->SetIsLifeTimeScale(true);
-	dustEmit_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	dustEmit_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 
 	dustEmit2_ = std::make_unique<ParticleEmitter>();
@@ -249,7 +249,7 @@ void NormalEnemy::InitParticle()
 	dustEmit2_->SetEnableLighting(false);
 	dustEmit2_->SetIsAlpha(true);
 	dustEmit2_->SetIsLifeTimeScale(true);
-	dustEmit2_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	dustEmit2_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 	dustEmit3_ = std::make_unique<ParticleEmitter>();
 	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03_2");
@@ -268,7 +268,7 @@ void NormalEnemy::InitParticle()
 	dustEmit3_->SetEnableLighting(false);
 	dustEmit3_->SetIsAlpha(true);
 	dustEmit3_->SetIsLifeTimeScale(true);
-	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 
 

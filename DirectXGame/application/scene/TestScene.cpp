@@ -509,7 +509,7 @@ void TestScene::InitializeParticle()
 	primitvPlaneSmoke_->SetEnableLighting(false);
 	primitvPlaneSmoke_->SetIsAlpha(true);
 	primitvPlaneSmoke_->SetIsLifeTimeScale(true);
-	primitvPlaneSmoke_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	primitvPlaneSmoke_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 	primitvPlaneSmoke_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	primitvPlaneSmoke_->SetIsRotateVelocity(true);
