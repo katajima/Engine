@@ -96,6 +96,19 @@ void Model::DrawSkinning()
 	commandList->ResourceBarrier(1, &barrier);
 }
 
+float Model::GetMaterialAlfa()
+{
+	float a = 1.000f;
+
+	for (auto& mesh : modelData.mesh)
+	{
+		if (mesh->material->color.a < a) {
+			a = mesh->material->color.a;
+		}		
+	}
+	return a;
+}
+
 ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
 	//必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData

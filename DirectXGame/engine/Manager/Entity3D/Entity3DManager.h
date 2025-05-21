@@ -35,6 +35,8 @@ public:
 
 	void ObjectClean();
 
+	void ObjectDraw();
+
 public: //セッター
 
 	void SetEntity3D(Object3d* entity3D);
@@ -64,6 +66,11 @@ public: //ゲッター
 private:
 
 	std::vector<Object3d*> object3d;
+
+	std::vector<Object3d*> opaqueObjects;
+	std::vector<Object3d*> transparentObjects01;
+	std::vector<Object3d*> transparentObjects02;
+	std::vector<Object3d*> transparentObjects03;
 
 private:
 	// DirectX

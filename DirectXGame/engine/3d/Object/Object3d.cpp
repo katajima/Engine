@@ -196,6 +196,9 @@ void Object3d::Update()
 
 void Object3d::Draw()
 {
+	if (!isDraw) return;
+
+
 	switch (objectType_)
 	{
 	case Object3d::ObjectType::kNormal:
@@ -273,6 +276,37 @@ void Object3d::Draw()
 void Object3d::DebugImguiSkin()
 {
 	DebugModel::ImguiSkin(model->modelData);
+}
+
+float Object3d::GetAlpha()
+{
+	float a;
+	switch (objectType_)
+	{
+	case Object3d::ObjectType::kNormal:
+		a = model->GetMaterialAlfa();
+		break;
+	case Object3d::ObjectType::kAnimation:
+		a = model->GetMaterialAlfa();
+		break;
+	case Object3d::ObjectType::kSkinning:
+		a = model->GetMaterialAlfa();
+		break;
+	case Object3d::ObjectType::kPrimitive:
+		a = primitive_->GetMaterial()->color.a;
+		break;
+	case Object3d::ObjectType::kSkyBox:
+		a = skyBox_->GetMaterial()->color.a;
+		break;
+	case Object3d::ObjectType::kOcean:
+		a = ocean_->GetMaterial()->color.a;
+		break;
+	default:
+		a = 1.0f;
+		break;
+	}
+
+	return a;
 }
 
 void Object3d::DrawSetting()

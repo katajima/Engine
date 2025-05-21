@@ -46,7 +46,6 @@ struct ModelData
 	std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 	std::unique_ptr<ModelMesh> allMesh;
 	std::vector<uint32_t> cachedLineIndices_;				// ライン
-	//std::vector <std::unique_ptr<Material>> material;		// マテリアルデータ
 	Animation animation;									// アニメーション
 	float animationTime = 0.0f;								// アニメーション時間
 	Skeleton skeleton;										// スケルトン

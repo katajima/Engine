@@ -58,6 +58,9 @@ void SkinningConmmon::DrawCommonSetting(PSOType type)
 	default:
 		break;
 	}
+
+	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void SkinningConmmon::DrawComputeSetting()

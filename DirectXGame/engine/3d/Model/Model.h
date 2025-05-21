@@ -48,6 +48,9 @@ public:
 
 	// ModelData取得
 	ModelData& GetModelData(){ return modelData; }	
+
+	float GetMaterialAlfa();
+
 public:
 	// モデルのデータ
 	ModelData modelData;

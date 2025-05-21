@@ -145,33 +145,33 @@ void TestScene::Draw3D()
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
 		
-		skyBoxObject->Draw();
-		skyBoxObject2->Draw();
-		
-		tail.Draw();
-		
-		oceanObject->Draw();
+		//skyBoxObject->Draw();
+		//skyBoxObject2->Draw();
+		//
+		//tail.Draw();
+		//
+		//oceanObject->Draw();
 
-		multiy->Draw();
+		//multiy->Draw();
 
 
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
-		tail.Draw();
+		//tail.Draw();
 
-		primitiveObject3d->Draw();
+		//primitiveObject3d->Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
-		taleObject->Draw();
+		//taleObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
-		tail.Draw();
+		//tail.Draw();
 
-		skinningObject->Draw();
-		skinningObject2->Draw();
-		skinningObject3->Draw();
+		//skinningObject->Draw();
+		//skinningObject2->Draw();
+		//skinningObject3->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
 		break;
@@ -180,11 +180,11 @@ void TestScene::Draw3D()
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
 
-		// プレイヤー
-		playerObject->Draw();
+		//// プレイヤー
+		//playerObject->Draw();
 
-		// ゴール
-		goalObject->Draw();
+		//// ゴール
+		//goalObject->Draw();
 
 
 		break;
@@ -271,8 +271,8 @@ void TestScene::InitializeObject3D()
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->worldtransform_.translate_ = { 0,10,0 };
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
-	
-
+	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
+		
 	skinningObject = std::make_unique<Object3d>();
 	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
 	skinningObject->SetModel("iku.gltf");
@@ -304,6 +304,8 @@ void TestScene::InitializeObject3D()
 	tail.SetCamera(camera.get());
 	tail.SetName("tail");
 	tail.GetMaterial(0)->shininess_ = 1000.0f;
+	tail.worldtransform_.translate_.y = -10.0f;
+
 
 	multiy = std::make_unique<Object3d>();
 	multiy->Initialize(GetEntity3DManager());
@@ -319,63 +321,23 @@ void TestScene::InitializeObject3D()
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
 
+
+
 	taleObject = std::make_unique<Object3d>();
 	taleObject->Initialize(GetEntity3DManager());
 	taleObject->SetModel("terrain.obj");
 	taleObject->SetCamera(camera.get());
 	taleObject->worldtransform_.scale_ = 10.0f;
 
-	tri2d.vertices[0] = { 10,0, };
-	tri2d.vertices[1] = { 10,10, };
-	tri2d.vertices[2] = { -10,0, };
-
-	// プレイヤーオブジェクト
-	playerObject = std::make_unique<Object3d>();
-	playerObject->Initialize(GetEntity3DManager());
-	playerObject->SetModel("teapot.obj");
-	playerObject->SetCamera(camera.get());
-	playerObject->worldtransform_.translate_ = { 10,10,10 };
-	playerObject->worldtransform_.scale_ = 3;
-
-
-	// ゴールのオブジェクト
-	goalObject = std::make_unique<Object3d>();
-	goalObject->Initialize(GetEntity3DManager());
-	goalObject->SetModel("Sphere.obj");
-	goalObject->SetCamera(camera.get());
-	goalObject->worldtransform_.translate_ = { 200,10,200 };
-	goalObject->worldtransform_.scale_ = 3;
-
-	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(camera.get());
 	
-
-	for (int i = 0; i < map->GetWidth(); i++) {
-		for (int j = 0; j < map->GetHeight(); j++) {
-			ObjectInstans obj{};
-			obj.Initialize();
-			obj.transform.scale_ = { 5,5,5 };
-			obj.transform.translate_.x = float(10 * i);
-			obj.transform.translate_.z = float(10 * j);
-			obj.transform.translate_.y = noise->PerlinNoise(float(i), float(j)) * obj.transform.scale_.y;
-
-
-
-
-
-			GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
-
-		}
-	}
-
-
+	ShapeParameter::Ring ring;
+	ring.innerRadius = 1.0f;
+	ring.outerRadius = 7.0f;
+	ring.segments = 16;
 	primitiveObject = std::make_unique<Primitive>();
-	
-	ShapeParameter::ShapeSphere sph;
-	primitiveObject->Initialize<ShapeParameter::ShapeSphere>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, sph, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
-	
-	
+	primitiveObject->Initialize<ShapeParameter::Ring>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, ring, "resources/Texture/gradationLine.png");
 
-
+	
 	primitiveObject3d = std::make_unique<Object3d>();
 	primitiveObject3d->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive); //primitiveObject
 	primitiveObject3d->SetPrimitive(primitiveObject.get());
@@ -384,15 +346,20 @@ void TestScene::InitializeObject3D()
 
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
+	
 	skyBox2 = std::make_unique<SkyBox>();
 	skyBox2->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
 
+	
 	skyBoxObject = std::make_unique<Object3d>();
 	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
 	skyBoxObject->SetSkyBox(skyBox.get());
 	skyBoxObject->SetCamera(camera.get());
 	skyBoxObject->worldtransform_.scale_ = {10,10,10};
 	skyBoxObject->SetName("skyBox");
+	
+	
+	
 	skyBoxObject2 = std::make_unique<Object3d>();
 	skyBoxObject2->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
 	skyBoxObject2->SetSkyBox(skyBox2.get());
@@ -563,7 +530,7 @@ void TestScene::InitializeLight()
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 2.0f;
+	directionalLightData.intensity = 0.9f;
 	directionalLightData.isLight = true;
 
 
@@ -598,115 +565,12 @@ void TestScene::InitializeCamera()
 /// </summary>
 void TestScene::InitializeOthers()
 {
-	capsule_.radius = 10;
-	capsule_.segment.origin = { 4,-5,4 };
-	capsule_.segment.end = { 4,5,4 };
-
-
+	
 
 	octree = std::make_unique<Octree>(AABB({ -100,-100,-100 }, { 100,100,100 }), 0);
 	octree->root->subdivide(4, 4, 4, 10);
 
 	octree->insert(*stairObject->GetMesh(0));// メッシュ挿入
-
-
-	world.Initialize();
-
-	Box box;
-	box.min_ = { 20,20 };
-	box.max_ = { 30,30 };
-
-	OBB2D obb2d{};
-	obb2d.center = { 100,100 };
-	obb2d.halfSize = { 100,10 };
-	obb2d.axisZ.x = 1.0f;
-
-	map->AddObstacleFromOBB2D(obb2d);
-
-	map->AddObstacleFromBox(box);
-
-	for (int i = 0; i < 500; i++) {
-
-
-
-		Box boxs;
-		boxs.min_.x = Random::RandomFloat(0, map->GetWidth() * map->GetCellSize());
-		boxs.min_.y = Random::RandomFloat(0, map->GetHeight() * map->GetCellSize());
-		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + map->GetCellSize() * 3);
-		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + map->GetCellSize() * 3);
-
-
-		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} }, goalObject->worldtransform_.translate_)) {
-			continue;
-		}
-		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} }, playerObject->worldtransform_.translate_)) {
-			continue;
-		}
-
-
-		map->AddObstacleFromBox(boxs);
-	}
-
-
-
-
-
-
-	pathfinder.SetMap(*map);
-
-	playerObject->Update();
-	goalObject->Update();
-
-	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
-	Vector2 goalPos = goalObject->GetWorldPosition().xz();
-
-	pathfinder.FindPath(plyerPos, goalPos, path);
-
-
-
-	//for (int i = 0; i < map->GetWidth(); i++) {
-	//	for (int j = 0; j < map->GetHeight(); j++) {
-
-	//		// マップチップの種類を取得
-	//		MapCellType cell = map->GetCell(i, j);
-
-	//		// 障害物でないならスキップ
-	//		if (cell != MapCellType::Obstacle) {
-	//			continue;
-	//		}
-
-	//		// 障害物だった場合、オブジェクトを生成
-	//		ObjectInstans obj{};
-	//		obj.Initialize();
-	//		obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
-	//		obj.transform.translate_.y = 10;
-	//		obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
-	//		obj.transform.scale_ = map->GetCellSize() / 2.0f;
-
-	//		int randdd = Random::RandomInt32_t(0, 0);
-
-	//		// オブジェクトを種類ごとに配置
-	//		if (randdd == 0) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/uvChecker.png", obj);
-	//		}
-	//		else if (randdd == 1) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
-	//		}
-	//		else if (randdd == 2) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/Image.png", obj);
-	//		}
-	//		else if (randdd == 3) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/ground.png", obj);
-	//		}
-	//		else if (randdd == 4) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/grass.png", obj);
-	//		}
-	//		else {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/enemy.png", obj);
-	//		}
-	//	}
-	//}
-
 }
 
 #pragma endregion 各初期化
@@ -753,10 +617,7 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
-	ImGui::Begin("TTTT");
-	ImGui::Text(multiy->model->modelData.mesh[0]->material->tex_.diffuseFilePath.c_str());
-	ImGui::Text(multiy->model->modelData.mesh[1]->material->tex_.diffuseFilePath.c_str());
-	ImGui::End();
+	
 
 }
 
@@ -790,23 +651,7 @@ void TestScene::UpdateRoom04()
 	primitvPlaneSmoke_->Update();
 
 
-	CornerSegment corner;// = { sphere2d.center }
-	corner.center.x = sphere2d.center.x;
-	corner.center.y = 5;
-	corner.center.z = sphere2d.center.y;
-
-	corner.radius = sphere2d.radius;
-	corner.segment = 16;
-
-
-	world.translate_.x = sphere2d.center.x;
-	world.translate_.z = sphere2d.center.y;
-
-	GetEntity3DManager()->Get3DLineCommon()->AddLineCorner(corner, world);
-
-	int size = GetEntity3DManager()->GetObject3dInstansManager()->GetSize();
-
-
+	
 }
 
 void TestScene::UpdateRoom05()
@@ -816,141 +661,15 @@ void TestScene::UpdateRoom05()
 
 void TestScene::UpdateRoom06()
 {
-
-#ifdef _DEBUG
-
-	ImGui::Begin("oc");
-	ImGui::DragFloat3("div", &div_.x);
-	ImGui::DragInt("maxDepth", &maxDepth);
-	ImGui::DragInt("depth", &octree->root->depth);
-	ImGui::DragFloat3("max", &octree->root->bounds.max_.x);
-	ImGui::DragFloat3("min", &octree->root->bounds.min_.x);
-	bool isColl = octree->checkCollisions(capsule_);
-	ImGui::Checkbox("isColl", &isColl);
-	if (ImGui::Button("clear")) {
-		octree->root->clear();
-	};
-	if (ImGui::Button("Set")) {
-		int x = static_cast<int>(div_.x);
-		int y = static_cast<int>(div_.y);
-		int z = static_cast<int>(div_.z);
-
-		octree->root->subdivide(x, y, z, maxDepth);
-	}
-	ImGui::End();
-	ImGui::Begin("capsule");
-	ImGui::DragFloat("rad", &capsule_.radius, 0.1f);
-	ImGui::DragFloat3("origin", &capsule_.segment.origin.x, 0.1f);
-	ImGui::DragFloat3("end", &capsule_.segment.end.x, 0.1f);
-	ImGui::End();
-#endif // _DEBUG
-
-
-
-
-
-
-
-
-
-
-	GetEntity3DManager()->Get3DLineCommon()->AddLineCapsule(capsule_);
-	octree->draw(*GetEntity3DManager()->Get3DLineCommon());
-
 }
 
 void TestScene::UpdateRoom07()
 {
 
-	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
-	Vector2 goalPos = goalObject->GetWorldPosition().xz();
-	int playerX, playerZ;
-	int goalX, goalZ;
-
-	// ワールド座標 -> マップ座標に変換
-	bool validPlayer = map->WorldToMap(plyerPos.x, plyerPos.y, playerX, playerZ);
-	bool validGoal = map->WorldToMap(goalPos.x, goalPos.y, goalX, goalZ);
-
-	if (validPlayer && validGoal &&
-		!map->IsBlocked(playerX, playerZ) &&
-		!map->IsBlocked(goalX, goalZ))
-	{
-		pathfinder.FindPath(plyerPos, goalPos, path);
-
-
-		// 進行方向を取得して正規化
-		Vector2 direction = pathfinder.GetDirectionToNextNode().Normalize();
-
-		// プレイヤーの位置を更新
-		float speed = 1.0f;  // 任意の速度
-		playerObject->worldtransform_.translate_.x += direction.x * speed;
-		playerObject->worldtransform_.translate_.z += direction.y * speed;
-	}
-
-
-
-
-
-	Vector2 sosos = input_->GetGamePadLeftStick();
-
-
-
-	goalObject->worldtransform_.translate_.x += sosos.x * 2.0f;
-	goalObject->worldtransform_.translate_.z += sosos.y * 2.0f;
-
-
-
-
-#ifdef _DEBUG
-	ImGui::Begin("dnadjas");
-	ImGui::DragFloat3("goal", &goalObject->worldtransform_.translate_.x);
-	ImGui::End();
-#endif // _DEBUG
-
-
-
-
-	
-	pathfinder.DrawPath(GetEntity3DManager()->Get3DLineCommon(), 11.0f);
-
-	map->DrawMapChip(GetEntity3DManager()->Get3DLineCommon(), 10.0f);
 }
 
 void TestScene::UpdateRoom08()
 {
-
-	noise->ImguiParameter();
-
-
-#ifdef _DEBUG
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("NoiseSet")) {
-		if (ImGui::Button("set")) {
-			GetEntity3DManager()->GetObject3dInstansManager()->Clear("BoxBox.obj");
-
-			for (int i = 0; i < map->GetWidth(); i++) {
-				for (int j = 0; j < map->GetHeight(); j++) {
-					ObjectInstans obj{};
-					obj.Initialize();
-					obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
-					obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
-					obj.transform.scale_ = map->GetCellSize() / 2.0f;
-
-
-					float y = static_cast<float>(noise->PerlinNoise(float(i), float(j)) * map->GetCellSize() * 20);
-
-					obj.transform.translate_.y = static_cast<float>(y);
-
-					GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
-				}
-			}
-		}
-	}
-	ImGui::End();
-
-
-#endif // _DEBUG
-
 
 
 }

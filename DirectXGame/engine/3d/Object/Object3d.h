@@ -52,6 +52,14 @@ public:
 		kOcean,		// 波を描画するオブジェクト
 	};
 
+	// 描画する順番
+	enum class ObjectDrawType {
+		kOpaque,		// 不透明
+		kTranslucent01,	// 半透明最前
+		kTranslucent02,	// 半透明中
+		kTranslucent03,	// 半透明最後
+	};
+
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, ObjectType objectType = ObjectType::kNormal, ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 	// 更新(アニメーション無し)
@@ -84,7 +92,8 @@ public:
 	// 波セット
 	void SetOcean(Ocean* ocean) { ocean_ = ocean; }
 
-
+	// 描画順
+	void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
 
 	// ゲッター
 
@@ -132,6 +141,9 @@ public:
 
 	ObjectType GetObjectType() { return objectType_; }
 
+	ObjectDrawType GetObjectDrawType() { return objectDrawType_; }
+
+
 	void DebugImguiModel();
 
 	void DebugImguiSkin();
@@ -139,6 +151,10 @@ public:
 	void IsDelete() { isDelete = true; }
 
 	bool GetIsDelete() { return isDelete; }
+
+	void SetIsDraw(bool is) { isDraw = is; }
+
+	float GetAlpha();
 
 private:
 	// 各コマンドリスト
@@ -173,8 +189,14 @@ private:
 	//
 	bool isDelete = false;
 
+	// 
+	bool isDraw = true;
+
 	// オブジェクトのタイプ
 	ObjectType objectType_ = ObjectType::kNormal;
+
+	// オブジェクトの描画順
+	ObjectDrawType objectDrawType_ = ObjectDrawType::kOpaque;
 
 	// オブジェクトの映り方タイプ
 	ObjectRasterizerType rasterizerType_ = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK;

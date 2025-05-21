@@ -146,8 +146,6 @@ private:
 	Object3d tail;
 	std::unique_ptr<Object3d> multiy;
 
-	std::unique_ptr<Object3d> playerObject;
-	std::unique_ptr<Object3d> goalObject;
 	std::unique_ptr<Object3d> taleObject;
 	std::unique_ptr<Object3d> primitiveObject3d;
 	std::unique_ptr<Object3d> skyBoxObject;
@@ -209,26 +207,6 @@ private:
 	std::unique_ptr <Octree> octree;
 	Vector3 div_ = { 1,1,1 };
 	int maxDepth = { 1 };
-
-	Capsule capsule_ = Capsule{Vector3{},Vector3{},10};
-	Vector3 offset_ = { 0,0,0 };
-
-
-	Triangle2D tri2d = { Vector2{} ,Vector2{} ,Vector2{}};
-	Vector3 triCen = {0,0,0};
-
-	Sphere2D sphere2d{};
-	WorldTransform world{};
-
-	ObjectInstans object_;
-
-	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(100, 100, 5.0f);
-	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
-	AStarPathfinder pathfinder;
-
-
-	std::unique_ptr<Noise> noise = std::make_unique<Noise>();
-
 };
 
 
