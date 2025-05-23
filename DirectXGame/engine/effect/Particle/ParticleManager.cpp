@@ -121,22 +121,14 @@ void ParticleManager::Update()
 
 void ParticleManager::Draw()
 {
-
-
 	auto commandList = dxCommon_->GetCommandList();
-
-
-
 
 	for (auto& pair : particleGroups) {
 		ParticleGroup& group = pair.second;
 		if (group.instanceCount == 0) {
 			continue;
 		}
-
-
 		DrawCommonSetting(group.rasteType, group.blendType);
-
 
 		group.material->GetCommandListTexture(2);
 
@@ -162,79 +154,12 @@ void ParticleManager::Emit(const std::string name, ParticleData::EmitType type, 
 	if (ParticleData::SpawnType::kSegmentLine == spawnType) {
 		for (int i = 0; i < particleGroups[name].emiter.corner.segment; ++i)
 		{
-			Particle newParticle;
-
-			// パーティクルの初期化 (必要に応じて詳細を設定)
-			// 位置
-			newParticle.transform.translate = EmitFanction::EmitPos(particleGroups[name], spawnType, randomEngine_, i);
-
-			// 大きさ
-			newParticle.transform.scale = EmitFanction::RandVector3(particleGroups[name].emiter.size, randomEngine_);
-
-			// 回転
-			newParticle.transform.rotate = EmitFanction::RandVector3(particleGroups[name].emiter.rotate, randomEngine_);
-
-			// 色
-			newParticle.color = EmitFanction::RandVector4(particleGroups[name].emiter.color, randomEngine_);
-
-			// 回転速度
-			newParticle.rotateVelocity = EmitFanction::RandVector3(particleGroups[name].emiter.rotateVelocity, randomEngine_);
-
-			//速度
-			newParticle.velocity = EmitFanction::RandVector3(particleGroups[name].emiter.velocity, randomEngine_);
-
-			// ライフタイム
-			newParticle.lifeTime = EmitFanction::RandFloat(particleGroups[name].emiter.lifeTime, randomEngine_);
-
-			// 加速度
-			newParticle.acceleration = EmitFanction::RandVector3(particleGroups[name].emiter.acceleration, randomEngine_);
-
-			// タイム
-			newParticle.currentTime = 0;
-
-			// 初期値
-			newParticle.strtTransform = newParticle.transform;
-
-			particleGroups[name].particle.push_back(newParticle);
+			EmitFanction::CreateParticle(particleGroups[name], randomEngine_, spawnType, i);
 		}
 	}
 	else {
 		for (int t = 0; t < particleGroups[name].emiter.count; ++t) {
-			Particle newParticle;
-			// パーティクルの初期化 (必要に応じて詳細を設定)
-
-			// 位置
-			newParticle.transform.translate = EmitFanction::EmitPos(particleGroups[name], spawnType, randomEngine_);
-
-			// 大きさ
-			newParticle.transform.scale = EmitFanction::RandVector3(particleGroups[name].emiter.size, randomEngine_);
-
-			// 回転
-			newParticle.transform.rotate = EmitFanction::RandVector3(particleGroups[name].emiter.rotate, randomEngine_);
-
-			// 色
-			newParticle.color = EmitFanction::RandVector4(particleGroups[name].emiter.color, randomEngine_);
-
-			// 回転速度
-			newParticle.rotateVelocity = EmitFanction::RandVector3(particleGroups[name].emiter.rotateVelocity, randomEngine_);
-
-			//速度
-			newParticle.velocity = EmitFanction::RandVector3(particleGroups[name].emiter.velocity, randomEngine_);
-
-			// 加速度
-			newParticle.acceleration = EmitFanction::RandVector3(particleGroups[name].emiter.acceleration, randomEngine_);
-
-			// ライフタイム
-			newParticle.lifeTime = EmitFanction::RandFloat(particleGroups[name].emiter.lifeTime, randomEngine_);
-
-			// タイム
-			newParticle.currentTime = 0;
-
-			// 初期値
-			newParticle.strtTransform = newParticle.transform;
-
-			// パーティクルをグループに追加
-			particleGroups[name].particle.push_back(newParticle);
+			EmitFanction::CreateParticle(particleGroups[name], randomEngine_, spawnType, 0);
 		}
 	}
 
@@ -246,10 +171,12 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	std::random_device seedGenerator;
 	randomEngine_.seed(seedGenerator()); // randomEngine_ にシードを設定
 
+	// あるなら
 	if (particleGroups.contains(name)) {
 		return;
 	}
 
+	// パーティクルグループ生成
 	ParticleFanction::Create(particleGroups[name],name, textureFilePath,kNumMaxInstance,dxCommon_,model->modelData.mesh[0].get(),rasteType,blendType);
 }
 
@@ -259,9 +186,12 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	std::random_device seedGenerator;
 	randomEngine_.seed(seedGenerator()); // randomEngine_ にシードを設定
 
+	// あるなら
 	if (particleGroups.contains(name)) {
 		return;
 	}
+
+	// パーティクルグループ生成
 	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, primitive->GetMesh(), rasteType, blendType);
 }
 

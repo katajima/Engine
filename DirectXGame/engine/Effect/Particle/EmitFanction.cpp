@@ -145,6 +145,44 @@ void EmitFanction::ConversionMinMaxV4(MaxMin<Vector4>& renge)
 	renge.max.w = (std::max)(renge.min.w, renge.max.w);
 }
 
+void EmitFanction::CreateParticle(ParticleGroup& group, std::mt19937& randomEngine, ParticleData::SpawnType spawnType, int index)
+{
+	Particle newParticle;
+
+	// パーティクルの初期化 (必要に応じて詳細を設定)
+	// 位置
+	newParticle.transform.translate = EmitFanction::EmitPos(group, spawnType, randomEngine, index);
+
+	// 大きさ
+	newParticle.transform.scale = EmitFanction::RandVector3(group.emiter.size, randomEngine);
+
+	// 回転
+	newParticle.transform.rotate = EmitFanction::RandVector3(group.emiter.rotate, randomEngine);
+
+	// 色
+	newParticle.color = EmitFanction::RandVector4(group.emiter.color, randomEngine);
+
+	// 回転速度
+	newParticle.rotateVelocity = EmitFanction::RandVector3(group.emiter.rotateVelocity, randomEngine);
+
+	//速度
+	newParticle.velocity = EmitFanction::RandVector3(group.emiter.velocity, randomEngine);
+
+	// ライフタイム
+	newParticle.lifeTime = EmitFanction::RandFloat(group.emiter.lifeTime, randomEngine);
+
+	// 加速度
+	newParticle.acceleration = EmitFanction::RandVector3(group.emiter.acceleration, randomEngine);
+
+	// タイム
+	newParticle.currentTime = 0;
+
+	// 初期値
+	newParticle.strtTransform = newParticle.transform;
+
+	group.particle.push_back(newParticle);
+}
+
 
 
 

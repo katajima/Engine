@@ -32,6 +32,8 @@ namespace EmitFanction {
 	//
 	void ConversionMinMaxV4(MaxMin<Vector4>& renge);
 
+	// 
+	void CreateParticle(ParticleGroup& grop, std::mt19937& randomEngine, ParticleData::SpawnType spawnType, int index = 0);
 
 }
 
