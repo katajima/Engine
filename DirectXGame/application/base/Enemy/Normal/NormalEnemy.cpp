@@ -32,6 +32,8 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 
 
 	InitParticle();
+
+	nullChek = Matrix4x4::Identity();
 }
 
 void NormalEnemy::Update()
@@ -72,6 +74,9 @@ void NormalEnemy::Update()
 		dustEmit_->Update();
 		dustEmit2_->Update();
 		dustEmit3_->Update();
+	}
+	else {
+		//object_->
 	}
 
 	object_->Update();

@@ -202,22 +202,23 @@ void Entity3DManager::Update()
 		if (object != nullptr) {
 			object->Update();
 
-
-			if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent01) {
-				transparentObjects01.push_back(object);
-			}
-			else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent02) {
-				transparentObjects02.push_back(object);
-			}
-			else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent03) {
-				transparentObjects03.push_back(object);
-			}
-			else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kOpaque) {
-				if (object->GetAlpha() < 1.0f) {
+			if (object->GetIsSkin()) {
+				if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent01) {
 					transparentObjects01.push_back(object);
 				}
-				else {
-					opaqueObjects.push_back(object);
+				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent02) {
+					transparentObjects02.push_back(object);
+				}
+				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent03) {
+					transparentObjects03.push_back(object);
+				}
+				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kOpaque) {
+					if (object->GetAlpha() < 1.0f) {
+						transparentObjects01.push_back(object);
+					}
+					else {
+						opaqueObjects.push_back(object);
+					}
 				}
 			}
 		}

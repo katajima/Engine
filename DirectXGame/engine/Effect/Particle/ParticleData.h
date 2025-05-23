@@ -20,16 +20,27 @@ struct ParticleForGPU
 // パーティクル(一粒)
 struct Particle
 {
-	Transform transform;
-	Vector3 velocity;
-	Vector3 acceleration;
-	Vector4 color;
-	float lifeTime;
-	float currentTime;
+	Transform transform;			// SRT
+	Vector3 velocity;				// 速度
+	Vector3 acceleration;			// 加速
+	Vector4 color;					// 色
+	float lifeTime;					// 生存時間
+	float currentTime;				// 経過時間
+									   
+	Transform strtTransform;		// 初期SRT
+	Vector3 rotateVelocity;			// 回転速度
+	bool isDestroy = false;			// 破棄フラグ
 
-	Transform strtTransform;
-	Vector3 rotateVelocity;
-	bool isDestroy = false;
+	bool isEvent = false;			// イベントフラグ
+
+	float t01 = 0.25f;				// 
+	float t02 = 0.50f;				// 
+	float t03 = 0.57f;				// 
+
+
+	Vector4 color01;				// 色01
+	Vector4 color02;				// 色02
+	Vector4 color03;				// 色03
 };
 
 template<typename T>
@@ -110,6 +121,16 @@ struct Emiter
 	WorldTransform worldtransform;
 	bool isEmit = false;
 	int count;
+
+	bool isEvent = false;
+	
+
+	float t01 = 0.25f;				// 
+	float t02 = 0.50f;				// 
+	float t03 = 0.57f;				// 
+	Vector4 color01;				// 色01
+	Vector4 color02;				// 色02
+	Vector4 color03;				// 色03
 };
 
 // パーティクルグループ

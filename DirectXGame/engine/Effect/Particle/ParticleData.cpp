@@ -83,6 +83,20 @@ void ParticleFanction::Effect(ParticleGroup& group, std::list<Particle>::iterato
 	// 時間
 	particleIterator->currentTime += deltaTime;
 
+	float t = particleIterator->currentTime / particleIterator->lifeTime;
+
+	if (particleIterator->isEvent) {
+		if (particleIterator->t03 >= t) {
+			particleIterator->color = particleIterator->color03;
+		}
+		else if (particleIterator->t02 >= t) {
+			particleIterator->color = particleIterator->color02;
+		}
+		else if (particleIterator->t01 >= t) {
+			particleIterator->color = particleIterator->color01;
+		}
+	}
+
 	// 透過するか
 	if (group.isFlag.isAlpha) {
 		float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
@@ -121,7 +135,7 @@ void ParticleFanction::MaterialEffect(ParticleGroup& group)
 	group.material->GPUData();
 }
 
-void ParticleFanction::Create(ParticleGroup& particleGroup,const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
+void ParticleFanction::Create(ParticleGroup& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
 	DirectXCommon* dxCommon, ModelMesh* mesh, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
 {
 	particleGroup.emiter.renge.max = Vector3{ 1.0f,1.0f,1.0f };

@@ -238,6 +238,51 @@ void LineCommon::AddLineAABB(AABB aabb, Vector3 pos, Vector4 color)
 	}
 }
 
+void LineCommon::AddLineSphere(Sphere sphere, Vector4 color, int segmentW, int segmentH)
+{
+	float radius = sphere.radius;
+	Vector3 center = sphere.center;
+	float pi = static_cast<float>(std::numbers::pi * 2.0f);
+
+
+	for (int h = 0; h <= segmentH; ++h)
+	{
+		float theta = static_cast<float>(h) / segmentH * pi; // 緯度角 (0 ~ π)
+
+		for (int w = 0; w < segmentW; ++w)
+		{
+			float phi1 = static_cast<float>(w) / segmentW * pi; // 経度角 (0 ~ 2π)
+			float phi2 = static_cast<float>(w + 1) / segmentW * pi;
+
+			// 緯度線
+			Vector3 p1 = {
+				center.x + radius * sinf(theta) * cosf(phi1),
+				center.y + radius * cosf(theta),
+				center.z + radius * sinf(theta) * sinf(phi1)
+			};
+			Vector3 p2 = {
+				center.x + radius * sinf(theta) * cosf(phi2),
+				center.y + radius * cosf(theta),
+				center.z + radius * sinf(theta) * sinf(phi2)
+			};
+			AddLine(p1, p2, color);
+
+			if (h < segmentH)
+			{
+				float theta2 = static_cast<float>(h + 1) / segmentH * pi;
+
+				// 経度線
+				Vector3 p3 = {
+					center.x + radius * sinf(theta2) * cosf(phi1),
+					center.y + radius * cosf(theta2),
+					center.z + radius * sinf(theta2) * sinf(phi1)
+				};
+				AddLine(p1, p3, color);
+			}
+		}
+	}
+}
+
 void LineCommon::AddLineCorner(CornerSegment corner, WorldTransform pos)
 {
 	std::vector<Vector3> vertices;

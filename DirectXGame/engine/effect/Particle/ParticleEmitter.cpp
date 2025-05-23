@@ -23,6 +23,15 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	frequencyTime_ = 0.0f;
 
 	emitter_.color = { {1,1,1,1} ,{1,1,1,1} };
+	
+	emitter_.color01 = {1,1,1,1};
+	emitter_.color02 = {1,1,1,1};
+	emitter_.color03 = {1,1,1,1};
+	emitter_.t01 = 0.25f;
+	emitter_.t02 = 0.50f;
+	emitter_.t03 = 0.75f;
+
+
 	emitter_.renge.max = Vector3{ 1.0f,1.0f,1.0f };
 	emitter_.renge.min = Vector3{ -1.0f,-1.0f,-1.0f };
 	emitter_.color.max = Vector4{ 1,1,1,1 };
@@ -46,6 +55,8 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	emitter_.corner.center = 0;
 	emitter_.corner.segment = 3;
 
+	emitter_.isEvent = false;
+
 	isFlag.isLifeTimeScale_ = false;	// スケール
 	isFlag.isLifeTimeVelocity = false;// 速度
 	enableLighting_ = false;
@@ -54,7 +65,7 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	isFlag.isAlpha = false;    // 透明度
 
 	isEmit = true;
-
+	
 
 	uvTransformVeloctiy_.rotate = { 0,0,0 };
 	uvTransformVeloctiy_.scale = { 0,0,0 };
@@ -64,16 +75,22 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 void ParticleEmitter::Update()
 {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
-
-
 #ifdef _DEBUG
 	ImGui::Begin("EmitParticle");
-
 	if (ImGui::TreeNode(emitName_.c_str())) {
 		ImGui::SeparatorText("Emitter");
 		ImGui::DragFloat3("translate", &transform_.translate_.x, 0.1f);
 		ImGui::DragFloat3("rotate", &transform_.rotate_.x, 0.1f);
 		ImGui::Separator();
+		if(ImGui::Button("MODE_ADD") ){
+			particleGroup.blendType = ParticleData::BlendType::MODE_ADD;
+		}
+		if(ImGui::Button("MODE_MUlLIPLY") ){
+			particleGroup.blendType = ParticleData::BlendType::MODE_MUlLIPLY;
+		}
+		if(ImGui::Button("MODE_SUBTRACT") ){
+			particleGroup.blendType = ParticleData::BlendType::MODE_SUBTRACT;
+		}
 		ImGui::Text("flag");
 		ImGui::Checkbox("Emit", &isEmit);
 		ImGui::Separator();
@@ -85,6 +102,7 @@ void ParticleEmitter::Update()
 		ImGui::Checkbox("Alpha", &isFlag.isAlpha);
 		ImGui::Checkbox("Bounce", &isFlag.isBounce);
 		ImGui::Checkbox("Acceleration", &isFlag.isAcceleration);
+		ImGui::Checkbox("Event", &emitter_.isEvent);
 
 		ImGui::Separator();
 		ImGui::Checkbox("LifeTimeScale_", &isFlag.isLifeTimeScale_);
@@ -134,8 +152,6 @@ void ParticleEmitter::Update()
 			}
 
 		}
-
-
 		if (spawnShapeType_ == ParticleData::SpawnType::kSpline) {
 			ImGui::Separator();
 			ImGui::Text("spline");
@@ -146,18 +162,22 @@ void ParticleEmitter::Update()
 			}
 
 		}
-
-
-
+		ImGui::Separator(); // 水平線を引く
 		ImGui::Separator(); // 水平線を引く
 		ImGui::ColorEdit4("colorMax", &emitter_.color.max.x);
 		ImGui::ColorEdit4("colorMin", &emitter_.color.min.x);
-		ImGui::TreePop();
+		
+		ImGui::Separator(); // 水平線を引く
 
+		ImGui::SliderFloat("t01", &emitter_.t01,0.0f,1.0f);
+		ImGui::SliderFloat("t02", &emitter_.t02,0.0f,1.0f);
+		ImGui::SliderFloat("t03", &emitter_.t03,0.0f,1.0f);
+		ImGui::ColorEdit4("color01", &emitter_.color01.x);
+		ImGui::ColorEdit4("color02", &emitter_.color02.x);
+		ImGui::ColorEdit4("color03", &emitter_.color03.x);
+		ImGui::TreePop();
 		EmitMinMax();
 	}
-
-
 	ImGui::End();
 #endif
 

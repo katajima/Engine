@@ -406,10 +406,14 @@ void TestScene::InitializeParticle()
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 	
 	
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kAcceleration,"Acc");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kDestruction,"Dcc");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kColor,"Ccc");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kGravity,"Gcc");
+	/*GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kAcceleration,Field::ShapeType::kAABB,"加速");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kDestruction, Field::ShapeType::kAABB,"破棄");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kColor, Field::ShapeType::kAABB,"色");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kGravity, Field::ShapeType::kAABB,"重力");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kGravity, Field::ShapeType::kSphere,"重力");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kDeceleration, Field::ShapeType::kAABB,"減速");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kNoise, Field::ShapeType::kAABB,"ノイズ");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kTornado, Field::ShapeType::kAABB,"竜巻");*/
 
 	
 	emitter_ = std::make_unique<ParticleEmitter>();
@@ -429,6 +433,17 @@ void TestScene::InitializeParticle()
 	emitter_->AddControlPoints(Vector3{ 20,20,0 });
 	emitter_->AddControlPoints(Vector3{ 30,30,0 });
 
+
+	primitvPa_ = std::make_unique<ParticleEmitter>();
+	primitvPa_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitterPPPP", "cc", ParticleData::SpawnType::kAABB);
+	primitvPa_->GetFrequency() = 0.1f;
+	primitvPa_->SetCount(1);
+	//primitvPa_->SetParent(tail.worldtransform_);
+	primitvPa_->SetRotateMinMax(-Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
+	primitvPa_->SetPos({ 0,10,0 });
+	primitvPa_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
+	primitvPa_->SetLifeTimeMinMax(1.0f, 2.0f);
+	
 
 
 
@@ -637,6 +652,7 @@ void TestScene::UpdateRoom02()
 
 	emitter_->Update();
 	emitterEnemy_->Update();
+	primitvPa_->Update();
 }
 
 void TestScene::UpdateRoom03()

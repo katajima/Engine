@@ -12,6 +12,7 @@ void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 
 	objectWeapon_.Initialize(entity3DManager);
 	objectWeapon_.SetCamera(camera);
+	objectWeapon_.SetIsDraw(false);
 	objectWeapon_.SetModel("Sword.obj");
 
 }

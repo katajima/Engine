@@ -4,6 +4,11 @@
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 
 #include "ParticleData.h"
+#include "EmitFanction.h"
+
+#include "DirectXGame/engine/Math/Noise.h"
+
+
 
 class LineCommon;
 namespace Field {
@@ -23,6 +28,10 @@ namespace Field {
 		kAcceleration,	// 加速
 		kDestruction,	// 破棄
 		kColor,			// 色
+		kDeceleration,  // 減速
+		kNoise,			// ノイズ
+		kTornado,		// トルネード
+		kEvent,			// イベント
 	};
 
 	class FieldEffect {
@@ -49,13 +58,17 @@ namespace Field {
 		int segmentPerCurve = 3;											// カーブのセグメント数
 		std::vector<Vector3> controlPoints;									// 各ポジション
 		float force_{};														// 力
+		float lift_{};														// 上昇力
+		float deceleration_{};												// 減速
 		Vector4 color_{1,1,1,1};											// 色
-		
-	private:
-		bool isEffect = true;												// 効果を出すか
+		Noise noise_;														// ノイズ
+		float noiseScale_ = 1.0f;											// ノイズスケール
+
+		MaxMin<Vector3> rondomRenge{};										// 乱数範囲 (Vector3の範囲)
 
 	private:
-		
+		bool isEffect = true;												// 効果を出すか
+	private:
 		ShapeType shapeType_ = ShapeType::kAABB;							// 形状選択
 		std::string name_ = "EffectFildeAABB";								// 名前
 		std::string nameType = "Acceleration";								// タイプ名前

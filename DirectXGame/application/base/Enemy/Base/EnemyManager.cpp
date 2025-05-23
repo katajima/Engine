@@ -12,6 +12,15 @@ void EnemyManager::Update()
 	for (auto& enemy : enemys_) {
 		enemy->Update();
 	}
+
+
+	// 死亡した敵を削除
+	enemys_.erase(
+		std::remove_if(enemys_.begin(), enemys_.end(),
+			[](const std::unique_ptr<BaseEnemy>& enemy) {
+				return !enemy->GetAlive(); 
+			}),
+		enemys_.end());
 }
 
 void EnemyManager::Draw()

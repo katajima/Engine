@@ -156,6 +156,8 @@ public:
 
 	float GetAlpha();
 
+	bool GetIsSkin() { return isSkin_; }
+
 private:
 	// 各コマンドリスト
 	void DrawSetting();
@@ -179,7 +181,10 @@ private:
 	Camera* camera = nullptr;
 	// トランスフォームデータ
 	std::unique_ptr<Transfomation> transfomation = nullptr;
-	//
+	
+	// 何かしらの見た目があるか
+	bool isSkin_ = false;
+
 
 	// アニメーションするかのフラグ
 	bool flag = true;

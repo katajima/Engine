@@ -37,6 +37,8 @@ public:
 	
 	void AddLineAABB(AABB aabb, Vector3 pos, Vector4 color = {1,1,1,1});
 
+	void AddLineSphere(Sphere sphere,Vector4 color = { 1,1,1,1 },int segmentW = 5,int segmentH = 5);
+
 	void AddLineCorner(CornerSegment corner,WorldTransform pos);
 
 	void AddLineCapsule(Capsule capsule);

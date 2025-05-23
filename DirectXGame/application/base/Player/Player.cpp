@@ -29,6 +29,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	objectReticle_.Initialize(entity3DManager);
 	objectReticle_.SetCamera(camera_);
 	objectReticle_.SetModel("enemy.obj");
+	objectReticle_.SetIsDraw(false);
 	objectReticle_.worldtransform_.parent_ = &objectBase_.worldtransform_;
 	objectReticle_.worldtransform_.translate_ = { 0,0,30 };
 
@@ -120,16 +121,21 @@ void Player::Update()
 			switch (behavior_) {
 			case Behavior::kRoot:
 			default:
+				weapon_->GetObject3D().SetIsDraw(false);
+
 				BehaviorRootInitialize();
 				isInvincible = false;
 				break;
 			case Behavior::kAttack:
+				weapon_->GetObject3D().SetIsDraw(true);
 				BehaviorAttackInitialize();
 				isInvincible = true;
 				break;
 			case Behavior::kJump:
+				weapon_->GetObject3D().SetIsDraw(false);
 				break;
 			case Behavior::kDie:
+				weapon_->GetObject3D().SetIsDraw(false);
 				BehaviorDieInitialize();
 				break;
 			}

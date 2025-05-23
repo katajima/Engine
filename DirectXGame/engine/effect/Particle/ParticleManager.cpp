@@ -69,7 +69,7 @@ void ParticleManager::Update()
 {
 #ifdef _DEBUG
 	ImGui::Begin("Field");
-	for (auto& acc : fieldEffectAABB_) {
+	for (auto& acc : fieldEffect_) {
 		acc.DebugImgui();
 	}
 	ImGui::End();
@@ -98,7 +98,7 @@ void ParticleManager::Update()
 				if (group.instanceCount < kNumMaxInstance) {
 
 					// 場所による影響
-					Field::Effect(group, particleIterator, fieldEffectAABB_, deltaTime);
+					Field::Effect(group, particleIterator, fieldEffect_, deltaTime);
 
 					// パーティクル影響
 					ParticleFanction::Effect(group, particleIterator, deltaTime);

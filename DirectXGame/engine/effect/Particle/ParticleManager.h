@@ -75,10 +75,10 @@ public:
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
 	// フィールド
-	void AddFieldEffectAABB(Field::EffectType type,const std::string& name) {
+	void AddFieldEffect(Field::EffectType type,Field::ShapeType shapeType,const std::string& name) {
 		Field::FieldEffect field;
-		field.Init(name, Field::ShapeType::kAABB,type,lineCommon_);
-		fieldEffectAABB_.push_back(field);
+		field.Init(name, shapeType,type,lineCommon_);
+		fieldEffect_.push_back(field);
 	}
 	
 private:
@@ -115,7 +115,7 @@ private:
 	const uint32_t kNumMaxInstance = 12000;
 	
 	// フィールド関係
-	std::vector <Field::FieldEffect> fieldEffectAABB_;
+	std::vector <Field::FieldEffect> fieldEffect_;
 
 private: //PSO関係 
 	////ルートシグネチャデスク

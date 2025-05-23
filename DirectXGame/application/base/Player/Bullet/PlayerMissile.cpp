@@ -165,6 +165,10 @@ void PlayerMissile::Update()
 		ｍSmokeEmitter2_->Update();
 	}
 
+	if (enemy_->nullChek == Matrix4x4::Identity()) {
+		enemyPos_ = enemy_->GetObject3D()->GetWorldPosition();
+	}
+
 	if (isAlive_) {
 		Vector3 norm;
 
@@ -192,7 +196,7 @@ void PlayerMissile::Update()
 			count += GetTimer();
 			if (count >= max_count)
 			{
-				Vector3 pos = enemy_->GetObject3D()->GetWorldPosition() - object_->GetWorldPosition();
+				Vector3 pos = enemyPos_ - object_->GetWorldPosition();
 
 				Vector3 pos2 = pos;
 
@@ -201,9 +205,9 @@ void PlayerMissile::Update()
 
 				object_->worldtransform_.translate_ += velocity_ * GetTimer();
 
-				if (5 >= DistanceXZ(object_->GetWorldPosition(), enemy_->GetObject3D()->GetWorldPosition())) {
+				if (5 >= DistanceXZ(object_->GetWorldPosition(), enemyPos_)) {
 					phase_++;
-					posGround = enemy_->GetObject3D()->GetWorldPosition();
+					posGround = enemyPos_;
 					tragetPos = posGround - object_->GetWorldPosition();
 					count = 0;
 				}

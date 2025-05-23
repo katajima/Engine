@@ -40,7 +40,7 @@ private:
 
 	Vector3 tragetPos;
 
-
+	Vector3 enemyPos_;
 
 
 private: //パーティクルエミッター

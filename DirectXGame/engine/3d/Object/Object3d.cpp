@@ -46,6 +46,8 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 
 	entity3DManager_->SetEntity3D(this);
 
+	isSkin_ = false;
+
 	// オブジェクトタイプ
 	objectType_ = objectType;
 
@@ -73,7 +75,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 		objectTypeName = "NoObject";
 		break;
 	}
-
+	
 	// 映り方
 	rasterizerType_ = rasterizerType;
 
@@ -86,8 +88,12 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 void Object3d::Update()
 {
 	Matrix4x4 localMatrix = MakeIdentity4x4();
-
 	worldtransform_.Update();
+
+	if (model || primitive_ || skyBox_ || ocean_) {
+		isSkin_ = true;
+	}
+	
 
 	switch (objectType_)
 	{

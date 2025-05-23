@@ -180,6 +180,19 @@ void EmitFanction::CreateParticle(ParticleGroup& group, std::mt19937& randomEngi
 	// 初期値
 	newParticle.strtTransform = newParticle.transform;
 
+	// 
+	newParticle.isEvent = group.emiter.isEvent;
+	
+	newParticle.color01 = group.emiter.color01;
+	newParticle.color02 = group.emiter.color02;
+	newParticle.color03 = group.emiter.color03;
+
+	newParticle.t01 = group.emiter.t01;
+	newParticle.t02 = group.emiter.t02;
+	newParticle.t03 = group.emiter.t03;
+
+
+
 	group.particle.push_back(newParticle);
 }
 

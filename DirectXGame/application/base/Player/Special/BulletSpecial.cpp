@@ -15,6 +15,7 @@ void BulletSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	injectionLeftObj_->Initialize(entity3DManager);
 	injectionLeftObj_->SetCamera(camera);
 	injectionLeftObj_->SetModel("AnimatedCube.gltf");
+	injectionLeftObj_->SetIsDraw(false);
 	injectionLeftObj_->worldtransform_.translate_ = injectionLeftPos_;
 	injectionLeftObj_->worldtransform_.scale_ = { 0.75f,1.25f,1.0f };
 
@@ -22,6 +23,7 @@ void BulletSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	injectionRightObj_->Initialize(entity3DManager);
 	injectionRightObj_->SetCamera(camera);
 	injectionRightObj_->SetModel("AnimatedCube.gltf");
+	injectionRightObj_->SetIsDraw(false);
 	injectionRightObj_->worldtransform_.translate_ = injectionRightPos_;
 	injectionRightObj_->worldtransform_.scale_ = { 0.75f,1.25f,1.0f };
 
@@ -74,6 +76,9 @@ void BulletSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletMa
 			}
 		}
 		index_b = 0;
+
+		injectionLeftObj_->SetIsDraw(true);
+		injectionRightObj_->SetIsDraw(true);
 		break;
 	case 1:
 		// 弾を発射
@@ -121,10 +126,13 @@ void BulletSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletMa
 			clock_ = 1;
 			bulletNum = 0;
 			phese_ = 2;
+			injectionLeftObj_->SetIsDraw(false);
+			injectionRightObj_->SetIsDraw(false);
 		}
 
 		break;
 	case 2:
+		
 		break;
 	}
 }
