@@ -199,7 +199,7 @@ void LineCommon::AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vec
 	lineNum_ += static_cast<uint32_t>(mesh_->indices.size());
 }
 
-void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
+void LineCommon::AddLineAABB(AABB aabb, Vector3 pos, Vector4 color)
 {
 	// AABB の最小・最大範囲をワールド座標に適用
 	Vector3 min = aabb.min_ + pos;
@@ -220,9 +220,6 @@ void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
 		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // 前後を結ぶ
 	};
 
-	// ラインの色（固定値または動的変更可能）
-	Vector4 lineColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色（必要なら引数に追加）
-
 	// 頂点とラインを追加
 	for (int i = 0; i < 12; ++i)
 	{
@@ -230,8 +227,8 @@ void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
 		int idx2 = edges[i][1];
 
 		// 頂点を追加
-		mesh_->verticesline.push_back({ { vertices[idx1].x, vertices[idx1].y, vertices[idx1].z, 1.0f }, lineColor });
-		mesh_->verticesline.push_back({ { vertices[idx2].x, vertices[idx2].y, vertices[idx2].z, 1.0f }, lineColor });
+		mesh_->verticesline.push_back({ { vertices[idx1].x, vertices[idx1].y, vertices[idx1].z, 1.0f }, color });
+		mesh_->verticesline.push_back({ { vertices[idx2].x, vertices[idx2].y, vertices[idx2].z, 1.0f }, color });
 
 		// インデックスを追加
 		mesh_->indices.push_back(lineNum_);
@@ -346,7 +343,7 @@ void LineCommon::AddLineCapsule(Capsule capsule)
 
 
 
-void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform pos)
+void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform pos, Vector4 color)
 {
 	int SPLIT = static_cast<int>(4 * controlPoints.size());
 
@@ -357,11 +354,31 @@ void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform po
 		float t0 = index / float(SPLIT);
 		float t1 = (index + 1) / float(SPLIT);
 
-		splineStr = CatmullRom(controlPoints, t0) + pos.translate_;
-		splineEnd = CatmullRom(controlPoints, t1) + pos.translate_;
+		splineStr = CatmullRom(controlPoints, t0) + pos.worldMat_.GetWorldPosition();
+		splineEnd = CatmullRom(controlPoints, t1) + pos.worldMat_.GetWorldPosition();
 
 
-		AddLine(splineStr, splineEnd,{1,1,1,1});
+		AddLine(splineStr, splineEnd, color);
+	}
+
+}
+
+void LineCommon::AddSpline(std::vector<Vector3> controlPoints, Vector3 pos, Vector4 color)
+{
+	int SPLIT = static_cast<int>(4 * controlPoints.size());
+
+	Vector3 splineStr{};
+	Vector3 splineEnd{};
+	//ライン
+	for (int index = 0; index < SPLIT; index++) {
+		float t0 = index / float(SPLIT);
+		float t1 = (index + 1) / float(SPLIT);
+
+		splineStr = CatmullRom(controlPoints, t0) + pos;
+		splineEnd = CatmullRom(controlPoints, t1) + pos;
+
+
+		AddLine(splineStr, splineEnd, color);
 	}
 
 }

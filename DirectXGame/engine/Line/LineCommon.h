@@ -35,14 +35,14 @@ public:
 	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat);
 	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
 	
-	void AddLineAABB(AABB aabb, Vector3 pos);
+	void AddLineAABB(AABB aabb, Vector3 pos, Vector4 color = {1,1,1,1});
 
 	void AddLineCorner(CornerSegment corner,WorldTransform pos);
 
 	void AddLineCapsule(Capsule capsule);
 
-	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos);
-
+	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos, Vector4 color = { 1,1,1,1 });
+	void AddSpline(std::vector<Vector3> controlPoints, Vector3 pos, Vector4 color = { 1,1,1,1 });
 	
 	void AddLineTriangle(Triangle triangle, WorldTransform pos);
 

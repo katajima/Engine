@@ -46,6 +46,31 @@ static bool IsCollision(const Sphere& s1, const Sphere& s2)
 
 	return isDistance;
 }
+//衝突判定(球と点)
+static bool IsCollision(const Sphere& s1, const Vector3& v1)
+{
+	Vector3 result{};
+	float isDistance = false;
+
+	result.x = v1.x - s1.center.x;
+	result.y = v1.y - s1.center.y;
+	result.z = v1.z - s1.center.z;
+
+	float distance = Length(result);
+
+	if (distance <= s1.radius) {
+
+		isDistance = true;
+
+	}
+	else {
+
+		isDistance = false;
+
+	}
+
+	return isDistance;
+}
 
 //衝突判定(球と平面)
 static bool IsCollision(const Sphere& sphere, const Plane& plane)
@@ -156,6 +181,42 @@ static bool IsCollision(const Triangle& triangle, const Capsule& capsule)
 
 	return false;
 }
+
+
+// 点とカプセル（線分 + 半径）の距離チェック
+static bool PointInCapsule(const Vector3& point, const Vector3& a, const Vector3& b, float radius) {
+	Vector3 ab = b - a;
+	Vector3 ap = point - a;
+
+	float abLengthSq = Dot(ab, ab);
+	float t = abLengthSq > 0.0f ? std::clamp(Dot(ap, ab) / abLengthSq, 0.0f, 1.0f) : 0.0f;
+
+	Vector3 closest = a + ab * t;
+	float distSq = LengthSquared(point - closest);
+
+	return distSq <= radius * radius;
+}
+
+
+static bool IsCollision(const std::vector<Vector3>& controlPoints, float radius, const Vector3& point, int segmentPerCurve = 10) {
+	if (controlPoints.size() < 4) return false;
+
+	int totalSegment = static_cast<int>(controlPoints.size() - 3) * segmentPerCurve;
+	for (int i = 0; i < totalSegment; ++i) {
+		float t0 = i / static_cast<float>(totalSegment);
+		float t1 = (i + 1) / static_cast<float>(totalSegment);
+
+		Vector3 pA = CatmullRom(controlPoints, t0);
+		Vector3 pB = CatmullRom(controlPoints, t1);
+
+		if (PointInCapsule(point, pA, pB, radius)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 
 // AABBとAABB
 static bool IsCollision(const AABB& aabb1, const AABB& aabb2)
@@ -472,7 +533,5 @@ static bool CapsuleIntersectsAABB(const Capsule& capsule, const AABB& box) {
 	return distanceSquared <= (capsule.radius * capsule.radius);
 }
 
-// カプセルとおくつりー衝突判定
-//bool CapsuleIntersectsWithOctree(const Capsule& capsule, OctreeNode* node);
 
 #pragma endregion

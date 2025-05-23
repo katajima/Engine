@@ -4,6 +4,8 @@
 #include "DirectXGame/engine/DirectX/Resource/StructuredBuffer.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
 
+
+
 class Material;
 class Primitive;
 
@@ -27,7 +29,7 @@ struct Particle
 
 	Transform strtTransform;
 	Vector3 rotateVelocity;
-	//Matrix4x4 pre;
+	bool isDestroy = false;
 };
 
 template<typename T>
@@ -74,6 +76,8 @@ namespace ParticleData {
 	struct IsFlag
 	{
 		bool usebillboard = true;								// ビルボードするか
+		bool usebillboardY = false;								// Y軸
+		bool billboardRotZ = false;								// z軸回転するか
 		bool isAlpha = false;									// 透明にしていくか
 		bool isLine = true;										// ライン描画するか
 		bool isGravity = false;									// 重力を有効にするか
@@ -81,6 +85,7 @@ namespace ParticleData {
 		bool isRotateVelocity = false;							// 回転するか
 		bool isLifeTimeVelocity = false;						// 速度
 		bool isBounce = false;									// 跳ねるか
+		bool isAcceleration = false;							// 加速度を付けるか
 	};
 
 }
@@ -90,13 +95,15 @@ namespace ParticleData {
 struct Emiter
 {
 	// ランダム用
-	MaxMin<Vector3> renge;     //出現位置 (Vector3の範囲)
-	MaxMin<Vector4> color;     // 色 (Vector3の範囲)
-	MaxMin<Vector3> size;        // 大きさ (floatの範囲)
-	MaxMin<Vector3> rotate;      // 回転 (floatの範囲)
-	MaxMin<Vector3> rotateVelocity;// 回転 (floatの範囲)
-	MaxMin<float> lifeTime;    // 生存時間 (floatの範囲)
-	MaxMin<Vector3> velocity;  // 速度 (Vector3の範囲)
+	MaxMin<Vector3> renge;			//出現位置 (Vector3の範囲)
+	MaxMin<Vector4> color;			// 色 (Vector3の範囲)
+	MaxMin<Vector3> size;			// 大きさ (floatの範囲)
+	MaxMin<Vector3> rotate;			// 回転 (floatの範囲)
+	MaxMin<Vector3> rotateVelocity;	// 回転 (floatの範囲)
+	MaxMin<float> lifeTime;			// 生存時間 (floatの範囲)
+	MaxMin<Vector3> velocity;		// 速度 (Vector3の範囲)
+	MaxMin<Vector3> acceleration;	// 加速度 (Vector3の範囲)
+
 	CornerSegment corner;
 	float sphereRad;
 	std::vector<Vector3> controlPoints; // 各ポジション
@@ -108,18 +115,40 @@ struct Emiter
 // パーティクルグループ
 struct ParticleGroup
 {
-	std::string name;										// 名前
-	std::unique_ptr<Material> material = nullptr;			// マテリアルデータ
-	std::list<Particle> particle;							// パーティクル
-	bool flag;												//　
-	StructuredBuffer<ParticleForGPU> sbParticleResource_;	// パーティクルリソース(sBuffer)
-	uint32_t instanceCount;									// インスタンス数
-	ModelMesh* mesh;										// メッシュ
-	Emiter emiter;											// エミッター
-	ParticleData::IsFlag isFlag;
+	std::string name;														// 名前
+	std::unique_ptr<Material> material = nullptr;							// マテリアルデータ
+	std::list<Particle> particle;											// パーティクル
+	
+
+	StructuredBuffer<ParticleForGPU> sbParticleResource_;					// パーティクルリソース(sBuffer)
+	uint32_t instanceCount;													// インスタンス数
+	ModelMesh* mesh;														// メッシュ
+	Emiter emiter;															// エミッター
+	ParticleData::IsFlag isFlag;											// 各フラグ
 	ParticleData::EmitType emitType = ParticleData::EmitType::kRandom;		// エミッターでの出方
 	ParticleData::TopBottom topBottom = ParticleData::TopBottom::kBottom;	// 
 	ParticleData::RasterizerType rasteType;									// ラスタライザタイプ
 	ParticleData::BlendType blendType;										// ブレンドタイプ
-	Transform uvTransformVeloctiy_{ {},{},{0,0,0} };		// uvトランスフォーム
+	Transform uvTransformVeloctiy_{ {},{},{0,0,0} };						// uvトランスフォーム
+	float kGravitationalAcceleration = 9.8f;								// 重力
+};
+
+
+class DirectXCommon;
+namespace ParticleFanction {
+
+	// ビルボード
+	Matrix4x4 Billboard(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera);
+
+	// パーティクル影響
+	void Effect(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, float deltaTime);
+
+	// パーティクルデータをGPUに送る
+	void WorldDataForGPU(ParticleGroup& group, std::list<Particle>::iterator& particleIterator, Camera* camera);
+
+	void MaterialEffect(ParticleGroup& group);
+
+	void Create(ParticleGroup& particleGrou,const std::string name, const std::string textureFilePath , uint32_t kNumMaxInstance,
+		DirectXCommon* dxCommon, ModelMesh* mesh , ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType);
+
 };

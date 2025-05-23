@@ -601,3 +601,41 @@ Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const V
 	return result;
 }
 ;
+
+Matrix4x4 MakeBillboardMatrixY(const Matrix4x4& cameraWorldMatrix)
+{
+	// カメラの正面ベクトル（Z軸）
+	Vector3 cameraZ = Normalize(cameraWorldMatrix.Forward());
+
+	// Y軸固定
+	Vector3 up = { 0.0f, 1.0f, 0.0f };
+	
+	Vector3 right = Normalize({ cameraZ.z, 0.0f, cameraZ.x }); // Y軸ビルボードの右方向
+	
+	// Z軸 = X × up（再計算して直交に）
+	Vector3 front = Normalize(Cross(right, up));
+
+	Matrix4x4 result;
+
+	result.m[0][0] = right.x;
+	result.m[1][0] = right.y;
+	result.m[2][0] = right.z;
+	result.m[3][0] = 0.0f;
+
+	result.m[0][1] = up.x;
+	result.m[1][1] = up.y;
+	result.m[2][1] = up.z;
+	result.m[3][1] = 0.0f;
+
+	result.m[0][2] = front.x;
+	result.m[1][2] = front.y;
+	result.m[2][2] = front.z;
+	result.m[3][2] = 0.0f;
+
+	result.m[0][3] = 0.0f;
+	result.m[1][3] = 0.0f;
+	result.m[2][3] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}

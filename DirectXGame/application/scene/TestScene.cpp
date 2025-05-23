@@ -405,7 +405,13 @@ void TestScene::InitializeParticle()
 {
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 	
+	
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kAcceleration,"Acc");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kDestruction,"Dcc");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kColor,"Ccc");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffectAABB(Field::EffectType::kGravity,"Gcc");
 
+	
 	emitter_ = std::make_unique<ParticleEmitter>();
 	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleData::SpawnType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
@@ -433,9 +439,11 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->SetCount(1);
 	//emitterEnemy_->SetParent(mm.worldtransform_);
 	emitterEnemy_->SetPos({ 0,50,0 });
-	emitterEnemy_->SetVelocityMinMax({ -0,20,-5 }, { 5, 20, 5 });
+	emitterEnemy_->SetVelocityMinMax({ -10,20,-10 }, { 10, 50, 10 });
+	emitterEnemy_->SetRengeMinMax({ -1,0,-1 }, { 1, 10, 1 });
 	emitterEnemy_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
 	emitterEnemy_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	//emitterEnemy_->SetColorMinMax();
 	emitterEnemy_->SetLifeTimeMinMax(5, 10);
 	emitterEnemy_->SetIsGravity(true);
 	emitterEnemy_->SetUsebillboard(false);

@@ -80,6 +80,10 @@ public:
         };
     }
 
+    Vector3 Forward() const {
+        // ワールド行列のZ軸は「m[2][0], m[2][1], m[2][2]」列
+        return Vector3{ m[2][0], m[2][1], m[2][2] };
+    }
 private:
 
 };
@@ -141,3 +145,5 @@ Matrix4x4 MakeViewportMatrix(float leht, float top, float width, float height, f
 
 
 Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
+
+Matrix4x4 MakeBillboardMatrixY(const Matrix4x4& cameraWorldMatrix);

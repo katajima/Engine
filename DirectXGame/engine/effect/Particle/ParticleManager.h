@@ -9,21 +9,6 @@
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 
-// C++
-#include <windows.h>
-#include<cstdint>
-#include<string>
-#include<fstream>
-#include<sstream>
-#include<wrl.h>
-using namespace Microsoft::WRL;
-#include<memory>
-#include<vector>
-#include<random>
-#include<numbers>
-
-
-
 // engine
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
@@ -33,6 +18,8 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 #include "ParticleData.h"
+#include "EmitFanction.h"
+#include "ParticleField.h"
 
 class LightManager;
 class Material;
@@ -87,68 +74,50 @@ public:
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
+	// フィールド
+	void AddFieldEffectAABB(Field::EffectType type,const std::string& name) {
+		Field::FieldEffect field;
+		field.Init(name, Field::ShapeType::kAABB,type,lineCommon_);
+		fieldEffectAABB_.push_back(field);
+	}
+	
 private:
 	// ルートシグネチャの作成
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
 
-	// ランダム
-	void RandParticle(const std::string name, ParticleData::SpawnType spawnType);
-
 	
-
 	void BlendAdd();
 
 	void BlendSubtract();
 
 	void BlendMuliply();
 
-private: // エミッタ種類
-	void PointEmit(ParticleGroup& particleGroup); // Point
-
-	void AABBEmit(ParticleGroup& particleGroup); // AABB
-
-	void LineEmit(ParticleGroup& particleGroup); // ライン
-
-	void CornerLineEmit(ParticleGroup& particleGroup); // 角線
-
-	void SplineEmit(ParticleGroup& particleGroup); // スプライン曲線
-
-	void SphereEmit(ParticleGroup& particleGroup); // 球状
-
+private: // もらいもの
+	LightManager* lightManager_ = nullptr;	// ライト
+	DirectXCommon* dxCommon_ = nullptr;		// DirectX
+	SrvManager* srvManager_ = nullptr;		// SRV
+	EffectManager* efectManager_ = nullptr;	// エフェクト
+	LineCommon* lineCommon_ = nullptr;		// ライン
+	Camera* camera_ = nullptr;				// カメラ
 private:
-
-	LightManager* lightManager_ = nullptr;
-
-	DirectXCommon* dxCommon_ = nullptr;
-	SrvManager* srvManager_ = nullptr;
-	EffectManager* efectManager_ = nullptr;
-	LineCommon* lineCommon_ = nullptr;
-
+	// PSO設定
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
+	// ランダムエンジン
 	std::mt19937 randomEngine_;
 
-
+	// パーティクルグループ
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 
-
+	// 最大パーティクル量
 	const uint32_t kNumMaxInstance = 12000;
-	//float kDeltaTime;
-	bool usebillboard = true;
-	bool upData = true;
-	bool upDataWind = false;
-	uint32_t numInstance{};
+	
+	// フィールド関係
+	std::vector <Field::FieldEffect> fieldEffectAABB_;
 
-
-	Camera* camera_ = nullptr;
-
-
-	Transform transform{};
-
-
-	const float kGravitationalAcceleration = 9.8f;
+private: //PSO関係 
 	////ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 	////ルートシグネチャ
@@ -156,11 +125,6 @@ private:
 	//// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[6];
 
-
-
 	D3D12_BLEND_DESC blendDesc{};
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 };
-
-
-

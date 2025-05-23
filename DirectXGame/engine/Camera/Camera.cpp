@@ -183,7 +183,19 @@ void Camera::UpdateImGui()
 	if (input_->IsPushKey(DIK_DOWN)) {
 		transform_.translate.y -= sp;
 	}
-
+	sp = 0.01f;
+	if (input_->IsPushKey(DIK_I)) {
+		transform_.rotate.x += sp;
+	}
+	if (input_->IsPushKey(DIK_K)) {
+		transform_.rotate.x -= sp;
+	}
+	if (input_->IsPushKey(DIK_L)) {
+		transform_.rotate.y += sp;
+	}
+	if (input_->IsPushKey(DIK_J)) {
+		transform_.rotate.y -= sp;
+	}
 
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
 		SetShake(debugShakeTime_, debugShakeDirectionRange_);
