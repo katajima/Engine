@@ -110,7 +110,6 @@ float3 DirectionalLightFunc2(VertexShaderOutput input, float4 textureColor, floa
         }
 
         float3 specular = gDirectionalLight.color.rgb * spec * gDirectionalLight.intensity;
-        //specular = float3(0,0,0);
         result = diffuse + specular;
     }
     return result;

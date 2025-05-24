@@ -253,8 +253,6 @@ void PlayerMissile::Update()
 
 
 	mExplosionSmokeEmitter_->Update();
-
-	//object_->Update();
 }
 
 void PlayerMissile::Draw()

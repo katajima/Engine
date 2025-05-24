@@ -3,68 +3,61 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
 void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
 {
-	dxCommon_ =  dxcommon;
+	dxCommon_ = dxcommon;
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
+	skyBox = std::make_unique<SkyBox>();
+	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
 
 	// 空
 	sky_ = std::make_unique<Object3d>();
-	sky_->Initialize(entity3DManager_);
-	sky_->SetModel("skydome.obj");
+	sky_->Initialize(entity3DManager_, Object3d::ObjectType::kSkyBox);
+	sky_->SetModel("resources/Texture/hdr/sky.dds");
 	sky_->SetCamera(camera);
-	sky_->worldtransform_.scale_ = { 100,100,100 };
-	sky_->GetMaterial(0)->enableLighting_ = false;
-	sky_->GetMaterial(0)->enableLighting_ = false;
+	sky_->worldtransform_.scale_ = { 200,200,200 };
+	sky_->SetSkyBox(skyBox.get());
+	sky_->SetName("skyBox");
 
 	// 地面
 	tail_ = std::make_unique<Object3d>();
 	tail_->Initialize(entity3DManager_);
-	tail_->SetModel("renga.gltf");
-	//tail_->SetModel("coast.gltf");
+	tail_->SetModel("stage.gltf");
+	tail_->SetName("stage");
 	tail_->SetCamera(camera);
-	tail_->worldtransform_.scale_ = { 4,1,4 };
-	tail_->GetMaterial(0)->transform.scale = {10,10,1};
-	tail_->GetMaterial(0)->shininess_ = 1064.0f;
-	
+	tail_->worldtransform_.scale_ = { 4,4,4 };
+	tail_->GetMaterial(0)->transform.scale = { 10,10,1 };
+	tail_->GetMaterial(0)->shininess_ = 64.0f;
 
-	// 地面黒
-	tail2_ = std::make_unique<Object3d>();
-	tail2_->Initialize(entity3DManager_);
-	tail2_->SetModel("black.obj");
-	tail2_->SetCamera(camera);
-	tail2_->worldtransform_.scale_ = { 104,104,104 };
-	tail2_->worldtransform_.translate_.y = -20;
+	// 列車
+	train_ = std::make_unique<Object3d>();
+	train_->Initialize(entity3DManager_);
+	train_->SetModel("train.gltf");
+	train_->SetName("train");
+	train_->SetCamera(camera);
+	train_->worldtransform_.translate_ = { -3111,300,1040 };
+	train_->worldtransform_.scale_ = { 8,8,8 };
+	//train_->GetMaterial(0)->transform.scale = {10,10,1};
+	train_->GetMaterial(0)->shininess_ = 64.0f;
 
-
-	// 工場
-	warePos.push_back({ 300,0,-200 });
-	warePos.push_back({ 300,0,-100 });
-	warePos.push_back({ 300,0,0 });
-	warePos.push_back({ 300,0,100 });
-	warePos.push_back({ 300,0,200 });
-
-	for (int i = 0; i < warePos.size(); i++) {
-		auto obj = std::make_unique<Object3d>();
-		obj->Initialize(entity3DManager_);
-		obj->SetModel("warehouse.gltf");
-		obj->SetCamera(camera);
-		obj->worldtransform_.scale_ = { 2, 2, 2 };
-		obj->worldtransform_.translate_ = warePos[i];
-		obj->worldtransform_.rotate_.y = DegreesToRadians(90);
+	PointLightData pointLightData{};
+	pointLightData.color = { 1,1,1,1 };
+	pointLightData.position = { 0,100,0 };
+	pointLightData.radius = 1000.0f;
+	pointLightData.intensity = 1.0f;
+	pointLightData.isLight = true;
+	pointLightData.lig = 0.1f;
 
 
-		warehouseObject_.push_back(std::move(obj));
-	}
+	pointLight_ = std::make_shared<PointLight>();
+	pointLight_->point = pointLightData;
 
-	// 海
-	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(entity3DManager_, { 10000,10000 });
-
-
+	entity3DManager_->GetLightManager()->AddLight(pointLight_);
 
 
 	emit_ = std::make_unique<ParticleEmitter>();
@@ -78,49 +71,54 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	emit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.2f,0.2f,0.2f });
 	emit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
 	emit_->SetRengeMinMax({ -400,-100,-400 }, { 400,100,400 });
+
+
+	emitTrainDust_ = std::make_unique<ParticleEmitter>();
+	emitTrainDust_->Initialize(particleManager, "trainDust", "trainDust");
+	emitTrainDust_->GetFrequency() = 0.0f;
+	emitTrainDust_->SetLifeTimeMinMax(2.0f, 3.0f);
+	emitTrainDust_->SetSizeMinMax(Vector3{ 10.0f,10.0f,10.0f }, { 10.0f,10.0f,10.0f });
+	emitTrainDust_->SetColorMinMax({ 0.2f, 0.2f, 0.2f }, { 0.2f, 0.2f, 0.2f });
+	emitTrainDust_->SetAlphaClipping(0.0f);
+	emitTrainDust_->SetCount(7);
+	emitTrainDust_->transform_.translate_ = { 6,9,0 };
+	emitTrainDust_->SetParent(train_->worldtransform_);
+	emitTrainDust_->SetIsAlpha(true);
+	emitTrainDust_->SetVelocityMinMax(Vector3{ 0.0f,10.0f,0.0f }, { 0.0f, 20.0f, 0.0f });
+	//emitTrainDust_->SetIsLifeTimeScale(true);
+	//emitTrainDust_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
+	emitTrainDust_->SetUsebillboard(true);
+	emitTrainDust_->SetUsebillboardRotZ(true);
+	emitTrainDust_->SetRotateMinMax(-Vector3{0,0,3.14f}, Vector3{0,0,3.14f});
+
 }
 
 void Stage::Update()
 {
-	// タイル
-	tail_->Update();
-	tail2_->Update();
+	train_->worldtransform_.translate_.x += trainSpeed_ * MyGame::GameTime();
 
-	//空
-	sky_->Update();
+	if (trainEndX_ < train_->worldtransform_.translate_.x)
+	{
+		trainWarpTime_ += MyGame::GameTime();
 
-
-	// 工場
-	for (int i = 0; i < warehouseObject_.size(); i++) {
-		warehouseObject_[i]->Update();
+		if (trainWarpTime_ > trainWarpTimeMax_) {
+			trainWarpTime_ = 0.0f;
+			train_->worldtransform_.translate_.x = trainStartX_;
+		}
 	}
 
-	// 海
-	ocean_->Update();
-
-
 	emit_->Update();
+	emitTrainDust_->Update();
 }
 
 void Stage::Draw()
 {
-	// 空
-	sky_->Draw();
-
-	// 地面
-	tail_->Draw();
-	tail2_->Draw();
-
-	// 工場
-	for (int i = 0; i < warehouseObject_.size(); i++) {
-		warehouseObject_[i]->Draw();
-	}
 
 }
 
 void Stage::DrawP()
 {
-//	ocean_->Draw();
+
 }
 
 void Stage::Draw2D()

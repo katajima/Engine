@@ -43,19 +43,27 @@ private:
 
 	// 地面
 	std::unique_ptr < Object3d> tail_;
-	std::unique_ptr < Object3d> tail2_;
-	// 海
-	// オーシャンシェーダー
-	std::unique_ptr <Ocean> ocean_ = nullptr;
+	
+	// 列車
+	std::unique_ptr < Object3d> train_;
+	float trainSpeed_ = 300.0f;
+	float trainStartX_ = -3110.0f;
+	float trainEndX_ = 4000.0f;
+	float trainWarpTime_ = 0.0f;
+	float trainWarpTimeMax_ = 20.0f;
 
-	// 工場
-	std::vector < std::unique_ptr<Object3d>> warehouseObject_;
-	// 建物オブジェクト位置
-	std::vector<Vector3> warePos;
 
+
+
+	std::unique_ptr<SkyBox> skyBox;
+
+	// ライト
+	std::shared_ptr<PointLight> pointLight_;
 private:
 
 	std::unique_ptr<ParticleEmitter> emit_;
+
+	std::unique_ptr<ParticleEmitter> emitTrainDust_;
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;

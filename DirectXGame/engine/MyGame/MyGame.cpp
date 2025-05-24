@@ -23,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	sceneManager_->ChangeScene("TEST");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -206,6 +206,7 @@ void MyGame::InitializeResource()
 
 
 	
+	modelManager->LoadModel("train.gltf", "train");
 
 	/// <summary>
 	/// 地形
@@ -225,6 +226,7 @@ void MyGame::InitializeResource()
 	/// </summary>
 	modelManager->LoadModel("building.obj", "buildingAll/building"); // ビル
 	modelManager->LoadModel("warehouse.gltf", "buildingAll/warehouse"); // 倉庫
+	modelManager->LoadModel("stage.gltf", "stage"); // ステージ
 
 
 
@@ -297,6 +299,10 @@ void MyGame::InitializeResource()
 	particleManager->CreateParticleGroup("smokePlane01_2", "resources/Texture/smoke/no1.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane02_2", "resources/Texture/smoke/no2.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
 	particleManager->CreateParticleGroup("smokePlane03_2", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+
+	// 列車煙
+	particleManager->CreateParticleGroup("trainDust", "resources/Texture/smoke/no3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+
 
 	//
 	particleManager->CreateParticleGroup("hitEffect", "resources/Texture/effect.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);

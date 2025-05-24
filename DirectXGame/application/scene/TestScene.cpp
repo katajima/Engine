@@ -300,7 +300,7 @@ void TestScene::InitializeObject3D()
 	skinningObject3->SetName("testBri");
 
 	tail.Initialize(GetEntity3DManager());
-	tail.SetModel("renga.gltf");
+	tail.SetModel("stage.gltf");
 	tail.SetCamera(camera.get());
 	tail.SetName("tail");
 	tail.GetMaterial(0)->shininess_ = 1000.0f;

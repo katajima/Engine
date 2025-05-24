@@ -296,6 +296,7 @@ private:
 	// 移動関連
 	// 速度
 	Vector3 velocity_ = {};
+	float accelerationY_ = 0.1f; // 加速度
 	float moveLimit = 200;
 	float speed;
 

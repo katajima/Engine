@@ -125,7 +125,7 @@ void GamePlayScene::InitializeResources()
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 2.0f;
+	directionalLightData.intensity = 0.5f;
 	directionalLightData.isLight = true;
 	directionalLightData.lig = 0.1f;
 

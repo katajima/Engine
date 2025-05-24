@@ -24,6 +24,8 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	objectBase_.SetCamera(camera_);
 	objectBase_.worldtransform_.translate_ = position;
 	objectBase_.Update();
+	objectBase_.SetName("PlayerBase");
+
 
 	// レティクル
 	objectReticle_.Initialize(entity3DManager);
@@ -37,6 +39,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	objectBody_.Initialize(entity3DManager);
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
+	objectBody_.SetName("PlayerBody");
 	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
 	
 
@@ -208,7 +211,7 @@ void Player::Update()
 	// 重力
 	Gravity();
 	// 移動制限
-	//LimitMove();
+	LimitMove();
 
 	// エフェクト
 	effect_->Update();
@@ -364,18 +367,21 @@ void Player::Move()
 void Player::Gravity() {
 	
 	// 重力加速度
-	const float kGravityAcceleration = 4.4f;
+	const float kGravityAcceleration = 9.8f;
 
 	// 加速度ベクトル
 	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
+	accelerationY_ += accelerationVector * MyGame::GameTime();
 
+	
 	// 加速する
-	velocity_.y += accelerationVector;
+	velocity_.y += accelerationY_;
 
 	AddMove();
 	// 着地
 	if (objectBase_.worldtransform_.translate_.y <= groundY) {
 		objectBase_.worldtransform_.translate_.y = groundY;
+		accelerationY_ = 0.0f;
 		graVelo = 0;
 		isJamp = false;
 	}
@@ -389,17 +395,17 @@ void Player::AddMove()
 
 void Player::LimitMove()
 {
-	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
-		objectBase_.worldtransform_.translate_.x = moveLimit;
+	if (objectBase_.worldtransform_.translate_.x > moveLimit + 50) {
+		objectBase_.worldtransform_.translate_.x = moveLimit + 50;
 	}
-	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
+	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 50)) {
+		objectBase_.worldtransform_.translate_.x = -(moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
+	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 50)) {
+		objectBase_.worldtransform_.translate_.z = (moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
+	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 50)) {
+		objectBase_.worldtransform_.translate_.z = -(moveLimit + 50);
 	}
 }
 

@@ -47,6 +47,7 @@ public: // ゲッター兼セッター
 	void SetIsGravity(bool is) { isFlag.isGravity = is; } // 重力
 
 	void SetUsebillboard(bool is) { isFlag.usebillboard = is; } // ビルボード
+	void SetUsebillboardRotZ(bool is) { isFlag.billboardRotZ = is; } // ビルボードZ
 
 	void SetIsAlpha(bool is) { isFlag.isAlpha = is; } // 透明度
 
