@@ -302,7 +302,7 @@ private:
 
 	
 
-
+	bool isCreativeMode = false;
 	
 
 	ContactRecord contactRecord_;

@@ -7,7 +7,7 @@
 #include "assert.h"
 
 
-void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
+void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
@@ -18,7 +18,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 
 	camera_ = camera;
 	dxCommon_ = dxcommon;
-	
+
 	// プレイヤー
 	objectBase_.Initialize(entity3DManager);
 	objectBase_.SetCamera(camera_);
@@ -41,22 +41,22 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.SetName("PlayerBody");
 	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	
+
 
 	// スペシャル攻撃
 	bulletSpecial_ = std::make_unique<BulletSpecial>();
-	bulletSpecial_->Initialize(entity3DManager,entity2DManager,camera_);
+	bulletSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
 	bulletSpecial_->SetParent(&objectBase_.worldtransform_);
 
 
 
 	weapon_ = std::make_unique<playerWeapon>();
-	weapon_->Initialize(entity3DManager,camera);
+	weapon_->Initialize(entity3DManager, camera);
 	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_.worldtransform_;
 	weapon_->GetObject3D().worldtransform_.translate_ = { 0,0.5f,0.5f };
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
-	
+
 
 	// Factory
 	playerAttackFactory_ = std::make_unique<PlayerAttackFactory>();
@@ -98,7 +98,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 	// UI
 	ui_->Initialize(entity2DManager);
 
-	
+
 	/// エフェクト関係
 	effect_->Initialize(dxCommon_, entity3DManager_, entity2DManager, camera_);
 	// トレイルエフェクト
@@ -114,7 +114,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 void Player::Update()
 {
 	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
-	
+
 
 	if (isAlive) {
 		if (behaviorRequest_) {
@@ -160,7 +160,7 @@ void Player::Update()
 			break;
 		}
 	}
-	
+
 
 
 #ifdef _DEBUG
@@ -179,14 +179,14 @@ void Player::Update()
 	if (hp <= 0) {
 		isAlive = false;
 	}
-	workAttack.hitTime  -= MyGame::GameTime();
+	workAttack.hitTime -= MyGame::GameTime();
 	if (workAttack.hitTime <= 0) {
 		workAttack.hitCount = 0;
 	}
 
 
 
-	
+
 	// 攻撃開始条件（例：ボタンを押したら）
 	if (input_->IsTriggerKey(DIK_Z)) {
 		attackManager_->AddAttack("Punch1");
@@ -201,18 +201,31 @@ void Player::Update()
 	ImGui::InputFloat3("min", &min.x);
 	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
-	
 
-	
-	
+
+
+
 	ImGui::End();
+
+	if (input_->IsTriggerKey(DIK_C)) {
+		if (!isCreativeMode) {
+			isCreativeMode = true;
+		}
+		else {
+			isCreativeMode = false;
+		}
+
+	}
+
 #endif // _DEBUG
+
 
 	// 重力
 	Gravity();
-	// 移動制限
-	LimitMove();
-
+	if (!isCreativeMode) {
+		// 移動制限
+		LimitMove();
+	}
 	// エフェクト
 	effect_->Update();
 	//
@@ -222,7 +235,7 @@ void Player::Update()
 	objectBody_.Update();
 	weapon_->Update();
 
-	
+
 
 	objectReticle_.Update();
 }
@@ -365,18 +378,17 @@ void Player::Move()
 }
 
 void Player::Gravity() {
-	
+
 	// 重力加速度
 	const float kGravityAcceleration = 9.8f;
 
 	// 加速度ベクトル
 	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
-	accelerationY_ += accelerationVector * MyGame::GameTime();
-
-	
-	// 加速する
-	velocity_.y += accelerationY_;
-
+	if (!isCreativeMode) {
+		accelerationY_ += accelerationVector * MyGame::GameTime();
+		// 加速する
+		velocity_.y += accelerationY_;
+	}
 	AddMove();
 	// 着地
 	if (objectBase_.worldtransform_.translate_.y <= groundY) {
@@ -431,7 +443,7 @@ void Player::OnCollision(Collider* other)
 
 				contactRecord_.AddHistory(serialNumber);
 
-				
+
 				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
 
 			}

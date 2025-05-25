@@ -12,6 +12,23 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	entity2DManager_ = entity2DManager;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
+
+	ocean_ = std::make_unique<Ocean>();
+	ocean_->Initialize(entity3DManager_, { 5000,5000 });
+	ocean_->GetWaveParameters()[0].amplitude = 16.5f;
+	ocean_->GetWaveParameters()[0].waveDirection = {0.5f,0.5f};
+	ocean_->GetWaveParameters()[0].speed = 5.0f;
+	ocean_->GetMaterial()->color = Color{ 0.0f, 0.0f, 0.8f, 0.95f };
+
+	oceanObject = std::make_unique<Object3d>();
+	oceanObject->Initialize(entity3DManager_, Object3d::ObjectType::kOcean);
+	oceanObject->SetCamera(camera);
+	oceanObject->SetOcean(ocean_.get());
+	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
+	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
+	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
+	oceanObject->SetName("oceanObject");
+
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
 

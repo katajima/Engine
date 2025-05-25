@@ -31,6 +31,8 @@ public:
 	std::vector<LineVertexData> verticesline;
 
 	std::unique_ptr<Material> material;		// マテリアルデータ
+	std::string name;						// メッシュ名
+	Vector3 position;						// 位置
 private:
 	VertexBuffer<VertexData> vbvResorce_;
 	IndexBuffer<uint32_t> indexResorce_;

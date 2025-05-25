@@ -14,13 +14,16 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 		assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
 		//assert(mesh->HasTextureCoords(0)); //TexcoordがないMeshは今回は非対応
 		std::unique_ptr<ModelMesh> pMesh = std::make_unique<ModelMesh>();
-
+		pMesh->name = mesh->mName.C_Str();
 		pMesh->meshIndex = meshIndex;
 
 		Vector3 min = { 10000,10000,10000 };
 		Vector3 max = { -10000,-10000,-10000 };
 		pMesh->vertices.resize(mesh->mNumVertices);
 		pMesh->verticesline.resize(mesh->mNumVertices);
+
+		Vector3 offset = modelData.meshOffsetMap[(scene->mNumMeshes - 1) - meshIndex];
+		pMesh->position = offset;// 位置オフセットを設定
 
 		if (mesh->HasTangentsAndBitangents()) { // 追加: タンジェント・ビタンジェントの確認
 			modelData.isTangent = true;
@@ -51,7 +54,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 				pMesh->vertices[vertexIndex].tangent = {};
 			}
 
-			Vector3 offset = modelData.meshOffsetMap[(scene->mNumMeshes - 1) - meshIndex];
+			
 
 			pMesh->vertices[vertexIndex].position = { -position.x + offset.x ,position.y + offset.y,position.z + offset.z,1.0f };
 			pMesh->vertices[vertexIndex].normal = { -normal.x,normal.y,normal.z };

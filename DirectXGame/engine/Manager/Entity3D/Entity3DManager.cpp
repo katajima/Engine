@@ -97,6 +97,7 @@ void Entity3DManager::UpdateImgui()
 			Material* material;
 			int materialIndex = 0;
 			std::string nameMaterial = "";
+			std::string nameMesh = "";
 
 			if (entity->GetObjectType() == Object3d::ObjectType::kSkyBox) {
 				material = entity->skyBox_->GetMaterial();
@@ -141,11 +142,19 @@ void Entity3DManager::UpdateImgui()
 
 			}
 			else {
-
-
-
+				for (auto& mesh : entity->model->modelData.mesh) {
+					nameMesh = "Mesh" + mesh->name;
+					if (ImGui::CollapsingHeader(nameMesh.c_str())) {
+						int verticesCount = static_cast<int>(mesh->vertices.size());
+						int indexCount = static_cast<int>(mesh->indices.size());
+						ImGui::InputInt("vertices", &verticesCount);
+						ImGui::InputInt("index", &indexCount);
+					}
+				}
+				ImGui::Separator();
 				for (auto& mesh : entity->model->modelData.mesh) {
 					nameMaterial = "Material" + std::to_string(materialIndex);
+
 					if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
 						ImGui::DragFloat3("M_scale", &mesh->material->transform.scale.x, 0.1f);
 						ImGui::DragFloat3("M_rotate", &mesh->material->transform.rotate.x, 0.1f);

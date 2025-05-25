@@ -263,7 +263,7 @@ void TestScene::InitializeObject3D()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(GetEntity3DManager(), { 100,100 });
+	ocean_->Initialize(GetEntity3DManager(), { 10,100 });
 	
 	oceanObject = std::make_unique<Object3d>();
 	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kOcean);

@@ -53,8 +53,12 @@ private:
 	float trainWarpTimeMax_ = 20.0f;
 
 
+	// オーシャンシェーダー
+	std::unique_ptr<Ocean> ocean_ = nullptr;
+	std::unique_ptr<Object3d> oceanObject;
 
 
+	// スカイボックス
 	std::unique_ptr<SkyBox> skyBox;
 
 	// ライト

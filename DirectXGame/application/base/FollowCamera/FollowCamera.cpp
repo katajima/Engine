@@ -8,7 +8,7 @@ void FollowCamera::Initialize(CameraCommon* cameraCommon)
 	input_ = cameraCommon->GetInput();
 
 	camera_.Initialize(cameraCommon);
-	camera_.farClip_ = 5000.0f;
+	camera_.farClip_ = 15000.0f;
 	camera_.transform_.rotate.x = DegreesToRadians(90);
 	camera_.transform_.rotate.x = DegreesToRadians(20);
 

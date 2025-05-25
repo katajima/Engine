@@ -34,6 +34,17 @@ class Entity3DManager;
 class DirectXCommon;
 class Ocean
 {
+private:
+	// ウェーブデータ
+	struct WaveParameters {
+		Vector2 waveDirection; // 波の方向
+		float amplitude; // 波の振幅
+		float frequency; // 波の周波数
+		float speed; // 波の速度
+		float time; // 現在の時間（アニメーション用）
+		int flag;   // 波が起きるのか
+		float pad[1];
+	};
 public:
 	
 
@@ -49,6 +60,10 @@ public:
 	Material* GetMaterial() { return material.get(); }
 
 	ModelMesh* GetMesh() { return mesh_.get(); }
+
+
+	WaveParameters* GetWaveParameters() const { return cbWaveResource_.Data(); }
+
 private:
 
 
@@ -60,16 +75,7 @@ private:
 	// メッシュ
 	std::unique_ptr<ModelMesh> mesh_ = nullptr;
 private:
-	// ウェーブデータ
-	struct WaveParameters {
-		Vector2 waveDirection; // 波の方向
-		float amplitude; // 波の振幅
-		float frequency; // 波の周波数
-		float speed; // 波の速度
-		float time; // 現在の時間（アニメーション用）
-		int flag;   // 波が起きるのか
-		float pad[1];
-	};
+	
 
 	ConstantBuffer<WaveParameters> cbWaveResource_;
 
