@@ -61,27 +61,19 @@ void NormalEnemy::Update()
 			oldPos_ = { 0,0,0 };
 			HitMotion();
 		}
-		// 影
-		//objectSha_.worldtransform_.translate_ = transBase_.translate_;
-		//objectSha_.worldtransform_.translate_.y = 0.1f;
-
-		//Vector3 scale{};
-		//scale = 7;
-
-		//objectSha_.worldtransform_.scale_ = scale;
+		
 
 		// 煙
-		dustEmit_->Update();
+		/*dustEmit_->Update();
 		dustEmit2_->Update();
-		dustEmit3_->Update();
+		dustEmit3_->Update();*/
 	}
 	else {
-		//object_->
+		
 	}
 
 	object_->Update();
 	transBase_.Update();
-	//objectSha_.Update();
 }
 
 void NormalEnemy::Draw()
@@ -178,44 +170,13 @@ void NormalEnemy::Move()
 		// 移動
 		transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());
 	}
-
-
-	groundRightEmit_->SetVelocityMinMax(-moveDirection * 2, -moveDirection * 2);
-	groundRightEmit_->Update();
-	groundLeftEmit_->SetVelocityMinMax(-moveDirection * 2, -moveDirection * 2);
-	groundLeftEmit_->Update();
-
-
-
 }
 
 void NormalEnemy::InitParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
-	groundRightEmit_ = std::make_unique<ParticleEmitter>();
-	groundRightEmit_->Initialize(particleManager, "groundRight", "enemyGround");
-	groundRightEmit_->GetFrequency() = 0.15f;
-	groundRightEmit_->SetCount(1);
-	groundRightEmit_->SetParent(object_->worldtransform_);
-	groundRightEmit_->SetPos({ -1,-0.5f,0 });
-	groundRightEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	groundRightEmit_->SetLifeTimeMinMax(0.4f, 0.7f);
-	groundRightEmit_->SetIsAlpha(true);
-	groundRightEmit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.4f,0.4f,0.4f });
-	groundRightEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
-
-	groundLeftEmit_ = std::make_unique<ParticleEmitter>();
-	groundLeftEmit_->Initialize(particleManager, "groundLeft", "enemyGround");
-	groundLeftEmit_->GetFrequency() = 0.15f;
-	groundLeftEmit_->SetCount(1);
-	groundLeftEmit_->SetParent(object_->worldtransform_);
-	groundLeftEmit_->SetPos({ 1,-0.5f,0 });
-	groundLeftEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	groundLeftEmit_->SetLifeTimeMinMax(0.4f, 0.7f);
-	groundLeftEmit_->SetIsAlpha(true);
-	groundLeftEmit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.4f,0.4f,0.4f });
-	groundLeftEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
+	
 
 	dustEmit_ = std::make_unique<ParticleEmitter>();
 	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01_2");

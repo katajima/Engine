@@ -70,7 +70,7 @@ void ParticleManager::Update()
 #ifdef _DEBUG
 	ImGui::Begin("Field");
 	for (auto& acc : fieldEffect_) {
-		acc.DebugImgui();
+		acc->DebugImgui();
 	}
 	ImGui::End();
 #endif // _DEBUG

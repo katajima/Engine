@@ -57,7 +57,8 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	ｍSmokeEmitter_->SetIsAlpha(true);
 	ｍSmokeEmitter_->SetAlphaClipping(0.23f);
 	ｍSmokeEmitter_->SetIsLifeTimeScale(true);
-	ｍSmokeEmitter_->SetUsebillboard(false);
+	ｍSmokeEmitter_->SetUsebillboard(true);
+	ｍSmokeEmitter_->SetUsebillboardRotZ(true);
 	ｍSmokeEmitter_->SetEnableLighting(false);
 
 	ｍSmokeEmitter_->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
@@ -74,15 +75,15 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	ｍSmokeEmitter2_->SetIsAlpha(true);
 	ｍSmokeEmitter2_->SetAlphaClipping(0.23f);
 	ｍSmokeEmitter2_->SetIsLifeTimeScale(true);
-	ｍSmokeEmitter2_->SetUsebillboard(false);
-	ｍSmokeEmitter2_->SetEnableLighting(false);
+	ｍSmokeEmitter2_->SetUsebillboard(true);
+	ｍSmokeEmitter2_->SetUsebillboardRotZ(true);
 
+	
 	ｍSmokeEmitter2_->SetColorMinMax({ 1,0,0,1.5f }, { 1,0,0,1.5f });
 	ｍSmokeEmitter2_->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	ｍSmokeEmitter2_->SetSizeMinMax(Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
 	ｍSmokeEmitter2_->SetVelocityMinMax(-velocity_, -velocity_);
 	ｍSmokeEmitter2_->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-
 	ｍSmokeEmitter_->SetRengeMinMax(object_->worldtransform_.translate_, object_->worldtransform_.translate_);
 
 

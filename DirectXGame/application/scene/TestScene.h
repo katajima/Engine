@@ -192,6 +192,13 @@ private:
 	std::unique_ptr<ParticleEmitter> primitvPa_ = nullptr;
 
 	/// <summary>
+	/// 場所効果
+	/// </summary>
+
+	std::unique_ptr<Field::FieldEffect> fieldEffect_ = nullptr;
+
+
+	/// <summary>
 	/// ライト
 	/// </summary>
 

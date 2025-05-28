@@ -86,15 +86,6 @@ void ParticleFanction::Effect(ParticleGroup& group, std::list<Particle>::iterato
 	float t = particleIterator->currentTime / particleIterator->lifeTime;
 
 	if (particleIterator->isEvent) {
-		if (particleIterator->t03 >= t) {
-			particleIterator->color = particleIterator->color03;
-		}
-		else if (particleIterator->t02 >= t) {
-			particleIterator->color = particleIterator->color02;
-		}
-		else if (particleIterator->t01 >= t) {
-			particleIterator->color = particleIterator->color01;
-		}
 	}
 
 	// 透過するか

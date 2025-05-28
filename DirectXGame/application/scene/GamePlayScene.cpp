@@ -31,6 +31,8 @@ void GamePlayScene::Initialize()
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 	followCamera_->SetTarget(&player_->GetObject3D());
 
+	
+
 	// プレイヤー
 	player_->SetInput(input_);
 	player_->SetCamera(camera.get());
@@ -281,7 +283,7 @@ void GamePlayScene::Update()
 
 
 		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
-		
+		GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&followCamera_->GetViewProjection());
 		// 必要に応じて行列を更新
 		//camera->UpdateMatrix();
 	}

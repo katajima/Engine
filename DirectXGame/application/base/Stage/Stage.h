@@ -36,6 +36,11 @@ public:
 	void DrawP();
 
 	void Draw2D();
+private:
+
+	void InitEmit();
+
+	void CloudEmit(ParticleManager* particleManager,ParticleEmitter* emit,const std::string& name);
 
 private:
 	// 空
@@ -52,6 +57,16 @@ private:
 	float trainWarpTime_ = 0.0f;
 	float trainWarpTimeMax_ = 20.0f;
 
+	// 列車
+	std::unique_ptr < Object3d> ship_;
+	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
+
+	// 円運動のパラメータ
+	float radius = 1000.0f; // 円の半径
+	float angularSpeed = DirectX::XM_PI * 0.5f * 0.25f; // ラジアン/秒（90度/秒）
+	
+	Vector3 center = { -3111,-50,3040 }; // 中心座標を指定
+
 
 	// オーシャンシェーダー
 	std::unique_ptr<Ocean> ocean_ = nullptr;
@@ -65,9 +80,22 @@ private:
 	std::shared_ptr<PointLight> pointLight_;
 private:
 
+	// ステージに舞う埃
 	std::unique_ptr<ParticleEmitter> emit_;
 
+	// 列車の煙
 	std::unique_ptr<ParticleEmitter> emitTrainDust_;
+
+	// 船の水しぶき
+	std::unique_ptr<ParticleEmitter> emitShipDust_;
+
+	// 雲の粒子
+	std::unique_ptr<ParticleEmitter> emitCloudDust_;
+	std::unique_ptr<ParticleEmitter> emitCloudDust2_;
+	std::unique_ptr<ParticleEmitter> emitCloudDust3_;
+
+
+
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;

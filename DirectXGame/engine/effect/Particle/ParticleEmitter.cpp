@@ -24,14 +24,6 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 
 	emitter_.color = { {1,1,1,1} ,{1,1,1,1} };
 	
-	emitter_.color01 = {1,1,1,1};
-	emitter_.color02 = {1,1,1,1};
-	emitter_.color03 = {1,1,1,1};
-	emitter_.t01 = 0.25f;
-	emitter_.t02 = 0.50f;
-	emitter_.t03 = 0.75f;
-
-
 	emitter_.renge.max = Vector3{ 1.0f,1.0f,1.0f };
 	emitter_.renge.min = Vector3{ -1.0f,-1.0f,-1.0f };
 	emitter_.color.max = Vector4{ 1,1,1,1 };
@@ -56,6 +48,8 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	emitter_.corner.segment = 3;
 
 	emitter_.isEvent = false;
+
+	//emitter_.fieldName = ""; // パーティクルフィールドの名前を設定
 
 	isFlag.isLifeTimeScale_ = false;	// スケール
 	isFlag.isLifeTimeVelocity = false;// 速度
@@ -169,12 +163,7 @@ void ParticleEmitter::Update()
 		
 		ImGui::Separator(); // 水平線を引く
 
-		ImGui::SliderFloat("t01", &emitter_.t01,0.0f,1.0f);
-		ImGui::SliderFloat("t02", &emitter_.t02,0.0f,1.0f);
-		ImGui::SliderFloat("t03", &emitter_.t03,0.0f,1.0f);
-		ImGui::ColorEdit4("color01", &emitter_.color01.x);
-		ImGui::ColorEdit4("color02", &emitter_.color02.x);
-		ImGui::ColorEdit4("color03", &emitter_.color03.x);
+		
 		ImGui::TreePop();
 		EmitMinMax();
 	}

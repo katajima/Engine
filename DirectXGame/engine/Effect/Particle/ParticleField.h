@@ -36,7 +36,7 @@ namespace Field {
 
 	class FieldEffect {
 	public:
-		void Init(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon);
+		void Initialize(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon);
 
 		void Update();
 
@@ -47,7 +47,14 @@ namespace Field {
 
 	public:
 
+		std::string GetName() const { return name_; }
+
 		bool GetIsEffect() const { return isEffect; }
+
+		void SetParent(WorldTransform& parent)
+		{
+			transform_.parent_ = &parent;
+		}
 
 	public:	// 各パラメータ
 		EffectType effectType_ = EffectType::kAcceleration;					// エフェクト種類選択
@@ -76,7 +83,7 @@ namespace Field {
 	};
 
 
-	void Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector <Field::FieldEffect>& fieldEffect,float deltaTime);
+	void Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector<Field::FieldEffect*> fieldEffect,float deltaTime);
 
 
 }

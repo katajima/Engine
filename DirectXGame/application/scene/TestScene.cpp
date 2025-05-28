@@ -335,7 +335,7 @@ void TestScene::InitializeObject3D()
 	ring.outerRadius = 7.0f;
 	ring.segments = 16;
 	primitiveObject = std::make_unique<Primitive>();
-	primitiveObject->Initialize<ShapeParameter::Ring>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, ring, "resources/Texture/gradationLine.png");
+	primitiveObject->Initialize<ShapeParameter::Ring>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, ring, "resources/Texture/effect/gradationLine.png");
 
 	
 	primitiveObject3d = std::make_unique<Object3d>();
@@ -416,6 +416,7 @@ void TestScene::InitializeParticle()
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kTornado, Field::ShapeType::kAABB,"竜巻");*/
 
 	
+
 	emitter_ = std::make_unique<ParticleEmitter>();
 	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleData::SpawnType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
@@ -425,7 +426,6 @@ void TestScene::InitializeParticle()
 	emitter_->SetPos({ 0,10,0 });
 	emitter_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	emitter_->SetLifeTimeMinMax(1.0f, 2.0f);
-	/*emitter_->SetUsebillboard(false);*/
 	emitter_->SetIsGravity(true);
 	emitter_->SetIsAlpha(true);
 	emitter_->AddControlPoints(Vector3{ 0,0,0 });
@@ -438,7 +438,6 @@ void TestScene::InitializeParticle()
 	primitvPa_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitterPPPP", "cc", ParticleData::SpawnType::kAABB);
 	primitvPa_->GetFrequency() = 0.1f;
 	primitvPa_->SetCount(1);
-	//primitvPa_->SetParent(tail.worldtransform_);
 	primitvPa_->SetRotateMinMax(-Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
 	primitvPa_->SetPos({ 0,10,0 });
 	primitvPa_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -452,7 +451,6 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitterPrimi", "primi");
 	emitterEnemy_->GetFrequency() = 0.1f;
 	emitterEnemy_->SetCount(1);
-	//emitterEnemy_->SetParent(mm.worldtransform_);
 	emitterEnemy_->SetPos({ 0,50,0 });
 	emitterEnemy_->SetVelocityMinMax({ -10,20,-10 }, { 10, 50, 10 });
 	emitterEnemy_->SetRengeMinMax({ -1,0,-1 }, { 1, 10, 1 });
@@ -467,6 +465,12 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->SetIsRotateVelocity(true);
 	emitterEnemy_->SetIsBounce(true);
 	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
+	emitterEnemy_->SetUseFieldName({"All"});
+
+	fieldEffect_ = std::make_unique <Field::FieldEffect >();
+	fieldEffect_->Initialize("fieldEffect", Field::ShapeType::kAABB, Field::EffectType::kAcceleration, GetEntity3DManager()->Get3DLineCommon());
+	fieldEffect_->SetParent(emitterEnemy_->transform_);
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(fieldEffect_.get());
 
 	primitvPlane_ = std::make_unique<ParticleEmitter>();
 	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleData::SpawnType::kPoint);
@@ -475,15 +479,11 @@ void TestScene::InitializeParticle()
 	primitvPlane_->SetPos({ 0,50,0 });
 	primitvPlane_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	primitvPlane_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	//primitvPlane_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
 	primitvPlane_->SetLifeTimeMinMax(1, 3);
-	//primitvPlane_->SetIsGravity(true);
 	primitvPlane_->SetUsebillboard(false);
 	primitvPlane_->SetIsAlpha(true);
 	primitvPlane_->SetIsLifeTimeScale(true);
 	primitvPlane_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	//primitvPlane_->SetIsRotateVelocity(true);
-	//primitvPlane_->SetIsBounce(true);
 	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,2.5f,0.1f }, { 0.1f ,5.0f,0.1f });
 
 
@@ -494,9 +494,7 @@ void TestScene::InitializeParticle()
 	primitvPlaneSmoke_->SetPos({ 0,50,0 });
 	primitvPlaneSmoke_->SetVelocityMinMax({ 0,0,0 }, { 0, 10, 0 });
 	primitvPlaneSmoke_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	//primitvPlaneSmoke_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
 	primitvPlaneSmoke_->SetLifeTimeMinMax(1, 3);
-	//primitvPlaneSmoke_->SetIsGravity(true);
 	primitvPlaneSmoke_->SetUsebillboard(false);
 	primitvPlaneSmoke_->SetEnableLighting(false);
 	primitvPlaneSmoke_->SetIsAlpha(true);
@@ -506,7 +504,6 @@ void TestScene::InitializeParticle()
 	primitvPlaneSmoke_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	primitvPlaneSmoke_->SetIsRotateVelocity(true);
 	primitvPlaneSmoke_->SetAlphaClipping(0.25f);
-	//primitvPlaneSmoke_->SetIsBounce(true);
 	primitvPlaneSmoke_->SetSizeMinMax(Vector3{ 5.0f,5.0f,1.0f }, { 5.0f ,5.0f,1.0f });
 	primitvPlaneSmoke_->SetUvTransformVeloctiy({{0.0f,0,0},{},{0.0f,0.0f,0}});
 

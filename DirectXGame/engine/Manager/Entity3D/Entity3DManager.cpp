@@ -149,6 +149,7 @@ void Entity3DManager::UpdateImgui()
 						int indexCount = static_cast<int>(mesh->indices.size());
 						ImGui::InputInt("vertices", &verticesCount);
 						ImGui::InputInt("index", &indexCount);
+						ImGui::InputFloat3("position", &mesh->position.x);
 					}
 				}
 				ImGui::Separator();

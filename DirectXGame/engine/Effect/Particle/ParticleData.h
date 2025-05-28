@@ -33,14 +33,8 @@ struct Particle
 
 	bool isEvent = false;			// イベントフラグ
 
-	float t01 = 0.25f;				// 
-	float t02 = 0.50f;				// 
-	float t03 = 0.57f;				// 
+	std::vector<std::string> fieldEffect; // 
 
-
-	Vector4 color01;				// 色01
-	Vector4 color02;				// 色02
-	Vector4 color03;				// 色03
 };
 
 template<typename T>
@@ -123,14 +117,9 @@ struct Emiter
 	int count;
 
 	bool isEvent = false;
-	
 
-	float t01 = 0.25f;				// 
-	float t02 = 0.50f;				// 
-	float t03 = 0.57f;				// 
-	Vector4 color01;				// 色01
-	Vector4 color02;				// 色02
-	Vector4 color03;				// 色03
+	std::vector<std::string> fieldName; // 名前
+
 };
 
 // パーティクルグループ

@@ -46,16 +46,11 @@ void BulletSpecial::Update()
 	else {
 		isSpecial_ = false;
 	}
-
-
-	injectionLeftObj_->Update();
-	injectionRightObj_->Update();
 }
 
 void BulletSpecial::Draw()
 {
-	injectionLeftObj_->Draw();
-	injectionRightObj_->Draw();
+
 }
 
 void BulletSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletManager, std::vector<BaseEnemy*> enemy)

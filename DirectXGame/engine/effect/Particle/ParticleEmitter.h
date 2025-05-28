@@ -85,6 +85,13 @@ public: // ゲッター兼セッター
 	void SetVelocityMinMax(Vector3 min, Vector3 max) { emitter_.velocity.min = min; emitter_.velocity.max = max; } // 速度
 
 	void SetRotateVelocityMinMax(Vector3 min, Vector3 max) { emitter_.rotateVelocity.min = min; emitter_.rotateVelocity.max = max; } // 速度
+
+	void SetUseFieldName(std::vector<std::string> fieldName) { // フィールド名
+		for (auto& name : fieldName) {
+			emitter_.fieldName.push_back(name);
+		}
+	} 
+
 private: // エミッタ可視化
 
 	void DrawEmitterLine();
