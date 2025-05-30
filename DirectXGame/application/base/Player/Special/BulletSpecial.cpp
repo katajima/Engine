@@ -90,13 +90,13 @@ void BulletSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletMa
 				
 				if (clock_ == 1) {
 					followCamera->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
-					bulletManager->GeneratBullet(BulletManager::BulletType::kPlayerMissile, injectionLeftObj_->GetWorldPosition(), enemy[index_b]);
+					bulletManager->GenerateBullet(BulletManager::BulletType::kPlayerMissile, injectionLeftObj_->GetWorldPosition(), enemy[index_b]);
 					injectionLeftObj_->worldtransform_.translate_.y -= 0.5f;
 
 				}
 				else {
 					followCamera->GetViewProjection().SetShake(1.3f, { 0.2f,0.2f,0.2f });
-					bulletManager->GeneratBullet(BulletManager::BulletType::kPlayerMissile, injectionRightObj_->GetWorldPosition(), enemy[index_b]);
+					bulletManager->GenerateBullet(BulletManager::BulletType::kPlayerMissile, injectionRightObj_->GetWorldPosition(), enemy[index_b]);
 					injectionRightObj_->worldtransform_.translate_.y -= 0.5f;
 				}
 

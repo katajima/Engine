@@ -44,6 +44,9 @@ public:
 public:
 	// 生存判定
 	bool GetAlive() const { return isAlive_; }
+	//
+	bool GetIsEffectPlay() const { return isEffectPlay_; }
+
 	// ダメージ
 	void AddDamage(float damage) {
 		parameter_.HP -= damage;
@@ -65,6 +68,8 @@ public:
 	void SetEnemy(BaseEnemy* enemy);
 
 	void SetTargetType(CollisionTypeIdDef type);
+
+	void SetTargerRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
 
 protected:
 	// 当たり判定をするか
@@ -96,12 +101,18 @@ protected:
 	Vector3 velocity_{};
 	// デスフラグ
 	bool isAlive_ = false;
+	// effect
+	bool isEffectPlay_ = false;
+
 	// ヒット
 	bool Hit = false;
 	// 
 	bool isCollision = true;
 
-
+	struct TargerRange {
+		Vector3 position; // 位置
+		float radius;    // 半径
+	} targetRange_;
 
 protected:
 	Player* player_;

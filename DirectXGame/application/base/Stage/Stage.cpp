@@ -30,15 +30,34 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
-
+	
 	// 空
 	sky_ = std::make_unique<Object3d>();
 	sky_->Initialize(entity3DManager_, Object3d::ObjectType::kSkyBox);
 	sky_->SetModel("resources/Texture/hdr/sky.dds");
 	sky_->SetCamera(camera);
-	sky_->worldtransform_.scale_ = { 200,200,200 };
+	sky_->worldtransform_.scale_ = { 100,100,100 };
 	sky_->SetSkyBox(skyBox.get());
 	sky_->SetName("skyBox");
+
+	//
+	for(int i = 0; i < 5; ++i)
+	{
+		for(int j = 0; j < 2; ++j)
+		{
+			auto object = std::make_unique<Object3d>();
+			object->Initialize(entity3DManager_, Object3d::ObjectType::kNormal);
+			object->SetModel("Missile.gltf");
+			object->SetName("Missile" + std::to_string(j)+ "_" + std::to_string(i));
+			object->worldtransform_.translate_ = { 3500 + static_cast<float>(j) * 120.0f ,106,3000 + static_cast<float>(i) * 100.0f };
+			object->worldtransform_.rotate_.y = DegreesToRadians(-90);
+			float size = 10.0f;
+			object->worldtransform_.scale_ = { size,size,size };
+			missiles_.push_back(std::move(object));
+		}	
+	}
+
+	
 
 	// 地面
 	tail_ = std::make_unique<Object3d>();
@@ -47,7 +66,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	tail_->SetName("stage");
 	tail_->SetCamera(camera);
 	tail_->worldtransform_.scale_ = { 4,4,4 };
-	tail_->GetMaterial(0)->transform.scale = { 10,10,1 };
+	tail_->GetMaterial(0)->transform.scale = { 1,1,1 };
 	tail_->GetMaterial(0)->shininess_ = 64.0f;
 
 	// 列車
@@ -60,6 +79,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	train_->worldtransform_.scale_ = { 8,8,8 };
 	train_->GetMaterial(0)->shininess_ = 64.0f;
 
+	// 船
 	ship_ = std::make_unique<Object3d>();
 	ship_->Initialize(entity3DManager_);
 	ship_->SetModel("ship.gltf");
@@ -69,7 +89,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	ship_->worldtransform_.scale_ = { 8,8,8 };
 	ship_->GetMaterial(0)->shininess_ = 64.0f;
 
-	
+	// ポイントライト
 	PointLightData pointLightData{};
 	pointLightData.color = { 1,1,1,1 };
 	pointLightData.position = { 0,100,0 };
@@ -84,6 +104,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 	entity3DManager_->GetLightManager()->AddLight(pointLight_);
 
+	// エミッター設定
 	InitEmit();
 }
 
@@ -101,36 +122,24 @@ void Stage::Update()
 		}
 	}
 
-	velocity_ = Subtract(ship_->GetWorldPosition(), ship_->GetPreWorldPosition());
+	//velocity_ = Subtract(ship_->GetWorldPosition(), ship_->GetPreWorldPosition());
 	
-	 static float angle = 0.0f; // 現在の角度
-	// 時間を加味して角度を進める
-	angle += angularSpeed * MyGame::GameTime();
-	ship_->worldtransform_.translate_.x = center.x + (cosf(angle) * radius);
-	ship_->worldtransform_.translate_.z = center.z + (sinf(angle) * radius);
+	// static float angle = 0.0f; // 現在の角度
+	//// 時間を加味して角度を進める
+	//angle += angularSpeed * MyGame::GameTime();
+	//ship_->worldtransform_.translate_.x = center.x + (cosf(angle) * radius);
+	//ship_->worldtransform_.translate_.z = center.z + (sinf(angle) * radius);
+	//
+	//// Y軸周り角度(θy)
+	//ship_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+	//float length = Length(Vector3(velocity_.x, 0, velocity_.z));
+	//// X軸周り角度(θx)
+	//ship_->worldtransform_.rotate_.x = std::atan2(velocity_.y, length);
 	
-	// Y軸周り角度(θy)
-	ship_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
-	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
-	// X軸周り角度(θx)
-	ship_->worldtransform_.rotate_.x = std::atan2(velocity_.y, length);
-	
 
 
 
-	emit_->Update();
-
-	// 列車のパーティクルエミッター
-	emitTrainDust_->Update();
-
-	// 船のパーティクルエミッター
-	emitShipDust_->SetVelocityMinMax(-velocity_  * 10,-velocity_ * 10);
-	emitShipDust_->Update();
-	
-	// 雲のパーティクルエミッターの更新
-	emitCloudDust_->Update();
-	emitCloudDust2_->Update();
-	emitCloudDust3_->Update();
+	EmitUpdate();
 }
 
 void Stage::Draw()
@@ -227,4 +236,22 @@ void Stage::CloudEmit(ParticleManager* particleManager, ParticleEmitter* emit, c
 	emit->SetUsebillboard(true);
 	emit->SetUsebillboardRotZ(true);
 	emit->SetRotateMinMax(-Vector3{ 0,0,0.0f }, Vector3{ 0,0,0.0f });
+}
+
+void Stage::EmitUpdate()
+{
+	// 埃のパーティクルエミッターの更新
+	//emit_->Update();
+
+	// 列車のパーティクルエミッター
+	emitTrainDust_->Update();
+
+	// 船のパーティクルエミッター
+	//emitShipDust_->SetVelocityMinMax(-velocity_ * 10, -velocity_ * 10);
+	//emitShipDust_->Update();
+
+	// 雲のパーティクルエミッターの更新
+	//emitCloudDust_->Update();
+	//emitCloudDust2_->Update();
+	//emitCloudDust3_->Update();
 }

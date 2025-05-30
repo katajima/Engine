@@ -40,10 +40,10 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 
 	name = "object" + std::to_string(object3dCommon_->count);
 
-	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(object3dCommon_->GetDxCommon());
+	transformation = std::make_unique<Transfomation>();
+	transformation->Initialize(object3dCommon_->GetDxCommon());
 
-
+	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
 	entity3DManager_->SetEntity3D(this);
 
 	isSkin_ = false;
@@ -94,6 +94,16 @@ void Object3d::Update()
 		isSkin_ = true;
 	}
 	
+	Camera* cameraPtr;
+
+	if (isIndividualCamera_) {
+		cameraPtr = individualCamera_;
+	}
+	else {
+		cameraPtr = defaltCamera;
+	}
+
+
 
 	switch (objectType_)
 	{
@@ -108,7 +118,7 @@ void Object3d::Update()
 		}
 
 		// トランスフォームデータ
-		transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
+		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
 	case Object3d::ObjectType::kAnimation:
 		// モデルが存在する場合
@@ -136,7 +146,7 @@ void Object3d::Update()
 		}
 
 		// トランスフォームデータ
-		transfomation->Update(model, camera, localMatrix, worldtransform_.worldMat_);
+		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
 	case Object3d::ObjectType::kSkinning:
 
@@ -168,27 +178,27 @@ void Object3d::Update()
 		}
 
 		// トランスフォームデータ
-		transfomation->UpdateSkinning(model, camera, localMatrix, worldtransform_.worldMat_);
+		transformation->UpdateSkinning(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
 	case ObjectType::kPrimitive:
 		if (primitive_) {
 			primitive_->Update();
 
-			transfomation->Update(primitive_, camera, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
 	case ObjectType::kSkyBox:
 		if (skyBox_) {
 			skyBox_->Update();
 
-			transfomation->Update(primitive_, camera, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
 	case ObjectType::kOcean:
 		if (ocean_) {
 			ocean_->Update();
 
-			transfomation->Update(ocean_, camera, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(ocean_, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
 	default:
@@ -244,9 +254,9 @@ void Object3d::Draw()
 
 		if (primitive_) {
 
-			primitive_->DrawSetting();
+			primitive_->DrawSetting(primitive_->GetPsoType());
 
-			transfomation->GetCommandList(1);
+			transformation->GetCommandList(1);
 
 			primitive_->Draw();
 		}
@@ -257,7 +267,7 @@ void Object3d::Draw()
 		if (skyBox_) {
 			skyBoxCommon_->DrawCommonSetting();
 
-			transfomation->GetCommandList(1);
+			transformation->GetCommandList(1);
 
 			skyBox_->Draw();
 		}
@@ -319,15 +329,20 @@ void Object3d::DrawSetting()
 {
 	entity3DManager_->GetLightManager()->DrawLight();
 
-	transfomation->GetCommandList(1);
+	transformation->GetCommandList(1);
 
 
 
-	transfomation->GetCommandList(10);
+	transformation->GetCommandList(10);
 
+	if (isIndividualCamera_) {
+		individualCamera_->GetCommandList(4);
+	}
+	else {
+		defaltCamera->GetCommandList(4);
+	}
 
-
-	camera->GetCommandList(4);
+	
 }
 
 void Object3d::DrawSettingSkin()
@@ -335,9 +350,14 @@ void Object3d::DrawSettingSkin()
 
 	entity3DManager_->GetLightManager()->DrawLight();
 
-	transfomation->GetCommandList(1);
+	transformation->GetCommandList(1);
 
-	camera->GetCommandList(4);
+	if (isIndividualCamera_) {
+		individualCamera_->GetCommandList(4);
+	}
+	else {
+		defaltCamera->GetCommandList(4);
+	}
 }
 
 void Object3d::DrawSettingOcean()
@@ -347,10 +367,15 @@ void Object3d::DrawSettingOcean()
 
 	entity3DManager_->GetLightManager()->DrawLight();
 
-	transfomation->GetCommandList(1);
-	transfomation->GetCommandList(9);
+	transformation->GetCommandList(1);
+	transformation->GetCommandList(9);
 
-	camera->GetCommandList(4);
+	if (isIndividualCamera_) {
+		individualCamera_->GetCommandList(4);
+	}
+	else {
+		defaltCamera->GetCommandList(4);
+	}
 }
 
 void Object3d::ObjectTypeDiscrimination(ObjectRasterizerType type)
@@ -455,7 +480,13 @@ Vector2 Object3d::GetScreenPosition()
 	Vector3 wPos = worldtransform_.worldMat_.GetWorldPosition();
 
 	// カメラのビュープロジェクション行列を取得
-	Matrix4x4 matViewProjection = Multiply(camera->GetViewMatrix(), camera->GetProjectionMatrix());
+	Matrix4x4 matViewProjection;
+	if (isIndividualCamera_) {
+		matViewProjection = Multiply(individualCamera_->GetViewMatrix(), individualCamera_->GetProjectionMatrix()); 
+	}
+	else {
+		matViewProjection = Multiply(defaltCamera->GetViewMatrix(), defaltCamera->GetProjectionMatrix());;
+	}
 
 	// ビューポート行列
 	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, 1280, 720, 0, 1);

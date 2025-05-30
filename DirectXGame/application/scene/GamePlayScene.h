@@ -23,6 +23,7 @@
 #include"DirectXGame/application/base/Player/Player.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/BulletManager.h"
@@ -91,9 +92,21 @@ private:
 private:
 	// カメラ
 	std::unique_ptr < Camera> camera;
+
+	
 	bool flag = true;
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
+
+	// 宇宙カメラ
+	std::unique_ptr<UniverseCamera> universeCamera_;
+
+	bool isUniverseCamera = false;
+	float timer = 0.0f;
+	float cameraScaleT = 0.0f;
+
+	float minScaleZCamera = 1.5f;
+
 private:
 	// ライト
 	std::shared_ptr<DirectionalLight> directional;
@@ -107,6 +120,8 @@ private:
 
 	// 敵マネージャ
 	std::unique_ptr<EnemyManager> enemyManager_;
+	Vector3 enemyPosition = Vector3(0, 0, 0);
+
 
 	// ステージ
 	std::unique_ptr<Stage> stage_;

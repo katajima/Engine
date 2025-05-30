@@ -103,11 +103,13 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {	
-	// 3Dオブジェクトの描画
-	//sceneManager->Draw3D();
-
+	
 
 	entity3DManager->ObjectDraw();
+
+	// 3Dオブジェクトの描画
+	sceneManager->Draw3D();
+
 
 	// パーティクル描画
 	entity3DManager->GetEffectManager()->GetParticleManager()->Draw();

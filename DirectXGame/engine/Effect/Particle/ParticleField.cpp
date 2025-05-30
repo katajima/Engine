@@ -109,7 +109,7 @@ void Field::FieldEffect::DebugImgui()
 			break;
 		case Field::ShapeType::kCapsuleSpline:
 			ImGui::DragFloat("rad", &rad, 0.1f);
-			if (ImGui::CollapsingHeader("Sprine")) {
+			if (ImGui::CollapsingHeader("Spline")) {
 				for (int i = 0; i < controlPoints.size(); i++) {
 					std::string index = std::to_string(i);
 					ImGui::DragFloat3(index.c_str(), &controlPoints[i].x, 0.1f);

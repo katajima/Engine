@@ -19,19 +19,19 @@ void GamePlayScene::Initialize()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	// プレイヤー
-	/*playerManager_ = std::make_unique<PlayerManager>();
-	playerManager_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
-	playerManager_->SelectPlayer(PlayerManager::Type::kNormal, Vector3(0, 2, -40));*/
-	
 	player_ = std::make_unique<Player>();
-	player_->Initialize(input_,GetDxCommon(), GetEntity3DManager(),GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
-	
+	player_->Initialize(input_, GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
+
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 	followCamera_->SetTarget(&player_->GetObject3D());
 
-	
+	// 宇宙カメラ
+	universeCamera_ = std::make_unique<UniverseCamera>();
+	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
+
+
 
 	// プレイヤー
 	player_->SetInput(input_);
@@ -45,20 +45,20 @@ void GamePlayScene::Initialize()
 
 	for (int i = 0; i < 10; i++) {
 
-		Vector3 rand = Random::RandomVector3(-100,100);
+		Vector3 rand = Random::RandomVector3(-100, 100);
 		rand.y = 2;
 		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, rand);
 	}
 
-	
-	
-	
-	
+
+
+
+
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
-
+	player_->GetRangeBombingSpecial()->SetStage(stage_.get());
 
 
 
@@ -69,14 +69,12 @@ void GamePlayScene::Initialize()
 
 	player_->SetBulletManager(bulletManager_.get());
 
-	
+
 	// 衝突マネージャの生成
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables());
 
 	InitializeResources();
-
-	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 }
 
 
@@ -84,7 +82,7 @@ void GamePlayScene::Initialize()
 void GamePlayScene::InitializeCamera()
 {
 	camera = std::make_unique <Camera>();
-	
+
 	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	//camera = Camera::GetInstance();
 	camera->transform_.rotate = { 0.36f,0,0 };
@@ -267,29 +265,70 @@ void GamePlayScene::Update()
 
 	// プレイヤー
 	//if (player_->GetAlive()) {
-		player_->Update();
-		player_->LockOn(enemyManager_->GetEnemys());
+	player_->Update();
+	player_->LockOn(enemyManager_->GetEnemys());
 	//}
-	
+
+#ifdef _DEBUG
+	ImGui::Begin("Debug");
+	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
+	if (ImGui::Button("ADDEnemy")) {
+		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, enemyPosition);
+	}
+	ImGui::Checkbox("isUniverseCamera", &isUniverseCamera);
+	ImGui::End();
+#endif // _DEBUG
+
+
+	if (player_->GetRangeBombingSpecial()->IsAction()) {
+		timer = 0.0f;
+		isUniverseCamera = true;
+
+		cameraScaleT += 0.05f;
+
+		if (cameraScaleT >= 1.0f) {
+			cameraScaleT = 1.0f;	
+		}
+
+		universeCamera_->GetViewProjection().transform_.scale.z = Lerp(minScaleZCamera, 1.0f, cameraScaleT);
+	}
+	else {
 		
+		timer += MyGame::GameTime();
+	}
+
+	if (timer >= 1.5f) {
+		timer = 0.0f;
+		cameraScaleT = 0.0f;
+		universeCamera_->GetViewProjection().transform_.scale.z = minScaleZCamera;
+		isUniverseCamera = false;
+	}
+
 
 	/// レールカメラ
 	// カメラの回転を設定
 	if (flag) {
-
+		universeCamera_->Update();
 		followCamera_->Update();
-		camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
-		camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
 
 
-		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
-		GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&followCamera_->GetViewProjection());
-		// 必要に応じて行列を更新
-		//camera->UpdateMatrix();
+		if (isUniverseCamera) {
+			camera->viewMatrix_ = universeCamera_->GetViewProjection().viewMatrix_;
+			camera->projectionMatrix_ = universeCamera_->GetViewProjection().projectionMatrix_;
+			GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&universeCamera_->GetViewProjection());
+			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&universeCamera_->GetViewProjection());
+		}
+		else {
+			camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
+			camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
+			GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
+			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&followCamera_->GetViewProjection());
+		}
+		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+		GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 	}
 	else {
-#ifdef _DEBUG
-#endif // _DEBUG
+
 
 		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 		camera->UpdateMatrix();
@@ -299,18 +338,18 @@ void GamePlayScene::Update()
 
 
 
-	
+
 
 
 	// 弾マネージャ
 	bulletManager_->Update();
-	
+
 
 	// デバック表示用にワールドトランスフォームを更新
 	collisionManager_->UpdateWorldTransform();
 
 
-	
+
 	// ステージ
 	stage_->Update();
 	// 当たり判定
@@ -358,31 +397,7 @@ void GamePlayScene::Draw3D()
 {
 	////3Dオブジェクトの描画
 
-	// ステージ
-	stage_->Draw();
-
-	// プレイヤー
-	player_->Draw();
-
-	enemyManager_->Draw();
-
-	bulletManager_->Draw();
-
-
-	// パーティクル
-	player_->DrawP();
-
-	
-	
-	
-	// パーティクル	
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->Draw();
-	
-	stage_->DrawP();
-
-	// 当たり判定の表示
-	collisionManager_->Draw();
-
+	bulletManager_->DrawEffect();
 }
 
 // 2D描画
@@ -391,12 +406,12 @@ void GamePlayScene::Draw2D()
 
 
 	//////////////--------スプライト-----------///////////////////
-	
+
 
 
 	// ゲームUI
 	gameUI->Draw();
-	
+
 	// 敵スプライト
 	enemyManager_->Draw2D();
 
@@ -406,7 +421,7 @@ void GamePlayScene::Draw2D()
 	player_->Draw2D();
 
 
-	
+
 
 
 

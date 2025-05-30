@@ -60,10 +60,25 @@ Vector3 EmitFanction::EmitPos(ParticleGroup& particleGroup, ParticleData::SpawnT
 	case ParticleData::SpawnType::kSegmentLine:
 		// 発生セグメントの設定
 		
-		segment_.origin = particleGroup.emiter.renge.min;  // 始点
-		segment_.end = particleGroup.emiter.renge.max;    // 終点
-		result = particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition() +
-			Lerp(segment_.origin, segment_.end, EmitFanction::RandFloat({ 0.0f,1.0f }, randomEngine));
+		if (particleGroup.isFlag.isLineInterpolation) {
+			segment_.origin = particleGroup.emiter.renge.min;  // 始点
+			segment_.end = particleGroup.emiter.renge.max;    // 終点
+
+			// 線分の始点と終点を補間して位置を決定
+			float t = static_cast<float>(index) / static_cast<float>(particleGroup.emiter.count);
+
+			Vector3 lerpPosition = Lerp(segment_.origin, segment_.end, t);
+
+			result = particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition() + lerpPosition;
+		}
+		else {
+			segment_.origin = particleGroup.emiter.renge.min;  // 始点
+			segment_.end = particleGroup.emiter.renge.max;    // 終点
+			result = particleGroup.emiter.worldtransform.worldMat_.GetWorldPosition() +
+				Lerp(segment_.origin, segment_.end, EmitFanction::RandFloat({ 0.0f,1.0f }, randomEngine));
+		}
+
+		
 		break;
 	case ParticleData::SpawnType::kCornerLine:
 		// 頂点を計算

@@ -180,7 +180,10 @@ void Entity3DManager::UpdateImgui()
 			if (entity->GetPrimitive()) {
 				ImGui::Separator();
 				entity->GetPrimitive()->MeshUpdateImGui();
+
 			}
+
+
 
 			if (entity->GetOcean()) {
 				ImGui::Separator();
@@ -191,6 +194,8 @@ void Entity3DManager::UpdateImgui()
 				entity->DebugImguiSkin();
 			}
 		}
+
+		
 	}
 
 	ImGui::End();

@@ -130,14 +130,15 @@ void ShapeParameter::Star::Create(ModelMesh* mesh)
 	if (segments < 3) {
 		throw std::invalid_argument("Segments must be >= 3.");
 	}
+
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
-	
+
 	// 中心の頂点を追加
 	mesh->vertices.push_back({
-		.position = {0.0f, 0.0f, 0.0f, 1.0f}, // 中心の頂点座標
-		.texcoord = {0.5f, 0.5f},             // 中心のUV座標
-		.normal = {0.0f, 0.0f, -1.0f}         // 法線を逆方向に
+		.position = {0.0f, 0.0f, 0.0f, 1.0f},
+		.texcoord = {0.5f, 0.5f},
+		.normal = {0.0f, 0.0f, -1.0f}
 		});
 
 	// 頂点生成
@@ -151,17 +152,17 @@ void ShapeParameter::Star::Create(ModelMesh* mesh)
 		float y = radius * sin(theta);
 
 		mesh->vertices.push_back({
-			.position = {x, y, 0.0f, 1.0f}, // 頂点座標
-			.texcoord = {x / (2.0f * outerRadius) + 0.5f, -y / (2.0f * outerRadius) + 0.5f}, // UV座標
-			.normal = {0.0f, 0.0f, -1.0f} // 法線を逆方向に
+			.position = {x, y, 0.0f, 1.0f},
+			.texcoord = {x / (2.0f * outerRadius) + 0.5f, -y / (2.0f * outerRadius) + 0.5f},
+			.normal = {0.0f, 0.0f, -1.0f}
 			});
 	}
 
-	// インデックス生成
+	// インデックス生成（面の向きを反転）
 	for (int i = 1; i <= segments * 2; ++i) {
-		mesh->indices.push_back(0); // 中心点
-		mesh->indices.push_back((i % (segments * 2)) + 1); // 次の頂点（ループ処理）
-		mesh->indices.push_back(i);
+		mesh->indices.push_back(0);                                   // 中心点
+		mesh->indices.push_back(i);                                   // 現在の頂点
+		mesh->indices.push_back((i % (segments * 2)) + 1);            // 次の頂点（ループ処理）
 	}
 
 	mesh->UpdateVertexBuffer();

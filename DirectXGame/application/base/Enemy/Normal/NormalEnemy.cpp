@@ -91,7 +91,7 @@ void NormalEnemy::DrawP()
 
 void NormalEnemy::Draw2D()
 {
-	if (isLockOn) {
+	/*if (isLockOn) {
 		icon_lockOn->SetPosition(object_->GetScreenPosition());
 
 		icon_lockOn->Update();
@@ -109,7 +109,7 @@ void NormalEnemy::Draw2D()
 		hpBer_->SetSize({ (parameter_.HP * 0.95f),10.0f });
 		hpBer_->Update();
 		hpBer_->Draw();
-	}
+	}*/
 }
 
 void NormalEnemy::SetPlayer(Player* player)

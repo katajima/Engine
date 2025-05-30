@@ -97,6 +97,7 @@ void ParticleEmitter::Update()
 		ImGui::Checkbox("Bounce", &isFlag.isBounce);
 		ImGui::Checkbox("Acceleration", &isFlag.isAcceleration);
 		ImGui::Checkbox("Event", &emitter_.isEvent);
+		ImGui::Checkbox("LineInterpolation", &isFlag.isLineInterpolation);
 
 		ImGui::Separator();
 		ImGui::Checkbox("LifeTimeScale_", &isFlag.isLifeTimeScale_);

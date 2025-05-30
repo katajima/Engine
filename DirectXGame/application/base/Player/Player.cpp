@@ -26,14 +26,30 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	objectBase_.Update();
 	objectBase_.SetName("PlayerBase");
 
+	primitiveCylinder_ = std::make_unique<Primitive>();
 
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = 5.0f;
+	cylinderParam.innerRadius = reticleRad_;
+	cylinderParam.outerRadius = reticleRad_;
+	cylinderParam.isCover = false;
+	cylinderParam.segments = 16;
+
+
+	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
+	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	// レティクル
-	objectReticle_.Initialize(entity3DManager);
-	objectReticle_.SetCamera(camera_);
-	objectReticle_.SetModel("enemy.obj");
-	objectReticle_.SetIsDraw(false);
-	objectReticle_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	objectReticle_.worldtransform_.translate_ = { 0,0,30 };
+
+	objectReticle_ = std::make_unique<Object3d>();
+	objectReticle_->Initialize(entity3DManager,Object3d::ObjectType::kPrimitive);
+	objectReticle_->SetCamera(camera_);
+	objectReticle_->SetName("レティクルシリンダー");
+	objectReticle_->SetPrimitive(primitiveCylinder_.get());
+	objectReticle_->SetIsDraw(false);
+	objectReticle_->worldtransform_.parent_ = &objectBase_.worldtransform_;
+	objectReticle_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+	objectReticle_->worldtransform_.translate_ = { 0,2,100 };
+
 
 	// 体
 	objectBody_.Initialize(entity3DManager);
@@ -48,7 +64,9 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	bulletSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
 	bulletSpecial_->SetParent(&objectBase_.worldtransform_);
 
-
+	rangeBombingSpecial_ = std::make_unique<RangeBombingSpecial>();
+	rangeBombingSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
+	rangeBombingSpecial_->SetParent(&objectBase_.worldtransform_);
 
 	weapon_ = std::make_unique<playerWeapon>();
 	weapon_->Initialize(entity3DManager, camera);
@@ -171,11 +189,19 @@ void Player::Update()
 		objectBody_.model->modelData.mesh[0]->material->color = { 1,1,1,1 };
 	}
 
+
+	ImGui::Begin("Debug");
+	if (ImGui::Button("SP")) {
+		bulletSpecial_->SetGauge(100);
+		rangeBombingSpecial_->SetGauge(100);
+	}
+	ImGui::End();
+
 #endif // _DEBUG
 
 
-
-	bulletSpecial_->Update();
+	rangeBombingSpecial_->Update();
+	//bulletSpecial_->Update();
 	if (hp <= 0) {
 		isAlive = false;
 	}
@@ -231,13 +257,7 @@ void Player::Update()
 	//
 
 
-	objectBase_.Update();
-	objectBody_.Update();
 	weapon_->Update();
-
-
-
-	objectReticle_.Update();
 }
 
 #pragma region Draw
@@ -250,18 +270,18 @@ void Player::Draw()
 		default:
 			break;
 		case Behavior::kAttack: // 攻撃行動更新
-			weapon_->Draw();
+			//weapon_->Draw();
 
 			break;
 		case Behavior::kJump:
 			break;
 		case Behavior::kDie:
-			bulletSpecial_->Draw();
+			//bulletSpecial_->Draw();
 			break;
 		}
 
 
-		objectBody_.Draw();
+		//objectBody_.Draw();
 	}
 }
 
@@ -276,6 +296,12 @@ void Player::Draw2D()
 	ui_->SetIsTextmax(bulletSpecial_->GetIsSpecial());
 	ui_->SetIsTextRB(bulletSpecial_->GetIsSpecial());
 	ui_->SetSpecialGaugeSize(static_cast<float>(bulletSpecial_->GetGauge()));
+	
+
+
+	ui_->SetIsTextmax(rangeBombingSpecial_->GetIsSpecial());
+	ui_->SetIsTextRB(rangeBombingSpecial_->GetIsSpecial());
+	ui_->SetSpecialGaugeSize(static_cast<float>(rangeBombingSpecial_->GetGauge()));
 
 	ui_->Draw();
 

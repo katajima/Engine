@@ -151,7 +151,7 @@ void ParticleManager::Emit(const std::string name, ParticleData::EmitType type, 
 	// パーティクルグループが登録済みであることを確認
 	assert(particleGroups.contains(name) && "Error: Particle group with this name is not registered.");
 
-	if (ParticleData::SpawnType::kSegmentLine == spawnType) {
+	if (ParticleData::SpawnType::kCornerLine == spawnType) {
 		for (int i = 0; i < particleGroups[name].emiter.corner.segment; ++i)
 		{
 			EmitFanction::CreateParticle(particleGroups[name], randomEngine_, spawnType, i);
@@ -159,7 +159,7 @@ void ParticleManager::Emit(const std::string name, ParticleData::EmitType type, 
 	}
 	else {
 		for (int t = 0; t < particleGroups[name].emiter.count; ++t) {
-			EmitFanction::CreateParticle(particleGroups[name], randomEngine_, spawnType, 0);
+			EmitFanction::CreateParticle(particleGroups[name], randomEngine_, spawnType, t);
 		}
 	}
 

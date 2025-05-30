@@ -44,12 +44,16 @@ public: // ゲッター兼セッター
 
 	void SetIsEmit(bool is) { isEmit = is; } // 出すか
 
+	void SetIsLineInterpolation(bool is) { isFlag.isLineInterpolation = is; } // 線形補間
+
 	void SetIsGravity(bool is) { isFlag.isGravity = is; } // 重力
 
 	void SetUsebillboard(bool is) { isFlag.usebillboard = is; } // ビルボード
 	void SetUsebillboardRotZ(bool is) { isFlag.billboardRotZ = is; } // ビルボードZ
 
 	void SetIsAlpha(bool is) { isFlag.isAlpha = is; } // 透明度
+
+	void SetIsAcceleration(bool is) { isFlag.isAcceleration = is; } // 
 
 	void SetIsLifeTimeScale(bool is) { isFlag.isLifeTimeScale_ = is; } // スケール変更
 
@@ -85,6 +89,8 @@ public: // ゲッター兼セッター
 	void SetVelocityMinMax(Vector3 min, Vector3 max) { emitter_.velocity.min = min; emitter_.velocity.max = max; } // 速度
 
 	void SetRotateVelocityMinMax(Vector3 min, Vector3 max) { emitter_.rotateVelocity.min = min; emitter_.rotateVelocity.max = max; } // 速度
+
+	void SetAccelerationMinMax(Vector3 min, Vector3 max) { emitter_.acceleration.min = min; emitter_.acceleration.max = max; } // 速度
 
 	void SetUseFieldName(std::vector<std::string> fieldName) { // フィールド名
 		for (auto& name : fieldName) {

@@ -78,7 +78,7 @@ public:
 	void SetModel(const std::string& filePath);
 	
 	// カメラ設定
-	void SetCamera(Camera* camera) { this->camera = camera; }
+	void SetCamera(Camera* camera) { this->individualCamera_ = camera; }
 	
 	// 名前設定
 	void SetName(const std::string& name) { this->name = name; }
@@ -94,6 +94,8 @@ public:
 
 	// 描画順
 	void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
+
+	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera;}
 
 	// ゲッター
 
@@ -178,23 +180,29 @@ private:
 
 private:
 	// カメラ
-	Camera* camera = nullptr;
+	Camera* defaltCamera = nullptr;
+
+	Camera* individualCamera_ = nullptr;
+
 	// トランスフォームデータ
-	std::unique_ptr<Transfomation> transfomation = nullptr;
+	std::unique_ptr<Transfomation> transformation = nullptr;
 	
 	// 何かしらの見た目があるか
 	bool isSkin_ = false;
 
+	// 個人的にカメラを使用するか
+	bool isIndividualCamera_ = false;
 
 	// アニメーションするかのフラグ
 	bool flag = true;
 
+	// ImGuiを表示するか
 	bool imguiFlag_ = false;
 
-	//
+	// 削除フラグ
 	bool isDelete = false;
 
-	// 
+	// 描画するかのフラグ
 	bool isDraw = true;
 
 	// オブジェクトのタイプ

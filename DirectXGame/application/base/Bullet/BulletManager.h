@@ -20,7 +20,16 @@ public:
 	enum class BulletType
 	{
 		kPlayerMissile,	// プレイヤーミサイル
+		kRangeBombingSpecial,	// レンジボミングスペシャル
 		kEnemyBullet,
+	};
+
+	enum class BulletBehavior 
+	{
+		kFollow,				// ターゲットを追尾する弾
+		kStraight,				// 直進する弾
+		kStraightWithGravity,	// 重力を受けて直進する弾
+		kRange,					// 範囲攻撃弾
 	};
 
 	// 初期化
@@ -33,11 +42,18 @@ public:
 
 	// 描画3D
 	void Draw();
+	
+	// 描画3D
+	void DrawEffect();
 
 	// 描画2D
 	void Draw2D();
 
-	void GeneratBullet(BulletType type, Vector3 position, BaseEnemy* enemy = nullptr);
+	// 範囲攻撃する弾を生成(絨毯爆撃)
+	void GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad);
+
+	// ターゲットを追尾する弾を生成
+	void GenerateBullet(BulletType type, Vector3 position, BaseEnemy* enemy = nullptr);
 
 	// 弾リストを取得
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }

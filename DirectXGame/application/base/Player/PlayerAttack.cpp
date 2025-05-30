@@ -60,6 +60,9 @@ void Player::AttackKey()
 		if (bulletSpecial_->GetIsSpecial()) {
 			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 		}
+		if (rangeBombingSpecial_->GetIsSpecial()) {
+			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+		}
 
 
 		if (workAttack.key.IsNormalAttack) {
@@ -127,7 +130,7 @@ void Player::SetAttackCombo(WrokAttack& work)
 void Player::AttackTypeInit(int comboIndex)
 {
 	objectBase_.Update();
-	objectReticle_.Update();
+	objectReticle_->Update();
 	workAttack.pos.str = objectBase_.GetWorldPosition();
 	weapon_->ContactRecordClear();
 

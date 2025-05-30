@@ -42,13 +42,19 @@ private:
 
 	void CloudEmit(ParticleManager* particleManager,ParticleEmitter* emit,const std::string& name);
 
+	void EmitUpdate();
+
+public:
+	std::vector<std::unique_ptr <Object3d>> missiles_;
 private:
 	// 空
 	std::unique_ptr<Object3d> sky_;
 
+	
 	// 地面
 	std::unique_ptr < Object3d> tail_;
 	
+
 	// 列車
 	std::unique_ptr < Object3d> train_;
 	float trainSpeed_ = 300.0f;
@@ -75,7 +81,7 @@ private:
 
 	// スカイボックス
 	std::unique_ptr<SkyBox> skyBox;
-
+	
 	// ライト
 	std::shared_ptr<PointLight> pointLight_;
 private:

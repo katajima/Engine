@@ -155,6 +155,9 @@ private:
 public:
 	void SetColor(const Color& color) { material->color = color; }
 
+	PsoType GetPsoType() const { return psoType_; }
+
+	void SetPsoType(PsoType type) { psoType_ = type; }
 
 public:
 
@@ -222,6 +225,7 @@ private:
 
 	PrimitiveCommon* primitiveCommon_;
 
+	PsoType psoType_ = PsoType::kDefalt;
 
 	struct UVAnimetion {
 		bool isScaleX = false;

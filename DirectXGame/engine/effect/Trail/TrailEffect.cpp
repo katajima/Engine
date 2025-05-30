@@ -171,9 +171,6 @@ void TrailEffect::Update3(bool& flag,  Matrix4x4* strM,  Matrix4x4* endM,  Matri
 	Vector3 strPre = strPreM->GetWorldPosition();
 	Vector3 endPre = endPreM->GetWorldPosition() + Vector3{0,1,0};
 
-
-
-
 	Vector3 leftTop = { str.x , str.y , str.z };
 	Vector3 leftBottom = { end.x , end.y , end.z };
 	Vector3 rightTop = { strPre.x , strPre.y , strPre.z };

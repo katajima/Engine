@@ -272,7 +272,8 @@ void TestScene::InitializeObject3D()
 	oceanObject->worldtransform_.translate_ = { 0,10,0 };
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
 	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
-		
+	oceanObject->SetIsDraw(false);
+
 	skinningObject = std::make_unique<Object3d>();
 	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
 	skinningObject->SetModel("iku.gltf");
@@ -280,7 +281,7 @@ void TestScene::InitializeObject3D()
 	skinningObject->worldtransform_.scale_ = { 10,10,10 };
 	skinningObject->SetCamera(camera.get());
 	skinningObject->SetName("iku");
-
+	skinningObject->SetIsDraw(false);
 
 
 	skinningObject2 = std::make_unique<Object3d>();
@@ -290,6 +291,7 @@ void TestScene::InitializeObject3D()
 	skinningObject2->worldtransform_.scale_ = { 10,10,10 };
 	skinningObject2->SetCamera(camera.get());
 	skinningObject2->SetName("walk");
+	skinningObject2->SetIsDraw(false);
 
 	skinningObject3 = std::make_unique<Object3d>();
 	skinningObject3->Initialize(GetEntity3DManager(), Object3d::ObjectType::kNormal);
@@ -298,6 +300,7 @@ void TestScene::InitializeObject3D()
 	skinningObject3->worldtransform_.scale_ = { 10,10,10 };
 	skinningObject3->SetCamera(camera.get());
 	skinningObject3->SetName("testBri");
+	skinningObject3->SetIsDraw(false);
 
 	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("stage.gltf");
@@ -305,7 +308,7 @@ void TestScene::InitializeObject3D()
 	tail.SetName("tail");
 	tail.GetMaterial(0)->shininess_ = 1000.0f;
 	tail.worldtransform_.translate_.y = -10.0f;
-
+	tail.SetIsDraw(false);
 
 	multiy = std::make_unique<Object3d>();
 	multiy->Initialize(GetEntity3DManager());
@@ -313,14 +316,14 @@ void TestScene::InitializeObject3D()
 	multiy->SetCamera(camera.get());
 	multiy->worldtransform_.scale_ = { 10,10,10 };
 	multiy->SetName("multiy");
-
+	multiy->SetIsDraw(false);
 
 	/// 階段
 	stairObject = std::make_unique<Object3d>();
 	stairObject->Initialize(GetEntity3DManager());
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
-
+	stairObject->SetIsDraw(false);
 
 
 	taleObject = std::make_unique<Object3d>();
@@ -328,7 +331,7 @@ void TestScene::InitializeObject3D()
 	taleObject->SetModel("terrain.obj");
 	taleObject->SetCamera(camera.get());
 	taleObject->worldtransform_.scale_ = 10.0f;
-
+	taleObject->SetIsDraw(false);
 	
 	ShapeParameter::Ring ring;
 	ring.innerRadius = 1.0f;
@@ -344,6 +347,8 @@ void TestScene::InitializeObject3D()
 	primitiveObject3d->SetCamera(camera.get());
 	primitiveObject3d->SetName("primitiveR");
 
+
+
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
 	
@@ -357,7 +362,7 @@ void TestScene::InitializeObject3D()
 	skyBoxObject->SetCamera(camera.get());
 	skyBoxObject->worldtransform_.scale_ = {10,10,10};
 	skyBoxObject->SetName("skyBox");
-	
+	skyBoxObject->SetIsDraw(false);
 	
 	
 	skyBoxObject2 = std::make_unique<Object3d>();
@@ -366,8 +371,25 @@ void TestScene::InitializeObject3D()
 	skyBoxObject2->SetCamera(camera.get());
 	skyBoxObject2->worldtransform_.scale_ = {1,1,1};
 	skyBoxObject2->SetName("skyBox2");
+	skyBoxObject2->SetIsDraw(false);
 
-	
+
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = 10.0f;
+	cylinderParam.innerRadius = 2.1f;
+	cylinderParam.outerRadius = 2.1f;
+	cylinderParam.isCover = false;
+	cylinderParam.segments = 16;
+
+	primitiveCylinder_ = std::make_unique<Primitive>();
+	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
+
+
+	hitObject_ = std::make_unique<Object3d>();
+	hitObject_->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive);
+	hitObject_->SetPrimitive(primitiveCylinder_.get());
+	hitObject_->SetName("cylinder");
+	hitObject_->SetIsDraw(true);
 }
 
 /// <summary>

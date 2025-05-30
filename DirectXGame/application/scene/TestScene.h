@@ -163,6 +163,11 @@ private:
 	// オーシャンシェーダー
 	std::unique_ptr < Ocean> ocean_ = nullptr;
 
+	std::unique_ptr<Object3d> hitObject_ = nullptr;
+
+	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
+
+
 	/// <summary>
 	/// スプライト
 	/// </summary>
@@ -190,6 +195,8 @@ private:
 	float clipping_ = 0.25f;
 
 	std::unique_ptr<ParticleEmitter> primitvPa_ = nullptr;
+
+	
 
 	/// <summary>
 	/// 場所効果

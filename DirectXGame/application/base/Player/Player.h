@@ -9,8 +9,6 @@
 #include <list>
 
 
-
-
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 #include "DirectXGame/engine/collider/3d/Collider.h"
@@ -23,6 +21,8 @@
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
 #include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
+#include "DirectXGame/application/base/Player/Special/RangeBombingSpecial.h"
+
 #include "DirectXGame/application/base/Player/Attack/PlayerAttackFactory.h"
 
 
@@ -259,7 +259,11 @@ public:
 	void SetInput(Input* input) {
 		input_ = input;
 		bulletSpecial_->SetInput(input);
+		rangeBombingSpecial_->SetInput(input);
+
 	};
+
+	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
 private:  // パラメータ
 	
@@ -270,6 +274,8 @@ private:  // パラメータ
 private:
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;
+	// スペシャル攻撃
+	std::unique_ptr<RangeBombingSpecial> rangeBombingSpecial_;
 	//  プレイヤー用UI
 	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
 	// エフェクト 
@@ -289,9 +295,13 @@ private:
 	// 本体
 	Object3d objectBody_;
 	
+	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 	//　レティクル
-	Object3d objectReticle_;
-	
+	std::unique_ptr <Object3d> objectReticle_;
+	//
+	float reticleRad_ = 60.0f;
+	Vector3 rangeBombingPos{};
+
 
 	// 移動関連
 	// 速度

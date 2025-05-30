@@ -91,6 +91,7 @@ namespace ParticleData {
 		bool isLifeTimeVelocity = false;						// 速度
 		bool isBounce = false;									// 跳ねるか
 		bool isAcceleration = false;							// 加速度を付けるか
+		bool isLineInterpolation = false;						// ライン補間するか	
 	};
 
 }
