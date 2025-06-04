@@ -23,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	//sceneManager_->ChangeScene("TEST");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TEST");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -146,6 +146,7 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/effect/gradationLine.png");
 	textureManager->LoadTexture("resources/Texture/effect/dust.png");
 	textureManager->LoadTexture("resources/Texture/effect/hit.png");
+	textureManager->LoadTexture("resources/Texture/effect/ring.png");
 
 	// 煙
 	textureManager->LoadTexture("resources/Texture/smoke/no1.png");
@@ -328,7 +329,8 @@ void MyGame::CreateParticle()
 	//
 	particleManager->CreateParticleGroup("hitEffect", "resources/Texture/effect/effect.png", primiPlane.get());
 	particleManager->CreateParticleGroup("hitEffect2", "resources/Texture/effect/effect2.png", primiPlane.get());
-	//particleManager->CreateParticleGroup("hitEffect3", "resources/Texture/effect/effect3.png", primiPlane.get()/*, {}, ParticleManager::BlendType::MODE_MUlLIPLY*/);
+	particleManager->CreateParticleGroup("ringEmit", "resources/Texture/effect/ring.png", primiPlane.get());
+	
 
 
 	// 敵関係

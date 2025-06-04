@@ -159,7 +159,7 @@ private:
 	std::unique_ptr<SkyBox> skyBox2;
 
 
-
+	std::unique_ptr<Primitive> primiPlane = nullptr;
 	// オーシャンシェーダー
 	std::unique_ptr < Ocean> ocean_ = nullptr;
 

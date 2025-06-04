@@ -12,6 +12,8 @@
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffectManager.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
+#include "DirectXGame/engine/Effect/Particle/GPU/GpuParticleManager.h"
+
 
 class LightManager;
 class DirectXCommon;
@@ -34,6 +36,9 @@ public: // ゲッター
 	TrailEffectCommon* GetTrailEffectCommon() { return trailEffectCommon_.get(); }
 	// パーティクルマネージャ
 	ParticleManager* GetParticleManager() { return particleManager_.get(); }
+	// パーティクルマネージャ
+	GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_.get(); }
+
 
 	//
 	LineCommon* GetLineCommon() { return lineCommon_; }
@@ -44,6 +49,11 @@ private:
 
 	// パーティクルマネージャー
 	std::unique_ptr<ParticleManager> particleManager_;
+
+	// GPUパーティクルマネージャー
+	std::unique_ptr<GpuParticleManager> gpuParticleManager_;
+
+
 private:
 	DirectXCommon* directXCommon_;
 	LightManager* lightManager_;

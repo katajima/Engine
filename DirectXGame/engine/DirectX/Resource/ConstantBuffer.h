@@ -30,6 +30,11 @@ public:
 	{
 		dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
 	}
+	
+	void SetComputeRootConstantBufferView(int index)
+	{
+		dxCommon_->GetCommandList()->SetComputeRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
+	}
 
 	Type* Data() const { return data_; };
 

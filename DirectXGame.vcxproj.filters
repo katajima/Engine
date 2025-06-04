@@ -276,10 +276,10 @@
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager2d.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter2d.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp">
@@ -423,7 +423,7 @@
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\GpuParticleManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelData.cpp">
@@ -517,8 +517,11 @@
     <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
     <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\Particle.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\NewParticle.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticle.CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -761,10 +764,10 @@
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager2d.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter2d.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h">
@@ -944,7 +947,7 @@
     <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\GpuParticleManager.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h">

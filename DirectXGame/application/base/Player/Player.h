@@ -299,7 +299,7 @@ private:
 	//　レティクル
 	std::unique_ptr <Object3d> objectReticle_;
 	//
-	float reticleRad_ = 60.0f;
+	float reticleRad_ = 100.0f;
 	Vector3 rangeBombingPos{};
 
 

@@ -14,6 +14,11 @@ void EffectManager::Initialize(DirectXCommon* directXCommon, LightManager* light
 	particleManager_ = std::make_unique<ParticleManager>();
 	particleManager_->Initialize(directXCommon_, lightManager_,this);
 
+	gpuParticleManager_ = std::make_unique<GpuParticleManager>();
+	gpuParticleManager_->Initialize(directXCommon_, lightManager_, this);
+
 }
+
+
 
 

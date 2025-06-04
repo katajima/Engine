@@ -263,7 +263,7 @@ void Entity3DManager::ObjectDraw()
 		object->Draw();
 	}
 	transparentObjects01.clear();
-	
+
 	// 半透明中盤
 	for (auto& object : transparentObjects02) {
 		object->Draw();

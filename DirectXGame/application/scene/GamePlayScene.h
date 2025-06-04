@@ -105,7 +105,7 @@ private:
 	float timer = 0.0f;
 	float cameraScaleT = 0.0f;
 
-	float minScaleZCamera = 1.5f;
+	float minScaleZCamera = 5.5f;
 
 private:
 	// ライト

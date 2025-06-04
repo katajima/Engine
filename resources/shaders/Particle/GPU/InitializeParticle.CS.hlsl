@@ -1,4 +1,3 @@
-#include"NewParticle.hlsli"
 
 struct Particle
 {
@@ -18,10 +17,10 @@ void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint particleIndex = DTid.x;
     if (particleIndex < kMaxParticles)
-    {
+    {    
         gParticle[particleIndex] = (Particle) 0;
-
-    }
-    
-    
+        gParticle[particleIndex].translate = float3(0.0f, 0.0f, 0.0f);
+        gParticle[particleIndex].scale = float3(1.5f,1.5f,1.5f);
+        gParticle[particleIndex].color = float4(1.0f,1.0f,1.0f,1.0f);   
+    } 
 }

@@ -279,6 +279,9 @@ void GamePlayScene::Update()
 	ImGui::End();
 #endif // _DEBUG
 
+	if(input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+		player_->GetRangeBombingSpecial()->SetGauge(100);
+	}
 
 	if (player_->GetRangeBombingSpecial()->IsAction()) {
 		timer = 0.0f;
@@ -297,7 +300,7 @@ void GamePlayScene::Update()
 		timer += MyGame::GameTime();
 	}
 
-	if (timer >= 1.5f) {
+	if (timer >= 1.25f) {
 		timer = 0.0f;
 		cameraScaleT = 0.0f;
 		universeCamera_->GetViewProjection().transform_.scale.z = minScaleZCamera;

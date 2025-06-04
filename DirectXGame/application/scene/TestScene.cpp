@@ -263,17 +263,19 @@ void TestScene::InitializeObject3D()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(GetEntity3DManager(), { 10,100 });
-	
+	ocean_->Initialize(GetEntity3DManager(), { 10000,10000 });
+	ocean_->GetMaterial()->enableLighting_ = false;
+
+
 	oceanObject = std::make_unique<Object3d>();
 	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kOcean);
 	oceanObject->SetCamera(camera.get());
 	oceanObject->SetOcean(ocean_.get());
-	oceanObject->worldtransform_.translate_ = { 0,10,0 };
+	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
 	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
-	oceanObject->SetIsDraw(false);
-
+	oceanObject->SetIsDraw(true);
+	
 	skinningObject = std::make_unique<Object3d>();
 	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
 	skinningObject->SetModel("iku.gltf");
@@ -362,7 +364,7 @@ void TestScene::InitializeObject3D()
 	skyBoxObject->SetCamera(camera.get());
 	skyBoxObject->worldtransform_.scale_ = {10,10,10};
 	skyBoxObject->SetName("skyBox");
-	skyBoxObject->SetIsDraw(false);
+	skyBoxObject->SetIsDraw(true);
 	
 	
 	skyBoxObject2 = std::make_unique<Object3d>();
@@ -389,7 +391,13 @@ void TestScene::InitializeObject3D()
 	hitObject_->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive);
 	hitObject_->SetPrimitive(primitiveCylinder_.get());
 	hitObject_->SetName("cylinder");
-	hitObject_->SetIsDraw(true);
+	hitObject_->SetIsDraw(false);
+
+
+	primiPlane = std::make_unique<Primitive>();
+	ShapeParameter::ShapePlane shapePlane;
+	primiPlane->Initialize<ShapeParameter::ShapePlane>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
+
 }
 
 /// <summary>
@@ -426,6 +434,10 @@ void TestScene::InitializeObject2D()
 void TestScene::InitializeParticle()
 {
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
+	
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(camera.get());
+	
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(primiPlane->GetMesh());
 	
 	
 	/*GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kAcceleration,Field::ShapeType::kAABB,"加速");
