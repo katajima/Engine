@@ -476,6 +476,7 @@
     <None Include="resources\shaders\Object3D\Object3dInstans.hlsli" />
     <None Include="resources\shaders\Offscreen\Smoothing.hlsli" />
     <None Include="resources\shaders\Particle\NewParticle.hlsli" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl" />
@@ -522,6 +523,7 @@
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\EmitParticle.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">

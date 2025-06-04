@@ -19,6 +19,7 @@ public:
 
 	void TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newState);
 
+	void UavDependence(ID3D12Resource* res);
 
 	void RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state);
 private:

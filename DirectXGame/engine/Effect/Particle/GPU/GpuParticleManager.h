@@ -18,17 +18,26 @@
 #include "DirectXGame/engine/PSO/PSOManager.h"
 
 struct ParticleCS {
-	Vector3 transrate;
-	Vector3 scale;
-	Vector3 lifeTime;
-	Vector3 velocity;
-	float currentTime;
 	Vector4 color;
+	Vector3 transrate;
+	float lifeTime;
+	Vector3 scale;
+	float currentTime;
+	Vector3 velocity;
+	float pad[1];
 };
 
 struct PreView {
 	Matrix4x4 viewProjection;
 	Matrix4x4 billboardMatrix;
+};
+
+struct PerFrame
+{
+	// ゲームを起動してからの時間
+	float time;
+	// 1フレームの経過時間
+	float deltaTime;
 };
 
 struct EmitterSphere
@@ -82,11 +91,16 @@ private:
 
 	// CS用のパーティクルデータ
 	StructuredBuffer<ParticleCS> sbParticleResource_;
+	// CS用のパーティクルデータ
+	StructuredBuffer<int32_t> sbFreeCounterResource_;
 
 	// 球エミッター
 	ConstantBuffer<EmitterSphere> cbEmitterSphere_;
 
+	// 時間
+	ConstantBuffer<PerFrame> cbPerFrame_;
 
+	const int MaxInstance = 1024;
 
 	ModelMesh* mesh_ = nullptr;		// モデルメッシュ
 	std::string textureName_ = "";	// テクスチャインデック
@@ -98,6 +112,8 @@ private:
 	std::unique_ptr<CSPSOManager> csPsoManager_ = nullptr;
 	// CS用のPSO設定
 	std::unique_ptr<CSPSOManager> csEmitPsoManager_ = nullptr;
+	// CS用のPSO設定
+	std::unique_ptr<CSPSOManager> csUpdatePsoManager_ = nullptr;
 
 	////ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
@@ -117,6 +133,12 @@ private:
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeEmitRootSignature;
 	// コンピュートパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> computeEmitPipelineState;
+
+
+	//ルートシグネチャコンピュート
+	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeUpdateRootSignature;
+	// コンピュートパイプラインステート
+	Microsoft::WRL::ComPtr < ID3D12PipelineState> computeUpdatePipelineState;
 
 
 

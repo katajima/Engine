@@ -20,8 +20,11 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	dxCommon_ = dxCommon;
 
 	// パーティクルインスタンシングVS
-	sbParticleResource_.CreateBuffer(dxCommon_, 1024,true);
+	sbParticleResource_.CreateBuffer(dxCommon_, MaxInstance,true);
 	
+	// カウンター
+	sbFreeCounterResource_.CreateBuffer(dxCommon_, 1, true);
+
 	// パーティクルビュー
 	preViewResource_ = effectManager_->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(PreView));
 	preViewResource_->Map(0, nullptr, reinterpret_cast<void**>(&preView_));
@@ -32,11 +35,12 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	cbEmitterSphere_.Data()->frequency = 0.5f;
 	cbEmitterSphere_.Data()->frequencyTime = 0.0f;
 	cbEmitterSphere_.Data()->translate = Vector3(0.0f, 0.0f, 0.0f);
-	cbEmitterSphere_.Data()->radius = 1.0f;
+	cbEmitterSphere_.Data()->radius = 10.0f;
 	cbEmitterSphere_.Data()->emit = 0;
 
 
-
+	cbPerFrame_.CreateBuffer(dxCommon_, 1);
+	
 
 
 
@@ -50,6 +54,11 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	// Compute用のパイプラインステートオブジェクトを作成(エミッター)
 	csEmitPsoManager_ = std::make_unique<CSPSOManager>();
 	csEmitPsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+
+	// Compute用のパイプラインステートオブジェクトを作成(更新)
+	csUpdatePsoManager_ = std::make_unique<CSPSOManager>();
+	csUpdatePsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+
 
 
 	// グラフィック用のパイプラインステートオブジェクトを作成
@@ -66,6 +75,7 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	dxCommon_->GetCommandList()->SetComputeRootSignature(computeRootSignature.Get());
 	dxCommon_->GetCommandList()->SetPipelineState(computePipelineState.Get());
 	sbParticleResource_.SetComputeRootDescriptorTable(0);
+	sbFreeCounterResource_.SetComputeRootDescriptorTable(1);
 	dxCommon_->GetCommandList()->Dispatch(1, 1, 1);
 }
 
@@ -102,13 +112,28 @@ void GpuParticleManager::Update()
 		cbEmitterSphere_.Data()->emit = 0;
 	}
 	
+	cbPerFrame_.Data()->time += MyGame::GameTime();
+	cbPerFrame_.Data()->deltaTime = MyGame::GameTime();
 
-	//srvManager_->PreDraw();
-	//dxCommon_->GetCommandList()->SetComputeRootSignature(computeEmitRootSignature.Get());
-	//dxCommon_->GetCommandList()->SetPipelineState(computeEmitPipelineState.Get());
-	//sbParticleResource_.SetComputeRootDescriptorTable(0); // パーティクル
-	//cbEmitterSphere_.SetComputeRootConstantBufferView(1); // エミッター
-	//dxCommon_->GetCommandList()->Dispatch(1, 1, 1);
+
+	srvManager_->PreDraw();
+	dxCommon_->GetCommandList()->SetComputeRootSignature(computeEmitRootSignature.Get());
+	dxCommon_->GetCommandList()->SetPipelineState(computeEmitPipelineState.Get());
+	sbParticleResource_.SetComputeRootDescriptorTable(0);	// パーティクル
+	cbEmitterSphere_.SetComputeRootConstantBufferView(1);	// エミッター
+	cbPerFrame_.SetComputeRootConstantBufferView(2);		// 乱数用時間
+	sbFreeCounterResource_.SetComputeRootDescriptorTable(3);// カウンター
+	dxCommon_->GetCommandList()->Dispatch(1, 1, 1);
+
+	sbParticleResource_.UavDependence();
+
+	dxCommon_->GetCommandList()->SetComputeRootSignature(computeUpdateRootSignature.Get());
+	dxCommon_->GetCommandList()->SetPipelineState(computeUpdatePipelineState.Get());
+	sbParticleResource_.SetComputeRootDescriptorTable(0);	// パーティクル
+	cbPerFrame_.SetComputeRootConstantBufferView(1);		// 乱数用時間
+
+	dxCommon_->GetCommandList()->Dispatch(1, 1, 1);
+
 }
 
 void GpuParticleManager::Draw() 
@@ -131,7 +156,8 @@ void GpuParticleManager::Draw()
 		mesh_->GetCommandList();
 
 		// インスタンシング描画
-		dxCommon_->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh_->indices.size()), 1024, 0, 0, 0);
+		dxCommon_->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh_->indices.size()), MaxInstance, 0, 0, 0);
+		
 	}
 }
 
@@ -168,12 +194,14 @@ void GpuParticleManager::CreateRootSignature()
 
 	{
 		// Compute用のルートシグネチャを作成
-		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[1] = {};
+		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[2] = {};
 		csPsoManager_->SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
+		csPsoManager_->SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
 
 		// Compute用のRootParameterを作成
-		D3D12_ROOT_PARAMETER computeRootParameters[1] = {};
-		csPsoManager_->SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL); // gSkinningInfomation
+		D3D12_ROOT_PARAMETER computeRootParameters[2] = {};
+		csPsoManager_->SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL); // パーティクル
+		csPsoManager_->SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL); // カウント
 
 		// Compute用のSamplerを設定
 		csPsoManager_->SetRootSignature(computeRootSignature, computeRootParameters, _countof(computeRootParameters), staticSamplers, _countof(staticSamplers));
@@ -181,16 +209,33 @@ void GpuParticleManager::CreateRootSignature()
 
 	{
 		// Compute用のルートシグネチャを作成
-		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[1] = {};
+		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[2] = {};
 		csEmitPsoManager_->SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
+		csEmitPsoManager_->SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
 
 		// Compute用のRootParameterを作成
-		D3D12_ROOT_PARAMETER computeRootParameters[2] = {};
-		csEmitPsoManager_->SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL); // gSkinningInfomation
-		csEmitPsoManager_->SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV); // gSkinningInfomation
+		D3D12_ROOT_PARAMETER computeRootParameters[4] = {};
+		csEmitPsoManager_->SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
+		csEmitPsoManager_->SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッター(球)
+		csEmitPsoManager_->SetRootParameter(computeRootParameters[2], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
+		csEmitPsoManager_->SetRootParameter(computeRootParameters[3], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);			// カウンター
 
 		// Compute用のSamplerを設定
 		csEmitPsoManager_->SetRootSignature(computeEmitRootSignature, computeRootParameters, _countof(computeRootParameters), staticSamplers, _countof(staticSamplers));
+	}
+
+	{
+		// Compute用のルートシグネチャを作成
+		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[1] = {};
+		csUpdatePsoManager_->SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //Particle用
+		
+		// Compute用のRootParameterを作成
+		D3D12_ROOT_PARAMETER computeRootParameters[2] = {};
+		csUpdatePsoManager_->SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
+		csUpdatePsoManager_->SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 乱数生成用時間
+		
+		// Compute用のSamplerを設定
+		csUpdatePsoManager_->SetRootSignature(computeUpdateRootSignature, computeRootParameters, _countof(computeRootParameters), staticSamplers, _countof(staticSamplers));
 	}
 
 
@@ -245,6 +290,9 @@ void GpuParticleManager::CreateGraphicsPipeline()
 
 	csEmitPsoManager_->shderFile_.commpute.filePach = L"resources/shaders/Particle/GPU/EmitParticle.CS.hlsl";
 	csEmitPsoManager_->ComputePipelineState(computeEmitRootSignature, computeEmitPipelineState);
+
+	csUpdatePsoManager_->shderFile_.commpute.filePach = L"resources/shaders/Particle/GPU/UpdateParticle.CS.hlsl";
+	csUpdatePsoManager_->ComputePipelineState(computeUpdateRootSignature, computeUpdatePipelineState);
 
 
 };

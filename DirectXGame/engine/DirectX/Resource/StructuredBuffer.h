@@ -59,26 +59,28 @@ public:
 	void SetGraphicsRootDescriptorTable(int index)
 	{
 		if (useUav_) {
-			//barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			// UAV → SRV に切り替え
+			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		}
 
 		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(index, srvHandleGPU_);
 
 		if (useUav_) {
-			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+			// SRV → UAV に戻す
+			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		}
 	}
 
 	void SetComputeRootDescriptorTable(int index)
 	{
 		if (useUav_) {
-			//barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
+			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 			dxCommon_->GetCommandList()->SetComputeRootDescriptorTable(index, uavHandleGPU_);
-
-			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		}
 	}
+
+	void UavDependence() { barrier_->UavDependence(resource_.Get()); };
 
 	Type* Data() const { return data_; };
 

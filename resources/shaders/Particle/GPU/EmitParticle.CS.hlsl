@@ -1,43 +1,46 @@
-
-struct EmitterSphere
-{
-    float3 translate;       // 位置
-    float radius;           // 射出半径
-    uint count;             // 射出数
-    float frequency;        // 射出間隔
-    float frequencyTime;    // 射出間隔調整用時間
-    uint emit;              // 射出許可
-};
+#include "GpuParticle.hlsli"
 
 
-ConstantBuffer<EmitterSphere> gEmitter : register(b0);
+
+ConstantBuffer<EmitterSphere> gEmitter : register(b0);  // エミッター
+ConstantBuffer<PerFrame> gPerFrame : register(b1);      // 乱数生成用時間
 
 
-struct Particle
-{
-    float3 translate;
-    float3 scale;
-    float lifeTime;
-    float3 velocity;
-    float currentTime;
-    float4 color;
-};
+
 static const uint kMaxParticles = 1024;
 RWStructuredBuffer<Particle> gParticle : register(u0);
 
 
+RWStructuredBuffer<int> gFreeCounter : register(u1);
+
+
+
+
+
+
+
+
 [numthreads(1, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
-{
+{    
     if (gEmitter.emit != 0)
     {
+        RandomGeneratetor generator;
+        generator.seed = (DTid + gPerFrame.time) * gPerFrame.time;
+            
         for (uint countIndex = 0; countIndex < gEmitter.count; ++countIndex)
         {
+            int particleIndex;
+            InterlockedAdd(gFreeCounter[0],1,particleIndex);
+            if (particleIndex < kMaxParticles)
+            {
             // カウント分射出
-            gParticle[countIndex].scale = float3(0.3f, 0.3f, 0.3f);
-            gParticle[countIndex].translate = float3(0.0f, 0.0f, 0.0f);
-            gParticle[countIndex].color = float4(1.0f, 0.0f, 0.0f, 1.0f);
-          
+                gParticle[particleIndex].scale = generator.Generate3d_2();
+                gParticle[particleIndex].translate = gEmitter.translate + (generator.Generate3d());
+                gParticle[particleIndex].color.rgb = generator.Generate3d_2();
+                gParticle[particleIndex].color.a = 1.0f;
+                gParticle[particleIndex].velocity = generator.Generate3d_2();
+            }
         }
     }
 }

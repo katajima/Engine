@@ -1,4 +1,4 @@
-
+#include "GpuParticle.hlsli"
 
 struct VertexShaderOutput
 {
@@ -14,27 +14,14 @@ struct VertexShaderInput
     float3 normal : NORMAL0;
 };
 
-struct Particle
-{
-    float3 translate;
-    float3 scale;
-    float lifeTime;
-    float3 velocity;
-    float currentTime;
-    float4 color;
-};
 
-struct PerView
-{
-    float4x4 viewProjection;
-    float4x4 billboardMatrix;
-};
+
 
 StructuredBuffer<Particle> gParticles : register(t1);
 ConstantBuffer<PerView> gPerView : register(b0);
 
 
-VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_VertexID)
+VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
 {
     VertexShaderOutput output;
     
@@ -46,6 +33,8 @@ VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_VertexID)
     worldMatrix[1] *= particle.scale.y;             // Scale Y
     worldMatrix[2] *= particle.scale.z;             // Scale Z
     worldMatrix[3].xyz = particle.translate;        // Translate
+    worldMatrix[3].w = 1.0f;
+    
     output.position = mul(input.position, mul(worldMatrix,gPerView.viewProjection));
     output.texcoord = input.texcoord;
     output.color = particle.color;  

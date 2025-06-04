@@ -48,6 +48,15 @@ void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newS
     }
 }
 
+void Barrier::UavDependence(ID3D12Resource* res)
+{
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.UAV.pResource = res;
+    command_->GetList()->ResourceBarrier(1, &barrier);
+}
+
 void Barrier::RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state)
 {
     resourceStates_[res] = state;
