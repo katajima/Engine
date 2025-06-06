@@ -325,14 +325,13 @@ void GpuParticleManager::CreateGraphicsPipeline()
 
 
 
-
-	csPsoManager_->shderFile_.commpute.filePach = L"resources/shaders/Particle/GPU/InitializeParticle.CS.hlsl";
+	csPsoManager_->SetShaderFileName(L"resources/shaders/Particle/GPU/InitializeParticle.CS.hlsl");
 	csPsoManager_->ComputePipelineState();
 
-	csEmitPsoManager_->shderFile_.commpute.filePach = L"resources/shaders/Particle/GPU/EmitParticle.CS.hlsl";
+	csEmitPsoManager_->SetShaderFileName(L"resources/shaders/Particle/GPU/EmitParticle.CS.hlsl");
 	csEmitPsoManager_->ComputePipelineState();
 
-	csUpdatePsoManager_->shderFile_.commpute.filePach = L"resources/shaders/Particle/GPU/UpdateParticle.CS.hlsl";
+	csUpdatePsoManager_->SetShaderFileName(L"resources/shaders/Particle/GPU/UpdateParticle.CS.hlsl");
 	csUpdatePsoManager_->ComputePipelineState();
 
 

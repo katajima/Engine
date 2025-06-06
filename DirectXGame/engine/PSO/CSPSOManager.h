@@ -30,6 +30,8 @@ public:
 
 	void PreComputePSRS();
 
+	void SetShaderFileName(std::wstring filename);
+
 private:
 	Command* command_;
 	DXGIDevice* DXGIDevice_;
@@ -53,10 +55,7 @@ private:
 
 	PSRS computePSRS_;
 
-public:
 	ShaderFile shderFile_;
-
-
 public:
 	void SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline);
 };

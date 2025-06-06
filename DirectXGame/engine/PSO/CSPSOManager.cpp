@@ -44,6 +44,11 @@ void CSPSOManager::PreComputePSRS()
 	command_->GetList()->SetPipelineState(computePSRS_.computePipelineState.Get());
 }
 
+void CSPSOManager::SetShaderFileName(std::wstring filename)
+{
+	shderFile_.commpute.filePach = filename;
+}
+
 void CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline)
 {
 	if (shderFile_.commpute.filePach != L"") {

@@ -222,10 +222,7 @@ void SkinningConmmon::CreateGraphicsPipeline()
 	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[7], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
-
-	csPsoManager_->shderFile_.commpute.filePach = L"resources/shaders/Skining/Skinning.CS.hlsl";
-
+	csPsoManager_->SetShaderFileName(L"resources/shaders/Skining/Skinning.CS.hlsl");
+	
 	csPsoManager_->ComputePipelineState();
-
-
 }
