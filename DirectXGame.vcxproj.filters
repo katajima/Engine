@@ -481,6 +481,7 @@
     <None Include="resources\shaders\Particle\NewParticle.hlsli" />
     <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli" />
     <None Include="resources\shaders\Particle\GPU\random.hlsli" />
+    <None Include="resources\shaders\Particle\GPU\Collider.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl" />
@@ -528,7 +529,7 @@
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\EmitParticle.CS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleField.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">

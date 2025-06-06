@@ -52,8 +52,8 @@ struct EmitterSphere
 
 struct EffectFieldCS {
 	Vector3 translate;      // 位置
-	Vector3 range;			// 各半径
 	float force;			// 力
+	Vector3 range;			// 各半径
 	uint32_t isEffect;		// 影響を出すか
 };
 
@@ -131,9 +131,7 @@ private:
 	// CS用のPSO設定(影響場所)
 	std::unique_ptr<CSPSOManager> csFieldPsoManager_ = nullptr;
 
-	////ルートシグネチャデスク
-	//D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
-
+	
 	// パーティクル描画PSO
 	PSOManager::PSRS particleDraw;
 

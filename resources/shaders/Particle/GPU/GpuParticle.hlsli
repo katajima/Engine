@@ -43,3 +43,14 @@ struct MaxInstance
 {
     uint maxInstanse;
 };
+
+
+
+// Field影響
+struct EffectFieldCS
+{
+    float3 translate; // 位置
+    float force; // 力
+    float3 range; // 各半径
+    uint isEffect; // 影響を出すか
+};
