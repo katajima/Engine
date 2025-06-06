@@ -335,9 +335,10 @@ void Object3dInstansManager::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Object3D/Object3dInstans.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Object3D/Object3dInstans.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3dInstans.PS.hlsl");
 
+	
 
 	BlendAdd();
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);

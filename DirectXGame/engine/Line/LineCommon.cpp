@@ -590,8 +590,8 @@ void LineCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Line/Line.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Line/Line.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Line/Line.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Line/Line.PS.hlsl");
 
 
 	//DepthStencilStateの設定を行う

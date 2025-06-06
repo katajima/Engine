@@ -44,7 +44,7 @@ public:
 
 	void AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format,UINT slot = 0);
 
-
+	void SetShaderFileName(ShaderFileName shaderFileName, std::wstring filename);
 
 	void SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D12_COMPARISON_FUNC func);
 
@@ -96,7 +96,6 @@ private:
 	D3D12_RASTERIZER_DESC rasterizerDesc_{};
 	
 
-public:
 	ShaderFile shderFile_;
 private:
 	PSRS psoRoot_;

@@ -86,11 +86,10 @@ void TrailEffectCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Trail/Trail.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Trail/Trail.PS.hlsl");
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Trail/Trail.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Trail/Trail.PS.hlsl";
-
-
+	
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);

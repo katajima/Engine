@@ -196,8 +196,8 @@ void SkinningConmmon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("INDEX", 0, DXGI_FORMAT_R32G32B32A32_SINT, 1);
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Skining/NewSkinning.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Skining/SkinningObject3d.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Skining/NewSkinning.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Skining/SkinningObject3d.PS.hlsl");
 
 
 

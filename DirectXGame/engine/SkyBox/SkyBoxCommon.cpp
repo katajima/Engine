@@ -89,9 +89,8 @@ void SkyBoxCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
-
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/SkyBox/SkyBox.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/SkyBox/SkyBox.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/SkyBox/SkyBox.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/SkyBox/SkyBox.PS.hlsl");
 
 
 	//DepthStencilStateの設定を行う

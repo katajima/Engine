@@ -689,50 +689,47 @@ void RenderingCommon::CreateGraphicsPipeline()
 	depthStencilDesc.DepthEnable = false;
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Offscreen/Fullscreen.VS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Offscreen/Fullscreen.VS.hlsl");
+	
 
 
-
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/CopyImage.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/CopyImage.PS.hlsl");
 	psoManager_->GraphicsPipelineState(copy_.rootSignature, copy_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/GrayScale.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/GrayScale.PS.hlsl");
 	psoManager_->GraphicsPipelineState(grayScale_.rootSignature, grayScale_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Sepia.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/Sepia.PS.hlsl");
 	psoManager_->GraphicsPipelineState(sepia_.rootSignature, sepia_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Vignette.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/Vignette.PS.hlsl");
 	psoManager_->GraphicsPipelineState(vignette_.rootSignature, vignette_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Smoothing.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/Smoothing.PS.hlsl");
 	psoManager_->GraphicsPipelineState(smoothing_.rootSignature, smoothing_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Gaussian.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/Gaussian.PS.hlsl");
 	psoManager_->GraphicsPipelineState(gaussian_.rootSignature, gaussian_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Outline.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/Outline.PS.hlsl");
 	psoManager_->GraphicsPipelineState(outline_.rootSignature, outline_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/RadialBlur.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/RadialBlur.PS.hlsl");
 	psoManager_->GraphicsPipelineState(radialBlur_.rootSignature, radialBlur_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Dissovle.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/Dissovle.PS.hlsl");
 	psoManager_->GraphicsPipelineState(dissovle_.rootSignature, dissovle_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/Random.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/Random.PS.hlsl");
 	psoManager_->GraphicsPipelineState(random_.rootSignature, random_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/BloomExtract.PS.hlsl";
+
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/BloomExtract.PS.hlsl");
 	psoManager_->GraphicsPipelineState(bloom_.rootSignature, bloom_.graphicsPipelineState, blendDesc, depthStencilDesc);
 
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Offscreen/BloomCombine.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Offscreen/BloomCombine.PS.hlsl");
 	psoManager_->GraphicsPipelineState(bloomCombin_.rootSignature, bloomCombin_.graphicsPipelineState, blendDesc, depthStencilDesc);
-
-
 
 }
 

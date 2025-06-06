@@ -130,8 +130,8 @@ void PrimitiveCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Trail/Trail.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Trail/Trail.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Trail/Trail.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Trail/Trail.PS.hlsl");
 
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);

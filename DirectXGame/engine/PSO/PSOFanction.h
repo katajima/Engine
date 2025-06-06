@@ -23,6 +23,17 @@ enum class TextureAddressMode {
 	kMIRROR_ONCE,// 一度ミラーリングを適用し、その後は範囲外部分をクランプする方式です。最初の一回は反転させ、次からはエッジの値を使用するため、特殊な効果が実現できます。
 };
 
+enum class ShaderFileName
+{
+	PS,
+	VS,
+	DS,
+	HS,
+	GS,
+	AS,
+	MS,
+};
+
 class DXGIDevice;
 namespace PSOFanction {
 

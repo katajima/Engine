@@ -116,8 +116,8 @@ void SpriteCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Object2D/Object2D.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Object2D/Object2D.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object2D/Object2D.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object2D/Object2D.PS.hlsl");
 
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);

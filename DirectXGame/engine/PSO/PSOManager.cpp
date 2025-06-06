@@ -150,6 +150,38 @@ void PSOManager::AddInputElementDesc(const std::string& semanticName, UINT seman
 	inputElementDesc_.push_back(elementDesc);
 }
 
+void PSOManager::SetShaderFileName(ShaderFileName shaderFileName, std::wstring filename)
+{
+	switch (shaderFileName)
+	{
+	case ShaderFileName::PS:
+		shderFile_.pixel.filePach = filename;
+		break;
+	case ShaderFileName::VS:
+		shderFile_.vertex.filePach = filename;
+		break;
+	case ShaderFileName::DS:
+		shderFile_.domain.filePach = filename;
+		break;
+	case ShaderFileName::HS:
+		shderFile_.hull.filePach = filename;
+		break;
+	case ShaderFileName::GS:
+		shderFile_.geometry.filePach = filename;
+		break;
+	case ShaderFileName::AS:
+		shderFile_.amplification.filePach = filename;
+		break;
+	case ShaderFileName::MS:
+		shderFile_.domain.filePach = filename;
+		break;
+	default:
+		break;
+	}
+
+
+}
+
 void PSOManager::SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D12_COMPARISON_FUNC func)
 {
 	depthStencilDesc_ = {};

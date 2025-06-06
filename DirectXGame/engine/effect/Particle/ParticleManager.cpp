@@ -245,8 +245,9 @@ void ParticleManager::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Particle/Particle.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Particle/Particle.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Particle/Particle.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Particle/Particle.PS.hlsl");
+
 
 
 	BlendAdd();
