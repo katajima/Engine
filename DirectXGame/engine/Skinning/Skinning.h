@@ -62,14 +62,5 @@ private:// メンバ変数
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
 
-
-	//ルートシグネチャコンピュート
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeRootSignature;
-	
-	// コンピュートパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> computePipelineState;
-	
-
-
 };
 

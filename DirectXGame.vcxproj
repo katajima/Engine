@@ -177,6 +177,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Mesh\SkyBoxMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\PSO\PSOFanction.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp" />
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp" />
@@ -274,6 +275,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="resources\shaders\Particle\GPU\random.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
@@ -487,6 +492,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleField.CS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
@@ -667,6 +680,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Mesh\SkyBoxMesh.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h" />
     <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h" />
+    <ClInclude Include="DirectXGame\engine\PSO\PSOFanction.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h" />
     <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h" />
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h" />

@@ -552,9 +552,9 @@ void LineCommon::CreateRootSignature()
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};  // 2つのパラメーターを使う
 
 	// カメラデータ
-	psoManager_->SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters),nullptr,0);
 }

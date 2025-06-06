@@ -274,7 +274,7 @@ void TestScene::InitializeObject3D()
 	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
 	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
-	oceanObject->SetIsDraw(true);
+	oceanObject->SetIsDraw(false);
 	
 	skinningObject = std::make_unique<Object3d>();
 	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);

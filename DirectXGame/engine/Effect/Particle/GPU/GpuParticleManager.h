@@ -50,6 +50,18 @@ struct EmitterSphere
 	uint32_t emit;          // 射出許可
 };
 
+struct EffectFieldCS {
+	Vector3 translate;      // 位置
+	Vector3 range;			// 各半径
+	float force;			// 力
+	uint32_t isEffect;		// 影響を出すか
+};
+
+struct MaxInstance
+{
+	uint32_t maxInstance;	// 最大個数
+};
+
 class LightManager;
 class Entity3DManager;
 class EffectManager;
@@ -91,16 +103,18 @@ private:
 
 	// CS用のパーティクルデータ
 	StructuredBuffer<ParticleCS> sbParticleResource_;
-	// CS用のパーティクルデータ
-	StructuredBuffer<int32_t> sbFreeCounterResource_;
-
+	// CS用のカウントインデックス
+	StructuredBuffer<int32_t> sbFreeListIndexResource_;
+	// CS用のカウント
+	StructuredBuffer<uint32_t> sbFreeListResource_;
 	// 球エミッター
 	ConstantBuffer<EmitterSphere> cbEmitterSphere_;
-
 	// 時間
 	ConstantBuffer<PerFrame> cbPerFrame_;
-
-	const int MaxInstance = 1024;
+	// パーティクル上限
+	ConstantBuffer<MaxInstance> cbMaxInstance_;
+	// パーティクル影響場所
+	ConstantBuffer<EffectFieldCS> cbEffectFieldResource_;
 
 	ModelMesh* mesh_ = nullptr;		// モデルメッシュ
 	std::string textureName_ = "";	// テクスチャインデック
@@ -108,39 +122,29 @@ private:
 	// PSO設定
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-	// CS用のPSO設定
+	// CS用のPSO設定(初期化)
 	std::unique_ptr<CSPSOManager> csPsoManager_ = nullptr;
-	// CS用のPSO設定
+	// CS用のPSO設定(エミッター)
 	std::unique_ptr<CSPSOManager> csEmitPsoManager_ = nullptr;
-	// CS用のPSO設定
+	// CS用のPSO設定(更新)
 	std::unique_ptr<CSPSOManager> csUpdatePsoManager_ = nullptr;
+	// CS用のPSO設定(影響場所)
+	std::unique_ptr<CSPSOManager> csFieldPsoManager_ = nullptr;
 
 	////ルートシグネチャデスク
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
-	////ルートシグネチャ
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-	//// グラフィックスパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState;
+	//D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 
+	// パーティクル描画PSO
+	PSOManager::PSRS particleDraw;
 
-	//ルートシグネチャコンピュート
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeRootSignature;
-	// コンピュートパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> computePipelineState;
+	// パーティクル初期化PSO
+	CSPSOManager::PSRS particleCsInit;
+	
+	// パーティクルエミッターPSO
+	CSPSOManager::PSRS particleCsEmit;
 
-
-	//ルートシグネチャコンピュート
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeEmitRootSignature;
-	// コンピュートパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> computeEmitPipelineState;
-
-
-	//ルートシグネチャコンピュート
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeUpdateRootSignature;
-	// コンピュートパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> computeUpdatePipelineState;
-
-
+	// パーティクル更新PSO
+	CSPSOManager::PSRS particleCsUpdate;
 
 private:
 	Entity3DManager* entity3DManager_;		// エンティティマネージャー
