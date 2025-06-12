@@ -328,12 +328,14 @@ void GamePlayScene::Update()
 			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&followCamera_->GetViewProjection());
 		}
 		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-		GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
+		//GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 	}
 	else {
 
 
 		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
+		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+		GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 		camera->UpdateMatrix();
 	}
 
@@ -349,7 +351,7 @@ void GamePlayScene::Update()
 
 
 	// デバック表示用にワールドトランスフォームを更新
-	collisionManager_->UpdateWorldTransform();
+	collisionManager_->UpdateWorldTransform(GetEntity3DManager()->Get3DLineCommon());
 
 
 

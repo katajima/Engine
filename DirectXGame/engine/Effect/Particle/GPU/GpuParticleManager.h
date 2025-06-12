@@ -25,6 +25,8 @@ struct ParticleCS {
 	float currentTime;
 	Vector3 velocity;
 	float pad[1];
+	Vector3 acceleration;
+	float pad2[1];
 };
 
 struct PreView {
@@ -44,10 +46,18 @@ struct EmitterSphere
 {
 	Vector3 translate;      // 位置
 	float radius;           // 射出半径
+	Vector3 scale;			// サイズ
+	float lifeTime;			// 生存時間
+	Vector3 scaleRange;		// サイズ(範囲)
+	float lifeTimeRange;	// 生存時間(範囲)
+	Vector3 velocity;		// 速度
 	uint32_t count;         // 射出数
-	float frequency;        // 射出間隔
-	float frequencyTime;    // 射出間隔調整用時間
+	Vector3 velocityRange;	// 速度(範囲)
 	uint32_t emit;          // 射出許可
+	Vector3 color;			// 色
+	float frequency;        // 射出間隔
+	Vector3 colorRange;		// 色(範囲)
+	float frequencyTime;    // 射出間隔調整用時間
 };
 
 struct EffectFieldCS {
@@ -62,6 +72,7 @@ struct MaxInstance
 	uint32_t maxInstance;	// 最大個数
 };
 
+class LineCommon;
 class LightManager;
 class Entity3DManager;
 class EffectManager;
@@ -149,6 +160,7 @@ private:
 	EffectManager* effectManager_;			// エフェクトマネージャー
 	SrvManager* srvManager_ = nullptr;		// SRVマネージャー
 	DirectXCommon* dxCommon_ = nullptr;		// DirectX共通クラス
+	LineCommon* lineCommon_ = nullptr;		// ライン
 	Camera* camera_ = nullptr;				// カメラ
 };
 

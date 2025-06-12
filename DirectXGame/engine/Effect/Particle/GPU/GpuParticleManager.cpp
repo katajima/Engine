@@ -11,14 +11,15 @@
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 
 #include "DirectXgame/engine/MyGame/MyGame.h"
-
+#include"DirectXGame/engine/Line/LineCommon.h"
 
 void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* effectManager)
 {
 	effectManager_ = effectManager;
 	srvManager_ = dxCommon->GetSrvManager();
+	lineCommon_ = effectManager_->GetLineCommon();
 	dxCommon_ = dxCommon;
-
+	
 	cbMaxInstance_.CreateBuffer(dxCommon_, 1);
 	cbMaxInstance_.Data()->maxInstance = 1024 * 10000;
 
@@ -38,22 +39,27 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 
 	// 球エミッター
 	cbEmitterSphere_.CreateBuffer(dxCommon_, 1);
-	cbEmitterSphere_.Data()->count = 50;
+	cbEmitterSphere_.Data()->count = 10;
 	cbEmitterSphere_.Data()->frequency = 0.00f;
 	cbEmitterSphere_.Data()->frequencyTime = 0.0f;
 	cbEmitterSphere_.Data()->translate = Vector3(0.0f, 0.0f, 0.0f);
-	cbEmitterSphere_.Data()->radius = 100.0f;
+	cbEmitterSphere_.Data()->radius = 10.0f;
 	cbEmitterSphere_.Data()->emit = 0;
+
+	cbEmitterSphere_.Data()->color = { 1.0f,1.0f ,1.0f };
+	cbEmitterSphere_.Data()->lifeTime = 5.0f;
+	cbEmitterSphere_.Data()->velocity = { 0.0f,0.0f,0.0f };
+	cbEmitterSphere_.Data()->scale = { 2.0f,2.0f,2.0f };
 
 
 	cbPerFrame_.CreateBuffer(dxCommon_, 1);
 	
 	// 影響
 	cbEffectFieldResource_.CreateBuffer(dxCommon_, 1);
-	cbEffectFieldResource_.Data()->force = 30.0f;
+	cbEffectFieldResource_.Data()->force = 100.0f;
 	cbEffectFieldResource_.Data()->translate = { 0.0f,0.0f,0.0f};
 	cbEffectFieldResource_.Data()->isEffect = 1;
-	cbEffectFieldResource_.Data()->range = {30.0f,30.0f,30.0f};
+	cbEffectFieldResource_.Data()->range = {300.0f,300.0f,300.0f};
 
 
 	
@@ -120,9 +126,17 @@ void GpuParticleManager::Update()
 
 	preView_->viewProjection = camera_->GetViewProjectionMatrix();
 
+#ifdef _DEBUG
 	ImGui::Begin("GPUEmit");
 	ImGui::DragFloat3("transform", &cbEmitterSphere_.Data()->translate.x, 0.01f);
+	ImGui::DragFloat3("scale", &cbEmitterSphere_.Data()->scale.x, 0.01f);
+	ImGui::DragFloat3("scaleRange", &cbEmitterSphere_.Data()->scaleRange.x, 0.01f);
+	ImGui::DragFloat3("velocity", &cbEmitterSphere_.Data()->velocity.x, 0.01f);
+	ImGui::DragFloat3("velocityRange", &cbEmitterSphere_.Data()->velocityRange.x, 0.01f);
+	ImGui::ColorEdit3("color", &cbEmitterSphere_.Data()->color.x);
+	ImGui::ColorEdit3("colorRange", &cbEmitterSphere_.Data()->colorRange.x);
 	ImGui::End();
+#endif // _DEBUG
 
 	// 加算
 	cbEmitterSphere_.Data()->frequencyTime += MyGame::GameTime();
@@ -130,14 +144,17 @@ void GpuParticleManager::Update()
 	// 射出間隔を上回ったら射出許可を出して時間を調整
 	if (cbEmitterSphere_.Data()->frequency <= cbEmitterSphere_.Data()->frequencyTime) {
 		cbEmitterSphere_.Data()->frequencyTime -= cbEmitterSphere_.Data()->frequency;
-		cbEmitterSphere_.Data()->emit = 1;
+		//cbEmitterSphere_.Data()->emit = 1;
 		
 	}
 	else {
 		// 射出間隔を上回っていないので、射出許可は出せない
 		cbEmitterSphere_.Data()->emit = 0;
 	}
-	
+
+	lineCommon_->AddLineSphere({ cbEmitterSphere_.Data()->translate,cbEmitterSphere_.Data()->radius });
+
+
 	cbPerFrame_.Data()->time += MyGame::GameTime();
 	cbPerFrame_.Data()->deltaTime = MyGame::GameTime();
 
@@ -158,6 +175,9 @@ void GpuParticleManager::Update()
 
 
 	//// 場所影響
+	lineCommon_->AddLineAABB({-cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
+
+	
 	csFieldPsoManager_->PreComputePSRS();
 	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
 	cbPerFrame_.SetComputeRootConstantBufferView(1);			// 乱数用時間

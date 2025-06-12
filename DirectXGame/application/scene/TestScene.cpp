@@ -4,6 +4,8 @@
 
 #include "DirectXGame/engine/math/Random.h"
 
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
 void TestScene::Initialize()
 {
 	//オーディオの初期化
@@ -43,6 +45,10 @@ void TestScene::Update()
 {
 	SwitchRoom(); // 部屋切り替え
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
+
+	timer_.DebugImGui("timer");
+
+	timer_.Update(MyGame::GameTime());
 
 #ifdef _DEBUG
 
@@ -211,18 +217,18 @@ void TestScene::Draw2D()
 	switch (behavior_)
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
-		/*for (int i = 0; i < sprite_.size(); i++) {
+		for (int i = 0; i < sprite_.size(); i++) {
 			sprite_[i]->UpdateAmimetion(0.05f);
 		}
 		sprite_[0]->Draw();
 		sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
 		sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
-		sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);*/
+		sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
 
 
 
-		//primitive2d1_->Update();
-		//primitive2d1_->Draw();
+		/*primitive2d1_->Update();
+		primitive2d1_->Draw();*/
 
 
 

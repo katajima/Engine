@@ -1,5 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
+#include "CollisionFancion.h"
 #include"list"
 #include"Collider.h"
 
@@ -30,7 +31,7 @@ public:
 	void Initialize(GlobalVariables* globalVariables);
 
 	// ワールドトランスフォームの更新
-	void UpdateWorldTransform();
+	void UpdateWorldTransform(LineCommon* lineCommon);
 
 	//描画
 	void Draw();
@@ -41,9 +42,6 @@ public:
 private:
 	// コライダー
 	std::list<Collider*> colliders_;
-
-	// 衝突モデル
-	//std::unique_ptr<Model> modelCollosion_;
 
 	bool isCollider;
 

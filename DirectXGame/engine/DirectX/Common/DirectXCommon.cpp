@@ -121,7 +121,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 #ifdef _DEBUG
 	//if (!sceneManager->IsNowScene("GAMEPLAY")) {
 		// デバッグ用のライン描画
-	//	entity3DManager->Get3DLineCommon()->Draw();
+		entity3DManager->Get3DLineCommon()->Draw();
 	//}
 #endif // _DEBUG
 

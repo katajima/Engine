@@ -35,7 +35,7 @@
 #include "DirectXGame/engine/math/MapChip.h"
 #include "DirectXGame/engine/math/AStarAlgorithm.h"
 #include "DirectXGame/engine/math/Noise.h"
-
+#include "DirectXGame/engine/Animation/AnimationData.h"
 
 class TestScene : public BaseScene
 {
@@ -222,6 +222,14 @@ private:
 	std::unique_ptr <Octree> octree;
 	Vector3 div_ = { 1,1,1 };
 	int maxDepth = { 1 };
+
+
+	Timer timer_;
+
+	Collider* collA;
+	Collider* collB;
+
+
 };
 
 

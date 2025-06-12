@@ -25,9 +25,17 @@ void main(uint3 DTid : SV_DispatchThreadID)
             {
                 if (cllider.CollAABBPoint(gEffectField.range, gEffectField.translate, gParticle[particleIndex].translate))
                 {
-                    float3 diff = normalize(float3(gEffectField.translate - gParticle[particleIndex].translate));
-                            
-                    gParticle[particleIndex].velocity += diff * gEffectField.force * gPerFrame.deltaTime;
+                    float3 delta = gEffectField.translate - gParticle[particleIndex].translate;
+                    
+                    
+                    float distSqr = max(dot(delta, delta), 0.0001); // 距離の二乗（ゼロ割防止）
+                    float3 forceDir = normalize(delta);
+                    float forceMag = gEffectField.force / distSqr; // 距離が近いほど強く、遠いほど弱く
+       
+                    //gParticle[particleIndex].acceleration += forceDir * forceMag * gPerFrame.deltaTime;
+                    
+                    gParticle[particleIndex].acceleration += forceDir/* * gPerFrame.deltaTime*/;
+                    
                 }
             }
         }

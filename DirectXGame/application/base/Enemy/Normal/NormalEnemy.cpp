@@ -5,8 +5,13 @@
 void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
+	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Capsule));
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
-
+	Collider::SetRadius(3.0f);
+	Capsule cap = Collider::GetCapsule();
+	cap.radius = 3.0f;
+	cap.segment.origin.z = 10;
+	Collider::SetCapsule(cap);
 
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;

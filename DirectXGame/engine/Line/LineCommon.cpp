@@ -156,7 +156,6 @@ void LineCommon::AddLightLine(SpotLightData data)
 	}
 }
 
-
 void LineCommon::AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat)
 {
 
@@ -321,7 +320,7 @@ void LineCommon::AddLineCorner(CornerSegment corner, WorldTransform pos)
 	}
 }
 
-void LineCommon::AddLineCapsule(Capsule capsule)
+void LineCommon::AddLineCapsule(Capsule capsule ,const Vector4& color)
 {
 	const int segmentCount = 8; // 半球と円の分割数
 	const Vector3& start = capsule.segment.origin;
@@ -354,12 +353,12 @@ void LineCommon::AddLineCapsule(Capsule capsule)
 		Vector3 off2E = end + offset2;
 
 		// シリンダーの縁を描画
-		AddLine(off1S, off1E, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-		AddLine(off2S, off2E, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+		AddLine(off1S, off1E, color);
+		AddLine(off2S, off2E, color);
 
 		// 球と球の間に線を引く
-		AddLine(start + offset1, start + offset2, Vector4(1.0f, 1.0f, 0.0f, 1.0f));
-		AddLine(end + offset1, end + offset2, Vector4(1.0f, 1.0f, 0.0f, 1.0f));
+		AddLine(start + offset1, start + offset2, color);
+		AddLine(end + offset1, end + offset2, color);
 	}
 
 	// 半球の描画
@@ -375,18 +374,53 @@ void LineCommon::AddLineCapsule(Capsule capsule)
 			Vector3 offset2 = side * cosf(horizontalAngle2) * sinf(angle1) * radius + forward * sinf(horizontalAngle2) * sinf(angle1) * radius + axis * cosf(angle1) * radius;
 			Vector3 offset3 = side * cosf(horizontalAngle1) * sinf(angle2) * radius + forward * sinf(horizontalAngle1) * sinf(angle2) * radius + axis * cosf(angle2) * radius;
 
-			AddLine(start + offset1, start + offset2, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-			AddLine(start + offset1, start + offset3, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+			AddLine(start + offset1, start + offset2, color);
+			AddLine(start + offset1, start + offset3, color);
 
-			AddLine(end - offset1, end - offset2, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-			AddLine(end - offset1, end - offset3, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+			AddLine(end - offset1, end - offset2, color);
+			AddLine(end - offset1, end - offset3, color);
 		}
 	}
 }
 
+void LineCommon::AddLineOBB(const OBB& obb, const Vector4& color)
+{
+	// Half extents along each local axis
+	Vector3 halfSize = obb.size * 0.5f;
 
+	// ローカル軸方向にサイズを掛けて、各方向ベクトルにスケールを適用
+	Vector3 axes[3] = {
+		obb.orientations[0] * halfSize.x,
+		obb.orientations[1] * halfSize.y,
+		obb.orientations[2] * halfSize.z
+	};
 
+	// 8頂点（各コーナー）を構築
+	Vector3 corners[8];
+	int i = 0;
+	for (int dx = -1; dx <= 1; dx += 2) {
+		for (int dy = -1; dy <= 1; dy += 2) {
+			for (int dz = -1; dz <= 1; dz += 2) {
+				corners[i++] = obb.center
+					+ axes[0] * static_cast<float>(dx)
+					+ axes[1] * static_cast<float>(dy)
+					+ axes[2] * static_cast<float>(dz);
+			}
+		}
+	}
 
+	// エッジのペア（indicesでアクセス）
+	const int edgePairs[12][2] = {
+		{0, 1}, {1, 3}, {3, 2}, {2, 0}, // bottom face
+		{4, 5}, {5, 7}, {7, 6}, {6, 4}, // top face
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // vertical edges
+	};
+
+	// ラインを追加
+	for (int e = 0; e < 12; ++e) {
+		AddLine(corners[edgePairs[e][0]], corners[edgePairs[e][1]], color);
+	}
+}
 
 void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform pos, Vector4 color)
 {
@@ -470,8 +504,6 @@ void LineCommon::AddOctree(OctreeNode* node)
 
 }
 
-
-
 void LineCommon::AddGrid(float xRange, float zRange, float interval, Vector4 color)
 {
 	if (interval <= 0.0f) return;
@@ -497,7 +529,6 @@ void LineCommon::AddGrid(float xRange, float zRange, float interval, Vector4 col
 		AddLine(Vector3(-xRange, 0.0f, z), Vector3(xRange, 0.0f, z), lineColor);
 	}
 }
-
 
 void LineCommon::Update()
 {
@@ -558,7 +589,6 @@ void LineCommon::CreateRootSignature()
 
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters),nullptr,0);
 }
-
 
 void LineCommon::CreateGraphicsPipeline()
 {

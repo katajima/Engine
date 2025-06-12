@@ -35,13 +35,15 @@ void main( uint3 DTid : SV_DispatchThreadID )
             if (0 <= freeListIndex && freeListIndex < gMaxInstance.maxInstanse)
             {
                 int particleIndex = gFreeList[freeListIndex];
-                gParticle[particleIndex].currentTime = 0;
-                gParticle[particleIndex].lifeTime = 30.0f;
-                gParticle[particleIndex].scale = generator.Generate3d_4();
-                gParticle[particleIndex].translate = gEmitter.translate + generator.Generate3d_4();
-                gParticle[particleIndex].color.rgb = generator.Generate3d_4();
-                gParticle[particleIndex].color.a = 1.0f;
-                gParticle[particleIndex].velocity = generator.Generate3d_4() * 0.5f;
+                gParticle[particleIndex].currentTime = 0;                                                                   // 粒子時間
+                gParticle[particleIndex].lifeTime = gEmitter.lifeTime + generator.Generate1d_4() * gEmitter.lifeTimeRange;  // 生存時間
+                gParticle[particleIndex].scale = gEmitter.scale + generator.Generate3d_4() * gEmitter.scaleRange;           // スケール        
+                gParticle[particleIndex].translate = gEmitter.translate + generator.Generate3d_4() * gEmitter.radius;       // 位置
+                gParticle[particleIndex].color.rgb = gEmitter.color + generator.Generate3d_4() * gEmitter.colorRange;       // 色
+                gParticle[particleIndex].color.a = 1.0f;                                                                    // 透明度
+                gParticle[particleIndex].velocity = gEmitter.velocity + generator.Generate3d_4() * gEmitter.velocityRange;  // 速度
+                gParticle[particleIndex].acceleration = float3(0.0f,0.0f,0.0f);
+                
             }
             else
             {

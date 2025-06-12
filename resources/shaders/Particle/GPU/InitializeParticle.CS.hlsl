@@ -22,6 +22,8 @@ void main( uint3 DTid : SV_DispatchThreadID )
         gParticle[particleIndex].color = float4(1.0f,1.0f,1.0f,1.0f);
         gParticle[particleIndex].lifeTime = float(0.0f);
         gParticle[particleIndex].velocity = float3(0.0f, 0.0f, 0.0f);
+        gParticle[particleIndex].acceleration = float3(0.0f, 0.0f, 0.0f);
+        
         gParticle[particleIndex].currentTime = float(0.0f);
         
         gFreeList[particleIndex] = particleIndex;

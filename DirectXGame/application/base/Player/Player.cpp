@@ -10,6 +10,7 @@
 void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
+	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Capsule));
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
 
 
@@ -464,14 +465,12 @@ void Player::OnCollision(Collider* other)
 
 				// 接触履歴があれば何もせず抜ける
 				if (contactRecord_.CheckHistory(serialNumber)) {
-					return;
+					//return;
 				}
 
 				contactRecord_.AddHistory(serialNumber);
 
-
 				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
-
 			}
 		}
 	}

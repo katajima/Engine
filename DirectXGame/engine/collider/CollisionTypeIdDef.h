@@ -24,10 +24,11 @@ struct IsCollisionType
 };
 
 
-enum class ColliderType
+enum class ColliderType : uint32_t
 {
 	Sphere,
 	Capsule,
-	Box,
+	AABB,
+	OBB,
 	Mesh,
 };

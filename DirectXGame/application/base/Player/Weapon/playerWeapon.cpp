@@ -6,6 +6,7 @@
 void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 {
 	Collider::Initialize(camera);
+	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
 
 

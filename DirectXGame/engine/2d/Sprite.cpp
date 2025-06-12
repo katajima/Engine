@@ -11,36 +11,22 @@ void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, 
 	// 引数で受け取ってメンバ変数にする
 	this->spriteCommon_ = spriteCommon;
 
-	vertexResource = spriteCommon_->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(VertexData) * 4);
 
-	indexResource = spriteCommon_->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(uint32_t) * 6);
+	indices.push_back(0);
+	indices.push_back(1);
+	indices.push_back(2);
+	indices.push_back(1);
+	indices.push_back(3);
+	indices.push_back(2);
+	indexResorce_.CreateBufferView(spriteCommon_->GetDxCommon(), indices, indices.size());
 
-	//リソースの先頭のアドレスを作成する
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点6つの分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 4;
-	//1頂点当たりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
+	vertices.push_back({});
+	vertices.push_back({});
+	vertices.push_back({});
+	vertices.push_back({});
+	vbvResorce_.CreateBufferView(spriteCommon_->GetDxCommon(), vertices, vertices.size());
 
-	// リソースの先頭のアドレスから使う
-	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-	// 使用するリソースのサイズはインデック6つ分のサイズ
-	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
-	// インデックはuint32_tとする
-	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-
-
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-
-	indexData[0] = 0;
-	indexData[1] = 1;
-	indexData[2] = 2;
-	indexData[3] = 1;
-	indexData[4] = 3;
-	indexData[5] = 2;
-
+	
 	// マテリアル
 	material = std::make_unique<Material>();
 	material->Initialize(spriteCommon_->GetDxCommon());
@@ -115,21 +101,21 @@ void Sprite::Update()
 	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
 
 	// 1枚目の三角形
-	vertexData[0].position = { left,bottom,0.0f,1.0f };//左下
-	vertexData[0].texcoord = { tex_left,tex_bottom };
-	vertexData[0].normal = { 0.0f,0.0f,-1.0f };
+	vbvResorce_.Data()[0].position = { left,bottom,0.0f,1.0f };//左下
+	vbvResorce_.Data()[0].texcoord = { tex_left,tex_bottom };
+	vbvResorce_.Data()[0].normal = { 0.0f,0.0f,-1.0f };
 
-	vertexData[1].position = { left,top,0.0f,1.0f };//左上
-	vertexData[1].texcoord = { tex_left,tex_top };
-	vertexData[1].normal = { 0.0f,0.0f,-1.0f };
+	vbvResorce_.Data()[1].position = { left,top,0.0f,1.0f };//左上
+	vbvResorce_.Data()[1].texcoord = { tex_left,tex_top };
+	vbvResorce_.Data()[1].normal = { 0.0f,0.0f,-1.0f };
 
-	vertexData[2].position = { right,bottom,0.0f,1.0f };//右下
-	vertexData[2].texcoord = { tex_right,tex_bottom };
-	vertexData[2].normal = { 0.0f,0.0f,-1.0f };
+	vbvResorce_.Data()[2].position = { right,bottom,0.0f,1.0f };//右下
+	vbvResorce_.Data()[2].texcoord = { tex_right,tex_bottom };
+	vbvResorce_.Data()[2].normal = { 0.0f,0.0f,-1.0f };
 	//2枚目の三角形
-	vertexData[3].position = { right,top,0.0f,1.0f };//右上
-	vertexData[3].texcoord = { tex_right,tex_top };
-	vertexData[3].normal = { 0.0f,0.0f,-1.0f };
+	vbvResorce_.Data()[3].position = { right,top,0.0f,1.0f };//右上
+	vbvResorce_.Data()[3].texcoord = { tex_right,tex_top };
+	vbvResorce_.Data()[3].normal = { 0.0f,0.0f,-1.0f };
 
 
 	//transform変数を作る
@@ -181,11 +167,9 @@ void Sprite::Draw(SpriteType type)
 		material->GetCommandListTexture(2, 2, 2);
 
 
-		//vertexBufferViewSprite
-		spriteCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
-
-		spriteCommon_->GetDxCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);
-
+		vbvResorce_.IASetVertexBuffers();
+		indexResorce_.IASetIndexBuffer();
+		
 		//トランスフォームMatrixResource
 		transfomation->GetCommandList(1);
 

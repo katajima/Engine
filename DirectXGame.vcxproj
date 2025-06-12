@@ -145,6 +145,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionFancion.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Command\Command.cpp" />
@@ -637,11 +638,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h" />
     <ClInclude Include="DirectXGame\application\scene\TestScene.h" />
     <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h" />
+    <ClInclude Include="DirectXGame\engine\2d\SpriteData.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
+    <ClInclude Include="DirectXGame\engine\Animation\AnimationData.h" />
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
