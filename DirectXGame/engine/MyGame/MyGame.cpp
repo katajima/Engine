@@ -23,8 +23,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	//sceneManager_->ChangeScene("TEST");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TEST");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -232,6 +232,8 @@ void MyGame::InitializeResource()
 	modelManager->LoadModel("stage.gltf", "stage"); // ステージ
 	modelManager->LoadModel("Missile.gltf", "Missile"); // ミサイル発射台
 
+
+	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
 
 
 	/// <summary>

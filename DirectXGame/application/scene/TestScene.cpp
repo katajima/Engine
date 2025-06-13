@@ -34,6 +34,9 @@ void TestScene::Initialize()
 	// その他の初期化
 	InitializeOthers();
 
+
+	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
 }
 
 void TestScene::Finalize()
@@ -45,6 +48,8 @@ void TestScene::Update()
 {
 	SwitchRoom(); // 部屋切り替え
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
+
+	loadData_->Update();
 
 	timer_.DebugImGui("timer");
 
@@ -770,6 +775,9 @@ void TestScene::SwitchRoom()
 		}
 		if (ImGui::Button("Room08")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom08;
+		}
+		if (ImGui::Button("GameScene")) {
+			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}
 
 		ImGui::EndMenu();

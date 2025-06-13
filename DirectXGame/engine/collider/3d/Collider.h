@@ -54,6 +54,9 @@ public:
 	// OBB
 	OBB GetOBB() const { return obb_; }
 
+	// 色
+	void SetColor(Vector4 color) { color_ = color; }
+
 private:
 	// 衝突判定
 	float radius_ = 1.5f; // 半径
@@ -66,6 +69,9 @@ private:
 
 	// Capsule
 	Capsule capsule_ = Capsule(Vector3{},Vector3{},1.5f);
+
+	// 色
+	Vector4 color_ = { 1,1,1,1 };
 
 	// 種別ID
 	uint32_t typeID_ = 0u;

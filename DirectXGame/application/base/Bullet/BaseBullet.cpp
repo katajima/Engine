@@ -101,7 +101,9 @@ void BaseBullet::OnCollision(Collider* other)
 			enemy->SetHit();
 
 			enemy->Emit();
-
+			
+			enemy->hitStop(0.1f);
+			
 			// 敵
 			EnemyToColl();
 		}

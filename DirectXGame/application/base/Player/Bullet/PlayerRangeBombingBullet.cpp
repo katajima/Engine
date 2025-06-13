@@ -15,7 +15,11 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	Collider::Initialize(camera);
 	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
-	Collider::SetRadius(3.0f);
+	Collider::SetRadius(0.01f);
+	Capsule cap = Collider::GetCapsule();
+	cap.radius = 6.0f;
+
+	Collider::SetCapsule(cap);
 
 	// オブジェクト設定
 	object_ = std::make_unique<Object3d>();
@@ -279,11 +283,12 @@ void PlayerRangeBombingBullet::Update()
 			if (count >= max_count)
 			{
 				velocity_ = targetPos * 3;
-
+				Collider::SetRadius(20.0f);
 				object_->worldtransform_.translate_ += velocity_ * GetTimer();
 			}
 
 			if (-0.0f >= object_->GetWorldPosition().y) {
+				
 				object_->worldtransform_.translate_.y = 0.5f;
 				isAlive_ = false;
 				count = 0;
@@ -382,6 +387,7 @@ void PlayerRangeBombingBullet::EnemyToColl()
 
 void PlayerRangeBombingBullet::PlayerToColl()
 {
+
 }
 
 void PlayerRangeBombingBullet::InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)

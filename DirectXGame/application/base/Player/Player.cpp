@@ -10,9 +10,9 @@
 void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
-	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Capsule));
+	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
-
+	Collider::SetColor(Vector4{ 0,0,1,1 });
 
 	entity3DManager_ = entity3DManager;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();

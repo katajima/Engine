@@ -14,6 +14,21 @@ CollisionManager::~CollisionManager()
 
 void CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* colliderB) 
 {
+	// コライダーAの座標を取得
+	Vector3 posA = colliderA->GetCenterPosition();
+	// コライダーBの座標を取得
+	Vector3 posB = colliderB->GetCenterPosition();
+	// 座標の差分ベクトル
+	Vector3 subtract = Subtract(posB, posA);
+
+	if (subtract.Length() >= 100) {
+		return;
+	};
+
+	if (colliderA->GetTypeID() == colliderB->GetTypeID()) {
+		return;
+	}
+
 	// 球同士
 	if (colliderA->GetColliderType() == static_cast<uint32_t>(ColliderType::Sphere) &&
 		colliderB->GetColliderType() == static_cast<uint32_t>(ColliderType::Sphere)) {

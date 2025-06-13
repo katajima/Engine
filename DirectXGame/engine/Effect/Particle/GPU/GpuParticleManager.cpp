@@ -144,7 +144,7 @@ void GpuParticleManager::Update()
 	// 射出間隔を上回ったら射出許可を出して時間を調整
 	if (cbEmitterSphere_.Data()->frequency <= cbEmitterSphere_.Data()->frequencyTime) {
 		cbEmitterSphere_.Data()->frequencyTime -= cbEmitterSphere_.Data()->frequency;
-		//cbEmitterSphere_.Data()->emit = 1;
+		cbEmitterSphere_.Data()->emit = 1;
 		
 	}
 	else {
@@ -152,7 +152,7 @@ void GpuParticleManager::Update()
 		cbEmitterSphere_.Data()->emit = 0;
 	}
 
-	lineCommon_->AddLineSphere({ cbEmitterSphere_.Data()->translate,cbEmitterSphere_.Data()->radius });
+	//lineCommon_->AddLineSphere({ cbEmitterSphere_.Data()->translate,cbEmitterSphere_.Data()->radius });
 
 
 	cbPerFrame_.Data()->time += MyGame::GameTime();
@@ -175,7 +175,7 @@ void GpuParticleManager::Update()
 
 
 	//// 場所影響
-	lineCommon_->AddLineAABB({-cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
+	//lineCommon_->AddLineAABB({-cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
 
 	
 	csFieldPsoManager_->PreComputePSRS();

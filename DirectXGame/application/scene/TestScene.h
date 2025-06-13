@@ -36,6 +36,7 @@
 #include "DirectXGame/engine/math/AStarAlgorithm.h"
 #include "DirectXGame/engine/math/Noise.h"
 #include "DirectXGame/engine/Animation/AnimationData.h"
+#include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
 class TestScene : public BaseScene
 {
@@ -229,7 +230,7 @@ private:
 	Collider* collA;
 	Collider* collB;
 
-
+	std::unique_ptr<LoadLevelData> loadData_;
 };
 
 

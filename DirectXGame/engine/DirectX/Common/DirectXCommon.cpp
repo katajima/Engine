@@ -115,7 +115,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 	entity3DManager->GetEffectManager()->GetParticleManager()->Draw();
 
 	// GPUパーティクル描画
-	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
+	//entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
 
 
 #ifdef _DEBUG
