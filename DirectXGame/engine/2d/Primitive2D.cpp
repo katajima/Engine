@@ -7,7 +7,7 @@ void Primitive2D::Initialize(SpriteCommon* spriteCommon,ShapeType type, const Co
 	spriteCommon_ = spriteCommon;
 
 
-	mesh = std::make_unique<Mesh>();
+	mesh = std::make_unique<ModelMesh>();
 	switch (type_)
 	{
 	case Primitive2D::ShapeType::Cube:

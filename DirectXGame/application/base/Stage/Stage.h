@@ -9,7 +9,7 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
@@ -36,26 +36,72 @@ public:
 	void DrawP();
 
 	void Draw2D();
+private:
 
+	void InitEmit();
+
+	void CloudEmit(ParticleManager* particleManager,ParticleEmitter* emit,const std::string& name);
+
+	void EmitUpdate();
+
+public:
+	std::vector<std::unique_ptr <Object3d>> missiles_;
 private:
 	// 空
 	std::unique_ptr<Object3d> sky_;
 
+	
 	// 地面
 	std::unique_ptr < Object3d> tail_;
-	std::unique_ptr < Object3d> tail2_;
-	// 海
+	
+
+	// 列車
+	std::unique_ptr < Object3d> train_;
+	float trainSpeed_ = 300.0f;
+	float trainStartX_ = -3110.0f;
+	float trainEndX_ = 4000.0f;
+	float trainWarpTime_ = 0.0f;
+	float trainWarpTimeMax_ = 20.0f;
+
+	// 列車
+	std::unique_ptr < Object3d> ship_;
+	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
+
+	// 円運動のパラメータ
+	float radius = 1000.0f; // 円の半径
+	float angularSpeed = DirectX::XM_PI * 0.5f * 0.25f; // ラジアン/秒（90度/秒）
+	
+	Vector3 center = { -3111,-50,3040 }; // 中心座標を指定
+
+
 	// オーシャンシェーダー
-	std::unique_ptr <Ocean> ocean_ = nullptr;
+	std::unique_ptr<Ocean> ocean_ = nullptr;
+	std::unique_ptr<Object3d> oceanObject;
 
-	// 工場
-	std::vector < std::unique_ptr<Object3d>> warehouseObject_;
-	// 建物オブジェクト位置
-	std::vector<Vector3> warePos;
 
+	// スカイボックス
+	std::unique_ptr<SkyBox> skyBox;
+	
+	// ライト
+	std::shared_ptr<PointLight> pointLight_;
 private:
 
+	// ステージに舞う埃
 	std::unique_ptr<ParticleEmitter> emit_;
+
+	// 列車の煙
+	std::unique_ptr<ParticleEmitter> emitTrainDust_;
+
+	// 船の水しぶき
+	std::unique_ptr<ParticleEmitter> emitShipDust_;
+
+	// 雲の粒子
+	std::unique_ptr<ParticleEmitter> emitCloudDust_;
+	std::unique_ptr<ParticleEmitter> emitCloudDust2_;
+	std::unique_ptr<ParticleEmitter> emitCloudDust3_;
+
+
+
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;

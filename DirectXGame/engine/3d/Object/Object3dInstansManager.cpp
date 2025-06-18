@@ -191,7 +191,7 @@ void Object3dInstansManager::CreateObject3dGroup(const std::string name, const s
 	objectGroup.rasteType = rasteType;
 }
 
-void Object3dInstansManager::CreateObject3dGroup(const std::string name, const std::string textureFilePath, Mesh* mesh, RasterizerType rasteType, BlendType blendType)
+void Object3dInstansManager::CreateObject3dGroup(const std::string name, const std::string textureFilePath, ModelMesh* mesh, RasterizerType rasteType, BlendType blendType)
 {
 	if (objectGroups.contains(name)) {
 		return;
@@ -259,7 +259,7 @@ void Object3dInstansManager::AddObject(const std::string name, const std::string
 	
 
 	if (texName == "") {
-		object.texIndex = objectGroups[name].model->modelData.material[0]->tex_.diffuseIndex;
+		object.texIndex = objectGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
 	}
 	else {
 		
@@ -281,8 +281,8 @@ void Object3dInstansManager::Clear(const std::string name)
 void Object3dInstansManager::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
-	psoManager_->SetDescriptorRenge(descriptorRange[0], 1, UINT_MAX, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	psoManager_->SetDescriptorRenge(descriptorRange[1], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
+	PSOFanction::SetDescriptorRenge(descriptorRange[0], 1, UINT_MAX, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[1], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
 
 
 	// RootParameter作成。複数指定できるのではい
@@ -291,11 +291,11 @@ void Object3dInstansManager::CreateRootSignature()
 	//CD3DX12_ROOT_PARAMETER 
 
 	// マテリアル (b4) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// インスタンシング(t1) をバーテックシェーダ使用する
-	psoManager_->SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[1], D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
 	//psoManager_->SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// カメラデータ (b2) をピクセルシェーダで使用する
@@ -308,7 +308,7 @@ void Object3dInstansManager::CreateRootSignature()
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	psoManager_->SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 
 	// ルートシグネチャ作成
@@ -335,9 +335,10 @@ void Object3dInstansManager::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Object3D/Object3dInstans.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Object3D/Object3dInstans.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3dInstans.PS.hlsl");
 
+	
 
 	BlendAdd();
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);

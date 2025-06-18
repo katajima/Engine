@@ -31,8 +31,8 @@ public:
 
     Microsoft::WRL::ComPtr < ID3D12Resource> CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color);
 
-    // 必要に応じて他のRTV関連の関数を追加
-    // ...
+
+    void Finalize();
 
 public:
     // 最大RTV数

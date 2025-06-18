@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/struct/VertexDeta.h"

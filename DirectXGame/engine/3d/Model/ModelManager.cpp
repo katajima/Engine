@@ -16,7 +16,7 @@ void ModelManager::Initialize(DirectXCommon* dxCommon)
 	modelCommon_->Initialize(command_, DXGIDevice_, srvManager_);
 }
 
-void ModelManager::LoadModel(const std::string& filePath, const std::string& dire, const Vector2 texScale)
+void ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
 {
 
 	std::string file = filePath;
@@ -31,33 +31,11 @@ void ModelManager::LoadModel(const std::string& filePath, const std::string& dir
 	}
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(dxCommon_,modelCommon_.get(), "./resources/Models", filePath, dire, texScale);
+	model->Initialize(dxCommon_,modelCommon_.get(), "./resources/Models", filePath, dire);
 
 	// モデルをmapコンテナに格納
 	models.insert(std::make_pair(filePath, std::move(model)));
 }
-
-void ModelManager::LoadModelAmime(const std::string& filePath, const std::string& dire)
-{
-
-	std::string file = filePath;
-	if (dire != "") {
-		file = dire + filePath;
-	}
-
-
-	// 読み込み済みモデルを検索
-	if (models.contains(file)) {
-		return;
-	}
-	//モデルの生成とファイル読み込み、初期化
-	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->InitializeAnime(dxCommon_,modelCommon_.get(), "./resources/Models", filePath, dire);
-
-	// モデルをmapコンテナに格納
-	models.insert(std::make_pair(filePath, std::move(model)));
-}
-
 
 Model* ModelManager::FindModel(const std::string& filePath)
 {

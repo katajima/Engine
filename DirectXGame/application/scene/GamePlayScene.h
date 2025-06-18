@@ -1,6 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/audio/Audio.h"
 #include"DirectXGame/engine/3d/Model/ModelManager.h"
@@ -11,10 +11,9 @@
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
-#include"DirectXGame/engine/base/LevelData.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
@@ -24,6 +23,7 @@
 #include"DirectXGame/application/base/Player/Player.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/BulletManager.h"
@@ -52,9 +52,7 @@ public:
 
 	void UpdateImGui();
 
-	// レベルデータ
-	void LoadLevelData();
-
+	
 	void ApplyGlobalVariables();
 
 	/// <summary>
@@ -94,9 +92,21 @@ private:
 private:
 	// カメラ
 	std::unique_ptr < Camera> camera;
+
+	
 	bool flag = true;
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
+
+	// 宇宙カメラ
+	std::unique_ptr<UniverseCamera> universeCamera_;
+
+	bool isUniverseCamera = false;
+	float timer = 0.0f;
+	float cameraScaleT = 0.0f;
+
+	float minScaleZCamera = 5.5f;
+
 private:
 	// ライト
 	std::shared_ptr<DirectionalLight> directional;
@@ -110,6 +120,8 @@ private:
 
 	// 敵マネージャ
 	std::unique_ptr<EnemyManager> enemyManager_;
+	Vector3 enemyPosition = Vector3(0, 0, 0);
+
 
 	// ステージ
 	std::unique_ptr<Stage> stage_;
@@ -119,8 +131,7 @@ private:
 
 private:
 
-	// ロードデータ用
-	std::vector <Object3d*> objects;
+	
 	// 衝突マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;
 

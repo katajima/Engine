@@ -24,7 +24,7 @@ struct OctreeNode {
 };
 
 
-class Mesh;
+class BaseMesh;
 class LineCommon;
 // オクツリーの管理クラス
 class Octree {
@@ -40,7 +40,7 @@ public:
     }
 
 
-    void insert(const Mesh& mesh);
+    void insert(const BaseMesh& mesh);
 
     // オクツリーに三角形を挿入
     void insert(const Triangle& triangle) {

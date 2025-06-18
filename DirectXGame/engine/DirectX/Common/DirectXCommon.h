@@ -8,7 +8,7 @@
 #include <array>
 #include"DirectXGame/engine/base/Logger.h"
 #include"DirectXGame/engine/base/StringUtility.h"
-#include"DirectXGame/engine/base/WinApp.h"
+#include"DirectXGame/engine/base/WinApp/WinApp.h"
 #include<chrono>
 #include <thread>
 #include<vector>
@@ -31,18 +31,17 @@
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 
-#include "DirectXGame/engine/Manager/UAV/UavManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Manager/DSV/DsvManager.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 
-#include"DirectXGame/engine/base/TextureManager.h"
+#include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
-
+#include "DirectXGame/engine/Offscreen/PostEffectManager.h"
 
 class Entity3DManager;
 class SceneManager;
@@ -53,8 +52,6 @@ public: // メンバ関数
 	// 初期化
 	void Intialize(WinApp* winApp);
 
-
-
 	//終了処理
 	void Finalize();
 
@@ -62,30 +59,10 @@ public: // メンバ関数
 
 	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
-	RenderTexture* GetFinalRenderTexture() { return finalRenderTexture_; };
-
 private:
-	// レンダーテクスチャ描画前処理
-	void PreDraw(RenderTexture* renderTexture);
-	// レンダーテクスチャ描画後処理
-	void PostDraw(RenderTexture* renderTexture);
-	// 
-	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder, RenderTexture* renderTexturePixelSheder2 = nullptr);
-
-	void SetFinalRenderTexture(RenderTexture* renderTex) { finalRenderTexture_ = renderTex; };
-
-private:
-	// レンダーターゲット用描画前処理
-	void PreDrawOffscreen();
-	// レンダーターゲット用描画後処理
-	void PostDrawOffscreen();
 	// シーンの画面を書き出す
 	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 private:
-	// スワップチェーン用描画前処理
-	void PreDrawSwap();
-	// スワップチェーン用描画後処理
-	void PostDrawSwap();
 	// スワップチェーンにレンダーターゲットを渡す
 	void PassSwap(RenderTexture* renderTexture);
 private:
@@ -109,10 +86,7 @@ public:
 
 	SrvManager* GetSrvManager() { return  srvManager_.get(); }
 
-	UavManager* GetUavManager() { return uavManager_.get(); }
-
-	//RenderTexture* GetRenderTexture() { return renderTextures_[0].get(); }
-
+	
 	TextureManager* GetTextureManager() { return textureManager_.get(); }
 
 	ModelManager* GetModelManager() { return modelManager_.get(); }
@@ -130,6 +104,9 @@ public:
 	DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
 
 	Barrier* GetBarrier() { return barrier_.get(); }
+
+	PostEffectManager* GetPostEffectManager() { return postEffectManager_.get(); }
+
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス
 	std::unique_ptr<Command> command_ = std::make_unique<Command>();					     // コマンド
@@ -139,26 +116,19 @@ private:
 	std::unique_ptr<DXCCompiler> dxcCompiler_ = std::make_unique<DXCCompiler>();		     // コンパイル
 	std::unique_ptr<SwapChain> swapChain_ = std::make_unique<SwapChain>();				     // スワップチェーン 
 	std::unique_ptr<RtvManager> rtvManager_ = std::make_unique<RtvManager>();			     // RTVマネージャー 
-	std::unique_ptr<UavManager> uavManager_ = std::make_unique<UavManager>();			     // UAVマネージャー 
 	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();			     // SRVマネージャー 
 	std::unique_ptr<DsvManager> dsvManager_ = std::make_unique<DsvManager>();			     // DRVマネージャー 
 	std::unique_ptr<DepthStencil> depthStencil_ = std::make_unique<DepthStencil>();		     // デプスステンシル 
 	std::unique_ptr<Barrier> barrier_ = std::make_unique<Barrier>();					     // バリア 
-	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;							 // レンダーテクスチャ 
 	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();    // テクスチャマネージャー 
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();		     // モデルマネージャー
 	std::unique_ptr<RenderingCommon> renderingCommon_ = std::make_unique<RenderingCommon>(); // レンダリング
 
+	std::unique_ptr<PostEffectManager> postEffectManager_ = std::make_unique<PostEffectManager>(); // ポストエフェクト
 
 	// ImGuiマネージャー
 	std::unique_ptr <ImGuiManager> imguiManager_ = std::make_unique<ImGuiManager>();
 
 	// 記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
-
-	RenderTexture* finalRenderTexture_;
-public:
-
-
 };
-

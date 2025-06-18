@@ -11,7 +11,7 @@ void Player::Attack()
 	float k = 0.5f;
 	switch (workAttack.type)
 	{
-	case AttackType::kNormal:
+	case AttackTypePlay::kNormal:
 		if (workAttack.parameter >= 5.0f / 60) {
 			effect_->SetIsTrail(true);
 
@@ -58,6 +58,9 @@ void Player::AttackKey()
 	if (input_->IsControllerConnected()) {
 		workAttack.key.IsNormalAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 		if (bulletSpecial_->GetIsSpecial()) {
+			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+		}
+		if (rangeBombingSpecial_->GetIsSpecial()) {
 			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 		}
 
@@ -127,7 +130,7 @@ void Player::SetAttackCombo(WrokAttack& work)
 void Player::AttackTypeInit(int comboIndex)
 {
 	objectBase_.Update();
-	objectReticle_.Update();
+	objectReticle_->Update();
 	workAttack.pos.str = objectBase_.GetWorldPosition();
 	weapon_->ContactRecordClear();
 
@@ -140,7 +143,7 @@ void Player::AttackTypeInit(int comboIndex)
 		// 各ふるまいごとの初期化を実行
 		switch (workAttack.type)
 		{
-		case AttackType::kNormal:
+		case AttackTypePlay::kNormal:
 
 
 			if (comboIndex == 0) {
@@ -175,7 +178,7 @@ void Player::AttackTypes()
 {
 	if (workAttack.key.IsAttack) {
 		if (workAttack.key.IsNormalAttack) {
-			workAttack.typeRequest_ = AttackType::kNormal;
+			workAttack.typeRequest_ = AttackTypePlay::kNormal;
 		}
 	}
 }

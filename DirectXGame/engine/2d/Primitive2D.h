@@ -7,6 +7,8 @@
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Material/Material.h"
 
+#include"DirectXGame/engine/Mesh/ModelMesh.h"
+
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -149,7 +151,7 @@ private:
 
 	
 	// メッシュ
-	std::unique_ptr<Mesh> mesh;
+	std::unique_ptr<ModelMesh> mesh;
 	// トランスフォーム
 	std::unique_ptr<Transfomation>transfomation = nullptr;
 	// マテリアル

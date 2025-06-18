@@ -40,10 +40,8 @@ public:
 	/// モデルファイルの読み込み
 	/// </summary>
 	/// <param name="filePath"></param>
-	void LoadModel(const std::string& filePath, const std::string& dire = "",const Vector2 texScale = {1,1});
+	void LoadModel(const std::string& filePath, const std::string& dire = "");
 	
-	void LoadModelAmime(const std::string& filePath, const std::string& dire = "");
-
 	Model* FindModel(const std::string& filePath);
 
 	// 

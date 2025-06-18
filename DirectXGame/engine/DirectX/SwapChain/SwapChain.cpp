@@ -1,18 +1,24 @@
 #include "SwapChain.h"
 
-#include "DirectXGame/engine/DirectX/Command/Command.h"
-#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
+#include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
+#include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
+#include "DirectXGame/engine/DirectX/Command/Command.h"
+#include "DirectXGame/engine/DirectX/ScissorRect/ScissorRect.h"
+#include "DirectXGame/engine/DirectX/ViewPort/ViewPort.h"
+#include "DirectXGame/engine/DirectX/Fence/Fence.h"
 
-void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager)
+void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager,Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence)
 {
 	winApp_ = winApp;
 	DXGIDevice_ = dxgi;
 	command_ = command;
 	rtvManager_ = rtvManager;
-
-
+	barrier_ = barrier;
+	scissorRect_ = scissorRect;
+	viewPort_ = viewPort;
+	fence_ = fence;
 	// スワップチェーン作成
 	CreateSwapChain();
 	// スワップチェーンリソースの作成
@@ -41,6 +47,42 @@ D3D12_CPU_DESCRIPTOR_HANDLE SwapChain::GetCurrentBackBufferRTVHandle()
 {
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 	return rtvManager_->GetCPUDescriptorHandle(rtvIndex_[backBufferIndex_]);
+}
+
+void SwapChain::PreDraw()
+{
+	// スワップチェーン用
+	barrier_->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	// 描画先のRTVとDSVを設定する
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCurrentBackBufferRTVHandle();
+	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+
+	// 指定した色で画面全体をクリアする
+	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };  // 任意のクリアカラー（青）
+	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+	// コマンドを積む
+	viewPort_->SettingViewport();
+	scissorRect_->SettingScissorRect();
+}
+
+void SwapChain::PostDraw()
+{
+	// スワップチェーン用
+	barrier_->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+
+	// コマンドキック
+	command_->KickCommand();
+
+	// GPUに画面交換を通知
+	Present();
+
+	// フェンス
+	fence_->WaitGPU();
+
+	// コマンドリセット
+	command_->ResetCommand();
 }
 
 void SwapChain::CreateSwapChain()

@@ -4,7 +4,7 @@
 
 void Primitive::Init(const std::string& tex, const Color color, const std::string& name)
 {
-	mesh = std::make_unique<Mesh>();
+	mesh = std::make_unique<ModelMesh>();
 	MeshInitialize();
 
 	mesh->Initialize(primitiveCommon_->GetDxCommon());
@@ -14,15 +14,6 @@ void Primitive::Init(const std::string& tex, const Color color, const std::strin
 	material->tex_.diffuseFilePath = tex;
 
 	material->color = color;
-	transfomation = std::make_unique<Transfomation>();
-
-	transfomation->Initialize(primitiveCommon_->GetDxCommon());
-
-
-
-	//transform変数を作る
-	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	mat_.Identity();
 
 
 	if (name == "") {
@@ -36,19 +27,8 @@ void Primitive::Init(const std::string& tex, const Color color, const std::strin
 void Primitive::Update()
 {
 	material->GPUData();
-	//material->transform.translate.y += 0.001f;
-	mat_ = MakeAffineMatrix(transform.scale, Vector3(transform.rotate), transform.translate);
-
-#ifdef _DEBUG
-	MeshUpdateImGui();
-#endif // _DEBUG
-
-
-
+	
 	MeshUpdate();
-
-	transfomation->Update(camera_, mat_);
-
 }
 
 void Primitive::MeshInitialize()
@@ -205,22 +185,17 @@ void Primitive::MeshUpdate()
 
 void Primitive::MeshUpdateImGui()
 {
-	ImGui::Begin("Primitive");
+	//ImGui::Begin("Primitive");
 	if (ImGui::CollapsingHeader(name_.c_str())) {
 		std::string str = name_ + "_translate";
-		ImGui::DragFloat3(str.c_str(), &transform.translate.x, 0.1f);
-		str = name_ + "_rotate";
-		ImGui::DragFloat3(str.c_str(), &transform.rotate.x, 0.01f);
-		str = name_ + "_scale";
-		ImGui::DragFloat3(str.c_str(), &transform.scale.x, 0.1f);
+
 		int i = (int)mesh->vertices.size();
 		ImGui::InputInt("index2", &i);
 		str = name_ + "material";
 		ImGui::DragFloat3(str.c_str(), &material->transform.scale.x, 0.01f);
 		str += "rotate";
 		ImGui::DragFloat3(str.c_str(), &material->transform.rotate.x, 0.01f);
-		//material->transform.rotate.x += 1.0f;
-
+		
 		ImGui::Checkbox("isScaleX", &aimetion_.isScaleX);
 		ImGui::Checkbox("isScaleY", &aimetion_.isScaleY);
 		ImGui::DragFloat2("speed", &aimetion_.speed.x, 0.01f);
@@ -413,10 +388,26 @@ void Primitive::MeshUpdateImGui()
 			break;
 		}
 	}
-	ImGui::End();
+	//ImGui::End();
 }
 
-void Primitive::Draw(PsoType type)
+void Primitive::Draw()
+{
+	if (mesh->vertices.size() != 0) {
+
+		material->GetCommandListMaterial(0);
+
+		material->GetCommandListTexture(2, 7, 8);
+
+
+
+		mesh->GetCommandList();
+
+		primitiveCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+	}
+}
+
+void Primitive::DrawSetting(PsoType type)
 {
 	switch (type)
 	{
@@ -439,26 +430,4 @@ void Primitive::Draw(PsoType type)
 		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);
 		break;
 	}
-
-
-	if (mesh->vertices.size() != 0) {
-
-
-		transfomation->GetCommandList(1);
-
-		material->GetCommandListMaterial(0);
-
-		material->GetCommandListTexture(2, 7, 8);
-
-
-
-		mesh->GetCommandList();
-
-		primitiveCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
-	}
-}
-
-void Primitive::SetStar(ShapeParameter::Star& _star)
-{
-	star = _star;
 }

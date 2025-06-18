@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
-#include "DirectXGame/engine/base/TextureManager.h"
+#include "DirectXGame/engine/base/Texture/TextureManager.h"
 
 
 
@@ -70,54 +70,56 @@ void Object3dCommon::AllDraw()
 
 }
 
+
+
 void Object3dCommon::CreateRootSignature()
 {
 	//HRESULT hr;
 	
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
-	psoManager_->SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	psoManager_->SetDescriptorRenge(descriptorRange[1],1,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
-	psoManager_->SetDescriptorRenge(descriptorRange[2],2,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
-	psoManager_->SetDescriptorRenge(descriptorRange[3],3,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[1],1,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[2],2,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[3],3,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
 
 	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[11] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// トランスフォームデータ (b0) を頂点シェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[2],descriptorRange[0],D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFanction::SetRootParameter(rootParameters[2],descriptorRange[0],D3D12_SHADER_VISIBILITY_PIXEL);
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[3],1,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[3],1,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// カメラデータ (b2) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[4],2,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[4],2,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[5],3,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[5],3,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[6],4,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[6],4,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t1) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFanction::SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t2) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFanction::SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t3) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	//トランスフォームデータ (b5) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[10],5,D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[10],5,D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	psoManager_->SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(rootSignature[0], rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
 
-	psoManager_->SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(rootSignature[1], rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
@@ -158,12 +160,11 @@ void Object3dCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
-	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT);
+	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
-
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Object3D/Object3d.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Object3D/Object3d.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Object3D/Object3d.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3d.PS.hlsl");
 
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);

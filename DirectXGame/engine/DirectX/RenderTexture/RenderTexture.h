@@ -44,11 +44,14 @@ public:
 
 	void Update();
 
-	void Draw(RenderTexture* renderTexture = nullptr);
+	void Draw();
 
 	void SetCamera(Camera* camera) {camera_ = camera;}
 
+	void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
 
+
+	uint32_t GetSrvIndex() { return srvIndex_; }
 	// クリアカラーを取得
 	Vector4 GetClearColor()const;
 	// RTVハンドルを取得
@@ -93,6 +96,10 @@ private:
 	const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
 
 	std::string name_;
+
+	// もらってくるSRVインデックス
+	uint32_t otherSrvIndex_ = 0;
+
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;

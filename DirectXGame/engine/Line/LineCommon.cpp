@@ -32,13 +32,13 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	*cameraWVP = MakeIdentity4x4();
 
 	
-	mesh_ = std::make_unique<Mesh>();
+	mesh_ = std::make_unique<LineMesh>();
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->indices.push_back({ 0 });
 	mesh_->indices.push_back({ 1 });
 
-	mesh_->InitializeLine(dxCommon_);
+	mesh_->Initialize(dxCommon_);
 
 	mesh_->verticesline.clear();
 	mesh_->indices.clear();
@@ -156,8 +156,7 @@ void LineCommon::AddLightLine(SpotLightData data)
 	}
 }
 
-
-void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
+void LineCommon::AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat)
 {
 
 
@@ -171,14 +170,14 @@ void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat)
 		//mesh_->indices();
 	}
 
-	Mesh::MeshLine(mesh->indices,mesh_->indices, lineNum_);
+	LineMesh::MeshLine(mesh->indices,mesh_->indices, lineNum_);
 
 
 	// インデックスオフセットを更新
 	lineNum_ += static_cast<uint32_t>(mesh_->indices.size());
 }
 
-void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices)
+void LineCommon::AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices)
 {
 
 
@@ -199,7 +198,7 @@ void LineCommon::AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<
 	lineNum_ += static_cast<uint32_t>(mesh_->indices.size());
 }
 
-void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
+void LineCommon::AddLineAABB(AABB aabb, Vector3 pos, Vector4 color)
 {
 	// AABB の最小・最大範囲をワールド座標に適用
 	Vector3 min = aabb.min_ + pos;
@@ -220,9 +219,6 @@ void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
 		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // 前後を結ぶ
 	};
 
-	// ラインの色（固定値または動的変更可能）
-	Vector4 lineColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色（必要なら引数に追加）
-
 	// 頂点とラインを追加
 	for (int i = 0; i < 12; ++i)
 	{
@@ -230,14 +226,59 @@ void LineCommon::AddLineAABB(AABB aabb, Vector3 pos)
 		int idx2 = edges[i][1];
 
 		// 頂点を追加
-		mesh_->verticesline.push_back({ { vertices[idx1].x, vertices[idx1].y, vertices[idx1].z, 1.0f }, lineColor });
-		mesh_->verticesline.push_back({ { vertices[idx2].x, vertices[idx2].y, vertices[idx2].z, 1.0f }, lineColor });
+		mesh_->verticesline.push_back({ { vertices[idx1].x, vertices[idx1].y, vertices[idx1].z, 1.0f }, color });
+		mesh_->verticesline.push_back({ { vertices[idx2].x, vertices[idx2].y, vertices[idx2].z, 1.0f }, color });
 
 		// インデックスを追加
 		mesh_->indices.push_back(lineNum_);
 		mesh_->indices.push_back(lineNum_ + 1);
 
 		lineNum_ += 2;
+	}
+}
+
+void LineCommon::AddLineSphere(Sphere sphere, Vector4 color, int segmentW, int segmentH)
+{
+	float radius = sphere.radius;
+	Vector3 center = sphere.center;
+	float pi = static_cast<float>(std::numbers::pi * 2.0f);
+
+
+	for (int h = 0; h <= segmentH; ++h)
+	{
+		float theta = static_cast<float>(h) / segmentH * pi; // 緯度角 (0 ~ π)
+
+		for (int w = 0; w < segmentW; ++w)
+		{
+			float phi1 = static_cast<float>(w) / segmentW * pi; // 経度角 (0 ~ 2π)
+			float phi2 = static_cast<float>(w + 1) / segmentW * pi;
+
+			// 緯度線
+			Vector3 p1 = {
+				center.x + radius * sinf(theta) * cosf(phi1),
+				center.y + radius * cosf(theta),
+				center.z + radius * sinf(theta) * sinf(phi1)
+			};
+			Vector3 p2 = {
+				center.x + radius * sinf(theta) * cosf(phi2),
+				center.y + radius * cosf(theta),
+				center.z + radius * sinf(theta) * sinf(phi2)
+			};
+			AddLine(p1, p2, color);
+
+			if (h < segmentH)
+			{
+				float theta2 = static_cast<float>(h + 1) / segmentH * pi;
+
+				// 経度線
+				Vector3 p3 = {
+					center.x + radius * sinf(theta2) * cosf(phi1),
+					center.y + radius * cosf(theta2),
+					center.z + radius * sinf(theta2) * sinf(phi1)
+				};
+				AddLine(p1, p3, color);
+			}
+		}
 	}
 }
 
@@ -279,7 +320,7 @@ void LineCommon::AddLineCorner(CornerSegment corner, WorldTransform pos)
 	}
 }
 
-void LineCommon::AddLineCapsule(Capsule capsule)
+void LineCommon::AddLineCapsule(Capsule capsule ,const Vector4& color)
 {
 	const int segmentCount = 8; // 半球と円の分割数
 	const Vector3& start = capsule.segment.origin;
@@ -312,12 +353,12 @@ void LineCommon::AddLineCapsule(Capsule capsule)
 		Vector3 off2E = end + offset2;
 
 		// シリンダーの縁を描画
-		AddLine(off1S, off1E, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-		AddLine(off2S, off2E, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+		AddLine(off1S, off1E, color);
+		AddLine(off2S, off2E, color);
 
 		// 球と球の間に線を引く
-		AddLine(start + offset1, start + offset2, Vector4(1.0f, 1.0f, 0.0f, 1.0f));
-		AddLine(end + offset1, end + offset2, Vector4(1.0f, 1.0f, 0.0f, 1.0f));
+		AddLine(start + offset1, start + offset2, color);
+		AddLine(end + offset1, end + offset2, color);
 	}
 
 	// 半球の描画
@@ -333,20 +374,55 @@ void LineCommon::AddLineCapsule(Capsule capsule)
 			Vector3 offset2 = side * cosf(horizontalAngle2) * sinf(angle1) * radius + forward * sinf(horizontalAngle2) * sinf(angle1) * radius + axis * cosf(angle1) * radius;
 			Vector3 offset3 = side * cosf(horizontalAngle1) * sinf(angle2) * radius + forward * sinf(horizontalAngle1) * sinf(angle2) * radius + axis * cosf(angle2) * radius;
 
-			AddLine(start + offset1, start + offset2, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-			AddLine(start + offset1, start + offset3, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+			AddLine(start + offset1, start + offset2, color);
+			AddLine(start + offset1, start + offset3, color);
 
-			AddLine(end - offset1, end - offset2, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-			AddLine(end - offset1, end - offset3, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+			AddLine(end - offset1, end - offset2, color);
+			AddLine(end - offset1, end - offset3, color);
 		}
 	}
 }
 
+void LineCommon::AddLineOBB(const OBB& obb, const Vector4& color)
+{
+	// Half extents along each local axis
+	Vector3 halfSize = obb.size * 0.5f;
 
+	// ローカル軸方向にサイズを掛けて、各方向ベクトルにスケールを適用
+	Vector3 axes[3] = {
+		obb.orientations[0] * halfSize.x,
+		obb.orientations[1] * halfSize.y,
+		obb.orientations[2] * halfSize.z
+	};
 
+	// 8頂点（各コーナー）を構築
+	Vector3 corners[8];
+	int i = 0;
+	for (int dx = -1; dx <= 1; dx += 2) {
+		for (int dy = -1; dy <= 1; dy += 2) {
+			for (int dz = -1; dz <= 1; dz += 2) {
+				corners[i++] = obb.center
+					+ axes[0] * static_cast<float>(dx)
+					+ axes[1] * static_cast<float>(dy)
+					+ axes[2] * static_cast<float>(dz);
+			}
+		}
+	}
 
+	// エッジのペア（indicesでアクセス）
+	const int edgePairs[12][2] = {
+		{0, 1}, {1, 3}, {3, 2}, {2, 0}, // bottom face
+		{4, 5}, {5, 7}, {7, 6}, {6, 4}, // top face
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}  // vertical edges
+	};
 
-void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform pos)
+	// ラインを追加
+	for (int e = 0; e < 12; ++e) {
+		AddLine(corners[edgePairs[e][0]], corners[edgePairs[e][1]], color);
+	}
+}
+
+void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform pos, Vector4 color)
 {
 	int SPLIT = static_cast<int>(4 * controlPoints.size());
 
@@ -357,11 +433,31 @@ void LineCommon::AddSpline(std::vector<Vector3> controlPoints, WorldTransform po
 		float t0 = index / float(SPLIT);
 		float t1 = (index + 1) / float(SPLIT);
 
-		splineStr = CatmullRom(controlPoints, t0) + pos.translate_;
-		splineEnd = CatmullRom(controlPoints, t1) + pos.translate_;
+		splineStr = CatmullRom(controlPoints, t0) + pos.worldMat_.GetWorldPosition();
+		splineEnd = CatmullRom(controlPoints, t1) + pos.worldMat_.GetWorldPosition();
 
 
-		AddLine(splineStr, splineEnd,{1,1,1,1});
+		AddLine(splineStr, splineEnd, color);
+	}
+
+}
+
+void LineCommon::AddSpline(std::vector<Vector3> controlPoints, Vector3 pos, Vector4 color)
+{
+	int SPLIT = static_cast<int>(4 * controlPoints.size());
+
+	Vector3 splineStr{};
+	Vector3 splineEnd{};
+	//ライン
+	for (int index = 0; index < SPLIT; index++) {
+		float t0 = index / float(SPLIT);
+		float t1 = (index + 1) / float(SPLIT);
+
+		splineStr = CatmullRom(controlPoints, t0) + pos;
+		splineEnd = CatmullRom(controlPoints, t1) + pos;
+
+
+		AddLine(splineStr, splineEnd, color);
 	}
 
 }
@@ -408,8 +504,6 @@ void LineCommon::AddOctree(OctreeNode* node)
 
 }
 
-
-
 void LineCommon::AddGrid(float xRange, float zRange, float interval, Vector4 color)
 {
 	if (interval <= 0.0f) return;
@@ -436,10 +530,9 @@ void LineCommon::AddGrid(float xRange, float zRange, float interval, Vector4 col
 	}
 }
 
-
 void LineCommon::Update()
 {
-	mesh_->UpdateLineVertexBuffer();
+	mesh_->UpdateVertexBuffer();
 	mesh_->UpdateIndexBuffer();
 
 	if (camera_ && cameraWVP) {
@@ -490,13 +583,12 @@ void LineCommon::CreateRootSignature()
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};  // 2つのパラメーターを使う
 
 	// カメラデータ
-	psoManager_->SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	psoManager_->SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters),nullptr,0);
 }
-
 
 void LineCommon::CreateGraphicsPipeline()
 {
@@ -528,8 +620,8 @@ void LineCommon::CreateGraphicsPipeline()
 	psoManager_->AddInputElementDesc("COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 
-	psoManager_->shderFile_.vertex.filePach = L"resources/shaders/Line/Line.VS.hlsl";
-	psoManager_->shderFile_.pixel.filePach = L"resources/shaders/Line/Line.PS.hlsl";
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Line/Line.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Line/Line.PS.hlsl");
 
 
 	//DepthStencilStateの設定を行う

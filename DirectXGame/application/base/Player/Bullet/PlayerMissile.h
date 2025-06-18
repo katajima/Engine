@@ -1,7 +1,9 @@
 #pragma once
 
 #include "DirectXGame/application/base/Bullet/BaseBullet.h"
+#include "DirectXGame/engine/effect/primitive/primitive.h"
 
+class Primitive;
 class PlayerMissile :public BaseBullet {
 public:
 	// 初期化
@@ -22,8 +24,14 @@ private:
 	void EnemyToColl() override;
 	//
 	void PlayerToColl() override;
+
+
+private: // 演出関係
+
+	void InitMoveSmoke(ParticleEmitter* emitter,ParticleManager* particleManager, std::string emitName);
+
 private:
-	Vector3 terget;
+	Vector3 target;
 
 	
 	int phase_ = 0;
@@ -38,19 +46,25 @@ private:
 	float max_count = 0.5f;
 	float t;
 
-	Vector3 tragetPos;
+	Vector3 targetPos;
 
+	Vector3 enemyPos_;
 
+	
+	float radius_ = 0.5f; // 半径
 
+	float time_ = 0.0f; // 時間
 
 private: //パーティクルエミッター
-	// ミサイル煙エミッター
-	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter_ = nullptr;
-	std::unique_ptr<ParticleEmitter> ｍSmokeEmitter2_ = nullptr;
+	// ミサイルi移動中煙エミッター
+	std::unique_ptr<ParticleEmitter> moveSmokeEmitter_ = nullptr;
+	std::unique_ptr<ParticleEmitter> moveSmokeEmitter2_ = nullptr;
 
+	// ヒット
+	std::unique_ptr<ParticleEmitter> hitEmitter_ = nullptr;
 
-	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter_ = nullptr;
-	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter2_ = nullptr;
-	std::unique_ptr<ParticleEmitter> mExplosionSmokeEmitter3_ = nullptr;
+	std::unique_ptr<Object3d> hitObject_ = nullptr;
+
+	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 };
 

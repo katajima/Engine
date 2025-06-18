@@ -1,6 +1,5 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/struct/Light.h"
 #include<d3d12.h>
 #include<dxgi1_6.h>
@@ -9,17 +8,32 @@
 #include<string>
 #include<vector>
 #include<format>
-#include"DirectXGame/engine/Transfomation/Transfomation.h"
-#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include<DirectXGame/engine/Material/Material.h>
+#include<DirectXGame/engine/Mesh/SkyBoxMesh.h>
 
 
+
+class Entity3DManager;
 class SkyBox
 {
 public:
-	
+	// 初期化
+	void Initialize(Entity3DManager* entity3DManager,std::string txtueName);
+
+	void Update();
+
+	void Draw();
+
+	Material* GetMaterial() { return material.get(); }
+
+	SkyBoxMesh* GetMesh() { return mesh_.get(); }
 private:
 
+	std::unique_ptr<SkyBoxMesh> mesh_;
+	std::unique_ptr<Material> material;
 
+private:
+	Entity3DManager* entity3DManager_;
 
 };
 

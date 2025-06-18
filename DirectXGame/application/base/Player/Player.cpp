@@ -6,62 +6,118 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "assert.h"
 
-void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
+
+void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
+	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
-
+	Collider::SetColor(Vector4{ 0,0,1,1 });
 
 	entity3DManager_ = entity3DManager;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	camera_ = camera;
 	dxCommon_ = dxcommon;
-	
+
 	// プレイヤー
 	objectBase_.Initialize(entity3DManager);
 	objectBase_.SetCamera(camera_);
 	objectBase_.worldtransform_.translate_ = position;
 	objectBase_.Update();
+	objectBase_.SetName("PlayerBase");
 
+	primitiveCylinder_ = std::make_unique<Primitive>();
+
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = 5.0f;
+	cylinderParam.innerRadius = reticleRad_;
+	cylinderParam.outerRadius = reticleRad_;
+	cylinderParam.isCover = false;
+	cylinderParam.segments = 16;
+
+
+	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
+	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	// レティクル
-	objectReticle_.Initialize(entity3DManager);
-	objectReticle_.SetCamera(camera_);
-	objectReticle_.SetModel("enemy.obj");
-	objectReticle_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	objectReticle_.worldtransform_.translate_ = { 0,0,30 };
+
+	objectReticle_ = std::make_unique<Object3d>();
+	objectReticle_->Initialize(entity3DManager,Object3d::ObjectType::kPrimitive);
+	objectReticle_->SetCamera(camera_);
+	objectReticle_->SetName("レティクルシリンダー");
+	objectReticle_->SetPrimitive(primitiveCylinder_.get());
+	objectReticle_->SetIsDraw(false);
+	objectReticle_->worldtransform_.parent_ = &objectBase_.worldtransform_;
+	objectReticle_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+	objectReticle_->worldtransform_.translate_ = { 0,2,100 };
+
 
 	// 体
 	objectBody_.Initialize(entity3DManager);
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
+	objectBody_.SetName("PlayerBody");
 	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
-	objectBody_.model->modelData.material[0]->shininess_ = 10000;
 
 
 	// スペシャル攻撃
 	bulletSpecial_ = std::make_unique<BulletSpecial>();
-	bulletSpecial_->Initialize(entity3DManager,entity2DManager,camera_);
+	bulletSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
 	bulletSpecial_->SetParent(&objectBase_.worldtransform_);
 
-
+	rangeBombingSpecial_ = std::make_unique<RangeBombingSpecial>();
+	rangeBombingSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
+	rangeBombingSpecial_->SetParent(&objectBase_.worldtransform_);
 
 	weapon_ = std::make_unique<playerWeapon>();
-	weapon_->Initialize(entity3DManager,camera);
+	weapon_->Initialize(entity3DManager, camera);
 	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_.worldtransform_;
 	weapon_->GetObject3D().worldtransform_.translate_ = { 0,0.5f,0.5f };
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
-	
+
+
+	// Factory
+	playerAttackFactory_ = std::make_unique<PlayerAttackFactory>();
+
 	// 攻撃マネージャー
 	attackManager_ = std::make_unique<AttackManager>();
-	attackManager_->Initialize(input_);
+	attackManager_->Initialize(input_, playerAttackFactory_.get());
+
+
+	// Transform 登録
+	transformMap["Player"] = &objectBase_.worldtransform_;
+	attackManager_->SetContext(input_, transformMap);
+
+	// 攻撃ノードの登録（攻撃名・次の遷移・キャンセル条件など）
+	AttackNode node{};
+	node.data.attackType = AttackType::Blow;
+	node.data.transformId = "Player";
+	node.data.activeFrames = 60.0f;
+	node.data.recoveryFrames = 10.0f;
+	node.data.startupFrames = 60.0f;
+	node.canCancelFunc = [] { return true; };
+	node.nextNodeIds = { "Punch2" };
+
+	attackManager_->RegisterAttackNode("Punch1", node);
+
+	// もう一つの攻撃も登録例
+	AttackNode node2{};
+	node2.data.attackType = AttackType::Blow;
+	node2.data.transformId = "Player";
+	node.data.activeFrames = 60.0f;
+	node.data.recoveryFrames = 10.0f;
+	node.data.startupFrames = 60.0f;
+	node2.canCancelFunc = [] { return true; };
+	node2.nextNodeIds = {};
+
+	attackManager_->RegisterAttackNode("Punch2", node2);
 
 
 	// UI
 	ui_->Initialize(entity2DManager);
 
-	
+
 	/// エフェクト関係
 	effect_->Initialize(dxCommon_, entity3DManager_, entity2DManager, camera_);
 	// トレイルエフェクト
@@ -77,7 +133,7 @@ void Player::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* e
 void Player::Update()
 {
 	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
-	
+
 
 	if (isAlive) {
 		if (behaviorRequest_) {
@@ -87,16 +143,21 @@ void Player::Update()
 			switch (behavior_) {
 			case Behavior::kRoot:
 			default:
+				weapon_->GetObject3D().SetIsDraw(false);
+
 				BehaviorRootInitialize();
 				isInvincible = false;
 				break;
 			case Behavior::kAttack:
+				weapon_->GetObject3D().SetIsDraw(true);
 				BehaviorAttackInitialize();
 				isInvincible = true;
 				break;
 			case Behavior::kJump:
+				weapon_->GetObject3D().SetIsDraw(false);
 				break;
 			case Behavior::kDie:
+				weapon_->GetObject3D().SetIsDraw(false);
 				BehaviorDieInitialize();
 				break;
 			}
@@ -118,32 +179,48 @@ void Player::Update()
 			break;
 		}
 	}
-	
+
 
 
 #ifdef _DEBUG
 	if (isInvincible) {
-		objectBody_.model->modelData.material[0]->color = { 0,0,1,1 };
+		objectBody_.model->modelData.mesh[0]->material->color = { 0,0,1,1 };
 	}
 	else {
-		objectBody_.model->modelData.material[0]->color = { 1,1,1,1 };
+		objectBody_.model->modelData.mesh[0]->material->color = { 1,1,1,1 };
 	}
+
+
+	ImGui::Begin("Debug");
+	if (ImGui::Button("SP")) {
+		bulletSpecial_->SetGauge(100);
+		rangeBombingSpecial_->SetGauge(100);
+	}
+	ImGui::End();
 
 #endif // _DEBUG
 
 
-
-	bulletSpecial_->Update();
+	rangeBombingSpecial_->Update();
+	//bulletSpecial_->Update();
 	if (hp <= 0) {
 		isAlive = false;
 	}
-	workAttack.hitTime  -= MyGame::GameTime();
+	workAttack.hitTime -= MyGame::GameTime();
 	if (workAttack.hitTime <= 0) {
 		workAttack.hitCount = 0;
 	}
 
 
-	
+
+
+	// 攻撃開始条件（例：ボタンを押したら）
+	if (input_->IsTriggerKey(DIK_Z)) {
+		attackManager_->AddAttack("Punch1");
+	}
+
+	attackManager_->Update(MyGame::GameTime());
+
 
 #ifdef _DEBUG
 	ImGui::Begin("trail");
@@ -151,30 +228,37 @@ void Player::Update()
 	ImGui::InputFloat3("min", &min.x);
 	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
-	
 
-	
-	
+
+
+
 	ImGui::End();
+
+	if (input_->IsTriggerKey(DIK_C)) {
+		if (!isCreativeMode) {
+			isCreativeMode = true;
+		}
+		else {
+			isCreativeMode = false;
+		}
+
+	}
+
 #endif // _DEBUG
+
 
 	// 重力
 	Gravity();
-	// 移動制限
-	LimitMove();
-
+	if (!isCreativeMode) {
+		// 移動制限
+		LimitMove();
+	}
 	// エフェクト
 	effect_->Update();
 	//
 
 
-	objectBase_.Update();
-	objectBody_.Update();
 	weapon_->Update();
-
-	
-
-	objectReticle_.Update();
 }
 
 #pragma region Draw
@@ -187,18 +271,18 @@ void Player::Draw()
 		default:
 			break;
 		case Behavior::kAttack: // 攻撃行動更新
-			weapon_->Draw();
+			//weapon_->Draw();
 
 			break;
 		case Behavior::kJump:
 			break;
 		case Behavior::kDie:
-			bulletSpecial_->Draw();
+			//bulletSpecial_->Draw();
 			break;
 		}
 
 
-		objectBody_.Draw();
+		//objectBody_.Draw();
 	}
 }
 
@@ -213,6 +297,12 @@ void Player::Draw2D()
 	ui_->SetIsTextmax(bulletSpecial_->GetIsSpecial());
 	ui_->SetIsTextRB(bulletSpecial_->GetIsSpecial());
 	ui_->SetSpecialGaugeSize(static_cast<float>(bulletSpecial_->GetGauge()));
+	
+
+
+	ui_->SetIsTextmax(rangeBombingSpecial_->GetIsSpecial());
+	ui_->SetIsTextRB(rangeBombingSpecial_->GetIsSpecial());
+	ui_->SetSpecialGaugeSize(static_cast<float>(rangeBombingSpecial_->GetGauge()));
 
 	ui_->Draw();
 
@@ -315,20 +405,22 @@ void Player::Move()
 }
 
 void Player::Gravity() {
-	
+
 	// 重力加速度
-	const float kGravityAcceleration = 4.4f;
+	const float kGravityAcceleration = 9.8f;
 
 	// 加速度ベクトル
 	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
-
-	// 加速する
-	velocity_.y += accelerationVector;
-
+	if (!isCreativeMode) {
+		accelerationY_ += accelerationVector * MyGame::GameTime();
+		// 加速する
+		velocity_.y += accelerationY_;
+	}
 	AddMove();
 	// 着地
 	if (objectBase_.worldtransform_.translate_.y <= groundY) {
 		objectBase_.worldtransform_.translate_.y = groundY;
+		accelerationY_ = 0.0f;
 		graVelo = 0;
 		isJamp = false;
 	}
@@ -342,17 +434,17 @@ void Player::AddMove()
 
 void Player::LimitMove()
 {
-	if (objectBase_.worldtransform_.translate_.x > moveLimit) {
-		objectBase_.worldtransform_.translate_.x = moveLimit;
+	if (objectBase_.worldtransform_.translate_.x > moveLimit + 50) {
+		objectBase_.worldtransform_.translate_.x = moveLimit + 50;
 	}
-	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.x = -(moveLimit + 100);
+	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 50)) {
+		objectBase_.worldtransform_.translate_.x = -(moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = (moveLimit + 100);
+	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 50)) {
+		objectBase_.worldtransform_.translate_.z = (moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 100)) {
-		objectBase_.worldtransform_.translate_.z = -(moveLimit + 100);
+	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 50)) {
+		objectBase_.worldtransform_.translate_.z = -(moveLimit + 50);
 	}
 }
 
@@ -373,14 +465,12 @@ void Player::OnCollision(Collider* other)
 
 				// 接触履歴があれば何もせず抜ける
 				if (contactRecord_.CheckHistory(serialNumber)) {
-					return;
+					//return;
 				}
 
 				contactRecord_.AddHistory(serialNumber);
 
-				
 				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
-
 			}
 		}
 	}

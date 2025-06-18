@@ -12,6 +12,7 @@ struct Vertex
     float4 position;
     float2 texcoord;
     float3 normal;
+    float4 tangent; // ← w を含める
 };
 StructuredBuffer<Vertex> gInputVertices : register(t1);
 
@@ -21,7 +22,7 @@ struct VertexInfluence
     int4 index;
 };
 StructuredBuffer<VertexInfluence> gInfluence : register(t2);
-;
+
 RWStructuredBuffer<Vertex> gOutputVertices : register(u0);
 
 struct SkinningInfomation
@@ -60,6 +61,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
         skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[influence.index.w].skeletonSpaceInverseTransposeMatrix) * influence.weight.w;
         skinned.normal = normalize(skinned.normal);
         
+        skinned.tangent = input.tangent;
         
         // 頂点データを格納
         gOutputVertices[vertexIndex] = skinned;

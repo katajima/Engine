@@ -103,7 +103,7 @@ public:
 		ObjectGPU* instanceData; // インスタンシングデータを書き込むためのポインタ
 		D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU;
 		D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU;
-		Mesh* mesh;
+		ModelMesh* mesh;
 		RasterizerType rasteType;
 		BlendType blendType;
 	};
@@ -126,7 +126,7 @@ public:
 	// パーティクルグループ作り(モデル)
 	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 	// パーティクルグループ作り(モデル)
-	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, Mesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, ModelMesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }

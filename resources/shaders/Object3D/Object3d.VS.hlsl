@@ -15,30 +15,26 @@ struct VertexShaderInput
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
     // 追加
-    float3 tangent : TANGENT0; // 接ベクトル
+    float4 tangent : TANGENT0; // 接ベクトル
     float3 biNormal : BINORMAL0; // 従ベクトル 
 };
 
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
-    
     output.position = mul(input.position, gTransformationMatrix.WVP);
     output.texcoord = input.texcoord;
     output.worldPosition = mul(input.position, gTransformationMatrix.World).xyz;
 
-    
-    
-    
+    // 頂点シェーダ側
     float3 transformedNormal = normalize(mul((float3x3) gTransformationMatrix.WorldInverseTranspose, input.normal));
-    float3 transformedTangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent));
-    float3 transformedBinormal = normalize(cross(transformedNormal, transformedTangent)); // ←ここ！！
+    float3 transformedTangent = normalize(mul((float3x3) gTransformationMatrix.World, input.tangent.xyz));
+    float3 transformedBinormal = normalize(cross(transformedNormal, transformedTangent) * input.tangent.w); // ←重要！
 
-    
     output.normal = transformedNormal;
     output.tangent = transformedTangent;
     output.biNormal = transformedBinormal;
-   
+
     return output;
 }
 

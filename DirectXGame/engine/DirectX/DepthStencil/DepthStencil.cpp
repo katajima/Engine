@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 #include "DirectXGame/engine/Manager/DSV/DsvManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 

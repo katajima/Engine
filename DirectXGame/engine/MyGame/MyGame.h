@@ -46,6 +46,8 @@ public:
 	
 	void InitializeResource();
 
+	// パーティクル生成
+	void CreateParticle();
 
 public:
 	static float const kDeltaTime_;

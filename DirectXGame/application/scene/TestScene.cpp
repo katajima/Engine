@@ -4,6 +4,8 @@
 
 #include "DirectXGame/engine/math/Random.h"
 
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
 void TestScene::Initialize()
 {
 	//オーディオの初期化
@@ -32,6 +34,26 @@ void TestScene::Initialize()
 	// その他の初期化
 	InitializeOthers();
 
+
+	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
+
+	GlobalVariables* globalVariables = GetGlobalVariables();
+	globalVariables->CreateGroup("ddd");
+	globalVariables->AddItem("ddd","g_bool",g_bool);
+	globalVariables->AddItem("ddd","g_int",g_int);
+	globalVariables->AddItem("ddd","g_uint", g_uint);
+	globalVariables->AddItem("ddd","g_float",g_float);
+	globalVariables->AddItem("ddd","g_v2",g_v2);
+	globalVariables->AddItem("ddd","g_v3",g_v3);
+	globalVariables->AddItem("ddd","g_v4",g_v4);
+	globalVariables->AddItem("ddd","g_string", g_string);
+	globalVariables->AddItem("ddd","g_transform", g_transform);
+	
+	
+	globalVariables->AddItem("aaa","g_aaaa", g_aaaa);
+
+	AppGlobalVariables();
 }
 
 void TestScene::Finalize()
@@ -44,28 +66,15 @@ void TestScene::Update()
 	SwitchRoom(); // 部屋切り替え
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 
+	loadData_->Update();
+
+	timer_.DebugImGui("timer");
+
+	timer_.Update(MyGame::GameTime());
+
 #ifdef _DEBUG
-	ImGui::Begin("primi2D");
-	ImGui::DragFloat2("pos", &primitive2d1_->position.x);
-	ImGui::DragFloat2("scale", &primitive2d1_->scale.x, 0.1f);
-	ImGui::DragFloat("rotate", &primitive2d1_->rotation, 0.01f);
-	ImGui::DragInt("segment", &segment);
-	ImGui::DragFloat("inRad", &inRad);
-	ImGui::DragFloat("outRad", &outRad);
-	if (segment < 3) {
-		segment = 3;
-	}
-	if (inRad >= outRad) {
-		inRad = outRad;
-	}
-	primitive2d1_->SetParametar(inRad, outRad, segment);
-	ImGui::End();
 
-	ImGui::Begin("engine");
-	ImGui::Checkbox("debugCamera", &isDebugCamera);
-
-
-
+	
 
 	if (isDebugCamera) {
 		debugCamera->Update();
@@ -74,17 +83,7 @@ void TestScene::Update()
 		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
 		camera->transform_ = debugCamera->GetViewProjection().transform_;
 	}
-	else {
-
-	}
-
-
-	ImGui::End();
-
-
 #endif // _DEBUG
-
-	
 
 	if (behaviorRequest_) {
 
@@ -163,11 +162,9 @@ void TestScene::Update()
 	default:
 		break;
 	}
-	taleObject->Update();
-	tail.Update();
-
-
+	
 	camera->UpdateMatrix();
+
 }
 
 void TestScene::Draw3D()
@@ -176,43 +173,47 @@ void TestScene::Draw3D()
 	switch (behavior_)
 	{
 	case TestScene::SceneBehavior::kSceneRoom01:
-		GetEntity3DManager()->GetSkyBoxCommon()->DrawCommonSetting();
+		
+		//skyBoxObject->Draw();
+		//skyBoxObject2->Draw();
+		//
+		//tail.Draw();
+		//
+		//oceanObject->Draw();
 
-		//primitivePlaneObject->Draw(Primitive::PsoType::kRingClamp);
-		//primitiveObject->Draw(Primitive::PsoType::kRingClamp);
+		//multiy->Draw();
 
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		//ocean_->Draw();
+
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		//tail.Draw();
+
+		//primitiveObject3d->Draw();
+
 		break;
 	case TestScene::SceneBehavior::kSceneRoom03:
-		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
-		taleObject->Draw();
-		//multiy.Draw();
+		//taleObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom04:
-		tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
+		//tail.Draw();
 
-		skinningObject.DrawSkinning();
-		skinningObject2.DrawSkinning();
-
+		//skinningObject->Draw();
+		//skinningObject2->Draw();
+		//skinningObject3->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom05:
-		//tail.Draw(Object3d::ObjectType::NoUvInterpolation_MODE_SOLID_BACK);
 		break;
 	case TestScene::SceneBehavior::kSceneRoom06:
 
-		//stairObject->Draw();
 		break;
 	case TestScene::SceneBehavior::kSceneRoom07:
 
-		// プレイヤー
-		playerObject->Draw();
+		//// プレイヤー
+		//playerObject->Draw();
 
-		// ゴール
-		goalObject->Draw();
+		//// ゴール
+		//goalObject->Draw();
 
 
 		break;
@@ -249,8 +250,8 @@ void TestScene::Draw2D()
 
 
 
-		//primitive2d1_->Update();
-		//primitive2d1_->Draw();
+		/*primitive2d1_->Update();
+		primitive2d1_->Draw();*/
 
 
 
@@ -280,6 +281,23 @@ void TestScene::Draw2D()
 
 }
 
+void TestScene::AppGlobalVariables()
+{
+	GlobalVariables* globalVariables = GetGlobalVariables();
+	g_bool = globalVariables->GetValue<bool>("ddd", "g_bool");
+	g_int = globalVariables->GetValue<int>("ddd", "g_int");
+	g_uint = globalVariables->GetValue<uint32_t>("ddd", "g_uint");
+	g_float = globalVariables->GetValue<float>("ddd", "g_float");
+	g_v2 = globalVariables->GetValue<Vector2>("ddd", "g_v2");
+	g_v3 = globalVariables->GetValue<Vector3>("ddd", "g_v3");
+	g_v4 = globalVariables->GetValue<Vector4>("ddd", "g_v4");
+	g_string = globalVariables->GetValue<std::string>("ddd", "g_string");
+	g_transform = globalVariables->GetValue<Transform>("ddd", "g_transform");
+	
+	g_aaaa = globalVariables->GetValue<bool>("aaa", "g_aaaa");
+
+}
+
 
 #pragma region Initialize
 
@@ -291,105 +309,141 @@ void TestScene::InitializeObject3D()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	ocean_ = std::make_unique<Ocean>();
-	ocean_->Initialize(GetEntity3DManager(), { 100,100 });
-	ocean_->SetCamera(camera.get());
-	ocean_->transform.rotate.x = DegreesToRadians(90);
-	ocean_->material->color.a = 0.99f;
-
-	skinningObject.Initialize(GetEntity3DManager());
-	skinningObject.SetModel("iku.gltf");
-	skinningObject.worldtransform_.translate_ = { 30,1,1 };
-	skinningObject.worldtransform_.scale_ = { 10,10,10 };
-	skinningObject.SetCamera(camera.get());
+	ocean_->Initialize(GetEntity3DManager(), { 10000,10000 });
+	ocean_->GetMaterial()->enableLighting_ = false;
 
 
-	skinningObject2.Initialize(GetEntity3DManager());
-	skinningObject2.SetModel("walk.gltf");
-	skinningObject2.worldtransform_.translate_ = { -30,10,1 };
-	skinningObject2.worldtransform_.scale_ = { 10,10,10 };
-	skinningObject2.SetCamera(camera.get());
+	oceanObject = std::make_unique<Object3d>();
+	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kOcean);
+	oceanObject->SetCamera(camera.get());
+	oceanObject->SetOcean(ocean_.get());
+	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
+	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
+	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
+	oceanObject->SetIsDraw(false);
+	
+	skinningObject = std::make_unique<Object3d>();
+	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
+	skinningObject->SetModel("iku.gltf");
+	skinningObject->worldtransform_.translate_ = { 30,1,1 };
+	skinningObject->worldtransform_.scale_ = { 10,10,10 };
+	skinningObject->SetCamera(camera.get());
+	skinningObject->SetName("iku");
+	skinningObject->SetIsDraw(false);
 
+
+	skinningObject2 = std::make_unique<Object3d>();
+	skinningObject2->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
+	skinningObject2->SetModel("walk.gltf");
+	skinningObject2->worldtransform_.translate_ = { -30,10,1 };
+	skinningObject2->worldtransform_.scale_ = { 10,10,10 };
+	skinningObject2->SetCamera(camera.get());
+	skinningObject2->SetName("walk");
+	skinningObject2->SetIsDraw(false);
+
+	skinningObject3 = std::make_unique<Object3d>();
+	skinningObject3->Initialize(GetEntity3DManager(), Object3d::ObjectType::kNormal);
+	skinningObject3->SetModel("d.gltf");
+	skinningObject3->worldtransform_.translate_ = { -30,10,1 };
+	skinningObject3->worldtransform_.scale_ = { 10,10,10 };
+	skinningObject3->SetCamera(camera.get());
+	skinningObject3->SetName("testBri");
+	skinningObject3->SetIsDraw(false);
 
 	tail.Initialize(GetEntity3DManager());
-	tail.SetModel("renga.gltf");
+	tail.SetModel("stage.gltf");
 	tail.SetCamera(camera.get());
-	tail.model->modelData.material[0]->shininess_ = 1000.0f;
+	tail.SetName("tail");
+	tail.GetMaterial(0)->shininess_ = 1000.0f;
+	tail.worldtransform_.translate_.y = -10.0f;
+	tail.SetIsDraw(false);
 
-	multiy.Initialize(GetEntity3DManager());
-	multiy.SetModel("multiMaterial.gltf");
-	multiy.SetCamera(camera.get());
-	multiy.worldtransform_.scale_ = { 10,10,10 };
+	multiy = std::make_unique<Object3d>();
+	multiy->Initialize(GetEntity3DManager());
+	multiy->SetModel("multiMaterial.gltf");
+	multiy->SetCamera(camera.get());
+	multiy->worldtransform_.scale_ = { 10,10,10 };
+	multiy->SetName("multiy");
+	multiy->SetIsDraw(false);
 
 	/// 階段
 	stairObject = std::make_unique<Object3d>();
 	stairObject->Initialize(GetEntity3DManager());
 	stairObject->SetModel("stair.obj");
 	stairObject->SetCamera(camera.get());
+	stairObject->SetIsDraw(false);
+
 
 	taleObject = std::make_unique<Object3d>();
 	taleObject->Initialize(GetEntity3DManager());
 	taleObject->SetModel("terrain.obj");
 	taleObject->SetCamera(camera.get());
 	taleObject->worldtransform_.scale_ = 10.0f;
-
-	tri2d.vertices[0] = { 10,0, };
-	tri2d.vertices[1] = { 10,10, };
-	tri2d.vertices[2] = { -10,0, };
-
-	// プレイヤーオブジェクト
-	playerObject = std::make_unique<Object3d>();
-	playerObject->Initialize(GetEntity3DManager());
-	playerObject->SetModel("teapot.obj");
-	playerObject->SetCamera(camera.get());
-	playerObject->worldtransform_.translate_ = { 10,10,10 };
-	playerObject->worldtransform_.scale_ = 3;
-
-
-	// ゴールのオブジェクト
-	goalObject = std::make_unique<Object3d>();
-	goalObject->Initialize(GetEntity3DManager());
-	goalObject->SetModel("Sphere.obj");
-	goalObject->SetCamera(camera.get());
-	goalObject->worldtransform_.translate_ = { 200,10,200 };
-	goalObject->worldtransform_.scale_ = 3;
-
-	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(camera.get());
-	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
-
-
-	for (int i = 0; i < map->GetWidth(); i++) {
-		for (int j = 0; j < map->GetHeight(); j++) {
-			ObjectInstans obj{};
-			obj.Initialize();
-			obj.transform.scale_ = { 5,5,5 };
-			obj.transform.translate_.x = float(10 * i);
-			obj.transform.translate_.z = float(10 * j);
-			obj.transform.translate_.y = noise->PerlinNoise(float(i), float(j)) * obj.transform.scale_.y;
-
-
-
-
-
-			GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
-
-		}
-	}
-
-
+	taleObject->SetIsDraw(false);
+	
+	ShapeParameter::Ring ring;
+	ring.innerRadius = 1.0f;
+	ring.outerRadius = 7.0f;
+	ring.segments = 16;
 	primitiveObject = std::make_unique<Primitive>();
-	primitivePlaneObject = std::make_unique<Primitive>();
+	primitiveObject->Initialize<ShapeParameter::Ring>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, ring, "resources/Texture/effect/gradationLine.png");
+
 	
-	ShapeParameter::ShapeSphere sph;
-	primitiveObject->Initialize<ShapeParameter::ShapeSphere>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, sph, "resources/Texture/gradationLine.png",{1,1,1,1},"ring");
-	primitiveObject->SetCamera(camera.get());
-	primitiveObject->transform.translate.y = 100;
-	primitiveObject->transform.rotate.y = DegreesToRadians(180);
+	primitiveObject3d = std::make_unique<Object3d>();
+	primitiveObject3d->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive); //primitiveObject
+	primitiveObject3d->SetPrimitive(primitiveObject.get());
+	primitiveObject3d->SetCamera(camera.get());
+	primitiveObject3d->SetName("primitiveR");
+
+
+
+	skyBox = std::make_unique<SkyBox>();
+	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
 	
-	ShapeParameter::Torus toru;
-	primitivePlaneObject->Initialize<ShapeParameter::Torus>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Torus, toru , "resources/Texture/gradationLine.png",{1,1,1,1},"Plane");
-	primitivePlaneObject->SetCamera(camera.get());
-	primitivePlaneObject->transform.translate.y = 80;
-	//primitivePlaneObject->transform.rotate.y = DegreesToRadians(180);
+	skyBox2 = std::make_unique<SkyBox>();
+	skyBox2->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
+
+	
+	skyBoxObject = std::make_unique<Object3d>();
+	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
+	skyBoxObject->SetSkyBox(skyBox.get());
+	skyBoxObject->SetCamera(camera.get());
+	skyBoxObject->worldtransform_.scale_ = {10,10,10};
+	skyBoxObject->SetName("skyBox");
+	skyBoxObject->SetIsDraw(true);
+	
+	
+	skyBoxObject2 = std::make_unique<Object3d>();
+	skyBoxObject2->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
+	skyBoxObject2->SetSkyBox(skyBox2.get());
+	skyBoxObject2->SetCamera(camera.get());
+	skyBoxObject2->worldtransform_.scale_ = {1,1,1};
+	skyBoxObject2->SetName("skyBox2");
+	skyBoxObject2->SetIsDraw(false);
+
+
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = 10.0f;
+	cylinderParam.innerRadius = 2.1f;
+	cylinderParam.outerRadius = 2.1f;
+	cylinderParam.isCover = false;
+	cylinderParam.segments = 16;
+
+	primitiveCylinder_ = std::make_unique<Primitive>();
+	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
+
+
+	hitObject_ = std::make_unique<Object3d>();
+	hitObject_->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive);
+	hitObject_->SetPrimitive(primitiveCylinder_.get());
+	hitObject_->SetName("cylinder");
+	hitObject_->SetIsDraw(false);
+
+
+	primiPlane = std::make_unique<Primitive>();
+	ShapeParameter::ShapePlane shapePlane;
+	primiPlane->Initialize<ShapeParameter::ShapePlane>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
+
 }
 
 /// <summary>
@@ -427,9 +481,24 @@ void TestScene::InitializeParticle()
 {
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 	
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(camera.get());
+	
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(primiPlane->GetMesh());
+	
+	
+	/*GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kAcceleration,Field::ShapeType::kAABB,"加速");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kDestruction, Field::ShapeType::kAABB,"破棄");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kColor, Field::ShapeType::kAABB,"色");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kGravity, Field::ShapeType::kAABB,"重力");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kGravity, Field::ShapeType::kSphere,"重力");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kDeceleration, Field::ShapeType::kAABB,"減速");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kNoise, Field::ShapeType::kAABB,"ノイズ");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kTornado, Field::ShapeType::kAABB,"竜巻");*/
+
+	
 
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleEmitter::EmitSpawnShapeType::kSpline);
+	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleData::SpawnType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	emitter_->SetParent(tail.worldtransform_);
@@ -437,7 +506,6 @@ void TestScene::InitializeParticle()
 	emitter_->SetPos({ 0,10,0 });
 	emitter_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	emitter_->SetLifeTimeMinMax(1.0f, 2.0f);
-	/*emitter_->SetUsebillboard(false);*/
 	emitter_->SetIsGravity(true);
 	emitter_->SetIsAlpha(true);
 	emitter_->AddControlPoints(Vector3{ 0,0,0 });
@@ -446,6 +514,16 @@ void TestScene::InitializeParticle()
 	emitter_->AddControlPoints(Vector3{ 30,30,0 });
 
 
+	primitvPa_ = std::make_unique<ParticleEmitter>();
+	primitvPa_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitterPPPP", "cc", ParticleData::SpawnType::kAABB);
+	primitvPa_->GetFrequency() = 0.1f;
+	primitvPa_->SetCount(1);
+	primitvPa_->SetRotateMinMax(-Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
+	primitvPa_->SetPos({ 0,10,0 });
+	primitvPa_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
+	primitvPa_->SetLifeTimeMinMax(1.0f, 2.0f);
+	
+
 
 
 
@@ -453,11 +531,12 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitterPrimi", "primi");
 	emitterEnemy_->GetFrequency() = 0.1f;
 	emitterEnemy_->SetCount(1);
-	//emitterEnemy_->SetParent(mm.worldtransform_);
 	emitterEnemy_->SetPos({ 0,50,0 });
-	emitterEnemy_->SetVelocityMinMax({ -0,20,-5 }, { 5, 20, 5 });
+	emitterEnemy_->SetVelocityMinMax({ -10,20,-10 }, { 10, 50, 10 });
+	emitterEnemy_->SetRengeMinMax({ -1,0,-1 }, { 1, 10, 1 });
 	emitterEnemy_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
 	emitterEnemy_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	//emitterEnemy_->SetColorMinMax();
 	emitterEnemy_->SetLifeTimeMinMax(5, 10);
 	emitterEnemy_->SetIsGravity(true);
 	emitterEnemy_->SetUsebillboard(false);
@@ -466,46 +545,45 @@ void TestScene::InitializeParticle()
 	emitterEnemy_->SetIsRotateVelocity(true);
 	emitterEnemy_->SetIsBounce(true);
 	emitterEnemy_->SetSizeMinMax(Vector3{ 0.1f,0.1f,0.1f }, { 0.2f,0.2f,0.2f });
+	emitterEnemy_->SetUseFieldName({"All"});
+
+	fieldEffect_ = std::make_unique <Field::FieldEffect >();
+	fieldEffect_->Initialize("fieldEffect", Field::ShapeType::kAABB, Field::EffectType::kAcceleration, GetEntity3DManager()->Get3DLineCommon());
+	fieldEffect_->SetParent(emitterEnemy_->transform_);
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(fieldEffect_.get());
 
 	primitvPlane_ = std::make_unique<ParticleEmitter>();
-	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleData::SpawnType::kPoint);
 	primitvPlane_->GetFrequency() = 0.025f;
 	primitvPlane_->SetCount(40);
 	primitvPlane_->SetPos({ 0,50,0 });
 	primitvPlane_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	primitvPlane_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	//primitvPlane_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
 	primitvPlane_->SetLifeTimeMinMax(1, 3);
-	//primitvPlane_->SetIsGravity(true);
 	primitvPlane_->SetUsebillboard(false);
 	primitvPlane_->SetIsAlpha(true);
 	primitvPlane_->SetIsLifeTimeScale(true);
 	primitvPlane_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	//primitvPlane_->SetIsRotateVelocity(true);
-	//primitvPlane_->SetIsBounce(true);
 	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,2.5f,0.1f }, { 0.1f ,5.0f,0.1f });
 
 
 	primitvPlaneSmoke_ = std::make_unique<ParticleEmitter>();
-	primitvPlaneSmoke_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"smokePlane01", "smokePlane01", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	primitvPlaneSmoke_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"smokePlane01", "smokePlane01", ParticleData::SpawnType::kPoint);
 	primitvPlaneSmoke_->GetFrequency() = 0.025f;
 	primitvPlaneSmoke_->SetCount(3);
 	primitvPlaneSmoke_->SetPos({ 0,50,0 });
 	primitvPlaneSmoke_->SetVelocityMinMax({ 0,0,0 }, { 0, 10, 0 });
 	primitvPlaneSmoke_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	//primitvPlaneSmoke_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
 	primitvPlaneSmoke_->SetLifeTimeMinMax(1, 3);
-	//primitvPlaneSmoke_->SetIsGravity(true);
 	primitvPlaneSmoke_->SetUsebillboard(false);
 	primitvPlaneSmoke_->SetEnableLighting(false);
 	primitvPlaneSmoke_->SetIsAlpha(true);
 	primitvPlaneSmoke_->SetIsLifeTimeScale(true);
-	primitvPlaneSmoke_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	primitvPlaneSmoke_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 	primitvPlaneSmoke_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	primitvPlaneSmoke_->SetIsRotateVelocity(true);
 	primitvPlaneSmoke_->SetAlphaClipping(0.25f);
-	//primitvPlaneSmoke_->SetIsBounce(true);
 	primitvPlaneSmoke_->SetSizeMinMax(Vector3{ 5.0f,5.0f,1.0f }, { 5.0f ,5.0f,1.0f });
 	primitvPlaneSmoke_->SetUvTransformVeloctiy({{0.0f,0,0},{},{0.0f,0.0f,0}});
 
@@ -552,7 +630,7 @@ void TestScene::InitializeLight()
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 2.0f;
+	directionalLightData.intensity = 0.9f;
 	directionalLightData.isLight = true;
 
 
@@ -587,115 +665,12 @@ void TestScene::InitializeCamera()
 /// </summary>
 void TestScene::InitializeOthers()
 {
-	capsule_.radius = 10;
-	capsule_.segment.origin = { 4,-5,4 };
-	capsule_.segment.end = { 4,5,4 };
-
-
+	
 
 	octree = std::make_unique<Octree>(AABB({ -100,-100,-100 }, { 100,100,100 }), 0);
 	octree->root->subdivide(4, 4, 4, 10);
 
 	octree->insert(*stairObject->GetMesh(0));// メッシュ挿入
-
-
-	world.Initialize();
-
-	Box box;
-	box.min_ = { 20,20 };
-	box.max_ = { 30,30 };
-
-	OBB2D obb2d{};
-	obb2d.center = { 100,100 };
-	obb2d.halfSize = { 100,10 };
-	obb2d.axisZ.x = 1.0f;
-
-	map->AddObstacleFromOBB2D(obb2d);
-
-	map->AddObstacleFromBox(box);
-
-	for (int i = 0; i < 500; i++) {
-
-
-
-		Box boxs;
-		boxs.min_.x = Random::RandomFloat(0, map->GetWidth() * map->GetCellSize());
-		boxs.min_.y = Random::RandomFloat(0, map->GetHeight() * map->GetCellSize());
-		boxs.max_.x = Random::RandomFloat(boxs.min_.x, boxs.min_.x + map->GetCellSize() * 3);
-		boxs.max_.y = Random::RandomFloat(boxs.min_.y, boxs.min_.y + map->GetCellSize() * 3);
-
-
-		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} }, goalObject->worldtransform_.translate_)) {
-			continue;
-		}
-		if (IsCollision(AABB{ {boxs.min_.x,-20,boxs.min_.y},{boxs.max_.x,20,boxs.max_.y} }, playerObject->worldtransform_.translate_)) {
-			continue;
-		}
-
-
-		map->AddObstacleFromBox(boxs);
-	}
-
-
-
-
-
-
-	pathfinder.SetMap(*map);
-
-	playerObject->Update();
-	goalObject->Update();
-
-	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
-	Vector2 goalPos = goalObject->GetWorldPosition().xz();
-
-	pathfinder.FindPath(plyerPos, goalPos, path);
-
-
-
-	//for (int i = 0; i < map->GetWidth(); i++) {
-	//	for (int j = 0; j < map->GetHeight(); j++) {
-
-	//		// マップチップの種類を取得
-	//		MapCellType cell = map->GetCell(i, j);
-
-	//		// 障害物でないならスキップ
-	//		if (cell != MapCellType::Obstacle) {
-	//			continue;
-	//		}
-
-	//		// 障害物だった場合、オブジェクトを生成
-	//		ObjectInstans obj{};
-	//		obj.Initialize();
-	//		obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
-	//		obj.transform.translate_.y = 10;
-	//		obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
-	//		obj.transform.scale_ = map->GetCellSize() / 2.0f;
-
-	//		int randdd = Random::RandomInt32_t(0, 0);
-
-	//		// オブジェクトを種類ごとに配置
-	//		if (randdd == 0) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/uvChecker.png", obj);
-	//		}
-	//		else if (randdd == 1) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
-	//		}
-	//		else if (randdd == 2) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/Image.png", obj);
-	//		}
-	//		else if (randdd == 3) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/ground.png", obj);
-	//		}
-	//		else if (randdd == 4) {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/grass.png", obj);
-	//		}
-	//		else {
-	//			Object3dInstansManager::GetInstance()->AddObject("BoxBox.obj", "resources/Texture/enemy.png", obj);
-	//		}
-	//	}
-	//}
-
 }
 
 #pragma endregion 各初期化
@@ -742,25 +717,8 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
-	ocean_->Update();
+	
 
-	GetEntity3DManager()->GetSkyBoxCommon()->SetCamara(camera.get());
-	GetEntity3DManager()->GetSkyBoxCommon()->Update();
-
-
-#ifdef _DEBUG
-
-	//ImGui::Begin("Primitive");
-	//ImGui::DragFloat3("translate",&primitiveObject->transform.translate.x,0.1f);
-	//ImGui::DragFloat3("rotate",&primitiveObject->transform.rotate.x,0.1f);
-	//ImGui::DragFloat3("scale",&primitiveObject->transform.scale.x,0.1f);
-	//ImGui::End();
-#endif // _DEBUG
-
-	//primitiveObject->Update();
-
-	//primitivePlaneObject->Update();
-	//primitvPlane_->Update();
 }
 
 void TestScene::UpdateRoom02()
@@ -771,13 +729,12 @@ void TestScene::UpdateRoom02()
 
 	emitter_->Update();
 	emitterEnemy_->Update();
+	primitvPa_->Update();
 }
 
 void TestScene::UpdateRoom03()
 {
-	primitvPlaneSmoke_->Update();
-	//taleObject->Update();
-	//multiy.Update();
+	
 }
 
 void TestScene::UpdateRoom04()
@@ -795,42 +752,7 @@ void TestScene::UpdateRoom04()
 	primitvPlaneSmoke_->Update();
 
 
-	skinningObject.UpdateSkinning();
-	skinningObject2.UpdateSkinning();
-
-	triCen;
-
-	/*Vector3 a = { tri2d.vertices[0].x, 5 ,tri2d.vertices[0].y };
-	Vector3 b = { tri2d.vertices[1].x, 5 ,tri2d.vertices[1].y };
-	Vector3 c = { tri2d.vertices[2].x, 5 ,tri2d.vertices[2].y };
-
-
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(a, b, { 1,1,1,1 });
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(b, c, { 1,1,1,1 });
-	GetEntity3DManager()->Get3DLineCommon()->AddLine(c, a, { 1,1,1,1 });*/
-
-
-	CornerSegment corner;// = { sphere2d.center }
-	corner.center.x = sphere2d.center.x;
-	corner.center.y = 5;
-	corner.center.z = sphere2d.center.y;
-
-	corner.radius = sphere2d.radius;
-	corner.segment = 16;
-
-
-	world.translate_.x = sphere2d.center.x;
-	world.translate_.z = sphere2d.center.y;
-
-	GetEntity3DManager()->Get3DLineCommon()->AddLineCorner(corner, world);
-
-	int size = GetEntity3DManager()->GetObject3dInstansManager()->GetSize();
-
-
-
-
-	object_;
-
+	
 }
 
 void TestScene::UpdateRoom05()
@@ -840,145 +762,15 @@ void TestScene::UpdateRoom05()
 
 void TestScene::UpdateRoom06()
 {
-
-#ifdef _DEBUG
-
-	ImGui::Begin("oc");
-	ImGui::DragFloat3("div", &div_.x);
-	ImGui::DragInt("maxDepth", &maxDepth);
-	ImGui::DragInt("depth", &octree->root->depth);
-	ImGui::DragFloat3("max", &octree->root->bounds.max_.x);
-	ImGui::DragFloat3("min", &octree->root->bounds.min_.x);
-	bool isColl = octree->checkCollisions(capsule_);
-	ImGui::Checkbox("isColl", &isColl);
-	if (ImGui::Button("clear")) {
-		octree->root->clear();
-	};
-	if (ImGui::Button("Set")) {
-		int x = static_cast<int>(div_.x);
-		int y = static_cast<int>(div_.y);
-		int z = static_cast<int>(div_.z);
-
-		octree->root->subdivide(x, y, z, maxDepth);
-	}
-	ImGui::End();
-	ImGui::Begin("capsule");
-	ImGui::DragFloat("rad", &capsule_.radius, 0.1f);
-	ImGui::DragFloat3("origin", &capsule_.segment.origin.x, 0.1f);
-	ImGui::DragFloat3("end", &capsule_.segment.end.x, 0.1f);
-	ImGui::End();
-#endif // _DEBUG
-
-
-
-
-
-
-
-
-
-
-	//stairObject->LineMesh();
-	stairObject->Update();
-	GetEntity3DManager()->Get3DLineCommon()->AddLineCapsule(capsule_);
-	octree->draw(*GetEntity3DManager()->Get3DLineCommon());
-
 }
 
 void TestScene::UpdateRoom07()
 {
 
-	Vector2 plyerPos = playerObject->GetWorldPosition().xz();
-	Vector2 goalPos = goalObject->GetWorldPosition().xz();
-	int playerX, playerZ;
-	int goalX, goalZ;
-
-	// ワールド座標 -> マップ座標に変換
-	bool validPlayer = map->WorldToMap(plyerPos.x, plyerPos.y, playerX, playerZ);
-	bool validGoal = map->WorldToMap(goalPos.x, goalPos.y, goalX, goalZ);
-
-	if (validPlayer && validGoal &&
-		!map->IsBlocked(playerX, playerZ) &&
-		!map->IsBlocked(goalX, goalZ))
-	{
-		pathfinder.FindPath(plyerPos, goalPos, path);
-
-
-		// 進行方向を取得して正規化
-		Vector2 direction = pathfinder.GetDirectionToNextNode().Normalize();
-
-		// プレイヤーの位置を更新
-		float speed = 1.0f;  // 任意の速度
-		playerObject->worldtransform_.translate_.x += direction.x * speed;
-		playerObject->worldtransform_.translate_.z += direction.y * speed;
-	}
-
-
-
-
-
-	Vector2 sosos = input_->GetGamePadLeftStick();
-
-
-
-	goalObject->worldtransform_.translate_.x += sosos.x * 2.0f;
-	goalObject->worldtransform_.translate_.z += sosos.y * 2.0f;
-
-
-
-
-#ifdef _DEBUG
-	ImGui::Begin("dnadjas");
-	ImGui::DragFloat3("goal", &goalObject->worldtransform_.translate_.x);
-	ImGui::End();
-#endif // _DEBUG
-
-
-
-
-	playerObject->Update();
-	goalObject->Update();
-
-	pathfinder.DrawPath(GetEntity3DManager()->Get3DLineCommon(), 11.0f);
-
-	map->DrawMapChip(GetEntity3DManager()->Get3DLineCommon(), 10.0f);
 }
 
 void TestScene::UpdateRoom08()
 {
-
-	noise->ImguiParameter();
-
-
-#ifdef _DEBUG
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("NoiseSet")) {
-		if (ImGui::Button("set")) {
-			GetEntity3DManager()->GetObject3dInstansManager()->Clear("BoxBox.obj");
-
-			for (int i = 0; i < map->GetWidth(); i++) {
-				for (int j = 0; j < map->GetHeight(); j++) {
-					ObjectInstans obj{};
-					obj.Initialize();
-					obj.transform.translate_.x = float(map->GetCellSize() * i) + map->GetCellSize() / 2;
-					obj.transform.translate_.z = float(map->GetCellSize() * j) + map->GetCellSize() / 2;
-					obj.transform.scale_ = map->GetCellSize() / 2.0f;
-
-
-					float y = static_cast<float>(noise->PerlinNoise(float(i), float(j)) * map->GetCellSize() * 20);
-
-					obj.transform.translate_.y = static_cast<float>(y);
-
-					GetEntity3DManager()->GetObject3dInstansManager()->AddObject("BoxBox.obj", "resources/Texture/renga.png", obj);
-				}
-			}
-		}
-	}
-	ImGui::End();
-
-
-#endif // _DEBUG
-
 
 
 }
@@ -986,8 +778,15 @@ void TestScene::UpdateRoom08()
 void TestScene::SwitchRoom()
 {
 #ifdef _DEBUG
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("SceneRoom")) {
+	
+	if (!ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar)) {
+		ImGui::End();
+		return;
+	}
+	if (!ImGui::BeginMenuBar())
+		return;
+
+	if (ImGui::BeginMenu("SceneRoom")) {
 		if (ImGui::Button("Room01")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom01;
 		}
@@ -1012,35 +811,17 @@ void TestScene::SwitchRoom()
 		if (ImGui::Button("Room08")) {
 			behaviorRequest_ = SceneBehavior::kSceneRoom08;
 		}
+		if (ImGui::Button("GameScene")) {
+			GetSceneManager()->ChangeScene("GAMEPLAY");
+		}
 
+		ImGui::EndMenu();
 	}
+	ImGui::EndMenuBar();
 	ImGui::End();
 #endif // _DEBUG
 
-	if (input_->IsTriggerKey(DIK_1)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom01;
-	}
-	if (input_->IsTriggerKey(DIK_2)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom02;
-	}
-	if (input_->IsTriggerKey(DIK_3)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom03;
-	}
-	if (input_->IsTriggerKey(DIK_4)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom04;
-	}
-	if (input_->IsTriggerKey(DIK_5)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom05;
-	}
-	if (input_->IsTriggerKey(DIK_6)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom06;
-	}
-	if (input_->IsTriggerKey(DIK_7)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom07;
-	}
-	if (input_->IsTriggerKey(DIK_8)) {
-		behaviorRequest_ = SceneBehavior::kSceneRoom08;
-	}
+
 
 }
 

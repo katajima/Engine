@@ -10,34 +10,11 @@
 #include"ParticleManager.h"
 #include"DirectXGame/engine/WorldTransform/WorldTransform.h"
 
-
+class LineCommon;
 class ParticleEmitter
 {
 public:
-	// 
-
-	enum class EmitSpawnShapeType // 出現形状
-	{
-		kPoint,
-		kAABB,		// AABB
-		kOBB,		// OBB
-		kSphere,	// Sphere
-
-		//////// ライン
-
-		kSegmentLine,		// セグメントライン
-		kCornerLine,		// こーなーライン
-
-
-
-
-		kSpline,			// スプライン
-	};
-
-
-
-public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitSpawnShapeType spawnType = EmitSpawnShapeType::kAABB);
+	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, ParticleData::SpawnType spawnType = ParticleData::SpawnType::kAABB);
 
 	void Update();
 
@@ -67,19 +44,24 @@ public: // ゲッター兼セッター
 
 	void SetIsEmit(bool is) { isEmit = is; } // 出すか
 
-	void SetIsGravity(bool is) { isGravity = is; } // 重力
+	void SetIsLineInterpolation(bool is) { isFlag.isLineInterpolation = is; } // 線形補間
 
-	void SetUsebillboard(bool is) { usebillboard = is; } // ビルボード
+	void SetIsGravity(bool is) { isFlag.isGravity = is; } // 重力
 
-	void SetIsAlpha(bool is) { isAlpha = is; } // 透明度
+	void SetUsebillboard(bool is) { isFlag.usebillboard = is; } // ビルボード
+	void SetUsebillboardRotZ(bool is) { isFlag.billboardRotZ = is; } // ビルボードZ
 
-	void SetIsLifeTimeScale(bool is) { isLifeTimeScale_ = is; } // スケール変更
+	void SetIsAlpha(bool is) { isFlag.isAlpha = is; } // 透明度
 
-	void SetLifeTimeScaleTopBottom(ParticleManager::TopBottom topBottom) { topBottom_ = topBottom; }
+	void SetIsAcceleration(bool is) { isFlag.isAcceleration = is; } // 
 
-	void SetIsRotateVelocity(bool is) { isRotateVelocity = is; } // 回転速度
+	void SetIsLifeTimeScale(bool is) { isFlag.isLifeTimeScale_ = is; } // スケール変更
 
-	void SetIsBounce(bool is) { isBounce = is; } // 跳ねるか
+	void SetLifeTimeScaleTopBottom(ParticleData::TopBottom topBottom) { topBottom_ = topBottom; }
+
+	void SetIsRotateVelocity(bool is) { isFlag.isRotateVelocity = is; } // 回転速度
+
+	void SetIsBounce(bool is) { isFlag.isBounce = is; } // 跳ねるか
 
 	void SetIsAll(bool billboard, bool alpha, bool gravity, bool isLifeTimeScale, bool rotateVelocity);
 
@@ -107,6 +89,15 @@ public: // ゲッター兼セッター
 	void SetVelocityMinMax(Vector3 min, Vector3 max) { emitter_.velocity.min = min; emitter_.velocity.max = max; } // 速度
 
 	void SetRotateVelocityMinMax(Vector3 min, Vector3 max) { emitter_.rotateVelocity.min = min; emitter_.rotateVelocity.max = max; } // 速度
+
+	void SetAccelerationMinMax(Vector3 min, Vector3 max) { emitter_.acceleration.min = min; emitter_.acceleration.max = max; } // 速度
+
+	void SetUseFieldName(std::vector<std::string> fieldName) { // フィールド名
+		for (auto& name : fieldName) {
+			emitter_.fieldName.push_back(name);
+		}
+	} 
+
 private: // エミッタ可視化
 
 	void DrawEmitterLine();
@@ -114,35 +105,24 @@ private: // エミッタ可視化
 	void EmitMinMax();
 
 private:
-	ParticleManager::EmitType emitType_ = ParticleManager::EmitType::kRandom; // 出現方法
-	ParticleManager::TopBottom topBottom_ = ParticleManager::TopBottom::kBottom; // 拡縮
-	EmitSpawnShapeType spawnShapeType_ = EmitSpawnShapeType::kAABB; // 出現形状
+	ParticleData::EmitType emitType_ = ParticleData::EmitType::kRandom; // 出現方法
+	ParticleData::TopBottom topBottom_ = ParticleData::TopBottom::kBottom; // 拡縮
+	ParticleData::SpawnType spawnShapeType_ = ParticleData::SpawnType::kAABB; // 出現形状
 
 private:
-	bool isLifeTimeScale_ = false;	// スケール
-	bool isLifeTimeAlpha_ = false;	// 透明度
-	bool isLifeTimeVelocity = false;// 速度
-	bool isRotateVelocity = false;  // 回転
+	// パーティクル制御に必要なフラグ
+	ParticleData::IsFlag isFlag;
 
-	bool isGravity = false; // 重力
-	bool isWind = false;  // 風
-	bool usebillboard = true; // ビルボード
-	bool isAlpha = false; // 透明度
-	bool isBounce = false; // 透明度
-
+	// 出すか
 	bool isEmit = true; // 出すか
 
 	float alphaClipping_ = 0.5f; // αクリッピング
-	int enableLighting_ = false;
+	int enableLighting_ = false; // ライティング
 private:
-	Transform uvTransformVeloctiy_{};
-
-
-
+	Transform uvTransformVeloctiy_{};	// UVトランスフォーム
 public:
-	WorldTransform transform_;
+	WorldTransform transform_;			// ワールドトランスフォーム
 private:
-	//uint32_t count_;			// < 発生数
 	float frequency_;		// < 発生頻度
 	float frequencyTime_;	// < 頻度用時刻
 
@@ -152,8 +132,10 @@ private:
 	std::string particleName_; // パーティクル名
 
 
-	ParticleManager::Emiter emitter_{};
+	Emiter emitter_{};
+
 	ParticleManager* particleManager_;
+	LineCommon* lineCommon_ = nullptr;
 };
 
 

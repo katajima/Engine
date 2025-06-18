@@ -5,8 +5,14 @@
 void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	Collider::Initialize(camera);
+	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
 	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
-
+	Collider::SetRadius(3.0f);
+	Capsule cap = Collider::GetCapsule();
+	cap.radius = 6.0f;
+	//cap.segment.origin.z = 10;
+	Collider::SetCapsule(cap);
+	Collider::SetColor(Vector4{ 1,0,1,1 });
 
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
@@ -32,6 +38,8 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 
 
 	InitParticle();
+
+	nullChek = Matrix4x4::Identity();
 }
 
 void NormalEnemy::Update()
@@ -59,24 +67,19 @@ void NormalEnemy::Update()
 			oldPos_ = { 0,0,0 };
 			HitMotion();
 		}
-		// 影
-		//objectSha_.worldtransform_.translate_ = transBase_.translate_;
-		//objectSha_.worldtransform_.translate_.y = 0.1f;
-
-		//Vector3 scale{};
-		//scale = 7;
-
-		//objectSha_.worldtransform_.scale_ = scale;
+		
 
 		// 煙
-		dustEmit_->Update();
+		/*dustEmit_->Update();
 		dustEmit2_->Update();
-		dustEmit3_->Update();
+		dustEmit3_->Update();*/
+	}
+	else {
+		
 	}
 
 	object_->Update();
 	transBase_.Update();
-	//objectSha_.Update();
 }
 
 void NormalEnemy::Draw()
@@ -94,7 +97,7 @@ void NormalEnemy::DrawP()
 
 void NormalEnemy::Draw2D()
 {
-	if (isLockOn) {
+	/*if (isLockOn) {
 		icon_lockOn->SetPosition(object_->GetScreenPosition());
 
 		icon_lockOn->Update();
@@ -112,7 +115,7 @@ void NormalEnemy::Draw2D()
 		hpBer_->SetSize({ (parameter_.HP * 0.95f),10.0f });
 		hpBer_->Update();
 		hpBer_->Draw();
-	}
+	}*/
 }
 
 void NormalEnemy::SetPlayer(Player* player)
@@ -173,44 +176,13 @@ void NormalEnemy::Move()
 		// 移動
 		transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());
 	}
-
-
-	groundRightEmit_->SetVelocityMinMax(-moveDirection * 2, -moveDirection * 2);
-	groundRightEmit_->Update();
-	groundLeftEmit_->SetVelocityMinMax(-moveDirection * 2, -moveDirection * 2);
-	groundLeftEmit_->Update();
-
-
-
 }
 
 void NormalEnemy::InitParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
-	groundRightEmit_ = std::make_unique<ParticleEmitter>();
-	groundRightEmit_->Initialize(particleManager, "groundRight", "enemyGround");
-	groundRightEmit_->GetFrequency() = 0.15f;
-	groundRightEmit_->SetCount(1);
-	groundRightEmit_->SetParent(object_->worldtransform_);
-	groundRightEmit_->SetPos({ -1,-0.5f,0 });
-	groundRightEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	groundRightEmit_->SetLifeTimeMinMax(0.4f, 0.7f);
-	groundRightEmit_->SetIsAlpha(true);
-	groundRightEmit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.4f,0.4f,0.4f });
-	groundRightEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
-
-	groundLeftEmit_ = std::make_unique<ParticleEmitter>();
-	groundLeftEmit_->Initialize(particleManager, "groundLeft", "enemyGround");
-	groundLeftEmit_->GetFrequency() = 0.15f;
-	groundLeftEmit_->SetCount(1);
-	groundLeftEmit_->SetParent(object_->worldtransform_);
-	groundLeftEmit_->SetPos({ 1,-0.5f,0 });
-	groundLeftEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	groundLeftEmit_->SetLifeTimeMinMax(0.4f, 0.7f);
-	groundLeftEmit_->SetIsAlpha(true);
-	groundLeftEmit_->SetSizeMinMax(Vector3{ 0.2f,0.2f,0.2f }, { 0.4f,0.4f,0.4f });
-	groundLeftEmit_->SetColorMinMax({ 0.604f, 0.384f, 0.161f }, { 0.604f, 0.384f, 0.161f });
+	
 
 	dustEmit_ = std::make_unique<ParticleEmitter>();
 	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01_2");
@@ -229,7 +201,7 @@ void NormalEnemy::InitParticle()
 	dustEmit_->SetEnableLighting(false);
 	dustEmit_->SetIsAlpha(true);
 	dustEmit_->SetIsLifeTimeScale(true);
-	dustEmit_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	dustEmit_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 
 	dustEmit2_ = std::make_unique<ParticleEmitter>();
@@ -249,7 +221,7 @@ void NormalEnemy::InitParticle()
 	dustEmit2_->SetEnableLighting(false);
 	dustEmit2_->SetIsAlpha(true);
 	dustEmit2_->SetIsLifeTimeScale(true);
-	dustEmit2_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	dustEmit2_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 	dustEmit3_ = std::make_unique<ParticleEmitter>();
 	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03_2");
@@ -268,7 +240,7 @@ void NormalEnemy::InitParticle()
 	dustEmit3_->SetEnableLighting(false);
 	dustEmit3_->SetIsAlpha(true);
 	dustEmit3_->SetIsLifeTimeScale(true);
-	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleManager::TopBottom::kTop);
+	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
 
 
 
@@ -304,7 +276,7 @@ void NormalEnemy::InitParticle()
 
 
 	effectEmit_ = std::make_unique<ParticleEmitter>();
-	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleEmitter::EmitSpawnShapeType::kPoint);
+	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleData::SpawnType::kPoint);
 	effectEmit_->GetFrequency() = 0.0f;
 	effectEmit_->SetCount(1);
 	effectEmit_->SetParent(object_->worldtransform_);

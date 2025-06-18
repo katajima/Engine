@@ -1,5 +1,5 @@
 #include "Camera.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -48,81 +48,9 @@ void Camera::GetCommandList(int index)
 
 
 void Camera::UpdateMatrix() {
-
-#ifdef _DEBUG
-
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::DragFloat("debugShakeTime", &debugShakeTime_, 0.01f);
-		ImGui::DragFloat3("debugShakeDirectionRange", &debugShakeDirectionRange_.x, 0.1f);
-
-		ImGui::DragFloat3("Translate", &transform_.translate.x, 0.1f);
-		ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
-		ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-		if (ImGui::Button("cameraPos")) {
-			transform_.translate = { 0,20,-175 };
-			transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos2")) {
-			transform_.translate = { -30,10,-140 };
-			transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos3")) {
-			transform_.translate = { 0,500,0 };
-			transform_.rotate = { DegreesToRadians(90),0,0 };
-		}
-		if (ImGui::Button("cameraPos4")) {
-			transform_.translate = { 0,60,-220 };
-			transform_.rotate = { DegreesToRadians(10),0,0 };
-		}
-		if (ImGui::Button("cameraPos5")) {
-			transform_.translate = { 0,60,220 };
-			transform_.rotate = { DegreesToRadians(10),DegreesToRadians(180),0 };
-		}
-	}
-	ImGui::End();
-
-
-
-	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
-		speed = 10.0f;
-	}
-	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
-		speed = 0.1f;
-	}
-	else {
-		speed = 1.0f;
-	}
-
-	float sp = move * speed;
-
-	if (input_->IsPushKey(DIK_A)) {
-		transform_.translate.x -= sp;
-	}
-	if (input_->IsPushKey(DIK_D)) {
-		transform_.translate.x += sp;
-	}
-	if (input_->IsPushKey(DIK_W)) {
-		transform_.translate.z += sp;
-	}
-	if (input_->IsPushKey(DIK_S)) {
-		transform_.translate.z -= sp;
-	}
-	if (input_->IsPushKey(DIK_UP)) {
-		transform_.translate.y += sp;
-	}
-	if (input_->IsPushKey(DIK_DOWN)) {
-		transform_.translate.y -= sp;
-	}
-
-
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
-		SetShake(debugShakeTime_, debugShakeDirectionRange_);
-	}
-#endif // _DEBUG
-
-
-
+	
+	UpdateImGui();
+	
 	if (shakeTime_ > 0) {
 		// Reduce shake time
 		shakeTime_ -= MyGame::GameTime();
@@ -187,6 +115,92 @@ void Camera::UpdateMatrix(const Vector3& targetPosition)
 
 	// ビュー・プロジェクション行列を更新
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
+}
+
+void Camera::UpdateImGui()
+{
+#ifdef _DEBUG
+	ImGui::Begin("Canera Properties");
+	if (ImGui::CollapsingHeader("Camera")) {
+		ImGui::DragFloat("debugShakeTime", &debugShakeTime_, 0.01f);
+		ImGui::DragFloat3("debugShakeDirectionRange", &debugShakeDirectionRange_.x, 0.1f);
+
+		ImGui::DragFloat3("Translate", &transform_.translate.x, 0.1f);
+		ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
+		ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+		if (ImGui::Button("cameraPos")) {
+			transform_.translate = { 0,20,-175 };
+			transform_.rotate = { 0,0,0 };
+		}
+		if (ImGui::Button("cameraPos2")) {
+			transform_.translate = { -30,10,-140 };
+			transform_.rotate = { 0,0,0 };
+		}
+		if (ImGui::Button("cameraPos3")) {
+			transform_.translate = { 0,500,0 };
+			transform_.rotate = { DegreesToRadians(90),0,0 };
+		}
+		if (ImGui::Button("cameraPos4")) {
+			transform_.translate = { 0,60,-220 };
+			transform_.rotate = { DegreesToRadians(10),0,0 };
+		}
+		if (ImGui::Button("cameraPos5")) {
+			transform_.translate = { 0,60,220 };
+			transform_.rotate = { DegreesToRadians(10),DegreesToRadians(180),0 };
+		}
+	}
+	ImGui::End();
+
+
+
+	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
+		speed = 10.0f;
+	}
+	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
+		speed = 0.1f;
+	}
+	else {
+		speed = 1.0f;
+	}
+
+	float sp = move * speed;
+
+	if (input_->IsPushKey(DIK_A)) {
+		transform_.translate.x -= sp;
+	}
+	if (input_->IsPushKey(DIK_D)) {
+		transform_.translate.x += sp;
+	}
+	if (input_->IsPushKey(DIK_W)) {
+		transform_.translate.z += sp;
+	}
+	if (input_->IsPushKey(DIK_S)) {
+		transform_.translate.z -= sp;
+	}
+	if (input_->IsPushKey(DIK_UP)) {
+		transform_.translate.y += sp;
+	}
+	if (input_->IsPushKey(DIK_DOWN)) {
+		transform_.translate.y -= sp;
+	}
+	sp = 0.01f;
+	if (input_->IsPushKey(DIK_I)) {
+		transform_.rotate.x += sp;
+	}
+	if (input_->IsPushKey(DIK_K)) {
+		transform_.rotate.x -= sp;
+	}
+	if (input_->IsPushKey(DIK_L)) {
+		transform_.rotate.y += sp;
+	}
+	if (input_->IsPushKey(DIK_J)) {
+		transform_.rotate.y -= sp;
+	}
+
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
+		SetShake(debugShakeTime_, debugShakeDirectionRange_);
+	}
+#endif // _DEBUG
 }
 
 void Camera::TransferMatrix()

@@ -2,13 +2,11 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include <imgui.h>
 #include <list>
-
-
 
 
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
@@ -23,6 +21,10 @@
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
 #include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
+#include "DirectXGame/application/base/Player/Special/RangeBombingSpecial.h"
+
+#include "DirectXGame/application/base/Player/Attack/PlayerAttackFactory.h"
+
 
 #include"DirectXGame/application/base/Attack/AttackManager.h"
 
@@ -112,7 +114,7 @@ public: // 攻撃関係
 		bool IsNormalAttack; // B
 		bool IsSpecialAttack;// RT
 	};
-	enum class  AttackType
+	enum class  AttackTypePlay
 	{
 		kNone = 0,
 		kNormal, // 通常攻撃
@@ -132,9 +134,9 @@ private: // 攻撃関係
 		float parameter;
 		// 
 		//振るまい
-		AttackType type = AttackType::kNone;
+		AttackTypePlay type = AttackTypePlay::kNone;
 		// 次の振るまいリクエスト
-		std::optional<AttackType> typeRequest_ = std::nullopt;
+		std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
 		//
 		StartEnd pos; // 位置
 		// 過去位置
@@ -220,7 +222,7 @@ public:
 	playerWeapon* GetWeapon() { return weapon_.get(); }
 
 	Behavior GetBehavior() const { return behavior_; };
-	AttackType GetAttackType() const { return workAttack.type; };
+	AttackTypePlay GetAttackType() const { return workAttack.type; };
 
 	uint32_t GetSerialNumber() const { return serialNumber; }
 
@@ -257,7 +259,11 @@ public:
 	void SetInput(Input* input) {
 		input_ = input;
 		bulletSpecial_->SetInput(input);
+		rangeBombingSpecial_->SetInput(input);
+
 	};
+
+	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
 private:  // パラメータ
 	
@@ -268,6 +274,8 @@ private:  // パラメータ
 private:
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;
+	// スペシャル攻撃
+	std::unique_ptr<RangeBombingSpecial> rangeBombingSpecial_;
 	//  プレイヤー用UI
 	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
 	// エフェクト 
@@ -276,7 +284,10 @@ private:
 	std::unique_ptr<playerWeapon> weapon_;
 	//
 	std::unique_ptr<AttackManager> attackManager_;
+	//
+	std::unique_ptr<BaseAttackFactory> playerAttackFactory_;
 
+	std::unordered_map<std::string, WorldTransform*> transformMap;
 
 	// オブジェクト3D
 
@@ -284,19 +295,24 @@ private:
 	// 本体
 	Object3d objectBody_;
 	
+	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 	//　レティクル
-	Object3d objectReticle_;
-	
+	std::unique_ptr <Object3d> objectReticle_;
+	//
+	float reticleRad_ = 100.0f;
+	Vector3 rangeBombingPos{};
+
 
 	// 移動関連
 	// 速度
 	Vector3 velocity_ = {};
+	float accelerationY_ = 0.1f; // 加速度
 	float moveLimit = 200;
 	float speed;
 
 	
 
-
+	bool isCreativeMode = false;
 	
 
 	ContactRecord contactRecord_;

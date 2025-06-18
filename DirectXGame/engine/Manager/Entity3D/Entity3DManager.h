@@ -15,16 +15,35 @@
 #include "DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 
+#include "Entity3D.h"
+
 class DirectXCommon;
 class Entity3DManager
 {
 public:
 
+
+
 	// 初期化
 	void Initialize(DirectXCommon* directXCommon);
 
-	OceanManager* GetOceanManager() { return oceanManager_.get(); };
+	// ImGui
+	void UpdateImgui();
 
+	// 
+	void Update();
+
+	void ObjectClean();
+
+	void ObjectDraw();
+
+public: //セッター
+
+	void SetEntity3D(Object3d* entity3D);
+
+public: //ゲッター
+
+	OceanManager* GetOceanManager() { return oceanManager_.get(); };
 
 	Object3dInstansManager* GetObject3dInstansManager() { return object3dInstansManager_.get(); }
 
@@ -46,6 +65,14 @@ public:
 
 private:
 
+	std::vector<Object3d*> object3d;
+
+	std::vector<Object3d*> opaqueObjects;
+	std::vector<Object3d*> transparentObjects01;
+	std::vector<Object3d*> transparentObjects02;
+	std::vector<Object3d*> transparentObjects03;
+
+private:
 	// DirectX
 	DirectXCommon* directXCommon_;
 
@@ -77,7 +104,7 @@ private:
 	std::unique_ptr<PrimitiveCommon> primitiveCommon_ = nullptr;
 
 	// エフェクトマネージャー
-	std::unique_ptr<EffectManager> effectManager_ = nullptr;	 // エフェクトマネージャー
+	std::unique_ptr<EffectManager> effectManager_ = nullptr;
 
 };
 

@@ -5,15 +5,14 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Camera/DebugCamera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
-#include "DirectXGame/engine/base/TextureManager.h"
-#include "DirectXGame/engine/input/Input.h"
+#include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/audio/Audio.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include"DirectXGame/engine/2d/SpriteCommon.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 
-#include"DirectXGame/engine/base/ImGuiManager.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
@@ -25,6 +24,8 @@
 
 
 #include"DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include"DirectXGame/engine/SkyBox/SkyBox.h"
+
 #include "DirectXGame/engine/2d/Primitive2D.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 #include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
@@ -33,6 +34,9 @@
 #include "DirectXGame/engine/math/MapChip.h"
 #include "DirectXGame/engine/math/AStarAlgorithm.h"
 #include "DirectXGame/engine/math/Noise.h"
+#include "DirectXGame/engine/Animation/AnimationData.h"
+#include "DirectXGame/engine/base/Load/LoadLevelData.h"
+#include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 
 class TestScene : public BaseScene
@@ -52,6 +56,8 @@ public:
 	void Draw3D() override;
 
 	void Draw2D() override;
+
+	void AppGlobalVariables();
 
 private: // 各初期化
 
@@ -138,21 +144,33 @@ private:
 	/// </summary>
 
 	std::unique_ptr<Object3d> stairObject;
-	Object3d skinningObject;
-	Object3d skinningObject2;
+	std::unique_ptr<Object3d> skinningObject;
+	std::unique_ptr<Object3d> skinningObject2;
+	std::unique_ptr<Object3d> skinningObject3;
 	Object3d tail;
-	Object3d multiy;
+	std::unique_ptr<Object3d> multiy;
 
-	std::unique_ptr<Object3d> playerObject;
-	std::unique_ptr<Object3d> goalObject;
 	std::unique_ptr<Object3d> taleObject;
+	std::unique_ptr<Object3d> primitiveObject3d;
+	std::unique_ptr<Object3d> skyBoxObject;
+	std::unique_ptr<Object3d> skyBoxObject2;
+	std::unique_ptr<Object3d> oceanObject;
+
 
 	std::unique_ptr<Primitive> primitiveObject;
-	std::unique_ptr<Primitive> primitivePlaneObject;
+	
+	std::unique_ptr<SkyBox> skyBox;
+	std::unique_ptr<SkyBox> skyBox2;
 
 
+	std::unique_ptr<Primitive> primiPlane = nullptr;
 	// オーシャンシェーダー
 	std::unique_ptr < Ocean> ocean_ = nullptr;
+
+	std::unique_ptr<Object3d> hitObject_ = nullptr;
+
+	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
+
 
 	/// <summary>
 	/// スプライト
@@ -180,6 +198,16 @@ private:
 	std::unique_ptr<ParticleEmitter> primitvPlaneSmoke_  =nullptr;
 	float clipping_ = 0.25f;
 
+	std::unique_ptr<ParticleEmitter> primitvPa_ = nullptr;
+
+	
+
+	/// <summary>
+	/// 場所効果
+	/// </summary>
+
+	std::unique_ptr<Field::FieldEffect> fieldEffect_ = nullptr;
+
 
 	/// <summary>
 	/// ライト
@@ -199,25 +227,26 @@ private:
 	Vector3 div_ = { 1,1,1 };
 	int maxDepth = { 1 };
 
-	Capsule capsule_ = Capsule{Vector3{},Vector3{},10};
-	Vector3 offset_ = { 0,0,0 };
+
+	Timer timer_;
+
+	Collider* collA;
+	Collider* collB;
+
+	std::unique_ptr<LoadLevelData> loadData_;
+
+	bool g_bool = false;
+	int g_int = 0;
+	uint32_t g_uint = 0;
+	float g_float = 0.0f;
+	Vector2 g_v2 = {};
+	Vector3 g_v3 = {};
+	Vector4 g_v4 = {};
+	std::string g_string = "name";
+	Transform g_transform = {};
 
 
-	Triangle2D tri2d = { Vector2{} ,Vector2{} ,Vector2{}};
-	Vector3 triCen = {0,0,0};
-
-	Sphere2D sphere2d{};
-	WorldTransform world{};
-
-	ObjectInstans object_;
-
-	std::unique_ptr<MapChip> map = std::make_unique<MapChip>(100, 100, 5.0f);
-	std::vector<Vector2> path;  // 最短経路の結果を格納するためのベクター
-	AStarPathfinder pathfinder;
-
-
-	std::unique_ptr<Noise> noise = std::make_unique<Noise>();
-
+	bool g_aaaa = false;
 };
 
 

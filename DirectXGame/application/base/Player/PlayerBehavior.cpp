@@ -36,6 +36,18 @@ void Player::BehaviorRootUpdate()
 			}
 		}
 	}
+
+	if (rangeBombingSpecial_->GetIsSpecial()) {
+		if (workAttack.key.IsSpecialAttack) {
+			if (recastTime >= MaxRecastTime) {
+				behaviorRequest_ = Behavior::kDie;
+				
+			}
+		}
+	}
+
+
+
 }
 
 void Player::BehaviorAttackInitialize()
@@ -77,7 +89,10 @@ void Player::BehaviorDieInitialize()
 	effect_->GetDashEmitter()->SetIsEmit(false);
 	bulletSpecial_->SetPhese(0);
 	bulletSpecial_->SetGauge(0);
-
+	rangeBombingSpecial_->SetPhese(0);
+	rangeBombingSpecial_->SetGauge(0);
+	//objectReticle_.SetIsDraw(true);
+	
 }
 
 void Player::BehaviorDieUpdate()
@@ -88,13 +103,30 @@ void Player::BehaviorDieUpdate()
 
 	ui_->SetIsTextRB(false);
 
-	bulletSpecial_->InAction(followCamera_, bulletManager_, lockedOnEnemies);
+	if (false) {
+		bulletSpecial_->InAction(followCamera_, bulletManager_, lockedOnEnemies);
 
-	if (bulletSpecial_->GetPhese() == 0) {
+		if (bulletSpecial_->GetPhese() == 0) {
+			Move();
+			ui_->SetIsTextRB(true);
+		}
+		if (bulletSpecial_->GetPhese() == 2) {
+			behaviorRequest_ = Behavior::kRoot;
+		}
+	}
+
+	
+	rangeBombingSpecial_->InAction(followCamera_, bulletManager_, rangeBombingPos, reticleRad_);
+
+
+	objectReticle_->SetIsDraw(false);
+	if (rangeBombingSpecial_->GetPhese() == 0) {
 		Move();
 		ui_->SetIsTextRB(true);
+		objectReticle_->SetIsDraw(true);
+		rangeBombingPos = objectReticle_->worldtransform_.worldMat_.GetWorldPosition();
 	}
-	if (bulletSpecial_->GetPhese() == 2) {
+	if (rangeBombingSpecial_->GetPhese() == 2) {
 		behaviorRequest_ = Behavior::kRoot;
 	}
 

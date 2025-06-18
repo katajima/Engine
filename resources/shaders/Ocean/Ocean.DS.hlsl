@@ -11,7 +11,7 @@ struct WaveParameter
     int flag; // 波があるのか
 };
 
-static const int MaxWave = 3;
+static const int MaxWave = 10;
 
 // 複数の波を管理する構造体
 struct WaveParameters
@@ -96,64 +96,65 @@ DS_OUTPUT main(
     for (uint i = 0; i < MaxWave; i++)
     {
         if (!gWaveParameters.waveParameters[i].flag)
-        {
             continue;
-        }
-        
-        WaveParameter wave = gWaveParameters.waveParameters[i];
 
-        // 各波の位相計算
+        WaveParameter wave = gWaveParameters.waveParameters[i];
         float wavePhase = dot(WorldPosition.xy, wave.waveDirection);
-        waveSum += wave.amplitude * (
-            cos(wave.frequency * (wavePhase) - wave.speed * wave.time) +
-            sin(wave.frequency * (wavePhase + WorldPosition.y) - wave.speed * wave.time));
+        waveSum += wave.amplitude * sin(wave.frequency * wavePhase - wave.speed * wave.time);
     }
 
-    // フラクタルノイズを追加
-    float noise = gNoiseParameters.noiseStrength * FractalNoise(WorldPosition.xy * gNoiseParameters.noiseScale + gWaveParameters.waveParameters[0].time);
+// ノイズの追加
+    float2 noiseUV = WorldPosition.xy * gNoiseParameters.noiseScale + float2(0.1, 0.1) * gWaveParameters.waveParameters[0].time;
+    float noise = gNoiseParameters.noiseStrength * FractalNoise(noiseUV);
 
-    // Z軸に波とノイズを適用
+// Z軸に波とノイズを反映
     WorldPosition.z += waveSum + noise;
 
-    // ワールド座標を保存
-    Output.vWorldPos = WorldPosition;
-
-    // スクリーン座標に変換
-    Output.vPosition = mul(float4(WorldPosition, 1.0), gTransformationMatrix.WVP);
-
-    // 法線の計算
-    float dX = 0.0, dY = 0.0, noiseDX = 0.0, noiseDY = 0.0;
+// 法線計算用
+    float dX = 0.0, dY = 0.0;
+    float noiseDX = 0.0, noiseDY = 0.0;
+    float delta = 0.05;
 
     for (uint j = 0; j < MaxWave; j++)
     {
         if (!gWaveParameters.waveParameters[j].flag)
-        {
             continue;
-        }
-        
+
         WaveParameter wave = gWaveParameters.waveParameters[j];
-        
+        float wavePhase = dot(WorldPosition.xy, wave.waveDirection);
+    
         dX += -wave.amplitude * wave.frequency *
-              sin(wave.frequency * (WorldPosition.x + WorldPosition.y) - wave.speed * wave.time);
-        
-        dY += -wave.amplitude * wave.frequency * (
-              sin(wave.frequency * WorldPosition.y - wave.speed * wave.time) +
-              cos(wave.frequency * (WorldPosition.x + WorldPosition.y) - wave.speed * wave.time));
-        
-        // ノイズの影響を追加
-        noiseDX += gNoiseParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0.01, 0)) * gNoiseParameters.noiseScale) - noise);
-        noiseDY += gNoiseParameters.noiseStrength * (FractalNoise((WorldPosition.xy + float2(0, 0.01)) * gNoiseParameters.noiseScale) - noise);
+        cos(wave.frequency * wavePhase - wave.speed * wave.time) * wave.waveDirection.x;
+
+        dY += -wave.amplitude * wave.frequency *
+        cos(wave.frequency * wavePhase - wave.speed * wave.time) * wave.waveDirection.y;
+
+    // ノイズ勾配
+        float2 baseUV = WorldPosition.xy * gNoiseParameters.noiseScale;
+        noiseDX += gNoiseParameters.noiseStrength *
+        (FractalNoise(baseUV + float2(delta, 0)) - FractalNoise(baseUV));
+        noiseDY += gNoiseParameters.noiseStrength *
+        (FractalNoise(baseUV + float2(0, delta)) - FractalNoise(baseUV));
     }
 
     float dZ = 1.0;
 
-    // 正しい接線ベクトル
+// 法線計算（左手系確認要）
     float3 tangent = normalize(float3(1.0, dX + noiseDX, 0.0));
     float3 bitangent = normalize(float3(0.0, dY + noiseDY, dZ));
+   
+    
+    
+    //Output.vNormal = normalize(cross(tangent, bitangent)); // ← 左手系であればこのままでOK
+    
+    Output.vNormal = float3(0.0, 1.0, 0.0); // Y軸が上（水平な水面）
+    
+    
+     // ワールド座標を保存
+    Output.vWorldPos = WorldPosition;
 
-    // 法線を計算（tangent × bitangent）
-    Output.vNormal = normalize(cross(tangent, bitangent));
-
+    // スクリーン座標に変換
+    Output.vPosition = mul(float4(WorldPosition, 1.0), gTransformationMatrix.WVP);
     // テクスチャ座標の計算
     Output.texcoord = WorldPosition.xy;
 

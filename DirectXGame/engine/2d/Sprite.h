@@ -6,6 +6,10 @@
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Material/Material.h"
 
+
+#include "DirectXGame/engine/DirectX/Resource/VertexBufferResource.h"
+#include "DirectXGame/engine/DirectX/Resource/IndexBufferResource.h"
+
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<cstdint>
@@ -26,7 +30,7 @@ public:// メンバ関数
 
 
 	// 初期化
-	void Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, bool isTexLoad = true);
+	void Initialize(SpriteCommon* spriteCommon, std::string textureFilePath, bool isTexLoad = true);
 	// 更新
 	void Update();
 	// アニメーション
@@ -83,6 +87,10 @@ public:// メンバ関数
 	void SetActive(const bool& isActive) { isActive_ = isActive; }
 	bool GetActive() const { return isActive_; }
 
+	// フェードイン
+	void SetIsFadeIn(const bool& isFadeIn) { isFadeIn_ = isFadeIn;};
+	void SetIsFadeOut(const bool& isFadeOut) {isFadeOut_ = isFadeOut;};
+
 
 private:
 
@@ -95,19 +103,15 @@ private:
 	// スプライト用
 	SpriteCommon* spriteCommon_ = nullptr;
 
+	// インデクスデータ
+	IndexBuffer<uint32_t> indexResorce_;
+	std::vector<uint32_t> indices;
 
-	// バッファリソース
-	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
-	Microsoft::WRL::ComPtr < ID3D12Resource> indexResource;
-
-	// バッファリソース内のデータを指すポインタ
-	VertexData* vertexData = nullptr;
-	uint32_t* indexData = nullptr;
-
-	//バッファリソースの使い道を補足するバッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView;
-
+	VertexBuffer<VertexData> vbvResorce_;
+	std::vector<VertexData> vertices;
+	
+	
+	
 
 	// トランスフォーム
 	std::unique_ptr<Transfomation>transfomation = nullptr;
@@ -128,7 +132,7 @@ private:
 	float rotation = 0.0f;														// 回転													
 	bool isActive_ = true;
 private:
-	
+
 	// アニメーション関係
 
 	Vector2 maxAnimeNum_;
@@ -137,6 +141,11 @@ private:
 	Vector2 animeSize_;
 
 	bool isPixelInterpolation_ = true;// 表示させるか
+
+	// フェードインフラグ
+	bool isFadeIn_ = false;
+	// フェードアウトフラグ
+	bool isFadeOut_ = false;
 
 
 private: // テクスチャいじいじ

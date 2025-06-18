@@ -12,18 +12,25 @@
 #include"DirectXGame/engine/3d/Model/ModelManager.h"
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
-
+#include "DirectXGame/engine/Manager/Entity3D/Entity3D.h"
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
+#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 using namespace Microsoft::WRL;
 
 class Entity3DManager;
 class Object3dCommon;
 class SkinningConmmon;
 class ImGuiManager;
-
+class Primitive;
+class SkyBox;
+class SkyBoxCommon;
+class OceanManager;
 class Object3d
 {
 public:
-	enum class ObjectType {
+
+	// 描画するときの映り方を指定する
+	enum class ObjectRasterizerType {
 		UvInterpolation_MODE_SOLID_BACK,
 		NoUvInterpolation_MODE_SOLID_BACK,
 		UvInterpolation_MODE_WIREFRAME_BACK,
@@ -35,35 +42,64 @@ public:
 		NoUvInterpolation_MODE_WIREFRAME_NONE,
 	};
 
+	// オブジェクトのタイプを指定する
+	enum class ObjectType { // オブジェクト種類
+		kNormal,	// モデルを描画するオブジェクト
+		kAnimation,	// モデルをアニメーション描画するオブジェクト
+		kSkinning,	// モデルをスキニング描画するオブジェクト
+		kPrimitive, // プリミティブを描画するオブジェクト
+		kSkyBox,	// スカイボックスを描画するオブジェクト
+		kOcean,		// 波を描画するオブジェクト
+	};
+
+	// 描画する順番
+	enum class ObjectDrawType {
+		kOpaque,		// 不透明
+		kTranslucent01,	// 半透明最前
+		kTranslucent02,	// 半透明中
+		kTranslucent03,	// 半透明最後
+	};
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager);
+	void Initialize(Entity3DManager* entity3DManager, ObjectType objectType = ObjectType::kNormal, ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 	// 更新(アニメーション無し)
 	void Update();
-	// 更新(スキニング有り)
-	void UpdateSkinning();
-	// 更新(アニメーション有り)
-	void UpdateAnimation();
-	
-	// メッシュライン描画
-	void LineMesh();
 
 	// 描画通常
-	void Draw(ObjectType type = {});
-	// 描画スキニング用
-	void DrawSkinning(ObjectType type = {});
-	// 描画ライン
-	void DrawLine();
+	void Draw();
+
+
+	// セッター
+
+	// モデル設定
+	void SetModel(Model* model) { this->model = model; }
 	
-	// setter
-	 void SetModel(Model* model) { this->model = model; }
-	 Model* GetModel() const { return model; }
+	// モデル指定
+	void SetModel(const std::string& filePath);
 	
-	 void SetModel(const std::string& filePath);
-	void SetCamera(Camera* camera) { this->camera = camera; }
+	// カメラ設定
+	void SetCamera(Camera* camera) { this->individualCamera_ = camera; }
+	
+	// 名前設定
 	void SetName(const std::string& name) { this->name = name; }
 
+	// プリミティブ形状
+	void SetPrimitive(Primitive* primitive) { primitive_ = primitive; }
 
+	// スカイボックス
+	void SetSkyBox(SkyBox* skyBox) { skyBox_ = skyBox; }
+
+	// 波セット
+	void SetOcean(Ocean* ocean) { ocean_ = ocean; }
+
+	// 描画順
+	void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
+
+	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera;}
+
+	// ゲッター
+
+	// ワールド座標
 	Vector3 GetWorldPosition() const {
 		// ワールド座標を入れる
 		Vector3 worldPos;
@@ -72,6 +108,8 @@ public:
 		worldPos.z = worldtransform_.worldMat_.m[3][2];
 		return worldPos;
 	};
+
+	// １フレーム前のワールド座標
 	Vector3 GetPreWorldPosition() const {
 		// ワールド座標を入れる
 		Vector3 worldPos;
@@ -81,43 +119,129 @@ public:
 		return worldPos;
 	};
 
+	// スクリーン座標
 	Vector2 GetScreenPosition();
-	
+
+	// オブジェクトがカメラ内に映っているか
 	bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
 
-	Mesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
-	Material* GetMaterial(int index) { return model->modelData.material[index].get(); }
+	// メッシュ取得
+	ModelMesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
+
+	// マテリアル取得
+	Material* GetMaterial(int index) { return model->modelData.mesh[index]->material.get(); }
+	
+	// モデル取得
+	Model* GetModel() const { return model; }
+
+	// プリミティブ取得
+	Primitive* GetPrimitive() { return primitive_; }
+	// 波取得
+	Ocean* GetOcean() { return ocean_; }
+
+	std::string GetObjectTypeName() { return objectTypeName; }
+
+	ObjectType GetObjectType() { return objectType_; }
+
+	ObjectDrawType GetObjectDrawType() { return objectDrawType_; }
+
+
+	void DebugImguiModel();
+
+	void DebugImguiSkin();
+
+	void IsDelete() { isDelete = true; }
+
+	bool GetIsDelete() { return isDelete; }
+
+	void SetIsDraw(bool is) { isDraw = is; }
+
+	float GetAlpha();
+
+	bool GetIsSkin() { return isSkin_; }
 
 private:
 	// 各コマンドリスト
 	void DrawSetting();
 
+	// スキニング設定
 	void DrawSettingSkin();
+
+	// 波
+	void DrawSettingOcean();
+
 	//
-	void ObjectTypeDiscrimination(ObjectType type);
-	void ObjectSkinTypeDiscrimination(ObjectType type);
+	void ObjectTypeDiscrimination(ObjectRasterizerType type);
+	void ObjectSkinTypeDiscrimination(ObjectRasterizerType type);
+
+
+
 
 
 private:
 	// カメラ
-	Camera* camera = nullptr;
+	Camera* defaltCamera = nullptr;
+
+	Camera* individualCamera_ = nullptr;
+
 	// トランスフォームデータ
-	std::unique_ptr<Transfomation> transfomation = nullptr;
-	//
-	// 
-	bool flag = true;
+	std::unique_ptr<Transfomation> transformation = nullptr;
 	
+	// 何かしらの見た目があるか
+	bool isSkin_ = false;
+
+	// 個人的にカメラを使用するか
+	bool isIndividualCamera_ = false;
+
+	// アニメーションするかのフラグ
+	bool flag = true;
+
+	// ImGuiを表示するか
+	bool imguiFlag_ = false;
+
+	// 削除フラグ
+	bool isDelete = false;
+
+	// 描画するかのフラグ
+	bool isDraw = true;
+
+	// オブジェクトのタイプ
+	ObjectType objectType_ = ObjectType::kNormal;
+
+	// オブジェクトの描画順
+	ObjectDrawType objectDrawType_ = ObjectDrawType::kOpaque;
+
+	// オブジェクトの映り方タイプ
+	ObjectRasterizerType rasterizerType_ = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK;
+
+public:
+	// モデル
+	Model* model = nullptr;
+	// プリミティブ
+	Primitive* primitive_ = nullptr;
+	// スカイボックス
+	SkyBox* skyBox_ = nullptr;
+	// 波
+	Ocean* ocean_ = nullptr;
+
+	std::unique_ptr<Entity3D> entity3D_;
+
+	// 位置
+	WorldTransform worldtransform_;
+
+	// オブジェクト名前
+	std::string name = "";
+
+	// オブジェクトタイプ名前
+	std::string objectTypeName = "";
+
+private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;
 	ImGuiManager* imGuiManager_;
 	Entity3DManager* entity3DManager_;
-public:
-	// モデル
-	Model* model = nullptr;
-	
-	WorldTransform worldtransform_;
-
-	std::string name = "";
+	SkyBoxCommon* skyBoxCommon_;
+	OceanManager* oceanManager_;
 };
 
 

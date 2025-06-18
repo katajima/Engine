@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/Manager/RTV/RtvManeger.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 
@@ -24,8 +24,6 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 	CreateResourcePixel();
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成
-
-	//resource_->SetName(L"RenderTexture");
 
 	name_ = name;
 
@@ -84,7 +82,7 @@ void RenderTexture::Update()
 	
 }
 
-void RenderTexture::Draw(RenderTexture* renderTexture)
+void RenderTexture::Draw()
 {
 	switch (type_)
 	{
@@ -122,7 +120,7 @@ void RenderTexture::Draw(RenderTexture* renderTexture)
 		renderingCommon_->DrawBloomRender(srvIndex_);
 		break;
 	case RenderTexture::PostEffectType::kBloomCombin:
-		renderingCommon_->DrawBloomCombinRender(renderTexture->srvIndex_,srvIndex_);
+		renderingCommon_->DrawBloomCombinRender(otherSrvIndex_,srvIndex_);
 
 		break;
 	default:

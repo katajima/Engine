@@ -1,6 +1,6 @@
 #include "ShapeParameter.h"
 
-void ShapeParameter::ShapePlane::Create(Mesh* mesh)
+void ShapeParameter::ShapePlane::Create(ModelMesh* mesh)
 {
     mesh->Clear();
 
@@ -20,7 +20,7 @@ void ShapeParameter::ShapePlane::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeCross::Create(Mesh* mesh)
+void ShapeParameter::ShapeCross::Create(ModelMesh* mesh)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
@@ -67,7 +67,7 @@ void ShapeParameter::ShapeCross::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeTriangle::Create(Mesh* mesh)
+void ShapeParameter::ShapeTriangle::Create(ModelMesh* mesh)
 {
 	mesh->Clear();
 
@@ -83,7 +83,7 @@ void ShapeParameter::ShapeTriangle::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Circle::Create(Mesh* mesh)
+void ShapeParameter::Circle::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -122,7 +122,7 @@ void ShapeParameter::Circle::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Star::Create(Mesh* mesh)
+void ShapeParameter::Star::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -130,14 +130,15 @@ void ShapeParameter::Star::Create(Mesh* mesh)
 	if (segments < 3) {
 		throw std::invalid_argument("Segments must be >= 3.");
 	}
+
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
-	
+
 	// 中心の頂点を追加
 	mesh->vertices.push_back({
-		.position = {0.0f, 0.0f, 0.0f, 1.0f}, // 中心の頂点座標
-		.texcoord = {0.5f, 0.5f},             // 中心のUV座標
-		.normal = {0.0f, 0.0f, -1.0f}         // 法線を逆方向に
+		.position = {0.0f, 0.0f, 0.0f, 1.0f},
+		.texcoord = {0.5f, 0.5f},
+		.normal = {0.0f, 0.0f, -1.0f}
 		});
 
 	// 頂点生成
@@ -151,24 +152,24 @@ void ShapeParameter::Star::Create(Mesh* mesh)
 		float y = radius * sin(theta);
 
 		mesh->vertices.push_back({
-			.position = {x, y, 0.0f, 1.0f}, // 頂点座標
-			.texcoord = {x / (2.0f * outerRadius) + 0.5f, -y / (2.0f * outerRadius) + 0.5f}, // UV座標
-			.normal = {0.0f, 0.0f, -1.0f} // 法線を逆方向に
+			.position = {x, y, 0.0f, 1.0f},
+			.texcoord = {x / (2.0f * outerRadius) + 0.5f, -y / (2.0f * outerRadius) + 0.5f},
+			.normal = {0.0f, 0.0f, -1.0f}
 			});
 	}
 
-	// インデックス生成
+	// インデックス生成（面の向きを反転）
 	for (int i = 1; i <= segments * 2; ++i) {
-		mesh->indices.push_back(0); // 中心点
-		mesh->indices.push_back((i % (segments * 2)) + 1); // 次の頂点（ループ処理）
-		mesh->indices.push_back(i);
+		mesh->indices.push_back(0);                                   // 中心点
+		mesh->indices.push_back(i);                                   // 現在の頂点
+		mesh->indices.push_back((i % (segments * 2)) + 1);            // 次の頂点（ループ処理）
 	}
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Crescent::Create(Mesh* mesh)
+void ShapeParameter::Crescent::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -233,7 +234,7 @@ void ShapeParameter::Crescent::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Ring::Create(Mesh* mesh)
+void ShapeParameter::Ring::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -285,7 +286,7 @@ void ShapeParameter::Ring::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeSphere::Create(Mesh* mesh)
+void ShapeParameter::ShapeSphere::Create(ModelMesh* mesh)
 {
 	if (longitudeSegments < 3) {
 		longitudeSegments = 3;
@@ -354,7 +355,7 @@ void ShapeParameter::ShapeSphere::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeArrow::Create(Mesh* mesh)
+void ShapeParameter::ShapeArrow::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -447,7 +448,7 @@ void ShapeParameter::ShapeArrow::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::ShapeCube::Create(Mesh* mesh)
+void ShapeParameter::ShapeCube::Create(ModelMesh* mesh)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
@@ -515,7 +516,7 @@ void ShapeParameter::ShapeCube::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Cylinder::Create(Mesh* mesh)
+void ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -598,7 +599,7 @@ void ShapeParameter::Cylinder::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Tube::Create(Mesh* mesh)
+void ShapeParameter::Tube::Create(ModelMesh* mesh)
 {
 	if (segments < 3) {
 		segments = 3;
@@ -700,7 +701,7 @@ void ShapeParameter::Tube::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Pyramid::Create(Mesh* mesh)
+void ShapeParameter::Pyramid::Create(ModelMesh* mesh)
 {
 
 	if (segments < 3) {
@@ -756,7 +757,7 @@ void ShapeParameter::Pyramid::Create(Mesh* mesh)
 	mesh->UpdateIndexBuffer();
 }
 
-void ShapeParameter::Torus::Create(Mesh* mesh)
+void ShapeParameter::Torus::Create(ModelMesh* mesh)
 {
 	if (tubeSegments < 3) {
 		tubeSegments = 3;

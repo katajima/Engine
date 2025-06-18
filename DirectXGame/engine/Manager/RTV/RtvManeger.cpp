@@ -3,7 +3,7 @@
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 const uint32_t RtvManager::kMaxRTVCount = 16;
 
@@ -96,5 +96,10 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RtvManager::CreateRenderTextureResource(D
 	assert(SUCCEEDED(hr));
 
 	return resource;
+}
+
+void RtvManager::Finalize()
+{
+	descriptorHeap.Reset();
 }
 

@@ -23,7 +23,7 @@ public:
 
 	};
 
-
+	Matrix4x4 nullChek;
 public:
 	// デフォルトコンストラクタ
 	BaseEnemy();

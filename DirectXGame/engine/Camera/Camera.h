@@ -30,6 +30,8 @@ public: // メンバ関数
 	void UpdateMatrix();
 	void UpdateMatrix(const Vector3& targetPosition);
 
+	void UpdateImGui();
+
 	void TransferMatrix();
 
 	void LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector);

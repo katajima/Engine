@@ -7,7 +7,7 @@ void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& te
 {
 	effectManager_ = effectManager;
 
-	mesh = std::make_unique<Mesh>();
+	mesh = std::make_unique<ModelMesh>();
 
 	mesh->vertices.push_back({ 0,0,0 });
 	mesh->indices.push_back(1);
@@ -170,9 +170,6 @@ void TrailEffect::Update3(bool& flag,  Matrix4x4* strM,  Matrix4x4* endM,  Matri
 	Vector3 end = endM->GetWorldPosition() + Vector3{ 0,1,0 };
 	Vector3 strPre = strPreM->GetWorldPosition();
 	Vector3 endPre = endPreM->GetWorldPosition() + Vector3{0,1,0};
-
-
-
 
 	Vector3 leftTop = { str.x , str.y , str.z };
 	Vector3 leftBottom = { end.x , end.y , end.z };

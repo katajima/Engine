@@ -3,6 +3,7 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
+#include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
 #include<d3d12.h>
 #include<dxgi1_6.h>
@@ -13,6 +14,9 @@
 #include<format>
 
 
+class Primitive;
+class SkyBox;
+class Ocean;
 class Transfomation
 {
 public:
@@ -20,6 +24,12 @@ public:
 	void Initialize(DirectXCommon* dxCommon);
 	// 更新
 	void Update(Model* model, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	// 更新
+	void Update(Primitive* primitive, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	// 更新
+	void Update(SkyBox* skyBox, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	// 更新
+	void Update(Ocean* ocean, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
 	// 更新
 	void Update(Camera* camera,Matrix4x4& mat);
 	// 更新
@@ -30,20 +40,17 @@ public:
 	// データ
 	void GetCommandList(int index);
 
-	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister);
-
 	struct TransfomationMatrix
 	{
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 		Matrix4x4 worldInverseTranspose;
 	};
-	TransfomationMatrix* data_;
-
+	
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 
-	Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
+	ConstantBuffer<TransfomationMatrix> cbResource_;
 
 };
 

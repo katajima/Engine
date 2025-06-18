@@ -8,7 +8,7 @@
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include "DirectXGame/engine/Mesh/Mesh.h"
+#include "DirectXGame/engine/Mesh/LineMesh.h"
 #include "DirectXGame/engine/struct/Light.h"
 #include "DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
@@ -32,17 +32,21 @@ public:
 
 	void AddLightLine(SpotLightData data);
 
-	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat);
-	void AddLineMesh(Mesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
+	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat);
+	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
 	
-	void AddLineAABB(AABB aabb, Vector3 pos);
+	void AddLineAABB(AABB aabb, Vector3 pos, Vector4 color = {1,1,1,1});
+
+	void AddLineOBB(const OBB& obb, const Vector4& color = {1,1,1,1});
+
+	void AddLineSphere(Sphere sphere,Vector4 color = { 1,1,1,1 },int segmentW = 5,int segmentH = 5);
 
 	void AddLineCorner(CornerSegment corner,WorldTransform pos);
 
-	void AddLineCapsule(Capsule capsule);
+	void AddLineCapsule(Capsule capsule, const Vector4& color = {1,1,1,1});
 
-	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos);
-
+	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos, Vector4 color = { 1,1,1,1 });
+	void AddSpline(std::vector<Vector3> controlPoints, Vector3 pos, Vector4 color = { 1,1,1,1 });
 	
 	void AddLineTriangle(Triangle triangle, WorldTransform pos);
 
@@ -108,7 +112,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
 
 	DirectXCommon* dxCommon_;
-	std::unique_ptr<Mesh> mesh_;
+	std::unique_ptr<LineMesh> mesh_;
 	//std::unique_ptr<Mate>
 	const uint32_t kNumMaxInstance = 300000;
 	

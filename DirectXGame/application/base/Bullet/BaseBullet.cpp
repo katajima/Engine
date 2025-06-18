@@ -15,6 +15,11 @@ BaseBullet::BaseBullet()
 	parameter_ = {};
 }
 
+BaseBullet::~BaseBullet()
+{
+	object_->IsDelete();
+}
+
 float BaseBullet::GetTimer() const
 {
 	return  MyGame::GameTime();
@@ -89,14 +94,16 @@ void BaseBullet::OnCollision(Collider* other)
 
 		contactRecord_.AddHistory(serialNumber);
 
-		if (enemy->GetAlive()) {
+		if (enemy->GetAlive() && GetAlive()) {
 
 			enemy->AddDamage(parameter_.damege);
 
 			enemy->SetHit();
 
 			enemy->Emit();
-
+			
+			enemy->hitStop(0.1f);
+			
 			// 敵
 			EnemyToColl();
 		}
@@ -117,7 +124,7 @@ void BaseBullet::OnCollision(Collider* other)
 
 		contactRecord_.AddHistory(serialNumber);
 
-		if (player->GetAlive()) {
+		if (player->GetAlive() && GetAlive()) {
 
 			player->AddDamege(parameter_.damege);
 

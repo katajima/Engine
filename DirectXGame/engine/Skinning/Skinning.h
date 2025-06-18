@@ -27,7 +27,7 @@ public:
 
 	void DrawCommonSetting(PSOType type);
 
-	void DrawCompureSetting();
+	void DrawComputeSetting();
 
 
 
@@ -61,15 +61,6 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature[2];
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
-
-
-	//ルートシグネチャコンピュート
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> computeRootSignature;
-	
-	// コンピュートパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> computePipelineState;
-	
-
 
 };
 

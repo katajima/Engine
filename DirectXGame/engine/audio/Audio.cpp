@@ -1,6 +1,6 @@
 #include"Audio.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include "DirectXGame/engine/base/WinApp.h"
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 void Audio::Initialize()
 {

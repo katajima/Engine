@@ -8,7 +8,7 @@ void FollowCamera::Initialize(CameraCommon* cameraCommon)
 	input_ = cameraCommon->GetInput();
 
 	camera_.Initialize(cameraCommon);
-	camera_.farClip_ = 5000.0f;
+	camera_.farClip_ = 15000.0f;
 	camera_.transform_.rotate.x = DegreesToRadians(90);
 	camera_.transform_.rotate.x = DegreesToRadians(20);
 
@@ -16,61 +16,64 @@ void FollowCamera::Initialize(CameraCommon* cameraCommon)
 
 void FollowCamera::Update()
 {
-	//追従対象がいれば
-	if (target_) {
-		
-		const float kRotateSpeed = 0.000003f * 10000;
+    if (target_) {
 
-		if (input_->IsControllerConnected())
-		{
-			camera_.transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
-			camera_.transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
+        const float kRotateSpeed = 0.03f;
 
-			if (camera_.transform_.rotate.x >= DegreesToRadians(60)) {
-				camera_.transform_.rotate.x = DegreesToRadians(60);
-			}
-			
-			if (camera_.transform_.rotate.x <= DegreesToRadians(0)) {
-				camera_.transform_.rotate.x = DegreesToRadians(0);
-			}
+        if (input_->IsControllerConnected()) {
+            camera_.transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
+            camera_.transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
 
+            camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(-15.0f), DegreesToRadians(60.0f));
+        }
+        else {
+            if (input_->IsPushKey(DIK_LEFT)) {
+                camera_.transform_.rotate.y -= 0.01f;
+            }
+            if (input_->IsPushKey(DIK_RIGHT)) {
+                camera_.transform_.rotate.y += 0.01f;
+            }
 
-		}
-		else {
-			if (input_->IsPushKey(DIK_LEFT)) {
-				camera_.transform_.rotate.y -= 0.01f;
-			}
-			if (input_->IsPushKey(DIK_RIGHT)) {
-				camera_.transform_.rotate.y += 0.01f;
-			}
+            camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, DegreesToRadians(0.0f), DegreesToRadians(60.0f));
+        }
 
-			if (camera_.transform_.rotate.x >= DegreesToRadians(60)) {
-				camera_.transform_.rotate.x = DegreesToRadians(60);
-			}
+        // ベースのオフセット（固定距離）
+        Vector3 baseOffset = { 0.0f, 5.0f, -50.0f };
 
-			if (camera_.transform_.rotate.x <= DegreesToRadians(0)) {
-				camera_.transform_.rotate.x = DegreesToRadians(0);
-			}
-		}
+        // 回転適用
+        Matrix4x4 rotY = MakeRotateYMatrix(camera_.transform_.rotate.y);
+        Matrix4x4 rotX = MakeRotateXMatrix(camera_.transform_.rotate.x);
+        Matrix4x4 rotateMatrix = rotX * rotY;
+        Vector3 offset = TransformNormal(baseOffset, rotateMatrix);
 
+        Vector3 targetPos = target_->worldtransform_.translate_;
+        Vector3 desiredCameraPos = Add(targetPos, offset);
 
-		// 追従対象からカメラまでのオフセット
-		Vector3 offset = { 0.0f, 5.0f, -50.0f };
+        // 地面以下にカメラが沈んでいる場合のみ、Zを近づけて補正
+        if (desiredCameraPos.y < 0.0f) {
+            float depth = -desiredCameraPos.y; // どれだけ沈んでいるか
+            float maxZOffset = 30.0f; // 最大どれだけZを近づけるか（調整可）
+            float zAdjust = std::clamp(depth * 2.0f, 0.0f, maxZOffset); // 線形補間
 
-		Matrix4x4 matrix = MakeRotateYMatrix(camera_.transform_.rotate.y);
-		Matrix4x4 matrix2 = MakeRotateXMatrix(camera_.transform_.rotate.x);
+            // カメラ方向を正規化
+            Vector3 direction = Normalize(Subtract(targetPos, desiredCameraPos));
+            Vector3 zOffset = Multiply(direction, zAdjust);
 
-		// オフセットをカメラの回転に合わせて回転させる
-		offset = TransformNormal(offset, matrix2 * matrix);
+            // 補正を加える
+            desiredCameraPos = Add(desiredCameraPos, zOffset);
 
-		// 座標をコピーしてオフセット分ずらす
-		camera_.transform_.translate = Add(target_->worldtransform_.translate_, offset);
-	}
+            // 地面に出るようにYを補正
+            desiredCameraPos.y = 0.0f;
+        }
 
-	if (Camera::isShake_) {
-		camera_.SetShake(0.2f, { 0.1f,0.3f,0.1f });
-	}
+        camera_.transform_.translate = desiredCameraPos;
+    }
 
-	//ビュー行列の更新
-	camera_.UpdateMatrix();
+    if (Camera::isShake_) {
+        camera_.SetShake(0.2f, { 0.1f, 0.3f, 0.1f });
+    }
+
+    camera_.UpdateMatrix();
 }
+
+

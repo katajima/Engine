@@ -4,9 +4,6 @@
 #include <unordered_map>
 
 class Command;
-class SwapChain;
-class RenderTexture;
-class DepthStencil;
 class Barrier
 {
 public:
@@ -14,19 +11,21 @@ public:
 	~Barrier() = default;
 
 	// 
-	void Initialize(Command* command, SwapChain* swapChain, RenderTexture* renderTexture, DepthStencil* depthStencil);
+	void Initialize(Command* command);
 
 public:
 
 	void TransitionResource(ID3D12Resource* res,D3D12_RESOURCE_STATES before,D3D12_RESOURCE_STATES after);
 
+	void TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newState);
+
+	void UavDependence(ID3D12Resource* res);
+
+	void RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state);
 private:
 
 	Command* command_;
-	SwapChain* swapChain_;
-	RenderTexture* renderTexture_;
-	DepthStencil* depthStencil_;
 private:
-
+	std::unordered_map<ID3D12Resource*, D3D12_RESOURCE_STATES> resourceStates_;
 };
 
