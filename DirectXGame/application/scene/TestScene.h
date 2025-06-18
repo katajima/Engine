@@ -6,7 +6,6 @@
 #include"DirectXGame/engine/Camera/DebugCamera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
-#include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/audio/Audio.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
@@ -37,6 +36,8 @@
 #include "DirectXGame/engine/math/Noise.h"
 #include "DirectXGame/engine/Animation/AnimationData.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
+#include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
+
 
 class TestScene : public BaseScene
 {
@@ -55,6 +56,8 @@ public:
 	void Draw3D() override;
 
 	void Draw2D() override;
+
+	void AppGlobalVariables();
 
 private: // 各初期化
 
@@ -231,6 +234,19 @@ private:
 	Collider* collB;
 
 	std::unique_ptr<LoadLevelData> loadData_;
+
+	bool g_bool = false;
+	int g_int = 0;
+	uint32_t g_uint = 0;
+	float g_float = 0.0f;
+	Vector2 g_v2 = {};
+	Vector3 g_v3 = {};
+	Vector4 g_v4 = {};
+	std::string g_string = "name";
+	Transform g_transform = {};
+
+
+	bool g_aaaa = false;
 };
 
 

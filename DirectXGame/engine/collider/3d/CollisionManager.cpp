@@ -119,6 +119,6 @@ void CollisionManager::ApplyGlobalVariables()
 	const char* gropName = "CollisionManager";
 	// グループを追加する
 	globalVariables_->CreateGroup(gropName);
-	isCollider = globalVariables_->GetBoolValue(gropName, "isCollider");
+	isCollider = globalVariables_->GetValue<bool>(gropName, "isCollider");
 
 }

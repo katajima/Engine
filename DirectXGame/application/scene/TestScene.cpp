@@ -37,6 +37,23 @@ void TestScene::Initialize()
 
 	loadData_ = std::make_unique<LoadLevelData>();
 	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
+
+	GlobalVariables* globalVariables = GetGlobalVariables();
+	globalVariables->CreateGroup("ddd");
+	globalVariables->AddItem("ddd","g_bool",g_bool);
+	globalVariables->AddItem("ddd","g_int",g_int);
+	globalVariables->AddItem("ddd","g_uint", g_uint);
+	globalVariables->AddItem("ddd","g_float",g_float);
+	globalVariables->AddItem("ddd","g_v2",g_v2);
+	globalVariables->AddItem("ddd","g_v3",g_v3);
+	globalVariables->AddItem("ddd","g_v4",g_v4);
+	globalVariables->AddItem("ddd","g_string", g_string);
+	globalVariables->AddItem("ddd","g_transform", g_transform);
+	
+	
+	globalVariables->AddItem("aaa","g_aaaa", g_aaaa);
+
+	AppGlobalVariables();
 }
 
 void TestScene::Finalize()
@@ -147,6 +164,7 @@ void TestScene::Update()
 	}
 	
 	camera->UpdateMatrix();
+
 }
 
 void TestScene::Draw3D()
@@ -260,6 +278,23 @@ void TestScene::Draw2D()
 		break;
 	}
 
+
+}
+
+void TestScene::AppGlobalVariables()
+{
+	GlobalVariables* globalVariables = GetGlobalVariables();
+	g_bool = globalVariables->GetValue<bool>("ddd", "g_bool");
+	g_int = globalVariables->GetValue<int>("ddd", "g_int");
+	g_uint = globalVariables->GetValue<uint32_t>("ddd", "g_uint");
+	g_float = globalVariables->GetValue<float>("ddd", "g_float");
+	g_v2 = globalVariables->GetValue<Vector2>("ddd", "g_v2");
+	g_v3 = globalVariables->GetValue<Vector3>("ddd", "g_v3");
+	g_v4 = globalVariables->GetValue<Vector4>("ddd", "g_v4");
+	g_string = globalVariables->GetValue<std::string>("ddd", "g_string");
+	g_transform = globalVariables->GetValue<Transform>("ddd", "g_transform");
+	
+	g_aaaa = globalVariables->GetValue<bool>("aaa", "g_aaaa");
 
 }
 

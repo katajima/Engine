@@ -72,8 +72,8 @@ void MyGame::Update()
 		ImGui::End();
 		return;
 	}
-	if (!ImGui::BeginMenuBar())
-		return;
+	//if (!ImGui::BeginMenuBar())
+	//	return;
 
 	if (ImGui::BeginMenu("Time")) {
 
@@ -82,7 +82,7 @@ void MyGame::Update()
 
 		ImGui::EndMenu();
 	}
-	ImGui::EndMenuBar();
+	//ImGui::EndMenuBar();
 	ImGui::End();
 
 #endif // _DEBUG
