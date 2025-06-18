@@ -39,3 +39,26 @@ void CollFanction::CapsuleAndCapsule(Collider* colliderA, Collider* colliderB)
 		colliderB->OnCollision(colliderA);
 	}
 }
+
+void CollFanction::AABBAndAABB(Collider* colliderA, Collider* colliderB)
+{
+	// コライダーAの座標を取得
+	Vector3 posA = colliderA->GetCenterPosition();
+	// コライダーBの座標を取得
+	Vector3 posB = colliderB->GetCenterPosition();
+
+	AABB aabbA = colliderA->GetAABB();
+	aabbA.min_ += posA;
+	aabbA.max_ += posA;
+
+	AABB aabbB = colliderB->GetAABB();
+	aabbB.min_ += posB;
+	aabbB.max_ += posB;
+
+	if (IsCollision(aabbA, aabbB)) {
+		// コライダーAの衝突判時コールバックを呼び出す
+		colliderA->OnCollision(colliderB);
+		// コライダーBの衝突判時コールバックを呼び出す
+		colliderB->OnCollision(colliderA);
+	}
+}

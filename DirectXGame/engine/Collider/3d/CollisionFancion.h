@@ -11,6 +11,9 @@ namespace CollFanction
 	// カプセルとカプセル
 	void CapsuleAndCapsule(Collider* colliderA, Collider* colliderB);
 
+	// AABBとAABB 
+	void AABBAndAABB(Collider* colliderA, Collider* colliderB);
+
 }
 
 
