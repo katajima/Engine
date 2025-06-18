@@ -2,8 +2,7 @@
 #include "Windows.h"
 #include "imgui.h"
 #include <limits>
-#undef max
-#undef min
+
 
 
 /// -----
@@ -37,6 +36,36 @@ bool GlobalVariables::HasKey(const std::string& groupName, const std::string& ke
 	}
 	const auto& group = groupIt->second;
 	return group.find(key) != group.end();
+}
+
+/// <summary>
+/// グループ名前取得
+/// </summary>
+std::vector<std::string> GlobalVariables::GetGroupNames() const
+{
+	std::vector<std::string> groupNames;
+	groupNames.reserve(datas_.size());
+	for (const auto& [groupName, _] : datas_) {
+		groupNames.push_back(groupName);
+	}
+	return groupNames;
+}
+
+/// <summary>
+/// キー名前取得
+/// </summary>
+std::vector<std::string> GlobalVariables::GetKeys(const std::string& groupName) const
+{
+	std::vector<std::string> keys;
+	auto it = datas_.find(groupName);
+	if (it == datas_.end()) return keys;
+
+	const auto& group = it->second;
+	keys.reserve(group.size());
+	for (const auto& [key, _] : group) {
+		keys.push_back(key);
+	}
+	return keys;
 }
 
 /// <summary>
@@ -92,6 +121,55 @@ void GlobalVariables::RemoveGroup(const std::string& groupName)
 {
 	datas_.erase(groupName);
 	groupKeys_.erase(groupName);
+}
+
+/// <summary>
+/// 複製
+/// </summary>
+bool GlobalVariables::DuplicateItem(const std::string& srcGroupName, const std::string& srcKey, const std::string& dstGroupName, const std::string& dstKey)
+{
+	// コピー元グループの存在チェック
+	auto itSrcGroup = datas_.find(srcGroupName);
+	if (itSrcGroup == datas_.end()) return false;
+
+	auto& srcGroup = itSrcGroup->second;
+	// コピー元キーの存在チェック
+	auto itSrcItem = srcGroup.find(srcKey);
+	if (itSrcItem == srcGroup.end()) return false;
+
+	// コピー先グループを作成または取得
+	auto itDstGroup = datas_.find(dstGroupName);
+	if (itDstGroup == datas_.end()) {
+		CreateGroup(dstGroupName);
+		itDstGroup = datas_.find(dstGroupName);
+		if (itDstGroup == datas_.end()) return false; // 失敗した場合
+	}
+	auto& dstGroup = itDstGroup->second;
+
+	// コピー先キーが既にある場合は上書きしない
+	if (dstGroup.find(dstKey) != dstGroup.end()) return false;
+
+	// 複製
+	dstGroup[dstKey] = itSrcItem->second;
+
+	// groupKeys_の管理も忘れずに
+	auto& dstKeys = groupKeys_[dstGroupName];
+	dstKeys.push_back(dstKey);
+
+	return true;
+}
+
+/// <summary>
+/// 複製したときの重複対処
+/// </summary>
+std::string GlobalVariables::MakeUniqueKey(const std::string& baseKey, const GvData::Group& group)
+{
+	std::string newKey = baseKey;
+	int count = 1;
+	while (group.find(newKey) != group.end()) {
+		newKey = baseKey + "("+ std::to_string(count++)+ ")";
+	}
+	return newKey;
 }
 
 
@@ -266,81 +344,112 @@ void GlobalVariables::Update() {
 #ifdef _DEBUG
 	ImGui::Begin("GlobalVariables", nullptr, ImGuiWindowFlags_MenuBar);
 	ImGui::BeginMenuBar();
-	for (std::map<std::string, GvData::Group>::iterator itGroup_ = datas_.begin(); itGroup_ != datas_.end(); ++itGroup_) {
-		// グループ名を取得
-		const std::string& groupName = itGroup_->first;
-		// グループの参照を取得
-		GvData::Group& group = itGroup_->second;
 
+	static std::pair<std::string, std::string> pendingDeleteItem;
+	static bool confirmDelete = false;
+
+	std::vector<std::string> groupsToRemove;
+	std::vector<std::pair<std::string, std::string>> itemsToRemove;
+
+	for (auto& [groupName, group] : datas_) {
 		if (!ImGui::BeginMenu(groupName.c_str()))
 			continue;
-		for (std::map<std::string, GvData::Item>::iterator itItem = group.begin(); itItem != group.end(); ++itItem) {
-			// 項目名を取得
-			const std::string& itemName = itItem->first;
-			// 項目の参照を取得
-			GvData::Item& item = itItem->second;
 
+		for (auto& [itemName, item] : group) {
+			ImGui::PushID(itemName.c_str());
+
+			// 値表示・編集
 			if (std::holds_alternative<int32_t>(item)) {
-				int32_t* ptr = std::get_if<int32_t>(&item);
-				ImGui::DragInt(itemName.c_str(), ptr);
+				ImGui::DragInt(itemName.c_str(), std::get_if<int32_t>(&item));
 			}
 			else if (std::holds_alternative<uint32_t>(item)) {
 				uint32_t& value = std::get<uint32_t>(item);
 				int32_t tmp = static_cast<int32_t>(value);
 				if (ImGui::DragInt(itemName.c_str(), &tmp)) {
-					if (tmp < 0) tmp = 0; // 負の値は禁止
+					if (tmp < 0) tmp = 0;
 					value = static_cast<uint32_t>(tmp);
 				}
 			}
 			else if (std::holds_alternative<float>(item)) {
-				float* ptr = std::get_if<float>(&item);
-				ImGui::DragFloat(itemName.c_str(), ptr, 0.01f);
+				ImGui::DragFloat(itemName.c_str(), std::get_if<float>(&item), 0.01f);
 			}
 			else if (std::holds_alternative<Vector2>(item)) {
-				Vector2* ptr = std::get_if<Vector2>(&item);
-				ImGui::DragFloat2(itemName.c_str(), reinterpret_cast<float*>(ptr), 0.1f);
+				ImGui::DragFloat2(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector2>(&item)), 0.1f);
 			}
 			else if (std::holds_alternative<Vector3>(item)) {
-				Vector3* ptr = std::get_if<Vector3>(&item);
-				ImGui::DragFloat3(itemName.c_str(), reinterpret_cast<float*>(ptr), 0.1f);
+				ImGui::DragFloat3(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector3>(&item)), 0.1f);
 			}
 			else if (std::holds_alternative<Vector4>(item)) {
-				Vector4* ptr = std::get_if<Vector4>(&item);
-				ImGui::DragFloat4(itemName.c_str(), reinterpret_cast<float*>(ptr), 0.1f);
+				ImGui::DragFloat4(itemName.c_str(), reinterpret_cast<float*>(std::get_if<Vector4>(&item)), 0.1f);
 			}
 			else if (std::holds_alternative<bool>(item)) {
-				bool* ptr = std::get_if<bool>(&item);
-				ImGui::Checkbox(itemName.c_str(), ptr);
+				ImGui::Checkbox(itemName.c_str(), std::get_if<bool>(&item));
 			}
 			else if (std::holds_alternative<std::string>(item)) {
 				std::string* ptr = std::get_if<std::string>(&item);
-				if (ptr) {
-					// ImGuiのInputTextはchar配列が必要なので、一時バッファを用意
-					char buffer[256];
-					strncpy_s(buffer, ptr->c_str(), sizeof(buffer));
-					buffer[sizeof(buffer) - 1] = '\0';
-
-					if (ImGui::InputText(itemName.c_str(), buffer, sizeof(buffer))) {
-						*ptr = std::string(buffer);
-					}
+				char buffer[256];
+				strncpy_s(buffer, ptr->c_str(), sizeof(buffer));
+				buffer[sizeof(buffer) - 1] = '\0';
+				if (ImGui::InputText(itemName.c_str(), buffer, sizeof(buffer))) {
+					*ptr = std::string(buffer);
 				}
 			}
 			else if (std::holds_alternative<Transform>(item)) {
 				Transform* ptr = std::get_if<Transform>(&item);
-				if (ptr) {
-					ImGui::DragFloat3(("Scale##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->scale), 0.1f);
-					ImGui::DragFloat3(("Rotate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->rotate), 0.1f);
-					ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
+				ImGui::DragFloat3(("Scale##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->scale), 0.1f);
+				ImGui::DragFloat3(("Rotate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->rotate), 0.1f);
+				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
+			}
+
+			// 複製ボタン
+			ImGui::SameLine();
+			if (ImGui::SmallButton("複製")) {
+				// 複製先のキー名を生成
+				std::string baseKey = itemName;
+				// ユニークキー生成（重複チェックと連番付与）
+				std::string newKey = MakeUniqueKey(baseKey, group);
+
+				if (!DuplicateItem(groupName, itemName, groupName, newKey)) {
+					// 複製失敗時の対応（ログ出力や警告表示など）
 				}
 			}
+
+			// 削除ボタン + 確認
+			ImGui::SameLine();
+			if (pendingDeleteItem.first == groupName && pendingDeleteItem.second == itemName && confirmDelete) {
+				ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "削除しますか？");
+				ImGui::SameLine();
+				if (ImGui::SmallButton("はい")) {
+					itemsToRemove.emplace_back(groupName, itemName);
+					confirmDelete = false;
+					pendingDeleteItem = {};
+				}
+				ImGui::SameLine();
+				if (ImGui::SmallButton("いいえ")) {
+					confirmDelete = false;
+					pendingDeleteItem = {};
+				}
+			}
+			else {
+				if (ImGui::SmallButton("×")) {
+					pendingDeleteItem = { groupName, itemName };
+					confirmDelete = true;
+				}
+			}
+
+			ImGui::PopID();
 		}
 
-		// 改行
 		ImGui::Text("\n");
+
 		if (ImGui::Button("Save")) {
 			saveFile(groupName);
 			std::string message = std::format("{}.json saved.", groupName);
 			MessageBoxA(nullptr, message.c_str(), "GlobalVariables", 0);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Delete Group")) {
+			groupsToRemove.push_back(groupName);
 		}
 
 		ImGui::EndMenu();
@@ -348,6 +457,15 @@ void GlobalVariables::Update() {
 
 	ImGui::EndMenuBar();
 	ImGui::End();
+
+	// 削除予約された項目を後で実行（安全）
+	for (const auto& [group, item] : itemsToRemove) {
+		RemoveItem(group, item);
+	}
+
+	// 削除予約されたグループも後で実行
+	for (const std::string& group : groupsToRemove) {
+		RemoveGroup(group);
+	}
 #endif
 }
-

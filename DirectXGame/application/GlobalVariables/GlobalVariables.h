@@ -33,6 +33,10 @@ public:
 	// キーが存在するか？
 	bool HasKey(const std::string& groupName, const std::string& key) const;
 
+	// グループやキーの一覧取得
+	std::vector<std::string> GetGroupNames() const;
+	std::vector<std::string> GetKeys(const std::string& groupName) const;
+
 	// 何の型か？
 	std::string GetTypeName(const std::string& groupName, const std::string& key) const;
 
@@ -41,8 +45,13 @@ public:
 	// 削除(グループ)
 	void RemoveGroup(const std::string& groupName);
 
-
+	// 複製
+	bool DuplicateItem(
+		const std::string& srcGroupName, const std::string& srcKey,
+		const std::string& dstGroupName, const std::string& dstKey);
 	
+	std::string MakeUniqueKey(const std::string& baseKey, const GvData::Group& group);
+
 	/// <summary>
 	/// ファイルに書き出し
 	/// </summary>
