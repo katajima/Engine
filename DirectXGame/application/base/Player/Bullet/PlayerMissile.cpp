@@ -9,11 +9,11 @@
 
 void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	// コライダー設定
-	Collider::Initialize(camera);
-	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
-	Collider::SetRadius(3.0f);
+	//// コライダー設定
+	//Collider::Initialize(camera);
+	//Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
+	//Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
+	//Collider::SetRadius(3.0f);
 
 	// オブジェクト設定
 	object_ = std::make_unique<Object3d>();

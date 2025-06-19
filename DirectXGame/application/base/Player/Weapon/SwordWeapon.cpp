@@ -2,8 +2,8 @@
 
 void SwordWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 {
-	Collider::Initialize(camera);
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
+	//Collider::Initialize(camera);
+	//Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
 
 
 	object_ = std::make_unique<Object3d>();

@@ -649,6 +649,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />

@@ -1,38 +1,98 @@
 #include "Collider.h"
 
-
-
-void Collider::Initialize(Camera* camera) 
+void SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
-	capsule_.radius = radius_;
-	capsule_.segment.origin = { 0,1.0f,0 };
-	capsule_.segment.end = { 0,-1.0f,0 };
-	color_ = { 1,1,1,1 };
-}
+	centerWorld = worldTransform.worldMat_.GetWorldPosition();
 
-void Collider::UpdateWorldTransform(LineCommon* lineCommon) {
+#ifdef _DEBUG
+    if (lineCommon) {
+        lineCommon->AddLineSphere({ centerWorld ,radius });
+    }
+#endif // _DEBUG
 
-
-	if (colliderTypeID_ == static_cast<uint32_t>(ColliderType::Sphere)) {
-		lineCommon->AddLineSphere(Sphere{GetCenterPosition(), radius_ }, color_, 5, 5);
-	}
-	if (colliderTypeID_ == static_cast<uint32_t>(ColliderType::AABB)) {
-		lineCommon->AddLineAABB(aabb_, GetCenterPosition(), color_);
-	}
-	if (colliderTypeID_ == static_cast<uint32_t>(ColliderType::OBB)) {
-		lineCommon->AddLineOBB(obb_, color_);
-	}
-	if (colliderTypeID_ == static_cast<uint32_t>(ColliderType::Capsule)) {
-		Capsule cap = capsule_;
-		cap.segment.origin += GetCenterPosition();
-		cap.segment.end += GetCenterPosition();
-		lineCommon->AddLineCapsule(cap, color_);
-	}
 
 }
 
-void Collider::Draw() {
+bool SphereCollider::CheckHit(const Collider& other) const
+{
+    if (!other.enabled) return false;
+
+    if (other.GetType() == ColliderType::Sphere) {
+        auto& o = static_cast<const SphereCollider&>(other);
+        float distSq = (centerWorld - o.centerWorld).LengthSq();
+        float radiusSum = radius + o.radius;
+        return distSq <= radiusSum * radiusSum;
+    }
+
+    if (other.GetType() == ColliderType::AABB) {
+        auto& o = static_cast<const AABBCollider&>(other);
+        return IsCollision(AABB(o.minWorld,o.maxWorld), Sphere{ centerWorld ,radius });
+    }
+
+    // AABBとの衝突など他の型は別で判定
+    return false;
+}
+
+bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const
+{
+    if (other.GetType() != ColliderType::Sphere) {
+        return false; // 他の形状は未対応
+    }
+
+    const SphereCollider& o = static_cast<const SphereCollider&>(other);
+    Vector3 diff = centerWorld - o.centerWorld;
+    float dist = diff.Length();
+
+    float radiusSum = radius + o.radius;
+
+    if (dist < radiusSum && dist > 0.0001f) {
+        float pushDepth = radiusSum - dist;
+        Vector3 pushDir = diff / dist; // Normalizeと同じだが安全
+        outPushVec = pushDir * pushDepth;
+        return true;
+    }
+
+    return false;
+}
+
+
+void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
+{
+    centerWorld = worldTransform.worldMat_.GetWorldPosition();
+    minWorld = aabb.min_ + centerWorld;
+    maxWorld = aabb.max_ + centerWorld;
+
+
+#ifdef _DEBUG
+    if (lineCommon) {
+        lineCommon->AddLineAABB(aabb, centerWorld);
+    }
+#endif // _DEBUG
 
 }
 
-void Collider::SetTypeID(uint32_t typeID) { typeID_ = typeID; };
+bool AABBCollider::CheckHit(const Collider& other) const
+{
+    if (!other.enabled) return false;
+
+    if (other.GetType() == ColliderType::AABB) {
+        auto& o = static_cast<const AABBCollider&>(other);
+        return (minWorld.x <= o.maxWorld.x && maxWorld.x >= o.minWorld.x) &&
+            (minWorld.y <= o.maxWorld.y && maxWorld.y >= o.minWorld.y) &&
+            (minWorld.z <= o.maxWorld.z && maxWorld.z >= o.minWorld.z);
+    }
+
+    if (other.GetType() == ColliderType::Sphere) {
+        auto& o = static_cast<const SphereCollider&>(other);
+        return IsCollision(AABB(minWorld, maxWorld), Sphere{ o.centerWorld ,o.radius });
+    }
+
+   
+    return false;
+}
+
+bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
+    if (!other.enabled) return false;
+
+    return false;
+}

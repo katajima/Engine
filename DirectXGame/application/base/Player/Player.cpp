@@ -9,10 +9,64 @@
 
 void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	Collider::Initialize(camera);
-	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
-	Collider::SetColor(Vector4{ 0,0,1,1 });
+	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_->SetOwner(colliderComponent_.get());
+	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+	// プレイヤー本体のSphereColliderを作成
+	auto playerCollider = std::make_unique<SphereCollider>();
+	playerCollider->radius = 1.0f;
+	playerCollider->tag = CollisionTag::Player;
+	playerCollider->layer = CollisionLayer::Player;
+	playerCollider->isStatic = true;
+	/*playerCollider->collisionMask =
+		(1 << static_cast<uint32_t>(CollisionLayer::Enemy)) |
+		(1 << static_cast<uint32_t>(CollisionLayer::EnemyAttack));*/
+
+
+
+	// 登録（IDを取得したければ変数で受ける）
+	colliderComponent_->AddCollider(std::move(playerCollider));
+	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+
+	// 衝突時のコールバック登録
+	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+		if (!otherComponent) return;
+
+		uint32_t otherId = otherComponent->GetUniqueId();
+
+
+		Vector3 pushVec;
+		if (self->ResolveCollision(*other, pushVec)) {
+			if (other->isStatic) {
+				// 相手が動かないなら自分だけ押し戻す
+				objectBase_.worldtransform_.translate_ += pushVec;
+			}
+			else if (self->isStatic) {
+				// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
+			}
+			else {
+				// 双方が動く → 半分ずつ押し戻す（応用例）
+				objectBase_.worldtransform_.translate_ += pushVec * 0.5f;
+				// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
+			}
+
+			objectBase_.Update();
+		}
+
+		// すでに当たっていたら無視
+		if (contactRecord_.CheckHistory(otherComponent->GetUniqueId())) {
+			return;
+		}
+
+		// 初接触として処理
+		contactRecord_.AddHistory(otherComponent->GetUniqueId());
+
+		AddDamege(10);
+		followCamera_->GetViewProjection().SetShake(0.5f, {1,1,1});
+	};
+
+
 
 	entity3DManager_ = entity3DManager;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
@@ -229,7 +283,7 @@ void Player::Update()
 	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
 
-
+	ImGui::InputInt("HP", &hp);
 
 
 	ImGui::End();
@@ -259,6 +313,9 @@ void Player::Update()
 
 
 	weapon_->Update();
+
+
+	colliderComponent_->UpdateAll(objectBase_.worldtransform_);
 }
 
 #pragma region Draw
@@ -453,35 +510,6 @@ void Player::LimitMove()
 
 #pragma region MyRegion
 
-void Player::OnCollision(Collider* other)
-{
-	// 衝突判定の種別IDを取得
-	uint32_t typeID = other->GetTypeID();
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-		if (isAlive) {
-			if (!GetInvincible()) {
-				BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
-				uint32_t serialNumber = enemy->GetSerialNumber();
-
-				// 接触履歴があれば何もせず抜ける
-				if (contactRecord_.CheckHistory(serialNumber)) {
-					//return;
-				}
-
-				contactRecord_.AddHistory(serialNumber);
-
-				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
-			}
-		}
-	}
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyWeapon)) {
-	}
-}
-
-Vector3 Player::GetCenterPosition() const
-{
-	return objectBase_.GetWorldPosition();
-}
 
 void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {

@@ -4,79 +4,63 @@
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
+#include <DirectXGame/engine/Collider/CollisionTypeIdDef.h>
 
-class Collider {
+
+
+class Collider
+{
 public:
-
-	// 初期化
-	void Initialize(Camera* camera );
-
-	// ワールドトランスフォームの初期化
-	void UpdateWorldTransform(LineCommon* lineCommon);
-	// 描画
-	void Draw();
-
-	
+	void* owner = nullptr; // 通知先ポインタ
+	bool enabled = true;
+	bool isStatic = false;  // 動かさない
+	Vector3 centerWorld;
+	CollisionLayer layer = CollisionLayer::Default;
+	CollisionTag tag = CollisionTag::None; // タグ
+	uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
 
 
+	void Enable() { enabled = true; }
+	void Disable() { enabled = false; }
+	bool IsEnabled() const { return enabled; }
 
-	// 衝突時に呼ばれる関数
-	virtual void OnCollision([[maybe_unused]] Collider* other){};
-	
-	virtual void NoCollision([[maybe_unused]] Collider* other){};
-
-	virtual Vector3 GetCenterPosition() const = 0;
-
-	virtual ~Collider() = default; 
-
-	// 種別IDの取得
-	uint32_t GetTypeID() const { return typeID_; };
-	// 種別IDの設定
-	void SetTypeID(uint32_t typeID);
-	
-	// コライダーID取得
-	uint32_t GetColliderType() const { return colliderTypeID_; }
-
-	// コライダーID設定
-	void SetColliderType(uint32_t collType) { colliderTypeID_ = collType; }
+	virtual void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) = 0;
+	virtual bool CheckHit(const Collider& other) const = 0;
+	virtual bool ResolveCollision(const Collider& other, Vector3& outPushVec) const = 0;
+	virtual ColliderType GetType() const = 0;
+	virtual ~Collider() = default;
+};
 
 
-	// 半径取得
-	float GetRadius() const { return radius_; }
-	// 半径設定
-	void SetRadius(float radius) { radius_ = radius; }
-	// カプセル
-	Capsule GetCapsule() const { return capsule_; }
-	// カプセル
-	void SetCapsule(Capsule& capsule) { capsule_ = capsule; }
-	// AABB
-	AABB GetAABB() const { return aabb_; }
-	// OBB
-	OBB GetOBB() const { return obb_; }
+class SphereCollider : public Collider
+{
+public:
+	float radius = 1.0f;
 
-	// 色
-	void SetColor(Vector4 color) { color_ = color; }
+	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	bool CheckHit(const Collider& other) const override;
+	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	ColliderType GetType() const override {
+		return ColliderType::Sphere;
+	}
 
-private:
-	// 衝突判定
-	float radius_ = 1.5f; // 半径
+};
 
-	// AABB
-	AABB aabb_ = {{ -1.0f, -1.0f, -1.0f}, {1.0f,1.0f,1.0f}};
 
-	// OBB
-	OBB obb_ = {};
+class AABBCollider : public Collider
+{
+public:
+	AABB aabb{ {-0.5f,-0.5f,-0.5f} ,{0.5f,0.5f,0.5f}};
+	Vector3 minWorld;
+	Vector3 maxWorld;
 
-	// Capsule
-	Capsule capsule_ = Capsule(Vector3{},Vector3{},1.5f);
+	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	bool CheckHit(const Collider& other) const override;
+	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 
-	// 色
-	Vector4 color_ = { 1,1,1,1 };
+	ColliderType GetType() const override {
+		return ColliderType::AABB;
+	}
 
-	// 種別ID
-	uint32_t typeID_ = 0u;
-
-	// コライダー形状
-	uint32_t colliderTypeID_ = 0u;
 };
 

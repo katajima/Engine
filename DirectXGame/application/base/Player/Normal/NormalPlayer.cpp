@@ -2,8 +2,8 @@
 
 void NormalPlayer::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	Collider::Initialize(camera);
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
+	//Collider::Initialize(camera);
+	//Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
 
 	input_ = input;
 	entity3DManager_ = entity3DManager;

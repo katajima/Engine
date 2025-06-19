@@ -10,7 +10,7 @@ class DirectXCommon;
 class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
-class BasePlayer : public Collider
+class BasePlayer
 {
 public:
 	struct Parameters {
@@ -55,10 +55,7 @@ public:
 
 
 public:
-	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision([[maybe_unused]] Collider* other) override;
-
-	virtual Vector3 GetCenterPosition() const;
+	
 
 	// シリアルナンバー
 	uint32_t GetSerialNumber() const { return serialNumber; }

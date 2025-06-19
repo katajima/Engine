@@ -49,13 +49,13 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	{
 	case BulletManager::BulletType::kPlayerMissile:
 		bullet = std::make_unique<PlayerMissile>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	default:
 		break;
@@ -78,13 +78,13 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 	{
 	case BulletManager::BulletType::kPlayerMissile:
 		bullet = std::make_unique<PlayerMissile>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	default:
 		break;

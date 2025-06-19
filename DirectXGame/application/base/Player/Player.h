@@ -39,7 +39,7 @@ class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
 
-class Player : public Collider {
+class Player {
 public:
 
 
@@ -62,10 +62,7 @@ public:
 	
 	void Draw2D();
 
-	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision([[maybe_unused]] Collider* other) override;
 
-	virtual Vector3 GetCenterPosition() const;
 
 	
 	// 振るまい
@@ -265,6 +262,8 @@ public:
 
 	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+
 private:  // パラメータ
 	
 	uint32_t maxHp = 100;
@@ -272,6 +271,8 @@ private:  // パラメータ
 	bool isAlive = true;
 	bool isInvincible = false;
 private:
+	std::unique_ptr<ColliderComponent> colliderComponent_;
+
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;
 	// スペシャル攻撃

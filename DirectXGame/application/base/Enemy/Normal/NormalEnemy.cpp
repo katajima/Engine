@@ -4,15 +4,76 @@
 
 void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	Collider::Initialize(camera);
-	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kEnemy));
-	Collider::SetRadius(3.0f);
-	Capsule cap = Collider::GetCapsule();
-	cap.radius = 6.0f;
-	//cap.segment.origin.z = 10;
-	Collider::SetCapsule(cap);
-	Collider::SetColor(Vector4{ 1,0,1,1 });
+
+	// コライダーコンポーネントの作成と初期設定
+	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_->SetOwner(colliderComponent_.get());
+	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+
+	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+
+	// SphereColliderを追加
+	auto sphere = std::make_unique<SphereCollider>();
+	sphere->tag = CollisionTag::Enemy;
+	sphere->radius = 3.0f; // 半径を適宜設定
+	colliderComponent_->AddCollider(std::move(sphere));
+
+	// AABBColliderを追加
+	auto aabb = std::make_unique<AABBCollider>();
+	aabb->tag = CollisionTag::Enemy;
+	aabb->aabb = { -Vector3{3,3,3},Vector3{3,3,3} };
+	colliderComponent_->AddCollider(std::move(aabb));
+
+	// コールバック登録（例：プレイヤーと衝突したらダメージ）
+	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+		// プレイヤーかチェック
+		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+		if (!otherComponent) return;
+
+		if (other->tag == CollisionTag::Enemy) {
+			Vector3 pushVec;
+			if (self->ResolveCollision(*other, pushVec)) {
+				if (other->isStatic) {
+					// 相手が動かないなら自分だけ押し戻す
+					transBase_.translate_ += pushVec;
+				}
+				else if (self->isStatic) {
+					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
+				}
+				else {
+					// 双方が動く → 半分ずつ押し戻す（応用例）
+					transBase_.translate_ += pushVec * 0.5f;
+					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
+				}
+
+				object_->Update();
+			}
+		}
+
+		if (other->tag == CollisionTag::Player) {
+			// ここにダメージ処理などを書く
+			std::cout << "敵がプレイヤーに当たった！" << std::endl;
+
+			Vector3 pushVec;
+			if (self->ResolveCollision(*other, pushVec)) {
+				if (other->isStatic) {
+					// 相手が動かないなら自分だけ押し戻す
+					transBase_.translate_ += pushVec;
+				}
+				else if (self->isStatic) {
+					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
+				}
+				else {
+					// 双方が動く → 半分ずつ押し戻す（応用例）
+					transBase_.translate_ += pushVec * 0.5f;
+					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
+				}
+
+				object_->Update();
+			}
+		}
+	};
+
 
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
@@ -80,6 +141,9 @@ void NormalEnemy::Update()
 
 	object_->Update();
 	transBase_.Update();
+
+
+	colliderComponent_->UpdateAll(object_->worldtransform_);
 }
 
 void NormalEnemy::Draw()
@@ -171,7 +235,7 @@ void NormalEnemy::Move()
 	// Y軸周り角度
 	transBase_.rotate_.y = std::atan2(sub.x, sub.z);
 
-	if (Distance(player_->GetCenterPosition(), object_->GetWorldPosition()) >= 5) {
+	if (Distance(player_->GetObject3D().GetWorldPosition(), object_->GetWorldPosition()) >= 5) {
 
 		// 移動
 		transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());

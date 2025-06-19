@@ -147,24 +147,32 @@ void GamePlayScene::ApplyGlobalVariables()
 void GamePlayScene::CheckAllCollisions()
 {
 	// 衝突マネージャのリセット
-	collisionManager_->Reset();
-	// コライダーをリストに登録
-	collisionManager_->AddCollider(player_.get());
-	if (player_->GetBehavior() == Player::Behavior::kAttack) {
-		// コライダーをリストに登録
-		collisionManager_->AddCollider(player_->GetWeapon());
-	}
+	collisionManager_->Clear();
 
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		collisionManager_->AddCollider(bullet.get());
-	}
+	// プレイヤーコライダーセット
+	collisionManager_->Register(player_->GetColliderComponent());
 
+	// 敵コライダーセット
 	for (auto enemy : enemyManager_->GetEnemys()) {
-		collisionManager_->AddCollider(enemy);
+		collisionManager_->Register(enemy->GetColliderComponent());
 	}
+
+	
+	collisionManager_->CheckAll();
+	//if (player_->GetBehavior() == Player::Behavior::kAttack) {
+	//	// コライダーをリストに登録
+	//	collisionManager_->AddCollider(player_->GetWeapon());
+	//}
+
+	//for (const auto& bullet : bulletManager_->GetBullets()) {
+	//	collisionManager_->AddCollider(bullet.get());
+	//}
+
+	
+
 
 	// 衝突判定
-	collisionManager_->CheckAllCollisions();
+	//collisionManager_->CheckAllCollisions();
 }
 #pragma endregion 初期化関係
 
@@ -279,7 +287,7 @@ void GamePlayScene::Update()
 	ImGui::End();
 #endif // _DEBUG
 
-	if(input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
 		player_->GetRangeBombingSpecial()->SetGauge(100);
 	}
 
@@ -290,13 +298,13 @@ void GamePlayScene::Update()
 		cameraScaleT += 0.05f;
 
 		if (cameraScaleT >= 1.0f) {
-			cameraScaleT = 1.0f;	
+			cameraScaleT = 1.0f;
 		}
 
 		universeCamera_->GetViewProjection().transform_.scale.z = Lerp(minScaleZCamera, 1.0f, cameraScaleT);
 	}
 	else {
-		
+
 		timer += MyGame::GameTime();
 	}
 
@@ -351,7 +359,7 @@ void GamePlayScene::Update()
 
 
 	// デバック表示用にワールドトランスフォームを更新
-	collisionManager_->UpdateWorldTransform(GetEntity3DManager()->Get3DLineCommon());
+	//collisionManager_->UpdateWorldTransform(GetEntity3DManager()->Get3DLineCommon());
 
 
 

@@ -101,37 +101,6 @@ void BaseEnemy::Initialize2D()
 	backHpBer_->SetAnchorPoint({ 0.5f,0.0f });
 }
 
-void BaseEnemy::OnCollision(Collider* other)
-{
-	// 衝突判定の種別IDを取得
-	uint32_t typeID = other->GetTypeID();
-	// 衝突相手が敵なら
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kPlayer)) {
-		Player* player = static_cast<Player*>(other);
-		uint32_t serialNumber = player->GetSerialNumber();
-
-		if (isAlive_) {
-			if (!player->GetInvincible()) {
-
-				// 接触履歴があれば何もせず抜ける
-				if (contactRecord_.CheckHistory(serialNumber)) {
-					return;
-				}
-				contactRecord_.AddHistory(serialNumber);
-				player->AddDamege(parameter_.damege);
-			}
-		}
-	}
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon)) {
-
-	}
-}
-
-Vector3 BaseEnemy::GetCenterPosition() const
-{
-	return object_->GetWorldPosition();
-}
-
 BaseEnemy::BaseEnemy()
 {
 	// シリアル番号を振る

@@ -147,22 +147,22 @@ void Player::AttackTypeInit(int comboIndex)
 
 
 			if (comboIndex == 0) {
-				weapon_->SetRad(2.5f);
+				//weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,0 });
 			}
 			if (comboIndex == 1) {
-				weapon_->SetRad(2.5f);
+				//weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			if (comboIndex == 2) {
-				weapon_->SetRad(3.5f);
+				//weapon_->SetRad(3.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,-90 });
 			}
 			if (comboIndex == 3) {
-				weapon_->SetRad(4.5f);
+				//weapon_->SetRad(4.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,90 });
 			}

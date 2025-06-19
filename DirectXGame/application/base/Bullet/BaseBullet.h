@@ -13,7 +13,7 @@ class Player;
 class BaseEnemy;
 class Entity3DManager;
 class Entity2DManager;
-class BaseBullet : public Collider {
+class BaseBullet{
 public:
 	struct Parameters {
 		float HP;			// HP
@@ -67,7 +67,7 @@ public:
 
 	void SetEnemy(BaseEnemy* enemy);
 
-	void SetTargetType(CollisionTypeIdDef type);
+	//void SetTargetType(CollisionTypeIdDef type);
 
 	void SetTargerRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
 
@@ -81,10 +81,7 @@ protected:
 
 
 public:
-	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision([[maybe_unused]] Collider* other) override;
-
-	virtual Vector3 GetCenterPosition() const;
+	
 protected:
 	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
 

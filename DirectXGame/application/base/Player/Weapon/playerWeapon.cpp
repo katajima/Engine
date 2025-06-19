@@ -5,9 +5,9 @@
 
 void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 {
-	Collider::Initialize(camera);
-	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
+	//Collider::Initialize(camera);
+	//Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
+	//Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
 
 
 
@@ -28,49 +28,7 @@ void playerWeapon::Draw()
 	objectWeapon_.Draw();
 }
 
-void playerWeapon::OnCollision(Collider* other)
-{
-	// 衝突判定の種別IDを取得
-	uint32_t typeID = other->GetTypeID();
-	// 衝突相手が敵なら
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
-		uint32_t serialNumber = enemy->GetSerialNumber();
 
-
-
-		// 接触履歴があれば何もせず抜ける
-		if (contactRecord_.CheckHistory(serialNumber)) {
-			return;
-		}
-
-
-		contactRecord_.AddHistory(serialNumber);
-
-		if (enemy->GetAlive()) {
-			enemy->AddDamage(10);
-
-			enemy->SetHit();
-			enemy->Emit();
-
-			enemy->hitStop(0.1f);
-
-			player_->AddHit();
-			player_->AddSP();
-			player_->SetHitTime();
-		}
-
-	}
-}
-
-Vector3 playerWeapon::GetCenterPosition() const
-{
-	const Vector3 ofset = offset;
-	// ワールド座標に変換
-	Vector3 worldPos = Transforms(ofset, objectWeapon_.worldtransform_.worldMat_);
-
-	return worldPos;
-}
 
 void playerWeapon::ContactRecordClear()
 {

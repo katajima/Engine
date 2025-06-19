@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/engine/collider/3d/Collider.h"
+#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 #include"DirectXGame/engine/collider/ContactRecord.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
@@ -12,7 +13,7 @@
 class Player;
 class Entity3DManager;
 class Entity2DManager;
-class BaseEnemy : public Collider {
+class BaseEnemy{
 public:
 
 	struct Parameters {
@@ -69,12 +70,15 @@ public:
 	// ヒットした
 	void SetHit() { hit = true; };
 
+
+	void SetSerialNumber(uint32_t num) { serialNumber = num; };
 	// シリアルナンバー
 	uint32_t GetSerialNumber() const { return serialNumber; }
 
 	Object3d* GetObject3D() { return object_.get(); }
 
-	
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+
 protected:
 	// 時間
 	float Timer() const;
@@ -89,10 +93,7 @@ protected:
 
 
 public: // コライダー関係
-	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision([[maybe_unused]] Collider* other) override;
 
-	virtual Vector3 GetCenterPosition() const;
 protected:
 	// オブジェクト
 	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
@@ -127,6 +128,7 @@ protected:
 	// 次のシリアルナンバー
 	static uint32_t nextSerialNumber;
 	ContactRecord contactRecord_;
+	std::unique_ptr<ColliderComponent> colliderComponent_;
 
 protected: //2D
 	std::unique_ptr<Sprite> icon_lockOn;

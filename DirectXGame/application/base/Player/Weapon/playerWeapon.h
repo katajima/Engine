@@ -13,7 +13,7 @@
 class BasePlayer;
 class Player;
 class Entity3DManager;
-class playerWeapon : public Collider
+class playerWeapon
 {
 public:
 
@@ -32,10 +32,7 @@ public:
 	///</summary>
 	void Draw();
 
-	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision([[maybe_unused]] Collider* other) override;
-
-	virtual Vector3 GetCenterPosition() const;
+	
 
 
 
@@ -49,7 +46,7 @@ public:
 	// 接触履歴を抹消
 	void ContactRecordClear();
 
-	void SetRad(float rad) { Collider::SetRadius(rad); };
+	//void SetRad(float rad) { Collider::SetRadius(rad); };
 
 	void SetPlayer(Player* player);
 	
