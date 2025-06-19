@@ -5,6 +5,7 @@
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
 float MyGame::hitStopTimer = 0.0f;
+float MyGame::nowTime = 0.0f;
 
 void MyGame::Initialize()
 {
@@ -60,7 +61,7 @@ void MyGame::Update()
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-
+	nowTime += deltaTime;
 	if (deltaTime > 0) {
 		fps = 1.0f / deltaTime;
 	}

@@ -315,8 +315,6 @@ private:
 
 	bool isCreativeMode = false;
 	
-
-	ContactRecord contactRecord_;
 	// シリアルナンバー
 	uint32_t serialNumber = 0;
 

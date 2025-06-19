@@ -54,7 +54,9 @@ public:
 	static float kTimeSpeed_;
 	static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
 	static void hitStop(float time) { hitStopTimer = time; };
+	static float NowTime() { return nowTime; };
 	static float hitStopTimer;
+	static float nowTime;
 private:
 	void HitStpoTime();
 

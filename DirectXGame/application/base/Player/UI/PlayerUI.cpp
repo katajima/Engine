@@ -38,11 +38,11 @@ void PlayerUI::Update()
 void PlayerUI::Draw()
 {
 	HpBer_->SetPosition({ 100,650 });
-	HpBer_->SetSize({ 50,-sizeHP_* 2 });
+	HpBer_->SetSize({ 50,sizeHP_* 2 });
 	HpBer_->Update();
 	HpBer_->Draw();
 
-	SpecailBer_->SetSize({ 50,-sizeSpecialGauge_ * 2 * 2.5f });
+	SpecailBer_->SetSize({ 50,sizeSpecialGauge_ * 2 * 2.5f });
 	SpecailBer_->Update();
 	SpecailBer_->Draw();
 

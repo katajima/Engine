@@ -17,7 +17,7 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	playerCollider->radius = 1.0f;
 	playerCollider->tag = CollisionTag::Player;
 	playerCollider->layer = CollisionLayer::Player;
-	playerCollider->isStatic = true;
+	//playerCollider->isStatic = true;
 	/*playerCollider->collisionMask =
 		(1 << static_cast<uint32_t>(CollisionLayer::Enemy)) |
 		(1 << static_cast<uint32_t>(CollisionLayer::EnemyAttack));*/
@@ -43,27 +43,27 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 				objectBase_.worldtransform_.translate_ += pushVec;
 			}
 			else if (self->isStatic) {
-				// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
+				
 			}
 			else {
 				// 双方が動く → 半分ずつ押し戻す（応用例）
 				objectBase_.worldtransform_.translate_ += pushVec * 0.5f;
-				// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
+				
 			}
 
 			objectBase_.Update();
 		}
 
-		// すでに当たっていたら無視
-		if (contactRecord_.CheckHistory(otherComponent->GetUniqueId())) {
-			return;
+		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+
+		if (colliderComponent_->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
+			return; // クールタイム中のため無視
 		}
 
-		// 初接触として処理
-		contactRecord_.AddHistory(otherComponent->GetUniqueId());
+		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
 
 		AddDamege(10);
-		followCamera_->GetViewProjection().SetShake(0.5f, {1,1,1});
+		followCamera_->GetViewProjection().SetShake(0.25f, {1,1,1});
 	};
 
 

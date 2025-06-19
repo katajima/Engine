@@ -3,8 +3,9 @@
 #include <memory>
 #include <functional>
 #include "Collider.h"  // Colliderの基底クラス
-
+#include "DirectXGame/engine/collider/ContactRecord.h"
 #include "DirectXGame/engine/line/lineCommon.h"
+
 
 class UniqueIdGenerator {
 public:
@@ -29,6 +30,8 @@ public:
 
     // 衝突時に呼ばれる関数（任意）
     std::function<void(Collider* self, Collider* other)> onHitCallback;
+
+    ContactRecord contactRecord_;
 private:
     uint32_t nextId_ = 1; // IDは1から開始
 
