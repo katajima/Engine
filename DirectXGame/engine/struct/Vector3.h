@@ -359,3 +359,8 @@ static Vector3 DegreesToRadians(Vector3 degrees) {
 
 	return resurt;
 }
+
+// absDot
+static float AbsDot(const Vector3& a, const Vector3& b) {
+	return std::abs(Dot(a, b));
+}

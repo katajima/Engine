@@ -318,6 +318,8 @@ private:
 	// シリアルナンバー
 	uint32_t serialNumber = 0;
 
+	std::unique_ptr<OBBCollider> obbCollider_;
+
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;

@@ -22,7 +22,7 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 	auto aabb = std::make_unique<AABBCollider>();
 	aabb->tag = CollisionTag::Enemy;
 	aabb->aabb = { -Vector3{3,3,3},Vector3{3,3,3} };
-	colliderComponent_->AddCollider(std::move(aabb));
+	//colliderComponent_->AddCollider(std::move(aabb));
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
 	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {

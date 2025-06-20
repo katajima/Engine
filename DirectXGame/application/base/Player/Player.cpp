@@ -13,19 +13,17 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	colliderComponent_->SetOwner(colliderComponent_.get());
 	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
 	// プレイヤー本体のSphereColliderを作成
-	auto playerCollider = std::make_unique<SphereCollider>();
-	playerCollider->radius = 1.0f;
-	playerCollider->tag = CollisionTag::Player;
-	playerCollider->layer = CollisionLayer::Player;
-	//playerCollider->isStatic = true;
-	/*playerCollider->collisionMask =
-		(1 << static_cast<uint32_t>(CollisionLayer::Enemy)) |
-		(1 << static_cast<uint32_t>(CollisionLayer::EnemyAttack));*/
+	obbCollider_ = std::make_unique<OBBCollider>();
+	obbCollider_->obb.size = {2,2,2};
+	
+	obbCollider_->tag = CollisionTag::Player;
+	obbCollider_->layer = CollisionLayer::Player;
+	
 
 
 
 	// 登録（IDを取得したければ変数で受ける）
-	colliderComponent_->AddCollider(std::move(playerCollider));
+	colliderComponent_->AddCollider(std::move(obbCollider_));
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 
 	// 衝突時のコールバック登録
@@ -181,7 +179,7 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
 
-
+	objectBase_.Update();
 }
 
 void Player::Update()
@@ -313,6 +311,10 @@ void Player::Update()
 
 
 	weapon_->Update();
+
+	Matrix4x4 mat = objectBase_.worldtransform_.worldMat_;
+
+
 
 
 	colliderComponent_->UpdateAll(objectBase_.worldtransform_);

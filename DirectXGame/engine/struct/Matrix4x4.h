@@ -80,9 +80,24 @@ public:
         };
     }
 
+    //Vector3 Forward() const {
+    //    // ワールド行列のZ軸は「m[2][0], m[2][1], m[2][2]」列
+    //    return Vector3{ m[2][0], m[2][1], m[2][2] };
+    //}
+
+    // X軸（右方向）
+    Vector3 Right() const {
+        return Vector3{ m[0][0], m[1][0], m[2][0] };
+    }
+
+    // Y軸（上方向）
+    Vector3 Up() const {
+        return Vector3{ m[0][1], m[1][1], m[2][1] };
+    }
+
+    // Z軸（前方向）
     Vector3 Forward() const {
-        // ワールド行列のZ軸は「m[2][0], m[2][1], m[2][2]」列
-        return Vector3{ m[2][0], m[2][1], m[2][2] };
+        return Vector3{ m[0][2], m[1][2], m[2][2] };
     }
 private:
 

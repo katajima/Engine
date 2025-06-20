@@ -74,6 +74,8 @@ class CapsuleCollider : public Collider
 {
 public:
 	Capsule capsule{ Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,-1.0f,0.0f},{1.0f}};
+	Capsule capWorld_;
+
 
 	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
 	bool CheckHit(const Collider& other) const override;
@@ -90,12 +92,16 @@ class OBBCollider : public Collider
 public:
 	OBB obb{ {0,0,0},{0,0,0},{0.5f,0.5f,0.5f}};
 
+
 	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
 	bool CheckHit(const Collider& other) const override;
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 	ColliderType GetType() const override {
 		return ColliderType::OBB;
 	}
+	
+private:
+
 };
 
 

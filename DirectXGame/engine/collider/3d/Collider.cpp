@@ -35,13 +35,13 @@ bool SphereCollider::CheckHit(const Collider& other) const
     // カプセル
     if (other.GetType() == ColliderType::Capsule) {
         auto& o = static_cast<const CapsuleCollider&>(other);
-        return false;
+        return IsCollision(Sphere{ centerWorld ,radius },o.capWorld_);
     }
 
     // OBB
     if (other.GetType() == ColliderType::OBB) {
         auto& o = static_cast<const OBBCollider&>(other);
-        return false;
+        return IsCollision(o.obb,Sphere{ centerWorld ,radius });
     }
 
     // AABBとの衝突など他の型は別で判定
@@ -108,13 +108,15 @@ bool AABBCollider::CheckHit(const Collider& other) const
     // カプセル
     if (other.GetType() == ColliderType::Capsule) {
         auto& o = static_cast<const CapsuleCollider&>(other);
-        return false;
+
+        return CapsuleIntersectsAABB(o.capWorld_, AABB(minWorld, maxWorld));
     }
 
     // OBB
     if (other.GetType() == ColliderType::OBB) {
         auto& o = static_cast<const OBBCollider&>(other);
-        return false;
+
+        return IsCollision(o.obb, AABB(minWorld, maxWorld));
     }
 
     return false;
@@ -132,11 +134,11 @@ void CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* l
 {
     centerWorld = worldTransform.worldMat_.GetWorldPosition();
    
-    Capsule capWorld{ Vector3{capsule.segment.origin + centerWorld},Vector3{capsule.segment.end + centerWorld},{capsule.radius}};
-
+    capWorld_ = { Vector3{capsule.segment.origin + centerWorld},Vector3{capsule.segment.end + centerWorld},{capsule.radius}};
+    
 #ifdef _DEBUG
     if (lineCommon) {
-        lineCommon->AddLineCapsule(capWorld);
+        lineCommon->AddLineCapsule(capWorld_);
     }
 #endif // _DEBUG
 
@@ -150,25 +152,25 @@ bool CapsuleCollider::CheckHit(const Collider& other) const
     // 球
     if (other.GetType() == ColliderType::Sphere) {
         auto& o = static_cast<const SphereCollider&>(other);
-        return false;
+        return IsCollision(Sphere{ {o.centerWorld} ,{o.radius}}, capWorld_);
     }
 
     // AABB
     if (other.GetType() == ColliderType::AABB) {
         auto& o = static_cast<const AABBCollider&>(other);
-        return false;
+        return CapsuleIntersectsAABB(capWorld_,AABB{o.minWorld,o.maxWorld});
     }
 
     // カプセル
     if (other.GetType() == ColliderType::Capsule) {
         auto& o = static_cast<const CapsuleCollider&>(other);
-        return false;
+        return IsCollision(capWorld_,o.capWorld_);
     }
 
     // OBB
     if (other.GetType() == ColliderType::OBB) {
         auto& o = static_cast<const OBBCollider&>(other);
-        return false;
+        return IsCollision(o.obb,capWorld_);
     }
     
   
@@ -188,8 +190,15 @@ void OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
     centerWorld = worldTransform.worldMat_.GetWorldPosition();
 
     obb.center = centerWorld;
+    obb.orientations[0] = worldTransform.worldMat_.Right().Normalize();
+    obb.orientations[1] = worldTransform.worldMat_.Up().Normalize();
+    obb.orientations[2] = worldTransform.worldMat_.Forward().Normalize();
+
 #ifdef _DEBUG
     if (lineCommon) {
+        lineCommon->AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
+        lineCommon->AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
+        lineCommon->AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
         lineCommon->AddLineOBB(obb);
     }
 #endif // _DEBUG
@@ -203,25 +212,25 @@ bool OBBCollider::CheckHit(const Collider& other) const
     // 球
     if (other.GetType() == ColliderType::Sphere) {
         auto& o = static_cast<const SphereCollider&>(other);
-        return false;
+        return IsCollision(obb,Sphere{o.centerWorld,o.radius });
     }
 
     // AABB
     if (other.GetType() == ColliderType::AABB) {
         auto& o = static_cast<const AABBCollider&>(other);
-        return false;
+        return IsCollision(obb, AABB(o.minWorld, o.maxWorld));
     }
 
     // カプセル
     if (other.GetType() == ColliderType::Capsule) {
         auto& o = static_cast<const CapsuleCollider&>(other);
-        return false;
+        return IsCollision(obb,o.capWorld_);
     }
 
     // OBB
     if (other.GetType() == ColliderType::OBB) {
         auto& o = static_cast<const OBBCollider&>(other);
-        return false;
+        return IsCollision(obb,o.obb);
     }
 
     return false;
