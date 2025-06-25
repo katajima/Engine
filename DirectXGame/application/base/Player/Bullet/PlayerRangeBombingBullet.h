@@ -22,17 +22,17 @@ public:
 private: // 演出関係
 
 	// 初期煙初期化
-	void InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
-	// ミサイル移動中煙初期化
-	void InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
-	// 爆発煙初期化
-	void InitExpSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
-	// 爆発火初期化
-	void InitExpFire(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
-	// アニメーションキューブ初期化
-	void InitExpBre(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
-	// リングエミッター初期化
-	void InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	//void InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	//// ミサイル移動中煙初期化
+	//void InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	//// 爆発煙初期化
+	//void InitExpSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	//// 爆発火初期化
+	//void InitExpFire(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	//// アニメーションキューブ初期化
+	//void InitExpBre(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	//// リングエミッター初期化
+	//void InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
 
 private:
 	WorldTransform worldTransformUp_;
@@ -65,7 +65,7 @@ private:
 	float time_ = 0.0f; // 時間
 
 private: //パーティクルエミッター
-	// ミサイルi移動中煙エミッター
+	//// ミサイルi移動中煙エミッター
 	std::unique_ptr<ParticleEmitter> moveSmokeEmitter_ = nullptr;
 	std::unique_ptr<ParticleEmitter> moveSmokeEmitter2_ = nullptr;
 	
@@ -85,8 +85,8 @@ private: //パーティクルエミッター
 	// ヒット
 	std::unique_ptr<ParticleEmitter> hitEmitter_ = nullptr;
 
-	//Object3d* hitObject_ = nullptr;
-	//Object3d* hitObject2_ = nullptr;
+	Object3d* hitObject_ = nullptr;
+	Object3d* hitObject2_ = nullptr;
 
 	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 	std::unique_ptr<Primitive> primitiveCylinder2_ = nullptr;

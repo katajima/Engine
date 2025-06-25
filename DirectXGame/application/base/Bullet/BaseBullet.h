@@ -69,7 +69,7 @@ public:
 
 	void SetTargerRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
 
-	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
+	//ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
 
 protected:
 	// 当たり判定をするか
@@ -77,7 +77,7 @@ protected:
 public:
 	
 protected:
-	//Object3d* object_;
+	Object3d* object_;
 	
 	// 各パラメータ
 	Parameters parameter_{};
@@ -103,7 +103,7 @@ protected:
 	BaseEnemy* enemy_;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
-	std::unique_ptr<ColliderComponent> colliderComponent_ = nullptr;
+	//std::unique_ptr<ColliderComponent> colliderComponent_ = nullptr;
 };
 
 
