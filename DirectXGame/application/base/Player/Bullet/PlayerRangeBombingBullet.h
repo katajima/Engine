@@ -6,6 +6,8 @@
 class Primitive;
 class PlayerRangeBombingBullet :public BaseBullet {
 public:
+	~PlayerRangeBombingBullet();
+
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) override;
 

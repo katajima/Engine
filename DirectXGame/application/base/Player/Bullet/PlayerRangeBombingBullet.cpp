@@ -9,6 +9,11 @@
 
 #include "DirectXGame/engine/math/random.h"
 
+PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
+{
+	trailEffect_.reset(nullptr);
+}
+
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	colliderComponent_ = std::make_unique<ColliderComponent>();
@@ -114,10 +119,10 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	InitRingEmitter(ringEmitter_.get(), particleManager, "ringEmit");
 
 
-	/*trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entity3DManager->GetEffectManager(), "resources/Texture/Image.png", 0.15f, {1.0f,1.0f,1.0f,1.0f});
-	trailEffect_->SetCamera(camera);
-	trailEffect_->SetObject(object_);*/
+	//trailEffect_ = std::make_unique<TrailEffect>();
+	//trailEffect_->Initialize(entity3DManager->GetEffectManager(), "resources/Texture/Image.png", 0.15f, {1.0f,1.0f,1.0f,1.0f});
+	//trailEffect_->SetCamera(camera);
+	//trailEffect_->SetObject(object_);
 
 
 	Vector3 size = { 2.0f, 2.0f, 2.0f };
@@ -353,6 +358,8 @@ void PlayerRangeBombingBullet::Update()
 			hitObject2_->IsDelete();
 			isEffectPlay_ = false;
 			colliderComponent_->ClearColliders();
+
+			//trailEffect_.reset(nullptr);
 		}
 
 

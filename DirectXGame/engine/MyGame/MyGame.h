@@ -49,6 +49,9 @@ public:
 	// パーティクル生成
 	void CreateParticle();
 
+	//
+	void LoadModel();
+
 public:
 	static float const kDeltaTime_;
 	static float kTimeSpeed_;

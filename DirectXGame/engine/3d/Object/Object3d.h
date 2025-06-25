@@ -1,23 +1,17 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Light.h"
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<cstdint>
-#include<wrl.h>
-#include<string>
-#include<vector>
-#include<format>
+
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/3d/Model/ModelManager.h"
 #include"DirectXGame/engine/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3D.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 class Entity3DManager;
 class Object3dCommon;
@@ -227,9 +221,10 @@ public:
 	SkyBox* skyBox_ = nullptr;
 	// 波
 	Ocean* ocean_ = nullptr;
+	//
+	//std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 
-	std::unique_ptr<Entity3D> entity3D_;
-
+	
 	// 位置
 	WorldTransform worldtransform_;
 

@@ -11,6 +11,7 @@ BaseBullet::BaseBullet()
 
 BaseBullet::~BaseBullet()
 {
+	
 	object_->IsDelete();
 }
 

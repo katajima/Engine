@@ -13,6 +13,9 @@ using namespace Microsoft::WRL;
 #include<map>
 #include <memory>
 
+#include <future>       // 追加：非同期処理用
+#include <mutex>        // 追加：排他制御用
+#include <shared_mutex> // C++17以降の共有ロック用（optional）
 
 #include "DirectXGame/engine/struct/Structs3D.h"
 
@@ -42,6 +45,12 @@ public:
 	/// <param name="filePath"></param>
 	void LoadModel(const std::string& filePath, const std::string& dire = "");
 	
+	// 非同期読み込み開始（マルチスレッド）
+	void LoadModelAsync(const std::string& filePath, const std::string& dire = "");
+
+	// 読み込み完了待ち（全て）
+	void WaitAllLoadFinished();
+
 	Model* FindModel(const std::string& filePath);
 
 	// 
@@ -52,6 +61,12 @@ public:
 
 private:
 	std::map<std::string, std::unique_ptr<Model>> models;
+
+	// 非同期読み込みで管理するfutureのリスト
+	std::vector<std::future<void>> loadingFutures_;
+
+	// 排他制御
+	std::mutex modelsMutex_;  // modelsへの書き込みを守るmutex
 
 	Command* command_;
 	DXGIDevice* DXGIDevice_;

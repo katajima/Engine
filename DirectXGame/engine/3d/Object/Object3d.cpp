@@ -1,18 +1,7 @@
 #include"Object3dCommon.h"
 #include"Object3d.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
-#include<cstdint>
-#include<string>
-#include<format>
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<cassert>
-#include<dxgidebug.h>
-#include<dxcapi.h>
-#include<fstream>
-#include<sstream>
-#include <iostream>
-#include<wrl.h>
+
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
@@ -23,8 +12,8 @@
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-//#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
+
 
 void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
 {

@@ -37,6 +37,38 @@ void ModelManager::LoadModel(const std::string& filePath, const std::string& dir
 	models.insert(std::make_pair(filePath, std::move(model)));
 }
 
+void ModelManager::LoadModelAsync(const std::string& filePath, const std::string& dire)
+{
+	// すでにロード済みかロックを使って確認
+	{
+		std::lock_guard<std::mutex> lock(modelsMutex_);
+		if (models.contains(filePath)) {
+			return;
+		}
+	}
+
+	// 非同期に読み込み開始
+	loadingFutures_.push_back(std::async(std::launch::async, [this, filePath, dire]() {
+		// 実際の読み込み処理（LoadModel内部の処理を分解するイメージ）
+		std::unique_ptr<Model> model = std::make_unique<Model>();
+		model->Initialize(dxCommon_, modelCommon_.get(), "./resources/Models", filePath, dire);
+
+		// 読み込み後にモデル登録（排他制御）
+		{
+			std::lock_guard<std::mutex> lock(modelsMutex_);
+			models.insert(std::make_pair(filePath, std::move(model)));
+		}
+		}));
+}
+
+void ModelManager::WaitAllLoadFinished()
+{
+	for (auto& fut : loadingFutures_) {
+		fut.get();  // 完了待ち
+	}
+	loadingFutures_.clear();
+}
+
 Model* ModelManager::FindModel(const std::string& filePath)
 {
 	// 読み込み済みモデルを検索
