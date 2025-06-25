@@ -77,7 +77,7 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	
 
 
-	primitiveCylinder_ = std::make_unique<Primitive>();
+	//primitiveCylinder_ = std::make_unique<Primitive>();
 
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 5.0f;
@@ -87,12 +87,9 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	cylinderParam.segments = 16;
 
 
-	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
-	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	// レティクル
-
-	objectReticle_ = entity3DManager_->CreateObject3D("レティクルシリンダー", Object3d::ObjectType::kPrimitive, {}, camera_);
-	objectReticle_->SetPrimitive(primitiveCylinder_.get());
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D("レティクルシリンダー", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
+	objectReticle_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
 	objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
 	objectReticle_->worldtransform_.rotate_.x = DegreesToRadians(-90);

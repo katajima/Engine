@@ -137,49 +137,34 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitEmitter_->SetIsEmit(false);
 
 
-	/*primitiveCylinder_ = std::make_unique<Primitive>();
-	primitiveCylinder2_ = std::make_unique<Primitive>();
-
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = cilnderHeight_;
 	cylinderParam.innerRadius = 6.0f;
 	cylinderParam.outerRadius = 12.0f;
 	cylinderParam.isCover = false;
 	cylinderParam.segments = 16;
-
-
-	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
-	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);*/
-
 	
-	hitObject_ = entity3DManager->CreateObject3D("cylinder", Object3d::ObjectType::kPrimitive, {0,0,50.0f}, camera);
-	//hitObject_->SetPrimitive(primitiveCylinder_.get());
+	hitObject_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
+	hitObject_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	hitObject_->SetObjectRasterizerType(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
 	hitObject_->worldtransform_.translate_.z = 50.0f;
 	hitObject_->worldtransform_.rotate_.y = DegreesToRadians(-90);
 	hitObject_->SetIsDraw(false);
 	
-	/*cylinderParam.height = 10.0f;
+	cylinderParam.height = 10.0f;
 	cylinderParam.innerRadius = 12.0f;
 	cylinderParam.outerRadius = 12.0f;
-	cylinderParam.isCover = true;*/
-
-	/*primitiveCylinder2_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/Image.png");
-	primitiveCylinder2_->SetPsoType(Primitive::PsoType::kRingClamp);*/
+	cylinderParam.isCover = true;
 
 	
-	hitObject2_ = entity3DManager->CreateObject3D("cylinder2", Object3d::ObjectType::kPrimitive, { 0,0,0.0f }, camera);
-	//hitObject2_->SetPrimitive(primitiveCylinder2_.get());
+	hitObject2_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/Image.png", Primitive::ShapeType::Cylinder, camera);
+	hitObject2_->GetPrimitive()->SetPsoType(Primitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
-	//hitObject2_->primitive_->GetMaterial()->color = { 1.0f,0.0f,0.0f,0.5f };
+	hitObject2_->GetPrimitive()->GetMaterial()->color = {1.0f,0.0f,0.0f,0.5f};
 	
 	enemyPos_.x = targetRange_.position.x = Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
 	enemyPos_.z = targetRange_.position.z = Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
 	enemyPos_.y = -2.0f;
-	
-
-	//flag_ = false;
-
 }
 
 void PlayerRangeBombingBullet::Update()
@@ -359,7 +344,7 @@ void PlayerRangeBombingBullet::Update()
 		hitObject_->worldtransform_.translate_.y = cilnderHeight_ /3.0f;
 		hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
 		hitObject_->worldtransform_.scale_ += Vector3(0.15f, 0.15f, 0.00f);
-		//hitObject_->GetPrimitive()->GetMaterial()->color.a -= 0.05f;
+		hitObject_->GetPrimitive()->GetMaterial()->color.a -= 0.05f;
 
 
 		if (time_ >= 0.5f) {

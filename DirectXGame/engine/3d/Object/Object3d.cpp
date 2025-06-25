@@ -23,7 +23,7 @@
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+//#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 
 void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
@@ -184,14 +184,14 @@ void Object3d::Update()
 		if (primitive_) {
 			primitive_->Update();
 
-			transformation->Update(primitive_, cameraPtr, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
 	case ObjectType::kSkyBox:
 		if (skyBox_) {
 			skyBox_->Update();
 
-			transformation->Update(primitive_, cameraPtr, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
 	case ObjectType::kOcean:
@@ -536,6 +536,11 @@ bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3&
 	return true;
 }
 
+Primitive* Object3d::GetPrimitive() const
+{
+	return primitive_.get();
+}
+
 void Object3d::DebugImguiModel()
 {
 	DebugModel::ImguiModel(model->modelData);
@@ -546,6 +551,12 @@ void Object3d::SetModel(const std::string& filePath)
 	//モデルを検索してセット
 
 	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
+}
+
+void Object3d::SetPrimitive(std::unique_ptr<Primitive> primitive)
+{
+	primitive_ = std::move(primitive);
+	//primitive_ = primitive_.get();
 }
 
 #pragma endregion // その他

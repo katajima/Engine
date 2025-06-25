@@ -17,6 +17,8 @@
 
 #include "Entity3D.h"
 
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+
 class DirectXCommon;
 class Entity3DManager
 {
@@ -48,6 +50,30 @@ public: //セッター
 		object->SetName(name);
 		object->worldtransform_.translate_ = pos;
 		object->SetCamera(camera);
+
+		Object3d* raw = object.get();
+		object3d.push_back(std::move(object));
+		return raw;
+	}
+
+	template<typename T>
+	Object3d* CreatePrimitiveObject3D(const std::string& name,
+		const T& param,
+		const std::string& texturePath,
+		Primitive::ShapeType shapeType,
+		Camera* camera,
+		Object3d::ObjectRasterizerType rasterizerType = Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK)
+	{
+		// プリミティブ生成
+		auto primitive = std::make_unique<Primitive>();
+		primitive->Initialize<T>(GetPrimitiveCommon(), shapeType, param, texturePath);
+
+		// Object3d 生成
+		auto object = std::make_unique<Object3d>();
+		object->Initialize(this, Object3d::ObjectType::kPrimitive, rasterizerType);
+		object->SetName(name);
+		object->SetCamera(camera);
+		object->SetPrimitive(std::move(primitive)); // 所有権を渡す
 
 		Object3d* raw = object.get();
 		object3d.push_back(std::move(object));

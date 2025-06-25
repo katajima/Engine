@@ -17,11 +17,13 @@
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 using namespace Microsoft::WRL;
 
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+
 class Entity3DManager;
 class Object3dCommon;
 class SkinningConmmon;
 class ImGuiManager;
-class Primitive;
+//class Primitive;
 class SkyBox;
 class SkyBoxCommon;
 class OceanManager;
@@ -84,8 +86,7 @@ public:
 	void SetName(const std::string& name) { this->name = name; }
 
 	// プリミティブ形状
-	void SetPrimitive(Primitive* primitive) { primitive_ = primitive; }
-
+	void SetPrimitive(std::unique_ptr<Primitive> primitive);
 	// スカイボックス
 	void SetSkyBox(SkyBox* skyBox) { skyBox_ = skyBox; }
 
@@ -138,7 +139,7 @@ public:
 	Model* GetModel() const { return model; }
 
 	// プリミティブ取得
-	Primitive* GetPrimitive() { return primitive_; }
+	Primitive* GetPrimitive() const;
 	// 波取得
 	Ocean* GetOcean() { return ocean_; }
 
@@ -221,7 +222,7 @@ public:
 	// モデル
 	Model* model = nullptr;
 	// プリミティブ
-	Primitive* primitive_ = nullptr;
+	std::unique_ptr<Primitive> primitive_ = nullptr;
 	// スカイボックス
 	SkyBox* skyBox_ = nullptr;
 	// 波

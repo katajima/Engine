@@ -385,15 +385,15 @@ void TestScene::InitializeObject3D()
 	ring.innerRadius = 1.0f;
 	ring.outerRadius = 7.0f;
 	ring.segments = 16;
-	primitiveObject = std::make_unique<Primitive>();
-	primitiveObject->Initialize<ShapeParameter::Ring>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, ring, "resources/Texture/effect/gradationLine.png");
+	//primitiveObject = std::make_unique<Primitive>();
+	//primitiveObject->Initialize<ShapeParameter::Ring>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, ring, "resources/Texture/effect/gradationLine.png");
 
 	
-	primitiveObject3d = std::make_unique<Object3d>();
-	primitiveObject3d->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive); //primitiveObject
-	primitiveObject3d->SetPrimitive(primitiveObject.get());
-	primitiveObject3d->SetCamera(camera.get());
-	primitiveObject3d->SetName("primitiveR");
+	//primitiveObject3d = std::make_unique<Object3d>();
+	//primitiveObject3d->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive); //primitiveObject
+	//primitiveObject3d->SetPrimitive(primitiveObject.get());
+	//primitiveObject3d->SetCamera(camera.get());
+	//primitiveObject3d->SetName("primitiveR");
 
 
 
@@ -429,15 +429,15 @@ void TestScene::InitializeObject3D()
 	cylinderParam.isCover = false;
 	cylinderParam.segments = 16;
 
-	primitiveCylinder_ = std::make_unique<Primitive>();
-	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
+	//primitiveCylinder_ = std::make_unique<Primitive>();
+	//primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
 
 
-	hitObject_ = std::make_unique<Object3d>();
-	hitObject_->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive);
-	hitObject_->SetPrimitive(primitiveCylinder_.get());
-	hitObject_->SetName("cylinder");
-	hitObject_->SetIsDraw(false);
+	//hitObject_ = std::make_unique<Object3d>();
+	//hitObject_->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive);
+	//hitObject_->SetPrimitive(primitiveCylinder_.get());
+	//hitObject_->SetName("cylinder");
+	//hitObject_->SetIsDraw(false);
 
 
 	primiPlane = std::make_unique<Primitive>();

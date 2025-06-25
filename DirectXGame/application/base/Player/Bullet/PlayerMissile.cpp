@@ -110,12 +110,12 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	cylinderParam.segments = 16;
 
 
-	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
-	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
+	//primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
+	//primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 
 	hitObject_ = std::make_unique<Object3d>();
 	hitObject_->Initialize(entity3DManager, Object3d::ObjectType::kPrimitive, Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
-	hitObject_->SetPrimitive(primitiveCylinder_.get());
+	//hitObject_->SetPrimitive(primitiveCylinder_.get());
 	hitObject_->worldtransform_.translate_.z = 50.0f;
 	hitObject_->worldtransform_.rotate_.y = DegreesToRadians(-90);
 	hitObject_->SetName("cylinder");
