@@ -5,7 +5,7 @@
 #include"list"
 #include"Collider.h"
 #include <unordered_set>
-
+#include "DirectXGame/engine/collider/Octree/Octree.h"  
 /// <summary>
 /// 衝突マネージャ
 /// </summary>
@@ -14,8 +14,10 @@ class CollisionManager {
 public:
     // 初期化
     // 初期化
-    void Initialize(GlobalVariables* globalVariables) {
+    void Initialize(GlobalVariables* globalVariables,const AABB& sceneBounds) {
         globalVariables_ = globalVariables;
+        // オクツリー初期化（シーン全体のAABBと深さなど指定）
+        octree_ = std::make_unique<Octree>(sceneBounds, 4, 2, 2, 2);
     }
 
     // 動的コライダーコンポーネント追加
@@ -48,13 +50,6 @@ public:
                 CheckByLayer(*dynamicColliders[i], *dynamicColliders[j]);
             }
         }
-
-        // 動的 vs 静的
-        for (auto* dyn : dynamicColliders) {
-            for (auto* stat : staticColliders) {
-                CheckByLayer(*dyn, *stat);
-            }
-        }
     }
 
     // レイヤーとマスクに基づいて衝突を行う
@@ -78,13 +73,15 @@ public:
     }
 
 private:
-    std::vector<ColliderComponent*> dynamicColliders;
-    std::vector<ColliderComponent*> staticColliders;
+    std::vector<ColliderComponent*> dynamicColliders; // 動的コライダー
+    std::vector<ColliderComponent*> staticColliders;  // 静的コライダー
 
     std::unordered_set<ColliderComponent*> registeredDynamic_;
     std::unordered_set<ColliderComponent*> registeredStatic_;
 
-    GlobalVariables* globalVariables_ = nullptr;
+    GlobalVariables* globalVariables_ = nullptr;      // 保存
+
+    std::unique_ptr<Octree> octree_; // オクツリー管理
 public:
 
     CollisionManager() = default;

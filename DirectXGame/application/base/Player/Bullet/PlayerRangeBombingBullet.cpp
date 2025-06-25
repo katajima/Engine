@@ -11,15 +11,39 @@
 
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	//// コライダー設定
-	//Collider::Initialize(camera);
-	//Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
-	//Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
-	//Collider::SetRadius(0.01f);
-	//Capsule cap = Collider::GetCapsule();
-	//cap.radius = 6.0f;
+	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_->SetOwner(colliderComponent_.get());
+	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 
-	//Collider::SetCapsule(cap);
+	auto sphere = std::make_unique<SphereCollider>();
+	sphere->tag = CollisionTag::PlayerAttack;
+	sphere->layer = CollisionLayer::PlayerAttack;
+	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
+	sphere->radius = 10.0f; // 半径を適宜設定
+	colliderComponent_->AddCollider(std::move(sphere));
+
+	// 衝突時のコールバック登録
+	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
+
+		uint32_t otherId = otherComponent->GetUniqueId();
+
+
+
+
+		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+
+		if (colliderComponent_->contactRecord_.CheckHistory(otherId)) {
+			return; // クールタイム中のため無視
+		}
+
+		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
+
+		enemy->AddDamage(parameter_.damege);
+		};
 
 	// オブジェクト設定
 	object_ = std::make_unique<Object3d>();
@@ -34,7 +58,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	// X軸周り角度(θx)
 	object_->worldtransform_.rotate_.x = std::atan2(velocity_.y, -length);
 
-	
+	entity3DManager->SetEntity3D(std::move(object_));
 
 	// ダメージ量
 	parameter_.damege = 30;
@@ -141,7 +165,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitObject_->SetName("cylinder");
 	hitObject_->SetIsDraw(false);
 	hitObject_->SetCamera(camera);
-
+	entity3DManager->SetEntity3D(std::move(hitObject_));
 
 	cylinderParam.height = 10.0f;
 	cylinderParam.innerRadius = 12.0f;
@@ -160,7 +184,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitObject2_->SetIsDraw(false);
 	hitObject2_->SetCamera(camera);
 	hitObject2_->primitive_->GetMaterial()->color = { 1.0f,0.0f,0.0f,0.5f };
-	
+	entity3DManager->SetEntity3D(std::move(hitObject2_));
 
 	enemyPos_.x = targetRange_.position.x = Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
 	enemyPos_.z = targetRange_.position.z = Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
@@ -168,6 +192,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	
 
 	flag_ = false;
+
 }
 
 void PlayerRangeBombingBullet::Update()
@@ -308,19 +333,35 @@ void PlayerRangeBombingBullet::Update()
 
 			break;
 		}
+
+		Vector3 velo = velocity_.Normalize();
+
+		moveSmokeEmitter_->SetVelocityMinMax(-velo, -velo);
+
+
+		// Y軸周り角度(θy)
+		object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+		float length = Length(Vector3(velocity_.x, 0, velocity_.z));
+		// X軸周り角度(θx)
+		object_->worldtransform_.rotate_.x = std::atan2(velocity_.y, -length);
+
+
+		hitObject2_->worldtransform_.translate_ = posGround + Vector3{ 0,-6.0f,0 };
+
+		worldTransformUp_.Update();
+		worldTransformBottom_.Update();
+		object_->Update();
+		// 
+		hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_;
+		hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+
+		hitObject2_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+
+		colliderComponent_->UpdateAll(object_->worldtransform_);
 	}
 
 
-	hitObject2_->worldtransform_.translate_ = posGround + Vector3{0,-6.0f,0};
-
-	worldTransformUp_.Update();
-	worldTransformBottom_.Update();
-	object_->Update();
-	// 
-	hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_;
-	hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
 	
-	hitObject2_->worldtransform_.rotate_.x = DegreesToRadians(-90);
 
 	if (isEffectPlay_) {
 		time_ += GetTimer();
@@ -335,28 +376,18 @@ void PlayerRangeBombingBullet::Update()
 
 
 		if (time_ >= 0.5f) {
+			object_->IsDelete();
 			hitObject_->IsDelete();
 			hitObject2_->IsDelete();
 			isEffectPlay_ = false;
 		}
+
+
+
 	}
 
 	hitEmitter_->Update();
 
-
-
-
-
-	Vector3 velo = velocity_.Normalize();
-
-	moveSmokeEmitter_->SetVelocityMinMax(-velo, -velo);
-
-
-	// Y軸周り角度(θy)
-	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
-	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
-	// X軸周り角度(θx)
-	object_->worldtransform_.rotate_.x = std::atan2(velocity_.y, -length);
 
 
 
@@ -377,17 +408,6 @@ void PlayerRangeBombingBullet::DrawP()
 
 void PlayerRangeBombingBullet::Draw2D()
 {
-}
-
-void PlayerRangeBombingBullet::EnemyToColl()
-{
-	player_->AddHit();
-	player_->SetHitTime();
-}
-
-void PlayerRangeBombingBullet::PlayerToColl()
-{
-
 }
 
 void PlayerRangeBombingBullet::InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)

@@ -14,16 +14,20 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
 	// プレイヤー本体のSphereColliderを作成
 	obbCollider_ = std::make_unique<OBBCollider>();
-	obbCollider_->obb.size = {2,2,2};
+	obbCollider_->obb.size = {1,1,1};
 	
 	obbCollider_->tag = CollisionTag::Player;
 	obbCollider_->layer = CollisionLayer::Player;
-	
-
+	//colliderComponent_->AddCollider(std::move(obbCollider_));
+	// SphereColliderを追加
+	auto sphere = std::make_unique<SphereCollider>();
+	sphere->tag = CollisionTag::Player;
+	sphere->layer = CollisionLayer::Player;
+	sphere->radius = 1.0f; // 半径を適宜設定
+	colliderComponent_->AddCollider(std::move(sphere));
 
 
 	// 登録（IDを取得したければ変数で受ける）
-	colliderComponent_->AddCollider(std::move(obbCollider_));
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 
 	// 衝突時のコールバック登録
@@ -38,18 +42,18 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 		if (self->ResolveCollision(*other, pushVec)) {
 			if (other->isStatic) {
 				// 相手が動かないなら自分だけ押し戻す
-				objectBase_.worldtransform_.translate_ += pushVec;
+				objectBase_->worldtransform_.translate_ += pushVec;
 			}
 			else if (self->isStatic) {
 				
 			}
 			else {
 				// 双方が動く → 半分ずつ押し戻す（応用例）
-				objectBase_.worldtransform_.translate_ += pushVec * 0.5f;
+				objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
 				
 			}
 
-			objectBase_.Update();
+			objectBase_->Update();
 		}
 
 		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
@@ -61,7 +65,7 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
 
 		AddDamege(10);
-		followCamera_->GetViewProjection().SetShake(0.25f, {1,1,1});
+		followCamera_->GetViewProjection().SetShake(0.25f, {0.1f,0.1f,0.1f});
 	};
 
 
@@ -73,11 +77,12 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	dxCommon_ = dxcommon;
 
 	// プレイヤー
-	objectBase_.Initialize(entity3DManager);
-	objectBase_.SetCamera(camera_);
-	objectBase_.worldtransform_.translate_ = position;
-	objectBase_.Update();
-	objectBase_.SetName("PlayerBase");
+	objectBase_->Initialize(entity3DManager);
+	objectBase_->SetCamera(camera_);
+	objectBase_->worldtransform_.translate_ = position;
+	objectBase_->Update();
+	objectBase_->SetName("PlayerBase");
+	entity3DManager_;
 
 	primitiveCylinder_ = std::make_unique<Primitive>();
 

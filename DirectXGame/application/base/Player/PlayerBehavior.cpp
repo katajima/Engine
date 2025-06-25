@@ -7,6 +7,7 @@ void Player::BehaviorRootInitialize()
 	effect_->GetDashEmitter()->SetIsEmit(false);
 	workAttack.parameter = 0;
 	
+	//weapon_->SetIsCollider(false);
 	effect_->SetIsTrail(false);
 }
 
@@ -56,7 +57,7 @@ void Player::BehaviorAttackInitialize()
 	workAttack.attackAll.max_t = 1;
 	workAttack.comboIndex = 0;
 	
-
+	//weapon_->SetIsCollider(true);
 	effect_->GetDashEmitter()->SetIsEmit(false);
 	AttackTypes();
 
@@ -67,6 +68,7 @@ void Player::BehaviorAttackInitialize()
 
 void Player::BehaviorAttackUpdate()
 {
+	//weapon_->SetIsCollider(true);
 	AttackKey();
 
 	AttackTypes();
@@ -86,6 +88,7 @@ void Player::BehaviorAttackUpdate()
 
 void Player::BehaviorDieInitialize()
 {
+	//weapon_->SetIsCollider(false);
 	effect_->GetDashEmitter()->SetIsEmit(false);
 	bulletSpecial_->SetPhese(0);
 	bulletSpecial_->SetGauge(0);

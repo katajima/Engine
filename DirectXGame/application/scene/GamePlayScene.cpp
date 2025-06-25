@@ -71,8 +71,9 @@ void GamePlayScene::Initialize()
 
 
 	// 衝突マネージャの生成
+	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables());
+	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 
 	InitializeResources();
 }
@@ -156,23 +157,18 @@ void GamePlayScene::CheckAllCollisions()
 	for (auto enemy : enemyManager_->GetEnemys()) {
 		collisionManager_->Register(enemy->GetColliderComponent());
 	}
+	// 武器コライダコンセット
+	if (player_->GetBehavior() == Player::Behavior::kAttack) {
+		
+		collisionManager_->Register(player_->GetWeapon()->GetColliderComponent());
+	}
+	// 弾のコライダー追加
+	for (const auto& bullet : bulletManager_->GetBullets()) {
+		collisionManager_->Register(bullet->GetColliderComponent());
+	}
 
-	
 	collisionManager_->CheckAll();
-	//if (player_->GetBehavior() == Player::Behavior::kAttack) {
-	//	// コライダーをリストに登録
-	//	collisionManager_->AddCollider(player_->GetWeapon());
-	//}
-
-	//for (const auto& bullet : bulletManager_->GetBullets()) {
-	//	collisionManager_->AddCollider(bullet.get());
-	//}
-
-	
-
-
-	// 衝突判定
-	//collisionManager_->CheckAllCollisions();
+	collisionManager_->Clear();
 }
 #pragma endregion 初期化関係
 
@@ -358,10 +354,7 @@ void GamePlayScene::Update()
 	bulletManager_->Update();
 
 
-	// デバック表示用にワールドトランスフォームを更新
-	//collisionManager_->UpdateWorldTransform(GetEntity3DManager()->Get3DLineCommon());
-
-
+	
 
 	// ステージ
 	stage_->Update();

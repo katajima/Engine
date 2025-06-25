@@ -3,15 +3,9 @@
 #include "DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Player/Player.h"
 
-uint32_t BaseBullet::nextSerialNumber = 0;
 
 BaseBullet::BaseBullet()
 {
-	// シリアル番号を振る
-	serialNumber = nextSerialNumber;
-	// 次の番号を1加算
-	++nextSerialNumber;
-
 	parameter_ = {};
 }
 

@@ -579,6 +579,71 @@ static bool IsCollision(const OBB& obb0, const OBB& obb1) {
 	return true;
 }
 
+// 分離軸定理による OBB vs OBB の衝突判定
+static bool IsCollision2(const OBB& obb0, const OBB& obb1) {
+	const Vector3* A = obb0.orientations;
+	const Vector3* B = obb1.orientations;
+
+	// OBB1の中心をOBB0のローカル空間に投影
+	Vector3 T = obb1.center - obb0.center;
+	T = { T.Dot(A[0]), T.Dot(A[1]), T.Dot(A[2]) };
+
+	constexpr float EPSILON = 1e-6f;
+	float ra, rb;
+	float R[3][3], AbsR[3][3];
+
+	// R行列とAbsRの計算
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			R[i][j] = A[i].Dot(B[j]);
+			AbsR[i][j] = std::abs(R[i][j]) + EPSILON;
+		}
+	}
+
+	// 1. A[i] 軸
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[i] * 1.0f;
+		rb = obb1.size[0] * 1.0f * AbsR[i][0] +
+			obb1.size[1] * 1.0f * AbsR[i][1] +
+			obb1.size[2] * 1.0f * AbsR[i][2];
+
+		if (std::abs(T[i]) > ra + rb) return false;
+	}
+
+	// 2. B[i] 軸
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[0] * 1.0f * AbsR[0][i] +
+			obb0.size[1] * 1.0f * AbsR[1][i] +
+			obb0.size[2] * 1.0f * AbsR[2][i];
+
+		rb = obb1.size[i] * 1.0f;
+
+		float t = T[0] * R[0][i] + T[1] * R[1][i] + T[2] * R[2][i];
+		if (std::abs(t) > ra + rb) return false;
+	}
+
+	// 3. 交差軸 A[i] x B[j]
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			ra = obb0.size[(i + 1) % 3] * 1.0f * AbsR[(i + 2) % 3][j] +
+				obb0.size[(i + 2) % 3] * 1.0f * AbsR[(i + 1) % 3][j];
+
+			rb = obb1.size[(j + 1) % 3] * 1.0f * AbsR[i][(j + 2) % 3] +
+				obb1.size[(j + 2) % 3] * 1.0f * AbsR[i][(j + 1) % 3];
+
+			float t = std::abs(
+				T[(i + 1) % 3] * R[(i + 2) % 3][j] -
+				T[(i + 2) % 3] * R[(i + 1) % 3][j]
+			);
+
+			if (t > ra + rb) return false;
+		}
+	}
+
+	return true;
+}
+
+
 // カプセルとカプセル
 static bool IsCollision(const Capsule& cap0, const Capsule& cap1)
 {
@@ -643,5 +708,19 @@ static bool CapsuleIntersectsAABB(const Capsule& capsule, const AABB& box) {
 	return distanceSquared <= (capsule.radius * capsule.radius);
 }
 
+static Vector3 ClosestPtSegmentAABB(const Vector3& segStart, const Vector3& segEnd, const AABB& aabb) {
+	// 線分の最近接点をAABB内にクランプ
+	Vector3 ab = segEnd - segStart;
+	float t = 0.0f;
+	float abLenSq = ab.LengthSq();
+	if (abLenSq > 0.0001f) {
+		Vector3 aabbCenter = (aabb.min_ + aabb.max_) * 0.5f;
+		t = (aabbCenter - segStart).Dot(ab) / abLenSq;
+		t = std::clamp(t, 0.0f, 1.0f);
+	}
+	Vector3 closest = segStart + ab * t;
 
+	// AABB内にクランプ（closest点がAABBの内外どちらでも動作する）
+	return Vector3::Clamp(closest, aabb.min_, aabb.max_);
+}
 #pragma endregion

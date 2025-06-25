@@ -7,7 +7,7 @@ void Player::Attack()
 	workAttack.parameter += MyGame::GameTime();
 
 	float t = static_cast<float>(workAttack.parameter) / workAttack.attackAll.max_t;
-
+	weapon_->GetObject3D().SetIsDraw(true);
 	float k = 0.5f;
 	switch (workAttack.type)
 	{
@@ -102,12 +102,13 @@ void Player::SetAttackCombo(WrokAttack& work)
 			work.comboNext = false;
 			work.key.IsAttack = false;
 			effect_->SetIsTrail(false);
-
+			weapon_->SetColliderHistoryClear();
 		}
 		else {
 			effect_->SetIsTrail(false);
-
+			weapon_->GetObject3D().SetIsDraw(false);
 			behaviorRequest_ = Behavior::kRoot;
+			
 		}
 	}
 	else {

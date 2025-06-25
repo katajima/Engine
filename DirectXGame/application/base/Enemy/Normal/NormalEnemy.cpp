@@ -8,6 +8,7 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 	// コライダーコンポーネントの作成と初期設定
 	colliderComponent_ = std::make_unique<ColliderComponent>();
 	colliderComponent_->SetOwner(colliderComponent_.get());
+	colliderComponent_->SetHitReceiver(this);
 	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
 
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
@@ -15,14 +16,10 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::Enemy;
+	sphere->layer = CollisionLayer::Enemy;
+	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::PlayerAttack));
 	sphere->radius = 3.0f; // 半径を適宜設定
 	colliderComponent_->AddCollider(std::move(sphere));
-
-	// AABBColliderを追加
-	auto aabb = std::make_unique<AABBCollider>();
-	aabb->tag = CollisionTag::Enemy;
-	aabb->aabb = { -Vector3{3,3,3},Vector3{3,3,3} };
-	//colliderComponent_->AddCollider(std::move(aabb));
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
 	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
@@ -72,6 +69,9 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 				object_->Update();
 			}
 		}
+
+
+
 	};
 
 

@@ -4,9 +4,14 @@
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
-#include <DirectXGame/engine/Collider/CollisionTypeIdDef.h>
 
+constexpr float kFloatMax = 3.4028235e+38f;
 
+struct SATResult {
+	bool hit;
+	float minOverlap = FLT_MAX; // 初期化は最大値
+	Vector3 pushDir; // 押し出し軸（world space）
+};
 // コライダー基底クラス
 class Collider
 {
@@ -104,6 +109,70 @@ private:
 
 };
 
+
+static SATResult CheckOBBCollisionSAT(const OBB& obb0, const OBB& obb1)
+{
+	SATResult result;
+	const Vector3* A = obb0.orientations;
+	const Vector3* B = obb1.orientations;
+
+	Vector3 T = obb1.center - obb0.center;
+
+	float R[3][3], AbsR[3][3];
+	constexpr float EPSILON = 1e-6f;
+
+	// 回転行列の生成
+	for (int i = 0; i < 3; ++i)
+		for (int j = 0; j < 3; ++j) {
+			R[i][j] = A[i].Dot(B[j]);
+			AbsR[i][j] = std::abs(R[i][j]) + EPSILON;
+		}
+
+	Vector3 tLocal{
+		T.Dot(A[0]),
+		T.Dot(A[1]),
+		T.Dot(A[2])
+	};
+
+	float ra, rb;// , overlap;
+	//Vector3 axis;
+
+	auto testAxis = [&](const Vector3& testAxis, float ra, float rb, float tProj) {
+		float overlap = ra + rb - std::abs(tProj);
+		if (overlap < 0.0f) {
+			result.hit = false;
+			return false;
+		}
+		if (overlap < result.minOverlap) {
+			result.minOverlap = overlap;
+			result.pushDir = testAxis;
+		}
+		return true;
+		};
+
+	result.hit = true;
+
+	// 各軸のテスト（A[0~2], B[0~2], A×Bの9軸）
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[i] * 0.5f;
+		rb = obb1.size[0] * AbsR[i][0] + obb1.size[1] * AbsR[i][1] + obb1.size[2] * AbsR[i][2];
+		if (!testAxis(A[i], ra, rb, tLocal[i])) return result;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[0] * AbsR[0][i] + obb0.size[1] * AbsR[1][i] + obb0.size[2] * AbsR[2][i];
+		rb = obb1.size[i] * 0.5f;
+		if (!testAxis(B[i], ra, rb, T.Dot(B[i]))) return result;
+	}
+
+	// 交差軸は省略（まずはここまでで試す）
+
+	// pushDir の向き補正
+	if (T.Dot(result.pushDir) < 0.0f)
+		result.pushDir = -result.pushDir;
+
+	return result;
+}
 
 
 

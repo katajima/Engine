@@ -44,7 +44,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 	transformation->Initialize(object3dCommon_->GetDxCommon());
 
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
-	entity3DManager_->SetEntity3D(this);
+	//entity3DManager_->SetEntity3D();
 
 	isSkin_ = false;
 

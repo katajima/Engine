@@ -8,7 +8,7 @@
 
 #include "DirectXGame/engine/collider/3d/Collider.h"
 #include"DirectXGame/engine/collider/ContactRecord.h"
-
+#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 
 class BasePlayer;
 class Player;
@@ -36,10 +36,14 @@ public:
 
 
 
-	Object3d& GetObject3D() { return objectWeapon_; }
+	Object3d& GetObject3D() { return *objectWeapon_.get(); }
 
 	// カメラのビュープロジェクション
 	//void SetCamera(const Camera* camera) { camera_ = camera; };
+
+	void SetIsCollider(bool is) { colliderComponent_->SetEnableByTag(CollisionTag::PlayerAttack, is); };
+	void SetColliderHistoryClear() { colliderComponent_->contactRecord_.Clear(); }
+
 
 	void SetOffset(const Vector3& translation) { offset = translation; }
 
@@ -52,14 +56,22 @@ public:
 	
 	void SetPlayer(BasePlayer* player);
 
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
+
 private:
 	// 武器
-	Object3d objectWeapon_;
+	std::unique_ptr<Object3d> objectWeapon_;
+	//std::unique_ptr<WorldTransform> colliderWorld_ = nullptr;
+	WorldTransform colliderWorld_;
+
 	const Camera* camera_ = nullptr;
 	ContactRecord contactRecord_;
 	Vector3 offset;
 
 	Player* player_;
 	BasePlayer* basePlayer_;
+
+
+	std::unique_ptr<ColliderComponent> colliderComponent_ = nullptr;
 };
 

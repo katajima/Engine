@@ -733,11 +733,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\scene\SceneManager.h" />
     <ClInclude Include="DirectXGame\engine\Skinning\Skinning.h" />
     <ClInclude Include="DirectXGame\engine\struct\Light.h" />
+    <ClInclude Include="DirectXGame\engine\struct\LineStruct.h" />
     <ClInclude Include="DirectXGame\engine\struct\Material.h" />
     <ClInclude Include="DirectXGame\engine\struct\Matrix3x3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h" />
     <ClInclude Include="DirectXGame\engine\struct\Quaternion.h" />
     <ClInclude Include="DirectXGame\engine\struct\Structs2D.h" />
+    <ClInclude Include="DirectXGame\engine\struct\TransformStruct.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector2.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector4.h" />

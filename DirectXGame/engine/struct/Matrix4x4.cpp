@@ -605,7 +605,7 @@ Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const V
 Matrix4x4 MakeBillboardMatrixY(const Matrix4x4& cameraWorldMatrix)
 {
 	// カメラの正面ベクトル（Z軸）
-	Vector3 cameraZ = Normalize(cameraWorldMatrix.Forward());
+	Vector3 cameraZ = Normalize(cameraWorldMatrix.AxisRow(2));
 
 	// Y軸固定
 	Vector3 up = { 0.0f, 1.0f, 0.0f };

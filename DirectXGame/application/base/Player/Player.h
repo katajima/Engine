@@ -267,7 +267,7 @@ public:
 private:  // パラメータ
 	
 	uint32_t maxHp = 100;
-	int hp = 100;
+	int hp = 10000;
 	bool isAlive = true;
 	bool isInvincible = false;
 private:
@@ -292,7 +292,7 @@ private:
 
 	// オブジェクト3D
 
-	Object3d objectBase_;
+	std::unique_ptr<Object3d> objectBase_;
 	// 本体
 	Object3d objectBody_;
 	

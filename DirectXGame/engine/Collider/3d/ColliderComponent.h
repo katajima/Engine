@@ -6,13 +6,20 @@
 #include "DirectXGame/engine/collider/ContactRecord.h"
 #include "DirectXGame/engine/line/lineCommon.h"
 
-
+// 一意なIDを生成するためのユーティリティクラス
 class UniqueIdGenerator {
 public:
     static uint32_t Generate() {
         static uint32_t currentId = 1;
         return currentId++;
     }
+};
+
+// インターフェース的な役割クラス
+class IHitReceiver {
+public:
+    virtual void OnHit(float damage) = 0;
+    virtual ~IHitReceiver() = default;
 };
 
 class ColliderComponent {
@@ -31,6 +38,10 @@ public:
     // 衝突時に呼ばれる関数（任意）
     std::function<void(Collider* self, Collider* other)> onHitCallback;
 
+	// 衝突時に受け取るインターフェース（任意）
+    IHitReceiver* hitReceiver = nullptr;
+
+	// 履歴情報（衝突履歴）
     ContactRecord contactRecord_;
 private:
     uint32_t nextId_ = 1; // IDは1から開始
@@ -118,6 +129,11 @@ public: // 設定or追加
         }
     }
 
+	// 衝突インターフェースをセット(※IHitReceiverを継承必須)
+    void SetHitReceiver(IHitReceiver* receiver) {
+        hitReceiver = receiver;
+    }
+
     // タグと判定があるかの設定
     void SetEnableByTag(CollisionTag tag, bool enable) {
         for (auto& entry : colliders) {
@@ -131,6 +147,9 @@ public: // 設定or追加
     void SetUniqueId(uint32_t id) { uniqueId_ = id; }
 
 public: // 取得
+
+    //
+    IHitReceiver* GetHitReceiver() const { return hitReceiver; }
 
     // IDセット()
     uint32_t GetUniqueId() const { return uniqueId_; }

@@ -7,7 +7,7 @@
 
 #include "DirectXGame/engine/Effect/Particle/ParticleEmitter.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
-
+#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 
 class Player;
 class BaseEnemy;
@@ -58,8 +58,6 @@ public:
 	// 時間
 	float GetTimer() const;
 
-	// シリアルナンバー
-	uint32_t GetSerialNumber() const { return serialNumber; }
 	// オブジェクト
 	Object3d* GetObject3D() { return object_.get(); }
 	//
@@ -67,31 +65,18 @@ public:
 
 	void SetEnemy(BaseEnemy* enemy);
 
-	//void SetTargetType(CollisionTypeIdDef type);
-
 	void SetTargerRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
+
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
 
 protected:
 	// 当たり判定をするか
 	void SetIsCollision(bool is) { isCollision = is; }
-	// 敵に対して
-	virtual void EnemyToColl() = 0; 
-	// プレイヤーに対して
-	virtual void PlayerToColl() = 0;
-
-
 public:
 	
 protected:
 	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
-
-
-	// シリアルナンバー
-	uint32_t serialNumber = 0;
-	// 次のシリアルナンバー
-	static uint32_t nextSerialNumber;
-	ContactRecord contactRecord_;
-
+	
 	// 各パラメータ
 	Parameters parameter_{};
 	// 移動
@@ -116,9 +101,7 @@ protected:
 	BaseEnemy* enemy_;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
-private:
-	IsCollisionType isCollisioType_{};
-
+	std::unique_ptr<ColliderComponent> colliderComponent_ = nullptr;
 };
 
 

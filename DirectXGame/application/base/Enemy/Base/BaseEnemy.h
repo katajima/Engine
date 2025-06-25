@@ -13,7 +13,7 @@
 class Player;
 class Entity3DManager;
 class Entity2DManager;
-class BaseEnemy{
+class BaseEnemy : public IHitReceiver {
 public:
 
 	struct Parameters {
@@ -44,6 +44,11 @@ public:
 	virtual void Draw2D() = 0;
 
 	virtual void SetPlayer(Player* player) = 0;
+
+	// ヒット時の処理
+	void OnHit(float damage) override {
+		AddDamage(damage);
+	}
 
 public:
 	// パーティクル発生
