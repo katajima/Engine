@@ -89,29 +89,29 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	ParticleManager* particleManager = entity3DManager->GetEffectManager()->GetParticleManager();
 
 	//// ミサイル移動中の煙パーティクルエミッター
-	//moveSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	//InitMoveSmoke(moveSmokeEmitter_.get(), particleManager, "smokePlane01");
+	moveSmokeEmitter_ = std::make_unique <ParticleEmitter>();
+	InitMoveSmoke(moveSmokeEmitter_.get(), particleManager, "smokePlane01");
 
-	//// ミサイル移動中の煙パーティクルエミッター2
-	//moveSmokeEmitter2_ = std::make_unique <ParticleEmitter>();
-	//InitMoveSmoke(moveSmokeEmitter2_.get(), particleManager, "smokePlane04");
+	// ミサイル移動中の煙パーティクルエミッター2
+	moveSmokeEmitter2_ = std::make_unique <ParticleEmitter>();
+	InitMoveSmoke(moveSmokeEmitter2_.get(), particleManager, "smokePlane04");
 
-	//// ミサイル爆発時の煙パーティクルエミッター
-	//moveExpEmitter_ = std::make_unique <ParticleEmitter>();
-	//InitExpSmoke(moveExpEmitter_.get(), particleManager, "smokePlane05");
+	// ミサイル爆発時の煙パーティクルエミッター
+	moveExpEmitter_ = std::make_unique <ParticleEmitter>();
+	InitExpSmoke(moveExpEmitter_.get(), particleManager, "smokePlane05");
 
-	//expFireEmitter_ = std::make_unique <ParticleEmitter>(); 
-	//InitExpFire(expFireEmitter_.get(), particleManager, "expPlane01");
+	expFireEmitter_ = std::make_unique <ParticleEmitter>(); 
+	InitExpFire(expFireEmitter_.get(), particleManager, "expPlane01");
 
-	//animatedCubeEmitter_ = std::make_unique <ParticleEmitter>();
-	//InitExpBre(animatedCubeEmitter_.get(), particleManager, "AnimatedCube");
+	animatedCubeEmitter_ = std::make_unique <ParticleEmitter>();
+	InitExpBre(animatedCubeEmitter_.get(), particleManager, "AnimatedCube");
 
-	//startSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	//InitStartSmoke(startSmokeEmitter_.get(), particleManager, "smokePlane05");
+	startSmokeEmitter_ = std::make_unique <ParticleEmitter>();
+	InitStartSmoke(startSmokeEmitter_.get(), particleManager, "smokePlane05");
 
-	//// ミサイル爆発時のリングパーティクルエミッター
-	//ringEmitter_ = std::make_unique <ParticleEmitter>();
-	//InitRingEmitter(ringEmitter_.get(), particleManager, "ringEmit");
+	// ミサイル爆発時のリングパーティクルエミッター
+	ringEmitter_ = std::make_unique <ParticleEmitter>();
+	InitRingEmitter(ringEmitter_.get(), particleManager, "ringEmit");
 
 
 	/*trailEffect_ = std::make_unique<TrailEffect>();
@@ -121,7 +121,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 
 	Vector3 size = { 2.0f, 2.0f, 2.0f };
-	/*hitEmitter_ = std::make_unique <ParticleEmitter>();
+	hitEmitter_ = std::make_unique <ParticleEmitter>();
 	hitEmitter_->Initialize(particleManager, "missileHit", "missileHit", ParticleData::SpawnType::kPoint);
 	hitEmitter_->SetCount(2);
 	hitEmitter_->SetLifeTimeMinMax(0.25f, 0.25f);
@@ -134,7 +134,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitEmitter_->SetIsAlpha(true);
 	hitEmitter_->SetVelocityMinMax({}, {});
 	hitEmitter_->SetRotateMinMax({ 0,0,-3.14f }, { 0,0,3.14f });
-	hitEmitter_->SetIsEmit(false);*/
+	hitEmitter_->SetIsEmit(false);
 
 
 	/*primitiveCylinder_ = std::make_unique<Primitive>();
@@ -184,11 +184,11 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 void PlayerRangeBombingBullet::Update()
 {
-	//hitEmitter_->SetIsEmit(false);
+	hitEmitter_->SetIsEmit(false);
 	// 時間経過でデス
 	if (Hit) {
-		//hitEmitter_->SetIsEmit(true);
-		//hitEmitter_->Emit();
+		hitEmitter_->SetIsEmit(true);
+		hitEmitter_->Emit();
 		isAlive_ = false;
 	}
 
@@ -213,8 +213,8 @@ void PlayerRangeBombingBullet::Update()
 				flag_ = true;
 			}
 			else {
-				//startSmokeEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{10.0f,-5.0f,0.0f});
-				//startSmokeEmitter_->Update();
+				startSmokeEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{10.0f,-5.0f,0.0f});
+				startSmokeEmitter_->Update();
 			}
 
 			count += GetTimer() * 2.0f;
@@ -248,19 +248,19 @@ void PlayerRangeBombingBullet::Update()
 
 
 				if (posLength > 500.0f) {
-					//moveSmokeEmitter_->SetLifeTimeMinMax(0.2f, 0.4f);
-					//moveSmokeEmitter_->SetCount(5);
-					//moveSmokeEmitter2_->SetCount(7);
+					moveSmokeEmitter_->SetLifeTimeMinMax(0.2f, 0.4f);
+					moveSmokeEmitter_->SetCount(5);
+					moveSmokeEmitter2_->SetCount(7);
 				}
 				else if (posLength > 100.0f) {
-					//moveSmokeEmitter_->SetLifeTimeMinMax(0.3f, 0.5f);
-					//moveSmokeEmitter_->SetCount(5);
-					//moveSmokeEmitter2_->SetCount(7);
+					moveSmokeEmitter_->SetLifeTimeMinMax(0.3f, 0.5f);
+					moveSmokeEmitter_->SetCount(5);
+					moveSmokeEmitter2_->SetCount(7);
 				}
 				else {
-					//moveSmokeEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
-					//moveSmokeEmitter_->SetCount(5);
-					//moveSmokeEmitter2_->SetCount(5);
+					moveSmokeEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
+					moveSmokeEmitter_->SetCount(5);
+					moveSmokeEmitter2_->SetCount(5);
 				}
 
 				Vector3 pos2 = pos;
@@ -284,12 +284,12 @@ void PlayerRangeBombingBullet::Update()
 		case 2:
 			flag_ = true;
 			
-			//moveSmokeEmitter_->SetCount(5);
-			//moveSmokeEmitter2_->SetCount(5);
+			moveSmokeEmitter_->SetCount(5);
+			moveSmokeEmitter2_->SetCount(5);
 
 			// リングエフェクトの位置を設定
-			//ringEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
-			//ringEmitter_->Update();
+			ringEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
+			ringEmitter_->Update();
 
 			count += GetTimer();
 			if (count >= max_count)
@@ -305,17 +305,17 @@ void PlayerRangeBombingBullet::Update()
 				isAlive_ = false;
 				count = 0;
 				phase_ = 0;
-				//hitEmitter_->SetIsEmit(true);
-				//hitEmitter_->Emit();
+				hitEmitter_->SetIsEmit(true);
+				hitEmitter_->Emit();
 				isEffectPlay_ = true;
 				flag_ = false;
 				//hitObject2_->SetIsDraw(false);
-				//moveExpEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition());
-				//moveExpEmitter_->Update();
-				//expFireEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() +Vector3{0,5,0});
-				//expFireEmitter_->Update();
-				//animatedCubeEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
-				//animatedCubeEmitter_->Update();
+				moveExpEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition());
+				moveExpEmitter_->Update();
+				expFireEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() +Vector3{0,5,0});
+				expFireEmitter_->Update();
+				animatedCubeEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
+				animatedCubeEmitter_->Update();
 			}
 
 			break;
@@ -323,7 +323,7 @@ void PlayerRangeBombingBullet::Update()
 
 		Vector3 velo = velocity_.Normalize();
 
-		//moveSmokeEmitter_->SetVelocityMinMax(-velo, -velo);
+		moveSmokeEmitter_->SetVelocityMinMax(-velo, -velo);
 
 
 		// Y軸周り角度(θy)
@@ -374,7 +374,7 @@ void PlayerRangeBombingBullet::Update()
 
 	}
 
-	//hitEmitter_->Update();
+	hitEmitter_->Update();
 
 }
 

@@ -17,7 +17,6 @@ void BulletManager::Update()
 		bullet->Update();
 	}
 	bullets_.remove_if([](const std::unique_ptr<BaseBullet>& bullet) { if (bullet->IsExpired()) {
-		// DebugLog("Bullet expired and removed.");
 		return true;
 	}
 	return false;
