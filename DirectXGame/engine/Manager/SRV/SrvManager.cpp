@@ -28,13 +28,8 @@ void SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 
 uint32_t SrvManager::Allocate()
 {
-	assert(kMaxSRVCount > useIndex);
-
-	// return する番号を一旦記録
-	int index = useIndex + 1;
-	// 次回のために番号を1進める
-	useIndex++;
-	// 上で記録した番号をreturn
+	uint32_t index = useIndex_.fetch_add(1, std::memory_order_relaxed);
+	assert(index < kMaxSRVCount);
 	return index;
 }
 
@@ -130,7 +125,7 @@ void SrvManager::SetGraphicsRootdescriptorTable(UINT RootParameterIndex, uint32_
 
 bool SrvManager::IsMaxTextuer()
 {
-	if (kMaxSRVCount > useIndex) {
+	if (kMaxSRVCount > useIndex_) {
 		return true;
 	}
 	return false;

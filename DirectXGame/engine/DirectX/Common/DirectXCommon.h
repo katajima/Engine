@@ -107,6 +107,9 @@ public:
 
 	PostEffectManager* GetPostEffectManager() { return postEffectManager_.get(); }
 
+	SwapChain* GetSwapChain() { return swapChain_.get(); }
+
+	Fence* GetFence() { return fence_.get(); }
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス
 	std::unique_ptr<Command> command_ = std::make_unique<Command>();					     // コマンド

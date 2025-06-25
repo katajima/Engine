@@ -49,11 +49,15 @@ void ModelManager::LoadModelAsync(const std::string& filePath, const std::string
 
 	// 非同期に読み込み開始
 	loadingFutures_.push_back(std::async(std::launch::async, [this, filePath, dire]() {
-		// 実際の読み込み処理（LoadModel内部の処理を分解するイメージ）
 		std::unique_ptr<Model> model = std::make_unique<Model>();
 		model->Initialize(dxCommon_, modelCommon_.get(), "./resources/Models", filePath, dire);
 
-		// 読み込み後にモデル登録（排他制御）
+		// GPUにリソース記録が終わったあと、必ずキックして完了を待つ（非同期内）
+		auto* command = dxCommon_->GetCommand();
+		command->KickCommand();
+		dxCommon_->GetFence()->WaitGPU();
+		command->ResetCommand();
+
 		{
 			std::lock_guard<std::mutex> lock(modelsMutex_);
 			models.insert(std::make_pair(filePath, std::move(model)));
@@ -67,6 +71,12 @@ void ModelManager::WaitAllLoadFinished()
 		fut.get();  // 完了待ち
 	}
 	loadingFutures_.clear();
+
+	
+	auto* command = dxCommon_->GetCommand();
+	command->KickCommand();            // Close & ExecuteCommandLists
+	dxCommon_->GetFence()->WaitGPU();  // 完了待ち
+	command->ResetCommand();           // 次回描画準備
 }
 
 Model* ModelManager::FindModel(const std::string& filePath)
