@@ -164,7 +164,7 @@ void GamePlayScene::CheckAllCollisions()
 	}
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
-		//collisionManager_->Register(bullet->GetColliderComponent());
+		collisionManager_->Register(bullet->GetColliderComponent());
 	}
 
 	collisionManager_->CheckAll();

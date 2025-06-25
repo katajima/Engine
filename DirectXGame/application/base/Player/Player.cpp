@@ -13,12 +13,8 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	colliderComponent_->SetOwner(colliderComponent_.get());
 	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
 	// プレイヤー本体のSphereColliderを作成
-	obbCollider_ = std::make_unique<OBBCollider>();
-	obbCollider_->obb.size = {1,1,1};
-	
-	obbCollider_->tag = CollisionTag::Player;
-	obbCollider_->layer = CollisionLayer::Player;
-	//colliderComponent_->AddCollider(std::move(obbCollider_));
+
+
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::Player;
@@ -76,6 +72,7 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 
 	// プレイヤー
 	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase",Object3d::ObjectType::kNormal,position,camera_);
+	objectBase_->SetModel("AnimatedCube.gltf");
 	objectBase_->Update();
 	
 

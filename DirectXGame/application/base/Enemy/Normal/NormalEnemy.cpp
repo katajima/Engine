@@ -134,7 +134,7 @@ void NormalEnemy::Update()
 		dustEmit3_->Update();*/
 	}
 	else {
-		
+		object_->IsDelete();
 	}
 
 	object_->Update();
@@ -146,11 +146,6 @@ void NormalEnemy::Update()
 
 void NormalEnemy::Draw()
 {
-	// 生きていたら
-	if (isAlive_) {
-		object_->Draw();
-		//objectSha_.Draw();
-	}
 }
 
 void NormalEnemy::DrawP()
