@@ -44,11 +44,8 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 		};
 
 	// オブジェクト設定
-	object_ = std::make_unique<Object3d>();
-	object_->Initialize(entity3DManager);
-	object_->SetCamera(camera);
+	object_ = entity3DManager->CreateObject3D("playerbullet", Object3d::ObjectType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");
-	object_->worldtransform_.translate_ = position;
 	object_->Update();
 	// Y軸周り角度(θy)
 	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);

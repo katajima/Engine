@@ -85,8 +85,8 @@ private: //パーティクルエミッター
 	// ヒット
 	std::unique_ptr<ParticleEmitter> hitEmitter_ = nullptr;
 
-	std::unique_ptr<Object3d> hitObject_ = nullptr;
-	std::unique_ptr<Object3d> hitObject2_ = nullptr;
+	//Object3d* hitObject_ = nullptr;
+	//Object3d* hitObject2_ = nullptr;
 
 	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 	std::unique_ptr<Primitive> primitiveCylinder2_ = nullptr;

@@ -81,13 +81,11 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 	transBase_.Initialize();
 	transBase_.translate_ = position;
 
-	object_->Initialize(entity3DManager_);
+	object_ = entity3DManager_->CreateObject3D("enemy", Object3d::ObjectType::kNormal, {}, camera);
 	object_->SetModel("enemy2.obj");
-	object_->SetCamera(camera);
 	object_->worldtransform_.parent_ = &transBase_;
 	object_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
-
-
+	
 	isAlive_ = true;
 
 	parameter_.HP = 100;
@@ -227,7 +225,7 @@ void NormalEnemy::Move()
 	moveDirection = TransformNormal(moveDirection, rotationMatrix);
 
 	// ロックオン座標
-	Vector3 lockOnPosition = player_->GetObject3D().GetWorldPosition();
+	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
 
 	// 追跡対象からロックオン対象へのベクトル
 	Vector3 sub = Subtract(lockOnPosition, transBase_.translate_);
@@ -235,7 +233,7 @@ void NormalEnemy::Move()
 	// Y軸周り角度
 	transBase_.rotate_.y = std::atan2(sub.x, sub.z);
 
-	if (Distance(player_->GetObject3D().GetWorldPosition(), object_->GetWorldPosition()) >= 5) {
+	if (Distance(player_->GetObject3D()->GetWorldPosition(), object_->GetWorldPosition()) >= 5) {
 
 		// 移動
 		transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());

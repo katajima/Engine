@@ -139,5 +139,5 @@ void Player::BehaviorDieUpdate()
 
 
 
-	objectBase_.Update();
+	objectBase_->Update();
 }

@@ -80,7 +80,7 @@ public:
 	// シリアルナンバー
 	uint32_t GetSerialNumber() const { return serialNumber; }
 
-	Object3d* GetObject3D() { return object_.get(); }
+	Object3d* GetObject3D() { return object_; }
 
 	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
 
@@ -101,7 +101,7 @@ public: // コライダー関係
 
 protected:
 	// オブジェクト
-	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
+	Object3d* object_;
 	WorldTransform transBase_;
 	Vector3 oldPos_;
 

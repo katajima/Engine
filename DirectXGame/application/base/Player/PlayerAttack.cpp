@@ -44,9 +44,9 @@ void Player::Attack()
 
 			Vector3 move(0, 0, k);
 			// 速度ベクトルを自機の向きに合わせて回転させる
-			move = TransformNormal(move, objectBase_.worldtransform_.worldMat_);
+			move = TransformNormal(move, objectBase_->worldtransform_.worldMat_);
 
-			objectBase_.worldtransform_.translate_ += move;
+			objectBase_->worldtransform_.translate_ += move;
 		}
 		break;
 	}
@@ -130,9 +130,9 @@ void Player::SetAttackCombo(WrokAttack& work)
 // 攻撃位置初期化
 void Player::AttackTypeInit(int comboIndex)
 {
-	objectBase_.Update();
+	objectBase_->Update();
 	objectReticle_->Update();
-	workAttack.pos.str = objectBase_.GetWorldPosition();
+	workAttack.pos.str = objectBase_->GetWorldPosition();
 	weapon_->ContactRecordClear();
 
 	// スピード

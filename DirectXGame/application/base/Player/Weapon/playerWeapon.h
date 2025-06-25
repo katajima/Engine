@@ -36,7 +36,7 @@ public:
 
 
 
-	Object3d& GetObject3D() { return *objectWeapon_.get(); }
+	Object3d& GetObject3D() { return *objectWeapon_; }
 
 	// カメラのビュープロジェクション
 	//void SetCamera(const Camera* camera) { camera_ = camera; };
@@ -60,7 +60,7 @@ public:
 
 private:
 	// 武器
-	std::unique_ptr<Object3d> objectWeapon_;
+	Object3d* objectWeapon_;
 	//std::unique_ptr<WorldTransform> colliderWorld_ = nullptr;
 	WorldTransform colliderWorld_;
 

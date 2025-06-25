@@ -209,7 +209,7 @@ void Entity3DManager::Update()
 
 	object3d.erase(
 		std::remove_if(object3d.begin(), object3d.end(),
-			[](Object3d* object) {
+			[](const std::unique_ptr<Object3d>& object) {
 				return object->GetIsDelete();
 			}),
 		object3d.end());
@@ -278,9 +278,5 @@ void Entity3DManager::ObjectDraw()
 
 }
 
-void Entity3DManager::SetEntity3D(std::unique_ptr<Object3d> entity3D)
-{
-	object3d.push_back(std::move(entity3D));
-}
 
 

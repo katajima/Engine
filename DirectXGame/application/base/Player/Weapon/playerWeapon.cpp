@@ -54,14 +54,10 @@ void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 		player_->SetHitTime();
 		};
 
-	objectWeapon_ = std::make_unique<Object3d>();
-	objectWeapon_->Initialize(entity3DManager);
-	objectWeapon_->SetCamera(camera);
+	objectWeapon_ = entity3DManager->CreateObject3D("PlayerWeapon", Object3d::ObjectType::kNormal, {}, camera);
 	objectWeapon_->SetIsDraw(false);
 	objectWeapon_->SetModel("Sword.obj");
-	entity3DManager->SetEntity3D(std::move(objectWeapon_));
-
-	//colliderWorld_ = std::make_unique<WorldTransform>();
+	
 	colliderWorld_.Initialize();
 	colliderWorld_.parent_ = &objectWeapon_->worldtransform_;
 	colliderWorld_.translate_.y = 5.0f; // 武器の位置調整

@@ -65,7 +65,7 @@ void BaseEnemy::HitMotion()
 	moveDirection = TransformNormal(moveDirection, rotationMatrix);
 
 	// ロックオン座標
-	Vector3 lockOnPosition = player_->GetObject3D().GetWorldPosition();
+	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
 
 	// 追跡対象からロックオン対象へのベクトル
 	Vector3 sub = Subtract(lockOnPosition, transBase_.translate_);

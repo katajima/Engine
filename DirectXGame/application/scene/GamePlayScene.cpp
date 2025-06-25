@@ -25,7 +25,7 @@ void GamePlayScene::Initialize()
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
-	followCamera_->SetTarget(&player_->GetObject3D());
+	followCamera_->SetTarget(player_->GetObject3D());
 
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
@@ -164,7 +164,7 @@ void GamePlayScene::CheckAllCollisions()
 	}
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
-		collisionManager_->Register(bullet->GetColliderComponent());
+		//collisionManager_->Register(bullet->GetColliderComponent());
 	}
 
 	collisionManager_->CheckAll();
@@ -184,7 +184,7 @@ void GamePlayScene::UpdateImGui()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
-	Vector2 pos = player_->GetObject3D().GetScreenPosition();
+	Vector2 pos = player_->GetObject3D()->GetScreenPosition();
 	ImGui::Begin("engine");
 	ImGui::Checkbox("flag", &flag);
 	ImGui::DragFloat2("screenpos", &pos.x, 0.1f);

@@ -95,6 +95,9 @@ public:
 	// 描画順
 	void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
 
+	// 映り方タイプ設定
+	void SetObjectRasterizerType(ObjectRasterizerType type) { rasterizerType_ = type; }
+
 	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera;}
 
 	// ゲッター

@@ -16,7 +16,12 @@ void BulletManager::Update()
 	for (auto& bullet : bullets_) {
 		bullet->Update();
 	}
-	bullets_.remove_if([](const std::unique_ptr<BaseBullet>& bullet) { return !bullet->GetAlive() && !bullet->GetIsEffectPlay(); });
+	bullets_.remove_if([](const std::unique_ptr<BaseBullet>& bullet) { if (bullet->IsExpired()) {
+		// DebugLog("Bullet expired and removed.");
+		return true;
+	}
+	return false;
+		});
 }
 
 void BulletManager::Draw()
@@ -64,7 +69,7 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	bullet->SetTargerRange(targetPos, rad);
 	bullet->Initialize(entity3DManager_, entity2DManager_, position, camera_);
 	bullet->SetPlayer(player_);
-	
+
 
 	bullets_.push_back(std::move(bullet));
 }

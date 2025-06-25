@@ -69,20 +69,16 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	};
 
 
-
 	entity3DManager_ = entity3DManager;
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-
 	camera_ = camera;
 	dxCommon_ = dxcommon;
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	// プレイヤー
-	objectBase_->Initialize(entity3DManager);
-	objectBase_->SetCamera(camera_);
-	objectBase_->worldtransform_.translate_ = position;
+	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase",Object3d::ObjectType::kNormal,position,camera_);
 	objectBase_->Update();
-	objectBase_->SetName("PlayerBase");
-	entity3DManager_;
+	
+
 
 	primitiveCylinder_ = std::make_unique<Primitive>();
 
@@ -98,13 +94,10 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	// レティクル
 
-	objectReticle_ = std::make_unique<Object3d>();
-	objectReticle_->Initialize(entity3DManager,Object3d::ObjectType::kPrimitive);
-	objectReticle_->SetCamera(camera_);
-	objectReticle_->SetName("レティクルシリンダー");
+	objectReticle_ = entity3DManager_->CreateObject3D("レティクルシリンダー", Object3d::ObjectType::kPrimitive, {}, camera_);
 	objectReticle_->SetPrimitive(primitiveCylinder_.get());
 	objectReticle_->SetIsDraw(false);
-	objectReticle_->worldtransform_.parent_ = &objectBase_.worldtransform_;
+	objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
 	objectReticle_->worldtransform_.rotate_.x = DegreesToRadians(-90);
 	objectReticle_->worldtransform_.translate_ = { 0,2,100 };
 
@@ -114,21 +107,21 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.SetName("PlayerBody");
-	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
+	objectBody_.worldtransform_.parent_ = &objectBase_->worldtransform_;
 
 
 	// スペシャル攻撃
 	bulletSpecial_ = std::make_unique<BulletSpecial>();
 	bulletSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
-	bulletSpecial_->SetParent(&objectBase_.worldtransform_);
+	bulletSpecial_->SetParent(&objectBase_->worldtransform_);
 
 	rangeBombingSpecial_ = std::make_unique<RangeBombingSpecial>();
 	rangeBombingSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
-	rangeBombingSpecial_->SetParent(&objectBase_.worldtransform_);
+	rangeBombingSpecial_->SetParent(&objectBase_->worldtransform_);
 
 	weapon_ = std::make_unique<playerWeapon>();
 	weapon_->Initialize(entity3DManager, camera);
-	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_.worldtransform_;
+	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_->worldtransform_;
 	weapon_->GetObject3D().worldtransform_.translate_ = { 0,0.5f,0.5f };
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
@@ -143,7 +136,7 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 
 
 	// Transform 登録
-	transformMap["Player"] = &objectBase_.worldtransform_;
+	transformMap["Player"] = &objectBase_->worldtransform_;
 	attackManager_->SetContext(input_, transformMap);
 
 	// 攻撃ノードの登録（攻撃名・次の遷移・キャンセル条件など）
@@ -184,12 +177,12 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
 
-	objectBase_.Update();
+	//objectBase_.Update();
 }
 
 void Player::Update()
 {
-	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
+	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_->worldtransform_.rotate_.y;
 
 
 	if (isAlive) {
@@ -317,12 +310,12 @@ void Player::Update()
 
 	weapon_->Update();
 
-	Matrix4x4 mat = objectBase_.worldtransform_.worldMat_;
+	Matrix4x4 mat = objectBase_->worldtransform_.worldMat_;
 
 
 
-
-	colliderComponent_->UpdateAll(objectBase_.worldtransform_);
+	objectBase_->Update();
+	colliderComponent_->UpdateAll(objectBase_->worldtransform_);
 }
 
 #pragma region Draw
@@ -417,7 +410,7 @@ void Player::Move()
 			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
 			//
 			if (velocity_.Length() != 0) {
-				objectBase_.worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+				objectBase_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
 			}
 
 
@@ -482,8 +475,8 @@ void Player::Gravity() {
 	}
 	AddMove();
 	// 着地
-	if (objectBase_.worldtransform_.translate_.y <= groundY) {
-		objectBase_.worldtransform_.translate_.y = groundY;
+	if (objectBase_->worldtransform_.translate_.y <= groundY) {
+		objectBase_->worldtransform_.translate_.y = groundY;
 		accelerationY_ = 0.0f;
 		graVelo = 0;
 		isJamp = false;
@@ -493,22 +486,22 @@ void Player::Gravity() {
 void Player::AddMove()
 {
 	if (isAlive)
-		objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
+		objectBase_->worldtransform_.translate_ += velocity_ * MyGame::GameTime();
 }
 
 void Player::LimitMove()
 {
-	if (objectBase_.worldtransform_.translate_.x > moveLimit + 50) {
-		objectBase_.worldtransform_.translate_.x = moveLimit + 50;
+	if (objectBase_->worldtransform_.translate_.x > moveLimit + 50) {
+		objectBase_->worldtransform_.translate_.x = moveLimit + 50;
 	}
-	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 50)) {
-		objectBase_.worldtransform_.translate_.x = -(moveLimit + 50);
+	if (objectBase_->worldtransform_.translate_.x < -(moveLimit + 50)) {
+		objectBase_->worldtransform_.translate_.x = -(moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 50)) {
-		objectBase_.worldtransform_.translate_.z = (moveLimit + 50);
+	if (objectBase_->worldtransform_.translate_.z > (moveLimit + 50)) {
+		objectBase_->worldtransform_.translate_.z = (moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 50)) {
-		objectBase_.worldtransform_.translate_.z = -(moveLimit + 50);
+	if (objectBase_->worldtransform_.translate_.z < -(moveLimit + 50)) {
+		objectBase_->worldtransform_.translate_.z = -(moveLimit + 50);
 	}
 }
 

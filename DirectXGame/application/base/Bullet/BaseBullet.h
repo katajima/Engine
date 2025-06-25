@@ -40,7 +40,9 @@ public:
 
 	virtual void Draw2D() = 0;
 	
-	
+	virtual bool IsExpired() const {
+		return !GetAlive() && !GetIsEffectPlay(); // ← 演出含めて完全終了
+	}
 public:
 	// 生存判定
 	bool GetAlive() const { return isAlive_; }
@@ -59,7 +61,7 @@ public:
 	float GetTimer() const;
 
 	// オブジェクト
-	Object3d* GetObject3D() { return object_.get(); }
+	Object3d* GetObject3D() { return object_; }
 	//
 	void SetPlayer(Player* player);
 
@@ -75,7 +77,7 @@ protected:
 public:
 	
 protected:
-	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
+	//Object3d* object_;
 	
 	// 各パラメータ
 	Parameters parameter_{};

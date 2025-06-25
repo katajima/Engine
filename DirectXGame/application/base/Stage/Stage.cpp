@@ -19,73 +19,53 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	ocean_->GetWaveParameters()[0].speed = 5.0f;
 	ocean_->GetMaterial()->color = Color{ 0.0f, 0.0f, 0.8f, 0.75f };
 
-	oceanObject = std::make_unique<Object3d>();
-	oceanObject->Initialize(entity3DManager_, Object3d::ObjectType::kOcean);
-	oceanObject->SetCamera(camera);
+	oceanObject = entity3DManager_->CreateObject3D("oceanObject", Object3d::ObjectType::kOcean, { 0,-30,0 }, camera_);
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
 	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
-	oceanObject->SetName("oceanObject");
-
+	
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
 	
 	// 空
-	sky_ = std::make_unique<Object3d>();
-	sky_->Initialize(entity3DManager_, Object3d::ObjectType::kSkyBox);
-	sky_->SetModel("resources/Texture/hdr/sky.dds");
-	sky_->SetCamera(camera);
+	sky_ = entity3DManager_->CreateObject3D("skyBox", Object3d::ObjectType::kSkyBox, {},camera_);
 	sky_->worldtransform_.scale_ = { 100,100,100 };
 	sky_->SetSkyBox(skyBox.get());
-	sky_->SetName("skyBox");
-
+	
 	//
 	for(int i = 0; i < 5; ++i)
 	{
 		for(int j = 0; j < 2; ++j)
 		{
-			auto object = std::make_unique<Object3d>();
-			object->Initialize(entity3DManager_, Object3d::ObjectType::kNormal);
+			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),Object3d::ObjectType::kNormal,
+				{ 3500 + static_cast<float>(j) * 120.0f ,106,3000 + static_cast<float>(i) * 100.0f },camera_);
 			object->SetModel("Missile.gltf");
-			object->SetName("Missile" + std::to_string(j)+ "_" + std::to_string(i));
-			object->worldtransform_.translate_ = { 3500 + static_cast<float>(j) * 120.0f ,106,3000 + static_cast<float>(i) * 100.0f };
 			object->worldtransform_.rotate_.y = DegreesToRadians(-90);
 			float size = 10.0f;
 			object->worldtransform_.scale_ = { size,size,size };
-			missiles_.push_back(std::move(object));
+			missiles_.push_back(object);
 		}	
 	}
 
 	
 
 	// 地面
-	tail_ = std::make_unique<Object3d>();
-	tail_->Initialize(entity3DManager_);
+	tail_ = entity3DManager_->CreateObject3D("stage", Object3d::ObjectType::kNormal, {}, camera_);
 	tail_->SetModel("stage.gltf");
-	tail_->SetName("stage");
-	tail_->SetCamera(camera);
 	tail_->worldtransform_.scale_ = { 4,4,4 };
 	tail_->GetMaterial(0)->transform.scale = { 1,1,1 };
 	tail_->GetMaterial(0)->shininess_ = 64.0f;
 
 	// 列車
-	train_ = std::make_unique<Object3d>();
-	train_->Initialize(entity3DManager_);
+	train_ = entity3DManager_->CreateObject3D("train", Object3d::ObjectType::kNormal, { -3111,300,1040 }, camera_);
 	train_->SetModel("train.gltf");
-	train_->SetName("train");
-	train_->SetCamera(camera);
-	train_->worldtransform_.translate_ = { -3111,300,1040 };
 	train_->worldtransform_.scale_ = { 8,8,8 };
 	train_->GetMaterial(0)->shininess_ = 64.0f;
 
 	// 船
-	ship_ = std::make_unique<Object3d>();
-	ship_->Initialize(entity3DManager_);
+	ship_ = entity3DManager_->CreateObject3D("ship", Object3d::ObjectType::kNormal, { -3111,-50,2040 }, camera_);
 	ship_->SetModel("ship.gltf");
-	ship_->SetName("ship");
-	ship_->SetCamera(camera);
-	ship_->worldtransform_.translate_ = { -3111,-50,2040 };
 	ship_->worldtransform_.scale_ = { 8,8,8 };
 	ship_->GetMaterial(0)->shininess_ = 64.0f;
 
@@ -104,6 +84,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 	entity3DManager_->GetLightManager()->AddLight(pointLight_);
 
+	
 	// エミッター設定
 	InitEmit();
 }

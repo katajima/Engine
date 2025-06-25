@@ -39,9 +39,20 @@ public:
 
 public: //セッター
 
-	void SetEntity3D(std::unique_ptr<Object3d> entity3D);
+	//void SetEntity3D(std::unique_ptr<Object3d> entity3D);
 
+	// オブジェクト3D生成
+	Object3d* CreateObject3D(const std::string& name, Object3d::ObjectType type, const Vector3& pos, Camera* camera) {
+		auto object = std::make_unique<Object3d>();
+		object->Initialize(this, type);
+		object->SetName(name);
+		object->worldtransform_.translate_ = pos;
+		object->SetCamera(camera);
 
+		Object3d* raw = object.get();
+		object3d.push_back(std::move(object));
+		return raw;
+	}
 
 public: //ゲッター
 

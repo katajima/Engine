@@ -213,7 +213,7 @@ private: // 移動
 	
 public:
 	
-	Object3d& GetObject3D() { return objectBase_; }
+	Object3d* GetObject3D() { return objectBase_; }
 	
 	
 	playerWeapon* GetWeapon() { return weapon_.get(); }
@@ -292,13 +292,13 @@ private:
 
 	// オブジェクト3D
 
-	std::unique_ptr<Object3d> objectBase_;
+	Object3d* objectBase_;
 	// 本体
 	Object3d objectBody_;
 	
 	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 	//　レティクル
-	std::unique_ptr <Object3d> objectReticle_;
+	Object3d* objectReticle_;
 	//
 	float reticleRad_ = 100.0f;
 	Vector3 rangeBombingPos{};
