@@ -193,6 +193,15 @@ void Object3d::Update()
 	default:
 		break;
 	}
+
+	if (isTrailEffect) {
+		worldtransformTstr_.Update();
+		worldtransformTend_.Update();
+
+		trailEffect_->Update(isEmitTrailEffect,worldtransformTstr_,worldtransformTend_);
+	// トレイル
+	}
+
 }
 
 #pragma endregion //更新系
@@ -276,6 +285,13 @@ void Object3d::Draw()
 
 
 
+}
+
+void Object3d::DrawTrailEffect()
+{
+	if (!isTrailEffect) return;
+		// トレイルエフェクトの描画
+		trailEffect_->Draw();
 }
 
 void Object3d::DebugImguiSkin()
@@ -546,6 +562,23 @@ void Object3d::SetPrimitive(std::unique_ptr<Primitive> primitive)
 {
 	primitive_ = std::move(primitive);
 	//primitive_ = primitive_.get();
+}
+
+void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,Vector3 offsetStr,Vector3 offsetEnd)
+{
+	trailEffect_ = std::make_unique<TrailEffect>();
+	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
+	trailEffect_->SetCamera(defaltCamera);
+	//trailEffect_->SetObject(this);
+	isTrailEffect = true;
+
+	worldtransformTstr_.Initialize();
+	worldtransformTstr_.parent_ = &worldtransform_;
+	worldtransformTstr_.translate_ = offsetStr;
+
+	worldtransformTend_.Initialize();
+	worldtransformTend_.parent_ = &worldtransform_;
+	worldtransformTend_.translate_ = offsetEnd;
 }
 
 #pragma endregion // その他

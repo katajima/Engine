@@ -64,7 +64,7 @@ public:
 	// 描画通常
 	void Draw();
 
-
+	void DrawTrailEffect();
 	// セッター
 
 	// モデル設定
@@ -94,6 +94,8 @@ public:
 	void SetObjectRasterizerType(ObjectRasterizerType type) { rasterizerType_ = type; }
 
 	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera;}
+
+	void UseTrailEffect(const std::string tex, float maxTime, Color color = {1,1,1,1} ,Vector3 offsetStr = {0,0.5f,0}, Vector3 offsetEnd = { 0,-0.5f,0 });
 
 	// ゲッター
 
@@ -158,6 +160,7 @@ public:
 
 	bool GetIsSkin() { return isSkin_; }
 
+	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
 private:
 	// 各コマンドリスト
 	void DrawSetting();
@@ -203,6 +206,11 @@ private:
 	// 描画するかのフラグ
 	bool isDraw = true;
 
+	// trailエフェクトを使用するかのフラグ
+	bool isTrailEffect = false;
+	bool isEmitTrailEffect = false;
+
+
 	// オブジェクトのタイプ
 	ObjectType objectType_ = ObjectType::kNormal;
 
@@ -222,7 +230,7 @@ public:
 	// 波
 	Ocean* ocean_ = nullptr;
 	//
-	//std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
+	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 
 	
 	// 位置
@@ -233,6 +241,9 @@ public:
 
 	// オブジェクトタイプ名前
 	std::string objectTypeName = "";
+
+	WorldTransform worldtransformTstr_;
+	WorldTransform worldtransformTend_;
 
 private:
 	Object3dCommon* object3dCommon_;

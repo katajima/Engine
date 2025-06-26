@@ -11,7 +11,7 @@
 
 PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 {
-	trailEffect_.reset(nullptr);
+	//trailEffect_.reset(nullptr);
 }
 
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
@@ -48,11 +48,15 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
 
 		enemy->AddDamage(parameter_.damege);
+		enemy->SetHit();
+		enemy->Emit();
+		enemy->hitStop(0.1f);
 		};
 
 	//// オブジェクト設定
 	object_ = entity3DManager->CreateObject3D("playerbullet",Object3d::ObjectType::kNormal,position,camera);
 	object_->SetModel("player_bullet.obj");
+	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, {0,1.5f,0}, { 0,-1.5f,0 });
 	object_->Update();
 	// Y軸周り角度(θy)
 	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
@@ -66,15 +70,6 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	isAlive_ = true;
 	// 行動フェーズ
 	phase_ = 0;
-
-
-	worldTransformUp_.Initialize();
-	worldTransformUp_.parent_ = &object_->worldtransform_;
-	worldTransformUp_.translate_.y = 1.5f;
-
-	worldTransformBottom_.Initialize();
-	worldTransformBottom_.parent_ = &object_->worldtransform_;
-	worldTransformBottom_.translate_.y = -1.5f;
 
 	
 	// 初期地点記録
@@ -117,12 +112,6 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	// ミサイル爆発時のリングパーティクルエミッター
 	ringEmitter_ = std::make_unique <ParticleEmitter>();
 	InitRingEmitter(ringEmitter_.get(), particleManager, "ringEmit");
-
-
-	//trailEffect_ = std::make_unique<TrailEffect>();
-	//trailEffect_->Initialize(entity3DManager->GetEffectManager(), "resources/Texture/Image.png", 0.15f, {1.0f,1.0f,1.0f,1.0f});
-	//trailEffect_->SetCamera(camera);
-	//trailEffect_->SetObject(object_);
 
 
 	Vector3 size = { 2.0f, 2.0f, 2.0f };
@@ -325,8 +314,7 @@ void PlayerRangeBombingBullet::Update()
 
 		hitObject2_->worldtransform_.translate_ = posGround + Vector3{ 0,-6.0f,0 };
 
-		worldTransformUp_.Update();
-		worldTransformBottom_.Update();
+
 		object_->Update();
 		 
 		hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_;
@@ -359,13 +347,13 @@ void PlayerRangeBombingBullet::Update()
 			isEffectPlay_ = false;
 			colliderComponent_->ClearColliders();
 
-			//trailEffect_.reset(nullptr);
+		
 		}
 
 
 
 	}
-
+	object_->SetIsEmitTrailEffect(true);
 	hitEmitter_->Update();
 
 }
@@ -377,8 +365,7 @@ void PlayerRangeBombingBullet::Draw()
 
 void PlayerRangeBombingBullet::DrawP()
 {
-	//trailEffect_->Update(flag_, worldTransformUp_, worldTransformBottom_);
-	//trailEffect_->Draw();
+	object_->DrawTrailEffect();
 }
 
 void PlayerRangeBombingBullet::Draw2D()

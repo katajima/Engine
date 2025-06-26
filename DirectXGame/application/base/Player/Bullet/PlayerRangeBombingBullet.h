@@ -37,8 +37,6 @@ private: // 演出関係
 	void InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
 
 private:
-	WorldTransform worldTransformUp_;
-	WorldTransform worldTransformBottom_;
 
 
 	Vector3 target;
@@ -89,8 +87,6 @@ private: //パーティクルエミッター
 
 	Object3d* hitObject_ = nullptr;
 	Object3d* hitObject2_ = nullptr;
-
-	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 
 	bool flag_ = false; 
 };
