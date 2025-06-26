@@ -6,7 +6,7 @@
 using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
-
+#include <atomic>
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 
@@ -63,7 +63,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 
 	// 次に使用するSRVインデックス
-	uint32_t useIndex = 0;
+	std::atomic<uint32_t> useIndex_{ 0 };
 
 private:
 	DXGIDevice* DXGIDevice_;

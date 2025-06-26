@@ -16,7 +16,7 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	maxGauge_ = 20;
 
 	clock_ = 1;
-	maxBullet = 100;
+	maxBullet = 40;
 	bulletNum = 0;
 
 }

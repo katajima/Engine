@@ -65,15 +65,7 @@ struct EulerTransform {
 	Vector3 translate;
 };
 
-/// <summary>
-/// Quaternionトランスフォーム情報(Quaternion回転)
-/// </summary>
-struct QuaternionTransform
-{
-	Vector3 scale;
-	Quaternion rotate;
-	Vector3 translate;
-};
+
 
 /// <summary>
 /// アニメーションを行うジョイント(Node)データ

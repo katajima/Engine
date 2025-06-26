@@ -159,6 +159,25 @@ struct Vector3 final {
 		float dz = z - other.z;
 		return std::sqrt(dx * dx + dz * dz);
 	}
+	static Vector3 Clamp(Vector3 value, Vector3 min, Vector3 max)
+	{
+		Vector3 result;
+		result.x = (std::max)(min.x, (std::min)(max.x, value.x));
+		result.y = (std::max)(min.y, (std::min)(max.y, value.y));
+		result.z = (std::max)(min.z, (std::min)(max.z, value.z));
+		return result;
+	}
+
+	// 補間
+	static Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
+		Vector3 temp;
+		t = std::clamp(t, 0.0f, 1.0f);
+		temp.x = a.x * (1.0f - t) + b.x * t;
+		temp.y = a.y * (1.0f - t) + b.y * t;
+		temp.z = a.z * (1.0f - t) + b.z * t;
+
+		return temp;
+	}
 };
 
 
@@ -358,4 +377,9 @@ static Vector3 DegreesToRadians(Vector3 degrees) {
 	resurt.z = float(degrees.z * ((float)M_PI / 180.0));
 
 	return resurt;
+}
+
+// absDot
+static float AbsDot(const Vector3& a, const Vector3& b) {
+	return std::abs(Dot(a, b));
 }

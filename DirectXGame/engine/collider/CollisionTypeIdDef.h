@@ -3,13 +3,25 @@
 #include <cstdint>
 
 // コリジョン種別ID定義
-enum class CollisionTypeIdDef : uint32_t {
-	kdefault,
-	kPlayer,
-	kPlayerWeapon,
-	kEnemy,
-	kEnemyWeapon,
-	kEnemyWeapon2,
+enum class CollisionTag {
+	None,
+	Player,
+	Enemy,
+	PlayerAttack,
+	EnemyAttack,
+	Wall,
+	Item,
+};
+
+// レイヤー
+enum class CollisionLayer : uint8_t {
+	Default,
+	Player,
+	Enemy,
+	PlayerAttack,
+	EnemyAttack,
+	Environment,
+	// 必要に応じて拡張
 };
 
 // 当たる対象選択
@@ -24,7 +36,7 @@ struct IsCollisionType
 };
 
 
-enum class ColliderType : uint32_t
+enum class ColliderType
 {
 	Sphere,
 	Capsule,

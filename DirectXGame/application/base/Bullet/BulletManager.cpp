@@ -16,7 +16,11 @@ void BulletManager::Update()
 	for (auto& bullet : bullets_) {
 		bullet->Update();
 	}
-	bullets_.remove_if([](const std::unique_ptr<BaseBullet>& bullet) { return !bullet->GetAlive() && !bullet->GetIsEffectPlay(); });
+	bullets_.remove_if([](const std::unique_ptr<BaseBullet>& bullet) { if (bullet->IsExpired()) {
+		return true;
+	}
+	return false;
+		});
 }
 
 void BulletManager::Draw()
@@ -49,13 +53,13 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	{
 	case BulletManager::BulletType::kPlayerMissile:
 		bullet = std::make_unique<PlayerMissile>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	default:
 		break;
@@ -64,7 +68,7 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	bullet->SetTargerRange(targetPos, rad);
 	bullet->Initialize(entity3DManager_, entity2DManager_, position, camera_);
 	bullet->SetPlayer(player_);
-	
+
 
 	bullets_.push_back(std::move(bullet));
 }
@@ -78,13 +82,13 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 	{
 	case BulletManager::BulletType::kPlayerMissile:
 		bullet = std::make_unique<PlayerMissile>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
-		bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	default:
 		break;

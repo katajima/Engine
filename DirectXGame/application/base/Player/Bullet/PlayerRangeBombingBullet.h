@@ -6,6 +6,8 @@
 class Primitive;
 class PlayerRangeBombingBullet :public BaseBullet {
 public:
+	~PlayerRangeBombingBullet();
+
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) override;
 
@@ -18,13 +20,6 @@ public:
 	void DrawP() override;
 	//
 	void Draw2D() override;
-
-private:
-	//
-	void EnemyToColl() override;
-	//
-	void PlayerToColl() override;
-
 
 private: // 演出関係
 
@@ -42,8 +37,6 @@ private: // 演出関係
 	void InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
 
 private:
-	WorldTransform worldTransformUp_;
-	WorldTransform worldTransformBottom_;
 
 
 	Vector3 target;
@@ -92,13 +85,8 @@ private: //パーティクルエミッター
 	// ヒット
 	std::unique_ptr<ParticleEmitter> hitEmitter_ = nullptr;
 
-	std::unique_ptr<Object3d> hitObject_ = nullptr;
-	std::unique_ptr<Object3d> hitObject2_ = nullptr;
-
-	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
-	std::unique_ptr<Primitive> primitiveCylinder2_ = nullptr;
-
-	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
+	Object3d* hitObject_ = nullptr;
+	Object3d* hitObject2_ = nullptr;
 
 	bool flag_ = false; 
 };

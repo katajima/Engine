@@ -348,6 +348,23 @@ static bool IsCollision(const Sphere& sphere, const Segment& segment) {
 	return false;
 }
 
+
+// 線分と点の最近接点
+static Vector3 ClosestPointOnSegment(const Vector3& point, const Segment& seg) {
+	Vector3 ab = seg.end - seg.origin;
+	float t = (point - seg.origin).Dot(ab) / ab.Dot(ab);
+	t = std::clamp(t, 0.0f, 1.0f);
+	return seg.origin + ab * t;
+}
+// 球とカプセル
+static bool IsCollision(const Sphere& sphere, const Capsule& cap) {
+	Vector3 closest = ClosestPointOnSegment(sphere.center, cap.segment);
+	Vector3 diff = closest - sphere.center;
+
+	float sumRadius = sphere.radius + cap.radius;
+	return diff.LengthSq() <= (sumRadius * sumRadius);
+}
+
 // OBBと球
 static bool IsCollision(const OBB& obb, const Sphere& sphere)
 {
@@ -405,6 +422,99 @@ static bool IsCollision(const OBB& obb, const Segment& segment) {
 		}
 	}
 	return true; // 交差する
+}
+
+// OBBとAABBの衝突判定
+static bool IsCollision(const OBB& obb, const AABB& aabb) {
+	// AABBの中心と半径
+	Vector3 aabbCenter = (aabb.min_ + aabb.max_) * 0.5f;
+	Vector3 aabbHalf = (aabb.max_ - aabb.min_) * 0.5f;
+
+	// AABBの軸（固定）
+	Vector3 aabbAxes[3] = {
+		{1, 0, 0}, {0, 1, 0}, {0, 0, 1}
+	};
+
+	// OBBの軸
+	const Vector3* obbAxes = obb.orientations;
+
+	// 軸間のベクトル
+	Vector3 t = aabbCenter - obb.center;
+
+	// 分離軸15本をすべてテスト
+	for (int i = 0; i < 3; ++i) {
+		Vector3 axis = Normalize(obbAxes[i]);
+		float r1 = obb.size[i];
+		float r2 =
+			aabbHalf.x * AbsDot(axis, aabbAxes[0]) +
+			aabbHalf.y * AbsDot(axis, aabbAxes[1]) +
+			aabbHalf.z * AbsDot(axis, aabbAxes[2]);
+
+		if (std::abs(Dot(t, axis)) > r1 + r2) return false;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		Vector3 axis = aabbAxes[i];
+		float r1 =
+			obb.size.x * AbsDot(axis, obbAxes[0]) +
+			obb.size.y * AbsDot(axis, obbAxes[1]) +
+			obb.size.z * AbsDot(axis, obbAxes[2]);
+		float r2 = aabbHalf[i];
+
+		if (std::abs(Dot(t, axis)) > r1 + r2) return false;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			Vector3 axis = Cross(obbAxes[i], aabbAxes[j]);
+			if (axis.x == 0 && axis.y == 0 && axis.z == 0) continue;
+			axis = Normalize(axis);
+
+			float r1 =
+				obb.size.x * AbsDot(axis, obbAxes[0]) +
+				obb.size.y * AbsDot(axis, obbAxes[1]) +
+				obb.size.z * AbsDot(axis, obbAxes[2]);
+			float r2 =
+				aabbHalf.x * AbsDot(axis, aabbAxes[0]) +
+				aabbHalf.y * AbsDot(axis, aabbAxes[1]) +
+				aabbHalf.z * AbsDot(axis, aabbAxes[2]);
+
+			if (std::abs(Dot(t, axis)) > r1 + r2) return false;
+		}
+	}
+
+	return true;
+};
+
+
+static Vector3 ClosestPointOnOBB(const Vector3& point, const OBB& obb) {
+	Vector3 d = point - obb.center;
+	Vector3 closest = obb.center;
+
+	for (int i = 0; i < 3; ++i) {
+		Vector3 axis = obb.orientations[i];
+		float extent = obb.size[i];
+		float dist = d.Dot(axis);
+		dist = std::clamp(dist, -extent, extent);
+		closest = closest + axis * dist;
+	}
+	return closest;
+}
+// OBBとカプセル
+static bool IsCollision(const OBB& obb, const Capsule& cap) {
+	const int kSamples = 10;
+
+	for (int i = 0; i <= kSamples; ++i) {
+		float t = static_cast<float>(i) / kSamples;
+		Vector3 capsulePoint = cap.segment.pointAt(t);
+		Vector3 closest = ClosestPointOnOBB(capsulePoint, obb);
+		Vector3 delta = capsulePoint - closest;
+		if (delta.LengthSq() <= cap.radius * cap.radius) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // 分離軸定理による OBB vs OBB の衝突判定
@@ -468,6 +578,71 @@ static bool IsCollision(const OBB& obb0, const OBB& obb1) {
 	// すべての軸で分離がない場合、衝突あり
 	return true;
 }
+
+// 分離軸定理による OBB vs OBB の衝突判定
+static bool IsCollision2(const OBB& obb0, const OBB& obb1) {
+	const Vector3* A = obb0.orientations;
+	const Vector3* B = obb1.orientations;
+
+	// OBB1の中心をOBB0のローカル空間に投影
+	Vector3 T = obb1.center - obb0.center;
+	T = { T.Dot(A[0]), T.Dot(A[1]), T.Dot(A[2]) };
+
+	constexpr float EPSILON = 1e-6f;
+	float ra, rb;
+	float R[3][3], AbsR[3][3];
+
+	// R行列とAbsRの計算
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			R[i][j] = A[i].Dot(B[j]);
+			AbsR[i][j] = std::abs(R[i][j]) + EPSILON;
+		}
+	}
+
+	// 1. A[i] 軸
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[i] * 1.0f;
+		rb = obb1.size[0] * 1.0f * AbsR[i][0] +
+			obb1.size[1] * 1.0f * AbsR[i][1] +
+			obb1.size[2] * 1.0f * AbsR[i][2];
+
+		if (std::abs(T[i]) > ra + rb) return false;
+	}
+
+	// 2. B[i] 軸
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[0] * 1.0f * AbsR[0][i] +
+			obb0.size[1] * 1.0f * AbsR[1][i] +
+			obb0.size[2] * 1.0f * AbsR[2][i];
+
+		rb = obb1.size[i] * 1.0f;
+
+		float t = T[0] * R[0][i] + T[1] * R[1][i] + T[2] * R[2][i];
+		if (std::abs(t) > ra + rb) return false;
+	}
+
+	// 3. 交差軸 A[i] x B[j]
+	for (int i = 0; i < 3; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			ra = obb0.size[(i + 1) % 3] * 1.0f * AbsR[(i + 2) % 3][j] +
+				obb0.size[(i + 2) % 3] * 1.0f * AbsR[(i + 1) % 3][j];
+
+			rb = obb1.size[(j + 1) % 3] * 1.0f * AbsR[i][(j + 2) % 3] +
+				obb1.size[(j + 2) % 3] * 1.0f * AbsR[i][(j + 1) % 3];
+
+			float t = std::abs(
+				T[(i + 1) % 3] * R[(i + 2) % 3][j] -
+				T[(i + 2) % 3] * R[(i + 1) % 3][j]
+			);
+
+			if (t > ra + rb) return false;
+		}
+	}
+
+	return true;
+}
+
 
 // カプセルとカプセル
 static bool IsCollision(const Capsule& cap0, const Capsule& cap1)
@@ -533,5 +708,19 @@ static bool CapsuleIntersectsAABB(const Capsule& capsule, const AABB& box) {
 	return distanceSquared <= (capsule.radius * capsule.radius);
 }
 
+static Vector3 ClosestPtSegmentAABB(const Vector3& segStart, const Vector3& segEnd, const AABB& aabb) {
+	// 線分の最近接点をAABB内にクランプ
+	Vector3 ab = segEnd - segStart;
+	float t = 0.0f;
+	float abLenSq = ab.LengthSq();
+	if (abLenSq > 0.0001f) {
+		Vector3 aabbCenter = (aabb.min_ + aabb.max_) * 0.5f;
+		t = (aabbCenter - segStart).Dot(ab) / abLenSq;
+		t = std::clamp(t, 0.0f, 1.0f);
+	}
+	Vector3 closest = segStart + ab * t;
 
+	// AABB内にクランプ（closest点がAABBの内外どちらでも動作する）
+	return Vector3::Clamp(closest, aabb.min_, aabb.max_);
+}
 #pragma endregion

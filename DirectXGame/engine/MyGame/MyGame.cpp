@@ -5,6 +5,7 @@
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
 float MyGame::hitStopTimer = 0.0f;
+float MyGame::nowTime = 0.0f;
 
 void MyGame::Initialize()
 {
@@ -23,8 +24,8 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	sceneManager_->ChangeScene("TEST");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -60,7 +61,7 @@ void MyGame::Update()
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-
+	nowTime += deltaTime;
 	if (deltaTime > 0) {
 		fps = 1.0f / deltaTime;
 	}
@@ -72,8 +73,8 @@ void MyGame::Update()
 		ImGui::End();
 		return;
 	}
-	//if (!ImGui::BeginMenuBar())
-	//	return;
+	if (!ImGui::BeginMenuBar())
+		return;
 
 	if (ImGui::BeginMenu("Time")) {
 
@@ -82,7 +83,7 @@ void MyGame::Update()
 
 		ImGui::EndMenu();
 	}
-	//ImGui::EndMenuBar();
+	ImGui::EndMenuBar();
 	ImGui::End();
 
 #endif // _DEBUG
@@ -156,97 +157,8 @@ void MyGame::InitializeResource()
 	//
 	textureManager->LoadTexture("resources/Texture/effect/exp.png");
 	
-	
-	modelManager->LoadModel("d.gltf", "glTF");
-
-	modelManager->LoadModel("a.obj");
-
-	modelManager->LoadModel("multiMaterial.obj", "multiMaterial");
-
-	modelManager->LoadModel("multiMaterial.gltf", "multiMaterial");
-
-	modelManager->LoadModel("multiMesh.obj", "multiMesh");
-
-	
-
-
-
-
-	modelManager->LoadModel("walk.gltf", "human");
-	modelManager->LoadModel("iku.gltf", "iku");
-
-
-
-	modelManager->LoadModel("player_bullet.obj", "player_bullet");
-	modelManager->LoadModel("Sword.obj", "Sword");
-	modelManager->LoadModel("plane.obj", "plane");
-	modelManager->LoadModel("AnimatedCube.gltf", "AnimatedCube");
-
-	modelManager->LoadModel("Ground.obj", "Ground");
-	modelManager->LoadModel("stair.obj");
-	modelManager->LoadModel("BoxBox.obj", "BoxAABB");
-
-
-
-	modelManager->LoadModel("plane.obj", "plane");
-	modelManager->LoadModel("axis.obj", "axis");
-	
-
-	modelManager->LoadModel("teapot.obj", "teapot");
-
-
-
-	modelManager->LoadModel("rail.obj", "rail");
-	modelManager->LoadModel("Sphere.obj", "sphere");
-	modelManager->LoadModel("Sphere2.obj", "sphere");
-	modelManager->LoadModel("Sphere3.obj", "sphere");
-	modelManager->LoadModel("skydome.obj", "skydome");
-
-
-
-	/// <summary>
-	/// 乗り物
-	/// </summary>
-	
-	modelManager->LoadModel("train.gltf", "train");
-	modelManager->LoadModel("ship.gltf", "ship");
-
-	/// <summary>
-	/// 地形
-	/// </summary>
-	modelManager->LoadModel("renga.gltf", "renga");
-
-
-	modelManager->LoadModel("coast.gltf", "terrain/coast");
-	modelManager->LoadModel("black.obj", "terrain/black");
-	modelManager->LoadModel("terrain.obj", "terrain/terrain");
-	modelManager->LoadModel("stair.obj");
-
-
-
-	/// <summary>
-	/// 建物
-	/// </summary>
-	modelManager->LoadModel("building.obj", "buildingAll/building"); // ビル
-	modelManager->LoadModel("warehouse.gltf", "buildingAll/warehouse"); // 倉庫
-	modelManager->LoadModel("stage.gltf", "stage"); // ステージ
-	modelManager->LoadModel("Missile.gltf", "Missile"); // ミサイル発射台
-
-
-	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
-
-
-	/// <summary>
-	/// 敵
-	/// </summary>
-
-	modelManager->LoadModel("enemy.obj", "enemyAll/enemy"); // 的
-	modelManager->LoadModel("enemy2.obj", "enemyAll/enemy2"); // 本体
-	modelManager->LoadModel("enemyTire.obj", "enemyAll/tire"); // タイヤ
-	modelManager->LoadModel("enemyDuct.obj", "enemyAll/duct"); // ダクト
-	modelManager->LoadModel("enemyPlank.obj", "enemyAll/plank"); // 鋼板
-	modelManager->LoadModel("enemyGear.obj", "enemyAll/gear"); // 歯車
-	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
+	// ModelData;
+	LoadModel();
 
 
 	/// <summary>
@@ -360,6 +272,103 @@ void MyGame::CreateParticle()
 	
 
 
+
+}
+
+void MyGame::LoadModel()
+{
+	ModelManager* modelManager = dxCommon->GetModelManager();
+
+	modelManager->LoadModel("d.gltf", "glTF");
+
+	modelManager->LoadModel("a.obj");
+
+	modelManager->LoadModel("multiMaterial.obj", "multiMaterial");
+
+	modelManager->LoadModel("multiMaterial.gltf", "multiMaterial");
+
+	modelManager->LoadModel("multiMesh.obj", "multiMesh");
+
+
+
+
+
+
+	//modelManager->LoadModel("walk.gltf", "human");
+	//modelManager->LoadModel("iku.gltf", "iku");
+
+
+
+	modelManager->LoadModel("player_bullet.obj", "player_bullet");
+	modelManager->LoadModel("Sword.obj", "Sword");
+	modelManager->LoadModel("plane.obj", "plane");
+	modelManager->LoadModel("AnimatedCube.gltf", "AnimatedCube");
+
+	modelManager->LoadModel("Ground.obj", "Ground");
+	modelManager->LoadModel("stair.obj");
+	modelManager->LoadModel("BoxBox.obj", "BoxAABB");
+
+
+
+	modelManager->LoadModel("plane.obj", "plane");
+	modelManager->LoadModel("axis.obj", "axis");
+
+
+	modelManager->LoadModel("teapot.obj", "teapot");
+
+
+
+	modelManager->LoadModel("rail.obj", "rail");
+	modelManager->LoadModel("Sphere.obj", "sphere");
+	modelManager->LoadModel("Sphere2.obj", "sphere");
+	modelManager->LoadModel("Sphere3.obj", "sphere");
+	modelManager->LoadModel("skydome.obj", "skydome");
+
+
+
+	/// <summary>
+	/// 乗り物
+	/// </summary>
+
+	modelManager->LoadModel("train.gltf", "train");
+	modelManager->LoadModel("ship.gltf", "ship");
+
+	/// <summary>
+	/// 地形
+	/// </summary>
+	modelManager->LoadModel("renga.gltf", "renga");
+
+
+	modelManager->LoadModel("coast.gltf", "terrain/coast");
+	modelManager->LoadModel("black.obj", "terrain/black");
+	modelManager->LoadModel("terrain.obj", "terrain/terrain");
+	modelManager->LoadModel("stair.obj");
+
+
+
+	/// <summary>
+	/// 建物
+	/// </summary>
+	modelManager->LoadModel("building.obj", "buildingAll/building"); // ビル
+	modelManager->LoadModel("warehouse.gltf", "buildingAll/warehouse"); // 倉庫
+	modelManager->LoadModel("stage.gltf", "stage"); // ステージ
+	modelManager->LoadModel("Missile.gltf", "Missile"); // ミサイル発射台
+
+
+	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
+
+
+	/// <summary>
+	/// 敵
+	/// </summary>
+
+	modelManager->LoadModel("enemy.obj", "enemyAll/enemy"); // 的
+	modelManager->LoadModel("enemy2.obj", "enemyAll/enemy2"); // 本体
+	modelManager->LoadModel("enemyTire.obj", "enemyAll/tire"); // タイヤ
+	modelManager->LoadModel("enemyDuct.obj", "enemyAll/duct"); // ダクト
+	modelManager->LoadModel("enemyPlank.obj", "enemyAll/plank"); // 鋼板
+	modelManager->LoadModel("enemyGear.obj", "enemyAll/gear"); // 歯車
+	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
 
 }
 

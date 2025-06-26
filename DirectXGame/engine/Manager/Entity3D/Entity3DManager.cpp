@@ -209,7 +209,7 @@ void Entity3DManager::Update()
 
 	object3d.erase(
 		std::remove_if(object3d.begin(), object3d.end(),
-			[](Object3d* object) {
+			[](const std::unique_ptr<Object3d>& object) {
 				return object->GetIsDelete();
 			}),
 		object3d.end());
@@ -221,20 +221,20 @@ void Entity3DManager::Update()
 
 			if (object->GetIsSkin()) {
 				if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent01) {
-					transparentObjects01.push_back(object);
+					transparentObjects01.push_back(object.get());
 				}
 				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent02) {
-					transparentObjects02.push_back(object);
+					transparentObjects02.push_back(object.get());
 				}
 				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent03) {
-					transparentObjects03.push_back(object);
+					transparentObjects03.push_back(object.get());
 				}
 				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kOpaque) {
 					if (object->GetAlpha() < 1.0f) {
-						transparentObjects01.push_back(object);
+						transparentObjects01.push_back(object.get());
 					}
 					else {
-						opaqueObjects.push_back(object);
+						opaqueObjects.push_back(object.get());
 					}
 				}
 			}
@@ -278,9 +278,5 @@ void Entity3DManager::ObjectDraw()
 
 }
 
-void Entity3DManager::SetEntity3D(Object3d* entity3D)
-{
-	object3d.push_back(std::move(entity3D));
-}
 
 

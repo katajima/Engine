@@ -39,7 +39,7 @@ class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
 
-class Player : public Collider {
+class Player {
 public:
 
 
@@ -62,10 +62,7 @@ public:
 	
 	void Draw2D();
 
-	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision([[maybe_unused]] Collider* other) override;
 
-	virtual Vector3 GetCenterPosition() const;
 
 	
 	// 振るまい
@@ -216,7 +213,7 @@ private: // 移動
 	
 public:
 	
-	Object3d& GetObject3D() { return objectBase_; }
+	Object3d* GetObject3D() { return objectBase_; }
 	
 	
 	playerWeapon* GetWeapon() { return weapon_.get(); }
@@ -265,13 +262,17 @@ public:
 
 	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+
 private:  // パラメータ
 	
 	uint32_t maxHp = 100;
-	int hp = 100;
+	int hp = 10000;
 	bool isAlive = true;
 	bool isInvincible = false;
 private:
+	std::unique_ptr<ColliderComponent> colliderComponent_;
+
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;
 	// スペシャル攻撃
@@ -291,13 +292,13 @@ private:
 
 	// オブジェクト3D
 
-	Object3d objectBase_;
+	Object3d* objectBase_;
 	// 本体
 	Object3d objectBody_;
 	
 	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 	//　レティクル
-	std::unique_ptr <Object3d> objectReticle_;
+	Object3d* objectReticle_;
 	//
 	float reticleRad_ = 100.0f;
 	Vector3 rangeBombingPos{};
@@ -314,10 +315,10 @@ private:
 
 	bool isCreativeMode = false;
 	
-
-	ContactRecord contactRecord_;
 	// シリアルナンバー
 	uint32_t serialNumber = 0;
+
+	std::unique_ptr<OBBCollider> obbCollider_;
 
 private:
 	DirectXCommon* dxCommon_;

@@ -4,6 +4,7 @@
 #include "Matrix4x4.h"
 #include <limits>
 
+
 static float Lerp(float a, float b, float t)
 {
     return a + (b - a) * t;
@@ -90,7 +91,31 @@ struct Quaternion final {
 
         return { result.x, result.y, result.z };
     }
+    Vector3 RotateVectorFast(const Vector3& v) const {
+        // クォータニオンをベクトル v に適用
+        Vector3 qv(x, y, z);
+        Vector3 t = Cross(qv, v) * 2.0f;
+        return v + t * w + Cross(qv, t);
+    }
 
+    // Quaternion から Euler 角に変換
+    Vector3 ToEulerAngles() const {
+        Vector3 angles;
+        // Yaw (Z軸まわり)
+        angles.y = std::atan2(2.0f * (w * y + x * z), 1.0f - 2.0f * (y * y + z * z));
+        // Pitch (X軸まわり)
+        angles.x = std::asin(std::clamp(2.0f * (w * x - y * z), -1.0f, 1.0f));
+        // Roll (Y軸まわり)
+        angles.z = std::atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (x * x + z * z));
+        return angles;
+    }
+
+    static Quaternion FromAxisAngle(const Vector3& axis, float angle) {
+        Vector3 n = axis.Normalize();
+        float halfAngle = angle * 0.5f;
+        float sinHalf = sinf(halfAngle);
+        return Quaternion(n.x * sinHalf, n.y * sinHalf, n.z * sinHalf, cosf(halfAngle));
+    }
 
     // + 演算子のオーバーロード
     Quaternion operator+(const Quaternion& other) const;

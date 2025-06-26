@@ -61,4 +61,6 @@ private:
 	
 public:	
 	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
+
+
 };

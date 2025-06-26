@@ -58,6 +58,7 @@ public:
 private:
 	std::vector<std::unique_ptr<BaseEnemy>> enemys_;
 
+	uint32_t serialNumber = 0;
 
 private:
 	Camera* camera_;						// カメラ

@@ -5,78 +5,174 @@
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
-class Collider {
-public:
+constexpr float kFloatMax = 3.4028235e+38f;
 
-	// 初期化
-	void Initialize(Camera* camera );
-
-	// ワールドトランスフォームの初期化
-	void UpdateWorldTransform(LineCommon* lineCommon);
-	// 描画
-	void Draw();
-
-	
-
-
-
-	// 衝突時に呼ばれる関数
-	virtual void OnCollision([[maybe_unused]] Collider* other){};
-	
-	virtual void NoCollision([[maybe_unused]] Collider* other){};
-
-	virtual Vector3 GetCenterPosition() const = 0;
-
-	virtual ~Collider() = default; 
-
-	// 種別IDの取得
-	uint32_t GetTypeID() const { return typeID_; };
-	// 種別IDの設定
-	void SetTypeID(uint32_t typeID);
-	
-	// コライダーID取得
-	uint32_t GetColliderType() const { return colliderTypeID_; }
-
-	// コライダーID設定
-	void SetColliderType(uint32_t collType) { colliderTypeID_ = collType; }
-
-
-	// 半径取得
-	float GetRadius() const { return radius_; }
-	// 半径設定
-	void SetRadius(float radius) { radius_ = radius; }
-	// カプセル
-	Capsule GetCapsule() const { return capsule_; }
-	// カプセル
-	void SetCapsule(Capsule& capsule) { capsule_ = capsule; }
-	// AABB
-	AABB GetAABB() const { return aabb_; }
-	// OBB
-	OBB GetOBB() const { return obb_; }
-
-	// 色
-	void SetColor(Vector4 color) { color_ = color; }
-
-private:
-	// 衝突判定
-	float radius_ = 1.5f; // 半径
-
-	// AABB
-	AABB aabb_ = {{ -1.0f, -1.0f, -1.0f}, {1.0f,1.0f,1.0f}};
-
-	// OBB
-	OBB obb_ = {};
-
-	// Capsule
-	Capsule capsule_ = Capsule(Vector3{},Vector3{},1.5f);
-
-	// 色
-	Vector4 color_ = { 1,1,1,1 };
-
-	// 種別ID
-	uint32_t typeID_ = 0u;
-
-	// コライダー形状
-	uint32_t colliderTypeID_ = 0u;
+struct SATResult {
+	bool hit;
+	float minOverlap = FLT_MAX; // 初期化は最大値
+	Vector3 pushDir; // 押し出し軸（world space）
 };
+// コライダー基底クラス
+class Collider
+{
+public:
+	void* owner = nullptr; // 通知先ポインタ
+	bool enabled = true;
+	bool isStatic = false;  // 動かさない
+	Vector3 centerWorld;
+	CollisionLayer layer = CollisionLayer::Default;
+	CollisionTag tag = CollisionTag::None; // タグ
+	uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
+
+	// 判定有効
+	void Enable() { enabled = true; }
+	// 判定無効
+	void Disable() { enabled = false; }
+	// 判定効力取得
+	bool IsEnabled() const { return enabled; }
+	// 更新
+	virtual void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) = 0;	
+	// 判定
+	virtual bool CheckHit(const Collider& other) const = 0;									
+	// 押し戻し
+	virtual bool ResolveCollision(const Collider& other, Vector3& outPushVec) const = 0;	
+	// コライダータイプ取得
+	virtual ColliderType GetType() const = 0;
+	virtual ~Collider() = default;
+};
+
+// 球コライダークラス
+class SphereCollider : public Collider
+{
+public:
+	float radius = 1.0f;
+
+	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	bool CheckHit(const Collider& other) const override;
+	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	ColliderType GetType() const override {
+		return ColliderType::Sphere;
+	}
+
+};
+
+// AABBコライダークラス
+class AABBCollider : public Collider
+{
+public:
+	AABB aabb{ {-0.5f,-0.5f,-0.5f} ,{0.5f,0.5f,0.5f}};
+	Vector3 minWorld;
+	Vector3 maxWorld;
+
+	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	bool CheckHit(const Collider& other) const override;
+	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+
+	ColliderType GetType() const override {
+		return ColliderType::AABB;
+	}
+
+};
+
+// カプセルコライダークラス
+class CapsuleCollider : public Collider
+{
+public:
+	Capsule capsule{ Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,-1.0f,0.0f},{1.0f}};
+	Capsule capWorld_;
+
+
+	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	bool CheckHit(const Collider& other) const override;
+	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	ColliderType GetType() const override {
+		return ColliderType::Capsule;
+	}
+
+};
+
+// OBBコライダークラス
+class OBBCollider : public Collider
+{
+public:
+	OBB obb{ {0,0,0},{0,0,0},{0.5f,0.5f,0.5f}};
+
+
+	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	bool CheckHit(const Collider& other) const override;
+	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	ColliderType GetType() const override {
+		return ColliderType::OBB;
+	}
+	
+private:
+
+};
+
+
+static SATResult CheckOBBCollisionSAT(const OBB& obb0, const OBB& obb1)
+{
+	SATResult result;
+	const Vector3* A = obb0.orientations;
+	const Vector3* B = obb1.orientations;
+
+	Vector3 T = obb1.center - obb0.center;
+
+	float R[3][3], AbsR[3][3];
+	constexpr float EPSILON = 1e-6f;
+
+	// 回転行列の生成
+	for (int i = 0; i < 3; ++i)
+		for (int j = 0; j < 3; ++j) {
+			R[i][j] = A[i].Dot(B[j]);
+			AbsR[i][j] = std::abs(R[i][j]) + EPSILON;
+		}
+
+	Vector3 tLocal{
+		T.Dot(A[0]),
+		T.Dot(A[1]),
+		T.Dot(A[2])
+	};
+
+	float ra, rb;// , overlap;
+	//Vector3 axis;
+
+	auto testAxis = [&](const Vector3& testAxis, float ra, float rb, float tProj) {
+		float overlap = ra + rb - std::abs(tProj);
+		if (overlap < 0.0f) {
+			result.hit = false;
+			return false;
+		}
+		if (overlap < result.minOverlap) {
+			result.minOverlap = overlap;
+			result.pushDir = testAxis;
+		}
+		return true;
+		};
+
+	result.hit = true;
+
+	// 各軸のテスト（A[0~2], B[0~2], A×Bの9軸）
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[i] * 0.5f;
+		rb = obb1.size[0] * AbsR[i][0] + obb1.size[1] * AbsR[i][1] + obb1.size[2] * AbsR[i][2];
+		if (!testAxis(A[i], ra, rb, tLocal[i])) return result;
+	}
+
+	for (int i = 0; i < 3; ++i) {
+		ra = obb0.size[0] * AbsR[0][i] + obb0.size[1] * AbsR[1][i] + obb0.size[2] * AbsR[2][i];
+		rb = obb1.size[i] * 0.5f;
+		if (!testAxis(B[i], ra, rb, T.Dot(B[i]))) return result;
+	}
+
+	// 交差軸は省略（まずはここまでで試す）
+
+	// pushDir の向き補正
+	if (T.Dot(result.pushDir) < 0.0f)
+		result.pushDir = -result.pushDir;
+
+	return result;
+}
+
+
 

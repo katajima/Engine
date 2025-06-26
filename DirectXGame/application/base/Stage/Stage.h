@@ -45,26 +45,26 @@ private:
 	void EmitUpdate();
 
 public:
-	std::vector<std::unique_ptr <Object3d>> missiles_;
+	std::vector<Object3d*> missiles_;
 private:
 	// 空
-	std::unique_ptr<Object3d> sky_;
+	Object3d* sky_;
 
 	
 	// 地面
-	std::unique_ptr < Object3d> tail_;
+	Object3d* tail_;
 	
 
 	// 列車
-	std::unique_ptr < Object3d> train_;
+	Object3d* train_;
 	float trainSpeed_ = 300.0f;
 	float trainStartX_ = -3110.0f;
 	float trainEndX_ = 4000.0f;
 	float trainWarpTime_ = 0.0f;
 	float trainWarpTimeMax_ = 20.0f;
 
-	// 列車
-	std::unique_ptr < Object3d> ship_;
+	// 船
+	Object3d* ship_;
 	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
 
 	// 円運動のパラメータ
@@ -76,7 +76,7 @@ private:
 
 	// オーシャンシェーダー
 	std::unique_ptr<Ocean> ocean_ = nullptr;
-	std::unique_ptr<Object3d> oceanObject;
+	Object3d* oceanObject;
 
 
 	// スカイボックス

@@ -23,7 +23,7 @@ struct OctreeNode {
     void clear();
 };
 
-
+class Collider;
 class BaseMesh;
 class LineCommon;
 // オクツリーの管理クラス
@@ -60,6 +60,11 @@ public:
     bool checkCollisions(const Capsule& capsule) {
         // ルートノードから衝突判定を開始
         return checkCollisionWithNode(capsule, root);
+    }
+
+    // query: 指定AABBと交差する全てのCollider（ここではCapsuleとTriangle）をresultsに追加する
+    void query(const AABB& area, std::vector<Collider*>& results) {
+        queryNode(root, area, results);
     }
 private:
     void drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));
@@ -110,6 +115,8 @@ private:
             }
         }
     }
+
+    void queryNode(OctreeNode* node, const AABB& area, std::vector<Collider*>& results);
 
     // OctreeNode 内でカプセルと三角形の衝突判定を行う
     bool checkCollisionWithNode(const Capsule& capsule, OctreeNode* node);

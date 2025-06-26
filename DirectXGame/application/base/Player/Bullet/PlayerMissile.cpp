@@ -9,18 +9,43 @@
 
 void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	// コライダー設定
-	Collider::Initialize(camera);
-	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayerWeapon));
-	Collider::SetRadius(3.0f);
+	//colliderComponent_ = std::make_unique<ColliderComponent>();
+	//colliderComponent_->SetOwner(colliderComponent_.get());
+	//colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+	//colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+
+	//auto sphere = std::make_unique<SphereCollider>();
+	//sphere->tag = CollisionTag::PlayerAttack;
+	//sphere->layer = CollisionLayer::PlayerAttack;
+	//sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
+	//sphere->radius = 3.0f; // 半径を適宜設定
+	//colliderComponent_->AddCollider(std::move(sphere));
+
+	//// 衝突時のコールバック登録
+	//colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+	//	auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+	//	if (!otherComponent || other->tag != CollisionTag::Enemy) return;
+	//	BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
+
+	//	uint32_t otherId = otherComponent->GetUniqueId();
+
+
+
+
+	//	float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+
+	//	if (colliderComponent_->contactRecord_.CheckHistory(otherId)) {
+	//		return; // クールタイム中のため無視
+	//	}
+
+	//	colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
+
+	//	enemy->AddDamage(parameter_.damege);
+	//	};
 
 	// オブジェクト設定
-	object_ = std::make_unique<Object3d>();
-	object_->Initialize(entity3DManager);
-	object_->SetCamera(camera);
+	object_ = entity3DManager->CreateObject3D("playerbullet", Object3d::ObjectType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");
-	object_->worldtransform_.translate_ = position;
 	object_->Update();
 	// Y軸周り角度(θy)
 	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
@@ -85,12 +110,12 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	cylinderParam.segments = 16;
 
 
-	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
-	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
+	//primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
+	//primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 
 	hitObject_ = std::make_unique<Object3d>();
 	hitObject_->Initialize(entity3DManager, Object3d::ObjectType::kPrimitive, Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
-	hitObject_->SetPrimitive(primitiveCylinder_.get());
+	//hitObject_->SetPrimitive(primitiveCylinder_.get());
 	hitObject_->worldtransform_.translate_.z = 50.0f;
 	hitObject_->worldtransform_.rotate_.y = DegreesToRadians(-90);
 	hitObject_->SetName("cylinder");
@@ -241,7 +266,7 @@ void PlayerMissile::Update()
 	hitEmitter_->Update();
 
 
-
+	//colliderComponent_->UpdateAll(object_->worldtransform_);
 
 
 	Vector3 velo = velocity_.Normalize();
@@ -266,16 +291,6 @@ void PlayerMissile::DrawP()
 }
 
 void PlayerMissile::Draw2D()
-{
-}
-
-void PlayerMissile::EnemyToColl()
-{
-	player_->AddHit();
-	player_->SetHitTime();
-}
-
-void PlayerMissile::PlayerToColl()
 {
 }
 

@@ -28,12 +28,7 @@ public:
 
 	void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
 
-	
-	void Update(bool& flag, const Object3d& str, const Object3d& end);
-	
 	void Update(bool& flag, const WorldTransform& str, const WorldTransform& end);
-	
-	void Update3(bool& flag,  Matrix4x4* str,  Matrix4x4* end, Matrix4x4* strPre,  Matrix4x4* endPre);
 	
 	void Draw();
 
@@ -66,16 +61,10 @@ private:
 
 	bool flag_ = false;
 	Vector3 velocity_; // 速度
-	//Object3d object_;
-
+	
 	int timer = 0;
-
-	Matrix4x4 preStr_;
-	Matrix4x4 preEnd_;
-
 
 private:
 	EffectManager* effectManager_;
-
 };
 

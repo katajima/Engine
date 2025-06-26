@@ -1,18 +1,7 @@
 #include"Object3dCommon.h"
 #include"Object3d.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
-#include<cstdint>
-#include<string>
-#include<format>
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<cassert>
-#include<dxgidebug.h>
-#include<dxcapi.h>
-#include<fstream>
-#include<sstream>
-#include <iostream>
-#include<wrl.h>
+
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
@@ -23,8 +12,8 @@
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
+
 
 void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
 {
@@ -44,7 +33,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 	transformation->Initialize(object3dCommon_->GetDxCommon());
 
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
-	entity3DManager_->SetEntity3D(this);
+	//entity3DManager_->SetEntity3D();
 
 	isSkin_ = false;
 
@@ -184,14 +173,14 @@ void Object3d::Update()
 		if (primitive_) {
 			primitive_->Update();
 
-			transformation->Update(primitive_, cameraPtr, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
 	case ObjectType::kSkyBox:
 		if (skyBox_) {
 			skyBox_->Update();
 
-			transformation->Update(primitive_, cameraPtr, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
 	case ObjectType::kOcean:
@@ -204,6 +193,15 @@ void Object3d::Update()
 	default:
 		break;
 	}
+
+	if (isTrailEffect) {
+		worldtransformTstr_.Update();
+		worldtransformTend_.Update();
+
+		trailEffect_->Update(isEmitTrailEffect,worldtransformTstr_,worldtransformTend_);
+	// トレイル
+	}
+
 }
 
 #pragma endregion //更新系
@@ -287,6 +285,13 @@ void Object3d::Draw()
 
 
 
+}
+
+void Object3d::DrawTrailEffect()
+{
+	if (!isTrailEffect) return;
+		// トレイルエフェクトの描画
+		trailEffect_->Draw();
 }
 
 void Object3d::DebugImguiSkin()
@@ -536,6 +541,11 @@ bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3&
 	return true;
 }
 
+Primitive* Object3d::GetPrimitive() const
+{
+	return primitive_.get();
+}
+
 void Object3d::DebugImguiModel()
 {
 	DebugModel::ImguiModel(model->modelData);
@@ -546,6 +556,29 @@ void Object3d::SetModel(const std::string& filePath)
 	//モデルを検索してセット
 
 	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
+}
+
+void Object3d::SetPrimitive(std::unique_ptr<Primitive> primitive)
+{
+	primitive_ = std::move(primitive);
+	//primitive_ = primitive_.get();
+}
+
+void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,Vector3 offsetStr,Vector3 offsetEnd)
+{
+	trailEffect_ = std::make_unique<TrailEffect>();
+	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
+	trailEffect_->SetCamera(defaltCamera);
+	//trailEffect_->SetObject(this);
+	isTrailEffect = true;
+
+	worldtransformTstr_.Initialize();
+	worldtransformTstr_.parent_ = &worldtransform_;
+	worldtransformTstr_.translate_ = offsetStr;
+
+	worldtransformTend_.Initialize();
+	worldtransformTend_.parent_ = &worldtransform_;
+	worldtransformTend_.translate_ = offsetEnd;
 }
 
 #pragma endregion // その他

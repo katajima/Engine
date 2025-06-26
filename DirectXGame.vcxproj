@@ -608,6 +608,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Base\BasePlayer.h" />
@@ -649,6 +650,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />
@@ -732,11 +734,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\scene\SceneManager.h" />
     <ClInclude Include="DirectXGame\engine\Skinning\Skinning.h" />
     <ClInclude Include="DirectXGame\engine\struct\Light.h" />
+    <ClInclude Include="DirectXGame\engine\struct\LineStruct.h" />
     <ClInclude Include="DirectXGame\engine\struct\Material.h" />
     <ClInclude Include="DirectXGame\engine\struct\Matrix3x3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h" />
     <ClInclude Include="DirectXGame\engine\struct\Quaternion.h" />
     <ClInclude Include="DirectXGame\engine\struct\Structs2D.h" />
+    <ClInclude Include="DirectXGame\engine\struct\TransformStruct.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector2.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector3.h" />
     <ClInclude Include="DirectXGame\engine\struct\Vector4.h" />

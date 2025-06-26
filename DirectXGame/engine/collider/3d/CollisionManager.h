@@ -1,50 +1,88 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "CollisionFancion.h"
+#include "ColliderComponent.h"
 #include"list"
 #include"Collider.h"
-
+#include <unordered_set>
+#include "DirectXGame/engine/collider/Octree/Octree.h"  
 /// <summary>
 /// 衝突マネージャ
 /// </summary>
 class GlobalVariables;
 class CollisionManager {
 public:
-	// リセット
-	void Reset();
+    // 初期化
+    // 初期化
+    void Initialize(GlobalVariables* globalVariables,const AABB& sceneBounds) {
+        globalVariables_ = globalVariables;
+        // オクツリー初期化（シーン全体のAABBと深さなど指定）
+        octree_ = std::make_unique<Octree>(sceneBounds, 4, 2, 2, 2);
+    }
 
-	~CollisionManager();
+    // 動的コライダーコンポーネント追加
+    void Register(ColliderComponent* comp) {
+        if (comp && registeredDynamic_.insert(comp).second) {
+            dynamicColliders.push_back(comp);
+        }
+    }
 
-	/// <summary>
-	/// コライダー2つの衝突判定と応答
-	/// </summary>
-	/// <param name="colliderA"></param>
-	/// <param name="colliderB"></param>
-	void CheckCollisionPair(Collider* colliderA, Collider* colliderB);
+    // 静的コライダーコンポーネント追加
+    void RegisterStatic(ColliderComponent* comp) {
+        if (comp && registeredStatic_.insert(comp).second) {
+            staticColliders.push_back(comp);
+        }
+    }
 
-	// 全ての当たり判定チェック
-	void CheckAllCollisions();
+    // 全削除（次フレームから再登録）
+    void Clear() {
+        dynamicColliders.clear();
+        staticColliders.clear();
+        registeredDynamic_.clear();
+        registeredStatic_.clear();
+    }
 
-	void AddCollider(Collider* collider);
+    // 衝突チェック：全てのColliderComponentのペアをチェック
+    void CheckAll() {
+        size_t n = dynamicColliders.size();
+        for (size_t i = 0; i < n; ++i) {
+            for (size_t j = i + 1; j < n; ++j) {
+                CheckByLayer(*dynamicColliders[i], *dynamicColliders[j]);
+            }
+        }
+    }
 
-	// 初期化
-	void Initialize(GlobalVariables* globalVariables);
+    // レイヤーとマスクに基づいて衝突を行う
+    void CheckByLayer(ColliderComponent& a, ColliderComponent& b) {
+        for (auto* colA : a.GetAllColliders()) {
+            for (auto* colB : b.GetAllColliders()) {
+                if (!colA->enabled || !colB->enabled) continue;
 
-	// ワールドトランスフォームの更新
-	void UpdateWorldTransform(LineCommon* lineCommon);
+                // ビットマスク判定（どちらかが相手を対象にしていないならスキップ）
+                if (!((1 << static_cast<uint32_t>(colB->layer)) & colA->collisionMask) ||
+                    !((1 << static_cast<uint32_t>(colA->layer)) & colB->collisionMask)) {
+                    continue;
+                }
 
-	//描画
-	void Draw();
-
-	// 調整項目の適用
-	void ApplyGlobalVariables();
+                if (colA->CheckHit(*colB)) {
+                    if (a.onHitCallback) a.onHitCallback(colA, colB);
+                    if (b.onHitCallback) b.onHitCallback(colB, colA);
+                }
+            }
+        }
+    }
 
 private:
-	// コライダー
-	std::list<Collider*> colliders_;
+    std::vector<ColliderComponent*> dynamicColliders; // 動的コライダー
+    std::vector<ColliderComponent*> staticColliders;  // 静的コライダー
 
-	bool isCollider;
+    std::unordered_set<ColliderComponent*> registeredDynamic_;
+    std::unordered_set<ColliderComponent*> registeredStatic_;
 
-	GlobalVariables* globalVariables_;
+    GlobalVariables* globalVariables_ = nullptr;      // 保存
+
+    std::unique_ptr<Octree> octree_; // オクツリー管理
+public:
+
+    CollisionManager() = default;
 };
-

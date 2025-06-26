@@ -80,9 +80,16 @@ public:
         };
     }
 
-    Vector3 Forward() const {
-        // ワールド行列のZ軸は「m[2][0], m[2][1], m[2][2]」列
-        return Vector3{ m[2][0], m[2][1], m[2][2] };
+    // 0 = Right 1 = Up 2 = Forward
+    Vector3 AxisColumn(int column, bool invert = false) const {
+        Vector3 axis = { m[0][column], m[1][column], m[2][column] };
+        return invert ? -axis : axis;
+    }
+
+    // 0 = Right 1 = Up 2 = Forward
+    Vector3 AxisRow(int row, bool invert = false) const {
+        Vector3 axis = { m[row][0], m[row][1], m[row][2] };
+        return invert ? -axis : axis;
     }
 private:
 
@@ -147,3 +154,6 @@ Matrix4x4 MakeViewportMatrix(float leht, float top, float width, float height, f
 Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 
 Matrix4x4 MakeBillboardMatrixY(const Matrix4x4& cameraWorldMatrix);
+
+
+

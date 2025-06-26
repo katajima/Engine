@@ -9,25 +9,75 @@
 
 void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	Collider::Initialize(camera);
-	Collider::SetColliderType(static_cast<uint32_t>(ColliderType::Sphere));
-	Collider::SetTypeID(static_cast<uint32_t>(CollisionTypeIdDef::kPlayer));
-	Collider::SetColor(Vector4{ 0,0,1,1 });
+	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_->SetOwner(colliderComponent_.get());
+	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+	// プレイヤー本体のSphereColliderを作成
+
+
+	// SphereColliderを追加
+	auto sphere = std::make_unique<SphereCollider>();
+	sphere->tag = CollisionTag::Player;
+	sphere->layer = CollisionLayer::Player;
+	sphere->radius = 1.0f; // 半径を適宜設定
+	colliderComponent_->AddCollider(std::move(sphere));
+
+
+	// 登録（IDを取得したければ変数で受ける）
+	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+
+	// 衝突時のコールバック登録
+	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+		if (!otherComponent) return;
+
+		uint32_t otherId = otherComponent->GetUniqueId();
+
+
+		Vector3 pushVec;
+		if (self->ResolveCollision(*other, pushVec)) {
+			if (other->isStatic) {
+				// 相手が動かないなら自分だけ押し戻す
+				objectBase_->worldtransform_.translate_ += pushVec;
+			}
+			else if (self->isStatic) {
+				
+			}
+			else {
+				// 双方が動く → 半分ずつ押し戻す（応用例）
+				objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+				
+			}
+
+			objectBase_->Update();
+		}
+
+		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+
+		if (colliderComponent_->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
+			return; // クールタイム中のため無視
+		}
+
+		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
+
+		AddDamege(10);
+		followCamera_->GetViewProjection().SetShake(0.25f, {0.1f,0.1f,0.1f});
+	};
+
 
 	entity3DManager_ = entity3DManager;
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-
 	camera_ = camera;
 	dxCommon_ = dxcommon;
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	// プレイヤー
-	objectBase_.Initialize(entity3DManager);
-	objectBase_.SetCamera(camera_);
-	objectBase_.worldtransform_.translate_ = position;
-	objectBase_.Update();
-	objectBase_.SetName("PlayerBase");
+	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase",Object3d::ObjectType::kNormal,position,camera_);
+	objectBase_->SetModel("AnimatedCube.gltf");
+	objectBase_->Update();
+	
 
-	primitiveCylinder_ = std::make_unique<Primitive>();
+
+	//primitiveCylinder_ = std::make_unique<Primitive>();
 
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 5.0f;
@@ -37,17 +87,11 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	cylinderParam.segments = 16;
 
 
-	primitiveCylinder_->Initialize<ShapeParameter::Cylinder>(entity3DManager->GetPrimitiveCommon(), Primitive::ShapeType::Cylinder, cylinderParam, "resources/Texture/effect/gradationLine.png");
-	primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	// レティクル
-
-	objectReticle_ = std::make_unique<Object3d>();
-	objectReticle_->Initialize(entity3DManager,Object3d::ObjectType::kPrimitive);
-	objectReticle_->SetCamera(camera_);
-	objectReticle_->SetName("レティクルシリンダー");
-	objectReticle_->SetPrimitive(primitiveCylinder_.get());
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D("レティクルシリンダー", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
+	objectReticle_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
-	objectReticle_->worldtransform_.parent_ = &objectBase_.worldtransform_;
+	objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
 	objectReticle_->worldtransform_.rotate_.x = DegreesToRadians(-90);
 	objectReticle_->worldtransform_.translate_ = { 0,2,100 };
 
@@ -57,21 +101,21 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.SetName("PlayerBody");
-	objectBody_.worldtransform_.parent_ = &objectBase_.worldtransform_;
+	objectBody_.worldtransform_.parent_ = &objectBase_->worldtransform_;
 
 
 	// スペシャル攻撃
 	bulletSpecial_ = std::make_unique<BulletSpecial>();
 	bulletSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
-	bulletSpecial_->SetParent(&objectBase_.worldtransform_);
+	bulletSpecial_->SetParent(&objectBase_->worldtransform_);
 
 	rangeBombingSpecial_ = std::make_unique<RangeBombingSpecial>();
 	rangeBombingSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
-	rangeBombingSpecial_->SetParent(&objectBase_.worldtransform_);
+	rangeBombingSpecial_->SetParent(&objectBase_->worldtransform_);
 
 	weapon_ = std::make_unique<playerWeapon>();
 	weapon_->Initialize(entity3DManager, camera);
-	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_.worldtransform_;
+	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_->worldtransform_;
 	weapon_->GetObject3D().worldtransform_.translate_ = { 0,0.5f,0.5f };
 	weapon_->SetOffset({ 0,5.0f,0.5f });
 	weapon_->SetPlayer(this);
@@ -86,7 +130,7 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 
 
 	// Transform 登録
-	transformMap["Player"] = &objectBase_.worldtransform_;
+	transformMap["Player"] = &objectBase_->worldtransform_;
 	attackManager_->SetContext(input_, transformMap);
 
 	// 攻撃ノードの登録（攻撃名・次の遷移・キャンセル条件など）
@@ -127,12 +171,12 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
 
-
+	//objectBase_.Update();
 }
 
 void Player::Update()
 {
-	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_.worldtransform_.rotate_.y;
+	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_->worldtransform_.rotate_.y;
 
 
 	if (isAlive) {
@@ -229,7 +273,7 @@ void Player::Update()
 	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
 
-
+	ImGui::InputInt("HP", &hp);
 
 
 	ImGui::End();
@@ -259,6 +303,13 @@ void Player::Update()
 
 
 	weapon_->Update();
+
+	Matrix4x4 mat = objectBase_->worldtransform_.worldMat_;
+
+
+
+	objectBase_->Update();
+	colliderComponent_->UpdateAll(objectBase_->worldtransform_);
 }
 
 #pragma region Draw
@@ -353,7 +404,7 @@ void Player::Move()
 			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
 			//
 			if (velocity_.Length() != 0) {
-				objectBase_.worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+				objectBase_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
 			}
 
 
@@ -418,8 +469,8 @@ void Player::Gravity() {
 	}
 	AddMove();
 	// 着地
-	if (objectBase_.worldtransform_.translate_.y <= groundY) {
-		objectBase_.worldtransform_.translate_.y = groundY;
+	if (objectBase_->worldtransform_.translate_.y <= groundY) {
+		objectBase_->worldtransform_.translate_.y = groundY;
 		accelerationY_ = 0.0f;
 		graVelo = 0;
 		isJamp = false;
@@ -429,22 +480,22 @@ void Player::Gravity() {
 void Player::AddMove()
 {
 	if (isAlive)
-		objectBase_.worldtransform_.translate_ += velocity_ * MyGame::GameTime();
+		objectBase_->worldtransform_.translate_ += velocity_ * MyGame::GameTime();
 }
 
 void Player::LimitMove()
 {
-	if (objectBase_.worldtransform_.translate_.x > moveLimit + 50) {
-		objectBase_.worldtransform_.translate_.x = moveLimit + 50;
+	if (objectBase_->worldtransform_.translate_.x > moveLimit + 50) {
+		objectBase_->worldtransform_.translate_.x = moveLimit + 50;
 	}
-	if (objectBase_.worldtransform_.translate_.x < -(moveLimit + 50)) {
-		objectBase_.worldtransform_.translate_.x = -(moveLimit + 50);
+	if (objectBase_->worldtransform_.translate_.x < -(moveLimit + 50)) {
+		objectBase_->worldtransform_.translate_.x = -(moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z > (moveLimit + 50)) {
-		objectBase_.worldtransform_.translate_.z = (moveLimit + 50);
+	if (objectBase_->worldtransform_.translate_.z > (moveLimit + 50)) {
+		objectBase_->worldtransform_.translate_.z = (moveLimit + 50);
 	}
-	if (objectBase_.worldtransform_.translate_.z < -(moveLimit + 50)) {
-		objectBase_.worldtransform_.translate_.z = -(moveLimit + 50);
+	if (objectBase_->worldtransform_.translate_.z < -(moveLimit + 50)) {
+		objectBase_->worldtransform_.translate_.z = -(moveLimit + 50);
 	}
 }
 
@@ -453,35 +504,6 @@ void Player::LimitMove()
 
 #pragma region MyRegion
 
-void Player::OnCollision(Collider* other)
-{
-	// 衝突判定の種別IDを取得
-	uint32_t typeID = other->GetTypeID();
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemy)) {
-		if (isAlive) {
-			if (!GetInvincible()) {
-				BaseEnemy* enemy = static_cast<BaseEnemy*>(other);
-				uint32_t serialNumber = enemy->GetSerialNumber();
-
-				// 接触履歴があれば何もせず抜ける
-				if (contactRecord_.CheckHistory(serialNumber)) {
-					//return;
-				}
-
-				contactRecord_.AddHistory(serialNumber);
-
-				followCamera_->GetViewProjection().SetShake(0.1f, { 1.5f,1.5f,1.5f });
-			}
-		}
-	}
-	if (typeID == static_cast<uint32_t>(CollisionTypeIdDef::kEnemyWeapon)) {
-	}
-}
-
-Vector3 Player::GetCenterPosition() const
-{
-	return objectBase_.GetWorldPosition();
-}
 
 void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {

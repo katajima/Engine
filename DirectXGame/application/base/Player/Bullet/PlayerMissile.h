@@ -20,11 +20,6 @@ public:
 	void Draw2D() override;
 
 private:
-	//
-	void EnemyToColl() override;
-	//
-	void PlayerToColl() override;
-
 
 private: // 演出関係
 

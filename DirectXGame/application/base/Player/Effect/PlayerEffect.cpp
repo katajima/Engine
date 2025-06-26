@@ -44,7 +44,7 @@ void PlayerEffect::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3D
 
 void PlayerEffect::Update()
 {
-	trailEffect_->Update(isTrail_, weaponStr, weaponEnd);
+	//trailEffect_->Update(isTrail_, weaponStr, weaponEnd);
 
 	dashEmitter_->Update();
 	weaponStr.Update();
@@ -53,7 +53,7 @@ void PlayerEffect::Update()
 
 void PlayerEffect::Draw()
 {
-	trailEffect_->Draw();
+	//trailEffect_->Draw();
 }
 
 void PlayerEffect::SetTrailParent(Object3d* object)

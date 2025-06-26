@@ -7,7 +7,7 @@ void Player::Attack()
 	workAttack.parameter += MyGame::GameTime();
 
 	float t = static_cast<float>(workAttack.parameter) / workAttack.attackAll.max_t;
-
+	weapon_->GetObject3D().SetIsDraw(true);
 	float k = 0.5f;
 	switch (workAttack.type)
 	{
@@ -44,9 +44,9 @@ void Player::Attack()
 
 			Vector3 move(0, 0, k);
 			// 速度ベクトルを自機の向きに合わせて回転させる
-			move = TransformNormal(move, objectBase_.worldtransform_.worldMat_);
+			move = TransformNormal(move, objectBase_->worldtransform_.worldMat_);
 
-			objectBase_.worldtransform_.translate_ += move;
+			objectBase_->worldtransform_.translate_ += move;
 		}
 		break;
 	}
@@ -102,12 +102,13 @@ void Player::SetAttackCombo(WrokAttack& work)
 			work.comboNext = false;
 			work.key.IsAttack = false;
 			effect_->SetIsTrail(false);
-
+			weapon_->SetColliderHistoryClear();
 		}
 		else {
 			effect_->SetIsTrail(false);
-
+			weapon_->GetObject3D().SetIsDraw(false);
 			behaviorRequest_ = Behavior::kRoot;
+			
 		}
 	}
 	else {
@@ -129,9 +130,9 @@ void Player::SetAttackCombo(WrokAttack& work)
 // 攻撃位置初期化
 void Player::AttackTypeInit(int comboIndex)
 {
-	objectBase_.Update();
+	objectBase_->Update();
 	objectReticle_->Update();
-	workAttack.pos.str = objectBase_.GetWorldPosition();
+	workAttack.pos.str = objectBase_->GetWorldPosition();
 	weapon_->ContactRecordClear();
 
 	// スピード
@@ -147,22 +148,22 @@ void Player::AttackTypeInit(int comboIndex)
 
 
 			if (comboIndex == 0) {
-				weapon_->SetRad(2.5f);
+				//weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,0 });
 			}
 			if (comboIndex == 1) {
-				weapon_->SetRad(2.5f);
+				//weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			if (comboIndex == 2) {
-				weapon_->SetRad(3.5f);
+				//weapon_->SetRad(3.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,-90 });
 			}
 			if (comboIndex == 3) {
-				weapon_->SetRad(4.5f);
+				//weapon_->SetRad(4.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,90 });
 			}

@@ -26,7 +26,9 @@ void EnemyManager::Update()
 void EnemyManager::Draw()
 {
 	for (auto& enemy : enemys_) {
-		enemy->Draw();
+		if (enemy->GetAlive()) {
+			enemy->Draw();
+		}
 	}
 }
 
@@ -61,11 +63,11 @@ void EnemyManager::GenerateEnemy(EnemyType type, Vector3 position)
 		break;
 	}
 
-
+	enemy->SetSerialNumber(serialNumber);
 	enemy->Initialize(entity3DManager_, entity2DManager_, position, camera_);
 	enemy->SetPlayer(player_);
 
 	enemys_.push_back(std::move(enemy));
 
-
+	serialNumber++;
 }

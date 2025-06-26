@@ -25,7 +25,7 @@ void GamePlayScene::Initialize()
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
-	followCamera_->SetTarget(&player_->GetObject3D());
+	followCamera_->SetTarget(player_->GetObject3D());
 
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
@@ -71,8 +71,9 @@ void GamePlayScene::Initialize()
 
 
 	// 衝突マネージャの生成
+	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<CollisionManager>();
-	collisionManager_->Initialize(GetGlobalVariables());
+	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 
 	InitializeResources();
 }
@@ -147,24 +148,27 @@ void GamePlayScene::ApplyGlobalVariables()
 void GamePlayScene::CheckAllCollisions()
 {
 	// 衝突マネージャのリセット
-	collisionManager_->Reset();
-	// コライダーをリストに登録
-	collisionManager_->AddCollider(player_.get());
-	if (player_->GetBehavior() == Player::Behavior::kAttack) {
-		// コライダーをリストに登録
-		collisionManager_->AddCollider(player_->GetWeapon());
-	}
+	collisionManager_->Clear();
 
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		collisionManager_->AddCollider(bullet.get());
-	}
+	// プレイヤーコライダーセット
+	collisionManager_->Register(player_->GetColliderComponent());
 
+	// 敵コライダーセット
 	for (auto enemy : enemyManager_->GetEnemys()) {
-		collisionManager_->AddCollider(enemy);
+		collisionManager_->Register(enemy->GetColliderComponent());
+	}
+	// 武器コライダコンセット
+	if (player_->GetBehavior() == Player::Behavior::kAttack) {
+		
+		collisionManager_->Register(player_->GetWeapon()->GetColliderComponent());
+	}
+	// 弾のコライダー追加
+	for (const auto& bullet : bulletManager_->GetBullets()) {
+		collisionManager_->Register(bullet->GetColliderComponent());
 	}
 
-	// 衝突判定
-	collisionManager_->CheckAllCollisions();
+	collisionManager_->CheckAll();
+	collisionManager_->Clear();
 }
 #pragma endregion 初期化関係
 
@@ -180,7 +184,7 @@ void GamePlayScene::UpdateImGui()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
-	Vector2 pos = player_->GetObject3D().GetScreenPosition();
+	Vector2 pos = player_->GetObject3D()->GetScreenPosition();
 	ImGui::Begin("engine");
 	ImGui::Checkbox("flag", &flag);
 	ImGui::DragFloat2("screenpos", &pos.x, 0.1f);
@@ -279,7 +283,7 @@ void GamePlayScene::Update()
 	ImGui::End();
 #endif // _DEBUG
 
-	if(input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
 		player_->GetRangeBombingSpecial()->SetGauge(100);
 	}
 
@@ -290,13 +294,13 @@ void GamePlayScene::Update()
 		cameraScaleT += 0.05f;
 
 		if (cameraScaleT >= 1.0f) {
-			cameraScaleT = 1.0f;	
+			cameraScaleT = 1.0f;
 		}
 
 		universeCamera_->GetViewProjection().transform_.scale.z = Lerp(minScaleZCamera, 1.0f, cameraScaleT);
 	}
 	else {
-		
+
 		timer += MyGame::GameTime();
 	}
 
@@ -350,10 +354,7 @@ void GamePlayScene::Update()
 	bulletManager_->Update();
 
 
-	// デバック表示用にワールドトランスフォームを更新
-	collisionManager_->UpdateWorldTransform(GetEntity3DManager()->Get3DLineCommon());
-
-
+	
 
 	// ステージ
 	stage_->Update();

@@ -386,7 +386,7 @@ void LineCommon::AddLineCapsule(Capsule capsule ,const Vector4& color)
 void LineCommon::AddLineOBB(const OBB& obb, const Vector4& color)
 {
 	// Half extents along each local axis
-	Vector3 halfSize = obb.size * 0.5f;
+	Vector3 halfSize = obb.size * 1.0f;
 
 	// ローカル軸方向にサイズを掛けて、各方向ベクトルにスケールを適用
 	Vector3 axes[3] = {

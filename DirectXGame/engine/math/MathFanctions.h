@@ -53,6 +53,8 @@ float Clamp(float t, float min, float max);
 
 float Clamp3(float value, float min, float max);
 
+
+
 //球と四角形に対する最近接点
 Vector3 ClosestPointAABBSphere(const Sphere& sphere, const AABB& aabb);
 
