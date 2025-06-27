@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
-void PlayerEffect::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
+void PlayerEffect::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();

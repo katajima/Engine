@@ -1,12 +1,12 @@
 #pragma once
-#include "DirectXGame/engine/collider/3d/Collider.h"
-#include"DirectXGame/engine/collider/ContactRecord.h"
+
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 
 #include "DirectXGame/engine/Effect/Particle/ParticleEmitter.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
+
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 
 class Player;
@@ -69,7 +69,7 @@ public:
 
 	void SetTargerRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
 
-	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
+	ColliderComponent* GetColliderComponent() { return object_->GetColliderComponent(); }
 
 protected:
 	// 当たり判定をするか
@@ -103,7 +103,6 @@ protected:
 	BaseEnemy* enemy_;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
-	std::unique_ptr<ColliderComponent> colliderComponent_ = nullptr;
 };
 
 

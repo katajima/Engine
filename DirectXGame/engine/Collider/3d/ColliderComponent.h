@@ -48,7 +48,7 @@ private:
 
     uint32_t uniqueId_ = 0; // 外部から一意な番号を割り当て
 
-    LineCommon* lineCommon;
+	LineCommon* lineCommon; // ライン描画用の共通オブジェクト
 public: // 更新or判定
    
     // ワールド変換に基づいて各Colliderの座標を更新
@@ -65,6 +65,15 @@ public: // 更新or判定
             }
         }
     }
+
+	// 特定のIDのコライダーだけ更新
+    void UpdateByID(const WorldTransform& worldTransform, uint32_t id) {
+        for (auto& entry : colliders) {
+            if (entry.id == id) {
+                entry.collider->Update(worldTransform, lineCommon);
+            }
+        }
+	}
 
     // 衝突チェック＋コールバック通知（このComponent vs 他のComponent）
     void CheckAndNotify(ColliderComponent& other) {
@@ -134,7 +143,7 @@ public: // 設定or追加
         hitReceiver = receiver;
     }
 
-    // タグと判定があるかの設定
+    // タグでの有効or無効設定
     void SetEnableByTag(CollisionTag tag, bool enable) {
         for (auto& entry : colliders) {
             if (entry.collider->tag == tag) {
@@ -142,6 +151,15 @@ public: // 設定or追加
             }
         }
     }
+
+	// IDでの有効or無効設定
+    void SetEnableById(uint32_t id, bool enable) {
+        for (auto& entry : colliders) {
+            if (entry.id == id) {
+                entry.collider->enabled = enable;
+            }
+        }
+	}
 
     // 初期化時に必ずセット
     void SetUniqueId(uint32_t id) { uniqueId_ = id; }
@@ -151,10 +169,14 @@ public: // 取得
     //
     IHitReceiver* GetHitReceiver() const { return hitReceiver; }
 
-    // IDセット()
+    // コライダーコンポーネントID取得
     uint32_t GetUniqueId() const { return uniqueId_; }
 
-   
+	// コライダーID取得
+    uint32_t GetNextId() const {
+        return nextId_;
+	}
+
     // ID検索でコライダー取得
     Collider* FindColliderById(uint32_t id) {
         for (auto& entry : colliders) {

@@ -3,7 +3,7 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "ColliderFanction3D.h"
 
 constexpr float kFloatMax = 3.4028235e+38f;
 

@@ -5,10 +5,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 
 
-
-#include "DirectXGame/engine/collider/3d/Collider.h"
-#include"DirectXGame/engine/collider/ContactRecord.h"
-#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
+//#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 
 class BasePlayer;
 class Player;
@@ -41,8 +38,8 @@ public:
 	// カメラのビュープロジェクション
 	//void SetCamera(const Camera* camera) { camera_ = camera; };
 
-	void SetIsCollider(bool is) { colliderComponent_->SetEnableByTag(CollisionTag::PlayerAttack, is); };
-	void SetColliderHistoryClear() { colliderComponent_->contactRecord_.Clear(); }
+	void SetIsCollider(bool is) { objectWeapon_->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, is); };
+	void SetColliderHistoryClear() { objectWeapon_->GetColliderComponent()->contactRecord_.Clear(); }
 
 
 	void SetOffset(const Vector3& translation) { offset = translation; }
@@ -50,19 +47,20 @@ public:
 	// 接触履歴を抹消
 	void ContactRecordClear();
 
-	//void SetRad(float rad) { Collider::SetRadius(rad); };
-
 	void SetPlayer(Player* player);
 	
 	void SetPlayer(BasePlayer* player);
 
-	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
+	ColliderComponent* GetColliderComponent() { return objectWeapon_->GetColliderComponent(); }
 
 private:
 	// 武器
 	Object3d* objectWeapon_;
-	//std::unique_ptr<WorldTransform> colliderWorld_ = nullptr;
 	WorldTransform colliderWorld_;
+	uint32_t weaponColliderId_ = 0;
+
+	WorldTransform colliderWorld2_;
+	uint32_t weaponColliderId2_ = 0;
 
 	const Camera* camera_ = nullptr;
 	ContactRecord contactRecord_;
@@ -71,7 +69,5 @@ private:
 	Player* player_;
 	BasePlayer* basePlayer_;
 
-
-	std::unique_ptr<ColliderComponent> colliderComponent_ = nullptr;
 };
 

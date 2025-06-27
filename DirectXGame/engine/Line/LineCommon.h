@@ -14,8 +14,8 @@
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 
 #include"DirectXGame/engine/math/LineCurveMath.h"
-#include "DirectXGame/engine/collider/Octree/Octree.h"
 
+struct OctreeNode;
 class LineCommon
 {
 public:

@@ -2,8 +2,7 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
-#include "DirectXGame/engine/collider/3d/Collider.h"
-#include "DirectXGame/engine/Collider/ContactRecord.h"
+
 
 class FollowCamera;
 class DirectXCommon;
@@ -65,7 +64,6 @@ protected:
 	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
 
 	
-	ContactRecord contactRecord_;
 	// シリアルナンバー
 	uint32_t serialNumber = 0;
 

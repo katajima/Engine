@@ -54,10 +54,8 @@ void NormalPlayer::Initialize(Input* input,DirectXCommon* dxcommon, Entity3DMana
 
 
 	/// エフェクト関係
-	effect_->Initialize(dxCommon_, entity3DManager_, entity2DManager, camera_);
+	effect_->Initialize(entity3DManager_, entity2DManager, camera_);
 	// トレイルエフェクト
-	effect_->GetTrailEffect()->SetObject(&weapon_->GetObject3D());
-	effect_->SetTrailEffectParent(&weapon_->GetObject3D());
 	effect_->SetTrailParent(&weapon_->GetObject3D());
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);

@@ -1,14 +1,10 @@
 #pragma once
-#include "DirectXGame/engine/collider/3d/Collider.h"
-#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
-#include"DirectXGame/engine/collider/ContactRecord.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 
 #include "DirectXGame/engine/Effect/Particle/ParticleEmitter.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
-
 
 class Player;
 class Entity3DManager;
@@ -82,7 +78,7 @@ public:
 
 	Object3d* GetObject3D() { return object_; }
 
-	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+	ColliderComponent* GetColliderComponent() { return object_->GetColliderComponent(); };
 
 protected:
 	// 時間
@@ -132,8 +128,8 @@ protected:
 	uint32_t serialNumber = 0;
 	// 次のシリアルナンバー
 	static uint32_t nextSerialNumber;
-	ContactRecord contactRecord_;
-	std::unique_ptr<ColliderComponent> colliderComponent_;
+	//ContactRecord contactRecord_;
+	//std::unique_ptr<ColliderComponent> colliderComponent_;
 
 protected: //2D
 	std::unique_ptr<Sprite> icon_lockOn;

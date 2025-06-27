@@ -608,6 +608,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\BaseCharacter.h" />
     <ClInclude Include="DirectXGame\application\base\Character\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackType.h" />

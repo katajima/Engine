@@ -7,27 +7,32 @@
 #include "assert.h"
 
 
-void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
+void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	colliderComponent_ = std::make_unique<ColliderComponent>();
-	colliderComponent_->SetOwner(colliderComponent_.get());
-	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
-	// プレイヤー本体のSphereColliderを作成
+	entity3DManager_ = entity3DManager;
+	camera_ = camera;
+	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
+	// プレイヤー
+	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectType::kNormal, position, camera_);
+	objectBase_->SetModel("AnimatedCube.gltf");
+	objectBase_->Update();
+	objectBase_->InitColliderComponent();
 
+	
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::Player;
 	sphere->layer = CollisionLayer::Player;
-	sphere->radius = 1.0f; // 半径を適宜設定
-	colliderComponent_->AddCollider(std::move(sphere));
+	sphere->collisionMask = 0xFFFFFFFF;
+	sphere->radius = 2.0f; // 半径を適宜設定
+	
+	objectBase_->GetColliderComponent()->AddCollider(std::move(sphere));
 
 
-	// 登録（IDを取得したければ変数で受ける）
-	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 
 	// 衝突時のコールバック登録
-	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+	objectBase_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
 
@@ -54,30 +59,16 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 
 		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
-		if (colliderComponent_->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
+		if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
 			return; // クールタイム中のため無視
 		}
 
-		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
+		objectBase_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		AddDamege(10);
 		followCamera_->GetViewProjection().SetShake(0.25f, {0.1f,0.1f,0.1f});
 	};
 
-
-	entity3DManager_ = entity3DManager;
-	camera_ = camera;
-	dxCommon_ = dxcommon;
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-
-	// プレイヤー
-	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase",Object3d::ObjectType::kNormal,position,camera_);
-	objectBase_->SetModel("AnimatedCube.gltf");
-	objectBase_->Update();
-	
-
-
-	//primitiveCylinder_ = std::make_unique<Primitive>();
 
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 5.0f;
@@ -163,15 +154,11 @@ void Player::Initialize(Input* input, DirectXCommon* dxcommon, Entity3DManager* 
 
 
 	/// エフェクト関係
-	effect_->Initialize(dxCommon_, entity3DManager_, entity2DManager, camera_);
+	effect_->Initialize(entity3DManager_, entity2DManager, camera_);
 	// トレイルエフェクト
-	effect_->GetTrailEffect()->SetObject(&weapon_->GetObject3D());
-	effect_->SetTrailEffectParent(&weapon_->GetObject3D());
 	effect_->SetTrailParent(&weapon_->GetObject3D());
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
-
-	//objectBase_.Update();
 }
 
 void Player::Update()
@@ -309,7 +296,7 @@ void Player::Update()
 
 
 	objectBase_->Update();
-	colliderComponent_->UpdateAll(objectBase_->worldtransform_);
+	//colliderComponent_->UpdateAll(objectBase_->worldtransform_);
 }
 
 #pragma region Draw

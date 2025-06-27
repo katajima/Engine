@@ -2,8 +2,6 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
-#include "DirectXGame/engine/collider/3d/Collider.h"
-#include "DirectXGame/engine/Collider/ContactRecord.h"
 
 class Entity3DManager;
 class BaseWeapon
@@ -40,9 +38,6 @@ public:
 	// 接触履歴を抹消
 	void ContactRecordClear();
 
-	//void SetRad(float rad) { Collider::SetRadius(rad); };
-
-
 protected:
 
 	virtual void UsePlayer() = 0;
@@ -56,8 +51,6 @@ protected:
 	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
 	const Camera* camera_ = nullptr;
 
-
-	ContactRecord contactRecord_;
 	Vector3 offset;
 private:
 

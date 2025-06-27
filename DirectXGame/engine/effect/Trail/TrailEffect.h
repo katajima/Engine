@@ -18,9 +18,8 @@
 
 #include"TrailEffectManager.h"
 
-class Object3d;
-class EffectManager;
 
+class EffectManager;
 class TrailEffect
 {
 public:
@@ -34,7 +33,7 @@ public:
 
 	void SetCamera(Camera* camera) { camera_ = camera; };
 
-	void SetObject(Object3d* obj) { object_ = obj; };
+	//void SetObject(Object3d* obj) { object_ = obj; };
 
 	void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
 
@@ -51,7 +50,7 @@ private:
 	// カメラ
 	Camera* camera_ = nullptr;
 
-	Object3d* object_;
+	//Object3d* object_;
 
 	std::unique_ptr<Material> material;
 	std::unique_ptr<Transfomation> transfomation = nullptr;

@@ -9,11 +9,9 @@
 #include <list>
 
 
-#include "DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
-#include "DirectXGame/engine/collider/3d/Collider.h"
-#include "DirectXGame/engine/effect/Trail/TrailEffect.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+
+#include "DirectXGame/application/base/Character/BaseCharacter.h"
 
 // プレイヤー
 #include"BasePlayerState.h"
@@ -22,7 +20,6 @@
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
 #include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
 #include "DirectXGame/application/base/Player/Special/RangeBombingSpecial.h"
-
 #include "DirectXGame/application/base/Player/Attack/PlayerAttackFactory.h"
 
 
@@ -34,19 +31,18 @@
 
 class Enemy;
 class FollowCamera;
-class DirectXCommon;
 class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
 
-class Player {
+class Player{
 public:
 
 
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera);
+	void Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera);
 
 	///< summary>
 	/// 更新
@@ -221,8 +217,6 @@ public:
 	Behavior GetBehavior() const { return behavior_; };
 	AttackTypePlay GetAttackType() const { return workAttack.type; };
 
-	uint32_t GetSerialNumber() const { return serialNumber; }
-
 	bool GetAlive() const { return isAlive; };
 	
 	void AddDamege(float da) { hp -= int(da); };
@@ -240,9 +234,6 @@ public:
 
 public:
 
-	// dxCommon
-	void SetDxCommon(DirectXCommon* dxcommon) { dxCommon_ = dxcommon; }
-
 	// カメラのビュープロジェクション
 	void SetCamera(Camera* camera) { camera_ = camera; };
 
@@ -257,12 +248,11 @@ public:
 		input_ = input;
 		bulletSpecial_->SetInput(input);
 		rangeBombingSpecial_->SetInput(input);
-
 	};
 
 	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
-	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+	ColliderComponent* GetColliderComponent() { return objectBase_->GetColliderComponent(); };
 
 private:  // パラメータ
 	
@@ -271,8 +261,6 @@ private:  // パラメータ
 	bool isAlive = true;
 	bool isInvincible = false;
 private:
-	std::unique_ptr<ColliderComponent> colliderComponent_;
-
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;
 	// スペシャル攻撃
@@ -315,13 +303,7 @@ private:
 
 	bool isCreativeMode = false;
 	
-	// シリアルナンバー
-	uint32_t serialNumber = 0;
-
-	std::unique_ptr<OBBCollider> obbCollider_;
-
 private:
-	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;
 	BulletManager* bulletManager_;
 	FollowCamera* followCamera_;

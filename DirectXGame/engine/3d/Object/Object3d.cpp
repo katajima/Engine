@@ -14,7 +14,6 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 
-
 void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
@@ -33,7 +32,9 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 	transformation->Initialize(object3dCommon_->GetDxCommon());
 
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
-	//entity3DManager_->SetEntity3D();
+	
+
+
 
 	isSkin_ = false;
 
@@ -202,6 +203,11 @@ void Object3d::Update()
 	// トレイル
 	}
 
+	if (isColliderComponent_) {
+		if (isColliderComponenyUpdate_) {
+			colliderComponent_->UpdateAll(worldtransform_);
+		}
+	}
 }
 
 #pragma endregion //更新系
@@ -328,6 +334,19 @@ float Object3d::GetAlpha()
 	}
 
 	return a;
+}
+
+void Object3d::InitColliderComponent()
+{
+	// コライダーコンポーネントの初期化
+	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_->SetOwner(colliderComponent_.get());
+	// ラインコモンをセット
+	colliderComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
+	// 登録（IDを取得したければ変数で受ける）
+	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+	isColliderComponent_ = true;
+	isColliderComponenyUpdate_ = true;
 }
 
 void Object3d::DrawSetting()

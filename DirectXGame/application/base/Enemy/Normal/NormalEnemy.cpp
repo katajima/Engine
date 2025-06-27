@@ -4,25 +4,30 @@
 
 void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
+	entity3DManager_ = entity3DManager;
+	entity2DManager_ = entity2DManager;
 
-	// コライダーコンポーネントの作成と初期設定
-	colliderComponent_ = std::make_unique<ColliderComponent>();
-	colliderComponent_->SetOwner(colliderComponent_.get());
-	colliderComponent_->SetHitReceiver(this);
-	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+	transBase_.Initialize();
+	transBase_.translate_ = position;
 
-	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+	object_ = entity3DManager_->CreateObject3D("enemy", Object3d::ObjectType::kNormal, {}, camera);
+	object_->SetModel("enemy2.obj");
+	object_->worldtransform_.parent_ = &transBase_;
+	object_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
+	object_->InitColliderComponent();
+	object_->GetColliderComponent()->SetHitReceiver(this);
+	
 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::Enemy;
 	sphere->layer = CollisionLayer::Enemy;
-	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::PlayerAttack));
+	//sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::PlayerAttack));
 	sphere->radius = 3.0f; // 半径を適宜設定
-	colliderComponent_->AddCollider(std::move(sphere));
+	object_->GetColliderComponent()->AddCollider(std::move(sphere));
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
-	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+	object_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		// プレイヤーかチェック
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
@@ -75,16 +80,7 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 	};
 
 
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-
-	transBase_.Initialize();
-	transBase_.translate_ = position;
-
-	object_ = entity3DManager_->CreateObject3D("enemy", Object3d::ObjectType::kNormal, {}, camera);
-	object_->SetModel("enemy2.obj");
-	object_->worldtransform_.parent_ = &transBase_;
-	object_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
+	
 	
 	isAlive_ = true;
 
@@ -141,7 +137,7 @@ void NormalEnemy::Update()
 	transBase_.Update();
 
 
-	colliderComponent_->UpdateAll(object_->worldtransform_);
+	//colliderComponent_->UpdateAll(object_->worldtransform_);
 }
 
 void NormalEnemy::Draw()

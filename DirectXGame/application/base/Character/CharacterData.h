@@ -57,16 +57,57 @@ struct Gage {
 	}
 };
 
-
 // キャラクターの基本パラメータを定義する構造体
 struct BasicParameters 
 {
 	Gage HP;				// ヒットポイント
 	Gage MP;				// マジックポイント
-	Gage Stamina;			// スタミナ
-	float Strength = 1.0f;	// 力
-	float Speed = 1.0f;		// 速さ
+	Gage stamina;			// スタミナ
+	float strength = 1.0f;	// 力
+	float speed = 1.0f;		// 速さ
+	float defense = 1.0f;	// 防御力
+	int intelligence = 1;// 知力
 };
+
+// キャラクターの状況を定義する構造体
+struct Situation
+{
+	bool isAlive = true;		// 生存フラグ
+	bool isAttacking = false;	// 攻撃中フラグ
+	bool isDefending = false;	// 防御中フラグ
+	bool isMoving = false;		// 移動中フラグ
+	bool isIdle = true;			// 待機中フラグ
+	bool isStunned = false;		// 気絶中フラグ
+	bool isInvincible = false;	// 無敵フラグ
+	bool isJumping = false;		// ジャンプ中フラグ
+};
+
+// キャラクターの種類を定義する列挙型
+enum class CharacterType
+{
+	None,		// キャラクターなし
+	Player,		// プレイヤーキャラクター
+	Enemy,		// 敵キャラクター
+	NPC,		// NPCキャラクター
+	Boss,		// ボスキャラクター
+	Friendly,	// フレンドリーキャラクター
+};
+
+// キャラクターの性格を定義する列挙型
+enum class Personality
+{
+	kNormal,			// 特になし
+	kAggressive,		// 攻撃的
+	kDefensive,			// 防御的
+	kCautious,			// 用心深い
+	kCurious,			// 好奇心旺盛
+	kFriendly,			// フレンドリー
+	kObsession			// 執着的
+};
+
+
+
+
 
 
 
@@ -74,11 +115,8 @@ struct BasicParameters
 class CharacterData
 {
 public:
-	virtual void Initialize() = 0; // 初期化関数
-
-
-private:
-
-public:
-	BasicParameters parameters_; // 基本パラメータ
+	Situation situation_;			// キャラクターの状況
+	BasicParameters parameters_;	// 基本パラメータ
+	Vector3 velocity_ = {};			// キャラクターの速度
+	Vector3 acceleration_ = {};		// キャラクターの加速度
 };

@@ -3,6 +3,7 @@
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/Material/Material.h"
+#include "DirectXGame/engine/collider/Octree/Octree.h"
 
 void LineCommon::Initialize(DirectXCommon* dxCommon)
 {

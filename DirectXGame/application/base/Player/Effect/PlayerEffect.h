@@ -14,7 +14,7 @@ class PlayerEffect
 {
 public:
 	
-	void Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,  Camera* camera);
+	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,  Camera* camera);
 
 	void Update();
 
@@ -28,7 +28,6 @@ public:
 
 	// トレイル関係
 
-	void SetTrailEffectParent(Object3d* object){ trailEffect_->SetObject(object); }
 	TrailEffect* GetTrailEffect() {return trailEffect_.get();}
 	void SetTrailParent(Object3d* object);
 	void SetIsTrail(bool is) { isTrail_ = is; }
@@ -45,7 +44,6 @@ private:
 	Object3d weaponEnd;
 
 private:
-	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;
 };
 

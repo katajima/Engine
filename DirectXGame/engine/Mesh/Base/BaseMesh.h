@@ -2,7 +2,6 @@
 
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Material.h"
-#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 #include "DirectXGame/engine/struct/VertexDeta.h"
 
 

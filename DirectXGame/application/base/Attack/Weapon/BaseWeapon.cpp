@@ -6,6 +6,6 @@
 
 void BaseWeapon::ContactRecordClear()
 {
-	contactRecord_.Clear();
+	//contactRecord_.Clear();
 }
 

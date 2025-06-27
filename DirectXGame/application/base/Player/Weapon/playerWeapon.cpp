@@ -1,30 +1,35 @@
 #include "playerWeapon.h"
 #include "DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Player/Player.h"
-#include "DirectXGame/application/base/Player/Base/BasePlayer.h"
+//#include "DirectXGame/application/base/Player/Base/BasePlayer.h"
 
 void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 {
-	// コライダコンポーネント追加
-	colliderComponent_ = std::make_unique<ColliderComponent>();
-	colliderComponent_->SetOwner(colliderComponent_.get());
-	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
-	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+	objectWeapon_ = entity3DManager->CreateObject3D("PlayerWeapon", Object3d::ObjectType::kNormal, {}, camera);
+	objectWeapon_->SetIsDraw(false);
+	objectWeapon_->SetModel("Sword.obj");
+	objectWeapon_->InitColliderComponent(); // コライダーコンポーネントの初期化
+	objectWeapon_->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
+	
 
 	auto obbCollider_ = std::make_unique<OBBCollider>();
 	obbCollider_->obb.size = { 0.5f,3,1 };
 	obbCollider_->tag = CollisionTag::PlayerAttack;
 	obbCollider_->layer = CollisionLayer::PlayerAttack;
 	obbCollider_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
-	colliderComponent_->AddCollider(std::move(obbCollider_));
+	weaponColliderId_ = objectWeapon_->GetColliderComponent()->GetNextId();
+	objectWeapon_->GetColliderComponent()->AddCollider(std::move(obbCollider_));
+	
+	auto obbCollider2_ = std::make_unique<OBBCollider>();
+	obbCollider2_->obb.size = { 0.5f,3,1 };
+	obbCollider2_->tag = CollisionTag::PlayerAttack;
+	obbCollider2_->layer = CollisionLayer::PlayerAttack;
+	obbCollider2_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
+	weaponColliderId2_ = objectWeapon_->GetColliderComponent()->GetNextId();
+	objectWeapon_->GetColliderComponent()->AddCollider(std::move(obbCollider2_));
+	
 
-	//auto sphere = std::make_unique<SphereCollider>();
-	//sphere->tag = CollisionTag::PlayerAttack;
-	//sphere->layer = CollisionLayer::Enemy;
-	//sphere->radius = 3.0f; // 半径を適宜設定
-	//colliderComponent_->AddCollider(std::move(sphere));
-
-	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+	objectWeapon_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		if (!other || other->tag != CollisionTag::Enemy) return;
 
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
@@ -38,11 +43,11 @@ void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 		const uint32_t otherId = otherComponent->GetUniqueId();
 		const float nowTime = MyGame::NowTime();
 
-		if (colliderComponent_->contactRecord_.CheckHistory(otherId)) {
+		if (objectWeapon_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
 			return; // クールタイム中のため無視
 		}
 
-		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
+		objectWeapon_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		enemy->AddDamage(10);
 		enemy->SetHit();
@@ -54,25 +59,30 @@ void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 		player_->SetHitTime();
 		};
 
-	objectWeapon_ = entity3DManager->CreateObject3D("PlayerWeapon", Object3d::ObjectType::kNormal, {}, camera);
-	objectWeapon_->SetIsDraw(false);
-	objectWeapon_->SetModel("Sword.obj");
+	
 	
 	colliderWorld_.Initialize();
 	colliderWorld_.parent_ = &objectWeapon_->worldtransform_;
 	colliderWorld_.translate_.y = 5.0f; // 武器の位置調整
+
+	colliderWorld2_.Initialize();
+	colliderWorld2_.parent_ = &colliderWorld_;
+	colliderWorld2_.translate_.y = 2.0f; // 武器の位置調整
 }
 
 void playerWeapon::Update()
 {
 	colliderWorld_.Update();
-	colliderComponent_->UpdateAll(colliderWorld_);
-	//objectWeapon_->Update();
+	colliderWorld2_.Update();
+
+	//objectWeapon_->GetColliderComponent()->SetEnableById(weaponColliderId_,false);
+	objectWeapon_->GetColliderComponent()->UpdateByID(colliderWorld_, weaponColliderId_);
+	objectWeapon_->GetColliderComponent()->UpdateByID(colliderWorld2_, weaponColliderId2_);
+
 }
 
 void playerWeapon::Draw()
 {
-	//objectWeapon_.Draw();
 }
 
 

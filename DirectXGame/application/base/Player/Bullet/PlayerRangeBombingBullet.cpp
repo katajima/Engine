@@ -9,27 +9,27 @@
 
 #include "DirectXGame/engine/math/random.h"
 
-PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
-{
-	//trailEffect_.reset(nullptr);
-}
-
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
-	colliderComponent_ = std::make_unique<ColliderComponent>();
-	colliderComponent_->SetOwner(colliderComponent_.get());
-	colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
-	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
-
+	//// オブジェクト設定
+	object_ = entity3DManager->CreateObject3D("playerbullet", Object3d::ObjectType::kNormal, position, camera);
+	object_->SetModel("player_bullet.obj");
+	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,1.5f,0 }, { 0,-1.5f,0 });
+	object_->Update();
+	object_->InitColliderComponent();
+	
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::PlayerAttack;
 	sphere->layer = CollisionLayer::PlayerAttack;
 	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
 	sphere->radius = 10.0f; // 半径を適宜設定
-	colliderComponent_->AddCollider(std::move(sphere));
+	sphere->Disable(); // 初期状態では無効化
+	object_->GetColliderComponent()->AddCollider(std::move(sphere));
+
+
 
 	// 衝突時のコールバック登録
-	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+	object_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
@@ -41,11 +41,11 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
-		if (colliderComponent_->contactRecord_.CheckHistory(otherId)) {
+		if (object_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
 			return; // クールタイム中のため無視
 		}
 
-		colliderComponent_->contactRecord_.AddHistory(otherId, nowTime);
+		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		enemy->AddDamage(parameter_.damege);
 		enemy->SetHit();
@@ -53,11 +53,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 		enemy->hitStop(0.1f);
 		};
 
-	//// オブジェクト設定
-	object_ = entity3DManager->CreateObject3D("playerbullet",Object3d::ObjectType::kNormal,position,camera);
-	object_->SetModel("player_bullet.obj");
-	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, {0,1.5f,0}, { 0,-1.5f,0 });
-	object_->Update();
+	
 	// Y軸周り角度(θy)
 	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
 	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
@@ -173,10 +169,6 @@ void PlayerRangeBombingBullet::Update()
 
 	Vector3 strSmoke = object_->worldtransform_.worldMat_.GetWorldPosition();
 	Vector3 endSmoke = object_->worldtransform_.worldPreMat_.GetWorldPosition();
-	//moveSmokeEmitter_->SetRengeMinMax(strSmoke, endSmoke);
-	//moveSmokeEmitter2_->SetRengeMinMax(strSmoke, endSmoke);
-
-
 
 	if (count > 0 || phase_ > 0) {
 		
@@ -274,7 +266,6 @@ void PlayerRangeBombingBullet::Update()
 			if (count >= max_count)
 			{
 				velocity_ = targetPos * 3;
-				//Collider::SetRadius(20.0f);
 				object_->worldtransform_.translate_ += velocity_ * GetTimer();
 			}
 
@@ -315,14 +306,14 @@ void PlayerRangeBombingBullet::Update()
 		hitObject2_->worldtransform_.translate_ = posGround + Vector3{ 0,-6.0f,0 };
 
 
-		object_->Update();
+		//object_->Update();
 		 
 		hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_;
 		hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
 
 		hitObject2_->worldtransform_.rotate_.x = DegreesToRadians(-90);
 
-		colliderComponent_->UpdateAll(object_->worldtransform_);
+		//colliderComponent_->UpdateAll(object_->worldtransform_);
 	}
 
 
@@ -330,7 +321,7 @@ void PlayerRangeBombingBullet::Update()
 
 	if (isEffectPlay_) {
 		time_ += GetTimer();
-
+		object_->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
 		object_->SetIsDraw(false);
 		hitObject_->SetIsDraw(true);
 		hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_ + Vector3{ 0.0f,5.0f ,0.0f };
@@ -345,7 +336,7 @@ void PlayerRangeBombingBullet::Update()
 			hitObject_->IsDelete();
 			hitObject2_->IsDelete();
 			isEffectPlay_ = false;
-			colliderComponent_->ClearColliders();
+			//object_->GetColliderComponent()->ClearColliders();
 
 		
 		}

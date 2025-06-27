@@ -20,7 +20,7 @@ void GamePlayScene::Initialize()
 
 	// プレイヤー
 	player_ = std::make_unique<Player>();
-	player_->Initialize(input_, GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
+	player_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();

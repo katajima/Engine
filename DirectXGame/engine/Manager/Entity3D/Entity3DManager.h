@@ -15,9 +15,9 @@
 #include "DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 
-#include "Entity3D.h"
 
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/3d/Object/Object3d.h"
 
 class DirectXCommon;
 class Entity3DManager
