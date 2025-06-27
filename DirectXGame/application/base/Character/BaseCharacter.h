@@ -38,6 +38,9 @@ public:
 	// オブジェクト3d取得
 	Object3d* GetObject3D() { return objectBase_; }
 
+	// コライダーコンポーネント取得
+	ColliderComponent* GetColliderComponent() { return objectBase_->GetColliderComponent(); }
+
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return characterData_.situation_.isAlive; };
 
@@ -49,8 +52,6 @@ public:
 
 	// HP取得
 	float GetHP() const { return characterData_.parameters_.HP.value; }
-
-
 
 protected:
 	// 基本パラメータ
@@ -75,7 +76,7 @@ protected:
 
 protected: // 貰ってくるもの
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Entity2DManager* Entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
 	Camera* camera_ = nullptr;						// カメラ
 	Input* input_ = nullptr;						// 入力
 

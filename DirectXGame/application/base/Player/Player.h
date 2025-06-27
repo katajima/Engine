@@ -234,8 +234,6 @@ public:
 
 	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
-	ColliderComponent* GetColliderComponent() { return objectBase_->GetColliderComponent(); };
-
 private:
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;

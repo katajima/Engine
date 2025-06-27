@@ -10,12 +10,12 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	transBase_.Initialize();
 	transBase_.translate_ = position;
 
-	object_ = entity3DManager_->CreateObject3D("enemy", Object3d::ObjectType::kNormal, {}, camera);
-	object_->SetModel("enemy2.obj");
-	object_->worldtransform_.parent_ = &transBase_;
-	object_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
-	object_->InitColliderComponent();
-	object_->GetColliderComponent()->SetHitReceiver(this);
+	objectBase_ = entity3DManager_->CreateObject3D("enemy", Object3d::ObjectType::kNormal, {}, camera);
+	objectBase_->SetModel("enemy2.obj");
+	objectBase_->worldtransform_.parent_ = &transBase_;
+	objectBase_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
+	objectBase_->InitColliderComponent();
+	GetColliderComponent()->SetHitReceiver(this);
 	
 
 	// SphereColliderを追加
@@ -24,10 +24,10 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	sphere->layer = CollisionLayer::Enemy;
 	//sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::PlayerAttack));
 	sphere->radius = 3.0f; // 半径を適宜設定
-	object_->GetColliderComponent()->AddCollider(std::move(sphere));
+	GetColliderComponent()->AddCollider(std::move(sphere));
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
-	object_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
+	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		// プレイヤーかチェック
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
@@ -48,7 +48,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
 				}
 
-				object_->Update();
+				objectBase_->Update();
 			}
 		}
 
@@ -71,7 +71,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
 				}
 
-				object_->Update();
+				objectBase_->Update();
 			}
 		}
 
@@ -129,10 +129,10 @@ void NormalEnemy::Update()
 		dustEmit3_->Update();*/
 	}
 	else {
-		object_->IsDelete();
+		objectBase_->IsDelete();
 	}
 
-	object_->Update();
+	objectBase_->Update();
 	transBase_.Update();
 
 }
@@ -217,7 +217,7 @@ void NormalEnemy::Move()
 	// Y軸周り角度
 	transBase_.rotate_.y = std::atan2(sub.x, sub.z);
 
-	if (Distance(player_->GetObject3D()->GetWorldPosition(), object_->GetWorldPosition()) >= 5) {
+	if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
 
 		// 移動
 		transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());
@@ -234,7 +234,7 @@ void NormalEnemy::InitParticle()
 	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01_2");
 	dustEmit_->GetFrequency() = 0.25f;
 	dustEmit_->SetCount(3);
-	dustEmit_->SetParent(object_->worldtransform_);
+	dustEmit_->SetParent(objectBase_->worldtransform_);
 	dustEmit_->SetPos({ 0,1.1f,-0.45f });
 	dustEmit_->SetRengeMinMax({ 0,0,0 }, { 0,0,0 });
 	dustEmit_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
@@ -254,7 +254,7 @@ void NormalEnemy::InitParticle()
 	dustEmit2_->Initialize(particleManager, "smokePlane02", "smokePlane02_2");
 	dustEmit2_->GetFrequency() = 0.25f;
 	dustEmit2_->SetCount(3);
-	dustEmit2_->SetParent(object_->worldtransform_);
+	dustEmit2_->SetParent(objectBase_->worldtransform_);
 	dustEmit2_->SetPos({ 0,1.1f,-0.45f });
 	dustEmit2_->SetRengeMinMax({ 0,0,0 }, { 0,0,0 });
 	dustEmit2_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
@@ -273,7 +273,7 @@ void NormalEnemy::InitParticle()
 	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03_2");
 	dustEmit3_->GetFrequency() = 0.25f;
 	dustEmit3_->SetCount(3);
-	dustEmit3_->SetParent(object_->worldtransform_);
+	dustEmit3_->SetParent(objectBase_->worldtransform_);
 	dustEmit3_->SetPos({ 0,1.1f,-0.45f });
 	dustEmit3_->SetRengeMinMax({ 0,0,0 }, { 0,0,0 });
 	dustEmit3_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
@@ -294,7 +294,7 @@ void NormalEnemy::InitParticle()
 	starEmit_->Initialize(particleManager, "dust", "hitStar");
 	starEmit_->GetFrequency() = 0.0f;
 	starEmit_->SetCount(1);
-	starEmit_->SetParent(object_->worldtransform_);
+	starEmit_->SetParent(objectBase_->worldtransform_);
 	starEmit_->SetPos({ 0,0.0f,0.0f });
 	starEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	starEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -308,7 +308,7 @@ void NormalEnemy::InitParticle()
 	traiEmit_->Initialize(particleManager, "dust", "hitEffect");
 	traiEmit_->GetFrequency() = 0.0f;
 	traiEmit_->SetCount(5);
-	traiEmit_->SetParent(object_->worldtransform_);
+	traiEmit_->SetParent(objectBase_->worldtransform_);
 	traiEmit_->SetPos({ 0,0.0f,0.0f });
 	traiEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	traiEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -325,7 +325,7 @@ void NormalEnemy::InitParticle()
 	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleData::SpawnType::kPoint);
 	effectEmit_->GetFrequency() = 0.0f;
 	effectEmit_->SetCount(1);
-	effectEmit_->SetParent(object_->worldtransform_);
+	effectEmit_->SetParent(objectBase_->worldtransform_);
 	effectEmit_->SetPos({ 0,0.0f,0.0f });
 	effectEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	effectEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -342,7 +342,7 @@ void NormalEnemy::InitParticle()
 	hitEmit_->Initialize(particleManager, "dust", "hit");
 	hitEmit_->GetFrequency() = 0.0f;
 	hitEmit_->SetCount(10);
-	hitEmit_->SetParent(object_->worldtransform_);
+	hitEmit_->SetParent(objectBase_->worldtransform_);
 	hitEmit_->SetPos({ 0,0.0f,0.0f });
 	hitEmit_->SetRotateMinMax(-DegreesToRadians({ 90,90,90 }), DegreesToRadians({ 90,90,90 }));
 	hitEmit_->SetLifeTimeMinMax(0.5f, 0.6f);
@@ -359,7 +359,7 @@ void NormalEnemy::InitParticle()
 	tireEmit_->Initialize(particleManager, "", "enemyTire");
 	tireEmit_->GetFrequency() = 0.0f;
 	tireEmit_->SetCount(1);
-	tireEmit_->SetParent(object_->worldtransform_);
+	tireEmit_->SetParent(objectBase_->worldtransform_);
 	tireEmit_->SetPos({ 0,0,0 });
 	tireEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	tireEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -379,7 +379,7 @@ void NormalEnemy::InitParticle()
 	ductEmit_->Initialize(particleManager, "", "enemyDuct");
 	ductEmit_->GetFrequency() = 0.0f;
 	ductEmit_->SetCount(1);
-	ductEmit_->SetParent(object_->worldtransform_);
+	ductEmit_->SetParent(objectBase_->worldtransform_);
 	ductEmit_->SetPos({ 0,0,0 });
 	ductEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	ductEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -398,7 +398,7 @@ void NormalEnemy::InitParticle()
 	fenceEmit_->Initialize(particleManager, "", "enemyFence");
 	fenceEmit_->GetFrequency() = 0.0f;
 	fenceEmit_->SetCount(1);
-	fenceEmit_->SetParent(object_->worldtransform_);
+	fenceEmit_->SetParent(objectBase_->worldtransform_);
 	fenceEmit_->SetPos({ 0,0,0 });
 	fenceEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	fenceEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -418,7 +418,7 @@ void NormalEnemy::InitParticle()
 	gearEmit_->Initialize(particleManager, "", "enemyGear");
 	gearEmit_->GetFrequency() = 0.0f;
 	gearEmit_->SetCount(5);
-	gearEmit_->SetParent(object_->worldtransform_);
+	gearEmit_->SetParent(objectBase_->worldtransform_);
 	gearEmit_->SetPos({ 0,0,0 });
 	gearEmit_->SetVelocityMinMax({ -2,3,-2 }, { 2, 4, 2 });
 	gearEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -440,7 +440,7 @@ void NormalEnemy::InitParticle()
 	plankEmit_->Initialize(particleManager, "", "enemyPlank");
 	plankEmit_->GetFrequency() = 0.0f;
 	plankEmit_->SetCount(10);
-	plankEmit_->SetParent(object_->worldtransform_);
+	plankEmit_->SetParent(objectBase_->worldtransform_);
 	plankEmit_->SetPos({ 0,0,0 });
 	plankEmit_->SetVelocityMinMax({ -2,2,-2 }, { 2, 3, 2 });
 	plankEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));

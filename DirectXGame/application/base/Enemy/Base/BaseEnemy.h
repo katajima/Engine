@@ -51,9 +51,6 @@ public:
 	// ヒットした
 	void SetHit() { hit = true; };
 
-
-	ColliderComponent* GetColliderComponent() { return object_->GetColliderComponent(); };
-
 protected:
 	// 時間
 	float Timer() const;
@@ -66,12 +63,8 @@ protected:
 	// スプライト初期化
 	void Initialize2D();
 
-
-public: // コライダー関係
-
 protected:
 	// オブジェクト
-	Object3d* object_;
 	WorldTransform transBase_;
 	Vector3 oldPos_;
 
@@ -84,34 +77,12 @@ protected:
 	bool hit = false;
 	float count = 0;
 
-
-	// パラメータ
-	//Parameters parameter_;
-
-	// 移動
-	//Vector3 velocity_;
-
-	// 生存フラグ
-	//bool isAlive_ = true;
-
 	// ロックオンされているか
 	bool isLockOn = false;
-
-
-	// シリアルナンバー
-	//uint32_t serialNumber = 0;
-	// 次のシリアルナンバー
-	//static uint32_t nextSerialNumber;
-	//ContactRecord contactRecord_;
-	//std::unique_ptr<ColliderComponent> colliderComponent_;
-
 protected: //2D
 	std::unique_ptr<Sprite> icon_lockOn;
 	std::unique_ptr<Sprite> hpBer_;
 	std::unique_ptr<Sprite> backHpBer_;
 protected:
 	Player* player_;
-	Entity3DManager* entity3DManager_;
-	Entity2DManager* entity2DManager_;
-
 };

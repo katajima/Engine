@@ -7,7 +7,6 @@ void Player::BehaviorRootInitialize()
 	effect_->GetDashEmitter()->SetIsEmit(false);
 	workAttack.parameter = 0;
 	
-	//weapon_->SetIsCollider(false);
 	effect_->SetIsTrail(false);
 }
 

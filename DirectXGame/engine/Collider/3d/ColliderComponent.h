@@ -18,7 +18,6 @@ public:
 // インターフェース的な役割クラス
 class IHitReceiver {
 public:
-    //virtual void OnHit(float damage) = 0;
     virtual ~IHitReceiver() = default;
 };
 

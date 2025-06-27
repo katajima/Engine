@@ -10,6 +10,7 @@
 void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
+	entity2DManager_ = entity2DManager;
 	camera_ = camera;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
@@ -31,12 +32,12 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	sphere->collisionMask = 0xFFFFFFFF;
 	sphere->radius = 2.0f; // 半径を適宜設定
 	
-	objectBase_->GetColliderComponent()->AddCollider(std::move(sphere));
+	GetColliderComponent()->AddCollider(std::move(sphere));
 
 
 
 	// 衝突時のコールバック登録
-	objectBase_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
+	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
 
@@ -63,11 +64,11 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
-		if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
+		if (GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
 			return; // クールタイム中のため無視
 		}
 
-		objectBase_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
+		GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		AddDamege(10);
 		followCamera_->GetViewProjection().SetShake(0.25f, {0.1f,0.1f,0.1f});

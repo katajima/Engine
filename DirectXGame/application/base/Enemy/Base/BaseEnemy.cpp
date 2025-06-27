@@ -18,8 +18,8 @@ void BaseEnemy::Shake()
 	float zShake = float(z) / static_cast<float>(10);
 
 
-	object_->worldtransform_.translate_.x = xShake;
-	object_->worldtransform_.translate_.z = zShake;
+	objectBase_->worldtransform_.translate_.x = xShake;
+	objectBase_->worldtransform_.translate_.z = zShake;
 }
 
 void BaseEnemy::HitStpoTime()
@@ -39,7 +39,7 @@ void BaseEnemy::HitStpoTime()
 		Shake();
 	}
 	else {
-		object_->worldtransform_.translate_ = { 0,0,0 };
+		objectBase_->worldtransform_.translate_ = { 0,0,0 };
 		timeSpeed_ = 1.0f;
 	}
 }
