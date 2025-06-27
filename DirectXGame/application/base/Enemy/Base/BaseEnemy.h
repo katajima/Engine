@@ -30,8 +30,7 @@ public:
 public:
 	// パーティクル発生
 	virtual void Emit() = 0;
-	// 生存判定
-	//bool GetAlive() const { return isAlive_; }
+	
 	// ダメージ
 	void AddDamage(float damage) {
 		HP() -= damage;
@@ -52,12 +51,6 @@ public:
 	// ヒットした
 	void SetHit() { hit = true; };
 
-
-	//void SetSerialNumber(uint32_t num) { serialNumber = num; };
-	// シリアルナンバー
-	//uint32_t GetSerialNumber() const { return serialNumber; }
-
-	Object3d* GetObject3D() { return object_; }
 
 	ColliderComponent* GetColliderComponent() { return object_->GetColliderComponent(); };
 

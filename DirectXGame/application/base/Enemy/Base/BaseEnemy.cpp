@@ -4,9 +4,6 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-
-//uint32_t BaseEnemy::nextSerialNumber = 0;
-
 float BaseEnemy::Timer() const
 {
 	return MyGame::GameTime() * timeSpeed_;
@@ -103,10 +100,4 @@ void BaseEnemy::Initialize2D()
 
 BaseEnemy::BaseEnemy()
 {
-	// シリアル番号を振る
-	//serialNumber = nextSerialNumber;
-	// 次の番号を1加算
-	//++nextSerialNumber;
-
-	//parameter_ = {};
 }

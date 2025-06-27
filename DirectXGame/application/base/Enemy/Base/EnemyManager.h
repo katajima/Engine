@@ -55,9 +55,6 @@ public:
 	}
 private:
 	std::vector<std::unique_ptr<BaseEnemy>> enemys_;
-
-	//uint32_t serialNumber = 0;
-
 private:
 	Camera* camera_;						// カメラ
 	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理

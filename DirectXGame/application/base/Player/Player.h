@@ -44,7 +44,7 @@ public:
 	void DrawEffect() override;
 
 	
-	void Draw2D();
+	void Draw2D() override;
 
 
 

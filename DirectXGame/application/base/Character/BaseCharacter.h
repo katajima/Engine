@@ -28,6 +28,11 @@ public:
 	/// </summary>
 	virtual void DrawEffect() = 0;
 
+	/// <summary>
+	/// 2d描画
+	/// </summary>
+	virtual void Draw2D() = 0;
+
 public:
 
 	// オブジェクト3d取得
@@ -65,14 +70,14 @@ public:
 
 
 protected:
-	Object3d* objectBase_;			// オブジェクト3d
+	Object3d* objectBase_ = nullptr;// オブジェクト3d
 	CharacterData characterData_;	// キャラクターデータ
 
 protected: // 貰ってくるもの
-	Entity3DManager* entity3DManager_;	// 3Dエンティティマネージャー
-	Entity2DManager* Entity2DManager_;	// 2Dエンティティマネージャー
-	Camera* camera_ = nullptr;			// カメラ
-	Input* input_;						// 入力
+	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Entity2DManager* Entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	Camera* camera_ = nullptr;						// カメラ
+	Input* input_ = nullptr;						// 入力
 
 };
 
