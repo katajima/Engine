@@ -100,7 +100,7 @@ void Player::BehaviorDieInitialize()
 
 void Player::BehaviorDieUpdate()
 {
-	velocity_ = {};
+	Velocity() = {};
 	AttackKey();
 	int time = 0;
 

@@ -5,8 +5,6 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 
 
-//#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
-
 class BasePlayer;
 class Player;
 class Entity3DManager;

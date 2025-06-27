@@ -1,16 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include <imgui.h>
-#include <list>
-
-
 #include "DirectXGame/engine/MyGame/MyGame.h"
-
 #include "DirectXGame/application/base/Character/BaseCharacter.h"
 
 // プレイヤー
@@ -35,26 +24,25 @@ class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
 
-class Player{
+class Player : public BaseCharacter{
 public:
 
 
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera);
+	void Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera) override;
 
 	///< summary>
 	/// 更新
 	///</summary>
-	void Update();
+	void Update() override;
 
-	///< summary>
-	/// 描画
-	///</summary>
-	void Draw();
+	/// <summary>
+	/// エフェクトの描画
+	/// </summary>
+	void DrawEffect() override;
 
-	void DrawP();
 	
 	void Draw2D();
 
@@ -200,13 +188,8 @@ private: // 移動
 
 	float groundY = 2;
 
-	bool isJamp = false;
-
 	float ty = 0;
 
-	bool isMove = false;
-
-	
 public:
 	
 	Object3d* GetObject3D() { return objectBase_; }
@@ -217,13 +200,12 @@ public:
 	Behavior GetBehavior() const { return behavior_; };
 	AttackTypePlay GetAttackType() const { return workAttack.type; };
 
-	bool GetAlive() const { return isAlive; };
-	
-	void AddDamege(float da) { hp -= int(da); };
+
+	void AddDamege(float da) { HP() -= int(da); };
 
 	void AddSpecial(int d) { bulletSpecial_->AddGauge(d); };
 
-	bool GetInvincible() const { return isInvincible; }
+	bool GetInvincible() const { return GetSituation().isInvincible; }
 	
 	bool GetIsSpecial() const { return bulletSpecial_->GetIsSpecial(); }
 
@@ -254,12 +236,6 @@ public:
 
 	ColliderComponent* GetColliderComponent() { return objectBase_->GetColliderComponent(); };
 
-private:  // パラメータ
-	
-	uint32_t maxHp = 100;
-	int hp = 10000;
-	bool isAlive = true;
-	bool isInvincible = false;
 private:
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;
@@ -278,9 +254,6 @@ private:
 
 	std::unordered_map<std::string, WorldTransform*> transformMap;
 
-	// オブジェクト3D
-
-	Object3d* objectBase_;
 	// 本体
 	Object3d objectBody_;
 	
@@ -292,23 +265,13 @@ private:
 	Vector3 rangeBombingPos{};
 
 
-	// 移動関連
-	// 速度
-	Vector3 velocity_ = {};
-	float accelerationY_ = 0.1f; // 加速度
 	float moveLimit = 200;
-	float speed;
-
 	
-
 	bool isCreativeMode = false;
 	
 private:
-	Entity3DManager* entity3DManager_;
 	BulletManager* bulletManager_;
 	FollowCamera* followCamera_;
-	Camera* camera_ = nullptr;
-	Input* input_;
 	std::vector<BaseEnemy*> lockedOnEnemies;
 };
 

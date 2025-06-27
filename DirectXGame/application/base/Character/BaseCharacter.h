@@ -23,7 +23,10 @@ public:
 	///</summary>
 	virtual void Update() = 0; 
 
-
+	/// <summary>
+	/// エフェクトの描画
+	/// </summary>
+	virtual void DrawEffect() = 0;
 
 public:
 
@@ -33,7 +36,30 @@ public:
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return characterData_.situation_.isAlive; };
 
-private:
+	// 速度取得
+	Vector3 GetVelocity() const { return characterData_.velocity_; }
+
+	// キャラクター状態
+	Situation GetSituation() const { return characterData_.situation_; }
+
+	// HP取得
+	float GetHP() const { return characterData_.parameters_.HP.value; }
+
+
+
+protected:
+	// 基本パラメータ
+	BasicParameters& Parameters() { return characterData_.parameters_; } 
+
+	// キャラクター状態
+	Situation& Situations() { return characterData_.situation_; }
+
+	// 速度
+	Vector3& Velocity() { return characterData_.velocity_; }
+	// 加速度
+	Vector3& Acceleration() { return characterData_.acceleration_; }
+	// HP
+	float& HP() { return characterData_.parameters_.HP.value; } 
 
 public:
 
@@ -44,6 +70,7 @@ protected:
 
 protected: // 貰ってくるもの
 	Entity3DManager* entity3DManager_;	// 3Dエンティティマネージャー
+	Entity2DManager* Entity2DManager_;	// 2Dエンティティマネージャー
 	Camera* camera_ = nullptr;			// カメラ
 	Input* input_;						// 入力
 

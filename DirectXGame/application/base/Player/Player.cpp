@@ -13,6 +13,10 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	camera_ = camera;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
+	// HP設定
+	Parameters().HP.Initiaize(1000, 0, 1000, 0);
+	HP() = 1000; // 初期HP設定
+
 	// プレイヤー
 	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectType::kNormal, position, camera_);
 	objectBase_->SetModel("AnimatedCube.gltf");
@@ -166,7 +170,7 @@ void Player::Update()
 	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_->worldtransform_.rotate_.y;
 
 
-	if (isAlive) {
+	if (GetSituation().isAlive) {
 		if (behaviorRequest_) {
 			// ふるまいを変更する
 			behavior_ = behaviorRequest_.value();
@@ -177,12 +181,12 @@ void Player::Update()
 				weapon_->GetObject3D().SetIsDraw(false);
 
 				BehaviorRootInitialize();
-				isInvincible = false;
+				Situations().isInvincible = false;
 				break;
 			case Behavior::kAttack:
 				weapon_->GetObject3D().SetIsDraw(true);
 				BehaviorAttackInitialize();
-				isInvincible = true;
+				Situations().isInvincible = true;
 				break;
 			case Behavior::kJump:
 				weapon_->GetObject3D().SetIsDraw(false);
@@ -214,7 +218,7 @@ void Player::Update()
 
 
 #ifdef _DEBUG
-	if (isInvincible) {
+	if (GetSituation().isInvincible) {
 		objectBody_.model->modelData.mesh[0]->material->color = { 0,0,1,1 };
 	}
 	else {
@@ -234,8 +238,8 @@ void Player::Update()
 
 	rangeBombingSpecial_->Update();
 	//bulletSpecial_->Update();
-	if (hp <= 0) {
-		isAlive = false;
+	if (GetHP() <= 0) {
+		Situations().isAlive = false;
 	}
 	workAttack.hitTime -= MyGame::GameTime();
 	if (workAttack.hitTime <= 0) {
@@ -259,8 +263,7 @@ void Player::Update()
 	ImGui::InputFloat3("min", &min.x);
 	Vector3 max = weapon_->GetObject3D().GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
-
-	ImGui::InputInt("HP", &hp);
+	ImGui::InputFloat("HP", &HP());
 
 
 	ImGui::End();
@@ -296,42 +299,18 @@ void Player::Update()
 
 
 	objectBase_->Update();
-	//colliderComponent_->UpdateAll(objectBase_->worldtransform_);
 }
 
 #pragma region Draw
 
-void Player::Draw()
-{
-	if (isAlive) {
-		switch (behavior_) {
-		case Behavior::kRoot: // 通常行動更新
-		default:
-			break;
-		case Behavior::kAttack: // 攻撃行動更新
-			//weapon_->Draw();
-
-			break;
-		case Behavior::kJump:
-			break;
-		case Behavior::kDie:
-			//bulletSpecial_->Draw();
-			break;
-		}
-
-
-		//objectBody_.Draw();
-	}
-}
-
-void Player::DrawP()
+void Player::DrawEffect()
 {
 	effect_->Draw();
 }
 
 void Player::Draw2D()
 {
-	ui_->SetHPBerSize(static_cast<float>(hp));
+	ui_->SetHPBerSize(static_cast<float>(HP()));
 	ui_->SetIsTextmax(bulletSpecial_->GetIsSpecial());
 	ui_->SetIsTextRB(bulletSpecial_->GetIsSpecial());
 	ui_->SetSpecialGaugeSize(static_cast<float>(bulletSpecial_->GetGauge()));
@@ -354,24 +333,24 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-	speed = 20.0f;
-	velocity_ = { 0,0,0 };
-	isMove = false;
+	Parameters().speed = 20.0f;
+	Velocity() = {0,0,0};
+	Situations().isMoving = false;
 
 
 
 	if (input_->IsControllerConnected()) {
 
 
-		velocity_.x = input_->GetGamePadLeftStick().x;
-		velocity_.z = input_->GetGamePadLeftStick().y;
+		Velocity().x = input_->GetGamePadLeftStick().x;
+		Velocity().z = input_->GetGamePadLeftStick().y;
 
 
-		if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
-			isMove = true;
+		if (GetVelocity().x != 0.0f || GetVelocity().z != 0.0f) {
+			Situations().isMoving = true;
 			// 入力方向を正規化
-			velocity_ = Normalize(velocity_);
-			velocity_ = Multiply(velocity_, speed);
+			Velocity() = Normalize(GetVelocity());
+			Velocity() = Multiply(GetVelocity(), Parameters().speed);
 
 
 			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
@@ -379,19 +358,19 @@ void Player::Move()
 
 			// カメラの向きに基づいて移動方向をワールド座標系に変換
 			Vector3 worldDirection = {
-				velocity_.x * cameraWorldMatrix.m[0][0] + velocity_.z * cameraWorldMatrix.m[2][0],
+				GetVelocity().x * cameraWorldMatrix.m[0][0] + GetVelocity().z * cameraWorldMatrix.m[2][0],
 				0.0f,
-				velocity_.x * cameraWorldMatrix.m[0][2] + velocity_.z * cameraWorldMatrix.m[2][2]
+				GetVelocity().x * cameraWorldMatrix.m[0][2] + GetVelocity().z * cameraWorldMatrix.m[2][2]
 			};
 
-			velocity_ = Multiply(Normalize(worldDirection), speed);
+			Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
 
 			//// 移動ベクトルをカメラの角度だけ回転する
 			//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
 			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
 			//
-			if (velocity_.Length() != 0) {
-				objectBase_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+			if (Velocity().Length() != 0) {
+				objectBase_->worldtransform_.rotate_.y = std::atan2(GetVelocity().x, GetVelocity().z);
 			}
 
 
@@ -401,37 +380,37 @@ void Player::Move()
 
 
 		if (input_->IsPushKey(DIK_W)) {
-			velocity_.z += 0.3f;
+			Velocity().z += 0.3f;
 		}
 		if (input_->IsPushKey(DIK_S)) {
-			velocity_.z -= 0.3f;
+			Velocity().z -= 0.3f;
 
 		}
 		if (input_->IsPushKey(DIK_A)) {
-			velocity_.x -= 0.3f;
+			Velocity().x -= 0.3f;
 
 		}
 		if (input_->IsPushKey(DIK_D)) {
-			velocity_.x += 0.3f;
+			Velocity().x += 0.3f;
 		}
 
 
-		if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
+		if (Velocity().x != 0.0f || Velocity().z != 0.0f) {
 			// 入力方向を正規化
-			velocity_ = Normalize(velocity_);
-			isMove = true;
+			Velocity() = Normalize(Velocity());
+			Situations().isMoving = true;
 
 			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
 			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetViewProjection().GetViewMatrix());
 
 			// カメラの向きに基づいて移動方向をワールド座標系に変換
 			Vector3 worldDirection = {
-				velocity_.x * cameraWorldMatrix.m[0][0] + velocity_.z * cameraWorldMatrix.m[2][0],
+				GetVelocity().x * cameraWorldMatrix.m[0][0] + GetVelocity().z * cameraWorldMatrix.m[2][0],
 				0.0f,
-				velocity_.x * cameraWorldMatrix.m[0][2] + velocity_.z * cameraWorldMatrix.m[2][2]
+				GetVelocity().x * cameraWorldMatrix.m[0][2] + GetVelocity().z * cameraWorldMatrix.m[2][2]
 			};
 
-			velocity_ = Multiply(Normalize(worldDirection), speed);
+			Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
 
 
 		}
@@ -450,24 +429,24 @@ void Player::Gravity() {
 	// 加速度ベクトル
 	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
 	if (!isCreativeMode) {
-		accelerationY_ += accelerationVector * MyGame::GameTime();
+		Acceleration().y += accelerationVector * MyGame::GameTime();
 		// 加速する
-		velocity_.y += accelerationY_;
+		Velocity().y += Acceleration().y;
 	}
 	AddMove();
 	// 着地
 	if (objectBase_->worldtransform_.translate_.y <= groundY) {
 		objectBase_->worldtransform_.translate_.y = groundY;
-		accelerationY_ = 0.0f;
+		Acceleration().y = 0.0f;
 		graVelo = 0;
-		isJamp = false;
+		Situations().isJumping = false;
 	}
 }
 
 void Player::AddMove()
 {
-	if (isAlive)
-		objectBase_->worldtransform_.translate_ += velocity_ * MyGame::GameTime();
+	if (GetAlive())
+		objectBase_->worldtransform_.translate_ += GetVelocity() * MyGame::GameTime();
 }
 
 void Player::LimitMove()

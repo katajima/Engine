@@ -115,6 +115,10 @@ enum class Personality
 class CharacterData
 {
 public:
+	void Initialize() {}	// 初期化関数
+
+
+public:
 	Situation situation_;			// キャラクターの状況
 	BasicParameters parameters_;	// 基本パラメータ
 	Vector3 velocity_ = {};			// キャラクターの速度

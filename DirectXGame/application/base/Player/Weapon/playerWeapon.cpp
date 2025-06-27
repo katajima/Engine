@@ -1,7 +1,6 @@
 #include "playerWeapon.h"
 #include "DirectXGame/application/base/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Player/Player.h"
-//#include "DirectXGame/application/base/Player/Base/BasePlayer.h"
 
 void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 {
@@ -75,7 +74,6 @@ void playerWeapon::Update()
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
 
-	//objectWeapon_->GetColliderComponent()->SetEnableById(weaponColliderId_,false);
 	objectWeapon_->GetColliderComponent()->UpdateByID(colliderWorld_, weaponColliderId_);
 	objectWeapon_->GetColliderComponent()->UpdateByID(colliderWorld2_, weaponColliderId2_);
 
