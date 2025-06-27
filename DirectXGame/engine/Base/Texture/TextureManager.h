@@ -14,7 +14,7 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/d3dx12.h"
 
 
-
+#include "DirectXGame/engine/base/Timer.h"
 class Command;
 class DXGIDevice;
 class SrvManager;
@@ -73,7 +73,7 @@ private:
 
 	static uint32_t kSRVIndexTop;
 	
-	
+	DebugTimer debugTimerTex_;
 private:
 	Command* command_;
 	DXGIDevice* DXGIDevice_;

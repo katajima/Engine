@@ -9,6 +9,7 @@ void SceneManager::Update()
 {
 	// 次のシーンの予約があるなら
 	if (nextScene_) {
+
 		// 旧シーンの終了
 		if (scene_) {
 			scene_->Finalize();

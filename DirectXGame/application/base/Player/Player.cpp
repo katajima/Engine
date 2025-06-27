@@ -12,7 +12,12 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
 	camera_ = camera;
+	input_ = input;
+
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+
+	
+	
 
 	// HP設定
 	Parameters().HP.Initiaize(1000, 0, 1000, 0);
@@ -104,10 +109,12 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	bulletSpecial_ = std::make_unique<BulletSpecial>();
 	bulletSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
 	bulletSpecial_->SetParent(&objectBase_->worldtransform_);
+	bulletSpecial_->SetInput(input);
 
 	rangeBombingSpecial_ = std::make_unique<RangeBombingSpecial>();
 	rangeBombingSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
 	rangeBombingSpecial_->SetParent(&objectBase_->worldtransform_);
+	rangeBombingSpecial_->SetInput(input);
 
 	weapon_ = std::make_unique<playerWeapon>();
 	weapon_->Initialize(entity3DManager, camera);

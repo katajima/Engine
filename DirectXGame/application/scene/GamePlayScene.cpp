@@ -11,30 +11,42 @@
 // 初期化
 void GamePlayScene::Initialize()
 {
+	debugTimer_.StartTimer();
+	debugTimerAll_.StartTimer();
 	input_ = GetInput();
 
+	
 	// カメラ
 	InitializeCamera();
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "camera");
+	debugTimer_.StartTimer();
+
 	// オブジェクト3D
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
 	// プレイヤー
 	player_ = std::make_unique<Player>();
 	player_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
-
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit " , "Player");
+	debugTimer_.StartTimer();
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 	followCamera_->SetTarget(player_->GetObject3D());
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ",  "InitFollowCamera");
+	debugTimer_.StartTimer();
 
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
 	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "universeCamera");
+	debugTimer_.StartTimer();
 
-
-
-	// プレイヤー
-	player_->SetInput(input_);
+	
 	player_->SetCamera(camera.get());
 	player_->SetFollowCamera(followCamera_.get());
 
@@ -49,8 +61,9 @@ void GamePlayScene::Initialize()
 		rand.y = 2;
 		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, rand);
 	}
-
-
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "enemy");
+	debugTimer_.StartTimer();
 
 
 
@@ -60,6 +73,9 @@ void GamePlayScene::Initialize()
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
 	player_->GetRangeBombingSpecial()->SetStage(stage_.get());
 
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "stage");
+	debugTimer_.StartTimer();
 
 
 	// 弾
@@ -68,14 +84,22 @@ void GamePlayScene::Initialize()
 	bulletManager_->SetPlayer(player_.get());
 
 	player_->SetBulletManager(bulletManager_.get());
-
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "bulletManager");
+	debugTimer_.StartTimer();
 
 	// 衝突マネージャの生成
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "collisionManager");
+	debugTimer_.StartTimer();
 
 	InitializeResources();
+
+	debugTimerAll_.EndTimer();
+	debugTimerAll_.LogTimeSec("AllGamePlayScene ");
 }
 
 
@@ -109,7 +133,9 @@ void GamePlayScene::InitializeResources()
 
 	gameUI->Initialize(GetEntity2DManager());
 	gameUI->SetPlayer(player_.get());
-
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "gameUI");
+	debugTimer_.StartTimer();
 
 
 
@@ -135,7 +161,9 @@ void GamePlayScene::InitializeResources()
 	directional->directional = directionalLightData;
 
 	GetEntity3DManager()->GetLightManager()->AddLight(directional);
-
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("GamePlaySceneInit ", "Light");
+	debugTimer_.StartTimer();
 
 }
 

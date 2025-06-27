@@ -68,7 +68,8 @@ private:
 
 	float fps = 0.0f;
 	
-	
+	DebugTimer debugTimer_;
+
 	std::unique_ptr<Primitive> primi = nullptr;
 	std::unique_ptr<Primitive> primiPlane = nullptr;
 	std::unique_ptr<Primitive> primiStar = nullptr;

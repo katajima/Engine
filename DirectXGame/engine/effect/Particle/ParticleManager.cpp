@@ -167,6 +167,7 @@ void ParticleManager::Emit(const std::string name, ParticleData::EmitType type, 
 
 void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
 {
+	debugTimer_.StartTimer(); // デバッグ用タイマー開始
 	// ランダムエンジンの初期化
 	std::random_device seedGenerator;
 	randomEngine_.seed(seedGenerator()); // randomEngine_ にシードを設定
@@ -178,10 +179,13 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 	// パーティクルグループ生成
 	ParticleFanction::Create(particleGroups[name],name, textureFilePath,kNumMaxInstance,dxCommon_,model->modelData.mesh[0].get(),rasteType,blendType);
+	debugTimer_.EndTimer(); // デバッグ用タイマー終了
+	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
 }
 
 void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
 {
+	debugTimer_.StartTimer(); // デバッグ用タイマー開始
 	// ランダムエンジンの初期化
 	std::random_device seedGenerator;
 	randomEngine_.seed(seedGenerator()); // randomEngine_ にシードを設定
@@ -193,6 +197,9 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 	// パーティクルグループ生成
 	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, primitive->GetMesh(), rasteType, blendType);
+
+	debugTimer_.EndTimer(); // デバッグ用タイマー終了
+	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
 }
 
 #pragma region PSO

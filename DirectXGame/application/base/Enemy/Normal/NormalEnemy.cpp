@@ -230,7 +230,7 @@ void NormalEnemy::InitParticle()
 
 	
 
-	dustEmit_ = std::make_unique<ParticleEmitter>();
+	/*dustEmit_ = std::make_unique<ParticleEmitter>();
 	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01_2");
 	dustEmit_->GetFrequency() = 0.25f;
 	dustEmit_->SetCount(3);
@@ -286,7 +286,7 @@ void NormalEnemy::InitParticle()
 	dustEmit3_->SetEnableLighting(false);
 	dustEmit3_->SetIsAlpha(true);
 	dustEmit3_->SetIsLifeTimeScale(true);
-	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
+	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);*/
 
 
 
@@ -352,107 +352,107 @@ void NormalEnemy::InitParticle()
 	hitEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
 
 
-	Vector3 scale = Vector3{ 1.0f,1.0f,1.0f };
+	//Vector3 scale = Vector3{ 1.0f,1.0f,1.0f };
 
-	// タイヤ
-	tireEmit_ = std::make_unique<ParticleEmitter>();
-	tireEmit_->Initialize(particleManager, "", "enemyTire");
-	tireEmit_->GetFrequency() = 0.0f;
-	tireEmit_->SetCount(1);
-	tireEmit_->SetParent(objectBase_->worldtransform_);
-	tireEmit_->SetPos({ 0,0,0 });
-	tireEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
-	tireEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	tireEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	tireEmit_->SetLifeTimeMinMax(2, 2);
-	tireEmit_->SetIsGravity(true);
-	tireEmit_->SetUsebillboard(false);
-	tireEmit_->SetIsAlpha(true);
-	tireEmit_->SetIsRotateVelocity(true);
-	tireEmit_->SetIsBounce(true);
-	tireEmit_->SetSizeMinMax(scale, scale);
-	tireEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
-
-
-	// ダクト
-	ductEmit_ = std::make_unique<ParticleEmitter>();
-	ductEmit_->Initialize(particleManager, "", "enemyDuct");
-	ductEmit_->GetFrequency() = 0.0f;
-	ductEmit_->SetCount(1);
-	ductEmit_->SetParent(objectBase_->worldtransform_);
-	ductEmit_->SetPos({ 0,0,0 });
-	ductEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
-	ductEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	ductEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	ductEmit_->SetLifeTimeMinMax(2, 2);
-	ductEmit_->SetIsGravity(true);
-	ductEmit_->SetUsebillboard(false);
-	ductEmit_->SetIsAlpha(true);
-	ductEmit_->SetIsRotateVelocity(true);
-	ductEmit_->SetIsBounce(true);
-	ductEmit_->SetSizeMinMax(scale, scale);
-	ductEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
-
-	// ダクト
-	fenceEmit_ = std::make_unique<ParticleEmitter>();
-	fenceEmit_->Initialize(particleManager, "", "enemyFence");
-	fenceEmit_->GetFrequency() = 0.0f;
-	fenceEmit_->SetCount(1);
-	fenceEmit_->SetParent(objectBase_->worldtransform_);
-	fenceEmit_->SetPos({ 0,0,0 });
-	fenceEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
-	fenceEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	fenceEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	fenceEmit_->SetLifeTimeMinMax(3, 4);
-	fenceEmit_->SetIsGravity(true);
-	fenceEmit_->SetUsebillboard(false);
-	fenceEmit_->SetIsAlpha(true);
-	fenceEmit_->SetIsRotateVelocity(true);
-	fenceEmit_->SetIsBounce(true);
-	fenceEmit_->SetSizeMinMax(scale, scale);
-	fenceEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
+	//// タイヤ
+	//tireEmit_ = std::make_unique<ParticleEmitter>();
+	//tireEmit_->Initialize(particleManager, "", "enemyTire");
+	//tireEmit_->GetFrequency() = 0.0f;
+	//tireEmit_->SetCount(1);
+	//tireEmit_->SetParent(objectBase_->worldtransform_);
+	//tireEmit_->SetPos({ 0,0,0 });
+	//tireEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
+	//tireEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//tireEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	//tireEmit_->SetLifeTimeMinMax(2, 2);
+	//tireEmit_->SetIsGravity(true);
+	//tireEmit_->SetUsebillboard(false);
+	//tireEmit_->SetIsAlpha(true);
+	//tireEmit_->SetIsRotateVelocity(true);
+	//tireEmit_->SetIsBounce(true);
+	//tireEmit_->SetSizeMinMax(scale, scale);
+	//tireEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
 
 
-	scale = { 0.5f,0.5f,0.5f };
-	gearEmit_ = std::make_unique<ParticleEmitter>();
-	gearEmit_->Initialize(particleManager, "", "enemyGear");
-	gearEmit_->GetFrequency() = 0.0f;
-	gearEmit_->SetCount(5);
-	gearEmit_->SetParent(objectBase_->worldtransform_);
-	gearEmit_->SetPos({ 0,0,0 });
-	gearEmit_->SetVelocityMinMax({ -2,3,-2 }, { 2, 4, 2 });
-	gearEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	gearEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	gearEmit_->SetLifeTimeMinMax(3, 3.5f);
-	gearEmit_->SetIsGravity(true);
-	gearEmit_->SetUsebillboard(false);
-	gearEmit_->SetIsAlpha(true);
-	gearEmit_->SetIsRotateVelocity(true);
-	gearEmit_->SetIsBounce(true);
-	gearEmit_->SetSizeMinMax(scale, scale);
-	gearEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
+	//// ダクト
+	//ductEmit_ = std::make_unique<ParticleEmitter>();
+	//ductEmit_->Initialize(particleManager, "", "enemyDuct");
+	//ductEmit_->GetFrequency() = 0.0f;
+	//ductEmit_->SetCount(1);
+	//ductEmit_->SetParent(objectBase_->worldtransform_);
+	//ductEmit_->SetPos({ 0,0,0 });
+	//ductEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
+	//ductEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//ductEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	//ductEmit_->SetLifeTimeMinMax(2, 2);
+	//ductEmit_->SetIsGravity(true);
+	//ductEmit_->SetUsebillboard(false);
+	//ductEmit_->SetIsAlpha(true);
+	//ductEmit_->SetIsRotateVelocity(true);
+	//ductEmit_->SetIsBounce(true);
+	//ductEmit_->SetSizeMinMax(scale, scale);
+	//ductEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
+
+	//// ダクト
+	//fenceEmit_ = std::make_unique<ParticleEmitter>();
+	//fenceEmit_->Initialize(particleManager, "", "enemyFence");
+	//fenceEmit_->GetFrequency() = 0.0f;
+	//fenceEmit_->SetCount(1);
+	//fenceEmit_->SetParent(objectBase_->worldtransform_);
+	//fenceEmit_->SetPos({ 0,0,0 });
+	//fenceEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
+	//fenceEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//fenceEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	//fenceEmit_->SetLifeTimeMinMax(3, 4);
+	//fenceEmit_->SetIsGravity(true);
+	//fenceEmit_->SetUsebillboard(false);
+	//fenceEmit_->SetIsAlpha(true);
+	//fenceEmit_->SetIsRotateVelocity(true);
+	//fenceEmit_->SetIsBounce(true);
+	//fenceEmit_->SetSizeMinMax(scale, scale);
+	//fenceEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
+
+
+	//scale = { 0.5f,0.5f,0.5f };
+	//gearEmit_ = std::make_unique<ParticleEmitter>();
+	//gearEmit_->Initialize(particleManager, "", "enemyGear");
+	//gearEmit_->GetFrequency() = 0.0f;
+	//gearEmit_->SetCount(5);
+	//gearEmit_->SetParent(objectBase_->worldtransform_);
+	//gearEmit_->SetPos({ 0,0,0 });
+	//gearEmit_->SetVelocityMinMax({ -2,3,-2 }, { 2, 4, 2 });
+	//gearEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//gearEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	//gearEmit_->SetLifeTimeMinMax(3, 3.5f);
+	//gearEmit_->SetIsGravity(true);
+	//gearEmit_->SetUsebillboard(false);
+	//gearEmit_->SetIsAlpha(true);
+	//gearEmit_->SetIsRotateVelocity(true);
+	//gearEmit_->SetIsBounce(true);
+	//gearEmit_->SetSizeMinMax(scale, scale);
+	//gearEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
 
 
 
-	scale = { 2,2,2 };
-	// 鋼板
-	plankEmit_ = std::make_unique<ParticleEmitter>();
-	plankEmit_->Initialize(particleManager, "", "enemyPlank");
-	plankEmit_->GetFrequency() = 0.0f;
-	plankEmit_->SetCount(10);
-	plankEmit_->SetParent(objectBase_->worldtransform_);
-	plankEmit_->SetPos({ 0,0,0 });
-	plankEmit_->SetVelocityMinMax({ -2,2,-2 }, { 2, 3, 2 });
-	plankEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	plankEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
-	plankEmit_->SetLifeTimeMinMax(3, 3.5f);
-	plankEmit_->SetIsGravity(true);
-	plankEmit_->SetUsebillboard(false);
-	plankEmit_->SetIsAlpha(true);
-	plankEmit_->SetIsRotateVelocity(true);
-	plankEmit_->SetIsBounce(true);
-	plankEmit_->SetSizeMinMax(scale, scale);
-	plankEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
+	//scale = { 2,2,2 };
+	//// 鋼板
+	//plankEmit_ = std::make_unique<ParticleEmitter>();
+	//plankEmit_->Initialize(particleManager, "", "enemyPlank");
+	//plankEmit_->GetFrequency() = 0.0f;
+	//plankEmit_->SetCount(10);
+	//plankEmit_->SetParent(objectBase_->worldtransform_);
+	//plankEmit_->SetPos({ 0,0,0 });
+	//plankEmit_->SetVelocityMinMax({ -2,2,-2 }, { 2, 3, 2 });
+	//plankEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
+	//plankEmit_->SetRotateVelocityMinMax(-Vector3{ 0.1f,0.1f,0.1f }, { 0.1f,0.1f,0.1f });
+	//plankEmit_->SetLifeTimeMinMax(3, 3.5f);
+	//plankEmit_->SetIsGravity(true);
+	//plankEmit_->SetUsebillboard(false);
+	//plankEmit_->SetIsAlpha(true);
+	//plankEmit_->SetIsRotateVelocity(true);
+	//plankEmit_->SetIsBounce(true);
+	//plankEmit_->SetSizeMinMax(scale, scale);
+	//plankEmit_->SetColorMinMax({ 1,1,1,1 }, { 1,1,1,1 });
 
 
 

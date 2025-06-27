@@ -50,6 +50,10 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	for (auto& mesh : modelData.mesh) {
 		mesh->material->LoadTex();
 	};
+
+
+	std::string filenameT = " name : " + filename;
+	timer_.LogTimeSec("All Load Time: ", filenameT);
 }
 
 void Model::Draw()
@@ -112,7 +116,9 @@ float Model::GetMaterialAlfa()
 ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
 	//必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData
-	auto start = std::chrono::high_resolution_clock::now();
+	
+	timer_.StartTimer();
+
 	Assimp::Importer importer;
 	std::string filePach = directoryPath + "/" + filename;
 
@@ -127,15 +133,20 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 	// メッシュ読み込み
 	LoadModel::LoadMesh(scene, modelData, dxCommon_);
 	// Assimp読み込みやメッシュ生成
-	auto end = std::chrono::high_resolution_clock::now();
-	float ms = std::chrono::duration<float, std::milli>(end - start).count();
-	Logger::Log(filePach + " : Model LoadMesh Time: " + std::to_string(ms) + " ms" + "\n");
+	
+	timer_.EndTimer();
 
+	std::string filenameT = " name : " + filename;
+
+	timer_.LogTimeSec("Model LoadMesh Time: ",filenameT);
+	
 	// ボーン読み込み
 	LoadModel::LoadBone(scene, modelData, dxCommon_);
 	
 	// マテリアル読み込み
 	LoadModel::LoadMaterial(scene, modelData, dxCommon_, directoryPath);
+
+	timer_.EndTimer();
 
 	return modelData;
 }

@@ -9,6 +9,8 @@ float MyGame::nowTime = 0.0f;
 
 void MyGame::Initialize()
 {
+	debugTimer_.StartTimer();
+
 	Framework::Initialize();
 
 
@@ -33,6 +35,9 @@ void MyGame::Initialize()
 	// グローバル変数の読み込み
 	globalVariables_->LoadFiles();
 
+
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("MyGameAllTime ");
 }
 
 void MyGame::Finalize()
@@ -119,6 +124,7 @@ void MyGame::InitializeResource()
 	TextureManager* textureManager = dxCommon->GetTextureManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
 	
+
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
 	textureManager->LoadTexture("resources/Texture/grass.png");

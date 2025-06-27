@@ -20,10 +20,7 @@
 
 class Enemy;
 class FollowCamera;
-class Entity3DManager;
-class Entity2DManager;
 class BulletManager;
-
 class Player : public BaseCharacter{
 public:
 
@@ -225,12 +222,6 @@ public:
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager;};
 
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
-
-	void SetInput(Input* input) {
-		input_ = input;
-		bulletSpecial_->SetInput(input);
-		rangeBombingSpecial_->SetInput(input);
-	};
 
 	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 

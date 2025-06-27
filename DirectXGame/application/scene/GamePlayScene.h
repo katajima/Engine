@@ -29,7 +29,7 @@
 #include"DirectXGame/application/base/Bullet/BulletManager.h"
 #include"DirectXGame/application/base/Player/Base/PlayerManager.h"
 
-
+#include "DirectXGame/engine/base/Timer.h"
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 {
@@ -142,6 +142,9 @@ private:
 	int sceneCount = 0;
 	int clock = 1;
 	
+	DebugTimer debugTimer_;
+	DebugTimer debugTimerAll_;
+
 private:
 	
 	// ゲームUI
