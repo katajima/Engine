@@ -35,8 +35,7 @@ void playerWeapon::Initialize(Entity3DManager* entity3DManager, Camera* camera)
 		if (!otherComponent) return;
 
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
-		enemy->GetSerialNumber(); // シリアル番号を取得しておく（デバッグ用）
-
+		
 		if (!enemy) return;
 
 		const uint32_t otherId = otherComponent->GetUniqueId();

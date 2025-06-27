@@ -37,9 +37,7 @@ public:
 	// 更新
 	void Update();
 
-	// 描画3D
-	void Draw();
-
+	
 	// 描画2D
 	void Draw2D();
 
@@ -58,7 +56,7 @@ public:
 private:
 	std::vector<std::unique_ptr<BaseEnemy>> enemys_;
 
-	uint32_t serialNumber = 0;
+	//uint32_t serialNumber = 0;
 
 private:
 	Camera* camera_;						// カメラ

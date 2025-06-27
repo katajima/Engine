@@ -10,7 +10,7 @@
 
 class Entity3DManager;
 class Entity2DManager;
-class BaseCharacter
+class BaseCharacter : public IHitReceiver
 {
 public:
 	///< summary>

@@ -2,7 +2,7 @@
 
 #include "DirectXGame/application/base/Player/Player.h"
 
-void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
+void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
@@ -81,14 +81,13 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 
 
 	
+	Situations().isAlive = true;
 	
-	isAlive_ = true;
+	Parameters().HP.Initiaize(100,0,100,0);
 
-	parameter_.HP = 100;
-	parameter_.MaxHP = 100;
-
-	parameter_.moveSpeed = 3.0f;
-
+	
+	Parameters().speed = 3.0f;
+	
 	Initialize2D();
 
 
@@ -100,8 +99,8 @@ void NormalEnemy::Initialize(Entity3DManager* entity3DManager, Entity2DManager* 
 void NormalEnemy::Update()
 {
 	HitStpoTime();
-	if (parameter_.HP <= 0) {
-		if (isAlive_ == true) {
+	if (GetHP() <= 0) {
+		if (GetAlive() == true) {
 			ductEmit_->Update();
 			tireEmit_->Update();
 			plankEmit_->Update();
@@ -109,10 +108,10 @@ void NormalEnemy::Update()
 			fenceEmit_->Update();
 		}
 		isLockOn = false;
-		isAlive_ = false;
+		Situations().isAlive = false;
 	}
 
-	if (isAlive_) {
+	if (GetAlive()) {
 		if (!hit) {
 			count = 0.0f;
 			Move();
@@ -136,15 +135,9 @@ void NormalEnemy::Update()
 	object_->Update();
 	transBase_.Update();
 
-
-	//colliderComponent_->UpdateAll(object_->worldtransform_);
 }
 
-void NormalEnemy::Draw()
-{
-}
-
-void NormalEnemy::DrawP()
+void NormalEnemy::DrawEffect()
 {
 }
 
@@ -207,7 +200,7 @@ void NormalEnemy::ATest()
 void NormalEnemy::Move()
 {
 	// 回転と移動量の設定
-	const float kMoveSpeed = parameter_.moveSpeed; // 移動速度
+	const float kMoveSpeed = Parameters().speed; // 移動速度
 	// worldTransformBase_.rotation_.y += 0.00f; // 一定量のY軸回転
 
 	// 向いている方向への移動ベクトルの計算

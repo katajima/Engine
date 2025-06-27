@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
-uint32_t BaseEnemy::nextSerialNumber = 0;
+//uint32_t BaseEnemy::nextSerialNumber = 0;
 
 float BaseEnemy::Timer() const
 {
@@ -104,9 +104,9 @@ void BaseEnemy::Initialize2D()
 BaseEnemy::BaseEnemy()
 {
 	// シリアル番号を振る
-	serialNumber = nextSerialNumber;
+	//serialNumber = nextSerialNumber;
 	// 次の番号を1加算
-	++nextSerialNumber;
+	//++nextSerialNumber;
 
-	parameter_ = {};
+	//parameter_ = {};
 }

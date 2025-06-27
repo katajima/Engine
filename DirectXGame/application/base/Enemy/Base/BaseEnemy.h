@@ -1,62 +1,43 @@
 #pragma once
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-
 #include "DirectXGame/engine/Effect/Particle/ParticleEmitter.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
+
+#include "DirectXGame/application/base/Character/BaseCharacter.h"
 
 class Player;
 class Entity3DManager;
 class Entity2DManager;
-class BaseEnemy : public IHitReceiver {
+class BaseEnemy : public BaseCharacter {
 public:
-
-	struct Parameters {
-		float HP;			// HP
-		float MaxHP;		// HPMAX
-		float moveSpeed;	// 移動速度
-		float damege;		// ダメージ
-
-	};
-
 	Matrix4x4 nullChek;
 public:
 	// デフォルトコンストラクタ
 	BaseEnemy();
 
 	// 初期化
-	virtual void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
 
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
 
-	// 描画
-	virtual void Draw() = 0;
-	//
-	virtual void DrawP() = 0;
+	virtual void DrawEffect() = 0;
 
 	virtual void Draw2D() = 0;
 
 	virtual void SetPlayer(Player* player) = 0;
 
-	// ヒット時の処理
-	void OnHit(float damage) override {
-		AddDamage(damage);
-	}
-
 public:
 	// パーティクル発生
 	virtual void Emit() = 0;
 	// 生存判定
-	bool GetAlive() const { return isAlive_; }
+	//bool GetAlive() const { return isAlive_; }
 	// ダメージ
 	void AddDamage(float damage) {
-		parameter_.HP -= damage;
-		if (parameter_.HP <= 0) {
-			parameter_.HP = 0;
-			isAlive_ = false; // 敵が死亡
+		HP() -= damage;
+		if (GetHP() <= 0) {
+			HP() = 0;
+			Situations().isAlive = false; // 敵が死亡
 		}
 	}
 	// ロックオンされているか
@@ -72,9 +53,9 @@ public:
 	void SetHit() { hit = true; };
 
 
-	void SetSerialNumber(uint32_t num) { serialNumber = num; };
+	//void SetSerialNumber(uint32_t num) { serialNumber = num; };
 	// シリアルナンバー
-	uint32_t GetSerialNumber() const { return serialNumber; }
+	//uint32_t GetSerialNumber() const { return serialNumber; }
 
 	Object3d* GetObject3D() { return object_; }
 
@@ -112,22 +93,22 @@ protected:
 
 
 	// パラメータ
-	Parameters parameter_;
+	//Parameters parameter_;
 
 	// 移動
-	Vector3 velocity_;
+	//Vector3 velocity_;
 
 	// 生存フラグ
-	bool isAlive_ = true;
+	//bool isAlive_ = true;
 
 	// ロックオンされているか
 	bool isLockOn = false;
 
 
 	// シリアルナンバー
-	uint32_t serialNumber = 0;
+	//uint32_t serialNumber = 0;
 	// 次のシリアルナンバー
-	static uint32_t nextSerialNumber;
+	//static uint32_t nextSerialNumber;
 	//ContactRecord contactRecord_;
 	//std::unique_ptr<ColliderComponent> colliderComponent_;
 
