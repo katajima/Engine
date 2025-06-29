@@ -27,7 +27,7 @@ void GamePlayScene::Initialize()
 
 	// プレイヤー
 	player_ = std::make_unique<Player>();
-	player_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
+	player_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), Vector3(0, 2, -40), camera.get());
 	debugTimer_.EndTimer();
 	debugTimer_.LogTimeSec("GamePlaySceneInit " , "Player");
 	debugTimer_.StartTimer();
@@ -52,10 +52,10 @@ void GamePlayScene::Initialize()
 
 	// 敵マネージャ
 	enemyManager_ = std::make_unique<EnemyManager>();
-	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
+	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(),GetGlobalVariables(), camera.get());
 	enemyManager_->SetPlayer(player_.get());
 
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 5; i++) {
 
 		Vector3 rand = Random::RandomVector3(-100, 100);
 		rand.y = 2;

@@ -5,7 +5,7 @@
 class NormalEnemy : public BaseEnemy {
 public:
 	// 初期化
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) override;
+	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables,Vector3 position, Camera* camera) override;
 
 	// 毎フレーム更新
 	void Update() override;

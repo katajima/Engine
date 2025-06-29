@@ -7,15 +7,15 @@
 #include "assert.h"
 
 
-void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
+void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
+	globalVariables_ = globalVariables;
 	camera_ = camera;
 	input_ = input;
-
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-
+	CreateGroup("Player");
 	
 	
 
@@ -23,13 +23,17 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	Parameters().HP.Initiaize(1000, 0, 1000, 0);
 	HP() = 1000; // 初期HP設定
 
+	Parameters().speed = 20.0f;// 移動速度設定
+
 	// プレイヤー
 	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectType::kNormal, position, camera_);
 	objectBase_->SetModel("AnimatedCube.gltf");
 	objectBase_->Update();
 	objectBase_->InitColliderComponent();
-
+	GetColliderComponent()->SetHitReceiver(this);
 	
+	InitializeBaseAddItem();
+
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::Player;
@@ -51,6 +55,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 		Vector3 pushVec;
 		if (self->ResolveCollision(*other, pushVec)) {
+			pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 			if (other->isStatic) {
 				// 相手が動かないなら自分だけ押し戻す
 				objectBase_->worldtransform_.translate_ += pushVec;
@@ -160,6 +165,8 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 	attackManager_->RegisterAttackNode("Punch2", node2);
 
+	
+	
 
 	// UI
 	ui_->Initialize(entity2DManager);
@@ -171,12 +178,14 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	effect_->SetTrailParent(&weapon_->GetObject3D());
 	// ダッシュ用エフェクト
 	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
+
+
 }
 
 void Player::Update()
 {
 	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_->worldtransform_.rotate_.y;
-
+	UpdateBaseGetValue(); //保存機能 基本値の更新
 
 	if (GetSituation().isAlive) {
 		if (behaviorRequest_) {
@@ -302,10 +311,7 @@ void Player::Update()
 
 	weapon_->Update();
 
-	Matrix4x4 mat = objectBase_->worldtransform_.worldMat_;
-
-
-
+	
 	objectBase_->Update();
 }
 
@@ -341,7 +347,6 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-	Parameters().speed = 20.0f;
 	Velocity() = {0,0,0};
 	Situations().isMoving = false;
 

@@ -31,7 +31,7 @@ public:
 
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera);
+	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera);
 	void SetPlayer(Player* player) { player_ = player; };
 	
 	// 更新
@@ -55,9 +55,11 @@ public:
 	}
 private:
 	std::vector<std::unique_ptr<BaseEnemy>> enemys_;
+	uint32_t enemyCount_ = 0;	// 敵の数
 private:
 	Camera* camera_;						// カメラ
 	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
 	Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
+	GlobalVariables* globalVariables_;	// グローバル変数
 	Player* player_;					// プレイヤー
 };

@@ -15,7 +15,7 @@ public:
 	BaseEnemy();
 
 	// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
 
 
 	// 毎フレーム更新
@@ -51,6 +51,8 @@ public:
 	// ヒットした
 	void SetHit() { hit = true; };
 
+	void SetID(uint32_t id) { id_ = id; }
+
 protected:
 	// 時間
 	float Timer() const;
@@ -64,6 +66,8 @@ protected:
 	void Initialize2D();
 
 protected:
+	uint32_t id_ = 0; // ID
+
 	// オブジェクト
 	WorldTransform transBase_;
 	Vector3 oldPos_;

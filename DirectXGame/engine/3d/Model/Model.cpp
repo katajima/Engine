@@ -136,9 +136,9 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 	
 	timer_.EndTimer();
 
-	std::string filenameT = " name : " + filename;
+	//std::string filenameT = " name : " + filename;
 
-	timer_.LogTimeSec("Model LoadMesh Time: ",filenameT);
+	//timer_.LogTimeSec("Model LoadMesh Time: ",filenameT);
 	
 	// ボーン読み込み
 	LoadModel::LoadBone(scene, modelData, dxCommon_);

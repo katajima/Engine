@@ -1,9 +1,10 @@
 #include "EnemyManager.h"
 
-void EnemyManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
+void EnemyManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
+	globalVariables_ = globalVariables;
 	camera_ = camera;
 }
 
@@ -53,12 +54,11 @@ void EnemyManager::GenerateEnemy(EnemyType type, Vector3 position)
 		
 		break;
 	}
-
-	//enemy->SetSerialNumber(serialNumber);
-	enemy->Initialize(nullptr,entity3DManager_, entity2DManager_, position, camera_);
+	enemy->SetID(enemyCount_);
+	enemy->Initialize(nullptr,entity3DManager_, entity2DManager_, globalVariables_,position, camera_);
 	enemy->SetPlayer(player_);
 
 	enemys_.push_back(std::move(enemy));
 
-	//serialNumber++;
+	enemyCount_++;
 }

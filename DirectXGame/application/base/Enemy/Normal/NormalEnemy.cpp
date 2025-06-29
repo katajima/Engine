@@ -2,27 +2,30 @@
 
 #include "DirectXGame/application/base/Player/Player.h"
 
-void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
+void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
+	globalVariables_ = globalVariables;
+	CreateGroup("enemy");
 
 	transBase_.Initialize();
 	transBase_.translate_ = position;
 
-	objectBase_ = entity3DManager_->CreateObject3D("enemy", Object3d::ObjectType::kNormal, {}, camera);
+	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_), Object3d::ObjectType::kNormal, {}, camera);
 	objectBase_->SetModel("enemy2.obj");
+	//objectBase_->worldtransform_.translate_ = position;
 	objectBase_->worldtransform_.parent_ = &transBase_;
 	objectBase_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
 	objectBase_->InitColliderComponent();
 	GetColliderComponent()->SetHitReceiver(this);
 	
 
+
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::Enemy;
 	sphere->layer = CollisionLayer::Enemy;
-	//sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::PlayerAttack));
 	sphere->radius = 3.0f; // 半径を適宜設定
 	GetColliderComponent()->AddCollider(std::move(sphere));
 
@@ -48,7 +51,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
 				}
 
-				objectBase_->Update();
+				objectBase_->worldtransform_.Update();
 			}
 		}
 
@@ -71,13 +74,13 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
 				}
 
-				objectBase_->Update();
+				objectBase_->worldtransform_.Update();
 			}
 		}
 
 
 
-	};
+		};
 
 
 	
@@ -88,16 +91,20 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	
 	Parameters().speed = 3.0f;
 	
+
+	InitializeBaseAddItem();
+
 	Initialize2D();
-
-
 	InitParticle();
 
 	nullChek = Matrix4x4::Identity();
+	objectBase_->Update();
 }
 
 void NormalEnemy::Update()
 {
+	UpdateBaseGetValue();
+
 	HitStpoTime();
 	if (GetHP() <= 0) {
 		if (GetAlive() == true) {
@@ -134,7 +141,6 @@ void NormalEnemy::Update()
 
 	objectBase_->Update();
 	transBase_.Update();
-
 }
 
 void NormalEnemy::DrawEffect()
@@ -201,8 +207,7 @@ void NormalEnemy::Move()
 {
 	// 回転と移動量の設定
 	const float kMoveSpeed = Parameters().speed; // 移動速度
-	// worldTransformBase_.rotation_.y += 0.00f; // 一定量のY軸回転
-
+	
 	// 向いている方向への移動ベクトルの計算
 	Vector3 moveDirection = { 0.0f, 0.0f, kMoveSpeed };
 	Matrix4x4 rotationMatrix = MakeRotateYMatrix(transBase_.rotate_.y);

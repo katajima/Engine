@@ -28,7 +28,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,Vector3 position, Camera* camera) override;
+	void Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables ,Vector3 position, Camera* camera) override;
 
 	///< summary>
 	/// 更新
@@ -164,13 +164,10 @@ private: // 攻撃関係
 
 
 public:
-
 	void LockOn(const std::vector<BaseEnemy*>& enemys);
 
 	const int MaxLockOn = 10;
 	bool isLockOn = false;
-
-
 private: // 移動
 	// 移動処理
 	void Move();

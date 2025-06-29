@@ -1,6 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
-
+#include "optional"
 // AI Character Data
 // キャラクターの思考や知能を持つデータ
 
@@ -66,7 +66,7 @@ struct BasicParameters
 	float strength = 1.0f;	// 力
 	float speed = 1.0f;		// 速さ
 	float defense = 1.0f;	// 防御力
-	int intelligence = 1;// 知力
+	int intelligence = 1;	// 知力
 };
 
 // キャラクターの状況を定義する構造体
@@ -105,7 +105,13 @@ enum class Personality
 	kObsession			// 執着的
 };
 
-
+// 基本的な振るまい
+enum class BasicBehavior {
+	kRoot,		// 通常状態
+	kAttack,	// 攻撃中
+	kJump,		// ジャンプ中
+	kDie,       // 死亡状態
+};
 
 
 

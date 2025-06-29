@@ -16,7 +16,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
 
 	///< summary>
 	/// 更新
@@ -33,7 +33,7 @@ public:
 	/// </summary>
 	virtual void Draw2D() = 0;
 
-public:
+public: // 取得系関数
 
 	// オブジェクト3d取得
 	Object3d* GetObject3D() { return objectBase_; }
@@ -53,7 +53,7 @@ public:
 	// HP取得
 	float GetHP() const { return characterData_.parameters_.HP.value; }
 
-protected:
+protected: // 取得系関数(変更可能)
 	// 基本パラメータ
 	BasicParameters& Parameters() { return characterData_.parameters_; } 
 
@@ -67,16 +67,65 @@ protected:
 	// HP
 	float& HP() { return characterData_.parameters_.HP.value; } 
 
+protected: // 保存機能
+
+	// 保存生成
+	void CreateGroup(const std::string name) {
+		name_ = name;
+		globalVariables_->CreateGroup(name_);
+	}
+
+	// 保存するもの追加
+	template<typename T>
+	void AddItem(const std::string itemName, T& item) {
+		globalVariables_->AddItem(name_, itemName, item);
+	}
+
+	template<typename T>
+	T GetValue(const std::string itemName) {
+		return globalVariables_->GetValue<T>(name_, itemName);
+	}
+
+	// ベースの保存項目を追加
+	void InitializeBaseAddItem() {
+		//AddItem("Position", objectBase_->worldtransform_.translate_);
+		AddItem("speed", characterData_.parameters_.speed);
+		AddItem("HP", characterData_.parameters_.HP.value);
+		AddItem("MaxHP", characterData_.parameters_.HP.maxValue);
+		AddItem("MP", characterData_.parameters_.MP.value);
+		AddItem("MaxMP", characterData_.parameters_.MP.maxValue);
+		AddItem("stamina", characterData_.parameters_.stamina.value);
+		AddItem("MaxStamina", characterData_.parameters_.stamina.maxValue);
+
+
+
+		//objectBase_->worldtransform_.translate_ = GetValue<Vector3>("Position");
+		characterData_.parameters_.speed = GetValue<float>("speed");
+		characterData_.parameters_.HP.value = GetValue<float>("HP");
+		characterData_.parameters_.HP.maxValue = GetValue<float>("MaxHP");
+		characterData_.parameters_.MP.value = GetValue<float>("MP");
+		characterData_.parameters_.MP.maxValue = GetValue<float>("MaxMP");
+		characterData_.parameters_.stamina.value = GetValue<float>("stamina");
+		characterData_.parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
+	}
+
+	void UpdateBaseGetValue() {
+		characterData_.parameters_.speed = GetValue<float>("speed");
+	}
+
 public:
 
 
 protected:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d
 	CharacterData characterData_;	// キャラクターデータ
+private:
+	std::string name_ = ""; // キャラクター名
 
 protected: // 貰ってくるもの
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
 	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
 	Camera* camera_ = nullptr;						// カメラ
 	Input* input_ = nullptr;						// 入力
 
