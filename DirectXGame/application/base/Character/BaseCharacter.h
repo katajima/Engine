@@ -53,6 +53,8 @@ public: // 取得系関数
 	// HP取得
 	float GetHP() const { return characterData_.parameters_.HP.value; }
 
+	BasicBehavior GetBasicBehavior() const { return basicbehavior_; }
+
 protected: // 取得系関数(変更可能)
 	// 基本パラメータ
 	BasicParameters& Parameters() { return characterData_.parameters_; } 
@@ -119,6 +121,10 @@ public:
 protected:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d
 	CharacterData characterData_;	// キャラクターデータ
+	// 振るまい
+	BasicBehavior basicbehavior_ = BasicBehavior::kRoot; 
+	// 次の振るまいリクエスト
+	std::optional<BasicBehavior> basicbehaviorRequest_ = std::nullopt;
 private:
 	std::string name_ = ""; // キャラクター名
 

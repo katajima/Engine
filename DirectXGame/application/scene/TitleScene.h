@@ -67,6 +67,9 @@ private:
 
 	Object3d tail;
 
+	// ライト
+	std::shared_ptr<DirectionalLight> directional;
+
 };
 
 

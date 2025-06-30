@@ -78,24 +78,24 @@ void GameUI::Update()
 void GameUI::Draw()
 {
 	icon_B->Update();
-	icon_Y->Update();
-	icon_X->Update();
+	//icon_Y->Update();
+	//icon_X->Update();
 	icon_RT->Update();
 	text_normal->Update();
-	text_jump->Update();
-	text_dash->Update();
+	//text_jump->Update();
+	//text_dash->Update();
 	text_special->Update();
 	text_hit->Update();
 	icon_B->Draw();
-	icon_Y->Draw();
-	icon_X->Draw();
+	//icon_Y->Draw();
+	//icon_X->Draw();
 	if (player_->GetIsSpecial()) {
 		icon_RT->Draw();
 		text_special->Draw();
 	}
 	text_normal->Draw();
-	text_jump->Draw();
-	text_dash->Draw();
+	//text_jump->Draw();
+	//text_dash->Draw();
 	text_hit->Draw();
 
 

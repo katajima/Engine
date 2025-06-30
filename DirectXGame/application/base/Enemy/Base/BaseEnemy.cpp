@@ -68,7 +68,7 @@ void BaseEnemy::HitMotion()
 	Vector3 sub = Subtract(lockOnPosition, transBase_.translate_);
 
 	
-
+	moveDirection.y = 0;
 	// 移動
 	transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());
 

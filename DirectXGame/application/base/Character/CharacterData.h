@@ -107,10 +107,17 @@ enum class Personality
 
 // 基本的な振るまい
 enum class BasicBehavior {
-	kRoot,		// 通常状態
-	kAttack,	// 攻撃中
-	kJump,		// ジャンプ中
-	kDie,       // 死亡状態
+	kRoot,			// 通常状態
+	kAttack,		// 攻撃中
+	kDie,			// 死亡状態
+	kSpecialAttack,	// 特殊攻撃中
+};
+
+// 通常時の振るまい
+enum class RootBehavior {
+	kIdle,		// 待機状態
+	kMove,		// 移動状態
+	kJump,		// ジャンプ状態
 };
 
 

@@ -54,34 +54,40 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 
 		Vector3 pushVec;
-		if (self->ResolveCollision(*other, pushVec)) {
-			pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
-			if (other->isStatic) {
-				// 相手が動かないなら自分だけ押し戻す
-				objectBase_->worldtransform_.translate_ += pushVec;
-			}
-			else if (self->isStatic) {
-				
-			}
-			else {
-				// 双方が動く → 半分ずつ押し戻す（応用例）
-				objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
-				
-			}
+		if (other->tag == CollisionTag::Enemy) {
+			if (self->ResolveCollision(*other, pushVec)) {
+				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
+				if (other->isStatic) {
+					// 相手が動かないなら自分だけ押し戻す
+					objectBase_->worldtransform_.translate_ += pushVec;
+				}
+				else if (self->isStatic) {
 
-			objectBase_->Update();
+				}
+				else {
+					// 双方が動く → 半分ずつ押し戻す（応用例）
+					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+
+				}
+
+				objectBase_->Update();
+			}
 		}
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
-		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+		if (!enemy) return;
+		if (enemy->GetBasicBehavior() == BasicBehavior::kAttack) {
+			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
-		if (GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
-			return; // クールタイム中のため無視
+			if (GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime, 1.0f)) {
+				return; // クールタイム中のため無視
+			}
+
+			GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
+
+			AddDamege(10);
+			followCamera_->GetViewProjection().SetShake(0.25f, { 0.1f,0.1f,0.1f });
 		}
-
-		GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
-
-		AddDamege(10);
-		followCamera_->GetViewProjection().SetShake(0.25f, {0.1f,0.1f,0.1f});
 	};
 
 
@@ -176,58 +182,56 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	effect_->Initialize(entity3DManager_, entity2DManager, camera_);
 	// トレイルエフェクト
 	effect_->SetTrailParent(&weapon_->GetObject3D());
-	// ダッシュ用エフェクト
-	effect_->SetDashEmitterParent(weapon_->GetObject3D().worldtransform_);
-
-
+	
 }
 
 void Player::Update()
 {
-	effect_->GetDashEmitter()->transform_.rotate_.y = objectBase_->worldtransform_.rotate_.y;
 	UpdateBaseGetValue(); //保存機能 基本値の更新
 
 	if (GetSituation().isAlive) {
-		if (behaviorRequest_) {
+		if (basicbehaviorRequest_) {
 			// ふるまいを変更する
-			behavior_ = behaviorRequest_.value();
+			basicbehavior_ = basicbehaviorRequest_.value();
 			// 各ふるまいごとの初期化を実行
-			switch (behavior_) {
-			case Behavior::kRoot:
-			default:
+			switch (basicbehavior_)
+			{
+			case BasicBehavior::kRoot:
 				weapon_->GetObject3D().SetIsDraw(false);
-
 				BehaviorRootInitialize();
 				Situations().isInvincible = false;
 				break;
-			case Behavior::kAttack:
+			case BasicBehavior::kAttack:
 				weapon_->GetObject3D().SetIsDraw(true);
 				BehaviorAttackInitialize();
 				Situations().isInvincible = true;
 				break;
-			case Behavior::kJump:
-				weapon_->GetObject3D().SetIsDraw(false);
+			case BasicBehavior::kDie:
 				break;
-			case Behavior::kDie:
+			case BasicBehavior::kSpecialAttack:
 				weapon_->GetObject3D().SetIsDraw(false);
 				BehaviorDieInitialize();
 				break;
+			default:
+				break;
 			}
 			// ふるまいリクエストリセット
-			behaviorRequest_ = std::nullopt;
+			basicbehaviorRequest_ = std::nullopt;
 		}
-		switch (behavior_) {
-		case Behavior::kRoot: // 通常行動更新
-		default:
+		switch (basicbehavior_)
+		{
+		case BasicBehavior::kRoot:
 			BehaviorRootUpdate();
 			break;
-		case Behavior::kAttack: // 攻撃行動更新
+		case BasicBehavior::kAttack:
 			BehaviorAttackUpdate();
 			break;
-		case Behavior::kJump:
+		case BasicBehavior::kDie:
 			break;
-		case Behavior::kDie:
+		case BasicBehavior::kSpecialAttack:
 			BehaviorDieUpdate();
+			break;
+		default:
 			break;
 		}
 	}
@@ -254,7 +258,6 @@ void Player::Update()
 
 
 	rangeBombingSpecial_->Update();
-	//bulletSpecial_->Update();
 	if (GetHP() <= 0) {
 		Situations().isAlive = false;
 	}
@@ -343,23 +346,24 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-	Velocity() = {0,0,0};
+	if (!Situations().isJumping) {
+		Velocity() = { 0,0,0 };
+	}
 	Situations().isMoving = false;
-
-
+	Vector3 velo = GetVelocity();
 
 	if (input_->IsControllerConnected()) {
 
 
-		Velocity().x = input_->GetGamePadLeftStick().x;
-		Velocity().z = input_->GetGamePadLeftStick().y;
+		velo.x = input_->GetGamePadLeftStick().x;
+		velo.z = input_->GetGamePadLeftStick().y;
 
 
-		if (GetVelocity().x != 0.0f || GetVelocity().z != 0.0f) {
+		if (velo.x != 0.0f || velo.z != 0.0f) {
 			Situations().isMoving = true;
 			// 入力方向を正規化
-			Velocity() = Normalize(GetVelocity());
-			Velocity() = Multiply(GetVelocity(), Parameters().speed);
+			velo = Normalize(velo);
+			velo = Multiply(velo, Parameters().speed);
 
 
 			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
@@ -367,19 +371,19 @@ void Player::Move()
 
 			// カメラの向きに基づいて移動方向をワールド座標系に変換
 			Vector3 worldDirection = {
-				GetVelocity().x * cameraWorldMatrix.m[0][0] + GetVelocity().z * cameraWorldMatrix.m[2][0],
+				velo.x * cameraWorldMatrix.m[0][0] + velo.z * cameraWorldMatrix.m[2][0],
 				0.0f,
-				GetVelocity().x * cameraWorldMatrix.m[0][2] + GetVelocity().z * cameraWorldMatrix.m[2][2]
+				velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
 			};
 
-			Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
+			velo = Multiply(Normalize(worldDirection), Parameters().speed);
 
 			//// 移動ベクトルをカメラの角度だけ回転する
 			//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
 			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
 			//
-			if (Velocity().Length() != 0) {
-				objectBase_->worldtransform_.rotate_.y = std::atan2(GetVelocity().x, GetVelocity().z);
+			if (velo.Length() != 0) {
+				objectBase_->worldtransform_.rotate_.y = std::atan2(velo.x, velo.z);
 			}
 
 
@@ -424,10 +428,23 @@ void Player::Move()
 
 		}
 	}
-	if (behavior_ == Behavior::kRoot || behavior_ == Behavior::kDie) {
+	
+	Velocity().x = velo.x;
+	Velocity().z = velo.z;
 
+
+}
+
+void Player::Jump()
+{
+	if (Situations().isJumping) return; // ジャンプ中は無効化
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) { // ジャンプボタンが押されたらジャンプ
+		if (GetAlive()) {
+			Situations().isJumping = true;
+			Velocity().y += 40.0f; // ジャンプ時の加速度を設定
+			//AddMove();
+		}
 	}
-
 }
 
 void Player::Gravity() {
@@ -438,6 +455,7 @@ void Player::Gravity() {
 	// 加速度ベクトル
 	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
 	if (!isCreativeMode) {
+		if(objectBase_->worldtransform_.translate_.y > groundY || Situations().isJumping)
 		Acceleration().y += accelerationVector * MyGame::GameTime();
 		// 加速する
 		Velocity().y += Acceleration().y;
@@ -483,36 +501,36 @@ void Player::LimitMove()
 void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {
 
-	if (behavior_ == Behavior::kDie) {
-		if (bulletSpecial_->GetPhese() == 0) {
-			lockedOnEnemies.clear();
-			int i = 0;
+	//if (basicbehavior_ == BasicBehavior::kSpecialAttack) {
+	//	if (bulletSpecial_->GetPhese() == 0) {
+	//		lockedOnEnemies.clear();
+	//		int i = 0;
 
-			for (int j = 0; j < enemys.size(); j++) {
-				if (i >= MaxLockOn) {
-					break; // 最大ロックオン数を超えたら抜ける
-				}
+	//		for (int j = 0; j < enemys.size(); j++) {
+	//			if (i >= MaxLockOn) {
+	//				break; // 最大ロックオン数を超えたら抜ける
+	//			}
 
-				Vector2 posEne = enemys[j]->GetObject3D()->GetScreenPosition();
-				Vector2 diff = Vector2{ 640,360 } - posEne;
-				float length = diff.Length();
+	//			Vector2 posEne = enemys[j]->GetObject3D()->GetScreenPosition();
+	//			Vector2 diff = Vector2{ 640,360 } - posEne;
+	//			float length = diff.Length();
 
-				if (length <= 300.0f && enemys[j]->GetAlive()) {
-					enemys[j]->SetLockOn(true);
-					lockedOnEnemies.push_back(enemys[j]);
-					i++;
-				}
-				else {
-					enemys[j]->SetLockOn(false);
-				}
-			}
-		}
-	}
-	else {
-		for (int j = 0; j < enemys.size(); j++) {
-			enemys[j]->SetLockOn(false);
-		}
-	}
+	//			if (length <= 300.0f && enemys[j]->GetAlive()) {
+	//				enemys[j]->SetLockOn(true);
+	//				lockedOnEnemies.push_back(enemys[j]);
+	//				i++;
+	//			}
+	//			else {
+	//				enemys[j]->SetLockOn(false);
+	//			}
+	//		}
+	//	}
+	//}
+	//else {
+	//	for (int j = 0; j < enemys.size(); j++) {
+	//		enemys[j]->SetLockOn(false);
+	//	}
+	//}
 }
 
 void Player::ApplyGlobalVariables()

@@ -27,7 +27,31 @@ private:
 
 	void InitParticle();
 
+	//通常行動初期化
+	void BehaviorRootInitialize();
 
+	//通常行動更新
+	void BehaviorRootUpdate();
+
+	//攻撃行動初期化
+	void BehaviorAttackInitialize();
+
+	//攻撃行動更新
+	void BehaviorAttackUpdate();
+	
+	// 死亡行動初期化
+	void BehaviorDieInitialize();
+	// 死亡行動更新
+	void BehaviorDieUpdate();
+
+private:
+	Vector3 lockonPosition_ = {}; // 位置
+	Vector3 subPosition_ = {}; // 位置
+	float timer_ = 0.0f; // タイマー
+	float attackTimer_ = 3.0f; // 攻撃タイマー
+	float rootTimer_ = 3.0f; // 通常タイマー
+	float attackSpeed_ = 10.0f; // 攻撃速度
+	float dieTimer_ = 3.0f; // 死亡タイマー 
 private:
 
 	std::unique_ptr<ParticleEmitter> groundRightEmit_ = nullptr;

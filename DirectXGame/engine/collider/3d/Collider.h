@@ -23,6 +23,7 @@ public:
 	CollisionLayer layer = CollisionLayer::Default;
 	CollisionTag tag = CollisionTag::None; // タグ
 	uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
+	uint32_t id = 0; // コライダーID（ユニーク）
 
 	// 判定有効
 	void Enable() { enabled = true; }

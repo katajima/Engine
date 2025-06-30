@@ -10,7 +10,7 @@ void PlayerEffect::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 	entity3DManager_ = entity3DManager;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
-	dashEmitter_ = std::make_unique <ParticleEmitter>();
+	/*dashEmitter_ = std::make_unique <ParticleEmitter>();
 	dashEmitter_->Initialize(particleManager, "dash", "dashEmit", ParticleData::SpawnType::kCornerLine);
 	dashEmitter_->GetFrequency() = 0.05f;
 	dashEmitter_->SetCount(5);
@@ -23,7 +23,7 @@ void PlayerEffect::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 	dashEmitter_->SetVelocityMinMax({}, {});
 	dashEmitter_->SetPos({ 0,7,0 });
 	dashEmitter_->SetCorner(16, 0.5f);
-	dashEmitter_->transform_.rotate_.x = DegreesToRadians(90);
+	dashEmitter_->transform_.rotate_.x = DegreesToRadians(90);*/
 
 
 
@@ -46,7 +46,7 @@ void PlayerEffect::Update()
 {
 	//trailEffect_->Update(isTrail_, weaponStr, weaponEnd);
 
-	dashEmitter_->Update();
+	//dashEmitter_->Update();
 	weaponStr.Update();
 	weaponEnd.Update();
 }

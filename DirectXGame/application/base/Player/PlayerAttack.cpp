@@ -6,7 +6,7 @@ void Player::Attack()
 	//workAttack.parameter++;
 	workAttack.parameter += MyGame::GameTime();
 
-	float t = static_cast<float>(workAttack.parameter) / workAttack.attackAll.max_t;
+	//float t = static_cast<float>(workAttack.parameter) / workAttack.attackAll.max_t;
 	weapon_->GetObject3D().SetIsDraw(true);
 	float k = 0.5f;
 	switch (workAttack.type)
@@ -38,14 +38,23 @@ void Player::Attack()
 				weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(16 * 60) * MyGame::GameTime();
 			}
 		}
-
-
 		if (workAttack.parameter <= 5.0f / 60) {
 
 			Vector3 move(0, 0, k);
 			// 速度ベクトルを自機の向きに合わせて回転させる
 			move = TransformNormal(move, objectBase_->worldtransform_.worldMat_);
 
+			objectBase_->worldtransform_.translate_ += move;
+		}
+		break;
+	case AttackTypePlay::kJump:
+		if (workAttack.parameter >= 1.0f / 60) {
+			weapon_->GetObject3D().worldtransform_.rotate_.x += DegreesToRadians(16 * 180) * MyGame::GameTime();
+			k = 0.2f;
+		
+			Vector3 move(0, 0, k);
+			// 速度ベクトルを自機の向きに合わせて回転させる
+			move = TransformNormal(move, objectBase_->worldtransform_.worldMat_);
 			objectBase_->worldtransform_.translate_ += move;
 		}
 		break;
@@ -106,8 +115,8 @@ void Player::SetAttackCombo(WrokAttack& work)
 		}
 		else {
 			effect_->SetIsTrail(false);
-			weapon_->GetObject3D().SetIsDraw(false);
-			behaviorRequest_ = Behavior::kRoot;
+			//weapon_->GetObject3D().SetIsDraw(false);
+			basicbehaviorRequest_ = BasicBehavior::kRoot;
 			
 		}
 	}
@@ -148,24 +157,26 @@ void Player::AttackTypeInit(int comboIndex)
 
 
 			if (comboIndex == 0) {
-				//weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,0 });
 			}
 			if (comboIndex == 1) {
-				//weapon_->SetRad(2.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			if (comboIndex == 2) {
-				//weapon_->SetRad(3.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,-90 });
 			}
 			if (comboIndex == 3) {
-				//weapon_->SetRad(4.5f);
 				workAttack.attackAll.max_t = 0.3f;
 				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,90 });
+			}
+			break;
+		case AttackTypePlay::kJump:
+			if (comboIndex == 0) {
+				workAttack.attackAll.max_t = 0.5f;
+				weapon_->GetObject3D().worldtransform_.rotate_ = DegreesToRadians({ 0,0,0 });
 			}
 			break;
 		}
@@ -179,7 +190,12 @@ void Player::AttackTypes()
 {
 	if (workAttack.key.IsAttack) {
 		if (workAttack.key.IsNormalAttack) {
-			workAttack.typeRequest_ = AttackTypePlay::kNormal;
+			if (GetSituation().isJumping && workAttack.comboIndex == 0) {
+				workAttack.typeRequest_ = AttackTypePlay::kJump;
+			}
+			else {
+				workAttack.typeRequest_ = AttackTypePlay::kNormal;
+			}
 		}
 	}
 }

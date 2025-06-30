@@ -52,7 +52,7 @@ public:
 	void SetHit() { hit = true; };
 
 	void SetID(uint32_t id) { id_ = id; }
-
+	bool  GetDelete() const { return isDelete; };
 protected:
 	// 時間
 	float Timer() const;
@@ -65,6 +65,7 @@ protected:
 	// スプライト初期化
 	void Initialize2D();
 
+	void Delete() { isDelete = true; };
 protected:
 	uint32_t id_ = 0; // ID
 
@@ -83,6 +84,7 @@ protected:
 
 	// ロックオンされているか
 	bool isLockOn = false;
+	bool isDelete = false;
 protected: //2D
 	std::unique_ptr<Sprite> icon_lockOn;
 	std::unique_ptr<Sprite> hpBer_;

@@ -19,7 +19,7 @@ void EnemyManager::Update()
 	enemys_.erase(
 		std::remove_if(enemys_.begin(), enemys_.end(),
 			[](const std::unique_ptr<BaseEnemy>& enemy) {
-				return !enemy->GetAlive(); 
+				return !enemy->GetAlive() && enemy->GetDelete();
 			}),
 		enemys_.end());
 }

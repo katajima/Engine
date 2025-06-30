@@ -55,11 +55,11 @@ void GamePlayScene::Initialize()
 	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(),GetGlobalVariables(), camera.get());
 	enemyManager_->SetPlayer(player_.get());
 
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 10; i++) {
 
 		Vector3 rand = Random::RandomVector3(-100, 100);
 		rand.y = 2;
-		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, rand);
+		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, rand + Vector3{0,0,10});
 	}
 	debugTimer_.EndTimer();
 	debugTimer_.LogTimeSec("GamePlaySceneInit ", "enemy");
@@ -183,10 +183,11 @@ void GamePlayScene::CheckAllCollisions()
 
 	// 敵コライダーセット
 	for (auto enemy : enemyManager_->GetEnemys()) {
+		if (enemy->GetHP() <= 0) continue;
 		collisionManager_->Register(enemy->GetColliderComponent());
 	}
 	// 武器コライダコンセット
-	if (player_->GetBehavior() == Player::Behavior::kAttack) {
+	if (player_->GetBehavior() == BasicBehavior::kAttack) {
 		
 		collisionManager_->Register(player_->GetWeapon()->GetColliderComponent());
 	}
@@ -210,6 +211,11 @@ void GamePlayScene::UpdateImGui()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
+	if(enemyManager_->GetEnemys().size() <= 0 || !player_->GetAlive()) {
+		// シーン切り替え
+		GetSceneManager()->ChangeScene("TITLE");
+	}
+
 #ifdef _DEBUG
 	
 	Vector2 pos = player_->GetObject3D()->GetScreenPosition();
@@ -346,7 +352,6 @@ void GamePlayScene::Update()
 		universeCamera_->Update();
 		followCamera_->Update();
 
-
 		if (isUniverseCamera) {
 			camera->viewMatrix_ = universeCamera_->GetViewProjection().viewMatrix_;
 			camera->projectionMatrix_ = universeCamera_->GetViewProjection().projectionMatrix_;
@@ -360,11 +365,8 @@ void GamePlayScene::Update()
 			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&followCamera_->GetViewProjection());
 		}
 		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-		//GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
 	}
 	else {
-
-
 		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 		GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());

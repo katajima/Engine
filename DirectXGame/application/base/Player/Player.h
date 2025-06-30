@@ -43,16 +43,6 @@ public:
 	
 	void Draw2D() override;
 
-
-
-	
-	// 振るまい
-	enum class Behavior {
-		kRoot,   // 通常状態
-		kAttack, // 攻撃中
-		kJump,   // ジャンプ中
-		kDie,       // 死亡状態
-	};
 private: //Behavior
 
 	//通常行動初期化
@@ -74,11 +64,6 @@ private: //Behavior
 	//では必殺技でフェーズ1で選択、フェーズ2で発射(上空に)、フェーズ3で(的へ(上付近まで))、フェーズ4で(的に向かい着弾))
 	void BehaviorDieUpdate();
 
-
-	//振るまい
-	Behavior behavior_ = Behavior::kRoot;
-	// 次の振るまいリクエスト
-	std::optional<Behavior> behaviorRequest_ = std::nullopt;
 public: // 攻撃関係
 	struct Parameter
 	{
@@ -88,7 +73,6 @@ public: // 攻撃関係
 	struct AttackKeyFlag
 	{
 		bool IsAttack; // 攻撃するか
-
 		bool IsNormalAttack; // B
 		bool IsSpecialAttack;// RT
 	};
@@ -96,6 +80,7 @@ public: // 攻撃関係
 	{
 		kNone = 0,
 		kNormal, // 通常攻撃
+		kJump, // ジャンプ攻撃
 	};
 private: // 攻撃関係
 	struct StartEnd
@@ -166,11 +151,13 @@ private: // 攻撃関係
 public:
 	void LockOn(const std::vector<BaseEnemy*>& enemys);
 
-	const int MaxLockOn = 10;
-	bool isLockOn = false;
+	const int MaxLockOn = 10;	// 最大ロックオン数
+	bool isLockOn = false;		// ロックオン中かどうか
 private: // 移動
 	// 移動処理
 	void Move();
+	// ジャンプ
+	void Jump();
 	// 重力
 	void Gravity();
 	// 移動加算
@@ -178,12 +165,8 @@ private: // 移動
 	// 移動制限
 	void LimitMove();
 
-	float graVelo;
-
-	float groundY = 2;
-
-	float ty = 0;
-
+	float graVelo;     // 重力の速度
+	float groundY = 2; // 地面の高さ
 public:
 	
 	Object3d* GetObject3D() { return objectBase_; }
@@ -191,22 +174,22 @@ public:
 	
 	playerWeapon* GetWeapon() { return weapon_.get(); }
 
-	Behavior GetBehavior() const { return behavior_; };
+	BasicBehavior GetBehavior() const { return basicbehavior_; };
 	AttackTypePlay GetAttackType() const { return workAttack.type; };
 
 
 	void AddDamege(float da) { HP() -= int(da); };
 
-	void AddSpecial(int d) { bulletSpecial_->AddGauge(d); };
+	void AddSpecial(int d) { rangeBombingSpecial_->AddGauge(d); };
 
 	bool GetInvincible() const { return GetSituation().isInvincible; }
 	
-	bool GetIsSpecial() const { return bulletSpecial_->GetIsSpecial(); }
+	bool GetIsSpecial() const { return rangeBombingSpecial_->GetIsSpecial(); }
 
 	int GetHitCount() const { return workAttack.hitCount; }
 
 	void AddHit() { workAttack.hitCount++; };
-	void AddSP() { bulletSpecial_->AddGauge(1); };
+	void AddSP() { rangeBombingSpecial_->AddGauge(1); };
 
 public:
 
@@ -233,32 +216,24 @@ private:
 	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
 	// 武器
 	std::unique_ptr<playerWeapon> weapon_;
-	//
+	// 攻撃マネージャー
 	std::unique_ptr<AttackManager> attackManager_;
-	//
+	// 攻撃ファクトリー
 	std::unique_ptr<BaseAttackFactory> playerAttackFactory_;
-
+	//
 	std::unordered_map<std::string, WorldTransform*> transformMap;
 
-	// 本体
-	Object3d objectBody_;
-	
-	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
-	//　レティクル
-	Object3d* objectReticle_;
-	//
-	float reticleRad_ = 100.0f;
-	Vector3 rangeBombingPos{};
-
-
-	float moveLimit = 200;
-	
-	bool isCreativeMode = false;
-	
+	Object3d objectBody_;					// オブジェクト本体
+	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr; // 円柱プリミティブ
+	Object3d* objectReticle_;				// オブジェクトレティクル
+	float reticleRad_ = 100.0f;				// レティクルの半径　　　
+	Vector3 rangeBombingPos{};				// レンジボムの位置
+	float moveLimit = 200;					// 移動制限
+	bool isCreativeMode = false;			// クリエイティブモードかどうか
 private:
-	BulletManager* bulletManager_;
-	FollowCamera* followCamera_;
-	std::vector<BaseEnemy*> lockedOnEnemies;
+	BulletManager* bulletManager_;			// 弾管理
+	FollowCamera* followCamera_;			// フォローカメラ
+	std::vector<BaseEnemy*> lockedOnEnemies;// ロックオンした敵
 };
 
 

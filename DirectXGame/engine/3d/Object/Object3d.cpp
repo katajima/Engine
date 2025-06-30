@@ -77,6 +77,8 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 
 void Object3d::Update()
 {
+	if (isDelete) return;
+
 	Matrix4x4 localMatrix = MakeIdentity4x4();
 	worldtransform_.Update();
 
@@ -217,7 +219,7 @@ void Object3d::Update()
 void Object3d::Draw()
 {
 	if (!isDraw) return;
-
+	if (isDelete) return;
 
 	switch (objectType_)
 	{

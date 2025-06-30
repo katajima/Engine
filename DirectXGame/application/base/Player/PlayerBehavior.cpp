@@ -4,7 +4,6 @@
 
 void Player::BehaviorRootInitialize()
 {
-	effect_->GetDashEmitter()->SetIsEmit(false);
 	workAttack.parameter = 0;
 	
 	effect_->SetIsTrail(false);
@@ -16,23 +15,22 @@ void Player::BehaviorRootUpdate()
 
 	AttackKey();
 
+	// ジャンプ
+	Jump();
 
 	// 移動
 	Move();
 
-	
-
 	recastTime += MyGame::GameTime();
 	if (workAttack.key.IsAttack) {
 		if (recastTime >= MaxRecastTime) {
-			behaviorRequest_ = Behavior::kAttack;
+			basicbehaviorRequest_ = BasicBehavior::kAttack;
 		}
 	}
 	if (bulletSpecial_->GetIsSpecial()) {
 		if (workAttack.key.IsSpecialAttack) {
 			if (recastTime >= MaxRecastTime) {
-				behaviorRequest_ = Behavior::kDie;
-				
+				basicbehaviorRequest_ = BasicBehavior::kSpecialAttack;
 			}
 		}
 	}
@@ -40,8 +38,7 @@ void Player::BehaviorRootUpdate()
 	if (rangeBombingSpecial_->GetIsSpecial()) {
 		if (workAttack.key.IsSpecialAttack) {
 			if (recastTime >= MaxRecastTime) {
-				behaviorRequest_ = Behavior::kDie;
-				
+				basicbehaviorRequest_ = BasicBehavior::kSpecialAttack;			
 			}
 		}
 	}
@@ -56,8 +53,6 @@ void Player::BehaviorAttackInitialize()
 	workAttack.attackAll.max_t = 1;
 	workAttack.comboIndex = 0;
 	
-	//weapon_->SetIsCollider(true);
-	effect_->GetDashEmitter()->SetIsEmit(false);
 	AttackTypes();
 
 	AttackTypeInit(workAttack.comboIndex);
@@ -67,7 +62,7 @@ void Player::BehaviorAttackInitialize()
 
 void Player::BehaviorAttackUpdate()
 {
-	//weapon_->SetIsCollider(true);
+	weapon_->SetIsCollider(true);
 	AttackKey();
 
 	AttackTypes();
@@ -87,13 +82,10 @@ void Player::BehaviorAttackUpdate()
 
 void Player::BehaviorDieInitialize()
 {
-	//weapon_->SetIsCollider(false);
-	effect_->GetDashEmitter()->SetIsEmit(false);
 	bulletSpecial_->SetPhese(0);
 	bulletSpecial_->SetGauge(0);
 	rangeBombingSpecial_->SetPhese(0);
 	rangeBombingSpecial_->SetGauge(0);
-	//objectReticle_.SetIsDraw(true);
 	
 }
 
@@ -104,18 +96,6 @@ void Player::BehaviorDieUpdate()
 	int time = 0;
 
 	ui_->SetIsTextRB(false);
-
-	if (false) {
-		bulletSpecial_->InAction(followCamera_, bulletManager_, lockedOnEnemies);
-
-		if (bulletSpecial_->GetPhese() == 0) {
-			Move();
-			ui_->SetIsTextRB(true);
-		}
-		if (bulletSpecial_->GetPhese() == 2) {
-			behaviorRequest_ = Behavior::kRoot;
-		}
-	}
 
 	
 	rangeBombingSpecial_->InAction(followCamera_, bulletManager_, rangeBombingPos, reticleRad_);
@@ -129,7 +109,7 @@ void Player::BehaviorDieUpdate()
 		rangeBombingPos = objectReticle_->worldtransform_.worldMat_.GetWorldPosition();
 	}
 	if (rangeBombingSpecial_->GetPhese() == 2) {
-		behaviorRequest_ = Behavior::kRoot;
+		basicbehaviorRequest_ = BasicBehavior::kRoot;
 	}
 
 

@@ -124,6 +124,7 @@ public: // 設定or追加
     // コライダー追加
     uint32_t AddCollider(std::unique_ptr<Collider> collider) {
         collider->owner = owner;
+        collider->id = nextId_;
         uint32_t id = nextId_++;
         colliders.push_back({ id, std::move(collider) });
         return id;

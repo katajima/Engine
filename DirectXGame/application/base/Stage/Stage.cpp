@@ -56,19 +56,19 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	tail_->worldtransform_.scale_ = { 4,4,4 };
 	tail_->GetMaterial(0)->transform.scale = { 1,1,1 };
 	tail_->GetMaterial(0)->shininess_ = 64.0f;
-
+	tail_->worldtransform_.Update();
 	// 列車
 	train_ = entity3DManager_->CreateObject3D("train", Object3d::ObjectType::kNormal, { -3111,300,1040 }, camera_);
 	train_->SetModel("train.gltf");
 	train_->worldtransform_.scale_ = { 8,8,8 };
 	train_->GetMaterial(0)->shininess_ = 64.0f;
-
+	train_->worldtransform_.Update();
 	// 船
 	ship_ = entity3DManager_->CreateObject3D("ship", Object3d::ObjectType::kNormal, { -3111,-50,2040 }, camera_);
 	ship_->SetModel("ship.gltf");
 	ship_->worldtransform_.scale_ = { 8,8,8 };
 	ship_->GetMaterial(0)->shininess_ = 64.0f;
-
+	ship_->worldtransform_.Update();
 	// ポイントライト
 	PointLightData pointLightData{};
 	pointLightData.color = { 1,1,1,1 };
@@ -191,6 +191,8 @@ void Stage::InitEmit()
 	emitShipDust_->SetUsebillboardRotZ(true);
 	emitShipDust_->SetRotateMinMax(-Vector3{ 0,0,3.14f }, Vector3{ 0,0,3.14f });
 
+
+	emitTrainDust_->Update();
 
 	emitCloudDust_ = std::make_unique<ParticleEmitter>();
 	emitCloudDust2_ = std::make_unique<ParticleEmitter>();
