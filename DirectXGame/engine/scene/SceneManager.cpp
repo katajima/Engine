@@ -28,6 +28,7 @@ void SceneManager::Update()
 		scene_->SetDirectXCommon(directXCommon_);
 		scene_->SetEntity3DManager(entity3DManager_);
 		entity3DManager_->ObjectClean();
+		entity3DManager_->GetLightManager()->ClearLights();
 		scene_->SetEntity2DManager(entity2DManager_);
 		scene_->Initialize();
 		SetCamera(scene_->GetCamara()); // カメラ情報をもらう

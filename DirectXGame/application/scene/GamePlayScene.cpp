@@ -206,12 +206,12 @@ void GamePlayScene::CheckAllCollisions()
 // ImGui更新
 void GamePlayScene::UpdateImGui()
 {
-
-#ifdef _DEBUG
 	if (input_->IsTriggerKey(DIK_P)) {
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
+#ifdef _DEBUG
+	
 	Vector2 pos = player_->GetObject3D()->GetScreenPosition();
 	ImGui::Begin("engine");
 	ImGui::Checkbox("flag", &flag);

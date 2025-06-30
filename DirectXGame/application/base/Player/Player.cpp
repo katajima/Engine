@@ -116,11 +116,13 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	bulletSpecial_->SetParent(&objectBase_->worldtransform_);
 	bulletSpecial_->SetInput(input);
 
+	// スペシャル攻撃
 	rangeBombingSpecial_ = std::make_unique<RangeBombingSpecial>();
 	rangeBombingSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
 	rangeBombingSpecial_->SetParent(&objectBase_->worldtransform_);
 	rangeBombingSpecial_->SetInput(input);
 
+	// 武器
 	weapon_ = std::make_unique<playerWeapon>();
 	weapon_->Initialize(entity3DManager, camera);
 	weapon_->GetObject3D().worldtransform_.parent_ = &objectBase_->worldtransform_;
@@ -170,8 +172,6 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 	// UI
 	ui_->Initialize(entity2DManager);
-
-
 	/// エフェクト関係
 	effect_->Initialize(entity3DManager_, entity2DManager, camera_);
 	// トレイルエフェクト
@@ -306,13 +306,9 @@ void Player::Update()
 	}
 	// エフェクト
 	effect_->Update();
-	//
-
-
-	weapon_->Update();
-
 	
-	objectBase_->Update();
+	//武器更新
+	weapon_->Update();
 }
 
 #pragma region Draw
