@@ -1,5 +1,5 @@
 #include "GameUI.h"
-#include "DirectXGame/application/base/Player/Player.h"
+#include "DirectXGame/application/base/Character/Player/Player.h"
 
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 

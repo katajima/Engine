@@ -14,7 +14,7 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 
-void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
+void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
 	object3dCommon_ = entity3DManager_->GetObject3dCommon();
@@ -43,22 +43,22 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 
 	switch (objectType)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		objectTypeName = "NormalModelObject";
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		objectTypeName = "AnimationModelObject";
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 		objectTypeName = "SkinningModelObject";
 		break;
-	case Object3d::ObjectType::kPrimitive:
+	case Object3d::ObjectModelType::kPrimitive:
 		objectTypeName = "PrimitiveObject";
 		break;
-	case Object3d::ObjectType::kSkyBox:
+	case Object3d::ObjectModelType::kSkyBox:
 		objectTypeName = "SkyBoxObject";
 		break;
-	case Object3d::ObjectType::kOcean:
+	case Object3d::ObjectModelType::kOcean:
 		objectTypeName = "OceanObject";
 		break;
 	default:
@@ -99,7 +99,7 @@ void Object3d::Update()
 
 	switch (objectType_)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		// モデルが存在する場合
 		if (model) {
 			localMatrix = model->modelData.rootNode.localMatrix;
@@ -112,7 +112,7 @@ void Object3d::Update()
 		// トランスフォームデータ
 		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		// モデルが存在する場合
 		if (model) {
 			// アニメーションの更新
@@ -140,7 +140,7 @@ void Object3d::Update()
 		// トランスフォームデータ
 		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 
 		// モデルが存在する場合
 		if (model) {
@@ -172,21 +172,21 @@ void Object3d::Update()
 		// トランスフォームデータ
 		transformation->UpdateSkinning(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
-	case ObjectType::kPrimitive:
+	case ObjectModelType::kPrimitive:
 		if (primitive_) {
 			primitive_->Update();
 
 			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
-	case ObjectType::kSkyBox:
+	case ObjectModelType::kSkyBox:
 		if (skyBox_) {
 			skyBox_->Update();
 
 			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
-	case ObjectType::kOcean:
+	case ObjectModelType::kOcean:
 		if (ocean_) {
 			ocean_->Update();
 
@@ -223,7 +223,7 @@ void Object3d::Draw()
 
 	switch (objectType_)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		ObjectTypeDiscrimination(rasterizerType_);
 
 		DrawSetting();
@@ -234,7 +234,7 @@ void Object3d::Draw()
 			model->Draw();
 		}
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		ObjectTypeDiscrimination(rasterizerType_);
 
 		DrawSetting();
@@ -245,7 +245,7 @@ void Object3d::Draw()
 			model->Draw();
 		}
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 		ObjectSkinTypeDiscrimination(rasterizerType_);
 
 		DrawSettingSkin();
@@ -255,7 +255,7 @@ void Object3d::Draw()
 			model->DrawSkinning();
 		}
 		break;
-	case ObjectType::kPrimitive:
+	case ObjectModelType::kPrimitive:
 
 
 		if (primitive_) {
@@ -268,7 +268,7 @@ void Object3d::Draw()
 		}
 		break;
 
-	case ObjectType::kSkyBox:
+	case ObjectModelType::kSkyBox:
 
 		if (skyBox_) {
 			skyBoxCommon_->DrawCommonSetting();
@@ -278,7 +278,7 @@ void Object3d::Draw()
 			skyBox_->Draw();
 		}
 		break;
-	case ObjectType::kOcean:
+	case ObjectModelType::kOcean:
 
 		if (ocean_) {
 			oceanManager_->DrawCommonSetting();
@@ -312,22 +312,22 @@ float Object3d::GetAlpha()
 	float a;
 	switch (objectType_)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		a = model->GetMaterialAlfa();
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		a = model->GetMaterialAlfa();
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 		a = model->GetMaterialAlfa();
 		break;
-	case Object3d::ObjectType::kPrimitive:
+	case Object3d::ObjectModelType::kPrimitive:
 		a = primitive_->GetMaterial()->color.a;
 		break;
-	case Object3d::ObjectType::kSkyBox:
+	case Object3d::ObjectModelType::kSkyBox:
 		a = skyBox_->GetMaterial()->color.a;
 		break;
-	case Object3d::ObjectType::kOcean:
+	case Object3d::ObjectModelType::kOcean:
 		a = ocean_->GetMaterial()->color.a;
 		break;
 	default:

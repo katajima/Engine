@@ -20,15 +20,14 @@
 
 
 // application
-#include"DirectXGame/application/base/Character/BaseCharacterManeger.h"
-//#include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
-//#include"DirectXGame/application/base/Player/Player.h"
+#include"DirectXGame/application/base/BaseClass/Character/BaseCharacterManeger.h"
+
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
-#include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
-#include"DirectXGame/application/base/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
-#include"DirectXGame/application/base/Bullet/BulletManager.h"
+#include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
 
 
 #include "DirectXGame/engine/base/Timer.h"

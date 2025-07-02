@@ -40,7 +40,7 @@ public:
 	};
 
 	// オブジェクトのタイプを指定する
-	enum class ObjectType { // オブジェクト種類
+	enum class ObjectModelType { // オブジェクト種類
 		kNormal,	// モデルを描画するオブジェクト
 		kAnimation,	// モデルをアニメーション描画するオブジェクト
 		kSkinning,	// モデルをスキニング描画するオブジェクト
@@ -58,7 +58,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, ObjectType objectType = ObjectType::kNormal, ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+	void Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 	// 更新(アニメーション無し)
 	void Update();
 
@@ -142,7 +142,7 @@ public:
 
 	std::string GetObjectTypeName() { return objectTypeName; }
 
-	ObjectType GetObjectType() { return objectType_; }
+	ObjectModelType GetObjectType() { return objectType_; }
 
 	ObjectDrawType GetObjectDrawType() { return objectDrawType_; }
 
@@ -214,7 +214,7 @@ private:
 
 
 	// オブジェクトのタイプ
-	ObjectType objectType_ = ObjectType::kNormal;
+	ObjectModelType objectType_ = ObjectModelType::kNormal;
 
 	// オブジェクトの描画順
 	ObjectDrawType objectDrawType_ = ObjectDrawType::kOpaque;

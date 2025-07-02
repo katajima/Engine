@@ -314,7 +314,7 @@ void TestScene::InitializeObject3D()
 
 
 	oceanObject = std::make_unique<Object3d>();
-	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kOcean);
+	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kOcean);
 	oceanObject->SetCamera(camera.get());
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
@@ -323,7 +323,7 @@ void TestScene::InitializeObject3D()
 	oceanObject->SetIsDraw(false);
 	
 	skinningObject = std::make_unique<Object3d>();
-	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
+	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkinning);
 	skinningObject->SetModel("iku.gltf");
 	skinningObject->worldtransform_.translate_ = { 30,1,1 };
 	skinningObject->worldtransform_.scale_ = { 10,10,10 };
@@ -333,7 +333,7 @@ void TestScene::InitializeObject3D()
 
 
 	skinningObject2 = std::make_unique<Object3d>();
-	skinningObject2->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkinning);
+	skinningObject2->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkinning);
 	skinningObject2->SetModel("walk.gltf");
 	skinningObject2->worldtransform_.translate_ = { -30,10,1 };
 	skinningObject2->worldtransform_.scale_ = { 10,10,10 };
@@ -342,7 +342,7 @@ void TestScene::InitializeObject3D()
 	skinningObject2->SetIsDraw(false);
 
 	skinningObject3 = std::make_unique<Object3d>();
-	skinningObject3->Initialize(GetEntity3DManager(), Object3d::ObjectType::kNormal);
+	skinningObject3->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kNormal);
 	skinningObject3->SetModel("d.gltf");
 	skinningObject3->worldtransform_.translate_ = { -30,10,1 };
 	skinningObject3->worldtransform_.scale_ = { 10,10,10 };
@@ -405,7 +405,7 @@ void TestScene::InitializeObject3D()
 
 	
 	skyBoxObject = std::make_unique<Object3d>();
-	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
+	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkyBox);
 	skyBoxObject->SetSkyBox(skyBox.get());
 	skyBoxObject->SetCamera(camera.get());
 	skyBoxObject->worldtransform_.scale_ = {10,10,10};
@@ -414,7 +414,7 @@ void TestScene::InitializeObject3D()
 	
 	
 	skyBoxObject2 = std::make_unique<Object3d>();
-	skyBoxObject2->Initialize(GetEntity3DManager(), Object3d::ObjectType::kSkyBox);
+	skyBoxObject2->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkyBox);
 	skyBoxObject2->SetSkyBox(skyBox2.get());
 	skyBoxObject2->SetCamera(camera.get());
 	skyBoxObject2->worldtransform_.scale_ = {1,1,1};

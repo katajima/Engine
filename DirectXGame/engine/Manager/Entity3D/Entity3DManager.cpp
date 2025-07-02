@@ -99,7 +99,7 @@ void Entity3DManager::UpdateImgui()
 			std::string nameMaterial = "";
 			std::string nameMesh = "";
 
-			if (entity->GetObjectType() == Object3d::ObjectType::kSkyBox) {
+			if (entity->GetObjectType() == Object3d::ObjectModelType::kSkyBox) {
 				material = entity->skyBox_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -113,7 +113,7 @@ void Entity3DManager::UpdateImgui()
 				}
 
 			}
-			else if (entity->GetObjectType() == Object3d::ObjectType::kPrimitive) {
+			else if (entity->GetObjectType() == Object3d::ObjectModelType::kPrimitive) {
 				material = entity->primitive_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -127,7 +127,7 @@ void Entity3DManager::UpdateImgui()
 				}
 
 			}
-			else if (entity->GetObjectType() == Object3d::ObjectType::kOcean) {
+			else if (entity->GetObjectType() == Object3d::ObjectModelType::kOcean) {
 				material = entity->ocean_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -190,7 +190,7 @@ void Entity3DManager::UpdateImgui()
 				entity->GetOcean()->UpdateImgui();
 			}
 
-			if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {
+			if (entity->GetObjectType() == Object3d::ObjectModelType::kSkinning) {
 				entity->DebugImguiSkin();
 			}
 		}

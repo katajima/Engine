@@ -44,7 +44,7 @@ public: //セッター
 	//void SetEntity3D(std::unique_ptr<Object3d> entity3D);
 
 	// オブジェクト3D生成
-	Object3d* CreateObject3D(const std::string& name, Object3d::ObjectType type, const Vector3& pos, Camera* camera) {
+	Object3d* CreateObject3D(const std::string& name, Object3d::ObjectModelType type, const Vector3& pos, Camera* camera) {
 		auto object = std::make_unique<Object3d>();
 		object->Initialize(this, type);
 		object->SetName(name);
@@ -70,7 +70,7 @@ public: //セッター
 
 		// Object3d 生成
 		auto object = std::make_unique<Object3d>();
-		object->Initialize(this, Object3d::ObjectType::kPrimitive, rasterizerType);
+		object->Initialize(this, Object3d::ObjectModelType::kPrimitive, rasterizerType);
 		object->SetName(name);
 		object->SetCamera(camera);
 		object->SetPrimitive(std::move(primitive)); // 所有権を渡す

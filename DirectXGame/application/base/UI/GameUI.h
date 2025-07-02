@@ -1,5 +1,5 @@
 #pragma once
-#include "BaseUI.h"
+#include "DirectXGame/application/base/BaseClass/UI/BaseUI.h"
 
 class BasePlayer;
 class GameUI : public BaseUI
