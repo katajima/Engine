@@ -192,7 +192,7 @@ void NormalEnemy::Draw2D()
 	}
 }
 
-void NormalEnemy::SetPlayer(Player* player)
+void NormalEnemy::SetPlayer(BasePlayer* player)
 {
 	player_ = player; 
 }

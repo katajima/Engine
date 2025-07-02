@@ -89,17 +89,17 @@ void GameUI::Draw()
 	icon_B->Draw();
 	//icon_Y->Draw();
 	//icon_X->Draw();
-	if (player_->GetIsSpecial()) {
+	//if (player_->GetIsSpecial()) {
 		icon_RT->Draw();
 		text_special->Draw();
-	}
+	//}
 	text_normal->Draw();
 	//text_jump->Draw();
 	//text_dash->Draw();
 	text_hit->Draw();
 
 
-	int adsbhads = player_->GetHitCount();
+	int adsbhads = 0;// player_->GetHitCount();
 	if (adsbhads >= 999) {
 		adsbhads = 999;
 	}
@@ -119,7 +119,7 @@ void GameUI::Draw()
 	}
 }
 
-void GameUI::SetPlayer(Player* player)
+void GameUI::SetPlayer(BasePlayer* player)
 {
 	player_ = player;
 }

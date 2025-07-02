@@ -9,7 +9,7 @@
 
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 
-class Player;
+class BasePlayer;
 class BaseEnemy;
 class Entity3DManager;
 class Entity2DManager;
@@ -63,7 +63,7 @@ public:
 	// オブジェクト
 	Object3d* GetObject3D() { return object_; }
 	//
-	void SetPlayer(Player* player);
+	void SetPlayer(BasePlayer* player);
 
 	void SetEnemy(BaseEnemy* enemy);
 
@@ -99,7 +99,7 @@ protected:
 	} targetRange_;
 
 protected:
-	Player* player_;
+	BasePlayer* player_;
 	BaseEnemy* enemy_;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;

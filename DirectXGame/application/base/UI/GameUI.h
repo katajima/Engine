@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseUI.h"
 
-class Player;
+class BasePlayer;
 class GameUI : public BaseUI
 {
 public:
@@ -12,7 +12,7 @@ public:
 
 	void Draw() override;
 
-	void SetPlayer(Player* player);
+	void SetPlayer(BasePlayer* player);
 
 private:
 	std::unique_ptr<Sprite> icon_X;
@@ -32,7 +32,7 @@ private:
 
 
 private:
-	Player* player_;
+	BasePlayer* player_;
 
 };
 

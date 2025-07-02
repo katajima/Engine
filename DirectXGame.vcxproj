@@ -108,21 +108,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Player\Base\BasePlayer.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\BaseCharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Special\BaseSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Enemy\Base\EnemyManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\BasePlayerState.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Player\Base\PlayerManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Bullet\PlayerMissile.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Bullet\PlayerRangeBombingBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Effect\PlayerEffect.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Player\Normal\NormalPlayer.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\Player.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerAttack.cpp" />
     <ClCompile Include="DirectXGame\application\base\Player\PlayerBehavior.cpp" />
@@ -608,7 +605,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseObject.h" />
     <ClInclude Include="DirectXGame\application\base\Character\BaseCharacter.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\BaseCharacterManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Character\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackType.h" />
@@ -619,15 +618,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\BaseBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\BulletManager.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.h" />
-    <ClInclude Include="DirectXGame\application\base\Enemy\Base\EnemyManager.h" />
     <ClInclude Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Player\BasePlayerState.h" />
-    <ClInclude Include="DirectXGame\application\base\Player\Base\PlayerManager.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Bullet\PlayerMissile.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Effect\PlayerEffect.h" />
-    <ClInclude Include="DirectXGame\application\base\Player\Normal\NormalPlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Player.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Special\RangeBombingSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\Player\Weapon\playerWeapon.h" />

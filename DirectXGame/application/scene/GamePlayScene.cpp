@@ -3,8 +3,11 @@
 #include <corecrt_math_defines.h>
 #include <algorithm>
 
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
 #pragma region Initialize
 
@@ -25,76 +28,67 @@ void GamePlayScene::Initialize()
 	// オブジェクト3D
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
-	// プレイヤー
-	player_ = std::make_unique<Player>();
-	player_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), Vector3(0, 2, -40), camera.get());
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit " , "Player");
-	debugTimer_.StartTimer();
+
+	caracterManager_ = std::make_unique<BaseCharacterManager>();
+	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), camera.get());
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
-	followCamera_->SetTarget(player_->GetObject3D());
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ",  "InitFollowCamera");
-	debugTimer_.StartTimer();
+	caracterManager_->SetFollowCamera(followCamera_.get());
+
+	// プレイヤー生成
+	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+
+
+	// プレイヤー
+	//player_ = std::make_unique<Player>();
+	//player_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), Vector3(0, 2, -40), camera.get());
+	
+	followCamera_->SetTarget(caracterManager_->GetPlayer()->GetObject3D());
+
+
 
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
 	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ", "universeCamera");
-	debugTimer_.StartTimer();
+
 
 	
-	player_->SetCamera(camera.get());
-	player_->SetFollowCamera(followCamera_.get());
-
-	// 敵マネージャ
-	enemyManager_ = std::make_unique<EnemyManager>();
-	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(),GetGlobalVariables(), camera.get());
-	enemyManager_->SetPlayer(player_.get());
-
+	
+	
+	
 	for (int i = 0; i < 10; i++) {
 
 		Vector3 rand = Random::RandomVector3(-100, 100);
 		rand.y = 2;
-		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, rand + Vector3{0,0,10});
+		caracterManager_->CreateCharacter(EnemyType::kNormal,"", rand + Vector3{0,0,10});
 	}
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ", "enemy");
-	debugTimer_.StartTimer();
-
 
 
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
-	player_->GetRangeBombingSpecial()->SetStage(stage_.get());
+	caracterManager_->GetPlayer()->GetRangeBombingSpecial()->SetStage(stage_.get());
 
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ", "stage");
-	debugTimer_.StartTimer();
 
 
 	// 弾
 	bulletManager_ = std::make_unique<BulletManager>();
 	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
-	bulletManager_->SetPlayer(player_.get());
+	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
 
-	player_->SetBulletManager(bulletManager_.get());
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ", "bulletManager");
-	debugTimer_.StartTimer();
+
+
+	caracterManager_->GetPlayer()->SetBulletManager(bulletManager_.get());
+
+
 
 	// 衝突マネージャの生成
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ", "collisionManager");
-	debugTimer_.StartTimer();
+
 
 	InitializeResources();
 
@@ -132,11 +126,8 @@ void GamePlayScene::InitializeResources()
 
 
 	gameUI->Initialize(GetEntity2DManager());
-	gameUI->SetPlayer(player_.get());
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ", "gameUI");
-	debugTimer_.StartTimer();
-
+	gameUI->SetPlayer(caracterManager_->GetPlayer());
+	
 
 
 
@@ -161,9 +152,7 @@ void GamePlayScene::InitializeResources()
 	directional->directional = directionalLightData;
 
 	GetEntity3DManager()->GetLightManager()->AddLight(directional);
-	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("GamePlaySceneInit ", "Light");
-	debugTimer_.StartTimer();
+	
 
 }
 
@@ -179,17 +168,17 @@ void GamePlayScene::CheckAllCollisions()
 	collisionManager_->Clear();
 
 	// プレイヤーコライダーセット
-	collisionManager_->Register(player_->GetColliderComponent());
+	//collisionManager_->Register(player_->GetColliderComponent());
 
 	// 敵コライダーセット
-	for (auto enemy : enemyManager_->GetEnemys()) {
+	for (auto enemy : caracterManager_->GetCharacters()) {
 		if (enemy->GetHP() <= 0) continue;
 		collisionManager_->Register(enemy->GetColliderComponent());
 	}
 	// 武器コライダコンセット
-	if (player_->GetBehavior() == BasicBehavior::kAttack) {
+	if (caracterManager_->GetPlayer()->GetBasicBehavior() == BasicBehavior::kAttack) {
 		
-		collisionManager_->Register(player_->GetWeapon()->GetColliderComponent());
+		collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
 	}
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
@@ -211,19 +200,12 @@ void GamePlayScene::UpdateImGui()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
-	if(enemyManager_->GetEnemys().size() <= 0 || !player_->GetAlive()) {
+	if(caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
 
 #ifdef _DEBUG
-	
-	Vector2 pos = player_->GetObject3D()->GetScreenPosition();
-	ImGui::Begin("engine");
-	ImGui::Checkbox("flag", &flag);
-	ImGui::DragFloat2("screenpos", &pos.x, 0.1f);
-	ImGui::End();
-
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
@@ -303,25 +285,25 @@ void GamePlayScene::Update()
 
 	// プレイヤー
 	//if (player_->GetAlive()) {
-	player_->Update();
-	player_->LockOn(enemyManager_->GetEnemys());
+	//player_->Update();
+	//player_->LockOn(enemyManager_->GetEnemys());
 	//}
 
 #ifdef _DEBUG
 	ImGui::Begin("Debug");
 	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
 	if (ImGui::Button("ADDEnemy")) {
-		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, enemyPosition);
+		caracterManager_->CreateCharacter(EnemyType::kNormal,"", enemyPosition);
 	}
 	ImGui::Checkbox("isUniverseCamera", &isUniverseCamera);
 	ImGui::End();
 #endif // _DEBUG
 
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-		player_->GetRangeBombingSpecial()->SetGauge(100);
+		//player_->GetRangeBombingSpecial()->SetGauge(100);
 	}
 
-	if (player_->GetRangeBombingSpecial()->IsAction()) {
+	if (caracterManager_->GetPlayer()->GetRangeBombingSpecial()->IsAction()) {
 		timer = 0.0f;
 		isUniverseCamera = true;
 
@@ -403,7 +385,7 @@ void GamePlayScene::BehaviorPhase1Initialize()
 void GamePlayScene::BehaviorPhase1Update()
 {
 
-	enemyManager_->Update();
+	caracterManager_->Update();
 
 }
 
@@ -449,16 +431,9 @@ void GamePlayScene::Draw2D()
 	gameUI->Draw();
 
 	// 敵スプライト
-	enemyManager_->Draw2D();
+	caracterManager_->Draw2D();
 
 	bulletManager_->Draw2D();
-
-	// プレイヤースプライト
-	player_->Draw2D();
-
-
-
-
 
 
 

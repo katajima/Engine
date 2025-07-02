@@ -1,14 +1,12 @@
 #pragma once
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/BaseCharacter.h"
-
+#include "DirectXGame/application/base/Player/Base/BasePlayer.h"
 // プレイヤー
 #include"BasePlayerState.h"
-#include"DirectXGame/application/base/Player/Weapon/playerWeapon.h"
 #include "DirectXGame/application/base/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Player/UI/PlayerUI.h"
-#include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
-#include "DirectXGame/application/base/Player/Special/RangeBombingSpecial.h"
+
 #include "DirectXGame/application/base/Player/Attack/PlayerAttackFactory.h"
 
 
@@ -19,9 +17,7 @@
 ///</summary>
 
 class Enemy;
-class FollowCamera;
-class BulletManager;
-class Player : public BaseCharacter{
+class Player : public BasePlayer{
 public:
 
 
@@ -171,10 +167,6 @@ public:
 	
 	Object3d* GetObject3D() { return objectBase_; }
 	
-	
-	playerWeapon* GetWeapon() { return weapon_.get(); }
-
-	BasicBehavior GetBehavior() const { return basicbehavior_; };
 	AttackTypePlay GetAttackType() const { return workAttack.type; };
 
 
@@ -199,23 +191,14 @@ public:
 
 	void SetHitTime() { workAttack.hitTime = 1.5f; }
 
-	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager;};
-
-	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
-
-	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
-
+	
 private:
-	// スペシャル攻撃
-	std::unique_ptr<BulletSpecial> bulletSpecial_;
-	// スペシャル攻撃
-	std::unique_ptr<RangeBombingSpecial> rangeBombingSpecial_;
 	//  プレイヤー用UI
 	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
 	// エフェクト 
 	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
 	// 武器
-	std::unique_ptr<playerWeapon> weapon_;
+	//std::unique_ptr<playerWeapon> weapon_;
 	// 攻撃マネージャー
 	std::unique_ptr<AttackManager> attackManager_;
 	// 攻撃ファクトリー
@@ -231,8 +214,6 @@ private:
 	float moveLimit = 200;					// 移動制限
 	bool isCreativeMode = false;			// クリエイティブモードかどうか
 private:
-	BulletManager* bulletManager_;			// 弾管理
-	FollowCamera* followCamera_;			// フォローカメラ
 	std::vector<BaseEnemy*> lockedOnEnemies;// ロックオンした敵
 };
 

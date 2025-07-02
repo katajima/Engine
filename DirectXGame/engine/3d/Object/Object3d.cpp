@@ -35,7 +35,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 	
 
 
-
+	isTrailEffect = false;
 	isSkin_ = false;
 
 	// オブジェクトタイプ
@@ -297,7 +297,7 @@ void Object3d::Draw()
 
 void Object3d::DrawTrailEffect()
 {
-	if (!isTrailEffect) return;
+	if (isTrailEffect == false) return;
 		// トレイルエフェクトの描画
 		trailEffect_->Draw();
 }

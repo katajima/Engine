@@ -18,16 +18,18 @@
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 
+
 // application
-#include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
-#include"DirectXGame/application/base/Player/Player.h"
+#include"DirectXGame/application/base/Character/BaseCharacterManeger.h"
+//#include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
+//#include"DirectXGame/application/base/Player/Player.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/BulletManager.h"
-#include"DirectXGame/application/base/Player/Base/PlayerManager.h"
+
 
 #include "DirectXGame/engine/base/Timer.h"
 // ゲームプレイシーン
@@ -114,14 +116,13 @@ private:
 	std::shared_ptr<DirectionalLight> directional;
 private:
 	
+
+	std::unique_ptr<BaseCharacterManager> caracterManager_;
+
 	// プレイヤー
-	std::unique_ptr<Player> player_;
+	//std::unique_ptr<Player> player_;
 
-	std::unique_ptr<PlayerManager> playerManager_;
-
-
-	// 敵マネージャ
-	std::unique_ptr<EnemyManager> enemyManager_;
+	
 	Vector3 enemyPosition = Vector3(0, 0, 0);
 
 

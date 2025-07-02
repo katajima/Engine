@@ -20,7 +20,7 @@ float BaseBullet::GetTimer() const
 	return  MyGame::GameTime();
 }
 
-void BaseBullet::SetPlayer(Player* player)
+void BaseBullet::SetPlayer(BasePlayer* player)
 {
 	player_ = player;
 }

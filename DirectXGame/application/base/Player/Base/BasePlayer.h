@@ -1,89 +1,42 @@
 #pragma once
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
+#include "DirectXGame/application/base/Character/BaseCharacter.h"
 
+#include "DirectXGame/application/base/Player/Special/RangeBombingSpecial.h"
+#include "DirectXGame/application/base/Player/Special/BulletSpecial.h"
+#include"DirectXGame/application/base/Player/Weapon/playerWeapon.h"
 
 class FollowCamera;
-class DirectXCommon;
-class Entity3DManager;
-class Entity2DManager;
 class BulletManager;
-class BasePlayer
+class BasePlayer : public BaseCharacter
 {
 public:
-	struct Parameters {
-		float HP;			// HP
-		float MaxHP;		// HPMAX
-		float moveSpeed;	// 移動速度
-	};
+	// 初期化
+	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
 
-	///< summary>
-	/// 初期化
-	///</summary>
-	virtual void Initialize(Input* input,DirectXCommon* dxcommon, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
-
-	///< summary>
-	/// 更新
-	///</summary>
+	// 毎フレーム更新
 	virtual void Update() = 0;
 
-	///< summary>
-	/// 描画
-	///</summary>
-	virtual void Draw() = 0;
+	virtual void DrawEffect() = 0;
 
-	virtual void DrawP()= 0;
+	virtual void Draw2D() = 0;
 
-	virtual void Draw2D()= 0;
-public:
-	// 生存判定
-	bool GetAlive() const { return isAlive_; }
-	// ダメージ
-	void AddDamage(float damage) {
-		parameter_.HP -= damage;
-		if (parameter_.HP <= 0) {
-			parameter_.HP = 0;
-			isAlive_ = false; // 敵が死亡
-		}
-	}
+	// 弾マネージャーの設定
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
+	// フォローカメラの設定
+	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
-	Object3d* GetObject3D() { return object_.get(); }
+	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
-	bool GetInvincible() const { return isInvincible_; }
-
-
-public:
-	
-
-	// シリアルナンバー
-	uint32_t GetSerialNumber() const { return serialNumber; }
-
+	playerWeapon* GetWeapon() { return weapon_.get(); }
 protected:
-	// オブジェクト
-	std::unique_ptr<Object3d> object_ = std::make_unique<Object3d>();
+	// スペシャル攻撃
+	std::unique_ptr<BulletSpecial> bulletSpecial_;
+	// スペシャル攻撃
+	std::unique_ptr<RangeBombingSpecial> rangeBombingSpecial_;
+	// 武器
+	std::unique_ptr<playerWeapon> weapon_;
 
-	
-	// シリアルナンバー
-	uint32_t serialNumber = 0;
-
-	bool isAlive_ = true;
-	bool isInvincible_ = false;
-
-	Parameters parameter_;
-	// 移動
-	Vector3 velocity_;
-
-	
-protected:
-	DirectXCommon* dxCommon_;
-	FollowCamera* followCamera_;
-	Entity3DManager* entity3DManager_;
-	Entity2DManager* entity2DManager_;
-	Camera* camera_ = nullptr;
-	Input* input_;
-
-private:
-
+	BulletManager* bulletManager_;			// 弾管理
+	FollowCamera* followCamera_;			// フォローカメラ
 };
 

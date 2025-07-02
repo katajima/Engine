@@ -10,7 +10,7 @@
 
 
 
-class Player;
+class BasePlayer;
 class BaseEnemy;
 class Entity3DManager;
 class Entity2DManager;
@@ -34,7 +34,7 @@ public:
 
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera);
-	void SetPlayer(Player* player) { player_ = player; };
+	void SetPlayer(BasePlayer* player) { player_ = player; };
 
 
 	// 更新
@@ -63,7 +63,7 @@ private:
 
 
 private:
-	Player* player_;
+	BasePlayer* player_;
 	Camera* camera_;						// カメラ
 	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
 	Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理

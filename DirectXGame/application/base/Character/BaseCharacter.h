@@ -33,6 +33,11 @@ public:
 	/// </summary>
 	virtual void Draw2D() = 0;
 
+public:
+
+	// キャラクタータイプ設定
+	void SetCharacterType(CharacterType type) { characterData_.characterType_ = type; }
+
 public: // 取得系関数
 
 	// オブジェクト3d取得
@@ -54,6 +59,9 @@ public: // 取得系関数
 	float GetHP() const { return characterData_.parameters_.HP.value; }
 
 	BasicBehavior GetBasicBehavior() const { return basicbehavior_; }
+
+	// キャラクター取得
+	CharacterType GetCharacterType() const { return characterData_.characterType_; }
 
 protected: // 取得系関数(変更可能)
 	// 基本パラメータ
@@ -121,6 +129,8 @@ public:
 protected:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d
 	CharacterData characterData_;	// キャラクターデータ
+
+
 	// 振るまい
 	BasicBehavior basicbehavior_ = BasicBehavior::kRoot; 
 	// 次の振るまいリクエスト

@@ -121,8 +121,25 @@ enum class RootBehavior {
 };
 
 
+// 敵キャラクターの種類を定義する列挙型
+enum class EnemyType
+{
+	kNormal,	// 通常
+	kBullet,	// 弾撃ち
+	kAttacker,	// アタッカー 
+	kTank,		// タンク
+	kElite,     // エリート
+	kBoss,		// ボス 
+};
 
-
+// プレイヤーキャラクターの種類を定義する列挙型
+enum class PlayerType
+{
+	kNormal,	// 通常
+	kBullet,	// 弾撃ち
+	kAttacker,	// アタッカー 
+	kTank,		// タンク
+};
 
 // キャラクターデータの基底クラス
 class CharacterData
@@ -133,6 +150,7 @@ public:
 
 public:
 	Situation situation_;			// キャラクターの状況
+	CharacterType characterType_ = CharacterType::None;	// キャラクターの種類
 	BasicParameters parameters_;	// 基本パラメータ
 	Vector3 velocity_ = {};			// キャラクターの速度
 	Vector3 acceleration_ = {};		// キャラクターの加速度

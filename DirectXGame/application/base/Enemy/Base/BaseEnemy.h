@@ -4,7 +4,7 @@
 
 #include "DirectXGame/application/base/Character/BaseCharacter.h"
 
-class Player;
+class BasePlayer;
 class Entity3DManager;
 class Entity2DManager;
 class BaseEnemy : public BaseCharacter {
@@ -25,7 +25,7 @@ public:
 
 	virtual void Draw2D() = 0;
 
-	virtual void SetPlayer(Player* player) = 0;
+	virtual void SetPlayer(BasePlayer* player) = 0;
 
 public:
 	// パーティクル発生
@@ -53,6 +53,12 @@ public:
 
 	void SetID(uint32_t id) { id_ = id; }
 	bool  GetDelete() const { return isDelete; };
+
+	// 敵タイプ取得
+	EnemyType GetType() const { return type_; };
+	// 敵タイプ設定
+	void SetType(EnemyType type) { type_ = type; };
+
 protected:
 	// 時間
 	float Timer() const;
@@ -67,6 +73,9 @@ protected:
 
 	void Delete() { isDelete = true; };
 protected:
+	EnemyType type_ = EnemyType::kNormal; // 敵の種類
+
+
 	uint32_t id_ = 0; // ID
 
 	// オブジェクト
@@ -90,5 +99,5 @@ protected: //2D
 	std::unique_ptr<Sprite> hpBer_;
 	std::unique_ptr<Sprite> backHpBer_;
 protected:
-	Player* player_;
+	BasePlayer* player_;
 };

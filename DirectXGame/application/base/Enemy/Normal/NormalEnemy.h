@@ -15,7 +15,7 @@ public:
 	//
 	void Draw2D() override;
 
-	void SetPlayer(Player* player) override;
+	void SetPlayer(BasePlayer* player) override;
 
 	void Emit() override;
 
