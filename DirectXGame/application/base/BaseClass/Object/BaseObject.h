@@ -5,6 +5,7 @@
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
+#include"DirectXGame/engine/audio/Audio.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleEmitter.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
 
@@ -79,5 +80,5 @@ protected: // 貰ってくるもの
 	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
 	Camera* camera_ = nullptr;						// カメラ
 	Input* input_ = nullptr;						// 入力(使わないならnullptr)
-
+	Audio* audio_ = nullptr;
 };

@@ -5,7 +5,7 @@
 
 
 #include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Player/Player.h"
+#include "DirectXGame/application/base/Character/Player/Player.h"
 
 #include "DirectXGame/engine/math/random.h"
 

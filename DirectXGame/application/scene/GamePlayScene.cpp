@@ -38,25 +38,13 @@ void GamePlayScene::Initialize()
 
 	// プレイヤー生成
 	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
-
-
-	// プレイヤー
-	//player_ = std::make_unique<Player>();
-	//player_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), Vector3(0, 2, -40), camera.get());
-	
+	// 追従カメラtarget設定
 	followCamera_->SetTarget(caracterManager_->GetPlayer()->GetObject3D());
-
-
-
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
 	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 
-
-	
-	
-	
-	
+	// 敵生成(10体)
 	for (int i = 0; i < 10; i++) {
 
 		Vector3 rand = Random::RandomVector3(-100, 100);
@@ -64,15 +52,10 @@ void GamePlayScene::Initialize()
 		caracterManager_->CreateCharacter(EnemyType::kNormal,"", rand + Vector3{0,0,10});
 	}
 
-
-
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
 	caracterManager_->GetPlayer()->GetRangeBombingSpecial()->SetStage(stage_.get());
-
-
-
 	// 弾
 	bulletManager_ = std::make_unique<BulletManager>();
 	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
@@ -326,8 +309,6 @@ void GamePlayScene::Update()
 		universeCamera_->GetViewProjection().transform_.scale.z = minScaleZCamera;
 		isUniverseCamera = false;
 	}
-
-
 	/// レールカメラ
 	// カメラの回転を設定
 	if (flag) {
@@ -355,19 +336,8 @@ void GamePlayScene::Update()
 		camera->UpdateMatrix();
 	}
 
-
-
-
-
-
-
-
 	// 弾マネージャ
 	bulletManager_->Update();
-
-
-	
-
 	// ステージ
 	stage_->Update();
 	// 当たり判定
@@ -414,53 +384,17 @@ void GamePlayScene::Finalize()
 void GamePlayScene::Draw3D()
 {
 	////3Dオブジェクトの描画
-
 	bulletManager_->DrawEffect();
 }
 
 // 2D描画
 void GamePlayScene::Draw2D()
 {
-
-
-	//////////////--------スプライト-----------///////////////////
-
-
-
 	// ゲームUI
 	gameUI->Draw();
-
-	// 敵スプライト
+	// キャラクター
 	caracterManager_->Draw2D();
-
+	// 弾マネージャ
 	bulletManager_->Draw2D();
-
-
-
-	//if (!player_->GetAlive()) {
-	//	sceneCount++;
-	//	if (clock == 1) {
-	//		//text_over->Update();
-	//		//text_over->Draw();
-	//	}
-	//}
-	//else if (count >= enemys_.size()) {
-	//	sceneCount++;
-	//	if (clock == 1) {
-	//		//text_clera->Update();
-	//		//text_clera->Draw();
-	//	}
-	//}
-	//if (sceneCount % 15 == 0) {
-	//	clock *= -1;
-	//}
-
-	//if (sceneCount >= 240) {
-	//	//GetSceneManager()->ChangeScene("TITLE");
-	//}
-
-
-
-
 }
 
