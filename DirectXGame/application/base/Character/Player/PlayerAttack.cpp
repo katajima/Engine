@@ -1,46 +1,44 @@
 #include"Player.h"
+#include "DirectXGame/application/base/BaseClass/Weapon/Weapons.h"
+
 
 // 攻撃更新
 void Player::Attack()
 {
-	//workAttack.parameter++;
-	workAttack.parameter += MyGame::GameTime();
+	weapon_->GetTimer().Update(MyGame::GameTime());
 
 	weapon_->GetObject3D()->SetIsDraw(true);
-	//weapon_->data_
-	float k = 0.5f;
 	switch (workAttack.type)
 	{
 	case AttackTypePlay::kNormal:
-		if (workAttack.parameter >= 5.0f / 60) {
+		if (weapon_->GetTimer().t >= 5.0f / 60) {
 			effect_->SetIsTrail(true);
-
 		}
-		if (workAttack.comboIndex == 0) {
-			if (workAttack.parameter >= 1.0f / 60) {
-				k = 0.1f;
+		if (weapon_->GetCurrentComboCount() == 0) {
+			if (weapon_->GetTimer().t >= 1.0f / 60) {
+				weapon_->SetMovementSpeedMultiplier(0.1f);
 				weapon_->GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * MyGame::GameTime();
 
 			}
-		}if (workAttack.comboIndex == 1) {
-			if (workAttack.parameter >= 1.0f / 60) {
-				k = 0.3f;
+		}if (weapon_->GetCurrentComboCount() == 1) {
+			if (weapon_->GetTimer().t >= 1.0f / 60) {
+				weapon_->SetMovementSpeedMultiplier(0.3f);
 				weapon_->GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * MyGame::GameTime();
 			}
-		}if (workAttack.comboIndex == 2) {
-			if (workAttack.parameter >= 1.0f / 60) {
-				k = 0.4f;
+		}if (weapon_->GetCurrentComboCount() == 2) {
+			if (weapon_->GetTimer().t >= 1.0f / 60) {
+				weapon_->SetMovementSpeedMultiplier(0.4f);
 				weapon_->GetWorldTransform().rotate_.x += DegreesToRadians(16 * 60) * MyGame::GameTime();
 			}
-		}if (workAttack.comboIndex == 3) {
-			if (workAttack.parameter >= 1.0f / 60) {
-				k = 1.5f;
+		}if (weapon_->GetCurrentComboCount() == 3) {
+			if (weapon_->GetTimer().t >= 1.0f / 60) {
+				weapon_->SetMovementSpeedMultiplier(1.5f);
 				weapon_->GetWorldTransform().rotate_.x += DegreesToRadians(16 * 60) * MyGame::GameTime();
 			}
 		}
-		if (workAttack.parameter <= 5.0f / 60) {
+		if (weapon_->GetTimer().t <= 5.0f / 60) {
 
-			Vector3 move(0, 0, k);
+			Vector3 move(0, 0, weapon_->GetMovementSpeedMultiplier());
 			// 速度ベクトルを自機の向きに合わせて回転させる
 			move = TransformNormal(move, objectBase_->worldtransform_.worldMat_);
 
@@ -48,11 +46,10 @@ void Player::Attack()
 		}
 		break;
 	case AttackTypePlay::kJump:
-		if (workAttack.parameter >= 1.0f / 60) {
+		if (weapon_->GetTimer().t >= 1.0f / 60) {
 			weapon_->GetWorldTransform().rotate_.x += DegreesToRadians(16 * 180) * MyGame::GameTime();
-			k = 0.2f;
-		
-			Vector3 move(0, 0, k);
+			weapon_->SetMovementSpeedMultiplier(0.2f);
+			Vector3 move(0, 0, weapon_->GetMovementSpeedMultiplier());
 			// 速度ベクトルを自機の向きに合わせて回転させる
 			move = TransformNormal(move, objectBase_->worldtransform_.worldMat_);
 			objectBase_->worldtransform_.translate_ += move;
@@ -72,68 +69,60 @@ void Player::AttackKey()
 		if (rangeBombingSpecial_->GetIsSpecial()) {
 			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 		}
-
-
 		if (workAttack.key.IsNormalAttack) {
 			workAttack.key.IsAttack = true;
-
 		}
-
 	}
-
 }
 
 // コンボするのか
 void Player::SetAttackCombo(WrokAttack& work)
 {
 	//  既定の時間経過で通常行動に戻る
-	work.attackAll.t += MyGame::GameTime();
-	if (work.attackAll.t >= work.attackAll.max_t) {
+	weapon_->AddCurrentTime(MyGame::GameTime());
+	if (weapon_->GetCurrentTimer() >= weapon_->GetAllTime()) {
 		// コンボ継続なら次のコンボに進む
-		if (work.comboNext) {
+		if (weapon_->IsComboNext()) {
 
-			work.attackAll.t = 0;
+			weapon_->ResetCurrentTime();
 
-			workAttack.parameter = 0;
+			weapon_->GetTimer().t = 0;
+			weapon_->GetTimer().maxT = weapon_->GetAllTime();
+
 			// 各パーツの角度などを次のコンボ用に初期化
 
-			work.comboIndex++;
+			weapon_->IncrementCurrentComboCount();
 
 			// 方向
 			Move();
 			// 攻撃タイプ
 			AttackTypes();
 			// 攻撃タイプによって初期化
-			AttackTypeInit(work.comboIndex);
+			AttackTypeInit(weapon_->GetCurrentComboCount());
 
 
 			// コンボフラグをリセット
-			work.comboNext = false;
+			weapon_->SetIsComboNext(false);
 			work.key.IsAttack = false;
 			effect_->SetIsTrail(false);
 			weapon_->ColliderHistoryClear();
 		}
 		else {
 			effect_->SetIsTrail(false);
-			//weapon_->GetObject3D().SetIsDraw(false);
-			basicbehaviorRequest_ = BasicBehavior::kRoot;
-			
+			weapon_->ResetCurrentComboCount();
+			basicbehaviorRequest_ = BasicBehavior::kRoot;	
 		}
 	}
 	else {
 		// コンボ上限に達していない
-		if (workAttack.comboIndex < ComboNum - 1) {
+		if (weapon_->GetCurrentComboCount() < weapon_->GetComboMaxCount() - 1) {
 			if (workAttack.key.IsAttack) {
 				// 攻撃ボタンをトリガーしたら
-					// コンボ有効
-				workAttack.comboNext = true;
-
-
+				// コンボ有効
+				weapon_->SetIsComboNext(true);
 			}
 		}
-
 	}
-
 }
 
 // 攻撃位置初期化
@@ -141,11 +130,7 @@ void Player::AttackTypeInit(int comboIndex)
 {
 	objectBase_->Update();
 	objectReticle_->Update();
-	workAttack.pos.str = objectBase_->GetWorldPosition();
 	weapon_->ColliderHistoryClear();
-
-	// スピード
-	const float k = 30.0f;
 
 	if (workAttack.typeRequest_) {
 		// ふるまいを変更する
@@ -157,25 +142,25 @@ void Player::AttackTypeInit(int comboIndex)
 
 
 			if (comboIndex == 0) {
-				workAttack.attackAll.max_t = 0.3f;
+				weapon_->SetTime(0.0f,0.2f,0.1f);
 				weapon_->GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,0 });
 			}
 			if (comboIndex == 1) {
-				workAttack.attackAll.max_t = 0.3f;
+				weapon_->SetTime(0.0f, 0.2f, 0.1f);
 				weapon_->GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			if (comboIndex == 2) {
-				workAttack.attackAll.max_t = 0.3f;
+				weapon_->SetTime(0.0f, 0.2f, 0.1f);
 				weapon_->GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,-90 });
 			}
 			if (comboIndex == 3) {
-				workAttack.attackAll.max_t = 0.3f;
+				weapon_->SetTime(0.0f, 0.2f, 0.1f);
 				weapon_->GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			break;
 		case AttackTypePlay::kJump:
 			if (comboIndex == 0) {
-				workAttack.attackAll.max_t = 0.5f;
+				weapon_->SetTime(0.0f, 0.4f, 0.1f);
 				weapon_->GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,0 });
 			}
 			break;
@@ -190,7 +175,7 @@ void Player::AttackTypes()
 {
 	if (workAttack.key.IsAttack) {
 		if (workAttack.key.IsNormalAttack) {
-			if (GetSituation().isJumping && workAttack.comboIndex == 0) {
+			if (GetSituation().isJumping && weapon_->GetCurrentComboCount() == 0) {
 				workAttack.typeRequest_ = AttackTypePlay::kJump;
 			}
 			else {

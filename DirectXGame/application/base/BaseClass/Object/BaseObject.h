@@ -8,7 +8,7 @@
 #include"DirectXGame/engine/audio/Audio.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleEmitter.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
-
+#include "DirectXGame/engine/Animation/AnimationData.h"
 
 enum class ObjectType
 {
@@ -53,10 +53,8 @@ public:
 
 	// オブジェクト3d取得
 	Object3d* GetObject3D() { return objectBase_; }
-
-	//
+	// ワールド変換取得
 	WorldTransform& GetWorldTransform() { return objectBase_->worldtransform_; }
-
 	// コライダーコンポーネント取得
 	ColliderComponent* GetColliderComponent() { return objectBase_->GetColliderComponent(); }
 	// コライダー衝突履歴削除
@@ -65,6 +63,8 @@ public:
 	ContactRecord& GetContactRecord() { return objectBase_->GetColliderComponent()->contactRecord_; }
 	// オブジェクトタイプ取得
 	ObjectType GetObjectType() const { return objectType_; }
+	// カメラのビュープロジェクション
+	void SetCamera(Camera* camera) { camera_ = camera; };
 
 protected:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d

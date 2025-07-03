@@ -28,6 +28,13 @@ public:
 	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
 
 	BaseWeapon* GetWeapon() { return weapon_.get(); }
+	// ヒット数の取得
+	int GetHitCount() const { return weapon_->GetHitData().hitCount; }
+	// 攻撃がヒットしたら加算
+	void AddHit() { weapon_->GetHitData().AddHit(); };
+	// ヒットタイマーのリセット
+	void SetHitTime() { weapon_->GetHitData().ResetTimer(); }
+
 protected:
 	// スペシャル攻撃
 	std::unique_ptr<BulletSpecial> bulletSpecial_;

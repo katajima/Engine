@@ -4,7 +4,7 @@
 
 void Player::BehaviorRootInitialize()
 {
-	workAttack.parameter = 0;
+	weapon_->GetTimer().t = 0.0f;
 	
 	effect_->SetIsTrail(false);
 }
@@ -49,13 +49,12 @@ void Player::BehaviorRootUpdate()
 
 void Player::BehaviorAttackInitialize()
 {
-	workAttack.attackAll.t = 0;
-	workAttack.attackAll.max_t = 1;
-	workAttack.comboIndex = 0;
+	weapon_->ResetCurrentTime();
+	weapon_->SetTime(0, 1.0f, 0.0f);
 	
 	AttackTypes();
 
-	AttackTypeInit(workAttack.comboIndex);
+	AttackTypeInit(0);
 
 	
 }
@@ -72,12 +71,6 @@ void Player::BehaviorAttackUpdate()
 	Attack();
 
 	SetAttackCombo(workAttack);
-	
-	float k = 2.5f;
-	Vector3 move(0, 0, k);
-	// 速度ベクトルを自機の向きに合わせて回転させる
-	move = TransformNormal(move, weapon_->GetObject3D()->worldtransform_.worldMat_);
-
 }
 
 void Player::BehaviorDieInitialize()

@@ -260,12 +260,9 @@ void Player::Update()
 	if (GetHP() <= 0) {
 		Situations().isAlive = false;
 	}
-	workAttack.hitTime -= MyGame::GameTime();
-	if (workAttack.hitTime <= 0) {
-		workAttack.hitCount = 0;
-	}
 
-
+	// ヒットデータの更新
+	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 
 
 	// 攻撃開始条件（例：ボタンを押したら）
@@ -334,7 +331,6 @@ void Player::Draw2D()
 	ui_->SetSpecialGaugeSize(static_cast<float>(rangeBombingSpecial_->GetGauge()));
 
 	ui_->Draw();
-
 }
 
 

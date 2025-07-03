@@ -99,7 +99,7 @@ void GameUI::Draw()
 	text_hit->Draw();
 
 
-	int adsbhads = 0;// player_->GetHitCount();
+	int adsbhads =  player_->GetHitCount();
 	if (adsbhads >= 999) {
 		adsbhads = 999;
 	}
