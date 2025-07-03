@@ -25,14 +25,6 @@ public:
 	// パーティクル発生
 	virtual void Emit() = 0;
 	
-	// ダメージ
-	void AddDamage(float damage) {
-		HP() -= damage;
-		if (GetHP() <= 0) {
-			HP() = 0;
-			Situations().isAlive = false; // 敵が死亡
-		}
-	}
 	// ロックオンされているか
 	bool GetLockOn() const { return isLockOn; }
 	// 

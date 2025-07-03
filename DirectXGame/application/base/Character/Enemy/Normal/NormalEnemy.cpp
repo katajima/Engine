@@ -109,6 +109,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 void NormalEnemy::Update()
 {
 	UpdateBaseGetValue();
+	velocity_ = { 0,0,0 };
 	HitStpoTime();
 	if (GetHP() <= 0) {
 		if (GetAlive() == true) {
@@ -222,9 +223,7 @@ void NormalEnemy::Emit()
 	traiEmit_->Update();
 }
 
-void NormalEnemy::ATest()
-{
-}
+
 
 void NormalEnemy::Move()
 {
@@ -240,10 +239,12 @@ void NormalEnemy::Move()
 	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
 
 	// 追跡対象からロックオン対象へのベクトル
-	Vector3 sub = Subtract(lockOnPosition, transBase_.translate_);
+	velocity_ = Subtract(lockOnPosition, transBase_.translate_);
 
 	// Y軸周り角度
-	transBase_.rotate_.y = std::atan2(sub.x, sub.z);
+	transBase_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+
+	//GravityUpdate(Timer(),Situations().isJumping, );
 
 	if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
 

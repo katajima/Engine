@@ -18,8 +18,6 @@ public:
 
 	void Emit() override;
 
-	void ATest();
-
 private:
 	// 移動
 	void Move();

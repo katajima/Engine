@@ -26,20 +26,26 @@ public:
 	virtual void Draw() = 0;
 public:
 
-	// フェーズ
+	// フェーズ取得
 	int GetPhese() const { return phese_; }
+	// フェーズセット
 	void SetPhese(int phese) { phese_ = phese; }
-	//
+	// 最大ゲージ取得
 	void SetMaxGauge(int gauge) { maxGauge_ = gauge; }
+	// ゲージ取得
 	int GetGauge() const { return gauge_; };
+	// ゲージセット
 	void SetGauge(int gauge) { gauge_ = gauge; };
+	// ゲージ追加
 	void AddGauge(int gauge) { gauge_ += gauge; };
 
 
 	// スペシャル
 	bool GetIsSpecial() const { return isSpecial_; }
-	
+	// 入力をセット
 	void SetInput(Input* input) {input_ = input;};
+	// 親子付け
+	void SetParent(WorldTransform* parent) {};
 protected:
 	// ゲージ
 	int gauge_ = 0;

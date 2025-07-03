@@ -63,10 +63,7 @@ void Player::AttackKey()
 {
 	if (input_->IsControllerConnected()) {
 		workAttack.key.IsNormalAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-		if (bulletSpecial_->GetIsSpecial()) {
-			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
-		}
-		if (rangeBombingSpecial_->GetIsSpecial()) {
+		if (special_->GetIsSpecial()) {
 			workAttack.key.IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 		}
 		if (workAttack.key.IsNormalAttack) {

@@ -85,7 +85,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 			GetContactRecord().AddHistory(otherId, nowTime);
 
-			AddDamege(10);
+			AddDamage(10.0f);
 			followCamera_->GetViewProjection().SetShake(0.25f, { 0.1f,0.1f,0.1f });
 		}
 	};
@@ -115,18 +115,11 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	objectBody_.SetName("PlayerBody");
 	objectBody_.worldtransform_.parent_ = &objectBase_->worldtransform_;
 
-
 	// スペシャル攻撃
-	bulletSpecial_ = std::make_unique<BulletSpecial>();
-	bulletSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
-	bulletSpecial_->SetParent(&objectBase_->worldtransform_);
-	bulletSpecial_->SetInput(input);
-
-	// スペシャル攻撃
-	rangeBombingSpecial_ = std::make_unique<RangeBombingSpecial>();
-	rangeBombingSpecial_->Initialize(entity3DManager, entity2DManager, camera_);
-	rangeBombingSpecial_->SetParent(&objectBase_->worldtransform_);
-	rangeBombingSpecial_->SetInput(input);
+	special_ = std::make_unique<RangeBombingSpecial>();
+	special_->Initialize(entity3DManager, entity2DManager, camera_);
+	special_->SetParent(&objectBase_->worldtransform_);
+	special_->SetInput(input);
 
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
@@ -234,29 +227,7 @@ void Player::Update()
 			break;
 		}
 	}
-
-
-
-#ifdef _DEBUG
-	if (GetSituation().isInvincible) {
-		objectBody_.model->modelData.mesh[0]->material->color = { 0,0,1,1 };
-	}
-	else {
-		objectBody_.model->modelData.mesh[0]->material->color = { 1,1,1,1 };
-	}
-
-
-	ImGui::Begin("Debug");
-	if (ImGui::Button("SP")) {
-		bulletSpecial_->SetGauge(100);
-		rangeBombingSpecial_->SetGauge(100);
-	}
-	ImGui::End();
-
-#endif // _DEBUG
-
-
-	rangeBombingSpecial_->Update();
+	special_->Update();
 	if (GetHP() <= 0) {
 		Situations().isAlive = false;
 	}
@@ -274,35 +245,45 @@ void Player::Update()
 
 
 #ifdef _DEBUG
+	if (GetSituation().isInvincible) {
+		objectBody_.model->modelData.mesh[0]->material->color = { 0,0,1,1 };
+	}
+	else {
+		objectBody_.model->modelData.mesh[0]->material->color = { 1,1,1,1 };
+	}
+
+
+	ImGui::Begin("Debug");
+	if (ImGui::Button("SP")) {
+		special_->SetGauge(100);
+	}
+	ImGui::End();
 	ImGui::Begin("trail");
 	Vector3 min = weapon_->GetObject3D()->GetMesh(0)->GetMin();
 	ImGui::InputFloat3("min", &min.x);
 	Vector3 max = weapon_->GetObject3D()->GetMesh(0)->GetMax();
 	ImGui::InputFloat3("max", &max.x);
 	ImGui::InputFloat("HP", &HP());
-
-
 	ImGui::End();
-
 	if (input_->IsTriggerKey(DIK_C)) {
 		if (!isCreativeMode) {
 			isCreativeMode = true;
+			
 		}
 		else {
 			isCreativeMode = false;
 		}
-
 	}
-
 #endif // _DEBUG
 
 
 	// 重力
-	Gravity();
+	GravityUpdate(MyGame::GameTime(),Situations().isJumping,GetAlive());
 	if (!isCreativeMode) {
 		// 移動制限
-		LimitMove();
+		LimitMove(-Vector3{200,200,200},Vector3{200,200,200});
 	}
+	
 	// エフェクト
 	effect_->Update();
 	
@@ -320,15 +301,10 @@ void Player::DrawEffect()
 void Player::Draw2D()
 {
 	ui_->SetHPBerSize(static_cast<float>(HP()));
-	ui_->SetIsTextmax(bulletSpecial_->GetIsSpecial());
-	ui_->SetIsTextRB(bulletSpecial_->GetIsSpecial());
-	ui_->SetSpecialGaugeSize(static_cast<float>(bulletSpecial_->GetGauge()));
-	
 
-
-	ui_->SetIsTextmax(rangeBombingSpecial_->GetIsSpecial());
-	ui_->SetIsTextRB(rangeBombingSpecial_->GetIsSpecial());
-	ui_->SetSpecialGaugeSize(static_cast<float>(rangeBombingSpecial_->GetGauge()));
+	ui_->SetIsTextmax(special_->GetIsSpecial());
+	ui_->SetIsTextRB(special_->GetIsSpecial());
+	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
 	ui_->Draw();
 }
@@ -438,51 +414,6 @@ void Player::Jump()
 			Situations().isJumping = true;
 			Velocity().y += 40.0f; // ジャンプ時の加速度を設定
 		}
-	}
-}
-
-void Player::Gravity() {
-
-	// 重力加速度
-	const float kGravityAcceleration = 9.8f;
-
-	// 加速度ベクトル
-	float accelerationVector = -kGravityAcceleration; // 毎フレームのデルタ時間で重力を適用
-	if (!isCreativeMode) {
-		if(objectBase_->worldtransform_.translate_.y > groundY || Situations().isJumping)
-		Acceleration().y += accelerationVector * MyGame::GameTime();
-		// 加速する
-		Velocity().y += Acceleration().y;
-	}
-	AddMove();
-	// 着地
-	if (objectBase_->worldtransform_.translate_.y <= groundY) {
-		objectBase_->worldtransform_.translate_.y = groundY;
-		Acceleration().y = 0.0f;
-		graVelo = 0;
-		Situations().isJumping = false;
-	}
-}
-
-void Player::AddMove()
-{
-	if (GetAlive())
-		objectBase_->worldtransform_.translate_ += GetVelocity() * MyGame::GameTime();
-}
-
-void Player::LimitMove()
-{
-	if (objectBase_->worldtransform_.translate_.x > moveLimit + 50) {
-		objectBase_->worldtransform_.translate_.x = moveLimit + 50;
-	}
-	if (objectBase_->worldtransform_.translate_.x < -(moveLimit + 50)) {
-		objectBase_->worldtransform_.translate_.x = -(moveLimit + 50);
-	}
-	if (objectBase_->worldtransform_.translate_.z > (moveLimit + 50)) {
-		objectBase_->worldtransform_.translate_.z = (moveLimit + 50);
-	}
-	if (objectBase_->worldtransform_.translate_.z < -(moveLimit + 50)) {
-		objectBase_->worldtransform_.translate_.z = -(moveLimit + 50);
 	}
 }
 

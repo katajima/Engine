@@ -55,7 +55,8 @@ void GamePlayScene::Initialize()
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
-	caracterManager_->GetPlayer()->GetRangeBombingSpecial()->SetStage(stage_.get());
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
+	sp->SetStage(stage_.get());
 	// 弾
 	bulletManager_ = std::make_unique<BulletManager>();
 	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
@@ -283,23 +284,22 @@ void GamePlayScene::Update()
 #endif // _DEBUG
 
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-		caracterManager_->GetPlayer()->GetRangeBombingSpecial()->SetGauge(100);
+		caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
 	}
 
-	if (caracterManager_->GetPlayer()->GetRangeBombingSpecial()->IsAction()) {
+
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
+	if (sp->IsAction()) {
 		timer = 0.0f;
 		isUniverseCamera = true;
 
 		cameraScaleT += 0.05f;
-
 		if (cameraScaleT >= 1.0f) {
 			cameraScaleT = 1.0f;
 		}
-
 		universeCamera_->GetViewProjection().transform_.scale.z = Lerp(minScaleZCamera, 1.0f, cameraScaleT);
 	}
 	else {
-
 		timer += MyGame::GameTime();
 	}
 

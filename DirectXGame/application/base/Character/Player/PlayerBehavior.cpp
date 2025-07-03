@@ -27,24 +27,13 @@ void Player::BehaviorRootUpdate()
 			basicbehaviorRequest_ = BasicBehavior::kAttack;
 		}
 	}
-	if (bulletSpecial_->GetIsSpecial()) {
-		if (workAttack.key.IsSpecialAttack) {
-			if (recastTime >= MaxRecastTime) {
-				basicbehaviorRequest_ = BasicBehavior::kSpecialAttack;
-			}
-		}
-	}
-
-	if (rangeBombingSpecial_->GetIsSpecial()) {
+	if (special_->GetIsSpecial()) {
 		if (workAttack.key.IsSpecialAttack) {
 			if (recastTime >= MaxRecastTime) {
 				basicbehaviorRequest_ = BasicBehavior::kSpecialAttack;			
 			}
 		}
 	}
-
-
-
 }
 
 void Player::BehaviorAttackInitialize()
@@ -75,11 +64,8 @@ void Player::BehaviorAttackUpdate()
 
 void Player::BehaviorDieInitialize()
 {
-	bulletSpecial_->SetPhese(0);
-	bulletSpecial_->SetGauge(0);
-	rangeBombingSpecial_->SetPhese(0);
-	rangeBombingSpecial_->SetGauge(0);
-	
+	special_->SetPhese(0);
+	special_->SetGauge(0);	
 }
 
 void Player::BehaviorDieUpdate()
@@ -90,18 +76,20 @@ void Player::BehaviorDieUpdate()
 
 	ui_->SetIsTextRB(false);
 
+	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
+
 	
-	rangeBombingSpecial_->InAction(followCamera_, bulletManager_, rangeBombingPos, reticleRad_);
+	rengeSp->InAction(followCamera_, bulletManager_, rangeBombingPos, reticleRad_);
 
 
 	objectReticle_->SetIsDraw(false);
-	if (rangeBombingSpecial_->GetPhese() == 0) {
+	if (special_->GetPhese() == 0) {
 		Move();
 		ui_->SetIsTextRB(true);
 		objectReticle_->SetIsDraw(true);
 		rangeBombingPos = objectReticle_->worldtransform_.worldMat_.GetWorldPosition();
 	}
-	if (rangeBombingSpecial_->GetPhese() == 2) {
+	if (special_->GetPhese() == 2) {
 		basicbehaviorRequest_ = BasicBehavior::kRoot;
 	}
 

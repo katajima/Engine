@@ -28,18 +28,42 @@ public:
 	virtual void Draw2D() = 0;
 
 public:
-
 	// キャラクタータイプ設定
 	void SetCharacterType(CharacterType type) { characterData_.characterType_ = type; }
+
+	// ダメージ
+	void AddDamage(float damage) {
+		HP() -= damage;
+		if (GetHP() <= 0) {
+			HP() = 0;
+			Situations().isAlive = false; // 敵が死亡
+		}
+	}
+
+	// 移動制限
+	void LimitMove(Vector3 min, Vector3 max) {
+		if (objectBase_->worldtransform_.translate_.x > max.x) {
+			objectBase_->worldtransform_.translate_.x = max.x;
+		}
+		if (objectBase_->worldtransform_.translate_.x < min.x) {
+			objectBase_->worldtransform_.translate_.x = min.x;
+		}
+		if (objectBase_->worldtransform_.translate_.z > max.z) {
+			objectBase_->worldtransform_.translate_.z = max.z;
+		}
+		if (objectBase_->worldtransform_.translate_.z < min.z) {
+			objectBase_->worldtransform_.translate_.z = min.z;
+		}
+	};
 
 public: // 取得系関数
 
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return characterData_.situation_.isAlive; };
-
-	// 速度取得
-	Vector3 GetVelocity() const { return characterData_.velocity_; }
-
+	
+	// キャラクターが無敵状態かどうかを取得
+	bool GetInvincible() const { return GetSituation().isInvincible; }
+	
 	// キャラクター状態
 	Situation GetSituation() const { return characterData_.situation_; }
 
@@ -58,10 +82,6 @@ protected: // 取得系関数(変更可能)
 	// キャラクター状態
 	Situation& Situations() { return characterData_.situation_; }
 
-	// 速度
-	Vector3& Velocity() { return characterData_.velocity_; }
-	// 加速度
-	Vector3& Acceleration() { return characterData_.acceleration_; }
 	// HP
 	float& HP() { return characterData_.parameters_.HP.value; } 
 

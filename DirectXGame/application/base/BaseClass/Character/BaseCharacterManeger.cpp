@@ -17,6 +17,7 @@ void BaseCharacterManager::Update()
 	for (auto& character : character_)
 	{
 		character->Update();
+
 	}
 
 	// 死亡したキャラクター(敵)を削除

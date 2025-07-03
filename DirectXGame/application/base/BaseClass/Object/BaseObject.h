@@ -47,7 +47,44 @@ public:
 	/// 2d描画
 	/// </summary>
 	virtual void Draw2D() = 0;
+	
+protected:
+	// 重力更新
+	void GravityUpdate(float deltaTime,bool& is,bool isAlive)
+	{
+		// 加速度ベクトル
+		float accelerationVector = -forceGravity_; // 毎フレームのデルタ時間で重力を適用
+		if (isGravity_) {
+			if (objectBase_->worldtransform_.translate_.y > groundHeight_ || is)
+				Acceleration().y += accelerationVector * deltaTime;
+			// 加速する
+			Velocity().y += Acceleration().y;
+		}
+		AddMove(deltaTime, isAlive); // 移動加算
 
+		Landing(is); // 着地処理
+
+
+	}
+
+	// 移動加算
+	void AddMove(float deltaTime, bool is)
+	{
+		if (is) {
+			objectBase_->worldtransform_.translate_ += GetVelocity() * deltaTime;
+		}
+	};
+
+private:
+	// 着地処理
+	void Landing(bool& is) {
+		// 着地
+		if (objectBase_->worldtransform_.translate_.y <= groundHeight_) {
+			objectBase_->worldtransform_.translate_.y = groundHeight_;
+			Acceleration().y = 0.0f;
+			is = false;
+		}
+	}
 
 public:
 
@@ -66,11 +103,25 @@ public:
 	// カメラのビュープロジェクション
 	void SetCamera(Camera* camera) { camera_ = camera; };
 
+
+	// 速度取得
+	Vector3 GetVelocity() const { return velocity_; }
+	// 速度
+	Vector3& Velocity() { return velocity_; }
+	// 加速度
+	Vector3& Acceleration() { return acceleration_; }
+
 protected:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d
 	ObjectType objectType_ = ObjectType::None; // オブジェクトの種類
-	std::string name_ = ""; // オブジェクト名
-	float timeSpeed_ = 1.0f; // 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	std::string name_ = "";		// オブジェクト名
+	Vector3 velocity_ = {};			// キャラクターの速度
+	Vector3 acceleration_ = {};		// キャラクターの加速度
+	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
+	float isVisible_ = true;	// オブジェクトの可視状態(デフォルトはtrue、falseで非表示)
+	bool isGravity_ = true;		// 重力の有無(デフォルトはtrue、falseで重力を無効化)
+	float forceGravity_ = 9.8f;	// 重力の強さ(デフォルトは9.8f、0.0fで重力を無効化)
+	float groundHeight_ = 2.0f; // 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
 private:
 	
 

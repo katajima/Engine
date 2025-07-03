@@ -152,6 +152,4 @@ public:
 	Situation situation_;			// キャラクターの状況
 	CharacterType characterType_ = CharacterType::None;	// キャラクターの種類
 	BasicParameters parameters_;	// 基本パラメータ
-	Vector3 velocity_ = {};			// キャラクターの速度
-	Vector3 acceleration_ = {};		// キャラクターの加速度
 };

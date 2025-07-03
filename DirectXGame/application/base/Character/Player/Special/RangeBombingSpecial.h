@@ -34,7 +34,7 @@ public:
 
 public:
 
-	void SetParent(WorldTransform* parent);
+	
 
 	void SetStage(Stage* stage);
 

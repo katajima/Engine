@@ -70,7 +70,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		
 
 		player->AddHit();
-		player->AddSP();
+		player->AddSpGauge(1);
 		player->SetHitTime();
 		};
 

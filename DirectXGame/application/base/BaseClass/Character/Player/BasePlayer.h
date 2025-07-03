@@ -25,7 +25,7 @@ public:
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
-	RangeBombingSpecial* GetRangeBombingSpecial() { return rangeBombingSpecial_.get(); }
+	BaseSpecial* GetSpecial() { return special_.get(); }
 
 	BaseWeapon* GetWeapon() { return weapon_.get(); }
 	// ヒット数の取得
@@ -34,12 +34,14 @@ public:
 	void AddHit() { weapon_->GetHitData().AddHit(); };
 	// ヒットタイマーのリセット
 	void SetHitTime() { weapon_->GetHitData().ResetTimer(); }
+	// SPゲージ加算
+	void AddSpGauge(int d) { special_->AddGauge(d); };
+	// SP発動可能？
+	bool GetIsSpecial() const { return special_->GetIsSpecial(); }
 
 protected:
 	// スペシャル攻撃
-	std::unique_ptr<BulletSpecial> bulletSpecial_;
-	// スペシャル攻撃
-	std::unique_ptr<RangeBombingSpecial> rangeBombingSpecial_;
+	std::unique_ptr<BaseSpecial> special_;
 	// 武器
 	std::unique_ptr<BaseWeapon> weapon_;
 

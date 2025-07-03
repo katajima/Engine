@@ -110,29 +110,8 @@ private: // 移動
 	void Move();
 	// ジャンプ
 	void Jump();
-	// 重力
-	void Gravity();
-	// 移動加算
-	void AddMove();
-	// 移動制限
-	void LimitMove();
-
-	float graVelo;     // 重力の速度
-	float groundY = 2; // 地面の高さ
 public:
 	AttackTypePlay GetAttackType() const { return workAttack.type; };
-
-
-	void AddDamege(float da) { HP() -= int(da); };
-
-	void AddSpecial(int d) { rangeBombingSpecial_->AddGauge(d); };
-
-	bool GetInvincible() const { return GetSituation().isInvincible; }
-	
-	bool GetIsSpecial() const { return rangeBombingSpecial_->GetIsSpecial(); }
-
-	void AddSP() { rangeBombingSpecial_->AddGauge(1); };
-
 private:
 	//  プレイヤー用UI
 	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
@@ -150,7 +129,6 @@ private:
 	Object3d* objectReticle_;				// オブジェクトレティクル
 	float reticleRad_ = 100.0f;				// レティクルの半径　　　
 	Vector3 rangeBombingPos{};				// レンジボムの位置
-	float moveLimit = 200;					// 移動制限
 	bool isCreativeMode = false;			// クリエイティブモードかどうか
 private:
 	std::vector<BaseEnemy*> lockedOnEnemies;// ロックオンした敵

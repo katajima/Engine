@@ -103,10 +103,6 @@ void RangeBombingSpecial::InAction(FollowCamera* followCamera, BulletManager* bu
 	}
 }
 
-void RangeBombingSpecial::SetParent(WorldTransform* parent)
-{
-
-}
 
 void RangeBombingSpecial::SetStage(Stage* stage)
 {
