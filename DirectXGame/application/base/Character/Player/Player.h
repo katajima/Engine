@@ -8,6 +8,8 @@
 #include "DirectXGame/application/base/Character/Player/Attack/PlayerAttackFactory.h"
 #include"DirectXGame/application/base/Attack/AttackManager.h"
 
+#include "DirectXGame/application/base/Weapon/playerWeapon.h"
+
 ///< summary>
 /// 自キャラ
 ///</summary>
@@ -15,8 +17,6 @@
 class Enemy;
 class Player : public BasePlayer{
 public:
-
-
 	///< summary>
 	/// 初期化
 	///</summary>
@@ -193,8 +193,8 @@ private:
 	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
 	// エフェクト 
 	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
-	// 武器
-	//std::unique_ptr<playerWeapon> weapon_;
+	
+	
 	// 攻撃マネージャー
 	std::unique_ptr<AttackManager> attackManager_;
 	// 攻撃ファクトリー

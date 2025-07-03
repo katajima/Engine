@@ -6,8 +6,8 @@ void Player::Attack()
 	//workAttack.parameter++;
 	workAttack.parameter += MyGame::GameTime();
 
-	//float t = static_cast<float>(workAttack.parameter) / workAttack.attackAll.max_t;
 	weapon_->GetObject3D()->SetIsDraw(true);
+	//weapon_->data_
 	float k = 0.5f;
 	switch (workAttack.type)
 	{

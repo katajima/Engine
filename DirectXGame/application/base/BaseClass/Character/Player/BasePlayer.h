@@ -3,7 +3,7 @@
 
 #include "DirectXGame/application/base/Character/Player/Special/RangeBombingSpecial.h"
 #include "DirectXGame/application/base/Character/Player/Special/BulletSpecial.h"
-#include"DirectXGame/application/base/Weapon/playerWeapon.h"
+#include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
 
 class FollowCamera;
 class BulletManager;

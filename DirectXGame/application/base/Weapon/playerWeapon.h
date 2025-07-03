@@ -1,9 +1,9 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
+#include "DirectXGame/application/base/BaseClass/Weapon/Weapons.h"
 
 class BasePlayer;
 class Player;
-class PlayerWeapon : public BaseWeapon
+class PlayerWeapon : public SwordWeapon
 {
 public:
 

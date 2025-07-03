@@ -283,7 +283,7 @@ void GamePlayScene::Update()
 #endif // _DEBUG
 
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-		//player_->GetRangeBombingSpecial()->SetGauge(100);
+		caracterManager_->GetPlayer()->GetRangeBombingSpecial()->SetGauge(100);
 	}
 
 	if (caracterManager_->GetPlayer()->GetRangeBombingSpecial()->IsAction()) {

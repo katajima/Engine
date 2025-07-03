@@ -441,7 +441,6 @@ void Player::Jump()
 		if (GetAlive()) {
 			Situations().isJumping = true;
 			Velocity().y += 40.0f; // ジャンプ時の加速度を設定
-			//AddMove();
 		}
 	}
 }

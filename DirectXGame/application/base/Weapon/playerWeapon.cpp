@@ -59,10 +59,10 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		objectBase_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		if (self->id == weaponColliderId_) {
-			enemy->AddDamage(20);
+			enemy->AddDamage(GetDamage());
 			enemy->hitStop(0.2f);
 		}else if(self->id == weaponColliderId2_) {
-			enemy->AddDamage(10);
+			enemy->AddDamage(GetDamage());
 			enemy->hitStop(0.1f);
 		}
 		enemy->SetHit();
@@ -76,6 +76,9 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	
 	
+	SetTime(0.1f, 0.3f, 0.1f); // 武器のアニメーション時間設定
+
+
 	colliderWorld_.Initialize();
 	colliderWorld_.parent_ = &objectBase_->worldtransform_;
 	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
