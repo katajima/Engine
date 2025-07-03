@@ -181,7 +181,7 @@ void Player::Update()
 {
 	UpdateBaseGetValue(); //保存機能 基本値の更新
 
-	if (GetSituation().isAlive) {
+	if (flags_.isAlive) {
 		if (basicbehaviorRequest_) {
 			// ふるまいを変更する
 			basicbehavior_ = basicbehaviorRequest_.value();
@@ -229,7 +229,7 @@ void Player::Update()
 	}
 	special_->Update();
 	if (GetHP() <= 0) {
-		Situations().isAlive = false;
+		flags_.isAlive = false;
 	}
 
 	// ヒットデータの更新
@@ -408,7 +408,7 @@ void Player::Move()
 
 void Player::Jump()
 {
-	if (Situations().isJumping) return; // ジャンプ中は無効化
+	if (Situations().isJumping && flags_.isGrounded) return; // ジャンプ中は無効化
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) { // ジャンプボタンが押されたらジャンプ
 		if (GetAlive()) {
 			Situations().isJumping = true;
@@ -419,10 +419,7 @@ void Player::Jump()
 
 #pragma endregion //移動関係
 
-
 #pragma region MyRegion
-
-
 void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {
 

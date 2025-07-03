@@ -36,7 +36,7 @@ public:
 		HP() -= damage;
 		if (GetHP() <= 0) {
 			HP() = 0;
-			Situations().isAlive = false; // 敵が死亡
+			flags_.isAlive = false; // 敵が死亡
 		}
 	}
 
@@ -59,7 +59,7 @@ public:
 public: // 取得系関数
 
 	// キャラクターの生存状態を取得
-	bool GetAlive() const { return characterData_.situation_.isAlive; };
+	bool GetAlive() const { return flags_.isAlive; };
 	
 	// キャラクターが無敵状態かどうかを取得
 	bool GetInvincible() const { return GetSituation().isInvincible; }

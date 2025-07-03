@@ -67,6 +67,24 @@ struct Vector3 final {
 		return *this;
 	}
 
+	// * 演算子のオーバーロード
+	Vector3& operator*=(const Vector3& other) {
+
+		x *= other.x;
+		y *= other.y;
+		z *= other.z;
+		return *this;
+	}
+
+	// * 演算子のオーバーロード
+	Vector3& operator*=(const float& other)  {
+		
+		x *= other;
+		y *= other;
+		z *= other;
+		return *this;
+	}
+
 	// - 演算子のオーバーロード
 	Vector3 operator-(const Vector3& other) const {
 		return Vector3{ x - other.x, y - other.y, z - other.z };

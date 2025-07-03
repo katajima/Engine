@@ -23,6 +23,18 @@ enum class ObjectType
 	Other,		// その他
 };
 
+struct ObjectStateFlags
+{
+	bool isActive = true;		// アクティブ状態(デフォルトはtrue、falseで非アクティブ)
+	bool isVisible = true;		// 可視状態(デフォルトはtrue、falseで非表示)
+	bool isAlive = true;		// 生存状態(デフォルトはtrue、falseで死亡)
+	bool isDeleted = false;		// 削除状態(デフォルトはfalse、trueで削除済み)
+	bool isInvincible = false;	// 無敵状態(デフォルトはfalse、trueで無敵)
+	bool isGrounded = false;	// 地面に接地しているか(デフォルトはfalse、trueで接地)
+	bool isGravity_ = true;		// 重力の有無(デフォルトはtrue、falseで重力を無効化)
+	bool isLockonTarget = false;// ロックオンターゲット状態(デフォルトはfalse、trueでロックオン対象)
+};
+
 class Entity3DManager;
 class Entity2DManager;
 class BaseObject : public IHitReceiver
@@ -54,23 +66,21 @@ protected:
 	{
 		// 加速度ベクトル
 		float accelerationVector = -forceGravity_; // 毎フレームのデルタ時間で重力を適用
-		if (isGravity_) {
-			if (objectBase_->worldtransform_.translate_.y > groundHeight_ || is)
+		if (flags_.isGravity_) {
+			if (objectBase_->worldtransform_.translate_.y > groundHeight_ || !flags_.isGrounded)
 				Acceleration().y += accelerationVector * deltaTime;
-			// 加速する
-			Velocity().y += Acceleration().y;
 		}
 		AddMove(deltaTime, isAlive); // 移動加算
 
 		Landing(is); // 着地処理
-
-
 	}
 
 	// 移動加算
 	void AddMove(float deltaTime, bool is)
 	{
 		if (is) {
+			velocity_+= Acceleration(); // 加速度を速度に加算
+			velocity_ *= airResistance; // 空気抵抗を適用
 			objectBase_->worldtransform_.translate_ += GetVelocity() * deltaTime;
 		}
 	};
@@ -81,13 +91,23 @@ private:
 		// 着地
 		if (objectBase_->worldtransform_.translate_.y <= groundHeight_) {
 			objectBase_->worldtransform_.translate_.y = groundHeight_;
+			
+			// 着地したら着地フラグを立てる
+			flags_.isGrounded = true;
+			// 着地したら加速度を0にする
 			Acceleration().y = 0.0f;
+			velocity_.y = 0.0f;
 			is = false;
+		}
+		else {
+			// 着地していない着地フラグを下ろす
+			flags_.isGrounded = false;
 		}
 	}
 
 public:
-
+	// オブジェクトの状態フラグ取得
+	ObjectStateFlags GetFlags() const { return flags_; } 
 	// オブジェクト3d取得
 	Object3d* GetObject3D() { return objectBase_; }
 	// ワールド変換取得
@@ -111,15 +131,29 @@ public:
 	// 加速度
 	Vector3& Acceleration() { return acceleration_; }
 
+	// 削除フラグ取得
+	bool  GetDelete() const { return flags_.isDeleted; };
+	// 削除する
+	void Delete() { flags_.isDeleted = true; };
+
+	// ロックオン状態の取得
+	bool GetLockOn() const { return flags_.isLockonTarget; }
+	// ロックオン状態を設定
+	void SetLockOn(bool lock) { flags_.isLockonTarget = lock; }
+protected:
+	// オブジェクトの状態フラグ取得
+	ObjectStateFlags& GetFlags() { return flags_; }
+
 protected:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d
 	ObjectType objectType_ = ObjectType::None; // オブジェクトの種類
 	std::string name_ = "";		// オブジェクト名
-	Vector3 velocity_ = {};			// キャラクターの速度
-	Vector3 acceleration_ = {};		// キャラクターの加速度
+	Vector3 velocity_ = {};		// オブジェクトの速度
+	Vector3 acceleration_ = {};	// オブジェクトの加速度
+	float airResistance = 1.0f; // 空気抵抗(デフォルトは0.0f、1.0fで抵抗なし、0.5fで半分の抵抗など)
+
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
-	float isVisible_ = true;	// オブジェクトの可視状態(デフォルトはtrue、falseで非表示)
-	bool isGravity_ = true;		// 重力の有無(デフォルトはtrue、falseで重力を無効化)
+	ObjectStateFlags flags_;	// 重力の有無(デフォルトはtrue、falseで重力を無効化)
 	float forceGravity_ = 9.8f;	// 重力の強さ(デフォルトは9.8f、0.0fで重力を無効化)
 	float groundHeight_ = 2.0f; // 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
 private:

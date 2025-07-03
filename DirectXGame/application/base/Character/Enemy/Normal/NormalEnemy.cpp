@@ -10,17 +10,13 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	globalVariables_ = globalVariables;
 	CreateGroup("enemy");
 
-	transBase_.Initialize();
-	transBase_.translate_ = position;
-
 	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_), Object3d::ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetModel("enemy2.obj");
-	//objectBase_->worldtransform_.translate_ = position;
-	objectBase_->worldtransform_.parent_ = &transBase_;
+	objectBase_->worldtransform_.translate_ = position;
 	objectBase_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
 	objectBase_->InitColliderComponent();
 	GetColliderComponent()->SetHitReceiver(this);
-	
+
 
 
 	// SphereColliderを追加
@@ -42,15 +38,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					transBase_.translate_ += pushVec;
+					objectBase_->worldtransform_.translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					transBase_.translate_ += pushVec * 0.5f;
-					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
+					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
 				}
 
 				objectBase_->worldtransform_.Update();
@@ -66,15 +61,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					transBase_.translate_ += pushVec;
+					objectBase_->worldtransform_.translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					transBase_.translate_ += pushVec * 0.5f;
-					// ※相手のTransformも取得して -0.5f してあげると対称押し戻しが可能
+					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
 				}
 
 				objectBase_->worldtransform_.Update();
@@ -88,14 +82,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 		};
 
 
-	
-	Situations().isAlive = true;
-	
-	Parameters().HP.Initiaize(100,0,100,0);
 
-	
+	flags_.isAlive = true;
+	airResistance = 0.98f;
+	Parameters().HP.Initiaize(100, 0, 100, 0);
+
+
 	Parameters().speed = 3.0f;
-	
+
 
 	InitializeBaseAddItem();
 
@@ -109,7 +103,6 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 void NormalEnemy::Update()
 {
 	UpdateBaseGetValue();
-	velocity_ = { 0,0,0 };
 	HitStpoTime();
 	if (GetHP() <= 0) {
 		if (GetAlive() == true) {
@@ -119,8 +112,8 @@ void NormalEnemy::Update()
 			gearEmit_->Update();
 			fenceEmit_->Update();
 		}
-		isLockOn = false;
-		Situations().isAlive = false;
+		flags_.isLockonTarget = false;
+		flags_.isAlive = false;
 	}
 
 	if (GetHP() >= 0) {
@@ -161,10 +154,9 @@ void NormalEnemy::Update()
 		}
 	}
 
-	
+
 
 	objectBase_->Update();
-	transBase_.Update();
 }
 
 void NormalEnemy::DrawEffect()
@@ -173,7 +165,7 @@ void NormalEnemy::DrawEffect()
 
 void NormalEnemy::Draw2D()
 {
-	if (isLockOn) {
+	if (flags_.isLockonTarget) {
 		icon_lockOn->SetPosition(objectBase_->GetScreenPosition());
 
 		icon_lockOn->Update();
@@ -182,7 +174,7 @@ void NormalEnemy::Draw2D()
 
 	if (GetAlive()) {
 
-		backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f});
+		backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f });
 		backHpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-30 });
 		backHpBer_->Update();
 		backHpBer_->Draw();
@@ -196,7 +188,7 @@ void NormalEnemy::Draw2D()
 
 void NormalEnemy::SetPlayer(BasePlayer* player)
 {
-	player_ = player; 
+	player_ = player;
 }
 
 void NormalEnemy::Emit()
@@ -227,38 +219,46 @@ void NormalEnemy::Emit()
 
 void NormalEnemy::Move()
 {
-	// 回転と移動量の設定
-	const float kMoveSpeed = Parameters().speed; // 移動速度
-	
-	// 向いている方向への移動ベクトルの計算
-	Vector3 moveDirection = { 0.0f, 0.0f, kMoveSpeed };
-	Matrix4x4 rotationMatrix = MakeRotateYMatrix(transBase_.rotate_.y);
-	moveDirection = TransformNormal(moveDirection, rotationMatrix);
+	if (flags_.isGrounded) {
+		Velocity() = { 0,0,0 };
 
-	// ロックオン座標
-	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
+		// 回転と移動量の設定
+		if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
+			Parameters().speed = 0;
+		}
+		else {
+			Parameters().speed = 3.0f;
+		}
 
-	// 追跡対象からロックオン対象へのベクトル
-	velocity_ = Subtract(lockOnPosition, transBase_.translate_);
+		// 向いている方向への移動ベクトルの計算
+		Vector3 moveDirection = { 0.0f, 0.0f, Parameters().speed };
+		Matrix4x4 rotationMatrix = MakeRotateYMatrix(GetWorldTransform().rotate_.y);
+		moveDirection = TransformNormal(moveDirection, rotationMatrix);
 
-	// Y軸周り角度
-	transBase_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+		// ロックオン座標
+		Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
 
-	//GravityUpdate(Timer(),Situations().isJumping, );
-
-	if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
-
-		// 移動
-		moveDirection.y = 0;
-		transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());
+		// 追跡対象からロックオン対象へのベクトル
+		velocity_ = Subtract(lockOnPosition, GetWorldTransform().translate_);	
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
 	}
+	else {
+		// ロックオン座標
+		Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
+		Vector3 dire = Subtract(lockOnPosition, GetWorldTransform().translate_);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = std::atan2(dire.x, dire.z);
+	}
+
+	GravityUpdate(Timer(), Situations().isJumping, GetAlive());
 }
 
 void NormalEnemy::InitParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
-	
+
 
 	/*dustEmit_ = std::make_unique<ParticleEmitter>();
 	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01_2");
@@ -409,7 +409,7 @@ void NormalEnemy::InitParticle()
 	ductEmit_->Initialize(particleManager, "enemyDuct", "enemyDuct");
 	ductEmit_->GetFrequency() = 0.0f;
 	ductEmit_->SetCount(1);
-	ductEmit_->SetParent(transBase_);
+	ductEmit_->SetParent(GetWorldTransform());
 	ductEmit_->SetPos({ 0,0,0 });
 	ductEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	ductEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -488,26 +488,28 @@ void NormalEnemy::InitParticle()
 
 }
 
-void NormalEnemy::BehaviorRootInitialize() 
+void NormalEnemy::BehaviorRootInitialize()
 {
 	timer_ = rootTimer_;
 }
-void NormalEnemy::BehaviorRootUpdate() 
+
+void NormalEnemy::BehaviorRootUpdate()
 {
 	if (GetHP() > 0) {
 		if (!hit) {
-			count = 0.0f;
+			//count = 0.0f;
 			Move();
-			oldPos_ = { 0,0,0 };
 		}
 		else {
-			oldPos_ = { 0,0,0 };
-			HitMotion();
+			GravityUpdate(Timer(), Situations().isJumping, GetAlive());
+			if (flags_.isGrounded) {
+				hit = false;
+			}
 		}
 
 		timer_ -= Timer();
 
-		if (timer_ <= 0.0f) {
+		if (timer_ <= 0.0f && flags_.isGrounded) {
 			basicbehaviorRequest_ = BasicBehavior::kAttack;
 			timer_ = 0.0f;
 			return;
@@ -517,23 +519,25 @@ void NormalEnemy::BehaviorRootUpdate()
 		basicbehaviorRequest_ = BasicBehavior::kDie;
 	}
 }
+
 void NormalEnemy::BehaviorAttackInitialize()
 {
 	// ロックオン座標
 	lockonPosition_ = player_->GetObject3D()->GetWorldPosition();
 
 	// 追跡対象からロックオン対象へのベクトル
-	subPosition_ = Subtract(lockonPosition_, transBase_.translate_);
+	subPosition_ = Subtract(lockonPosition_, GetWorldTransform().translate_);
 	timer_ = attackTimer_;
 }
-void NormalEnemy::BehaviorAttackUpdate() 
+
+void NormalEnemy::BehaviorAttackUpdate()
 {
 	timer_ -= Timer();
 	Vector3 direct = subPosition_.Normalize() * Timer() * attackSpeed_;
 	direct.y = 0;
-	transBase_.translate_ = Add(transBase_.translate_, direct);
+	GetWorldTransform().translate_ = Add(GetWorldTransform().translate_, direct);
 
-	if(timer_ <= 0.0f) {
+	if (timer_ <= 0.0f) {
 		basicbehaviorRequest_ = BasicBehavior::kRoot;
 		timer_ = 0.0f;
 		return;
@@ -542,6 +546,7 @@ void NormalEnemy::BehaviorAttackUpdate()
 		basicbehaviorRequest_ = BasicBehavior::kDie;
 	}
 }
+
 void NormalEnemy::BehaviorDieInitialize()
 {
 	ductEmit_->Update();
@@ -551,24 +556,25 @@ void NormalEnemy::BehaviorDieInitialize()
 	fenceEmit_->Update();
 	timer_ = dieTimer_;
 }
+
 void NormalEnemy::BehaviorDieUpdate()
 {
 
-	
+
 
 	timer_ -= Timer();
 	if (timer_ <= 0.0f) {
-		Situations().isAlive = false;
+		flags_.isAlive = false;
 		timer_ = 0.0f;
-		if (!Situations().isAlive) {
+		if (!flags_.isAlive) {
 			Delete();
 		}
 	}
-	else if (timer_ <= dieTimer_ /2.0f) {
+	else if (timer_ <= dieTimer_ / 2.0f) {
 		objectBase_->IsDelete();
 	}
 	else {
-		objectBase_->worldtransform_.scale_ -= Vector3(1.1f,1.1f,1.1f) * Timer();
+		objectBase_->worldtransform_.scale_ -= Vector3(1.1f, 1.1f, 1.1f) * Timer();
 		if (objectBase_->worldtransform_.scale_.x <= 0) {
 			objectBase_->worldtransform_.scale_ = Vector3{ 0,0,0 };
 		}

@@ -45,7 +45,7 @@ void GamePlayScene::Initialize()
 	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 
 	// 敵生成(10体)
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 1; i++) {
 
 		Vector3 rand = Random::RandomVector3(-100, 100);
 		rand.y = 2;

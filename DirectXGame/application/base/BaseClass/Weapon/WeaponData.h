@@ -16,6 +16,7 @@ struct WeaponData
 	float attackInterval = 1.0f;		// 攻撃間隔
 	bool isAutomatic = false;			// オート連射(入力しっぱなしで攻撃)可能かのフラグ
 	float knockbackPower = 0.0f;		// ノックバックの力
+	float knockbackYPower = 0.0f;	// ノックバックY距離(敵をどれだけ吹き飛ばすか)
 	float staminaCost = 0;				// スタミナ消費量
 	Timer animetionTimer;				// アニメーションタイマー(攻撃アニメーションの管理用)
 	float currentTime = 0.0f;			// 現在の時間(攻撃開始からの時間)

@@ -12,14 +12,13 @@ float BaseEnemy::Timer() const
 void BaseEnemy::Shake()
 {
 
-	float x = oldPos_.x + float(rand() % 20 - 10);
-	float xShake = float(x) / static_cast<float>(10);
-	float z = oldPos_.z + float(rand() % 20 - 10);
-	float zShake = float(z) / static_cast<float>(10);
-
-
-	objectBase_->worldtransform_.translate_.x = xShake;
-	objectBase_->worldtransform_.translate_.z = zShake;
+	//shakePos_.x = oldPos_.x + float(rand() % 20 - 10);
+	//float xShake = float(shakePos_.x) / static_cast<float>(10);
+	//shakePos_.z = oldPos_.z + float(rand() % 20 - 10);
+	//float zShake = float(shakePos_.z) / static_cast<float>(10);
+	//
+	//objectBase_->worldtransform_.translate_.x = xShake;
+	//objectBase_->worldtransform_.translate_.z = zShake;
 }
 
 void BaseEnemy::HitStpoTime()
@@ -34,44 +33,27 @@ void BaseEnemy::HitStpoTime()
 	}
 
 	if (is) {
-
 		timeSpeed_ = 0.0f;
 		Shake();
 	}
 	else {
-		objectBase_->worldtransform_.translate_ = { 0,0,0 };
 		timeSpeed_ = 1.0f;
 	}
 }
 
 void BaseEnemy::HitMotion()
 {
-	count += Timer();
-
-	if (count >= 0.5f) {
-		hit = false;
-	}
-
-
-	// 回転と移動量の設定
-	const float kMoveSpeed = -45.0f; // 移動速度
-	
-	// 向いている方向への移動ベクトルの計算
-	Vector3 moveDirection = { 0.0f, 0.0f, kMoveSpeed };
-	Matrix4x4 rotationMatrix = MakeRotateYMatrix(transBase_.rotate_.y);
-	moveDirection = TransformNormal(moveDirection, rotationMatrix);
-
 	// ロックオン座標
 	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
 
 	// 追跡対象からロックオン対象へのベクトル
-	Vector3 sub = Subtract(lockOnPosition, transBase_.translate_);
-
+	Vector3 sub = Subtract(lockOnPosition, GetWorldTransform().translate_);
+	Vector3 move = sub.Normalize() * (-hitKnockbackPower);
 	
-	moveDirection.y = 0;
-	// 移動
-	transBase_.translate_ = Add(transBase_.translate_, moveDirection * Timer());
-
+	if (move.y <= hitKonckbackYPower) {
+		move.y = hitKonckbackYPower;
+	}
+	velocity_ = move;
 }
 
 void BaseEnemy::Initialize2D()

@@ -61,13 +61,17 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		if (self->id == weaponColliderId_) {
 			enemy->AddDamage(GetDamage() * 2);
 			enemy->hitStop(GetHitStopTime() * 2);
+			enemy->SetHitKnockbackPower(data_.knockbackPower * 2);
+			enemy->SetHitKkonckbackYPower(data_.knockbackYPower * 2);
 		}else if(self->id == weaponColliderId2_) {
 			enemy->AddDamage(GetDamage());
 			enemy->hitStop(GetHitStopTime());
+			enemy->SetHitKnockbackPower(data_.knockbackPower);
+			enemy->SetHitKkonckbackYPower(data_.knockbackYPower);
 		}
 		enemy->SetHit();
 		enemy->Emit();
-		
+		enemy->HitMotion();
 
 		player->AddHit();
 		player->AddSpGauge(1);
@@ -76,6 +80,8 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	
 	data_.damage = 10; // 武器のダメージ設定
+	data_.knockbackPower = 50.5f; // ノックバックの力設定
+	data_.knockbackYPower = 20.5f; // Y方向のノックバックの力設定
 	SetTime(0.1f, 0.3f, 0.1f); // 武器のアニメーション時間設定
 
 

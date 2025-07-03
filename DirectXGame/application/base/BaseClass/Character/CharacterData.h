@@ -72,7 +72,6 @@ struct BasicParameters
 // キャラクターの状況を定義する構造体
 struct Situation
 {
-	bool isAlive = true;		// 生存フラグ
 	bool isAttacking = false;	// 攻撃中フラグ
 	bool isDefending = false;	// 防御中フラグ
 	bool isMoving = false;		// 移動中フラグ
