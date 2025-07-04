@@ -1,11 +1,48 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
+#include "DirectXGame/application/base/BaseClass/Attack/AttackData.h"
 
 enum class WeaonType
 {
-	MELL, // 近距離武器
+	MELL,	// 近距離武器
 	RANGED, // 遠距離武器
 	Hybrid, // 例えば剣＋銃みたいな特殊系
+};
+
+// 攻撃方法
+enum class  AttackTypePlay
+{
+	kNone = 0,
+	kNormal, // 通常攻撃
+	kJump, // ジャンプ攻撃
+};
+
+// コンボデータ構造体
+struct ComboData 
+{
+	bool isComboWeapon = true;			// コンボ武器かのフラグ(連続攻撃可能かどうか)
+	int comboMaxCount = 3;				// コンボの最大回数
+	int currentComboCount = 0;			// 現在のコンボ回数
+	bool isComboNext = false;			// 次のコンボを受け付けるかのフラグ(コンボ間隔内かどうか)
+
+	// コンボの現在の回数をリセット
+	void ResetCurrentComboCount() {	currentComboCount = 0; }
+	// コンボの現在の回数をインクリメント
+	void IncrementCurrentComboCount() { currentComboCount++; }
+};
+
+
+
+struct AttackMotions 
+{
+	std::string name = "";					// 名前
+	float damage = 0;						// ダメージ 
+	float staminaCost = 0;					// スタミナ消費量
+	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
+	KnockbackData knockbackData{};			// ノックバックデータ
+	ComboMotionData motionData{};			// モーションデータ
+	Vector3 initRotate{};					// 回転初期位置
+	Vector3	rotateSpeed{};					// 回転更新(速度)	
 };
 
 // 遠近どちらにもあるパラメータ持つ武器データ構造体
@@ -13,22 +50,13 @@ struct WeaponData
 {
 	float damage = 0;					// ダメージ 
 	WeaonType type = WeaonType::MELL;	// 武器の種類(遠近)
-	float attackInterval = 1.0f;		// 攻撃間隔
-	bool isAutomatic = false;			// オート連射(入力しっぱなしで攻撃)可能かのフラグ
-	float knockbackPower = 0.0f;		// ノックバックの力
-	float knockbackYPower = 0.0f;	// ノックバックY距離(敵をどれだけ吹き飛ばすか)
-	float staminaCost = 0;				// スタミナ消費量
 	Timer animetionTimer;				// アニメーションタイマー(攻撃アニメーションの管理用)
-	float currentTime = 0.0f;			// 現在の時間(攻撃開始からの時間)
-	float startupTime = 0.1f;			// 発生時間(攻撃開始から当たり判定が出るまでの時間)
-	float attackAnimationTime = 0.5f;	// 攻撃アニメーション時間(攻撃モーションの長さ)
-	float recoveryTime = 0.3f;			// 攻撃後の隙(攻撃モーション終了から次の入力を受け付けるまでの時間)
-	bool canBeInterrupted = true;		// 攻撃中にキャンセル可能かのフラグ
+	bool isAutomatic = false;			// オート連射(入力しっぱなしで攻撃)可能かのフラグ
 	bool isActive = false;				// 武器が有効かどうかのフラグ(攻撃中か)
-	bool isComboWeapon = true;			// コンボ武器かのフラグ(連続攻撃可能かどうか)
-	int comboMaxCount = 3;				// コンボの最大回数
-	int currentComboCount = 0;			// 現在のコンボ回数
-	bool isComboNext = false;				// 次のコンボを受け付けるかのフラグ(コンボ間隔内かどうか)
+	KnockbackData knockbackData{};		// ノックバックデータ
+	ComboMotionData motionData{};		// モーションデータ
+	ComboData comboData{};				// コンボデータ
+	float staminaCost = 0;				// スタミナ消費量
 	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
 };
 
@@ -75,7 +103,6 @@ struct AttackHitData
 
 };
 
-
 // 近距離武器専用のデータ構造体(近距離武器クラス用)
 struct MellWeaponData
 {
@@ -100,5 +127,4 @@ struct RangedWeaponData
 	int ammoCapacity = 10;					// 弾薬の最大容量(一度に持てる弾の数)
 	int currentAmmo = 10;					// 現在の弾薬数(残りの弾の数)
 	bool hasPierce = false;					// 貫通弾かのフラグ(敵を貫通するかどうか)
-
 };

@@ -22,7 +22,7 @@ void Player::BehaviorRootUpdate()
 	Move();
 
 	recastTime += MyGame::GameTime();
-	if (workAttack.key.IsAttack) {
+	if (weapon_->IsAttack()) {
 		if (recastTime >= MaxRecastTime) {
 			basicbehaviorRequest_ = BasicBehavior::kAttack;
 		}
@@ -40,12 +40,8 @@ void Player::BehaviorAttackInitialize()
 {
 	weapon_->ResetCurrentTime();
 	weapon_->SetTime(0, 1.0f, 0.0f);
-	
 	AttackTypes();
-
-	AttackTypeInit(0);
-
-	
+	weapon_->AttackTypeInit(0);
 }
 
 void Player::BehaviorAttackUpdate()
@@ -59,7 +55,7 @@ void Player::BehaviorAttackUpdate()
 	// コンボ段階によってモーションを分岐
 	Attack();
 
-	SetAttackCombo(workAttack);
+	SetAttackCombo();
 }
 
 void Player::BehaviorDieInitialize()

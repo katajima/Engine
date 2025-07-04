@@ -1030,6 +1030,9 @@
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\WeaponData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

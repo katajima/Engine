@@ -5,8 +5,8 @@
 #include"BasePlayerState.h"
 #include "DirectXGame/application/base/Character/Player/Effect/PlayerEffect.h"
 #include "DirectXGame/application/base/Character/Player/UI/PlayerUI.h"
-#include "DirectXGame/application/base/Character/Player/Attack/PlayerAttackFactory.h"
-#include"DirectXGame/application/base/Attack/AttackManager.h"
+//#include "DirectXGame/application/base/Character/Player/Attack/PlayerAttackFactory.h"
+//#include"DirectXGame/application/base/Attack/AttackManager.h"
 
 #include "DirectXGame/application/base/Weapon/playerWeapon.h"
 
@@ -59,24 +59,14 @@ private: //Behavior
 public: // 攻撃関係
 	struct AttackKeyFlag
 	{
-		bool IsAttack; // 攻撃するか
 		bool IsNormalAttack; // B
 		bool IsSpecialAttack;// RT
 	};
-	enum class  AttackTypePlay
-	{
-		kNone = 0,
-		kNormal, // 通常攻撃
-		kJump, // ジャンプ攻撃
-	};
+	
 private: // 攻撃関係
 	// 攻撃用ワーク
 	struct WrokAttack {
 		AttackKeyFlag key; // 攻撃方法キー
-		//振るまい
-		AttackTypePlay type = AttackTypePlay::kNone;
-		// 次の振るまいリクエスト
-		std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
 	};
 	WrokAttack workAttack{};
 	
@@ -89,16 +79,14 @@ private: // 攻撃関係
 	void AttackKey();
 	// 攻撃タイプ
 	void AttackTypes();
-	// 攻撃タイプ初期化
-	void AttackTypeInit(int comboIndex);
-
+	
 	//攻撃
 	void Attack();
 
 	// 調整項目の適用
 	void ApplyGlobalVariables();
 
-	void SetAttackCombo(WrokAttack& work);
+	void SetAttackCombo();
 
 public:
 	void LockOn(const std::vector<BaseEnemy*>& enemys);
@@ -111,16 +99,16 @@ private: // 移動
 	// ジャンプ
 	void Jump();
 public:
-	AttackTypePlay GetAttackType() const { return workAttack.type; };
+	AttackTypePlay GetAttackType() const { return weapon_->GetAttackTypePlay(); };
 private:
 	//  プレイヤー用UI
 	std::unique_ptr<PlayerUI> ui_ = std::make_unique<PlayerUI>();
 	// エフェクト 
 	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
 	// 攻撃マネージャー
-	std::unique_ptr<AttackManager> attackManager_;
+	//std::unique_ptr<AttackManager> attackManager_;
 	// 攻撃ファクトリー
-	std::unique_ptr<BaseAttackFactory> playerAttackFactory_;
+	//std::unique_ptr<BaseAttackFactory> playerAttackFactory_;
 	//
 	std::unordered_map<std::string, WorldTransform*> transformMap;
 
