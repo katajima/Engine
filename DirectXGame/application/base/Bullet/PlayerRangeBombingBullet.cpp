@@ -76,7 +76,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	randPosSky.y = max_y;
 
 
-
+	//posGround = targetRange_.position;
 
 	//// 各演出設定
 	ParticleManager* particleManager = entity3DManager->GetEffectManager()->GetParticleManager();
@@ -149,9 +149,9 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitObject2_->SetIsDraw(false);
 	hitObject2_->GetPrimitive()->GetMaterial()->color = {1.0f,0.0f,0.0f,0.5f};
 	
-	enemyPos_.x = targetRange_.position.x = Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
-	enemyPos_.z = targetRange_.position.z = Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
-	enemyPos_.y = -2.0f;
+	enemyPos_.x = targetRange_.position.x + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
+	enemyPos_.z = targetRange_.position.z + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
+	enemyPos_.y = 2.0f;
 }
 
 void PlayerRangeBombingBullet::Update()
@@ -241,6 +241,8 @@ void PlayerRangeBombingBullet::Update()
 				if (5 >= DistanceXZ(object_->GetWorldPosition(), enemyPos_)) {
 					phase_++;
 					posGround = enemyPos_;
+
+
 					targetPos = posGround - object_->GetWorldPosition();
 					count = 0;
 

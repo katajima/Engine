@@ -114,6 +114,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\BasePlayerState.cpp" />
@@ -121,7 +123,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Effect\PlayerEffect.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Player.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Player\PlayerBehavior.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\playerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\BulletSpecial.cpp" />
@@ -193,7 +194,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Effect\Ocean\OceanManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffect.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\Light\Lights.cpp" />
     <ClCompile Include="DirectXGame\engine\Line\LineCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp" />
@@ -603,7 +603,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseDirectionalLight.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLight.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLights.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BasePointLight.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseSpotLight.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.h" />
@@ -613,6 +621,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\WeaponData.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\Weapons.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayer.h" />

@@ -89,9 +89,6 @@ private:
 	float cameraScaleT = 0.0f;
 	float minScaleZCamera = 5.5f;
 private:
-	// ライト
-	std::shared_ptr<DirectionalLight> directional;
-private:
 	// キャラクター管理
 	std::unique_ptr<BaseCharacterManager> caracterManager_;
 	// 敵ポジション

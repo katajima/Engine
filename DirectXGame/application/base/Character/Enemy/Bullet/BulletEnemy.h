@@ -1,15 +1,16 @@
 #pragma once
 #include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
 
-class NormalEnemy : public BaseEnemy {
+// 弾を撃つ敵
+class BulletEnemy : public BaseEnemy {
 public:
 	// 初期化
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables,Vector3 position, Camera* camera) override;
+	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
 
 	// 毎フレーム更新
 	void Update() override;
 
-	
+
 	void DrawEffect() override;
 	//
 	void Draw2D() override;
@@ -21,8 +22,9 @@ public:
 	void Move() override;
 
 	void Jump() override;
+
 private:
-	
+
 	void InitParticle();
 
 	//通常行動初期化
@@ -36,7 +38,7 @@ private:
 
 	//攻撃行動更新
 	void BehaviorAttackUpdate();
-	
+
 	// 死亡行動初期化
 	void BehaviorDieInitialize();
 	// 死亡行動更新

@@ -19,6 +19,22 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	maxBullet = 40;
 	bulletNum = 0;
 
+
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = 5.0f;
+	cylinderParam.innerRadius = reticleRad_;
+	cylinderParam.outerRadius = reticleRad_;
+	cylinderParam.isCover = false;
+	cylinderParam.segments = 16;
+
+
+	// レティクル
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D("レティクルシリンダー", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
+	objectReticle_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
+	objectReticle_->SetIsDraw(false);
+	//objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
+	objectReticle_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+	objectReticle_->worldtransform_.translate_ = { 0,2,100 };
 }
 
 void RangeBombingSpecial::Update()
@@ -30,6 +46,7 @@ void RangeBombingSpecial::Update()
 	else {
 		isSpecial_ = false;
 	}
+
 }
 
 void RangeBombingSpecial::Draw()
@@ -37,7 +54,7 @@ void RangeBombingSpecial::Draw()
 
 }
 
-void RangeBombingSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletManager, Vector3 worldpos, float rad)
+void RangeBombingSpecial::InAction()
 {
 	// 弾発射に使うインターバル（秒）
 	const float fireInterval = 0.01f; // 例：0.04秒ごとに1発ずつ発射
@@ -53,6 +70,7 @@ void RangeBombingSpecial::InAction(FollowCamera* followCamera, BulletManager* bu
 			if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
 				phese_ = 1;
 				time_ = 0;
+				rangeBombingPos = objectReticle_->worldtransform_.worldMat_.GetWorldPosition();
 			}
 		}
 		index_b = 0;
@@ -72,8 +90,8 @@ void RangeBombingSpecial::InAction(FollowCamera* followCamera, BulletManager* bu
 					bulletManager->GenerateBulletRange(
 						BulletManager::BulletType::kRangeBombingSpecial,
 						stage_->missiles_[currentMissileIndex]->worldtransform_.translate_ + Vector3{ 0,30,0 },
-						worldpos,
-						rad
+						rangeBombingPos,
+						reticleRad_
 					);
 
 					currentMissileIndex++;  // 次のミサイルに移動

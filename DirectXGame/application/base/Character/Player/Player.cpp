@@ -92,23 +92,6 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	};
 
 
-	ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = 5.0f;
-	cylinderParam.innerRadius = reticleRad_;
-	cylinderParam.outerRadius = reticleRad_;
-	cylinderParam.isCover = false;
-	cylinderParam.segments = 16;
-
-
-	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D("レティクルシリンダー", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
-	objectReticle_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
-	objectReticle_->SetIsDraw(false);
-	objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
-	objectReticle_->worldtransform_.rotate_.x = DegreesToRadians(-90);
-	objectReticle_->worldtransform_.translate_ = { 0,2,100 };
-
-
 	// 体
 	objectBody_.Initialize(entity3DManager);
 	objectBody_.SetCamera(camera_);
@@ -121,6 +104,10 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	special_->Initialize(entity3DManager, entity2DManager, camera_);
 	special_->SetParent(&objectBase_->worldtransform_);
 	special_->SetInput(input);
+	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
+	rengeSp->SetRadius(100);
+	rengeSp->SetReticleParent(&objectBase_->worldtransform_);
+	rengeSp->Set(followCamera_, bulletManager_);
 
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
@@ -131,71 +118,28 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 
 	// UI
+	ui_ = std::make_unique<PlayerUI>();
 	ui_->Initialize(entity2DManager);
 	/// エフェクト関係
 	effect_->Initialize(entity3DManager_, entity2DManager, camera_);
 	// トレイルエフェクト
 	effect_->SetTrailParent(weapon_->GetObject3D());
 	
+
+	ChangeState("Move");
 }
 
 void Player::Update()
 {
 	UpdateBaseGetValue(); //保存機能 基本値の更新
 
-	if (flags_.isAlive) {
-		if (basicbehaviorRequest_) {
-			// ふるまいを変更する
-			basicbehavior_ = basicbehaviorRequest_.value();
-			// 各ふるまいごとの初期化を実行
-			switch (basicbehavior_)
-			{
-			case BasicBehavior::kRoot:
-				weapon_->GetObject3D()->SetIsDraw(false);
-				BehaviorRootInitialize();
-				Situations().isInvincible = false;
-				break;
-			case BasicBehavior::kAttack:
-				weapon_->GetObject3D()->SetIsDraw(true);
-				BehaviorAttackInitialize();
-				Situations().isInvincible = true;
-				break;
-			case BasicBehavior::kDie:
-				break;
-			case BasicBehavior::kSpecialAttack:
-				weapon_->GetObject3D()->SetIsDraw(false);
-				BehaviorDieInitialize();
-				break;
-			default:
-				break;
-			}
-			// ふるまいリクエストリセット
-			basicbehaviorRequest_ = std::nullopt;
-		}
-		switch (basicbehavior_)
-		{
-		case BasicBehavior::kRoot:
-			BehaviorRootUpdate();
-			break;
-		case BasicBehavior::kAttack:
-			BehaviorAttackUpdate();
-			break;
-		case BasicBehavior::kDie:
-			break;
-		case BasicBehavior::kSpecialAttack:
-			BehaviorDieUpdate();
-			break;
-		default:
-			break;
-		}
-	}
-	special_->Update();
+	// ステート
+	state_->Update();
+	
 	if (GetHP() <= 0) {
 		flags_.isAlive = false;
 	}
 
-	// ヒットデータの更新
-	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 
 
 #ifdef _DEBUG
@@ -211,6 +155,7 @@ void Player::Update()
 	if (ImGui::Button("SP")) {
 		special_->SetGauge(100);
 	}
+	ImGui::Text(state_->GetName().c_str());
 	ImGui::End();
 	ImGui::Begin("trail");
 	Vector3 min = weapon_->GetObject3D()->GetMesh(0)->GetMin();
@@ -231,18 +176,23 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	// 重力
-	GravityUpdate(MyGame::GameTime(),Situations().isJumping,GetAlive());
-	if (!isCreativeMode) {
-		// 移動制限
-		LimitMove(-Vector3{200,200,200},Vector3{200,200,200});
-	}
-	
+	// 必殺技
+	special_->Update();
 	// エフェクト
-	effect_->Update();
-	
+	effect_->Update();	
+	// ヒットデータの更新
+	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 	//武器更新
 	weapon_->Update();
+
+
+	// 重力
+	GravityUpdate(MyGame::GameTime(), Situations().isJumping, GetAlive());
+	if (!isCreativeMode) {
+		// 移動制限
+		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
+	}
+
 }
 
 #pragma region Draw
@@ -347,8 +297,6 @@ void Player::Move()
 			};
 
 			Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
-
-
 		}
 	}
 	
@@ -372,6 +320,7 @@ void Player::Jump()
 #pragma endregion //移動関係
 
 #pragma region MyRegion
+
 void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 {
 

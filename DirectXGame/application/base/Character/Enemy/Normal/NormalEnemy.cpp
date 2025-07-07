@@ -254,6 +254,11 @@ void NormalEnemy::Move()
 	GravityUpdate(Timer(), Situations().isJumping, GetAlive());
 }
 
+void NormalEnemy::Jump() 
+{
+
+}
+
 void NormalEnemy::InitParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();

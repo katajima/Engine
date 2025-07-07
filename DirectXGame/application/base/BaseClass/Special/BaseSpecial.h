@@ -42,6 +42,11 @@ public:
 
 	// スペシャル
 	bool GetIsSpecial() const { return isSpecial_; }
+	// Inputでのbool
+	bool GetIsSpecialAttack() const { return isSpecialAttack; }
+	// Inputでのbool
+	void SetIsSpecialAttack(bool is) { isSpecialAttack = is; }
+
 	// 入力をセット
 	void SetInput(Input* input) {input_ = input;};
 	// 親子付け
@@ -60,6 +65,8 @@ protected:
 	
 	// クロック
 	int clock_ = 1;
+
+	bool isSpecialAttack = false;// RT
 
 protected:
 	Input* input_;

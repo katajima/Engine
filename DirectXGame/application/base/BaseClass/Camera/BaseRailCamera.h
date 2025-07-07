@@ -21,6 +21,11 @@ public:
 
 
 	virtual void Draw2D() = 0;
-private:
+protected:
+	std::vector<Vector3> controlPoint;	// 制御点
+	float currentDistance = 0;			// 現在の位置(0.0f~1.0f)
+	float moveSpeed = 0.01f;			// 進むスピード
+	bool isLooping = false;				// ループさせるか
+	bool autoMove = false;				// 自動で進むか
 
 };

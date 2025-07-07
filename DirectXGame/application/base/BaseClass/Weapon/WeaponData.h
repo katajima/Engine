@@ -63,6 +63,9 @@ struct WeaponData
 	ComboData comboData{};				// コンボデータ
 	float staminaCost = 0;				// スタミナ消費量
 	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
+	// 攻撃再発動時間
+	float recastTime = 0;
+	const float MaxRecastTime = 0.5f;
 };
 
 // 攻撃ヒットデータ構造体

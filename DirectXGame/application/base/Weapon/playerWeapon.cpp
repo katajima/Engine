@@ -100,10 +100,6 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 void PlayerWeapon::Update()
 {
-
-
-
-
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
 

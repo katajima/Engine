@@ -16,6 +16,7 @@
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
 #include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
 
+#include "DirectXGame/application/base/BaseClass/Light/BaseLights.h"
 
 class DirectXCommon;
 class Entity3DManager;
@@ -82,6 +83,9 @@ private:
 	// スカイボックス
 	std::unique_ptr<SkyBox> skyBox;
 	
+
+	// ライト
+	std::shared_ptr<DirectionalLight> directional;
 	// ライト
 	std::shared_ptr<PointLight> pointLight_;
 private:

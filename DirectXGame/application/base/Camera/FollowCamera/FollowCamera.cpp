@@ -24,8 +24,8 @@ void FollowCamera::Update()
         const float kRotateSpeed = 0.03f;
 
         if (input_->IsControllerConnected()) {
-            uniqueCamera_->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
-            uniqueCamera_->transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
+            uniqueCamera_->transform_.rotate.y += input_->GetGamePadRightStick().x * rotateSpeed;
+            uniqueCamera_->transform_.rotate.x += input_->GetGamePadRightStick().y * rotateSpeed;
 
             uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, DegreesToRadians(-15.0f), DegreesToRadians(60.0f));
         }
@@ -40,8 +40,7 @@ void FollowCamera::Update()
             uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, DegreesToRadians(0.0f), DegreesToRadians(60.0f));
         }
 
-        // ベースのオフセット（固定距離）
-        Vector3 baseOffset = { 0.0f, 5.0f, -50.0f };
+        
 
         // 回転適用
         Matrix4x4 rotY = MakeRotateYMatrix(uniqueCamera_->transform_.rotate.y);

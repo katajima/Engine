@@ -32,6 +32,11 @@ public:
 	/// </summary>
 	virtual void Move() = 0;
 
+	/// <summary>
+	/// ジャンプ
+	/// </summary>
+	virtual void Jump() = 0;
+
 public:
 	// キャラクタータイプ設定
 	void SetCharacterType(CharacterType type) { characterData_.characterType_ = type; }
@@ -92,9 +97,10 @@ public: // 取得系関数
 	// ふるまいリクエストの設定
 	void SetRequest(BasicBehavior type) { basicbehaviorRequest_ = type; }
 
-protected: // 取得系関数(変更可能)
 	// キャラクター状態
 	Situation& Situations() { return characterData_.situation_; }
+protected: // 取得系関数(変更可能)
+	
 	// 基本パラメータ
 	BasicParameters& Parameters() { return characterData_.parameters_; } 
 

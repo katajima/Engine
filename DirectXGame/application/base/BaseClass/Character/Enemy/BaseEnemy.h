@@ -21,6 +21,8 @@ public:
 
 	virtual void Move() = 0;
 
+	virtual void Jump() = 0;
+
 	virtual void SetPlayer(BasePlayer* player) = 0;
 
 public:

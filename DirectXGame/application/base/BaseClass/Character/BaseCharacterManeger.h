@@ -13,6 +13,7 @@
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
 
 class FollowCamera;
+class BulletManager;
 class Entity3DManager;
 class Entity2DManager;
 class BaseCharacterManager
@@ -30,7 +31,7 @@ public:
 	void Draw2D();
 public:
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
-
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; }
 public: // 取得系
 
 	// キャラクターのタイプによっての数を取得
@@ -87,5 +88,6 @@ private: // 貰いもの
 	Entity2DManager* entity2DManager_ = nullptr;
 	GlobalVariables* globalVariables_;	// グローバル変数
 	FollowCamera* followCamera_ = nullptr;	// フォローカメラ 
+	BulletManager* bulletManager_ = nullptr; // 弾をマネジャー
 };
 

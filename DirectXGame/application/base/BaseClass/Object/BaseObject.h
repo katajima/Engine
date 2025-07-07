@@ -21,6 +21,7 @@ enum class ObjectType
 	Environment,// 環境オブジェクト
 	Effect,		// エフェクト
 	Camera,		// カメラ
+	Light,		// ライト
 	Event,		// イベント
 	Other,		// その他
 };
@@ -144,6 +145,10 @@ public:
 	bool GetLockOn() const { return flags_.isLockonTarget; }
 	// ロックオン状態を設定
 	void SetLockOn(bool lock) { flags_.isLockonTarget = lock; }
+
+	// 入力
+	Input* GetInput() { return input_; }
+
 protected:
 	// オブジェクトの状態フラグ取得
 	ObjectStateFlags& GetFlags() { return flags_; }

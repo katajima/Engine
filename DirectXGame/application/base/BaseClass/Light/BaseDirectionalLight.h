@@ -1,7 +1,7 @@
 #pragma once
-#include "BaseCamera.h"
+#include "BaseLight.h"
 
-class BaseFollowCamera : public BaseCamera
+class BaseDirectionalLight : public BaseLight
 {
 public:
 	///< summary>
@@ -22,15 +22,10 @@ public:
 
 	virtual void Draw2D() = 0;
 
-
-	//追従対象をポインタで持つ
-	void SetTarget(BaseObject* target) { target_ = target; };
-
 protected:
-	//追従対象
-	BaseObject* target_ = nullptr;
-	// ベースのオフセット（固定距離）
-	Vector3 baseOffset = { 0.0f, 5.0f, -50.0f };
-	// カメラ回転速度
-	const float rotateSpeed = 0.03f;
+	// ライト
+	std::shared_ptr<DirectionalLight> directionalLight_;
+	// 平行ライトデータ
+	DirectionalLightData directionalLightData{};
 };
+

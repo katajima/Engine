@@ -84,6 +84,18 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 	entity3DManager_->GetLightManager()->AddLight(pointLight_);
 
+	DirectionalLightData directionalLightData{};
+	directionalLightData.color = { 1,1,1,1 };
+	directionalLightData.direction = { 0,-1,0 };
+	directionalLightData.intensity = 0.5f;
+	directionalLightData.isLight = true;
+	directionalLightData.lig = 0.1f;
+
+
+	directional = std::make_shared<DirectionalLight>();
+	directional->directional = directionalLightData;
+
+	entity3DManager_->GetLightManager()->AddLight(directional);
 	
 	// エミッター設定
 	InitEmit();
@@ -102,6 +114,8 @@ void Stage::Update()
 			train_->worldtransform_.translate_.x = trainStartX_;
 		}
 	}
+
+	//pointLight_->point.color = { 1,0,0,1 };
 
 	//velocity_ = Subtract(ship_->GetWorldPosition(), ship_->GetPreWorldPosition());
 	
@@ -238,3 +252,5 @@ void Stage::EmitUpdate()
 	//emitCloudDust2_->Update();
 	//emitCloudDust3_->Update();
 }
+
+

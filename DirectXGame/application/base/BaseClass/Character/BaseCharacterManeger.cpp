@@ -1,7 +1,6 @@
 #include "BaseCharacterManeger.h"
 
-#include"DirectXGame/application/base/Character/Player/Player.h"
-#include"DirectXGame/application/base/Character/Enemy/Normal/NormalEnemy.h"
+#include "DirectXGame/application/base/BaseClass/Character/Characters.h"
 
 void BaseCharacterManager::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera)
 {
@@ -50,6 +49,7 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 
 		break;
 	case EnemyType::kBullet:
+		enemy = std::make_unique<BulletEnemy>();
 		break;
 	case EnemyType::kAttacker:
 		break;
@@ -92,6 +92,7 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 	}
 	player->SetCharacterType(CharacterType::Player);
 	player->SetFollowCamera(followCamera_);
+	player->SetBulletManager(bulletManager_);
 	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
 	character_.push_back(std::move(player));
 }

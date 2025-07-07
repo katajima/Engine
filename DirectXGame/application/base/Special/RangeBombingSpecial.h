@@ -30,17 +30,38 @@ public:
 	/// <summary>
 	/// 発動中
 	/// </summary>
-	void InAction(FollowCamera* followCamera, BulletManager* bulletManager ,Vector3 worldpos,float rad);
+	void InAction();
+
+
+	void SetReticleParent(WorldTransform* parent) { objectReticle_->worldtransform_.parent_ = parent; };
 
 public:
 
-	
+	// 描画するか
+	void SetIsDraw(bool is) { objectReticle_->SetIsDraw(is); };
 
 	void SetStage(Stage* stage);
 
 	bool IsAction() const { return isAction_; }
 
+
+	void SetRadius(float rad) { reticleRad_ = rad; }
+
+	// 半径爆心
+	float GetRadius() const { return reticleRad_; };
+
+	// 爆心位置 
+	Vector3 GetRangeBombingPos() const { return rangeBombingPos; }
+
+	void Set(FollowCamera* followCamera, BulletManager* bulletManager) 
+	{
+		this->followCamera = followCamera;
+		this->bulletManager = bulletManager;
+	}
+
 private:
+	Object3d* objectReticle_;				// オブジェクトレティクル
+
 	int index_b = 0;
 	int maxBullet = 1;
 	int bulletNum = 0;
@@ -50,8 +71,11 @@ private:
 
 	bool isAction_ = false;
 
+	float reticleRad_ = 100.0f;				// レティクルの半径　　　
+	Vector3 rangeBombingPos{};				// レンジボムの位置
 private:
 	Stage* stage_ = nullptr;
-
+	FollowCamera* followCamera = nullptr;
+	BulletManager* bulletManager = nullptr;
 };
 
