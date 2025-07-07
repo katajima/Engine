@@ -1,9 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
-
-#include "DirectXGame/application/base/Character/Player/Special/RangeBombingSpecial.h"
-#include "DirectXGame/application/base/Character/Player/Special/BulletSpecial.h"
 #include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
+#include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
 
 class FollowCamera;
 class BulletManager;
@@ -20,6 +18,9 @@ public:
 
 	virtual void Draw2D() = 0;
 
+	virtual void Move() = 0;
+
+public:
 	// 弾マネージャーの設定
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 	// フォローカメラの設定
@@ -47,5 +48,7 @@ protected:
 
 	BulletManager* bulletManager_;			// 弾管理
 	FollowCamera* followCamera_;			// フォローカメラ
+
+	bool isCreativeMode = false;			// クリエイティブモードかどうか
 };
 

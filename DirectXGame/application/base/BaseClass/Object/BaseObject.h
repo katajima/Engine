@@ -20,6 +20,8 @@ enum class ObjectType
 	Gimmick,	// ギミック
 	Environment,// 環境オブジェクト
 	Effect,		// エフェクト
+	Camera,		// カメラ
+	Event,		// イベント
 	Other,		// その他
 };
 
@@ -106,6 +108,8 @@ private:
 	}
 
 public:
+	// オブジェクト時間取得
+	float GetTime() const;
 	// オブジェクトの状態フラグ取得
 	ObjectStateFlags GetFlags() const { return flags_; } 
 	// オブジェクト3d取得

@@ -1,8 +1,5 @@
 #include "PlayerRangeBombingBullet.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
-
-
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Player.h"

@@ -1,19 +1,27 @@
 #include"Player.h"
-
+#include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
 
 void Player::BehaviorRootInitialize()
 {
 	weapon_->GetTimer().t = 0.0f;
-	
 	effect_->SetIsTrail(false);
 }
 
 void Player::BehaviorRootUpdate()
 {
-	
+	// 
+	if (input_->IsControllerConnected()) {
 
-	AttackKey();
+		if (special_->GetIsSpecial()) {
+			IsSpecialAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
+		}
+
+		weapon_->GetAttackKeyFlag().IsNormalAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+		if (weapon_->GetAttackKeyFlag().IsNormalAttack) {
+			weapon_->SetIsAttack(true);
+		}
+	}
 
 	// ジャンプ
 	Jump();
@@ -28,9 +36,9 @@ void Player::BehaviorRootUpdate()
 		}
 	}
 	if (special_->GetIsSpecial()) {
-		if (workAttack.key.IsSpecialAttack) {
+		if (IsSpecialAttack) {
 			if (recastTime >= MaxRecastTime) {
-				basicbehaviorRequest_ = BasicBehavior::kSpecialAttack;			
+				basicbehaviorRequest_ = BasicBehavior::kSpecialAttack;
 			}
 		}
 	}
@@ -38,46 +46,29 @@ void Player::BehaviorRootUpdate()
 
 void Player::BehaviorAttackInitialize()
 {
-	weapon_->ResetCurrentTime();
-	weapon_->SetTime(0, 1.0f, 0.0f);
-	AttackTypes();
+	weapon_->KeyAttackTypes(Situations().isJumping);
 	weapon_->AttackTypeInit(0);
 }
 
 void Player::BehaviorAttackUpdate()
 {
-	weapon_->SetIsCollider(CollisionTag::PlayerAttack,true);
-	AttackKey();
-
-	AttackTypes();
-
-
-	// コンボ段階によってモーションを分岐
-	Attack();
-
-	SetAttackCombo();
+	// 攻撃処理
+	weapon_->AttackUpdate();
 }
 
 void Player::BehaviorDieInitialize()
 {
 	special_->SetPhese(0);
-	special_->SetGauge(0);	
+	special_->SetGauge(0);
 }
 
 void Player::BehaviorDieUpdate()
 {
 	Velocity() = {};
-	AttackKey();
 	int time = 0;
-
 	ui_->SetIsTextRB(false);
-
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-
-	
 	rengeSp->InAction(followCamera_, bulletManager_, rangeBombingPos, reticleRad_);
-
-
 	objectReticle_->SetIsDraw(false);
 	if (special_->GetPhese() == 0) {
 		Move();
@@ -88,7 +79,5 @@ void Player::BehaviorDieUpdate()
 	if (special_->GetPhese() == 2) {
 		basicbehaviorRequest_ = BasicBehavior::kRoot;
 	}
-
-
 	objectBase_->Update();
 }

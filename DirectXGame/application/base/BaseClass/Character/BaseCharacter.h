@@ -27,6 +27,11 @@ public:
 	/// </summary>
 	virtual void Draw2D() = 0;
 
+	/// <summary>
+	/// 移動
+	/// </summary>
+	virtual void Move() = 0;
+
 public:
 	// キャラクタータイプ設定
 	void SetCharacterType(CharacterType type) { characterData_.characterType_ = type; }
@@ -70,17 +75,29 @@ public: // 取得系関数
 	// HP取得
 	float GetHP() const { return characterData_.parameters_.HP.value; }
 
-	BasicBehavior GetBasicBehavior() const { return basicbehavior_; }
-
 	// キャラクター取得
 	CharacterType GetCharacterType() const { return characterData_.characterType_; }
 
+	// ビヘイビア状態取得
+	BasicBehavior GetBasicBehavior() const { return basicbehavior_; }
+
+	// リクエスト取得
+	std::optional<BasicBehavior> GetBasicBehaviorRequest() const { return basicbehaviorRequest_; }
+
+	// ふるまい変更
+	void ChangeRequest() { basicbehavior_ = basicbehaviorRequest_.value(); }
+
+	// ふるまいリクエストリセット
+	void ResetRequest() { basicbehaviorRequest_ = std::nullopt; }
+	// ふるまいリクエストの設定
+	void SetRequest(BasicBehavior type) { basicbehaviorRequest_ = type; }
+
 protected: // 取得系関数(変更可能)
+	// キャラクター状態
+	Situation& Situations() { return characterData_.situation_; }
 	// 基本パラメータ
 	BasicParameters& Parameters() { return characterData_.parameters_; } 
 
-	// キャラクター状態
-	Situation& Situations() { return characterData_.situation_; }
 
 	// HP
 	float& HP() { return characterData_.parameters_.HP.value; } 

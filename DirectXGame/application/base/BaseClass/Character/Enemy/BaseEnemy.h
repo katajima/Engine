@@ -19,6 +19,8 @@ public:
 
 	virtual void Draw2D() = 0;
 
+	virtual void Move() = 0;
+
 	virtual void SetPlayer(BasePlayer* player) = 0;
 
 public:

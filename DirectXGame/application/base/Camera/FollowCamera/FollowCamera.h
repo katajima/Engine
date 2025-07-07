@@ -1,41 +1,27 @@
 #pragma once
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/application/base/BaseClass/Camera/BaseFollowCamera.h"
 
-
-class Input;
-class FollowCamera
+class FollowCamera : public BaseFollowCamera
 {
 public:
-	
-	/// <summary>
+	///< summary>
 	/// 初期化
-	/// </summary>
-	void Initialize(CameraCommon* cameraCommon);
+	///</summary>
+	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
+
+	///< summary>
+	/// 更新
+	///</summary>
+	void Update() override;
 
 	/// <summary>
-	/// 毎フレーム処理
+	/// エフェクトの描画
 	/// </summary>
-	void Update();
-
-	//追従対象をポインタで持つ
-	void SetTarget(const Object3d* target) { target_ = target; };
-
-	Camera& GetViewProjection() { return camera_; };
+	void DrawEffect() override;
 
 
-	//void SetCameraRotate(Vector3& rotate) { return camera_.transform_.rotate = rotate; }
-
+	void Draw2D() override;
 private:
-	//
-	Input* input_;
-	// ビュープロジェクション
-	Camera camera_;
-
-	//追従対象
-	const Object3d* target_ = nullptr;
 
 };
 

@@ -14,8 +14,6 @@ public:
 	virtual void DrawEffect() = 0;
 	/// 2d描画
 	virtual void Draw2D() = 0;
-	// 使っているキャラクター設定
-	virtual void SetCharacter(BaseCharacter* character) = 0;
 protected:
 
 };
@@ -32,8 +30,6 @@ public:
 	virtual void DrawEffect() = 0;
 	/// 2d描画
 	virtual void Draw2D() = 0;
-	// 使っているキャラクター設定
-	virtual void SetCharacter(BaseCharacter* character) = 0;
 protected:
 
 };
@@ -50,8 +46,6 @@ public:
 	virtual void DrawEffect() = 0;
 	/// 2d描画
 	virtual void Draw2D() = 0;
-	// 使っているキャラクター設定
-	virtual void SetCharacter(BaseCharacter* character) = 0;
 protected:
 
 };

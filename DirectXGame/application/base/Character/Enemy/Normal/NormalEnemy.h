@@ -17,11 +17,10 @@ public:
 	void SetPlayer(BasePlayer* player) override;
 
 	void Emit() override;
-
-private:
 	// 移動
-	void Move();
-
+	void Move() override;
+private:
+	
 	void InitParticle();
 
 	//通常行動初期化

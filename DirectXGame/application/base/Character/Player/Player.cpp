@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
@@ -86,7 +87,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 			GetContactRecord().AddHistory(otherId, nowTime);
 
 			AddDamage(10.0f);
-			followCamera_->GetViewProjection().SetShake(0.25f, { 0.1f,0.1f,0.1f });
+			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
 		}
 	};
 
@@ -123,50 +124,11 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
-	weapon_->Initialize(nullptr, entity3DManager_, nullptr, globalVariables_, {}, camera);
+	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
 	weapon_->GetObject3D()->worldtransform_.parent_ = &objectBase_->worldtransform_;
 	weapon_->GetObject3D()->worldtransform_.translate_ = { 0,0.5f,0.5f };
 	weapon_->SetCharacter(this);
 
-
-	//// Factory
-	//playerAttackFactory_ = std::make_unique<PlayerAttackFactory>();
-
-	//// 攻撃マネージャー
-	//attackManager_ = std::make_unique<AttackManager>();
-	//attackManager_->Initialize(input_, playerAttackFactory_.get());
-
-
-	//// Transform 登録
-	//transformMap["Player"] = &objectBase_->worldtransform_;
-	//attackManager_->SetContext(input_, transformMap);
-
-	//// 攻撃ノードの登録（攻撃名・次の遷移・キャンセル条件など）
-	//AttackNode node{};
-	//node.data.attackType = AttackType::Blow;
-	//node.data.transformId = "Player";
-	//node.data.activeFrames = 60.0f;
-	//node.data.recoveryFrames = 10.0f;
-	//node.data.startupFrames = 60.0f;
-	//node.canCancelFunc = [] { return true; };
-	//node.nextNodeIds = { "Punch2" };
-
-	//attackManager_->RegisterAttackNode("Punch1", node);
-
-	//// もう一つの攻撃も登録例
-	//AttackNode node2{};
-	//node2.data.attackType = AttackType::Blow;
-	//node2.data.transformId = "Player";
-	//node.data.activeFrames = 60.0f;
-	//node.data.recoveryFrames = 10.0f;
-	//node.data.startupFrames = 60.0f;
-	//node2.canCancelFunc = [] { return true; };
-	//node2.nextNodeIds = {};
-
-	//attackManager_->RegisterAttackNode("Punch2", node2);
-
-	
-	
 
 	// UI
 	ui_->Initialize(entity2DManager);
@@ -234,14 +196,6 @@ void Player::Update()
 
 	// ヒットデータの更新
 	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
-
-
-	// 攻撃開始条件（例：ボタンを押したら）
-	if (input_->IsTriggerKey(DIK_Z)) {
-		//attackManager_->AddAttack("Punch1");
-	}
-
-	//attackManager_->Update(MyGame::GameTime());
 
 
 #ifdef _DEBUG
@@ -338,7 +292,7 @@ void Player::Move()
 
 
 			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetViewProjection().GetViewMatrix());
+			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
 
 			// カメラの向きに基づいて移動方向をワールド座標系に変換
 			Vector3 worldDirection = {
@@ -383,7 +337,7 @@ void Player::Move()
 			Situations().isMoving = true;
 
 			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetViewProjection().GetViewMatrix());
+			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
 
 			// カメラの向きに基づいて移動方向をワールド座標系に変換
 			Vector3 worldDirection = {

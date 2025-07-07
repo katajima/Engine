@@ -14,7 +14,8 @@ public:
 	virtual void Draw2D() = 0;
 
 public:
-	virtual void SetCharacter(BaseCharacter* character) = 0;
+	// 使っているキャラクター設定
+	void SetCharacter(BaseCharacter* character) { this->character = character; };
 
 	// タグによるコライダーの有効・無効を設定
 	void SetIsCollider(CollisionTag tag ,bool is) { objectBase_->GetColliderComponent()->SetEnableByTag(tag, is); };
@@ -26,6 +27,8 @@ public:
 	bool IsAutomatic() const { return data_.isAutomatic; };
 	// 攻撃中かどうかのフラグを設定
 	void SetIsActive(bool isActive) { data_.isActive = isActive; };
+
+
 	// 現在時間を加算
 	void AddCurrentTime(float deltaTime) { data_.motionData.AddCurrentTime(deltaTime); };
 	// 現在経過時間をリセット
@@ -40,6 +43,9 @@ public:
 	float GetAttackAnimationTime() const { return data_.motionData.attackAnimationTime; };
 	// 攻撃のリカバリー時間を取得
 	float GetRecoveryTime() const { return data_.motionData.recoveryTime; };
+	// コンボモーションデータ
+	ComboMotionData GetComboMotionData() const { return data_.motionData; }
+
 	// コンボ武器かどうかのフラグを取得
 	bool IsCommonWeapon() const { return data_.comboData.isComboWeapon; }
 	// コンボ武器かどうかのフラグを設定
@@ -88,6 +94,8 @@ public:
 	void ResetRequest(){ typeRequest_ = std::nullopt;}
 	// ふるまいリクエストの設定
 	void SetRequest(AttackTypePlay type) { typeRequest_ = type; }
+
+	AttackKeyFlag& GetAttackKeyFlag() { return key; }
 
 public:
 
@@ -155,32 +163,32 @@ public:
 		}
 	}
 
-	// 
+	// 攻撃各コンボによる初期化
 	void AttackTypeInit(int comboIndex) {
 		ColliderHistoryClear();
 		if (GetTypeRequest()) {
 			// ふるまいを変更する
 			ChangeRequest();
+			ResetCurrentTime();
 			// 各ふるまいごとの初期化を実行
 			switch (GetAttackTypePlay())
 			{
 			case AttackTypePlay::kNormal:
-
-
+			
 				if (comboIndex == 0) {
-					SetTime(0.0f, 0.2f, 0.1f);
+					SetTime(0.1f, 0.2f, 0.1f);
 					GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,0 });
 				}
 				if (comboIndex == 1) {
-					SetTime(0.0f, 0.2f, 0.1f);
+					SetTime(0.1f, 0.2f, 0.1f);
 					GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
 				}
 				if (comboIndex == 2) {
-					SetTime(0.0f, 0.2f, 0.1f);
+					SetTime(0.1f, 0.2f, 0.1f);
 					GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,-90 });
 				}
 				if (comboIndex == 3) {
-					SetTime(0.0f, 0.2f, 0.1f);
+					SetTime(0.1f, 0.2f, 0.1f);
 					GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
 				}
 				break;
@@ -195,7 +203,114 @@ public:
 			ResetRequest();
 		}
 	}
+	// 攻撃更新
+	void AttackUpdate(float deltaTime, WorldTransform& worldTransform) {
+		GetTimer().Update(deltaTime);
 
+		GetObject3D()->SetIsDraw(true);
+		switch (GetAttackTypePlay())
+		{
+		case AttackTypePlay::kNormal:
+			if (GetCurrentComboCount() == 0) {
+				if (GetComboMotionData().isStartup) {
+					SetMovementSpeedMultiplier(0.01f);
+					GetWorldTransform().rotate_.x += DegreesToRadians(1 * 60) * deltaTime;
+				}
+				if (GetComboMotionData().isAttackAnimation){
+					SetMovementSpeedMultiplier(0.1f);
+					GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * deltaTime;
+				}
+				if (GetComboMotionData().isRecovery) {
+					SetMovementSpeedMultiplier(1.05f);
+					//GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * deltaTime;
+				}
+			}if (GetCurrentComboCount() == 1) {
+				if (GetTimer().t >= GetStartupTime()) {
+					SetMovementSpeedMultiplier(0.3f);
+					GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * deltaTime;
+				}
+			}if (GetCurrentComboCount() == 2) {
+				if (GetTimer().t >= GetStartupTime()) {
+					SetMovementSpeedMultiplier(0.4f);
+					GetWorldTransform().rotate_.x += DegreesToRadians(16 * 60) * deltaTime;
+				}
+			}if (GetCurrentComboCount() == 3) {
+				if (GetTimer().t >= GetStartupTime()) {
+					SetMovementSpeedMultiplier(1.5f);
+					GetWorldTransform().rotate_.x += DegreesToRadians(16 * 60) * deltaTime;
+				}
+			}
+
+
+			if (GetTimer().t <= 5.0f / 60) {
+
+				Vector3 move(0, 0, GetMovementSpeedMultiplier());
+				// 速度ベクトルを自機の向きに合わせて回転させる
+				move = TransformNormal(move, worldTransform.worldMat_);
+
+				worldTransform.translate_ += move;
+			}
+			break;
+		case AttackTypePlay::kJump:
+			if (GetTimer().t >= 1.0f / 60) {
+				GetWorldTransform().rotate_.x += DegreesToRadians(16 * 180) * deltaTime;
+				SetMovementSpeedMultiplier(0.2f);
+				Vector3 move(0, 0,GetMovementSpeedMultiplier());
+				// 速度ベクトルを自機の向きに合わせて回転させる
+				move = TransformNormal(move, worldTransform.worldMat_);
+				worldTransform.translate_ += move;
+			}
+			break;
+		}
+	}
+	// 攻撃方法設定
+	void KeyAttackTypes(bool is) {
+		if (IsAttack()) {
+			if (GetAttackKeyFlag().IsNormalAttack) {
+				if (is && GetCurrentComboCount() == 0) {
+					SetRequest(AttackTypePlay::kJump);
+				}
+				else {
+					SetRequest(AttackTypePlay::kNormal);
+				}
+			}
+		}
+	}
+
+	void AttackUpdate() {
+		SetIsCollider(CollisionTag::PlayerAttack, true);
+
+		if (input_->IsControllerConnected()) {
+			GetAttackKeyFlag().IsNormalAttack = input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+			if (GetAttackKeyFlag().IsNormalAttack) {
+				SetIsAttack(true);
+			}
+		}
+		KeyAttackTypes(character->GetSituation().isJumping);
+
+
+		// コンボ段階によってモーションを分岐
+		AttackUpdate(character->GetTime(), character->GetObject3D()->worldtransform_);
+
+
+		// 全て終えたら
+		if (GetCurrentTimer() >= GetAllTime()) {
+			// コンボ継続なら次のコンボに進む
+			if (IsComboNext()) {
+				// 方向
+				character->Move();
+				// 攻撃タイプ
+				KeyAttackTypes(character->GetSituation().isJumping);
+			}
+			else {
+
+				// 通常行動へ移行
+				character->SetRequest(BasicBehavior::kRoot);
+			}
+		}
+		// コンボ攻撃
+		SetAttackCombo(character->GetTime());
+	}
 
 protected:
 	WeaponData data_;		// 武器データ
@@ -206,6 +321,8 @@ protected:
 	AttackTypePlay type = AttackTypePlay::kNone;
 	// 次の振るまいリクエスト
 	std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
+	AttackKeyFlag key;
+	BaseCharacter* character;	// 使っているキャラクター
 };
 
 // 近距離の武器クラス
@@ -220,9 +337,7 @@ public:
 	virtual void DrawEffect() = 0;
 	/// 2d描画
 	virtual void Draw2D() = 0;
-	// 使っているキャラクター設定
-	virtual void SetCharacter(BaseCharacter* character) = 0;
-
+	
 public:
 	// ヒットストップ時間を取得
 	float GetHitStopTime() const { return mellData_.hitStopTime; } 
@@ -243,8 +358,7 @@ public:
 	virtual void DrawEffect() = 0;
 	/// 2d描画
 	virtual void Draw2D() = 0;
-	// 使っているキャラクター設定
-	virtual void SetCharacter(BaseCharacter* character) = 0;
+	
 protected:
 	RangedWeaponData rengedData_; // 遠距離武器データ
 

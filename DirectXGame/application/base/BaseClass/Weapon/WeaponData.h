@@ -17,6 +17,11 @@ enum class  AttackTypePlay
 	kJump, // ジャンプ攻撃
 };
 
+struct AttackKeyFlag
+{
+	bool IsNormalAttack; // B
+};
+
 // コンボデータ構造体
 struct ComboData 
 {

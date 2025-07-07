@@ -240,9 +240,6 @@
     <ClCompile Include="DirectXGame\application\base\Character\Player\PlayerBehavior.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\PlayerAttack.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Weapon\playerWeapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -393,10 +390,10 @@
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\PlayerMissile.cpp">
+    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerMissile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Special\BulletSpecial.cpp">
+    <ClCompile Include="DirectXGame\application\base\Special\BulletSpecial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
@@ -429,10 +426,10 @@
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Special\RangeBombingSpecial.cpp">
+    <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\PlayerRangeBombingBullet.cpp">
+    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp">
@@ -451,6 +448,12 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Attack\AttackData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -895,13 +898,13 @@
     <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\PlayerMissile.h">
+    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerMissile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Special\BaseSpecial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Special\BulletSpecial.h">
+    <ClInclude Include="DirectXGame\application\base\Special\BulletSpecial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayer.h">
@@ -973,10 +976,10 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Special\RangeBombingSpecial.h">
+    <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\PlayerRangeBombingBullet.h">
+    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h">
@@ -1031,6 +1034,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

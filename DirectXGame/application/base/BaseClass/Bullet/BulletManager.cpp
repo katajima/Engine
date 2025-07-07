@@ -1,7 +1,7 @@
 #include "BulletManager.h"
 
-#include "DirectXGame/application/base/Character/Player/Bullet/PlayerMissile.h"
-#include "DirectXGame/application/base/Character/Player/Bullet/PlayerRangeBombingBullet.h"
+#include "DirectXGame/application/base/Bullet/PlayerMissile.h"
+#include "DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.h"
 
 void BulletManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
 {

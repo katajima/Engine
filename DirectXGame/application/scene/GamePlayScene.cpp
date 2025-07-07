@@ -3,11 +3,13 @@
 #include <corecrt_math_defines.h>
 #include <algorithm>
 
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+
+#include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
+#include "DirectXGame/application/base/Special/BulletSpecial.h"
 
 #pragma region Initialize
 
@@ -33,13 +35,13 @@ void GamePlayScene::Initialize()
 	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), camera.get());
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
+	followCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(),{},nullptr);
 	caracterManager_->SetFollowCamera(followCamera_.get());
 
 	// プレイヤー生成
 	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
 	// 追従カメラtarget設定
-	followCamera_->SetTarget(caracterManager_->GetPlayer()->GetObject3D());
+	followCamera_->SetTarget(caracterManager_->GetPlayer());
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
 	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
@@ -54,7 +56,7 @@ void GamePlayScene::Initialize()
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
-	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
+	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
 	// 弾
@@ -322,10 +324,10 @@ void GamePlayScene::Update()
 			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&universeCamera_->GetViewProjection());
 		}
 		else {
-			camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
-			camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
-			GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
-			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&followCamera_->GetViewProjection());
+			camera->viewMatrix_ = followCamera_->GetUniqueCamera()->viewMatrix_;
+			camera->projectionMatrix_ = followCamera_->GetUniqueCamera()->projectionMatrix_;
+			GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(followCamera_->GetUniqueCamera());
+			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(followCamera_->GetUniqueCamera());
 		}
 		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 	}

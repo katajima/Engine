@@ -1,8 +1,8 @@
 #include "BaseEnemy.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Player.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+
 
 float BaseEnemy::Timer() const
 {

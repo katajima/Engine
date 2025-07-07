@@ -1,9 +1,12 @@
 #include "playerWeapon.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Player.h"
 
 void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
+	input_ = input;
+
 	objectBase_ = entity3DManager->CreateObject3D("PlayerWeapon", Object3d::ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetIsDraw(false);
 	objectBase_->SetModel("Sword.obj");
@@ -42,9 +45,9 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		const uint32_t otherId = otherComponent->GetUniqueId();
 		const float nowTime = MyGame::NowTime();
 
-		Player* player = static_cast<Player*>(basePlayer_);
+		Player* player = static_cast<Player*>(character);
 
-		if (player->GetAttackType() == AttackTypePlay::kJump) {
+		if (GetAttackTypePlay() == AttackTypePlay::kJump) {
 			if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime,0.1f)) {
 				return; // クールタイム中のため無視
 			}
@@ -97,12 +100,15 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 void PlayerWeapon::Update()
 {
+
+
+
+
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
 
 	objectBase_->GetColliderComponent()->UpdateByID(colliderWorld_, weaponColliderId_);
 	objectBase_->GetColliderComponent()->UpdateByID(colliderWorld2_, weaponColliderId2_);
-
 }
 
 void PlayerWeapon::Draw2D()
@@ -111,9 +117,4 @@ void PlayerWeapon::Draw2D()
 
 void PlayerWeapon::DrawEffect()
 {
-}
-
-void PlayerWeapon::SetCharacter(BaseCharacter* character)
-{
-	basePlayer_ = static_cast<BasePlayer*>(character);
 }

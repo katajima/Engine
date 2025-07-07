@@ -25,8 +25,6 @@ public:
 
 	void Draw2D() override;
 
-	void SetCharacter(BaseCharacter* character) override;
-
 private:
 	WorldTransform colliderWorld_;
 	uint32_t weaponColliderId_ = 0;
@@ -34,6 +32,6 @@ private:
 	WorldTransform colliderWorld2_;
 	uint32_t weaponColliderId2_ = 0;
 
-	BasePlayer* basePlayer_;
+	//BasePlayer* basePlayer_;
 };
 

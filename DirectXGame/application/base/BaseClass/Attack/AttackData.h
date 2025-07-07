@@ -18,9 +18,35 @@ struct ComboMotionData
 	float recoveryTime = 0.3f;			// 攻撃後の隙(攻撃モーション終了から次の入力を受け付けるまでの時間)
 	bool canBeInterrupted = true;		// 攻撃中にキャンセル可能かのフラグ
 
+	bool isStartup = false;				// 発生時間か
+	bool isAttackAnimation = false;		// 攻撃発生中か
+	bool isRecovery = false;			// 後隙中か
+
+
 	// 時間加算
 	void AddCurrentTime(float deltaTime) {
 		currentTime += deltaTime;
+
+		if (currentTime <= startupTime) { // 発生フレーム中
+			isStartup = true;
+			isAttackAnimation = false;
+			isRecovery = false;
+		}
+		else if (currentTime > startupTime && currentTime <= attackAnimationTime + startupTime) { // 攻撃フレーム中
+			isStartup = false;
+			isAttackAnimation = true;
+			isRecovery = false;
+		}
+		else if (currentTime > attackAnimationTime + startupTime &&  currentTime <= AllTime()) { // 後隙中 
+			isStartup = false;
+			isAttackAnimation = false;
+			isRecovery = true;
+		}
+		else {// 何もしていない
+			isStartup = false;
+			isAttackAnimation = false;
+			isRecovery = false;
+		}
 	}
 	// 時間リセット
 	void ResetTime() {
@@ -61,7 +87,7 @@ struct ComboDatas
 	int currentComboCount = 0;			// 現在のコンボ回数
 	bool isComboNext = false;			// 次のコンボを受け付けるかのフラグ(コンボ間隔内かどうか)
 	bool isAutomatic = false;			// オート連射(入力しっぱなしで攻撃)可能かのフラグ
-	std::vector<ComboDataPiece> combos;		// コンボデータ 
+	std::vector<ComboDataPiece> combos;	// コンボデータ 
 	Timer animetionTimer;				// アニメーションタイマー(攻撃アニメーションの管理用)
 	//振るまい
 	int type = 0;
@@ -99,82 +125,20 @@ struct ComboDatas
 	// 全体時間を取得
 	float GetAllTime() const { return combos[currentComboCount].comboMotion.AllTime(); };
 
+
+
 	// コンボデータセット(コンボするのかしないのかなどを決める)関数
-	void SetAttackCombo(float deltaTime) {
-		//  既定の時間経過で通常行動に戻る
-		AddCurrentTime(deltaTime);
-		if (GetCurrentTimer() >= GetAllTime()) {
-			// コンボ継続なら次のコンボに進む
-			if (IsComboNext()) {
-
-				ResetCurrentTime();
-
-				GetTimer().t = 0;
-				GetTimer().maxT = GetAllTime();
-
-				// 各パーツの角度などを次のコンボ用に初期化
-
-				IncrementCurrentComboCount();
-
-				// 攻撃タイプによって初期化
-				AttackTypeInit(currentComboCount);
-
-
-				// コンボフラグをリセット
-				SetIsComboNext(false);
-				//SetIsAttack(false);
-				//ColliderHistoryClear();
-			}
-			else {
-				ResetCurrentComboCount();
-			}
-		}
-		else {
-			// コンボ上限に達していない
-			if (GetCurrentComboCount() < GetComboMaxCount() - 1) {
-				//if (IsAttack()) {
-				//	// コンボ有効
-				//	SetIsComboNext(true);
-				//}
-			}
-		}
-	}
-
+	void SetAttackCombo(float deltaTime);
 	// コンボ関係の初期化
-	void AttackTypeInit(int comboIndex) {
-		//ColliderHistoryClear();
-		if (GetTypeRequest()) {
-			// ふるまいを変更する
-			ChangeRequest();
-			
-			//for (auto& combo : combos) {
-				if (GetAttackTypePlay() == comboIndex) {
+	void AttackTypeInit(int comboIndex);
+	// コンボ更新
+	void AttackUpdate(float deltaTime, WorldTransform& worldTransform);
 
-				}
-
-			//}
-
-			// 各ふるまいごとの初期化を実行
-			switch (GetAttackTypePlay())
-			{
-			case 0:
-
-				break;
-			case 1:
-			
-				break;
-			}
-			// ふるまいリクエストリセット
-			ResetRequest();
-		}
-	}
 
 	// 攻撃方法取得
 	int GetAttackTypePlay() const { return type; }
-
 	// リクエスト取得
 	std::optional<int> GetTypeRequest() const { return typeRequest_; }
-
 	// ふるまい変更
 	void ChangeRequest() { type = typeRequest_.value(); }
 
@@ -182,14 +146,39 @@ struct ComboDatas
 	void ResetRequest() { typeRequest_ = std::nullopt; }
 	// ふるまいリクエストの設定
 	void SetRequest(int type) { typeRequest_ = type; }
-
 };
 
 // 技の１つのデータ構造体
-struct SkilData 
+struct SkillData 
 {
 	std::string name = "";					// 名前
 	ComboDatas comboDatas;					// 全コンボデータの構造体
+
+};
+
+// 全ての技の管理
+class SkillDatas
+{
+public:
+	// 技方法取得
+	int GetAttackTypePlay() const { return type; }
+	// 技リクエスト取得
+	std::optional<int> GetTypeRequest() const { return typeRequest_; }
+	// ふるまい変更
+	void ChangeRequest() { type = typeRequest_.value(); }
+
+	// ふるまいリクエストリセット
+	void ResetRequest() { typeRequest_ = std::nullopt; }
+	// ふるまいリクエストの設定
+	void SetRequest(int type) { typeRequest_ = type; }
+public:
+	std::map<int,SkillData> skillDatas;		// 全技データ
+
+	//振るまい
+	int type = 0;
+	// 次の振るまいリクエスト
+	std::optional<int> typeRequest_ = std::nullopt;
+public:
 
 
 };
