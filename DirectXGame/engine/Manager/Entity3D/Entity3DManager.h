@@ -18,6 +18,7 @@
 
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/collider/3d/CollisionManager.h"
 
 class DirectXCommon;
 class Entity3DManager
@@ -35,6 +36,8 @@ public:
 	// 
 	void Update();
 
+	//void CheckAllCollisions();
+
 	void ObjectClean();
 
 	void ObjectDraw();
@@ -43,7 +46,7 @@ public: //セッター
 
 	//void SetEntity3D(std::unique_ptr<Object3d> entity3D);
 
-	// オブジェクト3D生成
+	// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
 	Object3d* CreateObject3D(const std::string& name, Object3d::ObjectModelType type, const Vector3& pos, Camera* camera) {
 		auto object = std::make_unique<Object3d>();
 		object->Initialize(this, type);
@@ -80,6 +83,13 @@ public: //セッター
 		return raw;
 	}
 
+	// タグでの削除
+	void EraseObject3DByTag(const std::string& tag) {
+		std::erase_if(object3d, [&](const std::unique_ptr<Object3d>& o) {
+			return  o->GetNameTag() == tag;
+			});
+	}
+
 public: //ゲッター
 
 	OceanManager* GetOceanManager() { return oceanManager_.get(); };
@@ -101,8 +111,13 @@ public: //ゲッター
 	PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
 
 	EffectManager* GetEffectManager() { return effectManager_.get(); }
+public:
+	//void SetCollisionManager(CollisionManager* collisionManager) {collisionManager_ = collisionManager;}
+
 
 private:
+	//CollisionManager* collisionManager_;
+
 
 	std::vector<std::unique_ptr<Object3d>> object3d;
 

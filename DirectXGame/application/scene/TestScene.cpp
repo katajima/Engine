@@ -38,6 +38,14 @@ void TestScene::Initialize()
 	loadData_ = std::make_unique<LoadLevelData>();
 	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
 
+
+	if (!loadData_->GetLevelData()->players.empty()) {
+		auto& playerData = loadData_->GetLevelData()->players[0];
+		skinningObject->worldtransform_.translate_ = playerData.position;
+		skinningObject->worldtransform_.rotate_ = playerData.rotation;
+	}
+
+
 	GlobalVariables* globalVariables = GetGlobalVariables();
 	globalVariables->CreateGroup("ddd");
 	globalVariables->AddItem("ddd","g_bool",g_bool);
@@ -250,11 +258,6 @@ void TestScene::Draw2D()
 
 
 
-		/*primitive2d1_->Update();
-		primitive2d1_->Draw();*/
-
-
-
 		break;
 	case TestScene::SceneBehavior::kSceneRoom02:
 		break;
@@ -320,17 +323,14 @@ void TestScene::InitializeObject3D()
 	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
 	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
-	oceanObject->SetIsDraw(false);
+	oceanObject->SetIsDraw(true);
 	
-	skinningObject = std::make_unique<Object3d>();
-	skinningObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkinning);
+
+	skinningObject = GetEntity3DManager()->CreateObject3D("iku", Object3d::ObjectModelType::kSkinning, {30,1,1}, camera.get());
 	skinningObject->SetModel("iku.gltf");
 	skinningObject->worldtransform_.translate_ = { 30,1,1 };
 	skinningObject->worldtransform_.scale_ = { 10,10,10 };
-	skinningObject->SetCamera(camera.get());
-	skinningObject->SetName("iku");
-	skinningObject->SetIsDraw(false);
-
+	skinningObject->SetIsDraw(true);
 
 	skinningObject2 = std::make_unique<Object3d>();
 	skinningObject2->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkinning);
@@ -339,7 +339,7 @@ void TestScene::InitializeObject3D()
 	skinningObject2->worldtransform_.scale_ = { 10,10,10 };
 	skinningObject2->SetCamera(camera.get());
 	skinningObject2->SetName("walk");
-	skinningObject2->SetIsDraw(false);
+	skinningObject2->SetIsDraw(true);
 
 	skinningObject3 = std::make_unique<Object3d>();
 	skinningObject3->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kNormal);
@@ -385,17 +385,7 @@ void TestScene::InitializeObject3D()
 	ring.innerRadius = 1.0f;
 	ring.outerRadius = 7.0f;
 	ring.segments = 16;
-	//primitiveObject = std::make_unique<Primitive>();
-	//primitiveObject->Initialize<ShapeParameter::Ring>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Ring, ring, "resources/Texture/effect/gradationLine.png");
-
 	
-	//primitiveObject3d = std::make_unique<Object3d>();
-	//primitiveObject3d->Initialize(GetEntity3DManager(), Object3d::ObjectType::kPrimitive); //primitiveObject
-	//primitiveObject3d->SetPrimitive(primitiveObject.get());
-	//primitiveObject3d->SetCamera(camera.get());
-	//primitiveObject3d->SetName("primitiveR");
-
-
 
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
@@ -481,9 +471,9 @@ void TestScene::InitializeParticle()
 {
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 	
-	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(camera.get());
+	//GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(camera.get());
 	
-	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(primiPlane->GetMesh());
+	//GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(primiPlane->GetMesh());
 	
 	
 	/*GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kAcceleration,Field::ShapeType::kAABB,"加速");

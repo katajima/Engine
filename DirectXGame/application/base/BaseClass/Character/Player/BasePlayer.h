@@ -3,13 +3,11 @@
 #include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
 #include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
 
-#include "DirectXGame/application/base/Character/Player/BasePlayerState.h"
+#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h"
 #include "DirectXGame/application/base/Character/Player/UI/PlayerUI.h"
 
 using StateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
 
-
-//class BasePlayerState;
 class FollowCamera;
 class BulletManager;
 class BasePlayer : public BaseCharacter
@@ -79,7 +77,7 @@ public:
 
 	
 
-protected:
+private:
 
 	void ChangeState(std::unique_ptr<BasePlayerState> newState) {
 		if (state_) {

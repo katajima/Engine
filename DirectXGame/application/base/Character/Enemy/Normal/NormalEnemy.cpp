@@ -74,6 +74,26 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				objectBase_->worldtransform_.Update();
 			}
 		}
+		if (other->tag == CollisionTag::Wall) {
+			Vector3 pushVec;
+			if (self->ResolveCollision(*other, pushVec)) {
+				if (other->isStatic) {
+					// 相手が動かないなら自分だけ押し戻す
+					objectBase_->worldtransform_.translate_ += pushVec;
+				}
+				else if (self->isStatic) {
+					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
+				}
+				else {
+					// 双方が動く → 半分ずつ押し戻す（応用例）
+					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+				}
+				acceleration_.y = 0;
+				velocity_.y = 0;
+				flags_.isGrounded = true;
+				objectBase_->worldtransform_.Update();
+			}
+		}
 		if (other->tag == CollisionTag::PlayerAttack) {
 			basicbehaviorRequest_ = BasicBehavior::kRoot;
 		}
@@ -472,7 +492,7 @@ void NormalEnemy::InitParticle()
 	scale = { 2,2,2 };
 	// 鋼板
 	plankEmit_ = std::make_unique<ParticleEmitter>();
-	plankEmit_->Initialize(particleManager, "", "enemyPlank");
+	plankEmit_->Initialize(particleManager, "enemyPlank", "enemyPlank");
 	plankEmit_->GetFrequency() = 0.0f;
 	plankEmit_->SetCount(10);
 	plankEmit_->SetParent(objectBase_->worldtransform_);

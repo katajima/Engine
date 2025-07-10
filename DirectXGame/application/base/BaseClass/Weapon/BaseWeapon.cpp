@@ -66,19 +66,19 @@ void BaseWeapon::AttackTypeInit(int comboIndex) {
 		case AttackTypePlay::kNormal:
 
 			if (comboIndex == 0) {
-				SetTime(0.1f, 0.2f, 0.1f);
+				SetTime(0.1f, 0.2f, 0.01f);
 				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,0 });
 			}
 			if (comboIndex == 1) {
-				SetTime(0.1f, 0.2f, 0.1f);
+				SetTime(0.1f, 0.2f, 0.01f);
 				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			if (comboIndex == 2) {
-				SetTime(0.1f, 0.2f, 0.1f);
+				SetTime(0.1f, 0.2f, 0.01f);
 				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,-90 });
 			}
 			if (comboIndex == 3) {
-				SetTime(0.1f, 0.2f, 0.1f);
+				SetTime(0.1f, 0.2f, 0.01f);
 				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
 			}
 			break;

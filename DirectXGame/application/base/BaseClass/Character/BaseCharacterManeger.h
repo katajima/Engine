@@ -70,9 +70,9 @@ public: // 取得系
 
 public: // 生成系
 	// キャラクター生成(敵)
-	void CreateCharacter(EnemyType enemyType, const std::string& characterName, Vector3 position);
+	void CreateCharacter(EnemyType enemyType, const std::string& characterName, Transform transform);
 	// キャラクター生成(プレイヤー)
-	void CreateCharacter(PlayerType playerType, const std::string& characterName, Vector3 position);
+	void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
 private:
 	

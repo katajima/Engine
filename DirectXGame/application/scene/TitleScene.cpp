@@ -14,6 +14,9 @@ void TitleScene::Initialize()
 	// リソース
 	InitializeResources();
 
+	//loadData_ = std::make_unique<LoadLevelData>();
+	//loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
+
 
 }
 
@@ -32,7 +35,7 @@ void TitleScene::Update()
 			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}
 	}
-
+	//loadData_->Update();
 	tail.Update();
 	camera->UpdateMatrix();
 }

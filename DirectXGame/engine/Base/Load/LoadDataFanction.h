@@ -12,5 +12,7 @@ namespace LoadDataFanc
 
 	void ModelTransfom(nlohmann::json& object, LevelData* levelData);
 
+	void SpawwnPoint(nlohmann::json& object, LevelData* levelData);
+
 }
 

@@ -39,7 +39,7 @@ void BaseCharacterManager::Draw2D()
 	}
 }
 
-void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, Vector3 position)
+void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, Transform transform)
 {
 	std::unique_ptr<BaseEnemy> enemy;
 	switch (enemyType)
@@ -67,12 +67,16 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 
 	enemy->SetCharacterType(CharacterType::Enemy);
 	enemy->SetID(characterCount_);
-	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
+	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
 	enemy->SetPlayer(GetPlayer());
+	enemy->GetObject3D()->worldtransform_.translate_ = transform.translate;
+	enemy->GetObject3D()->worldtransform_.rotate_ = transform.rotate;
+	//enemy->GetObject3D()->worldtransform_.scale_ = transform.scale;
+
 	character_.push_back(std::move(enemy));
 }
 
-void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Vector3 position)
+void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
 {
 	std::unique_ptr<BasePlayer> player;
 
@@ -93,7 +97,7 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 	player->SetCharacterType(CharacterType::Player);
 	player->SetFollowCamera(followCamera_);
 	player->SetBulletManager(bulletManager_);
-	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
+	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
 	character_.push_back(std::move(player));
 }
 

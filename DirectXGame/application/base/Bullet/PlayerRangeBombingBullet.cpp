@@ -2,7 +2,7 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Player/Player.h"
+#include "DirectXGame/application/base/Character/Player/Normal/Player.h"
 
 #include "DirectXGame/engine/math/random.h"
 

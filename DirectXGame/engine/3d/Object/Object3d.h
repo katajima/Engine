@@ -79,6 +79,8 @@ public:
 
 	// 名前設定
 	void SetName(const std::string& name) { this->name = name; }
+	// タグ設定
+	void SetNameTag(const std::string& name) { nameTag = name; }
 
 	// プリミティブ形状
 	void SetPrimitive(std::unique_ptr<Primitive> primitive);
@@ -140,7 +142,13 @@ public:
 	// 波取得
 	Ocean* GetOcean() { return ocean_; }
 
-	std::string GetObjectTypeName() { return objectTypeName; }
+	// オブジェクト型名前
+	std::string GetObjectTypeName() const { return objectTypeName; }
+
+	// タグ
+	std::string GetNameTag() const { return nameTag; }
+
+	bool GetIsColliderComponent() const {return isColliderComponent_;}
 
 	ObjectModelType GetObjectType() { return objectType_; }
 
@@ -159,7 +167,7 @@ public:
 
 	float GetAlpha();
 
-	bool GetIsSkin() { return isSkin_; }
+	bool GetIsSkin() const { return isSkin_; }
 
 	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
 
@@ -265,6 +273,9 @@ public:
 
 	// オブジェクト名前
 	std::string name = "";
+
+	// オブジェクトタグ
+	std::string nameTag = "";
 
 	// オブジェクトタイプ名前
 	std::string objectTypeName = "";

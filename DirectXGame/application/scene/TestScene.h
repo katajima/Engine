@@ -144,7 +144,7 @@ private:
 	/// </summary>
 
 	std::unique_ptr<Object3d> stairObject;
-	std::unique_ptr<Object3d> skinningObject;
+	Object3d* skinningObject;
 	std::unique_ptr<Object3d> skinningObject2;
 	std::unique_ptr<Object3d> skinningObject3;
 	Object3d tail;

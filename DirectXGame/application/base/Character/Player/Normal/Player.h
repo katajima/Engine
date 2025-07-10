@@ -1,7 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
 // プレイヤー
-#include"BasePlayerState.h"
 #include "DirectXGame/application/base/Character/Player/Effect/PlayerEffect.h"
 
 

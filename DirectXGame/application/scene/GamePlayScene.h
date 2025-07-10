@@ -3,6 +3,7 @@
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 #include"DirectXGame/engine/base/Timer.h"
+#include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
 #include"DirectXGame/application/base/BaseClass/Character/BaseCharacterManeger.h"
@@ -47,7 +48,6 @@ public:
 
 private:
 
-	void InitializeResources();
 	void InitializeCamera();
 
 private:
@@ -97,6 +97,8 @@ private:
 	std::unique_ptr<Stage> stage_;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
+	// レベルデータ
+	std::unique_ptr<LoadLevelData> loadData_;
 private:
 	// 衝突マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;

@@ -75,9 +75,9 @@ bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec
 	if (other.GetType() == ColliderType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 		Vector3 closest = {
-			std::clamp(centerWorld.x, o.aabb.min_.x, o.aabb.max_.x),
-			std::clamp(centerWorld.y, o.aabb.min_.y, o.aabb.max_.y),
-			std::clamp(centerWorld.z, o.aabb.min_.z, o.aabb.max_.z)
+			std::clamp(centerWorld.x, o.minWorld.x, o.maxWorld.x),
+			std::clamp(centerWorld.y, o.minWorld.y, o.maxWorld.y),
+			std::clamp(centerWorld.z, o.minWorld.z, o.maxWorld.z)
 		};
 
 		Vector3 diff = centerWorld - closest;
@@ -151,12 +151,15 @@ void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* line
 	minWorld = aabb.min_ + centerWorld;
 	maxWorld = aabb.max_ + centerWorld;
 
+	//Vector3 size = aabb.min_;//; +aabb.max_;
 
 #ifdef _DEBUG
 	if (lineCommon) {
 		if(enabled) {
 			// AABBの最小・最大座標を使ってラインを描画
 			lineCommon->AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
+			//OBB obb = { {centerWorld},{},{size} };
+			//lineCommon->AddLineOBB(obb, { 1,1,1,1 });
 		}
 		else {
 			// 無効な場合は透明にする
@@ -209,7 +212,7 @@ bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) 
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		// AABBの最近接点を求める
-		Vector3 closestPoint = Vector3::Clamp(sphere.centerWorld, aabb.min_, aabb.max_);
+		Vector3 closestPoint = Vector3::Clamp(sphere.centerWorld, minWorld, maxWorld);
 
 		Vector3 diff = sphere.centerWorld - closestPoint;
 		float distSq = diff.LengthSq();

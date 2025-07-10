@@ -1,7 +1,7 @@
 #include "playerWeapon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Player/Player.h"
+#include "DirectXGame/application/base/Character/Player/Normal/Player.h"
 
 void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
@@ -64,8 +64,8 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		if (self->id == weaponColliderId_) {
 			enemy->AddDamage(GetDamage() * 2);
 			enemy->hitStop(GetHitStopTime() * 2);
-			enemy->SetHitKnockbackPower(data_.knockbackData.power * 2);
-			enemy->SetHitKkonckbackYPower(data_.knockbackData.yPower * 2);
+			enemy->SetHitKnockbackPower(data_.knockbackData.power);
+			enemy->SetHitKkonckbackYPower(data_.knockbackData.yPower);
 		}else if(self->id == weaponColliderId2_) {
 			enemy->AddDamage(GetDamage());
 			enemy->hitStop(GetHitStopTime());
@@ -83,8 +83,8 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	
 	data_.damage = 10; // 武器のダメージ設定
-	data_.knockbackData.power = 150.5f; // ノックバックの力設定
-	data_.knockbackData.yPower = 20.5f; // Y方向のノックバックの力設定
+	data_.knockbackData.power = 15.5f; // ノックバックの力設定
+	data_.knockbackData.yPower = 4.5f; // Y方向のノックバックの力設定
 	SetTime(0.1f, 0.3f, 0.1f); // 武器のアニメーション時間設定
 
 

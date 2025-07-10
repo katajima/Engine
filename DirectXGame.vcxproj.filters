@@ -183,10 +183,7 @@
     <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Player.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\BasePlayerState.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.cpp">
@@ -456,6 +453,15 @@
     <ClCompile Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -661,10 +667,10 @@
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Player.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\BasePlayerState.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayerState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h">
@@ -1070,6 +1076,18 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Spawn\BasespawnPoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

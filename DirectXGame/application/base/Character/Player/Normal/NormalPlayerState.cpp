@@ -1,6 +1,7 @@
-#include "BasePlayerState.h"
+#include "NormalPlayerState.h"
 #include"Player.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+
 
 PlayerStateMove::PlayerStateMove(BasePlayer* player)
 	: BasePlayerState("Move", player) {
@@ -60,13 +61,14 @@ void PlayerStateMove::Enter()
 }
 
 PlayerStateAttack::PlayerStateAttack(BasePlayer* player)
-	: BasePlayerState("Attack", player) {}
+	: BasePlayerState("Attack", player) {
+}
 
 void PlayerStateAttack::Update()
 {
 	BaseWeapon* weapon = player_->GetWeapon();
-	
-	
+
+
 	// 攻撃処理
 	weapon->AttackUpdate();
 
@@ -75,6 +77,7 @@ void PlayerStateAttack::Update()
 		return;
 	}
 }
+
 
 void PlayerStateAttack::Exit()
 {
@@ -94,7 +97,8 @@ void PlayerStateAttack::Enter()
 }
 
 PlayerStateSpecial::PlayerStateSpecial(BasePlayer* player)
-	: BasePlayerState("Special", player) {}
+	: BasePlayerState("Special", player) {
+}
 
 void PlayerStateSpecial::Update()
 {

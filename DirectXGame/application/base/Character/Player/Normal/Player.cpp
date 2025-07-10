@@ -74,6 +74,26 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 				objectBase_->Update();
 			}
 		}
+		if (other->tag == CollisionTag::Wall) {
+			if (self->ResolveCollision(*other, pushVec)) {
+				if (other->isStatic) {
+					// 相手が動かないなら自分だけ押し戻す
+					objectBase_->worldtransform_.translate_ += pushVec;
+				}
+				else if (self->isStatic) {
+
+				}
+				else {
+					// 双方が動く → 半分ずつ押し戻す（応用例）
+					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+
+				}
+				velocity_.y = 0;
+				acceleration_.y = 0;
+
+				objectBase_->Update();
+			}
+		}
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;

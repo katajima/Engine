@@ -6,9 +6,9 @@
             "name": "building",
             "transform": {
                 "translation": [
-                    0.0,
-                    0.0,
-                    0.0
+                    57.26722717285156,
+                    488.22198486328125,
+                    166.36451721191406
                 ],
                 "rotation": [
                     0.0,
@@ -20,7 +20,9 @@
                     10.0,
                     10.0
                 ]
-            }
+            },
+            "disabled": 0,
+            "file_name": "building"
         },
         {
             "type": "MESH",
@@ -41,7 +43,9 @@
                     1.0,
                     1.0
                 ]
-            }
+            },
+            "disabled": 0,
+            "file_name": "trainBridge"
         },
         {
             "type": "MESH",
@@ -61,6 +65,29 @@
                     10.0,
                     10.0,
                     10.0
+                ]
+            },
+            "disabled": 0,
+            "file_name": "Ground"
+        },
+        {
+            "type": "PlayerSpawn",
+            "name": "PlayerSpawn",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    118.88053894042969
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    12.253275871276855
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
                 ]
             }
         }

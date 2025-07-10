@@ -1,0 +1,397 @@
+{
+    "name": "scene",
+    "objects": [
+        {
+            "type": "MESH",
+            "name": "円柱",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "field",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "橋",
+            "transform": {
+                "translation": [
+                    0.0,
+                    744.1453857421875,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "trainBridge"
+        },
+        {
+            "type": "MESH",
+            "name": "立方体",
+            "transform": {
+                "translation": [
+                    0.0,
+                    26.5148983001709,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    4.0,
+                    4.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn",
+            "transform": {
+                "translation": [
+                    57.596473693847656,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Normal",
+            "emitSpawn": {
+                "spawn_enable": 1,
+                "spawn_count": 5,
+                "spawn_timer": 3.0
+            }
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.001",
+            "transform": {
+                "translation": [
+                    -34.91377258300781,
+                    53.55630874633789,
+                    -1.9073486328125e-06
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Normal",
+            "emitSpawn": {
+                "spawn_enable": 1,
+                "spawn_count": 3,
+                "spawn_timer": 1.0
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.001",
+            "transform": {
+                "translation": [
+                    0.0,
+                    -56.502349853515625,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    4.0,
+                    4.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.002",
+            "transform": {
+                "translation": [
+                    51.794700622558594,
+                    -31.942974090576172,
+                    1.9073486328125e-06
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "disabled": 0,
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    35.31999969482422,
+                    4.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.003",
+            "transform": {
+                "translation": [
+                    -7.585624694824219,
+                    71.55760192871094,
+                    1.9073486328125e-06
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    4.060080528259277,
+                    4.060080528259277,
+                    4.060080528259277
+                ]
+            },
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    4.0,
+                    4.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.004",
+            "transform": {
+                "translation": [
+                    -33.708290100097656,
+                    -21.19523811340332,
+                    -6.798334121704102
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    4.0,
+                    4.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.005",
+            "transform": {
+                "translation": [
+                    -7.204643249511719,
+                    -151.16973876953125,
+                    9.5367431640625e-06
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    12.182440757751465,
+                    12.182440757751465,
+                    1.2180242538452148
+                ]
+            },
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    4.0,
+                    4.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "type": "EnemySpawn",
+            "name": "EnemySpawn.002",
+            "transform": {
+                "translation": [
+                    -6.848602294921875,
+                    -153.6658935546875,
+                    15.648231506347656
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    10.0,
+                    10.0,
+                    10.0
+                ]
+            },
+            "file_name": "Normal",
+            "emitSpawn": {
+                "spawn_enable": 0,
+                "spawn_count": 3,
+                "spawn_timer": 1.0
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.006",
+            "transform": {
+                "translation": [
+                    -31.457538604736328,
+                    -44.9610710144043,
+                    41.600311279296875
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    11.012946128845215,
+                    11.012946128845215,
+                    0.17647826671600342
+                ]
+            },
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 1,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    4.0,
+                    4.0,
+                    20.0
+                ]
+            }
+        }
+    ]
+}

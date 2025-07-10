@@ -34,10 +34,29 @@ void LoadDataFanc::ModelTransfom(nlohmann::json& object, LevelData* levelData)
 		levelData->objects.emplace_back(LevelData::ObjectData{});
 		//今追加した要素の参照を得る 
 		LevelData::ObjectData& objectData = levelData->objects.back();
-		if (object.contains("name")) {
+		if (object.contains("file_name")) {
 			// ファイル名 
-			objectData.fileName = object["name"];
+			objectData.fileName = object["file_name"];
 		}
+		if (object.contains("collider")) {
+			auto& collider = object["collider"];
+			if (collider.contains("collider_size")) {
+				auto& size = collider["collider_size"];
+				objectData.size.x = size[0];
+				objectData.size.y = size[2];
+				objectData.size.z = size[1];
+			}
+			if (collider.contains("collider")) {
+				objectData.type = collider["collider"];
+			}
+			if (collider.contains("collider_disabled")) {
+				objectData.isCollider = collider["collider_disabled"];
+			}
+		}
+		else {
+			objectData.isCollider = false;
+		}
+
 		// トランスフォームのパラメータ読み込み 
 		nlohmann::json& transform = object["transform"];
 		// 平行移動 
@@ -54,5 +73,66 @@ void LoadDataFanc::ModelTransfom(nlohmann::json& object, LevelData* levelData)
 		objectData.scale.z = (float)transform["scaling"][1];
 		// 再帰関数にまとめ、再帰呼出で枝を走査する 
 		if (object.contains("children")) {}
+	}
+}
+
+void LoadDataFanc::SpawwnPoint(nlohmann::json& object, LevelData* levelData)
+{
+	assert(object.contains("type"));
+	// 種別を取得 
+	std::string type = object["type"].get<std::string>();
+	if (type.compare("PlayerSpawn") == 0) {
+		// 要素追加 
+		levelData->players.emplace_back(LevelData::PlayerSpawnData{});
+		//今追加した要素の参照を得る 
+		LevelData::PlayerSpawnData& playerSpawnData = levelData->players.back();
+		
+		// トランスフォームのパラメータ読み込み 
+		nlohmann::json& transform = object["transform"];
+		// 平行移動 
+		playerSpawnData.position.x = (float)transform["translation"][0];
+		playerSpawnData.position.y = (float)transform["translation"][2];
+		playerSpawnData.position.z = (float)transform["translation"][1];
+		// 回転 
+		playerSpawnData.rotation.x = -(float)transform["rotation"][0];
+		playerSpawnData.rotation.y = -(float)transform["rotation"][2];
+		playerSpawnData.rotation.z = -(float)transform["rotation"][1];
+	}
+	else if (type.compare("EnemySpawn") == 0) {
+		// 要素追加 
+		levelData->enemys.emplace_back(LevelData::EnemySpawnData{});
+		levelData->counts.emplace_back(0);
+		//今追加した要素の参照を得る 
+		LevelData::EnemySpawnData& enemySpawnData = levelData->enemys.back();
+		int& countData = levelData->counts.back();
+		if (object.contains("file_name")) {
+			// ファイル名 
+			enemySpawnData.fileName = object["file_name"];
+		}
+		if (object.contains("emitSpawn")) {
+			auto& emitSpawn = object["emitSpawn"];
+			//enemySpawnData.crrentCount = 0;
+			enemySpawnData.crrentTimer = 0;
+			if (emitSpawn.contains("spawn_enable")) {
+				enemySpawnData.isEnable = emitSpawn["spawn_enable"];
+			}
+			if (emitSpawn.contains("spawn_count")) {
+				enemySpawnData.count = emitSpawn["spawn_count"];
+			}
+			if (emitSpawn.contains("spawn_count")) {
+				enemySpawnData.timer = emitSpawn["spawn_timer"];
+			}
+		}
+
+		// トランスフォームのパラメータ読み込み 
+		nlohmann::json& transform = object["transform"];
+		// 平行移動 
+		enemySpawnData.position.x = (float)transform["translation"][0];
+		enemySpawnData.position.y = (float)transform["translation"][2];
+		enemySpawnData.position.z = (float)transform["translation"][1];
+		// 回転 
+		enemySpawnData.rotation.x = -(float)transform["rotation"][0];
+		enemySpawnData.rotation.y = -(float)transform["rotation"][2];
+		enemySpawnData.rotation.z = -(float)transform["rotation"][1];
 	}
 }

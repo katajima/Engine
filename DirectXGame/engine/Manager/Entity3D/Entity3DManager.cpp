@@ -52,7 +52,8 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 void Entity3DManager::UpdateImgui()
 {
 #ifdef _DEBUG
-
+	ImGui::Begin("EmitParticle");
+	ImGui::End();
 	std::string title = reinterpret_cast<const char*>(ICON_MD_HOME);
 
 	title += " SceneCollection";
@@ -88,6 +89,19 @@ void Entity3DManager::UpdateImgui()
 		ImGui::DragFloat3("T_rotate", &entity->worldtransform_.rotate_.x, 0.1f);
 		ImGui::DragFloat3("T_translate", &entity->worldtransform_.translate_.x, 0.1f);
 
+		std::string nameColliderComponent = "";
+		if (entity->GetIsColliderComponent()) {
+			if (ImGui::CollapsingHeader("ColliderComponent")) {
+				int collIndex = 0;
+				for (auto& coll : entity->GetColliderComponent()->GetAllColliders()) {
+					nameColliderComponent = "Collider" + std::to_string(collIndex);
+					if (ImGui::CollapsingHeader(nameColliderComponent.c_str())) {
+						ImGui::InputFloat3("position", &coll->centerWorld.x);
+					}
+					collIndex++;
+				}
+			}
+		}
 
 		if (entity->GetIsSkin()) {
 			ImGui::Separator();
@@ -206,7 +220,6 @@ void Entity3DManager::UpdateImgui()
 
 void Entity3DManager::Update()
 {
-
 	object3d.erase(
 		std::remove_if(object3d.begin(), object3d.end(),
 			[](const std::unique_ptr<Object3d>& object) {
@@ -238,10 +251,14 @@ void Entity3DManager::Update()
 					}
 				}
 			}
+			//if (object->GetIsColliderComponent() && !object->GetIsDelete()) {
+			//	collisionManager_->Register(object->GetColliderComponent());
+			//}
 		}
 	}
 
-
+	// コライダーチェック
+	//CheckAllCollisions();
 
 }
 

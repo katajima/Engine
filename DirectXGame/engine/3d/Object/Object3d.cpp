@@ -34,7 +34,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
 	
 
-
+	isColliderComponenyUpdate_ = true;
 	isTrailEffect = false;
 	isSkin_ = false;
 

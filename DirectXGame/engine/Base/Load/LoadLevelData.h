@@ -24,20 +24,29 @@ public:
 
 	// 描画
 	void Draw3D();
-private:
 
+public:
+	LevelData* GetLevelData() { return levelData_; };
+
+	std::vector<Object3d*>GetObjects() { return objects_; }
+
+private:
+	// オブジェクト3D生成
 	void CreateObject3d(LevelData* levelData);
+	// スポーンポイントの生成
+	//void CreateSpawnPoint(LevelData* levelData);
+
 
 private:
-	// ロードデータ用
-	std::vector<std::unique_ptr<Object3d>> objects;
-
 	Entity3DManager* entity3DManager_;
 	ModelManager* modelManager_;
+	std::vector<Object3d*> objects_;
 private:
 	std::string kFileName;
 	std::string kExtension;
 	std::string kDefaultBaseDirectory = "resources/";
 	std::string extensionName;
+	// レベルデータ格納用インスタンスを生成 
+	LevelData* levelData_ = nullptr;
 };
 

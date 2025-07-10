@@ -56,14 +56,6 @@ void GamePlayScene::Initialize()
 	universeCamera_ = std::make_unique<UniverseCamera>();
 	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
 
-	// 敵生成(10体)
-	for (int i = 0; i < 1; i++) {
-
-		Vector3 rand = Random::RandomVector3(-100, 100);
-		rand.y = 2;
-		caracterManager_->CreateCharacter(EnemyType::kNormal, "", rand + Vector3{ 0,0,10 });
-	}
-
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
@@ -77,12 +69,23 @@ void GamePlayScene::Initialize()
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
+	//GetEntity3DManager()->SetCollisionManager(collisionManager_.get());
+	// オブジェクト3D
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+	ParticleManager* particleManager = GetEntity3DManager()->GetEffectManager()->GetParticleManager();
 
 
-	InitializeResources();
+	gameUI->Initialize(GetEntity2DManager());
+	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
-	debugTimerAll_.EndTimer();
-	debugTimerAll_.LogTimeSec("AllGamePlayScene ");
+
+	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "gameScene.json");
+
+	for (auto& enemy : loadData_->GetLevelData()->enemys) {
+		if(enemy.isEnable)
+		caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
+	}
 }
 
 
@@ -97,26 +100,7 @@ void GamePlayScene::InitializeCamera()
 	camera->transform_.translate = { 5,32.5f,-59.2f };
 
 	flag = true;
-#ifdef _DEBUG
-
-	//flag = false;
-
-#endif // _DEBUG]
-
 	SetCamera(camera.get());
-}
-
-// 各オブジェクトやスプライトなどの初期化
-void GamePlayScene::InitializeResources()
-{
-	// オブジェクト3D
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-	ParticleManager* particleManager = GetEntity3DManager()->GetEffectManager()->GetParticleManager();
-
-
-	gameUI->Initialize(GetEntity2DManager());
-	gameUI->SetPlayer(caracterManager_->GetPlayer());
-
 }
 
 // 調整項目
@@ -133,7 +117,13 @@ void GamePlayScene::CheckAllCollisions()
 	// プレイヤーコライダーセット
 	//collisionManager_->Register(player_->GetColliderComponent());
 
-	// 敵コライダーセット
+	for (auto objects : loadData_->GetObjects()) {
+		if (objects->GetIsColliderComponent()) {
+			collisionManager_->Register(objects->GetColliderComponent());
+		}
+	}
+
+	// キャラクターセット
 	for (auto caracter : caracterManager_->GetCharacters()) {
 		if (caracter->GetHP() <= 0) continue;
 		collisionManager_->Register(caracter->GetColliderComponent());
@@ -220,7 +210,19 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-
+	int countIndex = 0;
+	for (auto& enemy : loadData_->GetLevelData()->enemys) {
+		if (enemy.isEnable)
+		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
+			enemy.crrentTimer += MyGame::GameTime();
+			if (enemy.crrentTimer >= enemy.timer) {
+				caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
+				loadData_->GetLevelData()->counts[countIndex]++;
+				enemy.crrentTimer = 0;
+			}
+		}
+		countIndex++;
+	}
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -250,7 +252,7 @@ void GamePlayScene::Update()
 	ImGui::Begin("Debug");
 	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
 	if (ImGui::Button("ADDEnemy")) {
-		caracterManager_->CreateCharacter(EnemyType::kNormal, "", enemyPosition);
+		caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, enemyPosition));
 	}
 	ImGui::Checkbox("isUniverseCamera", &isUniverseCamera);
 	ImGui::End();
@@ -309,6 +311,9 @@ void GamePlayScene::Update()
 		camera->UpdateMatrix();
 	}
 
+
+	// レベルデータアップデート
+	loadData_->Update();
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ

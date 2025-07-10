@@ -26,8 +26,9 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	sceneManager_->ChangeScene("TITLE");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -301,7 +302,7 @@ void MyGame::LoadModel()
 
 
 	//modelManager->LoadModel("walk.gltf", "human");
-	//modelManager->LoadModel("iku.gltf", "iku");
+	modelManager->LoadModel("iku.gltf", "iku");
 
 
 
@@ -362,6 +363,9 @@ void MyGame::LoadModel()
 
 
 	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
+	//modelManager->LoadModel("trainBridge.obj", "stage/Bridge"); // ステージ(橋)
+	modelManager->LoadModel("field.obj", "stage/Field"); // フィールド()
+	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
 
 
 	/// <summary>

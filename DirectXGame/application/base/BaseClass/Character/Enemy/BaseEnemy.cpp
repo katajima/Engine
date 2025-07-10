@@ -1,6 +1,6 @@
 #include "BaseEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include "DirectXGame/application/base/Character/Player/Player.h"
+#include "DirectXGame/application/base/Character/Player/Normal/Player.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 
 
