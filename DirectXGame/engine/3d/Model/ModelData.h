@@ -24,32 +24,25 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-struct SkinningSRVUAV {
-	uint32_t wellSrvIndex; // Well
-	uint32_t inputVerticesIndex; // 入力頂点
-	uint32_t influencesIndex; // 入力インフルエンス
-	uint32_t outputVerticesUavIndex; // 計算後の頂点データ
-};
+
 
 //モデルデータ
 struct ModelData
 {
 	std::string name;										// 名前
-	std::map<std::string, JointWeightData> skinClusterData;	// スキンクラスターデータ
 	bool isNormalmap;										// ノーマルマップを使っているか？
 	std::unordered_map<uint32_t, Vector3> meshOffsetMap;	// オフセット位置
 	Node rootNode;											// ノードデータ
 	bool isAssimp;											// アシンプか
 	bool isAmimetion;										// アニメーションするか
 	bool isTangent;											// タンジェント
-	SkinningSRVUAV skinning;								// スキニング用のSRV、UAVのインデックス
 	std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
 	std::unique_ptr<ModelMesh> allMesh;
 	std::vector<uint32_t> cachedLineIndices_;				// ライン
-	Animation animation;									// アニメーション
+	std::map<std::string, Animation> animations;			// 名前付きアニメーション
+	std::string currentAnimName = "Idle";					// 現在のアニメーション名前
 	float animationTime = 0.0f;								// アニメーション時間
 	Skeleton skeleton;										// スケルトン
-	SkinCluster skinCluster;								// スキンクラスター
 };
 
 class DirectXCommon;

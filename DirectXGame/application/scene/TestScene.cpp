@@ -326,8 +326,8 @@ void TestScene::InitializeObject3D()
 	oceanObject->SetIsDraw(true);
 	
 
-	skinningObject = GetEntity3DManager()->CreateObject3D("iku", Object3d::ObjectModelType::kSkinning, {30,1,1}, camera.get());
-	skinningObject->SetModel("iku.gltf");
+	skinningObject = GetEntity3DManager()->CreateObject3D("KnightCharacter", Object3d::ObjectModelType::kSkinning, {30,1,1}, camera.get());
+	skinningObject->SetModel("KnightCharacter.gltf");
 	skinningObject->worldtransform_.translate_ = { 30,1,1 };
 	skinningObject->worldtransform_.scale_ = { 10,10,10 };
 	skinningObject->SetIsDraw(true);
@@ -707,8 +707,14 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
-	
-
+	ImGui::Begin("Animetion");
+	if (ImGui::Button("Idle")) {
+		skinningObject->SetAnimetion("Idle");
+	}
+	if (ImGui::Button("Run")) {
+		skinningObject->SetAnimetion("Run");
+	}
+	ImGui::End();
 }
 
 void TestScene::UpdateRoom02()

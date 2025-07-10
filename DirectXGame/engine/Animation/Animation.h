@@ -141,12 +141,21 @@ struct SkinningInfomation {
 	uint32_t numVertices;
 };
 
+
+struct SkinningSRVUAV {
+	uint32_t wellSrvIndex; // Well
+	uint32_t inputVerticesIndex; // 入力頂点
+	uint32_t influencesIndex; // 入力インフルエンス
+	uint32_t outputVerticesUavIndex; // 計算後の頂点データ
+};
 /// <summary>
 /// スキンクラスター
 /// </summary>
 struct SkinCluster {
-	std::vector<Matrix4x4> inverseBindPoseMatrices;
+	SkinningSRVUAV srvUavIndices;
 
+	std::vector<Matrix4x4> inverseBindPoseMatrices;
+	std::map<std::string, JointWeightData> skinClusterData;	// ← 全体で1つだけ
 	/// <summary>
 	/// 
 	/// </summary>
@@ -183,6 +192,7 @@ struct SkinCluster {
 	/// </summary>
 	Microsoft::WRL::ComPtr < ID3D12Resource> skinningInfomation;
 	SkinningInfomation* skinningInfomationDeta;
+
 };
 
 

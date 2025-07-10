@@ -3,6 +3,7 @@
 
 #include "DirectXGame/engine/DirectX/Resource/VertexBufferResource.h"
 #include "DirectXGame/engine/DirectX/Resource/IndexBufferResource.h"
+#include "DirectXGame/engine/Animation/Animation.h"
 
 class Material;
 class ModelMesh : public BaseMesh {
@@ -26,6 +27,11 @@ public:
 	Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return vbvResorce_.GetVertexResource(); };
 
 	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vbvResorce_.GetVertexBufferView(); }
+
+
+	// メッシュごとのスキンクラスタ
+	std::unique_ptr<SkinCluster> skinCluster;
+
 public:
 	std::vector<VertexData> vertices;
 	std::vector<LineVertexData> verticesline;
@@ -36,4 +42,10 @@ public:
 private:
 	VertexBuffer<VertexData> vbvResorce_;
 	IndexBuffer<uint32_t> indexResorce_;
+};
+
+
+struct MeshData
+{
+
 };

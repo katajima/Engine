@@ -81,6 +81,9 @@ public:
 	void SetName(const std::string& name) { this->name = name; }
 	// タグ設定
 	void SetNameTag(const std::string& name) { nameTag = name; }
+	// アニメーション変更
+	void SetAnimetion(const std::string& name) { model->modelData.currentAnimName = name; }
+
 
 	// プリミティブ形状
 	void SetPrimitive(std::unique_ptr<Primitive> primitive);
@@ -205,7 +208,7 @@ private:
 	bool isIndividualCamera_ = false;
 
 	// アニメーションするかのフラグ
-	bool flag = true;
+	//bool flag = true;
 
 	// ImGuiを表示するか
 	bool imguiFlag_ = false;

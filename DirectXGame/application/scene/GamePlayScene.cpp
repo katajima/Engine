@@ -69,7 +69,6 @@ void GamePlayScene::Initialize()
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	//GetEntity3DManager()->SetCollisionManager(collisionManager_.get());
 	// オブジェクト3D
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 	ParticleManager* particleManager = GetEntity3DManager()->GetEffectManager()->GetParticleManager();

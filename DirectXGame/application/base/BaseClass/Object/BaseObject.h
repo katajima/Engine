@@ -164,7 +164,7 @@ protected:
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	ObjectStateFlags flags_;	// 重力の有無(デフォルトはtrue、falseで重力を無効化)
 	float forceGravity_ = 9.8f;	// 重力の強さ(デフォルトは9.8f、0.0fで重力を無効化)
-	float groundHeight_ = 2.0f; // 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
+	float groundHeight_ = 0.0f; // 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
 private:
 	
 

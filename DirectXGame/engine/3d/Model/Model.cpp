@@ -30,6 +30,8 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	// メッシュ状にライン生成
 	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->indices);
 
+
+	
 	// アニメーションがあるなら
 	if (modelData.isAmimetion) {
 		;
@@ -42,8 +44,12 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 		// スキンクラスター生成
 		CreateModel::CreateSkinCluster(modelData, modelCommon_);
 
+		auto it = modelData.animations.find(modelData.currentAnimName);
+		if (it != modelData.animations.end()) {
+			Animetion::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
+		}
 		// 
-		Animetion::ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
+		//Animetion::ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
 	}
 
 	// マテリアル読み込み
@@ -82,22 +88,22 @@ void Model::DrawSkinning()
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 
-		mesh->GetCommandList(modelData.skinCluster.outputBufferView, modelData.skinCluster.influenceBufferView);
+		mesh->GetCommandList(mesh->skinCluster->outputBufferView,mesh->GetVertexBufferView()/* modelData.skinCluster.influenceBufferView*/);
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 
-	}
 
-	// 初期状態を UAV 用に遷移させる
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = modelData.skinCluster.outputVertexResource.Get();
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	commandList->ResourceBarrier(1, &barrier);
+		// 初期状態を UAV 用に遷移させる
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		commandList->ResourceBarrier(1, &barrier);
+	}
 }
 
 float Model::GetMaterialAlfa()

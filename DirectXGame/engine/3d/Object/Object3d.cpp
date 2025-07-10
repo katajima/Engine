@@ -116,22 +116,22 @@ void Object3d::Update()
 		// モデルが存在する場合
 		if (model) {
 			// アニメーションの更新
-			if (model->modelData.animation.flag) {
-				if (flag) {
-					model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
-				}
-				model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
+			//if (model->modelData.animation.flag) {
+			//	if (flag) {
+			//		model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+			//	}
+			//	model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
 
-				// 単一のジョイントの場合
-				const NodeAnimation& rootNodeAnimation = model->modelData.animation.nodeAnimations[model->modelData.rootNode.name];
-				Vector3 translate = Animetion::CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
-				Quaternion rotate = Animetion::CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
-				Vector3 scale = Animetion::CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
-				localMatrix = MakeAffineMatrix(scale, rotate, translate);
-			}
-			else {
+			//	// 単一のジョイントの場合
+			//	const NodeAnimation& rootNodeAnimation = model->modelData.animation.nodeAnimations[model->modelData.rootNode.name];
+			//	Vector3 translate = Animetion::CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
+			//	Quaternion rotate = Animetion::CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
+			//	Vector3 scale = Animetion::CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
+			//	localMatrix = MakeAffineMatrix(scale, rotate, translate);
+			//}
+			/*else {
 				localMatrix = model->modelData.rootNode.localMatrix;
-			}
+			}*/
 			for (auto& mesh : model->modelData.mesh) {
 				mesh->material->GPUData();
 			}
@@ -144,24 +144,36 @@ void Object3d::Update()
 
 		// モデルが存在する場合
 		if (model) {
-			// アニメーションの更新
-			if (model->modelData.animation.flag) {
-				if (flag) {
-					model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
-				}
-				model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
-				localMatrix = model->modelData.skeleton.joints[0].skeletonSpaceMatrix;
+			// 現在のアニメーション名と一致するアニメーションを探す
+			const auto& animations = model->modelData.animations;
+			const std::string& currentName = model->modelData.currentAnimName;
 
-				Animetion::ApplyAnimation(model->modelData.skeleton, model->modelData.animation, model->modelData.animationTime);
-				// スケルトンの更新
+			auto it = animations.find(currentName);
+			if (it != animations.end()) {
+				const Animation& currentAnimation = it->second;
+
+				// アニメーション時間を更新
+				model->modelData.animationTime += MyGame::GameTime();
+				// アニメーション適用
+				Animetion::ApplyAnimation(model->modelData.skeleton, currentAnimation, model->modelData.animationTime);
 				Animetion::UpdateSkeleton(model->modelData.skeleton);
+				for (auto& mesh : model->modelData.mesh) {
+					model->modelData.animationTime = std::fmod(model->modelData.animationTime, currentAnimation.duration);
 
-				// スキニング更新
-				Animetion::UpdateSkinCluster(model->modelData.skinCluster, model->modelData.skeleton);
-
+					
+					Animetion::UpdateSkinCluster(*mesh->skinCluster, model->modelData.skeleton);
+					
+				}
+				localMatrix = model->modelData.skeleton.joints[0].skeletonSpaceMatrix;
+				// デバッグ用スケルトン描画
 				Animetion::DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->modelData.skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
 			}
+
+
+
+
 			else {
+				// アニメーションが見つからない場合のフォールバック
 				localMatrix = model->modelData.rootNode.localMatrix;
 			}
 			for (auto& mesh : model->modelData.mesh) {
@@ -443,26 +455,27 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 {
 	skinningConmmon_->DrawComputeSetting();
 
+	for (auto& mesh : model->modelData.mesh) {
 
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, model->modelData.skinCluster.paletteSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, model->modelData.skinCluster.inputVertexSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, model->modelData.skinCluster.influenceSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, model->modelData.skinCluster.outputVertexUavHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, model->modelData.skinCluster.skinningInfomation->GetGPUVirtualAddress());
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, mesh->skinCluster->paletteSrvHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, mesh->skinCluster->inputVertexSrvHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, mesh->skinCluster->influenceSrvHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, mesh->skinCluster->outputVertexUavHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, mesh->skinCluster->skinningInfomation->GetGPUVirtualAddress());
 
 
-	skinningConmmon_->GetDxCommon()->GetCommandList()->Dispatch(UINT(model->modelData.mesh[0]->vertices.size() + 1023) / 1024, 1, 1);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->Dispatch(UINT(mesh->vertices.size() + 1023) / 1024, 1, 1);
 
-	// 初期状態を UAV 用に遷移させる
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = model->modelData.skinCluster.outputVertexResource.Get();
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-	skinningConmmon_->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
-
+		// 初期状態を UAV 用に遷移させる
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+		skinningConmmon_->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
+	}
 
 	switch (type)
 	{
