@@ -1,4 +1,5 @@
 #include "Animation.h"
+#include"DirectXGame/engine/3d/Model/Model.h"
 
 void Animetion::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
@@ -79,6 +80,36 @@ void Animetion::UpdateSkeleton(Skeleton& skeleton)
 	}
 }
 
+void Animetion::BlendSkeletons(Skeleton& outSkeleton,
+	const Skeleton& fromSkeleton,
+	const Skeleton& toSkeleton,
+	float t)
+{
+	size_t jointCount = fromSkeleton.joints.size();
+	outSkeleton.joints.resize(jointCount);
+
+	for (size_t i = 0; i < jointCount; ++i) {
+		const Joint& fromJoint = fromSkeleton.joints[i];
+		const Joint& toJoint = toSkeleton.joints[i];
+
+		Joint& outJoint = outSkeleton.joints[i];
+
+		// Transformの補間
+		outJoint.transform.translate = Lerp(fromJoint.transform.translate, toJoint.transform.translate, t);
+		outJoint.transform.scale = Lerp(fromJoint.transform.scale, toJoint.transform.scale, t);
+		outJoint.transform.rotate = Slerp(fromJoint.transform.rotate, toJoint.transform.rotate, t);
+
+		// 残りの固定情報はどちらでもOK
+		outJoint.name = fromJoint.name;
+		outJoint.index = fromJoint.index;
+		outJoint.parent = fromJoint.parent;
+		outJoint.children = fromJoint.children;
+	}
+
+	// 補間後、localMatrix / skeletonSpaceMatrix を更新する
+	Animetion::UpdateSkeleton(outSkeleton);
+}
+
 void Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale)
 {
 	// ジョイントごとの深さを計算して保存
@@ -104,6 +135,17 @@ void Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& jo
 		}
 	}
 
+}
+
+void Animetion::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
+{
+	if (modelData.currentAnimName != newAnimName) {
+		modelData.previousAnimName = modelData.currentAnimName;
+		modelData.currentAnimName = newAnimName;
+		modelData.blendTime = 0.0f;
+		modelData.blendDuration = blendDuration;
+		modelData.isBlending = true;
+	}
 }
 
 void Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton)

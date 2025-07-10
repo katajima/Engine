@@ -144,30 +144,80 @@ void Object3d::Update()
 
 		// モデルが存在する場合
 		if (model) {
-			// 現在のアニメーション名と一致するアニメーションを探す
 			const auto& animations = model->modelData.animations;
-			const std::string& currentName = model->modelData.currentAnimName;
+			auto& modelData = model->modelData;
 
-			auto it = animations.find(currentName);
-			if (it != animations.end()) {
-				const Animation& currentAnimation = it->second;
+			const std::string& currentName = modelData.currentAnimName;
+			auto itCurrent = animations.find(currentName);
 
-				// アニメーション時間を更新
-				model->modelData.animationTime += MyGame::GameTime();
-				// アニメーション適用
-				Animetion::ApplyAnimation(model->modelData.skeleton, currentAnimation, model->modelData.animationTime);
-				Animetion::UpdateSkeleton(model->modelData.skeleton);
-				for (auto& mesh : model->modelData.mesh) {
-					model->modelData.animationTime = std::fmod(model->modelData.animationTime, currentAnimation.duration);
+			if (itCurrent != animations.end()) {
+				// アニメーション時間更新（毎フレーム）
+				float deltaTime = MyGame::GameTime();
+				modelData.animationTime += deltaTime;
+				modelData.animationTime = std::fmod(modelData.animationTime, itCurrent->second.duration);
 
-					
-					Animetion::UpdateSkinCluster(*mesh->skinCluster, model->modelData.skeleton);
-					
+				// アニメーションブレンド中か？
+				if (modelData.isBlending && modelData.previousAnimName != "") {
+					auto itPrev = animations.find(modelData.previousAnimName);
+					if (itPrev != animations.end()) {
+						const Animation& prevAnim = itPrev->second;
+						const Animation& currAnim = itCurrent->second;
+
+						// 時間取得
+						float prevTime = std::fmod(modelData.animationTime, prevAnim.duration);
+						float currTime = std::fmod(modelData.animationTime, currAnim.duration);
+
+						// ① 各スケルトン姿勢を取得
+						Skeleton prevSkeleton = modelData.skeleton;
+						Skeleton currSkeleton = modelData.skeleton;
+						Animetion::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
+						Animetion::ApplyAnimation(currSkeleton, currAnim, currTime);
+
+						// ② 補間割合を更新（EaseInOutでなめらかに）
+						modelData.blendTime += deltaTime;
+						float t = modelData.blendTime / modelData.blendDuration;
+						t = std::clamp(t, 0.0f, 1.0f);
+						t = t * t * (3.0f - 2.0f * t); // Hermite補間（EaseInOut）
+
+						// ③ スケルトン補間
+						Animetion::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
+
+						// ブレンド完了判定
+						if (modelData.blendTime >= modelData.blendDuration) {
+							modelData.isBlending = false;
+							modelData.previousAnimName.clear();
+						}
+					}
+					else {
+						// 前アニメーションが見つからなければ通常再生
+						Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+					}
 				}
-				localMatrix = model->modelData.skeleton.joints[0].skeletonSpaceMatrix;
-				// デバッグ用スケルトン描画
-				Animetion::DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->modelData.skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
+				else {
+					// ブレンドしていない通常の再生
+					Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+				}
+
+				// スケルトン姿勢更新
+				Animetion::UpdateSkeleton(modelData.skeleton);
+
+				// 各メッシュのスキンクラスタ更新
+				for (auto& mesh : modelData.mesh) {
+					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton);
+				}
+
+				// ルートの変換行列反映
+				localMatrix = modelData.skeleton.joints[0].skeletonSpaceMatrix;
+
+				// デバッグ用：スケルトン描画
+				Animetion::DrawSkeleton(
+					entity3DManager_->Get3DLineCommon(),
+					modelData.skeleton.joints,
+					worldtransform_.worldMat_.GetWorldPosition(),
+					worldtransform_.scale_
+				);
 			}
+
 
 
 

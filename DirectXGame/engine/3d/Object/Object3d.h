@@ -82,7 +82,9 @@ public:
 	// タグ設定
 	void SetNameTag(const std::string& name) { nameTag = name; }
 	// アニメーション変更
-	void SetAnimetion(const std::string& name) { model->modelData.currentAnimName = name; }
+	void SetAnimetion(const std::string& name,float time) {
+		Animetion::SetAnimation(model->modelData, name, time);
+	}
 
 
 	// プリミティブ形状

@@ -709,10 +709,10 @@ void TestScene::UpdateRoom01()
 {
 	ImGui::Begin("Animetion");
 	if (ImGui::Button("Idle")) {
-		skinningObject->SetAnimetion("Idle");
+		skinningObject->SetAnimetion("Idle",0.3f);
 	}
 	if (ImGui::Button("Run")) {
-		skinningObject->SetAnimetion("Run");
+		skinningObject->SetAnimetion("Run", 0.3f);
 	}
 	ImGui::End();
 }

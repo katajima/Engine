@@ -195,7 +195,7 @@ struct SkinCluster {
 
 };
 
-
+struct ModelData;
 namespace Animetion {
 
 	// スケルトンに対してアニメーションを適用させる関数
@@ -210,12 +210,16 @@ namespace Animetion {
 	// スケルトン更新
 	void UpdateSkeleton(Skeleton& skeleton);
 
+	// 
+	void BlendSkeletons(Skeleton& outSkeleton, const Skeleton& from, const Skeleton& to, float t);
+
 	// スキンクラスター更新
 	void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton);
 
 	// スケルトンの描画
 	void DrawSkeleton(LineCommon* lineCommo, const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale);
 	
+	void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
 	
 	//
 	void ValidateTransform(Joint& joint);
