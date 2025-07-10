@@ -209,9 +209,6 @@ private:
 	// 個人的にカメラを使用するか
 	bool isIndividualCamera_ = false;
 
-	// アニメーションするかのフラグ
-	//bool flag = true;
-
 	// ImGuiを表示するか
 	bool imguiFlag_ = false;
 

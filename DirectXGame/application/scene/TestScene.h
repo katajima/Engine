@@ -145,7 +145,8 @@ private:
 
 	std::unique_ptr<Object3d> stairObject;
 	Object3d* skinningObject;
-	std::unique_ptr<Object3d> skinningObject2;
+
+	Object3d* skinningObject2;
 	std::unique_ptr<Object3d> skinningObject3;
 	Object3d tail;
 	std::unique_ptr<Object3d> multiy;

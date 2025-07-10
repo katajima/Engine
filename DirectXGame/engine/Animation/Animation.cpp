@@ -172,6 +172,17 @@ const Joint* Animetion::FindJointByNameConst(const Skeleton& skeleton, const std
 	return nullptr;
 }
 
+Matrix4x4 Animetion::GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix)
+{
+	auto it = skeleton.jointMap.find(jointName);
+	if (it != skeleton.jointMap.end()) {
+		const Joint& joint = skeleton.joints[it->second];
+		//return Multiply(modelWorldMatrix ,joint.skeletonSpaceMatrix);
+		return Multiply(joint.skeletonSpaceMatrix,modelWorldMatrix);
+	}
+	return Matrix4x4::Identity(); // 見つからなければ単位行列
+}
+
 void Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton)
 {
 	static std::vector<Matrix4x4> cachedSkeletonMatrices;

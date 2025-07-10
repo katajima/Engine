@@ -6,7 +6,7 @@ void WorldTransform::Initialize()
 	rotate_ = {};
 	translate_ = { 0,0,0 };
 
-
+	isPearent = false;
 
 	worldMat_ = MakeIdentity4x4();
 	worldPreMat_ = MakeIdentity4x4();
@@ -22,5 +22,8 @@ void WorldTransform::Update()
 	// 親がいれば
 	if (parent_) {
 		worldMat_ = worldMat_ * parent_->worldMat_;
+	}
+	if (isPearent) {
+		worldMat_ = Multiply(worldMat_,parentMatrix_);
 	}
 }

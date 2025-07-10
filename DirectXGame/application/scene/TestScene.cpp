@@ -329,17 +329,15 @@ void TestScene::InitializeObject3D()
 	skinningObject = GetEntity3DManager()->CreateObject3D("KnightCharacter", Object3d::ObjectModelType::kSkinning, {30,1,1}, camera.get());
 	skinningObject->SetModel("KnightCharacter.gltf");
 	skinningObject->worldtransform_.translate_ = { 30,1,1 };
-	skinningObject->worldtransform_.scale_ = { 10,10,10 };
+	skinningObject->worldtransform_.scale_ = { 1,1,1 };
 	skinningObject->SetIsDraw(true);
 
-	skinningObject2 = std::make_unique<Object3d>();
-	skinningObject2->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkinning);
-	skinningObject2->SetModel("walk.gltf");
-	skinningObject2->worldtransform_.translate_ = { -30,10,1 };
-	skinningObject2->worldtransform_.scale_ = { 10,10,10 };
-	skinningObject2->SetCamera(camera.get());
-	skinningObject2->SetName("walk");
+	skinningObject2 = GetEntity3DManager()->CreateObject3D("BoxBox", Object3d::ObjectModelType::kNormal, { 0,0,0 }, camera.get());
+	skinningObject2->SetModel("BoxBox.obj");
+	skinningObject2->worldtransform_.scale_ = { 1,1,1 };
 	skinningObject2->SetIsDraw(true);
+	//skinningObject2->worldtransform_.SetParent(&Animetion::FindJointByName(skinningObject->model->modelData.skeleton,"LowerArm.R")->skeletonSpaceMatrix);
+	//skinningObject2->worldtransform_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject->model->modelData.skeleton, "LowerArm.R", skinningObject->worldtransform_.worldMat_));
 
 	skinningObject3 = std::make_unique<Object3d>();
 	skinningObject3->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kNormal);
@@ -491,7 +489,7 @@ void TestScene::InitializeParticle()
 	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleData::SpawnType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
-	emitter_->SetParent(tail.worldtransform_);
+	//emitter_->SetParent(skinningObject2->worldtransform_);
 	emitter_->SetRotateMinMax(-Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
 	emitter_->SetPos({ 0,10,0 });
 	emitter_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -546,7 +544,7 @@ void TestScene::InitializeParticle()
 	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleData::SpawnType::kPoint);
 	primitvPlane_->GetFrequency() = 0.025f;
 	primitvPlane_->SetCount(40);
-	primitvPlane_->SetPos({ 0,50,0 });
+	//primitvPlane_->SetPos({ 0,50,0 });
 	primitvPlane_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
 	primitvPlane_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
 	primitvPlane_->SetLifeTimeMinMax(1, 3);
@@ -555,7 +553,7 @@ void TestScene::InitializeParticle()
 	primitvPlane_->SetIsLifeTimeScale(true);
 	primitvPlane_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,2.5f,0.1f }, { 0.1f ,5.0f,0.1f });
-
+	primitvPlane_->SetParent(skinningObject2->worldtransform_);
 
 	primitvPlaneSmoke_ = std::make_unique<ParticleEmitter>();
 	primitvPlaneSmoke_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"smokePlane01", "smokePlane01", ParticleData::SpawnType::kPoint);
@@ -707,6 +705,9 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
+	skinningObject2->worldtransform_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject->model->modelData.skeleton, "MiddleHand.R", skinningObject->worldtransform_.worldMat_));
+	//emitter_->Update();
+	primitvPlane_->Update();
 	ImGui::Begin("Animetion");
 	if (ImGui::Button("Idle")) {
 		skinningObject->SetAnimetion("Idle",0.3f);

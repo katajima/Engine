@@ -226,6 +226,9 @@ namespace Animetion {
 	Joint* FindJointByName(Skeleton& skeleton, const std::string& name);
 	/// 名前からJointを取得する（存在しなければnullptr）
 	const Joint* FindJointByNameConst(const Skeleton& skeleton, const std::string& name);
+	
+	Matrix4x4 GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix);
+	
 	//
 	void ValidateTransform(Joint& joint);
 
