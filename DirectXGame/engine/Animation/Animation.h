@@ -221,6 +221,11 @@ namespace Animetion {
 	
 	void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
 	
+
+	/// モディファイ可能な Joint が欲しい場合
+	Joint* FindJointByName(Skeleton& skeleton, const std::string& name);
+	/// 名前からJointを取得する（存在しなければnullptr）
+	const Joint* FindJointByNameConst(const Skeleton& skeleton, const std::string& name);
 	//
 	void ValidateTransform(Joint& joint);
 

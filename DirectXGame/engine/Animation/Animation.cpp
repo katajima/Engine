@@ -148,6 +148,30 @@ void Animetion::SetAnimation(ModelData& modelData, const std::string& newAnimNam
 	}
 }
 
+Joint* Animetion::FindJointByName(Skeleton& skeleton, const std::string& name)
+{
+	auto it = skeleton.jointMap.find(name);
+	if (it != skeleton.jointMap.end()) {
+		int32_t index = it->second;
+		if (index >= 0 && index < skeleton.joints.size()) {
+			return &skeleton.joints[index];
+		}
+	}
+	return nullptr;
+}
+
+const Joint* Animetion::FindJointByNameConst(const Skeleton& skeleton, const std::string& name)
+{
+	auto it = skeleton.jointMap.find(name);
+	if (it != skeleton.jointMap.end()) {
+		int32_t index = it->second;
+		if (index >= 0 && index < skeleton.joints.size()) {
+			return &skeleton.joints[index];
+		}
+	}
+	return nullptr;
+}
+
 void Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton)
 {
 	static std::vector<Matrix4x4> cachedSkeletonMatrices;
