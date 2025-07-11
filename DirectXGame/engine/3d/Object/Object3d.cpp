@@ -201,10 +201,22 @@ void Object3d::Update()
 				// スケルトン姿勢更新
 				Animetion::UpdateSkeleton(modelData.skeleton);
 
-				// 各メッシュのスキンクラスタ更新
+				std::vector<Matrix4x4> cachedSkeletonMatrices;
 				for (auto& mesh : modelData.mesh) {
-					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton);
+					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
 				}
+				//std::vector<std::future<void>> futures;
+
+				//for (auto& mesh : modelData.mesh) {
+				//	
+				//	futures.push_back(std::async(std::launch::async, [&mesh, &modelData]() {
+				//		Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				//		}));
+				//}
+				//// 全スレッドの終了を待つ
+				//for (auto& f : futures) {
+				//	f.get();
+				//}
 
 				// ルートの変換行列反映
 				localMatrix = modelData.skeleton.joints[0].skeletonSpaceMatrix;
@@ -214,21 +226,27 @@ void Object3d::Update()
 					entity3DManager_->Get3DLineCommon(),
 					modelData.skeleton.joints,
 					worldtransform_.worldMat_.GetWorldPosition(),
-					worldtransform_.scale_
+					worldtransform_.scale_,
+					MakeRotateXYZ(worldtransform_.rotate_)
 				);
 			}
-
-
-
-
-
 			else {
 				// アニメーションが見つからない場合のフォールバック
 				localMatrix = model->modelData.rootNode.localMatrix;
 			}
+
+			std::vector<std::future<void>> futures;
 			for (auto& mesh : model->modelData.mesh) {
+				futures.push_back(std::async(std::launch::async, [&mesh]() {
 				mesh->material->GPUData();
+					}));
 			}
+
+			// 全スレッドの終了を待つ
+			for (auto& f : futures) {
+				f.get();
+			}
+
 		}
 
 		// トランスフォームデータ
@@ -666,4 +684,44 @@ void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,
 }
 
 #pragma endregion // その他
+
+
+void Object3d::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton) {
+	//static std::vector<Matrix4x4> cachedSkeletonMatrices;
+
+	//// サイズチェックとキャッシュ確保
+	//if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
+	//	cachedSkeletonMatrices.resize(skeleton.joints.size());
+	//}
+
+	//// Step 1: スケルトン空間行列のキャッシュを1度だけ作成
+	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+	//	cachedSkeletonMatrices[jointIndex] = skeleton.joints[jointIndex].skeletonSpaceMatrix;
+	//}
+
+	//// Step 2: スキンクラスタ用のマトリクス更新
+	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+	//	const auto& invBind = skinCluster.inverseBindPoseMatrices[jointIndex];
+	//	const auto& skelMat = cachedSkeletonMatrices[jointIndex];
+
+	//	auto skinnedMat = Multiply(invBind, skelMat);
+
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix = skinnedMat;
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
+	//}
+
+	//// サイズチェック
+	assert(skinCluster.inverseBindPoseMatrices.size() == skeleton.joints.size());
+	assert(skinCluster.mappedPalette.size() == skeleton.joints.size());
+
+	for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+		// スケルトンスペース行列を計算
+		skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
+			skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
+
+		// 逆転置行列を計算
+		skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
+			Transpose(Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
+	}
+}
 

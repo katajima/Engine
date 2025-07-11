@@ -15,6 +15,8 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 
+#include <future>
+
 class Entity3DManager;
 class Object3dCommon;
 class SkinningConmmon;
@@ -191,7 +193,8 @@ private:
 	void ObjectSkinTypeDiscrimination(ObjectRasterizerType type);
 
 
-
+	void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton);
+	
 
 
 private:
@@ -284,7 +287,6 @@ public:
 
 	WorldTransform worldtransformTstr_;
 	WorldTransform worldtransformTend_;
-
 private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;

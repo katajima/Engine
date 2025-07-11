@@ -88,7 +88,7 @@ void Model::DrawSkinning()
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 
-		mesh->GetCommandList(mesh->skinCluster->outputBufferView,mesh->GetVertexBufferView()/* modelData.skinCluster.influenceBufferView*/);
+		mesh->GetCommandList(mesh->skinCluster->outputBufferView,mesh->GetVertexBufferView());
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);

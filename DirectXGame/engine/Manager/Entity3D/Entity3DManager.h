@@ -2,7 +2,8 @@
 
 // C++
 #include"memory"
-
+#include <future>
+#include <mutex>
 // engine
 #include"DirectXGame/engine/effect/Ocean/OceanManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
@@ -19,6 +20,13 @@
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
+
+struct SortResult {
+	Object3d* ptr;
+	Object3d::ObjectDrawType drawType;
+	float alpha;
+	bool isSkin;
+};
 
 class DirectXCommon;
 class Entity3DManager

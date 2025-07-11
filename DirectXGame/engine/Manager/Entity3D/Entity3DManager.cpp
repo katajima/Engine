@@ -2,6 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+std::mutex mutex;  // グローバルやスコープ内に必要
 
 void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 {
@@ -209,7 +210,7 @@ void Entity3DManager::UpdateImgui()
 			}
 		}
 
-		
+
 	}
 
 	ImGui::End();
@@ -229,36 +230,80 @@ void Entity3DManager::Update()
 
 
 	for (auto& object : object3d) {
-		if (object != nullptr) {
-			object->Update();
-
-			if (object->GetIsSkin()) {
-				if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent01) {
-					transparentObjects01.push_back(object.get());
-				}
-				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent02) {
-					transparentObjects02.push_back(object.get());
-				}
-				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent03) {
-					transparentObjects03.push_back(object.get());
-				}
-				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kOpaque) {
-					if (object->GetAlpha() < 1.0f) {
-						transparentObjects01.push_back(object.get());
-					}
-					else {
-						opaqueObjects.push_back(object.get());
-					}
-				}
+		object->Update();
+		switch (object->GetObjectDrawType()) {
+		case Object3d::ObjectDrawType::kTranslucent01:
+			transparentObjects01.push_back(object.get());
+			break;
+		case Object3d::ObjectDrawType::kTranslucent02:
+			transparentObjects02.push_back(object.get());
+			break;
+		case Object3d::ObjectDrawType::kTranslucent03:
+			transparentObjects03.push_back(object.get());
+			break;
+		case Object3d::ObjectDrawType::kOpaque:
+			if (object->GetAlpha() < 1.0f) {
+				transparentObjects01.push_back(object.get());
 			}
-			//if (object->GetIsColliderComponent() && !object->GetIsDelete()) {
-			//	collisionManager_->Register(object->GetColliderComponent());
-			//}
+			else {
+				opaqueObjects.push_back(object.get());
+			}
+			break;
 		}
 	}
 
-	// コライダーチェック
-	//CheckAllCollisions();
+	//std::vector<SortResult> sortResults;
+
+	//std::vector<std::future<void>> futures;
+
+
+	//for (auto& object : object3d) {
+	//	if (object != nullptr) {
+	//		futures.push_back(std::async(std::launch::async, [&object, &sortResults]() {
+	//			object->Update();
+	//			SortResult result;
+	//			result.ptr = object.get();
+	//			result.drawType = object->GetObjectDrawType();
+	//			result.alpha = object->GetAlpha();
+	//			result.isSkin = object->GetIsSkin();
+
+	//			// 同時 push_back は危険なので、排他制御が必要
+	//			// → 代わりに並列実行は Update までにして、main スレッドで分類
+	//			std::lock_guard<std::mutex> lock(mutex);
+	//			sortResults.push_back(result);
+	//			}));
+	//	}
+	//}
+
+	//// 待機
+	//for (auto& f : futures) {
+	//	f.get();
+	//}
+
+	//// 分類はシングルスレッドで安全に行う
+	//for (const auto& r : sortResults) {
+	//	if (r.isSkin) {
+	//		switch (r.drawType) {
+	//		case Object3d::ObjectDrawType::kTranslucent01:
+	//			transparentObjects01.push_back(r.ptr);
+	//			break;
+	//		case Object3d::ObjectDrawType::kTranslucent02:
+	//			transparentObjects02.push_back(r.ptr);
+	//			break;
+	//		case Object3d::ObjectDrawType::kTranslucent03:
+	//			transparentObjects03.push_back(r.ptr);
+	//			break;
+	//		case Object3d::ObjectDrawType::kOpaque:
+	//			if (r.alpha < 1.0f) {
+	//				transparentObjects01.push_back(r.ptr);
+	//			}
+	//			else {
+	//				opaqueObjects.push_back(r.ptr);
+	//			}
+	//			break;
+	//		}
+	//	}
+	//}
 
 }
 
@@ -286,7 +331,7 @@ void Entity3DManager::ObjectDraw()
 		object->Draw();
 	}
 	transparentObjects02.clear();
-	
+
 	// 半透明最後
 	for (auto& object : transparentObjects03) {
 		object->Draw();

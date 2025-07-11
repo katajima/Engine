@@ -63,6 +63,8 @@ struct ComboMotionData
 		attackAnimationTime = attackAnimation;
 		recoveryTime = recovery;
 	}
+
+
 };
 
 // 技の中に含まれるコンボ１つのデータ構造体
@@ -77,6 +79,7 @@ struct ComboDataPiece
 	KnockbackData knoback;					// ノックバックデータ
 	ComboMotionData comboMotion;			// コンボ一つのモーション時間データ
 };
+
 
 
 // 全コンボデータの構造体

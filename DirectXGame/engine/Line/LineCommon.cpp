@@ -43,6 +43,17 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 
 	mesh_->verticesline.clear();
 	mesh_->indices.clear();
+	
+	mesh2_ = std::make_unique<LineMesh>();
+	mesh2_->verticesline.push_back({ 0,0,0,0 });
+	mesh2_->verticesline.push_back({ 0,0,0,0 });
+	mesh2_->indices.push_back({ 0 });
+	mesh2_->indices.push_back({ 1 });
+
+	mesh2_->Initialize(dxCommon_);
+
+	mesh2_->verticesline.clear();
+	mesh2_->indices.clear();
 }
 
 void LineCommon::AddLine(Vector3 start, Vector3 end, Vector4 color)
@@ -55,6 +66,18 @@ void LineCommon::AddLine(Vector3 start, Vector3 end, Vector4 color)
 
 	lineNum_ += 2;
 }
+
+void LineCommon::AddLine2(Vector3 start, Vector3 end, Vector4 color)
+{
+	mesh2_->verticesline.push_back({ { start.x, start.y, start.z, 1.0f }, color });
+	mesh2_->verticesline.push_back({ { end.x, end.y, end.z, 1.0f }, color });
+
+	mesh2_->indices.push_back(lineNum2_);
+	mesh2_->indices.push_back(lineNum2_ + 1);
+
+	lineNum2_ += 2;
+}
+
 
 void LineCommon::AddLightLine(PointLightData data)
 {
@@ -535,6 +558,8 @@ void LineCommon::Update()
 {
 	mesh_->UpdateVertexBuffer();
 	mesh_->UpdateIndexBuffer();
+	mesh2_->UpdateVertexBuffer();
+	mesh2_->UpdateIndexBuffer();
 
 	if (camera_ && cameraWVP) {
 		*cameraWVP = camera_->viewProjectionMatrix_;  // データをコピー
@@ -547,6 +572,17 @@ void LineCommon::DrawCommonSetting()
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
+
+	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+}
+
+void LineCommon::DrawCommonSetting2()
+{
+	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature2.Get());
+
+	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState2.Get()); //PSOを設定
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
@@ -571,12 +607,28 @@ void LineCommon::Draw()
 		//commandList->DrawInstanced(UINT(mesh_->verticesline.size()), 1, 0, 0);
 		commandList->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
 	}
+
+	DrawCommonSetting2();
+
+	mesh2_->GetCommandList();
+
+	// SRV (インスタンシングデータ) をルートパラメータ [0] に設定
+	commandList->SetGraphicsRootConstantBufferView(1, materialResource->GetGPUVirtualAddress());
+
+	// ビューデータ
+	commandList->SetGraphicsRootConstantBufferView(0, viewResource->GetGPUVirtualAddress());
+
+	if (mesh2_->indices.size() != 0) {
+		commandList->DrawIndexedInstanced(UINT(mesh2_->indices.size()), 1, 0, 0, 0);
+	}
 }
 
 void LineCommon::LineClear()
 {
 	lineNum_ = 0;
 	mesh_->Clear();
+	lineNum2_ = 0;
+	mesh2_->Clear();
 }
 
 void LineCommon::CreateRootSignature()
@@ -589,6 +641,15 @@ void LineCommon::CreateRootSignature()
 	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters),nullptr,0);
+
+	// カメラデータ
+	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// マテリアルデータ (b0) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+
+	psoManager_->SetRootSignature(rootSignature2, rootParameters, _countof(rootParameters),nullptr,0);
+
+
 }
 
 void LineCommon::CreateGraphicsPipeline()
@@ -614,13 +675,10 @@ void LineCommon::CreateGraphicsPipeline()
 
 	// RasterizerState(ラスタライザステート)の設定
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
-
-
 	// インプットレイアウト
 	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
-
-
+	//
 	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Line/Line.VS.hlsl");
 	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Line/Line.PS.hlsl");
 
@@ -636,4 +694,15 @@ void LineCommon::CreateGraphicsPipeline()
 
 
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState, blendDesc, depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+	// Depthの機能を有効化する
+	depthStencilDesc.DepthEnable = false;
+	// 書き込みします
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	// 比較関数はLessEqual。つまり、近ければ描画される
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState2, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+
+
+
 }

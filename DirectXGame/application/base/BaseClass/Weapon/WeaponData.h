@@ -17,10 +17,53 @@ enum class  AttackTypePlay
 	kJump, // ジャンプ攻撃
 };
 
-struct AttackKeyFlag
+// 攻撃入力系クラス
+class AttackInput 
 {
-	bool IsNormalAttack; // B
+public:
+	struct AttackKeyFlag
+	{
+		bool IsNormalAttack; // B
+	};
+
+	// 攻撃方法取得
+	AttackTypePlay GetAttackTypePlay() const { return type; }
+	// リクエスト取得
+	std::optional<AttackTypePlay> GetTypeRequest() const { return typeRequest_; }
+	// ふるまい変更
+	void ChangeRequest() { type = typeRequest_.value(); }
+
+	// ふるまいリクエストリセット
+	void ResetRequest() { typeRequest_ = std::nullopt; }
+	// ふるまいリクエストの設定
+	void SetRequest(AttackTypePlay type) { typeRequest_ = type; }
+	// 
+	AttackKeyFlag& GetAttackKeyFlag() { return key; }
+
+	// 攻撃するかのフラグ取得
+	bool GetIsAttack() const { return isAttack; };
+	// 攻撃するかのフラグ設定
+	void SetIsAttack(bool is) { isAttack = is; }
+	// 攻撃ステート中かのフラグ取得
+	bool GetIsState() const { return isState; }
+	// 攻撃ステート中かのフラグ設定
+	void SetIsState(bool is){isState = is; }
+	// 攻撃ステート中かのフラグをTrueに
+	void TrueState() { isState = true; }
+private:
+	//振るまい
+	AttackTypePlay type = AttackTypePlay::kNone;
+	// 次の振るまいリクエスト
+	std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
+	AttackKeyFlag key;
+
+	Vector2 direction;			// 入力方向
+
+	bool isAttack = false;		// 攻撃するか
+	bool isState = false;		// 攻撃ステートか
 };
+
+
 
 // コンボデータ構造体
 struct ComboData 
@@ -34,6 +77,19 @@ struct ComboData
 	void ResetCurrentComboCount() {	currentComboCount = 0; }
 	// コンボの現在の回数をインクリメント
 	void IncrementCurrentComboCount() { currentComboCount++; }
+	// 次コンボするかのフラグを設定
+	void SetIsComboNext(bool is) { isComboNext = is; }
+
+	// コンボ武器かどうかのフラグを設定
+	void SetIsComboWeapon(bool isComboWeapon) { isComboWeapon = isComboWeapon; }
+	// コンボの最大回数を取得
+	int GetComboMaxCount() const { return comboMaxCount; }
+	// コンボの最大回数を設定
+	void SetComboMaxCount(int comboMaxCount) { comboMaxCount = comboMaxCount; }
+	// コンボの現在の回数を取得
+	int GetCurrentComboCount() const { return currentComboCount; }
+	// コンボの現在の回数を設定
+	void SetCurrentComboCount(int currentComboCount) { currentComboCount = currentComboCount; }
 };
 
 
@@ -110,6 +166,8 @@ struct AttackHitData
 	}
 
 };
+
+
 
 // 近距離武器専用のデータ構造体(近距離武器クラス用)
 struct MellWeaponData

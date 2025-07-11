@@ -37,7 +37,7 @@
 #include "DirectXGame/engine/Animation/AnimationData.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 #include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
-
+#include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 
 class TestScene : public BaseScene
 {
@@ -147,12 +147,10 @@ private:
 	Object3d* skinningObject;
 
 	Object3d* skinningObject2;
-	std::unique_ptr<Object3d> skinningObject3;
-	Object3d tail;
-	std::unique_ptr<Object3d> multiy;
+	
+	Object3d* skinningObject3;
+	
 
-	std::unique_ptr<Object3d> taleObject;
-	std::unique_ptr<Object3d> primitiveObject3d;
 	std::unique_ptr<Object3d> skyBoxObject;
 	std::unique_ptr<Object3d> skyBoxObject2;
 	std::unique_ptr<Object3d> oceanObject;
@@ -172,7 +170,7 @@ private:
 
 	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 
-
+	WorldTransform worldparticleEmitter_;
 	/// <summary>
 	/// スプライト
 	/// </summary>
@@ -192,14 +190,7 @@ private:
 
 	std::unique_ptr<ParticleEmitter> emitter_  =nullptr;
 
-	std::unique_ptr<ParticleEmitter> emitterEnemy_  =nullptr;
-
 	std::unique_ptr<ParticleEmitter> primitvPlane_  =nullptr;
-
-	std::unique_ptr<ParticleEmitter> primitvPlaneSmoke_  =nullptr;
-	float clipping_ = 0.25f;
-
-	std::unique_ptr<ParticleEmitter> primitvPa_ = nullptr;
 
 	
 
@@ -248,6 +239,9 @@ private:
 
 
 	bool g_aaaa = false;
+
+
+	Vector3 velo;
 };
 
 

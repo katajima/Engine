@@ -18,7 +18,6 @@ public:
 public:
 	// 使っているキャラクター設定
 	void SetCharacter(BaseCharacter* character) { this->character = character; };
-
 	// タグによるコライダーの有効・無効を設定
 	void SetIsCollider(CollisionTag tag ,bool is) { objectBase_->GetColliderComponent()->SetEnableByTag(tag, is); };
 	// ダメージ取得
@@ -29,83 +28,28 @@ public:
 	bool IsAutomatic() const { return data_.isAutomatic; };
 	// 攻撃中かどうかのフラグを設定
 	void SetIsActive(bool isActive) { data_.isActive = isActive; };
-
-
-	// 現在時間を加算
-	void AddCurrentTime(float deltaTime) { data_.motionData.AddCurrentTime(deltaTime); };
-	// 現在経過時間をリセット
-	void ResetCurrentTime() { data_.motionData.ResetTime(); };
-	// 現在経過時間を取得
-	float GetCurrentTimer() const { return  data_.motionData.currentTime; };
-	// 全体時間を取得
-	float GetAllTime() const { return data_.motionData.AllTime(); };
-	// 攻撃のスタートアップ時間を取得
-	float GetStartupTime() const { return data_.motionData.startupTime; };
-	// 攻撃のアニメーション時間を取得
-	float GetAttackAnimationTime() const { return data_.motionData.attackAnimationTime; };
-	// 攻撃のリカバリー時間を取得
-	float GetRecoveryTime() const { return data_.motionData.recoveryTime; };
-	// コンボモーションデータ
-	ComboMotionData GetComboMotionData() const { return data_.motionData; }
-
-	// コンボ武器かどうかのフラグを取得
-	bool IsCommonWeapon() const { return data_.comboData.isComboWeapon; }
-	// コンボ武器かどうかのフラグを設定
-	void SetIsComboWeapon(bool isComboWeapon) { data_.comboData.isComboWeapon = isComboWeapon; }
-	// コンボの最大回数を取得
-	int GetComboMaxCount() const { return data_.comboData.comboMaxCount; }
-	// コンボの最大回数を設定
-	void SetComboMaxCount(int comboMaxCount) { data_.comboData.comboMaxCount = comboMaxCount; }
-	// コンボの現在の回数を取得
-	int GetCurrentComboCount() const { return data_.comboData.currentComboCount; }
-	// コンボの現在の回数を設定
-	void SetCurrentComboCount(int currentComboCount) { data_.comboData.currentComboCount = currentComboCount; }
-	// コンボの現在の回数をリセット
-	void ResetCurrentComboCount() { data_.comboData.ResetCurrentComboCount(); }
-	// コンボの現在の回数をインクリメント
-	void IncrementCurrentComboCount() { data_.comboData.IncrementCurrentComboCount(); }
-	// コンボを次にするかどうかのフラグを取得
-	bool IsComboNext() const { return data_.comboData.isComboNext; }
-	// コンボを次にするかどうかのフラグを設定
-	void SetIsComboNext(bool isComboNext) { data_.comboData.isComboNext = isComboNext; }
-	//
-	Timer& GetTimer() { return data_.animetionTimer; }
 	// 移動速度倍率を取得 
 	float GetMovementSpeedMultiplier() const { return data_.movementSpeedMultiplier; }
 	// 移動速度倍率を設定
 	void SetMovementSpeedMultiplier(float multiplier) { data_.movementSpeedMultiplier = multiplier; }
-	
+	// コンボモーションデータ
+	ComboMotionData GetComboMotionData() const { return data_.motionData; }
+	// コンボデータ
+	ComboData GetComboData() const { return data_.comboData; }
+	// アニメーション中の時間取得
+	Timer& GetTimer() { return data_.animetionTimer; }
 	// ヒットデータを取得
 	AttackHitData& GetHitData() { return hitData_; }
+	// 攻撃入力系クラス取得
+	AttackInput& GetAttackInput() { return attackInput_; }
 
-	bool IsAttack() const { return isAttack; };
-
-	void SetIsAttack(bool is) { isAttack = is; }
+	
 
 
-	// 攻撃方法取得
-	AttackTypePlay GetAttackTypePlay() const { return type; }
-
-	// リクエスト取得
-	std::optional<AttackTypePlay> GetTypeRequest() const { return typeRequest_; }
-
-	// ふるまい変更
-	void ChangeRequest(){ type = typeRequest_.value(); }
-
-	// ふるまいリクエストリセット
-	void ResetRequest(){ typeRequest_ = std::nullopt;}
-	// ふるまいリクエストの設定
-	void SetRequest(AttackTypePlay type) { typeRequest_ = type; }
-
-	AttackKeyFlag& GetAttackKeyFlag() { return key; }
 
 	bool GetIsRecastTimeOver() const { return data_.MaxRecastTime <= data_.recastTime; }
 
 	void RecastTime(float timer) { data_.recastTime += timer; }
-
-	bool GetisTrueState() const { return isState; }
-
-	void TrueState() { isState = true; }
 
 public:
 
@@ -131,20 +75,20 @@ public:
 	void SetAttackCombo(float deltaTime);
 
 	// 攻撃各コンボによる初期化
-	void AttackTypeInit(int comboIndex);
+	virtual void AttackTypeInit(int comboIndex) = 0;
 
 	// 攻撃更新
-	void AttackUpdate(float deltaTime, WorldTransform& worldTransform);
+	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 
 	// 攻撃方法設定
 	void KeyAttackTypes(bool is) {
-		if (IsAttack()) {
-			if (GetAttackKeyFlag().IsNormalAttack) {
-				if (is && GetCurrentComboCount() == 0) {
-					SetRequest(AttackTypePlay::kJump);
+		if (attackInput_.GetIsAttack()) {
+			if (attackInput_.GetAttackKeyFlag().IsNormalAttack) {
+				if (is && GetComboData().currentComboCount == 0) {
+					attackInput_.SetRequest(AttackTypePlay::kJump);
 				}
 				else {
-					SetRequest(AttackTypePlay::kNormal);
+					attackInput_.SetRequest(AttackTypePlay::kNormal);
 				}
 			}
 		}
@@ -155,14 +99,14 @@ public:
 protected:
 	WeaponData data_;		// 武器データ
 	AttackHitData hitData_; // 攻撃ヒットデータ
-	bool isAttack = false;	// 攻撃するか
-	bool isState = false;
 	std::vector<AttackMotions> attack_;//
-	//振るまい
-	AttackTypePlay type = AttackTypePlay::kNone;
-	// 次の振るまいリクエスト
-	std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
-	AttackKeyFlag key;
+
+	// 攻撃入力系クラス
+	AttackInput attackInput_;
+
+	
+
+protected:
 	BaseCharacter* character;	// 使っているキャラクター
 };
 
@@ -179,6 +123,12 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 	
+	// 攻撃各コンボによる初期化
+	virtual void AttackTypeInit(int comboIndex) = 0;
+
+	// 攻撃更新
+	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
+
 public:
 	// ヒットストップ時間を取得
 	float GetHitStopTime() const { return mellData_.hitStopTime; } 
@@ -200,6 +150,12 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 	
+	// 攻撃各コンボによる初期化
+	virtual void AttackTypeInit(int comboIndex) = 0;
+
+	// 攻撃更新
+	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
+
 protected:
 	RangedWeaponData rengedData_; // 遠距離武器データ
 

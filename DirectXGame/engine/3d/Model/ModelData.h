@@ -43,8 +43,8 @@ struct ModelData
 	std::string currentAnimName = "Idle";					// 現在のアニメーション名前
 
 	std::string previousAnimName = "";
-	float blendTime = 0.0f;           // ブレンドに使う経過時間
-	float blendDuration = 0.3f;      // ブレンドにかける合計時間
+	float blendTime = 0.0f;									// ブレンドに使う経過時間
+	float blendDuration = 0.3f;								// ブレンドにかける合計時間
 	bool isBlending = false;
 	float animationTime = 0.0f;								// アニメーション時間
 	Skeleton skeleton;										// スケルトン

@@ -19,9 +19,9 @@ void PlayerStateMove::Update()
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
 		}
 
-		weapon->GetAttackKeyFlag().IsNormalAttack = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-		if (weapon->GetAttackKeyFlag().IsNormalAttack) {
-			weapon->SetIsAttack(true);
+		weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+		if (weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack) {
+			weapon->GetAttackInput().SetIsAttack(true);
 		}
 	}
 
@@ -32,11 +32,11 @@ void PlayerStateMove::Update()
 	player_->Move();
 
 	weapon->RecastTime(MyGame::GameTime());
-	if (weapon->IsAttack()) {
+	if (weapon->GetAttackInput().GetIsAttack()) {
 		if (weapon->GetIsRecastTimeOver()) {
 			player_->ChangeState("Attack");
 			weapon->GetTimer().t = 0.0f;
-			weapon->TrueState();
+			weapon->GetAttackInput().TrueState();
 		}
 	}
 	if (special->GetIsSpecial()) {
@@ -72,7 +72,7 @@ void PlayerStateAttack::Update()
 	// 攻撃処理
 	weapon->AttackUpdate();
 
-	if (!weapon->GetisTrueState()) {
+	if (!weapon->GetAttackInput().GetIsState()) {
 		player_->ChangeState("Move");
 		return;
 	}
@@ -88,7 +88,7 @@ void PlayerStateAttack::Exit()
 void PlayerStateAttack::Enter()
 {
 	BaseWeapon* weapon = player_->GetWeapon();
-	weapon->GetAttackKeyFlag().IsNormalAttack = true;
+	weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = true;
 	weapon->KeyAttackTypes(player_->GetSituation().isJumping);
 	weapon->AttackTypeInit(0);
 	weapon->GetObject3D()->SetIsDraw(true);

@@ -306,6 +306,7 @@ void MyGame::LoadModel()
 	modelManager->LoadModel("KnightCharacter.gltf", "Character");
 	//modelManager->LoadModel("Characters_Anne.gltf", "Character");
 	modelManager->LoadModel("Humans_Master.gltf", "Character");
+	modelManager->LoadModel("run.gltf", "Character");
 
 
 

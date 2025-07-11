@@ -29,7 +29,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	// プレイヤー
 	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectModelType::kNormal, position, camera_);
 	objectBase_->SetModel("AnimatedCube.gltf");
-	objectBase_->Update();
+	//objectBase_->Update();
 	objectBase_->InitColliderComponent();
 	GetColliderComponent()->SetHitReceiver(this);
 	
@@ -70,8 +70,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
 
 				}
-
-				objectBase_->Update();
+				objectBase_->worldtransform_.Update();
 			}
 		}
 		if (other->tag == CollisionTag::Wall) {
@@ -90,8 +89,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 				}
 				velocity_.y = 0;
 				acceleration_.y = 0;
-
-				objectBase_->Update();
+				objectBase_->worldtransform_.Update();
 			}
 		}
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
@@ -159,7 +157,12 @@ void Player::Update()
 	if (GetHP() <= 0) {
 		flags_.isAlive = false;
 	}
-
+	if (ImGui::Button("Idle")) {
+		objectBase_->SetAnimetion("Idle", 0.3f);
+	}
+	if (ImGui::Button("Run")) {
+		objectBase_->SetAnimetion("Run", 0.3f);
+	}
 
 
 #ifdef _DEBUG
@@ -280,6 +283,10 @@ void Player::Move()
 			if (velo.Length() != 0) {
 				objectBase_->worldtransform_.rotate_.y = std::atan2(velo.x, velo.z);
 			}
+			
+		}
+		else {
+			
 		}
 	}
 	else {

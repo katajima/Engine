@@ -27,6 +27,8 @@ public:
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
 	void AddLine(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
+	void AddLine2(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
+
 
 	void AddLightLine(PointLightData data);
 
@@ -58,6 +60,7 @@ public:
 	void Update();
 
 	void DrawCommonSetting();
+	void DrawCommonSetting2();
 
 	void Draw();
 
@@ -110,25 +113,29 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 	// パイプラインステートオブジェクト
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
+	// ルートシグネチャ
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature2;
+	// パイプラインステートオブジェクト
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState2;
 
-	DirectXCommon* dxCommon_;
+
+
 	std::unique_ptr<LineMesh> mesh_;
-	//std::unique_ptr<Mate>
-	const uint32_t kNumMaxInstance = 300000;
+	uint32_t lineNum_ = 0;
+	std::unique_ptr<LineMesh> mesh2_;
+	uint32_t lineNum2_ = 0;
+	const uint32_t kNumMaxInstance = 300000;	
 	
+
 	//マテリアルデータ
 	struct MaterialData {
 		Vector4 color;
 	};
 	Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;
 	MaterialData* materialData;
-
-	
-
 	Microsoft::WRL::ComPtr<ID3D12Resource> viewResource;
 	Matrix4x4* cameraWVP;
-
-
-	uint32_t lineNum_ = 0;
+private:
+	DirectXCommon* dxCommon_;
 };
 

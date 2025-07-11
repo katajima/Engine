@@ -25,7 +25,7 @@ public:
 
 	//追従対象をポインタで持つ
 	void SetTarget(BaseObject* target) { target_ = target; };
-
+	
 protected:
 	//追従対象
 	BaseObject* target_ = nullptr;

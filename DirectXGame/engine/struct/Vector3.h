@@ -7,6 +7,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <math.h>
+#include <xmmintrin.h>
 
 struct Vector3 final {
 	float x, y, z;
