@@ -6,9 +6,11 @@ struct CameraSRTSpeed
 {
 	float scale = 0.0f;
 	Vector3 rotate = {};
-	float rotate = 0.0f;
+	float translate = 0.0f;
 };
 
+
+class CameraManeger;
 class BaseCamera : public BaseObject
 {
 public:
@@ -36,17 +38,28 @@ public:
 	/// <returns></returns>
 	Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
 
+
 	/// <summary>
 	/// ロックオン対象を設定
 	/// </summary>
 	/// <param name="object"></param>
 	void LockOn(BaseObject* object) { lockOnObject = object; };
 
+	/// <summary>
+	/// カメラ管理を設定
+	/// </summary>
+	/// <param name="cameraManeger"></param>
+	void SetCameraManeger(CameraManeger* cameraManeger) { this->cameraManeger = cameraManeger; };
+public:
+	bool useCamera = false;
+
 protected:
 	std::unique_ptr<Camera> uniqueCamera_;	// 固有カメラ
+	
+
 	CameraSRTSpeed srtSpeed_;				// SRTスピード
 	BaseObject* lockOnObject = nullptr;		// ロックオン対象
-
+	CameraManeger* cameraManeger = nullptr;	// カメラ管理
 
 };
 

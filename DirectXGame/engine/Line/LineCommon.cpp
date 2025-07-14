@@ -78,6 +78,65 @@ void LineCommon::AddLine2(Vector3 start, Vector3 end, Vector4 color)
 	lineNum2_ += 2;
 }
 
+void LineCommon::AddCameraLine(Camera* camera, Vector4 color)
+{
+	// --- カメラのパラメータ取得 ---
+	float fovY = camera->fovY_;
+	float aspect = camera->aspect_;
+	float nearZ = camera->nearClip_;
+	float farZ = camera->farClip_;
+
+	// --- カメラのワールド行列と位置・向き取得 ---
+	Matrix4x4 worldMatrix = camera->transform_.GetWorldMatrix(); // または camera->worldMatrix_
+	Vector3 camPos = Vector3(worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2]);
+
+	Vector3 right = Vector3(worldMatrix.m[0][0], worldMatrix.m[0][1], worldMatrix.m[0][2]);
+	Vector3 up = Vector3(worldMatrix.m[1][0], worldMatrix.m[1][1], worldMatrix.m[1][2]);
+	Vector3 forward = Vector3(worldMatrix.m[2][0], worldMatrix.m[2][1], worldMatrix.m[2][2]);
+
+	// --- Near/Far プレーンの半分の高さ・幅を計算 ---
+	float tanFovY = tanf(fovY * 0.5f);
+	float nearH = tanFovY * nearZ;
+	float nearW = nearH * aspect;
+	float farH = tanFovY * farZ;
+	float farW = farH * aspect;
+
+	// --- 各プレーンの中心座標 ---
+	Vector3 nearCenter = camPos + forward * nearZ;
+	Vector3 farCenter = camPos + forward * farZ;
+
+	// --- Near plane corners ---
+	Vector3 nearTopLeft = nearCenter + (up * nearH) - (right * nearW);
+	Vector3 nearTopRight = nearCenter + (up * nearH) + (right * nearW);
+	Vector3 nearBottomLeft = nearCenter - (up * nearH) - (right * nearW);
+	Vector3 nearBottomRight = nearCenter - (up * nearH) + (right * nearW);
+
+	// --- Far plane corners ---
+	Vector3 farTopLeft = farCenter + (up * farH) - (right * farW);
+	Vector3 farTopRight = farCenter + (up * farH) + (right * farW);
+	Vector3 farBottomLeft = farCenter - (up * farH) - (right * farW);
+	Vector3 farBottomRight = farCenter - (up * farH) + (right * farW);
+
+	// --- Frustum ラインを追加 ---
+	// Near plane
+	AddLine(nearTopLeft, nearTopRight, color);
+	AddLine(nearTopRight, nearBottomRight, color);
+	AddLine(nearBottomRight, nearBottomLeft, color);
+	AddLine(nearBottomLeft, nearTopLeft, color);
+
+	// Far plane
+	AddLine(farTopLeft, farTopRight, color);
+	AddLine(farTopRight, farBottomRight, color);
+	AddLine(farBottomRight, farBottomLeft, color);
+	AddLine(farBottomLeft, farTopLeft, color);
+
+	// Connections
+	AddLine(nearTopLeft, farTopLeft, color);
+	AddLine(nearTopRight, farTopRight, color);
+	AddLine(nearBottomLeft, farBottomLeft, color);
+	AddLine(nearBottomRight, farBottomRight, color);
+}
+
 
 void LineCommon::AddLightLine(PointLightData data)
 {

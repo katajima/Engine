@@ -27,7 +27,7 @@ public:
 
 private:
 	// 全てのカメラ
-	std::map<std::string, CameraInfo> cameras;
+	std::map<std::string, BaseCamera*> cameras;
 	// カメラ
 	std::unique_ptr < Camera> camera;
 	// ゲームでの画面か
@@ -37,8 +37,14 @@ private:
 	bool isInterpolating = false;
 	float interpolationTime = 0.0f;
 	float currentTime = 0.0f;
-	Transform startTransform;
-	Transform targetTransform;
+
+	//Transform;
+
+	QuaternionTransform startTransform;
+	QuaternionTransform targetTransform;
+
+
+
 private:
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
 	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー

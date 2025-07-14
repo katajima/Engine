@@ -10,6 +10,8 @@
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
@@ -76,13 +78,12 @@ private:
 	std::unique_ptr<FollowCamera> followCamera_;
 	// 宇宙カメラ
 	std::unique_ptr<UniverseCamera> universeCamera_;
-
+	// 固定カメラ
+	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
 	std::unique_ptr<CameraManeger> cameraManeger_;
+	
 
-	float timer = 0.0f;
-	float cameraScaleT = 0.0f;
-	float minScaleZCamera = 5.5f;
 private:
 	// キャラクター管理
 	std::unique_ptr<BaseCharacterManager> caracterManager_;

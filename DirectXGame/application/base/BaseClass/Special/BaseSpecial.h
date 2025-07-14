@@ -24,6 +24,7 @@ public:
 	/// 描画
 	///</summary>
 	virtual void Draw() = 0;
+
 public:
 
 	// フェーズ取得
@@ -46,6 +47,8 @@ public:
 	bool GetIsSpecialAttack() const { return isSpecialAttack; }
 	// Inputでのbool
 	void SetIsSpecialAttack(bool is) { isSpecialAttack = is; }
+	//
+	bool IsAction() const { return isAction_; }
 
 	// 入力をセット
 	void SetInput(Input* input) {input_ = input;};
@@ -66,8 +69,11 @@ protected:
 	// クロック
 	int clock_ = 1;
 
+	// 発射ボタン
 	bool isSpecialAttack = false;// RT
 
+	// 発動中か
+	bool isAction_ = false;
 protected:
 	Input* input_;
 };

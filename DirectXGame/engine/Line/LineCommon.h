@@ -29,6 +29,7 @@ public:
 	void AddLine(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
 	void AddLine2(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
 
+	void AddCameraLine(Camera* camera,Vector4 collor = {1,1,1,1});
 
 	void AddLightLine(PointLightData data);
 

@@ -49,6 +49,11 @@ void GamePlayScene::Initialize()
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
 	universeCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
+	//
+	fixedCamera_ = std::make_unique<FixedCamera>();
+	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
+
+
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
@@ -82,6 +87,8 @@ void GamePlayScene::Initialize()
 	// カメラ追加
 	cameraManeger_->AddCamera({ followCamera_.get(),true},"followCamera");
 	cameraManeger_->AddCamera({ universeCamera_.get(),false},"universeCamera");
+	cameraManeger_->AddCamera({ fixedCamera_.get(),false},"fixedCamera");
+
 }
 
 
@@ -198,6 +205,14 @@ void GamePlayScene::Update()
 	if (ImGui::Button("ADDEnemy")) {
 		caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, enemyPosition));
 	}
+	if (ImGui::Button("lockOn")) {
+		cameraManeger_->SetUseCamera("fixedCamera",0.3f);
+	}
+	if (ImGui::Button("noLockOn")) {
+		cameraManeger_->SetUseCamera("followCamera", 0.3f);
+	}
+
+	
 	ImGui::End();
 #endif // _DEBUG
 
@@ -206,29 +221,10 @@ void GamePlayScene::Update()
 	}
 
 
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
-	if (sp->IsAction()) {
+	// スペシャル
+	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
 		cameraManeger_->SetUseCamera("universeCamera",0.0f);
-
-		timer = 0.0f;
-		
-		cameraScaleT += 0.05f;
-		if (cameraScaleT >= 1.0f) {
-			cameraScaleT = 1.0f;
-		}
-		universeCamera_->GetUniqueCamera()->transform_.scale.z = Lerp(minScaleZCamera, 1.0f, cameraScaleT);
 	}
-	else {
-		timer += MyGame::GameTime();
-	}
-
-	if (timer >= 1.25f) {
-		timer = 0.0f;
-		cameraScaleT = 0.0f;
-		universeCamera_->GetUniqueCamera()->transform_.scale.z = minScaleZCamera;
-		cameraManeger_->SetUseCamera("followCamera", 0.0f);
-	}
-	
 	// カメラ管理の更新
 	cameraManeger_->Update();
 	// レベルデータアップデート

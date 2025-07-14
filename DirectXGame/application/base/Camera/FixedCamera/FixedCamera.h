@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/BaseClass/Camera/BaseFixedCamera.h"
 
 
-class UniverseCamera : public BaseFixedCamera
+class FixedCamera : public BaseFixedCamera
 {
 public:
 	///< summary>
@@ -24,10 +24,6 @@ public:
 	void Draw2D() override;
 
 private:
-	LerpMinMax scaleLerp_;
-
-	float strScaleZCamera = 5.5f;
-	float endScaleZCamera = 1.0f;
 
 };
 

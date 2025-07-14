@@ -27,8 +27,7 @@ public:
 
 
 protected:
-	Vector3 speed
-
+	Timer timer_;
 
 };
 

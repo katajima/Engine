@@ -32,7 +32,7 @@ void CameraManeger::Update()
 
 		// 各カメラ更新
 		for (auto& cam : cameras) {
-			cam.second.camera->Update();
+			cam.second->Update();
 		}
 
 		if (isInterpolating) {
@@ -42,7 +42,7 @@ void CameraManeger::Update()
 
 			// 位置と回転を補間
 			camera->transform_.translate = Lerp(startTransform.translate, targetTransform.translate, t);
-			camera->transform_.rotate = Lerp(startTransform.rotate, targetTransform.rotate, t);
+			camera->transform_.rotate = QuaternionToEuler(Slerp(startTransform.rotate, targetTransform.rotate, t));
 			camera->UpdateMatrix();
 
 			if (t >= 1.0f) {
@@ -51,8 +51,8 @@ void CameraManeger::Update()
 		}
 		else {
 			for (auto& cam : cameras) {
-				if (cam.second.useCamera) {
-					camera->transform_ = cam.second.camera->GetUniqueCamera()->GetTransform();
+				if (cam.second->useCamera) {
+					camera->transform_ = cam.second->GetUniqueCamera()->GetTransform();
 					camera->UpdateMatrix();
 				}
 			}
@@ -70,7 +70,9 @@ void CameraManeger::Update()
 
 void CameraManeger::AddCamera(CameraInfo camera, std::string name)
 {
-	cameras.insert(std::make_pair(name, camera));
+	camera.camera->SetCameraManeger(this);
+	camera.camera->useCamera = camera.useCamera;
+	cameras.insert(std::make_pair(name, camera.camera));
 }
 
 void CameraManeger::SetUseCamera(std::string name, float time)
@@ -78,14 +80,16 @@ void CameraManeger::SetUseCamera(std::string name, float time)
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
 		for (auto& cam : cameras) {
-			cam.second.useCamera = false;
+			cam.second->useCamera = false;
+			//cam.second.camera->useCamere = cam.second.useCamera;
 		}
-		it->second.useCamera = true;
+		it->second->useCamera = true;
+		//it->second.camera->useCamere = it->second.useCamera;
 
 		if (time <= 0.0f) {
 			// 即時切り替え
 			isInterpolating = false;
-			camera->transform_ = it->second.camera->GetUniqueCamera()->GetTransform();
+			camera->transform_ = it->second->GetUniqueCamera()->GetTransform();
 			camera->UpdateMatrix();
 		}
 		else {
@@ -94,8 +98,16 @@ void CameraManeger::SetUseCamera(std::string name, float time)
 			currentTime = 0.0f;
 			interpolationTime = time;
 
-			startTransform = camera->transform_;
-			targetTransform = it->second.camera->GetUniqueCamera()->GetTransform();
+
+			startTransform.translate = camera->transform_.translate;
+			startTransform.rotate    = MakeQuaternionFromEuler(camera->transform_.rotate);
+			startTransform.translate = camera->transform_.translate;
+
+
+			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
+			targetTransform.rotate    = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
+			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
+
 		}
 	}
 }

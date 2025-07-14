@@ -42,7 +42,7 @@ public:
 
 	void SetStage(Stage* stage);
 
-	bool IsAction() const { return isAction_; }
+	
 
 
 	void SetRadius(float rad) { reticleRad_ = rad; }
@@ -68,8 +68,6 @@ private:
 	int currentMissileIndex = 0;
 
 	float shotTimer = 0.0f;
-
-	bool isAction_ = false;
 
 	float reticleRad_ = 100.0f;				// レティクルの半径　　　
 	Vector3 rangeBombingPos{};				// レンジボムの位置
