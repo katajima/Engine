@@ -35,7 +35,7 @@ public:
 	// コンボモーションデータ
 	ComboMotionData GetComboMotionData() const { return data_.motionData; }
 	// コンボデータ
-	ComboData GetComboData() const { return data_.comboData; }
+	ComboData& GetComboData() { return data_.comboData; }
 	// アニメーション中の時間取得
 	Timer& GetTimer() { return data_.animetionTimer; }
 	// ヒットデータを取得
@@ -81,18 +81,7 @@ public:
 	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 
 	// 攻撃方法設定
-	void KeyAttackTypes(bool is) {
-		if (attackInput_.GetIsAttack()) {
-			if (attackInput_.GetAttackKeyFlag().IsNormalAttack) {
-				if (is && GetComboData().currentComboCount == 0) {
-					attackInput_.SetRequest(AttackTypePlay::kJump);
-				}
-				else {
-					attackInput_.SetRequest(AttackTypePlay::kNormal);
-				}
-			}
-		}
-	}
+	void KeyAttackTypes(bool is);
 
 	void AttackUpdate();
 

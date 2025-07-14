@@ -17,7 +17,9 @@ void BaseWeapon::SetAttackCombo(float deltaTime) {
 
 			// 各パーツの角度などを次のコンボ用に初期化
 
-			GetComboData().IncrementCurrentComboCount();
+			data_.comboData.currentComboCount++;
+
+			//GetComboData().IncrementCurrentComboCount();
 
 			// 攻撃タイプによって初期化
 			AttackTypeInit(GetComboData().GetCurrentComboCount());
@@ -28,20 +30,22 @@ void BaseWeapon::SetAttackCombo(float deltaTime) {
 			KeyAttackTypes(character->GetSituation().isJumping);
 
 			attackInput_.SetIsState(true);
+			attackInput_.SetIsAttack(true);
 
 			// コンボフラグをリセット
-			GetComboData().SetIsComboNext(false);
-			attackInput_.SetIsAttack(false);
+			//GetComboData().SetIsComboNext(false);
+			data_.comboData.isComboNext = false;
+			// 衝突履歴削除
 			ColliderHistoryClear();
 		}
 		else {
 			GetComboData().ResetCurrentComboCount();
 			attackInput_.SetIsState(false);
 			attackInput_.SetIsAttack(false);
-
 			data_.recastTime = 0.0f;
+			data_.motionData.ResetTime();
 			// 通常行動へ移行
-			character->SetRequest(BasicBehavior::kRoot);
+			//character->SetRequest(BasicBehavior::kRoot);
 		}
 	}
 	else {
@@ -49,12 +53,24 @@ void BaseWeapon::SetAttackCombo(float deltaTime) {
 		if (GetComboData().currentComboCount < GetComboData().comboMaxCount - 1) {
 			if (attackInput_.GetIsAttack()) {
 				// コンボ有効
-				GetComboData().SetIsComboNext(true);
+				data_.comboData.isComboNext = true;// SetIsComboNext(true);
 			}
 		}
 	}
 }
 
+void BaseWeapon::KeyAttackTypes(bool is) {
+	if (attackInput_.GetIsAttack()) {
+		if (attackInput_.GetAttackKeyFlag().IsNormalAttack) {
+			if (is && GetComboData().currentComboCount == 0) {
+				attackInput_.SetRequest(AttackTypePlay::kJump);
+			}
+			else {
+				attackInput_.SetRequest(AttackTypePlay::kNormal);
+			}
+		}
+	}
+}
 
 void BaseWeapon::AttackUpdate() {
 	SetIsCollider(CollisionTag::PlayerAttack, true);

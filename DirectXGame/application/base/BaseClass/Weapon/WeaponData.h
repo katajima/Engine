@@ -76,20 +76,20 @@ struct ComboData
 	// コンボの現在の回数をリセット
 	void ResetCurrentComboCount() {	currentComboCount = 0; }
 	// コンボの現在の回数をインクリメント
-	void IncrementCurrentComboCount() { currentComboCount++; }
+	void IncrementCurrentComboCount() { currentComboCount += 1; }
 	// 次コンボするかのフラグを設定
 	void SetIsComboNext(bool is) { isComboNext = is; }
 
 	// コンボ武器かどうかのフラグを設定
-	void SetIsComboWeapon(bool isComboWeapon) { isComboWeapon = isComboWeapon; }
+	void SetIsComboWeapon(bool isComboWeapon) { this->isComboWeapon = isComboWeapon; }
 	// コンボの最大回数を取得
 	int GetComboMaxCount() const { return comboMaxCount; }
 	// コンボの最大回数を設定
-	void SetComboMaxCount(int comboMaxCount) { comboMaxCount = comboMaxCount; }
+	void SetComboMaxCount(int comboMaxCount) { this->comboMaxCount = comboMaxCount; }
 	// コンボの現在の回数を取得
 	int GetCurrentComboCount() const { return currentComboCount; }
 	// コンボの現在の回数を設定
-	void SetCurrentComboCount(int currentComboCount) { currentComboCount = currentComboCount; }
+	void SetCurrentComboCount(int currentComboCount) { this->currentComboCount = currentComboCount; }
 };
 
 

@@ -88,6 +88,7 @@ void PlayerStateAttack::Exit()
 void PlayerStateAttack::Enter()
 {
 	BaseWeapon* weapon = player_->GetWeapon();
+	weapon->GetTimer().t = 0.0f;
 	weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = true;
 	weapon->KeyAttackTypes(player_->GetSituation().isJumping);
 	weapon->AttackTypeInit(0);
@@ -95,6 +96,9 @@ void PlayerStateAttack::Enter()
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
 	player_->Situations().isInvincible = true;
 }
+
+
+#pragma region MyRegion
 
 PlayerStateSpecial::PlayerStateSpecial(BasePlayer* player)
 	: BasePlayerState("Special", player) {
@@ -133,3 +137,6 @@ void PlayerStateSpecial::Enter()
 	player_->GetSpecial()->SetGauge(0);
 	player_->GetWeapon()->GetObject3D()->SetIsDraw(false);
 }
+
+#pragma endregion // 必殺技
+

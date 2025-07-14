@@ -71,6 +71,8 @@ void FollowCamera::Update()
         uniqueCamera_->transform_.translate = desiredCameraPos;
     }
 
+
+
     if (Camera::isShake_) {
         uniqueCamera_->SetShake(0.2f, { 0.1f, 0.3f, 0.1f });
     }

@@ -27,8 +27,8 @@ void MyGame::Initialize()
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	//sceneManager_->ChangeScene("TITLE");
-	sceneManager_->ChangeScene("TEST");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();

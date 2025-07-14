@@ -108,6 +108,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\BaseClass\Attack\AttackData.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp" />
@@ -626,6 +627,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\RangedWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\WeaponData.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\MellWeapons.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackType.h" />

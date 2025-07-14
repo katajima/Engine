@@ -8,22 +8,26 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
+	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
 
 	///< summary>
 	/// 更新
 	///</summary>
-	void Update() override;
+	virtual void Update() = 0;
 
 	/// <summary>
 	/// エフェクトの描画
 	/// </summary>
-	void DrawEffect() override;
+	virtual void DrawEffect() = 0;
 
 
-	void Draw2D() override;
+	virtual void Draw2D() = 0;
+
+
+
+
 protected:
-
+	Vector3 speed
 
 
 };

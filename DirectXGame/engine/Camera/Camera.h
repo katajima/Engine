@@ -46,8 +46,10 @@ public: // メンバ関数
 	const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix_; }
 	const Vector3& GetRotate() const { return transform_.rotate; }
 	const Vector3& GetTranslate() const { return transform_.translate; }
+	const Transform& GetTransform() const { return transform_; }
 	const float& GetNearZ() const { return nearClip_; }
 	const float& GetFarZ() const { return farClip_; }
+
 
 
 

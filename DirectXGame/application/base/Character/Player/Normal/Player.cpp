@@ -175,17 +175,22 @@ void Player::Update()
 
 
 	ImGui::Begin("Debug");
+	ImGui::InputFloat("HP", &HP());
 	if (ImGui::Button("SP")) {
 		special_->SetGauge(100);
 	}
 	ImGui::Text(state_->GetName().c_str());
-	ImGui::End();
-	ImGui::Begin("trail");
-	Vector3 min = weapon_->GetObject3D()->GetMesh(0)->GetMin();
-	ImGui::InputFloat3("min", &min.x);
-	Vector3 max = weapon_->GetObject3D()->GetMesh(0)->GetMax();
-	ImGui::InputFloat3("max", &max.x);
-	ImGui::InputFloat("HP", &HP());
+	int count = weapon_->GetComboData().GetCurrentComboCount();
+	ImGui::InputInt("ComboCount", &count);
+	count = weapon_->GetComboData().GetComboMaxCount();
+	ImGui::InputInt("maxComboCount", &count);
+	bool is = weapon_->GetComboData().isComboNext;
+	ImGui::Checkbox("isComboNext", &is);
+	is = weapon_->GetAttackInput().GetIsAttack();
+	ImGui::Checkbox("isAttack", &is);
+	is = weapon_->GetAttackInput().GetIsState();
+	ImGui::Checkbox("isState", &is);
+
 	ImGui::End();
 	if (input_->IsTriggerKey(DIK_C)) {
 		if (!isCreativeMode) {

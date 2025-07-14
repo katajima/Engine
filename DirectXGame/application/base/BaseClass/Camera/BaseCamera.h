@@ -1,6 +1,14 @@
 #pragma once
 #include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
 
+// カメラの各速度
+struct CameraSRTSpeed
+{
+	float scale = 0.0f;
+	Vector3 rotate = {};
+	float rotate = 0.0f;
+};
+
 class BaseCamera : public BaseObject
 {
 public:
@@ -28,7 +36,17 @@ public:
 	/// <returns></returns>
 	Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
 
+	/// <summary>
+	/// ロックオン対象を設定
+	/// </summary>
+	/// <param name="object"></param>
+	void LockOn(BaseObject* object) { lockOnObject = object; };
+
 protected:
-	std::unique_ptr<Camera> uniqueCamera_;
+	std::unique_ptr<Camera> uniqueCamera_;	// 固有カメラ
+	CameraSRTSpeed srtSpeed_;				// SRTスピード
+	BaseObject* lockOnObject = nullptr;		// ロックオン対象
+
+
 };
 

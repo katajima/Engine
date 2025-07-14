@@ -35,7 +35,9 @@ void BaseCharacterManager::Draw2D()
 {
 	for (auto& character : character_)
 	{
-		character->Draw2D();
+		if (character->GetAlive()) {
+			character->Draw2D();
+		}
 	}
 }
 

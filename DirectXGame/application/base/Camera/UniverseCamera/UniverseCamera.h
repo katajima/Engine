@@ -1,29 +1,29 @@
 #pragma once
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/application/base/BaseClass/Camera/BaseFixedCamera.h"
 
 
-class UniverseCamera
+class UniverseCamera : public BaseFixedCamera
 {
 public:
-	/// <summary>
+	///< summary>
 	/// 初期化
-	/// </summary>
-	void Initialize(CameraCommon* cameraCommon);
+	///</summary>
+	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
+
+	///< summary>
+	/// 更新
+	///</summary>
+	void Update() override;
 
 	/// <summary>
-	/// 毎フレーム処理
+	/// エフェクトの描画
 	/// </summary>
-	void Update();
+	void DrawEffect() override;
 
-	
-	Camera& GetViewProjection() { return camera_; };
+
+	void Draw2D() override;
 
 private:
-	// ビュープロジェクション
-	Camera camera_;
 
 };
 

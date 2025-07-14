@@ -13,6 +13,7 @@
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
+#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
 
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
@@ -47,10 +48,6 @@ public:
 	void CheckAllCollisions();
 
 private:
-
-	void InitializeCamera();
-
-private:
 	// 振るまい
 	enum class Behavior {
 		kPhase1,	// フェーズ１
@@ -75,16 +72,14 @@ private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 private:
-	// カメラ
-	std::unique_ptr < Camera> camera;
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
 	// 宇宙カメラ
 	std::unique_ptr<UniverseCamera> universeCamera_;
 
+	// カメラ管理
+	std::unique_ptr<CameraManeger> cameraManeger_;
 
-	bool flag = true;
-	bool isUniverseCamera = false;
 	float timer = 0.0f;
 	float cameraScaleT = 0.0f;
 	float minScaleZCamera = 5.5f;
