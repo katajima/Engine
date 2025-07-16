@@ -43,6 +43,9 @@ void GamePlayScene::Initialize()
 	caracterManager_->SetFollowCamera(followCamera_.get());
 	// プレイヤー生成
 	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+	// レベルデータロード
+	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
 	// 敵生成
 	for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
@@ -80,9 +83,7 @@ void GamePlayScene::Initialize()
 	gameUI->Initialize(GetEntity2DManager());
 	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
-	// レベルデータロード
-	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
+	
 }
 
 
