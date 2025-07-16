@@ -50,13 +50,6 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 	
 
-	// 地面
-	//tail_ = entity3DManager_->CreateObject3D("stage", Object3d::ObjectModelType::kNormal, {}, camera_);
-	//tail_->SetModel("stage.gltf");
-	//tail_->worldtransform_.scale_ = { 4,4,4 };
-	//tail_->GetMaterial(0)->transform.scale = { 1,1,1 };
-	//tail_->GetMaterial(0)->shininess_ = 64.0f;
-	//tail_->worldtransform_.Update();
 	
 	
 	//// 列車

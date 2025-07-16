@@ -102,9 +102,6 @@ private:
 	int count = 0;
 	int sceneCount = 0;
 	int clock = 1;
-	// デバッグ用タイマー
-	DebugTimer debugTimer_;
-	DebugTimer debugTimerAll_;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = std::make_unique<GameUI>();
