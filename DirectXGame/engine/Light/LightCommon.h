@@ -40,6 +40,10 @@ public:
 	
 	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr);
 
+
+	void ClearLights() {
+		m_lights.clear();
+	}
 private:
 	void ApplyGlobalVariables();
 

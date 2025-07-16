@@ -64,29 +64,29 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":71200,
+			"count":74075,
 			"max":[
-				1599.9852294921875,
-				101.17269134521484,
-				21.85919189453125
+				4799.95556640625,
+				303.51806640625,
+				65.57757568359375
 			],
 			"min":[
-				-1600.0147705078125,
-				-100.99869537353516,
-				-21.74481201171875
+				-4800.04443359375,
+				-302.99609375,
+				-65.23443603515625
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":71200,
+			"count":74075,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":71200,
+			"count":74075,
 			"type":"VEC2"
 		},
 		{
@@ -99,26 +99,26 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":854400,
+			"byteLength":888900,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":854400,
-			"byteOffset":854400,
+			"byteLength":888900,
+			"byteOffset":888900,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":569600,
-			"byteOffset":1708800,
+			"byteLength":592600,
+			"byteOffset":1777800,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":668160,
-			"byteOffset":2278400,
+			"byteOffset":2370400,
 			"target":34963
 		}
 	],
@@ -130,7 +130,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":2946560,
+			"byteLength":3038560,
 			"uri":"trainBridge.bin"
 		}
 	]

@@ -19,7 +19,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	ocean_->GetWaveParameters()[0].speed = 5.0f;
 	ocean_->GetMaterial()->color = Color{ 0.0f, 0.0f, 0.8f, 0.75f };
 
-	oceanObject = entity3DManager_->CreateObject3D("oceanObject", Object3d::ObjectType::kOcean, { 0,-30,0 }, camera_);
+	oceanObject = entity3DManager_->CreateObject3D("oceanObject", Object3d::ObjectModelType::kOcean, { 0,-30,0 }, camera_);
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
 	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
@@ -29,7 +29,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
 	
 	// 空
-	sky_ = entity3DManager_->CreateObject3D("skyBox", Object3d::ObjectType::kSkyBox, {},camera_);
+	sky_ = entity3DManager_->CreateObject3D("skyBox", Object3d::ObjectModelType::kSkyBox, {},camera_);
 	sky_->worldtransform_.scale_ = { 100,100,100 };
 	sky_->SetSkyBox(skyBox.get());
 	
@@ -38,7 +38,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	{
 		for(int j = 0; j < 2; ++j)
 		{
-			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),Object3d::ObjectType::kNormal,
+			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),Object3d::ObjectModelType::kNormal,
 				{ 3500 + static_cast<float>(j) * 120.0f ,106,3000 + static_cast<float>(i) * 100.0f },camera_);
 			object->SetModel("Missile.gltf");
 			object->worldtransform_.rotate_.y = DegreesToRadians(-90);
@@ -50,24 +50,24 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 	
 
-	// 地面
-	tail_ = entity3DManager_->CreateObject3D("stage", Object3d::ObjectType::kNormal, {}, camera_);
-	tail_->SetModel("stage.gltf");
-	tail_->worldtransform_.scale_ = { 4,4,4 };
-	tail_->GetMaterial(0)->transform.scale = { 1,1,1 };
-	tail_->GetMaterial(0)->shininess_ = 64.0f;
+	
+	
+	//// 列車
+	//train_ = entity3DManager_->CreateObject3D("train", Object3d::ObjectModelType::kNormal, { -3111,300,1040 }, camera_);
+	//train_->SetModel("train.gltf");
+	//train_->worldtransform_.scale_ = { 8,8,8 };
+	//train_->GetMaterial(0)->shininess_ = 64.0f;
+	//train_->worldtransform_.Update();
+	//// 船
+	//ship_ = entity3DManager_->CreateObject3D("ship", Object3d::ObjectModelType::kNormal, { -3111,-50,2040 }, camera_);
+	//ship_->SetModel("ship.gltf");
+	//ship_->worldtransform_.scale_ = { 8,8,8 };
+	//ship_->GetMaterial(0)->shininess_ = 64.0f;
+	//ship_->worldtransform_.Update();
+	
 
-	// 列車
-	train_ = entity3DManager_->CreateObject3D("train", Object3d::ObjectType::kNormal, { -3111,300,1040 }, camera_);
-	train_->SetModel("train.gltf");
-	train_->worldtransform_.scale_ = { 8,8,8 };
-	train_->GetMaterial(0)->shininess_ = 64.0f;
 
-	// 船
-	ship_ = entity3DManager_->CreateObject3D("ship", Object3d::ObjectType::kNormal, { -3111,-50,2040 }, camera_);
-	ship_->SetModel("ship.gltf");
-	ship_->worldtransform_.scale_ = { 8,8,8 };
-	ship_->GetMaterial(0)->shininess_ = 64.0f;
+
 
 	// ポイントライト
 	PointLightData pointLightData{};
@@ -84,14 +84,26 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 	entity3DManager_->GetLightManager()->AddLight(pointLight_);
 
+	DirectionalLightData directionalLightData{};
+	directionalLightData.color = { 1,1,1,1 };
+	directionalLightData.direction = { 0,-1,0 };
+	directionalLightData.intensity = 0.5f;
+	directionalLightData.isLight = true;
+	directionalLightData.lig = 0.1f;
+
+
+	directional = std::make_shared<DirectionalLight>();
+	directional->directional = directionalLightData;
+
+	entity3DManager_->GetLightManager()->AddLight(directional);
 	
 	// エミッター設定
-	InitEmit();
+	//InitEmit();
 }
 
 void Stage::Update()
 {
-	train_->worldtransform_.translate_.x += trainSpeed_ * MyGame::GameTime();
+	/*train_->worldtransform_.translate_.x += trainSpeed_ * MyGame::GameTime();
 
 	if (trainEndX_ < train_->worldtransform_.translate_.x)
 	{
@@ -101,7 +113,9 @@ void Stage::Update()
 			trainWarpTime_ = 0.0f;
 			train_->worldtransform_.translate_.x = trainStartX_;
 		}
-	}
+	}*/
+
+	//pointLight_->point.color = { 1,0,0,1 };
 
 	//velocity_ = Subtract(ship_->GetWorldPosition(), ship_->GetPreWorldPosition());
 	
@@ -120,7 +134,7 @@ void Stage::Update()
 
 
 
-	EmitUpdate();
+	//EmitUpdate();
 }
 
 void Stage::Draw()
@@ -192,6 +206,8 @@ void Stage::InitEmit()
 	emitShipDust_->SetRotateMinMax(-Vector3{ 0,0,3.14f }, Vector3{ 0,0,3.14f });
 
 
+	emitTrainDust_->Update();
+
 	emitCloudDust_ = std::make_unique<ParticleEmitter>();
 	emitCloudDust2_ = std::make_unique<ParticleEmitter>();
 	emitCloudDust3_ = std::make_unique<ParticleEmitter>();
@@ -236,3 +252,5 @@ void Stage::EmitUpdate()
 	//emitCloudDust2_->Update();
 	//emitCloudDust3_->Update();
 }
+
+

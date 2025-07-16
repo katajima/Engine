@@ -1,4 +1,6 @@
 #include "Animation.h"
+#include"DirectXGame/engine/3d/Model/Model.h"
+#include <execution> // C++17 以降
 
 void Animetion::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
@@ -79,9 +81,38 @@ void Animetion::UpdateSkeleton(Skeleton& skeleton)
 	}
 }
 
-void Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale)
+void Animetion::BlendSkeletons(Skeleton& outSkeleton,
+	const Skeleton& fromSkeleton,
+	const Skeleton& toSkeleton,
+	float t)
 {
-	// ジョイントごとの深さを計算して保存
+	size_t jointCount = fromSkeleton.joints.size();
+	outSkeleton.joints.resize(jointCount);
+
+	for (size_t i = 0; i < jointCount; ++i) {
+		const Joint& fromJoint = fromSkeleton.joints[i];
+		const Joint& toJoint = toSkeleton.joints[i];
+
+		Joint& outJoint = outSkeleton.joints[i];
+
+		// Transformの補間
+		outJoint.transform.translate = Lerp(fromJoint.transform.translate, toJoint.transform.translate, t);
+		outJoint.transform.scale = Lerp(fromJoint.transform.scale, toJoint.transform.scale, t);
+		outJoint.transform.rotate = Slerp(fromJoint.transform.rotate, toJoint.transform.rotate, t);
+
+		// 残りの固定情報はどちらでもOK
+		outJoint.name = fromJoint.name;
+		outJoint.index = fromJoint.index;
+		outJoint.parent = fromJoint.parent;
+		outJoint.children = fromJoint.children;
+	}
+
+	// 補間後、localMatrix / skeletonSpaceMatrix を更新する
+	Animetion::UpdateSkeleton(outSkeleton);
+}
+
+void Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scaleconst ,const Matrix4x4& rotationMatrix)
+{
 	std::vector<int> depths(joints.size(), 0);
 	int maxDepth = 0;
 	for (size_t i = 0; i < joints.size(); ++i) {
@@ -89,38 +120,140 @@ void Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& jo
 		maxDepth = (std::max)(maxDepth, depths[i]);
 	}
 
-
 	for (const Joint& joint : joints) {
 		if (joint.parent.has_value()) {
 			const int32_t parentIndex = joint.parent.value();
-			const Vector3& parentPosition = joints[parentIndex].skeletonSpaceMatrix.GetWorldPosition() * scale;
-			const Vector3& childPosition = joint.skeletonSpaceMatrix.GetWorldPosition() * scale;
 
+			// ワールド座標を取得
+			Vector3 parentPos = joints[parentIndex].skeletonSpaceMatrix.GetWorldPosition();
+			Vector3 childPos = joint.skeletonSpaceMatrix.GetWorldPosition();
 
-			Vector3 offsetParentPosition = Add(parentPosition, pos);
-			Vector3 offsetChildPosition = Add(childPosition, pos);
-			lineCommon->AddLine(offsetParentPosition, offsetChildPosition, { 1,1,1,1 });
+			// スケール適用
+			parentPos = Multiply(parentPos, scaleconst);
+			childPos = Multiply(childPos, scaleconst);
 
+			// 回転適用
+			parentPos = Transforms(parentPos, rotationMatrix);
+			childPos = Transforms(childPos, rotationMatrix);
+
+			// 平行移動適用
+			parentPos = Add(parentPos, pos);
+			childPos = Add(childPos, pos);
+
+			// ライン描画
+			lineCommon->AddLine2(parentPos, childPos, { 1,1,1,1 });
 		}
 	}
 
 }
 
-void Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton)
+void Animetion::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
 {
-	// サイズチェック
-	assert(skinCluster.inverseBindPoseMatrices.size() == skeleton.joints.size());
-	assert(skinCluster.mappedPalette.size() == skeleton.joints.size());
-
-	for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
-		// スケルトンスペース行列を計算
-		skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
-			skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
-
-		// 逆転置行列を計算
-		skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
-			Transpose(Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
+	if (modelData.currentAnimName != newAnimName) {
+		modelData.previousAnimName = modelData.currentAnimName;
+		modelData.currentAnimName = newAnimName;
+		modelData.blendTime = 0.0f;
+		modelData.blendDuration = blendDuration;
+		modelData.isBlending = true;
 	}
+}
+
+Joint* Animetion::FindJointByName(Skeleton& skeleton, const std::string& name)
+{
+	auto it = skeleton.jointMap.find(name);
+	if (it != skeleton.jointMap.end()) {
+		int32_t index = it->second;
+		if (index >= 0 && index < skeleton.joints.size()) {
+			return &skeleton.joints[index];
+		}
+	}
+	return nullptr;
+}
+
+const Joint* Animetion::FindJointByNameConst(const Skeleton& skeleton, const std::string& name)
+{
+	auto it = skeleton.jointMap.find(name);
+	if (it != skeleton.jointMap.end()) {
+		int32_t index = it->second;
+		if (index >= 0 && index < skeleton.joints.size()) {
+			return &skeleton.joints[index];
+		}
+	}
+	return nullptr;
+}
+
+Matrix4x4 Animetion::GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix)
+{
+	auto it = skeleton.jointMap.find(jointName);
+	if (it != skeleton.jointMap.end()) {
+		const Joint& joint = skeleton.joints[it->second];
+		//return Multiply(modelWorldMatrix ,joint.skeletonSpaceMatrix);
+		return Multiply(joint.skeletonSpaceMatrix,modelWorldMatrix);
+	}
+	return Matrix4x4::Identity(); // 見つからなければ単位行列
+}
+
+void Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices)
+{
+	if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
+		cachedSkeletonMatrices.resize(skeleton.joints.size());
+	}
+
+	// キャッシュ作成
+	for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+		cachedSkeletonMatrices[i] = skeleton.joints[i].skeletonSpaceMatrix;
+	}
+
+	//// 更新処理
+	//for (size_t i = 0; i < skeleton.joints.size(); ++i) {
+	//	auto skinnedMat = Multiply(skinCluster.inverseBindPoseMatrices[i], cachedSkeletonMatrices[i]);
+	//	skinCluster.mappedPalette[i].skeletonSpaceMatrix = skinnedMat;
+	//	skinCluster.mappedPalette[i].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
+	//}
+
+	std::vector<size_t> indices(skeleton.joints.size());
+	std::iota(indices.begin(), indices.end(), 0);
+
+	std::for_each(std::execution::par, indices.begin(), indices.end(), [&](size_t i) {
+		auto skinnedMat = Multiply(skinCluster.inverseBindPoseMatrices[i], cachedSkeletonMatrices[i]);
+		skinCluster.mappedPalette[i].skeletonSpaceMatrix = skinnedMat;
+		skinCluster.mappedPalette[i].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
+		});
+
+	//// サイズチェックとキャッシュ確保
+	//if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
+	//	cachedSkeletonMatrices.resize(skeleton.joints.size());
+	//}
+
+	//// Step 1: スケルトン空間行列のキャッシュを1度だけ作成
+	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+	//	cachedSkeletonMatrices[jointIndex] = skeleton.joints[jointIndex].skeletonSpaceMatrix;
+	//}
+
+	//// Step 2: スキンクラスタ用のマトリクス更新
+	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+	//	const auto& invBind = skinCluster.inverseBindPoseMatrices[jointIndex];
+	//	const auto& skelMat = cachedSkeletonMatrices[jointIndex];
+
+	//	auto skinnedMat = Multiply(invBind , skelMat);
+
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix = skinnedMat;
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
+	//}
+
+	//// サイズチェック
+	//assert(skinCluster.inverseBindPoseMatrices.size() == skeleton.joints.size());
+	//assert(skinCluster.mappedPalette.size() == skeleton.joints.size());
+
+	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+	//	// スケルトンスペース行列を計算
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
+	//		skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
+
+	//	// 逆転置行列を計算
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
+	//		Transpose(Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
+	//}
 }
 
 void Animetion::ValidateTransform(Joint& joint)

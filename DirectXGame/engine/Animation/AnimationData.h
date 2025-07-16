@@ -1,6 +1,7 @@
 #pragma once
 #include "imgui.h"
 #include<string>
+#include"DirectXGame/engine/math/MathFanctions.h"
 
 // タイマーの構造体
 struct Timer {
@@ -9,7 +10,7 @@ struct Timer {
 	bool isMaxOverStr = false;	// タイマーが最大値に達したらtを初期値に戻すフラグ
 	bool isClock = false;		//クロック機能を使うか
 	int clock = 1;				// クロック
-	
+
 	float Update(float dt) {
 		if (clock == 1) {
 			t += dt; // タイマーの値を更新する
@@ -56,7 +57,7 @@ struct Timer {
 		ImGui::Begin(name.c_str());
 		ImGui::DragFloat("t", &t, 0.01f);
 		ImGui::DragFloat("MaxT", &maxT, 0.01f);
-		ImGui::SliderInt("clock", &clock, -1,1);
+		ImGui::SliderInt("clock", &clock, -1, 1);
 		float  lerpT = LerpT();
 		ImGui::InputFloat("lerpT", &lerpT);
 		ImGui::Checkbox("isMaxOverStr", &isMaxOverStr);
@@ -73,8 +74,67 @@ private:
 	}
 
 	void MaxOverSetTimer(float t) {
-		this->t = t;	
+		this->t = t;
 		Clock();		// クロック反転
 	}
 
+};
+
+
+// 補間系構造体
+struct LerpMinMax
+{
+	float strT = 0.0f;				// 初期T
+	float currentT = 0.0f;			// 現在T
+	float minT = 0.0f;				// 最小T
+	float maxT = 1.0f;				// 最大T
+	float speedT = 0.01f;			// 速度T
+	float strP = 0.0f;				// スタート地点
+	float endP = 0.0f;				// 最終地点
+	bool isMinMaxOverStr = false;	// 初期値に戻すか
+	bool isOver = false;			// 値が超えてもいいか
+
+	void Initialize(float strP,float endP, float strT,float speed, float min = 0.0f, float max = 1.0f, bool isMinMaxOverStr = false, bool isOver = false) {
+		
+		this->strP = strP;
+		this->endP = endP;
+		this->strT = strT;
+		currentT = strT;
+		minT = min;
+		maxT = max;
+		speedT = speed;
+		this->isMinMaxOverStr = isMinMaxOverStr;
+		this->isOver = isOver;
+	}
+
+	void Update(float dt) {
+
+		if (isOver) {
+			currentT += speedT * dt;
+		}
+		else {
+			if ((minT <= currentT && maxT >= currentT)) {
+				currentT += speedT * dt;
+
+				if (minT >= currentT) {
+					if (isMinMaxOverStr) {
+						currentT = strT;
+					}
+					else {
+						currentT = minT;
+					}
+				}
+				else if (maxT <= currentT) {
+					if (isMinMaxOverStr) {
+						currentT = strT;
+					}
+					else {
+						currentT = maxT;
+					}
+				}
+			}
+		}
+
+	}
+	float LerpData() const { return Lerp(strP, endP, currentT); }
 };

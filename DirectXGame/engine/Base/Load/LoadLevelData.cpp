@@ -15,35 +15,57 @@ void LoadLevelData::Initialize(Entity3DManager* entity3DManager, ModelManager* m
 	// 凍結してフルパスを得る 
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
-	// レベルデータ格納用インスタンスを生成 
-	LevelData* levelData = new LevelData();
+	levelData_ = new LevelData();
 	// "objects"の全オブジェクトを走査 
 	for (nlohmann::json& object : deserialized["objects"]) {
-		// JSONファイルからトランスフォーム情報をレベルデータに書き出す
-		LoadDataFanc::ModelTransfom(object, levelData);
-		// レベルデータよりオブジェクトを生成する
-		CreateObject3d(levelData);
+		// 有効無効フラグ
+		if (object.contains("disabled")) {
+			bool disabled = object["disabled"].get<int>();
+			if (disabled) {
+				// 配置しない
+				continue;
+			}
+		}
+		
+		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(オブジェクト)
+		LoadDataFanc::ModelTransfom(object, levelData_);
+		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(出現位置)
+		LoadDataFanc::SpawwnPoint(object, levelData_);
 	}
+	// レベルデータよりオブジェクトを生成する
+	CreateObject3d(levelData_);
+
 }
 
 void LoadLevelData::ReLoad()
 {
-	for (auto& object : objects) {
-		object->IsDelete();
-	}	
-	//objects.clear();
+	// "LevelObject" タグを持つオブジェクトを全削除
+	entity3DManager_->EraseObject3DByTag("LevelObject");
+	levelData_->objects.clear();
+	levelData_->players.clear();
+	levelData_->enemys.clear();
+	objects_.clear();
 
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
-	// レベルデータ格納用インスタンスを生成 
-	LevelData* levelData = new LevelData();
 	// "objects"の全オブジェクトを走査 
-	for (nlohmann::json& object : deserialized["objects"]) {	
+	for (nlohmann::json& object : deserialized["objects"]) {
+		// 有効無効フラグ
+		if (object.contains("disabled")) {
+			bool disabled = object["disabled"].get<int>();
+			if (disabled) {
+				// 配置しない
+				continue;
+			}
+		}
+
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す
-		LoadDataFanc::ModelTransfom(object, levelData);
-		// レベルデータよりオブジェクトを生成する
-		CreateObject3d(levelData);
+		LoadDataFanc::ModelTransfom(object, levelData_);
+		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(出現位置)
+		LoadDataFanc::SpawwnPoint(object, levelData_);
 	}
+	// レベルデータよりオブジェクトを生成する
+	CreateObject3d(levelData_);
 }
 
 
@@ -56,6 +78,7 @@ void LoadLevelData::Update()
 	}
 	ImGui::End();
 #endif // _DEBUG
+
 }
 
 void LoadLevelData::Draw3D()
@@ -85,17 +108,34 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 		}
 
 		// モデルを指定して3Dオブジェクトを生成 
-		std::unique_ptr<Object3d> newObject = std::make_unique<Object3d>();
-		newObject->Initialize(entity3DManager_);
+		Object3d* newObject = entity3DManager_->CreateObject3D(objectData.fileName,Object3d::ObjectModelType::kNormal,{},{});
+		//newObject->Initialize(entity3DManager_);
 		newObject->SetModel(model);
 		newObject->SetIsDraw(true);
+		newObject->SetNameTag("LevelObject");
+		if (objectData.isCollider) {
+			newObject->InitColliderComponent();
+
+			// SphereColliderを追加
+			auto aabb = std::make_unique<AABBCollider>();
+			aabb->tag = CollisionTag::Wall;
+			//sphere->layer = CollisionLayer::None;
+			aabb->collisionMask = 0xFFFFFFFF;
+			//aabb->radius = objectData.size.x;
+			aabb->aabb.min_ = -((objectData.size) / 2)* objectData.scale;
+			aabb->aabb.max_ = ((objectData.size) / 2)* objectData.scale;
+			aabb->isStatic = true;
+			newObject->GetColliderComponent()->AddCollider(std::move(aabb));
+		}
 		// 座標 
 		newObject->worldtransform_.translate_ = objectData.position;
 		// 回転角 
 		newObject->worldtransform_.rotate_ = objectData.rotation;
 		// 大きさ
 		newObject->worldtransform_.scale_ = objectData.scale;
-		// 配列に登録
-		objects.push_back(std::move(newObject));
+
+		objects_.push_back(newObject);
 	}
 }
+
+

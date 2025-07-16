@@ -141,12 +141,21 @@ struct SkinningInfomation {
 	uint32_t numVertices;
 };
 
+
+struct SkinningSRVUAV {
+	uint32_t wellSrvIndex; // Well
+	uint32_t inputVerticesIndex; // 入力頂点
+	uint32_t influencesIndex; // 入力インフルエンス
+	uint32_t outputVerticesUavIndex; // 計算後の頂点データ
+};
 /// <summary>
 /// スキンクラスター
 /// </summary>
 struct SkinCluster {
-	std::vector<Matrix4x4> inverseBindPoseMatrices;
+	SkinningSRVUAV srvUavIndices;
 
+	std::vector<Matrix4x4> inverseBindPoseMatrices;
+	std::map<std::string, JointWeightData> skinClusterData;	// ← 全体で1つだけ
 	/// <summary>
 	/// 
 	/// </summary>
@@ -183,9 +192,10 @@ struct SkinCluster {
 	/// </summary>
 	Microsoft::WRL::ComPtr < ID3D12Resource> skinningInfomation;
 	SkinningInfomation* skinningInfomationDeta;
+
 };
 
-
+struct ModelData;
 namespace Animetion {
 
 	// スケルトンに対してアニメーションを適用させる関数
@@ -200,12 +210,24 @@ namespace Animetion {
 	// スケルトン更新
 	void UpdateSkeleton(Skeleton& skeleton);
 
+	// 
+	void BlendSkeletons(Skeleton& outSkeleton, const Skeleton& from, const Skeleton& to, float t);
+
 	// スキンクラスター更新
-	void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton);
+	void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton , std::vector<Matrix4x4>& cachedSkeletonMatrices);
 
 	// スケルトンの描画
-	void DrawSkeleton(LineCommon* lineCommo, const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale);
+	void DrawSkeleton(LineCommon* lineCommo, const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale, const Matrix4x4& rotationMatrix);
 	
+	void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
+	
+
+	/// モディファイ可能な Joint が欲しい場合
+	Joint* FindJointByName(Skeleton& skeleton, const std::string& name);
+	/// 名前からJointを取得する（存在しなければnullptr）
+	const Joint* FindJointByNameConst(const Skeleton& skeleton, const std::string& name);
+	
+	Matrix4x4 GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix);
 	
 	//
 	void ValidateTransform(Joint& joint);

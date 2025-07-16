@@ -9,6 +9,8 @@ float MyGame::nowTime = 0.0f;
 
 void MyGame::Initialize()
 {
+	debugTimer_.StartTimer();
+
 	Framework::Initialize();
 
 
@@ -24,6 +26,7 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
+	//sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("TEST");
 	sceneManager_->ChangeScene("GAMEPLAY");
 
@@ -33,6 +36,9 @@ void MyGame::Initialize()
 	// グローバル変数の読み込み
 	globalVariables_->LoadFiles();
 
+
+	debugTimer_.EndTimer();
+	debugTimer_.LogTimeSec("MyGameAllTime ");
 }
 
 void MyGame::Finalize()
@@ -119,6 +125,7 @@ void MyGame::InitializeResource()
 	TextureManager* textureManager = dxCommon->GetTextureManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
 	
+
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
 	textureManager->LoadTexture("resources/Texture/grass.png");
@@ -296,6 +303,10 @@ void MyGame::LoadModel()
 
 	//modelManager->LoadModel("walk.gltf", "human");
 	//modelManager->LoadModel("iku.gltf", "iku");
+	modelManager->LoadModel("KnightCharacter.gltf", "Character");
+	//modelManager->LoadModel("Characters_Anne.gltf", "Character");
+	modelManager->LoadModel("Humans_Master.gltf", "Character");
+	modelManager->LoadModel("run.gltf", "Character");
 
 
 
@@ -356,6 +367,9 @@ void MyGame::LoadModel()
 
 
 	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
+	//modelManager->LoadModel("trainBridge.obj", "stage/Bridge"); // ステージ(橋)
+	modelManager->LoadModel("field.obj", "stage/Field"); // フィールド()
+	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
 
 
 	/// <summary>

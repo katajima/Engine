@@ -2,7 +2,8 @@
 
 // C++
 #include"memory"
-
+#include <future>
+#include <mutex>
 // engine
 #include"DirectXGame/engine/effect/Ocean/OceanManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
@@ -15,9 +16,17 @@
 #include "DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 
-#include "Entity3D.h"
 
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/collider/3d/CollisionManager.h"
+
+struct SortResult {
+	Object3d* ptr;
+	Object3d::ObjectDrawType drawType;
+	float alpha;
+	bool isSkin;
+};
 
 class DirectXCommon;
 class Entity3DManager
@@ -35,6 +44,8 @@ public:
 	// 
 	void Update();
 
+	//void CheckAllCollisions();
+
 	void ObjectClean();
 
 	void ObjectDraw();
@@ -43,8 +54,8 @@ public: //セッター
 
 	//void SetEntity3D(std::unique_ptr<Object3d> entity3D);
 
-	// オブジェクト3D生成
-	Object3d* CreateObject3D(const std::string& name, Object3d::ObjectType type, const Vector3& pos, Camera* camera) {
+	// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
+	Object3d* CreateObject3D(const std::string& name, Object3d::ObjectModelType type, const Vector3& pos, Camera* camera) {
 		auto object = std::make_unique<Object3d>();
 		object->Initialize(this, type);
 		object->SetName(name);
@@ -70,7 +81,7 @@ public: //セッター
 
 		// Object3d 生成
 		auto object = std::make_unique<Object3d>();
-		object->Initialize(this, Object3d::ObjectType::kPrimitive, rasterizerType);
+		object->Initialize(this, Object3d::ObjectModelType::kPrimitive, rasterizerType);
 		object->SetName(name);
 		object->SetCamera(camera);
 		object->SetPrimitive(std::move(primitive)); // 所有権を渡す
@@ -78,6 +89,13 @@ public: //セッター
 		Object3d* raw = object.get();
 		object3d.push_back(std::move(object));
 		return raw;
+	}
+
+	// タグでの削除
+	void EraseObject3DByTag(const std::string& tag) {
+		std::erase_if(object3d, [&](const std::unique_ptr<Object3d>& o) {
+			return  o->GetNameTag() == tag;
+			});
 	}
 
 public: //ゲッター
@@ -101,8 +119,13 @@ public: //ゲッター
 	PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
 
 	EffectManager* GetEffectManager() { return effectManager_.get(); }
+public:
+	//void SetCollisionManager(CollisionManager* collisionManager) {collisionManager_ = collisionManager;}
+
 
 private:
+	//CollisionManager* collisionManager_;
+
 
 	std::vector<std::unique_ptr<Object3d>> object3d;
 

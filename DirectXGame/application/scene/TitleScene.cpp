@@ -14,6 +14,9 @@ void TitleScene::Initialize()
 	// リソース
 	InitializeResources();
 
+	//loadData_ = std::make_unique<LoadLevelData>();
+	//loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
+
 
 }
 
@@ -32,7 +35,7 @@ void TitleScene::Update()
 			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}
 	}
-
+	//loadData_->Update();
 	tail.Update();
 	camera->UpdateMatrix();
 }
@@ -75,6 +78,18 @@ void TitleScene::InitializeResources()
 	tail.SetCamera(camera.get());
 	tail.worldtransform_.scale_ = { 10,10,10 };
 
+	DirectionalLightData directionalLightData{};
+	directionalLightData.color = { 1,1,1,1 };
+	directionalLightData.direction = { 0,-1,0 };
+	directionalLightData.intensity = 1.5f;
+	directionalLightData.isLight = true;
+	directionalLightData.lig = 0.1f;
+
+
+	directional = std::make_shared<DirectionalLight>();
+	directional->directional = directionalLightData;
+
+	GetEntity3DManager()->GetLightManager()->AddLight(directional);
 }
 
 void TitleScene::InitializeCamera()

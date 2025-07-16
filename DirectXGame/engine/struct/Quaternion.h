@@ -221,6 +221,48 @@ static Quaternion Slerp2(const Quaternion& q0, const Quaternion& q1, float t) {
 
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
 
+static Quaternion MakeQuaternionFromEuler(const Vector3& euler) {
+    float cy = std::cos(euler.y * 0.5f); // yaw
+    float sy = std::sin(euler.y * 0.5f);
+    float cp = std::cos(euler.x * 0.5f); // pitch
+    float sp = std::sin(euler.x * 0.5f);
+    float cr = std::cos(euler.z * 0.5f); // roll
+    float sr = std::sin(euler.z * 0.5f);
+
+    Quaternion q;
+    q.w = cr * cp * cy + sr * sp * sy;
+    q.x = sr * cp * cy - cr * sp * sy;
+    q.y = cr * sp * cy + sr * cp * sy;
+    q.z = cr * cp * sy - sr * sp * cy;
+
+    return q;
+}
+
+static Vector3 QuaternionToEuler(const Quaternion& q) {
+    Vector3 euler;
+
+    // roll (Z軸回転)
+    float sinr_cosp = 2.0f * (q.w * q.x + q.y * q.z);
+    float cosr_cosp = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
+    euler.z = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (X軸回転)
+    float sinp = 2.0f * (q.w * q.y - q.z * q.x);
+    if (std::abs(sinp) >= 1.0f) {
+        // 90度に張り付く場合（Gimbal Lock）
+        euler.x = std::copysign(float(M_PI) / 2.0f, sinp);
+    }
+    else {
+        euler.x = std::asin(sinp);
+    }
+
+    // yaw (Y軸回転)
+    float siny_cosp = 2.0f * (q.w * q.z + q.x * q.y);
+    float cosy_cosp = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
+    euler.y = std::atan2(siny_cosp, cosy_cosp);
+
+    return euler; // 単位はラジアン
+}
 
 
 

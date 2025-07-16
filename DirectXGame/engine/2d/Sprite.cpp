@@ -6,7 +6,7 @@
 
 void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, bool isTexLoad)
 {
-
+	timer_.StartTimer();
 	textureFilePath_ = textureFilePath;
 	// 引数で受け取ってメンバ変数にする
 	this->spriteCommon_ = spriteCommon;
@@ -69,6 +69,10 @@ void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, 
 	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
 
 	AdjusttextureSize();
+
+
+	timer_.EndTimer();
+	timer_.LogTimeSec("InitSprite ", textureFilePath);
 }
 
 void Sprite::Update()

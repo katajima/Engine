@@ -183,13 +183,10 @@
     <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Player.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\BasePlayerState.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\FollowCamera\FollowCamera.cpp">
+    <ClCompile Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Offscreen\RenderingCommon.cpp">
@@ -237,13 +234,7 @@
     <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\PlayerBehavior.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\PlayerAttack.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Weapon\playerWeapon.cpp">
+    <ClCompile Include="DirectXGame\application\base\Weapon\playerWeapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffect.cpp">
@@ -265,9 +256,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Color\Color.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Light\Lights.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp">
@@ -366,58 +354,37 @@
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Effect\PlayerEffect.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Effect\PlayerEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\UI\PlayerUI.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Player\UI\PlayerUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Enemy\Base\EnemyManager.cpp">
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\UI\BaseUI.cpp">
+    <ClCompile Include="DirectXGame\application\base\BaseClass\UI\BaseUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Bullet\BulletManager.cpp">
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Bullet\BaseBullet.cpp">
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Bullet\PlayerMissile.cpp">
+    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerMissile.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Special\BaseSpecial.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Special\BulletSpecial.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Base\BasePlayer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Base\PlayerManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Normal\NormalPlayer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Weapon\SwordWeapon.cpp">
+    <ClCompile Include="DirectXGame\application\base\Special\BulletSpecial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
@@ -450,13 +417,13 @@
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Special\RangeBombingSpecial.cpp">
+    <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Player\Bullet\PlayerRangeBombingBullet.cpp">
+    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\UniverseCamera\UniverseCamera.cpp">
+    <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\PSO\PSOFanction.cpp">
@@ -469,6 +436,39 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Attack\AttackData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -676,13 +676,13 @@
     <ClInclude Include="DirectXGame\engine\Light\LightCommon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Player.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\BasePlayerState.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayerState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\FollowCamera\FollowCamera.h">
+    <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Offscreen\RenderingCommon.h">
@@ -748,7 +748,7 @@
     <ClInclude Include="DirectXGame\engine\Math\Easing.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Weapon\playerWeapon.h">
+    <ClInclude Include="DirectXGame\application\base\Weapon\playerWeapon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffect.h">
@@ -886,58 +886,46 @@
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Effect\PlayerEffect.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Effect\PlayerEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\UI\PlayerUI.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\UI\PlayerUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\Stage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Enemy\Base\EnemyManager.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Enemy\Base\BaseEnemy.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Enemy\Normal\NormalEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\UI\BaseUI.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\UI\BaseUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Bullet\BulletManager.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Bullet\BaseBullet.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Bullet\PlayerMissile.h">
+    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerMissile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Special\BaseSpecial.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Special\BaseSpecial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Special\BulletSpecial.h">
+    <ClInclude Include="DirectXGame\application\base\Special\BulletSpecial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Base\BasePlayer.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Base\PlayerManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Normal\NormalPlayer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Weapon\BaseWeapon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Weapon\SwordWeapon.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttack.h">
@@ -946,10 +934,10 @@
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackFactory.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Attack\PlayerAttackType.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h">
@@ -1003,13 +991,13 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Special\RangeBombingSpecial.h">
+    <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Player\Bullet\PlayerRangeBombingBullet.h">
+    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\UniverseCamera\UniverseCamera.h">
+    <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\PSO\PSOFanction.h">
@@ -1039,7 +1027,88 @@
     <ClInclude Include="DirectXGame\engine\struct\TransformStruct.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\CharacterData.h">
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\CharacterData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Timer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Object\BaseObject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\MellWeapons.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\WeaponData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFixedCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BasePointLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseSpotLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseDirectionalLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLights.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Spawn\BasespawnPoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\RangedWeapons.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

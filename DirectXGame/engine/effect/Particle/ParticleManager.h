@@ -131,4 +131,6 @@ private: //PSO関係
 
 	D3D12_BLEND_DESC blendDesc{};
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
+
+	DebugTimer debugTimer_;
 };

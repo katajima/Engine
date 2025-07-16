@@ -8,16 +8,19 @@
 #include "DirectXGame/engine/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
-using namespace Microsoft::WRL;
-
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
+using namespace Microsoft::WRL;
+
+
+#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
+
+#include <future>
 
 class Entity3DManager;
 class Object3dCommon;
 class SkinningConmmon;
 class ImGuiManager;
-//class Primitive;
 class SkyBox;
 class SkyBoxCommon;
 class OceanManager;
@@ -39,7 +42,7 @@ public:
 	};
 
 	// オブジェクトのタイプを指定する
-	enum class ObjectType { // オブジェクト種類
+	enum class ObjectModelType { // オブジェクト種類
 		kNormal,	// モデルを描画するオブジェクト
 		kAnimation,	// モデルをアニメーション描画するオブジェクト
 		kSkinning,	// モデルをスキニング描画するオブジェクト
@@ -57,7 +60,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, ObjectType objectType = ObjectType::kNormal, ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
+	void Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
 	// 更新(アニメーション無し)
 	void Update();
 
@@ -69,15 +72,22 @@ public:
 
 	// モデル設定
 	void SetModel(Model* model) { this->model = model; }
-	
+
 	// モデル指定
 	void SetModel(const std::string& filePath);
-	
+
 	// カメラ設定
 	void SetCamera(Camera* camera) { this->individualCamera_ = camera; }
-	
+
 	// 名前設定
 	void SetName(const std::string& name) { this->name = name; }
+	// タグ設定
+	void SetNameTag(const std::string& name) { nameTag = name; }
+	// アニメーション変更
+	void SetAnimetion(const std::string& name,float time) {
+		Animetion::SetAnimation(model->modelData, name, time);
+	}
+
 
 	// プリミティブ形状
 	void SetPrimitive(std::unique_ptr<Primitive> primitive);
@@ -93,9 +103,9 @@ public:
 	// 映り方タイプ設定
 	void SetObjectRasterizerType(ObjectRasterizerType type) { rasterizerType_ = type; }
 
-	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera;}
+	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera; }
 
-	void UseTrailEffect(const std::string tex, float maxTime, Color color = {1,1,1,1} ,Vector3 offsetStr = {0,0.5f,0}, Vector3 offsetEnd = { 0,-0.5f,0 });
+	void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
 
 	// ゲッター
 
@@ -130,7 +140,7 @@ public:
 
 	// マテリアル取得
 	Material* GetMaterial(int index) { return model->modelData.mesh[index]->material.get(); }
-	
+
 	// モデル取得
 	Model* GetModel() const { return model; }
 
@@ -139,9 +149,15 @@ public:
 	// 波取得
 	Ocean* GetOcean() { return ocean_; }
 
-	std::string GetObjectTypeName() { return objectTypeName; }
+	// オブジェクト型名前
+	std::string GetObjectTypeName() const { return objectTypeName; }
 
-	ObjectType GetObjectType() { return objectType_; }
+	// タグ
+	std::string GetNameTag() const { return nameTag; }
+
+	bool GetIsColliderComponent() const {return isColliderComponent_;}
+
+	ObjectModelType GetObjectType() { return objectType_; }
 
 	ObjectDrawType GetObjectDrawType() { return objectDrawType_; }
 
@@ -158,9 +174,10 @@ public:
 
 	float GetAlpha();
 
-	bool GetIsSkin() { return isSkin_; }
+	bool GetIsSkin() const { return isSkin_; }
 
 	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
+
 private:
 	// 各コマンドリスト
 	void DrawSetting();
@@ -176,7 +193,8 @@ private:
 	void ObjectSkinTypeDiscrimination(ObjectRasterizerType type);
 
 
-
+	void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton);
+	
 
 
 private:
@@ -187,15 +205,12 @@ private:
 
 	// トランスフォームデータ
 	std::unique_ptr<Transfomation> transformation = nullptr;
-	
+
 	// 何かしらの見た目があるか
 	bool isSkin_ = false;
 
 	// 個人的にカメラを使用するか
 	bool isIndividualCamera_ = false;
-
-	// アニメーションするかのフラグ
-	bool flag = true;
 
 	// ImGuiを表示するか
 	bool imguiFlag_ = false;
@@ -212,7 +227,7 @@ private:
 
 
 	// オブジェクトのタイプ
-	ObjectType objectType_ = ObjectType::kNormal;
+	ObjectModelType objectType_ = ObjectModelType::kNormal;
 
 	// オブジェクトの描画順
 	ObjectDrawType objectDrawType_ = ObjectDrawType::kOpaque;
@@ -220,7 +235,32 @@ private:
 	// オブジェクトの映り方タイプ
 	ObjectRasterizerType rasterizerType_ = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK;
 
+private:
+	// コライダーコンポーネント
+	std::unique_ptr<ColliderComponent> colliderComponent_;
+
+	// コライダーコンポーネントを使用するかのフラグ
+	bool isColliderComponent_ = false;
+
+	// コライダーコンポーネントをObject3d内で更新するかのフラグ
+	bool isColliderComponenyUpdate_ = false;
+
 public:
+	// コライダーコンポーネントを初期化
+	void InitColliderComponent();
+
+	// Object3d内でコライダーコンポーネントを更新するか
+	void SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
+
+	// コライダーコンポーネントを取得
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+
+	// コライダーコンポーネントの接触情報を取得
+	ContactRecord& GetContactRecord() { return colliderComponent_->contactRecord_; };
+
+public:
+
+
 	// モデル
 	Model* model = nullptr;
 	// プリミティブ
@@ -232,19 +272,21 @@ public:
 	//
 	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 
-	
+
 	// 位置
 	WorldTransform worldtransform_;
 
 	// オブジェクト名前
 	std::string name = "";
 
+	// オブジェクトタグ
+	std::string nameTag = "";
+
 	// オブジェクトタイプ名前
 	std::string objectTypeName = "";
 
 	WorldTransform worldtransformTstr_;
 	WorldTransform worldtransformTend_;
-
 private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;

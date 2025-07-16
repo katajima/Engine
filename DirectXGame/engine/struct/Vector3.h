@@ -7,6 +7,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <math.h>
+#include <xmmintrin.h>
 
 struct Vector3 final {
 	float x, y, z;
@@ -64,6 +65,24 @@ struct Vector3 final {
 		x -= other.x;
 		y -= other.y;
 		z -= other.z;
+		return *this;
+	}
+
+	// * 演算子のオーバーロード
+	Vector3& operator*=(const Vector3& other) {
+
+		x *= other.x;
+		y *= other.y;
+		z *= other.z;
+		return *this;
+	}
+
+	// * 演算子のオーバーロード
+	Vector3& operator*=(const float& other)  {
+		
+		x *= other;
+		y *= other;
+		z *= other;
 		return *this;
 	}
 

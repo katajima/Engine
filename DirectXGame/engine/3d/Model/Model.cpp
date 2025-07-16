@@ -30,6 +30,8 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	// メッシュ状にライン生成
 	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->indices);
 
+
+	
 	// アニメーションがあるなら
 	if (modelData.isAmimetion) {
 		;
@@ -42,14 +44,22 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 		// スキンクラスター生成
 		CreateModel::CreateSkinCluster(modelData, modelCommon_);
 
+		auto it = modelData.animations.find(modelData.currentAnimName);
+		if (it != modelData.animations.end()) {
+			Animetion::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
+		}
 		// 
-		Animetion::ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
+		//Animetion::ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
 	}
 
 	// マテリアル読み込み
 	for (auto& mesh : modelData.mesh) {
 		mesh->material->LoadTex();
 	};
+
+
+	std::string filenameT = " name : " + filename;
+	timer_.LogTimeSec("All Load Time: ", filenameT);
 }
 
 void Model::Draw()
@@ -78,22 +88,22 @@ void Model::DrawSkinning()
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 
-		mesh->GetCommandList(modelData.skinCluster.outputBufferView, modelData.skinCluster.influenceBufferView);
+		mesh->GetCommandList(mesh->skinCluster->outputBufferView,mesh->GetVertexBufferView());
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 
-	}
 
-	// 初期状態を UAV 用に遷移させる
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = modelData.skinCluster.outputVertexResource.Get();
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	commandList->ResourceBarrier(1, &barrier);
+		// 初期状態を UAV 用に遷移させる
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		commandList->ResourceBarrier(1, &barrier);
+	}
 }
 
 float Model::GetMaterialAlfa()
@@ -112,7 +122,9 @@ float Model::GetMaterialAlfa()
 ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
 	//必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData
-	auto start = std::chrono::high_resolution_clock::now();
+	
+	timer_.StartTimer();
+
 	Assimp::Importer importer;
 	std::string filePach = directoryPath + "/" + filename;
 
@@ -127,15 +139,20 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 	// メッシュ読み込み
 	LoadModel::LoadMesh(scene, modelData, dxCommon_);
 	// Assimp読み込みやメッシュ生成
-	auto end = std::chrono::high_resolution_clock::now();
-	float ms = std::chrono::duration<float, std::milli>(end - start).count();
-	Logger::Log(filePach + " : Model LoadMesh Time: " + std::to_string(ms) + " ms" + "\n");
+	
+	timer_.EndTimer();
 
+	//std::string filenameT = " name : " + filename;
+
+	//timer_.LogTimeSec("Model LoadMesh Time: ",filenameT);
+	
 	// ボーン読み込み
 	LoadModel::LoadBone(scene, modelData, dxCommon_);
 	
 	// マテリアル読み込み
 	LoadModel::LoadMaterial(scene, modelData, dxCommon_, directoryPath);
+
+	timer_.EndTimer();
 
 	return modelData;
 }

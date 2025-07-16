@@ -160,6 +160,7 @@ Vector3 Transforms(const Vector3& vector, const Matrix4x4& matrix) {
 	result.z /= w;
 	return result;
 }
+
 // 座標変換Vector4
 Vector4 Transforms(const Vector4& vec, const Matrix4x4& mat)
 {

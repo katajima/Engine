@@ -14,8 +14,7 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 
-
-void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectType, ObjectRasterizerType rasterizerType)
+void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
 	object3dCommon_ = entity3DManager_->GetObject3dCommon();
@@ -33,8 +32,10 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 	transformation->Initialize(object3dCommon_->GetDxCommon());
 
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
-	//entity3DManager_->SetEntity3D();
+	
 
+	isColliderComponenyUpdate_ = true;
+	isTrailEffect = false;
 	isSkin_ = false;
 
 	// オブジェクトタイプ
@@ -42,22 +43,22 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 
 	switch (objectType)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		objectTypeName = "NormalModelObject";
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		objectTypeName = "AnimationModelObject";
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 		objectTypeName = "SkinningModelObject";
 		break;
-	case Object3d::ObjectType::kPrimitive:
+	case Object3d::ObjectModelType::kPrimitive:
 		objectTypeName = "PrimitiveObject";
 		break;
-	case Object3d::ObjectType::kSkyBox:
+	case Object3d::ObjectModelType::kSkyBox:
 		objectTypeName = "SkyBoxObject";
 		break;
-	case Object3d::ObjectType::kOcean:
+	case Object3d::ObjectModelType::kOcean:
 		objectTypeName = "OceanObject";
 		break;
 	default:
@@ -76,6 +77,8 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectType objectTyp
 
 void Object3d::Update()
 {
+	if (isDelete) return;
+
 	Matrix4x4 localMatrix = MakeIdentity4x4();
 	worldtransform_.Update();
 
@@ -96,7 +99,7 @@ void Object3d::Update()
 
 	switch (objectType_)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		// モデルが存在する場合
 		if (model) {
 			localMatrix = model->modelData.rootNode.localMatrix;
@@ -109,26 +112,26 @@ void Object3d::Update()
 		// トランスフォームデータ
 		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		// モデルが存在する場合
 		if (model) {
 			// アニメーションの更新
-			if (model->modelData.animation.flag) {
-				if (flag) {
-					model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
-				}
-				model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
+			//if (model->modelData.animation.flag) {
+			//	if (flag) {
+			//		model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+			//	}
+			//	model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
 
-				// 単一のジョイントの場合
-				const NodeAnimation& rootNodeAnimation = model->modelData.animation.nodeAnimations[model->modelData.rootNode.name];
-				Vector3 translate = Animetion::CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
-				Quaternion rotate = Animetion::CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
-				Vector3 scale = Animetion::CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
-				localMatrix = MakeAffineMatrix(scale, rotate, translate);
-			}
-			else {
+			//	// 単一のジョイントの場合
+			//	const NodeAnimation& rootNodeAnimation = model->modelData.animation.nodeAnimations[model->modelData.rootNode.name];
+			//	Vector3 translate = Animetion::CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
+			//	Quaternion rotate = Animetion::CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
+			//	Vector3 scale = Animetion::CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
+			//	localMatrix = MakeAffineMatrix(scale, rotate, translate);
+			//}
+			/*else {
 				localMatrix = model->modelData.rootNode.localMatrix;
-			}
+			}*/
 			for (auto& mesh : model->modelData.mesh) {
 				mesh->material->GPUData();
 			}
@@ -137,53 +140,133 @@ void Object3d::Update()
 		// トランスフォームデータ
 		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 
 		// モデルが存在する場合
 		if (model) {
-			// アニメーションの更新
-			if (model->modelData.animation.flag) {
-				if (flag) {
-					model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
+			const auto& animations = model->modelData.animations;
+			auto& modelData = model->modelData;
+
+			const std::string& currentName = modelData.currentAnimName;
+			auto itCurrent = animations.find(currentName);
+
+			if (itCurrent != animations.end()) {
+				// アニメーション時間更新（毎フレーム）
+				float deltaTime = MyGame::GameTime();
+				modelData.animationTime += deltaTime;
+				modelData.animationTime = std::fmod(modelData.animationTime, itCurrent->second.duration);
+
+				// アニメーションブレンド中か？
+				if (modelData.isBlending && modelData.previousAnimName != "") {
+					auto itPrev = animations.find(modelData.previousAnimName);
+					if (itPrev != animations.end()) {
+						const Animation& prevAnim = itPrev->second;
+						const Animation& currAnim = itCurrent->second;
+
+						// 時間取得
+						float prevTime = std::fmod(modelData.animationTime, prevAnim.duration);
+						float currTime = std::fmod(modelData.animationTime, currAnim.duration);
+
+						// ① 各スケルトン姿勢を取得
+						Skeleton prevSkeleton = modelData.skeleton;
+						Skeleton currSkeleton = modelData.skeleton;
+						Animetion::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
+						Animetion::ApplyAnimation(currSkeleton, currAnim, currTime);
+
+						// ② 補間割合を更新（EaseInOutでなめらかに）
+						modelData.blendTime += deltaTime;
+						float t = modelData.blendTime / modelData.blendDuration;
+						t = std::clamp(t, 0.0f, 1.0f);
+						t = t * t * (3.0f - 2.0f * t); // Hermite補間（EaseInOut）
+
+						// ③ スケルトン補間
+						Animetion::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
+
+						// ブレンド完了判定
+						if (modelData.blendTime >= modelData.blendDuration) {
+							modelData.isBlending = false;
+							modelData.previousAnimName.clear();
+						}
+					}
+					else {
+						// 前アニメーションが見つからなければ通常再生
+						Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+					}
 				}
-				model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
-				localMatrix = model->modelData.skeleton.joints[0].skeletonSpaceMatrix;
+				else {
+					// ブレンドしていない通常の再生
+					Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+				}
 
-				Animetion::ApplyAnimation(model->modelData.skeleton, model->modelData.animation, model->modelData.animationTime);
-				// スケルトンの更新
-				Animetion::UpdateSkeleton(model->modelData.skeleton);
+				// スケルトン姿勢更新
+				Animetion::UpdateSkeleton(modelData.skeleton);
 
-				// スキニング更新
-				Animetion::UpdateSkinCluster(model->modelData.skinCluster, model->modelData.skeleton);
+				std::vector<Matrix4x4> cachedSkeletonMatrices;
+				for (auto& mesh : modelData.mesh) {
+					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				}
+				//std::vector<std::future<void>> futures;
 
-				Animetion::DrawSkeleton(entity3DManager_->Get3DLineCommon(), model->modelData.skeleton.joints, worldtransform_.worldMat_.GetWorldPosition(), worldtransform_.scale_);
+				//for (auto& mesh : modelData.mesh) {
+				//	
+				//	futures.push_back(std::async(std::launch::async, [&mesh, &modelData]() {
+				//		Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				//		}));
+				//}
+				//// 全スレッドの終了を待つ
+				//for (auto& f : futures) {
+				//	f.get();
+				//}
+
+				// ルートの変換行列反映
+				localMatrix = modelData.skeleton.joints[0].skeletonSpaceMatrix;
+
+				// デバッグ用：スケルトン描画
+				Animetion::DrawSkeleton(
+					entity3DManager_->Get3DLineCommon(),
+					modelData.skeleton.joints,
+					worldtransform_.worldMat_.GetWorldPosition(),
+					worldtransform_.scale_,
+					MakeRotateXYZ(worldtransform_.rotate_)
+				);
 			}
 			else {
+				// アニメーションが見つからない場合のフォールバック
 				localMatrix = model->modelData.rootNode.localMatrix;
 			}
+
+			std::vector<std::future<void>> futures;
 			for (auto& mesh : model->modelData.mesh) {
+				futures.push_back(std::async(std::launch::async, [&mesh]() {
 				mesh->material->GPUData();
+					}));
 			}
+
+			// 全スレッドの終了を待つ
+			for (auto& f : futures) {
+				f.get();
+			}
+
 		}
 
 		// トランスフォームデータ
 		transformation->UpdateSkinning(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
 		break;
-	case ObjectType::kPrimitive:
+	case ObjectModelType::kPrimitive:
 		if (primitive_) {
 			primitive_->Update();
 
 			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
-	case ObjectType::kSkyBox:
+	case ObjectModelType::kSkyBox:
 		if (skyBox_) {
 			skyBox_->Update();
 
 			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
 		}
 		break;
-	case ObjectType::kOcean:
+	case ObjectModelType::kOcean:
 		if (ocean_) {
 			ocean_->Update();
 
@@ -202,6 +285,11 @@ void Object3d::Update()
 	// トレイル
 	}
 
+	if (isColliderComponent_) {
+		if (isColliderComponenyUpdate_) {
+			colliderComponent_->UpdateAll(worldtransform_);
+		}
+	}
 }
 
 #pragma endregion //更新系
@@ -211,11 +299,11 @@ void Object3d::Update()
 void Object3d::Draw()
 {
 	if (!isDraw) return;
-
+	if (isDelete) return;
 
 	switch (objectType_)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		ObjectTypeDiscrimination(rasterizerType_);
 
 		DrawSetting();
@@ -226,7 +314,7 @@ void Object3d::Draw()
 			model->Draw();
 		}
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		ObjectTypeDiscrimination(rasterizerType_);
 
 		DrawSetting();
@@ -237,7 +325,7 @@ void Object3d::Draw()
 			model->Draw();
 		}
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 		ObjectSkinTypeDiscrimination(rasterizerType_);
 
 		DrawSettingSkin();
@@ -247,7 +335,7 @@ void Object3d::Draw()
 			model->DrawSkinning();
 		}
 		break;
-	case ObjectType::kPrimitive:
+	case ObjectModelType::kPrimitive:
 
 
 		if (primitive_) {
@@ -260,7 +348,7 @@ void Object3d::Draw()
 		}
 		break;
 
-	case ObjectType::kSkyBox:
+	case ObjectModelType::kSkyBox:
 
 		if (skyBox_) {
 			skyBoxCommon_->DrawCommonSetting();
@@ -270,7 +358,7 @@ void Object3d::Draw()
 			skyBox_->Draw();
 		}
 		break;
-	case ObjectType::kOcean:
+	case ObjectModelType::kOcean:
 
 		if (ocean_) {
 			oceanManager_->DrawCommonSetting();
@@ -289,7 +377,7 @@ void Object3d::Draw()
 
 void Object3d::DrawTrailEffect()
 {
-	if (!isTrailEffect) return;
+	if (isTrailEffect == false) return;
 		// トレイルエフェクトの描画
 		trailEffect_->Draw();
 }
@@ -304,22 +392,22 @@ float Object3d::GetAlpha()
 	float a;
 	switch (objectType_)
 	{
-	case Object3d::ObjectType::kNormal:
+	case Object3d::ObjectModelType::kNormal:
 		a = model->GetMaterialAlfa();
 		break;
-	case Object3d::ObjectType::kAnimation:
+	case Object3d::ObjectModelType::kAnimation:
 		a = model->GetMaterialAlfa();
 		break;
-	case Object3d::ObjectType::kSkinning:
+	case Object3d::ObjectModelType::kSkinning:
 		a = model->GetMaterialAlfa();
 		break;
-	case Object3d::ObjectType::kPrimitive:
+	case Object3d::ObjectModelType::kPrimitive:
 		a = primitive_->GetMaterial()->color.a;
 		break;
-	case Object3d::ObjectType::kSkyBox:
+	case Object3d::ObjectModelType::kSkyBox:
 		a = skyBox_->GetMaterial()->color.a;
 		break;
-	case Object3d::ObjectType::kOcean:
+	case Object3d::ObjectModelType::kOcean:
 		a = ocean_->GetMaterial()->color.a;
 		break;
 	default:
@@ -328,6 +416,19 @@ float Object3d::GetAlpha()
 	}
 
 	return a;
+}
+
+void Object3d::InitColliderComponent()
+{
+	// コライダーコンポーネントの初期化
+	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_->SetOwner(colliderComponent_.get());
+	// ラインコモンをセット
+	colliderComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
+	// 登録（IDを取得したければ変数で受ける）
+	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+	isColliderComponent_ = true;
+	isColliderComponenyUpdate_ = true;
 }
 
 void Object3d::DrawSetting()
@@ -422,26 +523,27 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 {
 	skinningConmmon_->DrawComputeSetting();
 
+	for (auto& mesh : model->modelData.mesh) {
 
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, model->modelData.skinCluster.paletteSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, model->modelData.skinCluster.inputVertexSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, model->modelData.skinCluster.influenceSrvHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, model->modelData.skinCluster.outputVertexUavHandle.second);
-	skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, model->modelData.skinCluster.skinningInfomation->GetGPUVirtualAddress());
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, mesh->skinCluster->paletteSrvHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, mesh->skinCluster->inputVertexSrvHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, mesh->skinCluster->influenceSrvHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, mesh->skinCluster->outputVertexUavHandle.second);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, mesh->skinCluster->skinningInfomation->GetGPUVirtualAddress());
 
 
-	skinningConmmon_->GetDxCommon()->GetCommandList()->Dispatch(UINT(model->modelData.mesh[0]->vertices.size() + 1023) / 1024, 1, 1);
+		skinningConmmon_->GetDxCommon()->GetCommandList()->Dispatch(UINT(mesh->vertices.size() + 1023) / 1024, 1, 1);
 
-	// 初期状態を UAV 用に遷移させる
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = model->modelData.skinCluster.outputVertexResource.Get();
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-	skinningConmmon_->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
-
+		// 初期状態を UAV 用に遷移させる
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+		skinningConmmon_->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
+	}
 
 	switch (type)
 	{
@@ -582,4 +684,44 @@ void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,
 }
 
 #pragma endregion // その他
+
+
+void Object3d::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton) {
+	//static std::vector<Matrix4x4> cachedSkeletonMatrices;
+
+	//// サイズチェックとキャッシュ確保
+	//if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
+	//	cachedSkeletonMatrices.resize(skeleton.joints.size());
+	//}
+
+	//// Step 1: スケルトン空間行列のキャッシュを1度だけ作成
+	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+	//	cachedSkeletonMatrices[jointIndex] = skeleton.joints[jointIndex].skeletonSpaceMatrix;
+	//}
+
+	//// Step 2: スキンクラスタ用のマトリクス更新
+	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+	//	const auto& invBind = skinCluster.inverseBindPoseMatrices[jointIndex];
+	//	const auto& skelMat = cachedSkeletonMatrices[jointIndex];
+
+	//	auto skinnedMat = Multiply(invBind, skelMat);
+
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix = skinnedMat;
+	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
+	//}
+
+	//// サイズチェック
+	assert(skinCluster.inverseBindPoseMatrices.size() == skeleton.joints.size());
+	assert(skinCluster.mappedPalette.size() == skeleton.joints.size());
+
+	for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
+		// スケルトンスペース行列を計算
+		skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
+			skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
+
+		// 逆転置行列を計算
+		skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
+			Transpose(Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
+	}
+}
 

@@ -20,6 +20,8 @@ void TextureManager::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvMan
 
 
 void TextureManager::LoadTexture(const std::string& filePath) {
+	debugTimerTex_.StartTimer();
+
 	// 読み込み済みテクスチャを検索
 	if (textureDatas.contains(filePath)) {
 		return;
@@ -94,6 +96,10 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	textureData.srvHandleGPU = srvManager_->GetGPUDescriptorHandle(textureData.srvIndex);
 
 	srvManager_->CreateSRVforTexture2D(textureData.srvIndex, textureData.resource.Get(), textureData.metadata);
+
+
+	debugTimerTex_.EndTimer();
+	//debugTimerTex_.LogTimeSec("LoadTex " ,filePath);
 }
 
 

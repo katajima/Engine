@@ -149,7 +149,7 @@ private:
 
 
 private: // テクスチャいじいじ
-
+	DebugTimer timer_;
 
 	// アンカーポイント
 	Vector2 anchorPoint = { 0.0f,0.0f };

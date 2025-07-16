@@ -2,6 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+std::mutex mutex;  // グローバルやスコープ内に必要
 
 void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 {
@@ -52,7 +53,8 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 void Entity3DManager::UpdateImgui()
 {
 #ifdef _DEBUG
-
+	ImGui::Begin("EmitParticle");
+	ImGui::End();
 	std::string title = reinterpret_cast<const char*>(ICON_MD_HOME);
 
 	title += " SceneCollection";
@@ -88,6 +90,19 @@ void Entity3DManager::UpdateImgui()
 		ImGui::DragFloat3("T_rotate", &entity->worldtransform_.rotate_.x, 0.1f);
 		ImGui::DragFloat3("T_translate", &entity->worldtransform_.translate_.x, 0.1f);
 
+		std::string nameColliderComponent = "";
+		if (entity->GetIsColliderComponent()) {
+			if (ImGui::CollapsingHeader("ColliderComponent")) {
+				int collIndex = 0;
+				for (auto& coll : entity->GetColliderComponent()->GetAllColliders()) {
+					nameColliderComponent = "Collider" + std::to_string(collIndex);
+					if (ImGui::CollapsingHeader(nameColliderComponent.c_str())) {
+						ImGui::InputFloat3("position", &coll->centerWorld.x);
+					}
+					collIndex++;
+				}
+			}
+		}
 
 		if (entity->GetIsSkin()) {
 			ImGui::Separator();
@@ -99,7 +114,7 @@ void Entity3DManager::UpdateImgui()
 			std::string nameMaterial = "";
 			std::string nameMesh = "";
 
-			if (entity->GetObjectType() == Object3d::ObjectType::kSkyBox) {
+			if (entity->GetObjectType() == Object3d::ObjectModelType::kSkyBox) {
 				material = entity->skyBox_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -113,7 +128,7 @@ void Entity3DManager::UpdateImgui()
 				}
 
 			}
-			else if (entity->GetObjectType() == Object3d::ObjectType::kPrimitive) {
+			else if (entity->GetObjectType() == Object3d::ObjectModelType::kPrimitive) {
 				material = entity->primitive_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -127,7 +142,7 @@ void Entity3DManager::UpdateImgui()
 				}
 
 			}
-			else if (entity->GetObjectType() == Object3d::ObjectType::kOcean) {
+			else if (entity->GetObjectType() == Object3d::ObjectModelType::kOcean) {
 				material = entity->ocean_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -190,12 +205,12 @@ void Entity3DManager::UpdateImgui()
 				entity->GetOcean()->UpdateImgui();
 			}
 
-			if (entity->GetObjectType() == Object3d::ObjectType::kSkinning) {
+			if (entity->GetObjectType() == Object3d::ObjectModelType::kSkinning) {
 				entity->DebugImguiSkin();
 			}
 		}
 
-		
+
 	}
 
 	ImGui::End();
@@ -206,7 +221,6 @@ void Entity3DManager::UpdateImgui()
 
 void Entity3DManager::Update()
 {
-
 	object3d.erase(
 		std::remove_if(object3d.begin(), object3d.end(),
 			[](const std::unique_ptr<Object3d>& object) {
@@ -216,32 +230,80 @@ void Entity3DManager::Update()
 
 
 	for (auto& object : object3d) {
-		if (object != nullptr) {
-			object->Update();
-
-			if (object->GetIsSkin()) {
-				if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent01) {
-					transparentObjects01.push_back(object.get());
-				}
-				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent02) {
-					transparentObjects02.push_back(object.get());
-				}
-				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kTranslucent03) {
-					transparentObjects03.push_back(object.get());
-				}
-				else if (object->GetObjectDrawType() == Object3d::ObjectDrawType::kOpaque) {
-					if (object->GetAlpha() < 1.0f) {
-						transparentObjects01.push_back(object.get());
-					}
-					else {
-						opaqueObjects.push_back(object.get());
-					}
-				}
+		object->Update();
+		switch (object->GetObjectDrawType()) {
+		case Object3d::ObjectDrawType::kTranslucent01:
+			transparentObjects01.push_back(object.get());
+			break;
+		case Object3d::ObjectDrawType::kTranslucent02:
+			transparentObjects02.push_back(object.get());
+			break;
+		case Object3d::ObjectDrawType::kTranslucent03:
+			transparentObjects03.push_back(object.get());
+			break;
+		case Object3d::ObjectDrawType::kOpaque:
+			if (object->GetAlpha() < 1.0f) {
+				transparentObjects01.push_back(object.get());
 			}
+			else {
+				opaqueObjects.push_back(object.get());
+			}
+			break;
 		}
 	}
 
+	//std::vector<SortResult> sortResults;
 
+	//std::vector<std::future<void>> futures;
+
+
+	//for (auto& object : object3d) {
+	//	if (object != nullptr) {
+	//		futures.push_back(std::async(std::launch::async, [&object, &sortResults]() {
+	//			object->Update();
+	//			SortResult result;
+	//			result.ptr = object.get();
+	//			result.drawType = object->GetObjectDrawType();
+	//			result.alpha = object->GetAlpha();
+	//			result.isSkin = object->GetIsSkin();
+
+	//			// 同時 push_back は危険なので、排他制御が必要
+	//			// → 代わりに並列実行は Update までにして、main スレッドで分類
+	//			std::lock_guard<std::mutex> lock(mutex);
+	//			sortResults.push_back(result);
+	//			}));
+	//	}
+	//}
+
+	//// 待機
+	//for (auto& f : futures) {
+	//	f.get();
+	//}
+
+	//// 分類はシングルスレッドで安全に行う
+	//for (const auto& r : sortResults) {
+	//	if (r.isSkin) {
+	//		switch (r.drawType) {
+	//		case Object3d::ObjectDrawType::kTranslucent01:
+	//			transparentObjects01.push_back(r.ptr);
+	//			break;
+	//		case Object3d::ObjectDrawType::kTranslucent02:
+	//			transparentObjects02.push_back(r.ptr);
+	//			break;
+	//		case Object3d::ObjectDrawType::kTranslucent03:
+	//			transparentObjects03.push_back(r.ptr);
+	//			break;
+	//		case Object3d::ObjectDrawType::kOpaque:
+	//			if (r.alpha < 1.0f) {
+	//				transparentObjects01.push_back(r.ptr);
+	//			}
+	//			else {
+	//				opaqueObjects.push_back(r.ptr);
+	//			}
+	//			break;
+	//		}
+	//	}
+	//}
 
 }
 
@@ -269,7 +331,7 @@ void Entity3DManager::ObjectDraw()
 		object->Draw();
 	}
 	transparentObjects02.clear();
-	
+
 	// 半透明最後
 	for (auto& object : transparentObjects03) {
 		object->Draw();

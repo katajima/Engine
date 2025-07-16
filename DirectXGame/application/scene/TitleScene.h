@@ -17,7 +17,7 @@
 
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
-
+#include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
 class TitleScene : public BaseScene
 {
@@ -67,6 +67,11 @@ private:
 
 	Object3d tail;
 
+	// ライト
+	std::shared_ptr<DirectionalLight> directional;
+
+
+	std::unique_ptr<LoadLevelData> loadData_;
 };
 
 

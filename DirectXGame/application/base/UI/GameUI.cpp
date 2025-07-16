@@ -1,5 +1,5 @@
 #include "GameUI.h"
-#include "DirectXGame/application/base/Player/Player.h"
+#include "DirectXGame/application/base/Character/Player/Normal/Player.h"
 
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
@@ -78,28 +78,28 @@ void GameUI::Update()
 void GameUI::Draw()
 {
 	icon_B->Update();
-	icon_Y->Update();
-	icon_X->Update();
+	//icon_Y->Update();
+	//icon_X->Update();
 	icon_RT->Update();
 	text_normal->Update();
-	text_jump->Update();
-	text_dash->Update();
+	//text_jump->Update();
+	//text_dash->Update();
 	text_special->Update();
 	text_hit->Update();
 	icon_B->Draw();
-	icon_Y->Draw();
-	icon_X->Draw();
-	if (player_->GetIsSpecial()) {
+	//icon_Y->Draw();
+	//icon_X->Draw();
+	//if (player_->GetIsSpecial()) {
 		icon_RT->Draw();
 		text_special->Draw();
-	}
+	//}
 	text_normal->Draw();
-	text_jump->Draw();
-	text_dash->Draw();
+	//text_jump->Draw();
+	//text_dash->Draw();
 	text_hit->Draw();
 
 
-	int adsbhads = player_->GetHitCount();
+	int adsbhads =  player_->GetHitCount();
 	if (adsbhads >= 999) {
 		adsbhads = 999;
 	}
@@ -119,7 +119,7 @@ void GameUI::Draw()
 	}
 }
 
-void GameUI::SetPlayer(Player* player)
+void GameUI::SetPlayer(BasePlayer* player)
 {
 	player_ = player;
 }

@@ -1,34 +1,21 @@
 #pragma once
-#include"DirectXGame/engine/2d/SpriteCommon.h"
-#include"DirectXGame/engine/base/Texture/TextureManager.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/audio/Audio.h"
-#include"DirectXGame/engine/3d/Model/ModelManager.h"
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include"DirectXGame/engine/3d/Model/ModelCommon.h"
-#include"DirectXGame/engine/Line/LineCommon.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/scene/BaseScene.h"
+// engine
 #include"DirectXGame/engine/scene/SceneManager.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
-#include"DirectXGame/engine/Light/LightCommon.h"
+#include"DirectXGame/engine/base/Timer.h"
+#include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/base/Enemy/Base/EnemyManager.h"
-#include"DirectXGame/application/base/Player/Player.h"
+#include"DirectXGame/application/base/BaseClass/Character/BaseCharacterManeger.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
-#include"DirectXGame/application/base/FollowCamera/FollowCamera.h"
-#include"DirectXGame/application/base/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
-#include"DirectXGame/application/base/Bullet/BulletManager.h"
-#include"DirectXGame/application/base/Player/Base/PlayerManager.h"
-
+#include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
+#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
 
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
@@ -63,11 +50,6 @@ public:
 	void CheckAllCollisions();
 
 private:
-
-	void InitializeResources();
-	void InitializeCamera();
-
-private:
 	// 振るまい
 	enum class Behavior {
 		kPhase1,	// フェーズ１
@@ -92,60 +74,36 @@ private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 private:
-	// カメラ
-	std::unique_ptr < Camera> camera;
-
-	
-	bool flag = true;
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
-
 	// 宇宙カメラ
 	std::unique_ptr<UniverseCamera> universeCamera_;
-
-	bool isUniverseCamera = false;
-	float timer = 0.0f;
-	float cameraScaleT = 0.0f;
-
-	float minScaleZCamera = 5.5f;
-
-private:
-	// ライト
-	std::shared_ptr<DirectionalLight> directional;
-private:
+	// 固定カメラ
+	std::unique_ptr <FixedCamera> fixedCamera_;
+	// カメラ管理
+	std::unique_ptr<CameraManeger> cameraManeger_;
 	
-	// プレイヤー
-	std::unique_ptr<Player> player_;
 
-	std::unique_ptr<PlayerManager> playerManager_;
-
-
-	// 敵マネージャ
-	std::unique_ptr<EnemyManager> enemyManager_;
+private:
+	// キャラクター管理
+	std::unique_ptr<BaseCharacterManager> caracterManager_;
+	// 敵ポジション
 	Vector3 enemyPosition = Vector3(0, 0, 0);
-
-
 	// ステージ
 	std::unique_ptr<Stage> stage_;
-
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
-
+	// レベルデータ
+	std::unique_ptr<LoadLevelData> loadData_;
 private:
-
-	
 	// 衝突マネージャ
 	std::unique_ptr<CollisionManager> collisionManager_;
-
 	// シーン遷移用
 	int count = 0;
 	int sceneCount = 0;
 	int clock = 1;
-	
 private:
-	
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = std::make_unique<GameUI>();
-
 };
 

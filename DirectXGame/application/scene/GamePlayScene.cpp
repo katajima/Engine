@@ -3,141 +3,90 @@
 #include <corecrt_math_defines.h>
 #include <algorithm>
 
+
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
+#include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
+#include "DirectXGame/application/base/Special/BulletSpecial.h"
 
 #pragma region Initialize
 
 // 初期化
 void GamePlayScene::Initialize()
 {
+	// Input
 	input_ = GetInput();
-
-	// カメラ
-	InitializeCamera();
-	// オブジェクト3D
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-
-	// プレイヤー
-	player_ = std::make_unique<Player>();
-	player_->Initialize(input_, GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), Vector3(0, 2, -40), camera.get());
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
-	followCamera_->SetTarget(player_->GetObject3D());
-
+	followCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(GetEntity3DManager()->GetCameraCommon());
+	universeCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
+	// 固定カメラ
+	fixedCamera_ = std::make_unique<FixedCamera>();
+	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
 
+	// カメラ管理
+	cameraManeger_ = std::make_unique<CameraManeger>();
+	cameraManeger_->Initialize(input_,GetEntity3DManager(),GetEntity2DManager(),GetGlobalVariables());
+	// カメラ追加
+	cameraManeger_->AddCamera({ followCamera_.get(),true }, "followCamera");
+	cameraManeger_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
+	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
-
-	// プレイヤー
-	player_->SetInput(input_);
-	player_->SetCamera(camera.get());
-	player_->SetFollowCamera(followCamera_.get());
-
-	// 敵マネージャ
-	enemyManager_ = std::make_unique<EnemyManager>();
-	enemyManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
-	enemyManager_->SetPlayer(player_.get());
-
-	for (int i = 0; i < 10; i++) {
-
-		Vector3 rand = Random::RandomVector3(-100, 100);
-		rand.y = 2;
-		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, rand);
+	// キャラクター管理 
+	caracterManager_ = std::make_unique<BaseCharacterManager>();
+	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	caracterManager_->SetFollowCamera(followCamera_.get());
+	// プレイヤー生成
+	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+	// 敵生成
+	for (auto& enemy : loadData_->GetLevelData()->enemys) {
+		if (enemy.isEnable)
+			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
 	}
+	
+	// 弾管理クラス
+	bulletManager_ = std::make_unique<BulletManager>();
+	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), nullptr);
+	// 弾にプレイヤーセット
+	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
+	caracterManager_->SetBulletManager(bulletManager_.get());
+	
+	
 
+	// 追従カメラtarget設定
+	followCamera_->SetTarget(caracterManager_->GetPlayer());
+	
 
-
-
+	
 
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
-	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), &followCamera_->GetViewProjection());
-	player_->GetRangeBombingSpecial()->SetStage(stage_.get());
-
-
-
-	// 弾
-	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), camera.get());
-	bulletManager_->SetPlayer(player_.get());
-
-	player_->SetBulletManager(bulletManager_.get());
-
+	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
+	sp->SetStage(stage_.get());
 
 	// 衝突マネージャの生成
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-
-	InitializeResources();
-}
-
-
-// カメラ初期化
-void GamePlayScene::InitializeCamera()
-{
-	camera = std::make_unique <Camera>();
-
-	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
-	//camera = Camera::GetInstance();
-	camera->transform_.rotate = { 0.36f,0,0 };
-	camera->transform_.translate = { 5,32.5f,-59.2f };
-
-	flag = true;
-#ifdef _DEBUG
-
-	//flag = false;
-
-#endif // _DEBUG]
-
-	SetCamera(camera.get());
-}
-
-// 各オブジェクトやスプライトなどの初期化
-void GamePlayScene::InitializeResources()
-{
-	// オブジェクト3D
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-	ParticleManager* particleManager = GetEntity3DManager()->GetEffectManager()->GetParticleManager();
-
-
+	
+	// UI
 	gameUI->Initialize(GetEntity2DManager());
-	gameUI->SetPlayer(player_.get());
+	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-	DirectionalLightData directionalLightData{};
-	directionalLightData.color = { 1,1,1,1 };
-	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 0.5f;
-	directionalLightData.isLight = true;
-	directionalLightData.lig = 0.1f;
-
-
-	directional = std::make_shared<DirectionalLight>();
-	directional->directional = directionalLightData;
-
-	GetEntity3DManager()->GetLightManager()->AddLight(directional);
-
-
+	// レベルデータロード
+	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
 }
+
+
+
 
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables()
@@ -150,18 +99,21 @@ void GamePlayScene::CheckAllCollisions()
 	// 衝突マネージャのリセット
 	collisionManager_->Clear();
 
-	// プレイヤーコライダーセット
-	collisionManager_->Register(player_->GetColliderComponent());
+	
+	for (auto objects : loadData_->GetObjects()) {
+		if (objects->GetIsColliderComponent()) {
+			collisionManager_->Register(objects->GetColliderComponent());
+		}
+	}
 
-	// 敵コライダーセット
-	for (auto enemy : enemyManager_->GetEnemys()) {
-		collisionManager_->Register(enemy->GetColliderComponent());
+	// キャラクターセット
+	for (auto caracter : caracterManager_->GetCharacters()) {
+		if (caracter->GetHP() <= 0) continue;
+		collisionManager_->Register(caracter->GetColliderComponent());
 	}
-	// 武器コライダコンセット
-	if (player_->GetBehavior() == Player::Behavior::kAttack) {
-		
-		collisionManager_->Register(player_->GetWeapon()->GetColliderComponent());
-	}
+	
+	collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
+	
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
 		collisionManager_->Register(bullet->GetColliderComponent());
@@ -170,6 +122,7 @@ void GamePlayScene::CheckAllCollisions()
 	collisionManager_->CheckAll();
 	collisionManager_->Clear();
 }
+
 #pragma endregion 初期化関係
 
 
@@ -178,56 +131,6 @@ void GamePlayScene::CheckAllCollisions()
 // ImGui更新
 void GamePlayScene::UpdateImGui()
 {
-
-#ifdef _DEBUG
-	if (input_->IsTriggerKey(DIK_P)) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
-	}
-	Vector2 pos = player_->GetObject3D()->GetScreenPosition();
-	ImGui::Begin("engine");
-	ImGui::Checkbox("flag", &flag);
-	ImGui::DragFloat2("screenpos", &pos.x, 0.1f);
-	ImGui::End();
-
-	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
-		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);
-		ImGui::Checkbox("flag", &flag);
-		if (ImGui::Button("cameraPos")) {
-			camera->transform_.translate = { 0,20,-175 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos2")) {
-			camera->transform_.translate = { -30,10,-140 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos3")) {
-			camera->transform_.translate = { 0,500,0 };
-			camera->transform_.rotate = { DegreesToRadians(90),0,0 };
-		}
-		if (ImGui::Button("cameraPos4")) {
-			camera->transform_.translate = { 0,60,-220 };
-			camera->transform_.rotate = { DegreesToRadians(10),0,0 };
-		}
-
-
-	}
-
-	if (ImGui::TreeNode("Test")) {
-		ImGui::Text("Camera1");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		//ImGui::TreePop();
-		ImGui::Text("Camera2");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		ImGui::TreePop();
-	}
-
-
-	ImGui::End();
-
-#endif
 }
 
 // 更新処理
@@ -241,7 +144,19 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-
+	int countIndex = 0;
+	for (auto& enemy : loadData_->GetLevelData()->enemys) {
+		if (enemy.isEnable)
+		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
+			enemy.crrentTimer += MyGame::GameTime();
+			if (enemy.crrentTimer >= enemy.timer) {
+				caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
+				loadData_->GetLevelData()->counts[countIndex]++;
+				enemy.crrentTimer = 0;
+			}
+		}
+		countIndex++;
+	}
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -267,95 +182,48 @@ void GamePlayScene::Update()
 		break;
 	}
 
-	// プレイヤー
-	//if (player_->GetAlive()) {
-	player_->Update();
-	player_->LockOn(enemyManager_->GetEnemys());
-	//}
-
+	if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
+		// シーン切り替え
+		GetSceneManager()->ChangeScene("TITLE");
+	}
 #ifdef _DEBUG
+	if (input_->IsTriggerKey(DIK_P)) {
+		// シーン切り替え
+		GetSceneManager()->ChangeScene("TITLE");
+	}
+
 	ImGui::Begin("Debug");
 	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
 	if (ImGui::Button("ADDEnemy")) {
-		enemyManager_->GenerateEnemy(EnemyManager::EnemyType::kNormal, enemyPosition);
+		caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, enemyPosition));
 	}
-	ImGui::Checkbox("isUniverseCamera", &isUniverseCamera);
-	ImGui::End();
-#endif // _DEBUG
-
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-		player_->GetRangeBombingSpecial()->SetGauge(100);
+	if (ImGui::Button("lockOn")) {
+		cameraManeger_->SetUseCamera("fixedCamera",0.3f);
 	}
-
-	if (player_->GetRangeBombingSpecial()->IsAction()) {
-		timer = 0.0f;
-		isUniverseCamera = true;
-
-		cameraScaleT += 0.05f;
-
-		if (cameraScaleT >= 1.0f) {
-			cameraScaleT = 1.0f;
-		}
-
-		universeCamera_->GetViewProjection().transform_.scale.z = Lerp(minScaleZCamera, 1.0f, cameraScaleT);
+	if (ImGui::Button("noLockOn")) {
+		cameraManeger_->SetUseCamera("followCamera", 0.3f);
 	}
-	else {
-
-		timer += MyGame::GameTime();
-	}
-
-	if (timer >= 1.25f) {
-		timer = 0.0f;
-		cameraScaleT = 0.0f;
-		universeCamera_->GetViewProjection().transform_.scale.z = minScaleZCamera;
-		isUniverseCamera = false;
-	}
-
-
-	/// レールカメラ
-	// カメラの回転を設定
-	if (flag) {
-		universeCamera_->Update();
-		followCamera_->Update();
-
-
-		if (isUniverseCamera) {
-			camera->viewMatrix_ = universeCamera_->GetViewProjection().viewMatrix_;
-			camera->projectionMatrix_ = universeCamera_->GetViewProjection().projectionMatrix_;
-			GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&universeCamera_->GetViewProjection());
-			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&universeCamera_->GetViewProjection());
-		}
-		else {
-			camera->viewMatrix_ = followCamera_->GetViewProjection().viewMatrix_;
-			camera->projectionMatrix_ = followCamera_->GetViewProjection().projectionMatrix_;
-			GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(&followCamera_->GetViewProjection());
-			GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(&followCamera_->GetViewProjection());
-		}
-		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-		//GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
-	}
-	else {
-
-
-		GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
-		GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-		GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
-		camera->UpdateMatrix();
-	}
-
-
-
-
-
-
-
-
-	// 弾マネージャ
-	bulletManager_->Update();
-
 
 	
+	ImGui::End();
 
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+		caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
+	}
+#endif // _DEBUG
+
+
+
+	// スペシャル
+	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
+		cameraManeger_->SetUseCamera("universeCamera",0.0f);
+	}
+	// カメラ管理の更新
+	cameraManeger_->Update();
+	// レベルデータアップデート
+	loadData_->Update();
+	// 弾マネージャ
+	bulletManager_->Update();
 	// ステージ
 	stage_->Update();
 	// 当たり判定
@@ -373,7 +241,7 @@ void GamePlayScene::BehaviorPhase1Initialize()
 void GamePlayScene::BehaviorPhase1Update()
 {
 
-	enemyManager_->Update();
+	caracterManager_->Update();
 
 }
 
@@ -386,12 +254,6 @@ void GamePlayScene::BehaviorPhase2Update()
 }
 #pragma endregion // フェーズ
 
-
-#pragma region 
-
-
-#pragma endregion その他
-
 // 終了
 void GamePlayScene::Finalize()
 {
@@ -402,60 +264,17 @@ void GamePlayScene::Finalize()
 void GamePlayScene::Draw3D()
 {
 	////3Dオブジェクトの描画
-
 	bulletManager_->DrawEffect();
 }
 
 // 2D描画
 void GamePlayScene::Draw2D()
 {
-
-
-	//////////////--------スプライト-----------///////////////////
-
-
-
 	// ゲームUI
 	gameUI->Draw();
-
-	// 敵スプライト
-	enemyManager_->Draw2D();
-
+	// キャラクター
+	caracterManager_->Draw2D();
+	// 弾マネージャ
 	bulletManager_->Draw2D();
-
-	// プレイヤースプライト
-	player_->Draw2D();
-
-
-
-
-
-
-
-	//if (!player_->GetAlive()) {
-	//	sceneCount++;
-	//	if (clock == 1) {
-	//		//text_over->Update();
-	//		//text_over->Draw();
-	//	}
-	//}
-	//else if (count >= enemys_.size()) {
-	//	sceneCount++;
-	//	if (clock == 1) {
-	//		//text_clera->Update();
-	//		//text_clera->Draw();
-	//	}
-	//}
-	//if (sceneCount % 15 == 0) {
-	//	clock *= -1;
-	//}
-
-	//if (sceneCount >= 240) {
-	//	//GetSceneManager()->ChangeScene("TITLE");
-	//}
-
-
-
-
 }
 

@@ -27,7 +27,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-
+#include "DirectXGame/engine/base/Timer.h"
 
 class ModelCommon;
 class DirectXCommon;
@@ -58,7 +58,7 @@ private:
 	ModelCommon* modelCommon_ = nullptr;
 	SrvManager* srvManager_ = nullptr;
 	DirectXCommon* dxCommon_;
-	
+	DebugTimer timer_;
 public:	
 	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 

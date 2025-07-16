@@ -7,7 +7,14 @@ void SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* li
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		lineCommon->AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
+		if(enabled) {
+			// 球の中心位置と半径を使ってラインを描画
+			lineCommon->AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
+		}
+		else {
+			// 無効な場合は透明にする
+			lineCommon->AddLineSphere({ centerWorld ,radius }, { 0.5f,0.5f,0.5f,1.0f }, 8, 8);
+		}
 	}
 #endif // _DEBUG
 }
@@ -68,9 +75,9 @@ bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec
 	if (other.GetType() == ColliderType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 		Vector3 closest = {
-			std::clamp(centerWorld.x, o.aabb.min_.x, o.aabb.max_.x),
-			std::clamp(centerWorld.y, o.aabb.min_.y, o.aabb.max_.y),
-			std::clamp(centerWorld.z, o.aabb.min_.z, o.aabb.max_.z)
+			std::clamp(centerWorld.x, o.minWorld.x, o.maxWorld.x),
+			std::clamp(centerWorld.y, o.minWorld.y, o.maxWorld.y),
+			std::clamp(centerWorld.z, o.minWorld.z, o.maxWorld.z)
 		};
 
 		Vector3 diff = centerWorld - closest;
@@ -144,10 +151,20 @@ void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* line
 	minWorld = aabb.min_ + centerWorld;
 	maxWorld = aabb.max_ + centerWorld;
 
+	//Vector3 size = aabb.min_;//; +aabb.max_;
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		lineCommon->AddLineAABB(aabb, centerWorld);
+		if(enabled) {
+			// AABBの最小・最大座標を使ってラインを描画
+			lineCommon->AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
+			//OBB obb = { {centerWorld},{},{size} };
+			//lineCommon->AddLineOBB(obb, { 1,1,1,1 });
+		}
+		else {
+			// 無効な場合は透明にする
+			lineCommon->AddLineAABB(aabb, centerWorld, { 0.5f,0.5f,0.5f,1.0f });
+		}
 	}
 #endif // _DEBUG
 
@@ -195,7 +212,7 @@ bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) 
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		// AABBの最近接点を求める
-		Vector3 closestPoint = Vector3::Clamp(sphere.centerWorld, aabb.min_, aabb.max_);
+		Vector3 closestPoint = Vector3::Clamp(sphere.centerWorld, minWorld, maxWorld);
 
 		Vector3 diff = sphere.centerWorld - closestPoint;
 		float distSq = diff.LengthSq();
@@ -279,7 +296,14 @@ void CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* l
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		lineCommon->AddLineCapsule(capWorld_);
+		if(enabled) {
+			// カプセルの線分と半径を使ってラインを描画
+			lineCommon->AddLineCapsule(capWorld_, { 1,1,1,1 });
+		}
+		else {
+			// 無効な場合は透明にする
+			lineCommon->AddLineCapsule(capWorld_, { 0.5f,0.5f,0.5f,1.0f });
+		}
 	}
 #endif // _DEBUG
 
@@ -349,7 +373,14 @@ void OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
 		lineCommon->AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
 		lineCommon->AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
 		lineCommon->AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
-		lineCommon->AddLineOBB(obb);
+		if(obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
+			// OBBのサイズを使ってラインを描画
+			lineCommon->AddLineOBB(obb, { 1,1,1,1 });
+		}
+		else {
+			// 無効な場合は透明にする
+			lineCommon->AddLineOBB(obb, { 0.0f,0.0f,0.0f,1.0f });
+		}
 	}
 #endif // _DEBUG
 

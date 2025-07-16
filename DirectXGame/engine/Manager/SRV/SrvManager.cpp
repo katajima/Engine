@@ -8,7 +8,7 @@
 
 
 
-const uint32_t SrvManager::kMaxSRVCount = 512;
+const uint32_t SrvManager::kMaxSRVCount = 2048;
 
 
 

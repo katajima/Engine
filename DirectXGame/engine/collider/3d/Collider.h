@@ -3,7 +3,7 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "ColliderFanction3D.h"
 
 constexpr float kFloatMax = 3.4028235e+38f;
 
@@ -23,6 +23,7 @@ public:
 	CollisionLayer layer = CollisionLayer::Default;
 	CollisionTag tag = CollisionTag::None; // タグ
 	uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
+	uint32_t id = 0; // コライダーID（ユニーク）
 
 	// 判定有効
 	void Enable() { enabled = true; }
