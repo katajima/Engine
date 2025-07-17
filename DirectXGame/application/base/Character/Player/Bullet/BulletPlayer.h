@@ -1,9 +1,5 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
-// プレイヤー
-#include "DirectXGame/application/base/Character/Player/Effect/PlayerEffect.h"
-
-
 #include "DirectXGame/application/base/Weapon/playerWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "DirectXGame/application/base/Special/BulletSpecial.h"
@@ -43,11 +39,5 @@ private: // 攻撃関係
 
 	// 調整項目の適用
 	void ApplyGlobalVariables();
-
-private:
-	// エフェクト 
-	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
-
-	Object3d objectBody_;					// オブジェクト本体
 private:
 };

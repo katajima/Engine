@@ -43,7 +43,7 @@ public:
 
 public:
 	// キャラクタータイプ設定
-	void SetCharacterType(CharacterType type) { characterData_.characterType_ = type; }
+	void SetCharacterType(CharacterType type) { characterParameterComponent_.characterType_ = type; }
 
 	// ダメージ
 	void AddDamage(float damage) {
@@ -78,47 +78,31 @@ public: // 取得系関数
 	BaseWeapon* GetWeapon() { return weapon_.get(); }
 	// 弾マネージャーの設定
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
-
-
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return flags_.isAlive; };
-
-	// キャラクターが無敵状態かどうかを取得
-	//bool GetInvincible() const { return GetSituation().isInvincible; }
-
-	// キャラクター状態
-	//Situation GetSituation() const { return characterData_.situation_; }
-
 	// HP取得
-	float GetHP() const { return characterData_.parameters_.HP.value; }
-
+	float GetHP() const { return characterParameterComponent_.parameters_.HP.value; }
 	// キャラクター取得
-	CharacterType GetCharacterType() const { return characterData_.characterType_; }
+	CharacterType GetCharacterType() const { return characterParameterComponent_.characterType_; }
+
 
 	// ビヘイビア状態取得
 	BasicBehavior GetBasicBehavior() const { return basicbehavior_; }
-
 	// リクエスト取得
 	std::optional<BasicBehavior> GetBasicBehaviorRequest() const { return basicbehaviorRequest_; }
-
 	// ふるまい変更
 	void ChangeRequest() { basicbehavior_ = basicbehaviorRequest_.value(); }
-
 	// ふるまいリクエストリセット
 	void ResetRequest() { basicbehaviorRequest_ = std::nullopt; }
 	// ふるまいリクエストの設定
 	void SetRequest(BasicBehavior type) { basicbehaviorRequest_ = type; }
 
-	// キャラクター状態
-	//Situation& Situations() { return characterData_.situation_; }
 protected: // 取得系関数(変更可能)
 
 	// 基本パラメータ
-	BasicParameters& Parameters() { return characterData_.parameters_; }
-
-
+	BasicParameters& Parameters() { return characterParameterComponent_.parameters_; }
 	// HP
-	float& HP() { return characterData_.parameters_.HP.value; }
+	float& HP() { return characterParameterComponent_.parameters_.HP.value; }
 
 protected: // 保存機能
 
@@ -141,27 +125,30 @@ protected: // 保存機能
 
 	// ベースの保存項目を追加
 	void InitializeBaseAddItem() {
-		AddItem("speed", characterData_.parameters_.speed);
-		AddItem("HP", characterData_.parameters_.HP.value);
-		AddItem("MaxHP", characterData_.parameters_.HP.maxValue);
-		AddItem("MP", characterData_.parameters_.MP.value);
-		AddItem("MaxMP", characterData_.parameters_.MP.maxValue);
-		AddItem("stamina", characterData_.parameters_.stamina.value);
-		AddItem("MaxStamina", characterData_.parameters_.stamina.maxValue);
+		AddItem("speed", characterParameterComponent_.parameters_.speed);
+		AddItem("HP", characterParameterComponent_.parameters_.HP.value);
+		AddItem("MaxHP", characterParameterComponent_.parameters_.HP.maxValue);
+		AddItem("MP", characterParameterComponent_.parameters_.MP.value);
+		AddItem("MaxMP", characterParameterComponent_.parameters_.MP.maxValue);
+		AddItem("stamina", characterParameterComponent_.parameters_.stamina.value);
+		AddItem("MaxStamina", characterParameterComponent_.parameters_.stamina.maxValue);
+		AddItem("jampPower", characterParameterComponent_.parameters_.jampPower);
 
 
 
-		characterData_.parameters_.speed = GetValue<float>("speed");
-		characterData_.parameters_.HP.value = GetValue<float>("HP");
-		characterData_.parameters_.HP.maxValue = GetValue<float>("MaxHP");
-		characterData_.parameters_.MP.value = GetValue<float>("MP");
-		characterData_.parameters_.MP.maxValue = GetValue<float>("MaxMP");
-		characterData_.parameters_.stamina.value = GetValue<float>("stamina");
-		characterData_.parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
+		characterParameterComponent_.parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_.parameters_.HP.value = GetValue<float>("HP");
+		characterParameterComponent_.parameters_.HP.maxValue = GetValue<float>("MaxHP");
+		characterParameterComponent_.parameters_.MP.value = GetValue<float>("MP");
+		characterParameterComponent_.parameters_.MP.maxValue = GetValue<float>("MaxMP");
+		characterParameterComponent_.parameters_.stamina.value = GetValue<float>("stamina");
+		characterParameterComponent_.parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
+		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
 	}
 
 	void UpdateBaseGetValue() {
-		characterData_.parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_.parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
 	}
 
 protected:
@@ -175,12 +162,13 @@ public:
 	Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
 protected:
 	// キャラクターパラメータコンポーネント
-	CharacterParameterComponent characterData_;	
+	CharacterParameterComponent characterParameterComponent_;
 	// キャラクターの状態コンポーネント
 	CharacterStateComponent characterStateComponent_;
+public:
+	CharacterStateComponent& GetCharacterStateComponent() {return characterStateComponent_;}
 
-
-
+protected:
 
 	// 振るまい
 	BasicBehavior basicbehavior_ = BasicBehavior::kRoot;

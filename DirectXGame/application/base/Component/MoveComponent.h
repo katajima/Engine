@@ -21,24 +21,16 @@ public:
 	};
 
 	// 着地処理
-	void Landing(bool& is, TransformComponent& world, RigidBodyComponent& rigid) {
+	void Landing(TransformComponent& world, RigidBodyComponent& rigid) {
 		// 着地
 		if (world.GetWorldPosition().y <= groundHeight_) {
 			world.GetWorldTransform().translate_.y = groundHeight_;
 			rigid.Velocity().y = 0.0f;
-			is = false;
-		}
-		else {
-			is = true;
-		}
-
-		if (is) {
-			rigid.SetIsGravity(true);
-		}
-		else {
 			rigid.SetIsGravity(false);
 		}
-
+		else {
+			rigid.SetIsGravity(true);
+		}
 	}
 
 private:

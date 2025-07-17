@@ -56,7 +56,6 @@ void PlayerStateMove::Enter()
 	BaseWeapon* weapon = player_->GetWeapon();
 	weapon->GetTimer().t = 0.0f;
 	weapon->GetObject3D()->SetIsDraw(false);
-	player_->Situations().isInvincible = false;
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
 }
 
@@ -90,11 +89,20 @@ void PlayerStateAttack::Enter()
 	BaseWeapon* weapon = player_->GetWeapon();
 	weapon->GetTimer().t = 0.0f;
 	weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = true;
-	weapon->KeyAttackTypes(player_->GetSituation().isJumping);
+	
+	if (player_->GetCharacterStateComponent().IsJumping()) {
+
+		weapon->KeyAttackTypes(true);
+	}
+	else {
+		weapon->KeyAttackTypes(false);
+	}
+	
+
+	
 	weapon->AttackTypeInit(0);
 	weapon->GetObject3D()->SetIsDraw(true);
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
-	player_->Situations().isInvincible = true;
 }
 
 

@@ -1,8 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "optional"
-// AI Character Data
-// キャラクターの思考や知能を持つデータ
 
 // ゲージを管理するための構造体
 struct Gage {
@@ -66,7 +64,7 @@ struct BasicParameters
 	float strength = 1.0f;	// 力
 	float speed = 1.0f;		// 速さ
 	float defense = 1.0f;	// 防御力
-	float jampPawor = 80.0f	// ジャンプ力
+	float jampPower = 80.0f;// ジャンプ力
 	int intelligence = 1;	// 知力
 };
 
@@ -159,11 +157,12 @@ public:
 	
 	}
 public:
+	Personality personality = Personality::kNormal;
 	CharacterType characterType_ = CharacterType::None;	// キャラクターの種類
 	BasicParameters parameters_;						// 基本パラメータ
 };
 
-//
+// キャラクターの状態のコンポーネント
 class CharacterStateComponent
 {
 public:

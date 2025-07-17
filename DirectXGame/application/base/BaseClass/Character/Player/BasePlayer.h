@@ -3,7 +3,8 @@
 
 
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h"
-#include "DirectXGame/application/base/Character/Player/UI/PlayerUI.h"
+#include "DirectXGame/application/base/UI/PlayerUI.h"
+
 #include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
 #include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
 using StateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;

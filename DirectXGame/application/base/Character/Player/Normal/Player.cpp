@@ -8,7 +8,7 @@
 #include "assert.h"
 
 
-void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager,GlobalVariables* globalVariables, Vector3 position, Camera* camera)
+void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
@@ -17,8 +17,8 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	input_ = input;
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 	CreateGroup("Player");
-	
-	
+
+
 
 	// HP設定
 	Parameters().HP.Initiaize(1000, 0, 1000, 0);
@@ -35,7 +35,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	objectBase_->InitRigidBodyComponent();
 
 	GetColliderComponent()->SetHitReceiver(this);
-	
+
 	InitializeBaseAddItem();
 
 	// SphereColliderを追加
@@ -44,7 +44,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	sphere->layer = CollisionLayer::Player;
 	sphere->collisionMask = 0xFFFFFFFF;
 	sphere->radius = 2.0f; // 半径を適宜設定
-	
+
 	GetColliderComponent()->AddCollider(std::move(sphere));
 
 
@@ -91,7 +91,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 
 				}
 				Velocity().y = 0;
-				
+
 				//acceleration_.y = 0;
 				objectBase_->GetWorldTransform().Update();
 			}
@@ -111,7 +111,7 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 			AddDamage(10.0f);
 			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
 		}
-	};
+		};
 
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
@@ -131,14 +131,12 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	weapon_->SetCharacter(this);
 
 
+
 	// UI
 	ui_ = std::make_unique<PlayerUI>();
 	ui_->Initialize(entity2DManager);
-	/// エフェクト関係
-	effect_->Initialize(entity3DManager_, entity2DManager, camera_);
-	// トレイルエフェクト
-	effect_->SetTrailParent(weapon_->GetObject3D());
-	
+
+
 
 	ChangeState("Move");
 }
@@ -149,7 +147,7 @@ void Player::Update()
 
 	// ステート
 	state_->Update();
-	
+
 	if (GetHP() <= 0) {
 		flags_.isAlive = false;
 	}
@@ -177,8 +175,8 @@ void Player::Update()
 	ImGui::InputInt("maxComboCount", &count);
 	bool is = weapon_->GetComboData().isComboNext;
 	ImGui::Checkbox("isComboNext", &is);
-	is = Situations().isJumping;
-	ImGui::Checkbox("Jumping", &is);
+
+
 	is = weapon_->GetAttackInput().GetIsAttack();
 	ImGui::Checkbox("isAttack", &is);
 	is = weapon_->GetAttackInput().GetIsState();
@@ -190,7 +188,7 @@ void Player::Update()
 	if (input_->IsTriggerKey(DIK_C)) {
 		if (!isCreativeMode) {
 			isCreativeMode = true;
-			
+
 		}
 		else {
 			isCreativeMode = false;
@@ -199,17 +197,18 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	
 
 
 
-	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(),*objectBase_);
 
-	moveComponent_->Landing(Situations().isJumping, *objectBase_->GetTransformComponent(),*objectBase_->GetRigidBodyComponent());
+	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), *objectBase_);
+
+	moveComponent_->Landing(*objectBase_->GetTransformComponent(),*objectBase_->GetRigidBodyComponent());
+	characterStateComponent_.Update(Velocity(),false,GetAlive());
+
 
 	// 重力
-	//GravityUpdate(MyGame::GameTime(), Situations().isJumping, GetAlive());
-	if (!Situations().isJumping) {
+	if (!characterStateComponent_.IsJumping()) {
 		Velocity() = { 0,0,0 };
 	}
 
@@ -223,8 +222,6 @@ void Player::Update()
 
 	// 必殺技
 	special_->Update();
-	// エフェクト
-	effect_->Update();
 	// ヒットデータの更新
 	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 	//武器更新
@@ -235,7 +232,6 @@ void Player::Update()
 
 void Player::DrawEffect()
 {
-	effect_->Draw();
 }
 
 void Player::Draw2D()
@@ -257,48 +253,48 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-	Situations().isMoving = false;
+
+
 	Vector3 velo = GetVelocity();
 
-	//if (input_->IsControllerConnected()) {
+
+	velo.x = input_->GetGamePadLeftStick().x;
+	velo.z = input_->GetGamePadLeftStick().y;
 
 
-		velo.x = input_->GetGamePadLeftStick().x;
-		velo.z = input_->GetGamePadLeftStick().y;
+	if (velo.x != 0.0f || velo.z != 0.0f) {
 
 
-		if (velo.x != 0.0f || velo.z != 0.0f) {
-			Situations().isMoving = true;
-			// 入力方向を正規化
-			velo = Normalize(velo);
-			velo = Multiply(velo, Parameters().speed);
+		// 入力方向を正規化
+		velo = Normalize(velo);
+		velo = Multiply(velo, Parameters().speed);
 
 
-			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
+		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
+		Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
 
-			// カメラの向きに基づいて移動方向をワールド座標系に変換
-			Vector3 worldDirection = {
-				velo.x * cameraWorldMatrix.m[0][0] + velo.z * cameraWorldMatrix.m[2][0],
-				0.0f,
-				velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
-			};
+		// カメラの向きに基づいて移動方向をワールド座標系に変換
+		Vector3 worldDirection = {
+			velo.x * cameraWorldMatrix.m[0][0] + velo.z * cameraWorldMatrix.m[2][0],
+			0.0f,
+			velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
+		};
 
-			velo = Multiply(Normalize(worldDirection), Parameters().speed);
+		velo = Multiply(Normalize(worldDirection), Parameters().speed);
 
-			//// 移動ベクトルをカメラの角度だけ回転する
-			//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
-			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
-			//
-			if (velo.Length() != 0) {
-				objectBase_->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
-			}
-			
+		//// 移動ベクトルをカメラの角度だけ回転する
+		//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
+		//velocity_ = TransformNormal(velocity_, rotateMatrixY);
+		//
+		if (velo.Length() != 0) {
+			objectBase_->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
 		}
-		else {
-			
-		}
-	//}
+
+	}
+	else {
+
+	}
+
 	//{
 
 
@@ -336,7 +332,7 @@ void Player::Move()
 	//		Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
 	//	}
 	//}
-	
+
 	Velocity().x = velo.x;
 	Velocity().z = velo.z;
 
@@ -347,14 +343,12 @@ void Player::Jump()
 {
 
 
-	if (Situations().isJumping) return; // ジャンプ中は無効化
-	//if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) { // ジャンプボタンが押されたらジャンプ
-		if (GetAlive()) {
-			Situations().isJumping = true;
-			//Velocity().y += 40.0f; // ジャンプ時の加速度を設定
-			objectBase_->GetRigidBodyComponent()->AddForce({0,180.0f,0});
-		}
-	//}
+	if (characterStateComponent_.IsJumping()) return; // ジャンプ中は無効化
+	if (GetAlive()) {
+		characterStateComponent_.ChangeState(CharacterState::Jump);
+		objectBase_->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
+	}
+	
 }
 
 #pragma endregion //移動関係

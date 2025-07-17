@@ -5,7 +5,7 @@
 
 void BaseWeapon::SetAttackCombo(float deltaTime) {
 	//  既定の時間経過で通常行動に戻る
-	 data_.motionData.AddCurrentTime(deltaTime);
+	data_.motionData.AddCurrentTime(deltaTime);
 	if (data_.motionData.currentTime >= data_.motionData.AllTime()) {
 		// コンボ継続なら次のコンボに進む
 		if (GetComboData().isComboNext) {
@@ -27,7 +27,8 @@ void BaseWeapon::SetAttackCombo(float deltaTime) {
 			// 方向
 			character->Move();
 			// 攻撃タイプ
-			KeyAttackTypes(character->GetSituation().isJumping);
+
+			KeyAttackTypes(character->GetCharacterStateComponent().IsJumping());
 
 			attackInput_.SetIsState(true);
 			attackInput_.SetIsAttack(true);
@@ -81,7 +82,7 @@ void BaseWeapon::AttackUpdate() {
 			attackInput_.SetIsAttack(true);
 		}
 	}
-	KeyAttackTypes(character->GetSituation().isJumping);
+	KeyAttackTypes(character->GetCharacterStateComponent().IsJumping());
 
 
 	// コンボ段階によってモーションを分岐

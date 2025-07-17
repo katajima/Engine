@@ -37,7 +37,6 @@ struct ObjectStateFlags
 	bool isVisible = true;		// 可視状態(デフォルトはtrue、falseで非表示)
 	bool isAlive = true;		// 生存状態(デフォルトはtrue、falseで死亡)
 	bool isDeleted = false;		// 削除状態(デフォルトはfalse、trueで削除済み)
-	bool isInvincible = false;	// 無敵状態(デフォルトはfalse、trueで無敵)
 	bool isLockonTarget = false;// ロックオンターゲット状態(デフォルトはfalse、trueでロックオン対象)
 };
 

@@ -354,10 +354,7 @@
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Effect\PlayerEffect.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\UI\PlayerUI.cpp">
+    <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp">
@@ -889,10 +886,7 @@
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Effect\PlayerEffect.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\UI\PlayerUI.h">
+    <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\Stage.h">
