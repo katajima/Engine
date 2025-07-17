@@ -17,8 +17,6 @@ public:
 		if (is) {
 			velocity_ += Acceleration(); // 加速度を速度に加算
 			object.GetWorldTransform().translate_ += GetVelocity() * deltaTime;
-
-			//object.GetRigidBodyComponent()->AddForce(GetVelocity() * deltaTime);
 		}
 	};
 
@@ -28,19 +26,10 @@ public:
 		if (world.GetWorldPosition().y <= groundHeight_) {
 			world.GetWorldTransform().translate_.y = groundHeight_;
 			rigid.Velocity().y = 0.0f;
-			// 着地したら着地フラグを立てる
-			//flags_.isGrounded = true;
-			// 着地したら加速度を0にする
-			//Acceleration().y = 0.0f;
-			//velocity_.y = 0.0f;
 			is = false;
-
 		}
 		else {
-			// 着地していない着地フラグを下ろす
-			//flags_.isGrounded = false;
 			is = true;
-
 		}
 
 		if (is) {

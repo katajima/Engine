@@ -96,10 +96,7 @@ public: // オブジェクト
 	void SetCamera(Camera* camera) { camera_ = camera; };
 
 
-	// 速度取得
-	Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
-	// 速度
-	Vector3& Velocity() { return moveComponent_->Velocity(); }
+	
 	
 
 	// 削除フラグ取得
@@ -119,7 +116,7 @@ protected:
 	// オブジェクトの状態フラグ取得
 	ObjectStateFlags& GetFlags() { return flags_; }
 
-	void InitMoveComponent() { moveComponent_ = std::make_unique<MoveComponent>(); }
+	
 
 protected:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d
@@ -127,12 +124,13 @@ protected:
 	std::string name_ = "";		// オブジェクト名
 	
 	
-	std::unique_ptr<MoveComponent> moveComponent_;
 
 	
-	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
-	ObjectStateFlags flags_;	// 重力の有無(デフォルトはtrue、falseで重力を無効化)
+	
+	ObjectStateFlags flags_;
 
+
+	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 protected: // 貰ってくるもの
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
 	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー

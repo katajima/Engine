@@ -245,6 +245,8 @@ void Object3d::Update()
 				localMatrix = model->modelData.rootNode.localMatrix;
 			}
 
+
+
 			std::vector<std::future<void>> futures;
 			for (auto& mesh : model->modelData.mesh) {
 				futures.push_back(std::async(std::launch::async, [&mesh]() {

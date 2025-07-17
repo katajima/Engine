@@ -345,6 +345,8 @@ void Player::Move()
 
 void Player::Jump()
 {
+
+
 	if (Situations().isJumping) return; // ジャンプ中は無効化
 	//if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) { // ジャンプボタンが押されたらジャンプ
 		if (GetAlive()) {

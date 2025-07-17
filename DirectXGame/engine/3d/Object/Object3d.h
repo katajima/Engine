@@ -177,15 +177,18 @@ private:
 	// カメラ
 	Camera* defaltCamera = nullptr;
 	Camera* individualCamera_ = nullptr;
+	// 個人的にカメラを使用するか
+	bool isIndividualCamera_ = false;
+
 	// トランスフォームデータ
 	std::unique_ptr<Transfomation> transformation = nullptr;
 	
 
 	// 何かしらの見た目があるか
 	bool isSkin_ = false;
-
-	// 個人的にカメラを使用するか
-	bool isIndividualCamera_ = false;
+	// 描画するかのフラグ
+	bool isDraw = true;
+	
 
 	// ImGuiを表示するか
 	bool imguiFlag_ = false;
@@ -193,13 +196,9 @@ private:
 	// 削除フラグ
 	bool isDelete = false;
 
-	// 描画するかのフラグ
-	bool isDraw = true;
+	
 
-	// trailエフェクトを使用するかのフラグ
-	bool isEmitTrailEffect = false;
-
-
+	
 	// オブジェクトのタイプ
 	ObjectModelType objectType_ = ObjectModelType::kNormal;
 
@@ -286,8 +285,12 @@ public:
 	SkyBox* skyBox_ = nullptr;
 	// 波
 	Ocean* ocean_ = nullptr;
+	
 	//
 	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
+	// trailエフェクトを使用するかのフラグ
+	bool isEmitTrailEffect = false;
+
 
 
 

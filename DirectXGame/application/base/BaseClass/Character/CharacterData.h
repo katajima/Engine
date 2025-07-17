@@ -66,19 +66,26 @@ struct BasicParameters
 	float strength = 1.0f;	// 力
 	float speed = 1.0f;		// 速さ
 	float defense = 1.0f;	// 防御力
+	float jampPawor = 80.0f	// ジャンプ力
 	int intelligence = 1;	// 知力
 };
 
-// キャラクターの状況を定義する構造体
-struct Situation
+
+
+// キャラクターの状態
+enum class CharacterState 
 {
-	bool isAttacking = false;	// 攻撃中フラグ
-	bool isDefending = false;	// 防御中フラグ
-	bool isMoving = false;		// 移動中フラグ
-	bool isIdle = true;			// 待機中フラグ
-	bool isStunned = false;		// 気絶中フラグ
-	bool isInvincible = false;	// 無敵フラグ
-	bool isJumping = false;		// ジャンプ中フラグ
+	Idle,		// 待機
+	Walk,		// 歩き
+	Run,		// 走り
+	Dash,		// ダッシュ
+	Jump,		// ジャンプ
+	Fall,		// 落ちている
+	Attack,		// 攻撃
+	Defense,	// 防御
+	Damage,		// 被弾
+	Dead,		// 死亡
+	Stan,		// 気絶中
 };
 
 // キャラクターの種類を定義する列挙型
@@ -140,15 +147,70 @@ enum class PlayerType
 	kTank,		// タンク
 };
 
-// キャラクターデータの基底クラス
-class CharacterData
+
+
+// キャラクターパラメータコンポーネント
+class CharacterParameterComponent
 {
 public:
-	void Initialize() {}	// 初期化関数
-
-
+	// 初期化関数
+	void Initialize() {
+	
+	
+	}
 public:
-	Situation situation_;			// キャラクターの状況
 	CharacterType characterType_ = CharacterType::None;	// キャラクターの種類
-	BasicParameters parameters_;	// 基本パラメータ
+	BasicParameters parameters_;						// 基本パラメータ
+};
+
+//
+class CharacterStateComponent
+{
+public:
+
+	// 移動可能
+	bool CanMove() const {
+		return currentState_ != CharacterState::Attack && currentState_ != CharacterState::Damage;
+	}
+
+	// 攻撃可能
+	bool CanAttack() const {
+		return currentState_ == CharacterState::Idle || currentState_ == CharacterState::Run || currentState_ == CharacterState::Walk || currentState_ == CharacterState::Jump;
+	}
+
+	// 変更
+	void ChangeState(CharacterState state) {
+		if (currentState_ != state) {
+			currentState_ = state;
+		}
+	}
+
+	void Update(const Vector3& velocity, bool isGrounded, bool isDead) {
+		if (isDead) {
+			ChangeState(CharacterState::Dead);
+		}
+		else if (!isGrounded && velocity.y < 0) {
+			ChangeState(CharacterState::Fall);
+		}
+		else if (!isGrounded && velocity.y > 0) {
+			ChangeState(CharacterState::Jump);
+		}
+		else if (velocity.Normalize().Length() > 0.5f) {
+			ChangeState(CharacterState::Run);
+		}
+		else {
+			ChangeState(CharacterState::Idle);
+		}
+	}
+
+
+// 状態取得
+	bool IsJumping() const { return currentState_ == CharacterState::Jump; }
+	bool IsFalling() const { return currentState_ == CharacterState::Fall; }
+	bool IsInAir() const { return IsJumping() || IsFalling(); }
+	bool IsDead() const { return currentState_ == CharacterState::Dead; }
+	CharacterState GetState() const { return currentState_; }
+private:
+	CharacterState currentState_ = CharacterState::Idle; // キャラクターの状況
+
 };

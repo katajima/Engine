@@ -19,7 +19,7 @@ public:
 	///< summary>
 	/// 更新
 	///</summary>
-	virtual void Update() = 0; 
+	virtual void Update() = 0;
 
 	/// <summary>
 	/// エフェクトの描画
@@ -82,12 +82,12 @@ public: // 取得系関数
 
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return flags_.isAlive; };
-	
+
 	// キャラクターが無敵状態かどうかを取得
-	bool GetInvincible() const { return GetSituation().isInvincible; }
-	
+	//bool GetInvincible() const { return GetSituation().isInvincible; }
+
 	// キャラクター状態
-	Situation GetSituation() const { return characterData_.situation_; }
+	//Situation GetSituation() const { return characterData_.situation_; }
 
 	// HP取得
 	float GetHP() const { return characterData_.parameters_.HP.value; }
@@ -110,15 +110,15 @@ public: // 取得系関数
 	void SetRequest(BasicBehavior type) { basicbehaviorRequest_ = type; }
 
 	// キャラクター状態
-	Situation& Situations() { return characterData_.situation_; }
+	//Situation& Situations() { return characterData_.situation_; }
 protected: // 取得系関数(変更可能)
-	
+
 	// 基本パラメータ
-	BasicParameters& Parameters() { return characterData_.parameters_; } 
+	BasicParameters& Parameters() { return characterData_.parameters_; }
 
 
 	// HP
-	float& HP() { return characterData_.parameters_.HP.value; } 
+	float& HP() { return characterData_.parameters_.HP.value; }
 
 protected: // 保存機能
 
@@ -141,7 +141,6 @@ protected: // 保存機能
 
 	// ベースの保存項目を追加
 	void InitializeBaseAddItem() {
-		//AddItem("Position", objectBase_->worldtransform_.translate_);
 		AddItem("speed", characterData_.parameters_.speed);
 		AddItem("HP", characterData_.parameters_.HP.value);
 		AddItem("MaxHP", characterData_.parameters_.HP.maxValue);
@@ -152,7 +151,6 @@ protected: // 保存機能
 
 
 
-		//objectBase_->worldtransform_.translate_ = GetValue<Vector3>("Position");
 		characterData_.parameters_.speed = GetValue<float>("speed");
 		characterData_.parameters_.HP.value = GetValue<float>("HP");
 		characterData_.parameters_.HP.maxValue = GetValue<float>("MaxHP");
@@ -166,15 +164,26 @@ protected: // 保存機能
 		characterData_.parameters_.speed = GetValue<float>("speed");
 	}
 
-public:
-
-
 protected:
-	CharacterData characterData_;	// キャラクターデータ
+	void InitMoveComponent() { moveComponent_ = std::make_unique<MoveComponent>(); }
+	// 移動コンポーネント
+	std::unique_ptr<MoveComponent> moveComponent_;
+public:
+	// 速度
+	Vector3& Velocity() { return moveComponent_->Velocity(); }
+	// 速度取得
+	Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
+protected:
+	// キャラクターパラメータコンポーネント
+	CharacterParameterComponent characterData_;	
+	// キャラクターの状態コンポーネント
+	CharacterStateComponent characterStateComponent_;
+
+
 
 
 	// 振るまい
-	BasicBehavior basicbehavior_ = BasicBehavior::kRoot; 
+	BasicBehavior basicbehavior_ = BasicBehavior::kRoot;
 	// 次の振るまいリクエスト
 	std::optional<BasicBehavior> basicbehaviorRequest_ = std::nullopt;
 
