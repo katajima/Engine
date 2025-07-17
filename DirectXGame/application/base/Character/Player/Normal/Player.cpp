@@ -113,14 +113,6 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 		}
 	};
 
-
-	// 体
-	objectBody_.Initialize(entity3DManager);
-	objectBody_.SetCamera(camera_);
-	objectBody_.SetModel("AnimatedCube.gltf");
-	objectBody_.SetName("PlayerBody");
-	objectBody_.GetWorldTransform().parent_ = &objectBase_->GetWorldTransform();
-
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
 	special_->Initialize(entity3DManager, entity2DManager, camera_);
@@ -170,12 +162,7 @@ void Player::Update()
 
 
 #ifdef _DEBUG
-	if (GetSituation().isInvincible) {
-		objectBody_.model->modelData.mesh[0]->material->color = { 0,0,1,1 };
-	}
-	else {
-		objectBody_.model->modelData.mesh[0]->material->color = { 1,1,1,1 };
-	}
+
 
 
 	ImGui::Begin("Debug");

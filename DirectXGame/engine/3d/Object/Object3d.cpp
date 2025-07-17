@@ -27,9 +27,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	transformComponent_ = std::make_unique<TransformComponent>();
 	transformComponent_->Init();
 
-	//worldtransform_.Initialize();
-	//worldtransform_.translate_.x = { 0.00000001f };
-
+	
 	name = "object" + std::to_string(object3dCommon_->count);
 
 	transformation = std::make_unique<Transfomation>();
@@ -89,14 +87,17 @@ void Object3d::Update()
 		rigidBodyComponent_->Integrate(MyGame::GameTime(), *transformComponent_.get());
 	}
 
+	// トランスフォームコンポーネント
 	transformComponent_->Update();
+
 
 	if (model || primitive_ || skyBox_ || ocean_) {
 		isSkin_ = true;
 	}
 	
-	Camera* cameraPtr;
 
+
+	Camera* cameraPtr;
 	if (isIndividualCamera_) {
 		cameraPtr = individualCamera_;
 	}

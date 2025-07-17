@@ -233,8 +233,7 @@ private: // コンポネント
 	/// </summary>
 	
 	std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
-	bool isRigidBody = false;
-
+	
 public:
 	// コライダーコンポーネントを初期化
 	void InitColliderComponent();
@@ -290,15 +289,14 @@ public:
 	//
 	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 
+
+
 	// オブジェクト名前
 	std::string name = "";
-
 	// オブジェクトタグ
 	std::string nameTag = "";
-
 	// オブジェクトタイプ名前
 	std::string objectTypeName = "";
-
 private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;

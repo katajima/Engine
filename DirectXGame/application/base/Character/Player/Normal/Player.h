@@ -50,8 +50,7 @@ private:
 	
 	// エフェクト 
 	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
-	
-	Object3d objectBody_;					// オブジェクト本体
+
 public:
 	void LockOn(const std::vector<BaseEnemy*>& enemys);
 private:
