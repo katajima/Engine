@@ -58,10 +58,10 @@ void PlayerEffect::Draw()
 
 void PlayerEffect::SetTrailParent(Object3d* object)
 {
-	weaponStr.worldtransform_.parent_ = &object->worldtransform_;
-	weaponStr.worldtransform_.translate_ = { 0,object->GetMesh(0)->GetMax().y ,0 };
+	weaponStr.GetWorldTransform().parent_ = &object->GetWorldTransform();
+	weaponStr.GetWorldTransform().translate_ = { 0,object->GetMesh(0)->GetMax().y ,0 };
 
-	weaponEnd.worldtransform_.parent_ = &object->worldtransform_;
-	weaponEnd.worldtransform_.translate_ = { 0,object->GetMesh(0)->GetMin().y ,0 };
-	weaponEnd.worldtransform_.translate_ = { 0,2 ,0 };
+	weaponEnd.GetWorldTransform().parent_ = &object->GetWorldTransform();
+	weaponEnd.GetWorldTransform().translate_ = { 0,object->GetMesh(0)->GetMin().y ,0 };
+	weaponEnd.GetWorldTransform().translate_ = { 0,2 ,0 };
 }

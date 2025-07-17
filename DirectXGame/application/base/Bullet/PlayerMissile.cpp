@@ -48,10 +48,10 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	object_->SetModel("player_bullet.obj");
 	object_->Update();
 	// Y軸周り角度(θy)
-	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+	object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
 	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
 	// X軸周り角度(θx)
-	object_->worldtransform_.rotate_.x = std::atan2(velocity_.y, -length);
+	object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
 
 	// ダメージ量
 	parameter_.damege = 30;
@@ -62,7 +62,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 
 
 	// 初期地点記録
-	str = object_->worldtransform_.translate_;
+	str = object_->GetWorldTransform().translate_;
 
 	// ランダムな空中位置を設定
 	randPosSky = str + float(rand() % 11 - 5);
@@ -92,7 +92,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	hitEmitter_->SetSizeMinMax(size, size);
 	hitEmitter_->SetFrequency(0.00f);
-	hitEmitter_->SetParent(object_->worldtransform_);
+	hitEmitter_->SetParent(object_->GetWorldTransform());
 	hitEmitter_->SetUsebillboardRotZ(true);
 	hitEmitter_->SetIsAlpha(true);
 	hitEmitter_->SetVelocityMinMax({}, {});
@@ -116,8 +116,8 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	hitObject_ = std::make_unique<Object3d>();
 	hitObject_->Initialize(entity3DManager, Object3d::ObjectModelType::kPrimitive, Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
 	//hitObject_->SetPrimitive(primitiveCylinder_.get());
-	hitObject_->worldtransform_.translate_.z = 50.0f;
-	hitObject_->worldtransform_.rotate_.y = DegreesToRadians(-90);
+	hitObject_->GetWorldTransform().translate_.z = 50.0f;
+	hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
 	hitObject_->SetName("cylinder");
 	hitObject_->SetIsDraw(false);
 	hitObject_->SetCamera(camera);
@@ -134,8 +134,8 @@ void PlayerMissile::Update()
 		isAlive_ = false;
 	}
 
-	Vector3 strSmoke = object_->worldtransform_.worldMat_.GetWorldPosition();
-	Vector3 endSmoke = object_->worldtransform_.worldPreMat_.GetWorldPosition();
+	Vector3 strSmoke = object_->GetWorldTransform().worldMat_.GetWorldPosition();
+	Vector3 endSmoke = object_->GetWorldTransform().worldPreMat_.GetWorldPosition();
 	moveSmokeEmitter_->SetRengeMinMax(strSmoke, endSmoke);
 	moveSmokeEmitter2_->SetRengeMinMax(strSmoke, endSmoke);
 
@@ -161,7 +161,7 @@ void PlayerMissile::Update()
 
 			t = count;
 
-			object_->worldtransform_.translate_ = Lerp(str, randPosSky, t);
+			object_->GetWorldTransform().translate_ = Lerp(str, randPosSky, t);
 
 			norm = randPosSky - str;
 
@@ -207,7 +207,7 @@ void PlayerMissile::Update()
 				velocity_ = pos2;
 				velocity_.y = 0;
 
-				object_->worldtransform_.translate_ += velocity_ * GetTimer();
+				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();
 
 				if (5 >= DistanceXZ(object_->GetWorldPosition(), enemyPos_)) {
 					phase_++;
@@ -227,7 +227,7 @@ void PlayerMissile::Update()
 			{
 				velocity_ = targetPos * 3;
 
-				object_->worldtransform_.translate_ += velocity_ * GetTimer();
+				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();
 			}
 
 			if (2.5f >= object_->GetWorldPosition().y) {
@@ -245,17 +245,17 @@ void PlayerMissile::Update()
 	}
 
 
-	hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_;
-	hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+	hitObject_->GetWorldTransform().translate_ = object_->GetWorldTransform().translate_;
+	hitObject_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
 
 	if (isEffectPlay_) {
 		time_ += GetTimer();
 
 		object_->SetIsDraw(false);
 		hitObject_->SetIsDraw(true);
-		hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_ + Vector3{ 0.0f,5.0f ,0.0f };
-		hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
-		hitObject_->worldtransform_.scale_ += Vector3(0.15f, 0.15f, 0.00f);
+		hitObject_->GetWorldTransform().translate_ = object_->GetWorldTransform().translate_ + Vector3{ 0.0f,5.0f ,0.0f };
+		hitObject_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
+		hitObject_->GetWorldTransform().scale_ += Vector3(0.15f, 0.15f, 0.00f);
 		hitObject_->GetPrimitive()->GetMaterial()->color.a -= 0.05f;
 
 		if (time_ >= 0.5f) {
@@ -275,10 +275,10 @@ void PlayerMissile::Update()
 
 
 	// Y軸周り角度(θy)
-	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+	object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
 	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
 	// X軸周り角度(θx)
-	object_->worldtransform_.rotate_.x = std::atan2(velocity_.y, -length);
+	object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
 }
 
 void PlayerMissile::Draw()
@@ -312,5 +312,5 @@ void PlayerMissile::InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* par
 	emitter->SetSizeMinMax(Vector3{ 0.8f,0.8f,0.8f }, { 0.8f,0.8f,0.8f });
 	emitter->SetVelocityMinMax(-velocity_, -velocity_);
 	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-	emitter->SetRengeMinMax(object_->worldtransform_.translate_, object_->worldtransform_.translate_);
+	emitter->SetRengeMinMax(object_->GetWorldTransform().translate_, object_->GetWorldTransform().translate_);
 }

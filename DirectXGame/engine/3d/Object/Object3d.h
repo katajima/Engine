@@ -4,8 +4,7 @@
 
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/3d/Model/ModelManager.h"
-#include"DirectXGame/engine/Transfomation/Transfomation.h"
-#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
@@ -14,6 +13,8 @@ using namespace Microsoft::WRL;
 
 
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
+#include "DirectXGame/engine/Transform/TransformComponent.h"
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
 
 #include <future>
 
@@ -61,7 +62,7 @@ public:
 
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK);
-	// 更新(アニメーション無し)
+	// 更新
 	void Update();
 
 	// 描画通常
@@ -109,28 +110,7 @@ public:
 
 	// ゲッター
 
-	// ワールド座標
-	Vector3 GetWorldPosition() const {
-		// ワールド座標を入れる
-		Vector3 worldPos;
-		worldPos.x = worldtransform_.worldMat_.m[3][0];
-		worldPos.y = worldtransform_.worldMat_.m[3][1];
-		worldPos.z = worldtransform_.worldMat_.m[3][2];
-		return worldPos;
-	};
-
-	// １フレーム前のワールド座標
-	Vector3 GetPreWorldPosition() const {
-		// ワールド座標を入れる
-		Vector3 worldPos;
-		worldPos.x = worldtransform_.worldPreMat_.m[3][0];
-		worldPos.y = worldtransform_.worldPreMat_.m[3][1];
-		worldPos.z = worldtransform_.worldPreMat_.m[3][2];
-		return worldPos;
-	};
-
-	// スクリーン座標
-	Vector2 GetScreenPosition();
+	
 
 	// オブジェクトがカメラ内に映っているか
 	bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
@@ -193,18 +173,13 @@ private:
 	void ObjectSkinTypeDiscrimination(ObjectRasterizerType type);
 
 
-	void UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton);
-	
-
-
 private:
 	// カメラ
 	Camera* defaltCamera = nullptr;
-
 	Camera* individualCamera_ = nullptr;
-
 	// トランスフォームデータ
 	std::unique_ptr<Transfomation> transformation = nullptr;
+	
 
 	// 何かしらの見た目があるか
 	bool isSkin_ = false;
@@ -222,7 +197,6 @@ private:
 	bool isDraw = true;
 
 	// trailエフェクトを使用するかのフラグ
-	bool isTrailEffect = false;
 	bool isEmitTrailEffect = false;
 
 
@@ -235,28 +209,72 @@ private:
 	// オブジェクトの映り方タイプ
 	ObjectRasterizerType rasterizerType_ = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK;
 
-private:
+private: // コンポネント
+
+	/// <summary>
+	/// コライダー
+	/// </summary>	
+	
 	// コライダーコンポーネント
 	std::unique_ptr<ColliderComponent> colliderComponent_;
-
 	// コライダーコンポーネントを使用するかのフラグ
 	bool isColliderComponent_ = false;
-
 	// コライダーコンポーネントをObject3d内で更新するかのフラグ
 	bool isColliderComponenyUpdate_ = false;
+
+	/// <summary>
+	///  トランスフォーム
+	/// </summary>
+
+	std::unique_ptr<TransformComponent> transformComponent_ = nullptr;
+
+	/// <summary>
+	///  物理
+	/// </summary>
+	
+	std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
+	bool isRigidBody = false;
 
 public:
 	// コライダーコンポーネントを初期化
 	void InitColliderComponent();
-
 	// Object3d内でコライダーコンポーネントを更新するか
 	void SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
-
 	// コライダーコンポーネントを取得
 	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
-
 	// コライダーコンポーネントの接触情報を取得
 	ContactRecord& GetContactRecord() { return colliderComponent_->contactRecord_; };
+
+	/// <summary>
+	///  トランスフォーム
+	/// </summary>
+
+	// トランスフォームコンポーネント
+	TransformComponent* GetTransformComponent() { return transformComponent_.get(); }
+	// ワールド座標
+	Vector3 GetWorldPosition() const { return transformComponent_->GetWorldPosition();};
+	// １フレーム前のワールド座標
+	Vector3 GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition();};
+	// スクリーン座標
+	Vector2 GetScreenPosition();
+	// ワールド座標
+	WorldTransform& GetWorldTransform() { return transformComponent_->GetWorldTransform();}
+	// 座標更新
+	void UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
+
+	
+
+	/// <summary>
+	/// 物理
+	/// </summary>
+	
+	// 初期化
+	void InitRigidBodyComponent() {
+		rigidBodyComponent_ = std::make_unique<RigidBodyComponent>();
+	}
+	// 物理取得
+	RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
+	
 
 public:
 
@@ -272,10 +290,6 @@ public:
 	//
 	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 
-
-	// 位置
-	WorldTransform worldtransform_;
-
 	// オブジェクト名前
 	std::string name = "";
 
@@ -285,8 +299,6 @@ public:
 	// オブジェクトタイプ名前
 	std::string objectTypeName = "";
 
-	WorldTransform worldtransformTstr_;
-	WorldTransform worldtransformTend_;
 private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;

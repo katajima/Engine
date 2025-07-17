@@ -57,6 +57,7 @@ void GamePlayScene::Initialize()
 	// 弾にプレイヤーセット
 	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
 	
+
 	// レベルデータロード
 	loadData_ = std::make_unique<LoadLevelData>();
 	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
@@ -160,19 +161,19 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	int countIndex = 0;
-	for (auto& enemy : loadData_->GetLevelData()->enemys) {
-		if (enemy.isEnable)
-		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
-			enemy.crrentTimer += MyGame::GameTime();
-			if (enemy.crrentTimer >= enemy.timer) {
-				caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
-				loadData_->GetLevelData()->counts[countIndex]++;
-				enemy.crrentTimer = 0;
-			}
-		}
-		countIndex++;
-	}
+	//int countIndex = 0;
+	//for (auto& enemy : loadData_->GetLevelData()->enemys) {
+	//	if (enemy.isEnable)
+	//	if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
+	//		enemy.crrentTimer += MyGame::GameTime();
+	//		if (enemy.crrentTimer >= enemy.timer) {
+	//			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
+	//			loadData_->GetLevelData()->counts[countIndex]++;
+	//			enemy.crrentTimer = 0;
+	//		}
+	//	}
+	//	countIndex++;
+	//}
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する

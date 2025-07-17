@@ -53,7 +53,7 @@ void BaseEnemy::HitMotion()
 	if (move.y <= hitKonckbackYPower) {
 		move.y = hitKonckbackYPower;
 	}
-	velocity_ = move;
+	Velocity() = move;
 }
 
 void BaseEnemy::Initialize2D()

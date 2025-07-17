@@ -23,8 +23,12 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	skyBoxCommon_ = entity3DManager_->GetSkyBoxCommon();
 	oceanManager_ = entity3DManager_->GetOceanManager();
 
-	worldtransform_.Initialize();
-	worldtransform_.translate_.x = { 0.00000001f };
+
+	transformComponent_ = std::make_unique<TransformComponent>();
+	transformComponent_->Init();
+
+	//worldtransform_.Initialize();
+	//worldtransform_.translate_.x = { 0.00000001f };
 
 	name = "object" + std::to_string(object3dCommon_->count);
 
@@ -35,7 +39,6 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	
 
 	isColliderComponenyUpdate_ = true;
-	isTrailEffect = false;
 	isSkin_ = false;
 
 	// オブジェクトタイプ
@@ -80,7 +83,13 @@ void Object3d::Update()
 	if (isDelete) return;
 
 	Matrix4x4 localMatrix = MakeIdentity4x4();
-	worldtransform_.Update();
+
+	// 物理
+	if (rigidBodyComponent_) {
+		rigidBodyComponent_->Integrate(MyGame::GameTime(), *transformComponent_.get());
+	}
+
+	transformComponent_->Update();
 
 	if (model || primitive_ || skyBox_ || ocean_) {
 		isSkin_ = true;
@@ -110,7 +119,7 @@ void Object3d::Update()
 		}
 
 		// トランスフォームデータ
-		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
+		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case Object3d::ObjectModelType::kAnimation:
 		// モデルが存在する場合
@@ -138,7 +147,7 @@ void Object3d::Update()
 		}
 
 		// トランスフォームデータ
-		transformation->Update(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
+		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case Object3d::ObjectModelType::kSkinning:
 
@@ -225,9 +234,9 @@ void Object3d::Update()
 				Animetion::DrawSkeleton(
 					entity3DManager_->Get3DLineCommon(),
 					modelData.skeleton.joints,
-					worldtransform_.worldMat_.GetWorldPosition(),
-					worldtransform_.scale_,
-					MakeRotateXYZ(worldtransform_.rotate_)
+					transformComponent_->GetWorldTransform().worldMat_.GetWorldPosition(),
+					transformComponent_->GetWorldTransform().scale_,
+					MakeRotateXYZ(transformComponent_->GetWorldTransform().rotate_)
 				);
 			}
 			else {
@@ -250,44 +259,43 @@ void Object3d::Update()
 		}
 
 		// トランスフォームデータ
-		transformation->UpdateSkinning(model, cameraPtr, localMatrix, worldtransform_.worldMat_);
+		transformation->UpdateSkinning(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case ObjectModelType::kPrimitive:
 		if (primitive_) {
 			primitive_->Update();
 
-			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_.get(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
 		break;
 	case ObjectModelType::kSkyBox:
 		if (skyBox_) {
 			skyBox_->Update();
 
-			transformation->Update(primitive_.get(), cameraPtr, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(primitive_.get(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
 		break;
 	case ObjectModelType::kOcean:
 		if (ocean_) {
 			ocean_->Update();
 
-			transformation->Update(ocean_, cameraPtr, localMatrix, worldtransform_.worldMat_);
+			transformation->Update(ocean_, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
 		break;
 	default:
 		break;
 	}
 
-	if (isTrailEffect) {
-		worldtransformTstr_.Update();
-		worldtransformTend_.Update();
 
-		trailEffect_->Update(isEmitTrailEffect,worldtransformTstr_,worldtransformTend_);
 	// トレイル
+	if (trailEffect_) {
+		trailEffect_->Update(isEmitTrailEffect);
 	}
 
+	// コライダー
 	if (isColliderComponent_) {
 		if (isColliderComponenyUpdate_) {
-			colliderComponent_->UpdateAll(worldtransform_);
+			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
 	}
 }
@@ -377,9 +385,10 @@ void Object3d::Draw()
 
 void Object3d::DrawTrailEffect()
 {
-	if (isTrailEffect == false) return;
+	if (trailEffect_) {
 		// トレイルエフェクトの描画
 		trailEffect_->Draw();
+	}
 }
 
 void Object3d::DebugImguiSkin()
@@ -584,7 +593,7 @@ void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
 
 Vector2 Object3d::GetScreenPosition()
 {
-	Vector3 wPos = worldtransform_.worldMat_.GetWorldPosition();
+	Vector3 wPos = transformComponent_->GetWorldTransform().worldMat_.GetWorldPosition();
 
 	// カメラのビュープロジェクション行列を取得
 	Matrix4x4 matViewProjection;
@@ -671,57 +680,10 @@ void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,
 	trailEffect_ = std::make_unique<TrailEffect>();
 	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
 	trailEffect_->SetCamera(defaltCamera);
-	//trailEffect_->SetObject(this);
-	isTrailEffect = true;
-
-	worldtransformTstr_.Initialize();
-	worldtransformTstr_.parent_ = &worldtransform_;
-	worldtransformTstr_.translate_ = offsetStr;
-
-	worldtransformTend_.Initialize();
-	worldtransformTend_.parent_ = &worldtransform_;
-	worldtransformTend_.translate_ = offsetEnd;
+	trailEffect_->SetOffset(offsetStr,offsetEnd,transformComponent_->GetWorldTransform());
+	
 }
 
 #pragma endregion // その他
 
-
-void Object3d::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton) {
-	//static std::vector<Matrix4x4> cachedSkeletonMatrices;
-
-	//// サイズチェックとキャッシュ確保
-	//if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
-	//	cachedSkeletonMatrices.resize(skeleton.joints.size());
-	//}
-
-	//// Step 1: スケルトン空間行列のキャッシュを1度だけ作成
-	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
-	//	cachedSkeletonMatrices[jointIndex] = skeleton.joints[jointIndex].skeletonSpaceMatrix;
-	//}
-
-	//// Step 2: スキンクラスタ用のマトリクス更新
-	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
-	//	const auto& invBind = skinCluster.inverseBindPoseMatrices[jointIndex];
-	//	const auto& skelMat = cachedSkeletonMatrices[jointIndex];
-
-	//	auto skinnedMat = Multiply(invBind, skelMat);
-
-	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix = skinnedMat;
-	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
-	//}
-
-	//// サイズチェック
-	assert(skinCluster.inverseBindPoseMatrices.size() == skeleton.joints.size());
-	assert(skinCluster.mappedPalette.size() == skeleton.joints.size());
-
-	for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
-		// スケルトンスペース行列を計算
-		skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
-			skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
-
-		// 逆転置行列を計算
-		skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
-			Transpose(Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
-	}
-}
 

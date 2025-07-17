@@ -31,6 +31,9 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	objectBase_->SetModel("AnimatedCube.gltf");
 	//objectBase_->Update();
 	objectBase_->InitColliderComponent();
+	InitMoveComponent();
+	objectBase_->InitRigidBodyComponent();
+
 	GetColliderComponent()->SetHitReceiver(this);
 	
 	InitializeBaseAddItem();
@@ -60,36 +63,37 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->worldtransform_.translate_ += pushVec;
+					objectBase_->GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
 
 				}
-				objectBase_->worldtransform_.Update();
+				objectBase_->GetWorldTransform().Update();
 			}
 		}
 		if (other->tag == CollisionTag::Wall) {
 			if (self->ResolveCollision(*other, pushVec)) {
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->worldtransform_.translate_ += pushVec;
+					objectBase_->GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
 
 				}
-				velocity_.y = 0;
-				acceleration_.y = 0;
-				objectBase_->worldtransform_.Update();
+				Velocity().y = 0;
+				
+				//acceleration_.y = 0;
+				objectBase_->GetWorldTransform().Update();
 			}
 		}
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
@@ -115,23 +119,23 @@ void Player::Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DM
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.SetName("PlayerBody");
-	objectBody_.worldtransform_.parent_ = &objectBase_->worldtransform_;
+	objectBody_.GetWorldTransform().parent_ = &objectBase_->GetWorldTransform();
 
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
 	special_->Initialize(entity3DManager, entity2DManager, camera_);
-	special_->SetParent(&objectBase_->worldtransform_);
+	special_->SetParent(&objectBase_->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
 	rengeSp->SetRadius(100);
-	rengeSp->SetReticleParent(&objectBase_->worldtransform_);
+	rengeSp->SetReticleParent(&objectBase_->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
 	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
-	weapon_->GetObject3D()->worldtransform_.parent_ = &objectBase_->worldtransform_;
-	weapon_->GetObject3D()->worldtransform_.translate_ = { 0,0.5f,0.5f };
+	weapon_->GetObject3D()->GetWorldTransform().parent_ = &objectBase_->GetWorldTransform();
+	weapon_->GetObject3D()->GetWorldTransform().translate_ = { 0,0.5f,0.5f };
 	weapon_->SetCharacter(this);
 
 
@@ -186,10 +190,14 @@ void Player::Update()
 	ImGui::InputInt("maxComboCount", &count);
 	bool is = weapon_->GetComboData().isComboNext;
 	ImGui::Checkbox("isComboNext", &is);
+	is = Situations().isJumping;
+	ImGui::Checkbox("Jumping", &is);
 	is = weapon_->GetAttackInput().GetIsAttack();
 	ImGui::Checkbox("isAttack", &is);
 	is = weapon_->GetAttackInput().GetIsState();
 	ImGui::Checkbox("isState", &is);
+	is = objectBase_->GetRigidBodyComponent()->IsGravity();
+	ImGui::Checkbox("IsGravity", &is);
 
 	ImGui::End();
 	if (input_->IsTriggerKey(DIK_C)) {
@@ -204,18 +212,16 @@ void Player::Update()
 #endif // _DEBUG
 
 
-	// 必殺技
-	special_->Update();
-	// エフェクト
-	effect_->Update();	
-	// ヒットデータの更新
-	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
-	//武器更新
-	weapon_->Update();
+	
 
+
+
+	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(),*objectBase_);
+
+	moveComponent_->Landing(Situations().isJumping, *objectBase_->GetTransformComponent(),*objectBase_->GetRigidBodyComponent());
 
 	// 重力
-	GravityUpdate(MyGame::GameTime(), Situations().isJumping, GetAlive());
+	//GravityUpdate(MyGame::GameTime(), Situations().isJumping, GetAlive());
 	if (!Situations().isJumping) {
 		Velocity() = { 0,0,0 };
 	}
@@ -225,6 +231,17 @@ void Player::Update()
 		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
 	}
 
+	objectBase_->UpdateWorldTransform();
+
+
+	// 必殺技
+	special_->Update();
+	// エフェクト
+	effect_->Update();
+	// ヒットデータの更新
+	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
+	//武器更新
+	weapon_->Update();
 }
 
 #pragma region Draw
@@ -287,7 +304,7 @@ void Player::Move()
 			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
 			//
 			if (velo.Length() != 0) {
-				objectBase_->worldtransform_.rotate_.y = std::atan2(velo.x, velo.z);
+				objectBase_->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
 			}
 			
 		}
@@ -341,11 +358,12 @@ void Player::Move()
 
 void Player::Jump()
 {
-	if (Situations().isJumping && flags_.isGrounded) return; // ジャンプ中は無効化
+	if (Situations().isJumping) return; // ジャンプ中は無効化
 	//if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) { // ジャンプボタンが押されたらジャンプ
 		if (GetAlive()) {
 			Situations().isJumping = true;
-			Velocity().y += 40.0f; // ジャンプ時の加速度を設定
+			//Velocity().y += 40.0f; // ジャンプ時の加速度を設定
+			objectBase_->GetRigidBodyComponent()->AddForce({0,180.0f,0});
 		}
 	//}
 }

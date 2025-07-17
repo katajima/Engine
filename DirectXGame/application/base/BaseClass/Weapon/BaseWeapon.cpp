@@ -85,7 +85,7 @@ void BaseWeapon::AttackUpdate() {
 
 
 	// コンボ段階によってモーションを分岐
-	AttackUpdate(character->GetTime(), character->GetObject3D()->worldtransform_);
+	AttackUpdate(character->GetTime(), character->GetObject3D()->GetWorldTransform());
 
 	// コンボ攻撃
 	SetAttackCombo(character->GetTime());

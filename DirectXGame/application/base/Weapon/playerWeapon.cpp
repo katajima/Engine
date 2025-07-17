@@ -10,7 +10,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	objectBase_ = entity3DManager->CreateObject3D("PlayerWeapon", Object3d::ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetIsDraw(false);
 	objectBase_->SetModel("Sword.obj");
-	objectBase_->worldtransform_.scale_ = { 1.25f,1.25f ,1.25f };
+	objectBase_->GetWorldTransform().scale_ = { 1.25f,1.25f ,1.25f };
 	objectBase_->InitColliderComponent(); // コライダーコンポーネントの初期化
 	objectBase_->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
 	
@@ -89,7 +89,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 
 	colliderWorld_.Initialize();
-	colliderWorld_.parent_ = &objectBase_->worldtransform_;
+	colliderWorld_.parent_ = &objectBase_->GetWorldTransform();
 	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
 	colliderWorld_.translate_.y = 3.0f; // 武器の位置調整
 
@@ -100,6 +100,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 void PlayerWeapon::Update()
 {
+	objectBase_->UpdateWorldTransform();
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
 

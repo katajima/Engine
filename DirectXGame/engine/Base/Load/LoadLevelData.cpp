@@ -128,11 +128,11 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 			newObject->GetColliderComponent()->AddCollider(std::move(aabb));
 		}
 		// 座標 
-		newObject->worldtransform_.translate_ = objectData.position;
+		newObject->GetWorldTransform().translate_ = objectData.position;
 		// 回転角 
-		newObject->worldtransform_.rotate_ = objectData.rotation;
+		newObject->GetWorldTransform().rotate_ = objectData.rotation;
 		// 大きさ
-		newObject->worldtransform_.scale_ = objectData.scale;
+		newObject->GetWorldTransform().scale_ = objectData.scale;
 
 		objects_.push_back(newObject);
 	}

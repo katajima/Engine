@@ -86,9 +86,9 @@ void Entity3DManager::UpdateImgui()
 
 		ImGui::Text("transform");
 		ImGui::Separator();
-		ImGui::DragFloat3("T_scale", &entity->worldtransform_.scale_.x, 0.1f);
-		ImGui::DragFloat3("T_rotate", &entity->worldtransform_.rotate_.x, 0.1f);
-		ImGui::DragFloat3("T_translate", &entity->worldtransform_.translate_.x, 0.1f);
+		ImGui::DragFloat3("T_scale", &entity->GetWorldTransform().scale_.x, 0.1f);
+		ImGui::DragFloat3("T_rotate", &entity->GetWorldTransform().rotate_.x, 0.1f);
+		ImGui::DragFloat3("T_translate", &entity->GetWorldTransform().translate_.x, 0.1f);
 
 		std::string nameColliderComponent = "";
 		if (entity->GetIsColliderComponent()) {

@@ -16,16 +16,16 @@ void BulletSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	injectionLeftObj_->SetCamera(camera);
 	injectionLeftObj_->SetModel("AnimatedCube.gltf");
 	injectionLeftObj_->SetIsDraw(false);
-	injectionLeftObj_->worldtransform_.translate_ = injectionLeftPos_;
-	injectionLeftObj_->worldtransform_.scale_ = { 0.75f,1.25f,1.0f };
+	injectionLeftObj_->GetWorldTransform().translate_ = injectionLeftPos_;
+	injectionLeftObj_->GetWorldTransform().scale_ = { 0.75f,1.25f,1.0f };
 
 	injectionRightObj_ = std::make_unique<Object3d>();
 	injectionRightObj_->Initialize(entity3DManager);
 	injectionRightObj_->SetCamera(camera);
 	injectionRightObj_->SetModel("AnimatedCube.gltf");
 	injectionRightObj_->SetIsDraw(false);
-	injectionRightObj_->worldtransform_.translate_ = injectionRightPos_;
-	injectionRightObj_->worldtransform_.scale_ = { 0.75f,1.25f,1.0f };
+	injectionRightObj_->GetWorldTransform().translate_ = injectionRightPos_;
+	injectionRightObj_->GetWorldTransform().scale_ = { 0.75f,1.25f,1.0f };
 
 	isSpecial_ = false;
 
@@ -79,8 +79,8 @@ void BulletSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletMa
 		// 弾を発射
 		time_ += MyGame::GameTime();
 		time = int(time_ * 60);
-		injectionLeftObj_->worldtransform_.translate_.y = injectionLeftPos_.y;
-		injectionRightObj_->worldtransform_.translate_.y = injectionRightPos_.y;
+		injectionLeftObj_->GetWorldTransform().translate_.y = injectionLeftPos_.y;
+		injectionRightObj_->GetWorldTransform().translate_.y = injectionRightPos_.y;
 
 
 		if (time % 10 == 0) {
@@ -91,13 +91,13 @@ void BulletSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletMa
 				if (clock_ == 1) {
 					followCamera->GetUniqueCamera()->SetShake(1.3f, { 0.2f,0.2f,0.2f });
 					bulletManager->GenerateBullet(BulletManager::BulletType::kPlayerMissile, injectionLeftObj_->GetWorldPosition(), enemy[index_b]);
-					injectionLeftObj_->worldtransform_.translate_.y -= 0.5f;
+					injectionLeftObj_->GetWorldTransform().translate_.y -= 0.5f;
 
 				}
 				else {
 					followCamera->GetUniqueCamera()->SetShake(1.3f, { 0.2f,0.2f,0.2f });
 					bulletManager->GenerateBullet(BulletManager::BulletType::kPlayerMissile, injectionRightObj_->GetWorldPosition(), enemy[index_b]);
-					injectionRightObj_->worldtransform_.translate_.y -= 0.5f;
+					injectionRightObj_->GetWorldTransform().translate_.y -= 0.5f;
 				}
 
 
@@ -134,6 +134,6 @@ void BulletSpecial::InAction(FollowCamera* followCamera, BulletManager* bulletMa
 
 void BulletSpecial::SetParent(WorldTransform* parent)
 {
-	injectionLeftObj_->worldtransform_.parent_ = parent;
-	injectionRightObj_->worldtransform_.parent_ = parent;
+	injectionLeftObj_->GetWorldTransform().parent_ = parent;
+	injectionRightObj_->GetWorldTransform().parent_ = parent;
 }

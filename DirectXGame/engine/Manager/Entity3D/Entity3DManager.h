@@ -59,7 +59,7 @@ public: //セッター
 		auto object = std::make_unique<Object3d>();
 		object->Initialize(this, type);
 		object->SetName(name);
-		object->worldtransform_.translate_ = pos;
+		object->GetWorldTransform().translate_ = pos;
 		object->SetCamera(camera);
 
 		Object3d* raw = object.get();

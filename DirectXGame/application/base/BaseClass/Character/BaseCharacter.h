@@ -56,17 +56,17 @@ public:
 
 	// 移動制限
 	void LimitMove(Vector3 min, Vector3 max) {
-		if (objectBase_->worldtransform_.translate_.x > max.x) {
-			objectBase_->worldtransform_.translate_.x = max.x;
+		if (objectBase_->GetWorldTransform().translate_.x > max.x) {
+			objectBase_->GetWorldTransform().translate_.x = max.x;
 		}
-		if (objectBase_->worldtransform_.translate_.x < min.x) {
-			objectBase_->worldtransform_.translate_.x = min.x;
+		if (objectBase_->GetWorldTransform().translate_.x < min.x) {
+			objectBase_->GetWorldTransform().translate_.x = min.x;
 		}
-		if (objectBase_->worldtransform_.translate_.z > max.z) {
-			objectBase_->worldtransform_.translate_.z = max.z;
+		if (objectBase_->GetWorldTransform().translate_.z > max.z) {
+			objectBase_->GetWorldTransform().translate_.z = max.z;
 		}
-		if (objectBase_->worldtransform_.translate_.z < min.z) {
-			objectBase_->worldtransform_.translate_.z = min.z;
+		if (objectBase_->GetWorldTransform().translate_.z < min.z) {
+			objectBase_->GetWorldTransform().translate_.z = min.z;
 		}
 	};
 

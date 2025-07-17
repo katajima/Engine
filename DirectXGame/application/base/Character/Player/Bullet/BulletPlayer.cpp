@@ -29,6 +29,7 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	objectBase_->Update();
 	objectBase_->InitColliderComponent();
 	GetColliderComponent()->SetHitReceiver(this);
+	InitMoveComponent();
 
 	InitializeBaseAddItem();
 
@@ -57,14 +58,14 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->worldtransform_.translate_ += pushVec;
+					objectBase_->GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
 
 				}
 
@@ -75,18 +76,18 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 			if (self->ResolveCollision(*other, pushVec)) {
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->worldtransform_.translate_ += pushVec;
+					objectBase_->GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
 
 				}
-				velocity_.y = 0;
-				acceleration_.y = 0;
+				Velocity().y = 0;
+				//acceleration_.y = 0;
 
 				objectBase_->Update();
 			}
@@ -114,23 +115,23 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	objectBody_.SetCamera(camera_);
 	objectBody_.SetModel("AnimatedCube.gltf");
 	objectBody_.SetName("PlayerBody");
-	objectBody_.worldtransform_.parent_ = &objectBase_->worldtransform_;
+	objectBody_.GetWorldTransform().parent_ = &objectBase_->GetWorldTransform();
 
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
 	special_->Initialize(entity3DManager, entity2DManager, camera_);
-	special_->SetParent(&objectBase_->worldtransform_);
+	special_->SetParent(&objectBase_->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
 	rengeSp->SetRadius(100);
-	rengeSp->SetReticleParent(&objectBase_->worldtransform_);
+	rengeSp->SetReticleParent(&objectBase_->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
 	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
-	weapon_->GetObject3D()->worldtransform_.parent_ = &objectBase_->worldtransform_;
-	weapon_->GetObject3D()->worldtransform_.translate_ = { 0,0.5f,0.5f };
+	weapon_->GetObject3D()->GetWorldTransform().parent_ = &objectBase_->GetWorldTransform();
+	weapon_->GetObject3D()->GetWorldTransform().translate_ = { 0,0.5f,0.5f };
 	weapon_->SetCharacter(this);
 
 

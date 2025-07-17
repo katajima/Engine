@@ -12,11 +12,11 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_), Object3d::ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetModel("enemy2.obj");
-	objectBase_->worldtransform_.translate_ = position;
-	objectBase_->worldtransform_.scale_ = { 1.7f,1.7f,1.7f };
+	objectBase_->GetWorldTransform().translate_ = position;
+	objectBase_->GetWorldTransform().scale_ = { 1.7f,1.7f,1.7f };
 	objectBase_->InitColliderComponent();
 	GetColliderComponent()->SetHitReceiver(this);
-
+	InitMoveComponent();
 
 
 	// SphereColliderを追加
@@ -38,17 +38,17 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->worldtransform_.translate_ += pushVec;
+					objectBase_->GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
 				}
 
-				objectBase_->worldtransform_.Update();
+				objectBase_->GetWorldTransform().Update();
 			}
 		}
 
@@ -61,17 +61,17 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->worldtransform_.translate_ += pushVec;
+					objectBase_->GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
 				}
 
-				objectBase_->worldtransform_.Update();
+				objectBase_->GetWorldTransform().Update();
 			}
 		}
 		if (other->tag == CollisionTag::Wall) {
@@ -79,19 +79,20 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			if (self->ResolveCollision(*other, pushVec)) {
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->worldtransform_.translate_ += pushVec;
+					objectBase_->GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->worldtransform_.translate_ += pushVec * 0.5f;
+					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
 				}
-				acceleration_.y = 0;
-				velocity_.y = 0;
-				flags_.isGrounded = true;
-				objectBase_->worldtransform_.Update();
+				//acceleration_.y = 0;
+				Velocity().y = 0;
+				//velocity_.y = 0;
+				//flags_.isGrounded = true;
+				objectBase_->GetWorldTransform().Update();
 			}
 		}
 		if (other->tag == CollisionTag::PlayerAttack) {
@@ -104,7 +105,6 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 
 	flags_.isAlive = true;
-	airResistance = 0.98f;
 	Parameters().HP.Initiaize(100, 0, 100, 0);
 
 
@@ -239,42 +239,44 @@ void NormalEnemy::Emit()
 
 void NormalEnemy::Move()
 {
-	if (flags_.isGrounded) {
-		Velocity() = { 0,0,0 };
+	//if (flags_.isGrounded) {
+	Velocity() = { 0,0,0 };
 
-		// 回転と移動量の設定
-		if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
-			Parameters().speed = 0;
-		}
-		else {
-			Parameters().speed = 3.0f;
-		}
-
-		// 向いている方向への移動ベクトルの計算
-		Vector3 moveDirection = { 0.0f, 0.0f, Parameters().speed };
-		Matrix4x4 rotationMatrix = MakeRotateYMatrix(GetWorldTransform().rotate_.y);
-		moveDirection = TransformNormal(moveDirection, rotationMatrix);
-
-		// ロックオン座標
-		Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
-
-		// 追跡対象からロックオン対象へのベクトル
-		velocity_ = Subtract(lockOnPosition, GetWorldTransform().translate_);	
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
+	// 回転と移動量の設定
+	if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
+		Parameters().speed = 0;
 	}
 	else {
-		// ロックオン座標
-		Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
-		Vector3 dire = Subtract(lockOnPosition, GetWorldTransform().translate_);
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = std::atan2(dire.x, dire.z);
+		Parameters().speed = 3.0f;
 	}
 
-	GravityUpdate(Timer(), Situations().isJumping, GetAlive());
+	// 向いている方向への移動ベクトルの計算
+	Vector3 moveDirection = { 0.0f, 0.0f, Parameters().speed };
+	Matrix4x4 rotationMatrix = MakeRotateYMatrix(GetWorldTransform().rotate_.y);
+	moveDirection = TransformNormal(moveDirection, rotationMatrix);
+
+	// ロックオン座標
+	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
+
+	// 追跡対象からロックオン対象へのベクトル
+	Velocity() = Subtract(lockOnPosition, GetWorldTransform().translate_);
+	// Y軸周り角度
+	GetWorldTransform().rotate_.y = std::atan2(Velocity().x, Velocity().z);
+	//}
+	//else {
+	//	// ロックオン座標
+	//	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
+	//	Vector3 dire = Subtract(lockOnPosition, GetWorldTransform().translate_);
+	//	// Y軸周り角度
+	//	GetWorldTransform().rotate_.y = std::atan2(dire.x, dire.z);
+	//}
+
+
+
+	//GravityUpdate(Timer(), Situations().isJumping, GetAlive());
 }
 
-void NormalEnemy::Jump() 
+void NormalEnemy::Jump()
 {
 
 }
@@ -349,7 +351,7 @@ void NormalEnemy::InitParticle()
 	starEmit_->Initialize(particleManager, "dust", "hitStar");
 	starEmit_->GetFrequency() = 0.0f;
 	starEmit_->SetCount(1);
-	starEmit_->SetParent(objectBase_->worldtransform_);
+	starEmit_->SetParent(objectBase_->GetWorldTransform());
 	starEmit_->SetPos({ 0,0.0f,0.0f });
 	starEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	starEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -363,7 +365,7 @@ void NormalEnemy::InitParticle()
 	traiEmit_->Initialize(particleManager, "dust", "hitEffect");
 	traiEmit_->GetFrequency() = 0.0f;
 	traiEmit_->SetCount(5);
-	traiEmit_->SetParent(objectBase_->worldtransform_);
+	traiEmit_->SetParent(objectBase_->GetWorldTransform());
 	traiEmit_->SetPos({ 0,0.0f,0.0f });
 	traiEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	traiEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -380,7 +382,7 @@ void NormalEnemy::InitParticle()
 	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleData::SpawnType::kPoint);
 	effectEmit_->GetFrequency() = 0.0f;
 	effectEmit_->SetCount(1);
-	effectEmit_->SetParent(objectBase_->worldtransform_);
+	effectEmit_->SetParent(objectBase_->GetWorldTransform());
 	effectEmit_->SetPos({ 0,0.0f,0.0f });
 	effectEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
 	effectEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
@@ -397,7 +399,7 @@ void NormalEnemy::InitParticle()
 	hitEmit_->Initialize(particleManager, "dust", "hit");
 	hitEmit_->GetFrequency() = 0.0f;
 	hitEmit_->SetCount(10);
-	hitEmit_->SetParent(objectBase_->worldtransform_);
+	hitEmit_->SetParent(objectBase_->GetWorldTransform());
 	hitEmit_->SetPos({ 0,0.0f,0.0f });
 	hitEmit_->SetRotateMinMax(-DegreesToRadians({ 90,90,90 }), DegreesToRadians({ 90,90,90 }));
 	hitEmit_->SetLifeTimeMinMax(0.5f, 0.6f);
@@ -414,7 +416,7 @@ void NormalEnemy::InitParticle()
 	tireEmit_->Initialize(particleManager, "enemyTire", "enemyTire");
 	tireEmit_->GetFrequency() = 0.0f;
 	tireEmit_->SetCount(1);
-	tireEmit_->SetParent(objectBase_->worldtransform_);
+	tireEmit_->SetParent(objectBase_->GetWorldTransform());
 	tireEmit_->SetPos({ 0,0,0 });
 	tireEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	tireEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -453,7 +455,7 @@ void NormalEnemy::InitParticle()
 	fenceEmit_->Initialize(particleManager, "enemyFence", "enemyFence");
 	fenceEmit_->GetFrequency() = 0.0f;
 	fenceEmit_->SetCount(1);
-	fenceEmit_->SetParent(objectBase_->worldtransform_);
+	fenceEmit_->SetParent(objectBase_->GetWorldTransform());
 	fenceEmit_->SetPos({ 0,0,0 });
 	fenceEmit_->SetVelocityMinMax({ -2,10,-2 }, { 2, 10, 2 });
 	fenceEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -473,7 +475,7 @@ void NormalEnemy::InitParticle()
 	gearEmit_->Initialize(particleManager, "enemyGear", "enemyGear");
 	gearEmit_->GetFrequency() = 0.0f;
 	gearEmit_->SetCount(5);
-	gearEmit_->SetParent(objectBase_->worldtransform_);
+	gearEmit_->SetParent(objectBase_->GetWorldTransform());
 	gearEmit_->SetPos({ 0,0,0 });
 	gearEmit_->SetVelocityMinMax({ -2,3,-2 }, { 2, 4, 2 });
 	gearEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -495,7 +497,7 @@ void NormalEnemy::InitParticle()
 	plankEmit_->Initialize(particleManager, "enemyPlank", "enemyPlank");
 	plankEmit_->GetFrequency() = 0.0f;
 	plankEmit_->SetCount(10);
-	plankEmit_->SetParent(objectBase_->worldtransform_);
+	plankEmit_->SetParent(objectBase_->GetWorldTransform());
 	plankEmit_->SetPos({ 0,0,0 });
 	plankEmit_->SetVelocityMinMax({ -2,2,-2 }, { 2, 3, 2 });
 	plankEmit_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
@@ -526,19 +528,21 @@ void NormalEnemy::BehaviorRootUpdate()
 			Move();
 		}
 		else {
-			GravityUpdate(Timer(), Situations().isJumping, GetAlive());
-			if (flags_.isGrounded) {
-				hit = false;
-			}
+			moveComponent_->AddMove(Timer(), GetAlive(), *objectBase_);
+
+			//GravityUpdate(Timer(), Situations().isJumping, GetAlive());
+			//if (flags_.isGrounded) {
+			//	hit = false;
+			//}
 		}
 
-		timer_ -= Timer();
+		//timer_ -= Timer();
 
-		if (timer_ <= 0.0f && flags_.isGrounded) {
-			basicbehaviorRequest_ = BasicBehavior::kAttack;
-			timer_ = 0.0f;
-			return;
-		}
+		//if (timer_ <= 0.0f && flags_.isGrounded) {
+		//	basicbehaviorRequest_ = BasicBehavior::kAttack;
+		//	timer_ = 0.0f;
+		//	return;
+		//}
 	}
 	if (GetHP() <= 0) {
 		basicbehaviorRequest_ = BasicBehavior::kDie;
@@ -599,12 +603,9 @@ void NormalEnemy::BehaviorDieUpdate()
 		objectBase_->IsDelete();
 	}
 	else {
-		objectBase_->worldtransform_.scale_ -= Vector3(1.1f, 1.1f, 1.1f) * Timer();
-		if (objectBase_->worldtransform_.scale_.x <= 0) {
-			objectBase_->worldtransform_.scale_ = Vector3{ 0,0,0 };
+		objectBase_->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * Timer();
+		if (objectBase_->GetWorldTransform().scale_.x <= 0) {
+			objectBase_->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
 		}
 	}
-
-
-
 }

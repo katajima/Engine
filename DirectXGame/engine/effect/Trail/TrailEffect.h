@@ -14,7 +14,7 @@
 
 #include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Transfomation/Transfomation.h"
+#include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 
 #include"TrailEffectManager.h"
 
@@ -27,13 +27,22 @@ public:
 
 	void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
 
-	void Update(bool& flag, const WorldTransform& str, const WorldTransform& end);
+	void Update(bool& flag);
 	
 	void Draw();
 
 	void SetCamera(Camera* camera) { camera_ = camera; };
 
-	//void SetObject(Object3d* obj) { object_ = obj; };
+	void SetOffset(Vector3 offsetStr, Vector3 offsetEnd,WorldTransform& world){
+		worldtransformTstr_.Initialize();
+		worldtransformTstr_.parent_ = &world;
+		worldtransformTstr_.translate_ = offsetStr;
+
+		worldtransformTend_.Initialize();
+		worldtransformTend_.parent_ = &world;
+		worldtransformTend_.translate_ = offsetEnd;
+	}
+
 
 	void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
 
@@ -65,5 +74,8 @@ private:
 
 private:
 	EffectManager* effectManager_;
+
+	WorldTransform worldtransformTstr_;
+	WorldTransform worldtransformTend_;
 };
 

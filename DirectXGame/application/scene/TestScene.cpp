@@ -320,26 +320,26 @@ void TestScene::InitializeObject3D()
 	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kOcean);
 	oceanObject->SetCamera(camera.get());
 	oceanObject->SetOcean(ocean_.get());
-	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
-	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
+	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
+	oceanObject->GetWorldTransform().rotate_.x = DegreesToRadians(90);
 	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
 	oceanObject->SetIsDraw(true);
 	
 
 	skinningObject = GetEntity3DManager()->CreateObject3D("run", Object3d::ObjectModelType::kSkinning, {0,0,0}, camera.get());
 	skinningObject->SetModel("run.gltf");
-	skinningObject->worldtransform_.scale_ = { 3,3,3 };
+	skinningObject->GetWorldTransform().scale_ = { 3,3,3 };
 	skinningObject->SetIsDraw(true);
 	skinningObject->SetAnimetion("Anim_0", 0.3f);
 
 	skinningObject2 = GetEntity3DManager()->CreateObject3D("BoxBox", Object3d::ObjectModelType::kNormal, { 0,0,0 }, camera.get());
 	skinningObject2->SetModel("BoxBox.obj");
-	skinningObject2->worldtransform_.scale_ = { 1.0f,1.0f,1.0f };
+	skinningObject2->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
 	skinningObject2->SetIsDraw(true);
 	
 	skinningObject3 = GetEntity3DManager()->CreateObject3D("KnightCharacter", Object3d::ObjectModelType::kSkinning, { 0,0,0 }, camera.get());
 	skinningObject3->SetModel("KnightCharacter.gltf");
-	skinningObject3->worldtransform_.scale_ = { 1.0f,1.0f,1.0f };
+	skinningObject3->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
 	skinningObject3->SetIsDraw(true);
 	
 
@@ -363,7 +363,7 @@ void TestScene::InitializeObject3D()
 	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkyBox);
 	skyBoxObject->SetSkyBox(skyBox.get());
 	skyBoxObject->SetCamera(camera.get());
-	skyBoxObject->worldtransform_.scale_ = {10,10,10};
+	skyBoxObject->GetWorldTransform().scale_ = {10,10,10};
 	skyBoxObject->SetName("skyBox");
 	skyBoxObject->SetIsDraw(true);
 	
@@ -372,7 +372,7 @@ void TestScene::InitializeObject3D()
 	skyBoxObject2->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkyBox);
 	skyBoxObject2->SetSkyBox(skyBox2.get());
 	skyBoxObject2->SetCamera(camera.get());
-	skyBoxObject2->worldtransform_.scale_ = {1,1,1};
+	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
 	skyBoxObject2->SetName("skyBox2");
 	skyBoxObject2->SetIsDraw(false);
 
@@ -628,7 +628,7 @@ void TestScene::UpdateRoom01()
 	Matrix4x4 rotateMatrix = rotX * rotY;
 	Vector3 offset = TransformNormal(Vector3{ 0,5,-50 }, rotateMatrix);
 
-	Vector3 targetPos = skinningObject3->worldtransform_.worldMat_.GetWorldPosition();
+	Vector3 targetPos = skinningObject3->GetWorldTransform().worldMat_.GetWorldPosition();
 	Vector3 desiredCameraPos = Add(targetPos, offset);
 
 	// 地面以下にカメラが沈んでいる場合のみ、Zを近づけて補正
@@ -680,7 +680,7 @@ void TestScene::UpdateRoom01()
 			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
 			//
 			if (velo.Length() != 0) {
-				skinningObject3->worldtransform_.rotate_.y = std::atan2(velo.x, velo.z);
+				skinningObject3->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
 			}
 			skinningObject3->SetAnimetion("Run", 0.3f);
 		}
@@ -689,11 +689,11 @@ void TestScene::UpdateRoom01()
 		}
 	}
 
-	skinningObject3->worldtransform_.translate_ += velo;
-	skinningObject3->worldtransform_.Update();
+	skinningObject3->GetWorldTransform().translate_ += velo;
+	skinningObject3->GetWorldTransform().Update();
 
-	skinningObject2->worldtransform_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.R", skinningObject3->worldtransform_.worldMat_));
-	worldparticleEmitter_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.L", skinningObject3->worldtransform_.worldMat_));
+	skinningObject2->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.R", skinningObject3->GetWorldTransform().worldMat_));
+	worldparticleEmitter_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.L", skinningObject3->GetWorldTransform().worldMat_));
 	worldparticleEmitter_.Update();
 	primitvPlane_->Update();
 

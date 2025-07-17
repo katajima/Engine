@@ -7,7 +7,7 @@
 #include"DirectXGame/engine/struct/Vector3.h"
 #include"DirectXGame/engine/struct/Vector4.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 // 攻撃キーInput
 struct AttackKeyFlag
