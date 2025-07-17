@@ -23,13 +23,11 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	// HP設定
 	Parameters().HP.Initiaize(1000, 0, 1000, 0);
 	HP() = 1000; // 初期HP設定
-
 	Parameters().speed = 20.0f;// 移動速度設定
-
+	Parameters().jampPower = 100.0f;
 	// プレイヤー
 	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectModelType::kNormal, position, camera_);
 	objectBase_->SetModel("AnimatedCube.gltf");
-	//objectBase_->Update();
 	objectBase_->InitColliderComponent();
 	InitMoveComponent();
 	objectBase_->InitRigidBodyComponent();
