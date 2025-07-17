@@ -126,6 +126,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Player\Effect\PlayerEffect.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
@@ -649,6 +650,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Player\Effect\PlayerEffect.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h" />
+    <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h" />

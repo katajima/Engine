@@ -22,7 +22,7 @@ protected:
 protected:
 	Entity2DManager* entity2DManager_;
 
-	//std::vector<std::unique_ptr<Sprite>> sprite_;
+	std::vector<std::unique_ptr<Sprite>> sprite_;
 
 
 

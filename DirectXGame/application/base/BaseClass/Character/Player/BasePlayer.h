@@ -1,15 +1,16 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
-#include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
-#include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
+
 
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h"
 #include "DirectXGame/application/base/Character/Player/UI/PlayerUI.h"
-
+#include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
+#include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
 using StateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
 
+
+
 class FollowCamera;
-class BulletManager;
 class BasePlayer : public BaseCharacter
 {
 public:
@@ -41,14 +42,10 @@ public:
 	virtual void Jump() = 0;
 
 public:
-	// 弾マネージャーの設定
-	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
-	BaseSpecial* GetSpecial() { return special_.get(); }
 
-	BaseWeapon* GetWeapon() { return weapon_.get(); }
 
 	PlayerUI* GetPlayerUI() { return ui_.get(); }
 
@@ -93,20 +90,13 @@ private:
 		stateFactoryMap_[name] = factory;
 	}
 protected:
-	// スペシャル攻撃
-	std::unique_ptr<BaseSpecial> special_;
-	// 武器
-	std::unique_ptr<BaseWeapon> weapon_;
-	//  プレイヤー用UI
-	std::unique_ptr<PlayerUI> ui_;
-
-	BulletManager* bulletManager_;			// 弾管理
+	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 	FollowCamera* followCamera_;			// フォローカメラ
 
 	bool isCreativeMode = false;			// クリエイティブモードかどうか
 
 
-	std::unique_ptr<BasePlayerState> state_;
-	std::unordered_map<std::string, StateFactory> stateFactoryMap_;
+	std::unique_ptr<BasePlayerState> state_;// ステート
+	std::unordered_map<std::string, StateFactory> stateFactoryMap_;	// 
 };
 

@@ -216,6 +216,10 @@ void Player::Update()
 
 	// 重力
 	GravityUpdate(MyGame::GameTime(), Situations().isJumping, GetAlive());
+	if (!Situations().isJumping) {
+		Velocity() = { 0,0,0 };
+	}
+
 	if (!isCreativeMode) {
 		// 移動制限
 		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
@@ -249,13 +253,10 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-	if (!Situations().isJumping) {
-		Velocity() = { 0,0,0 };
-	}
 	Situations().isMoving = false;
 	Vector3 velo = GetVelocity();
 
-	if (input_->IsControllerConnected()) {
+	//if (input_->IsControllerConnected()) {
 
 
 		velo.x = input_->GetGamePadLeftStick().x;
@@ -293,44 +294,44 @@ void Player::Move()
 		else {
 			
 		}
-	}
-	else {
+	//}
+	//{
 
 
-		if (input_->IsPushKey(DIK_W)) {
-			Velocity().z += 0.3f;
-		}
-		if (input_->IsPushKey(DIK_S)) {
-			Velocity().z -= 0.3f;
+	//	if (input_->IsPushKey(DIK_W)) {
+	//		Velocity().z += 0.3f;
+	//	}
+	//	if (input_->IsPushKey(DIK_S)) {
+	//		Velocity().z -= 0.3f;
 
-		}
-		if (input_->IsPushKey(DIK_A)) {
-			Velocity().x -= 0.3f;
+	//	}
+	//	if (input_->IsPushKey(DIK_A)) {
+	//		Velocity().x -= 0.3f;
 
-		}
-		if (input_->IsPushKey(DIK_D)) {
-			Velocity().x += 0.3f;
-		}
+	//	}
+	//	if (input_->IsPushKey(DIK_D)) {
+	//		Velocity().x += 0.3f;
+	//	}
 
 
-		if (Velocity().x != 0.0f || Velocity().z != 0.0f) {
-			// 入力方向を正規化
-			Velocity() = Normalize(Velocity());
-			Situations().isMoving = true;
+	//	if (Velocity().x != 0.0f || Velocity().z != 0.0f) {
+	//		// 入力方向を正規化
+	//		Velocity() = Normalize(Velocity());
+	//		Situations().isMoving = true;
 
-			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
+	//		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
+	//		Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
 
-			// カメラの向きに基づいて移動方向をワールド座標系に変換
-			Vector3 worldDirection = {
-				GetVelocity().x * cameraWorldMatrix.m[0][0] + GetVelocity().z * cameraWorldMatrix.m[2][0],
-				0.0f,
-				GetVelocity().x * cameraWorldMatrix.m[0][2] + GetVelocity().z * cameraWorldMatrix.m[2][2]
-			};
+	//		// カメラの向きに基づいて移動方向をワールド座標系に変換
+	//		Vector3 worldDirection = {
+	//			GetVelocity().x * cameraWorldMatrix.m[0][0] + GetVelocity().z * cameraWorldMatrix.m[2][0],
+	//			0.0f,
+	//			GetVelocity().x * cameraWorldMatrix.m[0][2] + GetVelocity().z * cameraWorldMatrix.m[2][2]
+	//		};
 
-			Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
-		}
-	}
+	//		Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
+	//	}
+	//}
 	
 	Velocity().x = velo.x;
 	Velocity().z = velo.z;
@@ -341,12 +342,12 @@ void Player::Move()
 void Player::Jump()
 {
 	if (Situations().isJumping && flags_.isGrounded) return; // ジャンプ中は無効化
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) { // ジャンプボタンが押されたらジャンプ
+	//if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) { // ジャンプボタンが押されたらジャンプ
 		if (GetAlive()) {
 			Situations().isJumping = true;
 			Velocity().y += 40.0f; // ジャンプ時の加速度を設定
 		}
-	}
+	//}
 }
 
 #pragma endregion //移動関係

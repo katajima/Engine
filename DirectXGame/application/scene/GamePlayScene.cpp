@@ -19,6 +19,12 @@ void GamePlayScene::Initialize()
 	// Input
 	input_ = GetInput();
 
+	inputHander_ = std::make_unique<InputHander>();
+	inputHander_->SetInput(input_);
+	inputHander_->AssignMoveCommandPad();
+	inputHander_->AssignJampCommandPad();
+
+
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
@@ -37,12 +43,20 @@ void GamePlayScene::Initialize()
 	cameraManeger_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
+	// 弾管理クラス
+	bulletManager_ = std::make_unique<BulletManager>();
+	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), nullptr);
+
 	// キャラクター管理 
 	caracterManager_ = std::make_unique<BaseCharacterManager>();
 	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	caracterManager_->SetFollowCamera(followCamera_.get());
+	caracterManager_->SetBulletManager(bulletManager_.get());
 	// プレイヤー生成
 	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+	// 弾にプレイヤーセット
+	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
+	
 	// レベルデータロード
 	loadData_ = std::make_unique<LoadLevelData>();
 	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
@@ -52,12 +66,7 @@ void GamePlayScene::Initialize()
 			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
 	}
 	
-	// 弾管理クラス
-	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), nullptr);
-	// 弾にプレイヤーセット
-	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
-	caracterManager_->SetBulletManager(bulletManager_.get());
+	
 	
 	
 
@@ -139,6 +148,12 @@ void GamePlayScene::Update()
 {
 	Camera::isShake_ = false;
 
+
+	iCommand_ = inputHander_->HandleInput();
+	if (this->iCommand_) {
+		iCommand_->Exec(*caracterManager_->GetPlayer());
+	}
+
 	// 調整項目
 	ApplyGlobalVariables();
 
@@ -187,6 +202,7 @@ void GamePlayScene::Update()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
+
 #ifdef _DEBUG
 	if (input_->IsTriggerKey(DIK_P)) {
 		// シーン切り替え

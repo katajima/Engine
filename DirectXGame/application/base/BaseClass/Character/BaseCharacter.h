@@ -2,8 +2,12 @@
 #include"CharacterData.h"
 #include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
 
+
+class BaseSpecial;
+class BaseWeapon;
 class Entity3DManager;
 class Entity2DManager;
+class BulletManager;
 class BaseCharacter : public BaseObject
 {
 public:
@@ -67,6 +71,14 @@ public:
 	};
 
 public: // 取得系関数
+
+	// 必殺技
+	BaseSpecial* GetSpecial() { return special_.get(); }
+	// 武器
+	BaseWeapon* GetWeapon() { return weapon_.get(); }
+	// 弾マネージャーの設定
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
+
 
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return flags_.isAlive; };
@@ -165,5 +177,9 @@ protected:
 	BasicBehavior basicbehavior_ = BasicBehavior::kRoot; 
 	// 次の振るまいリクエスト
 	std::optional<BasicBehavior> basicbehaviorRequest_ = std::nullopt;
+
+	std::unique_ptr<BaseSpecial> special_;	// スペシャル攻撃
+	std::unique_ptr<BaseWeapon> weapon_;	// 武器
+	BulletManager* bulletManager_;			// 弾管理
 };
 

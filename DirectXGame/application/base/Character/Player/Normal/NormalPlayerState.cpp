@@ -26,10 +26,10 @@ void PlayerStateMove::Update()
 	}
 
 	// ジャンプ
-	player_->Jump();
+	//player_->Jump();
 
 	// 移動
-	player_->Move();
+	//player_->Move();
 
 	weapon->RecastTime(MyGame::GameTime());
 	if (weapon->GetAttackInput().GetIsAttack()) {
@@ -116,7 +116,7 @@ void PlayerStateSpecial::Update()
 	rengeSp->InAction();
 	rengeSp->SetIsDraw(false);
 	if (special->GetPhese() == 0) {
-		player_->Move();
+		//player_->Move();
 		player_->GetPlayerUI()->SetIsTextRB(true);
 		rengeSp->SetIsDraw(true);
 	}

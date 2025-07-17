@@ -39,6 +39,8 @@ public:
 	// ジャンプ
 	void Jump() override;
 
+
+
 private: // 攻撃関係
 
 	// 調整項目の適用
