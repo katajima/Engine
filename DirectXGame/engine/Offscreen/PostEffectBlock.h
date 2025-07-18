@@ -6,6 +6,21 @@
 // engine
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 
+
+enum class PostEffectType {
+	kCopy,			// コピー
+	kGrayScale,		// グレースケール
+	kSepia,			// セピア
+	kVignette,      // ビネット
+	kSmoothing,     // スムージング
+	kGaussian,      // ガウス
+	kOitline,		// アウトライン
+	kRadialBlur,	// ラジアルブラー
+	kDissovle,      // ディゾルブ
+	kRandom,		// ランダム
+	kBloom,			// ブルーム
+};
+
 class DXGIDevice;
 class Command;
 class SrvManager;
@@ -24,7 +39,8 @@ public:
 	///  初期化
 	/// </summary>
 	void Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon,
-		DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort);
+		DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort,
+		const std::string name, PostEffectType type);
 
 	void Update(Camera* camera);
 
@@ -41,13 +57,20 @@ public:
 	// 繋げる
 	void ConnectBlock(RenderTexture* other);
 
+
+	RenderTexture* GetRenderTextures(int i) {
+		if (renderTextures_.empty()) return nullptr;
+		return renderTextures_[i].get();
+	}
 	// 最初
 	RenderTexture* GetFirstRenderTexture() {
-		return renderTextures_.begin()->get();
+		if (renderTextures_.empty()) return nullptr;
+		return renderTextures_.front().get();
 	};
 	// 最後
 	RenderTexture* GetEndRenderTexture() {
-		return renderTextures_.end()->get();
+		if (renderTextures_.empty()) return nullptr;
+		return renderTextures_.back().get();
 	};
 private:
 	// レンダーテクスチャ描画前処理
@@ -59,8 +82,10 @@ private:
 
 	// レンダーテクスチャたち
 	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;
-	// 最後
-	//RenderTexture* endRenderTexture = nullptr;
+	
+	// 名前
+	std::string name_ = "none";
+
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;

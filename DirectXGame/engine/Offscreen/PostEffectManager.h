@@ -6,6 +6,12 @@
 
 // engine
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
+#include "PostEffectBlock.h"
+
+
+
+
+
 
 class DXGIDevice;
 class Command;
@@ -34,39 +40,17 @@ public:
 	void Update(Camera* camera);
 
 	// レンダーテクスチャ追加
-	void AddRenderTexture(const std::string name);
+	void AddEffectBlock(const std::string name, PostEffectType type);
 
 	//
 	RenderTexture* GetEndRenderTexture() {
-		return endRenderTexture;
+		if (effectBlocks_.empty()) return nullptr;
+		return effectBlocks_.back()->GetEndRenderTexture();
 	};
 
-	RenderTexture* GetRenderTextures(int i){
-		return renderTextures_[i].get();
-	}
-
 private:
-
-	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder);
-
-	// レンダーテクスチャ描画前処理
-	void PreDraw(RenderTexture* renderTexture);
-	// レンダーテクスチャ描画後処理
-	void PostDraw(RenderTexture* renderTexture);
-
-	
-
-private:
-
-	// 
-	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;
-
-	
-	RenderTexture* endRenderTexture = nullptr;
-private:
-	bool isFirst_ = false;
-
-
+	std::unique_ptr <RenderTexture> renderTexture_;
+	std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;

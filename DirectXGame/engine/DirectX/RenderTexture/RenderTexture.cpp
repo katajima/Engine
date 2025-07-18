@@ -37,7 +37,7 @@ void RenderTexture::Update()
 #ifdef _DEBUG
 	
 	if (ImGui::TreeNode(name_.c_str())) {
-		if (ImGui::Button("kCopy")) {
+		/*if (ImGui::Button("kCopy")) {
 			type_ = RenderTexture::PostEffectType::kCopy;
 		}
 		if (ImGui::Button("kDissovle")) {
@@ -72,7 +72,7 @@ void RenderTexture::Update()
 		}
 		if (ImGui::Button("kBloomCombin")) {
 			type_ = RenderTexture::PostEffectType::kBloomCombin;
-		}
+		}*/
 		UpdateImgui();
 		ImGui::TreePop(); // <- 対応する TreePop を忘れずに！
 	}

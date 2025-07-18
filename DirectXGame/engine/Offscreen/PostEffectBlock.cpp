@@ -14,7 +14,9 @@
 #include"imgui.h"
 
 // 初期化
-void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
+void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, 
+	DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, 
+	const std::string name, PostEffectType type)
 {
 	DXGIDevice_ = DXGIDevice;
 	command_ = command;
@@ -25,6 +27,51 @@ void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvMan
 	barrier_ = barrier;
 	scissorRect_ = scissorRect;
 	viewPort_ = viewPort;
+
+	name_ = name;
+	switch (type)
+	{
+	case PostEffectType::kCopy:
+		AddRenderTexture("Copy_" + name, RenderTexture::PostEffectType::kCopy);
+		break;
+	case PostEffectType::kGrayScale:
+		AddRenderTexture("GrayScale_" + name, RenderTexture::PostEffectType::kGrayScale);
+		break;
+	case PostEffectType::kSepia:
+		AddRenderTexture("Sepia_" + name, RenderTexture::PostEffectType::kSepia);
+		break;
+	case PostEffectType::kVignette:
+		AddRenderTexture("Vignette_" + name, RenderTexture::PostEffectType::kVignette);
+		break;
+	case PostEffectType::kSmoothing:
+		AddRenderTexture("Smoothing_" + name, RenderTexture::PostEffectType::kSmoothing);
+		break;
+	case PostEffectType::kGaussian:
+		AddRenderTexture("Gaussian_" + name, RenderTexture::PostEffectType::kGaussian);
+		break;
+	case PostEffectType::kOitline:
+		AddRenderTexture("Oitline_" + name, RenderTexture::PostEffectType::kOitline);
+		break;
+	case PostEffectType::kRadialBlur:
+		AddRenderTexture("RadialBlur_" + name, RenderTexture::PostEffectType::kRadialBlur);
+		break;
+	case PostEffectType::kDissovle:
+		AddRenderTexture("Dissovle_" + name, RenderTexture::PostEffectType::kDissovle);
+		break;
+	case PostEffectType::kRandom:
+		AddRenderTexture("Random_" + name, RenderTexture::PostEffectType::kRandom);
+		break;
+	case PostEffectType::kBloom:
+		//AddRenderTexture("Bloom_1_" + name, RenderTexture::PostEffectType::kCopy);
+		AddRenderTexture("Bloom_1_" + name, RenderTexture::PostEffectType::kBloom);
+		AddRenderTexture("Bloom_2_" + name, RenderTexture::PostEffectType::kGaussian);
+		AddRenderTexture("Bloom_3_" + name, RenderTexture::PostEffectType::kBloomCombin);
+		GetRenderTextures(2)->SetOtherSrvIndex(GetRenderTextures(0)->GetSrvIndex());
+
+		break;
+	}
+
+
 }
 
 // 更新
@@ -32,14 +79,14 @@ void PostEffectBlock::Update(Camera* camera)
 {
 	for (auto& renderTexture : renderTextures_) {
 		renderTexture->SetCamera(camera);
+		renderTexture->Update();
 	}
 
 #ifdef _DEBUG
 	// レンダーテクスチャ
 	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("RenderTexture")) {
+	if (ImGui::CollapsingHeader(name_.c_str())) {
 		for (auto& renderTexture : renderTextures_) {
-			renderTexture->SetCamera(camera);
 			renderTexture->Update();
 		}
 	}
@@ -53,11 +100,8 @@ void PostEffectBlock::AddRenderTexture(const std::string name, RenderTexture::Po
 	auto renderTexture = std::make_unique<RenderTexture>();
 	renderTexture->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name);
 	renderTexture->type_ = type;
-	//RenderTexture* current = renderTexture.get();
-
+	
 	renderTextures_.push_back(std::move(renderTexture));
-
-	//endRenderTexture = current;
 }
 
 void PostEffectBlock::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* sourceRT)

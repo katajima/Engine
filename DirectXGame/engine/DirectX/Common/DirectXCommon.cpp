@@ -43,12 +43,12 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
 
-	postEffectManager_->AddRenderTexture("postEffect0_outline");
-	postEffectManager_->AddRenderTexture("postEffect1_Extract");
-	postEffectManager_->AddRenderTexture("postEffect2_Blur");
-	postEffectManager_->AddRenderTexture("postEffect3_Comb");
-	postEffectManager_->GetRenderTextures(3)->SetOtherSrvIndex(postEffectManager_->GetRenderTextures(1)->GetSrvIndex());
-	postEffectManager_->AddRenderTexture("postEffect4_All");
+
+	//postEffectManager_->AddEffectBlock("bloom",PostEffectType::kBloom);
+	postEffectManager_->AddEffectBlock("copy",PostEffectType::kGrayScale);
+	//postEffectManager_->AddEffectBlock("bloom",PostEffectType::kBloom);
+
+
 	
 	imguiManager_->Initialize(this);
 }
