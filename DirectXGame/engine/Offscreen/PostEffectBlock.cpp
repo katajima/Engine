@@ -53,11 +53,11 @@ void PostEffectBlock::AddRenderTexture(const std::string name, RenderTexture::Po
 	auto renderTexture = std::make_unique<RenderTexture>();
 	renderTexture->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name);
 	renderTexture->type_ = type;
-	RenderTexture* current = renderTexture.get();
+	//RenderTexture* current = renderTexture.get();
 
 	renderTextures_.push_back(std::move(renderTexture));
 
-	endRenderTexture = current;
+	//endRenderTexture = current;
 }
 
 void PostEffectBlock::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* sourceRT)
@@ -79,6 +79,11 @@ void PostEffectBlock::DrawEffectBlock()
 	for (int i = 0; i < static_cast<int>(renderTextures_.size() - 1); i++) {
 		DrawRenderTexture(renderTextures_[i + 1].get(), renderTextures_[i].get());
 	}
+}
+
+void PostEffectBlock::ConnectBlock(RenderTexture* other)
+{
+	DrawRenderTexture(GetFirstRenderTexture(), other);
 }
 
 

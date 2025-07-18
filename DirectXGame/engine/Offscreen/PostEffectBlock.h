@@ -38,6 +38,9 @@ public:
 	// エフェクト
 	void DrawEffectBlock();
 
+	// 繋げる
+	void ConnectBlock(RenderTexture* other);
+
 	// 最初
 	RenderTexture* GetFirstRenderTexture() {
 		return renderTextures_.begin()->get();
@@ -57,7 +60,7 @@ private:
 	// レンダーテクスチャたち
 	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;
 	// 最後
-	RenderTexture* endRenderTexture = nullptr;
+	//RenderTexture* endRenderTexture = nullptr;
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;
