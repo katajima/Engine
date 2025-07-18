@@ -47,8 +47,9 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	postEffectManager_->AddRenderTexture("postEffect1_Extract");
 	postEffectManager_->AddRenderTexture("postEffect2_Blur");
 	postEffectManager_->AddRenderTexture("postEffect3_Comb");
+	postEffectManager_->GetRenderTextures(3)->SetOtherSrvIndex(postEffectManager_->GetRenderTextures(1)->GetSrvIndex());
 	postEffectManager_->AddRenderTexture("postEffect4_All");
-
+	
 	imguiManager_->Initialize(this);
 }
 

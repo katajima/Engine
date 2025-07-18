@@ -474,6 +474,9 @@
     <ClCompile Include="DirectXGame\application\scene\SelectScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectBlock.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -1124,6 +1127,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\scene\SelectScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectBlock.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

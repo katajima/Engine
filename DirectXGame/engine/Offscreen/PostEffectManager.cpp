@@ -76,8 +76,10 @@ void PostEffectManager::AllPostEffect()
 
 void PostEffectManager::Update(Camera* camera)
 {
+	renderingCommon_->SetCamera(camera);
 	for (auto& renderTexture : renderTextures_) {
 		renderTexture->SetCamera(camera);
+		renderTexture->Update();
 	}
 
 #ifdef _DEBUG
@@ -87,6 +89,9 @@ void PostEffectManager::Update(Camera* camera)
 		for (auto& renderTexture : renderTextures_) {
 			renderTexture->SetCamera(camera);
 			renderTexture->Update();
+			if (renderTexture->type_ == RenderTexture::PostEffectType::kBloomCombin) {
+				renderTexture->GetSrvIndex();
+			}
 		}
 	}
 	ImGui::End();

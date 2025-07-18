@@ -1,5 +1,4 @@
 #pragma once
-
 // C++
 #include<vector>
 #include<memory>
@@ -17,56 +16,48 @@ class Barrier;
 class ScissorRect;
 class ViewPort;
 
-class PostEffectManager
+class PostEffectBlock 
 {
 public:
-	void Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect,ViewPort* viewPort);
 
-	// 最初(シーンに書き込み)
-	void PreDrawOffscreen();
-
-	// 最初
-	void PostDrawOffscreen();
-
-	void AllPostEffect();
-
+	/// <summary>
+	///  初期化
+	/// </summary>
+	void Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon,
+		DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort);
 
 	void Update(Camera* camera);
 
 	// レンダーテクスチャ追加
-	void AddRenderTexture(const std::string name);
+	void AddRenderTexture(const std::string name, RenderTexture::PostEffectType type);
 
-	//
-	RenderTexture* GetEndRenderTexture() {
-		return endRenderTexture;
-	};
-
-	RenderTexture* GetRenderTextures(int i){
-		return renderTextures_[i].get();
-	}
-
-private:
-
+	
+	// テクスチャ書き込み
 	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder);
 
+	// エフェクト
+	void DrawEffectBlock();
+
+	// 最初
+	RenderTexture* GetFirstRenderTexture() {
+		return renderTextures_.begin()->get();
+	};
+	// 最後
+	RenderTexture* GetEndRenderTexture() {
+		return renderTextures_.end()->get();
+	};
+private:
 	// レンダーテクスチャ描画前処理
 	void PreDraw(RenderTexture* renderTexture);
 	// レンダーテクスチャ描画後処理
 	void PostDraw(RenderTexture* renderTexture);
 
-	
-
 private:
 
-	// 
+	// レンダーテクスチャたち
 	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;
-
-	
+	// 最後
 	RenderTexture* endRenderTexture = nullptr;
-private:
-	bool isFirst_ = false;
-
-
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;
@@ -78,4 +69,3 @@ private:
 	ScissorRect* scissorRect_;
 	ViewPort* viewPort_;
 };
-

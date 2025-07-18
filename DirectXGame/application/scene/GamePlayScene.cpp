@@ -42,6 +42,8 @@ void GamePlayScene::Initialize()
 	cameraManeger_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManeger_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	SetCamera(cameraManeger_->GetCamera());
+
 
 	// 弾管理クラス
 	bulletManager_ = std::make_unique<BulletManager>();

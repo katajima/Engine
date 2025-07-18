@@ -25,6 +25,8 @@ public:
 
 	void UpadateImGui();
 
+	Camera* GetCamera() {return camera.get();}
+
 private:
 	// 全てのカメラ
 	std::map<std::string, BaseCamera*> cameras;
