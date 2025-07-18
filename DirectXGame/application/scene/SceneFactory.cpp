@@ -12,6 +12,9 @@ BaseScene* SceneFactory::CreateScene(const std::string& sceneName)
 	}else if (sceneName == "TEST") {
 		newScene = new TestScene();
 	}
+	else if (sceneName == "SELECT") {
+		newScene = new SelectScene();
+	}
 
 	return newScene;
 }

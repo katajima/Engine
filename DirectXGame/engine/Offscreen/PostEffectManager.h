@@ -57,10 +57,7 @@ private:
 	// 
 	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;
 
-	// レンダーテクスチャ番号
-	//uint32_t renderTextureIndex_ = 0;
-
-	//RenderTexture* firstRenderTexture = nullptr;
+	
 	RenderTexture* endRenderTexture = nullptr;
 private:
 	bool isFirst_ = false;

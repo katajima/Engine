@@ -1,5 +1,5 @@
 #include "GamePlayScene.h"
-#include <iostream>//用いるヘッダファイルが変わります。
+#include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
 

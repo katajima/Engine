@@ -51,6 +51,7 @@ public:
 	void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
 
 
+
 	uint32_t GetSrvIndex() { return srvIndex_; }
 	// クリアカラーを取得
 	Vector4 GetClearColor()const;
@@ -70,11 +71,6 @@ private:
 	// 
 	// レンダーテクスチャのリソースを作成
 	void CreateResourcePixel();
-
-
-
-
-
 
 	// RTVを作成
 	void CreateRTV();

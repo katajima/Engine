@@ -3,6 +3,7 @@
 #include"TitleScene.h"
 #include"GamePlayScene.h"
 #include"TestScene.h"
+#include "SelectScene.h"
 
 
 // このゲーム用のシーン工場
