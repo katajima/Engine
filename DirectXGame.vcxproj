@@ -632,6 +632,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\MellWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackType.h" />
@@ -650,6 +651,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h" />
     <ClInclude Include="DirectXGame\application\base\Component\MoveComponent.h" />
+    <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.h" />
@@ -678,6 +680,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Timer.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h" />
+    <ClInclude Include="DirectXGame\application\base\Vision\VisionComponent.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />

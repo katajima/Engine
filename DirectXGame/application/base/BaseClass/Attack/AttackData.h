@@ -6,6 +6,21 @@ struct KnockbackData
 {
 	float power = 0.0f;					// ノックバックの力
 	float yPower = 0.0f;				// ノックバックY距離(敵をどれだけ上に吹き飛ばすか)
+	Vector3 normal{};					// 飛ぶ方向
+
+	// 方向とパワーを合算した値(Vector3)
+	Vector3 DirectionPower() const{
+		Vector3 reslut{};
+		reslut = normal.Normalize();
+		reslut.x *= power;
+		reslut.y *= yPower;
+		reslut.z *= power;
+
+
+		return reslut;
+	}
+
+
 };
 
 // 攻撃モーションデータ構造体

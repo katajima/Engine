@@ -147,9 +147,9 @@ void PlayerMissile::Update()
 
 	}
 
-	if (enemy_->nullChek == Matrix4x4::Identity()) {
+	//if (enemy_->nullChek == Matrix4x4::Identity()) {
 		enemyPos_ = enemy_->GetObject3D()->GetWorldPosition();
-	}
+	//}
 
 	if (isAlive_) {
 		Vector3 norm;

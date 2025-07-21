@@ -1,7 +1,6 @@
 #pragma once
 #include "WeaponData.h"
-//#include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
-//#include "DirectXGame/application/base/Character/Player/BasePlayerState.h"
+
 
 // 武器のベースクラス
 class BaseWeapon : public BaseObject
@@ -42,7 +41,9 @@ public:
 	AttackHitData& GetHitData() { return hitData_; }
 	// 攻撃入力系クラス取得
 	AttackInput& GetAttackInput() { return attackInput_; }
-
+	
+	//
+	KnockbackData GetKnockbackData() const { return data_.knockbackData; };
 	
 
 

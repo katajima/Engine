@@ -45,9 +45,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		enemy->AddDamage(parameter_.damege);
-		enemy->SetHit();
 		enemy->Emit();
-		enemy->hitStop(0.1f);
 		};
 
 	

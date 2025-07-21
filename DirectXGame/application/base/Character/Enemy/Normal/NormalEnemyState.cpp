@@ -14,7 +14,7 @@ void EnemyStateMove::Update()
 		enemy_->Move();
 
 
-		timer_ -= enemy_->Timer();
+		timer_ -= enemy_->GetTime();
 
 		if (timer_ <= 0.0f) {
 			enemy_->ChangeState("Attack");
@@ -40,8 +40,8 @@ EnemyStateAttack::EnemyStateAttack(BaseEnemy* enemy)
 
 void EnemyStateAttack::Update()
 {
-	timer_ -= enemy_->Timer();
-	Vector3 direct = subPos_.Normalize() * enemy_->Timer() * attackSpeed_;
+	timer_ -= enemy_->GetTime();
+	Vector3 direct = subPos_.Normalize() * enemy_->GetTime() * attackSpeed_;
 	direct.y = 0;
 	enemy_->GetWorldTransform().translate_ = Add(enemy_->GetWorldTransform().translate_, direct);
 
@@ -90,7 +90,7 @@ EnemyStateDie::EnemyStateDie(BaseEnemy* enemy)
 }
 
 void EnemyStateDie::Update() {
-	timer_ -= enemy_->Timer();
+	timer_ -= enemy_->GetTime();
 	if (timer_ <= 0.0f) {
 		enemy_->SetAlive(false);
 		timer_ = 0.0f;
@@ -102,10 +102,14 @@ void EnemyStateDie::Update() {
 		enemy_->GetObject3D()->IsDelete();
 	}
 	else {
-		enemy_->GetObject3D()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * enemy_->Timer();
+		enemy_->GetObject3D()->GetRigidBodyComponent()->SetIsGravity(false);
+		enemy_->GetObject3D()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * enemy_->GetTime();
 		if (enemy_->GetObject3D()->GetWorldTransform().scale_.x <= 0) {
 			enemy_->GetObject3D()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
 		}
+
+		// 着地処理
+		enemy_->GetMoveComponent()->Landing(*enemy_->GetObject3D()->GetTransformComponent(), *enemy_->GetObject3D()->GetRigidBodyComponent());
 	}
 }
 

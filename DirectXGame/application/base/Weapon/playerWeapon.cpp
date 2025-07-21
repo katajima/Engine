@@ -61,21 +61,27 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 		objectBase_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
+		enemy->GetHitMotionComponent()->SetIsHit(true);
+		data_.knockbackData.normal = player->GetMoveComponent()->GetDirection();
 		if (self->id == weaponColliderId_) {
+			enemy->GetHitMotionComponent()->SetKnockbackData(data_.knockbackData);
+			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);
 			enemy->AddDamage(GetDamage() * 2);
-			enemy->hitStop(GetHitStopTime() * 2);
-			enemy->SetHitKnockbackPower(data_.knockbackData.power);
-			enemy->SetHitKkonckbackYPower(data_.knockbackData.yPower);
-		}else if(self->id == weaponColliderId2_) {
-			enemy->AddDamage(GetDamage());
-			enemy->hitStop(GetHitStopTime());
-			enemy->SetHitKnockbackPower(data_.knockbackData.power);
-			enemy->SetHitKkonckbackYPower(data_.knockbackData.yPower);
-		}
-		enemy->SetHit();
-		enemy->Emit();
-		enemy->HitMotion();
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
+			enemy->GetHitMotionComponent()->SetIsKnockback(true);
 
+
+
+		}else if(self->id == weaponColliderId2_) {
+			enemy->GetHitMotionComponent()->SetKnockbackData(data_.knockbackData);
+			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);
+			enemy->AddDamage(GetDamage());
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
+			enemy->GetHitMotionComponent()->SetIsKnockback(true);
+			
+		}
+		enemy->Emit();
+		
 		player->AddHit();
 		player->AddSpGauge(1);
 		player->SetHitTime();
@@ -83,8 +89,8 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	
 	data_.damage = 10; // 武器のダメージ設定
-	data_.knockbackData.power = 15.5f; // ノックバックの力設定
-	data_.knockbackData.yPower = 4.5f; // Y方向のノックバックの力設定
+	data_.knockbackData.power = 25.5f; // ノックバックの力設定
+	data_.knockbackData.yPower = 34.5f; // Y方向のノックバックの力設定
 	SetTime(0.1f, 0.3f, 0.1f); // 武器のアニメーション時間設定
 
 

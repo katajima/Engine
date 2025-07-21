@@ -299,7 +299,7 @@ void RenderingCommon::UpdateImgui(PostEffectType type)
 			randomData_->time += 0.01f;
 			break;
 		case RenderingCommon::PostEffectType::kBloom:
-			ImGui::DragFloat("threshold", &bloomData_->threshold, 0.001f);
+			ImGui::SliderFloat("threshold", &bloomData_->threshold, 0.0f,1.0f);
 			break;
 		case RenderingCommon::PostEffectType::kBloomCombin:
 			ImGui::DragFloat("intensity", &bloomData_->intensity, 0.01f);

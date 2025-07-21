@@ -64,9 +64,6 @@ public:
 	/// 2d描画
 	/// </summary>
 	virtual void Draw2D() = 0;
-	
-protected:
-
 public: // コライダー
 	// コライダーコンポーネント取得
 	ColliderComponent* GetColliderComponent() { return objectBase_->GetColliderComponent(); }
@@ -74,7 +71,6 @@ public: // コライダー
 	void ColliderHistoryClear() { objectBase_->GetColliderComponent()->contactRecord_.Clear(); }
 	// 衝突履歴取得
 	ContactRecord& GetContactRecord() { return objectBase_->GetColliderComponent()->contactRecord_; }
-
 
 public: // オブジェクト
 	// オブジェクトタイプ取得

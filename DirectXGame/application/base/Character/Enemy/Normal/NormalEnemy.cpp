@@ -102,30 +102,38 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 		};
 
+	// 視野
+	visionComponent_ = std::make_unique<VisionComponent>();
+	visionComponent_->SetAlertView(120.0f, 100.0f);
+	visionComponent_->SetCombatView(90.0f, 100.0f);
+
+	// ヒットモーション
+	hitMotionComponent_ = std::make_unique<HitMotionComponent>();
+
+	hitMotionComponent_->Init(0.1f, { 2.5f,2.2f,2.5f });
+
+
+
+
 
 
 	flags_.isAlive = true;
 	Parameters().HP.Initiaize(100, 0, 100, 0);
-
-
 	Parameters().speed = 3.0f;
-
-
 	InitializeBaseAddItem();
 
 	Initialize2D();
 	InitParticle();
 
-	nullChek = Matrix4x4::Identity();
+	
 	objectBase_->Update();
-
 	ChangeState("Move");
 }
 
 void NormalEnemy::Update()
 {
 	UpdateBaseGetValue();
-	HitStpoTime();
+	//HitStpoTime();
 	if (GetHP() <= 0) {
 		if (GetAlive() == true) {
 			ductEmit_->Update();
@@ -133,33 +141,39 @@ void NormalEnemy::Update()
 			plankEmit_->Update();
 			gearEmit_->Update();
 			fenceEmit_->Update();
+			
 		}
 		flags_.isLockonTarget = false;
 		flags_.isAlive = false;
 	}
+	else {
+		// 移動
+		moveComponent_->AddMove(GetTime(), GetAlive(), *objectBase_);
+		// 着地
+		moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
+		// 状態
+		characterStateComponent_.Update(Velocity(), false, GetAlive());
+		// ヒット
+		hitMotionComponent_->Update(GetTime(), objectBase_);
 
 
-	state_->Update();
+		
 
 
-	moveComponent_->AddMove(Timer(), GetAlive(), *objectBase_);
 
-	moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
-	characterStateComponent_.Update(Velocity(), false, GetAlive());
-
-
-	// 重力
-	if (!characterStateComponent_.IsJumping()) {
-		Velocity() = { 0,0,0 };
+		if (GetHP() >= 0) {
+			// 重力
+			if (!characterStateComponent_.IsJumping()) {
+				Velocity() = { 0,0,0 };
+			}
+		}
+		// 移動制限
+		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
+		// 更新
+		objectBase_->UpdateWorldTransform();
 	}
-
-	// 移動制限
-	LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
-
-
-	objectBase_->UpdateWorldTransform();
-
-	objectBase_->Update();
+	// ステート
+	state_->Update();
 }
 
 void NormalEnemy::DrawEffect()

@@ -45,7 +45,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 
 
 	//postEffectManager_->AddEffectBlock("bloom",PostEffectType::kBloom);
-	postEffectManager_->AddEffectBlock("grayScale",PostEffectType::kGrayScale);
+	//postEffectManager_->AddEffectBlock("grayScale",PostEffectType::kGrayScale);
 	postEffectManager_->AddEffectBlock("bloom", PostEffectType::kBloom);
 	postEffectManager_->AddEffectBlock("copy",PostEffectType::kCopy);
 	
