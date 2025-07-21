@@ -1138,6 +1138,9 @@
     <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

@@ -633,6 +633,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackType.h" />
