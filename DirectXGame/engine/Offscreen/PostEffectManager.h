@@ -51,6 +51,8 @@ public:
 private:
 	std::unique_ptr <RenderTexture> renderTexture_;
 	std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
+	std::unique_ptr <RenderTexture> renderTextureEnd_;
+
 private:
 	DXGIDevice* DXGIDevice_;
 	Command* command_;

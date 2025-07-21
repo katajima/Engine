@@ -3,6 +3,8 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 
+
+
 PlayerStateMove::PlayerStateMove(BasePlayer* player)
 	: BasePlayerState("Move", player) {
 }
@@ -25,12 +27,6 @@ void PlayerStateMove::Update()
 		}
 	}
 
-	// ジャンプ
-	//player_->Jump();
-
-	// 移動
-	//player_->Move();
-
 	weapon->RecastTime(MyGame::GameTime());
 	if (weapon->GetAttackInput().GetIsAttack()) {
 		if (weapon->GetIsRecastTimeOver()) {
@@ -45,6 +41,8 @@ void PlayerStateMove::Update()
 		}
 	}
 }
+
+
 
 void PlayerStateMove::Exit()
 {

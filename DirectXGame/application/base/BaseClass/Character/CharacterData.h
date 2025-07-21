@@ -151,11 +151,25 @@ enum class PlayerType
 class CharacterParameterComponent
 {
 public:
-	// 初期化関数
-	void Initialize() {
-	
-	
-	}
+	// HP取得
+	float GetHP() const { return parameters_.HP.value; }
+	// MP取得
+	float GetMP() const { return parameters_.MP.value; }
+	// スタミナ取得
+	float GetStamina() const { return parameters_.stamina.value; }
+	// パワー取得
+	float GetStrength() const { return parameters_.strength; }
+	// 防御力取得
+	float GetDefense() const { return parameters_.defense; }
+	// 知力取得
+	int GetIntelligence() const { return parameters_.intelligence; }
+	// 速度取得
+	float GetSpeed() const { return parameters_.speed; }
+	// 性格取得
+	Personality GetPersonality() const { return personality; }
+	// キャラクター種類
+	CharacterType GetCharacterType() const { return characterType_; }
+
 public:
 	Personality personality = Personality::kNormal;
 	CharacterType characterType_ = CharacterType::None;	// キャラクターの種類

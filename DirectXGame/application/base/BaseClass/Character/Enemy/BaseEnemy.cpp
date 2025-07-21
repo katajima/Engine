@@ -9,6 +9,11 @@ float BaseEnemy::Timer() const
 	return MyGame::GameTime() * timeSpeed_;
 }
 
+Vector3 BaseEnemy::GetTargetPos()
+{
+	return player_->GetObject3D()->GetWorldPosition(); 
+}
+
 void BaseEnemy::Shake()
 {
 

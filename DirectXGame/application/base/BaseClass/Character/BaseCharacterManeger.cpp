@@ -51,7 +51,7 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 
 		break;
 	case EnemyType::kBullet:
-		enemy = std::make_unique<BulletEnemy>();
+		//enemy = std::make_unique<BulletEnemy>();
 		break;
 	case EnemyType::kAttacker:
 		break;

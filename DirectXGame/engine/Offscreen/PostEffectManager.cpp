@@ -27,8 +27,14 @@ void PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvM
 
 
 	renderTexture_ = std::make_unique<RenderTexture>();
-	renderTexture_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "main");
+	renderTexture_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainStr");
 	renderTexture_->type_ = RenderTexture::PostEffectType::kCopy;
+	
+	renderTextureEnd_ = std::make_unique<RenderTexture>();
+	renderTextureEnd_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainEnd");
+	renderTextureEnd_->type_ = RenderTexture::PostEffectType::kCopy;
+
+
 }
 
 void PostEffectManager::PreDrawOffscreen()
@@ -69,20 +75,14 @@ void PostEffectManager::PostDrawOffscreen()
 void PostEffectManager::AllPostEffect()
 {
 
-	if (effectBlocks_.size() == 0) return;
+	for (size_t i = 0; i < effectBlocks_.size(); ++i) {
+		auto& current = effectBlocks_[i];
+		// 処理を実行（最終RTに反映されるように）
 
-	for (int i = 0; i < static_cast<int>(effectBlocks_.size()); i++) {
-
-		if (i == 0) {
-			// 最初なので作っていたRenderTextureを渡す
-			effectBlocks_[i]->ConnectBlock(renderTexture_.get());	
-		}
-		else {
-			effectBlocks_[i]->ConnectBlock(effectBlocks_[i-1]->GetEndRenderTexture());
-		}
-
-		effectBlocks_[i]->DrawEffectBlock();
+		current->DrawEffectBlock(i == 0 ? renderTexture_.get() : effectBlocks_[i - 1]->GetEndRenderTexture());
 	}
+
+
 }
 
 void PostEffectManager::Update(Camera* camera)

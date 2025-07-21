@@ -17,7 +17,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	objectBase_->InitColliderComponent();
 	GetColliderComponent()->SetHitReceiver(this);
 	InitMoveComponent();
-
+	objectBase_->InitRigidBodyComponent();
 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
@@ -96,7 +96,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			}
 		}
 		if (other->tag == CollisionTag::PlayerAttack) {
-			basicbehaviorRequest_ = BasicBehavior::kRoot;
+			ChangeState("Move");
 		}
 
 
@@ -118,6 +118,8 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	nullChek = Matrix4x4::Identity();
 	objectBase_->Update();
+
+	ChangeState("Move");
 }
 
 void NormalEnemy::Update()
@@ -136,45 +138,26 @@ void NormalEnemy::Update()
 		flags_.isAlive = false;
 	}
 
-	if (GetHP() >= 0) {
-		if (basicbehaviorRequest_) {
-			// ふるまいを変更する
-			basicbehavior_ = basicbehaviorRequest_.value();
-			// 各ふるまいごとの初期化を実行
-			switch (basicbehavior_)
-			{
-			case BasicBehavior::kRoot:
-				BehaviorRootInitialize();
-				break;
-			case BasicBehavior::kAttack:
-				BehaviorAttackInitialize();
-				break;
-			case BasicBehavior::kDie:
-				BehaviorDieInitialize();
-				break;
-			default:
-				break;
-			}
-			// ふるまいリクエストリセット
-			basicbehaviorRequest_ = std::nullopt;
-		}
-		switch (basicbehavior_)
-		{
-		case BasicBehavior::kRoot:
-			BehaviorRootUpdate();
-			break;
-		case BasicBehavior::kAttack:
-			BehaviorAttackUpdate();
-			break;
-		case BasicBehavior::kDie:
-			BehaviorDieUpdate();
-			break;
-		default:
-			break;
-		}
+
+	state_->Update();
+
+
+	moveComponent_->AddMove(Timer(), GetAlive(), *objectBase_);
+
+	moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
+	characterStateComponent_.Update(Velocity(), false, GetAlive());
+
+
+	// 重力
+	if (!characterStateComponent_.IsJumping()) {
+		Velocity() = { 0,0,0 };
 	}
 
+	// 移動制限
+	LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
 
+
+	objectBase_->UpdateWorldTransform();
 
 	objectBase_->Update();
 }
@@ -513,99 +496,4 @@ void NormalEnemy::InitParticle()
 
 
 
-}
-
-void NormalEnemy::BehaviorRootInitialize()
-{
-	timer_ = rootTimer_;
-}
-
-void NormalEnemy::BehaviorRootUpdate()
-{
-	if (GetHP() > 0) {
-		if (!hit) {
-			//count = 0.0f;
-			Move();
-		}
-		else {
-			moveComponent_->AddMove(Timer(), GetAlive(), *objectBase_);
-
-			//GravityUpdate(Timer(), Situations().isJumping, GetAlive());
-			//if (flags_.isGrounded) {
-			//	hit = false;
-			//}
-		}
-
-		//timer_ -= Timer();
-
-		//if (timer_ <= 0.0f && flags_.isGrounded) {
-		//	basicbehaviorRequest_ = BasicBehavior::kAttack;
-		//	timer_ = 0.0f;
-		//	return;
-		//}
-	}
-	if (GetHP() <= 0) {
-		basicbehaviorRequest_ = BasicBehavior::kDie;
-	}
-}
-
-void NormalEnemy::BehaviorAttackInitialize()
-{
-	// ロックオン座標
-	lockonPosition_ = player_->GetObject3D()->GetWorldPosition();
-
-	// 追跡対象からロックオン対象へのベクトル
-	subPosition_ = Subtract(lockonPosition_, GetWorldTransform().translate_);
-	timer_ = attackTimer_;
-}
-
-void NormalEnemy::BehaviorAttackUpdate()
-{
-	timer_ -= Timer();
-	Vector3 direct = subPosition_.Normalize() * Timer() * attackSpeed_;
-	direct.y = 0;
-	GetWorldTransform().translate_ = Add(GetWorldTransform().translate_, direct);
-
-	if (timer_ <= 0.0f) {
-		basicbehaviorRequest_ = BasicBehavior::kRoot;
-		timer_ = 0.0f;
-		return;
-	}
-	if (GetHP() <= 0) {
-		basicbehaviorRequest_ = BasicBehavior::kDie;
-	}
-}
-
-void NormalEnemy::BehaviorDieInitialize()
-{
-	ductEmit_->Update();
-	tireEmit_->Update();
-	plankEmit_->Update();
-	gearEmit_->Update();
-	fenceEmit_->Update();
-	timer_ = dieTimer_;
-}
-
-void NormalEnemy::BehaviorDieUpdate()
-{
-
-
-
-	timer_ -= Timer();
-	if (timer_ <= 0.0f) {
-		flags_.isAlive = false;
-		timer_ = 0.0f;
-		if (!flags_.isAlive) {
-			Delete();
-		}
-	}
-	else if (timer_ <= dieTimer_ / 2.0f) {
-		objectBase_->IsDelete();
-	}
-	else {
-		objectBase_->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * Timer();
-		if (objectBase_->GetWorldTransform().scale_.x <= 0) {
-			objectBase_->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
-		}
-	}
 }

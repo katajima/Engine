@@ -80,22 +80,13 @@ public: // 取得系関数
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return flags_.isAlive; };
+	// キャラクターの生存状態を取得
+	void SetAlive(bool is){ flags_.isAlive = is; };
+
 	// HP取得
 	float GetHP() const { return characterParameterComponent_.parameters_.HP.value; }
 	// キャラクター取得
 	CharacterType GetCharacterType() const { return characterParameterComponent_.characterType_; }
-
-
-	// ビヘイビア状態取得
-	BasicBehavior GetBasicBehavior() const { return basicbehavior_; }
-	// リクエスト取得
-	std::optional<BasicBehavior> GetBasicBehaviorRequest() const { return basicbehaviorRequest_; }
-	// ふるまい変更
-	void ChangeRequest() { basicbehavior_ = basicbehaviorRequest_.value(); }
-	// ふるまいリクエストリセット
-	void ResetRequest() { basicbehaviorRequest_ = std::nullopt; }
-	// ふるまいリクエストの設定
-	void SetRequest(BasicBehavior type) { basicbehaviorRequest_ = type; }
 
 protected: // 取得系関数(変更可能)
 
@@ -155,25 +146,24 @@ protected:
 	void InitMoveComponent() { moveComponent_ = std::make_unique<MoveComponent>(); }
 	// 移動コンポーネント
 	std::unique_ptr<MoveComponent> moveComponent_;
+
 public:
 	// 速度
 	Vector3& Velocity() { return moveComponent_->Velocity(); }
 	// 速度取得
 	Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
+
+	MoveComponent* GetMoveComponent() { return moveComponent_.get(); }
+
 protected:
 	// キャラクターパラメータコンポーネント
 	CharacterParameterComponent characterParameterComponent_;
 	// キャラクターの状態コンポーネント
 	CharacterStateComponent characterStateComponent_;
 public:
-	CharacterStateComponent& GetCharacterStateComponent() {return characterStateComponent_;}
+	CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
 
 protected:
-
-	// 振るまい
-	BasicBehavior basicbehavior_ = BasicBehavior::kRoot;
-	// 次の振るまいリクエスト
-	std::optional<BasicBehavior> basicbehaviorRequest_ = std::nullopt;
 
 	std::unique_ptr<BaseSpecial> special_;	// スペシャル攻撃
 	std::unique_ptr<BaseWeapon> weapon_;	// 武器

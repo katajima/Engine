@@ -97,18 +97,18 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;
-		if (enemy->GetBasicBehavior() == BasicBehavior::kAttack) {
-			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+		//if (enemy->GetBasicBehavior() == BasicBehavior::kAttack) {
+		//	float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
-			if (GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
-				return; // クールタイム中のため無視
-			}
+		//	if (GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
+		//		return; // クールタイム中のため無視
+		//	}
 
-			GetContactRecord().AddHistory(otherId, nowTime);
+		//	GetContactRecord().AddHistory(otherId, nowTime);
 
-			AddDamage(10.0f);
-			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
-		}
+		//	AddDamage(10.0f);
+		//	followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
+		//}
 		};
 
 	// スペシャル攻撃

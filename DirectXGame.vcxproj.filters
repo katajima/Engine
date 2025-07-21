@@ -444,9 +444,6 @@
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -457,9 +454,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp">
@@ -475,6 +469,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectBlock.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1084,9 +1081,6 @@
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1100,9 +1094,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\RangedWeapons.h">
@@ -1130,6 +1121,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectBlock.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemyState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -52,7 +52,7 @@ public:
 	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder);
 
 	// エフェクト
-	void DrawEffectBlock();
+	void DrawEffectBlock(RenderTexture* inputTexture);
 
 	// 繋げる
 	void ConnectBlock(RenderTexture* other);

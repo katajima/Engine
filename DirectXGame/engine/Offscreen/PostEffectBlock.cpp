@@ -116,18 +116,32 @@ void PostEffectBlock::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* 
 	PostDraw(targetRT);
 }
 
-void PostEffectBlock::DrawEffectBlock()
+void PostEffectBlock::DrawEffectBlock(RenderTexture* inputTexture)
 {
-	if (renderTextures_.size() == 0) return;
+	if (renderTextures_.empty()) return;
 
-	for (int i = 0; i < static_cast<int>(renderTextures_.size() - 1); i++) {
-		DrawRenderTexture(renderTextures_[i + 1].get(), renderTextures_[i].get());
+	if (renderTextures_.size() == 1) {
+		// 入力テクスチャを最初のレンダーターゲットに書き込む（処理なしコピー）
+		DrawRenderTexture(renderTextures_[0].get(), inputTexture);
+		return;
 	}
+	else {
+		// 最初の入力
+		DrawRenderTexture(renderTextures_[0].get(), inputTexture);
+
+		// 2番目以降でチェーン処理
+		for (size_t i = 0; i < renderTextures_.size() - 1; ++i){
+			DrawRenderTexture(renderTextures_[i + 1].get(), renderTextures_[i].get());
+		}
+
+
+	}
+	
 }
 
-void PostEffectBlock::ConnectBlock(RenderTexture* other)
+void PostEffectBlock::ConnectBlock(RenderTexture* input)
 {
-	DrawRenderTexture(GetFirstRenderTexture(), other);
+	DrawEffectBlock(input);
 }
 
 

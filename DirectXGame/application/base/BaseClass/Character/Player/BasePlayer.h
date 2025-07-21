@@ -7,7 +7,8 @@
 
 #include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
 #include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
-using StateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
+
+using PlayerStateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
 
 
 
@@ -87,7 +88,7 @@ private:
 		}
 	}
 
-	void RegisterState(const std::string& name, StateFactory factory) {
+	void RegisterState(const std::string& name, PlayerStateFactory factory) {
 		stateFactoryMap_[name] = factory;
 	}
 protected:
@@ -98,6 +99,6 @@ protected:
 
 
 	std::unique_ptr<BasePlayerState> state_;// ステート
-	std::unordered_map<std::string, StateFactory> stateFactoryMap_;	// 
+	std::unordered_map<std::string, PlayerStateFactory> stateFactoryMap_;	// 
 };
 

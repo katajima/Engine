@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
+//#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h"
 
 class BasePlayer;
 class Entity3DManager;
@@ -50,10 +51,16 @@ public:
 
 	// ヒットモーション
 	void HitMotion();
-
-protected:
 	// 時間
 	float Timer() const;
+
+	Vector3 GetTargetPos();
+
+
+	virtual void ChangeState(const std::string& name) = 0;
+
+protected:
+	
 	// シェイク
 	void Shake();
 	// ヒットストップ時間
@@ -76,6 +83,7 @@ protected:
 	// ヒット
 	bool hit = false;
 	
+
 protected: //2D
 	std::unique_ptr<Sprite> icon_lockOn;
 	std::unique_ptr<Sprite> hpBer_;
