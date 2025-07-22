@@ -8,6 +8,23 @@ using BossEnemyStateFactory = std::function<std::unique_ptr<BaseEnemyState>(Base
 class BossEnemy : public BaseEnemy
 {
 public:
+	BossEnemy() {
+		// 初期化時に状態名とその生成関数を登録
+		RegisterState("Move", [](BaseEnemy* p) {
+			return std::make_unique<BossEnemyStateMove>(p);
+			});
+		RegisterState("Attack", [](BaseEnemy* p) {
+			return std::make_unique<BossEnemyStateAttack>(p);
+			});
+		RegisterState("Special", [](BaseEnemy* p) {
+			return std::make_unique<BossEnemyStateSpecial>(p);
+			});
+		RegisterState("Die", [](BaseEnemy* p) {
+			return std::make_unique<BossEnemyStateDie>(p);
+			});
+	}
+
+
 	// 初期化
 	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
 
@@ -19,7 +36,7 @@ public:
 	//
 	void Draw2D() override;
 
-	void SetPlayer(BasePlayer* player) override;
+	void SetPlayer(BasePlayer* player) { player_ = player; };
 
 	void Emit() override;
 	// 移動
@@ -55,7 +72,7 @@ private:
 	}
 private:
 	std::unique_ptr<BaseEnemyState> state_;// ステート
-	std::unordered_map<std::string, BossEnemyStateFactory> stateFactoryMap_;	// 
+	std::unordered_map<std::string, BossEnemyStateFactory> stateFactoryMap_;// 
 
 };
 

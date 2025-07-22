@@ -117,6 +117,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerMissile.cpp" />
@@ -124,6 +126,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Component\AttackComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.cpp" />
@@ -605,6 +608,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttack.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h" />
@@ -651,6 +655,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h" />
+    <ClInclude Include="DirectXGame\application\base\Component\AttackComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Component\MoveComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />

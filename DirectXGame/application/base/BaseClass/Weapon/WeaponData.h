@@ -90,6 +90,8 @@ struct ComboData
 	int GetCurrentComboCount() const { return currentComboCount; }
 	// コンボの現在の回数を設定
 	void SetCurrentComboCount(int currentComboCount) { this->currentComboCount = currentComboCount; }
+
+
 };
 
 
@@ -102,8 +104,6 @@ struct AttackMotions
 	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
 	KnockbackData knockbackData{};			// ノックバックデータ
 	ComboMotionData motionData{};			// モーションデータ
-	Vector3 initRotate{};					// 回転初期位置
-	Vector3	rotateSpeed{};					// 回転更新(速度)	
 };
 
 // 遠近どちらにもあるパラメータ持つ武器データ構造体

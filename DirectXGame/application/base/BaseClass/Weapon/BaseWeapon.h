@@ -60,19 +60,6 @@ public:
 		data_.motionData.SetTime(startupTime, attackAnimationTime, recoveryTime);
 	}
 
-	void CreateData(ComboMotionData attackM, KnockbackData knock,Vector3 rotateIint, Vector3 rotateSpeed, float damage, float staminaCost, float movementSpeedMultiplier) {
-		AttackMotions attack;
-
-		attack.motionData = attackM;
-		attack.knockbackData = knock;
-		attack.initRotate = rotateIint;
-		attack.rotateSpeed = rotateSpeed;
-		attack.damage = damage;
-		attack.staminaCost = staminaCost;
-		attack.movementSpeedMultiplier = movementSpeedMultiplier;
-		attack_.push_back(attack);
-	}
-
 	void SetAttackCombo(float deltaTime);
 
 	// 攻撃各コンボによる初期化
