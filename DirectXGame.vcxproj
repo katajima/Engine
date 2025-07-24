@@ -146,6 +146,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelData.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Model\RenderComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\AnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp" />

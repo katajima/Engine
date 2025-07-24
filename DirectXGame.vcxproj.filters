@@ -489,6 +489,9 @@
     <ClCompile Include="DirectXGame\engine\Animation\AnimationComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Model\RenderComponent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
