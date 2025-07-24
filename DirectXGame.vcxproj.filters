@@ -444,9 +444,6 @@
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

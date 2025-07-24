@@ -25,8 +25,6 @@ public:
 	};
 	// タグによるコライダーの有効・無効を設定
 	void SetIsCollider(CollisionTag tag ,bool is) { objectBase_->GetColliderComponent()->SetEnableByTag(tag, is); };
-	// ダメージ取得
-	//float GetDamage() const { return data_.damage; };
 	// 攻撃中かどうかのフラグを取得
 	bool IsActive() const { return data_.isActive; };
 	// オートマチックかどうかのフラグを取得
@@ -35,11 +33,13 @@ public:
 	void SetIsActive(bool isActive) { data_.isActive = isActive; };
 	// ヒットデータを取得
 	AttackHitData& GetHitData() { return hitData_; }
-	// データ
+	
+	
+	// コンボデータ取得
 	ComboData GetComboData() const { return comboData_; }
-	//
+	// コンボデータ設定
 	void SetComboData(ComboData data) { comboData_ = data; }
-		//
+	// コンボステートマシーン取得
 	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
 
 
@@ -80,15 +80,7 @@ protected:
 	ComboData comboData_;					// コンボデータ
 	std::unique_ptr<ComboStateMachine> comboStateMachine_;	// コンボステートマシーン
 	std::map<std::string, std::shared_ptr<ComboNodeState>> comboNodes_;
-	//std::shared_ptr<ComboNodeState>
-
-	//std::vector<AttackMotions> attack_;//
 	
-	// 攻撃入力系クラス
-	//AttackInput attackInput_;
-
-	
-
 protected:
 	BaseCharacter* character;	// 使っているキャラクター
 };
@@ -106,12 +98,6 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 	
-	// 攻撃各コンボによる初期化
-	//virtual void AttackTypeInit(int comboIndex) = 0;
-
-	// 攻撃更新
-	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
-
 public:
 	// ヒットストップ時間を取得
 	float GetHitStopTime() const { return mellData_.hitStopTime; } 
@@ -133,12 +119,6 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 	
-	// 攻撃各コンボによる初期化
-	//virtual void AttackTypeInit(int comboIndex) = 0;
-
-	// 攻撃更新
-	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
-
 protected:
 	RangedWeaponData rengedData_; // 遠距離武器データ
 

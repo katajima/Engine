@@ -57,7 +57,11 @@ public:
 
 
 	// プリミティブ形状
-	void SetPrimitive(std::unique_ptr<Primitive> primitive);
+	void SetPrimitive(std::unique_ptr<Primitive> primitive)
+	{
+		primitive_ = std::move(primitive);
+		renderComponent_->SetPrimitive(primitive_.get());
+	};
 	// スカイボックス
 	void SetSkyBox(SkyBox* skyBox) {
 		skyBox_ = skyBox;
@@ -90,9 +94,9 @@ public:
 	Model* GetModel() const { return model; }
 
 	// プリミティブ取得
-	Primitive* GetPrimitive() const;
+	Primitive* GetPrimitive() const { return primitive_.get();};
 	// 波取得
-	Ocean* GetOcean() { return ocean_; }
+	Ocean* GetOcean() const { return ocean_; }
 
 	// タグ
 	std::string GetNameTag() const { return nameTag; }

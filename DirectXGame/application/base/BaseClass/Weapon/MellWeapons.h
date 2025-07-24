@@ -15,11 +15,6 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 
-	// 攻撃各コンボによる初期化
-	//virtual void AttackTypeInit(int comboIndex) = 0;
-
-	// 攻撃更新
-	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 protected:
 
 };
@@ -37,11 +32,6 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 
-	// 攻撃各コンボによる初期化
-	//virtual void AttackTypeInit(int comboIndex) = 0;
-
-	// 攻撃更新
-	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 protected:
 
 };
@@ -59,11 +49,6 @@ public:
 	/// 2d描画
 	virtual void Draw2D() = 0;
 
-	// 攻撃各コンボによる初期化
-	//virtual void AttackTypeInit(int comboIndex) = 0;
-
-	// 攻撃更新
-	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 protected:
 
 };

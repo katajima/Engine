@@ -14,6 +14,8 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 
+#pragma region Init
+
 void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
@@ -27,17 +29,17 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	transformComponent_ = std::make_unique<TransformComponent>();
 	transformComponent_->Init();
 
-	
+
 	name = "object" + std::to_string(object3dCommon_->count);
 
 	transformation = std::make_unique<Transfomation>();
 	transformation->Initialize(object3dCommon_->GetDxCommon());
 
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
-	
+
 
 	renderComponent_ = std::make_unique<RenderComponent>();
-	renderComponent_->Init(entity3DManager_,objectType,rasterizerType);
+	renderComponent_->Init(entity3DManager_, objectType, rasterizerType);
 	renderComponent_->SetTransfomation(transformation.get());
 
 	isColliderComponenyUpdate_ = true;
@@ -45,6 +47,29 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	// オブジェクト数
 	object3dCommon_->count++;
 }
+
+void Object3d::InitColliderComponent()
+{
+	// コライダーコンポーネントの初期化
+	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_->SetOwner(colliderComponent_.get());
+	// ラインコモンをセット
+	colliderComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
+	// 登録（IDを取得したければ変数で受ける）
+	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+	isColliderComponenyUpdate_ = true;
+}
+
+void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+{
+	trailEffect_ = std::make_unique<TrailEffect>();
+	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
+	trailEffect_->SetCamera(defaltCamera);
+	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
+
+}
+
+#pragma endregion // 初期化系
 
 #pragma region Update
 
@@ -173,18 +198,6 @@ void Object3d::DebugImguiSkin()
 	DebugModel::ImguiSkin(model->modelData);
 }
 
-void Object3d::InitColliderComponent()
-{
-	// コライダーコンポーネントの初期化
-	colliderComponent_ = std::make_unique<ColliderComponent>();
-	colliderComponent_->SetOwner(colliderComponent_.get());
-	// ラインコモンをセット
-	colliderComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
-	// 登録（IDを取得したければ変数で受ける）
-	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
-	isColliderComponenyUpdate_ = true;
-}
-
 #pragma endregion // 描画系
 
 #pragma region Other
@@ -250,11 +263,6 @@ bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3&
 	return true;
 }
 
-Primitive* Object3d::GetPrimitive() const
-{
-	return primitive_.get();
-}
-
 void Object3d::DebugImguiModel()
 {
 	DebugModel::ImguiModel(model->modelData);
@@ -266,21 +274,6 @@ void Object3d::SetModel(const std::string& filePath)
 
 	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
 	renderComponent_->SetModel(model);
-}
-
-void Object3d::SetPrimitive(std::unique_ptr<Primitive> primitive)
-{
-	primitive_ = std::move(primitive);
-	renderComponent_->SetPrimitive(primitive_.get());
-}
-
-void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,Vector3 offsetStr,Vector3 offsetEnd)
-{
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
-	trailEffect_->SetCamera(defaltCamera);
-	trailEffect_->SetOffset(offsetStr,offsetEnd,transformComponent_->GetWorldTransform());
-	
 }
 
 #pragma endregion // その他

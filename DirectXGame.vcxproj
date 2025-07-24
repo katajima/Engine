@@ -116,7 +116,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.cpp" />
