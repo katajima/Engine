@@ -13,6 +13,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	objectBase_->GetWorldTransform().scale_ = { 1.25f,1.25f ,1.25f };
 	objectBase_->InitColliderComponent(); // コライダーコンポーネントの初期化
 	objectBase_->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
+	objectBase_->UseTrailEffect("resources/Texture/Image.png",0.25f,{1,1,1,0.25f}, objectBase_->GetModel()->modelData.mesh[0]->GetMin(), objectBase_->GetModel()->modelData.mesh[0]->GetMax());
 	
 
 	auto obbCollider_ = std::make_unique<OBBCollider>();
@@ -113,8 +114,10 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	AddComboNode("Attack3", attack3);
 
 	ConnectCombo("Attack1",AttackInput::Light, "Attack2");
-	ConnectCombo("Attack2",AttackInput::Light, "Attack3");
+	ConnectCombo("Attack1", AttackInput::Heavy, "Attack3");
 
+	ConnectCombo("Attack2",AttackInput::Light, "Attack3");
+	
 	//attack1->SetNextState(AttackInput::Light, attack2);
 	//attack2->SetNextState(AttackInput::Light, attack3);
 	//attack2->SetNextState(AttackInput::Heavy, heavy1);

@@ -97,6 +97,7 @@ public:
 	Primitive* GetPrimitive() const { return primitive_.get();};
 	// 波取得
 	Ocean* GetOcean() const { return ocean_; }
+	// トレイルエフェクト
 
 	// タグ
 	std::string GetNameTag() const { return nameTag; }

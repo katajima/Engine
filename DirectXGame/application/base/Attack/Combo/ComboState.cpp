@@ -34,6 +34,8 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 	bool isInputWindowOver = timeInState > inputWindowEnd;
 	bool hasNext = HasNextState();
 
+	weapon->GetObject3D()->SetIsEmitTrailEffect(true);
+
 	if ((/*isAnimEnd || */isInputWindowOver)/* && !hasNext*/) {
 
 
@@ -43,6 +45,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 		anima->SetIsPlaying(true);
 		anima->SetAnimationSpeed(1.0f);
 		anima->SetStratAnimeTime();
+		weapon->GetObject3D()->SetIsEmitTrailEffect(false);
 	}
 
 }

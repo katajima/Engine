@@ -111,7 +111,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Attack\AttackData.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\AttackManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
@@ -611,9 +610,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttack.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Factory\BaseAttackFactory.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Type\BaseAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemyState.h" />
@@ -641,11 +637,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackFactory.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Attack\PlayerAttackType.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayer.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\AttackManager.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Special\BaseSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.h" />

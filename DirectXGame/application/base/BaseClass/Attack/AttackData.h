@@ -15,17 +15,19 @@ struct KnockbackData
 		reslut.x *= power;
 		reslut.y *= yPower;
 		reslut.z *= power;
-
-
 		return reslut;
 	}
-
-
 };
 
 enum class AttackInput {
-	Light,
-	Heavy
+	Light,          // 弱攻撃
+	Heavy,          // 強攻撃
+	Special,        // 必殺技など特殊攻撃
+	JumpAttack,     // 空中攻撃
+	DashAttack,     // ダッシュ中に攻撃
+	Charge,         // チャージ攻撃（ボタン長押し）
+	Cancel,         // コンボキャンセル（ステップや回避などに移行）
+	Parry,          // 敵の攻撃に対するカウンター
 };
 
 
@@ -37,62 +39,3 @@ public:
 	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率
 	KnockbackData knockbackData{};			// ノックバックデータ
 };
-
-//// 攻撃モーションデータ構造体
-//struct ComboMotionData
-//{
-//	float attackInterval = 1.0f;		// 攻撃間隔
-//	float currentTime = 0.0f;			// 現在の時間(攻撃開始からの時間)
-//	float startupTime = 0.1f;			// 発生時間(攻撃開始から当たり判定が出るまでの時間)
-//	float attackAnimationTime = 0.5f;	// 攻撃アニメーション時間(攻撃モーションの長さ)
-//	float recoveryTime = 0.3f;			// 攻撃後の隙(攻撃モーション終了から次の入力を受け付けるまでの時間)
-//	bool canBeInterrupted = true;		// 攻撃中にキャンセル可能かのフラグ
-//
-//	bool isStartup = false;				// 発生時間か
-//	bool isAttackAnimation = false;		// 攻撃発生中か
-//	bool isRecovery = false;			// 後隙中か
-//
-//
-//	// 時間加算
-//	void AddCurrentTime(float deltaTime) {
-//		currentTime += deltaTime;
-//
-//		if (currentTime <= startupTime) { // 発生フレーム中
-//			isStartup = true;
-//			isAttackAnimation = false;
-//			isRecovery = false;
-//		}
-//		else if (currentTime > startupTime && currentTime <= attackAnimationTime + startupTime) { // 攻撃フレーム中
-//			isStartup = false;
-//			isAttackAnimation = true;
-//			isRecovery = false;
-//		}
-//		else if (currentTime > attackAnimationTime + startupTime &&  currentTime <= AllTime()) { // 後隙中 
-//			isStartup = false;
-//			isAttackAnimation = false;
-//			isRecovery = true;
-//		}
-//		else {// 何もしていない
-//			isStartup = false;
-//			isAttackAnimation = false;
-//			isRecovery = false;
-//		}
-//	}
-//	// 時間リセット
-//	void ResetTime() {
-//		currentTime = 0.0f;
-//	}
-//	// 全体時間取得
-//	float AllTime() const {
-//		return startupTime + attackAnimationTime + recoveryTime;
-//	}
-//	// 時間設定
-//	void SetTime(float startup, float attackAnimation, float recovery)
-//	{
-//		startupTime = startup;
-//		attackAnimationTime = attackAnimation;
-//		recoveryTime = recovery;
-//	}
-//
-//
-//};
