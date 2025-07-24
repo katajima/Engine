@@ -36,39 +36,11 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
 	
 
+	renderComponent_ = std::make_unique<RenderComponent>();
+	renderComponent_->Init(entity3DManager_,objectType,rasterizerType);
+	renderComponent_->SetTransfomation(transformation.get());
+
 	isColliderComponenyUpdate_ = true;
-	isSkin_ = false;
-
-	// オブジェクトタイプ
-	objectType_ = objectType;
-
-	switch (objectType)
-	{
-	case Object3d::ObjectModelType::kNormal:
-		objectTypeName = "NormalModelObject";
-		break;
-	case Object3d::ObjectModelType::kAnimation:
-		objectTypeName = "AnimationModelObject";
-		break;
-	case Object3d::ObjectModelType::kSkinning:
-		objectTypeName = "SkinningModelObject";
-		break;
-	case Object3d::ObjectModelType::kPrimitive:
-		objectTypeName = "PrimitiveObject";
-		break;
-	case Object3d::ObjectModelType::kSkyBox:
-		objectTypeName = "SkyBoxObject";
-		break;
-	case Object3d::ObjectModelType::kOcean:
-		objectTypeName = "OceanObject";
-		break;
-	default:
-		objectTypeName = "NoObject";
-		break;
-	}
-	
-	// 映り方
-	rasterizerType_ = rasterizerType;
 
 	// オブジェクト数
 	object3dCommon_->count++;
@@ -91,9 +63,6 @@ void Object3d::Update()
 	transformComponent_->Update();
 
 
-	if (model || primitive_ || skyBox_ || ocean_) {
-		isSkin_ = true;
-	}
 	
 
 
@@ -104,12 +73,13 @@ void Object3d::Update()
 	else {
 		cameraPtr = defaltCamera;
 	}
+	renderComponent_->Update();
+	renderComponent_->SetCamera(cameraPtr);
 
 
-
-	switch (objectType_)
+	switch (renderComponent_->GetObjectType())
 	{
-	case Object3d::ObjectModelType::kNormal:
+	case ObjectModelType::kNormal:
 		// モデルが存在する場合
 		if (model) {
 			localMatrix = model->modelData.rootNode.localMatrix;
@@ -122,7 +92,7 @@ void Object3d::Update()
 		// トランスフォームデータ
 		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
-	case Object3d::ObjectModelType::kAnimation:
+	case ObjectModelType::kAnimation:
 		
 		// アニメーションコンポーネント更新
 		animationComponent_->Update(MyGame::GameTime(), transformComponent_->GetWorldTransform());
@@ -131,7 +101,7 @@ void Object3d::Update()
 		// トランスフォームデータ
 		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
-	case Object3d::ObjectModelType::kSkinning:
+	case ObjectModelType::kSkinning:
 
 		// アニメーションコンポーネント更新
 		animationComponent_->UpdateSkin(MyGame::GameTime(), transformComponent_->GetWorldTransform());
@@ -185,84 +155,9 @@ void Object3d::Update()
 
 void Object3d::Draw()
 {
-	if (!isDraw) return;
-	if (!isSkin_) return;
 	if (isDelete) return;
 
-
-
-	switch (objectType_)
-	{
-	case Object3d::ObjectModelType::kNormal:
-		ObjectTypeDiscrimination(rasterizerType_);
-
-		DrawSetting();
-
-
-		// 3Dモデルが割り当てれていれば描画する
-		if (model) {
-			model->Draw();
-		}
-		break;
-	case Object3d::ObjectModelType::kAnimation:
-		ObjectTypeDiscrimination(rasterizerType_);
-
-		DrawSetting();
-
-
-		// 3Dモデルが割り当てれていれば描画する
-		if (model) {
-			model->Draw();
-		}
-		break;
-	case Object3d::ObjectModelType::kSkinning:
-		ObjectSkinTypeDiscrimination(rasterizerType_);
-
-		DrawSettingSkin();
-
-		// 3Dモデルが割り当てれていれば描画する
-		if (model) {
-			model->DrawSkinning();
-		}
-		break;
-	case ObjectModelType::kPrimitive:
-
-
-		if (primitive_) {
-
-			primitive_->DrawSetting(primitive_->GetPsoType());
-
-			transformation->GetCommandList(1);
-
-			primitive_->Draw();
-		}
-		break;
-
-	case ObjectModelType::kSkyBox:
-
-		if (skyBox_) {
-			skyBoxCommon_->DrawCommonSetting();
-
-			transformation->GetCommandList(1);
-
-			skyBox_->Draw();
-		}
-		break;
-	case ObjectModelType::kOcean:
-
-		if (ocean_) {
-			oceanManager_->DrawCommonSetting();
-
-			DrawSettingOcean();
-
-			ocean_->Draw();
-		}
-		break;
-	}
-
-
-
-
+	renderComponent_->Draw();
 }
 
 void Object3d::DrawTrailEffect()
@@ -278,37 +173,6 @@ void Object3d::DebugImguiSkin()
 	DebugModel::ImguiSkin(model->modelData);
 }
 
-float Object3d::GetAlpha()
-{
-	float a;
-	switch (objectType_)
-	{
-	case Object3d::ObjectModelType::kNormal:
-		a = model->GetMaterialAlfa();
-		break;
-	case Object3d::ObjectModelType::kAnimation:
-		a = model->GetMaterialAlfa();
-		break;
-	case Object3d::ObjectModelType::kSkinning:
-		a = model->GetMaterialAlfa();
-		break;
-	case Object3d::ObjectModelType::kPrimitive:
-		a = primitive_->GetMaterial()->color.a;
-		break;
-	case Object3d::ObjectModelType::kSkyBox:
-		a = skyBox_->GetMaterial()->color.a;
-		break;
-	case Object3d::ObjectModelType::kOcean:
-		a = ocean_->GetMaterial()->color.a;
-		break;
-	default:
-		a = 1.0f;
-		break;
-	}
-
-	return a;
-}
-
 void Object3d::InitColliderComponent()
 {
 	// コライダーコンポーネントの初期化
@@ -319,153 +183,6 @@ void Object3d::InitColliderComponent()
 	// 登録（IDを取得したければ変数で受ける）
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 	isColliderComponenyUpdate_ = true;
-}
-
-void Object3d::DrawSetting()
-{
-	entity3DManager_->GetLightManager()->DrawLight();
-
-	transformation->GetCommandList(1);
-
-
-
-	transformation->GetCommandList(10);
-
-	if (isIndividualCamera_) {
-		individualCamera_->GetCommandList(4);
-	}
-	else {
-		defaltCamera->GetCommandList(4);
-	}
-
-	
-}
-
-void Object3d::DrawSettingSkin()
-{
-
-	entity3DManager_->GetLightManager()->DrawLight();
-
-	transformation->GetCommandList(1);
-
-	if (isIndividualCamera_) {
-		individualCamera_->GetCommandList(4);
-	}
-	else {
-		defaltCamera->GetCommandList(4);
-	}
-}
-
-void Object3d::DrawSettingOcean()
-{
-	entity3DManager_->GetOceanManager()->DrawCommonSetting();
-
-
-	entity3DManager_->GetLightManager()->DrawLight();
-
-	transformation->GetCommandList(1);
-	transformation->GetCommandList(9);
-
-	if (isIndividualCamera_) {
-		individualCamera_->GetCommandList(4);
-	}
-	else {
-		defaltCamera->GetCommandList(4);
-	}
-}
-
-void Object3d::ObjectTypeDiscrimination(ObjectRasterizerType type)
-{
-	switch (type)
-	{
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_BACK:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_BACK:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_NONE:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_NONE);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
-		break;
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_NONE:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		object3dCommon_->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	default:
-		break;
-	}
-
-
-}
-
-void Object3d::ObjectSkinTypeDiscrimination(ObjectRasterizerType type)
-{
-	skinningConmmon_->DrawComputeSetting();
-
-	for (auto& mesh : model->modelData.mesh) {
-
-		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, mesh->skinCluster->paletteSrvHandle.second);
-		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, mesh->skinCluster->inputVertexSrvHandle.second);
-		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(3, mesh->skinCluster->influenceSrvHandle.second);
-		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(4, mesh->skinCluster->outputVertexUavHandle.second);
-		skinningConmmon_->GetDxCommon()->GetCommandList()->SetComputeRootConstantBufferView(0, mesh->skinCluster->skinningInfomation->GetGPUVirtualAddress());
-
-
-		skinningConmmon_->GetDxCommon()->GetCommandList()->Dispatch(UINT(mesh->vertices.size() + 1023) / 1024, 1, 1);
-
-		// 初期状態を UAV 用に遷移させる
-		D3D12_RESOURCE_BARRIER barrier{};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = mesh->skinCluster->outputVertexResource.Get();
-		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-		skinningConmmon_->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
-	}
-
-	switch (type)
-	{
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_BACK:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_BACK:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_SOLID_NONE:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
-		break;
-	case Object3d::ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_NONE:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	case Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		skinningConmmon_->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	default:
-		break;
-	}
-	
-
 }
 
 #pragma endregion // 描画系
@@ -548,12 +265,13 @@ void Object3d::SetModel(const std::string& filePath)
 	//モデルを検索してセット
 
 	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
+	renderComponent_->SetModel(model);
 }
 
 void Object3d::SetPrimitive(std::unique_ptr<Primitive> primitive)
 {
 	primitive_ = std::move(primitive);
-	//primitive_ = primitive_.get();
+	renderComponent_->SetPrimitive(primitive_.get());
 }
 
 void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,Vector3 offsetStr,Vector3 offsetEnd)

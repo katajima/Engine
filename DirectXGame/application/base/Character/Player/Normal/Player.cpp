@@ -26,7 +26,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	Parameters().speed = 20.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	// プレイヤー
-	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectModelType::kSkinning, position, camera_);
+	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", ObjectModelType::kSkinning, position, camera_);
 	objectBase_->SetModel("origin.gltf");
 	objectBase_->InitColliderComponent();
 	objectBase_->InitAnimationComponent();

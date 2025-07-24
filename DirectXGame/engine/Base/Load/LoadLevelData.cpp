@@ -108,7 +108,7 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 		}
 
 		// モデルを指定して3Dオブジェクトを生成 
-		Object3d* newObject = entity3DManager_->CreateObject3D(objectData.fileName,Object3d::ObjectModelType::kNormal,{},{});
+		Object3d* newObject = entity3DManager_->CreateObject3D(objectData.fileName,ObjectModelType::kNormal,{},{});
 		//newObject->Initialize(entity3DManager_);
 		newObject->SetModel(model);
 		newObject->SetIsDraw(true);

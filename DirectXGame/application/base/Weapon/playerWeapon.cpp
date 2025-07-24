@@ -7,7 +7,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 {
 	input_ = input;
 
-	objectBase_ = entity3DManager->CreateObject3D("PlayerWeapon", Object3d::ObjectModelType::kNormal, {}, camera);
+	objectBase_ = entity3DManager->CreateObject3D("PlayerWeapon", ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetIsDraw(false);
 	objectBase_->SetModel("Sword.obj");
 	objectBase_->GetWorldTransform().scale_ = { 1.25f,1.25f ,1.25f };

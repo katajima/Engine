@@ -19,17 +19,17 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	ocean_->GetWaveParameters()[0].speed = 5.0f;
 	ocean_->GetMaterial()->color = Color{ 0.0f, 0.0f, 0.8f, 0.75f };
 
-	oceanObject = entity3DManager_->CreateObject3D("oceanObject", Object3d::ObjectModelType::kOcean, { 0,-30,0 }, camera_);
+	oceanObject = entity3DManager_->CreateObject3D("oceanObject", ObjectModelType::kOcean, { 0,-30,0 }, camera_);
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
 	oceanObject->GetWorldTransform().rotate_.x = DegreesToRadians(90);
-	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
+	oceanObject->GetRenderComponent()->SetObjectDrawType(ObjectDrawType::kTranslucent03);
 	
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
 	
 	// 空
-	sky_ = entity3DManager_->CreateObject3D("skyBox", Object3d::ObjectModelType::kSkyBox, {},camera_);
+	sky_ = entity3DManager_->CreateObject3D("skyBox", ObjectModelType::kSkyBox, {},camera_);
 	sky_->GetWorldTransform().scale_ = { 100,100,100 };
 	sky_->SetSkyBox(skyBox.get());
 	
@@ -38,7 +38,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	{
 		for(int j = 0; j < 2; ++j)
 		{
-			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),Object3d::ObjectModelType::kNormal,
+			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),ObjectModelType::kNormal,
 				{ 3500 + static_cast<float>(j) * 120.0f ,106,3000 + static_cast<float>(i) * 100.0f },camera_);
 			object->SetModel("Missile.gltf");
 			object->GetWorldTransform().rotate_.y = DegreesToRadians(-90);

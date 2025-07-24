@@ -80,7 +80,7 @@ void Entity3DManager::UpdateImgui()
 		auto& entity = object3d[openedIndex];
 		ImGui::Text(entity->name.c_str());
 		ImGui::Separator();
-		std::string objectTypeName = "ObjectType : " + entity->GetObjectTypeName();
+		std::string objectTypeName = "ObjectType : " + entity->GetRenderComponent()->GetObjectTypeName();
 		ImGui::Text(objectTypeName.c_str());
 		ImGui::Separator();
 
@@ -104,7 +104,7 @@ void Entity3DManager::UpdateImgui()
 			}
 		}
 
-		if (entity->GetIsSkin()) {
+		if (entity->GetRenderComponent()->GetIsSkin()) {
 			ImGui::Separator();
 			ImGui::Text("material");
 			ImGui::Separator();
@@ -114,7 +114,7 @@ void Entity3DManager::UpdateImgui()
 			std::string nameMaterial = "";
 			std::string nameMesh = "";
 
-			if (entity->GetObjectType() == Object3d::ObjectModelType::kSkyBox) {
+			if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kSkyBox) {
 				material = entity->skyBox_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -128,7 +128,7 @@ void Entity3DManager::UpdateImgui()
 				}
 
 			}
-			else if (entity->GetObjectType() == Object3d::ObjectModelType::kPrimitive) {
+			else if (entity->GetRenderComponent()->GetObjectType() ==ObjectModelType::kPrimitive) {
 				material = entity->primitive_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -142,7 +142,7 @@ void Entity3DManager::UpdateImgui()
 				}
 
 			}
-			else if (entity->GetObjectType() == Object3d::ObjectModelType::kOcean) {
+			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kOcean) {
 				material = entity->ocean_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
@@ -210,7 +210,7 @@ void Entity3DManager::UpdateImgui()
 				entity->GetOcean()->UpdateImgui();
 			}
 
-			if (entity->GetObjectType() == Object3d::ObjectModelType::kSkinning) {
+			if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kSkinning) {
 				entity->DebugImguiSkin();
 			}
 		}
@@ -236,17 +236,17 @@ void Entity3DManager::Update()
 
 	for (auto& object : object3d) {
 		object->Update();
-		switch (object->GetObjectDrawType()) {
-		case Object3d::ObjectDrawType::kTranslucent01:
+		switch (object->GetRenderComponent()->GetObjectDrawType()) {
+		case ObjectDrawType::kTranslucent01:
 			transparentObjects01.push_back(object.get());
 			break;
-		case Object3d::ObjectDrawType::kTranslucent02:
+		case ObjectDrawType::kTranslucent02:
 			transparentObjects02.push_back(object.get());
 			break;
-		case Object3d::ObjectDrawType::kTranslucent03:
+		case ObjectDrawType::kTranslucent03:
 			transparentObjects03.push_back(object.get());
 			break;
-		case Object3d::ObjectDrawType::kOpaque:
+		case ObjectDrawType::kOpaque:
 			if (object->GetAlpha() < 1.0f) {
 				transparentObjects01.push_back(object.get());
 			}

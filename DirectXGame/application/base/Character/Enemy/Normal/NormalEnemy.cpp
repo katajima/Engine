@@ -10,7 +10,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	globalVariables_ = globalVariables;
 	CreateGroup("enemy");
 
-	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_), Object3d::ObjectModelType::kNormal, {}, camera);
+	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_),ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetModel("enemy2.obj");
 	objectBase_->GetWorldTransform().translate_ = position;
 	objectBase_->GetWorldTransform().scale_ = { 1.7f,1.7f,1.7f };

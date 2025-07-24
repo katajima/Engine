@@ -9,7 +9,7 @@
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	//// オブジェクト設定
-	object_ = entity3DManager->CreateObject3D("playerbullet", Object3d::ObjectModelType::kNormal, position, camera);
+	object_ = entity3DManager->CreateObject3D("playerbullet", ObjectModelType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");
 	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,1.5f,0 }, { 0,-1.5f,0 });
 	object_->Update();
@@ -131,7 +131,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	
 	hitObject_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
 	hitObject_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
-	hitObject_->SetObjectRasterizerType(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
+	hitObject_->GetRenderComponent()->SetObjectRasterizerType(ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
 	hitObject_->GetWorldTransform().translate_.z = 50.0f;
 	hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
 	hitObject_->SetIsDraw(false);

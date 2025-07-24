@@ -23,7 +23,7 @@
 
 struct SortResult {
 	Object3d* ptr;
-	Object3d::ObjectDrawType drawType;
+	ObjectDrawType drawType;
 	float alpha;
 	bool isSkin;
 };
@@ -55,7 +55,7 @@ public: //セッター
 	//void SetEntity3D(std::unique_ptr<Object3d> entity3D);
 
 	// オブジェクト3D生成(名前、タグ、モデルタイプ、位置、カメラ)
-	Object3d* CreateObject3D(const std::string& name, Object3d::ObjectModelType type, const Vector3& pos, Camera* camera) {
+	Object3d* CreateObject3D(const std::string& name, ObjectModelType type, const Vector3& pos, Camera* camera) {
 		auto object = std::make_unique<Object3d>();
 		object->Initialize(this, type);
 		object->SetName(name);
@@ -73,7 +73,7 @@ public: //セッター
 		const std::string& texturePath,
 		Primitive::ShapeType shapeType,
 		Camera* camera,
-		Object3d::ObjectRasterizerType rasterizerType = Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK)
+		ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK)
 	{
 		// プリミティブ生成
 		auto primitive = std::make_unique<Primitive>();
@@ -81,7 +81,7 @@ public: //セッター
 
 		// Object3d 生成
 		auto object = std::make_unique<Object3d>();
-		object->Initialize(this, Object3d::ObjectModelType::kPrimitive, rasterizerType);
+		object->Initialize(this, ObjectModelType::kPrimitive, rasterizerType);
 		object->SetName(name);
 		object->SetCamera(camera);
 		object->SetPrimitive(std::move(primitive)); // 所有権を渡す

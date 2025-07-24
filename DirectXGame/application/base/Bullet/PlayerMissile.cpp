@@ -44,7 +44,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	//	};
 
 	// オブジェクト設定
-	object_ = entity3DManager->CreateObject3D("playerbullet", Object3d::ObjectModelType::kNormal, position, camera);
+	object_ = entity3DManager->CreateObject3D("playerbullet", ObjectModelType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");
 	object_->Update();
 	// Y軸周り角度(θy)
@@ -114,7 +114,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	//primitiveCylinder_->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
 
 	hitObject_ = std::make_unique<Object3d>();
-	hitObject_->Initialize(entity3DManager, Object3d::ObjectModelType::kPrimitive, Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
+	hitObject_->Initialize(entity3DManager, ObjectModelType::kPrimitive, ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
 	//hitObject_->SetPrimitive(primitiveCylinder_.get());
 	hitObject_->GetWorldTransform().translate_.z = 50.0f;
 	hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);

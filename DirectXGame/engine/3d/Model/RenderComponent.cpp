@@ -8,13 +8,50 @@
 
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
-void RenderComponent::Init(Entity3DManager* entity3DManager)
+void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
+	objectType_ = objectType;
+	rasterizerType_ = rasterizerType;
+
+	isSkin_ = false;
+
+	switch (objectType)
+	{
+	case ObjectModelType::kNormal:
+		objectTypeName = "NormalModelObject";
+		break;
+	case ObjectModelType::kAnimation:
+		objectTypeName = "AnimationModelObject";
+		break;
+	case ObjectModelType::kSkinning:
+		objectTypeName = "SkinningModelObject";
+		break;
+	case ObjectModelType::kPrimitive:
+		objectTypeName = "PrimitiveObject";
+		break;
+	case ObjectModelType::kSkyBox:
+		objectTypeName = "SkyBoxObject";
+		break;
+	case ObjectModelType::kOcean:
+		objectTypeName = "OceanObject";
+		break;
+	default:
+		objectTypeName = "NoObject";
+		break;
+	}
+
 }
 
 void RenderComponent::Update()
 {
+	if (model || primitive_ || skyBox_ || ocean_) {
+		isSkin_ = true;
+	}
+	else {
+		isSkin_ = false;
+	}
+
 }
 
 void RenderComponent::Draw()
@@ -94,6 +131,37 @@ void RenderComponent::Draw()
 		break;
 	}
 
+}
+
+float RenderComponent::GetAlpha()
+{
+	float a;
+	switch (objectType_)
+	{
+	case ObjectModelType::kNormal:
+		a = model->GetMaterialAlfa();
+		break;
+	case ObjectModelType::kAnimation:
+		a = model->GetMaterialAlfa();
+		break;
+	case ObjectModelType::kSkinning:
+		a = model->GetMaterialAlfa();
+		break;
+	case ObjectModelType::kPrimitive:
+		a = primitive_->GetMaterial()->color.a;
+		break;
+	case ObjectModelType::kSkyBox:
+		a = skyBox_->GetMaterial()->color.a;
+		break;
+	case ObjectModelType::kOcean:
+		a = ocean_->GetMaterial()->color.a;
+		break;
+	default:
+		a = 1.0f;
+		break;
+	}
+
+	return a;
 }
 
 void RenderComponent::ObjectNormalTypeDiscrimination(ObjectRasterizerType type)

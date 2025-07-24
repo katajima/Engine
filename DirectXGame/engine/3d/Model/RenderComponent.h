@@ -44,7 +44,7 @@ class RenderComponent
 {
 public:
 
-	void Init(Entity3DManager* entity3DManager);
+	void Init(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType);
 
 
 	void Update();
@@ -53,6 +53,9 @@ public:
 
 	// カメラ
 	void SetCamera(Camera* camera) { camera_ = camera; }
+	// トランスフォーム
+	void SetTransfomation(Transfomation* transfomation) { transfomation_ = transfomation; }
+	
 	// モデル
 	void SetModel(Model* model) { this->model = model; }
 	// スカイボックス
@@ -61,6 +64,8 @@ public:
 	void SetOcean(Ocean* ocean) { ocean_ = ocean; }
 	// プリミティブ
 	void SetPrimitive(Primitive* primitive){primitive_ = primitive;}
+	
+
 public:
 	// 何かしらの見た目があるか
 	bool GetIsSkin() const { return isSkin_; }
@@ -74,6 +79,13 @@ public:
 	void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
 	// 映り方タイプ設定
 	void SetObjectRasterizerType(ObjectRasterizerType type) { rasterizerType_ = type; }
+	// オブジェクト型名前
+	std::string GetObjectTypeName() const { return objectTypeName; }
+
+
+public:
+
+	float GetAlpha();
 
 
 private:
@@ -101,6 +113,8 @@ private:
 	// 描画するかのフラグ
 	bool isDraw = true;
 
+	// オブジェクトタイプ名前
+	std::string objectTypeName = "";
 private:
 	Entity3DManager* entity3DManager_ = nullptr;
 	Model* model = nullptr;

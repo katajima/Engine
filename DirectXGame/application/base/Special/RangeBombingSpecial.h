@@ -38,7 +38,7 @@ public:
 public:
 
 	// 描画するか
-	void SetIsDraw(bool is) { objectReticle_->SetIsDraw(is); };
+	void SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };
 
 	void SetStage(Stage* stage);
 

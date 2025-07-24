@@ -317,28 +317,28 @@ void TestScene::InitializeObject3D()
 
 
 	oceanObject = std::make_unique<Object3d>();
-	oceanObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kOcean);
+	oceanObject->Initialize(GetEntity3DManager(), ObjectModelType::kOcean);
 	oceanObject->SetCamera(camera.get());
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
 	oceanObject->GetWorldTransform().rotate_.x = DegreesToRadians(90);
-	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
+	oceanObject->GetRenderComponent()->SetObjectDrawType(ObjectDrawType::kTranslucent03);
 	oceanObject->SetIsDraw(true);
 	
 
-	skinningObject = GetEntity3DManager()->CreateObject3D("run", Object3d::ObjectModelType::kSkinning, {0,0,0}, camera.get());
+	skinningObject = GetEntity3DManager()->CreateObject3D("run", ObjectModelType::kSkinning, {0,0,0}, camera.get());
 	skinningObject->SetModel("run.gltf");
 	skinningObject->GetWorldTransform().scale_ = { 3,3,3 };
 	skinningObject->InitAnimationComponent();
 	skinningObject->SetIsDraw(true);
 	skinningObject->GetAnimationComponent()->SetAnimetion("Anim_0", 0.3f);
 
-	skinningObject2 = GetEntity3DManager()->CreateObject3D("BoxBox", Object3d::ObjectModelType::kNormal, { 0,0,0 }, camera.get());
+	skinningObject2 = GetEntity3DManager()->CreateObject3D("BoxBox", ObjectModelType::kNormal, { 0,0,0 }, camera.get());
 	skinningObject2->SetModel("BoxBox.obj");
 	skinningObject2->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
 	skinningObject2->SetIsDraw(true);
 	
-	skinningObject3 = GetEntity3DManager()->CreateObject3D("KnightCharacter", Object3d::ObjectModelType::kSkinning, { 0,0,0 }, camera.get());
+	skinningObject3 = GetEntity3DManager()->CreateObject3D("KnightCharacter", ObjectModelType::kSkinning, { 0,0,0 }, camera.get());
 	skinningObject3->SetModel("KnightCharacter.gltf");
 	skinningObject3->InitAnimationComponent();
 	skinningObject3->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
@@ -362,7 +362,7 @@ void TestScene::InitializeObject3D()
 
 	
 	skyBoxObject = std::make_unique<Object3d>();
-	skyBoxObject->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkyBox);
+	skyBoxObject->Initialize(GetEntity3DManager(), ObjectModelType::kSkyBox);
 	skyBoxObject->SetSkyBox(skyBox.get());
 	skyBoxObject->SetCamera(camera.get());
 	skyBoxObject->GetWorldTransform().scale_ = {10,10,10};
@@ -371,7 +371,7 @@ void TestScene::InitializeObject3D()
 	
 	
 	skyBoxObject2 = std::make_unique<Object3d>();
-	skyBoxObject2->Initialize(GetEntity3DManager(), Object3d::ObjectModelType::kSkyBox);
+	skyBoxObject2->Initialize(GetEntity3DManager(), ObjectModelType::kSkyBox);
 	skyBoxObject2->SetSkyBox(skyBox2.get());
 	skyBoxObject2->SetCamera(camera.get());
 	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
