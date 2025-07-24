@@ -40,7 +40,7 @@ public:
 	}
 
 private:
-	float groundHeight_ = 0.0f;		// 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
+	float groundHeight_ = -3.0f;		// 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
 	Vector3 velocity_ = {};			// オブジェクトの速度
 	Vector3 acceleration_ = {};		// オブジェクトの加速度
 	Vector3 direction_{0,0.,-1.0f};	// 方向

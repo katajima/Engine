@@ -23,6 +23,8 @@ public:
 
 	virtual void Jump() = 0;
 
+	virtual void Attack() = 0;
+
 	virtual void SetPlayer(BasePlayer* player) = 0;
 
 public:

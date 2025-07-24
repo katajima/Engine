@@ -39,11 +39,13 @@ public:
 
 	void AssignMoveCommandPad();
 	void AssignJampCommandPad();
+	void AssignAttackCommandPad();
 
 private:
 	Input* input_;
 
 	ICommand* movePad;
 	ICommand* jampPad;
+	ICommand* attackPad;
 
 };

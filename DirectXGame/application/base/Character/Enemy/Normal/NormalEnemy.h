@@ -45,6 +45,7 @@ public:
 
 	void Jump() override;
 
+	void Attack() override;
 
 	void ChangeState(const std::string& name) override{
 		auto it = stateFactoryMap_.find(name);

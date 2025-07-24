@@ -40,6 +40,13 @@ public:
 	/// ジャンプ
 	/// </summary>
 	virtual void Jump() = 0;
+	
+	/// <summary>
+	/// 攻撃
+	/// </summary>
+	virtual void Attack() = 0;
+
+	virtual void ChangeState(const std::string& name) = 0;
 
 public:
 	// キャラクタータイプ設定

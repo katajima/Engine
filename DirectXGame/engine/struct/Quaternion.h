@@ -165,8 +165,8 @@ static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
     }
 
     // 内積が1に近い場合（ほぼ同一方向）の処理
-    const float DOT_THRESHOLD = 1.0f - FLT_EPSILON; // 定数名を定義
-    if (dot >= DOT_THRESHOLD) {
+    constexpr float DOT_THRESHOLD = 0.9995f;
+    if (dot > DOT_THRESHOLD) {
         Quaternion result{};
         result = Lerp(q0_t, q1_t, t);
         result.Normalize(); // 正規化を追加
@@ -196,7 +196,6 @@ static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
         (scale0 * q0_t.z) + (scale1 * q1_t.z),
         (scale0 * q0_t.w) + (scale1 * q1_t.w)
     };
-    result.Normalize(); // 最終結果の正規化
     return result.Normalize();
 }
 static Quaternion Slerp2(const Quaternion& q0, const Quaternion& q1, float t) {

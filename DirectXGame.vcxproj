@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Attack\AttackData.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp" />
@@ -679,6 +680,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
+    <ClInclude Include="DirectXGame\engine\Animation\AnimationComponent.h" />
     <ClInclude Include="DirectXGame\engine\Animation\AnimationData.h" />
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h" />

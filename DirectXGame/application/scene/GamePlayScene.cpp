@@ -23,6 +23,7 @@ void GamePlayScene::Initialize()
 	inputHander_->SetInput(input_);
 	inputHander_->AssignMoveCommandPad();
 	inputHander_->AssignJampCommandPad();
+	inputHander_->AssignAttackCommandPad();
 
 
 	// フォローカメラ
@@ -64,10 +65,10 @@ void GamePlayScene::Initialize()
 	loadData_ = std::make_unique<LoadLevelData>();
 	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
 	// 敵生成
-	for (auto& enemy : loadData_->GetLevelData()->enemys) {
+	/*for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
 			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
-	}
+	}*/
 	
 	
 	
@@ -163,19 +164,19 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	//int countIndex = 0;
-	//for (auto& enemy : loadData_->GetLevelData()->enemys) {
-	//	if (enemy.isEnable)
-	//	if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
-	//		enemy.crrentTimer += MyGame::GameTime();
-	//		if (enemy.crrentTimer >= enemy.timer) {
-	//			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
-	//			loadData_->GetLevelData()->counts[countIndex]++;
-	//			enemy.crrentTimer = 0;
-	//		}
-	//	}
-	//	countIndex++;
-	//}
+	int countIndex = 0;
+	for (auto& enemy : loadData_->GetLevelData()->enemys) {
+		if (enemy.isEnable)
+		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
+			enemy.crrentTimer += MyGame::GameTime();
+			if (enemy.crrentTimer >= enemy.timer) {
+				caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
+				loadData_->GetLevelData()->counts[countIndex]++;
+				enemy.crrentTimer = 0;
+			}
+		}
+		countIndex++;
+	}
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -200,12 +201,13 @@ void GamePlayScene::Update()
 		BehaviorPhase2Update();
 		break;
 	}
-
-	if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
+	tumeee_ += MyGame::GameTime();
+	if (tumeee_ >= 10.0f) {
+		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
+			// シーン切り替え
+			GetSceneManager()->ChangeScene("TITLE");
+		}
 	}
-
 #ifdef _DEBUG
 	if (input_->IsTriggerKey(DIK_P)) {
 		// シーン切り替え

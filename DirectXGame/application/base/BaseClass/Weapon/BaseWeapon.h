@@ -1,6 +1,7 @@
 #pragma once
 #include "WeaponData.h"
-
+#include "DirectXGame/application/base/BaseClass/Attack/AttackData.h"
+#include "DirectXGame/application/base/Attack/Combo/ComboState.h"
 
 // 武器のベースクラス
 class BaseWeapon : public BaseObject
@@ -14,37 +15,32 @@ public:
 
 	virtual void Draw2D() = 0;
 
+
+
 public:
 	// 使っているキャラクター設定
-	void SetCharacter(BaseCharacter* character) { this->character = character; };
+	void SetCharacter(BaseCharacter* character) {
+		this->character = character;
+		comboStateMachine_ = std::make_unique<ComboStateMachine>(this->character);
+	};
 	// タグによるコライダーの有効・無効を設定
 	void SetIsCollider(CollisionTag tag ,bool is) { objectBase_->GetColliderComponent()->SetEnableByTag(tag, is); };
 	// ダメージ取得
-	float GetDamage() const { return data_.damage; };
+	//float GetDamage() const { return data_.damage; };
 	// 攻撃中かどうかのフラグを取得
 	bool IsActive() const { return data_.isActive; };
 	// オートマチックかどうかのフラグを取得
 	bool IsAutomatic() const { return data_.isAutomatic; };
 	// 攻撃中かどうかのフラグを設定
 	void SetIsActive(bool isActive) { data_.isActive = isActive; };
-	// 移動速度倍率を取得 
-	float GetMovementSpeedMultiplier() const { return data_.movementSpeedMultiplier; }
-	// 移動速度倍率を設定
-	void SetMovementSpeedMultiplier(float multiplier) { data_.movementSpeedMultiplier = multiplier; }
-	// コンボモーションデータ
-	ComboMotionData GetComboMotionData() const { return data_.motionData; }
-	// コンボデータ
-	ComboData& GetComboData() { return data_.comboData; }
-	// アニメーション中の時間取得
-	Timer& GetTimer() { return data_.animetionTimer; }
 	// ヒットデータを取得
 	AttackHitData& GetHitData() { return hitData_; }
-	// 攻撃入力系クラス取得
-	AttackInput& GetAttackInput() { return attackInput_; }
-	
+	// データ
+	ComboData GetComboData() const { return comboData_; }
 	//
-	KnockbackData GetKnockbackData() const { return data_.knockbackData; };
-	
+	void SetComboData(ComboData data) { comboData_ = data; }
+		//
+	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
 
 
 
@@ -53,33 +49,43 @@ public:
 	void RecastTime(float timer) { data_.recastTime += timer; }
 
 public:
-
-	// 時間を設定
-	void SetTime(float startupTime, float attackAnimationTime, float recoveryTime)
-	{
-		data_.motionData.SetTime(startupTime, attackAnimationTime, recoveryTime);
+	void AddComboNode(const std::string& name, std::shared_ptr<ComboNodeState> node) {
+		comboNodes_[name] = node;
 	}
-
-	void SetAttackCombo(float deltaTime);
-
-	// 攻撃各コンボによる初期化
-	virtual void AttackTypeInit(int comboIndex) = 0;
-
-	// 攻撃更新
-	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
-
-	// 攻撃方法設定
-	void KeyAttackTypes(bool is);
-
-	void AttackUpdate();
-
+	void ConnectCombo(const std::string& from, AttackInput input, const std::string& to) {
+		auto itFrom = comboNodes_.find(from);
+		auto itTo = comboNodes_.find(to);
+		if (itFrom != comboNodes_.end() && itTo != comboNodes_.end()) {
+			itFrom->second->SetNextState(input, itTo->second);
+		}
+	}
+	void StartCombo(const std::string& name) {
+		auto it = comboNodes_.find(name);
+		if (it != comboNodes_.end()) {
+			comboStateMachine_->SetRoot(it->second);
+		}
+	}
+	void UpdateCombo(float dt) {
+		comboStateMachine_->Update(dt);
+	}
+	void InputCombo(AttackInput input) {
+		comboStateMachine_->HandleInput(input);
+	}
+	bool IsComboFinished() const {
+		return comboStateMachine_->IsComboFinished();
+	}
 protected:
-	WeaponData data_;		// 武器データ
-	AttackHitData hitData_; // 攻撃ヒットデータ
-	std::vector<AttackMotions> attack_;//
+	WeaponData data_;						// 武器データ
+	AttackHitData hitData_;					// 攻撃ヒットデータ
+	ComboData comboData_;					// コンボデータ
+	std::unique_ptr<ComboStateMachine> comboStateMachine_;	// コンボステートマシーン
+	std::map<std::string, std::shared_ptr<ComboNodeState>> comboNodes_;
+	//std::shared_ptr<ComboNodeState>
 
+	//std::vector<AttackMotions> attack_;//
+	
 	// 攻撃入力系クラス
-	AttackInput attackInput_;
+	//AttackInput attackInput_;
 
 	
 
@@ -101,10 +107,10 @@ public:
 	virtual void Draw2D() = 0;
 	
 	// 攻撃各コンボによる初期化
-	virtual void AttackTypeInit(int comboIndex) = 0;
+	//virtual void AttackTypeInit(int comboIndex) = 0;
 
 	// 攻撃更新
-	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
+	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 
 public:
 	// ヒットストップ時間を取得
@@ -128,10 +134,10 @@ public:
 	virtual void Draw2D() = 0;
 	
 	// 攻撃各コンボによる初期化
-	virtual void AttackTypeInit(int comboIndex) = 0;
+	//virtual void AttackTypeInit(int comboIndex) = 0;
 
 	// 攻撃更新
-	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
+	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 
 protected:
 	RangedWeaponData rengedData_; // 遠距離武器データ

@@ -16,10 +16,10 @@ public:
 	virtual void Draw2D() = 0;
 
 	// 攻撃各コンボによる初期化
-	virtual void AttackTypeInit(int comboIndex) = 0;
+	//virtual void AttackTypeInit(int comboIndex) = 0;
 
 	// 攻撃更新
-	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
+	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 protected:
 
 };
@@ -38,10 +38,10 @@ public:
 	virtual void Draw2D() = 0;
 
 	// 攻撃各コンボによる初期化
-	virtual void AttackTypeInit(int comboIndex) = 0;
+	//virtual void AttackTypeInit(int comboIndex) = 0;
 
 	// 攻撃更新
-	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
+	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 protected:
 
 };
@@ -60,10 +60,10 @@ public:
 	virtual void Draw2D() = 0;
 
 	// 攻撃各コンボによる初期化
-	virtual void AttackTypeInit(int comboIndex) = 0;
+	//virtual void AttackTypeInit(int comboIndex) = 0;
 
 	// 攻撃更新
-	virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
+	//virtual void AttackUpdate(float deltaTime, WorldTransform& worldTransform) = 0;
 protected:
 
 };

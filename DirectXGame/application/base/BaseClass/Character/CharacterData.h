@@ -64,7 +64,7 @@ struct BasicParameters
 	float strength = 1.0f;	// 力
 	float speed = 1.0f;		// 速さ
 	float defense = 1.0f;	// 防御力
-	float jampPower = 80.0f;// ジャンプ力
+	float jampPower = 180.0f;// ジャンプ力
 	int intelligence = 1;	// 知力
 };
 

@@ -15,26 +15,53 @@ void PlayerStateMove::Update()
 	BaseWeapon* weapon = player_->GetWeapon();
 	BaseSpecial* special = player_->GetSpecial();
 
+	weapon->GetObject3D()->SetIsDraw(true);
+
+	player_->GetObject3D()->SetIsLoop(true);
+	player_->GetObject3D()->SetIsPlaying(true);
+	player_->GetObject3D()->SetAnimationSpeed(1.0f);
+
+	if(player_->GetCharacterStateComponent().IsJumping()){
+		if (player_->GetObject3D()->GetRigidBodyComponent()->Velocity().y <=  0.0f) {
+			player_->GetObject3D()->SetAnimetion("Fall", 0.01f);
+		}
+		else {
+			player_->GetObject3D()->SetAnimetion("Fall", 0.01f);
+		}
+	}
+	else {
+		if (player_->GetVelocity().Length() != 0) {
+
+			player_->GetObject3D()->SetAnimetion("Walk", 0.1f);
+		}
+		else {
+			player_->GetObject3D()->SetAnimetion("Idle1", 0.1f);
+		}
+	}
+	
+
 	if (input->IsControllerConnected()) {
 
 		if (player_->GetSpecial()->GetIsSpecial()) {
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
 		}
 
-		weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-		if (weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack) {
-			weapon->GetAttackInput().SetIsAttack(true);
-		}
+
+
+		//weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
+		//if (weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack) {
+		//	weapon->GetAttackInput().SetIsAttack(true);
+		//}
 	}
 
 	weapon->RecastTime(MyGame::GameTime());
-	if (weapon->GetAttackInput().GetIsAttack()) {
-		if (weapon->GetIsRecastTimeOver()) {
-			player_->ChangeState("Attack");
-			weapon->GetTimer().t = 0.0f;
-			weapon->GetAttackInput().TrueState();
-		}
-	}
+	//if (weapon->GetAttackInput().GetIsAttack()) {
+		//if (weapon->GetIsRecastTimeOver()) {
+		//	player_->ChangeState("Attack");
+		//	weapon->GetTimer().t = 0.0f;
+		//	weapon->GetAttackInput().TrueState();
+		//}
+	//}
 	if (special->GetIsSpecial()) {
 		if (special->GetIsSpecialAttack()) {
 			player_->ChangeState("Special");
@@ -52,9 +79,12 @@ void PlayerStateMove::Exit()
 void PlayerStateMove::Enter()
 {
 	BaseWeapon* weapon = player_->GetWeapon();
-	weapon->GetTimer().t = 0.0f;
+	//weapon->GetTimer().t = 0.0f;
 	weapon->GetObject3D()->SetIsDraw(false);
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
+	player_->GetObject3D()->SetIsLoop(true);
+	player_->GetObject3D()->SetIsPlaying(true);
+	player_->GetObject3D()->SetAnimationSpeed(1.0f);
 }
 
 PlayerStateAttack::PlayerStateAttack(BasePlayer* player)
@@ -64,43 +94,59 @@ PlayerStateAttack::PlayerStateAttack(BasePlayer* player)
 void PlayerStateAttack::Update()
 {
 	BaseWeapon* weapon = player_->GetWeapon();
+	
+	
 
+	//// コンボの終了判定：次がない && アニメ終了
+	//if (player_->GetWeapon()->GetComboStateMachine()->IsComboFinished() && player_->GetObject3D()->IsAnimationFinished()) {
+	//	player_->ChangeState("Move");
+	//}
+
+	weapon->GetComboStateMachine()->Update(player_->GetTime());
 
 	// 攻撃処理
-	weapon->AttackUpdate();
+	//weapon->AttackUpdate();
 
-	if (!weapon->GetAttackInput().GetIsState()) {
-		player_->ChangeState("Move");
-		return;
-	}
+	///if (!weapon->GetAttackInput().GetIsState()) {
+	//	player_->ChangeState("Move");
+	//	return;
+	//}
 }
 
 
 void PlayerStateAttack::Exit()
 {
+	// 武器
+	player_->GetWeapon()->GetComboStateMachine()->HandleInput(AttackInput::Light);
 	player_->GetWeapon()->GetObject3D()->SetIsDraw(false);
 	player_->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
+	
+	// アニメーション
+	player_->GetObject3D()->SetIsLoop(true);
+	player_->GetObject3D()->SetIsPlaying(true);
+	player_->GetObject3D()->SetAnimationSpeed(1.0f);
+	/*player_->GetObject3D()->SetStratAnimeTime();
+	player_->GetObject3D()->SetIsLoop(true);
+	player_->GetObject3D()->SetIsPlaying(true);
+	player_->GetObject3D()->SetAnimationSpeed(1.0f);*/
 }
 
 void PlayerStateAttack::Enter()
 {
 	BaseWeapon* weapon = player_->GetWeapon();
-	weapon->GetTimer().t = 0.0f;
-	weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = true;
 	
-	if (player_->GetCharacterStateComponent().IsJumping()) {
-
-		weapon->KeyAttackTypes(true);
-	}
-	else {
-		weapon->KeyAttackTypes(false);
-	}
-	
-
-	
-	weapon->AttackTypeInit(0);
+	// 武器
+	weapon->GetComboStateMachine()->Update(player_->GetTime());
 	weapon->GetObject3D()->SetIsDraw(true);
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
+	weapon->GetColliderComponent()->contactRecord_.Clear();
+
+	// アニメーション
+	//player_->GetObject3D()->SetEndAnimeTime();
+	/*player_->GetObject3D()->SetStratAnimeTime();
+	player_->GetObject3D()->SetIsLoop(false);
+	player_->GetObject3D()->SetAnimationSpeed(1.0f);
+	player_->GetObject3D()->SetAnimetion("Attack2", 0.0f);*/
 }
 
 
@@ -128,7 +174,6 @@ void PlayerStateSpecial::Update()
 	}
 	if (special->GetPhese() == 2) {
 		player_->ChangeState("Move");
-		//basicbehaviorRequest_ = BasicBehavior::kRoot;
 	}
 }
 

@@ -162,9 +162,40 @@ void Object3d::Update()
 
 			if (itCurrent != animations.end()) {
 				// アニメーション時間更新（毎フレーム）
-				float deltaTime = MyGame::GameTime();
-				modelData.animationTime += deltaTime;
-				modelData.animationTime = std::fmod(modelData.animationTime, itCurrent->second.duration);
+				float deltaTime = MyGame::GameTime() * animationSpeed;
+				if (isPlaying) {
+					if (isReversePlayback) { // 逆再生なら
+						modelData.animationTime -= deltaTime;
+					}
+					else {
+						modelData.animationTime += deltaTime;
+					}	
+				}
+
+				// ループするなら
+				if (isLoop) {
+					modelData.animationTime = std::fmod(modelData.animationTime, itCurrent->second.duration);
+					
+					// 負の値を返す可能性があるので
+					if (modelData.animationTime < 0.0f) {
+						modelData.animationTime += itCurrent->second.duration;
+					}
+				}
+				else { // しないなら
+					if (isReversePlayback) {
+						if (modelData.animationTime <= 0) {
+							modelData.animationTime = 0; // 最終フレームで止める
+							isPlaying = false; // 自動停止
+						}
+					}
+					else {
+						if (modelData.animationTime >= itCurrent->second.duration) {
+							modelData.animationTime = itCurrent->second.duration; // 最終フレームで止める
+							isPlaying = false; // 自動停止
+						}
+					}		
+				}
+
 
 				// アニメーションブレンド中か？
 				if (modelData.isBlending && modelData.previousAnimName != "") {
@@ -173,10 +204,16 @@ void Object3d::Update()
 						const Animation& prevAnim = itPrev->second;
 						const Animation& currAnim = itCurrent->second;
 
-						// 時間取得
-						float prevTime = std::fmod(modelData.animationTime, prevAnim.duration);
-						float currTime = std::fmod(modelData.animationTime, currAnim.duration);
+						auto WrapTime = [](float time, float duration) {
+							float wrapped = std::fmod(time, duration);
+							if (wrapped < 0.0f) wrapped += duration;
+							return wrapped;
+							};
 
+						float prevTime = WrapTime(modelData.animationTime, prevAnim.duration);
+						float currTime = WrapTime(modelData.animationTime, currAnim.duration);
+
+						
 						// ① 各スケルトン姿勢を取得
 						Skeleton prevSkeleton = modelData.skeleton;
 						Skeleton currSkeleton = modelData.skeleton;
@@ -215,22 +252,9 @@ void Object3d::Update()
 				for (auto& mesh : modelData.mesh) {
 					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
 				}
-				//std::vector<std::future<void>> futures;
-
-				//for (auto& mesh : modelData.mesh) {
-				//	
-				//	futures.push_back(std::async(std::launch::async, [&mesh, &modelData]() {
-				//		Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
-				//		}));
-				//}
-				//// 全スレッドの終了を待つ
-				//for (auto& f : futures) {
-				//	f.get();
-				//}
-
+				
 				// ルートの変換行列反映
 				localMatrix = modelData.skeleton.joints[0].skeletonSpaceMatrix;
-
 				// デバッグ用：スケルトン描画
 				Animetion::DrawSkeleton(
 					entity3DManager_->Get3DLineCommon(),
@@ -243,6 +267,20 @@ void Object3d::Update()
 			else {
 				// アニメーションが見つからない場合のフォールバック
 				localMatrix = model->modelData.rootNode.localMatrix;
+
+				std::vector<Matrix4x4> cachedSkeletonMatrices;
+				for (auto& mesh : modelData.mesh) {
+					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				}
+
+				// デバッグ用：スケルトン描画
+				Animetion::DrawSkeleton(
+					entity3DManager_->Get3DLineCommon(),
+					modelData.skeleton.joints,
+					transformComponent_->GetWorldTransform().worldMat_.GetWorldPosition(),
+					transformComponent_->GetWorldTransform().scale_,
+					MakeRotateXYZ(transformComponent_->GetWorldTransform().rotate_)
+				);
 			}
 
 
@@ -441,6 +479,31 @@ void Object3d::InitColliderComponent()
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 	isColliderComponent_ = true;
 	isColliderComponenyUpdate_ = true;
+}
+
+bool Object3d::IsAnimationFinished()
+{
+	if (!model) return false;
+
+	const auto& animations = model->modelData.animations;
+	auto& modelData = model->modelData;
+
+	const std::string& currentName = modelData.currentAnimName;
+	auto itCurrent = animations.find(currentName);
+
+	// 現在のアニメーション名が見つからなかった場合は再生終了扱い
+	if (itCurrent == animations.end()) {
+		return true;
+	}
+
+	// アニメ再生中かつアニメ時間が duration に達していれば終了
+	if (isReversePlayback) {
+		
+		return !isPlaying && modelData.animationTime <= 0;
+	}
+	else {
+		return !isPlaying && modelData.animationTime >= itCurrent->second.duration;
+	}
 }
 
 void Object3d::DrawSetting()

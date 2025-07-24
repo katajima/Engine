@@ -183,7 +183,7 @@ void NormalEnemy::DrawEffect()
 void NormalEnemy::Draw2D()
 {
 	if (flags_.isLockonTarget) {
-		icon_lockOn->SetPosition(objectBase_->GetScreenPosition());
+		icon_lockOn->SetPosition(objectBase_->GetScreenPosition() + Vector2{0.0f,-40.0f});
 
 		icon_lockOn->Update();
 		icon_lockOn->Draw();
@@ -192,11 +192,11 @@ void NormalEnemy::Draw2D()
 	if (GetAlive()) {
 
 		backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f });
-		backHpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-30 });
+		backHpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-30 + -30.0f });
 		backHpBer_->Update();
 		backHpBer_->Draw();
 
-		hpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-27.5f });
+		hpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-27.5f + -30.0f });
 		hpBer_->SetSize({ (HP() * 0.95f),10.0f });
 		hpBer_->Update();
 		hpBer_->Draw();
@@ -275,6 +275,10 @@ void NormalEnemy::Move()
 
 void NormalEnemy::Jump()
 {
+
+}
+
+void NormalEnemy::Attack() {
 
 }
 

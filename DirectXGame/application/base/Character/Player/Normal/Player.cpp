@@ -26,12 +26,12 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	Parameters().speed = 20.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	// プレイヤー
-	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectModelType::kNormal, position, camera_);
-	objectBase_->SetModel("AnimatedCube.gltf");
+	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectModelType::kSkinning, position, camera_);
+	objectBase_->SetModel("origin.gltf");
 	objectBase_->InitColliderComponent();
 	InitMoveComponent();
 	objectBase_->InitRigidBodyComponent();
-
+	objectBase_->SetIsUpdateColliderComponent(false);
 	GetColliderComponent()->SetHitReceiver(this);
 
 	InitializeBaseAddItem();
@@ -46,7 +46,10 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	GetColliderComponent()->AddCollider(std::move(sphere));
 
 
+	worldCollider_.Initialize();
 
+	worldCollider_.parent_ = &objectBase_->GetWorldTransform();
+	worldCollider_.translate_.y = 3.0f;
 	// 衝突時のコールバック登録
 	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
@@ -123,18 +126,15 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
-	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
-	weapon_->GetObject3D()->GetWorldTransform().parent_ = &objectBase_->GetWorldTransform();
-	weapon_->GetObject3D()->GetWorldTransform().translate_ = { 0,0.5f,0.5f };
 	weapon_->SetCharacter(this);
+	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
 
 
+	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { DegreesToRadians(-90),0.0f,0.0f };
 
 	// UI
 	ui_ = std::make_unique<PlayerUI>();
 	ui_->Initialize(entity2DManager);
-
-
 
 	ChangeState("Move");
 }
@@ -149,12 +149,7 @@ void Player::Update()
 	if (GetHP() <= 0) {
 		flags_.isAlive = false;
 	}
-	if (ImGui::Button("Idle")) {
-		objectBase_->SetAnimetion("Idle", 0.3f);
-	}
-	if (ImGui::Button("Run")) {
-		objectBase_->SetAnimetion("Run", 0.3f);
-	}
+
 
 
 #ifdef _DEBUG
@@ -167,20 +162,6 @@ void Player::Update()
 		special_->SetGauge(100);
 	}
 	ImGui::Text(state_->GetName().c_str());
-	int count = weapon_->GetComboData().GetCurrentComboCount();
-	ImGui::InputInt("ComboCount", &count);
-	count = weapon_->GetComboData().GetComboMaxCount();
-	ImGui::InputInt("maxComboCount", &count);
-	bool is = weapon_->GetComboData().isComboNext;
-	ImGui::Checkbox("isComboNext", &is);
-
-
-	is = weapon_->GetAttackInput().GetIsAttack();
-	ImGui::Checkbox("isAttack", &is);
-	is = weapon_->GetAttackInput().GetIsState();
-	ImGui::Checkbox("isState", &is);
-	is = objectBase_->GetRigidBodyComponent()->IsGravity();
-	ImGui::Checkbox("IsGravity", &is);
 
 	ImGui::End();
 	if (input_->IsTriggerKey(DIK_C)) {
@@ -201,8 +182,8 @@ void Player::Update()
 
 	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), *objectBase_);
 
-	moveComponent_->Landing(*objectBase_->GetTransformComponent(),*objectBase_->GetRigidBodyComponent());
-	characterStateComponent_.Update(Velocity(),false,GetAlive());
+	moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
+	characterStateComponent_.Update(Velocity(), false, GetAlive());
 
 
 	// 重力
@@ -216,14 +197,18 @@ void Player::Update()
 	}
 
 	objectBase_->UpdateWorldTransform();
+	worldCollider_.Update();
 
+	objectBase_->GetColliderComponent()->UpdateAll(worldCollider_);
 
 	// 必殺技
 	special_->Update();
 	// ヒットデータの更新
 	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 	//武器更新
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(objectBase_->model->modelData.skeleton, "rightHand", objectBase_->GetWorldTransform().worldMat_));
 	weapon_->Update();
+
 }
 
 #pragma region Draw
@@ -289,9 +274,7 @@ void Player::Move()
 		}
 
 	}
-	else {
 
-	}
 
 	//{
 
@@ -345,8 +328,25 @@ void Player::Jump()
 	if (GetAlive()) {
 		characterStateComponent_.ChangeState(CharacterState::Jump);
 		objectBase_->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
+		objectBase_->SetAnimetion("JumpStrat1", 0.01f);
 	}
-	
+
+}
+
+void Player::Attack()
+{
+	if (stateName_ == "Attack") {
+
+
+		weapon_->InputCombo(AttackInput::Light);
+
+		//weapon_->GetComboStateMachine()->HandleInput(AttackInput::Light);
+	}
+	else if (stateName_ == "Move") {
+		ChangeState("Attack");
+		weapon_->StartCombo("Attack1");
+	}
+
 }
 
 #pragma endregion //移動関係

@@ -189,6 +189,11 @@ void Entity3DManager::UpdateImgui()
 					}
 					materialIndex++;
 				}
+				if (ImGui::CollapsingHeader("Animetion")) {
+					for (auto& anima : entity->model->modelData.animations) {
+						ImGui::Text(anima.first.c_str());
+					}
+				}
 			}
 
 			// プリミティブ形状なら

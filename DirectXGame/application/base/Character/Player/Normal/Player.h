@@ -35,9 +35,13 @@ public:
 	// ジャンプ
 	void Jump() override;
 
+	void Attack() override;
+
 private: 
 	// 調整項目の適用
 	void ApplyGlobalVariables();
+
+	WorldTransform worldCollider_;
 
 public:
 	void LockOn(const std::vector<BaseEnemy*>& enemys);

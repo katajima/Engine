@@ -43,6 +43,8 @@ public:
 	
 	virtual void Jump() = 0;
 
+	virtual void Attack() = 0;
+
 public:
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
@@ -66,6 +68,7 @@ public:
 	void ChangeState(const std::string& name) {
 		auto it = stateFactoryMap_.find(name);
 		if (it != stateFactoryMap_.end()) {
+			stateName_ = name;
 			ChangeState(it->second(this)); // unique_ptr<BasePlayerState>
 		}
 		else {
@@ -98,6 +101,7 @@ protected:
 	bool isCreativeMode = false;			// クリエイティブモードかどうか
 
 
+	std::string stateName_ = "";
 	std::unique_ptr<BasePlayerState> state_;// ステート
 	std::unordered_map<std::string, PlayerStateFactory> stateFactoryMap_;	// 
 };

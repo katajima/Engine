@@ -16,7 +16,7 @@ void JampCommand::Exec(BaseCharacter& character)
 }
 void AttackCommand::Exec(BaseCharacter& character)
 {
-	character.Jump();
+	character.Attack();
 }
 
 
@@ -32,6 +32,12 @@ void InputHander::AssignJampCommandPad()
 	this->jampPad = command;
 }
 
+void InputHander::AssignAttackCommandPad()
+{
+	ICommand* command = new AttackCommand();
+	this->attackPad = command;
+}
+
 
 
 ICommand* InputHander::HandleInput()
@@ -40,9 +46,13 @@ ICommand* InputHander::HandleInput()
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
 			return jampPad;
 		}
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
+			return attackPad;
+		}
 		if (input_->GetGamePadLeftStick().Length() != 0) {
 			return movePad;
 		}
+		
 	}
 	return nullptr;
 }

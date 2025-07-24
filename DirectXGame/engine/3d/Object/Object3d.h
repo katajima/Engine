@@ -84,10 +84,7 @@ public:
 	void SetName(const std::string& name) { this->name = name; }
 	// タグ設定
 	void SetNameTag(const std::string& name) { nameTag = name; }
-	// アニメーション変更
-	void SetAnimetion(const std::string& name,float time) {
-		Animetion::SetAnimation(model->modelData, name, time);
-	}
+	
 
 
 	// プリミティブ形状
@@ -110,7 +107,7 @@ public:
 
 	// ゲッター
 
-	
+
 
 	// オブジェクトがカメラ内に映っているか
 	bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
@@ -135,7 +132,7 @@ public:
 	// タグ
 	std::string GetNameTag() const { return nameTag; }
 
-	bool GetIsColliderComponent() const {return isColliderComponent_;}
+	bool GetIsColliderComponent() const { return isColliderComponent_; }
 
 	ObjectModelType GetObjectType() { return objectType_; }
 
@@ -157,6 +154,44 @@ public:
 	bool GetIsSkin() const { return isSkin_; }
 
 	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
+
+
+public:
+	// アニメーション変更
+	void SetAnimetion(const std::string& name, float time) {
+		Animetion::SetAnimation(model->modelData, name, time);
+	}
+	// アニメーションが終了しているか
+	bool IsAnimationFinished();
+	// 再生するか
+	void SetIsPlaying(bool is) { isPlaying = is; }
+	// 逆再生
+	void SetIsReversePlayback(bool is) { isReversePlayback = is; };
+	// アニメーションスピード
+	void SetAnimationSpeed(float speed) { animationSpeed = speed; }
+	// ループ再生するか
+	void SetIsLoop(bool is) { isLoop = is; };
+	//
+	void SetStratAnimeTime() { model->modelData.animationTime = 0.0f; }
+
+	void SetEndAnimeTime() {
+		const auto& animations = model->modelData.animations;
+		auto& modelData = model->modelData;
+		const std::string& currentName = modelData.currentAnimName;
+		auto itCurrent = animations.find(currentName);
+
+		modelData.animationTime = itCurrent->second.duration;
+	}
+	float GetEndAnimeTime(std::string name) const {
+		const auto& animations = model->modelData.animations;
+		auto it = animations.find(name);
+		if (it != animations.end()) {
+			return it->second.duration;
+		}
+
+		// 見つからない場合は 0.0f や -1.0f を返す
+		return 0.0f;
+	}
 
 private:
 	// 各コマンドリスト
@@ -182,23 +217,28 @@ private:
 
 	// トランスフォームデータ
 	std::unique_ptr<Transfomation> transformation = nullptr;
-	
+
 
 	// 何かしらの見た目があるか
 	bool isSkin_ = false;
 	// 描画するかのフラグ
 	bool isDraw = true;
-	
+
 
 	// ImGuiを表示するか
 	bool imguiFlag_ = false;
 
 	// 削除フラグ
 	bool isDelete = false;
+	// アニメーション再生しているか
+	bool isPlaying = true;
+	// 逆再生するか
+	bool isReversePlayback = false;
+	// アニメーション速度
+	float animationSpeed = 1.0f;
+	// 
+	bool isLoop = true;
 
-	
-
-	
 	// オブジェクトのタイプ
 	ObjectModelType objectType_ = ObjectModelType::kNormal;
 
@@ -213,7 +253,7 @@ private: // コンポネント
 	/// <summary>
 	/// コライダー
 	/// </summary>	
-	
+
 	// コライダーコンポーネント
 	std::unique_ptr<ColliderComponent> colliderComponent_;
 	// コライダーコンポーネントを使用するかのフラグ
@@ -230,9 +270,9 @@ private: // コンポネント
 	/// <summary>
 	///  物理
 	/// </summary>
-	
+
 	std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
-	
+
 public:
 	// コライダーコンポーネントを初期化
 	void InitColliderComponent();
@@ -250,29 +290,29 @@ public:
 	// トランスフォームコンポーネント
 	TransformComponent* GetTransformComponent() { return transformComponent_.get(); }
 	// ワールド座標
-	Vector3 GetWorldPosition() const { return transformComponent_->GetWorldPosition();};
+	Vector3 GetWorldPosition() const { return transformComponent_->GetWorldPosition(); };
 	// １フレーム前のワールド座標
-	Vector3 GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition();};
+	Vector3 GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition(); };
 	// スクリーン座標
 	Vector2 GetScreenPosition();
 	// ワールド座標
-	WorldTransform& GetWorldTransform() { return transformComponent_->GetWorldTransform();}
+	WorldTransform& GetWorldTransform() { return transformComponent_->GetWorldTransform(); }
 	// 座標更新
 	void UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
 
-	
+
 
 	/// <summary>
 	/// 物理
 	/// </summary>
-	
+
 	// 初期化
 	void InitRigidBodyComponent() {
 		rigidBodyComponent_ = std::make_unique<RigidBodyComponent>();
 	}
 	// 物理取得
 	RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
-	
+
 
 public:
 
@@ -285,7 +325,7 @@ public:
 	SkyBox* skyBox_ = nullptr;
 	// 波
 	Ocean* ocean_ = nullptr;
-	
+
 	//
 	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 	// trailエフェクトを使用するかのフラグ

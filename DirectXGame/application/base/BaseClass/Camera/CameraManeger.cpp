@@ -15,7 +15,7 @@ void CameraManeger::Initialize(Input* input, Entity3DManager* entity3DManager, E
 	camera->Initialize(entity3DManager_->GetCameraCommon());
 	camera->transform_.rotate = { 0.36f,0,0 };
 	camera->transform_.translate = { 5,32.5f,-59.2f };
-
+	camera->SetFarClip(10000.0f);
 	isGameCamera = true;
 
 	entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());

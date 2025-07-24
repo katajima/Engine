@@ -108,6 +108,8 @@ private:
 	int count = 0;
 	int sceneCount = 0;
 	int clock = 1;
+
+	float tumeee_ = 0.0f;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = std::make_unique<GameUI>();

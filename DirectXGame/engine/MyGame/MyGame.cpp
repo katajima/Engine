@@ -26,9 +26,9 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	//sceneManager_->ChangeScene("TITLE");
+	sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("TEST");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -286,7 +286,7 @@ void MyGame::LoadModel()
 {
 	ModelManager* modelManager = dxCommon->GetModelManager();
 
-	modelManager->LoadModel("d.gltf", "glTF");
+	//modelManager->LoadModel("d.gltf", "glTF");
 
 	modelManager->LoadModel("a.obj");
 
@@ -307,6 +307,7 @@ void MyGame::LoadModel()
 	//modelManager->LoadModel("Characters_Anne.gltf", "Character");
 	modelManager->LoadModel("Humans_Master.gltf", "Character");
 	modelManager->LoadModel("run.gltf", "Character");
+	modelManager->LoadModel("origin.gltf", "Character");
 
 
 
