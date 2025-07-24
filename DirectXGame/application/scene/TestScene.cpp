@@ -329,8 +329,9 @@ void TestScene::InitializeObject3D()
 	skinningObject = GetEntity3DManager()->CreateObject3D("run", Object3d::ObjectModelType::kSkinning, {0,0,0}, camera.get());
 	skinningObject->SetModel("run.gltf");
 	skinningObject->GetWorldTransform().scale_ = { 3,3,3 };
+	skinningObject->InitAnimationComponent();
 	skinningObject->SetIsDraw(true);
-	skinningObject->SetAnimetion("Anim_0", 0.3f);
+	skinningObject->GetAnimationComponent()->SetAnimetion("Anim_0", 0.3f);
 
 	skinningObject2 = GetEntity3DManager()->CreateObject3D("BoxBox", Object3d::ObjectModelType::kNormal, { 0,0,0 }, camera.get());
 	skinningObject2->SetModel("BoxBox.obj");
@@ -339,6 +340,7 @@ void TestScene::InitializeObject3D()
 	
 	skinningObject3 = GetEntity3DManager()->CreateObject3D("KnightCharacter", Object3d::ObjectModelType::kSkinning, { 0,0,0 }, camera.get());
 	skinningObject3->SetModel("KnightCharacter.gltf");
+	skinningObject3->InitAnimationComponent();
 	skinningObject3->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
 	skinningObject3->SetIsDraw(true);
 	
@@ -682,10 +684,10 @@ void TestScene::UpdateRoom01()
 			if (velo.Length() != 0) {
 				skinningObject3->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
 			}
-			skinningObject3->SetAnimetion("Run", 0.3f);
+			skinningObject3->GetAnimationComponent()->SetAnimetion("Run", 0.3f);
 		}
 		else {
-			skinningObject3->SetAnimetion("Idle", 0.3f);
+			skinningObject3->GetAnimationComponent()->SetAnimetion("Idle", 0.3f);
 		}
 	}
 

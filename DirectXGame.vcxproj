@@ -147,6 +147,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelData.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Animation\AnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
@@ -678,6 +679,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h" />
     <ClInclude Include="DirectXGame\engine\2d\SpriteData.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Model\RenderComponent.h" />
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h" />
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h" />
     <ClInclude Include="DirectXGame\engine\Animation\AnimationComponent.h" />

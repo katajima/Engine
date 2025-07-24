@@ -1,9 +1,6 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Light.h"
 
-#include"DirectXGame/engine/3d/Model/Model.h"
-#include"DirectXGame/engine/3d/Model/ModelManager.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
@@ -11,7 +8,7 @@
 #include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 using namespace Microsoft::WRL;
 
-
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 #include "DirectXGame/engine/Transform/TransformComponent.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
@@ -105,7 +102,6 @@ public:
 
 	void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
 
-	// ゲッター
 
 
 
@@ -132,8 +128,7 @@ public:
 	// タグ
 	std::string GetNameTag() const { return nameTag; }
 
-	bool GetIsColliderComponent() const { return isColliderComponent_; }
-
+	
 	ObjectModelType GetObjectType() { return objectType_; }
 
 	ObjectDrawType GetObjectDrawType() { return objectDrawType_; }
@@ -154,45 +149,6 @@ public:
 	bool GetIsSkin() const { return isSkin_; }
 
 	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
-
-
-public:
-	// アニメーション変更
-	void SetAnimetion(const std::string& name, float time) {
-		Animetion::SetAnimation(model->modelData, name, time);
-	}
-	// アニメーションが終了しているか
-	bool IsAnimationFinished();
-	// 再生するか
-	void SetIsPlaying(bool is) { isPlaying = is; }
-	// 逆再生
-	void SetIsReversePlayback(bool is) { isReversePlayback = is; };
-	// アニメーションスピード
-	void SetAnimationSpeed(float speed) { animationSpeed = speed; }
-	// ループ再生するか
-	void SetIsLoop(bool is) { isLoop = is; };
-	//
-	void SetStratAnimeTime() { model->modelData.animationTime = 0.0f; }
-
-	void SetEndAnimeTime() {
-		const auto& animations = model->modelData.animations;
-		auto& modelData = model->modelData;
-		const std::string& currentName = modelData.currentAnimName;
-		auto itCurrent = animations.find(currentName);
-
-		modelData.animationTime = itCurrent->second.duration;
-	}
-	float GetEndAnimeTime(std::string name) const {
-		const auto& animations = model->modelData.animations;
-		auto it = animations.find(name);
-		if (it != animations.end()) {
-			return it->second.duration;
-		}
-
-		// 見つからない場合は 0.0f や -1.0f を返す
-		return 0.0f;
-	}
-
 private:
 	// 各コマンドリスト
 	void DrawSetting();
@@ -230,14 +186,6 @@ private:
 
 	// 削除フラグ
 	bool isDelete = false;
-	// アニメーション再生しているか
-	bool isPlaying = true;
-	// 逆再生するか
-	bool isReversePlayback = false;
-	// アニメーション速度
-	float animationSpeed = 1.0f;
-	// 
-	bool isLoop = true;
 
 	// オブジェクトのタイプ
 	ObjectModelType objectType_ = ObjectModelType::kNormal;
@@ -256,8 +204,6 @@ private: // コンポネント
 
 	// コライダーコンポーネント
 	std::unique_ptr<ColliderComponent> colliderComponent_;
-	// コライダーコンポーネントを使用するかのフラグ
-	bool isColliderComponent_ = false;
 	// コライダーコンポーネントをObject3d内で更新するかのフラグ
 	bool isColliderComponenyUpdate_ = false;
 
@@ -272,6 +218,12 @@ private: // コンポネント
 	/// </summary>
 
 	std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
+
+	/// <summary>
+	/// アニメーション
+	/// </summary>
+
+	std::unique_ptr<AnimationComponent> animationComponent_ = nullptr;
 
 public:
 	// コライダーコンポーネントを初期化
@@ -314,6 +266,19 @@ public:
 	RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
 
 
+	/// <summary>
+	/// アニメーション
+	/// </summary>
+
+	// アニメーションコンポーネント初期化
+
+	void InitAnimationComponent() {
+		animationComponent_ = std::make_unique<AnimationComponent>();
+		animationComponent_->Init(lineCommon_);
+		animationComponent_->SetModel(model);
+	}
+	AnimationComponent* GetAnimationComponent() { return animationComponent_.get(); }
+
 public:
 
 
@@ -345,6 +310,7 @@ private:
 	SkinningConmmon* skinningConmmon_;
 	ImGuiManager* imGuiManager_;
 	Entity3DManager* entity3DManager_;
+	LineCommon* lineCommon_;
 	SkyBoxCommon* skyBoxCommon_;
 	OceanManager* oceanManager_;
 };

@@ -115,7 +115,7 @@ void GamePlayScene::CheckAllCollisions()
 
 	
 	for (auto objects : loadData_->GetObjects()) {
-		if (objects->GetIsColliderComponent()) {
+		if (objects->GetColliderComponent()) {
 			collisionManager_->Register(objects->GetColliderComponent());
 		}
 	}

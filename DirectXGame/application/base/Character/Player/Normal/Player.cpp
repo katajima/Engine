@@ -29,6 +29,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", Object3d::ObjectModelType::kSkinning, position, camera_);
 	objectBase_->SetModel("origin.gltf");
 	objectBase_->InitColliderComponent();
+	objectBase_->InitAnimationComponent();
 	InitMoveComponent();
 	objectBase_->InitRigidBodyComponent();
 	objectBase_->SetIsUpdateColliderComponent(false);
@@ -328,7 +329,7 @@ void Player::Jump()
 	if (GetAlive()) {
 		characterStateComponent_.ChangeState(CharacterState::Jump);
 		objectBase_->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
-		objectBase_->SetAnimetion("JumpStrat1", 0.01f);
+		objectBase_->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
 	}
 
 }

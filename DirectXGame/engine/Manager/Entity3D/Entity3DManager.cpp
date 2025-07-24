@@ -91,7 +91,7 @@ void Entity3DManager::UpdateImgui()
 		ImGui::DragFloat3("T_translate", &entity->GetWorldTransform().translate_.x, 0.1f);
 
 		std::string nameColliderComponent = "";
-		if (entity->GetIsColliderComponent()) {
+		if (entity->GetColliderComponent()) {
 			if (ImGui::CollapsingHeader("ColliderComponent")) {
 				int collIndex = 0;
 				for (auto& coll : entity->GetColliderComponent()->GetAllColliders()) {

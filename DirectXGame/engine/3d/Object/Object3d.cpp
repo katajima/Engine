@@ -22,7 +22,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();
 	skyBoxCommon_ = entity3DManager_->GetSkyBoxCommon();
 	oceanManager_ = entity3DManager_->GetOceanManager();
-
+	lineCommon_ = entity3DManager_->Get3DLineCommon();
 
 	transformComponent_ = std::make_unique<TransformComponent>();
 	transformComponent_->Init();
@@ -123,181 +123,19 @@ void Object3d::Update()
 		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case Object3d::ObjectModelType::kAnimation:
-		// モデルが存在する場合
-		if (model) {
-			// アニメーションの更新
-			//if (model->modelData.animation.flag) {
-			//	if (flag) {
-			//		model->modelData.animationTime += MyGame::GameTime(); // フレームごとの時間経過を反映
-			//	}
-			//	model->modelData.animationTime = std::fmod(model->modelData.animationTime, model->modelData.animation.duration);
-
-			//	// 単一のジョイントの場合
-			//	const NodeAnimation& rootNodeAnimation = model->modelData.animation.nodeAnimations[model->modelData.rootNode.name];
-			//	Vector3 translate = Animetion::CalculateValue(rootNodeAnimation.translate.keyframes, model->modelData.animationTime);
-			//	Quaternion rotate = Animetion::CalculateValue(rootNodeAnimation.rotate.keyframes, model->modelData.animationTime);
-			//	Vector3 scale = Animetion::CalculateValue(rootNodeAnimation.scale.keyframes, model->modelData.animationTime);
-			//	localMatrix = MakeAffineMatrix(scale, rotate, translate);
-			//}
-			/*else {
-				localMatrix = model->modelData.rootNode.localMatrix;
-			}*/
-			for (auto& mesh : model->modelData.mesh) {
-				mesh->material->GPUData();
-			}
-		}
+		
+		// アニメーションコンポーネント更新
+		animationComponent_->Update(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
 		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case Object3d::ObjectModelType::kSkinning:
 
-		// モデルが存在する場合
-		if (model) {
-			const auto& animations = model->modelData.animations;
-			auto& modelData = model->modelData;
-
-			const std::string& currentName = modelData.currentAnimName;
-			auto itCurrent = animations.find(currentName);
-
-			if (itCurrent != animations.end()) {
-				// アニメーション時間更新（毎フレーム）
-				float deltaTime = MyGame::GameTime() * animationSpeed;
-				if (isPlaying) {
-					if (isReversePlayback) { // 逆再生なら
-						modelData.animationTime -= deltaTime;
-					}
-					else {
-						modelData.animationTime += deltaTime;
-					}	
-				}
-
-				// ループするなら
-				if (isLoop) {
-					modelData.animationTime = std::fmod(modelData.animationTime, itCurrent->second.duration);
-					
-					// 負の値を返す可能性があるので
-					if (modelData.animationTime < 0.0f) {
-						modelData.animationTime += itCurrent->second.duration;
-					}
-				}
-				else { // しないなら
-					if (isReversePlayback) {
-						if (modelData.animationTime <= 0) {
-							modelData.animationTime = 0; // 最終フレームで止める
-							isPlaying = false; // 自動停止
-						}
-					}
-					else {
-						if (modelData.animationTime >= itCurrent->second.duration) {
-							modelData.animationTime = itCurrent->second.duration; // 最終フレームで止める
-							isPlaying = false; // 自動停止
-						}
-					}		
-				}
-
-
-				// アニメーションブレンド中か？
-				if (modelData.isBlending && modelData.previousAnimName != "") {
-					auto itPrev = animations.find(modelData.previousAnimName);
-					if (itPrev != animations.end()) {
-						const Animation& prevAnim = itPrev->second;
-						const Animation& currAnim = itCurrent->second;
-
-						auto WrapTime = [](float time, float duration) {
-							float wrapped = std::fmod(time, duration);
-							if (wrapped < 0.0f) wrapped += duration;
-							return wrapped;
-							};
-
-						float prevTime = WrapTime(modelData.animationTime, prevAnim.duration);
-						float currTime = WrapTime(modelData.animationTime, currAnim.duration);
-
-						
-						// ① 各スケルトン姿勢を取得
-						Skeleton prevSkeleton = modelData.skeleton;
-						Skeleton currSkeleton = modelData.skeleton;
-						Animetion::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
-						Animetion::ApplyAnimation(currSkeleton, currAnim, currTime);
-
-						// ② 補間割合を更新（EaseInOutでなめらかに）
-						modelData.blendTime += deltaTime;
-						float t = modelData.blendTime / modelData.blendDuration;
-						t = std::clamp(t, 0.0f, 1.0f);
-						t = t * t * (3.0f - 2.0f * t); // Hermite補間（EaseInOut）
-
-						// ③ スケルトン補間
-						Animetion::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
-
-						// ブレンド完了判定
-						if (modelData.blendTime >= modelData.blendDuration) {
-							modelData.isBlending = false;
-							modelData.previousAnimName.clear();
-						}
-					}
-					else {
-						// 前アニメーションが見つからなければ通常再生
-						Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
-					}
-				}
-				else {
-					// ブレンドしていない通常の再生
-					Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
-				}
-
-				// スケルトン姿勢更新
-				Animetion::UpdateSkeleton(modelData.skeleton);
-
-				std::vector<Matrix4x4> cachedSkeletonMatrices;
-				for (auto& mesh : modelData.mesh) {
-					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
-				}
-				
-				// ルートの変換行列反映
-				localMatrix = modelData.skeleton.joints[0].skeletonSpaceMatrix;
-				// デバッグ用：スケルトン描画
-				Animetion::DrawSkeleton(
-					entity3DManager_->Get3DLineCommon(),
-					modelData.skeleton.joints,
-					transformComponent_->GetWorldTransform().worldMat_.GetWorldPosition(),
-					transformComponent_->GetWorldTransform().scale_,
-					MakeRotateXYZ(transformComponent_->GetWorldTransform().rotate_)
-				);
-			}
-			else {
-				// アニメーションが見つからない場合のフォールバック
-				localMatrix = model->modelData.rootNode.localMatrix;
-
-				std::vector<Matrix4x4> cachedSkeletonMatrices;
-				for (auto& mesh : modelData.mesh) {
-					Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
-				}
-
-				// デバッグ用：スケルトン描画
-				Animetion::DrawSkeleton(
-					entity3DManager_->Get3DLineCommon(),
-					modelData.skeleton.joints,
-					transformComponent_->GetWorldTransform().worldMat_.GetWorldPosition(),
-					transformComponent_->GetWorldTransform().scale_,
-					MakeRotateXYZ(transformComponent_->GetWorldTransform().rotate_)
-				);
-			}
-
-
-
-			std::vector<std::future<void>> futures;
-			for (auto& mesh : model->modelData.mesh) {
-				futures.push_back(std::async(std::launch::async, [&mesh]() {
-				mesh->material->GPUData();
-					}));
-			}
-
-			// 全スレッドの終了を待つ
-			for (auto& f : futures) {
-				f.get();
-			}
-
-		}
+		// アニメーションコンポーネント更新
+		animationComponent_->UpdateSkin(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
 		transformation->UpdateSkinning(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
@@ -334,7 +172,7 @@ void Object3d::Update()
 	}
 
 	// コライダー
-	if (isColliderComponent_) {
+	if (colliderComponent_) {
 		if (isColliderComponenyUpdate_) {
 			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
@@ -477,33 +315,7 @@ void Object3d::InitColliderComponent()
 	colliderComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
 	// 登録（IDを取得したければ変数で受ける）
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
-	isColliderComponent_ = true;
 	isColliderComponenyUpdate_ = true;
-}
-
-bool Object3d::IsAnimationFinished()
-{
-	if (!model) return false;
-
-	const auto& animations = model->modelData.animations;
-	auto& modelData = model->modelData;
-
-	const std::string& currentName = modelData.currentAnimName;
-	auto itCurrent = animations.find(currentName);
-
-	// 現在のアニメーション名が見つからなかった場合は再生終了扱い
-	if (itCurrent == animations.end()) {
-		return true;
-	}
-
-	// アニメ再生中かつアニメ時間が duration に達していれば終了
-	if (isReversePlayback) {
-		
-		return !isPlaying && modelData.animationTime <= 0;
-	}
-	else {
-		return !isPlaying && modelData.animationTime >= itCurrent->second.duration;
-	}
 }
 
 void Object3d::DrawSetting()
