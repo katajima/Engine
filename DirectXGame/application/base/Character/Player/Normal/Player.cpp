@@ -51,6 +51,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 
 	worldCollider_.parent_ = &objectBase_->GetWorldTransform();
 	worldCollider_.translate_.y = 3.0f;
+
 	// 衝突時のコールバック登録
 	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
@@ -129,9 +130,11 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	weapon_ = std::make_unique<PlayerWeapon>();
 	weapon_->SetCharacter(this);
 	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
-
-
 	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { DegreesToRadians(-90),0.0f,0.0f };
+
+
+	attackInputHander_ = std::make_unique<AttackInputHander>();
+	attackInputHander_->AssignAttack();
 
 	// UI
 	ui_ = std::make_unique<PlayerUI>();

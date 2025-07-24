@@ -19,18 +19,6 @@ struct KnockbackData
 	}
 };
 
-enum class AttackInput {
-	Light,          // 弱攻撃
-	Heavy,          // 強攻撃
-	Special,        // 必殺技など特殊攻撃
-	JumpAttack,     // 空中攻撃
-	DashAttack,     // ダッシュ中に攻撃
-	Charge,         // チャージ攻撃（ボタン長押し）
-	Cancel,         // コンボキャンセル（ステップや回避などに移行）
-	Parry,          // 敵の攻撃に対するカウンター
-};
-
-
 class ComboData {
 public:
 	float damage;
@@ -39,3 +27,10 @@ public:
 	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率
 	KnockbackData knockbackData{};			// ノックバックデータ
 };
+
+
+
+
+
+
+

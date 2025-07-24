@@ -108,7 +108,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Attack\AttackData.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp" />
@@ -610,6 +610,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemyState.h" />

@@ -5,6 +5,7 @@
 
 class BaseSpecial;
 class BaseWeapon;
+class AttackInputHander;
 class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
@@ -174,6 +175,8 @@ protected:
 
 	std::unique_ptr<BaseSpecial> special_;	// スペシャル攻撃
 	std::unique_ptr<BaseWeapon> weapon_;	// 武器
+	std::unique_ptr<AttackInputHander> attackInputHander_; // 攻撃入力系クラス
+
 	BulletManager* bulletManager_;			// 弾管理
 };
 

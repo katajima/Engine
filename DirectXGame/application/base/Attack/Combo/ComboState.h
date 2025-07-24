@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
 #include "DirectXGame/application/base/BaseClass/Attack/AttackData.h"
+#include "DirectXGame/application/base/Attack/Input/AttackInputHander.h"
 
 
 
