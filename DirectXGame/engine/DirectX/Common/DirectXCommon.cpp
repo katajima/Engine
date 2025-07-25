@@ -12,6 +12,7 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 
+#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 
@@ -46,7 +47,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 
 	//postEffectManager_->AddEffectBlock("bloom",PostEffectType::kBloom);
 	//postEffectManager_->AddEffectBlock("grayScale",PostEffectType::kGrayScale);
-	postEffectManager_->AddEffectBlock("bloom", PostEffectType::kBloom);
+	postEffectManager_->AddEffectBlock("bloom", PostEffectType::kGaussian);
 	postEffectManager_->AddEffectBlock("copy",PostEffectType::kCopy);
 	
 

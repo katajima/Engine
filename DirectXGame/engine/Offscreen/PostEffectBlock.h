@@ -19,6 +19,7 @@ enum class PostEffectType {
 	kDissovle,      // ディゾルブ
 	kRandom,		// ランダム
 	kBloom,			// ブルーム
+	kDoF,			// 被写界深度
 };
 
 class DXGIDevice;

@@ -30,7 +30,7 @@
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
-#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
+//#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 
@@ -43,6 +43,7 @@
 #include "DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Offscreen/PostEffectManager.h"
 
+class RenderingCommon;
 class Entity3DManager;
 class SceneManager;
 class DirectXCommon

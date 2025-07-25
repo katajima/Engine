@@ -8,6 +8,8 @@
 
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
+
+
 void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
@@ -261,6 +263,7 @@ void RenderComponent::ObjectSkinningTypeDiscrimination(ObjectRasterizerType type
 
 }
 
+
 void RenderComponent::DrawSetting()
 {
 	entity3DManager_->GetLightManager()->DrawLight();
@@ -270,6 +273,8 @@ void RenderComponent::DrawSetting()
 
 	camera_->GetCommandList(4);
 }
+
+
 
 void RenderComponent::DrawSettingSkin()
 {

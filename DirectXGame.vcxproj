@@ -183,6 +183,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Mesh\LineMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\ModelMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\SkyBoxMesh.cpp" />
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffect.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectBlock.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp" />
@@ -725,6 +726,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Mesh\ModelMesh.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\SkyBoxMesh.h" />
     <ClInclude Include="DirectXGame\engine\Move\RigidBodyComponent.h" />
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffect.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectBlock.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h" />
     <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h" />

@@ -1,15 +1,13 @@
 #pragma once
-#include"DirectXGame/engine/base/Texture/TextureManager.h"
-
-#include "DirectXGame/engine/struct/Structs3D.h"
-#include "DirectXGame/engine/struct/VertexDeta.h"
-#include "DirectXGame/engine/PSO/PSOManager.h"
+#include "PostEffect.h"
 
 
 class Camera;
 class DirectXCommon;
 class RenderingCommon
 {
+private:
+
 public:
 	enum class PostEffectType {
 		kCopy,			// コピー
@@ -24,6 +22,10 @@ public:
 		kRandom,		// ランダム
 		kBloom,			// ブルーム
 		kBloomCombin,	// 合成ブルーム
+
+
+
+
 	};
 
 	// 初期化
@@ -152,30 +154,33 @@ private:
 	
 
 private:
+
+	
+
 	struct VignetteGPU {
 		float scale;
 		float squared;
 		float padding[2];
 	};
-	VignetteGPU* vignetteData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> vignetteResource_;
+
+	ConstantBuffer<VignetteGPU> cbVignette_;
+
 	
 	struct SmoothigGPU {
 		int num;
 		float padding[3];
 	};
-	SmoothigGPU* smoothingData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> smoothingResource_;
+	ConstantBuffer<SmoothigGPU> cbSmoothig_;
 
+	
 
 	struct GaussianGPU {
 		int num;
 		float sigma;
 		float padding[2];
 	};
-	GaussianGPU* gaussianData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> gaussianResource_;
-
+	ConstantBuffer<GaussianGPU> cbGaussian_;
+	
 	struct OutlineGPU {
 		Matrix4x4 projectionInverse;
 		int num;
@@ -183,17 +188,16 @@ private:
 		float nearZ;
 		float farZ;
 	};
-	OutlineGPU* outlineData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> outlineResource_;
+	ConstantBuffer<OutlineGPU> cbOutline_;
 
+	
 	struct RadialBlurGPU
 	{
 		Vector2 center;
 		int numSamples;
 		float blurWidth;
 	};
-	RadialBlurGPU* radialBlurData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> radialBlurResource_;
+	ConstantBuffer<RadialBlurGPU> cbRadialBlur_;
 
 
 	struct DissovleGPU
@@ -203,8 +207,7 @@ private:
 		float edge;
 		float pad[3];
 	};
-	DissovleGPU* dissovleData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> dissovleResource_;
+	ConstantBuffer<DissovleGPU> cbDissovle_;
 
 	uint32_t dissovleIndex = 0;
 
@@ -215,8 +218,7 @@ private:
 		float time;
 		float pad[3];
 	};
-	RandomGPU* randomData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> randomResource_;
+	ConstantBuffer<RandomGPU> cbRandom_;
 
 	struct BloomGPU
 	{
@@ -224,16 +226,7 @@ private:
 		float intensity;
 		float pad[2];
 	};
-	BloomGPU* bloomData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> bloomResource_;
-
-	/*struct BloomGPU
-	{
-		float threshold;
-		float pad[3];
-	};
-	BloomGPU* bloomData_{};
-	Microsoft::WRL::ComPtr < ID3D12Resource> bloomResource_;*/
+	ConstantBuffer<BloomGPU> cbBloom_;
 
 
 

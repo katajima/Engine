@@ -1,6 +1,9 @@
-#include "RenderingCommon.h"
-#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Camera/Camera.h"
+#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+#include "RenderingCommon.h"
+
+//#include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
+
 
 void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 {
@@ -10,56 +13,49 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
 	// ビネット
-	vignetteResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(VignetteGPU));
-	vignetteResource_->Map(0, nullptr, reinterpret_cast<void**>(&vignetteData_));
-	vignetteData_->scale = 16.0f;
-	vignetteData_->squared = 0.8f;
 
+	cbVignette_.CreateBuffer(dxCommon_);
+	cbVignette_.Data()->scale = 16.0f;
+	cbVignette_.Data()->squared = 0.8f;
+	
 	// スムージング
-	smoothingResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SmoothigGPU));
-	smoothingResource_->Map(0, nullptr, reinterpret_cast<void**>(&smoothingData_));
-	smoothingData_->num = 3;
+	cbSmoothig_.CreateBuffer(dxCommon_);
+	cbSmoothig_.Data()->num = 3;
 
 	// ガウス
-	gaussianResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(GaussianGPU));
-	gaussianResource_->Map(0, nullptr, reinterpret_cast<void**>(&gaussianData_));
-	gaussianData_->num = 3;
-	gaussianData_->sigma = 2.0f;
-
+	cbGaussian_.CreateBuffer(dxCommon_);
+	cbGaussian_.Data()->num = 3;
+	cbGaussian_.Data()->sigma = 2.0f;
+	
 	// アウトライン
-	outlineResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(OutlineGPU));
-	outlineResource_->Map(0, nullptr, reinterpret_cast<void**>(&outlineData_));
-	outlineData_->num = 3;
-	outlineData_->weightSquared = 0.002f;
-	outlineData_->projectionInverse = Identity();
-
+	cbOutline_.CreateBuffer(dxCommon_);
+	cbOutline_.Data()->num = 3;
+	cbOutline_.Data()->weightSquared = 0.002f;
+	cbOutline_.Data()->projectionInverse = Identity();
+	
 	// ラジアルブラー
-	radialBlurResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(RadialBlurGPU));
-	radialBlurResource_->Map(0, nullptr, reinterpret_cast<void**>(&radialBlurData_));
-	radialBlurData_->center = Vector2{ 0.5f,0.5f };
-	radialBlurData_->numSamples = 10;
-	radialBlurData_->blurWidth = 0.01f;
+	cbRadialBlur_.CreateBuffer(dxCommon_);
+	cbRadialBlur_.Data()->center = Vector2{0.5f,0.5f};
+	cbRadialBlur_.Data()->numSamples = 10;
+	cbRadialBlur_.Data()->blurWidth = 0.01f;
 
 	//	ディゾルブ
-	dissovleResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DissovleGPU));
-	dissovleResource_->Map(0, nullptr, reinterpret_cast<void**>(&dissovleData_));
-	dissovleData_->threshold = 0.5f;
-	dissovleData_->edge = 0.03f;
-	dissovleData_->color.x = 1.0f;
-	dissovleData_->color.y = 0.4f;
-	dissovleData_->color.z = 0.3f;
+	cbDissovle_.CreateBuffer(dxCommon_);
+	cbDissovle_.Data()->threshold = 0.5f;
+	cbDissovle_.Data()->edge = 0.03f;
+	cbDissovle_.Data()->color.x = 1.0f;
+	cbDissovle_.Data()->color.y = 0.4f;
+	cbDissovle_.Data()->color.z = 0.3f;
 
 
 	//	ランダム
-	randomResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(RandomGPU));
-	randomResource_->Map(0, nullptr, reinterpret_cast<void**>(&randomData_));
-	randomData_->time = 0.0f;
+	cbRandom_.CreateBuffer(dxCommon_);
+	cbRandom_.Data()->time = 0.0f;
 
 	//	ブルーム
-	bloomResource_ = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(BloomGPU));
-	bloomResource_->Map(0, nullptr, reinterpret_cast<void**>(&bloomData_));
-	bloomData_->threshold = 0.9f;
-	bloomData_->intensity = 1.0f;
+	cbBloom_.CreateBuffer(dxCommon_);
+	cbBloom_.Data()->threshold = 0.9f;
+	cbBloom_.Data()->intensity = 1.0f;
 
 	CreateGraphicsPipeline();
 
@@ -114,10 +110,7 @@ void RenderingCommon::DrawVignetteRender(int index)
 {
 	DrawVignetteSetting();
 
-
-	//vignetteData_->scale = 16.0f;
-	// ビネットデータ
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, vignetteResource_->GetGPUVirtualAddress());
+	cbVignette_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -128,8 +121,7 @@ void RenderingCommon::DrawSmoothingRender(int index)
 {
 	DrawSmoothingSetting();
 
-
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, smoothingResource_->GetGPUVirtualAddress());
+	cbSmoothig_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -140,8 +132,7 @@ void RenderingCommon::DrawGaussianRender(int index)
 {
 	DrawGaussianSetting();
 
-
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, gaussianResource_->GetGPUVirtualAddress());
+	cbGaussian_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -152,14 +143,11 @@ void RenderingCommon::DrawOutlineRender(int index)
 {
 	DrawOutlineSetting();
 
-	outlineData_->projectionInverse = Inverse(camera_->GetProjectionMatrix());
-	outlineData_->nearZ = camera_->GetNearZ();
-	outlineData_->farZ = camera_->GetFarZ();
+	cbOutline_.Data()->projectionInverse = Inverse(camera_->GetProjectionMatrix());
+	cbOutline_.Data()->nearZ = camera_->GetNearZ();
+	cbOutline_.Data()->farZ = camera_->GetFarZ();
 
-
-
-
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, outlineResource_->GetGPUVirtualAddress());
+	cbOutline_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -172,8 +160,7 @@ void RenderingCommon::DrawRadialBlurRender(int index)
 {
 	DrawRadialBlurSetting();
 
-
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, radialBlurResource_->GetGPUVirtualAddress());
+	cbRadialBlur_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -184,8 +171,7 @@ void RenderingCommon::DrawDissovleRender(int index)
 {
 	DrawDissovleSetting();
 
-
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, dissovleResource_->GetGPUVirtualAddress());
+	cbDissovle_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -198,7 +184,9 @@ void RenderingCommon::DrawRandomRender(int index)
 {
 	DrawRandomSetting();
 
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, randomResource_->GetGPUVirtualAddress());
+	cbRandom_.Data()->time += 0.01f;
+
+	cbRandom_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -209,7 +197,7 @@ void RenderingCommon::DrawBloomRender(int index)
 {
 	DrawBloomSetting();
 
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, bloomResource_->GetGPUVirtualAddress());
+	cbBloom_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -220,7 +208,7 @@ void RenderingCommon::DrawBloomCombinRender(int index, int indexB)
 {
 	DrawBloomCombinSetting();
 
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, bloomResource_->GetGPUVirtualAddress());
+	cbBloom_.SetGraphicsRootConstantBufferView(0);
 
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 
@@ -245,64 +233,64 @@ void RenderingCommon::UpdateImgui(PostEffectType type)
 		case RenderingCommon::PostEffectType::kSepia:
 			break;
 		case RenderingCommon::PostEffectType::kVignette:
-			ImGui::DragFloat("scale", &vignetteData_->scale, 0.01f);
-			ImGui::DragFloat("squared", &vignetteData_->squared, 0.01f);
+			ImGui::DragFloat("scale", &cbVignette_.Data()->scale, 0.01f);
+			ImGui::DragFloat("squared", &cbVignette_.Data()->squared, 0.01f);
 			break;
 		case RenderingCommon::PostEffectType::kSmoothing:
 			if (ImGui::Button("Filter3x3")) {
-				smoothingData_->num = 3;
+				cbSmoothig_.Data()->num = 3;
 			}
 			if (ImGui::Button("Filter5x5")) {
-				smoothingData_->num = 5;
+				cbSmoothig_.Data()->num = 5;
 			}
 			break;
 		case RenderingCommon::PostEffectType::kGaussian:
 			if (ImGui::Button("Filter3x3")) {
-				gaussianData_->num = 3;
+				cbGaussian_.Data()->num = 3;
 			}
 			if (ImGui::Button("Filter5x5")) {
-				gaussianData_->num = 5;
+				cbGaussian_.Data()->num = 5;
 			}
 			if (ImGui::Button("Filter7x7")) {
-				gaussianData_->num = 7;
+				cbGaussian_.Data()->num = 7;
 			}
 			if (ImGui::Button("Filter9x9")) {
-				gaussianData_->num = 9;
+				cbGaussian_.Data()->num = 9;
 			}
+			ImGui::DragFloat("sigma", &cbGaussian_.Data()->sigma);
 			break;
 		case RenderingCommon::PostEffectType::kOitline:
 			if (ImGui::Button("0")) {
-				outlineData_->num = 0;
+				cbOutline_.Data()->num = 0;
 			}
 			if (ImGui::Button("1")) {
-				outlineData_->num = 1;
+				cbOutline_.Data()->num = 1;
 			}
 			if (ImGui::Button("2")) {
-				outlineData_->num = 2;
+				cbOutline_.Data()->num = 2;
 			}
 			if (ImGui::Button("3")) {
-				outlineData_->num = 3;
+				cbOutline_.Data()->num = 3;
 			}
-			ImGui::DragFloat("squared", &outlineData_->weightSquared, 0.1f);
+			ImGui::DragFloat("squared", &cbOutline_.Data()->weightSquared, 0.1f);
 			break;
 		case RenderingCommon::PostEffectType::kRadialBlur:
-			ImGui::DragFloat2("scale", &radialBlurData_->center.x, 0.01f);
-			ImGui::DragFloat("blurWidth", &radialBlurData_->blurWidth, 0.01f);
-			ImGui::SliderInt("numSamples", &radialBlurData_->numSamples, 1, 20);
+			ImGui::DragFloat2("scale", &cbRadialBlur_.Data()->center.x, 0.01f);
+			ImGui::DragFloat("blurWidth", &cbRadialBlur_.Data()->blurWidth, 0.01f);
+			ImGui::SliderInt("numSamples", &cbRadialBlur_.Data()->numSamples, 1, 20);
 			break;
 		case RenderingCommon::PostEffectType::kDissovle:
-			ImGui::DragFloat("threshold", &dissovleData_->threshold, 0.01f);
-			ImGui::DragFloat("edge", &dissovleData_->edge, 0.001f);
-			ImGui::ColorEdit3("color", &dissovleData_->color.x);
+			ImGui::DragFloat("threshold", &cbDissovle_.Data()->threshold, 0.01f);
+			ImGui::DragFloat("edge", &cbDissovle_.Data()->edge, 0.001f);
+			ImGui::ColorEdit3("color", &cbDissovle_.Data()->color.x);
 			break;
 		case RenderingCommon::PostEffectType::kRandom:
-			randomData_->time += 0.01f;
 			break;
 		case RenderingCommon::PostEffectType::kBloom:
-			ImGui::SliderFloat("threshold", &bloomData_->threshold, 0.0f,1.0f);
+			ImGui::SliderFloat("threshold", &cbBloom_.Data()->threshold, 0.0f, 1.0f);
 			break;
 		case RenderingCommon::PostEffectType::kBloomCombin:
-			ImGui::DragFloat("intensity", &bloomData_->intensity, 0.01f);
+			ImGui::DragFloat("intensity", &cbBloom_.Data()->intensity, 0.01f);
 			break;
 		default:
 			break;

@@ -63,9 +63,9 @@ void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvMan
 		break;
 	case PostEffectType::kBloom:
 		//AddRenderTexture("Bloom_1_" + name, RenderTexture::PostEffectType::kCopy);
-		AddRenderTexture("Bloom_1_" + name, RenderTexture::PostEffectType::kBloom);
-		AddRenderTexture("Bloom_2_" + name, RenderTexture::PostEffectType::kGaussian);
-		AddRenderTexture("Bloom_3_" + name, RenderTexture::PostEffectType::kBloomCombin);
+		AddRenderTexture("BrightPassFilter" + name, RenderTexture::PostEffectType::kBloom);
+		AddRenderTexture("Gaussian" + name, RenderTexture::PostEffectType::kGaussian);
+		AddRenderTexture("BloomCombine" + name, RenderTexture::PostEffectType::kBloomCombin);
 		GetRenderTextures(2)->SetOtherSrvIndex(GetRenderTextures(0)->GetSrvIndex());
 
 		break;
