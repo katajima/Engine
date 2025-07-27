@@ -49,10 +49,10 @@ float Luminance(float3 v)
     return dot(v, float3(0.2125f, 0.7154f, 0.0721f));
 }
 
-// ”ñüŒ`‚Ì[“x’li0`1j ¨ view ‹óŠÔ‚ÌZi•‰‚Ì’lj
+// éç·šå½¢ã®æ·±åº¦å€¤ï¼ˆ0ï½1ï¼‰ â†’ view ç©ºé–“ã®Zï¼ˆè² ã®å€¤ï¼‰
 float ReconstructViewZ(float depth, float nearZ, float farZ)
 {
-    // DirectX ‚Ì‰EèÀ•WŒn‚Å‚ÍAviewZ‚Í•‰‚Ì’l‚Åo‚Ä‚­‚é
+    // DirectX ã®å³æ‰‹åº§æ¨™ç³»ã§ã¯ã€viewZã¯è² ã®å€¤ã§å‡ºã¦ãã‚‹
     return -nearZ * farZ / (depth * (farZ - nearZ) - farZ);
 }
 
@@ -64,13 +64,13 @@ struct PixelShaderOutput
 
 PixelShaderOutput main(VertexShaderOutput input)
 {
-    uint width, height; // 1. uvStepSize‚ÌZo
+    uint width, height; // 1. uvStepSizeã®ç®—å‡º
     gTexture.GetDimensions(width, height);
     float2 uvStepSize = float2(rcp(float(width)), rcp(float(height)));
 
     
-    float2 difference = float2(0.0f, 0.0f); // c‰¡‚»‚ê‚¼‚ê‚Ìô‚İ‚İ‚ÌŒ‹‰Ê‚ğŠi”[‚·‚é
-   // F‚ğ‹P“x‚É•ÏŠ·‚µ‚ÄAô‚İ‚İ‚ğs‚Á‚Ä‚¢‚­B”÷•ªFilter—p‚Ìkernel‚É‚È‚Á‚Ä‚¢‚é‚Ì‚ÅA‚â‚é‚±‚Æ©‘Ì‚Í¡‚Ü‚Å‚Ìô‚İ‚İ‚Æ“¯‚¶
+    float2 difference = float2(0.0f, 0.0f); // ç¸¦æ¨ªãã‚Œãã‚Œã®ç•³ã¿è¾¼ã¿ã®çµæœã‚’æ ¼ç´ã™ã‚‹
+   // è‰²ã‚’è¼åº¦ã«å¤‰æ›ã—ã¦ã€ç•³ã¿è¾¼ã¿ã‚’è¡Œã£ã¦ã„ãã€‚å¾®åˆ†Filterç”¨ã®kernelã«ãªã£ã¦ã„ã‚‹ã®ã§ã€ã‚„ã‚‹ã“ã¨è‡ªä½“ã¯ä»Šã¾ã§ã®ç•³ã¿è¾¼ã¿ã¨åŒã˜
     for (int x = 0; x < 3; ++x)
     {
         for (int y = 0; y < 3; ++y)
@@ -87,11 +87,11 @@ PixelShaderOutput main(VertexShaderOutput input)
             if (gOutline.num == 2)
             {
                 float ndcDepth = gDepthTexture.Sample(gSamplerPoint, texcoord);
-                // NDC -> View. P^{-1}‚É‚¨‚¢‚Äx‚Æy‚Ízw‚É‰e‹¿‚ğ—^‚¦‚È‚¢‚Ì‚Å‚È‚ñ‚Å‚à—Ç‚¢B
-                // ‚È‚Ì‚ÅA‚í‚´‚í‚´s—ñ‚ğ“n‚³‚È‚­‚Ä‚à—Ç‚¢B
-                // gMaterial.projectionInverse‚ÍCBuffer‚ğg‚Á‚Ä“n‚µ‚Ä‚¨‚­‚±‚Æ
-                float4 viewSpace = mul(float4(0.0f, 0.0f, ndcDepth, 1.0f), gOutline.projectionInverse);
-                float viewZ = viewSpace.z * rcp(viewSpace.w); // “¯ŸÀ•WŒn‚©‚çƒfƒtƒHƒ‹ƒgÀ•WŒn‚Ö•ÏŠ·
+                float zClip = ndcDepth * 2.0f - 1.0f; // NDC â†’ clip space Z
+                float4 clipPos = float4(0.0f, 0.0f, zClip, 1.0f);
+                float4 viewPos = mul(clipPos, gOutline.projectionInverse);
+                float viewZ = viewPos.z / viewPos.w;
+                
                 difference.x += viewZ * kPrewittHorizontalKernel[x][y];
                 difference.y += viewZ * kPrewittVerticalKernel[x][y];
             }
@@ -106,15 +106,16 @@ PixelShaderOutput main(VertexShaderOutput input)
             
         }
     }
-    // •Ï‰»‚Ì’·‚³‚ğƒEƒFƒCƒg‚Æ‚µ‚Ä‡¬BƒEƒFƒCƒg‚ÌŒˆ’è•û–@‚àFX‚Æl‚¦‚ç‚ê‚éB‚½‚Æ‚¦‚Îdifference.x‚¾‚¯g‚¦‚Î‰¡•ûŒü‚ÌƒGƒbƒW‚ªŒŸo‚³‚ê‚é
+    // å¤‰åŒ–ã®é•·ã•ã‚’ã‚¦ã‚§ã‚¤ãƒˆã¨ã—ã¦åˆæˆã€‚ã‚¦ã‚§ã‚¤ãƒˆã®æ±ºå®šæ–¹æ³•ã‚‚è‰²ã€…ã¨è€ƒãˆã‚‰ã‚Œã‚‹ã€‚ãŸã¨ãˆã°difference.xã ã‘ä½¿ãˆã°æ¨ªæ–¹å‘ã®ã‚¨ãƒƒã‚¸ãŒæ¤œå‡ºã•ã‚Œã‚‹
     float weight = length(difference);
+   
     
     PixelShaderOutput output;
     output.color.a = 1.0f;
     
     if (gOutline.num == 0)
     {
-        weight = saturate(weight); // 0~1‚É‚µ‚Ä‚¨‚­
+        weight = saturate(weight); // 0~1ã«ã—ã¦ãŠã
 
         output.color.rgb = weight;
     
@@ -126,12 +127,18 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
     if (gOutline.num == 2)
     {
-        weight = saturate(weight); // 0~1‚É‚µ‚Ä‚¨‚­
+
+        weight = saturate(weight); // 0~1ã«ã—ã¦ãŠã
         output.color.rgb = (1.0f - weight) * gTexture.Sample(gSampler, input.texcoord).rgb;
     }
     if (gOutline.num == 3)
     {
-        weight = saturate(weight * gOutline.weightSquared); // 0~1‚É‚µ‚Ä‚¨‚­
+       // æœ€çµ‚ weight è¨ˆç®—
+        float viewZCenter = ReconstructViewZ(gDepthTexture.Sample(gSamplerPoint, input.texcoord), gOutline.nearZ, gOutline.farZ);
+        float weight = length(difference) / (abs(viewZCenter) + 1e-5f); // ç›¸å¯¾å¤‰åŒ–ç‡ã§å®‰å®šåŒ–
+        weight *= gOutline.weightSquared;
+        weight = saturate(weight);
+
         output.color.rgb = (1.0f - weight) * gTexture.Sample(gSampler, input.texcoord).rgb;
     }
 

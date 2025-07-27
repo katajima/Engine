@@ -13,6 +13,8 @@ using namespace Microsoft::WRL;
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 
+#include "DirectXGame/engine/Offscreen/PostEffectData.h"
+
 class DXGIDevice;
 class Command;
 class SrvManager;
@@ -22,21 +24,6 @@ class Camera;
 class RenderTexture
 {
 public:
-	enum class PostEffectType {
-		kCopy,			// コピー
-		kGrayScale,		// グレースケール
-		kSepia,			// セピア
-		kVignette,      // ビネット
-		kSmoothing,     // スムージング
-		kGaussian,      // ガウス
-		kOitline,		// アウトライン
-		kRadialBlur,	// ラジアルブラー
-		kDissovle,      // ディゾルブ
-		kRandom,		// ランダム
-		kBloom,			// ブルーム
-		kBloomCombin,	// 合成ブルーム
-	};
-
 	RenderTexture() = default;
 	~RenderTexture() = default;
 

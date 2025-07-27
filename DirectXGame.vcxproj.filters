@@ -546,7 +546,6 @@
     <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Bloom.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
     <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
     <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
@@ -1151,6 +1150,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffect.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

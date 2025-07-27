@@ -23,35 +23,57 @@ class Barrier;
 class ScissorRect;
 class ViewPort;
 
+class SceneManager;
+
 class PostEffectManager
 {
 public:
 	void Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect,ViewPort* viewPort);
 
-	// 最初(シーンに書き込み)
+	// 最初
 	void PreDrawOffscreen();
 
 	// 最初
 	void PostDrawOffscreen();
 
-	void AllPostEffect();
+	// 2D
+	void PreDraw2dOffscreen();
+
+	// 2D
+	void PostDraw2dOffscreen();
+
+
+
+
+	
+	void AllPostEffect(SceneManager* sceneManager);
 
 
 	void Update(Camera* camera);
 
 	// レンダーテクスチャ追加
-	void AddEffectBlock(const std::string name, PostEffectType type);
+	void AddEffectBlock(const std::string name, PostEffectBlockType type,bool use = true);
 
 	//
-	RenderTexture* GetEndRenderTexture() {
-		if (effectBlocks_.empty()) return nullptr;
-		return effectBlocks_.back()->GetEndRenderTexture();
-	};
+	RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get();};
+
+private:
+
+	void PreEnd(RenderTexture* renderTexture);
+
+	void PostEnd(RenderTexture* renderTexture);
+
 
 private:
 	std::unique_ptr <RenderTexture> renderTexture_;
-	std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
 	std::unique_ptr <RenderTexture> renderTextureEnd_;
+	
+	std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
+	
+	std::vector<PostEffectBlock*> effect_;
+
+
+	uint32_t indexCount_ = 0;
 
 private:
 	DXGIDevice* DXGIDevice_;

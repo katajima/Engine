@@ -31,6 +31,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
 	depthStencil_->Initialize(DXGIDevice_.get(),command_.get(),dsvManager_.get(),srvManager_.get()); // デプスステンシル     
 	
+
 	textureManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // テクスチャマネージャー
 	modelManager_->Initialize(this); // モデルマネージャー
 	
@@ -45,13 +46,19 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
 
 
-	//postEffectManager_->AddEffectBlock("bloom",PostEffectType::kBloom);
-	//postEffectManager_->AddEffectBlock("grayScale",PostEffectType::kGrayScale);
-	postEffectManager_->AddEffectBlock("bloom", PostEffectType::kGaussian);
-	postEffectManager_->AddEffectBlock("copy",PostEffectType::kCopy);
+	postEffectManager_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
+	postEffectManager_->AddEffectBlock("grayScale", PostEffectBlockType::kGrayScale,false);
+	postEffectManager_->AddEffectBlock("gaussian", PostEffectBlockType::kGaussian, false);
 	
-
-
+	postEffectManager_->AddEffectBlock("Sepia", PostEffectBlockType::kSepia, false);
+	postEffectManager_->AddEffectBlock("Dissovle", PostEffectBlockType::kDissovle, false);
+	postEffectManager_->AddEffectBlock("Oitline", PostEffectBlockType::kOitline, false);
+	
+	postEffectManager_->AddEffectBlock("Random", PostEffectBlockType::kRandom, false);
+	postEffectManager_->AddEffectBlock("RadialBlur", PostEffectBlockType::kRadialBlur, false);
+	postEffectManager_->AddEffectBlock("Smoothing", PostEffectBlockType::kSmoothing, false);
+	
+	postEffectManager_->AddEffectBlock("Vignette", PostEffectBlockType::kVignette, false);
 	
 	imguiManager_->Initialize(this);
 }
@@ -74,9 +81,16 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 
 	// レンダーターゲット用の描画後処理
 	postEffectManager_->PostDrawOffscreen();
+
+
+	postEffectManager_->PreDraw2dOffscreen();
+
+	sceneManager->Draw2D();
+
+	postEffectManager_->PostDraw2dOffscreen();
 }
 
-void DirectXCommon::PassSwap(RenderTexture* renderTexture)
+void DirectXCommon::PassSwap(SceneManager* sceneManager,RenderTexture* renderTexture)
 {
 	// スワップチェーン用の描画準備
 	swapChain_->PreDraw();
@@ -84,6 +98,8 @@ void DirectXCommon::PassSwap(RenderTexture* renderTexture)
 	// レンダーテクスチャ(コピー)
 	renderTexture->Draw();
 	
+	//sceneManager->Draw2D();
+
 	// ImGuiの描画
 	GetImGuiManager()->Draw();
 
@@ -99,10 +115,10 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
 
-	postEffectManager_->AllPostEffect();
+	postEffectManager_->AllPostEffect(sceneManager);
 
 	// スワップチェーン
-	PassSwap(postEffectManager_->GetEndRenderTexture());
+	PassSwap(sceneManager,postEffectManager_->GetEndRenderTexture());
 }
 
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
@@ -130,7 +146,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 #endif // _DEBUG
 
 	// 2Dオブジェクトの描画
-	sceneManager->Draw2D();
+	//sceneManager->Draw2D();
 }
 
 void DirectXCommon::InitializeFixFPS()

@@ -26,10 +26,14 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     
     float3 color = gInput.Sample(gSampler, input.texcoord).rgb;
+    //color *= gBloomParams.intensity;
     float luminance = Luminance(color);
     float mask = step(gBloomParams.threshold, luminance);
     
+    
     output.color = float4(color * mask, 1.0f);
+    
+    output.color.rgb *= gBloomParams.intensity;
     
     return output;
 }

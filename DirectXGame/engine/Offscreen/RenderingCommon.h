@@ -2,6 +2,7 @@
 #include "PostEffect.h"
 
 
+
 class Camera;
 class DirectXCommon;
 class RenderingCommon
@@ -9,227 +10,35 @@ class RenderingCommon
 private:
 
 public:
-	enum class PostEffectType {
-		kCopy,			// コピー
-		kGrayScale,		// グレースケール
-		kSepia,			// セピア
-		kVignette,      // ビネット
-		kSmoothing,     // スムージング
-		kGaussian,      // ガウス
-		kOitline,		// アウトライン
-		kRadialBlur,	// ラジアルブラー
-		kDissovle,      // ディゾルブ
-		kRandom,		// ランダム
-		kBloom,			// ブルーム
-		kBloomCombin,	// 合成ブルーム
-
-
-
-
-	};
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
+	// ImGui
+	void UpdateImgui(PostEffectType type);
+	//
+	void DrawRender(PostEffectType type, int index, int indexB = 0);
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	void DrawCopyRender(int index);
-
-	void DrawGrayScaleRender(int index);
-
-	void DrawSepiaeRender(int index);
-
-	void DrawVignetteRender(int index);
-
-	void DrawSmoothingRender(int index);
-
-	void DrawGaussianRender(int index);
-
-	void DrawOutlineRender(int index);
-
-	void DrawRadialBlurRender(int index);
-
-	void DrawDissovleRender(int index);
-
-	void DrawRandomRender(int index);
-
-	void DrawBloomRender(int index);
-
-	void DrawBloomCombinRender(int index, int indexB);
-
-
-
 	void SetCamera(Camera* camera) { camera_ = camera; }
-	void UpdateImgui(PostEffectType type);
 
 private:
-	// ルートシグネチャの作成
-	void CreateRootSignature();
-	// グラフィックスパイプラインの作成
-	void CreateGraphicsPipeline();
-
-
-private:
-	void DrawColl();
-
-	// コピー
-	void DrawCopyImageSetting();
-
-	// グレースケール
-	void DrawGrayScaleSetting();
-
-	// セピアケール
-	void DrawSepiaSetting();
-
-	// ビネット
-	void DrawVignetteSetting();
-
-	// スムージング
-	void DrawSmoothingSetting();
-
-	// ガウス
-	void DrawGaussianSetting();
-
-	// アウトライン
-	void DrawOutlineSetting();
-	
-	// ラジアルブラー
-	void DrawRadialBlurSetting();
-
-	// ディゾルブ
-	void DrawDissovleSetting();
-
-	// ランダム
-	void DrawRandomSetting();
-
-	// ブルーム
-	void DrawBloomSetting();
-
-	// ブルーム合成
-	void DrawBloomCombinSetting();
-
-
-private:
-	// アウトライン
-	void RootOutlineSetting();
-	// ディゾルブ
-	void RootDissovleSetting();
-	// ラジアルブラー
-	void RootRadialBlurSetting();
-	// ブルーム
-	void RootBloomSetting();
-
-
-
-private:
-	std::unique_ptr<PSOManager> psoManager_;
 	DirectXCommon* dxCommon_;
 	Camera* camera_;
 
 	PostEffectType type_ = PostEffectType::kCopy;
 
-	struct Rendering
-	{
-		//ルートシグネチャ
-		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-		// グラフィックスパイプラインステート
-		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
-	};
-	Rendering copy_;
-	Rendering grayScale_;
-	Rendering sepia_;
-	Rendering vignette_;
-	Rendering smoothing_;
-	Rendering gaussian_;
-	Rendering outline_;
-	Rendering radialBlur_;
-	Rendering dissovle_;
-	Rendering random_;
-	Rendering bloom_;
-	Rendering bloomCombin_;
-
-	//バッファリソースの使い道を補足するバッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-	Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
-	
-
-private:
-
-	
-
-	struct VignetteGPU {
-		float scale;
-		float squared;
-		float padding[2];
-	};
-
-	ConstantBuffer<VignetteGPU> cbVignette_;
-
-	
-	struct SmoothigGPU {
-		int num;
-		float padding[3];
-	};
-	ConstantBuffer<SmoothigGPU> cbSmoothig_;
-
-	
-
-	struct GaussianGPU {
-		int num;
-		float sigma;
-		float padding[2];
-	};
-	ConstantBuffer<GaussianGPU> cbGaussian_;
-	
-	struct OutlineGPU {
-		Matrix4x4 projectionInverse;
-		int num;
-		float weightSquared;
-		float nearZ;
-		float farZ;
-	};
-	ConstantBuffer<OutlineGPU> cbOutline_;
-
-	
-	struct RadialBlurGPU
-	{
-		Vector2 center;
-		int numSamples;
-		float blurWidth;
-	};
-	ConstantBuffer<RadialBlurGPU> cbRadialBlur_;
-
-
-	struct DissovleGPU
-	{
-		float threshold;
-		Vector3 color;
-		float edge;
-		float pad[3];
-	};
-	ConstantBuffer<DissovleGPU> cbDissovle_;
-
-	uint32_t dissovleIndex = 0;
-
-
-
-	struct RandomGPU
-	{
-		float time;
-		float pad[3];
-	};
-	ConstantBuffer<RandomGPU> cbRandom_;
-
-	struct BloomGPU
-	{
-		float threshold;
-		float intensity;
-		float pad[2];
-	};
-	ConstantBuffer<BloomGPU> cbBloom_;
-
-
-
+	PostEffectCopy copy_;
+	PostEffectGrayScale grayScale_;
+	PostEffectSepia sepia_;
+	PostEffectVignette vignette_;
+	PostEffectSmoothing		smoothing_;
+	PostEffectGaussian		gaussian_;
+	PostEffectOutline		outline_;
+	PostEffectRadialBlur	radialBlur_;
+	PostEffectDissovle		dissovle_;
+	PostEffectRandom		random_;
+	PostEffectBloom			bloom_;
+	PostEffectCombin		cimbin_;
 };
 
 

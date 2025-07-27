@@ -16,7 +16,7 @@
 // 初期化
 void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, 
 	DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, 
-	const std::string name, PostEffectType type)
+	const std::string name, PostEffectBlockType type)
 {
 	DXGIDevice_ = DXGIDevice;
 	command_ = command;
@@ -31,41 +31,40 @@ void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvMan
 	name_ = name;
 	switch (type)
 	{
-	case PostEffectType::kCopy:
-		AddRenderTexture("Copy_" + name, RenderTexture::PostEffectType::kCopy);
+	case PostEffectBlockType::kCopy:
+		AddRenderTexture("Copy_" + name, PostEffectType::kCopy);
 		break;
-	case PostEffectType::kGrayScale:
-		AddRenderTexture("GrayScale_" + name, RenderTexture::PostEffectType::kGrayScale);
+	case PostEffectBlockType::kGrayScale:
+		AddRenderTexture("GrayScale_" + name, ::PostEffectType::kGrayScale);
 		break;
-	case PostEffectType::kSepia:
-		AddRenderTexture("Sepia_" + name, RenderTexture::PostEffectType::kSepia);
+	case PostEffectBlockType::kSepia:
+		AddRenderTexture("Sepia_" + name, PostEffectType::kSepia);
 		break;
-	case PostEffectType::kVignette:
-		AddRenderTexture("Vignette_" + name, RenderTexture::PostEffectType::kVignette);
+	case PostEffectBlockType::kVignette:
+		AddRenderTexture("Vignette_" + name, PostEffectType::kVignette);
 		break;
-	case PostEffectType::kSmoothing:
-		AddRenderTexture("Smoothing_" + name, RenderTexture::PostEffectType::kSmoothing);
+	case PostEffectBlockType::kSmoothing:
+		AddRenderTexture("Smoothing_" + name, PostEffectType::kSmoothing);
 		break;
-	case PostEffectType::kGaussian:
-		AddRenderTexture("Gaussian_" + name, RenderTexture::PostEffectType::kGaussian);
+	case PostEffectBlockType::kGaussian:
+		AddRenderTexture("Gaussian_" + name, PostEffectType::kGaussian);
 		break;
-	case PostEffectType::kOitline:
-		AddRenderTexture("Oitline_" + name, RenderTexture::PostEffectType::kOitline);
+	case PostEffectBlockType::kOitline:
+		AddRenderTexture("Oitline_" + name, PostEffectType::kOitline);
 		break;
-	case PostEffectType::kRadialBlur:
-		AddRenderTexture("RadialBlur_" + name, RenderTexture::PostEffectType::kRadialBlur);
+	case PostEffectBlockType::kRadialBlur:
+		AddRenderTexture("RadialBlur_" + name, PostEffectType::kRadialBlur);
 		break;
-	case PostEffectType::kDissovle:
-		AddRenderTexture("Dissovle_" + name, RenderTexture::PostEffectType::kDissovle);
+	case PostEffectBlockType::kDissovle:
+		AddRenderTexture("Dissovle_" + name,PostEffectType::kDissovle);
 		break;
-	case PostEffectType::kRandom:
-		AddRenderTexture("Random_" + name, RenderTexture::PostEffectType::kRandom);
+	case PostEffectBlockType::kRandom:
+		AddRenderTexture("Random_" + name,PostEffectType::kRandom);
 		break;
-	case PostEffectType::kBloom:
-		//AddRenderTexture("Bloom_1_" + name, RenderTexture::PostEffectType::kCopy);
-		AddRenderTexture("BrightPassFilter" + name, RenderTexture::PostEffectType::kBloom);
-		AddRenderTexture("Gaussian" + name, RenderTexture::PostEffectType::kGaussian);
-		AddRenderTexture("BloomCombine" + name, RenderTexture::PostEffectType::kBloomCombin);
+	case PostEffectBlockType::kBloom:
+		AddRenderTexture("BrightPassFilter" + name, PostEffectType::kBloom);
+		AddRenderTexture("Gaussian" + name, PostEffectType::kGaussian);
+		AddRenderTexture("BloomCombine" + name, PostEffectType::kBloomCombin);
 		GetRenderTextures(2)->SetOtherSrvIndex(GetRenderTextures(0)->GetSrvIndex());
 
 		break;
@@ -81,21 +80,29 @@ void PostEffectBlock::Update(Camera* camera)
 		renderTexture->SetCamera(camera);
 		renderTexture->Update();
 	}
-
+	
 #ifdef _DEBUG
 	// レンダーテクスチャ
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader(name_.c_str())) {
+		ImGui::Checkbox("use",&use_);
+		int index = static_cast<int>(index_);
+		ImGui::DragInt("index", &index);
+		if (index <= 0) {
+			index = 0;
+		}
+		index_ = static_cast<uint32_t>(index);
 		for (auto& renderTexture : renderTextures_) {
 			renderTexture->Update();
 		}
 	}
+	
 	ImGui::End();
 #endif // _DEBUG
 }
 
 // 追加
-void PostEffectBlock::AddRenderTexture(const std::string name, RenderTexture::PostEffectType type)
+void PostEffectBlock::AddRenderTexture(const std::string name, PostEffectType type)
 {
 	auto renderTexture = std::make_unique<RenderTexture>();
 	renderTexture->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name);
@@ -156,7 +163,8 @@ void PostEffectBlock::PreDraw(RenderTexture* renderTexture)
 	// 描画先のRTVとDSVを設定する
 	// このポストエフェクトでは深度バッファを使用しないため、DSVは設定しない
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRTVHandle();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
+	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 
 	//// レンダーターゲットと深度バッファをクリア

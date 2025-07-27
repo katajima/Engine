@@ -1,6 +1,6 @@
 #include"Object2D.hlsli"
 
-//色など三角形の表面の材質を決定するものMaterial
+//濶ｲ縺ｪ縺ｩ荳芽ｧ貞ｽ｢縺ｮ陦ｨ髱｢縺ｮ譚占ｳｪ繧呈ｱｺ螳壹☆繧九ｂ縺ｮMaterial
 struct Material
 { 
     float4 color;
@@ -17,7 +17,7 @@ struct PixelShaderOutput
 };
 
 
-// バイキュービック補間関数
+// 繝舌う繧ｭ繝･繝ｼ繝薙ャ繧ｯ陬憺俣髢｢謨ｰ
 float CubicHermite(float A, float B, float C, float D, float t)
 {
     float a = (-A + 3 * B - 3 * C + D) / 2.0;
@@ -27,7 +27,7 @@ float CubicHermite(float A, float B, float C, float D, float t)
     return a * t * t * t + b * t * t + c * t + d;
 }
 
-// 2Dテクスチャのバイキュービックサンプリング
+// 2D繝�繧ｯ繧ｹ繝√Ε縺ｮ繝舌う繧ｭ繝･繝ｼ繝薙ャ繧ｯ繧ｵ繝ｳ繝励Μ繝ｳ繧ｰ
 float4 SampleBicubic(Texture2D tex, SamplerState samp, float2 uv, float2 texSize)
 {
     float2 texCoord = uv * texSize - 0.5;
@@ -80,6 +80,16 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     float4 textureColor = gTexture.Sample(sSampler, input.texcoord);
     
+    
+    
+    if (textureColor.a <= 0.5f)
+    {
+        discard;
+    }
+    if (output.color.a <= 0.0f)
+    {
+        discard;
+    }
     
     output.color = gMaterial.color * textureColor;
     

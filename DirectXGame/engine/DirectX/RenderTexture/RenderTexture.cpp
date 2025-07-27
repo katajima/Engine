@@ -27,7 +27,7 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 
 	name_ = name;
 
-	type_ = RenderTexture::PostEffectType::kCopy;
+	type_ = PostEffectType::kCopy;
 }
 
 void RenderTexture::Update()
@@ -35,98 +35,20 @@ void RenderTexture::Update()
 	renderingCommon_->SetCamera(camera_);
 
 #ifdef _DEBUG
-	
+
 	if (ImGui::TreeNode(name_.c_str())) {
-		/*if (ImGui::Button("kCopy")) {
-			type_ = RenderTexture::PostEffectType::kCopy;
-		}
-		if (ImGui::Button("kDissovle")) {
-			type_ = RenderTexture::PostEffectType::kDissovle;
-		}
-		if (ImGui::Button("kGaussian")) {
-			type_ = RenderTexture::PostEffectType::kGaussian;
-		}
-		if (ImGui::Button("kGrayScale")) {
-			type_ = RenderTexture::PostEffectType::kGrayScale;
-		}
-		if (ImGui::Button("kOitline")) {
-			type_ = RenderTexture::PostEffectType::kOitline;
-		}
-		if (ImGui::Button("kRadialBlur")) {
-			type_ = RenderTexture::PostEffectType::kRadialBlur;
-		}
-		if (ImGui::Button("kRandom")) {
-			type_ = RenderTexture::PostEffectType::kRandom;
-		}
-		if (ImGui::Button("kSepia")) {
-			type_ = RenderTexture::PostEffectType::kSepia;
-		}
-		if (ImGui::Button("kSmoothing")) {
-			type_ = RenderTexture::PostEffectType::kSmoothing;
-		}
-		if (ImGui::Button("kVignette")) {
-			type_ = RenderTexture::PostEffectType::kVignette;
-		}
-		if (ImGui::Button("kBloom")) {
-			type_ = RenderTexture::PostEffectType::kBloom;
-		}
-		if (ImGui::Button("kBloomCombin")) {
-			type_ = RenderTexture::PostEffectType::kBloomCombin;
-		}*/
 		UpdateImgui();
 		ImGui::TreePop(); // <- 対応する TreePop を忘れずに！
 	}
 #endif // _DEBUG
 
 
-	
+
 }
 
 void RenderTexture::Draw()
 {
-	switch (type_)
-	{
-	case RenderTexture::PostEffectType::kCopy:
-		renderingCommon_->DrawCopyRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kGrayScale:
-		renderingCommon_->DrawGrayScaleRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kSepia:
-		renderingCommon_->DrawSepiaeRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kVignette:
-		renderingCommon_->DrawVignetteRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kSmoothing:
-		renderingCommon_->DrawSmoothingRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kGaussian:
-		renderingCommon_->DrawGaussianRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kOitline:
-		renderingCommon_->DrawOutlineRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kRadialBlur:
-		renderingCommon_->DrawRadialBlurRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kDissovle:
-		renderingCommon_->DrawDissovleRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kRandom:
-		renderingCommon_->DrawRandomRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kBloom:
-		renderingCommon_->DrawBloomRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kBloomCombin:
-		renderingCommon_->DrawBloomCombinRender(otherSrvIndex_,srvIndex_);
-
-		break;
-	default:
-		renderingCommon_->DrawCopyRender(srvIndex_);
-		break;
-	}
+	renderingCommon_->DrawRender(type_, srvIndex_, otherSrvIndex_);
 }
 
 Vector4 RenderTexture::GetClearColor() const
@@ -256,48 +178,45 @@ void RenderTexture::CreateSRV()
 
 void RenderTexture::UpdateImgui()
 {
+	//if (ImGui::Button("kCopy")) {
+	//	type_ = PostEffectType::kCopy;
+	//}
+	//if (ImGui::Button("kDissovle")) {
+	//	type_ = PostEffectType::kDissovle;
+	//}
+	//if (ImGui::Button("kGaussian")) {
+	//	type_ = PostEffectType::kGaussian;
+	//}
+	//if (ImGui::Button("kGrayScale")) {
+	//	type_ = PostEffectType::kGrayScale;
+	//}
+	//if (ImGui::Button("kOitline")) {
+	//	type_ = PostEffectType::kOitline;
+	//}
+	//if (ImGui::Button("kRadialBlur")) {
+	//	type_ = PostEffectType::kRadialBlur;
+	//}
+	//if (ImGui::Button("kRandom")) {
+	//	type_ = PostEffectType::kRandom;
+	//}
+	//if (ImGui::Button("kSepia")) {
+	//	type_ = PostEffectType::kSepia;
+	//}
+	//if (ImGui::Button("kSmoothing")) {
+	//	type_ = PostEffectType::kSmoothing;
+	//}
+	//if (ImGui::Button("kVignette")) {
+	//	type_ = PostEffectType::kVignette;
+	//}
+	//if (ImGui::Button("kBloom")) {
+	//	type_ = PostEffectType::kBloom;
+	//}
+	//if (ImGui::Button("kBloomCombin")) {
+	//	type_ = PostEffectType::kBloomCombin;
+	//}
 
-	switch (type_)
-	{
-	case RenderTexture::PostEffectType::kCopy:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kCopy);
-		break;
-	case RenderTexture::PostEffectType::kGrayScale:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kGrayScale);
-		break;
-	case RenderTexture::PostEffectType::kSepia:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kSepia);
-		break;
-	case RenderTexture::PostEffectType::kVignette:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kVignette);
-		break;
-	case RenderTexture::PostEffectType::kSmoothing:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kSmoothing);
-		break;
-	case RenderTexture::PostEffectType::kGaussian:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kGaussian);
-		break;
-	case RenderTexture::PostEffectType::kOitline:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kOitline);
-		break;
-	case RenderTexture::PostEffectType::kRadialBlur:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRadialBlur);
-		break;
-	case RenderTexture::PostEffectType::kDissovle:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kDissovle);
-		break;
-	case RenderTexture::PostEffectType::kRandom:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRandom);
-		break;
-	case RenderTexture::PostEffectType::kBloom:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kBloom);
-		break;
-	case RenderTexture::PostEffectType::kBloomCombin:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kBloomCombin);
-		break;
-	default:
-		break;
-	}
+	renderingCommon_->UpdateImgui(type_);
+
 }
 
 

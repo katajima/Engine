@@ -11,6 +11,16 @@ template<class Type>
 class ConstantBuffer {
 public:
 
+	~ConstantBuffer() {
+		if (resource_ && data_) {
+			resource_->Unmap(0, nullptr);
+			data_ = nullptr;
+		}
+		resource_.Reset(); // 明示的にComPtrも解放
+	}
+	//ConstantBuffer(const ConstantBuffer&) = delete;
+	ConstantBuffer& operator=(const ConstantBuffer&) = delete;
+
 	void CreateBuffer(DirectXCommon* dxCommon, int num = 1)
 	{
 		dxCommon_ = dxCommon;

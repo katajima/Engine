@@ -321,12 +321,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\shaders\Offscreen\Bloom.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -728,6 +722,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Move\RigidBodyComponent.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffect.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectBlock.h" />
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectData.h" />
     <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h" />
     <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h" />
     <ClInclude Include="DirectXGame\engine\PSO\PSOFanction.h" />

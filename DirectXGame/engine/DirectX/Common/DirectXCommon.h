@@ -65,7 +65,7 @@ private:
 	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 private:
 	// スワップチェーンにレンダーターゲットを渡す
-	void PassSwap(RenderTexture* renderTexture);
+	void PassSwap(SceneManager* sceneManager,RenderTexture* renderTexture);
 private:
 	// 3D2D描画
 	void Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager);

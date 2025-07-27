@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
-const uint32_t RtvManager::kMaxRTVCount = 16;
+const uint32_t RtvManager::kMaxRTVCount = 32;
 
 
 
