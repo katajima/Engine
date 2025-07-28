@@ -13,6 +13,7 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/d3dx12.h"
 
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
+#include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 
@@ -46,7 +47,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
 
 
-	postEffectManager_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
+	/*postEffectManager_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
 	postEffectManager_->AddEffectBlock("grayScale", PostEffectBlockType::kGrayScale,false);
 	postEffectManager_->AddEffectBlock("gaussian", PostEffectBlockType::kGaussian, false);
 	
@@ -58,7 +59,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	postEffectManager_->AddEffectBlock("RadialBlur", PostEffectBlockType::kRadialBlur, false);
 	postEffectManager_->AddEffectBlock("Smoothing", PostEffectBlockType::kSmoothing, false);
 	
-	postEffectManager_->AddEffectBlock("Vignette", PostEffectBlockType::kVignette, false);
+	postEffectManager_->AddEffectBlock("Vignette", PostEffectBlockType::kVignette, false);*/
 	
 	imguiManager_->Initialize(this);
 }
@@ -105,7 +106,7 @@ void DirectXCommon::PassSwap(SceneManager* sceneManager,RenderTexture* renderTex
 
 	// スワップチェーン用の描画後処理
 	swapChain_->PostDraw();
-	
+	postEffectManager_->ClearPostEffectBlock();
 	// FPS制限の更新
 	UpdateFixFPS();
 }

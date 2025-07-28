@@ -53,9 +53,13 @@ public:
 
 	// レンダーテクスチャ追加
 	void AddEffectBlock(const std::string name, PostEffectBlockType type,bool use = true);
+	//
+	void AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks);
 
 	//
 	RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get();};
+
+	void ClearPostEffectBlock();
 
 private:
 
@@ -68,7 +72,7 @@ private:
 	std::unique_ptr <RenderTexture> renderTexture_;
 	std::unique_ptr <RenderTexture> renderTextureEnd_;
 	
-	std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
+	std::vector<PostEffectBlock*> effectBlocks_;
 	
 	uint32_t indexCount_ = 0;
 

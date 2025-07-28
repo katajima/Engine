@@ -9,7 +9,10 @@
 using namespace Microsoft::WRL;
 #include<d3d12.h>
 #include<dxgi1_6.h>
-
+#include "DirectXGame/engine/Offscreen/PostEffectData.h"
+#include "DirectXGame/engine/Offscreen/PostEffect.h"
+class PostEffectManager;
+class PostEffectBlock;
 class DirectXCommon;
 class Input;
 class CameraCommon;
@@ -51,9 +54,17 @@ public: // メンバ関数
 	const float& GetFarZ() const { return farClip_; }
 
 
-
+	PostEffectManager* GetPostEffectManager() { return postEffectManager_; }
 
 	void SetShake(float time,Vector3 diectionRange);
+
+
+
+	// レンダーテクスチャ追加
+	void AddEffectBlock(const std::string name, PostEffectBlockType type, bool use = true);
+
+	std::vector<PostEffectBlock*> GetPostEffectBlocks();
+
 private:
 	float shakeTime_ = 0;
 	Vector3 shakeDirectionRange_{};
@@ -87,7 +98,8 @@ public:
 	DataGPU* data;
 private:
 	DirectXCommon* dxCommon_;
-
+	PostEffectManager* postEffectManager_;
+	std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
 	Input* input_;
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> resource;

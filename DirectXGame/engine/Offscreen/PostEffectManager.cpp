@@ -113,7 +113,7 @@ void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 	
 
 	std::sort(effectBlocks_.begin(), effectBlocks_.end(),
-		[](const std::unique_ptr<PostEffectBlock>& a, const std::unique_ptr<PostEffectBlock>& b) {
+		[](const PostEffectBlock* a, const PostEffectBlock* b) {
 			return a->GetIndex() < b->GetIndex();
 		});
 
@@ -154,12 +154,26 @@ void PostEffectManager::Update(Camera* camera)
 
 void PostEffectManager::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
 {
-	auto effectBlock = std::make_unique<PostEffectBlock>();
-	effectBlock->Intialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, depthStencil_, barrier_, scissorRect_, viewPort_,name,type);
-	effectBlock->SetUse(use);			// 使うか
-	effectBlock->SetIndex(indexCount_); // 順番
-	effectBlocks_.push_back(std::move(effectBlock));
-	indexCount_++; // 加算
+	////auto effectBlock = std::make_unique<PostEffectBlock>();
+	////effectBlock->Intialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, depthStencil_, barrier_, scissorRect_, viewPort_,name,type);
+	////effectBlock->SetUse(use);			// 使うか
+	////effectBlock->SetIndex(indexCount_); // 順番
+	//effectBlocks_.push_back(effectBlock);
+	//indexCount_++; // 加算
+}
+
+void PostEffectManager::AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks)
+{
+	for (auto& effect  : effectBlocks) {
+		effectBlocks_.push_back(effect);
+	}
+
+	//effectBlocks_.push_back(std::move(effectBlock));
+}
+
+void PostEffectManager::ClearPostEffectBlock()
+{
+	effectBlocks_.clear();
 }
 
 void PostEffectManager::PreEnd(RenderTexture* renderTexture)

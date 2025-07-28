@@ -17,12 +17,13 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/input/Input.h"
-#include "DirectXGame/engine/Camera/Camera.h"
+
 
 
 #define ICON_MD_HOME u8"\uE88A"
 
 // 前方宣言
+class Camera;
 class WinApp;
 class DirectXCommon;
 class SrvManager;

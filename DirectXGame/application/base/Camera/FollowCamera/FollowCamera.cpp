@@ -15,10 +15,18 @@ void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager, En
     uniqueCamera_->transform_.rotate.x = DegreesToRadians(90);
     uniqueCamera_->transform_.rotate.x = DegreesToRadians(20);
 
+    //uniqueCamera_->GetPostEffectManager()->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
+
+    uniqueCamera_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
+
+    
 }
 
 void FollowCamera::Update()
 {
+    if (useCamera) {
+        uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
+    }
     if (target_) {
 
         const float kRotateSpeed = 0.03f;

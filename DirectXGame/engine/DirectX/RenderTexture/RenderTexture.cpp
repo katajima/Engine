@@ -41,13 +41,9 @@ void RenderTexture::Update()
 
 	if (ImGui::TreeNode(name_.c_str())) {
 		postEffectData_->UpdateImgui();
-		//renderingCommon_->UpdateImgui(type_);
 		ImGui::TreePop(); // <- 対応する TreePop を忘れずに！
 	}
 #endif // _DEBUG
-
-
-
 }
 
 void RenderTexture::Draw()
@@ -79,6 +75,11 @@ D3D12_GPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVGPUHandle()
 D3D12_CPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVCPUHandle()
 {
 	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
+}
+
+PostEffectData* RenderTexture::GetPostEffectData()
+{
+	return postEffectData_.get();
 }
 
 
@@ -180,10 +181,3 @@ void RenderTexture::CreateSRV()
 	matadata.mipLevels = 1;
 	srvManager_->CreateSRVforTexture2D(srvIndex_, resource_.Get(), matadata);
 }
-
-void RenderTexture::UpdateImgui()
-{
-	
-}
-
-

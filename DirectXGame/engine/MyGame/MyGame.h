@@ -56,13 +56,8 @@ public:
 	static float const kDeltaTime_;
 	static float kTimeSpeed_;
 	static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
-	static void hitStop(float time) { hitStopTimer = time; };
 	static float NowTime() { return nowTime; };
-	static float hitStopTimer;
 	static float nowTime;
-private:
-	void HitStpoTime();
-
 private:
 	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
 
@@ -75,7 +70,6 @@ private:
 	std::unique_ptr<Primitive> primiStar = nullptr;
 	std::unique_ptr<Primitive> primiTrai = nullptr;
 	
-	//PostEffectType type_ = PostEffectType::kCopy;
 private:
 	// ゲーム終了フラグ
 	bool endRequst_ = false;

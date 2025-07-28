@@ -11,7 +11,7 @@ using namespace Microsoft::WRL;
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
-#include"DirectXGame/engine/struct/Structs3D.h"
+//#include"DirectXGame/engine/struct/Structs3D.h"
 
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
 
@@ -54,6 +54,8 @@ public:
 	// SRVCPUハンドル取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
 
+	PostEffectData* GetPostEffectData();
+
 private:
 	// レンダーテクスチャのリソースを作成
 	void CreateResource();
@@ -65,10 +67,6 @@ private:
 	void CreateRTV();
 	// SRVを作成
 	void CreateSRV();
-
-
-	void UpdateImgui();
-
 private:
 	HRESULT hr_ = S_FALSE;
 	// レンダーテクスチャ用リソース

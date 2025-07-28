@@ -4,7 +4,6 @@
 
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
-float MyGame::hitStopTimer = 0.0f;
 float MyGame::nowTime = 0.0f;
 
 void MyGame::Initialize()
@@ -385,28 +384,4 @@ void MyGame::LoadModel()
 	modelManager->LoadModel("enemyGear.obj", "enemyAll/gear"); // 歯車
 	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
 
-}
-
-
-
-
-
-void MyGame::HitStpoTime()
-{
-	bool is = false;
-	hitStopTimer -= kDeltaTime_;
-	if (hitStopTimer <= 0.0f) {
-		hitStopTimer = 0.0f;
-	}
-	if (hitStopTimer > 0) {
-		is = true;
-	}
-
-	if (is) {
-
-		kTimeSpeed_ = 0.4f;
-	}
-	else {
-		kTimeSpeed_ = 1.0f;
-	}
 }

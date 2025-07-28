@@ -25,6 +25,20 @@ public:
 
 	void SetCamera(Camera* camera) { camera_ = camera; }
 
+
+
+
+
+
+	ConstantBuffer<VignetteGPU>*	GetVignette(){return cbVignette_.get();}
+	ConstantBuffer<SmoothigGPU>*	GetSmoothig() { return cbSmoothig_.get(); }
+	ConstantBuffer<GaussianGPU>*	GetGaussian() { return cbGaussian_.get(); }
+	ConstantBuffer<OutlineGPU>*		GetOutline() { return cbOutline_.get(); }
+	ConstantBuffer<RadialBlurGPU>*	GetRadialBlur() { return cbRadialBlur_.get(); }
+	ConstantBuffer<DissovleGPU>*	GetDissovle() { return cbDissovle_.get(); }
+	ConstantBuffer<RandomGPU>*		GetRandom() { return cbRandom_.get(); }
+	ConstantBuffer<BloomGPU>*		GetBloom() { return cbBloom_.get(); }
+
 private:
 	PostEffectType type_;
 
@@ -33,14 +47,14 @@ private:
 	DirectXCommon* dxCommon_ = nullptr;
 	Camera* camera_ = nullptr;
 
-	std::unique_ptr<ConstantBuffer<VignetteGPU>> cbVignette_;
-	std::unique_ptr < ConstantBuffer<SmoothigGPU>> cbSmoothig_;
-	std::unique_ptr < ConstantBuffer<GaussianGPU>> cbGaussian_;
-	std::unique_ptr < ConstantBuffer<OutlineGPU>> cbOutline_;
-	std::unique_ptr < ConstantBuffer<RadialBlurGPU>> cbRadialBlur_;
-	std::unique_ptr < ConstantBuffer<DissovleGPU>> cbDissovle_;
-	std::unique_ptr < ConstantBuffer<RandomGPU>> cbRandom_;
-	std::unique_ptr < ConstantBuffer<BloomGPU>> cbBloom_;
+	std::unique_ptr	<ConstantBuffer<VignetteGPU>>	cbVignette_;
+	std::unique_ptr <ConstantBuffer<SmoothigGPU>>	cbSmoothig_;
+	std::unique_ptr <ConstantBuffer<GaussianGPU>>	cbGaussian_;
+	std::unique_ptr <ConstantBuffer<OutlineGPU>>	cbOutline_;
+	std::unique_ptr <ConstantBuffer<RadialBlurGPU>> cbRadialBlur_;
+	std::unique_ptr <ConstantBuffer<DissovleGPU>>	cbDissovle_;
+	std::unique_ptr <ConstantBuffer<RandomGPU>>		cbRandom_;
+	std::unique_ptr <ConstantBuffer<BloomGPU>>		cbBloom_;
 };
 
 

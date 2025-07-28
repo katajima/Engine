@@ -140,17 +140,6 @@ void CameraManeger::UpadateImGui()
 
 
 	}
-
-	if (ImGui::TreeNode("Test")) {
-		ImGui::Text("Camera1");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		//ImGui::TreePop();
-		ImGui::Text("Camera2");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		ImGui::TreePop();
-	}
-
-
 	ImGui::End();
 
 #endif

@@ -57,6 +57,7 @@ protected:
 	std::unique_ptr<Camera> uniqueCamera_;	// 固有カメラ
 	
 
+
 	CameraSRTSpeed srtSpeed_;				// SRTスピード
 	BaseObject* lockOnObject = nullptr;		// ロックオン対象
 	CameraManeger* cameraManeger = nullptr;	// カメラ管理

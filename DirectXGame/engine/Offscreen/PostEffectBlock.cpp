@@ -96,7 +96,6 @@ void PostEffectBlock::Update(Camera* camera)
 			renderTexture->Update();
 		}
 	}
-	
 	ImGui::End();
 #endif // _DEBUG
 }
