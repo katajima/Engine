@@ -105,8 +105,7 @@ void PostEffectBlock::Update(Camera* camera)
 void PostEffectBlock::AddRenderTexture(const std::string name, PostEffectType type)
 {
 	auto renderTexture = std::make_unique<RenderTexture>();
-	renderTexture->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name);
-	renderTexture->type_ = type;
+	renderTexture->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name, type);
 	
 	renderTextures_.push_back(std::move(renderTexture));
 }

@@ -27,13 +27,11 @@ void PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvM
 
 
 	renderTexture_ = std::make_unique<RenderTexture>();
-	renderTexture_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainStr");
-	renderTexture_->type_ = PostEffectType::kCopy;
+	renderTexture_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainStr", PostEffectType::kCopy);
 	
 	renderTextureEnd_ = std::make_unique<RenderTexture>();
-	renderTextureEnd_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainEnd");
-	renderTextureEnd_->type_ = PostEffectType::kCopy;
-
+	renderTextureEnd_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainEnd", PostEffectType::kCopy);
+	
 
 }
 

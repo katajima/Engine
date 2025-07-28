@@ -66,7 +66,7 @@ public:
 	// 順番取得
 	uint32_t GetIndex() const { return index_; }
 	// 順番設定
-	void SetIndex(uint32_t index) { index_ = index; }
+	void SetIndex(uint32_t index){index_ = index;}
 
 private:
 	// レンダーテクスチャ描画前処理

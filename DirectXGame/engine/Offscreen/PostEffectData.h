@@ -1,9 +1,10 @@
 #pragma once
-#include "DirectXGame/engine/struct/Structs3D.h"
-
+#include "DirectXGame/engine/struct/Vector4.h"
+#include "DirectXGame/engine/struct/Vector3.h"
+#include "DirectXGame/engine/struct/Vector2.h"
+#include "DirectXGame/engine/struct/Matrix4x4.h"
 
 #pragma region GPUData
-
 struct VignetteGPU {
 	float scale;
 	float squared;
@@ -60,6 +61,7 @@ struct BloomGPU
 
 
 #pragma endregion // GPUに送るデータ
+
 
 
 

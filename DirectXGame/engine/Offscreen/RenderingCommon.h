@@ -12,8 +12,6 @@ private:
 public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-	// ImGui
-	void UpdateImgui(PostEffectType type);
 	//
 	void DrawRender(PostEffectType type, int index, int indexB = 0);
 
@@ -27,10 +25,10 @@ private:
 
 	PostEffectType type_ = PostEffectType::kCopy;
 
-	PostEffectCopy copy_;
-	PostEffectGrayScale grayScale_;
-	PostEffectSepia sepia_;
-	PostEffectVignette vignette_;
+	PostEffectCopy			copy_;
+	PostEffectGrayScale		grayScale_;
+	PostEffectSepia			sepia_;
+	PostEffectVignette		vignette_;
 	PostEffectSmoothing		smoothing_;
 	PostEffectGaussian		gaussian_;
 	PostEffectOutline		outline_;

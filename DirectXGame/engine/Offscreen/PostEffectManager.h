@@ -70,9 +70,6 @@ private:
 	
 	std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
 	
-	std::vector<PostEffectBlock*> effect_;
-
-
 	uint32_t indexCount_ = 0;
 
 private:

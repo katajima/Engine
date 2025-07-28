@@ -23,52 +23,6 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	
 }
 
-void RenderingCommon::UpdateImgui(PostEffectType type)
-{
-	switch (type)
-	{
-	case PostEffectType::kCopy:
-		copy_.UpdateImgui();
-		break;
-	case PostEffectType::kGrayScale:
-		grayScale_.UpdateImgui();
-		break;
-	case PostEffectType::kSepia:
-		sepia_.UpdateImgui();
-		break;
-	case PostEffectType::kVignette:
-		vignette_.UpdateImgui();
-		break;
-	case PostEffectType::kSmoothing:
-		smoothing_.UpdateImgui();
-		break;
-	case PostEffectType::kGaussian:
-		gaussian_.UpdateImgui();
-		break;
-	case PostEffectType::kOitline:
-		outline_.UpdateImgui();
-		break;
-	case PostEffectType::kRadialBlur:
-		radialBlur_.UpdateImgui();
-		break;
-	case PostEffectType::kDissovle:
-		dissovle_.UpdateImgui();
-		break;
-	case PostEffectType::kRandom:
-		random_.UpdateImgui();
-		break;
-	case PostEffectType::kBloom:
-		bloom_.UpdateImgui();
-		break;
-	case PostEffectType::kBloomCombin:
-		cimbin_.UpdateImgui();
-		break;
-	default:
-		break;
-	}
-
-}
-
 void RenderingCommon::DrawRender(PostEffectType type, int index, int indexB)
 {
 
@@ -93,7 +47,6 @@ void RenderingCommon::DrawRender(PostEffectType type, int index, int indexB)
 		gaussian_.DrawRender(index, indexB);
 		break;
 	case PostEffectType::kOitline:
-		outline_.SetCamera(camera_);
 		outline_.DrawRender(index, indexB);
 		break;
 	case PostEffectType::kRadialBlur:

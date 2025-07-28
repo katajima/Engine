@@ -185,6 +185,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Mesh\SkyBoxMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffect.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectBlock.cpp" />
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectData.cpp" />
     <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\PSOFanction.cpp" />
