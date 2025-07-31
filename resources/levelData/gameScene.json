@@ -39,28 +39,6 @@
         },
         {
             "type": "MESH",
-            "name": "橋",
-            "transform": {
-                "translation": [
-                    0.0,
-                    744.1453857421875,
-                    0.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scaling": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "trainBridge"
-        },
-        {
-            "type": "MESH",
             "name": "立方体",
             "transform": {
                 "translation": [
@@ -205,7 +183,6 @@
                     1.0
                 ]
             },
-            "disabled": 0,
             "file_name": "hasira",
             "collider": {
                 "collider_disabled": 1,
@@ -392,6 +369,186 @@
                     20.0
                 ]
             }
+        },
+        {
+            "type": "CAMERA",
+            "name": "カメラ",
+            "transform": {
+                "translation": [
+                    -130.91383361816406,
+                    0.0,
+                    81.2860107421875
+                ],
+                "rotation": [
+                    45.000003814697266,
+                    1.4654536926173023e-06,
+                    -90.00001525878906
+                ],
+                "scaling": [
+                    400.0,
+                    400.0000305175781,
+                    400.0000305175781
+                ]
+            },
+            "file_name": "Fixed"
+        },
+        {
+            "type": "CAMERA",
+            "name": "カメラ.001",
+            "transform": {
+                "translation": [
+                    -401.0086669921875,
+                    -3.9752275943756104,
+                    237.5475311279297
+                ],
+                "rotation": [
+                    64.81761932373047,
+                    5.497803954312985e-07,
+                    -90.0
+                ],
+                "scaling": [
+                    500.0,
+                    500.00006103515625,
+                    500.00006103515625
+                ]
+            },
+            "file_name": "Fixed2"
+        },
+        {
+            "type": "LIGHT",
+            "name": "ポイント",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    135.7747039794922
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "object_disabled": {
+                "object_disabled": false
+            },
+            "collider": {
+                "collider_disabled": 0,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    2.0,
+                    2.0,
+                    2.0
+                ]
+            },
+            "blender_light": {
+                "blender_light_type": "POINT",
+                "color": [
+                    1.0,
+                    0.17216692864894867,
+                    0.3427371382713318
+                ],
+                "energy": 900000.0,
+                "shadow_soft_size": 8.170000076293945,
+                "use_shadow": false,
+                "falloff_type": "INVERSE_SQUARE",
+                "cutoff_distance": 1000.0
+            }
+        },
+        {
+            "type": "LIGHT",
+            "name": "スポット",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    215.44705200195312
+                ],
+                "rotation": [
+                    -93.92626953125,
+                    20.599201202392578,
+                    55.265480041503906
+                ],
+                "scaling": [
+                    1.0,
+                    0.9999999403953552,
+                    1.0
+                ]
+            },
+            "object_disabled": {
+                "object_disabled": true
+            },
+            "blender_light": {
+                "blender_light_type": "SPOT",
+                "color": [
+                    1.0,
+                    0.06665738672018051,
+                    0.8640764355659485
+                ],
+                "energy": 1000000.0,
+                "shadow_soft_size": 0.25,
+                "use_shadow": true,
+                "spot_size": 3.1415927410125732,
+                "spot_blend": 1.0,
+                "custom_distance": 1000.0
+            }
+        },
+        {
+            "type": "CAMERA",
+            "name": "カメラ.002",
+            "transform": {
+                "translation": [
+                    0.0,
+                    -1586.4208984375,
+                    1049.2900390625
+                ],
+                "rotation": [
+                    60.923622131347656,
+                    0.37488681077957153,
+                    0.3657226860523224
+                ],
+                "scaling": [
+                    780.0000610351562,
+                    780.0,
+                    780.0
+                ]
+            },
+            "object_disabled": {
+                "object_disabled": false
+            },
+            "file_name": "Fixed3"
+        },
+        {
+            "type": "MESH",
+            "name": "橋",
+            "transform": {
+                "translation": [
+                    0.0,
+                    744.14501953125,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "trainBridge"
         }
     ]
 }

@@ -125,11 +125,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Component\AttackComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Vision\VisionComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\playerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\BulletSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp" />
@@ -646,7 +646,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h" />
-    <ClInclude Include="DirectXGame\application\base\Component\AttackComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Component\MoveComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
@@ -700,7 +699,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\EmitFanction.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleField.h" />

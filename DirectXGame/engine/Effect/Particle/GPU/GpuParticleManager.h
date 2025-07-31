@@ -58,6 +58,8 @@ struct EmitterSphere
 	float frequency;        // 射出間隔
 	Vector3 colorRange;		// 色(範囲)
 	float frequencyTime;    // 射出間隔調整用時間
+	//Vector3 translateRange; // 位置範囲
+	//float pad[1];			// パディング
 };
 
 struct EffectFieldCS {
@@ -70,6 +72,15 @@ struct EffectFieldCS {
 struct MaxInstance
 {
 	uint32_t maxInstance;	// 最大個数
+};
+
+struct FreeListIndex {
+	int32_t index;
+};
+
+struct ParticleCount
+{
+	int32_t count;
 };
 
 class LineCommon;
@@ -108,14 +119,13 @@ private:
 	void CreateGraphicsPipeline();
 
 private:
-	// VS用のビューデータ
-	Microsoft::WRL::ComPtr < ID3D12Resource> preViewResource_;
-	PreView* preView_;
-
+	// ビュー情報
+	ConstantBuffer<PreView> cbPreViewResource_;
+	
 	// CS用のパーティクルデータ
 	StructuredBuffer<ParticleCS> sbParticleResource_;
 	// CS用のカウントインデックス
-	StructuredBuffer<int32_t> sbFreeListIndexResource_;
+	StructuredBuffer<FreeListIndex> sbFreeListIndexResource_;
 	// CS用のカウント
 	StructuredBuffer<uint32_t> sbFreeListResource_;
 	// 球エミッター
@@ -126,6 +136,7 @@ private:
 	ConstantBuffer<MaxInstance> cbMaxInstance_;
 	// パーティクル影響場所
 	ConstantBuffer<EffectFieldCS> cbEffectFieldResource_;
+	
 
 	ModelMesh* mesh_ = nullptr;		// モデルメッシュ
 	std::string textureName_ = "";	// テクスチャインデック

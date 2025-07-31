@@ -86,8 +86,6 @@ private:
 
 	// ライト
 	std::shared_ptr<DirectionalLight> directional;
-	// ライト
-	std::shared_ptr<PointLight> pointLight_;
 private:
 
 	// ステージに舞う埃

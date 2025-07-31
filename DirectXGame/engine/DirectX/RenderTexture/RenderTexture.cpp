@@ -11,6 +11,11 @@
 
 #include "imgui.h"
 
+RenderTexture::~RenderTexture()
+{
+	rtvManager_->DecAllocate();
+}
+
 void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
 {
 	DXGIDevice_ = DXGIDevice;

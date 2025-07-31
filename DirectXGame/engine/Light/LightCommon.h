@@ -31,8 +31,11 @@ public:
 	void Update();
 
 	void AddLight(std::shared_ptr<Lights> light) {
+		light->SetNumber(int(m_lights.size()));
 		m_lights.push_back(light);
+		//count++;
 	}
+	int GetLightSize() const {return static_cast<int>(m_lights.size());}
 
 	const std::vector<std::shared_ptr<Lights>>& GetLights() const {
 		return m_lights;
@@ -42,8 +45,22 @@ public:
 
 
 	void ClearLights() {
+		for (auto& m_light : m_lights) {
+			m_light.reset();
+		}
 		m_lights.clear();
 	}
+
+	void ClearLight(int index) {
+		m_lights[index].reset();
+		m_lights.resize(m_lights.size());
+		//int count = 0;
+		//for (auto& m_light : m_lights) {
+		//	m_light->SetNumber(count);
+		//	count++;
+		//}
+	}
+
 private:
 	void ApplyGlobalVariables();
 
@@ -73,6 +90,8 @@ private:
 
 	bool isLine = false;
 
+
+	int count_ = 0;
 };
 
 

@@ -14,6 +14,7 @@ class CameraManeger;
 class BaseCamera : public BaseObject
 {
 public:
+	virtual ~BaseCamera() = default; 
 	///< summary>
 	/// 初期化
 	///</summary>

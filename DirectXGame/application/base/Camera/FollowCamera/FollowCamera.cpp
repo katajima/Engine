@@ -15,11 +15,12 @@ void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager, En
     uniqueCamera_->transform_.rotate.x = DegreesToRadians(90);
     uniqueCamera_->transform_.rotate.x = DegreesToRadians(20);
 
-    //uniqueCamera_->GetPostEffectManager()->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
-
+   
     uniqueCamera_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
 
-    
+    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = 10.0f;
+    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = 9;
+    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = 100.0f;
 }
 
 void FollowCamera::Update()

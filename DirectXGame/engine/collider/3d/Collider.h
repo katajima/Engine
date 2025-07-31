@@ -111,6 +111,24 @@ private:
 };
 
 
+// Rayコライダークラス
+class RayCollider : public Collider
+{
+public:
+	Ray ray_;
+
+	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	bool CheckHit(const Collider& other) const override;
+	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	ColliderType GetType() const override {
+		return ColliderType::Ray;
+	}
+
+private:
+
+};
+
+
 static SATResult CheckOBBCollisionSAT(const OBB& obb0, const OBB& obb1)
 {
 	SATResult result;

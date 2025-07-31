@@ -17,6 +17,10 @@ public:
 
     Type GetType() const { return m_type; }
 
+    int GetNumber() const { return num; }
+
+    void SetNumber(int num) { this->num = num; }
+
     // ライトデータをシェーダに送る
     virtual void SetLightData(void* data) const = 0;
 
@@ -26,6 +30,7 @@ public:
     bool isLine = true;
 protected:
     Type m_type;
+    int num = 0; //番号
 };
 
 

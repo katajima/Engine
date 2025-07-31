@@ -91,8 +91,9 @@ public: // オブジェクト
 	void SetCamera(Camera* camera) { camera_ = camera; };
 
 
+	void SetName(std::string name) { this->name_ = name; };
 	
-	
+	std::string GetName() const { return name_; }
 
 	// 削除フラグ取得
 	bool  GetDelete() const { return flags_.isDeleted; };

@@ -34,6 +34,11 @@ uint32_t RtvManager::Allocate()
 	return index;
 }
 
+void RtvManager::DecAllocate()
+{
+	useIndex--;
+}
+
 D3D12_CPU_DESCRIPTOR_HANDLE RtvManager::GetCPUDescriptorHandle(uint32_t index)
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE handle = descriptorHeap->GetCPUDescriptorHandleForHeapStart();

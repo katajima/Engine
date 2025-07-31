@@ -57,6 +57,6 @@ protected: //2D
 	std::unique_ptr<Sprite> backHpBer_;
 protected:
 	BasePlayer* player_;
-	std::unique_ptr <VisionComponent> visionComponent_;
-	std::unique_ptr <HitMotionComponent> hitMotionComponent_;
+	std::unique_ptr <VisionComponent> visionComponent_;			// 視界
+	std::unique_ptr <HitMotionComponent> hitMotionComponent_;	// ヒットモーション
 };

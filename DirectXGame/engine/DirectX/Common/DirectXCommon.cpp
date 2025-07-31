@@ -46,21 +46,6 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
 
-
-	/*postEffectManager_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
-	postEffectManager_->AddEffectBlock("grayScale", PostEffectBlockType::kGrayScale,false);
-	postEffectManager_->AddEffectBlock("gaussian", PostEffectBlockType::kGaussian, false);
-	
-	postEffectManager_->AddEffectBlock("Sepia", PostEffectBlockType::kSepia, false);
-	postEffectManager_->AddEffectBlock("Dissovle", PostEffectBlockType::kDissovle, false);
-	postEffectManager_->AddEffectBlock("Oitline", PostEffectBlockType::kOitline, false);
-	
-	postEffectManager_->AddEffectBlock("Random", PostEffectBlockType::kRandom, false);
-	postEffectManager_->AddEffectBlock("RadialBlur", PostEffectBlockType::kRadialBlur, false);
-	postEffectManager_->AddEffectBlock("Smoothing", PostEffectBlockType::kSmoothing, false);
-	
-	postEffectManager_->AddEffectBlock("Vignette", PostEffectBlockType::kVignette, false);*/
-	
 	imguiManager_->Initialize(this);
 }
 
@@ -136,7 +121,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 	entity3DManager->GetEffectManager()->GetParticleManager()->Draw();
 
 	// GPUパーティクル描画
-	//entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
+	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
 
 
 #ifdef _DEBUG

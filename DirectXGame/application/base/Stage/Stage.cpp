@@ -69,33 +69,21 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 
 
-	// ポイントライト
-	PointLightData pointLightData{};
-	pointLightData.color = { 1,1,1,1 };
-	pointLightData.position = { 0,100,0 };
-	pointLightData.radius = 1000.0f;
-	pointLightData.intensity = 1.0f;
-	pointLightData.isLight = true;
-	pointLightData.lig = 0.1f;
+	
+
+	
+	//DirectionalLightData directionalLightData{};
+	//directionalLightData.color = { 1,1,1,1 };
+	//directionalLightData.direction = { 0,-1,0 };
+	//directionalLightData.intensity = 0.5f;
+	//directionalLightData.isLight = true;
+	//directionalLightData.lig = 0.1f;
 
 
-	pointLight_ = std::make_shared<PointLight>();
-	pointLight_->point = pointLightData;
+	//directional = std::make_shared<DirectionalLight>();
+	//directional->directional = directionalLightData;
 
-	entity3DManager_->GetLightManager()->AddLight(pointLight_);
-
-	DirectionalLightData directionalLightData{};
-	directionalLightData.color = { 1,1,1,1 };
-	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 0.5f;
-	directionalLightData.isLight = true;
-	directionalLightData.lig = 0.1f;
-
-
-	directional = std::make_shared<DirectionalLight>();
-	directional->directional = directionalLightData;
-
-	entity3DManager_->GetLightManager()->AddLight(directional);
+	//entity3DManager_->GetLightManager()->AddLight(directional);
 	
 	// エミッター設定
 	//InitEmit();

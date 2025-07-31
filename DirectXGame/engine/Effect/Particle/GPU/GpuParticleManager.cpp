@@ -21,7 +21,7 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	dxCommon_ = dxCommon;
 	
 	cbMaxInstance_.CreateBuffer(dxCommon_, 1);
-	cbMaxInstance_.Data()->maxInstance = 1024 * 10000;
+	cbMaxInstance_.Data()->maxInstance = 1024 * 1000;
 
 
 	// パーティクルインスタンシングVS
@@ -29,36 +29,37 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	
 	// カウンターインデックス
 	sbFreeListIndexResource_.CreateBuffer(dxCommon_, 1, true);
-
 	// カウンター
 	sbFreeListResource_.CreateBuffer(dxCommon_, cbMaxInstance_.Data()->maxInstance, true);
 
+
 	// パーティクルビュー
-	preViewResource_ = effectManager_->GetDxCommon()->GetDXGIDevice()->CreateBufferResource(sizeof(PreView));
-	preViewResource_->Map(0, nullptr, reinterpret_cast<void**>(&preView_));
+	cbPreViewResource_.CreateBuffer(dxCommon_,1);
 
 	// 球エミッター
 	cbEmitterSphere_.CreateBuffer(dxCommon_, 1);
-	cbEmitterSphere_.Data()->count = 10;
+	cbEmitterSphere_.Data()->count = 200;
 	cbEmitterSphere_.Data()->frequency = 0.00f;
 	cbEmitterSphere_.Data()->frequencyTime = 0.0f;
-	cbEmitterSphere_.Data()->translate = Vector3(0.0f, 0.0f, 0.0f);
-	cbEmitterSphere_.Data()->radius = 10.0f;
+	cbEmitterSphere_.Data()->translate = Vector3(0.0f, 10.0f, 0.0f);
+	cbEmitterSphere_.Data()->radius = 0.25f;
 	cbEmitterSphere_.Data()->emit = 0;
 
-	cbEmitterSphere_.Data()->color = { 1.0f,1.0f ,1.0f };
+	cbEmitterSphere_.Data()->color = { 1.0f,0.8f ,0.1f };
+	cbEmitterSphere_.Data()->colorRange = { 0.0f,0.0f,0.0f };
 	cbEmitterSphere_.Data()->lifeTime = 5.0f;
-	cbEmitterSphere_.Data()->velocity = { 0.0f,0.0f,0.0f };
-	cbEmitterSphere_.Data()->scale = { 2.0f,2.0f,2.0f };
-
+	cbEmitterSphere_.Data()->velocity = { 0.0f,2.0f,0.0f };
+	cbEmitterSphere_.Data()->velocityRange = { 0.5f,0.0f,0.5f };
+	cbEmitterSphere_.Data()->scale = { 0.01f,0.01f,0.01f };
+	cbEmitterSphere_.Data()->scaleRange = { 0.0f,0.0f,0.0f};
 
 	cbPerFrame_.CreateBuffer(dxCommon_, 1);
 	
 	// 影響
 	cbEffectFieldResource_.CreateBuffer(dxCommon_, 1);
-	cbEffectFieldResource_.Data()->force = 100.0f;
-	cbEffectFieldResource_.Data()->translate = { 0.0f,0.0f,0.0f};
-	cbEffectFieldResource_.Data()->isEffect = 1;
+	cbEffectFieldResource_.Data()->force = 10.0f;
+	cbEffectFieldResource_.Data()->translate = { 0.0f,50.0f,0.0f};
+	cbEffectFieldResource_.Data()->isEffect = 0;
 	cbEffectFieldResource_.Data()->range = {300.0f,300.0f,300.0f};
 
 
@@ -106,7 +107,6 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
 	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
-	//dxCommon_->GetCommandList()->Dispatch(UINT(cbMaxInstance_.Data()->maxInstance + 1023 / 1024), 1, 1);
 }
 
 
@@ -122,9 +122,9 @@ void GpuParticleManager::Update()
 	billboardMatrix.m[3][1] = 0.0f;
 	billboardMatrix.m[3][2] = 0.0f;
 
-	preView_->billboardMatrix = billboardMatrix;
+	cbPreViewResource_.Data()->billboardMatrix = billboardMatrix;
+	cbPreViewResource_.Data()->viewProjection = camera_->GetViewProjectionMatrix();
 
-	preView_->viewProjection = camera_->GetViewProjectionMatrix();
 
 #ifdef _DEBUG
 	ImGui::Begin("GPUEmit");
@@ -135,7 +135,19 @@ void GpuParticleManager::Update()
 	ImGui::DragFloat3("velocityRange", &cbEmitterSphere_.Data()->velocityRange.x, 0.01f);
 	ImGui::ColorEdit3("color", &cbEmitterSphere_.Data()->color.x);
 	ImGui::ColorEdit3("colorRange", &cbEmitterSphere_.Data()->colorRange.x);
+	ImGui::DragFloat("radius", &cbEmitterSphere_.Data()->radius);
+	ImGui::DragFloat("frequency", &cbEmitterSphere_.Data()->frequency,0.01f);
+	int count = int(cbEmitterSphere_.Data()->count);
+	ImGui::DragInt("count", &count);
+	cbEmitterSphere_.Data()->count = uint32_t(count);
 	ImGui::End();
+
+	if (sbFreeListIndexResource_.Data()) {
+		ImGui::Begin("FreeList");
+		int index = int(sbFreeListIndexResource_.Data()->index);
+		ImGui::InputInt("FreeListIndex", &index);
+		ImGui::End();
+	}
 #endif // _DEBUG
 
 	// 加算
@@ -167,12 +179,13 @@ void GpuParticleManager::Update()
 	sbFreeListIndexResource_.SetComputeRootDescriptorTable(3);	// カウンターインデックス
 	sbFreeListResource_.SetComputeRootDescriptorTable(4);		// カウンター
 	cbMaxInstance_.SetComputeRootConstantBufferView(5);			// Maxインスタンス
+
 	dxCommon_->GetCommandList()->Dispatch(1, 1, 1);
 
 	sbParticleResource_.UavDependence();
 	sbFreeListIndexResource_.UavDependence();
 	sbFreeListResource_.UavDependence();
-
+	
 
 	//// 場所影響
 	//lineCommon_->AddLineAABB({-cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
@@ -220,7 +233,7 @@ void GpuParticleManager::Draw()
 	//psoManager_->DrawSetting();
 
 	if (mesh_) {
-		dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, preViewResource_->GetGPUVirtualAddress());
+		cbPreViewResource_.SetGraphicsRootConstantBufferView(0);
 
 		sbParticleResource_.SetGraphicsRootDescriptorTable(1);
 

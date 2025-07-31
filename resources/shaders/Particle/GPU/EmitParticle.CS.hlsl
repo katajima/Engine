@@ -24,17 +24,19 @@ void main( uint3 DTid : SV_DispatchThreadID )
     if (gEmitter.emit != 0)
     {
         RandomGeneratetor generator;
-            
+           
+        generator.seed = (float3(DTid) + gPerFrame.time) * gPerFrame.time;
+        
         for (uint countIndex = 0; countIndex < gEmitter.count; ++countIndex)
         {
-            generator.seed = (DTid + gPerFrame.time) * gPerFrame.time;
+           
             
             // FreeListのIndexをひとつ前に設定し、現在のIndexを取得する
             int freeListIndex;
             InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
             if (0 <= freeListIndex && freeListIndex < gMaxInstance.maxInstanse)
             {
-                int particleIndex = gFreeList[freeListIndex];
+                uint particleIndex = gFreeList[freeListIndex];
                 gParticle[particleIndex].currentTime = 0;                                                                   // 粒子時間
                 gParticle[particleIndex].lifeTime = gEmitter.lifeTime + generator.Generate1d_4() * gEmitter.lifeTimeRange;  // 生存時間
                 gParticle[particleIndex].scale = gEmitter.scale + generator.Generate3d_4() * gEmitter.scaleRange;           // スケール        

@@ -43,7 +43,7 @@ void GamePlayScene::Initialize()
 	cameraManeger_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManeger_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
-	SetCamera(cameraManeger_->GetCamera());
+	
 
 
 	// 弾管理クラス
@@ -63,23 +63,13 @@ void GamePlayScene::Initialize()
 
 	// レベルデータロード
 	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->SetCameraManager(cameraManeger_.get());
 	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
-	// 敵生成
-	/*for (auto& enemy : loadData_->GetLevelData()->enemys) {
-		if (enemy.isEnable)
-			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
-	}*/
 	
 	
-	
-	
-
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(caracterManager_->GetPlayer());
 	
-
-	
-
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
@@ -96,7 +86,12 @@ void GamePlayScene::Initialize()
 	gameUI->Initialize(GetEntity2DManager());
 	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
-	
+	SetCamera(cameraManeger_->GetCamera());
+
+
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(GetDxCommon()->GetModelManager()->FindModel("plane.obj")->modelData.mesh[0].get());
+
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
 }
 
 
@@ -158,13 +153,15 @@ void GamePlayScene::Update()
 		iCommand_->Exec(*caracterManager_->GetPlayer());
 	}
 
+
+	
 	// 調整項目
 	ApplyGlobalVariables();
 
 	// ImGuiの更新
 	UpdateImGui();
 
-	int countIndex = 0;
+	/*int countIndex = 0;
 	for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
 		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
@@ -176,7 +173,7 @@ void GamePlayScene::Update()
 			}
 		}
 		countIndex++;
-	}
+	}*/
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -201,7 +198,7 @@ void GamePlayScene::Update()
 		BehaviorPhase2Update();
 		break;
 	}
-	tumeee_ += MyGame::GameTime();
+	//tumeee_ += MyGame::GameTime();
 	if (tumeee_ >= 10.0f) {
 		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
 			// シーン切り替え
@@ -242,14 +239,14 @@ void GamePlayScene::Update()
 	}
 	// カメラ管理の更新
 	cameraManeger_->Update();
-	// レベルデータアップデート
-	loadData_->Update();
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
 	stage_->Update();
 	// 当たり判定
 	CheckAllCollisions();
+	// レベルデータアップデート
+	loadData_->Update();
 }
 
 #pragma endregion //更新関係

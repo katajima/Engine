@@ -137,7 +137,9 @@ void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 	}
 
 	PreDraw2dOffscreen();
-	previousTexture->Draw();
+	if (previousTexture) {
+		previousTexture->Draw();
+	}
 	sceneManager->Draw2D();
 	PostDraw2dOffscreen();
 }

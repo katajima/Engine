@@ -76,11 +76,12 @@ void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvMan
 // 更新
 void PostEffectBlock::Update(Camera* camera)
 {
-	for (auto& renderTexture : renderTextures_) {
-		renderTexture->SetCamera(camera);
-		renderTexture->Update();
-	}
-	
+	if (!renderTextures_.empty()) {
+		for (auto& renderTexture : renderTextures_) {
+			renderTexture->SetCamera(camera);
+			renderTexture->Update();
+		}
+
 #ifdef _DEBUG
 	// レンダーテクスチャ
 	ImGui::Begin("engine");
@@ -98,6 +99,7 @@ void PostEffectBlock::Update(Camera* camera)
 	}
 	ImGui::End();
 #endif // _DEBUG
+	}
 }
 
 // 追加

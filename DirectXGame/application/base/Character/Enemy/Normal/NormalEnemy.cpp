@@ -106,6 +106,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	visionComponent_ = std::make_unique<VisionComponent>();
 	visionComponent_->SetAlertView(120.0f, 100.0f);
 	visionComponent_->SetCombatView(90.0f, 100.0f);
+	visionComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
+	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {
+		
+		
+		
+		return false;
+		};
+
 
 	// ヒットモーション
 	hitMotionComponent_ = std::make_unique<HitMotionComponent>();
@@ -155,7 +163,8 @@ void NormalEnemy::Update()
 		characterStateComponent_.Update(Velocity(), false, GetAlive());
 		// ヒット
 		hitMotionComponent_->Update(GetTime(), objectBase_);
-
+		//
+		visionComponent_->Update(GetTime(), objectBase_->GetWorldPosition(),moveComponent_->GetDirection(),player_->GetWorldTransform().translate_);
 
 		
 

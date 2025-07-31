@@ -130,7 +130,11 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 
 	modelData.name = filePach;
 
-	const aiScene* scene = importer.ReadFile(filePach.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(filePach.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | 
+		aiProcess_Triangulate | 
+		aiProcess_GenSmoothNormals |
+		aiProcess_CalcTangentSpace |
+		aiProcess_JoinIdenticalVertices);
 	assert(scene->HasMeshes()); //メッシュがないのは対応しない
 
 	// ノード読み込み
@@ -142,10 +146,6 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 	
 	timer_.EndTimer();
 
-	//std::string filenameT = " name : " + filename;
-
-	//timer_.LogTimeSec("Model LoadMesh Time: ",filenameT);
-	
 	// ボーン読み込み
 	LoadModel::LoadBone(scene, modelData, dxCommon_);
 	

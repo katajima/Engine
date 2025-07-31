@@ -10,6 +10,8 @@
 
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 
+class CameraManeger;
+class BaseCamera;
 class Entity3DManager;
 class LoadLevelData
 {
@@ -25,22 +27,35 @@ public:
 	// 描画
 	void Draw3D();
 
-public:
-	LevelData* GetLevelData() { return levelData_; };
+	void SetCameraManager(CameraManeger* cameraManager) { cameraManager_ = cameraManager; };
 
+public:
+	// レベルデータ取得
+	LevelData* GetLevelData() { return levelData_; };
+	// オブジェクト取得
 	std::vector<Object3d*>GetObjects() { return objects_; }
+	// 
+
 
 private:
 	// オブジェクト3D生成
 	void CreateObject3d(LevelData* levelData);
-	// スポーンポイントの生成
-	//void CreateSpawnPoint(LevelData* levelData);
+	// カメラ生成
+	void CreateCamera(LevelData* levelData);
+	// ライト生成
+	void CreateLight(LevelData* levelData);
 
+	// データクリア
+	void ClearData();
 
 private:
-	Entity3DManager* entity3DManager_;
-	ModelManager* modelManager_;
-	std::vector<Object3d*> objects_;
+	Entity3DManager* entity3DManager_ = nullptr;
+	ModelManager* modelManager_ = nullptr;
+	CameraManeger* cameraManager_ = nullptr;
+	std::vector<Object3d*> objects_;					// オブジェクト
+	std::vector<std::unique_ptr<BaseCamera>> cameras_;	// カメラ
+	std::vector<std::shared_ptr<Lights>> lights_;		// ライト
+
 private:
 	std::string kFileName;
 	std::string kExtension;

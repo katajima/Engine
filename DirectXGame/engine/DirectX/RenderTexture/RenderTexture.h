@@ -27,7 +27,7 @@ class RenderTexture
 {
 public:
 	RenderTexture() = default;
-	~RenderTexture() = default;
+	~RenderTexture();
 
 	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommonm,const std::string name, PostEffectType type);
 

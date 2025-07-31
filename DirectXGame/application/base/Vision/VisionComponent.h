@@ -2,6 +2,8 @@
 //#include "DirectXGame/engine/line/lineCommon.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 
+#include"functional"
+
 inline bool IsObjectVisible(
     const Vector3& enemyPos,
     const Vector3& enemyDir, // Z+ forward方向
@@ -37,6 +39,8 @@ enum class VisionMode {
 class LineCommon;
 class VisionComponent
 {
+public:
+    std::function<bool(Vector3, Vector3, float)> raycastFunc;
 private:
     VisionMode currentMode = VisionMode::Alert;
     float alertViewAngle = 90.0f;
@@ -68,8 +72,7 @@ public:
     VisionMode GetMode() const { return currentMode; }
     bool IsPlayerVisible() const { return canSeePlayer; }
 
-    void Update(float deltaTime, Vector3 selfPos, Vector3 selfDir, Vector3 targetPos,
-        std::function<bool(Vector3, Vector3, float)> raycastFunc)
+    void Update(float deltaTime, Vector3 selfPos, Vector3 selfDir, Vector3 targetPos)
     {
         float viewAngle = (currentMode == VisionMode::Combat) ? combatViewAngle : alertViewAngle;
         float viewDistance = (currentMode == VisionMode::Combat) ? combatViewDistance : alertViewDistance;
@@ -87,6 +90,16 @@ public:
             if (lastSeenTime > maxLostTime)
                 canSeePlayer = false;
         }
+
+#ifdef _DEBUG
+
+        DrawDireLine(selfPos, selfDir, targetPos, viewDistance);
+#endif // _DEBUG
+
+       
     }
+private:
+    void DrawDireLine(Vector3 selfPos, Vector3 selfDir, Vector3 targetPos, float viewDistance);
+
 };
 
