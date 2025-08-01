@@ -178,6 +178,7 @@ void MyGame::InitializeResource()
 void MyGame::CreateParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
 
 
@@ -278,6 +279,16 @@ void MyGame::CreateParticle()
 	
 
 
+	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 1000);
+	gpuParticleManager_->CreateEmitter("emitte_no1");
+	gpuParticleManager_->CreateEmitter("emitte2_no1");
+	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
+
+
+	gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
+ 
+	gpuParticleManager_->CreateField("AABBField");
 
 }
 

@@ -165,7 +165,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\EmitFanction.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleData.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleField.cpp" />
@@ -699,7 +702,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\EmitFanction.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleData.h" />

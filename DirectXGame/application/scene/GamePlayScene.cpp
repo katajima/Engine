@@ -88,9 +88,6 @@ void GamePlayScene::Initialize()
 
 	SetCamera(cameraManeger_->GetCamera());
 
-
-	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(GetDxCommon()->GetModelManager()->FindModel("plane.obj")->modelData.mesh[0].get());
-
 	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
 }
 
