@@ -76,7 +76,7 @@ void TitleScene::InitializeResources()
 	tail.Initialize(GetEntity3DManager());
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
-	tail.worldtransform_.scale_ = { 10,10,10 };
+	tail.GetWorldTransform().scale_ = { 10,10,10 };
 
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };

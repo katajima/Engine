@@ -29,8 +29,6 @@
 #include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
-#include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
-#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include "DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 
@@ -43,6 +41,8 @@
 #include "DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Offscreen/PostEffectManager.h"
 
+class RenderTexture;
+class RenderingCommon;
 class Entity3DManager;
 class SceneManager;
 class DirectXCommon
@@ -64,7 +64,7 @@ private:
 	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 private:
 	// スワップチェーンにレンダーターゲットを渡す
-	void PassSwap(RenderTexture* renderTexture);
+	void PassSwap(SceneManager* sceneManager,RenderTexture* renderTexture);
 private:
 	// 3D2D描画
 	void Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager);
@@ -86,6 +86,7 @@ public:
 
 	SrvManager* GetSrvManager() { return  srvManager_.get(); }
 
+	RtvManager* GetRtvManager() { return  rtvManager_.get(); }
 	
 	TextureManager* GetTextureManager() { return textureManager_.get(); }
 
@@ -110,6 +111,10 @@ public:
 	SwapChain* GetSwapChain() { return swapChain_.get(); }
 
 	Fence* GetFence() { return fence_.get(); }
+
+	ScissorRect* GetScissorRect() {return scissorRect_.get();};
+
+	ViewPort* GetViewPort() { return viewPort_.get(); }
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス
 	std::unique_ptr<Command> command_ = std::make_unique<Command>();					     // コマンド

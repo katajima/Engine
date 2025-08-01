@@ -20,7 +20,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
-#include"DirectXGame/engine/Transfomation/Transfomation.h"
+#include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 

@@ -52,8 +52,8 @@ struct Animation
 	float duration; // アニメーション全体の尺 (単位は秒)
 	// NodeAnimationの集合。Node名でひけるようにしておく
 	std::map<std::string, NodeAnimation> nodeAnimations;
-
-	bool flag = false; // アニメーションがあるかないか
+	bool isLoop = true;	 // 基本的にはループさせる
+	bool flag = false;   // アニメーションがあるかないか
 };
 
 /// <summary>
@@ -221,6 +221,7 @@ namespace Animetion {
 	
 	void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
 	
+
 
 	/// モディファイ可能な Joint が欲しい場合
 	Joint* FindJointByName(Skeleton& skeleton, const std::string& name);

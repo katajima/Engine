@@ -6,6 +6,12 @@
 
 // engine
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
+#include "PostEffectBlock.h"
+
+
+
+
+
 
 class DXGIDevice;
 class Command;
@@ -17,54 +23,58 @@ class Barrier;
 class ScissorRect;
 class ViewPort;
 
+class SceneManager;
+
 class PostEffectManager
 {
 public:
 	void Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect,ViewPort* viewPort);
 
-	// 最初(シーンに書き込み)
+	// 最初
 	void PreDrawOffscreen();
 
 	// 最初
 	void PostDrawOffscreen();
 
-	void AllPostEffect();
+	// 2D
+	void PreDraw2dOffscreen();
+
+	// 2D
+	void PostDraw2dOffscreen();
+
+
+
+
+	
+	void AllPostEffect(SceneManager* sceneManager);
 
 
 	void Update(Camera* camera);
 
 	// レンダーテクスチャ追加
-	void AddRenderTexture(const std::string name);
+	void AddEffectBlock(const std::string name, PostEffectBlockType type,bool use = true);
+	//
+	void AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks);
 
 	//
-	RenderTexture* GetEndRenderTexture() {
-		return endRenderTexture;
-	};
+	RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get();};
+
+	void ClearPostEffectBlock();
 
 private:
 
-	void DrawRenderTexture(RenderTexture* renderTextureRenderTreget, RenderTexture* renderTexturePixelSheder);
+	void PreEnd(RenderTexture* renderTexture);
 
-	// レンダーテクスチャ描画前処理
-	void PreDraw(RenderTexture* renderTexture);
-	// レンダーテクスチャ描画後処理
-	void PostDraw(RenderTexture* renderTexture);
+	void PostEnd(RenderTexture* renderTexture);
 
+
+private:
+	std::unique_ptr <RenderTexture> renderTexture_;
+	std::unique_ptr <RenderTexture> renderTextureEnd_;
 	
-
-private:
-
-	// 
-	std::vector<std::unique_ptr<RenderTexture>> renderTextures_;
-
-	// レンダーテクスチャ番号
-	//uint32_t renderTextureIndex_ = 0;
-
-	//RenderTexture* firstRenderTexture = nullptr;
-	RenderTexture* endRenderTexture = nullptr;
-private:
-	bool isFirst_ = false;
-
+	std::vector<PostEffectBlock*> effectBlocks_;
+	
+	uint32_t indexCount_ = 0;
 
 private:
 	DXGIDevice* DXGIDevice_;

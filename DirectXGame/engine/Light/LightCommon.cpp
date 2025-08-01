@@ -42,6 +42,10 @@ void LightManager::DrawLight(IsLight is, int dire, int point, int spot)
 
 void LightManager::Update()
 {
+	ZeroMemory(pointLightData, sizeof(PointLightData) * kNumMaxInstance);
+	ZeroMemory(directionalLightData, sizeof(DirectionalLightData) * kNumMaxInstance);
+	ZeroMemory(spotLightData, sizeof(SpotLightData) * kNumMaxInstance);
+
 	size_t pointLightIndex = 0;
 	size_t directionalLightIndex = 0;
 	size_t spotLightIndex = 0;
@@ -49,6 +53,8 @@ void LightManager::Update()
 	// m_lights から GPU に送るバッファを更新
 	for (const auto& light : m_lights)
 	{
+		if (!light) continue;
+
 		if (light->GetType() == Lights::Type::Point)
 		{
 			light->SetLightData(&pointLightData[pointLightIndex]);
@@ -139,6 +145,8 @@ void LightManager::Update()
 
 	for (auto& light : m_lights)
 	{
+		if (!light) continue;
+
 		if (light->GetType() == Lights::Type::Point)
 			light->UpdateFromData(&pointLightData[pIndex++]);
 		else if (light->GetType() == Lights::Type::Directional)

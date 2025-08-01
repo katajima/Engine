@@ -81,6 +81,8 @@ class RandomGeneratetor
         return seed;
     }
 
+    
+    
     float Generate1d_4(float3 dotDir = float3(12.9898, 78.233, 37.719))
     {
         seed = sin(seed);

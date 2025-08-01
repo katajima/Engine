@@ -39,14 +39,16 @@ void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& te
 	mat_.Identity();
 }
 
-void TrailEffect::Update(bool& flag, const WorldTransform& strM, const WorldTransform& endM)
+void TrailEffect::Update(bool& flag)
 {
 	material->GPUData();
+	worldtransformTstr_.Update();
+	worldtransformTend_.Update();
 
-	Vector3 str = strM.worldMat_.GetWorldPosition();
-	Vector3 end = endM.worldMat_.GetWorldPosition();
-	Vector3 strPre = strM.worldPreMat_.GetWorldPosition();
-	Vector3 endPre = endM.worldPreMat_.GetWorldPosition();
+	Vector3 str = worldtransformTstr_.worldMat_.GetWorldPosition();
+	Vector3 end = worldtransformTend_.worldMat_.GetWorldPosition();
+	Vector3 strPre = worldtransformTstr_.worldPreMat_.GetWorldPosition();
+	Vector3 endPre = worldtransformTend_.worldPreMat_.GetWorldPosition();
 
 
 

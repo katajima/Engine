@@ -25,17 +25,16 @@ public:
 
 	void Draw2D() override;
 
-	// 攻撃各コンボによる初期化
-	void AttackTypeInit(int comboIndex) override;
-
-	// 攻撃更新
-	void AttackUpdate(float deltaTime, WorldTransform& worldTransform) override;
-
 private:
 	WorldTransform colliderWorld_;
 	uint32_t weaponColliderId_ = 0;
 
 	WorldTransform colliderWorld2_;
 	uint32_t weaponColliderId2_ = 0;
+
+	std::shared_ptr<ComboNodeState> attack1;
+	std::shared_ptr<ComboNodeState> attack2;
+	std::shared_ptr<ComboNodeState> attack3;
+	std::shared_ptr<ComboNodeState> heavy1;
 };
 

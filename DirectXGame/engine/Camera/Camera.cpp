@@ -5,6 +5,10 @@
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/input/Input.h"
 
+#include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
+#include "DirectXGame/engine/Offscreen/PostEffect.h"
+
+
 bool Camera::isShake_ = false;
 
 
@@ -29,6 +33,7 @@ Camera::Camera()
 void Camera::Initialize(CameraCommon* cameraCommon)
 {
 	dxCommon_ = cameraCommon->GetDxCommon();
+	postEffectManager_ = dxCommon_->GetPostEffectManager();
 
 	input_ = cameraCommon->GetInput();
 
@@ -45,7 +50,6 @@ void Camera::GetCommandList(int index)
 	// Cameraのバインド
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource->GetGPUVirtualAddress());
 }
-
 
 void Camera::UpdateMatrix() {
 	
@@ -95,7 +99,6 @@ void Camera::UpdateMatrix() {
 	data->worldPosition = worldMatrix_.GetWorldPosition();
 }
 
-
 void Camera::UpdateMatrix(const Vector3& targetPosition)
 {
 	// カメラとターゲットの距離を設定
@@ -120,39 +123,6 @@ void Camera::UpdateMatrix(const Vector3& targetPosition)
 void Camera::UpdateImGui()
 {
 #ifdef _DEBUG
-	ImGui::Begin("Canera Properties");
-	if (ImGui::CollapsingHeader("Camera")) {
-		ImGui::DragFloat("debugShakeTime", &debugShakeTime_, 0.01f);
-		ImGui::DragFloat3("debugShakeDirectionRange", &debugShakeDirectionRange_.x, 0.1f);
-
-		ImGui::DragFloat3("Translate", &transform_.translate.x, 0.1f);
-		ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
-		ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-		if (ImGui::Button("cameraPos")) {
-			transform_.translate = { 0,20,-175 };
-			transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos2")) {
-			transform_.translate = { -30,10,-140 };
-			transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos3")) {
-			transform_.translate = { 0,500,0 };
-			transform_.rotate = { DegreesToRadians(90),0,0 };
-		}
-		if (ImGui::Button("cameraPos4")) {
-			transform_.translate = { 0,60,-220 };
-			transform_.rotate = { DegreesToRadians(10),0,0 };
-		}
-		if (ImGui::Button("cameraPos5")) {
-			transform_.translate = { 0,60,220 };
-			transform_.rotate = { DegreesToRadians(10),DegreesToRadians(180),0 };
-		}
-	}
-	ImGui::End();
-
-
-
 	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
 		speed = 10.0f;
 	}
@@ -233,10 +203,28 @@ void Camera::LookAt(const Vector3& cameraPosition, const Vector3& targetPosition
 }
 
 void Camera::SetShake(float time, Vector3 directionRange) {
-	// Initialize shake timer
 	shakeTime_ = time;
-	// Save the direction range for shaking
 	shakeDirectionRange_ = directionRange;
 }
 
 
+void Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
+{
+	auto effectBlock = std::make_unique<PostEffectBlock>();
+	effectBlock->Intialize(dxCommon_->GetDXGIDevice(), dxCommon_->GetCommand(), dxCommon_->GetSrvManager(), dxCommon_->GetRtvManager(),
+		dxCommon_->GetRenderingCommon(), dxCommon_->GetDepthStencil(), dxCommon_->GetBarrier(), dxCommon_->GetScissorRect(), dxCommon_->GetViewPort(), name, type);
+	effectBlock->SetUse(use);			// 使うか
+	effectBlock->SetIndex(0); // 順番
+	effectBlocks_.push_back(std::move(effectBlock));
+	//indexCount_++; // 加算
+}
+
+std::vector<PostEffectBlock*> Camera::GetPostEffectBlocks()
+{
+	std::vector<PostEffectBlock*> rawPtrs;
+	rawPtrs.reserve(effectBlocks_.size());
+	for (auto& block : effectBlocks_) {
+		rawPtrs.push_back(block.get());
+	}
+	return rawPtrs;
+}

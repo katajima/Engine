@@ -7,12 +7,13 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 {
 	input_ = input;
 
-	objectBase_ = entity3DManager->CreateObject3D("PlayerWeapon", Object3d::ObjectModelType::kNormal, {}, camera);
+	objectBase_ = entity3DManager->CreateObject3D("PlayerWeapon", ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetIsDraw(false);
 	objectBase_->SetModel("Sword.obj");
-	objectBase_->worldtransform_.scale_ = { 1.25f,1.25f ,1.25f };
+	objectBase_->GetWorldTransform().scale_ = { 1.25f,1.25f ,1.25f };
 	objectBase_->InitColliderComponent(); // コライダーコンポーネントの初期化
 	objectBase_->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
+	objectBase_->UseTrailEffect("resources/Texture/Image.png",0.25f,{1,1,1,0.25f}, objectBase_->GetModel()->modelData.mesh[0]->GetMin(), objectBase_->GetModel()->modelData.mesh[0]->GetMax());
 	
 
 	auto obbCollider_ = std::make_unique<OBBCollider>();
@@ -47,49 +48,86 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 		Player* player = static_cast<Player*>(character);
 
-		if (GetAttackInput().GetAttackTypePlay() == AttackTypePlay::kJump) {
-			if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime,0.1f)) {
-				return; // クールタイム中のため無視
-			}
-		}
-		else {
+		//if (GetAttackInput().GetAttackTypePlay() == AttackTypePlay::kJump) {
+		//	if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime,0.1f)) {
+		//		return; // クールタイム中のため無視
+		//	}
+		//}
+		//else {
 			if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
 				return; // クールタイム中のため無視
 			}
-		}
+		//}
 		
 
 		objectBase_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
-		if (self->id == weaponColliderId_) {
-			enemy->AddDamage(GetDamage() * 2);
-			enemy->hitStop(GetHitStopTime() * 2);
-			enemy->SetHitKnockbackPower(data_.knockbackData.power);
-			enemy->SetHitKkonckbackYPower(data_.knockbackData.yPower);
-		}else if(self->id == weaponColliderId2_) {
-			enemy->AddDamage(GetDamage());
-			enemy->hitStop(GetHitStopTime());
-			enemy->SetHitKnockbackPower(data_.knockbackData.power);
-			enemy->SetHitKkonckbackYPower(data_.knockbackData.yPower);
-		}
-		enemy->SetHit();
-		enemy->Emit();
-		enemy->HitMotion();
+		enemy->GetHitMotionComponent()->SetIsHit(true);
 
+		
+
+
+
+		comboData_.knockbackData.normal = player->GetMoveComponent()->GetDirection();
+		if (self->id == weaponColliderId_) {
+			enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);
+			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);
+			enemy->AddDamage(comboData_.damage * 2);
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
+			enemy->GetHitMotionComponent()->SetIsKnockback(true);
+		}else if(self->id == weaponColliderId2_) {
+			enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);
+			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);
+			enemy->AddDamage(comboData_.damage);
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
+			enemy->GetHitMotionComponent()->SetIsKnockback(true);
+			
+		}
+		enemy->Emit();
+		
 		player->AddHit();
 		player->AddSpGauge(1);
 		player->SetHitTime();
 		};
 
+	ComboData data;
+	data.damage = 10;
+	data.knockbackData.power = 30;
+	data.knockbackData.yPower = 30;
+	data.movementSpeedMultiplier = 1.0f;
+	data.mpCost = 0.0f;
+	data.staminaCost = 1.0f;
+
+
 	
-	data_.damage = 10; // 武器のダメージ設定
-	data_.knockbackData.power = 15.5f; // ノックバックの力設定
-	data_.knockbackData.yPower = 4.5f; // Y方向のノックバックの力設定
-	SetTime(0.1f, 0.3f, 0.1f); // 武器のアニメーション時間設定
+	attack1  = std::make_shared<ComboNodeState>("Attack1", data);
+	data.damage = 11;
+	attack2 = std::make_shared<ComboNodeState>("Attack2", data);
+	data.damage = 12;
+	attack3 = std::make_shared<ComboNodeState>("Attack3", data);
+	//data.damage = 30;
+	//heavy1   = std::make_shared<ComboNodeState>("Heavy1", data);
+
+	
+	AddComboNode("Attack1", attack1);
+	AddComboNode("Attack2", attack2);
+	AddComboNode("Attack3", attack3);
+
+	ConnectCombo("Attack1",AttackInput::Light, "Attack2");
+	ConnectCombo("Attack1", AttackInput::Heavy, "Attack3");
+
+	ConnectCombo("Attack2",AttackInput::Light, "Attack3");
+	
+	//attack1->SetNextState(AttackInput::Light, attack2);
+	//attack2->SetNextState(AttackInput::Light, attack3);
+	//attack2->SetNextState(AttackInput::Heavy, heavy1);
+
+	
+	//comboStateMachine_->SetRoot(comboRoot);
 
 
 	colliderWorld_.Initialize();
-	colliderWorld_.parent_ = &objectBase_->worldtransform_;
+	colliderWorld_.parent_ = &objectBase_->GetWorldTransform();
 	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
 	colliderWorld_.translate_.y = 3.0f; // 武器の位置調整
 
@@ -100,6 +138,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 void PlayerWeapon::Update()
 {
+	objectBase_->UpdateWorldTransform();
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
 
@@ -115,107 +154,3 @@ void PlayerWeapon::DrawEffect()
 {
 }
 
-
-void PlayerWeapon::AttackTypeInit(int comboIndex)
-{
-	ColliderHistoryClear();
-	if (GetAttackInput().GetTypeRequest()) {
-		// ふるまいを変更する
-		GetAttackInput().ChangeRequest();
-
-		GetComboMotionData().ResetTime();
-
-		// 各ふるまいごとの初期化を実行
-		switch (GetAttackInput().GetAttackTypePlay())
-		{
-		case AttackTypePlay::kNormal:
-
-			if (comboIndex == 0) {
-				SetTime(0.1f, 0.2f, 0.01f);
-				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,0 });
-			}
-			if (comboIndex == 1) {
-				SetTime(0.1f, 0.2f, 0.01f);
-				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
-			}
-			if (comboIndex == 2) {
-				SetTime(0.1f, 0.2f, 0.01f);
-				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,-90 });
-			}
-			if (comboIndex == 3) {
-				SetTime(0.1f, 0.2f, 0.01f);
-				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,90 });
-			}
-			break;
-		case AttackTypePlay::kJump:
-			if (comboIndex == 0) {
-				SetTime(0.0f, 0.4f, 0.1f);
-				GetWorldTransform().rotate_ = DegreesToRadians({ 0,0,0 });
-			}
-			break;
-		}
-		// ふるまいリクエストリセット
-		GetAttackInput().ResetRequest();
-	}
-}
-
-void PlayerWeapon::AttackUpdate(float deltaTime, WorldTransform& worldTransform)
-{
-	GetTimer().Update(deltaTime);
-
-	GetObject3D()->SetIsDraw(true);
-	switch (GetAttackInput().GetAttackTypePlay())
-	{
-	case AttackTypePlay::kNormal:
-		if (GetComboData().GetCurrentComboCount() == 0) {
-			if (GetComboMotionData().isStartup) {
-				SetMovementSpeedMultiplier(0.01f);
-				GetWorldTransform().rotate_.x += DegreesToRadians(1 * 60) * deltaTime;
-			}
-			if (GetComboMotionData().isAttackAnimation) {
-				SetMovementSpeedMultiplier(0.1f);
-				GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * deltaTime;
-			}
-			if (GetComboMotionData().isRecovery) {
-				SetMovementSpeedMultiplier(1.05f);
-				GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * deltaTime;
-			}
-		}if (GetComboData().GetCurrentComboCount() == 1) {
-			if (GetTimer().t >= GetComboMotionData().startupTime) {
-				SetMovementSpeedMultiplier(0.3f);
-				GetWorldTransform().rotate_.x += DegreesToRadians(8 * 60) * deltaTime;
-			}
-		}if (GetComboData().GetCurrentComboCount() == 2) {
-			if (GetTimer().t >= GetComboMotionData().startupTime) {
-				SetMovementSpeedMultiplier(0.4f);
-				GetWorldTransform().rotate_.x += DegreesToRadians(16 * 60) * deltaTime;
-			}
-		}if (GetComboData().GetCurrentComboCount() == 3) {
-			if (GetTimer().t >= GetComboMotionData().startupTime) {
-				SetMovementSpeedMultiplier(1.5f);
-				GetWorldTransform().rotate_.x += DegreesToRadians(16 * 60) * deltaTime;
-			}
-		}
-
-
-		if (GetTimer().t <= 5.0f / 60) {
-
-			Vector3 move(0, 0, GetMovementSpeedMultiplier());
-			// 速度ベクトルを自機の向きに合わせて回転させる
-			move = TransformNormal(move, worldTransform.worldMat_);
-
-			worldTransform.translate_ += move;
-		}
-		break;
-	case AttackTypePlay::kJump:
-		if (GetTimer().t >= 1.0f / 60) {
-			GetWorldTransform().rotate_.x += DegreesToRadians(16 * 180) * deltaTime;
-			SetMovementSpeedMultiplier(0.2f);
-			Vector3 move(0, 0, GetMovementSpeedMultiplier());
-			// 速度ベクトルを自機の向きに合わせて回転させる
-			move = TransformNormal(move, worldTransform.worldMat_);
-			worldTransform.translate_ += move;
-		}
-		break;
-	}
-}

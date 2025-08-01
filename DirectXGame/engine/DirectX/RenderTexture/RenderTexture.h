@@ -11,8 +11,12 @@ using namespace Microsoft::WRL;
 #include <d3d12.h>
 #include <dxgi1_6.h>
 
-#include"DirectXGame/engine/struct/Structs3D.h"
+//#include"DirectXGame/engine/struct/Structs3D.h"
 
+#include "DirectXGame/engine/Offscreen/PostEffectData.h"
+
+
+class PostEffectData;
 class DXGIDevice;
 class Command;
 class SrvManager;
@@ -22,25 +26,10 @@ class Camera;
 class RenderTexture
 {
 public:
-	enum class PostEffectType {
-		kCopy,			// コピー
-		kGrayScale,		// グレースケール
-		kSepia,			// セピア
-		kVignette,      // ビネット
-		kSmoothing,     // スムージング
-		kGaussian,      // ガウス
-		kOitline,		// アウトライン
-		kRadialBlur,	// ラジアルブラー
-		kDissovle,      // ディゾルブ
-		kRandom,		// ランダム
-		kBloom,			// ブルーム
-		kBloomCombin,	// 合成ブルーム
-	};
-
 	RenderTexture() = default;
-	~RenderTexture() = default;
+	~RenderTexture();
 
-	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommonm,const std::string name);
+	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommonm,const std::string name, PostEffectType type);
 
 	void Update();
 
@@ -51,7 +40,8 @@ public:
 	void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
 
 
-	uint32_t GetSrvIndex() { return srvIndex_; }
+
+	uint32_t GetSrvIndex() const { return srvIndex_; }
 	// クリアカラーを取得
 	Vector4 GetClearColor()const;
 	// RTVハンドルを取得
@@ -64,6 +54,8 @@ public:
 	// SRVCPUハンドル取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
 
+	PostEffectData* GetPostEffectData();
+
 private:
 	// レンダーテクスチャのリソースを作成
 	void CreateResource();
@@ -71,19 +63,10 @@ private:
 	// レンダーテクスチャのリソースを作成
 	void CreateResourcePixel();
 
-
-
-
-
-
 	// RTVを作成
 	void CreateRTV();
 	// SRVを作成
 	void CreateSRV();
-
-
-	void UpdateImgui();
-
 private:
 	HRESULT hr_ = S_FALSE;
 	// レンダーテクスチャ用リソース
@@ -107,6 +90,9 @@ private:
 	RtvManager* rtvManager_;
 	RenderingCommon* renderingCommon_;
 	Camera* camera_;
+
+	std::unique_ptr<PostEffectData> postEffectData_;
+
 public:
 	PostEffectType type_;
 

@@ -9,7 +9,7 @@
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	//// オブジェクト設定
-	object_ = entity3DManager->CreateObject3D("playerbullet", Object3d::ObjectModelType::kNormal, position, camera);
+	object_ = entity3DManager->CreateObject3D("playerbullet", ObjectModelType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");
 	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,1.5f,0 }, { 0,-1.5f,0 });
 	object_->Update();
@@ -45,17 +45,15 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		enemy->AddDamage(parameter_.damege);
-		enemy->SetHit();
 		enemy->Emit();
-		enemy->hitStop(0.1f);
 		};
 
 	
 	// Y軸周り角度(θy)
-	object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+	object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
 	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
 	// X軸周り角度(θx)
-	object_->worldtransform_.rotate_.x = std::atan2(velocity_.y, -length);
+	object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
 
 	// ダメージ量
 	parameter_.damege = 30;
@@ -66,7 +64,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 	
 	// 初期地点記録
-	str = object_->worldtransform_.translate_;
+	str = object_->GetWorldTransform().translate_;
 
 	// ランダムな空中位置を設定
 	randPosSky = str + Vector3{ -1000,0,0};
@@ -115,7 +113,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	hitEmitter_->SetSizeMinMax(size, size);
 	hitEmitter_->SetFrequency(0.00f);
-	hitEmitter_->SetParent(object_->worldtransform_);
+	hitEmitter_->SetParent(object_->GetWorldTransform());
 	hitEmitter_->SetPos({0,0,0});
 	hitEmitter_->SetUsebillboardRotZ(true);
 	hitEmitter_->SetIsAlpha(true);
@@ -133,9 +131,9 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	
 	hitObject_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
 	hitObject_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
-	hitObject_->SetObjectRasterizerType(Object3d::ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
-	hitObject_->worldtransform_.translate_.z = 50.0f;
-	hitObject_->worldtransform_.rotate_.y = DegreesToRadians(-90);
+	hitObject_->GetRenderComponent()->SetObjectRasterizerType(ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
+	hitObject_->GetWorldTransform().translate_.z = 50.0f;
+	hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
 	hitObject_->SetIsDraw(false);
 	
 	cylinderParam.height = 10.0f;
@@ -164,8 +162,8 @@ void PlayerRangeBombingBullet::Update()
 		isAlive_ = false;
 	}
 
-	Vector3 strSmoke = object_->worldtransform_.worldMat_.GetWorldPosition();
-	Vector3 endSmoke = object_->worldtransform_.worldPreMat_.GetWorldPosition();
+	Vector3 strSmoke = object_->GetWorldTransform().worldMat_.GetWorldPosition();
+	Vector3 endSmoke = object_->GetWorldTransform().worldPreMat_.GetWorldPosition();
 
 	if (count > 0 || phase_ > 0) {
 		
@@ -181,7 +179,7 @@ void PlayerRangeBombingBullet::Update()
 				flag_ = true;
 			}
 			else {
-				startSmokeEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{10.0f,-5.0f,0.0f});
+				startSmokeEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{10.0f,-5.0f,0.0f});
 				startSmokeEmitter_->Update();
 			}
 
@@ -189,7 +187,7 @@ void PlayerRangeBombingBullet::Update()
 
 			t = count;
 
-			object_->worldtransform_.translate_ = Lerp(str, randPosSky, t);
+			object_->GetWorldTransform().translate_ = Lerp(str, randPosSky, t);
 
 			norm = randPosSky - str;
 
@@ -236,7 +234,7 @@ void PlayerRangeBombingBullet::Update()
 				velocity_ = pos2.Normalize() * 1000;
 				velocity_.y = 0;
 
-				object_->worldtransform_.translate_ += velocity_ * GetTimer();
+				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();
 
 				if (5 >= DistanceXZ(object_->GetWorldPosition(), enemyPos_)) {
 					phase_++;
@@ -258,19 +256,19 @@ void PlayerRangeBombingBullet::Update()
 			moveSmokeEmitter2_->SetCount(5);
 
 			// リングエフェクトの位置を設定
-			ringEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
+			ringEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
 			ringEmitter_->Update();
 
 			count += GetTimer();
 			if (count >= max_count)
 			{
 				velocity_ = targetPos * 3;
-				object_->worldtransform_.translate_ += velocity_ * GetTimer();
+				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();
 			}
 
 			if (-0.0f >= object_->GetWorldPosition().y) {
 				
-				object_->worldtransform_.translate_.y = 0.5f;
+				object_->GetWorldTransform().translate_.y = 0.5f;
 				isAlive_ = false;
 				count = 0;
 				phase_ = 0;
@@ -279,11 +277,11 @@ void PlayerRangeBombingBullet::Update()
 				isEffectPlay_ = true;
 				flag_ = false;
 				//hitObject2_->SetIsDraw(false);
-				moveExpEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition());
+				moveExpEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition());
 				moveExpEmitter_->Update();
-				expFireEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() +Vector3{0,5,0});
+				expFireEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() +Vector3{0,5,0});
 				expFireEmitter_->Update();
-				animatedCubeEmitter_->SetPos(object_->worldtransform_.worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
+				animatedCubeEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
 				animatedCubeEmitter_->Update();
 			}
 
@@ -296,21 +294,21 @@ void PlayerRangeBombingBullet::Update()
 
 
 		// Y軸周り角度(θy)
-		object_->worldtransform_.rotate_.y = std::atan2(velocity_.x, velocity_.z);
+		object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
 		float length = Length(Vector3(velocity_.x, 0, velocity_.z));
 		// X軸周り角度(θx)
-		object_->worldtransform_.rotate_.x = std::atan2(velocity_.y, -length);
+		object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
 
 
-		hitObject2_->worldtransform_.translate_ = posGround + Vector3{ 0,-6.0f,0 };
+		hitObject2_->GetWorldTransform().translate_ = posGround + Vector3{ 0,-6.0f,0 };
 
 
 		//object_->Update();
 		 
-		hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_;
-		hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+		hitObject_->GetWorldTransform().translate_ = object_->GetWorldTransform().translate_;
+		hitObject_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
 
-		hitObject2_->worldtransform_.rotate_.x = DegreesToRadians(-90);
+		hitObject2_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
 
 		//colliderComponent_->UpdateAll(object_->worldtransform_);
 	}
@@ -323,10 +321,10 @@ void PlayerRangeBombingBullet::Update()
 		object_->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
 		object_->SetIsDraw(false);
 		hitObject_->SetIsDraw(true);
-		hitObject_->worldtransform_.translate_ = object_->worldtransform_.translate_ + Vector3{ 0.0f,5.0f ,0.0f };
-		hitObject_->worldtransform_.translate_.y = cilnderHeight_ /3.0f;
-		hitObject_->worldtransform_.rotate_.x = DegreesToRadians(-90);
-		hitObject_->worldtransform_.scale_ += Vector3(0.15f, 0.15f, 0.00f);
+		hitObject_->GetWorldTransform().translate_ = object_->GetWorldTransform().translate_ + Vector3{ 0.0f,5.0f ,0.0f };
+		hitObject_->GetWorldTransform().translate_.y = cilnderHeight_ /3.0f;
+		hitObject_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
+		hitObject_->GetWorldTransform().scale_ += Vector3(0.15f, 0.15f, 0.00f);
 		hitObject_->GetPrimitive()->GetMaterial()->color.a -= 0.05f;
 
 
@@ -399,7 +397,7 @@ void PlayerRangeBombingBullet::InitMoveSmoke(ParticleEmitter* emitter, ParticleM
 	emitter->SetSizeMinMax(Vector3{ 2.8f,2.8f,2.8f }, { 2.8f,2.8f,2.8f });
 	emitter->SetVelocityMinMax(-velocity_, -velocity_);
 	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-	emitter->SetRengeMinMax(object_->worldtransform_.translate_, object_->worldtransform_.translate_);
+	emitter->SetRengeMinMax(object_->GetWorldTransform().translate_, object_->GetWorldTransform().translate_);
 }
 
 void PlayerRangeBombingBullet::InitExpSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)

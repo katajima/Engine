@@ -4,7 +4,6 @@
 
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
-float MyGame::hitStopTimer = 0.0f;
 float MyGame::nowTime = 0.0f;
 
 void MyGame::Initialize()
@@ -179,6 +178,7 @@ void MyGame::InitializeResource()
 void MyGame::CreateParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
 
 
@@ -279,6 +279,16 @@ void MyGame::CreateParticle()
 	
 
 
+	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 1000);
+	gpuParticleManager_->CreateEmitter("emitte_no1");
+	gpuParticleManager_->CreateEmitter("emitte2_no1");
+	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
+
+
+	gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
+ 
+	gpuParticleManager_->CreateField("AABBField");
 
 }
 
@@ -286,7 +296,7 @@ void MyGame::LoadModel()
 {
 	ModelManager* modelManager = dxCommon->GetModelManager();
 
-	modelManager->LoadModel("d.gltf", "glTF");
+	//modelManager->LoadModel("d.gltf", "glTF");
 
 	modelManager->LoadModel("a.obj");
 
@@ -303,10 +313,11 @@ void MyGame::LoadModel()
 
 	//modelManager->LoadModel("walk.gltf", "human");
 	//modelManager->LoadModel("iku.gltf", "iku");
-	modelManager->LoadModel("KnightCharacter.gltf", "Character");
+	//modelManager->LoadModel("KnightCharacter.gltf", "Character");
 	//modelManager->LoadModel("Characters_Anne.gltf", "Character");
-	modelManager->LoadModel("Humans_Master.gltf", "Character");
-	modelManager->LoadModel("run.gltf", "Character");
+	//modelManager->LoadModel("Humans_Master.gltf", "Character");
+	//modelManager->LoadModel("run.gltf", "Character");
+	modelManager->LoadModel("origin.gltf", "Character");
 
 
 
@@ -384,28 +395,4 @@ void MyGame::LoadModel()
 	modelManager->LoadModel("enemyGear.obj", "enemyAll/gear"); // 歯車
 	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
 
-}
-
-
-
-
-
-void MyGame::HitStpoTime()
-{
-	bool is = false;
-	hitStopTimer -= kDeltaTime_;
-	if (hitStopTimer <= 0.0f) {
-		hitStopTimer = 0.0f;
-	}
-	if (hitStopTimer > 0) {
-		is = true;
-	}
-
-	if (is) {
-
-		kTimeSpeed_ = 0.4f;
-	}
-	else {
-		kTimeSpeed_ = 1.0f;
-	}
 }

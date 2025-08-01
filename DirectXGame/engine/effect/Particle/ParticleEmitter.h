@@ -8,7 +8,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"ParticleManager.h"
-#include"DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include"DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 class LineCommon;
 class ParticleEmitter

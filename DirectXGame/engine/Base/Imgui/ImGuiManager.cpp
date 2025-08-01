@@ -3,6 +3,7 @@
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/Base/WinApp/WinApp.h"
+#include "DirectXGame/engine/Camera/Camera.h"
 #include <iostream>//用いるヘッダファイルが変わります。
 
 // 日本語対応用

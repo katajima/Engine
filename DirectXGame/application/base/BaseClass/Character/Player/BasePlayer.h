@@ -1,15 +1,18 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
+
+
+#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h"
+#include "DirectXGame/application/base/UI/PlayerUI.h"
+
 #include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
 #include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
 
-#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h"
-#include "DirectXGame/application/base/Character/Player/UI/PlayerUI.h"
+using PlayerStateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
 
-using StateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
+
 
 class FollowCamera;
-class BulletManager;
 class BasePlayer : public BaseCharacter
 {
 public:
@@ -40,15 +43,13 @@ public:
 	
 	virtual void Jump() = 0;
 
+	virtual void Attack() = 0;
+
 public:
-	// 弾マネージャーの設定
-	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 
-	BaseSpecial* GetSpecial() { return special_.get(); }
 
-	BaseWeapon* GetWeapon() { return weapon_.get(); }
 
 	PlayerUI* GetPlayerUI() { return ui_.get(); }
 
@@ -67,6 +68,7 @@ public:
 	void ChangeState(const std::string& name) {
 		auto it = stateFactoryMap_.find(name);
 		if (it != stateFactoryMap_.end()) {
+			stateName_ = name;
 			ChangeState(it->second(this)); // unique_ptr<BasePlayerState>
 		}
 		else {
@@ -89,24 +91,18 @@ private:
 		}
 	}
 
-	void RegisterState(const std::string& name, StateFactory factory) {
+	void RegisterState(const std::string& name, PlayerStateFactory factory) {
 		stateFactoryMap_[name] = factory;
 	}
 protected:
-	// スペシャル攻撃
-	std::unique_ptr<BaseSpecial> special_;
-	// 武器
-	std::unique_ptr<BaseWeapon> weapon_;
-	//  プレイヤー用UI
-	std::unique_ptr<PlayerUI> ui_;
-
-	BulletManager* bulletManager_;			// 弾管理
+	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 	FollowCamera* followCamera_;			// フォローカメラ
 
 	bool isCreativeMode = false;			// クリエイティブモードかどうか
 
 
-	std::unique_ptr<BasePlayerState> state_;
-	std::unordered_map<std::string, StateFactory> stateFactoryMap_;
+	std::string stateName_ = "";
+	std::unique_ptr<BasePlayerState> state_;// ステート
+	std::unordered_map<std::string, PlayerStateFactory> stateFactoryMap_;	// 
 };
 

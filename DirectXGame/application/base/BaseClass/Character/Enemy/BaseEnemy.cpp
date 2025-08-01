@@ -3,57 +3,9 @@
 #include "DirectXGame/application/base/Character/Player/Normal/Player.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 
-
-float BaseEnemy::Timer() const
+Vector3 BaseEnemy::GetTargetPos()
 {
-	return MyGame::GameTime() * timeSpeed_;
-}
-
-void BaseEnemy::Shake()
-{
-
-	//shakePos_.x = oldPos_.x + float(rand() % 20 - 10);
-	//float xShake = float(shakePos_.x) / static_cast<float>(10);
-	//shakePos_.z = oldPos_.z + float(rand() % 20 - 10);
-	//float zShake = float(shakePos_.z) / static_cast<float>(10);
-	//
-	//objectBase_->worldtransform_.translate_.x = xShake;
-	//objectBase_->worldtransform_.translate_.z = zShake;
-}
-
-void BaseEnemy::HitStpoTime()
-{
-	bool is = false;
-	hitStopTimer -= MyGame::GameTime();
-	if (hitStopTimer <= 0.0f) {
-		hitStopTimer = 0.0f;
-	}
-	if (hitStopTimer > 0) {
-		is = true;
-	}
-
-	if (is) {
-		timeSpeed_ = 0.0f;
-		Shake();
-	}
-	else {
-		timeSpeed_ = 1.0f;
-	}
-}
-
-void BaseEnemy::HitMotion()
-{
-	// ロックオン座標
-	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
-
-	// 追跡対象からロックオン対象へのベクトル
-	Vector3 sub = Subtract(lockOnPosition, GetWorldTransform().translate_);
-	Vector3 move = sub.Normalize() * (-hitKnockbackPower);
-	
-	if (move.y <= hitKonckbackYPower) {
-		move.y = hitKonckbackYPower;
-	}
-	velocity_ = move;
+	return player_->GetObject3D()->GetWorldPosition(); 
 }
 
 void BaseEnemy::Initialize2D()

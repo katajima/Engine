@@ -1,5 +1,5 @@
 #include "GamePlayScene.h"
-#include <iostream>//用いるヘッダファイルが変わります。
+#include <iostream>
 #include <corecrt_math_defines.h>
 #include <algorithm>
 
@@ -19,6 +19,13 @@ void GamePlayScene::Initialize()
 	// Input
 	input_ = GetInput();
 
+	inputHander_ = std::make_unique<InputHander>();
+	inputHander_->SetInput(input_);
+	inputHander_->AssignMoveCommandPad();
+	inputHander_->AssignJampCommandPad();
+	inputHander_->AssignAttackCommandPad();
+
+
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
 	followCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
@@ -36,37 +43,33 @@ void GamePlayScene::Initialize()
 	cameraManeger_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManeger_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	
+
+
+	// 弾管理クラス
+	bulletManager_ = std::make_unique<BulletManager>();
+	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), nullptr);
 
 	// キャラクター管理 
 	caracterManager_ = std::make_unique<BaseCharacterManager>();
 	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	caracterManager_->SetFollowCamera(followCamera_.get());
+	caracterManager_->SetBulletManager(bulletManager_.get());
 	// プレイヤー生成
 	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
-	// レベルデータロード
-	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
-	// 敵生成
-	for (auto& enemy : loadData_->GetLevelData()->enemys) {
-		if (enemy.isEnable)
-			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
-	}
-	
-	// 弾管理クラス
-	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), nullptr);
 	// 弾にプレイヤーセット
 	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
-	caracterManager_->SetBulletManager(bulletManager_.get());
-	
 	
 
+	// レベルデータロード
+	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->SetCameraManager(cameraManeger_.get());
+	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
+	
+	
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(caracterManager_->GetPlayer());
 	
-
-	
-
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
@@ -83,7 +86,9 @@ void GamePlayScene::Initialize()
 	gameUI->Initialize(GetEntity2DManager());
 	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
-	
+	SetCamera(cameraManeger_->GetCamera());
+
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
 }
 
 
@@ -102,7 +107,7 @@ void GamePlayScene::CheckAllCollisions()
 
 	
 	for (auto objects : loadData_->GetObjects()) {
-		if (objects->GetIsColliderComponent()) {
+		if (objects->GetColliderComponent()) {
 			collisionManager_->Register(objects->GetColliderComponent());
 		}
 	}
@@ -139,13 +144,21 @@ void GamePlayScene::Update()
 {
 	Camera::isShake_ = false;
 
+
+	iCommand_ = inputHander_->HandleInput();
+	if (this->iCommand_) {
+		iCommand_->Exec(*caracterManager_->GetPlayer());
+	}
+
+
+	
 	// 調整項目
 	ApplyGlobalVariables();
 
 	// ImGuiの更新
 	UpdateImGui();
 
-	int countIndex = 0;
+	/*int countIndex = 0;
 	for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
 		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
@@ -157,7 +170,7 @@ void GamePlayScene::Update()
 			}
 		}
 		countIndex++;
-	}
+	}*/
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -182,10 +195,12 @@ void GamePlayScene::Update()
 		BehaviorPhase2Update();
 		break;
 	}
-
-	if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
+	//tumeee_ += MyGame::GameTime();
+	if (tumeee_ >= 10.0f) {
+		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
+			// シーン切り替え
+			GetSceneManager()->ChangeScene("TITLE");
+		}
 	}
 #ifdef _DEBUG
 	if (input_->IsTriggerKey(DIK_P)) {
@@ -221,14 +236,14 @@ void GamePlayScene::Update()
 	}
 	// カメラ管理の更新
 	cameraManeger_->Update();
-	// レベルデータアップデート
-	loadData_->Update();
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
 	stage_->Update();
 	// 当たり判定
 	CheckAllCollisions();
+	// レベルデータアップデート
+	loadData_->Update();
 }
 
 #pragma endregion //更新関係

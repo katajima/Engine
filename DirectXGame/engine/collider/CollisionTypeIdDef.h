@@ -21,20 +21,7 @@ enum class CollisionLayer : uint8_t {
 	PlayerAttack,
 	EnemyAttack,
 	Environment,
-	// 必要に応じて拡張
 };
-
-// 当たる対象選択
-struct IsCollisionType 
-{
-	int isDefault;
-	int isPlayer;
-	int isPlayerWeapon;
-	int isEnemy;
-	int isEnemyWeapon;
-	int isEnemyWeapon2;
-};
-
 
 enum class ColliderType
 {
@@ -42,5 +29,7 @@ enum class ColliderType
 	Capsule,
 	AABB,
 	OBB,
-	Mesh,
+	Mesh,		// 追加予定
+	Segment,
+	Ray,
 };

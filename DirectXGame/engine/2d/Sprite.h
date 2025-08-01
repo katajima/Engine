@@ -3,7 +3,7 @@
 #include"DirectXGame/engine/struct/Material.h"
 
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/Transfomation/Transfomation.h"
+#include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Material/Material.h"
 
 

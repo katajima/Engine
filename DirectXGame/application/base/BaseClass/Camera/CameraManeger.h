@@ -25,6 +25,10 @@ public:
 
 	void UpadateImGui();
 
+	Camera* GetCamera() {return camera.get();}
+	// カメラを管理対象から削除
+	void DeleteCamera(std::string name);
+
 private:
 	// 全てのカメラ
 	std::map<std::string, BaseCamera*> cameras;
@@ -38,7 +42,8 @@ private:
 	float interpolationTime = 0.0f;
 	float currentTime = 0.0f;
 
-	//Transform;
+	
+	float chengeTime = 0.1f;
 
 	QuaternionTransform startTransform;
 	QuaternionTransform targetTransform;

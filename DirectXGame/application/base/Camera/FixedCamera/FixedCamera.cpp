@@ -12,10 +12,17 @@ void FixedCamera::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	uniqueCamera_->transform_.translate = { 0, 107, 0 };
 	uniqueCamera_->transform_.rotate = { -0.341f, 0.0f, 0.0f };
+
+
+	uniqueCamera_->AddEffectBlock("grayScale", PostEffectBlockType::kGrayScale, false);
+
 }
 
 void FixedCamera::Update()
 {
+	if (useCamera) {
+		uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
+	}
 #ifdef _DEBUG
 	ImGui::Begin("FixedCamera");
 	ImGui::DragFloat3("translate", &uniqueCamera_->transform_.translate.x, 0.1f);

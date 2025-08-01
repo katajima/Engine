@@ -14,6 +14,7 @@ class CameraManeger;
 class BaseCamera : public BaseObject
 {
 public:
+	virtual ~BaseCamera() = default; 
 	///< summary>
 	/// 初期化
 	///</summary>
@@ -56,6 +57,7 @@ public:
 protected:
 	std::unique_ptr<Camera> uniqueCamera_;	// 固有カメラ
 	
+
 
 	CameraSRTSpeed srtSpeed_;				// SRTスピード
 	BaseObject* lockOnObject = nullptr;		// ロックオン対象

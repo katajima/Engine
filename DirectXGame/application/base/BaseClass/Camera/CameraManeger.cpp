@@ -15,7 +15,7 @@ void CameraManeger::Initialize(Input* input, Entity3DManager* entity3DManager, E
 	camera->Initialize(entity3DManager_->GetCameraCommon());
 	camera->transform_.rotate = { 0.36f,0,0 };
 	camera->transform_.translate = { 5,32.5f,-59.2f };
-
+	camera->SetFarClip(10000.0f);
 	isGameCamera = true;
 
 	entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());
@@ -117,7 +117,7 @@ void CameraManeger::UpadateImGui()
 
 #ifdef _DEBUG
 	ImGui::Begin("engine");
-	if (ImGui::CollapsingHeader("Camera")) {
+	if (ImGui::CollapsingHeader("CameraManeger")) {
 		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
 		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);
 		ImGui::Checkbox("isGameCamera", &isGameCamera);
@@ -140,18 +140,37 @@ void CameraManeger::UpadateImGui()
 
 
 	}
+	ImGui::End();
 
-	if (ImGui::TreeNode("Test")) {
-		ImGui::Text("Camera1");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		//ImGui::TreePop();
-		ImGui::Text("Camera2");
-		ImGui::SliderFloat("値", &camera->transform_.rotate.x, 0.0f, 1.0f);
-		ImGui::TreePop();
+	ImGui::Begin("Camera Properties");
+	if (ImGui::CollapsingHeader("Camera")) {
+		ImGui::Separator();
+		ImGui::DragFloat("chengeTime",&chengeTime,0.01f);
+		ImGui::Separator();
+		for (auto& cameraData : cameras) {
+			if (ImGui::TreeNode(cameraData.first.c_str())) {
+				ImGui::DragFloat3("Translate", &cameraData.second->GetUniqueCamera()->transform_.translate.x, 0.1f);
+				ImGui::DragFloat3("Rotate", &cameraData.second->GetUniqueCamera()->transform_.rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &cameraData.second->GetUniqueCamera()->transform_.scale.x, 0.01f);
+				
+				if (ImGui::Button("use")) {
+					SetUseCamera(cameraData.first.c_str(), chengeTime);
+				}
+
+				ImGui::TreePop();
+			}
+		}
 	}
-
-
 	ImGui::End();
 
 #endif
+}
+
+void CameraManeger::DeleteCamera(std::string name)
+{
+	auto it = cameras.find(name);
+	if (it != cameras.end()) {
+		delete it->second;         // メモリの解放
+		cameras.erase(it);         // マップから削除
+	}
 }

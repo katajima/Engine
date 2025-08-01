@@ -29,11 +29,12 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthSRV();
 
 	// デプスSRVインデックス取得
-	uint32_t GetDepthSrvIndex();
+	uint32_t GetDepthSrvIndex() const;
 
 	// リソースを取得
 	ID3D12Resource* GetResource();
 
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
 
 private:
 	// デプスステンシルリソースの作成

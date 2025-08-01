@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
-#include "DirectXGame/engine/WorldTransform/WorldTransform.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 class Entity3DManager;
 class Entity2DManager;
@@ -33,12 +33,12 @@ public:
 	void InAction();
 
 
-	void SetReticleParent(WorldTransform* parent) { objectReticle_->worldtransform_.parent_ = parent; };
+	void SetReticleParent(WorldTransform* parent) { objectReticle_->GetWorldTransform().parent_ = parent; };
 
 public:
 
 	// 描画するか
-	void SetIsDraw(bool is) { objectReticle_->SetIsDraw(is); };
+	void SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };
 
 	void SetStage(Stage* stage);
 

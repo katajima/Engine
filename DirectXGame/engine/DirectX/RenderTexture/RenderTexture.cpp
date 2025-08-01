@@ -7,11 +7,16 @@
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
-
+#include "DirectXGame/engine/Offscreen/Posteffect.h"
 
 #include "imgui.h"
 
-void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name)
+RenderTexture::~RenderTexture()
+{
+	rtvManager_->DecAllocate();
+}
+
+void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
 {
 	DXGIDevice_ = DXGIDevice;
 	command_ = command;
@@ -27,106 +32,29 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 
 	name_ = name;
 
-	type_ = RenderTexture::PostEffectType::kCopy;
+	type_ = type;
+
+	postEffectData_ = std::make_unique<PostEffectData>();
+	postEffectData_->Initialize(renderingCommon->GetDxCommon(),type_);
 }
 
 void RenderTexture::Update()
 {
 	renderingCommon_->SetCamera(camera_);
-
+	postEffectData_->SetCamera(camera_);
 #ifdef _DEBUG
-	
+
 	if (ImGui::TreeNode(name_.c_str())) {
-		if (ImGui::Button("kCopy")) {
-			type_ = RenderTexture::PostEffectType::kCopy;
-		}
-		if (ImGui::Button("kDissovle")) {
-			type_ = RenderTexture::PostEffectType::kDissovle;
-		}
-		if (ImGui::Button("kGaussian")) {
-			type_ = RenderTexture::PostEffectType::kGaussian;
-		}
-		if (ImGui::Button("kGrayScale")) {
-			type_ = RenderTexture::PostEffectType::kGrayScale;
-		}
-		if (ImGui::Button("kOitline")) {
-			type_ = RenderTexture::PostEffectType::kOitline;
-		}
-		if (ImGui::Button("kRadialBlur")) {
-			type_ = RenderTexture::PostEffectType::kRadialBlur;
-		}
-		if (ImGui::Button("kRandom")) {
-			type_ = RenderTexture::PostEffectType::kRandom;
-		}
-		if (ImGui::Button("kSepia")) {
-			type_ = RenderTexture::PostEffectType::kSepia;
-		}
-		if (ImGui::Button("kSmoothing")) {
-			type_ = RenderTexture::PostEffectType::kSmoothing;
-		}
-		if (ImGui::Button("kVignette")) {
-			type_ = RenderTexture::PostEffectType::kVignette;
-		}
-		if (ImGui::Button("kBloom")) {
-			type_ = RenderTexture::PostEffectType::kBloom;
-		}
-		if (ImGui::Button("kBloomCombin")) {
-			type_ = RenderTexture::PostEffectType::kBloomCombin;
-		}
-		UpdateImgui();
+		postEffectData_->UpdateImgui();
 		ImGui::TreePop(); // <- 対応する TreePop を忘れずに！
 	}
 #endif // _DEBUG
-
-
-	
 }
 
 void RenderTexture::Draw()
 {
-	switch (type_)
-	{
-	case RenderTexture::PostEffectType::kCopy:
-		renderingCommon_->DrawCopyRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kGrayScale:
-		renderingCommon_->DrawGrayScaleRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kSepia:
-		renderingCommon_->DrawSepiaeRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kVignette:
-		renderingCommon_->DrawVignetteRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kSmoothing:
-		renderingCommon_->DrawSmoothingRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kGaussian:
-		renderingCommon_->DrawGaussianRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kOitline:
-		renderingCommon_->DrawOutlineRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kRadialBlur:
-		renderingCommon_->DrawRadialBlurRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kDissovle:
-		renderingCommon_->DrawDissovleRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kRandom:
-		renderingCommon_->DrawRandomRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kBloom:
-		renderingCommon_->DrawBloomRender(srvIndex_);
-		break;
-	case RenderTexture::PostEffectType::kBloomCombin:
-		renderingCommon_->DrawBloomCombinRender(otherSrvIndex_,srvIndex_);
-
-		break;
-	default:
-		renderingCommon_->DrawCopyRender(srvIndex_);
-		break;
-	}
+	renderingCommon_->DrawRender(type_, srvIndex_, otherSrvIndex_);
+	postEffectData_->DrawRender();
 }
 
 Vector4 RenderTexture::GetClearColor() const
@@ -152,6 +80,11 @@ D3D12_GPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVGPUHandle()
 D3D12_CPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVCPUHandle()
 {
 	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
+}
+
+PostEffectData* RenderTexture::GetPostEffectData()
+{
+	return postEffectData_.get();
 }
 
 
@@ -253,51 +186,3 @@ void RenderTexture::CreateSRV()
 	matadata.mipLevels = 1;
 	srvManager_->CreateSRVforTexture2D(srvIndex_, resource_.Get(), matadata);
 }
-
-void RenderTexture::UpdateImgui()
-{
-
-	switch (type_)
-	{
-	case RenderTexture::PostEffectType::kCopy:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kCopy);
-		break;
-	case RenderTexture::PostEffectType::kGrayScale:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kGrayScale);
-		break;
-	case RenderTexture::PostEffectType::kSepia:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kSepia);
-		break;
-	case RenderTexture::PostEffectType::kVignette:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kVignette);
-		break;
-	case RenderTexture::PostEffectType::kSmoothing:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kSmoothing);
-		break;
-	case RenderTexture::PostEffectType::kGaussian:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kGaussian);
-		break;
-	case RenderTexture::PostEffectType::kOitline:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kOitline);
-		break;
-	case RenderTexture::PostEffectType::kRadialBlur:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRadialBlur);
-		break;
-	case RenderTexture::PostEffectType::kDissovle:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kDissovle);
-		break;
-	case RenderTexture::PostEffectType::kRandom:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kRandom);
-		break;
-	case RenderTexture::PostEffectType::kBloom:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kBloom);
-		break;
-	case RenderTexture::PostEffectType::kBloomCombin:
-		renderingCommon_->UpdateImgui(RenderingCommon::PostEffectType::kBloomCombin);
-		break;
-	default:
-		break;
-	}
-}
-
-

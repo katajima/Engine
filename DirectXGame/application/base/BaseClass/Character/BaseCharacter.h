@@ -2,8 +2,13 @@
 #include"CharacterData.h"
 #include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
 
+
+class BaseSpecial;
+class BaseWeapon;
+class AttackInputHander;
 class Entity3DManager;
 class Entity2DManager;
+class BulletManager;
 class BaseCharacter : public BaseObject
 {
 public:
@@ -15,7 +20,7 @@ public:
 	///< summary>
 	/// 更新
 	///</summary>
-	virtual void Update() = 0; 
+	virtual void Update() = 0;
 
 	/// <summary>
 	/// エフェクトの描画
@@ -36,10 +41,17 @@ public:
 	/// ジャンプ
 	/// </summary>
 	virtual void Jump() = 0;
+	
+	/// <summary>
+	/// 攻撃
+	/// </summary>
+	virtual void Attack() = 0;
+
+	virtual void ChangeState(const std::string& name) = 0;
 
 public:
 	// キャラクタータイプ設定
-	void SetCharacterType(CharacterType type) { characterData_.characterType_ = type; }
+	void SetCharacterType(CharacterType type) { characterParameterComponent_.characterType_ = type; }
 
 	// ダメージ
 	void AddDamage(float damage) {
@@ -52,61 +64,44 @@ public:
 
 	// 移動制限
 	void LimitMove(Vector3 min, Vector3 max) {
-		if (objectBase_->worldtransform_.translate_.x > max.x) {
-			objectBase_->worldtransform_.translate_.x = max.x;
+		if (objectBase_->GetWorldTransform().translate_.x > max.x) {
+			objectBase_->GetWorldTransform().translate_.x = max.x;
 		}
-		if (objectBase_->worldtransform_.translate_.x < min.x) {
-			objectBase_->worldtransform_.translate_.x = min.x;
+		if (objectBase_->GetWorldTransform().translate_.x < min.x) {
+			objectBase_->GetWorldTransform().translate_.x = min.x;
 		}
-		if (objectBase_->worldtransform_.translate_.z > max.z) {
-			objectBase_->worldtransform_.translate_.z = max.z;
+		if (objectBase_->GetWorldTransform().translate_.z > max.z) {
+			objectBase_->GetWorldTransform().translate_.z = max.z;
 		}
-		if (objectBase_->worldtransform_.translate_.z < min.z) {
-			objectBase_->worldtransform_.translate_.z = min.z;
+		if (objectBase_->GetWorldTransform().translate_.z < min.z) {
+			objectBase_->GetWorldTransform().translate_.z = min.z;
 		}
 	};
 
 public: // 取得系関数
 
+	// 必殺技
+	BaseSpecial* GetSpecial() { return special_.get(); }
+	// 武器
+	BaseWeapon* GetWeapon() { return weapon_.get(); }
+	// 弾マネージャーの設定
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return flags_.isAlive; };
-	
-	// キャラクターが無敵状態かどうかを取得
-	bool GetInvincible() const { return GetSituation().isInvincible; }
-	
-	// キャラクター状態
-	Situation GetSituation() const { return characterData_.situation_; }
+	// キャラクターの生存状態を取得
+	void SetAlive(bool is){ flags_.isAlive = is; };
 
 	// HP取得
-	float GetHP() const { return characterData_.parameters_.HP.value; }
-
+	float GetHP() const { return characterParameterComponent_.parameters_.HP.value; }
 	// キャラクター取得
-	CharacterType GetCharacterType() const { return characterData_.characterType_; }
+	CharacterType GetCharacterType() const { return characterParameterComponent_.characterType_; }
 
-	// ビヘイビア状態取得
-	BasicBehavior GetBasicBehavior() const { return basicbehavior_; }
-
-	// リクエスト取得
-	std::optional<BasicBehavior> GetBasicBehaviorRequest() const { return basicbehaviorRequest_; }
-
-	// ふるまい変更
-	void ChangeRequest() { basicbehavior_ = basicbehaviorRequest_.value(); }
-
-	// ふるまいリクエストリセット
-	void ResetRequest() { basicbehaviorRequest_ = std::nullopt; }
-	// ふるまいリクエストの設定
-	void SetRequest(BasicBehavior type) { basicbehaviorRequest_ = type; }
-
-	// キャラクター状態
-	Situation& Situations() { return characterData_.situation_; }
 protected: // 取得系関数(変更可能)
-	
+
 	// 基本パラメータ
-	BasicParameters& Parameters() { return characterData_.parameters_; } 
-
-
+	BasicParameters& Parameters() { return characterParameterComponent_.parameters_; }
 	// HP
-	float& HP() { return characterData_.parameters_.HP.value; } 
+	float& HP() { return characterParameterComponent_.parameters_.HP.value; }
 
 protected: // 保存機能
 
@@ -129,41 +124,59 @@ protected: // 保存機能
 
 	// ベースの保存項目を追加
 	void InitializeBaseAddItem() {
-		//AddItem("Position", objectBase_->worldtransform_.translate_);
-		AddItem("speed", characterData_.parameters_.speed);
-		AddItem("HP", characterData_.parameters_.HP.value);
-		AddItem("MaxHP", characterData_.parameters_.HP.maxValue);
-		AddItem("MP", characterData_.parameters_.MP.value);
-		AddItem("MaxMP", characterData_.parameters_.MP.maxValue);
-		AddItem("stamina", characterData_.parameters_.stamina.value);
-		AddItem("MaxStamina", characterData_.parameters_.stamina.maxValue);
+		AddItem("speed", characterParameterComponent_.parameters_.speed);
+		AddItem("HP", characterParameterComponent_.parameters_.HP.value);
+		AddItem("MaxHP", characterParameterComponent_.parameters_.HP.maxValue);
+		AddItem("MP", characterParameterComponent_.parameters_.MP.value);
+		AddItem("MaxMP", characterParameterComponent_.parameters_.MP.maxValue);
+		AddItem("stamina", characterParameterComponent_.parameters_.stamina.value);
+		AddItem("MaxStamina", characterParameterComponent_.parameters_.stamina.maxValue);
+		AddItem("jampPower", characterParameterComponent_.parameters_.jampPower);
 
 
 
-		//objectBase_->worldtransform_.translate_ = GetValue<Vector3>("Position");
-		characterData_.parameters_.speed = GetValue<float>("speed");
-		characterData_.parameters_.HP.value = GetValue<float>("HP");
-		characterData_.parameters_.HP.maxValue = GetValue<float>("MaxHP");
-		characterData_.parameters_.MP.value = GetValue<float>("MP");
-		characterData_.parameters_.MP.maxValue = GetValue<float>("MaxMP");
-		characterData_.parameters_.stamina.value = GetValue<float>("stamina");
-		characterData_.parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
+		characterParameterComponent_.parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_.parameters_.HP.value = GetValue<float>("HP");
+		characterParameterComponent_.parameters_.HP.maxValue = GetValue<float>("MaxHP");
+		characterParameterComponent_.parameters_.MP.value = GetValue<float>("MP");
+		characterParameterComponent_.parameters_.MP.maxValue = GetValue<float>("MaxMP");
+		characterParameterComponent_.parameters_.stamina.value = GetValue<float>("stamina");
+		characterParameterComponent_.parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
+		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
 	}
 
 	void UpdateBaseGetValue() {
-		characterData_.parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_.parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
 	}
 
-public:
+protected:
+	void InitMoveComponent() { moveComponent_ = std::make_unique<MoveComponent>(); }
+	// 移動コンポーネント
+	std::unique_ptr<MoveComponent> moveComponent_;
 
+public:
+	// 速度
+	Vector3& Velocity() { return moveComponent_->Velocity(); }
+	// 速度取得
+	Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
+
+	MoveComponent* GetMoveComponent() { return moveComponent_.get(); }
 
 protected:
-	CharacterData characterData_;	// キャラクターデータ
+	// キャラクターパラメータコンポーネント
+	CharacterParameterComponent characterParameterComponent_;
+	// キャラクターの状態コンポーネント
+	CharacterStateComponent characterStateComponent_;
+public:
+	CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
 
+protected:
 
-	// 振るまい
-	BasicBehavior basicbehavior_ = BasicBehavior::kRoot; 
-	// 次の振るまいリクエスト
-	std::optional<BasicBehavior> basicbehaviorRequest_ = std::nullopt;
+	std::unique_ptr<BaseSpecial> special_;	// スペシャル攻撃
+	std::unique_ptr<BaseWeapon> weapon_;	// 武器
+	std::unique_ptr<AttackInputHander> attackInputHander_; // 攻撃入力系クラス
+
+	BulletManager* bulletManager_;			// 弾管理
 };
 

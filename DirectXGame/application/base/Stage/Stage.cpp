@@ -19,18 +19,18 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	ocean_->GetWaveParameters()[0].speed = 5.0f;
 	ocean_->GetMaterial()->color = Color{ 0.0f, 0.0f, 0.8f, 0.75f };
 
-	oceanObject = entity3DManager_->CreateObject3D("oceanObject", Object3d::ObjectModelType::kOcean, { 0,-30,0 }, camera_);
+	oceanObject = entity3DManager_->CreateObject3D("oceanObject", ObjectModelType::kOcean, { 0,-30,0 }, camera_);
 	oceanObject->SetOcean(ocean_.get());
-	oceanObject->worldtransform_.translate_ = { 0,-30,0 };
-	oceanObject->worldtransform_.rotate_.x = DegreesToRadians(90);
-	oceanObject->SetObjectDrawType(Object3d::ObjectDrawType::kTranslucent03);
+	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
+	oceanObject->GetWorldTransform().rotate_.x = DegreesToRadians(90);
+	oceanObject->GetRenderComponent()->SetObjectDrawType(ObjectDrawType::kTranslucent03);
 	
 	skyBox = std::make_unique<SkyBox>();
 	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
 	
 	// 空
-	sky_ = entity3DManager_->CreateObject3D("skyBox", Object3d::ObjectModelType::kSkyBox, {},camera_);
-	sky_->worldtransform_.scale_ = { 100,100,100 };
+	sky_ = entity3DManager_->CreateObject3D("skyBox", ObjectModelType::kSkyBox, {},camera_);
+	sky_->GetWorldTransform().scale_ = { 100,100,100 };
 	sky_->SetSkyBox(skyBox.get());
 	
 	//
@@ -38,12 +38,12 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	{
 		for(int j = 0; j < 2; ++j)
 		{
-			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),Object3d::ObjectModelType::kNormal,
+			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),ObjectModelType::kNormal,
 				{ 3500 + static_cast<float>(j) * 120.0f ,106,3000 + static_cast<float>(i) * 100.0f },camera_);
 			object->SetModel("Missile.gltf");
-			object->worldtransform_.rotate_.y = DegreesToRadians(-90);
+			object->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
 			float size = 10.0f;
-			object->worldtransform_.scale_ = { size,size,size };
+			object->GetWorldTransform().scale_ = { size,size,size };
 			missiles_.push_back(object);
 		}	
 	}
@@ -69,33 +69,21 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 
 
 
-	// ポイントライト
-	PointLightData pointLightData{};
-	pointLightData.color = { 1,1,1,1 };
-	pointLightData.position = { 0,100,0 };
-	pointLightData.radius = 1000.0f;
-	pointLightData.intensity = 1.0f;
-	pointLightData.isLight = true;
-	pointLightData.lig = 0.1f;
+	
+
+	
+	//DirectionalLightData directionalLightData{};
+	//directionalLightData.color = { 1,1,1,1 };
+	//directionalLightData.direction = { 0,-1,0 };
+	//directionalLightData.intensity = 0.5f;
+	//directionalLightData.isLight = true;
+	//directionalLightData.lig = 0.1f;
 
 
-	pointLight_ = std::make_shared<PointLight>();
-	pointLight_->point = pointLightData;
+	//directional = std::make_shared<DirectionalLight>();
+	//directional->directional = directionalLightData;
 
-	entity3DManager_->GetLightManager()->AddLight(pointLight_);
-
-	DirectionalLightData directionalLightData{};
-	directionalLightData.color = { 1,1,1,1 };
-	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 0.5f;
-	directionalLightData.isLight = true;
-	directionalLightData.lig = 0.1f;
-
-
-	directional = std::make_shared<DirectionalLight>();
-	directional->directional = directionalLightData;
-
-	entity3DManager_->GetLightManager()->AddLight(directional);
+	//entity3DManager_->GetLightManager()->AddLight(directional);
 	
 	// エミッター設定
 	//InitEmit();
@@ -179,7 +167,7 @@ void Stage::InitEmit()
 	emitTrainDust_->SetAlphaClipping(0.0f);
 	emitTrainDust_->SetCount(7);
 	emitTrainDust_->transform_.translate_ = { 6,9,0 };
-	emitTrainDust_->SetParent(train_->worldtransform_);
+	emitTrainDust_->SetParent(train_->GetWorldTransform());
 	emitTrainDust_->SetIsAlpha(true);
 	emitTrainDust_->SetVelocityMinMax(Vector3{ 0.0f,10.0f,0.0f }, { 0.0f, 20.0f, 0.0f });
 	emitTrainDust_->SetUsebillboard(true);
@@ -197,7 +185,7 @@ void Stage::InitEmit()
 	emitShipDust_->SetAlphaClipping(0.0f);
 	emitShipDust_->SetCount(7);
 	emitShipDust_->transform_.translate_ = { 0,5,0 };
-	emitShipDust_->SetParent(ship_->worldtransform_);
+	emitShipDust_->SetParent(ship_->GetWorldTransform());
 	emitShipDust_->SetIsAlpha(true);
 	emitShipDust_->SetIsGravity(true);
 	emitShipDust_->SetVelocityMinMax(Vector3{ 0.0f,0.0f,0.0f }, { 0.0f, 00.0f, 0.0f });

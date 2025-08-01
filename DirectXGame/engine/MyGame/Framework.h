@@ -6,6 +6,7 @@
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include"DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
+#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
 

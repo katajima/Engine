@@ -9,116 +9,116 @@ enum class WeaonType
 	Hybrid, // 例えば剣＋銃みたいな特殊系
 };
 
-// 攻撃方法
-enum class  AttackTypePlay
-{
-	kNone = 0,
-	kNormal, // 通常攻撃
-	kJump, // ジャンプ攻撃
-};
-
-// 攻撃入力系クラス
-class AttackInput 
-{
-public:
-	struct AttackKeyFlag
-	{
-		bool IsNormalAttack; // B
-	};
-
-	// 攻撃方法取得
-	AttackTypePlay GetAttackTypePlay() const { return type; }
-	// リクエスト取得
-	std::optional<AttackTypePlay> GetTypeRequest() const { return typeRequest_; }
-	// ふるまい変更
-	void ChangeRequest() { type = typeRequest_.value(); }
-
-	// ふるまいリクエストリセット
-	void ResetRequest() { typeRequest_ = std::nullopt; }
-	// ふるまいリクエストの設定
-	void SetRequest(AttackTypePlay type) { typeRequest_ = type; }
-	// 
-	AttackKeyFlag& GetAttackKeyFlag() { return key; }
-
-	// 攻撃するかのフラグ取得
-	bool GetIsAttack() const { return isAttack; };
-	// 攻撃するかのフラグ設定
-	void SetIsAttack(bool is) { isAttack = is; }
-	// 攻撃ステート中かのフラグ取得
-	bool GetIsState() const { return isState; }
-	// 攻撃ステート中かのフラグ設定
-	void SetIsState(bool is){isState = is; }
-	// 攻撃ステート中かのフラグをTrueに
-	void TrueState() { isState = true; }
-private:
-	//振るまい
-	AttackTypePlay type = AttackTypePlay::kNone;
-	// 次の振るまいリクエスト
-	std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
-	AttackKeyFlag key;
-
-	Vector2 direction;			// 入力方向
-
-	bool isAttack = false;		// 攻撃するか
-	bool isState = false;		// 攻撃ステートか
-};
+//// 攻撃方法
+//enum class  AttackTypePlay
+//{
+//	kNone = 0,
+//	kNormal, // 通常攻撃
+//	kJump, // ジャンプ攻撃
+//};
+//
+//// 攻撃入力系クラス
+//class AttackInput 
+//{
+//public:
+//	struct AttackKeyFlag
+//	{
+//		bool IsNormalAttack; // B
+//	};
+//
+//	// 攻撃方法取得
+//	AttackTypePlay GetAttackTypePlay() const { return type; }
+//	// リクエスト取得
+//	std::optional<AttackTypePlay> GetTypeRequest() const { return typeRequest_; }
+//	// ふるまい変更
+//	void ChangeRequest() { type = typeRequest_.value(); }
+//
+//	// ふるまいリクエストリセット
+//	void ResetRequest() { typeRequest_ = std::nullopt; }
+//	// ふるまいリクエストの設定
+//	void SetRequest(AttackTypePlay type) { typeRequest_ = type; }
+//	// 
+//	AttackKeyFlag& GetAttackKeyFlag() { return key; }
+//
+//	// 攻撃するかのフラグ取得
+//	bool GetIsAttack() const { return isAttack; };
+//	// 攻撃するかのフラグ設定
+//	void SetIsAttack(bool is) { isAttack = is; }
+//	// 攻撃ステート中かのフラグ取得
+//	bool GetIsState() const { return isState; }
+//	// 攻撃ステート中かのフラグ設定
+//	void SetIsState(bool is){isState = is; }
+//	// 攻撃ステート中かのフラグをTrueに
+//	void TrueState() { isState = true; }
+//private:
+//	//振るまい
+//	AttackTypePlay type = AttackTypePlay::kNone;
+//	// 次の振るまいリクエスト
+//	std::optional<AttackTypePlay> typeRequest_ = std::nullopt;
+//	AttackKeyFlag key;
+//
+//	Vector2 direction;			// 入力方向
+//
+//	bool isAttack = false;		// 攻撃するか
+//	bool isState = false;		// 攻撃ステートか
+//};
 
 
 
 // コンボデータ構造体
-struct ComboData 
-{
-	bool isComboWeapon = true;			// コンボ武器かのフラグ(連続攻撃可能かどうか)
-	int comboMaxCount = 3;				// コンボの最大回数
-	int currentComboCount = 0;			// 現在のコンボ回数
-	bool isComboNext = false;			// 次のコンボを受け付けるかのフラグ(コンボ間隔内かどうか)
+//struct ComboData 
+//{
+//	bool isComboWeapon = true;			// コンボ武器かのフラグ(連続攻撃可能かどうか)
+//	int comboMaxCount = 3;				// コンボの最大回数
+//	int currentComboCount = 0;			// 現在のコンボ回数
+//	bool isComboNext = false;			// 次のコンボを受け付けるかのフラグ(コンボ間隔内かどうか)
+//
+//	// コンボの現在の回数をリセット
+//	void ResetCurrentComboCount() {	currentComboCount = 0; }
+//	// コンボの現在の回数をインクリメント
+//	void IncrementCurrentComboCount() { currentComboCount += 1; }
+//	// 次コンボするかのフラグを設定
+//	void SetIsComboNext(bool is) { isComboNext = is; }
+//
+//	// コンボ武器かどうかのフラグを設定
+//	void SetIsComboWeapon(bool isComboWeapon) { this->isComboWeapon = isComboWeapon; }
+//	// コンボの最大回数を取得
+//	int GetComboMaxCount() const { return comboMaxCount; }
+//	// コンボの最大回数を設定
+//	void SetComboMaxCount(int comboMaxCount) { this->comboMaxCount = comboMaxCount; }
+//	// コンボの現在の回数を取得
+//	int GetCurrentComboCount() const { return currentComboCount; }
+//	// コンボの現在の回数を設定
+//	void SetCurrentComboCount(int currentComboCount) { this->currentComboCount = currentComboCount; }
+//
+//
+//};
 
-	// コンボの現在の回数をリセット
-	void ResetCurrentComboCount() {	currentComboCount = 0; }
-	// コンボの現在の回数をインクリメント
-	void IncrementCurrentComboCount() { currentComboCount += 1; }
-	// 次コンボするかのフラグを設定
-	void SetIsComboNext(bool is) { isComboNext = is; }
-
-	// コンボ武器かどうかのフラグを設定
-	void SetIsComboWeapon(bool isComboWeapon) { this->isComboWeapon = isComboWeapon; }
-	// コンボの最大回数を取得
-	int GetComboMaxCount() const { return comboMaxCount; }
-	// コンボの最大回数を設定
-	void SetComboMaxCount(int comboMaxCount) { this->comboMaxCount = comboMaxCount; }
-	// コンボの現在の回数を取得
-	int GetCurrentComboCount() const { return currentComboCount; }
-	// コンボの現在の回数を設定
-	void SetCurrentComboCount(int currentComboCount) { this->currentComboCount = currentComboCount; }
-};
 
 
-
-struct AttackMotions 
-{
-	std::string name = "";					// 名前
-	float damage = 0;						// ダメージ 
-	float staminaCost = 0;					// スタミナ消費量
-	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
-	KnockbackData knockbackData{};			// ノックバックデータ
-	ComboMotionData motionData{};			// モーションデータ
-	Vector3 initRotate{};					// 回転初期位置
-	Vector3	rotateSpeed{};					// 回転更新(速度)	
-};
+//struct AttackMotions 
+//{
+//	std::string name = "";					// 名前
+//	float damage = 0;						// ダメージ 
+//	float staminaCost = 0;					// スタミナ消費量
+//	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
+//	KnockbackData knockbackData{};			// ノックバックデータ
+//	//ComboMotionData motionData{};			// モーションデータ
+//};
 
 // 遠近どちらにもあるパラメータ持つ武器データ構造体
 struct WeaponData
 {
-	float damage = 0;					// ダメージ 
+	//float damage = 0;					// ダメージ 
 	WeaonType type = WeaonType::MELL;	// 武器の種類(遠近)
-	Timer animetionTimer;				// アニメーションタイマー(攻撃アニメーションの管理用)
+	//Timer animetionTimer;				// アニメーションタイマー(攻撃アニメーションの管理用)
 	bool isAutomatic = false;			// オート連射(入力しっぱなしで攻撃)可能かのフラグ
 	bool isActive = false;				// 武器が有効かどうかのフラグ(攻撃中か)
-	KnockbackData knockbackData{};		// ノックバックデータ
-	ComboMotionData motionData{};		// モーションデータ
-	ComboData comboData{};				// コンボデータ
-	float staminaCost = 0;				// スタミナ消費量
-	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
+	//KnockbackData knockbackData{};		// ノックバックデータ
+	//ComboMotionData motionData{};		// モーションデータ
+	//ComboData comboData{};				// コンボデータ
+	//float staminaCost = 0;				// スタミナ消費量
+	//float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率(攻撃中の移動速度を変化させる)
 	// 攻撃再発動時間
 	float recastTime = 0;
 	const float MaxRecastTime = 0.5f;

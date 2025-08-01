@@ -15,7 +15,7 @@ public:
     }
 };
 
-// インターフェース的な役割クラス
+// インターフェースクラス
 class IHitReceiver {
 public:
     virtual ~IHitReceiver() = default;

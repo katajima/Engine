@@ -28,8 +28,7 @@ private:
 	std::unique_ptr<Sprite> text_over;
 
 	Vector2 numpos[3]{};
-	std::vector<std::unique_ptr<Sprite>> sprite_;
-
+	
 
 private:
 	BasePlayer* player_;

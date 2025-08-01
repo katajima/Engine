@@ -2,6 +2,7 @@
 #include "DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <string>
+#include "DirectXGame/engine/Light/Lights.h"
 
 class LevelData
 {
@@ -57,7 +58,19 @@ public:
 		Vector3 rotation;
 	};
 	std::vector<StageObjectSpawnData> stageObjects;
-
+	//
+	struct CameraObject
+	{
+		std::string fileName;
+		Vector3 position;
+		Vector3 rotation;
+		Vector3 scale;
+	};
+	std::vector<CameraObject> cameras;
+	//
+	std::vector <DirectionalLightData> directionalDatas;
+	std::vector <PointLightData> pointDatas;
+	std::vector <SpotLightData> spotDatas;
 
 private:
 

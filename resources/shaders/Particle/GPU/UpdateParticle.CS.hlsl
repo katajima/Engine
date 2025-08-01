@@ -23,23 +23,24 @@ void main(uint3 DTid : SV_DispatchThreadID)
             gParticle[particleIndex].currentTime += gPerFrame.deltaTime;
             float alpha = 1.0f - (gParticle[particleIndex].currentTime / gParticle[particleIndex].lifeTime);
             gParticle[particleIndex].color.a = saturate(alpha);
+           
+        }
         
-            if (gParticle[particleIndex].color.a == 0)
-            {
+        if (gParticle[particleIndex].color.a == 0)
+        {
                 // スケール0を入れておいてVertexShader出力で棄却されるようにする
-                gParticle[particleIndex].scale = float3(0.0f, 0.0f, 0.0f);
-                int freeListIndex;
-                InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
+            gParticle[particleIndex].scale = float3(0.0f, 0.0f, 0.0f);
+            int freeListIndex;
+            InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
                 // 最新のFreeListIndexの場所に死んだParticleのIndexを設定する
-                if ((freeListIndex + 1) < gMaxInstance.maxInstanse)
-                {
-                    gFreeList[freeListIndex + 1] = particleIndex;
-                }
-                else
-                {
+            if ((freeListIndex + 1) < gMaxInstance.maxInstanse)
+            {
+                gFreeList[freeListIndex + 1] = particleIndex;
+            }
+            else
+            {
                 // ここに来るはずがない、来たら何かが間違っているが、安全策をうっておく
-                    InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
-                }
+                InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
             }
         }
     }

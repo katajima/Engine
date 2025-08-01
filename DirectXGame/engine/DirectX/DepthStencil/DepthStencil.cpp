@@ -37,7 +37,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE DepthStencil::GetCPUHandleDepthSRV()
 	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
 }
 
-uint32_t DepthStencil::GetDepthSrvIndex()
+uint32_t DepthStencil::GetDepthSrvIndex() const
 {
 	return srvIndex_;
 }
@@ -92,6 +92,7 @@ void DepthStencil::CreateDepthStencilView()
 	);
 
 	srvIndex_ = srvManager_->Allocate();
+	srvIndex_ = srvManager_->Allocate();
 
 	// SRVを作成
 	DirectX::TexMetadata matadata{};
@@ -99,4 +100,9 @@ void DepthStencil::CreateDepthStencilView()
 	matadata.mipLevels = 1;
 	srvManager_->CreateSRVforTexture2D(srvIndex_, depthStencilResource_.Get(), matadata);
 
+}
+
+
+D3D12_GPU_DESCRIPTOR_HANDLE DepthStencil::GetSRVGPUHandle() {
+	return srvManager_->GetGPUDescriptorHandle(srvIndex_);
 }

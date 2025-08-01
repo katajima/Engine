@@ -149,13 +149,19 @@ void Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& jo
 
 void Animetion::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
 {
-	if (modelData.currentAnimName != newAnimName) {
-		modelData.previousAnimName = modelData.currentAnimName;
-		modelData.currentAnimName = newAnimName;
-		modelData.blendTime = 0.0f;
-		modelData.blendDuration = blendDuration;
-		modelData.isBlending = true;
+	const auto& animations = modelData.animations;
+	auto it = animations.find(newAnimName);
+	if (it != animations.end()) {
+		if (modelData.currentAnimName != newAnimName) {
+			modelData.previousAnimName = modelData.currentAnimName;
+			modelData.currentAnimName = newAnimName;
+			modelData.blendTime = 0.0f;
+			modelData.blendDuration = blendDuration;
+			modelData.isBlending = true;
+		}
 	}
+
+	
 }
 
 Joint* Animetion::FindJointByName(Skeleton& skeleton, const std::string& name)

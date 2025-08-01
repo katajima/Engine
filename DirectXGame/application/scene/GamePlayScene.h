@@ -17,6 +17,8 @@
 #include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
 #include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
 
+#include "DirectXGame/application/base/Input/InputHander.h"
+
 // ゲームプレイシーン
 class GamePlayScene : public BaseScene
 {
@@ -73,6 +75,10 @@ private:
 private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
+
+	// インプットハンドラ
+	std::unique_ptr < InputHander> inputHander_;
+	ICommand* iCommand_;
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
@@ -102,6 +108,8 @@ private:
 	int count = 0;
 	int sceneCount = 0;
 	int clock = 1;
+
+	float tumeee_ = 0.0f;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI = std::make_unique<GameUI>();

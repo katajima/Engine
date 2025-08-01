@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
-const uint32_t RtvManager::kMaxRTVCount = 16;
+const uint32_t RtvManager::kMaxRTVCount = 32;
 
 
 
@@ -32,6 +32,11 @@ uint32_t RtvManager::Allocate()
 	useIndex++;
 	// 上で記録した番号をreturn
 	return index;
+}
+
+void RtvManager::DecAllocate()
+{
+	useIndex--;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE RtvManager::GetCPUDescriptorHandle(uint32_t index)

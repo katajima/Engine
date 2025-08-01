@@ -182,6 +182,49 @@ static bool IsCollision(const Triangle& triangle, const Capsule& capsule)
 	return false;
 }
 
+// Rayと球の衝突判定
+static bool IsCollision(const Ray& ray, const Sphere& sphere) {
+	Vector3 m = ray.origin - sphere.center;
+	float b = Dot(m, ray.diff);
+	float c = Dot(m, m) - sphere.radius * sphere.radius;
+
+	// 判別式が負なら交差なし
+	float discriminant = b * b - c;
+	if (discriminant < 0.0f) return false;
+
+	return true; // 交差あり
+}
+// RayとAABBの衝突判定
+static bool IsCollision(const Ray& ray, const AABB& aabb) {
+	float tMin = 0.0f;
+	float tMax = FLT_MAX;
+
+	for (int i = 0; i < 3; ++i) {
+		float rayOrig = (&ray.origin.x)[i];
+		float rayDir = (&ray.diff.x)[i];
+		float aabbMin = (&aabb.min_.x)[i];
+		float aabbMax = (&aabb.max_.x)[i];
+
+		if (fabsf(rayDir) < 1e-6f) {
+			// レイが軸と平行 → 原点が範囲外なら交差なし
+			if (rayOrig < aabbMin || rayOrig > aabbMax)
+				return false;
+		}
+		else {
+			float invD = 1.0f / rayDir;
+			float t1 = (aabbMin - rayOrig) * invD;
+			float t2 = (aabbMax - rayOrig) * invD;
+			if (t1 > t2) std::swap(t1, t2);
+			tMin = (std::max)(tMin, t1);
+			tMax = (std::min)(tMax, t2);
+			if (tMin > tMax)
+				return false;
+		}
+	}
+
+	return true;
+}
+
 
 // 点とカプセル（線分 + 半径）の距離チェック
 static bool PointInCapsule(const Vector3& point, const Vector3& a, const Vector3& b, float radius) {

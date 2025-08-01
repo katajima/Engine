@@ -12,6 +12,8 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 
+#include "DirectXGame/engine/Offscreen/RenderingCommon.h"
+#include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 
@@ -30,6 +32,7 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
 	depthStencil_->Initialize(DXGIDevice_.get(),command_.get(),dsvManager_.get(),srvManager_.get()); // デプスステンシル     
 	
+
 	textureManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // テクスチャマネージャー
 	modelManager_->Initialize(this); // モデルマネージャー
 	
@@ -42,12 +45,6 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 
 	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
-
-	postEffectManager_->AddRenderTexture("postEffect0_outline");
-	postEffectManager_->AddRenderTexture("postEffect1_Extract");
-	postEffectManager_->AddRenderTexture("postEffect2_Blur");
-	postEffectManager_->AddRenderTexture("postEffect3_Comb");
-	postEffectManager_->AddRenderTexture("postEffect4_All");
 
 	imguiManager_->Initialize(this);
 }
@@ -70,9 +67,16 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 
 	// レンダーターゲット用の描画後処理
 	postEffectManager_->PostDrawOffscreen();
+
+
+	postEffectManager_->PreDraw2dOffscreen();
+
+	sceneManager->Draw2D();
+
+	postEffectManager_->PostDraw2dOffscreen();
 }
 
-void DirectXCommon::PassSwap(RenderTexture* renderTexture)
+void DirectXCommon::PassSwap(SceneManager* sceneManager,RenderTexture* renderTexture)
 {
 	// スワップチェーン用の描画準備
 	swapChain_->PreDraw();
@@ -80,12 +84,14 @@ void DirectXCommon::PassSwap(RenderTexture* renderTexture)
 	// レンダーテクスチャ(コピー)
 	renderTexture->Draw();
 	
+	//sceneManager->Draw2D();
+
 	// ImGuiの描画
 	GetImGuiManager()->Draw();
 
 	// スワップチェーン用の描画後処理
 	swapChain_->PostDraw();
-	
+	postEffectManager_->ClearPostEffectBlock();
 	// FPS制限の更新
 	UpdateFixFPS();
 }
@@ -95,10 +101,10 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
 
-	postEffectManager_->AllPostEffect();
+	postEffectManager_->AllPostEffect(sceneManager);
 
 	// スワップチェーン
-	PassSwap(postEffectManager_->GetEndRenderTexture());
+	PassSwap(sceneManager,postEffectManager_->GetEndRenderTexture());
 }
 
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
@@ -115,7 +121,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 	entity3DManager->GetEffectManager()->GetParticleManager()->Draw();
 
 	// GPUパーティクル描画
-	//entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
+	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
 
 
 #ifdef _DEBUG
@@ -126,7 +132,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 #endif // _DEBUG
 
 	// 2Dオブジェクトの描画
-	sceneManager->Draw2D();
+	//sceneManager->Draw2D();
 }
 
 void DirectXCommon::InitializeFixFPS()

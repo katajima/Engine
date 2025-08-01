@@ -27,14 +27,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
                 {
                     float3 delta = gEffectField.translate - gParticle[particleIndex].translate;
                     
-                    
-                    float distSqr = max(dot(delta, delta), 0.0001); // 距離の二乗（ゼロ割防止）
-                    float3 forceDir = normalize(delta);
-                    float forceMag = gEffectField.force / distSqr; // 距離が近いほど強く、遠いほど弱く
+                    //float distSqr = max(dot(delta, delta), 0.0001); // 距離の二乗（ゼロ割防止）
+                    float3 forceDir = -normalize(delta);
+                    float forceMag = gEffectField.force /*/ distSqr*/; // 距離が近いほど強く、遠いほど弱く
        
                     //gParticle[particleIndex].acceleration += forceDir * forceMag * gPerFrame.deltaTime;
                     
-                    gParticle[particleIndex].acceleration += forceDir/* * gPerFrame.deltaTime*/;
+                    gParticle[particleIndex].acceleration += forceMag * forceDir /* * gPerFrame.deltaTime*/;
                     
                 }
             }

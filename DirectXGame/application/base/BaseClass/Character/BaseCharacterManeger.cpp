@@ -51,7 +51,7 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 
 		break;
 	case EnemyType::kBullet:
-		enemy = std::make_unique<BulletEnemy>();
+		//enemy = std::make_unique<BulletEnemy>();
 		break;
 	case EnemyType::kAttacker:
 		break;
@@ -71,10 +71,9 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 	enemy->SetID(characterCount_);
 	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
 	enemy->SetPlayer(GetPlayer());
-	enemy->GetObject3D()->worldtransform_.translate_ = transform.translate;
-	enemy->GetObject3D()->worldtransform_.rotate_ = transform.rotate;
-	//enemy->GetObject3D()->worldtransform_.scale_ = transform.scale;
-
+	enemy->GetObject3D()->GetWorldTransform().translate_ = transform.translate;
+	enemy->GetObject3D()->GetWorldTransform().rotate_ = transform.rotate;
+	
 	character_.push_back(std::move(enemy));
 }
 

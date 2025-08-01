@@ -49,6 +49,14 @@ bool SphereCollider::CheckHit(const Collider& other) const
 		return IsCollision(o.obb, Sphere{ centerWorld ,radius });
 	}
 
+	// OBB
+	if (other.GetType() == ColliderType::Ray) {
+		auto& o = static_cast<const RayCollider&>(other);
+		return IsCollision(o.ray_, Sphere{ centerWorld ,radius });
+	}
+
+
+
 	// AABBとの衝突など他の型は別で判定
 	return false;
 }
@@ -200,6 +208,12 @@ bool AABBCollider::CheckHit(const Collider& other) const
 		auto& o = static_cast<const OBBCollider&>(other);
 
 		return IsCollision(o.obb, AABB(minWorld, maxWorld));
+	}
+
+	// OBB
+	if (other.GetType() == ColliderType::Ray) {
+		auto& o = static_cast<const RayCollider&>(other);
+		return IsCollision(o.ray_, AABB(minWorld, maxWorld));
 	}
 
 	return false;
@@ -486,6 +500,58 @@ bool OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) c
 	}
 
 
+	return false;
+}
+#pragma endregion
+
+#pragma region Ray
+void RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
+{
+	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+
+	ray_.origin = centerWorld;
+
+#ifdef _DEBUG
+	if (lineCommon) {
+		lineCommon->AddLine(ray_.origin, ray_.origin + ray_.diff ,{1,1,1,1});
+	}
+#endif // _DEBUG
+
+}
+
+bool RayCollider::CheckHit(const Collider& other) const
+{
+	if (!other.enabled) return false;
+
+	// 球
+	if (other.GetType() == ColliderType::Sphere) {
+		auto& o = static_cast<const SphereCollider&>(other);
+		return IsCollision(ray_, Sphere{ o.centerWorld,o.radius });
+	}
+
+	// AABB
+	if (other.GetType() == ColliderType::AABB) {
+		auto& o = static_cast<const AABBCollider&>(other);
+		return IsCollision(ray_, AABB(o.minWorld, o.maxWorld));
+	}
+
+	//// カプセル
+	//if (other.GetType() == ColliderType::Capsule) {
+	//	auto& o = static_cast<const CapsuleCollider&>(other);
+	//	return IsCollision(obb, o.capWorld_);
+	//}
+
+	//// OBB
+	//if (other.GetType() == ColliderType::OBB) {
+	//	auto& o = static_cast<const OBBCollider&>(other);
+	//	return IsCollision2(obb, o.obb);
+	//}
+
+	return false;
+}
+
+bool RayCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
+	if (!other.enabled) return false;
 	return false;
 }
 #pragma endregion

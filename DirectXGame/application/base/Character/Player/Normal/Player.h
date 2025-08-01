@@ -1,9 +1,5 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
-// プレイヤー
-#include "DirectXGame/application/base/Character/Player/Effect/PlayerEffect.h"
-
-
 #include "DirectXGame/application/base/Weapon/playerWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "DirectXGame/application/base/Special/BulletSpecial.h"
@@ -39,21 +35,14 @@ public:
 	// ジャンプ
 	void Jump() override;
 
-private: // 攻撃関係
+	void Attack() override;
 
+private: 
 	// 調整項目の適用
 	void ApplyGlobalVariables();
 
-private:
-	
-	// エフェクト 
-	std::unique_ptr<PlayerEffect> effect_ = std::make_unique<PlayerEffect>();
-	
-	Object3d objectBody_;					// オブジェクト本体
+	WorldTransform worldCollider_;
+
 public:
 	void LockOn(const std::vector<BaseEnemy*>& enemys);
-private:
-	//const int MaxLockOn = 10;	// 最大ロックオン数
-	//bool isLockOn = false;		// ロックオン中かどうか
-	//std::vector<BaseEnemy*> lockedOnEnemies;// ロックオンした敵
 };

@@ -1,0 +1,82 @@
+#pragma once
+#include"DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/Transform/TransformComponent.h"
+
+class RigidBodyComponent
+{
+public:
+	void AddForce(const Vector3& f) {
+		force += f;
+	}
+
+	void AddTorque(const Vector3& t) {
+		torque += t;
+	}
+
+	void Integrate(float deltaTime, TransformComponent& transform) {
+		if (isKinematic || isSleeping || inverseMass == 0.0f) return;
+
+		// 加速度計算
+		Vector3 acceleration = force * inverseMass;
+
+		// 速度更新
+		velocity_ += acceleration /** deltaTime*/;
+
+		// 重力適用
+		if (useGravity) {
+			velocity_.y += -gravity /** deltaTime*/;
+		}
+
+		// 位置更新
+		transform.GetWorldTransform().translate_ += velocity_ * deltaTime;
+
+
+
+		// トルクによる回転（簡略化）
+		Vector3 angularAcceleration = torque * inverseMass; // 実際は慣性モーメントが必要
+		angularVelocity += angularAcceleration * deltaTime;
+
+		// 回転適用（クォータニオンが理想）
+		//transform.rotation += angularVelocity * deltaTime;
+		transform.GetWorldTransform().rotate_ * angularVelocity* deltaTime;
+
+
+		// 力のリセット
+		force = { 0, 0, 0 };
+		torque = { 0, 0, 0 };
+	}
+
+
+	bool IsGravity() const { return useGravity; }
+
+	void SetIsGravity(bool is) { useGravity = is; }
+
+	void SetVelocity(const Vector3& v) { velocity_ = v; }
+	Vector3 GetVelocity() const { return velocity_; }
+	Vector3& Velocity() { return velocity_; }
+
+	void SetMass(float m) {
+		mass_ = m;
+		inverseMass = (m != 0.0f) ? 1.0f / m : 0.0f;
+	}
+
+private:
+	Vector3 velocity_ = {0,0,0};				// 速度
+	Vector3 angularVelocity = { 0, 0, 0 };		// 角速度（回転）
+	float mass_ = 1.0f;							// 質量
+	float inverseMass = 1.0f;					// 計算用の逆質量（質量0の除算対策）
+	
+	Vector3 force = { 0, 0, 0 };				// 現在加えられている合力（フレーム毎に加算してリセット）
+	Vector3 torque = { 0, 0, 0 };				// 回転方向の力（トルク）
+
+
+	float gravity = 9.8f;						// 重力
+
+	float friction = 0.3f;						// 摩擦係数（床とのすべり）
+	float restitution = 0.1f;					// 反発係数（跳ね返り）
+
+	bool useGravity = true;						// 重力の影響を受けるか
+	bool isKinematic = false;					// 外部力を受けない（スクリプト制御用）
+
+	bool isSleeping = false;					// 物体が静止していて物理更新をスキップしてよいか
+};
