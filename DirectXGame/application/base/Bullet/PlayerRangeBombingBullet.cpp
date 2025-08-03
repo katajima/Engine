@@ -6,6 +6,18 @@
 
 #include "DirectXGame/engine/math/random.h"
 
+PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
+{
+	moveSmokeEmitter_.reset();
+	moveSmokeEmitter2_.reset();
+	startSmokeEmitter_.reset();
+	moveExpEmitter_.reset();
+	expFireEmitter_.reset();
+	animatedCubeEmitter_.reset();
+	ringEmitter_.reset();
+	hitEmitter_.reset();
+}
+
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
 {
 	//// オブジェクト設定
@@ -80,6 +92,8 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	ParticleManager* particleManager = entity3DManager->GetEffectManager()->GetParticleManager();
 
 	//// ミサイル移動中の煙パーティクルエミッター
+
+	
 	moveSmokeEmitter_ = std::make_unique <ParticleEmitter>();
 	InitMoveSmoke(moveSmokeEmitter_.get(), particleManager, "smokePlane01");
 

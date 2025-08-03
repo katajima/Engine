@@ -11,21 +11,28 @@ using namespace Microsoft::WRL;
 template<class Type>
 class StructuredBuffer {
 public:
+	~StructuredBuffer() {
+		if (data_) {
+			resource_->Unmap(0, nullptr);
+			data_ = nullptr;
+		}
+	}
 
 	void CreateBuffer(DirectXCommon* dxCommon, int num = 1, bool useUav = false)
 	{
 		dxCommon_ = dxCommon;
 		useUav_ = useUav;
+		num_ = num;
 
 		barrier_ = std::make_unique<Barrier>();
 		barrier_->Initialize(dxCommon_->GetCommand());
 
 		// リソース生成
 		if (useUav_) {
-			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(Type) * num);
+			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResourceUAV(sizeof(Type) * num_);
 		}
 		else {
-			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);
+			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num_);
 
 			// データ
 			data_ = nullptr;
@@ -41,13 +48,13 @@ public:
 		srvIndex_ = dxCommon_->GetSrvManager()->Allocate();
 		srvHandleCPU_ = dxCommon_->GetSrvManager()->GetCPUDescriptorHandle(srvIndex_);
 		srvHandleGPU_ = dxCommon_->GetSrvManager()->GetGPUDescriptorHandle(srvIndex_);
-		dxCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(srvIndex_, resource_.Get(), num, sizeof(Type));
+		dxCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(srvIndex_, resource_.Get(), num_, sizeof(Type));
 
 		if (useUav_) {
 			uavIndex_ = dxCommon_->GetSrvManager()->Allocate();
 			uavHandleCPU_ = dxCommon_->GetSrvManager()->GetCPUDescriptorHandle(uavIndex_);
 			uavHandleGPU_ = dxCommon_->GetSrvManager()->GetGPUDescriptorHandle(uavIndex_);
-			dxCommon_->GetSrvManager()->CreateUAVforStructuredBuffer(uavIndex_, resource_.Get(), num, sizeof(Type));
+			dxCommon_->GetSrvManager()->CreateUAVforStructuredBuffer(uavIndex_, resource_.Get(), num_, sizeof(Type));
 
 			//
 			barrier_->RegisterInitialState(resource_.Get(), D3D12_RESOURCE_STATE_COMMON);
@@ -82,7 +89,10 @@ public:
 
 	void UavDependence() { barrier_->UavDependence(resource_.Get()); };
 
-	Type* Data() const { return data_; };
+	Type* Data() const {
+		assert(!useUav_ && "UAVバッファにはCPUからアクセスできません");
+		return data_; 
+	};
 
 	Microsoft::WRL::ComPtr < ID3D12Resource> GetResource() const { return resource_; }
 
@@ -95,7 +105,7 @@ private:
 
 	//
 	bool useUav_ = false;					// UAVを使用するかどうか
-
+	int num_ = 1;
 
 	// SRVハンドル
 	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_;			// SRVハンドルGPU

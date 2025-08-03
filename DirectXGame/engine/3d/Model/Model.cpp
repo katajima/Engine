@@ -135,6 +135,9 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 		aiProcess_GenSmoothNormals |
 		aiProcess_CalcTangentSpace |
 		aiProcess_JoinIdenticalVertices);
+
+	assert(scene);
+
 	assert(scene->HasMeshes()); //メッシュがないのは対応しない
 
 	// ノード読み込み

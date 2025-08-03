@@ -70,7 +70,7 @@ void ParticleManager::Update()
 #ifdef _DEBUG
 	ImGui::Begin("Field");
 	for (auto& acc : fieldEffect_) {
-	//	acc->DebugImgui();
+		//	acc->DebugImgui();
 	}
 	ImGui::End();
 #endif // _DEBUG
@@ -79,9 +79,9 @@ void ParticleManager::Update()
 
 	std::for_each(std::execution::par, particleGroups.begin(), particleGroups.end(),
 		[&](auto& pair) {
+
 			ParticleGroup& group = pair.second;
 			group.instanceCount = 0;
-
 			// エミッター位置更新
 			group.emiter.worldtransform.Update();
 
@@ -104,7 +104,7 @@ void ParticleManager::Update()
 					ParticleFanction::Effect(group, particleIterator, deltaTime);
 
 					// パーティクルデータをGPUに送る
-					ParticleFanction::WorldDataForGPU(group,particleIterator,camera_);
+					ParticleFanction::WorldDataForGPU(group, particleIterator, camera_);
 
 					// 加算 
 					++group.instanceCount;
@@ -112,10 +112,8 @@ void ParticleManager::Update()
 
 				++particleIterator;
 			}
-
 			// マテリアルデータ
 			ParticleFanction::MaterialEffect(group);
-
 		});
 }
 
@@ -178,7 +176,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name],name, textureFilePath,kNumMaxInstance,dxCommon_,model->modelData.mesh[0].get(),rasteType,blendType);
+	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, model->modelData.mesh[0].get(), rasteType, blendType);
 	debugTimer_.EndTimer(); // デバッグ用タイマー終了
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
 }

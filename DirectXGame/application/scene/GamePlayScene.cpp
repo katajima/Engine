@@ -70,7 +70,6 @@ void GamePlayScene::Initialize()
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(caracterManager_->GetPlayer());
 	
-
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
@@ -82,8 +81,10 @@ void GamePlayScene::Initialize()
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 	
+
 	// UI
-	gameUI->Initialize(GetEntity2DManager());
+	gameUI = std::make_unique<GameUI>();
+	gameUI->Initialize(GetInput(), GetEntity2DManager(), GetGlobalVariables());
 	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
 	SetCamera(cameraManeger_->GetCamera());
@@ -114,15 +115,19 @@ void GamePlayScene::CheckAllCollisions()
 
 	// キャラクターセット
 	for (auto caracter : caracterManager_->GetCharacters()) {
-		if (caracter->GetHP() <= 0) continue;
-		collisionManager_->Register(caracter->GetColliderComponent());
+		if (caracter->GetColliderComponent()) {
+			if (caracter->GetHP() <= 0) continue;
+			collisionManager_->Register(caracter->GetColliderComponent());
+		}
 	}
 	
 	collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
 	
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
-		collisionManager_->Register(bullet->GetColliderComponent());
+		if (bullet->GetColliderComponent()) {
+			collisionManager_->Register(bullet->GetColliderComponent());
+		}
 	}
 
 	collisionManager_->CheckAll();
@@ -137,6 +142,11 @@ void GamePlayScene::CheckAllCollisions()
 // ImGui更新
 void GamePlayScene::UpdateImGui()
 {
+#ifdef _DEBUG
+
+	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+
+#endif // _DEBUG
 }
 
 // 更新処理
@@ -144,12 +154,10 @@ void GamePlayScene::Update()
 {
 	Camera::isShake_ = false;
 
-
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
 		iCommand_->Exec(*caracterManager_->GetPlayer());
 	}
-
 
 	
 	// 調整項目
@@ -158,7 +166,7 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	/*int countIndex = 0;
+	int countIndex = 0;
 	for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
 		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
@@ -170,7 +178,7 @@ void GamePlayScene::Update()
 			}
 		}
 		countIndex++;
-	}*/
+	}
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -195,7 +203,7 @@ void GamePlayScene::Update()
 		BehaviorPhase2Update();
 		break;
 	}
-	//tumeee_ += MyGame::GameTime();
+	tumeee_ += MyGame::GameTime();
 	if (tumeee_ >= 10.0f) {
 		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
 			// シーン切り替え
@@ -234,6 +242,8 @@ void GamePlayScene::Update()
 	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
 		cameraManeger_->SetUseCamera("universeCamera",0.0f);
 	}
+
+	gameUI->Update();
 	// カメラ管理の更新
 	cameraManeger_->Update();
 	// 弾マネージャ

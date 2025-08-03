@@ -44,6 +44,8 @@ public:
 
 	virtual void ChangeState(const std::string& name) = 0;
 
+	virtual std::string GetStateName() = 0;
+
 protected:
 	// スプライト初期化
 	void Initialize2D();

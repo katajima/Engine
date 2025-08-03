@@ -112,6 +112,6 @@ private:
 	float tumeee_ = 0.0f;
 private:
 	// ゲームUI
-	std::unique_ptr<GameUI> gameUI = std::make_unique<GameUI>();
+	std::unique_ptr<GameUI> gameUI;
 };
 

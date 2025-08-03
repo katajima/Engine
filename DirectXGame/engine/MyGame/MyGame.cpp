@@ -100,13 +100,7 @@ void MyGame::Update()
 
 
 #ifdef _DEBUG
-	ImGui::Begin("GameScene");
-	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
-	float height = static_cast<float> (WinApp::GetClientHeight() / 1.5f);
-
-	ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetPostEffectManager()->GetEndRenderTexture()->GetSRVGPUHandle().ptr);
-	ImGui::Image(imguiTexture, ImVec2(width, height));
-	ImGui::End();
+	dxCommon->GetPostEffectManager()->RenderImGui();
 #endif // _DEBUG
 	// ImGuiの受付終了
 	dxCommon->GetImGuiManager()->End();
@@ -131,6 +125,16 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/ground.png");
 	textureManager->LoadTexture("resources/Texture/renga.png");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
+
+	textureManager->LoadTexture("resources/Texture/icon/B.png");
+	textureManager->LoadTexture("resources/Texture/text/normalAttack.png");
+	textureManager->LoadTexture("resources/Texture/icon/RT.png");
+	textureManager->LoadTexture("resources/Texture/icon/RB.png");
+	textureManager->LoadTexture("resources/Texture/text/special.png");
+	textureManager->LoadTexture("resources/Texture/text/Hit.png");
+	textureManager->LoadTexture("resources/Texture/text/HP.png");
+	textureManager->LoadTexture("resources/Texture/text/SP.png");
+
 
 
 
@@ -279,16 +283,16 @@ void MyGame::CreateParticle()
 	
 
 
-	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 1000);
-	gpuParticleManager_->CreateEmitter("emitte_no1");
-	gpuParticleManager_->CreateEmitter("emitte2_no1");
-	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
-	gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
+	//gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 1000);
+	//gpuParticleManager_->CreateEmitter("emitte_no1");
+	//gpuParticleManager_->CreateEmitter("emitte2_no1");
+	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 
 
-	gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
- 
-	gpuParticleManager_->CreateField("AABBField");
+	//gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
+ //
+	//gpuParticleManager_->CreateField("AABBField");
 
 }
 
@@ -388,6 +392,7 @@ void MyGame::LoadModel()
 	/// </summary>
 
 	modelManager->LoadModel("enemy.obj", "enemyAll/enemy"); // 的
+	modelManager->LoadModel("enemy.gltf", "enemyAll/enemy2"); // 本体
 	modelManager->LoadModel("enemy2.obj", "enemyAll/enemy2"); // 本体
 	modelManager->LoadModel("enemyTire.obj", "enemyAll/tire"); // タイヤ
 	modelManager->LoadModel("enemyDuct.obj", "enemyAll/duct"); // ダクト

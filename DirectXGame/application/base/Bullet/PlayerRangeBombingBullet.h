@@ -6,6 +6,8 @@
 class Primitive;
 class PlayerRangeBombingBullet :public BaseBullet {
 public:
+	~PlayerRangeBombingBullet();
+
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) override;
 
@@ -64,7 +66,7 @@ private:
 
 private: //パーティクルエミッター
 	// ミサイルi移動中煙エミッター
-	std::unique_ptr<ParticleEmitter> moveSmokeEmitter_ = nullptr;
+	std::unique_ptr<ParticleEmitter> moveSmokeEmitter_;
 	std::unique_ptr<ParticleEmitter> moveSmokeEmitter2_ = nullptr;
 	
 	std::unique_ptr<ParticleEmitter> startSmokeEmitter_ = nullptr;

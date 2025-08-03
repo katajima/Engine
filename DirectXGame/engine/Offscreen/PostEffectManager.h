@@ -61,6 +61,12 @@ public:
 
 	void ClearPostEffectBlock();
 
+	void RenderImGui();
+
+	// 左上座標取得
+	Vector2 GetImageleftTopPos() const { return imageleftTopPos_; };
+	// 画面比率取得
+	Vector2 GetImageRatio() const { return imageRatio_; }
 private:
 
 	void PreEnd(RenderTexture* renderTexture);
@@ -75,6 +81,9 @@ private:
 	std::vector<PostEffectBlock*> effectBlocks_;
 	
 	uint32_t indexCount_ = 0;
+
+	Vector2 imageleftTopPos_;
+	Vector2 imageRatio_;
 
 private:
 	DXGIDevice* DXGIDevice_;

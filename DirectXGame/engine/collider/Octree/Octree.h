@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
 #include <iostream>
+
 #include "DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
-
+#include "DirectXGame/engine/Base/pch.h"
 // オクツリーのノード
 struct OctreeNode {
     AABB bounds;  // ノードの境界
@@ -29,14 +30,14 @@ class LineCommon;
 // オクツリーの管理クラス
 class Octree {
 public:
-    OctreeNode* root;
+    std::unique_ptr<OctreeNode> root;
     int maxDepth; // 分割の最大深度
     int divX, divY, divZ; // X, Y, Z方向の分割数
 
     // コンストラクタで最大深度と分割数を指定できるようにする
     Octree(const AABB& bounds, int maxDepth = 4, int divX = 2, int divY = 2, int divZ = 2)
         : maxDepth(maxDepth), divX(divX), divY(divY), divZ(divZ) {
-        root = new OctreeNode(bounds, 0);
+        root = std::make_unique<OctreeNode>(bounds, 0);
     }
 
 
@@ -44,12 +45,12 @@ public:
 
     // オクツリーに三角形を挿入
     void insert(const Triangle& triangle) {
-        insertTriangle(root, triangle);
+        insertTriangle(root.get(), triangle);
     }
 
     // オクツリーにカプセルを挿入
     void insert(const Capsule& capsule) {
-        insertCapsule(root, capsule);
+        insertCapsule(root.get(), capsule);
     }
 
     // Octree クラス内で呼び出し用の関数を追加
@@ -59,12 +60,12 @@ public:
     // オクツリー全体でカプセルと三角形の衝突判定を行う
     bool checkCollisions(const Capsule& capsule) {
         // ルートノードから衝突判定を開始
-        return checkCollisionWithNode(capsule, root);
+        return checkCollisionWithNode(capsule, root.get());
     }
 
     // query: 指定AABBと交差する全てのCollider（ここではCapsuleとTriangle）をresultsに追加する
     void query(const AABB& area, std::vector<Collider*>& results) {
-        queryNode(root, area, results);
+        queryNode(root.get(), area, results);
     }
 private:
     void drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));

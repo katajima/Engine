@@ -115,6 +115,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\UI\BaseSprite.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\UI\UIElement.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.cpp" />
@@ -154,6 +156,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionFancion.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
+    <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Command\Command.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.cpp" />
@@ -255,6 +258,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="cpp.hint" />
     <None Include="resources\shaders\Offscreen\Fullscreen.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -624,6 +628,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Spawn\BasespawnPoint.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\UI\BaseSprite.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\UI\UIElement.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Object\BaseObject.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacter.h" />
@@ -678,10 +684,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
+    <ClInclude Include="DirectXGame\engine\Base\pch.h" />
     <ClInclude Include="DirectXGame\engine\Base\Timer.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h" />
     <ClInclude Include="DirectXGame\application\base\Vision\VisionComponent.h" />
+    <ClInclude Include="DirectXGame\engine\Color\ColorComponent.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />

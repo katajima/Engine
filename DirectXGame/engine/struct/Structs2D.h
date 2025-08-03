@@ -20,6 +20,11 @@ struct Box {
 		return (min_.x <= other.max_.x && max_.x >= other.min_.x &&
 			min_.y <= other.max_.y && max_.y >= other.min_.y);
 	}
+	bool intersects(const Vector2& other) const {
+		return (min_.x <= other.x && max_.x >= other.x &&
+			min_.y <= other.y && max_.y >= other.y);
+	}
+
 };
 
 

@@ -26,10 +26,10 @@ AttackICommand* AttackInputHander::HandleInput()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			return light;
+			return light.get();
 		}
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			return heavy;
+			return heavy.get();
 		}
 	}
 	return nullptr;
@@ -45,12 +45,10 @@ void AttackInputHander::AssignAttack()
 
 void AttackInputHander::AssignAttackLight()
 {
-	AttackICommand* command = new AttackLight();
-	this->light = command;
+	this->light = std::make_unique<AttackLight>();
 }
 
 void AttackInputHander::AssignAttackHeavy()
 {
-	AttackICommand* command = new AttackHeavy();
-	this->heavy = command;
+	this->heavy = std::make_unique<AttackHeavy>();
 }

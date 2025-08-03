@@ -94,7 +94,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	data.damage = 10;
 	data.knockbackData.power = 30;
 	data.knockbackData.yPower = 30;
-	data.movementSpeedMultiplier = 1.0f;
+	data.movementSpeedMultiplier = 10.0f;
 	data.mpCost = 0.0f;
 	data.staminaCost = 1.0f;
 
@@ -102,8 +102,12 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	
 	attack1  = std::make_shared<ComboNodeState>("Attack1", data);
 	data.damage = 11;
+	data.movementSpeedMultiplier = 10.0f;
 	attack2 = std::make_shared<ComboNodeState>("Attack2", data);
 	data.damage = 12;
+	data.knockbackData.power = 60.0f;
+	data.movementSpeedMultiplier = 150.15f;
+	data.moveTime = 0.1f;
 	attack3 = std::make_shared<ComboNodeState>("Attack3", data);
 	//data.damage = 30;
 	//heavy1   = std::make_shared<ComboNodeState>("Heavy1", data);

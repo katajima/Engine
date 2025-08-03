@@ -25,6 +25,7 @@ public:
 	float staminaCost = 0;					// スタミナ消費量
 	float mpCost = 0;                       // MP消費
 	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率
+	float moveTime = 1.0f;					// コンボ時に移動する時間
 	KnockbackData knockbackData{};			// ノックバックデータ
 };
 

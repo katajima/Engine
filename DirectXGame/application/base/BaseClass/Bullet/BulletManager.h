@@ -17,6 +17,8 @@ class Entity2DManager;
 
 class BulletManager {
 public:
+	~BulletManager();
+
 	enum class BulletType
 	{
 		kPlayerMissile,	// プレイヤーミサイル

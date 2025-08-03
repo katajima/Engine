@@ -44,6 +44,7 @@ public:
 		// 力のリセット
 		force = { 0, 0, 0 };
 		torque = { 0, 0, 0 };
+		transform.Update();
 	}
 
 

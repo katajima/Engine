@@ -501,6 +501,15 @@
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\UI\UIElement.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\UI\BaseSprite.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -521,6 +530,7 @@
     <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli" />
     <None Include="resources\shaders\Particle\GPU\random.hlsli" />
     <None Include="resources\shaders\Particle\GPU\Collider.hlsli" />
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl" />
@@ -1174,6 +1184,18 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\UI\UIElement.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\UI\BaseSprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Color\ColorComponent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\pch.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

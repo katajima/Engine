@@ -96,10 +96,11 @@ void EnemyStateDie::Update() {
 		timer_ = 0.0f;
 		if (!enemy_->GetAlive()) {
 			enemy_->Delete();
+			enemy_->GetObject3D()->IsDelete();
 		}
 	}
 	else if (timer_ <= dieTimer_ / 2.0f) {
-		enemy_->GetObject3D()->IsDelete();
+		enemy_->GetObject3D()->SetIsDraw(false);
 	}
 	else {
 		enemy_->GetObject3D()->GetRigidBodyComponent()->SetIsGravity(false);

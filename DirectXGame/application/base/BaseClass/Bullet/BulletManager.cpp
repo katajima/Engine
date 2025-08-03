@@ -3,6 +3,15 @@
 #include "DirectXGame/application/base/Bullet/PlayerMissile.h"
 #include "DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.h"
 
+BulletManager::~BulletManager()
+{
+	for (auto& bullet : bullets_) {
+		//bullet.release();
+		bullet.reset();
+	}
+	bullets_.clear();
+}
+
 void BulletManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
@@ -53,13 +62,12 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	{
 	case BulletManager::BulletType::kPlayerMissile:
 		bullet = std::make_unique<PlayerMissile>();
-		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
-		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	default:
 		break;

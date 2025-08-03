@@ -23,7 +23,7 @@
             },
             "file_name": "field",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,
@@ -455,8 +455,8 @@
                 "blender_light_type": "POINT",
                 "color": [
                     1.0,
-                    0.17216692864894867,
-                    0.3427371382713318
+                    1.0,
+                    1.0
                 ],
                 "energy": 900000.0,
                 "shadow_soft_size": 8.170000076293945,
@@ -549,6 +549,119 @@
                 ]
             },
             "file_name": "trainBridge"
+        },
+        {
+            "type": "LIGHT",
+            "name": "サン",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    676.5370483398438
+                ],
+                "rotation": [
+                    28.880416870117188,
+                    16.595191955566406,
+                    -14.889121055603027
+                ],
+                "scaling": [
+                    0.9999999403953552,
+                    1.0,
+                    1.0
+                ]
+            },
+            "blender_light": {
+                "blender_light_type": "SUN",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "energy": 1.0,
+                "shadow_soft_size": 0.125,
+                "use_shadow": true,
+                "angle": 0.009180432185530663
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.007",
+            "transform": {
+                "translation": [
+                    3600.337890625,
+                    3918.31884765625,
+                    22.857357025146484
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1026.27099609375,
+                    1026.27099609375,
+                    5.216921806335449
+                ]
+            },
+            "file_name": "hasira",
+            "collider": {
+                "collider_disabled": 0,
+                "collider": 0,
+                "collider_center": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "collider_size": [
+                    4.0,
+                    4.0,
+                    20.0
+                ]
+            }
+        },
+        {
+            "type": "CAMERA",
+            "name": "カメラ.003",
+            "transform": {
+                "translation": [
+                    -110.88941955566406,
+                    1123.2471923828125,
+                    386.8148193359375
+                ],
+                "rotation": [
+                    74.99999237060547,
+                    4.602518117735599e-07,
+                    -172.1999969482422
+                ],
+                "scaling": [
+                    400.0,
+                    400.0000305175781,
+                    400.0000305175781
+                ]
+            },
+            "file_name": "Fixed4"
+        },
+        {
+            "type": "CAMERA",
+            "name": "カメラ.004",
+            "transform": {
+                "translation": [
+                    -170.20046997070312,
+                    7622.16845703125,
+                    944.9594116210938
+                ],
+                "rotation": [
+                    80.49999237060547,
+                    2.184121752814988e-13,
+                    179.99998474121094
+                ],
+                "scaling": [
+                    1503.591064453125,
+                    1503.5911865234375,
+                    1503.591064453125
+                ]
+            },
+            "file_name": "Fixed5"
         }
     ]
 }

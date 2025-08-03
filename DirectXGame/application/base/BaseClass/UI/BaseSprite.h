@@ -1,0 +1,110 @@
+#pragma once
+#include"DirectXGame/engine/2d/Sprite.h"
+#include"DirectXGame/engine/Color/ColorComponent.h"
+
+
+
+enum class SpriteSize {
+	Top,
+	Down,
+	Right,
+	Left,
+};
+
+class Entity2DManager;
+class BaseSprite {
+public:
+	void Init(Entity2DManager* entity2DManager, std::string name, std::string texturName);
+
+	void Update() {
+
+		if (useColl) {
+			BoxUpdate();
+		}
+		sprite_->Update();
+	};
+	void Draw() {
+		if (sprite_->GetActive()) {
+			sprite_->Draw();
+		}
+	}
+
+
+	Box GetBox() const { return box; }
+	Sprite* GetSprite() { return sprite_.get(); }
+	Vector2 GetSize() { return sprite_->GetSize(); }
+	Vector2 GetAnchorPoint() { return sprite_->GetAnchorPoint(); }
+	ColorComponent* GetColorComponent() { return colorComponent_.get(); }
+
+
+
+	void SetSize(const Vector2& size) { sprite_->SetSize(size); }
+	void SetAnchorPoint(const Vector2& anchor) { sprite_->SetAnchorPoint(anchor); }
+	void SetTextureName(const std::string& name) { sprite_->SetTexture(name); };
+	void SetColor(Color color) { sprite_->SetColor(color); }
+	void SetUseColl(bool is) { useColl = is; }
+
+	void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) { 
+		leftTopPos_ = leftTopPos;
+		ratio_ = ratio;
+	};
+	// 比率
+	Vector2 GetRatio() const { return ratio_; }
+
+	Vector2 GetHalfSise(SpriteSize type){
+		Vector2 size = sprite_->GetSize();
+		Vector2 anchor = sprite_->GetAnchorPoint();
+		Vector2 result{};
+
+		switch (type)
+		{
+		case SpriteSize::Top:
+			result = { 0.0f, size.y * anchor.y };
+			break;
+		case SpriteSize::Down:
+			result = { 0.0f, size.y * (1.0f - anchor.y) };
+			break;
+		case SpriteSize::Left:
+			result = { size.x * anchor.x, 0.0f };
+			break;
+		case SpriteSize::Right:
+			result = { size.x * (1.0f - anchor.x), 0.0f };
+			break;
+		default:
+			result = { 0.0f, 0.0f };
+			break;
+		}
+
+		return result;
+	}
+
+private:
+	void BoxUpdate() {
+		Vector2 position = sprite_->GetPosition(); 
+		Vector2 size = sprite_->GetSize();
+		Vector2 anchor = sprite_->GetAnchorPoint();
+
+		// スプライトのローカルでの AABB
+		Vector2 localMin = position - size * anchor;
+		Vector2 localMax = position + size * (Vector2(1.0f, 1.0f) - anchor);
+
+
+		box.min_ = localMin;
+		box.max_ = localMax;
+		// ImGuiImage 上でのワールド座標に変換（左上位置 + 比率）
+#ifdef _DEBUG
+		box.min_ = leftTopPos_ + localMin * ratio_;
+		box.max_ = leftTopPos_ + localMax * ratio_;
+#endif // _DEBUG
+	}
+private:
+	std::unique_ptr<Sprite> sprite_;
+	std::unique_ptr <ColorComponent> colorComponent_ = nullptr;
+	Box box;
+	bool useColl = false;
+
+	Vector2 leftTopPos_{};	// 画面左上位置(ImGuiImage)
+	Vector2 ratio_{};		// 画面サイズとImGuiImageにした比率
+
+};
+

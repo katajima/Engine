@@ -23,13 +23,12 @@ public:
 
 		// リソースを書き込むためのアドレス取得
 		resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
-
+		std::memcpy(Data(), index.data(), sizeof(Type) * num);
+		resource_->Unmap(0, nullptr);
 		// リソースの先頭のアドレスを作成する
 		bufferView.BufferLocation = resource_->GetGPUVirtualAddress();
 		bufferView.SizeInBytes = UINT(sizeof(Type) * index.size());
 		bufferView.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマット
-
-		std::memcpy(Data(), index.data(), sizeof(Type) * num);
 	}
 
 

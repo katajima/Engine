@@ -27,7 +27,7 @@ void Octree::drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset
 void Octree::draw(LineCommon& lineDrawer, Vector3 offset)
 {
 
-	drawOctree(root, lineDrawer, offset);
+	drawOctree(root.get(), lineDrawer, offset);
 }
 
 
@@ -41,7 +41,7 @@ void Octree::draw(LineCommon& lineDrawer, Vector3 offset)
 /// <param name="mesh"></param>
 void Octree::insert(const BaseMesh& mesh) {
 	for (auto& triangle : mesh.triangle) {
-		insertTriangle(root, triangle);
+		insertTriangle(root.get(), triangle);
 	}
 }
 

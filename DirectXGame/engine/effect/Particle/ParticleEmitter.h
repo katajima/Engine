@@ -14,6 +14,10 @@ class LineCommon;
 class ParticleEmitter
 {
 public:
+	~ParticleEmitter() {
+
+	}
+
 	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, ParticleData::SpawnType spawnType = ParticleData::SpawnType::kAABB);
 
 	void Update();

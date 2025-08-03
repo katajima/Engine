@@ -21,7 +21,7 @@ public:
 
 			object.GetWorldTransform().translate_ += GetVelocity() * deltaTime;
 			if (Velocity().Length() != 0.0f) {
-				direction_ = Velocity();
+				direction_ = Velocity().Normalize();
 			}
 		}
 	};
@@ -33,15 +33,71 @@ public:
 			world.GetWorldTransform().translate_.y = groundHeight_;
 			rigid.Velocity().y = 0.0f;
 			rigid.SetIsGravity(false);
+
+			jumpCount_ = jumpMaxCount_;
 		}
 		else {
 			rigid.SetIsGravity(true);
 		}
 	}
 
+	void Move(TransformComponent& world,Input* input) {
+		Vector3 velo = GetVelocity();
+
+
+		velo.x = input->GetGamePadLeftStick().x;
+		velo.z = input->GetGamePadLeftStick().y;
+
+
+		if (velo.x != 0.0f || velo.z != 0.0f) {
+
+
+			// 入力方向を正規化
+			velo = Normalize(velo);
+			velo = Multiply(velo, speed_);
+
+
+			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
+			if (camera_) {
+				Matrix4x4 cameraWorldMatrix = Inverse(camera_->GetViewMatrix());
+
+				// カメラの向きに基づいて移動方向をワールド座標系に変換
+				Vector3 worldDirection = {
+					velo.x * cameraWorldMatrix.m[0][0] + velo.z * cameraWorldMatrix.m[2][0],
+					0.0f,
+					velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
+				};
+			
+				velo = Multiply(Normalize(worldDirection), speed_);
+			}
+			
+
+			//// 移動ベクトルをカメラの角度だけ回転する
+			//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
+			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
+			//
+			if (velo.Length() != 0) {
+				world.GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
+			}
+		}
+		Velocity().x = velo.x;
+		Velocity().z = velo.z;
+	}
+	void SetCamera(Camera* camera) { camera_ = camera; }
+	void SetSpeed(float speed) { speed_ = speed; };
+
+	void DecrementJumpCount() { jumpCount_--; }
+	//	ジャンプ出来るか
+	bool GetIsJump() const { return jumpCount_ > 0; }
+
 private:
-	float groundHeight_ = 3.0f;		// 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
+	Camera* camera_ = nullptr;
+	float groundHeight_ = -3.0f;		// 地面の高さ(デフォルトは0.0f、地面の高さを指定する場合に使用)
 	Vector3 velocity_ = {};			// オブジェクトの速度
 	Vector3 acceleration_ = {};		// オブジェクトの加速度
 	Vector3 direction_{0,0.,-1.0f};	// 方向
+	float speed_ = 1.0f;
+	int jumpMaxCount_ = 1;				// ジャンプ回数
+	int jumpCount_ = 0;
+
 };

@@ -13,12 +13,6 @@ void BaseCharacterManager::Initialize(Input* input, Entity3DManager* entity3DMan
 
 void BaseCharacterManager::Update()
 {
-	for (auto& character : character_)
-	{
-		character->Update();
-
-	}
-
 	// 死亡したキャラクター(敵)を削除
 	character_.erase(
 		std::remove_if(character_.begin(), character_.end(),
@@ -28,6 +22,13 @@ void BaseCharacterManager::Update()
 				return !enemy->GetAlive() && enemy->GetDelete();
 			}),
 		character_.end());
+
+	for (auto& character : character_)
+	{
+		if (character) {
+			character->Update();
+		}
+	}
 }
 
 
@@ -35,8 +36,12 @@ void BaseCharacterManager::Draw2D()
 {
 	for (auto& character : character_)
 	{
-		if (character->GetAlive()) {
-			character->Draw2D();
+		if (character->GetObject3D()) {
+			if (character->GetCharacterStateComponent().IsDead()) {
+				if (character->GetAlive()) {
+					character->Draw2D();
+				}
+			}
 		}
 	}
 }

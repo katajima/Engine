@@ -102,18 +102,18 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;
-		//if (enemy->GetBasicBehavior() == BasicBehavior::kAttack) {
-		//	float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+		if (enemy->GetStateName() == "Attack") {
+			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
-		//	if (GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
-		//		return; // クールタイム中のため無視
-		//	}
+			if (GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
+				return; // クールタイム中のため無視
+			}
 
-		//	GetContactRecord().AddHistory(otherId, nowTime);
+			GetContactRecord().AddHistory(otherId, nowTime);
 
-		//	AddDamage(10.0f);
-		//	followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
-		//}
+			AddDamage(10.0f);
+			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
+		}
 		};
 
 	// スペシャル攻撃
@@ -131,14 +131,14 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	weapon_->SetCharacter(this);
 	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
 	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { DegreesToRadians(-90),0.0f,0.0f };
-
+	weapon_->GetHitData().hitTime.maxT = 2.0f;
 
 	attackInputHander_ = std::make_unique<AttackInputHander>();
 	attackInputHander_->AssignAttack();
 
 	// UI
 	ui_ = std::make_unique<PlayerUI>();
-	ui_->Initialize(entity2DManager);
+	ui_->Initialize(input_, entity2DManager_, globalVariables_);
 
 	ChangeState("Move");
 }
@@ -213,6 +213,8 @@ void Player::Update()
 	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(objectBase_->model->modelData.skeleton, "rightHand", objectBase_->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
+	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()-> GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+	ui_->Update();
 }
 
 #pragma region Draw
@@ -240,97 +242,22 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-
-
-	Vector3 velo = GetVelocity();
-
-
-	velo.x = input_->GetGamePadLeftStick().x;
-	velo.z = input_->GetGamePadLeftStick().y;
-
-
-	if (velo.x != 0.0f || velo.z != 0.0f) {
-
-
-		// 入力方向を正規化
-		velo = Normalize(velo);
-		velo = Multiply(velo, Parameters().speed);
-
-
-		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-		Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
-
-		// カメラの向きに基づいて移動方向をワールド座標系に変換
-		Vector3 worldDirection = {
-			velo.x * cameraWorldMatrix.m[0][0] + velo.z * cameraWorldMatrix.m[2][0],
-			0.0f,
-			velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
-		};
-
-		velo = Multiply(Normalize(worldDirection), Parameters().speed);
-
-		//// 移動ベクトルをカメラの角度だけ回転する
-		//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
-		//velocity_ = TransformNormal(velocity_, rotateMatrixY);
-		//
-		if (velo.Length() != 0) {
-			objectBase_->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
-		}
-
+	if (stateName_ == "Move") {
+		moveComponent_->SetSpeed(Parameters().speed);
+		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
+		moveComponent_->Move(*objectBase_->GetTransformComponent(), input_);
 	}
-
-
-	//{
-
-
-	//	if (input_->IsPushKey(DIK_W)) {
-	//		Velocity().z += 0.3f;
-	//	}
-	//	if (input_->IsPushKey(DIK_S)) {
-	//		Velocity().z -= 0.3f;
-
-	//	}
-	//	if (input_->IsPushKey(DIK_A)) {
-	//		Velocity().x -= 0.3f;
-
-	//	}
-	//	if (input_->IsPushKey(DIK_D)) {
-	//		Velocity().x += 0.3f;
-	//	}
-
-
-	//	if (Velocity().x != 0.0f || Velocity().z != 0.0f) {
-	//		// 入力方向を正規化
-	//		Velocity() = Normalize(Velocity());
-	//		Situations().isMoving = true;
-
-	//		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-	//		Matrix4x4 cameraWorldMatrix = Inverse(followCamera_->GetUniqueCamera()->GetViewMatrix());
-
-	//		// カメラの向きに基づいて移動方向をワールド座標系に変換
-	//		Vector3 worldDirection = {
-	//			GetVelocity().x * cameraWorldMatrix.m[0][0] + GetVelocity().z * cameraWorldMatrix.m[2][0],
-	//			0.0f,
-	//			GetVelocity().x * cameraWorldMatrix.m[0][2] + GetVelocity().z * cameraWorldMatrix.m[2][2]
-	//		};
-
-	//		Velocity() = Multiply(Normalize(worldDirection), Parameters().speed);
-	//	}
-	//}
-
-	Velocity().x = velo.x;
-	Velocity().z = velo.z;
-
-
 }
 
 void Player::Jump()
 {
 
 
-	if (characterStateComponent_.IsJumping()) return; // ジャンプ中は無効化
+	if (characterStateComponent_.IsJumping() || !moveComponent_->GetIsJump()) return; // ジャンプ中は無効化
 	if (GetAlive()) {
+		
 		characterStateComponent_.ChangeState(CharacterState::Jump);
+		moveComponent_->DecrementJumpCount();
 		objectBase_->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
 		objectBase_->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
 	}
@@ -340,11 +267,7 @@ void Player::Jump()
 void Player::Attack()
 {
 	if (stateName_ == "Attack") {
-
-
 		weapon_->InputCombo(AttackInput::Light);
-
-		//weapon_->GetComboStateMachine()->HandleInput(AttackInput::Light);
 	}
 	else if (stateName_ == "Move") {
 		ChangeState("Attack");

@@ -23,20 +23,17 @@ void AttackCommand::Exec(BaseCharacter& character)
 
 void InputHander::AssignMoveCommandPad()
 {
-	ICommand* command = new MoveCommand();
-	this->movePad = command;
+	this->movePad = std::make_unique<MoveCommand>();
 }
 
 void InputHander::AssignJampCommandPad()
 {
-	ICommand* command = new JampCommand();
-	this->jampPad = command;
+	this->jampPad = std::make_unique<JampCommand>();
 }
 
 void InputHander::AssignAttackCommandPad()
 {
-	ICommand* command = new AttackCommand();
-	this->attackPad = command;
+	this->attackPad = std::make_unique<AttackCommand>();
 }
 
 
@@ -45,13 +42,13 @@ ICommand* InputHander::HandleInput()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
-			return jampPad;
+			return jampPad.get();
 		}
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			return attackPad;
+			return attackPad.get();
 		}
 		if (input_->GetGamePadLeftStick().Length() != 0) {
-			return movePad;
+			return movePad.get();
 		}
 		
 	}

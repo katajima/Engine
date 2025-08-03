@@ -18,7 +18,7 @@ void LoadLevelData::Initialize(Entity3DManager* entity3DManager, ModelManager* m
 	// 凍結してフルパスを得る 
 	nlohmann::json deserialized = LoadDataFanc::FileData(kDefaultBaseDirectory + kFileName + kExtension);
 
-	levelData_ = new LevelData();
+	levelData_ = std::make_unique<LevelData>();
 	// "objects"の全オブジェクトを走査 
 	for (nlohmann::json& object : deserialized["objects"]) {
 		// 有効無効フラグ
@@ -31,20 +31,20 @@ void LoadLevelData::Initialize(Entity3DManager* entity3DManager, ModelManager* m
 		}
 		
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(オブジェクト)
-		LoadDataFanc::ModelTransfom(object, levelData_);
+		LoadDataFanc::ModelTransfom(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(出現位置)
-		LoadDataFanc::SpawwnPoint(object, levelData_);
+		LoadDataFanc::SpawwnPoint(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(カメラ位置)
-		LoadDataFanc::CameraTransform(object, levelData_);
+		LoadDataFanc::CameraTransform(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(ライト位置)
-		LoadDataFanc::LightTransform(object, levelData_);
+		LoadDataFanc::LightTransform(object, levelData_.get());
 	}
 	// レベルデータよりオブジェクトを生成する
-	CreateObject3d(levelData_);
+	CreateObject3d(levelData_.get());
 	// レベルデータよりカメラを生成する
-	CreateCamera(levelData_);
+	CreateCamera(levelData_.get());
 	// レベルデータよりライトを生成する
-	CreateLight(levelData_);
+	CreateLight(levelData_.get());
 }
 
 void LoadLevelData::ReLoad()
@@ -65,20 +65,20 @@ void LoadLevelData::ReLoad()
 		}
 
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(オブジェクト)
-		LoadDataFanc::ModelTransfom(object, levelData_);
+		LoadDataFanc::ModelTransfom(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(出現位置)
-		LoadDataFanc::SpawwnPoint(object, levelData_);
+		LoadDataFanc::SpawwnPoint(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(カメラ位置)
-		LoadDataFanc::CameraTransform(object, levelData_);
+		LoadDataFanc::CameraTransform(object, levelData_.get());
 		// JSONファイルからトランスフォーム情報をレベルデータに書き出す(ライト位置)
-		LoadDataFanc::LightTransform(object, levelData_);
+		LoadDataFanc::LightTransform(object, levelData_.get());
 	}
 	// レベルデータよりオブジェクトを生成する
-	CreateObject3d(levelData_);
+	CreateObject3d(levelData_.get());
 	// レベルデータよりカメラを生成する
-	CreateCamera(levelData_);
+	CreateCamera(levelData_.get());
 	// レベルデータよりライトを生成する
-	CreateLight(levelData_);
+	CreateLight(levelData_.get());
 
 
 }
@@ -180,6 +180,13 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 
 void LoadLevelData::CreateLight(LevelData* levelData)
 {
+	for (auto& directionalData : levelData->directionalDatas) {
+		std::shared_ptr<DirectionalLight> directional = std::make_shared<DirectionalLight>();
+		directionalData.intensity = 0.3f;
+		directional->directional = directionalData;
+
+		lights_.push_back(directional);
+	}
 	for (auto& pointData : levelData->pointDatas) {
 		std::shared_ptr<PointLight> point = std::make_shared<PointLight>();
 		point->point = pointData;
@@ -192,12 +199,7 @@ void LoadLevelData::CreateLight(LevelData* levelData)
 		
 		lights_.push_back(spot);
 	}
-	for (auto& directionalData : levelData->directionalDatas) {
-		std::shared_ptr<DirectionalLight> directional = std::make_shared<DirectionalLight>();
-		directional->directional = directionalData;
-		
-		lights_.push_back(directional);
-	}
+	
 
 	for (auto& light : lights_) {
 		entity3DManager_->GetLightManager()->AddLight(light);

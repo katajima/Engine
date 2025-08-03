@@ -1,5 +1,5 @@
 #pragma once
-
+#include<memory>
 
 enum class AttackInput {
 	Light,          // 弱攻撃
@@ -51,7 +51,7 @@ private:
 
 	Input* input_;
 
-	AttackICommand* light;
-	AttackICommand* heavy;
+	std::unique_ptr<AttackICommand> light = nullptr;
+	std::unique_ptr<AttackICommand> heavy = nullptr;
 };
 

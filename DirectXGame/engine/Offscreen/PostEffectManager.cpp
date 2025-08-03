@@ -146,6 +146,8 @@ void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 
 void PostEffectManager::Update(Camera* camera)
 {
+	imageRatio_ = { 1.0f,1.0f };
+	imageleftTopPos_ = { 0.0f,0.0f };
 	renderingCommon_->SetCamera(camera);
 	renderTexture_->SetCamera(camera);
 	renderTexture_->Update();
@@ -176,6 +178,24 @@ void PostEffectManager::AddEffectBlocks(std::vector<PostEffectBlock*> effectBloc
 void PostEffectManager::ClearPostEffectBlock()
 {
 	effectBlocks_.clear();
+}
+
+void PostEffectManager::RenderImGui()
+{
+	ImGui::Begin("GameScene");
+	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
+	float height = static_cast<float> (WinApp::GetClientHeight() / 1.5f);
+
+	ImTextureID imguiTexture = (ImTextureID)(GetEndRenderTexture()->GetSRVGPUHandle().ptr);
+	ImGui::Image(imguiTexture, ImVec2(width, height));
+	ImVec2 imagePos = ImGui::GetCursorScreenPos();
+	imagePos.y -= height;
+
+	ImGui::InputFloat2("GetCursorScreenPos", &imagePos.x);
+	
+	imageleftTopPos_ = Vector2(imagePos.x, imagePos.y);
+	imageRatio_ = Vector2{ width / WinApp::GetClientWidth(),height / WinApp::GetClientHeight() };
+	ImGui::End();
 }
 
 void PostEffectManager::PreEnd(RenderTexture* renderTexture)

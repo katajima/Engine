@@ -1,7 +1,7 @@
 #pragma once
 #include <windows.h>
 #include<cstdint>
-
+#include "DirectXGame/engine/Base/pch.h"
 
 
 // WindowsAPI

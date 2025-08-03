@@ -47,11 +47,11 @@ public:
 
 public:
 	// フォローカメラの設定
-	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
+	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera;}
 
 
 
-	PlayerUI* GetPlayerUI() { return ui_.get(); }
+	virtual PlayerUI* GetPlayerUI() = 0;
 
 	// ヒット数の取得
 	int GetHitCount() const { return weapon_->GetHitData().hitCount; }
@@ -95,7 +95,7 @@ private:
 		stateFactoryMap_[name] = factory;
 	}
 protected:
-	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
+	
 	FollowCamera* followCamera_;			// フォローカメラ
 
 	bool isCreativeMode = false;			// クリエイティブモードかどうか

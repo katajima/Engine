@@ -31,10 +31,11 @@ public:
 
 public:
 	// レベルデータ取得
-	LevelData* GetLevelData() { return levelData_; };
+	LevelData* GetLevelData() { return levelData_.get(); };
 	// オブジェクト取得
 	std::vector<Object3d*>GetObjects() { return objects_; }
 	// 
+	std::vector< std::shared_ptr<Lights>>GetLights() { return lights_; }
 
 
 private:
@@ -62,6 +63,6 @@ private:
 	std::string kDefaultBaseDirectory = "resources/";
 	std::string extensionName;
 	// レベルデータ格納用インスタンスを生成 
-	LevelData* levelData_ = nullptr;
+	std::unique_ptr<LevelData> levelData_ = nullptr;
 };
 

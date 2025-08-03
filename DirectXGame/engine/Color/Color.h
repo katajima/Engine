@@ -2,10 +2,9 @@
 #include <iostream>
 #include <unordered_map>
 
+
 struct Color {
     float r, g, b, a;
-
-    // デフォルトコンストラクタ（白に初期化）
 };
 
 // 色の名前を列挙型で定義

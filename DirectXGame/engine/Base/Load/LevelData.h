@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <string>
 #include "DirectXGame/engine/Light/Lights.h"
-
+#include "DirectXGame/engine/Base/pch.h"
 class LevelData
 {
 public:

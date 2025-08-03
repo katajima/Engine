@@ -50,12 +50,16 @@ public:
 	void ChangeState(const std::string& name) override{
 		auto it = stateFactoryMap_.find(name);
 		if (it != stateFactoryMap_.end()) {
+			stateName_ = name;
 			ChangeState(it->second(this)); // unique_ptr<BasePlayerState>
 		}
 		else {
 			assert(true);
 		}
 	}
+
+	std::string GetStateName() override { return stateName_; }
+
 private:
 	
 	void InitParticle();
@@ -76,6 +80,7 @@ private:
 	}
 
 private:
+	std::string stateName_ = "";
 	std::unique_ptr<BaseEnemyState> state_;// ステート
 	std::unordered_map<std::string, EnemyStateFactory> stateFactoryMap_;	// 
 private:

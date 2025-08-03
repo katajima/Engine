@@ -1,32 +1,33 @@
 #pragma once
-#include"DirectXGame/engine/2d/Sprite.h"
+#include "DirectXGame/application/base/BaseClass/UI/BaseUI.h"
 
 class Entity2DManager;
-class PlayerUI {
+class PlayerUI : public BaseUI{
 public:
-	void Initialize(Entity2DManager* entity2DManager);
+	void Initialize(Input* input, Entity2DManager* entity2DManager, GlobalVariables* globalVariables) override;
 
-	void Update();
+	void Update() override;
 
-	void Draw();
 
+	void Draw() override;
+
+
+
+
+public:
 	void SetHPBerSize(float size) { sizeHP_ = size; }
 	void SetSpecialGaugeSize(float size) { sizeSpecialGauge_ = size; }
-
 	void SetIsTextmax(bool is) { isTextMax_ = is; }
 	void SetIsTextRB(bool is) { isTextRB_ = is; }
-
-
 private:
-	std::unique_ptr<Sprite> HpBer_;
-	std::unique_ptr<Sprite> SpecailBer_;
+
+	float srideM_ = 0;
+
 	std::unique_ptr<Sprite> textMax_;
 	std::unique_ptr<Sprite> textRB_;
 	bool isTextRB_ = false;
 	bool isTextMax_ = false;
 	float sizeHP_ = 0;
 	float sizeSpecialGauge_ = 0;
-
-
 };
 

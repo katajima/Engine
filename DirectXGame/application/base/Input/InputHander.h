@@ -1,5 +1,5 @@
 #pragma once
-
+#include<memory>
 
 
 class BaseCharacter;
@@ -44,8 +44,8 @@ public:
 private:
 	Input* input_;
 
-	ICommand* movePad;
-	ICommand* jampPad;
-	ICommand* attackPad;
+	std::unique_ptr<ICommand> movePad;
+	std::unique_ptr<ICommand> jampPad;
+	std::unique_ptr<ICommand> attackPad;
 
 };

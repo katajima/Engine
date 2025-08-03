@@ -24,12 +24,13 @@ public:
 		// リソースを書き込むためのアドレス取得
 		resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
+		std::memcpy(Data(), vertex.data(), sizeof(Type) * num);
+		resource_->Unmap(0, nullptr);  // 🔧 安全なタイミングでアンマップ
+
 		// リソースの先頭のアドレスを作成する
 		bufferView.BufferLocation = resource_->GetGPUVirtualAddress();
 		bufferView.SizeInBytes = UINT(sizeof(Type) * num);
 		bufferView.StrideInBytes = sizeof(Type);
-
-		std::memcpy(Data(), vertex.data(), sizeof(Type) * num);
 	}
 
 

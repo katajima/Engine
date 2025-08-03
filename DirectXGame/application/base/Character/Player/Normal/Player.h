@@ -37,12 +37,14 @@ public:
 
 	void Attack() override;
 
+	PlayerUI* GetPlayerUI()override { return ui_.get(); };
+
 private: 
 	// 調整項目の適用
 	void ApplyGlobalVariables();
 
 	WorldTransform worldCollider_;
-
+	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 public:
 	void LockOn(const std::vector<BaseEnemy*>& enemys);
 };

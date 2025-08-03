@@ -8,6 +8,7 @@
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
 
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
+#include "DirectXGame/engine/Base/pch.h"
 
 class BasePlayer;
 class BaseEnemy;
@@ -15,6 +16,10 @@ class Entity3DManager;
 class Entity2DManager;
 class BaseBullet{
 public:
+	// デフォルトコンストラクタ
+	BaseBullet() = default;
+	virtual ~BaseBullet() = 0;
+	
 	struct Parameters {
 		float HP;			// HP
 		float MaxHP;		// HPMAX
@@ -22,10 +27,7 @@ public:
 		float damege;		// ダメージ
 
 	};
-
-	// デフォルトコンストラクタ
-	BaseBullet();
-	~BaseBullet();
+	
 	// 初期化
 	virtual void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
 

@@ -91,6 +91,11 @@ public:// メンバ関数
 	void SetIsFadeIn(const bool& isFadeIn) { isFadeIn_ = isFadeIn;};
 	void SetIsFadeOut(const bool& isFadeOut) {isFadeOut_ = isFadeOut;};
 
+	void SetName(std::string name) { name_ = name; }
+
+	std::string GetName() { return name_; }
+
+	void SetTexture(const std::string texture) { material->tex_.diffuseFilePath = texture; };
 
 private:
 
@@ -122,7 +127,7 @@ private:
 	//テクスチャ番号
 	uint32_t textureIndex = 0;
 
-
+	std::string name_ = "NoName";
 private:
 
 

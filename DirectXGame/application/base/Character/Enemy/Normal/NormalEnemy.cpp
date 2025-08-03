@@ -10,7 +10,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	globalVariables_ = globalVariables;
 	CreateGroup("enemy");
 
-	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_),ObjectModelType::kNormal, {}, camera);
+	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_), ObjectModelType::kNormal, {}, camera);
 	objectBase_->SetModel("enemy2.obj");
 	objectBase_->GetWorldTransform().translate_ = position;
 	objectBase_->GetWorldTransform().scale_ = { 1.7f,1.7f,1.7f };
@@ -108,9 +108,9 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	visionComponent_->SetCombatView(90.0f, 100.0f);
 	visionComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
 	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {
-		
-		
-		
+
+
+
 		return false;
 		};
 
@@ -133,56 +133,60 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	Initialize2D();
 	InitParticle();
 
-	
+
 	objectBase_->Update();
 	ChangeState("Move");
 }
 
 void NormalEnemy::Update()
 {
-	UpdateBaseGetValue();
-	//HitStpoTime();
-	if (GetHP() <= 0) {
-		if (GetAlive() == true) {
-			ductEmit_->Update();
-			tireEmit_->Update();
-			plankEmit_->Update();
-			gearEmit_->Update();
-			fenceEmit_->Update();
-			
-		}
-		flags_.isLockonTarget = false;
-		flags_.isAlive = false;
-	}
-	else {
-		// 移動
-		moveComponent_->AddMove(GetTime(), GetAlive(), *objectBase_);
-		// 着地
-		moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
-		// 状態
-		characterStateComponent_.Update(Velocity(), false, GetAlive());
-		// ヒット
-		hitMotionComponent_->Update(GetTime(), objectBase_);
-		//
-		visionComponent_->Update(GetTime(), objectBase_->GetWorldPosition(),moveComponent_->GetDirection(),player_->GetWorldTransform().translate_);
+	if (objectBase_ == nullptr) { return; }
 
-		
+	if (objectBase_) {
+		UpdateBaseGetValue();
+		//HitStpoTime();
+		if (GetHP() <= 0) {
+			if (GetAlive() == true) {
+				ductEmit_->Update();
+				tireEmit_->Update();
+				plankEmit_->Update();
+				gearEmit_->Update();
+				fenceEmit_->Update();
 
-
-
-		if (GetHP() >= 0) {
-			// 重力
-			if (!characterStateComponent_.IsJumping()) {
-				Velocity() = { 0,0,0 };
 			}
+			flags_.isLockonTarget = false;
+			flags_.isAlive = false;
 		}
-		// 移動制限
-		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
-		// 更新
-		objectBase_->UpdateWorldTransform();
+		else {
+			// 移動
+			moveComponent_->AddMove(GetTime(), GetAlive(), *objectBase_);
+			// 着地
+			moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
+			// 状態
+			characterStateComponent_.Update(Velocity(), false, GetAlive());
+			// ヒット
+			hitMotionComponent_->Update(GetTime(), objectBase_);
+			//
+			visionComponent_->Update(GetTime(), objectBase_->GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
+
+
+
+
+
+			if (GetHP() >= 0) {
+				// 重力
+				if (!characterStateComponent_.IsJumping()) {
+					Velocity() = { 0,0,0 };
+				}
+			}
+			// 移動制限
+			LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
+			// 更新
+			objectBase_->UpdateWorldTransform();
+		}
+		// ステート
+		state_->Update();
 	}
-	// ステート
-	state_->Update();
 }
 
 void NormalEnemy::DrawEffect()
@@ -191,24 +195,28 @@ void NormalEnemy::DrawEffect()
 
 void NormalEnemy::Draw2D()
 {
-	if (flags_.isLockonTarget) {
-		icon_lockOn->SetPosition(objectBase_->GetScreenPosition() + Vector2{0.0f,-40.0f});
+	if (objectBase_ == nullptr) { return; }
 
-		icon_lockOn->Update();
-		icon_lockOn->Draw();
-	}
+	if (objectBase_) {
+		if (flags_.isLockonTarget) {
+			icon_lockOn->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0.0f,-40.0f });
 
-	if (GetAlive()) {
+			icon_lockOn->Update();
+			icon_lockOn->Draw();
+		}
 
-		backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f });
-		backHpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-30 + -30.0f });
-		backHpBer_->Update();
-		backHpBer_->Draw();
+		if (GetAlive() && !GetFlags().isDeleted  ) {
 
-		hpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-27.5f + -30.0f });
-		hpBer_->SetSize({ (HP() * 0.95f),10.0f });
-		hpBer_->Update();
-		hpBer_->Draw();
+			backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f });
+			backHpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-30 + -30.0f });
+			backHpBer_->Update();
+			backHpBer_->Draw();
+
+			hpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-27.5f + -30.0f });
+			hpBer_->SetSize({ (HP() * 0.95f),10.0f });
+			hpBer_->Update();
+			hpBer_->Draw();
+		}
 	}
 }
 
