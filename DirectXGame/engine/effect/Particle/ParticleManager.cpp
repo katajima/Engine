@@ -9,7 +9,7 @@
 #include "DirectXGame/engine/Light/LightCommon.h"
 
 #include "imgui.h"
-#include <execution> // for std::execution::par
+#include <execution>
 #undef max
 #include <limits>
 #include <windows.h>

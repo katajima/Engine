@@ -9,11 +9,10 @@ void Primitive::Init(const std::string& tex, const Color color, const std::strin
 
 	mesh->Initialize(primitiveCommon_->GetDxCommon());
 
-	material = std::make_unique<Material>();
-	material->Initialize(primitiveCommon_->GetDxCommon());
-	material->tex_.diffuseFilePath = tex;
-
-	material->color = color;
+	mesh->material = std::make_unique<Material>();
+	mesh->material->Initialize(primitiveCommon_->GetDxCommon());
+	mesh->material->tex_.diffuseFilePath = tex;
+	mesh->material->color = color;
 
 
 	if (name == "") {
@@ -26,7 +25,7 @@ void Primitive::Init(const std::string& tex, const Color color, const std::strin
 
 void Primitive::Update()
 {
-	material->GPUData();
+	mesh->material->GPUData();
 	
 	MeshUpdate();
 }
@@ -192,9 +191,9 @@ void Primitive::MeshUpdateImGui()
 		int i = (int)mesh->vertices.size();
 		ImGui::InputInt("index2", &i);
 		str = name_ + "material";
-		ImGui::DragFloat3(str.c_str(), &material->transform.scale.x, 0.01f);
+		ImGui::DragFloat3(str.c_str(), &mesh->material->transform.scale.x, 0.01f);
 		str += "rotate";
-		ImGui::DragFloat3(str.c_str(), &material->transform.rotate.x, 0.01f);
+		ImGui::DragFloat3(str.c_str(), &mesh->material->transform.rotate.x, 0.01f);
 		
 		ImGui::Checkbox("isScaleX", &aimetion_.isScaleX);
 		ImGui::Checkbox("isScaleY", &aimetion_.isScaleY);
@@ -207,30 +206,30 @@ void Primitive::MeshUpdateImGui()
 		ImGui::DragFloat2("maxRotate", &aimetion_.maxRotate.x, 0.01f);
 		
 		if (aimetion_.isScaleX) {
-			material->transform.scale.x += aimetion_.speed.x;
-			if (material->transform.scale.x >= aimetion_.maxCount.x) {
-				material->transform.scale.x = 0;
+			mesh->material->transform.scale.x += aimetion_.speed.x;
+			if (mesh->material->transform.scale.x >= aimetion_.maxCount.x) {
+				mesh->material->transform.scale.x = 0;
 			}
 
 		}
 		if (aimetion_.isScaleY) {
-			material->transform.scale.y += aimetion_.speed.y;
-			if (material->transform.scale.y >= aimetion_.maxCount.y) {
-				material->transform.scale.y = 0;
+			mesh->material->transform.scale.y += aimetion_.speed.y;
+			if (mesh->material->transform.scale.y >= aimetion_.maxCount.y) {
+				mesh->material->transform.scale.y = 0;
 			}
 		}
 
 		if (aimetion_.isRotateX) {
-			material->transform.rotate.x += aimetion_.rotateSpeed.x;
-			if (material->transform.rotate.x >= aimetion_.maxRotate.x) {
-				material->transform.rotate.x = 0;
+			mesh->material->transform.rotate.x += aimetion_.rotateSpeed.x;
+			if (mesh->material->transform.rotate.x >= aimetion_.maxRotate.x) {
+				mesh->material->transform.rotate.x = 0;
 			}
 
 		}
 		if (aimetion_.isRotateY) {
-			material->transform.rotate.y += aimetion_.rotateSpeed.y;
-			if (material->transform.rotate.y >= aimetion_.maxRotate.y) {
-				material->transform.rotate.y = 0;
+			mesh->material->transform.rotate.y += aimetion_.rotateSpeed.y;
+			if (mesh->material->transform.rotate.y >= aimetion_.maxRotate.y) {
+				mesh->material->transform.rotate.y = 0;
 			}
 		}
 
@@ -395,9 +394,9 @@ void Primitive::Draw()
 {
 	if (mesh->vertices.size() != 0) {
 
-		material->GetCommandListMaterial(0);
+		mesh->material->GetCommandListMaterial(0);
 
-		material->GetCommandListTexture(2, 7, 8);
+		mesh->material->GetCommandListTexture(2, 7, 8);
 
 
 

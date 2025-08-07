@@ -29,6 +29,85 @@ using ShapeParameters = std::variant<ShapeParameter::ShapePlane, ShapeParameter:
 	ShapeParameter::ShapeSphere, ShapeParameter::Tube, ShapeParameter::Pyramid, ShapeParameter::Torus>;
 
 class PrimitiveCommon;
+
+
+class BasePrimitive {
+public:
+	~BasePrimitive() = default;
+
+	enum class PsoType {
+		kDefalt,
+		kRingClamp,
+		kNoCull,
+		kNoCullRingClamp,
+		kNoCullWireFrame,
+
+	};
+
+	void Initialize(PrimitiveCommon* primitiveCommon, const std::string& tex, const Color color = { 1,1,1,1 }, const std::string& name = "", bool isLine = false);
+
+	// 更新
+	void Update();
+	// 描画
+	void Draw();
+
+public:
+	void SetColor(const Color& color) { material->color = color; }
+
+	PsoType GetPsoType() const { return psoType_; }
+
+	void SetPsoType(PsoType type) { psoType_ = type; }
+private:
+
+
+	bool isLine_ = false;
+
+	std::unique_ptr<ModelMesh> mesh;
+	std::unique_ptr<Material> material;
+
+	// 名前
+	std::string name_ = "primitive";
+	PsoType psoType_ = PsoType::kDefalt;
+
+	struct UVAnimetion {
+		bool isScaleX = false;
+		bool isScaleY = false;
+		Vector2 maxCount{ 10,10 };
+		Vector2 speed{ 0.2f,0.2f };
+
+		bool isRotateX = false;
+		bool isRotateY = false;
+		Vector2 maxRotate{ 10,10 };
+		Vector2 rotateSpeed{ 0.2f,0.2f };
+
+	};
+	UVAnimetion aimetion_{};
+private:
+	PrimitiveCommon* primitiveCommon_;
+};
+
+
+
+class PlanePrimitive :public BasePrimitive{
+public:
+
+
+private:
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Primitive
 {
 public:
@@ -134,7 +213,7 @@ public:
 
 	void DrawSetting(PsoType type = PsoType::kDefalt);
 
-	Material* GetMaterial() { return material.get(); }
+	Material* GetMaterial() { return  mesh->material.get(); }
 
 	ModelMesh* GetMesh() { return mesh.get(); }
 
@@ -153,7 +232,7 @@ private:
 private:
 
 public:
-	void SetColor(const Color& color) { material->color = color; }
+	void SetColor(const Color& color) { mesh->material->color = color; }
 
 	PsoType GetPsoType() const { return psoType_; }
 
@@ -215,7 +294,6 @@ private:
 	bool isLine_ = false;
 
 	std::unique_ptr<ModelMesh> mesh;
-	std::unique_ptr<Material> material;
 	
 	// 名前
 	std::string name_ = "primitive";

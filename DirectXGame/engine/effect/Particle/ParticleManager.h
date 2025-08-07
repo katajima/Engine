@@ -74,13 +74,7 @@ public:
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
-	// フィールド
-	/*void AddFieldEffect(Field::EffectType type,Field::ShapeType shapeType,const std::string& name) {
-		std::unique_ptr<Field::FieldEffect> field = std::make_unique<Field::FieldEffect>();
-		field->Init(name, shapeType,type,lineCommon_);
-		fieldEffect_.push_back(std::move(field.get()));
-	}*/
-
+	
 	void AddFieldEffect(Field::FieldEffect* field) {
 		fieldEffect_.push_back(field);
 	}
