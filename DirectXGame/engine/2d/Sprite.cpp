@@ -41,10 +41,14 @@ void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, 
 	transfomation->Initialize(spriteCommon_->GetDxCommon());
 
 
-	transform.scale = { size.x,size.y,1.0f };
-	transform.rotate = { 0.0f,0.0f,rotation };
-	transform.translate = { position.x,position.y,0.0f };
+	worldTransform2d.Initialize();
 
+	transform.scale = { size.x * worldTransform2d.scale_.x,size.y * worldTransform2d.scale_.y,1.0f };
+	transform.rotate = { 0.0f,0.0f,worldTransform2d.rotate_ };
+	transform.translate = { worldTransform2d.translate_.x,worldTransform2d.translate_.y,0.0f };
+
+
+	
 	float left = 0.0f - anchorPoint.x;
 	float right = 1.0f - anchorPoint.x;
 	float top = 0.0f - anchorPoint.y;
@@ -77,62 +81,52 @@ void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, 
 
 void Sprite::Update()
 {
-	transform.scale = { size.x,size.y,1.0f };
-	transform.rotate = { 0.0f,0.0f,rotation };
-	transform.translate = { position.x,position.y,0.0f };
+	worldTransform2d.Update();  // scale_ は Transform の scale 値のみ使う
 
-	float left = 0.0f - anchorPoint.x;
-	float right = 1.0f - anchorPoint.x;
-	float top = 0.0f - anchorPoint.y;
-	float bottom = 1.0f - anchorPoint.y;
+	// anchorPoint を中心にしたジオメトリを "size" で構築
+	float left = -anchorPoint.x * size.x;
+	float right = (1.0f - anchorPoint.x) * size.x;
+	float top = -anchorPoint.y * size.y;
+	float bottom = (1.0f - anchorPoint.y) * size.y;
 
 	// 左右反転
 	if (isFlipX_) {
-		left = -left;
-		right = -right;
+		std::swap(left, right);
 	}
 	// 上下反転
 	if (isFlipY_) {
-		top = -top;
-		bottom = -bottom;
+		std::swap(top, bottom);
 	}
 
-	/// テクスチャ範囲指定-反映処理-
+	// テクスチャUV
 	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
 	float tex_top = textureLeftTop.y / metadata.height;
 	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
 
-	// 1枚目の三角形
-	vbvResorce_.Data()[0].position = { left,bottom,0.0f,1.0f };//左下
-	vbvResorce_.Data()[0].texcoord = { tex_left,tex_bottom };
-	vbvResorce_.Data()[0].normal = { 0.0f,0.0f,-1.0f };
+	// 頂点データ更新（サイズから構築）
+	vbvResorce_.Data()[0].position = { left,  bottom, 0.0f, 1.0f };
+	vbvResorce_.Data()[1].position = { left,  top,    0.0f, 1.0f };
+	vbvResorce_.Data()[2].position = { right, bottom, 0.0f, 1.0f };
+	vbvResorce_.Data()[3].position = { right, top,    0.0f, 1.0f };
 
-	vbvResorce_.Data()[1].position = { left,top,0.0f,1.0f };//左上
-	vbvResorce_.Data()[1].texcoord = { tex_left,tex_top };
-	vbvResorce_.Data()[1].normal = { 0.0f,0.0f,-1.0f };
+	// UV と normal は変更なし
+	for (int i = 0; i < 4; ++i) {
+		vbvResorce_.Data()[i].normal = { 0.0f, 0.0f, -1.0f };
+	}
+	vbvResorce_.Data()[0].texcoord = { tex_left,  tex_bottom };
+	vbvResorce_.Data()[1].texcoord = { tex_left,  tex_top };
+	vbvResorce_.Data()[2].texcoord = { tex_right, tex_bottom };
+	vbvResorce_.Data()[3].texcoord = { tex_right, tex_top };
 
-	vbvResorce_.Data()[2].position = { right,bottom,0.0f,1.0f };//右下
-	vbvResorce_.Data()[2].texcoord = { tex_right,tex_bottom };
-	vbvResorce_.Data()[2].normal = { 0.0f,0.0f,-1.0f };
-	//2枚目の三角形
-	vbvResorce_.Data()[3].position = { right,top,0.0f,1.0f };//右上
-	vbvResorce_.Data()[3].texcoord = { tex_right,tex_top };
-	vbvResorce_.Data()[3].normal = { 0.0f,0.0f,-1.0f };
-
-
-	//transform変数を作る
+	// 変換行列
 	Matrix4x4 viewMatrix = MakeIdentity4x4();
-	////透視射影行列
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::GetClientWidth()), float(WinApp::GetClientHeight()), 0.0f, 100.0f);
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+	Matrix4x4 worldViewProjectionMatrix = Multiply(worldTransform2d.GetConvert2DMatrixTo4x4(), Multiply(viewMatrix, projectionMatrix));
 
-	// トランスフォーム
+	// シェーダーに送信
 	transfomation->UpdateSprite(worldViewProjectionMatrix);
-
-	// マテリアル
 	material->GPUData();
 }
 

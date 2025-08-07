@@ -91,6 +91,8 @@ struct Vector2 final {
 		return result;
 	};
 
+	
+
 };
 
 static Vector2 Lerp(const Vector2& a, const Vector2& b, float t) {
@@ -151,4 +153,17 @@ static float Length(Vector2 a) {
 	length = sqrtf(a.x * a.x + a.y * a.y);
 
 	return length;
+}
+
+static float Dot(const Vector2& a, const Vector2& b) {
+	return a.x * b.x + a.y * b.y;
+}
+
+static Vector2 Rotate(const Vector2& v, float angle) {
+	float cosA = std::cos(angle);
+	float sinA = std::sin(angle);
+	return {
+		v.x * cosA - v.y * sinA,
+		v.x * sinA + v.y * cosA
+	};
 }

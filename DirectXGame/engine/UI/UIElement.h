@@ -1,26 +1,21 @@
 #pragma once
 #include "BaseSprite.h"
-#include"DirectXGame/engine/input/Input.h"
+#include "UIData.h"
 
 
-enum class UIType
-{
-	Normal,
-	Button,
-	CheckBox,
-};
 
 class Entity2DManager;
 class UIElement
 {
 public:
+	virtual ~UIElement() = default;  
 
 	void SetInstance(int instance) {instance_ = instance;}
 	void Init(Entity2DManager* entity2DManager, std::string name);
 	void Draw();
 	virtual void Update(float deltaTime) = 0;
-
-
+	void SetUseNameSprite(bool use) { useNameSprite_ = use; }
+	void SetPos(const Vector2& pos) { pos_ = pos; }
 	void SetInput(Input* input) { input_ = input; }
 	void AddSprite(std::string name, std::string textureName);
 
@@ -30,6 +25,10 @@ public:
 		leftTopPos_ = leftTopPos;
 		ratio_ = ratio;
 	};
+
+	void SetParent(WorldTransform2d* parent) {
+		parent_ = parent;
+	}
 
 protected:
 	virtual void UniqueDraw() = 0;
@@ -43,6 +42,10 @@ protected:
 	Vector2 ratio_{};		// 画面サイズとImGuiImageにした比率
 	bool isDebuck_ = false;	// デバッグか
 	int instance_ = 1;		// 生成量
+	Vector2 pos_ = {};		// 位置
+	bool useNameSprite_ = false;
+	WorldTransform2d* parent_;
+
 };
 
 // 通常
@@ -64,7 +67,6 @@ protected:
 	void UniqueDraw()override {};
 	void InitSprite()override;
 private:
-	Vector2 pos_ = {};
 	bool isCheck_ = false;
 };
 
@@ -74,12 +76,10 @@ public:
 	void Update(float deltaTime)override;
 	BaseSprite* GetCheckSprite() { return checkSprite.get(); }
 	BaseSprite* GetBackgroundSprite() { return backgroundSprite.get(); }
-	void SetPos(const Vector2& pos) { pos_ = pos; }
 protected:
 	void UniqueDraw()override;
 	void InitSprite()override;
 private:
-	Vector2 pos_ = {};
 	std::unique_ptr<BaseSprite> checkSprite;
 	std::unique_ptr<BaseSprite> backgroundSprite;
 	bool isCheck_ = false;
@@ -91,10 +91,6 @@ public:
 	void Update(float deltaTime)override;
 	BaseSprite* GetSlidSprite() { return slidSprite.get(); }
 	BaseSprite* GetBackgroundSprite() { return backgroundSprite.get(); }
-	void SetPos(const Vector2& pos) {
-		pos_ = pos;
-		offsetPos_ = pos_;
-	}
 	void SetMinMax(float min, float max) {
 		min_ = min;
 		max_ = max;
@@ -103,7 +99,6 @@ protected:
 	void UniqueDraw()override;
 	void InitSprite()override;
 private:
-	Vector2 pos_ = {};
 	std::unique_ptr<BaseSprite> slidSprite;
 	std::unique_ptr<BaseSprite> backgroundSprite;
 	float min_;
@@ -112,17 +107,11 @@ private:
 
 	Vector2 preMousePos{};
 	Vector2 offsetPos_{};
+	// クラスメンバに追加
+	float dragOffsetX_ = 0.0f;
 };
 
-// メーター方向
-enum class UIMeterType {
-	Top,
-	Down,
-	Right,
-	Left,
-	WidthCenter,
-	HeightCenter,
-};
+
 // メーター
 class UIMeter : public UIElement {
 public:
@@ -130,8 +119,6 @@ public:
 	BaseSprite* GetMeterSprite() { return meterSprite.get(); }
 	BaseSprite* GetBackgroundSprite() { return backgroundSprite.get(); }
 	BaseSprite* GetNameSprite() { return nameSprite_.get(); }
-	void SetPos(const Vector2& pos) { pos_ = pos;}
-
 	void SetMeterType(UIMeterType type) { type_ = type; }
 
 	// 背景スプライトのサイズとメーターのサイズ
@@ -148,12 +135,10 @@ public:
 		meterMin_ = min;
 		meterMax_ = max;
 	};
-	void SetUseNameSprite(bool use) { useNameSprite_ = use; }
 protected:
 	void UniqueDraw()override;
 	void InitSprite()override;
 private:
-	Vector2 pos_ = {};
 	Vector2 size_ = {};
 	Vector2 offsetSize = {};
 	//Vector2 
@@ -165,15 +150,6 @@ private:
 	float meter_;									// 現在のメータ
 	float meterMin_;								// メーター下限
 	float meterMax_;								// メーター上限
-	bool useNameSprite_ = false;
-};
-
-// ペア方向
-enum class UIPairDrectionType {
-	Top,
-	Down,
-	Right,
-	Left,
 };
 
 //  ペア
@@ -182,14 +158,13 @@ public:
 	void Update(float deltaTime)override;
 	BaseSprite* GetFirstSprite() { return firstSprite.get(); }
 	BaseSprite* GetSecondSprite() { return secondSprite.get(); }
-	void SetPos(const Vector2& pos) { pos_ = pos; }
+	
 	void SetOffset(float offset) {offset_ = offset;}
 	void SetUIPairDrectionType(UIPairDrectionType type) { type_ = type; }
 protected:
 	void UniqueDraw()override;
 	void InitSprite()override;
 private:
-	Vector2 pos_ = {};
 	float offset_ = 10.0f;
 	UIPairDrectionType type_ = UIPairDrectionType::Right;
 	std::unique_ptr<BaseSprite> firstSprite;
@@ -207,8 +182,7 @@ public:
 		return countSprite_[num].get(); 
 	}
 	BaseSprite* GetNameSprite() { return nameSprite_.get(); }
-	void SetPos(const Vector2& pos) { pos_ = pos; }
-
+	
 	// 
 	void SetMaxSize(const Vector2& size, const Vector2& offsetSise) {
 		size_ = size;
@@ -228,14 +202,10 @@ public:
 	void SetCount(float count) { count_ = count; }
 
 	void SetCountMax(float max) { countMax_ = max;}
-
-	void SetUseNameSprite(bool use) {useNameSprite_ = use;}
-
 protected:
 	void UniqueDraw()override;
 	void InitSprite()override;
 private:
-	Vector2 pos_{};
 	Vector2 size_{};
 	Vector2 offsetSize{};
 	Vector2 texSize_{};
@@ -244,5 +214,6 @@ private:
 
 	float count_;									// 現在のメータ
 	float countMax_;								// メーター上限
-	bool useNameSprite_ = false;
 };
+
+

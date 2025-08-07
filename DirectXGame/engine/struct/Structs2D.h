@@ -1,6 +1,8 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Matrix3x3.h"
+#include "array"
+
 
 //Transform
 struct Transform2D {
@@ -27,6 +29,111 @@ struct Box {
 
 };
 
+
+
+
+struct BoxOBB {
+	Vector2 center_;		//!< 中心座標
+	Vector2 halfSize_;		//!< 幅/2, 高さ/2
+	float rotation_;		//!< ラジアンでの回転角（時計回り）
+	Vector2 corners_[4];	// コーナー情報
+	BoxOBB(Vector2 center = {}, Vector2 halfSize = {}, float rotation = 0.0f)
+		: center_(center), halfSize_(halfSize), rotation_(rotation) {
+	}
+
+	std::array<Vector2, 4> GetCorners() const {
+		// 回転行列
+		float cosA = std::cos(rotation_);
+		float sinA = std::sin(rotation_);
+
+		Vector2 localCorners[4] = {
+			{-halfSize_.x, -halfSize_.y},  // 左下
+			{ halfSize_.x, -halfSize_.y},  // 右下
+			{ halfSize_.x,  halfSize_.y},  // 右上
+			{-halfSize_.x,  halfSize_.y},  // 左上
+		};
+
+		std::array<Vector2, 4> worldCorners;
+		for (int i = 0; i < 4; ++i) {
+			float x = localCorners[i].x * cosA - localCorners[i].y * sinA;
+			float y = localCorners[i].x * sinA + localCorners[i].y * cosA;
+			worldCorners[i] = { center_.x + x, center_.y + y };
+		}
+		return worldCorners;
+	}
+
+	bool intersects(const Vector2& point) const {
+		auto corners = GetCorners();
+
+		// 三角形2つに分割して点が含まれるか確認
+		return PointInQuad(point, corners);
+	}
+
+
+
+	bool intersects(const BoxOBB& other) const {
+		auto aCorners = this->GetCorners();
+		auto bCorners = other.GetCorners();
+
+		// 判定軸（各辺の法線）を取得（4本）
+		std::array<Vector2, 4> axes = {
+			GetEdgeNormal(aCorners[0], aCorners[1]),
+			GetEdgeNormal(aCorners[1], aCorners[2]),
+			GetEdgeNormal(bCorners[0], bCorners[1]),
+			GetEdgeNormal(bCorners[1], bCorners[2]),
+		};
+
+		for (const auto& axis : axes) {
+			// 各矩形を軸に投影してオーバーラップ確認
+			auto [minA, maxA] = ProjectOntoAxis(aCorners, axis);
+			auto [minB, maxB] = ProjectOntoAxis(bCorners, axis);
+
+			if (maxA < minB || maxB < minA) {
+				return false; // 分離軸あり → 交差していない
+			}
+		}
+
+		return true; // 全軸で重なっている → 交差
+	}
+
+
+
+	bool PointInQuad(const Vector2& p, const std::array<Vector2, 4>& quad) const {
+		// 三角形 1: [0, 1, 2], 三角形 2: [2, 3, 0]
+		return PointInTriangle(p, quad[0], quad[1], quad[2]) ||
+			PointInTriangle(p, quad[2], quad[3], quad[0]);
+	}
+
+	bool PointInTriangle(const Vector2& p, const Vector2& a, const Vector2& b, const Vector2& c) const {
+		auto sign = [](const Vector2& p1, const Vector2& p2, const Vector2& p3) {
+			return (p1.x - p3.x) * (p2.y - p3.y) -
+				(p2.x - p3.x) * (p1.y - p3.y);
+			};
+
+		bool b1 = sign(p, a, b) < 0.0f;
+		bool b2 = sign(p, b, c) < 0.0f;
+		bool b3 = sign(p, c, a) < 0.0f;
+
+		return (b1 == b2) && (b2 == b3);
+	}
+
+	Vector2 GetEdgeNormal(const Vector2& p1, const Vector2& p2) const {
+		Vector2 edge = { p2.x - p1.x, p2.y - p1.y };
+		return { -edge.y, edge.x }; // 法線ベクトル（右手系）
+	}
+
+	std::pair<float, float> ProjectOntoAxis(const std::array<Vector2, 4>& points, const Vector2& axis)const {
+		float min = Dot(points[0], axis);
+		float max = min;
+
+		for (int i = 1; i < 4; ++i) {
+			float projection = Dot(points[i], axis);
+			min = (std::min)(min, projection);
+			max = (std::max)(max, projection);
+		}
+		return { min, max };
+	}
+};
 
 // 球
 struct Sphere2D {

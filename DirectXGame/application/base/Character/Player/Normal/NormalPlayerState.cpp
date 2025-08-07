@@ -128,10 +128,6 @@ void PlayerStateAttack::Exit()
 	anima->SetIsLoop(true);
 	anima->SetIsPlaying(true);
 	anima->SetAnimationSpeed(1.0f);
-	/*player_->GetObject3D()->SetStratAnimeTime();
-	player_->GetObject3D()->SetIsLoop(true);
-	player_->GetObject3D()->SetIsPlaying(true);
-	player_->GetObject3D()->SetAnimationSpeed(1.0f);*/
 }
 
 void PlayerStateAttack::Enter()
@@ -143,13 +139,6 @@ void PlayerStateAttack::Enter()
 	weapon->GetObject3D()->SetIsDraw(true);
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
 	weapon->GetColliderComponent()->contactRecord_.Clear();
-
-	// アニメーション
-	//player_->GetObject3D()->SetEndAnimeTime();
-	/*player_->GetObject3D()->SetStratAnimeTime();
-	player_->GetObject3D()->SetIsLoop(false);
-	player_->GetObject3D()->SetAnimationSpeed(1.0f);
-	player_->GetObject3D()->SetAnimetion("Attack2", 0.0f);*/
 }
 
 
@@ -171,7 +160,7 @@ void PlayerStateSpecial::Update()
 	rengeSp->InAction();
 	rengeSp->SetIsDraw(false);
 	if (special->GetPhese() == 0) {
-		//player_->Move();
+		player_->GetMoveComponent()->Move(*player_->GetObject3D()->GetTransformComponent(), player_->GetInput());
 		player_->GetPlayerUI()->SetIsTextRB(true);
 		rengeSp->SetIsDraw(true);
 	}

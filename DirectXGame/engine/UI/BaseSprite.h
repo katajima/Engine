@@ -17,7 +17,7 @@ public:
 	void Init(Entity2DManager* entity2DManager, std::string name, std::string texturName);
 
 	void Update() {
-
+		
 		if (useColl) {
 			BoxUpdate();
 		}
@@ -33,17 +33,18 @@ public:
 	Box GetBox() const { return box; }
 	Sprite* GetSprite() { return sprite_.get(); }
 	Vector2 GetSize() { return sprite_->GetSize(); }
+	Vector2 GetPos() { return sprite_->GetPosition(); }
 	Vector2 GetAnchorPoint() { return sprite_->GetAnchorPoint(); }
 	ColorComponent* GetColorComponent() { return colorComponent_.get(); }
-
-
+	
 
 	void SetSize(const Vector2& size) { sprite_->SetSize(size); }
+	void SetPos(const Vector2& pos) { sprite_->SetPosition(pos); }
 	void SetAnchorPoint(const Vector2& anchor) { sprite_->SetAnchorPoint(anchor); }
 	void SetTextureName(const std::string& name) { sprite_->SetTexture(name); };
 	void SetColor(Color color) { sprite_->SetColor(color); }
 	void SetUseColl(bool is) { useColl = is; }
-
+	
 	void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) { 
 		leftTopPos_ = leftTopPos;
 		ratio_ = ratio;
@@ -77,10 +78,9 @@ public:
 
 		return result;
 	}
-
 private:
 	void BoxUpdate() {
-		Vector2 position = sprite_->GetPosition(); 
+		Vector2 position = sprite_->GetWorldTransform2d().GetWorldPosition(); 
 		Vector2 size = sprite_->GetSize();
 		Vector2 anchor = sprite_->GetAnchorPoint();
 
@@ -105,6 +105,5 @@ private:
 
 	Vector2 leftTopPos_{};	// 画面左上位置(ImGuiImage)
 	Vector2 ratio_{};		// 画面サイズとImGuiImageにした比率
-
 };
 

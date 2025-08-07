@@ -166,7 +166,7 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	int countIndex = 0;
+	/*int countIndex = 0;
 	for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
 		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
@@ -178,7 +178,7 @@ void GamePlayScene::Update()
 			}
 		}
 		countIndex++;
-	}
+	}*/
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -203,7 +203,7 @@ void GamePlayScene::Update()
 		BehaviorPhase2Update();
 		break;
 	}
-	tumeee_ += MyGame::GameTime();
+	//tumeee_ += MyGame::GameTime();
 	if (tumeee_ >= 10.0f) {
 		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
 			// シーン切り替え

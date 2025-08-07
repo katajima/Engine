@@ -5,6 +5,7 @@
 #include <cmath>
 #include <math.h>
 #include<assert.h>
+#include "Matrix3x3.h"
 
 //行列
 struct Matrix4x4
@@ -94,6 +95,10 @@ public:
 private:
 
 };
+
+
+Matrix4x4 Convert2DMatrixTo4x4(Matrix3x3 m);
+
 
 float* GetMatrix(Matrix4x4 mat);
 

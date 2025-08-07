@@ -1,6 +1,12 @@
 #include "UIElement.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
+
+static Vector2 ToLocalSpace(const Vector2& worldPos, const WorldTransform2d& parentTransform) {
+	Matrix3x3 invMat = Inverse(parentTransform.worldMat_);
+	return Transforms(worldPos, invMat);
+}
+
 void UIElement::Init(Entity2DManager* entity2DManager, std::string name)
 {
 	entity2DManager_ = entity2DManager;
@@ -81,6 +87,12 @@ void UICheckBox::InitSprite()
 	backgroundSprite->GetSprite()->SetColor({0.5f,0.5f ,0.5f ,1.0f});
 	backgroundSprite->GetSprite()->SetSize({ 30.0f,30.0f });
 	backgroundSprite->SetUseColl(true);
+
+	if (parent_) {
+		checkSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+	}
+
 }
 
 
@@ -130,6 +142,11 @@ void UISlider::InitSprite() {
 	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });
 	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });
 	backgroundSprite->SetUseColl(true);
+	backgroundSprite->GetSprite()->GetWorldTransform2d().SetChild(&slidSprite->GetSprite()->GetWorldTransform2d());
+	
+	if (parent_) {
+		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+	}
 }
 
 void UISlider::Update(float deltaTime) {
@@ -137,20 +154,42 @@ void UISlider::Update(float deltaTime) {
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 	slidSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 
-
 	preMousePos = input_->GetMousePosition();
+
 	Box box = backgroundSprite->GetBox();
-	Vector2 result{ preMousePos.x / backgroundSprite->GetRatio().x,pos_.y };
-	if (!isDebuck_) {
-		result.x = preMousePos.x;
+	Vector2 size = backgroundSprite->GetSize();
+
+
+	Vector2 result = offsetPos_;
+
+
+
+	const float margin = 0.0f;
+
+	// スライダーの半サイズ
+	float leftHalf = slidSprite->GetHalfSise(SpriteSize::Left).x;
+	float rightHalf = slidSprite->GetHalfSise(SpriteSize::Right).x;
+
+	// マウス座標と背景BoxのX範囲
+	Vector2 mouse = preMousePos;
+	float boxMinX = box.min_.x;
+	float boxMaxX = box.max_.x;
+
+	// デバッグ時は比率補正を解除
+	if (isDebuck_) {
+		mouse.x /= ratio_.x;
+		mouse.y/= ratio_.y;
+		boxMinX /= ratio_.x;
+		boxMaxX /= ratio_.x;
+		size.x /= ratio_.x;
 	}
 
+
+
+	// スライダーのクリック判定
 	if (slidSprite->GetBox().intersects(preMousePos)) {
 		if (input_->IsMousePressed(0)) {
 			isClick = true;
-		}
-		else {
-			isClick = false;
 		}
 	}
 	else {
@@ -159,37 +198,50 @@ void UISlider::Update(float deltaTime) {
 		}
 	}
 
+	// スライダーの移動処理（背景Boxの範囲に制限）
 	if (isClick) {
-		if (isDebuck_) {
-			if (box.min_.x + slidSprite->GetHalfSise(SpriteSize::Left).x >= preMousePos.x) {
-				result.x = (box.min_.x + slidSprite->GetHalfSise(SpriteSize::Left).x * ratio_.x) / ratio_.x;
-			}
-			else if (box.max_.x - (slidSprite->GetHalfSise(SpriteSize::Right).x) <= preMousePos.x) {
-				result.x = (box.max_.x - float(slidSprite->GetHalfSise(SpriteSize::Right).x / ratio_.x)) / ratio_.x;
-			}
-			else {
+		// 左・右の制限境界
+		float leftLimit = leftHalf * 2;
+		float rightLimit = size.x - rightHalf *2;
 
-			}
-			offsetPos_ = result;
+		//mouse.x /= ratio_.x;
+
+		// マウス座標を背景スプライトのローカル座標に変換
+		Vector2 localMousePos = ToLocalSpace(mouse, backgroundSprite->GetSprite()->GetWorldTransform2d());
+		float mouseX = localMousePos.x;
+
+
+		// マウスXをスライダー範囲にクランプ
+		mouseX = std::clamp(mouseX, leftLimit, rightLimit);
+		
+		
+		
+
+		
+		// デバッグ補正戻す
+		if (isDebuck_) {
+			result.x = mouseX * ratio_.x;;
 		}
 		else {
-			if (box.min_.x + slidSprite->GetHalfSise(SpriteSize::Left).x + 3.0f >= preMousePos.x) {
-				result.x = (box.min_.x + slidSprite->GetHalfSise(SpriteSize::Left).x + 3.0f);
-			}
-			else if (box.max_.x - (slidSprite->GetHalfSise(SpriteSize::Right).x + 3.0f) <= preMousePos.x) {
-				result.x = (box.max_.x - float(slidSprite->GetHalfSise(SpriteSize::Right).x + 3.0f));
-			}
-			else {
-
-			}
-			offsetPos_ = result;
+			result.x = mouseX;
 		}
+
+		offsetPos_ = result;
+
 	}
 
-
+	// ImGui表示（任意）
+	ImGui::Begin("UI");
+	Vector2 pos = slidSprite->GetSprite()->GetWorldTransform2d().GetWorldPosition();
+	ImGui::InputFloat2("slidSpritePos", &pos.x);
+	ImGui::InputFloat2("preMousePos", &preMousePos.x);
+	ImGui::InputFloat("mouseX", &mouse.x);
+	ImGui::End();
+	offsetPos_.y = 0;
+	// スライダー位置更新
 	slidSprite->GetSprite()->SetPosition(offsetPos_);
-	slidSprite->Update();
 	backgroundSprite->Update();
+	slidSprite->Update();
 }
 
 void UISlider::UniqueDraw() {
@@ -218,6 +270,15 @@ void UIMeter::InitSprite() {
 		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));
 		nameSprite_->SetSize({ 24.0f,24.0f });
 	}
+
+	if (parent_) {
+		meterSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+		if (useNameSprite_) {
+			nameSprite_->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+		}
+	}
+
 }
 
 void UIMeter::Update(float deltaTime) {
@@ -318,7 +379,10 @@ void UIPair::InitSprite()
 	firstSprite->Init(entity2DManager_, "first", "resources/Texture/Image.png");
 	secondSprite = std::make_unique<BaseSprite>();
 	secondSprite->Init(entity2DManager_, "second", "resources/Texture/Image.png");
-	
+	if (parent_) {
+		firstSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+		secondSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+	}
 	
 }
 
@@ -360,7 +424,7 @@ void UIPair::UniqueDraw() {
 
 #pragma endregion
 
-#pragma region UICheckBox
+#pragma region UICount
 
 void UICount::InitSprite()
 {
@@ -377,6 +441,15 @@ void UICount::InitSprite()
 		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.png");
 		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));
 		nameSprite_->SetSize({ 24.0f,24.0f });
+	}
+
+	if (parent_) {
+		for (auto& sprite : countSprite_) {
+			sprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+		}
+		if (useNameSprite_) {
+			nameSprite_->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+		}
 	}
 }
 

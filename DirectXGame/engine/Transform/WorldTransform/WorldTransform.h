@@ -15,6 +15,8 @@ public:
 		parentMatrix_ = parent; 
 	};
 
+	
+
 public:
 	Vector3 scale_ = { 1,1,1 };		// 拡縮
 	Vector3 rotate_ = {0,0,0};		// 回転

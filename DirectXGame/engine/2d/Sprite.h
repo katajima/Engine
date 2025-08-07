@@ -5,7 +5,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Material/Material.h"
-
+#include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
 
 #include "DirectXGame/engine/DirectX/Resource/VertexBufferResource.h"
 #include "DirectXGame/engine/DirectX/Resource/IndexBufferResource.h"
@@ -41,14 +41,18 @@ public:// メンバ関数
 
 	///位置
 	// getter
-	const Vector2& GetPosition() const { return position; }
+	const Vector2& GetPosition() const { return worldTransform2d.translate_; }
 	// setter
-	void SetPosition(const Vector2& position) { this->position = position; }
+	void SetPosition(const Vector2& position) { worldTransform2d.translate_ = position; }
 
 	// 回転
-	float GetRotation() const { return rotation; }
-	void SetRotation(float rotation) { this->rotation = rotation; }
+	float GetRotation() const { return  worldTransform2d.rotate_; }
+	void SetRotation(float rotation) { worldTransform2d.rotate_ = rotation; }
 
+	// スケール
+	const Vector2& GetScale() const { return worldTransform2d.scale_; }
+	void SetScale(const Vector2& size) { worldTransform2d.scale_ = size; }
+	
 	// サイズ
 	const Vector2& GetSize() const { return size; }
 	void SetSize(const Vector2& size) { this->size = size; }
@@ -96,7 +100,9 @@ public:// メンバ関数
 	std::string GetName() { return name_; }
 
 	void SetTexture(const std::string texture) { material->tex_.diffuseFilePath = texture; };
-
+	
+	WorldTransform2d& GetWorldTransform2d() { return worldTransform2d; }
+	
 private:
 
 	// テクスチャサイズをイメージに合わせる
@@ -129,12 +135,12 @@ private:
 
 	std::string name_ = "NoName";
 private:
-
-
+	
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };	// トランスフォーム
-	Vector2 size = { 640.0f,360.0f };											// サイズ
-	Vector2 position = { 0.0f,0.0f };											// 位置
-	float rotation = 0.0f;														// 回転													
+
+	WorldTransform2d worldTransform2d;
+
+	Vector2 size = { 640.0f,360.0f };											// サイズ													
 	bool isActive_ = true;
 private:
 

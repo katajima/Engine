@@ -8,11 +8,11 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	input_ = input;
 
 
-	//InitUIMeter("HPBer",{30,650}, true);
-	//InitUIMeter("SpecailBer",{30,700}, true);
+	InitUIMeter("HPBer",{30,650}, true);
+	InitUIMeter("SpecailBer",{30,700}, true);
 
 
-	/*UIMeter* hpber  = GetUIMeter("HPBer");
+	UIMeter* hpber  = GetUIMeter("HPBer");
 	hpber->SetMaxSize({ 100,30 },{4.0f,4.0f });
 	hpber->SetMeterMinMax(0.0f,100.0f);
 	hpber->GetMeterSprite()->SetColor({ 0,1,0,1 });
@@ -26,7 +26,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	specailBer_->GetMeterSprite()->SetColor({ 0,0,1,1 });
 	specailBer_->SetMeterType(UIMeterType::Left);
 	specailBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");
-	specailBer_->GetNameSprite()->SetSize({ 60,40 });*/
+	specailBer_->GetNameSprite()->SetSize({ 60,40 });
 
 
 
@@ -45,7 +45,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	textRB_->SetAnchorPoint({ 0.5f,0.5f });
 	textRB_->SetSize(0.2f);
 
-	InitUICheckBox("check1", { 300,100 });
+	/*InitUICheckBox("check1", { 300,100 });
 	InitUICheckBox("check2", { 340,100 });
 	InitUICheckBox("check3", { 380,100 });
 	InitUICheckBox("check4", { 420,100 });
@@ -93,58 +93,22 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	HPBer6_->GetMeterSprite()->SetColor({ 0,0,1,1 });
 	HPBer6_->SetMeterType(UIMeterType::HeightCenter);
 
-	InitUISlider("Slider",{300,200});
+	InitUISlider("Slider",{300,200});*/
 
 }
 
 void PlayerUI::Update()
 {
-#ifdef _DEBUG
-	ImGui::Begin("UI");
-	ImGui::DragFloat("meter", &srideM_);
-	ImGui::End();
-#endif // _DEBUG
-
-	UIMeter* hpber1 = GetUIMeter("HPBer1");
-	UIMeter* hpber2 = GetUIMeter("HPBer2");
-	UIMeter* hpber3 = GetUIMeter("HPBer3");
-	UIMeter* hpber4 = GetUIMeter("HPBer4");
-	UIMeter* hpber5 = GetUIMeter("HPBer5");
-	UIMeter* hpber6 = GetUIMeter("HPBer6");
-	hpber1->SetMeter(srideM_);
-	hpber2->SetMeter(srideM_);
-	hpber3->SetMeter(srideM_);
-	hpber4->SetMeter(srideM_);
-	hpber5->SetMeter(srideM_);
-	hpber6->SetMeter(srideM_);
-
-
-
-	GetUICheckBox("check1")->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
-	GetUICheckBox("check2")->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
-	GetUICheckBox("check3")->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
-	GetUICheckBox("check4")->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
-	GetUICheckBox("check5")->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
-
-
-
-	GetUISlider("Slider")->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
+	UIMeter* hpber = GetUIMeter("HPBer");
+	UIMeter* specailBer_ = GetUIMeter("SpecailBer");
+	hpber->SetMeter(sizeHP_);
+	specailBer_->SetMeter(sizeSpecialGauge_);
 
 	UpdateUIElement(0);
-
-
-
-	
-
 }
 
 void PlayerUI::Draw()
 {
-	/*UIMeter* hpber = GetUIMeter("HPBer");
-	UIMeter* specailBer_ = GetUIMeter("SpecailBer");
-	hpber->SetMeter(sizeHP_);
-	specailBer_->SetMeter(sizeSpecialGauge_);*/
-
 	DrawUIElement();
 	
 

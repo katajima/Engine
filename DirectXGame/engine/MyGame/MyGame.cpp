@@ -27,7 +27,17 @@ void MyGame::Initialize()
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	//sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("TEST");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TITLE");
+
+#ifdef _DEBUG
+	//sceneManager_->ChangeScene("GAMEPLAY");
+#endif // _DEBUG
+
+
+
+
+
+	
 
 	// リソース初期化
 	InitializeResource();
@@ -283,16 +293,16 @@ void MyGame::CreateParticle()
 	
 
 
-	//gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 1000);
-	//gpuParticleManager_->CreateEmitter("emitte_no1");
+	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 10000);
+	gpuParticleManager_->CreateEmitter("emitte_no1");
 	//gpuParticleManager_->CreateEmitter("emitte2_no1");
-	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
 	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 
 
-	//gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
- //
-	//gpuParticleManager_->CreateField("AABBField");
+	gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
+ 
+	gpuParticleManager_->CreateField("AABBField");
 
 }
 

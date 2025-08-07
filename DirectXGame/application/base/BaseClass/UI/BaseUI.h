@@ -1,6 +1,5 @@
 #pragma once
-#include"UIElement.h"
-
+#include "DirectXGame/engine/UI/UIBoard.h"
 class Entity2DManager;
 class GlobalVariables;
 class BaseUI
@@ -18,6 +17,7 @@ public:
 		leftTopPos_ = leftTopPos;
 		ratio_ = ratio;
 	};
+
 
 protected:
 	void InitSprite(Sprite* sprite,std::string texFile,Vector2 pos,Vector2 size);
@@ -43,12 +43,18 @@ protected:
 	Entity2DManager* entity2DManager_;
 	GlobalVariables* globalVariables_;
 	Input* input_;
+
+
+	std::unique_ptr <UIBaseBoard> board_;
+
+
 	std::map<std::string,std::unique_ptr<UICheckBox>> uiCheckBox_;
 	std::map<std::string,std::unique_ptr<UISlider>> uiSlider_;
 	std::map<std::string,std::unique_ptr<UIMeter>> uiMeter_;
 	std::map<std::string,std::unique_ptr<UIPair>> uiPair_;
 	std::map<std::string,std::unique_ptr<UICount>> uiCount_;
 
+	
 
 
 	Vector2 leftTopPos_{};	// 画面左上位置(ImGuiImage)

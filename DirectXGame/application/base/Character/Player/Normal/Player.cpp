@@ -213,7 +213,9 @@ void Player::Update()
 	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(objectBase_->model->modelData.skeleton, "rightHand", objectBase_->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
-	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()-> GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+#ifdef _DEBUG
+	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+#endif // _DEBUG
 	ui_->Update();
 }
 
