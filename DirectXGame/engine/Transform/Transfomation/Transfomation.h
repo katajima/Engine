@@ -14,7 +14,7 @@
 #include<format>
 
 
-class Primitive;
+class BasePrimitive;
 class SkyBox;
 class Ocean;
 class Transfomation
@@ -25,7 +25,7 @@ public:
 	// 更新
 	void Update(Model* model, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
 	// 更新
-	void Update(Primitive* primitive, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	void Update(BasePrimitive* primitive, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
 	// 更新
 	void Update(SkyBox* skyBox, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
 	// 更新

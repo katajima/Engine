@@ -132,7 +132,7 @@
     <ClCompile Include="DirectXGame\engine\Base\Logger.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Base\StringUtility.cpp">
+    <ClCompile Include="DirectXGame\engine\Utility\StringUtility.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp">
@@ -144,7 +144,7 @@
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp">
@@ -402,7 +402,7 @@
     <ClCompile Include="DirectXGame\engine\Mesh\SkyBoxMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\EmitFanction.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleField.cpp">
@@ -520,6 +520,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\DamageUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\DamageUIManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -658,7 +667,7 @@
     <ClInclude Include="DirectXGame\engine\Base\Logger.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\StringUtility.h">
+    <ClInclude Include="DirectXGame\engine\Utility\StringUtility.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h">
@@ -673,7 +682,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h">
@@ -1012,7 +1021,7 @@
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\IndexBufferResource.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\EmitFanction.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleField.h">
@@ -1060,7 +1069,7 @@
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Timer.h">
+    <ClInclude Include="DirectXGame\engine\Utility\TimerUtility.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.h">
@@ -1229,6 +1238,33 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\EffectComponent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Structs.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\MapUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\VectorUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\RangeUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\DamageUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\DamageUIManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

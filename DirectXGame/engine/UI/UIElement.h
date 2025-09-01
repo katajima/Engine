@@ -199,6 +199,14 @@ public:
 		}
 	}
 
+
+	void SetColor(const Color& color) {
+		color_ = color;
+		for (auto& count : countSprite_) {
+			count->SetColor(color_);
+		}
+	}
+
 	void SetCount(float count) { count_ = count; }
 
 	void SetCountMax(float max) { countMax_ = max;}
@@ -209,6 +217,7 @@ private:
 	Vector2 size_{};
 	Vector2 offsetSize{};
 	Vector2 texSize_{};
+	Color color_ = { 1,1,1,1 }; // 色
 	std::vector<std::unique_ptr<BaseSprite>> countSprite_;
 	std::unique_ptr<BaseSprite> nameSprite_;
 

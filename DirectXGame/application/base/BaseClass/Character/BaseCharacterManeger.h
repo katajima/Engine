@@ -3,6 +3,8 @@
 // engine
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include "DirectXGame/engine/Utility/VectorUtility.h"
+
 
 // ベースキャラクター
 #include"BaseCharacter.h"
@@ -68,6 +70,8 @@ public: // 取得系
 		return nullptr;
 	}
 
+	void SetIsMenu(bool isMenu) { isMenu_ = isMenu; }
+
 public: // 生成系
 	// キャラクター生成(敵)
 	void CreateCharacter(EnemyType enemyType, const std::string& characterName, Transform transform);
@@ -77,10 +81,10 @@ public: // 生成系
 private:
 	
 private:
-	std::vector<std::unique_ptr<BaseCharacter>> character_;	// キャラクター
+	VectorContainer<std::unique_ptr<BaseCharacter>> character_;;	// キャラクター
 
 	uint32_t characterCount_ = 0;	// キャラクターの数
-
+	bool isMenu_ = false; // メニュー画面かどうか
 private: // 貰いもの
 	Camera* camera_;
 	Input* input_;

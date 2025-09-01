@@ -13,7 +13,7 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 	
 
 	board_ = std::make_unique<UIBaseBoard>();
-	board_->Init(input_,entity2DManager_, "bord", { 100,100 }, { 400,400 });
+	board_->Init(input_,entity2DManager_, "bord", { 50,50 }, { 1180,620 });
 
 	InitUIPair("normalAttack", { 1120,520 });
 	UIPair* normalAttackPair = GetUIPair("normalAttack");
@@ -68,13 +68,14 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 void GameUI::Update()
 {
 	//UIButton* botton = board_->GetUIElement<UIButton>(UIType::CheckBox, "botton");
-	board_->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
+	if (isMenu_) {
+		board_->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 
-	UISlider* slider = board_->GetUIElement<UISlider>(UIType::UISlider, "slider");
-	slider->SetPos({30,50});
+		UISlider* slider = board_->GetUIElement<UISlider>(UIType::UISlider, "slider");
+		slider->SetPos({ 30,50 });
 
-	board_->Update(0);
-	
+		board_->Update(0);
+	}
 	
 
 	UICount* hitCount = GetUICount("hitCount");
@@ -85,8 +86,9 @@ void GameUI::Update()
 
 void GameUI::Draw()
 {
-	board_->Draw();
-
+	if (isMenu_) {
+		board_->Draw();
+	}
 	DrawUIElement();
 }
 

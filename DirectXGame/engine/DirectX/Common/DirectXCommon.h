@@ -7,7 +7,7 @@
 #include<wrl.h>
 #include <array>
 #include"DirectXGame/engine/base/Logger.h"
-#include"DirectXGame/engine/base/StringUtility.h"
+#include"DirectXGame/engine/Utility/StringUtility.h"
 #include"DirectXGame/engine/base/WinApp/WinApp.h"
 #include<chrono>
 #include <thread>

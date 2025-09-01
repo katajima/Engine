@@ -48,11 +48,11 @@ void GamePlayScene::Initialize()
 
 	// 弾管理クラス
 	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), nullptr);
+	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), cameraManeger_->GetCamera());
 
 	// キャラクター管理 
 	caracterManager_ = std::make_unique<BaseCharacterManager>();
-	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), cameraManeger_->GetCamera());
 	caracterManager_->SetFollowCamera(followCamera_.get());
 	caracterManager_->SetBulletManager(bulletManager_.get());
 	// プレイヤー生成
@@ -152,98 +152,107 @@ void GamePlayScene::UpdateImGui()
 // 更新処理
 void GamePlayScene::Update()
 {
-	Camera::isShake_ = false;
-
-	iCommand_ = inputHander_->HandleInput();
-	if (this->iCommand_) {
-		iCommand_->Exec(*caracterManager_->GetPlayer());
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Start)) {
+		if (isMenu_) {
+			isMenu_ = false;
+		}
+		else {
+			isMenu_ = true;
+		}
 	}
 
-	
-	// 調整項目
-	ApplyGlobalVariables();
+	if (!isMenu_) {
+		Camera::isShake_ = false;
 
-	// ImGuiの更新
-	UpdateImGui();
-
-	/*int countIndex = 0;
-	for (auto& enemy : loadData_->GetLevelData()->enemys) {
-		if (enemy.isEnable)
-		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
-			enemy.crrentTimer += MyGame::GameTime();
-			if (enemy.crrentTimer >= enemy.timer) {
-				caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
-				loadData_->GetLevelData()->counts[countIndex]++;
-				enemy.crrentTimer = 0;
-			}
+		iCommand_ = inputHander_->HandleInput();
+		if (this->iCommand_) {
+			iCommand_->Exec(*caracterManager_->GetPlayer());
 		}
-		countIndex++;
-	}*/
 
-	if (behaviorRequest_) {
-		// ふるまいを変更する
-		behavior_ = behaviorRequest_.value();
-		// 各ふるまいごとの初期化を実行
+
+		// 調整項目
+		ApplyGlobalVariables();
+
+		// ImGuiの更新
+		UpdateImGui();
+
+		int countIndex = 0;
+		for (auto& enemy : loadData_->GetLevelData()->enemys) {
+			if (enemy.isEnable)
+				if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
+					enemy.crrentTimer += MyGame::GameTime();
+					if (enemy.crrentTimer >= enemy.timer) {
+						caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
+						loadData_->GetLevelData()->counts[countIndex]++;
+						enemy.crrentTimer = 0;
+					}
+				}
+			countIndex++;
+		}
+
+		if (behaviorRequest_) {
+			// ふるまいを変更する
+			behavior_ = behaviorRequest_.value();
+			// 各ふるまいごとの初期化を実行
+			switch (behavior_) {
+			case Behavior::kPhase1: // フェーズ１
+				BehaviorPhase1Initialize();
+				break;
+			case Behavior::kPhase2: // フェーズ２
+				BehaviorPhase2Initialize();
+				break;
+			}
+			// ふるまいリクエストリセット
+			behaviorRequest_ = std::nullopt;
+		}
 		switch (behavior_) {
 		case Behavior::kPhase1: // フェーズ１
-			BehaviorPhase1Initialize();
+			BehaviorPhase1Update();
 			break;
 		case Behavior::kPhase2: // フェーズ２
-			BehaviorPhase2Initialize();
+			BehaviorPhase2Update();
 			break;
 		}
-		// ふるまいリクエストリセット
-		behaviorRequest_ = std::nullopt;
-	}
-	switch (behavior_) {
-	case Behavior::kPhase1: // フェーズ１
-		BehaviorPhase1Update();
-		break;
-	case Behavior::kPhase2: // フェーズ２
-		BehaviorPhase2Update();
-		break;
-	}
-	//tumeee_ += MyGame::GameTime();
-	if (tumeee_ >= 10.0f) {
-		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
+		tumeee_ += MyGame::GameTime();
+		if (tumeee_ >= 10.0f) {
+			if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
+				// シーン切り替え
+				GetSceneManager()->ChangeScene("TITLE");
+			}
+		}
+#ifdef _DEBUG
+		if (input_->IsTriggerKey(DIK_P)) {
 			// シーン切り替え
 			GetSceneManager()->ChangeScene("TITLE");
 		}
-	}
-#ifdef _DEBUG
-	if (input_->IsTriggerKey(DIK_P)) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
-	}
 
-	ImGui::Begin("Debug");
-	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
-	if (ImGui::Button("ADDEnemy")) {
-		caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, enemyPosition));
-	}
-	if (ImGui::Button("lockOn")) {
-		cameraManeger_->SetUseCamera("fixedCamera",0.3f);
-	}
-	if (ImGui::Button("noLockOn")) {
-		cameraManeger_->SetUseCamera("followCamera", 0.3f);
-	}
+		ImGui::Begin("Debug");
+		ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
+		if (ImGui::Button("ADDEnemy")) {
+			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, enemyPosition));
+		}
+		if (ImGui::Button("lockOn")) {
+			cameraManeger_->SetUseCamera("fixedCamera", 0.3f);
+		}
+		if (ImGui::Button("noLockOn")) {
+			cameraManeger_->SetUseCamera("followCamera", 0.3f);
+		}
 
-	
-	ImGui::End();
 
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-		caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
-	}
+		ImGui::End();
+
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+			caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
+		}
 #endif // _DEBUG
 
 
 
-	// スペシャル
-	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
-		cameraManeger_->SetUseCamera("universeCamera",0.0f);
-	}
-
-	gameUI->Update();
+		// スペシャル
+		if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
+			cameraManeger_->SetUseCamera("universeCamera", 0.0f);
+		}
+	
 	// カメラ管理の更新
 	cameraManeger_->Update();
 	// 弾マネージャ
@@ -254,6 +263,9 @@ void GamePlayScene::Update()
 	CheckAllCollisions();
 	// レベルデータアップデート
 	loadData_->Update();
+	}
+	gameUI->SetIsMenu(isMenu_);
+	gameUI->Update();
 }
 
 #pragma endregion //更新関係
@@ -266,7 +278,7 @@ void GamePlayScene::BehaviorPhase1Initialize()
 
 void GamePlayScene::BehaviorPhase1Update()
 {
-
+	caracterManager_->SetIsMenu(isMenu_);
 	caracterManager_->Update();
 
 }

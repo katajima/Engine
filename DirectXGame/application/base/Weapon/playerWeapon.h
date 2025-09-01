@@ -1,5 +1,8 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Weapon/MellWeapons.h"
+#include "DirectXGame/application/base/UI/DamageUIManager.h"
+
+
 
 class BasePlayer;
 class Player;
@@ -36,5 +39,9 @@ private:
 	std::shared_ptr<ComboNodeState> attack2;
 	std::shared_ptr<ComboNodeState> attack3;
 	std::shared_ptr<ComboNodeState> heavy1;
+
+
+	std::unique_ptr<DamageUIManager> damageUI_;
+
 };
 

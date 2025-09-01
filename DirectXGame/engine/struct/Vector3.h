@@ -12,6 +12,10 @@
 struct Vector3 final {
 	float x, y, z;
 	
+	static constexpr size_t Dim = 3;
+	float& operator[](size_t i) { return i == 0 ? x : (i == 1 ? y : z); }
+	const float& operator[](size_t i) const { return i == 0 ? x : (i == 1 ? y : z); }
+
 	// 配列のようにアクセスできるオーバーロード
 	float& operator[](int index) {
 		return (&x)[index]; // x のアドレスを使って配列のようにアクセス

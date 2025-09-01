@@ -44,57 +44,6 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	textRB_->SetPosition({ 1280 / 2,550 });
 	textRB_->SetAnchorPoint({ 0.5f,0.5f });
 	textRB_->SetSize(0.2f);
-
-	/*InitUICheckBox("check1", { 300,100 });
-	InitUICheckBox("check2", { 340,100 });
-	InitUICheckBox("check3", { 380,100 });
-	InitUICheckBox("check4", { 420,100 });
-	InitUICheckBox("check5", { 460,100 });
-
-
-	InitUIMeter("HPBer1", { 30,150 });
-	UIMeter* HPBer1_ = GetUIMeter("HPBer1");
-	HPBer1_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer1_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer1_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer1_->SetMeterType(UIMeterType::Left);
-	InitUIMeter("HPBer2", { 30,250 });
-	UIMeter* HPBer2_ = GetUIMeter("HPBer2");
-	HPBer2_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer2_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer2_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer2_->SetMeterType(UIMeterType::Right);
-
-	InitUIMeter("HPBer3", { 30,350 });
-	UIMeter* HPBer3_ = GetUIMeter("HPBer3");
-	HPBer3_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer3_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer3_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer3_->SetMeterType(UIMeterType::Top);
-
-	InitUIMeter("HPBer4", { 30,450 });
-	UIMeter* HPBer4_ = GetUIMeter("HPBer4");
-	HPBer4_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer4_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer4_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer4_->SetMeterType(UIMeterType::Down);
-
-	InitUIMeter("HPBer5", { 30,550 });
-	UIMeter* HPBer5_ = GetUIMeter("HPBer5");
-	HPBer5_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer5_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer5_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer5_->SetMeterType(UIMeterType::WidthCenter);
-
-	InitUIMeter("HPBer6", { 30,650 });
-	UIMeter* HPBer6_ = GetUIMeter("HPBer6");
-	HPBer6_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer6_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer6_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer6_->SetMeterType(UIMeterType::HeightCenter);
-
-	InitUISlider("Slider",{300,200});*/
-
 }
 
 void PlayerUI::Update()

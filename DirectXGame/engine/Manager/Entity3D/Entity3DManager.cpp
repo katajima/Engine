@@ -129,7 +129,7 @@ void Entity3DManager::UpdateImgui()
 
 			}
 			else if (entity->GetRenderComponent()->GetObjectType() ==ObjectModelType::kPrimitive) {
-				material = entity->primitive_->GetMaterial();
+				/*material = entity->primitive_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
 					ImGui::DragFloat3("M_scale", &material->transform.scale.x, 0.1f);
@@ -139,7 +139,7 @@ void Entity3DManager::UpdateImgui()
 					ImGui::SliderInt("enableLighting", &material->enableLighting_, 0, 1);
 					ImGui::SliderFloat("alphaClipping", &material->alphaClipping_, 0, 1);
 					ImGui::DragFloat("shininess", &material->shininess_, 0.01f);
-				}
+				}*/
 
 			}
 			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kOcean) {
@@ -199,7 +199,7 @@ void Entity3DManager::UpdateImgui()
 			// プリミティブ形状なら
 			if (entity->GetPrimitive()) {
 				ImGui::Separator();
-				entity->GetPrimitive()->MeshUpdateImGui();
+				//entity->GetPrimitive()->MeshUpdateImGui();
 
 			}
 

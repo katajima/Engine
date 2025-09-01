@@ -2,7 +2,7 @@
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
-#include"DirectXGame/engine/base/Timer.h"
+#include"DirectXGame/engine/Utility/TimerUtility.h"
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
@@ -78,7 +78,10 @@ private:
 
 	// インプットハンドラ
 	std::unique_ptr < InputHander> inputHander_;
-	ICommand* iCommand_;
+	ICharacterCommand* iCommand_;
+
+
+
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
@@ -113,5 +116,9 @@ private:
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;
+
+	bool isMenu_ = false;
+
+
 };
 

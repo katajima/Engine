@@ -3,7 +3,7 @@
 #include"DirectXGame/engine/input/Input.h"
 
 
-ICommand::~ICommand()
+ICharacterCommand::~ICharacterCommand()
 {
 }
 
@@ -38,7 +38,7 @@ void InputHander::AssignAttackCommandPad()
 
 
 
-ICommand* InputHander::HandleInput()
+ICharacterCommand* InputHander::HandleInput()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
@@ -53,4 +53,12 @@ ICommand* InputHander::HandleInput()
 		
 	}
 	return nullptr;
+}
+
+ICommand::~ICommand()
+{
+}
+
+void MenuCommand::Exec()
+{
 }

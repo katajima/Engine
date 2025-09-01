@@ -27,6 +27,12 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	object_->Update();
 	object_->InitColliderComponent();
 	
+	// ダメージUIマネージャー設定
+	damageUIManager_ = std::make_unique<DamageUIManager>();
+	damageUIManager_->SetCamera(camera);
+	damageUIManager_->Initialize(nullptr,entity2DManager, nullptr);
+
+	// コライダー設定
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::PlayerAttack;
 	sphere->layer = CollisionLayer::PlayerAttack;
@@ -57,6 +63,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		enemy->AddDamage(parameter_.damege);
+		damageUIManager_->AddUI("damage", parameter_.damege, 1.0f, enemy->GetObject3D()->GetWorldPosition());
 		enemy->Emit();
 		};
 
@@ -121,7 +128,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 	Vector3 size = { 2.0f, 2.0f, 2.0f };
 	hitEmitter_ = std::make_unique <ParticleEmitter>();
-	hitEmitter_->Initialize(particleManager, "missileHit", "missileHit", ParticleData::SpawnType::kPoint);
+	hitEmitter_->Initialize(particleManager, "missileHit", "missileHit", EmitData::SpawnType::kPoint);
 	hitEmitter_->SetCount(2);
 	hitEmitter_->SetLifeTimeMinMax(0.25f, 0.25f);
 	hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
@@ -143,12 +150,16 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	cylinderParam.isCover = false;
 	cylinderParam.segments = 16;
 	
-	hitObject_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
-	hitObject_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
+	hitObject_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("cylinder","resources/Texture/effect/gradationLine.png", camera);
+	hitObject_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
 	hitObject_->GetRenderComponent()->SetObjectRasterizerType(ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
 	hitObject_->GetWorldTransform().translate_.z = 50.0f;
 	hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
 	hitObject_->SetIsDraw(false);
+	CylinderPrimitive* cy = dynamic_cast<CylinderPrimitive*>(hitObject_->GetPrimitive());
+	cy->Data() = cylinderParam;
+	
+	
 	
 	cylinderParam.height = 10.0f;
 	cylinderParam.innerRadius = 12.0f;
@@ -156,11 +167,14 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	cylinderParam.isCover = true;
 
 	
-	hitObject2_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/Image.png", Primitive::ShapeType::Cylinder, camera);
-	hitObject2_->GetPrimitive()->SetPsoType(Primitive::PsoType::kRingClamp);
+	hitObject2_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("cylinder", "resources/Texture/Image.png", camera);
+	hitObject2_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
 	hitObject2_->GetPrimitive()->GetMaterial()->color = {1.0f,0.0f,0.0f,0.5f};
-	
+	CylinderPrimitive* cy2 = dynamic_cast<CylinderPrimitive*>(hitObject2_->GetPrimitive());
+	cy2->Data() = cylinderParam;
+
+
 	enemyPos_.x = targetRange_.position.x + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
 	enemyPos_.z = targetRange_.position.z + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
 	enemyPos_.y = 2.0f;
@@ -334,12 +348,12 @@ void PlayerRangeBombingBullet::Update()
 		time_ += GetTimer();
 		object_->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
 		object_->SetIsDraw(false);
-		hitObject_->SetIsDraw(true);
+		/*hitObject_->SetIsDraw(true);
 		hitObject_->GetWorldTransform().translate_ = object_->GetWorldTransform().translate_ + Vector3{ 0.0f,5.0f ,0.0f };
 		hitObject_->GetWorldTransform().translate_.y = cilnderHeight_ /3.0f;
 		hitObject_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
 		hitObject_->GetWorldTransform().scale_ += Vector3(0.15f, 0.15f, 0.00f);
-		hitObject_->GetPrimitive()->GetMaterial()->color.a -= 0.05f;
+		hitObject_->GetPrimitive()->GetMaterial()->color.a -= 0.05f;*/
 
 
 		if (time_ >= 0.5f) {
@@ -357,7 +371,7 @@ void PlayerRangeBombingBullet::Update()
 	}
 	object_->SetIsEmitTrailEffect(true);
 	hitEmitter_->Update();
-
+	damageUIManager_->Update();
 }
 
 void PlayerRangeBombingBullet::Draw()
@@ -372,11 +386,12 @@ void PlayerRangeBombingBullet::DrawP()
 
 void PlayerRangeBombingBullet::Draw2D()
 {
+	damageUIManager_->Draw();
 }
 
 void PlayerRangeBombingBullet::InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
 {
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+	emitter->Initialize(particleManager, emitName, emitName, EmitData::SpawnType::kPoint);
 	emitter->GetFrequency() = 0.00f;
 	emitter->SetCount(5);
 	emitter->SetLifeTimeMinMax(1.7f, 2.0f);
@@ -395,7 +410,7 @@ void PlayerRangeBombingBullet::InitStartSmoke(ParticleEmitter* emitter, Particle
 
 void PlayerRangeBombingBullet::InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
 {
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kSegmentLine);
+	emitter->Initialize(particleManager, emitName, emitName, EmitData::SpawnType::kSegmentLine);
 	emitter->GetFrequency() = 0.00f;
 	emitter->SetCount(2);
 	emitter->SetLifeTimeMinMax(0.5f, 0.7f);
@@ -416,7 +431,7 @@ void PlayerRangeBombingBullet::InitMoveSmoke(ParticleEmitter* emitter, ParticleM
 
 void PlayerRangeBombingBullet::InitExpSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
 {
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+	emitter->Initialize(particleManager, emitName, emitName, EmitData::SpawnType::kPoint);
 	emitter->GetFrequency() = 0.00f;
 	emitter->SetCount(10);
 	emitter->SetLifeTimeMinMax(2.5f, 2.5f);
@@ -436,7 +451,7 @@ void PlayerRangeBombingBullet::InitExpSmoke(ParticleEmitter* emitter, ParticleMa
 
 void PlayerRangeBombingBullet::InitExpFire(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
 {
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+	emitter->Initialize(particleManager, emitName, emitName, EmitData::SpawnType::kPoint);
 	emitter->GetFrequency() = 0.00f;
 	emitter->SetCount(2);
 	emitter->SetLifeTimeMinMax(0.25f, 0.27f);
@@ -458,14 +473,14 @@ void PlayerRangeBombingBullet::InitExpFire(ParticleEmitter* emitter, ParticleMan
 
 void PlayerRangeBombingBullet::InitExpBre(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
 {
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+	emitter->Initialize(particleManager, emitName, emitName, EmitData::SpawnType::kPoint);
 	emitter->GetFrequency() = 0.00f;
 	emitter->SetCount(6);
 	emitter->SetLifeTimeMinMax(3.25f, 3.27f);
 	//emitter->SetIsAlpha(true);
 	emitter->SetAlphaClipping(0.23f);
 	emitter->SetIsLifeTimeScale(true);
-	emitter->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kBottom);
+	emitter->SetLifeTimeScaleTopBottom(EmitData::TopBottom::kBottom);
 	emitter->SetIsGravity(true);
 	emitter->SetUsebillboard(false);
 	emitter->SetUsebillboardRotZ(true);
@@ -483,7 +498,7 @@ void PlayerRangeBombingBullet::InitExpBre(ParticleEmitter* emitter, ParticleMana
 
 void PlayerRangeBombingBullet::InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
 {
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kAABB);
+	emitter->Initialize(particleManager, emitName, emitName, EmitData::SpawnType::kAABB);
 	emitter->GetFrequency() = 0.00f;
 	emitter->SetCount(3);
 	emitter->SetLifeTimeMinMax(0.10f, 0.20f);

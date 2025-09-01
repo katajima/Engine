@@ -25,12 +25,11 @@ void MyGame::Initialize()
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
-	//sceneManager_->ChangeScene("TITLE");
-	//sceneManager_->ChangeScene("TEST");
 	sceneManager_->ChangeScene("TITLE");
-
+	//sceneManager_->ChangeScene("TEST");
+	
 #ifdef _DEBUG
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("GAMEPLAY");
 #endif // _DEBUG
 
 
@@ -196,29 +195,28 @@ void MyGame::CreateParticle()
 	ModelManager* modelManager = dxCommon->GetModelManager();
 
 
-	primi = std::make_unique<Primitive>();
-	ShapeParameter::Torus t;
-	primi->Initialize<ShapeParameter::Torus>(entity3DManager_->GetPrimitiveCommon(),Primitive::ShapeType::Torus,t,"resources/Texture/uvChecker.png");
+	primi = std::make_unique<TorusPrimitive>();
+	primi->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/uvChecker.png");
 
-	primiTrai = std::make_unique<Primitive>();
-	ShapeParameter::ShapeTriangle t2;
-	primiTrai->Initialize<ShapeParameter::ShapeTriangle>(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Triangle, t2, "resources/Texture/Image.png");
+	primiTrai = std::make_unique<TrianglePrimitive>();
+	primiTrai->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/Image.png");
 
-	primiPlane = std::make_unique<Primitive>();
-	ShapeParameter::ShapePlane shapePlane;
-	primiPlane->Initialize<ShapeParameter::ShapePlane>(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
+	primiPlane = std::make_unique<PlanePrimitive>();
+	primiPlane->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/uvChecker.png");
 
 
 	ShapeParameter::Star star;
 	star.innerRadius = 1.0f;
 	star.outerRadius = 7.0f;
 	star.segments = 4;
-	primiStar = std::make_unique<Primitive>();
-	primiStar->Initialize<ShapeParameter::Star>(entity3DManager_->GetPrimitiveCommon(), Primitive::ShapeType::Star, star, "resources/Texture/Image.png");
+	primiStar = std::make_unique<StarPrimitive>();
+	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/Image.png");
+	primiStar->Data() = star;
+	primiStar->MeshInitialize();
 
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
-	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, ParticleData::BlendType::MODE_ADD);
+	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, EmitData::BlendType::MODE_ADD);
 
 	particleManager->CreateParticleGroup("dustt", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
 
@@ -293,16 +291,16 @@ void MyGame::CreateParticle()
 	
 
 
-	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 10000);
+	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 1000);
 	gpuParticleManager_->CreateEmitter("emitte_no1");
 	//gpuParticleManager_->CreateEmitter("emitte2_no1");
-	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
 	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 
 
-	gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
+	//gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
  
-	gpuParticleManager_->CreateField("AABBField");
+	//gpuParticleManager_->CreateField("AABBField");
 
 }
 

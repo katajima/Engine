@@ -57,7 +57,7 @@ public:
 
 
 	// プリミティブ形状
-	void SetPrimitive(std::unique_ptr<Primitive> primitive)
+	void SetPrimitive(std::unique_ptr<BasePrimitive> primitive)
 	{
 		primitive_ = std::move(primitive);
 		renderComponent_->SetPrimitive(primitive_.get());
@@ -80,10 +80,6 @@ public:
 
 
 
-
-	// オブジェクトがカメラ内に映っているか
-	bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
-
 	// メッシュ取得
 	ModelMesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
 
@@ -94,7 +90,7 @@ public:
 	Model* GetModel() const { return model; }
 
 	// プリミティブ取得
-	Primitive* GetPrimitive() const { return primitive_.get();};
+	BasePrimitive* GetPrimitive() const { return primitive_.get();};
 	// 波取得
 	Ocean* GetOcean() const { return ocean_; }
 	// トレイルエフェクト
@@ -236,7 +232,7 @@ public:
 	// モデル
 	Model* model = nullptr;
 	// プリミティブ
-	std::unique_ptr<Primitive> primitive_ = nullptr;
+	std::unique_ptr<BasePrimitive> primitive_ = nullptr;
 	// スカイボックス
 	SkyBox* skyBox_ = nullptr;
 	// 波

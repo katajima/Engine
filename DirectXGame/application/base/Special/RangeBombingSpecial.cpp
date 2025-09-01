@@ -29,12 +29,15 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 
 
 	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D("レティクルシリンダー", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
-	objectReticle_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("レティクルシリンダー","resources/Texture/effect/gradationLine.png", camera);
+	objectReticle_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
 	//objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
 	objectReticle_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
 	objectReticle_->GetWorldTransform().translate_ = { 0,2,100 };
+	CylinderPrimitive* cy = dynamic_cast<CylinderPrimitive*>(objectReticle_->GetPrimitive());
+	cy->Data() = cylinderParam;
+
 }
 
 void RangeBombingSpecial::Update()

@@ -7,7 +7,7 @@
 // engine
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"ParticleManager.h"
+#include"DirectXGame/engine/Effect/Particle/ParticleManager.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 class LineCommon;
@@ -18,7 +18,7 @@ public:
 
 	}
 
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, ParticleData::SpawnType spawnType = ParticleData::SpawnType::kAABB);
+	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitData::SpawnType spawnType = EmitData::SpawnType::kAABB);
 
 	void Update();
 
@@ -61,7 +61,7 @@ public: // ゲッター兼セッター
 
 	void SetIsLifeTimeScale(bool is) { isFlag.isLifeTimeScale_ = is; } // スケール変更
 
-	void SetLifeTimeScaleTopBottom(ParticleData::TopBottom topBottom) { topBottom_ = topBottom; }
+	void SetLifeTimeScaleTopBottom(EmitData::TopBottom topBottom) { topBottom_ = topBottom; }
 
 	void SetIsRotateVelocity(bool is) { isFlag.isRotateVelocity = is; } // 回転速度
 
@@ -109,13 +109,13 @@ private: // エミッタ可視化
 	void EmitMinMax();
 
 private:
-	ParticleData::EmitType emitType_ = ParticleData::EmitType::kRandom; // 出現方法
-	ParticleData::TopBottom topBottom_ = ParticleData::TopBottom::kBottom; // 拡縮
-	ParticleData::SpawnType spawnShapeType_ = ParticleData::SpawnType::kAABB; // 出現形状
+	EmitData::EmitType emitType_ = EmitData::EmitType::kRandom; // 出現方法
+	EmitData::TopBottom topBottom_ = EmitData::TopBottom::kBottom; // 拡縮
+	EmitData::SpawnType spawnShapeType_ = EmitData::SpawnType::kAABB; // 出現形状
 
 private:
 	// パーティクル制御に必要なフラグ
-	ParticleData::IsFlag isFlag;
+	EmitData::IsFlag isFlag;
 
 	// 出すか
 	bool isEmit = true; // 出すか

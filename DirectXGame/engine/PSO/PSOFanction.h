@@ -11,7 +11,7 @@ using namespace Microsoft::WRL;
 #include<format>
 
 #include "DirectXGame/engine/base/Logger.h"
-#include "DirectXGame/engine/base/StringUtility.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
 
 
 

@@ -326,23 +326,6 @@ void TestScene::InitializeObject3D()
 	oceanObject->SetIsDraw(true);
 	
 
-	skinningObject = GetEntity3DManager()->CreateObject3D("run", ObjectModelType::kSkinning, {0,0,0}, camera.get());
-	skinningObject->SetModel("run.gltf");
-	skinningObject->GetWorldTransform().scale_ = { 3,3,3 };
-	skinningObject->InitAnimationComponent();
-	skinningObject->SetIsDraw(true);
-	skinningObject->GetAnimationComponent()->SetAnimetion("Anim_0", 0.3f);
-
-	skinningObject2 = GetEntity3DManager()->CreateObject3D("BoxBox", ObjectModelType::kNormal, { 0,0,0 }, camera.get());
-	skinningObject2->SetModel("BoxBox.obj");
-	skinningObject2->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
-	skinningObject2->SetIsDraw(true);
-	
-	skinningObject3 = GetEntity3DManager()->CreateObject3D("KnightCharacter", ObjectModelType::kSkinning, { 0,0,0 }, camera.get());
-	skinningObject3->SetModel("KnightCharacter.gltf");
-	skinningObject3->InitAnimationComponent();
-	skinningObject3->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
-	skinningObject3->SetIsDraw(true);
 	
 
 	/// 階段
@@ -377,18 +360,6 @@ void TestScene::InitializeObject3D()
 	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
 	skyBoxObject2->SetName("skyBox2");
 	skyBoxObject2->SetIsDraw(false);
-
-
-	ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = 10.0f;
-	cylinderParam.innerRadius = 2.1f;
-	cylinderParam.outerRadius = 2.1f;
-	cylinderParam.isCover = false;
-	cylinderParam.segments = 16;
-	worldparticleEmitter_.Initialize();
-	primiPlane = std::make_unique<Primitive>();
-	ShapeParameter::ShapePlane shapePlane;
-	primiPlane->Initialize<ShapeParameter::ShapePlane>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
 
 }
 
@@ -442,9 +413,8 @@ void TestScene::InitializeParticle()
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kTornado, Field::ShapeType::kAABB,"竜巻");*/
 
 	
-
 	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleData::SpawnType::kSpline);
+	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "hitStar", EmitData::SpawnType::kSpline);
 	emitter_->GetFrequency() = 0.1f;
 	emitter_->SetCount(1);
 	//emitter_->SetParent(skinningObject2->worldtransform_);
@@ -469,7 +439,7 @@ void TestScene::InitializeParticle()
 	//GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(fieldEffect_.get());
 
 	primitvPlane_ = std::make_unique<ParticleEmitter>();
-	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleData::SpawnType::kPoint);
+	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", EmitData::SpawnType::kPoint);
 	primitvPlane_->GetFrequency() = 0.025f;
 	primitvPlane_->SetCount(40);
 	//primitvPlane_->SetPos({ 0,50,0 });
@@ -613,92 +583,7 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
-	velo = { 0,0,0 };
-
-	const float kRotateSpeed = 0.03f;
-
-	if (input_->IsControllerConnected()) {
-		camera->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
-		camera->transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
-
-		camera->transform_.rotate.x = std::clamp(camera->transform_.rotate.x, DegreesToRadians(-15.0f), DegreesToRadians(60.0f));
-	}
-	
-	// 回転適用
-	Matrix4x4 rotY = MakeRotateYMatrix(camera->transform_.rotate.y);
-	Matrix4x4 rotX = MakeRotateXMatrix(camera->transform_.rotate.x);
-	Matrix4x4 rotateMatrix = rotX * rotY;
-	Vector3 offset = TransformNormal(Vector3{ 0,5,-50 }, rotateMatrix);
-
-	Vector3 targetPos = skinningObject3->GetWorldTransform().worldMat_.GetWorldPosition();
-	Vector3 desiredCameraPos = Add(targetPos, offset);
-
-	// 地面以下にカメラが沈んでいる場合のみ、Zを近づけて補正
-	if (desiredCameraPos.y < 0.0f) {
-		float depth = -desiredCameraPos.y; // どれだけ沈んでいるか
-		float maxZOffset = 30.0f; // 最大どれだけZを近づけるか（調整可）
-		float zAdjust = std::clamp(depth * 2.0f, 0.0f, maxZOffset); // 線形補間
-
-		// カメラ方向を正規化
-		Vector3 direction = Normalize(Subtract(targetPos, desiredCameraPos));
-		Vector3 zOffset = Multiply(direction, zAdjust);
-
-		// 補正を加える
-		desiredCameraPos = Add(desiredCameraPos, zOffset);
-
-		// 地面に出るようにYを補正
-		desiredCameraPos.y = 0.0f;
-	}
-
-	camera->transform_.translate = desiredCameraPos;
-
-	if (input_->IsControllerConnected()) {
-
-
-		velo.x = input_->GetGamePadLeftStick().x;
-		velo.z = input_->GetGamePadLeftStick().y;
-
-
-		if (velo.x != 0.0f || velo.z != 0.0f) {
-			// 入力方向を正規化
-			velo = Normalize(velo);
-			velo = Multiply(velo,0.1f);
-
-
-			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
-
-			// カメラの向きに基づいて移動方向をワールド座標系に変換
-			Vector3 worldDirection = {
-				velo.x * cameraWorldMatrix.m[0][0] + velo.z * cameraWorldMatrix.m[2][0],
-				0.0f,
-				velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
-			};
-
-			velo = Multiply(Normalize(worldDirection), 0.1f);
-
-			//// 移動ベクトルをカメラの角度だけ回転する
-			//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
-			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
-			//
-			if (velo.Length() != 0) {
-				skinningObject3->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
-			}
-			skinningObject3->GetAnimationComponent()->SetAnimetion("Run", 0.3f);
-		}
-		else {
-			skinningObject3->GetAnimationComponent()->SetAnimetion("Idle", 0.3f);
-		}
-	}
-
-	skinningObject3->GetWorldTransform().translate_ += velo;
-	skinningObject3->GetWorldTransform().Update();
-
-	skinningObject2->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.R", skinningObject3->GetWorldTransform().worldMat_));
-	worldparticleEmitter_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.L", skinningObject3->GetWorldTransform().worldMat_));
-	worldparticleEmitter_.Update();
-	primitvPlane_->Update();
-
+	emitter_->Update();
 }
 
 void TestScene::UpdateRoom02()

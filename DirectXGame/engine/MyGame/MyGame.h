@@ -65,10 +65,10 @@ private:
 	
 	DebugTimer debugTimer_;
 
-	std::unique_ptr<Primitive> primi = nullptr;
-	std::unique_ptr<Primitive> primiPlane = nullptr;
-	std::unique_ptr<Primitive> primiStar = nullptr;
-	std::unique_ptr<Primitive> primiTrai = nullptr;
+	std::unique_ptr<TorusPrimitive> primi = nullptr;
+	std::unique_ptr<PlanePrimitive> primiPlane = nullptr;
+	std::unique_ptr<StarPrimitive> primiStar = nullptr;
+	std::unique_ptr<TrianglePrimitive> primiTrai = nullptr;
 	
 private:
 	// ゲーム終了フラグ

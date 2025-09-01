@@ -1,5 +1,5 @@
 #include "TextureManager.h"
-#include"DirectXGame/engine/Base/StringUtility.h"
+#include"DirectXGame/engine/Utility/StringUtility.h"
 #include<unordered_map>
 
 #include"DirectXGame/engine/Manager/SRV/SrvManager.h"

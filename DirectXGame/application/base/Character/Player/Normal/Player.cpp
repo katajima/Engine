@@ -129,7 +129,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
 	weapon_->SetCharacter(this);
-	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
+	weapon_->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, {}, camera_);
 	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { DegreesToRadians(-90),0.0f,0.0f };
 	weapon_->GetHitData().hitTime.maxT = 2.0f;
 
@@ -227,6 +227,9 @@ void Player::DrawEffect()
 
 void Player::Draw2D()
 {
+	weapon_->Draw2D();
+
+
 	ui_->SetHPBerSize(static_cast<float>(HP()));
 
 	ui_->SetIsTextmax(special_->GetIsSpecial());
@@ -234,6 +237,9 @@ void Player::Draw2D()
 	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
 	ui_->Draw();
+
+
+
 }
 
 

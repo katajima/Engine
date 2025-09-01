@@ -14,11 +14,13 @@ public:
 
 	void SetPlayer(BasePlayer* player);
 
+	void SetIsMenu(bool is) { isMenu_ = is; };
+
 private:
 	std::unique_ptr<Sprite> text_clera;
 	std::unique_ptr<Sprite> text_over;
 private:
 	BasePlayer* player_;
-
+	bool isMenu_ = false;
 };
 

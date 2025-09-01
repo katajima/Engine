@@ -35,7 +35,7 @@ enum class ObjectDrawType {
 	kTranslucent03,	// 半透明最後
 };
 
-class Primitive;
+class BasePrimitive;
 class SkyBox;
 class Ocean;
 class Transfomation;
@@ -63,7 +63,7 @@ public:
 	// 波セット
 	void SetOcean(Ocean* ocean) { ocean_ = ocean; }
 	// プリミティブ
-	void SetPrimitive(Primitive* primitive){primitive_ = primitive;}
+	void SetPrimitive(BasePrimitive* primitive){primitive_ = primitive;}
 	
 
 public:
@@ -119,7 +119,7 @@ private:
 	Entity3DManager* entity3DManager_ = nullptr;
 	Model* model = nullptr;
 	// プリミティブ
-	Primitive* primitive_ = nullptr;
+	BasePrimitive* primitive_ = nullptr;
 	// スカイボックス
 	SkyBox* skyBox_ = nullptr;
 	// 波

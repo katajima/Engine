@@ -31,6 +31,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 		// プレイヤーかチェック
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
+		uint32_t otherId = otherComponent->GetUniqueId();
 
 		if (other->tag == CollisionTag::Enemy) {
 			Vector3 pushVec;
@@ -96,6 +97,18 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			}
 		}
 		if (other->tag == CollisionTag::PlayerAttack) {
+
+			//float nowTime =  GetTime(); // ← 時間取得関数（例）
+			//
+			//if (GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
+			//	return; // クールタイム中のため無視
+			//}
+			//
+			//GetContactRecord().AddHistory(otherId, nowTime);
+			//
+			//AddDamage(10.0f);
+			
+
 			ChangeState("Move");
 		}
 
@@ -258,10 +271,12 @@ void NormalEnemy::Move()
 
 	// 回転と移動量の設定
 	if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
+		moveComponent_->SetSpeed(0);
 		Parameters().speed = 0;
 	}
 	else {
-		Parameters().speed = 3.0f;
+		moveComponent_->SetSpeed(1.0f);
+		Parameters().speed = 1.0f;
 	}
 
 	// 向いている方向への移動ベクトルの計算
@@ -276,18 +291,6 @@ void NormalEnemy::Move()
 	Velocity() = Subtract(lockOnPosition, GetWorldTransform().translate_);
 	// Y軸周り角度
 	GetWorldTransform().rotate_.y = std::atan2(Velocity().x, Velocity().z);
-	//}
-	//else {
-	//	// ロックオン座標
-	//	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
-	//	Vector3 dire = Subtract(lockOnPosition, GetWorldTransform().translate_);
-	//	// Y軸周り角度
-	//	GetWorldTransform().rotate_.y = std::atan2(dire.x, dire.z);
-	//}
-
-
-
-	//GravityUpdate(Timer(), Situations().isJumping, GetAlive());
 }
 
 void NormalEnemy::Jump()
@@ -302,68 +305,6 @@ void NormalEnemy::Attack() {
 void NormalEnemy::InitParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-
-
-
-	/*dustEmit_ = std::make_unique<ParticleEmitter>();
-	dustEmit_->Initialize(particleManager, "smokePlane01", "smokePlane01_2");
-	dustEmit_->GetFrequency() = 0.25f;
-	dustEmit_->SetCount(3);
-	dustEmit_->SetParent(objectBase_->worldtransform_);
-	dustEmit_->SetPos({ 0,1.1f,-0.45f });
-	dustEmit_->SetRengeMinMax({ 0,0,0 }, { 0,0,0 });
-	dustEmit_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
-	dustEmit_->SetLifeTimeMinMax(2.5f, 2.7f);
-	dustEmit_->SetAlphaClipping(0.15f);
-	dustEmit_->SetSizeMinMax(Vector3{ 1.6f,1.6f,1.6f }, { 1.8f,1.8f,1.8f });
-	dustEmit_->SetColorMinMax({ 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f });
-	dustEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
-	dustEmit_->SetUsebillboard(false);
-	dustEmit_->SetEnableLighting(false);
-	dustEmit_->SetIsAlpha(true);
-	dustEmit_->SetIsLifeTimeScale(true);
-	dustEmit_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
-
-
-	dustEmit2_ = std::make_unique<ParticleEmitter>();
-	dustEmit2_->Initialize(particleManager, "smokePlane02", "smokePlane02_2");
-	dustEmit2_->GetFrequency() = 0.25f;
-	dustEmit2_->SetCount(3);
-	dustEmit2_->SetParent(objectBase_->worldtransform_);
-	dustEmit2_->SetPos({ 0,1.1f,-0.45f });
-	dustEmit2_->SetRengeMinMax({ 0,0,0 }, { 0,0,0 });
-	dustEmit2_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
-	dustEmit2_->SetLifeTimeMinMax(2.0f, 2.0f);
-	dustEmit2_->SetAlphaClipping(0.10f);
-	dustEmit2_->SetSizeMinMax(Vector3{ 1.0f,1.0f,1.0f }, { 1.5f,1.5f,1.5f });
-	dustEmit2_->SetColorMinMax({ 0.1f, 0.1f, 0.1f }, { 0.1f, 0.1f, 0.1f });
-	dustEmit2_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
-	dustEmit2_->SetUsebillboard(false);
-	dustEmit2_->SetEnableLighting(false);
-	dustEmit2_->SetIsAlpha(true);
-	dustEmit2_->SetIsLifeTimeScale(true);
-	dustEmit2_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);
-
-	dustEmit3_ = std::make_unique<ParticleEmitter>();
-	dustEmit3_->Initialize(particleManager, "smokePlane03", "smokePlane03_2");
-	dustEmit3_->GetFrequency() = 0.25f;
-	dustEmit3_->SetCount(3);
-	dustEmit3_->SetParent(objectBase_->worldtransform_);
-	dustEmit3_->SetPos({ 0,1.1f,-0.45f });
-	dustEmit3_->SetRengeMinMax({ 0,0,0 }, { 0,0,0 });
-	dustEmit3_->SetVelocityMinMax({ 0,2,0 }, { 0, 5, 0 });
-	dustEmit3_->SetLifeTimeMinMax(2.5f, 2.7f);
-	dustEmit3_->SetAlphaClipping(0.10f);
-	dustEmit3_->SetSizeMinMax(Vector3{ 1.2f,1.2f,1.2f }, { 1.5f,1.5f,1.5f });
-	dustEmit3_->SetColorMinMax({ 0.5f, 0.5f, 0.5f }, { 0.5f, 0.5f, 0.5f });
-	dustEmit3_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
-	dustEmit3_->SetUsebillboard(false);
-	dustEmit3_->SetEnableLighting(false);
-	dustEmit3_->SetIsAlpha(true);
-	dustEmit3_->SetIsLifeTimeScale(true);
-	dustEmit3_->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kTop);*/
-
-
 
 	starEmit_ = std::make_unique<ParticleEmitter>();
 	starEmit_->Initialize(particleManager, "dust", "hitStar");
@@ -397,7 +338,7 @@ void NormalEnemy::InitParticle()
 
 
 	effectEmit_ = std::make_unique<ParticleEmitter>();
-	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleData::SpawnType::kPoint);
+	effectEmit_->Initialize(particleManager, "dust", "hitEffect2", EmitData::SpawnType::kPoint);
 	effectEmit_->GetFrequency() = 0.0f;
 	effectEmit_->SetCount(1);
 	effectEmit_->SetParent(objectBase_->GetWorldTransform());

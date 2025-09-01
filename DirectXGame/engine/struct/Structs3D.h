@@ -1,7 +1,32 @@
 #pragma once
 #include "LineStruct.h"
 #include "array"
-//#include "TransformStruct.h"
+#include "Structs.h"
+
+
+//速度や加速度を管理する構造体
+struct Kinematics {
+	Vector3 velocity{ 0.0f, 0.0f, 0.0f };
+	Vector3 acceleration{ 0.0f, 0.0f, 0.0f };
+
+	// デフォルトコンストラクタ
+	Kinematics() = default;
+
+	// 初期値を設定できるコンストラクタ
+	Kinematics(const Vector3& v, const Vector3& a)
+		: velocity(v), acceleration(a) {
+	}
+
+	// 更新処理
+	void Update(float deltaTime) {
+		velocity += acceleration * deltaTime; // 加速度から速度更新
+	}
+
+	// 減衰などが必要なら追加
+	void ApplyDamping(float damping) {
+		velocity *= damping; // 0.0f〜1.0fの範囲
+	}
+};
 
 //Transform
 struct Transform {

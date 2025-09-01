@@ -1,10 +1,11 @@
 #pragma once
-#include <vector>
-#include <memory>
+
 #include <functional>
 #include "Collider.h"  // Colliderの基底クラス
 #include "DirectXGame/engine/collider/ContactRecord.h"
 #include "DirectXGame/engine/line/lineCommon.h"
+
+#include "DirectXGame/engine/Utility/VectorUtility.h"
 
 // 一意なIDを生成するためのユーティリティクラス
 class UniqueIdGenerator {
@@ -29,8 +30,9 @@ public:
         std::unique_ptr<Collider> collider;
     };
 
-    std::vector<ColliderEntry> colliders;
+    VectorContainer<ColliderEntry> colliders;
 
+   
     // 所有オブジェクト（通知用）
     void* owner = nullptr;
 
@@ -96,25 +98,21 @@ public: // 削除
 
     // すべてのコライダーを削除
     void ClearColliders() {
-        colliders.clear();
+        colliders.Clear();
     }
 
     // 指定したコライダーを削除
     void RemoveCollider(Collider* target) {
-        auto it = std::remove_if(colliders.begin(), colliders.end(),
-            [target](const ColliderEntry& entry) {
-                return entry.collider.get() == target;
+        colliders.RemoveIf([target](const ColliderEntry& entry) {
+            return entry.collider.get() == target;
             });
-        colliders.erase(it, colliders.end());
     }
 
     // IDでのコライダー削除
     void RemoveColliderById(uint32_t id) {
-        auto it = std::remove_if(colliders.begin(), colliders.end(),
-            [id](const ColliderEntry& entry) {
-                return entry.id == id;
+        colliders.RemoveIf([id](const ColliderEntry& entry) {
+            return entry.id == id;
             });
-        colliders.erase(it, colliders.end());
     }
 
 public: // 設定or追加
@@ -126,7 +124,7 @@ public: // 設定or追加
         collider->owner = owner;
         collider->id = nextId_;
         uint32_t id = nextId_++;
-        colliders.push_back({ id, std::move(collider) });
+        colliders.Add({ id, std::move(collider) });
         return id;
     }
 
@@ -189,7 +187,7 @@ public: // 取得
 
     // コライダ数取得
     size_t GetColliderCount() const {
-        return colliders.size();
+        return colliders.Size();
     }
 
     // 全コライダー取得

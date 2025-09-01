@@ -14,7 +14,7 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/d3dx12.h"
 
 
-#include "DirectXGame/engine/base/Timer.h"
+#include "DirectXGame/engine/Utility/TimerUtility.h"
 class Command;
 class DXGIDevice;
 class SrvManager;

@@ -3,7 +3,6 @@
 #include "DirectXGame/application/base/BaseClass/Bullet/BaseBullet.h"
 #include "DirectXGame/engine/effect/primitive/primitive.h"
 
-class Primitive;
 class PlayerMissile :public BaseBullet {
 public:
 	// 初期化
@@ -60,6 +59,6 @@ private: //パーティクルエミッター
 
 	std::unique_ptr<Object3d> hitObject_ = nullptr;
 
-	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
+	std::unique_ptr<BasePrimitive> primitiveCylinder_ = nullptr;
 };
 

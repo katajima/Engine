@@ -46,6 +46,7 @@ void BaseUI::InitUIMeter(std::string name, Vector2 pos, bool useSprite)
 	sprite->Init(entity2DManager_, name);
 	sprite->SetInput(input_);
 	sprite->SetPos(pos);
+
 	uiMeter_.insert(std::make_pair(name, std::move(sprite)));
 }
 
@@ -177,5 +178,15 @@ UICount* BaseUI::GetUICount(std::string name)
 		return uiCount_[name].get();
 	}
 	return nullptr;
+}
+
+const std::map<std::string, std::unique_ptr<UIMeter>>& BaseUI::GetUIMeters() const
+{
+	return uiMeter_;
+}
+
+const std::map<std::string, std::unique_ptr<UICount>>& BaseUI::GetUICounts() const
+{
+	return uiCount_;
 }
 

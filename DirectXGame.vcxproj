@@ -115,6 +115,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\DamageUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\DamageUIManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\struct\Matrix3x3.cpp" />
     <ClCompile Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.cpp" />
@@ -171,7 +174,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\EmitFanction.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.cpp" />
@@ -222,7 +225,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Common\DirectXCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Material\Material.cpp" />
@@ -255,7 +258,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3dCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\Sprite.cpp" />
     <ClCompile Include="DirectXGame\engine\2d\SpriteCommon.cpp" />
-    <ClCompile Include="DirectXGame\engine\Base\StringUtility.cpp" />
+    <ClCompile Include="DirectXGame\engine\Utility\StringUtility.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Texture\TextureManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\WinApp\WinApp.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.cpp" />
@@ -632,7 +635,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Spawn\BasespawnPoint.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\DamageUI.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\DamageUIManager.h" />
+    <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectComponent.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h" />
+    <ClInclude Include="DirectXGame\engine\struct\Structs.h" />
     <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.h" />
     <ClInclude Include="DirectXGame\engine\UI\BaseSprite.h" />
     <ClInclude Include="DirectXGame\engine\UI\UIBoard.h" />
@@ -696,7 +705,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
     <ClInclude Include="DirectXGame\engine\Base\pch.h" />
-    <ClInclude Include="DirectXGame\engine\Base\Timer.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\TimerUtility.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h" />
     <ClInclude Include="DirectXGame\application\base\Vision\VisionComponent.h" />
@@ -720,7 +729,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\EmitFanction.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.h" />
@@ -783,7 +792,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h" />
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleEmitter.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h" />
     <ClInclude Include="DirectXGame\engine\MyGame\Framework.h" />
@@ -805,6 +814,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Transform\Transfomation\Transfomation.h" />
     <ClInclude Include="DirectXGame\engine\Transform\TransformComponent.h" />
     <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\MapUtility.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\VectorUtility.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\RangeUtility.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\ImGuizmo.h" />
@@ -824,7 +836,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\3d\Object\Object3dCommon.h" />
     <ClInclude Include="DirectXGame\engine\2d\Sprite.h" />
     <ClInclude Include="DirectXGame\engine\2d\SpriteCommon.h" />
-    <ClInclude Include="DirectXGame\engine\Base\StringUtility.h" />
+    <ClInclude Include="DirectXGame\engine\Utility\StringUtility.h" />
     <ClInclude Include="DirectXGame\engine\struct\Structs3D.h" />
     <ClInclude Include="DirectXGame\engine\Base\Texture\TextureManager.h" />
     <ClInclude Include="DirectXGame\engine\Base\WinApp\WinApp.h" />

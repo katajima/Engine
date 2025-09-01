@@ -3,30 +3,41 @@
 
 
 class BaseCharacter;
-class ICommand 
+class ICharacterCommand
 {
 public:
-	virtual ~ICommand();
+	virtual ~ICharacterCommand();
 	virtual void Exec(BaseCharacter& character) = 0;
 
 };
+class ICommand
+{
+public:
+	virtual ~ICommand();
+	virtual void Exec() = 0;
+};
 
-class MoveCommand :public ICommand 
+class MoveCommand :public ICharacterCommand
 {
 public:
 	void Exec(BaseCharacter& character) override;
 };
 
-class JampCommand : public ICommand
+class JampCommand : public ICharacterCommand
 {
 public:
 	void Exec(BaseCharacter& character) override;
 };
 
-class AttackCommand : public ICommand
+class AttackCommand : public ICharacterCommand
 {
 public:
 	void Exec(BaseCharacter& character) override;
+};
+
+class MenuCommand : public ICommand {
+public:
+	void Exec() override;
 };
 
 class Input;
@@ -35,8 +46,8 @@ class InputHander
 public:
 	void SetInput(Input* input) { input_ = input; };
 
-	ICommand* HandleInput();
-
+	ICharacterCommand* HandleInput();
+	//ICommand* HandleInput();
 	void AssignMoveCommandPad();
 	void AssignJampCommandPad();
 	void AssignAttackCommandPad();
@@ -44,8 +55,8 @@ public:
 private:
 	Input* input_;
 
-	std::unique_ptr<ICommand> movePad;
-	std::unique_ptr<ICommand> jampPad;
-	std::unique_ptr<ICommand> attackPad;
+	std::unique_ptr<ICharacterCommand> movePad;
+	std::unique_ptr<ICharacterCommand> jampPad;
+	std::unique_ptr<ICharacterCommand> attackPad;
 
 };

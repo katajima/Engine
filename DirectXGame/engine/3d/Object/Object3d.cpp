@@ -130,7 +130,7 @@ void Object3d::Update()
 		break;
 	case ObjectModelType::kPrimitive:
 		if (primitive_) {
-			primitive_->Update();
+			primitive_->Update(MyGame::GameTime());
 
 			transformation->Update(primitive_.get(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
@@ -241,27 +241,6 @@ Vector2 Object3d::GetScreenPosition()
 	else {
 		return Vector2{ 0.0f,0.0f };
 	}
-}
-
-bool Object3d::IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position)
-{
-	// クリップスペース座標を取得
-	Vector4 clipSpacePosition = Transforms(Vector4(position.x, position.y, position.z, 1.0f), viewProjectionMatrix);
-
-	// w が負の場合、カメラの後ろにあるため視錐台外
-	if (clipSpacePosition.w <= 0.0f) {
-		return false;
-	}
-
-	// 視錐台内にあるかチェック
-	if (clipSpacePosition.x < -clipSpacePosition.w || clipSpacePosition.x > clipSpacePosition.w ||
-		clipSpacePosition.y < -clipSpacePosition.w || clipSpacePosition.y > clipSpacePosition.w ||
-		clipSpacePosition.z < 0 || clipSpacePosition.z > clipSpacePosition.w)
-	{
-		return false;
-	}
-
-	return true;
 }
 
 void Object3d::DebugImguiModel()

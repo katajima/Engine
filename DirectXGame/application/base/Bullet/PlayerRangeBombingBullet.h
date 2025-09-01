@@ -2,8 +2,8 @@
 
 #include "DirectXGame/application/base/BaseClass/Bullet/BaseBullet.h"
 #include "DirectXGame/engine/effect/primitive/primitive.h"
+#include "DirectXGame/application/base/UI/DamageUIManager.h"
 
-class Primitive;
 class PlayerRangeBombingBullet :public BaseBullet {
 public:
 	~PlayerRangeBombingBullet();
@@ -89,5 +89,8 @@ private: //パーティクルエミッター
 	Object3d* hitObject2_ = nullptr;
 
 	bool flag_ = false; 
+private:
+	std::unique_ptr<DamageUIManager> damageUIManager_ = nullptr;
+
 };
 

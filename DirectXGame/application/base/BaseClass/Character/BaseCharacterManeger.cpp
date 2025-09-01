@@ -14,18 +14,16 @@ void BaseCharacterManager::Initialize(Input* input, Entity3DManager* entity3DMan
 void BaseCharacterManager::Update()
 {
 	// 死亡したキャラクター(敵)を削除
-	character_.erase(
-		std::remove_if(character_.begin(), character_.end(),
-			[](const std::unique_ptr<BaseCharacter>& character) {
-				auto enemy = dynamic_cast<BaseEnemy*>(character.get());
-				if (!enemy) { return false; } // 敵じゃない
-				return !enemy->GetAlive() && enemy->GetDelete();
-			}),
-		character_.end());
+	character_.RemoveIf([](const std::unique_ptr<BaseCharacter>& character) {
+		auto enemy = dynamic_cast<BaseEnemy*>(character.get());
+		if (!enemy) return false;
+		return !enemy->GetAlive() && enemy->GetDelete();
+		});
 
 	for (auto& character : character_)
 	{
 		if (character) {
+			character->GetObject3D()->GetRigidBodyComponent()->SetIsGravity(!isMenu_);
 			character->Update();
 		}
 	}
@@ -79,7 +77,9 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 	enemy->GetObject3D()->GetWorldTransform().translate_ = transform.translate;
 	enemy->GetObject3D()->GetWorldTransform().rotate_ = transform.rotate;
 	
-	character_.push_back(std::move(enemy));
+	character_.Add(std::move(enemy));
+
+	//character_.push_back(std::move(enemy));
 }
 
 void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
@@ -104,7 +104,7 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 	player->SetFollowCamera(followCamera_);
 	player->SetBulletManager(bulletManager_);
 	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
-	character_.push_back(std::move(player));
+	character_.Add(std::move(player));
 }
 
 

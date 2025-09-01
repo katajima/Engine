@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 #include "ParticleData.h"
-#include "EmitFanction.h"
+#include "DirectXGame/engine/Effect/Particle/Emit/EmitFanction.h"
 
 #include "DirectXGame/engine/Math/Noise.h"
 
@@ -71,7 +71,7 @@ namespace Field {
 		Noise noise_;														// ノイズ
 		float noiseScale_ = 1.0f;											// ノイズスケール
 
-		MaxMin<Vector3> rondomRenge{};										// 乱数範囲 (Vector3の範囲)
+		Range <Vector3> rondomRenge{};										// 乱数範囲 (Vector3の範囲)
 
 	private:
 		bool isEffect = true;												// 効果を出すか

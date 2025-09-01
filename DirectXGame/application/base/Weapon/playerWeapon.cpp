@@ -13,8 +13,12 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	objectBase_->GetWorldTransform().scale_ = { 1.25f,1.25f ,1.25f };
 	objectBase_->InitColliderComponent(); // コライダーコンポーネントの初期化
 	objectBase_->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
-	objectBase_->UseTrailEffect("resources/Texture/Image.png",0.25f,{1,1,1,0.25f}, objectBase_->GetModel()->modelData.mesh[0]->GetMin(), objectBase_->GetModel()->modelData.mesh[0]->GetMax());
-	
+	objectBase_->UseTrailEffect("resources/Texture/Image.png", 0.25f, { 1,1,1,0.25f }, objectBase_->GetModel()->modelData.mesh[0]->GetMin(), objectBase_->GetModel()->modelData.mesh[0]->GetMax());
+
+
+	damageUI_ = std::make_unique<DamageUIManager>();
+	damageUI_->Initialize(input_, entity2DManager, globalVariables);
+	damageUI_->SetCamera(camera);
 
 	auto obbCollider_ = std::make_unique<OBBCollider>();
 	obbCollider_->obb.size = { 0.5f,2.0f,1.0f };
@@ -23,7 +27,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	obbCollider_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
 	weaponColliderId_ = objectBase_->GetColliderComponent()->GetNextId();
 	objectBase_->GetColliderComponent()->AddCollider(std::move(obbCollider_));
-	
+
 	auto obbCollider2_ = std::make_unique<OBBCollider>();
 	obbCollider2_->obb.size = { 0.5f,2.5f,1.0f };
 	obbCollider2_->tag = CollisionTag::PlayerAttack;
@@ -31,7 +35,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	obbCollider2_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
 	weaponColliderId2_ = objectBase_->GetColliderComponent()->GetNextId();
 	objectBase_->GetColliderComponent()->AddCollider(std::move(obbCollider2_));
-	
+
 
 	objectBase_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		if (!other || other->tag != CollisionTag::Enemy) return;
@@ -40,7 +44,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		if (!otherComponent) return;
 
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
-		
+
 		if (!enemy) return;
 
 		const uint32_t otherId = otherComponent->GetUniqueId();
@@ -54,11 +58,11 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		//	}
 		//}
 		//else {
-			if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
-				return; // クールタイム中のため無視
-			}
+		if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
+			return; // クールタイム中のため無視
+		}
 		//}
-		
+
 
 		objectBase_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
@@ -75,16 +79,18 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 			enemy->AddDamage(comboData_.damage * 2);
 			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
 			enemy->GetHitMotionComponent()->SetIsKnockback(true);
-		}else if(self->id == weaponColliderId2_) {
+			damageUI_->AddUI("damage", comboData_.damage * 2, 1.0f, enemy->GetObject3D()->GetWorldPosition());
+		}
+		else if (self->id == weaponColliderId2_) {
 			enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);
 			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);
 			enemy->AddDamage(comboData_.damage);
 			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
 			enemy->GetHitMotionComponent()->SetIsKnockback(true);
-			
+			damageUI_->AddUI("damage", comboData_.damage, 1.0f, enemy->GetObject3D()->GetWorldPosition());
 		}
 		enemy->Emit();
-		
+
 		player->AddHit();
 		player->AddSpGauge(1);
 		player->SetHitTime();
@@ -99,8 +105,8 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	data.staminaCost = 1.0f;
 
 
-	
-	attack1  = std::make_shared<ComboNodeState>("Attack1", data);
+
+	attack1 = std::make_shared<ComboNodeState>("Attack1", data);
 	data.damage = 11;
 	data.movementSpeedMultiplier = 10.0f;
 	attack2 = std::make_shared<ComboNodeState>("Attack2", data);
@@ -109,25 +115,18 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	data.movementSpeedMultiplier = 150.15f;
 	data.moveTime = 0.1f;
 	attack3 = std::make_shared<ComboNodeState>("Attack3", data);
-	//data.damage = 30;
-	//heavy1   = std::make_shared<ComboNodeState>("Heavy1", data);
-
 	
+
 	AddComboNode("Attack1", attack1);
 	AddComboNode("Attack2", attack2);
 	AddComboNode("Attack3", attack3);
 
-	ConnectCombo("Attack1",AttackInput::Light, "Attack2");
+	ConnectCombo("Attack1", AttackInput::Light, "Attack2");
 	ConnectCombo("Attack1", AttackInput::Heavy, "Attack3");
 
-	ConnectCombo("Attack2",AttackInput::Light, "Attack3");
-	
-	//attack1->SetNextState(AttackInput::Light, attack2);
-	//attack2->SetNextState(AttackInput::Light, attack3);
-	//attack2->SetNextState(AttackInput::Heavy, heavy1);
+	ConnectCombo("Attack2", AttackInput::Light, "Attack3");
 
 	
-	//comboStateMachine_->SetRoot(comboRoot);
 
 
 	colliderWorld_.Initialize();
@@ -142,6 +141,9 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 void PlayerWeapon::Update()
 {
+
+	damageUI_->Update();
+
 	objectBase_->UpdateWorldTransform();
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
@@ -152,6 +154,9 @@ void PlayerWeapon::Update()
 
 void PlayerWeapon::Draw2D()
 {
+
+	damageUI_->Draw();
+
 }
 
 void PlayerWeapon::DrawEffect()

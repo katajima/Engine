@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/engine/UI/UIBoard.h"
+#include "DirectXGame/engine/Utility/MapUtility.h"
 class Entity2DManager;
 class GlobalVariables;
 class BaseUI
@@ -39,6 +40,8 @@ protected:
 	UIPair* GetUIPair(std::string name);
 	UICount* GetUICount(std::string name);
 
+	const std::map<std::string, std::unique_ptr<UIMeter>>& GetUIMeters() const;
+	const std::map<std::string, std::unique_ptr<UICount>>& GetUICounts() const;
 protected:
 	Entity2DManager* entity2DManager_;
 	GlobalVariables* globalVariables_;
@@ -50,7 +53,7 @@ protected:
 
 	std::map<std::string,std::unique_ptr<UICheckBox>> uiCheckBox_;
 	std::map<std::string,std::unique_ptr<UISlider>> uiSlider_;
-	std::map<std::string,std::unique_ptr<UIMeter>> uiMeter_;
+	std::map<std::string, std::unique_ptr<UIMeter>> uiMeter_;
 	std::map<std::string,std::unique_ptr<UIPair>> uiPair_;
 	std::map<std::string,std::unique_ptr<UICount>> uiCount_;
 

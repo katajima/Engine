@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Collider/3d/ColliderFanction3D.h"
 #include "DirectXGame/engine/Math/Random.h"
-
+#include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "imgui.h"
 
 void Field::FieldEffect::Initialize(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon)
@@ -250,7 +250,7 @@ void Field::Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleI
 					break;
 				case Field::EffectType::kNoise:
 
-					EmitFanction::ConversionMinMaxV3(acc->rondomRenge);
+					ConversionRange(acc->rondomRenge);
 
 					particleIterator->velocity.x += Random::RandomFloat(acc->rondomRenge.min.x, acc->rondomRenge.max.x) * acc->noiseScale_;
 					particleIterator->velocity.y += Random::RandomFloat(acc->rondomRenge.min.y, acc->rondomRenge.max.y) * acc->noiseScale_;

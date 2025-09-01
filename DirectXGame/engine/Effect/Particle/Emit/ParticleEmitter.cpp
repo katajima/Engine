@@ -3,9 +3,10 @@
 #include "ParticleEmitter.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
-#include "ParticleField.h"
+#include "DirectXGame/engine/Effect/Particle/ParticleField.h"
+#include "DirectXGame/engine/Utility/RangeUtility.h"
 
-void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, ParticleData::SpawnType spawnType)
+void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName, EmitData::SpawnType spawnType)
 {
 	particleManager_ = particleManager;
 
@@ -14,7 +15,7 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	emitter_.controlPoints.clear(); // 初期化
 
 	spawnShapeType_ = spawnType;
-	emitType_ = ParticleData::EmitType::kRandom;
+	emitType_ = EmitData::EmitType::kRandom;
 
 	emitName_ = emitName;
 	particleName_ = particleName;
@@ -23,7 +24,7 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	frequencyTime_ = 0.0f;
 
 	emitter_.color = { {1,1,1,1} ,{1,1,1,1} };
-	
+
 	emitter_.renge.max = Vector3{ 1.0f,1.0f,1.0f };
 	emitter_.renge.min = Vector3{ -1.0f,-1.0f,-1.0f };
 	emitter_.color.max = Vector4{ 1,1,1,1 };
@@ -47,9 +48,7 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	emitter_.corner.center = 0;
 	emitter_.corner.segment = 3;
 
-	emitter_.isEvent = false;
 
-	//emitter_.fieldName = ""; // パーティクルフィールドの名前を設定
 
 	isFlag.isLifeTimeScale_ = false;	// スケール
 	isFlag.isLifeTimeVelocity = false;// 速度
@@ -59,7 +58,7 @@ void ParticleEmitter::Initialize(ParticleManager* particleManager, std::string e
 	isFlag.isAlpha = false;    // 透明度
 
 	isEmit = true;
-	
+
 
 	uvTransformVeloctiy_.rotate = { 0,0,0 };
 	uvTransformVeloctiy_.scale = { 0,0,0 };
@@ -76,14 +75,14 @@ void ParticleEmitter::Update()
 		ImGui::DragFloat3("translate", &transform_.translate_.x, 0.1f);
 		ImGui::DragFloat3("rotate", &transform_.rotate_.x, 0.1f);
 		ImGui::Separator();
-		if(ImGui::Button("MODE_ADD") ){
-			particleGroup.blendType = ParticleData::BlendType::MODE_ADD;
+		if (ImGui::Button("MODE_ADD")) {
+			particleGroup.blendType = EmitData::BlendType::MODE_ADD;
 		}
-		if(ImGui::Button("MODE_MUlLIPLY") ){
-			particleGroup.blendType = ParticleData::BlendType::MODE_MUlLIPLY;
+		if (ImGui::Button("MODE_MUlLIPLY")) {
+			particleGroup.blendType = EmitData::BlendType::MODE_MUlLIPLY;
 		}
-		if(ImGui::Button("MODE_SUBTRACT") ){
-			particleGroup.blendType = ParticleData::BlendType::MODE_SUBTRACT;
+		if (ImGui::Button("MODE_SUBTRACT")) {
+			particleGroup.blendType = EmitData::BlendType::MODE_SUBTRACT;
 		}
 		ImGui::Text("flag");
 		ImGui::Checkbox("Emit", &isEmit);
@@ -96,7 +95,6 @@ void ParticleEmitter::Update()
 		ImGui::Checkbox("Alpha", &isFlag.isAlpha);
 		ImGui::Checkbox("Bounce", &isFlag.isBounce);
 		ImGui::Checkbox("Acceleration", &isFlag.isAcceleration);
-		ImGui::Checkbox("Event", &emitter_.isEvent);
 		ImGui::Checkbox("LineInterpolation", &isFlag.isLineInterpolation);
 
 		ImGui::Separator();
@@ -123,7 +121,7 @@ void ParticleEmitter::Update()
 
 		ImGui::DragInt("count", &emitter_.count, 1.0f);
 
-		if (spawnShapeType_ == ParticleData::SpawnType::kCornerLine) {
+		if (spawnShapeType_ == EmitData::SpawnType::kCornerLine) {
 			ImGui::Separator();
 			ImGui::Text("CornerLine");
 			ImGui::Separator();
@@ -147,7 +145,7 @@ void ParticleEmitter::Update()
 			}
 
 		}
-		if (spawnShapeType_ == ParticleData::SpawnType::kSpline) {
+		if (spawnShapeType_ == EmitData::SpawnType::kSpline) {
 			ImGui::Separator();
 			ImGui::Text("spline");
 			ImGui::Separator();
@@ -161,10 +159,10 @@ void ParticleEmitter::Update()
 		ImGui::Separator(); // 水平線を引く
 		ImGui::ColorEdit4("colorMax", &emitter_.color.max.x);
 		ImGui::ColorEdit4("colorMin", &emitter_.color.min.x);
-		
+
 		ImGui::Separator(); // 水平線を引く
 
-		
+
 		ImGui::TreePop();
 		EmitMinMax();
 	}
@@ -172,17 +170,12 @@ void ParticleEmitter::Update()
 #endif
 
 	transform_.Update();
-	emitter_.worldtransform = transform_;
-	particleGroup.emiter.worldtransform = emitter_.worldtransform;
-	particleGroup.emiter.worldtransform.Update();
 
 
 
 	frequencyTime_ += MyGame::GameTime();
 	if (frequency_ <= frequencyTime_) {
-		if (isEmit) {
-			Emit();
-		}
+		Emit();
 		frequencyTime_ -= frequency_;
 	}
 
@@ -213,7 +206,10 @@ void ParticleEmitter::Emit()
 		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.rotate = uvTransformVeloctiy_.rotate; // UV
 		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.translate = uvTransformVeloctiy_.translate; // UV
 		particleManager_->GetParticleGroups(particleName_).emiter = emitter_;
-		particleManager_->Emit(particleName_, emitType_, spawnShapeType_);
+
+
+
+		particleManager_->Emit(particleName_, transform_, emitType_, spawnShapeType_);
 
 	}
 }
@@ -236,21 +232,19 @@ void ParticleEmitter::DrawEmitterLine()
 {
 	switch (spawnShapeType_)
 	{
-	case ParticleData::SpawnType::kAABB:
-		lineCommon_->AddLineAABB({ emitter_.renge.min,emitter_.renge.max }, emitter_.worldtransform.translate_);
+	case EmitData::SpawnType::kAABB:
+		lineCommon_->AddLineAABB({ emitter_.renge.min,emitter_.renge.max }, transform_.translate_);
 		break;
-	case ParticleData::SpawnType::kOBB:
+	case EmitData::SpawnType::kSphere:
 		break;
-	case ParticleData::SpawnType::kSphere:
+	case EmitData::SpawnType::kSegmentLine:
+		lineCommon_->AddLine(emitter_.renge.min + transform_.translate_, emitter_.renge.max + transform_.translate_, { 1,1,1,1 });
 		break;
-	case ParticleData::SpawnType::kSegmentLine:
-		lineCommon_->AddLine(emitter_.renge.min + emitter_.worldtransform.translate_, emitter_.renge.max + emitter_.worldtransform.translate_, { 1,1,1,1 });
+	case EmitData::SpawnType::kCornerLine:
+		lineCommon_->AddLineCorner(emitter_.corner, transform_);
 		break;
-	case ParticleData::SpawnType::kCornerLine:
-		lineCommon_->AddLineCorner(emitter_.corner, emitter_.worldtransform);
-		break;
-	case ParticleData::SpawnType::kSpline:
-		lineCommon_->AddSpline(emitter_.controlPoints, emitter_.worldtransform);
+	case EmitData::SpawnType::kSpline:
+		lineCommon_->AddSpline(emitter_.controlPoints, transform_);
 		break;
 	default:
 		break;
@@ -260,26 +254,26 @@ void ParticleEmitter::DrawEmitterLine()
 void ParticleEmitter::EmitMinMax()
 {
 	//	範囲 
-	EmitFanction::ConversionMinMaxV3(emitter_.renge);
+	ConversionRange(emitter_.renge);
 
 	// 回転
-	EmitFanction::ConversionMinMaxV3(emitter_.rotate);
+	ConversionRange(emitter_.rotate);
 
 	// 速度 
-	EmitFanction::ConversionMinMaxV3(emitter_.velocity);
-	
+	ConversionRange(emitter_.velocity);
+
 	// 回転速度 
-	EmitFanction::ConversionMinMaxV3(emitter_.rotateVelocity);
+	ConversionRange(emitter_.rotateVelocity);
 
 	// 加速度 
-	EmitFanction::ConversionMinMaxV3(emitter_.acceleration);
+	ConversionRange(emitter_.acceleration);
 
 	//　色
-	EmitFanction::ConversionMinMaxV4(emitter_.color);
+	ConversionRange(emitter_.color);
 
 
 	//	サイズ 
-	EmitFanction::ConversionMinMaxV3(emitter_.size);
+	ConversionRange(emitter_.size);
 
 	if (emitter_.size.min.x < 0) {
 		emitter_.size.min.x = 0;
@@ -295,7 +289,7 @@ void ParticleEmitter::EmitMinMax()
 	}
 
 	// 生存時間
-	EmitFanction::ConversionMinMaxFloat(emitter_.lifeTime);
+	ConversionRangeFloat(emitter_.lifeTime);
 	if (emitter_.lifeTime.min < 0) {
 		emitter_.lifeTime.min = 0;
 	}

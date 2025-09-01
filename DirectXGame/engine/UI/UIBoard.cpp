@@ -29,6 +29,8 @@ void UIBaseBoard::Init(Input* input,Entity2DManager* entity2DManager, const std:
 
 void UIBaseBoard::Update(float deltaTime)
 {
+#ifdef _DEBUG
+
 	ImGui::Begin("UI");
 	Vector2 pos = spriteBar_->GetPos();
 	ImGui::InputFloat2("bar_pos", &pos.x);
@@ -48,7 +50,7 @@ void UIBaseBoard::Update(float deltaTime)
 
 
 	ImGui::End();
-
+#endif // _DEBUG
 
 
 	if (useBoard_) {

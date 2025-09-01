@@ -86,7 +86,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 
 	Vector3 size = { 2.0f, 2.0f, 2.0f };
 	hitEmitter_ = std::make_unique <ParticleEmitter>();
-	hitEmitter_->Initialize(particleManager, "missileHit", "missileHit", ParticleData::SpawnType::kPoint);
+	hitEmitter_->Initialize(particleManager, "missileHit", "missileHit", EmitData::SpawnType::kPoint);
 	hitEmitter_->SetCount(2);
 	hitEmitter_->SetLifeTimeMinMax(0.25f, 0.25f);
 	hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
@@ -100,7 +100,7 @@ void PlayerMissile::Initialize(Entity3DManager* entity3DManager, Entity2DManager
 	hitEmitter_->SetIsEmit(false);
 
 
-	primitiveCylinder_ = std::make_unique<Primitive>();
+	primitiveCylinder_ = std::make_unique<CylinderPrimitive>();
 
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 20.0f;
@@ -296,7 +296,7 @@ void PlayerMissile::Draw2D()
 
 void PlayerMissile::InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
 {
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kSegmentLine);
+	emitter->Initialize(particleManager, emitName, emitName, EmitData::SpawnType::kSegmentLine);
 	emitter->GetFrequency() = 0.00f;
 	emitter->SetCount(2);
 	emitter->SetLifeTimeMinMax(0.5f, 0.7f);

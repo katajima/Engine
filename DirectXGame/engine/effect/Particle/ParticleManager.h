@@ -18,12 +18,15 @@
 #include"DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 #include "ParticleData.h"
-#include "EmitFanction.h"
+#include "DirectXGame/engine/Effect/Particle/Emit/EmitFanction.h"
 #include "ParticleField.h"
+
+
+#include "DirectXGame/engine/Utility/MapUtility.h"
 
 class LightManager;
 class Material;
-class Primitive;
+class BasePrimitive;
 class DirectXCommon;
 class SrvManager;
 class EffectManager;
@@ -44,13 +47,13 @@ public:
 	void Draw();
 
 	// 描画準備
-	void DrawCommonSetting(ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType);
+	void DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType);
 
 	// パーティクルの発生
-	void Emit(const std::string name, ParticleData::EmitType type, ParticleData::SpawnType spawnType);
+	void Emit(const std::string name,WorldTransform& transform, EmitData::EmitType type, EmitData::SpawnType spawnType);
 
 	// パーティクルグループ取得
-	std::unordered_map<std::string, ParticleGroup>& GetParticleGroups()
+	UnorderedMapContainer<std::string, ParticleGroup>& GetParticleGroups()
 	{
 		return particleGroups;
 	}
@@ -65,11 +68,11 @@ public:
 
 	// パーティクルグループ作り(モデル)
 	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model,
-		ParticleData::RasterizerType rasteType = ParticleData::RasterizerType::MODE_SOLID_BACK, ParticleData::BlendType blendType = ParticleData::BlendType::MODE_ADD);
+		EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
 	// パーティクルグループ作り(プリミティブ)
-	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, 
-		ParticleData::RasterizerType rasteType = ParticleData::RasterizerType::MODE_SOLID_BACK, ParticleData::BlendType blendType = ParticleData::BlendType::MODE_ADD);
+	void CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive,
+		EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
@@ -106,8 +109,7 @@ private:
 	// ランダムエンジン
 	std::mt19937 randomEngine_;
 
-	// パーティクルグループ
-	std::unordered_map<std::string, ParticleGroup> particleGroups;
+	UnorderedMapContainer<std::string, ParticleGroup> particleGroups;
 
 	// 最大パーティクル量
 	const uint32_t kNumMaxInstance = 1024 * 4;

@@ -80,4 +80,7 @@ private:
 	Vector3 offset_{};
 	// ノックバックデータ
 	KnockbackData knockback_;
+
+
+
 };

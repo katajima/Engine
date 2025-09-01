@@ -5,7 +5,7 @@
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/base/Logger.h"
-#include"DirectXGame/engine/base/StringUtility.h"
+#include"DirectXGame/engine/Utility/StringUtility.h"
 
 // C++
 #include <iostream>

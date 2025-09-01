@@ -26,28 +26,28 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightMan
 	CreateGraphicsPipeline();
 }
 
-void ParticleManager::DrawCommonSetting(ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
+void ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
 {
 	switch (blendType)
 	{
-	case ParticleData::BlendType::MODE_ADD:
-		if (rasteType == ParticleData::RasterizerType::MODE_SOLID_BACK) {
+	case EmitData::BlendType::MODE_ADD:
+		if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
 		}
 		else {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
 		}
 		break;
-	case ParticleData::BlendType::MODE_SUBTRACT:
-		if (rasteType == ParticleData::RasterizerType::MODE_SOLID_BACK) {
+	case EmitData::BlendType::MODE_SUBTRACT:
+		if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
 		}
 		else {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
 		}
 		break;
-	case ParticleData::BlendType::MODE_MUlLIPLY:
-		if (rasteType == ParticleData::RasterizerType::MODE_SOLID_BACK) {
+	case EmitData::BlendType::MODE_MUlLIPLY:
+		if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
 		}
 		else {
@@ -82,9 +82,7 @@ void ParticleManager::Update()
 
 			ParticleGroup& group = pair.second;
 			group.instanceCount = 0;
-			// エミッター位置更新
-			group.emiter.worldtransform.Update();
-
+			
 			// パーティクル粒子更新
 			for (auto particleIterator = group.particle.begin(); particleIterator != group.particle.end(); ) {
 
@@ -144,26 +142,26 @@ void ParticleManager::Draw()
 	}
 }
 
-void ParticleManager::Emit(const std::string name, ParticleData::EmitType type, ParticleData::SpawnType spawnType)
+void ParticleManager::Emit(const std::string name, WorldTransform& transform, EmitData::EmitType type, EmitData::SpawnType spawnType)
 {
 	// パーティクルグループが登録済みであることを確認
-	assert(particleGroups.contains(name) && "Error: Particle group with this name is not registered.");
+	assert(particleGroups.Contains(name) && "Error: Particle group with this name is not registered.");
 
-	if (ParticleData::SpawnType::kCornerLine == spawnType) {
+	if (EmitData::SpawnType::kCornerLine == spawnType) {
 		for (int i = 0; i < particleGroups[name].emiter.corner.segment; ++i)
 		{
-			EmitFanction::CreateParticle(particleGroups[name], randomEngine_, spawnType, i);
+			EmitFanction::CreateParticle(particleGroups[name], transform, randomEngine_, spawnType, i);
 		}
 	}
 	else {
 		for (int t = 0; t < particleGroups[name].emiter.count; ++t) {
-			EmitFanction::CreateParticle(particleGroups[name], randomEngine_, spawnType, t);
+			EmitFanction::CreateParticle(particleGroups[name], transform, randomEngine_, spawnType, t);
 		}
 	}
 
 }
 
-void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
+void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
 {
 	debugTimer_.StartTimer(); // デバッグ用タイマー開始
 	// ランダムエンジンの初期化
@@ -171,7 +169,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	randomEngine_.seed(seedGenerator()); // randomEngine_ にシードを設定
 
 	// あるなら
-	if (particleGroups.contains(name)) {
+	if (particleGroups.Contains(name)) {
 		return;
 	}
 
@@ -181,7 +179,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
 }
 
-void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
+void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
 {
 	debugTimer_.StartTimer(); // デバッグ用タイマー開始
 	// ランダムエンジンの初期化
@@ -189,12 +187,12 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	randomEngine_.seed(seedGenerator()); // randomEngine_ にシードを設定
 
 	// あるなら
-	if (particleGroups.contains(name)) {
+	if (particleGroups.Contains(name)) {
 		return;
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, primitive->GetMesh(), rasteType, blendType);
+	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, primitive->GetModelMesh(), rasteType, blendType);
 
 	debugTimer_.EndTimer(); // デバッグ用タイマー終了
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");

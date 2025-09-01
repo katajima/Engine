@@ -2,7 +2,7 @@
 // engine
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
-#include"DirectXGame/engine/base/Timer.h"
+#include"DirectXGame/engine/Utility/TimerUtility.h"
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application

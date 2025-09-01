@@ -65,7 +65,7 @@ void ParticleFanction::Effect(ParticleGroup& group, std::list<Particle>::iterato
 	// 生存時間によって大きさが変化するか
 	if (group.isFlag.isLifeTimeScale_) {
 		float t = particleIterator->currentTime / particleIterator->lifeTime;
-		float scaling = (group.topBottom == ParticleData::TopBottom::kBottom) ? (1.0f - t) : t;
+		float scaling = (group.topBottom == EmitData::TopBottom::kBottom) ? (1.0f - t) : t;
 		particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
 	}
 
@@ -127,7 +127,7 @@ void ParticleFanction::MaterialEffect(ParticleGroup& group)
 }
 
 void ParticleFanction::Create(ParticleGroup& particleGroup, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
-	DirectXCommon* dxCommon, ModelMesh* mesh, ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType)
+	DirectXCommon* dxCommon, ModelMesh* mesh, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
 {
 	particleGroup.emiter.renge.max = Vector3{ 1.0f,1.0f,1.0f };
 	particleGroup.emiter.renge.min = Vector3{ -1.0f,-1.0f,-1.0f };
@@ -145,8 +145,7 @@ void ParticleFanction::Create(ParticleGroup& particleGroup, const std::string na
 	particleGroup.emiter.rotateVelocity.min = Vector3{ 0,0,0 };
 	particleGroup.emiter.rotateVelocity.max = Vector3{ 0,0,0 };
 
-	particleGroup.emiter.worldtransform.Initialize();
-
+	
 	// 名前
 	particleGroup.name = name;
 	// メッシュ

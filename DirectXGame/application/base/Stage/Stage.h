@@ -14,7 +14,7 @@
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
+#include"DirectXGame/engine/effect/Particle/Emit/ParticleEmitter.h"
 
 #include "DirectXGame/application/base/BaseClass/Light/BaseLights.h"
 

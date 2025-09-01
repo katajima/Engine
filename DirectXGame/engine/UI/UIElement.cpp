@@ -230,13 +230,15 @@ void UISlider::Update(float deltaTime) {
 
 	}
 
-	// ImGui表示（任意）
+#ifdef _DEBUG
 	ImGui::Begin("UI");
 	Vector2 pos = slidSprite->GetSprite()->GetWorldTransform2d().GetWorldPosition();
 	ImGui::InputFloat2("slidSpritePos", &pos.x);
 	ImGui::InputFloat2("preMousePos", &preMousePos.x);
 	ImGui::InputFloat("mouseX", &mouse.x);
 	ImGui::End();
+#endif // _DEBUG
+
 	offsetPos_.y = 0;
 	// スライダー位置更新
 	slidSprite->GetSprite()->SetPosition(offsetPos_);
@@ -430,7 +432,7 @@ void UICount::InitSprite()
 {
 	for (int i = 0; i < instance_; i++) {
 		auto sprite = std::make_unique<BaseSprite>();
-		sprite->Init(entity2DManager_, "count", "resources/Texture/num/Number_x64y96.png");
+		sprite->Init(entity2DManager_, "count" + std::to_string(i), "resources/Texture/num/Number_x64y96.png");
 		sprite->SetSize({ 24.0f,24.0f });
 		sprite->SetAnchorPoint({ 0.5f,0.5f });
 

@@ -6,6 +6,10 @@
 
 struct Vector2 final {
 	float x, y;
+	static constexpr size_t Dim = 2;
+	float& operator[](size_t i) { return i == 0 ? x : y; }
+	const float& operator[](size_t i) const { return i == 0 ? x : y; }
+
 
 	// == 演算子のオーバーロード
 	bool operator==(const Vector2& other) const {

@@ -27,7 +27,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "DirectXGame/engine/base/Timer.h"
+#include "DirectXGame/engine/Utility/TimerUtility.h"
 
 class ModelCommon;
 class DirectXCommon;
