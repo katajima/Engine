@@ -5,7 +5,7 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(),dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
 	CreateGraphicsPipeline();
 }
@@ -46,6 +46,10 @@ void Object3dCommon::DrawCommonSetting(PSOType type)
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
 		break;
+	case Object3dCommon::PSOType::Transparent:
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignatureTransparent.Get());
+		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineStateTransparent.Get());
+		break;
 	default:
 		break;
 	}
@@ -67,31 +71,31 @@ void Object3dCommon::AllDraw()
 void Object3dCommon::CreateRootSignature()
 {
 	//HRESULT hr;
-	
+
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[1],1,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[2],2,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[3],3,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
 
 	// RootParameter作成。複数指定できるのではい
 	D3D12_ROOT_PARAMETER rootParameters[11] = {};
 
 	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0],0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// トランスフォームデータ (b0) を頂点シェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1],0,D3D12_SHADER_VISIBILITY_VERTEX,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[1], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2],descriptorRange[0],D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[3],1,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// カメラデータ (b2) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[4],2,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[4], 2, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[5],3,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[5], 3, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[6],4,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[6], 4, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// テクスチャデータ (t1) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
 	// テクスチャデータ (t2) をピクセルシェーダで使用する
@@ -99,7 +103,7 @@ void Object3dCommon::CreateRootSignature()
 	// テクスチャデータ (t3) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
 	//トランスフォームデータ (b5) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[10],5,D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
@@ -115,6 +119,11 @@ void Object3dCommon::CreateRootSignature()
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(rootSignature[1], rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+
+
+	// 透過
+
+	psoManager_->SetRootSignature(rootSignatureTransparent, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 }
 
 void Object3dCommon::CreateGraphicsPipeline()
@@ -161,8 +170,8 @@ void Object3dCommon::CreateGraphicsPipeline()
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[0], blendDesc,depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[1], blendDesc,depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[0], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[1], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME);
 
@@ -171,12 +180,38 @@ void Object3dCommon::CreateGraphicsPipeline()
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[4], blendDesc,depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[5], blendDesc,depthStencilDesc,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[4], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[5], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME);
 
 	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[6], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[7], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+
+	// ---- Transparent ----
+	D3D12_BLEND_DESC blendAlpha = {};
+	blendAlpha.AlphaToCoverageEnable = FALSE;
+	blendAlpha.IndependentBlendEnable = FALSE;
+	auto& rt = blendAlpha.RenderTarget[0];
+	rt.BlendEnable = TRUE;
+	rt.SrcBlend = D3D12_BLEND_SRC_ALPHA;     // 直線アルファ
+	rt.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	rt.BlendOp = D3D12_BLEND_OP_ADD;
+	rt.SrcBlendAlpha = D3D12_BLEND_ONE;
+	rt.DestBlendAlpha = D3D12_BLEND_ZERO;
+	rt.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	rt.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	D3D12_DEPTH_STENCIL_DESC depthAlpha = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	depthAlpha.DepthEnable = TRUE;
+	depthAlpha.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; // ← 書かない
+	depthAlpha.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+
+	psoManager_->GraphicsPipelineState(rootSignatureTransparent, graphicsPipelineStateTransparent, blendAlpha, depthAlpha, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+
 
 }

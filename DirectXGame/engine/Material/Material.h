@@ -21,7 +21,7 @@ public:
 
 	void GetCommandListMaterial(int index);
 
-	void GetCommandListTexture(int indexDiffuse, int normalIndex = 0,int speculerIndex = 0,int environmentIndex = 0);
+	void GetCommandListTexture(int indexDiffuse, int normalIndex = 0, int speculerIndex = 0, int environmentIndex = 0);
 
 
 	void GPUData();
@@ -34,12 +34,12 @@ public:
 	float  environmentCoefficient_ = 0.5f;
 	float shininess_ = 64.0f;
 	int32_t useLig_ = false;
-	
+
 	int32_t useNormalMap_ = 0;
 	int32_t useSpeculerMap_ = 0;
 	bool useEnvironment_ = 0;
 	float alphaClipping_ = 0.5f;
-
+	float alpha_ = 1.0f;
 	struct Tex {
 		std::string diffuseFilePath;
 		std::string normalFilePath;
@@ -62,8 +62,8 @@ private:
 		Color color;
 		int32_t enableLighting;
 		float alphaClipping = 0.5f;
-		float  environmentCoefficient = 0.5f;
-		float padding[1];
+		float environmentCoefficient = 0.5f;
+		float alpha = 1.0f;
 		Matrix4x4 uvTransform;
 		float shininess;
 		int32_t useLig;

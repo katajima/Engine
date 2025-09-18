@@ -9,7 +9,7 @@ using namespace Microsoft::WRL;
 #include <dxgi1_6.h>
 
 #include "DirectXGame/engine/base/Logger.h"
-#include "DirectXGame/engine/base/StringUtility.h"
+#include "DirectXGame/engine/Utility/StringUtility.h"
 
 class DXGIDevice
 {

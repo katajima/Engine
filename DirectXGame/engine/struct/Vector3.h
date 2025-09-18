@@ -11,7 +11,11 @@
 
 struct Vector3 final {
 	float x, y, z;
-	
+
+	static constexpr size_t Dim = 3;
+	float& operator[](size_t i) { return i == 0 ? x : (i == 1 ? y : z); }
+	const float& operator[](size_t i) const { return i == 0 ? x : (i == 1 ? y : z); }
+
 	// 配列のようにアクセスできるオーバーロード
 	float& operator[](int index) {
 		return (&x)[index]; // x のアドレスを使って配列のようにアクセス
@@ -20,7 +24,7 @@ struct Vector3 final {
 	const float& operator[](int index) const {
 		return (&x)[index]; // const バージョン
 	}
-	
+
 	Vector2 xy() { return Vector2{ x,y }; }
 	Vector2 xz() { return Vector2{ x,z }; }
 
@@ -52,16 +56,16 @@ struct Vector3 final {
 		return Vector3{ x + other, y + other, z + other };;
 	}
 	// + 演算子のオーバーロード
-	Vector3& operator+=(const Vector3& other)  {
-		
+	Vector3& operator+=(const Vector3& other) {
+
 		x += other.x;
 		y += other.y;
 		z += other.z;
 		return *this;
 	}
 	// + 演算子のオーバーロード
-	Vector3& operator-=(const Vector3& other)  {
-		
+	Vector3& operator-=(const Vector3& other) {
+
 		x -= other.x;
 		y -= other.y;
 		z -= other.z;
@@ -78,8 +82,8 @@ struct Vector3 final {
 	}
 
 	// * 演算子のオーバーロード
-	Vector3& operator*=(const float& other)  {
-		
+	Vector3& operator*=(const float& other) {
+
 		x *= other;
 		y *= other;
 		z *= other;
@@ -102,24 +106,24 @@ struct Vector3 final {
 
 	// * 演算子のオーバーロード (スカラーとベクトル) 
 	Vector3 operator*(float other) const {
-		return Vector3{ x * other, y * other, z * other};;
+		return Vector3{ x * other, y * other, z * other };;
 	}
-	
+
 
 
 	Vector3 operator-() const {
-		return Vector3{ -x,-y,-z};
+		return Vector3{ -x,-y,-z };
 	};
-	 
+
 
 
 	// / 演算子のオーバーロード (スカラー除算) 
-	Vector3 operator/(float s) const { 
-		return Vector3{(x / s), (y / s), (z / s)}; 
+	Vector3 operator/(float s) const {
+		return Vector3{ (x / s), (y / s), (z / s) };
 	}
 
 	// 正規化
-	Vector3 Normalize() const{
+	Vector3 Normalize() const {
 		Vector3 result{};
 		float length;
 
@@ -173,7 +177,7 @@ struct Vector3 final {
 		float dz = z - other.z;
 		return std::sqrt(dx * dx + dy * dy + dz * dz);
 	}
-	float DistanceXZ(const Vector3& other) const{
+	float DistanceXZ(const Vector3& other) const {
 		float dx = x - other.x;
 		float dz = z - other.z;
 		return std::sqrt(dx * dx + dz * dz);

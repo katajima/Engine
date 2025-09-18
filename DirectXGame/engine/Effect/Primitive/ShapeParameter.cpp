@@ -1,13 +1,17 @@
 #include "ShapeParameter.h"
 
-void ShapeParameter::ShapePlane::Create(ModelMesh* mesh)
+void ShapeParameter::ShapePlane::Create(ModelMesh* mesh, bool isInv)
 {
-    mesh->Clear();
+	mesh->Clear();
 
-    mesh->vertices.push_back({ .position = {width,height,0.0f,1.0f}  ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 左上
-    mesh->vertices.push_back({ .position = {-width,height,0.0f,1.0f} ,.texcoord = {0.0f,0.0f},.normal = {0.0f,0.0f,1.0f } });	// 右上
-    mesh->vertices.push_back({ .position = {width,-height,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
-    mesh->vertices.push_back({ .position = {-width,-height,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
+	float normal = 1.0f;
+	if (isInv) {
+		normal = -1.0f;
+	}
+	mesh->vertices.push_back({ .position = {width,height,0.0f,1.0f}  ,.texcoord = {1.0f,0.0f},.normal = {0.0f,0.0f,normal } });	// 左上
+	mesh->vertices.push_back({ .position = {-width,height,0.0f,1.0f} ,.texcoord = {0.0f,0.0f},.normal = {0.0f,0.0f,normal } });	// 右上
+	mesh->vertices.push_back({ .position = {width,-height,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,normal } });	// 左下
+	mesh->vertices.push_back({ .position = {-width,-height,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,normal } });	// 右下
 
 	mesh->indices.push_back(0);
 	mesh->indices.push_back(1);
@@ -177,7 +181,7 @@ void ShapeParameter::Crescent::Create(ModelMesh* mesh)
 	if (innerRadius >= outerRadius) {
 		innerRadius = outerRadius;
 	}
-	if (distance <= 0 ) {
+	if (distance <= 0) {
 		distance = 0;
 	}
 	if (segments < 3 || innerRadius > outerRadius || distance < 0) {
@@ -715,7 +719,7 @@ void ShapeParameter::Pyramid::Create(ModelMesh* mesh)
 
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
-	
+
 	// 頂点データの生成
 	// 頂点0: ピラミッドの頂点（上）
 	mesh->vertices.push_back({
@@ -771,7 +775,7 @@ void ShapeParameter::Torus::Create(ModelMesh* mesh)
 
 	// 既存の頂点とインデックスをクリア
 	mesh->Clear();
-	
+
 	// 頂点データの生成
 	for (int i = 0; i <= tubeSegments; ++i) {
 		float theta = 2.0f * float(M_PI) * i / tubeSegments;

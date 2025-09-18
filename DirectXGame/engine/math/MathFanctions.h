@@ -109,3 +109,11 @@ static float DistancePointToPlane(const Vector3& point, const Vector3& A, const 
 	return std::abs((point - A).Dot(normal));
 }
 
+
+// オブジェクトがカメラ内に映っているか
+bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
+
+class Camera;
+class WorldTransform;
+Vector2 GetScreenPos(WorldTransform worldTransform, Camera* camera);
+

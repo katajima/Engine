@@ -74,7 +74,7 @@ class ModelCommon;
 namespace CreateModel {
 
 	// メッシュ状にライン生成
-	void CreateMeshLine(ModelData& modelData,const std::vector<uint32_t>& indices);
+	void CreateMeshLine(ModelData& modelData, const std::vector<uint32_t>& indices);
 
 	// スケルトン生成
 	void CreateSkeleton(ModelData& modelData);

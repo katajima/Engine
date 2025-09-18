@@ -2,9 +2,9 @@
 
 
 Texture2D<float4> gTexture : register(t0);
-Texture2D<float4> g_Normalmap : register(t1); // t1ƒŒƒWƒXƒ^‚ÉƒoƒCƒ“ƒh‚³‚ê‚é–@üƒ}ƒbƒvƒf[ƒ^
-Texture2D<float4> g_Specularmap : register(t2); // t2ƒŒƒWƒXƒ^‚ÉƒoƒCƒ“ƒh‚³‚ê‚éƒXƒyƒLƒ…ƒ‰[ƒ}ƒbƒvƒf[ƒ^
-Texture2D<float4> g_aoMap : register(t3); // t3ƒŒƒWƒXƒ^‚ÉƒoƒCƒ“ƒh‚³‚ê‚éƒXƒyƒLƒ…ƒ‰[ƒ}ƒbƒvƒf[ƒ^
+Texture2D<float4> g_Normalmap : register(t1); // t1ãƒ¬ã‚¸ã‚¹ã‚¿ã«ãƒã‚¤ãƒ³ãƒ‰ã•ã‚Œã‚‹æ³•ç·šãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿
+Texture2D<float4> g_Specularmap : register(t2); // t2ãƒ¬ã‚¸ã‚¹ã‚¿ã«ãƒã‚¤ãƒ³ãƒ‰ã•ã‚Œã‚‹ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿
+Texture2D<float4> g_aoMap : register(t3); // t3ãƒ¬ã‚¸ã‚¹ã‚¿ã«ãƒã‚¤ãƒ³ãƒ‰ã•ã‚Œã‚‹ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒ¼ãƒãƒƒãƒ—ãƒ‡ãƒ¼ã‚¿
 SamplerState sSampler : register(s0);
 
 struct Camera
@@ -38,8 +38,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     
     
-    if (gMaterial.enableLighting != 0) // Lighting‚·‚éê‡
-    {      
+    if (gMaterial.enableLighting != 0) // Lightingã™ã‚‹å ´åˆ
+    {
         
         float3 normal = input.normal;
         float3 tangent = input.tangent;
@@ -50,7 +50,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         {
             float3 localNormal = g_Normalmap.Sample(sSampler, transformedUV.xy).xyz * 2.0f - 1.0f;
             
-            float3x3 TBN = (float3x3(input.tangent.xyz, input.biNormal, input.normal)); // ‚Ü‚½‚Í•K—v‚È‚ç transpose
+            float3x3 TBN = (float3x3(input.tangent.xyz, input.biNormal, input.normal)); // ã¾ãŸã¯å¿…è¦ãªã‚‰ transpose
             float3 worldNormal = normalize(mul(localNormal, TBN));
 
             normal = worldNormal;
@@ -68,7 +68,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         output.color.rgb = allDire + allPoint + allSpot;
         
         
-        output.color.a = gMaterial.color.a * textureColor.a;
+        output.color.a = gMaterial.color.a * textureColor.a * gMaterial.alpha;
 
         if (textureColor.a <= gMaterial.alphaClipping)
         {
@@ -80,9 +80,9 @@ PixelShaderOutput main(VertexShaderOutput input)
         }
         output.color = pow(output.color, 2.2f);
     }
-    else // Lighting‚µ‚È‚¢ê‡B‘O‰ñ‚Ü‚Å‚Æ“¯‚¶‰‰Z
+    else // Lightingã—ãªã„å ´åˆã€‚å‰å›ã¾ã§ã¨åŒã˜æ¼”ç®—
     {
-        output.color = gMaterial.color * textureColor;
+        output.color = gMaterial.color * textureColor * gMaterial.alpha;
     }
     
     

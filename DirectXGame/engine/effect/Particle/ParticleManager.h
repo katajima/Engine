@@ -18,12 +18,15 @@
 #include"DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 #include "ParticleData.h"
-#include "EmitFanction.h"
+#include "DirectXGame/engine/Effect/Particle/Emit/EmitFanction.h"
 #include "ParticleField.h"
+
+
+#include "DirectXGame/engine/Utility/MapUtility.h"
 
 class LightManager;
 class Material;
-class Primitive;
+class BasePrimitive;
 class DirectXCommon;
 class SrvManager;
 class EffectManager;
@@ -37,20 +40,17 @@ public:
 	ParticleManager& operator=(ParticleManager&) = delete;
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon, LightManager* lightManager,EffectManager* efectManager);
+	void Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager);
 	// 更新
 	void Update();
 	// 描画
 	void Draw();
 
 	// 描画準備
-	void DrawCommonSetting(ParticleData::RasterizerType rasteType, ParticleData::BlendType blendType);
-
-	// パーティクルの発生
-	void Emit(const std::string name, ParticleData::EmitType type, ParticleData::SpawnType spawnType);
+	void DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType);
 
 	// パーティクルグループ取得
-	std::unordered_map<std::string, ParticleGroup>& GetParticleGroups()
+	UnorderedMapContainer<std::string, ParticleGroup>& GetParticleGroups()
 	{
 		return particleGroups;
 	}
@@ -60,38 +60,37 @@ public:
 		return particleGroups[name];
 	}
 
-	LineCommon* GetLineCommon() {return lineCommon_;}
+	LineCommon* GetLineCommon() { return lineCommon_; }
 
 
 	// パーティクルグループ作り(モデル)
 	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model,
-		ParticleData::RasterizerType rasteType = ParticleData::RasterizerType::MODE_SOLID_BACK, ParticleData::BlendType blendType = ParticleData::BlendType::MODE_ADD);
+		EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
 	// パーティクルグループ作り(プリミティブ)
-	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive* primitive, 
-		ParticleData::RasterizerType rasteType = ParticleData::RasterizerType::MODE_SOLID_BACK, ParticleData::BlendType blendType = ParticleData::BlendType::MODE_ADD);
+	void CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive,
+		EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
-	// フィールド
-	/*void AddFieldEffect(Field::EffectType type,Field::ShapeType shapeType,const std::string& name) {
-		std::unique_ptr<Field::FieldEffect> field = std::make_unique<Field::FieldEffect>();
-		field->Init(name, shapeType,type,lineCommon_);
-		fieldEffect_.push_back(std::move(field.get()));
-	}*/
 
 	void AddFieldEffect(Field::FieldEffect* field) {
 		fieldEffect_.push_back(field);
 	}
-	
+
+	std::mt19937& GetRandomEngine() { return randomEngine_; }
+
+
+	void ClearParticle(std::string name);
+
 private:
 	// ルートシグネチャの作成
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
 
-	
+
 	void BlendAdd();
 
 	void BlendSubtract();
@@ -112,12 +111,11 @@ private:
 	// ランダムエンジン
 	std::mt19937 randomEngine_;
 
-	// パーティクルグループ
-	std::unordered_map<std::string, ParticleGroup> particleGroups;
+	UnorderedMapContainer<std::string, ParticleGroup> particleGroups;
 
 	// 最大パーティクル量
 	const uint32_t kNumMaxInstance = 1024 * 4;
-	
+
 	// フィールド関係
 	std::vector<Field::FieldEffect*> fieldEffect_;
 

@@ -10,7 +10,7 @@ namespace ShapeParameter {
 		float width = 1.0f;
 		float height = 1.0f;
 
-		void Create(ModelMesh* mesh);
+		void Create(ModelMesh* mesh, bool isInv = false);
 
 		// == オペレーター
 		bool operator==(const ShapePlane& other) const {
@@ -112,7 +112,7 @@ namespace ShapeParameter {
 
 	struct Circle
 	{
-		
+
 		float radius = 5.0f;
 		int segments = 16;
 
@@ -189,7 +189,7 @@ namespace ShapeParameter {
 
 	struct ShapeSphere {
 		float radius = 5.0f;
-		int latitudeSegments = 16; 
+		int latitudeSegments = 16;
 		int longitudeSegments = 16;
 		bool isTopBased = false;
 
@@ -197,7 +197,7 @@ namespace ShapeParameter {
 
 		// == オペレーター
 		bool operator==(const ShapeSphere& other) const {
-			return radius == other.radius && latitudeSegments == other.latitudeSegments&& longitudeSegments == other.longitudeSegments && isTopBased == other.isTopBased;
+			return radius == other.radius && latitudeSegments == other.latitudeSegments && longitudeSegments == other.longitudeSegments && isTopBased == other.isTopBased;
 		}
 
 		// != オペレーター
@@ -217,7 +217,7 @@ namespace ShapeParameter {
 
 		// == オペレーター
 		bool operator==(const ShapeArrow& other) const {
-			return shaftLength == other.shaftLength && shaftRadius == other.shaftRadius && headLength == other.headLength && headRadius == other.headRadius&& segments == other.segments;
+			return shaftLength == other.shaftLength && shaftRadius == other.shaftRadius && headLength == other.headLength && headRadius == other.headRadius && segments == other.segments;
 		}
 
 		// != オペレーター

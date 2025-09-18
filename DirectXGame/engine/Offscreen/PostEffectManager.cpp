@@ -15,23 +15,23 @@
 
 void PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
 {
-	DXGIDevice_		= DXGIDevice;
-	command_		= command;
-	srvManager_		= srvManager;
-	rtvManager_		= rtvManager;
+	DXGIDevice_ = DXGIDevice;
+	command_ = command;
+	srvManager_ = srvManager;
+	rtvManager_ = rtvManager;
 	renderingCommon_ = renderingCommon;
-	depthStencil_	= depthStencil;
-	barrier_		= barrier;
-	scissorRect_	= scissorRect;
-	viewPort_		= viewPort;
+	depthStencil_ = depthStencil;
+	barrier_ = barrier;
+	scissorRect_ = scissorRect;
+	viewPort_ = viewPort;
 
 
 	renderTexture_ = std::make_unique<RenderTexture>();
 	renderTexture_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainStr", PostEffectType::kCopy);
-	
+
 	renderTextureEnd_ = std::make_unique<RenderTexture>();
 	renderTextureEnd_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainEnd", PostEffectType::kCopy);
-	
+
 
 }
 
@@ -69,6 +69,8 @@ void PostEffectManager::PostDrawOffscreen()
 	// デプスステンシル
 	barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
+
+
 
 void PostEffectManager::PreDraw2dOffscreen()
 {
@@ -110,7 +112,7 @@ void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 {
 
 	RenderTexture* previousTexture = renderTexture_.get();
-	
+
 
 	std::sort(effectBlocks_.begin(), effectBlocks_.end(),
 		[](const PostEffectBlock* a, const PostEffectBlock* b) {
@@ -140,7 +142,7 @@ void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 	if (previousTexture) {
 		previousTexture->Draw();
 	}
-	sceneManager->Draw2D();
+	//sceneManager->Draw2D();
 	PostDraw2dOffscreen();
 }
 
@@ -168,11 +170,9 @@ void PostEffectManager::AddEffectBlock(const std::string name, PostEffectBlockTy
 
 void PostEffectManager::AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks)
 {
-	for (auto& effect  : effectBlocks) {
+	for (auto& effect : effectBlocks) {
 		effectBlocks_.push_back(effect);
 	}
-
-	//effectBlocks_.push_back(std::move(effectBlock));
 }
 
 void PostEffectManager::ClearPostEffectBlock()
@@ -191,11 +191,27 @@ void PostEffectManager::RenderImGui()
 	ImVec2 imagePos = ImGui::GetCursorScreenPos();
 	imagePos.y -= height;
 
+	Vector2 windowSize = Vector2{ static_cast<float> (WinApp::GetClientWidth()),static_cast<float> (WinApp::GetClientHeight()) };
+	Vector2 imageSize = Vector2{ width,height };
+
 	ImGui::InputFloat2("GetCursorScreenPos", &imagePos.x);
-	
+	ImGui::InputFloat2("WindowSize", &windowSize.x);
+	ImGui::InputFloat2("ImageSize", &imageSize.x);
+
+
 	imageleftTopPos_ = Vector2(imagePos.x, imagePos.y);
-	imageRatio_ = Vector2{ width / WinApp::GetClientWidth(),height / WinApp::GetClientHeight() };
+	imageSize_ = Vector2(width, height);
+	imageRatio_ = Vector2{ width / windowSize.x,height / windowSize.y };
+	ImGui::InputFloat2("ImageleftTopPos", &imageleftTopPos_.x);
+	ImGui::InputFloat2("ImageRatio", &imageRatio_.x);
+
 	ImGui::End();
+}
+
+void PostEffectManager::RenderUpdate()
+{
+	float width = static_cast<float> (WinApp::GetClientWidth());
+	float height = static_cast<float> (WinApp::GetClientHeight());
 }
 
 void PostEffectManager::PreEnd(RenderTexture* renderTexture)

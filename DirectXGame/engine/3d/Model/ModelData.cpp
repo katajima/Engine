@@ -80,19 +80,23 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 			aiFace& face = mesh->mFaces[faceIndex];
 			assert(face.mNumIndices == 3); // 三角形のみサポート
 
+			Vector3 vert[3];
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
 				pMesh->indices.push_back(vertexIndex);
-				//modelData.allMesh->indices.push_back(vertexIndex + vertexOffset); // ★補正
+
+				vert[element] = pMesh->vertices[vertexIndex].position.xyz();
 			}
+			pMesh->triangle.push_back({ {vert[0]},{vert[1]},{vert[2]} });
+
 		}
+
 		vertexOffset += mesh->mNumVertices; // ★次メッシュの頂点オフセット更新
 		pMesh->Initialize(dxCommon);
 
 		modelData.mesh.push_back(std::move(pMesh));
-		
+
 	}
-	//modelData.allMesh->Initialize(dxCommon);
 }
 
 // ボーン読み込み
@@ -171,6 +175,14 @@ void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectX
 				pMaterial->color = { baseColor.r, baseColor.g, baseColor.b, 1.0f };
 				pMaterial->tex_.diffuseFilePath = "resources/Texture/Image.png";
 			}
+		}
+
+		// Opacity（透過）
+		float opacity = 1.0f;
+		pMaterial->alpha_ = opacity;
+		if (AI_SUCCESS == material->Get(AI_MATKEY_OPACITY, opacity)) {
+			std::cout << "Mesh[" << meshIndex << "] Opacity: " << opacity << std::endl;
+			pMaterial->alpha_ = opacity;  // αに格納
 		}
 
 		// Specular
@@ -426,7 +438,7 @@ void CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelComm
 		skinCluster.outputVertexUavHandle.first = modelCommon->GetSrvManager()->GetCPUDescriptorHandle(skinCluster.srvUavIndices.outputVerticesUavIndex);
 		skinCluster.outputVertexUavHandle.second = modelCommon->GetSrvManager()->GetGPUDescriptorHandle(skinCluster.srvUavIndices.outputVerticesUavIndex);
 
-	
+
 
 		// skinningInfomation
 		skinCluster.skinningInfomation = modelCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SkinningInfomation));
@@ -452,7 +464,7 @@ void CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelComm
 					continue;
 				}
 
-				
+
 
 				auto& currentInfluence = skinCluster.mappedInfluence[vertexWeight.vertexIndex];
 				bool weightSet = false;

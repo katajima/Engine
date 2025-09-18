@@ -32,6 +32,17 @@ using namespace Microsoft::WRL;
 #include <mutex>
 
 
+enum class MapAxis {
+	XY,
+	ZX,
+	YZ
+};
+
+struct MapId {
+	int id; // テクスチャIndexや種類を表すID
+	std::string tex; // テクスチャname
+};
+
 class ObjectInstans
 {
 public:
@@ -48,10 +59,11 @@ public:
 	Vector4 color;
 	bool is;
 	uint32_t texIndex;
-
-
+	int id = -1;   // ← 固有ID（負なら未使用）
 };
 
+
+class Entity3DManager;
 class Object3dInstansManager
 {
 public:
@@ -95,6 +107,7 @@ public:
 	{
 		std::string name; // 名前
 		std::vector<ObjectInstans> object;
+		std::unordered_map<int, size_t> idMap;
 		Model* model;
 		bool flag;
 		uint32_t srvIndex;
@@ -116,6 +129,8 @@ public:
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
+	void SetEntity3D(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; };
+
 	// 更新
 	void Update();
 	// 描画
@@ -123,9 +138,9 @@ public:
 	// 描画準備
 	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
-	// パーティクルグループ作り(モデル)
+	// オブジェクトグループ作り(モデル)
 	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
-	// パーティクルグループ作り(モデル)
+	// オブジェクトグループ作り(モデル)
 	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, ModelMesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 
 	// カメラセット
@@ -137,8 +152,38 @@ public:
 
 	void Clear(const std::string name);
 
+	void ClearObject() {
+		for (auto& obj : objectGroups) {
+			obj.second.object.clear();
+		}
+	}
+
+	void AllClear() { objectGroups.clear(); }
+
+	// タイルマップ作成
+	void CreateTileMap(const std::string& groupName,
+		const std::string& textureFilePath,
+		Model* tileModel,
+		int mapWidth,
+		int mapHeight,
+		Vector3 tileSize,
+		Vector2 tileInterval,
+		const std::vector<int>& tileIndices,
+		const std::vector<MapId>& mapIds,
+		MapAxis axis = MapAxis::ZX); // テクスチャIndexや種類を表すID
+
+	// タイル移動
+	void MoveTile(const std::string& groupName, int tileId, const Vector3& newPos);
+public: //取得
+
+	ObjectInstans* GetObjectById(const std::string& groupName, int id);
+
+	std::vector<ObjectInstans>& GetObjects(const std::string& groupName);
+
+	ObjectGroup& GetObjectGroup(const std::string& groupName);
+
 private:
-	
+
 	// ルートシグネチャの作成
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
@@ -152,19 +197,12 @@ private:
 
 
 
-	DirectXCommon* dxCommon_ = nullptr;
-	SrvManager* srvManager_ = nullptr;
 
-
-
-	std::unique_ptr<PSOManager> psoManager_ = nullptr;
-	ModelManager* modelManager_;
-	
 
 	std::unordered_map<std::string, ObjectGroup> objectGroups;
 
 
-	const uint32_t kNumMaxInstance = 100000;
+	const uint32_t kNumMaxInstance = 10000;
 
 	uint32_t numInstance{};
 
@@ -175,6 +213,14 @@ private:
 	Transform transform{};
 
 
+
+private:
+	DirectXCommon* dxCommon_ = nullptr;
+	SrvManager* srvManager_ = nullptr;
+	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+	ModelManager* modelManager_;
+	Entity3DManager* entity3DManager_;
+private:
 	const float kGravitationalAcceleration = 9.8f;
 	////ルートシグネチャデスク
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};

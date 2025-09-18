@@ -8,7 +8,7 @@ struct VertexShaderOutput
     float3 basis_col0 : TEXCOORD1;
     float3 basis_col1 : TEXCOORD2;
     float3 basis_col2 : TEXCOORD3;
-    float3 normal : NORMAL0; // ©•K—vI
+    float3 normal : NORMAL0; // â†å¿…è¦ï¼
 };
 
 struct ParticleGPU
@@ -29,6 +29,8 @@ struct Material
     float4 color;
     int enableLighting;
     float alphaClipping;
+    float environmentCoefficient;
+    float alpha;
     float4x4 uvTransform;
     float shininess;
     int useLig;
@@ -38,16 +40,16 @@ struct Material
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 
-// •½sŒõü
+// å¹³è¡Œå…‰ç·š
 struct DirectionalLight
 {
-    float4 color; //!< ƒ‰ƒCƒg‚ÌF
-    float3 direction; //!< ƒ‰ƒCƒg‚ÌŒü‚«
-    float intensity; //!< ‹P“x
-    float ilg; // ƒŠƒO
+    float4 color; //!< ãƒ©ã‚¤ãƒˆã®è‰²
+    float3 direction; //!< ãƒ©ã‚¤ãƒˆã®å‘ã
+    float intensity; //!< è¼åº¦
+    float ilg; // ãƒªã‚°
     int enableLighting;
-    float3 groundColor; // ’n–ÊF
-    float3 skyColor; // “V‹…F
-    float3 groundNormal; // ’n–Ê–@ü•ûŒü
+    float3 groundColor; // åœ°é¢è‰²
+    float3 skyColor; // å¤©çƒè‰²
+    float3 groundNormal; // åœ°é¢æ³•ç·šæ–¹å‘
 };
 ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);

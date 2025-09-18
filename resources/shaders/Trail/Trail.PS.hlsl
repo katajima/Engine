@@ -1,6 +1,6 @@
 #include "Trail.hlsli"
 
-//色など三角形の表面の材質を決定するものMaterial
+//濶ｲ縺ｪ縺ｩ荳芽ｧ貞ｽ｢縺ｮ陦ｨ髱｢縺ｮ譚占ｳｪ繧呈ｱｺ螳壹☆繧九ｂ縺ｮMaterial
 struct Material
 {
     
@@ -28,7 +28,7 @@ struct PixelShaderOutput
 
 PixelShaderOutput main(VertexShaderOutput input)
 {
-    PixelShaderOutput output; 
+    PixelShaderOutput output;
     float4 transformedUV = mul(float4(input.texcoord.xy, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTexture.Sample(sSampler, transformedUV.xy);
     

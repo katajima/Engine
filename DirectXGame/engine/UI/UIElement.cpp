@@ -229,7 +229,7 @@ void UISlider::Update(float deltaTime) {
 		offsetPos_ = result;
 
 	}
-
+#ifdef _DEBUG
 	// ImGui表示（任意）
 	ImGui::Begin("UI");
 	Vector2 pos = slidSprite->GetSprite()->GetWorldTransform2d().GetWorldPosition();
@@ -237,6 +237,7 @@ void UISlider::Update(float deltaTime) {
 	ImGui::InputFloat2("preMousePos", &preMousePos.x);
 	ImGui::InputFloat("mouseX", &mouse.x);
 	ImGui::End();
+#endif // _DEBUG
 	offsetPos_.y = 0;
 	// スライダー位置更新
 	slidSprite->GetSprite()->SetPosition(offsetPos_);
@@ -465,7 +466,9 @@ void UICount::Update(float deltaTime)
 
 	int i = 0;
 	for (auto& sprite : countSprite_) {
-		if (i >= numDigits) break; // 桁数を超えたら描画しない
+		if (i >= numDigits) {
+			break;
+		} // 桁数を超えたら描画しない
 
 		int digit = (count / static_cast<int>(pow(10, i))) % 10;
 
@@ -478,16 +481,25 @@ void UICount::Update(float deltaTime)
 
 	if (nameSprite_) {
 
-		nameSprite_->GetSprite()->SetPosition(countSprite_.front()->GetSprite()->GetPosition() + Vector2(offsetSize.x,0) );
+		nameSprite_->GetSprite()->SetPosition(countSprite_.front()->GetSprite()->GetPosition() + Vector2(offsetSize.x, 0));
 		nameSprite_->Update();
 	}
 }
 
 
 void UICount::UniqueDraw() {
-	for (auto& sprite : countSprite_) {
+	const int count = (std::max)(0, static_cast<int>(count_)); // 念のためマイナス防止
+	const int numDigits = (count == 0) ? 1 : static_cast<int>(log10(static_cast<double>(count))) + 1;
+
+	int i = 0;
+	for (const auto& sprite : countSprite_) {
+		if (i >= numDigits) {
+			break; // 桁数を超えたら描画しない
+		}
 		sprite->Draw();
+		i++;
 	}
+
 	if (nameSprite_) {
 		nameSprite_->Draw();
 	}

@@ -14,7 +14,7 @@
 
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
+#include "DirectXGame/engine/effect/Particle/Emit/ParticleEmitter.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Trail/TrailEffect.h"
 
@@ -155,20 +155,16 @@ private:
 	std::unique_ptr<Object3d> skyBoxObject2;
 	std::unique_ptr<Object3d> oceanObject;
 
-
-	std::unique_ptr<Primitive> primitiveObject;
 	
 	std::unique_ptr<SkyBox> skyBox;
 	std::unique_ptr<SkyBox> skyBox2;
 
 
-	std::unique_ptr<Primitive> primiPlane = nullptr;
 	// オーシャンシェーダー
 	std::unique_ptr < Ocean> ocean_ = nullptr;
 
 	std::unique_ptr<Object3d> hitObject_ = nullptr;
 
-	std::unique_ptr<Primitive> primitiveCylinder_ = nullptr;
 
 	WorldTransform worldparticleEmitter_;
 	/// <summary>
@@ -188,11 +184,6 @@ private:
 	/// パーティクルエミッタ
 	/// </summary>
 
-	std::unique_ptr<ParticleEmitter> emitter_  =nullptr;
-
-	std::unique_ptr<ParticleEmitter> primitvPlane_  =nullptr;
-
-	
 
 	/// <summary>
 	/// 場所効果

@@ -13,7 +13,7 @@ struct PixelShaderOutput
 
 
 
-// HL2 —p‚ÌŠî’êƒxƒNƒgƒ‹i’è”j
+// HL2 ç”¨ã®åŸºåº•ãƒ™ã‚¯ãƒˆãƒ«ï¼ˆå®šæ•°ï¼‰
 static const float3 hl2_basis0 = float3(0.866f, 0.5f, 0.0f);
 static const float3 hl2_basis1 = float3(-0.866f, 0.5f, 0.0f);
 static const float3 hl2_basis2 = float3(0.0f, -1.0f, 0.0f);
@@ -30,7 +30,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     float3 finalColor = textureColor.rgb * input.color.rgb;
     float alpha = textureColor.a * input.color.a;
 
-    // ƒAƒ‹ƒtƒ@ƒNƒŠƒbƒsƒ“ƒO
+    // ã‚¢ãƒ«ãƒ•ã‚¡ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°
     if (textureColor.a <= gMaterial.alphaClipping)
     {
         discard;
@@ -38,7 +38,7 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     if (gMaterial.enableLighting != 0)
     {
-    // HL2 ƒ‰ƒCƒeƒBƒ“ƒOÄ\¬
+    // HL2 ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°å†æ§‹æˆ
         float3 normal = normalize(input.normal);
 
         float3 w;
@@ -52,7 +52,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         finalColor *= light;
     }
     
-    // Š®‘S“§‰ß‚È‚ç”jŠü
+    // å®Œå…¨é€éãªã‚‰ç ´æ£„
     if (alpha <= 0.0f)
     {
         discard;

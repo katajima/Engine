@@ -2,6 +2,7 @@
 #include"BaseScene.h"
 #include"AbstractSceneFactory.h"
 
+#include <algorithm> // clamp 用
 
 class Input;
 class DirectXCommon;
@@ -12,12 +13,15 @@ class Camera;
 class SceneManager
 {
 public:
+	void Init();
+
 	void Update();
 
 	void Draw2D();
 	
 	void Draw3D();
 	
+	void DrawForeground2D();
 	
 
 	~SceneManager();
@@ -58,6 +62,8 @@ public:
 		}
 		return false; 
 	};
+	bool IsFinished() const { return finished_; }
+
 
 private:
 	// 今のシーン(実行中シーン)
@@ -73,5 +79,10 @@ private:
 	Input* input_;
 	GlobalVariables* globalVariables_;
 	Camera* camera_;
+
+	// 終了フラグ
+	bool                  finished_ = false;
+	std::unique_ptr<Fade> fade_;
+	Phase                 phase_ = Phase::kMain;
 };
 

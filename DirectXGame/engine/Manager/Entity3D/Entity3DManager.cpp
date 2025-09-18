@@ -128,8 +128,8 @@ void Entity3DManager::UpdateImgui()
 				}
 
 			}
-			else if (entity->GetRenderComponent()->GetObjectType() ==ObjectModelType::kPrimitive) {
-				material = entity->primitive_->GetMaterial();
+			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kPrimitive) {
+				/*material = entity->primitive_->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
 					ImGui::DragFloat3("M_scale", &material->transform.scale.x, 0.1f);
@@ -139,7 +139,7 @@ void Entity3DManager::UpdateImgui()
 					ImGui::SliderInt("enableLighting", &material->enableLighting_, 0, 1);
 					ImGui::SliderFloat("alphaClipping", &material->alphaClipping_, 0, 1);
 					ImGui::DragFloat("shininess", &material->shininess_, 0.01f);
-				}
+				}*/
 
 			}
 			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kOcean) {
@@ -150,6 +150,7 @@ void Entity3DManager::UpdateImgui()
 					ImGui::DragFloat3("M_rotate", &material->transform.rotate.x, 0.1f);
 					ImGui::DragFloat3("M_translate", &material->transform.translate.x, 0.1f);
 					ImGui::ColorEdit4("color", &material->color.r);
+					ImGui::DragFloat("alpha", &material->alpha_);
 					ImGui::SliderInt("enableLighting", &material->enableLighting_, 0, 1);
 					ImGui::SliderFloat("alphaClipping", &material->alphaClipping_, 0, 1);
 					ImGui::DragFloat("shininess", &material->shininess_, 0.01f);
@@ -179,7 +180,7 @@ void Entity3DManager::UpdateImgui()
 						ImGui::SliderInt("enableLighting", &mesh->material->enableLighting_, 0, 1);
 						ImGui::SliderFloat("alphaClipping", &mesh->material->alphaClipping_, 0, 1);
 						ImGui::DragFloat("shininess", &mesh->material->shininess_, 0.01f);
-
+						ImGui::SliderFloat("alpha", &mesh->material->alpha_, 0, 1);
 						float width = static_cast<float> (100);
 						float height = static_cast<float> (100);
 
@@ -199,7 +200,7 @@ void Entity3DManager::UpdateImgui()
 			// プリミティブ形状なら
 			if (entity->GetPrimitive()) {
 				ImGui::Separator();
-				entity->GetPrimitive()->MeshUpdateImGui();
+				//entity->GetPrimitive()->MeshUpdateImGui();
 
 			}
 
@@ -226,6 +227,9 @@ void Entity3DManager::UpdateImgui()
 
 void Entity3DManager::Update()
 {
+	object3dInstansManager_->SetEntity3D(this);
+	object3dInstansManager_->Update();
+
 	object3d.erase(
 		std::remove_if(object3d.begin(), object3d.end(),
 			[](const std::unique_ptr<Object3d>& object) {
@@ -267,6 +271,9 @@ void Entity3DManager::ObjectClean()
 
 void Entity3DManager::ObjectDraw()
 {
+
+	object3dInstansManager_->Draw();
+
 	// 不透明
 	for (auto& object : opaqueObjects) {
 		object->Draw();

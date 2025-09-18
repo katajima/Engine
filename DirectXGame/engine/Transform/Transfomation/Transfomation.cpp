@@ -50,7 +50,7 @@ void Transfomation::Update(Model* model, Camera* camera, Matrix4x4& local, Matri
 
 }
 
-void Transfomation::Update(Primitive* primitive, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
+void Transfomation::Update(BasePrimitive* primitive, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 

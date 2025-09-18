@@ -5,6 +5,8 @@
 
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
+#include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
+
 #include"DirectXGame/engine/Material/Material.h"
 
 #include"DirectXGame/engine/Mesh/ModelMesh.h"
@@ -86,7 +88,7 @@ public:
 
 
 	// 形
-	void Initialize(SpriteCommon* spriteCommon,ShapeType type, const Color color = { 1,1,1,1 });
+	void Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color = { 1,1,1,1 });
 
 	void Update();
 
@@ -102,14 +104,14 @@ public:
 	void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
 
 
-	
+
 	void SetParametar(float innerRadius, float outerRadius, int segments);
 	void SetParametar(float radius, int segments);
 	void SetParametar(Vector2 size);
 	void SetParametar(Vector2 p0, Vector2 p1, Vector2 p2);
 private:
 	// 三角面
-	void CreateTriangle(Vector2 p0,Vector2 p1,Vector2 p2);
+	void CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2);
 	// 円
 	void CreateCircle(float radius, int segments);
 	// リング
@@ -129,9 +131,7 @@ private:
 	ShapeParameter2D::Ring ring_;
 
 public:
-	Vector2 position = { 0.0f,0.0f };
-	float rotation = 0.0f;
-	Vector2 scale = { 1.0f,1.0f };
+	WorldTransform2d worldTransform;
 private:
 	SpriteCommon* spriteCommon_ = nullptr;
 
@@ -147,9 +147,9 @@ private:
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
-	
 
-	
+
+
 	// メッシュ
 	std::unique_ptr<ModelMesh> mesh;
 	// トランスフォーム

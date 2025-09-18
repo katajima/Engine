@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 
-
+#include "DirectXGame/engine/3d/Model/ModelCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
 
@@ -67,34 +67,96 @@ void RenderComponent::Draw()
 	switch (objectType_)
 	{
 	case ObjectModelType::kNormal:
-		ObjectNormalTypeDiscrimination(rasterizerType_);
-
-		DrawSetting();
-
-
-		// 3Dモデルが割り当てれていれば描画する
 		if (model) {
-			model->Draw();
+			std::vector<ModelMesh*> tra;
+			std::vector<ModelMesh*> opa;
+
+
+			for (auto& mesh : model->modelData.mesh) {
+
+				if (mesh->material->alpha_ < 1.0f) {
+					tra.push_back(mesh.get());
+				}
+				else {
+					opa.push_back(mesh.get());
+				}
+			}
+
+			for (auto& mesh : opa) {
+				if (mesh->material->alpha_ < 1.0f) {
+					ObjectNormalTypeDiscrimination(ObjectRasterizerType::Transparent);
+				}
+				else {
+					ObjectNormalTypeDiscrimination(rasterizerType_);
+				}
+
+
+				DrawSetting();
+
+				mesh->material->GetCommandListMaterial(0);
+
+				mesh->material->GetCommandListTexture(2, 7, 8);
+
+				mesh->GetCommandList();
+
+				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
+				entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+			}
+
+			for (auto& mesh : tra) {
+				if (mesh->material->alpha_ < 1.0f) {
+					ObjectNormalTypeDiscrimination(ObjectRasterizerType::Transparent);
+				}
+				else {
+					ObjectNormalTypeDiscrimination(rasterizerType_);
+				}
+
+
+				DrawSetting();
+
+				mesh->material->GetCommandListMaterial(0);
+
+				mesh->material->GetCommandListTexture(2, 7, 8);
+
+				mesh->GetCommandList();
+
+				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
+				entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+			}
+
+
+
+
+
+			for (auto& mesh : model->modelData.mesh)
+			{
+
+			}
+			//model->Draw();
 		}
 		break;
 	case ObjectModelType::kAnimation:
-		ObjectNormalTypeDiscrimination(rasterizerType_);
-
-		DrawSetting();
-
-
-		// 3Dモデルが割り当てれていれば描画する
 		if (model) {
+			ObjectNormalTypeDiscrimination(rasterizerType_);
+
+			DrawSetting();
+
+
+			// 3Dモデルが割り当てれていれば描画する
+
 			model->Draw();
 		}
 		break;
 	case ObjectModelType::kSkinning:
-		ObjectSkinningTypeDiscrimination(rasterizerType_);
-
-		DrawSettingSkin();
-
-		// 3Dモデルが割り当てれていれば描画する
 		if (model) {
+			ObjectSkinningTypeDiscrimination(rasterizerType_);
+
+			DrawSettingSkin();
+
+			// 3Dモデルが割り当てれていれば描画する
+
 			model->DrawSkinning();
 		}
 		break;
@@ -195,6 +257,9 @@ void RenderComponent::ObjectNormalTypeDiscrimination(ObjectRasterizerType type)
 		break;
 	case ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_NONE:
 		object->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
+		break;
+	case ObjectRasterizerType::Transparent:
+		object->DrawCommonSetting(Object3dCommon::PSOType::Transparent);
 		break;
 	default:
 		break;

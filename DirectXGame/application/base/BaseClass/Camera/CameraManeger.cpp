@@ -58,12 +58,17 @@ void CameraManeger::Update()
 			}
 		}
 
-
+		entity3DManager_->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
+		entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());
+		entity3DManager_->Get3DLineCommon()->SetDefaltCamera(camera.get());
+		entity3DManager_->GetObject3dInstansManager()->SetCamera(camera.get());
+		camera->UpdateMatrix();
 	}
 	else {
 		entity3DManager_->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
 		entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());
 		entity3DManager_->Get3DLineCommon()->SetDefaltCamera(camera.get());
+		entity3DManager_->GetObject3dInstansManager()->SetCamera(camera.get());
 		camera->UpdateMatrix();
 	}
 }
@@ -100,12 +105,12 @@ void CameraManeger::SetUseCamera(std::string name, float time)
 
 
 			startTransform.translate = camera->transform_.translate;
-			startTransform.rotate    = MakeQuaternionFromEuler(camera->transform_.rotate);
+			startTransform.rotate = MakeQuaternionFromEuler(camera->transform_.rotate);
 			startTransform.translate = camera->transform_.translate;
 
 
 			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
-			targetTransform.rotate    = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
+			targetTransform.rotate = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
 			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
 
 		}
@@ -121,6 +126,9 @@ void CameraManeger::UpadateImGui()
 		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
 		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);
 		ImGui::Checkbox("isGameCamera", &isGameCamera);
+		bool isPro = camera->GetIsProjection();
+		ImGui::Checkbox("isProjection", &isPro);
+		camera->SetIsProjection(isPro);
 		if (ImGui::Button("cameraPos")) {
 			camera->transform_.translate = { 0,20,-175 };
 			camera->transform_.rotate = { 0,0,0 };
@@ -145,14 +153,14 @@ void CameraManeger::UpadateImGui()
 	ImGui::Begin("Camera Properties");
 	if (ImGui::CollapsingHeader("Camera")) {
 		ImGui::Separator();
-		ImGui::DragFloat("chengeTime",&chengeTime,0.01f);
+		ImGui::DragFloat("chengeTime", &chengeTime, 0.01f);
 		ImGui::Separator();
 		for (auto& cameraData : cameras) {
 			if (ImGui::TreeNode(cameraData.first.c_str())) {
 				ImGui::DragFloat3("Translate", &cameraData.second->GetUniqueCamera()->transform_.translate.x, 0.1f);
 				ImGui::DragFloat3("Rotate", &cameraData.second->GetUniqueCamera()->transform_.rotate.x, 0.01f);
 				ImGui::DragFloat3("Scale", &cameraData.second->GetUniqueCamera()->transform_.scale.x, 0.01f);
-				
+
 				if (ImGui::Button("use")) {
 					SetUseCamera(cameraData.first.c_str(), chengeTime);
 				}

@@ -28,14 +28,14 @@ public:// メンバ関数
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
 	void DrawCommonSetting(PSOType type);
-	
+
 private:// メンバ関数
 	// ルートシグネチャの作成
 	void CreateRootSignature();
 
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
-	
+
 private:// メンバ変数
 	DirectXCommon* dxCommon_;
 
@@ -47,7 +47,7 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature[2];
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[4];
-	
+
 
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 };

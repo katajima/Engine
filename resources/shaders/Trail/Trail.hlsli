@@ -36,8 +36,8 @@ float SpecularPow(float32_t3 dire, float32_t3 toEye, float32_t3 normal, float32_
 
 float SpecularPow2(float32_t3 dire, float32_t3 toEye, float32_t3 normal, float32_t shininess)
 {
-    float32_t3 reflectLight = reflect(dire, normalize(normal)); // ”½ËƒxƒNƒgƒ‹
-    float32_t RdotE = dot(reflectLight, toEye); // ‹üƒxƒNƒgƒ‹‚Æ”½ËƒxƒNƒgƒ‹‚ÌƒhƒbƒgÏ
+    float32_t3 reflectLight = reflect(dire, normalize(normal)); // åå°„ãƒ™ã‚¯ãƒˆãƒ«
+    float32_t RdotE = dot(reflectLight, toEye); // è¦–ç·šãƒ™ã‚¯ãƒˆãƒ«ã¨åå°„ãƒ™ã‚¯ãƒˆãƒ«ã®ãƒ‰ãƒƒãƒˆç©
 
     return pow(saturate(RdotE), shininess);
 }

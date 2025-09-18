@@ -18,16 +18,20 @@ public:
 	void Update();
 
 	// カメラセット
-	void AddCamera(CameraInfo camera,std::string name);
+	void AddCamera(CameraInfo camera, std::string name);
 
 	// 使っているカメラ設定(string カメラの名前、float 切り替わり時間(補間時間))
-	void SetUseCamera(std::string name,float time);
+	void SetUseCamera(std::string name, float time);
 
 	void UpadateImGui();
 
-	Camera* GetCamera() {return camera.get();}
+	Camera* GetCamera() { return camera.get(); }
 	// カメラを管理対象から削除
 	void DeleteCamera(std::string name);
+
+	void Clear() {
+		cameras.clear();
+	};
 
 private:
 	// 全てのカメラ
@@ -42,7 +46,7 @@ private:
 	float interpolationTime = 0.0f;
 	float currentTime = 0.0f;
 
-	
+
 	float chengeTime = 0.1f;
 
 	QuaternionTransform startTransform;

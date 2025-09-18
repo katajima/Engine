@@ -9,7 +9,7 @@
 #include "DirectXGame/engine/DirectX/ViewPort/ViewPort.h"
 #include "DirectXGame/engine/DirectX/Fence/Fence.h"
 
-void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager,Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence)
+void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence)
 {
 	winApp_ = winApp;
 	DXGIDevice_ = dxgi;
@@ -23,6 +23,9 @@ void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, R
 	CreateSwapChain();
 	// スワップチェーンリソースの作成
 	CreateSwapChainResource();
+
+	rtvIndex_[0] = rtvManager_->Allocate();
+	rtvIndex_[1] = rtvManager_->Allocate();
 	// RTV作成
 	CreateRTV();
 
@@ -85,13 +88,48 @@ void SwapChain::PostDraw()
 	command_->ResetCommand();
 }
 
+void SwapChain::Resize(int width, int height)
+{
+	if (!swapChain_) return;
+
+	// GPUの使用完了を待つ（安全のため）
+	fence_->WaitGPU();
+
+	// バックバッファを解放
+	for (auto& res : swapChainResources_) {
+		res.Reset();
+	}
+
+	// バッファをリサイズ
+	hr_ = swapChain_->ResizeBuffers(
+		2, width, height,
+		DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	assert(SUCCEEDED(hr_));
+
+	// 新しいリソースを再取得
+	CreateSwapChainResource();
+
+	// RTVも作り直す
+	CreateRTV();
+}
+
 void SwapChain::CreateSwapChain()
 {
 	////------スワップチェーン------////
-	//WinApp::GetClientWidth;
 	//スワップチェーンを生成する
-	swapChainDesc_.Width = WinApp::GetClientWidth();   //画面の幅。ウィンドウクライアント領域を同じものにしておく
-	swapChainDesc_.Height = WinApp::GetClientHeight();  //画面の高さ。ウィンドウクライアント領域を同じものにしておく
+	int32_t width = WinApp::GetClientWidth(false);
+	int32_t height = WinApp::GetClientHeight(false);
+
+#ifndef _DEBUG
+	//width = WinApp::GetClientWidth();
+	//height = WinApp::GetClientHeight();
+#endif // !_DEBUG
+
+
+
+
+	swapChainDesc_.Width = width;   //画面の幅。ウィンドウクライアント領域を同じものにしておく
+	swapChainDesc_.Height = height;  //画面の高さ。ウィンドウクライアント領域を同じものにしておく
 	swapChainDesc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM;  //色の形式
 	swapChainDesc_.SampleDesc.Count = 1;  //マルチサンプルしない
 	swapChainDesc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  //描画ターゲットとして利用する
@@ -129,11 +167,10 @@ void SwapChain::CreateRTV()
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	//rtvTexDesc_ = rtvDesc;
 
-	
-	
-	rtvIndex_[0] = rtvManager_->Allocate();
+
+
+
 	rtvManager_->CreateRTV(rtvIndex_[0], swapChainResources_[0].Get());
 
-	rtvIndex_[1] = rtvManager_->Allocate();
 	rtvManager_->CreateRTV(rtvIndex_[1], swapChainResources_[1].Get());
 }

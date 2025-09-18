@@ -14,7 +14,7 @@
 #include<format>
 
 
-class Primitive;
+class BasePrimitive;
 class SkyBox;
 class Ocean;
 class Transfomation
@@ -23,17 +23,17 @@ public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 	// 更新
-	void Update(Model* model, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	void Update(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
 	// 更新
-	void Update(Primitive* primitive, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	void Update(BasePrimitive* primitive, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
 	// 更新
-	void Update(SkyBox* skyBox, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	void Update(SkyBox* skyBox, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
 	// 更新
-	void Update(Ocean* ocean, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	void Update(Ocean* ocean, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
 	// 更新
-	void Update(Camera* camera,Matrix4x4& mat);
+	void Update(Camera* camera, Matrix4x4& mat);
 	// 更新
-	void UpdateSkinning(Model* model, Camera* camera,Matrix4x4& local,Matrix4x4& mat);
+	void UpdateSkinning(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat);
 	// 更新
 	void UpdateSprite(Matrix4x4& mat);
 
@@ -46,7 +46,7 @@ public:
 		Matrix4x4 World;
 		Matrix4x4 worldInverseTranspose;
 	};
-	
+
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 

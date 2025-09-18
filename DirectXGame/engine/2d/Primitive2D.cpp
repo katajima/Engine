@@ -1,7 +1,7 @@
 #include "Primitive2D.h"
 #include "SpriteCommon.h"
 
-void Primitive2D::Initialize(SpriteCommon* spriteCommon,ShapeType type, const Color color)
+void Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color)
 {
 	type_ = type;
 	spriteCommon_ = spriteCommon;
@@ -11,16 +11,16 @@ void Primitive2D::Initialize(SpriteCommon* spriteCommon,ShapeType type, const Co
 	switch (type_)
 	{
 	case Primitive2D::ShapeType::Cube:
-		CreateCube({100,100});
+		CreateCube({ 100,100 });
 		break;
 	case Primitive2D::ShapeType::Triangle:
-		CreateTriangle({50.0f,-50.0f},{0,50.0f},{100.0f,50.0f});
+		CreateTriangle({ 50.0f,-50.0f }, { 0,50.0f }, { 100.0f,50.0f });
 		break;
 	case Primitive2D::ShapeType::Circle:
-		CreateCircle(100,32);
+		CreateCircle(100, 32);
 		break;
 	case Primitive2D::ShapeType::Star:
-		CreateStar(50,100,5);
+		CreateStar(50, 100, 5);
 		break;
 	case Primitive2D::ShapeType::Ring:
 		CreateRing(50, 100, 5);
@@ -51,11 +51,11 @@ void Primitive2D::Initialize(SpriteCommon* spriteCommon,ShapeType type, const Co
 
 void Primitive2D::Update()
 {
-	transform.scale = { scale.x,scale.y,1.0f };
-	transform.rotate = { 0.0f,0.0f,rotation };
-	transform.translate = { position.x,position.y,0.0f };
+	transform.scale = { worldTransform.scale_.x,worldTransform.scale_.y,1.0f };
+	transform.rotate = { 0.0f,0.0f,worldTransform.rotate_ };
+	transform.translate = { worldTransform.translate_.x,worldTransform.translate_.y,0.0f };
 
-
+	worldTransform.Update();
 
 
 	//transform変数を作る
@@ -246,11 +246,11 @@ void Primitive2D::CreateCube(Vector2 size)
 
 	Vector2 halfSize = size * 0.5f;
 
-	// +Z 方向を向く四角形
-	mesh->vertices.push_back({ .position = {-halfSize.x,  halfSize.y, 0.0f, 1.0f}, .texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左上
-	mesh->vertices.push_back({ .position = { halfSize.x,  halfSize.y, 0.0f, 1.0f}, .texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右上
-	mesh->vertices.push_back({ .position = {-halfSize.x, -halfSize.y, 0.0f, 1.0f}, .texcoord = {0.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
-	mesh->vertices.push_back({ .position = { halfSize.x, -halfSize.y, 0.0f, 1.0f}, .texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右下
+	// -Z 方向を向く四角形
+	mesh->vertices.push_back({ .position = {-halfSize.x,  halfSize.y, 0.0f, 1.0f}, .texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, -1.0f} }); // 左上
+	mesh->vertices.push_back({ .position = { halfSize.x,  halfSize.y, 0.0f, 1.0f}, .texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, -1.0f} }); // 右上
+	mesh->vertices.push_back({ .position = {-halfSize.x, -halfSize.y, 0.0f, 1.0f}, .texcoord = {0.0f, 1.0f}, .normal = {0.0f, 0.0f, -1.0f} }); // 左下
+	mesh->vertices.push_back({ .position = { halfSize.x, -halfSize.y, 0.0f, 1.0f}, .texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, -1.0f} }); // 右下
 
 	// **時計回り (CW) に修正**
 	mesh->indices.push_back(0);
@@ -308,7 +308,7 @@ void Primitive2D::SetParametar(Vector2 size)
 	default:
 		break;
 	}
-	
+
 }
 
 void Primitive2D::SetParametar(Vector2 p0, Vector2 p1, Vector2 p2)

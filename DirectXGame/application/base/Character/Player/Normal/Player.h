@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
 #include "DirectXGame/application/base/Weapon/playerWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
-#include "DirectXGame/application/base/Special/BulletSpecial.h"
+
 
 ///< summary>
 /// 自キャラ

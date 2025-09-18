@@ -5,7 +5,7 @@
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/base/Logger.h"
-#include"DirectXGame/engine/base/StringUtility.h"
+#include"DirectXGame/engine/Utility/StringUtility.h"
 
 // C++
 #include <iostream>
@@ -31,7 +31,7 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->indices);
 
 
-	
+
 	// アニメーションがあるなら
 	if (modelData.isAmimetion) {
 		;
@@ -64,17 +64,19 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 
 void Model::Draw()
 {
-	for (auto& mesh : modelData.mesh)
-	{
-		mesh->material->GetCommandListMaterial(0);
+	//for (auto& mesh : modelData.mesh)
+	//{
 
-		mesh->material->GetCommandListTexture(2, 7, 8);
 
-		mesh->GetCommandList();
+	//	mesh->material->GetCommandListMaterial(0);
 
-		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-		modelCommon_->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
-	}
+	//	mesh->material->GetCommandListTexture(2, 7, 8);
+
+	//	mesh->GetCommandList();
+
+	//	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
+	//	modelCommon_->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+	//}
 }
 
 void Model::DrawSkinning()
@@ -88,7 +90,7 @@ void Model::DrawSkinning()
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 
-		mesh->GetCommandList(mesh->skinCluster->outputBufferView,mesh->GetVertexBufferView());
+		mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
@@ -112,9 +114,9 @@ float Model::GetMaterialAlfa()
 
 	for (auto& mesh : modelData.mesh)
 	{
-		if (mesh->material->color.a < a) {
-			a = mesh->material->color.a;
-		}		
+		if (mesh->material->color.a < a || mesh->material->alpha_ < a) {
+			a = mesh->material->color.a * mesh->material->alpha_;
+		}
 	}
 	return a;
 }
@@ -122,7 +124,7 @@ float Model::GetMaterialAlfa()
 ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
 	//必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData
-	
+
 	timer_.StartTimer();
 
 	Assimp::Importer importer;
@@ -130,8 +132,8 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 
 	modelData.name = filePach;
 
-	const aiScene* scene = importer.ReadFile(filePach.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | 
-		aiProcess_Triangulate | 
+	const aiScene* scene = importer.ReadFile(filePach.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs |
+		aiProcess_Triangulate |
 		aiProcess_GenSmoothNormals |
 		aiProcess_CalcTangentSpace |
 		aiProcess_JoinIdenticalVertices);
@@ -141,17 +143,17 @@ ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const 
 	assert(scene->HasMeshes()); //メッシュがないのは対応しない
 
 	// ノード読み込み
-	modelData.rootNode = LoadModel::ReadNode(scene->mRootNode,modelData.meshOffsetMap);
+	modelData.rootNode = LoadModel::ReadNode(scene->mRootNode, modelData.meshOffsetMap);
 
 	// メッシュ読み込み
 	LoadModel::LoadMesh(scene, modelData, dxCommon_);
 	// Assimp読み込みやメッシュ生成
-	
+
 	timer_.EndTimer();
 
 	// ボーン読み込み
 	LoadModel::LoadBone(scene, modelData, dxCommon_);
-	
+
 	// マテリアル読み込み
 	LoadModel::LoadMaterial(scene, modelData, dxCommon_, directoryPath);
 

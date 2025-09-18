@@ -7,7 +7,7 @@
 #include<wrl.h>
 #include <array>
 #include"DirectXGame/engine/base/Logger.h"
-#include"DirectXGame/engine/base/StringUtility.h"
+#include"DirectXGame/engine/Utility/StringUtility.h"
 #include"DirectXGame/engine/base/WinApp/WinApp.h"
 #include<chrono>
 #include <thread>
@@ -48,7 +48,7 @@ class SceneManager;
 class DirectXCommon
 {
 public: // メンバ関数
-	
+
 	// 初期化
 	void Intialize(WinApp* winApp);
 
@@ -64,7 +64,7 @@ private:
 	void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 private:
 	// スワップチェーンにレンダーターゲットを渡す
-	void PassSwap(SceneManager* sceneManager,RenderTexture* renderTexture);
+	void PassSwap(SceneManager* sceneManager, RenderTexture* renderTexture);
 private:
 	// 3D2D描画
 	void Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager);
@@ -81,13 +81,13 @@ public:
 
 
 	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return DXGIDevice_->GetDevice(); }
-	
+
 	Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> GetCommandList() { return command_->GetList(); }
 
 	SrvManager* GetSrvManager() { return  srvManager_.get(); }
 
 	RtvManager* GetRtvManager() { return  rtvManager_.get(); }
-	
+
 	TextureManager* GetTextureManager() { return textureManager_.get(); }
 
 	ModelManager* GetModelManager() { return modelManager_.get(); }
@@ -95,7 +95,7 @@ public:
 	DXGIDevice* GetDXGIDevice() { return DXGIDevice_.get(); }
 
 	Command* GetCommand() { return command_.get(); }
-	
+
 	DXCCompiler* GetDXCCompiler() { return dxcCompiler_.get(); }
 
 	ImGuiManager* GetImGuiManager() { return imguiManager_.get(); }
@@ -112,7 +112,7 @@ public:
 
 	Fence* GetFence() { return fence_.get(); }
 
-	ScissorRect* GetScissorRect() {return scissorRect_.get();};
+	ScissorRect* GetScissorRect() { return scissorRect_.get(); };
 
 	ViewPort* GetViewPort() { return viewPort_.get(); }
 private:

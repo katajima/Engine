@@ -27,7 +27,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "DirectXGame/engine/base/Timer.h"
+#include "DirectXGame/engine/Utility/TimerUtility.h"
 
 class ModelCommon;
 class DirectXCommon;
@@ -38,16 +38,16 @@ class Model
 public:
 
 	// 初期化
-	void Initialize(DirectXCommon* dxCommon,ModelCommon* modelCommon,const std::string& directorypath,const std::string& filename,const std::string& file = "");
+	void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file = "");
 
 	// 通常描画
 	void Draw();
-	
+
 	// スキニング用描画
 	void DrawSkinning();
 
 	// ModelData取得
-	ModelData& GetModelData(){ return modelData; }	
+	ModelData& GetModelData() { return modelData; }
 
 	float GetMaterialAlfa();
 
@@ -59,7 +59,7 @@ private:
 	SrvManager* srvManager_ = nullptr;
 	DirectXCommon* dxCommon_;
 	DebugTimer timer_;
-public:	
+public:
 	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 
 

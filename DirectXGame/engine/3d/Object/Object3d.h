@@ -38,8 +38,8 @@ public:
 	// セッター
 
 	// モデル設定
-	void SetModel(Model* model) { 
-		this->model = model; 
+	void SetModel(Model* model) {
+		this->model = model;
 		renderComponent_->SetModel(model);
 	}
 
@@ -57,7 +57,7 @@ public:
 
 
 	// プリミティブ形状
-	void SetPrimitive(std::unique_ptr<Primitive> primitive)
+	void SetPrimitive(std::unique_ptr<BasePrimitive> primitive)
 	{
 		primitive_ = std::move(primitive);
 		renderComponent_->SetPrimitive(primitive_.get());
@@ -69,8 +69,8 @@ public:
 	}
 
 	// 波セット
-	void SetOcean(Ocean* ocean) { 
-		ocean_ = ocean; 
+	void SetOcean(Ocean* ocean) {
+		ocean_ = ocean;
 		renderComponent_->SetOcean(ocean_);
 	}
 
@@ -79,10 +79,6 @@ public:
 	void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
 
 
-
-
-	// オブジェクトがカメラ内に映っているか
-	bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
 
 	// メッシュ取得
 	ModelMesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
@@ -94,7 +90,7 @@ public:
 	Model* GetModel() const { return model; }
 
 	// プリミティブ取得
-	Primitive* GetPrimitive() const { return primitive_.get();};
+	BasePrimitive* GetPrimitive() const { return primitive_.get(); };
 	// 波取得
 	Ocean* GetOcean() const { return ocean_; }
 	// トレイルエフェクト
@@ -236,7 +232,7 @@ public:
 	// モデル
 	Model* model = nullptr;
 	// プリミティブ
-	std::unique_ptr<Primitive> primitive_ = nullptr;
+	std::unique_ptr<BasePrimitive> primitive_ = nullptr;
 	// スカイボックス
 	SkyBox* skyBox_ = nullptr;
 	// 波
@@ -254,6 +250,9 @@ public:
 	std::string name = "";
 	// オブジェクトタグ
 	std::string nameTag = "";
+	// ID
+	uint32_t id = 0;
+
 private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;

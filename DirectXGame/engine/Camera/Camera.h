@@ -56,27 +56,30 @@ public: // メンバ関数
 
 	PostEffectManager* GetPostEffectManager() { return postEffectManager_; }
 
-	void SetShake(float time,Vector3 diectionRange);
+	void SetShake(float time, Vector3 diectionRange);
 
-
+	bool GetIsProjection() const { return isProjection_; }
+	void SetIsProjection(bool isProjection) { isProjection_ = isProjection; }
 
 	// レンダーテクスチャ追加
 	void AddEffectBlock(const std::string name, PostEffectBlockType type, bool use = true);
 
 	std::vector<PostEffectBlock*> GetPostEffectBlocks();
 
+	void Clear() { effectBlocks_.clear(); }
+
 private:
 	float shakeTime_ = 0;
 	Vector3 shakeDirectionRange_{};
 #ifdef _DEBUG
 	float debugShakeTime_ = 0.1f;
-	Vector3 debugShakeDirectionRange_ = {0.1f,0.1f,0.1f};
+	Vector3 debugShakeDirectionRange_ = { 0.1f,0.1f,0.1f };
 #endif // _DEBUG
 
-	
+
 public:
 	static bool isShake_;
-
+	bool isProjection_ = true;
 
 	float fovY_ = 0.45f;
 	float aspect_ = float(1280) / float(720);
@@ -105,10 +108,8 @@ private:
 	Microsoft::WRL::ComPtr < ID3D12Resource> resource;
 
 
-	float move = 0.3f;
-
-	float speed = 1.0f;
-
+	float move = 0.3f;		// 移動量
+	float speed = 1.0f;		// 速度
 };
 
 

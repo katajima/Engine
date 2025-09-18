@@ -6,6 +6,7 @@
 #include<sstream>
 #include<wrl.h>
 #include<cassert>
+#include<unordered_map>
 
 // チャンクヘッダ
 struct ChunkHeader
@@ -40,6 +41,7 @@ struct SoundData
 	unsigned int bufferSize;
 };
 
+
 // 前方宣言
 class WinApp;
 class DirectXCommon;
@@ -48,6 +50,11 @@ class DirectXCommon;
 class Audio
 {
 public:
+	Audio() = default;
+	~Audio() {
+		Finalize();
+	};
+
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -64,18 +71,27 @@ public:
 
 	void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);
 
-	uint32_t PlayWave(uint32_t soundDataHandle);
-
+	// 返り値: サウンドハンドル（0 は無効）
 	uint32_t LoadWave(const char* filename);
 
-private:
+	void UnloadWave(uint32_t soundDataHandle);
 
+	// 多重再生可能
+	void PlayWave(uint32_t soundDataHandle, bool loop = false, float volume = 1.0f);
+
+	void StopWave(uint32_t soundDataHandle);
+private:
 	//////------音--------///////
 
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
 
-	SoundData soundData1;
+
+	std::unordered_map<uint32_t, SoundData> soundDatas;
+	std::unordered_map<uint32_t, IXAudio2SourceVoice*> playingVoices;
+	uint32_t nextHandle = 1;
+
+	std::string directoryPath = "Resources/sound/";
 
 };
 

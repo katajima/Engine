@@ -15,6 +15,8 @@ enum class ObjectRasterizerType {
 	NoUvInterpolation_MODE_SOLID_NONE,
 	UvInterpolation_MODE_WIREFRAME_NONE,
 	NoUvInterpolation_MODE_WIREFRAME_NONE,
+
+	Transparent,
 };
 
 // オブジェクトのタイプを指定する
@@ -35,7 +37,7 @@ enum class ObjectDrawType {
 	kTranslucent03,	// 半透明最後
 };
 
-class Primitive;
+class BasePrimitive;
 class SkyBox;
 class Ocean;
 class Transfomation;
@@ -55,7 +57,7 @@ public:
 	void SetCamera(Camera* camera) { camera_ = camera; }
 	// トランスフォーム
 	void SetTransfomation(Transfomation* transfomation) { transfomation_ = transfomation; }
-	
+
 	// モデル
 	void SetModel(Model* model) { this->model = model; }
 	// スカイボックス
@@ -63,8 +65,8 @@ public:
 	// 波セット
 	void SetOcean(Ocean* ocean) { ocean_ = ocean; }
 	// プリミティブ
-	void SetPrimitive(Primitive* primitive){primitive_ = primitive;}
-	
+	void SetPrimitive(BasePrimitive* primitive) { primitive_ = primitive; }
+
 
 public:
 	// 何かしらの見た目があるか
@@ -90,16 +92,16 @@ public:
 
 private:
 	void ObjectNormalTypeDiscrimination(ObjectRasterizerType type);
-	
+
 	void ObjectSkinningTypeDiscrimination(ObjectRasterizerType type);
-	
+
 	// 描画セッティング(デフォルト)
 	void DrawSetting();
 	// 描画セッティング(スキニング)
 	void DrawSettingSkin();
 	// 描画セッティング(海)
 	void DrawSettingOcean();
-	
+
 
 private:
 	// オブジェクトの描画順
@@ -119,7 +121,7 @@ private:
 	Entity3DManager* entity3DManager_ = nullptr;
 	Model* model = nullptr;
 	// プリミティブ
-	Primitive* primitive_ = nullptr;
+	BasePrimitive* primitive_ = nullptr;
 	// スカイボックス
 	SkyBox* skyBox_ = nullptr;
 	// 波

@@ -18,9 +18,9 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/scene/SceneManager.h"
 
 void DirectXCommon::Intialize(WinApp* winApp) {
-    
-    InitializeFixFPS();
-   
+
+	InitializeFixFPS();
+
 	DXGIDevice_->Initialize();
 	command_->Initialize(DXGIDevice_.get()); // コマンド
 	viewPort_->Initialize(command_.get());   // ビューポート
@@ -30,18 +30,18 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	srvManager_->Initialize(DXGIDevice_.get(), command_.get()); // SRV
 	rtvManager_->Initialize(DXGIDevice_.get(), command_.get()); // RTV
 	dsvManager_->Initialize(DXGIDevice_.get(), command_.get()); // DSV
-	depthStencil_->Initialize(DXGIDevice_.get(),command_.get(),dsvManager_.get(),srvManager_.get()); // デプスステンシル     
-	
+	depthStencil_->Initialize(DXGIDevice_.get(), command_.get(), dsvManager_.get(), srvManager_.get()); // デプスステンシル     
+
 
 	textureManager_->Initialize(command_.get(), DXGIDevice_.get(), srvManager_.get()); // テクスチャマネージャー
 	modelManager_->Initialize(this); // モデルマネージャー
-	
+
 	renderingCommon_->Initialize(this);
 	barrier_->Initialize(command_.get()); // バリア
 
 
-	swapChain_->Initialize(winApp, DXGIDevice_.get(), command_.get(), rtvManager_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get(),fence_.get()); // スワップチェーン
-
+	swapChain_->Initialize(winApp, DXGIDevice_.get(), command_.get(), rtvManager_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get(), fence_.get()); // スワップチェーン
+	WinApp::SetSwapChain(swapChain_.get());
 
 	// ポストエフェクトマネージャー(レンダリング関係のマネージャー)
 	postEffectManager_->Intialize(DXGIDevice_.get(), command_.get(), srvManager_.get(), rtvManager_.get(), renderingCommon_.get(), depthStencil_.get(), barrier_.get(), scissorRect_.get(), viewPort_.get());
@@ -71,19 +71,19 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 
 	postEffectManager_->PreDraw2dOffscreen();
 
-	sceneManager->Draw2D();
+	//sceneManager->Draw2D();
 
 	postEffectManager_->PostDraw2dOffscreen();
 }
 
-void DirectXCommon::PassSwap(SceneManager* sceneManager,RenderTexture* renderTexture)
+void DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* renderTexture)
 {
 	// スワップチェーン用の描画準備
 	swapChain_->PreDraw();
 
 	// レンダーテクスチャ(コピー)
 	renderTexture->Draw();
-	
+
 	//sceneManager->Draw2D();
 
 	// ImGuiの描画
@@ -104,17 +104,19 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	postEffectManager_->AllPostEffect(sceneManager);
 
 	// スワップチェーン
-	PassSwap(sceneManager,postEffectManager_->GetEndRenderTexture());
+	PassSwap(sceneManager, postEffectManager_->GetEndRenderTexture());
 }
 
 void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
-{	
-	
+{
+	sceneManager->DrawForeground2D();
+
 
 	entity3DManager->ObjectDraw();
 
 	// 3Dオブジェクトの描画
 	sceneManager->Draw3D();
+
 
 
 	// パーティクル描画
@@ -127,12 +129,15 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 #ifdef _DEBUG
 	//if (!sceneManager->IsNowScene("GAMEPLAY")) {
 		// デバッグ用のライン描画
-		entity3DManager->Get3DLineCommon()->Draw();
+	entity3DManager->Get3DLineCommon()->Draw();
 	//}
 #endif // _DEBUG
 
 	// 2Dオブジェクトの描画
-	//sceneManager->Draw2D();
+	sceneManager->Draw2D();
+
+	entity3DManager->GetEffectManager()->GetParticleManager2d()->Draw();
+
 }
 
 void DirectXCommon::InitializeFixFPS()
@@ -172,7 +177,11 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 	entity3DManager->UpdateImgui();
 #endif // _DEBUG
 
+
+
 	sceneManager->Update();
+
+	postEffectManager_->Update(sceneManager->GetCamara());
 
 	entity3DManager->Update();
 
@@ -180,11 +189,15 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 
 	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update();
 
-	postEffectManager_->Update(sceneManager->GetCamara());
+	entity3DManager->GetEffectManager()->GetParticleManager2d()->Update();
+
+
+
+
+
+
 
 #ifdef _DEBUG
-
 	entity3DManager->Get3DLineCommon()->Update();
-
 #endif // _DEBUG
 }

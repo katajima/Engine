@@ -1,25 +1,12 @@
 #pragma once
-#include <vector>
-#include <memory>
+
 #include <functional>
 #include "Collider.h"  // Colliderの基底クラス
 #include "DirectXGame/engine/collider/ContactRecord.h"
 #include "DirectXGame/engine/line/lineCommon.h"
+#include "DirectXGame/engine/Collider/ColliderData.h"
+#include "DirectXGame/engine/Utility/VectorUtility.h"
 
-// 一意なIDを生成するためのユーティリティクラス
-class UniqueIdGenerator {
-public:
-    static uint32_t Generate() {
-        static uint32_t currentId = 1;
-        return currentId++;
-    }
-};
-
-// インターフェースクラス
-class IHitReceiver {
-public:
-    virtual ~IHitReceiver() = default;
-};
 
 class ColliderComponent {
 public:

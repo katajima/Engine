@@ -142,7 +142,7 @@ void Stage::Draw2D()
 
 void Stage::InitEmit()
 {
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+	/*ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	emit_ = std::make_unique<ParticleEmitter>();
 	emit_->Initialize(particleManager, "groundRtttight", "dustt");
@@ -201,27 +201,27 @@ void Stage::InitEmit()
 	emitCloudDust3_ = std::make_unique<ParticleEmitter>();
 	CloudEmit(particleManager,emitCloudDust_.get(), "cloudDust");
 	CloudEmit(particleManager,emitCloudDust2_.get(), "cloudDust2");
-	CloudEmit(particleManager,emitCloudDust3_.get(), "cloudDust3");
+	CloudEmit(particleManager,emitCloudDust3_.get(), "cloudDust3");*/
 
 }
 
-void Stage::CloudEmit(ParticleManager* particleManager, ParticleEmitter* emit, const std::string& name)
-{
-	emit->Initialize(particleManager, name, name);
-	emit->GetFrequency() = 0.5f;
-	emit->SetLifeTimeMinMax(10.0f, 20.0f);
-	emit->SetSizeMinMax(Vector3{ 50.0f,50.0f,10.0f }, { 50.0f,50.0f,10.0f });
-	emit->SetColorMinMax({ 1.0f, 1.0f, 1.0f,0.8f }, { 1.0f, 1.0f, 1.0f ,0.8f });
-	emit->SetRengeMinMax({ -4000,-5,-4000 }, { 4000,100,4000 });
-	emit->SetAlphaClipping(0.0f);
-	emit->SetCount(10);
-	emit->transform_.translate_ = { -2000,1500,0 };
-	emit->SetIsAlpha(true);
-	emit->SetVelocityMinMax(Vector3{ 20.0f,0.0f,0.0f }, { 60.0f, 00.0f, 0.0f });
-	emit->SetUsebillboard(true);
-	emit->SetUsebillboardRotZ(true);
-	emit->SetRotateMinMax(-Vector3{ 0,0,0.0f }, Vector3{ 0,0,0.0f });
-}
+//void Stage::CloudEmit(ParticleManager* particleManager, ParticleEmitter* emit, const std::string& name)
+//{
+//	emit->Initialize(particleManager, name, name);
+//	emit->GetFrequency() = 0.5f;
+//	emit->SetLifeTimeMinMax(10.0f, 20.0f);
+//	emit->SetSizeMinMax(Vector3{ 50.0f,50.0f,10.0f }, { 50.0f,50.0f,10.0f });
+//	emit->SetColorMinMax({ 1.0f, 1.0f, 1.0f,0.8f }, { 1.0f, 1.0f, 1.0f ,0.8f });
+//	emit->SetRengeMinMax({ -4000,-5,-4000 }, { 4000,100,4000 });
+//	emit->SetAlphaClipping(0.0f);
+//	emit->SetCount(10);
+//	emit->transform_.translate_ = { -2000,1500,0 };
+//	emit->SetIsAlpha(true);
+//	emit->SetVelocityMinMax(Vector3{ 20.0f,0.0f,0.0f }, { 60.0f, 00.0f, 0.0f });
+//	emit->SetUsebillboard(true);
+//	emit->SetUsebillboardRotZ(true);
+//	emit->SetRotateMinMax(-Vector3{ 0,0,0.0f }, Vector3{ 0,0,0.0f });
+//}
 
 void Stage::EmitUpdate()
 {
@@ -229,7 +229,7 @@ void Stage::EmitUpdate()
 	//emit_->Update();
 
 	// 列車のパーティクルエミッター
-	emitTrainDust_->Update();
+	//emitTrainDust_->Update();
 
 	// 船のパーティクルエミッター
 	//emitShipDust_->SetVelocityMinMax(-velocity_ * 10, -velocity_ * 10);

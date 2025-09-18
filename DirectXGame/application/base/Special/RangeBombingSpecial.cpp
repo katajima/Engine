@@ -28,9 +28,14 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	cylinderParam.segments = 16;
 
 
+	ctlinder_ = std::make_unique<CylinderPrimitive>();
+	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
+	ctlinder_->Data() = cylinderParam;
+
 	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D("レティクルシリンダー", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
-	objectReticle_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("レティクルシリンダー","resources/Texture/effect/gradationLine.png",camera);
+	objectReticle_->SetPrimitive(std::move(ctlinder_));
+	objectReticle_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
 	//objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
 	objectReticle_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);

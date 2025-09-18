@@ -47,6 +47,8 @@ public:
 
 	void PostDraw();
 
+	void Resize(int width, int height);
+
 private:
 	/// <summary>
 	/// スワップチェーンの生成

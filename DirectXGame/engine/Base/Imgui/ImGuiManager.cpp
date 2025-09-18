@@ -66,9 +66,13 @@ void ImGuiManager::Begin()
 
 	// 
 	ImGuiViewport* vi = ImGui::GetMainViewport();
-	ImGui::DockSpaceOverViewport(0,vi);
+	ImGui::DockSpaceOverViewport(0, vi);
 
 	ImGuizmo::BeginFrame();
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.DisplaySize = ImVec2((float)WinApp::GetClientWidth(),
+		(float)WinApp::GetClientHeight());
 #endif // _DEBUG
 }
 

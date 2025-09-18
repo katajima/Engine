@@ -4,7 +4,7 @@
 #include"GamePlayScene.h"
 #include"TestScene.h"
 #include "SelectScene.h"
-
+#include "SampleScene.h"
 
 // このゲーム用のシーン工場
 class SceneFactory : public AbstractSceneFactory 

@@ -14,7 +14,7 @@
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include"DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include"DirectXGame/engine/effect/Particle/ParticleEmitter.h"
+#include"DirectXGame/engine/effect/Particle/Emit/ParticleEmitter.h"
 
 #include "DirectXGame/application/base/BaseClass/Light/BaseLights.h"
 
@@ -41,7 +41,7 @@ private:
 
 	void InitEmit();
 
-	void CloudEmit(ParticleManager* particleManager,ParticleEmitter* emit,const std::string& name);
+	//void CloudEmit(ParticleManager* particleManager,ParticleEmitter* emit,const std::string& name);
 
 	void EmitUpdate();
 
@@ -89,18 +89,18 @@ private:
 private:
 
 	// ステージに舞う埃
-	std::unique_ptr<ParticleEmitter> emit_;
+	//std::unique_ptr<ParticleEmitter> emit_;
 
-	// 列車の煙
-	std::unique_ptr<ParticleEmitter> emitTrainDust_;
+	//// 列車の煙
+	//std::unique_ptr<ParticleEmitter> emitTrainDust_;
 
-	// 船の水しぶき
-	std::unique_ptr<ParticleEmitter> emitShipDust_;
+	//// 船の水しぶき
+	//std::unique_ptr<ParticleEmitter> emitShipDust_;
 
-	// 雲の粒子
-	std::unique_ptr<ParticleEmitter> emitCloudDust_;
-	std::unique_ptr<ParticleEmitter> emitCloudDust2_;
-	std::unique_ptr<ParticleEmitter> emitCloudDust3_;
+	//// 雲の粒子
+	//std::unique_ptr<ParticleEmitter> emitCloudDust_;
+	//std::unique_ptr<ParticleEmitter> emitCloudDust2_;
+	//std::unique_ptr<ParticleEmitter> emitCloudDust3_;
 
 
 

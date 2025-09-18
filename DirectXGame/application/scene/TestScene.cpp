@@ -378,18 +378,6 @@ void TestScene::InitializeObject3D()
 	skyBoxObject2->SetName("skyBox2");
 	skyBoxObject2->SetIsDraw(false);
 
-
-	ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = 10.0f;
-	cylinderParam.innerRadius = 2.1f;
-	cylinderParam.outerRadius = 2.1f;
-	cylinderParam.isCover = false;
-	cylinderParam.segments = 16;
-	worldparticleEmitter_.Initialize();
-	primiPlane = std::make_unique<Primitive>();
-	ShapeParameter::ShapePlane shapePlane;
-	primiPlane->Initialize<ShapeParameter::ShapePlane>(GetEntity3DManager()->GetPrimitiveCommon(), Primitive::ShapeType::Plane, shapePlane, "resources/Texture/uvChecker.png");
-
 }
 
 /// <summary>
@@ -415,7 +403,7 @@ void TestScene::InitializeObject2D()
 	///
 	primitive2d1_ = std::make_unique<Primitive2D>();
 	primitive2d1_->Initialize(GetEntity2DManager()->GetSpriteCommon(),Primitive2D::ShapeType::Ring, { 1,1,1,1 });
-	primitive2d1_->position = { 640,360 };
+	//primitive2d1_->position = { 640,360 };
 	//primitive2d1_->rotation = DegreesToRadians(45);
 
 }
@@ -432,57 +420,6 @@ void TestScene::InitializeParticle()
 	//GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(primiPlane->GetMesh());
 	
 	
-	/*GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kAcceleration,Field::ShapeType::kAABB,"加速");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kDestruction, Field::ShapeType::kAABB,"破棄");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kColor, Field::ShapeType::kAABB,"色");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kGravity, Field::ShapeType::kAABB,"重力");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kGravity, Field::ShapeType::kSphere,"重力");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kDeceleration, Field::ShapeType::kAABB,"減速");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kNoise, Field::ShapeType::kAABB,"ノイズ");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(Field::EffectType::kTornado, Field::ShapeType::kAABB,"竜巻");*/
-
-	
-
-	emitter_ = std::make_unique<ParticleEmitter>();
-	emitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"emitter", "cc", ParticleData::SpawnType::kSpline);
-	emitter_->GetFrequency() = 0.1f;
-	emitter_->SetCount(1);
-	//emitter_->SetParent(skinningObject2->worldtransform_);
-	emitter_->SetRotateMinMax(-Vector3{ 1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f });
-	emitter_->SetPos({ 0,10,0 });
-	emitter_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	emitter_->SetLifeTimeMinMax(1.0f, 2.0f);
-	emitter_->SetIsGravity(true);
-	emitter_->SetIsAlpha(true);
-	emitter_->AddControlPoints(Vector3{ 0,0,0 });
-	emitter_->AddControlPoints(Vector3{ 10,10,0 });
-	emitter_->AddControlPoints(Vector3{ 20,20,0 });
-	emitter_->AddControlPoints(Vector3{ 30,30,0 });
-
-
-
-
-
-	//fieldEffect_ = std::make_unique <Field::FieldEffect >();
-	//fieldEffect_->Initialize("fieldEffect", Field::ShapeType::kAABB, Field::EffectType::kAcceleration, GetEntity3DManager()->Get3DLineCommon());
-	//fieldEffect_->SetParent(emitterEnemy_->transform_);
-	//GetEntity3DManager()->GetEffectManager()->GetParticleManager()->AddFieldEffect(fieldEffect_.get());
-
-	primitvPlane_ = std::make_unique<ParticleEmitter>();
-	primitvPlane_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),"primiPlane", "primiPlane", ParticleData::SpawnType::kPoint);
-	primitvPlane_->GetFrequency() = 0.025f;
-	primitvPlane_->SetCount(40);
-	//primitvPlane_->SetPos({ 0,50,0 });
-	primitvPlane_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	primitvPlane_->SetRotateMinMax(-DegreesToRadians(Vector3{ 90,90,90 }), DegreesToRadians(Vector3{ 90,90,90 }));
-	primitvPlane_->SetLifeTimeMinMax(1, 3);
-	primitvPlane_->SetUsebillboard(false);
-	primitvPlane_->SetIsAlpha(true);
-	primitvPlane_->SetIsLifeTimeScale(true);
-	primitvPlane_->SetColorMinMax({ 1.0f ,1.0f ,1.0f ,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	primitvPlane_->SetSizeMinMax(Vector3{ 0.1f,1.5f,0.1f }, { 0.1f ,2.0f,0.1f });
-	primitvPlane_->SetParent(worldparticleEmitter_);
-
 
 }
 
@@ -697,7 +634,7 @@ void TestScene::UpdateRoom01()
 	skinningObject2->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.R", skinningObject3->GetWorldTransform().worldMat_));
 	worldparticleEmitter_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.L", skinningObject3->GetWorldTransform().worldMat_));
 	worldparticleEmitter_.Update();
-	primitvPlane_->Update();
+	//primitvPlane_->Update();
 
 }
 
@@ -707,7 +644,7 @@ void TestScene::UpdateRoom02()
 		GetSceneManager()->ChangeScene("GAMEPLAY");
 	}
 
-	emitter_->Update();
+	//emitter_->Update();
 
 }
 

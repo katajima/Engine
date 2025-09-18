@@ -16,7 +16,7 @@ Camera::Camera()
 
 	:transform_({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
 	, fovY_(0.45f)
-	, aspect_(float(1280) / float(720))
+	, aspect_(static_cast<float>(WinApp::GetClientWidth()) / static_cast<float>(WinApp::GetClientHeight()))
 	, nearClip_(0.1f)
 	, farClip_(1000.0f)
 	, worldMatrix_(MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate))
@@ -43,6 +43,7 @@ void Camera::Initialize(CameraCommon* cameraCommon)
 
 	data->worldPosition = Vector3{ 1.0f,1.0f,1.0f };
 	data->normal = { 0,0,0 };
+	isProjection_ = true;
 }
 
 void Camera::GetCommandList(int index)
@@ -52,9 +53,19 @@ void Camera::GetCommandList(int index)
 }
 
 void Camera::UpdateMatrix() {
-	
+	float winWidth = static_cast<float>(WinApp::GetClientWidth(false));
+	float winHeight = static_cast<float>(WinApp::GetClientHeight(false));
+
+
+#ifndef _DEBUG
+	winWidth = static_cast<float>(WinApp::GetClientWidth());
+	winHeight = static_cast<float>(WinApp::GetClientHeight());
+#endif // _DEBUG
+
+	aspect_ = winWidth / winHeight;
+
 	UpdateImGui();
-	
+
 	if (shakeTime_ > 0) {
 		// Reduce shake time
 		shakeTime_ -= MyGame::GameTime();
@@ -87,8 +98,17 @@ void Camera::UpdateMatrix() {
 	viewMatrix_ = Inverse(worldMatrix_);
 
 	// 射影行列を計算
-	projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspect_, nearClip_, farClip_);
-
+	if (isProjection_) {
+		projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspect_, nearClip_, farClip_);
+	}
+	else {
+		projectionMatrix_ = MakeOrthographicMatrix2(
+			-winWidth * 0.5f,
+			winWidth * 0.5f,
+			-winHeight * 0.5f,
+			winHeight * 0.5f,
+			nearClip_, farClip_);
+	}
 	// ビュー・プロジェクション行列を更新
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 
@@ -122,55 +142,55 @@ void Camera::UpdateMatrix(const Vector3& targetPosition)
 
 void Camera::UpdateImGui()
 {
-#ifdef _DEBUG
-	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
-		speed = 10.0f;
-	}
-	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
-		speed = 0.1f;
-	}
-	else {
-		speed = 1.0f;
-	}
-
-	float sp = move * speed;
-
-	if (input_->IsPushKey(DIK_A)) {
-		transform_.translate.x -= sp;
-	}
-	if (input_->IsPushKey(DIK_D)) {
-		transform_.translate.x += sp;
-	}
-	if (input_->IsPushKey(DIK_W)) {
-		transform_.translate.z += sp;
-	}
-	if (input_->IsPushKey(DIK_S)) {
-		transform_.translate.z -= sp;
-	}
-	if (input_->IsPushKey(DIK_UP)) {
-		transform_.translate.y += sp;
-	}
-	if (input_->IsPushKey(DIK_DOWN)) {
-		transform_.translate.y -= sp;
-	}
-	sp = 0.01f;
-	if (input_->IsPushKey(DIK_I)) {
-		transform_.rotate.x += sp;
-	}
-	if (input_->IsPushKey(DIK_K)) {
-		transform_.rotate.x -= sp;
-	}
-	if (input_->IsPushKey(DIK_L)) {
-		transform_.rotate.y += sp;
-	}
-	if (input_->IsPushKey(DIK_J)) {
-		transform_.rotate.y -= sp;
-	}
-
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
-		SetShake(debugShakeTime_, debugShakeDirectionRange_);
-	}
-#endif // _DEBUG
+	// #ifdef _DEBUG
+	// 	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
+	// 		speed = 10.0f;
+	// 	}
+	// 	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
+	// 		speed = 0.1f;
+	// 	}
+	// 	else {
+	// 		speed = 1.0f;
+	// 	}
+	//
+	// 	float sp = move * speed;
+	//
+	// 	if (input_->IsPushKey(DIK_A)) {
+	// 		transform_.translate.x -= sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_D)) {
+	// 		transform_.translate.x += sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_W)) {
+	// 		transform_.translate.z += sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_S)) {
+	// 		transform_.translate.z -= sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_UP)) {
+	// 		transform_.translate.y += sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_DOWN)) {
+	// 		transform_.translate.y -= sp;
+	// 	}
+	// 	sp = 0.01f;
+	// 	if (input_->IsPushKey(DIK_I)) {
+	// 		transform_.rotate.x += sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_K)) {
+	// 		transform_.rotate.x -= sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_L)) {
+	// 		transform_.rotate.y += sp;
+	// 	}
+	// 	if (input_->IsPushKey(DIK_J)) {
+	// 		transform_.rotate.y -= sp;
+	// 	}
+	//
+	// 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
+	// 		SetShake(debugShakeTime_, debugShakeDirectionRange_);
+	// 	}
+	// #endif // _DEBUG
 }
 
 void Camera::TransferMatrix()

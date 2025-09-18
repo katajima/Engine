@@ -1,9 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <random>
 #include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/struct/Vector4.h"
+#include "DirectXGame/engine/struct/Structs.h"
 
 class Random
 {
@@ -27,6 +29,35 @@ public:
 	static Vector4 RandomVector4(float min, float max);
 	// bool型の乱数
 	static bool RandomBool();
+
+
+	// ランダムエンジンを使った乱数生成(float)
+	static float RandFloat(const Range <float>& vec3, std::mt19937& randomEngine);
+
+	// ランダムエンジンを使った乱数生成(Vector2)
+	static Vector2 RandVector2(const Range <Vector2>& vec3, std::mt19937& randomEngine);
+
+	// ランダムエンジンを使った乱数生成(Vector3)
+	static Vector3 RandVector3(const Range <Vector3>& vec3, std::mt19937& randomEngine);
+
+	// ランダムエンジンを使った乱数生成(Vector4)
+	static Vector4 RandVector4(const Range <Vector4>& vec3, std::mt19937& randomEngine);
+
+
+	// ランダムエンジンを使った乱数生成(float)
+	static float RandFloat(const MedianWithRange <float>& vec3, std::mt19937& randomEngine);
+
+	// ランダムエンジンを使った乱数生成(Vector2)
+	static Vector2 RandVector2(const MedianWithRange <Vector2>& vec3, std::mt19937& randomEngine);
+
+	// ランダムエンジンを使った乱数生成(Vector3)
+	static Vector3 RandVector3(const MedianWithRange <Vector3>& vec3, std::mt19937& randomEngine);
+
+	// ランダムエンジンを使った乱数生成(Vector4)
+	static Vector4 RandVector4(const MedianWithRange <Vector4>& vec3, std::mt19937& randomEngine);
+
+	//  ランダムエンジンを使った乱数生成(球) 
+	static Vector3 RandomUnitVector3(std::mt19937& engine);
 
 };
 

@@ -5,12 +5,12 @@ struct VertexShaderOutput
     float3 normal : NORMAL0;
     float3 worldPosition : POSITION0;
     
-    // ’Ç‰Á
-    float3 tangent : TANGENT0; // ÚƒxƒNƒgƒ‹
-    float3 biNormal : BINORMAL0; // ]ƒxƒNƒgƒ‹
-    float3 transformedNormal : NORMAL1; // ƒsƒNƒZƒ‹ƒVƒF[ƒ_‚Åg—p‚·‚é–@ü
+    // è¿½åŠ 
+    float3 tangent : TANGENT0; // æ¥ãƒ™ã‚¯ãƒˆãƒ«
+    float3 biNormal : BINORMAL0; // å¾“ãƒ™ã‚¯ãƒˆãƒ«
+    float3 transformedNormal : NORMAL1; // ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ã§ä½¿ç”¨ã™ã‚‹æ³•ç·š
     
-    // ƒXƒLƒjƒ“ƒO
+    // ã‚¹ã‚­ãƒ‹ãƒ³ã‚°
     float4 weight : WEIGHT0;
     int4 index : INDEX0;
 };
@@ -24,9 +24,9 @@ struct PixelShaderInput
     
     float3 tangent : TANGENT0;
     float3 biNormal : BINORMAL0;
-    float3 transformedNormal : NORMAL1; // ’¸“_ƒVƒF[ƒ_‚©‚ç“n‚³‚ê‚½–@ü 
+    float3 transformedNormal : NORMAL1; // é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ã‹ã‚‰æ¸¡ã•ã‚ŒãŸæ³•ç·š 
     
-    // ƒXƒLƒjƒ“ƒO
+    // ã‚¹ã‚­ãƒ‹ãƒ³ã‚°
     float4 weight : WEIGHT0;
     int4 index : INDEX0;
 };
@@ -51,8 +51,8 @@ float SpecularPow(float3 dire, float3 toEye, float3 normal, float shininess)
 
 float SpecularPow2(float3 dire, float3 toEye, float3 normal, float shininess)
 {
-    float3 reflectLight = reflect(dire, normalize(normal)); // ”½ËƒxƒNƒgƒ‹
-    float RdotE = dot(reflectLight, toEye); // ‹üƒxƒNƒgƒ‹‚Æ”½ËƒxƒNƒgƒ‹‚ÌƒhƒbƒgÏ
+    float3 reflectLight = reflect(dire, normalize(normal)); // åå°„ãƒ™ã‚¯ãƒˆãƒ«
+    float RdotE = dot(reflectLight, toEye); // è¦–ç·šãƒ™ã‚¯ãƒˆãƒ«ã¨åå°„ãƒ™ã‚¯ãƒˆãƒ«ã®ãƒ‰ãƒƒãƒˆç©
 
     return pow(saturate(RdotE), shininess);
 }

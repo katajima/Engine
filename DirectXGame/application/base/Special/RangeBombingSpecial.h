@@ -62,6 +62,9 @@ public:
 private:
 	Object3d* objectReticle_;				// オブジェクトレティクル
 
+	std::unique_ptr<CylinderPrimitive> ctlinder_;
+
+
 	int index_b = 0;
 	int maxBullet = 1;
 	int bulletNum = 0;

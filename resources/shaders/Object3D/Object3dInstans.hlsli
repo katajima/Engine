@@ -4,8 +4,10 @@ struct VertexShaderOutput
 {
     float4 position : SV_Position;
     float2 texcoord : TEXCOORD0;
+    float3 normal : NORMAL0;
     float4 color : COLOR0;
-    uint textureIndex : TEXCOORD1; // インスタンスごとに異なるテクスチャID
+    uint textureIndex : TEXCOORD1; // 繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ縺斐→縺ｫ逡ｰ縺ｪ繧九ユ繧ｯ繧ｹ繝√ΕID
+    float3 worldPosition : POSITION0;
 };
 
 struct Object3dGPU

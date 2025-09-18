@@ -2,55 +2,55 @@
 
 static const int kMaxLight = 3;
 
-// •½sŒõü
+// å¹³è¡Œå…‰ç·š
 struct DirectionalLight
 {
-    float4 color; //!< ƒ‰ƒCƒg‚ÌF
-    float3 direction; //!< ƒ‰ƒCƒg‚ÌŒü‚«
-    float intensity; //!< ‹P“x
-    float ilg; // ƒŠƒO
+    float4 color; //!< ãƒ©ã‚¤ãƒˆã®è‰²
+    float3 direction; //!< ãƒ©ã‚¤ãƒˆã®å‘ã
+    float intensity; //!< è¼åº¦
+    float ilg; // ãƒªã‚°
     int enableLighting;
-    float3 groundColor; // ’n–ÊF
-    float3 skyColor; // “V‹…F
-    float3 groundNormal; // ’n–Ê–@ü•ûŒü
+    float3 groundColor; // åœ°é¢è‰²
+    float3 skyColor; // å¤©çƒè‰²
+    float3 groundNormal; // åœ°é¢æ³•ç·šæ–¹å‘
 };
 ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
 
-// ƒ|ƒCƒ“ƒgƒ‰ƒCƒg
+// ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆ
 struct PointLight
 {
-    float4 color; //ƒ‰ƒCƒgF
-    float3 position; // ƒ‰ƒCƒgˆÊ’u
-    float intensity; //‹P“x
-    float radius; // !< ƒ‰ƒCƒg‚Ì“Í‚­Å‘å‹——£
-    float decay; //!< Œ¸Š—¦ 
-    float ilg; // ƒŠƒO
+    float4 color; //ãƒ©ã‚¤ãƒˆè‰²
+    float3 position; // ãƒ©ã‚¤ãƒˆä½ç½®
+    float intensity; //è¼åº¦
+    float radius; // !< ãƒ©ã‚¤ãƒˆã®å±Šãæœ€å¤§è·é›¢
+    float decay; //!< æ¸›è¡°ç‡ 
+    float ilg; // ãƒªã‚°
     int enableLighting;
 };
 
 
-// •¡”ƒ|ƒCƒ“ƒgƒ‰ƒCƒg
+// è¤‡æ•°ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆ
 struct PointLights
 {
     PointLight pointLights[kMaxLight];
 };
 ConstantBuffer<PointLights> gPointLight : register(b3);
 
-// ƒXƒ|ƒbƒgƒ‰ƒCƒg
+// ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆ
 struct SpotLight
 {
-    float4 color; //ƒ‰ƒCƒgF
-    float3 position; // ƒ‰ƒCƒgˆÊ’u
-    float intensity; //‹P“x
-    float3 direction; //!< ƒ‰ƒCƒg‚ÌŒü‚«
-    float distance; //!< ƒ‰ƒCƒg“Í‚­‹——£
-    float decay; //!< Œ¸Š—¦ 
-    float cosAngle; //!< ƒXƒ|ƒbƒgƒ‰ƒCƒg‚Ì—]Œ·
+    float4 color; //ãƒ©ã‚¤ãƒˆè‰²
+    float3 position; // ãƒ©ã‚¤ãƒˆä½ç½®
+    float intensity; //è¼åº¦
+    float3 direction; //!< ãƒ©ã‚¤ãƒˆã®å‘ã
+    float distance; //!< ãƒ©ã‚¤ãƒˆå±Šãè·é›¢
+    float decay; //!< æ¸›è¡°ç‡ 
+    float cosAngle; //!< ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®ä½™å¼¦
     float cosFalloffStart;
     int enableLighting;
 };
 
-// •¡”ƒ|ƒCƒ“ƒgƒ‰ƒCƒg
+// è¤‡æ•°ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆ
 struct SpotLights
 {
     SpotLight spotLights[kMaxLight];
@@ -67,17 +67,19 @@ ConstantBuffer<SpotLights> gSpotLight : register(b4);
     
 //    float4 tangent : TANGENT0;
 //    float3 biNormal : BINORMAL0;
-//   // float3 transformedNormal : NORMAL1; // ’¸“_ƒVƒF[ƒ_‚©‚ç“n‚³‚ê‚½–@ü 
+//   // float3 transformedNormal : NORMAL1; // é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ã‹ã‚‰æ¸¡ã•ã‚ŒãŸæ³•ç·š 
 //};
 
 
-//F‚È‚ÇOŠpŒ`‚Ì•\–Ê‚ÌŞ¿‚ğŒˆ’è‚·‚é‚à‚ÌMaterial
+//è‰²ãªã©ä¸‰è§’å½¢ã®è¡¨é¢ã®æè³ªã‚’æ±ºå®šã™ã‚‹ã‚‚ã®Material
 struct Material
 {
     
     float4 color;
     int enableLighting;
     float alphaClipping;
+    float environmentCoefficient;
+    float alpha;
     float4x4 uvTransform;
     float shininess;
     int useLig;
@@ -94,10 +96,10 @@ float3 DirectionalLightFunc2(VertexShaderOutput input, float4 textureColor, floa
     if (gDirectionalLight.enableLighting)
     {
         float3 L = -normalize(gDirectionalLight.direction);
-        normal = normalize(normal); // ‚±‚±‚Åˆê“x‚¾‚¯³‹K‰»
+        normal = normalize(normal); // ã“ã“ã§ä¸€åº¦ã ã‘æ­£è¦åŒ–
         viewDir = normalize(viewDir);
 
-        // Afteri‚È‚ß‚ç‚©‚É‚·‚éj
+        // Afterï¼ˆãªã‚ã‚‰ã‹ã«ã™ã‚‹ï¼‰
         float halfLambert = saturate(dot(normal, L) * 0.5f + 0.5f);
         halfLambert = smoothstep(0.0f, 1.0f, halfLambert);
         float3 diffuse = gMaterial.color.rgb * textureColor.rgb * halfLambert * gDirectionalLight.intensity;
@@ -131,7 +133,7 @@ float Cos(float3 dire, float3 toEye, float3 normal)
 
 float SpecularBlinn(float3 lightDir, float3 viewDir, float3 normal, float shininess)
 {
-    float3 H = normalize(-lightDir + viewDir); // ƒn[ƒtƒxƒNƒgƒ‹
+    float3 H = normalize(-lightDir + viewDir); // ãƒãƒ¼ãƒ•ãƒ™ã‚¯ãƒˆãƒ«
     float NdotH = dot(normalize(normal), H);
     return pow(saturate(NdotH), shininess);
 }
@@ -172,12 +174,12 @@ float3 DirectionalLightFunc(VertexShaderOutput input, float4 textureColor, float
     if (gDirectionalLight.enableLighting)
     {
        
-              // •½sŒõŒ¹‚Ìˆ—
-              // ŠgU”½Ë
+              // å¹³è¡Œå…‰æºã®å‡¦ç†
+              // æ‹¡æ•£åå°„
         float cos = Cos(gDirectionalLight.direction, toEye, normal);
 
             
-              // ‹¾–Ê”½Ë
+              // é¡é¢åå°„
         float specularPow = 0.0f;
         if (gMaterial.shininess >= 1.0f)
         {
@@ -197,7 +199,7 @@ float3 DirectionalLightFunc(VertexShaderOutput input, float4 textureColor, float
             
             
             
-            // ƒŠƒ€ƒ‰ƒCƒg
+            // ãƒªãƒ ãƒ©ã‚¤ãƒˆ
         float3 limColor = { 0, 0, 0 };
             //float power1 = 1.0f - max(0.0f, dot(gDirectionalLight.direction, input.normal));
             //float power2 = 1.0f - max(0.0f, input.normal.z * -1.0f);
@@ -208,7 +210,7 @@ float3 DirectionalLightFunc(VertexShaderOutput input, float4 textureColor, float
             
             
             
-            //   // ”¼‹…ƒ‰ƒCƒg
+            //   // åŠçƒãƒ©ã‚¤ãƒˆ
         float3 hemiLight = { 0, 0, 0 };
             //if (gMaterial.useHem != 0)
             //{
@@ -217,18 +219,18 @@ float3 DirectionalLightFunc(VertexShaderOutput input, float4 textureColor, float
             //    hemiLight = lerp(gDirectionalLight.groundColor, gDirectionalLight.skyColor, t);
             //}
 
-               // ŠgU”½Ë
+               // æ‹¡æ•£åå°„
         diffuse = gMaterial.color.rgb * textureColor.rgb * cos * gDirectionalLight.intensity;
 
             //diffuseDirectionalLight /= 3.1415926f;
             
-               // ‹¾–Ê”½Ë
+               // é¡é¢åå°„
         specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);
 
             
             
             
-             // ŠÂ‹«Œõ
+             // ç’°å¢ƒå…‰
             //directionalLig = diffuseDirectionalLight + specularDirectionalLight + limColor;
             
         if (gMaterial.useNormalMap)
@@ -263,7 +265,7 @@ float3 PointLightFunc(VertexShaderOutput input, float4 textureColor, float3 toEy
     
             
         float cosP = Cos(pointLightDirection, toEye, normal);
-            //‹¾–Ê”½Ë
+            //é¡é¢åå°„
         float specularPowP = SpecularPow(pointLightDirection, toEye, normal, gMaterial.shininess);
         
             
@@ -307,11 +309,11 @@ float3 SpotLightFunc(VertexShaderOutput input, float4 textureColor, float3 toEye
            
         
         
-        // ‹——£Œ¸Š‚ÌŒvZ
+        // è·é›¢æ¸›è¡°ã®è¨ˆç®—
         float distanceS = length(gSpotLight.spotLights[spot_i].position - input.worldPosition);
         float attenuationFactorS = pow(saturate(-distanceS / gSpotLight.spotLights[spot_i].distance + 1.0), gSpotLight.spotLights[spot_i].decay);
         
-        // ƒtƒH[ƒ‹ƒIƒt‚ÌŒvZ
+        // ãƒ•ã‚©ãƒ¼ãƒ«ã‚ªãƒ•ã®è¨ˆç®—
         float cosAngle = dot(spotLightDirectionOnSurface, normalize(gSpotLight.spotLights[spot_i].direction));
         float falloffFactor = saturate((cosAngle - gSpotLight.spotLights[spot_i].cosAngle) / (gSpotLight.spotLights[spot_i].cosFalloffStart - gSpotLight.spotLights[spot_i].cosAngle));
        
@@ -320,7 +322,7 @@ float3 SpotLightFunc(VertexShaderOutput input, float4 textureColor, float3 toEye
         float cosS = Cos(spotLightDirectionOnSurface, toEye, normal);
         float specularPowS = SpecularPow(spotLightDirectionOnSurface, toEye, normal, gMaterial.shininess);
             
-             // ƒXƒ|ƒbƒgƒ‰ƒCƒg‚ÌŠgU”½Ë‚Æ‹¾–Ê”½Ë‚ÌŒvZ
+             // ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®æ‹¡æ•£åå°„ã¨é¡é¢åå°„ã®è¨ˆç®—
         diffuseSpotLight += gSpotLight.spotLights[spot_i].color.rgb * cosS * gSpotLight.spotLights[spot_i].intensity * attenuationFactorS * falloffFactor;
         specularSpotLight += gSpotLight.spotLights[spot_i].color.rgb * gSpotLight.spotLights[spot_i].intensity * specularPowS * attenuationFactorS * falloffFactor;
     }

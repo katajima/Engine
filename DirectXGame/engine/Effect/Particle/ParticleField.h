@@ -4,11 +4,11 @@
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 #include "ParticleData.h"
-#include "EmitFanction.h"
+#include "DirectXGame/engine/Effect/Particle/Emit/EmitFanction.h"
 
 #include "DirectXGame/engine/Math/Noise.h"
 
-
+#include <DirectXGame/engine/struct/Structs.h>
 
 class LineCommon;
 namespace Field {
@@ -67,11 +67,11 @@ namespace Field {
 		float force_{};														// 力
 		float lift_{};														// 上昇力
 		float deceleration_{};												// 減速
-		Vector4 color_{1,1,1,1};											// 色
+		Vector4 color_{ 1,1,1,1 };											// 色
 		Noise noise_;														// ノイズ
 		float noiseScale_ = 1.0f;											// ノイズスケール
 
-		MaxMin<Vector3> rondomRenge{};										// 乱数範囲 (Vector3の範囲)
+		Range <Vector3> rondomRenge{};										// 乱数範囲 (Vector3の範囲)
 
 	private:
 		bool isEffect = true;												// 効果を出すか
@@ -83,7 +83,7 @@ namespace Field {
 	};
 
 
-	void Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector<Field::FieldEffect*> fieldEffect,float deltaTime);
+	void Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector<Field::FieldEffect*> fieldEffect, float deltaTime);
 
 
 }

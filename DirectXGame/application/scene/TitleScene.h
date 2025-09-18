@@ -12,7 +12,7 @@
 #include"DirectXGame/engine/2d/Sprite.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include "DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include "DirectXGame/engine/effect/Particle/ParticleEmitter.h"
+#include "DirectXGame/engine/effect/Particle/Emit/ParticleEmitter.h"
 
 
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"

@@ -69,15 +69,13 @@ public: //セッター
 
 	template<typename T>
 	Object3d* CreatePrimitiveObject3D(const std::string& name,
-		const T& param,
 		const std::string& texturePath,
-		Primitive::ShapeType shapeType,
 		Camera* camera,
 		ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK)
 	{
 		// プリミティブ生成
-		auto primitive = std::make_unique<Primitive>();
-		primitive->Initialize<T>(GetPrimitiveCommon(), shapeType, param, texturePath);
+		std::unique_ptr<BasePrimitive> primitive = std::make_unique<T>();
+		primitive->Initialize(GetPrimitiveCommon(), texturePath);
 
 		// Object3d 生成
 		auto object = std::make_unique<Object3d>();
@@ -149,7 +147,7 @@ private:
 
 	// スカイボックス
 	std::unique_ptr<SkyBoxCommon> skyBoxCommon_ = nullptr;
-	
+
 	// ライト
 	std::unique_ptr<LightManager> lightManager_ = nullptr;
 

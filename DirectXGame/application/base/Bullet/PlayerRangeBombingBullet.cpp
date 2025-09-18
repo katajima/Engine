@@ -8,14 +8,14 @@
 
 PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 {
-	moveSmokeEmitter_.reset();
-	moveSmokeEmitter2_.reset();
-	startSmokeEmitter_.reset();
-	moveExpEmitter_.reset();
-	expFireEmitter_.reset();
-	animatedCubeEmitter_.reset();
-	ringEmitter_.reset();
-	hitEmitter_.reset();
+	//moveSmokeEmitter_.reset();
+	//moveSmokeEmitter2_.reset();
+	//startSmokeEmitter_.reset();
+	//moveExpEmitter_.reset();
+	//expFireEmitter_.reset();
+	//animatedCubeEmitter_.reset();
+	//ringEmitter_.reset();
+	//hitEmitter_.reset();
 }
 
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera)
@@ -94,72 +94,72 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	//// ミサイル移動中の煙パーティクルエミッター
 
 	
-	moveSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	InitMoveSmoke(moveSmokeEmitter_.get(), particleManager, "smokePlane01");
+	//moveSmokeEmitter_ = std::make_unique <ParticleEmitter>();
+	//InitMoveSmoke(moveSmokeEmitter_.get(), particleManager, "smokePlane01");
 
-	// ミサイル移動中の煙パーティクルエミッター2
-	moveSmokeEmitter2_ = std::make_unique <ParticleEmitter>();
-	InitMoveSmoke(moveSmokeEmitter2_.get(), particleManager, "smokePlane04");
+	//// ミサイル移動中の煙パーティクルエミッター2
+	//moveSmokeEmitter2_ = std::make_unique <ParticleEmitter>();
+	//InitMoveSmoke(moveSmokeEmitter2_.get(), particleManager, "smokePlane04");
 
-	// ミサイル爆発時の煙パーティクルエミッター
-	moveExpEmitter_ = std::make_unique <ParticleEmitter>();
-	InitExpSmoke(moveExpEmitter_.get(), particleManager, "smokePlane05");
+	//// ミサイル爆発時の煙パーティクルエミッター
+	//moveExpEmitter_ = std::make_unique <ParticleEmitter>();
+	//InitExpSmoke(moveExpEmitter_.get(), particleManager, "smokePlane05");
 
-	expFireEmitter_ = std::make_unique <ParticleEmitter>(); 
-	InitExpFire(expFireEmitter_.get(), particleManager, "expPlane01");
+	//expFireEmitter_ = std::make_unique <ParticleEmitter>(); 
+	//InitExpFire(expFireEmitter_.get(), particleManager, "expPlane01");
 
-	animatedCubeEmitter_ = std::make_unique <ParticleEmitter>();
-	InitExpBre(animatedCubeEmitter_.get(), particleManager, "AnimatedCube");
+	//animatedCubeEmitter_ = std::make_unique <ParticleEmitter>();
+	//InitExpBre(animatedCubeEmitter_.get(), particleManager, "AnimatedCube");
 
-	startSmokeEmitter_ = std::make_unique <ParticleEmitter>();
-	InitStartSmoke(startSmokeEmitter_.get(), particleManager, "smokePlane05");
+	//startSmokeEmitter_ = std::make_unique <ParticleEmitter>();
+	//InitStartSmoke(startSmokeEmitter_.get(), particleManager, "smokePlane05");
 
-	// ミサイル爆発時のリングパーティクルエミッター
-	ringEmitter_ = std::make_unique <ParticleEmitter>();
-	InitRingEmitter(ringEmitter_.get(), particleManager, "ringEmit");
-
-
-	Vector3 size = { 2.0f, 2.0f, 2.0f };
-	hitEmitter_ = std::make_unique <ParticleEmitter>();
-	hitEmitter_->Initialize(particleManager, "missileHit", "missileHit", ParticleData::SpawnType::kPoint);
-	hitEmitter_->SetCount(2);
-	hitEmitter_->SetLifeTimeMinMax(0.25f, 0.25f);
-	hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	hitEmitter_->SetSizeMinMax(size, size);
-	hitEmitter_->SetFrequency(0.00f);
-	hitEmitter_->SetParent(object_->GetWorldTransform());
-	hitEmitter_->SetPos({0,0,0});
-	hitEmitter_->SetUsebillboardRotZ(true);
-	hitEmitter_->SetIsAlpha(true);
-	hitEmitter_->SetVelocityMinMax({}, {});
-	hitEmitter_->SetRotateMinMax({ 0,0,-3.14f }, { 0,0,3.14f });
-	hitEmitter_->SetIsEmit(false);
+	//// ミサイル爆発時のリングパーティクルエミッター
+	//ringEmitter_ = std::make_unique <ParticleEmitter>();
+	//InitRingEmitter(ringEmitter_.get(), particleManager, "ringEmit");
 
 
-	ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = cilnderHeight_;
-	cylinderParam.innerRadius = 6.0f;
-	cylinderParam.outerRadius = 12.0f;
-	cylinderParam.isCover = false;
-	cylinderParam.segments = 16;
-	
-	hitObject_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
-	hitObject_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
-	hitObject_->GetRenderComponent()->SetObjectRasterizerType(ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
-	hitObject_->GetWorldTransform().translate_.z = 50.0f;
-	hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
-	hitObject_->SetIsDraw(false);
-	
-	cylinderParam.height = 10.0f;
-	cylinderParam.innerRadius = 12.0f;
-	cylinderParam.outerRadius = 12.0f;
-	cylinderParam.isCover = true;
+	//Vector3 size = { 2.0f, 2.0f, 2.0f };
+	//hitEmitter_ = std::make_unique <ParticleEmitter>();
+	//hitEmitter_->Initialize(particleManager, "missileHit", "missileHit", ParticleData::SpawnType::kPoint);
+	//hitEmitter_->SetCount(2);
+	//hitEmitter_->SetLifeTimeMinMax(0.25f, 0.25f);
+	//hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
+	//hitEmitter_->SetSizeMinMax(size, size);
+	//hitEmitter_->SetFrequency(0.00f);
+	//hitEmitter_->SetParent(object_->GetWorldTransform());
+	//hitEmitter_->SetPos({0,0,0});
+	//hitEmitter_->SetUsebillboardRotZ(true);
+	//hitEmitter_->SetIsAlpha(true);
+	//hitEmitter_->SetVelocityMinMax({}, {});
+	//hitEmitter_->SetRotateMinMax({ 0,0,-3.14f }, { 0,0,3.14f });
+	//hitEmitter_->SetIsEmit(false);
 
-	
-	hitObject2_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/Image.png", Primitive::ShapeType::Cylinder, camera);
-	hitObject2_->GetPrimitive()->SetPsoType(Primitive::PsoType::kRingClamp);
-	hitObject2_->SetIsDraw(false);
-	hitObject2_->GetPrimitive()->GetMaterial()->color = {1.0f,0.0f,0.0f,0.5f};
+
+	//ShapeParameter::Cylinder cylinderParam;
+	//cylinderParam.height = cilnderHeight_;
+	//cylinderParam.innerRadius = 6.0f;
+	//cylinderParam.outerRadius = 12.0f;
+	//cylinderParam.isCover = false;
+	//cylinderParam.segments = 16;
+	//
+	//hitObject_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/effect/gradationLine.png", Primitive::ShapeType::Cylinder, camera);
+	//hitObject_->GetPrimitive()->SetPsoType(Primitive::PsoType::kNoCullRingClamp);
+	//hitObject_->GetRenderComponent()->SetObjectRasterizerType(ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE);
+	//hitObject_->GetWorldTransform().translate_.z = 50.0f;
+	//hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
+	//hitObject_->SetIsDraw(false);
+	//
+	//cylinderParam.height = 10.0f;
+	//cylinderParam.innerRadius = 12.0f;
+	//cylinderParam.outerRadius = 12.0f;
+	//cylinderParam.isCover = true;
+
+	//
+	//hitObject2_ = entity3DManager->CreatePrimitiveObject3D("cylinder", cylinderParam, "resources/Texture/Image.png", Primitive::ShapeType::Cylinder, camera);
+	//hitObject2_->GetPrimitive()->SetPsoType(Primitive::PsoType::kRingClamp);
+	//hitObject2_->SetIsDraw(false);
+	//hitObject2_->GetPrimitive()->GetMaterial()->color = {1.0f,0.0f,0.0f,0.5f};
 	
 	enemyPos_.x = targetRange_.position.x + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
 	enemyPos_.z = targetRange_.position.z + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
@@ -168,11 +168,11 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 void PlayerRangeBombingBullet::Update()
 {
-	hitEmitter_->SetIsEmit(false);
+	//hitEmitter_->SetIsEmit(false);
 	// 時間経過でデス
 	if (Hit) {
-		hitEmitter_->SetIsEmit(true);
-		hitEmitter_->Emit();
+		//hitEmitter_->SetIsEmit(true);
+		//hitEmitter_->Emit();
 		isAlive_ = false;
 	}
 
@@ -193,8 +193,8 @@ void PlayerRangeBombingBullet::Update()
 				flag_ = true;
 			}
 			else {
-				startSmokeEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{10.0f,-5.0f,0.0f});
-				startSmokeEmitter_->Update();
+				//startSmokeEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{10.0f,-5.0f,0.0f});
+				//startSmokeEmitter_->Update();
 			}
 
 			count += GetTimer() * 2.0f;
@@ -228,19 +228,19 @@ void PlayerRangeBombingBullet::Update()
 
 
 				if (posLength > 500.0f) {
-					moveSmokeEmitter_->SetLifeTimeMinMax(0.2f, 0.4f);
-					moveSmokeEmitter_->SetCount(5);
-					moveSmokeEmitter2_->SetCount(7);
+					//moveSmokeEmitter_->SetLifeTimeMinMax(0.2f, 0.4f);
+					//moveSmokeEmitter_->SetCount(5);
+					//moveSmokeEmitter2_->SetCount(7);
 				}
 				else if (posLength > 100.0f) {
-					moveSmokeEmitter_->SetLifeTimeMinMax(0.3f, 0.5f);
-					moveSmokeEmitter_->SetCount(5);
-					moveSmokeEmitter2_->SetCount(7);
+					//moveSmokeEmitter_->SetLifeTimeMinMax(0.3f, 0.5f);
+					//moveSmokeEmitter_->SetCount(5);
+					//moveSmokeEmitter2_->SetCount(7);
 				}
 				else {
-					moveSmokeEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
-					moveSmokeEmitter_->SetCount(5);
-					moveSmokeEmitter2_->SetCount(5);
+					//moveSmokeEmitter_->SetLifeTimeMinMax(0.7f, 1.0f);
+					//moveSmokeEmitter_->SetCount(5);
+					//moveSmokeEmitter2_->SetCount(5);
 				}
 
 				Vector3 pos2 = pos;
@@ -266,12 +266,12 @@ void PlayerRangeBombingBullet::Update()
 		case 2:
 			flag_ = true;
 			
-			moveSmokeEmitter_->SetCount(5);
-			moveSmokeEmitter2_->SetCount(5);
+			//moveSmokeEmitter_->SetCount(5);
+			//moveSmokeEmitter2_->SetCount(5);
 
 			// リングエフェクトの位置を設定
-			ringEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
-			ringEmitter_->Update();
+			//ringEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
+			//ringEmitter_->Update();
 
 			count += GetTimer();
 			if (count >= max_count)
@@ -286,17 +286,17 @@ void PlayerRangeBombingBullet::Update()
 				isAlive_ = false;
 				count = 0;
 				phase_ = 0;
-				hitEmitter_->SetIsEmit(true);
-				hitEmitter_->Emit();
+				//hitEmitter_->SetIsEmit(true);
+				//hitEmitter_->Emit();
 				isEffectPlay_ = true;
 				flag_ = false;
 				//hitObject2_->SetIsDraw(false);
-				moveExpEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				moveExpEmitter_->Update();
-				expFireEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() +Vector3{0,5,0});
-				expFireEmitter_->Update();
-				animatedCubeEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
-				animatedCubeEmitter_->Update();
+				//moveExpEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition());
+				//moveExpEmitter_->Update();
+				//expFireEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() +Vector3{0,5,0});
+				//expFireEmitter_->Update();
+				//animatedCubeEmitter_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
+				//animatedCubeEmitter_->Update();
 			}
 
 			break;
@@ -304,7 +304,7 @@ void PlayerRangeBombingBullet::Update()
 
 		Vector3 velo = velocity_.Normalize();
 
-		moveSmokeEmitter_->SetVelocityMinMax(-velo, -velo);
+		//moveSmokeEmitter_->SetVelocityMinMax(-velo, -velo);
 
 
 		// Y軸周り角度(θy)
@@ -356,7 +356,7 @@ void PlayerRangeBombingBullet::Update()
 
 	}
 	object_->SetIsEmitTrailEffect(true);
-	hitEmitter_->Update();
+	//hitEmitter_->Update();
 
 }
 
@@ -373,129 +373,129 @@ void PlayerRangeBombingBullet::DrawP()
 void PlayerRangeBombingBullet::Draw2D()
 {
 }
-
-void PlayerRangeBombingBullet::InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
-{
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
-	emitter->GetFrequency() = 0.00f;
-	emitter->SetCount(5);
-	emitter->SetLifeTimeMinMax(1.7f, 2.0f);
-	emitter->SetIsAlpha(true);
-	emitter->SetAlphaClipping(0.1f);
-	emitter->SetIsLifeTimeScale(true);
-	emitter->SetUsebillboard(true);
-	emitter->SetUsebillboardRotZ(true);
-	emitter->SetEnableLighting(false);
-	emitter->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
-	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
-	emitter->SetSizeMinMax(Vector3{ 55.8f,55.8f,55.8f }, { 55.8f,55.8f,55.8f });
-	emitter->SetVelocityMinMax(-Vector3{ 160,-10,160 }, { 160,60,160 });
-	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-}
-
-void PlayerRangeBombingBullet::InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
-{
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kSegmentLine);
-	emitter->GetFrequency() = 0.00f;
-	emitter->SetCount(2);
-	emitter->SetLifeTimeMinMax(0.5f, 0.7f);
-	emitter->SetIsAlpha(true);
-	emitter->SetAlphaClipping(0.23f);
-	emitter->SetIsLifeTimeScale(true);
-	emitter->SetUsebillboard(true);
-	emitter->SetUsebillboardRotZ(true);
-	emitter->SetEnableLighting(false);
-	emitter->SetIsLineInterpolation(true);
-	emitter->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
-	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
-	emitter->SetSizeMinMax(Vector3{ 2.8f,2.8f,2.8f }, { 2.8f,2.8f,2.8f });
-	emitter->SetVelocityMinMax(-velocity_, -velocity_);
-	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-	emitter->SetRengeMinMax(object_->GetWorldTransform().translate_, object_->GetWorldTransform().translate_);
-}
-
-void PlayerRangeBombingBullet::InitExpSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
-{
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
-	emitter->GetFrequency() = 0.00f;
-	emitter->SetCount(10);
-	emitter->SetLifeTimeMinMax(2.5f, 2.5f);
-	emitter->SetIsAlpha(true);
-	emitter->SetAlphaClipping(0.23f);
-	emitter->SetIsLifeTimeScale(true);
-	emitter->SetUsebillboard(true);
-	emitter->SetUsebillboardRotZ(true);
-	emitter->SetEnableLighting(false);
-	emitter->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
-	emitter->SetSizeMinMax(Vector3{ 15.8f,15.8f,15.8f }, { 15.8f,15.8f,15.8f });
-	emitter->SetVelocityMinMax(-Vector3{30,0,30}, {30,100,30});
-	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-	
-}
-
-void PlayerRangeBombingBullet::InitExpFire(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
-{
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
-	emitter->GetFrequency() = 0.00f;
-	emitter->SetCount(2);
-	emitter->SetLifeTimeMinMax(0.25f, 0.27f);
-	emitter->SetIsAlpha(true);
-	emitter->SetAlphaClipping(0.23f);
-	//emitter->SetIsLifeTimeScale(true);
-	emitter->SetUsebillboard(true);
-	emitter->SetUsebillboardRotZ(true);
-	emitter->SetEnableLighting(false);
-//	emitter->SetColorMinMax({ 1.0f,0.1f,0.1f,1.0f }, { 1.0f,0.1f,0.1f,1.0f });
-	emitter->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-
-	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
-	emitter->SetSizeMinMax(Vector3{ 8.8f,8.8f,8.8f }, { 8.8f,8.8f,8.8f });
-	emitter->SetVelocityMinMax(-Vector3{ 3,0,3 }, { 3,10,3 });
-	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-
-}
-
-void PlayerRangeBombingBullet::InitExpBre(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
-{
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
-	emitter->GetFrequency() = 0.00f;
-	emitter->SetCount(6);
-	emitter->SetLifeTimeMinMax(3.25f, 3.27f);
-	//emitter->SetIsAlpha(true);
-	emitter->SetAlphaClipping(0.23f);
-	emitter->SetIsLifeTimeScale(true);
-	emitter->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kBottom);
-	emitter->SetIsGravity(true);
-	emitter->SetUsebillboard(false);
-	emitter->SetUsebillboardRotZ(true);
-	emitter->SetEnableLighting(false);
-	emitter->SetColorMinMax({ 1.0f,0.5f,0.0f,1.0f }, { 1.0f,1.0f,0.0f,1.0f });
-	emitter->SetIsAcceleration(true);
-	emitter->SetIsBounce(true);
-	emitter->SetIsRotateVelocity(true);
-	emitter->SetRotateVelocityMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
-	emitter->SetSizeMinMax(Vector3{ 0.5f,0.5f,0.5f }, { 0.5f,0.5f,0.5f });
-	emitter->SetVelocityMinMax(Vector3{ -40,20,-60 }, { 40,40,40 });
-	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
-}
-
-void PlayerRangeBombingBullet::InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
-{
-	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kAABB);
-	emitter->GetFrequency() = 0.00f;
-	emitter->SetCount(3);
-	emitter->SetLifeTimeMinMax(0.10f, 0.20f);
-	emitter->SetIsAlpha(true);
-	emitter->SetAlphaClipping(0.23f);
-	emitter->SetIsLifeTimeScale(true);
-	emitter->SetUsebillboard(false);
-	emitter->SetUsebillboardRotZ(false);
-	emitter->SetEnableLighting(false);
-	emitter->SetRengeMinMax({ 0.0f,-4.0f ,0.0f }, { 0.0f,20.0f,0.0f });
-	emitter->SetColorMinMax({ 1.0f,1.0f,0.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	emitter->SetSizeMinMax(Vector3{ 5.8f,5.8f,5.8f }, { 5.8f,5.8f,5.8f });
-	emitter->SetVelocityMinMax(-Vector3{ 0,0,0 }, { 0,0,0 });
-	emitter->SetRotateMinMax(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
-}
+//
+//void PlayerRangeBombingBullet::InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
+//{
+//	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+//	emitter->GetFrequency() = 0.00f;
+//	emitter->SetCount(5);
+//	emitter->SetLifeTimeMinMax(1.7f, 2.0f);
+//	emitter->SetIsAlpha(true);
+//	emitter->SetAlphaClipping(0.1f);
+//	emitter->SetIsLifeTimeScale(true);
+//	emitter->SetUsebillboard(true);
+//	emitter->SetUsebillboardRotZ(true);
+//	emitter->SetEnableLighting(false);
+//	emitter->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
+//	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
+//	emitter->SetSizeMinMax(Vector3{ 55.8f,55.8f,55.8f }, { 55.8f,55.8f,55.8f });
+//	emitter->SetVelocityMinMax(-Vector3{ 160,-10,160 }, { 160,60,160 });
+//	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
+//}
+//
+//void PlayerRangeBombingBullet::InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
+//{
+//	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kSegmentLine);
+//	emitter->GetFrequency() = 0.00f;
+//	emitter->SetCount(2);
+//	emitter->SetLifeTimeMinMax(0.5f, 0.7f);
+//	emitter->SetIsAlpha(true);
+//	emitter->SetAlphaClipping(0.23f);
+//	emitter->SetIsLifeTimeScale(true);
+//	emitter->SetUsebillboard(true);
+//	emitter->SetUsebillboardRotZ(true);
+//	emitter->SetEnableLighting(false);
+//	emitter->SetIsLineInterpolation(true);
+//	emitter->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
+//	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
+//	emitter->SetSizeMinMax(Vector3{ 2.8f,2.8f,2.8f }, { 2.8f,2.8f,2.8f });
+//	emitter->SetVelocityMinMax(-velocity_, -velocity_);
+//	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
+//	emitter->SetRengeMinMax(object_->GetWorldTransform().translate_, object_->GetWorldTransform().translate_);
+//}
+//
+//void PlayerRangeBombingBullet::InitExpSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
+//{
+//	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+//	emitter->GetFrequency() = 0.00f;
+//	emitter->SetCount(10);
+//	emitter->SetLifeTimeMinMax(2.5f, 2.5f);
+//	emitter->SetIsAlpha(true);
+//	emitter->SetAlphaClipping(0.23f);
+//	emitter->SetIsLifeTimeScale(true);
+//	emitter->SetUsebillboard(true);
+//	emitter->SetUsebillboardRotZ(true);
+//	emitter->SetEnableLighting(false);
+//	emitter->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
+//	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
+//	emitter->SetSizeMinMax(Vector3{ 15.8f,15.8f,15.8f }, { 15.8f,15.8f,15.8f });
+//	emitter->SetVelocityMinMax(-Vector3{30,0,30}, {30,100,30});
+//	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
+//	
+//}
+//
+//void PlayerRangeBombingBullet::InitExpFire(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
+//{
+//	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+//	emitter->GetFrequency() = 0.00f;
+//	emitter->SetCount(2);
+//	emitter->SetLifeTimeMinMax(0.25f, 0.27f);
+//	emitter->SetIsAlpha(true);
+//	emitter->SetAlphaClipping(0.23f);
+//	//emitter->SetIsLifeTimeScale(true);
+//	emitter->SetUsebillboard(true);
+//	emitter->SetUsebillboardRotZ(true);
+//	emitter->SetEnableLighting(false);
+////	emitter->SetColorMinMax({ 1.0f,0.1f,0.1f,1.0f }, { 1.0f,0.1f,0.1f,1.0f });
+//	emitter->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
+//
+//	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
+//	emitter->SetSizeMinMax(Vector3{ 8.8f,8.8f,8.8f }, { 8.8f,8.8f,8.8f });
+//	emitter->SetVelocityMinMax(-Vector3{ 3,0,3 }, { 3,10,3 });
+//	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
+//
+//}
+//
+//void PlayerRangeBombingBullet::InitExpBre(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
+//{
+//	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kPoint);
+//	emitter->GetFrequency() = 0.00f;
+//	emitter->SetCount(6);
+//	emitter->SetLifeTimeMinMax(3.25f, 3.27f);
+//	//emitter->SetIsAlpha(true);
+//	emitter->SetAlphaClipping(0.23f);
+//	emitter->SetIsLifeTimeScale(true);
+//	emitter->SetLifeTimeScaleTopBottom(ParticleData::TopBottom::kBottom);
+//	emitter->SetIsGravity(true);
+//	emitter->SetUsebillboard(false);
+//	emitter->SetUsebillboardRotZ(true);
+//	emitter->SetEnableLighting(false);
+//	emitter->SetColorMinMax({ 1.0f,0.5f,0.0f,1.0f }, { 1.0f,1.0f,0.0f,1.0f });
+//	emitter->SetIsAcceleration(true);
+//	emitter->SetIsBounce(true);
+//	emitter->SetIsRotateVelocity(true);
+//	emitter->SetRotateVelocityMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
+//	emitter->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
+//	emitter->SetSizeMinMax(Vector3{ 0.5f,0.5f,0.5f }, { 0.5f,0.5f,0.5f });
+//	emitter->SetVelocityMinMax(Vector3{ -40,20,-60 }, { 40,40,40 });
+//	emitter->SetRotateMinMax(-DegreesToRadians(Vector3{ 180,180,180 }), DegreesToRadians(Vector3{ 180,180,180 }));
+//}
+//
+//void PlayerRangeBombingBullet::InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName)
+//{
+//	emitter->Initialize(particleManager, emitName, emitName, ParticleData::SpawnType::kAABB);
+//	emitter->GetFrequency() = 0.00f;
+//	emitter->SetCount(3);
+//	emitter->SetLifeTimeMinMax(0.10f, 0.20f);
+//	emitter->SetIsAlpha(true);
+//	emitter->SetAlphaClipping(0.23f);
+//	emitter->SetIsLifeTimeScale(true);
+//	emitter->SetUsebillboard(false);
+//	emitter->SetUsebillboardRotZ(false);
+//	emitter->SetEnableLighting(false);
+//	emitter->SetRengeMinMax({ 0.0f,-4.0f ,0.0f }, { 0.0f,20.0f,0.0f });
+//	emitter->SetColorMinMax({ 1.0f,1.0f,0.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
+//	emitter->SetSizeMinMax(Vector3{ 5.8f,5.8f,5.8f }, { 5.8f,5.8f,5.8f });
+//	emitter->SetVelocityMinMax(-Vector3{ 0,0,0 }, { 0,0,0 });
+//	emitter->SetRotateMinMax(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
+//}

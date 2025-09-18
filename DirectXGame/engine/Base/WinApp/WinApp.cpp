@@ -8,6 +8,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 
+#include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
+
 
 LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -21,11 +23,19 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 	switch (msg) {
 		//ウィンドウが破棄された
 	case WM_DESTROY:
-		//OSに応じて、アプリの終了を伝える
+
 		PostQuitMessage(0);
+	case WM_KEYDOWN:
+		if (wparam == VK_F11) {  // F11で切替
+			ToggleFullscreen();
+		}
 		return 0;
 	}
+	if (isFnish_) {
 
+		//OSに応じて、アプリの終了を伝える
+		PostQuitMessage(0);
+	}
 	//標準メッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -63,7 +73,7 @@ void WinApp::Initialize()
 	hwnd = CreateWindow(
 
 		wc.lpszClassName,      // 利用するクラス
-		L"LE3A_10_カタジマ_ロウノシン",	// タイトルバーの文字 (何でもいい)
+		L"LE3A_10_カタジマロウノシン",	// タイトルバーの文字 (何でもいい)
 		WS_OVERLAPPEDWINDOW,   // よく見るウィンドウスタイル
 		CW_USEDEFAULT,		   // 表示X座標 (windousに任せる)
 		CW_USEDEFAULT,		   // 表示Y座標 (WindowsOSに任せる)
@@ -91,16 +101,74 @@ bool WinApp::ProcessMessage()
 {
 	MSG msg{};
 
-	while(PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) 
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 
-	if (msg.message == WM_QUIT) 
+	if (msg.message == WM_QUIT)
 	{
 		return true;
 	}
 
 	return false;
+}
+
+void WinApp::ToggleFullscreen()
+{
+	if (!hwnd || !swapChain) return;
+
+	if (!isFullscreen) {
+		// 現在のウィンドウ位置を保存
+		wpPrev.length = sizeof(WINDOWPLACEMENT);
+		GetWindowPlacement(hwnd, &wpPrev);
+
+		// モニター解像度を取得
+		HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+		MONITORINFO mi = { sizeof(mi) };
+		GetMonitorInfo(hMonitor, &mi);
+
+		// 枠を消す
+		SetWindowLong(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+
+		// 全画面に拡大
+		SetWindowPos(hwnd, HWND_TOP,
+			mi.rcMonitor.left,
+			mi.rcMonitor.top,
+			mi.rcMonitor.right - mi.rcMonitor.left,
+			mi.rcMonitor.bottom - mi.rcMonitor.top,
+			SWP_FRAMECHANGED | SWP_NOOWNERZORDER);
+
+		isFullscreen = true;
+
+
+		fullscreenWidth = mi.rcMonitor.right - mi.rcMonitor.left;
+		fullscreenHeight = mi.rcMonitor.bottom - mi.rcMonitor.top;
+
+#ifdef _DEBUG
+		swapChain->Resize(fullscreenWidth, fullscreenHeight);
+#endif // DEBUG
+
+#ifndef _DEBUG
+		swapChain->Resize(kClientWidth, kClientHeight);
+#endif // !_DEBUG
+
+
+
+	}
+	else {
+		// 元のスタイルに戻す
+		SetWindowLong(hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+
+		// 保存しておいた位置に戻す
+		SetWindowPlacement(hwnd, &wpPrev);
+		SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+			SWP_FRAMECHANGED | SWP_NOOWNERZORDER);
+
+		isFullscreen = false;
+
+		swapChain->Resize(kClientWidth, kClientHeight);
+	}
 }

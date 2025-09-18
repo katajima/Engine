@@ -8,18 +8,21 @@
 class Object3dCommon
 {
 public:
-	
+
 	enum class PSOType {
 
 		UvInterpolation_MODE_SOLID_BACK,
 		NoUvInterpolation_MODE_SOLID_BACK,
 		UvInterpolation_MODE_WIREFRAME_BACK,
 		NoUvInterpolation_MODE_WIREFRAME_BACK,
-		
+
 		UvInterpolation_MODE_SOLID_NONE,
 		NoUvInterpolation_MODE_SOLID_NONE,
 		UvInterpolation_MODE_WIREFRAME_NONE,
 		NoUvInterpolation_MODE_WIREFRAME_NONE,
+
+		Transparent,
+
 	};
 
 	// 初期化
@@ -55,8 +58,15 @@ private:// メンバ変数
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
 
+	// 透過用
+
+	//ルートシグネチャ
+	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignatureTransparent;
+	// グラフィックスパイプラインステート
+	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineStateTransparent;
+
 private:// メンバ変数
-	
-	
+
+
 };
 

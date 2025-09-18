@@ -4,7 +4,7 @@
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, bool isTexLoad)
+void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath, bool isTexLoad)
 {
 	timer_.StartTimer();
 	textureFilePath_ = textureFilePath;
@@ -26,7 +26,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, 
 	vertices.push_back({});
 	vbvResorce_.CreateBufferView(spriteCommon_->GetDxCommon(), vertices, vertices.size());
 
-	
+
 	// マテリアル
 	material = std::make_unique<Material>();
 	material->Initialize(spriteCommon_->GetDxCommon());
@@ -48,7 +48,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, 
 	transform.translate = { worldTransform2d.translate_.x,worldTransform2d.translate_.y,0.0f };
 
 
-	
+
 	float left = 0.0f - anchorPoint.x;
 	float right = 1.0f - anchorPoint.x;
 	float top = 0.0f - anchorPoint.y;
@@ -82,6 +82,16 @@ void Sprite::Initialize(SpriteCommon* spriteCommon,std::string textureFilePath, 
 void Sprite::Update()
 {
 	worldTransform2d.Update();  // scale_ は Transform の scale 値のみ使う
+
+	float winWidth = static_cast<float>(WinApp::GetClientWidth(false));
+	float winHeight = static_cast<float>(WinApp::GetClientHeight(false));
+
+
+#ifndef _DEBUG
+	//winWidth = static_cast<float>(WinApp::GetClientWidth());
+	//winHeight = static_cast<float>(WinApp::GetClientHeight());
+#endif // _DEBUG
+
 
 	// anchorPoint を中心にしたジオメトリを "size" で構築
 	float left = -anchorPoint.x * size.x;
@@ -122,7 +132,7 @@ void Sprite::Update()
 
 	// 変換行列
 	Matrix4x4 viewMatrix = MakeIdentity4x4();
-	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::GetClientWidth()), float(WinApp::GetClientHeight()), 0.0f, 100.0f);
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, winWidth, winHeight, 0.0f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldTransform2d.GetConvert2DMatrixTo4x4(), Multiply(viewMatrix, projectionMatrix));
 
 	// シェーダーに送信
@@ -167,7 +177,7 @@ void Sprite::Draw(SpriteType type)
 
 		vbvResorce_.IASetVertexBuffers();
 		indexResorce_.IASetIndexBuffer();
-		
+
 		//トランスフォームMatrixResource
 		transfomation->GetCommandList(1);
 
@@ -175,6 +185,11 @@ void Sprite::Draw(SpriteType type)
 		spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 	}
 }
+
+void Sprite::GetCommandList() {
+	vbvResorce_.IASetVertexBuffers();
+	indexResorce_.IASetIndexBuffer();
+};
 
 void Sprite::AdjusttextureSize()
 {
@@ -207,5 +222,5 @@ void Sprite::SpriteTypeDiscrimination(SpriteType type)
 		break;
 	}
 
-	
+
 }

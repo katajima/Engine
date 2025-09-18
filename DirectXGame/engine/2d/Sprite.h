@@ -52,7 +52,7 @@ public:// メンバ関数
 	// スケール
 	const Vector2& GetScale() const { return worldTransform2d.scale_; }
 	void SetScale(const Vector2& size) { worldTransform2d.scale_ = size; }
-	
+
 	// サイズ
 	const Vector2& GetSize() const { return size; }
 	void SetSize(const Vector2& size) { this->size = size; }
@@ -92,17 +92,19 @@ public:// メンバ関数
 	bool GetActive() const { return isActive_; }
 
 	// フェードイン
-	void SetIsFadeIn(const bool& isFadeIn) { isFadeIn_ = isFadeIn;};
-	void SetIsFadeOut(const bool& isFadeOut) {isFadeOut_ = isFadeOut;};
+	void SetIsFadeIn(const bool& isFadeIn) { isFadeIn_ = isFadeIn; };
+	void SetIsFadeOut(const bool& isFadeOut) { isFadeOut_ = isFadeOut; };
 
 	void SetName(std::string name) { name_ = name; }
 
 	std::string GetName() { return name_; }
 
 	void SetTexture(const std::string texture) { material->tex_.diffuseFilePath = texture; };
-	
+
 	WorldTransform2d& GetWorldTransform2d() { return worldTransform2d; }
-	
+
+	void GetCommandList();
+
 private:
 
 	// テクスチャサイズをイメージに合わせる
@@ -120,9 +122,9 @@ private:
 
 	VertexBuffer<VertexData> vbvResorce_;
 	std::vector<VertexData> vertices;
-	
-	
-	
+
+
+
 
 	// トランスフォーム
 	std::unique_ptr<Transfomation>transfomation = nullptr;
@@ -135,7 +137,7 @@ private:
 
 	std::string name_ = "NoName";
 private:
-	
+
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };	// トランスフォーム
 
 	WorldTransform2d worldTransform2d;

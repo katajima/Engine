@@ -8,9 +8,7 @@
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include "PostEffectBlock.h"
 
-
-
-
+#include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 
 class DXGIDevice;
@@ -25,10 +23,13 @@ class ViewPort;
 
 class SceneManager;
 
-class PostEffectManager
-{
+class PostEffectManager {
 public:
-	void Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect,ViewPort* viewPort);
+	void Intialize(DXGIDevice* DXGIDevice, Command* command,
+		SrvManager* srvManager, RtvManager* rvtManager,
+		RenderingCommon* renderingCommon, DepthStencil* depthStencil,
+		Barrier* barrier, ScissorRect* scissorRect,
+		ViewPort* viewPort);
 
 	// 最初
 	void PreDrawOffscreen();
@@ -43,46 +44,66 @@ public:
 	void PostDraw2dOffscreen();
 
 
-
-
-	
 	void AllPostEffect(SceneManager* sceneManager);
 
 
 	void Update(Camera* camera);
 
 	// レンダーテクスチャ追加
-	void AddEffectBlock(const std::string name, PostEffectBlockType type,bool use = true);
+	void AddEffectBlock(const std::string name, PostEffectBlockType type,
+		bool              use = true);
 	//
 	void AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks);
 
 	//
-	RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get();};
+	RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get(); };
 
 	void ClearPostEffectBlock();
 
 	void RenderImGui();
 
-	// 左上座標取得
-	Vector2 GetImageleftTopPos() const { return imageleftTopPos_; };
-	// 画面比率取得
-	Vector2 GetImageRatio() const { return imageRatio_; }
-private:
+	void RenderUpdate();
 
+	// ImGui画像左上座標取得
+	Vector2 GetImageleftTopPos() const {
+#ifdef _DEBUG
+		return imageleftTopPos_;
+#else
+		return Vector2(0, 0);
+#endif
+	}
+
+	// ImGui画像サイズ取得
+	Vector2 GetImageSize() const {
+#ifdef _DEBUG
+		return imageSize_;
+#else
+		RECT rect;
+		GetClientRect(WinApp::GetHwnd(), &rect);
+		const int width = rect.right - rect.left;
+		const int height = rect.bottom - rect.top;
+		return Vector2(static_cast<float>(width), static_cast<float>(height));
+#endif
+	}
+
+	// ImGui画像画面比率取得
+	Vector2 GetImageRatio() const { return imageRatio_; }
+
+private:
 	void PreEnd(RenderTexture* renderTexture);
 
 	void PostEnd(RenderTexture* renderTexture);
 
-
 private:
-	std::unique_ptr <RenderTexture> renderTexture_;
-	std::unique_ptr <RenderTexture> renderTextureEnd_;
-	
+	std::unique_ptr<RenderTexture> renderTexture_;
+	std::unique_ptr<RenderTexture> renderTextureEnd_;
+
 	std::vector<PostEffectBlock*> effectBlocks_;
-	
+
 	uint32_t indexCount_ = 0;
 
 	Vector2 imageleftTopPos_;
+	Vector2 imageSize_;
 	Vector2 imageRatio_;
 
 private:
@@ -96,4 +117,3 @@ private:
 	ScissorRect* scissorRect_;
 	ViewPort* viewPort_;
 };
-

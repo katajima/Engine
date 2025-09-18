@@ -1,7 +1,35 @@
 #pragma once
 #include "LineStruct.h"
 #include "array"
-//#include "TransformStruct.h"
+#include "Structs.h"
+
+
+
+
+
+//速度や加速度を管理する構造体
+struct Kinematics {
+	Vector3 velocity{ 0.0f, 0.0f, 0.0f };
+	Vector3 acceleration{ 0.0f, 0.0f, 0.0f };
+
+	// デフォルトコンストラクタ
+	Kinematics() = default;
+
+	// 初期値を設定できるコンストラクタ
+	Kinematics(const Vector3& v, const Vector3& a)
+		: velocity(v), acceleration(a) {
+	}
+
+	// 更新処理
+	void Update(float deltaTime) {
+		velocity += acceleration * deltaTime; // 加速度から速度更新
+	}
+
+	// 減衰などが必要なら追加
+	void ApplyDamping(float damping) {
+		velocity *= damping; // 0.0f〜1.0fの範囲
+	}
+};
 
 //Transform
 struct Transform {
@@ -236,11 +264,11 @@ struct Triangle
 	AABB bounds;
 
 	// +=オペレーターのオーバーロード 
-	Triangle& operator+=(const Vector3& offset) { 
-		for (auto& vertex : vertices) { 
-			vertex += offset; 
-		} 
-		return *this; 
+	Triangle& operator+=(const Vector3& offset) {
+		for (auto& vertex : vertices) {
+			vertex += offset;
+		}
+		return *this;
 	}
 
 	Triangle OffsetVector3(const Vector3& offset) const {
@@ -293,7 +321,7 @@ struct Triangle
 	}
 
 	// Rayとの交差判定（Möller–Trumbore法）
-	bool IntersectRay(const Vector3 & rayOrigin, const Vector3 & rayDir, float& outT) const {
+	bool IntersectRay(const Vector3& rayOrigin, const Vector3& rayDir, float& outT) const {
 		const float EPSILON = 1e-6f;
 		Vector3 edge1 = vertices[1] - vertices[0];
 		Vector3 edge2 = vertices[2] - vertices[0];

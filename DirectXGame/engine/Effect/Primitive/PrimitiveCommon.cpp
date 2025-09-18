@@ -7,7 +7,7 @@ void PrimitiveCommon::Initialize(DirectXCommon* dxcommon)
 
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
-	
+
 	CreateGraphicsPipeline();
 }
 

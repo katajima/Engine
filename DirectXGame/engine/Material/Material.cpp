@@ -53,13 +53,13 @@ void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int spec
 
 void Material::GPUData()
 {
-	
+
 
 	cbResource_.Data()->environmentCoefficient = environmentCoefficient_;
 	cbResource_.Data()->enableLighting = enableLighting_;
 	cbResource_.Data()->shininess = shininess_;
 	cbResource_.Data()->useLig = useLig_;
-
+	cbResource_.Data()->alpha = alpha_;
 	if (useNormalMap_) {
 		cbResource_.Data()->useNormalMap = useNormalMap_;
 	}
@@ -70,7 +70,7 @@ void Material::GPUData()
 	cbResource_.Data()->alphaClipping = alphaClipping_;
 
 	cbResource_.Data()->color = color;
-
+	//cbResource_.Data()
 	cbResource_.Data()->uvTransform = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Fade.h"
 
 class Input;
 class SceneManager;
@@ -22,10 +22,17 @@ public:
 	// 毎フレーム更新
 	virtual void Update() = 0;
 
+	// 
+	void AllUpdate();
+
 	// 描画
 	virtual void Draw3D() = 0;
-	
+
 	virtual void Draw2D() = 0;
+	// 2D前景描画
+	virtual void DrawForeground2D() {};
+
+	void AllDraw2D();
 
 	virtual void SetSceneManader(SceneManager* sceneManager) { sceneManager_ = sceneManager; }
 
@@ -55,6 +62,8 @@ public:
 
 	Camera* GetCamara() { return camera_; }
 
+	bool IsInitialized() const { return initialized_; }
+
 private:
 	// シーンマネージャ(借りてくる)
 	SceneManager* sceneManager_ = nullptr;
@@ -65,5 +74,7 @@ private:
 	Input* input_;
 	GlobalVariables* globalVariables_;
 	Camera* camera_;
+protected:
+	bool initialized_ = false;
 };
 

@@ -6,6 +6,10 @@
 
 struct Vector2 final {
 	float x, y;
+	static constexpr size_t Dim = 2;
+	float& operator[](size_t i) { return i == 0 ? x : y; }
+	const float& operator[](size_t i) const { return i == 0 ? x : y; }
+
 
 	// == 演算子のオーバーロード
 	bool operator==(const Vector2& other) const {
@@ -13,7 +17,7 @@ struct Vector2 final {
 	}
 	// + 演算子のオーバーロード
 	Vector2 operator+(const Vector2& other) const {
-		return Vector2{ x + other.x, y + other.y};
+		return Vector2{ x + other.x, y + other.y };
 	}
 	// - 演算子のオーバーロード
 	Vector2 operator+(float other) const {
@@ -22,20 +26,20 @@ struct Vector2 final {
 
 	// - 演算子のオーバーロード
 	Vector2 operator-(const Vector2& other) const {
-		return Vector2{ x - other.x, y - other.y};
+		return Vector2{ x - other.x, y - other.y };
 	}
 	// - 演算子のオーバーロード
 	Vector2 operator-(float other) const {
-		return Vector2{ x - other, y - other};
+		return Vector2{ x - other, y - other };
 	}
 
 	// * 演算子のオーバーロード
 	Vector2 operator*(const Vector2& other) const {
-		return Vector2{ x * other.x, y * other.y};
+		return Vector2{ x * other.x, y * other.y };
 	}
 	// * 演算子のオーバーロード
 	Vector2 operator*(float other) const {
-		return Vector2{ x * other, y * other};
+		return Vector2{ x * other, y * other };
 	}
 	// + 演算子のオーバーロード
 	Vector2& operator+=(const Vector2& other) {
@@ -63,7 +67,7 @@ struct Vector2 final {
 		if (length != 0.0f) {
 			result.x = x / length;
 			result.y = y / length;
-			
+
 		};
 
 		return result;
@@ -76,7 +80,7 @@ struct Vector2 final {
 
 		return result;
 	};
-	
+
 	float LengthSq() const {
 		return x * x + y * y;
 	}
@@ -85,13 +89,13 @@ struct Vector2 final {
 	float Dot(const Vector2& other) const {
 		float result;
 
-		result = x * other.x + y * other.y ;
+		result = x * other.x + y * other.y;
 
 
 		return result;
 	};
 
-	
+
 
 };
 
@@ -100,7 +104,7 @@ static Vector2 Lerp(const Vector2& a, const Vector2& b, float t) {
 	t = std::clamp(t, 0.0f, 1.0f);
 	temp.x = a.x * (1.0f - t) + b.x * t;
 	temp.y = a.y * (1.0f - t) + b.y * t;
-	
+
 	return temp;
 }
 static Vector2 Max(const Vector2& v1, const Vector2& v2) {
@@ -109,7 +113,7 @@ static Vector2 Max(const Vector2& v1, const Vector2& v2) {
 
 	result.x = (std::max)(v1.x, v2.x);
 	result.y = (std::max)(v1.y, v2.y);
-	
+
 	return result;
 }
 
@@ -119,7 +123,7 @@ static Vector2 Min(const Vector2& v1, const Vector2& v2) {
 
 	result.x = (std::min)(v1.x, v2.x);
 	result.y = (std::min)(v1.y, v2.y);
-	
+
 	return result;
 }
 
@@ -127,7 +131,7 @@ static Vector2 Normalize(const Vector2& v) {
 	Vector2 result{};
 	float length;
 
-	length = sqrtf((v.x * v.x) + (v.y * v.y) );
+	length = sqrtf((v.x * v.x) + (v.y * v.y));
 
 	if (length != 0.0f) {
 		result.x = v.x / length;

@@ -13,7 +13,7 @@
 #include "DirectXGame/engine/Effect/Trail/TrailEffectManager.h"
 #include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
 #include "DirectXGame/engine/Effect/Particle/GPU/GpuParticleManager.h"
-
+#include <DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.h>
 
 class LightManager;
 class DirectXCommon;
@@ -38,7 +38,8 @@ public: // ゲッター
 	ParticleManager* GetParticleManager() { return particleManager_.get(); }
 	// パーティクルマネージャ
 	GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_.get(); }
-
+	//
+	ParticleManager2d* GetParticleManager2d() { return particleManager2d_.get(); }
 
 	//
 	LineCommon* GetLineCommon() { return lineCommon_; }
@@ -53,7 +54,7 @@ private:
 	// GPUパーティクルマネージャー
 	std::unique_ptr<GpuParticleManager> gpuParticleManager_;
 
-
+	std::unique_ptr<ParticleManager2d> particleManager2d_;
 private:
 	DirectXCommon* directXCommon_;
 	LightManager* lightManager_;

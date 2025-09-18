@@ -8,6 +8,10 @@ struct Vector4 final {
 	float z;
 	float w;
 
+	static constexpr size_t Dim = 4;
+	float& operator[](size_t i) { return i == 0 ? x : (i == 1 ? y : (i == 2 ? z : w)); }
+	const float& operator[](size_t i) const { return i == 0 ? x : (i == 1 ? y : (i == 2 ? z : w)); }
+
 	Vector3 xyz() { return Vector3{ x,y,z }; }
 
 
@@ -36,11 +40,11 @@ struct Vector4 final {
 	}
 	//
 	Vector4 operator+(const Vector3& other) const {
-		return Vector4{ x + other.x, y + other.y, z + other.z,w};
+		return Vector4{ x + other.x, y + other.y, z + other.z,w };
 	}
 	//
 	Vector4 operator=(const Vector3& other) const {
-		return Vector4{ other.x, other.y, other.z,w};
+		return Vector4{ other.x, other.y, other.z,w };
 	}
 
 	/*Vector4  operator=(const Color& other) const {

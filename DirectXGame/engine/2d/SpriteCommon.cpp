@@ -7,8 +7,8 @@ void SpriteCommon::Initialize(DirectXCommon* dxCommon)
 	dxCommon_ = dxCommon;
 
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(),dxCommon_->GetDXGIDevice(),dxCommon_->GetDXCCompiler());
-	
+	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+
 	CreateGraphicsPipeline();
 }
 
@@ -64,7 +64,7 @@ void SpriteCommon::CreateRootSignature()
 
 	// テクスチャ用
 	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
-	
+
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ

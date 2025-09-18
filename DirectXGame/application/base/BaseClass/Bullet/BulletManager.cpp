@@ -1,6 +1,6 @@
 #include "BulletManager.h"
 
-#include "DirectXGame/application/base/Bullet/PlayerMissile.h"
+
 #include "DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.h"
 
 BulletManager::~BulletManager()
@@ -61,7 +61,6 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	switch (type)
 	{
 	case BulletManager::BulletType::kPlayerMissile:
-		bullet = std::make_unique<PlayerMissile>();
 		
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
@@ -89,8 +88,6 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 	switch (type)
 	{
 	case BulletManager::BulletType::kPlayerMissile:
-		bullet = std::make_unique<PlayerMissile>();
-		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
 		break;

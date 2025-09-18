@@ -9,21 +9,40 @@ void Audio::Initialize()
 
 	// XAudioエンジンのインスタンスを生成
 	hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	assert(SUCCEEDED(hr));
 	// マスターボイスを生成
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
-	
+	assert(SUCCEEDED(hr));
 }
 
 void Audio::Finalize()
 {
-	xAudio2.Reset();
+	// 再生中の全てのソースボイスを破棄
+	for (auto& kv : playingVoices) {
+		if (kv.second) {
+			kv.second->Stop();
+			kv.second->FlushSourceBuffers();
+			kv.second->DestroyVoice();
+		}
+	}
+	playingVoices.clear();
 
-	SoundUnload(&soundData1);
+	// サウンドデータ解放
+	for (auto& kv : soundDatas) {
+		SoundUnload(&kv.second);
+	}
+	soundDatas.clear();
+
+	if (masterVoice) {
+		masterVoice->DestroyVoice();
+		masterVoice = nullptr;
+	}
+	xAudio2.Reset();
 }
 
 SoundData Audio::SoundLoadWave(const char* filename) {
 
-	
+
 
 	//HRESULT result;
 
@@ -98,7 +117,6 @@ void Audio::SoundUnload(SoundData* soundData)
 	soundData->pBuffer = 0;
 	soundData->bufferSize = 0;
 	soundData->wfex = {};
-
 }
 
 void Audio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
@@ -121,19 +139,99 @@ void Audio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	result = pSourceVoice->Start();
 }
 
-uint32_t Audio::PlayWave(uint32_t soundDataHandle)
-{
-	// 今回は soundDataHandle を使用せず、直接 soundData1 を再生
-	SoundPlayWave(xAudio2.Get(), soundData1);
-	return soundDataHandle;
-}
+//uint32_t Audio::PlayWave(uint32_t soundDataHandle)
+//{
+//	auto it = soundDatas.find(soundDataHandle);
+//	if (it == soundDatas.end()) return;
+//
+//	const SoundData& soundData = it->second;
+//
+//	IXAudio2SourceVoice* pSourceVoice = nullptr;
+//	HRESULT hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+//	assert(SUCCEEDED(hr));
+//
+//	XAUDIO2_BUFFER buf{};
+//	buf.pAudioData = soundData.pBuffer;
+//	buf.AudioBytes = soundData.bufferSize;
+//	buf.Flags = XAUDIO2_END_OF_STREAM;
+//
+//	hr = pSourceVoice->SubmitSourceBuffer(&buf);
+//	hr = pSourceVoice->Start();
+//}
 
 uint32_t Audio::LoadWave(const char* filename)
 {
-	// 音声読み込み
-	soundData1 = SoundLoadWave(filename);
+	SoundData sd = SoundLoadWave(filename);
+	if (!sd.pBuffer || sd.bufferSize == 0) {
+		return 0; // 失敗
+	}
+	uint32_t handle = nextHandle++;
+	soundDatas.emplace(handle, sd);
+	return handle;
+}
 
-	return soundData1.bufferSize;
+void Audio::UnloadWave(uint32_t soundDataHandle)
+{
+	auto it = soundDatas.find(soundDataHandle);
+	if (it == soundDatas.end()) return;
+	SoundUnload(&it->second);
+	soundDatas.erase(it);
 }
 
 
+void Audio::PlayWave(uint32_t soundDataHandle, bool loop, float volume)
+{
+	HRESULT hresult = S_FALSE;
+
+	// 該当データが存在しなければ return
+	auto it = soundDatas.find(soundDataHandle);
+	if (it == soundDatas.end()) {
+		return;
+	}
+
+	SoundData& data = it->second;
+
+	// SourceVoice作成
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
+	hresult = xAudio2->CreateSourceVoice(&pSourceVoice, &data.wfex);
+	assert(SUCCEEDED(hresult));
+
+	// バッファ設定
+	XAUDIO2_BUFFER buf{};
+	buf.pAudioData = data.pBuffer;
+	buf.AudioBytes = data.bufferSize;
+	buf.Flags = XAUDIO2_END_OF_STREAM;
+	if (loop) {
+		buf.LoopCount = XAUDIO2_LOOP_INFINITE;
+	}
+
+	// バッファ送信
+	hresult = pSourceVoice->SubmitSourceBuffer(&buf);
+	assert(SUCCEEDED(hresult));
+
+	// 音量設定（Start 前に）
+	hresult = pSourceVoice->SetVolume(volume);
+	assert(SUCCEEDED(hresult));
+
+	// 再生開始
+	hresult = pSourceVoice->Start();
+	assert(SUCCEEDED(hresult));
+
+	// 再生中リストに登録
+	playingVoices[soundDataHandle] = pSourceVoice;
+}
+
+void Audio::StopWave(uint32_t soundDataHandle) {
+	auto it = playingVoices.find(soundDataHandle);
+	if (it == playingVoices.end()) return;
+
+	it->second->Stop();
+
+	IXAudio2SourceVoice* src = it->second;
+	if (src) {
+		src->Stop();
+		src->FlushSourceBuffers();
+		src->DestroyVoice();
+	}
+	playingVoices.erase(it);
+}
