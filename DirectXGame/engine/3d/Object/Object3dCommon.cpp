@@ -14,39 +14,39 @@ void Object3dCommon::DrawCommonSetting(PSOType type)
 {
 	switch (type)
 	{
-	case Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_BACK:
+	case PSOType::UvInterpolation_MODE_SOLID_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
 		break;
-	case Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_BACK:
+	case PSOType::NoUvInterpolation_MODE_SOLID_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
 		break;
-	case Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
+	case PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
 		break;
-	case Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
+	case PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
 		break;
-	case Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_NONE:
+	case PSOType::UvInterpolation_MODE_SOLID_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
 		break;
-	case Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_NONE:
+	case PSOType::NoUvInterpolation_MODE_SOLID_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
 		break;
-	case Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE:
+	case PSOType::UvInterpolation_MODE_WIREFRAME_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
 		break;
-	case Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE:
+	case PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
 		break;
-	case Object3dCommon::PSOType::Transparent:
+	case PSOType::Transparent:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignatureTransparent.Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineStateTransparent.Get());
 		break;
@@ -70,8 +70,6 @@ void Object3dCommon::AllDraw()
 
 void Object3dCommon::CreateRootSignature()
 {
-	//HRESULT hr;
-
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用

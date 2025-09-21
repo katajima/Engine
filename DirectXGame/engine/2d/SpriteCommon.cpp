@@ -18,19 +18,19 @@ void SpriteCommon::DrawCommonSetting(PSOType type)
 {
 	switch (type)
 	{
-	case SpriteCommon::PSOType::UvInterpolation_MODE_SOLID:
+	case PSOType::UvInterpolation_MODE_SOLID_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get()); //PSOを設定
 		break;
-	case SpriteCommon::PSOType::NoUvInterpolation_MODE_SOLID:
+	case PSOType::NoUvInterpolation_MODE_SOLID_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get()); //PSOを設定
 		break;
-	case SpriteCommon::PSOType::UvInterpolation_MODE_WIREFRAME:
+	case PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get()); //PSOを設定
 		break;
-	case SpriteCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME:
+	case PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get()); //PSOを設定
 		break;

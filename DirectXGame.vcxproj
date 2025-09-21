@@ -660,6 +660,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleSystem.h" />
+    <ClInclude Include="DirectXGame\engine\PSO\psoData.h" />
     <ClInclude Include="DirectXGame\engine\scene\Fade.h" />
     <ClInclude Include="DirectXGame\engine\struct\Structs.h" />
     <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.h" />

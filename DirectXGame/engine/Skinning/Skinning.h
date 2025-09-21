@@ -8,18 +8,6 @@
 class SkinningConmmon
 {
 public:
-	enum class PSOType {
-
-		UvInterpolation_MODE_SOLID_BACK,
-		NoUvInterpolation_MODE_SOLID_BACK,
-		UvInterpolation_MODE_WIREFRAME_BACK,
-		NoUvInterpolation_MODE_WIREFRAME_BACK,
-
-		UvInterpolation_MODE_SOLID_NONE,
-		NoUvInterpolation_MODE_SOLID_NONE,
-		UvInterpolation_MODE_WIREFRAME_NONE,
-		NoUvInterpolation_MODE_WIREFRAME_NONE,
-	};
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 

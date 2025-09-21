@@ -8,23 +8,6 @@
 class Object3dCommon
 {
 public:
-
-	enum class PSOType {
-
-		UvInterpolation_MODE_SOLID_BACK,
-		NoUvInterpolation_MODE_SOLID_BACK,
-		UvInterpolation_MODE_WIREFRAME_BACK,
-		NoUvInterpolation_MODE_WIREFRAME_BACK,
-
-		UvInterpolation_MODE_SOLID_NONE,
-		NoUvInterpolation_MODE_SOLID_NONE,
-		UvInterpolation_MODE_WIREFRAME_NONE,
-		NoUvInterpolation_MODE_WIREFRAME_NONE,
-
-		Transparent,
-
-	};
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
@@ -51,8 +34,6 @@ private:// メンバ変数
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-	//ルートシグネチャデスク
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 	//ルートシグネチャ
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature[2];
 	// グラフィックスパイプラインステート

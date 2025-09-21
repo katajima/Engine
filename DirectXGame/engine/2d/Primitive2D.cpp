@@ -74,7 +74,7 @@ void Primitive2D::Update()
 
 void Primitive2D::Draw()
 {
-	spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_SOLID);
+	spriteCommon_->DrawCommonSetting(PSOType::UvInterpolation_MODE_SOLID_BACK);
 
 	material->GetCommandListMaterial(0);
 

@@ -165,7 +165,7 @@ void Sprite::UpdateAmimetion(float time)
 	Update();
 }
 
-void Sprite::Draw(SpriteType type)
+void Sprite::Draw(PSOType type)
 {
 	if (isActive_) {
 		SpriteTypeDiscrimination(type);
@@ -202,25 +202,7 @@ void Sprite::AdjusttextureSize()
 	size = textureSize;
 }
 
-void Sprite::SpriteTypeDiscrimination(SpriteType type)
+void Sprite::SpriteTypeDiscrimination(PSOType type)
 {
-	switch (type)
-	{
-	case Sprite::SpriteType::UvInterpolation_MODE_SOLID:
-		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_SOLID);
-		break;
-	case Sprite::SpriteType::NoUvInterpolation_MODE_SOLID:
-		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::NoUvInterpolation_MODE_SOLID);
-		break;
-	case Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME:
-		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_WIREFRAME);
-		break;
-	case Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME:
-		spriteCommon_->DrawCommonSetting(SpriteCommon::PSOType::UvInterpolation_MODE_WIREFRAME);
-		break;
-	default:
-		break;
-	}
-
-
+	spriteCommon_->DrawCommonSetting(type);
 }

@@ -11,17 +11,6 @@ class DirectXCommon;
 class SpriteCommon
 {
 public:// メンバ関数
-	enum class PSOType {
-
-		UvInterpolation_MODE_SOLID,
-		NoUvInterpolation_MODE_SOLID,
-		UvInterpolation_MODE_WIREFRAME,
-		NoUvInterpolation_MODE_WIREFRAME,
-
-	};
-
-
-
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 

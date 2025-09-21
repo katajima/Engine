@@ -18,35 +18,35 @@ void SkinningConmmon::DrawCommonSetting(PSOType type)
 {
 	switch (type)
 	{
-	case SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK:
+	case PSOType::UvInterpolation_MODE_SOLID_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
 		break;
-	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK:
+	case PSOType::NoUvInterpolation_MODE_SOLID_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
 		break;
-	case SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
+	case PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
 		break;
-	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
+	case PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
 		break;
-	case SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE:
+	case PSOType::UvInterpolation_MODE_SOLID_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
 		break;
-	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE:
+	case PSOType::NoUvInterpolation_MODE_SOLID_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
 		break;
-	case SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE:
+	case PSOType::UvInterpolation_MODE_WIREFRAME_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
 		break;
-	case SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE:
+	case PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE:
 		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
 		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
 		break;

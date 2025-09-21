@@ -4,21 +4,6 @@
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
-// 描画するときの映り方を指定する
-enum class ObjectRasterizerType {
-	UvInterpolation_MODE_SOLID_BACK,
-	NoUvInterpolation_MODE_SOLID_BACK,
-	UvInterpolation_MODE_WIREFRAME_BACK,
-	NoUvInterpolation_MODE_WIREFRAME_BACK,
-
-	UvInterpolation_MODE_SOLID_NONE,
-	NoUvInterpolation_MODE_SOLID_NONE,
-	UvInterpolation_MODE_WIREFRAME_NONE,
-	NoUvInterpolation_MODE_WIREFRAME_NONE,
-
-	Transparent,
-};
-
 // オブジェクトのタイプを指定する
 enum class ObjectModelType { // オブジェクト種類
 	kNormal,	// モデルを描画するオブジェクト
@@ -46,7 +31,7 @@ class RenderComponent
 {
 public:
 
-	void Init(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType);
+	void Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType);
 
 
 	void Update();
@@ -80,7 +65,7 @@ public:
 	// 描画順の設定
 	void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
 	// 映り方タイプ設定
-	void SetObjectRasterizerType(ObjectRasterizerType type) { rasterizerType_ = type; }
+	void SetObjectRasterizerType(PSOType type) { rasterizerType_ = type; }
 	// オブジェクト型名前
 	std::string GetObjectTypeName() const { return objectTypeName; }
 
@@ -91,9 +76,9 @@ public:
 
 
 private:
-	void ObjectNormalTypeDiscrimination(ObjectRasterizerType type);
+	void ObjectNormalTypeDiscrimination(PSOType type);
 
-	void ObjectSkinningTypeDiscrimination(ObjectRasterizerType type);
+	void ObjectSkinningTypeDiscrimination(PSOType type);
 
 	// 描画セッティング(デフォルト)
 	void DrawSetting();
@@ -107,7 +92,7 @@ private:
 	// オブジェクトの描画順
 	ObjectDrawType objectDrawType_ = ObjectDrawType::kOpaque;
 	// オブジェクトの映り方タイプ
-	ObjectRasterizerType rasterizerType_ = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK;
+	PSOType rasterizerType_ = PSOType::NoUvInterpolation_MODE_SOLID_BACK;
 	// オブジェクトのタイプ
 	ObjectModelType objectType_ = ObjectModelType::kNormal;
 	// 何かしらの見た目があるか

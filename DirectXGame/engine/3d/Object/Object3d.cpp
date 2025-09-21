@@ -16,7 +16,7 @@
 
 #pragma region Init
 
-void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType)
+void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
 	object3dCommon_ = entity3DManager_->GetObject3dCommon();

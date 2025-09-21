@@ -10,7 +10,7 @@
 
 
 
-void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, ObjectRasterizerType rasterizerType)
+void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;
 	objectType_ = objectType;
@@ -84,7 +84,7 @@ void RenderComponent::Draw()
 
 			for (auto& mesh : opa) {
 				if (mesh->material->alpha_ < 1.0f) {
-					ObjectNormalTypeDiscrimination(ObjectRasterizerType::Transparent);
+					ObjectNormalTypeDiscrimination(PSOType::Transparent);
 				}
 				else {
 					ObjectNormalTypeDiscrimination(rasterizerType_);
@@ -106,7 +106,7 @@ void RenderComponent::Draw()
 
 			for (auto& mesh : tra) {
 				if (mesh->material->alpha_ < 1.0f) {
-					ObjectNormalTypeDiscrimination(ObjectRasterizerType::Transparent);
+					ObjectNormalTypeDiscrimination(PSOType::Transparent);
 				}
 				else {
 					ObjectNormalTypeDiscrimination(rasterizerType_);
@@ -228,45 +228,14 @@ float RenderComponent::GetAlpha()
 	return a;
 }
 
-void RenderComponent::ObjectNormalTypeDiscrimination(ObjectRasterizerType type)
+void RenderComponent::ObjectNormalTypeDiscrimination(PSOType type)
 {
 	Object3dCommon* object = entity3DManager_->GetObject3dCommon();
 
-	switch (type)
-	{
-	case ObjectRasterizerType::UvInterpolation_MODE_SOLID_BACK:
-		object->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_BACK);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK:
-		object->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
-		break;
-	case ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_BACK:
-		object->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		object->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case ObjectRasterizerType::UvInterpolation_MODE_SOLID_NONE:
-		object->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_SOLID_NONE);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE:
-		object->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
-		break;
-	case ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_NONE:
-		object->DrawCommonSetting(Object3dCommon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		object->DrawCommonSetting(Object3dCommon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	case ObjectRasterizerType::Transparent:
-		object->DrawCommonSetting(Object3dCommon::PSOType::Transparent);
-		break;
-	default:
-		break;
-	}
+	object->DrawCommonSetting(type);
 }
 
-void RenderComponent::ObjectSkinningTypeDiscrimination(ObjectRasterizerType type)
+void RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 {
 	SkinningConmmon* skinning = entity3DManager_->GetSkinningConmmon();
 
@@ -295,37 +264,7 @@ void RenderComponent::ObjectSkinningTypeDiscrimination(ObjectRasterizerType type
 		skinning->GetDxCommon()->GetCommandList()->ResourceBarrier(1, &barrier);
 	}
 
-	switch (type)
-	{
-	case ObjectRasterizerType::UvInterpolation_MODE_SOLID_BACK:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_BACK);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
-		break;
-	case ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_BACK:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
-		break;
-	case ObjectRasterizerType::UvInterpolation_MODE_SOLID_NONE:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_SOLID_NONE);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_NONE:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_SOLID_NONE);
-		break;
-	case ObjectRasterizerType::UvInterpolation_MODE_WIREFRAME_NONE:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::UvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	case ObjectRasterizerType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		skinning->DrawCommonSetting(SkinningConmmon::PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE);
-		break;
-	default:
-		break;
-	}
-
-
+	skinning->DrawCommonSetting(type);
 }
 
 

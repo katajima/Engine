@@ -252,9 +252,9 @@ void TestScene::Draw2D()
 			sprite_[i]->UpdateAmimetion(0.05f);
 		}
 		sprite_[0]->Draw();
-		sprite_[1]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_SOLID);
-		sprite_[2]->Draw(Sprite::SpriteType::UvInterpolation_MODE_WIREFRAME);
-		sprite_[3]->Draw(Sprite::SpriteType::NoUvInterpolation_MODE_WIREFRAME);
+		sprite_[1]->Draw(PSOType::NoUvInterpolation_MODE_SOLID_BACK);
+		sprite_[2]->Draw(PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
+		sprite_[3]->Draw(PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
 
 
 

@@ -1,10 +1,6 @@
 #pragma once
 
-#include "PSOFanction.h"
-
-
-#include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include "psoData.h"
 
 
 class Command;

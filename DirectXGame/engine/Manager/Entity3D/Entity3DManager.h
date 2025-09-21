@@ -71,7 +71,7 @@ public: //セッター
 	Object3d* CreatePrimitiveObject3D(const std::string& name,
 		const std::string& texturePath,
 		Camera* camera,
-		ObjectRasterizerType rasterizerType = ObjectRasterizerType::NoUvInterpolation_MODE_SOLID_BACK)
+		PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK)
 	{
 		// プリミティブ生成
 		std::unique_ptr<BasePrimitive> primitive = std::make_unique<T>();
