@@ -16,11 +16,9 @@ public:// メンバ関数
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	void DrawCommonSetting(PSOType type);
+	void DrawCommonSetting(PSOType type){ psoManager_->DrawSetting(type);}
 
 private:// メンバ関数
-	// ルートシグネチャの作成
-	void CreateRootSignature();
 
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
@@ -30,15 +28,10 @@ private:// メンバ変数
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-	//ルートシグネチャデスク
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 	//ルートシグネチャ
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature[2];
 	// グラフィックスパイプラインステート
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[4];
-
-
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
 };
 
 

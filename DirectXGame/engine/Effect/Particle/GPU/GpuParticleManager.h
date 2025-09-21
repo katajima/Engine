@@ -87,7 +87,7 @@ private:
 
 	
 	// パーティクル描画PSO
-	PSOManager::PSRS particleDraw;
+	PSRS particleDraw;
 
 	// パーティクル初期化PSO
 	CSPSOManager::PSRS particleCsInit;

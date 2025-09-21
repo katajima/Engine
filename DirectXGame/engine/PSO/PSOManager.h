@@ -1,29 +1,15 @@
 #pragma once
 
 #include "psoData.h"
-
+#include "map"
 
 class Command;
 class DXGIDevice;
 class DXCCompiler;
 
-
-
-
 class PSOManager
 {
 public:
-	// パイプラインステート＋ルートシグネチャ
-	struct PSRS {
-		////ルートシグネチャ
-		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-		//// グラフィックスパイプラインステート
-		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState;
-	};
-
-
-
-
 	// 初期化
 	void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
@@ -46,7 +32,14 @@ public:
 
 	void SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill);
 
-	void DrawSetting(D3D12_PRIMITIVE_TOPOLOGY topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	void DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	void CreatePso(PSOType type, D3D12_ROOT_PARAMETER* rootParameter, UINT rootNum, D3D12_STATIC_SAMPLER_DESC* samplerDesc, UINT samplerNum, 
+		D3D12_CULL_MODE cull, D3D12_FILL_MODE fill,
+		D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, 
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE  topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
 
 private:
 	Command* command_;
@@ -94,12 +87,8 @@ private:
 
 	ShaderFile shderFile_;
 private:
-	PSRS psoRoot_;
-
-
+	std::map<PSOType, PSRS> psoRoots_;
 private:
-	
 	void SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline);
-
 };
 

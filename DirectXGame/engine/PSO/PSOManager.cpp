@@ -203,12 +203,30 @@ void PSOManager::SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill)
 	rasterizerDesc_.FillMode = fill;
 }
 
-void PSOManager::DrawSetting(D3D12_PRIMITIVE_TOPOLOGY topology) {
+void PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topology) {
 
-	command_->GetList()->SetPipelineState(psoRoot_.graphicsPipelineState.Get());
-	//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	command_->GetList()->SetGraphicsRootSignature(psoRoot_.rootSignature.Get());
-	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	command_->GetList()->IASetPrimitiveTopology(topology);
+	// 読み込み済みモデルを検索
+	if (psoRoots_.contains(type)) {
+		command_->GetList()->SetPipelineState(psoRoots_[type].graphicsPipelineState.Get());
+		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		command_->GetList()->SetGraphicsRootSignature(psoRoots_[type].rootSignature.Get());
+		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+		command_->GetList()->IASetPrimitiveTopology(topology);
+	}
+}
+
+void PSOManager::CreatePso(	
+	PSOType type, D3D12_ROOT_PARAMETER* rootParameter,UINT rootNum ,
+	D3D12_STATIC_SAMPLER_DESC* samplerDesc,UINT samplerNum, 
+	D3D12_CULL_MODE cull, D3D12_FILL_MODE fill, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType)
+{
+	if (psoRoots_.contains(type)) {
+		return;
+	}
+
+	SetRootSignature(psoRoots_[type].rootSignature, rootParameter, rootNum, samplerDesc, samplerNum);
+	SetRasterizerDesc(cull, fill);
+	GraphicsPipelineState(psoRoots_[type].rootSignature, psoRoots_[type].graphicsPipelineState, blendDesc, depthStencilDesc, topologyType);
 }
 

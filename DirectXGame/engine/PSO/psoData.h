@@ -22,3 +22,10 @@ enum class PSOType {
 	Transparent,							// 透明物
 };
 
+// パイプラインステート＋ルートシグネチャ
+struct PSRS {
+	////ルートシグネチャ
+	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
+	//// グラフィックスパイプラインステート
+	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState;
+};

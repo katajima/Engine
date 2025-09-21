@@ -13,9 +13,7 @@ public:
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	void DrawCommonSetting(PSOType type);
-
-	void AllDraw();
+	void DrawCommonSetting(PSOType type){ psoManager_->DrawSetting(type, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);}
 
 	void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
 
@@ -23,8 +21,6 @@ public:
 
 	int32_t count = 0;
 private:
-	// ルートシグネチャの作成
-	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
 private:// メンバ変数
@@ -34,17 +30,7 @@ private:// メンバ変数
 
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-	//ルートシグネチャ
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature[2];
-	// グラフィックスパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
 
-	// 透過用
-
-	//ルートシグネチャ
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignatureTransparent;
-	// グラフィックスパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineStateTransparent;
 
 private:// メンバ変数
 

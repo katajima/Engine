@@ -10,67 +10,8 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 	CreateGraphicsPipeline();
 }
 
-void Object3dCommon::DrawCommonSetting(PSOType type)
+void Object3dCommon::CreateGraphicsPipeline()
 {
-	switch (type)
-	{
-	case PSOType::UvInterpolation_MODE_SOLID_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_SOLID_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
-		break;
-	case PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
-		break;
-	case PSOType::UvInterpolation_MODE_SOLID_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_SOLID_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
-		break;
-	case PSOType::UvInterpolation_MODE_WIREFRAME_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
-		break;
-	case PSOType::Transparent:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignatureTransparent.Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineStateTransparent.Get());
-		break;
-	default:
-		break;
-	}
-
-
-
-	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-}
-
-void Object3dCommon::AllDraw()
-{
-
-}
-
-
-
-void Object3dCommon::CreateRootSignature()
-{
-
 	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
@@ -106,28 +47,9 @@ void Object3dCommon::CreateRootSignature()
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers2[1] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
-
-
-	// ルートシグネチャ作成
-	psoManager_->SetRootSignature(rootSignature[0], rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
-
-
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
-
-	// ルートシグネチャ作成
-	psoManager_->SetRootSignature(rootSignature[1], rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
-
-
-	// 透過
-
-	psoManager_->SetRootSignature(rootSignatureTransparent, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
-}
-
-void Object3dCommon::CreateGraphicsPipeline()
-{
-	CreateRootSignature();
-
+	PSOFanction::SetSampler(staticSamplers2[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 #pragma region BlendState
 
@@ -166,27 +88,47 @@ void Object3dCommon::CreateGraphicsPipeline()
 	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Object3D/Object3d.PS.hlsl");
 
 
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[0], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[1], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	// PSO生成
 
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME);
+	// UV補間背面カリング
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_SOLID_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	
+	// UV補間なし背面カリング 
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_SOLID_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[2], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[3], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	//  UV補間背面カリングワイヤーフレーム
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_WIREFRAME_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	
+	//  UV補間なし背面カリングワイヤーフレーム
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[4], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[5], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[6], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[7], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	//  UV補間カリングなし
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_SOLID_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	
+	//  UV補間なしカリングなし
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_SOLID_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+	//  UV補間カリングなしワイヤーフレーム
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_WIREFRAME_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	
+	//  UV補間なしカリングなしワイヤーフレーム
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+
+
+
 
 	// ---- Transparent ----
 	D3D12_BLEND_DESC blendAlpha = {};
@@ -208,8 +150,7 @@ void Object3dCommon::CreateGraphicsPipeline()
 	depthAlpha.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 
-	psoManager_->GraphicsPipelineState(rootSignatureTransparent, graphicsPipelineStateTransparent, blendAlpha, depthAlpha, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-
-
-
+	//  UV補間背面カリング
+	psoManager_->CreatePso(PSOType::Transparent, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+		, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID, blendAlpha, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 }
