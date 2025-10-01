@@ -11,9 +11,13 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager,DirectXComm
 {
 	dxCommon_ = dxCommon;
 	gpuParticleManager_ = gpuParticleManager;
+	// テクスチャ
+	textureName_ = textureName;
+	// 名前
+	name_ = name;
+
 	// 最大値設定CB
 	cbMaxInstance_.CreateBuffer(dxCommon_, 1);
-	cbMaxInstance_.Data()->maxInstance = 1024 * 1000;
 	cbMaxInstance_.Data()->maxInstance = MaxInstance;
 	// パーティクルインスタンシングVS
 	sbParticleResource_.CreateBuffer(dxCommon_, cbMaxInstance_.Data()->maxInstance, true);
@@ -23,10 +27,10 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager,DirectXComm
 	sbFreeListResource_.CreateBuffer(dxCommon_, cbMaxInstance_.Data()->maxInstance, true);
 	// 時間
 	cbPerFrame_.CreateBuffer(dxCommon_, 1);
-	// テクスチャ
-	textureName_ = textureName;
-	//
-	name_ = name;
+	// カメラ位置
+	cbCameraPos_.CreateBuffer(dxCommon_, 1);
+
+
 
 	gpuParticleManager_->PreCsPso();
 	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
@@ -34,14 +38,44 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager,DirectXComm
 	sbFreeListResource_.SetComputeRootDescriptorTable(2);		// フリーリスト
 	cbMaxInstance_.SetComputeRootConstantBufferView(3);			// Maxインスタンス
 
-	// 例：1000万粒子を256スレッドで処理
-	const uint32_t threadsPerGroup = 256;
-	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
+	{
+		const uint32_t threadsPerGroup = 256;
+		const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
-	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+		dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	}
 
 
-	//cbPerFrame_.Data()->time = 6000.0f;
+
+	
+
+
+	// トレイル用最大値設定CB
+	cbMaxTrailVertexInstance_.CreateBuffer(dxCommon_, 1);
+	cbMaxTrailVertexInstance_.Data()->maxInstance = MaxInstance * 16;
+	// トレイル頂点バッファ
+	sbTrailVertexResource_.CreateBuffer(dxCommon_, cbMaxTrailVertexInstance_.Data()->maxInstance, true);
+	// トレイル頂点カウンターインデックス
+	sbTrailVertexFreeListIndexResource_.CreateBuffer(dxCommon_, 1, true);
+	// トレイル頂点カウンター
+	sbTrailVertexFreeListResource_.CreateBuffer(dxCommon_, cbMaxTrailVertexInstance_.Data()->maxInstance, true);
+
+	gpuParticleManager_->PreCsTrailPso();
+	sbTrailVertexResource_.SetComputeRootDescriptorTable(0);				// トレイル頂点
+	sbTrailVertexFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// フリーリストインデックス
+	sbTrailVertexFreeListResource_.SetComputeRootDescriptorTable(2);		// フリーリスト
+	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(3);			// Maxインスタンス
+	{
+		const uint32_t threadsPerGroup = 256;
+		const uint32_t dispatchCount = (cbMaxTrailVertexInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
+
+		dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	}
+
+	// メッシュ
+	trailMesh_ = std::make_unique<TrailMesh>();
+	trailMesh_->CreateMesh(cbMaxTrailVertexInstance_.Data()->maxInstance);
+	trailMesh_->Initialize(dxCommon_);
 }
 
 void GpuParticleGroup::UpdateEmitte(float deltaTime,int count)
@@ -52,6 +86,9 @@ void GpuParticleGroup::UpdateEmitte(float deltaTime,int count)
 	if (cbPerFrame_.Data()->time >= 60.0f) {
 		cbPerFrame_.Data()->time = 0.0f;
 	}
+
+
+
 
 	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
 	cbPerFrame_.SetComputeRootConstantBufferView(2);			// 乱数用時間
@@ -78,7 +115,7 @@ void GpuParticleGroup::UpdateField()
 	sbFreeListResource_.SetComputeRootDescriptorTable(3);		// カウンター
 	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
 
-	// 例：1000万粒子を256スレッドで処理
+	
 	const uint32_t threadsPerGroup = 256;
 	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
@@ -93,7 +130,12 @@ void GpuParticleGroup::UpdateField()
 
 void GpuParticleGroup::Update()
 {
-	// 例：1000万粒子を256スレッドで処理
+
+	cbCameraPos_.Data()->x = camera_->transform_.translate.x;
+	cbCameraPos_.Data()->y = camera_->transform_.translate.y;
+	cbCameraPos_.Data()->z = camera_->transform_.translate.z;
+
+
 	const uint32_t threadsPerGroup = 256;
 	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
@@ -111,6 +153,52 @@ void GpuParticleGroup::Update()
 	sbFreeListResource_.UavDependence();
 }
 
+void GpuParticleGroup::UpateTrailEmitte(float deltaTime)
+{
+	const uint32_t threadsPerGroup = 256;
+	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
+
+
+	sbTrailVertexResource_.SetComputeRootDescriptorTable(0);				// トレイル
+	sbTrailVertexFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// カウンターインデックス(トレイル)
+	sbTrailVertexFreeListResource_.SetComputeRootDescriptorTable(2);		// カウンター(トレイル)
+	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(3);			// Maxインスタンス(トレイル)
+
+
+	sbParticleResource_.SetComputeRootDescriptorTable(4);					// パーティクル
+	cbMaxInstance_.SetComputeRootConstantBufferView(5);						// Maxインスタンス(パーティクル)
+	cbCameraPos_.SetComputeRootConstantBufferView(6);						// カメラ位置
+
+
+
+
+	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+
+	sbParticleResource_.UavDependence();
+	sbTrailVertexResource_.UavDependence();
+	sbTrailVertexFreeListIndexResource_.UavDependence();
+	sbTrailVertexFreeListResource_.UavDependence();
+
+}
+
+void GpuParticleGroup::UpdateTrail()
+{
+	const uint32_t threadsPerGroup = 256;
+	const uint32_t dispatchCount = (cbMaxTrailVertexInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
+
+	sbTrailVertexResource_.SetComputeRootDescriptorTable(0);				// トレイル
+	sbTrailVertexFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// カウンターインデックス(トレイル)
+	sbTrailVertexFreeListResource_.SetComputeRootDescriptorTable(2);		// カウンター(トレイル)
+	cbPerFrame_.SetComputeRootConstantBufferView(3);						// 乱数用時間
+	cbMaxInstance_.SetComputeRootConstantBufferView(4);						// Maxインスタンス(パーティクル)
+
+	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+
+
+	sbTrailVertexResource_.UavDependence();
+	sbTrailVertexFreeListIndexResource_.UavDependence();
+	sbTrailVertexFreeListResource_.UavDependence();
+}
 
 void GpuParticleGroup::Draw() {
 
@@ -126,5 +214,4 @@ void GpuParticleGroup::Draw() {
 		dxCommon_->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh_->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
 
 	}
-
 }

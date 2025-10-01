@@ -14,121 +14,8 @@ void SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 	CreateGraphicsPipeline();
 }
 
-void SkinningConmmon::DrawCommonSetting(PSOType type)
-{
-	switch (type)
-	{
-	case PSOType::UvInterpolation_MODE_SOLID_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_SOLID_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
-		break;
-	case PSOType::UvInterpolation_MODE_WIREFRAME_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
-		break;
-	case PSOType::UvInterpolation_MODE_SOLID_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_SOLID_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
-		break;
-	case PSOType::UvInterpolation_MODE_WIREFRAME_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[0].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
-		break;
-	case PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE:
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature[1].Get());
-		dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
-		break;
-	default:
-		break;
-	}
-
-	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-
-void SkinningConmmon::DrawComputeSetting()
-{
-	csPsoManager_->PreComputePSRS();
-}
-
-
 void SkinningConmmon::CreateRootSignature()
 {
-	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
-	
-	
-
-	
-
-	// Roosignature(ルートシグネチャ)作成
-	//ShaderとResorceをどのように関連付けるかを示したオブジェクト
-
-	//Roosignature作成
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
-
-	descriptionSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	// RootParameter作成。複数指定できるのではい
-	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[10] = {};
-
-
-	// マテリアルデータ (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// トランスフォームデータ (b0) を頂点シェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[1], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
-	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// カメラデータ (b2) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[4], 2, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[5], 3, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[6], 4, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// テクスチャデータ (t1) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
-	// テクスチャデータ (t2) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
-	// テクスチャデータ (t3) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
-	
-	
-	///Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
-
-
-	// ルートシグネチャ作成
-	psoManager_->SetRootSignature(rootSignature[0], rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
-
-
-	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
-
-	// ルートシグネチャ作成
-	psoManager_->SetRootSignature(rootSignature[1], rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
-	
-
-	
-
-
 	D3D12_DESCRIPTOR_RANGE computeDescriptorRange[4] = {};
 	PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //Palette
 	PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //InputVertices
@@ -153,7 +40,43 @@ void SkinningConmmon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 
+	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
+	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
 
+	// RootParameter作成。複数指定できるのではい
+	D3D12_ROOT_PARAMETER rootParameters[10] = {};
+
+
+	// マテリアルデータ (b0) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[0], 0, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// トランスフォームデータ (b0) を頂点シェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[1], 0, D3D12_SHADER_VISIBILITY_VERTEX, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t0) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// カメラデータ (b2) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[4], 2, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// ポイントライトデータ (b3) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[5], 3, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// スポットライトデータ (b4) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[6], 4, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t1) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t2) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t3) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
+
+
+	///Samplerの設定
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers2[1] = {};
+	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
+	PSOFanction::SetSampler(staticSamplers2[0], 0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_SHADER_VISIBILITY_PIXEL);// バイリニアフィルタ
 
 #pragma region BlendState
 
@@ -196,25 +119,29 @@ void SkinningConmmon::CreateGraphicsPipeline()
 
 
 
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_SOLID_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
+	
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_SOLID_BACK, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[0], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[1], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_WIREFRAME_BACK, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
+	
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
+	, D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
 
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_WIREFRAME);
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_SOLID_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
+	
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_SOLID_NONE, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID,blendDesc,depthStencilDesc);
 
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[2], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[3], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
-
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[4], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[5], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-
-	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME);
-
-	psoManager_->GraphicsPipelineState(rootSignature[0], graphicsPipelineState[6], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	psoManager_->GraphicsPipelineState(rootSignature[1], graphicsPipelineState[7], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->CreatePso(PSOType::UvInterpolation_MODE_WIREFRAME_NONE, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
+	
+	psoManager_->CreatePso(PSOType::NoUvInterpolation_MODE_WIREFRAME_NONE, rootParameters, _countof(rootParameters), staticSamplers2, _countof(staticSamplers2)
+	, D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_WIREFRAME,blendDesc,depthStencilDesc);
 
 
 	csPsoManager_->SetShaderFileName(L"resources/shaders/Skining/Skinning.CS.hlsl");

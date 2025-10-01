@@ -60,14 +60,6 @@ void Object3d::InitColliderComponent()
 	isColliderComponenyUpdate_ = true;
 }
 
-void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
-{
-	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
-	trailEffect_->SetCamera(defaltCamera);
-	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
-}
-
 #pragma endregion // 初期化系
 
 #pragma region Update
@@ -156,11 +148,6 @@ void Object3d::Update()
 	if (rigidBodyComponent_) {
 		rigidBodyComponent_->Integrate(MyGame::GameTime(), *transformComponent_.get());
 	}
-	// トレイル
-	if (trailEffect_) {
-		trailEffect_->Update(isEmitTrailEffect);
-	}
-
 	// コライダー
 	if (colliderComponent_) {
 		if (isColliderComponenyUpdate_) {
@@ -178,14 +165,6 @@ void Object3d::Draw()
 	if (isDelete) return;
 
 	renderComponent_->Draw();
-}
-
-void Object3d::DrawTrailEffect()
-{
-	if (trailEffect_) {
-		// トレイルエフェクトの描画
-		trailEffect_->Draw();
-	}
 }
 
 void Object3d::DebugImguiSkin()

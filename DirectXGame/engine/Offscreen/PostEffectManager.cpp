@@ -142,7 +142,6 @@ void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 	if (previousTexture) {
 		previousTexture->Draw();
 	}
-	//sceneManager->Draw2D();
 	PostDraw2dOffscreen();
 }
 
@@ -158,15 +157,7 @@ void PostEffectManager::Update(Camera* camera)
 	}
 }
 
-void PostEffectManager::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
-{
-	////auto effectBlock = std::make_unique<PostEffectBlock>();
-	////effectBlock->Intialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, depthStencil_, barrier_, scissorRect_, viewPort_,name,type);
-	////effectBlock->SetUse(use);			// 使うか
-	////effectBlock->SetIndex(indexCount_); // 順番
-	//effectBlocks_.push_back(effectBlock);
-	//indexCount_++; // 加算
-}
+
 
 void PostEffectManager::AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks)
 {

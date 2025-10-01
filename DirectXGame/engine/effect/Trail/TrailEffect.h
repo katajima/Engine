@@ -27,7 +27,7 @@ public:
 
 	void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
 
-	void Update(bool& flag);
+	void Update();
 	
 	void Draw();
 
@@ -42,6 +42,16 @@ public:
 		worldtransformTend_.parent_ = &world;
 		worldtransformTend_.translate_ = offsetEnd;
 	}
+	
+	// 発生フラグをセット
+	void SetIsEmit(bool is) { flag_ = is;}
+	// 発生フラグを取得
+	bool GetIsEmit() const { return flag_; }
+	// 時間をセット
+	void SetTimer(float t) { timer = t; }
+	// 発生時間を取得
+	float GetTimer() const { return timer; }
+
 
 
 	void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
@@ -59,8 +69,6 @@ private:
 	// カメラ
 	Camera* camera_ = nullptr;
 
-	//Object3d* object_;
-
 	std::unique_ptr<Material> material;
 	std::unique_ptr<Transfomation> transfomation = nullptr;
 
@@ -70,7 +78,7 @@ private:
 	bool flag_ = false;
 	Vector3 velocity_; // 速度
 	
-	int timer = 0;
+	float timer = 0;
 
 private:
 	EffectManager* effectManager_;

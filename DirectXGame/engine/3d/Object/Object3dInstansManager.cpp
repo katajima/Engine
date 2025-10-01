@@ -108,7 +108,7 @@ void Object3dInstansManager::Draw() {
 void Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 	BlendType      blendType) {
 	switch (blendType) {
-	case Object3dInstansManager::BlendType::MODE_ADD:
+	case BlendType::MODE_ADD:
 		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[0].Get());
@@ -118,7 +118,7 @@ void Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 				graphicsPipelineState[1].Get());
 		}
 		break;
-	case Object3dInstansManager::BlendType::MODE_SUBTRACT:
+	case BlendType::MODE_SUBTRACT:
 		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[2].Get());
@@ -128,7 +128,7 @@ void Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 				graphicsPipelineState[3].Get());
 		}
 		break;
-	case Object3dInstansManager::BlendType::MODE_MUlLIPLY:
+	case BlendType::MODE_MUlLIPLY:
 		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
 			dxCommon_->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[4].Get());
@@ -424,11 +424,8 @@ Object3dInstansManager::ObjectGroup& Object3dInstansManager::GetObjectGroup(cons
 
 void Object3dInstansManager::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 1, UINT_MAX,
-		D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[1], 0, 1,
-		D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-	// インスタンシング用
+	PSOFanction::SetDescriptorRenge(descriptorRange[0], 1, UINT_MAX,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[1], 0, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV);// インスタンシング用
 
 
 	// RootParameter作成。複数指定できるのではい
@@ -437,32 +434,21 @@ void Object3dInstansManager::CreateRootSignature() {
 	//CD3DX12_ROOT_PARAMETER 
 
 	// マテリアル (b0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[0], 0,
-		D3D12_SHADER_VISIBILITY_PIXEL,
-		D3D12_ROOT_PARAMETER_TYPE_CBV);
+	PSOFanction::SetRootParameter(rootParameters[0], 0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// インスタンシング(t1) をバーテックシェーダ使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[1],
-		D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[1],D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
-	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0],
-		D3D12_SHADER_VISIBILITY_PIXEL);
+	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0],D3D12_SHADER_VISIBILITY_PIXEL);
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// カメラデータ (b2) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[4], 2, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
-	// ポイントライトデータ (b3) をピクセルシェーダで使用する
-	///psoManager_->SetRootParameter(rootParameters[5], 3, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-	// スポットライトデータ (b4) をピクセルシェーダで使用する
-	//psoManager_->SetRootParameter(rootParameters[6], 4, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-
 
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	PSOFanction::SetSampler(staticSamplers[0], 0,
-		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
-		D3D12_SHADER_VISIBILITY_PIXEL); // バイリニアフィルタ
+	PSOFanction::SetSampler(staticSamplers[0], 0,D3D12_FILTER_MIN_MAG_MIP_LINEAR,D3D12_SHADER_VISIBILITY_PIXEL); // バイリニアフィルタ
 
 
 	// ルートシグネチャ作成
@@ -505,6 +491,7 @@ void Object3dInstansManager::CreateGraphicsPipeline() {
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState[1],
 		blendDesc, depthStencilDesc,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
 	BlendSubtract();
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState[2],

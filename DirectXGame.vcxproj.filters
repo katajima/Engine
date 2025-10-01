@@ -540,6 +540,9 @@
     <ClCompile Include="DirectXGame\engine\PSO\psoData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Mesh\TrailMesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -606,11 +609,17 @@
     <FxCompile Include="resources\shaders\Particle\NewParticle.VS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticle.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -1292,6 +1301,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\PSO\psoData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\ConvertUtility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

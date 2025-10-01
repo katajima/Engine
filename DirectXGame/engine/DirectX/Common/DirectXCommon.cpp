@@ -69,11 +69,11 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 	postEffectManager_->PostDrawOffscreen();
 
 
-	postEffectManager_->PreDraw2dOffscreen();
+	//postEffectManager_->PreDraw2dOffscreen();
 
 	//sceneManager->Draw2D();
 
-	postEffectManager_->PostDraw2dOffscreen();
+	//postEffectManager_->PostDraw2dOffscreen();
 }
 
 void DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* renderTexture)

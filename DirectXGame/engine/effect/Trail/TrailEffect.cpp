@@ -19,7 +19,7 @@ void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& te
 	mesh->indices.clear();
 	mesh->vertices.clear();
 	mesh->maxTime = maxtime;
-
+	timer = maxtime;
 	material = std::make_unique<Material>();
 	material->Initialize(effectManager_->GetDxCommon());
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
@@ -39,7 +39,7 @@ void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& te
 	mat_.Identity();
 }
 
-void TrailEffect::Update(bool& flag)
+void TrailEffect::Update()
 {
 	material->GPUData();
 	worldtransformTstr_.Update();
@@ -59,7 +59,7 @@ void TrailEffect::Update(bool& flag)
 	Vector3 rightBottom = { endPre.x , endPre.y , endPre.z };
 
 
-	if (flag) {
+	if (flag_) {
 		mesh->vertices.push_back({ .position = {leftTop.x, leftTop.y, leftTop.z, 1.0f}, .texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 左上
 		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f}, .texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 右上
 		mesh->vertices.push_back({ .position = {leftBottom.x, leftBottom.y, leftBottom.z, 1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
@@ -71,7 +71,6 @@ void TrailEffect::Update(bool& flag)
 		for (int i = 0; i < 6; ++i) {
 			mesh->verticesTimer.push_back({ 0.0f });
 		}
-
 	}
 
 

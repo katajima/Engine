@@ -34,7 +34,6 @@ public:
 	// 描画通常
 	void Draw();
 
-	void DrawTrailEffect();
 	// セッター
 
 	// モデル設定
@@ -76,10 +75,6 @@ public:
 
 	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera; }
 
-	void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
-
-
-
 	// メッシュ取得
 	ModelMesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
 
@@ -111,8 +106,6 @@ public:
 
 	float GetAlpha() { return renderComponent_->GetAlpha(); };
 
-
-	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
 private:
 	// カメラ
 	Camera* defaltCamera = nullptr;
@@ -237,14 +230,6 @@ public:
 	SkyBox* skyBox_ = nullptr;
 	// 波
 	Ocean* ocean_ = nullptr;
-
-	//
-	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
-	// trailエフェクトを使用するかのフラグ
-	bool isEmitTrailEffect = false;
-
-
-
 
 	// オブジェクト名前
 	std::string name = "";

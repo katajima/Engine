@@ -142,55 +142,55 @@ void Camera::UpdateMatrix(const Vector3& targetPosition)
 
 void Camera::UpdateImGui()
 {
-	// #ifdef _DEBUG
-	// 	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
-	// 		speed = 10.0f;
-	// 	}
-	// 	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
-	// 		speed = 0.1f;
-	// 	}
-	// 	else {
-	// 		speed = 1.0f;
-	// 	}
-	//
-	// 	float sp = move * speed;
-	//
-	// 	if (input_->IsPushKey(DIK_A)) {
-	// 		transform_.translate.x -= sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_D)) {
-	// 		transform_.translate.x += sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_W)) {
-	// 		transform_.translate.z += sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_S)) {
-	// 		transform_.translate.z -= sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_UP)) {
-	// 		transform_.translate.y += sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_DOWN)) {
-	// 		transform_.translate.y -= sp;
-	// 	}
-	// 	sp = 0.01f;
-	// 	if (input_->IsPushKey(DIK_I)) {
-	// 		transform_.rotate.x += sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_K)) {
-	// 		transform_.rotate.x -= sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_L)) {
-	// 		transform_.rotate.y += sp;
-	// 	}
-	// 	if (input_->IsPushKey(DIK_J)) {
-	// 		transform_.rotate.y -= sp;
-	// 	}
-	//
-	// 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
-	// 		SetShake(debugShakeTime_, debugShakeDirectionRange_);
-	// 	}
-	// #endif // _DEBUG
+	 #ifdef _DEBUG
+	 	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
+	 		speed = 10.0f;
+	 	}
+	 	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
+	 		speed = 0.1f;
+	 	}
+	 	else {
+	 		speed = 1.0f;
+	 	}
+	
+	 	float sp = move * speed;
+	
+	 	if (input_->IsPushKey(DIK_A)) {
+	 		transform_.translate.x -= sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_D)) {
+	 		transform_.translate.x += sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_W)) {
+	 		transform_.translate.z += sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_S)) {
+	 		transform_.translate.z -= sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_UP)) {
+	 		transform_.translate.y += sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_DOWN)) {
+	 		transform_.translate.y -= sp;
+	 	}
+	 	sp = 0.01f;
+	 	if (input_->IsPushKey(DIK_I)) {
+	 		transform_.rotate.x += sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_K)) {
+	 		transform_.rotate.x -= sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_L)) {
+	 		transform_.rotate.y += sp;
+	 	}
+	 	if (input_->IsPushKey(DIK_J)) {
+	 		transform_.rotate.y -= sp;
+	 	}
+	
+	 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
+	 		SetShake(debugShakeTime_, debugShakeDirectionRange_);
+	 	}
+	 #endif // _DEBUG
 }
 
 void Camera::TransferMatrix()

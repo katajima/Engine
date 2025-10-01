@@ -18,13 +18,43 @@ void main(uint3 DTid : SV_DispatchThreadID)
         // alphaが0のparticleは死んでいるとみなして更新しない
         if (gParticle[particleIndex].color.a != 0)
         {
+            gParticle[particleIndex].prevTranslate = gParticle[particleIndex].translate;
+            
             gParticle[particleIndex].velocity += gParticle[particleIndex].acceleration;
             gParticle[particleIndex].translate += gParticle[particleIndex].velocity * gPerFrame.deltaTime;
             gParticle[particleIndex].currentTime += gPerFrame.deltaTime;
-            float alpha = 1.0f - (gParticle[particleIndex].currentTime / gParticle[particleIndex].lifeTime);
-            gParticle[particleIndex].color.a = saturate(alpha);
+            
+            // 透けるようにする
+            if (gParticle[particleIndex].isAlpha == true)
+            {
+                float alpha = 1.0f - (gParticle[particleIndex].currentTime / gParticle[particleIndex].lifeTime);
+                gParticle[particleIndex].color.a = saturate(alpha);
+            }
+            
+            // スケーリングする
+            if (gParticle[particleIndex].isScaling == true)
+            {
+                float scale = gParticle[particleIndex].scaleAmount * gPerFrame.deltaTime;
+                
+                gParticle[particleIndex].scale.x += scale;
+                gParticle[particleIndex].scale.y += scale;
+                gParticle[particleIndex].scale.z += scale;
+            }
+            
+            // 寿命を超えたら強制的にalphaを0にする
+            if (gParticle[particleIndex].currentTime >= gParticle[particleIndex].lifeTime)
+            {
+                gParticle[particleIndex].color.a = 0.0f;
+            }
+            
+            if (length(gParticle[particleIndex].scale) < 0.0f)
+            {  
+                gParticle[particleIndex].color.a = 0.0f;
+            }
            
         }
+        
+        
         
         if (gParticle[particleIndex].color.a == 0)
         {

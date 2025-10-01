@@ -13,11 +13,10 @@ public:
 
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	void DrawCommonSetting(PSOType type);
+	
+	void DrawCommonSetting(PSOType type){psoManager_->DrawSetting(type);}
 
-	void DrawComputeSetting();
-
-
+	void DrawComputeSetting(){csPsoManager_->PreComputePSRS();}
 
 	void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
 
@@ -42,13 +41,5 @@ private:// メンバ変数
 
 
 	Camera* defaultCamera = nullptr;
-
-	//ルートシグネチャデスク
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
-	//ルートシグネチャ
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature[2];
-	// グラフィックスパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[8];
-
 };
 

@@ -4,16 +4,32 @@
 #include "DirectXGame/engine/DirectX/Resource/StructuredBuffer.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
+
+
 struct ParticleCS {
 	Vector4 color;
+
 	Vector3 transrate;
 	float lifeTime;
+
 	Vector3 scale;
 	float currentTime;
+
 	Vector3 velocity;
-	float pad[1];
+	uint32_t isAlhpa;
+
 	Vector3 acceleration;
-	float pad2[1];
+	uint32_t isScaling;
+
+	float scaleAmount;
+	Vector3 prevTranslate; 
+
+	Vector4 trailcolor;     // リボンの色
+
+	uint32_t isGravity;// 重力影響するか
+	uint32_t isTrail;  // リボンを引くか
+	float width;       // リボンの太さ
+	float trailLifeTime;    // トレイル生存時間
 };
 
 struct PreView {
@@ -29,30 +45,91 @@ struct PerFrame
 	float deltaTime;
 };
 
+// 球体エミッター
 struct EmitterSphere
 {
-	Vector3 translate;      // 位置
-	float radius;           // 射出半径
-	Vector3 scale;			// サイズ
-	float lifeTime;			// 生存時間
-	Vector3 scaleRange;		// サイズ(範囲)
-	float lifeTimeRange;	// 生存時間(範囲)
-	Vector3 velocity;		// 速度
-	uint32_t count;         // 射出数
-	Vector3 velocityRange;	// 速度(範囲)
-	uint32_t emit;          // 射出許可
-	Vector3 color;			// 色
-	float frequency;        // 射出間隔
-	Vector3 colorRange;		// 色(範囲)
-	float frequencyTime;    // 射出間隔調整用時間
+	float radius;           // 射出半径	
 };
 
+// AABBエミッター
+struct EmitterAABB
+{
+	Vector3 size;	        // 射出サイズ
+};
+
+// 出方
+enum class ParticleSpawnShape : uint32_t
+{
+	Volume = 0, // 形状内ランダム
+	Surface,    // 面上
+	Edge        // 辺上
+};
+
+// 方向
+enum class ParticleDireccion : uint32_t
+{
+	Random = 0,     // ランダム
+	Outward,        // 外向き
+	Inward,			// 内向き
+};
+
+enum class EmitterType : uint32_t
+{
+	Sphere = 0,     // 球体
+	AABB,           // AABB
+};
+
+
+// 共通エミッター
+struct EmitterCommon
+{
+	Vector3 scale;						// サイズ
+	float lifeTime;						// 生存時間
+	
+	Vector3 scaleRange;					// サイズ(範囲)
+	float lifeTimeRange;				// 生存時間(範囲)
+	
+	Vector3 velocity;					// 速度
+	uint32_t count;						// 射出数
+	
+	Vector3 velocityRange;				// 速度(範囲)
+	uint32_t emit;						// 射出許可
+	
+	Vector3 color;						// 色
+	float frequency;					// 射出間隔
+	
+	Vector3 colorRange;					// 色(範囲)
+	float frequencyTime;				// 射出間隔調整用時間
+	
+	Vector3 translate;					// 位置
+	ParticleSpawnShape spawnShape;		// 出方(0:形状内ランダム, 1:面上, 2:辺上)
+	
+	ParticleDireccion directionType;	// 方向(0:ランダム, 1:外向き, 2:内向き)
+	float force;						// 力 
+	uint32_t isAlhpa;					// アルファブレンドするか
+	uint32_t isScaling;
+	
+	float scaleAmount;
+	uint32_t isGravity;         // 重力影響するか
+	uint32_t isTrail;           // リボンを引くか
+	float trailWidth;       // リボンの太さ
+
+	Vector4 trailcolor;     // リボンの色
+
+	float trailLifeTime;   // リボンの生存時間
+	float pad[3];
+};
+
+
+// フィールド
 struct EffectFieldCS {
 	Vector3 translate;      // 位置
 	float force;			// 力
 	Vector3 range;			// 各半径
 	uint32_t isEffect;		// 影響を出すか
 };
+
+
 
 struct MaxInstance
 {
@@ -66,5 +143,18 @@ struct FreeListIndex {
 struct ParticleCount
 {
 	int32_t count;
+};
+
+
+struct GpuTrailVertex
+{
+	Vector3 position;	// 座標
+	Vector2 uv;			// uv
+	Vector3 normal;		// 法線
+	Vector4 color;		// 色
+	float lifeTime;		// 生存時間
+	float currentTime;	// 経過時間
+	uint32_t isAlive;	// 生存しているか
+	float pad;
 };
 

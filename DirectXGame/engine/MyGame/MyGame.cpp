@@ -27,9 +27,8 @@ void MyGame::Initialize()
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->Init();
 	//sceneManager_->ChangeScene("TITLE");
-	//sceneManager_->ChangeScene("TEST");
-	sceneManager_->ChangeScene("TITLE");
-
+	sceneManager_->ChangeScene("TEST");
+	
 #ifdef _DEBUG
 	//sceneManager_->ChangeScene("GAMEPLAY");
 #endif // _DEBUG
@@ -132,6 +131,8 @@ void MyGame::InitializeResource()
 
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
+
+
 	textureManager->LoadTexture("resources/Texture/grass.png");
 	textureManager->LoadTexture("resources/Texture/ground.png");
 	textureManager->LoadTexture("resources/Texture/renga.png");
@@ -156,13 +157,10 @@ void MyGame::InitializeResource()
 		textureManager->LoadTexture(label);
 	}
 	textureManager->LoadTexture("resources/Texture/num/Number_x64y96.png");
-	textureManager->LoadTexture("resources/Texture/uvChecker.png");
-	textureManager->LoadTexture("resources/Texture/Image.png");
-	textureManager->LoadTexture("resources/Texture/uvChecker.png");
-	textureManager->LoadTexture("resources/Texture/Image.png");
+
 
 	textureManager->LoadTexture("resources/Texture/text/max.png");
-	textureManager->LoadTexture("resources/Texture/enemy.png");
+
 	
 	textureManager->LoadTexture("resources/Texture/effect/circle2.png");
 	textureManager->LoadTexture("resources/Texture/effect/gradationLine.png");
@@ -295,15 +293,17 @@ void MyGame::CreateParticle()
 
 
 	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 100);
-	gpuParticleManager_->CreateEmitter("emitte_no1");
-	//gpuParticleManager_->CreateEmitter("emitte2_no1");
+	gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/uvChecker.png", 1024 * 100);
+	gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
+	gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no2");
 	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	gpuParticleManager_->SetEmitteToGroup("emitte_no2","no2");
 	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 
 
-	gpuParticleManager_->GetGpuParticleEmitter("emitte_no1").GetData()->translate.x = 40.0f;
+	gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterSphere>("emitte_no1")->GetCommonData()->translate.x = 40.0f;
  
-	gpuParticleManager_->CreateField("AABBField");
+	//gpuParticleManager_->CreateField("AABBField");
 
 }
 
@@ -322,16 +322,6 @@ void MyGame::LoadModel()
 	modelManager->LoadModel("multiMesh.obj", "multiMesh");
 
 
-
-
-
-
-	//modelManager->LoadModel("walk.gltf", "human");
-	//modelManager->LoadModel("iku.gltf", "iku");
-	//modelManager->LoadModel("KnightCharacter.gltf", "Character");
-	//modelManager->LoadModel("Characters_Anne.gltf", "Character");
-	//modelManager->LoadModel("Humans_Master.gltf", "Character");
-	//modelManager->LoadModel("run.gltf", "Character");
 	modelManager->LoadModel("origin.gltf", "Character");
 
 

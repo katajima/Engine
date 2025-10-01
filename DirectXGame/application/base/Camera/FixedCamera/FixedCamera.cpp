@@ -11,10 +11,12 @@ void FixedCamera::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	uniqueCamera_->farClip_ = 15000.0f;
 
 	uniqueCamera_->transform_.translate = { 0, 107, 0 };
-	uniqueCamera_->transform_.rotate = { -0.341f, 0.0f, 0.0f };
+	uniqueCamera_->transform_.rotate = { 0.341f, 0.0f, 0.0f };
 
 
-	uniqueCamera_->AddEffectBlock("grayScale", PostEffectBlockType::kGrayScale, false);
+	//uniqueCamera_->AddEffectBlock("grayScale", PostEffectBlockType::kGrayScale, false);
+	uniqueCamera_->AddEffectBlock("out", PostEffectBlockType::kOitline, true);
+	uniqueCamera_->AddEffectBlock("copy", PostEffectBlockType::kCopy, true);
 
 }
 

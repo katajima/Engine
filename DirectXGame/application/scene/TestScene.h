@@ -38,6 +38,8 @@
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 #include "DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
 
 class TestScene : public BaseScene
 {
@@ -134,26 +136,20 @@ private:
 	/// カメラ
 	/// </summary>
 	
-	std::unique_ptr < Camera> camera;
-	std::unique_ptr < DebugCamera> debugCamera;
-	
-	bool isDebugCamera = false;
+	// 固定カメラ
+	std::unique_ptr <FixedCamera> fixedCamera_;
+	// カメラ管理
+	std::unique_ptr<CameraManeger> cameraManeger_;
 
 	/// <summary>
 	/// 3Dオブジェクト
 	/// </summary>
 
-	std::unique_ptr<Object3d> stairObject;
-	Object3d* skinningObject;
-
-	Object3d* skinningObject2;
-	
-	Object3d* skinningObject3;
 	
 
-	std::unique_ptr<Object3d> skyBoxObject;
-	std::unique_ptr<Object3d> skyBoxObject2;
-	std::unique_ptr<Object3d> oceanObject;
+	Object3d* skyBoxObject;
+	Object3d* skyBoxObject2;
+	Object3d* oceanObject;
 
 	
 	std::unique_ptr<SkyBox> skyBox;
@@ -163,33 +159,20 @@ private:
 	// オーシャンシェーダー
 	std::unique_ptr < Ocean> ocean_ = nullptr;
 
-	std::unique_ptr<Object3d> hitObject_ = nullptr;
 
 
-	WorldTransform worldparticleEmitter_;
 	/// <summary>
 	/// スプライト
 	/// </summary>
 	
 	std::vector<std::unique_ptr<Sprite>> sprite_;
 
-	std::unique_ptr<Primitive2D> primitive2d1_;
-	std::unique_ptr<Primitive2D> primitive2d2_;
 
-	float inRad = 50;
-	float outRad = 100;
-	int segment = 5;
 
 	/// <summary>
 	/// パーティクルエミッタ
 	/// </summary>
 
-
-	/// <summary>
-	/// 場所効果
-	/// </summary>
-
-	std::unique_ptr<Field::FieldEffect> fieldEffect_ = nullptr;
 
 
 	/// <summary>
@@ -206,15 +189,7 @@ private:
 	/// その他
 	/// </summary>
 	
-	std::unique_ptr <Octree> octree;
-	Vector3 div_ = { 1,1,1 };
-	int maxDepth = { 1 };
-
-
-	Timer timer_;
-
-	Collider* collA;
-	Collider* collB;
+	
 
 	std::unique_ptr<LoadLevelData> loadData_;
 

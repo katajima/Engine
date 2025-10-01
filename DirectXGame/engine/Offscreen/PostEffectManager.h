@@ -49,9 +49,7 @@ public:
 
 	void Update(Camera* camera);
 
-	// レンダーテクスチャ追加
-	void AddEffectBlock(const std::string name, PostEffectBlockType type,
-		bool              use = true);
+
 	//
 	void AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks);
 

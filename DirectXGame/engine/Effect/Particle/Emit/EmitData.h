@@ -70,6 +70,20 @@ namespace EmitData {
 
 }
 
+
+enum class EmitterShapeType
+{
+	AABB,		// AABB
+	SPHERE,		// 球
+	CIRCLE,		// 円
+	POINT,		// 点
+	LINE,		// 線
+	SPLINE,		// スプライン
+	TRIANGLE,	// 三角形
+	MESH,		// メッシュ
+};
+
+
 // エミッターのデータ
 class EffectEmitData
 {

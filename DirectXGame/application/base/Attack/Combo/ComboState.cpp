@@ -36,7 +36,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 	bool isMove = timeInState < comboData_.moveTime;
 	bool hasNext = HasNextState();
 
-	weapon->GetObject3D()->SetIsEmitTrailEffect(true);
+	//weapon->GetObject3D()->SetIsEmitTrailEffect(true);
 
 	if (isMove) {
 		owner->Velocity() = owner->GetMoveComponent()->GetDirection() * comboData_.movementSpeedMultiplier;
@@ -51,7 +51,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 		anima->SetIsPlaying(true);
 		anima->SetAnimationSpeed(1.0f);
 		anima->SetStratAnimeTime();
-		weapon->GetObject3D()->SetIsEmitTrailEffect(false);
+		//weapon->GetObject3D()->SetIsEmitTrailEffect(false);
 	}
 
 }

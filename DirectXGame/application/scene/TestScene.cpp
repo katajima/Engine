@@ -35,17 +35,7 @@ void TestScene::Initialize()
 	InitializeOthers();
 
 
-	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
-
-
-	/*if (!loadData_->GetLevelData()->players.empty()) {
-		auto& playerData = loadData_->GetLevelData()->players[0];
-		skinningObject->worldtransform_.translate_ = playerData.position;
-		skinningObject->worldtransform_.rotate_ = playerData.rotation;
-	}*/
-
-
+	
 	GlobalVariables* globalVariables = GetGlobalVariables();
 	globalVariables->CreateGroup("ddd");
 	globalVariables->AddItem("ddd","g_bool",g_bool);
@@ -72,25 +62,15 @@ void TestScene::Finalize()
 void TestScene::Update()
 {
 	SwitchRoom(); // 部屋切り替え
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
 
-	loadData_->Update();
-
-	timer_.DebugImGui("timer");
-
-	timer_.Update(MyGame::GameTime());
+	//loadData_->Update();
 
 #ifdef _DEBUG
 
 	
 
-	if (isDebugCamera) {
-		debugCamera->Update();
-
-		camera->viewMatrix_ = debugCamera->GetViewProjection().viewMatrix_;
-		camera->projectionMatrix_ = debugCamera->GetViewProjection().projectionMatrix_;
-		camera->transform_ = debugCamera->GetViewProjection().transform_;
-	}
+	
 #endif // _DEBUG
 
 	if (behaviorRequest_) {
@@ -171,7 +151,7 @@ void TestScene::Update()
 		break;
 	}
 	
-	camera->UpdateMatrix();
+	cameraManeger_->Update();
 
 }
 
@@ -226,9 +206,6 @@ void TestScene::Draw3D()
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom08:
-
-		GetEntity3DManager()->GetObject3dInstansManager()->Update();
-		GetEntity3DManager()->GetObject3dInstansManager()->Draw();
 
 		break;
 	case TestScene::SceneBehavior::kSceneRoom09:
@@ -309,49 +286,20 @@ void TestScene::AppGlobalVariables()
 /// </summary>
 void TestScene::InitializeObject3D()
 {
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
+
 
 	ocean_ = std::make_unique<Ocean>();
 	ocean_->Initialize(GetEntity3DManager(), { 10000,10000 });
 	ocean_->GetMaterial()->enableLighting_ = false;
 
 
-	oceanObject = std::make_unique<Object3d>();
-	oceanObject->Initialize(GetEntity3DManager(), ObjectModelType::kOcean);
-	oceanObject->SetCamera(camera.get());
+	oceanObject = GetEntity3DManager()->CreateObject3D("ocean", ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
 	oceanObject->GetWorldTransform().rotate_.x = DegreesToRadians(90);
 	oceanObject->GetRenderComponent()->SetObjectDrawType(ObjectDrawType::kTranslucent03);
 	oceanObject->SetIsDraw(true);
-	
-
-	skinningObject = GetEntity3DManager()->CreateObject3D("run", ObjectModelType::kSkinning, {0,0,0}, camera.get());
-	skinningObject->SetModel("run.gltf");
-	skinningObject->GetWorldTransform().scale_ = { 3,3,3 };
-	skinningObject->InitAnimationComponent();
-	skinningObject->SetIsDraw(true);
-	skinningObject->GetAnimationComponent()->SetAnimetion("Anim_0", 0.3f);
-
-	skinningObject2 = GetEntity3DManager()->CreateObject3D("BoxBox", ObjectModelType::kNormal, { 0,0,0 }, camera.get());
-	skinningObject2->SetModel("BoxBox.obj");
-	skinningObject2->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
-	skinningObject2->SetIsDraw(true);
-	
-	skinningObject3 = GetEntity3DManager()->CreateObject3D("KnightCharacter", ObjectModelType::kSkinning, { 0,0,0 }, camera.get());
-	skinningObject3->SetModel("KnightCharacter.gltf");
-	skinningObject3->InitAnimationComponent();
-	skinningObject3->GetWorldTransform().scale_ = { 1.0f,1.0f,1.0f };
-	skinningObject3->SetIsDraw(true);
-	
-
-	/// 階段
-	stairObject = std::make_unique<Object3d>();
-	stairObject->Initialize(GetEntity3DManager());
-	stairObject->SetModel("stair.obj");
-	stairObject->SetCamera(camera.get());
-	stairObject->SetIsDraw(false);
-
 	
 	
 	skyBox = std::make_unique<SkyBox>();
@@ -360,22 +308,16 @@ void TestScene::InitializeObject3D()
 	skyBox2 = std::make_unique<SkyBox>();
 	skyBox2->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
 
-	
-	skyBoxObject = std::make_unique<Object3d>();
-	skyBoxObject->Initialize(GetEntity3DManager(), ObjectModelType::kSkyBox);
+
+	skyBoxObject = GetEntity3DManager()->CreateObject3D("skyBox", ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
 	skyBoxObject->SetSkyBox(skyBox.get());
-	skyBoxObject->SetCamera(camera.get());
 	skyBoxObject->GetWorldTransform().scale_ = {10,10,10};
-	skyBoxObject->SetName("skyBox");
 	skyBoxObject->SetIsDraw(true);
 	
 	
-	skyBoxObject2 = std::make_unique<Object3d>();
-	skyBoxObject2->Initialize(GetEntity3DManager(), ObjectModelType::kSkyBox);
+	skyBoxObject2 = GetEntity3DManager()->CreateObject3D("skyBox2", ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
 	skyBoxObject2->SetSkyBox(skyBox2.get());
-	skyBoxObject2->SetCamera(camera.get());
 	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
-	skyBoxObject2->SetName("skyBox2");
 	skyBoxObject2->SetIsDraw(false);
 
 }
@@ -400,11 +342,6 @@ void TestScene::InitializeObject2D()
 		sprite_.push_back(std::move(sprite));
 	}
 
-	///
-	primitive2d1_ = std::make_unique<Primitive2D>();
-	primitive2d1_->Initialize(GetEntity2DManager()->GetSpriteCommon(),Primitive2D::ShapeType::Ring, { 1,1,1,1 });
-	//primitive2d1_->position = { 640,360 };
-	//primitive2d1_->rotation = DegreesToRadians(45);
 
 }
 
@@ -413,9 +350,8 @@ void TestScene::InitializeObject2D()
 /// </summary>
 void TestScene::InitializeParticle()
 {
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
-	
-	//GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(camera.get());
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
 	
 	//GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(primiPlane->GetMesh());
 	
@@ -456,9 +392,9 @@ void TestScene::InitializeLight()
 	spot->spot = spotLightData;
 	//GetEntity3DManager()->GetLightManager()->AddLight(spot);
 
-	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
 
-	SetCamera(camera.get());
+	SetCamera(cameraManeger_->GetCamera());
 	
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
@@ -480,17 +416,16 @@ void TestScene::InitializeLight()
 /// </summary>
 void TestScene::InitializeCamera()
 {
-	camera = std::make_unique <Camera>();
-	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
-	camera->transform_.rotate = { 1.0f,0,0 };
-	camera->transform_.translate = { 0,100,-60.0f };
-	//camera->SetNearClip();
-	camera->SetFarClip(10000.0f);
-
-
-
-	debugCamera = std::make_unique<DebugCamera>();
-	debugCamera->Initialize(GetEntity3DManager()->GetCameraCommon());
+	// 固定カメラ
+	fixedCamera_ = std::make_unique<FixedCamera>();
+	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
+	
+	// カメラ管理
+	cameraManeger_ = std::make_unique<CameraManeger>();
+	cameraManeger_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables());
+	// カメラ追加
+	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManeger_->SetUseCamera("fixedCamera", 0.0f);
 }
 
 /// <summary>
@@ -498,12 +433,7 @@ void TestScene::InitializeCamera()
 /// </summary>
 void TestScene::InitializeOthers()
 {
-	
 
-	octree = std::make_unique<Octree>(AABB({ -100,-100,-100 }, { 100,100,100 }), 0);
-	octree->root->subdivide(4, 4, 4, 10);
-
-	octree->insert(*stairObject->GetMesh(0));// メッシュ挿入
 }
 
 #pragma endregion 各初期化
@@ -550,92 +480,7 @@ void TestScene::InitializeRoom08()
 
 void TestScene::UpdateRoom01()
 {
-	velo = { 0,0,0 };
-
-	const float kRotateSpeed = 0.03f;
-
-	if (input_->IsControllerConnected()) {
-		camera->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
-		camera->transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
-
-		camera->transform_.rotate.x = std::clamp(camera->transform_.rotate.x, DegreesToRadians(-15.0f), DegreesToRadians(60.0f));
-	}
 	
-	// 回転適用
-	Matrix4x4 rotY = MakeRotateYMatrix(camera->transform_.rotate.y);
-	Matrix4x4 rotX = MakeRotateXMatrix(camera->transform_.rotate.x);
-	Matrix4x4 rotateMatrix = rotX * rotY;
-	Vector3 offset = TransformNormal(Vector3{ 0,5,-50 }, rotateMatrix);
-
-	Vector3 targetPos = skinningObject3->GetWorldTransform().worldMat_.GetWorldPosition();
-	Vector3 desiredCameraPos = Add(targetPos, offset);
-
-	// 地面以下にカメラが沈んでいる場合のみ、Zを近づけて補正
-	if (desiredCameraPos.y < 0.0f) {
-		float depth = -desiredCameraPos.y; // どれだけ沈んでいるか
-		float maxZOffset = 30.0f; // 最大どれだけZを近づけるか（調整可）
-		float zAdjust = std::clamp(depth * 2.0f, 0.0f, maxZOffset); // 線形補間
-
-		// カメラ方向を正規化
-		Vector3 direction = Normalize(Subtract(targetPos, desiredCameraPos));
-		Vector3 zOffset = Multiply(direction, zAdjust);
-
-		// 補正を加える
-		desiredCameraPos = Add(desiredCameraPos, zOffset);
-
-		// 地面に出るようにYを補正
-		desiredCameraPos.y = 0.0f;
-	}
-
-	camera->transform_.translate = desiredCameraPos;
-
-	if (input_->IsControllerConnected()) {
-
-
-		velo.x = input_->GetGamePadLeftStick().x;
-		velo.z = input_->GetGamePadLeftStick().y;
-
-
-		if (velo.x != 0.0f || velo.z != 0.0f) {
-			// 入力方向を正規化
-			velo = Normalize(velo);
-			velo = Multiply(velo,0.1f);
-
-
-			// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-			Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
-
-			// カメラの向きに基づいて移動方向をワールド座標系に変換
-			Vector3 worldDirection = {
-				velo.x * cameraWorldMatrix.m[0][0] + velo.z * cameraWorldMatrix.m[2][0],
-				0.0f,
-				velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
-			};
-
-			velo = Multiply(Normalize(worldDirection), 0.1f);
-
-			//// 移動ベクトルをカメラの角度だけ回転する
-			//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
-			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
-			//
-			if (velo.Length() != 0) {
-				skinningObject3->GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
-			}
-			skinningObject3->GetAnimationComponent()->SetAnimetion("Run", 0.3f);
-		}
-		else {
-			skinningObject3->GetAnimationComponent()->SetAnimetion("Idle", 0.3f);
-		}
-	}
-
-	skinningObject3->GetWorldTransform().translate_ += velo;
-	skinningObject3->GetWorldTransform().Update();
-
-	skinningObject2->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.R", skinningObject3->GetWorldTransform().worldMat_));
-	worldparticleEmitter_.SetParent(Animetion::GetWorldMatrixOfJoint(skinningObject3->model->modelData.skeleton, "MiddleHand.L", skinningObject3->GetWorldTransform().worldMat_));
-	worldparticleEmitter_.Update();
-	//primitvPlane_->Update();
-
 }
 
 void TestScene::UpdateRoom02()

@@ -81,13 +81,6 @@ public:
 		MODE_SOLID_NONE,
 	};
 
-	enum class BlendType
-	{
-		MODE_ADD,
-		MODE_SUBTRACT,
-		MODE_MUlLIPLY,
-	};
-
 	enum class MeshType
 	{
 		kPrimitiv,

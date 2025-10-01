@@ -38,24 +38,41 @@ public:
 	void Draw();
 
 
-	void Emit();
-
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
 	void PreCsPso();
 
+	void PreCsTrailPso();
 
 	void CreateGroup(std::string name, ModelMesh* mesh, std::string textureName, int instance);
 		
-	void CreateEmitter(std::string name);
-
+	
 	void SetEmitteToGroup(std::string emitteName, std::string particleGroupName);
 
 	void CreateField(std::string name);
 
-	GpuParticleEmitter& GetGpuParticleEmitter(std::string name);
 
+	// ヘッダにテンプレート関数を定義
+	template <typename EmitterType>
+	void CreateEmitter(const std::string& name) {
+		if (gpuParticleEmitter_.contains(name)) {
+			return;
+		}
+
+		auto emitter = std::make_unique<EmitterType>();
+		emitter->Init(dxCommon_, lineCommon_, nullptr, name);
+		gpuParticleEmitter_[name] = std::move(emitter);
+	}
+
+	template <typename T>
+	T* GetGpuParticleEmitter(const std::string& name) {
+		auto it = gpuParticleEmitter_.find(name);
+		if (it == gpuParticleEmitter_.end()) {
+			return nullptr;
+		}
+		return dynamic_cast<T*>(it->second.get()); 
+	}
 private:
 
 	// ルートシグネチャの作成
@@ -69,34 +86,39 @@ private:
 	
 
 	std::map<std::string, GpuParticleGroup> gpuParticleGroup_;
-	std::map<std::string, GpuParticleEmitter> gpuParticleEmitter_;
+
+	
+	std::map<std::string, std::unique_ptr<BaseGpuParticleEmitter>> gpuParticleEmitter_;
+	
+	
 	std::map<std::string, GpuParticleField> gpuParticleField_;
 
 private:
 	// PSO設定
 	std::unique_ptr<PSOManager> psoManager_ = nullptr;
-
 	// CS用のPSO設定(初期化)
 	std::unique_ptr<CSPSOManager> csPsoManager_ = nullptr;
-	// CS用のPSO設定(エミッター)
-	std::unique_ptr<CSPSOManager> csEmitPsoManager_ = nullptr;
+	// CS用のPSO設定(エミッターAABB)
+	std::map<EmitterType, std::unique_ptr<CSPSOManager>> csEmitPsoManagers_;
 	// CS用のPSO設定(更新)
 	std::unique_ptr<CSPSOManager> csUpdatePsoManager_ = nullptr;
 	// CS用のPSO設定(影響場所)
 	std::unique_ptr<CSPSOManager> csFieldPsoManager_ = nullptr;
-
-	
 	// パーティクル描画PSO
 	PSRS particleDraw;
 
-	// パーティクル初期化PSO
-	CSPSOManager::PSRS particleCsInit;
-	
-	// パーティクルエミッターPSO
-	CSPSOManager::PSRS particleCsEmit;
 
-	// パーティクル更新PSO
-	CSPSOManager::PSRS particleCsUpdate;
+
+private:
+	// PSO設定(トレイルエフェクト)
+	std::unique_ptr<PSOManager> psoTrailManager_ = nullptr;
+	// CS用のPSO設定(トレイル初期化)
+	std::unique_ptr<CSPSOManager> csTrailInitPsoManager_ = nullptr;
+	// CS用のPSO設定(トレイルエミッター)
+	std::unique_ptr<CSPSOManager> csTrailEmitPsoManager_ = nullptr;
+	// CS用のPSO設定(トレイル更新)
+	std::unique_ptr<CSPSOManager> csTrailUpdatePsoManager_ = nullptr;
+
 
 private:
 	Entity3DManager* entity3DManager_;		// エンティティマネージャー

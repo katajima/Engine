@@ -57,7 +57,7 @@ void SwapChain::PreDraw()
 	// スワップチェーン用
 	barrier_->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	// 描画先のRTVとDSVを設定する
+	// 描画先のRTVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCurrentBackBufferRTVHandle();
 	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 

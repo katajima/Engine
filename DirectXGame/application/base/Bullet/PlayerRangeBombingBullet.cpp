@@ -23,7 +23,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	//// オブジェクト設定
 	object_ = entity3DManager->CreateObject3D("playerbullet", ObjectModelType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");
-	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,1.5f,0 }, { 0,-1.5f,0 });
+	//object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,1.5f,0 }, { 0,-1.5f,0 });
 	object_->Update();
 	object_->InitColliderComponent();
 	
@@ -355,7 +355,6 @@ void PlayerRangeBombingBullet::Update()
 
 
 	}
-	object_->SetIsEmitTrailEffect(true);
 	//hitEmitter_->Update();
 
 }
@@ -367,7 +366,7 @@ void PlayerRangeBombingBullet::Draw()
 
 void PlayerRangeBombingBullet::DrawP()
 {
-	object_->DrawTrailEffect();
+	
 }
 
 void PlayerRangeBombingBullet::Draw2D()

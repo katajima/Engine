@@ -158,6 +158,7 @@ void PostEffectBlock::PreDraw(RenderTexture* renderTexture)
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
+	//barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
@@ -181,4 +182,6 @@ void PostEffectBlock::PostDraw(RenderTexture* renderTexture)
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	//barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }

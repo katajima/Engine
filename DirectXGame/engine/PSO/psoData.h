@@ -22,6 +22,42 @@ enum class PSOType {
 	Transparent,							// 透明物
 };
 
+
+// ラスタライザタイプ
+enum class RasterizerType {
+	MODE_SOLID_BACK,		// 背面カリング
+	MODE_WIREFRAME_BACK,	// 背面カリングワイヤーフレーム
+	MODE_SOLID_NONE,		// カリングなし
+	MODE_WIREFRAME_NONE,	// カリングなしワイヤーフレーム
+};
+
+// ブレンドモードタイプ
+enum class BlendType
+{
+	MODE_ADD,
+	MODE_SUBTRACT,
+	MODE_MUlLIPLY,
+};
+
+
+
+
+struct GraphicsPSOKey {
+	bool isUvInterpolation_ = true; // UV補間するか
+	bool isTransparent = false;		// 透過物か
+	RasterizerType rasterizerType = RasterizerType::MODE_SOLID_BACK;
+	BlendType blendType = BlendType::MODE_ADD;
+
+};
+
+
+
+
+
+
+
+
+
 // パイプラインステート＋ルートシグネチャ
 struct PSRS {
 	////ルートシグネチャ
