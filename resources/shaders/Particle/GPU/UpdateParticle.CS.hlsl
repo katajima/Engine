@@ -15,10 +15,12 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint particleIndex = DTid.x;
     if (particleIndex < gMaxInstance.maxInstanse)
     {
+         gParticle[particleIndex].prevTranslate = gParticle[particleIndex].translate;
+        
         // alphaが0のparticleは死んでいるとみなして更新しない
         if (gParticle[particleIndex].color.a != 0)
         {
-            gParticle[particleIndex].prevTranslate = gParticle[particleIndex].translate;
+           
             
             gParticle[particleIndex].velocity += gParticle[particleIndex].acceleration;
             gParticle[particleIndex].translate += gParticle[particleIndex].velocity * gPerFrame.deltaTime;

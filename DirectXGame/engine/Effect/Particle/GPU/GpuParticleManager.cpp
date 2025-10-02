@@ -128,26 +128,47 @@ void GpuParticleManager::Update()
 	}
 
 
-
+	csTrailEmitPsoManager_->PreComputePSRS();
 
 	for (auto& group : gpuParticleGroup_) {
-		//group.second.UpateTrail();
+		group.second.UpateTrailEmitte(MyGame::GameTime());
+	}
+
+	csTrailUpdatePsoManager_->PreComputePSRS();
+
+	for (auto& group : gpuParticleGroup_) {
+		group.second.UpdateTrail();
 	}
 
 }
 
 void GpuParticleManager::Draw()
 {
-	dxCommon_->GetCommandList()->SetPipelineState(particleDraw.graphicsPipelineState.Get());
-	//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(particleDraw.rootSignature.Get());
-	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+	
 	for (auto& group : gpuParticleGroup_) {
+
+		// パーティクル描画
+
+		dxCommon_->GetCommandList()->SetPipelineState(particleDraw.graphicsPipelineState.Get());
+		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(particleDraw.rootSignature.Get());
+		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+		dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		
 		cbPreViewResource_.SetGraphicsRootConstantBufferView(0);
 
 		group.second.Draw();
+
+		// トレイル描画
+
+		dxCommon_->GetCommandList()->SetPipelineState(trailDraw.graphicsPipelineState.Get());
+		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(trailDraw.rootSignature.Get());
+		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
+		dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		group.second.DrawTrail();
 	}
 
 }
@@ -221,6 +242,10 @@ void GpuParticleManager::CreateRootSignature()
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(particleDraw.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
+
+
+	// トレイルエフェクト用のルートシグネチャ作成
+	psoTrailManager_->SetRootSignature(trailDraw.rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
 	//===============================
 	// Compute用のPSOManagerを作成
@@ -416,6 +441,9 @@ void GpuParticleManager::CreateGraphicsPipeline()
 
 
 
+
+	
+
 	csPsoManager_->SetShaderFileName(L"resources/shaders/Particle/GPU/InitializeParticle.CS.hlsl");
 	csPsoManager_->ComputePipelineState();
 
@@ -432,8 +460,28 @@ void GpuParticleManager::CreateGraphicsPipeline()
 	csFieldPsoManager_->ComputePipelineState();
 
 
+	/// トレイルエフェクト用のパイプライン作成
+
+	// トレイルPSO
+
+	psoTrailManager_->NoInputLayout();
+
+	/*psoTrailManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	psoTrailManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
+	psoTrailManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
+	psoTrailManager_->AddInputElementDesc("COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);*/
+
+	psoTrailManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Particle/GPU/GpuParticleTrail.VS.hlsl");
+	psoTrailManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Particle/GPU/GpuParticleTrail.PS.hlsl");
+
+	psoTrailManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
+	psoTrailManager_->GraphicsPipelineState(trailDraw.rootSignature, trailDraw.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
+
+
+
+	// トレイルエフェクト用のCSPSO
 	csTrailInitPsoManager_->SetShaderFileName(L"resources/shaders/Particle/GPU/InitializeTrail.CS.hlsl");
 	csTrailInitPsoManager_->ComputePipelineState();
 

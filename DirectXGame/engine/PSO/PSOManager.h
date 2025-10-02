@@ -40,6 +40,8 @@ public:
 		D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, 
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE  topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
+	// インプットレイアウトを無くす
+	void NoInputLayout() { useInputLayout_ = false; };
 
 private:
 	Command* command_;
@@ -86,6 +88,10 @@ private:
 	
 
 	ShaderFile shderFile_;
+
+
+	bool useInputLayout_ = true;
+
 private:
 	std::map<PSOType, PSRS> psoRoots_;
 private:

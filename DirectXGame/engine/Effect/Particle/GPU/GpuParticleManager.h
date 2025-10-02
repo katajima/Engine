@@ -118,6 +118,8 @@ private:
 	std::unique_ptr<CSPSOManager> csTrailEmitPsoManager_ = nullptr;
 	// CS用のPSO設定(トレイル更新)
 	std::unique_ptr<CSPSOManager> csTrailUpdatePsoManager_ = nullptr;
+	// トレイル描画PSO
+	PSRS trailDraw;
 
 
 private:

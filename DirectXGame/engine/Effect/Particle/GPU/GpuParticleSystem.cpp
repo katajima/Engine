@@ -7,12 +7,14 @@
 #include "DirectXGame/engine/Light/LightCommon.h"
 
 
-void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager,DirectXCommon* dxCommon,int MaxInstance, std::string name, std::string textureName)
+void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName)
 {
 	dxCommon_ = dxCommon;
 	gpuParticleManager_ = gpuParticleManager;
 	// テクスチャ
 	textureName_ = textureName;
+	trailTextureName_ = "resources/Texture/Image.png";
+
 	// 名前
 	name_ = name;
 
@@ -47,12 +49,15 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager,DirectXComm
 
 
 
-	
 
+	// CPU 側で作る最大バッファサイズ
+	int maxSegments = 8; // 例: 1パーティクルあたり8セグメント
+	int verticesPerSegment = 6; // Quadを三角形2個で作る
+	int totalVertexCount = MaxInstance * maxSegments * verticesPerSegment;
 
 	// トレイル用最大値設定CB
 	cbMaxTrailVertexInstance_.CreateBuffer(dxCommon_, 1);
-	cbMaxTrailVertexInstance_.Data()->maxInstance = MaxInstance * 16;
+	cbMaxTrailVertexInstance_.Data()->maxInstance = totalVertexCount;
 	// トレイル頂点バッファ
 	sbTrailVertexResource_.CreateBuffer(dxCommon_, cbMaxTrailVertexInstance_.Data()->maxInstance, true);
 	// トレイル頂点カウンターインデックス
@@ -71,14 +76,9 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager,DirectXComm
 
 		dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 	}
-
-	// メッシュ
-	trailMesh_ = std::make_unique<TrailMesh>();
-	trailMesh_->CreateMesh(cbMaxTrailVertexInstance_.Data()->maxInstance);
-	trailMesh_->Initialize(dxCommon_);
 }
 
-void GpuParticleGroup::UpdateEmitte(float deltaTime,int count)
+void GpuParticleGroup::UpdateEmitte(float deltaTime, int count)
 {
 
 	cbPerFrame_.Data()->time += deltaTime;
@@ -97,7 +97,7 @@ void GpuParticleGroup::UpdateEmitte(float deltaTime,int count)
 	cbMaxInstance_.SetComputeRootConstantBufferView(5);			// Maxインスタンス
 
 
-	
+
 	dxCommon_->GetCommandList()->Dispatch(count, 1, 1);
 
 	sbParticleResource_.UavDependence();
@@ -115,7 +115,7 @@ void GpuParticleGroup::UpdateField()
 	sbFreeListResource_.SetComputeRootDescriptorTable(3);		// カウンター
 	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
 
-	
+
 	const uint32_t threadsPerGroup = 256;
 	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
@@ -190,7 +190,7 @@ void GpuParticleGroup::UpdateTrail()
 	sbTrailVertexFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// カウンターインデックス(トレイル)
 	sbTrailVertexFreeListResource_.SetComputeRootDescriptorTable(2);		// カウンター(トレイル)
 	cbPerFrame_.SetComputeRootConstantBufferView(3);						// 乱数用時間
-	cbMaxInstance_.SetComputeRootConstantBufferView(4);						// Maxインスタンス(パーティクル)
+	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(4);						// Maxインスタンス(パーティクル)
 
 	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 
@@ -198,6 +198,22 @@ void GpuParticleGroup::UpdateTrail()
 	sbTrailVertexResource_.UavDependence();
 	sbTrailVertexFreeListIndexResource_.UavDependence();
 	sbTrailVertexFreeListResource_.UavDependence();
+}
+
+void GpuParticleGroup::DrawTrail()
+{
+
+	sbTrailVertexResource_.SetGraphicsRootDescriptorTable(1);
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon_->GetTextureManager()->GetSrvHandleGPU(trailTextureName_));
+	D3D12_VERTEX_BUFFER_VIEW emptyVB = {};
+	emptyVB.BufferLocation = 0;
+	emptyVB.SizeInBytes = 0;
+	emptyVB.StrideInBytes = 0;
+
+	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &emptyVB);
+	dxCommon_->GetCommandList()->IASetIndexBuffer(nullptr);
+	// インスタンシング描画
+	dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(cbMaxTrailVertexInstance_.Data()->maxInstance), 1, 0, 0);
 }
 
 void GpuParticleGroup::Draw() {
@@ -212,6 +228,5 @@ void GpuParticleGroup::Draw() {
 
 		// インスタンシング描画
 		dxCommon_->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh_->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
-
 	}
 }

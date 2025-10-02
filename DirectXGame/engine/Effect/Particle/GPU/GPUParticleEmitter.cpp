@@ -94,9 +94,20 @@ void BaseGpuParticleEmitter::UpdateImGui()
 		bool isScaling = ConvertUtility::ToBool(cbEmitterCommon_.Data()->isScaling);
 		ImGui::Checkbox("isScaling", &isScaling);
 		cbEmitterCommon_.Data()->isScaling = ConvertUtility::ToUint32(isScaling);
-
-
 		ImGui::DragFloat("scaleAmount", &cbEmitterCommon_.Data()->scaleAmount, 0.01f);
+
+		bool isGravity = ConvertUtility::ToBool(cbEmitterCommon_.Data()->isGravity);
+		ImGui::Checkbox("isGravity", &isGravity);
+		cbEmitterCommon_.Data()->isGravity = ConvertUtility::ToUint32(isGravity);
+
+		bool isTrail = ConvertUtility::ToBool(cbEmitterCommon_.Data()->isTrail);
+		ImGui::Checkbox("isTrail", &isTrail);
+		cbEmitterCommon_.Data()->isTrail = ConvertUtility::ToUint32(isTrail);
+
+		ImGui::DragFloat("trailLifeTime", &cbEmitterCommon_.Data()->trailLifeTime, 0.01f);
+		ImGui::DragFloat("trailWidth", &cbEmitterCommon_.Data()->trailWidth, 0.01f);
+		ImGui::ColorEdit3("trailcolor", &cbEmitterCommon_.Data()->trailcolor.x);
+
 		ImGui::DragFloat3("scale", &cbEmitterCommon_.Data()->scale.x, 0.01f);
 		ImGui::DragFloat3("scaleRange", &cbEmitterCommon_.Data()->scaleRange.x, 0.01f);
 		ImGui::ColorEdit3("color", &cbEmitterCommon_.Data()->color.x);
@@ -107,6 +118,9 @@ void BaseGpuParticleEmitter::UpdateImGui()
 		
 		int count = ConvertUtility::ToInt(cbEmitterCommon_.Data()->count);;
 		ImGui::DragInt("count", &count);
+		if (count <= 1) {
+			count = 1;
+		}
 		cbEmitterCommon_.Data()->count = ConvertUtility::ToUint32(count);
 
 		// 派生クラス固有の更新

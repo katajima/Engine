@@ -9,6 +9,7 @@ void PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompile
 	command_ = command;
 	DXGIDevice_ = DXGIDevice;
 	dxcCompiler_ = dxcCompiler;
+	useInputLayout_ = true;
 }
 
 void PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
@@ -83,19 +84,24 @@ void PSOManager::SetRootSignature(
 void PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& graphicsPipelineState, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType)
 {
 	HRESULT hr;
-
-	for (int i = 0; i < inputElementDesc_.size(); i++) {
-		inputElementDesc_[i].SemanticName = semanticNames_[i].c_str();
-		inputElementDesc_[i].Format = semanticformat_[i];
-		inputElementDesc_[i].SemanticIndex = semanticIndex_[i];
-		inputElementDesc_[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-		inputElementDesc_[i].InputSlot = semanticSlot_[i];
-	}
-
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	inputLayoutDesc.pInputElementDescs = inputElementDesc_.data();
-	inputLayoutDesc.NumElements = UINT(inputElementDesc_.size());
+	if (useInputLayout_) {
+		for (int i = 0; i < inputElementDesc_.size(); i++) {
+			inputElementDesc_[i].SemanticName = semanticNames_[i].c_str();
+			inputElementDesc_[i].Format = semanticformat_[i];
+			inputElementDesc_[i].SemanticIndex = semanticIndex_[i];
+			inputElementDesc_[i].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+			inputElementDesc_[i].InputSlot = semanticSlot_[i];
+		}
 
+		
+		inputLayoutDesc.pInputElementDescs = inputElementDesc_.data();
+		inputLayoutDesc.NumElements = UINT(inputElementDesc_.size());
+	}
+	else {
+		inputLayoutDesc.pInputElementDescs = nullptr;
+		inputLayoutDesc.NumElements = 0;
+	}
 
 
 

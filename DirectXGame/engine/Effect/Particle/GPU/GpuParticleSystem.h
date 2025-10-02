@@ -18,7 +18,7 @@ public:
 
 	void Update();
 
-
+	void Draw();
 
 public: // トレイル用
 
@@ -26,9 +26,11 @@ public: // トレイル用
 
 	void UpdateTrail();
 
+	void DrawTrail();
+
+public:
 
 
-	void Draw();
 
 
 	void SetMesh(ModelMesh* mesh) { this->mesh_ = mesh; }	// メッシュセット
@@ -43,7 +45,9 @@ public: // トレイル用
 
 private:
 	ModelMesh* mesh_ = nullptr;		// モデルメッシュ
-	std::string textureName_ = "";	// テクスチャインデック
+	std::string textureName_ = "";	// テクスチャ名前(パーティクル)
+	std::string trailTextureName_ = "";	// テクスチャ名前(トレイル)
+
 	std::string name_ = "no";		// 名前
 	// CS用のパーティクルデータ
 	StructuredBuffer<ParticleCS> sbParticleResource_;
@@ -68,11 +72,6 @@ private: // トレイル用
 	StructuredBuffer<uint32_t> sbTrailVertexFreeListResource_;
 	// トレイル上限
 	ConstantBuffer<MaxInstance> cbMaxTrailVertexInstance_;
-
-
-
-	std::unique_ptr<TrailMesh> trailMesh_ = nullptr;	// トレイルメッシュ
-	
 
 
 	// カメラ位置
