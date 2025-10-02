@@ -15,12 +15,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint particleIndex = DTid.x;
     if (particleIndex < gMaxInstance.maxInstanse)
     {
-         gParticle[particleIndex].prevTranslate = gParticle[particleIndex].translate;
-        
-        // alphaが0のparticleは死んでいるとみなして更新しない
-        if (gParticle[particleIndex].color.a != 0)
+         
+        if (gParticle[particleIndex].currentTime <= gParticle[particleIndex].lifeTime)
         {
-           
+            gParticle[particleIndex].prevTranslate = gParticle[particleIndex].translate;
+          
             
             gParticle[particleIndex].velocity += gParticle[particleIndex].acceleration;
             gParticle[particleIndex].translate += gParticle[particleIndex].velocity * gPerFrame.deltaTime;
@@ -43,37 +42,37 @@ void main(uint3 DTid : SV_DispatchThreadID)
                 gParticle[particleIndex].scale.z += scale;
             }
             
-            // 寿命を超えたら強制的にalphaを0にする
-            if (gParticle[particleIndex].currentTime >= gParticle[particleIndex].lifeTime)
+            // 重力を加える
+            if (gParticle[particleIndex].isGravity)
             {
-                gParticle[particleIndex].color.a = 0.0f;
+                gParticle[particleIndex].acceleration.y -= 9.8f * gPerFrame.deltaTime; // 重力加速度
             }
+            
             
             if (length(gParticle[particleIndex].scale) < 0.0f)
             {  
                 gParticle[particleIndex].color.a = 0.0f;
             }
            
-        }
-        
-        
-        
-        if (gParticle[particleIndex].color.a == 0)
-        {
+            
+            if (gParticle[particleIndex].currentTime > gParticle[particleIndex].lifeTime)
+            {
                 // スケール0を入れておいてVertexShader出力で棄却されるようにする
-            gParticle[particleIndex].scale = float3(0.0f, 0.0f, 0.0f);
-            int freeListIndex;
-            InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
+                gParticle[particleIndex].scale = float3(0.0f, 0.0f, 0.0f);
+                gParticle[particleIndex].color.a = 0.0f;
+                int freeListIndex;
+                InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
                 // 最新のFreeListIndexの場所に死んだParticleのIndexを設定する
-            if ((freeListIndex + 1) < gMaxInstance.maxInstanse)
-            {
-                gFreeList[freeListIndex + 1] = particleIndex;
-            }
-            else
-            {
+                if ((freeListIndex + 1) < gMaxInstance.maxInstanse)
+                {
+                    gFreeList[freeListIndex + 1] = particleIndex;
+                }
+                else
+                {
                 // ここに来るはずがない、来たら何かが間違っているが、安全策をうっておく
-                InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
+                    InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
+                }
             }
-        }
+        }       
     }
 }

@@ -30,11 +30,23 @@ struct ParticleCS {
 	uint32_t isTrail;  // リボンを引くか
 	float width;       // リボンの太さ
 	float trailLifeTime;    // トレイル生存時間
+
+	uint32_t trailHeadIndex;       // リングバッファの先頭インデックス
+	Vector3 trailPrevEnd;       // 前フレームの末端位置
+
+	uint32_t hasPrevQuad;	// 前のQuadが有効か
+	Vector3 rotation;				// 回転
+
+	uint32_t isAlive;           // 生存しているか
+	uint32_t useBillboard;      // ビルボードを使うか
+	Vector2 pad;
 };
 
 struct PreView {
 	Matrix4x4 viewProjection;
 	Matrix4x4 billboardMatrix;
+	Matrix4x4 billboardMatrixY;
+
 };
 
 struct PerFrame
@@ -117,7 +129,10 @@ struct EmitterCommon
 	Vector4 trailcolor;     // リボンの色
 
 	float trailLifeTime;   // リボンの生存時間
-	float pad[3];
+	Vector3 rotate;       // 回転
+	
+	Vector3 rotateRange; // 回転(範囲)
+	uint32_t useBillboard;  // ビルボードを使うか
 };
 
 

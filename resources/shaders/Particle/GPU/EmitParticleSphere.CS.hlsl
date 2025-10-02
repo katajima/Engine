@@ -96,7 +96,9 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
 
             
             gParticle[particleIndex].translate = gParticle[particleIndex].translate = EmitSpawn(generator);
-              
+            gParticle[particleIndex].prevTranslate = gParticle[particleIndex].translate;
+            
+            
             gParticle[particleIndex].velocity = EmitDirection(generator, particleIndex);
             
             
@@ -104,6 +106,7 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
             gParticle[particleIndex].currentTime = 0;
             gParticle[particleIndex].lifeTime = gEmitterCommon.lifeTime + generator.Generate1d_4() * gEmitterCommon.lifeTimeRange;
             gParticle[particleIndex].scale = gEmitterCommon.scale + generator.Generate3d_4() * gEmitterCommon.scaleRange;
+            gParticle[particleIndex].rotation = gEmitterCommon.rotate + generator.Generate3d_4() * gEmitterCommon.rotateRange;
             gParticle[particleIndex].color.rgb = gEmitterCommon.color + generator.Generate3d_4() * gEmitterCommon.colorRange;
             gParticle[particleIndex].color.a = 1.0f;
             
@@ -123,6 +126,14 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
             
             gParticle[particleIndex].trailLifeTime = gEmitterCommon.trailLifeTime;
             
+            gParticle[particleIndex].trailHeadIndex = 0;
+            gParticle[particleIndex].hasPrevQuad = false;
+            
+            gParticle[particleIndex].isAlive = true;
+         
+            
+            gParticle[particleIndex].useBillboard = gEmitterCommon.useBillboard;
+
         }
         else
         {
