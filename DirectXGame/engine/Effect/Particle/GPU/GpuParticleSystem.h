@@ -66,10 +66,6 @@ private: // トレイル用
 
 	// トレイル頂点バッファ
 	StructuredBuffer<GpuTrailVertex> sbTrailVertexResource_;
-	// CS用のトレイル頂点カウントインデックス
-	StructuredBuffer<FreeListIndex> sbTrailVertexFreeListIndexResource_;
-	// CS用のカウント
-	StructuredBuffer<uint32_t> sbTrailVertexFreeListResource_;
 	// トレイル上限
 	ConstantBuffer<MaxInstance> cbMaxTrailVertexInstance_;
 

@@ -51,7 +51,7 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 
 
 	// CPU 側で作る最大バッファサイズ
-	int maxSegments = 8; // 例: 1パーティクルあたり8セグメント
+	int maxSegments = 5; // 例: 1パーティクルあたり10セグメント
 	int verticesPerSegment = 6; // Quadを三角形2個で作る
 	int totalVertexCount = MaxInstance * maxSegments * verticesPerSegment;
 
@@ -60,16 +60,10 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 	cbMaxTrailVertexInstance_.Data()->maxInstance = totalVertexCount;
 	// トレイル頂点バッファ
 	sbTrailVertexResource_.CreateBuffer(dxCommon_, cbMaxTrailVertexInstance_.Data()->maxInstance, true);
-	// トレイル頂点カウンターインデックス
-	sbTrailVertexFreeListIndexResource_.CreateBuffer(dxCommon_, 1, true);
-	// トレイル頂点カウンター
-	sbTrailVertexFreeListResource_.CreateBuffer(dxCommon_, cbMaxTrailVertexInstance_.Data()->maxInstance, true);
-
+	
 	gpuParticleManager_->PreCsTrailPso();
 	sbTrailVertexResource_.SetComputeRootDescriptorTable(0);				// トレイル頂点
-	sbTrailVertexFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// フリーリストインデックス
-	sbTrailVertexFreeListResource_.SetComputeRootDescriptorTable(2);		// フリーリスト
-	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(3);			// Maxインスタンス
+	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(1);			// Maxインスタンス
 	{
 		const uint32_t threadsPerGroup = 256;
 		const uint32_t dispatchCount = (cbMaxTrailVertexInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
@@ -160,14 +154,9 @@ void GpuParticleGroup::UpateTrailEmitte(float deltaTime)
 
 
 	sbTrailVertexResource_.SetComputeRootDescriptorTable(0);				// トレイル
-	sbTrailVertexFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// カウンターインデックス(トレイル)
-	sbTrailVertexFreeListResource_.SetComputeRootDescriptorTable(2);		// カウンター(トレイル)
-	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(3);			// Maxインスタンス(トレイル)
-
-
-	sbParticleResource_.SetComputeRootDescriptorTable(4);					// パーティクル
-	cbMaxInstance_.SetComputeRootConstantBufferView(5);						// Maxインスタンス(パーティクル)
-	cbCameraPos_.SetComputeRootConstantBufferView(6);						// カメラ位置
+	sbParticleResource_.SetComputeRootDescriptorTable(1);					// パーティクル
+	cbMaxInstance_.SetComputeRootConstantBufferView(2);						// Maxインスタンス(パーティクル)
+	cbCameraPos_.SetComputeRootConstantBufferView(3);						// カメラ位置
 
 
 
@@ -176,9 +165,7 @@ void GpuParticleGroup::UpateTrailEmitte(float deltaTime)
 
 	sbParticleResource_.UavDependence();
 	sbTrailVertexResource_.UavDependence();
-	sbTrailVertexFreeListIndexResource_.UavDependence();
-	sbTrailVertexFreeListResource_.UavDependence();
-
+	
 }
 
 void GpuParticleGroup::UpdateTrail()
@@ -187,17 +174,14 @@ void GpuParticleGroup::UpdateTrail()
 	const uint32_t dispatchCount = (cbMaxTrailVertexInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
 	sbTrailVertexResource_.SetComputeRootDescriptorTable(0);				// トレイル
-	sbTrailVertexFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// カウンターインデックス(トレイル)
-	sbTrailVertexFreeListResource_.SetComputeRootDescriptorTable(2);		// カウンター(トレイル)
-	cbPerFrame_.SetComputeRootConstantBufferView(3);						// 乱数用時間
-	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(4);						// Maxインスタンス(パーティクル)
+	cbPerFrame_.SetComputeRootConstantBufferView(1);						// 乱数用時間
+	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(2);			// Maxインスタンス(トレイル頂点)
 
 	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 
 
 	sbTrailVertexResource_.UavDependence();
-	sbTrailVertexFreeListIndexResource_.UavDependence();
-	sbTrailVertexFreeListResource_.UavDependence();
+	
 }
 
 void GpuParticleGroup::DrawTrail()

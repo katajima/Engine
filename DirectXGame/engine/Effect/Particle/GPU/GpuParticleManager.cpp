@@ -82,11 +82,13 @@ void GpuParticleManager::Update()
 
 	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraWorldMatrix);
+	Matrix4x4 billboardMatrixY = MakeBillboardMatrixY(billboardMatrix);
 	billboardMatrix.m[3][0] = 0.0f;
 	billboardMatrix.m[3][1] = 0.0f;
 	billboardMatrix.m[3][2] = 0.0f;
 
 	cbPreViewResource_.Data()->billboardMatrix = billboardMatrix;
+	cbPreViewResource_.Data()->billboardMatrixY = billboardMatrixY;
 	cbPreViewResource_.Data()->viewProjection = camera_->GetViewProjectionMatrix();
 
 
@@ -337,17 +339,13 @@ void GpuParticleManager::CreateRootSignature()
 	// トレイルエフェクト(初期化)
 	{
 		// Compute用のルートシグネチャを作成
-		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[3] = {};
+		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[1] = {};
 		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
-
+		
 		// Compute用のRootParameterを作成
-		D3D12_ROOT_PARAMETER computeRootParameters[4] = {};
+		D3D12_ROOT_PARAMETER computeRootParameters[2] = {};
 		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
-		PSOFanction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウントインデックス
-		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウント
-		PSOFanction::SetRootParameter(computeRootParameters[3], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点
+		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点
 
 
 		csTrailInitPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
@@ -356,24 +354,17 @@ void GpuParticleManager::CreateRootSignature()
 	// トレイルエフェクト(エミッター)
 	{
 		// Compute用のルートシグネチャを作成
-		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[4] = {};
+		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[2] = {};
 		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用(トレイル頂点)
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用(トレイル頂点)
-
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //パーティクル用
+		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //パーティクル用
 		
 
 		// Compute用のRootParameterを作成
-		D3D12_ROOT_PARAMETER computeRootParameters[7] = {};
+		D3D12_ROOT_PARAMETER computeRootParameters[4] = {};
 		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
-		PSOFanction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウントインデックス(トレイル)
-		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウント(トレイル)
-		PSOFanction::SetRootParameter(computeRootParameters[3], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(トレイル)
-
-		PSOFanction::SetRootParameter(computeRootParameters[4], computeDescriptorRange[3], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
-		PSOFanction::SetRootParameter(computeRootParameters[5], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大数(パーティクル)
-		PSOFanction::SetRootParameter(computeRootParameters[6], 2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// カメラ位置
+		PSOFanction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
+		PSOFanction::SetRootParameter(computeRootParameters[2], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(パーティクル)
+		PSOFanction::SetRootParameter(computeRootParameters[3], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// カメラ位置
 
 		csTrailEmitPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 	}
@@ -381,18 +372,14 @@ void GpuParticleManager::CreateRootSignature()
 	// トレイル(更新)
 	{
 		// Compute用のルートシグネチャを作成
-		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[3] = {};
+		D3D12_DESCRIPTOR_RANGE computeDescriptorRange[1] = {};
 		PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //頂点用
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウントインデックス用(トレイル頂点)
-		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用(トレイル頂点)
-
+		
 		// Compute用のRootParameterを作成
-		D3D12_ROOT_PARAMETER computeRootParameters[5] = {};
+		D3D12_ROOT_PARAMETER computeRootParameters[3] = {};
 		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// トレイル頂点
-		PSOFanction::SetRootParameter(computeRootParameters[1], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウントインデックス(トレイル)
-		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウント(トレイル)
-		PSOFanction::SetRootParameter(computeRootParameters[3], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
-		PSOFanction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(トレイル)
+		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
+		PSOFanction::SetRootParameter(computeRootParameters[2], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大頂点(トレイル)
 		
 		csTrailUpdatePsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 	}
@@ -466,11 +453,7 @@ void GpuParticleManager::CreateGraphicsPipeline()
 
 	psoTrailManager_->NoInputLayout();
 
-	/*psoTrailManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
-	psoTrailManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
-	psoTrailManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
-	psoTrailManager_->AddInputElementDesc("COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);*/
-
+	
 	psoTrailManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Particle/GPU/GpuParticleTrail.VS.hlsl");
 	psoTrailManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Particle/GPU/GpuParticleTrail.PS.hlsl");
 

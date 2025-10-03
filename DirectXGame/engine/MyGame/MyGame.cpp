@@ -303,7 +303,7 @@ void MyGame::CreateParticle()
 
 	gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterSphere>("emitte_no1")->GetCommonData()->translate.x = 40.0f;
  
-	//gpuParticleManager_->CreateField("AABBField");
+	gpuParticleManager_->CreateField("AABBField");
 
 }
 

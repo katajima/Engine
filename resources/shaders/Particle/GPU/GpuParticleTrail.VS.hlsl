@@ -21,10 +21,10 @@ VSOut main(uint id : SV_VertexID)
     if (!v.isAlive)
     {
         // 完全に画面外へ飛ばす
-        output.pos = float4(0, 0, 0, 0);
+        output.pos = float4(1e6, 1e6, 1e6, 1.0f);
         output.color = float4(0, 0, 0, 0);
-        output.uv = 0;
-        output.normal = 0;
+        output.uv = float2(0, 0);
+        output.normal = float3(0, 0, 0);
         return output;
     }
     

@@ -38,8 +38,9 @@ void BaseGpuParticleEmitter::Init(DirectXCommon* dxCommon, LineCommon* lineCommo
 	cbEmitterCommon_.Data()->isTrail = false;
 	cbEmitterCommon_.Data()->trailWidth = 1.0f;
 	cbEmitterCommon_.Data()->isGravity = false;
-
-
+	cbEmitterCommon_.Data()->rotate = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->rotateRange = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->useBillboard = true;
 
 	// 派生クラス固有の初期化
 	InitUniqe();
@@ -86,6 +87,12 @@ void BaseGpuParticleEmitter::UpdateImGui()
 			ImGui::DragFloat("force", &cbEmitterCommon_.Data()->force, 0.01f);
 		}
 		ImGui::Separator();
+		bool useBillboard = ConvertUtility::ToBool(cbEmitterCommon_.Data()->useBillboard);
+		ImGui::Checkbox("useBillboard", &useBillboard);
+		cbEmitterCommon_.Data()->useBillboard = ConvertUtility::ToUint32(useBillboard);
+
+
+
 		bool isAlpha = ConvertUtility::ToBool(cbEmitterCommon_.Data()->isAlhpa);
 		ImGui::Checkbox("isAlpha", &isAlpha);
 		cbEmitterCommon_.Data()->isAlhpa = ConvertUtility::ToUint32(isAlpha);
@@ -110,6 +117,11 @@ void BaseGpuParticleEmitter::UpdateImGui()
 
 		ImGui::DragFloat3("scale", &cbEmitterCommon_.Data()->scale.x, 0.01f);
 		ImGui::DragFloat3("scaleRange", &cbEmitterCommon_.Data()->scaleRange.x, 0.01f);
+
+		ImGui::DragFloat3("rotate", &cbEmitterCommon_.Data()->rotate.x, 0.01f);
+		ImGui::DragFloat3("rotateRange", &cbEmitterCommon_.Data()->rotateRange.x, 0.01f);
+
+
 		ImGui::ColorEdit3("color", &cbEmitterCommon_.Data()->color.x);
 		ImGui::ColorEdit3("colorRange", &cbEmitterCommon_.Data()->colorRange.x);
 		ImGui::DragFloat("frequency", &cbEmitterCommon_.Data()->frequency, 0.01f);
