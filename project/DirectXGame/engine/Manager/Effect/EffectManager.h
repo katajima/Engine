@@ -11,7 +11,7 @@
 #include<format>
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Effect/Trail/TrailEffectManager.h"
-#include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
+#include "DirectXGame/engine/Effect/Particle/CPU/ParticleManager.h"
 #include "DirectXGame/engine/Effect/Particle/GPU/GpuParticleManager.h"
 #include <DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.h>
 

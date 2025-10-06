@@ -36,6 +36,9 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 	csEmitPsoManagers_[EmitterType::Sphere] = std::make_unique<CSPSOManager>();
 	csEmitPsoManagers_[EmitterType::Sphere]->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
+	csEmitPsoManagers_[EmitterType::Point] = std::make_unique<CSPSOManager>();
+	csEmitPsoManagers_[EmitterType::Point]->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+
 
 	// Compute用のパイプラインステートオブジェクトを作成(更新)
 	csUpdatePsoManager_ = std::make_unique<CSPSOManager>();
@@ -171,6 +174,8 @@ void GpuParticleManager::Draw()
 		dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		group.second.DrawTrail();
+
+
 	}
 
 }
@@ -217,6 +222,33 @@ void GpuParticleManager::CreateField(std::string name)
 
 	gpuParticleField_[name].Init(dxCommon_, lineCommon_, name);
 
+}
+
+void GpuParticleManager::ClearEmitter(std::string nume)
+{
+	gpuParticleEmitter_.erase(nume);
+}
+
+void GpuParticleManager::ClearEmitterAll()
+{
+	gpuParticleEmitter_.clear();
+}
+
+void GpuParticleManager::ClearGroupParticle(std::string name)
+{
+	gpuParticleGroup_[name].Reset();
+}
+
+void GpuParticleManager::ClearGroupParticleAll()
+{
+	for (auto& group : gpuParticleGroup_) {
+		group.second.Reset();
+	}
+}
+
+void GpuParticleManager::ClearField(std::string name)
+{
+	gpuParticleField_.erase(name);
 }
 
 void GpuParticleManager::CreateRootSignature()
@@ -281,18 +313,21 @@ void GpuParticleManager::CreateRootSignature()
 		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
 
 		// Compute用のRootParameterを作成
-		D3D12_ROOT_PARAMETER computeRootParameters[7] = {};
-		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
+		D3D12_ROOT_PARAMETER computeRootParameters[9] = {};
+		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);		// パーティクル
 		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッター(球)
 		PSOFanction::SetRootParameter(computeRootParameters[2], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 乱数生成用時間
-		PSOFanction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);			// カウンターインデックス
-		PSOFanction::SetRootParameter(computeRootParameters[4], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);			// カウンター
+		PSOFanction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);		// カウンターインデックス
+		PSOFanction::SetRootParameter(computeRootParameters[4], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);		// カウンター
 		PSOFanction::SetRootParameter(computeRootParameters[5], 2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// 最大個数
-		PSOFanction::SetRootParameter(computeRootParameters[6], 3, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッター(球)
+		PSOFanction::SetRootParameter(computeRootParameters[6], 3, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッター共通
+		PSOFanction::SetRootParameter(computeRootParameters[7], 4, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッタートレイル関係
+		PSOFanction::SetRootParameter(computeRootParameters[8], 5, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);	// エミッターディスパッチ数
 
 		// Compute用のSamplerを設定
 		csEmitPsoManagers_[EmitterType::AABB]->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 		csEmitPsoManagers_[EmitterType::Sphere]->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
+		csEmitPsoManagers_[EmitterType::Point]->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 	}
 
 	// 更新
@@ -304,12 +339,13 @@ void GpuParticleManager::CreateRootSignature()
 		PSOFanction::SetDescriptorRenge(computeDescriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_UAV); //カウント用
 
 		// Compute用のRootParameterを作成
-		D3D12_ROOT_PARAMETER computeRootParameters[5] = {};
+		D3D12_ROOT_PARAMETER computeRootParameters[6] = {};
 		PSOFanction::SetRootParameter(computeRootParameters[0], computeDescriptorRange[0], D3D12_SHADER_VISIBILITY_ALL);			// パーティクル
 		PSOFanction::SetRootParameter(computeRootParameters[1], 0, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 乱数生成用時間
 		PSOFanction::SetRootParameter(computeRootParameters[2], computeDescriptorRange[1], D3D12_SHADER_VISIBILITY_ALL);			// カウントインデックス
 		PSOFanction::SetRootParameter(computeRootParameters[3], computeDescriptorRange[2], D3D12_SHADER_VISIBILITY_ALL);			// カウント
 		PSOFanction::SetRootParameter(computeRootParameters[4], 1, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// 最大個数
+		PSOFanction::SetRootParameter(computeRootParameters[5], 2, D3D12_SHADER_VISIBILITY_ALL, D3D12_ROOT_PARAMETER_TYPE_CBV);		// パーティクル削除
 
 		// Compute用のSamplerを設定
 		csUpdatePsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
@@ -413,15 +449,22 @@ void GpuParticleManager::CreateGraphicsPipeline()
 	// BlendState(ブレンドステート)の設定
 	D3D12_BLEND_DESC blendDesc{};
 	//すべての色要素を書き込む
+	//blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	//blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
 	psoManager_->GraphicsPipelineState(particleDraw.rootSignature, particleDraw.graphicsPipelineState, blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
@@ -439,6 +482,9 @@ void GpuParticleManager::CreateGraphicsPipeline()
 
 	csEmitPsoManagers_[EmitterType::Sphere]->SetShaderFileName(L"resources/shaders/Particle/GPU/EmitParticleSphere.CS.hlsl");
 	csEmitPsoManagers_[EmitterType::Sphere]->ComputePipelineState();
+	
+	csEmitPsoManagers_[EmitterType::Point]->SetShaderFileName(L"resources/shaders/Particle/GPU/EmitParticlePoint.CS.hlsl");
+	csEmitPsoManagers_[EmitterType::Point]->ComputePipelineState();
 
 	csUpdatePsoManager_->SetShaderFileName(L"resources/shaders/Particle/GPU/UpdateParticle.CS.hlsl");
 	csUpdatePsoManager_->ComputePipelineState();
@@ -450,6 +496,10 @@ void GpuParticleManager::CreateGraphicsPipeline()
 	/// トレイルエフェクト用のパイプライン作成
 
 	// トレイルPSO
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
 
 	psoTrailManager_->NoInputLayout();
 

@@ -2,7 +2,7 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-void FixedCamera::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
+void FixedCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position)
 {
 	entity3DManager_ = entity3DManager;
 
@@ -36,12 +36,4 @@ void FixedCamera::Update()
 
 
 	uniqueCamera_->UpdateMatrix();
-}
-
-void FixedCamera::Draw2D() {
-
-}
-
-void FixedCamera::DrawEffect() {
-
 }

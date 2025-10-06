@@ -42,6 +42,12 @@ struct ParticleCS {
 	Vector2 pad;
 };
 
+// パーティクル削除
+struct DeleteParticleCS {
+	uint32_t isDelete;
+	Vector3 pad;
+};
+
 struct PreView {
 	Matrix4x4 viewProjection;
 	Matrix4x4 billboardMatrix;
@@ -57,17 +63,7 @@ struct PerFrame
 	float deltaTime;
 };
 
-// 球体エミッター
-struct EmitterSphere
-{
-	float radius;           // 射出半径	
-};
 
-// AABBエミッター
-struct EmitterAABB
-{
-	Vector3 size;	        // 射出サイズ
-};
 
 // 出方
 enum class ParticleSpawnShape : uint32_t
@@ -85,12 +81,41 @@ enum class ParticleDireccion : uint32_t
 	Inward,			// 内向き
 };
 
+// エミッタータイプ
 enum class EmitterType : uint32_t
 {
 	Sphere = 0,     // 球体
 	AABB,           // AABB
+	Point           // 点
 };
 
+// 補間方法
+enum class EmitterInterpolation : uint32_t
+{
+	NoUse = 0,			// 補間しない
+	Random = 1,			// ランダム
+	Sequential = 2,     // 順番
+};
+
+
+// 球体エミッター
+struct EmitterSphereCS
+{
+	float radius;           // 射出半径	
+};
+
+// AABBエミッター
+struct EmitterAABBCS
+{
+	Vector3 size;	        // 射出サイズ
+};
+
+// 点エミッター
+struct EmitterPointCS
+{
+	EmitterInterpolation interpolation; // 補間方法(0:しない,1:ランダムに,2:順番)
+	Vector3 pad;	                    // パディング
+};
 
 // 共通エミッター
 struct EmitterCommon
@@ -121,18 +146,34 @@ struct EmitterCommon
 	uint32_t isAlhpa;					// アルファブレンドするか
 	uint32_t isScaling;
 	
-	float scaleAmount;
-	uint32_t isGravity;         // 重力影響するか
-	uint32_t isTrail;           // リボンを引くか
-	float trailWidth;       // リボンの太さ
+	Vector3 rotate;						// 回転
+	uint32_t isGravity;					// 重力影響するか
 
-	Vector4 trailcolor;     // リボンの色
-
-	float trailLifeTime;   // リボンの生存時間
-	Vector3 rotate;       // 回転
+	Vector3 rotateRange;				// 回転(範囲)
+	uint32_t useBillboard;				// ビルボードを使うか
 	
-	Vector3 rotateRange; // 回転(範囲)
-	uint32_t useBillboard;  // ビルボードを使うか
+	float scaleAmount;					// スケーリング量
+	Vector3 prevTranslate;				// 前フレームの位置
+
+};
+
+// エミッタースレッド数
+struct EmiterDispatch
+{
+	uint32_t totalThreadCount;
+	uint32_t pad[3];
+};
+
+
+// エミッターリボン
+struct EmitterTrail
+{
+	Vector4 trailcolor;     // リボンの色
+	
+	uint32_t isTrail;       // リボンを引くか
+	float trailWidth;       // リボンの太さ
+	float trailLifeTime;	// リボンの生存時間
+	float pad;
 };
 
 
@@ -145,22 +186,23 @@ struct EffectFieldCS {
 };
 
 
-
+// 最大個数
 struct MaxInstance
 {
 	uint32_t maxInstance;	// 最大個数
 };
-
+// 空きリストのインデックス
 struct FreeListIndex {
 	int32_t index;
 };
-
+// 生存数
 struct ParticleCount
 {
 	int32_t count;
 };
 
 
+// 頂点データ(トレイル)
 struct GpuTrailVertex
 {
 	Vector3 position;	// 座標

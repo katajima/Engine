@@ -138,7 +138,7 @@
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.cpp">
@@ -396,10 +396,10 @@
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleField.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleData.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp">
@@ -432,12 +432,6 @@
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -454,12 +448,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp">
@@ -531,7 +519,7 @@
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleSystem.cpp">
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp">
@@ -543,10 +531,16 @@
     <ClCompile Include="DirectXGame\engine\Mesh\TrailMesh.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="resources\shaders\Particle\Particle.hlsli" />
+    <None Include="resources\shaders\Particle\CPU\Particle.hlsli" />
     <None Include="resources\shaders\Line\Line.hlsli" />
     <None Include="resources\shaders\Object2D\Object2D.hlsli" />
     <None Include="resources\shaders\Offscreen\Fullscreen.hlsli" />
@@ -559,16 +553,17 @@
     <None Include="resources\shaders\SkyBox\SkyBox.hlsli" />
     <None Include="resources\shaders\Object3D\Object3dInstans.hlsli" />
     <None Include="resources\shaders\Offscreen\Smoothing.hlsli" />
-    <None Include="resources\shaders\Particle\NewParticle.hlsli" />
+    <None Include="resources\shaders\Particle\CPU\NewParticle.hlsli" />
     <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli" />
     <None Include="resources\shaders\Particle\GPU\random.hlsli" />
     <None Include="resources\shaders\Particle\GPU\Collider.hlsli" />
     <None Include="cpp.hint" />
     <None Include="resources\shaders\Particle\2d\Particle2d.hlsli" />
+    <None Include="resources\shaders\Particle\GPU\EmitSpawn.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\Particle.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\CPU\Particle.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\CPU\Particle.VS.hlsl" />
     <FxCompile Include="resources\shaders\Line\Line.PS.hlsl" />
     <FxCompile Include="resources\shaders\Line\Line.VS.hlsl" />
     <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
@@ -606,7 +601,7 @@
     <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
     <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\NewParticle.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl" />
@@ -620,6 +615,7 @@
     <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl" />
     <FxCompile Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -697,7 +693,7 @@
     <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h">
@@ -967,9 +963,6 @@
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\UI\BaseUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1027,7 +1020,7 @@
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\StructuredBuffer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleData.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\Resource\IndexBufferResource.h">
@@ -1036,7 +1029,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleField.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h">
@@ -1132,15 +1125,6 @@
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Spawn\BasespawnPoint.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\RangedWeapons.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1174,16 +1158,10 @@
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Vision\VisionComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h">
@@ -1291,7 +1269,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleSystem.h">
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\Structs.h">
@@ -1307,6 +1285,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

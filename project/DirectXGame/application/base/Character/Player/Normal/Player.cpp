@@ -15,9 +15,21 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	globalVariables_ = globalVariables;
 	camera_ = camera;
 	input_ = input;
+	
+	
+	
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+	
+	// オブジェクトコンポーネント追加
+	objectComponent_ = std::make_unique<ObjectComponent>();
+	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true,this, ObjectModelType::kSkinning);
+
+
 	CreateGroup("Player");
 
+	objectComponent_->SetSRT({1,1,1}, {}, position);				//　SRT設定
+	GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
+	GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
 
 	// HP設定
@@ -25,14 +37,8 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	HP() = 1000; // 初期HP設定
 	Parameters().speed = 20.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
-	// プレイヤー
-	objectBase_ = entity3DManager_->CreateObject3D("PlayerBase", ObjectModelType::kSkinning, position, camera_);
-	objectBase_->SetModel("origin.gltf");
-	objectBase_->InitColliderComponent();
-	objectBase_->InitAnimationComponent();
+	
 	InitMoveComponent();
-	objectBase_->InitRigidBodyComponent();
-	objectBase_->SetIsUpdateColliderComponent(false);
 	GetColliderComponent()->SetHitReceiver(this);
 
 	InitializeBaseAddItem();
@@ -49,7 +55,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 
 	worldCollider_.Initialize();
 
-	worldCollider_.parent_ = &objectBase_->GetWorldTransform();
+	worldCollider_.parent_ = &GetObject3D()->GetWorldTransform();
 	worldCollider_.translate_.y = 3.0f;
 
 	// 衝突時のコールバック登録
@@ -66,37 +72,37 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->GetWorldTransform().translate_ += pushVec;
+					GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
+					GetWorldTransform().translate_ += pushVec * 0.5f;
 
 				}
-				objectBase_->GetWorldTransform().Update();
+				GetWorldTransform().Update();
 			}
 		}
 		if (other->tag == CollisionTag::Wall) {
 			if (self->ResolveCollision(*other, pushVec)) {
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->GetWorldTransform().translate_ += pushVec;
+					GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
+					GetWorldTransform().translate_ += pushVec * 0.5f;
 
 				}
 				Velocity().y = 0;
 
 				//acceleration_.y = 0;
-				objectBase_->GetWorldTransform().Update();
+				GetWorldTransform().Update();
 			}
 		}
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
@@ -105,11 +111,11 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 		if (enemy->GetStateName() == "Attack") {
 			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
-			if (GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
+			if (objectComponent_->GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
 				return; // クールタイム中のため無視
 			}
 
-			GetContactRecord().AddHistory(otherId, nowTime);
+			objectComponent_->GetContactRecord().AddHistory(otherId, nowTime);
 
 			AddDamage(10.0f);
 			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
@@ -119,11 +125,11 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
 	special_->Initialize(entity3DManager, entity2DManager, camera_);
-	special_->SetParent(&objectBase_->GetWorldTransform());
+	special_->SetParent(&GetObject3D()->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
 	rengeSp->SetRadius(100);
-	rengeSp->SetReticleParent(&objectBase_->GetWorldTransform());
+	rengeSp->SetReticleParent(&GetObject3D()->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
 	// 武器
@@ -151,7 +157,7 @@ void Player::Update()
 	state_->Update();
 
 	if (GetHP() <= 0) {
-		flags_.isAlive = false;
+		objectComponent_->GetObjectStateFlags().isAlive = false;
 	}
 
 
@@ -184,9 +190,9 @@ void Player::Update()
 
 
 
-	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), *objectBase_);
+	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), *GetObject3D());
 
-	moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
+	moveComponent_->Landing(*GetObject3D()->GetTransformComponent(), *GetObject3D()->GetRigidBodyComponent());
 	characterStateComponent_.Update(Velocity(), false, GetAlive());
 
 
@@ -200,17 +206,17 @@ void Player::Update()
 		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
 	}
 
-	objectBase_->UpdateWorldTransform();
+	GetObject3D()->UpdateWorldTransform();
 	worldCollider_.Update();
 
-	objectBase_->GetColliderComponent()->UpdateAll(worldCollider_);
+	GetObject3D()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 	// 必殺技
 	special_->Update();
 	// ヒットデータの更新
 	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(objectBase_->model->modelData.skeleton, "rightHand", objectBase_->GetWorldTransform().worldMat_));
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObject3D()->model->modelData.skeleton, "rightHand", GetObject3D()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
 #ifdef _DEBUG
@@ -247,7 +253,7 @@ void Player::Move()
 	if (stateName_ == "Move") {
 		moveComponent_->SetSpeed(Parameters().speed);
 		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
-		moveComponent_->Move(*objectBase_->GetTransformComponent(), input_);
+		moveComponent_->Move(*GetObject3D()->GetTransformComponent(), input_);
 	}
 }
 
@@ -260,8 +266,8 @@ void Player::Jump()
 		
 		characterStateComponent_.ChangeState(CharacterState::Jump);
 		moveComponent_->DecrementJumpCount();
-		objectBase_->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
-		objectBase_->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
+		GetObject3D()->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
+		GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
 	}
 
 }

@@ -6,34 +6,36 @@
 void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
 	input_ = input;
+	entity3DManager_ = entity3DManager;
+	entity2DManager_ = entity2DManager;
+	Vector3 size = { 1.25f,1.25f ,1.25f };
 
-	objectBase_ = entity3DManager->CreateObject3D("PlayerWeapon", ObjectModelType::kNormal, {}, camera);
-	objectBase_->SetIsDraw(false);
-	objectBase_->SetModel("Sword.obj");
-	objectBase_->GetWorldTransform().scale_ = { 1.25f,1.25f ,1.25f };
-	objectBase_->InitColliderComponent(); // コライダーコンポーネントの初期化
-	objectBase_->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
+	// オブジェクトコンポーネント追加
+	objectComponent_ = std::make_unique<ObjectComponent>();
+	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerWeapon", "Sword.obj", true,false, this);
+	objectComponent_->SetSRT(size, {}, position);				//　SRT設定
+	GetObject3D()->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
 	//objectBase_->UseTrailEffect("resources/Texture/Image.png",0.25f,{1,1,1,0.25f}, objectBase_->GetModel()->modelData.mesh[0]->GetMin(), objectBase_->GetModel()->modelData.mesh[0]->GetMax());
-	
+	GetObject3D()->SetIsDraw(true);
 
 	auto obbCollider_ = std::make_unique<OBBCollider>();
 	obbCollider_->obb.size = { 0.5f,2.0f,1.0f };
 	obbCollider_->tag = CollisionTag::PlayerAttack;
 	obbCollider_->layer = CollisionLayer::PlayerAttack;
 	obbCollider_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
-	weaponColliderId_ = objectBase_->GetColliderComponent()->GetNextId();
-	objectBase_->GetColliderComponent()->AddCollider(std::move(obbCollider_));
+	weaponColliderId_ = GetObject3D()->GetColliderComponent()->GetNextId();
+	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider_));
 	
 	auto obbCollider2_ = std::make_unique<OBBCollider>();
 	obbCollider2_->obb.size = { 0.5f,2.5f,1.0f };
 	obbCollider2_->tag = CollisionTag::PlayerAttack;
 	obbCollider2_->layer = CollisionLayer::PlayerAttack;
 	obbCollider2_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
-	weaponColliderId2_ = objectBase_->GetColliderComponent()->GetNextId();
-	objectBase_->GetColliderComponent()->AddCollider(std::move(obbCollider2_));
+	weaponColliderId2_ = GetObject3D()->GetColliderComponent()->GetNextId();
+	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider2_));
 	
 
-	objectBase_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
+	GetObject3D()->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		if (!other || other->tag != CollisionTag::Enemy) return;
 
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
@@ -54,13 +56,13 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		//	}
 		//}
 		//else {
-			if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
+			if (GetObject3D()->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
 				return; // クールタイム中のため無視
 			}
 		//}
 		
 
-		objectBase_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
+			GetObject3D()->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		enemy->GetHitMotionComponent()->SetIsHit(true);
 
@@ -131,7 +133,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 
 	colliderWorld_.Initialize();
-	colliderWorld_.parent_ = &objectBase_->GetWorldTransform();
+	colliderWorld_.parent_ = &GetObject3D()->GetWorldTransform();
 	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
 	colliderWorld_.translate_.y = 3.0f; // 武器の位置調整
 
@@ -142,12 +144,12 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 void PlayerWeapon::Update()
 {
-	objectBase_->UpdateWorldTransform();
+	GetObject3D()->UpdateWorldTransform();
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
 
-	objectBase_->GetColliderComponent()->UpdateByID(colliderWorld_, weaponColliderId_);
-	objectBase_->GetColliderComponent()->UpdateByID(colliderWorld2_, weaponColliderId2_);
+	GetObject3D()->GetColliderComponent()->UpdateByID(colliderWorld_, weaponColliderId_);
+	GetObject3D()->GetColliderComponent()->UpdateByID(colliderWorld2_, weaponColliderId2_);
 }
 
 void PlayerWeapon::Draw2D()

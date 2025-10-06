@@ -4,7 +4,30 @@
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 
+
+
+
 namespace ShapeParameter {
+
+	enum class ShapeType {
+		None = -1,
+		Plane,
+		Triangle,
+		Cross,
+		Cube,
+		Circle,
+		Star,
+		Crescent,
+		Ring,
+		Sphere,
+		Arrow,
+		Cylinder,
+		Tube,
+		Pyramid,
+		Torus,
+		Max
+	};
+
 
 	struct ShapePlane {
 		float width = 1.0f;

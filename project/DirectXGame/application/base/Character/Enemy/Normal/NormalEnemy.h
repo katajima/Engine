@@ -10,6 +10,7 @@ using EnemyStateFactory = std::function<std::unique_ptr<BaseEnemyState>(BaseEnem
 
 class NormalEnemy : public BaseEnemy {
 public:
+	// コンストラクタ
 	NormalEnemy() {
 		// 初期化時に状態名とその生成関数を登録
 		RegisterState("Move", [](BaseEnemy* p) {
@@ -88,9 +89,13 @@ private:
 	//std::unique_ptr<ParticleEmitter> groundRightEmit_ = nullptr;
 	//std::unique_ptr<ParticleEmitter> groundLeftEmit_ = nullptr;
 
-	//std::unique_ptr<ParticleEmitter> starEmit_ = nullptr;
-	//std::unique_ptr<ParticleEmitter> traiEmit_ = nullptr;
-	//std::unique_ptr<ParticleEmitter> hitEmit_ = nullptr;
+
+	
+	std::unique_ptr<PointParticleEmitter> starEmit_ = nullptr;
+	std::unique_ptr < AABBParticleEmitter> traiEmit_ = nullptr;
+	std::unique_ptr < AABBParticleEmitter> hitEmit_ = nullptr;
+	std::unique_ptr < PointParticleEmitter> effectEmit_ = nullptr; // 
+
 	//std::unique_ptr<ParticleEmitter> dustEmit_ = nullptr;
 	//std::unique_ptr<ParticleEmitter> dustEmit2_ = nullptr;
 	//std::unique_ptr<ParticleEmitter> dustEmit3_ = nullptr;
@@ -104,5 +109,5 @@ private:
 	//std::unique_ptr<ParticleEmitter> gearEmit_ = nullptr; // 歯車
 	//std::unique_ptr<ParticleEmitter> fenceEmit_ = nullptr; // 柵
 
-	//std::unique_ptr<ParticleEmitter> effectEmit_ = nullptr; // 
+
 };

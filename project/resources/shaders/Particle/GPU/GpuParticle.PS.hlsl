@@ -25,7 +25,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     float alpha = textureColor.a * input.color.a;
 
     // アルファクリッピング
-    if (textureColor.a <= 0.5f)
+    if (textureColor.a <= 0.15f)
     {
         discard;
     }

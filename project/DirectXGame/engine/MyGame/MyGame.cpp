@@ -2,6 +2,7 @@
 
 #include "DirectXGame/engine/Camera/Camera.h"
 
+
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
 float MyGame::nowTime = 0.0f;
@@ -26,8 +27,8 @@ void MyGame::Initialize()
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->Init();
-	//sceneManager_->ChangeScene("TITLE");
-	sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("TEST");
 	
 #ifdef _DEBUG
 	//sceneManager_->ChangeScene("GAMEPLAY");
@@ -55,7 +56,10 @@ void MyGame::Finalize()
 	//
 	//Audio::GetInstance()->Finalize();
 	//
-
+	
+	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
+	gpuParticleManager_->ClearEmitterAll();
+	gpuParticleManager_->ClearGroupParticleAll();
 
 	// 基底クラスの終了処理
 	Framework::Finalize();
@@ -69,9 +73,18 @@ void MyGame::Update()
 
 	Framework::Update();
 
+
+
 	//HitStpoTime(); // ストップ用
 
 #ifdef _DEBUG
+
+	if(input_->IsTriggerKey(DIK_M)){
+		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearEmitterAll();
+	}
+	if(input_->IsTriggerKey(DIK_N)){
+		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
+	}
 
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -290,20 +303,23 @@ void MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("missileHit", "resources/Texture/Image.png", primiStar.get());
 
 	
-
+	
 
 	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 100);
-	gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/uvChecker.png", 1024 * 100);
-	gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
-	gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no2");
-	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
-	gpuParticleManager_->SetEmitteToGroup("emitte_no2","no2");
+	gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/effect/dust.png", 1024 * 100);
+	
+	gpuParticleManager_->CreateGroup("no3", primiPlane->GetModelMesh(), "resources/Texture/smoke/no3.png", 1024 * 100);
+	//
+	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
+	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no2");
+	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	//gpuParticleManager_->SetEmitteToGroup("emitte_no2","no2");
 	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 
 
-	gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterSphere>("emitte_no1")->GetCommonData()->translate.x = 40.0f;
- 
-	gpuParticleManager_->CreateField("AABBField");
+	//gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterSphere>("emitte_no1")->GetCommonData()->translate.x = 40.0f;
+ //
+	//gpuParticleManager_->CreateField("AABBField");
 
 }
 

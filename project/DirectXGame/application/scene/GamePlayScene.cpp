@@ -28,17 +28,17 @@ void GamePlayScene::Initialize()
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
+	followCamera_->Initialize(input_, GetEntity3DManager(),  GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
+	universeCamera_->Initialize(input_, GetEntity3DManager(),  GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), {}, nullptr);
+	fixedCamera_->Initialize(input_, GetEntity3DManager(),  GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManeger>();
-	cameraManeger_->Initialize(input_,GetEntity3DManager(),GetEntity2DManager(),GetGlobalVariables());
+	cameraManeger_->Initialize(input_,GetEntity3DManager(),GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManeger_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
@@ -48,7 +48,7 @@ void GamePlayScene::Initialize()
 
 	// 弾管理クラス
 	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), nullptr);
+	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(),GetGlobalVariables(), nullptr);
 
 	// キャラクター管理 
 	caracterManager_ = std::make_unique<BaseCharacterManager>();
@@ -68,7 +68,7 @@ void GamePlayScene::Initialize()
 	
 	
 	// 追従カメラtarget設定
-	followCamera_->SetTarget(caracterManager_->GetPlayer());
+	followCamera_->SetTarget(caracterManager_->GetPlayer()->GetObject3D());
 	
 	// ステージ
 	stage_ = std::make_unique<Stage>();
@@ -90,6 +90,9 @@ void GamePlayScene::Initialize()
 	SetCamera(cameraManeger_->GetCamera());
 
 	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
+
+	effectComponent_ = std::make_unique<EffectComponent>();
+	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 }
 
 
@@ -203,7 +206,7 @@ void GamePlayScene::Update()
 		BehaviorPhase2Update();
 		break;
 	}
-	tumeee_ += MyGame::GameTime();
+	//tumeee_ += MyGame::GameTime();
 	if (tumeee_ >= 10.0f) {
 		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
 			// シーン切り替え
@@ -231,11 +234,11 @@ void GamePlayScene::Update()
 	
 	ImGui::End();
 
+	
+#endif // _DEBUG
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
 		caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
 	}
-#endif // _DEBUG
-
 
 
 	// スペシャル

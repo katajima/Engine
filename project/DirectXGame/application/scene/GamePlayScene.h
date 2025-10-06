@@ -89,7 +89,7 @@ private:
 	// カメラ管理
 	std::unique_ptr<CameraManeger> cameraManeger_;
 	
-
+	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
 private:
 	// キャラクター管理
 	std::unique_ptr<BaseCharacterManager> caracterManager_;

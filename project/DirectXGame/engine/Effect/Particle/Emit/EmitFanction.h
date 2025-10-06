@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EmitData.h"
-#include "DirectXGame/engine/Effect/Particle/ParticleData.h"
+#include "DirectXGame/engine/Effect/Particle/CPU/ParticleData.h"
 #include<random>
 
 namespace EmitFanction {

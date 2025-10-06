@@ -41,7 +41,12 @@ public:
 
 	std::string GetName() const { return name_; }
 
+
+	std::string GetTextureName() const { return textureName_; }
+
 	int GetMaxInstance() const {return cbMaxInstance_.Data()->maxInstance;}
+
+	void Reset() { cbDeleteParticleCS_.Data()->isDelete = true; };
 
 private:
 	ModelMesh* mesh_ = nullptr;		// モデルメッシュ
@@ -59,8 +64,10 @@ private:
 	ConstantBuffer<MaxInstance> cbMaxInstance_;
 	// 時間
 	ConstantBuffer<PerFrame> cbPerFrame_;
-
-
+	// エミッター情報
+	ConstantBuffer<EmiterDispatch> cbEmiterDispatch_;
+	// パーティクル削除情報
+	ConstantBuffer<DeleteParticleCS> cbDeleteParticleCS_;
 
 private: // トレイル用
 
@@ -72,6 +79,9 @@ private: // トレイル用
 
 	// カメラ位置
 	ConstantBuffer<Vector3> cbCameraPos_;
+
+
+	float deleteTimer_ = 0.0f;	// パーティクル削除タイマー
 
 private:
 	SrvManager* srvManager_ = nullptr;		// SRVマネージャー

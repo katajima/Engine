@@ -8,16 +8,20 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
 	globalVariables_ = globalVariables;
-	CreateGroup("enemy");
+	
+	// サイズ
+	Vector3 size = { 1.7f,1.7f,1.7f };
 
-	objectBase_ = entity3DManager_->CreateObject3D("enemy" + std::to_string(id_), ObjectModelType::kNormal, {}, camera);
-	objectBase_->SetModel("enemy.gltf");
-	objectBase_->GetWorldTransform().translate_ = position;
-	objectBase_->GetWorldTransform().scale_ = { 1.7f,1.7f,1.7f };
-	objectBase_->InitColliderComponent();
-	GetColliderComponent()->SetHitReceiver(this);
+	// オブジェクトコンポーネント追加
+	objectComponent_ = std::make_unique<ObjectComponent>();
+	objectComponent_->Initialize(entity3DManager_,globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf",true,true, this);
+	objectComponent_->SetSRT(size,{}, position);
+	
+	CreateGroup("enemy");
+	
+	
 	InitMoveComponent();
-	objectBase_->InitRigidBodyComponent();
+	
 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
@@ -38,17 +42,17 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->GetWorldTransform().translate_ += pushVec;
+					GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
+					GetWorldTransform().translate_ += pushVec * 0.5f;
 				}
 
-				objectBase_->GetWorldTransform().Update();
+				GetWorldTransform().Update();
 			}
 		}
 
@@ -61,17 +65,17 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->GetWorldTransform().translate_ += pushVec;
+					GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
+					GetWorldTransform().translate_ += pushVec * 0.5f;
 				}
 
-				objectBase_->GetWorldTransform().Update();
+				GetWorldTransform().Update();
 			}
 		}
 		if (other->tag == CollisionTag::Wall) {
@@ -79,20 +83,20 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			if (self->ResolveCollision(*other, pushVec)) {
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
-					objectBase_->GetWorldTransform().translate_ += pushVec;
+					GetWorldTransform().translate_ += pushVec;
 				}
 				else if (self->isStatic) {
 					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
 				}
 				else {
 					// 双方が動く → 半分ずつ押し戻す（応用例）
-					objectBase_->GetWorldTransform().translate_ += pushVec * 0.5f;
+					GetWorldTransform().translate_ += pushVec * 0.5f;
 				}
 				//acceleration_.y = 0;
 				Velocity().y = 0;
 				//velocity_.y = 0;
 				//flags_.isGrounded = true;
-				objectBase_->GetWorldTransform().Update();
+				GetWorldTransform().Update();
 			}
 		}
 		if (other->tag == CollisionTag::PlayerAttack) {
@@ -107,25 +111,21 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	visionComponent_->SetAlertView(120.0f, 100.0f);
 	visionComponent_->SetCombatView(90.0f, 100.0f);
 	visionComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
-	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {
-
-
-
-		return false;
-		};
+	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false;};
 
 
 	// ヒットモーション
 	hitMotionComponent_ = std::make_unique<HitMotionComponent>();
-
 	hitMotionComponent_->Init(0.1f, { 2.5f,2.2f,2.5f });
 
+	
+	effectComponent_ = std::make_unique<EffectComponent>();
+	effectComponent_->Init(entity3DManager_, globalVariables_);
 
 
 
-
-
-	flags_.isAlive = true;
+	 
+	objectComponent_->GetObjectStateFlags().isAlive = true;
 	Parameters().HP.Initiaize(100, 0, 100, 0);
 	Parameters().speed = 3.0f;
 	InitializeBaseAddItem();
@@ -134,15 +134,17 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	InitParticle();
 
 
-	objectBase_->Update();
+	GetWorldTransform().Update();
 	ChangeState("Move");
 }
 
 void NormalEnemy::Update()
 {
-	if (objectBase_ == nullptr) { return; }
+	if (GetObject3D() == nullptr) { return; }
+	assert(this);
 
-	if (objectBase_) {
+
+	if (GetObject3D()) {
 		UpdateBaseGetValue();
 		//HitStpoTime();
 		if (GetHP() <= 0) {
@@ -154,20 +156,20 @@ void NormalEnemy::Update()
 				//fenceEmit_->Update();
 
 			}
-			flags_.isLockonTarget = false;
-			flags_.isAlive = false;
+			objectComponent_->GetObjectStateFlags().isLockonTarget = false;
+			objectComponent_->GetObjectStateFlags().isAlive = false;
 		}
 		else {
 			// 移動
-			moveComponent_->AddMove(GetTime(), GetAlive(), *objectBase_);
+			moveComponent_->AddMove(GetTime(), GetAlive(), *GetObject3D());
 			// 着地
-			moveComponent_->Landing(*objectBase_->GetTransformComponent(), *objectBase_->GetRigidBodyComponent());
+			moveComponent_->Landing(*GetObject3D()->GetTransformComponent(), *GetObject3D()->GetRigidBodyComponent());
 			// 状態
 			characterStateComponent_.Update(Velocity(), false, GetAlive());
 			// ヒット
-			hitMotionComponent_->Update(GetTime(), objectBase_);
+			hitMotionComponent_->Update(GetTime(), GetObject3D());
 			//
-			visionComponent_->Update(GetTime(), objectBase_->GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
+			visionComponent_->Update(GetTime(), GetObject3D()->GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
 
 
 
@@ -182,7 +184,7 @@ void NormalEnemy::Update()
 			// 移動制限
 			LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
 			// 更新
-			objectBase_->UpdateWorldTransform();
+			GetObject3D()->UpdateWorldTransform();
 		}
 		// ステート
 		state_->Update();
@@ -191,28 +193,29 @@ void NormalEnemy::Update()
 
 void NormalEnemy::DrawEffect()
 {
+
 }
 
 void NormalEnemy::Draw2D()
 {
-	if (objectBase_ == nullptr) { return; }
+	if (GetObject3D() == nullptr) { return; }
 
-	if (objectBase_) {
-		if (flags_.isLockonTarget) {
-			icon_lockOn->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0.0f,-40.0f });
+	if (GetObject3D()) {
+		if (objectComponent_->GetObjectStateFlags().isLockonTarget) {
+			icon_lockOn->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{0.0f,-40.0f});
 
 			icon_lockOn->Update();
 			icon_lockOn->Draw();
 		}
 
-		if (GetAlive() && !GetFlags().isDeleted  ) {
+		if (GetAlive() && !objectComponent_->GetObjectStateFlags().isDeleted) {
 
 			backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f });
-			backHpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-30 + -30.0f });
+			backHpBer_->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{ 0,-30 + -30.0f });
 			backHpBer_->Update();
 			backHpBer_->Draw();
 
-			hpBer_->SetPosition(objectBase_->GetScreenPosition() + Vector2{ 0,-27.5f + -30.0f });
+			hpBer_->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{ 0,-27.5f + -30.0f });
 			hpBer_->SetSize({ (HP() * 0.95f),10.0f });
 			hpBer_->Update();
 			hpBer_->Draw();
@@ -227,26 +230,29 @@ void NormalEnemy::SetPlayer(BasePlayer* player)
 
 void NormalEnemy::Emit()
 {
-	//starEmit_->Update();
+	starEmit_->Update();
+	effectEmit_->Update();
+	traiEmit_->Update();
+	hitEmit_->Update();
 
-	//int dirac = rand() % 2;
+	int dirac = rand() % 2;
 
-	//if (dirac == 0) {
-	//	hitEmit_->SetVelocityMinMax(-Vector3{ 5,5,0 }, { 5, 5, 0 });
-	//	traiEmit_->SetVelocityMinMax(-Vector3{ 5,5,0 }, { 5, 5, 0 });
-	//}
-	//else if (dirac == 1) {
-	//	hitEmit_->SetVelocityMinMax(-Vector3{ 0,5,5 }, { 0, 5, 5 });
-	//	traiEmit_->SetVelocityMinMax(-Vector3{ 0,5,5 }, { 0, 5, 5 });
-	//}
-	//else {
-	//	hitEmit_->SetVelocityMinMax(-Vector3{ 5,0,5 }, { 5, 0, 5 });
-	//	traiEmit_->SetVelocityMinMax(-Vector3{ 5,0,5 }, { 5, 0, 5 });
-	//}
-
-	//effectEmit_->Update();
-	//hitEmit_->Update();
-	//traiEmit_->Update();
+	if (dirac == 0) {
+		hitEmit_->SetVelocity({}, { 5, 5, 0 });
+		traiEmit_->SetVelocity({}, { 5, 5, 0 });
+	}
+	else if (dirac == 1) {
+		hitEmit_->SetVelocity({}, { 0, 5, 5 });
+		traiEmit_->SetVelocity({}, { 0, 5, 5 });
+	}
+	else {
+		hitEmit_->SetVelocity({}, { 5, 0, 5 });
+		traiEmit_->SetVelocity({}, { 5, 0, 5 });
+	}
+	starEmit_->Emit();
+	effectEmit_->Emit();
+	hitEmit_->Emit();
+	traiEmit_->Emit();
 }
 
 
@@ -257,7 +263,7 @@ void NormalEnemy::Move()
 	Velocity() = { 0,0,0 };
 
 	// 回転と移動量の設定
-	if (Distance(player_->GetObject3D()->GetWorldPosition(), objectBase_->GetWorldPosition()) >= 5) {
+	if (Distance(player_->GetObject3D()->GetWorldPosition(), GetObject3D()->GetWorldPosition()) >= 5) {
 		Parameters().speed = 0;
 	}
 	else {
@@ -303,6 +309,72 @@ void NormalEnemy::InitParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
+
+	starEmit_ = std::make_unique<PointParticleEmitter>();
+	starEmit_->Initialize(particleManager,globalVariables_, "starEmit","hitStar");
+	starEmit_->GetFrequency() = 0.0f;
+	starEmit_->SetCount(1, 0);
+	starEmit_->SetParent(GetObject3D()->GetWorldTransform());
+	starEmit_->SetPos({ 0,0.0f,0.0f });
+	starEmit_->SetRotate({}, DegreesToRadians({ 180,180,180 }));
+	starEmit_->SetVelocity({}, {});
+	starEmit_->SetLifeTime(0.2f, 0);
+	starEmit_->SetIsAlpha(true);
+	starEmit_->SetUsebillboard(false);
+	starEmit_->SetSize(Vector3{ 1.7f,1.7f,1.7f }, { 0.1f,0.1f,0.1f });
+	starEmit_->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
+	starEmit_->SetIsEmit(true);
+
+
+	traiEmit_ = std::make_unique<AABBParticleEmitter>();
+	traiEmit_->Initialize(particleManager, globalVariables_, "traiEmit", "hitEffect");
+	traiEmit_->GetFrequency() = 0.0f;
+	traiEmit_->SetCount(5, 0);
+	traiEmit_->SetParent(GetObject3D()->GetWorldTransform());
+	traiEmit_->SetPos({ 0,0.0f,0.0f });
+	traiEmit_->SetRotate({}, DegreesToRadians({ 180,180,180 }));
+	traiEmit_->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
+	traiEmit_->SetLifeTime(0.2f, 0);
+	traiEmit_->SetIsAlpha(true);
+	traiEmit_->SetUsebillboard(false);
+	traiEmit_->SetSize(Vector3{ 2.6f,2.6f,2.6f }, { 0.1f,0.1f,0.1f });
+	traiEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
+	traiEmit_->SetRange(Vector3{ -5,-5,-5 }, Vector3{ 5,5,5 });
+	traiEmit_->SetAlphaClipping(0.15f);
+	traiEmit_->SetIsEmit(true);
+
+
+	hitEmit_ = std::make_unique<AABBParticleEmitter>();
+	hitEmit_->Initialize(particleManager, globalVariables_, "hitEmit", "hit");
+	hitEmit_->GetFrequency() = 0.0f;
+	hitEmit_->SetCount(10, 0);
+	hitEmit_->SetParent(GetObject3D()->GetWorldTransform());
+	hitEmit_->SetPos({ 0,0.0f,0.0f });
+	hitEmit_->SetRotate({}, DegreesToRadians({ 90,90,90 }));
+	hitEmit_->SetLifeTime(0.5f, 0.1f);
+	hitEmit_->SetIsAlpha(true);
+	hitEmit_->SetUsebillboard(false);
+	hitEmit_->SetSize(Vector3{ 3.6f,3.6f,3.6f }, { 0.1f,0.1f,0.1f });
+	hitEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
+	hitEmit_->SetIsEmit(true);
+
+
+	effectEmit_ = std::make_unique<PointParticleEmitter>();
+	effectEmit_->Initialize(particleManager, globalVariables_, "hitEffect2", "hitEffect2");
+	effectEmit_->GetFrequency() = 0.0f;
+	effectEmit_->SetCount(1,0);
+	effectEmit_->SetParent(GetObject3D()->GetWorldTransform());
+	effectEmit_->SetPos({ 0,0.0f,0.0f });
+	effectEmit_->SetRotate({}, DegreesToRadians({ 180,180,180 }));
+	effectEmit_->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
+	effectEmit_->SetLifeTime(0.2f, 0.1f);
+	effectEmit_->SetIsAlpha(true);
+	effectEmit_->SetUsebillboard(true);
+	effectEmit_->SetSize({ 8,8,8 }, {});
+	effectEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
+	//effectEmit_->S(Vector3{ -5,-5,-5 }, Vector3{ 5,5,5 });
+	effectEmit_->SetAlphaClipping(0.15f);
+	effectEmit_->SetIsEmit(true);
 
 
 	/*dustEmit_ = std::make_unique<ParticleEmitter>();
@@ -365,66 +437,13 @@ void NormalEnemy::InitParticle()
 
 
 
-	//starEmit_ = std::make_unique<ParticleEmitter>();
-	//starEmit_->Initialize(particleManager, "dust", "hitStar");
-	//starEmit_->GetFrequency() = 0.0f;
-	//starEmit_->SetCount(1);
-	//starEmit_->SetParent(objectBase_->GetWorldTransform());
-	//starEmit_->SetPos({ 0,0.0f,0.0f });
-	//starEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
-	//starEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	//starEmit_->SetLifeTimeMinMax(0.2f, 0.2f);
-	//starEmit_->SetIsAlpha(true);
-	//starEmit_->SetUsebillboard(false);
-	//starEmit_->SetSizeMinMax(Vector3{ 1.6f,1.6f,1.6f }, { 1.8f,1.8f,1.8f });
-	//starEmit_->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
-
-	//traiEmit_ = std::make_unique<ParticleEmitter>();
-	//traiEmit_->Initialize(particleManager, "dust", "hitEffect");
-	//traiEmit_->GetFrequency() = 0.0f;
-	//traiEmit_->SetCount(5);
-	//traiEmit_->SetParent(objectBase_->GetWorldTransform());
-	//traiEmit_->SetPos({ 0,0.0f,0.0f });
-	//traiEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
-	//traiEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	//traiEmit_->SetLifeTimeMinMax(0.2f, 0.2f);
-	//traiEmit_->SetIsAlpha(true);
-	//traiEmit_->SetUsebillboard(false);
-	//traiEmit_->SetSizeMinMax(Vector3{ 2.6f,2.6f,2.6f }, { 2.8f,2.8f,2.8f });
-	//traiEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
-	//traiEmit_->SetRengeMinMax(Vector3{ -5,-5,-5 }, Vector3{ 5,5,5 });
-	//traiEmit_->SetAlphaClipping(0.15f);
 
 
-	//effectEmit_ = std::make_unique<ParticleEmitter>();
-	//effectEmit_->Initialize(particleManager, "dust", "hitEffect2", ParticleData::SpawnType::kPoint);
-	//effectEmit_->GetFrequency() = 0.0f;
-	//effectEmit_->SetCount(1);
-	//effectEmit_->SetParent(objectBase_->GetWorldTransform());
-	//effectEmit_->SetPos({ 0,0.0f,0.0f });
-	//effectEmit_->SetRotateMinMax(-DegreesToRadians({ 180,180,180 }), DegreesToRadians({ 180,180,180 }));
-	//effectEmit_->SetVelocityMinMax({ 0,0,0 }, { 0, 0, 0 });
-	//effectEmit_->SetLifeTimeMinMax(0.2f, 0.3f);
-	//effectEmit_->SetIsAlpha(true);
-	//effectEmit_->SetUsebillboard(true);
-	//effectEmit_->SetSizeMinMax({ 8,8,8 }, { 8,8,8 });
-	//effectEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
-	//effectEmit_->SetRengeMinMax(Vector3{ -5,-5,-5 }, Vector3{ 5,5,5 });
-	//effectEmit_->SetAlphaClipping(0.15f);
 
 
-	//hitEmit_ = std::make_unique<ParticleEmitter>();
-	//hitEmit_->Initialize(particleManager, "dust", "hit");
-	//hitEmit_->GetFrequency() = 0.0f;
-	//hitEmit_->SetCount(10);
-	//hitEmit_->SetParent(objectBase_->GetWorldTransform());
-	//hitEmit_->SetPos({ 0,0.0f,0.0f });
-	//hitEmit_->SetRotateMinMax(-DegreesToRadians({ 90,90,90 }), DegreesToRadians({ 90,90,90 }));
-	//hitEmit_->SetLifeTimeMinMax(0.5f, 0.6f);
-	//hitEmit_->SetIsAlpha(true);
-	//hitEmit_->SetUsebillboard(false);
-	//hitEmit_->SetSizeMinMax(Vector3{ 3.6f,3.6f,3.6f }, { 3.8f,3.8f,3.8f });
-	//hitEmit_->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
+
+
+
 
 
 	//Vector3 scale = Vector3{ 1.0f,1.0f,1.0f };

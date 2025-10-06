@@ -3,11 +3,10 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
-void CameraManeger::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables)
+void CameraManeger::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables)
 {
 	input_ = input;
 	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
 	globalVariables_ = globalVariables;
 
 

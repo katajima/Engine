@@ -229,15 +229,15 @@ void ParticleManager::CreateGraphicsPipeline()
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
+	
 	// インプットレイアウト
 	psoManager_->AddInputElementDesc("POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 
-	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Particle/Particle.VS.hlsl");
-	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Particle/Particle.PS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::VS, L"resources/shaders/Particle/CPU/Particle.VS.hlsl");
+	psoManager_->SetShaderFileName(ShaderFileName::PS, L"resources/shaders/Particle/CPU/Particle.PS.hlsl");
 
 
 

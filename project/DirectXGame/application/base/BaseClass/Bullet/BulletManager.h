@@ -14,7 +14,7 @@ class BasePlayer;
 class BaseEnemy;
 class Entity3DManager;
 class Entity2DManager;
-
+class GlobalVariables;
 class BulletManager {
 public:
 	~BulletManager();
@@ -35,7 +35,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera);
+	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera);
 	void SetPlayer(BasePlayer* player) { player_ = player; };
 
 
@@ -63,10 +63,10 @@ private:
 	std::list<std::unique_ptr<BaseBullet>> bullets_;
 
 
-
 private:
 	BasePlayer* player_;
 	Camera* camera_;						// カメラ
+	GlobalVariables* globalVariables_ = nullptr;
 	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
 	Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
 };

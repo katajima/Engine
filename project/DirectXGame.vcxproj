@@ -109,18 +109,20 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleSystem.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\TrailMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\psoData.cpp" />
     <ClCompile Include="DirectXGame\engine\scene\BaseScene.cpp" />
@@ -131,8 +133,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\UI\UIBoard.cpp" />
     <ClCompile Include="DirectXGame\engine\UI\UIElement.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp" />
@@ -140,8 +140,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Vision\VisionComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\playerWeapon.cpp" />
@@ -183,9 +181,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleData.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleField.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\DSV\DsvManager.cpp" />
@@ -230,7 +228,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\DirectX\Common\DirectXCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\ParticleManager.cpp" />
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp" />
     <ClCompile Include="DirectXGame\engine\Material\Material.cpp" />
     <ClCompile Include="DirectXGame\engine\MyGame\Framework.cpp" />
@@ -310,6 +308,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="resources\shaders\Particle\GPU\EmitSpawn.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -318,11 +320,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="resources\shaders\Particle\NewParticle.hlsli">
+    <None Include="resources\shaders\Particle\CPU\NewParticle.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="resources\shaders\Particle\Particle.hlsli">
+    <None Include="resources\shaders\Particle\CPU\Particle.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
@@ -518,6 +520,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
@@ -590,7 +600,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\NewParticle.VS.hlsl">
+    <FxCompile Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -604,11 +614,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\Particle.PS.hlsl">
+    <FxCompile Include="resources\shaders\Particle\CPU\Particle.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\Particle.VS.hlsl">
+    <FxCompile Include="resources\shaders\Particle\CPU\Particle.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
@@ -694,7 +704,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h" />
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Spawn\BasespawnPoint.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\scene\SampleScene.h" />
     <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h" />
     <ClInclude Include="DirectXGame\engine\Collider\2d\Collider2D.h" />
@@ -705,7 +716,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleSystem.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h" />
     <ClInclude Include="DirectXGame\engine\PSO\psoData.h" />
     <ClInclude Include="DirectXGame\engine\scene\Fade.h" />
@@ -728,15 +739,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\MellWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemy.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Boss\BossEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayer.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Special\BaseSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
@@ -745,8 +753,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Component\MoveComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
-    <ClInclude Include="DirectXGame\application\base\Spawn\EnemySpawnPoint.h" />
-    <ClInclude Include="DirectXGame\application\base\Spawn\PlayerSpawnPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\playerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h" />
@@ -800,9 +806,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleData.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleField.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.h" />
     <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h" />
@@ -858,7 +864,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h" />
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\ParticleManager.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.h" />
     <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h" />
     <ClInclude Include="DirectXGame\engine\MyGame\Framework.h" />
     <ClInclude Include="DirectXGame\engine\MyGame\MyGame.h" />

@@ -13,20 +13,18 @@
 #include"DirectXGame/engine/2d/Sprite.h"
 
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include "DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include "DirectXGame/engine/effect/Particle/Emit/ParticleEmitter.h"
+#include<DirectXGame/engine/Effect/EffectComponent.h>
+
+
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include"DirectXGame/engine/effect/Trail/TrailEffect.h"
-
-
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
-#include"DirectXGame/engine/Effect/Primitive/Primitive.h"
+
 #include"DirectXGame/engine/SkyBox/SkyBox.h"
 
-#include "DirectXGame/engine/2d/Primitive2D.h"
+
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 #include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"

@@ -1,11 +1,11 @@
-#include "GpuParticle.hlsli"
-#include "random.hlsli"
+//#include "GpuParticle.hlsli"
+//#include "random.hlsli"
+#include "EmitSpawn.hlsli"
 
-
-ConstantBuffer<EmitterAABB> gEmitter      : register(b0); // エミッター
-ConstantBuffer<EmitterCommon> gEmitterCommon : register(b3); // エミッター
-
-
+ConstantBuffer<EmitterAABB> gEmitter      : register(b0); // エミッター(固有)
+ConstantBuffer<EmitterCommon> gEmitterCommon : register(b3); // エミッター(共通)
+ConstantBuffer<EmitterTrail> gEmitterTrail : register(b4); // エミッター(トレイル)
+ConstantBuffer<PerEmitterDispatch> gPerEmitterDispatch : register(b5); // エミッター(ディスパッチ数)
 
 
 ConstantBuffer<PerFrame> gPerFrame          : register(b1); // 乱数生成用時間
@@ -18,7 +18,7 @@ RWStructuredBuffer<uint> gFreeList     : register(u2);
 
 #define THREAD_COUNT 64
 [numthreads(THREAD_COUNT, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
+void main(uint3 DTid : SV_DispatchThreadID)
 {
     if (gEmitterCommon.emit == 0)
         return;
@@ -26,10 +26,13 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
     uint globalIndex = DTid.x;
 
     RandomGeneratetor generator;
+    EmitSpawns emitSpawn; // エミット形状
+    EmitDirections emitDirection; // エミット方向
+    
     generator.seed = (float3(globalIndex, 0, 0) + gPerFrame.time) * gPerFrame.time;
 
     // スレッド数に応じて各スレッドがemit処理を分担
-    for (uint countIndex = globalIndex; countIndex < gEmitterCommon.count; countIndex += THREAD_COUNT)
+    for (uint countIndex = globalIndex; countIndex < gEmitterCommon.count; countIndex +=  gPerEmitterDispatch.totalThreadCount)
     {
         int freeListIndex;
         InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
@@ -39,16 +42,17 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTid : SV_GroupThreadID)
             uint particleIndex = gFreeList[freeListIndex];
 
             
-            gParticle[particleIndex].translate = gEmitterCommon.translate + generator.Generate1d_4() * gEmitter.size;
+            gParticle[particleIndex].translate = emitSpawn.EmitAABB(generator, gEmitterCommon.spawnShape, gEmitterCommon.translate, gEmitter.size, particleIndex);
+           
             
             
-            gParticle[particleIndex].currentTime = 0;
-            gParticle[particleIndex].lifeTime = gEmitterCommon.lifeTime + generator.Generate1d_4() * gEmitterCommon.lifeTimeRange;
-            gParticle[particleIndex].scale = gEmitterCommon.scale + generator.Generate3d_4() * gEmitterCommon.scaleRange;
-            gParticle[particleIndex].color.rgb = gEmitterCommon.color + generator.Generate3d_4() * gEmitterCommon.colorRange;
-            gParticle[particleIndex].color.a = 1.0f;
-            gParticle[particleIndex].velocity = gEmitterCommon.velocity + generator.Generate3d_4() * gEmitterCommon.velocityRange;
-            gParticle[particleIndex].acceleration = float3(0.0f, 0.0f, 0.0f);
+            gParticle[particleIndex].velocity =
+            emitDirection.EmitDirection(generator, gEmitterCommon.directionType,
+            gParticle[particleIndex].translate, gEmitterCommon.translate,
+            gEmitterCommon.velocity, gEmitterCommon.velocityRange, gEmitterCommon.force);
+            
+           
+            EmitSetting_Set(generator, gParticle[particleIndex], gEmitterCommon, gEmitterTrail);
         }
         else
         {

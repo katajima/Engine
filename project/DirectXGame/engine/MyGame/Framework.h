@@ -8,9 +8,6 @@
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 
-#include"DirectXGame/engine/effect/Particle/ParticleManager.h"
-
-
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include"DirectXGame/engine/scene/AbstractSceneFactory.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"

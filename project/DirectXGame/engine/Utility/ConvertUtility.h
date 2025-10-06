@@ -88,4 +88,14 @@ namespace ConvertUtility
 		return v != 0;
 	}
 
+
+
+	// 
+	float TimeToSeconds(int timeInMilliseconds) {
+		return static_cast<float>(timeInMilliseconds) / 1000.0f;
+	}
+
+	float FramesToSeconds(int frameCount, float fps = 60.0f) {
+		return static_cast<float>(frameCount) / fps;
+	}
 }

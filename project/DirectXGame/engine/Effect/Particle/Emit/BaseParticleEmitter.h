@@ -6,16 +6,17 @@
 // engine
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/Effect/Particle/ParticleManager.h"
+#include"DirectXGame/engine/Effect/Particle/CPU/ParticleManager.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
+class GlobalVariables;
 class LineCommon;
 class BaseParticleEmitter
 {
 public:
 	virtual ~BaseParticleEmitter() {}
 	// 初期化
-	virtual void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) = 0;
+	virtual void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) = 0;
 	// 更新
 	void Update();
 	// 発生
@@ -24,13 +25,17 @@ public:
 
 protected:
 	// 共通初期化
-	void CommonParticleInit(ParticleManager* particleManager, std::string emitName, std::string particleName);
+	void CommonParticleInit(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName);
 
 	virtual void EmitUniqe() = 0;
 
 	virtual void UpdateUniqe() {}; //
 
 	virtual void DebugImGui() {};
+
+	virtual void ApplyGlobalVariablesUniqe() {}; // グローバル変数適用
+
+	void ApplyGlobalVariables(); // グローバル変数適用
 
 public: // Getter Setter
 	EffectEmitData& GetEmitData() { return emitData_; };	// エミットデータ
@@ -149,7 +154,7 @@ protected:
 
 
 	EffectEmitData emitData_{}; // エミットデータ
-	
-	ParticleManager* particleManager_;
+	GlobalVariables* globalVariables_ = nullptr;
+	ParticleManager* particleManager_ = nullptr;
 	LineCommon* lineCommon_ = nullptr;
 };

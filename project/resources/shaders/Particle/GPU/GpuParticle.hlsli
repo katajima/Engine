@@ -42,6 +42,12 @@ struct Particle
     
 };
 
+struct DeleteParticle
+{
+    uint isDelete; // 削除
+    float3 pad;
+};
+
 struct PerView
 {
     float4x4 viewProjection;
@@ -80,23 +86,35 @@ struct EmitterCommon
     uint isAlpha;           // アルファブレンドするか
     uint isScaling;         // スケーリングするか
     
-    float scaleAmount;      // スケーリング量
+    float3 rotate;          // 回転
     uint isGravity;         // 重力影響するか
-    uint isTrail;           // リボンを引くか
-    float trailWidth;       // リボンの太さ
     
-    float4 trailColor; // リボンの色
+    float3 rotateRange;     // 回転(範囲)
+    uint useBillboard;      // ビルボードを使うか
     
-    float trailLifeTime; // リボンの生存時間
-    float3 rotate; // 回転
-	
-    float3 rotateRange; // 回転(範囲)
-    uint useBillboard; // ビルボードを使うか
+    
+    float scaleAmount;      // スケーリング量
+    float3 prevTranslate;   // 前フレームの位置
+    
 };
 
 
 
+// トレイル関係エミッター
+struct EmitterTrail
+{
+    float4 trailColor; // リボンの色
+    
+    uint isTrail; // リボンを引くか
+    float trailWidth; // リボンの太さ
+    float trailLifeTime; // リボンの生存時間 
+    float pad; // パディング
+};
 
+struct PerEmitterDispatch
+{
+    uint totalThreadCount;
+};
 
 // エミッター(球)
 struct EmitterSphere
@@ -108,7 +126,12 @@ struct EmitterAABB
 {
     float3 size; // 大きさ
 };
-
+// エミッター(点)
+struct EmitterPoint
+{
+    uint interpolation;
+    float3 pad; // パディング
+};
 
 
 struct PerFrame

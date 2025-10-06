@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
+void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position)
 {
 	input_ = input;
 
@@ -103,13 +103,4 @@ void FollowCamera::Update()
     }
 
     uniqueCamera_->UpdateMatrix();
-}
-
-
-void FollowCamera::DrawEffect() {
-
-}
-
-void FollowCamera::Draw2D() {
-
 }

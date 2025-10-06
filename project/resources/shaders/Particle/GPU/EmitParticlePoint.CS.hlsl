@@ -1,9 +1,9 @@
 #include "EmitSpawn.hlsli"
 
-ConstantBuffer<EmitterSphere> gEmitter : register(b0);                  // エミッター(固有)
-ConstantBuffer<EmitterCommon> gEmitterCommon : register(b3);            // エミッター(共通)
-ConstantBuffer<EmitterTrail>  gEmitterTrail : register(b4);             // エミッター(トレイル)
-ConstantBuffer<PerEmitterDispatch> gPerEmitterDispatch : register(b5);  // エミッター(ディスパッチ数)
+ConstantBuffer<EmitterPoint> gEmitter : register(b0); // エミッター(固有)
+ConstantBuffer<EmitterCommon> gEmitterCommon : register(b3); // エミッター(共通)
+ConstantBuffer<EmitterTrail> gEmitterTrail : register(b4); // エミッター(トレイル)
+ConstantBuffer<PerEmitterDispatch> gPerEmitterDispatch : register(b5); // エミッター(ディスパッチ数)
 
 
 
@@ -30,9 +30,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     uint globalIndex = DTid.x;
 
-    RandomGeneratetor generator;    // 乱数生成器
-    EmitSpawns emitSpawn;           // エミット形状
-    EmitDirections emitDirection;   // エミット方向
+    RandomGeneratetor generator; // 乱数生成器
+    EmitSpawns emitSpawn; // エミット形状
+    EmitDirections emitDirection; // エミット方向
 
     
     
@@ -47,19 +47,19 @@ void main(uint3 DTid : SV_DispatchThreadID)
         if (0 <= freeListIndex && freeListIndex < gMaxInstance.maxInstanse)
         {
             uint particleIndex = gFreeList[freeListIndex];
-
             
-            gParticle[particleIndex].translate = emitSpawn.EmitSphere(generator, gEmitterCommon.spawnShape, gEmitterCommon.translate, gEmitter.radius);
-           
+            gParticle[particleIndex].translate = emitSpawn.EmitPoint(generator, gEmitterCommon, gEmitter.interpolation, countIndex, globalIndex, gPerEmitterDispatch.totalThreadCount);
+                                                           
             
-            gParticle[particleIndex].velocity = 
-            emitDirection.EmitDirection(generator, gEmitterCommon.directionType, 
+            gParticle[particleIndex].velocity =
+            emitDirection.EmitDirection(generator, gEmitterCommon.directionType,
             gParticle[particleIndex].translate, gEmitterCommon.translate,
             gEmitterCommon.velocity, gEmitterCommon.velocityRange, gEmitterCommon.force);
             
-           
             EmitSetting_Set(generator, gParticle[particleIndex], gEmitterCommon, gEmitterTrail);
           
+            
+         
 
         }
         else

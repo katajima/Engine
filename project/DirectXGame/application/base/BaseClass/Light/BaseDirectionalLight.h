@@ -7,7 +7,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, GlobalVariables* globalVariables, Vector3 position) = 0;
 
 	///< summary>
 	/// 更新

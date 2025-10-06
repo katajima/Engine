@@ -2,9 +2,10 @@
 #include "WeaponData.h"
 #include "DirectXGame/application/base/BaseClass/Attack/AttackData.h"
 #include "DirectXGame/application/base/Attack/Combo/ComboState.h"
+#include "DirectXGame/application/base/BaseClass/Object/ObjectComponent.h"
 
 // 武器のベースクラス
-class BaseWeapon : public BaseObject
+class BaseWeapon : public IHitReceiver
 {
 public:
 	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
@@ -24,7 +25,7 @@ public:
 		comboStateMachine_ = std::make_unique<ComboStateMachine>(this->character);
 	};
 	// タグによるコライダーの有効・無効を設定
-	void SetIsCollider(CollisionTag tag ,bool is) { objectBase_->GetColliderComponent()->SetEnableByTag(tag, is); };
+	void SetIsCollider(CollisionTag tag ,bool is) { GetObject3D()->GetColliderComponent()->SetEnableByTag(tag, is); };
 	// 攻撃中かどうかのフラグを取得
 	bool IsActive() const { return data_.isActive; };
 	// オートマチックかどうかのフラグを取得
@@ -41,6 +42,14 @@ public:
 	void SetComboData(ComboData data) { comboData_ = data; }
 	// コンボステートマシーン取得
 	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
+	
+	
+	// コライダーコンポーネント
+	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
+	// オブジェクト3d取得
+	Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	// ワールド変換取得
+	WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
 
 
 
@@ -83,6 +92,15 @@ protected:
 	
 protected:
 	BaseCharacter* character;	// 使っているキャラクター
+protected:
+	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
+protected:
+	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Camera* camera_ = nullptr;						// カメラ
+	Input* input_ = nullptr;						// 入力(使わないならnullptr)
+	Audio* audio_ = nullptr;
 };
 
 // 近距離の武器クラス

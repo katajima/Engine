@@ -68,8 +68,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
     v2.pos = p.translate + side * p.trailWidth;
     v3.pos = p.translate - side * p.trailWidth;
 
-    // alpha は color.w を使うこと（HLSL で float4 color の .w が alpha）
-    float4 col = p.color;
+    // トレイルカラー
+    float4 col = p.trailColor;
     col.w = 1.0f;
     v0.color = v1.color = v2.color = v3.color = col;
 

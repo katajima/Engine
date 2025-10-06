@@ -13,8 +13,8 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include"DirectXGame/engine/effect/Particle/ParticleManager.h"
-#include"DirectXGame/engine/effect/Particle/Emit/ParticleEmitter.h"
+
+#include<DirectXGame/engine/Effect/EffectComponent.h>
 
 #include "DirectXGame/application/base/BaseClass/Light/BaseLights.h"
 

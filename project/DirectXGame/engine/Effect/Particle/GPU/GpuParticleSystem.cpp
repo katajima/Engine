@@ -31,7 +31,12 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 	cbPerFrame_.CreateBuffer(dxCommon_, 1);
 	// カメラ位置
 	cbCameraPos_.CreateBuffer(dxCommon_, 1);
-
+	// エミッタ発生数
+	cbEmiterDispatch_.CreateBuffer(dxCommon_, 1);
+	cbEmiterDispatch_.Data()->totalThreadCount = 0; // 初期化
+	// 削除フラグ
+	cbDeleteParticleCS_.CreateBuffer(dxCommon_, 1);
+	cbDeleteParticleCS_.Data()->isDelete = false; // 初期化
 
 
 	gpuParticleManager_->PreCsPso();
@@ -72,7 +77,7 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 	}
 }
 
-void GpuParticleGroup::UpdateEmitte(float deltaTime, int count)
+void GpuParticleGroup::UpdateEmitte(float deltaTime, int threadGroupCount)
 {
 
 	cbPerFrame_.Data()->time += deltaTime;
@@ -91,8 +96,14 @@ void GpuParticleGroup::UpdateEmitte(float deltaTime, int count)
 	cbMaxInstance_.SetComputeRootConstantBufferView(5);			// Maxインスタンス
 
 
+	// --- 重要: totalThreadCount は「総スレッド数」を入れる ---
+	// threadGroupCount はグループ数。count_ がシェーダの THREAD_COUNT に相当する値である前提。
+	cbEmiterDispatch_.Data()->totalThreadCount = static_cast<uint32_t>(threadGroupCount * 64); // <-- 総スレッド数
+	cbEmiterDispatch_.SetComputeRootConstantBufferView(8);   // エミッタ発生数（CBVはデータ設定後にセット）
 
-	dxCommon_->GetCommandList()->Dispatch(count, 1, 1);
+	// Dispatch にはグループ数を渡す
+	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
+
 
 	sbParticleResource_.UavDependence();
 	sbFreeListIndexResource_.UavDependence();
@@ -139,12 +150,21 @@ void GpuParticleGroup::Update()
 	sbFreeListIndexResource_.SetComputeRootDescriptorTable(2);	// カウンターインデックス
 	sbFreeListResource_.SetComputeRootDescriptorTable(3);		// カウンター
 	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
+	cbDeleteParticleCS_.SetComputeRootConstantBufferView(5); 	// 削除フラグ
 
 	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 
 	sbParticleResource_.UavDependence();
 	sbFreeListIndexResource_.UavDependence();
 	sbFreeListResource_.UavDependence();
+
+	if (cbDeleteParticleCS_.Data()->isDelete != 0) {
+		deleteTimer_ += cbPerFrame_.Data()->deltaTime;
+		if(deleteTimer_ >= 0.05f){ // 0.5秒に一回削除
+			deleteTimer_ = 0.0f;
+			cbDeleteParticleCS_.Data()->isDelete = false; // フラグ戻す
+		}
+	}
 }
 
 void GpuParticleGroup::UpateTrailEmitte(float deltaTime)

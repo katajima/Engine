@@ -3,15 +3,15 @@
 #include "ParticleEmitter.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
-#include "DirectXGame/engine/Effect/Particle/ParticleField.h"
+#include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "DirectXGame/engine/Math/Random.h"
 
 #pragma region Point
-void PointParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void PointParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
 // デバック線描画
 void PointParticleEmitter::DrawEmitterLine() {}
@@ -26,15 +26,25 @@ void PointParticleEmitter::EmitUniqe() {
 
 #pragma region AABB
 
-void AABBParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void AABBParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 
 	//
 	range_ = { {-1.0f,-1.0f,-1.0f},{1.0f,1.0f,1.0f} };
 
+	//globalVariables_->AddItem(emitName,"rangeAABB.min", range_.min);
+	//globalVariables_->AddItem(emitName,"rangeAABB.max", range_.max);
+	//// グローバル変数適用
+	//ApplyGlobalVariablesUniqe();
 }
+
+void AABBParticleEmitter::ApplyGlobalVariablesUniqe() {
+	//range_.min = globalVariables_->GetValue<Vector3>(emitName_,"rangeAABB.min");
+	//range_.max = globalVariables_->GetValue<Vector3>(emitName_,"rangeAABB.max");
+}
+
 // デバック線描画
 void AABBParticleEmitter::DrawEmitterLine() { lineCommon_->AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
 // パーティクル発生
@@ -42,6 +52,7 @@ void AABBParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 	auto& rnd = particleManager_->GetRandomEngine();
 
+	ApplyGlobalVariablesUniqe();
 
 	Vector3 pos{};
 	if (emitType_ == EmitData::EmitType::kRandom) {	// ランダム
@@ -160,15 +171,23 @@ void AABBParticleEmitter::SetRange(Vector3 min, Vector3 max)
 
 #pragma region Shpere
 
-void SphereParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void SphereParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 
 	// 半径
 	radius_ = 1.0f;
 
+	//globalVariables_->AddItem(emitName, "radiusShpere", radius_);
+	//// グローバル変数適用
+	//ApplyGlobalVariablesUniqe();
 }
+
+void SphereParticleEmitter::ApplyGlobalVariablesUniqe() {
+	//radius_ = globalVariables_->GetValue<float>(emitName_, "radiusShpere");
+}
+
 // デバック線描画
 void SphereParticleEmitter::DrawEmitterLine() {
 	Sphere sphere{};
@@ -180,6 +199,8 @@ void SphereParticleEmitter::DrawEmitterLine() {
 }
 // パーティクル発生
 void SphereParticleEmitter::EmitUniqe() {
+	ApplyGlobalVariablesUniqe();
+
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 	Vector3 pos = transform_.worldMat_.GetWorldPosition() + Random::RandomUnitVector3(particleManager_->GetRandomEngine()) * radius_;
@@ -200,19 +221,31 @@ void SphereParticleEmitter::DebugImGui()
 
 #pragma region Circle
 
-void CornerParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void CornerParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 
 	//
 	corner.segment = 8;
 	corner.radius = 1.0f;
 	corner.center = {};
 
+	//globalVariables_->AddItem(emitName, "corner.segment", corner.segment);
+	//globalVariables_->AddItem(emitName, "corner.radius", corner.radius);
+
+	//// グローバル変数適用
+	//ApplyGlobalVariablesUniqe();
+}
+
+void CornerParticleEmitter::ApplyGlobalVariablesUniqe() {
+	/*corner.segment = globalVariables_->GetValue<int>(emitName_, "corner.segment");
+	corner.radius = globalVariables_->GetValue<float>(emitName_, "radiusShpere");*/
+
 }
 
 void CornerParticleEmitter::UpdateUniqe() {
+	ApplyGlobalVariablesUniqe();
 	corner.center = transform_.worldMat_.GetWorldPosition();
 }
 
@@ -281,13 +314,24 @@ void CornerParticleEmitter::DebugImGui()
 
 #pragma region Line
 
-void LineParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void LineParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 
 	segment_.origin = { 0,0,0 };
 	segment_.end = { 1.0f,0,0 };
+
+	//globalVariables_->AddItem(emitName, "segment.origin", segment_.origin);
+	//globalVariables_->AddItem(emitName, "segment.ends", segment_.end);
+
+	//// グローバル変数適用
+	//ApplyGlobalVariablesUniqe();
+}
+
+void LineParticleEmitter::ApplyGlobalVariablesUniqe() {
+	/*segment_.origin = globalVariables_->GetValue<Vector3>(emitName_, "segment.origin");
+	segment_.end = globalVariables_->GetValue<Vector3>(emitName_, "segment.ends");*/
 
 }
 // デバック線描画
@@ -330,11 +374,15 @@ void LineParticleEmitter::DebugImGui()
 
 #pragma region Spline
 
-void SplineParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void SplineParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
+void SplineParticleEmitter::ApplyGlobalVariablesUniqe() {
+	
+}
+
 // デバック線描画
 void SplineParticleEmitter::DrawEmitterLine() {
 	lineCommon_->AddSpline(controlPoints, transform_);
@@ -382,16 +430,20 @@ void SplineParticleEmitter::DebugImGui()
 
 #pragma region Triangle
 
-void TriangleParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void TriangleParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 
 	triangle_.vertices[0] = { 0,0.5f,0 };
 	triangle_.vertices[1] = { 0.5f,-0.5f,0 };
 	triangle_.vertices[2] = { -0.5f,-0.5f,0 };
 
 }
+void TriangleParticleEmitter::ApplyGlobalVariablesUniqe() {
+
+}
+
 // デバック線描画
 void TriangleParticleEmitter::DrawEmitterLine() {
 	lineCommon_->AddLineTriangle(triangle_, transform_);
@@ -440,10 +492,13 @@ void TriangleParticleEmitter::DebugImGui()
 #pragma region Mesh
 
 
-void MeshParticleEmitter::Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void MeshParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
-	CommonParticleInit(particleManager, emitName, particleName);
+	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
+}
+void MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
+	
 }
 // デバック線描画
 void MeshParticleEmitter::DrawEmitterLine() {

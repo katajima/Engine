@@ -15,7 +15,7 @@
 #include"DirectXGame/engine/PSO/PSOManager.h"
 #include"DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
-#include <DirectXGame/engine/Effect/Particle/ParticleData.h>
+#include <DirectXGame/engine/Effect/Particle/CPU/ParticleData.h>
 #include "DirectXGame/engine/Utility/MapUtility.h"
 
 class Material;

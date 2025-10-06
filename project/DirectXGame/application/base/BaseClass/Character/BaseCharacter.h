@@ -1,7 +1,9 @@
 #pragma once
 #include"CharacterData.h"
-#include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
+#include"DirectXGame/application/base/Component/MoveComponent.h"
 
+//#include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
+#include "DirectXGame/application/base/BaseClass/Object/ObjectComponent.h"
 
 class BaseSpecial;
 class BaseWeapon;
@@ -9,7 +11,7 @@ class AttackInputHander;
 class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
-class BaseCharacter : public BaseObject
+class BaseCharacter : public IHitReceiver
 {
 public:
 	///< summary>
@@ -41,7 +43,7 @@ public:
 	/// ジャンプ
 	/// </summary>
 	virtual void Jump() = 0;
-	
+
 	/// <summary>
 	/// 攻撃
 	/// </summary>
@@ -58,23 +60,25 @@ public:
 		HP() -= damage;
 		if (GetHP() <= 0) {
 			HP() = 0;
-			flags_.isAlive = false; // 敵が死亡
+			objectComponent_->GetObjectStateFlags().isAlive = false; // 敵が死亡
 		}
 	}
 
 	// 移動制限
 	void LimitMove(Vector3 min, Vector3 max) {
-		if (objectBase_->GetWorldTransform().translate_.x > max.x) {
-			objectBase_->GetWorldTransform().translate_.x = max.x;
+		Object3d* object = objectComponent_->GetObject3D();
+
+		if (object->GetWorldTransform().translate_.x > max.x) {
+			object->GetWorldTransform().translate_.x = max.x;
 		}
-		if (objectBase_->GetWorldTransform().translate_.x < min.x) {
-			objectBase_->GetWorldTransform().translate_.x = min.x;
+		if (object->GetWorldTransform().translate_.x < min.x) {
+			object->GetWorldTransform().translate_.x = min.x;
 		}
-		if (objectBase_->GetWorldTransform().translate_.z > max.z) {
-			objectBase_->GetWorldTransform().translate_.z = max.z;
+		if (object->GetWorldTransform().translate_.z > max.z) {
+			object->GetWorldTransform().translate_.z = max.z;
 		}
-		if (objectBase_->GetWorldTransform().translate_.z < min.z) {
-			objectBase_->GetWorldTransform().translate_.z = min.z;
+		if (object->GetWorldTransform().translate_.z < min.z) {
+			object->GetWorldTransform().translate_.z = min.z;
 		}
 	};
 
@@ -87,14 +91,28 @@ public: // 取得系関数
 	// 弾マネージャーの設定
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 	// キャラクターの生存状態を取得
-	bool GetAlive() const { return flags_.isAlive; };
+	bool GetAlive() const { return objectComponent_->GetObjectStateFlags().isAlive; };
 	// キャラクターの生存状態を取得
-	void SetAlive(bool is){ flags_.isAlive = is; };
+	void SetAlive(bool is) { objectComponent_->GetObjectStateFlags().isAlive = is; };
 
 	// HP取得
 	float GetHP() const { return characterParameterComponent_.parameters_.HP.value; }
 	// キャラクター取得
 	CharacterType GetCharacterType() const { return characterParameterComponent_.characterType_; }
+	// コライダーコンポーネント
+	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
+	// オブジェクト3d取得
+	Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	// ワールド変換取得
+	WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
+	// 削除フラグ
+	bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
+	// 削除する
+	void Delete() { objectComponent_->GetObjectStateFlags().isDeleted = true; };
+	// 時間
+	float GetTime() { return objectComponent_->GetTime(); }
+	// インプット取得
+	Input* GetInput() { return input_; };
 
 protected: // 取得系関数(変更可能)
 
@@ -107,19 +125,19 @@ protected: // 保存機能
 
 	// 保存生成
 	void CreateGroup(const std::string name) {
-		name_ = name;
-		globalVariables_->CreateGroup(name_);
+		objectComponent_->SetName(name);
+		globalVariables_->CreateGroup(name);
 	}
 
 	// 保存するもの追加
 	template<typename T>
 	void AddItem(const std::string itemName, T& item) {
-		globalVariables_->AddItem(name_, itemName, item);
+		globalVariables_->AddItem(objectComponent_->GetName(), itemName, item);
 	}
 
 	template<typename T>
 	T GetValue(const std::string itemName) {
-		return globalVariables_->GetValue<T>(name_, itemName);
+		return globalVariables_->GetValue<T>(objectComponent_->GetName(), itemName);
 	}
 
 	// ベースの保存項目を追加
@@ -172,11 +190,21 @@ public:
 	CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
 
 protected:
+	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
+
 
 	std::unique_ptr<BaseSpecial> special_;	// スペシャル攻撃
 	std::unique_ptr<BaseWeapon> weapon_;	// 武器
 	std::unique_ptr<AttackInputHander> attackInputHander_; // 攻撃入力系クラス
+	
 
 	BulletManager* bulletManager_;			// 弾管理
+protected: // 貰ってくるもの
+	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Camera* camera_ = nullptr;						// カメラ
+	Input* input_ = nullptr;						// 入力(使わないならnullptr)
+	Audio* audio_ = nullptr;
 };
 

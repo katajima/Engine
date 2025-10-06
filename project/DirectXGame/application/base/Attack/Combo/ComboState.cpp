@@ -62,7 +62,7 @@ void ComboNodeState::Exit(BaseCharacter* owner)
 
 	timeInState = 0.0f;
 	// アニメ終了時の処理など
-	owner->GetWeapon()->ColliderHistoryClear();
+	owner->GetWeapon()->GetColliderComponent()->contactRecord_.Clear();
 	owner->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
 
 	anima->SetStratAnimeTime();

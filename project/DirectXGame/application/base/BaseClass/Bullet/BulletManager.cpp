@@ -12,10 +12,11 @@ BulletManager::~BulletManager()
 	bullets_.clear();
 }
 
-void BulletManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
+void BulletManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera)
 {
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
+	globalVariables_ = globalVariables;
 	camera_ = camera;
 
 }
@@ -73,7 +74,7 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	}
 
 	bullet->SetTargerRange(targetPos, rad);
-	bullet->Initialize(entity3DManager_, entity2DManager_, position, camera_);
+	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
 	bullet->SetPlayer(player_);
 
 
@@ -99,7 +100,7 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 		break;
 	}
 
-	bullet->Initialize(entity3DManager_, entity2DManager_, position, camera_);
+	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
 	bullet->SetEnemy(enemy);
 	bullet->SetPlayer(player_);
 

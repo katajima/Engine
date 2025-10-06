@@ -4,7 +4,7 @@
 #include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
 
 
-void UniverseCamera::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
+void UniverseCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position)
 {
 	uniqueCamera_ = std::make_unique<Camera>();
 	uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
@@ -44,12 +44,4 @@ void UniverseCamera::Update() {
 
 	}
 	uniqueCamera_->UpdateMatrix();
-}
-
-void UniverseCamera::DrawEffect() {
-
-}
-
-void UniverseCamera::Draw2D() {
-
 }

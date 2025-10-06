@@ -36,7 +36,7 @@ public:
 	void Update();
 	// 描画
 	void Draw();
-
+	
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
@@ -48,10 +48,25 @@ public:
 	void CreateGroup(std::string name, ModelMesh* mesh, std::string textureName, int instance);
 		
 	
+
+
 	void SetEmitteToGroup(std::string emitteName, std::string particleGroupName);
 
 	void CreateField(std::string name);
 
+	// エミッターの解放
+	void ClearEmitter(std::string nume);
+
+	void ClearEmitterAll();
+
+
+	// パーティクル削除
+	void ClearGroupParticle(std::string name);
+	// パーティクル削除(全て)
+	void ClearGroupParticleAll();
+
+	// フィールドの解放
+	void ClearField(std::string name);
 
 	// ヘッダにテンプレート関数を定義
 	template <typename EmitterType>
@@ -73,6 +88,16 @@ public:
 		}
 		return dynamic_cast<T*>(it->second.get()); 
 	}
+
+
+	GpuParticleGroup* GetGpuParticleGroup(const std::string& name) {
+		auto it = gpuParticleGroup_.find(name);
+		if (it == gpuParticleGroup_.end()) {
+			return nullptr;
+		}
+		return &it->second;
+	}
+
 private:
 
 	// ルートシグネチャの作成

@@ -4,8 +4,7 @@
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 
-#include "DirectXGame/engine/Effect/Particle/Emit/ParticleEmitter.h"
-#include "DirectXGame/engine/Effect/Particle/ParticleManager.h"
+#include<DirectXGame/engine/Effect/EffectComponent.h>
 
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 #include "DirectXGame/engine/Base/pch.h"
@@ -14,6 +13,7 @@ class BasePlayer;
 class BaseEnemy;
 class Entity3DManager;
 class Entity2DManager;
+class GlobalVariables;
 class BaseBullet{
 public:
 	// デフォルトコンストラクタ
@@ -29,7 +29,7 @@ public:
 	};
 	
 	// 初期化
-	virtual void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
 
 
 	// 毎フレーム更新
@@ -103,8 +103,9 @@ protected:
 protected:
 	BasePlayer* player_;
 	BaseEnemy* enemy_;
-	Entity3DManager* entity3DManager_;
-	Entity2DManager* entity2DManager_;
+	GlobalVariables* globalVariables_ = nullptr;
+	Entity3DManager* entity3DManager_ = nullptr;
+	Entity2DManager* entity2DManager_ = nullptr;
 };
 
 

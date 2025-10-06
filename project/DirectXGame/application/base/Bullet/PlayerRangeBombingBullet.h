@@ -9,7 +9,7 @@ public:
 	~PlayerRangeBombingBullet();
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Vector3 position, Camera* camera) override;
+	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
 
 	// 毎フレーム更新
 	void Update() override;
@@ -24,17 +24,19 @@ public:
 private: // 演出関係
 
 	//// 初期煙初期化
-	//void InitStartSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	void InitStartSmoke();
 	//// ミサイル移動中煙初期化
-	//void InitMoveSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	void InitMoveSmoke();
 	//// 爆発煙初期化
-	//void InitExpSmoke(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	void InitExpSmoke();
 	//// 爆発火初期化
-	//void InitExpFire(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	void InitExpFire();
 	//// アニメーションキューブ初期化
-	//void InitExpBre(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	void InitExpBre();
 	//// リングエミッター初期化
-	//void InitRingEmitter(ParticleEmitter* emitter, ParticleManager* particleManager, std::string emitName);
+	void InitRingEmitter();
+	//// ヒットエミッター初期化
+	void InitHitEmitter();
 
 private:
 
@@ -64,7 +66,12 @@ private:
 
 	float time_ = 0.0f; // 時間
 
+	uint32_t countIndex_ = 0;
+
 private: //パーティクルエミッター
+	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
+
+
 	//// ミサイルi移動中煙エミッター
 	//std::unique_ptr<ParticleEmitter> moveSmokeEmitter_;
 	//std::unique_ptr<ParticleEmitter> moveSmokeEmitter2_ = nullptr;
@@ -85,9 +92,21 @@ private: //パーティクルエミッター
 	//// ヒット
 	//std::unique_ptr<ParticleEmitter> hitEmitter_ = nullptr;
 
+	PointParticleEmitter* hitEmitter_ = nullptr;
+	PointParticleEmitter* stratSmoke01_ = nullptr;
+	PointParticleEmitter* stratSmoke02_ = nullptr;
+	PointParticleEmitter* smokePlaneExpSmoke = nullptr;
+	//LineParticleEmitter* moveSmoke = nullptr;
+	PointParticleEmitter* animatedCube = nullptr;
+	AABBParticleEmitter* ringEmit = nullptr;
+	PointParticleEmitter* expPlane = nullptr;
+
+
+	GpuParticleEmitterPoint* emitterPoint = nullptr;
+
 	Object3d* hitObject_ = nullptr;
 	Object3d* hitObject2_ = nullptr;
 
-	bool flag_ = false; 
+	bool flag_ = false;
 };
 

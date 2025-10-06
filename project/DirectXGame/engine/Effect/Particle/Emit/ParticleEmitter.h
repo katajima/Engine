@@ -5,7 +5,7 @@
 // 点エミッター
 class PointParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 private:
 	void EmitUniqe() override;
 
@@ -15,13 +15,15 @@ private:
 // AABBエミッター
 class AABBParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 private:
 	void EmitUniqe() override;
 
 	void DebugImGui() override;
 
 	void DrawEmitterLine() override;
+
+	void ApplyGlobalVariablesUniqe() override;
 public:
 	void SetRange(Vector3 min, Vector3 max);// 範囲設定
 private:
@@ -31,7 +33,7 @@ private:
 // 球エミッター
 class SphereParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 
 private:
 	void EmitUniqe() override;
@@ -40,6 +42,7 @@ private:
 
 	void DrawEmitterLine() override;
 
+	void ApplyGlobalVariablesUniqe() override;
 public:
 
 	void SetRadius(float radius) { radius_ = radius; } // 半径
@@ -50,7 +53,7 @@ private:
 // 円エミッター
 class CornerParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 private:
 	void EmitUniqe() override;
 
@@ -60,6 +63,7 @@ private:
 
 	void DrawEmitterLine() override;
 
+	void ApplyGlobalVariablesUniqe() override;
 public:
 
 	void SetRadius(float radius) { corner.radius = radius; } // 半径
@@ -71,7 +75,7 @@ private:
 //	ラインエミッター
 class LineParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 
 
 private:
@@ -80,6 +84,8 @@ private:
 	void DebugImGui() override;
 
 	void DrawEmitterLine() override;
+
+	void ApplyGlobalVariablesUniqe() override;
 public:
 	void SetSegment(Vector3 origin, Vector3 end);
 
@@ -91,7 +97,7 @@ private:
 // スプライン
 class SplineParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 
 
 
@@ -101,6 +107,8 @@ private:
 	void DebugImGui() override;
 
 	void DrawEmitterLine() override;
+
+	void ApplyGlobalVariablesUniqe() override;
 public:
 
 	void AddControlPoints(const Vector3& pos) { controlPoints.push_back(pos); }
@@ -116,7 +124,7 @@ private:
 // 三角
 class TriangleParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 
 private:
 	void EmitUniqe() override;
@@ -124,6 +132,8 @@ private:
 	void DebugImGui() override;
 
 	void DrawEmitterLine() override;
+
+	void ApplyGlobalVariablesUniqe() override;
 public:
 
 private:
@@ -133,7 +143,7 @@ private:
 // メッシュ
 class MeshParticleEmitter : public BaseParticleEmitter {
 public:
-	void Initialize(ParticleManager* particleManager, std::string emitName, std::string particleName) override;
+	void Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName) override;
 
 	void SetMesh(ModelMesh* modelMesh) { modelMesh_ = modelMesh; };
 
@@ -143,6 +153,8 @@ private:
 	void DebugImGui() override;
 
 	void DrawEmitterLine() override;
+
+	void ApplyGlobalVariablesUniqe() override;
 public:
 
 private:

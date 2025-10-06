@@ -61,4 +61,6 @@ protected:
 	BasePlayer* player_;
 	std::unique_ptr <VisionComponent> visionComponent_;			// 視界
 	std::unique_ptr <HitMotionComponent> hitMotionComponent_;	// ヒットモーション
+	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
+
 };

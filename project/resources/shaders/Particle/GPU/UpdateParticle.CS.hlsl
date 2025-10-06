@@ -6,18 +6,45 @@ RWStructuredBuffer<Particle> gParticle  : register(u0);
 RWStructuredBuffer<int> gFreeListIndex  : register(u1);
 RWStructuredBuffer<uint> gFreeList      : register(u2);
 
-ConstantBuffer<PerFrame> gPerFrame          : register(b0); // 乱数生成用時間
-ConstantBuffer<MaxInstance> gMaxInstance    : register(b1); // パーティクル最大個数
+ConstantBuffer<PerFrame> gPerFrame              : register(b0); // 乱数生成用時間
+ConstantBuffer<MaxInstance> gMaxInstance        : register(b1); // パーティクル最大個数
+ConstantBuffer<DeleteParticle> gDeleteParticle  : register(b2); // パーティクル削除
+
 
 [numthreads(1024, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     uint particleIndex = DTid.x;
+    
+    
     if (particleIndex < gMaxInstance.maxInstanse)
     {
          
         if (gParticle[particleIndex].currentTime <= gParticle[particleIndex].lifeTime)
         {
+            // 削除フラグが立っていたら消す
+            if (gDeleteParticle.isDelete != 0)
+            {
+                // スケール0を入れておいてVertexShader出力で棄却されるようにする
+                gParticle[particleIndex].scale = float3(0.0f, 0.0f, 0.0f);
+                gParticle[particleIndex].color.a = 0.0f;
+                int freeListIndex;
+                InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
+                // 最新のFreeListIndexの場所に死んだParticleのIndexを設定する
+                if ((freeListIndex + 1) < gMaxInstance.maxInstanse)
+                {
+                    gFreeList[freeListIndex + 1] = particleIndex;
+                }
+                else
+                {
+                // ここに来るはずがない、来たら何かが間違っているが、安全策をうっておく
+                    InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
+                }
+                return;
+            }
+    
+            
+            
             gParticle[particleIndex].prevTranslate = gParticle[particleIndex].translate;
           
             

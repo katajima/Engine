@@ -2,14 +2,15 @@
 // engine
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Line/LineCommon.h"
-#include "DirectXGame/engine/Effect/Particle/ParticleField.h"
+#include "DirectXGame/engine/Effect/Particle/CPU/ParticleField.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "DirectXGame/engine/Math/Random.h"
 
 
-void BaseParticleEmitter::CommonParticleInit(ParticleManager* particleManager, std::string emitName, std::string particleName)
+void BaseParticleEmitter::CommonParticleInit(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	particleManager_ = particleManager;					// パーティクルマネージャー
+	globalVariables_ = globalVariables;					// グローバル変数
 	lineCommon_ = particleManager_->GetLineCommon();	// ライン共通
 	emitName_ = emitName;								// エミッタ名
 	particleName_ = particleName;						// パーティクル名
@@ -32,13 +33,89 @@ void BaseParticleEmitter::CommonParticleInit(ParticleManager* particleManager, s
 	isFlag.usebillboard = true;			// ビルボード
 	isFlag.isAlpha = false;				// 透明度
 
-	isEmit = true;						// 発生フラグ
-	
+	isEmit = false;						// 発生フラグ
+	isLine = false;						// ライン
 	// uv
 	uvTransformVeloctiy_.rotate = { 0,0,0 };
 	uvTransformVeloctiy_.scale = { 0,0,0 };
 	uvTransformVeloctiy_.translate = { 0,0,0 };
+
+
+	//globalVariables_->CreateGroup(emitName);
+	//globalVariables_->AddItem(emitName, "transform.translate", transform_.translate_);	// トランスフォーム登録
+	//globalVariables_->AddItem(emitName, "transform.rotate", transform_.rotate_);		// トランスフォーム登録		
+	//globalVariables_->AddItem(emitName, "Gravity", isFlag.isGravity);					// 重力	
+	//globalVariables_->AddItem(emitName, "RotateVelocity", isFlag.isRotateVelocity);		// 回転するか
+
+	//globalVariables_->AddItem(emitName, "usebillboard", isFlag.usebillboard);			// ビルボード
+	//globalVariables_->AddItem(emitName, "usebillboardY", isFlag.usebillboardY);			// Y軸ビルボード
+	//globalVariables_->AddItem(emitName, "billboardRotZ", isFlag.billboardRotZ);			// Z回転ビルボード
+	//globalVariables_->AddItem(emitName, "Alpha", isFlag.isAlpha);						// 透明度
+	//globalVariables_->AddItem(emitName, "Bounce", isFlag.isBounce);						// バウンス
+	//globalVariables_->AddItem(emitName, "Acceleration", isFlag.isAcceleration);			// 加速度
+	//globalVariables_->AddItem(emitName, "LineInterpolation", isFlag.isLineInterpolation); // 線形補間
+	//globalVariables_->AddItem(emitName, "LifeTimeScale_", isFlag.isLifeTimeScale_);		// スケール
+	//globalVariables_->AddItem(emitName, "LifeTimeVelocity", isFlag.isLifeTimeVelocity); // 速度
+
+	//globalVariables_->AddItem(emitName, "rotate.median", emitData_.rotate.median);		// 回転量
+	//globalVariables_->AddItem(emitName, "rotate.range", emitData_.rotate.range);		// 回転量範囲
+	//globalVariables_->AddItem(emitName, "size.median", emitData_.size.median);			// サイズ
+	//globalVariables_->AddItem(emitName, "size.range", emitData_.size.range);			// サイズ範囲
+	//globalVariables_->AddItem(emitName, "rotateVelocity.median", emitData_.rotateVelocity.median); // 回転速度
+	//globalVariables_->AddItem(emitName, "rotateVelocity.range", emitData_.rotateVelocity.range);	// 回転速度範囲
+	//globalVariables_->AddItem(emitName, "velocity.median", emitData_.velocity.median);			// 速度
+	//globalVariables_->AddItem(emitName, "velocity.range", emitData_.velocity.range);				// 速度範囲
+	//globalVariables_->AddItem(emitName, "acceleration.median", emitData_.acceleration.median);	// 加速度
+	//globalVariables_->AddItem(emitName, "acceleration.range", emitData_.acceleration.range);		// 加速度範囲
+	//globalVariables_->AddItem(emitName, "lifeTime.median", emitData_.lifeTime.median);			// 生存時間
+	//globalVariables_->AddItem(emitName, "lifeTime.range", emitData_.lifeTime.range);				// 生存時間範囲
+	//globalVariables_->AddItem(emitName, "count.median", emitData_.count.median);					// 個数
+	//globalVariables_->AddItem(emitName, "count.range", emitData_.count.range);						// 個数範囲
+	//globalVariables_->AddItem(emitName, "colorRange.min", emitData_.colorRange.min);				// 色範囲最小
+	//globalVariables_->AddItem(emitName, "colorRange.max", emitData_.colorRange.max);				// 色範囲最大
+	//globalVariables_->AddItem(emitName, "frequency", frequency_);									// 発生頻度
+
+	//
+	//ApplyGlobalVariables(); // グローバル変数適用
 }
+
+void BaseParticleEmitter::ApplyGlobalVariables() {
+	/*transform_.translate_ = globalVariables_->GetValue<Vector3>(emitName_, "transform.translate");
+	transform_.rotate_ = globalVariables_->GetValue<Vector3>(emitName_, "transform.rotate");
+	isFlag.isGravity = globalVariables_->GetValue<bool>(emitName_, "Gravity");
+	isFlag.isRotateVelocity = globalVariables_->GetValue<bool>(emitName_, "RotateVelocity");
+	isFlag.usebillboard = globalVariables_->GetValue<bool>(emitName_, "usebillboard");
+	isFlag.usebillboardY = globalVariables_->GetValue<bool>(emitName_, "usebillboardY");
+	isFlag.billboardRotZ = globalVariables_->GetValue<bool>(emitName_, "billboardRotZ");
+	isFlag.isAlpha = globalVariables_->GetValue<bool>(emitName_, "Alpha");
+	isFlag.isBounce = globalVariables_->GetValue<bool>(emitName_, "Bounce");
+	isFlag.isAcceleration = globalVariables_->GetValue<bool>(emitName_, "Acceleration");
+	isFlag.isLineInterpolation = globalVariables_->GetValue<bool>(emitName_, "LineInterpolation");
+	isFlag.isLifeTimeScale_ = globalVariables_->GetValue<bool>(emitName_, "LifeTimeScale_");
+	isFlag.isLifeTimeVelocity = globalVariables_->GetValue<bool>(emitName_, "LifeTimeVelocity");
+	emitData_.rotate.median = globalVariables_->GetValue<Vector3>(emitName_, "rotate.median");
+	emitData_.rotate.range = globalVariables_->GetValue<Vector3>(emitName_, "rotate.range");
+	emitData_.size.median = globalVariables_->GetValue<Vector3>(emitName_, "size.median");
+	emitData_.size.range = globalVariables_->GetValue<Vector3>(emitName_, "size.range");
+	emitData_.rotateVelocity.median = globalVariables_->GetValue<Vector3>(emitName_, "rotateVelocity.median");
+	emitData_.rotateVelocity.range = globalVariables_->GetValue<Vector3>(emitName_, "rotateVelocity.range");
+	emitData_.velocity.median = globalVariables_->GetValue<Vector3>(emitName_, "velocity.median");
+	emitData_.velocity.range = globalVariables_->GetValue<Vector3>(emitName_, "velocity.range");
+	emitData_.acceleration.median = globalVariables_->GetValue<Vector3>(emitName_, "acceleration.median");
+	emitData_.acceleration.range = globalVariables_->GetValue<Vector3>(emitName_, "acceleration.range");
+	emitData_.lifeTime.median = globalVariables_->GetValue<float>(emitName_, "lifeTime.median");
+	emitData_.lifeTime.range = globalVariables_->GetValue<float>(emitName_, "lifeTime.range");
+	emitData_.count.median = globalVariables_->GetValue<int>(emitName_, "count.median");
+	emitData_.count.range = globalVariables_->GetValue<int>(emitName_, "count.range");
+	emitData_.colorRange.min = globalVariables_->GetValue<Vector4>(emitName_, "colorRange.min");
+	emitData_.colorRange.max = globalVariables_->GetValue<Vector4>(emitName_, "colorRange.max");
+	frequency_ = globalVariables_->GetValue<float>(emitName_, "frequency");
+*/
+
+
+}
+
+
 // 共通発生処理
 void BaseParticleEmitter::Emit()
 {
@@ -66,6 +143,8 @@ void BaseParticleEmitter::Emit()
 
 void BaseParticleEmitter::Update() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+
+	ApplyGlobalVariables(); // グローバル変数適用
 
 	// トランスフォーム更新
 	transform_.Update();
