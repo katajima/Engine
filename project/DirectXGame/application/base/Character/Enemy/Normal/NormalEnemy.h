@@ -85,29 +85,11 @@ private:
 	std::unique_ptr<BaseEnemyState> state_;// ステート
 	std::unordered_map<std::string, EnemyStateFactory> stateFactoryMap_;	// 
 private:
-
-	//std::unique_ptr<ParticleEmitter> groundRightEmit_ = nullptr;
-	//std::unique_ptr<ParticleEmitter> groundLeftEmit_ = nullptr;
-
-
-	
-	std::unique_ptr<PointParticleEmitter> starEmit_ = nullptr;
-	std::unique_ptr < AABBParticleEmitter> traiEmit_ = nullptr;
-	std::unique_ptr < AABBParticleEmitter> hitEmit_ = nullptr;
-	std::unique_ptr < PointParticleEmitter> effectEmit_ = nullptr; // 
-
-	//std::unique_ptr<ParticleEmitter> dustEmit_ = nullptr;
-	//std::unique_ptr<ParticleEmitter> dustEmit2_ = nullptr;
-	//std::unique_ptr<ParticleEmitter> dustEmit3_ = nullptr;
+	WorldTransform worldEffect_;
 
 	//std::unique_ptr<ParticleEmitter> tireEmit_ = nullptr; // タイヤ
-
 	//std::unique_ptr<ParticleEmitter> ductEmit_ = nullptr; // ダクト
-
-
 	//std::unique_ptr<ParticleEmitter> plankEmit_ = nullptr; // 鋼板
 	//std::unique_ptr<ParticleEmitter> gearEmit_ = nullptr; // 歯車
 	//std::unique_ptr<ParticleEmitter> fenceEmit_ = nullptr; // 柵
-
-
 };

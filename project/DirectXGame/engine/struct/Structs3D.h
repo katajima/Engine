@@ -4,6 +4,15 @@
 #include "Structs.h"
 
 
+// 方向
+enum class Dire {
+	X,		// X軸
+	Y,		// Y軸
+	Z,		// Z軸
+	mX,		// -X軸
+	mY,		// -Y軸
+	mZ		// -Z軸
+};
 
 
 

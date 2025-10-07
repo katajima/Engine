@@ -189,7 +189,7 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 
 	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update();
 
-	entity3DManager->GetEffectManager()->GetParticleManager2d()->Update();
+	//entity3DManager->GetEffectManager()->GetParticleManager2d()->Update();
 
 
 

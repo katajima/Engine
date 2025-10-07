@@ -228,6 +228,18 @@ void MyGame::CreateParticle()
 	primiStar->Data() = star;
 
 
+	ShapeParameter::Ring ring;
+	ring.segments = 16;
+	ring.innerRadius = 0.1f;
+	ring.outerRadius = 0.8f;
+
+
+	primiRing = std::make_unique<RingPrimitive>();
+	primiRing->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/effect/gradationLine.png");
+	primiRing->Data() = ring;
+	primiRing->MeshInitialize();
+
+
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
 	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, EmitData::BlendType::MODE_ADD);
@@ -273,11 +285,14 @@ void MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("cloudDust3", "resources/Texture/effect/cloud3.png", primiPlane.get());
 
 
-	//
+	// ヒット
 	particleManager->CreateParticleGroup("hitEffect", "resources/Texture/effect/effect.png", primiPlane.get());
 	particleManager->CreateParticleGroup("hitEffect2", "resources/Texture/effect/effect2.png", primiPlane.get());
 	particleManager->CreateParticleGroup("ringEmit", "resources/Texture/effect/ring.png", primiPlane.get());
-	
+	particleManager->CreateParticleGroup("ringHit", "resources/Texture/effect/gradationLine.png", primiRing.get()); // 柵
+	particleManager->GetParticleGroups("ringHit").isUVClamp = true;
+	particleManager->GetParticleGroups("ringHit").mesh->material->transform.scale.x = 10.0f;
+	particleManager->GetParticleGroups("ringHit").mesh->material->transform.scale.y = 10.0f;
 
 
 	// 敵関係
@@ -297,6 +312,25 @@ void MyGame::CreateParticle()
 
 	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
 
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = 30.0f;
+	cylinderParam.innerRadius = 6.0f;
+	cylinderParam.outerRadius = 12.0f;
+	cylinderParam.isCover = false;
+	cylinderParam.segments = 16;
+	
+
+
+
+	cylinder_ = std::make_unique<CylinderPrimitive>();
+	cylinder_->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
+	cylinder_->Data() = cylinderParam;
+	cylinder_->MeshInitialize();
+	// 
+	particleManager->CreateParticleGroup("missileHitCylinder", "resources/Texture/effect/gradationLine.png", cylinder_.get());
+	particleManager->GetParticleGroups("missileHitCylinder").isUVClamp = true;
+	//particleManager->GetParticleGroups("missileHitCylinder").mesh->material->transform.scale.x = 10.0f;
+	//particleManager->GetParticleGroups("missileHitCylinder").mesh->material->transform.scale.y = 10.0f;
 
 
 	// ミサイルHitエフェクト

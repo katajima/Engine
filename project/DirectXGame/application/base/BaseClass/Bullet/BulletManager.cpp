@@ -77,6 +77,7 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
 	bullet->SetPlayer(player_);
 
+	bullet->SetEffect(effect_);
 
 	bullets_.push_back(std::move(bullet));
 }
@@ -103,7 +104,7 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
 	bullet->SetEnemy(enemy);
 	bullet->SetPlayer(player_);
-
+	bullet->SetEffect(effect_);
 
 	bullets_.push_back(std::move(bullet));
 

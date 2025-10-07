@@ -70,6 +70,9 @@ private:
 	std::unique_ptr<StarPrimitive> primiStar = nullptr;
 	std::unique_ptr<TrianglePrimitive> primiTrai = nullptr;
 	
+	std::unique_ptr<RingPrimitive> primiRing = nullptr;
+	std::unique_ptr<CylinderPrimitive> cylinder_ = nullptr;
+	
 private:
 	// ゲーム終了フラグ
 	bool endRequst_ = false;

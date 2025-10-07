@@ -105,6 +105,78 @@ Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution)
 	return input - norm * scale;
 }
 
+
+Vector3 DirectionToRotate(const Vector3& direction, Dire dire)
+{
+	Vector3 result{};
+
+	Vector3 dir = Normalize(direction);
+	if (dir.LengthSq() < 1e-6f)
+		return result; // 無効方向
+
+	// ----------------------------------------
+	// 各軸をforward基準とした場合の変換
+	// ----------------------------------------
+	switch (dire)
+	{
+	case Dire::Z: // +Z軸が前方向（標準）
+	{
+		result.y = std::atan2(dir.x, dir.z);                  // ヨー角
+		float len = std::sqrt(dir.x * dir.x + dir.z * dir.z);
+		result.x = std::atan2(dir.y, -len);                   // ピッチ角
+		result.z = 0.0f;                                      // ロール角不要
+		break;
+	}
+	case Dire::mZ: // -Z軸が前方向
+	{
+		result.y = std::atan2(-dir.x, -dir.z);
+		float len = std::sqrt(dir.x * dir.x + dir.z * dir.z);
+		result.x = std::atan2(dir.y, len);
+		result.z = 0.0f;
+		break;
+	}
+	case Dire::X: // +X軸が前方向
+	{
+		result.z = std::atan2(-dir.y, dir.z);                 // ロール角（Z軸回転）
+		float len = std::sqrt(dir.y * dir.y + dir.z * dir.z);
+		result.y = -std::atan2(dir.z, dir.x);                 // ヨー角（Y軸回転）
+		result.x = 0.0f;                                      // ピッチ不要
+		break;
+	}
+	case Dire::mX: // -X軸が前方向
+	{
+		result.z = std::atan2(dir.y, -dir.z);
+		float len = std::sqrt(dir.y * dir.y + dir.z * dir.z);
+		result.y = std::atan2(dir.z, -dir.x);
+		result.x = 0.0f;
+		break;
+	}
+	case Dire::Y: // +Y軸が前方向
+	{
+		result.x = std::atan2(dir.z, dir.y);                  // ピッチ角（X軸回転）
+		float len = std::sqrt(dir.z * dir.z + dir.y * dir.y);
+		result.z = std::atan2(dir.x, len);                    // ロール角（Z軸回転）
+		result.y = 0.0f;
+		break;
+	}
+	case Dire::mY: // -Y軸が前方向
+	{
+		result.x = std::atan2(-dir.z, -dir.y);
+		float len = std::sqrt(dir.z * dir.z + dir.y * dir.y);
+		result.z = std::atan2(-dir.x, -len);
+		result.y = 0.0f;
+		break;
+	}
+	}
+
+	return result;
+}
+
+float DirectionToRotateZ(const Vector3& direction)
+{
+	return 0.0f;
+}
+
 Vector3 ClosestPointOnPlane(const Plane& plane, const Vector3& point) {
 	// 平面の法線ベクトル
 	Vector3 normal = plane.normal.Normalize();

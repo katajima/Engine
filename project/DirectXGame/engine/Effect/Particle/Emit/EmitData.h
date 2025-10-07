@@ -66,6 +66,7 @@ namespace EmitData {
 		bool isBounce = false;									// 跳ねるか
 		bool isAcceleration = false;							// 加速度を付けるか
 		bool isLineInterpolation = false;						// ライン補間するか	
+		bool isScaling_ = false;								// サイズを大きくするか
 	};
 
 }
@@ -97,12 +98,15 @@ public:
 	MedianWithRange <Vector3> velocity;		// 速度 (Vector3の範囲)
 	MedianWithRange <Vector3> acceleration;	// 加速度 (Vector3の範囲)
 	
+	MedianWithRange <Vector3> sizeAmount;	// サイズ量 (Vector3の範囲)
+	
 	MedianWithRange <int> count;				// 個数 (intの範囲)
 	
 public:
 	bool isEmit = false;			// エミットするか
 	bool isLoop = false;			// ループするか
 	bool isUniformSize = false;		// サイズ一律(X座標優先)
+	bool isDirectionRotate = false;	// 方向によって回転を決める
 public:
 	bool isNoise = false;
 	int direction = 0; // 0↑、1→、2↓,3←

@@ -12,6 +12,7 @@
 // アプリケーション(プレイヤー)
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
 
+class Effect;
 class FollowCamera;
 class BulletManager;
 class Entity3DManager;
@@ -32,6 +33,7 @@ public:
 public:
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; }
+	void SetEffect(Effect* effect) { effect_ = effect; }
 public: // 取得系
 
 	// キャラクターのタイプによっての数を取得
@@ -89,5 +91,6 @@ private: // 貰いもの
 	GlobalVariables* globalVariables_;	// グローバル変数
 	FollowCamera* followCamera_ = nullptr;	// フォローカメラ 
 	BulletManager* bulletManager_ = nullptr; // 弾をマネジャー
+	Effect* effect_ = nullptr;
 };
 

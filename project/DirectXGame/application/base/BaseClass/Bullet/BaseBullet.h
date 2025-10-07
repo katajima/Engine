@@ -9,6 +9,7 @@
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 #include "DirectXGame/engine/Base/pch.h"
 
+class Effect;
 class BasePlayer;
 class BaseEnemy;
 class Entity3DManager;
@@ -73,6 +74,8 @@ public:
 
 	ColliderComponent* GetColliderComponent() { return object_->GetColliderComponent(); }
 
+	void SetEffect(Effect* effect) { effect_ = effect; };
+
 protected:
 	// 当たり判定をするか
 	void SetIsCollision(bool is) { isCollision = is; }
@@ -103,9 +106,12 @@ protected:
 protected:
 	BasePlayer* player_;
 	BaseEnemy* enemy_;
+	Effect* effect_;
+
 	GlobalVariables* globalVariables_ = nullptr;
 	Entity3DManager* entity3DManager_ = nullptr;
 	Entity2DManager* entity2DManager_ = nullptr;
+
 };
 
 

@@ -49,11 +49,13 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 		const uint32_t threadsPerGroup = 256;
 		const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
-		dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	//	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 	}
 
 
-
+	sbParticleResource_.UavDependence();
+	sbFreeListIndexResource_.UavDependence();
+	sbFreeListResource_.UavDependence();
 
 	// CPU 側で作る最大バッファサイズ
 	int maxSegments = 5; // 例: 1パーティクルあたり10セグメント
@@ -73,8 +75,10 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 		const uint32_t threadsPerGroup = 256;
 		const uint32_t dispatchCount = (cbMaxTrailVertexInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
-		dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	//	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 	}
+
+	sbTrailVertexResource_.UavDependence();
 }
 
 void GpuParticleGroup::UpdateEmitte(float deltaTime, int threadGroupCount)

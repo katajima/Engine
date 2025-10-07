@@ -68,6 +68,11 @@ Vector3 Reflect(const Vector3& input, const Vector3& normal);
 
 Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution);
 
+Vector3 DirectionToRotate(const Vector3& direction, Dire dire);
+
+float DirectionToRotateZ(const Vector3& direction);
+
+
 #pragma endregion //数学関数
 
 float DegreesToRadians(float degrees);

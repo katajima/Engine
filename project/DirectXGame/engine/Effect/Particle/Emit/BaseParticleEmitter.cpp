@@ -313,6 +313,12 @@ void BaseParticleEmitter::SetAcceleration(Vector3 acceleration, Vector3 range)
 	emitData_.acceleration.range = range;
 }
 
+void BaseParticleEmitter::SetSizeAmount(Vector3 size, Vector3 range)
+{
+	emitData_.sizeAmount.median = size;
+	emitData_.sizeAmount.range = range;
+}
+
 
 #pragma endregion // 設定
 

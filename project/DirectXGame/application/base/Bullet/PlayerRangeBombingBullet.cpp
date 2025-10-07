@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Character/Player/Normal/Player.h"
 
 #include "DirectXGame/engine/math/random.h"
+#include"DirectXGame/application/base/Effect/Effect.h"
 
 PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 {
@@ -34,7 +35,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	//object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,1.5f,0 }, { 0,-1.5f,0 });
 	object_->Update();
 	object_->InitColliderComponent();
-	
+
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->tag = CollisionTag::PlayerAttack;
 	sphere->layer = CollisionLayer::PlayerAttack;
@@ -68,7 +69,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 		enemy->Emit();
 		};
 
-	
+
 	// Y軸周り角度(θy)
 	object_->GetWorldTransform().rotate_.y = std::atan2(velocity_.x, velocity_.z);
 	float length = Length(Vector3(velocity_.x, 0, velocity_.z));
@@ -82,12 +83,12 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	// 行動フェーズ
 	phase_ = 0;
 
-	
+
 	// 初期地点記録
 	str = object_->GetWorldTransform().translate_;
 
 	// ランダムな空中位置を設定
-	randPosSky = str + Vector3{ -1000,0,0};
+	randPosSky = str + Vector3{ -1000,0,0 };
 
 	max_y = 600.0f; // 最大Y座標
 
@@ -120,15 +121,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	InitRingEmitter();
 	// ヒットエフェクト
 	InitHitEmitter();
-	hitEmitter_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("missileHit");
-	stratSmoke01_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlane01");
-	stratSmoke02_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlane05");
-	smokePlaneExpSmoke = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlaneExpSmoke");
-	//moveSmoke = effectComponent_->GetEmitterAs<LineParticleEmitter>("smokePlane04");
-	animatedCube = effectComponent_->GetEmitterAs<PointParticleEmitter>("AnimatedCube");
-	ringEmit = effectComponent_->GetEmitterAs<AABBParticleEmitter>("ringEmit");
-	expPlane = effectComponent_->GetEmitterAs<PointParticleEmitter>("expPlane01");
-
+	
 
 
 	ShapeParameter::Cylinder cylinderParam;
@@ -138,18 +131,6 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	cylinderParam.isCover = false;
 	cylinderParam.segments = 16;
 
-	std::unique_ptr<CylinderPrimitive> cylinder = std::make_unique<CylinderPrimitive>();
-	cylinder->Data() = cylinderParam;
-	cylinder->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
-
-	hitObject_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("cylinder", "resources/Texture/effect/gradationLine.png", camera);
-	hitObject_->SetPrimitive(std::move(cylinder));
-	hitObject_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
-	hitObject_->GetRenderComponent()->SetObjectRasterizerType(PSOType::NoUvInterpolation_MODE_SOLID_NONE);
-	hitObject_->GetWorldTransform().translate_.z = 50.0f;
-	hitObject_->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
-	hitObject_->SetIsDraw(false);
-	
 
 	std::unique_ptr<CylinderPrimitive> cylinder2 = std::make_unique<CylinderPrimitive>();
 	cylinder2->Data() = cylinderParam;
@@ -165,34 +146,21 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitObject2_->SetPrimitive(std::move(cylinder2));
 	hitObject2_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
-	hitObject2_->GetPrimitive()->GetMaterial()->color = {1.0f,0.0f,0.0f,0.5f};
+	hitObject2_->GetPrimitive()->GetMaterial()->color = { 1.0f,0.0f,0.0f,0.5f };
 
-	enemyPos_.x = targetRange_.position.x + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
-	enemyPos_.z = targetRange_.position.z + Random::RandomFloat(-targetRange_.radius,targetRange_.radius);
+	enemyPos_.x = targetRange_.position.x + Random::RandomFloat(-targetRange_.radius, targetRange_.radius);
+	enemyPos_.z = targetRange_.position.z + Random::RandomFloat(-targetRange_.radius, targetRange_.radius);
 	enemyPos_.y = 2.0f;
 }
 
 void PlayerRangeBombingBullet::Update()
 {
-	
 	effectComponent_->GetTrailEffect("trail")->SetIsEmit(true);
-
-	hitEmitter_->SetIsEmit(false);
-	stratSmoke01_->SetIsEmit(false);
-	stratSmoke02_->SetIsEmit(false);
-	smokePlaneExpSmoke->SetIsEmit(false);
-	
 	emitterPoint->GetCommonData()->emit = false;
-
-	//moveSmoke->SetIsEmit(false);
-	animatedCube->SetIsEmit(false);
-	ringEmit->SetIsEmit(false);
-	expPlane->SetIsEmit(false);
 
 	// 時間経過でデス
 	if (Hit) {
-		hitEmitter_->SetIsEmit(true);
-		hitEmitter_->Emit();
+		effect_->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
 		isAlive_ = false;
 	}
 
@@ -204,7 +172,7 @@ void PlayerRangeBombingBullet::Update()
 
 
 	if (count > 0 || phase_ > 0) {
-		
+
 	}
 
 	if (isAlive_) {
@@ -216,8 +184,7 @@ void PlayerRangeBombingBullet::Update()
 				flag_ = true;
 			}
 			else {
-				stratSmoke01_->SetIsEmit(true);
-				stratSmoke01_->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{10.0f,-5.0f,0.0f});
+				effect_->Emit("stratSmoke01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 10.0f,-5.0f,0.0f });
 			}
 
 			count += GetTimer() * 2.0f;
@@ -229,14 +196,14 @@ void PlayerRangeBombingBullet::Update()
 			norm = randPosSky - str;
 
 			velocity_ = norm * GetTimer();
-			
+
 			if (t >= 1) {
 				t = 0;
 				count = 0;
 				phase_++;
 			}
-			
-			
+
+
 			break;
 		case 1:
 
@@ -248,25 +215,20 @@ void PlayerRangeBombingBullet::Update()
 				Vector3 pos = enemyPos_ - object_->GetWorldPosition();
 
 				float posLength = Length(pos);
-				
+
 				emitterPoint->GetCommonData()->emit = true;
 
-				//moveSmoke->SetIsEmit(true);
-
+				
 				if (posLength > 500.0f) {
-					//moveSmoke->SetLifeTime(0.3f, 0.1f);
 					emitterPoint->GetCommonData()->count = 5;
-					
+
 				}
 				else if (posLength > 100.0f) {
-					//moveSmoke->SetLifeTime(0.4f, 0.1f);
 					emitterPoint->GetCommonData()->count = 5;
-					//moveSmoke->SetCount(5,0);
 				}
 				else {
 					emitterPoint->GetCommonData()->count = 5;
-					//moveSmoke->SetLifeTime(0.7f,0.1f);
-					//moveSmoke->SetCount(5,0);
+
 				}
 
 				Vector3 pos2 = pos;
@@ -291,13 +253,12 @@ void PlayerRangeBombingBullet::Update()
 			break;
 		case 2:
 			flag_ = true;
-			
-			//moveSmoke->SetCount(5,0);
+			emitterPoint->GetCommonData()->emit = false;
 			
 			// リングエフェクトの位置を設定
-			ringEmit->SetIsEmit(true);
-			ringEmit->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
-			
+			effect_->Emit("ringEmit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+
+	
 			count += GetTimer();
 			if (count >= max_count)
 			{
@@ -306,26 +267,26 @@ void PlayerRangeBombingBullet::Update()
 			}
 
 			if (-0.0f >= object_->GetWorldPosition().y) {
-				
+
 				object_->GetWorldTransform().translate_.y = 0.5f;
 				isAlive_ = false;
 				count = 0;
 				phase_ = 0;
-				hitEmitter_->SetIsEmit(true);
-				hitEmitter_->Emit();
+				effect_->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+
 				isEffectPlay_ = true;
+
+				object_->GetWorldTransform().Update();
+				effect_->Emit("missileHitCylinder", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,10,0 });
+
 				flag_ = false;
 				hitObject2_->SetIsDraw(false);
-				
-				smokePlaneExpSmoke->SetIsEmit(true);
-				smokePlaneExpSmoke->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				
-				expPlane->SetIsEmit(true);
-				expPlane->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() +Vector3{0,5,0});
-				
-				animatedCube->SetIsEmit(true);
-				animatedCube->SetPos(object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,0,0 });
-				
+
+				effect_->Emit("smokePlaneExpSmoke", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+
+				effect_->Emit("AnimatedCube", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+
+				effect_->Emit("expPlane01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,5,0 });
 			}
 
 			break;
@@ -333,7 +294,6 @@ void PlayerRangeBombingBullet::Update()
 
 		Vector3 velo = velocity_.Normalize();
 
-		//emitterPoint->SetIsEmit(true);
 		emitterPoint->GetCommonData()->velocity = -velo * 10.0f;
 
 
@@ -347,38 +307,28 @@ void PlayerRangeBombingBullet::Update()
 		hitObject2_->GetWorldTransform().translate_ = posGround + Vector3{ 0,-6.0f,0 };
 
 
-		
-		hitObject_->GetWorldTransform().translate_ = object_->GetWorldTransform().translate_;
-		hitObject_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
+
 
 		hitObject2_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
-
-		//colliderComponent_->UpdateAll(object_->worldtransform_);
 	}
 
 
-	
+
 
 	if (isEffectPlay_) {
 		time_ += GetTimer();
 		object_->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
 		object_->SetIsDraw(false);
-		hitObject_->SetIsDraw(true);
-		hitObject_->GetWorldTransform().translate_ = object_->GetWorldTransform().translate_ + Vector3{ 0.0f,5.0f ,0.0f };
-		hitObject_->GetWorldTransform().translate_.y = cilnderHeight_ /3.0f;
-		hitObject_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
-		hitObject_->GetWorldTransform().scale_ += Vector3(0.15f, 0.15f, 0.00f);
-		hitObject_->GetPrimitive()->GetMaterial()->color.a -= 0.05f;
+
 
 
 		if (time_ >= 0.5f) {
 			object_->IsDelete();
-			hitObject_->IsDelete();
 			hitObject2_->IsDelete();
 			isEffectPlay_ = false;
 			object_->GetColliderComponent()->ClearColliders();
 
-		
+
 		}
 
 
@@ -387,12 +337,12 @@ void PlayerRangeBombingBullet::Update()
 
 	effectComponent_->Update();
 
-	
+
 }
 
 void PlayerRangeBombingBullet::Draw()
 {
-	
+
 }
 
 void PlayerRangeBombingBullet::DrawP()
@@ -412,7 +362,7 @@ void PlayerRangeBombingBullet::InitStartSmoke()
 	PointParticleEmitter* stratSmoke01_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlane01");
 	PointParticleEmitter* stratSmoke02_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlane05");
 
-	
+
 	stratSmoke01_->SetFrequency(0);
 	stratSmoke01_->SetIsAlpha(true);
 	stratSmoke01_->SetAlphaClipping(0.1f);
@@ -422,8 +372,8 @@ void PlayerRangeBombingBullet::InitStartSmoke()
 	stratSmoke01_->SetEnableLighting(false);
 	stratSmoke01_->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
 	//stratSmoke01_->Set({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
-	stratSmoke01_->SetSize(Vector3{ 55.8f,55.8f,55.8f },{});
-	stratSmoke01_->SetVelocity({0,25,0}, { 160, 35, 160 });
+	stratSmoke01_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
+	stratSmoke01_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
 	stratSmoke01_->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
 
 	stratSmoke02_->SetIsAlpha(true);
@@ -447,7 +397,7 @@ void PlayerRangeBombingBullet::InitMoveSmoke()
 	effectComponent_->AddGPUParticleEmitter("MoveEmitte_" + std::to_string(countIndex_), "no3", EmitterType::Point);
 	emitterPoint = effectComponent_->GetGpuParticleManager()->GetGpuParticleEmitter<GpuParticleEmitterPoint>("MoveEmitte_" + std::to_string(countIndex_));
 
-	emitterPoint->GetCommonData()->color = { 1,1,1};
+	emitterPoint->GetCommonData()->color = { 1,1,1 };
 	emitterPoint->GetCommonData()->frequency = 0.0f;
 	emitterPoint->GetCommonData()->count = 50;
 	emitterPoint->GetCommonData()->useBillboard = true;
@@ -459,23 +409,7 @@ void PlayerRangeBombingBullet::InitMoveSmoke()
 	emitterPoint->GetCommonData()->isScaling = true;
 	emitterPoint->GetCommonData()->scaleAmount = 1.25f;
 	emitterPoint->GetData()->interpolation = EmitterInterpolation::Sequential;
-	emitterPoint->GetCommonData()->color = {0.25f,0.25f,0.25f};
-
-	/*moveSmoke->GetFrequency() = 0.00f;
-	moveSmoke->SetCount(2,0);
-	moveSmoke->SetLifeTime(0.6f,0.1f);
-	moveSmoke->SetIsAlpha(true);
-	moveSmoke->SetAlphaClipping(0.23f);
-	moveSmoke->SetIsLifeTimeScale(true);
-	moveSmoke->SetUsebillboard(true);
-	moveSmoke->SetUsebillboardRotZ(true);
-	moveSmoke->SetEnableLighting(false);
-	moveSmoke->SetIsLineInterpolation(true);
-	moveSmoke->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
-	moveSmoke->SetSize(Vector3{ 2.8f,2.8f,2.8f }, {});
-	moveSmoke->SetVelocity(-velocity_, {});
-	moveSmoke->SetRotate({}, DegreesToRadians(Vector3{180,180,180}));
-	moveSmoke->SetSegment(object_->GetWorldTransform().translate_, object_->GetWorldTransform().translate_);*/
+	emitterPoint->GetCommonData()->color = { 0.25f,0.25f,0.25f };
 }
 
 void PlayerRangeBombingBullet::InitExpSmoke()
@@ -485,7 +419,7 @@ void PlayerRangeBombingBullet::InitExpSmoke()
 	PointParticleEmitter* smokePlaneExpSmoke = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlaneExpSmoke");
 
 	smokePlaneExpSmoke->GetFrequency() = 0.00f;
-	smokePlaneExpSmoke->SetCount(10,0);
+	smokePlaneExpSmoke->SetCount(10, 0);
 	smokePlaneExpSmoke->SetLifeTime(2.5f, 0);
 	smokePlaneExpSmoke->SetIsAlpha(true);
 	smokePlaneExpSmoke->SetAlphaClipping(0.23f);
@@ -496,9 +430,9 @@ void PlayerRangeBombingBullet::InitExpSmoke()
 	smokePlaneExpSmoke->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	//smokePlaneExpSmoke->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	smokePlaneExpSmoke->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
-	smokePlaneExpSmoke->SetVelocity(Vector3{30,50,30}, {0,50,0});
+	smokePlaneExpSmoke->SetVelocity(Vector3{ 30,50,30 }, { 0,50,0 });
 	smokePlaneExpSmoke->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
-	
+
 }
 
 void PlayerRangeBombingBullet::InitExpFire()
@@ -508,7 +442,7 @@ void PlayerRangeBombingBullet::InitExpFire()
 
 
 	expPlane->GetFrequency() = 0.00f;
-	expPlane->SetCount(2,0);
+	expPlane->SetCount(2, 0);
 	expPlane->SetLifeTime(0.26f, 0.01f);
 	expPlane->SetIsAlpha(true);
 	expPlane->SetAlphaClipping(0.23f);
@@ -519,7 +453,7 @@ void PlayerRangeBombingBullet::InitExpFire()
 	expPlane->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	//expPlane->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	expPlane->SetSize(Vector3{ 8.8f,8.8f,8.8f }, {});
-	expPlane->SetVelocity({0,5,0}, { 3, 10, 3 });
+	expPlane->SetVelocity({ 0,5,0 }, { 3, 10, 3 });
 	expPlane->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
 }
 
@@ -529,7 +463,7 @@ void PlayerRangeBombingBullet::InitExpBre()
 	PointParticleEmitter* animatedCube = effectComponent_->GetEmitterAs<PointParticleEmitter>("AnimatedCube");
 
 	animatedCube->GetFrequency() = 0.00f;
-	animatedCube->SetCount(6,0);
+	animatedCube->SetCount(6, 0);
 	animatedCube->SetLifeTime(3.26f, 0.01f);
 	animatedCube->SetAlphaClipping(0.23f);
 	animatedCube->SetIsLifeTimeScale(true);
@@ -543,7 +477,7 @@ void PlayerRangeBombingBullet::InitExpBre()
 	animatedCube->SetIsBounce(true);
 	animatedCube->SetIsRotateVelocity(true);
 	animatedCube->SetRotateVelocity({}, DegreesToRadians(Vector3{ 180,180,180 }));
-	animatedCube->SetSize(Vector3{ 0.5f,0.5f,0.5f },{});
+	animatedCube->SetSize(Vector3{ 0.5f,0.5f,0.5f }, {});
 	animatedCube->SetVelocity(Vector3{ 0,30,0 }, { 40,20,40 });
 	animatedCube->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
 }
@@ -554,7 +488,7 @@ void PlayerRangeBombingBullet::InitRingEmitter()
 	AABBParticleEmitter* ringEmit = effectComponent_->GetEmitterAs<AABBParticleEmitter>("ringEmit");
 
 	ringEmit->GetFrequency() = 0.00f;
-	ringEmit->SetCount(3,0);
+	ringEmit->SetCount(3, 0);
 	ringEmit->SetLifeTime(0.15f, 0.05f);
 	ringEmit->SetIsAlpha(true);
 	ringEmit->SetAlphaClipping(0.23f);
@@ -576,13 +510,13 @@ void PlayerRangeBombingBullet::InitHitEmitter()
 	PointParticleEmitter* hitEmitter_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("missileHit");
 
 	Vector3 size = { 2.0f, 2.0f, 2.0f };
-	hitEmitter_->SetCount(2,0);
-	hitEmitter_->SetLifeTime(0.25f,0);
+	hitEmitter_->SetCount(2, 0);
+	hitEmitter_->SetLifeTime(0.25f, 0);
 	hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	hitEmitter_->SetSize(size, size);
 	hitEmitter_->SetFrequency(0.00f);
 	hitEmitter_->SetParent(object_->GetWorldTransform());
-	hitEmitter_->SetPos({0,0,0});
+	hitEmitter_->SetPos({ 0,0,0 });
 	hitEmitter_->SetUsebillboardRotZ(true);
 	hitEmitter_->SetIsAlpha(true);
 	hitEmitter_->SetVelocity({}, {});

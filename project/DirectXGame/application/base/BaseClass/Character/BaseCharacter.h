@@ -5,6 +5,7 @@
 //#include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
 #include "DirectXGame/application/base/BaseClass/Object/ObjectComponent.h"
 
+class Effect;
 class BaseSpecial;
 class BaseWeapon;
 class AttackInputHander;
@@ -113,6 +114,8 @@ public: // 取得系関数
 	float GetTime() { return objectComponent_->GetTime(); }
 	// インプット取得
 	Input* GetInput() { return input_; };
+	//
+	void SetEffect(Effect* effect) { effect_ = effect; }
 
 protected: // 取得系関数(変更可能)
 
@@ -196,8 +199,10 @@ protected:
 	std::unique_ptr<BaseSpecial> special_;	// スペシャル攻撃
 	std::unique_ptr<BaseWeapon> weapon_;	// 武器
 	std::unique_ptr<AttackInputHander> attackInputHander_; // 攻撃入力系クラス
-	
 
+
+protected:
+	Effect* effect_;
 	BulletManager* bulletManager_;			// 弾管理
 protected: // 貰ってくるもの
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー

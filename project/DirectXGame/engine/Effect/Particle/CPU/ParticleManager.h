@@ -47,7 +47,7 @@ public:
 	void Draw();
 
 	// 描画準備
-	void DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType);
+	void DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType, bool uvClamp);
 
 	// パーティクルグループ取得
 	UnorderedMapContainer<std::string, ParticleGroup>& GetParticleGroups()
@@ -124,8 +124,10 @@ private: //PSO関係
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 	////ルートシグネチャ
 	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
+	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature2;
+
 	//// グラフィックスパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[6];
+	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[12];
 
 	D3D12_BLEND_DESC blendDesc{};
 	D3D12_RASTERIZER_DESC rasterizerDesc{};

@@ -29,6 +29,8 @@ struct Particle
 
 	Transform strtTransform;		// 初期SRT
 	Vector3 rotateVelocity;			// 回転速度
+	Vector3 sizeAmount;				// サイズ変化量
+
 	bool isDestroy = false;			// 破棄フラグ
 
 	bool isEvent = false;			// イベントフラグ
@@ -61,6 +63,7 @@ struct ParticleGroup
 	EmitData::BlendType blendType;										// ブレンドタイプ
 	Transform uvTransformVeloctiy_{ {},{},{0,0,0} };						// uvトランスフォーム
 	float kGravitationalAcceleration = 9.8f;								// 重力
+	bool isUVClamp = false;												// UVを
 };
 
 

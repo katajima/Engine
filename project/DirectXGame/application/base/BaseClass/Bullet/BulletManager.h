@@ -59,12 +59,15 @@ public:
 
 	// 弾リストを取得
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
+
+	void SetEffect(Effect* effect) { effect_ = effect; }
 private:
 	std::list<std::unique_ptr<BaseBullet>> bullets_;
 
 
 private:
 	BasePlayer* player_;
+	Effect* effect_;
 	Camera* camera_;						// カメラ
 	GlobalVariables* globalVariables_ = nullptr;
 	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理

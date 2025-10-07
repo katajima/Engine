@@ -18,8 +18,25 @@ void EmitFanction::CreateParticle(ParticleGroup& group, EffectEmitData emitData,
 	else {
 		newParticle.transform.scale = Random::RandVector3(emitData.size, randomEngine);
 	}
+	
+	//速度
+	newParticle.velocity = Random::RandVector3(emitData.velocity, randomEngine);
+
+	
 	// 回転
-	newParticle.transform.rotate = Random::RandVector3(emitData.rotate, randomEngine);
+	Vector3 rotate{};
+
+	if (emitData.isDirectionRotate) {
+		rotate = DirectionToRotate(newParticle.velocity.Normalize(),Dire::X);
+	}
+	else {
+		rotate = Random::RandVector3(emitData.rotate, randomEngine);
+	}
+
+	newParticle.transform.rotate = rotate;
+
+	// サイズ変化量
+	newParticle.sizeAmount = Random::RandVector3(emitData.sizeAmount, randomEngine);
 
 	// 色
 	newParticle.color = Random::RandVector4(emitData.colorRange, randomEngine);
@@ -27,9 +44,7 @@ void EmitFanction::CreateParticle(ParticleGroup& group, EffectEmitData emitData,
 	// 回転速度
 	newParticle.rotateVelocity = Random::RandVector3(emitData.rotateVelocity, randomEngine);
 
-	//速度
-	newParticle.velocity = Random::RandVector3(emitData.velocity, randomEngine);
-
+	
 	// ライフタイム
 	newParticle.lifeTime = Random::RandFloat(emitData.lifeTime, randomEngine);
 
@@ -76,6 +91,10 @@ void EmitFanction::CreateParticle(ParticleGroup& group, EffectEmitData emitData,
 
 	// 色
 	newParticle.color = Random::RandVector4(emitData.colorRange, randomEngine);
+
+	// サイズ変化量
+	newParticle.sizeAmount = Random::RandVector3(emitData.sizeAmount, randomEngine);
+
 
 	// 回転速度
 	newParticle.rotateVelocity = Random::RandVector3(emitData.rotateVelocity, randomEngine);

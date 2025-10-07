@@ -56,6 +56,8 @@ public: // Getter Setter
 
 	WorldTransform& GetWorldTransform() { return transform_; }
 
+	void SetIsDirectionRotate(const bool& is) { emitData_.isDirectionRotate = is; }
+
 public:
 
 	void SetEnableLighting(int lighting) { enableLighting_ = lighting; }
@@ -80,6 +82,8 @@ public:
 	void SetIsRotateVelocity(bool is) { isFlag.isRotateVelocity = is; } // 回転速度
 
 	void SetIsBounce(bool is) { isFlag.isBounce = is; } // 跳ねるか
+	
+	void SetIsScaling(bool is) { isFlag.isScaling_ = is; } // サイズを変化させるか
 
 public: // 
 
@@ -96,6 +100,8 @@ public: //
 	void SetRotateVelocity(Vector3 rotateVelocity, Vector3 range); // 回転速度
 
 	void SetAcceleration(Vector3 acceleration, Vector3 range); // 加速度
+
+	void SetSizeAmount(Vector3 size, Vector3 range);		// 増加量()
 
 	void SetUseFieldName(std::vector<std::string> fieldName) { // フィールド名
 		for (auto& name : fieldName) {

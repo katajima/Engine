@@ -26,40 +26,75 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightMan
 	CreateGraphicsPipeline();
 }
 
-void ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
+void ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType, bool uvClamp)
 {
-	switch (blendType)
-	{
-	case EmitData::BlendType::MODE_ADD:
-		if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
+	if (!uvClamp) {
+		switch (blendType)
+		{
+		case EmitData::BlendType::MODE_ADD:
+			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
+			}
+			else {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
+			}
+			break;
+		case EmitData::BlendType::MODE_SUBTRACT:
+			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
+			}
+			else {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
+			}
+			break;
+		case EmitData::BlendType::MODE_MUlLIPLY:
+			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
+			}
+			else {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
+			}
+			break;
+		default:
+			break;
 		}
-		else {
-			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
-		}
-		break;
-	case EmitData::BlendType::MODE_SUBTRACT:
-		if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
-		}
-		else {
-			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
-		}
-		break;
-	case EmitData::BlendType::MODE_MUlLIPLY:
-		if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
-		}
-		else {
-			dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
-		}
-		break;
-	default:
-		break;
+		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	}
-	//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	else {
 
+		switch (blendType)
+		{
+		case EmitData::BlendType::MODE_ADD:
+			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
+			}
+			else {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
+			}
+			break;
+		case EmitData::BlendType::MODE_SUBTRACT:
+			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[8].Get());
+			}
+			else {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[9].Get());
+			}
+			break;
+		case EmitData::BlendType::MODE_MUlLIPLY:
+			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[10].Get());
+			}
+			else {
+				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[11].Get());
+			}
+			break;
+		default:
+			break;
+		}
+		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature2.Get());
+	}
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -126,7 +161,7 @@ void ParticleManager::Draw()
 		if (group.instanceCount == 0) {
 			continue;
 		}
-		DrawCommonSetting(group.rasteType, group.blendType);
+		DrawCommonSetting(group.rasteType, group.blendType, group.isUVClamp);
 
 		group.material->GetCommandListTexture(2);
 
@@ -214,6 +249,10 @@ void ParticleManager::CreateRootSignature()
 
 	// ルートシグネチャ作成
 	psoManager_->SetRootSignature(rootSignature, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
+	
+	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	
+	psoManager_->SetRootSignature(rootSignature2, rootParameters, _countof(rootParameters), staticSamplers, _countof(staticSamplers));
 
 }
 
@@ -256,6 +295,27 @@ void ParticleManager::CreateGraphicsPipeline()
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState[4], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
 	psoManager_->GraphicsPipelineState(rootSignature, graphicsPipelineState[5], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+
+	BlendAdd();
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState[6], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState[7], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	BlendSubtract();
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState[8], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState[9], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	BlendMuliply();
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_BACK, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState[10], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	psoManager_->SetRasterizerDesc(D3D12_CULL_MODE_NONE, D3D12_FILL_MODE_SOLID);
+	psoManager_->GraphicsPipelineState(rootSignature2, graphicsPipelineState[11], blendDesc, depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+
+
+
 }
 
 #pragma region Blend

@@ -49,6 +49,15 @@ public: // パーティクルエミッター(CPU)
 		}
 		return nullptr;
 	}
+
+	BaseParticleEmitter* GetBaseEmitter(const std::string& name) {
+		auto it = emitters_.find(name);
+		if (it != emitters_.end()) {
+			return it->second.get();
+		}
+		return nullptr;
+	}
+
 public: // パーティクルエミッター(GPU)
 	
 	// 追加

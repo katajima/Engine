@@ -16,6 +16,8 @@
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
 #include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
+#include"DirectXGame/application/base/Effect/Effect.h"
+
 
 #include "DirectXGame/application/base/Input/InputHander.h"
 
@@ -90,6 +92,9 @@ private:
 	std::unique_ptr<CameraManeger> cameraManeger_;
 	
 	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
+
+	// 
+	std::unique_ptr<Effect> effect_;
 private:
 	// キャラクター管理
 	std::unique_ptr<BaseCharacterManager> caracterManager_;

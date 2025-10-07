@@ -72,6 +72,11 @@ void ParticleFanction::Effect(ParticleGroup& group, std::list<Particle>::iterato
 		float scaling = (group.topBottom == EmitData::TopBottom::kBottom) ? (1.0f - t) : t;
 		particleIterator->transform.scale = Lerp({}, particleIterator->strtTransform.scale, scaling);
 	}
+	else if (group.isFlag.isScaling_) {// サイズ変化させるか(生存時間によって大きさが変化と混ざらないようにelse if)
+		particleIterator->transform.scale += particleIterator->sizeAmount;
+	}
+
+
 
 	// 回転させるか
 	if (group.isFlag.isRotateVelocity) {

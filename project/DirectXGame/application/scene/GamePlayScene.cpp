@@ -25,6 +25,9 @@ void GamePlayScene::Initialize()
 	inputHander_->AssignJampCommandPad();
 	inputHander_->AssignAttackCommandPad();
 
+	//
+	effect_ = std::make_unique<Effect>();
+	effect_->Initialize(GetEntity3DManager(), GetGlobalVariables());
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
@@ -49,10 +52,12 @@ void GamePlayScene::Initialize()
 	// 弾管理クラス
 	bulletManager_ = std::make_unique<BulletManager>();
 	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(),GetGlobalVariables(), nullptr);
+	bulletManager_->SetEffect(effect_.get());
 
 	// キャラクター管理 
 	caracterManager_ = std::make_unique<BaseCharacterManager>();
 	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	caracterManager_->SetEffect(effect_.get());
 	caracterManager_->SetFollowCamera(followCamera_.get());
 	caracterManager_->SetBulletManager(bulletManager_.get());
 	// プレイヤー生成
@@ -257,6 +262,8 @@ void GamePlayScene::Update()
 	CheckAllCollisions();
 	// レベルデータアップデート
 	loadData_->Update();
+	// Effect更新
+	effect_->Update();
 }
 
 #pragma endregion //更新関係

@@ -76,6 +76,7 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 	enemy->SetID(characterCount_);
 	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
 	enemy->SetPlayer(GetPlayer());
+	enemy->SetEffect(effect_);
 	enemy->GetObject3D()->GetWorldTransform().translate_ = transform.translate;
 	enemy->GetObject3D()->GetWorldTransform().rotate_ = transform.rotate;
 	
