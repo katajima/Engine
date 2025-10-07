@@ -1,9 +1,9 @@
 #pragma once
 #include"CharacterData.h"
 #include"DirectXGame/application/base/Component/MoveComponent.h"
-
-//#include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
 #include "DirectXGame/application/base/BaseClass/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/BaseClass/State/CharacterStateMachine.h"
+
 
 class Effect;
 class BaseSpecial;
@@ -50,7 +50,9 @@ public:
 	/// </summary>
 	virtual void Attack() = 0;
 
-	virtual void ChangeState(const std::string& name) = 0;
+	//virtual void ChangeState(const std::string& name) = 0;
+
+	virtual void InitStateMachine() {};
 
 public:
 	// キャラクタータイプ設定
@@ -85,6 +87,8 @@ public:
 
 public: // 取得系関数
 
+	//
+	CharacterStateMachine* GetCharacterStateMachine() { return stateMachine_.get(); }
 	// 必殺技
 	BaseSpecial* GetSpecial() { return special_.get(); }
 	// 武器
@@ -200,6 +204,7 @@ protected:
 	std::unique_ptr<BaseWeapon> weapon_;	// 武器
 	std::unique_ptr<AttackInputHander> attackInputHander_; // 攻撃入力系クラス
 
+	std::unique_ptr<CharacterStateMachine> stateMachine_;	// キャラクターの状態管理
 
 protected:
 	Effect* effect_;

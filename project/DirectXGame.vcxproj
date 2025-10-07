@@ -117,6 +117,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\State\BaseState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
@@ -714,6 +716,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\BaseState.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\CharacterStateMachine.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />
     <ClInclude Include="DirectXGame\application\scene\SampleScene.h" />

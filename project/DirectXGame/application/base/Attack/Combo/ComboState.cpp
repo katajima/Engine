@@ -46,7 +46,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
-		owner->ChangeState("Move");  // ← BaseCharacterが持っている関数
+		owner->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);  // ← BaseCharacterが持っている関数
 		anima->SetIsLoop(true);
 		anima->SetIsPlaying(true);
 		anima->SetAnimationSpeed(1.0f);

@@ -108,7 +108,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;
-		if (enemy->GetStateName() == "Attack") {
+		if (enemy->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Attack) {
 			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
 			if (objectComponent_->GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
@@ -146,15 +146,32 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	ui_ = std::make_unique<PlayerUI>();
 	ui_->Initialize(input_, entity2DManager_, globalVariables_);
 
-	ChangeState("Move");
+	// キャラクター行動ステート初期化
+	InitStateMachine();
 }
+
+
+void Player::InitStateMachine() {
+	stateMachine_ = std::make_unique<CharacterStateMachine>();
+	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateMove>(p);
+		});
+	stateMachine_->RegisterState(CharacterMainState::Attack, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateAttack>(p);
+		});
+	stateMachine_->RegisterState(CharacterMainState::Special, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateSpecial>(p);
+		});
+	stateMachine_->Init(this, CharacterMainState::Move);
+}
+
 
 void Player::Update()
 {
 	UpdateBaseGetValue(); //保存機能 基本値の更新
 
 	// ステート
-	state_->Update();
+	stateMachine_->Update();
 
 	if (GetHP() <= 0) {
 		objectComponent_->GetObjectStateFlags().isAlive = false;
@@ -171,7 +188,7 @@ void Player::Update()
 	if (ImGui::Button("SP")) {
 		special_->SetGauge(100);
 	}
-	ImGui::Text(state_->GetName().c_str());
+	//ImGui::Text(state_->GetName().c_str());
 
 	ImGui::End();
 	if (input_->IsTriggerKey(DIK_C)) {
@@ -250,7 +267,7 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-	if (stateName_ == "Move") {
+	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Move) {
 		moveComponent_->SetSpeed(Parameters().speed);
 		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
 		moveComponent_->Move(*GetObject3D()->GetTransformComponent(), input_);
@@ -274,11 +291,11 @@ void Player::Jump()
 
 void Player::Attack()
 {
-	if (stateName_ == "Attack") {
+	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Attack) {
 		weapon_->InputCombo(AttackInput::Light);
 	}
-	else if (stateName_ == "Move") {
-		ChangeState("Attack");
+	else if (stateMachine_->GetCurrentMainState() == CharacterMainState::Move) {
+		stateMachine_->ChangeState(CharacterMainState::Attack);
 		weapon_->StartCombo("Attack1");
 	}
 

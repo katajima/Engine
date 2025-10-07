@@ -101,7 +101,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			}
 		}
 		if (other->tag == CollisionTag::PlayerAttack) {
-			ChangeState("Move");
+			stateMachine_->ChangeState(CharacterMainState::Move);
 		}
 
 
@@ -136,7 +136,25 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 
 	GetWorldTransform().Update();
-	ChangeState("Move");
+
+	InitStateMachine();
+}
+
+void NormalEnemy::InitStateMachine(){
+	stateMachine_ = std::make_unique<CharacterStateMachine>();
+	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
+		return std::make_unique<EnemyStateAttack>(p);
+		});
+	stateMachine_->RegisterState(CharacterMainState::Attack, [](BaseCharacter* p) {
+		return std::make_unique<EnemyStateAttack>(p);
+		});
+	stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
+		return std::make_unique<EnemyStateDie>(p);
+		});
+	stateMachine_->RegisterState(CharacterMainState::Special, [](BaseCharacter* p) {
+		return std::make_unique<EnemyStateSpecial>(p);
+		});
+	stateMachine_->Init(this, CharacterMainState::Move);
 }
 
 void NormalEnemy::Update()
@@ -147,15 +165,13 @@ void NormalEnemy::Update()
 
 	if (GetObject3D()) {
 		UpdateBaseGetValue();
+		// ステート
+		stateMachine_->Update();
+
 		//HitStpoTime();
 		if (GetHP() <= 0) {
 			if (GetAlive() == true) {
-				//ductEmit_->Update();
-				//tireEmit_->Update();
-				//plankEmit_->Update();
-				//gearEmit_->Update();
-				//fenceEmit_->Update();
-
+				
 			}
 			objectComponent_->GetObjectStateFlags().isLockonTarget = false;
 			objectComponent_->GetObjectStateFlags().isAlive = false;
@@ -169,7 +185,7 @@ void NormalEnemy::Update()
 			characterStateComponent_.Update(Velocity(), false, GetAlive());
 			// ヒット
 			hitMotionComponent_->Update(GetTime(), GetObject3D());
-			//
+			// 視野
 			visionComponent_->Update(GetTime(), GetObject3D()->GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
 
 
@@ -187,8 +203,6 @@ void NormalEnemy::Update()
 			// 更新
 			GetObject3D()->UpdateWorldTransform();
 		}
-		// ステート
-		state_->Update();
 	}
 }
 

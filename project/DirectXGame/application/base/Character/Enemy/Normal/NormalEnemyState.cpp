@@ -2,27 +2,24 @@
 #include "NormalEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-EnemyStateMove::EnemyStateMove(BaseEnemy* enemy)
-	: BaseEnemyState("Move", enemy) {
-}
-
 void EnemyStateMove::Update()
 {
 
-	if (enemy_->GetHP() > 0) {
+	if (character_->GetHP() > 0) {
 
-		enemy_->Move();
+		character_->Move();
 
 
-		timer_ -= enemy_->GetTime();
+		timer_ -= character_->GetTime();
 
 		if (timer_ <= 0.0f) {
-			enemy_->ChangeState("Attack");
+			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 			return;
 		}
 	}
 	else {
-		enemy_->ChangeState("Die");
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+
 	}
 }
 
@@ -34,24 +31,23 @@ void EnemyStateMove::Enter() {
 	timer_ = rootTimer_;
 }
 
-EnemyStateAttack::EnemyStateAttack(BaseEnemy* enemy)
-	: BaseEnemyState("Attack", enemy) {
-}
 
 void EnemyStateAttack::Update()
 {
-	timer_ -= enemy_->GetTime();
-	Vector3 direct = subPos_.Normalize() * enemy_->GetTime() * attackSpeed_;
+	timer_ -= character_->GetTime();
+	/*Vector3 direct = subPos_.Normalize() * character_->GetTime() * attackSpeed_;
 	direct.y = 0;
-	enemy_->GetWorldTransform().translate_ = Add(enemy_->GetWorldTransform().translate_, direct);
+	character_->GetWorldTransform().translate_ = Add(character_->GetWorldTransform().translate_, direct);*/
+
+	character_->Move();
 
 	if (timer_ <= 0.0f) {
-		enemy_->ChangeState("Move");
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 		timer_ = 0.0f;
 		return;
 	}
-	if (enemy_->GetHP() <= 0) {
-		enemy_->ChangeState("Die");
+	if (character_->GetHP() <= 0) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
 	}
 }
 
@@ -60,18 +56,19 @@ void EnemyStateAttack::Exit() {
 }
 
 void EnemyStateAttack::Enter() {
+	BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+
+
 	// ロックオン座標
-	lockonPos_ = enemy_->GetTargetPos();
+	lockonPos_ = enemy->GetTargetPos();
 
 	// 追跡対象からロックオン対象へのベクトル
-	subPos_ = Subtract(lockonPos_, enemy_->GetWorldTransform().translate_);
+	subPos_ = Subtract(lockonPos_, enemy->GetWorldTransform().translate_);
 	timer_ = attackTimer_;
 }
 
 
-EnemyStateSpecial::EnemyStateSpecial(BaseEnemy* enemy)
-	: BaseEnemyState("Special", enemy) {
-}
+
 
 void EnemyStateSpecial::Update() {
 
@@ -85,32 +82,30 @@ void EnemyStateSpecial::Enter() {
 
 }
 
-EnemyStateDie::EnemyStateDie(BaseEnemy* enemy)
-	: BaseEnemyState("Die", enemy) {
-}
+
 
 void EnemyStateDie::Update() {
-	timer_ -= enemy_->GetTime();
+	timer_ -= character_->GetTime();
 	if (timer_ <= 0.0f) {
-		enemy_->SetAlive(false);
+		character_->SetAlive(false);
 		timer_ = 0.0f;
-		if (!enemy_->GetAlive()) {
-			enemy_->Delete();
-			enemy_->GetObject3D()->IsDelete();
+		if (!character_->GetAlive()) {
+			character_->Delete();
+			character_->GetObject3D()->IsDelete();
 		}
 	}
 	else if (timer_ <= dieTimer_ / 2.0f) {
-		enemy_->GetObject3D()->SetIsDraw(false);
+		character_->GetObject3D()->SetIsDraw(false);
 	}
 	else {
-		enemy_->GetObject3D()->GetRigidBodyComponent()->SetIsGravity(false);
-		enemy_->GetObject3D()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * enemy_->GetTime();
-		if (enemy_->GetObject3D()->GetWorldTransform().scale_.x <= 0) {
-			enemy_->GetObject3D()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
+		character_->GetObject3D()->GetRigidBodyComponent()->SetIsGravity(false);
+		character_->GetObject3D()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character_->GetTime();
+		if (character_->GetObject3D()->GetWorldTransform().scale_.x <= 0) {
+			character_->GetObject3D()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
 		}
 
 		// 着地処理
-		enemy_->GetMoveComponent()->Landing(*enemy_->GetObject3D()->GetTransformComponent(), *enemy_->GetObject3D()->GetRigidBodyComponent());
+		character_->GetMoveComponent()->Landing(*character_->GetObject3D()->GetTransformComponent(), *character_->GetObject3D()->GetRigidBodyComponent());
 	}
 }
 

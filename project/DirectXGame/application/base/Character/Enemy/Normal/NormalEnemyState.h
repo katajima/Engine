@@ -1,12 +1,15 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemyState.h"
-
+//#include "DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemyState.h"
+#include "DirectXGame/application/base/BaseClass/State/BaseState.h"
 // 移動
-class EnemyStateMove : public BaseEnemyState
+class EnemyStateMove : public MoveState
 {
 public:
 	// コンストラクタ
-	EnemyStateMove(BaseEnemy* enemy);
+	EnemyStateMove(BaseCharacter* enemy)
+		: MoveState(enemy){}
+
+
 	// 更新
 	void Update();
 
@@ -21,10 +24,11 @@ private:
 };
 
 // 攻撃
-class EnemyStateAttack :public BaseEnemyState
+class EnemyStateAttack :public AttackState
 {
 public:
-	EnemyStateAttack(BaseEnemy* enemy);
+	EnemyStateAttack(BaseCharacter* enemy)
+		: AttackState(enemy) {}
 
 	void Update();
 
@@ -41,10 +45,12 @@ private:
 };
 
 // 必殺技
-class EnemyStateSpecial :public BaseEnemyState
+class EnemyStateSpecial :public SpecialState
 {
 public:
-	EnemyStateSpecial(BaseEnemy* enemy);
+	EnemyStateSpecial(BaseCharacter* enemy)
+		: SpecialState(enemy) {}
+	
 	// 更新
 	void Update();
 
@@ -55,10 +61,12 @@ public:
 };
 
 // 死亡
-class EnemyStateDie :public BaseEnemyState
+class EnemyStateDie :public DieState
 {
 public:
-	EnemyStateDie(BaseEnemy* enemy);
+	EnemyStateDie(BaseCharacter* enemy)
+		: DieState(enemy) {}
+
 	// 更新
 	void Update();
 

@@ -8,7 +8,7 @@
 #include"DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
 #include"DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
 
-using PlayerStateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
+//using PlayerStateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
 
 
 
@@ -16,18 +16,20 @@ class FollowCamera;
 class BasePlayer : public BaseCharacter
 {
 public:
-	BasePlayer() {
-		// 初期化時に状態名とその生成関数を登録
-		RegisterState("Move", [](BasePlayer* p) {
-			return std::make_unique<PlayerStateMove>(p);
-			});
-		RegisterState("Attack", [](BasePlayer* p) {
-			return std::make_unique<PlayerStateAttack>(p);
-			});
-		RegisterState("Special", [](BasePlayer* p) {
-			return std::make_unique<PlayerStateSpecial>(p);
-			});
-	}
+
+
+	//BasePlayer() {
+	//	// 初期化時に状態名とその生成関数を登録
+	//	RegisterState("Move", [](BasePlayer* p) {
+	//		return std::make_unique<PlayerStateMove>(p);
+	//		});
+	//	RegisterState("Attack", [](BasePlayer* p) {
+	//		return std::make_unique<PlayerStateAttack>(p);
+	//		});
+	//	RegisterState("Special", [](BasePlayer* p) {
+	//		return std::make_unique<PlayerStateSpecial>(p);
+	//		});
+	//}
 
 	// 初期化
 	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
@@ -65,23 +67,23 @@ public:
 	bool GetIsSpecial() const { return special_->GetIsSpecial(); }
 
 
-	void ChangeState(const std::string& name) {
-		auto it = stateFactoryMap_.find(name);
-		if (it != stateFactoryMap_.end()) {
-			stateName_ = name;
-			ChangeState(it->second(this)); // unique_ptr<BasePlayerState>
-		}
-		else {
-			assert(true);
-		}
-	}
+	//void ChangeState(const std::string& name) {
+	//	auto it = stateFactoryMap_.find(name);
+	//	if (it != stateFactoryMap_.end()) {
+	//		stateName_ = name;
+	//		ChangeState(it->second(this)); // unique_ptr<BasePlayerState>
+	//	}
+	//	else {
+	//		assert(true);
+	//	}
+	//}
 
 
 	
 
 private:
 
-	void ChangeState(std::unique_ptr<BasePlayerState> newState) {
+	/*void ChangeState(std::unique_ptr<BasePlayerState> newState) {
 		if (state_) {
 			state_->Exit();
 		}
@@ -93,7 +95,7 @@ private:
 
 	void RegisterState(const std::string& name, PlayerStateFactory factory) {
 		stateFactoryMap_[name] = factory;
-	}
+	}*/
 protected:
 	
 	FollowCamera* followCamera_;			// フォローカメラ
@@ -101,8 +103,8 @@ protected:
 	bool isCreativeMode = false;			// クリエイティブモードかどうか
 
 
-	std::string stateName_ = "";
-	std::unique_ptr<BasePlayerState> state_;// ステート
-	std::unordered_map<std::string, PlayerStateFactory> stateFactoryMap_;	// 
+	//std::string stateName_ = "";
+	//std::unique_ptr<BasePlayerState> state_;// ステート
+	//std::unordered_map<std::string, PlayerStateFactory> stateFactoryMap_;	// 
 };
 

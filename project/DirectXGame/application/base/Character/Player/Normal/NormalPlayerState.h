@@ -1,45 +1,51 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayerState.h"
+//#include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayerState.h"
+#include "DirectXGame/application/base/BaseClass/State/BaseState.h"
 
 
-class PlayerStateMove : public BasePlayerState
+class PlayerStateMove : public MoveState
 {
 public:
 	// コンストラクタ
-	PlayerStateMove(BasePlayer* player);
+	PlayerStateMove(BaseCharacter* player)
+		: MoveState(player) {}
+
 	// 更新
-	void Update();
+	void Update() override;
 
 	// 終了
-	void Exit();
+	void Exit()override;
 
 	// 初期化
-	void Enter();
+	void Enter() override;
 };
 
 
-class PlayerStateAttack :public BasePlayerState
+class PlayerStateAttack :public AttackState
 {
 public:
-	PlayerStateAttack(BasePlayer* player);
+	PlayerStateAttack(BaseCharacter* player)
+		: AttackState(player) {}
 
-	void Update();
+	void Update() override;
 
 	// 終了
-	void Exit();
+	void Exit() override;
 	// 初期化
-	void Enter();
+	void Enter() override;
 };
 
-class PlayerStateSpecial :public BasePlayerState
+class PlayerStateSpecial :public SpecialState
 {
 public:
-	PlayerStateSpecial(BasePlayer* player);
+	PlayerStateSpecial(BaseCharacter* player)
+		: SpecialState(player) {}
+
 	// 更新
-	void Update();
+	void Update() override;
 
 	// 終了
-	void Exit();
+	void Exit() override;
 	// 初期化
-	void Enter();
+	void Enter() override;
 };

@@ -3,28 +3,11 @@
 
 #include"NormalEnemyState.h"
 
-using EnemyStateFactory = std::function<std::unique_ptr<BaseEnemyState>(BaseEnemy*)>;
-
-
-
-
 class NormalEnemy : public BaseEnemy {
 public:
 	// コンストラクタ
 	NormalEnemy() {
-		// 初期化時に状態名とその生成関数を登録
-		RegisterState("Move", [](BaseEnemy* p) {
-			return std::make_unique<EnemyStateMove>(p);
-			});
-		RegisterState("Attack", [](BaseEnemy* p) {
-			return std::make_unique<EnemyStateAttack>(p);
-			});
-		RegisterState("Special", [](BaseEnemy* p) {
-			return std::make_unique<EnemyStateSpecial>(p);
-			});
-		RegisterState("Die", [](BaseEnemy* p) {
-			return std::make_unique<EnemyStateDie>(p);
-			});
+		
 	}
 
 	// 初期化
@@ -48,42 +31,13 @@ public:
 
 	void Attack() override;
 
-	void ChangeState(const std::string& name) override{
-		auto it = stateFactoryMap_.find(name);
-		if (it != stateFactoryMap_.end()) {
-			stateName_ = name;
-			ChangeState(it->second(this)); // unique_ptr<BasePlayerState>
-		}
-		else {
-			assert(true);
-		}
-	}
-
-	std::string GetStateName() override { return stateName_; }
-
 private:
 	
+	void InitStateMachine() override;
+
+
 	void InitParticle();
 
-
-	void ChangeState(std::unique_ptr<BaseEnemyState> newState) {
-		if (state_) {
-			state_->Exit();
-		}
-		state_ = std::move(newState);
-		if (state_) {
-			state_->Enter();
-		}
-	}
-
-	void RegisterState(const std::string& name, EnemyStateFactory factory) {
-		stateFactoryMap_[name] = factory;
-	}
-
-private:
-	std::string stateName_ = "";
-	std::unique_ptr<BaseEnemyState> state_;// ステート
-	std::unordered_map<std::string, EnemyStateFactory> stateFactoryMap_;	// 
 private:
 	WorldTransform worldEffect_;
 

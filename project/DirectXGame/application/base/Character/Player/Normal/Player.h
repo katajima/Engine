@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
 #include "DirectXGame/application/base/Weapon/playerWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
-
+#include "NormalPlayerState.h"
 
 ///< summary>
 /// 自キャラ
@@ -11,6 +11,8 @@
 class Enemy;
 class Player : public BasePlayer{
 public:
+
+
 	///< summary>
 	/// 初期化
 	///</summary>
@@ -39,7 +41,11 @@ public:
 
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };
 
+
+
 private: 
+	void InitStateMachine() override;
+
 	// 調整項目の適用
 	void ApplyGlobalVariables();
 
