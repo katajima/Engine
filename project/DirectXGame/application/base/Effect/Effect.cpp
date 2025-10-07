@@ -96,7 +96,7 @@ void Effect::InitParticle(){
 	hitRingEmit->SetPos({ 0,0.0f,0.0f });
 	hitRingEmit->SetRotate({}, DegreesToRadians({ 180,180,180 }));
 	hitRingEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
-	hitRingEmit->SetLifeTime(0.4f, 0.1f);
+	hitRingEmit->SetLifeTime(0.3f, 0.05f);
 	hitRingEmit->SetIsAlpha(true);
 	hitRingEmit->SetUsebillboard(true);
 	hitRingEmit->SetIsLifeTimeScale(true);
@@ -104,9 +104,11 @@ void Effect::InitParticle(){
 	hitRingEmit->SetSize({ 8,8,8 }, {});
 	hitRingEmit->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
 	hitRingEmit->SetAlphaClipping(0.15f);
-	//hitRingEmit->SetIsEmit(true);
+	
+}
 
-
+void Effect::InitRangeBombingBullet()
+{
 
 	effectComponent_->AddEmitter("missileHitCylinder", "missileHitCylinder", EmitterShapeType::POINT);
 	PointParticleEmitter* missileHitCylinder = effectComponent_->GetEmitterAs<PointParticleEmitter>("missileHitCylinder");
@@ -116,19 +118,18 @@ void Effect::InitParticle(){
 	missileHitCylinder->SetPos({ 0,0.0f,0.0f });
 	missileHitCylinder->SetPos({ 0,0.0f,0.0f });
 	missileHitCylinder->SetLifeTime(0.5f, 0.0f);
-	missileHitCylinder->SetRotate({ -DegreesToRadians(90),DegreesToRadians(0) ,0}, {});
+	missileHitCylinder->SetRotate({ -DegreesToRadians(90),DegreesToRadians(0) ,0 }, {});
 	missileHitCylinder->SetIsAlpha(true);
 	missileHitCylinder->SetUsebillboard(false);
 
 
 	missileHitCylinder->SetIsScaling(true);
-	missileHitCylinder->SetSizeAmount({0.15f,0.15f ,0.0f},{});
+	missileHitCylinder->SetSizeAmount({ 0.15f,0.15f ,0.0f }, {});
 	missileHitCylinder->SetSize({ 1,1,1 }, {});
 	missileHitCylinder->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
-}
-
-void Effect::InitRangeBombingBullet()
-{
+	
+	
+	
 	effectComponent_->AddEmitter("stratSmoke01", "smokePlane01", EmitterShapeType::POINT);
 	effectComponent_->AddEmitter("stratSmoke02", "smokePlane05", EmitterShapeType::POINT);
 	PointParticleEmitter* stratSmoke01_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("stratSmoke01");
@@ -166,8 +167,8 @@ void Effect::InitRangeBombingBullet()
 	PointParticleEmitter* smokePlaneExpSmoke = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlaneExpSmoke");
 
 	smokePlaneExpSmoke->GetFrequency() = 0.00f;
-	smokePlaneExpSmoke->SetCount(10, 0);
-	smokePlaneExpSmoke->SetLifeTime(2.5f, 0);
+	smokePlaneExpSmoke->SetCount(30, 0);
+	smokePlaneExpSmoke->SetLifeTime(3.5f, 0);
 	smokePlaneExpSmoke->SetIsAlpha(true);
 	smokePlaneExpSmoke->SetAlphaClipping(0.23f);
 	smokePlaneExpSmoke->SetIsLifeTimeScale(true);
@@ -177,7 +178,7 @@ void Effect::InitRangeBombingBullet()
 	smokePlaneExpSmoke->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	//smokePlaneExpSmoke->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	smokePlaneExpSmoke->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
-	smokePlaneExpSmoke->SetVelocity(Vector3{ 30,50,30 }, { 0,50,0 });
+	smokePlaneExpSmoke->SetVelocity(Vector3{ 00,50,00 }, { 40,50,40 });
 	smokePlaneExpSmoke->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
 
 
@@ -240,6 +241,25 @@ void Effect::InitRangeBombingBullet()
 	ringEmit->SetSize(Vector3{ 5.8f,5.8f,5.8f }, {});
 	ringEmit->SetVelocity(Vector3{ 0,0,0 }, { 0,0,0 });
 	ringEmit->SetRotate(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
+
+	effectComponent_->AddEmitter("expSpark", "expSpark", EmitterShapeType::POINT);
+	PointParticleEmitter* expSpark = effectComponent_->GetEmitterAs<PointParticleEmitter>("expSpark");
+
+	expSpark->GetFrequency() = 0.00f;
+	expSpark->SetCount(1, 0);
+	expSpark->SetLifeTime(0.15f, 0.00f);
+	expSpark->SetIsAlpha(true);
+	//
+	// 
+	expSpark->SetAlphaClipping(0.10f);
+	//expSpark->SetIsLifeTimeScale(true);
+	expSpark->SetUsebillboard(true);
+	//expSpark->SetUsebillboardRotZ(false);
+	//expSpark->SetEnableLighting(false);
+	expSpark->SetColorMinMax({ 1.0f,1.0f,0.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
+	expSpark->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
+	expSpark->SetVelocity(Vector3{ 0,0,0 }, { 0,0,0 });
+	expSpark->SetRotate(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
 
 	effectComponent_->AddEmitter("missileHit", "missileHit", EmitterShapeType::POINT);
 	PointParticleEmitter* hitEmitter_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("missileHit");

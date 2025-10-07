@@ -189,6 +189,8 @@ void MyGame::InitializeResource()
 	//
 	textureManager->LoadTexture("resources/Texture/effect/exp.png");
 	
+	textureManager->LoadTexture("resources/Texture/effect/spark.png");
+	
 	// ModelData;
 	LoadModel();
 
@@ -265,6 +267,7 @@ void MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("smokePlane04", "resources/Texture/smoke/no4.png", primiPlane.get());
 	particleManager->CreateParticleGroup("smokePlane05", "resources/Texture/smoke/no3.png", primiPlane.get());
 	particleManager->CreateParticleGroup("expPlane01", "resources/Texture/effect/exp2.png", primiPlane.get());
+	particleManager->CreateParticleGroup("expSpark", "resources/Texture/effect/spark.png", primiPlane.get());
 
 	particleManager->CreateParticleGroup("smokePlane01_1", "resources/Texture/smoke/no1.png", primiPlane.get());
 	particleManager->CreateParticleGroup("smokePlane02_1", "resources/Texture/smoke/no2.png", primiPlane.get());

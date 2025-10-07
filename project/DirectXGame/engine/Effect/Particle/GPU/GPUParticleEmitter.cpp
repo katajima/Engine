@@ -211,13 +211,6 @@ void BaseGpuParticleEmitter::Update(float deltaTime)
 		int threadGroupCount = (count + count_ - 1) / count_;
 		group_->UpdateEmitte(deltaTime, threadGroupCount);
 	}
-
-	time_ += deltaTime;
-	if (interval_ <= time_) {
-		time_ -= interval_;
-		// 前回の座標を保存
-		//cbEmitterCommon_.Data()->prevTranslate = cbEmitterCommon_.Data()->translate;
-	}
 	worldTransform_.Update();
 }
 

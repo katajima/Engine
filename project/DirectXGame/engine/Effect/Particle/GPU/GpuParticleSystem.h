@@ -64,10 +64,17 @@ private:
 	ConstantBuffer<MaxInstance> cbMaxInstance_;
 	// 時間
 	ConstantBuffer<PerFrame> cbPerFrame_;
-	// エミッター情報
-	ConstantBuffer<EmiterDispatch> cbEmiterDispatch_;
 	// パーティクル削除情報
 	ConstantBuffer<DeleteParticleCS> cbDeleteParticleCS_;
+	//
+	ConstantBuffer<PerEmitterDispatch> emitterDispatchBuffer_;
+
+
+private:
+	/*std::vector<BaseGpuParticleEmitter*> emitters_;
+	StructuredBuffer<EmitterCommon> emitterCommonBuffer_;
+	StructuredBuffer<EmitterTrail>  emitterTrailBuffer_;
+	StructuredBuffer<PerEmitterDispatch> emitterDispatchBuffer_;*/
 
 private: // トレイル用
 

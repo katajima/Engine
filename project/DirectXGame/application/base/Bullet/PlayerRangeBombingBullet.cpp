@@ -9,20 +9,10 @@
 
 PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 {
-	//moveSmokeEmitter_.reset();
-	//moveSmokeEmitter2_.reset();
-	//startSmokeEmitter_.reset();
-	//moveExpEmitter_.reset();
-	//expFireEmitter_.reset();
-	//animatedCubeEmitter_.reset();
-	//ringEmitter_.reset();
-	//hitEmitter_.reset();
-
 	effectComponent_->GetGpuParticleManager()->ClearEmitter("MoveEmitte_" + std::to_string(countIndex_));
 	effectComponent_->RemoveEmitterAll();
 	effectComponent_->RemovePrimitiveAll();
 	effectComponent_->RemoveTrailEffectAll();
-
 }
 
 void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
@@ -247,13 +237,15 @@ void PlayerRangeBombingBullet::Update()
 					count = 0;
 
 					hitObject2_->SetIsDraw(true);
+					emitterPoint->GetCommonData()->emit = false;
+					emitterPoint->GetCommonData()->lifeTime = 0.01f;
 				}
-
+				
 			}
 			break;
 		case 2:
 			flag_ = true;
-			emitterPoint->GetCommonData()->emit = false;
+			
 			
 			// リングエフェクトの位置を設定
 			effect_->Emit("ringEmit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
@@ -287,6 +279,11 @@ void PlayerRangeBombingBullet::Update()
 				effect_->Emit("AnimatedCube", object_->GetWorldTransform().worldMat_.GetWorldPosition());
 
 				effect_->Emit("expPlane01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,5,0 });
+			
+			
+				effect_->Emit("expSpark", object_->GetWorldTransform().worldMat_.GetWorldPosition() );
+			
+			
 			}
 
 			break;
@@ -409,7 +406,7 @@ void PlayerRangeBombingBullet::InitMoveSmoke()
 	emitterPoint->GetCommonData()->isScaling = true;
 	emitterPoint->GetCommonData()->scaleAmount = 1.25f;
 	emitterPoint->GetData()->interpolation = EmitterInterpolation::Sequential;
-	emitterPoint->GetCommonData()->color = { 0.25f,0.25f,0.25f };
+	emitterPoint->GetCommonData()->color = { 0.35f,0.35f,0.35f };
 }
 
 void PlayerRangeBombingBullet::InitExpSmoke()

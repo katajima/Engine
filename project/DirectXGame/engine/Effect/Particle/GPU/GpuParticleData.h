@@ -157,12 +157,7 @@ struct EmitterCommon
 
 };
 
-// エミッタースレッド数
-struct EmiterDispatch
-{
-	uint32_t totalThreadCount;
-	uint32_t pad[3];
-};
+
 
 
 // エミッターリボン
@@ -201,6 +196,13 @@ struct ParticleCount
 	int32_t count;
 };
 
+// 
+struct PerEmitterDispatch {
+	uint32_t startThread;       // このエミッタが処理を始めるスレッドのインデックス
+	uint32_t totalThreadCount;  // このエミッタが必要とするスレッド数
+	uint32_t particleOffset;    // 書き込み先パーティクルバッファの開始インデックス
+	uint32_t emitterIndex;      // エミッタ番号（StructuredBufferのインデックス）
+};
 
 // 頂点データ(トレイル)
 struct GpuTrailVertex

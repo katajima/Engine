@@ -111,11 +111,6 @@ struct EmitterTrail
     float pad; // パディング
 };
 
-struct PerEmitterDispatch
-{
-    uint totalThreadCount;
-};
-
 // エミッター(球)
 struct EmitterSphere
 {
@@ -186,4 +181,12 @@ struct GpuTrailCount
     uint vertexMaxCount; // 最大数(Vertex)
     uint indexCount; // 使用数(Index)
     uint indexMaxCount; // 最大数(Index)
+};
+
+struct PerEmitterDispatch
+{
+    uint startThread; // このエミッタが処理を始めるスレッドのインデックス
+    uint totalThreadCount; // このエミッタが必要とするスレッド数
+    uint particleOffset; // 書き込み先パーティクルバッファの開始インデックス
+    uint emitterIndex; // エミッタ番号（StructuredBufferのインデックス）
 };

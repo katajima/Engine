@@ -85,7 +85,7 @@ void GameUI::Update()
 
 void GameUI::Draw()
 {
-	board_->Draw();
+	//board_->Draw();
 
 	DrawUIElement();
 }

@@ -1,6 +1,9 @@
 #include "EmitSpawn.hlsli"
 
 ConstantBuffer<EmitterSphere> gEmitter : register(b0);                  // エミッター(固有)
+
+
+
 ConstantBuffer<EmitterCommon> gEmitterCommon : register(b3);            // エミッター(共通)
 ConstantBuffer<EmitterTrail>  gEmitterTrail : register(b4);             // エミッター(トレイル)
 ConstantBuffer<PerEmitterDispatch> gPerEmitterDispatch : register(b5);  // エミッター(ディスパッチ数)

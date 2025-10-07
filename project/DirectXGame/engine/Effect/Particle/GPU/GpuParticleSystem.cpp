@@ -32,8 +32,8 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 	// カメラ位置
 	cbCameraPos_.CreateBuffer(dxCommon_, 1);
 	// エミッタ発生数
-	cbEmiterDispatch_.CreateBuffer(dxCommon_, 1);
-	cbEmiterDispatch_.Data()->totalThreadCount = 0; // 初期化
+	emitterDispatchBuffer_.CreateBuffer(dxCommon_, 1);
+	emitterDispatchBuffer_.Data()->totalThreadCount = 0; // 初期化
 	// 削除フラグ
 	cbDeleteParticleCS_.CreateBuffer(dxCommon_, 1);
 	cbDeleteParticleCS_.Data()->isDelete = false; // 初期化
@@ -102,8 +102,8 @@ void GpuParticleGroup::UpdateEmitte(float deltaTime, int threadGroupCount)
 
 	// --- 重要: totalThreadCount は「総スレッド数」を入れる ---
 	// threadGroupCount はグループ数。count_ がシェーダの THREAD_COUNT に相当する値である前提。
-	cbEmiterDispatch_.Data()->totalThreadCount = static_cast<uint32_t>(threadGroupCount * 64); // <-- 総スレッド数
-	cbEmiterDispatch_.SetComputeRootConstantBufferView(8);   // エミッタ発生数（CBVはデータ設定後にセット）
+	emitterDispatchBuffer_.Data()->totalThreadCount = static_cast<uint32_t>(threadGroupCount * 64); // <-- 総スレッド数
+	emitterDispatchBuffer_.SetComputeRootConstantBufferView(8);   // エミッタ発生数（CBVはデータ設定後にセット）
 
 	// Dispatch にはグループ数を渡す
 	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
