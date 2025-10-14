@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
+#include"DirectXGame/engine/math/MathFanctions.h"
 
 class BaseLight
 {

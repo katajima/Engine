@@ -43,13 +43,14 @@ public:
 
 	virtual void Draw2D() = 0;
 	
+	// 消すか
 	virtual bool IsExpired() const {
 		return !GetAlive() && !GetIsEffectPlay(); // ← 演出含めて完全終了
 	}
 public:
 	// 生存判定
 	bool GetAlive() const { return isAlive_; }
-	//
+	// 演出再生中か
 	bool GetIsEffectPlay() const { return isEffectPlay_; }
 
 	// ダメージ

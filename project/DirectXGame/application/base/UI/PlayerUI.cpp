@@ -8,8 +8,9 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	input_ = input;
 
 
-	InitUIMeter("HPBer",{30,650}, true);
-	InitUIMeter("SpecailBer",{30,700}, true);
+	InitUIMeter("HPBer",{30,600}, true);
+	InitUIMeter("SpecailBer",{30,650}, true);
+	InitUIMeter("StaminaBer",{30,700}, true);
 
 
 	UIMeter* hpber  = GetUIMeter("HPBer");
@@ -28,6 +29,14 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	specailBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");
 	specailBer_->GetNameSprite()->SetSize({ 60,40 });
 
+	UIMeter* staminaBer_ = GetUIMeter("StaminaBer");
+	staminaBer_->SetMaxSize({ 100,30 },{4.0f,4.0f });
+	staminaBer_->SetMeterMinMax(0.0f, 20.0f);
+	staminaBer_->GetMeterSprite()->SetColor({ 1,1,0,1 });
+	staminaBer_->SetMeterType(UIMeterType::Left);
+	staminaBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");
+	staminaBer_->GetNameSprite()->SetSize({ 60,40 });
+
 
 
 	textMax_ = std::make_unique<Sprite>();
@@ -45,64 +54,22 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	textRB_->SetAnchorPoint({ 0.5f,0.5f });
 	textRB_->SetSize(0.2f);
 
-	/*InitUICheckBox("check1", { 300,100 });
-	InitUICheckBox("check2", { 340,100 });
-	InitUICheckBox("check3", { 380,100 });
-	InitUICheckBox("check4", { 420,100 });
-	InitUICheckBox("check5", { 460,100 });
-
-
-	InitUIMeter("HPBer1", { 30,150 });
-	UIMeter* HPBer1_ = GetUIMeter("HPBer1");
-	HPBer1_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer1_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer1_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer1_->SetMeterType(UIMeterType::Left);
-	InitUIMeter("HPBer2", { 30,250 });
-	UIMeter* HPBer2_ = GetUIMeter("HPBer2");
-	HPBer2_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer2_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer2_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer2_->SetMeterType(UIMeterType::Right);
-
-	InitUIMeter("HPBer3", { 30,350 });
-	UIMeter* HPBer3_ = GetUIMeter("HPBer3");
-	HPBer3_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer3_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer3_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer3_->SetMeterType(UIMeterType::Top);
-
-	InitUIMeter("HPBer4", { 30,450 });
-	UIMeter* HPBer4_ = GetUIMeter("HPBer4");
-	HPBer4_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer4_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer4_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer4_->SetMeterType(UIMeterType::Down);
-
-	InitUIMeter("HPBer5", { 30,550 });
-	UIMeter* HPBer5_ = GetUIMeter("HPBer5");
-	HPBer5_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer5_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer5_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer5_->SetMeterType(UIMeterType::WidthCenter);
-
-	InitUIMeter("HPBer6", { 30,650 });
-	UIMeter* HPBer6_ = GetUIMeter("HPBer6");
-	HPBer6_->SetMaxSize({ 100,30 }, { 4.0f,4.0f });
-	HPBer6_->SetMeterMinMax(0.0f, 20.0f);
-	HPBer6_->GetMeterSprite()->SetColor({ 0,0,1,1 });
-	HPBer6_->SetMeterType(UIMeterType::HeightCenter);
-
-	InitUISlider("Slider",{300,200});*/
-
 }
 
 void PlayerUI::Update()
 {
 	UIMeter* hpber = GetUIMeter("HPBer");
-	UIMeter* specailBer_ = GetUIMeter("SpecailBer");
-	hpber->SetMeter(sizeHP_);
-	specailBer_->SetMeter(sizeSpecialGauge_);
+	UIMeter* specailBer = GetUIMeter("SpecailBer");
+	UIMeter* staminaBer = GetUIMeter("StaminaBer");
+	hpber->SetMeterMinMax(hpBar_->minValue, hpBar_->maxValue);
+	hpber->SetMeter(hpBar_->value);
+	
+	staminaBer->SetMeterMinMax(staminaBar_->minValue, staminaBar_->maxValue);
+	staminaBer->SetMeter(staminaBar_->value);
+
+
+	specailBer->SetMeter(sizeSpecialGauge_);
+
 
 	UpdateUIElement(0);
 }

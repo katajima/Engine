@@ -19,13 +19,17 @@ class BulletManager {
 public:
 	~BulletManager();
 
+	// 弾の種類
 	enum class BulletType
 	{
 		kPlayerMissile,	// プレイヤーミサイル
 		kRangeBombingSpecial,	// レンジボミングスペシャル
+		kPlayerStan,			// スタン
 		kEnemyBullet,
+
 	};
 
+	// 弾の状態
 	enum class BulletBehavior 
 	{
 		kFollow,				// ターゲットを追尾する弾
@@ -36,8 +40,7 @@ public:
 
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera);
-	void SetPlayer(BasePlayer* player) { player_ = player; };
-
+	
 
 	// 更新
 	void Update();
@@ -51,25 +54,36 @@ public:
 	// 描画2D
 	void Draw2D();
 
+
+
+public: // 生成
+
 	// 範囲攻撃する弾を生成(絨毯爆撃)
 	void GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad);
 
 	// ターゲットを追尾する弾を生成
 	void GenerateBullet(BulletType type, Vector3 position, BaseEnemy* enemy = nullptr);
 
+public: // 取得or設定
 	// 弾リストを取得
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
+		
+	// プレイヤーをセット
+	void SetPlayer(BasePlayer* player) { player_ = player; };
 
+	// エフェクトの設定
 	void SetEffect(Effect* effect) { effect_ = effect; }
 private:
+
+	// 弾
 	std::list<std::unique_ptr<BaseBullet>> bullets_;
 
 
 private:
-	BasePlayer* player_;
-	Effect* effect_;
-	Camera* camera_;						// カメラ
-	GlobalVariables* globalVariables_ = nullptr;
+	BasePlayer* player_;							// プレイヤー
+	Effect* effect_;								// 演出
+	Camera* camera_;								// カメラ
+	GlobalVariables* globalVariables_ = nullptr;	// 保存項目
 	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
 	Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
 };

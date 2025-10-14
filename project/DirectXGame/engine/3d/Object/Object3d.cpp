@@ -35,7 +35,15 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	transformation = std::make_unique<Transfomation>();
 	transformation->Initialize(object3dCommon_->GetDxCommon());
 
+
+	direWorldTransform_.Initialize();
+	direWorldTransform_.translate_.z = 1.0f;
+	direWorldTransform_.parent_ = &transformComponent_->GetWorldTransform();
+
 	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
+
+
+
 
 
 	renderComponent_ = std::make_unique<RenderComponent>();
@@ -58,6 +66,14 @@ void Object3d::InitColliderComponent()
 	// 登録（IDを取得したければ変数で受ける）
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 	isColliderComponenyUpdate_ = true;
+}
+
+void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+{
+	trailEffect_ = std::make_unique<TrailEffect>();
+	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
+	trailEffect_->SetCamera(defaltCamera);
+	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
 }
 
 #pragma endregion // 初期化系
@@ -148,12 +164,22 @@ void Object3d::Update()
 	if (rigidBodyComponent_) {
 		rigidBodyComponent_->Integrate(MyGame::GameTime(), *transformComponent_.get());
 	}
+	// トレイル
+	if (trailEffect_) {
+		trailEffect_->SetIsEmit(isEmitTrailEffect);
+		trailEffect_->Update();
+	}
+
 	// コライダー
 	if (colliderComponent_) {
 		if (isColliderComponenyUpdate_) {
 			colliderComponent_->UpdateAll(transformComponent_->GetWorldTransform());
 		}
 	}
+	direWorldTransform_.Update();
+
+	direction_ = Subtract(direWorldTransform_.worldMat_.GetWorldPosition(),GetWorldPosition()).Normalize();
+
 }
 
 #pragma endregion //更新系
@@ -165,6 +191,14 @@ void Object3d::Draw()
 	if (isDelete) return;
 
 	renderComponent_->Draw();
+}
+
+void Object3d::DrawTrailEffect()
+{
+	if (trailEffect_) {
+		// トレイルエフェクトの描画
+		trailEffect_->Draw();
+	}
 }
 
 void Object3d::DebugImguiSkin()

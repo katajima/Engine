@@ -7,7 +7,6 @@ BaseBullet::~BaseBullet() {
 	object_->IsDelete();
 }
 
-
 float BaseBullet::GetTimer() const
 {
 	return  MyGame::GameTime();

@@ -9,20 +9,20 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
 	globalVariables_ = globalVariables;
-	
+
 	// サイズ
 	Vector3 size = { 1.7f,1.7f,1.7f };
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_,globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf",true,true, this);
-	objectComponent_->SetSRT(size,{}, position);
-	
+	objectComponent_->Initialize(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", true, true, this);
+	objectComponent_->SetSRT(size, {}, position);
+
 	CreateGroup("enemy");
-	
-	
+
+	// 移動コンポーネント初期化
 	InitMoveComponent();
-	
+
 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
@@ -101,7 +101,13 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			}
 		}
 		if (other->tag == CollisionTag::PlayerAttack) {
-			stateMachine_->ChangeState(CharacterMainState::Move);
+
+
+
+
+
+
+			//stateMachine_->ChangeState(CharacterMainState::Move);
 		}
 
 
@@ -112,23 +118,34 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	visionComponent_->SetAlertView(120.0f, 100.0f);
 	visionComponent_->SetCombatView(90.0f, 100.0f);
 	visionComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
-	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false;};
+	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
 
 
 	// ヒットモーション
 	hitMotionComponent_ = std::make_unique<HitMotionComponent>();
 	hitMotionComponent_->Init(0.1f, { 2.5f,2.2f,2.5f });
 
-	
+
 	effectComponent_ = std::make_unique<EffectComponent>();
 	effectComponent_->Init(entity3DManager_, globalVariables_);
 
 
 
-	 
+
 	objectComponent_->GetObjectStateFlags().isAlive = true;
+	
+	// パラメーター初期化
 	Parameters().HP.Initiaize(100, 0, 100, 0);
 	Parameters().speed = 3.0f;
+	Parameters().strength = 10.0f;
+
+
+	// 戦闘中の倍率・軽減率を扱う
+	combatStatComponent_ = std::make_unique<CombatStatComponent>();
+	combatStatComponent_->Initialize(&characterParameterComponent_);
+
+	
+	// 保存項目初期化
 	InitializeBaseAddItem();
 
 	Initialize2D();
@@ -137,13 +154,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	GetWorldTransform().Update();
 
+	// ステートマシーン初期化
 	InitStateMachine();
 }
 
-void NormalEnemy::InitStateMachine(){
+void NormalEnemy::InitStateMachine() {
 	stateMachine_ = std::make_unique<CharacterStateMachine>();
 	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
-		return std::make_unique<EnemyStateAttack>(p);
+		return std::make_unique<EnemyStateMove>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Attack, [](BaseCharacter* p) {
 		return std::make_unique<EnemyStateAttack>(p);
@@ -154,6 +172,11 @@ void NormalEnemy::InitStateMachine(){
 	stateMachine_->RegisterState(CharacterMainState::Special, [](BaseCharacter* p) {
 		return std::make_unique<EnemyStateSpecial>(p);
 		});
+	stateMachine_->RegisterState(CharacterMainState::Fainting, [](BaseCharacter* p) {
+		return std::make_unique<EenmyStateFainting>(p);
+		});
+
+
 	stateMachine_->Init(this, CharacterMainState::Move);
 }
 
@@ -171,7 +194,7 @@ void NormalEnemy::Update()
 		//HitStpoTime();
 		if (GetHP() <= 0) {
 			if (GetAlive() == true) {
-				
+
 			}
 			objectComponent_->GetObjectStateFlags().isLockonTarget = false;
 			objectComponent_->GetObjectStateFlags().isAlive = false;
@@ -195,7 +218,7 @@ void NormalEnemy::Update()
 			if (GetHP() >= 0) {
 				// 重力
 				if (!characterStateComponent_.IsJumping()) {
-					Velocity() = { 0,0,0 };
+				//	Velocity().y = 0;
 				}
 			}
 			// 移動制限
@@ -217,7 +240,7 @@ void NormalEnemy::Draw2D()
 
 	if (GetObject3D()) {
 		if (objectComponent_->GetObjectStateFlags().isLockonTarget) {
-			icon_lockOn->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{0.0f,-40.0f});
+			icon_lockOn->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{ 0.0f,-40.0f });
 
 			icon_lockOn->Update();
 			icon_lockOn->Draw();
@@ -258,41 +281,18 @@ void NormalEnemy::Emit()
 
 void NormalEnemy::Move()
 {
-	//if (flags_.isGrounded) {
-	Velocity() = { 0,0,0 };
 
 	// 回転と移動量の設定
-	if (Distance(player_->GetObject3D()->GetWorldPosition(), GetObject3D()->GetWorldPosition()) >= 5) {
-		Parameters().speed = 0;
+	if (stateMachine_->GetCurrentMainState() != CharacterMainState::Attack) {
+		if (Distance(GetTargetPos(), GetObject3D()->GetWorldPosition()) <= 10) {
+			Parameters().speed = 0;
+		}
+		else {
+			Parameters().speed = 15.0f;
+		}
+		// 移動
+		DirectionMove(Parameters().speed);
 	}
-	else {
-		Parameters().speed = 3.0f;
-	}
-
-	// 向いている方向への移動ベクトルの計算
-	Vector3 moveDirection = { 0.0f, 0.0f, Parameters().speed };
-	Matrix4x4 rotationMatrix = MakeRotateYMatrix(GetWorldTransform().rotate_.y);
-	moveDirection = TransformNormal(moveDirection, rotationMatrix);
-
-	// ロックオン座標
-	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
-
-	// 追跡対象からロックオン対象へのベクトル
-	Velocity() = Subtract(lockOnPosition, GetWorldTransform().translate_);
-	// Y軸周り角度
-	GetWorldTransform().rotate_.y = std::atan2(Velocity().x, Velocity().z);
-	//}
-	//else {
-	//	// ロックオン座標
-	//	Vector3 lockOnPosition = player_->GetObject3D()->GetWorldPosition();
-	//	Vector3 dire = Subtract(lockOnPosition, GetWorldTransform().translate_);
-	//	// Y軸周り角度
-	//	GetWorldTransform().rotate_.y = std::atan2(dire.x, dire.z);
-	//}
-
-
-
-	//GravityUpdate(Timer(), Situations().isJumping, GetAlive());
 }
 
 void NormalEnemy::Jump()

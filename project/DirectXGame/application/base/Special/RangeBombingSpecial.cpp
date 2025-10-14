@@ -51,10 +51,6 @@ void RangeBombingSpecial::Update()
 	else {
 		isSpecial_ = false;
 	}
-
-
-
-
 }
 
 void RangeBombingSpecial::Draw()

@@ -115,10 +115,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp" />
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.cpp" />
-    <ClCompile Include="DirectXGame\application\base\BaseClass\State\BaseState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\BaseClass\State\BaseMainState.cpp" />
     <ClCompile Include="DirectXGame\application\base\BaseClass\State\CharacterStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerStanBullet.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
@@ -704,7 +705,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h" />
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseDirectionalLight.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLight.h" />
@@ -716,9 +716,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.h" />
-    <ClInclude Include="DirectXGame\application\base\BaseClass\State\BaseState.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\BaseMainState.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\State\CharacterStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\BaseSubState.h" />
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\SubStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerStanBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />
     <ClInclude Include="DirectXGame\application\scene\SampleScene.h" />
     <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h" />
@@ -744,7 +748,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\UI\UIInputManager.h" />
     <ClInclude Include="DirectXGame\engine\UI\UIManager.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.h" />
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Object\BaseObject.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacter.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\CharacterData.h" />
@@ -760,7 +763,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h" />
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h" />

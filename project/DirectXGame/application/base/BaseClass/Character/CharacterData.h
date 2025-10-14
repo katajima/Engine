@@ -2,6 +2,7 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "optional"
 #include <DirectXGame/engine/struct/Structs.h>
+#include <DirectXGame/engine/Math/Random.h>
 
 // キャラクターの基本パラメータを定義する構造体
 struct BasicParameters 
@@ -94,10 +95,22 @@ enum class PlayerType
 };
 
 
-
 // キャラクターパラメータコンポーネント
 class CharacterParameterComponent
 {
+public:
+	// 更新
+	void Update() {
+
+
+		parameters_.stamina.useRate = true;
+
+		parameters_.HP.Update(deltaTime_);
+		parameters_.MP.Update(deltaTime_);
+		parameters_.stamina.Update(deltaTime_);
+	}
+
+
 public:
 	// HP取得
 	float GetHP() const { return parameters_.HP.value; }
@@ -113,16 +126,114 @@ public:
 	int GetIntelligence() const { return parameters_.intelligence; }
 	// 速度取得
 	float GetSpeed() const { return parameters_.speed; }
+	
+	// スタミナがあるか
+	bool IsGetStamina() const {
+		return !parameters_.stamina.IsEmpty();
+	}
+
+	// 
+	
+
+	Gage& HP() { return parameters_.HP; };				// ヒットポイント
+	Gage& MP() { return  parameters_.MP; };				// マジックポイント
+	Gage& Stamina() { return parameters_.stamina; };	// スタミナ
+
+
+	
 	// 性格取得
 	Personality GetPersonality() const { return personality; }
 	// キャラクター種類
 	CharacterType GetCharacterType() const { return characterType_; }
-
 public:
 	Personality personality = Personality::kNormal;
 	CharacterType characterType_ = CharacterType::None;	// キャラクターの種類
 	BasicParameters parameters_;						// 基本パラメータ
+
+	float deltaTime_ = 1.0f / 60.0f;
+
 };
+
+
+
+// 戦闘中の倍率・軽減率を扱うコンポーネント
+struct CombatStatComponent
+{
+public:
+	void Initialize(CharacterParameterComponent* base) {
+		baseParams_ = base;
+	}
+	float GetEffectiveAttack() const {
+		return baseParams_->GetStrength() * attackMultiplier_;
+	}
+
+	float GetEffectiveDefense() const {
+		return baseParams_->GetDefense() * defenseMultiplier_;
+	}
+
+	float attackMultiplier_ = 1.0f;		// 攻撃倍率
+	float defenseMultiplier_ = 1.0f;	// 防御倍率
+	float damageReduction_ = 0.0f;		// 被ダメ軽減率(0.2 = 20%)
+	float criticalRate_ = 0.5f;		// クリティカル確率
+	float criticalMultiplier_ = 1.5f;	// クリティカル時の倍率
+private:
+	CharacterParameterComponent* baseParams_ = nullptr;
+};
+
+// ダメージ計算
+class DamageCalculator {
+public:
+	// キャラクターとキャラクターによるダメージ計算
+	static float ComputeDamage(
+		const CombatStatComponent& attacker,
+		const CombatStatComponent& defender,
+		float skillPower
+	)
+	{
+		float attack = attacker.GetEffectiveAttack();
+		float defense = defender.GetEffectiveDefense();
+
+		float rawDamage = (attack * skillPower) - (defense * 0.5f);
+		rawDamage = (std::max)(0.0f, rawDamage);
+
+		// クリティカル判定
+		if (Random::RandomFloat(0,1.0f) < attacker.criticalRate_) {
+			rawDamage *= attacker.criticalMultiplier_;
+		}
+
+		// 軽減率反映
+		rawDamage *= (1.0f - defender.damageReduction_);
+
+		return rawDamage;
+	}
+
+	// 武器からキャラクターによるダメージ
+	static float ComputeDamageWeapon(
+		const CombatStatComponent& attacker,
+		const CombatStatComponent& defender,
+		float weponDamage) 
+	{
+		float defense = defender.GetEffectiveDefense();
+
+
+
+		float rawDamage = (weponDamage) - (defense * 0.5f);
+		rawDamage = (std::max)(0.0f, rawDamage);
+
+		// クリティカル判定
+		if (Random::RandomFloat(0, 1.0f) < attacker.criticalRate_) {
+			rawDamage *= attacker.criticalMultiplier_;
+		}
+
+		// 軽減率反映
+		rawDamage *= (1.0f - defender.damageReduction_);
+
+		return rawDamage;
+	}
+
+
+};
+
 
 // キャラクターの状態のコンポーネント
 class CharacterStateComponent
@@ -163,8 +274,6 @@ public:
 			ChangeState(CharacterState::Idle);
 		}
 	}
-
-
 // 状態取得
 	bool IsJumping() const { return currentState_ == CharacterState::Jump; }
 	bool IsFalling() const { return currentState_ == CharacterState::Fall; }
@@ -173,5 +282,4 @@ public:
 	CharacterState GetState() const { return currentState_; }
 private:
 	CharacterState currentState_ = CharacterState::Idle; // キャラクターの状況
-
 };

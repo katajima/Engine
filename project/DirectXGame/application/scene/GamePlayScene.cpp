@@ -98,6 +98,9 @@ void GamePlayScene::Initialize()
 
 	effectComponent_ = std::make_unique<EffectComponent>();
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
+
+	caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, {10,0,10}));
+
 }
 
 
@@ -174,7 +177,7 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	int countIndex = 0;
+	/*int countIndex = 0;
 	for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
 		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
@@ -186,7 +189,7 @@ void GamePlayScene::Update()
 			}
 		}
 		countIndex++;
-	}
+	}*/
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する

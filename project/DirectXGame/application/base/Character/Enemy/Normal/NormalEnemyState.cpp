@@ -2,17 +2,20 @@
 #include "NormalEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
+
+#pragma region Move
+
 void EnemyStateMove::Update()
 {
-
+	BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
 	if (character_->GetHP() > 0) {
 
 		character_->Move();
 
 
-		timer_ -= character_->GetTime();
+		timer_ += character_->GetTime();
 
-		if (timer_ <= 0.0f) {
+		if (timer_ >= rootTimer_ && enemy->GetTargetDistance() <= 50) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 			return;
 		}
@@ -28,24 +31,23 @@ void EnemyStateMove::Exit() {
 }
 
 void EnemyStateMove::Enter() {
-	timer_ = rootTimer_;
+	timer_ = 0.0f;
 }
+#pragma endregion // 移動
+
+#pragma region Attack
 
 
 void EnemyStateAttack::Update()
 {
-	timer_ -= character_->GetTime();
-	/*Vector3 direct = subPos_.Normalize() * character_->GetTime() * attackSpeed_;
-	direct.y = 0;
-	character_->GetWorldTransform().translate_ = Add(character_->GetWorldTransform().translate_, direct);*/
+	subStateMachine_->Update(character_->GetTime());
 
-	character_->Move();
-
-	if (timer_ <= 0.0f) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
-		timer_ = 0.0f;
+	// サブステートが完了したら Move に戻す
+	if (subStateMachine_->IsFinished()) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
 	}
+
 	if (character_->GetHP() <= 0) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
 	}
@@ -56,19 +58,24 @@ void EnemyStateAttack::Exit() {
 }
 
 void EnemyStateAttack::Enter() {
-	BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-
-
-	// ロックオン座標
-	lockonPos_ = enemy->GetTargetPos();
-
-	// 追跡対象からロックオン対象へのベクトル
-	subPos_ = Subtract(lockonPos_, enemy->GetWorldTransform().translate_);
-	timer_ = attackTimer_;
+	subStateMachine_ = std::make_unique<SubStateMachine<AttackSubState, BaseAttackSubState>>(character_);
+	// 攻撃用サブステート登録
+	subStateMachine_->RegisterState(AttackSubState::Ready, [](BaseCharacter* enemy, auto* fsm) {
+		return std::make_unique<NormalEnemyAttackReadySubState>(enemy, fsm);
+		});
+	subStateMachine_->RegisterState(AttackSubState::Swing, [](BaseCharacter* enemy, auto* fsm) {
+		return std::make_unique<NormalEnemyAttackSwingSubState>(enemy, fsm);
+		});
+	subStateMachine_->RegisterState(AttackSubState::End, [](BaseCharacter* enemy, auto* fsm) {
+		return std::make_unique<NormalEnemyAttackEndSubState>(enemy, fsm);
+		});
+	subStateMachine_->ChangeState(AttackSubState::Ready);
 }
 
 
+#pragma endregion
 
+#pragma region Special
 
 void EnemyStateSpecial::Update() {
 
@@ -82,7 +89,9 @@ void EnemyStateSpecial::Enter() {
 
 }
 
+#pragma endregion
 
+#pragma region Die
 
 void EnemyStateDie::Update() {
 	timer_ -= character_->GetTime();
@@ -117,3 +126,30 @@ void EnemyStateDie::Enter()
 {
 	timer_ = dieTimer_;
 }
+
+#pragma endregion
+
+#pragma region Fainting
+
+// 更新
+void EenmyStateFainting::Update() {
+	timer_ += character_->GetTime();
+
+	if (timer_ >= faintingTimer_) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		return;
+	}
+};
+
+// 終了
+void EenmyStateFainting::Exit() {
+
+};
+// 初期化
+void EenmyStateFainting::Enter() {
+	timer_ = 0.0f;
+	character_->Velocity() = {0,0,0};
+};
+
+#pragma endregion
+

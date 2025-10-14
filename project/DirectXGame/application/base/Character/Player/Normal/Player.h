@@ -7,8 +7,6 @@
 ///< summary>
 /// 自キャラ
 ///</summary>
-
-class Enemy;
 class Player : public BasePlayer{
 public:
 

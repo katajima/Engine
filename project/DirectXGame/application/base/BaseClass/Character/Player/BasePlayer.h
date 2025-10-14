@@ -16,21 +16,6 @@ class FollowCamera;
 class BasePlayer : public BaseCharacter
 {
 public:
-
-
-	//BasePlayer() {
-	//	// 初期化時に状態名とその生成関数を登録
-	//	RegisterState("Move", [](BasePlayer* p) {
-	//		return std::make_unique<PlayerStateMove>(p);
-	//		});
-	//	RegisterState("Attack", [](BasePlayer* p) {
-	//		return std::make_unique<PlayerStateAttack>(p);
-	//		});
-	//	RegisterState("Special", [](BasePlayer* p) {
-	//		return std::make_unique<PlayerStateSpecial>(p);
-	//		});
-	//}
-
 	// 初期化
 	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
 
@@ -66,45 +51,10 @@ public:
 	// SP発動可能？
 	bool GetIsSpecial() const { return special_->GetIsSpecial(); }
 
-
-	//void ChangeState(const std::string& name) {
-	//	auto it = stateFactoryMap_.find(name);
-	//	if (it != stateFactoryMap_.end()) {
-	//		stateName_ = name;
-	//		ChangeState(it->second(this)); // unique_ptr<BasePlayerState>
-	//	}
-	//	else {
-	//		assert(true);
-	//	}
-	//}
-
-
-	
-
-private:
-
-	/*void ChangeState(std::unique_ptr<BasePlayerState> newState) {
-		if (state_) {
-			state_->Exit();
-		}
-		state_ = std::move(newState);
-		if (state_) {
-			state_->Enter();
-		}
-	}
-
-	void RegisterState(const std::string& name, PlayerStateFactory factory) {
-		stateFactoryMap_[name] = factory;
-	}*/
 protected:
 	
 	FollowCamera* followCamera_;			// フォローカメラ
 
 	bool isCreativeMode = false;			// クリエイティブモードかどうか
-
-
-	//std::string stateName_ = "";
-	//std::unique_ptr<BasePlayerState> state_;// ステート
-	//std::unordered_map<std::string, PlayerStateFactory> stateFactoryMap_;	// 
 };
 

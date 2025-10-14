@@ -1,5 +1,4 @@
 #pragma once
-#include"DirectXGame/application/base/BaseClass/Object/BaseObject.h"
 
 // ノックバックデータ構造体
 struct KnockbackData

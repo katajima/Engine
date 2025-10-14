@@ -174,6 +174,18 @@ public: // 取得
         return nullptr;
     }
 
+    template <typename T>
+    T* FindColliderById(uint32_t id) {
+        for (auto& entry : colliders) {
+            if (entry.id == id) {
+                return  dynamic_cast<T*>(entry.collider.get());
+            }
+        }
+        return nullptr;
+        //return dynamic_cast<T*>(it->second.get());
+    }
+
+
     // コライダ数取得
     size_t GetColliderCount() const {
         return colliders.size();

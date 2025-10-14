@@ -37,8 +37,12 @@ public:
 	// 敵タイプ設定
 	void SetType(EnemyType type) { type_ = type; };
 
+	// 対象の位置(プレイヤー)
 	Vector3 GetTargetPos();
+	// 対象との距離(プレイヤー)
+	float GetTargetDistance();
 
+	void DirectionMove(float speed);
 
 	HitMotionComponent* GetHitMotionComponent() { return hitMotionComponent_.get(); }
 

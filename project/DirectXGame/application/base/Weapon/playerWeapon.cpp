@@ -13,9 +13,12 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerWeapon", "Sword.obj", true,false, this);
-	objectComponent_->SetSRT(size, {}, position);				//　SRT設定
+	objectComponent_->SetSRT(size, {}, position);
+	GetObject3D()->UseTrailEffect("resources/Texture/Image.png", 0.5f,{1,1,1,0.25}, 
+		GetObject3D()->GetModel()->modelData.mesh[0]->GetMin(),
+		GetObject3D()->GetModel()->modelData.mesh[0]->GetMax());
+	//　SRT設定
 	GetObject3D()->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
-	//objectBase_->UseTrailEffect("resources/Texture/Image.png",0.25f,{1,1,1,0.25f}, objectBase_->GetModel()->modelData.mesh[0]->GetMin(), objectBase_->GetModel()->modelData.mesh[0]->GetMax());
 	GetObject3D()->SetIsDraw(true);
 
 	auto obbCollider_ = std::make_unique<OBBCollider>();
@@ -69,29 +72,34 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		
 
 
-
+		// ノックバック方向
 		comboData_.knockbackData.normal = player->GetMoveComponent()->GetDirection();
+		enemy->GetHitMotionComponent()->SetIsKnockback(true);		// ノックバックするか
+
+		// ダメージ設定
+		float damage = comboData_.damage;
 		if (self->id == weaponColliderId_) {
-			enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);
-			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);
-			enemy->AddDamage(comboData_.damage * 2);
-			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
-			enemy->GetHitMotionComponent()->SetIsKnockback(true);
+			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);	// ノックバック時間設定
+			damage *= 2;	// ダメージ設定
 		}else if(self->id == weaponColliderId2_) {
-			enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);
-			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);
-			enemy->AddDamage(comboData_.damage);
-			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);
-			enemy->GetHitMotionComponent()->SetIsKnockback(true);
-			
+			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);	// ノックバック時間設定
+			damage *= 1;	// ダメージ設定
 		}
-		enemy->Emit();
-		
-		player->AddHit();
-		player->AddSpGauge(1);
-		player->SetHitTime();
+		enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);	 // ノックバックデータ設定
+		enemy->AddDamage(DamageCalculator::ComputeDamageWeapon(*character->GetCombatStatComponent(), *enemy->GetCombatStatComponent(), damage));
+		 
+
+
+		enemy->Emit();	//	エフェクト出現
+		enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move); // 敵ステート設定
+		player->AddHit();		// ヒット回数加算
+		player->AddSpGauge(1);	// スペシャルゲージ増化
+		player->SetHitTime();	// ヒットリセット時間をリセット
 		};
 
+	// コンボデータ設定
 	ComboData data;
 	data.damage = 10;
 	data.knockbackData.power = 30;
@@ -131,12 +139,13 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	
 	//comboStateMachine_->SetRoot(comboRoot);
 
-
+	// コライダ位置初期化
 	colliderWorld_.Initialize();
 	colliderWorld_.parent_ = &GetObject3D()->GetWorldTransform();
 	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
 	colliderWorld_.translate_.y = 3.0f; // 武器の位置調整
 
+	// コライダ位置初期化
 	colliderWorld2_.Initialize();
 	colliderWorld2_.parent_ = &colliderWorld_;
 	colliderWorld2_.translate_.y = 4.0f; // 武器の位置調整

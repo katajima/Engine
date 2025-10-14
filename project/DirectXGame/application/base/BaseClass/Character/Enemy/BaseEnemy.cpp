@@ -8,6 +8,23 @@ Vector3 BaseEnemy::GetTargetPos()
 	return player_->GetObject3D()->GetWorldPosition(); 
 }
 
+float BaseEnemy::GetTargetDistance()
+{
+	return GetObject3D()->GetWorldPosition().DistanceXZ(player_->GetObject3D()->GetWorldPosition());
+}
+
+void BaseEnemy::DirectionMove(float speed)
+{
+	Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+	Velocity() = { 0,0,0 };
+	Vector3 rotate = DirectionToRotate(dire, Dire::Z);
+
+	// Y軸周り角度
+	GetWorldTransform().rotate_.y = rotate.y;
+
+	Velocity() = dire * speed;
+}
+
 void BaseEnemy::Initialize2D()
 {
 	icon_lockOn = std::make_unique<Sprite>();

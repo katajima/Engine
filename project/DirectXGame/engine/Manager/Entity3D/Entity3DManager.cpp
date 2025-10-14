@@ -298,6 +298,12 @@ void Entity3DManager::ObjectDraw()
 	}
 	transparentObjects03.clear();
 
+
+	// トレイルエフェクト
+	for (auto& object : object3d) {
+		object->DrawTrailEffect();
+	}
+
 }
 
 

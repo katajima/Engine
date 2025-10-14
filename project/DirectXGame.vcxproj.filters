@@ -64,6 +64,156 @@
     <Filter Include="ヘッダー ファイル\engine\struct">
       <UniqueIdentifier>{c1752444-1af6-48af-b063-eb60e9141f7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\engine\audio">
+      <UniqueIdentifier>{13c1455f-86f3-4fb3-abed-505cdcba4ad4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\application">
+      <UniqueIdentifier>{3a04ce8b-76b3-4f21-914a-9e54e080516c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\effect">
+      <UniqueIdentifier>{25c5a7da-5cd4-4818-8c9f-fd0383374678}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\scene">
+      <UniqueIdentifier>{dd7864f3-1771-45cd-9886-03d8ac9e1b7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\camera">
+      <UniqueIdentifier>{685f942b-6c42-4711-b795-d08e828119ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\collider">
+      <UniqueIdentifier>{06ce763f-21ab-4803-88b5-83e2292ea131}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\application\base">
+      <UniqueIdentifier>{6fbea7dd-5fb1-42c5-8b67-5cd9680b0096}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\application\scene">
+      <UniqueIdentifier>{f4dadd7a-d917-47e7-9bc7-8421072feff7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\application\globalVariables">
+      <UniqueIdentifier>{de380468-bd77-4d0e-8f5d-1e9164ceb01f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\struct">
+      <UniqueIdentifier>{4df5d148-496f-494b-8ef0-7f221d549a43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\scene">
+      <UniqueIdentifier>{3dced905-42e7-431e-8cf2-8f143a4df45b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\3d\Animation">
+      <UniqueIdentifier>{dacdaacc-b1aa-404c-b152-2767c14952eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\3d\model">
+      <UniqueIdentifier>{e1813dff-194f-406f-a362-cc709b324701}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\3d\object">
+      <UniqueIdentifier>{819085bc-335b-4aa6-9a63-a079fefcf994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application">
+      <UniqueIdentifier>{029f3912-7a05-4379-8dc6-6c06023163fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\base">
+      <UniqueIdentifier>{4c71289b-dfae-4d00-87a4-8b20e0fade99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\scene">
+      <UniqueIdentifier>{f4ed227b-5537-431d-8f2c-c28ce0562e87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\audio">
+      <UniqueIdentifier>{ef3be689-6861-435a-9202-07fc4f7119c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\base\dx">
+      <UniqueIdentifier>{cfc90be0-d945-4351-9c0c-c506aab1ec52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\base\win">
+      <UniqueIdentifier>{1af62b1e-304e-4680-9f70-5d043fb9d693}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\3d\model">
+      <UniqueIdentifier>{c8e84c3f-ad33-4a57-8b17-3e9680d38ac7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\3d\skyBox">
+      <UniqueIdentifier>{b9762656-a64d-49c5-8274-45dd8d6918dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\3d\animation">
+      <UniqueIdentifier>{25f60f44-ea65-4750-ad3a-33620efb0e60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\3d\object">
+      <UniqueIdentifier>{4feb6ada-c36b-46b5-81b0-728873cd64e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\base\dx">
+      <UniqueIdentifier>{2a1eed0a-d4fa-472d-adb7-54ccae2928b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\base\imgui">
+      <UniqueIdentifier>{03e2ecf1-81b5-45d9-bbbe-71b740a811e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\base\win">
+      <UniqueIdentifier>{da888786-02ac-431a-b20f-cc48c1c46238}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\base\load">
+      <UniqueIdentifier>{e2fc3a78-d4c8-4f50-bd44-3a94d995c88d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\camera">
+      <UniqueIdentifier>{a3fb925f-7630-482d-ba90-ee2f2e689b9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\light">
+      <UniqueIdentifier>{115ba33d-36a8-4b8c-bf13-8df2aace9e07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\effect">
+      <UniqueIdentifier>{82f72076-4d0a-4dc0-a595-76c6e49825b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\effect\particle">
+      <UniqueIdentifier>{7df43f43-f094-49de-95be-026b1ed7f009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\collider">
+      <UniqueIdentifier>{3e809abd-c3c9-47b6-964f-b012d2baa32a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\globalVariables">
+      <UniqueIdentifier>{06e08c68-cb95-48a5-b956-37be827cf407}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\base\imgui">
+      <UniqueIdentifier>{848ed795-27ad-445e-a261-5c2255df3505}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\3d\line">
+      <UniqueIdentifier>{5d5a4014-28e8-4f9b-97d3-c4b8aa0446d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\base\load">
+      <UniqueIdentifier>{83e02527-c4c2-4c00-b775-7e9d730ddb59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\effect\postEffect">
+      <UniqueIdentifier>{58485c96-94ca-4068-a419-57fce7096a5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\effect\primitive">
+      <UniqueIdentifier>{61f59044-53f8-4d62-b01d-8c23897c9522}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\3d\skyBox">
+      <UniqueIdentifier>{17fa1536-4db7-4674-bd72-5d98822b4f26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\effect\trail">
+      <UniqueIdentifier>{379e3dfb-b6a0-4796-8dec-3490d94f7145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\transform">
+      <UniqueIdentifier>{4b04f624-8a49-4d86-8ece-ddb068eb08ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\2d\UI">
+      <UniqueIdentifier>{14f80047-257d-480b-80e6-715fcd9cc781}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\engine\base\utility">
+      <UniqueIdentifier>{88d1cd5c-523e-42e3-a6b6-499405f8d502}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\base\camera">
+      <UniqueIdentifier>{d9b68754-d41d-4f62-ba15-a3438f324d58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\base\character">
+      <UniqueIdentifier>{93fcbac9-18cd-4bc7-805c-3220da7d7e01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\application\base\attack">
+      <UniqueIdentifier>{da8a3023-77b5-4a6c-9544-9497d2c0a0b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\transform">
+      <UniqueIdentifier>{0ce1ea64-96d4-4cfc-a9f5-6b57db40b483}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\light">
+      <UniqueIdentifier>{fd6d8ff9-5b5f-412e-b35a-6c4e9a848462}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\engine\base\utility">
+      <UniqueIdentifier>{3d08972c-7c40-45e5-ac35-40d63d50781d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui_demo.cpp">
@@ -96,29 +246,8 @@
     <ClCompile Include="DirectXGame\engine\2d\SpriteCommon.cpp">
       <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Model\ModelCommon.cpp">
-      <Filter>ソース ファイル\engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Model\ModelManager.cpp">
-      <Filter>ソース ファイル\engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Object\Object3d.cpp">
-      <Filter>ソース ファイル\engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dCommon.cpp">
-      <Filter>ソース ファイル\engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Model\Model.cpp">
-      <Filter>ソース ファイル\engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Base\WinApp\WinApp.cpp">
-      <Filter>ソース ファイル\engine\base</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\Common\DirectXCommon.cpp">
-      <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\input\Input.cpp">
       <Filter>ソース ファイル\engine\input</Filter>
@@ -126,506 +255,678 @@
     <ClCompile Include="DirectXGame\engine\Base\Texture\TextureManager.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp">
-      <Filter>ソース ファイル\engine\base</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\engine\Base\Logger.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\MyGame\MyGame.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\MyGame\Framework.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\scene\GamePlayScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Line\LineCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\scene\TitleScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\scene\SceneManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\ImGuizmo.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Offscreen\RenderingCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManeger.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\scene\TestScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\struct\Quaternion.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\struct\Matrix4x4.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Animation\Animation.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Ocean\Ocean.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Ocean\OceanManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Skinning\Skinning.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\3d\Collider.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\ContactRecord.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Material\Material.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Transform\Transfomation\Transfomation.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Weapon\playerWeapon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffect.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Primitive\Primitive.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\PSO\PSOManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Color\Color.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Math\Random.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\engine\Math\AStarAlgorithm.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Math\Noise.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\Command\Command.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\Fence\Fence.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\DXCCompiler\DXCCompiler.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\DSV\DsvManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\Effect\EffectManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\UI\BaseUI.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Model\ModelData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Mesh\Base\BaseMesh.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Mesh\ModelMesh.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Mesh\LineMesh.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Mesh\SkyBoxMesh.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\PSO\PSOFanction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionFancion.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\BaseObject.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\scene\SelectScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectBlock.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Animation\AnimationComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\3d\Model\RenderComponent.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffect.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectData.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Vision\VisionComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\UI\UIElement.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\UI\BaseSprite.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\UI\UIBoard.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\struct\Matrix3x3.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\scene\BaseScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\scene\Fade.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Utility\StringUtility.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp">
+      <Filter>ソース ファイル\engine\audio</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\engine\effect</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\engine\UI\BaseSprite.cpp">
+      <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\engine\scene\BaseScene.cpp">
+      <Filter>ソース ファイル\engine\scene</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\PSO\psoData.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\UI\BaseUI.cpp">
+      <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Mesh\TrailMesh.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\engine\Camera\Camera.cpp">
+      <Filter>ソース ファイル\engine\camera</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp">
+      <Filter>ソース ファイル\engine\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.cpp">
+      <Filter>ソース ファイル\engine\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\3d\Collider.cpp">
+      <Filter>ソース ファイル\engine\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp">
+      <Filter>ソース ファイル\engine\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp">
+      <Filter>ソース ファイル\engine\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp">
+      <Filter>ソース ファイル\engine\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionFancion.cpp">
+      <Filter>ソース ファイル\engine\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionManager.cpp">
+      <Filter>ソース ファイル\engine\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Color\Color.cpp">
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp">
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\ContactRecord.cpp">
+      <Filter>ソース ファイル\engine\collider</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp">
+      <Filter>ソース ファイル\engine\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Manager\Effect\EffectManager.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.cpp">
+      <Filter>ソース ファイル\engine\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\scene\Fade.cpp">
+      <Filter>ソース ファイル\engine\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.cpp">
+      <Filter>ソース ファイル\engine\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.cpp">
+      <Filter>ソース ファイル\engine\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\MyGame\Framework.cpp">
+      <Filter>ソース ファイル\engine\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\BaseClass\State\BaseState.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\State\BaseMainState.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\BaseClass\State\CharacterStateMachine.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\GamePlayScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariables.cpp">
+      <Filter>ソース ファイル\application\globalVariables</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.cpp">
+      <Filter>ソース ファイル\application\globalVariables</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Mesh\LineMesh.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp">
+      <Filter>ソース ファイル\engine\math</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Line\LineCommon.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\struct\Matrix4x4.cpp">
+      <Filter>ソース ファイル\engine\struct</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\struct\Matrix3x3.cpp">
+      <Filter>ソース ファイル\engine\struct</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Material\Material.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\MyGame\MyGame.cpp">
+      <Filter>ソース ファイル\engine\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Math\Noise.cpp">
+      <Filter>ソース ファイル\engine\math</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Ocean\Ocean.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp">
+      <Filter>ソース ファイル\engine\math</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Normal\Player.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerStanBullet.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Weapon\playerWeapon.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffect.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectBlock.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectData.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Offscreen\PostEffectManager.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\Primitive.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\2d\Primitive2D.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\struct\Quaternion.cpp">
+      <Filter>ソース ファイル\engine\struct</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Math\Random.cpp">
+      <Filter>ソース ファイル\engine\math</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Model\RenderComponent.cpp">
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Offscreen\RenderingCommon.cpp">
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Ocean\OceanManager.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\SceneFactory.cpp">
+      <Filter>ソース ファイル\engine\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\scene\SceneManager.cpp">
+      <Filter>ソース ファイル\engine\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.cpp">
+      <Filter>ソース ファイル\engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\SelectScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\TestScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\TitleScene.cpp">
+      <Filter>ソース ファイル\application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffect.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Mesh\TrailMesh.cpp">
+      <Filter>ソース ファイル\engine\effect</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\UI\UIElement.cpp">
+      <Filter>ソース ファイル\engine\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\UI\UIBoard.cpp">
+      <Filter>ソース ファイル\engine\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Transform\Transfomation\Transfomation.cpp">
+      <Filter>ソース ファイル\engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Vision\VisionComponent.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Model\Model.cpp">
+      <Filter>ソース ファイル\engine\3d\model</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelCommon.cpp">
+      <Filter>ソース ファイル\engine\3d\model</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelData.cpp">
+      <Filter>ソース ファイル\engine\3d\model</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Model\ModelManager.cpp">
+      <Filter>ソース ファイル\engine\3d\model</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Mesh\ModelMesh.cpp">
+      <Filter>ソース ファイル\engine\3d\model</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Mesh\SkyBoxMesh.cpp">
+      <Filter>ソース ファイル\engine\3d\skyBox</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\SkyBox\SkyBox.cpp">
+      <Filter>ソース ファイル\engine\3d\skyBox</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\SkyBox\SkyBoxCommon.cpp">
+      <Filter>ソース ファイル\engine\3d\skyBox</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Animation\Animation.cpp">
+      <Filter>ソース ファイル\engine\3d\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Animation\AnimationComponent.cpp">
+      <Filter>ソース ファイル\engine\3d\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Skinning\Skinning.cpp">
+      <Filter>ソース ファイル\engine\3d\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp">
+      <Filter>ソース ファイル\engine\3d\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.cpp">
+      <Filter>ソース ファイル\engine\3d\object</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3d.cpp">
+      <Filter>ソース ファイル\engine\3d\object</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dCommon.cpp">
+      <Filter>ソース ファイル\engine\3d\object</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp">
+      <Filter>ソース ファイル\engine\3d\object</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Mesh\Base\BaseMesh.cpp">
+      <Filter>ソース ファイル\engine\3d\model</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\Command\Command.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\PSO\CSPSOManager.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Manager\DSV\DsvManager.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\Common\DirectXCommon.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\Fence\Fence.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\DXCCompiler\DXCCompiler.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\PSO\psoData.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\PSO\PSOFanction.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\PSO\PSOManager.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\ImGuizmo.cpp">
+      <Filter>ソース ファイル\engine\base\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Imgui\ImGuiManager.cpp">
+      <Filter>ソース ファイル\engine\base\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Manager\SRV\SrvManager.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Manager\RTV\RtvManeger.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\WinApp\WinApp.cpp">
+      <Filter>ソース ファイル\engine\base\win</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.cpp">
+      <Filter>ソース ファイル\engine\base\dx</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp">
+      <Filter>ソース ファイル\engine\base\load</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp">
+      <Filter>ソース ファイル\engine\base\load</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.cpp">
+      <Filter>ソース ファイル\engine\transform</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.cpp">
+      <Filter>ソース ファイル\engine\transform</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Light\LightCommon.cpp">
+      <Filter>ソース ファイル\engine\light</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\Utility\StringUtility.cpp">
+      <Filter>ソース ファイル\engine\base\utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="resources\shaders\Particle\CPU\Particle.hlsli" />
-    <None Include="resources\shaders\Line\Line.hlsli" />
-    <None Include="resources\shaders\Object2D\Object2D.hlsli" />
-    <None Include="resources\shaders\Offscreen\Fullscreen.hlsli" />
-    <None Include="resources\shaders\Octagrams\Octagrams.hlsli" />
-    <None Include="resources\shaders\Ocean\Ocean.hlsli" />
-    <None Include="resources\shaders\Thunder\Thunder.hlsli" />
-    <None Include="resources\shaders\Skining\SkinningObject3d.hlsli" />
-    <None Include="resources\shaders\Object3D\Light.hlsli" />
-    <None Include="resources\shaders\Trail\Trail.hlsli" />
-    <None Include="resources\shaders\SkyBox\SkyBox.hlsli" />
-    <None Include="resources\shaders\Object3D\Object3dInstans.hlsli" />
-    <None Include="resources\shaders\Offscreen\Smoothing.hlsli" />
-    <None Include="resources\shaders\Particle\CPU\NewParticle.hlsli" />
-    <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli" />
-    <None Include="resources\shaders\Particle\GPU\random.hlsli" />
-    <None Include="resources\shaders\Particle\GPU\Collider.hlsli" />
     <None Include="cpp.hint" />
-    <None Include="resources\shaders\Particle\2d\Particle2d.hlsli" />
-    <None Include="resources\shaders\Particle\GPU\EmitSpawn.hlsli" />
+    <None Include="resources\shaders\Particle\GPU\Collider.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Particle\GPU\EmitSpawn.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Offscreen\Fullscreen.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Object3D\Light.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Line\Line.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Particle\CPU\NewParticle.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Object2D\Object2D.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Object3D\Object3dInstans.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Ocean\Ocean.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Octagrams\Octagrams.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Particle\CPU\Particle.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Particle\2d\Particle2d.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Particle\GPU\random.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Skining\SkinningObject3d.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\SkyBox\SkyBox.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Offscreen\Smoothing.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Thunder\Thunder.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
+    <None Include="resources\shaders\Trail\Trail.hlsli">
+      <Filter>シェーダーファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Line\Line.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Line\Line.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Ocean\Ocean.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Ocean\Ocean.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Ocean\Ocean.HS.hlsl" />
-    <FxCompile Include="resources\shaders\Ocean\Ocean.DS.hlsl" />
-    <FxCompile Include="resources\shaders\Thunder\Thunder.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Thunder\Thunder.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Trail\Trail.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Trail\Trail.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.VS.hlsl" />
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Skining\Skinning.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\GrayScale.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Sepia.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Vignette.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Smoothing.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Gaussian.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Outline.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl" />
-    <FxCompile Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\CopyImage.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Gaussian.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\GrayScale.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Line\Line.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Line\Line.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Ocean\Ocean.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Ocean\Ocean.DS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Ocean\Ocean.HS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Ocean\Ocean.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Ocean\Ocean.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Octagrams\Octagrams.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Octagrams\Octagrams.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Outline.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\CPU\Particle.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\CPU\Particle.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Sepia.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Skining\Skinning.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\SkyBox\SkyBox.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\SkyBox\SkyBox.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Smoothing.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Thunder\Thunder.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Thunder\Thunder.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Trail\Trail.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Trail\Trail.VS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\shaders\Offscreen\Vignette.PS.hlsl">
+      <Filter>シェーダーファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -658,27 +959,6 @@
     <ClInclude Include="DirectXGame\engine\2d\Sprite.h">
       <Filter>ヘッダー ファイル\engine\2d</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Model\Model.h">
-      <Filter>ヘッダー ファイル\engine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h">
-      <Filter>ヘッダー ファイル\engine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dCommon.h">
-      <Filter>ヘッダー ファイル\engine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Object\Object3d.h">
-      <Filter>ヘッダー ファイル\engine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h">
-      <Filter>ヘッダー ファイル\engine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h">
-      <Filter>ヘッダー ファイル\engine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\WinApp\WinApp.h">
-      <Filter>ヘッダー ファイル\engine\base</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\input\Input.h">
       <Filter>ヘッダー ファイル\engine\input</Filter>
     </ClInclude>
@@ -694,623 +974,647 @@
     <ClInclude Include="DirectXGame\engine\Base\Logger.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h">
-      <Filter>ヘッダー ファイル\engine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Camera\Camera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Audio\Audio.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\MyGame\MyGame.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\MyGame\Framework.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\scene\GamePlayScene.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Line\LineCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\scene\TitleScene.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\scene\BaseScene.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\scene\SceneManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\scene\AbstractSceneFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\scene\SceneFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\ImGuizmo.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Material.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Light.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Light\LightCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayerState.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Offscreen\RenderingCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManeger.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Vector3.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Vector2.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Vector4.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\ProbabilityUtils.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\scene\TestScene.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Quaternion.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\engine\scene</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Animation\Animation.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Ocean\Ocean.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Ocean\OceanManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Skinning\Skinning.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\Collider.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\CollisionTypeIdDef.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\ContactRecord.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Material\Material.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Transform\Transfomation\Transfomation.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Camera\CameraCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\Easing.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Weapon\playerWeapon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffect.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Primitive\Primitive.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\PSO\PSOManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Color\Color.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Light\Lights.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\LineCurveMath.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Matrix3x3.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Structs2D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\Random.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\AStarAlgorithm.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\MapChip.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\Noise.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Command\Command.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Fence\Fence.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\DXCCompiler\DXCCompiler.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\Effect\EffectManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\VertexDeta.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Stage\Stage.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\UI\BaseUI.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\UI\GameUI.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Special\BaseSpecial.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Mesh\Base\BaseMesh.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Mesh\ModelMesh.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Mesh\LineMesh.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Mesh\SkyBoxMesh.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Resource\VertexBufferResource.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Resource\ConstantBuffer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Resource\StructuredBuffer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\DirectX\Resource\IndexBufferResource.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\PSO\PSOFanction.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\2d\SpriteData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Animation\AnimationData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\LineStruct.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\TransformStruct.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\CharacterData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Object\BaseObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\MellWeapons.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\WeaponData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFixedCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLight.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BasePointLight.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseSpotLight.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseDirectionalLight.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLights.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\RangedWeapons.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Input\InputHander.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Move\RigidBodyComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Transform\TransformComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Component\MoveComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\scene\SelectScene.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectBlock.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemyState.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Vision\VisionComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\engine\3d\Animation</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Animation\AnimationComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\engine\3d\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\3d\Model\RenderComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Animation\AnimationData.h">
+      <Filter>ヘッダー ファイル\engine\3d\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\3d\Model\Model.h">
+      <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffect.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h">
+      <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectData.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h">
+      <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3d.h">
+      <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dCommon.h">
+      <Filter>ヘッダー ファイル\engine\3d\object</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleData.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Math\AStarAlgorithm.h">
+      <Filter>ヘッダー ファイル\engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Audio\Audio.h">
+      <Filter>ヘッダー ファイル\engine\audio</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UIElement.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\BaseSprite.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\DirectX\D3DResourceLeakchecker\D3DResourceLeakchecker.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Color\ColorComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\DirectX\Common\DirectXCommon.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Base\pch.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Base\WinApp\WinApp.h">
+      <Filter>ヘッダー ファイル\engine\base\win</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UIManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseCamera.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UIInputManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseDirectionalLight.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UIData.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFixedCamera.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UIBoard.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseFollowCamera.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UICheckHit.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLight.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseLights.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\EffectComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\scene\SampleScene.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\scene\Fade.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\2d\Collider2D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderComponent2D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\2d\CollisionManager2D.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Utility\MapUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Utility\RangeUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Utility\StringUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Utility\TimerUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Utility\VectorUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\ColliderData.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\BaseMainState.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Mesh\Base\BaseMesh.h">
+      <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\BaseRailCamera.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\UI\BaseSprite.h">
+      <Filter>ヘッダー ファイル\engine\2d</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\struct\Structs.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BaseSpotLight.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\BaseSubState.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\PSO\psoData.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Light\BasePointLight.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Utility\ConvertUtility.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\scene\BaseScene.h">
+      <Filter>ヘッダー ファイル\engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Camera\Camera.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Camera\CameraCommon.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Camera\CameraManeger.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\CollisionTypeIdDef.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\3d\Collider.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\2d\Collider2D.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderComponent2D.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\ColliderData.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionManager.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\2d\CollisionManager2D.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Color\Color.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Color\ColorComponent.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\ContactRecord.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\Command\Command.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\ConstantBuffer.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h">
+      <Filter>ヘッダー ファイル\engine\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\DSV\DsvManager.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\DXCCompiler\DXCCompiler.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Math\Easing.h">
+      <Filter>ヘッダー ファイル\engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\EffectComponent.h">
+      <Filter>ヘッダー ファイル\engine\effect</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Effect\EffectManager.h">
+      <Filter>ヘッダー ファイル\engine\effect</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\BaseClass\State\BaseState.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.h">
+      <Filter>ヘッダー ファイル\engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\scene\Fade.h">
+      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\Fence\Fence.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\MyGame\Framework.h">
+      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\GamePlayScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\GameUI.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariablesFanction.h">
+      <Filter>ヘッダー ファイル\application\globalVariables</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\GlobalVariables\GlobalVariables.h">
+      <Filter>ヘッダー ファイル\application\globalVariables</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleData.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GPUParticleEmitter.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleField.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleManager.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Hit\HitComponent.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h">
+      <Filter>ヘッダー ファイル\engine\base\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiManager.h">
+      <Filter>ヘッダー ファイル\engine\base\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\ImGuizmo.h">
+      <Filter>ヘッダー ファイル\engine\base\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\IndexBufferResource.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Input\InputHander.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h">
+      <Filter>ヘッダー ファイル\application\globalVariables</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Light.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Light\LightCommon.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Light\Lights.h">
+      <Filter>ヘッダー ファイル\engine\light</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\LineStruct.h">
+      <Filter>ヘッダー ファイル\engine\3d\line</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Line\LineCommon.h">
+      <Filter>ヘッダー ファイル\engine\3d\line</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Math\LineCurveMath.h">
+      <Filter>ヘッダー ファイル\engine\3d\line</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Mesh\LineMesh.h">
+      <Filter>ヘッダー ファイル\engine\3d\line</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h">
+      <Filter>ヘッダー ファイル\engine\base\load</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\Load\LoadDataFanction.h">
+      <Filter>ヘッダー ファイル\engine\base\load</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Math\MapChip.h">
+      <Filter>ヘッダー ファイル\engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Material\Material.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Material.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Matrix3x3.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\MellWeapons.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h">
+      <Filter>ヘッダー ファイル\engine\3d\model</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Mesh\ModelMesh.h">
+      <Filter>ヘッダー ファイル\engine\3d\model</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Component\MoveComponent.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\MyGame\MyGame.h">
+      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Math\Noise.h">
+      <Filter>ヘッダー ファイル\engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Ocean\Ocean.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Ocean\OceanManager.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Object\ObjectComponent.h">
+      <Filter>ヘッダー ファイル\engine\3d\object</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\3d\Object\Object3dInstansManager.h">
+      <Filter>ヘッダー ファイル\engine\3d\object</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h">
+      <Filter>ヘッダー ファイル\engine\collider</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleEmitter2d.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleField.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleManager.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\2d\ParticleManager2d.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Base\pch.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectManager.h">
+      <Filter>ヘッダー ファイル\engine\effect\postEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffect.h">
+      <Filter>ヘッダー ファイル\engine\effect\postEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectBlock.h">
+      <Filter>ヘッダー ファイル\engine\effect\postEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\PostEffectData.h">
+      <Filter>ヘッダー ファイル\engine\effect\postEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.h">
+      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\PrimitiveCommon.h">
+      <Filter>ヘッダー ファイル\engine\effect\primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\Primitive.h">
+      <Filter>ヘッダー ファイル\engine\effect\primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\2d\Primitive2D.h">
+      <Filter>ヘッダー ファイル\engine\effect\primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\PSO\PSOManager.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\PSO\PSOFanction.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\PSO\psoData.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Quaternion.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Math\Random.h">
+      <Filter>ヘッダー ファイル\engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\RangedWeapons.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\3d\Model\RenderComponent.h">
+      <Filter>ヘッダー ファイル\engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Offscreen\RenderingCommon.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\RenderTexture\RenderTexture.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Move\RigidBodyComponent.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\SampleScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\scene\SceneManager.h">
+      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\SceneFactory.h">
+      <Filter>ヘッダー ファイル\engine\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\Stage.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Structs.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Structs2D.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Mesh\SkyBoxMesh.h">
+      <Filter>ヘッダー ファイル\engine\3d\skyBox</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\SkyBox\SkyBox.h">
+      <Filter>ヘッダー ファイル\engine\3d\skyBox</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\SkyBox\SkyBoxCommon.h">
+      <Filter>ヘッダー ファイル\engine\3d\skyBox</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Skinning\Skinning.h">
+      <Filter>ヘッダー ファイル\engine\3d\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\SelectScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Primitive\ShapeParameter.h">
+      <Filter>ヘッダー ファイル\engine\effect\primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\RTV\RtvManeger.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\ScissorRect\ScissorRect.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\2d\SpriteData.h">
+      <Filter>ヘッダー ファイル\engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h">
+      <Filter>ヘッダー ファイル\engine\effect\trail</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffect.h">
+      <Filter>ヘッダー ファイル\engine\effect\trail</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Effect\Trail\TrailEffectManager.h">
+      <Filter>ヘッダー ファイル\engine\effect\trail</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\State\SubStateMachine.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\TestScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\TitleScene.h">
+      <Filter>ヘッダー ファイル\application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\StructuredBuffer.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\SwapChain\SwapChain.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Manager\SRV\SrvManager.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Transform\Transfomation\Transfomation.h">
+      <Filter>ヘッダー ファイル\engine\transform</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Transform\TransformComponent.h">
+      <Filter>ヘッダー ファイル\engine\transform</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\TransformStruct.h">
+      <Filter>ヘッダー ファイル\engine\transform</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h">
+      <Filter>ヘッダー ファイル\engine\3d\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Vector4.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Vector2.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\Vector3.h">
+      <Filter>ヘッダー ファイル\engine\struct</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\UIManager.h">
+      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\UIBoard.h">
+      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\UICheckHit.h">
+      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\UIData.h">
+      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\UIElement.h">
+      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\UI\UIInputManager.h">
+      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\UI\BaseUI.h">
+      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\struct\VertexDeta.h">
+      <Filter>ヘッダー ファイル\engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\ViewPort\ViewPort.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\DirectX\Resource\VertexBufferResource.h">
+      <Filter>ヘッダー ファイル\engine\base\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\StringUtility.h">
+      <Filter>ヘッダー ファイル\engine\base\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\VectorUtility.h">
+      <Filter>ヘッダー ファイル\engine\base\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\TimerUtility.h">
+      <Filter>ヘッダー ファイル\engine\base\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\RangeUtility.h">
+      <Filter>ヘッダー ファイル\engine\base\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Math\ProbabilityUtils.h">
+      <Filter>ヘッダー ファイル\engine\base\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\MapUtility.h">
+      <Filter>ヘッダー ファイル\engine\base\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Utility\ConvertUtility.h">
+      <Filter>ヘッダー ファイル\engine\base\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Vision\VisionComponent.h">
+      <Filter>ヘッダー ファイル\application\base</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h">
+      <Filter>ヘッダー ファイル\application\base\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h">
+      <Filter>ヘッダー ファイル\application\base\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacterManeger.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\BaseCharacter.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Enemy\BaseEnemy.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Player\BasePlayer.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\CharacterData.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Character\Characters.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\BaseClass\State\CharacterStateMachine.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\Player.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Attack\AttackData.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BaseBullet.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\BaseWeapon.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Bullet\BulletManager.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Weapon\playerWeapon.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Special\BaseSpecial.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerStanBullet.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\BaseClass\Weapon\WeaponData.h">
+      <Filter>ヘッダー ファイル\application\base\attack</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.h">
+      <Filter>ヘッダー ファイル\engine\transform</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform.h">
+      <Filter>ヘッダー ファイル\engine\transform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

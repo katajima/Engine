@@ -2,11 +2,13 @@
 
 
 #include "DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.h"
+#include "DirectXGame/application/base/Bullet/PlayerStanBullet.h"
+
+
 
 BulletManager::~BulletManager()
 {
 	for (auto& bullet : bullets_) {
-		//bullet.release();
 		bullet.reset();
 	}
 	bullets_.clear();
@@ -69,15 +71,18 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
 		break;
+	case BulletType::kPlayerStan:
+		bullet = std::make_unique<PlayerStanBullet>();
+		break;
 	default:
 		break;
 	}
 
-	bullet->SetTargerRange(targetPos, rad);
-	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
-	bullet->SetPlayer(player_);
+	bullet->SetTargerRange(targetPos, rad);	// 範囲とターゲット設定
+	bullet->SetPlayer(player_);	// プレイヤーセット
+	bullet->SetEffect(effect_);	// エフェクトセット
+	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_);// 弾の初期化
 
-	bullet->SetEffect(effect_);
 
 	bullets_.push_back(std::move(bullet));
 }
@@ -95,17 +100,20 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
-		//bullet->SetTargetType(CollisionTypeIdDef::kEnemy);
+		break;
+	case BulletType::kPlayerStan:
+		bullet = std::make_unique<PlayerStanBullet>();
 		break;
 	default:
 		break;
 	}
 
-	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_);
-	bullet->SetEnemy(enemy);
-	bullet->SetPlayer(player_);
-	bullet->SetEffect(effect_);
-
+	bullet->SetPlayer(player_);	// プレイヤーセット
+	bullet->SetEffect(effect_);	// エフェクトセット
+	bullet->SetEnemy(enemy);	// 敵セット
+	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_); // 弾の初期化
+	
+	// moveする
 	bullets_.push_back(std::move(bullet));
 
 }

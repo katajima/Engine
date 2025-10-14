@@ -31,9 +31,17 @@ public:
 	// 更新
 	void Update();
 
+
 	// 描画通常
 	void Draw();
 
+
+	void DrawTrailEffect();
+	
+	void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
+
+
+	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
 	// セッター
 
 	// モデル設定
@@ -184,7 +192,8 @@ public:
 	WorldTransform& GetWorldTransform() { return transformComponent_->GetWorldTransform(); }
 	// 座標更新
 	void UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
-
+	// 向いている方向
+	Vector3 ObjectDirection() const { return direction_; }
 
 
 	/// <summary>
@@ -226,6 +235,13 @@ public:
 	Model* model = nullptr;
 	// プリミティブ
 	std::unique_ptr<BasePrimitive> primitive_ = nullptr;
+
+	//
+	std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
+	// trailエフェクトを使用するかのフラグ
+	bool isEmitTrailEffect = false;
+
+
 	// スカイボックス
 	SkyBox* skyBox_ = nullptr;
 	// 波
@@ -238,6 +254,9 @@ public:
 	// ID
 	uint32_t id = 0;
 
+
+	WorldTransform direWorldTransform_;
+	Vector3 direction_ = {};
 private:
 	Object3dCommon* object3dCommon_;
 	SkinningConmmon* skinningConmmon_;

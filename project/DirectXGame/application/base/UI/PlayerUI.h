@@ -15,11 +15,21 @@ public:
 
 
 public:
-	void SetHPBerSize(float size) { sizeHP_ = size; }
+
+
+	void SetHP(Gage* hp) { hpBar_ = hp; };
+	void SetStamina(Gage* stamina) { staminaBar_ = stamina; }
+
+
 	void SetSpecialGaugeSize(float size) { sizeSpecialGauge_ = size; }
 	void SetIsTextmax(bool is) { isTextMax_ = is; }
 	void SetIsTextRB(bool is) { isTextRB_ = is; }
 private:
+
+	Gage* hpBar_;
+	Gage* staminaBar_;
+
+
 
 	float srideM_ = 0;
 
@@ -27,7 +37,6 @@ private:
 	std::unique_ptr<Sprite> textRB_;
 	bool isTextRB_ = false;
 	bool isTextMax_ = false;
-	float sizeHP_ = 0;
 	float sizeSpecialGauge_ = 0;
 };
 

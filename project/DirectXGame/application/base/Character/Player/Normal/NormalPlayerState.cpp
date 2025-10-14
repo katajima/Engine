@@ -3,15 +3,10 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 
-
-
-
+#pragma region Move
 
 void PlayerStateMove::Update()
 {
-
-
-
 	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
 	Input* input = character_->GetInput();
 	BaseWeapon* weapon = character_->GetWeapon();
@@ -23,8 +18,8 @@ void PlayerStateMove::Update()
 	anima->SetIsPlaying(true);
 	anima->SetAnimationSpeed(1.0f);
 
-	if(character_->GetCharacterStateComponent().IsJumping()){
-		if (character_->GetObject3D()->GetRigidBodyComponent()->Velocity().y <=  0.0f) {
+	if (character_->GetCharacterStateComponent().IsJumping()) {
+		if (character_->GetObject3D()->GetRigidBodyComponent()->Velocity().y <= 0.0f) {
 			anima->SetAnimetion("Fall", 0.01f);
 		}
 		else {
@@ -40,7 +35,7 @@ void PlayerStateMove::Update()
 			anima->SetAnimetion("Idle1", 0.1f);
 		}
 	}
-	
+
 
 	if (input->IsControllerConnected()) {
 
@@ -48,30 +43,24 @@ void PlayerStateMove::Update()
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
 		}
 
+		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
+			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
+		}
 
+		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
+		}
 
-		//weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-		//if (weapon->GetAttackInput().GetAttackKeyFlag().IsNormalAttack) {
-		//	weapon->GetAttackInput().SetIsAttack(true);
-		//}
 	}
 
 	weapon->RecastTime(MyGame::GameTime());
-	//if (weapon->GetAttackInput().GetIsAttack()) {
-		//if (weapon->GetIsRecastTimeOver()) {
-		//	player_->ChangeState("Attack");
-		//	weapon->GetTimer().t = 0.0f;
-		//	weapon->GetAttackInput().TrueState();
-		//}
-	//}
+	
 	if (special->GetIsSpecial()) {
 		if (special->GetIsSpecialAttack()) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 		}
 	}
 }
-
-
 
 void PlayerStateMove::Exit()
 {
@@ -90,30 +79,39 @@ void PlayerStateMove::Enter()
 	anima->SetAnimationSpeed(1.0f);
 }
 
+#pragma endregion 
 
+#pragma region Jump
+
+// 更新
+void PlayerStateJump::Update() {
+	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	Input* input = character_->GetInput();
+
+
+}
+
+// 終了
+void PlayerStateJump::Exit() {
+
+}
+// 初期化
+void PlayerStateJump::Enter() {
+
+
+}
+
+#pragma endregion // ジャンプ
+
+
+#pragma region Attack
 
 void PlayerStateAttack::Update()
 {
 	BaseWeapon* weapon = character_->GetWeapon();
-	
-	
-
-	//// コンボの終了判定：次がない && アニメ終了
-	//if (player_->GetWeapon()->GetComboStateMachine()->IsComboFinished() && player_->GetObject3D()->IsAnimationFinished()) {
-	//	player_->ChangeState("Move");
-	//}
 
 	weapon->GetComboStateMachine()->Update(character_->GetTime());
-
-	// 攻撃処理
-	//weapon->AttackUpdate();
-
-	///if (!weapon->GetAttackInput().GetIsState()) {
-	//	player_->ChangeState("Move");
-	//	return;
-	//}
 }
-
 
 void PlayerStateAttack::Exit()
 {
@@ -122,7 +120,7 @@ void PlayerStateAttack::Exit()
 	character_->GetWeapon()->GetComboStateMachine()->HandleInput(AttackInput::Light);
 	character_->GetWeapon()->GetObject3D()->SetIsDraw(false);
 	character_->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
-	
+
 	// アニメーション
 	anima->SetIsLoop(true);
 	anima->SetIsPlaying(true);
@@ -132,7 +130,7 @@ void PlayerStateAttack::Exit()
 void PlayerStateAttack::Enter()
 {
 	BaseWeapon* weapon = character_->GetWeapon();
-	
+
 	// 武器
 	weapon->GetComboStateMachine()->Update(character_->GetTime());
 	weapon->GetObject3D()->SetIsDraw(true);
@@ -140,6 +138,7 @@ void PlayerStateAttack::Enter()
 	weapon->GetColliderComponent()->contactRecord_.Clear();
 }
 
+#pragma endregion
 
 #pragma region MyRegion
 
@@ -184,4 +183,102 @@ void PlayerStateSpecial::Enter()
 }
 
 #pragma endregion // 必殺技
+
+#pragma region Skill
+// 更新
+void PlayerStateSkill::Update() {
+
+	timer_ += character_->GetTime();
+	if (changeTimer_ <= timer_) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+	}
+
+};
+
+// 終了
+void PlayerStateSkill::Exit() {
+
+};
+// 初期化
+void PlayerStateSkill::Enter() {
+	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
+
+	timer_ = 0.0f;
+	player->GetBulletManager()->GenerateBullet(BulletManager::BulletType::kPlayerStan, player->GetWorldTransform().worldMat_.GetWorldPosition());
+};
+#pragma endregion // スキル
+
+#pragma region Defense
+
+// 更新
+void PlayerStateDefense::Update() {
+	Input* input = character_->GetInput();
+
+
+	if (input->IsControllerConnected()) {
+		if (input->IsGamePadPressed(GamePadButton::GAMEPAD_A) && isDifense_) {
+			isDifense_ = true;
+
+			character_->GetCombatStatComponent()->damageReduction_ = 0.75;
+
+			if (character_->GetCharacterParameterComponent().IsGetStamina()) {
+				character_->GetCharacterParameterComponent().Stamina().rateFluctuation = -5.0f;
+			}
+			else {
+				isDifense_ = false;
+			}
+
+		}
+		else {
+			character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
+			isDifense_ = false;
+			timer_ += character_->GetTime();
+			character_->GetCombatStatComponent()->damageReduction_ = 0.0f;
+		}
+	}
+
+
+
+	if (timer_ >= defenseTimer_) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+	}
+
+};
+
+// 終了
+void PlayerStateDefense::Exit() {
+	isDifense_ = false;
+	character_->GetCombatStatComponent()->damageReduction_ = 0.0f;
+	character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
+};
+// 初期化
+void PlayerStateDefense::Enter() {
+	isDifense_ = true;
+};
+
+#pragma endregion // 防御
+
+#pragma region Fainting
+
+// 更新
+void PlayerStateFainting::Update() {
+
+	timer_ += character_->GetTime();
+
+	if (timer_ <= faintingTimer_) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+	}
+
+}
+
+// 終了
+void PlayerStateFainting::Exit() {
+};
+// 初期化
+void PlayerStateFainting::Enter() {
+};
+
+#pragma endregion // 気絶
+
+
 

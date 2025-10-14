@@ -33,14 +33,21 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 
 
 	// HP設定
-	Parameters().HP.Initiaize(1000, 0, 1000, 0);
-	HP() = 1000; // 初期HP設定
+	Parameters().HP.Initiaize(100, 0, 100, 0);
+	Parameters().stamina.Initiaize(100, 0, 50, 0);
+	HP() = 100; // 初期HP設定
 	Parameters().speed = 20.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	
-	InitMoveComponent();
-	GetColliderComponent()->SetHitReceiver(this);
+	// 戦闘中の倍率・軽減率を扱う
+	combatStatComponent_ = std::make_unique<CombatStatComponent>();
+	combatStatComponent_->Initialize(&characterParameterComponent_);
 
+
+	// 移動コンポーネント初期化
+	InitMoveComponent();
+	
+	// 保存項目初期化
 	InitializeBaseAddItem();
 
 	// SphereColliderを追加
@@ -49,12 +56,13 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	sphere->layer = CollisionLayer::Player;
 	sphere->collisionMask = 0xFFFFFFFF;
 	sphere->radius = 2.0f; // 半径を適宜設定
-
+	// コライダ追加
 	GetColliderComponent()->AddCollider(std::move(sphere));
+	// コンポーネント衝突インターフェース設定
+	GetColliderComponent()->SetHitReceiver(this);
 
-
+	// コライダ位置用トランスフォーム初期化
 	worldCollider_.Initialize();
-
 	worldCollider_.parent_ = &GetObject3D()->GetWorldTransform();
 	worldCollider_.translate_.y = 3.0f;
 
@@ -117,10 +125,13 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 
 			objectComponent_->GetContactRecord().AddHistory(otherId, nowTime);
 
-			AddDamage(10.0f);
+
+			AddDamage(DamageCalculator::ComputeDamage(*enemy->GetCombatStatComponent(), *GetCombatStatComponent(), 1.0f));
 			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
 		}
 		};
+
+
 
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
@@ -145,12 +156,14 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	// UI
 	ui_ = std::make_unique<PlayerUI>();
 	ui_->Initialize(input_, entity2DManager_, globalVariables_);
+	ui_->SetHP(&characterParameterComponent_.HP());
+	ui_->SetStamina(&characterParameterComponent_.Stamina());
 
 	// キャラクター行動ステート初期化
 	InitStateMachine();
 }
 
-
+// ステート初期化and追加
 void Player::InitStateMachine() {
 	stateMachine_ = std::make_unique<CharacterStateMachine>();
 	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
@@ -162,10 +175,19 @@ void Player::InitStateMachine() {
 	stateMachine_->RegisterState(CharacterMainState::Special, [](BaseCharacter* p) {
 		return std::make_unique<PlayerStateSpecial>(p);
 		});
+	stateMachine_->RegisterState(CharacterMainState::Skill, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateSkill>(p);
+		});
+	stateMachine_->RegisterState(CharacterMainState::Defense, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateDefense>(p);
+		});
+	stateMachine_->RegisterState(CharacterMainState::Fainting, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateFainting>(p);
+		});
 	stateMachine_->Init(this, CharacterMainState::Move);
 }
 
-
+// 更新
 void Player::Update()
 {
 	UpdateBaseGetValue(); //保存機能 基本値の更新
@@ -173,6 +195,7 @@ void Player::Update()
 	// ステート
 	stateMachine_->Update();
 
+	// HPが0以下なら死亡
 	if (GetHP() <= 0) {
 		objectComponent_->GetObjectStateFlags().isAlive = false;
 	}
@@ -180,16 +203,12 @@ void Player::Update()
 
 
 #ifdef _DEBUG
-
-
-
 	ImGui::Begin("Debug");
 	ImGui::InputFloat("HP", &HP());
 	if (ImGui::Button("SP")) {
 		special_->SetGauge(100);
 	}
-	//ImGui::Text(state_->GetName().c_str());
-
+	
 	ImGui::End();
 	if (input_->IsTriggerKey(DIK_C)) {
 		if (!isCreativeMode) {
@@ -206,10 +225,12 @@ void Player::Update()
 
 
 
-
+	// 移動コンポーネント移動
 	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), *GetObject3D());
-
+	// 移動コンポーネント着地状態か
 	moveComponent_->Landing(*GetObject3D()->GetTransformComponent(), *GetObject3D()->GetRigidBodyComponent());
+	
+	// キャラクターステート更新
 	characterStateComponent_.Update(Velocity(), false, GetAlive());
 
 
@@ -218,14 +239,19 @@ void Player::Update()
 		Velocity() = { 0,0,0 };
 	}
 
+	// クリエイティブモードではないなら移動制限を付ける
 	if (!isCreativeMode) {
 		// 移動制限
 		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
 	}
 
+	// ワールドトランスフォーム更新
 	GetObject3D()->UpdateWorldTransform();
+	
+	// コライダのワールドトランスフォーム更新
 	worldCollider_.Update();
 
+	// コライダーコンポーネント更新
 	GetObject3D()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 	// 必殺技
@@ -239,7 +265,12 @@ void Player::Update()
 #ifdef _DEBUG
 	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 #endif // _DEBUG
+
+	// UI更新
 	ui_->Update();
+
+	// キャラクターパラメーター更新
+	characterParameterComponent_.Update();
 }
 
 #pragma region Draw
@@ -250,8 +281,7 @@ void Player::DrawEffect()
 
 void Player::Draw2D()
 {
-	ui_->SetHPBerSize(static_cast<float>(HP()));
-
+	
 	ui_->SetIsTextmax(special_->GetIsSpecial());
 	ui_->SetIsTextRB(special_->GetIsSpecial());
 	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
@@ -340,9 +370,6 @@ void Player::LockOn(const std::vector<BaseEnemy*>& enemys)
 	//}
 }
 
-void Player::ApplyGlobalVariables()
-{
-
-}
+void Player::ApplyGlobalVariables(){}
 
 #pragma endregion // そのほか

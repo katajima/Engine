@@ -23,21 +23,8 @@ public:
 
 private: // 演出関係
 
-	//// 初期煙初期化
-	void InitStartSmoke();
 	//// ミサイル移動中煙初期化
 	void InitMoveSmoke();
-	//// 爆発煙初期化
-	void InitExpSmoke();
-	//// 爆発火初期化
-	void InitExpFire();
-	//// アニメーションキューブ初期化
-	void InitExpBre();
-	//// リングエミッター初期化
-	void InitRingEmitter();
-	//// ヒットエミッター初期化
-	void InitHitEmitter();
-
 private:
 
 

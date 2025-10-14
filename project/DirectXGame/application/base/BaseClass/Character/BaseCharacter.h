@@ -50,8 +50,7 @@ public:
 	/// </summary>
 	virtual void Attack() = 0;
 
-	//virtual void ChangeState(const std::string& name) = 0;
-
+	
 	virtual void InitStateMachine() {};
 
 public:
@@ -93,6 +92,8 @@ public: // 取得系関数
 	BaseSpecial* GetSpecial() { return special_.get(); }
 	// 武器
 	BaseWeapon* GetWeapon() { return weapon_.get(); }
+	
+	BulletManager* GetBulletManager() { return bulletManager_; }
 	// 弾マネージャーの設定
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
 	// キャラクターの生存状態を取得
@@ -177,9 +178,7 @@ protected: // 保存機能
 
 protected:
 	void InitMoveComponent() { moveComponent_ = std::make_unique<MoveComponent>(); }
-	// 移動コンポーネント
-	std::unique_ptr<MoveComponent> moveComponent_;
-
+	
 public:
 	// 速度
 	Vector3& Velocity() { return moveComponent_->Velocity(); }
@@ -188,26 +187,31 @@ public:
 
 	MoveComponent* GetMoveComponent() { return moveComponent_.get(); }
 
+public:
+	CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
+
+	CombatStatComponent* GetCombatStatComponent() { return combatStatComponent_.get(); }
+
+	CharacterParameterComponent& GetCharacterParameterComponent() { return characterParameterComponent_; }
+protected:
+	std::unique_ptr<ObjectComponent> objectComponent_;		// オブジェクトコンポーネント
+	std::unique_ptr<BaseSpecial> special_;					// スペシャル攻撃
+	std::unique_ptr<BaseWeapon> weapon_;					// 武器
+	std::unique_ptr<AttackInputHander> attackInputHander_;	// 攻撃入力系クラス
+	std::unique_ptr<CharacterStateMachine> stateMachine_;	// キャラクターの状態管理
+	std::unique_ptr<MoveComponent> moveComponent_;			// 移動コンポーネント
+	std::unique_ptr<CombatStatComponent> combatStatComponent_;	// 攻撃パラメーター補正
+
+
+
+
 protected:
 	// キャラクターパラメータコンポーネント
 	CharacterParameterComponent characterParameterComponent_;
 	// キャラクターの状態コンポーネント
 	CharacterStateComponent characterStateComponent_;
-public:
-	CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
-
 protected:
-	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
-
-
-	std::unique_ptr<BaseSpecial> special_;	// スペシャル攻撃
-	std::unique_ptr<BaseWeapon> weapon_;	// 武器
-	std::unique_ptr<AttackInputHander> attackInputHander_; // 攻撃入力系クラス
-
-	std::unique_ptr<CharacterStateMachine> stateMachine_;	// キャラクターの状態管理
-
-protected:
-	Effect* effect_;
+	Effect* effect_;						// エフェクト
 	BulletManager* bulletManager_;			// 弾管理
 protected: // 貰ってくるもの
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
