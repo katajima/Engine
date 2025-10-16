@@ -149,7 +149,15 @@ static Vector2 Add(const Vector2& v1, const Vector2& v2) {
 
 	return result;
 };
+// 減算
+static Vector2 Subtract(const Vector2& v1, const Vector2& v2) {
+	Vector2 result{};
 
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	
+	return result;
+}
 //大きさ
 static float Length(Vector2 a) {
 	float length;

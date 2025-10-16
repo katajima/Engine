@@ -3,40 +3,91 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 
+#pragma region Idle
+
+// 更新
+void PlayerStateIdle::Update() {
+	Input* input = character_->GetInput();
+	BaseWeapon* weapon = character_->GetWeapon();
+	BaseSpecial* special = character_->GetSpecial();
+	
+	// 武器描画 
+	weapon->GetObject3D()->SetIsDraw(true);
+
+	// ゲームパッドが繋いであるなら
+	if (input->IsControllerConnected()) {
+
+		// 必殺技が使えるようになったら
+		if (character_->GetSpecial()->GetIsSpecial()) {
+			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
+		}
+
+		// スキル発動
+		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
+			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
+			return;
+		}
+
+		// 防御
+		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
+			return;
+		}
+
+	}
+
+#ifdef _DEBUG
+
+	// デバッグ用
+	if (input->IsTriggerKey(DIK_Z)) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
+		return;
+	}
+#endif // _DEBUG
+
+	weapon->RecastTime(MyGame::GameTime());
+
+	// 必殺技移行
+	if (special->GetIsSpecial()) {
+		if (special->GetIsSpecialAttack()) {
+			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
+			return;
+		}
+	}
+
+	// 移動したら
+	if (input->GetGamePadLeftStick().Length() != 0) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		return;
+	}
+};
+
+// 終了
+void PlayerStateIdle::Exit() {
+};
+
+// 初期化
+void PlayerStateIdle::Enter() {
+	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	anima->SetIsLoop(true);
+	anima->SetIsPlaying(true);
+	anima->SetAnimationSpeed(1.0f);
+	anima->SetAnimetion("Idle1", 0.1f);
+};
+
+#pragma endregion // 待機
+
 #pragma region Move
 
 void PlayerStateMove::Update()
 {
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
 	Input* input = character_->GetInput();
 	BaseWeapon* weapon = character_->GetWeapon();
 	BaseSpecial* special = character_->GetSpecial();
 
 	weapon->GetObject3D()->SetIsDraw(true);
 
-	anima->SetIsLoop(true);
-	anima->SetIsPlaying(true);
-	anima->SetAnimationSpeed(1.0f);
-
-	if (character_->GetCharacterStateComponent().IsJumping()) {
-		if (character_->GetObject3D()->GetRigidBodyComponent()->Velocity().y <= 0.0f) {
-			anima->SetAnimetion("Fall", 0.01f);
-		}
-		else {
-			anima->SetAnimetion("Fall", 0.01f);
-		}
-	}
-	else {
-		if (character_->GetVelocity().Length() != 0) {
-
-			anima->SetAnimetion("Walk", 0.1f);
-		}
-		else {
-			anima->SetAnimetion("Idle1", 0.1f);
-		}
-	}
-
-
+	
 	if (input->IsControllerConnected()) {
 
 		if (character_->GetSpecial()->GetIsSpecial()) {
@@ -45,12 +96,20 @@ void PlayerStateMove::Update()
 
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
+			return;
 		}
 
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
+			return;
 		}
 
+	}
+
+
+	if (input->IsTriggerKey(DIK_Z)) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
+		return;
 	}
 
 	weapon->RecastTime(MyGame::GameTime());
@@ -58,7 +117,14 @@ void PlayerStateMove::Update()
 	if (special->GetIsSpecial()) {
 		if (special->GetIsSpecialAttack()) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
+			return;
 		}
+	}
+
+	// 止まったら
+	if (input->GetGamePadLeftStick().Length() == 0) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
+		return;
 	}
 }
 
@@ -71,15 +137,15 @@ void PlayerStateMove::Enter()
 {
 	BaseWeapon* weapon = character_->GetWeapon();
 	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
-	//weapon->GetTimer().t = 0.0f;
 	weapon->GetObject3D()->SetIsDraw(false);
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
 	anima->SetIsLoop(true);
 	anima->SetIsPlaying(true);
 	anima->SetAnimationSpeed(1.0f);
+	anima->SetAnimetion("Walk", 0.1f);
 }
 
-#pragma endregion 
+#pragma endregion // 移動
 
 #pragma region Jump
 
@@ -88,12 +154,68 @@ void PlayerStateJump::Update() {
 	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
 	Input* input = character_->GetInput();
 
+	anima->SetIsPlaying(true);		// アニメーション再生
+	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
+
+
+	// ジャンプ出来るか
+	bool isJamp = character_->GetMoveComponent()->GetIsJump();
+	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+	bool isAlive = character_->GetAlive();
+
+#ifdef _DEBUG
+	//ImGui::
+
+
+#endif // _DEBUG
+
+
+
+	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
+	if (isAlive && isJamp && isTrigger) {
+
+		character_->GetObject3D()->GetRigidBodyComponent()->Velocity().y = 0;
+		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
+		
+		// 着地状態なら
+		if (character_->GetMoveComponent()->GetIsLanding()) {
+
+		}
+		else {
+			character_->GetObject3D()->GetRigidBodyComponent()->AddForce({ 0,character_->GetCharacterParameterComponent().parameters_.jampPower * 2,0 });
+		}
+		character_->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.05f);
+	}
+	else {
+		// 着地状態なら
+		if (character_->GetMoveComponent()->GetIsLanding()) {
+			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+			return;
+		}
+	}
+
+
+	// 降下しているならアニメーションを変える
+	if (character_->GetObject3D()->GetRigidBodyComponent()->Velocity().y <= 0.0f) {
+		anima->SetIsLoop(true);
+		anima->SetAnimetion("Fall", 0.1f);
+	}
+	else {	// 上昇しているならアニメーションを変える
+		anima->SetIsLoop(false);
+		anima->SetAnimetion("JumpStrat1", 0.05f);
+	}
+
+
+	
+
+	
+
 
 }
 
 // 終了
 void PlayerStateJump::Exit() {
-
+	character_->GetMoveComponent()->Velocity() = { 0,0,0 };
 }
 // 初期化
 void PlayerStateJump::Enter() {
@@ -102,7 +224,6 @@ void PlayerStateJump::Enter() {
 }
 
 #pragma endregion // ジャンプ
-
 
 #pragma region Attack
 
@@ -138,7 +259,7 @@ void PlayerStateAttack::Enter()
 	weapon->GetColliderComponent()->contactRecord_.Clear();
 }
 
-#pragma endregion
+#pragma endregion // 攻撃
 
 #pragma region MyRegion
 
@@ -254,6 +375,12 @@ void PlayerStateDefense::Exit() {
 // 初期化
 void PlayerStateDefense::Enter() {
 	isDifense_ = true;
+	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	anima->SetIsPlaying(true);		// アニメーション再生
+	anima->SetIsLoop(false);		// アニメーションをループさせるか
+	anima->SetStratAnimeTime();		// アニメーション時間を初期化
+	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
+	anima->SetAnimetion("Defense1", 0.10f);
 };
 
 #pragma endregion // 防御
@@ -262,20 +389,53 @@ void PlayerStateDefense::Enter() {
 
 // 更新
 void PlayerStateFainting::Update() {
+	Input* input = character_->GetInput();
+	Vector2 left = input->GetGamePadLeftStick();
 
 	timer_ += character_->GetTime();
 
-	if (timer_ <= faintingTimer_) {
+	if (prevleftStick != left) {
+		Vector2 sub = prevleftStick - left;
+		float length = sub.Length();
+		float subtime = 1.0f;
+
+		if (length >= 10.0f) {
+			subtime = 2.0f;
+		}
+		
+		timer_ += character_->GetTime() * subtime;
+	}
+
+
+	if (timer_ >= faintingTimer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 	}
 
+
+	prevleftStick = left;
 }
 
 // 終了
 void PlayerStateFainting::Exit() {
+	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	anima->SetIsPlaying(true);		// アニメーション再生
+	anima->SetIsLoop(true);			// アニメーションをループさせるか
+	anima->SetStratAnimeTime();		// アニメーション時間を初期化
+	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
 };
 // 初期化
 void PlayerStateFainting::Enter() {
+	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	anima->SetIsPlaying(true);		// アニメーション再生
+	anima->SetIsLoop(true);			// アニメーションをループさせるか
+	anima->SetStratAnimeTime();		// アニメーション時間を初期化
+	anima->SetAnimationSpeed(0.75f); // アニメーションスピード設定
+	anima->SetAnimetion("Stan1", 0.10f);
+	timer_ = 0;		// タイマーを0に設定
+
+
+	Input* input = character_->GetInput();
+	prevleftStick = input->GetGamePadLeftStick();
 };
 
 #pragma endregion // 気絶

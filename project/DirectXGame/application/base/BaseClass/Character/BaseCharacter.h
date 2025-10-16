@@ -188,7 +188,7 @@ public:
 	MoveComponent* GetMoveComponent() { return moveComponent_.get(); }
 
 public:
-	CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
+	//CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
 
 	CombatStatComponent* GetCombatStatComponent() { return combatStatComponent_.get(); }
 
@@ -209,7 +209,7 @@ protected:
 	// キャラクターパラメータコンポーネント
 	CharacterParameterComponent characterParameterComponent_;
 	// キャラクターの状態コンポーネント
-	CharacterStateComponent characterStateComponent_;
+	//CharacterStateComponent characterStateComponent_;
 protected:
 	Effect* effect_;						// エフェクト
 	BulletManager* bulletManager_;			// 弾管理

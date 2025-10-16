@@ -165,6 +165,11 @@ void GamePlayScene::Update()
 {
 	Camera::isShake_ = false;
 
+
+	if (input_->IsTriggerKey(DIK_R)) {
+		GetSceneManager()->ChangeScene("GAMEPLAY",0.5f);
+	}
+
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
 		iCommand_->Exec(*caracterManager_->GetPlayer());
@@ -245,7 +250,7 @@ void GamePlayScene::Update()
 	
 #endif // _DEBUG
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-		caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
+	//	caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
 	}
 
 

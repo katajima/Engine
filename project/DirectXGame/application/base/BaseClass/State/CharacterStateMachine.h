@@ -46,6 +46,7 @@ public:
 private:
     // ステート変更
     void ChangeState(std::unique_ptr<BaseCharacterState> newState) {
+        if(!isOneFrameOneState_)
         if (state_) {
             state_->Exit();
         }
@@ -53,6 +54,7 @@ private:
         if (state_) {
             state_->Enter();
         }
+        isOneFrameOneState_ = true;
     }
    
 private:
@@ -63,4 +65,6 @@ private:
     CharacterMainState nowState_;
     // 操作状態
     BaseCharacter* character_ = nullptr;
+    // ステート変更が1フレーム中に何度も起らないようにするフラグ
+    bool isOneFrameOneState_ = false;
 };

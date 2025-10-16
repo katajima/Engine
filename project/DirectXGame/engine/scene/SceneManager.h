@@ -54,7 +54,7 @@ public:
 	/// 次のシーン予約
 	/// </summary>
 	/// <param name="sceneName"></param>
-	void ChangeScene(const std::string& sceneName);
+	void ChangeScene(const std::string& sceneName,const float duration = 1.0f);
 
 	bool IsNowScene(std::string name) const {
 		if (sceneName == name) {

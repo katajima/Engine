@@ -236,50 +236,50 @@ public:
 
 
 // キャラクターの状態のコンポーネント
-class CharacterStateComponent
-{
-public:
-
-	// 移動可能
-	bool CanMove() const {
-		return currentState_ != CharacterState::Attack && currentState_ != CharacterState::Damage;
-	}
-
-	// 攻撃可能
-	bool CanAttack() const {
-		return currentState_ == CharacterState::Idle || currentState_ == CharacterState::Run || currentState_ == CharacterState::Walk || currentState_ == CharacterState::Jump;
-	}
-
-	// 変更
-	void ChangeState(CharacterState state) {
-		if (currentState_ != state) {
-			currentState_ = state;
-		}
-	}
-
-	void Update(const Vector3& velocity, bool isGrounded, bool isDead) {
-		if (isDead) {
-			ChangeState(CharacterState::Dead);
-		}
-		else if (!isGrounded && velocity.y < 0) {
-			ChangeState(CharacterState::Fall);
-		}
-		else if (!isGrounded && velocity.y > 0) {
-			ChangeState(CharacterState::Jump);
-		}
-		else if (velocity.Normalize().Length() > 0.5f) {
-			ChangeState(CharacterState::Run);
-		}
-		else {
-			ChangeState(CharacterState::Idle);
-		}
-	}
-// 状態取得
-	bool IsJumping() const { return currentState_ == CharacterState::Jump; }
-	bool IsFalling() const { return currentState_ == CharacterState::Fall; }
-	bool IsInAir() const { return IsJumping() || IsFalling(); }
-	bool IsDead() const { return currentState_ == CharacterState::Dead; }
-	CharacterState GetState() const { return currentState_; }
-private:
-	CharacterState currentState_ = CharacterState::Idle; // キャラクターの状況
-};
+//class CharacterStateComponent
+//{
+//public:
+//
+//	// 移動可能
+//	bool CanMove() const {
+//		return currentState_ != CharacterState::Attack && currentState_ != CharacterState::Damage;
+//	}
+//
+//	// 攻撃可能
+//	bool CanAttack() const {
+//		return currentState_ == CharacterState::Idle || currentState_ == CharacterState::Run || currentState_ == CharacterState::Walk || currentState_ == CharacterState::Jump;
+//	}
+//
+//	// 変更
+//	void ChangeState(CharacterState state) {
+//		if (currentState_ != state) {
+//			currentState_ = state;
+//		}
+//	}
+//
+//	void Update(const Vector3& velocity, bool isGrounded, bool isDead) {
+//		if (isDead) {
+//			ChangeState(CharacterState::Dead);
+//		}
+//		else if (!isGrounded && velocity.y < 0) {
+//			ChangeState(CharacterState::Fall);
+//		}
+//		else if (!isGrounded && velocity.y > 0) {
+//			ChangeState(CharacterState::Jump);
+//		}
+//		else if (velocity.Normalize().Length() > 0.5f) {
+//			ChangeState(CharacterState::Run);
+//		}
+//		else {
+//			ChangeState(CharacterState::Idle);
+//		}
+//	}
+//// 状態取得
+//	bool IsJumping() const { return currentState_ == CharacterState::Jump; }
+//	bool IsFalling() const { return currentState_ == CharacterState::Fall; }
+//	bool IsInAir() const { return IsJumping() || IsFalling(); }
+//	bool IsDead() const { return currentState_ == CharacterState::Dead; }
+//	CharacterState GetState() const { return currentState_; }
+//private:
+//	CharacterState currentState_ = CharacterState::Idle; // キャラクターの状況
+//};

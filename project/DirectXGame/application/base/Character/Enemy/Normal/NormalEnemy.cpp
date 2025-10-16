@@ -205,7 +205,7 @@ void NormalEnemy::Update()
 			// 着地
 			moveComponent_->Landing(*GetObject3D()->GetTransformComponent(), *GetObject3D()->GetRigidBodyComponent());
 			// 状態
-			characterStateComponent_.Update(Velocity(), false, GetAlive());
+			//characterStateComponent_.Update(Velocity(), false, GetAlive());
 			// ヒット
 			hitMotionComponent_->Update(GetTime(), GetObject3D());
 			// 視野
@@ -217,9 +217,9 @@ void NormalEnemy::Update()
 
 			if (GetHP() >= 0) {
 				// 重力
-				if (!characterStateComponent_.IsJumping()) {
+				//if (!characterStateComponent_.IsJumping()) {
 				//	Velocity().y = 0;
-				}
+				//}
 			}
 			// 移動制限
 			LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });

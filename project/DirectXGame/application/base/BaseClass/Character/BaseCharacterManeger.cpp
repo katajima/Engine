@@ -37,7 +37,7 @@ void BaseCharacterManager::Draw2D()
 	for (auto& character : character_)
 	{
 		if (character->GetObject3D()) {
-			if (character->GetCharacterStateComponent().IsDead()) {
+			if (character->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
 				if (character->GetAlive()) {
 					character->Draw2D();
 				}
