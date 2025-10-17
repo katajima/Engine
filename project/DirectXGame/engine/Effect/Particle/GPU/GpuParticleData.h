@@ -97,29 +97,11 @@ enum class EmitterInterpolation : uint32_t
 	Sequential = 2,     // 順番
 };
 
-
-// 球体エミッター
-struct EmitterSphereCS
-{
-	float radius;           // 射出半径	
-};
-
-// AABBエミッター
-struct EmitterAABBCS
-{
-	Vector3 size;	        // 射出サイズ
-};
-
-// 点エミッター
-struct EmitterPointCS
-{
-	EmitterInterpolation interpolation; // 補間方法(0:しない,1:ランダムに,2:順番)
-	Vector3 pad;	                    // パディング
-};
-
 // 共通エミッター
 struct EmitterCommon
 {
+	/// 共通部分
+
 	Vector3 scale;						// サイズ
 	float lifeTime;						// 生存時間
 	
@@ -154,6 +136,31 @@ struct EmitterCommon
 	
 	float scaleAmount;					// スケーリング量
 	Vector3 prevTranslate;				// 前フレームの位置
+
+
+	///
+	EmitterType shapeType;				// 形状
+
+
+	/// <summary>
+	/// 球
+	/// </summary>
+	float sphereRadius;					// 射出半径(球)
+	
+	
+	/// <summary>
+	/// AABB
+	/// </summary>
+	Vector3 size;						// 射出サイズ(AABB)
+
+	/// <summary>
+	///  点
+	/// </summary>
+	EmitterInterpolation interpolation; // 補間方法(0:しない,1:ランダムに,2:順番)
+
+	// ===== 🔹 新規追加（パーティクル範囲） =====
+	uint32_t particleStartOffset;   // GPUパーティクルバッファ上の開始インデックス
+	uint32_t particleMaxCount;      // このEmitterに割り当てられた最大粒子数
 
 };
 

@@ -12,21 +12,29 @@ class BaseGpuParticleEmitter
 public:
 	virtual ~BaseGpuParticleEmitter() {}
 
-
+	// 初期化
 	void Init(DirectXCommon* dxCommon, LineCommon* lineCommon, GpuParticleGroup* group, std::string name);
-
+	// 更新
 	void Update(float deltaTime);
-
+	// ImGui更新
 	void UpdateImGui();
-
+	// グループ設定
 	void SetParticleGroup(GpuParticleGroup* group) { group_ = group;}
-
-	EmitterCommon* GetCommonData() { return cbEmitterCommon_.Data(); }
-	EmitterTrail* GetTrailData() { return cbEmitterTrail_.Data(); }
-
+	// エミッターデータ
+	EmitterCommon& GetCommonData() { return cbEmitterCommon_; }
+	// トレイルデータ
+	EmitterTrail& GetTrailData() { return cbEmitterTrail_; }
+	// エミッター形状
 	EmitterType GetType() const { return type_; }
-
+	// トランスフォーム
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
+	// 名前
+	std::string GetName() {return name_;}
+	// エミッター時間設定
+	void SetDeltaTime(float delta) { deltaTime_ = delta; }
+	// エミッター時間取得
+	float GetDeltaTime() const { return deltaTime_; }
+
 
 protected:
 	
@@ -47,12 +55,12 @@ protected:
 
 	float time_ = 0.0f;			// 経過時間()
 	float interval_ = 0.02f;	// 発生間隔()
-
+	float deltaTime_ = 1.0f / 60.0f;
 
 	EmitterType type_ = EmitterType::Sphere;
 
-	ConstantBuffer<EmitterCommon> cbEmitterCommon_;	// 共通データ
-	ConstantBuffer<EmitterTrail> cbEmitterTrail_;	// トレイルエミッター用データ
+	EmitterCommon cbEmitterCommon_;	// 共通データ
+	EmitterTrail  cbEmitterTrail_;	// トレイルエミッター用データ
 
 	WorldTransform worldTransform_;	// ワールド変換情報
 
@@ -75,11 +83,7 @@ public:
 	// ライン描画
 	void DrawLine() override;
 
-	EmitterSphereCS* GetData() { return cbEmitterSphere_.Data(); }
-
 private:
-	// 球エミッター
-	ConstantBuffer<EmitterSphereCS> cbEmitterSphere_;
 };
 
 // 点エミッター
@@ -95,13 +99,8 @@ public:
 	// ライン描画
 	void DrawLine() override;
 
-	EmitterPointCS* GetData() { return cbEmitterPoint_.Data(); }
-
 private:
-	// 球エミッター
-	ConstantBuffer<EmitterPointCS> cbEmitterPoint_;
 };
-
 
 // 球エミッター
 class GpuParticleEmitterAABB : public BaseGpuParticleEmitter
@@ -115,10 +114,5 @@ public:
 	void UpdateImGuiUniqe() override;
 	// ライン描画
 	void DrawLine() override;
-
-	EmitterAABBCS* GetData() { return cbEmitterAABB_.Data(); }
-
 private:
-	// 球エミッター
-	ConstantBuffer<EmitterAABBCS> cbEmitterAABB_;
 };

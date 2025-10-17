@@ -325,6 +325,7 @@ void Player::Jump()
 	if (GetAlive() && (is || is2) &&
 		moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
 		stateMachine_->ChangeState(CharacterMainState::Jump);
+		GetObject3D()->GetRigidBodyComponent()->Velocity().y = 0;
 		moveComponent_->DecrementJumpCount(); // ジャンプ回数減少
 		GetObject3D()->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
 		GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);

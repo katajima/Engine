@@ -284,6 +284,7 @@ void PlayerStateSpecial::Update()
 	}
 	if (special->GetPhese() == 2) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		return;
 	}
 }
 
@@ -312,6 +313,7 @@ void PlayerStateSkill::Update() {
 	timer_ += character_->GetTime();
 	if (changeTimer_ <= timer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		return;
 	}
 
 };
@@ -362,6 +364,7 @@ void PlayerStateDefense::Update() {
 
 	if (timer_ >= defenseTimer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		return;
 	}
 
 };
@@ -409,6 +412,7 @@ void PlayerStateFainting::Update() {
 
 	if (timer_ >= faintingTimer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		return;
 	}
 
 
