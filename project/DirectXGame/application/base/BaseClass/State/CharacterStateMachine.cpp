@@ -8,4 +8,6 @@ void CharacterStateMachine::Init(BaseCharacter* character, CharacterMainState in
 
 void CharacterStateMachine::Update() {
 	state_->Update();
+
+	isOneFrameOneState_ = false;
 }

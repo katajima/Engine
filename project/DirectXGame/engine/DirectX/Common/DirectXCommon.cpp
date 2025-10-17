@@ -123,7 +123,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 	entity3DManager->GetEffectManager()->GetParticleManager()->Draw();
 
 	// GPUパーティクル描画
-	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
+	//entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
 
 
 #ifdef _DEBUG
@@ -187,7 +187,7 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 
 	entity3DManager->GetEffectManager()->GetParticleManager()->Update();
 
-	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update();
+	//entity3DManager->GetEffectManager()->GetGpuParticleManager()->Update();
 
 	//entity3DManager->GetEffectManager()->GetParticleManager2d()->Update();
 

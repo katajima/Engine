@@ -14,7 +14,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 
 
 	UIMeter* hpber  = GetUIMeter("HPBer");
-	hpber->SetMaxSize({ 100,30 },{4.0f,4.0f });
+	hpber->SetMaxSize({ 200,30 },{4.0f,4.0f });
 	hpber->SetMeterMinMax(0.0f,100.0f);
 	hpber->GetMeterSprite()->SetColor({ 0,1,0,1 });
 	hpber->SetMeterType(UIMeterType::Left);
@@ -22,7 +22,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	hpber->GetNameSprite()->SetSize({60,40});
 
 	UIMeter* specailBer_ = GetUIMeter("SpecailBer");
-	specailBer_->SetMaxSize({ 100,30 },{4.0f,4.0f });
+	specailBer_->SetMaxSize({ 200,30 },{4.0f,4.0f });
 	specailBer_->SetMeterMinMax(0.0f, 20.0f);
 	specailBer_->GetMeterSprite()->SetColor({ 0,0,1,1 });
 	specailBer_->SetMeterType(UIMeterType::Left);
@@ -30,7 +30,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	specailBer_->GetNameSprite()->SetSize({ 60,40 });
 
 	UIMeter* staminaBer_ = GetUIMeter("StaminaBer");
-	staminaBer_->SetMaxSize({ 100,30 },{4.0f,4.0f });
+	staminaBer_->SetMaxSize({ 200,30 },{4.0f,4.0f });
 	staminaBer_->SetMeterMinMax(0.0f, 20.0f);
 	staminaBer_->GetMeterSprite()->SetColor({ 1,1,0,1 });
 	staminaBer_->SetMeterType(UIMeterType::Left);

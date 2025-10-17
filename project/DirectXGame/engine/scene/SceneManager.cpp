@@ -62,7 +62,7 @@ void SceneManager::Update()
 			SetCamera(scene_->GetCamara());
 
 			// フェードイン開始
-			fade_->Start(Fade::Status::FadeIn, 1.5f, Color(0, 0, 0, 1));
+			fade_->Start(Fade::Status::FadeIn, 0.5f, Color(0, 0, 0, 1));
 			phase_ = Phase::kFadeIn;
 		}
 		break;
@@ -126,7 +126,7 @@ SceneManager::~SceneManager()
 	delete scene_;
 }
 
-void SceneManager::ChangeScene(const std::string& sceneName)
+void SceneManager::ChangeScene(const std::string& sceneName, float duration)
 {
 	assert(sceneFactory_);
 	if (nextScene_ == nullptr && phase_ == Phase::kMain) {
@@ -134,7 +134,7 @@ void SceneManager::ChangeScene(const std::string& sceneName)
 		this->sceneName = sceneName;
 
 		// フェードアウト開始
-		fade_->Start(Fade::Status::FadeOut, 1.5f, Color(0, 0, 0, 1));
+		fade_->Start(Fade::Status::FadeOut, duration, Color(0, 0, 0, 1));
 		fade_->SetSize({ static_cast<float>(WinApp::GetClientWidth()), static_cast<float>(WinApp::GetClientHeight()) });
 		phase_ = Phase::kFadeOut;
 	}

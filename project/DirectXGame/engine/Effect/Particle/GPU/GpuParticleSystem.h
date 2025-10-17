@@ -6,13 +6,14 @@
 class ModelMesh;
 class DirectXCommon;
 class GpuParticleManager;
+class BaseGpuParticleEmitter;
 class GpuParticleGroup
 {
 public:
 	void Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon,int MaxInstance, std::string name, std::string textureName);
 
 
-	void UpdateEmitte(float deltaTime, int count);
+	void UpdateEmitte(float deltaTime);
 
 	void UpdateField();
 
@@ -31,7 +32,7 @@ public: // トレイル用
 public:
 
 
-
+	void AddEmitter(BaseGpuParticleEmitter* emit);
 
 	void SetMesh(ModelMesh* mesh) { this->mesh_ = mesh; }	// メッシュセット
 
@@ -68,14 +69,16 @@ private:
 	ConstantBuffer<DeleteParticleCS> cbDeleteParticleCS_;
 	//
 	ConstantBuffer<PerEmitterDispatch> emitterDispatchBuffer_;
+	//
+private:
+	// エミッターたち
+	std::map<std::string, BaseGpuParticleEmitter*> emitters;
 
+	ConstantBuffer<EmitterCommon> cbEmitterCommon_;	// 共通データ
+	ConstantBuffer<EmitterTrail> cbEmitterTrail_;	// トレイルエミッター用データ
 
 private:
-	/*std::vector<BaseGpuParticleEmitter*> emitters_;
-	StructuredBuffer<EmitterCommon> emitterCommonBuffer_;
-	StructuredBuffer<EmitterTrail>  emitterTrailBuffer_;
-	StructuredBuffer<PerEmitterDispatch> emitterDispatchBuffer_;*/
-
+	
 private: // トレイル用
 
 	// トレイル頂点バッファ

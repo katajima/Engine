@@ -46,7 +46,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 
 	// 移動コンポーネント初期化
 	InitMoveComponent();
-	
+	moveComponent_->SetMaxJumpCount(3);
 	// 保存項目初期化
 	InitializeBaseAddItem();
 
@@ -166,6 +166,9 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 // ステート初期化and追加
 void Player::InitStateMachine() {
 	stateMachine_ = std::make_unique<CharacterStateMachine>();
+	stateMachine_->RegisterState(CharacterMainState::Idle, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateIdle>(p);
+		});
 	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
 		return std::make_unique<PlayerStateMove>(p);
 		});
@@ -184,6 +187,9 @@ void Player::InitStateMachine() {
 	stateMachine_->RegisterState(CharacterMainState::Fainting, [](BaseCharacter* p) {
 		return std::make_unique<PlayerStateFainting>(p);
 		});
+	stateMachine_->RegisterState(CharacterMainState::Jump, [](BaseCharacter* p) {
+		return std::make_unique<PlayerStateJump>(p);
+		});
 	stateMachine_->Init(this, CharacterMainState::Move);
 }
 
@@ -192,14 +198,11 @@ void Player::Update()
 {
 	UpdateBaseGetValue(); //保存機能 基本値の更新
 
-	// ステート
-	stateMachine_->Update();
-
 	// HPが0以下なら死亡
 	if (GetHP() <= 0) {
 		objectComponent_->GetObjectStateFlags().isAlive = false;
 	}
-
+	
 
 
 #ifdef _DEBUG
@@ -221,7 +224,11 @@ void Player::Update()
 	}
 #endif // _DEBUG
 
-
+	if (moveComponent_->GetIsLanding() && 
+		stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
+		input_->GetGamePadLeftStick().Length() == 0) {
+		moveComponent_->Velocity() = {};
+	}
 
 
 
@@ -230,15 +237,7 @@ void Player::Update()
 	// 移動コンポーネント着地状態か
 	moveComponent_->Landing(*GetObject3D()->GetTransformComponent(), *GetObject3D()->GetRigidBodyComponent());
 	
-	// キャラクターステート更新
-	characterStateComponent_.Update(Velocity(), false, GetAlive());
-
-
-	// 重力
-	if (!characterStateComponent_.IsJumping()) {
-		Velocity() = { 0,0,0 };
-	}
-
+	
 	// クリエイティブモードではないなら移動制限を付ける
 	if (!isCreativeMode) {
 		// 移動制限
@@ -271,6 +270,9 @@ void Player::Update()
 
 	// キャラクターパラメーター更新
 	characterParameterComponent_.Update();
+
+	// ステート
+	stateMachine_->Update();
 }
 
 #pragma region Draw
@@ -297,7 +299,16 @@ void Player::Draw2D()
 
 void Player::Move()
 {
-	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Move) {
+	// 重力
+	if (stateMachine_->GetCurrentMainState() != CharacterMainState::Jump) {
+		Velocity() = { 0,0,0 };
+	}
+
+
+	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
+	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
+
+	if (is || is2) {
 		moveComponent_->SetSpeed(Parameters().speed);
 		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
 		moveComponent_->Move(*GetObject3D()->GetTransformComponent(), input_);
@@ -306,13 +317,16 @@ void Player::Move()
 
 void Player::Jump()
 {
+	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
+	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
 
 
-	if (characterStateComponent_.IsJumping() || !moveComponent_->GetIsJump()) return; // ジャンプ中は無効化
-	if (GetAlive()) {
-		
-		characterStateComponent_.ChangeState(CharacterState::Jump);
-		moveComponent_->DecrementJumpCount();
+	// 生きていてステートの状態が移動状態ならジャンプステートへ移動
+	if (GetAlive() && (is || is2) &&
+		moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
+		stateMachine_->ChangeState(CharacterMainState::Jump);
+		GetObject3D()->GetRigidBodyComponent()->Velocity().y = 0;
+		moveComponent_->DecrementJumpCount(); // ジャンプ回数減少
 		GetObject3D()->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
 		GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
 	}
@@ -321,10 +335,14 @@ void Player::Jump()
 
 void Player::Attack()
 {
+	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
+	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
+
+
 	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Attack) {
 		weapon_->InputCombo(AttackInput::Light);
 	}
-	else if (stateMachine_->GetCurrentMainState() == CharacterMainState::Move) {
+	else if (is || is2) {
 		stateMachine_->ChangeState(CharacterMainState::Attack);
 		weapon_->StartCombo("Attack1");
 	}

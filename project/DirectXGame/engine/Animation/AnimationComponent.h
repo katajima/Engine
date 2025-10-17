@@ -32,6 +32,7 @@ public:
 	void SetAnimationSpeed(float speed) { animationSpeed = speed; }
 	// ループ再生するか
 	void SetIsLoop(bool is) { isLoop = is; };
+	
 
 	// ローカル行列取得
 	Matrix4x4 GetLocalMatrix() const { return localMatrix_; }

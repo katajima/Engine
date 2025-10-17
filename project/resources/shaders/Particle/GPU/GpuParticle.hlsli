@@ -57,6 +57,8 @@ struct PerView
 
 
 
+
+
 // エミッター共通
 struct EmitterCommon
 {
@@ -96,6 +98,30 @@ struct EmitterCommon
     float scaleAmount;      // スケーリング量
     float3 prevTranslate;   // 前フレームの位置
     
+    
+    
+    ///
+    uint shapeType; // 形状
+
+
+	/// <summary>
+	/// 球
+	/// </summary>
+    float sphereRadius; // 射出半径(球)
+	
+	
+	/// <summary>
+	/// AABB
+	/// </summary>
+    float3 size; // 射出サイズ(AABB)
+
+	/// <summary>
+	///  点
+	/// </summary>
+    uint interpolation; // 補間方法(0:しない,1:ランダムに,2:順番)
+    
+    uint particleStartOffset; // GPUパーティクルバッファ上の開始インデックス
+    uint particleMaxCount; // このEmitterに割り当てられた最大粒子数
 };
 
 

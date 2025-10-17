@@ -79,62 +79,41 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 	}
 
 	sbTrailVertexResource_.UavDependence();
-}
-
-void GpuParticleGroup::UpdateEmitte(float deltaTime, int threadGroupCount)
-{
-
-	cbPerFrame_.Data()->time += deltaTime;
-	cbPerFrame_.Data()->deltaTime = deltaTime;
-	if (cbPerFrame_.Data()->time >= 60.0f) {
-		cbPerFrame_.Data()->time = 0.0f;
-	}
 
 
+	// エミッター
+	cbEmitterCommon_.CreateBuffer(dxCommon_, 20);
+	cbEmitterCommon_.Data()->translate = Vector3(0.0f, 0.0f, 0.0f);
+	cbEmitterCommon_.Data()->prevTranslate = cbEmitterCommon_.Data()->translate;
+	cbEmitterCommon_.Data()->count = 10;
+	cbEmitterCommon_.Data()->frequency = 0.00f;
+	cbEmitterCommon_.Data()->frequencyTime = 0.0f;
+	cbEmitterCommon_.Data()->emit = 0;
+	cbEmitterCommon_.Data()->color = { 1.0f,0.8f ,0.1f };
+	cbEmitterCommon_.Data()->colorRange = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->lifeTime = 5.0f;
+	cbEmitterCommon_.Data()->velocity = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->velocityRange = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->scale = { 0.01f,0.01f,0.01f };
+	cbEmitterCommon_.Data()->scaleRange = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->spawnShape = ParticleSpawnShape::Volume;
+	cbEmitterCommon_.Data()->directionType = ParticleDireccion::Random;
+	cbEmitterCommon_.Data()->force = 1.0f;
+	cbEmitterCommon_.Data()->isAlhpa = true;
+	cbEmitterCommon_.Data()->isScaling = false;
+	cbEmitterCommon_.Data()->scaleAmount = 0.1f;
+	cbEmitterCommon_.Data()->isGravity = false;
+	cbEmitterCommon_.Data()->rotate = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->rotateRange = { 0.0f,0.0f,0.0f };
+	cbEmitterCommon_.Data()->useBillboard = true;
 
+	// トレイル
+	cbEmitterTrail_.CreateBuffer(dxCommon_, 20);
+	cbEmitterTrail_.Data()->trailcolor = { 1.0f,1.0f ,1.0f };
+	cbEmitterTrail_.Data()->trailLifeTime = 0.5f;
+	cbEmitterTrail_.Data()->isTrail = false;
+	cbEmitterTrail_.Data()->trailWidth = 1.0f;
 
-	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
-	cbPerFrame_.SetComputeRootConstantBufferView(2);			// 乱数用時間
-	sbFreeListIndexResource_.SetComputeRootDescriptorTable(3);	// カウンターインデックス
-	sbFreeListResource_.SetComputeRootDescriptorTable(4);		// カウンター
-	cbMaxInstance_.SetComputeRootConstantBufferView(5);			// Maxインスタンス
-
-
-	// --- 重要: totalThreadCount は「総スレッド数」を入れる ---
-	// threadGroupCount はグループ数。count_ がシェーダの THREAD_COUNT に相当する値である前提。
-	emitterDispatchBuffer_.Data()->totalThreadCount = static_cast<uint32_t>(threadGroupCount * 64); // <-- 総スレッド数
-	emitterDispatchBuffer_.SetComputeRootConstantBufferView(8);   // エミッタ発生数（CBVはデータ設定後にセット）
-
-	// Dispatch にはグループ数を渡す
-	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
-
-
-	sbParticleResource_.UavDependence();
-	sbFreeListIndexResource_.UavDependence();
-	sbFreeListResource_.UavDependence();
-
-
-}
-
-void GpuParticleGroup::UpdateField()
-{
-	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
-	cbPerFrame_.SetComputeRootConstantBufferView(1);			// 乱数用時間
-	sbFreeListIndexResource_.SetComputeRootDescriptorTable(2);	// カウンターインデックス
-	sbFreeListResource_.SetComputeRootDescriptorTable(3);		// カウンター
-	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
-
-
-	const uint32_t threadsPerGroup = 256;
-	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
-
-	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
-
-
-
-	sbParticleResource_.UavDependence();
-	sbFreeListIndexResource_.UavDependence();
-	sbFreeListResource_.UavDependence();
 }
 
 void GpuParticleGroup::Update()
@@ -171,6 +150,119 @@ void GpuParticleGroup::Update()
 	}
 }
 
+void GpuParticleGroup::Draw() {
+
+	if (mesh_) {
+		sbParticleResource_.SetGraphicsRootDescriptorTable(1);
+
+		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon_->GetTextureManager()->GetSrvHandleGPU(textureName_));
+
+
+		mesh_->GetCommandList();
+
+		// インスタンシング描画
+		dxCommon_->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh_->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
+	}
+}
+
+#pragma region Emit
+
+void GpuParticleGroup::UpdateEmitte(float deltaTime)
+{
+
+	cbPerFrame_.Data()->time += deltaTime;
+	cbPerFrame_.Data()->deltaTime = deltaTime;
+	if (cbPerFrame_.Data()->time >= 60.0f) {
+		cbPerFrame_.Data()->time = 0.0f;
+	}
+
+	
+	// エミッター設定
+	uint32_t particleOffset = 0;
+	for (auto& [id, emitter] : emitters)
+	{
+		auto& common = emitter->GetCommonData();
+
+		common.particleStartOffset = particleOffset;
+		
+		particleOffset += common.particleMaxCount;
+	}
+
+	// 総量
+	uint32_t totalParticleCount = 0;
+	for (auto& [id, emitter] : emitters)
+	{
+		totalParticleCount += emitter->GetCommonData().particleMaxCount;
+	}
+
+	uint32_t threadGroupCount = (totalParticleCount + 63) / 64; // スレッド数64の場合
+	emitterDispatchBuffer_.Data()->totalThreadCount = totalParticleCount;
+	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
+
+
+	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
+	cbPerFrame_.SetComputeRootConstantBufferView(1);			// 乱数用時間
+	sbFreeListIndexResource_.SetComputeRootDescriptorTable(2);	// カウンターインデックス
+	sbFreeListResource_.SetComputeRootDescriptorTable(3);		// カウンター
+	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
+	cbEmitterCommon_.SetComputeRootConstantBufferView(5);		// エミッター
+	cbEmitterTrail_.SetComputeRootConstantBufferView(6);		// トレイル
+
+
+
+	// --- 重要: totalThreadCount は「総スレッド数」を入れる ---
+	// threadGroupCount はグループ数。count_ がシェーダの THREAD_COUNT に相当する値である前提。
+	emitterDispatchBuffer_.Data()->totalThreadCount = static_cast<uint32_t>(threadGroupCount * 64); // <-- 総スレッド数
+	emitterDispatchBuffer_.SetComputeRootConstantBufferView(7);   // エミッタ発生数（CBVはデータ設定後にセット）
+
+	// Dispatch にはグループ数を渡す
+	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
+
+
+	sbParticleResource_.UavDependence();
+	sbFreeListIndexResource_.UavDependence();
+	sbFreeListResource_.UavDependence();
+
+
+}
+
+
+// エミッター追加
+void GpuParticleGroup::AddEmitter(BaseGpuParticleEmitter* emit) {
+
+	emitters[emit->GetName()] = emit;
+};
+
+#pragma endregion
+
+#pragma region Field
+
+void GpuParticleGroup::UpdateField()
+{
+	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
+	cbPerFrame_.SetComputeRootConstantBufferView(1);			// 乱数用時間
+	sbFreeListIndexResource_.SetComputeRootDescriptorTable(2);	// カウンターインデックス
+	sbFreeListResource_.SetComputeRootDescriptorTable(3);		// カウンター
+	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
+
+
+	const uint32_t threadsPerGroup = 256;
+	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
+
+	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+
+
+
+	sbParticleResource_.UavDependence();
+	sbFreeListIndexResource_.UavDependence();
+	sbFreeListResource_.UavDependence();
+}
+
+
+#pragma endregion
+
+#pragma region Trail
+
 void GpuParticleGroup::UpateTrailEmitte(float deltaTime)
 {
 	const uint32_t threadsPerGroup = 256;
@@ -189,8 +281,9 @@ void GpuParticleGroup::UpateTrailEmitte(float deltaTime)
 
 	sbParticleResource_.UavDependence();
 	sbTrailVertexResource_.UavDependence();
-	
+
 }
+
 
 void GpuParticleGroup::UpdateTrail()
 {
@@ -205,7 +298,7 @@ void GpuParticleGroup::UpdateTrail()
 
 
 	sbTrailVertexResource_.UavDependence();
-	
+
 }
 
 void GpuParticleGroup::DrawTrail()
@@ -224,17 +317,7 @@ void GpuParticleGroup::DrawTrail()
 	dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(cbMaxTrailVertexInstance_.Data()->maxInstance), 1, 0, 0);
 }
 
-void GpuParticleGroup::Draw() {
-
-	if (mesh_) {
-		sbParticleResource_.SetGraphicsRootDescriptorTable(1);
-
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon_->GetTextureManager()->GetSrvHandleGPU(textureName_));
+#pragma endregion
 
 
-		mesh_->GetCommandList();
 
-		// インスタンシング描画
-		dxCommon_->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh_->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
-	}
-}

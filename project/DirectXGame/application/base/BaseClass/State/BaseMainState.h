@@ -8,6 +8,7 @@
 
 // キャラクター行動(一段階)
 enum class CharacterMainState {
+	Idle,		// 待機
 	Move,       // 移動
 	Jump,       // ジャンプ
 	Avoidance,  // 回避
@@ -41,7 +42,16 @@ protected:
 };
 
 
-
+// 待機
+class IdleState : public BaseCharacterState {
+public:
+	IdleState(BaseCharacter* character)
+		: BaseCharacterState(CharacterMainState::Idle, character) {
+	}
+	virtual void Enter() {}
+	virtual void Update() {}
+	virtual void Exit() {}
+};
 
 // 移動
 class MoveState : public BaseCharacterState {

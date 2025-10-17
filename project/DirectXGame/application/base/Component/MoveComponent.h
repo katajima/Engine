@@ -35,9 +35,11 @@ public:
 			rigid.SetIsGravity(false);
 
 			jumpCount_ = jumpMaxCount_;
+			isLanding_ = true;
 		}
 		else {
 			rigid.SetIsGravity(true);
+			isLanding_ = false;
 		}
 	}
 
@@ -71,11 +73,7 @@ public:
 				velo = Multiply(Normalize(worldDirection), speed_);
 			}
 			
-
-			//// 移動ベクトルをカメラの角度だけ回転する
-			//Matrix4x4 rotateMatrixY = MakeRotateYMatrix(camera_->transform_.rotate.y);
-			//velocity_ = TransformNormal(velocity_, rotateMatrixY);
-			//
+			// スティックを動かしてたら
 			if (velo.Length() != 0) {
 				world.GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
 			}
@@ -89,6 +87,10 @@ public:
 	void DecrementJumpCount() { jumpCount_--; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }
+	// 着地状態か
+	bool GetIsLanding() const { return isLanding_; }
+	// 最大ジャンプカウント設定
+	void SetMaxJumpCount(int count) { jumpMaxCount_ = count; }
 
 private:
 	Camera* camera_ = nullptr;
@@ -96,8 +98,9 @@ private:
 	Vector3 velocity_ = {};			// オブジェクトの速度
 	Vector3 acceleration_ = {};		// オブジェクトの加速度
 	Vector3 direction_{0,0.,-1.0f};	// 方向
-	float speed_ = 1.0f;
-	int jumpMaxCount_ = 1;				// ジャンプ回数
-	int jumpCount_ = 0;
+	float speed_ = 1.0f;			// スピード
+	int jumpMaxCount_ = 1;			// ジャンプ回数(最大)
+	int jumpCount_ = 0;				// ジャンプ回数
+	bool isLanding_ = false;		// 着地状態か
 
 };
