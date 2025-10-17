@@ -262,7 +262,7 @@ void ImGuiManager::AddFont()
 	icons_config.OversampleH = 1;
 	icons_config.OversampleV = 1;
 
-	io.Fonts->AddFontFromFileTTF("C:/engine/project/externals/resources/GoogleMaterialFont/MaterialIcons-Regular.ttf", 10.0f, &icons_config, icon_ranges);
+	io.Fonts->AddFontFromFileTTF("./externals/resources/GoogleMaterialFont/MaterialIcons-Regular.ttf", 10.0f, &icons_config, icon_ranges);
 	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
 
 
