@@ -1,4 +1,4 @@
-#include"Object3d.hlsli"
+#include"Object3dInstans.hlsli"
 
 static const int kMaxLight = 3;
 

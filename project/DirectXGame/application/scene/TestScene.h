@@ -39,6 +39,10 @@
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 #include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
 
+
+/// <summary>
+/// テストシーン
+/// </summary>
 class TestScene : public BaseScene
 {
 public:
@@ -52,26 +56,26 @@ public:
 	// 毎フレーム更新
 	void Update() override;
 
-	// 描画
+	// 描画3d
 	void Draw3D() override;
-
+	// 描画2d
 	void Draw2D() override;
-
+	// グローバルバリアブル適応
 	void AppGlobalVariables();
 
 private: // 各初期化
-
-	void InitializeObject3D(); // オブジェクト3D
-
-	void InitializeObject2D(); // オブジェクト2D
-
-	void InitializeParticle(); // パーティクル
-
-	void InitializeLight(); // ライト
-
-	void InitializeCamera(); //かめら
-
-	void InitializeOthers(); // そのほか
+	// オブジェクト3D初期化
+	void InitializeObject3D(); 
+	// オブジェクト2D初期化
+	void InitializeObject2D(); 
+	// パーティクル初期化
+	void InitializeParticle(); 
+	// ライト初期化
+	void InitializeLight(); 
+	// カメラ初期化
+	void InitializeCamera(); 
+	// その他の初期化
+	void InitializeOthers();
 
 private:
 

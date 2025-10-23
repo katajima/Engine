@@ -21,7 +21,9 @@
 
 #include "DirectXGame/application/base/Input/InputHander.h"
 
-// ゲームプレイシーン
+/// <summary>
+/// ゲームプレイシーン
+/// </summary>
 class GamePlayScene : public BaseScene
 {
 public:
@@ -36,16 +38,16 @@ public:
 	// 毎フレーム更新
 	void Update() override;
 
-	// 描画
+	// 描画3d
 	void Draw3D() override;
-
+	// 描画2d
 	void Draw2D() override;
 
 
-
+	// ImGui更新
 	void UpdateImGui();
 
-	
+	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
 
 	/// <summary>
@@ -65,13 +67,13 @@ private:
 	// 次の振るまいリクエスト
 	std::optional<Behavior> behaviorRequest_ = std::nullopt;
 	
-	//
+	// フェーズ1初期化
 	void BehaviorPhase1Initialize();
-	//
+	// フェーズ1更新
 	void BehaviorPhase1Update();
-	//
+	// フェーズ2初期化
 	void BehaviorPhase2Initialize();
-	//
+	// フェーズ2更新
 	void BehaviorPhase2Update();
 	
 private:
@@ -81,6 +83,12 @@ private:
 	// インプットハンドラ
 	std::unique_ptr < InputHander> inputHander_;
 	ICommand* iCommand_;
+
+	static float nowTime;
+	float fps = 0.0f;
+private:
+	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+	std::unique_ptr<UICount> sprite;
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;

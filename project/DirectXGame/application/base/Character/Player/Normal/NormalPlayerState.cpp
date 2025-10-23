@@ -68,7 +68,7 @@ void PlayerStateIdle::Exit() {
 
 // 初期化
 void PlayerStateIdle::Enter() {
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsLoop(true);
 	anima->SetIsPlaying(true);
 	anima->SetAnimationSpeed(1.0f);
@@ -136,7 +136,7 @@ void PlayerStateMove::Exit()
 void PlayerStateMove::Enter()
 {
 	BaseWeapon* weapon = character_->GetWeapon();
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	weapon->GetObject3D()->SetIsDraw(false);
 	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
 	anima->SetIsLoop(true);
@@ -151,7 +151,7 @@ void PlayerStateMove::Enter()
 
 // 更新
 void PlayerStateJump::Update() {
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	Input* input = character_->GetInput();
 
 	anima->SetIsPlaying(true);		// アニメーション再生
@@ -174,7 +174,7 @@ void PlayerStateJump::Update() {
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
 
-		character_->GetObject3D()->GetRigidBodyComponent()->Velocity().y = 0;
+		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
 		
 		// 着地状態なら
@@ -182,9 +182,9 @@ void PlayerStateJump::Update() {
 
 		}
 		else {
-			character_->GetObject3D()->GetRigidBodyComponent()->AddForce({ 0,character_->GetCharacterParameterComponent().parameters_.jampPower * 2,0 });
+			character_->GetObjectComponent()->GetRigidBodyComponent()->AddForce({ 0,character_->GetCharacterParameterComponent().parameters_.jampPower * 2,0 });
 		}
-		character_->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.05f);
+		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.05f);
 	}
 	else {
 		// 着地状態なら
@@ -196,7 +196,7 @@ void PlayerStateJump::Update() {
 
 
 	// 降下しているならアニメーションを変える
-	if (character_->GetObject3D()->GetRigidBodyComponent()->Velocity().y <= 0.0f) {
+	if (character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y <= 0.0f) {
 		anima->SetIsLoop(true);
 		anima->SetAnimetion("Fall", 0.1f);
 	}
@@ -236,7 +236,7 @@ void PlayerStateAttack::Update()
 
 void PlayerStateAttack::Exit()
 {
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	// 武器
 	character_->GetWeapon()->GetComboStateMachine()->HandleInput(AttackInput::Light);
 	character_->GetWeapon()->GetObject3D()->SetIsDraw(false);
@@ -278,7 +278,7 @@ void PlayerStateSpecial::Update()
 	rengeSp->InAction();
 	rengeSp->SetIsDraw(false);
 	if (special->GetPhese() == 0) {
-		player->GetMoveComponent()->Move(*player->GetObject3D()->GetTransformComponent(), player->GetInput());
+		player->GetMoveComponent()->Move(player->GetObjectComponent()->GetWorldTransform(), player->GetInput());
 		player->GetPlayerUI()->SetIsTextRB(true);
 		rengeSp->SetIsDraw(true);
 	}
@@ -378,7 +378,7 @@ void PlayerStateDefense::Exit() {
 // 初期化
 void PlayerStateDefense::Enter() {
 	isDifense_ = true;
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(false);		// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -421,7 +421,7 @@ void PlayerStateFainting::Update() {
 
 // 終了
 void PlayerStateFainting::Exit() {
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -429,7 +429,7 @@ void PlayerStateFainting::Exit() {
 };
 // 初期化
 void PlayerStateFainting::Enter() {
-	AnimationComponent* anima = character_->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化

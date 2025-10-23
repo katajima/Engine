@@ -2,6 +2,10 @@
 
 #include"BaseCamera.h"
 
+
+/// <summary>
+/// 固定カメラクラス
+/// </summary>
 class BaseFixedCamera : public BaseCamera 
 {
 public:

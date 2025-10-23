@@ -2,6 +2,9 @@
 #include "BaseCamera.h"
 
 
+/// <summary>
+/// レールカメラクラス
+/// </summary>
 class BaseRailCamera : public BaseCamera {
 public:
 	///< summary>

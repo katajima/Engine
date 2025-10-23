@@ -6,83 +6,153 @@
 #include"Collider.h"
 #include <unordered_set>
 #include "DirectXGame/engine/collider/Octree/Octree.h"  
+
+
+// 前方宣言
+class GlobalVariables;
 /// <summary>
 /// 衝突マネージャ
 /// </summary>
-class GlobalVariables;
 class CollisionManager {
 public:
-    // 初期化
-    // 初期化
-    void Initialize(GlobalVariables* globalVariables,const AABB& sceneBounds) {
-        globalVariables_ = globalVariables;
-        // オクツリー初期化（シーン全体のAABBと深さなど指定）
-        octree_ = std::make_unique<Octree>(sceneBounds, 4, 2, 2, 2);
-    }
+	// 初期化
+	void Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
+		globalVariables_ = globalVariables;
 
-    // 動的コライダーコンポーネント追加
-    void Register(ColliderComponent* comp) {
-        if (comp && registeredDynamic_.insert(comp).second) {
-            dynamicColliders.push_back(comp);
-        }
-    }
+		float size = (sceneBounds.max_ - sceneBounds.min_).Length();
 
-    // 静的コライダーコンポーネント追加
-    void RegisterStatic(ColliderComponent* comp) {
-        if (comp && registeredStatic_.insert(comp).second) {
-            staticColliders.push_back(comp);
-        }
-    }
+		int depth = 4;
+		if (size > 1000.0f) depth = 6;
+		else if (size < 50.0f) depth = 3;
 
-    // 全削除（次フレームから再登録）
-    void Clear() {
-        dynamicColliders.clear();
-        staticColliders.clear();
-        registeredDynamic_.clear();
-        registeredStatic_.clear();
-    }
+		// オクツリー初期化（シーン全体のAABBと深さなど指定）
+		//octree_ = std::make_unique<Octree>(sceneBounds, 4, 2, 2, 2);
+		octreeCollider_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
+		octreeColliderStatic_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
+	}
 
-    // 衝突チェック：全てのColliderComponentのペアをチェック
-    void CheckAll() {
-        size_t n = dynamicColliders.size();
-        for (size_t i = 0; i < n; ++i) {
-            for (size_t j = i + 1; j < n; ++j) {
-                CheckByLayer(*dynamicColliders[i], *dynamicColliders[j]);
-            }
-        }
-    }
+	// 静的コライダをオクツリーに入れる
+	void BuildStaticSceneOctree() {
+		if (!octreeColliderStatic_) return;
 
-    // レイヤーとマスクに基づいて衝突を行う
-    void CheckByLayer(ColliderComponent& a, ColliderComponent& b) {
-        for (auto* colA : a.GetAllColliders()) {
-            for (auto* colB : b.GetAllColliders()) {
-                if (!colA->enabled || !colB->enabled) continue;
+		// 静的コライダーの登録（地形など）
+		for (auto* staticComp : staticColliders) {
+			for (auto* collider : staticComp->GetAllColliders()) {
+				if (collider->enabled) {
+					octreeColliderStatic_->Insert(collider);
+				}
+			}
+		}
+	}
 
-                // ビットマスク判定（どちらかが相手を対象にしていないならスキップ）
-                if (!((1 << static_cast<uint32_t>(colB->layer)) & colA->collisionMask) ||
-                    !((1 << static_cast<uint32_t>(colA->layer)) & colB->collisionMask)) {
-                    continue;
-                }
+	// 動的コライダーコンポーネント追加
+	void Register(ColliderComponent* comp) {
+		if (comp && registeredDynamic_.insert(comp).second) {
+			dynamicColliders.push_back(comp);
+		}
+	}
 
-                if (colA->CheckHit(*colB)) {
-                    if (a.onHitCallback) a.onHitCallback(colA, colB);
-                    if (b.onHitCallback) b.onHitCallback(colB, colA);
-                }
-            }
-        }
-    }
+	// 静的コライダーコンポーネント追加
+	void RegisterStatic(ColliderComponent* comp) {
+		if (comp && registeredStatic_.insert(comp).second) {
+			staticColliders.push_back(comp);
+		}
+
+	}
+
+	// 全削除（次フレームから再登録）
+	void Clear() {
+		dynamicColliders.clear();
+		staticColliders.clear();
+		registeredDynamic_.clear();
+		registeredStatic_.clear();
+	}
+
+	// 動的コライダの削除
+	void ClearDynamic() {
+		dynamicColliders.clear();
+		registeredDynamic_.clear();
+	}
+
+
+	// 静的コライダの削除
+	void ClearStatic() {
+		staticColliders.clear();
+		registeredStatic_.clear();
+	}
+
+	// 衝突チェック：全てのColliderComponentのペアをチェック
+	void CheckAllOrld() {
+		size_t n = dynamicColliders.size();
+		debugTimer_.StartTimer();
+		for (size_t i = 0; i < n; ++i) {
+			for (size_t j = i + 1; j < n; ++j) {
+				CheckByLayer(*dynamicColliders[i], *dynamicColliders[j]);
+			}
+		}
+		debugTimer_.EndTimer();
+		debugTimer_.LogTimeSec("");
+	}
+
+
+	// コライダ全走査
+	void CheckAll();
+
+
+	// レイヤーとマスクに基づいて衝突を行う（以前の全当たり用）
+	void CheckByLayer(ColliderComponent& a, ColliderComponent& b) {
+		for (auto* colA : a.GetAllColliders()) {
+			for (auto* colB : b.GetAllColliders()) {
+				if (!colA->enabled || !colB->enabled) continue;
+
+				// ビットマスク判定（どちらかが相手を対象にしていないならスキップ）
+				if (!((1 << static_cast<uint32_t>(colB->layer)) & colA->collisionMask) ||
+					!((1 << static_cast<uint32_t>(colA->layer)) & colB->collisionMask)) {
+					continue;
+				}
+
+				if (colA->CheckHit(*colB)) {
+					if (a.onHitCallback) a.onHitCallback(colA, colB);
+					if (b.onHitCallback) b.onHitCallback(colB, colA);
+				}
+			}
+		}
+	}
 
 private:
-    std::vector<ColliderComponent*> dynamicColliders; // 動的コライダー
-    std::vector<ColliderComponent*> staticColliders;  // 静的コライダー
+	// マスク処理
+	bool CheckMask(Collider* a, Collider* b) const {
+		return ((1 << static_cast<uint32_t>(b->layer)) & a->collisionMask) &&
+			((1 << static_cast<uint32_t>(a->layer)) & b->collisionMask);
+	}
+	// 処理応答
+	void NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const {
+		if (ownerComp->onHitCallback) {
+			ownerComp->onHitCallback(self, other);
+		}
+		if (other->owner) {
+			auto* otherComp = reinterpret_cast<ColliderComponent*>(other->owner);
+			if (otherComp->onHitCallback) {
+				otherComp->onHitCallback(other, self);
+			}
+		}
+	}
 
-    std::unordered_set<ColliderComponent*> registeredDynamic_;
-    std::unordered_set<ColliderComponent*> registeredStatic_;
+private:
+	std::vector<ColliderComponent*> dynamicColliders; // 動的コライダー
+	std::vector<ColliderComponent*> staticColliders;  // 静的コライダー
 
-    GlobalVariables* globalVariables_ = nullptr;      // 保存
+	std::unordered_set<ColliderComponent*> registeredDynamic_;
+	std::unordered_set<ColliderComponent*> registeredStatic_;
 
-    std::unique_ptr<Octree> octree_; // オクツリー管理
+	GlobalVariables* globalVariables_ = nullptr;      // 保存
+
+	std::unique_ptr<Octree> octree_; // オクツリー管理
+	std::unique_ptr<OctreeCollider> octreeCollider_; // オクツリー管理
+	std::unique_ptr<OctreeCollider> octreeColliderStatic_; // オクツリー管理
+
+	DebugTimer debugTimer_;
 public:
-
-    CollisionManager() = default;
+	// デストラクタ
+	CollisionManager() = default;
 };

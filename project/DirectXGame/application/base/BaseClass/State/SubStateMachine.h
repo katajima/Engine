@@ -5,6 +5,12 @@
 #include <memory>
 #include <cassert>
 
+
+/// <summary>
+/// サブステートマシーン
+/// </summary>
+/// <typeparam name="SubStateEnum"></typeparam>
+/// <typeparam name="BaseSubStateType"></typeparam>
 template<class SubStateEnum, class BaseSubStateType>
 class SubStateMachine
 {
@@ -15,11 +21,12 @@ public:
     explicit SubStateMachine(BaseCharacter* character)
         : character_(character) {
     }
+    
     // 登録
     void RegisterState(SubStateEnum type, FactoryType factory) {
         factories_[type] = factory;
     }
-
+    // 変更
     void ChangeState(const AttackSubState& name) {
         auto it = factories_.find(name);
         if (it != factories_.end()) {
@@ -35,7 +42,7 @@ public:
     void Update(float deltaTime = 1.0f / 60.0f) {
         if (state_) state_->Update(deltaTime);
     }
-
+    // 現在のステート取得
     AttackSubState GetAttackSubState() const {
         if (state_) {
             return state_->GetAttackSubState();
@@ -43,8 +50,9 @@ public:
         // 状態が無い場合は無効値を返す
         return SubStateEnum::Invalid;
     }
-
+    // 終了したか取得
     bool IsFinished() const { return isFinished_; }
+    // 終了したか設定
     void SetFinished(bool flag) { isFinished_ = flag; }
 private:
     // ステート変更

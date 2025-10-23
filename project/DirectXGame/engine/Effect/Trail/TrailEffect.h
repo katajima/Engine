@@ -18,21 +18,25 @@
 
 #include"TrailEffectManager.h"
 
-
+// 前方宣言
 class EffectManager;
+
+/// <summary>
+/// トレイルエフェクトクラス
+/// </summary>
 class TrailEffect
 {
 public:
 	
-
+	// 初期化
 	void Initialize(EffectManager* effectManager, const std::string& tex, float maxtime, const Color color = { 1,1,1,1 });
-
+	// 更新
 	void Update();
-	
+	// 描画
 	void Draw();
-
+	// カメラ設定
 	void SetCamera(Camera* camera) { camera_ = camera; };
-
+	// トレイルのオフセット設定
 	void SetOffset(Vector3 offsetStr, Vector3 offsetEnd,WorldTransform& world){
 		worldtransformTstr_.Initialize();
 		worldtransformTstr_.parent_ = &world;
@@ -53,14 +57,15 @@ public:
 	float GetTimer() const { return timer; }
 
 
-
+	// 行列設定
 	void SetMatrix(Matrix4x4& mat) { mat_ = mat; }
-
+	// メッシュ取得
 	ModelMesh* GetMesh() const { return mesh.get(); }
 
 	std::unique_ptr<ModelMesh> mesh;
 
 private:
+	// 頂点データ
 	struct VertexData {
 		Vector4 position;
 		Vector2 texcoord;

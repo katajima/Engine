@@ -6,6 +6,17 @@
 #include "DirectXGame/engine/DirectX/common/DirectXCommon.h"
 #include "DirectXGame/engine/Light/LightCommon.h"
 
+enum RootIndex {
+	ROOT_UAV_PARTICLE = 0,          // u0
+	ROOT_CBV_PERFRAME = 1,          // b0
+	ROOT_UAV_FREELIST_INDEX = 2,    // u1
+	ROOT_UAV_FREELIST = 3,          // u2
+	ROOT_CBV_MAXINSTANCE = 4,       // b1
+	ROOT_SRV_EMITTERCOMMON = 5,     // t0
+	ROOT_SRV_EMITTERTRAIL = 6,      // t1
+	ROOT_SRV_EMITTERDISPATCH = 7,   // t2
+	ROOT_CBV_DISPATCHCOUNT = 8      // b2
+};
 
 void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName)
 {
@@ -79,6 +90,13 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 	}
 
 	sbTrailVertexResource_.UavDependence();
+
+
+	emitterDispatchBuffer_.CreateBuffer(dxCommon_, 20);
+
+	// ディスパッチカウント
+	cbDispatchCount_.CreateBuffer(dxCommon_, 1);
+	cbDispatchCount_.Data()->gEmitterDispatchCount = 0;
 
 
 	// エミッター
@@ -169,68 +187,94 @@ void GpuParticleGroup::Draw() {
 
 void GpuParticleGroup::UpdateEmitte(float deltaTime)
 {
-
+	// time 更新（そのまま）
 	cbPerFrame_.Data()->time += deltaTime;
 	cbPerFrame_.Data()->deltaTime = deltaTime;
-	if (cbPerFrame_.Data()->time >= 60.0f) {
-		cbPerFrame_.Data()->time = 0.0f;
-	}
+	if (cbPerFrame_.Data()->time >= 60.0f) cbPerFrame_.Data()->time = 0.0f;
 
-	
-	// エミッター設定
+	// --- 1) 各エミッタに particleStartOffset を割り振る（既にやっている） ---
 	uint32_t particleOffset = 0;
+	int emitterIndex = 0;
+	// 事前に emitters を固定順 (vector 等) にしておくと emitterIndex が安定する
 	for (auto& [id, emitter] : emitters)
 	{
 		auto& common = emitter->GetCommonData();
-
 		common.particleStartOffset = particleOffset;
-		
 		particleOffset += common.particleMaxCount;
+		++emitterIndex;
 	}
 
-	// 総量
-	uint32_t totalParticleCount = 0;
+	// --- 2) PerEmitterDispatch 配列を作成 ---
+	std::vector<PerEmitterDispatch> dispatchList;
+	dispatchList.reserve(emitters.size());
+
+	uint32_t threadCursor = 0;      // 次に割り当てる startThread（スレッド単位）
+	uint32_t particleCursor = 0;    // 次に割り当てる particleOffset（粒子インデックス単位）
+	emitterIndex = 0;
 	for (auto& [id, emitter] : emitters)
 	{
-		totalParticleCount += emitter->GetCommonData().particleMaxCount;
+		const auto& common = emitter->GetCommonData();
+
+		// 1回の Emit で発生する数 = common.count
+		// threadGroups (= グループ数) を求める
+		uint32_t threadGroups = (common.count + threadCount - 1) / threadCount; // グループ数
+		uint32_t threadsForEmitter = threadGroups * threadCount; // スレッド数（THREAD_COUNT の倍）
+
+		PerEmitterDispatch info{};
+		info.startThread = threadCursor;
+		info.totalThreadCount = threadsForEmitter;
+		info.particleOffset = particleCursor;
+		info.emitterIndex = emitterIndex;
+
+		dispatchList.push_back(info);
+
+		threadCursor += threadsForEmitter;
+		particleCursor += common.particleMaxCount;
+		++emitterIndex;
 	}
 
-	uint32_t threadGroupCount = (totalParticleCount + 63) / 64; // スレッド数64の場合
-	emitterDispatchBuffer_.Data()->totalThreadCount = totalParticleCount;
+	// --- 3) 合計で何スレッド（グローバル）か計算して Dispatch 回数を求める ---
+	uint32_t totalThreads = (dispatchList.empty() ? 0 : dispatchList.back().startThread + dispatchList.back().totalThreadCount);
+	if (totalThreads == 0)
+		return; // 発生するものがなければ早期 return
+
+	uint32_t threadGroupCount = (totalThreads + threadCount - 1) / threadCount;
+
+	// --- 4) GPU に PerEmitterDispatch 配列を転送（StructuredBuffer として） ---
+	// sbEmitterDispatchResource_ は StructuredBuffer<PerEmitterDispatch> として用意しておく
+	emitterDispatchBuffer_.CopyFrom(dispatchList.data(), dispatchList.size() * sizeof(PerEmitterDispatch));
+
+	// --- 6) DispatchCount をセット（CBV） ---
+	cbDispatchCount_.Data()->gEmitterDispatchCount = static_cast<uint32_t>(dispatchList.size());
+	cbDispatchCount_.SetComputeRootConstantBufferView(ROOT_CBV_DISPATCHCOUNT);
+
+	// --- 7) ルート/リソースをバインド（順序は RootSignature に合わせる） ---
+	sbParticleResource_.SetComputeRootDescriptorTable(ROOT_UAV_PARTICLE);
+	cbPerFrame_.SetComputeRootConstantBufferView(ROOT_CBV_PERFRAME);
+	sbFreeListIndexResource_.SetComputeRootDescriptorTable(ROOT_UAV_FREELIST_INDEX);
+	sbFreeListResource_.SetComputeRootDescriptorTable(ROOT_UAV_FREELIST);
+	cbMaxInstance_.SetComputeRootConstantBufferView(ROOT_CBV_MAXINSTANCE);
+	cbEmitterCommon_.SetComputeRootDescriptorTable(ROOT_SRV_EMITTERCOMMON);
+	cbEmitterTrail_.SetComputeRootDescriptorTable(ROOT_SRV_EMITTERTRAIL);
+	emitterDispatchBuffer_.SetComputeRootDescriptorTable(ROOT_SRV_EMITTERDISPATCH);
+
+	// --- 7) DispatchCountCB（cbDispatchCount_） を Root にセット済み（上で） ---
+	// --- 8) 実際に Dispatch ---
 	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
 
-
-	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
-	cbPerFrame_.SetComputeRootConstantBufferView(1);			// 乱数用時間
-	sbFreeListIndexResource_.SetComputeRootDescriptorTable(2);	// カウンターインデックス
-	sbFreeListResource_.SetComputeRootDescriptorTable(3);		// カウンター
-	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
-	cbEmitterCommon_.SetComputeRootConstantBufferView(5);		// エミッター
-	cbEmitterTrail_.SetComputeRootConstantBufferView(6);		// トレイル
-
-
-
-	// --- 重要: totalThreadCount は「総スレッド数」を入れる ---
-	// threadGroupCount はグループ数。count_ がシェーダの THREAD_COUNT に相当する値である前提。
-	emitterDispatchBuffer_.Data()->totalThreadCount = static_cast<uint32_t>(threadGroupCount * 64); // <-- 総スレッド数
-	emitterDispatchBuffer_.SetComputeRootConstantBufferView(7);   // エミッタ発生数（CBVはデータ設定後にセット）
-
-	// Dispatch にはグループ数を渡す
-	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
-
-
+	// --- 9) UAVバリア等（既存コード） ---
 	sbParticleResource_.UavDependence();
 	sbFreeListIndexResource_.UavDependence();
 	sbFreeListResource_.UavDependence();
-
-
 }
+
 
 
 // エミッター追加
 void GpuParticleGroup::AddEmitter(BaseGpuParticleEmitter* emit) {
 
 	emitters[emit->GetName()] = emit;
+	emitters[emit->GetName()]->GetCommonData();
 };
 
 #pragma endregion

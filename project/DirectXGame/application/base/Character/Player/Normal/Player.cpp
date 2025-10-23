@@ -28,8 +28,8 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	CreateGroup("Player");
 
 	objectComponent_->SetSRT({1,1,1}, {}, position);				//　SRT設定
-	GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
-	GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
+	objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
+	objectComponent_->GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
 
 	// HP設定
@@ -63,7 +63,7 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 
 	// コライダ位置用トランスフォーム初期化
 	worldCollider_.Initialize();
-	worldCollider_.parent_ = &GetObject3D()->GetWorldTransform();
+	worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
 	worldCollider_.translate_.y = 3.0f;
 
 	// 衝突時のコールバック登録
@@ -136,18 +136,18 @@ void Player::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2D
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
 	special_->Initialize(entity3DManager, entity2DManager, camera_);
-	special_->SetParent(&GetObject3D()->GetWorldTransform());
+	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
 	rengeSp->SetRadius(100);
-	rengeSp->SetReticleParent(&GetObject3D()->GetWorldTransform());
+	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
 	// 武器
 	weapon_ = std::make_unique<PlayerWeapon>();
 	weapon_->SetCharacter(this);
 	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
-	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { DegreesToRadians(-90),0.0f,0.0f };
+	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(-90),0.0f,0.0f };
 	weapon_->GetHitData().hitTime.maxT = 2.0f;
 
 	attackInputHander_ = std::make_unique<AttackInputHander>();
@@ -233,9 +233,9 @@ void Player::Update()
 
 
 	// 移動コンポーネント移動
-	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), *GetObject3D());
+	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
 	// 移動コンポーネント着地状態か
-	moveComponent_->Landing(*GetObject3D()->GetTransformComponent(), *GetObject3D()->GetRigidBodyComponent());
+	moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
 	
 	
 	// クリエイティブモードではないなら移動制限を付ける
@@ -245,20 +245,20 @@ void Player::Update()
 	}
 
 	// ワールドトランスフォーム更新
-	GetObject3D()->UpdateWorldTransform();
+	GetObjectComponent()->GetWorldTransform().Update();
 	
 	// コライダのワールドトランスフォーム更新
 	worldCollider_.Update();
 
 	// コライダーコンポーネント更新
-	GetObject3D()->GetColliderComponent()->UpdateAll(worldCollider_);
+	GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 	// 必殺技
 	special_->Update();
 	// ヒットデータの更新
 	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObject3D()->model->modelData.skeleton, "rightHand", GetObject3D()->GetWorldTransform().worldMat_));
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
 #ifdef _DEBUG
@@ -311,7 +311,7 @@ void Player::Move()
 	if (is || is2) {
 		moveComponent_->SetSpeed(Parameters().speed);
 		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
-		moveComponent_->Move(*GetObject3D()->GetTransformComponent(), input_);
+		moveComponent_->Move(GetObjectComponent()->GetWorldTransform(), input_);
 	}
 }
 
@@ -325,10 +325,10 @@ void Player::Jump()
 	if (GetAlive() && (is || is2) &&
 		moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
 		stateMachine_->ChangeState(CharacterMainState::Jump);
-		GetObject3D()->GetRigidBodyComponent()->Velocity().y = 0;
+		GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		moveComponent_->DecrementJumpCount(); // ジャンプ回数減少
-		GetObject3D()->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
-		GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
+		GetObjectComponent()->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
+		GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
 	}
 
 }

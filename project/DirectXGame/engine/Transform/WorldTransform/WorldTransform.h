@@ -1,7 +1,9 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 
-
+/// <summary>
+/// ワールドトランスフォームクラス
+/// </summary>
 class WorldTransform
 {
 public:
@@ -9,13 +11,20 @@ public:
 	void Initialize();
 	// 更新
 	void Update();
-
+	// 親子関係
 	void SetParent(const Matrix4x4& parent) { 
 		isPearent = true;
 		parentMatrix_ = parent; 
 	};
 
-	
+	// ワールド座標取得
+	Vector3 GetWorldPosition() const {
+		return worldMat_.GetWorldPosition();
+	}
+	// 1フレーム前ワールド座標取得
+	Vector3 GetPreWorldPosition() const {
+		return worldPreMat_.GetWorldPosition();
+	}
 
 public:
 	Vector3 scale_ = { 1,1,1 };		// 拡縮

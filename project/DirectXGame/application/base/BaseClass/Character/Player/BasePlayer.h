@@ -11,8 +11,12 @@
 //using PlayerStateFactory = std::function<std::unique_ptr<BasePlayerState>(BasePlayer*)>;
 
 
-
+//前方宣言
 class FollowCamera;
+
+/// <summary>
+/// プレイヤクラス
+/// </summary>
 class BasePlayer : public BaseCharacter
 {
 public:
@@ -21,15 +25,15 @@ public:
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
-
+	// 描画エフェクト
 	virtual void DrawEffect() = 0;
-
+	// 描画2d
 	virtual void Draw2D() = 0;
-
+	// 移動
 	virtual void Move() = 0;
-	
+	// ジャンプ
 	virtual void Jump() = 0;
-
+	// 攻撃
 	virtual void Attack() = 0;
 
 public:
@@ -37,7 +41,7 @@ public:
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera;}
 
 
-
+	// プレイヤUI取得
 	virtual PlayerUI* GetPlayerUI() = 0;
 
 	// ヒット数の取得

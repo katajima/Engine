@@ -21,14 +21,20 @@ public:
         return data.at(key); // const版はatで例外を投げるようにするのも可
     }
 
+    // 開始
     auto begin() { return data.begin(); }
+    // 最後
     auto end() { return data.end(); }
+    // 空
     auto empty() { return data.empty(); }
+    // 開始
     auto begin() const { return data.begin(); }
+    // 最後
     auto end() const { return data.end(); }
+    // 空
     auto empty() const { return data.empty(); }
 
-   
+   // 追加
     void Insert(const K& key, V&& value) {
         data.insert(std::make_pair(key, std::move(value)));
         //data[key] = std::move(value);
@@ -67,11 +73,17 @@ public:
         return data.at(key);
     }
 
+    // 開始
     auto begin() { return data.begin(); }
+    // 最後
     auto end() { return data.end(); }
+    // 空
     auto empty() { return data.empty(); }
+    // 開始
     auto begin() const { return data.begin(); }
+    // 最後
     auto end() const { return data.end(); }
+    // 空
     auto empty() const { return data.empty(); }
 
     // 追加

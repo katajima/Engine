@@ -67,6 +67,7 @@ public:
 	PlayerStateAttack(BaseCharacter* player)
 		: AttackState(player) {}
 
+	// 更新
 	void Update() override;
 
 	// 終了

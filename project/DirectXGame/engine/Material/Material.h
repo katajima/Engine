@@ -12,19 +12,28 @@ using namespace Microsoft::WRL;
 #include<d3d12.h>
 #include<dxgi1_6.h>
 
+// 前方宣言
 class DirectXCommon;
+
+/// <summary>
+/// マテリアル
+/// </summary>
 class Material
 {
 public:
+	// 初期化
 	void Initialize(DirectXCommon* dxcommon);
 
-
+	// マテリアルコマンドリスト設定
 	void GetCommandListMaterial(int index);
 
+	// テクスチャコマンドリスト設定
 	void GetCommandListTexture(int indexDiffuse, int normalIndex = 0, int speculerIndex = 0, int environmentIndex = 0);
 
-
+	// GPUデータ更新
 	void GPUData();
+
+	// テクスチャ読み込み
 	void LoadTex();
 public:
 	Transform transform;
@@ -40,6 +49,8 @@ public:
 	bool useEnvironment_ = 0;
 	float alphaClipping_ = 0.5f;
 	float alpha_ = 1.0f;
+
+	// テクスチャ構造体
 	struct Tex {
 		std::string diffuseFilePath;
 		std::string normalFilePath;

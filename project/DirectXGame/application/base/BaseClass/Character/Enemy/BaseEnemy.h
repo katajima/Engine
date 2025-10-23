@@ -3,9 +3,14 @@
 #include "DirectXGame/application/base/Vision/VisionComponent.h"
 #include "DirectXGame/application/base/Hit/HitComponent.h"
 
+//前方宣言
 class BasePlayer;
 class Entity3DManager;
 class Entity2DManager;
+
+/// <summary>
+/// 敵クラス
+/// </summary>
 class BaseEnemy : public BaseCharacter {
 public:
 	// 初期化
@@ -14,23 +19,23 @@ public:
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
-
+	// 描画エフェクト
 	virtual void DrawEffect() = 0;
-
+	// 描画2d
 	virtual void Draw2D() = 0;
-
+	// 移動
 	virtual void Move() = 0;
-
+	// ジャンプ
 	virtual void Jump() = 0;
-
+	// 攻撃
 	virtual void Attack() = 0;
-
+	// プレイヤー設定
 	virtual void SetPlayer(BasePlayer* player) = 0;
 
 public:
 	// パーティクル発生
 	virtual void Emit() = 0;
-	
+	// ID設定
 	void SetID(uint32_t id) { id_ = id; }
 	// 敵タイプ取得
 	EnemyType GetType() const { return type_; };
@@ -41,9 +46,9 @@ public:
 	Vector3 GetTargetPos();
 	// 対象との距離(プレイヤー)
 	float GetTargetDistance();
-
+	// 移動方向
 	void DirectionMove(float speed);
-
+	// ヒットコンポーネント取得
 	HitMotionComponent* GetHitMotionComponent() { return hitMotionComponent_.get(); }
 
 protected:

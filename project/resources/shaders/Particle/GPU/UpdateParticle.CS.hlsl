@@ -17,7 +17,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint particleIndex = DTid.x;
     
     
-    if (particleIndex < gMaxInstance.maxInstanse)
+    if (particleIndex < gMaxInstance.maxInstance)
     {
          
         if (gParticle[particleIndex].currentTime <= gParticle[particleIndex].lifeTime)
@@ -31,7 +31,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
                 int freeListIndex;
                 InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
                 // 最新のFreeListIndexの場所に死んだParticleのIndexを設定する
-                if ((freeListIndex + 1) < gMaxInstance.maxInstanse)
+                if ((freeListIndex + 1) < gMaxInstance.maxInstance)
                 {
                     gFreeList[freeListIndex + 1] = particleIndex;
                 }
@@ -90,7 +90,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
                 int freeListIndex;
                 InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
                 // 最新のFreeListIndexの場所に死んだParticleのIndexを設定する
-                if ((freeListIndex + 1) < gMaxInstance.maxInstanse)
+                if ((freeListIndex + 1) < gMaxInstance.maxInstance)
                 {
                     gFreeList[freeListIndex + 1] = particleIndex;
                 }

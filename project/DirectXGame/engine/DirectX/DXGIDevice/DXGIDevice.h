@@ -11,12 +11,16 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/base/Logger.h"
 #include "DirectXGame/engine/Utility/StringUtility.h"
 
+/// <summary>
+/// DXGIデバイスクラス
+/// </summary>
 class DXGIDevice
 {
 public:
 	DXGIDevice() = default;
 	~DXGIDevice() = default;
 
+	// 初期化
 	void Initialize();
 
 

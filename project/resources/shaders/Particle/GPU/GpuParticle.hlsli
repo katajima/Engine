@@ -36,7 +36,8 @@ struct Particle
     
     uint isAlive;           // 生存しているか
     uint useBillboard;      // ビルボードを使うか
-    float2 pad;
+    uint emitterIndex;
+    float pad;
     
     
     
@@ -137,23 +138,6 @@ struct EmitterTrail
     float pad; // パディング
 };
 
-// エミッター(球)
-struct EmitterSphere
-{
-    float radius; // 射出半径
-};
-// エミッター(AABB)
-struct EmitterAABB
-{
-    float3 size; // 大きさ
-};
-// エミッター(点)
-struct EmitterPoint
-{
-    uint interpolation;
-    float3 pad; // パディング
-};
-
 
 struct PerFrame
 {
@@ -166,7 +150,7 @@ struct PerFrame
 // 最大個数
 struct MaxInstance
 {
-    uint maxInstanse;
+    uint maxInstance;
 };
 
 
@@ -209,10 +193,21 @@ struct GpuTrailCount
     uint indexMaxCount; // 最大数(Index)
 };
 
+
+// 
 struct PerEmitterDispatch
 {
     uint startThread; // このエミッタが処理を始めるスレッドのインデックス
     uint totalThreadCount; // このエミッタが必要とするスレッド数
     uint particleOffset; // 書き込み先パーティクルバッファの開始インデックス
     uint emitterIndex; // エミッタ番号（StructuredBufferのインデックス）
+};
+
+// ディスパッチカウント
+struct DispatchCount
+{
+    uint gEmitterDispatchCount;
+    uint pad0;
+    uint pad1;
+    uint pad2;
 };

@@ -50,7 +50,11 @@ struct ModelData
 	Skeleton skeleton;										// スケルトン
 };
 
+
+// 前方宣言
 class DirectXCommon;
+
+// モデル読み込みに関する
 namespace LoadModel {
 
 	// メッシュ読み込み
@@ -69,8 +73,10 @@ namespace LoadModel {
 	Node ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& meshOffsetMap);
 
 }
-
+// 前方宣言
 class ModelCommon;
+
+// モデル生成に関する
 namespace CreateModel {
 
 	// メッシュ状にライン生成
@@ -82,15 +88,16 @@ namespace CreateModel {
 	// スキンクラスター生成
 	void CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon);
 
-	//
+	// ジョイント生成
 	int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
 }
 
+// モデルデバッグに関する
 namespace DebugModel {
 
 	// スキニングデータImguiで表示
 	void ImguiSkin(ModelData& modelData);
-
+	// モデルデータをImGuiで表示
 	void ImguiModel(ModelData& modelData);
 
 }

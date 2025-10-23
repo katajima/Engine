@@ -19,7 +19,9 @@
 
 
 
-
+/// <summary>
+/// サンプルシーン
+/// </summary>
 class SampleScene : public BaseScene
 {
 public:
@@ -32,16 +34,16 @@ public:
 	// 毎フレーム更新
 	void Update() override;
 
-	// 描画
+	// 描画3d
 	void Draw3D() override;
-
+	// 描画2d
 	void Draw2D() override;
 
 
-
+	// ImGui更新
 	void UpdateImGui();
 
-
+	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
 
 	/// <summary>
@@ -50,15 +52,15 @@ public:
 	void CheckAllCollisions();
 
 private:
-	// カメラ
+	// カメラ初期化
 	void InitCamera();
-	// ライト
+	// ライト初期化
 	void InitLight();
-	// パーティクル
+	// パーティクル初期化
 	void InitParticle();
-	// オブジェクト
+	// オブジェクト初期化
 	void InitObject();
-	// スプライト
+	// スプライト初期化
 	void InitSprite();
 
 

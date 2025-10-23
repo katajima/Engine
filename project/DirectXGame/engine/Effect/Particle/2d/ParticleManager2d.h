@@ -18,10 +18,15 @@
 #include <DirectXGame/engine/Effect/Particle/CPU/ParticleData.h>
 #include "DirectXGame/engine/Utility/MapUtility.h"
 
+// 前方宣言
 class Material;
 class SrvManager;
 class EffectManager;
 class Primitive2D;
+
+/// <summary>
+/// パーティクル2dマネージャー
+/// </summary>
 class ParticleManager2d
 {
 public:

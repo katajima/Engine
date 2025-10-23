@@ -6,20 +6,21 @@
 #include"DirectXGame/engine/3d/Model/Model.h"
 
 
-// アニメーション
+// アニメーションコンポーネント
 class AnimationComponent 
 {
 public:
 
+	// 初期化
 	void Init(LineCommon* lineCommon);
 	
 	// アニメーションするモデルを設定
 	void SetModel(Model* mod) { model = mod; }
 
-	// スキニング
+	// スキニング更新
 	void UpdateSkin(float deltatime,WorldTransform worldTransform);
 
-	// アニメーション
+	// アニメーション更新
 	void Update(float deltatime, WorldTransform worldTransform);
 	
 

@@ -12,20 +12,24 @@
 #include<DirectXGame/engine/Mesh/SkyBoxMesh.h>
 
 
-
+// 前方宣言
 class Entity3DManager;
+
+/// <summary>
+/// スカイボックスクラス
+/// </summary>
 class SkyBox
 {
 public:
 	// 初期化
 	void Initialize(Entity3DManager* entity3DManager,std::string txtueName);
-
+	// 更新
 	void Update();
-
+	// 描画
 	void Draw();
-
+	// マテリアル取得
 	Material* GetMaterial() { return material.get(); }
-
+	// メッシュ取得
 	SkyBoxMesh* GetMesh() { return mesh_.get(); }
 private:
 

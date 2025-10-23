@@ -3,16 +3,22 @@
 #include "DirectXGame/engine/math/random.h"
 #include "DirectXGame/application/base/BaseClass/Attack/AttackData.h"
 
+
+/// <summary>
+/// ヒットコンポーネント
+/// </summary>
 class HitMotionComponent 
 {
 public:
 
+	// 初期化
 	void Init(float hitTimer,Vector3 offset) {
 		maxHitStopTimer = hitTimer;
 		offset_ = offset;
 	}
 
-	void Update(float deltaTime, Object3d* object) {
+	// 更新
+	void Update(float deltaTime, ObjectComponent* object) {
 
 		if (isHit) {
 			object->GetRigidBodyComponent()->SetIsGravity(false);
@@ -33,7 +39,7 @@ public:
 		else {
 			
 
-			strPos_ = object->GetWorldPosition();
+			strPos_ = object->GetWorldTransform().GetWorldPosition();
 
 
 			knockbackTimer += deltaTime;
@@ -48,7 +54,7 @@ public:
 
 	}
 
-
+	// ヒットしたか設定
 	void SetIsHit(bool is) { isHit = is; }
 	// ノックバックデータセット
 	void SetKnockbackData(KnockbackData data) { knockback_ = data; }

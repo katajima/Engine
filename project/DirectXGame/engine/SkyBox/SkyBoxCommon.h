@@ -4,16 +4,20 @@
 
 
 
-
+// 前方宣言
 class DirectXCommon;
+
+/// <summary>
+/// スカイボックス共通クラス
+/// </summary>
 class SkyBoxCommon
 {
 public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
+	// DirectX共通クラス取得
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-
+	// 描画前準備
 	void DrawCommonSetting();
 
 private:

@@ -27,6 +27,7 @@ class Camera;
 class WinApp;
 class DirectXCommon;
 class SrvManager;
+
 // ImGuiの管理
 class ImGuiManager
 {
@@ -60,8 +61,9 @@ public:
 	// ギズモの使用例
 	void RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name);
 
+	// ImGuiスタイル設定
 	void SetCustomColorScheme();
-
+	// インプット設定
 	void SetInput(Input* input) { input_ = input; }
 
 public:
@@ -87,12 +89,16 @@ private:
 
 };
 
+/// <summary>
+/// ImGuiウィンドウのスコープを管理するRAIIクラス。
+/// </summary>
 class ImGuiWindowScope {
 public:
+	// コンストラクタ
 	ImGuiWindowScope(const char* name, ImGuiWindowFlags flags = 0) {
 		ImGui::Begin(name, nullptr, flags);
 	}
-
+	// デストラクタ
 	~ImGuiWindowScope() {
 		ImGui::End();
 	}

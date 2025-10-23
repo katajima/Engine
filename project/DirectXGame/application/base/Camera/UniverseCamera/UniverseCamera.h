@@ -2,6 +2,9 @@
 #include "DirectXGame/application/base/BaseClass/Camera/BaseFixedCamera.h"
 
 
+/// <summary>
+/// ミサイルを映すカメラ
+/// </summary>
 class UniverseCamera : public BaseFixedCamera
 {
 public:

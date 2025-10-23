@@ -11,8 +11,12 @@
 #include <queue>
 #include <unordered_map>
 
-
+// 前方宣言
 class LineCommon;
+
+/// <summary>
+/// A＊アルゴリズムクラス
+/// </summary>
 class AStarPathfinder {
 public:
     struct Node {
@@ -26,8 +30,7 @@ public:
         }
     };
 
-   // AStarPathfinder(const MapChip& map) : m_map(map) {}
-
+    // マップチップ設定
     void SetMap(const MapChip& map) {
         m_map = &map;
     }
@@ -38,14 +41,15 @@ public:
 
     // 進行方向を計算する関数
     Vector2 GetDirectionToNextNode();
-
+    // 描画
     void DrawPath(LineCommon* line,float yPos) const;
 
 private:
     const MapChip* m_map;
     std::vector<Vector2> m_path;  // 最短経路を格納する
-
+    //ヒューリスティック
     float Heuristic(int x1, int z1, int x2, int z2);
+    // 近所
     std::vector<std::pair<int, int>> GetNeighbors(int x, int z);
 };
 

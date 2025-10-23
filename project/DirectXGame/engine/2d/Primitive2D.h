@@ -18,19 +18,21 @@
 #include<string>
 using namespace Microsoft::WRL;
 
-
-
+// シェイプパラメータ
 namespace ShapeParameter2D {
 
+	// 四角
 	struct Cube
 	{
 		Vector2 size = { 1,1 };
 	};
+	// 球
 	struct  Sphere
 	{
 		float radius;
 		int segment;
 	};
+	// 星
 	struct Star
 	{
 		float innerRadius_ = 2.0f;
@@ -48,6 +50,7 @@ namespace ShapeParameter2D {
 			return !(*this == other);
 		}
 	};
+	// リング
 	struct Ring {
 		float innerRadius_;
 		float outerRadius_;
@@ -63,7 +66,7 @@ namespace ShapeParameter2D {
 			return !(*this == other);
 		}
 	};
-
+	// 三角
 	struct Triangle {
 		Vector2 vertices[3]; // !頂点
 
@@ -71,9 +74,12 @@ namespace ShapeParameter2D {
 
 };
 
-
+// 前方宣言
 class SpriteCommon;
 
+/// <summary>
+/// 2dでのプリミティブクラス
+/// </summary>
 class Primitive2D
 {
 public:
@@ -86,39 +92,48 @@ public:
 		Ring,			// リング
 	};
 
-
-	// 形
+	/// <summary>
+	/// スプライトの共通設定を初期化します。
+	/// </summary>
+	/// <param name="spriteCommon">初期化するスプライトの共通設定を指すポインタ。</param>
+	/// <param name="type">スプライトの形状タイプ。</param>
+	/// <param name="color">スプライトの初期色（デフォルト値は {1, 1, 1, 1} ）。</param>
 	void Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color = { 1,1,1,1 });
-
+	// 更新
 	void Update();
-
+	// 描画
 	void Draw();
 
 
-	// 色
+	// 色取得
 	const Color& GetColor() const { return material->color; }
+	// 色設定
 	void SetColor(const Color& color) { material->color = color; }
 
-	// アンカーポイント
+	// アンカーポイント取得
 	const Vector2& GetAnchorPoint() const { return anchorPoint; };
+	// アンカーポイント設定
 	void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
 
 
-
+	// パラメーター設定(内半径、外半径、セグメント数)(星やリング)
 	void SetParametar(float innerRadius, float outerRadius, int segments);
+	// パラメーター設定(半径、セグメント数)(円)
 	void SetParametar(float radius, int segments);
+	// パラメーター設定(サイズ)(四角)
 	void SetParametar(Vector2 size);
+	// パラメーター設定(各点)(三角)
 	void SetParametar(Vector2 p0, Vector2 p1, Vector2 p2);
 private:
-	// 三角面
+	// 三角面生成
 	void CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2);
-	// 円
+	// 円生成
 	void CreateCircle(float radius, int segments);
-	// リング
+	// リング生成
 	void CreateRing(float innerRadius, float outerRadius, int segments);
-	// 星
+	// 星生成
 	void CreateStar(float innerRadius, float outerRadius, int segments);
-	// 四角
+	// 四角生成
 	void CreateCube(Vector2 size);
 
 

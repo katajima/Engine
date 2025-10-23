@@ -21,6 +21,7 @@
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 
+// そーと用構造体
 struct SortResult {
 	Object3d* ptr;
 	ObjectDrawType drawType;
@@ -28,7 +29,12 @@ struct SortResult {
 	bool isSkin;
 };
 
+// 前方宣言
 class DirectXCommon;
+
+/// <summary>
+/// エンティティ3dマネージャー
+/// </summary>
 class Entity3DManager
 {
 public:
@@ -41,13 +47,12 @@ public:
 	// ImGui
 	void UpdateImgui();
 
-	// 
+	// 更新
 	void Update();
-
-	//void CheckAllCollisions();
-
+	
+	// オブジェクトクリーン
 	void ObjectClean();
-
+	// オブジェクト描画
 	void ObjectDraw();
 
 public: //セッター
@@ -66,7 +71,7 @@ public: //セッター
 		object3d.push_back(std::move(object));
 		return raw;
 	}
-
+	// オブジェクト3D生成(プリミティブ)
 	template<typename T>
 	Object3d* CreatePrimitiveObject3D(const std::string& name,
 		const std::string& texturePath,
@@ -97,25 +102,25 @@ public: //セッター
 	}
 
 public: //ゲッター
-
+	// 海マネージャー取得
 	OceanManager* GetOceanManager() { return oceanManager_.get(); };
-
+	// オブジェクトインスタンスマネージャー取得
 	Object3dInstansManager* GetObject3dInstansManager() { return object3dInstansManager_.get(); }
-
+	// オブジェクト共通クラス取得
 	Object3dCommon* GetObject3dCommon() { return object3dCommon_.get(); }
-
+	// スカイボックス共通クラス取得
 	SkyBoxCommon* GetSkyBoxCommon() { return skyBoxCommon_.get(); }
-
+	// ライトマネージャー取得
 	LightManager* GetLightManager() { return lightManager_.get(); }
-
+	// スキニング共通クラス取得
 	SkinningConmmon* GetSkinningConmmon() { return skinningCommon_.get(); }
-
+	// カメラ共通クラス取得
 	CameraCommon* GetCameraCommon() { return cameraCommon_.get(); }
-
+	// ライン共通クラス取得
 	LineCommon* Get3DLineCommon() { return lineCommon_.get(); }
-
+	// プリミティブ共通クラス取得
 	PrimitiveCommon* GetPrimitiveCommon() { return primitiveCommon_.get(); }
-
+	// エフェクトマネージャークラス取得
 	EffectManager* GetEffectManager() { return effectManager_.get(); }
 public:
 	//void SetCollisionManager(CollisionManager* collisionManager) {collisionManager_ = collisionManager;}

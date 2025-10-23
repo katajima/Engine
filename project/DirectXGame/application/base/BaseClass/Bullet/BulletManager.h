@@ -9,12 +9,16 @@
 #include"DirectXGame/application/base/BaseClass/Bullet/BaseBullet.h"
 
 
-
+// 前方宣言
 class BasePlayer;
 class BaseEnemy;
 class Entity3DManager;
 class Entity2DManager;
 class GlobalVariables;
+
+/// <summary>
+/// 弾管理クラス
+/// </summary>
 class BulletManager {
 public:
 	~BulletManager();
@@ -48,7 +52,7 @@ public:
 	// 描画3D
 	void Draw();
 	
-	// 描画3D
+	// 描画エフェクト
 	void DrawEffect();
 
 	// 描画2D

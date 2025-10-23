@@ -37,7 +37,9 @@ enum class GamePadButton
 //XINPUT_GAMEPAD_LEFT_SHOULDER
 //XINPUT_GAMEPAD_RIGHT_SHOULDER
 
-//入力
+/// <summary>
+/// 入力クラス
+/// </summary>
 class Input
 {
 public:
@@ -73,21 +75,21 @@ public: //メンバ関数
 
 
 	/// <summary>
-	///  マウス
+	///  マウス押した瞬間
 	/// </summary>
 	/// <param name="_buttonNum"></param>
 	/// <returns></returns>
 	bool IsMouseTriggered(uint8_t _buttonNum) const;
 
 	/// <summary>
-	/// 
+	/// マウス押している間
 	/// </summary>
 	/// <param name="_buttonNum"></param>
 	/// <returns></returns>
 	bool IsMousePressed(uint8_t _buttonNum) const;
 
 	/// <summary>
-	/// 
+	/// マウス離した瞬間
 	/// </summary>
 	/// <param name="_buttonNum"></param>
 	/// <returns></returns>
@@ -95,15 +97,31 @@ public: //メンバ関数
 
 
 	/// <summary>
-	/// 
+	/// マウス位置取得
 	/// </summary>
 	/// <returns></returns>
 	Vector2 GetMousePosition() const;
 
 
-	// ゲームパッド
+	/// <summary>
+	/// ゲームパッド押した瞬間
+	/// </summary>
+	/// <param name="button"></param>
+	/// <returns></returns>
 	bool IsGamePadTriggered(GamePadButton button) const;
+	
+	/// <summary>
+	/// ゲームパッド押している間
+	/// </summary>
+	/// <param name="button"></param>
+	/// <returns></returns>
 	bool IsGamePadPressed(GamePadButton button) const;
+	
+	/// <summary>
+	/// ゲームパッド離した瞬間
+	/// </summary>
+	/// <param name="button"></param>
+	/// <returns></returns>
 	bool IsGamePadReleased(GamePadButton button) const;
 
 	// パッドの左スティックの値を取得

@@ -2,12 +2,18 @@
 #include "DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
+
+// 前方宣言
 class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
 class FollowCamera;
 class BaseEnemy;
 class Stage;
+
+/// <summary>
+/// 範囲攻撃必殺技
+/// </summary>
 class RangeBombingSpecial : public BaseSpecial
 {
 public:
@@ -32,19 +38,19 @@ public:
 	/// </summary>
 	void InAction();
 
-
+	// レティクル親子付け
 	void SetReticleParent(WorldTransform* parent) { objectReticle_->GetWorldTransform().parent_ = parent; };
 
 public:
 
 	// 描画するか
 	void SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };
-
+	// ステージ設定
 	void SetStage(Stage* stage);
 
 	
 
-
+	// 半径設定
 	void SetRadius(float rad) { reticleRad_ = rad; }
 
 	// 半径爆心
@@ -53,6 +59,7 @@ public:
 	// 爆心位置 
 	Vector3 GetRangeBombingPos() const { return rangeBombingPos; }
 
+	// フォローカメラと弾マネージャー設定
 	void Set(FollowCamera* followCamera, BulletManager* bulletManager) 
 	{
 		this->followCamera = followCamera;

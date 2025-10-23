@@ -11,6 +11,8 @@ using namespace Microsoft::WRL;
 #include<dxgi1_6.h>
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
+
+// 前方宣言
 class PostEffectManager;
 class PostEffectBlock;
 class DirectXCommon;
@@ -22,50 +24,73 @@ class Camera
 private:
 
 public: // メンバ関数
-
+	// コンストラクタ
 	Camera();
 
+	// 初期化
 	void Initialize(CameraCommon* cameraCommon);
 
+	// コマンドバインド設定
 	void GetCommandList(int index);
 
 	// 更新
 	void UpdateMatrix();
+	// 更新
 	void UpdateMatrix(const Vector3& targetPosition);
-
+	// いｍぐい更新
 	void UpdateImGui();
-
+	// トランスファー更新
 	void TransferMatrix();
 
+	// 向いている方向
 	void LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector);
+	// Fov設定
 	void SetFovY(const float fovY) { fovY_ = fovY; }
+	// アスペクト比設定
 	void SetAspectRatio(const float aspect) { aspect_ = aspect; }
+	// Nearクリップ設定
 	void SetNearClip(const float nearC) { nearClip_ = nearC; }
+	// Farクリップ設定
 	void SetFarClip(const float farC) { farClip_ = farC; }
 	// getter
+	// ワールド行列取得
 	const Matrix4x4& GetWorldMatrix() const { return worldMatrix_; }
+	// ビュー行列取得
 	const Matrix4x4& GetViewMatrix() const { return viewMatrix_; }
+	// プロジェクション行列取得
 	const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }
+	// ビュープロジェクション行列取得
 	const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix_; }
+	// 回転取得
 	const Vector3& GetRotate() const { return transform_.rotate; }
+	// 位置取得
 	const Vector3& GetTranslate() const { return transform_.translate; }
+	// トランスフォーム取得
 	const Transform& GetTransform() const { return transform_; }
+	// Nearクリップ取得
 	const float& GetNearZ() const { return nearClip_; }
+	// Farクリップ取得
 	const float& GetFarZ() const { return farClip_; }
 
-
+	// ポストエフェクトマネージャー取得
 	PostEffectManager* GetPostEffectManager() { return postEffectManager_; }
 
+	// カメラシェイクさせる
 	void SetShake(float time, Vector3 diectionRange);
 
+	// プロジェクションしているか取得
 	bool GetIsProjection() const { return isProjection_; }
+	
+	// プロジェクション設定
 	void SetIsProjection(bool isProjection) { isProjection_ = isProjection; }
 
 	// レンダーテクスチャ追加
 	void AddEffectBlock(const std::string name, PostEffectBlockType type, bool use = true);
 
+	// ポストエフェクトのブロック取得
 	std::vector<PostEffectBlock*> GetPostEffectBlocks();
 
+	// ポストエフェクトをクリア
 	void Clear() { effectBlocks_.clear(); }
 
 private:
@@ -92,6 +117,7 @@ public:
 	Matrix4x4 projectionMatrix_;
 	Matrix4x4 viewProjectionMatrix_;
 
+	// GPUデータ
 	struct DataGPU {
 		Vector3 worldPosition;
 		float padding[1];

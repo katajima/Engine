@@ -23,6 +23,7 @@ enum class CollisionLayer : uint8_t {
 	Environment,
 };
 
+// コライダタイプ
 enum class ColliderType
 {
 	Sphere,

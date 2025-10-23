@@ -19,7 +19,9 @@
 
 #include "DirectXGame/application/base/Input/InputHander.h"
 
-
+/// <summary>
+/// セレクトシーン
+/// </summary>
 class SelectScene : public BaseScene
 {
 public:
@@ -32,9 +34,9 @@ public:
 	// 毎フレーム更新
 	void Update()   override;
 
-	// 描画
+	// 描画3d
 	void Draw3D()   override;
-
+	// 描画2d
 	void Draw2D()   override;
 
 private:

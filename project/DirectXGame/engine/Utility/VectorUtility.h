@@ -4,11 +4,13 @@
 #include <algorithm>
 #include <memory>
 
+// ベクター
 template <typename T>
 class VectorContainer {
 public:
     std::vector<T> data;
 
+    // 削除
     template <typename Pred>
     void RemoveIf(Pred pred) {
         auto it = std::remove_if(data.begin(), data.end(), pred);
@@ -66,9 +68,13 @@ public:
     }
 
     // 範囲forで使えるように
+    // 最初
     auto begin() { return data.begin(); }
+    // 最後
     auto end() { return data.end(); }
+    // 最初
     auto begin() const { return data.begin(); }
+    // 最後
     auto end() const { return data.end(); }
 
     // 要素数

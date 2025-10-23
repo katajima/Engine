@@ -35,7 +35,7 @@ void NormalEnemyAttackSwingSubState::Exit() {
 
 void NormalEnemyAttackEndSubState::Enter() {
     timer_ = 0.0f;
-    rotate_ = character_->GetObject3D()->GetWorldTransform().rotate_;
+    rotate_ = character_->GetObjectComponent()->GetWorldTransform().rotate_;
 
     // プレイヤー方向を向くための目標角度を計算
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
@@ -55,7 +55,7 @@ void NormalEnemyAttackEndSubState::Update(float deltaTime) {
 
     // 角度補間
     float t = std::min(timer_ / endTime_, 1.0f); // 0～1 の範囲
-    float currentY = character_->GetObject3D()->GetWorldTransform().rotate_.y;
+    float currentY = character_->GetObjectComponent()->GetWorldTransform().rotate_.y;
 
     // 角度の最短差分を考慮（0～π方向への補間）
     float diff = targetRotateY_ - currentY;
@@ -63,7 +63,7 @@ void NormalEnemyAttackEndSubState::Update(float deltaTime) {
 
     float newY = currentY + diff * t * 0.2f; // 0.2f は回転速度係数（好みで調整）
 
-    character_->GetObject3D()->GetWorldTransform().rotate_.y = newY;
+    character_->GetObjectComponent()->GetWorldTransform().rotate_.y = newY;
 
     // 終了判定
     if (timer_ > endTime_) {

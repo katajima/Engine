@@ -4,6 +4,7 @@
 
 // エミットに関するデータ
 namespace EmitData {
+	// sin
 	enum class EmitSin {
 		UP,
 		DOWN,
@@ -11,7 +12,7 @@ namespace EmitData {
 		RIGHT
 	};
 
-
+	// 出る方法
 	enum class EmitType
 	{
 		kRandom,	// ランダム
@@ -19,7 +20,7 @@ namespace EmitData {
 		kEdge,		// エッジ
 	};
 
-
+	// 方向
 	enum class DirectionType // 方向
 	{
 		kNone,			// なし
@@ -31,7 +32,7 @@ namespace EmitData {
 		kVelocityBase,  // 速度依存
 	};
 
-
+	// スケール変更
 	enum class TopBottom { // スケール変更
 		kTop,
 		kBottom,
@@ -71,7 +72,7 @@ namespace EmitData {
 
 }
 
-
+// シェイプタイプ
 enum class EmitterShapeType
 {
 	AABB,		// AABB

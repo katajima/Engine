@@ -99,19 +99,24 @@ struct QuaternionTransform
 		return Inverse(GetWorldMatrix());
 	}
 
+	// スケール行列
 	Matrix4x4 GetScaleMatrix() const { return MakeScaleMatrix(scale); } // スケール行列取得
+	// 回転行列
 	Matrix4x4 GetRotateMatrix() const { return rotate.MakeRotateMatrix(); } // 回転行列取得
+	// 移動行列
 	Matrix4x4 GetTranslateMatrix() const { return MakeTranslateMatrix(translate); } // 移動行列取得
 
-
+	// 点を変換する
 	Vector3 TransformPoint(const Vector3& localPos) const {
 		Vector3 scaled = localPos * scale;
 		Vector3 rotated = rotate.RotateVector(scaled);
 		return rotated + translate;
 	}
-
+	// 右
 	Vector3 Right() const { return rotate.RotateVector(Vector3(1, 0, 0)); }
+	// 上
 	Vector3 Up() const { return rotate.RotateVector(Vector3(0, 1, 0)); }
+	// 前
 	Vector3 Forward() const { return rotate.RotateVector(Vector3(0, 0, 1)); }
 
 	// 補間
@@ -131,16 +136,25 @@ struct AABB {
 
 	AABB(Vector3 min = Vector3(), Vector3 max = Vector3()) : min_(min), max_(max) {}
 
+	// 判定
 	bool intersects(const AABB& other) const {
 		return (min_.x <= other.max_.x && max_.x >= other.min_.x &&
 			min_.y <= other.max_.y && max_.y >= other.min_.y &&
 			min_.z <= other.max_.z && max_.z >= other.min_.z);
 	}
 
+	// 点がAABBを完全に内包しているか判定
 	bool Contains(const Vector3& point) const {
 		return (point.x >= min_.x && point.x <= max_.x) &&
 			(point.y >= min_.y && point.y <= max_.y) &&
 			(point.z >= min_.z && point.z <= max_.z);
+	}
+
+	// AABBが別のAABBを完全に内包しているか判定
+	bool Contains(const AABB& other) const {
+		return (other.min_.x >= min_.x && other.max_.x <= max_.x) &&
+			(other.min_.y >= min_.y && other.max_.y <= max_.y) &&
+			(other.min_.z >= min_.z && other.max_.z <= max_.z);
 	}
 
 	// 中心点
@@ -152,7 +166,7 @@ struct AABB {
 	Vector3 Size() const {
 		return max_ - min_;
 	}
-
+	// 半径
 	Vector3 Extents() const {
 		return Size() * 0.5f;
 	}
@@ -244,6 +258,35 @@ struct Plane {
 		Vector3 n = ab.Cross(ac).Normalize();
 		return FromPointNormal(a, n);
 	}
+	// 3 点から平面を求める
+	static Plane PlaneFromPoints(const Vector3& p1, const Vector3& p2, const Vector3& p3) {
+		Plane result{};
+
+		// 2つのベクトルを求める
+		Vector3 v1 = p2 - p1;
+		Vector3 v2 = p3 - p1;
+
+		// 法線を計算 (外積)
+		result.normal = Cross(v1, v2);
+
+		// ゼロベクトルチェック (3点が同一直線上の場合)
+		if (Length(result.normal) == 0.0f) {
+			// 法線が求まらない場合のエラーハンドリング
+			result.normal = { 0.0f, 0.0f, 0.0f };
+			result.distance = 0.0f;
+			return result;
+		}
+
+		// 正規化
+		result.normal = result.normal.Normalize();
+
+		// 平面の距離 D の計算 (符号の修正)
+		result.distance = -Dot(result.normal, p1);
+
+		return result;
+	}
+
+
 	// 線分と平面の交点
 	bool IntersectSegment(const Segment& seg, Vector3& outPoint) const {
 		Vector3 dir = seg.end - seg.origin;
@@ -256,9 +299,16 @@ struct Plane {
 		outPoint = seg.origin + dir * t;
 		return true;
 	}
+	
+
+
+
+
 };
 
-
+/// <summary>
+/// こーな
+/// </summary>
 struct CornerSegment {
 	Vector3 center;
 	int segment;
@@ -280,6 +330,7 @@ struct Triangle
 		return *this;
 	}
 
+	// ずらす
 	Triangle OffsetVector3(const Vector3& offset) const {
 		Triangle result = *this;  // コピーを作成
 		for (auto& vertex : result.vertices) {
@@ -356,6 +407,7 @@ struct Triangle
 		return false;
 	}
 
+	// コンストラクタ
 	Triangle(Vector3 v0, Vector3 v1, Vector3 v2) : vertices{ v0, v1, v2 } {
 		bounds.min_ = Min(Min(v0, v1), v2);
 		bounds.max_ = Max(Max(v0, v1), v2);
@@ -371,6 +423,7 @@ struct Spring
 	float dampingCoefficient; // 減衰係数
 };
 
+// ボール
 struct Ball {
 	Vector3 position;		//位置
 	Vector3 veloctiy;		//速度
@@ -380,6 +433,7 @@ struct Ball {
 	unsigned int color;		//色
 };
 
+// 振り子
 struct Pendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ
@@ -388,6 +442,7 @@ struct Pendulum {
 	float angularAcceleration;	// 角加速度
 };
 
+// 円錐振り子
 struct ConicalPendulum {
 	Vector3 anchor;				// アンカーポイント
 	float length;				// 紐の長さ
@@ -425,15 +480,17 @@ struct Capsule
 		return (point - closest).LengthSq() <= radius * radius;
 	}
 
+	// 始点球
 	Sphere GetStartSphere() const { return Sphere{ segment.origin, radius }; }
+	// 終点球
 	Sphere GetEndSphere()   const { return Sphere{ segment.end, radius }; }
 };
-
+// OBB
 struct OBB {
 	Vector3 center;
 	Vector3 orientations[3];
 	Vector3 size;
-
+	// OBB生成
 	static Matrix4x4 MakeOBBMatrix(const OBB& obb) {
 		Matrix4x4 m{};
 
@@ -456,7 +513,7 @@ struct OBB {
 
 		return m;
 	}
-
+	// 各角
 	std::array<Vector3, 8> GetCorners() const {
 		Vector3 axes[3] = {
 			orientations[0] * size.x * 0.5f,
@@ -483,7 +540,10 @@ struct OBB {
 		return true;
 	}
 
+	// 右
 	Vector3 Right() const { return orientations[0]; }
+	// 上
 	Vector3 Up()    const { return orientations[1]; }
+	// 前
 	Vector3 Forward() const { return orientations[2]; }
 };

@@ -1,19 +1,21 @@
 
 namespace Easing {
 
+    // イーズイン
     template <typename T>
     static T EaseIn(const T& start, const T& end, float t) {
         if (t > 1.0f) t = 1.0f;
         return start + (end - start) * t * t;
     }
 
+    // イーズアウト
     template <typename T>
     static T EaseOut(const T& start, const T& end, float t) {
         if (t > 1.0f) t = 1.0f;
         return start + (end - start) * (1 - (1 - t) * (1 - t));
     }
 
-
+    // イーズインアウト
     template <typename T>
     static T EaseInOut(const T& start, const T& end, float t) {
         // t を 0.0～1.0 の範囲に制限

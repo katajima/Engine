@@ -158,12 +158,6 @@ void LightManager::Update()
 }
 
 
-void LightManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr)
-{
-	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	parameter.Descriptor.ShaderRegister = registr;
-}
 
 void LightManager::ApplyGlobalVariables()
 {

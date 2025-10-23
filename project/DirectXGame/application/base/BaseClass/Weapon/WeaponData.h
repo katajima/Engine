@@ -129,7 +129,7 @@ struct AttackHitData
 {
 	int hitCount = 0;	// ヒットカウント
 	Timer hitTime;		// コンボリセットまでの時間
-
+	// 最大ヒット時間設定
 	void SetmaxHitTime(float maxHitTime)
 	{
 		hitTime.maxT = maxHitTime; // コンボリセットまでの時間を設定

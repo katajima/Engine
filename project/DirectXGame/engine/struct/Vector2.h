@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
+// Vector2
 struct Vector2 final {
 	float x, y;
 	static constexpr size_t Dim = 2;
@@ -99,6 +100,7 @@ struct Vector2 final {
 
 };
 
+// 補間
 static Vector2 Lerp(const Vector2& a, const Vector2& b, float t) {
 	Vector2 temp;
 	t = std::clamp(t, 0.0f, 1.0f);
@@ -107,6 +109,8 @@ static Vector2 Lerp(const Vector2& a, const Vector2& b, float t) {
 
 	return temp;
 }
+
+// 最大値
 static Vector2 Max(const Vector2& v1, const Vector2& v2) {
 	Vector2 result{};
 
@@ -117,6 +121,7 @@ static Vector2 Max(const Vector2& v1, const Vector2& v2) {
 	return result;
 }
 
+// 最小値
 static Vector2 Min(const Vector2& v1, const Vector2& v2) {
 	Vector2 result{};
 
@@ -127,6 +132,7 @@ static Vector2 Min(const Vector2& v1, const Vector2& v2) {
 	return result;
 }
 
+// 正規化
 static Vector2 Normalize(const Vector2& v) {
 	Vector2 result{};
 	float length;
@@ -141,6 +147,7 @@ static Vector2 Normalize(const Vector2& v) {
 	return result;
 };
 
+// 加算
 static Vector2 Add(const Vector2& v1, const Vector2& v2) {
 	Vector2 result{};
 
@@ -166,11 +173,11 @@ static float Length(Vector2 a) {
 
 	return length;
 }
-
+// 内積
 static float Dot(const Vector2& a, const Vector2& b) {
 	return a.x * b.x + a.y * b.y;
 }
-
+// 回転
 static Vector2 Rotate(const Vector2& v, float angle) {
 	float cosA = std::cos(angle);
 	float sinA = std::sin(angle);

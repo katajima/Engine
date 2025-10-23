@@ -7,6 +7,10 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+/// <summary>
+/// コンスタントバッファ
+/// </summary>
+/// <typeparam name="Type"></typeparam>
 template<class Type>
 class ConstantBuffer {
 public:
@@ -20,7 +24,7 @@ public:
 	}
 	//ConstantBuffer(const ConstantBuffer&) = delete;
 	ConstantBuffer& operator=(const ConstantBuffer&) = delete;
-
+	//生成
 	void CreateBuffer(DirectXCommon* dxCommon, int num = 1)
 	{
 		dxCommon_ = dxCommon;
@@ -35,17 +39,19 @@ public:
 		resource_->Map(0, nullptr, reinterpret_cast<void**>(&data_));
 
 	}
-
+	// グラフィックパイプラインにバッファを設定
 	void SetGraphicsRootConstantBufferView(int index)
 	{
 		dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
 	}
 	
+	// コンピュートパイプラインにバッファを設定
 	void SetComputeRootConstantBufferView(int index)
 	{
 		dxCommon_->GetCommandList()->SetComputeRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
 	}
 
+	// データ取得
 	Type* Data() const { return data_; };
 
 private:

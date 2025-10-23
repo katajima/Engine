@@ -18,9 +18,14 @@
 
 #include "DirectXGame/application/base/BaseClass/Light/BaseLights.h"
 
+// 前方宣言
 class DirectXCommon;
 class Entity3DManager;
 class Entity2DManager;
+
+/// <summary>
+/// ステージクラス
+/// </summary>
 class Stage {
 public:
 	// 初期化
@@ -34,15 +39,24 @@ public:
 	///</summary>
 	void Draw();
 
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
 	void DrawP();
 
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D();
 private:
-
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
 	void InitEmit();
 
-	//void CloudEmit(ParticleManager* particleManager,ParticleEmitter* emit,const std::string& name);
-
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
 	void EmitUpdate();
 
 public:

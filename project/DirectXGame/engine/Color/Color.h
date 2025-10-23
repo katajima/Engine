@@ -2,7 +2,7 @@
 #include <iostream>
 #include <unordered_map>
 
-
+// 色(RGBA)
 struct Color {
     float r, g, b, a;
 };

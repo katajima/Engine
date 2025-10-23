@@ -11,7 +11,7 @@ static const uint N = 5; // 必ず CPU 側定義と一致
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     uint particleIndex = DTid.x;
-    if (particleIndex >= gParticleMaxInstance.maxInstanse)
+    if (particleIndex >= gParticleMaxInstance.maxInstance)
         return;
 
     Particle p = gParticle[particleIndex];
@@ -35,7 +35,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     // ここでは particleCount * N * 6 を超えないかチェックする
     // （gParticleMaxInstance と gTrailMaxInstance を両方利用しているなら gTrailMaxInstanceを使う）
     // まずは gParticleMaxInstance を用いた簡易チェック:
-    uint totalVertices = gParticleMaxInstance.maxInstanse * N * 6;
+    uint totalVertices = gParticleMaxInstance.maxInstance * N * 6;
     if (baseIndex + 5 >= totalVertices)
     {
         // 範囲外なら安全のため書き込みをスキップしてヘッドだけ進める

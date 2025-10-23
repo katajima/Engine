@@ -138,11 +138,11 @@ void CameraManeger::UpadateImGui()
 		}
 		if (ImGui::Button("cameraPos3")) {
 			camera->transform_.translate = { 0,500,0 };
-			camera->transform_.rotate = { DegreesToRadians(90),0,0 };
+			camera->transform_.rotate = { Math::DegreesToRadians(90),0,0 };
 		}
 		if (ImGui::Button("cameraPos4")) {
 			camera->transform_.translate = { 0,60,-220 };
-			camera->transform_.rotate = { DegreesToRadians(10),0,0 };
+			camera->transform_.rotate = { Math::DegreesToRadians(10),0,0 };
 		}
 
 

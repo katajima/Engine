@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/BaseClass/State/CharacterStateMachine.h"
 
 
+// 前方宣言
 class Effect;
 class BaseSpecial;
 class BaseWeapon;
@@ -12,6 +13,10 @@ class AttackInputHander;
 class Entity3DManager;
 class Entity2DManager;
 class BulletManager;
+
+/// <summary>
+/// キャラクター基底クラス
+/// </summary>
 class BaseCharacter : public IHitReceiver
 {
 public:
@@ -50,7 +55,9 @@ public:
 	/// </summary>
 	virtual void Attack() = 0;
 
-	
+	/// <summary>
+	/// ステートマシーン初期化
+	/// </summary>
 	virtual void InitStateMachine() {};
 
 public:
@@ -68,31 +75,31 @@ public:
 
 	// 移動制限
 	void LimitMove(Vector3 min, Vector3 max) {
-		Object3d* object = objectComponent_->GetObject3D();
+		WorldTransform world = objectComponent_->GetWorldTransform();
 
-		if (object->GetWorldTransform().translate_.x > max.x) {
-			object->GetWorldTransform().translate_.x = max.x;
+		if (world.translate_.x > max.x) {
+			world.translate_.x = max.x;
 		}
-		if (object->GetWorldTransform().translate_.x < min.x) {
-			object->GetWorldTransform().translate_.x = min.x;
+		if (world.translate_.x < min.x) {
+			world.translate_.x = min.x;
 		}
-		if (object->GetWorldTransform().translate_.z > max.z) {
-			object->GetWorldTransform().translate_.z = max.z;
+		if (world.translate_.z > max.z) {
+			world.translate_.z = max.z;
 		}
-		if (object->GetWorldTransform().translate_.z < min.z) {
-			object->GetWorldTransform().translate_.z = min.z;
+		if (world.translate_.z < min.z) {
+			world.translate_.z = min.z;
 		}
 	};
 
 public: // 取得系関数
 
-	//
+	// キャラクターステートマシーン取得
 	CharacterStateMachine* GetCharacterStateMachine() { return stateMachine_.get(); }
-	// 必殺技
+	// 必殺技取得
 	BaseSpecial* GetSpecial() { return special_.get(); }
-	// 武器
+	// 武器取得
 	BaseWeapon* GetWeapon() { return weapon_.get(); }
-	
+	// 弾マネージャ取得
 	BulletManager* GetBulletManager() { return bulletManager_; }
 	// 弾マネージャーの設定
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
@@ -108,9 +115,10 @@ public: // 取得系関数
 	// コライダーコンポーネント
 	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
-	Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	//Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
 	// ワールド変換取得
-	WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
+	WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 	// 削除フラグ
 	bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 	// 削除する
@@ -119,7 +127,7 @@ public: // 取得系関数
 	float GetTime() { return objectComponent_->GetTime(); }
 	// インプット取得
 	Input* GetInput() { return input_; };
-	//
+	//エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; }
 
 protected: // 取得系関数(変更可能)
@@ -143,6 +151,7 @@ protected: // 保存機能
 		globalVariables_->AddItem(objectComponent_->GetName(), itemName, item);
 	}
 
+	// 値取得
 	template<typename T>
 	T GetValue(const std::string itemName) {
 		return globalVariables_->GetValue<T>(objectComponent_->GetName(), itemName);
@@ -170,13 +179,14 @@ protected: // 保存機能
 		characterParameterComponent_.parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
 		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
 	}
-
+	// 更新保存項目
 	void UpdateBaseGetValue() {
 		characterParameterComponent_.parameters_.speed = GetValue<float>("speed");
 		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
 	}
 
 protected:
+	// 移動コンポーネント初期化
 	void InitMoveComponent() { moveComponent_ = std::make_unique<MoveComponent>(); }
 	
 public:
@@ -184,14 +194,14 @@ public:
 	Vector3& Velocity() { return moveComponent_->Velocity(); }
 	// 速度取得
 	Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
-
+	// 移動コンポーネント取得
 	MoveComponent* GetMoveComponent() { return moveComponent_.get(); }
 
 public:
 	//CharacterStateComponent& GetCharacterStateComponent() { return characterStateComponent_; }
-
+	// 攻撃コンポーネント取得
 	CombatStatComponent* GetCombatStatComponent() { return combatStatComponent_.get(); }
-
+	// キャラクターパラメータコンポーネント取得
 	CharacterParameterComponent& GetCharacterParameterComponent() { return characterParameterComponent_; }
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;		// オブジェクトコンポーネント

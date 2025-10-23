@@ -41,7 +41,7 @@ enum class BlendType
 
 
 
-
+// PSOキー
 struct GraphicsPSOKey {
 	bool isUvInterpolation_ = true; // UV補間するか
 	bool isTransparent = false;		// 透過物か

@@ -26,7 +26,9 @@
 #include "DirectXGame/application/scene/SceneFactory.h"
 
 
-
+/// <summary>
+/// ゲームのフレームワークを拡張したクラスで、ゲームの初期化、更新、描画、リソース管理などを行う。
+/// </summary>
 class  MyGame : public Framework
 {
 public:
@@ -43,19 +45,21 @@ public:
 	// 描画
 	void Draw() override;
 
-	
+	// リソース初期化
 	void InitializeResource();
 
 	// パーティクル生成
 	void CreateParticle();
 
-	//
+	// モデル読み込み
 	void LoadModel();
 
 public:
 	static float const kDeltaTime_;
 	static float kTimeSpeed_;
+	// ゲーム内時間取得
 	static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
+	// 現在の時間
 	static float NowTime() { return nowTime; };
 	static float nowTime;
 private:

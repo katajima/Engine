@@ -41,10 +41,15 @@
 #include "DirectXGame/engine/PSO/PSOManager.h"
 #include "DirectXGame/engine/Offscreen/PostEffectManager.h"
 
+// 前方宣言
 class RenderTexture;
 class RenderingCommon;
 class Entity3DManager;
 class SceneManager;
+
+/// <summary>
+/// DirectXの共通クラス
+/// </summary>
 class DirectXCommon
 {
 public: // メンバ関数
@@ -54,9 +59,9 @@ public: // メンバ関数
 
 	//終了処理
 	void Finalize();
-
+	// 更新
 	void Update(SceneManager* sceneManager, Entity3DManager* entity3DManager);
-
+	// 描画
 	void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
 
 private:
@@ -79,41 +84,41 @@ public:
 	// バックバッファの数を取得
 	size_t GetBackBufferCount() const { return swapChain_->GetBackBufferCount(); }
 
-
+	// デバイス取得
 	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return DXGIDevice_->GetDevice(); }
-
+	// コマンドリスト取得
 	Microsoft::WRL::ComPtr < ID3D12GraphicsCommandList> GetCommandList() { return command_->GetList(); }
-
+	// SRVマネージャー取得
 	SrvManager* GetSrvManager() { return  srvManager_.get(); }
-
+	// RTVマネージャー取得
 	RtvManager* GetRtvManager() { return  rtvManager_.get(); }
-
+	// テクスチャマネージャー取得
 	TextureManager* GetTextureManager() { return textureManager_.get(); }
-
+	// モデルマネージャー取得
 	ModelManager* GetModelManager() { return modelManager_.get(); }
-
+	// DXGIデバイス取得
 	DXGIDevice* GetDXGIDevice() { return DXGIDevice_.get(); }
-
+	// コマンド取得
 	Command* GetCommand() { return command_.get(); }
-
+	// DXコンパイラ取得
 	DXCCompiler* GetDXCCompiler() { return dxcCompiler_.get(); }
-
+	// ImGuiマネージャー取得
 	ImGuiManager* GetImGuiManager() { return imguiManager_.get(); }
-
+	// レンダリング共通クラス取得
 	RenderingCommon* GetRenderingCommon() { return renderingCommon_.get(); }
-
+	// デプスステンシル取得
 	DepthStencil* GetDepthStencil() { return depthStencil_.get(); }
-
+	// バリア取得
 	Barrier* GetBarrier() { return barrier_.get(); }
-
+	// ポストエフェクトマネージャー取得
 	PostEffectManager* GetPostEffectManager() { return postEffectManager_.get(); }
-
+	// スワップチェーン取得
 	SwapChain* GetSwapChain() { return swapChain_.get(); }
-
+	// フェンス取得
 	Fence* GetFence() { return fence_.get(); }
-
+	// シザーレクト取得
 	ScissorRect* GetScissorRect() { return scissorRect_.get(); };
-
+	// ビューポート取得
 	ViewPort* GetViewPort() { return viewPort_.get(); }
 private:
 	std::unique_ptr<DXGIDevice> DXGIDevice_ = std::make_unique<DXGIDevice>();			     // デバイス

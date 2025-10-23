@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseLight.h"
 
+/// <summary>
+/// スポットライト
+/// </summary>
 class BaseSpotLight : public BaseLight
 {
 public:

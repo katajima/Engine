@@ -18,7 +18,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     if (gEffectField.isEffect != 0)
     {    
         uint particleIndex = DTid.x;
-        if (particleIndex < gMaxInstance.maxInstanse)
+        if (particleIndex < gMaxInstance.maxInstance)
         {
             // alphaが0のparticleは死んでいるとみなして更新しない
             if (gParticle[particleIndex].color.a != 0)

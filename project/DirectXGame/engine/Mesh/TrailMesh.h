@@ -4,13 +4,17 @@
 #include "DirectXGame/engine/DirectX/Resource/VertexBufferResource.h"
 #include "DirectXGame/engine/DirectX/Resource/IndexBufferResource.h"
 
+
+/// <summary>
+/// トレイルメッシュ
+/// </summary>
 class TrailMesh : public BaseMesh {
 public:
-
+	// メッシュ生成
 	void CreateMesh(size_t instanse);
-
+	// 初期化
 	void Initialize(DirectXCommon* dxcommon) override;
-
+	// コマンドリスト設定
 	void GetCommandList();
 
 public:

@@ -182,16 +182,16 @@ bool Field::FieldEffect::IsCollisionAABB(const Vector3& point)
 	switch (shapeType_)
 	{
 	case Field::ShapeType::kAABB:
-		return IsCollision(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
+		return Collision::Detection::Check(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
 		break;
 	case Field::ShapeType::kSphere:
-		return IsCollision(Sphere{ worldPos,rad }, point);
+		return Collision::Detection::Check(Sphere{ worldPos,rad }, point);
 		break;
 	case Field::ShapeType::kCapsule:
-		return IsCollision(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
+		return Collision::Detection::Check(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
 		break;
 	case Field::ShapeType::kCapsuleSpline:
-		return IsCollision(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
+		return Collision::Detection::Check(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
 		break;
 	default:
 		break;

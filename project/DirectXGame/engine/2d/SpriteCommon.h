@@ -7,15 +7,21 @@
 #include<wrl.h>
 using namespace Microsoft::WRL;
 
+// 前方宣言
 class DirectXCommon;
+
+/// <summary>
+/// スプライト共通クラス
+/// </summary>
 class SpriteCommon
 {
 public:// メンバ関数
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
+	// DxCommon取得
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-
+	// 描画のうつり方設定
 	void DrawCommonSetting(PSOType type){ psoManager_->DrawSetting(type);}
 
 private:// メンバ関数

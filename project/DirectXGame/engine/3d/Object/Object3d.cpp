@@ -162,7 +162,7 @@ void Object3d::Update()
 
 	// 物理
 	if (rigidBodyComponent_) {
-		rigidBodyComponent_->Integrate(MyGame::GameTime(), *transformComponent_.get());
+		rigidBodyComponent_->Integrate(MyGame::GameTime(), transformComponent_->GetWorldTransform());
 	}
 	// トレイル
 	if (trailEffect_) {
@@ -178,7 +178,7 @@ void Object3d::Update()
 	}
 	direWorldTransform_.Update();
 
-	direction_ = Subtract(direWorldTransform_.worldMat_.GetWorldPosition(),GetWorldPosition()).Normalize();
+	direction_ = Subtract(direWorldTransform_.worldMat_.GetWorldPosition(), GetWorldPosition()).Normalize();
 
 }
 
@@ -213,42 +213,12 @@ void Object3d::DebugImguiSkin()
 Vector2 Object3d::GetScreenPosition()
 {
 	if (transformComponent_.get()) {
-		Vector3 wPos = transformComponent_->GetWorldTransform().worldMat_.GetWorldPosition();
-
-		// カメラのビュープロジェクション行列を取得
-		Matrix4x4 matViewProjection;
 		if (isIndividualCamera_) {
-			matViewProjection = Multiply(individualCamera_->GetViewMatrix(), individualCamera_->GetProjectionMatrix());
+			return ScreenPosition(transformComponent_->GetWorldTransform(), individualCamera_);
 		}
 		else {
-			matViewProjection = Multiply(defaltCamera->GetViewMatrix(), defaltCamera->GetProjectionMatrix());;
+			return ScreenPosition(transformComponent_->GetWorldTransform(), defaltCamera);
 		}
-
-		// ビューポート行列
-		Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(WinApp::GetClientWidth()), static_cast<float>(WinApp::GetClientHeight()), 0, 1);
-
-		// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
-		if (!IsInFrustum(matViewProjection, wPos)) {
-			return Vector2{ -100, -100 }; // 視錐台外にある場合、無効なスクリーン座標を返す
-		}
-
-		// ワールド座標をクリップ空間座標へ変換
-		Vector4 clipSpacePos = Transforms(Vector4(wPos.x, wPos.y, wPos.z, 1.0f), matViewProjection);
-
-		// 透視除算 (NDC へ変換)
-		if (clipSpacePos.w == 0.0f) {
-			return Vector2{ -100, -100 }; // 透視除算エラー
-		}
-		Vector3 ndcPos = {
-			clipSpacePos.x / clipSpacePos.w,
-			clipSpacePos.y / clipSpacePos.w,
-			clipSpacePos.z / clipSpacePos.w
-		};
-
-		// NDC → スクリーン座標変換
-		Vector4 screenPos = Transforms(Vector4(ndcPos.x, ndcPos.y, ndcPos.z, 1.0f), matViewport);
-
-		return Vector2{ screenPos.x, screenPos.y };
 	}
 	else {
 		return Vector2{ 0.0f,0.0f };
@@ -271,3 +241,39 @@ void Object3d::SetModel(const std::string& filePath)
 #pragma endregion // その他
 
 
+Vector2 ScreenPosition(const WorldTransform world, Camera* camera)
+{
+
+	Vector3 wPos = world.GetWorldPosition();
+
+	// カメラのビュープロジェクション行列を取得
+	Matrix4x4 matViewProjection;
+
+	matViewProjection = Multiply( camera->GetViewMatrix(), camera->GetProjectionMatrix());
+
+	// ビューポート行列
+	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(WinApp::GetClientWidth()), static_cast<float>(WinApp::GetClientHeight()), 0, 1);
+
+	// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
+	if (!IsInFrustum(matViewProjection, wPos)) {
+		return Vector2{ -100, -100 }; // 視錐台外にある場合、無効なスクリーン座標を返す
+	}
+
+	// ワールド座標をクリップ空間座標へ変換
+	Vector4 clipSpacePos = Transforms(Vector4(wPos.x, wPos.y, wPos.z, 1.0f), matViewProjection);
+
+	// 透視除算 (NDC へ変換)
+	if (clipSpacePos.w == 0.0f) {
+		return Vector2{ -100, -100 }; // 透視除算エラー
+	}
+	Vector3 ndcPos = {
+		clipSpacePos.x / clipSpacePos.w,
+		clipSpacePos.y / clipSpacePos.w,
+		clipSpacePos.z / clipSpacePos.w
+	};
+
+	// NDC → スクリーン座標変換
+	Vector4 screenPos = Transforms(Vector4(ndcPos.x, ndcPos.y, ndcPos.z, 1.0f), matViewport);
+
+	return Vector2{ screenPos.x, screenPos.y };
+}

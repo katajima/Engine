@@ -12,7 +12,7 @@ struct Matrix4x4
 {
 public:
 	float m[4][4];
-
+    // 単位行列
 	static Matrix4x4 Identity() {
 		return Matrix4x4{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 	}
@@ -34,6 +34,7 @@ public:
         return true;
     }
 
+    // 軸角度を回転させる
     Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
         Matrix4x4 result;
 
@@ -63,7 +64,7 @@ public:
 
         return result;
     }
-
+    // ワールド位置取得
 	Vector3 GetWorldPosition() const {
 		// ワールド座標を入れる
 		Vector3 worldPos{};
@@ -72,7 +73,7 @@ public:
 		worldPos.z = m[3][2];
 		return worldPos;
 	};
-
+    // 変形
     Vector3 Transform(Vector3 vec) const {
         return {
             vec.x * m[0][0] + vec.y * m[1][0] + vec.z * m[2][0] + m[3][0], // X成分
@@ -96,19 +97,20 @@ private:
 
 };
 
-
+// 3x3から4x4に変換
 Matrix4x4 Convert2DMatrixTo4x4(Matrix3x3 m);
 
-
+//  行列ポインタ取得
 float* GetMatrix(Matrix4x4 mat);
-
+// 行列ポインタ取得
 const float* GetMatrixPointer(const Matrix4x4& mat);
-
+// 
 Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to);
+// 乗算
 Vector4 Multiply(const Matrix4x4& m, const Vector4& v);
-
+// 加算
 Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2);
-
+// 減算
 Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2);
 
 //行列の積
@@ -123,9 +125,9 @@ Vector3 Transforms(const Vector3& vector, const Matrix4x4& matrix);
 // 座標変換Vector4
 Vector4 Transforms(const Vector4& vec, const Matrix4x4& mat);
 
-// 
+// 座標変換
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
-
+// 単位行列
 static Matrix4x4 Identity() {
     return Matrix4x4{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 }
@@ -147,7 +149,7 @@ Matrix4x4 Inverse(const Matrix4x4& m);
 Matrix4x4 Transpose(const Matrix4x4& m);
 //アフィン変換
 Matrix4x4 MakeAffineMatrix(const  Vector3& scale, const  Vector3& rotate, const  Vector3& translate);
-//
+//正射影行列
 Matrix4x4 MakeOrthographicMatrix2(float left, float right, float bottom, float top, float nearClip, float farClip);
 //正射影行列
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
@@ -157,9 +159,9 @@ Matrix4x4 MakePerspectiveFovMatrix(float forY, float aspectRatio, float nearClip
 Matrix4x4 MakeViewportMatrix(float leht, float top, float width, float height, float minDepth, float maxDepth);
 
 
-
+// アフィン変換
 Matrix4x4 MakeAffineMatrix2(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
-
+// Y軸ビルボード
 Matrix4x4 MakeBillboardMatrixY(const Matrix4x4& cameraWorldMatrix);
 
 

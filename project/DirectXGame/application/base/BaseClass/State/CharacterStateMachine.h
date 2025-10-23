@@ -5,7 +5,9 @@
 
 using CharacterMainStateFactory = std::function<std::unique_ptr<BaseCharacterState>(BaseCharacter*)>;
 
-
+/// <summary>
+/// キャラクターステートマシーンクラス
+/// </summary>
 class CharacterStateMachine {
 public:
     CharacterStateMachine() {
@@ -19,7 +21,7 @@ public:
     // 更新
     void Update();
 
-
+    // 変更
     void ChangeState(const CharacterMainState& name)  {
         auto it = stateFactoryMap_.find(name);
         if (it != stateFactoryMap_.end()) {
@@ -34,7 +36,7 @@ public:
     // ---- 現在ステートの取得 ----
     BaseCharacterState* GetCurrentState() const { return state_.get(); }
 
-
+    // 現在のステート取得
     CharacterMainState GetCurrentMainState() const {
         return state_ ? state_->GetCharacterMainState() : CharacterMainState::Move;
     }

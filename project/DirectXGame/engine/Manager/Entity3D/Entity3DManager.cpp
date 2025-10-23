@@ -19,10 +19,10 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	oceanManager_ = std::make_unique<OceanManager>();
 	oceanManager_->Initialize(directXCommon_);
 
-
+	// オブジェクトのインスタンシング
 	object3dInstansManager_ = std::make_unique<Object3dInstansManager>();
 	object3dInstansManager_->Initialize(directXCommon_);
-
+	object3dInstansManager_->SetEntity3D(this);
 
 	object3dCommon_ = std::make_unique<Object3dCommon>();
 	object3dCommon_->Initialize(directXCommon_);
@@ -129,18 +129,6 @@ void Entity3DManager::UpdateImgui()
 
 			}
 			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kPrimitive) {
-				/*material = entity->primitive_->GetMaterial();
-				nameMaterial = "Material" + std::to_string(materialIndex);
-				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
-					ImGui::DragFloat3("M_scale", &material->transform.scale.x, 0.1f);
-					ImGui::DragFloat3("M_rotate", &material->transform.rotate.x, 0.1f);
-					ImGui::DragFloat3("M_translate", &material->transform.translate.x, 0.1f);
-					ImGui::ColorEdit4("color", &material->color.r);
-					ImGui::SliderInt("enableLighting", &material->enableLighting_, 0, 1);
-					ImGui::SliderFloat("alphaClipping", &material->alphaClipping_, 0, 1);
-					ImGui::DragFloat("shininess", &material->shininess_, 0.01f);
-				}*/
-
 			}
 			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kOcean) {
 				material = entity->ocean_->GetMaterial();
@@ -200,8 +188,6 @@ void Entity3DManager::UpdateImgui()
 			// プリミティブ形状なら
 			if (entity->GetPrimitive()) {
 				ImGui::Separator();
-				//entity->GetPrimitive()->MeshUpdateImGui();
-
 			}
 
 
@@ -227,9 +213,10 @@ void Entity3DManager::UpdateImgui()
 
 void Entity3DManager::Update()
 {
-	object3dInstansManager_->SetEntity3D(this);
+	// オブジェクトインスタンシング更新
 	object3dInstansManager_->Update();
 
+	// オブジェクトが消えたときの処理
 	object3d.erase(
 		std::remove_if(object3d.begin(), object3d.end(),
 			[](const std::unique_ptr<Object3d>& object) {
@@ -238,9 +225,14 @@ void Entity3DManager::Update()
 		object3d.end());
 
 
+	// オブジェクトの更新
 	for (auto& object : object3d) {
 		if (object) {
+
+			// 更新
 			object->Update();
+			
+			// オブジェクトの描画順決定
 			switch (object->GetRenderComponent()->GetObjectDrawType()) {
 			case ObjectDrawType::kTranslucent01:
 				transparentObjects01.push_back(object.get());
@@ -271,7 +263,7 @@ void Entity3DManager::ObjectClean()
 
 void Entity3DManager::ObjectDraw()
 {
-
+	// インスタンシング描画
 	object3dInstansManager_->Draw();
 
 	// 不透明

@@ -9,8 +9,10 @@
 #include "DirectXGame/engine/Math/Noise.h"
 
 #include <DirectXGame/engine/struct/Structs.h>
-
+// 前方宣言
 class LineCommon;
+
+// フィールド
 namespace Field {
 
 	// 形状
@@ -34,23 +36,28 @@ namespace Field {
 		kEvent,			// イベント
 	};
 
+	
+	/// <summary>
+	/// パーティクルにかかるフィールドエフェクトクラス
+	/// </summary>
 	class FieldEffect {
 	public:
+		// 初期化
 		void Initialize(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon);
-
+		// 更新
 		void Update();
-
+		// デバック確認ImGui
 		void DebugImgui();
-
+		// パーティクルとの当たり判定
 		bool IsCollisionAABB(const Vector3& point);
 
 
 	public:
-
+		// 名前取得
 		std::string GetName() const { return name_; }
-
+		// エフェクトがかかっているか
 		bool GetIsEffect() const { return isEffect; }
-
+		// 親子関係設定
 		void SetParent(WorldTransform& parent)
 		{
 			transform_.parent_ = &parent;
@@ -82,7 +89,7 @@ namespace Field {
 		LineCommon* lineCommon_;
 	};
 
-
+	// パーティクルにかかるフィールドエフェクトの処理
 	void Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector<Field::FieldEffect*> fieldEffect, float deltaTime);
 
 

@@ -17,8 +17,12 @@ using namespace Microsoft::WRL;
 #include <unordered_map>
 #include <vector>
 
-
+// 前方宣言
 class DirectXCommon;
+
+/// <summary>
+/// メッシュの基底クラス
+/// </summary>
 class BaseMesh {
 public:
 	// 通常用

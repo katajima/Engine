@@ -117,9 +117,11 @@ public:
 
 	// 
 	
-
+	// HP取得
 	Gage& HP() { return parameters_.HP; };				// ヒットポイント
+	// MP取得
 	Gage& MP() { return  parameters_.MP; };				// マジックポイント
+	// スタミナ取得
 	Gage& Stamina() { return parameters_.stamina; };	// スタミナ
 
 
@@ -143,13 +145,15 @@ public:
 struct CombatStatComponent
 {
 public:
+	// 初期化
 	void Initialize(CharacterParameterComponent* base) {
 		baseParams_ = base;
 	}
+	// 攻撃力
 	float GetEffectiveAttack() const {
 		return baseParams_->GetStrength() * attackMultiplier_;
 	}
-
+	// 防御力
 	float GetEffectiveDefense() const {
 		return baseParams_->GetDefense() * defenseMultiplier_;
 	}

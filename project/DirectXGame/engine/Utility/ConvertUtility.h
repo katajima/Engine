@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Structs.h"
 
-
+// 変換
 namespace ConvertUtility
 {
 	// Vector4 to Vector3
@@ -45,6 +45,10 @@ namespace ConvertUtility
 
 	// uint to int
 	static int ToInt(const uint32_t& v) {
+		return static_cast<int>(v);
+	}
+	// size_t to int
+	static int ToInt(const size_t& v) {
 		return static_cast<int>(v);
 	}
 	// float to int
@@ -90,11 +94,11 @@ namespace ConvertUtility
 
 
 
-	// 
+	// 時間
 	static float TimeToSeconds(int timeInMilliseconds) {
 		return static_cast<float>(timeInMilliseconds) / 1000.0f;
 	}
-
+	// フレーム
 	static float FramesToSeconds(int frameCount, float fps = 60.0f) {
 		return static_cast<float>(frameCount) / fps;
 	}

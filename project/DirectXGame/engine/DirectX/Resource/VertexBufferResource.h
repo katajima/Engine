@@ -7,10 +7,14 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+/// <summary>
+/// 頂点バッファ
+/// </summary>
+/// <typeparam name="Type"></typeparam>
 template<class Type>
 class VertexBuffer {
 public:
-
+	// 生成
 	void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> vertex, size_t num = 1)
 	{
 		dxCommon_ = dxCommon;
@@ -33,7 +37,7 @@ public:
 		bufferView.StrideInBytes = sizeof(Type);
 	}
 
-
+	// 更新
 	void UpdateBuffer(std::vector<Type> vertex) {
 		if (resource_) {
 			// バッファサイズを確認
@@ -102,11 +106,12 @@ public:
 		dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
 	}
 
-
+	// データ取得
 	Type* Data() const { return data_; };
 
+	// リソース取得
 	Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return resource_; };
-
+	// バッファビュー取得
 	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return bufferView; }
 private:
 	DirectXCommon* dxCommon_;

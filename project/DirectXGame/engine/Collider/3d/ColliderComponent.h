@@ -7,7 +7,9 @@
 #include "DirectXGame/engine/Collider/ColliderData.h"
 #include "DirectXGame/engine/Utility/VectorUtility.h"
 
-
+/// <summary>
+/// コライダコンポーネント
+/// </summary>
 class ColliderComponent {
 public:
     // Colliderを保持
@@ -105,7 +107,7 @@ public: // 削除
     }
 
 public: // 設定or追加
-
+    // ライン共通クラス設定
     void SetLineCommon(LineCommon* line) { lineCommon = line; };
 
     // コライダー追加
@@ -153,7 +155,7 @@ public: // 設定or追加
 
 public: // 取得
 
-    //
+    // インターフェース取得
     IHitReceiver* GetHitReceiver() const { return hitReceiver; }
 
     // コライダーコンポーネントID取得
@@ -174,6 +176,7 @@ public: // 取得
         return nullptr;
     }
 
+    // コライダをIDで取得
     template <typename T>
     T* FindColliderById(uint32_t id) {
         for (auto& entry : colliders) {

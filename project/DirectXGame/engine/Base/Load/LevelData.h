@@ -4,6 +4,10 @@
 #include <string>
 #include "DirectXGame/engine/Light/Lights.h"
 #include "DirectXGame/engine/Base/pch.h"
+
+/// <summary>
+/// レベルデータのクラス
+/// </summary>
 class LevelData
 {
 public:
@@ -58,7 +62,7 @@ public:
 		Vector3 rotation;
 	};
 	std::vector<StageObjectSpawnData> stageObjects;
-	//
+	//　カメラデータ
 	struct CameraObject
 	{
 		std::string fileName;

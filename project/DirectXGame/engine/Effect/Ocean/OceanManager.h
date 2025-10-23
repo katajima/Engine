@@ -24,16 +24,18 @@ using namespace Microsoft::WRL;
 #include<numbers>
 
 
-
+/// <summary>
+/// 海マネージャー
+/// </summary>
 class OceanManager
 {
 public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
+	// 描画設定
 	void DrawCommonSetting();
 
-
+	// DirectX共通クラス取得
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
 private:

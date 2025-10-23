@@ -43,7 +43,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	textMax_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/max.png");
 	textMax_->SetColor({ 1,0,0,1 });
 	textMax_->SetPosition({ 30,700 });
-	textMax_->SetRotation(DegreesToRadians(-30));
+	textMax_->SetRotation(Math::DegreesToRadians(-30));
 	textMax_->SetAnchorPoint({ 0.5f,0.5f });
 	textMax_->SetSize(0.25f);
 

@@ -315,7 +315,7 @@ void LoadDataFanc::LightTransform(nlohmann::json& object, LevelData* levelData)
 					objectData.distance = lightData["custom_distance"];
 				}
 				if (lightData.contains("spot_size")) {
-					objectData.cosAngle = DegreesToRadians(lightData["spot_size"]);
+					objectData.cosAngle = Math::DegreesToRadians(lightData["spot_size"]);
 				}
 				if (lightData.contains("spot_blend")) {
 					objectData.cosFalloffStart = lightData["spot_blend"];

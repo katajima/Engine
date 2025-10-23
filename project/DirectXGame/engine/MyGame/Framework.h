@@ -36,6 +36,7 @@ public:
 	// 終了フラグのチェック
 	virtual bool IsEndRequst() { return endRequst_; }
 	
+	// デストラクタ
 	virtual ~Framework() = default;
 
 	// 実行

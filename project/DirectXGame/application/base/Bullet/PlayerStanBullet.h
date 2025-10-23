@@ -3,7 +3,12 @@
 #include "DirectXGame/application/base/BaseClass/Bullet/BaseBullet.h"
 #include "DirectXGame/engine/effect/primitive/primitive.h"
 
+// 前方宣言
 class Primitive;
+
+/// <summary>
+/// プレイヤースタン弾
+/// </summary>
 class PlayerStanBullet : public BaseBullet {
 public:
 
@@ -15,9 +20,9 @@ public:
 
 	// 描画
 	void Draw() override;
-	//
+	//描画エフェクト
 	void DrawP() override;
-	//
+	//描画2d
 	void Draw2D() override;
 
 private:

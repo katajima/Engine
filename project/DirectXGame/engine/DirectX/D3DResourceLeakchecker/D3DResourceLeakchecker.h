@@ -1,4 +1,6 @@
 #pragma once
+
+// リソースのリークチェッククラス
 class D3DResourceLeakchecker 
 {
 public:

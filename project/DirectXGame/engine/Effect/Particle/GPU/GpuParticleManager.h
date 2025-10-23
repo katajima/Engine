@@ -18,6 +18,7 @@
 #include "GPUParticleEmitter.h"
 #include "GpuParticleField.h"
 
+// 前方宣言
 class LineCommon;
 class LightManager;
 class Entity3DManager;
@@ -26,6 +27,10 @@ class SrvManager;
 class DirectXCommon;
 class ModelMesh;
 class Camera;
+
+/// <summary>
+/// GPUパーティクルマネージャー
+/// </summary>
 class GpuParticleManager {
 public:
 
@@ -40,23 +45,23 @@ public:
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
-
+	// コンピュートシェーダでのPSO設定
 	void PreCsPso();
-
+	// コンピュートシェーダトレイルのPSO設定
 	void PreCsTrailPso();
-
+	// グループ生成
 	void CreateGroup(std::string name, ModelMesh* mesh, std::string textureName, int instance);
 		
 	
 
-
+	// エミッターにグループを関連付け
 	void SetEmitteToGroup(std::string emitteName, std::string particleGroupName);
-
+	// フィールド生成
 	void CreateField(std::string name);
 
 	// エミッターの解放
 	void ClearEmitter(std::string nume);
-
+	// 全エミッターの開放
 	void ClearEmitterAll();
 
 
@@ -80,6 +85,7 @@ public:
 		gpuParticleEmitter_[name] = std::move(emitter);
 	}
 
+	// パーティクルエミッターの取得
 	template <typename T>
 	T* GetGpuParticleEmitter(const std::string& name) {
 		auto it = gpuParticleEmitter_.find(name);
@@ -89,7 +95,7 @@ public:
 		return dynamic_cast<T*>(it->second.get()); 
 	}
 
-
+	// パーティクルグループ取得
 	GpuParticleGroup* GetGpuParticleGroup(const std::string& name) {
 		auto it = gpuParticleGroup_.find(name);
 		if (it == gpuParticleGroup_.end()) {

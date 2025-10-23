@@ -8,7 +8,7 @@
 #include "ColliderFanction2D.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
 
-// コライダー基底クラス
+// コライダー2D基底クラス
 class Collider2D
 {
 public:
@@ -43,10 +43,13 @@ class SphereCollider2D : public Collider2D
 {
 public:
 	float radius = 1.0f;
-
+	// 更新
 	void Update(const WorldTransform2d& worldTransform) override;
+	// 判定
 	bool CheckHit(const Collider2D& other) const override;
+	// 押し出し
 	bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const override;
+	// コライダタイプ取得
 	ColliderType GetType() const override {
 		return ColliderType::Sphere;
 	}
@@ -61,10 +64,13 @@ public:
 	Vector2 minWorld;
 	Vector2 maxWorld;
 
+	// 更新
 	void Update(const WorldTransform2d& worldTransform) override;
+	// 判定
 	bool CheckHit(const Collider2D& other) const override;
+	// 押し出し
 	bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const override;
-
+	// コライダタイプ取得
 	ColliderType GetType() const override {
 		return ColliderType::AABB;
 	}

@@ -6,7 +6,7 @@
 
 #pragma region Math
 
-float Length(const float& v) {
+float Math::Length(const float& v) {
 	float result;
 
 	result = sqrtf((v * v));
@@ -14,7 +14,7 @@ float Length(const float& v) {
 	return result;
 };
 
-float Clamp(float t) {
+float Math::Clamp(float t) {
 
 	if (1.0f <= t) {
 		t = 1.0f;
@@ -26,7 +26,7 @@ float Clamp(float t) {
 	return t;
 }
 
-float Clamp(float t, float min, float max) {
+float Math::Clamp(float t, float min, float max) {
 
 	if (max <= t) {
 		t = max;
@@ -38,52 +38,11 @@ float Clamp(float t, float min, float max) {
 	return t;
 }
 
-float Clamp3(float value, float min, float max) {
+float Math::Clamp3(float value, float min, float max) {
 	return (std::max)(min, (std::min)(value, max));
 }
-
-
-// AABBと球最近接点
-Vector3 ClosestPointAABBSphere(const Sphere& sphere, const AABB& aabb)
-{
-	Vector3 closestPoint;
-	closestPoint.x = Clamp(sphere.center.x, aabb.min_.x, aabb.max_.x);
-	closestPoint.y = Clamp(sphere.center.y, aabb.min_.y, aabb.max_.y);
-	closestPoint.z = Clamp(sphere.center.z, aabb.min_.z, aabb.max_.z);
-
-	return closestPoint;
-}
-
-
-//
-Plane PlaneFromPoints(const Vector3& p1, const Vector3& p2, const Vector3& p3) {
-	Plane result{};
-
-	// 2つのベクトルを求める
-	Vector3 v1 = Subtract(p2, p1);
-	Vector3 v2 = Subtract(p3, p1);
-
-	// 法線を計算 (外積)
-	result.normal = Cross(v1, v2);
-
-	// ゼロベクトルチェック (3点が同一直線上の場合)
-	if (Length(result.normal) == 0.0f) {
-		// 法線が求まらない場合のエラーハンドリング
-		result.normal = { 0.0f, 0.0f, 0.0f };
-		result.distance = 0.0f;
-		return result;
-	}
-
-	// 正規化
-	result.normal = Normalize(result.normal);
-
-	// 平面の距離 D の計算 (符号の修正)
-	result.distance = -Dot(result.normal, p1);
-
-	return result;
-}
-
-Vector3 Reflect(const Vector3& input, const Vector3& normal)
+// 反射
+Vector3 Math::Reflect(const Vector3& input, const Vector3& normal)
 {
 	Vector3 result;
 	float dotProduct = Dot(input, normal);
@@ -92,8 +51,8 @@ Vector3 Reflect(const Vector3& input, const Vector3& normal)
 	result.z = input.z - normal.z * (2 * dotProduct);
 	return result;
 }
-
-Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution)
+// 反射
+Vector3 Math::Reflect(const Vector3& input, const Vector3& normal, float restitution)
 {
 	// まず normal が正規化されている前提だが、明示的に normalize する場合:
 	Vector3 norm = Normalize(normal);
@@ -104,9 +63,8 @@ Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution)
 	// 反射ベクトルの計算
 	return input - norm * scale;
 }
-
-
-Vector3 DirectionToRotate(const Vector3& direction, Dire dire)
+//
+Vector3 Math::DirectionToRotate(const Vector3& direction, Dire dire)
 {
 	Vector3 result{};
 
@@ -171,13 +129,41 @@ Vector3 DirectionToRotate(const Vector3& direction, Dire dire)
 
 	return result;
 }
-
-float DirectionToRotateZ(const Vector3& direction)
+//
+float Math::DirectionToRotateZ(const Vector3& direction)
 {
 	return 0.0f;
 }
+// 
+float Math::DegreesToRadians(float degrees) { return float(degrees * ((float)M_PI / 180.0)); }
+// 
+float Math::RadiansToDegrees(float radians) { return float(radians * (180.0 / (float)M_PI)); }
+//
+Vector3 Math::DegreesToRadians(Vector3 degrees)
+{
+	return Vector3(DegreesToRadians(degrees.x), DegreesToRadians(degrees.y), DegreesToRadians(degrees.z));
+}
+//
+Vector3 Math::RadiansToDegrees(Vector3 radians)
+{
+	return Vector3(RadiansToDegrees(radians.x), RadiansToDegrees(radians.y), RadiansToDegrees(radians.z));
+}
+#pragma endregion //数学関数
 
-Vector3 ClosestPointOnPlane(const Plane& plane, const Vector3& point) {
+
+#pragma region ClosestPoint
+// AABBと球最近接点
+Vector3 ClosestPoint::AABBSphere(const Sphere& sphere, const AABB& aabb)
+{
+	Vector3 closestPoint;
+	closestPoint.x = Math::Clamp(sphere.center.x, aabb.min_.x, aabb.max_.x);
+	closestPoint.y = Math::Clamp(sphere.center.y, aabb.min_.y, aabb.max_.y);
+	closestPoint.z = Math::Clamp(sphere.center.z, aabb.min_.z, aabb.max_.z);
+
+	return closestPoint;
+}
+// Planeと点の最近接点
+Vector3 ClosestPoint::PointOnPlane(const Plane& plane, const Vector3& point) {
 	// 平面の法線ベクトル
 	Vector3 normal = plane.normal.Normalize();
 
@@ -189,10 +175,116 @@ Vector3 ClosestPointOnPlane(const Plane& plane, const Vector3& point) {
 
 	return closestPoint;
 }
+// 点と線の最近接点
+Vector3 ClosestPoint::PointSegment(const Segment& segment, const Vector3& point) {
+	Vector3 diff = segment.diff();
+	float lenSq = Dot(diff, diff);
 
-float DegreesToRadians(float degrees) { return float(degrees * ((float)M_PI / 180.0)); }
+	if (lenSq == 0.0f) {
+		return segment.origin;  // 線分が点の場合は始点を返す
+	}
 
-float RadiansToDegrees(float radians) { return float(radians * (180.0 / (float)M_PI)); }
+	float t = Dot(point - segment.origin, diff) / lenSq;
+	t = Math::Clamp3(t, 0.0f, 1.0f);
+
+	return segment.origin - Multiply(diff, t);
+}
+// 線と三角
+Vector3 ClosestPoint::SegmentTriangle(const Segment& segment, const Triangle& triangle) {
+	// 三角形の3辺を定義
+	Segment edge1 = { triangle.vertices[0], triangle.vertices[1] };
+	Segment edge2 = { triangle.vertices[1], triangle.vertices[2] };
+	Segment edge3 = { triangle.vertices[2], triangle.vertices[0] };
+
+	// 最初に線分の始点を初期最近接点とする
+	Vector3 closest = PointSegment(segment, triangle.vertices[0]);
+
+	// 三角形のエッジに対して最近接点を更新
+	closest = SegmentSegment(segment, edge1, closest);
+	closest = SegmentSegment(segment, edge2, closest);
+	closest = SegmentSegment(segment, edge3, closest);
+
+	// 三角形の面上の最近接点も考慮（重要）
+	Plane plane = Plane::PlaneFromPoints(triangle.vertices[0], triangle.vertices[1], triangle.vertices[2]);
+	Vector3 pointOnPlane = PointOnPlane(plane, segment.origin);
+	closest = LengthSquared(Subtract(closest, segment.origin)) < LengthSquared(Subtract(pointOnPlane, segment.origin))
+		? closest
+		: pointOnPlane;
+
+	return closest;
+}
+// 線と線
+Vector3 ClosestPoint::SegmentSegment(const Segment& seg1, const Segment& seg2, Vector3 currentClosest) {
+	Vector3 u = seg1.diff();
+	Vector3 v = seg2.diff();
+	Vector3 w = Subtract(seg1.origin, seg2.origin);
+
+	float a = Dot(u, u);
+	float b = Dot(u, v);
+	float c = Dot(v, v);
+	float d = Dot(u, w);
+	float e = Dot(v, w);
+
+	float denom = a * c - b * b;
+
+	// ゼロ除算の回避
+	float s = 0.0f, t = 0.0f;
+	if (denom != 0.0f) {
+		s = Math::Clamp3((b * e - c * d) / denom, 0.0f, 1.0f);
+		t = Math::Clamp3((a * e - b * d) / denom, 0.0f, 1.0f);
+	}
+
+	Vector3 closestOnSeg1 = Add(seg1.origin, Multiply(u, s));
+	Vector3 closestOnSeg2 = Add(seg2.origin, Multiply(v, t));
+
+	return LengthSquared(Subtract(closestOnSeg1, closestOnSeg2)) < LengthSquared(Subtract(currentClosest, seg1.origin))
+		? closestOnSeg1
+		: currentClosest;
+}
+// 線とAABB
+Vector3 ClosestPoint::SegmentAABB(const Segment& segment, const AABB& box) {
+	Vector3 closestPoint = segment.origin;
+
+	for (int i = 0; i < 3; i++) { // X, Y, Z 各軸
+		if (closestPoint[i] < box.min_[i]) closestPoint[i] = box.min_[i];
+		if (closestPoint[i] > box.max_[i]) closestPoint[i] = box.max_[i];
+	}
+
+	return closestPoint;
+}
+// 点とOBB
+Vector3 ClosestPoint::PointOnOBB(const Vector3& point, const OBB& obb) {
+	Vector3 d = point - obb.center;
+	Vector3 closest = obb.center;
+
+	for (int i = 0; i < 3; ++i) {
+		Vector3 axis = obb.orientations[i];
+		float extent = obb.size[i];
+		float dist = d.Dot(axis);
+		dist = std::clamp(dist, -extent, extent);
+		closest = closest + axis * dist;
+	}
+	return closest;
+}
+// 線とAABB
+Vector3 ClosestPoint::SegmentAABB(const Vector3& segStart, const Vector3& segEnd, const AABB& aabb) {
+	// 線分の最近接点をAABB内にクランプ
+	Vector3 ab = segEnd - segStart;
+	float t = 0.0f;
+	float abLenSq = ab.LengthSq();
+	if (abLenSq > 0.0001f) {
+		Vector3 aabbCenter = (aabb.min_ + aabb.max_) * 0.5f;
+		t = (aabbCenter - segStart).Dot(ab) / abLenSq;
+		t = std::clamp(t, 0.0f, 1.0f);
+	}
+	Vector3 closest = segStart + ab * t;
+
+	// AABB内にクランプ（closest点がAABBの内外どちらでも動作する）
+	return Vector3::Clamp(closest, aabb.min_, aabb.max_);
+}
+
+
+#pragma endregion // 最近接点
 
 bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position) {
 	// クリップスペース座標を取得
@@ -253,4 +345,3 @@ Vector2 GetScreenPos(WorldTransform worldTransform, Camera* camera)
 	return Vector2{ screenPos.x, screenPos.y };
 }
 
-#pragma endregion //数学関数

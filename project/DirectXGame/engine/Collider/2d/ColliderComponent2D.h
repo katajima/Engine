@@ -6,7 +6,9 @@
 #include "DirectXGame/engine/Collider/ColliderData.h"
 #include "DirectXGame/engine/Utility/VectorUtility.h"
 
-
+/// <summary>
+/// コライダ2dコンポーネント
+/// </summary>
 class ColliderComponent2D {
 public:
     // Colliderを保持
@@ -147,7 +149,7 @@ public: // 設定or追加
 
 public: // 取得
 
-    //
+    // インターフェース取得
     IHitReceiver* GetHitReceiver() const { return hitReceiver; }
 
     // コライダーコンポーネントID取得

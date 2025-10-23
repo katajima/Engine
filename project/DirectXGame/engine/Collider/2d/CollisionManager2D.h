@@ -5,10 +5,14 @@
 #include"Collider2D.h"
 #include <unordered_set>
 #include "DirectXGame/engine/collider/Octree/Octree.h"  
-/// <summary>
-/// 衝突マネージャ
-/// </summary>
+
+// 前方宣言
 class GlobalVariables;
+
+
+/// <summary>
+/// 衝突2dマネージャ
+/// </summary>
 class CollisionManager2d {
 public:
     // 初期化

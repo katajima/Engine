@@ -23,7 +23,7 @@ namespace GvFanction {
 	// 型を判別して値を保存
 	void Save(const std::string& groupName, GvData::json& root,GvData::Item& item, const std::string& itemName);
 
-	// 
+	// 値を設定
 	void SetValue(const std::string& groupName,const std::string& itemName,const std::string& typeStr);
 
 }

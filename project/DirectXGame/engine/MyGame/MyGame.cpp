@@ -148,6 +148,7 @@ void MyGame::InitializeResource()
 
 	textureManager->LoadTexture("resources/Texture/grass.png");
 	textureManager->LoadTexture("resources/Texture/ground.png");
+	textureManager->LoadTexture("resources/Texture/icon/LockOnW.png");
 	textureManager->LoadTexture("resources/Texture/renga.png");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
 
@@ -347,9 +348,9 @@ void MyGame::CreateParticle()
 	
 	gpuParticleManager_->CreateGroup("no3", primiPlane->GetModelMesh(), "resources/Texture/smoke/no3.png", 1024 * 100);
 	//
-	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
+	gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
 	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no2");
-	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
 	//gpuParticleManager_->SetEmitteToGroup("emitte_no2","no2");
 	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 

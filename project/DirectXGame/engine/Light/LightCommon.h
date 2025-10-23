@@ -14,36 +14,41 @@
 
 #include"Lights.h"
 
+
+/// <summary>
+/// ライトマネージャークラス
+/// </summary>
 class LightManager
 {
 public:
+	// ライト使うかの構造体
 	struct IsLight {
 		bool dire;
 		bool pount;
 		bool spot;
 	};
 
-
+	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
+	// ライン描画
 	void DrawLight(IsLight is = {true,true,true }, int dire = 3, int point = 5, int spot = 6);
-
+	// 更新
 	void Update();
-
+	// ライト追加
 	void AddLight(std::shared_ptr<Lights> light) {
 		light->SetNumber(int(m_lights.size()));
 		m_lights.push_back(light);
 		//count++;
 	}
+	// ライト数取得
 	int GetLightSize() const {return static_cast<int>(m_lights.size());}
 
+	// ライト取得
 	const std::vector<std::shared_ptr<Lights>>& GetLights() const {
 		return m_lights;
 	}
-	
-	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int registr);
 
-
+	// ライト開放
 	void ClearLights() {
 		for (auto& m_light : m_lights) {
 			m_light.reset();
@@ -51,6 +56,7 @@ public:
 		m_lights.clear();
 	}
 
+	// ライト開放(インデクスで)
 	void ClearLight(int index) {
 		m_lights[index].reset();
 		m_lights.resize(m_lights.size());
@@ -62,6 +68,7 @@ public:
 	}
 
 private:
+	// グローバルバリアブル適応
 	void ApplyGlobalVariables();
 
 	

@@ -9,6 +9,7 @@
 #include <math.h>
 #include <xmmintrin.h>
 
+// Vector3
 struct Vector3 final {
 	float x, y, z;
 
@@ -24,8 +25,9 @@ struct Vector3 final {
 	const float& operator[](int index) const {
 		return (&x)[index]; // const バージョン
 	}
-
+	// xy
 	Vector2 xy() { return Vector2{ x,y }; }
+	// xz
 	Vector2 xz() { return Vector2{ x,z }; }
 
 
@@ -37,6 +39,14 @@ struct Vector3 final {
 		return fabs(x - other.x) < epsilon &&
 			fabs(y - other.y) < epsilon &&
 			fabs(z - other.z) < epsilon;
+	}
+	// >= 演算子オーバーロード
+	bool operator>=(const Vector3& other) const {
+		return (x >= other.x) && (y >= other.y) && (z >= other.z);
+	}
+	// <= 演算子オーバーロード
+	bool operator<=(const Vector3& other) const {
+		return (x <= other.x) && (y <= other.y) && (z <= other.z);
 	}
 
 	// = 演算子のオーバーロード
@@ -121,6 +131,9 @@ struct Vector3 final {
 	Vector3 operator/(float s) const {
 		return Vector3{ (x / s), (y / s), (z / s) };
 	}
+	Vector3 operator/(Vector3 s) const {
+		return Vector3{ (x / s.x), (y / s.y), (z / s.z) };
+	}
 
 	// 正規化
 	Vector3 Normalize() const {
@@ -154,6 +167,7 @@ struct Vector3 final {
 
 		return result;
 	};
+	// 長さ
 	float LengthSq() const {
 		return x * x + y * y + z * z;
 	}
@@ -170,18 +184,20 @@ struct Vector3 final {
 			x * other.y - y * other.x
 		};
 	}
-
+	// 距離
 	float Distance(const Vector3& other) const {
 		float dx = x - other.x;
 		float dy = y - other.y;
 		float dz = z - other.z;
 		return std::sqrt(dx * dx + dy * dy + dz * dz);
 	}
+	//　距離XZ
 	float DistanceXZ(const Vector3& other) const {
 		float dx = x - other.x;
 		float dz = z - other.z;
 		return std::sqrt(dx * dx + dz * dz);
 	}
+	// クランプ
 	static Vector3 Clamp(Vector3 value, Vector3 min, Vector3 max)
 	{
 		Vector3 result;

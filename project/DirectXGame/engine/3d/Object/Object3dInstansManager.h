@@ -9,6 +9,7 @@
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 #include<memory>
+#include<deque> 
 using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
@@ -31,62 +32,98 @@ using namespace Microsoft::WRL;
 #include <thread>
 #include <mutex>
 
-
+// 方向
 enum class MapAxis {
 	XY,
 	ZX,
 	YZ
 };
 
+// マップID
 struct MapId {
 	int id; // テクスチャIndexや種類を表すID
 	std::string tex; // テクスチャname
 };
 
+// 前方宣言
+class RigidBodyComponent;
+class ColliderComponent;
+class ContactRecord;
+
+// オブジェクトのインスタスクラス
 class ObjectInstans
 {
 public:
 	// 初期化
-	void Initialize(Transform transform = { {1,1,1},{},{} });
+	void Initialize(Entity3DManager* entity3DManager,bool useCollider = false,Transform transform = { {1,1,1},{},{} });
 	// 更新
 	void Update();
 
+	// Object3d内でコライダーコンポーネントを更新するか
+	void SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
+
+	// コライダーコンポーネントを取得
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+	// コライダーコンポーネントの接触情報を取得
+	ContactRecord& GetContactRecord();
+	// リジットボディー取得
+	RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
+
+
+	// 削除する
+	void IsDelete() { isDelete_ = true; }
+
+	// 削除されているか取得
+	bool GetIsDelete() const { return isDelete_; }
+private:
+	// コライダーコンポーネント
+	std::unique_ptr<ColliderComponent> colliderComponent_;
+	// コライダーコンポーネントをObject3d内で更新するかのフラグ
+	bool isColliderComponenyUpdate_ = false;
+	bool useCollider_ = false;
 
 private:
-
+	std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
+	bool isDelete_;
 public:
 	WorldTransform transform;
 	Vector4 color;
-	bool is;
+	bool is_;
+	bool isDraw_ = true;
 	uint32_t texIndex;
 	int id = -1;   // ← 固有ID（負なら未使用）
 };
 
-
+// 前方宣言
 class Entity3DManager;
+
+// オブジェクトインスタンシングクラス(大量描画用)
 class Object3dInstansManager
 {
 public:
+	// GPU転送用
 	struct ObjectGPU
 	{
 		Matrix4x4 WVP;
 		Matrix4x4 World;
+		Matrix4x4 worldInverseTranspose;
 		Vector4 color;
 		UINT textureIndex;
+		Vector3 pad;
 	};
-
+	// ラスタライザタイプ
 	enum class RasterizerType
 	{
 		MODE_SOLID_BACK,
 		MODE_SOLID_NONE,
 	};
-
+	// メッシュタイプ
 	enum class MeshType
 	{
 		kPrimitiv,
 		kModel,
 	};
-
+	// オブジェクト構造体
 	struct Object
 	{
 		WorldTransform transform;
@@ -95,11 +132,11 @@ public:
 		uint32_t texIndex;
 
 	};
-
+	// オブジェクトグループ
 	struct ObjectGroup
 	{
 		std::string name; // 名前
-		std::vector<ObjectInstans> object;
+		std::deque<ObjectInstans> object; // ✅ ここをdequeに
 		std::unordered_map<int, size_t> idMap;
 		Model* model;
 		bool flag;
@@ -122,6 +159,7 @@ public:
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
+	// エンティティ3dの設定
 	void SetEntity3D(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; };
 
 	// 更新
@@ -132,25 +170,25 @@ public:
 	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
 	// オブジェクトグループ作り(モデル)
-	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+	void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 	// オブジェクトグループ作り(モデル)
-	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, ModelMesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+	void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, ModelMesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
-
-	void AddObject(const std::string name, const std::string texName, ObjectInstans& object, MeshType type = MeshType::kModel);
-
+	// オブジェクトの追加
+	void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object,int& id,MeshType type = MeshType::kModel);
+	// オブジェクトのグループ数取得
 	int GetSize() { return static_cast<int>(objectGroups.size()); };
-
-	void Clear(const std::string name);
-
+	// オブジェクトグループ名前でオブジェクトクリーン
+	void Clear(const std::string& name);
+	// 全てのオブジェクトグループのオブジェクトのクリーン
 	void ClearObject() {
 		for (auto& obj : objectGroups) {
 			obj.second.object.clear();
 		}
 	}
-
+	// 全てクリーン
 	void AllClear() { objectGroups.clear(); }
 
 	// タイルマップ作成
@@ -165,14 +203,12 @@ public:
 		const std::vector<MapId>& mapIds,
 		MapAxis axis = MapAxis::ZX); // テクスチャIndexや種類を表すID
 
-	// タイル移動
-	void MoveTile(const std::string& groupName, int tileId, const Vector3& newPos);
 public: //取得
-
+	// オブジェクトインスタンスをIDで取得
 	ObjectInstans* GetObjectById(const std::string& groupName, int id);
-
-	std::vector<ObjectInstans>& GetObjects(const std::string& groupName);
-
+	// 全てのオブジェクトインスタンス取得
+	std::deque<ObjectInstans>& GetObjects(const std::string& groupName);
+	// オブジェクトグループ取得
 	ObjectGroup& GetObjectGroup(const std::string& groupName);
 
 private:
@@ -181,11 +217,11 @@ private:
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
-
+	// ブレンドモード設定(加算)
 	void BlendAdd();
-
+	// ブレンドモード設定(減算)
 	void BlendSubtract();
-
+	// ブレンドモード設定(乗算)
 	void BlendMuliply();
 
 
@@ -205,7 +241,7 @@ private:
 
 	Transform transform{};
 
-
+	int id_;
 
 private:
 	DirectXCommon* dxCommon_ = nullptr;

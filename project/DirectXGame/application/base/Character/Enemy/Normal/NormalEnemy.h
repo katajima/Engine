@@ -3,6 +3,9 @@
 
 #include"NormalEnemyState.h"
 
+/// <summary>
+/// 通常敵クラス
+/// </summary>
 class NormalEnemy : public BaseEnemy {
 public:
 	// コンストラクタ
@@ -16,30 +19,35 @@ public:
 	// 毎フレーム更新
 	void Update() override;
 
-	
+	// エフェクト描画
 	void DrawEffect() override;
-	//
+	// 描画2d
 	void Draw2D() override;
-
+	// プレイヤ設定
 	void SetPlayer(BasePlayer* player) override;
-
+	// エミッター出現
 	void Emit() override;
 	// 移動
 	void Move() override;
-
+	// ジャンプ
 	void Jump() override;
-
+	// 攻撃
 	void Attack() override;
 
 private:
-	
+	// ステートマシーン初期化
 	void InitStateMachine() override;
 
-
+	// パーティクル初期化
 	void InitParticle();
 
 private:
 	WorldTransform worldEffect_;
+
+	bool isStopMove_ = false;
+	float stopMoveTimer_ = 0.0f;
+
+	DebugTimer debugTimer_;
 
 	//std::unique_ptr<ParticleEmitter> tireEmit_ = nullptr; // タイヤ
 	//std::unique_ptr<ParticleEmitter> ductEmit_ = nullptr; // ダクト

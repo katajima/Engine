@@ -7,6 +7,9 @@
 #include "DirectXGame/engine/struct/Vector4.h"
 #include "DirectXGame/engine/struct/Structs.h"
 
+/// <summary>
+/// ランダムクラス
+/// </summary>
 class Random
 {
 public:

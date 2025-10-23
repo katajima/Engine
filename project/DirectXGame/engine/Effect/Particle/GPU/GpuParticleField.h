@@ -1,16 +1,21 @@
 #pragma once
 #include "GpuParticleData.h"
 
-
+// 前方宣言
 class LineCommon;
 class DirectXCommon;
+
+/// <summary>
+/// GPUパーティクルフィールド
+/// </summary>
 class GpuParticleField
 {
 public:
+	// 初期化
 	void Init(DirectXCommon* dxCommon,LineCommon* lineCommon,std::string name);
-
+	// ImGui更新
 	void UpdateImgui();
-
+	// 更新
 	void Update();
 
 private:

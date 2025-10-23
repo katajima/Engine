@@ -297,7 +297,7 @@ void TestScene::InitializeObject3D()
 	oceanObject = GetEntity3DManager()->CreateObject3D("ocean", ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
-	oceanObject->GetWorldTransform().rotate_.x = DegreesToRadians(90);
+	oceanObject->GetWorldTransform().rotate_.x = Math::DegreesToRadians(90);
 	oceanObject->GetRenderComponent()->SetObjectDrawType(ObjectDrawType::kTranslucent03);
 	oceanObject->SetIsDraw(true);
 	

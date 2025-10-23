@@ -13,12 +13,17 @@
 class CameraManeger;
 class BaseCamera;
 class Entity3DManager;
+
+/// <summary>
+/// レベルデータを管理するクラス。
+/// </summary>
 class LoadLevelData
 {
 public:
 
+	// 初期化
 	void Initialize(Entity3DManager* entity3DManager, ModelManager* modelManager,Camera* camera, const std::string extensionName, const std::string fileName = "levelData/");
-
+	// リロード
 	void ReLoad();
 
 	// 毎フレーム更新
@@ -27,6 +32,7 @@ public:
 	// 描画
 	void Draw3D();
 
+	// カメラマネージャー設定
 	void SetCameraManager(CameraManeger* cameraManager) { cameraManager_ = cameraManager; };
 
 public:
@@ -34,7 +40,7 @@ public:
 	LevelData* GetLevelData() { return levelData_.get(); };
 	// オブジェクト取得
 	std::vector<Object3d*>GetObjects() { return objects_; }
-	// 
+	// ライト取得
 	std::vector< std::shared_ptr<Lights>>GetLights() { return lights_; }
 
 

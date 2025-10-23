@@ -29,6 +29,7 @@ struct Quaternion final {
         float length = std::sqrt((w * w) + (x * x) + (y * y) + (z * z));
         return {x / length, y / length, z / length,w / length };
     }
+    // ノーマライズ
     void Normalize2() { 
         float magnitude = std::sqrt(w * w + x * x + y * y + z * z); 
         if (magnitude > FLT_EPSILON) { 
@@ -36,7 +37,7 @@ struct Quaternion final {
             w *= invMagnitude; x *= invMagnitude; y *= invMagnitude; z *= invMagnitude; 
         } 
     }
-
+    // 内積
     float Dot(const Quaternion& q) const {
 
         return q.w * w + q.x *x + q.y * y + q.z * z;
@@ -55,7 +56,7 @@ struct Quaternion final {
     }
    
     
-    
+    // 回転行列
     Matrix4x4 MakeRotateMatrix() const {
         Matrix4x4 m{};
         m.Identity();
@@ -91,6 +92,7 @@ struct Quaternion final {
 
         return { result.x, result.y, result.z };
     }
+    // ベクトル回転
     Vector3 RotateVectorFast(const Vector3& v) const {
         // クォータニオンをベクトル v に適用
         Vector3 qv(x, y, z);
@@ -110,6 +112,7 @@ struct Quaternion final {
         return angles;
     }
 
+    //軸角度から
     static Quaternion FromAxisAngle(const Vector3& axis, float angle) {
         Vector3 n = axis.Normalize();
         float halfAngle = angle * 0.5f;
@@ -136,7 +139,7 @@ struct Quaternion final {
 static float Dot(const Quaternion& q1, const Quaternion& q2) {
     return q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
 }
-
+// 逆行列
 static Quaternion Inverse(Quaternion& qua)
 {
     float norm = qua.Norm();
@@ -144,12 +147,12 @@ static Quaternion Inverse(Quaternion& qua)
     Quaternion conjugate = qua.Conjugate();
     return Quaternion(conjugate.x / normSquared, conjugate.y / normSquared, conjugate.z / normSquared, conjugate.w / normSquared);
 }
-
+// 補間
 static Quaternion Lerp(const Quaternion& q0, const Quaternion& q1, float _t)
 {
     return Quaternion(Lerp(q0.x, q1.x, _t), Lerp(q0.y, q1.y, _t), Lerp(q0.z, q1.z, _t), Lerp(q0.w, q1.w, _t));
 }
-
+// 球面補間
 static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
     Quaternion q0_t = q0, q1_t = q1;
 
@@ -198,6 +201,7 @@ static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
     };
     return result.Normalize();
 }
+// 球面補間
 static Quaternion Slerp2(const Quaternion& q0, const Quaternion& q1, float t) {
     Quaternion q0_t = q0, q1_t = q1;
 
@@ -217,9 +221,9 @@ static Quaternion Slerp2(const Quaternion& q0, const Quaternion& q1, float t) {
          ((scale0 * q0_t.z) + (scale1 * q1_t.z)), ((scale0 * q0_t.w) + (scale1 * q1_t.w)) };
 
 }
-
+// アフィン変換
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
-
+// オイラーをQuaternion
 static Quaternion MakeQuaternionFromEuler(const Vector3& euler) {
     float cy = std::cos(euler.y * 0.5f); // yaw
     float sy = std::sin(euler.y * 0.5f);
@@ -236,7 +240,7 @@ static Quaternion MakeQuaternionFromEuler(const Vector3& euler) {
 
     return q;
 }
-
+// Quaternionをオイラーに変換
 static Vector3 QuaternionToEuler(const Quaternion& q) {
     Vector3 euler;
 

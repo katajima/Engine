@@ -26,7 +26,9 @@ public:
 	/// </summary>
 	void DrawEffect() override;
 
-	
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
 
 	// 移動処理
@@ -35,13 +37,16 @@ public:
 	// ジャンプ
 	void Jump() override;
 
+	// 攻撃
 	void Attack() override;
 
+	// プレイヤUI取得
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };
 
 
 
 private: 
+	// ステートマシーン初期化
 	void InitStateMachine() override;
 
 	// 調整項目の適用
@@ -50,5 +55,6 @@ private:
 	WorldTransform worldCollider_;
 	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 public:
+	// ロックオン
 	void LockOn(const std::vector<BaseEnemy*>& enemys);
 };

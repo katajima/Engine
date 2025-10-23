@@ -5,19 +5,18 @@
 // 3Dモデル共通部分
 class Input;
 class DirectXCommon;
+
+// カメラ共通クラス
 class CameraCommon
 {
 public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-
+	// DxCommon取得
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-
+	// インプット設定
 	void SetInput(Input* input) { input_ = input; };
-
-	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister);
-	static void SetRootParameterVertex(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister);
-
+	// インプット取得
 	Input* GetInput() { return input_;};
 
 private:

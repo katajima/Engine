@@ -1,12 +1,15 @@
 #pragma once
 #include "BaseCamera.h"
 
-
+// カメラインフォメーション
 struct CameraInfo {
 	BaseCamera* camera;
 	bool useCamera = false;
 };
 
+/// <summary>
+/// カメラマネージャークラス
+/// </summary>
 class CameraManeger
 {
 public:
@@ -22,13 +25,13 @@ public:
 
 	// 使っているカメラ設定(string カメラの名前、float 切り替わり時間(補間時間))
 	void SetUseCamera(std::string name, float time);
-
+	// ImGui更新
 	void UpadateImGui();
-
+	// カメラ取得
 	Camera* GetCamera() { return camera.get(); }
 	// カメラを管理対象から削除
 	void DeleteCamera(std::string name);
-
+	// カメラクリア
 	void Clear() {
 		cameras.clear();
 	};

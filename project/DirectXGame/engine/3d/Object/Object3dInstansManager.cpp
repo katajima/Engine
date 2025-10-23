@@ -2,6 +2,10 @@
 
 #include"DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
+#include <DirectXGame/engine/Utility/ConvertUtility.h>
+
+#pragma region Object3dInstansManager
 
 void Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
@@ -22,7 +26,7 @@ void Object3dInstansManager::Update() {
 		Matrix4x4 viewprojection = Multiply(viewMatrix, projectionMatrix);
 		Matrix4x4 local = Matrix4x4::Identity();
 		// 全パーティクルグループに対する処理
-		for (auto& val : objectGroups | std::views::values) // 各パーティクルグループに対して
+		for (auto& val : objectGroups | std::views::values) // 各オブジェクトグループに対して
 		{
 			ObjectGroup& group = val;
 			group.instanceCount = 0; // 描画すべきインスタンスのカウント
@@ -31,7 +35,8 @@ void Object3dInstansManager::Update() {
 
 			for (auto objectIterator = group.object.begin(); objectIterator != group
 				.object.end();) {
-				if (!objectIterator->is) {
+				// 描画されていないもしくはオブジェクトがない場合はスキップ
+				if (!objectIterator->is_ || !objectIterator->isDraw_) {
 					++objectIterator;
 					continue;
 				}
@@ -50,8 +55,9 @@ void Object3dInstansManager::Update() {
 
 					// インスタンシング用データに情報を書き込み
 					group.instanceData[group.instanceCount].World = worldMatrix;
-					group.instanceData[group.instanceCount].WVP =
-						worldViewProjectionMatrix;
+					group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
+					group.instanceData[group.instanceCount].worldInverseTranspose = Transpose(Inverse(worldMatrix));
+
 					group.instanceData[group.instanceCount].color = objectIterator->
 						color;
 					group.instanceData[group.instanceCount].textureIndex =
@@ -79,9 +85,11 @@ void Object3dInstansManager::Draw() {
 
 		DrawCommonSetting(group.rasteType, group.blendType);
 
-		entity3DManager_->GetLightManager()->DrawLight({ true,false,false });
+		entity3DManager_->GetLightManager()->DrawLight({ true,true,true });
 
 		group.mesh->material->GetCommandListMaterial(0);
+
+		group.mesh->material->GetCommandListTexture(2, 7, 8);
 
 		camera_->GetCommandList(4);
 
@@ -152,7 +160,7 @@ void Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Object3dInstansManager::Clear(const std::string name) {
+void Object3dInstansManager::Clear(const std::string& name) {
 	auto it = objectGroups.find(name);
 	if (it == objectGroups.end()) return;
 	it->second.object.clear();
@@ -163,7 +171,7 @@ void Object3dInstansManager::Clear(const std::string name) {
 #pragma region Create
 
 void Object3dInstansManager::CreateObject3dGroup(
-	const std::string name, const std::string textureFilePath, Model* model,
+	const std::string& name, const std::string& textureFilePath, Model* model,
 	RasterizerType    rasteType, BlendType    blendType) {
 	if (objectGroups.contains(name)) {
 		return;
@@ -213,7 +221,7 @@ void Object3dInstansManager::CreateObject3dGroup(
 }
 
 void Object3dInstansManager::CreateObject3dGroup(
-	const std::string name, const std::string textureFilePath, ModelMesh* mesh,
+	const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
 	RasterizerType    rasteType, BlendType    blendType) {
 	if (objectGroups.contains(name)) {
 		return;
@@ -262,36 +270,38 @@ void Object3dInstansManager::CreateObject3dGroup(
 }
 
 
-void Object3dInstansManager::AddObject(const std::string name,
-	const std::string texName,
-	ObjectInstans& object, MeshType type) {
+void Object3dInstansManager::AddObject(const std::string& name,
+	const std::string& texName,
+	ObjectInstans&& object, int& id, MeshType type) {
+
 	if (MeshType::kModel == type) {
 		CreateObject3dGroup(name, texName, modelManager_->FindModel(name));
 	}
 
-
 	object.color = { 1, 1, 1, 1 };
-	object.is = true;
+	object.is_ = true;
+	object.isDraw_ = true;
 
-
-	if (texName == "") {
-		object.texIndex = objectGroups[name].model->modelData.mesh[0]->material
-			->tex_.diffuseIndex;
+	if (texName.empty()) {
+		object.texIndex = objectGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
 	}
 	else {
-		object.texIndex = dxCommon_->GetTextureManager()->
-			GetTextureIndexByFilePath(texName);
+		object.texIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(texName);
 	}
 
+	// ✅ ムーブ前にidを保存
+	int objectId = object.id;
 
-	objectGroups[name].object.push_back(object);
+	// ✅ 完全に右辺値としてムーブされる
+	objectGroups[name].object.emplace_back(std::move(object));
 
 	// 追加した要素のインデックスを取得
 	size_t index = objectGroups[name].object.size() - 1;
 
 	// ID → インデックスで登録
-	if (object.id != -1) {
-		objectGroups[name].idMap[object.id] = index;
+	if (objectId == -1) {
+		objectGroups[name].idMap[ConvertUtility::ToInt(index)] = index;
+		id = ConvertUtility::ToInt(index);
 	}
 }
 
@@ -315,7 +325,7 @@ void Object3dInstansManager::CreateTileMap(const std::string& groupName,
 			if (tileType <= 0) continue; // 0以下 = 空
 
 			ObjectInstans tile;
-			tile.Initialize();
+			tile.Initialize(entity3DManager_,false);
 
 			Vector3 pos{};
 
@@ -342,7 +352,8 @@ void Object3dInstansManager::CreateTileMap(const std::string& groupName,
 
 			// テクスチャインデックス設定
 			tile.texIndex = tileType; // spriteシートの場合はインデックス切替で管理可能
-			tile.is = true;
+			tile.is_ = true;
+			tile.isDraw_ = true;
 			// タイルID（オプション、必要なら）
 			tile.id = y * mapWidth + x;
 			// グループにタイルを追加
@@ -358,23 +369,14 @@ void Object3dInstansManager::CreateTileMap(const std::string& groupName,
 				}
 			}
 
-			AddObject(groupName, texPath, tile, MeshType::kModel);
+			AddObject(groupName, texPath, std::move(tile), id_,MeshType::kModel);
 		}
 	}
 }
 
 #pragma endregion // 生成or追加系
 
-void Object3dInstansManager::MoveTile(const std::string& groupName, int tileId,
-	const Vector3& newPos) {
-	auto& group = objectGroups[groupName];
-	for (auto& obj : group.object) {
-		if (obj.is && obj.id == tileId) {
-			obj.transform.translate_ = newPos;
-			return;
-		}
-	}
-}
+
 
 ObjectInstans* Object3dInstansManager::GetObjectById(
 	const std::string& groupName, int id) {
@@ -397,11 +399,11 @@ ObjectInstans* Object3dInstansManager::GetObjectById(
 	return &group.object[index];
 }
 
-std::vector<ObjectInstans>& Object3dInstansManager::GetObjects(const std::string& groupName)
+std::deque<ObjectInstans>& Object3dInstansManager::GetObjects(const std::string& groupName)
 {
 	auto itGroup = objectGroups.find(groupName);
 	if (itGroup == objectGroups.end()) {
-		static std::vector<ObjectInstans> empty; // 空のベクタを static で用意
+		static std::deque<ObjectInstans> empty; // 空のベクタを static で用意
 		return empty; // 空参照を返す
 	}
 
@@ -419,31 +421,47 @@ Object3dInstansManager::ObjectGroup& Object3dInstansManager::GetObjectGroup(cons
 	return itGroup->second;
 }
 
+#pragma endregion
+
 #pragma region PSO
 
 
 void Object3dInstansManager::CreateRootSignature() {
-	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
-	PSOFanction::SetDescriptorRenge(descriptorRange[0], 1, UINT_MAX,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
-	PSOFanction::SetDescriptorRenge(descriptorRange[1], 0, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV);// インスタンシング用
+	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
+	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[3], 3, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // AOマップ用
+	PSOFanction::SetDescriptorRenge(descriptorRange[4],	0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);// インスタンシング用
+	PSOFanction::SetDescriptorRenge(descriptorRange[0], 4, UINT_MAX, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
 
 
 	// RootParameter作成。複数指定できるのではい
-	D3D12_ROOT_PARAMETER rootParameters[5] = {};
+	D3D12_ROOT_PARAMETER rootParameters[11] = {};
 
 	//CD3DX12_ROOT_PARAMETER 
 
 	// マテリアル (b0) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[0], 0,D3D12_SHADER_VISIBILITY_PIXEL,D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// インスタンシング(t1) をバーテックシェーダ使用する
-	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[1],D3D12_SHADER_VISIBILITY_VERTEX);
+	PSOFanction::SetRootParameter(rootParameters[1], descriptorRange[4],D3D12_SHADER_VISIBILITY_VERTEX);
 	// テクスチャデータ (t0) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[2], descriptorRange[0],D3D12_SHADER_VISIBILITY_PIXEL);
 	// 方向性ライトデータ (b1) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[3], 1, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 	// カメラデータ (b2) をピクセルシェーダで使用する
 	PSOFanction::SetRootParameter(rootParameters[4], 2, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
-
+	// ポイントライトデータ (b3) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[5], 3, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// スポットライトデータ (b4) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[6], 4, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
+	// テクスチャデータ (t1) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[7], descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t2) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[8], descriptorRange[2], D3D12_SHADER_VISIBILITY_PIXEL);
+	// テクスチャデータ (t3) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[9], descriptorRange[3], D3D12_SHADER_VISIBILITY_PIXEL);
+	//トランスフォームデータ (b5) をピクセルシェーダで使用する
+	PSOFanction::SetRootParameter(rootParameters[10], 5, D3D12_SHADER_VISIBILITY_PIXEL, D3D12_ROOT_PARAMETER_TYPE_CBV);
 
 
 	///Samplerの設定
@@ -474,7 +492,8 @@ void Object3dInstansManager::CreateGraphicsPipeline() {
 		DXGI_FORMAT_R32G32B32A32_FLOAT);
 	psoManager_->AddInputElementDesc("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT);
 	psoManager_->AddInputElementDesc("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
-
+	psoManager_->AddInputElementDesc("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	psoManager_->AddInputElementDesc("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT);
 
 	psoManager_->SetShaderFileName(ShaderFileName::VS,
 		L"resources/shaders/Object3D/Object3dInstans.VS.hlsl");
@@ -564,14 +583,54 @@ void Object3dInstansManager::BlendMuliply() {
 #pragma endregion // パイプライン関係
 
 
-void ObjectInstans::Initialize(Transform transfor) {
+#pragma region ObjectInstans
+
+void ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollider, Transform transfor) {
 	transform.Initialize();
 	transform.translate_ = transfor.translate;
 	transform.rotate_ = transfor.rotate;
 	transform.scale_ = transfor.scale;
 	color = { 1,1,1,1 };
+	useCollider_ = useCollider;
+
+	if (useCollider_) {
+		colliderComponent_ = std::make_unique<ColliderComponent>();
+		colliderComponent_->SetOwner(colliderComponent_.get());
+		// ラインコモンをセット
+		colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+		// 登録（IDを取得したければ変数で受ける）
+		colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+		isColliderComponenyUpdate_ = true;
+	}
+
+	rigidBodyComponent_ = std::make_unique<RigidBodyComponent>();
+
 }
 
 void ObjectInstans::Update() {
+
+	if (!isDelete_) return;
+
 	transform.Update();
+
+	// コライダー
+	if (colliderComponent_) {
+		if (isColliderComponenyUpdate_) {
+			colliderComponent_->UpdateAll(transform);
+		}
+	}
+
+	// 物理
+	if (rigidBodyComponent_) {
+		rigidBodyComponent_->Integrate(MyGame::GameTime(), transform);
+	}
 }
+
+
+ContactRecord& ObjectInstans::GetContactRecord() { return colliderComponent_->contactRecord_; };
+
+
+
+#pragma endregion
+
+

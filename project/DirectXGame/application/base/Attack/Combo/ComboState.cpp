@@ -5,7 +5,7 @@
 // 開始
 void ComboNodeState::Enter(BaseCharacter* owner) {
 
-	AnimationComponent* anima = owner->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetAnimetion(animation, 0.0f);
 	owner->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
 	timeInState = 0.0f;
@@ -14,7 +14,7 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	anima->SetAnimationSpeed(1.0f);
 	owner->GetWeapon()->SetComboData(comboData_);
 	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = true;
-	owner->GetMoveComponent()->Move(*owner->GetObject3D()->GetTransformComponent(), owner->GetInput());
+	owner->GetMoveComponent()->Move(owner->GetObjectComponent()->GetWorldTransform(), owner->GetInput());
 	if (anima->GetEndAnimeTime(animation) == 0.0f) {
 		inputWindowEnd = 1.0f;
 	}
@@ -26,7 +26,7 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 // 更新
 void ComboNodeState::Update(BaseCharacter* owner, float dt)
 {
-	AnimationComponent* anima = owner->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 
 	timeInState += dt;
 	
@@ -59,7 +59,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 // 終了
 void ComboNodeState::Exit(BaseCharacter* owner)
 {
-	AnimationComponent* anima = owner->GetObject3D()->GetAnimationComponent();
+	AnimationComponent* anima = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 
 	timeInState = 0.0f;
 	// アニメ終了時の処理など

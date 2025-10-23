@@ -14,7 +14,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     gFreeListIndex[0] = 0;
     
     uint particleIndex = DTid.x;
-    if (particleIndex < gMaxInstance.maxInstanse)
+    if (particleIndex < gMaxInstance.maxInstance)
     {    
         gParticle[particleIndex] = (Particle) 0;
         gParticle[particleIndex].translate = float3(0.0f, 0.0f, 0.0f);
@@ -30,7 +30,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
         
         if (particleIndex == 0)
         {
-            gFreeListIndex[0] = gMaxInstance.maxInstanse - 1;
+            gFreeListIndex[0] = gMaxInstance.maxInstance - 1;
         }
         
     } 

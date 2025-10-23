@@ -1,6 +1,9 @@
 #pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
+/// <summary>
+/// 移動コンポーネント
+/// </summary>
 class MoveComponent
 {
 public:
@@ -13,13 +16,13 @@ public:
 	Vector3& Acceleration() { return acceleration_; }
 	// 向いている方向
 	Vector3 GetDirection() const { return direction_; }
-
-	void AddMove(float deltaTime, bool is, Object3d& object)
+	// 移動
+	void AddMove(float deltaTime, bool is, WorldTransform& object)
 	{
 		if (is) {
 			velocity_ += Acceleration(); // 加速度を速度に加算
 
-			object.GetWorldTransform().translate_ += GetVelocity() * deltaTime;
+			object.translate_ += GetVelocity() * deltaTime;
 			if (Velocity().Length() != 0.0f) {
 				direction_ = Velocity().Normalize();
 			}
@@ -27,10 +30,10 @@ public:
 	};
 
 	// 着地処理
-	void Landing(TransformComponent& world, RigidBodyComponent& rigid) {
+	void Landing(WorldTransform& world, RigidBodyComponent& rigid) {
 		// 着地
 		if (world.GetWorldPosition().y <= groundHeight_) {
-			world.GetWorldTransform().translate_.y = groundHeight_;
+			world.translate_.y = groundHeight_;
 			rigid.Velocity().y = 0.0f;
 			rigid.SetIsGravity(false);
 
@@ -42,8 +45,8 @@ public:
 			isLanding_ = false;
 		}
 	}
-
-	void Move(TransformComponent& world,Input* input) {
+	// 移動処理
+	void Move(WorldTransform& world,Input* input) {
 		Vector3 velo = GetVelocity();
 
 
@@ -75,15 +78,17 @@ public:
 			
 			// スティックを動かしてたら
 			if (velo.Length() != 0) {
-				world.GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
+				world.rotate_.y = std::atan2(velo.x, velo.z);
 			}
 		}
 		Velocity().x = velo.x;
 		Velocity().z = velo.z;
 	}
+	// カメラ設定
 	void SetCamera(Camera* camera) { camera_ = camera; }
+	// 速度設定
 	void SetSpeed(float speed) { speed_ = speed; };
-
+	// ジャンプ回数現象
 	void DecrementJumpCount() { jumpCount_--; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }

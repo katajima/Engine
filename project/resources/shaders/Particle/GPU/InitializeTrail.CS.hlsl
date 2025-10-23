@@ -8,7 +8,7 @@ ConstantBuffer<MaxInstance> gMaxInstance : register(b0); // トレイル頂点�
 void main( uint3 DTid : SV_DispatchThreadID )
 {    
     uint id = DTid.x;
-    if (id < gMaxInstance.maxInstanse)
+    if (id < gMaxInstance.maxInstance)
     {
         gRibbonVertex[id] = (RibbonVertex) 0;
     }
