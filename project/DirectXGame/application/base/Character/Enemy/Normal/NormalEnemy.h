@@ -41,6 +41,11 @@ private:
 private:
 	WorldTransform worldEffect_;
 
+	bool isStopMove_ = false;
+	float stopMoveTimer_ = 0.0f;
+
+	DebugTimer debugTimer_;
+
 	//std::unique_ptr<ParticleEmitter> tireEmit_ = nullptr; // タイヤ
 	//std::unique_ptr<ParticleEmitter> ductEmit_ = nullptr; // ダクト
 	//std::unique_ptr<ParticleEmitter> plankEmit_ = nullptr; // 鋼板

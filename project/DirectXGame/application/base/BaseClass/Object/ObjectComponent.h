@@ -1,6 +1,9 @@
 #pragma once
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
+
+#include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
+
 #include"DirectXGame/engine/2d/Sprite.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
@@ -36,6 +39,7 @@ struct ObjectStateFlags
 
 
 class Entity3DManager;	// 前方宣言
+class ObjectInstans;
 class ObjectComponent {
 public:
 
@@ -44,6 +48,10 @@ public:
 	///</summary>
 	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables,const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver,ObjectModelType modelType = ObjectModelType::kNormal);
 
+	/// <summary>
+	/// インスタンシング用初期化
+	/// </summary>
+	void InitializeInstancing(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver);
 
 	/// <summary>
 	/// 更新
@@ -53,16 +61,26 @@ public:
 
 public: // コライダー
 	// コライダーコンポーネント取得
-	ColliderComponent* GetColliderComponent() { return objectBase_->GetColliderComponent(); }
+	ColliderComponent* GetColliderComponent();
 	// コライダー衝突履歴削除
-	void ColliderHistoryClear() { objectBase_->GetColliderComponent()->contactRecord_.Clear(); }
+	void ColliderHistoryClear();
 	// 衝突履歴取得
-	ContactRecord& GetContactRecord() { return objectBase_->GetColliderComponent()->contactRecord_; }
+	ContactRecord& GetContactRecord();
+
+	// 描画するか
+	void SetIsDraw(bool is);
+
+	// 削除
+	void IsDelete();
+
 public: // 取得
 	// オブジェクト3d取得
 	Object3d* GetObject3D() { return objectBase_; }
 	// ワールド変換取得
-	WorldTransform& GetWorldTransform() { return objectBase_->GetWorldTransform(); }
+	WorldTransform& GetWorldTransform();
+	
+	RigidBodyComponent* GetRigidBodyComponent();
+	
 	// オブジェクト時間取得
 	float GetTime() const;
 	// 名前取得
@@ -87,15 +105,22 @@ public: // 設定
 	ObjectStateFlags& GetObjectStateFlags() { return flags_; }
 	// SRT設定
 	void SetSRT(const Vector3& s = {1,1,1}, const Vector3& r = {0,0,0}, const Vector3& t = {0,0,0});
+	
+	void SetInstancingSRT(const Vector3& s = {1,1,1}, const Vector3& r = {0,0,0}, const Vector3& t = {0,0,0});
 
 private:
 	Object3d* objectBase_ = nullptr;// オブジェクト3d(Entity3dManagerを使って)
 	ObjectType objectType_ = ObjectType::None; // オブジェクトの種類(キャラクター、武器など)
 	std::string name_ = "";		// オブジェクト名
+	std::string modelName_ = "";		// オブジェクト名
 	ObjectStateFlags flags_;	// オブジェクトの状態
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	bool useCollider_ = false;	// コライダーコンポーネントを使うか
+	bool useInstancing = false;	// インスタンシング描画にするか
 
+
+	ObjectInstans* objectInstance_;
+	int instanceId_ = 0;
 
 protected: // 貰ってくるもの
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー

@@ -14,12 +14,12 @@ public:
 	// 向いている方向
 	Vector3 GetDirection() const { return direction_; }
 
-	void AddMove(float deltaTime, bool is, Object3d& object)
+	void AddMove(float deltaTime, bool is, WorldTransform& object)
 	{
 		if (is) {
 			velocity_ += Acceleration(); // 加速度を速度に加算
 
-			object.GetWorldTransform().translate_ += GetVelocity() * deltaTime;
+			object.translate_ += GetVelocity() * deltaTime;
 			if (Velocity().Length() != 0.0f) {
 				direction_ = Velocity().Normalize();
 			}
@@ -27,10 +27,10 @@ public:
 	};
 
 	// 着地処理
-	void Landing(TransformComponent& world, RigidBodyComponent& rigid) {
+	void Landing(WorldTransform& world, RigidBodyComponent& rigid) {
 		// 着地
 		if (world.GetWorldPosition().y <= groundHeight_) {
-			world.GetWorldTransform().translate_.y = groundHeight_;
+			world.translate_.y = groundHeight_;
 			rigid.Velocity().y = 0.0f;
 			rigid.SetIsGravity(false);
 
@@ -43,7 +43,7 @@ public:
 		}
 	}
 
-	void Move(TransformComponent& world,Input* input) {
+	void Move(WorldTransform& world,Input* input) {
 		Vector3 velo = GetVelocity();
 
 
@@ -75,7 +75,7 @@ public:
 			
 			// スティックを動かしてたら
 			if (velo.Length() != 0) {
-				world.GetWorldTransform().rotate_.y = std::atan2(velo.x, velo.z);
+				world.rotate_.y = std::atan2(velo.x, velo.z);
 			}
 		}
 		Velocity().x = velo.x;

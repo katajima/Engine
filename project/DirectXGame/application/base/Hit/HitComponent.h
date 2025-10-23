@@ -12,7 +12,7 @@ public:
 		offset_ = offset;
 	}
 
-	void Update(float deltaTime, Object3d* object) {
+	void Update(float deltaTime, ObjectComponent* object) {
 
 		if (isHit) {
 			object->GetRigidBodyComponent()->SetIsGravity(false);
@@ -33,7 +33,7 @@ public:
 		else {
 			
 
-			strPos_ = object->GetWorldPosition();
+			strPos_ = object->GetWorldTransform().GetWorldPosition();
 
 
 			knockbackTimer += deltaTime;

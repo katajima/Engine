@@ -71,7 +71,7 @@ static Vector3 CatmullRom(const std::vector<Vector3>& points, float t) {
 
 	// `t` を `areaWidth` で割り、区間番号を取得
 	size_t index = static_cast<size_t>(t / areaWidth);
-	index = Clamp(index, static_cast<size_t>(0), division - 1);
+	index = Math::Clamp(index, static_cast<size_t>(0), division - 1);
 
 	// 各点のインデックス
 	size_t index0 = (index == 0) ? 0 : index - 1;
@@ -90,38 +90,10 @@ static Vector3 CatmullRom(const std::vector<Vector3>& points, float t) {
 
 	// 区間内の `t` を正規化
 	float t_2 = static_cast<float>(t - index * areaWidth) / areaWidth;
-	t_2 = Clamp(t_2, 0.0f, 1.0f);
+	t_2 = Math::Clamp(t_2, 0.0f, 1.0f);
 
 	// 4点を指定して Catmull-Rom 補間
 	return CatmullRom(p0, p1, p2, p3, t_2);
-}
-
-// 最近接点
-static Vector3 ClosestPoint(const Vector3& point, const Segment& segment)
-{
-	Vector3 result{};
-	Vector3 d = segment.diff();
-	Vector3 v = {
-		point.x - segment.origin.x,
-		point.y - segment.origin.y,
-		point.z - segment.origin.z
-	};
-
-
-	float dot = Dot(d, d);
-	if (dot == 0.0f) {
-		return segment.origin;
-	}
-
-	float t = Dot(v, d) / dot;
-
-	t = Clamp(t);
-
-	result.x = segment.origin.x + d.x * t;
-	result.y = segment.origin.y + d.y * t;
-	result.z = segment.origin.z + d.z * t;
-
-	return result;
 }
 
 // 点と線分間の距離の二乗を求める関数
@@ -175,95 +147,6 @@ static float SegmentSegmentDistanceSquared(const Segment& seg1, const Segment& s
 	return (closestPoint1 - closestPoint2).LengthSq();
 }
 
-// 線と線の最近接点
-static Vector3 ClosestPointSegmentSegment(const Segment& seg1, const Segment& seg2, Vector3 currentClosest) {
-	Vector3 u = seg1.diff();
-	Vector3 v = seg2.diff();
-	Vector3 w = Subtract(seg1.origin, seg2.origin);
-
-	float a = Dot(u, u);
-	float b = Dot(u, v);
-	float c = Dot(v, v);
-	float d = Dot(u, w);
-	float e = Dot(v, w);
-
-	float denom = a * c - b * b;
-
-	// ゼロ除算の回避
-	float s = 0.0f, t = 0.0f;
-	if (denom != 0.0f) {
-		s = Clamp3((b * e - c * d) / denom, 0.0f, 1.0f);
-		t = Clamp3((a * e - b * d) / denom, 0.0f, 1.0f);
-	}
-
-	Vector3 closestOnSeg1 = Add(seg1.origin, Multiply(u, s));
-	Vector3 closestOnSeg2 = Add(seg2.origin, Multiply(v, t));
-
-	return LengthSquared(Subtract(closestOnSeg1, closestOnSeg2)) < LengthSquared(Subtract(currentClosest, seg1.origin))
-		? closestOnSeg1
-		: currentClosest;
-}
-// 線と三角形の最近接点
-static Vector3 ClosestPointSegmentTriangle(const Segment& segment, const Triangle& triangle) {
-	// 三角形の3辺を定義
-	Segment edge1 = { triangle.vertices[0], triangle.vertices[1] };
-	Segment edge2 = { triangle.vertices[1], triangle.vertices[2] };
-	Segment edge3 = { triangle.vertices[2], triangle.vertices[0] };
-
-	// 最初に線分の始点を初期最近接点とする
-	Vector3 closest = ClosestPointSegment(segment, triangle.vertices[0]);
-
-	// 三角形のエッジに対して最近接点を更新
-	closest = ClosestPointSegmentSegment(segment, edge1, closest);
-	closest = ClosestPointSegmentSegment(segment, edge2, closest);
-	closest = ClosestPointSegmentSegment(segment, edge3, closest);
-
-	// 三角形の面上の最近接点も考慮（重要）
-	Plane plane = PlaneFromPoints(triangle.vertices[0], triangle.vertices[1], triangle.vertices[2]);
-	Vector3 pointOnPlane = ClosestPointOnPlane(plane, segment.origin);
-	closest = LengthSquared(Subtract(closest, segment.origin)) < LengthSquared(Subtract(pointOnPlane, segment.origin))
-		? closest
-		: pointOnPlane;
-
-	return closest;
-}
-// 線とAABBの最近接点
-static Vector3 ClosestPointSegmentAABB(const Segment& segment, const AABB& box) {
-	Vector3 closestPoint = segment.origin;
-
-	for (int i = 0; i < 3; i++) { // X, Y, Z 各軸
-		if (closestPoint[i] < box.min_[i]) closestPoint[i] = box.min_[i];
-		if (closestPoint[i] > box.max_[i]) closestPoint[i] = box.max_[i];
-	}
-
-	return closestPoint;
-}
-// 線と点の最近接点
-static Vector3 ClosestPointSegment(const Segment& segment, const Vector3& point) {
-	Vector3 diff = segment.diff();
-	float lenSq = Dot(diff, diff);
-
-	if (lenSq == 0.0f) {
-		return segment.origin;  // 線分が点の場合は始点を返す
-	}
-
-	float t = Dot(Subtract(point, segment.origin), diff) / lenSq;
-	t = Clamp3(t, 0.0f, 1.0f);
-
-	return Add(segment.origin, Multiply(diff, t));
-}
-// 線と点の最近接点
-static Vector3 ClosestPointOnSegment(const Segment& segment, const Vector3& point) {
-	Vector3 segVec = segment.diff();
-	float segLenSq = segVec.LengthSq(); // 長さの二乗
-
-	// 点 `point` が線分上のどの位置にあるかを求める
-	float t = ((point - segment.origin).Dot(segVec)) / segLenSq;
-
-	// t を 0～1 にクランプして線分上の点を求める
-	t = std::clamp(t, 0.0f, 1.0f);
-	return segment.pointAt(t);
-}
 // 
 static float SegmentClosestDistanceSq(const Segment& seg0, const Segment& seg1) {
 	Vector3 u = seg0.diff();

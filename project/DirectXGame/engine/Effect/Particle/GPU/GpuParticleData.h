@@ -39,7 +39,8 @@ struct ParticleCS {
 
 	uint32_t isAlive;           // 生存しているか
 	uint32_t useBillboard;      // ビルボードを使うか
-	Vector2 pad;
+	uint32_t emitterIndex;
+	uint32_t pad;
 };
 
 // パーティクル削除
@@ -209,6 +210,14 @@ struct PerEmitterDispatch {
 	uint32_t totalThreadCount;  // このエミッタが必要とするスレッド数
 	uint32_t particleOffset;    // 書き込み先パーティクルバッファの開始インデックス
 	uint32_t emitterIndex;      // エミッタ番号（StructuredBufferのインデックス）
+};
+
+
+struct DispatchCount {
+	uint32_t gEmitterDispatchCount;
+	uint32_t pad0;
+	uint32_t pad1;
+	uint32_t pad2;
 };
 
 // 頂点データ(トレイル)

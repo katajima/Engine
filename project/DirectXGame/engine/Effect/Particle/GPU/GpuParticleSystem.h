@@ -68,15 +68,24 @@ private:
 	// パーティクル削除情報
 	ConstantBuffer<DeleteParticleCS> cbDeleteParticleCS_;
 	//
-	ConstantBuffer<PerEmitterDispatch> emitterDispatchBuffer_;
-	//
+
+
+
+
+
+
 private:
 	// エミッターたち
 	std::map<std::string, BaseGpuParticleEmitter*> emitters;
 
-	ConstantBuffer<EmitterCommon> cbEmitterCommon_;	// 共通データ
-	ConstantBuffer<EmitterTrail> cbEmitterTrail_;	// トレイルエミッター用データ
+	StructuredBuffer<EmitterCommon> cbEmitterCommon_;	// 共通データ
+	StructuredBuffer<EmitterTrail> cbEmitterTrail_;	// トレイルエミッター用データ
+	StructuredBuffer<PerEmitterDispatch> emitterDispatchBuffer_;
+	ConstantBuffer<DispatchCount> cbDispatchCount_;
 
+	int threadCount = 64;
+
+	int emitCount_ = 0;
 private:
 	
 private: // トレイル用

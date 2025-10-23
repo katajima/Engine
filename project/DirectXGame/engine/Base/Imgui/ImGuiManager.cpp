@@ -121,7 +121,7 @@ void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camera, const
 				float translation[3], rotation[3], scale[3];
 				ImGuizmo::DecomposeMatrixToComponents(&obj.worldMat_.m[0][0], translation, rotation, scale);
 				obj.translate_ = Vector3(translation[0], translation[1], translation[2]);
-				obj.rotate_ = Vector3(DegreesToRadians(rotation[0]), DegreesToRadians(rotation[1]), DegreesToRadians(rotation[2]));
+				obj.rotate_ = Vector3(Math::DegreesToRadians(rotation[0]), Math::DegreesToRadians(rotation[1]), Math::DegreesToRadians(rotation[2]));
 				obj.scale_ = Vector3(scale[0], scale[1], scale[2]);
 				std::cout << "Translation: " << translation[0] << ", " << translation[1] << ", " << translation[2] << std::endl;
 				std::cout << "Rotation: " << rotation[0] << ", " << rotation[1] << ", " << rotation[2] << std::endl;

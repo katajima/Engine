@@ -34,7 +34,7 @@ void PlayerStanBullet::Initialize(Entity3DManager* entity3DManager, Entity2DMana
 	
 	
 	
-	velocity_ = player_->GetObject3D()->ObjectDirection();
+	velocity_ = player_->GetObjectComponent()->GetObject3D()->ObjectDirection();
 	velocity_ *= 30.0f;
 	velocity_.y = 100.0f;
 	

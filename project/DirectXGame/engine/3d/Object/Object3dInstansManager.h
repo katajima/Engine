@@ -9,6 +9,7 @@
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 #include<memory>
+#include<deque> 
 using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
@@ -43,21 +44,47 @@ struct MapId {
 	std::string tex; // テクスチャname
 };
 
+class RigidBodyComponent;
+class ColliderComponent;
+class ContactRecord;
 class ObjectInstans
 {
 public:
 	// 初期化
-	void Initialize(Transform transform = { {1,1,1},{},{} });
+	void Initialize(Entity3DManager* entity3DManager,bool useCollider = false,Transform transform = { {1,1,1},{},{} });
 	// 更新
 	void Update();
 
+	// Object3d内でコライダーコンポーネントを更新するか
+	void SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
+
+	// コライダーコンポーネントを取得
+	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+	// コライダーコンポーネントの接触情報を取得
+	ContactRecord& GetContactRecord();
+
+	RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
+
+
+
+	void IsDelete() { isDelete_ = true; }
+
+	bool GetIsDelete() const { return isDelete_; }
+private:
+	// コライダーコンポーネント
+	std::unique_ptr<ColliderComponent> colliderComponent_;
+	// コライダーコンポーネントをObject3d内で更新するかのフラグ
+	bool isColliderComponenyUpdate_ = false;
+	bool useCollider_ = false;
 
 private:
-
+	std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
+	bool isDelete_;
 public:
 	WorldTransform transform;
 	Vector4 color;
-	bool is;
+	bool is_;
+	bool isDraw_ = true;
 	uint32_t texIndex;
 	int id = -1;   // ← 固有ID（負なら未使用）
 };
@@ -71,8 +98,10 @@ public:
 	{
 		Matrix4x4 WVP;
 		Matrix4x4 World;
+		Matrix4x4 worldInverseTranspose;
 		Vector4 color;
 		UINT textureIndex;
+		Vector3 pad;
 	};
 
 	enum class RasterizerType
@@ -99,7 +128,7 @@ public:
 	struct ObjectGroup
 	{
 		std::string name; // 名前
-		std::vector<ObjectInstans> object;
+		std::deque<ObjectInstans> object; // ✅ ここをdequeに
 		std::unordered_map<int, size_t> idMap;
 		Model* model;
 		bool flag;
@@ -132,18 +161,18 @@ public:
 	void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
 	// オブジェクトグループ作り(モデル)
-	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+	void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 	// オブジェクトグループ作り(モデル)
-	void CreateObject3dGroup(const std::string name, const std::string textureFilePath, ModelMesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+	void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, ModelMesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
-	void AddObject(const std::string name, const std::string texName, ObjectInstans& object, MeshType type = MeshType::kModel);
+	void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object,int& id,MeshType type = MeshType::kModel);
 
 	int GetSize() { return static_cast<int>(objectGroups.size()); };
 
-	void Clear(const std::string name);
+	void Clear(const std::string& name);
 
 	void ClearObject() {
 		for (auto& obj : objectGroups) {
@@ -165,13 +194,11 @@ public:
 		const std::vector<MapId>& mapIds,
 		MapAxis axis = MapAxis::ZX); // テクスチャIndexや種類を表すID
 
-	// タイル移動
-	void MoveTile(const std::string& groupName, int tileId, const Vector3& newPos);
 public: //取得
 
 	ObjectInstans* GetObjectById(const std::string& groupName, int id);
 
-	std::vector<ObjectInstans>& GetObjects(const std::string& groupName);
+	std::deque<ObjectInstans>& GetObjects(const std::string& groupName);
 
 	ObjectGroup& GetObjectGroup(const std::string& groupName);
 
@@ -205,7 +232,7 @@ private:
 
 	Transform transform{};
 
-
+	int id_;
 
 private:
 	DirectXCommon* dxCommon_ = nullptr;

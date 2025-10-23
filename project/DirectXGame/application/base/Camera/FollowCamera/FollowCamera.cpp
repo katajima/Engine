@@ -12,8 +12,8 @@ void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  G
     uniqueCamera_ = std::make_unique<Camera>();
     uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
     uniqueCamera_->farClip_ = 15000.0f;
-    uniqueCamera_->transform_.rotate.x = DegreesToRadians(90);
-    uniqueCamera_->transform_.rotate.x = DegreesToRadians(20);
+    uniqueCamera_->transform_.rotate.x = Math::DegreesToRadians(90);
+    uniqueCamera_->transform_.rotate.x = Math::DegreesToRadians(20);
 
    
     uniqueCamera_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
@@ -34,7 +34,7 @@ void FollowCamera::Update()
 
         if (lockOnObject) {
             // ロックオン時の処理
-            Vector3 targetPos = target_->GetWorldTransform().worldMat_.GetWorldPosition();
+            Vector3 targetPos = target_->worldMat_.GetWorldPosition();
             Vector3 lockOnPos = lockOnObject->GetWorldTransform().worldMat_.GetWorldPosition();
 
             // カメラ方向をロックオンターゲットに向ける
@@ -50,7 +50,7 @@ void FollowCamera::Update()
 
             // スムーズに補間（必要なら）
             uniqueCamera_->transform_.rotate.y = targetYaw;
-            uniqueCamera_->transform_.rotate.x = std::clamp(targetPitch, DegreesToRadians(-15.0f), DegreesToRadians(60.0f));
+            uniqueCamera_->transform_.rotate.x = std::clamp(targetPitch, Math::DegreesToRadians(-15.0f), Math::DegreesToRadians(60.0f));
         }
         else {
             // 通常の自由操作
@@ -58,7 +58,7 @@ void FollowCamera::Update()
                 uniqueCamera_->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
                 uniqueCamera_->transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
 
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, DegreesToRadians(-15.0f), DegreesToRadians(60.0f));
+                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(-15.0f), Math::DegreesToRadians(60.0f));
             }
             else {
                 if (input_->IsPushKey(DIK_LEFT)) {
@@ -68,7 +68,7 @@ void FollowCamera::Update()
                     uniqueCamera_->transform_.rotate.y += 0.01f;
                 }
 
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, DegreesToRadians(0.0f), DegreesToRadians(60.0f));
+                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(0.0f), Math::DegreesToRadians(60.0f));
             }
         }
 
@@ -78,7 +78,7 @@ void FollowCamera::Update()
         Matrix4x4 rotateMatrix = rotX * rotY;
         Vector3 offset = TransformNormal(baseOffset, rotateMatrix);
 
-        Vector3 targetPos = target_->GetWorldTransform().worldMat_.GetWorldPosition();
+        Vector3 targetPos = target_->worldMat_.GetWorldPosition();
         Vector3 desiredCameraPos = Add(targetPos, offset);
 
         // 地面への沈み補正

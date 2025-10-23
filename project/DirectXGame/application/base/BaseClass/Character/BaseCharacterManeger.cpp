@@ -36,7 +36,7 @@ void BaseCharacterManager::Draw2D()
 {
 	for (auto& character : character_)
 	{
-		if (character->GetObject3D()) {
+		if (character) {
 			if (character->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
 				if (character->GetAlive()) {
 					character->Draw2D();
@@ -76,8 +76,8 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 	enemy->SetPlayer(GetPlayer());
 	enemy->SetEffect(effect_);
 	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
-	enemy->GetObject3D()->GetWorldTransform().translate_ = transform.translate;
-	enemy->GetObject3D()->GetWorldTransform().rotate_ = transform.rotate;
+	enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;
+	enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;
 	
 	character_.push_back(std::move(enemy));
 }

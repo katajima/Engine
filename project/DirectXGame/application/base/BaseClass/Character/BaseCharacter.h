@@ -68,19 +68,19 @@ public:
 
 	// 移動制限
 	void LimitMove(Vector3 min, Vector3 max) {
-		Object3d* object = objectComponent_->GetObject3D();
+		WorldTransform world = objectComponent_->GetWorldTransform();
 
-		if (object->GetWorldTransform().translate_.x > max.x) {
-			object->GetWorldTransform().translate_.x = max.x;
+		if (world.translate_.x > max.x) {
+			world.translate_.x = max.x;
 		}
-		if (object->GetWorldTransform().translate_.x < min.x) {
-			object->GetWorldTransform().translate_.x = min.x;
+		if (world.translate_.x < min.x) {
+			world.translate_.x = min.x;
 		}
-		if (object->GetWorldTransform().translate_.z > max.z) {
-			object->GetWorldTransform().translate_.z = max.z;
+		if (world.translate_.z > max.z) {
+			world.translate_.z = max.z;
 		}
-		if (object->GetWorldTransform().translate_.z < min.z) {
-			object->GetWorldTransform().translate_.z = min.z;
+		if (world.translate_.z < min.z) {
+			world.translate_.z = min.z;
 		}
 	};
 
@@ -108,9 +108,10 @@ public: // 取得系関数
 	// コライダーコンポーネント
 	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
-	Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	//Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
 	// ワールド変換取得
-	WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
+	WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 	// 削除フラグ
 	bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 	// 削除する

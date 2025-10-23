@@ -16,8 +16,8 @@ void EnemyStateMove::Update()
 		timer_ += character_->GetTime();
 
 		if (timer_ >= rootTimer_ && enemy->GetTargetDistance() <= 50) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
-			return;
+			//character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
+			//return;
 		}
 	}
 	else {
@@ -100,21 +100,21 @@ void EnemyStateDie::Update() {
 		timer_ = 0.0f;
 		if (!character_->GetAlive()) {
 			character_->Delete();
-			character_->GetObject3D()->IsDelete();
+			character_->GetObjectComponent()->IsDelete();
 		}
 	}
 	else if (timer_ <= dieTimer_ / 2.0f) {
-		character_->GetObject3D()->SetIsDraw(false);
+		character_->GetObjectComponent()->SetIsDraw(false);
 	}
 	else {
-		character_->GetObject3D()->GetRigidBodyComponent()->SetIsGravity(false);
-		character_->GetObject3D()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character_->GetTime();
-		if (character_->GetObject3D()->GetWorldTransform().scale_.x <= 0) {
-			character_->GetObject3D()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
+		character_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);
+		character_->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character_->GetTime();
+		if (character_->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
+			character_->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
 		}
 
 		// 着地処理
-		character_->GetMoveComponent()->Landing(*character_->GetObject3D()->GetTransformComponent(), *character_->GetObject3D()->GetRigidBodyComponent());
+		character_->GetMoveComponent()->Landing(character_->GetObjectComponent()->GetWorldTransform(), *character_->GetObjectComponent()->GetRigidBodyComponent());
 	}
 }
 

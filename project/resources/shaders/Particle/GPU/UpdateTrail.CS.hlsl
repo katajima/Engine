@@ -8,7 +8,7 @@ ConstantBuffer<MaxInstance> gTrailMaxInstance : register(b1);
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     uint id = DTid.x;
-    if (id >= gTrailMaxInstance.maxInstanse)
+    if (id >= gTrailMaxInstance.maxInstance)
         return;
 
     RibbonVertex v = gRibbonVertex[id];

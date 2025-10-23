@@ -19,6 +19,7 @@ public:
 	void* owner = nullptr; // 通知先ポインタ
 	bool enabled = true;
 	bool isStatic = false;  // 動かさない
+	bool isDebugLine = false;// ライン描画するか	
 	Vector3 centerWorld;
 	CollisionLayer layer = CollisionLayer::Default;
 	CollisionTag tag = CollisionTag::None; // タグ
@@ -40,6 +41,12 @@ public:
 	// コライダータイプ取得
 	virtual ColliderType GetType() const = 0;
 	virtual ~Collider() = default;
+
+	// 追加: このコライダーのワールド空間AABBを返す（Broad Phase用）
+	virtual AABB GetAABB() const {
+		// 基底は点AABB（派生でオーバーライド推奨）
+		return AABB{ centerWorld, centerWorld };
+	}
 };
 
 // 球コライダークラス
@@ -53,6 +60,11 @@ public:
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 	ColliderType GetType() const override {
 		return ColliderType::Sphere;
+	}
+
+	AABB GetAABB() const override {
+		Vector3 r{ radius, radius, radius };
+		return AABB{ centerWorld - r, centerWorld + r };
 	}
 
 };
@@ -73,6 +85,9 @@ public:
 		return ColliderType::AABB;
 	}
 
+	AABB GetAABB() const override {
+		return AABB{ minWorld, maxWorld };
+	}
 };
 
 // カプセルコライダークラス
@@ -90,6 +105,10 @@ public:
 		return ColliderType::Capsule;
 	}
 
+	AABB GetAABB() const override {
+		// Capsule 型に computeAABB() がある前提
+		return capWorld_.computeAABB();
+	}
 };
 
 // OBBコライダークラス
@@ -106,6 +125,24 @@ public:
 		return ColliderType::OBB;
 	}
 	
+	AABB GetAABB() const override {
+		// OBB の 8 頂点から AABB を作る
+		Vector3 mins{ FLT_MAX, FLT_MAX, FLT_MAX };
+		Vector3 maxs{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
+		Vector3 c = obb.center;
+		Vector3 u0 = obb.orientations[0] * (obb.size[0] * 0.5f);
+		Vector3 u1 = obb.orientations[1] * (obb.size[1] * 0.5f);
+		Vector3 u2 = obb.orientations[2] * (obb.size[2] * 0.5f);
+		for (int i = 0; i < 8; ++i) {
+			Vector3 corner = c;
+			corner += (i & 1) ? u0 : -u0;
+			corner += (i & 2) ? u1 : -u1;
+			corner += (i & 4) ? u2 : -u2;
+			mins = Min(mins, corner);
+			maxs = Max(maxs, corner);
+		}
+		return AABB{ mins, maxs };
+	}
 private:
 
 };
@@ -122,6 +159,15 @@ public:
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 	ColliderType GetType() const override {
 		return ColliderType::Ray;
+	}
+
+	AABB GetAABB() const override {
+		// Ray が origin, direction, length を持っている前提
+		Vector3 p0 = ray_.origin;
+		Vector3 p1 = ray_.origin + ray_.Direction() * ray_.diff; // length が無ければ direction を想定
+		Vector3 mins = Min(p0, p1);
+		Vector3 maxs = Max(p0, p1);
+		return AABB{ mins, maxs };
 	}
 
 private:

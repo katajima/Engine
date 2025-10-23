@@ -27,7 +27,7 @@ void EmitFanction::CreateParticle(ParticleGroup& group, EffectEmitData emitData,
 	Vector3 rotate{};
 
 	if (emitData.isDirectionRotate) {
-		rotate = DirectionToRotate(newParticle.velocity.Normalize(),Dire::X);
+		rotate = Math::DirectionToRotate(newParticle.velocity.Normalize(),Dire::X);
 	}
 	else {
 		rotate = Random::RandVector3(emitData.rotate, randomEngine);

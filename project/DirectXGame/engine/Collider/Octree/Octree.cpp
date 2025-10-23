@@ -110,14 +110,14 @@ bool Octree::checkCollisionWithNode(const Capsule& capsule, OctreeNode* node) {
 
 	// ノード内に含まれている三角形との衝突判定
 	for (const Triangle& triangle : node->triangles) {
-		if (IsCollision(triangle, capsule)) {
+		if (Collision::Detection::Check(triangle, capsule)) {
 			return true;
 		}
 	}
 
 	// ノード内に含まれているカプセルとの衝突判定
 	for (const Capsule& otherCapsule : node->capsules) {
-		if (IsCollision(capsule, otherCapsule)) {
+		if (Collision::Detection::Check(capsule, otherCapsule)) {
 			return true;
 		}
 	}
@@ -130,4 +130,72 @@ bool Octree::checkCollisionWithNode(const Capsule& capsule, OctreeNode* node) {
 	}
 
 	return false;  // 衝突しなかった場合
+}
+
+
+
+
+
+
+
+
+void OctreeCollider::Insert(Collider* collider)
+{
+	if (!collider || !collider->enabled) return;
+	AABB aabb = collider->GetAABB();
+	insertCollider(root.get(), collider, aabb);
+}
+
+
+void OctreeCollider::insertCollider(OctreeColliderNode* node, Collider* collider, const AABB& aabb) {
+	if (!node->bounds.intersects(aabb)) return;
+
+	// 子ノードを持たない場合、または最大深度に到達している場合はこのノードに保持
+	if (node->depth >= maxDepth) {
+		node->colliders.push_back(collider);
+		return;
+	}
+
+	if (node->children.empty()) {
+		node->subdivide(divX, divY, divZ, maxDepth);
+	}
+
+	bool insertedToChild = false;
+
+	for (auto& child : node->children) {
+		if (child->bounds.Contains(aabb)) {
+			insertCollider(child.get(), collider, aabb);
+			insertedToChild = true;
+			break;
+		}
+	}
+
+	// どの子にも完全には入らなかった場合、このノードに保持
+	if (!insertedToChild) {
+		node->colliders.push_back(collider);
+	}
+}
+
+void OctreeCollider::queryNode(OctreeColliderNode* node, const AABB& area, std::vector<Collider*>& results)
+{
+	// ノードAABBとクエリアABBが交差しない場合はスキップ
+	if (!node->bounds.intersects(area)) return;
+
+	// このノードに含まれるコライダーを追加
+	for (auto* c : node->colliders) {
+		if (c->GetAABB().intersects(area)) {
+			results.push_back(c);
+		}
+	}
+
+	// 子ノードを持たない場合、ここで終了
+	if (node->children.empty()) return;
+
+	// 子ノードに含まれるものだけ探索
+	for (auto& child : node->children) {
+		// 完全に内包される場合のみ再帰する
+		if (child->bounds.intersects(area)) {
+			queryNode(child.get(), area, results);
+		}
+	}
 }

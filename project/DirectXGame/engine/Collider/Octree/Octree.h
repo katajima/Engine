@@ -5,12 +5,15 @@
 #include "DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
 #include "DirectXGame/engine/Base/pch.h"
+//#include "DirectXGame/engine/collider/3d/Collider.h"
+
 // オクツリーのノード
 struct OctreeNode {
     AABB bounds;  // ノードの境界
     std::vector<Triangle> triangles;  // このノードに含まれる三角形
     std::vector<Capsule> capsules;    // このノードに含まれるカプセル
     std::vector<OctreeNode*> children; // 動的に子ノードの数を変更可能
+
     int depth; // 現在のノードの深さ
 
     // コンストラクタ
@@ -67,6 +70,7 @@ public:
     void query(const AABB& area, std::vector<Collider*>& results) {
         queryNode(root.get(), area, results);
     }
+
 private:
     void drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));
 
@@ -121,4 +125,79 @@ private:
 
     // OctreeNode 内でカプセルと三角形の衝突判定を行う
     bool checkCollisionWithNode(const Capsule& capsule, OctreeNode* node);
+
+};
+
+
+
+
+// =========================
+// Collider 用 OctreeNode
+// =========================
+struct OctreeColliderNode {
+    AABB bounds;
+    std::vector<Collider*> colliders;
+    std::vector<std::unique_ptr<OctreeColliderNode>> children;
+    int depth;
+
+    OctreeColliderNode(const AABB& bounds, int depth)
+        : bounds(bounds), depth(depth) {
+    }
+
+    void subdivide(int divX, int divY, int divZ, int maxDepth) {
+        if (depth >= maxDepth) return;
+
+        Vector3 size = (bounds.max_ - bounds.min_);
+        Vector3 childSize = size / Vector3(float(divX), float(divY), float(divZ));
+
+        for (int x = 0; x < divX; ++x) {
+            for (int y = 0; y < divY; ++y) {
+                for (int z = 0; z < divZ; ++z) {
+                    Vector3 childMin = bounds.min_ + Vector3(float(x), float(y), float(z)) * childSize;
+                    Vector3 childMax = childMin + childSize;
+                    children.push_back(std::make_unique<OctreeColliderNode>(
+                        AABB{ childMin, childMax }, depth + 1));
+                }
+            }
+        }
+    }
+
+    void clear() {
+        colliders.clear();
+        for (auto& c : children) {
+            c->clear();
+        }
+    }
+};
+
+// =========================
+// Collider 用 Octree
+// =========================
+class Collider;
+class OctreeCollider {
+public:
+    std::unique_ptr<OctreeColliderNode> root;
+    int maxDepth;
+    int divX, divY, divZ;
+
+    OctreeCollider(const AABB& bounds, int maxDepth = 4, int divX = 2, int divY = 2, int divZ = 2)
+        : maxDepth(maxDepth), divX(divX), divY(divY), divZ(divZ) {
+        root = std::make_unique<OctreeColliderNode>(bounds, 0);
+    }
+
+    void Clear() {
+        root->clear();
+    }
+
+    void Insert(Collider* collider);
+
+
+    void Query(const AABB& area, std::vector<Collider*>& results) {
+        queryNode(root.get(), area, results);
+    }
+
+private:
+    void insertCollider(OctreeColliderNode* node, Collider* collider, const AABB& aabb);
+
+    void queryNode(OctreeColliderNode* node, const AABB& area, std::vector<Collider*>& results);
 };

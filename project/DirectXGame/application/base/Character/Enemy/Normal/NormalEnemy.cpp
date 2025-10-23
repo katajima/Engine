@@ -15,8 +15,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", true, true, this);
-	objectComponent_->SetSRT(size, {}, position);
+
+	objectComponent_->InitializeInstancing(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", "", true, true, this);
+	objectComponent_->SetInstancingSRT(size, {}, position);
+
+	//objectComponent_->Initialize(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", true, true, this);
+	//objectComponent_->SetSRT(size, {}, position);
+	
+	objectComponent_->GetColliderComponent()->SetHitReceiver(this);
 
 	CreateGroup("enemy");
 
@@ -55,6 +61,9 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 				GetWorldTransform().Update();
 			}
+
+			isStopMove_ = true;
+
 		}
 
 		if (other->tag == CollisionTag::Player) {
@@ -100,17 +109,6 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				GetWorldTransform().Update();
 			}
 		}
-		if (other->tag == CollisionTag::PlayerAttack) {
-
-
-
-
-
-
-			//stateMachine_->ChangeState(CharacterMainState::Move);
-		}
-
-
 		};
 
 	// 視野
@@ -124,12 +122,6 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	// ヒットモーション
 	hitMotionComponent_ = std::make_unique<HitMotionComponent>();
 	hitMotionComponent_->Init(0.1f, { 2.5f,2.2f,2.5f });
-
-
-	effectComponent_ = std::make_unique<EffectComponent>();
-	effectComponent_->Init(entity3DManager_, globalVariables_);
-
-
 
 
 	objectComponent_->GetObjectStateFlags().isAlive = true;
@@ -182,11 +174,21 @@ void NormalEnemy::InitStateMachine() {
 
 void NormalEnemy::Update()
 {
-	if (GetObject3D() == nullptr) { return; }
+	if (GetObjectComponent() == nullptr) { return; }
 	assert(this);
 
 
-	if (GetObject3D()) {
+	if (GetObjectComponent()) {
+
+
+		if (isStopMove_) {
+			stopMoveTimer_ += GetTime();
+			if (stopMoveTimer_ >= 1.0f) {
+				stopMoveTimer_ = 0.0f;
+				isStopMove_ = false;
+			}
+		}
+
 		UpdateBaseGetValue();
 		// ステート
 		stateMachine_->Update();
@@ -201,30 +203,18 @@ void NormalEnemy::Update()
 		}
 		else {
 			// 移動
-			moveComponent_->AddMove(GetTime(), GetAlive(), *GetObject3D());
+			moveComponent_->AddMove(GetTime(), GetAlive(), objectComponent_->GetWorldTransform());
 			// 着地
-			moveComponent_->Landing(*GetObject3D()->GetTransformComponent(), *GetObject3D()->GetRigidBodyComponent());
-			// 状態
-			//characterStateComponent_.Update(Velocity(), false, GetAlive());
+			moveComponent_->Landing(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent());
 			// ヒット
-			hitMotionComponent_->Update(GetTime(), GetObject3D());
+			hitMotionComponent_->Update(GetTime(), objectComponent_.get());
 			// 視野
-			visionComponent_->Update(GetTime(), GetObject3D()->GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
-
-
-
-
-
-			if (GetHP() >= 0) {
-				// 重力
-				//if (!characterStateComponent_.IsJumping()) {
-				//	Velocity().y = 0;
-				//}
-			}
+			visionComponent_->Update(GetTime(), objectComponent_->GetWorldTransform().GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
 			// 移動制限
 			LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
 			// 更新
-			GetObject3D()->UpdateWorldTransform();
+
+			objectComponent_->GetWorldTransform().Update();
 		}
 	}
 }
@@ -236,11 +226,14 @@ void NormalEnemy::DrawEffect()
 
 void NormalEnemy::Draw2D()
 {
-	if (GetObject3D() == nullptr) { return; }
+	/*if (GetObjectComponent() == nullptr) { return; }
 
-	if (GetObject3D()) {
+	if (GetObjectComponent()) {
+		Vector2 screenPos = ScreenPosition(objectComponent_->GetWorldTransform(),entity3DManager_->GetObject3dCommon()->GetDefaltCamera());
+
+
 		if (objectComponent_->GetObjectStateFlags().isLockonTarget) {
-			icon_lockOn->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{ 0.0f,-40.0f });
+			icon_lockOn->SetPosition(screenPos + Vector2{ 0.0f,-40.0f });
 
 			icon_lockOn->Update();
 			icon_lockOn->Draw();
@@ -249,16 +242,16 @@ void NormalEnemy::Draw2D()
 		if (GetAlive() && !objectComponent_->GetObjectStateFlags().isDeleted) {
 
 			backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f });
-			backHpBer_->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{ 0,-30 + -30.0f });
+			backHpBer_->SetPosition(screenPos + Vector2{ 0,-30 + -30.0f });
 			backHpBer_->Update();
 			backHpBer_->Draw();
 
-			hpBer_->SetPosition(GetObject3D()->GetScreenPosition() + Vector2{ 0,-27.5f + -30.0f });
+			hpBer_->SetPosition(screenPos + Vector2{ 0,-27.5f + -30.0f });
 			hpBer_->SetSize({ (HP() * 0.95f),10.0f });
 			hpBer_->Update();
 			hpBer_->Draw();
 		}
-	}
+	}*/
 }
 
 void NormalEnemy::SetPlayer(BasePlayer* player)
@@ -283,12 +276,12 @@ void NormalEnemy::Move()
 {
 
 	// 回転と移動量の設定
-	if (stateMachine_->GetCurrentMainState() != CharacterMainState::Attack) {
-		if (Distance(GetTargetPos(), GetObject3D()->GetWorldPosition()) <= 10) {
+	if (stateMachine_->GetCurrentMainState() != CharacterMainState::Attack && !isStopMove_) {
+		if (Distance(GetTargetPos(), objectComponent_->GetWorldTransform().GetWorldPosition()) <= 10) {
 			Parameters().speed = 0;
 		}
 		else {
-			Parameters().speed = 15.0f;
+			Parameters().speed = 5.0f;
 		}
 		// 移動
 		DirectionMove(Parameters().speed);
@@ -309,7 +302,7 @@ void NormalEnemy::InitParticle()
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	worldEffect_.Initialize();
-	worldEffect_.parent_ = &GetObject3D()->GetWorldTransform();
+	worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
 	worldEffect_.translate_ = { 0,1,0 };
 
 	//Vector3 scale = Vector3{ 1.0f,1.0f,1.0f };

@@ -1,19 +1,22 @@
 #include "Collider.h"
 
 #pragma region 球
+
 void SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if(enabled) {
-			// 球の中心位置と半径を使ってラインを描画
-			lineCommon->AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
-		}
-		else {
-			// 無効な場合は透明にする
-			lineCommon->AddLineSphere({ centerWorld ,radius }, { 0.5f,0.5f,0.5f,1.0f }, 8, 8);
+		if (isDebugLine) {
+			if (enabled) {
+				// 球の中心位置と半径を使ってラインを描画
+				lineCommon->AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
+			}
+			else {
+				// 無効な場合は透明にする
+				lineCommon->AddLineSphere({ centerWorld ,radius }, { 0.5f,0.5f,0.5f,1.0f }, 8, 8);
+			}
 		}
 	}
 #endif // _DEBUG
@@ -26,33 +29,31 @@ bool SphereCollider::CheckHit(const Collider& other) const
 	// 球
 	if (other.GetType() == ColliderType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		float distSq = (centerWorld - o.centerWorld).LengthSq();
-		float radiusSum = radius + o.radius;
-		return distSq <= radiusSum * radiusSum;
+		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius });
 	}
 
 	// AABB
-	if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
-		return IsCollision(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld ,radius });
 	}
 
 	// カプセル
-	if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
-		return IsCollision(Sphere{ centerWorld ,radius }, o.capWorld_);
+		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, o.capWorld_);
 	}
 
 	// OBB
-	if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
-		return IsCollision(o.obb, Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(o.obb, Sphere{ centerWorld ,radius });
 	}
 
-	// OBB
-	if (other.GetType() == ColliderType::Ray) {
+	// Ray
+	else if (other.GetType() == ColliderType::Ray) {
 		auto& o = static_cast<const RayCollider&>(other);
-		return IsCollision(o.ray_, Sphere{ centerWorld ,radius });
+		return Collision::Detection::Check(o.ray_, Sphere{ centerWorld ,radius });
 	}
 
 
@@ -66,21 +67,11 @@ bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec
 	// 球
 	if (other.GetType() == ColliderType::Sphere) {
 		const SphereCollider& o = static_cast<const SphereCollider&>(other);
-		Vector3 diff = centerWorld - o.centerWorld;
-		float dist = diff.Length();
-
-		float radiusSum = radius + o.radius;
-
-		if (dist < radiusSum && dist > 0.0001f) {
-			float pushDepth = radiusSum - dist;
-			Vector3 pushDir = diff / dist; // Normalizeと同じだが安全
-			outPushVec = pushDir * pushDepth;
-			return true;
-		}
+		return Collision::Response::ReflectVelocity(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius },outPushVec);
 	}
 
 	// AABB
-	if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 		Vector3 closest = {
 			std::clamp(centerWorld.x, o.minWorld.x, o.maxWorld.x),
@@ -101,11 +92,11 @@ bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec
 	}
 
 	// Capsule
-	if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderType::Capsule) {
 		const CapsuleCollider& o = static_cast<const CapsuleCollider&>(other);
 
 		// 球の中心とカプセルの線分の最近接点を求める
-		Vector3 closest = ClosestPointOnSegment(o.capsule.segment, centerWorld);
+		Vector3 closest = ClosestPoint::PointSegment(o.capsule.segment, centerWorld);
 		Vector3 diff = centerWorld - closest;
 		float distSq = diff.LengthSq();
 		float radiusSum = radius + o.capsule.radius;
@@ -120,7 +111,7 @@ bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec
 	}
 
 	// OBB
-	if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderType::OBB) {
 		const OBBCollider& o = static_cast<const OBBCollider&>(other);
 
 		// 球の中心をOBBのローカル空間に変換
@@ -163,15 +154,17 @@ void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* line
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if(enabled) {
-			// AABBの最小・最大座標を使ってラインを描画
-			lineCommon->AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
-			//OBB obb = { {centerWorld},{},{size} };
-			//lineCommon->AddLineOBB(obb, { 1,1,1,1 });
-		}
-		else {
-			// 無効な場合は透明にする
-			lineCommon->AddLineAABB(aabb, centerWorld, { 0.5f,0.5f,0.5f,1.0f });
+		if (isDebugLine) {
+			if (enabled) {
+				// AABBの最小・最大座標を使ってラインを描画
+				lineCommon->AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
+				//OBB obb = { {centerWorld},{},{size} };
+				//lineCommon->AddLineOBB(obb, { 1,1,1,1 });
+			}
+			else {
+				// 無効な場合は透明にする
+				lineCommon->AddLineAABB(aabb, centerWorld, { 0.5f,0.5f,0.5f,1.0f });
+			}
 		}
 	}
 #endif // _DEBUG
@@ -185,11 +178,11 @@ bool AABBCollider::CheckHit(const Collider& other) const
 	// 球
 	if (other.GetType() == ColliderType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return IsCollision(AABB(minWorld, maxWorld), Sphere{ o.centerWorld ,o.radius });
+		return Collision::Detection::Check(AABB(minWorld, maxWorld), Sphere{ o.centerWorld ,o.radius });
 	}
 
 	// AABB
-	if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
 		return (minWorld.x <= o.maxWorld.x && maxWorld.x >= o.minWorld.x) &&
 			(minWorld.y <= o.maxWorld.y && maxWorld.y >= o.minWorld.y) &&
@@ -197,23 +190,23 @@ bool AABBCollider::CheckHit(const Collider& other) const
 	}
 
 	// カプセル
-	if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
 
-		return CapsuleIntersectsAABB(o.capWorld_, AABB(minWorld, maxWorld));
+		return Collision::Detection::Check(o.capWorld_, AABB(minWorld, maxWorld));
 	}
 
 	// OBB
-	if (other.GetType() == ColliderType::OBB) {
+	else  if (other.GetType() == ColliderType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
 
-		return IsCollision(o.obb, AABB(minWorld, maxWorld));
+		return Collision::Detection::Check(o.obb, AABB(minWorld, maxWorld));
 	}
 
 	// OBB
-	if (other.GetType() == ColliderType::Ray) {
+	else if (other.GetType() == ColliderType::Ray) {
 		auto& o = static_cast<const RayCollider&>(other);
-		return IsCollision(o.ray_, AABB(minWorld, maxWorld));
+		return Collision::Detection::Check(o.ray_, AABB(minWorld, maxWorld));
 	}
 
 	return false;
@@ -242,7 +235,7 @@ bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) 
 			}
 		}
 	}
-	if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 
 		// 交差してなければスキップ
@@ -273,12 +266,12 @@ bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) 
 		}
 		return true;
 	}
-	if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderType::Capsule) {
 		const CapsuleCollider& capsule = static_cast<const CapsuleCollider&>(other);
 		const Segment& seg = capsule.capsule.segment;
 
 		// 線分の最近接点をAABBに対して求める
-		Vector3 closest = ClosestPtSegmentAABB(seg.origin, seg.end, aabb);
+		Vector3 closest = ClosestPoint::SegmentAABB(seg.origin, seg.end, aabb);
 
 		Vector3 diff = capsule.capsule.segment.ClosestPoint(closest) - closest;
 		float distSq = diff.LengthSq();
@@ -294,7 +287,7 @@ bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) 
 			}
 		}
 	}
-	if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderType::OBB) {
 	}
 
 	return false;
@@ -302,6 +295,7 @@ bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) 
 #pragma endregion
 
 #pragma region Capsule
+
 void CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
@@ -310,13 +304,15 @@ void CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* l
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		if(enabled) {
-			// カプセルの線分と半径を使ってラインを描画
-			lineCommon->AddLineCapsule(capWorld_, { 1,1,1,1 });
-		}
-		else {
-			// 無効な場合は透明にする
-			lineCommon->AddLineCapsule(capWorld_, { 0.5f,0.5f,0.5f,1.0f });
+		if (isDebugLine) {
+			if (enabled) {
+				// カプセルの線分と半径を使ってラインを描画
+				lineCommon->AddLineCapsule(capWorld_, { 1,1,1,1 });
+			}
+			else {
+				// 無効な場合は透明にする
+				lineCommon->AddLineCapsule(capWorld_, { 0.5f,0.5f,0.5f,1.0f });
+			}
 		}
 	}
 #endif // _DEBUG
@@ -331,25 +327,25 @@ bool CapsuleCollider::CheckHit(const Collider& other) const
 	// 球
 	if (other.GetType() == ColliderType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return IsCollision(Sphere{ {o.centerWorld} ,{o.radius} }, capWorld_);
+		return Collision::Detection::Check(Sphere{ {o.centerWorld} ,{o.radius} }, capWorld_);
 	}
 
 	// AABB
-	if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
-		return CapsuleIntersectsAABB(capWorld_, AABB{ o.minWorld,o.maxWorld });
+		return Collision::Detection::Check(capWorld_, AABB{ o.minWorld,o.maxWorld });
 	}
 
 	// カプセル
-	if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
-		return IsCollision(capWorld_, o.capWorld_);
+		return Collision::Detection::Check(capWorld_, o.capWorld_);
 	}
 
 	// OBB
-	if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
-		return IsCollision(o.obb, capWorld_);
+		return Collision::Detection::Check(o.obb, capWorld_);
 	}
 
 
@@ -373,6 +369,7 @@ bool CapsuleCollider::ResolveCollision(const Collider& other, Vector3& outPushVe
 #pragma endregion
 
 #pragma region OBB
+
 void OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
@@ -384,16 +381,18 @@ void OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		lineCommon->AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
-		lineCommon->AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
-		lineCommon->AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
-		if(obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
-			// OBBのサイズを使ってラインを描画
-			lineCommon->AddLineOBB(obb, { 1,1,1,1 });
-		}
-		else {
-			// 無効な場合は透明にする
-			lineCommon->AddLineOBB(obb, { 0.0f,0.0f,0.0f,1.0f });
+		if (isDebugLine) {
+			lineCommon->AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
+			lineCommon->AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
+			lineCommon->AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
+			if (obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
+				// OBBのサイズを使ってラインを描画
+				lineCommon->AddLineOBB(obb, { 1,1,1,1 });
+			}
+			else {
+				// 無効な場合は透明にする
+				lineCommon->AddLineOBB(obb, { 0.0f,0.0f,0.0f,1.0f });
+			}
 		}
 	}
 #endif // _DEBUG
@@ -407,25 +406,25 @@ bool OBBCollider::CheckHit(const Collider& other) const
 	// 球
 	if (other.GetType() == ColliderType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return IsCollision(obb, Sphere{ o.centerWorld,o.radius });
+		return Collision::Detection::Check(obb, Sphere{ o.centerWorld,o.radius });
 	}
 
 	// AABB
-	if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
-		return IsCollision(obb, AABB(o.minWorld, o.maxWorld));
+		return Collision::Detection::Check(obb, AABB(o.minWorld, o.maxWorld));
 	}
 
 	// カプセル
-	if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
-		return IsCollision(obb, o.capWorld_);
+		return Collision::Detection::Check(obb, o.capWorld_);
 	}
 
 	// OBB
-	if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
-		return IsCollision2(obb, o.obb);
+		return Collision::Detection::Check2(obb, o.obb);
 	}
 
 	return false;
@@ -477,7 +476,7 @@ bool OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) c
 	}
 	if (other.GetType() == ColliderType::Capsule) {
 		const CapsuleCollider& cap = static_cast<const CapsuleCollider&>(other);
-		Vector3 closest = ClosestPointOnSegment(cap.capsule.segment, obb.center); // OBB中心から最接近点
+		Vector3 closest = ClosestPoint::PointSegment(cap.capsule.segment, obb.center); // OBB中心から最接近点
 		SphereCollider tempSphere;
 		tempSphere.centerWorld = closest;
 		tempSphere.radius = cap.capsule.radius;
@@ -513,7 +512,9 @@ void RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
 
 #ifdef _DEBUG
 	if (lineCommon) {
-		lineCommon->AddLine(ray_.origin, ray_.origin + ray_.diff ,{1,1,1,1});
+		if (isDebugLine) {
+			lineCommon->AddLine(ray_.origin, ray_.origin + ray_.diff, { 1,1,1,1 });
+		}
 	}
 #endif // _DEBUG
 
@@ -524,15 +525,15 @@ bool RayCollider::CheckHit(const Collider& other) const
 	if (!other.enabled) return false;
 
 	// 球
-	if (other.GetType() == ColliderType::Sphere) {
+	else if (other.GetType() == ColliderType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
-		return IsCollision(ray_, Sphere{ o.centerWorld,o.radius });
+		return Collision::Detection::Check(ray_, Sphere{ o.centerWorld,o.radius });
 	}
 
 	// AABB
-	if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
-		return IsCollision(ray_, AABB(o.minWorld, o.maxWorld));
+		return Collision::Detection::Check(ray_, AABB(o.minWorld, o.maxWorld));
 	}
 
 	//// カプセル

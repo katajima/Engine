@@ -15,11 +15,11 @@ public:
 	virtual void Update() = 0;
 
 	//追従対象をポインタで持つ
-	void SetTarget(Object3d* target) { target_ = target; };
+	void SetTarget(WorldTransform* target) { target_ = target; };
 	
 protected:
 	//追従対象
-	Object3d* target_ = nullptr;
+	WorldTransform* target_ = nullptr;
 	// ベースのオフセット（固定距離）
 	Vector3 baseOffset = { 0.0f, 5.0f, -50.0f };
 	// カメラ回転速度

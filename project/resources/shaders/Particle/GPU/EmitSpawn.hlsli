@@ -184,8 +184,8 @@ class EmitDirections
 void EmitSetting_Set(
     inout RandomGeneratetor gen,
     inout Particle particle,
-    ConstantBuffer<EmitterCommon> emitCommon,
-    ConstantBuffer<EmitterTrail> emitTrail)
+    EmitterCommon emitCommon,
+    EmitterTrail emitTrail)
 {
     particle.prevTranslate = particle.translate;
     particle.currentTime = 0;
@@ -210,4 +210,48 @@ void EmitSetting_Set(
     particle.trailColor = emitTrail.trailColor;
     particle.trailLifeTime = emitTrail.trailLifeTime;
     particle.isTrail = emitTrail.isTrail;
+}
+
+
+void EmitSetting_Set(
+    inout RandomGeneratetor gen,
+    inout Particle particle,
+    EmitterCommon emitCommon,
+    EmitterTrail emitTrail,
+    uint emitterIndex)
+{
+    particle.prevTranslate = particle.translate;
+    particle.currentTime = 0.0f;
+
+    // ランダムな初期属性生成
+    particle.lifeTime = emitCommon.lifeTime + gen.Generate1d_4() * emitCommon.lifeTimeRange;
+    particle.scale = emitCommon.scale + gen.Generate3d_4() * emitCommon.scaleRange;
+    particle.rotation = emitCommon.rotate + gen.Generate3d_4() * emitCommon.rotateRange;
+    particle.color.rgb = emitCommon.color + gen.Generate3d_4() * emitCommon.colorRange;
+    particle.color.a = 1.0f;
+
+    // 状態初期化
+    particle.isAlpha = (emitCommon.isAlpha != 0);
+    particle.isScaling = (emitCommon.isScaling != 0);
+    particle.scaleAmount = emitCommon.scaleAmount;
+    particle.acceleration = float3(0.0f, 0.0f, 0.0f);
+    particle.trailHeadIndex = 0;
+    particle.hasPrevQuad = false;
+    particle.isAlive = true;
+    particle.isGravity = (emitCommon.isGravity != 0);
+    particle.useBillboard = (emitCommon.useBillboard != 0);
+    particle.emitterIndex = emitterIndex;
+
+    // トレイル情報
+    if (emitTrail.isTrail)
+    {
+        particle.trailWidth = emitTrail.trailWidth;
+        particle.trailColor = emitTrail.trailColor;
+        particle.trailLifeTime = emitTrail.trailLifeTime;
+        particle.isTrail = true;
+    }
+    else
+    {
+        particle.isTrail = false;
+    }
 }

@@ -3,19 +3,15 @@
 
 StructuredBuffer<Object3dGPU> gParticle : register(t0);
 
-//struct TransformationMatrix
-//{
-//    float4x4 WVP;
-//    float4x4 World;
-//    float4x4 WorldInverseTranspose;
-//};
-//ConstantBuffer<TransformationMatrix> gTransformationMatrix : register(b0);
 
 struct VertexShaderInput
 {
     float4 position : POSITION0;
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
+    
+    float4 tangent : TANGENT0; // 接ベクトル
+    float3 biNormal : BINORMAL0; // 従ベクトル 
 };
 
 VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID)
@@ -28,6 +24,17 @@ VertexShaderOutput main(VertexShaderInput input, uint instanceId : SV_InstanceID
     output.color = gParticle[instanceId].color;
     output.textureIndex = gParticle[instanceId].textureIndex;
     output.worldPosition = mul(input.position, gParticle[instanceId].World).xyz;
+    
+    
+     // 頂点シェーダ側
+    float3 transformedNormal = normalize(mul((float3x3) gParticle[instanceId].WVP, input.normal));
+    float3 transformedTangent = normalize(mul((float3x3) gParticle[instanceId].worldInverseTranspose, input.tangent.xyz));
+    float3 transformedBinormal = normalize(cross(transformedNormal, transformedTangent) * input.tangent.w); // ←重要！
+
+    output.normal = transformedNormal;
+    output.tangent = transformedTangent;
+    output.biNormal = transformedBinormal;
+    
     return output;
 }
 

@@ -22,7 +22,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 	oceanObject = entity3DManager_->CreateObject3D("oceanObject", ObjectModelType::kOcean, { 0,-30,0 }, camera_);
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
-	oceanObject->GetWorldTransform().rotate_.x = DegreesToRadians(90);
+	oceanObject->GetWorldTransform().rotate_.x = Math::DegreesToRadians(90);
 	oceanObject->GetRenderComponent()->SetObjectDrawType(ObjectDrawType::kTranslucent03);
 	
 	skyBox = std::make_unique<SkyBox>();
@@ -41,7 +41,7 @@ void Stage::Initialize(DirectXCommon* dxcommon, Entity3DManager* entity3DManager
 			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i),ObjectModelType::kNormal,
 				{ 3500 + static_cast<float>(j) * 120.0f ,106,3000 + static_cast<float>(i) * 100.0f },camera_);
 			object->SetModel("Missile.gltf");
-			object->GetWorldTransform().rotate_.y = DegreesToRadians(-90);
+			object->GetWorldTransform().rotate_.y = Math::DegreesToRadians(-90);
 			float size = 10.0f;
 			object->GetWorldTransform().scale_ = { size,size,size };
 			missiles_.push_back(object);

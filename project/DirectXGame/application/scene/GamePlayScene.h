@@ -81,6 +81,12 @@ private:
 	// インプットハンドラ
 	std::unique_ptr < InputHander> inputHander_;
 	ICommand* iCommand_;
+
+	static float nowTime;
+	float fps = 0.0f;
+private:
+	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+	std::unique_ptr<UICount> sprite;
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;

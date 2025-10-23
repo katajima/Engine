@@ -86,7 +86,7 @@ void ParticleFanction::Effect(ParticleGroup& group, std::list<Particle>::iterato
 	// バウンドさせるか
 	if (group.isFlag.isBounce && particleIterator->transform.translate.y < 0) {
 		particleIterator->transform.translate.y = 0;
-		particleIterator->velocity = Reflect(particleIterator->velocity, { 0,1,0 }, 0.85f);
+		particleIterator->velocity = Math::Reflect(particleIterator->velocity, { 0,1,0 }, 0.85f);
 	}
 
 	// 時間

@@ -38,6 +38,14 @@ struct Vector3 final {
 			fabs(y - other.y) < epsilon &&
 			fabs(z - other.z) < epsilon;
 	}
+	// >= 演算子オーバーロード
+	bool operator>=(const Vector3& other) const {
+		return (x >= other.x) && (y >= other.y) && (z >= other.z);
+	}
+	// <= 演算子オーバーロード
+	bool operator<=(const Vector3& other) const {
+		return (x <= other.x) && (y <= other.y) && (z <= other.z);
+	}
 
 	// = 演算子のオーバーロード
 	Vector3& operator=(float other) {
@@ -120,6 +128,9 @@ struct Vector3 final {
 	// / 演算子のオーバーロード (スカラー除算) 
 	Vector3 operator/(float s) const {
 		return Vector3{ (x / s), (y / s), (z / s) };
+	}
+	Vector3 operator/(Vector3 s) const {
+		return Vector3{ (x / s.x), (y / s.y), (z / s.z) };
 	}
 
 	// 正規化

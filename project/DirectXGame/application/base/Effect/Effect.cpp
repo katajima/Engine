@@ -24,7 +24,7 @@ void Effect::InitParticle(){
 	starEmit->SetCount(1, 0);
 	//starEmit->SetParent(GetObject3D()->GetWorldTransform());
 	starEmit->SetPos({ 0,0.0f,0.0f });
-	starEmit->SetRotate({}, DegreesToRadians({ 180,180,180 }));
+	starEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	starEmit->SetVelocity({}, {});
 	starEmit->SetLifeTime(0.2f, 0);
 	starEmit->SetIsAlpha(true);
@@ -40,7 +40,7 @@ void Effect::InitParticle(){
 	traiEmit->SetCount(5, 0);
 	//traiEmit->SetParent(worldEffect_);
 	traiEmit->SetPos({ 0,0.0f,0.0f });
-	traiEmit->SetRotate({}, DegreesToRadians({ 180,180,180 }));
+	traiEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	traiEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
 	traiEmit->SetLifeTime(0.2f, 0);
 	traiEmit->SetIsAlpha(true);
@@ -77,7 +77,7 @@ void Effect::InitParticle(){
 	effectEmit->SetCount(1, 0);
 	//effectEmit->SetParent(worldEffect_);
 	effectEmit->SetPos({ 0,0.0f,0.0f });
-	effectEmit->SetRotate({}, DegreesToRadians({ 180,180,180 }));
+	effectEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	effectEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
 	effectEmit->SetLifeTime(0.2f, 0.1f);
 	effectEmit->SetIsAlpha(true);
@@ -94,7 +94,7 @@ void Effect::InitParticle(){
 	hitRingEmit->SetCount(1, 0);
 	//hitRingEmit->SetParent(worldEffect_);
 	hitRingEmit->SetPos({ 0,0.0f,0.0f });
-	hitRingEmit->SetRotate({}, DegreesToRadians({ 180,180,180 }));
+	hitRingEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	hitRingEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
 	hitRingEmit->SetLifeTime(0.3f, 0.05f);
 	hitRingEmit->SetIsAlpha(true);
@@ -118,7 +118,7 @@ void Effect::InitRangeBombingBullet()
 	missileHitCylinder->SetPos({ 0,0.0f,0.0f });
 	missileHitCylinder->SetPos({ 0,0.0f,0.0f });
 	missileHitCylinder->SetLifeTime(0.5f, 0.0f);
-	missileHitCylinder->SetRotate({ -DegreesToRadians(90),DegreesToRadians(0) ,0 }, {});
+	missileHitCylinder->SetRotate({ -Math::DegreesToRadians(90),Math::DegreesToRadians(0) ,0 }, {});
 	missileHitCylinder->SetIsAlpha(true);
 	missileHitCylinder->SetUsebillboard(false);
 
@@ -147,7 +147,7 @@ void Effect::InitRangeBombingBullet()
 	//stratSmoke01_->Set({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	stratSmoke01_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
 	stratSmoke01_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
-	stratSmoke01_->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
+	stratSmoke01_->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
 	stratSmoke02_->SetIsAlpha(true);
 	stratSmoke02_->SetAlphaClipping(0.1f);
@@ -159,7 +159,7 @@ void Effect::InitRangeBombingBullet()
 	//stratSmok201_->Set({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	stratSmoke02_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
 	stratSmoke02_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
-	stratSmoke02_->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
+	stratSmoke02_->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
 
 
@@ -179,7 +179,7 @@ void Effect::InitRangeBombingBullet()
 	//smokePlaneExpSmoke->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	smokePlaneExpSmoke->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
 	smokePlaneExpSmoke->SetVelocity(Vector3{ 00,50,00 }, { 40,50,40 });
-	smokePlaneExpSmoke->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
+	smokePlaneExpSmoke->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
 
 	effectComponent_->AddEmitter("expPlane01", "expPlane01", EmitterShapeType::POINT);
@@ -199,7 +199,7 @@ void Effect::InitRangeBombingBullet()
 	//expPlane->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	expPlane->SetSize(Vector3{ 8.8f,8.8f,8.8f }, {});
 	expPlane->SetVelocity({ 0,5,0 }, { 3, 10, 3 });
-	expPlane->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
+	expPlane->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
 	effectComponent_->AddEmitter("AnimatedCube", "AnimatedCube", EmitterShapeType::POINT);
 	PointParticleEmitter* animatedCube = effectComponent_->GetEmitterAs<PointParticleEmitter>("AnimatedCube");
@@ -218,10 +218,10 @@ void Effect::InitRangeBombingBullet()
 	animatedCube->SetIsAcceleration(true);
 	animatedCube->SetIsBounce(true);
 	animatedCube->SetIsRotateVelocity(true);
-	animatedCube->SetRotateVelocity({}, DegreesToRadians(Vector3{ 180,180,180 }));
+	animatedCube->SetRotateVelocity({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 	animatedCube->SetSize(Vector3{ 0.5f,0.5f,0.5f }, {});
 	animatedCube->SetVelocity(Vector3{ 0,30,0 }, { 40,20,40 });
-	animatedCube->SetRotate({}, DegreesToRadians(Vector3{ 180,180,180 }));
+	animatedCube->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
 
 	effectComponent_->AddEmitter("ringEmit", "ringEmit", EmitterShapeType::AABB);
@@ -240,7 +240,7 @@ void Effect::InitRangeBombingBullet()
 	ringEmit->SetColorMinMax({ 1.0f,1.0f,0.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	ringEmit->SetSize(Vector3{ 5.8f,5.8f,5.8f }, {});
 	ringEmit->SetVelocity(Vector3{ 0,0,0 }, { 0,0,0 });
-	ringEmit->SetRotate(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
+	ringEmit->SetRotate(Math::DegreesToRadians(Vector3{ 90,0,0 }), Math::DegreesToRadians(Vector3{ 90,0,0 }));
 
 	effectComponent_->AddEmitter("expSpark", "expSpark", EmitterShapeType::POINT);
 	PointParticleEmitter* expSpark = effectComponent_->GetEmitterAs<PointParticleEmitter>("expSpark");
@@ -259,7 +259,7 @@ void Effect::InitRangeBombingBullet()
 	expSpark->SetColorMinMax({ 1.0f,1.0f,0.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	expSpark->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
 	expSpark->SetVelocity(Vector3{ 0,0,0 }, { 0,0,0 });
-	expSpark->SetRotate(DegreesToRadians(Vector3{ 90,0,0 }), DegreesToRadians(Vector3{ 90,0,0 }));
+	expSpark->SetRotate(Math::DegreesToRadians(Vector3{ 90,0,0 }), Math::DegreesToRadians(Vector3{ 90,0,0 }));
 
 	effectComponent_->AddEmitter("missileHit", "missileHit", EmitterShapeType::POINT);
 	PointParticleEmitter* hitEmitter_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("missileHit");

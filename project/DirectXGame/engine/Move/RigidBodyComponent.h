@@ -13,7 +13,7 @@ public:
 		torque += t;
 	}
 
-	void Integrate(float deltaTime, TransformComponent& transform) {
+	void Integrate(float deltaTime, WorldTransform& transform) {
 		if (isKinematic || isSleeping || inverseMass == 0.0f) return;
 
 		// 加速度計算
@@ -28,7 +28,7 @@ public:
 		}
 
 		// 位置更新
-		transform.GetWorldTransform().translate_ += velocity_ * deltaTime;
+		transform.translate_ += velocity_ * deltaTime;
 
 
 
@@ -38,7 +38,7 @@ public:
 
 		// 回転適用（クォータニオンが理想）
 		//transform.rotation += angularVelocity * deltaTime;
-		transform.GetWorldTransform().rotate_ * angularVelocity* deltaTime;
+		transform.rotate_ * angularVelocity* deltaTime;
 
 
 		// 力のリセット

@@ -137,10 +137,18 @@ struct AABB {
 			min_.z <= other.max_.z && max_.z >= other.min_.z);
 	}
 
+	// 点がAABBを完全に内包しているか判定
 	bool Contains(const Vector3& point) const {
 		return (point.x >= min_.x && point.x <= max_.x) &&
 			(point.y >= min_.y && point.y <= max_.y) &&
 			(point.z >= min_.z && point.z <= max_.z);
+	}
+
+	// AABBが別のAABBを完全に内包しているか判定
+	bool Contains(const AABB& other) const {
+		return (other.min_.x >= min_.x && other.max_.x <= max_.x) &&
+			(other.min_.y >= min_.y && other.max_.y <= max_.y) &&
+			(other.min_.z >= min_.z && other.max_.z <= max_.z);
 	}
 
 	// 中心点
@@ -244,6 +252,35 @@ struct Plane {
 		Vector3 n = ab.Cross(ac).Normalize();
 		return FromPointNormal(a, n);
 	}
+	// 3 点から平面を求める
+	static Plane PlaneFromPoints(const Vector3& p1, const Vector3& p2, const Vector3& p3) {
+		Plane result{};
+
+		// 2つのベクトルを求める
+		Vector3 v1 = p2 - p1;
+		Vector3 v2 = p3 - p1;
+
+		// 法線を計算 (外積)
+		result.normal = Cross(v1, v2);
+
+		// ゼロベクトルチェック (3点が同一直線上の場合)
+		if (Length(result.normal) == 0.0f) {
+			// 法線が求まらない場合のエラーハンドリング
+			result.normal = { 0.0f, 0.0f, 0.0f };
+			result.distance = 0.0f;
+			return result;
+		}
+
+		// 正規化
+		result.normal = result.normal.Normalize();
+
+		// 平面の距離 D の計算 (符号の修正)
+		result.distance = -Dot(result.normal, p1);
+
+		return result;
+	}
+
+
 	// 線分と平面の交点
 	bool IntersectSegment(const Segment& seg, Vector3& outPoint) const {
 		Vector3 dir = seg.end - seg.origin;
@@ -256,6 +293,11 @@ struct Plane {
 		outPoint = seg.origin + dir * t;
 		return true;
 	}
+	
+
+
+
+
 };
 
 

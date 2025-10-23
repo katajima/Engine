@@ -280,7 +280,7 @@ void PlayerRangeBombingBullet::Update()
 
 
 		hitObject2_->GetWorldTransform().translate_ = posGround + Vector3{ 0,-6.0f,0 };
-		hitObject2_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
+		hitObject2_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(-90);
 	}
 
 

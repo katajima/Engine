@@ -760,6 +760,7 @@
     <None Include="resources\shaders\Trail\Trail.hlsli">
       <Filter>シェーダーファイル</Filter>
     </None>
+    <None Include="resources\shaders\Object3D\LightInstans.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl">

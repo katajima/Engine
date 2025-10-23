@@ -19,7 +19,7 @@ inline bool IsObjectVisible(
 
     Vector3 toPlayerDir = Normalize(toPlayer);
     float dot = Dot(enemyDir, toPlayerDir);
-    float angleCos = cosf(DegreesToRadians(viewAngleDegree * 0.5f));
+    float angleCos = cosf(Math::DegreesToRadians(viewAngleDegree * 0.5f));
     if (dot < angleCos) return false;
 
     // 視界内 → Raycastで壁をチェック
@@ -93,7 +93,7 @@ public:
 
 #ifdef _DEBUG
 
-        DrawDireLine(selfPos, selfDir, targetPos, viewDistance);
+       // DrawDireLine(selfPos, selfDir, targetPos, viewDistance);
 #endif // _DEBUG
 
        

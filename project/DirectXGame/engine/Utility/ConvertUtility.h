@@ -47,6 +47,10 @@ namespace ConvertUtility
 	static int ToInt(const uint32_t& v) {
 		return static_cast<int>(v);
 	}
+	// size_t to int
+	static int ToInt(const size_t& v) {
+		return static_cast<int>(v);
+	}
 	// float to int
 	static int ToInt(const float& v) {
 		return static_cast<int>(v);

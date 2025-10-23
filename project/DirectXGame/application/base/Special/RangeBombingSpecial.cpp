@@ -38,7 +38,7 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	objectReticle_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
 	//objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
-	objectReticle_->GetWorldTransform().rotate_.x = DegreesToRadians(-90);
+	objectReticle_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(-90);
 	objectReticle_->GetWorldTransform().translate_ = { 0,2,100 };
 }
 

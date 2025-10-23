@@ -7,10 +7,11 @@
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include <DirectXGame/engine/Utility/ConvertUtility.h>
 
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 
-
+float GamePlayScene::nowTime = 0.0f;
 #pragma region Initialize
 
 // 初期化
@@ -73,7 +74,7 @@ void GamePlayScene::Initialize()
 	
 	
 	// 追従カメラtarget設定
-	followCamera_->SetTarget(caracterManager_->GetPlayer()->GetObject3D());
+	followCamera_->SetTarget(&caracterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 	
 	// ステージ
 	stage_ = std::make_unique<Stage>();
@@ -86,11 +87,25 @@ void GamePlayScene::Initialize()
 	collisionManager_ = std::make_unique<CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 	
+	
+	collisionManager_->BuildStaticSceneOctree();
+
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
 	gameUI->Initialize(GetInput(), GetEntity2DManager(), GetGlobalVariables());
 	gameUI->SetPlayer(caracterManager_->GetPlayer());
+
+	sprite = std::make_unique<UICount>();
+	sprite->SetUseNameSprite(false);
+	sprite->SetInstance(2);
+	sprite->Init(GetEntity2DManager(), "fps");
+	sprite->SetInput(input_);
+	sprite->SetPos({32,48});
+	sprite->SetMaxSize({ 64 * 2 / 3, 96 * 2 / 3 }, { 20.0f,0.0f });
+	sprite->SetTextuerSize({ 64,96 });
+	sprite->SetCountMax(999);
+
 
 	SetCamera(cameraManeger_->GetCamera());
 
@@ -99,8 +114,16 @@ void GamePlayScene::Initialize()
 	effectComponent_ = std::make_unique<EffectComponent>();
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 
-	caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, {10,0,10}));
 
+
+
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 30; j++) {
+			Vector3 pos = Random::RandomVector3(-100,100);
+			pos.y = 0;
+			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, pos));
+		}
+	}
 }
 
 
@@ -115,15 +138,15 @@ void GamePlayScene::ApplyGlobalVariables()
 void GamePlayScene::CheckAllCollisions()
 {
 	// 衝突マネージャのリセット
-	collisionManager_->Clear();
-
+	collisionManager_->ClearDynamic();
+	//collisionManager_->Clear();
 	
 	for (auto objects : loadData_->GetObjects()) {
 		if (objects->GetColliderComponent()) {
 			collisionManager_->Register(objects->GetColliderComponent());
+			//collisionManager_->RegisterStatic(objects->GetColliderComponent());
 		}
 	}
-
 	// キャラクターセット
 	for (auto caracter : caracterManager_->GetCharacters()) {
 		if (caracter->GetColliderComponent()) {
@@ -141,8 +164,10 @@ void GamePlayScene::CheckAllCollisions()
 		}
 	}
 
+
 	collisionManager_->CheckAll();
-	collisionManager_->Clear();
+	collisionManager_->ClearDynamic();
+	//collisionManager_->Clear();
 }
 
 #pragma endregion 初期化関係
@@ -158,6 +183,19 @@ void GamePlayScene::UpdateImGui()
 	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 
 #endif // _DEBUG
+
+
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+	nowTime += deltaTime;
+	if (deltaTime > 0) {
+		fps = 1.0f / deltaTime;
+	}
+	lastTime = currentTime;
+
+	sprite->SetCount(fps);
+
+	sprite->Update(MyGame::GameTime());
 }
 
 // 更新処理
@@ -182,7 +220,7 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	/*int countIndex = 0;
+	int countIndex = 0;
 	for (auto& enemy : loadData_->GetLevelData()->enemys) {
 		if (enemy.isEnable)
 		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
@@ -194,7 +232,7 @@ void GamePlayScene::Update()
 			}
 		}
 		countIndex++;
-	}*/
+	}
 
 	if (behaviorRequest_) {
 		// ふるまいを変更する
@@ -316,6 +354,8 @@ void GamePlayScene::Draw2D()
 {
 	// ゲームUI
 	gameUI->Draw();
+	//
+	sprite->Draw();
 	// キャラクター
 	caracterManager_->Draw2D();
 	// 弾マネージャ

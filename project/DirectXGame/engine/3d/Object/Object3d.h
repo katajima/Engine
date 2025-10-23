@@ -186,15 +186,14 @@ public:
 	Vector3 GetWorldPosition() const { return transformComponent_->GetWorldPosition(); };
 	// １フレーム前のワールド座標
 	Vector3 GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition(); };
-	// スクリーン座標
-	Vector2 GetScreenPosition();
 	// ワールド座標
 	WorldTransform& GetWorldTransform() { return transformComponent_->GetWorldTransform(); }
 	// 座標更新
 	void UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
 	// 向いている方向
 	Vector3 ObjectDirection() const { return direction_; }
-
+	
+	Vector2 GetScreenPosition();
 
 	/// <summary>
 	/// 物理
@@ -268,3 +267,5 @@ private:
 };
 
 
+// スクリーン座標
+Vector2 ScreenPosition(const WorldTransform world,Camera* camera);
