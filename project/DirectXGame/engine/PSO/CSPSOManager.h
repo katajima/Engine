@@ -5,10 +5,14 @@
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 
+// 前方宣言
 class Command;
 class DXGIDevice;
 class DXCCompiler;
 
+/// <summary>
+/// コンピュートシェーダのPSOマネージャークラス
+/// </summary>
 class CSPSOManager
 {
 public:
@@ -23,13 +27,13 @@ public:
 	// 初期化
 	void Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler);
 
-
+	// ルートパラメータ設定
 	void SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter, UINT numRootParameters);
-
+	// コンピュートパイプライン生成
 	void ComputePipelineState();
-
+	// コンピュートパイプライン設定
 	void PreComputePSRS();
-
+	// シェーダーファイル設定
 	void SetShaderFileName(std::wstring filename);
 
 private:
@@ -37,12 +41,12 @@ private:
 	DXGIDevice* DXGIDevice_;
 	DXCCompiler* dxcCompiler_;
 
-
+	// ファイル名
 	struct fileName {
 		std::wstring filePach;
 	};
 
-
+	// シェーダーファイル
 	struct ShaderFile
 	{
 		fileName commpute;

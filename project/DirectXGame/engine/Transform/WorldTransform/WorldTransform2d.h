@@ -1,7 +1,9 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 
-
+/// <summary>
+/// ワールドトランスフォーム2dクラス
+/// </summary>
 class WorldTransform2d
 {
 public:
@@ -9,21 +11,21 @@ public:
 	void Initialize();
 	// 更新
 	void Update();
-
+	// 親子関係
 	void SetParent(const Matrix3x3& parent) {
 		isPearent = true;
 		parentMatrix_ = parent;
 	};
-
+	// 子設定
 	void SetChild(WorldTransform2d* child)
 	{
 		child->parent_ = this;
 	}
-
+	// ワールド位置取得
 	Vector2 GetWorldPosition() const { return worldMat_.GetWorldPosition(); }
-
+	// マトリックス4x4に変換
 	Matrix4x4 GetConvert2DMatrixTo4x4() const { return Convert2DMatrixTo4x4(worldMat_); }
-
+	// 回転取得
 	float GetWorldRotation() const {
 		if (parent_) {
 			return parent_->GetWorldRotation() + rotate_;

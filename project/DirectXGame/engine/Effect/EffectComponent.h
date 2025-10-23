@@ -11,23 +11,32 @@
 #include"DirectXGame/engine/Effect/Primitive/Primitive.h"
 #include "DirectXGame/engine/2d/Primitive2D.h"
 
+// 前方宣言
 class DirectXCommon;
 class Entity3DManager;
 class GlobalVariables;
 class PrimitiveCommon;
+
+/// <summary>
+/// エフェクトコンポーネントクラス
+/// </summary>
 class EffectComponent
 {
 public:
 	EffectComponent() = default;
 	~EffectComponent() = default;
 
+	// 初期化
 	void Init(Entity3DManager* entity3dManager, GlobalVariables* globalVariables);
+	// カメラ設定
 	void SetCamera(Camera* camera) { camera_ = camera; }
+	// 更新
 	void Update();
-
+	// 描画
 	void Draw();
+	// 描画エフェクト
 	void DrawEffect();
-
+	// GPUパーティクルマネージャー取得
 	GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_; }
 
 public: // パーティクルエミッター(CPU)
@@ -49,7 +58,7 @@ public: // パーティクルエミッター(CPU)
 		}
 		return nullptr;
 	}
-
+	// エミッター取得
 	BaseParticleEmitter* GetBaseEmitter(const std::string& name) {
 		auto it = emitters_.find(name);
 		if (it != emitters_.end()) {

@@ -1,7 +1,7 @@
 #pragma once
 #include"DirectXGame/engine/Material/Material.h"
 
-
+// UVアニメーションデータ構造体
 struct UVAnimetionData {
 	bool isScaleX = false;
 	bool isScaleY = false;
@@ -15,13 +15,15 @@ struct UVAnimetionData {
 
 };
 
-
+/// <summary>
+/// UVアニメーションコンポーネント
+/// </summary>
 class UVAnimationComponent
 {
 public:
-	
+	// 初期化
 	void Init(Material* mateirial);
-
+	// 更新
 	void Update(float deltaTime);
 
 

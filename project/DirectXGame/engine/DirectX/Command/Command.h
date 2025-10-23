@@ -12,7 +12,12 @@
 #include <wrl.h>
 using namespace Microsoft::WRL;
 
+// 前方宣言
 class DXGIDevice;
+
+/// <summary>
+/// コマンドクラス
+/// </summary>
 class Command
 {
 public:

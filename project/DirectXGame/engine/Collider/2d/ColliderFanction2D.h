@@ -99,9 +99,9 @@ static bool IsCollision(const Box& aabb1, const Box& aabb2)
 
 	return false;
 }
-
+// 三角と円の衝突判定
 bool IsCollision(const Triangle2D& triangle, const Sphere2D& sphere);
-
+// 点と三角に判定
 bool PointInTriangle(const Vector2& pt, const Triangle2D& triangle);
 
 // 点と線分の最短距離

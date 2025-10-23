@@ -11,7 +11,12 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
+// 前方宣言
 class DirectXCommon;
+
+/// <summary>
+/// プリミティブ共通クラス
+/// </summary>
 class PrimitiveCommon
 {
 public:
@@ -23,11 +28,11 @@ public:
 		kNoCullRingClamp,
 		kNoCullWireFrame,
 	};
-
+	// 初期化
 	void Initialize(DirectXCommon* dxcommon);
-
+	// 描画準備
 	void DrawCommonSetting(PsoType type = PsoType::kDefalt);
-
+	// DirectX共通クラス取得
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 private:
 	// ルートシグネチャの作成

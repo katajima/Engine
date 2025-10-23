@@ -3,6 +3,9 @@
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 
+/// <summary>
+/// トランスフォームコンポーネントクラス
+/// </summary>
 class TransformComponent 
 {
 public:
@@ -12,11 +15,11 @@ public:
 		worldTransform_.Initialize();
 		worldTransform_.translate_.x = { 0.00000001f };
 	}
-
+	// 更新
 	void Update() {
 		worldTransform_.Update();
 	}
-
+	// ワールドトランスフォーム取得
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
 	// ワールド座標

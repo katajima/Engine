@@ -1,7 +1,9 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 
-
+/// <summary>
+/// ワールドトランスフォームクラス
+/// </summary>
 class WorldTransform
 {
 public:

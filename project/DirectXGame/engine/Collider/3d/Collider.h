@@ -7,6 +7,7 @@
 
 constexpr float kFloatMax = 3.4028235e+38f;
 
+// SRTリザルト
 struct SATResult {
 	bool hit;
 	float minOverlap = FLT_MAX; // 初期化は最大値
@@ -55,13 +56,17 @@ class SphereCollider : public Collider
 public:
 	float radius = 1.0f;
 
+	// 更新
 	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	// 判定
 	bool CheckHit(const Collider& other) const override;
+	// 押し出し
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	// コライダタイプ取得
 	ColliderType GetType() const override {
 		return ColliderType::Sphere;
 	}
-
+	// AABB取得
 	AABB GetAABB() const override {
 		Vector3 r{ radius, radius, radius };
 		return AABB{ centerWorld - r, centerWorld + r };
@@ -77,14 +82,17 @@ public:
 	Vector3 minWorld;
 	Vector3 maxWorld;
 
+	// 更新
 	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	// 判定
 	bool CheckHit(const Collider& other) const override;
+	// 押し出し
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
-
+	// コライダタイプ取得
 	ColliderType GetType() const override {
 		return ColliderType::AABB;
 	}
-
+	// AABB取得
 	AABB GetAABB() const override {
 		return AABB{ minWorld, maxWorld };
 	}
@@ -98,13 +106,17 @@ public:
 	Capsule capWorld_;
 
 
+	// 更新
 	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	// 判定
 	bool CheckHit(const Collider& other) const override;
+	// 押し出し
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	// コライダタイプ取得
 	ColliderType GetType() const override {
 		return ColliderType::Capsule;
 	}
-
+	// AABB取得
 	AABB GetAABB() const override {
 		// Capsule 型に computeAABB() がある前提
 		return capWorld_.computeAABB();
@@ -118,13 +130,17 @@ public:
 	OBB obb{ {0,0,0},{0,0,0},{0.5f,0.5f,0.5f}};
 
 
+	// 更新
 	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	// 判定
 	bool CheckHit(const Collider& other) const override;
+	// 押し出し
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	// コライダタイプ取得
 	ColliderType GetType() const override {
 		return ColliderType::OBB;
 	}
-	
+	// AABB取得
 	AABB GetAABB() const override {
 		// OBB の 8 頂点から AABB を作る
 		Vector3 mins{ FLT_MAX, FLT_MAX, FLT_MAX };
@@ -154,13 +170,17 @@ class RayCollider : public Collider
 public:
 	Ray ray_;
 
+	// 更新
 	void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+	// 判定
 	bool CheckHit(const Collider& other) const override;
+	// 押し出し
 	bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+	// コライダタイプ取得
 	ColliderType GetType() const override {
 		return ColliderType::Ray;
 	}
-
+	// AABB取得
 	AABB GetAABB() const override {
 		// Ray が origin, direction, length を持っている前提
 		Vector3 p0 = ray_.origin;
@@ -174,7 +194,7 @@ private:
 
 };
 
-
+// OBB当たり判定
 static SATResult CheckOBBCollisionSAT(const OBB& obb0, const OBB& obb1)
 {
 	SATResult result;

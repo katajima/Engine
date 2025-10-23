@@ -3,7 +3,7 @@
 #include "Structs3D.h"
 
 
-
+// ディレクショナルライト
 struct DirectionalLightData {
 	Vector4 color; //!< ライトの色
 	Vector3 direction; //!< ライトの向き
@@ -18,6 +18,7 @@ struct DirectionalLightData {
 	Vector3 groundNormal; // 地面法線方向
 };
 
+// ポイントライト
 struct PointLightData {
 	Vector4 color; //ライト色
 	Vector3 position;// ライト位置
@@ -29,6 +30,7 @@ struct PointLightData {
 	//float padding[1]; // パディング
 };
 
+// スポットライト
 struct SpotLightData
 {
 	Vector4 color; //ライト色

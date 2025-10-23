@@ -15,7 +15,7 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
 
-
+// 前方宣言
 class PostEffectData;
 class DXGIDevice;
 class Command;
@@ -23,24 +23,28 @@ class SrvManager;
 class RtvManager;
 class RenderingCommon;
 class Camera;
+
+/// <summary>
+/// レンダーテクスチャクラス
+/// </summary>
 class RenderTexture
 {
 public:
 	RenderTexture() = default;
 	~RenderTexture();
-
+	// 初期化
 	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommonm,const std::string name, PostEffectType type);
-
+	// 更新
 	void Update();
-
+	// 描画
 	void Draw();
-
+	// カメラ設定
 	void SetCamera(Camera* camera) {camera_ = camera;}
-
+	// 他のSrvインデクス設定
 	void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
 
 
-
+	// SRVインデクス取得
 	uint32_t GetSrvIndex() const { return srvIndex_; }
 	// クリアカラーを取得
 	Vector4 GetClearColor()const;
@@ -53,7 +57,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
 	// SRVCPUハンドル取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
-
+	// ポストエフェクトデータ取得
 	PostEffectData* GetPostEffectData();
 
 private:

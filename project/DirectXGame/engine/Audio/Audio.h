@@ -46,7 +46,9 @@ struct SoundData
 class WinApp;
 class DirectXCommon;
 
-
+/// <summary>
+/// 音クラス
+/// </summary>
 class Audio
 {
 public:
@@ -65,20 +67,25 @@ public:
 	/// </summary>
 	void Finalize();
 
+	// サウンドデータ取得
 	SoundData SoundLoadWave(const char* filename);
 
+	// サウンドアップロード
 	void SoundUnload(SoundData* soundData);
 
+	// 再生
 	void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);
 
 	// 返り値: サウンドハンドル（0 は無効）
 	uint32_t LoadWave(const char* filename);
 
+	// アンロード
 	void UnloadWave(uint32_t soundDataHandle);
 
 	// 多重再生可能
 	void PlayWave(uint32_t soundDataHandle, bool loop = false, float volume = 1.0f);
 
+	// ストップ
 	void StopWave(uint32_t soundDataHandle);
 private:
 	//////------音--------///////

@@ -6,6 +6,10 @@
 
 // WindowsAPI
 class SwapChain;
+
+/// <summary>
+/// ウィンドウクラス
+/// </summary>
 class WinApp
 {
 public: // 静的メンバ関数
@@ -21,9 +25,9 @@ public: // メンバ関数
 
 	/// ウィンドウハンドルの取得
 	static HWND GetHwnd() { return hwnd; }
-
+	// インスタンス取得
 	static HINSTANCE GetHInstance() { return wc.hInstance; }
-
+	// 画面サイズ取得(横)
 	static int32_t GetClientWidth(bool isFull = true) {
 		if (isFullscreen && isFull) {
 			return fullscreenWidth;
@@ -32,6 +36,7 @@ public: // メンバ関数
 			return kClientWidth;
 		}
 	}
+	// 画面サイズ取得(縦)
 	static int32_t GetClientHeight(bool isFull = true) {
 		if (isFullscreen && isFull) {
 			return fullscreenHeight;
@@ -40,7 +45,7 @@ public: // メンバ関数
 			return kClientHeight;
 		}
 	}
-
+	// 画面のウィンドウからフルスクリーンの比率(横)
 	static float GetCalculateWindowToFullscreenScaleRatioWidth() {
 		if (isFullscreen) {
 			return static_cast<float>(kClientWidth) / static_cast<float>(fullscreenWidth);
@@ -49,6 +54,7 @@ public: // メンバ関数
 			return 1.0f;
 		}
 	}
+	// 画面のウィンドウからフルスクリーンの比率(縦)
 	static float GetCalculateWindowToFullscreenScaleRatioHeight() {
 		if (isFullscreen) {
 			return static_cast<float>(kClientHeight) / static_cast<float>(fullscreenHeight);
@@ -57,7 +63,7 @@ public: // メンバ関数
 			return 1.0f;
 		}
 	}
-
+	// 終了させる
 	static void IsFinish() { isFnish_ = true; }
 
 	//クライアント領域のサイズ
@@ -73,9 +79,11 @@ public: // メンバ関数
 
 	inline static bool isFnish_ = false;
 
-
+	// フルスクリーン設定
 	static void ToggleFullscreen();
+	// フルスクリーンか
 	static bool IsFullscreen() { return isFullscreen; }
+	// スワップチェーン設定
 	static void SetSwapChain(SwapChain* sc) { swapChain = sc; }
 private:
 	inline static HWND hwnd = nullptr; // ウィンドウハンドル

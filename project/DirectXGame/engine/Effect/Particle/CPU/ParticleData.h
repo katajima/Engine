@@ -110,14 +110,18 @@ namespace ParticleFanction {
 	void WorldDataForGPU(ParticleGroup2d& group, std::list<Particle>::iterator& particleIterator, Camera* camera);
 
 
-
+	// マテリアルのエフェクト処理
 	void MaterialEffect(ParticleGroup& group);
 
+	// パーティクル3dグループ生成
 	void Create(ParticleGroup& particleGrou, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
 		DirectXCommon* dxCommon, ModelMesh* mesh, EmitData::RasterizerType rasteType, EmitData::BlendType blendType);
 
+	// パーティクル2dグループ生成(スプライト)
 	void Create(ParticleGroup2d& particleGrou, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
 		DirectXCommon* dxCommon, Sprite* sprite);
+	
+	// パーティクル2dグループ生成(モデル)
 	void Create(ParticleGroup2d& particleGrou, const std::string name, const std::string textureFilePath, uint32_t kNumMaxInstance,
 		DirectXCommon* dxCommon, ModelMesh* sprite);
 

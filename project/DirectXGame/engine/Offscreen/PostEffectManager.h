@@ -11,6 +11,7 @@
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
 
+// 前方宣言
 class DXGIDevice;
 class Command;
 class SrvManager;
@@ -20,11 +21,14 @@ class DepthStencil;
 class Barrier;
 class ScissorRect;
 class ViewPort;
-
 class SceneManager;
 
+/// <summary>
+/// ポストエフェクトマネージャークラス
+/// </summary>
 class PostEffectManager {
 public:
+	// 初期化
 	void Intialize(DXGIDevice* DXGIDevice, Command* command,
 		SrvManager* srvManager, RtvManager* rvtManager,
 		RenderingCommon* renderingCommon, DepthStencil* depthStencil,
@@ -43,23 +47,24 @@ public:
 	// 2D
 	void PostDraw2dOffscreen();
 
-
+	// 全ポストエフェクト処理
 	void AllPostEffect(SceneManager* sceneManager);
 
-
+	// 更新
 	void Update(Camera* camera);
 
 
-	//
+	// ポストエフェクトブロック追加
 	void AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks);
 
-	//
+	// 最終レンダーテクスチャ取得
 	RenderTexture* GetEndRenderTexture() { return renderTextureEnd_.get(); };
 
+	// ポストエフェクトブロッククリア
 	void ClearPostEffectBlock();
-
+	// ImGui使用時の計算処理
 	void RenderImGui();
-
+	// サイズ更新
 	void RenderUpdate();
 
 	// ImGui画像左上座標取得
@@ -88,8 +93,9 @@ public:
 	Vector2 GetImageRatio() const { return imageRatio_; }
 
 private:
+	// 前レンダーテクスチャ
 	void PreEnd(RenderTexture* renderTexture);
-
+	// 後レンダーテクスチャ
 	void PostEnd(RenderTexture* renderTexture);
 
 private:

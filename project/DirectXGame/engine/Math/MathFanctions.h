@@ -16,6 +16,7 @@
 // 数学関数
 namespace Math {
 
+	// クランプ
 	template<typename T>
 	static T Clamp(T value, T min, T max)
 	{
@@ -23,6 +24,8 @@ namespace Math {
 		if (value > max) return max;
 		return value;
 	}
+
+	// 角度補間
 	static float LerpShortAngle(float a, float b, float t) {
 		// 角度差分を求める
 		float diff = b - a;
@@ -54,17 +57,17 @@ namespace Math {
 	// 反射関数(反射率付き)
 	Vector3 Reflect(const Vector3& input, const Vector3& normal, float restitution);
 
-	// 
+	// 方向による回転位置計算
 	Vector3 DirectionToRotate(const Vector3& direction, Dire dire);
-
+	// 方向による回転位置計算Z
 	float DirectionToRotateZ(const Vector3& direction);
-
+	// 角度からラジアン
 	float DegreesToRadians(float degrees);
-
+	// ラジアンから角度
 	float RadiansToDegrees(float radians);
-
+	// 角度からラジアン
 	Vector3 DegreesToRadians(Vector3 degrees);
-
+	// ラジアンから角度
 	Vector3 RadiansToDegrees(Vector3 radians);
 };
 
@@ -93,7 +96,7 @@ namespace ClosestPoint {
 #pragma endregion //数学関数
 
 
-
+// 衝突速度を計算する
 static std::pair<Vector3, Vector3> ComputeCollisionVelocities(float mass1, const Vector3& velocity1, float mass2, const Vector3& velocity2,
 	float coefficientOfRestitution, const Vector3& normal) {
 	// 衝突面法線方向の速度成分を射影
@@ -116,7 +119,7 @@ static std::pair<Vector3, Vector3> ComputeCollisionVelocities(float mass1, const
 	return std::make_pair(velocityAfter1 + sub1, velocityAfter2 + sub2);
 }
 
-
+//点から平面への距離
 static float DistancePointToPlane(const Vector3& point, const Vector3& A, const Vector3& B, const Vector3& C) {
 	// 三角形の辺ベクトル
 	Vector3 AB = B - A;
@@ -133,7 +136,10 @@ static float DistancePointToPlane(const Vector3& point, const Vector3& A, const 
 // オブジェクトがカメラ内に映っているか
 bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position);
 
+// 前方宣言
 class Camera;
 class WorldTransform;
+
+// スクリーン位置取得
 Vector2 GetScreenPos(WorldTransform worldTransform, Camera* camera);
 

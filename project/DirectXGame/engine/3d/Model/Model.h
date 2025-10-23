@@ -29,15 +29,26 @@
 
 #include "DirectXGame/engine/Utility/TimerUtility.h"
 
+// 前方宣言
 class ModelCommon;
 class DirectXCommon;
-
 class Material;
+
+/// <summary>
+/// モデルクラス
+/// </summary>
 class Model
 {
 public:
 
-	// 初期化
+	/// <summary>
+	/// モデルの初期化
+	/// </summary>
+	/// <param name="dxCommon">DirectXの共通クラス</param>
+	/// <param name="modelCommon">モデルの共通クラス</param>
+	/// <param name="directorypath">ディレクトリパス</param>
+	/// <param name="filename">ファイル名(モデルの名前(objやgltf))</param>
+	/// <param name="file">ファイル名(resources/models以降にファイルがあるならモデルの入っているファイル名を)</param>
 	void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file = "");
 
 	// 通常描画
@@ -48,8 +59,8 @@ public:
 
 	// ModelData取得
 	ModelData& GetModelData() { return modelData; }
-
-	float GetMaterialAlfa();
+	// モデルのが透過物しているかを計算して透明度を返す
+	float GetMaterialAlpha();
 
 public:
 	// モデルのデータ
@@ -60,6 +71,9 @@ private:
 	DirectXCommon* dxCommon_;
 	DebugTimer timer_;
 public:
+	// 読み込んだモデルからモデルデータ生成
+	// ディレクトリパス
+	// ファイル名
 	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 
 

@@ -11,9 +11,11 @@ struct Matrix3x3
 
 	Matrix3x3 operator*(const Matrix3x3& mat);
 
+	// 単位行列
 	static Matrix3x3 Identity() {
 		return Matrix3x3{ 1,0,0,0,1,0,0,0,1};
 	}
+	// ワールドポジション取得
 	Vector2 GetWorldPosition() const {
 		// ワールド座標を入れる
 		Vector2 worldPos{};

@@ -27,6 +27,7 @@ struct OctreeNode {
     void clear();
 };
 
+// 前方宣言
 class Collider;
 class BaseMesh;
 class LineCommon;
@@ -43,7 +44,7 @@ public:
         root = std::make_unique<OctreeNode>(bounds, 0);
     }
 
-
+    // 挿入
     void insert(const BaseMesh& mesh);
 
     // オクツリーに三角形を挿入
@@ -72,6 +73,7 @@ public:
     }
 
 private:
+    // オクツリー描画
     void drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset = Vector3(0, 0, 0));
 
     // 三角形を挿入
@@ -121,6 +123,7 @@ private:
         }
     }
 
+    // 書いていない
     void queryNode(OctreeNode* node, const AABB& area, std::vector<Collider*>& results);
 
     // OctreeNode 内でカプセルと三角形の衝突判定を行う
@@ -140,10 +143,12 @@ struct OctreeColliderNode {
     std::vector<std::unique_ptr<OctreeColliderNode>> children;
     int depth;
 
+    // コンストラクタ
     OctreeColliderNode(const AABB& bounds, int depth)
         : bounds(bounds), depth(depth) {
     }
 
+    // 小分け
     void subdivide(int divX, int divY, int divZ, int maxDepth) {
         if (depth >= maxDepth) return;
 
@@ -162,6 +167,7 @@ struct OctreeColliderNode {
         }
     }
 
+    // クリア
     void clear() {
         colliders.clear();
         for (auto& c : children) {
@@ -180,24 +186,28 @@ public:
     int maxDepth;
     int divX, divY, divZ;
 
+    // コンストラクタ
     OctreeCollider(const AABB& bounds, int maxDepth = 4, int divX = 2, int divY = 2, int divZ = 2)
         : maxDepth(maxDepth), divX(divX), divY(divY), divZ(divZ) {
         root = std::make_unique<OctreeColliderNode>(bounds, 0);
     }
 
+    // クリア
     void Clear() {
         root->clear();
     }
 
+    // 追加
     void Insert(Collider* collider);
 
-
+    //　挿入
     void Query(const AABB& area, std::vector<Collider*>& results) {
         queryNode(root.get(), area, results);
     }
 
 private:
+    // 挿入
     void insertCollider(OctreeColliderNode* node, Collider* collider, const AABB& aabb);
-
+    // 挿入
     void queryNode(OctreeColliderNode* node, const AABB& area, std::vector<Collider*>& results);
 };

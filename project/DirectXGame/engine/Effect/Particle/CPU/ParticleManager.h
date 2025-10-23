@@ -24,6 +24,7 @@
 
 #include "DirectXGame/engine/Utility/MapUtility.h"
 
+// 前方宣言
 class LightManager;
 class Material;
 class BasePrimitive;
@@ -31,6 +32,10 @@ class DirectXCommon;
 class SrvManager;
 class EffectManager;
 class LineCommon;
+
+/// <summary>
+/// パーティクル3dマネージャー
+/// </summary>
 class ParticleManager
 {
 public:
@@ -59,7 +64,7 @@ public:
 	{
 		return particleGroups[name];
 	}
-
+	// ライン共通クラス取得
 	LineCommon* GetLineCommon() { return lineCommon_; }
 
 
@@ -74,14 +79,15 @@ public:
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
 
-
+	// フィールドエフェクト追加
 	void AddFieldEffect(Field::FieldEffect* field) {
 		fieldEffect_.push_back(field);
 	}
 
+	// ランダムエンジン取得
 	std::mt19937& GetRandomEngine() { return randomEngine_; }
 
-
+	// パーティクルクリア(名前で検索)
 	void ClearParticle(std::string name);
 
 private:
@@ -90,11 +96,11 @@ private:
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
 
-
+	// ブレンド設定(加算)
 	void BlendAdd();
-
+	// ブレンド設定(減算)
 	void BlendSubtract();
-
+	// ブレンド設定(乗算)
 	void BlendMuliply();
 
 private: // もらいもの

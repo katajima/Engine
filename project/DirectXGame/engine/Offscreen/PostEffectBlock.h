@@ -7,6 +7,7 @@
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 
 
+// 前方宣言
 class DXGIDevice;
 class Command;
 class SrvManager;
@@ -17,6 +18,9 @@ class Barrier;
 class ScissorRect;
 class ViewPort;
 
+/// <summary>
+/// ポストエフェクトブロッククラス
+/// </summary>
 class PostEffectBlock
 {
 public:
@@ -28,6 +32,7 @@ public:
 		DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort,
 		const std::string name, PostEffectBlockType type);
 
+	// 更新
 	void Update(Camera* camera);
 
 	// レンダーテクスチャ追加
@@ -43,17 +48,17 @@ public:
 	// 繋げる
 	void ConnectBlock(RenderTexture* other);
 
-
+	// レンダーテクスチャ取得
 	RenderTexture* GetRenderTextures(int i) {
 		if (renderTextures_.empty()) return nullptr;
 		return renderTextures_[i].get();
 	}
-	// 最初
+	// レンダーテクスチャ最初取得
 	RenderTexture* GetFirstRenderTexture() {
 		if (renderTextures_.empty()) return nullptr;
 		return renderTextures_.front().get();
 	};
-	// 最後
+	// レンダーテクスチャ最後取得
 	RenderTexture* GetEndRenderTexture() {
 		if (renderTextures_.empty()) return nullptr;
 		return renderTextures_.back().get();

@@ -32,21 +32,25 @@ using namespace Microsoft::WRL;
 #include <thread>
 #include <mutex>
 
-
+// 方向
 enum class MapAxis {
 	XY,
 	ZX,
 	YZ
 };
 
+// マップID
 struct MapId {
 	int id; // テクスチャIndexや種類を表すID
 	std::string tex; // テクスチャname
 };
 
+// 前方宣言
 class RigidBodyComponent;
 class ColliderComponent;
 class ContactRecord;
+
+// オブジェクトのインスタスクラス
 class ObjectInstans
 {
 public:
@@ -62,13 +66,14 @@ public:
 	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
 	// コライダーコンポーネントの接触情報を取得
 	ContactRecord& GetContactRecord();
-
+	// リジットボディー取得
 	RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
 
 
-
+	// 削除する
 	void IsDelete() { isDelete_ = true; }
 
+	// 削除されているか取得
 	bool GetIsDelete() const { return isDelete_; }
 private:
 	// コライダーコンポーネント
@@ -89,11 +94,14 @@ public:
 	int id = -1;   // ← 固有ID（負なら未使用）
 };
 
-
+// 前方宣言
 class Entity3DManager;
+
+// オブジェクトインスタンシングクラス(大量描画用)
 class Object3dInstansManager
 {
 public:
+	// GPU転送用
 	struct ObjectGPU
 	{
 		Matrix4x4 WVP;
@@ -103,19 +111,19 @@ public:
 		UINT textureIndex;
 		Vector3 pad;
 	};
-
+	// ラスタライザタイプ
 	enum class RasterizerType
 	{
 		MODE_SOLID_BACK,
 		MODE_SOLID_NONE,
 	};
-
+	// メッシュタイプ
 	enum class MeshType
 	{
 		kPrimitiv,
 		kModel,
 	};
-
+	// オブジェクト構造体
 	struct Object
 	{
 		WorldTransform transform;
@@ -124,7 +132,7 @@ public:
 		uint32_t texIndex;
 
 	};
-
+	// オブジェクトグループ
 	struct ObjectGroup
 	{
 		std::string name; // 名前
@@ -151,6 +159,7 @@ public:
 
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
+	// エンティティ3dの設定
 	void SetEntity3D(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; };
 
 	// 更新
@@ -167,19 +176,19 @@ public:
 
 	// カメラセット
 	void SetCamera(Camera* camera) { this->camera_ = camera; }
-
+	// オブジェクトの追加
 	void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object,int& id,MeshType type = MeshType::kModel);
-
+	// オブジェクトのグループ数取得
 	int GetSize() { return static_cast<int>(objectGroups.size()); };
-
+	// オブジェクトグループ名前でオブジェクトクリーン
 	void Clear(const std::string& name);
-
+	// 全てのオブジェクトグループのオブジェクトのクリーン
 	void ClearObject() {
 		for (auto& obj : objectGroups) {
 			obj.second.object.clear();
 		}
 	}
-
+	// 全てクリーン
 	void AllClear() { objectGroups.clear(); }
 
 	// タイルマップ作成
@@ -195,11 +204,11 @@ public:
 		MapAxis axis = MapAxis::ZX); // テクスチャIndexや種類を表すID
 
 public: //取得
-
+	// オブジェクトインスタンスをIDで取得
 	ObjectInstans* GetObjectById(const std::string& groupName, int id);
-
+	// 全てのオブジェクトインスタンス取得
 	std::deque<ObjectInstans>& GetObjects(const std::string& groupName);
-
+	// オブジェクトグループ取得
 	ObjectGroup& GetObjectGroup(const std::string& groupName);
 
 private:
@@ -208,11 +217,11 @@ private:
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeline();
-
+	// ブレンドモード設定(加算)
 	void BlendAdd();
-
+	// ブレンドモード設定(減算)
 	void BlendSubtract();
-
+	// ブレンドモード設定(乗算)
 	void BlendMuliply();
 
 

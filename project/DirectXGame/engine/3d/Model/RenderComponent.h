@@ -22,62 +22,75 @@ enum class ObjectDrawType {
 	kTranslucent03,	// 半透明最後
 };
 
+// 前方宣言
 class BasePrimitive;
 class SkyBox;
 class Ocean;
 class Transfomation;
 class Entity3DManager;
+
+/// <summary>
+/// 描画に関するコンポーネントクラス
+/// </summary>
 class RenderComponent
 {
 public:
 
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <param name="entity3DManager">3dオブジェクトに関係するマネージャー</param>
+	/// <param name="objectType">オブジェクトのモデルタイプ(スキニング、アニメーション、プリミティブ、スカイボックスなど)</param>
+	/// <param name="rasterizerType">モデルのうつり方を設定</param>
 	void Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType);
 
-
+	// 更新
 	void Update();
 
+	// 描画
 	void Draw();
 
-	// カメラ
+	// カメラ設定
 	void SetCamera(Camera* camera) { camera_ = camera; }
-	// トランスフォーム
+	// トランスフォーム設定
 	void SetTransfomation(Transfomation* transfomation) { transfomation_ = transfomation; }
 
-	// モデル
+	// モデル設定
 	void SetModel(Model* model) { this->model = model; }
-	// スカイボックス
+	// スカイボックス設定
 	void SetSkyBox(SkyBox* skyBox) { skyBox_ = skyBox; }
-	// 波セット
+	// 波セット設定
 	void SetOcean(Ocean* ocean) { ocean_ = ocean; }
-	// プリミティブ
+	// プリミティブ設定
 	void SetPrimitive(BasePrimitive* primitive) { primitive_ = primitive; }
 
 
 public:
 	// 何かしらの見た目があるか
 	bool GetIsSkin() const { return isSkin_; }
-	// 描画するか
+	// 描画するかの設定
 	void SetIsDraw(bool is) { isDraw = is; }
-	// オブジェクトタイプ
+	// オブジェクトタイプ取得
 	ObjectModelType GetObjectType() const { return objectType_; }
-	// オブジェクトの描画順
+	// オブジェクトの描画順取得
 	ObjectDrawType GetObjectDrawType() const { return objectDrawType_; }
 	// 描画順の設定
 	void SetObjectDrawType(ObjectDrawType type) { objectDrawType_ = type; };
 	// 映り方タイプ設定
 	void SetObjectRasterizerType(PSOType type) { rasterizerType_ = type; }
-	// オブジェクト型名前
+	// オブジェクト型名前取得
 	std::string GetObjectTypeName() const { return objectTypeName; }
 
 
 public:
-
+	// 透明度取得
 	float GetAlpha();
 
 
 private:
+	// 通常オブジェクトのうつり方設定
 	void ObjectNormalTypeDiscrimination(PSOType type);
-
+	// スキニングオブジェクトのうつり方設定
 	void ObjectSkinningTypeDiscrimination(PSOType type);
 
 	// 描画セッティング(デフォルト)

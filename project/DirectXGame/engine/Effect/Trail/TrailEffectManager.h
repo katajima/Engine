@@ -12,14 +12,20 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
+// 前方宣言
 class DirectXCommon;
+
+/// <summary>
+/// トレイルエフェクト共通クラス
+/// </summary>
 class TrailEffectCommon
 {
 public:
+	// 初期化
 	void Initialize(DirectXCommon* dxcommon);
-
+	// 描画準備
 	void DrawCommonSetting();
-
+	// DirectX共通クラス取得
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 private:
 	// ルートシグネチャの作成

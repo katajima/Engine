@@ -13,7 +13,12 @@ enum class Phase {
 	kLoading,      // フェードアウト後、シーン生成・Initialize中（画面は黒）
 };
 
+// 前方宣言
 class Entity2DManager;
+
+/// <summary>
+/// フェードクラス
+/// </summary>
 class Fade {
 public:
 	enum class Status {
@@ -43,7 +48,9 @@ public:
 	/// </summary>
 	void Draw2D();
 
-
+	/// <summary>
+	/// 強制で描画
+	/// </summary>
 	void DrawCompulsion2D();
 
 	// フェード開始
@@ -54,11 +61,11 @@ public:
 
 	// フェード終了判定
 	bool IsFinished() const;
-
+	// 色設定
 	void SetColor(Color color) { baseColor_ = color; }
-
+	// 色設定
 	void SetColorUpdate(Color color);
-
+	// サイズ設定
 	void SetSize(Vector2 size);
 
 private:

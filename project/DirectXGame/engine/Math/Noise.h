@@ -15,19 +15,23 @@
 #define HASH_CODE_MAX       (256)
 #define HASH_CODE_TABLE_NUM     (HASH_CODE_MAX*2)
 
+/// <summary>
+/// ノイズ
+/// </summary>
 class Noise {
 public:
 	Noise();
-
+	// 初期化
 	void InitParameters();
-
+	// ImGuiパラメータ
 	void ImguiParameter();
 
-
+	// パーリンノイズ
 	float PerlinNoise(float x, float y);
 
 private:
 	
+	// ノイズ2D
 	float Noise2D(float x, float y);
 
 

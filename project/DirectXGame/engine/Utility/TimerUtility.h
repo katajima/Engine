@@ -3,12 +3,17 @@
 #include <string>
 #include"DirectXGame/engine/base/Logger.h"
 
+/// <summary>
+/// デバック用タイマー
+/// </summary>
 class DebugTimer
 {
 public:
+	// 開始
 	void StartTimer() {
 		start = std::chrono::steady_clock::now();
 	}
+	// 終了
 	void EndTimer() {
 		end = std::chrono::steady_clock::now();
 	}
@@ -22,10 +27,11 @@ public:
 	float GetTimeSec() const {
 		return GetTimeMs() * 0.001f;
 	}
-
+	// ログ出力
 	void LogTimeMs(const std::string& message) const {
 		Logger::Log(message + std::to_string(GetTimeMs()) + " ms" + "\n");
 	}
+	// ログ出力
 	void LogTimeMs(const std::string& message, const std::string& message2) const {
 		Logger::Log(message + std::to_string(GetTimeMs()) + " ms " + message2 + "\n");
 	}

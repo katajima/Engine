@@ -12,9 +12,9 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-
-
 #include "DirectXGame/engine/Utility/TimerUtility.h"
+
+// 前方宣言
 class Command;
 class DXGIDevice;
 class SrvManager;
@@ -42,11 +42,13 @@ public:
 	// メタデータを取得
 	const DirectX::TexMetadata& GetMataData(const std::string& filePach);
 
+	// SRVマネージャー取得
 	SrvManager* GetSrvManager(){ return srvManager_; }
 
+	// ルートパラメーター設定
 	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter,D3D12_DESCRIPTOR_RANGE& descriptorRange);
 
-
+	// テクスチャリソース生成
 	Microsoft::WRL::ComPtr <ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 
 	//データを転送するUploadTextureData関数を作る

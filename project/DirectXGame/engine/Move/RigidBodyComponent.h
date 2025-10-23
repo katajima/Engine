@@ -2,17 +2,23 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/Transform/TransformComponent.h"
 
+
+/// <summary>
+/// リジットボディー
+/// </summary>
 class RigidBodyComponent
 {
 public:
+	// 力加算
 	void AddForce(const Vector3& f) {
 		force += f;
 	}
 
+	// トルク加算
 	void AddTorque(const Vector3& t) {
 		torque += t;
 	}
-
+	// 統合
 	void Integrate(float deltaTime, WorldTransform& transform) {
 		if (isKinematic || isSleeping || inverseMass == 0.0f) return;
 
@@ -47,15 +53,17 @@ public:
 		transform.Update();
 	}
 
-
+	// 重力あるか取得
 	bool IsGravity() const { return useGravity; }
-
+	//重力あるか設定
 	void SetIsGravity(bool is) { useGravity = is; }
-
+	// 速度設定
 	void SetVelocity(const Vector3& v) { velocity_ = v; }
+	// 速度取得
 	Vector3 GetVelocity() const { return velocity_; }
+	// 速度取得
 	Vector3& Velocity() { return velocity_; }
-
+	// 質量設定
 	void SetMass(float m) {
 		mass_ = m;
 		inverseMass = (m != 0.0f) ? 1.0f / m : 0.0f;

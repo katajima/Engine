@@ -108,7 +108,7 @@ void Model::DrawSkinning()
 	}
 }
 
-float Model::GetMaterialAlfa()
+float Model::GetMaterialAlpha()
 {
 	float a = 1.000f;
 

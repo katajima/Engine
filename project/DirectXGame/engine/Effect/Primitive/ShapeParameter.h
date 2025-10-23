@@ -5,10 +5,9 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 
 
-
-
+// 各シェイプのパラメーター
 namespace ShapeParameter {
-
+	// シェイプタイプ
 	enum class ShapeType {
 		None = -1,
 		Plane,
@@ -28,11 +27,11 @@ namespace ShapeParameter {
 		Max
 	};
 
-
+	// 平面
 	struct ShapePlane {
 		float width = 1.0f;
 		float height = 1.0f;
-
+		// 生成
 		void Create(ModelMesh* mesh, bool isInv = false);
 
 		// == オペレーター
@@ -46,11 +45,12 @@ namespace ShapeParameter {
 		}
 	};
 
+	// 三角
 	struct ShapeTriangle {
 		Vector2 upPos = { 0.0f,1.0f };
 		Vector2 leftPos = { 1.0f,-1.0f };
 		Vector2 rightPos = { -1.0f,-1.0f };
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -64,11 +64,11 @@ namespace ShapeParameter {
 		}
 
 	};
-
+	// 十字
 	struct ShapeCross {
 		float armLength = 10;
 		float armWidth = 5;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -82,6 +82,7 @@ namespace ShapeParameter {
 		}
 	};
 
+	// ばね
 	struct Spring
 	{
 		float length = 1;
@@ -93,6 +94,7 @@ namespace ShapeParameter {
 		float thickness = 2;
 	};
 
+	// アニメーション平面
 	struct AnimationPlane {
 		bool flag;
 		bool isLoop;
@@ -115,10 +117,11 @@ namespace ShapeParameter {
 		}
 	};
 
+	// 四角
 	struct ShapeCube
 	{
 		Vector3 size = { 1,1,1 };
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -133,12 +136,13 @@ namespace ShapeParameter {
 
 	};
 
+	// 円
 	struct Circle
 	{
 
 		float radius = 5.0f;
 		int segments = 16;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 
@@ -153,12 +157,14 @@ namespace ShapeParameter {
 		}
 	};
 
+	// 星
 	struct Star
 	{
 		float innerRadius = 2.0f;
 		float outerRadius = 5.0f;
 		int segments = 5;
 
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -171,14 +177,14 @@ namespace ShapeParameter {
 			return !(*this == other);
 		}
 	};
-
+	// 三日月
 	struct Crescent
 	{
 		float innerRadius = 2.0f;
 		float outerRadius = 5.0f;
 		int segments = 16;
 		float distance = 5.0f;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -191,12 +197,12 @@ namespace ShapeParameter {
 			return !(*this == other);
 		}
 	};
-
+	// リング
 	struct Ring {
 		float innerRadius = 2.0f;
 		float outerRadius = 5.0f;
 		int segments = 16;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -209,13 +215,13 @@ namespace ShapeParameter {
 			return !(*this == other);
 		}
 	};
-
+	// 球
 	struct ShapeSphere {
 		float radius = 5.0f;
 		int latitudeSegments = 16;
 		int longitudeSegments = 16;
 		bool isTopBased = false;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -228,14 +234,14 @@ namespace ShapeParameter {
 			return !(*this == other);
 		}
 	};
-
+	// 矢印
 	struct ShapeArrow {
 		float shaftLength = 16.0f;
 		float shaftRadius = 4.0f;
 		float headLength = 8.0f;
 		float headRadius = 8.0f;
 		int segments = 16;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -249,14 +255,14 @@ namespace ShapeParameter {
 		}
 
 	};
-
+	// 円柱
 	struct Cylinder {
 		float innerRadius = 3.0f;
 		float outerRadius = 3.0f;
 		float height = 10.0f;
 		int segments = 16;
 		bool isCover = true;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -269,13 +275,13 @@ namespace ShapeParameter {
 			return !(*this == other);
 		}
 	};
-
+	// 筒
 	struct Tube {
 		float radius = 3.0f;
 		float innerRadius = 2.0f;
 		float height = 10.0f;
 		int segments = 16;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 
@@ -289,12 +295,12 @@ namespace ShapeParameter {
 			return !(*this == other);
 		}
 	};
-
+	// 角錐
 	struct Pyramid {
 		float radius = 3.0f;
 		float height = 3.0f;
 		int segments = 16;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター
@@ -307,13 +313,13 @@ namespace ShapeParameter {
 			return !(*this == other);
 		}
 	};
-
+	// トーラス
 	struct Torus {
 		float innerRadius = 3.0f;
 		float outerRadius = 3.0f;
 		int segments = 16;
 		int tubeSegments = 16;
-
+		// 生成
 		void Create(ModelMesh* mesh);
 
 		// == オペレーター

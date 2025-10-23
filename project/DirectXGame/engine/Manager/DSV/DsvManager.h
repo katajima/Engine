@@ -10,9 +10,13 @@ using namespace Microsoft::WRL;
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 
+// 前方宣言
 class DXGIDevice;
 class Command;
 
+/// <summary>
+/// DSVマネージャー
+/// </summary>
 class DsvManager
 {
 public:
@@ -21,11 +25,12 @@ public:
 
 	// 初期化
 	void Initialize(DXGIDevice* dxgi, Command* command);
-
+	// アロケート
 	uint32_t Allocate();
 
 	// デスクリプタハンドル計算
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
+	// デスクリプタハンドル計算
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 	
 	// DSV生成

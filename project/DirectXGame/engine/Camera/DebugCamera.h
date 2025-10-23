@@ -5,7 +5,10 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 
+// 前方宣言
 class CameraCommon;
+
+// デバッグカメラクラス
 class DebugCamera
 {
 public:
@@ -19,7 +22,7 @@ public:
 	/// </summary>
 	void Update();
 
-
+	// カメラ取得
 	Camera& GetViewProjection() { return camera_; };
 
 private:

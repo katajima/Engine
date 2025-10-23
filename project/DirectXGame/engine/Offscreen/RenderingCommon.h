@@ -2,9 +2,13 @@
 #include "PostEffect.h"
 
 
-
+// 前方宣言
 class Camera;
 class DirectXCommon;
+
+/// <summary>
+/// レンダリング共通クラス
+/// </summary>
 class RenderingCommon
 {
 private:
@@ -12,11 +16,11 @@ private:
 public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
-	//
+	// 描画
 	void DrawRender(PostEffectType type, int index, int indexB = 0);
-
+	// DirectX共通クラス取得
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-
+	// カメラ設定
 	void SetCamera(Camera* camera) { camera_ = camera; }
 
 private:

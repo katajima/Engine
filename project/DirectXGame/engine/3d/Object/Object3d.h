@@ -16,6 +16,7 @@ using namespace Microsoft::WRL;
 
 #include <future>
 
+// 前方宣言
 class Entity3DManager;
 class Object3dCommon;
 class SkinningConmmon;
@@ -23,6 +24,10 @@ class ImGuiManager;
 class SkyBox;
 class SkyBoxCommon;
 class OceanManager;
+
+/// <summary>
+/// オブジェクトクラス
+/// </summary>
 class Object3d
 {
 public:
@@ -35,22 +40,30 @@ public:
 	// 描画通常
 	void Draw();
 
-
+	// トレイルエフェクト描画
 	void DrawTrailEffect();
 	
+	/// <summary>
+	/// トレイルエフェクトを使うときの設定
+	/// </summary>
+	/// <param name="tex">tテクスチャ設定</param>
+	/// <param name="maxTime">トレイルの生存時間</param>
+	/// <param name="color">色</param>
+	/// <param name="offsetStr">トレイルのオフセットの位置始点</param>
+	/// <param name="offsetEnd">トレイルのオフセットの位置終点</param>
 	void UseTrailEffect(const std::string tex, float maxTime, Color color = { 1,1,1,1 }, Vector3 offsetStr = { 0,0.5f,0 }, Vector3 offsetEnd = { 0,-0.5f,0 });
 
-
+	// トレイルを出すかの設定
 	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
 	// セッター
 
-	// モデル設定
+	// モデル設定(モデル)
 	void SetModel(Model* model) {
 		this->model = model;
 		renderComponent_->SetModel(model);
 	}
 
-	// モデル指定
+	// モデル設定(モデル名での)
 	void SetModel(const std::string& filePath);
 
 	// カメラ設定
@@ -81,6 +94,7 @@ public:
 		renderComponent_->SetOcean(ocean_);
 	}
 
+	// オブジェクト固有に映すカメラを使用するか設定
 	void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera; }
 
 	// メッシュ取得
@@ -98,20 +112,21 @@ public:
 	Ocean* GetOcean() const { return ocean_; }
 	// トレイルエフェクト
 
-	// タグ
+	// タグ取得
 	std::string GetNameTag() const { return nameTag; }
 
-
+	// 描画するか設定
 	void SetIsDraw(bool is) { renderComponent_->SetIsDraw(is); }
-
+	
+	// モデルのデバッグ用ImGui
 	void DebugImguiModel();
-
+	// スキンモデルのデバッグ用
 	void DebugImguiSkin();
-
+	// 削除する
 	void IsDelete() { isDelete = true; }
-
+	// 削除されているか取得
 	bool GetIsDelete() const { return isDelete; }
-
+	// オブジェクトに使われているモデルの透明度取得
 	float GetAlpha() { return renderComponent_->GetAlpha(); };
 
 private:
@@ -192,7 +207,7 @@ public:
 	void UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
 	// 向いている方向
 	Vector3 ObjectDirection() const { return direction_; }
-	
+	// スクリーン位置取得
 	Vector2 GetScreenPosition();
 
 	/// <summary>
@@ -218,13 +233,14 @@ public:
 		animationComponent_->Init(lineCommon_);
 		animationComponent_->SetModel(model);
 	}
+	// アニメーションコンポーネント取得
 	AnimationComponent* GetAnimationComponent() { return animationComponent_.get(); }
 
 	/// <summary>
 	/// 描画
 	/// </summary>
 	/// <returns></returns>
-
+	// レンダーコンポーネント取得
 	RenderComponent* GetRenderComponent() { return renderComponent_.get(); }
 
 public:
@@ -267,5 +283,5 @@ private:
 };
 
 
-// スクリーン座標
+// スクリーン座標計算取得
 Vector2 ScreenPosition(const WorldTransform world,Camera* camera);

@@ -203,13 +203,13 @@ float RenderComponent::GetAlpha()
 	switch (objectType_)
 	{
 	case ObjectModelType::kNormal:
-		a = model->GetMaterialAlfa();
+		a = model->GetMaterialAlpha();
 		break;
 	case ObjectModelType::kAnimation:
-		a = model->GetMaterialAlfa();
+		a = model->GetMaterialAlpha();
 		break;
 	case ObjectModelType::kSkinning:
-		a = model->GetMaterialAlfa();
+		a = model->GetMaterialAlpha();
 		break;
 	case ObjectModelType::kPrimitive:
 		a = primitive_->GetMaterial()->color.a;

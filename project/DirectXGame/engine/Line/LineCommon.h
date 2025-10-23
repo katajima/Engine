@@ -15,7 +15,12 @@
 
 #include"DirectXGame/engine/math/LineCurveMath.h"
 
+// 前方宣言
 struct OctreeNode;
+
+/// <summary>
+/// ライン共通クラス
+/// </summary>
 class LineCommon
 {
 public:
@@ -70,6 +75,7 @@ public:
 
 	void LineClear();
 
+	// GPUデータ
 	struct LineGPU {
 		/*Matrix4x4 WVP;
 		Matrix4x4 World;

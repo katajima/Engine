@@ -2,11 +2,14 @@
 
 #include "GpuParticleData.h"
 
+// 前方宣言
 class DirectXCommon;
 class LineCommon;
 class GpuParticleGroup;
 
-
+/// <summary>
+/// GPUパーティクルエミッター基底クラス
+/// </summary>
 class BaseGpuParticleEmitter
 {
 public:
@@ -40,11 +43,11 @@ protected:
 	
 	// 固有の初期化
 	virtual void InitUniqe() = 0;
-
+	// 固有の更新
 	virtual void UpdateUniqe(float deltaTime) = 0;
-
+	// 固有のImGui更新
 	virtual void UpdateImGuiUniqe() = 0;
-
+	// ライン描画
 	virtual void DrawLine() = 0;
 
 protected:

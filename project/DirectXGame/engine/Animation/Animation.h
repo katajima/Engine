@@ -19,12 +19,14 @@
 #include"imgui.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 
+// キーフレーム
 template <typename tValue>
 struct Keyframe {
 	float time;
 	tValue value;
 };
 
+// アニメーションカーブ
 template <typename tValue>
 struct AnimationCurve
 {
@@ -141,7 +143,9 @@ struct SkinningInfomation {
 	uint32_t numVertices;
 };
 
-
+/// <summary>
+/// スキニング用SRVUAV
+/// </summary>
 struct SkinningSRVUAV {
 	uint32_t wellSrvIndex; // Well
 	uint32_t inputVerticesIndex; // 入力頂点
@@ -213,7 +217,7 @@ namespace Animetion {
 	// スケルトン更新
 	void UpdateSkeleton(Skeleton& skeleton);
 
-	// 
+	// スケルトンをブレンド
 	void BlendSkeletons(Skeleton& outSkeleton, const Skeleton& from, const Skeleton& to, float t);
 
 	// スキンクラスター更新
@@ -222,6 +226,7 @@ namespace Animetion {
 	// スケルトンの描画
 	void DrawSkeleton(LineCommon* lineCommo, const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scale, const Matrix4x4& rotationMatrix);
 	
+	// アニメーション適応
 	void SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration = 0.3f);
 	
 
@@ -230,14 +235,14 @@ namespace Animetion {
 	Joint* FindJointByName(Skeleton& skeleton, const std::string& name);
 	/// 名前からJointを取得する（存在しなければnullptr）
 	const Joint* FindJointByNameConst(const Skeleton& skeleton, const std::string& name);
-	
+	// ジョイントの行列取得
 	Matrix4x4 GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix);
 	
-	//
+	//　スケール調整
 	void ValidateTransform(Joint& joint);
-
+	// ジョイントのImGui表示
 	void ImGuiJoint(const std::vector<Joint>& joints);
-
+	// ノードのImGui表示
 	void ImGuiNode(const std::vector<Node>& nodes);
 
 	// ジョイントの深さを計算する関数

@@ -8,10 +8,15 @@ using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
 
+// 前方宣言
 class DXGIDevice;
 class Command;
 class DsvManager;
 class SrvManager;
+
+/// <summary>
+/// デプスステンシルクラス
+/// </summary>
 class DepthStencil
 {
 public:
@@ -33,7 +38,7 @@ public:
 
 	// リソースを取得
 	ID3D12Resource* GetResource();
-
+	// SRVGPUハンドル取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
 
 private:

@@ -15,12 +15,17 @@ enum class MapCellType : uint8_t {
     Obstacle = 1, // 障害物
     // 必要に応じて拡張
 };
-
+// 前方宣言
 class LineCommon;
+
+
+/// <summary>
+/// マップチップ
+/// </summary>
 class MapChip {
 public:
     MapChip(int width, int height, float cellSize);
-
+    // クリア
     void Clear(MapCellType value = MapCellType::Empty);
 
     // AABBに当たる範囲をObstacleに変換
@@ -30,8 +35,9 @@ public:
     // SATベースのOBB vs AABB
     bool CheckOBBvsAABB2D(const OBB2D& obb, const Vector2& aabbCenter, float halfExtent) const;
 
-    // マップチップの種類取得/設定
+    // マップチップの種類取得
     MapCellType GetCell(int x, int z) const;
+    // マップチップの種類設定
     void SetCell(int x, int z, MapCellType type);
 
     // マップチップ1マスの大きさ
@@ -40,9 +46,11 @@ public:
     // ワールド座標→マップ座標変換
     bool WorldToMap(float worldX, float worldZ, int& mapX, int& mapZ) const;
 
+    // 横幅取得
     int GetWidth() const { return m_width; }
+    // 縦幅取得
     int GetHeight() const { return m_height; }
-
+    // 描画
     void DrawMapChip(LineCommon* line,float yPos) const;
 
     // セルが障害物かどうかを返す

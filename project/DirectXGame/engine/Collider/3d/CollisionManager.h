@@ -6,13 +6,15 @@
 #include"Collider.h"
 #include <unordered_set>
 #include "DirectXGame/engine/collider/Octree/Octree.h"  
+
+
+// 前方宣言
+class GlobalVariables;
 /// <summary>
 /// 衝突マネージャ
 /// </summary>
-class GlobalVariables;
 class CollisionManager {
 public:
-	// 初期化
 	// 初期化
 	void Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
 		globalVariables_ = globalVariables;
@@ -123,7 +125,7 @@ private:
 		return ((1 << static_cast<uint32_t>(b->layer)) & a->collisionMask) &&
 			((1 << static_cast<uint32_t>(a->layer)) & b->collisionMask);
 	}
-
+	// 処理応答
 	void NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const {
 		if (ownerComp->onHitCallback) {
 			ownerComp->onHitCallback(self, other);
@@ -151,6 +153,6 @@ private:
 
 	DebugTimer debugTimer_;
 public:
-
+	// デストラクタ
 	CollisionManager() = default;
 };

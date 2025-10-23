@@ -11,11 +11,15 @@ enum class SpriteSize {
 	Left,
 };
 
+// 前方宣言
 class Entity2DManager;
+
+// スプライト基底クラス
 class BaseSprite {
 public:
+	// 初期化
 	void Init(Entity2DManager* entity2DManager, std::string name, std::string texturName);
-
+	// 更新
 	void Update() {
 		
 		if (useColl) {
@@ -23,35 +27,46 @@ public:
 		}
 		sprite_->Update();
 	};
+	// 描画
 	void Draw() {
 		if (sprite_->GetActive()) {
 			sprite_->Draw();
 		}
 	}
 
-
+	// Box取得
 	Box GetBox() const { return box; }
+	// スプライト取得
 	Sprite* GetSprite() { return sprite_.get(); }
+	// サイズ取得
 	Vector2 GetSize() { return sprite_->GetSize(); }
+	// 位置取得
 	Vector2 GetPos() { return sprite_->GetPosition(); }
+	// アンカーポイント取得
 	Vector2 GetAnchorPoint() { return sprite_->GetAnchorPoint(); }
+	// 色コンポーネント取得
 	ColorComponent* GetColorComponent() { return colorComponent_.get(); }
 	
-
+	// サイズ設定
 	void SetSize(const Vector2& size) { sprite_->SetSize(size); }
+	// 位置設定
 	void SetPos(const Vector2& pos) { sprite_->SetPosition(pos); }
+	// アンカーポイント設定
 	void SetAnchorPoint(const Vector2& anchor) { sprite_->SetAnchorPoint(anchor); }
+	// テクスチャ名設定
 	void SetTextureName(const std::string& name) { sprite_->SetTexture(name); };
+	// 色設定
 	void SetColor(Color color) { sprite_->SetColor(color); }
+	// コライダ判定を取るか設定
 	void SetUseColl(bool is) { useColl = is; }
-	
+	// 比率設定
 	void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) { 
 		leftTopPos_ = leftTopPos;
 		ratio_ = ratio;
 	};
 	// 比率
 	Vector2 GetRatio() const { return ratio_; }
-
+	// 半分のサイズ取得
 	Vector2 GetHalfSise(SpriteSize type){
 		Vector2 size = sprite_->GetSize();
 		Vector2 anchor = sprite_->GetAnchorPoint();
@@ -79,6 +94,7 @@ public:
 		return result;
 	}
 private:
+	// Box更新
 	void BoxUpdate() {
 		Vector2 position = sprite_->GetWorldTransform2d().GetWorldPosition(); 
 		Vector2 size = sprite_->GetSize();

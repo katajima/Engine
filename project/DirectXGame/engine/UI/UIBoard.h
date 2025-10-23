@@ -5,26 +5,30 @@
 
 // UIエレメントやウィンチェスターウィジットを収めるクラス
 
-
+// 前方宣言
 class Entity2DManager;
+
+/// <summary>
+/// UIボードクラス
+/// </summary>
 class UIBaseBoard {
 public:
-
+	// 初期化
 	void Init(Input* input,Entity2DManager* entity2DManager, const std::string& name, Vector2 pos, const Vector2& size, bool isStatic = true, std::string textureName = "resources/Texture/Image.png");
 
-
+	// 更新
 	void Update(float deltaTime);
-
+	// 描画
 	void Draw();
-
+	// 名前取得
 	std::string GetName() { return name_; };
-
+	//ボードを使うか
 	void SetUse(bool use) { useBoard_ = use; }
 
-
+	// UI生成
 	void CreateUIElement(UIType type, std::string name, Vector2 pos, int instance = 1, bool useSprite = false);
 
-
+	// UI取得
 	template <typename T>
 	T* GetUIElement(UIType type, std::string name)
 	{
@@ -45,6 +49,7 @@ public:
 		return dynamic_cast<T*>(innerIt->second.get());
 	}
 
+	// 画面比率設定
 	void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) {
 		leftTopPos_ = leftTopPos;
 		ratio_ = ratio;

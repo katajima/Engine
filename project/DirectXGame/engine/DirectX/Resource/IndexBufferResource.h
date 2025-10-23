@@ -7,10 +7,14 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+/// <summary>
+/// インデクスバッファ
+/// </summary>
+/// <typeparam name="Type"></typeparam>
 template<class Type>
 class IndexBuffer {
 public:
-
+	// 生成
 	void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> index, size_t num = 1)
 	{
 		dxCommon_ = dxCommon;
@@ -31,7 +35,7 @@ public:
 		bufferView.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマット
 	}
 
-
+	// 更新
 	void UpdateBuffer(std::vector<Type> index) {
 		if (resource_) {
 			// バッファサイズを確認
@@ -65,7 +69,7 @@ public:
 		}
 	}
 
-
+	// 頂点バッファの設定
 	void IASetIndexBuffer() {
 		// 頂点バッファの設定
 		dxCommon_->GetCommand()->GetList()->IASetIndexBuffer(&bufferView);
@@ -73,11 +77,11 @@ public:
 
 
 
-
+	// データ取得
 	Type* Data() const { return data_; };
-
+	// リソース取得
 	Microsoft::WRL::ComPtr < ID3D12Resource> GetVertexResource() { return resource_; };
-
+	// バッファビュー取得
 	D3D12_INDEX_BUFFER_VIEW GetIndexxBufferView() { return bufferView; }
 private:
 	DirectXCommon* dxCommon_;

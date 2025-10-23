@@ -8,6 +8,10 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/DirectX/Barrier/Barrier.h"
 
+/// <summary>
+/// ストラクチャードバッファ
+/// </summary>
+/// <typeparam name="Type"></typeparam>
 template<class Type>
 class StructuredBuffer {
 public:
@@ -18,6 +22,7 @@ public:
 		}
 	}
 
+	// 生成
 	void CreateBuffer(DirectXCommon* dxCommon, int num = 1, bool useUav = false)
 	{
 		dxCommon_ = dxCommon;
@@ -62,7 +67,7 @@ public:
 	}
 
 
-
+	// グラフィックパイプラインにバッファを設定
 	void SetGraphicsRootDescriptorTable(int index)
 	{
 		if (useUav_) {
@@ -77,7 +82,7 @@ public:
 			barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		}
 	}
-
+	// コンピュートパイプラインにバッファを設定
 	void SetComputeRootDescriptorTable(int index)
 	{
 		if (useUav_) {
@@ -90,14 +95,15 @@ public:
 			dxCommon_->GetCommandList()->SetComputeRootDescriptorTable(index, srvHandleGPU_);
 		}
 	}
-
+	// UAV依存
 	void UavDependence() { barrier_->UavDependence(resource_.Get()); };
 
+	// データ取得
 	Type* Data() const {
 		assert(!useUav_ && "UAVバッファにはCPUからアクセスできません");
 		return data_; 
 	};
-
+	// リソース取得
 	Microsoft::WRL::ComPtr < ID3D12Resource> GetResource() const { return resource_; }
 
 	// StructuredBuffer クラス内に追加するメソッド
@@ -182,6 +188,7 @@ public:
 		// uploadBuffer は関数終了で破棄（ComPtr が自動で release）
 	}
 
+	// コピー
 	template<typename Container>
 	void CopyFrom(const Container& c)
 	{

@@ -4,8 +4,7 @@
 #include "DirectXGame/engine/DirectX/Resource/StructuredBuffer.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
-
-
+// パーティクルデータCS
 struct ParticleCS {
 	Vector4 color;
 
@@ -49,13 +48,14 @@ struct DeleteParticleCS {
 	Vector3 pad;
 };
 
+// ビュー情報
 struct PreView {
 	Matrix4x4 viewProjection;
 	Matrix4x4 billboardMatrix;
 	Matrix4x4 billboardMatrixY;
 
 };
-
+// 時間情報
 struct PerFrame
 {
 	// ゲームを起動してからの時間
@@ -204,7 +204,7 @@ struct ParticleCount
 	int32_t count;
 };
 
-// 
+// ディスパッチカウント
 struct PerEmitterDispatch {
 	uint32_t startThread;       // このエミッタが処理を始めるスレッドのインデックス
 	uint32_t totalThreadCount;  // このエミッタが必要とするスレッド数
@@ -212,7 +212,7 @@ struct PerEmitterDispatch {
 	uint32_t emitterIndex;      // エミッタ番号（StructuredBufferのインデックス）
 };
 
-
+// ディスパッチカウント
 struct DispatchCount {
 	uint32_t gEmitterDispatchCount;
 	uint32_t pad0;

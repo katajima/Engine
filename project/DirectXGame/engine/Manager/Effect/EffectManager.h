@@ -15,9 +15,14 @@
 #include "DirectXGame/engine/Effect/Particle/GPU/GpuParticleManager.h"
 #include <DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.h>
 
+// 前方宣言
 class LightManager;
 class DirectXCommon;
 class LineCommon;
+
+/// <summary>
+/// エフェクトマネージャークラス
+/// </summary>
 class EffectManager
 {
 public:
@@ -30,18 +35,18 @@ public:
 
 public: // ゲッター
 
-	// DirectXCommon
+	// DirectXCommon取得
 	DirectXCommon* GetDxCommon() { return directXCommon_; }
-	// トレイルエフェクト用
+	// トレイルエフェクト用取得
 	TrailEffectCommon* GetTrailEffectCommon() { return trailEffectCommon_.get(); }
-	// パーティクルマネージャ
+	// パーティクルマネージャ取得
 	ParticleManager* GetParticleManager() { return particleManager_.get(); }
-	// パーティクルマネージャ
+	// パーティクルマネージャ取得
 	GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_.get(); }
-	//
+	// パーティクル2dマネージャー取得
 	ParticleManager2d* GetParticleManager2d() { return particleManager2d_.get(); }
 
-	//
+	// ライン共通クラス取得
 	LineCommon* GetLineCommon() { return lineCommon_; }
 
 private:

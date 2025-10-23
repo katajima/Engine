@@ -5,17 +5,19 @@
 #include "DirectXGame/engine/struct/Structs.h"
 #include <iostream>
 
-// 
+// 最小値
 inline float ConversionMin(float a, float b) {
     return (std::min)(a, b);
 }
+// 最小値
 inline int ConversionMin(int a, int b) {
     return (std::min)(a, b);
 }
-//
+// 最大値
 inline float ConversionMax(float a, float b) {
     return (std::max)(a, b);
 }
+// 最大値
 inline int ConversionMax(int a, int b) {
     return (std::max)(a, b);
 }

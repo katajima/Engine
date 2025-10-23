@@ -14,6 +14,7 @@
 #include <wrl.h>
 using namespace Microsoft::WRL;
 
+// 前方宣言
 class DXGIDevice;
 class Command;
 class WinApp;
@@ -22,6 +23,8 @@ class Barrier;
 class ScissorRect;
 class ViewPort;
 class Fence;
+
+// スワップチェーン
 class SwapChain
 {
 public:
@@ -29,7 +32,7 @@ public:
 	~SwapChain() = default;
 
 
-
+	// 初期化
 	void Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence);
 
 	// GPUに画面交換を通知
@@ -39,14 +42,14 @@ public:
 	// 描画先のRTVハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRTVHandle();
 
-	// 
+	// バッファカウント取得
 	size_t GetBackBufferCount() const { return backBuffers_.size(); }
 
-
+	// 描画前
 	void PreDraw();
-
+	// 描画後
 	void PostDraw();
-
+	// リサイズ
 	void Resize(int width, int height);
 
 private:

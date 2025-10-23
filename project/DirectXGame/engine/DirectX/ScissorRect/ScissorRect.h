@@ -1,6 +1,9 @@
 #pragma once
 
+// 前方宣言
 class Command;
+
+// シザーレクトクラス
 class ScissorRect
 {
 public:

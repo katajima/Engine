@@ -13,10 +13,14 @@
 #include<vector>
 #include<format>
 
-
+// 前方宣言
 class BasePrimitive;
 class SkyBox;
 class Ocean;
+
+/// <summary>
+/// トランスフォームクラス
+/// </summary>
 class Transfomation
 {
 public:
@@ -40,6 +44,7 @@ public:
 	// データ
 	void GetCommandList(int index);
 
+	// トランスフォーム行列
 	struct TransfomationMatrix
 	{
 		Matrix4x4 WVP;

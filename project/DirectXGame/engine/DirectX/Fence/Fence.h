@@ -8,9 +8,13 @@ using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
 
-
+// 前方宣言
 class DXGIDevice;
 class Command;
+
+/// <summary>
+/// フェンスクラス
+/// </summary>
 class Fence
 {
 public:

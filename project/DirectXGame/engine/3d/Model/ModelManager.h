@@ -20,7 +20,7 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/struct/Structs3D.h"
 
 
-
+// 前方宣言
 class Model;
 class Command;
 class DXGIDevice;
@@ -28,7 +28,9 @@ class SrvManager;
 class ModelCommon;
 class DirectXCommon;
 
-// テクスチャマネージャー
+/// <summary>
+/// モデルを管理するクラス
+/// </summary>
 class ModelManager {
 public:
 	ModelManager() = default;
@@ -51,12 +53,13 @@ public:
 	// 読み込み完了待ち（全て）
 	void WaitAllLoadFinished();
 
+	// モデル検索
 	Model* FindModel(const std::string& filePath);
 
-	// 
-
+	// モデル全取得
 	const std::map<std::string, std::unique_ptr<Model>>& GetModel() const { return models; }
-
+	
+	// モデル共通クラス取得
 	ModelCommon* GetModelCommon() { return modelCommon_.get(); }
 
 private:

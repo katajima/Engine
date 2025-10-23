@@ -5,23 +5,27 @@
 #include "DirectXGame/engine/struct/Matrix4x4.h"
 
 #pragma region GPUData
+// ビネット
 struct VignetteGPU {
 	float scale;
 	float squared;
 	float padding[2];
 };
 
+// スムージング
 struct SmoothigGPU {
 	int num;
 	float padding[3];
 };
 
+// ガウシアン
 struct GaussianGPU {
 	int num;
 	float sigma;
 	float padding[2];
 };
 
+// アウトライン
 struct OutlineGPU {
 	Matrix4x4 projectionInverse;
 	int num;
@@ -30,6 +34,7 @@ struct OutlineGPU {
 	float farZ;
 };
 
+// ラジアルブラ
 struct RadialBlurGPU
 {
 	Vector2 center;
@@ -37,6 +42,7 @@ struct RadialBlurGPU
 	float blurWidth;
 };
 
+// ディゾルブ
 struct DissovleGPU
 {
 	float threshold;
@@ -45,12 +51,14 @@ struct DissovleGPU
 	float pad[3];
 };
 
+// ランダム
 struct RandomGPU
 {
 	float time;
 	float pad[3];
 };
 
+// ブルーム
 struct BloomGPU
 {
 	float threshold;
