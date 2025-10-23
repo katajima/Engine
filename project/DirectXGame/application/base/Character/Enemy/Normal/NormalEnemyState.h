@@ -25,14 +25,16 @@ private:
 	float timer_ = 0.0f;
 };
 
-// 攻撃
+/// <summary>
+/// 攻撃
+/// </summary>
 class EnemyStateAttack :public AttackState
 {
 public:
 	EnemyStateAttack(BaseCharacter* enemy)
 		: AttackState(enemy) {
 	}
-
+	// 更新
 	void Update() override;
 
 	// 終了
@@ -50,7 +52,9 @@ private:
 	//Vector3 subPos_ = {};
 };
 
-// 必殺技
+/// <summary>
+/// 必殺技
+/// </summary>
 class EnemyStateSpecial :public SpecialState
 {
 public:
@@ -66,7 +70,9 @@ public:
 	void Enter() override;
 };
 
-// 死亡
+/// <summary>
+/// 死亡状態
+/// </summary>
 class EnemyStateDie :public DieState
 {
 public:
@@ -86,6 +92,9 @@ private:
 	float timer_ = 0.0f;
 };
 
+/// <summary>
+/// 気絶状態
+/// </summary>
 class EenmyStateFainting :public FaintingState {
 public:
 	EenmyStateFainting(BaseCharacter* enemy)

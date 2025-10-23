@@ -19,6 +19,9 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
+/// <summary>
+/// タイトルシーン
+/// </summary>
 class TitleScene : public BaseScene
 {
 public:
@@ -32,16 +35,17 @@ public:
 	// 毎フレーム更新
 	void Update() override;
 
-	// 描画
+	// 描画3d
 	void Draw3D() override;
 
-
+	// 描画2d
 	void Draw2D() override;
 
 private:
 private:
-
+	// リソース初期化
 	void InitializeResources();
+	// カメラ初期化
 	void InitializeCamera();
 private:
 	Input* input_ = nullptr;

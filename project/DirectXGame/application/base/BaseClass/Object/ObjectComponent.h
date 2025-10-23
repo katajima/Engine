@@ -11,7 +11,7 @@
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include"DirectXGame/engine/Animation/AnimationData.h"
 
-
+//オブジェクトタイプ
 enum class ObjectType
 {
 	None = -1,	// なし
@@ -28,6 +28,7 @@ enum class ObjectType
 	Other,		// その他
 };
 
+// オブジェクトステートクラス
 struct ObjectStateFlags
 {
 	bool isActive = true;		// アクティブ状態(デフォルトはtrue、falseで非アクティブ)
@@ -38,8 +39,13 @@ struct ObjectStateFlags
 };
 
 
-class Entity3DManager;	// 前方宣言
+// 前方宣言
+class Entity3DManager;	
 class ObjectInstans;
+
+/// <summary>
+/// オブジェクトコンポーネントくクラス
+/// </summary>
 class ObjectComponent {
 public:
 
@@ -78,7 +84,7 @@ public: // 取得
 	Object3d* GetObject3D() { return objectBase_; }
 	// ワールド変換取得
 	WorldTransform& GetWorldTransform();
-	
+	// リジッドボディー取得
 	RigidBodyComponent* GetRigidBodyComponent();
 	
 	// オブジェクト時間取得
@@ -105,7 +111,7 @@ public: // 設定
 	ObjectStateFlags& GetObjectStateFlags() { return flags_; }
 	// SRT設定
 	void SetSRT(const Vector3& s = {1,1,1}, const Vector3& r = {0,0,0}, const Vector3& t = {0,0,0});
-	
+	// インスタンシング用SRT設定
 	void SetInstancingSRT(const Vector3& s = {1,1,1}, const Vector3& r = {0,0,0}, const Vector3& t = {0,0,0});
 
 private:

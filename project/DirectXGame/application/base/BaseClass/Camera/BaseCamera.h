@@ -12,7 +12,12 @@ struct CameraSRTSpeed
 };
 
 
+// 前方宣言
 class CameraManeger;
+
+/// <summary>
+/// カメラ基底クラス
+/// </summary>
 class BaseCamera
 {
 public:
@@ -55,8 +60,9 @@ public:
 	/// <returns></returns>
 	float GetTime() const;
 
+	//名前設定
 	void SetName(const std::string& name) { name_ = name; };
-
+	// 名前取得
 	std::string GetName() const { return name_; }
 
 public:

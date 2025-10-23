@@ -2,6 +2,9 @@
 #include "DirectXGame/application/base/BaseClass/Camera/BaseFixedCamera.h"
 
 
+/// <summary>
+/// 固定カメラ
+/// </summary>
 class FixedCamera : public BaseFixedCamera
 {
 public:

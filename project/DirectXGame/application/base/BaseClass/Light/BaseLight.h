@@ -1,6 +1,10 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
 
+
+/// <summary>
+/// ライト基底クラス
+/// </summary>
 class BaseLight
 {
 public:

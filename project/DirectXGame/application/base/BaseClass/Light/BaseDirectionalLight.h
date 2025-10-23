@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseLight.h"
 
+/// <summary>
+/// ディレクショナルライト
+/// </summary>
 class BaseDirectionalLight : public BaseLight
 {
 public:
@@ -19,7 +22,9 @@ public:
 	/// </summary>
 	virtual void DrawEffect() = 0;
 
-
+	/// <summary>
+	/// 2d描画
+	/// </summary>
 	virtual void Draw2D() = 0;
 
 protected:

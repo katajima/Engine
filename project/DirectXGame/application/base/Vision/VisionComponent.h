@@ -4,6 +4,8 @@
 
 #include"functional"
 
+
+// オブジェクトが入っているか
 inline bool IsObjectVisible(
     const Vector3& enemyPos,
     const Vector3& enemyDir, // Z+ forward方向
@@ -36,7 +38,12 @@ enum class VisionMode {
     Combat
 };
 
+// 前方宣言
 class LineCommon;
+
+/// <summary>
+/// 視界コンポーネントクラス
+/// </summary>
 class VisionComponent
 {
 public:
@@ -57,21 +64,30 @@ private:
 
     LineCommon* gLineDrawer = nullptr;
 public:
+    //ライン共通クラス設定
     void SetLineCommon(LineCommon* line) { gLineDrawer = line; }
 
+    // アングル設定
     void SetAlertView(float angle,float distance) { 
         alertViewAngle = angle; 
         alertViewDistance = distance;
     }
+
+    // アングル設定
     void SetCombatView(float angle,float distance) {
         combatViewAngle = angle;
         combatViewDistance = distance;
     }
     
+    // ビューモード設定
     void SetMode(VisionMode mode) { currentMode = mode; }
+    // ビューモード取得
     VisionMode GetMode() const { return currentMode; }
+    
+    // プレイヤー視界
     bool IsPlayerVisible() const { return canSeePlayer; }
 
+    // 更新
     void Update(float deltaTime, Vector3 selfPos, Vector3 selfDir, Vector3 targetPos)
     {
         float viewAngle = (currentMode == VisionMode::Combat) ? combatViewAngle : alertViewAngle;
@@ -99,6 +115,7 @@ public:
        
     }
 private:
+    // ライン描画
     void DrawDireLine(Vector3 selfPos, Vector3 selfDir, Vector3 targetPos, float viewDistance);
 
 };

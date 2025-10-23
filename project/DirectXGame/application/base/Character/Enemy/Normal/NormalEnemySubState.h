@@ -5,18 +5,24 @@
 template<class SubStateEnum, class BaseSubStateType>
 class SubStateMachine;
 
+
+/// <summary>
+/// 攻撃準備
+/// </summary>
 class NormalEnemyAttackReadySubState :public BaseAttackSubState{
 public:
     NormalEnemyAttackReadySubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
         : BaseAttackSubState(AttackSubState::Ready, c, fsm) {
     }
 
+    // 開始
     void Enter() override {
         timer_ = 0.0f;
     }
-
+    // 更新
     void Update(float deltaTime) override;
 
+    // 終了
     void Exit() override {}
 
 private:
@@ -31,10 +37,11 @@ public:
     NormalEnemyAttackSwingSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
         : BaseAttackSubState(AttackSubState::Swing, c, fsm) {
     }
-
+    // 開始
     void Enter() override;
-
+    // 更新
     void Update(float deltaTime) override;
+    // 終了
     void Exit() override;
 
 private:
@@ -51,11 +58,11 @@ public:
     NormalEnemyAttackEndSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
         : BaseAttackSubState(AttackSubState::End, c, fsm) {
     }
-
+    // 開始
     void Enter() override;
-
+    // 更新
     void Update(float deltaTime) override;
-
+    // 終了
     void Exit() override {
         printf("[AttackEnd] Exit\n");
     }

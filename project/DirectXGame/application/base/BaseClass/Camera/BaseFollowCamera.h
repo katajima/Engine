@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseCamera.h"
 
+/// <summary>
+/// フォローカメラ
+/// </summary>
 class BaseFollowCamera : public BaseCamera
 {
 public:

@@ -1,8 +1,15 @@
 #pragma once
 #include "DirectXGame/application/base/BaseClass/Weapon/MellWeapons.h"
 
+
+// 前方宣言
 class BasePlayer;
 class Player;
+
+
+/// <summary>
+///  プレイヤー武器クラス
+/// </summary>
 class PlayerWeapon : public SwordWeapon
 {
 public:
@@ -22,7 +29,9 @@ public:
 	/// </summary>
 	void DrawEffect() override;
 
-
+	/// <summary>
+	/// 描画2d
+	/// </summary>
 	void Draw2D() override;
 
 private:

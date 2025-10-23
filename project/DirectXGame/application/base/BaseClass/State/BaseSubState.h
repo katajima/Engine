@@ -22,6 +22,10 @@ template<class SubStateEnum, class BaseSubStateType>
 class SubStateMachine;
 
 class BaseCharacter;
+
+/// <summary>
+/// 攻撃サブステートクラス
+/// </summary>
 class BaseAttackSubState {
 public:
     virtual ~BaseAttackSubState() = default;
@@ -30,12 +34,17 @@ public:
         SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
         : attackSubstate_(state), character_(character), fsm_(fsm) {
     }
+
+    // 開始
     virtual void Enter() {}
+    // 更新
     virtual void Update(float deltaTime) {}
+    // 終了
     virtual void Exit() {}
 
 
 public:
+    // サブステート取得
     AttackSubState GetAttackSubState() const { return attackSubstate_; }
 protected:
     AttackSubState attackSubstate_;

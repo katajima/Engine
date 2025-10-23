@@ -9,12 +9,17 @@
 #include "DirectXGame/engine/collider/3d/ColliderComponent.h"
 #include "DirectXGame/engine/Base/pch.h"
 
+// 前方宣言
 class Effect;
 class BasePlayer;
 class BaseEnemy;
 class Entity3DManager;
 class Entity2DManager;
 class GlobalVariables;
+
+/// <summary>
+/// 弾の基底クラス
+/// </summary>
 class BaseBullet{
 public:
 	// デフォルトコンストラクタ
@@ -36,11 +41,11 @@ public:
 	// 毎フレーム更新
 	virtual void Update() = 0;
 
-	// 描画
+	// 描画3d
 	virtual void Draw() = 0;
-	//
+	// 描画エフェクト
 	virtual void DrawP() = 0;
-
+	// 描画2d
 	virtual void Draw2D() = 0;
 	
 	// 消すか
@@ -66,15 +71,15 @@ public:
 
 	// オブジェクト
 	Object3d* GetObject3D() { return object_; }
-	//
+	// プレイヤー設定
 	void SetPlayer(BasePlayer* player);
-
+	// 敵設定
 	void SetEnemy(BaseEnemy* enemy);
-
+	// 範囲設定
 	void SetTargerRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
-
+	// コライダコンポーネント取得
 	ColliderComponent* GetColliderComponent() { return object_->GetColliderComponent(); }
-
+	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; };
 
 protected:

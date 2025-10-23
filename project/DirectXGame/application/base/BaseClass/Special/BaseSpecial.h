@@ -2,10 +2,14 @@
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
-
+// 前方宣言
 class Input;
 class Entity3DManager;
 class Entity2DManager;
+
+/// <summary>
+/// 必殺技クラス
+/// </summary>
 class BaseSpecial
 {
 public:
@@ -47,7 +51,7 @@ public:
 	bool GetIsSpecialAttack() const { return isSpecialAttack; }
 	// Inputでのbool
 	void SetIsSpecialAttack(bool is) { isSpecialAttack = is; }
-	//
+	// アクション中か
 	bool IsAction() const { return isAction_; }
 
 	// 入力をセット

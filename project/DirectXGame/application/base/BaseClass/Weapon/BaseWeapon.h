@@ -8,12 +8,13 @@
 class BaseWeapon : public IHitReceiver
 {
 public:
+	// 初期化
 	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
-
+	// 更新
 	virtual void Update() = 0;
-
+	// 描画エフェクト
 	virtual void DrawEffect() = 0;
-
+	// 描画2d
 	virtual void Draw2D() = 0;
 
 
@@ -52,15 +53,17 @@ public:
 	WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
 
 
-
+	// リキャストタイム取得
 	bool GetIsRecastTimeOver() const { return data_.MaxRecastTime <= data_.recastTime; }
-
+	// リキャストタイム設定
 	void RecastTime(float timer) { data_.recastTime += timer; }
 
 public:
+	// ノード追加
 	void AddComboNode(const std::string& name, std::shared_ptr<ComboNodeState> node) {
 		comboNodes_[name] = node;
 	}
+	// コンボ接続
 	void ConnectCombo(const std::string& from, AttackInput input, const std::string& to) {
 		auto itFrom = comboNodes_.find(from);
 		auto itTo = comboNodes_.find(to);
@@ -68,18 +71,22 @@ public:
 			itFrom->second->SetNextState(input, itTo->second);
 		}
 	}
+	// 最初のコンボ
 	void StartCombo(const std::string& name) {
 		auto it = comboNodes_.find(name);
 		if (it != comboNodes_.end()) {
 			comboStateMachine_->SetRoot(it->second);
 		}
 	}
+	// コンボ更新
 	void UpdateCombo(float dt) {
 		comboStateMachine_->Update(dt);
 	}
+	// インプット
 	void InputCombo(AttackInput input) {
 		comboStateMachine_->HandleInput(input);
 	}
+	// コンボが終了したか
 	bool IsComboFinished() const {
 		return comboStateMachine_->IsComboFinished();
 	}

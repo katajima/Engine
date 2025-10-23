@@ -18,6 +18,7 @@ struct KnockbackData
 	}
 };
 
+// コンボデータ
 class ComboData {
 public:
 	float damage;

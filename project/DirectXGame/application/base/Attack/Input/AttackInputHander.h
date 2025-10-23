@@ -1,6 +1,7 @@
 #pragma once
 #include<memory>
 
+// 攻撃種類
 enum class AttackInput {
 	Light,          // 弱攻撃
 	Heavy,          // 強攻撃
@@ -12,12 +13,17 @@ enum class AttackInput {
 	Parry,          // 敵の攻撃に対するカウンター
 };
 
-
+// 前方宣言
 class BaseCharacter;
+
+/// <summary>
+/// 攻撃コマンドクラス
+/// </summary>
 class AttackICommand
 {
 public:
 	virtual ~AttackICommand();
+	
 	virtual void Exec(BaseCharacter& character) = 0;
 
 };
@@ -35,18 +41,24 @@ class AttackHeavy : public AttackICommand
 
 
 class Input;
+
+/// <summary>
+/// 攻撃インプットハンドラークラス
+/// </summary>
 class AttackInputHander 
 {
 public:
+	// インプット設定
 	void SetInput(Input* input) { input_ = input; };
-
+	// ハンドルインプット取得
 	AttackICommand* HandleInput();
-
+	// 割り当てる
 	void AssignAttack();
 
 private:
+	//割り当てる弱攻撃
 	void AssignAttackLight();
-
+	// 割り当てる強攻撃
 	void AssignAttackHeavy();
 
 	Input* input_;

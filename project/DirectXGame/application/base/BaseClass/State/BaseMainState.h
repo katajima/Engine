@@ -22,18 +22,26 @@ enum class CharacterMainState {
 	Dash,       // ダッシュ
 };
 
+//前方宣言
 class BaseCharacter;
+
+/// <summary>
+/// キャラクターステートクラス
+/// </summary>
 class BaseCharacterState {
 public:
 	virtual ~BaseCharacterState() = default;
 	BaseCharacterState(const CharacterMainState& state, BaseCharacter* character) :characterMainstate_(state), character_(character) {};
-
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 
 
 public:
+	// キャラクターメインステート取得
 	CharacterMainState GetCharacterMainState() const { return characterMainstate_; }
 protected:
 	CharacterMainState characterMainstate_;
@@ -48,8 +56,11 @@ public:
 	IdleState(BaseCharacter* character)
 		: BaseCharacterState(CharacterMainState::Idle, character) {
 	}
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 };
 
@@ -60,8 +71,11 @@ public:
 		: BaseCharacterState(CharacterMainState::Move, character) {
 	}
 
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 };
 
@@ -72,8 +86,11 @@ public:
 		: BaseCharacterState(CharacterMainState::Jump, character) {
 	}
 
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 };
 
@@ -84,19 +101,12 @@ public:
 		: BaseCharacterState(CharacterMainState::Avoidance, character) {
 	}
 
-	void Enter() override {
-		// 無敵時間セット
-		// character_->SetInvincible(true);
-	}
-
-	void Update() override {
-		// 回避動作更新
-		// if (アニメーション終了) → Moveへ戻す
-	}
-
-	void Exit() override {
-		// character_->SetInvincible(false);
-	}
+	// 開始
+	virtual void Enter() {}
+	// 更新
+	virtual void Update() {}
+	// 終了
+	virtual void Exit() {}
 };
 
 // 防御
@@ -106,8 +116,11 @@ public:
 		: BaseCharacterState(CharacterMainState::Defense, character) {
 	}
 
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 };
 
@@ -118,8 +131,11 @@ public:
 		: BaseCharacterState(CharacterMainState::Attack, character) {
 	}
 
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 
 private:
@@ -136,16 +152,12 @@ public:
 		: BaseCharacterState(CharacterMainState::Die, character) {
 	}
 
-	void Enter() override {
-		// character_->PlayAnimation("Die");
-		// character_->SetCollidable(false);
-	}
-
-	void Update() override {
-		// 死亡演出中
-	}
-
-	void Exit() override {}
+	// 開始
+	virtual void Enter() {}
+	// 更新
+	virtual void Update() {}
+	// 終了
+	virtual void Exit() {}
 };
 
 // 被弾
@@ -155,16 +167,12 @@ public:
 		: BaseCharacterState(CharacterMainState::Damage, character) {
 	}
 
-	void Enter() override {
-		// character_->PlayAnimation("Damage");
-	}
-
-	void Update() override {
-		// よろけ中
-		// if (終了) → Moveへ
-	}
-
-	void Exit() override {}
+	// 開始
+	virtual void Enter() {}
+	// 更新
+	virtual void Update() {}
+	// 終了
+	virtual void Exit() {}
 };
 
 // ダッシュ
@@ -174,16 +182,12 @@ public:
 		: BaseCharacterState(CharacterMainState::Dash, character) {
 	}
 
-	void Enter() override {
-		// character_->SetDashSpeed(...);
-	}
-
-	void Update() override {
-		// ダッシュ中の移動処理
-		// if (終了) → Moveへ
-	}
-
-	void Exit() override {}
+	// 開始
+	virtual void Enter() {}
+	// 更新
+	virtual void Update() {}
+	// 終了
+	virtual void Exit() {}
 };
 
 // 気絶
@@ -193,8 +197,11 @@ public:
 		: BaseCharacterState(CharacterMainState::Fainting, character) {
 	}
 
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 
 
@@ -216,45 +223,12 @@ public:
 		: BaseCharacterState(CharacterMainState::Skill, character) {
 	}
 
-	void Enter() override {
-		phase_ = SkillPhase::Charge;
-		timer_ = 0.0f;
-		// character_->PlayAnimation("SkillCharge");
-	}
-
-	void Update() override {
-		//timer_ += character_->GetDeltaTime();
-
-		//switch (phase_) {
-		//case SkillPhase::Charge:
-		//    if (timer_ >= chargeTime_) {
-		//        phase_ = SkillPhase::Cast;
-		//        timer_ = 0.0f;
-		//        // スキル効果発動
-		//        // character_->PlayAnimation("SkillCast");
-		//        // character_->SpawnSkillEffect();
-		//    }
-		//    break;
-
-		//case SkillPhase::Cast:
-		//    if (timer_ >= castTime_) {
-		//        phase_ = SkillPhase::Cooldown;
-		//        timer_ = 0.0f;
-		//        // character_->PlayAnimation("SkillEnd");
-		//    }
-		//    break;
-
-		//case SkillPhase::Cooldown:
-		//    if (timer_ >= cooldownTime_) {
-		//        // character_->ChangeState(CharacterMainState::Move);
-		//    }
-		//    break;
-		//}
-	}
-
-	void Exit() override {
-		// character_->StopSkillEffect();
-	}
+	// 開始
+	virtual void Enter() {}
+	// 更新
+	virtual void Update() {}
+	// 終了
+	virtual void Exit() {}
 
 private:
 	SkillPhase phase_ = SkillPhase::Charge;
@@ -277,8 +251,11 @@ public:
 		: BaseCharacterState(CharacterMainState::Special, character) {
 	}
 
+	// 開始
 	virtual void Enter() {}
+	// 更新
 	virtual void Update() {}
+	// 終了
 	virtual void Exit() {}
 
 private:

@@ -1,6 +1,9 @@
 #pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
+/// <summary>
+/// 移動コンポーネント
+/// </summary>
 class MoveComponent
 {
 public:
@@ -13,7 +16,7 @@ public:
 	Vector3& Acceleration() { return acceleration_; }
 	// 向いている方向
 	Vector3 GetDirection() const { return direction_; }
-
+	// 移動
 	void AddMove(float deltaTime, bool is, WorldTransform& object)
 	{
 		if (is) {
@@ -42,7 +45,7 @@ public:
 			isLanding_ = false;
 		}
 	}
-
+	// 移動処理
 	void Move(WorldTransform& world,Input* input) {
 		Vector3 velo = GetVelocity();
 
@@ -81,9 +84,11 @@ public:
 		Velocity().x = velo.x;
 		Velocity().z = velo.z;
 	}
+	// カメラ設定
 	void SetCamera(Camera* camera) { camera_ = camera; }
+	// 速度設定
 	void SetSpeed(float speed) { speed_ = speed; };
-
+	// ジャンプ回数現象
 	void DecrementJumpCount() { jumpCount_--; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }

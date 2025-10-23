@@ -12,11 +12,16 @@
 // アプリケーション(プレイヤー)
 #include "DirectXGame/application/base/BaseClass/Character/Player/BasePlayer.h"
 
+//前方宣言
 class Effect;
 class FollowCamera;
 class BulletManager;
 class Entity3DManager;
 class Entity2DManager;
+
+/// <summary>
+/// キャラクターマネージャークラス
+/// </summary>
 class BaseCharacterManager
 {
 public:
@@ -28,11 +33,14 @@ public:
 
 	// 更新
 	void Update();
-
+	// 描画2d
 	void Draw2D();
 public:
+	// フォローカメラ設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
+	// 弾マネージャー設定
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; }
+	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; }
 public: // 取得系
 

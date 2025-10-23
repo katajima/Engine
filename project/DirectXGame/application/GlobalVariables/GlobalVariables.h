@@ -35,6 +35,7 @@ public:
 
 	// グループやキーの一覧取得
 	std::vector<std::string> GetGroupNames() const;
+	// グループやキーの取得(名前取得)
 	std::vector<std::string> GetKeys(const std::string& groupName) const;
 
 	// 何の型か？
@@ -49,7 +50,7 @@ public:
 	bool DuplicateItem(
 		const std::string& srcGroupName, const std::string& srcKey,
 		const std::string& dstGroupName, const std::string& dstKey);
-	
+	// 固有キー取得
 	std::string MakeUniqueKey(const std::string& baseKey, const GvData::Group& group);
 
 	/// <summary>

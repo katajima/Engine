@@ -3,15 +3,21 @@
 #include "DirectXGame/engine/math/random.h"
 #include "DirectXGame/application/base/BaseClass/Attack/AttackData.h"
 
+
+/// <summary>
+/// ヒットコンポーネント
+/// </summary>
 class HitMotionComponent 
 {
 public:
 
+	// 初期化
 	void Init(float hitTimer,Vector3 offset) {
 		maxHitStopTimer = hitTimer;
 		offset_ = offset;
 	}
 
+	// 更新
 	void Update(float deltaTime, ObjectComponent* object) {
 
 		if (isHit) {
@@ -48,7 +54,7 @@ public:
 
 	}
 
-
+	// ヒットしたか設定
 	void SetIsHit(bool is) { isHit = is; }
 	// ノックバックデータセット
 	void SetKnockbackData(KnockbackData data) { knockback_ = data; }
