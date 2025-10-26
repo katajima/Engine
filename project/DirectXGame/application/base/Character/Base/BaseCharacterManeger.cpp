@@ -23,19 +23,32 @@ void BaseCharacterManager::Update()
 			}),
 		character_.end());
 
-	for (auto& character : character_)
-	{
-		if (character) {
-			character->Update();
+
+
+
+	// キャラクター更新(敵)
+	std::vector<BaseEnemy*> target;
+	for (auto& character : character_) {
+		if (character->GetCharacterType() == CharacterType::Enemy) {
+			if (character) {
+				character->Update();
+
+				target.push_back(static_cast<BaseEnemy*>(character.get()));
+			}
 		}
+	}
+
+	// キャラクター更新(プレイヤー)
+	if (GetPlayer()) {
+		GetPlayer()->SetTargetCharacters(target);
+		GetPlayer()->Update();
 	}
 }
 
 
 void BaseCharacterManager::Draw2D()
 {
-	for (auto& character : character_)
-	{
+	for (auto& character : character_) {
 		if (character) {
 			if (character->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
 				if (character->GetAlive()) {
@@ -78,7 +91,7 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
 	enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;
 	enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;
-	
+
 	character_.push_back(std::move(enemy));
 }
 
@@ -92,6 +105,7 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 		player = std::make_unique<NormalPlayer>();
 		break;
 	case PlayerType::kBullet:
+		player = std::make_unique<BulletPlayer>();
 		break;
 	case PlayerType::kAttacker:
 		break;
@@ -103,6 +117,7 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 	player->SetCharacterType(CharacterType::Player);
 	player->SetFollowCamera(followCamera_);
 	player->SetBulletManager(bulletManager_);
+	player->SetEffect(effect_);
 	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
 	character_.push_back(std::move(player));
 }

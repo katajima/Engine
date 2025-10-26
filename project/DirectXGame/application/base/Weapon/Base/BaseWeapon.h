@@ -131,6 +131,9 @@ protected:
 
 };
 
+// 前方宣言
+class BulletManager;
+
 // 遠距離の武器クラス
 class RangedWeapon : public BaseWeapon
 {
@@ -143,8 +146,10 @@ public:
 	virtual void DrawEffect() = 0;
 	/// 2d描画
 	virtual void Draw2D() = 0;
-	
+	// 弾管理クラス設定
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; }
+
 protected:
 	RangedWeaponData rengedData_; // 遠距離武器データ
-
+	BulletManager* bulletManager_ = nullptr;	// 弾管理クラス
 };

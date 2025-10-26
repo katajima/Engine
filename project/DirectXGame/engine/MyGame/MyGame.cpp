@@ -315,6 +315,9 @@ void MyGame::CreateParticle()
 
 
 	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
+	
+	
+	particleManager->CreateParticleGroup("cartridge", "resources/Texture/Image.png", modelManager->FindModel("cartridge.obj"));
 
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 30.0f;
@@ -377,10 +380,12 @@ void MyGame::LoadModel()
 
 
 	modelManager->LoadModel("origin.gltf", "Character");
+	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
 
 
 
 	modelManager->LoadModel("player_bullet.obj", "player_bullet");
+	modelManager->LoadModel("cartridge.obj", "player_bullet");
 	modelManager->LoadModel("Sword.obj", "Sword");
 	modelManager->LoadModel("plane.obj", "plane");
 	modelManager->LoadModel("AnimatedCube.gltf", "AnimatedCube");

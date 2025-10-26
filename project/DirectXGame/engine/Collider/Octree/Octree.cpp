@@ -99,7 +99,7 @@ void OctreeNode::clear()
 void Octree::queryNode(OctreeNode* node, const AABB& area, std::vector<Collider*>& results)
 {
 
-	
+
 }
 
 // OctreeNode 内でカプセルと三角形の衝突判定を行う

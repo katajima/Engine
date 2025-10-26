@@ -3,6 +3,8 @@
 
 #include "DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.h"
 #include "DirectXGame/application/base/Bullet/PlayerStanBullet.h"
+#include "DirectXGame/application/base/Bullet/PlayerBullet.h"
+
 
 
 
@@ -67,6 +69,7 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 		
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
+
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
@@ -87,7 +90,7 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 	bullets_.push_back(std::move(bullet));
 }
 
-void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy* enemy)
+void BulletManager::GenerateBullet(BulletType type, const BulletInfo& info, BaseEnemy* enemy)
 {
 	std::unique_ptr<BaseBullet> bullet;
 
@@ -97,6 +100,9 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 	case BulletManager::BulletType::kPlayerMissile:
 		break;
 	case BulletManager::BulletType::kEnemyBullet:
+		break;
+	case BulletManager::BulletType::kPlayerBullet:
+		bullet = std::make_unique<PlayerBullet>();
 		break;
 	case BulletManager::BulletType::kRangeBombingSpecial:
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
@@ -108,10 +114,11 @@ void BulletManager::GenerateBullet(BulletType type, Vector3 position, BaseEnemy*
 		break;
 	}
 
+	bullet->SetInfo(info); // 設定
 	bullet->SetPlayer(player_);	// プレイヤーセット
 	bullet->SetEffect(effect_);	// エフェクトセット
 	bullet->SetEnemy(enemy);	// 敵セット
-	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, position, camera_); // 弾の初期化
+	bullet->Initialize(entity3DManager_, entity2DManager_, globalVariables_, info.position, camera_); // 弾の初期化
 	
 	// moveする
 	bullets_.push_back(std::move(bullet));

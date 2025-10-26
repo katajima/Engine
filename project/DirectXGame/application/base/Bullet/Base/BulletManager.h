@@ -11,6 +11,8 @@ class Entity2DManager;
 class GlobalVariables;
 class Camera;
 
+
+
 /// <summary>
 /// 弾管理クラス
 /// </summary>
@@ -23,6 +25,7 @@ public:
 	{
 		kPlayerMissile,	// プレイヤーミサイル
 		kRangeBombingSpecial,	// レンジボミングスペシャル
+		kPlayerBullet,	// プレイヤー弾
 		kPlayerStan,			// スタン
 		kEnemyBullet,
 
@@ -60,8 +63,8 @@ public: // 生成
 	// 範囲攻撃する弾を生成(絨毯爆撃)
 	void GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad);
 
-	// ターゲットを追尾する弾を生成
-	void GenerateBullet(BulletType type, Vector3 position, BaseEnemy* enemy = nullptr);
+	// 弾を生成
+	void GenerateBullet(BulletType type, const BulletInfo& info, BaseEnemy* enemy = nullptr);
 
 public: // 取得or設定
 	// 弾リストを取得

@@ -68,7 +68,7 @@ void GamePlayScene::Initialize()
 	stageEventManager_->Initialize(GetEntity3DManager(), GetGlobalVariables(), caracterManager_.get());
 
 	// プレイヤー生成
-	caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+	caracterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
 	// 弾にプレイヤーセット
 	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
 
@@ -85,8 +85,10 @@ void GamePlayScene::Initialize()
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
-	sp->SetStage(stage_.get());
+	
+	//if(caracterManager_->GetPlayer())
+	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
+	//sp->SetStage(stage_.get());
 
 	// 衝突マネージャの生成
 	Vector3 sizeAABB = { 1000,1000,1000 };
@@ -160,7 +162,7 @@ void GamePlayScene::CheckAllCollisions()
 		}
 	}
 
-	collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
+	//collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
 
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
@@ -283,9 +285,9 @@ void GamePlayScene::Update()
 
 
 	// スペシャル
-	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
+	/*if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
 		cameraManeger_->SetUseCamera("universeCamera", 0.0f);
-	}
+	}*/
 
 	gameUI->Update();
 	// カメラ管理の更新

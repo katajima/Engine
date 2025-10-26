@@ -10,6 +10,7 @@
 
 //前方宣言
 class FollowCamera;
+class BaseEnemy;
 
 /// <summary>
 /// プレイヤクラス
@@ -33,6 +34,9 @@ public:
 	// 攻撃
 	virtual void Attack() = 0;
 
+	// ターゲットキャラクターを設定
+	void SetTargetCharacters(const std::vector<BaseEnemy*>& targetCharacters) { targetCharacters_ = targetCharacters; }
+
 public:
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera;}
@@ -53,9 +57,9 @@ public:
 	bool GetIsSpecial() const { return special_->GetIsSpecial(); }
 
 protected:
-	
-	FollowCamera* followCamera_;			// フォローカメラ
+	std::vector<BaseEnemy*> targetCharacters_;				// 攻撃対象キャラクターリスト
+	FollowCamera* followCamera_;							// フォローカメラ
 
-	bool isCreativeMode = false;			// クリエイティブモードかどうか
+	bool isCreativeMode = false;							// クリエイティブモードかどうか
 };
 

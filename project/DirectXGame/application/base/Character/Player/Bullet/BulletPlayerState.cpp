@@ -1,26 +1,24 @@
-#include "NormalPlayerState.h"
-#include "NormalPlayer.h"
+#include "BulletPlayerState.h"
+#include "BulletPlayer.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletManager.h>
 
 #pragma region Idle
 
 // 更新
-void PlayerStateIdle::Update() {
+void BulletPlayerStateIdle::Update() {
 	Input* input = character_->GetInput();
-	BaseWeapon* weapon = character_->GetWeapon();
-	BaseSpecial* special = character_->GetSpecial();
-	
-	// 武器描画 
-	weapon->GetObject3D()->SetIsDraw(true);
+	//BaseSpecial* special = character_->GetSpecial();
 
+	// 武器描画 
+	
 	// ゲームパッドが繋いであるなら
 	if (input->IsControllerConnected()) {
 
 		// 必殺技が使えるようになったら
-		if (character_->GetSpecial()->GetIsSpecial()) {
-			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
-		}
+		//if (character_->GetSpecial()->GetIsSpecial()) {
+		////	special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
+		//}
 
 		// スキル発動
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
@@ -45,15 +43,13 @@ void PlayerStateIdle::Update() {
 	}
 #endif // _DEBUG
 
-	weapon->RecastTime(MyGame::GameTime());
-
 	// 必殺技移行
-	if (special->GetIsSpecial()) {
+	/*if (special->GetIsSpecial()) {
 		if (special->GetIsSpecialAttack()) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 			return;
 		}
-	}
+	}*/
 
 	// 移動したら
 	if (input->GetGamePadLeftStick().Length() != 0) {
@@ -63,11 +59,11 @@ void PlayerStateIdle::Update() {
 };
 
 // 終了
-void PlayerStateIdle::Exit() {
+void BulletPlayerStateIdle::Exit() {
 };
 
 // 初期化
-void PlayerStateIdle::Enter() {
+void BulletPlayerStateIdle::Enter() {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsLoop(true);
 	anima->SetIsPlaying(true);
@@ -79,20 +75,18 @@ void PlayerStateIdle::Enter() {
 
 #pragma region Move
 
-void PlayerStateMove::Update()
+void BulletPlayerStateMove::Update()
 {
 	Input* input = character_->GetInput();
-	BaseWeapon* weapon = character_->GetWeapon();
-	BaseSpecial* special = character_->GetSpecial();
-
-	weapon->GetObject3D()->SetIsDraw(true);
+	//BaseSpecial* special = character_->GetSpecial();
 
 	
+
 	if (input->IsControllerConnected()) {
 
-		if (character_->GetSpecial()->GetIsSpecial()) {
+		/*if (character_->GetSpecial()->GetIsSpecial()) {
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
-		}
+		}*/
 
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
@@ -112,14 +106,13 @@ void PlayerStateMove::Update()
 		return;
 	}
 
-	weapon->RecastTime(MyGame::GameTime());
-	
-	if (special->GetIsSpecial()) {
+
+	/*if (special->GetIsSpecial()) {
 		if (special->GetIsSpecialAttack()) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 			return;
 		}
-	}
+	}*/
 
 	// 止まったら
 	if (input->GetGamePadLeftStick().Length() == 0) {
@@ -128,17 +121,14 @@ void PlayerStateMove::Update()
 	}
 }
 
-void PlayerStateMove::Exit()
+void BulletPlayerStateMove::Exit()
 {
 
 }
 
-void PlayerStateMove::Enter()
+void BulletPlayerStateMove::Enter()
 {
-	BaseWeapon* weapon = character_->GetWeapon();
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	weapon->GetObject3D()->SetIsDraw(false);
-	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
 	anima->SetIsLoop(true);
 	anima->SetIsPlaying(true);
 	anima->SetAnimationSpeed(1.0f);
@@ -150,7 +140,7 @@ void PlayerStateMove::Enter()
 #pragma region Jump
 
 // 更新
-void PlayerStateJump::Update() {
+void BulletPlayerStateJump::Update() {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	Input* input = character_->GetInput();
 
@@ -181,7 +171,7 @@ void PlayerStateJump::Update() {
 
 		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
-		
+
 		// 着地状態なら
 		if (character_->GetMoveComponent()->GetIsLanding()) {
 
@@ -211,19 +201,19 @@ void PlayerStateJump::Update() {
 	}
 
 
-	
 
-	
+
+
 
 
 }
 
 // 終了
-void PlayerStateJump::Exit() {
+void BulletPlayerStateJump::Exit() {
 	character_->GetMoveComponent()->Velocity() = { 0,0,0 };
 }
 // 初期化
-void PlayerStateJump::Enter() {
+void BulletPlayerStateJump::Enter() {
 
 
 }
@@ -232,14 +222,19 @@ void PlayerStateJump::Enter() {
 
 #pragma region Attack
 
-void PlayerStateAttack::Update()
+void BulletPlayerStateAttack::Update()
 {
-	BaseWeapon* weapon = character_->GetWeapon();
+	//BaseWeapon* weapon = character_->GetWeapon();
 
-	weapon->GetComboStateMachine()->Update(character_->GetTime());
+	//weapon->GetComboStateMachine()->Update(character_->GetTime());
+
+
+
+	character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+	return;
 }
 
-void PlayerStateAttack::Exit()
+void BulletPlayerStateAttack::Exit()
 {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	// 武器
@@ -253,15 +248,15 @@ void PlayerStateAttack::Exit()
 	anima->SetAnimationSpeed(1.0f);
 }
 
-void PlayerStateAttack::Enter()
+void BulletPlayerStateAttack::Enter()
 {
-	BaseWeapon* weapon = character_->GetWeapon();
+	//BaseWeapon* weapon = character_->GetWeapon();
 
 	// 武器
-	weapon->GetComboStateMachine()->Update(character_->GetTime());
-	weapon->GetObject3D()->SetIsDraw(true);
-	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
-	weapon->GetColliderComponent()->contactRecord_.Clear();
+	//weapon->GetComboStateMachine()->Update(character_->GetTime());
+	//weapon->GetObject3D()->SetIsDraw(true);
+	//weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
+	//weapon->GetColliderComponent()->contactRecord_.Clear();
 }
 
 #pragma endregion // 攻撃
@@ -270,37 +265,25 @@ void PlayerStateAttack::Enter()
 
 
 
-void PlayerStateSpecial::Update()
+void BulletPlayerStateSpecial::Update()
 {
-	BaseSpecial* special = character_->GetSpecial();
+	//BaseSpecial* special = character_->GetSpecial();
 	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
 
 	character_->Velocity() = {};
 	int time = 0;
 	player->GetPlayerUI()->SetIsTextRB(false);
-	//ui_->SetIsTextRB(false);
-	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
-	rengeSp->InAction();
-	rengeSp->SetIsDraw(false);
-	if (special->GetPhese() == 0) {
-		player->GetMoveComponent()->Move(player->GetObjectComponent()->GetWorldTransform(), player->GetInput());
-		player->GetPlayerUI()->SetIsTextRB(true);
-		rengeSp->SetIsDraw(true);
-	}
-	if (special->GetPhese() == 2) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
+	
 }
 
-void PlayerStateSpecial::Exit()
+void BulletPlayerStateSpecial::Exit()
 {
 	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
 
 	player->GetPlayerUI()->SetIsTextRB(false);
 }
 
-void PlayerStateSpecial::Enter()
+void BulletPlayerStateSpecial::Enter()
 {
 	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
 
@@ -313,7 +296,7 @@ void PlayerStateSpecial::Enter()
 
 #pragma region Skill
 // 更新
-void PlayerStateSkill::Update() {
+void BulletPlayerStateSkill::Update() {
 
 	timer_ += character_->GetTime();
 	if (changeTimer_ <= timer_) {
@@ -324,24 +307,22 @@ void PlayerStateSkill::Update() {
 };
 
 // 終了
-void PlayerStateSkill::Exit() {
+void BulletPlayerStateSkill::Exit() {
 
 };
 // 初期化
-void PlayerStateSkill::Enter() {
-	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
+void BulletPlayerStateSkill::Enter() {
+	//BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
 
-	BulletInfo bulletInfo = {};
-	bulletInfo.position = player->GetWorldTransform().worldMat_.GetWorldPosition();
-	timer_ = 0.0f;
-	player->GetBulletManager()->GenerateBullet(BulletManager::BulletType::kPlayerStan, bulletInfo);
+	//timer_ = 0.0f;
+	//player->GetBulletManager()->GenerateBullet(BulletManager::BulletType::kPlayerStan, player->GetWorldTransform().worldMat_.GetWorldPosition());
 };
 #pragma endregion // スキル
 
 #pragma region Defense
 
 // 更新
-void PlayerStateDefense::Update() {
+void BulletPlayerStateDefense::Update() {
 	Input* input = character_->GetInput();
 
 
@@ -377,13 +358,13 @@ void PlayerStateDefense::Update() {
 };
 
 // 終了
-void PlayerStateDefense::Exit() {
+void BulletPlayerStateDefense::Exit() {
 	isDifense_ = false;
 	character_->GetCombatStatComponent()->damageReduction_ = 0.0f;
 	character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
 };
 // 初期化
-void PlayerStateDefense::Enter() {
+void BulletPlayerStateDefense::Enter() {
 	isDifense_ = true;
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
@@ -398,7 +379,7 @@ void PlayerStateDefense::Enter() {
 #pragma region Fainting
 
 // 更新
-void PlayerStateFainting::Update() {
+void BulletPlayerStateFainting::Update() {
 	Input* input = character_->GetInput();
 	Vector2 left = input->GetGamePadLeftStick();
 
@@ -412,7 +393,7 @@ void PlayerStateFainting::Update() {
 		if (length >= 10.0f) {
 			subtime = 2.0f;
 		}
-		
+
 		timer_ += character_->GetTime() * subtime;
 	}
 
@@ -427,7 +408,7 @@ void PlayerStateFainting::Update() {
 }
 
 // 終了
-void PlayerStateFainting::Exit() {
+void BulletPlayerStateFainting::Exit() {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
@@ -435,7 +416,7 @@ void PlayerStateFainting::Exit() {
 	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
 };
 // 初期化
-void PlayerStateFainting::Enter() {
+void BulletPlayerStateFainting::Enter() {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
@@ -450,6 +431,3 @@ void PlayerStateFainting::Enter() {
 };
 
 #pragma endregion // 気絶
-
-
-

@@ -1,4 +1,4 @@
-#include "NormalPlayer.h"
+#include "BulletPlayer.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -8,26 +8,29 @@
 #include "assert.h"
 
 
-void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
-{
+///< summary>
+/// 初期化
+///</summary>
+void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) {
+
 	entity3DManager_ = entity3DManager;
 	entity2DManager_ = entity2DManager;
 	globalVariables_ = globalVariables;
 	camera_ = camera;
 	input_ = input;
-	
-	
-	
+
+
+
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-	
+
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true,this, ObjectModelType::kSkinning);
+	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true, this, ObjectModelType::kSkinning);
 
 
 	CreateGroup("Player");
 
-	objectComponent_->SetSRT({1,1,1}, {}, position);				//　SRT設定
+	objectComponent_->SetSRT({ 1,1,1 }, {}, position);				//　SRT設定
 	objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
 	objectComponent_->GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
@@ -38,7 +41,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	HP() = 100; // 初期HP設定
 	Parameters().speed = 20.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
-	
+
 	// 戦闘中の倍率・軽減率を扱う
 	combatStatComponent_ = std::make_unique<CombatStatComponent>();
 	combatStatComponent_->Initialize(&characterParameterComponent_);
@@ -133,22 +136,36 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 
 
-	// スペシャル攻撃
-	special_ = std::make_unique<RangeBombingSpecial>();
-	special_->Initialize(entity3DManager, entity2DManager, camera_);
-	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
-	special_->SetInput(input);
-	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-	rengeSp->SetRadius(100);
-	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
-	rengeSp->Set(followCamera_, bulletManager_);
+	weaponManager_ = std::make_unique<BulletWeaponManager>();
+	weaponManager_->SetOwner(this);
+	weaponManager_->SetEffect(effect_);
+	weaponManager_->Initialize(bulletManager_,input,entity3DManager_,entity2DManager_,globalVariables_);
 
-	// 武器
-	weapon_ = std::make_unique<PlayerWeapon>();
-	weapon_->SetCharacter(this);
-	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
-	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(-90),0.0f,0.0f };
-	weapon_->GetHitData().hitTime.maxT = 2.0f;
+	// 右上
+	weaponManager_->AddBulletWeapon("UPRIGHT",Vector3{2.5f,6,0});
+	weaponManager_->AddBulletWeapon("UPLEFT",Vector3{-2.5f,6,0});
+	weaponManager_->AddBulletWeapon("DOWNRIGHT",Vector3{2.5f,3,0});
+	weaponManager_->AddBulletWeapon("DOWNLEFT",Vector3{-2.5f,3,0});
+
+
+
+	//// スペシャル攻撃
+	//special_ = std::make_unique<RangeBombingSpecial>();
+	//special_->Initialize(entity3DManager, entity2DManager, camera_);
+	//special_->SetParent(&GetObjectComponent()->GetWorldTransform());
+	//special_->SetInput(input);
+	//RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
+	//rengeSp->SetRadius(100);
+	//rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
+	//rengeSp->Set(followCamera_, bulletManager_);
+
+	//// 武器
+	//weapon_ = std::make_unique<PlayerWeapon>();
+	//weapon_->SetCharacter(this);
+	//weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
+	//weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(-90),0.0f,0.0f };
+	//weapon_->GetHitData().hitTime.maxT = 2.0f;
+
 
 	attackInputHander_ = std::make_unique<AttackInputHander>();
 	attackInputHander_->AssignAttack();
@@ -161,48 +178,50 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// キャラクター行動ステート初期化
 	InitStateMachine();
-}
+};
 
-// ステート初期化and追加
-void NormalPlayer::InitStateMachine() {
+
+// ステートマシーン初期化
+void BulletPlayer::InitStateMachine() {
 	stateMachine_ = std::make_unique<CharacterStateMachine>();
 	stateMachine_->RegisterState(CharacterMainState::Idle, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateIdle>(p);
+		return std::make_unique<BulletPlayerStateIdle>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateMove>(p);
+		return std::make_unique<BulletPlayerStateMove>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Attack, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateAttack>(p);
+		return std::make_unique<BulletPlayerStateAttack>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Special, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateSpecial>(p);
+		return std::make_unique<BulletPlayerStateSpecial>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Skill, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateSkill>(p);
+		return std::make_unique<BulletPlayerStateSkill>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Defense, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateDefense>(p);
+		return std::make_unique<BulletPlayerStateDefense>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Fainting, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateFainting>(p);
+		return std::make_unique<BulletPlayerStateFainting>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Jump, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateJump>(p);
+		return std::make_unique<BulletPlayerStateJump>(p);
 		});
 	stateMachine_->Init(this, CharacterMainState::Move);
-}
+};
 
-// 更新
-void NormalPlayer::Update()
-{
+///< summary>
+/// 更新
+///</summary>
+void BulletPlayer::Update() {
 	UpdateBaseGetValue(); //保存機能 基本値の更新
 
 	// HPが0以下なら死亡
 	if (GetHP() <= 0) {
 		objectComponent_->GetObjectStateFlags().isAlive = false;
 	}
-	
+
 
 
 #ifdef _DEBUG
@@ -211,7 +230,7 @@ void NormalPlayer::Update()
 	if (ImGui::Button("SP")) {
 		special_->SetGauge(100);
 	}
-	
+
 	ImGui::End();
 	if (input_->IsTriggerKey(DIK_C)) {
 		if (!isCreativeMode) {
@@ -224,7 +243,7 @@ void NormalPlayer::Update()
 	}
 #endif // _DEBUG
 
-	if (moveComponent_->GetIsLanding() && 
+	if (moveComponent_->GetIsLanding() &&
 		stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
 		input_->GetGamePadLeftStick().Length() == 0) {
 		moveComponent_->Velocity() = {};
@@ -236,8 +255,8 @@ void NormalPlayer::Update()
 	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
 	// 移動コンポーネント着地状態か
 	moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
-	
-	
+
+
 	// クリエイティブモードではないなら移動制限を付ける
 	if (!isCreativeMode) {
 		// 移動制限
@@ -246,7 +265,7 @@ void NormalPlayer::Update()
 
 	// ワールドトランスフォーム更新
 	GetObjectComponent()->GetWorldTransform().Update();
-	
+
 	// コライダのワールドトランスフォーム更新
 	worldCollider_.Update();
 
@@ -254,12 +273,12 @@ void NormalPlayer::Update()
 	GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 	// 必殺技
-	special_->Update();
+	//special_->Update();
 	// ヒットデータの更新
-	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
+	//weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
-	weapon_->Update();
+	///weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
+	//weapon_->Update();
 
 #ifdef _DEBUG
 	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
@@ -268,37 +287,38 @@ void NormalPlayer::Update()
 	// UI更新
 	ui_->Update();
 
+
+
+	// 武器マネージャー更新
+	LockOn();
+	weaponManager_->Update();
+
 	// キャラクターパラメーター更新
 	characterParameterComponent_.Update();
 
 	// ステート
 	stateMachine_->Update();
-}
+};
 
-#pragma region Draw
+/// <summary>
+/// エフェクトの描画
+/// </summary>
+void BulletPlayer::DrawEffect() {
+};
 
-void NormalPlayer::DrawEffect()
-{
-}
-
-void NormalPlayer::Draw2D()
-{
-	
-	ui_->SetIsTextmax(special_->GetIsSpecial());
-	ui_->SetIsTextRB(special_->GetIsSpecial());
-	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
+/// <summary>
+/// 描画2d
+/// </summary>
+void BulletPlayer::Draw2D() {
+	//ui_->SetIsTextmax(special_->GetIsSpecial());
+	//ui_->SetIsTextRB(special_->GetIsSpecial());
+	//ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
 	ui_->Draw();
-}
+};
 
-
-#pragma endregion //描画関係
-
-
-#pragma region Move
-
-void NormalPlayer::Move()
-{
+// 移動処理
+void BulletPlayer::Move() {
 	// 重力
 	if (stateMachine_->GetCurrentMainState() != CharacterMainState::Jump) {
 		Velocity() = { 0,0,0 };
@@ -313,10 +333,10 @@ void NormalPlayer::Move()
 		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
 		moveComponent_->Move(GetObjectComponent()->GetWorldTransform(), input_);
 	}
-}
+};
 
-void NormalPlayer::Jump()
-{
+// ジャンプ
+void BulletPlayer::Jump() {
 	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
 	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
 
@@ -330,30 +350,64 @@ void NormalPlayer::Jump()
 		GetObjectComponent()->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
 		GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
 	}
+};
 
-}
-
-void NormalPlayer::Attack()
-{
+// 攻撃
+void BulletPlayer::Attack() {
 	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
 	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
 	bool is3 = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
 
 
 	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Attack) {
-		weapon_->InputCombo(AttackInput::Light);
+		//weapon_->InputCombo(AttackInput::Light);
 	}
 	else if (is || is2 || is3) {
 		stateMachine_->ChangeState(CharacterMainState::Attack);
-		weapon_->StartCombo("Attack1");
+
+		weaponManager_->GetBulletWeapon("UPRIGHT")->Shoot();
+		weaponManager_->GetBulletWeapon("UPLEFT")->Shoot();
+		weaponManager_->GetBulletWeapon("DOWNRIGHT")->Shoot();
+		weaponManager_->GetBulletWeapon("DOWNLEFT")->Shoot();
+	}
+};
+
+void BulletPlayer::LockOn() {
+
+	// ターゲット選別
+
+	
+	std::vector<BaseEnemy*> enemys;
+	
+	// 範囲内に入った敵を抽出
+	for (auto& target : targetCharacters_) {
+		Vector2 posEne = target->GetObjectComponent()->GetScreenPosition();
+		float direction = target->GetTargetDistance();
+		Vector2 diff = Vector2{ 640,360 } - posEne;
+		float length = diff.Length();
+		target->SetIsLockOn(false);
+		if (length <= 300.0f && target->GetAlive() && direction < 300) {
+
+			
+
+			enemys.push_back(target);
+		}
 	}
 
-}
+	// --- 範囲内に敵がいない場合は処理を抜ける ---
+	if (enemys.empty()) {
+		weaponManager_->SetTargets({});
+		return;
+	}
 
-#pragma endregion //移動関係
+	// 範囲内の入った敵を近い順にソートしてそれぞれの銃にターゲットを指定
 
-#pragma region MyRegion
+	// --- 距離が近い順にソート ---
+	std::sort(enemys.begin(), enemys.end(),
+		[](BaseEnemy* a, BaseEnemy* b) {
+			return a->GetTargetDistance() < b->GetTargetDistance();
+		});
 
-void NormalPlayer::ApplyGlobalVariables(){}
-
-#pragma endregion // そのほか
+	// --- ソート後の敵リストを武器マネージャーへ渡す ---
+	weaponManager_->SetTargets(enemys);
+};

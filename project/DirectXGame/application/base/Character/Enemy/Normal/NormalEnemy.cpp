@@ -21,7 +21,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	//objectComponent_->Initialize(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", true, true, this);
 	//objectComponent_->SetSRT(size, {}, position);
-	
+
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);
 
 	CreateGroup("enemy");
@@ -125,7 +125,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 
 	objectComponent_->GetObjectStateFlags().isAlive = true;
-	
+
 	// パラメーター初期化
 	Parameters().HP.Initiaize(100, 0, 100, 0);
 	Parameters().speed = 3.0f;
@@ -136,7 +136,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	combatStatComponent_ = std::make_unique<CombatStatComponent>();
 	combatStatComponent_->Initialize(&characterParameterComponent_);
 
-	
+
 	// 保存項目初期化
 	InitializeBaseAddItem();
 
@@ -226,19 +226,16 @@ void NormalEnemy::DrawEffect()
 
 void NormalEnemy::Draw2D()
 {
-	/*if (GetObjectComponent() == nullptr) { return; }
+	if (GetObjectComponent() == nullptr) { return; }
 
-	if (GetObjectComponent()) {
-		Vector2 screenPos = ScreenPosition(objectComponent_->GetWorldTransform(),entity3DManager_->GetObject3dCommon()->GetDefaltCamera());
+	if (GetIsLockOn()) {
+		Vector2 screenPos = objectComponent_->GetScreenPosition();
+		icon_lockOn->SetPosition(screenPos + Vector2{ 0.0f,-40.0f });
 
-
-		if (objectComponent_->GetObjectStateFlags().isLockonTarget) {
-			icon_lockOn->SetPosition(screenPos + Vector2{ 0.0f,-40.0f });
-
-			icon_lockOn->Update();
-			icon_lockOn->Draw();
-		}
-
+		icon_lockOn->Update();
+		icon_lockOn->Draw();
+	}
+	/*if (GetObjectComponent()) {
 		if (GetAlive() && !objectComponent_->GetObjectStateFlags().isDeleted) {
 
 			backHpBer_->SetSize({ Parameters().HP.maxValue ,15.0f });
@@ -269,8 +266,6 @@ void NormalEnemy::Emit()
 	effect_->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
 	effect_->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
 }
-
-
 
 void NormalEnemy::Move()
 {

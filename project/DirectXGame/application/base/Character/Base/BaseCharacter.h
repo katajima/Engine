@@ -115,7 +115,6 @@ public: // 取得系関数
 	// コライダーコンポーネント
 	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
-	//Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
 	ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
 	// ワールド変換取得
 	WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
@@ -214,8 +213,6 @@ protected:
 	std::unique_ptr<MoveComponent> moveComponent_;				// 移動コンポーネント
 	std::unique_ptr<CombatStatComponent> combatStatComponent_;	// 攻撃パラメーター補正
 	std::unique_ptr <HitMotionComponent> hitMotionComponent_;	// ヒットモーション
-
-
 
 protected:
 	// キャラクターパラメータコンポーネント

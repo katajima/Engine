@@ -78,7 +78,7 @@ void GameUI::Update()
 	
 
 	UICount* hitCount = GetUICount("hitCount");
-	hitCount->SetCount(static_cast<float>(player_->GetHitCount()));
+	//hitCount->SetCount(static_cast<float>(player_->GetHitCount()));
 
 	UpdateUIElement(0);
 }

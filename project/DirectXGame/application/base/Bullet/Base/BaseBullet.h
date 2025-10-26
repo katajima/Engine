@@ -17,6 +17,16 @@ class Camera;
 
 
 /// <summary>
+/// 弾の情報構造体
+/// </summary>
+struct BulletInfo {
+	Vector3 position;			// 位置
+	Vector3 targetPos;			// 目標位置
+	float speed;				// 速度
+	float damage;				// ダメージ量
+};
+
+/// <summary>
 /// 弾の基底クラス
 /// </summary>
 class BaseBullet{
@@ -81,6 +91,9 @@ public:
 	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; };
 
+	// ターゲットの位置取得
+	void SetInfo(const BulletInfo& info) { info_ = info; }
+
 protected:
 	// 当たり判定をするか
 	void SetIsCollision(bool is) { isCollision = is; }
@@ -112,6 +125,8 @@ protected:
 	BasePlayer* player_;
 	BaseEnemy* enemy_;
 	Effect* effect_;
+	BulletInfo info_;
+
 
 	GlobalVariables* globalVariables_ = nullptr;
 	Entity3DManager* entity3DManager_ = nullptr;

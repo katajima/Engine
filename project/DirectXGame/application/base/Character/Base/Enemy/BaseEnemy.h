@@ -49,7 +49,10 @@ public:
 	float GetTargetDistance();
 	// 移動方向
 	void DirectionMove(float speed);
-
+	// ロックオンされているか
+	bool GetIsLockOn() const { return isLockOn_; }
+	//
+	void SetIsLockOn(bool isLockOn) { isLockOn_ = isLockOn; }
 
 protected:
 	// スプライト初期化
@@ -66,5 +69,6 @@ protected:
 	BasePlayer* player_;
 	std::unique_ptr <VisionComponent> visionComponent_;			// 視界
 	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
+	bool isLockOn_ = false; // ロックオンされているか
 
 };

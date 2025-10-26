@@ -14,6 +14,7 @@ void Effect::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globa
 
 	InitParticle();
 	InitRangeBombingBullet();
+	InitBullet();
 }
 
 void Effect::InitParticle(){
@@ -277,6 +278,48 @@ void Effect::InitRangeBombingBullet()
 	hitEmitter_->SetVelocity({}, {});
 	hitEmitter_->SetRotate({ 0,0,0 }, { 0,0,3.14f });
 	hitEmitter_->SetIsEmit(false);
+}
+
+void Effect::InitBullet()
+{
+	effectComponent_->AddEmitter("bulletSmoke", "smokePlane03_2", EmitterShapeType::POINT);
+	PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("bulletSmoke");
+	starEmit->GetFrequency() = 0.0f;
+	starEmit->SetCount(10, 0);
+	starEmit->SetPos({ 0,0.0f,0.0f });
+	starEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
+	starEmit->SetAlphaClipping(0.10f);
+	Vector3 velo = {2,2,2};
+	
+	starEmit->SetVelocity({}, velo);
+	starEmit->SetLifeTime(1.25f, 0);
+	starEmit->SetIsAlpha(true);
+	starEmit->SetSize(Vector3{ 0.8f,0.8f,0.8f }, { 0.1f,0.1f,0.1f });
+	starEmit->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
+
+
+
+	effectComponent_->AddEmitter("cartridge", "cartridge", EmitterShapeType::POINT);
+	PointParticleEmitter* cartridgeEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("cartridge");
+	cartridgeEmit->GetFrequency() = 0.0f;
+	cartridgeEmit->SetCount(1, 0);
+	cartridgeEmit->SetPos({ 0,0.0f,0.0f });
+	cartridgeEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
+	cartridgeEmit->SetAlphaClipping(0.10f);
+	cartridgeEmit->SetUsebillboard(false);
+	velo = {1,1,1};
+	
+	cartridgeEmit->SetVelocity({0,5,0}, velo);
+	cartridgeEmit->SetLifeTime(2.0f, 0);
+	cartridgeEmit->SetIsAlpha(true);
+	cartridgeEmit->SetIsGravity(true);
+	cartridgeEmit->SetIsBounce(true);
+	cartridgeEmit->SetSize(Vector3{ 0.8f,0.8f,0.8f }, {});
+	cartridgeEmit->SetColorMinMax({ 1,1, 0 }, { 1,1, 0 });
+
+
+
+
 }
 
 void Effect::Update() {

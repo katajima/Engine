@@ -85,6 +85,10 @@ public: // 取得
 	Object3d* GetObject3D() { return objectBase_; }
 	// ワールド変換取得
 	WorldTransform& GetWorldTransform();
+	// ワールド座標取得
+	Vector3 GetWorldPosition() { return GetWorldTransform().GetWorldPosition(); };
+	// スクリーン座標取得
+	Vector2 GetScreenPosition();
 	// リジッドボディー取得
 	RigidBodyComponent* GetRigidBodyComponent();
 	

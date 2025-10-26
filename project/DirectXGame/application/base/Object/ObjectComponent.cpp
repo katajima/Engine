@@ -108,6 +108,16 @@ ContactRecord& ObjectComponent::GetContactRecord() {
     }
 }
 
+// スクリーン座標取得
+Vector2 ObjectComponent::GetScreenPosition() {
+    if (useInstancing) {
+        return ScreenPosition(objectInstance_->transform, entity3DManager_->GetObject3dCommon()->GetDefaltCamera());
+    }
+    else {
+        return objectBase_->GetScreenPosition();
+    }
+}
+
 
 /// <summary>
 /// 初期化
