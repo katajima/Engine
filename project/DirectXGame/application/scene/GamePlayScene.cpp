@@ -101,6 +101,14 @@ void GamePlayScene::Initialize()
 
 	caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, {10,0,10}));
 
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			Vector3 pos = Random::RandomVector3(-100, 100);
+			pos.y = 0;
+			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, pos));
+		}
+	}
+
 }
 
 
@@ -214,7 +222,7 @@ void GamePlayScene::Update()
 		BehaviorPhase2Update();
 		break;
 	}
-	//tumeee_ += MyGame::GameTime();
+	tumeee_ += MyGame::GameTime();
 	if (tumeee_ >= 10.0f) {
 		if (caracterManager_->GetCharacterCount(CharacterType::Enemy) <= 0 || !caracterManager_->GetPlayer()->GetAlive()) {
 			// シーン切り替え
