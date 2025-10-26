@@ -28,7 +28,7 @@ void BulletWeaponManager::Draw() {
 
 }
 
-void BulletWeaponManager::AddBulletWeapon(const std::string& name, const Vector3& pos)
+void BulletWeaponManager::AddBulletWeapon(const std::string& name, const Vector3& pos, const Vector3 pos2)
 {
 	if(bulletWeapons_.find(name) != bulletWeapons_.end()) {
 		// すでに存在する場合は追加しない
@@ -38,6 +38,7 @@ void BulletWeaponManager::AddBulletWeapon(const std::string& name, const Vector3
 	auto weapon = std::make_unique<BulletPlayerWeapon>();
 	weapon->SetParent(player_);
 	weapon->SetEffect(effect_);
+	weapon->SetModePenetrationPos(pos2);
 	weapon->Initialize(input_, entity3DManager_, entity2DManager_, nullptr, pos, nullptr);
 	weapon->SetBulletManager(bulletManager_);
 	bulletWeapons_[name] = std::move(weapon);
@@ -84,3 +85,23 @@ BulletPlayerWeapon* BulletWeaponManager::GetBulletWeapon(const std::string& name
 	}
 	return nullptr;
 }
+
+
+/// <summary>
+	/// 通常弾
+	/// </summary>
+void BulletWeaponManager::Normal() {
+	for (auto& weapon : bulletWeapons_) {
+		weapon.second->SetModeType(BulletPlayerWeapon::ModeType::Normal);
+	}
+};
+
+
+/// <summary>
+/// 貫通弾
+/// </summary>
+void BulletWeaponManager::Penetration() {
+	for (auto& weapon : bulletWeapons_) {
+		weapon.second->SetModeType(BulletPlayerWeapon::ModeType::Penetration);
+	}
+};

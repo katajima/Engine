@@ -16,6 +16,17 @@ class Sprite;
 class Camera;
 
 
+
+enum class BulletType {
+	NORMAL,		// 通常弾
+	HOMING,		// ホーミング弾
+	LASER,		// レーザー
+	SHOTGUN,	// ショットガン
+	RAPID,		// 連射弾
+	PENETRATION,// 貫通弾 
+};
+
+
 /// <summary>
 /// 弾の情報構造体
 /// </summary>
@@ -24,6 +35,7 @@ struct BulletInfo {
 	Vector3 targetPos;			// 目標位置
 	float speed;				// 速度
 	float damage;				// ダメージ量
+	BulletType type;			// 弾の種類
 };
 
 /// <summary>

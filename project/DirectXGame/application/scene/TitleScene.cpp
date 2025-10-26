@@ -14,7 +14,8 @@ void TitleScene::Initialize()
 	// リソース
 	InitializeResources();
 
-	GetSceneData().playerID = 100; // プレイヤーID初期化
+
+	GetSceneData().playerID = 1;
 }
 
 void TitleScene::Finalize()
@@ -28,6 +29,15 @@ void TitleScene::Update()
 		GetSceneManager()->ChangeScene("GAMEPLAY");
 	}
 	else if (input_->IsControllerConnected()) {
+		if (input_->IsTriggerKey(DIK_1)) {
+			GetSceneManager()->GetSceneData().playerID = 1;
+		}
+		if (input_->IsTriggerKey(DIK_2)) {
+			GetSceneManager()->GetSceneData().playerID = 2;
+		}
+
+
+
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
 			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}

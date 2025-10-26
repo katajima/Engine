@@ -7,8 +7,19 @@ class BasePlayer;
 class BaseEnemy;
 class Effect;
 
+
+
 class BulletPlayerWeapon : public RangedWeapon {
 public:
+
+	enum class ModeType
+	{
+		Normal,			// 通常弾
+		Penetration,	// 貫通弾
+		Count,
+	};
+
+
 	///< summary>
 	/// 初期化
 	///</summary>
@@ -55,6 +66,13 @@ public:
 	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; };
 
+	// モードタイプ設定
+	void SetModeType(ModeType mode) { modeType_ = mode; }
+	
+
+	// 
+	void SetModePenetrationPos(Vector3 pos) { penetrationPos_ = pos; }
+
 private:
 	WorldTransform bulletTransform_;
 
@@ -66,6 +84,10 @@ private:
 	float interpolation_ = 0.1f;		// 補間
 	float timer_ = 0.0f;				// タイマー
 
+	Vector3 defaultPosition_{ 0,0,0 };	// デフォルト位置
+	Vector3 penetrationPos_{ 0,0,0 };		// 貫通弾位置
+
+	ModeType modeType_ = ModeType::Normal;	// 弾のモード
 private:
 	Effect* effect_ = nullptr;
 	BaseEnemy* target_ = nullptr;

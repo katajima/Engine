@@ -20,6 +20,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	//　SRT設定
 	GetObject3D()->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
 	GetObject3D()->SetIsDraw(true);
+	
 	GetObject3D()->GetWorldTransform().scale_ = 3;
 
 
@@ -34,7 +35,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider_));
 
 	auto obbCollider2_ = std::make_unique<OBBCollider>();
-	obbCollider2_->obb.size = { 0.5f,10.5f,1.0f };
+	obbCollider2_->obb.size = { 0.5f,5.5f,1.0f };
 	obbCollider2_->tag = CollisionTag::PlayerAttack;
 	obbCollider2_->layer = CollisionLayer::PlayerAttack;
 	obbCollider2_->isDebugLine = true;
@@ -118,7 +119,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	data.knockbackData.isYpower = true;
 	data.knockbackData.power = 130.0f;
 	data.knockbackData.yPower = 90.0f;
-	data.movementSpeedMultiplier = 150.15f;
+	data.movementSpeedMultiplier = 15.15f;
 	data.moveTime = 0.1f;
 	attack3 = std::make_shared<ComboNodeState>("Attack3", data);
 	//data.damage = 30;
@@ -143,11 +144,14 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	colliderWorld_.parent_ = &GetObject3D()->GetWorldTransform();
 	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
 	colliderWorld_.translate_.y = 2.5f; // 武器の位置調整
+	//colliderWorld_.translate_.y = 3.0f; // 武器の位置調整
 
 	// コライダ位置初期化
 	colliderWorld2_.Initialize();
 	colliderWorld2_.parent_ = &colliderWorld_;
 	colliderWorld2_.translate_.y = 2.0f; // 武器の位置調整
+	//colliderWorld2_.translate_.y = 4.0f; // 武器の位置調整
+
 }
 
 void PlayerWeapon::Update()

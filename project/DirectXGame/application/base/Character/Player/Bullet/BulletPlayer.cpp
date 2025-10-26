@@ -142,22 +142,22 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	weaponManager_->Initialize(bulletManager_,input,entity3DManager_,entity2DManager_,globalVariables_);
 
 	// 右上
-	weaponManager_->AddBulletWeapon("UPRIGHT",Vector3{2.5f,6,0});
-	weaponManager_->AddBulletWeapon("UPLEFT",Vector3{-2.5f,6,0});
-	weaponManager_->AddBulletWeapon("DOWNRIGHT",Vector3{2.5f,3,0});
-	weaponManager_->AddBulletWeapon("DOWNLEFT",Vector3{-2.5f,3,0});
+	weaponManager_->AddBulletWeapon("UPRIGHT",Vector3{2.5f,6,0}, Vector3{ 1.5f,4,8 });
+	weaponManager_->AddBulletWeapon("UPLEFT",Vector3{-2.5f,6,0}, Vector3{ -1.5f,4,8 });
+	weaponManager_->AddBulletWeapon("DOWNRIGHT",Vector3{2.5f,3,0}, Vector3{ 1.5f,3,8 });
+	weaponManager_->AddBulletWeapon("DOWNLEFT",Vector3{-2.5f,3,0}, Vector3{ -1.5f,3,8 });
 
 
 
-	//// スペシャル攻撃
-	//special_ = std::make_unique<RangeBombingSpecial>();
-	//special_->Initialize(entity3DManager, entity2DManager, camera_);
-	//special_->SetParent(&GetObjectComponent()->GetWorldTransform());
-	//special_->SetInput(input);
-	//RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-	//rengeSp->SetRadius(100);
-	//rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
-	//rengeSp->Set(followCamera_, bulletManager_);
+	// スペシャル攻撃
+	special_ = std::make_unique<RangeBombingSpecial>();
+	special_->Initialize(entity3DManager, entity2DManager, camera_);
+	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
+	special_->SetInput(input);
+	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
+	rengeSp->SetRadius(100);
+	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
+	rengeSp->Set(followCamera_, bulletManager_);
 
 	//// 武器
 	//weapon_ = std::make_unique<PlayerWeapon>();
@@ -243,6 +243,16 @@ void BulletPlayer::Update() {
 	}
 #endif // _DEBUG
 
+
+
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
+		weaponManager_->Normal();
+	}
+	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Down)) {
+		weaponManager_->Penetration();
+	}
+
+
 	if (moveComponent_->GetIsLanding() &&
 		stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
 		input_->GetGamePadLeftStick().Length() == 0) {
@@ -273,7 +283,7 @@ void BulletPlayer::Update() {
 	GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 	// 必殺技
-	//special_->Update();
+	special_->Update();
 	// ヒットデータの更新
 	//weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
 	//武器更新
@@ -310,9 +320,9 @@ void BulletPlayer::DrawEffect() {
 /// 描画2d
 /// </summary>
 void BulletPlayer::Draw2D() {
-	//ui_->SetIsTextmax(special_->GetIsSpecial());
-	//ui_->SetIsTextRB(special_->GetIsSpecial());
-	//ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
+	ui_->SetIsTextmax(special_->GetIsSpecial());
+	ui_->SetIsTextRB(special_->GetIsSpecial());
+	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
 	ui_->Draw();
 };

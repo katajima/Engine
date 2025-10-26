@@ -68,7 +68,13 @@ void GamePlayScene::Initialize()
 	stageEventManager_->Initialize(GetEntity3DManager(), GetGlobalVariables(), caracterManager_.get());
 
 	// プレイヤー生成
-	caracterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
+	if (GetSceneData().playerID == 1) {
+		caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+	}
+	else {
+		caracterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
+	}
+
 	// 弾にプレイヤーセット
 	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
 
@@ -86,9 +92,8 @@ void GamePlayScene::Initialize()
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
 	
-	//if(caracterManager_->GetPlayer())
-	//RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
-	//sp->SetStage(stage_.get());
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
+	sp->SetStage(stage_.get());
 
 	// 衝突マネージャの生成
 	Vector3 sizeAABB = { 1000,1000,1000 };
@@ -162,8 +167,9 @@ void GamePlayScene::CheckAllCollisions()
 		}
 	}
 
-	//collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
-
+	if (caracterManager_->GetPlayer()->GetWeapon() != nullptr) {
+		collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
+	}
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
 		if (bullet->GetColliderComponent()) {
@@ -213,6 +219,10 @@ void GamePlayScene::Update()
 
 	if (input_->IsTriggerKey(DIK_R)) {
 		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+	}
+	if (input_->IsTriggerKey(DIK_RETURN)) {
+		// シーン切り替え
+		GetSceneManager()->ChangeScene("TITLE");
 	}
 
 	iCommand_ = inputHander_->HandleInput();
@@ -285,9 +295,9 @@ void GamePlayScene::Update()
 
 
 	// スペシャル
-	/*if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
+	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
 		cameraManeger_->SetUseCamera("universeCamera", 0.0f);
-	}*/
+	}
 
 	gameUI->Update();
 	// カメラ管理の更新

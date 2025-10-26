@@ -267,13 +267,26 @@ void BulletPlayerStateAttack::Enter()
 
 void BulletPlayerStateSpecial::Update()
 {
-	//BaseSpecial* special = character_->GetSpecial();
+	BaseSpecial* special = character_->GetSpecial();
 	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
+
 
 	character_->Velocity() = {};
 	int time = 0;
 	player->GetPlayerUI()->SetIsTextRB(false);
-	
+	//ui_->SetIsTextRB(false);
+	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
+	rengeSp->InAction();
+	rengeSp->SetIsDraw(false);
+	if (special->GetPhese() == 0) {
+		player->GetMoveComponent()->Move(player->GetObjectComponent()->GetWorldTransform(), player->GetInput());
+		player->GetPlayerUI()->SetIsTextRB(true);
+		rengeSp->SetIsDraw(true);
+	}
+	if (special->GetPhese() == 2) {
+		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		return;
+	}
 }
 
 void BulletPlayerStateSpecial::Exit()

@@ -230,7 +230,13 @@ void NormalPlayer::Update()
 		moveComponent_->Velocity() = {};
 	}
 
-
+	// 必殺技
+	special_->Update();
+	// ヒットデータの更新
+	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
+	//武器更新
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
+	weapon_->Update();
 
 	// 移動コンポーネント移動
 	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
@@ -253,13 +259,7 @@ void NormalPlayer::Update()
 	// コライダーコンポーネント更新
 	GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 
-	// 必殺技
-	special_->Update();
-	// ヒットデータの更新
-	weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
-	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
-	weapon_->Update();
+
 
 #ifdef _DEBUG
 	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());

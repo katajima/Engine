@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include <DirectXGame/application/base/Weapon/Bullet/BulletWeaponManager.h>
+#include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "BulletPlayerState.h"
 
 // 前方宣言

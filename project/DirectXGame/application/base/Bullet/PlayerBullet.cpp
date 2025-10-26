@@ -65,7 +65,9 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 			//enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
 		enemy->Emit();
 		}
-		hitDelete_ = true;
+		if (info_.type == BulletType::NORMAL) {
+			hitDelete_ = true;
+		}
 		};
 
 	timer_ = 0.0f;

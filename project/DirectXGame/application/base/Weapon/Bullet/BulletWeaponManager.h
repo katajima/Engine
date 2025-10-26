@@ -45,7 +45,7 @@ public:
 	/// </summary>
 	/// <param name="name"></param>
 	/// <param name="pos"></param>
-	void AddBulletWeapon(const std::string& name,const Vector3& pos);
+	void AddBulletWeapon(const std::string& name,const Vector3& pos,const Vector3 pos2);
 
 	/// <summary>
 	/// ターゲット設定
@@ -62,6 +62,17 @@ public:
 	BulletPlayerWeapon* GetBulletWeapon(const std::string& name);
 
 
+	/// <summary>
+	/// 通常弾
+	/// </summary>
+	void Normal();
+
+
+		/// <summary>
+		/// 貫通弾
+		/// </summary>
+		void Penetration();
+
 	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; };
 private:
@@ -70,6 +81,7 @@ private:
 
 	int maxtargetNum_ = 5; // 最大ターゲット数
 
+	
 
 
 private:

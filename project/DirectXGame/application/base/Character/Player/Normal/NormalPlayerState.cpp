@@ -237,6 +237,8 @@ void PlayerStateAttack::Update()
 	BaseWeapon* weapon = character_->GetWeapon();
 
 	weapon->GetComboStateMachine()->Update(character_->GetTime());
+
+
 }
 
 void PlayerStateAttack::Exit()
