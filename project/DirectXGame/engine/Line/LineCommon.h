@@ -1,148 +1,85 @@
-#pragma once
-#include <array>
-#include <cstdint>
-#include <d3d12.h>
-#include <memory>
-#include <string>
-#include <wrl.h>
-#include "DirectXGame/engine/struct/Structs3D.h"
-#include "DirectXGame/engine/Camera/Camera.h"
-#include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include "DirectXGame/engine/Mesh/LineMesh.h"
-#include "DirectXGame/engine/struct/Light.h"
-#include "DirectXGame/engine/PSO/PSOManager.h"
-#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+#pragma once  
+#include <array>  
+#include <cstdint>  
+#include <d3d12.h>  
+#include <memory>  
+#include <string>  
+#include <wrl.h>  
+#include "DirectXGame/engine/PSO/PSOManager.h"  
+#include "CreateLine.h"  
+/// <summary>  
+/// ライン共通クラス  
+/// </summary>  
+class LineCommon  
+{  
+public:  
 
-#include"DirectXGame/engine/math/LineCurveMath.h"
+    // 初期化  
+    void Initialize(DirectXCommon* dxCommon);  
+    // 更新  
+    void Update();  
+    // 描画  
+    void Draw();  
+    // 描画前準備  
+    void DrawCommonSetting();  
+    // 描画前準備2  
+    void DrawCommonSetting2();  
+    // DitectXCommonの取得  
+    DirectXCommon* GetDxCommon() const { return dxCommon_; }  
+    // カメラ設定  
+    void SetDefaltCamera(Camera* camera) { camera_ = camera; }  
 
-// 前方宣言
-struct OctreeNode;
+    // デバッグラインメッシュデータの取得  
+    LineMeshData& GetDebugLineMeshData() { return lineDebugMeshData_; }  
 
-/// <summary>
-/// ライン共通クラス
-/// </summary>
-class LineCommon
-{
-public:
+    // ラインメッシュデータの取得  
+    LineMeshData& GetLineMeshData() { return lineMeshData_; }  
+public:  
+    void LineClear();  
 
-	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
+    // GPUデータ  
+    struct LineGPU {  
+        Vector4 color;  
+        Vector3 strPos;  
+        float pad;  
+        Vector3 endPos;  
+        float pad2;  
+    };  
+private:  
+    // ルートシグネチャの作成  
+    void CreateRootSignature();  
+    // グラフィックスパイプラインの作成  
+    void CreateGraphicsPipeline();  
+private:  
+    std::unique_ptr<PSOManager> psoManager_ = nullptr;  
+    Camera* camera_ = nullptr;  
 
-	
-	DirectXCommon* GetDxCommon() const { return dxCommon_; }
+    // ルートシグネチャ  
+    Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;  
+    // パイプラインステートオブジェクト  
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;  
+    // ルートシグネチャ  
+    Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature2;  
+    // パイプラインステートオブジェクト  
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState2;  
 
-	void AddLine(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
-	void AddLine2(Vector3 start, Vector3 end, Vector4 color = {1,1,1,1});
+    const uint32_t kNumMaxInstance = 300000;  
 
-	void AddCameraLine(Camera* camera,Vector4 collor = {1,1,1,1});
-
-	void AddLightLine(PointLightData data);
-
-	void AddLightLine(SpotLightData data);
-
-	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat);
-	void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
-	
-	void AddLineAABB(AABB aabb, Vector3 pos, Vector4 color = {1,1,1,1});
-
-	void AddLineOBB(const OBB& obb, const Vector4& color = {1,1,1,1});
-
-	void AddLineSphere(Sphere sphere,Vector4 color = { 1,1,1,1 },int segmentW = 5,int segmentH = 5);
-
-	void AddLineCorner(CornerSegment corner,WorldTransform pos);
-
-	void AddLineCapsule(Capsule capsule, const Vector4& color = {1,1,1,1});
-
-	void AddSpline(std::vector<Vector3> controlPoints,WorldTransform pos, Vector4 color = { 1,1,1,1 });
-	void AddSpline(std::vector<Vector3> controlPoints, Vector3 pos, Vector4 color = { 1,1,1,1 });
-	
-	void AddLineTriangle(Triangle triangle, WorldTransform pos);
-
-	void AddOctree(OctreeNode* node);
-
-	// グリッド線
-	void AddGrid(float xRange,float zRange,float interval,Vector4 color);
-
-	void Update();
-
-	void DrawCommonSetting();
-	void DrawCommonSetting2();
-
-	void Draw();
-
-	void SetDefaltCamera(Camera* camera) { camera_ = camera; }
-
-
-	void LineClear();
-
-	// GPUデータ
-	struct LineGPU {
-		/*Matrix4x4 WVP;
-		Matrix4x4 World;
-		*/
-		Vector4 color;
-		Vector3 strPos;
-		float pad;
-		Vector3 endPos;
-		float pad2;
-	};
-private:
-	// 法線ベクトルに対する垂直なベクトルを求める（円を作るため）
-	Vector3 GetPerpendicularVector(const Vector3& normal)
-	{
-		if (fabs(normal.x) < fabs(normal.y) && fabs(normal.x) < fabs(normal.z))
-			return Normalize(Vector3(0, -normal.z, normal.y));
-		else if (fabs(normal.y) < fabs(normal.z))
-			return Normalize(Vector3(-normal.z, 0, normal.x));
-		else
-			return Normalize(Vector3(-normal.y, normal.x, 0));
-	}
-
-	// 法線ベクトルに対する「上方向」のベクトルを求める
-	Vector3 GetUpVector(const Vector3& normal)
-	{
-		return Normalize(Cross(normal, GetPerpendicularVector(normal)));
-	}
+    //マテリアルデータ  
+    struct MaterialData {  
+        Vector4 color;  
+    };  
+    Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;  
+    MaterialData* materialData;  
+    Microsoft::WRL::ComPtr<ID3D12Resource> viewResource;  
+    Matrix4x4* cameraWVP;  
 
 
-private:
-	// ルートシグネチャの作成
-	void CreateRootSignature();
-	// グラフィックスパイプラインの作成
-	void CreateGraphicsPipeline();
+    // デバッグ用ラインメッシュデータ  
+    LineMeshData lineDebugMeshData_;
 
-
-private:
-	std::unique_ptr<PSOManager> psoManager_ = nullptr;
-	Camera* camera_ = nullptr;
-
-	// ルートシグネチャ
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-	// パイプラインステートオブジェクト
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
-	// ルートシグネチャ
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature2;
-	// パイプラインステートオブジェクト
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState2;
-
-
-
-	std::unique_ptr<LineMesh> mesh_;
-	uint32_t lineNum_ = 0;
-	std::unique_ptr<LineMesh> mesh2_;
-	uint32_t lineNum2_ = 0;
-	const uint32_t kNumMaxInstance = 300000;	
-	
-
-	//マテリアルデータ
-	struct MaterialData {
-		Vector4 color;
-	};
-	Microsoft::WRL::ComPtr < ID3D12Resource> materialResource;
-	MaterialData* materialData;
-	Microsoft::WRL::ComPtr<ID3D12Resource> viewResource;
-	Matrix4x4* cameraWVP;
-private:
-	DirectXCommon* dxCommon_;
+    // ラインメッシュデータ  
+    LineMeshData lineMeshData_;
+private:  
+    DirectXCommon* dxCommon_;  
 };
-

@@ -23,6 +23,7 @@ size_t Random::RandomSize_t(size_t min, size_t max)
 
 float Random::RandomFloat(float min, float max)
 {
+	if (min > max) std::swap(min, max);
 	static thread_local std::mt19937 generator(std::random_device{}());
 	std::uniform_real_distribution<float> distribution(min, max);
 	return distribution(generator);
@@ -50,6 +51,21 @@ Vector3 Random::RandomVector3(float min, float max)
 Vector4 Random::RandomVector4(float min, float max)
 {
 	return { RandomFloat(min,max) , RandomFloat(min,max) , RandomFloat(min,max) , RandomFloat(min,max) };
+}
+
+Vector2 Random::RandomVector2(Vector2 min, Vector2 max)
+{
+	return { RandomFloat(min.x,max.x), RandomFloat(min.y,max.y) };
+}
+
+Vector3 Random::RandomVector3(Vector3 min, Vector3 max)
+{
+	return { RandomFloat(min.x,max.x) , RandomFloat(min.y,max.y) , RandomFloat(min.z,max.z) };
+}
+
+Vector4 Random::RandomVector4(Vector4 min, Vector4 max)
+{
+	return { RandomFloat(min.x,max.x) , RandomFloat(min.y,max.y) , RandomFloat(min.z,max.z) , RandomFloat(min.w,max.w) };
 }
 
 bool Random::RandomBool()

@@ -1,5 +1,5 @@
 #pragma once
-#include <DirectXGame/application/base/BaseClass/State/SubStateMachine.h>
+#include <DirectXGame/application/base/State/SubStateMachine.h>
 
 
 template<class SubStateEnum, class BaseSubStateType>

@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/UI/BaseUI.h"
+#include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
 class BasePlayer;

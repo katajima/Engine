@@ -14,7 +14,7 @@ void Octree::drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset
 	// AABB を描画
 
 	//LineCommon::GetInstance()->AddLineAABB(node->bounds, offset);
-	lineDrawer.AddLineAABB(node->bounds, offset);
+	lineDrawer.GetDebugLineMeshData().AddLineAABB(node->bounds, offset);
 
 	// 子ノードがある場合は再帰的に描画
 	for (OctreeNode* child : node->children) {

@@ -56,6 +56,8 @@ public:
 	void SetCamera(Camera* camera) { camera_ = camera; };
 	// カメラ取得
 	Camera* GetCamara() { return camera_; }
+	// シーンデータ取得
+	SceneData& GetSceneData() { return sceneData_; }
 
 	/// <summary>
 	/// 次のシーン予約
@@ -89,6 +91,9 @@ private:
 	Input* input_;
 	GlobalVariables* globalVariables_;
 	Camera* camera_;
+
+
+	SceneData sceneData_;
 
 	// 終了フラグ
 	bool                  finished_ = false;

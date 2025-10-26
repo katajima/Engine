@@ -1,5 +1,6 @@
 #pragma once
 #include "Fade.h"
+#include <DirectXGame/application/scene/SceneData.h>
 
 // 前方宣言
 class Input;
@@ -68,6 +69,8 @@ public:
 	Camera* GetCamara() { return camera_; }
 	// 終了したか
 	bool IsInitialized() const { return initialized_; }
+	// シーンデータ取得
+	SceneData& GetSceneData();
 
 private:
 	// シーンマネージャ(借りてくる)

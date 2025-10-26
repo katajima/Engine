@@ -14,10 +14,7 @@ void TitleScene::Initialize()
 	// リソース
 	InitializeResources();
 
-	//loadData_ = std::make_unique<LoadLevelData>();
-	//loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), camera.get(), "scene.json");
-
-
+	GetSceneData().playerID = 100; // プレイヤーID初期化
 }
 
 void TitleScene::Finalize()
@@ -45,7 +42,6 @@ void TitleScene::Draw3D()
 	
 	tail.Draw();
 }
-
 
 void TitleScene::Draw2D()
 {
@@ -98,9 +94,4 @@ void TitleScene::InitializeCamera()
 	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };
-
-	/*cameraDebugT = camera->transform_.translate;
-	cameraDebugR = camera->transform_.rotate;*/
-
-	cameraT.y = 1.0f;
 }

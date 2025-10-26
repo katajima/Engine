@@ -1,7 +1,8 @@
 #include "NormalEnemyState.h"
 #include "NormalEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-
+#include <DirectXGame/application/base/Attack/Input/AttackInputHander.h>
+#include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 #pragma region Move
 

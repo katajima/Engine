@@ -1,6 +1,6 @@
 #pragma once
 //#include "DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemyState.h"
-#include "DirectXGame/application/base/BaseClass/State/BaseMainState.h"
+#include "DirectXGame/application/base/State/BaseMainState.h"
 #include "NormalEnemySubState.h"
 
 // 移動

@@ -6,7 +6,7 @@
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/base/BaseClass/Character/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
@@ -14,8 +14,8 @@
 
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
-#include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
-#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 #include "DirectXGame/application/base/Input/InputHander.h"
 

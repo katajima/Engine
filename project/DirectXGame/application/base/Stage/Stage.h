@@ -16,7 +16,7 @@
 
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 
-#include "DirectXGame/application/base/BaseClass/Light/BaseLights.h"
+#include "DirectXGame/application/base/Light/BaseLights.h"
 
 // 前方宣言
 class DirectXCommon;

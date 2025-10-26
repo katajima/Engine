@@ -46,7 +46,7 @@ void AABBParticleEmitter::ApplyGlobalVariablesUniqe() {
 }
 
 // デバック線描画
-void AABBParticleEmitter::DrawEmitterLine() { lineCommon_->AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
+void AABBParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
 // パーティクル発生
 void AABBParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
@@ -195,7 +195,7 @@ void SphereParticleEmitter::DrawEmitterLine() {
 	sphere.radius = radius_;
 	sphere.center = transform_.worldMat_.GetWorldPosition();
 
-	lineCommon_->AddLineSphere(sphere, Vector4{ 1,1,1,1 });
+	lineCommon_->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 1,1,1,1 });
 }
 // パーティクル発生
 void SphereParticleEmitter::EmitUniqe() {
@@ -250,7 +250,7 @@ void CornerParticleEmitter::UpdateUniqe() {
 }
 
 // デバック線描画
-void CornerParticleEmitter::DrawEmitterLine() { lineCommon_->AddLineCorner(corner, transform_); }
+void CornerParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineCorner(corner, transform_); }
 // パーティクル発生
 void CornerParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
@@ -339,7 +339,7 @@ void LineParticleEmitter::DrawEmitterLine() {
 	Vector3 str = segment_.origin + transform_.worldMat_.GetWorldPosition();
 
 	Vector3 end = segment_.end + transform_.worldMat_.GetWorldPosition();
-	lineCommon_->AddLine(str, end);
+	lineCommon_->GetDebugLineMeshData().AddLine(str, end);
 }
 
 void LineParticleEmitter::SetSegment(Vector3 origin, Vector3 end)
@@ -385,7 +385,7 @@ void SplineParticleEmitter::ApplyGlobalVariablesUniqe() {
 
 // デバック線描画
 void SplineParticleEmitter::DrawEmitterLine() {
-	lineCommon_->AddSpline(controlPoints, transform_);
+	lineCommon_->GetDebugLineMeshData().AddSpline(controlPoints, transform_);
 }
 // ポイントの座標指定
 void SplineParticleEmitter::SetControlPos(int index, Vector3 pos)
@@ -446,7 +446,7 @@ void TriangleParticleEmitter::ApplyGlobalVariablesUniqe() {
 
 // デバック線描画
 void TriangleParticleEmitter::DrawEmitterLine() {
-	lineCommon_->AddLineTriangle(triangle_, transform_);
+	lineCommon_->GetDebugLineMeshData().AddLineTriangle(triangle_, transform_);
 }
 // パーティクル発生
 void TriangleParticleEmitter::EmitUniqe() {
@@ -504,7 +504,7 @@ void MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
 void MeshParticleEmitter::DrawEmitterLine() {
 
 	for (auto& tri : modelMesh_->triangle) {
-		lineCommon_->AddLineTriangle(tri, transform_);
+		lineCommon_->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
 	}
 }
 // パーティクル発生

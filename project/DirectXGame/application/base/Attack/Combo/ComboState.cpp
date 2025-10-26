@@ -1,5 +1,5 @@
 #include "ComboState.h"
-#include "DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
+#include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 
 // 開始

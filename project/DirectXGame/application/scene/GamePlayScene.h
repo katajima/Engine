@@ -6,7 +6,7 @@
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/base/BaseClass/Character/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
@@ -14,12 +14,13 @@
 
 #include"DirectXGame/application/base/Stage/Stage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
-#include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
-#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 
 #include "DirectXGame/application/base/Input/InputHander.h"
+#include <DirectXGame/application/base/Stage/Manager/StageEventManager.h>
 
 /// <summary>
 /// ゲームプレイシーン
@@ -56,26 +57,8 @@ public:
 	void CheckAllCollisions();
 
 private:
-	// 振るまい
-	enum class Behavior {
-		kPhase1,	// フェーズ１
-		kPhase2,	// フェーズ２
-	};
 
-	//振るまい
-	Behavior behavior_ = Behavior::kPhase1;
-	// 次の振るまいリクエスト
-	std::optional<Behavior> behaviorRequest_ = std::nullopt;
-	
-	// フェーズ1初期化
-	void BehaviorPhase1Initialize();
-	// フェーズ1更新
-	void BehaviorPhase1Update();
-	// フェーズ2初期化
-	void BehaviorPhase2Initialize();
-	// フェーズ2更新
-	void BehaviorPhase2Update();
-	
+	std::unique_ptr<StageEventManager> stageEventManager_;
 private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;

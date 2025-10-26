@@ -141,7 +141,7 @@ void Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& jo
 			childPos = Add(childPos, pos);
 
 			// ライン描画
-			lineCommon->AddLine2(parentPos, childPos, { 1,1,1,1 });
+			lineCommon->GetLineMeshData().AddLine(parentPos, childPos, {1,1,1,1});
 		}
 	}
 

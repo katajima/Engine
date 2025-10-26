@@ -1,6 +1,5 @@
 #pragma once
-#include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
-
+#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include"NormalEnemyState.h"
 
 /// <summary>

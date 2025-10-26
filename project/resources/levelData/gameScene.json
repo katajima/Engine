@@ -57,9 +57,12 @@
                     1.0
                 ]
             },
+            "object_disabled": {
+                "object_disabled": true
+            },
             "file_name": "hasira",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,
@@ -147,9 +150,12 @@
                     1.0
                 ]
             },
+            "object_disabled": {
+                "object_disabled": true
+            },
             "file_name": "hasira",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,
@@ -183,9 +189,12 @@
                     1.0
                 ]
             },
+            "object_disabled": {
+                "object_disabled": true
+            },
             "file_name": "hasira",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,
@@ -219,9 +228,12 @@
                     4.060080528259277
                 ]
             },
+            "object_disabled": {
+                "object_disabled": true
+            },
             "file_name": "hasira",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,
@@ -255,9 +267,12 @@
                     1.0
                 ]
             },
+            "object_disabled": {
+                "object_disabled": true
+            },
             "file_name": "hasira",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,
@@ -291,9 +306,12 @@
                     1.2180242538452148
                 ]
             },
+            "object_disabled": {
+                "object_disabled": true
+            },
             "file_name": "hasira",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,
@@ -354,9 +372,12 @@
                     0.17647826671600342
                 ]
             },
+            "object_disabled": {
+                "object_disabled": true
+            },
             "file_name": "hasira",
             "collider": {
-                "collider_disabled": 1,
+                "collider_disabled": 0,
                 "collider": 0,
                 "collider_center": [
                     0.0,

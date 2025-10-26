@@ -1,13 +1,4 @@
 #pragma once
-
-// engine
-#include"DirectXGame/engine/math/MathFanctions.h"
-#include "DirectXGame/engine/Animation/Animation.h"
-#include"DirectXGame/engine/Mesh/ModelMesh.h"
-#include"DirectXGame/engine/struct/Material.h"
-#include"DirectXGame/engine/Material/Material.h"
-
-
 #include"ModelData.h"
 
 // C++
@@ -22,10 +13,6 @@
 #include <iostream>
 #include <memory>
 
-// assimp
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include "DirectXGame/engine/Utility/TimerUtility.h"
 

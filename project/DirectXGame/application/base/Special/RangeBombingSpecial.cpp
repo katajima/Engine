@@ -4,9 +4,9 @@
 #include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-#include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXgame/application/base/Stage/Stage.h"
 
 void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)

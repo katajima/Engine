@@ -30,6 +30,12 @@ public:
 	static Vector3 RandomVector3(float min, float max);
 	// Vector4型の乱数
 	static Vector4 RandomVector4(float min, float max);
+	// Vector2型の乱数
+	static Vector2 RandomVector2(Vector2 min, Vector2 max);
+	// Vector3型の乱数
+	static Vector3 RandomVector3(Vector3 min, Vector3 max);
+	// Vector4型の乱数
+	static Vector4 RandomVector4(Vector4 min, Vector4 max);
 	// bool型の乱数
 	static bool RandomBool();
 

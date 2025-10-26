@@ -133,7 +133,7 @@ void MapChip::DrawMapChip(LineCommon* line,float yPos) const
             Vector4 lineColor = IsBlocked(x, z) ? obstacleColor : gridColor;
 
             float fx = x * size;
-            line->AddLine(
+            line->GetDebugLineMeshData().AddLine(
                 Vector3{ fx, yPos, fz },
                 Vector3{ fx, yPos, fz + size },
                 lineColor
@@ -151,7 +151,7 @@ void MapChip::DrawMapChip(LineCommon* line,float yPos) const
             Vector4 lineColor = IsBlocked(x, z) ? obstacleColor : gridColor;
 
             float fz = z * size;
-            line->AddLine(
+            line->GetDebugLineMeshData().AddLine(
                 Vector3{ fx, yPos, fz },
                 Vector3{ fx + size, yPos, fz },
                 lineColor

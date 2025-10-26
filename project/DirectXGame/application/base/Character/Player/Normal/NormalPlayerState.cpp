@@ -1,7 +1,7 @@
 #include "NormalPlayerState.h"
-#include"Player.h"
+#include "NormalPlayer.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-
+#include <DirectXGame/application/base/Bullet/Base/BulletManager.h>
 
 #pragma region Idle
 
@@ -173,6 +173,11 @@ void PlayerStateJump::Update() {
 
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
+
+
+
+
+
 
 		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少

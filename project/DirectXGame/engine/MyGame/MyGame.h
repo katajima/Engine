@@ -23,9 +23,6 @@
 
 #include"Framework.h"
 
-#include "DirectXGame/application/scene/SceneFactory.h"
-
-
 /// <summary>
 /// ゲームのフレームワークを拡張したクラスで、ゲームの初期化、更新、描画、リソース管理などを行う。
 /// </summary>

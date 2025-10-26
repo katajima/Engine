@@ -144,7 +144,7 @@ void AStarPathfinder::DrawPath(LineCommon* line,float yPos) const
 		Vector2 next = m_path[i + 1];
 
 		// 現在のノードから次のノードに向かってラインを描画
-		line->AddLine(
+		line->GetDebugLineMeshData().AddLine(
 			Vector3(current.x, yPos, current.y),  // 現在のノード
 			Vector3(next.x, yPos, next.y),        // 次のノード
 			pathColor                             // ラインの色

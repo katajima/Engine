@@ -14,7 +14,7 @@
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
-#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 

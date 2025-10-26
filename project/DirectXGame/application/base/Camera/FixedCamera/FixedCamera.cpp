@@ -31,7 +31,7 @@ void FixedCamera::Update()
 	ImGui::DragFloat3("rotate", &uniqueCamera_->transform_.rotate.x, 0.01f);
 	ImGui::End();
 
-	entity3DManager_->Get3DLineCommon()->AddCameraLine(uniqueCamera_.get());
+	entity3DManager_->Get3DLineCommon()->GetLineMeshData().AddCameraLine(*uniqueCamera_.get());
 #endif // _DEBUG
 
 

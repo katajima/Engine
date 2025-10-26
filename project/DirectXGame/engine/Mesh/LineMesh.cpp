@@ -6,10 +6,10 @@ void LineMesh::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
+	// 頂点バッファ生成
 	vbvResorce_.CreateBufferView(dxCommon_, verticesline, verticesline.size());
-
+	// インデクスバッファ生成
 	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
-
 }
 
 void LineMesh::UpdateVertexBuffer()
@@ -32,8 +32,19 @@ void LineMesh::GetCommandList()
 {
 	// 頂点バッファの設定
 	vbvResorce_.IASetVertexBuffers();
-
+	// インデクスバッファの設定
 	indexResorce_.IASetIndexBuffer();
+}
+
+void LineMesh::DrawIndexedInstanced()
+{
+	// バッファ設定
+	GetCommandList();
+
+	// 描画コマンド
+	if (indices.size() != 0) {
+		dxCommon_->GetCommandList()->DrawIndexedInstanced(UINT(indices.size()), 1, 0, 0, 0);
+	}
 }
 
 void LineMesh::MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum)

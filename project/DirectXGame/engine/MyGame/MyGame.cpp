@@ -1,7 +1,7 @@
 #include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
-
+#include "DirectXGame/application/scene/SceneFactory.h"
 
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
@@ -343,14 +343,14 @@ void MyGame::CreateParticle()
 	
 	
 
-	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 100);
-	gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/effect/dust.png", 1024 * 100);
+	//gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 100);
+	//gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/effect/dust.png", 1024 * 100);
 	
-	gpuParticleManager_->CreateGroup("no3", primiPlane->GetModelMesh(), "resources/Texture/smoke/no3.png", 1024 * 100);
+	//gpuParticleManager_->CreateGroup("no3", primiPlane->GetModelMesh(), "resources/Texture/smoke/no3.png", 1024 * 100);
 	//
-	gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
+	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
 	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no2");
-	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
 	//gpuParticleManager_->SetEmitteToGroup("emitte_no2","no2");
 	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 
