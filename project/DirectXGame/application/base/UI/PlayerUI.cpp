@@ -23,7 +23,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 
 	UIMeter* specailBer_ = GetUIMeter("SpecailBer");
 	specailBer_->SetMaxSize({ 200,30 },{4.0f,4.0f });
-	specailBer_->SetMeterMinMax(0.0f, 20.0f);
+	specailBer_->SetMeterMinMax(0.0f, 100.0f);
 	specailBer_->GetMeterSprite()->SetColor({ 0,0,1,1 });
 	specailBer_->SetMeterType(UIMeterType::Left);
 	specailBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");

@@ -138,9 +138,6 @@ void GamePlayScene::Initialize()
 	}*/
 }
 
-
-
-
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables()
 {
@@ -167,7 +164,7 @@ void GamePlayScene::CheckAllCollisions()
 		}
 	}
 
-	if (caracterManager_->GetPlayer()->GetWeapon() != nullptr) {
+	if (GetSceneData().playerID == 1) {
 		collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
 	}
 	// 弾のコライダー追加

@@ -55,6 +55,9 @@ private:
 
 	uint32_t countIndex_ = 0;
 
+
+	float trailTime_ = 0.0f;
+
 private: //パーティクルエミッター
 	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
 

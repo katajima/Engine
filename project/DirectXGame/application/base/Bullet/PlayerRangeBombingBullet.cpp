@@ -24,7 +24,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	object_ = entity3DManager->CreateObject3D("playerbullet", ObjectModelType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");
 	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,0.5f,0 }, { 0,-0.5f,0 });
-	object_->isEmitTrailEffect = true;
+	object_->isEmitTrailEffect = false;
 	object_->Update();
 	object_->InitColliderComponent();
 	
@@ -40,7 +40,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	sphere->layer = CollisionLayer::PlayerAttack;
 	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
 	sphere->radius = 10.0f; // 半径を適宜設定
-	sphere->Disable(); // 初期状態では無効化
+	sphere->Enable(); // 初期状態では無効化
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));
 
 
@@ -284,6 +284,10 @@ void PlayerRangeBombingBullet::Update()
 	}
 
 
+	if (trailTime_ > 0.0f) {
+		object_->isEmitTrailEffect = true;
+	}
+	trailTime_ = 1;
 
 	// エフェクト再生
 	if (isEffectPlay_) {

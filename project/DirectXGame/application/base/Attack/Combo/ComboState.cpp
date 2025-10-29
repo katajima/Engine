@@ -40,7 +40,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 	// 移動できるなら
 	if (isMove) {
 		owner->Velocity() = owner->GetMoveComponent()->GetDirection() * comboData_.movementSpeedMultiplier;
-		owner->GetMoveComponent()->Move(owner->GetObjectComponent()->GetWorldTransform(), owner->GetInput());
+		//owner->GetMoveComponent()->Move(owner->GetObjectComponent()->GetWorldTransform(), owner->GetInput());
 	}
 	// 入力受付がないのなら終了する
 	if ((isInputWindowOver)) {

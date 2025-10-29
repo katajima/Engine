@@ -352,6 +352,7 @@ void GlobalVariables::Update() {
 	std::vector<std::pair<std::string, std::string>> itemsToRemove;
 
 	for (auto& [groupName, group] : datas_) {
+
 		if (!ImGui::BeginMenu(groupName.c_str()))
 			continue;
 
@@ -457,6 +458,8 @@ void GlobalVariables::Update() {
 
 	ImGui::EndMenuBar();
 	ImGui::End();
+
+
 
 	// 削除予約された項目を後で実行（安全）
 	for (const auto& [group, item] : itemsToRemove) {

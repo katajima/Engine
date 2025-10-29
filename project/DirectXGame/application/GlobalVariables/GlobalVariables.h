@@ -50,6 +50,7 @@ public:
 	bool DuplicateItem(
 		const std::string& srcGroupName, const std::string& srcKey,
 		const std::string& dstGroupName, const std::string& dstKey);
+
 	// 固有キー取得
 	std::string MakeUniqueKey(const std::string& baseKey, const GvData::Group& group);
 
