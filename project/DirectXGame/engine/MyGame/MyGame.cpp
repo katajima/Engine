@@ -154,10 +154,7 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/renga.png");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
 
-	textureManager->LoadTexture("resources/Texture/icon/B.png");
 	textureManager->LoadTexture("resources/Texture/text/normalAttack.png");
-	textureManager->LoadTexture("resources/Texture/icon/RT.png");
-	textureManager->LoadTexture("resources/Texture/icon/RB.png");
 	textureManager->LoadTexture("resources/Texture/text/special.png");
 	textureManager->LoadTexture("resources/Texture/text/Hit.png");
 	textureManager->LoadTexture("resources/Texture/text/HP.png");
@@ -193,6 +190,12 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/effect/exp.png");
 	
 	textureManager->LoadTexture("resources/Texture/effect/spark.png");
+	
+	// XBOXコントローラボタンテクスチャ全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
+
+	// アイコン全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
 	
 	// ModelData;
 	LoadModel();

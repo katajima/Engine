@@ -99,8 +99,54 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 
 
 	debugTimerTex_.EndTimer();
-	//debugTimerTex_.LogTimeSec("LoadTex " ,filePath);
 }
+
+void TextureManager::LoadAllTexturesInDirectory(const std::string& directoryPath)
+{
+	debugTimerTex_.StartTimer();
+
+	// 指定ディレクトリが存在しない場合
+	if (!std::filesystem::exists(directoryPath)) {
+		OutputDebugStringA(("TextureManager: Directory not found -> " + directoryPath + "\n").c_str());
+		return;
+	}
+
+	// 再帰的に探索
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath))
+	{
+		if (!entry.is_regular_file()) continue;
+
+		std::string filePath = entry.path().string();
+
+		// 「\」を「/」に変換
+		std::replace(filePath.begin(), filePath.end(), '\\', '/');
+
+		// 先頭に「/」があれば削除
+		if (!filePath.empty() && filePath.front() == '/') {
+			filePath.erase(filePath.begin());
+		}
+
+		std::string extension = entry.path().extension().string();
+
+		// 拡張子を小文字化
+		std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+		// 対応する拡張子のみ読み込む
+		if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" ||
+			extension == ".tga" || extension == ".bmp" || extension == ".dds" || extension == ".hdr")
+		{
+			try {
+				LoadTexture(filePath);
+			}
+			catch (...) {
+				OutputDebugStringA(("Failed to load texture: " + filePath + "\n").c_str());
+			}
+		}
+	}
+
+	debugTimerTex_.EndTimer();
+}
+
 
 
 

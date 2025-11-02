@@ -20,6 +20,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	hpber->SetMeterType(UIMeterType::Left);
 	hpber->GetNameSprite()->SetTextureName("resources/Texture/text/HP.png");
 	hpber->GetNameSprite()->SetSize({60,40});
+	hpber->GetNameSprite()->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
 
 	UIMeter* specailBer_ = GetUIMeter("SpecailBer");
 	specailBer_->SetMaxSize({ 200,30 },{4.0f,4.0f });
@@ -28,6 +29,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	specailBer_->SetMeterType(UIMeterType::Left);
 	specailBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");
 	specailBer_->GetNameSprite()->SetSize({ 60,40 });
+	specailBer_->GetNameSprite()->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
 
 	UIMeter* staminaBer_ = GetUIMeter("StaminaBer");
 	staminaBer_->SetMaxSize({ 200,30 },{4.0f,4.0f });
@@ -36,6 +38,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	staminaBer_->SetMeterType(UIMeterType::Left);
 	staminaBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");
 	staminaBer_->GetNameSprite()->SetSize({ 60,40 });
+	staminaBer_->GetNameSprite()->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
 
 
 

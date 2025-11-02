@@ -17,24 +17,27 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 
 	InitUIPair("normalAttack", { 1120,520 });
 	UIPair* normalAttackPair = GetUIPair("normalAttack");
-	normalAttackPair->SetOffset(10.0f);
+	normalAttackPair->SetOffset(20.0f);
 	normalAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);
-	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/icon/B.png");
+	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.png");
 	normalAttackPair->GetFirstSprite()->SetAnchorPoint({0.5f,0.5f});
-	normalAttackPair->GetFirstSprite()->SetSize({75.0f,75.0f });
-	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/text/normalAttack.png");
+	normalAttackPair->GetFirstSprite()->SetSize({64.0f,64.0f });
+	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.png");
 	normalAttackPair->GetSecondSprite()->SetAnchorPoint({ 0.0f,0.5f });
-	normalAttackPair->GetSecondSprite()->SetSize({ 100,33 });
+	normalAttackPair->GetSecondSprite()->SetSize({ 32,32 });
 	InitUIPair("special", { 1120,570 });
 	UIPair* specialPair = GetUIPair("special");
-	specialPair->SetOffset(10.0f);
+	specialPair->SetOffset(20.0f);
 	specialPair->SetUIPairDrectionType(UIPairDrectionType::Right);
-	specialPair->GetFirstSprite()->SetTextureName("resources/Texture/icon/RB.png");
+	specialPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_rb.png");
 	specialPair->GetFirstSprite()->SetAnchorPoint({ 0.5f,0.5f });
-	specialPair->GetFirstSprite()->SetSize({ 75.0f,75.0f });
-	specialPair->GetSecondSprite()->SetTextureName("resources/Texture/text/special.png");
+	specialPair->GetFirstSprite()->SetSize({ 64.0f,64.0f });
+	specialPair->GetFirstSprite()->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
+
+	specialPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Special.png");
 	specialPair->GetSecondSprite()->SetAnchorPoint({ 0.0f,0.5f });
-	specialPair->GetSecondSprite()->SetSize({ 100,33 });
+	specialPair->GetSecondSprite()->SetSize({ 32,32 });
+	specialPair->GetSecondSprite()->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
 
 	xpos = 1120;
 	scale = { 100 * 1.5f,33 * 1.5f };

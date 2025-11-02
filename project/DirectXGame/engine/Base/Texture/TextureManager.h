@@ -8,6 +8,7 @@
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
+#include <filesystem>
 using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
@@ -33,6 +34,9 @@ public:
 	//DirectTexを使ってTextureを読むためのLoadTextur関数
 	void LoadTexture(const std::string& filePath);
 	
+	// 指定したディレクトリ内の全テクスチャを読み込む
+	void LoadAllTexturesInDirectory(const std::string& directoryPath);
+
 	// テクスチャ番号取得
 	uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
