@@ -77,16 +77,6 @@ void MyGame::Update()
 
 	//HitStpoTime(); // ストップ用
 
-#ifdef _DEBUG
-
-	if(input_->IsTriggerKey(DIK_M)){
-		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearEmitterAll();
-	}
-	if(input_->IsTriggerKey(DIK_N)){
-		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
-	}
-
-
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 	nowTime += deltaTime;
@@ -95,8 +85,15 @@ void MyGame::Update()
 	}
 	lastTime = currentTime;
 
-	// FPS表示用ウィジェット
+#ifdef _DEBUG
 
+	if(input_->IsTriggerKey(DIK_M)){
+		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearEmitterAll();
+	}
+	if(input_->IsTriggerKey(DIK_N)){
+		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
+	}
+	// FPS表示用ウィジェット
 	if (!ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar)) {
 		ImGui::End();
 		return;

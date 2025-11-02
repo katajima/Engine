@@ -160,7 +160,6 @@ void ObjectComponent::InitializeInstancing(Entity3DManager* entity3DManager, Glo
     ObjectInstans object;
 
     object.Initialize(entity3DManager_,true);
-
     entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_);
 
     objectInstance_ = entity3DManager_->GetObject3dInstansManager()->GetObjectById(modelName_, instanceId_);

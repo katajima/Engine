@@ -84,11 +84,11 @@ private:
 
 private:
 	std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
-	bool isDelete_;
+	bool isDelete_ = false;
 public:
-	WorldTransform transform;
-	Vector4 color;
-	bool is_;
+	WorldTransform transform{};
+	Vector4 color = {1,1,1,1};
+	bool is_ = false;
 	bool isDraw_ = true;
 	uint32_t texIndex;
 	int id = -1;   // ← 固有ID（負なら未使用）

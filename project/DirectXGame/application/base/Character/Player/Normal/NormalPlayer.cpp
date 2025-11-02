@@ -56,6 +56,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	sphere->layer = CollisionLayer::Player;
 	sphere->collisionMask = 0xFFFFFFFF;
 	sphere->radius = 2.0f; // 半径を適宜設定
+	sphere->Enable();
 	// コライダ追加
 	GetColliderComponent()->AddCollider(std::move(sphere));
 	// コンポーネント衝突インターフェース設定
@@ -261,9 +262,9 @@ void NormalPlayer::Update()
 
 
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
-#endif // _DEBUG
+//#endif // _DEBUG
 
 	// UI更新
 	ui_->Update();

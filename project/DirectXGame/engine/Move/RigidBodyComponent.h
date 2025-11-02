@@ -19,39 +19,7 @@ public:
 		torque += t;
 	}
 	// 統合
-	void Integrate(float deltaTime, WorldTransform& transform) {
-		if (isKinematic || isSleeping || inverseMass == 0.0f) return;
-
-		// 加速度計算
-		Vector3 acceleration = force * inverseMass;
-
-		// 速度更新
-		velocity_ += acceleration /** deltaTime*/;
-
-		// 重力適用
-		if (useGravity) {
-			velocity_.y += -gravity /** deltaTime*/;
-		}
-
-		// 位置更新
-		transform.translate_ += velocity_ * deltaTime;
-
-
-
-		// トルクによる回転（簡略化）
-		Vector3 angularAcceleration = torque * inverseMass; // 実際は慣性モーメントが必要
-		angularVelocity += angularAcceleration * deltaTime;
-
-		// 回転適用（クォータニオンが理想）
-		//transform.rotation += angularVelocity * deltaTime;
-		transform.rotate_ * angularVelocity* deltaTime;
-
-
-		// 力のリセット
-		force = { 0, 0, 0 };
-		torque = { 0, 0, 0 };
-		transform.Update();
-	}
+	void Integrate(float deltaTime, WorldTransform& transform);
 
 	// 重力あるか取得
 	bool IsGravity() const { return useGravity; }

@@ -130,7 +130,7 @@ private:
 	bool useInstancing = false;	// インスタンシング描画にするか
 
 
-	ObjectInstans* objectInstance_;
+	ObjectInstans* objectInstance_ = nullptr;
 	int instanceId_ = 0;
 
 protected: // 貰ってくるもの

@@ -30,6 +30,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	obbCollider_->tag = CollisionTag::PlayerAttack;
 	obbCollider_->layer = CollisionLayer::PlayerAttack;
 	obbCollider_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
+	obbCollider_->Enable();
 	obbCollider_->isDebugLine = true;
 	weaponColliderId_ = GetObject3D()->GetColliderComponent()->GetNextId();
 	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider_));
@@ -39,6 +40,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	obbCollider2_->tag = CollisionTag::PlayerAttack;
 	obbCollider2_->layer = CollisionLayer::PlayerAttack;
 	obbCollider2_->isDebugLine = true;
+	obbCollider2_->Enable();
 	obbCollider2_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
 	weaponColliderId2_ = GetObject3D()->GetColliderComponent()->GetNextId();
 	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider2_));

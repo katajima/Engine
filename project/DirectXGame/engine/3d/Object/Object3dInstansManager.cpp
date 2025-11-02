@@ -382,17 +382,20 @@ ObjectInstans* Object3dInstansManager::GetObjectById(
 	const std::string& groupName, int id) {
 	auto itGroup = objectGroups.find(groupName);
 	if (itGroup == objectGroups.end()) {
+		std::terminate(); // 即座にプログラム停止
 		return nullptr;
 	}
 
 	auto& group = itGroup->second;
 	auto  it = group.idMap.find(id);
 	if (it == group.idMap.end()) {
+		std::terminate(); // 即座にプログラム停止
 		return nullptr;
 	}
 
 	size_t index = it->second;
 	if (index >= group.object.size()) {
+		std::terminate(); // 即座にプログラム停止
 		return nullptr; // 念のため安全確認
 	}
 
@@ -592,6 +595,8 @@ void ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollide
 	transform.scale_ = transfor.scale;
 	color = { 1,1,1,1 };
 	useCollider_ = useCollider;
+	isDelete_ = false;
+	is_ = false;
 
 	if (useCollider_) {
 		colliderComponent_ = std::make_unique<ColliderComponent>();
@@ -608,20 +613,17 @@ void ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollide
 }
 
 void ObjectInstans::Update() {
-
-	if (!isDelete_) return;
-
+	if (isDelete_) return;
 	transform.Update();
-
 	// コライダー
-	if (colliderComponent_) {
+	if (GetColliderComponent()) {
 		if (isColliderComponenyUpdate_) {
 			colliderComponent_->UpdateAll(transform);
 		}
 	}
 
 	// 物理
-	if (rigidBodyComponent_) {
+	if (GetRigidBodyComponent()) {
 		rigidBodyComponent_->Integrate(MyGame::GameTime(), transform);
 	}
 }

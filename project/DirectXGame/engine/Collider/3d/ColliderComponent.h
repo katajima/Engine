@@ -14,8 +14,8 @@ class ColliderComponent {
 public:
     // Colliderを保持
     struct ColliderEntry {
-        uint32_t id;
-        std::unique_ptr<Collider> collider;
+        uint32_t id = 0;
+        std::unique_ptr<Collider> collider = nullptr;
     };
 
     std::vector<ColliderEntry> colliders;
@@ -30,54 +30,26 @@ public:
     IHitReceiver* hitReceiver = nullptr;
 
 	// 履歴情報（衝突履歴）
-    ContactRecord contactRecord_;
+    ContactRecord contactRecord_{};
 private:
     uint32_t nextId_ = 1; // IDは1から開始
 
     uint32_t uniqueId_ = 0; // 外部から一意な番号を割り当て
 
-	LineCommon* lineCommon; // ライン描画用の共通オブジェクト
+	LineCommon* lineCommon = nullptr; // ライン描画用の共通オブジェクト
 public: // 更新or判定
    
     // ワールド変換に基づいて各Colliderの座標を更新
-    void UpdateAll(const WorldTransform& worldTransform) {
-        for (auto& entry : colliders) {
-            entry.collider->Update(worldTransform,lineCommon);
-        }
-    }
+    void UpdateAll(const WorldTransform& worldTransform);
     // 特定のタグだけ更新
-    void UpdateByTag(const WorldTransform& worldTransform, CollisionTag tag) {
-        for (auto& entry : colliders) {
-            if (entry.collider->tag == tag) {
-                entry.collider->Update(worldTransform, lineCommon);
-            }
-        }
-    }
+    void UpdateByTag(const WorldTransform& worldTransform, CollisionTag tag);
 
 	// 特定のIDのコライダーだけ更新
-    void UpdateByID(const WorldTransform& worldTransform, uint32_t id) {
-        for (auto& entry : colliders) {
-            if (entry.id == id) {
-                entry.collider->Update(worldTransform, lineCommon);
-            }
-        }
-	}
+    void UpdateByID(const WorldTransform& worldTransform, uint32_t id);
+
 
     // 衝突チェック＋コールバック通知（このComponent vs 他のComponent）
-    void CheckAndNotify(ColliderComponent& other) {
-        for (const auto& c1 : colliders) {
-            for (const auto& c2 : other.colliders) {
-                if (c1.collider->CheckHit(*c2.collider)) {
-                    if (onHitCallback) {
-                        onHitCallback(c1.collider.get(), c2.collider.get());
-                    }
-                    if (other.onHitCallback) {
-                        other.onHitCallback(c2.collider.get(), c1.collider.get());
-                    }
-                }
-            }
-        }
-    }
+    void CheckAndNotify(ColliderComponent& other);
 
     
 
@@ -111,21 +83,10 @@ public: // 設定or追加
     void SetLineCommon(LineCommon* line) { lineCommon = line; };
 
     // コライダー追加
-    uint32_t AddCollider(std::unique_ptr<Collider> collider) {
-        collider->owner = owner;
-        collider->id = nextId_;
-        uint32_t id = nextId_++;
-        colliders.push_back({ id, std::move(collider) });
-        return id;
-    }
+    uint32_t AddCollider(std::unique_ptr<Collider> collider);
 
     // コライダー再設定
-    void SetOwner(void* newOwner) {
-        owner = newOwner;
-        for (auto& entry : colliders) {
-            entry.collider->owner = newOwner;
-        }
-    }
+    void SetOwner(void* newOwner);
 
 	// 衝突インターフェースをセット(※IHitReceiverを継承必須)
     void SetHitReceiver(IHitReceiver* receiver) {
@@ -133,22 +94,10 @@ public: // 設定or追加
     }
 
     // タグでの有効or無効設定
-    void SetEnableByTag(CollisionTag tag, bool enable) {
-        for (auto& entry : colliders) {
-            if (entry.collider->tag == tag) {
-                entry.collider->enabled = enable;
-            }
-        }
-    }
+    void SetEnableByTag(CollisionTag tag, bool enable);
 
 	// IDでの有効or無効設定
-    void SetEnableById(uint32_t id, bool enable) {
-        for (auto& entry : colliders) {
-            if (entry.id == id) {
-                entry.collider->enabled = enable;
-            }
-        }
-	}
+    void SetEnableById(uint32_t id, bool enable);
 
     // 初期化時に必ずセット
     void SetUniqueId(uint32_t id) { uniqueId_ = id; }
@@ -185,7 +134,7 @@ public: // 取得
             }
         }
         return nullptr;
-        //return dynamic_cast<T*>(it->second.get());
+       
     }
 
 

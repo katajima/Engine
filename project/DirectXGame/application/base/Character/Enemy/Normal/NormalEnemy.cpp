@@ -28,6 +28,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
+	sphere->Enable();
 	sphere->tag = CollisionTag::Enemy;
 	sphere->layer = CollisionLayer::Enemy;
 	sphere->radius = 3.0f; // 半径を適宜設定
@@ -59,7 +60,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			}
 
 			isStopMove_ = true;
-
+			
 		}
 
 		if (other->tag == CollisionTag::Player) {
@@ -174,46 +175,43 @@ void NormalEnemy::Update()
 	assert(this);
 
 
-	if (GetObjectComponent()) {
 
-
-		if (isStopMove_) {
-			stopMoveTimer_ += GetTime();
-			if (stopMoveTimer_ >= 1.0f) {
-				stopMoveTimer_ = 0.0f;
-				isStopMove_ = false;
-			}
+	if (isStopMove_) {
+		stopMoveTimer_ += GetTime();
+		if (stopMoveTimer_ >= 1.0f) {
+			stopMoveTimer_ = 0.0f;
+			isStopMove_ = false;
 		}
+	}
 
-		UpdateBaseGetValue();
-		
-		// ステート
-		stateMachine_->Update();
+	UpdateBaseGetValue();
 
-		//HitStpoTime();
-		if (GetHP() <= 0) {
-			if (GetAlive() == true) {
+	// ステート
+	stateMachine_->Update();
 
-			}
-			objectComponent_->GetObjectStateFlags().isLockonTarget = false;
-			objectComponent_->GetObjectStateFlags().isAlive = false;
-			
+	if (GetHP() <= 0) {
+		if (GetAlive() == true) {
+
 		}
-		else {
-			// 移動
-			moveComponent_->AddMove(GetTime(), GetAlive(), objectComponent_->GetWorldTransform());
-			// 着地
-			moveComponent_->Landing(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent());
-			// ヒット
-			hitMotionComponent_->Update(GetTime(), objectComponent_.get());
-			// 視野
-			visionComponent_->Update(GetTime(), objectComponent_->GetWorldTransform().GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
-			// 移動制限
-			LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
-			// 更新
+		GetObjectComponent()->GetObjectStateFlags().isLockonTarget = false;
+		GetObjectComponent()->GetObjectStateFlags().isAlive = false;
 
-			objectComponent_->GetWorldTransform().Update();
-		}
+	}
+	else {
+		// 移動
+		moveComponent_->AddMove(GetTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
+		// 着地
+		moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
+		// ヒット
+		hitMotionComponent_->Update(GetTime(), GetObjectComponent());
+		// 視野
+		visionComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform().GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
+		// 移動制限
+		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
+		// 更新
+
+
+		//GetObjectComponent()->Update();
 	}
 }
 
@@ -276,11 +274,11 @@ void NormalEnemy::InitParticle()
 
 void NormalEnemy::AttackByCrowdCommand()
 {
-	
+
 	float dist = GetTargetDistance();
 	if (dist < 5.0f) {
 		// 攻撃ステートに遷移
 		stateMachine_->ChangeState(CharacterMainState::Attack);
 	}
-	
+
 }

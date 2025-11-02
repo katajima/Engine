@@ -124,6 +124,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Component\MoveComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\Manager\StageEventManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\BaseMainState.cpp" />
@@ -137,11 +138,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.cpp" />
     <ClCompile Include="DirectXGame\engine\Line\CreateLine.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\TrailMesh.cpp" />
+    <ClCompile Include="DirectXGame\engine\Move\RigidBodyComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\PSO\psoData.cpp" />
     <ClCompile Include="DirectXGame\engine\scene\BaseScene.cpp" />
     <ClCompile Include="DirectXGame\engine\scene\Fade.cpp" />

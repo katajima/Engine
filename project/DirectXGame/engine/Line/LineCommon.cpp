@@ -41,7 +41,9 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 void LineCommon::Update()
 {
 	lineMeshData_.Update();
+#ifdef _DEBUG
 	lineDebugMeshData_.Update();
+#endif // _DEBUG
 
 
 	if (camera_ && cameraWVP) {
@@ -77,6 +79,7 @@ void LineCommon::Draw()
 
 	auto commandList = dxCommon_->GetCommandList();
 
+#ifdef _DEBUG
 	// SRV (インスタンシングデータ) をルートパラメータ [0] に設定
 	commandList->SetGraphicsRootConstantBufferView(1, materialResource->GetGPUVirtualAddress());
 
@@ -85,6 +88,7 @@ void LineCommon::Draw()
 
 
 	lineDebugMeshData_.Draw();
+#endif // _DEBUG
 
 	// SRV (インスタンシングデータ) をルートパラメータ [0] に設定
 	commandList->SetGraphicsRootConstantBufferView(1, materialResource->GetGPUVirtualAddress());

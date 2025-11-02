@@ -3,7 +3,7 @@
 #include <corecrt_math_defines.h>
 #include <algorithm>
 
-
+#include <exception>
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
@@ -181,9 +181,10 @@ void GamePlayScene::UpdateImGui()
 {
 #ifdef _DEBUG
 
-	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
-
+	
 #endif // _DEBUG
+
+	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -236,7 +237,7 @@ void GamePlayScene::Update()
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
-
+	
 #ifdef _DEBUG
 	if (input_->IsTriggerKey(DIK_P)) {
 		// シーン切り替え
@@ -258,11 +259,7 @@ void GamePlayScene::Update()
 
 
 #endif // _DEBUG
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-		//	caracterManager_->GetPlayer()->GetSpecial()->SetGauge(100);
-	}
-
-
+	
 	// スペシャル
 	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
 		cameraManeger_->SetUseCamera("universeCamera", 0.0f);
