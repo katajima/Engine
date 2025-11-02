@@ -12,6 +12,8 @@
 // アプリケーション(プレイヤー)
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 
+#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
+
 //前方宣言
 class Effect;
 class FollowCamera;
@@ -78,11 +80,20 @@ public: // 取得系
 		return nullptr;
 	}
 
+
+	/// <summary>
+	/// 群衆AI取得
+	/// </summary>
+	/// <returns></returns>
+	CrowdManager* GetCrowdManager() { return crowdManager_.get();}
+
 public: // 生成系
 	// キャラクター生成(敵)
-	void CreateCharacter(EnemyType enemyType, const std::string& characterName, Transform transform);
+	void CreateCharacter(EnemyType enemyType, const std::string& characterName,int groupId, Transform transform);
 	// キャラクター生成(プレイヤー)
 	void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
+
+	void CreateEnemyGroup(int groupCount, int perGroup, Vector3 origin, AABB aabb);
 
 private:
 	
@@ -90,6 +101,10 @@ private:
 	std::vector<std::unique_ptr<BaseCharacter>> character_;	// キャラクター
 
 	uint32_t characterCount_ = 0;	// キャラクターの数
+
+	uint32_t enemyCount_ = 0;	// 敵カウンター
+
+	std::unique_ptr<CrowdManager> crowdManager_;	// 群衆AI
 
 private: // 貰いもの
 	Camera* camera_;

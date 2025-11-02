@@ -12,17 +12,18 @@ class BaseCharacter;
 /// エージェントの状態
 /// </summary>
 enum class AgentState {
-	Idle,			// 待機 ->Approach
-	Approach,		// 接近 ->Attack
-	Attack,			// 攻撃 ->Evade or Idle
-	Evade,			// 回避 ->
-	Dead			// 死亡 ->
+	Idle,				// 待機 ->Approach
+	Approach,			// 接近 ->Attack
+	PreparationAttack,	// 攻撃準備
+	Attack,				// 攻撃 ->Evade or Idle
+	Return,				// 戻る ->
 };
 
 
 // 前方宣言
 class CrowdGroupAgent;
-
+class BaseEnemy;
+class CrowdManager;
 
 /// <summary>
 /// 個々のキャラクター
@@ -45,9 +46,11 @@ public:
 	/// </summary>
 	void SetGroupAgent(CrowdGroupAgent* group) { group_ = group; }
 
-
-
-
+	/// <summary>
+	/// 管理クラス設定
+	/// </summary>
+	/// <param name="manager"></param>
+	void SetCrowdManager(CrowdManager* manager) { manager_ = manager; }
 
 
 	Vector3 ComputeSteering(const Vector3& target) const
@@ -58,25 +61,42 @@ public:
 		return dir;
 	}
 
+	// 敵
+	BaseEnemy* owner_ = nullptr;
+
+
 	AgentState state_ = AgentState::Idle;	// 状態
 	Vector3 position_ = {};					// 位置
 	Vector3 velocity_ = {};					// 速度
 	float attackCooldown_ = 0.0f;			// 攻撃クールタイム
 	uint32_t id;							// 個人ID
 	uint32_t groupId;                       // 部隊ID
-	float speed = 3.0f; // m/s
-	float radius = 0.5f; // 衝突半径
+	float speed = 30.0f;					// m/s
+	float radius = 0.5f;					// 衝突半径
 
 	Vector3 targetPos_ = {};				// ターゲット位置
+
+	bool isDed = false;						// 死んでいるか
+
+	float attackDelayTimer_ = 0.0f;			// 攻撃前の準備タイマー
+	float engageDistance_ = 20.0f;			// 攻撃を検討し始める距離
+	float attackRange_ = 7.5f;				// 実際に攻撃できる距離
 
 	// 表示用：インスタンスバッファに書き込むデータ
 	uint32_t animIndex = 0;
 private:
+	
+	CrowdManager* manager_ = nullptr;
 	CrowdGroupAgent* group_ = nullptr;
 };
 
 
-enum class GroupAction : uint8_t { Idle, Advance, Attack, Retreat };
+enum class GroupAction : uint8_t { 
+	Idle, 
+	Advance, 
+	Attack, 
+	Retreat 
+};
 
 
 struct GroupCommand
@@ -91,81 +111,36 @@ struct GroupCommand
 /// </summary>
 class CrowdGroupAgent {
 public:
+	
 
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	/// <param name="name"></param>
-	void Init(std::string name);
-
-
-	/// <summary>
-	/// ターゲット取得
-	/// </summary>
-	void SetTarget(BaseCharacter* character);
-
-
-private:
-
-	void UpdateCenter(const std::vector<CrowdAgent>& agents)
+	void Initialize(const Vector3& startPos)
 	{
-		if (memberIndices.empty()) return;
-		Vector3 sum = { 0,0,0 };
-		for (int idx : memberIndices)
-		{
-			sum = sum + agents[idx].position_;
-		}
-		centerPos = sum * (1.0f / (float)memberIndices.size());
+		centerPos = startPos;
+		anchorCenter = startPos; // 理想中心
 	}
 
+	// グループの中心位置
+	void UpdateCenter(const std::vector<CrowdAgent>& agents);
+	
 	// 各個体のフォーメーション上の目標位置を計算して返す
-	Vector3 CalcSlotTarget(int localIndex)
-	{
-		int col = localIndex % formationCols;
-		int row = localIndex / formationCols;
-		float x = (col - formationCols / 2) * formationSpacing;
-		float z = (float)row * formationSpacing;
-		// 部隊の向きを考慮して回転させる場合はここで行う（簡略化のため正面は+Z）
-		return { centerPos.x + x, centerPos.y, centerPos.z + z };
-	}
-
+	Vector3 CalcSlotTarget(int localIndex);
+	
 	// 部隊のコマンドに応じて内部ロジックでtargetPosを調整
-	void UpdateCommandLogic(const Vector3& playerPos)
-	{
-		float d = Length(playerPos - centerPos);
-		if (d < 12.0f) { command.action = GroupAction::Attack; command.targetPos = playerPos; command.moveSpeed = 3.0f; }
-		else if (d < 30.0f) { command.action = GroupAction::Advance; command.targetPos = playerPos; command.moveSpeed = 2.2f; }
-		else { command.action = GroupAction::Idle; command.targetPos = centerPos; command.moveSpeed = 0.0f; }
-	}
-
-
+	void UpdateCommandLogic(const Vector3& playerPos);
+	
 	// メンバーに与える目標（部隊目標 + 各スロット）を作る
-	void DistributeTargets(std::vector<CrowdAgent>& agents)
-	{
-		for (size_t i = 0; i < memberIndices.size(); ++i)
-		{
-			int idx = memberIndices[i];
-			if (idx < 0) continue;
-			Vector3 slot = CalcSlotTarget((int)i);
-			// 部隊目標へ向かうためにスロット位置を少し前方へオフセット
-			Vector3 dirToCmd = Normalize(command.targetPos - centerPos);
-			Vector3 finalTarget = { slot.x + dirToCmd.x * 0.5f, slot.y, slot.z + dirToCmd.z * 0.5f };
-			// Agentが持つ追加パラメータを通して使う（ここでは直接更新しても良い）
-			agents[idx].state_ = AgentState::Approach; // まずはMoveにする
-			// ここでは簡単のため agents[idx] に target 情報を渡さない。CrowdManager側で更新時に group.command.targetPos と slot を参照する。
-		}
-	}
-	// 部隊名前
-	std::string name_ = "";
+	void DistributeTargets(std::vector<CrowdAgent>& agents);
+	
+
+
+
 	// 部隊人数
 	uint32_t number_ = 0;
-	
 	uint32_t id;
 	std::vector<int> memberIndices; // CrowdManager側のエージェント配列へのインデックス
 	Vector3 centerPos = { 0,0,0 };
+	Vector3 anchorCenter = { 0,0,0 };
 	GroupCommand command;
-
-
 	// simple formation: grid parameters
 	int formationCols = 8;
 	float formationSpacing = 1.2f;
@@ -175,24 +150,6 @@ private:
 	BaseCharacter* character_ = nullptr;
 };
 
-
-
-
-/// <summary>
-/// 群衆LOD
-/// </summary>
-/// プレイヤーの位置によって部隊達がどう行動レベル、描画レベルを管理するクラス
-class CrowdLOD {
-public:
-
-
-
-
-
-private:
-	int leve_ = 0;					// レベル
-	std::vector<bool> conditions_;	// 条件
-};
 
 
 /// <summary>
@@ -264,11 +221,32 @@ public:
 	std::vector<CrowdAgent> agents;
 	std::vector<CrowdGroupAgent> groups;
 	
-	// 
-	CrowdLOD lod_;
-
-	//
-	UniformGrid grid_;
+	Vector3 playerPos = { 0,0,0 };
 
 
+	CrowdManager(int maxAgents = 1024, int maxGroups = 32) : grid(64, 64, 4.0f)
+	{
+		agents.reserve(maxAgents);
+		groups.reserve(maxGroups);
+	}
+
+
+	int CreateGroup()
+	{
+		CrowdGroupAgent g; g.id = (uint32_t)groups.size();
+		groups.push_back(std::move(g));
+		return (int)groups.size() - 1;
+	}
+
+	CrowdGroupAgent& GetGroup(uint32_t id) { return groups[id]; }
+
+	int CreateAgent(int groupId, BaseEnemy* ene,const Vector3 pos);
+
+	// LODコントロールの簡易実装: 距離に応じてAI更新の頻度や詳細度を落とす
+	void Update(float dt);
+	
+
+	void BindAgentsToEnemies(std::vector<BaseEnemy*>& enemies);
+
+	void UpdateAgentsToInstancing();
 };

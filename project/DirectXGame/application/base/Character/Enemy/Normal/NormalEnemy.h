@@ -40,6 +40,9 @@ private:
 	// パーティクル初期化
 	void InitParticle();
 
+
+	void AttackByCrowdCommand();
+
 private:
 	WorldTransform worldEffect_;
 

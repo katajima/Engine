@@ -13,13 +13,7 @@ void EnemyStateMove::Update()
 
 		character_->Move();
 
-
 		timer_ += character_->GetTime();
-
-		if (timer_ >= rootTimer_ && enemy->GetTargetDistance() <= 50) {
-			//character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
-			//return;
-		}
 	}
 	else {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);

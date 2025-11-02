@@ -235,10 +235,9 @@ void PlayerStateJump::Enter() {
 void PlayerStateAttack::Update()
 {
 	BaseWeapon* weapon = character_->GetWeapon();
-
+	
+	// コンボ
 	weapon->GetComboStateMachine()->Update(character_->GetTime());
-
-
 }
 
 void PlayerStateAttack::Exit()

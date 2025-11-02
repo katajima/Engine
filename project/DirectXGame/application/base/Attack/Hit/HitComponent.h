@@ -23,11 +23,7 @@ public:
 		if (isHit) {
 			object->GetRigidBodyComponent()->SetIsGravity(false);
 
-			//object->GetWorldTransform().translate_.x = strPos_.x + Random::RandomFloat(-offset_.x, offset_.x);
-			//object->GetWorldTransform().translate_.y = strPos_.y + Random::RandomFloat(-offset_.y, offset_.y);
-			//object->GetWorldTransform().translate_.z = strPos_.z + Random::RandomFloat(-offset_.z, offset_.z);
-
-
+			
 			hitStopTimer += deltaTime;
 			if (maxHitStopTimer > hitStopTimer) {
 				isHit = false;

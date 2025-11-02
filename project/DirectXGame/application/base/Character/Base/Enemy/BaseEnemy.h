@@ -3,11 +3,13 @@
 #include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 
 //前方宣言
 class BasePlayer;
 class Entity3DManager;
 class Entity2DManager;
+
 
 /// <summary>
 /// 敵クラス
@@ -47,12 +49,23 @@ public:
 	Vector3 GetTargetPos();
 	// 対象との距離(プレイヤー)
 	float GetTargetDistance();
-	// 移動方向
+	// 移動方向＋移動
+	void DirectionMoveVelocity(float speed);
+	// 移動向き
 	void DirectionMove(float speed);
+	// 
+	Vector3 TargetDirection();
+
 	// ロックオンされているか
 	bool GetIsLockOn() const { return isLockOn_; }
-	//
+	//　ロックオンされているか設定
 	void SetIsLockOn(bool isLockOn) { isLockOn_ = isLockOn; }
+
+	
+
+	void SetCrowdState(AgentState state) { agentState_ = state; }
+
+
 
 protected:
 	// スプライト初期化
@@ -61,6 +74,10 @@ protected:
 protected:
 	EnemyType type_ = EnemyType::kNormal; // 敵の種類
 	uint32_t id_ = 0; // ID
+
+	AgentState agentState_ = AgentState::Idle;
+protected:
+	
 protected: //2D
 	std::unique_ptr<Sprite> icon_lockOn;
 	std::unique_ptr<Sprite> hpBer_;

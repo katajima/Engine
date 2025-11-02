@@ -26,14 +26,40 @@ struct KnockbackData
 // コンボデータ
 class ComboData {
 public:
-	float damage;
+	float damage;							// ダメージ
 	float staminaCost = 0;					// スタミナ消費量
 	float mpCost = 0;                       // MP消費
+	float moveSpeed = 0;					// 移動速度
 	float movementSpeedMultiplier = 1.0f;	// 攻撃中の移動速度倍率
 	float moveTime = 1.0f;					// コンボ時に移動する時間
 	KnockbackData knockbackData{};			// ノックバックデータ
 };
 
+
+// コンボ受付条件クラス
+class ComboCondition {
+public:
+
+	// 開始
+	void Enter();
+
+	// 更新
+	void Update(float dt);
+
+	// 終了
+	void Exit();
+	
+	// 次のコンボに移行するか
+	bool IsNextCombo() const { return isNextCombo_; };
+
+
+public:
+	float inputWindowStart_ = 0.1f;      // 入力受付スタート
+	float inputWindowEnd_ = 0.5f;        // 入力受付エンド
+private:
+	float timer_ = 0.0f;				// 時間
+	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
+};
 
 
 

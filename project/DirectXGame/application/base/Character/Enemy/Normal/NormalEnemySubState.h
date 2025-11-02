@@ -27,7 +27,7 @@ public:
 
 private:
     float timer_ = 0.0f;
-    const float readyTime_ = 1.0f;
+    const float readyTime_ = 0.75f;
     Vector3 dire = {};
 };
 
@@ -46,7 +46,10 @@ public:
 
 private:
     float timer_ = 0.0f;
-    const float swingTime_ = 2.0f;
+    const float swingTime_ = 1.25f;
+
+    Vector3 dire_{};
+
 };
 
 

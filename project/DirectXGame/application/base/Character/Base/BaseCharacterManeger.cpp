@@ -1,5 +1,5 @@
 #include "BaseCharacterManeger.h"
-
+#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/Characters.h"
 
 void BaseCharacterManager::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera)
@@ -9,6 +9,10 @@ void BaseCharacterManager::Initialize(Input* input, Entity3DManager* entity3DMan
 	entity2DManager_ = entity2DManager;
 	globalVariables_ = globalVariables;
 	camera_ = camera;
+
+	// 群衆AI
+	crowdManager_ = std::make_unique<CrowdManager>();
+	crowdManager_->CreateGroup();
 }
 
 void BaseCharacterManager::Update()
@@ -25,6 +29,18 @@ void BaseCharacterManager::Update()
 
 
 
+	// プレイヤー座標をセット
+	if (GetPlayer()) {
+		crowdManager_->playerPos = GetPlayer()->GetObjectComponent()->GetWorldPosition();
+	}
+
+	// 群衆の結果を敵モデルに反映
+	crowdManager_->UpdateAgentsToInstancing();
+
+	// 群衆AI更新
+	crowdManager_->Update(MyGame::GameTime());
+
+
 
 	// キャラクター更新(敵)
 	std::vector<BaseEnemy*> target;
@@ -32,6 +48,7 @@ void BaseCharacterManager::Update()
 		if (character->GetCharacterType() == CharacterType::Enemy) {
 			if (character) {
 				character->Update();
+
 
 				target.push_back(static_cast<BaseEnemy*>(character.get()));
 			}
@@ -59,7 +76,7 @@ void BaseCharacterManager::Draw2D()
 	}
 }
 
-void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, Transform transform)
+void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
 {
 	std::unique_ptr<BaseEnemy> enemy;
 	switch (enemyType)
@@ -92,6 +109,10 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 	enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;
 	enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;
 
+
+	// 群衆AI
+	crowdManager_->CreateAgent(groupId, enemy.get(), transform.translate);
+
 	character_.push_back(std::move(enemy));
 }
 
@@ -120,6 +141,28 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 	player->SetEffect(effect_);
 	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
 	character_.push_back(std::move(player));
+}
+
+void BaseCharacterManager::CreateEnemyGroup(int groupIds, int perGroup, Vector3 origin,AABB aabb)
+{
+
+	int groupId = crowdManager_->CreateGroup();
+	crowdManager_->groups[groupId].Initialize(origin);
+
+	for (int i = 0; i < perGroup; ++i) {
+		Vector3 pos = Random::RandomVector3(aabb.min_, aabb.max_);
+		pos.y = 0.0f;
+		CreateCharacter(EnemyType::kNormal, "enemy", groupId, Transform{ {1,1,1}, {},pos });
+	}
+
+	std::vector<BaseEnemy*> enemys;
+	for (auto& character : character_) {
+		if (character->GetCharacterType() == CharacterType::Enemy) {
+			enemys.push_back(static_cast<BaseEnemy*>(character.get()));
+		}
+	}
+
+	crowdManager_->BindAgentsToEnemies(enemys);
 }
 
 

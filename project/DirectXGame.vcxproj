@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectField.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectModule.cpp" />
@@ -750,9 +751,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\UI\SelectUI.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.h" />
+    <ClInclude Include="DirectXGame\application\scene\ModelScene.h" />
     <ClInclude Include="DirectXGame\application\scene\SampleScene.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneData.h" />
     <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h" />
+    <ClInclude Include="DirectXGame\engine\Base\Editor\Editor.h" />
     <ClInclude Include="DirectXGame\engine\Collider\2d\Collider2D.h" />
     <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderComponent2D.h" />
     <ClInclude Include="DirectXGame\engine\Collider\2d\CollisionManager2D.h" />
@@ -765,6 +768,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Line\CreateLine.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h" />
     <ClInclude Include="DirectXGame\engine\PSO\psoData.h" />
+    <ClInclude Include="DirectXGame\application\scene\EffectScene.h" />
     <ClInclude Include="DirectXGame\engine\scene\Fade.h" />
     <ClInclude Include="DirectXGame\engine\struct\Structs.h" />
     <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.h" />

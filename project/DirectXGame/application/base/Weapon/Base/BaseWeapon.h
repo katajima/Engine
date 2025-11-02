@@ -16,9 +16,6 @@ public:
 	virtual void DrawEffect() = 0;
 	// 描画2d
 	virtual void Draw2D() = 0;
-
-
-
 public:
 	// 使っているキャラクター設定
 	void SetCharacter(BaseCharacter* character) {

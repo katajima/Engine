@@ -122,6 +122,8 @@ void MyGame::Update()
 	dxCommon->Update(sceneManager_.get(), entity3DManager_.get());
 
 
+
+
 #ifdef _DEBUG
 	dxCommon->GetPostEffectManager()->RenderImGui();
 #endif // _DEBUG

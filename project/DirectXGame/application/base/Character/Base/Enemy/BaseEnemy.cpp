@@ -13,16 +13,30 @@ float BaseEnemy::GetTargetDistance()
 	return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(player_->GetObjectComponent()->GetWorldTransform().GetWorldPosition());
 }
 
-void BaseEnemy::DirectionMove(float speed)
+void BaseEnemy::DirectionMoveVelocity(float speed)
 {
 	Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-	Velocity() = { 0,0,0 };
+	//Velocity() = { 0,0,0 };
 	Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
 
 	// Y軸周り角度
 	GetWorldTransform().rotate_.y = rotate.y;
 
 	Velocity() = dire * speed;
+}
+
+void BaseEnemy::DirectionMove(float speed)
+{
+	Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+	Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+
+	// Y軸周り角度
+	GetWorldTransform().rotate_.y = rotate.y;
+}
+
+Vector3 BaseEnemy::TargetDirection()
+{
+	return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 }
 
 void BaseEnemy::Initialize2D()

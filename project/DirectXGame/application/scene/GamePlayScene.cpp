@@ -127,15 +127,6 @@ void GamePlayScene::Initialize()
 	effectComponent_ = std::make_unique<EffectComponent>();
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 
-
-
-	/*for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
-			Vector3 pos = Random::RandomVector3(-100, 100);
-			pos.y = 0;
-			caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, pos));
-		}
-	}*/
 }
 
 // 調整項目
@@ -241,22 +232,6 @@ void GamePlayScene::Update()
 	stageEventManager_->Update();
 
 
-	/*int countIndex = 0;
-	for (auto& enemy : loadData_->GetLevelData()->enemys) {
-		if (enemy.isEnable)
-		if (loadData_->GetLevelData()->counts[countIndex] < enemy.count) {
-			enemy.crrentTimer += MyGame::GameTime();
-			if (enemy.crrentTimer >= enemy.timer) {
-				caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, enemy.rotation, enemy.position));
-				loadData_->GetLevelData()->counts[countIndex]++;
-				enemy.crrentTimer = 0;
-			}
-		}
-		countIndex++;
-	}*/
-
-
-
 	if (stageEventManager_->IsEndEvent()) {
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
@@ -271,9 +246,6 @@ void GamePlayScene::Update()
 	ImGui::Begin("Debug");
 	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
 	ImGui::InputInt("playerID", &GetSceneData().playerID);
-	if (ImGui::Button("ADDEnemy")) {
-		caracterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, enemyPosition));
-	}
 	if (ImGui::Button("lockOn")) {
 		cameraManeger_->SetUseCamera("fixedCamera", 0.3f);
 	}

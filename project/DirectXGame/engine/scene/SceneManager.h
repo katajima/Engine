@@ -79,9 +79,15 @@ public:
 
 private:
 	// 今のシーン(実行中シーン)
-	BaseScene* scene_ = nullptr;
+	std::unique_ptr<BaseScene> scene_ = nullptr;
 	// 次のシーン
-	BaseScene* nextScene_ = nullptr;
+	std::unique_ptr<BaseScene> nextScene_ = nullptr; 
+
+	
+
+
+
+
 	std::string sceneName = "";
 	// シーンファクトリー (借りてくる)
 	AbstractSceneFactory* sceneFactory_ = nullptr;

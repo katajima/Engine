@@ -43,13 +43,6 @@ public:
 	void Enter() override;
 private:
 	std::unique_ptr<SubStateMachine<AttackSubState, BaseAttackSubState>> subStateMachine_;
-
-
-	//float timer_ = 0.0f;
-	//float attackTimer_ = 1.0f;
-	//float attackSpeed_ = 10.0f; // 攻撃速度
-	//Vector3 lockonPos_ = {};
-	//Vector3 subPos_ = {};
 };
 
 /// <summary>

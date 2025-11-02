@@ -19,7 +19,7 @@ void StageEventManager::Initialize(Entity3DManager* entity3DManager, GlobalVaria
 	characterSpawnManager_->Initialize(characterManager_, entity3DManager_->Get3DLineCommon());
 
 	SpawnInfo data;
-	data.Initialize("test",2,50);
+	data.Initialize("test",1,50);
 	data.size_ = { 50,1,50 };
 	data.spawnInterval_ = 10.0f;
 	data.spawnTimer_ = 0.0f;

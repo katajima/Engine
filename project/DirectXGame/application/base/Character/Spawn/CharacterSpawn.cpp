@@ -48,14 +48,12 @@ void CharacterSpawn::SpawnProcess(){
 	spawnInfo_.Update(MyGame::GameTime());
 
 	if (spawnInfo_.IsSpawned()) return;
+	spawnTransform_.Update();
+	spawnAABBArea_.min_ = spawnTransform_.GetWorldPosition() - (spawnInfo_.size_ / 2.0f);
+	spawnAABBArea_.max_ = spawnTransform_.GetWorldPosition() + (spawnInfo_.size_ / 2.0f);
 
-	for (int i = 0; i < spawnInfo_.spawnAmount_; i++) {
-		Vector3 pos = Random::RandomVector3(spawnAABBArea_.min_, spawnAABBArea_.max_);
-		pos.y = 0.0f;
 
-		characterManager_->CreateCharacter(EnemyType::kNormal, "", Transform({ 1,1,1 }, {}, pos));
-	}
-
+	characterManager_->CreateEnemyGroup(0, spawnInfo_.spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
 
 	spawnInfo_.Spawned();
 }

@@ -18,10 +18,6 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	objectComponent_->InitializeInstancing(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", "", true, true, this);
 	objectComponent_->SetInstancingSRT(size, {}, position);
-
-	//objectComponent_->Initialize(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", true, true, this);
-	//objectComponent_->SetSRT(size, {}, position);
-
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);
 
 	CreateGroup("enemy");
@@ -190,6 +186,7 @@ void NormalEnemy::Update()
 		}
 
 		UpdateBaseGetValue();
+		
 		// ステート
 		stateMachine_->Update();
 
@@ -200,6 +197,7 @@ void NormalEnemy::Update()
 			}
 			objectComponent_->GetObjectStateFlags().isLockonTarget = false;
 			objectComponent_->GetObjectStateFlags().isAlive = false;
+			
 		}
 		else {
 			// 移動
@@ -255,18 +253,7 @@ void NormalEnemy::Emit()
 
 void NormalEnemy::Move()
 {
-
-	// 回転と移動量の設定
-	if (stateMachine_->GetCurrentMainState() != CharacterMainState::Attack && !isStopMove_) {
-		if (Distance(GetTargetPos(), objectComponent_->GetWorldTransform().GetWorldPosition()) <= 10) {
-			Parameters().speed = 0;
-		}
-		else {
-			Parameters().speed = 5.0f;
-		}
-		// 移動
-		DirectionMove(Parameters().speed);
-	}
+	DirectionMove(Parameters().speed);
 }
 
 void NormalEnemy::Jump()
@@ -285,4 +272,15 @@ void NormalEnemy::InitParticle()
 	worldEffect_.Initialize();
 	worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
 	worldEffect_.translate_ = { 0,1,0 };
+}
+
+void NormalEnemy::AttackByCrowdCommand()
+{
+	
+	float dist = GetTargetDistance();
+	if (dist < 5.0f) {
+		// 攻撃ステートに遷移
+		stateMachine_->ChangeState(CharacterMainState::Attack);
+	}
+	
 }
