@@ -6,13 +6,11 @@
 // メッシュ読み込み
 void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
 {
-	//modelData.allMesh = std::make_unique<ModelMesh>();
 	uint32_t vertexOffset = 0;
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 		assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
-		//assert(mesh->HasTextureCoords(0)); //TexcoordがないMeshは今回は非対応
 		std::unique_ptr<ModelMesh> pMesh = std::make_unique<ModelMesh>();
 		pMesh->name = mesh->mName.C_Str();
 		pMesh->meshIndex = meshIndex;
@@ -67,8 +65,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 
 			pMesh->verticesline[vertexIndex].position = pMesh->vertices[vertexIndex].position;
 
-			//modelData.allMesh->vertices.push_back(pMesh->vertices[vertexIndex]);
-
+	
 			min = Min(min, pMesh->vertices[vertexIndex].position.xyz());
 			max = Max(max, pMesh->vertices[vertexIndex].position.xyz());
 		}
@@ -205,14 +202,6 @@ void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectX
 			std::cout << "Mesh[" << meshIndex << "] Normal/Height: " << textureFilePath.C_Str() << std::endl;
 			pMaterial->tex_.normalFilePath = directoryPath + "/" + textureFilePath.C_Str();
 		}
-
-		//// テクスチャがない → ベースカラーを取得
-		//aiColor3D baseColor(1.0f, 1.0f, 1.0f); // デフォルト白
-		//if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor)) {
-		//	std::cout << "Mesh[" << meshIndex << "] BaseColor: " << baseColor.r << "," << baseColor.g << "," << baseColor.b << std::endl;
-		//	pMaterial->baseColor = { baseColor.r, baseColor.g, baseColor.b, 1.0f };
-		//	pMaterial->useColor = true;
-		//}
 
 		// モデルデータ内のメッシュへマテリアルを割り当て
 		assert(meshIndex < modelData.mesh.size());
