@@ -65,6 +65,5 @@ private: //パーティクルエミッター
 
 	Object3d* hitObject2_ = nullptr;
 
-	bool flag_ = false;
 };
 

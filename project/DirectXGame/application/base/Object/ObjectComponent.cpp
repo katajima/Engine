@@ -23,19 +23,20 @@ void ObjectComponent::SetTimeSpeed(const float& spped) { timeSpeed_ = spped; }
 /// <param name="t"></param>
 void ObjectComponent::SetSRT(const Vector3& s, const Vector3& r, const Vector3& t)
 {
+    // オブジェクトが存在するなら
     if (objectBase_) {
-        objectBase_->GetWorldTransform().scale_ = s;
-        objectBase_->GetWorldTransform().rotate_ = r;
-        objectBase_->GetWorldTransform().translate_ = t;
+        objectBase_->GetWorldTransform().scale_ = s;    // スケール
+        objectBase_->GetWorldTransform().rotate_ = r;   // 回転
+        objectBase_->GetWorldTransform().translate_ = t;// 位置
     }
 }
 
 void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const Vector3& t)
 {
     
-    objectInstance_->transform.scale_ = s;
-    objectInstance_->transform.rotate_ = r;
-    objectInstance_->transform.translate_ = t;
+    objectInstance_->transform.scale_ = s;    // スケール
+    objectInstance_->transform.rotate_ = r;   // 回転
+    objectInstance_->transform.translate_ = t;// 位置
 }
 
 
@@ -43,6 +44,8 @@ void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const
 
 // ワールド変換取得
 WorldTransform& ObjectComponent::GetWorldTransform() {
+    
+    // インスタンシング描画なら
     if (useInstancing) {
         return objectInstance_->transform;
     }
@@ -52,6 +55,7 @@ WorldTransform& ObjectComponent::GetWorldTransform() {
 }
 
 RigidBodyComponent* ObjectComponent::GetRigidBodyComponent() {
+    // インスタンシング描画なら
     if (useInstancing) {
         return objectInstance_->GetRigidBodyComponent();
     }
@@ -62,6 +66,7 @@ RigidBodyComponent* ObjectComponent::GetRigidBodyComponent() {
 
 
 void ObjectComponent::SetIsDraw(bool is) {
+    // インスタンシング描画なら
     if (useInstancing) {
         objectInstance_->isDraw_ = is;
     }
@@ -71,6 +76,7 @@ void ObjectComponent::SetIsDraw(bool is) {
 }
 
 void ObjectComponent::IsDelete() {
+    // インスタンシング描画なら
     if (useInstancing) {
         objectInstance_->IsDelete();
     }
@@ -82,6 +88,7 @@ void ObjectComponent::IsDelete() {
 
 // コライダーコンポーネント取得
 ColliderComponent* ObjectComponent::GetColliderComponent() {
+    // インスタンシング描画なら
     if (useInstancing) {
         return objectInstance_->GetColliderComponent();
     }
@@ -91,6 +98,7 @@ ColliderComponent* ObjectComponent::GetColliderComponent() {
 }
 // コライダー衝突履歴削除
 void ObjectComponent::ColliderHistoryClear() {
+    // インスタンシング描画なら
     if (useInstancing) {
         objectInstance_->GetColliderComponent()->contactRecord_.Clear();
     }
@@ -100,6 +108,7 @@ void ObjectComponent::ColliderHistoryClear() {
 }
 // 衝突履歴取得
 ContactRecord& ObjectComponent::GetContactRecord() {
+    // インスタンシング描画なら
     if (useInstancing) {
         return objectInstance_->GetColliderComponent()->contactRecord_;
     }
@@ -110,6 +119,7 @@ ContactRecord& ObjectComponent::GetContactRecord() {
 
 // スクリーン座標取得
 Vector2 ObjectComponent::GetScreenPosition() {
+    // インスタンシング描画なら
     if (useInstancing) {
         return ScreenPosition(objectInstance_->transform, entity3DManager_->GetObject3dCommon()->GetDefaltCamera());
     }
@@ -125,15 +135,15 @@ Vector2 ObjectComponent::GetScreenPosition() {
 /// <param name="entity3DManager"></param>
 /// <param name="globalVariables"></param>
 void ObjectComponent::Initialize(Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName,bool useCollider, bool useRigidBody,IHitReceiver* iHitReceiver, ObjectModelType modelType) {
-    this->entity3DManager_ = entity3DManager;   // 
-    this->globalVariables_ = globalVariables;   // 
+    this->entity3DManager_ = entity3DManager;   // エンティティ3d
+    this->globalVariables_ = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
     useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
     name_ = objectName;
 
-
+    // オブジェクト生成
     objectBase_ = entity3DManager_->CreateObject3D(name_, modelType, {}, nullptr);
-    objectBase_->SetModel(modelName);
+    objectBase_->SetModel(modelName);                           // モデル指定
     SetSRT({1,1,1},{0,0,0},{0,0,0});
     // コライダ使うか
     if (useCollider) {
@@ -148,20 +158,21 @@ void ObjectComponent::Initialize(Entity3DManager* entity3DManager,  GlobalVariab
 
 void ObjectComponent::InitializeInstancing(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver)
 {
-    this->entity3DManager_ = entity3DManager;   // 
-    this->globalVariables_ = globalVariables;   // 
+    this->entity3DManager_ = entity3DManager;   // エンティティ3d
+    this->globalVariables_ = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
     useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
-    name_ = objectName;
-    modelName_ = modelName;
-    useInstancing = true;
+    name_ = objectName;                         // 名前
+    modelName_ = modelName;                     // モデル名
+    useInstancing = true;                       // インスタンシング描画にする
    
-
+    // インスタンス初期化
     ObjectInstans object;
-
     object.Initialize(entity3DManager_,true);
+    // オブジェクト追加
     entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_);
 
+    // インスタンス
     objectInstance_ = entity3DManager_->GetObject3dInstansManager()->GetObjectById(modelName_, instanceId_);
 }
 
@@ -169,6 +180,7 @@ void ObjectComponent::InitializeInstancing(Entity3DManager* entity3DManager, Glo
 /// 更新
 /// </summary>
 void ObjectComponent::Update() {
+    // インスタンシング描画なら
     if (useInstancing)
         objectInstance_->Update();
 };

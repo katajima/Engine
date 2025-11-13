@@ -9,44 +9,47 @@
 
 // 初期化
 void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) {
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	entity2DManager_ = entity2DManager;	// エンティティ2d
+	globalVariables_ = globalVariables;	// 保存項目
 
+	// オブジェクト生成
 	object_ = entity3DManager->CreateObject3D("playerStanBullet", ObjectModelType::kNormal, position, camera);
-	object_->SetModel("AnimatedCube.gltf");
-	object_->GetWorldTransform().scale_ = { 0.2f,0.2f,0.2f };
-	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,0.2f,0 }, { 0,-0.2f,0 });
-	object_->Update();
-	object_->isEmitTrailEffect = false;
-	object_->InitColliderComponent();
-	object_->SetIsDraw(true);
+	object_->SetModel("AnimatedCube.gltf");	// モデル設定
+	object_->GetWorldTransform().scale_ = { 0.2f,0.2f,0.2f }; // スケール設定
+	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,0.2f,0 }, { 0,-0.2f,0 }); // トレイル設定
+	object_->Update();	// オブジェクト更新
+	object_->isEmitTrailEffect = false;	// トレイルの出現しないように
+	object_->InitColliderComponent();	// コライダコンポーネント初期化
+	object_->SetIsDraw(true);			// 描画する
 
+
+	// コライダ設定(球)
 	auto sphere = std::make_unique<SphereCollider>();
-	sphere->tag = CollisionTag::PlayerAttack;
-	sphere->layer = CollisionLayer::PlayerAttack;
-	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
+	sphere->tag = CollisionTag::PlayerAttack;		// タグ設定
+	sphere->layer = CollisionLayer::PlayerAttack;	// レイヤー設定
+	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));// マスク設定
 	sphere->radius = 2.0f; // 半径を適宜設定
-	sphere->Enable();
-	object_->GetColliderComponent()->AddCollider(std::move(sphere));
+	sphere->Enable();	// 判定有効
+	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
 
-
+	// ダメージ設定
 	parameter_.damege = info_.damage;
 
 
-	
 
+	// 移動方向指定
 	velocity_ = Normalize(info_.targetPos - object_->GetWorldTransform().GetWorldPosition()) * info_.speed;
-	
+
 
 	// 衝突時のコールバック登録
 	object_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
 		if (isAlive_ == false) return;
-
+		// 敵
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
-
+		// ID取得
 		uint32_t otherId = otherComponent->GetUniqueId();
 
 
@@ -58,42 +61,50 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 			return; // クールタイム中のため無視
 		}
 
+		// 衝突履歴追加
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
+		// 敵にダメージ
 		enemy->AddDamage(parameter_.damege);
+
 		if (enemy->GetCharacterParameterComponent().GetHP() > 0) {
-			//enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-		enemy->Emit();
+			enemy->Emit();	// エフェクト出現
 		}
+		// 弾が当たったら消えるか
 		if (info_.type == BulletType::NORMAL) {
-			hitDelete_ = true;
+			hitDelete_ = true;	// 当たったら消える
 		}
 		};
 
-	timer_ = 0.0f;
-	deleTimer_ = 5.0f;
-	isAlive_ = true;
+	timer_ = 0.0f;		// 時間初期化
+	deleTimer_ = 5.0f;	// 削除時間設定
+	isAlive_ = true;	// 生存フラグ設定
 
 };
 
 // 毎フレーム更新
 void PlayerBullet::Update() {
+
+	// 時間が初期値出なければ
 	if (timer_ != 0.0f) {
 		object_->isEmitTrailEffect = true;
 	}
-
+	// 時間更新
 	timer_ += GetTimer();
+
+	// y軸が-3.0f以下になったら
 	if (object_->GetWorldTransform().translate_.y <= -3.0f) {
-		velocity_ = 0.0f;
-		object_->GetWorldTransform().translate_.y = -3.0f;
-		hitDelete_ = true;
+		velocity_ = 0.0f;	// 速度0に
+		object_->GetWorldTransform().translate_.y = -3.0f;	// 位置固定
+		hitDelete_ = true;	// 削除
 	}
 	else {
-		object_->GetWorldTransform().translate_ += velocity_ * GetTimer();
+		object_->GetWorldTransform().translate_ += velocity_ * GetTimer();	// 位置更新
 	}
 
+	// 削除時間に達するか当たったら
 	if (deleTimer_ <= timer_ || hitDelete_) {
-		Final();
+		Final(); // 最終処理
 	}
 };
 
@@ -109,14 +120,14 @@ void PlayerBullet::Draw2D() {
 }
 void PlayerBullet::Final()
 {
-	isEffectPlay_ = true;
-	isAlive_ = false;
-	object_->SetIsDraw(false);
-	deleTimer_ += GetTimer();
-	if (deleTimer_ >= 0.1f) {
-		isEffectPlay_ = false;
-		object_->IsDelete();
-		object_->GetColliderComponent()->ClearColliders();
+	isEffectPlay_ = true;		// エフェクト再生
+	isAlive_ = false;			// 死亡に
+	object_->SetIsDraw(false);	// 描画しない
+	deleTimer_ += GetTimer();	// 削除タイマー
+	if (deleTimer_ >= 0.1f) {	// 削除タイマーが達したら
+		isEffectPlay_ = false;	// エフェクト終了
+		object_->IsDelete();	// オブジェクト削除
+		object_->GetColliderComponent()->ClearColliders(); // コライダクリア
 	}
 }
 ;

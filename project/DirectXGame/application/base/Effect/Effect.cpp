@@ -4,16 +4,19 @@
 
 void Effect::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables)
 {
-	entity3DManager_ = entity3DManager;
-	globalVariables_ = globalVariables;
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	globalVariables_ = globalVariables;	// 保存項目追加
 
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<EffectComponent>();
 	effectComponent_->Init(entity3DManager_, globalVariables_);
 
+	// パーティクル初期化
 	InitParticle();
+	// 範囲弾パーティクル初期化 
 	InitRangeBombingBullet();
+	// 通常弾初期化
 	InitBullet();
 }
 
@@ -23,7 +26,6 @@ void Effect::InitParticle(){
 	PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("starEmit");
 	starEmit->GetFrequency() = 0.0f;
 	starEmit->SetCount(1, 0);
-	//starEmit->SetParent(GetObject3D()->GetWorldTransform());
 	starEmit->SetPos({ 0,0.0f,0.0f });
 	starEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	starEmit->SetVelocity({}, {});
@@ -32,14 +34,12 @@ void Effect::InitParticle(){
 	starEmit->SetUsebillboard(false);
 	starEmit->SetSize(Vector3{ 1.7f,1.7f,1.7f }, { 0.1f,0.1f,0.1f });
 	starEmit->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
-	//starEmit->SetIsEmit(true);
-
+	
 
 	effectComponent_->AddEmitter("traiEmit", "hitEffect", EmitterShapeType::AABB);
 	AABBParticleEmitter* traiEmit = effectComponent_->GetEmitterAs<AABBParticleEmitter>("traiEmit");
 	traiEmit->GetFrequency() = 0.0f;
 	traiEmit->SetCount(5, 0);
-	//traiEmit->SetParent(worldEffect_);
 	traiEmit->SetPos({ 0,0.0f,0.0f });
 	traiEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	traiEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
@@ -50,7 +50,6 @@ void Effect::InitParticle(){
 	traiEmit->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
 	traiEmit->SetRange(Vector3{ -5,-5,-5 }, Vector3{ 5,5,5 });
 	traiEmit->SetAlphaClipping(0.15f);
-	//traiEmit->SetIsEmit(true);
 
 
 	effectComponent_->AddEmitter("hitEmit", "hit", EmitterShapeType::POINT);
@@ -58,7 +57,6 @@ void Effect::InitParticle(){
 
 	hitEmit->GetFrequency() = 0.0f;
 	hitEmit->SetCount(10, 0);
-	//hitEmit->SetParent(worldEffect_);
 	hitEmit->SetPos({ 0,0.0f,0.0f });
 	hitEmit->SetVelocity({}, { 15,15,15 });
 	hitEmit->SetLifeTime(0.5f, 0.1f);
@@ -67,7 +65,6 @@ void Effect::InitParticle(){
 	hitEmit->SetUsebillboardRotZ(true);
 	hitEmit->SetSize(Vector3{ 2.0f,1.0f,1.0f }, { 0.1f,0.1f,0.0f });
 	hitEmit->SetColorMinMax({ 1, 1,  1 }, { 1, 1, 1 });
-	//hitEmit->SetIsEmit(true);
 	hitEmit->SetIsDirectionRotate(true);
 
 
@@ -76,7 +73,6 @@ void Effect::InitParticle(){
 
 	effectEmit->GetFrequency() = 0.0f;
 	effectEmit->SetCount(1, 0);
-	//effectEmit->SetParent(worldEffect_);
 	effectEmit->SetPos({ 0,0.0f,0.0f });
 	effectEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	effectEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
@@ -86,14 +82,12 @@ void Effect::InitParticle(){
 	effectEmit->SetSize({ 8,8,8 }, {});
 	effectEmit->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
 	effectEmit->SetAlphaClipping(0.15f);
-	//effectEmit->SetIsEmit(true);
-
+	
 	effectComponent_->AddEmitter("ringHit", "ringHit", EmitterShapeType::POINT);
 	PointParticleEmitter* hitRingEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("ringHit");
 
 	hitRingEmit->GetFrequency() = 0.0f;
 	hitRingEmit->SetCount(1, 0);
-	//hitRingEmit->SetParent(worldEffect_);
 	hitRingEmit->SetPos({ 0,0.0f,0.0f });
 	hitRingEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	hitRingEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
@@ -145,7 +139,6 @@ void Effect::InitRangeBombingBullet()
 	stratSmoke01_->SetUsebillboardRotZ(true);
 	stratSmoke01_->SetEnableLighting(false);
 	stratSmoke01_->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
-	//stratSmoke01_->Set({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	stratSmoke01_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
 	stratSmoke01_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
 	stratSmoke01_->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
@@ -157,7 +150,6 @@ void Effect::InitRangeBombingBullet()
 	stratSmoke02_->SetUsebillboardRotZ(true);
 	stratSmoke02_->SetEnableLighting(false);
 	stratSmoke02_->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
-	//stratSmok201_->Set({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	stratSmoke02_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
 	stratSmoke02_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
 	stratSmoke02_->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
@@ -177,7 +169,6 @@ void Effect::InitRangeBombingBullet()
 	smokePlaneExpSmoke->SetUsebillboardRotZ(true);
 	smokePlaneExpSmoke->SetEnableLighting(false);
 	smokePlaneExpSmoke->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	//smokePlaneExpSmoke->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	smokePlaneExpSmoke->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
 	smokePlaneExpSmoke->SetVelocity(Vector3{ 00,50,00 }, { 40,50,40 });
 	smokePlaneExpSmoke->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
@@ -197,7 +188,6 @@ void Effect::InitRangeBombingBullet()
 	expPlane->SetUsebillboardRotZ(true);
 	expPlane->SetEnableLighting(false);
 	expPlane->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
-	//expPlane->SetRengeMinMax({ -0.25f,-0.25f ,-0.25f }, { 0.25f,0.25f,0.25f });
 	expPlane->SetSize(Vector3{ 8.8f,8.8f,8.8f }, {});
 	expPlane->SetVelocity({ 0,5,0 }, { 3, 10, 3 });
 	expPlane->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
@@ -250,13 +240,8 @@ void Effect::InitRangeBombingBullet()
 	expSpark->SetCount(1, 0);
 	expSpark->SetLifeTime(0.15f, 0.00f);
 	expSpark->SetIsAlpha(true);
-	//
-	// 
 	expSpark->SetAlphaClipping(0.10f);
-	//expSpark->SetIsLifeTimeScale(true);
 	expSpark->SetUsebillboard(true);
-	//expSpark->SetUsebillboardRotZ(false);
-	//expSpark->SetEnableLighting(false);
 	expSpark->SetColorMinMax({ 1.0f,1.0f,0.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	expSpark->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
 	expSpark->SetVelocity(Vector3{ 0,0,0 }, { 0,0,0 });
@@ -271,7 +256,6 @@ void Effect::InitRangeBombingBullet()
 	hitEmitter_->SetColorMinMax({ 1.0f,1.0f,1.0f,1.0f }, { 1.0f,1.0f,1.0f,1.0f });
 	hitEmitter_->SetSize(size, size);
 	hitEmitter_->SetFrequency(0.00f);
-	//hitEmitter_->SetParent(object_->GetWorldTransform());
 	hitEmitter_->SetPos({ 0,0,0 });
 	hitEmitter_->SetUsebillboardRotZ(true);
 	hitEmitter_->SetIsAlpha(true);
@@ -323,6 +307,7 @@ void Effect::InitBullet()
 }
 
 void Effect::Update() {
+	// 更新
 	effectComponent_->Update();
 }
 
@@ -330,11 +315,12 @@ void Effect::Emit(const std::string& name, const Vector3& pos)
 {
 	BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
 	
-	emit->SetPos(pos);
-	emit->SetIsEmit(false);
-	emit->Update();
-	emit->SetIsEmit(true);
-	emit->Emit();
-	emit->SetIsEmit(false);
+	// 出現
+	emit->SetPos(pos);		// 位置
+	emit->SetIsEmit(false); // 出さない
+	emit->Update();			// 更新
+	emit->SetIsEmit(true);	// 出す
+	emit->Emit();			// エフェクト出現
+	emit->SetIsEmit(false); // 出さない
 }
 

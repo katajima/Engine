@@ -23,6 +23,10 @@ public:
 	void Landing(WorldTransform& world, RigidBodyComponent& rigid);
 	// 移動処理
 	void Move(WorldTransform& world, Input* input);
+	// 移動処理
+	void Move(WorldTransform& world);
+
+
 	// カメラ設定
 	void SetCamera(Camera* camera) { camera_ = camera; }
 	// 速度設定

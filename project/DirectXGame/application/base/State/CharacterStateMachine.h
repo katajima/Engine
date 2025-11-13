@@ -50,11 +50,11 @@ private:
     void ChangeState(std::unique_ptr<BaseCharacterState> newState) {
         if(!isOneFrameOneState_)
         if (state_) {
-            state_->Exit();
+            state_->Exit(); // 終了
         }
         state_ = std::move(newState);
         if (state_) {
-            state_->Enter();
+            state_->Enter(); // 開始
         }
         isOneFrameOneState_ = true;
     }

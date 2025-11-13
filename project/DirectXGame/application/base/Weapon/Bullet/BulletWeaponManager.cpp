@@ -3,10 +3,10 @@
 
 void BulletWeaponManager::Initialize(BulletManager* bulletManager, Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables)
 {
-	bulletManager_ = bulletManager;
-	input_ = input;
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
+	bulletManager_ = bulletManager;		// 弾管理クラス更新
+	input_ = input;						// インプット
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	entity2DManager_ = entity2DManager;	// エンティティ2d
 }
 
 
@@ -14,7 +14,7 @@ void BulletWeaponManager::Initialize(BulletManager* bulletManager, Input* input,
 /// 更新
 /// </summary>
 void BulletWeaponManager::Update() {
-
+	// 更新
 	for(auto& weapon : bulletWeapons_) {
 		weapon.second->Update();
 	}
@@ -36,9 +36,9 @@ void BulletWeaponManager::AddBulletWeapon(const std::string& name, const Vector3
 	}
 
 	auto weapon = std::make_unique<BulletPlayerWeapon>();
-	weapon->SetParent(player_);
-	weapon->SetEffect(effect_);
-	weapon->SetModePenetrationPos(pos2);
+	weapon->SetParent(player_);				// 使用者設定
+	weapon->SetEffect(effect_);				// エフェクト設定
+	weapon->SetModePenetrationPos(pos2);	// 位置設定
 	weapon->Initialize(input_, entity3DManager_, entity2DManager_, nullptr, pos, nullptr);
 	weapon->SetBulletManager(bulletManager_);
 	bulletWeapons_[name] = std::move(weapon);
@@ -88,8 +88,8 @@ BulletPlayerWeapon* BulletWeaponManager::GetBulletWeapon(const std::string& name
 
 
 /// <summary>
-	/// 通常弾
-	/// </summary>
+/// 通常弾
+/// </summary>
 void BulletWeaponManager::Normal() {
 	for (auto& weapon : bulletWeapons_) {
 		weapon.second->SetModeType(BulletPlayerWeapon::ModeType::Normal);

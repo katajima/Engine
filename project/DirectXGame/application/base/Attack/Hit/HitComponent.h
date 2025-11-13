@@ -13,14 +13,16 @@ public:
 
 	// 初期化
 	void Init(float hitTimer,Vector3 offset) {
-		maxHitStopTimer = hitTimer;
-		offset_ = offset;
+		maxHitStopTimer = hitTimer;	// 最大ヒットストップ時間
+		offset_ = offset;			// オフセット
 	}
 
 	// 更新
 	void Update(float deltaTime, ObjectComponent* object) {
 
+		// ヒットしたら
 		if (isHit) {
+			// 重力をオフに
 			object->GetRigidBodyComponent()->SetIsGravity(false);
 
 			
@@ -34,15 +36,17 @@ public:
 		}
 		else {
 			
-
+			// 初期位置
 			strPos_ = object->GetWorldTransform().GetWorldPosition();
 
-
+			// ノックバック時間更新
 			knockbackTimer += deltaTime;
 			if (isknockback && knockbackTimer <= maxKnockbackTimer) {
+				// ノックバック方向にキャラクターを飛ばす
 				object->GetWorldTransform().translate_ += knockback_.DirectionPower() * deltaTime;
 			}
 			else {
+				// 重力をオンに
 				object->GetRigidBodyComponent()->SetIsGravity(true);
 			}
 			
@@ -69,8 +73,9 @@ private:
 	float hitStopTimer = 0.0f;
 	float maxHitStopTimer = 0.5f;
 	
+	// ノックバックタイマー
 	float knockbackTimer = 0.0f;
-	float maxKnockbackTimer = 1.0f;
+	float maxKnockbackTimer = 1.0f; // 最大時間
 
 	// ヒット
 	bool isHit = false;

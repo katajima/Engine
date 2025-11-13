@@ -3,30 +3,32 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
-void CameraManeger::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables)
+void CameraManager::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables)
 {
-	input_ = input;
-	entity3DManager_ = entity3DManager;
-	globalVariables_ = globalVariables;
+	input_ = input;						// インプット
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	globalVariables_ = globalVariables;	// 保存項目
 
-
+	// カメラ初期化
 	camera = std::make_unique <Camera>();
 	camera->Initialize(entity3DManager_->GetCameraCommon());
-	camera->transform_.rotate = { 0.36f,0,0 };
-	camera->transform_.translate = { 5,32.5f,-59.2f };
-	camera->SetFarClip(10000.0f);
-	isGameCamera = true;
+	camera->transform_.rotate = { 0.36f,0,0 };			// 回転指定
+	camera->transform_.translate = { 5,32.5f,-59.2f };	// 位置指定
+	camera->SetFarClip(10000.0f);						// farZを10000に
+	isGameCamera = true;								// ゲームに使用する
 
-	entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());
-	entity3DManager_->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
-	entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());
-	entity3DManager_->Get3DLineCommon()->SetDefaltCamera(camera.get());
+	entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
+	entity3DManager_->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
+	entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
+	entity3DManager_->Get3DLineCommon()->SetDefaltCamera(camera.get());						// デフォルトカメラ設定
 }
 
-void CameraManeger::Update()
+void CameraManager::Update()
 {
+	// ImGui更新
 	UpadateImGui();
 
+	// ゲームカメラOn
 	if (isGameCamera) {
 
 		// 各カメラ更新
@@ -34,6 +36,7 @@ void CameraManeger::Update()
 			cam.second->Update();
 		}
 
+		// 補間中
 		if (isInterpolating) {
 			currentTime += 1.0f / 60.0f; // 仮に60FPS固定
 
@@ -49,6 +52,7 @@ void CameraManeger::Update()
 			}
 		}
 		else {
+			// 使っているカメラを更新
 			for (auto& cam : cameras) {
 				if (cam.second->useCamera) {
 					camera->transform_ = cam.second->GetUniqueCamera()->GetTransform();
@@ -56,39 +60,38 @@ void CameraManeger::Update()
 				}
 			}
 		}
+	}
+	
 
-		entity3DManager_->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
-		entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());
-		entity3DManager_->Get3DLineCommon()->SetDefaltCamera(camera.get());
-		entity3DManager_->GetObject3dInstansManager()->SetCamera(camera.get());
-		camera->UpdateMatrix();
-	}
-	else {
-		entity3DManager_->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());
-		entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());
-		entity3DManager_->Get3DLineCommon()->SetDefaltCamera(camera.get());
-		entity3DManager_->GetObject3dInstansManager()->SetCamera(camera.get());
-		camera->UpdateMatrix();
-	}
+	entity3DManager_->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());// デフォルトカメラ設定
+	entity3DManager_->GetObject3dCommon()->SetDefaltCamera(camera.get());				// デフォルトカメラ設定
+	entity3DManager_->Get3DLineCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
+	entity3DManager_->GetObject3dInstansManager()->SetCamera(camera.get());				// デフォルトカメラ設定
+	// カメラ更新
+	camera->UpdateMatrix();
 }
 
-void CameraManeger::AddCamera(CameraInfo camera, std::string name)
+void CameraManager::AddCamera(CameraInfo camera, std::string name)
 {
+	// カメラ管理クラスを渡す
 	camera.camera->SetCameraManeger(this);
-	camera.camera->useCamera = camera.useCamera;
-	cameras.insert(std::make_pair(name, camera.camera));
+	camera.camera->useCamera = camera.useCamera;	// 使っているか
+	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
 }
 
-void CameraManeger::SetUseCamera(std::string name, float time)
+void CameraManager::SetUseCamera(std::string name, float time)
 {
+
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
+
+		// 全てのカメラを使用していないことに
 		for (auto& cam : cameras) {
-			cam.second->useCamera = false;
-			//cam.second.camera->useCamere = cam.second.useCamera;
+			cam.second->useCamera = false;	
 		}
+		// カメラ使用
 		it->second->useCamera = true;
-		//it->second.camera->useCamere = it->second.useCamera;
+		
 
 		if (time <= 0.0f) {
 			// 即時切り替え
@@ -102,12 +105,12 @@ void CameraManeger::SetUseCamera(std::string name, float time)
 			currentTime = 0.0f;
 			interpolationTime = time;
 
-
+			// 初期トランスフォーム計算
 			startTransform.translate = camera->transform_.translate;
 			startTransform.rotate = MakeQuaternionFromEuler(camera->transform_.rotate);
 			startTransform.translate = camera->transform_.translate;
 
-
+			// ターゲットトランスフォーム計算
 			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
 			targetTransform.rotate = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
 			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
@@ -116,31 +119,31 @@ void CameraManeger::SetUseCamera(std::string name, float time)
 	}
 }
 
-void CameraManeger::UpadateImGui()
+void CameraManager::UpadateImGui()
 {
 
 #ifdef _DEBUG
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("CameraManeger")) {
-		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);
-		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);
-		ImGui::Checkbox("isGameCamera", &isGameCamera);
-		bool isPro = camera->GetIsProjection();
+		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);	// 位置
+		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);		// 回転
+		ImGui::Checkbox("isGameCamera", &isGameCamera);							// カメラを使用するか
+		bool isPro = camera->GetIsProjection();									// プロジェクション設定
 		ImGui::Checkbox("isProjection", &isPro);
 		camera->SetIsProjection(isPro);
-		if (ImGui::Button("cameraPos")) {
+		if (ImGui::Button("cameraPos")) {	// 位置回転
 			camera->transform_.translate = { 0,20,-175 };
 			camera->transform_.rotate = { 0,0,0 };
 		}
-		if (ImGui::Button("cameraPos2")) {
+		if (ImGui::Button("cameraPos2")) {	// 位置回転
 			camera->transform_.translate = { -30,10,-140 };
 			camera->transform_.rotate = { 0,0,0 };
 		}
-		if (ImGui::Button("cameraPos3")) {
+		if (ImGui::Button("cameraPos3")) {	// 位置回転
 			camera->transform_.translate = { 0,500,0 };
 			camera->transform_.rotate = { Math::DegreesToRadians(90),0,0 };
 		}
-		if (ImGui::Button("cameraPos4")) {
+		if (ImGui::Button("cameraPos4")) {	// 位置回転
 			camera->transform_.translate = { 0,60,-220 };
 			camera->transform_.rotate = { Math::DegreesToRadians(10),0,0 };
 		}
@@ -154,12 +157,15 @@ void CameraManeger::UpadateImGui()
 		ImGui::Separator();
 		ImGui::DragFloat("chengeTime", &chengeTime, 0.01f);
 		ImGui::Separator();
+
+		// 各カメラのSRT設定
 		for (auto& cameraData : cameras) {
 			if (ImGui::TreeNode(cameraData.first.c_str())) {
 				ImGui::DragFloat3("Translate", &cameraData.second->GetUniqueCamera()->transform_.translate.x, 0.1f);
 				ImGui::DragFloat3("Rotate", &cameraData.second->GetUniqueCamera()->transform_.rotate.x, 0.01f);
 				ImGui::DragFloat3("Scale", &cameraData.second->GetUniqueCamera()->transform_.scale.x, 0.01f);
 
+				// 使う
 				if (ImGui::Button("use")) {
 					SetUseCamera(cameraData.first.c_str(), chengeTime);
 				}
@@ -173,7 +179,7 @@ void CameraManeger::UpadateImGui()
 #endif
 }
 
-void CameraManeger::DeleteCamera(std::string name)
+void CameraManager::DeleteCamera(std::string name)
 {
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {

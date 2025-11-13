@@ -25,6 +25,7 @@ void EffectField::Initialize(Entity3DManager* entity3DManager)
 // 更新
 void EffectField::Update() {
 
+	// 時間加算
 	time_ += MyGame::GameTime();
 
 	// 存続時間を超えたら削除フラグを立てる
@@ -62,7 +63,7 @@ void EffectField::Effect(BaseCharacter* character) {
 
 // ダメージモジュール使用
 void EffectField::UseDamageModule() { 
-	damage_ = std::make_unique<DamageModule>(); 
+	damage_ = std::make_unique<DamageModule>();		
 }
 
 // ノックバックモジュール使用

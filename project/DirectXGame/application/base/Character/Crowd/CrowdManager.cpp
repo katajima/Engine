@@ -9,20 +9,24 @@
 
 void CrowdAgent::Initialize(uint32_t _id, uint32_t _group, const Vector3& pos)
 {
-	id = _id; groupId = _group;
-	position_ = pos;
-	velocity_ = { 0,0,0 };
-	state_ = AgentState::Idle;
+	id = _id; groupId = _group;	// 個人Idとグループid設定
+	position_ = pos;	// 位置設定
+	velocity_ = { 0,0,0 };	// 速度
+	state_ = AgentState::Idle;	// 待機状態に
 }
 
 void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	const std::vector<int>& neighborIndices,
 	const std::vector<CrowdAgent>* allAgents)
 {
+	// 死んでいるなら早期リターン
 	if (isDed) return;
+	// 位置取得
 	position_ = owner_->GetObjectComponent()->GetWorldPosition();
 
+	// ターゲット
 	Vector3 toTarget = groupTarget - position_;
+	// ターゲット距離
 	float distToTarget = Length(toTarget);
 	if (distToTarget < 0.001f) return;
 
@@ -36,41 +40,44 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	// ===============================
 	switch (state_)
 	{
-	case AgentState::Idle:
-	{
+	case AgentState::Idle:	// 待機
+	{	
+		// 範囲内の入ったら
 		if (distToTarget < engageDistance_) {
-			state_ = AgentState::Approach;
+			state_ = AgentState::Approach;	// 接近に移行
 		}
 		break;
 	}
 
-	case AgentState::Approach:
+	case AgentState::Approach:	// 接近
 	{
+		// 範囲内に入ったら
 		if (distToTarget < attackRange_ * 3.0f) {
-			state_ = AgentState::PreparationAttack;
+			state_ = AgentState::PreparationAttack;	// 攻撃準備に入る
 			attackDelayTimer_ = Random::RandomFloat(4.0f, 6.0f);
 		}
-		else if (distToTarget > engageDistance_ * 1.5f) {
-			state_ = AgentState::Idle;
+		else if (distToTarget > engageDistance_ * 1.5f) {	// 範囲外なら
+			state_ = AgentState::Idle;	// 待機に戻る
 		}
 		break;
 	}
 
-	case AgentState::PreparationAttack:
-	{
+	case AgentState::PreparationAttack:	// 攻撃準備
+	{	
+		// 攻撃に移行
 		if (attackDelayTimer_ <= 0.0f) {
-			state_ = AgentState::Attack;
-			owner_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
+			state_ = AgentState::Attack; // 攻撃
+			owner_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);// 攻撃ステート移行
 			attackCooldown_ = 1.0f + Random::RandomFloat(0.0f, 0.5f);
 			animIndex = 1;
 		}
-		else if (distToTarget > attackRange_ * 3.0f) {
-			state_ = AgentState::Approach;
+		else if (distToTarget > attackRange_ * 3.0f) {	// 範囲外なら 
+			state_ = AgentState::Approach;	// 接近
 		}
 		break;
 	}
 
-	case AgentState::Attack:
+	case AgentState::Attack:	// 攻撃
 	{
 		if (distToTarget > attackRange_ * 1.5f) {
 			state_ = AgentState::Return; // ★攻撃後はフォーメーションへ戻る

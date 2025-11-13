@@ -421,7 +421,7 @@ void TestScene::InitializeCamera()
 	fixedCamera_->Initialize(input_, GetEntity3DManager(),  GetGlobalVariables(), {});
 	
 	// カメラ管理
-	cameraManeger_ = std::make_unique<CameraManeger>();
+	cameraManeger_ = std::make_unique<CameraManager>();
 	cameraManeger_->Initialize(input_, GetEntity3DManager(),GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");

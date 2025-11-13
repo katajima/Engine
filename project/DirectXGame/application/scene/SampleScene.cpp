@@ -31,7 +31,7 @@ void SampleScene::InitCamera() {
 	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
 	fixedCamera_->Update();
 	// カメラ管理
-	cameraManeger_ = std::make_unique<CameraManeger>();
+	cameraManeger_ = std::make_unique<CameraManager>();
 	cameraManeger_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
@@ -42,6 +42,8 @@ void SampleScene::InitCamera() {
 };
 // ライト
 void SampleScene::InitLight() {
+
+	// 平行光源パラメータ設定
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
@@ -50,9 +52,11 @@ void SampleScene::InitLight() {
 	directionalLightData.lig = 0.1f;
 
 
+	// 平行光源初期化
 	directional = std::make_shared<DirectionalLight>();
 	directional->directional = directionalLightData;
 
+	// ライト管理クラスに追加
 	GetEntity3DManager()->GetLightManager()->AddLight(directional);
 };
 // パーティクル
@@ -173,9 +177,7 @@ void SampleScene::InitSprite() {
 	sprite_->SetColor({1,1,1,1});			// 色
 	sprite_->SetPosition({ 10,10 });		// 位置
 	sprite_->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント
-	//sprite_->SetSize({30,30});				// サイズ(設定しなければ元画像のサイズが出る)
-	//sprite_->SetScale({ 1.5f,1.5f });		// スケール
-
+	
 };
 
 
@@ -205,13 +207,7 @@ void SampleScene::Update() {
 
 	
 	aabbParticleEmitter_->Update();
-	/*sphereParticleEmitter->Update();
-	cornerParticleEmitter->Update();
-	splineParticleEmitter->Update();
-	lineParticleEmitter->Update();
-	triangleParticleEmitter->Update();
-	meshParticleEmitter->Update();*/
-
+	
 
 	particleEmitter2d_->Update();
 

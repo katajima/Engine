@@ -66,9 +66,9 @@ public:
 
 	// ダメージ
 	void AddDamage(float damage) {
-		HP() -= damage;
-		if (GetHP() <= 0) {
-			HP() = 0;
+		HP() -= damage;		// HPをダメージ分減算
+		if (GetHP() <= 0) {	
+			HP() = 0;	
 			objectComponent_->GetObjectStateFlags().isAlive = false; // 敵が死亡
 		}
 	}

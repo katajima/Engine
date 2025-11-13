@@ -13,11 +13,11 @@
 ///</summary>
 void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) {
 
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
-	camera_ = camera;
-	input_ = input;
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	entity2DManager_ = entity2DManager;	// エンティティ2d
+	globalVariables_ = globalVariables;	// 保存項目
+	camera_ = camera;					// カメラ
+	input_ = input;						// インプット
 
 
 
@@ -27,7 +27,7 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true, this, ObjectModelType::kSkinning);
 
-
+	// 保存項目追加
 	CreateGroup("Player");
 
 	objectComponent_->SetSRT({ 1,1,1 }, {}, position);				//　SRT設定
@@ -78,6 +78,8 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 
 		Vector3 pushVec;
+
+		// 敵との衝突応答
 		if (other->tag == CollisionTag::Enemy) {
 			if (self->ResolveCollision(*other, pushVec)) {
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
@@ -96,6 +98,8 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 				GetWorldTransform().Update();
 			}
 		}
+
+		// 壁との衝突応答
 		if (other->tag == CollisionTag::Wall) {
 			if (self->ResolveCollision(*other, pushVec)) {
 				if (other->isStatic) {
@@ -119,6 +123,8 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;
+
+		// 敵の攻撃状態なら
 		if (enemy->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Attack) {
 			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
 
@@ -128,14 +134,14 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 			objectComponent_->GetContactRecord().AddHistory(otherId, nowTime);
 
-
+			// ダメージ
 			AddDamage(DamageCalculator::ComputeDamage(*enemy->GetCombatStatComponent(), *GetCombatStatComponent(), 1.0f));
 			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
 		}
 		};
 
 
-
+	// 武器管理クラス初期化
 	weaponManager_ = std::make_unique<BulletWeaponManager>();
 	weaponManager_->SetOwner(this);
 	weaponManager_->SetEffect(effect_);
@@ -159,14 +165,8 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
-	//// 武器
-	//weapon_ = std::make_unique<PlayerWeapon>();
-	//weapon_->SetCharacter(this);
-	//weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
-	//weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(-90),0.0f,0.0f };
-	//weapon_->GetHitData().hitTime.maxT = 2.0f;
-
-
+	
+	// インプットハンドラー初期化
 	attackInputHander_ = std::make_unique<AttackInputHander>();
 	attackInputHander_->AssignAttack();
 
@@ -232,6 +232,7 @@ void BulletPlayer::Update() {
 	}
 
 	ImGui::End();
+	// クリエイティブモード
 	if (input_->IsTriggerKey(DIK_C)) {
 		if (!isCreativeMode) {
 			isCreativeMode = true;
@@ -244,10 +245,11 @@ void BulletPlayer::Update() {
 #endif // _DEBUG
 
 
-
+	// ノーマル状態
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
 		weaponManager_->Normal();
 	}
+	// 貫通弾状態
 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Down)) {
 		weaponManager_->Penetration();
 	}
@@ -284,12 +286,7 @@ void BulletPlayer::Update() {
 
 	// 必殺技
 	special_->Update();
-	// ヒットデータの更新
-	//weapon_->GetHitData().Update(MyGame::GameTime()); // 武器のヒットデータ更新
-	//武器更新
-	///weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
-	//weapon_->Update();
-
+	
 #ifdef _DEBUG
 	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 #endif // _DEBUG
@@ -320,10 +317,11 @@ void BulletPlayer::DrawEffect() {
 /// 描画2d
 /// </summary>
 void BulletPlayer::Draw2D() {
-	ui_->SetIsTextmax(special_->GetIsSpecial());
+
+	// UI表示
+	ui_->SetIsTextmax(special_->GetIsSpecial());	
 	ui_->SetIsTextRB(special_->GetIsSpecial());
 	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
-
 	ui_->Draw();
 };
 
@@ -369,10 +367,8 @@ void BulletPlayer::Attack() {
 	bool is3 = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
 
 
-	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Attack) {
-		//weapon_->InputCombo(AttackInput::Light);
-	}
-	else if (is || is2 || is3) {
+	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Attack) {}
+	else if (is || is2 || is3) {	// 弾発射
 		stateMachine_->ChangeState(CharacterMainState::Attack);
 
 		weaponManager_->GetBulletWeapon("UPRIGHT")->Shoot();

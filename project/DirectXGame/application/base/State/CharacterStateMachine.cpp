@@ -7,7 +7,7 @@ void CharacterStateMachine::Init(BaseCharacter* character, CharacterMainState in
 }
 
 void CharacterStateMachine::Update() {
+	// 更新
 	state_->Update();
-
 	isOneFrameOneState_ = false;
 }

@@ -10,7 +10,7 @@ struct CameraInfo {
 /// <summary>
 /// カメラマネージャークラス
 /// </summary>
-class CameraManeger
+class CameraManager
 {
 public:
 

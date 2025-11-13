@@ -80,7 +80,7 @@ private:
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
-	std::unique_ptr<CameraManeger> cameraManeger_;
+	std::unique_ptr<CameraManager> cameraManeger_;
 	
 	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
 

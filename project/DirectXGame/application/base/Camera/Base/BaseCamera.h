@@ -12,7 +12,7 @@ struct CameraSRTSpeed
 
 
 // 前方宣言
-class CameraManeger;
+class CameraManager;
 
 /// <summary>
 /// カメラ基底クラス
@@ -50,7 +50,7 @@ public:
 	/// カメラ管理を設定
 	/// </summary>
 	/// <param name="cameraManeger"></param>
-	void SetCameraManeger(CameraManeger* cameraManeger) { this->cameraManeger = cameraManeger; };
+	void SetCameraManeger(CameraManager* cameraManeger) { this->cameraManeger = cameraManeger; };
 
 
 	/// <summary>
@@ -75,7 +75,7 @@ protected:
 
 	CameraSRTSpeed srtSpeed_;				// SRTスピード
 	Object3d* lockOnObject = nullptr;		// ロックオン対象
-	CameraManeger* cameraManeger = nullptr;	// カメラ管理
+	CameraManager* cameraManeger = nullptr;	// カメラ管理
 protected:
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
 	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数

@@ -4,11 +4,11 @@
 
 void BaseCharacterManager::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera)
 {
-	input_ = input;
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
-	camera_ = camera;
+	input_ = input;						// インプット
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	entity2DManager_ = entity2DManager; // エンティティ2d
+	globalVariables_ = globalVariables; // 保存項目
+	camera_ = camera;					// カメラ
 
 	// 群衆AI
 	crowdManager_ = std::make_unique<CrowdManager>();
@@ -57,6 +57,7 @@ void BaseCharacterManager::Update()
 
 	// キャラクター更新(プレイヤー)
 	if (GetPlayer()) {
+		// ターゲット設定
 		GetPlayer()->SetTargetCharacters(target);
 		GetPlayer()->Update();
 	}
@@ -65,9 +66,11 @@ void BaseCharacterManager::Update()
 
 void BaseCharacterManager::Draw2D()
 {
+	// スプライト描画
 	for (auto& character : character_) {
 		if (character) {
-			if (character->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
+			// 死んでいなければ
+			if (character->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {	
 				if (character->GetAlive()) {
 					character->Draw2D();
 				}
@@ -79,9 +82,10 @@ void BaseCharacterManager::Draw2D()
 void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
 {
 	std::unique_ptr<BaseEnemy> enemy;
+	// 敵タイプ
 	switch (enemyType)
 	{
-	case EnemyType::kNormal:
+	case EnemyType::kNormal: // 通常
 		enemy = std::make_unique<NormalEnemy>();
 
 		break;
@@ -101,13 +105,13 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 	}
 
 
-	enemy->SetCharacterType(CharacterType::Enemy);
-	enemy->SetID(characterCount_);
-	enemy->SetPlayer(GetPlayer());
-	enemy->SetEffect(effect_);
-	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
-	enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;
-	enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;
+	enemy->SetCharacterType(CharacterType::Enemy);	// キャラクタータイプを敵に設定
+	enemy->SetID(characterCount_);					// ID設定
+	enemy->SetPlayer(GetPlayer());					// ターゲット指定
+	enemy->SetEffect(effect_);						// エフェクト設定
+	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
+	enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
+	enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
 
 
 	// 群衆AI
@@ -120,12 +124,13 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 {
 	std::unique_ptr<BasePlayer> player;
 
+	// プレイヤータイプ
 	switch (playerType)
 	{
-	case PlayerType::kNormal:
+	case PlayerType::kNormal:	// 通常(剣)
 		player = std::make_unique<NormalPlayer>();
 		break;
-	case PlayerType::kBullet:
+	case PlayerType::kBullet:	// 弾
 		player = std::make_unique<BulletPlayer>();
 		break;
 	case PlayerType::kAttacker:
@@ -135,26 +140,31 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 	default:
 		break;
 	}
-	player->SetCharacterType(CharacterType::Player);
-	player->SetFollowCamera(followCamera_);
-	player->SetBulletManager(bulletManager_);
-	player->SetEffect(effect_);
-	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_);
-	character_.push_back(std::move(player));
+	
+	player->SetCharacterType(CharacterType::Player);// キャラクターのタイプをプレイヤーに
+	player->SetFollowCamera(followCamera_);		// フォローカメラ設定
+	player->SetCameraManager(cameraManager_);	// カメラ管理クラス設定
+	player->SetBulletManager(bulletManager_);	// 弾管理クラス設定
+	player->SetEffect(effect_);					// エフェクト設定
+	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
+	character_.push_back(std::move(player));	// キャラクターに追加 
 }
 
 void BaseCharacterManager::CreateEnemyGroup(int groupIds, int perGroup, Vector3 origin,AABB aabb)
 {
 
+	// グループId
 	int groupId = crowdManager_->CreateGroup();
 	crowdManager_->groups[groupId].Initialize(origin);
 
+	// 敵を出現させる
 	for (int i = 0; i < perGroup; ++i) {
 		Vector3 pos = Random::RandomVector3(aabb.min_, aabb.max_);
 		pos.y = 0.0f;
 		CreateCharacter(EnemyType::kNormal, "enemy", groupId, Transform{ {1,1,1}, {},pos });
 	}
 
+	// 群衆管理クラスに追加
 	std::vector<BaseEnemy*> enemys;
 	for (auto& character : character_) {
 		if (character->GetCharacterType() == CharacterType::Enemy) {

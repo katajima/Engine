@@ -10,11 +10,11 @@
 
 void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
-	camera_ = camera;
-	input_ = input;
+	entity3DManager_ = entity3DManager;	// エンティティ
+	entity2DManager_ = entity2DManager;	// エンティティ
+	globalVariables_ = globalVariables;	// 保存項目
+	camera_ = camera;					// カメラ
+	input_ = input;						// 入力
 	
 	
 	
@@ -24,7 +24,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true,this, ObjectModelType::kSkinning);
 
-
+	// 保存項目追加
 	CreateGroup("Player");
 
 	objectComponent_->SetSRT({1,1,1}, {}, position);				//　SRT設定
@@ -46,7 +46,8 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// 移動コンポーネント初期化
 	InitMoveComponent();
-	moveComponent_->SetMaxJumpCount(3);
+	moveComponent_->SetMaxJumpCount(2);
+	moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
 	// 保存項目初期化
 	InitializeBaseAddItem();
 
@@ -76,6 +77,8 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 
 		Vector3 pushVec;
+
+		// 敵との衝突応答
 		if (other->tag == CollisionTag::Enemy) {
 			if (self->ResolveCollision(*other, pushVec)) {
 				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
@@ -94,6 +97,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 				GetWorldTransform().Update();
 			}
 		}
+		// 壁との衝突応答
 		if (other->tag == CollisionTag::Wall) {
 			if (self->ResolveCollision(*other, pushVec)) {
 				if (other->isStatic) {
@@ -150,7 +154,9 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera);
 	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(-90),0.0f,0.0f };
 	weapon_->GetHitData().hitTime.maxT = 2.0f;
+	weapon_->ComboDataUse().camera;
 
+	// インプットハンドラー
 	attackInputHander_ = std::make_unique<AttackInputHander>();
 	attackInputHander_->AssignAttack();
 
@@ -166,6 +172,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 // ステート初期化and追加
 void NormalPlayer::InitStateMachine() {
+	// ステートマシーン初期化
 	stateMachine_ = std::make_unique<CharacterStateMachine>();
 	stateMachine_->RegisterState(CharacterMainState::Idle, [](BaseCharacter* p) {
 		return std::make_unique<PlayerStateIdle>(p);
@@ -212,8 +219,9 @@ void NormalPlayer::Update()
 	if (ImGui::Button("SP")) {
 		special_->SetGauge(100);
 	}
-	
 	ImGui::End();
+
+	// クリエイティブモード切替
 	if (input_->IsTriggerKey(DIK_C)) {
 		if (!isCreativeMode) {
 			isCreativeMode = true;
@@ -230,6 +238,7 @@ void NormalPlayer::Update()
 		input_->GetGamePadLeftStick().Length() == 0) {
 		moveComponent_->Velocity() = {};
 	}
+	
 
 	// 必殺技
 	special_->Update();
@@ -284,7 +293,7 @@ void NormalPlayer::DrawEffect()
 
 void NormalPlayer::Draw2D()
 {
-	
+	// UI表示
 	ui_->SetIsTextmax(special_->GetIsSpecial());
 	ui_->SetIsTextRB(special_->GetIsSpecial());
 	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
@@ -309,6 +318,7 @@ void NormalPlayer::Move()
 	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
 	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
 
+	// 移動処理
 	if (is || is2) {
 		moveComponent_->SetSpeed(Parameters().speed);
 		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
@@ -336,15 +346,17 @@ void NormalPlayer::Jump()
 
 void NormalPlayer::Attack()
 {
-	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-	bool is3 = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
+	bool isMove = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
+	bool isIdle = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
+	bool isJump = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
+	bool isAttack = stateMachine_->GetCurrentMainState() == CharacterMainState::Attack;
 
 
-	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Attack) {
+	// 攻撃
+	if (isAttack) {
 		weapon_->InputCombo(AttackInput::Light);
 	}
-	else if (is || is2 || is3) {
+	else if (isMove || isIdle || isJump) {
 		stateMachine_->ChangeState(CharacterMainState::Attack);
 		weapon_->StartCombo("Attack1");
 	}

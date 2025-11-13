@@ -78,6 +78,7 @@ private:
 
 
     float timeInState = 0.0f;
+    Vector3 dire_{};
 
     std::map<AttackInput, std::shared_ptr<ComboNodeState>> nextStates;
 };
@@ -98,8 +99,10 @@ public:
     }
     // 更新
     void Update(float dt) {
+        // ステートが無いなら早期リターン
         if (!currentState) return;
 
+        // 現在のステート更新
         currentState->Update(owner, dt);
 
         // 入力がバッファされていて、入力受付時間内なら状態遷移
@@ -136,10 +139,9 @@ public:
     }
 
 private:
-    BaseCharacter* owner;
-    std::shared_ptr<ComboState> currentState;
-    std::shared_ptr<ComboState> rootState;
+    BaseCharacter* owner;                       // 
+    std::shared_ptr<ComboState> currentState;   // 
+    std::shared_ptr<ComboState> rootState;      // 
 
-    std::optional<AttackInput> bufferedInput;  // 入力バッファ
-
+    std::optional<AttackInput> bufferedInput;   // 入力バッファ
 };

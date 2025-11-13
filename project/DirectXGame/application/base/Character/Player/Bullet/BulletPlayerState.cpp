@@ -8,17 +8,11 @@
 // 更新
 void BulletPlayerStateIdle::Update() {
 	Input* input = character_->GetInput();
-	//BaseSpecial* special = character_->GetSpecial();
 
 	// 武器描画 
 	
 	// ゲームパッドが繋いであるなら
 	if (input->IsControllerConnected()) {
-
-		// 必殺技が使えるようになったら
-		//if (character_->GetSpecial()->GetIsSpecial()) {
-		////	special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
-		//}
 
 		// スキル発動
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
@@ -43,14 +37,6 @@ void BulletPlayerStateIdle::Update() {
 	}
 #endif // _DEBUG
 
-	// 必殺技移行
-	/*if (special->GetIsSpecial()) {
-		if (special->GetIsSpecialAttack()) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
-			return;
-		}
-	}*/
-
 	// 移動したら
 	if (input->GetGamePadLeftStick().Length() != 0) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
@@ -65,10 +51,10 @@ void BulletPlayerStateIdle::Exit() {
 // 初期化
 void BulletPlayerStateIdle::Enter() {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsLoop(true);
-	anima->SetIsPlaying(true);
-	anima->SetAnimationSpeed(1.0f);
-	anima->SetAnimetion("Idle1", 0.1f);
+	anima->SetIsLoop(true);			// ループさせる
+	anima->SetIsPlaying(true);		// アニメーション再生
+	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
+	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
 };
 
 #pragma endregion // 待機
@@ -78,21 +64,18 @@ void BulletPlayerStateIdle::Enter() {
 void BulletPlayerStateMove::Update()
 {
 	Input* input = character_->GetInput();
-	//BaseSpecial* special = character_->GetSpecial();
-
+	
 	
 
 	if (input->IsControllerConnected()) {
 
-		/*if (character_->GetSpecial()->GetIsSpecial()) {
-			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
-		}*/
-
+		// スキル発動
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
 
+		// 防御発動
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
 			return;
@@ -100,19 +83,11 @@ void BulletPlayerStateMove::Update()
 
 	}
 
-
+	// 気絶
 	if (input->IsTriggerKey(DIK_Z)) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
 		return;
 	}
-
-
-	/*if (special->GetIsSpecial()) {
-		if (special->GetIsSpecialAttack()) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
-			return;
-		}
-	}*/
 
 	// 止まったら
 	if (input->GetGamePadLeftStick().Length() == 0) {
@@ -129,10 +104,10 @@ void BulletPlayerStateMove::Exit()
 void BulletPlayerStateMove::Enter()
 {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsLoop(true);
-	anima->SetIsPlaying(true);
-	anima->SetAnimationSpeed(1.0f);
-	anima->SetAnimetion("Walk", 0.1f);
+	anima->SetIsLoop(true);				// ループ再生
+	anima->SetIsPlaying(true);			// 再生
+	anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
+	anima->SetAnimetion("Walk", 0.1f);	// 流すアニメーション設定
 }
 
 #pragma endregion // 移動
@@ -224,12 +199,6 @@ void BulletPlayerStateJump::Enter() {
 
 void BulletPlayerStateAttack::Update()
 {
-	//BaseWeapon* weapon = character_->GetWeapon();
-
-	//weapon->GetComboStateMachine()->Update(character_->GetTime());
-
-
-
 	character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 	return;
 }
@@ -248,16 +217,7 @@ void BulletPlayerStateAttack::Exit()
 	anima->SetAnimationSpeed(1.0f);
 }
 
-void BulletPlayerStateAttack::Enter()
-{
-	//BaseWeapon* weapon = character_->GetWeapon();
-
-	// 武器
-	//weapon->GetComboStateMachine()->Update(character_->GetTime());
-	//weapon->GetObject3D()->SetIsDraw(true);
-	//weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);
-	//weapon->GetColliderComponent()->contactRecord_.Clear();
-}
+void BulletPlayerStateAttack::Enter(){}
 
 #pragma endregion // 攻撃
 
@@ -270,20 +230,23 @@ void BulletPlayerStateSpecial::Update()
 	BaseSpecial* special = character_->GetSpecial();
 	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
 
-
+	// キャラクターの動きを止める
 	character_->Velocity() = {};
 	int time = 0;
+	// UIを表示しない
 	player->GetPlayerUI()->SetIsTextRB(false);
-	//ui_->SetIsTextRB(false);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
-	rengeSp->InAction();
-	rengeSp->SetIsDraw(false);
-	if (special->GetPhese() == 0) {
+	rengeSp->InAction();	// アクション中
+	rengeSp->SetIsDraw(false);	// 描画
+	if (special->GetPhese() == 0) {	// 最初フェーズなら
+		// 移動
 		player->GetMoveComponent()->Move(player->GetObjectComponent()->GetWorldTransform(), player->GetInput());
+		// UI描画
 		player->GetPlayerUI()->SetIsTextRB(true);
+		// スペシャル描画
 		rengeSp->SetIsDraw(true);
 	}
-	if (special->GetPhese() == 2) {
+	if (special->GetPhese() == 2) {	// 最終フェーズなら
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
 	}
@@ -293,16 +256,16 @@ void BulletPlayerStateSpecial::Exit()
 {
 	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
 
-	player->GetPlayerUI()->SetIsTextRB(false);
+	player->GetPlayerUI()->SetIsTextRB(false);	// UI描画しない
 }
 
 void BulletPlayerStateSpecial::Enter()
 {
 	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
 
-	player->GetSpecial()->SetPhese(0);
-	player->GetSpecial()->SetGauge(0);
-	player->GetWeapon()->GetObject3D()->SetIsDraw(false);
+	player->GetSpecial()->SetPhese(0);	// フェーズ初期化
+	player->GetSpecial()->SetGauge(0);	// ゲージ初期化
+	player->GetWeapon()->GetObject3D()->SetIsDraw(false);	// 描画しない
 }
 
 #pragma endregion // 必殺技
@@ -312,6 +275,8 @@ void BulletPlayerStateSpecial::Enter()
 void BulletPlayerStateSkill::Update() {
 
 	timer_ += character_->GetTime();
+
+	// 移動状態に移行
 	if (changeTimer_ <= timer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
@@ -324,12 +289,7 @@ void BulletPlayerStateSkill::Exit() {
 
 };
 // 初期化
-void BulletPlayerStateSkill::Enter() {
-	//BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
-
-	//timer_ = 0.0f;
-	//player->GetBulletManager()->GenerateBullet(BulletManager::BulletType::kPlayerStan, player->GetWorldTransform().worldMat_.GetWorldPosition());
-};
+void BulletPlayerStateSkill::Enter() {};
 #pragma endregion // スキル
 
 #pragma region Defense
@@ -339,13 +299,17 @@ void BulletPlayerStateDefense::Update() {
 	Input* input = character_->GetInput();
 
 
+	// ゲームパッドがつながっているなら
 	if (input->IsControllerConnected()) {
+		// 防御中
 		if (input->IsGamePadPressed(GamePadButton::GAMEPAD_A) && isDifense_) {
 			isDifense_ = true;
 
 			character_->GetCombatStatComponent()->damageReduction_ = 0.75;
 
+			// スタミナがあるなら
 			if (character_->GetCharacterParameterComponent().IsGetStamina()) {
+				// スタミナ消費
 				character_->GetCharacterParameterComponent().Stamina().rateFluctuation = -5.0f;
 			}
 			else {
@@ -354,6 +318,7 @@ void BulletPlayerStateDefense::Update() {
 
 		}
 		else {
+			// スタミナ回復
 			character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
 			isDifense_ = false;
 			timer_ += character_->GetTime();
@@ -362,7 +327,7 @@ void BulletPlayerStateDefense::Update() {
 	}
 
 
-
+	// 移動状態に移行
 	if (timer_ >= defenseTimer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
@@ -384,7 +349,7 @@ void BulletPlayerStateDefense::Enter() {
 	anima->SetIsLoop(false);		// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
 	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
-	anima->SetAnimetion("Defense1", 0.10f);
+	anima->SetAnimetion("Defense1", 0.10f); // 流すアニメーション設定
 };
 
 #pragma endregion // 防御
@@ -398,6 +363,7 @@ void BulletPlayerStateFainting::Update() {
 
 	timer_ += character_->GetTime();
 
+	// スティックを動かしているなら
 	if (prevleftStick != left) {
 		Vector2 sub = prevleftStick - left;
 		float length = sub.Length();
@@ -407,10 +373,11 @@ void BulletPlayerStateFainting::Update() {
 			subtime = 2.0f;
 		}
 
+		// 復帰時間短縮
 		timer_ += character_->GetTime() * subtime;
 	}
 
-
+	// 復帰したら移動状態に移行
 	if (timer_ >= faintingTimer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
@@ -435,7 +402,7 @@ void BulletPlayerStateFainting::Enter() {
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
 	anima->SetAnimationSpeed(0.75f); // アニメーションスピード設定
-	anima->SetAnimetion("Stan1", 0.10f);
+	anima->SetAnimetion("Stan1", 0.10f); // 流すアニメーション設定
 	timer_ = 0;		// タイマーを0に設定
 
 

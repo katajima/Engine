@@ -133,6 +133,8 @@ protected:
 		float radius;    // 半径
 	} targetRange_;
 
+	// タイムスピード
+	float timeSpeed_ = 1.0f;
 protected:
 	BasePlayer* player_;
 	BaseEnemy* enemy_;

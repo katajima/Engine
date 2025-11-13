@@ -6,20 +6,21 @@
 
 void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	entity2DManager_ = entity2DManager;	// エンティティ2d
+	globalVariables_ = globalVariables;	// 保存項目
 
 	// サイズ
 	Vector3 size = { 1.7f,1.7f,1.7f };
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-
+	// オブジェクトインスタンシング初期化
 	objectComponent_->InitializeInstancing(entity3DManager_, globalVariables_, "enemy" + std::to_string(id_), "enemy.gltf", "", true, true, this);
-	objectComponent_->SetInstancingSRT(size, {}, position);
-	objectComponent_->GetColliderComponent()->SetHitReceiver(this);
-
+	objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
+	objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定
+		
+	// 保存項目追加
 	CreateGroup("enemy");
 
 	// 移動コンポーネント初期化
@@ -28,11 +29,11 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
-	sphere->Enable();
-	sphere->tag = CollisionTag::Enemy;
-	sphere->layer = CollisionLayer::Enemy;
+	sphere->Enable();					// コライダ有効
+	sphere->tag = CollisionTag::Enemy;	// タグ設定
+	sphere->layer = CollisionLayer::Enemy;// レイヤー設定
 	sphere->radius = 3.0f; // 半径を適宜設定
-	GetColliderComponent()->AddCollider(std::move(sphere));
+	GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
 	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
@@ -40,6 +41,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
 
+		// 敵同士の衝突応答
 		if (other->tag == CollisionTag::Enemy) {
 			Vector3 pushVec;
 			if (self->ResolveCollision(*other, pushVec)) {
@@ -63,6 +65,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 			
 		}
 
+		// プレイヤーとの衝突応答
 		if (other->tag == CollisionTag::Player) {
 			// ここにダメージ処理などを書く
 			std::cout << "敵がプレイヤーに当たった！" << std::endl;
@@ -85,6 +88,8 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 				GetWorldTransform().Update();
 			}
 		}
+
+		// 壁との衝突応答
 		if (other->tag == CollisionTag::Wall) {
 			Vector3 pushVec;
 			if (self->ResolveCollision(*other, pushVec)) {
@@ -110,7 +115,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// 視野
 	visionComponent_ = std::make_unique<VisionComponent>();
-	visionComponent_->SetAlertView(120.0f, 100.0f);
+	visionComponent_->SetAlertView(120.0f, 100.0f);	
 	visionComponent_->SetCombatView(90.0f, 100.0f);
 	visionComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
 	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
@@ -120,7 +125,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	hitMotionComponent_ = std::make_unique<HitMotionComponent>();
 	hitMotionComponent_->Init(0.1f, { 2.5f,2.2f,2.5f });
 
-
+	// オブジェクト状態生存
 	objectComponent_->GetObjectStateFlags().isAlive = true;
 
 	// パラメーター初期化
@@ -136,11 +141,12 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// 保存項目初期化
 	InitializeBaseAddItem();
-
+	// スプライト初期化
 	Initialize2D();
+	// パーティクル初期化
 	InitParticle();
 
-
+	// トランスフォーム更新
 	GetWorldTransform().Update();
 
 	// ステートマシーン初期化
@@ -148,6 +154,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 }
 
 void NormalEnemy::InitStateMachine() {
+	// ステートマシーン初期化
 	stateMachine_ = std::make_unique<CharacterStateMachine>();
 	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
 		return std::make_unique<EnemyStateMove>(p);
@@ -175,27 +182,29 @@ void NormalEnemy::Update()
 	assert(this);
 
 
-
+	// 移動を止めているなら
 	if (isStopMove_) {
+
+		// 移動Stop時間更新
 		stopMoveTimer_ += GetTime();
+
+		// 時間に達したら動き出す
 		if (stopMoveTimer_ >= 1.0f) {
 			stopMoveTimer_ = 0.0f;
 			isStopMove_ = false;
 		}
 	}
 
+	// 保存項目更新
 	UpdateBaseGetValue();
 
 	// ステート
 	stateMachine_->Update();
 
+	// HPが0以下なら
 	if (GetHP() <= 0) {
-		if (GetAlive() == true) {
-
-		}
 		GetObjectComponent()->GetObjectStateFlags().isLockonTarget = false;
 		GetObjectComponent()->GetObjectStateFlags().isAlive = false;
-
 	}
 	else {
 		// 移動
@@ -208,10 +217,6 @@ void NormalEnemy::Update()
 		visionComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform().GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
 		// 移動制限
 		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
-		// 更新
-
-
-		//GetObjectComponent()->Update();
 	}
 }
 
@@ -224,12 +229,13 @@ void NormalEnemy::Draw2D()
 {
 	if (GetObjectComponent() == nullptr) { return; }
 
+	// ロックオンされているなら
 	if (GetIsLockOn()) {
-		Vector2 screenPos = objectComponent_->GetScreenPosition();
-		icon_lockOn->SetPosition(screenPos + Vector2{ 0.0f,-40.0f });
+		Vector2 screenPos = objectComponent_->GetScreenPosition();	// スクリーン座標取得
+		icon_lockOn->SetPosition(screenPos + Vector2{ 0.0f,-40.0f });// 位置設定
 
-		icon_lockOn->Update();
-		icon_lockOn->Draw();
+		icon_lockOn->Update();	// 更新
+		icon_lockOn->Draw();	// 描画
 	}
 }
 
@@ -240,9 +246,10 @@ void NormalEnemy::SetPlayer(BasePlayer* player)
 
 void NormalEnemy::Emit()
 {
+	// エフェクト座標更新
 	worldEffect_.Update();
 
-
+	// 各エフェクト出現
 	effect_->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
 	effect_->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
 	effect_->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
@@ -251,6 +258,7 @@ void NormalEnemy::Emit()
 
 void NormalEnemy::Move()
 {
+	// 移動
 	DirectionMove(Parameters().speed);
 }
 
@@ -267,6 +275,7 @@ void NormalEnemy::InitParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
+	// エフェクト用のトランスフォーム初期化
 	worldEffect_.Initialize();
 	worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
 	worldEffect_.translate_ = { 0,1,0 };
@@ -274,7 +283,7 @@ void NormalEnemy::InitParticle()
 
 void NormalEnemy::AttackByCrowdCommand()
 {
-
+	// ターゲットとの距離
 	float dist = GetTargetDistance();
 	if (dist < 5.0f) {
 		// 攻撃ステートに遷移

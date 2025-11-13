@@ -20,6 +20,7 @@ class FollowCamera;
 class BulletManager;
 class Entity3DManager;
 class Entity2DManager;
+class CameraManager;
 
 /// <summary>
 /// キャラクターマネージャークラス
@@ -38,6 +39,8 @@ public:
 	// 描画2d
 	void Draw2D();
 public:
+	// カメラマネジャー設定
+	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; };
 	// フォローカメラ設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera; }
 	// 弾マネージャー設定
@@ -111,9 +114,10 @@ private: // 貰いもの
 	Input* input_;
 	Entity3DManager* entity3DManager_ = nullptr;
 	Entity2DManager* entity2DManager_ = nullptr;
-	GlobalVariables* globalVariables_;	// グローバル変数
-	FollowCamera* followCamera_ = nullptr;	// フォローカメラ 
-	BulletManager* bulletManager_ = nullptr; // 弾をマネジャー
+	GlobalVariables* globalVariables_;			// グローバル変数
+	FollowCamera* followCamera_ = nullptr;		// フォローカメラ 
+	BulletManager* bulletManager_ = nullptr;	// 弾をマネジャー
+	CameraManager* cameraManager_ = nullptr;	// カメラ管理
 	Effect* effect_ = nullptr;
 };
 

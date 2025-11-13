@@ -84,13 +84,10 @@ class CharacterParameterComponent
 public:
 	// 更新
 	void Update() {
-
-
-		parameters_.stamina.useRate = true;
-
-		parameters_.HP.Update(deltaTime_);
-		parameters_.MP.Update(deltaTime_);
-		parameters_.stamina.Update(deltaTime_);
+		parameters_.stamina.useRate = true;	// スタミナ変化
+		parameters_.HP.Update(deltaTime_);	// HP更新
+		parameters_.MP.Update(deltaTime_);	// MP更新
+		parameters_.stamina.Update(deltaTime_);	// スタミナ更新
 	}
 
 
@@ -177,10 +174,11 @@ public:
 		float skillPower
 	)
 	{
-		float attack = attacker.GetEffectiveAttack();
-		float defense = defender.GetEffectiveDefense();
+		float attack = attacker.GetEffectiveAttack();		// 攻撃力取得
+		float defense = defender.GetEffectiveDefense();		// 防御力取得
 
-		float rawDamage = (attack * skillPower) - (defense * 0.5f);
+		// ダメージ
+		float rawDamage = (attack * skillPower) - (defense * 0.5f);	// 
 		rawDamage = (std::max)(0.0f, rawDamage);
 
 		// クリティカル判定
@@ -200,10 +198,10 @@ public:
 		const CombatStatComponent& defender,
 		float weponDamage) 
 	{
-		float defense = defender.GetEffectiveDefense();
+		float defense = defender.GetEffectiveDefense();	// 防御力取得
 
 
-
+		// ダメージ
 		float rawDamage = (weponDamage) - (defense * 0.5f);
 		rawDamage = (std::max)(0.0f, rawDamage);
 

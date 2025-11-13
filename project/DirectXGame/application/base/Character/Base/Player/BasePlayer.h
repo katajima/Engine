@@ -11,7 +11,7 @@
 //前方宣言
 class FollowCamera;
 class BaseEnemy;
-
+class CameraManager;
 /// <summary>
 /// プレイヤクラス
 /// </summary>
@@ -41,6 +41,7 @@ public:
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera;}
 
+	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; }
 
 	// プレイヤUI取得
 	virtual PlayerUI* GetPlayerUI() = 0;
@@ -58,8 +59,8 @@ public:
 
 protected:
 	std::vector<BaseEnemy*> targetCharacters_;				// 攻撃対象キャラクターリスト
-	FollowCamera* followCamera_;							// フォローカメラ
-
+	FollowCamera* followCamera_ = nullptr;					// フォローカメラ
+	CameraManager* cameraManager_ = nullptr;				// カメラマネジャー
 	bool isCreativeMode = false;							// クリエイティブモードかどうか
 };
 

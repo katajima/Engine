@@ -58,11 +58,11 @@ private:
     // ステート変更
     void ChangeState(std::unique_ptr<BaseAttackSubState> newState) {
         if (state_) {
-            state_->Exit();
+            state_->Exit(); // 終了
         }
         state_ = std::move(newState);
         if (state_) {
-            state_->Enter();
+            state_->Enter();// 開始
         }
     }
 private:

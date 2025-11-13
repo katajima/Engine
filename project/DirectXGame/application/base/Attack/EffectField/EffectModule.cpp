@@ -4,13 +4,16 @@
 
 
 void DamageModule::Effect(BaseCharacter* character){
+	// ダメージ追加
 	character->AddDamage(damageAmount);
 }
 
 void KnockbackModule::Effect(BaseCharacter* character) {
-	character->GetHitMotionComponent()->SetIsKnockback(isknockback_);
-	character->GetHitMotionComponent()->SetKnockbackData(knockback_);
-	character->GetHitMotionComponent()->SetKnockbackTime(knockbackTime_);
+
+	// ノックバックのデータをそれぞれ送る
+	character->GetHitMotionComponent()->SetIsKnockback(isknockback_);	// ノックバックするか
+	character->GetHitMotionComponent()->SetKnockbackData(knockback_);	// ノックバックデータ
+	character->GetHitMotionComponent()->SetKnockbackTime(knockbackTime_);// ノックバック時間
 }
 
 void ChangeStateModule::Effect(BaseCharacter* character) {

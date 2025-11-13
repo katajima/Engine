@@ -15,10 +15,12 @@ inline bool IsObjectVisible(
     std::function<bool(Vector3 origin, Vector3 dir, float maxDist)> raycastFunc // 障害物チェック
 )
 {
+    // プレイヤーとの距離
     Vector3 toPlayer = playerPos - enemyPos;
     float distance = Length(toPlayer);
     if (distance > viewRadius) return false;
 
+    // プレイヤーの方向
     Vector3 toPlayerDir = Normalize(toPlayer);
     float dot = Dot(enemyDir, toPlayerDir);
     float angleCos = cosf(Math::DegreesToRadians(viewAngleDegree * 0.5f));
@@ -95,6 +97,7 @@ public:
 
         bool visible = IsObjectVisible(selfPos, selfDir, targetPos, viewDistance, viewAngle, raycastFunc);
 
+        // 入っているなら
         if (visible)
         {
             canSeePlayer = true;
@@ -105,14 +108,7 @@ public:
             lastSeenTime += deltaTime;
             if (lastSeenTime > maxLostTime)
                 canSeePlayer = false;
-        }
-
-#ifdef _DEBUG
-
-       // DrawDireLine(selfPos, selfDir, targetPos, viewDistance);
-#endif // _DEBUG
-
-       
+        }       
     }
 private:
     // ライン描画

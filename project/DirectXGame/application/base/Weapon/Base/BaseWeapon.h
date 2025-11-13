@@ -36,6 +36,8 @@ public:
 	
 	// コンボデータ取得
 	ComboData GetComboData() const { return comboData_; }
+	ComboData& ComboDataUse(){ return comboData_; }
+
 	// コンボデータ設定
 	void SetComboData(ComboData data) { comboData_ = data; }
 	// コンボステートマシーン取得

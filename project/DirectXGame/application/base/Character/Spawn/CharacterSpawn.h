@@ -16,16 +16,16 @@ public:
 
 	// 初期化
 	void Initialize(const std::string& name, int spawnMaxCount , int spawnAmount) {
-		name_ = name;
-		spawnMaxCount_ = spawnMaxCount;
-		spawnAmount_ = spawnAmount;
+		name_ = name;					// 名前
+		spawnMaxCount_ = spawnMaxCount;	// 出現回数
+		spawnAmount_ = spawnAmount;		// 出現量
 	}
 
 
 	// 更新
 	void Update(float timer) {
-		spawnDelay_ += timer;
-
+		spawnDelay_ += timer;	//
+		// 出現インターバル
 		if (spawnDelay_ >= spawnInterval_) {
 			spawnDelay_ = 0.0f;
 			isSpawned_ = false;

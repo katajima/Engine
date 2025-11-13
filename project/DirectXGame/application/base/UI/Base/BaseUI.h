@@ -24,8 +24,8 @@ public:
 
 	// 画面比率設定
 	void SetImageLeftTopPosAndRatio(Vector2 leftTopPos, Vector2 ratio) {
-		leftTopPos_ = leftTopPos;
-		ratio_ = ratio;
+		leftTopPos_ = leftTopPos;	// 画面左上座標
+		ratio_ = ratio;				// 画面比率
 	};
 
 

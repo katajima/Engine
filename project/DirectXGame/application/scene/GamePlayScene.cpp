@@ -20,13 +20,14 @@ void GamePlayScene::Initialize()
 	// Input
 	input_ = GetInput();
 
-	inputHander_ = std::make_unique<InputHander>();
-	inputHander_->SetInput(input_);
-	inputHander_->AssignMoveCommandPad();
-	inputHander_->AssignJampCommandPad();
-	inputHander_->AssignAttackCommandPad();
+	// インプットハンドラー初期化
+	inputHander_ = std::make_unique<InputHander>();	
+	inputHander_->SetInput(input_);			// インプット設定
+	inputHander_->AssignMoveCommandPad();	// 移動コマンド追加
+	inputHander_->AssignJampCommandPad();	// ジャンプコマンド追加
+	inputHander_->AssignAttackCommandPad();	// 攻撃コマンド追加
 
-	//
+	// エフェクト
 	effect_ = std::make_unique<Effect>();
 	effect_->Initialize(GetEntity3DManager(), GetGlobalVariables());
 
@@ -41,7 +42,7 @@ void GamePlayScene::Initialize()
 	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
-	cameraManeger_ = std::make_unique<CameraManeger>();
+	cameraManeger_ = std::make_unique<CameraManager>();
 	cameraManeger_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ followCamera_.get(),true }, "followCamera");
@@ -59,6 +60,7 @@ void GamePlayScene::Initialize()
 	caracterManager_ = std::make_unique<BaseCharacterManager>();
 	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	caracterManager_->SetEffect(effect_.get());
+	caracterManager_;
 	caracterManager_->SetFollowCamera(followCamera_.get());
 	caracterManager_->SetBulletManager(bulletManager_.get());
 
@@ -109,21 +111,23 @@ void GamePlayScene::Initialize()
 	gameUI->Initialize(GetInput(), GetEntity2DManager(), GetGlobalVariables());
 	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
+	// FPS表示用スプライト
 	sprite = std::make_unique<UICount>();
-	sprite->SetUseNameSprite(false);
-	sprite->SetInstance(2);
-	sprite->Init(GetEntity2DManager(), "fps");
-	sprite->SetInput(input_);
-	sprite->SetPos({ 32,48 });
-	sprite->SetMaxSize({ 64 * 2 / 3, 96 * 2 / 3 }, { 20.0f,0.0f });
-	sprite->SetTextuerSize({ 64,96 });
-	sprite->SetCountMax(999);
+	sprite->SetUseNameSprite(false);		// 使わない
+	sprite->SetInstance(2);					// 行数設定
+	sprite->Init(GetEntity2DManager(), "fps");	// 初期化
+	sprite->SetInput(input_);					// 入力設定
+	sprite->SetPos({ 32,48 });					// 位置設定
+	sprite->SetMaxSize({ 64 * 2 / 3, 96 * 2 / 3 }, { 20.0f,0.0f });	// 最大値サイズ設定
+	sprite->SetTextuerSize({ 64,96 });	// テクスチャサイズ設定
+	sprite->SetCountMax(999);			// カウント量設定
 
-
+	// カメラ設定
 	SetCamera(cameraManeger_->GetCamera());
 
 	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
 
+	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<EffectComponent>();
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 
@@ -139,12 +143,10 @@ void GamePlayScene::CheckAllCollisions()
 {
 	// 衝突マネージャのリセット
 	collisionManager_->ClearDynamic();
-	//collisionManager_->Clear();
-
+	
 	for (auto objects : loadData_->GetObjects()) {
 		if (objects->GetColliderComponent()) {
 			collisionManager_->Register(objects->GetColliderComponent());
-			//collisionManager_->RegisterStatic(objects->GetColliderComponent());
 		}
 	}
 	// キャラクターセット
@@ -155,6 +157,7 @@ void GamePlayScene::CheckAllCollisions()
 		}
 	}
 
+	// IDが1なら
 	if (GetSceneData().playerID == 1) {
 		collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
 	}
@@ -168,7 +171,7 @@ void GamePlayScene::CheckAllCollisions()
 
 	collisionManager_->CheckAll();
 	collisionManager_->ClearDynamic();
-	//collisionManager_->Clear();
+	
 }
 
 #pragma endregion 初期化関係
@@ -195,8 +198,10 @@ void GamePlayScene::UpdateImGui()
 	}
 	lastTime = currentTime;
 
+	// fpsカウント設定
 	sprite->SetCount(fps);
 
+	// fps用のスプライト更新
 	sprite->Update(MyGame::GameTime());
 }
 
@@ -205,15 +210,17 @@ void GamePlayScene::Update()
 {
 	Camera::isShake_ = false;
 
-
+	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
 		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
 	}
+	// タイトルへ
 	if (input_->IsTriggerKey(DIK_RETURN)) {
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
 
+	// コマンド
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
 		iCommand_->Exec(*caracterManager_->GetPlayer());
@@ -300,7 +307,7 @@ void GamePlayScene::Draw2D()
 	// ゲームUI
 	gameUI->Draw();
 	//
-	sprite->Draw();
+	//rite->Draw();
 	// キャラクター
 	caracterManager_->Draw2D();
 	// 弾マネージャ
