@@ -242,7 +242,7 @@ void GpuParticleEmitterSphere::DrawLine()
 {
 	Sphere sphere = { cbEmitterCommon_.translate,cbEmitterCommon_.sphereRadius };
 
-	lineCommon_->AddLineSphere(sphere, { 1,1,1,1 }, 16, 16);
+	lineCommon_->GetDebugLineMeshData().AddLineSphere(sphere, { 1,1,1,1 }, 16, 16);
 }
 #pragma endregion
 
@@ -277,7 +277,7 @@ void GpuParticleEmitterAABB::DrawLine()
 
 	AABB aabb = { cbEmitterCommon_.translate - cbEmitterCommon_.size,cbEmitterCommon_.translate + cbEmitterCommon_.size };
 
-	lineCommon_->AddLineAABB(aabb, cbEmitterCommon_.translate);
+	lineCommon_->GetDebugLineMeshData().AddLineAABB(aabb, cbEmitterCommon_.translate);
 }
 #pragma endregion
 

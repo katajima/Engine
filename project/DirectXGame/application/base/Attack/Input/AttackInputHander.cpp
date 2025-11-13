@@ -1,6 +1,6 @@
 #include "AttackInputHander.h"  
-#include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
-#include "DirectXGame/application/base/BaseClass/Weapon/BaseWeapon.h"
+#include "DirectXGame/application/base/Character/base/BaseCharacter.h"
+#include "DirectXGame/application/base/Weapon/base/BaseWeapon.h"
 #include "DirectXGame/engine/input/Input.h"
 
 

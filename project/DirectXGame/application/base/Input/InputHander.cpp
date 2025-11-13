@@ -1,5 +1,5 @@
 #include "InputHander.h"
-#include "DirectXGame/application/base/BaseClass/Character/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/base/BaseCharacter.h"
 #include"DirectXGame/engine/input/Input.h"
 
 
@@ -40,13 +40,17 @@ void InputHander::AssignAttackCommandPad()
 
 ICommand* InputHander::HandleInput()
 {
+	// ゲームパッドがつながっているなら
 	if (input_->IsControllerConnected()) {
+		// ジャンプコマンド
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
 			return jampPad.get();
 		}
+		// 攻撃コマンド
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
 			return attackPad.get();
 		}
+		// 移動コマンド
 		if (input_->GetGamePadLeftStick().Length() != 0) {
 			return movePad.get();
 		}

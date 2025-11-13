@@ -2,6 +2,59 @@
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 
 
+
+void CollisionManager::Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
+	globalVariables_ = globalVariables;
+
+	float size = (sceneBounds.max_ - sceneBounds.min_).Length();
+
+	int depth = 4;
+	if (size > 1000.0f) depth = 6;
+	else if (size < 50.0f) depth = 3;
+
+	// オクツリー初期化（シーン全体のAABBと深さなど指定）
+	//octree_ = std::make_unique<Octree>(sceneBounds, 4, 2, 2, 2);
+	octreeCollider_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
+	octreeColliderStatic_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
+	}
+
+void CollisionManager::BuildStaticSceneOctree()
+{
+	if (!octreeColliderStatic_) return;
+
+	// 静的コライダーの登録（地形など）
+	for (auto* staticComp : staticColliders) {
+		for (auto* collider : staticComp->GetAllColliders()) {
+			if (collider->enabled) {
+				octreeColliderStatic_->Insert(collider);
+			}
+		}
+	}
+}
+
+void CollisionManager::Register(ColliderComponent* comp)
+{
+	if (comp && registeredDynamic_.insert(comp).second) {
+		dynamicColliders.push_back(comp);
+	}
+}
+
+void CollisionManager::RegisterStatic(ColliderComponent* comp)
+{
+	if (comp && registeredStatic_.insert(comp).second) {
+		staticColliders.push_back(comp);
+	}
+
+}
+
+void CollisionManager::Clear(){
+	dynamicColliders.clear();
+	staticColliders.clear();
+	registeredDynamic_.clear();
+	registeredStatic_.clear();
+}
+
+
 void CollisionManager::CheckAll() {
 	debugTimer_.StartTimer();
 

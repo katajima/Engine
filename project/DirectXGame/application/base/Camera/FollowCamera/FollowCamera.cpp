@@ -7,12 +7,13 @@
 
 void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position)
 {
+    // インプット
 	input_ = input;
 
+    // カメラ初期化
     uniqueCamera_ = std::make_unique<Camera>();
     uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
     uniqueCamera_->farClip_ = 15000.0f;
-    uniqueCamera_->transform_.rotate.x = Math::DegreesToRadians(90);
     uniqueCamera_->transform_.rotate.x = Math::DegreesToRadians(20);
 
    
@@ -25,13 +26,17 @@ void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  G
 
 void FollowCamera::Update()
 {
+    // カメラを使っているなら
     if (useCamera) {
         uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
     }
+    // ターゲットがあるなら
     if (target_) {
 
+        // 回転速度
         const float kRotateSpeed = 0.03f;
 
+        // ロックオンするか
         if (lockOnObject) {
             // ロックオン時の処理
             Vector3 targetPos = target_->worldMat_.GetWorldPosition();
@@ -61,9 +66,11 @@ void FollowCamera::Update()
                 uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(-15.0f), Math::DegreesToRadians(60.0f));
             }
             else {
+                // 回転移動
                 if (input_->IsPushKey(DIK_LEFT)) {
                     uniqueCamera_->transform_.rotate.y -= 0.01f;
                 }
+                // 回転移動
                 if (input_->IsPushKey(DIK_RIGHT)) {
                     uniqueCamera_->transform_.rotate.y += 0.01f;
                 }
@@ -94,6 +101,7 @@ void FollowCamera::Update()
             desiredCameraPos.y = 0.0f;
         }
 
+        // 位置設定
         uniqueCamera_->transform_.translate = desiredCameraPos;
     }
 
@@ -102,5 +110,6 @@ void FollowCamera::Update()
         uniqueCamera_->SetShake(0.2f, { 0.1f, 0.3f, 0.1f });
     }
 
+    // カメラ更新
     uniqueCamera_->UpdateMatrix();
 }

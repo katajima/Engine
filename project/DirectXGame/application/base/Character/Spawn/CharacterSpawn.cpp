@@ -1,0 +1,64 @@
+#include "CharacterSpawn.h"
+#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+#include"DirectXGame/engine/Line/LineCommon.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+
+void CharacterSpawn::Initialize(BaseCharacterManager* characterManager, LineCommon* line, const SpawnInfo& info){
+	characterManager_ = characterManager;	// キャラクター管理クラス
+	lineCommon_ = line;						// ライン管理クラス
+		
+	spawnInfo_ = info;	// スポーン情報
+
+	// トランスフォーム初期化
+	spawnTransform_.Initialize();
+}
+
+void CharacterSpawn::Update(float time) {
+
+	// トランスフォーム更新
+	spawnTransform_.Update();
+
+	// 出現エリア設定
+	spawnAABBArea_.min_ = spawnTransform_.GetWorldPosition() - (spawnInfo_.size_ / 2.0f);
+	spawnAABBArea_.max_ = spawnTransform_.GetWorldPosition() + (spawnInfo_.size_ / 2.0f);
+
+#ifdef _DEBUG
+	lineCommon_->GetDebugLineMeshData().AddLineAABB(AABB{-spawnInfo_.size_,spawnInfo_.size_}, spawnTransform_.GetWorldPosition());
+#endif // _DEBUG
+
+	timer_ = time;
+
+	// 時間が来たら
+	if (timer_ >= spawnInfo_.spawnTimer_) {
+		spawnInfo_.SetIsSpawn(true);
+	}
+
+	// 出現
+	if (spawnInfo_.IsSpawn()) {
+		SpawnProcess();
+	}
+
+}
+
+void CharacterSpawn::Draw() {
+
+}
+
+void CharacterSpawn::SpawnProcess(){
+	if (spawnInfo_.IsEnd()) return;
+
+	// 情報更新
+	spawnInfo_.Update(MyGame::GameTime());
+
+	// 出し切ったら
+	if (spawnInfo_.IsSpawned()) return;
+	spawnTransform_.Update();
+	spawnAABBArea_.min_ = spawnTransform_.GetWorldPosition() - (spawnInfo_.size_ / 2.0f);
+	spawnAABBArea_.max_ = spawnTransform_.GetWorldPosition() + (spawnInfo_.size_ / 2.0f);
+
+	// グループ生成
+	characterManager_->CreateEnemyGroup(0, spawnInfo_.spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
+
+	// 出現した
+	spawnInfo_.Spawned();
+}

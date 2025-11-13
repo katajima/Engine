@@ -33,18 +33,14 @@ public:
 	void SetAnimationSpeed(float speed) { animationSpeed = speed; }
 	// ループ再生するか
 	void SetIsLoop(bool is) { isLoop = is; };
-	
-
 	// ローカル行列取得
 	Matrix4x4 GetLocalMatrix() const { return localMatrix_; }
-
 	// アニメーション変更
 	void SetAnimetion(const std::string& name, float time) {
 		Animetion::SetAnimation(model->modelData, name, time);
 	}
 	// アニメーションが終了しているか
 	bool IsAnimationFinished();
-	
 	// 初期時間に戻す
 	void SetStratAnimeTime() { model->modelData.animationTime = 0.0f; }
 	// 終了時間に合わせる
@@ -63,7 +59,6 @@ public:
 		if (it != animations.end()) {
 			return it->second.duration;
 		}
-
 		// 見つからない場合は 0.0f や -1.0f を返す
 		return 0.0f;
 	}
@@ -80,7 +75,7 @@ private:
 	// デバッグ表示するか
 	bool isDebug = true;
 
-
+	// ローカル行列
 	Matrix4x4 localMatrix_;
 
 private:

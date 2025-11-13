@@ -224,6 +224,14 @@ public:
 		}
 		return countSprite_[num].get(); 
 	}
+
+
+	void SetCountColor(const Color& color) {
+		for (auto& count : countSprite_) {
+			count->GetSprite()->SetColor(color);
+		}
+	}
+
 	// 名前スプライト取得
 	BaseSprite* GetNameSprite() { return nameSprite_.get(); }
 	

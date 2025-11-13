@@ -1,26 +1,24 @@
 #include "NormalEnemyState.h"
 #include "NormalEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-
+#include <DirectXGame/application/base/Attack/Input/AttackInputHander.h>
+#include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 #pragma region Move
 
 void EnemyStateMove::Update()
 {
 	BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+	
+	// HPが0以上なら
 	if (character_->GetHP() > 0) {
-
+		// 移動
 		character_->Move();
-
-
+		// 時間更新
 		timer_ += character_->GetTime();
-
-		if (timer_ >= rootTimer_ && enemy->GetTargetDistance() <= 50) {
-			//character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
-			//return;
-		}
 	}
 	else {
+		// 死亡状態に移行
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
 
 	}
@@ -40,6 +38,7 @@ void EnemyStateMove::Enter() {
 
 void EnemyStateAttack::Update()
 {
+	// サブステート更新
 	subStateMachine_->Update(character_->GetTime());
 
 	// サブステートが完了したら Move に戻す
@@ -48,6 +47,7 @@ void EnemyStateAttack::Update()
 		return;
 	}
 
+	// HPが0以下なら死亡
 	if (character_->GetHP() <= 0) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
 	}
@@ -94,23 +94,26 @@ void EnemyStateSpecial::Enter() {
 #pragma region Die
 
 void EnemyStateDie::Update() {
+
+	// 時間更新
 	timer_ -= character_->GetTime();
 	if (timer_ <= 0.0f) {
+		// 死亡判定に
 		character_->SetAlive(false);
 		timer_ = 0.0f;
 		if (!character_->GetAlive()) {
-			character_->Delete();
-			character_->GetObjectComponent()->IsDelete();
+			character_->Delete();	// キャラクター削除
+			character_->GetObjectComponent()->IsDelete();	// オブジェクトコンポーネント削除
 		}
 	}
 	else if (timer_ <= dieTimer_ / 2.0f) {
-		character_->GetObjectComponent()->SetIsDraw(false);
+		character_->GetObjectComponent()->SetIsDraw(false);	// 描画しない	
 	}
 	else {
-		character_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);
-		character_->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character_->GetTime();
+		character_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);		// 重力無し
+		character_->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character_->GetTime(); // サイズを縮小
 		if (character_->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
-			character_->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };
+			character_->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		}
 
 		// 着地処理
@@ -135,6 +138,7 @@ void EnemyStateDie::Enter()
 void EenmyStateFainting::Update() {
 	timer_ += character_->GetTime();
 
+	// 時間に達したら移動状態に
 	if (timer_ >= faintingTimer_) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;

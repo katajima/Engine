@@ -16,57 +16,19 @@ class GlobalVariables;
 class CollisionManager {
 public:
 	// 初期化
-	void Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
-		globalVariables_ = globalVariables;
-
-		float size = (sceneBounds.max_ - sceneBounds.min_).Length();
-
-		int depth = 4;
-		if (size > 1000.0f) depth = 6;
-		else if (size < 50.0f) depth = 3;
-
-		// オクツリー初期化（シーン全体のAABBと深さなど指定）
-		//octree_ = std::make_unique<Octree>(sceneBounds, 4, 2, 2, 2);
-		octreeCollider_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
-		octreeColliderStatic_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
-	}
+	void Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds);
 
 	// 静的コライダをオクツリーに入れる
-	void BuildStaticSceneOctree() {
-		if (!octreeColliderStatic_) return;
-
-		// 静的コライダーの登録（地形など）
-		for (auto* staticComp : staticColliders) {
-			for (auto* collider : staticComp->GetAllColliders()) {
-				if (collider->enabled) {
-					octreeColliderStatic_->Insert(collider);
-				}
-			}
-		}
-	}
+	void BuildStaticSceneOctree();
 
 	// 動的コライダーコンポーネント追加
-	void Register(ColliderComponent* comp) {
-		if (comp && registeredDynamic_.insert(comp).second) {
-			dynamicColliders.push_back(comp);
-		}
-	}
+	void Register(ColliderComponent* comp);
 
 	// 静的コライダーコンポーネント追加
-	void RegisterStatic(ColliderComponent* comp) {
-		if (comp && registeredStatic_.insert(comp).second) {
-			staticColliders.push_back(comp);
-		}
-
-	}
+	void RegisterStatic(ColliderComponent* comp);
 
 	// 全削除（次フレームから再登録）
-	void Clear() {
-		dynamicColliders.clear();
-		staticColliders.clear();
-		registeredDynamic_.clear();
-		registeredStatic_.clear();
-	}
+	void Clear();
 
 	// 動的コライダの削除
 	void ClearDynamic() {

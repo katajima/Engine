@@ -19,6 +19,8 @@ public:
 	void Clear();
 	// コマンドリスト設定
 	void GetCommandList() ;
+	// 描画
+	void DrawIndexedInstanced();
 
 
 	// ライン

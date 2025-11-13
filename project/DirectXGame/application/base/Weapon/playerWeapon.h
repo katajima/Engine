@@ -1,10 +1,10 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/Weapon/MellWeapons.h"
+#include "DirectXGame/application/base/Weapon/Base/MellWeapons.h"
 
 
 // 前方宣言
 class BasePlayer;
-class Player;
+class NormalPlayer;
 
 
 /// <summary>

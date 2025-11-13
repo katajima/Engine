@@ -1,6 +1,5 @@
 #pragma once
-#include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
-
+#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include"NormalEnemyState.h"
 
 /// <summary>
@@ -41,6 +40,9 @@ private:
 	// パーティクル初期化
 	void InitParticle();
 
+
+	void AttackByCrowdCommand();
+
 private:
 	WorldTransform worldEffect_;
 
@@ -48,10 +50,4 @@ private:
 	float stopMoveTimer_ = 0.0f;
 
 	DebugTimer debugTimer_;
-
-	//std::unique_ptr<ParticleEmitter> tireEmit_ = nullptr; // タイヤ
-	//std::unique_ptr<ParticleEmitter> ductEmit_ = nullptr; // ダクト
-	//std::unique_ptr<ParticleEmitter> plankEmit_ = nullptr; // 鋼板
-	//std::unique_ptr<ParticleEmitter> gearEmit_ = nullptr; // 歯車
-	//std::unique_ptr<ParticleEmitter> fenceEmit_ = nullptr; // 柵
 };

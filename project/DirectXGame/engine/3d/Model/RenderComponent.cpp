@@ -125,16 +125,6 @@ void RenderComponent::Draw()
 				entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
 					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 			}
-
-
-
-
-
-			for (auto& mesh : model->modelData.mesh)
-			{
-
-			}
-			//model->Draw();
 		}
 		break;
 	case ObjectModelType::kAnimation:
@@ -161,8 +151,6 @@ void RenderComponent::Draw()
 		}
 		break;
 	case ObjectModelType::kPrimitive:
-
-
 		if (primitive_) {
 
 			primitive_->DrawSetting(primitive_->GetPsoType());
@@ -172,9 +160,7 @@ void RenderComponent::Draw()
 			primitive_->Draw();
 		}
 		break;
-
 	case ObjectModelType::kSkyBox:
-
 		if (skyBox_) {
 			skyBoxCommon->DrawCommonSetting();
 
@@ -184,7 +170,6 @@ void RenderComponent::Draw()
 		}
 		break;
 	case ObjectModelType::kOcean:
-
 		if (ocean_) {
 			oceanManager->DrawCommonSetting();
 
@@ -194,7 +179,6 @@ void RenderComponent::Draw()
 		}
 		break;
 	}
-
 }
 
 float RenderComponent::GetAlpha()

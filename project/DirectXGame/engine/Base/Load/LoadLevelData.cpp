@@ -4,7 +4,7 @@
 
 #include "LoadDataFanction.h"
 
-#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
 void LoadLevelData::Initialize(Entity3DManager* entity3DManager, ModelManager* modelManager, Camera* camera,const std::string extensionName, const std::string fileName)

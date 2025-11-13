@@ -6,20 +6,23 @@ BaseScene* SceneFactory::CreateScene(const std::string& sceneName)
 {
 	BaseScene* newScene = nullptr;
 
-	if (sceneName == "TITLE") {
+	if (sceneName == "TITLE") {				// タイトル
 		newScene = new TitleScene();
 	}
-	else if (sceneName == "GAMEPLAY") {
+	if (sceneName == "GAMEPLAY") {			// ゲームプレイ
 		newScene = new GamePlayScene();
-	}else if (sceneName == "TEST") {
+	} 
+	if (sceneName == "TEST") {				// テスト
 		newScene = new TestScene();
 	}
-	else if (sceneName == "SELECT") {
+	if (sceneName == "SELECT") {			// セレクト
 		newScene = new SelectScene();
 	}	
-	if (sceneName == "SAMPLE") {
+	if (sceneName == "SAMPLE") {			// サンプル
 		newScene = new SampleScene();
 	}
+
+
 
 	return newScene;
 }

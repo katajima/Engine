@@ -1,7 +1,7 @@
 #include "MyGame.h"
 
 #include "DirectXGame/engine/Camera/Camera.h"
-
+#include "DirectXGame/application/scene/SceneFactory.h"
 
 const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
 float MyGame::kTimeSpeed_ = 1.0f;
@@ -77,16 +77,6 @@ void MyGame::Update()
 
 	//HitStpoTime(); // ストップ用
 
-#ifdef _DEBUG
-
-	if(input_->IsTriggerKey(DIK_M)){
-		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearEmitterAll();
-	}
-	if(input_->IsTriggerKey(DIK_N)){
-		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
-	}
-
-
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 	nowTime += deltaTime;
@@ -95,8 +85,15 @@ void MyGame::Update()
 	}
 	lastTime = currentTime;
 
-	// FPS表示用ウィジェット
+#ifdef _DEBUG
 
+	if(input_->IsTriggerKey(DIK_M)){
+		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearEmitterAll();
+	}
+	if(input_->IsTriggerKey(DIK_N)){
+		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
+	}
+	// FPS表示用ウィジェット
 	if (!ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar)) {
 		ImGui::End();
 		return;
@@ -120,6 +117,8 @@ void MyGame::Update()
 	globalVariables_->Update();
 
 	dxCommon->Update(sceneManager_.get(), entity3DManager_.get());
+
+
 
 
 #ifdef _DEBUG
@@ -152,10 +151,7 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/renga.png");
 	textureManager->LoadTexture("resources/Texture/enemy.png");
 
-	textureManager->LoadTexture("resources/Texture/icon/B.png");
 	textureManager->LoadTexture("resources/Texture/text/normalAttack.png");
-	textureManager->LoadTexture("resources/Texture/icon/RT.png");
-	textureManager->LoadTexture("resources/Texture/icon/RB.png");
 	textureManager->LoadTexture("resources/Texture/text/special.png");
 	textureManager->LoadTexture("resources/Texture/text/Hit.png");
 	textureManager->LoadTexture("resources/Texture/text/HP.png");
@@ -191,6 +187,12 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/effect/exp.png");
 	
 	textureManager->LoadTexture("resources/Texture/effect/spark.png");
+	
+	// XBOXコントローラボタンテクスチャ全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
+
+	// アイコン全て読み込み
+	textureManager->LoadAllTexturesInDirectory("resources/Texture/icon");
 	
 	// ModelData;
 	LoadModel();
@@ -315,6 +317,9 @@ void MyGame::CreateParticle()
 
 
 	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
+	
+	
+	particleManager->CreateParticleGroup("cartridge", "resources/Texture/Image.png", modelManager->FindModel("cartridge.obj"));
 
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 30.0f;
@@ -343,14 +348,14 @@ void MyGame::CreateParticle()
 	
 	
 
-	gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 100);
-	gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/effect/dust.png", 1024 * 100);
+	//gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 100);
+	//gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/effect/dust.png", 1024 * 100);
 	
-	gpuParticleManager_->CreateGroup("no3", primiPlane->GetModelMesh(), "resources/Texture/smoke/no3.png", 1024 * 100);
+	//gpuParticleManager_->CreateGroup("no3", primiPlane->GetModelMesh(), "resources/Texture/smoke/no3.png", 1024 * 100);
 	//
-	gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
+	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
 	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no2");
-	gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
+	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
 	//gpuParticleManager_->SetEmitteToGroup("emitte_no2","no2");
 	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
 
@@ -377,10 +382,12 @@ void MyGame::LoadModel()
 
 
 	modelManager->LoadModel("origin.gltf", "Character");
+	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
 
 
 
 	modelManager->LoadModel("player_bullet.obj", "player_bullet");
+	modelManager->LoadModel("cartridge.obj", "player_bullet");
 	modelManager->LoadModel("Sword.obj", "Sword");
 	modelManager->LoadModel("plane.obj", "plane");
 	modelManager->LoadModel("AnimatedCube.gltf", "AnimatedCube");

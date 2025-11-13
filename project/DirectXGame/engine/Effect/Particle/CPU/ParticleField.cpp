@@ -160,11 +160,11 @@ void Field::FieldEffect::DebugImgui()
 	{
 	case Field::ShapeType::kAABB:
 		// ライン
-		lineCommon_->AddLineAABB(renge_, transform_.worldMat_.GetWorldPosition(), color_);
+		lineCommon_->GetDebugLineMeshData().AddLineAABB(renge_, transform_.worldMat_.GetWorldPosition(), color_);
 		break;
 	case Field::ShapeType::kSphere:
 		// ライン
-		lineCommon_->AddLineSphere(Sphere{ transform_.worldMat_.GetWorldPosition(),rad }, color_, 16, 16);
+		lineCommon_->GetDebugLineMeshData().AddLineSphere(Sphere{ transform_.worldMat_.GetWorldPosition(),rad }, color_, 16, 16);
 		break;
 	case Field::ShapeType::kCapsule:
 		break;

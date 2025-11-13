@@ -6,8 +6,10 @@ void Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const C
 	type_ = type;
 	spriteCommon_ = spriteCommon;
 
-
+	// メッシュ
 	mesh = std::make_unique<ModelMesh>();
+
+	// 各タイプ生成処理
 	switch (type_)
 	{
 	case Primitive2D::ShapeType::Cube:
@@ -51,10 +53,12 @@ void Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const C
 
 void Primitive2D::Update()
 {
+	// SRT設定
 	transform.scale = { worldTransform.scale_.x,worldTransform.scale_.y,1.0f };
 	transform.rotate = { 0.0f,0.0f,worldTransform.rotate_ };
 	transform.translate = { worldTransform.translate_.x,worldTransform.translate_.y,0.0f };
 
+	// ワールドトランスフォーム更新
 	worldTransform.Update();
 
 

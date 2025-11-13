@@ -126,12 +126,7 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 	entity3DManager->GetEffectManager()->GetGpuParticleManager()->Draw();
 
 
-#ifdef _DEBUG
-	//if (!sceneManager->IsNowScene("GAMEPLAY")) {
-		// デバッグ用のライン描画
 	entity3DManager->Get3DLineCommon()->Draw();
-	//}
-#endif // _DEBUG
 
 	// 2Dオブジェクトの描画
 	sceneManager->Draw2D();
@@ -197,7 +192,7 @@ void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3D
 
 
 
-#ifdef _DEBUG
+
 	entity3DManager->Get3DLineCommon()->Update();
-#endif // _DEBUG
+
 }

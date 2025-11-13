@@ -57,14 +57,6 @@ private:
 	std::unique_ptr < DebugCamera> debugCamera;
 
 
-	Vector3 cameraR;
-	Vector3 cameraT;
-
-
-	Vector3 cameraDebugT;
-	Vector3 cameraDebugR;
-	bool flag = false;
-
 	std::unique_ptr<Sprite> icon_B;
 	std::unique_ptr<Sprite> title;
 

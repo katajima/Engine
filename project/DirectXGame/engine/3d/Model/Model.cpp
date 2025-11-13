@@ -48,8 +48,6 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 		if (it != modelData.animations.end()) {
 			Animetion::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
 		}
-		// 
-		//Animetion::ApplyAnimation(modelData.skeleton, modelData.animation, modelData.animationTime);
 	}
 
 	// マテリアル読み込み
@@ -64,19 +62,6 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 
 void Model::Draw()
 {
-	//for (auto& mesh : modelData.mesh)
-	//{
-
-
-	//	mesh->material->GetCommandListMaterial(0);
-
-	//	mesh->material->GetCommandListTexture(2, 7, 8);
-
-	//	mesh->GetCommandList();
-
-	//	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-	//	modelCommon_->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
-	//}
 }
 
 void Model::DrawSkinning()

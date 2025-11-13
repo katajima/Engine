@@ -22,6 +22,8 @@ private:
 	void InitParticle();
 	// パーティクル初期化(範囲攻撃弾)
 	void InitRangeBombingBullet();
+	// パーティクル初期化(弾)
+	void InitBullet();
 
 private:
 	std::unique_ptr<EffectComponent> effectComponent_;	// エフェクトコンポーネント

@@ -1,13 +1,15 @@
 #include "NormalEnemySubState.h"
 #include "NormalEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include <DirectXGame/application/base/Attack/Input/AttackInputHander.h>
+#include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 
 void NormalEnemyAttackReadySubState::Update(float deltaTime) {
     timer_ += deltaTime;
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-    
-    enemy->DirectionMove(-30.0f);
+    // 後ろに後退
+    enemy->DirectionMoveVelocity(-30.0f);
     if (timer_ > readyTime_) {
         // 攻撃へ遷移
         fsm_->ChangeState(AttackSubState::Swing);
@@ -18,12 +20,17 @@ void NormalEnemyAttackReadySubState::Update(float deltaTime) {
 void NormalEnemyAttackSwingSubState::Enter() {
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     timer_ = 0.0f;
-    enemy->DirectionMove(50.0f);
+
+    enemy->DirectionMoveVelocity(40.0f);
+    dire_ = enemy->TargetDirection();
 }
 
 void NormalEnemyAttackSwingSubState::Update(float deltaTime) {
+    BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     timer_ += deltaTime;
 
+    // 前進
+    enemy->Velocity() = dire_ * 40.0f;
     if (timer_ > swingTime_) {
         fsm_->ChangeState(AttackSubState::End);
     }

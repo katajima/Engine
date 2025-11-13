@@ -1,4 +1,5 @@
 #include "Collider.h"
+#include"DirectXGame/engine/Camera/Camera.h"
 
 #pragma region 球
 
@@ -11,11 +12,11 @@ void SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* li
 		if (isDebugLine) {
 			if (enabled) {
 				// 球の中心位置と半径を使ってラインを描画
-				lineCommon->AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->AddLineSphere({ centerWorld ,radius }, { 0.5f,0.5f,0.5f,1.0f }, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, { 0.5f,0.5f,0.5f,1.0f }, 8, 8);
 			}
 		}
 	}
@@ -157,13 +158,13 @@ void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* line
 		if (isDebugLine) {
 			if (enabled) {
 				// AABBの最小・最大座標を使ってラインを描画
-				lineCommon->AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
 				//OBB obb = { {centerWorld},{},{size} };
 				//lineCommon->AddLineOBB(obb, { 1,1,1,1 });
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->AddLineAABB(aabb, centerWorld, { 0.5f,0.5f,0.5f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, { 0.5f,0.5f,0.5f,1.0f });
 			}
 		}
 	}
@@ -307,11 +308,11 @@ void CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* l
 		if (isDebugLine) {
 			if (enabled) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->AddLineCapsule(capWorld_, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, { 1,1,1,1 });
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->AddLineCapsule(capWorld_, { 0.5f,0.5f,0.5f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, { 0.5f,0.5f,0.5f,1.0f });
 			}
 		}
 	}
@@ -382,16 +383,16 @@ void OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
 #ifdef _DEBUG
 	if (lineCommon) {
 		if (isDebugLine) {
-			lineCommon->AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
-			lineCommon->AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
-			lineCommon->AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
+			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[0], { 1,0,0,1 }); // X軸: 赤
+			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[1], { 0,1,0,1 }); // Y軸: 緑
+			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
 			if (obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
 				// OBBのサイズを使ってラインを描画
-				lineCommon->AddLineOBB(obb, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, { 1,1,1,1 });
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->AddLineOBB(obb, { 0.0f,0.0f,0.0f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, { 0.0f,0.0f,0.0f,1.0f });
 			}
 		}
 	}
@@ -513,7 +514,7 @@ void RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
 #ifdef _DEBUG
 	if (lineCommon) {
 		if (isDebugLine) {
-			lineCommon->AddLine(ray_.origin, ray_.origin + ray_.diff, { 1,1,1,1 });
+			lineCommon->GetDebugLineMeshData().AddLine(ray_.origin, ray_.origin + ray_.diff, { 1,1,1,1 });
 		}
 	}
 #endif // _DEBUG

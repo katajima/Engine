@@ -31,7 +31,7 @@ void GpuParticleField::UpdateImgui()
 		ImGui::TreePop();
 	}
 
-	lineCommon_->AddLineAABB({ -cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
+	lineCommon_->GetDebugLineMeshData().AddLineAABB({ -cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
 }
 
 void GpuParticleField::Update() 

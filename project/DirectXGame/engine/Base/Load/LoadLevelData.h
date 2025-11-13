@@ -10,7 +10,7 @@
 
 #include "DirectXGame/engine/3d/Object/Object3d.h"
 
-class CameraManeger;
+class CameraManager;
 class BaseCamera;
 class Entity3DManager;
 
@@ -33,7 +33,7 @@ public:
 	void Draw3D();
 
 	// カメラマネージャー設定
-	void SetCameraManager(CameraManeger* cameraManager) { cameraManager_ = cameraManager; };
+	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; };
 
 public:
 	// レベルデータ取得
@@ -58,7 +58,7 @@ private:
 private:
 	Entity3DManager* entity3DManager_ = nullptr;
 	ModelManager* modelManager_ = nullptr;
-	CameraManeger* cameraManager_ = nullptr;
+	CameraManager* cameraManager_ = nullptr;
 	std::vector<Object3d*> objects_;					// オブジェクト
 	std::vector<std::unique_ptr<BaseCamera>> cameras_;	// カメラ
 	std::vector<std::shared_ptr<Lights>> lights_;		// ライト

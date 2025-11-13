@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/Camera/BaseFixedCamera.h"
+#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
 
 
 /// <summary>

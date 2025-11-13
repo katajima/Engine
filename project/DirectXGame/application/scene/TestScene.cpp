@@ -421,7 +421,7 @@ void TestScene::InitializeCamera()
 	fixedCamera_->Initialize(input_, GetEntity3DManager(),  GetGlobalVariables(), {});
 	
 	// カメラ管理
-	cameraManeger_ = std::make_unique<CameraManeger>();
+	cameraManeger_ = std::make_unique<CameraManager>();
 	cameraManeger_->Initialize(input_, GetEntity3DManager(),GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
@@ -506,7 +506,7 @@ void TestScene::UpdateRoom04()
 
 void TestScene::UpdateRoom05()
 {
-	GetEntity3DManager()->Get3DLineCommon()->AddGrid(1000, 1000, 10, { 1,1,1,1 });
+	GetEntity3DManager()->Get3DLineCommon()->GetDebugLineMeshData().AddGrid(1000, 1000, 10, { 1,1,1,1 });
 }
 
 void TestScene::UpdateRoom06()

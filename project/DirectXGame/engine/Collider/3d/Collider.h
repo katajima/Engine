@@ -1,6 +1,5 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFanctions.h"
-#include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 #include "ColliderFanction3D.h"
@@ -21,7 +20,7 @@ public:
 	bool enabled = true;
 	bool isStatic = false;  // 動かさない
 	bool isDebugLine = false;// ライン描画するか	
-	Vector3 centerWorld;
+	Vector3 centerWorld = {0,0,0};
 	CollisionLayer layer = CollisionLayer::Default;
 	CollisionTag tag = CollisionTag::None; // タグ
 	uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）

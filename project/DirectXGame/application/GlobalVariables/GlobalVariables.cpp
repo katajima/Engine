@@ -31,6 +31,7 @@ bool GlobalVariables::HasGroup(const std::string& groupName) const
 bool GlobalVariables::HasKey(const std::string& groupName, const std::string& key) const
 {
 	auto groupIt = datas_.find(groupName);
+	// 無いならfalse
 	if (groupIt == datas_.end()) {
 		return false;
 	}
@@ -86,15 +87,16 @@ std::string GlobalVariables::GetTypeName(const std::string& groupName, const std
 
 	const auto& item = itemIt->second;
 
-	if (std::holds_alternative<int32_t>(item)) return "int32_t";
-	if (std::holds_alternative<uint32_t>(item)) return "uint32_t";
-	if (std::holds_alternative<float>(item)) return "float";
-	if (std::holds_alternative<Vector2>(item)) return "Vector2";
-	if (std::holds_alternative<Vector3>(item)) return "Vector3";
-	if (std::holds_alternative<Vector4>(item)) return "Vector4";
-	if (std::holds_alternative<bool>(item)) return "bool";
-	if (std::holds_alternative<std::string>(item)) return "string";
-	if (std::holds_alternative<Transform>(item)) return "Transform";
+	// 各条件のどれかに当てはまっていたらタイプ設定
+	if (std::holds_alternative<int32_t>(item)) return "int32_t";		// 
+	if (std::holds_alternative<uint32_t>(item)) return "uint32_t";		// 
+	if (std::holds_alternative<float>(item)) return "float";			// 
+	if (std::holds_alternative<Vector2>(item)) return "Vector2";		// 
+	if (std::holds_alternative<Vector3>(item)) return "Vector3";		// 
+	if (std::holds_alternative<Vector4>(item)) return "Vector4";		// 
+	if (std::holds_alternative<bool>(item)) return "bool";				// 
+	if (std::holds_alternative<std::string>(item)) return "string";		// 
+	if (std::holds_alternative<Transform>(item)) return "Transform";	// 
 
 	return "UnknownType";
 }
@@ -352,6 +354,7 @@ void GlobalVariables::Update() {
 	std::vector<std::pair<std::string, std::string>> itemsToRemove;
 
 	for (auto& [groupName, group] : datas_) {
+
 		if (!ImGui::BeginMenu(groupName.c_str()))
 			continue;
 
@@ -457,6 +460,8 @@ void GlobalVariables::Update() {
 
 	ImGui::EndMenuBar();
 	ImGui::End();
+
+
 
 	// 削除予約された項目を後で実行（安全）
 	for (const auto& [group, item] : itemsToRemove) {

@@ -12,18 +12,22 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath,
 	this->spriteCommon_ = spriteCommon;
 
 
+	// インデックスデータ設定
 	indices.push_back(0);
 	indices.push_back(1);
 	indices.push_back(2);
 	indices.push_back(1);
 	indices.push_back(3);
 	indices.push_back(2);
+	// インデックスリソース生成
 	indexResorce_.CreateBufferView(spriteCommon_->GetDxCommon(), indices, indices.size());
 
+	// 頂点データ設定
 	vertices.push_back({});
 	vertices.push_back({});
 	vertices.push_back({});
 	vertices.push_back({});
+	// 頂点リソース生成
 	vbvResorce_.CreateBufferView(spriteCommon_->GetDxCommon(), vertices, vertices.size());
 
 
@@ -40,15 +44,16 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath,
 	transfomation = std::make_unique<Transfomation>();
 	transfomation->Initialize(spriteCommon_->GetDxCommon());
 
-
+	// ワールドトランスフォーム初期化
 	worldTransform2d.Initialize();
 
+	// SRT設定
 	transform.scale = { size.x * worldTransform2d.scale_.x,size.y * worldTransform2d.scale_.y,1.0f };
 	transform.rotate = { 0.0f,0.0f,worldTransform2d.rotate_ };
 	transform.translate = { worldTransform2d.translate_.x,worldTransform2d.translate_.y,0.0f };
 
 
-
+	// 各角
 	float left = 0.0f - anchorPoint.x;
 	float right = 1.0f - anchorPoint.x;
 	float top = 0.0f - anchorPoint.y;
@@ -72,6 +77,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath,
 	float tex_top = textureLeftTop.y / metadata.height;
 	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
 
+	// イメージサイズに合わせる
 	AdjusttextureSize();
 
 

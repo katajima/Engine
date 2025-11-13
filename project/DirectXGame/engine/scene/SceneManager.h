@@ -56,6 +56,8 @@ public:
 	void SetCamera(Camera* camera) { camera_ = camera; };
 	// カメラ取得
 	Camera* GetCamara() { return camera_; }
+	// シーンデータ取得
+	SceneData& GetSceneData() { return sceneData_; }
 
 	/// <summary>
 	/// 次のシーン予約
@@ -77,9 +79,15 @@ public:
 
 private:
 	// 今のシーン(実行中シーン)
-	BaseScene* scene_ = nullptr;
+	std::unique_ptr<BaseScene> scene_ = nullptr;
 	// 次のシーン
-	BaseScene* nextScene_ = nullptr;
+	std::unique_ptr<BaseScene> nextScene_ = nullptr; 
+
+	
+
+
+
+
 	std::string sceneName = "";
 	// シーンファクトリー (借りてくる)
 	AbstractSceneFactory* sceneFactory_ = nullptr;
@@ -89,6 +97,9 @@ private:
 	Input* input_;
 	GlobalVariables* globalVariables_;
 	Camera* camera_;
+
+
+	SceneData sceneData_;
 
 	// 終了フラグ
 	bool                  finished_ = false;

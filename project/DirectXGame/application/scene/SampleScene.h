@@ -14,7 +14,7 @@
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
-#include"DirectXGame/application/base/BaseClass/Camera/CameraManeger.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 
@@ -80,7 +80,7 @@ private:
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
-	std::unique_ptr<CameraManeger> cameraManeger_;
+	std::unique_ptr<CameraManager> cameraManeger_;
 private:
 
 

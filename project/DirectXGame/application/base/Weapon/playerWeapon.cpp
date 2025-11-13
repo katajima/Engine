@@ -1,43 +1,57 @@
 #include "playerWeapon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Player/Normal/Player.h"
+#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 
 void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
 {
-	input_ = input;
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-	Vector3 size = { 1.25f,1.25f ,1.25f };
+	input_ = input;						// インプット
+	entity3DManager_ = entity3DManager; // エンティティ3d
+	entity2DManager_ = entity2DManager; // エンティティ2d
+	Vector3 size = { 1.25f,1.25f ,1.25f };// サイズ
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerWeapon", "Sword.obj", true,false, this);
-	objectComponent_->SetSRT(size, {}, position);
-	GetObject3D()->UseTrailEffect("resources/Texture/Image.png", 0.5f,{1,1,1,0.25}, 
+	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerWeapon", "Sword.obj", true, false, this);
+	objectComponent_->SetSRT(size, {}, position);	// SRT設定
+
+	// トレイルエフェクト設定
+	GetObject3D()->UseTrailEffect("resources/Texture/Image.png", 0.5f, { 1,1,1,0.25 },
 		GetObject3D()->GetModel()->modelData.mesh[0]->GetMin(),
 		GetObject3D()->GetModel()->modelData.mesh[0]->GetMax());
-	//　SRT設定
-	GetObject3D()->SetIsUpdateColliderComponent(false); // コライダーの更新は手動で行うため、Object3d内での更新無効化
+	
+	// コライダーの更新は手動で行うため、Object3d内での更新無効化
+	GetObject3D()->SetIsUpdateColliderComponent(false); 
+	// 描画する
 	GetObject3D()->SetIsDraw(true);
+	// スケール3
+	GetObject3D()->GetWorldTransform().scale_ = 3;
 
+
+	// コライダ根本(OBB)
 	auto obbCollider_ = std::make_unique<OBBCollider>();
-	obbCollider_->obb.size = { 0.5f,2.0f,1.0f };
-	obbCollider_->tag = CollisionTag::PlayerAttack;
-	obbCollider_->layer = CollisionLayer::PlayerAttack;
-	obbCollider_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
-	weaponColliderId_ = GetObject3D()->GetColliderComponent()->GetNextId();
-	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider_));
-	
-	auto obbCollider2_ = std::make_unique<OBBCollider>();
-	obbCollider2_->obb.size = { 0.5f,2.5f,1.0f };
-	obbCollider2_->tag = CollisionTag::PlayerAttack;
-	obbCollider2_->layer = CollisionLayer::PlayerAttack;
-	obbCollider2_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));
-	weaponColliderId2_ = GetObject3D()->GetColliderComponent()->GetNextId();
-	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider2_));
-	
+	obbCollider_->obb.size = { 0.5f,2.0f,1.0f };			// サイズ設定
+	obbCollider_->tag = CollisionTag::PlayerAttack;			// タグ設定
+	obbCollider_->layer = CollisionLayer::PlayerAttack;		// レイヤー設定
+	obbCollider_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
+	obbCollider_->Enable();																// 有効
+	obbCollider_->isDebugLine = true;													// デバッグライン描画
+	weaponColliderId_ = GetObject3D()->GetColliderComponent()->GetNextId();				// ID設定
+	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider_));		// コライダ追加
 
+	// コライダ先端(OBB)
+	auto obbCollider2_ = std::make_unique<OBBCollider>();
+	obbCollider2_->obb.size = { 0.5f,5.5f,1.0f };			// サイズ設定
+	obbCollider2_->tag = CollisionTag::PlayerAttack;		// タグ設定
+	obbCollider2_->layer = CollisionLayer::PlayerAttack;	// レイヤー設定
+	obbCollider2_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
+	obbCollider2_->Enable();															// 有効
+	obbCollider2_->isDebugLine = true;													// デバッグライン描画
+	weaponColliderId2_ = GetObject3D()->GetColliderComponent()->GetNextId();			// ID設定
+	GetObject3D()->GetColliderComponent()->AddCollider(std::move(obbCollider2_));		// コライダ追加
+
+	
+	// 衝突応答
 	GetObject3D()->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
 		if (!other || other->tag != CollisionTag::Enemy) return;
 
@@ -45,31 +59,25 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		if (!otherComponent) return;
 
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
-		
+
 		if (!enemy) return;
 
-		const uint32_t otherId = otherComponent->GetUniqueId();
-		const float nowTime = MyGame::NowTime();
+		const uint32_t otherId = otherComponent->GetUniqueId();	// ID取得
+		const float nowTime = MyGame::NowTime();				// 現在時間
 
-		Player* player = static_cast<Player*>(character);
+		NormalPlayer* player = static_cast<NormalPlayer*>(character);
 
-		//if (GetAttackInput().GetAttackTypePlay() == AttackTypePlay::kJump) {
-		//	if (objectBase_->GetColliderComponent()->contactRecord_.CheckHistory(otherId, nowTime,0.1f)) {
-		//		return; // クールタイム中のため無視
-		//	}
-		//}
-		//else {
-			if (GetObject3D()->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
-				return; // クールタイム中のため無視
-			}
-		//}
-		
+		if (GetObject3D()->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
+			return; // クールタイム中のため無視
+		}
 
-			GetObject3D()->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
+		// 履歴追加
+		GetObject3D()->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
+		// ヒット
 		enemy->GetHitMotionComponent()->SetIsHit(true);
 
-		
+
 
 
 		// ノックバック方向
@@ -77,19 +85,20 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		enemy->GetHitMotionComponent()->SetIsKnockback(true);		// ノックバックするか
 
 		// ダメージ設定
-		float damage = comboData_.damage;
+		float damage = comboData_.damage.damage_;
 		if (self->id == weaponColliderId_) {
 			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
-			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);	// ノックバック時間設定
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.3f);	// ノックバック時間設定
 			damage *= 2;	// ダメージ設定
-		}else if(self->id == weaponColliderId2_) {
+		}
+		else if (self->id == weaponColliderId2_) {
 			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
-			enemy->GetHitMotionComponent()->SetKnockbackTime(0.5f);	// ノックバック時間設定
+			enemy->GetHitMotionComponent()->SetKnockbackTime(0.3f);	// ノックバック時間設定
 			damage *= 1;	// ダメージ設定
 		}
 		enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);	 // ノックバックデータ設定
 		enemy->AddDamage(DamageCalculator::ComputeDamageWeapon(*character->GetCombatStatComponent(), *enemy->GetCombatStatComponent(), damage));
-		 
+
 
 
 		enemy->Emit();	//	エフェクト出現
@@ -101,62 +110,52 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// コンボデータ設定
 	ComboData data;
-	data.damage = 10;
-	data.knockbackData.power = 30;
-	data.knockbackData.yPower = 30;
-	data.movementSpeedMultiplier = 10.0f;
-	data.mpCost = 0.0f;
-	data.staminaCost = 1.0f;
-
-
+	data.damage.damage_ = 20;
+	data.knockbackData.power_ = 30;
+	data.knockbackData.yPower_ = 30;
 	
-	attack1  = std::make_shared<ComboNodeState>("Attack1", data);
-	data.damage = 11;
-	data.movementSpeedMultiplier = 10.0f;
+
+	attack1 = std::make_shared<ComboNodeState>("Attack1", data);
+	data.damage.damage_ = 21;
 	attack2 = std::make_shared<ComboNodeState>("Attack2", data);
-	data.damage = 12;
-	data.knockbackData.power = 60.0f;
-	data.movementSpeedMultiplier = 150.15f;
-	data.moveTime = 0.1f;
+	data.damage.damage_ = 35;
+	data.knockbackData.isYpower_ = true;
+	data.knockbackData.power_ = 130.0f;
+	data.knockbackData.yPower_ = 90.0f;
 	attack3 = std::make_shared<ComboNodeState>("Attack3", data);
-	//data.damage = 30;
-	//heavy1   = std::make_shared<ComboNodeState>("Heavy1", data);
+	
+	AddComboNode("Attack1", attack1);	// コンボ追加
+	AddComboNode("Attack2", attack2);	// コンボ追加
+	AddComboNode("Attack3", attack3);	// コンボ追加
+
+	ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
+	ConnectCombo("Attack1", AttackInput::Heavy, "Attack3"); // コンボ連結
+	ConnectCombo("Attack2", AttackInput::Light, "Attack3"); // コンボ連結
 
 	
-	AddComboNode("Attack1", attack1);
-	AddComboNode("Attack2", attack2);
-	AddComboNode("Attack3", attack3);
-
-	ConnectCombo("Attack1",AttackInput::Light, "Attack2");
-	ConnectCombo("Attack1", AttackInput::Heavy, "Attack3");
-
-	ConnectCombo("Attack2",AttackInput::Light, "Attack3");
-	
-	//attack1->SetNextState(AttackInput::Light, attack2);
-	//attack2->SetNextState(AttackInput::Light, attack3);
-	//attack2->SetNextState(AttackInput::Heavy, heavy1);
-
-	
-	//comboStateMachine_->SetRoot(comboRoot);
-
 	// コライダ位置初期化
 	colliderWorld_.Initialize();
 	colliderWorld_.parent_ = &GetObject3D()->GetWorldTransform();
 	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
-	colliderWorld_.translate_.y = 3.0f; // 武器の位置調整
+	colliderWorld_.translate_.y = 2.5f; // 武器の位置調整
 
 	// コライダ位置初期化
 	colliderWorld2_.Initialize();
 	colliderWorld2_.parent_ = &colliderWorld_;
-	colliderWorld2_.translate_.y = 4.0f; // 武器の位置調整
+	colliderWorld2_.translate_.y = 2.0f; // 武器の位置調整
+
 }
 
 void PlayerWeapon::Update()
 {
+	// ワールドトランスフォーム更新
 	GetObject3D()->UpdateWorldTransform();
+	
+	// コライダのワールドトランスフォーム更新
 	colliderWorld_.Update();
 	colliderWorld2_.Update();
 
+	// コライダコンポーネントにコライダの位置を送る
 	GetObject3D()->GetColliderComponent()->UpdateByID(colliderWorld_, weaponColliderId_);
 	GetObject3D()->GetColliderComponent()->UpdateByID(colliderWorld2_, weaponColliderId2_);
 }

@@ -1,10 +1,5 @@
 #pragma once
-
-#include "DirectXGame/application/base/BaseClass/Bullet/BaseBullet.h"
-#include "DirectXGame/engine/effect/primitive/primitive.h"
-
-//前方宣言
-class Primitive;
+#include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 
 /// <summary>
 /// 範囲攻撃用弾クラス
@@ -60,6 +55,9 @@ private:
 
 	uint32_t countIndex_ = 0;
 
+
+	float trailTime_ = 0.0f;
+
 private: //パーティクルエミッター
 	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
 
@@ -67,6 +65,5 @@ private: //パーティクルエミッター
 
 	Object3d* hitObject2_ = nullptr;
 
-	bool flag_ = false;
 };
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/Camera/BaseFollowCamera.h"
+#include "DirectXGame/application/base/Camera/Base/BaseFollowCamera.h"
 
 /// <summary>
 /// フォローカメラ

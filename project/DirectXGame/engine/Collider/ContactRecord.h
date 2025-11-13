@@ -43,8 +43,8 @@ public:
 
 private:
 	struct ContactInfo {
-		uint32_t id;	// ID
-		float timeStamp;// ゲーム内時間（秒）
+		uint32_t id = 0;	// ID
+		float timeStamp = 0;// ゲーム内時間（秒）
 	};
 	// 履歴
 	std::vector<ContactInfo> history_;

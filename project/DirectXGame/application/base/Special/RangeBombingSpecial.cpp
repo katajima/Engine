@@ -4,46 +4,46 @@
 #include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-#include"DirectXGame/application/base/BaseClass/Bullet/BulletManager.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include"DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXgame/application/base/Stage/Stage.h"
 
 void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
 {
-	isSpecial_ = false;
+	isSpecial_ = false;		// 使用不可にする
 
-	maxGauge_ = 20;
+	maxGauge_ = 100;		// 最大ゲージ設定
 
-	clock_ = 1;
-	maxBullet = 20;
-	bulletNum = 0;
+	clock_ = 1;				// 切り替え
+	maxBullet = 40;			// 発射数
+	bulletNum = 0;			// 弾番号
 
-
+	// シリンダーパラメータ設定
 	ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = 5.0f;
-	cylinderParam.innerRadius = reticleRad_;
-	cylinderParam.outerRadius = reticleRad_;
-	cylinderParam.isCover = false;
-	cylinderParam.segments = 16;
+	cylinderParam.height = 5.0f;			// 高さ
+	cylinderParam.innerRadius = reticleRad_;// 上底
+	cylinderParam.outerRadius = reticleRad_;// 下底
+	cylinderParam.isCover = false;			// 蓋するか
+	cylinderParam.segments = 16;			// セグメント数
 
-
+	// シリンダー生成
 	ctlinder_ = std::make_unique<CylinderPrimitive>();
 	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
-	ctlinder_->Data() = cylinderParam;
+	ctlinder_->Data() = cylinderParam;	//　パラメータ代入
 
 	// レティクル
 	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("レティクルシリンダー","resources/Texture/effect/gradationLine.png",camera);
 	objectReticle_->SetPrimitive(std::move(ctlinder_));
 	objectReticle_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
-	//objectReticle_->worldtransform_.parent_ = &objectBase_->worldtransform_;
 	objectReticle_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(-90);
 	objectReticle_->GetWorldTransform().translate_ = { 0,2,100 };
 }
 
 void RangeBombingSpecial::Update()
 {
+	// ゲージが超えているなら
 	if (gauge_ >= maxGauge_) {
 		isSpecial_ = true;
 		gauge_ = maxGauge_;

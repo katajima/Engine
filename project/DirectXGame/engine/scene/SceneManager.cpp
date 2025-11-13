@@ -36,12 +36,12 @@ void SceneManager::Update()
 			// フェードアウト完了 → シーン切り替え
 			if (scene_) {
 				scene_->Finalize();
-				delete scene_;
-				scene_ = nullptr;
+				scene_.reset();  // ★ unique_ptrなのでdelete不要
+				//scene_ = nullptr;
 			}
 
-			scene_ = nextScene_;
-			nextScene_ = nullptr;
+			scene_ = std::move(nextScene_);
+			//nextScene_ = nullptr;
 
 			// シーンマネージャをセット
 			scene_->SetSceneManader(this);
@@ -123,14 +123,14 @@ SceneManager::~SceneManager()
 {
 	// 最後のシーンの終了と解放
 	scene_->Finalize();
-	delete scene_;
+	scene_.reset();  // ★ delete不要
 }
 
 void SceneManager::ChangeScene(const std::string& sceneName, float duration)
 {
 	assert(sceneFactory_);
 	if (nextScene_ == nullptr && phase_ == Phase::kMain) {
-		nextScene_ = sceneFactory_->CreateScene(sceneName);
+		nextScene_.reset(sceneFactory_->CreateScene(sceneName));  // ★ unique_ptrで所有権管理
 		this->sceneName = sceneName;
 
 		// フェードアウト開始

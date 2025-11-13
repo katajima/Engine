@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/BaseClass/Special/BaseSpecial.h"
+#include "DirectXGame/application/base/Special/Base/BaseSpecial.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 

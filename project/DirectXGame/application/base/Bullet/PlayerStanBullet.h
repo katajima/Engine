@@ -1,10 +1,5 @@
 #pragma once
-
-#include "DirectXGame/application/base/BaseClass/Bullet/BaseBullet.h"
-#include "DirectXGame/engine/effect/primitive/primitive.h"
-
-// 前方宣言
-class Primitive;
+#include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 
 /// <summary>
 /// プレイヤースタン弾
