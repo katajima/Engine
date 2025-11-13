@@ -8,18 +8,25 @@
 #pragma region Object3dInstansManager
 
 void Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
-	dxCommon_ = dxCommon;
-	srvManager_ = dxCommon_->GetSrvManager();
+	dxCommon_ = dxCommon;						// DX共通クラス
+	srvManager_ = dxCommon_->GetSrvManager();	// SRV管理クラス
+
+	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(),
 		dxCommon_->GetDXCCompiler());
 
+	// モデル管理クラス
 	modelManager_ = dxCommon_->GetModelManager();
+
+	// パイプライン生成
 	CreateGraphicsPipeline();
 }
 
 
 void Object3dInstansManager::Update() {
+
+	// カメラあるなら
 	if (camera_) {
 		Matrix4x4 projectionMatrix = camera_->GetProjectionMatrix();
 		Matrix4x4 viewMatrix = camera_->GetViewMatrix();

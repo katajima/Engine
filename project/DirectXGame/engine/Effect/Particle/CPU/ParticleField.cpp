@@ -8,14 +8,15 @@
 
 void Field::FieldEffect::Initialize(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon)
 {
-	lineCommon_ = lineCommon;
-	name_ = name;
-	effectType_ = type;
-	shapeType_ = shapeType;
-	transform_.Initialize();
+	lineCommon_ = lineCommon;	// ライト共通クラス
+	name_ = name;				// 名前
+	effectType_ = type;			// 影響タイプ
+	shapeType_ = shapeType;		// 形状タイプ
+	transform_.Initialize();	// トランスフォーム初期化
 
-	noise_.InitParameters();
+	noise_.InitParameters();	// ノイズ初期化
 
+	// エフェクトの種類によって
 	switch (effectType_)
 	{
 	case Field::EffectType::kGravity:
@@ -45,6 +46,7 @@ void Field::FieldEffect::Initialize(const std::string& name, ShapeType shapeType
 		break;
 	}
 
+	// 形状ごとによって
 	switch (shapeType_)
 	{
 	case Field::ShapeType::kAABB:

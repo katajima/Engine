@@ -15,10 +15,10 @@
 
 void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* effectManager)
 {
-	effectManager_ = effectManager;
-	srvManager_ = dxCommon->GetSrvManager();
-	lineCommon_ = effectManager_->GetLineCommon();
-	dxCommon_ = dxCommon;
+	effectManager_ = effectManager;					// エフェクト管理クラス
+	srvManager_ = dxCommon->GetSrvManager();		// SRV管理クラス
+	lineCommon_ = effectManager_->GetLineCommon();	// ライン共通クラス
+	dxCommon_ = dxCommon;							// DX共通クラス
 
 	// パーティクルビュー
 	cbPreViewResource_.CreateBuffer(dxCommon_, 1);
@@ -217,7 +217,6 @@ void GpuParticleManager::SetEmitteToGroup(std::string emitteName, std::string pa
 	gpuParticleEmitter_[emitteName]->SetParticleGroup(&gpuParticleGroup_[particleGroupName]);
 	gpuParticleGroup_[particleGroupName].AddEmitter(gpuParticleEmitter_[emitteName].get());
 
-	//gpuParticleEmitter_[emitteName]->SetParticleGroup(&gpuParticleGroup_[particleGroupName]);
 }
 
 void GpuParticleManager::CreateField(std::string name)
@@ -457,14 +456,6 @@ void GpuParticleManager::CreateGraphicsPipeline()
 	// BlendState(ブレンドステート)の設定
 	D3D12_BLEND_DESC blendDesc{};
 	//すべての色要素を書き込む
-	//blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	//blendDesc.RenderTarget[0].BlendEnable = TRUE;
-	//blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	//blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	//blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	//blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	//blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	//blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
@@ -487,12 +478,6 @@ void GpuParticleManager::CreateGraphicsPipeline()
 
 	csEmitPsoManagers_[EmitterType::AABB]->SetShaderFileName(L"resources/shaders/Particle/GPU/AllEmitParticle.CS.hlsl");
 	csEmitPsoManagers_[EmitterType::AABB]->ComputePipelineState();
-
-	/*csEmitPsoManagers_[EmitterType::Sphere]->SetShaderFileName(L"resources/shaders/Particle/GPU/EmitParticleSphere.CS.hlsl");
-	csEmitPsoManagers_[EmitterType::Sphere]->ComputePipelineState();
-	
-	csEmitPsoManagers_[EmitterType::Point]->SetShaderFileName(L"resources/shaders/Particle/GPU/EmitParticlePoint.CS.hlsl");
-	csEmitPsoManagers_[EmitterType::Point]->ComputePipelineState();*/
 
 	csUpdatePsoManager_->SetShaderFileName(L"resources/shaders/Particle/GPU/UpdateParticle.CS.hlsl");
 	csUpdatePsoManager_->ComputePipelineState();

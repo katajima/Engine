@@ -5,37 +5,33 @@
 
 void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& tex,float maxtime  ,const Color color)
 {
+	// エフェクト管理クラス
 	effectManager_ = effectManager;
 
+	// メッシュ生成
 	mesh = std::make_unique<ModelMesh>();
-
 	mesh->vertices.push_back({ 0,0,0 });
 	mesh->indices.push_back(1);
-
-
-
 	mesh->Initialize(effectManager_->GetDxCommon());
-
 	mesh->indices.clear();
 	mesh->vertices.clear();
 	mesh->maxTime = maxtime;
+
+	// 生存時間設定
 	timer = maxtime;
+
+	// マテリアル初期化
 	material = std::make_unique<Material>();
 	material->Initialize(effectManager_->GetDxCommon());
-	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
-	material->tex_.diffuseFilePath = "resources/Texture/aa3.png";
-	material->tex_.diffuseFilePath = "resources/Texture/uvChecker.png";
-	material->tex_.diffuseFilePath = "resources/Texture/aaa.png";
 	material->tex_.diffuseFilePath = tex;
-
 	material->color = color;
-	transfomation = std::make_unique<Transfomation>();
 
+	// トランスフォーム初期化
+	transfomation = std::make_unique<Transfomation>();
 	transfomation->Initialize(effectManager_->GetDxCommon());
 
+
 	parentTransform_.Identity();
-
-
 	mat_.Identity();
 }
 
@@ -58,7 +54,7 @@ void TrailEffect::Update()
 	Vector3 rightTop = { strPre.x , strPre.y , strPre.z };
 	Vector3 rightBottom = { endPre.x , endPre.y , endPre.z };
 
-
+	//　出すなら二枚の三角ポリゴンを 
 	if (flag_) {
 		mesh->vertices.push_back({ .position = {leftTop.x, leftTop.y, leftTop.z, 1.0f}, .texcoord = {0.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 左上
 		mesh->vertices.push_back({ .position = {rightTop.x, rightTop.y, rightTop.z, 1.0f}, .texcoord = {1.0f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} });	// 右上
@@ -103,18 +99,22 @@ void TrailEffect::Update()
 
 void TrailEffect::Draw()
 {
+	// 頂点があるなら
 	if (mesh->vertices.size() != 0) {
 		
-
+		// 描画前準備
 		effectManager_->GetTrailEffectCommon()->DrawCommonSetting();
 		
+		// 位置
 		transfomation->GetCommandList(1);
 
+		// マテリアル
 		material->GetCommandListMaterial(0);
 
+		// テクスチャ
 		material->GetCommandListTexture(2, 7, 8);
 
-
+		// メッシュ
 		mesh->GetCommandList();
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用

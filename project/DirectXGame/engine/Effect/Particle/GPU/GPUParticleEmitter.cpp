@@ -9,10 +9,10 @@
 
 void BaseGpuParticleEmitter::Init(DirectXCommon* dxCommon, LineCommon* lineCommon, GpuParticleGroup* group, std::string name)
 {
-	dxCommon_ = dxCommon;
-	group_ = group;
-	name_ = name;
-	lineCommon_ = lineCommon;
+	dxCommon_ = dxCommon;		// DX共通クラス
+	group_ = group;				// グループ
+	name_ = name;				// 名前
+	lineCommon_ = lineCommon;	// ライン共通クラス
 
 	// 共通データ
 	cbEmitterCommon_.translate = Vector3(0.0f, 0.0f, 0.0f);

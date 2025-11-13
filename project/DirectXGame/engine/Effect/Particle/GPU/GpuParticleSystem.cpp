@@ -20,8 +20,8 @@ enum RootIndex {
 
 void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName)
 {
-	dxCommon_ = dxCommon;
-	gpuParticleManager_ = gpuParticleManager;
+	dxCommon_ = dxCommon;						// DX共通クラス
+	gpuParticleManager_ = gpuParticleManager;	// GPUパーティクル管理クラス
 	// テクスチャ
 	textureName_ = textureName;
 	trailTextureName_ = "resources/Texture/Image.png";
@@ -86,7 +86,7 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 		const uint32_t threadsPerGroup = 256;
 		const uint32_t dispatchCount = (cbMaxTrailVertexInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
-	//	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	
 	}
 
 	sbTrailVertexResource_.UavDependence();

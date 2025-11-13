@@ -210,12 +210,7 @@ void Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skel
 		cachedSkeletonMatrices[i] = skeleton.joints[i].skeletonSpaceMatrix;
 	}
 
-	//// 更新処理
-	//for (size_t i = 0; i < skeleton.joints.size(); ++i) {
-	//	auto skinnedMat = Multiply(skinCluster.inverseBindPoseMatrices[i], cachedSkeletonMatrices[i]);
-	//	skinCluster.mappedPalette[i].skeletonSpaceMatrix = skinnedMat;
-	//	skinCluster.mappedPalette[i].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
-	//}
+	
 
 	std::vector<size_t> indices(skeleton.joints.size());
 	std::iota(indices.begin(), indices.end(), 0);
@@ -225,41 +220,6 @@ void Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skel
 		skinCluster.mappedPalette[i].skeletonSpaceMatrix = skinnedMat;
 		skinCluster.mappedPalette[i].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
 		});
-
-	//// サイズチェックとキャッシュ確保
-	//if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
-	//	cachedSkeletonMatrices.resize(skeleton.joints.size());
-	//}
-
-	//// Step 1: スケルトン空間行列のキャッシュを1度だけ作成
-	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
-	//	cachedSkeletonMatrices[jointIndex] = skeleton.joints[jointIndex].skeletonSpaceMatrix;
-	//}
-
-	//// Step 2: スキンクラスタ用のマトリクス更新
-	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
-	//	const auto& invBind = skinCluster.inverseBindPoseMatrices[jointIndex];
-	//	const auto& skelMat = cachedSkeletonMatrices[jointIndex];
-
-	//	auto skinnedMat = Multiply(invBind , skelMat);
-
-	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix = skinnedMat;
-	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinnedMat));
-	//}
-
-	//// サイズチェック
-	//assert(skinCluster.inverseBindPoseMatrices.size() == skeleton.joints.size());
-	//assert(skinCluster.mappedPalette.size() == skeleton.joints.size());
-
-	//for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex) {
-	//	// スケルトンスペース行列を計算
-	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix =
-	//		skinCluster.inverseBindPoseMatrices[jointIndex] * skeleton.joints[jointIndex].skeletonSpaceMatrix;
-
-	//	// 逆転置行列を計算
-	//	skinCluster.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
-	//		Transpose(Inverse(skinCluster.mappedPalette[jointIndex].skeletonSpaceMatrix));
-	//}
 }
 
 void Animetion::ValidateTransform(Joint& joint)

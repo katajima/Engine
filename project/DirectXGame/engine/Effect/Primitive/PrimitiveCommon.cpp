@@ -3,17 +3,19 @@
 
 void PrimitiveCommon::Initialize(DirectXCommon* dxcommon)
 {
-	dxCommon_ = dxcommon;
+	dxCommon_ = dxcommon;	// DX共通クラス
 
+	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
+	// パイプライン生成
 	CreateGraphicsPipeline();
 }
 
 void PrimitiveCommon::DrawCommonSetting(PsoType type)
 {
-
+	// タイプに合わせてパイプライン選択
 	switch (type)
 	{
 	case PrimitiveCommon::PsoType::kDefalt:

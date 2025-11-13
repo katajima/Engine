@@ -6,10 +6,12 @@
 
 void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 {
-	entity3dManager_ = entity3dManager;
+	entity3dManager_ = entity3dManager;	// エンティティ3d
+
+	// DX共通クラス
 	directXCommon_ = entity3dManager_->GetOceanManager()->GetDxCommon();
 
-
+	// 範囲
 	renge_.renge = renge;
 
 	mesh_ = std::make_unique<ModelMesh>();
@@ -33,7 +35,7 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 
 
 
-	
+	// マテリアル生成
 	material = std::make_unique<Material>();
 	material->Initialize(entity3dManager_->GetOceanManager()->GetDxCommon());
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
@@ -42,28 +44,16 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 	material->color = { 0,0,1,1.0f };
 
 
+	// ノイズリソース生成
 	cbNoiseResource_.CreateBuffer(directXCommon_);
-
-
-	//noiseResource = directXCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(NoiseData));
-	//noiseResource->Map(0, nullptr, reinterpret_cast<void**>(&noiseData));
-
-	
-
 	cbNoiseResource_.Data()[0].noiseScale = 10.0f;
 	cbNoiseResource_.Data()[0].noiseStrength = 1.0f;
 	cbNoiseResource_.Data()[0].octaves = 37;
 	cbNoiseResource_.Data()[0].roughness = 10.0f;
 
 
-	// リソース生成
+	// ウェーブリソース生成
 	cbWaveResource_.CreateBuffer(directXCommon_,10);
-
-	
-
-	/*waveResource = directXCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(WaveParameters) * 10);
-	waveResource->Map(0, nullptr, reinterpret_cast<void**>(&waveData));*/
-
 	cbWaveResource_.Data()[0].amplitude = 1.500f;
 	cbWaveResource_.Data()[0].frequency = 3.340f;
 	cbWaveResource_.Data()[0].speed = 1.0f;
@@ -143,9 +133,6 @@ void Ocean::Draw()
 	cbWaveResource_.SetGraphicsRootConstantBufferView(7);
 	// ノイズデータ
 	cbNoiseResource_.SetGraphicsRootConstantBufferView(8);
-
-	//directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(7, waveResource->GetGPUVirtualAddress());
-	//directXCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(8, noiseResource->GetGPUVirtualAddress());
 
 	material->GetCommandListMaterial(0);
 	material->GetCommandListTexture(2,0,0,10);
