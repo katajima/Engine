@@ -167,6 +167,7 @@ bool Input::IsGamePadReleased(GamePadButton button) const
 
 Vector2 Input::GetGamePadLeftStick() const
 {
+	// 左スティック入力
 	if (xInputState_.Gamepad.sThumbLX || xInputState_.Gamepad.sThumbLY)
 	{
 		Vector2 result{};
@@ -195,6 +196,7 @@ Vector2 Input::GetGamePadLeftStick() const
 
 Vector2 Input::GetGamePadRightStick() const
 {
+	// 右スティック入力
 	if (xInputState_.Gamepad.sThumbRX || xInputState_.Gamepad.sThumbRY)
 	{
 		Vector2 result{};

@@ -8,11 +8,13 @@
 
 void LineCommon::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = dxCommon;	// DX共通クラス
 
+	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 	
+	// パイプライン生成
 	CreateGraphicsPipeline();
 
 	
@@ -27,7 +29,7 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	*materialData = MaterialData({ 1.0f, 1.0f, 1.0f, 1.0f }); //RGBA
 
 
-
+	// ビューリソース生成
 	viewResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Matrix4x4));
 	viewResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraWVP));
 

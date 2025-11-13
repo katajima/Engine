@@ -6,46 +6,49 @@ std::mutex mutex;  // グローバルやスコープ内に必要
 
 void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 {
-	directXCommon_ = directXCommon;
+	directXCommon_ = directXCommon;	// DX共通クラス
 
-	// ライト
+	// ライト共通クラス初期化
 	lightManager_ = std::make_unique<LightManager>();
 	lightManager_->Initialize(directXCommon_);
 
+	// カメラ共通クラス初期化
 	cameraCommon_ = std::make_unique<CameraCommon>();
 	cameraCommon_->Initialize(directXCommon_);
 
-	// オーシャンシェーダー
+	// オーシャンシェーダー初期化
 	oceanManager_ = std::make_unique<OceanManager>();
 	oceanManager_->Initialize(directXCommon_);
 
-	// オブジェクトのインスタンシング
+	// オブジェクトのインスタンシング初期化
 	object3dInstansManager_ = std::make_unique<Object3dInstansManager>();
 	object3dInstansManager_->Initialize(directXCommon_);
 	object3dInstansManager_->SetEntity3D(this);
 
+	// オブジェクト共通クラス初期化
 	object3dCommon_ = std::make_unique<Object3dCommon>();
 	object3dCommon_->Initialize(directXCommon_);
 
-	// スカイボックス
+	// スカイボックス共通クラス初期化
 	skyBoxCommon_ = std::make_unique<SkyBoxCommon>();
 	skyBoxCommon_->Initialize(directXCommon_);
 
 
 
-	// スキニング
+	// スキニング共通クラス初期化
 	skinningCommon_ = std::make_unique<SkinningConmmon>();
 	skinningCommon_->Initialize(directXCommon_);
 
+	// ライン共通クラス初期化
 	lineCommon_ = std::make_unique<LineCommon>();
 	lineCommon_->Initialize(directXCommon_);
 
-	// プリミティブ
+	// プリミティブ共通クラス初期化
 	primitiveCommon_ = std::make_unique<PrimitiveCommon>();
 	primitiveCommon_->Initialize(directXCommon_);
 
 
-	// エフェクトマネージャー
+	// エフェクトマネージャー初期化
 	effectManager_ = std::make_unique<EffectManager>();
 	effectManager_->Initialize(directXCommon_, lightManager_.get(), lineCommon_.get());
 }

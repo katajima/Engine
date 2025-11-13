@@ -60,11 +60,6 @@ public:
 	void ClearLight(int index) {
 		m_lights[index].reset();
 		m_lights.resize(m_lights.size());
-		//int count = 0;
-		//for (auto& m_light : m_lights) {
-		//	m_light->SetNumber(count);
-		//	count++;
-		//}
 	}
 
 private:

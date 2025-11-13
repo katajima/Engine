@@ -10,8 +10,8 @@ const uint32_t DsvManager::kMaxDsvCount = 1;
 
 void DsvManager::Initialize(DXGIDevice* dxgi, Command* command)
 {
-	DXGIDevice_ = dxgi;
-	command_ = command;
+	DXGIDevice_ = dxgi;	// デバイス
+	command_ = command;	// コマンド
 	// ディスクリプタヒープの作成
 	descriptorHeap_ = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, kMaxDsvCount, false);
 	// デスクリプタ一個分のサイズを取得して記録
