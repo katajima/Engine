@@ -7,11 +7,12 @@
 
 void Barrier::Initialize(Command* command)
 {
-    command_ = command;
+    command_ = command; // コマンド
 }
 
 void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 {
+    // 違うならバリアを張る
     if (before != after)
     {
         D3D12_RESOURCE_BARRIER barrier = {};
@@ -34,6 +35,7 @@ void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newS
         currentState = it->second;
     }
 
+    // 新しいステートと現在のステートが違うなら
     if (currentState != newState) {
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;

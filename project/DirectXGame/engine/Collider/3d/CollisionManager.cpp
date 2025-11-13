@@ -4,7 +4,7 @@
 
 
 void CollisionManager::Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
-	globalVariables_ = globalVariables;
+	globalVariables_ = globalVariables;	// 保存項目
 
 	float size = (sceneBounds.max_ - sceneBounds.min_).Length();
 

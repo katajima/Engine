@@ -9,8 +9,8 @@
 
 void LoadLevelData::Initialize(Entity3DManager* entity3DManager, ModelManager* modelManager, Camera* camera,const std::string extensionName, const std::string fileName)
 {
-	entity3DManager_ = entity3DManager;
-	modelManager_ = modelManager;
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	modelManager_ = modelManager;		// モデル管理クラス
 
 	kFileName = fileName;
 	kExtension = extensionName;
@@ -225,7 +225,6 @@ void LoadLevelData::ClearData()
 
 	
 	for (auto& light : lights_) {
-		//entity3DManager_->GetLightManager()->ClearLight(light->GetNumber());
 		light.reset();
 	}
 	entity3DManager_->GetLightManager()->ClearLights();

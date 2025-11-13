@@ -5,10 +5,10 @@
 
 void Fence::Initialize(DXGIDevice* dxgi, Command* command)
 {
-	dxgi_ = dxgi;
-	command_ = command;
+	dxgi_ = dxgi;		// デバイス
+	command_ = command;	// コマンド
 
-	CreateFence();
+	CreateFence();	// フェンス生成
 }
 
 void Fence::WaitGPU()

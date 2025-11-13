@@ -19,7 +19,7 @@ using namespace Microsoft::WRL;
 
 void DirectXCommon::Intialize(WinApp* winApp) {
 
-	InitializeFixFPS();
+	InitializeFixFPS();	// 固定FPS初期化
 
 	DXGIDevice_->Initialize();
 	command_->Initialize(DXGIDevice_.get()); // コマンド

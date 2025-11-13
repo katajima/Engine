@@ -8,11 +8,11 @@
 
 void DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager)
 {
-	DXGIDevice_ = dxgi;
-	command_ = command;
-	dsvManager_ = dsvManager;
-	srvManager_ = srvManager;
-	CreateDepthStencilView();
+	DXGIDevice_ = dxgi;			// デバイス
+	command_ = command;			// コマンド
+	dsvManager_ = dsvManager;	// DSV管理クラス
+	srvManager_ = srvManager;	// SRV管理クラス
+	CreateDepthStencilView();	// デプスステンシルビュー生成
 }
 
 void DepthStencil::ClearDepthView()

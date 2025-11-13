@@ -18,14 +18,13 @@ RenderTexture::~RenderTexture()
 
 void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
 {
-	DXGIDevice_ = DXGIDevice;
-	command_ = command;
-	srvManager_ = srvManager;
-	rtvManager_ = rvtManager;
-	renderingCommon_ = renderingCommon;
+	DXGIDevice_ = DXGIDevice;			// デバイス
+	command_ = command;					// コマンド
+	srvManager_ = srvManager;			// SRV管理クラス
+	rtvManager_ = rvtManager;			// RTV管理クラス
+	renderingCommon_ = renderingCommon;	// レンダリング共通クラス
 
 
-	//CreateResource(); // リソース作成
 	CreateResourcePixel();
 	CreateRTV();      // RTV作成
 	CreateSRV();      // SRV作成

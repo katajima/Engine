@@ -26,16 +26,6 @@ bool AABBCollider2D::CheckHit(const Collider2D& other) const {
 
 	if (!other.enabled) return false;
 
-	//// 球
-	//if (other.GetType() == ColliderType::Sphere) {
-	//	auto& o = static_cast<const SphereCollider&>(other);
-	//	float distSq = (centerWorld - o.centerWorld).LengthSq();
-	//	float radiusSum = radius + o.radius;
-	//	return distSq <= radiusSum * radiusSum;
-	//}
-
-
-
 	// AABB
 	if (other.GetType() == ColliderType::AABB) {
 		auto& o = static_cast<const AABBCollider2D&>(other);

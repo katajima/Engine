@@ -25,9 +25,9 @@ public:
 	// 生成
 	void CreateBuffer(DirectXCommon* dxCommon, int num = 1, bool useUav = false)
 	{
-		dxCommon_ = dxCommon;
-		useUav_ = useUav;
-		num_ = num;
+		dxCommon_ = dxCommon;	// DX共通クラス
+		useUav_ = useUav;	// uavを使うか
+		num_ = num;			// 生成個数
 
 		barrier_ = std::make_unique<Barrier>();
 		barrier_->Initialize(dxCommon_->GetCommand());

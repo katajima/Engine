@@ -17,7 +17,7 @@ public:
 	// 生成
 	void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> vertex, size_t num = 1)
 	{
-		dxCommon_ = dxCommon;
+		dxCommon_ = dxCommon;	// DX共通クラス
 
 		// リソース生成
 		resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);

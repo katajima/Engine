@@ -11,14 +11,14 @@
 
 void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence)
 {
-	winApp_ = winApp;
-	DXGIDevice_ = dxgi;
-	command_ = command;
-	rtvManager_ = rtvManager;
-	barrier_ = barrier;
-	scissorRect_ = scissorRect;
-	viewPort_ = viewPort;
-	fence_ = fence;
+	winApp_ = winApp;			// WinApp
+	DXGIDevice_ = dxgi;			// デバイス
+	command_ = command;			// コマンド
+	rtvManager_ = rtvManager;	// RTV管理クラス
+	barrier_ = barrier;			// バリア
+	scissorRect_ = scissorRect;	// シザー
+	viewPort_ = viewPort;		// ビューポート
+	fence_ = fence;				// フェンス
 	// スワップチェーン作成
 	CreateSwapChain();
 	// スワップチェーンリソースの作成

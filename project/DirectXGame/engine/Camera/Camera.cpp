@@ -32,11 +32,12 @@ Camera::Camera()
 
 void Camera::Initialize(CameraCommon* cameraCommon)
 {
-	dxCommon_ = cameraCommon->GetDxCommon();
-	postEffectManager_ = dxCommon_->GetPostEffectManager();
+	dxCommon_ = cameraCommon->GetDxCommon();				// DX共通クラス
+	postEffectManager_ = dxCommon_->GetPostEffectManager();	// ポストエフェクト管理クラス
 
-	input_ = cameraCommon->GetInput();
+	input_ = cameraCommon->GetInput();		// インプット
 
+	// リソース生成
 	resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
 	//書き込むためのアドレスを取得
 	resource->Map(0, nullptr, reinterpret_cast<void**>(&data));
