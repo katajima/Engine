@@ -139,26 +139,6 @@ void Audio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	result = pSourceVoice->Start();
 }
 
-//uint32_t Audio::PlayWave(uint32_t soundDataHandle)
-//{
-//	auto it = soundDatas.find(soundDataHandle);
-//	if (it == soundDatas.end()) return;
-//
-//	const SoundData& soundData = it->second;
-//
-//	IXAudio2SourceVoice* pSourceVoice = nullptr;
-//	HRESULT hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-//	assert(SUCCEEDED(hr));
-//
-//	XAUDIO2_BUFFER buf{};
-//	buf.pAudioData = soundData.pBuffer;
-//	buf.AudioBytes = soundData.bufferSize;
-//	buf.Flags = XAUDIO2_END_OF_STREAM;
-//
-//	hr = pSourceVoice->SubmitSourceBuffer(&buf);
-//	hr = pSourceVoice->Start();
-//}
-
 uint32_t Audio::LoadWave(const char* filename)
 {
 	SoundData sd = SoundLoadWave(filename);

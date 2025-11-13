@@ -3,8 +3,8 @@
 
 void Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color)
 {
-	type_ = type;
-	spriteCommon_ = spriteCommon;
+	type_ = type;					// タイプ
+	spriteCommon_ = spriteCommon;	// スプライト共通クラス
 
 	// メッシュ
 	mesh = std::make_unique<ModelMesh>();

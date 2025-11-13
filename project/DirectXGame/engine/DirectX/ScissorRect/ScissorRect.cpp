@@ -5,21 +5,13 @@
 
 void ScissorRect::Initialize(Command* command)
 {
-	command_ = command;
+	command_ = command;	// コマンド
 }
 
 void ScissorRect::SettingScissorRect()
 {
 	int32_t width = WinApp::GetClientWidth(false);
 	int32_t height = WinApp::GetClientHeight(false);
-
-#ifndef _DEBUG
-	//width = WinApp::GetClientWidth(true);
-	//height = WinApp::GetClientHeight(true);
-#endif // !_DEBUG
-
-
-
 
 	// シザー矩形の設定
 	D3D12_RECT scissorRect{};

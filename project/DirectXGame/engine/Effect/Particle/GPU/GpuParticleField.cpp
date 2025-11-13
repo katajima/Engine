@@ -5,9 +5,9 @@
 
 void GpuParticleField::Init(DirectXCommon* dxCommon, LineCommon* lineCommon, std::string name)
 {
-	dxCommon_ = dxCommon;
-	name_ = name;
-	lineCommon_ = lineCommon;
+	dxCommon_ = dxCommon;		// DX共通クラス
+	name_ = name;				// 名前
+	lineCommon_ = lineCommon;	// ライト管理クラス
 
 	// 影響
 	cbEffectFieldResource_.CreateBuffer(dxCommon_, 1);

@@ -12,12 +12,14 @@
 
 void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
 {
-	entity3DManager_ = entity3DManager;
-	objectType_ = objectType;
-	rasterizerType_ = rasterizerType;
+	entity3DManager_ = entity3DManager;	// エンティティ3d
+	objectType_ = objectType;			// オブジェクトタイプ
+	rasterizerType_ = rasterizerType;	// ラスタライザタイプ
 
+	// なにか見た目があるか
 	isSkin_ = false;
 
+	// オブジェクトタイプ
 	switch (objectType)
 	{
 	case ObjectModelType::kNormal:
@@ -47,6 +49,7 @@ void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType obj
 
 void RenderComponent::Update()
 {
+	// なにかしら見た目があるなら
 	if (model || primitive_ || skyBox_ || ocean_) {
 		isSkin_ = true;
 	}
@@ -183,6 +186,7 @@ void RenderComponent::Draw()
 
 float RenderComponent::GetAlpha()
 {
+	// モデルごとの透明度取得
 	float a;
 	switch (objectType_)
 	{
@@ -223,9 +227,10 @@ void RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 {
 	SkinningConmmon* skinning = entity3DManager_->GetSkinningConmmon();
 
-
+	// 描画前準備
 	skinning->DrawComputeSetting();
 
+	// メッシュごとに
 	for (auto& mesh : model->modelData.mesh) {
 
 		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, mesh->skinCluster->paletteSrvHandle.second);
@@ -254,11 +259,14 @@ void RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 
 void RenderComponent::DrawSetting()
 {
+	// ライト
 	entity3DManager_->GetLightManager()->DrawLight();
 
+	// 位置
 	transfomation_->GetCommandList(1);
 	transfomation_->GetCommandList(10);
 
+	// カメラ
 	camera_->GetCommandList(4);
 }
 
@@ -266,22 +274,24 @@ void RenderComponent::DrawSetting()
 
 void RenderComponent::DrawSettingSkin()
 {
+	// ライト
 	entity3DManager_->GetLightManager()->DrawLight();
-
+	// 位置
 	transfomation_->GetCommandList(1);
-
+	// カメラ
 	camera_->GetCommandList(4);
 }
 
 void RenderComponent::DrawSettingOcean()
 {
+	// 描画前準備
 	entity3DManager_->GetOceanManager()->DrawCommonSetting();
 
-
+	// ライト
 	entity3DManager_->GetLightManager()->DrawLight();
-
+	// 位置
 	transfomation_->GetCommandList(1);
 	transfomation_->GetCommandList(9);
-
+	// カメラ
 	camera_->GetCommandList(4);
 }

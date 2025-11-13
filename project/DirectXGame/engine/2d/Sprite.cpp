@@ -93,12 +93,6 @@ void Sprite::Update()
 	float winHeight = static_cast<float>(WinApp::GetClientHeight(false));
 
 
-#ifndef _DEBUG
-	//winWidth = static_cast<float>(WinApp::GetClientWidth());
-	//winHeight = static_cast<float>(WinApp::GetClientHeight());
-#endif // _DEBUG
-
-
 	// anchorPoint を中心にしたジオメトリを "size" で構築
 	float left = -anchorPoint.x * size.x;
 	float right = (1.0f - anchorPoint.x) * size.x;

@@ -18,24 +18,27 @@
 
 void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
 {
-	entity3DManager_ = entity3DManager;
-	object3dCommon_ = entity3DManager_->GetObject3dCommon();
-	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();
-	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();
-	skyBoxCommon_ = entity3DManager_->GetSkyBoxCommon();
-	oceanManager_ = entity3DManager_->GetOceanManager();
-	lineCommon_ = entity3DManager_->Get3DLineCommon();
+	entity3DManager_ = entity3DManager;														// エンティティ3d
+	object3dCommon_ = entity3DManager_->GetObject3dCommon();								// オブジェクト共通クラス
+	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();								// スキニング共通クラス
+	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();// ImGui管理クラス
+	skyBoxCommon_ = entity3DManager_->GetSkyBoxCommon();									// スカイボックス共通クラス
+	oceanManager_ = entity3DManager_->GetOceanManager();									// 波管理クラス
+	lineCommon_ = entity3DManager_->Get3DLineCommon();										// ライン共通クラス
 
+	// 位置コンポーネント初期化
 	transformComponent_ = std::make_unique<TransformComponent>();
 	transformComponent_->Init();
 
 
 	name = "object" + std::to_string(object3dCommon_->count);
 
+	// 位置初期化
 	transformation = std::make_unique<Transfomation>();
 	transformation->Initialize(object3dCommon_->GetDxCommon());
 
 
+	// 方向用トランスフォーム初期化
 	direWorldTransform_.Initialize();
 	direWorldTransform_.translate_.z = 1.0f;
 	direWorldTransform_.parent_ = &transformComponent_->GetWorldTransform();
@@ -45,7 +48,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 
 
 
-
+	// レンダーコンポーネント初期化
 	renderComponent_ = std::make_unique<RenderComponent>();
 	renderComponent_->Init(entity3DManager_, objectType, rasterizerType);
 	renderComponent_->SetTransfomation(transformation.get());

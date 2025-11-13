@@ -21,14 +21,16 @@ public:
 	void Init(Entity2DManager* entity2DManager, std::string name, std::string texturName);
 	// 更新
 	void Update() {
-		
+		// コライダーあるか
 		if (useColl) {
 			BoxUpdate();
 		}
+		// 更新
 		sprite_->Update();
 	};
 	// 描画
 	void Draw() {
+		// スプライトが生きているなら描画
 		if (sprite_->GetActive()) {
 			sprite_->Draw();
 		}

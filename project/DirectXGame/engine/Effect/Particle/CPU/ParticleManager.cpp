@@ -16,13 +16,17 @@
 
 void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager)
 {
-	dxCommon_ = dxCommon;
-	efectManager_ = efectManager;
-	lineCommon_ = efectManager_->GetLineCommon();
-	srvManager_ = dxCommon_->GetSrvManager();
+	dxCommon_ = dxCommon;							// DX共通クラス
+	efectManager_ = efectManager;					// エフェクト管理クラス
+	lineCommon_ = efectManager_->GetLineCommon();	// ライン共通クラス
+	srvManager_ = dxCommon_->GetSrvManager();		// SRV管理クラス
+	lightManager_ = lightManager;					// ライト管理クラス
+
+	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
-	lightManager_ = lightManager;
+	
+	// パイプライン生成
 	CreateGraphicsPipeline();
 }
 

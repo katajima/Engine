@@ -18,8 +18,8 @@ static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値�
 void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 {
 #ifdef _DEBUG
-	dxCommon_ = dxCommon;
-	srvManager_ = dxCommon_->GetSrvManager();
+	dxCommon_ = dxCommon;						// DX共通クラス
+	srvManager_ = dxCommon_->GetSrvManager();	// SRV管理クラス
 
 	// コンテキストの生成
 	ImGui::CreateContext();

@@ -58,10 +58,11 @@ void EmitFanction::CreateParticle(ParticleGroup& group, EffectEmitData emitData,
 	newParticle.strtTransform = newParticle.transform;
 
 
-	//
+	//　ノイズ
 
 	newParticle.isNoise = emitData.isNoise;
 
+	// 方向
 	newParticle.direction = emitData.direction;
 
 
@@ -114,10 +115,10 @@ void EmitFanction::CreateParticle(ParticleGroup& group, EffectEmitData emitData,
 	// 初期値
 	newParticle.strtTransform = newParticle.transform;
 
-	//
-
+	// ノイズ
 	newParticle.isNoise = emitData.isNoise;
 
+	// 方向
 	newParticle.direction = emitData.direction;
 
 	group.particle.push_back(newParticle);

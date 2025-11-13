@@ -11,8 +11,8 @@ const uint32_t RtvManager::kMaxRTVCount = 32;
 
 void RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
-	DXGIDevice_ = DXGI;
-	command_ = Command;
+	DXGIDevice_ = DXGI;	// デバイス
+	command_ = Command;	// コマンド
 
 	// デスクリプタヒープ
 	descriptorHeap = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kMaxRTVCount, false);

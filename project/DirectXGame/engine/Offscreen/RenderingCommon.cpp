@@ -2,13 +2,12 @@
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "RenderingCommon.h"
 
-//#include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
-
-
 void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;
-	copy_.Initialize(dxCommon_,"CopyImage");
+	dxCommon_ = dxCommon;	// DX共通クラス
+
+	// 各ポストエフェクト初期化
+	copy_.Initialize(dxCommon_,"CopyImage");		
 	grayScale_.Initialize(dxCommon_, "GrayScale");
 	sepia_.Initialize(dxCommon_,"Sepia");
 	vignette_.Initialize(dxCommon_, "Vignette");
@@ -25,43 +24,43 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 
 void RenderingCommon::DrawRender(PostEffectType type, int index, int indexB)
 {
-
+	// 描画方法
 	switch (type)
 	{
-	case PostEffectType::kCopy:
+	case PostEffectType::kCopy:	// コピー
 		copy_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kGrayScale:
+	case PostEffectType::kGrayScale: // グレースケール 
 		grayScale_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kSepia:
+	case PostEffectType::kSepia: // セピア
 		sepia_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kVignette:
+	case PostEffectType::kVignette: // ビネット
 		vignette_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kSmoothing:
+	case PostEffectType::kSmoothing: // スムージング
 		smoothing_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kGaussian:
+	case PostEffectType::kGaussian: // ガウシアンフィルタ
 		gaussian_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kOitline:
+	case PostEffectType::kOitline: // アウトライン
 		outline_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kRadialBlur:
+	case PostEffectType::kRadialBlur: // ラジアルブラ
 		radialBlur_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kDissovle:
+	case PostEffectType::kDissovle: // ディゾルブ
 		dissovle_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kRandom:
+	case PostEffectType::kRandom: // ランダム
 		random_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kBloom:
+	case PostEffectType::kBloom: // ブルーム
 		bloom_.DrawRender(index, indexB);
 		break;
-	case PostEffectType::kBloomCombin:
+	case PostEffectType::kBloomCombin: // 合成
 		cimbin_.DrawRender(indexB,index);
 		break;
 	default:

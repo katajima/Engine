@@ -77,6 +77,7 @@ void EffectComponent::AddEmitter(const std::string& name, const std::string& par
 
 void EffectComponent::AddGPUParticleEmitter(const std::string& name, const std::string& particleName, EmitterType type, WorldTransform* parent)
 {
+	// タイプに合わせて各形状エミッタの初期化
 	switch (type)
 	{
 	case EmitterType::Sphere:
@@ -137,6 +138,7 @@ void EffectComponent::AddPrimitive(const std::string& name, const std::string te
 	// 
 	std::unique_ptr<BasePrimitive> primitive;
 
+	// タイプに合わせて各形状に初期化
 	switch (type)
 	{
 	case ShapeParameter::ShapeType::Plane:
@@ -225,13 +227,17 @@ void EffectComponent::RemovePrimitive(const std::string& name, ShapeParameter::S
 
 void EffectComponent::Update() {
 
+	// エミッタ更新
 	for(auto& [name, emitter] : emitters_) {
 		emitter->Update();
 	}
 
+	// トレイルエフェクト更新
 	for(auto& [name, trail] : trails_) {
 		trail->Update();
 	}
+
+	// プリミティブ形状更新
 	for (auto& [type, primitiveMap] : primitives3D_) {
 		for (auto& [name, primitive] : primitiveMap) {
 			primitive->Update(MyGame::GameTime());
@@ -251,6 +257,8 @@ void EffectComponent::Draw() {
 };
 
 void EffectComponent::DrawEffect() {
+
+	// プリミティブ形状描画
 	for (auto& [type, primitiveMap] : primitives3D_) {
 		for (auto& [name, primitive] : primitiveMap) {
 			primitive->Draw();

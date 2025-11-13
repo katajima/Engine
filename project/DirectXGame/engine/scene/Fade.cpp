@@ -8,10 +8,9 @@
 void Fade::Initialize(Entity2DManager* entity2DManager) {
 	entity2DManager_ = entity2DManager;
 
-
+	// 背景スプライト初期化
 	sprite_ = std::make_unique<Sprite>();
 	sprite_->Initialize(entity2DManager_->GetSpriteCommon(), "resources/Texture/Image.png");
-	//sprite_->Initialize(entity2DManager_->GetSpriteCommon(), "resources/Texture/effect/circle2.png");
 	sprite_->SetSize({ static_cast<float>(WinApp::GetClientWidth()),static_cast<float>(WinApp::GetClientHeight()) });
 	// フェード持続時間
 	duration_ = 0.0f;
@@ -26,7 +25,9 @@ void Fade::Initialize(Entity2DManager* entity2DManager) {
 void Fade::Update() {
 	if (status_ == Status::None) return;
 
+	// 時間更新
 	counter_ += 1.0f / 60.0f;
+
 
 	if (counter_ > duration_) {
 		counter_ = duration_;
@@ -35,18 +36,19 @@ void Fade::Update() {
 	float t = counter_ / duration_;
 	float alpha = 0;
 	switch (status_) {
-	case Status::FadeIn: 
+	case Status::FadeIn:// フェードイン
 	{
 		alpha = std::clamp(1.0f - t, 0.0f, 1.0f);
 		
 	} 
 	break;
-	case Status::FadeOut:
+	case Status::FadeOut:// フェードアウト
 	{
 		alpha = std::clamp(t, 0.0f, 1.0f);
 	} 
 	break;
 	}
+	// スプライトサイズ、色更新
 	sprite_->SetSize({ static_cast<float>(WinApp::GetClientWidth()),static_cast<float>(WinApp::GetClientHeight()) });
 	sprite_->SetColor(Color(baseColor_.r, baseColor_.g, baseColor_.b, alpha));
 	sprite_->Update();
@@ -74,12 +76,13 @@ void Fade::Draw2D() {
 	if (status_ == Status::None) {
 		return;
 	}
-
+	// 描画
 	sprite_->Draw();
 
 }
 void Fade::DrawCompulsion2D()
 {
+	// 描画
 	sprite_->Draw();
 }
 

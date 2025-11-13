@@ -2,6 +2,7 @@
 
 void ColliderComponent::UpdateAll(const WorldTransform& worldTransform)
 {
+    // 更新
     for (auto& entry : colliders) {
         entry.collider->Update(worldTransform, lineCommon);
     }
@@ -9,6 +10,7 @@ void ColliderComponent::UpdateAll(const WorldTransform& worldTransform)
 
 void ColliderComponent::UpdateByTag(const WorldTransform& worldTransform, CollisionTag tag)
 {
+    // タグでの更新
     for (auto& entry : colliders) {
         if (entry.collider->tag == tag) {
             entry.collider->Update(worldTransform, lineCommon);
@@ -18,6 +20,7 @@ void ColliderComponent::UpdateByTag(const WorldTransform& worldTransform, Collis
 
 void ColliderComponent::UpdateByID(const WorldTransform& worldTransform, uint32_t id)
 {
+    // IDでの更新
     for (auto& entry : colliders) {
         if (entry.id == id) {
             entry.collider->Update(worldTransform, lineCommon);

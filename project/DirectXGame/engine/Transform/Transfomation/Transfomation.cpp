@@ -4,8 +4,10 @@
 
 void Transfomation::Initialize(DirectXCommon* dxCommon)
 {
+	// ダイレクトX共通クラス
 	dxCommon_ = dxCommon;
 
+	// リソース生成
 	cbResource_.CreateBuffer(dxCommon_);
 
 	//単位行列を書き込んでおく
@@ -18,6 +20,7 @@ void Transfomation::Update(Model* model, Camera* camera, Matrix4x4& local, Matri
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
+	// カメラがあるなら
 	if (camera) {
 		// WVP計算
 		Matrix4x4 worldViewProjectionMatrix{};
@@ -54,6 +57,7 @@ void Transfomation::Update(BasePrimitive* primitive, Camera* camera, Matrix4x4& 
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
+	// カメラがあるなら
 	if (camera) {
 		// WVP計算
 		Matrix4x4 worldViewProjectionMatrix{};
@@ -89,6 +93,7 @@ void Transfomation::Update(SkyBox* skyBox, Camera* camera, Matrix4x4& local, Mat
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
+	// カメラがあるなら
 	if (camera) {
 		// WVP計算
 		Matrix4x4 worldViewProjectionMatrix{};
@@ -124,6 +129,7 @@ void Transfomation::Update(Ocean* ocean, Camera* camera, Matrix4x4& local, Matri
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
+	// カメラがあるなら
 	if (camera) {
 		// WVP計算
 		Matrix4x4 worldViewProjectionMatrix{};
@@ -159,6 +165,7 @@ void Transfomation::Update(Camera* camera, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
+	// あるなら
 	if (camera) {
 
 		worldViewProjectionMatrix = mat;
@@ -182,6 +189,7 @@ void Transfomation::UpdateSkinning(Model* model, Camera* camera, Matrix4x4& loca
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
+	// カメラがあるなら
 	if (camera) {
 
 		worldViewProjectionMatrix = mat;

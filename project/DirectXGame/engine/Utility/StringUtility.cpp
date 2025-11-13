@@ -2,7 +2,9 @@
 
 namespace StringUtility {
 
+	// wstringに変換
 	std::wstring ConvertString(const std::string& str) {
+		// 空なら
 		if (str.empty()) {
 			return std::wstring();
 		}
@@ -16,7 +18,10 @@ namespace StringUtility {
 		return result;
 	}
 
+	// stringに変換
 	std::string ConvertString(const std::wstring& str) {
+		
+		// 空なら
 		if (str.empty()) {
 			return std::string();
 		}

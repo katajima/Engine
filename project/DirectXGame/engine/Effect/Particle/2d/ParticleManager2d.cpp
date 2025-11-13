@@ -13,13 +13,17 @@
 
 void ParticleManager2d::Initialize(DirectXCommon* dxCommon, EffectManager* effectManager)
 {
-	dxCommon_ = dxCommon;
-	effectManager_ = effectManager;
+	dxCommon_ = dxCommon;			// DX共通クラス
+	effectManager_ = effectManager;	// エフェクト管理クラス
 
+	// SRV管理クラス
 	srvManager_ = dxCommon_->GetSrvManager();
+	
+	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
+	// パイプライン生成
 	CreateGraphicsPipeline();
 }
 
@@ -55,10 +59,6 @@ void ParticleManager2d::Update() {
 
 					// パーティクルデータをGPUに送る
 					ParticleFanction::WorldDataForGPU(group, particleIterator, camera_);
-
-
-
-					//particleIterator->transform.translate 
 
 					// 加算 
 					++group.instanceCount;

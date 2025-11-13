@@ -6,7 +6,7 @@
 
 void Command::Initialize(DXGIDevice* dxgi)
 {
-	dxgi_ = dxgi;
+	dxgi_ = dxgi;	// デバイス
 	
 	////------コマンドキュー------////
 

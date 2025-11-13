@@ -42,44 +42,61 @@ void Noise::ImguiParameter()
 //特定の座標におけるパーリンノイズの値を計算します。パーリンノイズは、特定の座標におけるランダムな値の集合であり、これを補間することで滑らかなノイズが生成されます。
 float Noise::Noise2D(float x, float y)
 {
-	int X = (int)floor(x) & 255;
-	int Y = (int)floor(y) & 255;
+    // 整数グリッドの座標を求める（256でマスクして範囲を制限）
+    int X = (int)floor(x) & 255;
+    int Y = (int)floor(y) & 255;
 
-	x -= floor(x);
-	y -= floor(y);
+    // 小数部分（セル内の位置）を計算
+    x -= floor(x);
+    y -= floor(y);
 
-	float u = Fade(x);
-	float v = Fade(y);
+    // フェード関数を適用して補間用の値を計算
+    float u = Fade(x);
+    float v = Fade(y);
 
-	int A = hashT[X] + Y;
-	int B = hashT[X + 1] + Y;
+    // 周囲4点のハッシュ値を求める
+    int A = hashT[X] + Y;
+    int B = hashT[X + 1] + Y;
 
-	float n00 = Grad2(hashT[A], x, y);
-	float n01 = Grad2(hashT[A + 1], x, y - 1);
-	float n10 = Grad2(hashT[B], x - 1, y);
-	float n11 = Grad2(hashT[B + 1], x - 1, y - 1);
+    // 各グリッド点での勾配ノイズを取得
+    float n00 = Grad2(hashT[A], x, y);         // (0,0)
+    float n01 = Grad2(hashT[A + 1], x, y - 1); // (0,1)
+    float n10 = Grad2(hashT[B], x - 1, y);     // (1,0)
+    float n11 = Grad2(hashT[B + 1], x - 1, y - 1); // (1,1)
 
-	float n0 = Lerp(n00, n01,u);
-	float n1 = Lerp(n10, n11,u);
+    // x方向の線形補間
+    float n0 = Lerp(n00, n01, u);
+    float n1 = Lerp(n10, n11, u);
 
-	return Lerp(n0, n1,v);
+    // y方向の線形補間を行い最終値を返す
+    return Lerp(n0, n1, v);
 }
 
 
 float Noise::PerlinNoise(float x, float y)
 {
-	float total = 0.0f;
-	float frequency = Frequency;
-	float amplitude = Amplitude;
-	float max_value = Max_value; // ローカル変数として正しく初期化
+    // 合計値
+    float total = 0.0f;
+    // 基本周波数
+    float frequency = Frequency;
+    // 振幅
+    float amplitude = Amplitude;
+    // 正規化のための最大値
+    float max_value = Max_value; // ローカル変数として初期化
 
+    // オクターブ数分ノイズを加算
+    for (int i = 0; i < OCTAVES; ++i) {
+        // 各オクターブのノイズ値を加算（高周波ほど小さい振幅）
+        total += Noise2D(x * frequency, y * frequency) * amplitude;
+        // 振幅の合計を更新
+        max_value += amplitude;
+        // 振幅を減衰
+        amplitude *= PERSISTENCE;
+        // 周波数を倍増（詳細度を上げる）
+        frequency *= 2;
+    }
 
-
-	for (int i = 0; i < OCTAVES; ++i) {
-		total += Noise2D(x * frequency, y * frequency) * amplitude;
-		max_value += amplitude;
-		amplitude *= PERSISTENCE;
-		frequency *= 2;
-	}
-	return total / max_value;
+    // 正規化して返す（値を0〜1の範囲に）
+    return total / max_value;
 }
+

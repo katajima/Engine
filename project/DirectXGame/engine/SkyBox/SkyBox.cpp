@@ -6,15 +6,13 @@ void SkyBox::Initialize(Entity3DManager* entity3DManager, std::string txtueName)
 	entity3DManager_ = entity3DManager;
 
 
-
+	// マテリアル初期化
 	material = std::make_unique<Material>();
 	material->Initialize(entity3DManager_->GetSkyBoxCommon()->GetDxCommon());
-	/*material->tex_.diffuseFilePath = "resources/Texture/rostock_laage_airport_4k.dds";
-	material->tex_.diffuseFilePath = "resources/Texture/hdr/sky.dds";*/
-	material->tex_.diffuseFilePath = txtueName;
-	material->LoadTex();
-	material->color = { 1,1,1,1 };
-	material->enableLighting_ = false;
+	material->tex_.diffuseFilePath = txtueName;	// テクスチャ名設定
+	material->LoadTex();			// テクスチャ読み込み
+	material->color = { 1,1,1,1 };	// 色
+	material->enableLighting_ = false;	// ライティングしない
 
 
 

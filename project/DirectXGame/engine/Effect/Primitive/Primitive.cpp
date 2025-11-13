@@ -4,19 +4,20 @@
 
 void BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const std::string& tex, const Color color, const std::string& name, bool isLine)
 {
-	primitiveCommon_ = primitiveCommon;
+	primitiveCommon_ = primitiveCommon;	// プリミティブ共通クラス
 
+	// メッシュ初期化
 	mesh = std::make_unique<ModelMesh>();
 	MeshInitialize();
-
 	mesh->Initialize(primitiveCommon_->GetDxCommon());
 
+	// マテリアル初期化
 	mesh->material = std::make_unique<Material>();
 	mesh->material->Initialize(primitiveCommon_->GetDxCommon());
 	mesh->material->tex_.diffuseFilePath = tex;
 	mesh->material->color = color;
 
-
+	// 名前があるなら
 	if (name == "") {
 		name_ = "NoName";
 	}
@@ -48,6 +49,7 @@ void BasePrimitive::Update(float deltaTime)
 	ImGui::DragFloat2("maxRotate", &aimetion_.maxRotate.x, 0.01f);
 #endif // _DEBUG
 
+	// アニメーションスケールX
 	if (aimetion_.isScaleX) {
 		mesh->material->transform.scale.x += aimetion_.speed.x;
 		if (mesh->material->transform.scale.x >= aimetion_.maxCount.x) {
@@ -55,6 +57,7 @@ void BasePrimitive::Update(float deltaTime)
 		}
 
 	}
+	// アニメーションスケールY
 	if (aimetion_.isScaleY) {
 		mesh->material->transform.scale.y += aimetion_.speed.y;
 		if (mesh->material->transform.scale.y >= aimetion_.maxCount.y) {
@@ -62,6 +65,7 @@ void BasePrimitive::Update(float deltaTime)
 		}
 	}
 
+	// アニメーション回転X
 	if (aimetion_.isRotateX) {
 		mesh->material->transform.rotate.x += aimetion_.rotateSpeed.x;
 		if (mesh->material->transform.rotate.x >= aimetion_.maxRotate.x) {
@@ -69,6 +73,7 @@ void BasePrimitive::Update(float deltaTime)
 		}
 
 	}
+	// アニメーション回転Y
 	if (aimetion_.isRotateY) {
 		mesh->material->transform.rotate.y += aimetion_.rotateSpeed.y;
 		if (mesh->material->transform.rotate.y >= aimetion_.maxRotate.y) {
@@ -78,21 +83,26 @@ void BasePrimitive::Update(float deltaTime)
 
 	mesh->material->GPUData();
 
+	// 固有の更新
 	UniqeUpdate();
 }
 
 void BasePrimitive::Draw()
 {
+	// 頂点があるなら
 	if (mesh->vertices.size() != 0) {
 
+		// マテリアル
 		mesh->material->GetCommandListMaterial(0);
 
+		// テクスチャ
 		mesh->material->GetCommandListTexture(2, 7, 8);
 
 
-
+		// メッシュ
 		mesh->GetCommandList();
 
+		// Draw
 		primitiveCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 	}
 };

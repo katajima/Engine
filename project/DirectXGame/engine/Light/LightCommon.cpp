@@ -6,7 +6,7 @@
 
 void LightManager::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = dxCommon;	// DX共通クラス
 
 	//平行光源用のリソースを作る
 	directionalLightResource = dxCommon_->GetDXGIDevice()->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));

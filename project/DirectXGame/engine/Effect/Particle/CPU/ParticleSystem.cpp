@@ -13,20 +13,3 @@
 #include "DirectXgame/engine/MyGame/MyGame.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "ParticleManager.h"
-
-//void ParticleGroup::Create(ParticleManager* particleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName)
-//{
-//	dxCommon_ = dxCommon;
-//	particleManager_ = particleManager;
-//
-//
-//
-//}
-//
-//
-//void ParticleGroup::Update() {
-//
-//};
-//
-//void ParticleGroup::Draw() {
-//};

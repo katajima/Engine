@@ -14,10 +14,11 @@
 
 void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
 {
-	modelCommon_ = modelCommon;
-	dxCommon_ = dxCommon;
-	srvManager_ = modelCommon_->GetSrvManager();
+	modelCommon_ = modelCommon;					// モデル共通クラス
+	dxCommon_ = dxCommon;						// DX共通クラス
+	srvManager_ = modelCommon_->GetSrvManager();// SRV管理クラス
 
+	
 	std::string dire = directorypath;
 
 	if (file != "") {

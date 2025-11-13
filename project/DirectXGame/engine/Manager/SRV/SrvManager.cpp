@@ -14,8 +14,8 @@ const uint32_t SrvManager::kMaxSRVCount = 2048;
 
 void SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
-	DXGIDevice_ = DXGI;
-	command_ = Command;
+	DXGIDevice_ = DXGI;	// デバイス
+	command_ = Command;	// コマンド
 
 	// デスクリプタヒープ
 	descriptorHeap = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);

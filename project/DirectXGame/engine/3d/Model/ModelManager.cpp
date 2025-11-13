@@ -7,11 +7,13 @@
 
 void ModelManager::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;
+	dxCommon_ = dxCommon;	// DX共通クラス
 
-	command_ = dxCommon_->GetCommand();
-	DXGIDevice_ = dxCommon_->GetDXGIDevice();
-	srvManager_ = dxCommon_->GetSrvManager();
+	command_ = dxCommon_->GetCommand();			// コマンド
+	DXGIDevice_ = dxCommon_->GetDXGIDevice();	// デバイス
+	srvManager_ = dxCommon_->GetSrvManager();	// SRV管理クラス
+
+	// モデル共通クラス初期化
 	modelCommon_ = std::make_unique<ModelCommon>();
 	modelCommon_->Initialize(command_, DXGIDevice_, srvManager_);
 }

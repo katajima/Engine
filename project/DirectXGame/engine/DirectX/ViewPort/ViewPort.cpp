@@ -4,7 +4,7 @@
 
 void ViewPort::Initialize(Command* command)
 {
-	command_ = command;
+	command_ = command;	// コマンド
 }
 
 void ViewPort::SettingViewport()
@@ -15,11 +15,6 @@ void ViewPort::SettingViewport()
 
 	FLOAT width = static_cast<FLOAT>(WinApp::GetClientWidth(false));
 	FLOAT height = static_cast<FLOAT>(WinApp::GetClientHeight(false));
-
-#ifndef _DEBUG
-	//width = static_cast<FLOAT>(WinApp::GetClientWidth());
-	//height = static_cast<FLOAT>(WinApp::GetClientHeight());
-#endif // _DEBUG
 
 
 	// クライアント領域のサイズと一緒にして画面全体に表示

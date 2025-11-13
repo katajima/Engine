@@ -7,6 +7,7 @@ void UVAnimationComponent::Init(Material* mateirial)
 
 void UVAnimationComponent::Update(float deltaTime)
 {
+	// スケールX方向に
 	if (uvAnimationData_.isScaleX) {
 		mateirial_->transform.scale.x += uvAnimationData_.speed.x;
 		if (mateirial_->transform.scale.x >= uvAnimationData_.maxCount.x) {
@@ -14,6 +15,7 @@ void UVAnimationComponent::Update(float deltaTime)
 		}
 
 	}
+	// スケールY方向に
 	if (uvAnimationData_.isScaleY) {
 		mateirial_->transform.scale.y += uvAnimationData_.speed.y;
 		if (mateirial_->transform.scale.y >= uvAnimationData_.maxCount.y) {
@@ -21,6 +23,7 @@ void UVAnimationComponent::Update(float deltaTime)
 		}
 	}
 
+	// 回転X方向に
 	if (uvAnimationData_.isRotateX) {
 		mateirial_->transform.rotate.x += uvAnimationData_.rotateSpeed.x;
 		if (mateirial_->transform.rotate.x >= uvAnimationData_.maxRotate.x) {
@@ -28,6 +31,7 @@ void UVAnimationComponent::Update(float deltaTime)
 		}
 
 	}
+	// 回転Y方向に
 	if (uvAnimationData_.isRotateY) {
 		mateirial_->transform.rotate.y += uvAnimationData_.rotateSpeed.y;
 		if (mateirial_->transform.rotate.y >= uvAnimationData_.maxRotate.y) {
