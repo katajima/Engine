@@ -27,9 +27,6 @@ class BaseMesh {
 public:
 	// 通常用
 	virtual void Initialize(DirectXCommon* dxcommon) = 0;
-
-	//void UpdateIndexBuffer();
-
 public:
 	// 最小位置
 	Vector3 GetMin() const { return min_; }

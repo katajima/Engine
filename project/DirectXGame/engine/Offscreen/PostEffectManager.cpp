@@ -15,20 +15,21 @@
 
 void PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
 {
-	DXGIDevice_ = DXGIDevice;
-	command_ = command;
-	srvManager_ = srvManager;
-	rtvManager_ = rtvManager;
-	renderingCommon_ = renderingCommon;
-	depthStencil_ = depthStencil;
-	barrier_ = barrier;
-	scissorRect_ = scissorRect;
-	viewPort_ = viewPort;
+	DXGIDevice_ = DXGIDevice;				// デバイス
+	command_ = command;						// コマンド
+	srvManager_ = srvManager;				// SRV管理
+	rtvManager_ = rtvManager;				// RTV管理
+	renderingCommon_ = renderingCommon;		// レンダリング共通クラス
+	depthStencil_ = depthStencil;			// デプスステンシル
+	barrier_ = barrier;						// バリア
+	scissorRect_ = scissorRect;				// シザー
+	viewPort_ = viewPort;					// ビューポート
 
-
+	// レンダーテクスチャ初期化
 	renderTexture_ = std::make_unique<RenderTexture>();
 	renderTexture_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainStr", PostEffectType::kCopy);
 
+	// 最終レンダーテクスチャテクスチャ初期化
 	renderTextureEnd_ = std::make_unique<RenderTexture>();
 	renderTextureEnd_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainEnd", PostEffectType::kCopy);
 

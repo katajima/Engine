@@ -19,6 +19,7 @@ void SceneManager::Update()
 		scene_->AllUpdate();
 	}
 
+	// 各フェーズ処理
 	switch (phase_) {
 	case Phase::kFadeIn:
 		fade_->Update();

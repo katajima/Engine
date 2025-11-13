@@ -18,17 +18,19 @@ void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvMan
 	DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, 
 	const std::string name, PostEffectBlockType type)
 {
-	DXGIDevice_ = DXGIDevice;
-	command_ = command;
-	srvManager_ = srvManager;
-	rtvManager_ = rtvManager;
-	renderingCommon_ = renderingCommon;
-	depthStencil_ = depthStencil;
-	barrier_ = barrier;
-	scissorRect_ = scissorRect;
-	viewPort_ = viewPort;
+	DXGIDevice_ = DXGIDevice;				// デバイス
+	command_ = command;						// コマンド
+	srvManager_ = srvManager;				// SRV管理
+	rtvManager_ = rtvManager;				// RTV管理
+	renderingCommon_ = renderingCommon;		// レンダリング共通クラス
+	depthStencil_ = depthStencil;			// デプスステンシル
+	barrier_ = barrier;						// バリア
+	scissorRect_ = scissorRect;				// シザー
+	viewPort_ = viewPort;					// ビューポート
 
-	name_ = name;
+	name_ = name;	// 名前
+
+	// タイプに応じて各ポストエフェクトを追加する処理
 	switch (type)
 	{
 	case PostEffectBlockType::kCopy:

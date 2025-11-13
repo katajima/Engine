@@ -88,8 +88,8 @@ void PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType type)
 
 void PostEffectData::DrawRender()
 {
-	switch (type_
-)
+	// 各タイプに応じてGPUに送るデータ設定
+	switch (type_)
 	{
 	case PostEffectType::kCopy:
 		break;
@@ -138,7 +138,7 @@ void PostEffectData::DrawRender()
 
 void PostEffectData::UpdateImgui()
 {
-
+	// 各タイプに応じてImGui更新
 	switch (type_)
 	{
 	case PostEffectType::kCopy:
@@ -225,8 +225,8 @@ void PostEffectData::DrawColl()
 #pragma region Base
 
 void IPostEffect::Initialize(DirectXCommon* dxCommon, std::string psName) {
-	dxCommon_ = dxCommon;
-
+	dxCommon_ = dxCommon;	// DX共通クラス
+	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 	// ルートシグネチャ生成

@@ -24,7 +24,7 @@ void RigidBodyComponent::Integrate(float deltaTime, WorldTransform& transform)
 	Vector3 angularAcceleration = torque * inverseMass; // 実際は慣性モーメントが必要
 	angularVelocity += angularAcceleration * deltaTime;
 
-	// 回転適用（クォータニオンが理想）
+	// 回転適用
 	//transform.rotation += angularVelocity * deltaTime;
 	transform.rotate_ += angularVelocity * deltaTime;
 

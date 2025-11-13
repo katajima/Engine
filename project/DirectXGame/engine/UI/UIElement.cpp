@@ -9,9 +9,10 @@ static Vector2 ToLocalSpace(const Vector2& worldPos, const WorldTransform2d& par
 
 void UIElement::Init(Entity2DManager* entity2DManager, std::string name)
 {
-	entity2DManager_ = entity2DManager;
-	mainName_ = name;
+	entity2DManager_ = entity2DManager;	// エンティティ2d
+	mainName_ = name;					// 名前設定
 
+	// スプライト初期化
 	InitSprite();
 
 #ifdef _DEBUG
@@ -35,6 +36,7 @@ void UIElement::AddSprite(std::string name, std::string textureName)
 
 BaseSprite* UIElement::GetSprite(std::string name)
 {
+	// スプライトがあるなら返す
 	if (sprites_.contains(name)) {
 		return sprites_[name].get();
 	}
@@ -45,11 +47,13 @@ BaseSprite* UIElement::GetSprite(std::string name)
 
 void UIElement::Draw()
 {
+	// スプライト更新描画
 	for (auto& sprit : sprites_) {
 		sprit.second->Update();
 		sprit.second->Draw();
 	}
 
+	// 固有の描画
 	UniqueDraw();
 }
 
@@ -77,17 +81,21 @@ void UIButton::Update(float deltaTime) {
 
 void UICheckBox::InitSprite()
 {
+	// チェックボタン初期化
 	checkSprite = std::make_unique<BaseSprite>();
 	checkSprite->Init(entity2DManager_, "check", "resources/Texture/Image.png");
-	checkSprite->GetSprite()->SetSize({24.0f,24.0f});
-	checkSprite->GetSprite()->SetAnchorPoint({0.5f,0.5f});
+	checkSprite->GetSprite()->SetSize({24.0f,24.0f});		// サイズ設定
+	checkSprite->GetSprite()->SetAnchorPoint({0.5f,0.5f});	// アンカーポイント設定
+	
+	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();
 	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.png");
-	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });
-	backgroundSprite->GetSprite()->SetColor({0.5f,0.5f ,0.5f ,1.0f});
-	backgroundSprite->GetSprite()->SetSize({ 30.0f,30.0f });
-	backgroundSprite->SetUseColl(true);
+	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });		// アンカーポイント設定
+	backgroundSprite->GetSprite()->SetColor({0.5f,0.5f ,0.5f ,1.0f});	//色指定
+	backgroundSprite->GetSprite()->SetSize({ 30.0f,30.0f });			// サイズ設定
+	backgroundSprite->SetUseColl(true);									// コライダーを使うか
 
+	// 親子
 	if (parent_) {
 		checkSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
 		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
@@ -98,10 +106,13 @@ void UICheckBox::InitSprite()
 
 void UICheckBox::Update(float deltaTime) 
 {
+	// 各位置の更新
 	checkSprite->GetSprite()->SetPosition(pos_);
 	backgroundSprite->GetSprite()->SetPosition(pos_);
 
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
+	
+	// 入っているなら
 	if (backgroundSprite->GetBox().intersects(input_->GetMousePosition())) {
 		if (input_->IsMouseTriggered(0)){
 			if (!isCheck_) {
@@ -115,11 +126,14 @@ void UICheckBox::Update(float deltaTime)
 	else {
 
 	}
+	// 更新
 	checkSprite->Update();
 	backgroundSprite->Update();
 }
 
 void UICheckBox::UniqueDraw() {
+	
+	// 描画
 	backgroundSprite->Draw();
 	if (isCheck_) {
 		checkSprite->Draw();
@@ -131,25 +145,32 @@ void UICheckBox::UniqueDraw() {
 #pragma region UISlider
 
 void UISlider::InitSprite() {
+
+	// スライダー初期化
 	slidSprite = std::make_unique<BaseSprite>();
 	slidSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.png");
-	slidSprite->GetSprite()->SetSize({ 24.0f,24.0f });
-	slidSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });
-	slidSprite->SetUseColl(true);
+	slidSprite->GetSprite()->SetSize({ 24.0f,24.0f });		// サイズ設定
+	slidSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
+	slidSprite->SetUseColl(true);							// コライダー使うか設定
+
+	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();
 	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.png");
-	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });
-	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });
-	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });
-	backgroundSprite->SetUseColl(true);
+	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });		// アンカーポイント設定
+	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });	// 色設定
+	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });			// サイズ設定
+	backgroundSprite->SetUseColl(true);									// コライダー使うか設定
 	backgroundSprite->GetSprite()->GetWorldTransform2d().SetChild(&slidSprite->GetSprite()->GetWorldTransform2d());
 	
+	//	親子付け
 	if (parent_) {
 		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
 	}
 }
 
 void UISlider::Update(float deltaTime) {
+
+	// 比率と位置の設定
 	backgroundSprite->GetSprite()->SetPosition(pos_);
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 	slidSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
@@ -204,8 +225,6 @@ void UISlider::Update(float deltaTime) {
 		float leftLimit = leftHalf * 2;
 		float rightLimit = size.x - rightHalf *2;
 
-		//mouse.x /= ratio_.x;
-
 		// マウス座標を背景スプライトのローカル座標に変換
 		Vector2 localMousePos = ToLocalSpace(mouse, backgroundSprite->GetSprite()->GetWorldTransform2d());
 		float mouseX = localMousePos.x;
@@ -213,10 +232,6 @@ void UISlider::Update(float deltaTime) {
 
 		// マウスXをスライダー範囲にクランプ
 		mouseX = std::clamp(mouseX, leftLimit, rightLimit);
-		
-		
-		
-
 		
 		// デバッグ補正戻す
 		if (isDebuck_) {
@@ -255,23 +270,28 @@ void UISlider::UniqueDraw() {
 #pragma region UIMeter
 
 void UIMeter::InitSprite() {
+	// メータスプライト初期化
 	meterSprite = std::make_unique<BaseSprite>();
 	meterSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.png");
-	meterSprite->GetSprite()->SetSize({ 494.0f,24.0f });
-	meterSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });
-	backgroundSprite = std::make_unique<BaseSprite>();
-	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.png");
-	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });
-	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });
-	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });
+	meterSprite->GetSprite()->SetSize({ 494.0f,24.0f });			// サイズ設定
+	meterSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });		// アンカーポイント設定
 
+	// 背景スプライト初期化
+	backgroundSprite = std::make_unique<BaseSprite>();				
+	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.png");
+	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });		// アンカーポイント設定
+	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });	// 色設定
+	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });			// サイズ設定
+
+	// 名前スプライトを使うなら
 	if (useNameSprite_) {
 		nameSprite_ = std::make_unique<BaseSprite>();
 		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.png");
-		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));
-		nameSprite_->SetSize({ 24.0f,24.0f });
+		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));	// アンカーポイント設定
+		nameSprite_->SetSize({ 24.0f,24.0f });				// サイズ設定
 	}
 
+	// 親子付け
 	if (parent_) {
 		meterSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
 		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
@@ -283,6 +303,8 @@ void UIMeter::InitSprite() {
 }
 
 void UIMeter::Update(float deltaTime) {
+
+	// 名前スプライトがあるなら
 	if (nameSprite_) {
 		nameSprite_->GetSprite()->SetPosition(pos_);
 		nameSprite_->Update();
@@ -310,37 +332,37 @@ void UIMeter::Update(float deltaTime) {
 
 	// アンカーポイントとサイズを方向に応じて調整
 	switch (type_) {
-	case UIMeterType::Top:
+	case UIMeterType::Top:	// 上方向
 		meterSize.y *= rate;
 		meterSprite->GetSprite()->SetAnchorPoint({ 0.0f, 0.0f });
 		backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f, 0.0f });
 		meterPos += Vector2(offsetSize.x * 0.5f, offsetSize.x * 0.5f);
 		break;
-	case UIMeterType::Down:
+	case UIMeterType::Down:	// 下方向
 		meterSize.y *= rate;
 		meterSprite->GetSprite()->SetAnchorPoint({ 0.0f, 1.0f });
 		backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f, 1.0f });
 		meterPos += Vector2(offsetSize.x * 0.5f, -offsetSize.x * 0.5f);
 		break;
-	case UIMeterType::Right:
+	case UIMeterType::Right: // 右方向
 		meterSize.x *= rate;
 		meterSprite->GetSprite()->SetAnchorPoint({ 1.0f, 0.5f });
 		backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f, 0.5f });
 		meterPos += Vector2(-(offsetSize.x * 0.5f) + backgroundSprite->GetHalfSise(SpriteSize::Right).x, 0);
 		break;
-	case UIMeterType::Left:
+	case UIMeterType::Left:	// 左方向
 		meterSize.x *= rate;
 		meterSprite->GetSprite()->SetAnchorPoint({ 0.0f, 0.5f });
 		backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f, 0.5f });
 		meterPos += Vector2(offsetSize.x * 0.5f, 0);
 		break;
-	case UIMeterType::WidthCenter:
+	case UIMeterType::WidthCenter:	// 横方向
 		meterSize.x *= rate;
 		meterSprite->GetSprite()->SetAnchorPoint({ 0.5f, 0.5f });
 		backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f , 0.5f });
 		meterPos += Vector2(-(offsetSize.x * 0.5f) * 0.5f + backgroundSprite->GetHalfSise(SpriteSize::Right).x * 0.5f, 0);
 		break;
-	case UIMeterType::HeightCenter:
+	case UIMeterType::HeightCenter:	// 縦方向
 		meterSize.y *= rate;
 		meterSprite->GetSprite()->SetAnchorPoint({ 0.0f, 0.5f });
 		backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f, 0.5f });
@@ -355,14 +377,15 @@ void UIMeter::Update(float deltaTime) {
 	meterSprite->GetSprite()->SetPosition(meterPos);
 	backgroundSprite->GetSprite()->SetSize(baseSize);
 	backgroundSprite->GetSprite()->SetPosition(pos_);
-
+	
+	// 更新
 	meterSprite->Update();
 	backgroundSprite->Update();
-
-	
 }
 
 void UIMeter::UniqueDraw() {
+
+	// 描画
 	backgroundSprite->Draw();
 	meterSprite->Draw();
 	if (nameSprite_) {
@@ -376,10 +399,14 @@ void UIMeter::UniqueDraw() {
 
 void UIPair::InitSprite() 
 {
+	// 最初のスプライト初期化
 	firstSprite = std::make_unique<BaseSprite>();
 	firstSprite->Init(entity2DManager_, "first", "resources/Texture/Image.png");
+	// 次のスプライト初期化
 	secondSprite = std::make_unique<BaseSprite>();
 	secondSprite->Init(entity2DManager_, "second", "resources/Texture/Image.png");
+	
+	// 親子付け
 	if (parent_) {
 		firstSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
 		secondSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
@@ -393,32 +420,31 @@ void UIPair::Update(float deltaTime) {
 	Vector2 secondpos = pos_;
 	switch (type_)
 	{
-	case UIPairDrectionType::Top:
+	case UIPairDrectionType::Top:	// 上方向
 		secondpos.y -= offset_ + firstSprite->GetHalfSise(SpriteSize::Top).y;
 		break;
-	case UIPairDrectionType::Down:
+	case UIPairDrectionType::Down:	// 下方向
 		secondpos.y += offset_ + firstSprite->GetHalfSise(SpriteSize::Down).y;
 		break;
-	case UIPairDrectionType::Right:
+	case UIPairDrectionType::Right:	// 右方向
 		secondpos.x += offset_ + firstSprite->GetHalfSise(SpriteSize::Right).x;
 		break;
-	case UIPairDrectionType::Left:
+	case UIPairDrectionType::Left:	// 左方向
 		secondpos.x -= offset_ + firstSprite->GetHalfSise(SpriteSize::Left).x;
 		break;
 	default:
 		break;
 	}
 	
-	
-	
-	
 	secondSprite->GetSprite()->SetPosition(secondpos);
 
+	// 更新
 	firstSprite->Update();
 	secondSprite->Update();
 }
 
 void UIPair::UniqueDraw() {
+	/// 描画
 	firstSprite->Draw();
 	secondSprite->Draw();
 }
@@ -429,21 +455,24 @@ void UIPair::UniqueDraw() {
 
 void UICount::InitSprite()
 {
+	// 行数分初期化
 	for (int i = 0; i < instance_; i++) {
 		auto sprite = std::make_unique<BaseSprite>();
 		sprite->Init(entity2DManager_, "count", "resources/Texture/num/Number_x64y96.png");
-		sprite->SetSize({ 24.0f,24.0f });
-		sprite->SetAnchorPoint({ 0.5f,0.5f });
+		sprite->SetSize({ 24.0f,24.0f });		// サイズ設定
+		sprite->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
 
 		countSprite_.push_back(std::move(sprite));
 	}	
+	// 名前スプライトがあるなら初期化
 	if (useNameSprite_) {
 		nameSprite_ = std::make_unique<BaseSprite>();
 		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.png");
-		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));
-		nameSprite_->SetSize({ 24.0f,24.0f });
+		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));	// アンカーポイント設定
+		nameSprite_->SetSize({ 24.0f,24.0f });				// サイズ設定
 	}
 
+	// 親子付け
 	if (parent_) {
 		for (auto& sprite : countSprite_) {
 			sprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
@@ -479,8 +508,8 @@ void UICount::Update(float deltaTime)
 		i++;
 	}
 
+	// 名前スプライトがあるなら
 	if (nameSprite_) {
-
 		nameSprite_->GetSprite()->SetPosition(countSprite_.front()->GetSprite()->GetPosition() + Vector2(offsetSize.x, 0));
 		nameSprite_->Update();
 	}

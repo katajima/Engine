@@ -5,24 +5,28 @@
 
 void UIBaseBoard::Init(Input* input,Entity2DManager* entity2DManager, const std::string& name, Vector2 pos, const Vector2& size, bool isStatic, std::string textureName)
 {
-	entity2DManager_ = entity2DManager;
-	name_ = name;
-	size_ = size;
-	isStatic_ = isStatic;
-	textureName_ = textureName;
-	input_ = input;
+	entity2DManager_ = entity2DManager;		// エンティティ2d
+	name_ = name;							// 名前設定
+	size_ = size;							// サイズ設定
+	isStatic_ = isStatic;					// 静的か設定
+	textureName_ = textureName;				// テクスチャ名設定
+	input_ = input;							// インプット設定
 
+	// バースプライト初期化
 	spriteBar_ = std::make_unique<BaseSprite>();
 	spriteBar_->Init(entity2DManager_, name_, textureName_);
-	spriteBar_->SetSize({ size.x,30 });
-	spriteBar_->SetPos(pos);
-	spriteBar_->SetColor({ 0.5f,0.5f ,0.5f,1.0f });
+	spriteBar_->SetSize({ size.x,30 });				// サイズ設定
+	spriteBar_->SetPos(pos);						// 位置設定
+	spriteBar_->SetColor({ 0.5f,0.5f ,0.5f,1.0f });	// 色指定
+
+	// ボードスプライト設定
 	spriteBoard_ = std::make_unique<BaseSprite>();
 	spriteBoard_->Init(entity2DManager_, name_, textureName_);
-	spriteBoard_->SetSize(size_);
-	spriteBoard_->SetPos({ 0 , 30 });
-	spriteBoard_->SetColor({0.2f,0.2f, 0.2f, 0.5f});
+	spriteBoard_->SetSize(size_);					// サイズ設定
+	spriteBoard_->SetPos({ 0 , 30 });				// 位置設定
+	spriteBoard_->SetColor({ 0.2f,0.2f, 0.2f, 0.5f });// 色指定
 
+	// 子ども設定
 	spriteBar_->GetSprite()->GetWorldTransform2d().SetChild(&spriteBoard_->GetSprite()->GetWorldTransform2d());
 
 }
@@ -51,13 +55,14 @@ void UIBaseBoard::Update(float deltaTime)
 	ImGui::End();
 #endif // _DEBUG
 
-
+	// ボードを使用するなら
 	if (useBoard_) {
 		spriteBar_->Update();
 		spriteBoard_->Update();
 	}
 
 
+	// 各機能UI更新
 	for (auto& [layer, elements] : uiElement_)
 	{
 		for (auto& [name, element] : elements)
@@ -73,11 +78,14 @@ void UIBaseBoard::Update(float deltaTime)
 }
 
 void UIBaseBoard::Draw() {
+
+	// ボードを描画
 	if (useBoard_) {
 		spriteBar_->Draw();
 		spriteBoard_->Draw();
 	}
 
+	// 各機能UI更新
 	for (auto& [layer, elements] : uiElement_)
 	{
 		for (auto& [name, element] : elements)
@@ -101,6 +109,7 @@ void UIBaseBoard::CreateUIElement(UIType type, std::string name, Vector2 pos, in
 		return;
 	}
 
+	// 各UI機能の初期化
 	switch (type)
 	{
 	case UIType::Normal:
@@ -129,13 +138,13 @@ void UIBaseBoard::CreateUIElement(UIType type, std::string name, Vector2 pos, in
 		break;
 	}
 
-	sprite->SetInput(input_);
-	sprite->SetPos(pos);
-	sprite->SetInstance(instance);
-	sprite->SetUseNameSprite(useSprite);
-	sprite->SetParent(&spriteBoard_->GetSprite()->GetWorldTransform2d());
-	sprite->Init(entity2DManager_, name);
-	uiElement_[type].insert(std::make_pair(name, std::move(sprite)));
+	sprite->SetInput(input_);				// インプット
+	sprite->SetPos(pos);					// 位置設定
+	sprite->SetInstance(instance);			// 桁数設定
+	sprite->SetUseNameSprite(useSprite);	// 次のスプライト使うか
+	sprite->SetParent(&spriteBoard_->GetSprite()->GetWorldTransform2d());// ボードと親子付け
+	sprite->Init(entity2DManager_, name);								 // 初期化
+	uiElement_[type].insert(std::make_pair(name, std::move(sprite)));	 //	追加
 }
 
 

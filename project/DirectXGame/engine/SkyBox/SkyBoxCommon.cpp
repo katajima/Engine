@@ -10,9 +10,11 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
+	// PSOマネジャー
 	psoManager_ = std::make_unique<PSOManager>();
 	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
 
+	// グラフィックパイプライン生成
 	CreateGraphicsPipeline();
 
 }

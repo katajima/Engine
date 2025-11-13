@@ -28,17 +28,6 @@ void MyGame::Initialize()
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->Init();
 	sceneManager_->ChangeScene("TITLE");
-	//sceneManager_->ChangeScene("TEST");
-	
-#ifdef _DEBUG
-	//sceneManager_->ChangeScene("GAMEPLAY");
-#endif // _DEBUG
-
-
-
-
-
-	
 
 	// リソース初期化
 	InitializeResource();
@@ -72,10 +61,6 @@ void MyGame::Update()
 	dxCommon->GetImGuiManager()->Begin();
 
 	Framework::Update();
-
-
-
-	//HitStpoTime(); // ストップ用
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
@@ -369,8 +354,6 @@ void MyGame::CreateParticle()
 void MyGame::LoadModel()
 {
 	ModelManager* modelManager = dxCommon->GetModelManager();
-
-	//modelManager->LoadModel("d.gltf", "glTF");
 
 	modelManager->LoadModel("a.obj");
 
