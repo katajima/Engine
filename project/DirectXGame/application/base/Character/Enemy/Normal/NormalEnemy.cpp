@@ -104,13 +104,11 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 					// 双方が動く → 半分ずつ押し戻す（応用例）
 					GetWorldTransform().translate_ += pushVec * 0.5f;
 				}
-				//acceleration_.y = 0;
 				Velocity().y = 0;
-				//velocity_.y = 0;
-				//flags_.isGrounded = true;
 				GetWorldTransform().Update();
 			}
 		}
+
 		};
 
 	// 視野

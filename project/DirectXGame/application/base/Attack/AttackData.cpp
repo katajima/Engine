@@ -1,231 +1,174 @@
 #include "AttackData.h"
-#include "DirectXGame/engine/Animation/AnimationComponent.h"
-#include"DirectXGame/application/base/Component/MoveComponent.h"
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
 
-#pragma region ComboSequence
-
-/// <summary>
-/// コンボボタンを順番に登録
-/// </summary>
-void ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons) {
-	comboButtons_.clear();
-	for (auto& b : buttons) {
-		comboButtons_.emplace_back(b);
-	}
-}
-
-/// <summary>
-/// コンボ成立チェック
-/// </summary>
-bool ComboSequence::Update(const Input& input, float deltaTime) {
-	if (comboButtons_.empty()) return false;
-
-
-	// 次に押すべきボタン
-	const ComboButton& target = comboButtons_[currentIndex_];
-
-	// 入力判定
-	if (target.IsInput(input)) {
-		currentIndex_++;
-		// 全て成功
-		if (currentIndex_ >= comboButtons_.size()) {
-			return true;
-		}
-	}
-	return false;
-}
-#pragma endregion // コンボボタン
-
-
-#pragma region ComboCondition
-
-void ComboCondition::Update(const Input& input,float dt) {
-	// 時間加算
-	timer_ += dt;
-
-
-	bool isStart	= inputWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
-	bool isEnd = inputWindowEnd_ >= timer_;			// 受付終了時間より前なら
-
-	// 受付時間内なら
-	if (isStart && isEnd) {
-
-		// ボタン条件を満たしているなら
-		isNextCombo_ = comboSequence_.Update(input, dt);
-
-		// 強制的にコンボに移行
-		if (isCompulsionNextCombo_) {
-			isNextCombo_ = true;
-		}
-	}
-}
-
-void ComboCondition::Enter() {
-	timer_ = 0.0f;
-	isNextCombo_ = false;
-};
-
-void ComboCondition::Exit() {
-	timer_ = 0.0f;
-	isNextCombo_ = false;
-};
-
-#pragma endregion // コンボ条件
-
-
-#pragma region ComboMotion
-
-// 開始
-void ComboMotion::Enter() {
-	timer_ = 0;			// 時間を初期化
-	isMove_ = false;	// 移動しない
-	// アニメーション設定
-	animationComponent->SetAnimetion(animationName_,0.0f);	// 再生するアニメーション設定
-	animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
-	animationComponent->SetIsLoop(animationLoop_);			// ループ再生
-	animationComponent->SetAnimationSpeed(animationSpeed_);	// アニメーションスピード設定
-	animationComponent->SetIsPlaying(true);					// アニメーション再生
-}
+#pragma region DamageData
 
 // 更新
-void ComboMotion::Update(const Input& input, float dt) {
+void DamageData::Update(float dt) {
+	switch (type)
+	{
+	case DamageData::kOne:
+
+
+		break;
+	case DamageData::kContinuous:
+		break;
+	case DamageData::kDuration:
+		break;
+	default:
+		break;
+	}
+};
+// ダメージ取得
+float DamageData::GetDamage() {
+	float damage = 0;
 	
-	// 時間加算
-	timer_ += dt;
-
-	bool isStart = moveWindowStart_ <= timer_;		// 受付開始時間を過ぎたら
-	bool isEnd = moveWindowEnd_ >= timer_;			// 受付終了時間より前なら
-
-	// ゲームパッドの左スティックを動かしているか
-	bool isMoveStick = input.GetGamePadLeftStick().Length() != 0;
-
-	// 受付時間内なら
-	if (isStart && isEnd) {
-
-		// 動かしていたら
-		if (isMoveStick) {
-			isMove_ = true;
-		}
-
-
-		// 強制的に移動
-		if (isCompulsionMove_) {
-			isMove_ = true;
-		}
-	}
-	else {
-		isMove_ = false;
+	switch (type)
+	{
+	case DamageData::kOne:
+		damage = one.GetDamage();
+		break;
+	case DamageData::kContinuous:
+		damage = continuous.GetDamage();
+		break;
+	case DamageData::kDuration:
+		damage = duration.GetDamage();
+		break;
+	default:
+		break;
 	}
 
-
-	if (isMove_) {
-		moveComponent->SetSpeed(speed_);					// スピード設定
-		moveComponent->AddMove(dt, true, *worldTransform);	// 移動
+	return damage;
+};
+// 終了しているか
+bool DamageData::IsFinish() {
+	bool is = true;
+	switch (type)
+	{
+	case DamageData::kOne:
+		is = one.IsFinish();
+		break;
+	case DamageData::kContinuous:
+		is = continuous.IsFinish();
+		break;
+	case DamageData::kDuration:
+		is = duration.IsFinish();
+		break;
+	default:
+		break;
 	}
-
+	return is;
+}
+// ダメージが発生しているか
+bool DamageData::IsAttack()
+{
+	bool is = true;
+	switch (type)
+	{
+	case DamageData::kOne:
+		is = one.IsAttack();
+		break;
+	case DamageData::kContinuous:
+		is = continuous.IsAttack();
+		break;
+	case DamageData::kDuration:
+		is = duration.IsAttack();
+		break;
+	default:
+		break;
+	}
+	return is;
 }
 
-// 終了
-void ComboMotion::Exit() {
-	timer_ = 0;
-	isMove_ = false;
+#pragma endregion ダメージデータ
 
-	animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
-	animationComponent->SetIsLoop(animationLoop_);			// ループ再生
-	animationComponent->SetAnimationSpeed(animationSpeed_);	// アニメーションスピード設定
-	animationComponent->SetIsPlaying(true);					// アニメーション再生
-}
-
-#pragma endregion // コンボモーション
-
-
-#pragma region ComboDamage
-
-// 開始
-void ComboDamage::Enter() {
-	isDamage_ = false;
-	timer_ = 0.0f;
-}
-
+#pragma region One
 // 更新
-void ComboDamage::Update(float dt) {
-	// 時間加算
-	timer_ += dt;
+void DamageData::One::Update(float dt) {
 
-
-	bool isStart = damageWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
-	bool isEnd = damageWindowEnd_ >= timer_;			// 受付終了時間より前なら
-
-
-
-	// 受付時間内なら
-	if (isStart && isEnd) {
-		isDamage_ = true;
-	}
-	else {
-		isDamage_ = false;
-	}
+}
+// ダメージ取得
+float DamageData::One::GetDamage() const {
+	return damage; 
 }
 
-// 終了
-void ComboDamage::Exit() {
-	isDamage_ = false;
-	timer_ = 0.0f;
-}
+#pragma endregion // 一回ダメージ
 
-#pragma endregion //ダメージ
-
-
-#pragma region ComboCamera
-
-// 開始
-void ComboCamera::Enter() {
-	timer_ = 0.0f;
-}
-
+#pragma region Duration
 // 更新
-void ComboCamera::Update(float dt) {
-	timer_ += dt;
+void DamageData::Duration::Update(float dt) {
 
+	// カウント内なら時間を加算
+	if (count < num  && !isDamage) {
+		timer += dt;
+	}
+	else {	// カウントが回数以上になったら攻撃判定なし
+		isDamage = false;
+		isFinish = true;
+	}
 
-
+	if (interval >= timer) {
+		timer = 0;
+		count++;
+		isDamage = true;
+	}
 
 }
 
-// 終了
-void ComboCamera::Exit() {
-	timer_ = 0.0f;
+// カウントリセット
+void DamageData::Duration::Reset() {
+	count = 0;
+	isFinish = false;
 }
 
-#pragma endregion // コンボカメラ
+// ダメージ取得 
+float DamageData::Duration::GetDamage() const {
+	return damage;
+};
 
+#pragma endregion // 持続ダメージ
 
-#pragma region ComboData
-
-// 開始
-void ComboData::Enter() {
-	comboCondition.Enter();					// コンボ用条件クラス開始
-	motion.Enter();							// コンボ用モーションクラス開始
-	damage.Enter();							// コンボ用ダメージクラス開始
-	camera.Enter();							// コンボ用カメラクラス開始
-}
-
+#pragma region Continuous
 // 更新
-void ComboData::Update(const Input& input, float dt) {
-	comboCondition.Update(input, dt);		// コンボ用条件クラス更新
-	motion.Update(input, dt);				// コンボ用モーションクラス更新
-	damage.Update(dt);						// コンボ用ダメージクラス更新
-	camera.Update(dt);						// コンボ用カメラクラス更新
+void DamageData::Continuous::Update(float dt) {
+	// カウント内なら時間を加算
+	if (count < num) {
+		timer += dt;
+	}
+	else {	// カウントが回数以上になったら攻撃判定なし
+		isDamage = false;
+		isFinish = true;
+	}
+
+	if (interval >= timer) {
+		timer = 0;
+		count++;
+		isDamage = true;
+	}
+};
+
+// カウントリセット
+void DamageData::Continuous::Reset() {
+	count = 0;
+	isFinish = false;
 }
 
-// 終了
-void ComboData::Exit() {
-	comboCondition.Exit();					// 条件クラス終了
-	motion.Exit();							// コンボ用モーションクラス終了
-	damage.Exit();							// コンボ用ダメージクラス終了
-	camera.Exit();							// コンボ用カメラクラス終了
+// ダメージ取得
+float DamageData::Continuous::GetDamage() const
+{
+	float damage = 0;
+	switch (oneHitDamegeType)
+	{
+	case DamageData::kConstant:	// 一定
+		damage = this->damage;
+		break;
+	case DamageData::kCustom:	// カスタム
+		damage = damages[count];
+		break;
+	default:
+		break;
+	}
+	return damage;
 }
+#pragma endregion // 連撃ダメージ
 
-#pragma endregion // コンボデータ
 

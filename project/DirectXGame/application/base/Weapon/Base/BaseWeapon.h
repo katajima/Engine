@@ -1,6 +1,6 @@
 #pragma once
 #include "WeaponData.h"
-#include "DirectXGame/application/base/Attack/AttackData.h"
+#include "DirectXGame/application/base/Attack/Combo/ComboData.h"
 #include "DirectXGame/application/base/Attack/Combo/ComboState.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 

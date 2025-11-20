@@ -108,10 +108,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectField.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectModule.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Response\Response.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
@@ -719,11 +721,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectField.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectModule.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Response\Response.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Response\ResponseData.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />

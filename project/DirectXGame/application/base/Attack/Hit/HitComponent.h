@@ -48,10 +48,8 @@ public:
 			else {
 				// 重力をオンに
 				object->GetRigidBodyComponent()->SetIsGravity(true);
-			}
-			
+			}	
 		}
-
 	}
 
 	// ヒットしたか設定
