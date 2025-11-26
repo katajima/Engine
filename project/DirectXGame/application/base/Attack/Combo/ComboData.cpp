@@ -45,17 +45,17 @@ void ComboCondition::Update(const Input& input, float dt) {
 	timer_ += dt;
 
 
-	bool isStart = inputWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
-	bool isEnd = inputWindowEnd_ >= timer_;			// 受付終了時間より前なら
+	bool isStart = data_.inputWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
+	bool isEnd = data_.inputWindowEnd_ >= timer_;			// 受付終了時間より前なら
 
 	// 受付時間内なら
 	if (isStart && isEnd) {
 
 		// ボタン条件を満たしているなら
-		isNextCombo_ = comboSequence_.Update(input, dt);
+		isNextCombo_ = data_.comboSequence_.Update(input, dt);
 
 		// 強制的にコンボに移行
-		if (isCompulsionNextCombo_) {
+		if (data_.isCompulsionNextCombo_) {
 			isNextCombo_ = true;
 		}
 	}
@@ -81,10 +81,10 @@ void ComboMotion::Enter() {
 	timer_ = 0;			// 時間を初期化
 	isMove_ = false;	// 移動しない
 	// アニメーション設定
-	animationComponent->SetAnimetion(animationName_, 0.0f);	// 再生するアニメーション設定
+	animationComponent->SetAnimetion(data_.animationName_, 0.0f);	// 再生するアニメーション設定
 	animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
-	animationComponent->SetIsLoop(animationLoop_);			// ループ再生
-	animationComponent->SetAnimationSpeed(animationSpeed_);	// アニメーションスピード設定
+	animationComponent->SetIsLoop(data_.animationLoop_);			// ループ再生
+	animationComponent->SetAnimationSpeed(data_.animationSpeed_);	// アニメーションスピード設定
 	animationComponent->SetIsPlaying(true);					// アニメーション再生
 }
 
@@ -94,8 +94,8 @@ void ComboMotion::Update(const Input& input, float dt) {
 	// 時間加算
 	timer_ += dt;
 
-	bool isStart = moveWindowStart_ <= timer_;		// 受付開始時間を過ぎたら
-	bool isEnd = moveWindowEnd_ >= timer_;			// 受付終了時間より前なら
+	bool isStart = data_.moveWindowStart_ <= timer_;		// 受付開始時間を過ぎたら
+	bool isEnd = data_.moveWindowEnd_ >= timer_;			// 受付終了時間より前なら
 
 	// ゲームパッドの左スティックを動かしているか
 	bool isMoveStick = input.GetGamePadLeftStick().Length() != 0;
@@ -110,7 +110,7 @@ void ComboMotion::Update(const Input& input, float dt) {
 
 
 		// 強制的に移動
-		if (isCompulsionMove_) {
+		if (data_.isCompulsionMove_) {
 			isMove_ = true;
 		}
 	}
@@ -120,7 +120,7 @@ void ComboMotion::Update(const Input& input, float dt) {
 
 
 	if (isMove_) {
-		moveComponent->SetSpeed(speed_);					// スピード設定
+		moveComponent->SetSpeed(data_.speed_);					// スピード設定
 		moveComponent->AddMove(dt, true, *worldTransform);	// 移動
 	}
 
@@ -132,8 +132,8 @@ void ComboMotion::Exit() {
 	isMove_ = false;
 
 	animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
-	animationComponent->SetIsLoop(animationLoop_);			// ループ再生
-	animationComponent->SetAnimationSpeed(animationSpeed_);	// アニメーションスピード設定
+	animationComponent->SetIsLoop(data_.animationLoop_);			// ループ再生
+	animationComponent->SetAnimationSpeed(data_.animationSpeed_);	// アニメーションスピード設定
 	animationComponent->SetIsPlaying(true);					// アニメーション再生
 }
 
@@ -154,8 +154,8 @@ void ComboDamage::Update(float dt) {
 	timer_ += dt;
 
 
-	bool isStart = damageWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
-	bool isEnd = damageWindowEnd_ >= timer_;			// 受付終了時間より前なら
+	bool isStart = data_.damageWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
+	bool isEnd = data_.damageWindowEnd_ >= timer_;			// 受付終了時間より前なら
 
 
 

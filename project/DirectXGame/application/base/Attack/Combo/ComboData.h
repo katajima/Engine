@@ -102,6 +102,18 @@ private:
 // コンボ受付条件クラス
 class ComboCondition {
 public:
+	struct Data
+	{
+		float inputWindowStart_ = 0.1f;			// 入力受付スタート
+		float inputWindowEnd_ = 0.5f;			// 入力受付エンド
+
+		bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
+		ComboSequence comboSequence_;			// コンボボタン条件
+		float staminaCost = 0;					// スタミナ消費量
+		float mpCost = 0;                       // MP消費
+	};
+
+
 	// 開始
 	void Enter();
 
@@ -116,22 +128,17 @@ public:
 
 	// コンボ条件発動時間設定
 	void ConditionStartEnd(float start, float end) {
-		inputWindowStart_ = start;
-		inputWindowEnd_ = end;
+		data_.inputWindowStart_ = start;
+		data_.inputWindowEnd_ = end;
 	};
 
-public:
-	float inputWindowStart_ = 0.1f;			// 入力受付スタート
-	float inputWindowEnd_ = 0.5f;			// 入力受付エンド
+	// データ構造体取得
+	Data& GetData() { return data_; }
 
-	bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
-	ComboSequence comboSequence_;			// コンボボタン条件
-	float staminaCost = 0;					// スタミナ消費量
-	float mpCost = 0;                       // MP消費
 private:
 	float timer_ = 0.0f;				// 時間
 	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
-
+	Data data_;
 };
 
 
@@ -145,6 +152,23 @@ class WorldTransform;
 /// </summary>
 class ComboMotion {
 public:
+	// データ構造体
+	struct Data
+	{
+		float moveWindowStart_ = 0.1f;			// 移動受付スタート
+		float moveWindowEnd_ = 0.5f;			// 移動受付エンド
+		float speed_ = 0;						// 移動速度
+
+		bool isCompulsionMove_ = true;			// 強制的に移動
+		bool isCompulsionDirection_ = false;	// 強制方向に移動
+
+
+		// アニメーション
+		std::string animationName_ = "no";		// アニメーション名前
+		bool animationLoop_ = false;			// アニメーションループ
+		float animationSpeed_ = 1.0f;			// アニメーションスピード
+	};
+
 	// 開始
 	void Enter();
 
@@ -159,8 +183,8 @@ public:
 
 	// 移動可能時間設定
 	void MoveStartEnd(float start, float end) {
-		moveWindowStart_ = start;
-		moveWindowEnd_ = end;
+		data_.moveWindowStart_ = start;
+		data_.moveWindowEnd_ = end;
 	};
 
 	// アニメーション設定
@@ -172,22 +196,13 @@ public:
 	// ワールドトランスフォーム設定
 	void SetWorld(WorldTransform* world) { worldTransform = world; };
 
-public:
-	float moveWindowStart_ = 0.1f;			// 移動受付スタート
-	float moveWindowEnd_ = 0.5f;			// 移動受付エンド
-	float speed_ = 0;						// 移動速度
+	// データ構造体取得
+	Data& GetData() { return data_; }
 
-	bool isCompulsionMove_ = true;			// 強制的に移動
-	bool isCompulsionDirection_ = false;	// 強制方向に移動
-
-
-	// アニメーション
-	std::string animationName_ = "no";		// アニメーション名前
-	bool animationLoop_ = false;			// アニメーションループ
-	float animationSpeed_ = 1.0f;			// アニメーションスピード
 private:
 	float timer_ = 1.0f;					// コンボ時に移動する時間
 	bool isMove_ = true;					// 移動出来るか
+	Data data_;
 private: // 貰いもの 
 	AnimationComponent* animationComponent;	// アニメーション
 	MoveComponent* moveComponent;			// 移動
@@ -200,6 +215,19 @@ private: // 貰いもの
 /// </summary>
 class ComboDamage {
 public:
+	// データ構造体
+	struct Data
+	{
+		float damageWindowStart_ = 0.1f;		// ダメージ受付スタート
+		float damageWindowEnd_ = 0.5f;			// ダメージ受付エンド
+
+		float damage_ = 0;						// ダメージ
+
+		bool isWeaponColliderHit_ = true;		// 武器自体からダメージ判定があるか？
+		bool isWeaponImpactColliderHit_ = false;// 武器から出てくる衝撃波ダメージ判定があるか？
+	};
+
+
 	// 開始
 	void Enter();
 
@@ -214,21 +242,23 @@ public:
 
 	// ダメージ発生時間設定 
 	void DamageStartEnd(float start, float end) {
-		damageWindowStart_ = start;
-		damageWindowEnd_ = end;
+		data_.damageWindowStart_ = start;
+		data_.damageWindowEnd_ = end;
 	}
 
-public:
-	float damageWindowStart_ = 0.1f;		// ダメージ受付スタート
-	float damageWindowEnd_ = 0.5f;			// ダメージ受付エンド
+	// データ構造体取得
+	Data& GetData() { return data_; }
 
-	float damage_ = 0;						// ダメージ
+	// ダメージ設定
+	void SetDamage(float damage) { data_.damage_ = damage; }
 
-	bool isWeaponColliderHit_ = true;		// 武器自体からダメージ判定があるか？
-	bool isWeaponImpactColliderHit_ = false;// 武器から出てくる衝撃波ダメージ判定があるか？
+	// ダメージ取得
+	float GetDamage() const { return data_.damage_; }
+
 private:
 	bool isDamage_ = false;					// ダメージ発生しているか
 	float timer_ = 1.0f;					// 時間
+	Data data_;
 };
 
 // 前方宣言
@@ -239,6 +269,15 @@ class CameraManager;
 /// </summary>
 class ComboCamera {
 public:
+	// データ構造体
+	struct Data
+	{
+		std::string cameraName_ = "no";			// カメラ名
+		std::string baseCameraName_ = "no";		// 元のカメラ名
+		bool isChangeCamera_ = false;			// カメラを変更するか
+		float interpolation_ = 0.0f;			// 補間
+	};
+
 	// 開始
 	void Enter();
 
@@ -251,16 +290,12 @@ public:
 	// カメラ管理設定
 	void SetCameraManager(CameraManager* camera) { cameraManager = camera; }
 
-public:
-	std::string cameraName_ = "no";			// カメラ名
-	std::string baseCameraName_ = "no";		// 元のカメラ名
-	bool isChangeCamera_ = false;			// カメラを変更するか
-	float interpolation_ = 0.0f;			// 補間
-
+	// データ構造体取得
+	Data& GetData();
 
 private:
 	float timer_ = 0.0f;					// 時間
-
+	Data data_;
 	CameraManager* cameraManager = nullptr;	// カメラ管理
 };
 
@@ -278,7 +313,8 @@ public:
 	// 終了
 	void Exit();
 
-public:
+//private:
+
 	KnockbackData knockbackData{};			// ノックバックデータ
 	ComboCondition comboCondition{};		// コンボ条件クラス
 	ComboMotion motion{};					// コンボ用モーションクラス

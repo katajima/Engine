@@ -1,4 +1,122 @@
 #include "AttackData.h"
+#include <DirectXGame/engine/Math/Random.h>
+
+#pragma region KnockbackData
+
+Vector3 KnockbackData::DirectionPower() const
+{
+	Vector3 reslut{};
+	
+	if (data_.type == Type::kDirection) {	// 方向
+		reslut = data_.normal.Normalize();
+		// y座標同士の高さが同じでもy方向に飛ばしたい場合は
+		if (data_.isVerticalBoost_) {
+			// yを1に
+			reslut.y = 1.0f;
+		}
+		// それぞれかける
+		reslut.x *= data_.power_;
+		reslut.y *= data_.verticalBoost_;
+		reslut.z *= data_.power_;
+	}
+	else if (data_.type == Type::kRandom) {	// ランダム
+		reslut = Vector3{
+			Random::RandomFloat(-data_.power_,data_.power_),
+			Random::RandomFloat(-data_.power_,data_.power_),
+			Random::RandomFloat(-data_.power_,data_.power_)
+		};
+	}
+
+
+	float t = std::clamp(timer_ / data_.duration_, 0.0f, 1.0f);
+
+	// 減衰係数
+	// damping_=0 → 1.0（減衰なし）
+	// damping_=1 → (1-t)（終了で完全停止）
+	float dampFactor = 1.0f - (t * data_.damping_);
+
+	reslut *= dampFactor;
+
+	return reslut;
+}
+
+#pragma endregion // ノックバックデータ
+
+#pragma region AirStickData
+
+void AirStickData::Update(float dt) {
+	if (world_ == nullptr) return;
+	
+	timer_ += dt;
+	
+	// 終了しているなら処理しない
+	if (timer_ > data_.duration_) {
+		return;
+	}
+	Vector3 targetPos{};
+
+	if (data_.useWorldSpace_) {
+		// すでに targetOffset_ がワールド座標基準の場合
+		targetPos = data_.targetOffset_;
+	}
+	else {
+		// 攻撃者の位置を origin としてオフセットを計算する場合
+		// attackerPos_ が攻撃者の現在位置（外部からセットされる前提）
+		targetPos = world_->GetWorldPosition() + data_.targetOffset_;
+	}
+
+	//-----------------------------------------
+	// 2. 現在位置からターゲット位置への補正
+	//-----------------------------------------
+	Vector3 dir = targetPos;// -data_.currentPos_;   // 現在 → ターゲット
+	float dist = dir.Length();
+
+	if (dist > 0.0001f) {
+		dir.Normalize();
+	}
+
+	//-----------------------------------------
+	// 3. 追従速度に応じて移動量を計算
+	//-----------------------------------------
+	// followSpeed_: 1フレームあたりの吸着スピード
+	// stickStrength_: 吸着補正の強さ
+	float moveStep = data_.followSpeed_ * dt;
+
+	// 補間（LERP のような計算）
+	Vector3 move = dir * (moveStep * data_.stickStrength_);
+
+	//-----------------------------------------
+	// 4. 移動を適用
+	//-----------------------------------------
+	// 終端誤差を防ぐためのクランプ
+	if (move.Length() > dist) {
+		//data_.currentPos_ = targetPos;
+	}
+	else {
+		//data_.currentPos_ += move;
+	}
+
+	//-----------------------------------------
+	// 5. 向き補正（攻撃者の方向へ向かせる）
+	//-----------------------------------------
+	if (data_.keepFacingAttacker_) {
+		Vector3 lookDir = world_->GetWorldPosition();// -data_.currentPos_;
+		if (lookDir.Length() > 0.0001f) {
+			lookDir.Normalize();
+			// Y-Up, Z-Forward の座標系なので Z を正面方向とする
+			//data_.currentRot_.y = std::atan2(lookDir.x, lookDir.z);
+		}
+	}
+
+	//-----------------------------------------
+	// 6. 重力の ON/OFF
+	//-----------------------------------------
+	if (data_.gravityEnabled_) {
+		//data_.gravityEnabled_ = false;
+	}
+}
+
+#pragma endregion // エアスティックデータ
 
 #pragma region DamageData
 
@@ -7,7 +125,6 @@ void DamageData::Update(float dt) {
 	switch (type)
 	{
 	case DamageData::kOne:
-
 
 		break;
 	case DamageData::kContinuous:
@@ -171,4 +288,17 @@ float DamageData::Continuous::GetDamage() const
 }
 #pragma endregion // 連撃ダメージ
 
+#pragma region 
 
+void AttackData::Update(float dt) {
+	knockback.Update(dt);	// ノックバックデータ更新
+	damageData.Update(dt);	// ダメージデータ更新
+}
+
+
+bool AttackData::IsFinish(){
+	return damageData.IsFinish() && knockback.IsFinish();
+}
+;
+
+#pragma endregion // 攻撃データ

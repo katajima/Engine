@@ -11,9 +11,9 @@ void DamageModule::Effect(BaseCharacter* character){
 void KnockbackModule::Effect(BaseCharacter* character) {
 
 	// ノックバックのデータをそれぞれ送る
-	character->GetHitMotionComponent()->SetIsKnockback(isknockback_);	// ノックバックするか
-	character->GetHitMotionComponent()->SetKnockbackData(knockback_);	// ノックバックデータ
-	character->GetHitMotionComponent()->SetKnockbackTime(knockbackTime_);// ノックバック時間
+	//character->GetHitMotionComponent()->SetIsKnockback(isknockback_);	// ノックバックするか
+	//character->GetHitMotionComponent()->SetKnockbackData(knockback_);	// ノックバックデータ
+	//character->GetHitMotionComponent()->SetKnockbackTime(knockbackTime_);// ノックバック時間
 }
 
 void ChangeStateModule::Effect(BaseCharacter* character) {

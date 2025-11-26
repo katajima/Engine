@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Attack/Hit/HitComponent.h"
+#include <DirectXGame/application/base/Attack/Response/Response.h>
 
 // 前方宣言
 class Effect;
@@ -201,8 +202,8 @@ public:
 	CombatStatComponent* GetCombatStatComponent() { return combatStatComponent_.get(); }
 	// キャラクターパラメータコンポーネント取得
 	CharacterParameterComponent& GetCharacterParameterComponent() { return characterParameterComponent_; }
-	// ヒットコンポーネント取得
-	HitMotionComponent* GetHitMotionComponent() { return hitMotionComponent_.get(); }
+	// 攻撃応答システム取得
+	ResponseSystem* GetResponseSystem() { return responseSystem_.get(); }
 
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;			// オブジェクトコンポーネント
@@ -212,7 +213,7 @@ protected:
 	std::unique_ptr<CharacterStateMachine> stateMachine_;		// キャラクターの状態管理
 	std::unique_ptr<MoveComponent> moveComponent_;				// 移動コンポーネント
 	std::unique_ptr<CombatStatComponent> combatStatComponent_;	// 攻撃パラメーター補正
-	std::unique_ptr <HitMotionComponent> hitMotionComponent_;	// ヒットモーション
+	std::unique_ptr<ResponseSystem> responseSystem_;			// 攻撃応答システムクラス
 
 protected:
 	// キャラクターパラメータコンポーネント

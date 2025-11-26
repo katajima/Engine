@@ -112,6 +112,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectField.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectModule.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitComponent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotion.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Response\Response.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
@@ -725,6 +727,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectField.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectModule.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Response\Response.h" />

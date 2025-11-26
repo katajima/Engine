@@ -41,73 +41,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
 
-		// 敵同士の衝突応答
-		if (other->tag == CollisionTag::Enemy) {
-			Vector3 pushVec;
-			if (self->ResolveCollision(*other, pushVec)) {
-				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
-					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-				}
-
-				GetWorldTransform().Update();
-			}
-
-			isStopMove_ = true;
-			
-		}
+		//  敵同士の衝突応答
+		responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
 
 		// プレイヤーとの衝突応答
-		if (other->tag == CollisionTag::Player) {
-			// ここにダメージ処理などを書く
-			std::cout << "敵がプレイヤーに当たった！" << std::endl;
-
-			Vector3 pushVec;
-			if (self->ResolveCollision(*other, pushVec)) {
-				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
-					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-				}
-
-				GetWorldTransform().Update();
-			}
-		}
+		responseSystem_->GetHitResponse()->Hit(CollisionTag::Player,self,other);
 
 		// 壁との衝突応答
-		if (other->tag == CollisionTag::Wall) {
-			Vector3 pushVec;
-			if (self->ResolveCollision(*other, pushVec)) {
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
-					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-				}
-				Velocity().y = 0;
-				GetWorldTransform().Update();
-			}
-		}
+		responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall,self,other);
 
 		};
 
@@ -119,9 +60,10 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
 
 
-	// ヒットモーション
-	hitMotionComponent_ = std::make_unique<HitMotionComponent>();
-	hitMotionComponent_->Init(0.1f, { 2.5f,2.2f,2.5f });
+	// 攻撃応答システムクラス初期化
+	responseSystem_ = std::make_unique<ResponseSystem>();
+	responseSystem_->Initialize(&GetCharacterParameterComponent(),objectComponent_.get());
+	responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
 
 	// オブジェクト状態生存
 	objectComponent_->GetObjectStateFlags().isAlive = true;
@@ -209,12 +151,12 @@ void NormalEnemy::Update()
 		moveComponent_->AddMove(GetTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
 		// 着地
 		moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
-		// ヒット
-		hitMotionComponent_->Update(GetTime(), GetObjectComponent());
 		// 視野
 		visionComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform().GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
 		// 移動制限
 		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
+		// 応答システム
+		responseSystem_->Update(GetTime());
 	}
 }
 

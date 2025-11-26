@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include <DirectXGame/engine/Collider/CollisionTypeIdDef.h>
+#include "DirectXGame/application/base/Attack/Hit/HitComponent.h"
 
 // 前方宣言
 class CharacterParameterComponent;	// キャラクターパラメータ設定
@@ -8,10 +9,12 @@ class ObjectComponent;				// オブジェクト
 class WorldTransform;				// オブジェクト位置
 class Collider;						// コライダー
 
+
+
 /// <summary>
 /// 攻撃を食らったときの応答クラス
 /// </summary>
-class AttackResponseData {
+class AttackResponse {
 public:
 
 	/// <summary>
@@ -31,13 +34,29 @@ public:
 	/// </summary>
 	void SetHit(const AttackData& data);
 
-private:
+	/// <summary>
+	/// ヒットモーションクラス取得
+	/// </summary>
+	/// <returns></returns>
+	HitMotionSystem* GetHitMotionSystem() { return hitMotionSystem_.get(); }
 
 private:
-	CharacterParameterComponent* paremeter;
-	ObjectComponent* object;
+	// ヒットモーション
+	std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
+private:// 貰いもの
+	// キャラクターパラメータ
+	CharacterParameterComponent* paremeter = nullptr;
+	// オブジェクト
+	ObjectComponent* object = nullptr;
+	// 攻撃データ<vector>
 	std::vector<AttackData> datas_;
+	
+	// ヒットフラグ<タグ、フラグ>何かヒットしたときに使う用のやつ 
+	std::map<std::string, bool> hitFlags_;
+
 };
+
+
 
 /// <summary>
 /// 衝突応答
@@ -46,7 +65,7 @@ class HitResponse {
 public:
 
 	// 衝突応答(タグごとの)
-	void Hit(CollisionTag tag,Collider* self, Collider* other);
+	void Hit(CollisionTag tag, Collider* self, Collider* other);
 
 	// 使っているもののワールドトランスフォームを設定
 	void SetOwner(WorldTransform* owner) { transform = owner; };
@@ -55,3 +74,50 @@ private:
 	WorldTransform* transform;	//　衝突応答用
 
 };
+
+
+/// <summary>
+/// 攻撃もしくは接触衝突時のシステムクラス
+/// </summary>
+class ResponseSystem {
+public:
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <param name="paremeter">kキャラクターパラメータクラス</param>
+	/// <param name="object">オブジェクトクラス</param>
+	void Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object);
+
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void Update(float dt);
+
+	/// <summary>
+	/// 攻撃衝突応答クラス取得
+	/// </summary>
+	/// <returns></returns>
+	AttackResponse* GetAttackResponse() { return attackResponse_.get(); }
+
+	/// <summary>
+	/// 接触衝突応答クラス取得
+	/// </summary>
+	/// <returns></returns>
+	HitResponse* GetHitResponse() { return hitResponse_.get(); };
+
+
+	/// <summary>
+	/// ヒットモーションクラス取得
+	/// </summary>
+	HitMotionSystem* GetHitMotionSystem() { return attackResponse_->GetHitMotionSystem(); }
+
+private:
+	// 攻撃衝突応答クラス
+	std::unique_ptr<AttackResponse> attackResponse_ = nullptr;
+	// 衝突応答クラス(押し戻しなど)
+	std::unique_ptr<HitResponse> hitResponse_ = nullptr;	
+};
+

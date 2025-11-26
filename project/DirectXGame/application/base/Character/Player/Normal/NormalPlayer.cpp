@@ -43,7 +43,6 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	combatStatComponent_ = std::make_unique<CombatStatComponent>();
 	combatStatComponent_->Initialize(&characterParameterComponent_);
 
-
 	// 移動コンポーネント初期化
 	InitMoveComponent();
 	moveComponent_->SetMaxJumpCount(2);
@@ -75,49 +74,13 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 		uint32_t otherId = otherComponent->GetUniqueId();
 
-
-		Vector3 pushVec;
-
 		// 敵との衝突応答
-		if (other->tag == CollisionTag::Enemy) {
-			if (self->ResolveCollision(*other, pushVec)) {
-				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
+		responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy,self,other);
 
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-
-				}
-				GetWorldTransform().Update();
-			}
-		}
 		// 壁との衝突応答
-		if (other->tag == CollisionTag::Wall) {
-			if (self->ResolveCollision(*other, pushVec)) {
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
+		responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall,self,other);
 
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-
-				}
-				Velocity().y = 0;
-
-				//acceleration_.y = 0;
-				GetWorldTransform().Update();
-			}
-		}
+		
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;
@@ -136,6 +99,11 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		}
 		};
 
+
+	// 応答システム初期化
+	responseSystem_ = std::make_unique<ResponseSystem>();
+	responseSystem_->Initialize(&GetCharacterParameterComponent(), objectComponent_.get());
+	responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
 
 
 	// スペシャル攻撃
@@ -252,7 +220,8 @@ void NormalPlayer::Update()
 	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
 	// 移動コンポーネント着地状態か
 	moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
-	
+	// 応答システム
+	responseSystem_->Update(GetTime());
 	
 	// クリエイティブモードではないなら移動制限を付ける
 	if (!isCreativeMode) {

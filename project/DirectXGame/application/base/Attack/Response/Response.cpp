@@ -2,25 +2,54 @@
 #include <DirectXGame/application/base/Object/ObjectComponent.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
-#pragma region AttackResponseData
 
-void AttackResponseData::Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object) {
+
+#pragma region ResponseSystem
+
+
+void ResponseSystem::Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object) {
+
+	// 攻撃衝突応答クラス初期化
+	attackResponse_ = std::make_unique<AttackResponse>();
+	attackResponse_->Initialize(paremeter,object);
+
+	// 接触衝突応答クラス
+	hitResponse_ = std::make_unique<HitResponse>();
+	hitResponse_->SetOwner(&object->GetWorldTransform());
+
+}
+
+void ResponseSystem::Update(float dt) {
+	attackResponse_->Update(dt);
+}
+
+#pragma endregion // 応答システム
+
+
+#pragma region AttackResponse
+
+void AttackResponse::Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object) {
 	assert(paremeter && object);
 	this->paremeter = paremeter;
 	this->object = object;
+
+	// 攻撃衝突モーションクラス初期化
+	hitMotionSystem_ = std::make_unique<HitMotionSystem>();
+	
 }
 
-void AttackResponseData::Update(float dt) {
+void AttackResponse::Update(float dt) {
 	
-
-	// 攻撃データ
+	// 攻撃データ更新
 	for (auto& data : datas_) {
-		
+		data.Update(dt);
 	}
 
+	// 被撃モーション更新
+	hitMotionSystem_->Update(dt,object);
 }
 
-void AttackResponseData::SetHit(const AttackData& data) {
+void AttackResponse::SetHit(const AttackData& data) {
 	datas_.push_back(data);
 }
 
