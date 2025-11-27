@@ -92,4 +92,25 @@ private:
 	Effect* effect_ = nullptr;
 	BaseEnemy* target_ = nullptr;
 	BasePlayer* player_ = nullptr;
+
+
+private: // 一旦
+
+	// 補間係数（0.0f〜1.0f）
+	const float moveLerpSpeed = 0.15f;
+	// --- 補間率（0.0f〜1.0f）---
+	const float rotLerpSpeed = 0.15f;  // ← 回転スピード調整用（0.0〜1.0）
+	
+
+	struct ProvisionalData {
+		Vector3 translateMuzzle = { 0, 0, -5.0f };
+		Vector3 translateCartridge = { 0, 0, 1.0f };
+
+		float bulletSpeed = 500.0f;
+		float bulletSpeedScale = 2.0f;
+
+		float damage = 20.0f;
+	};
+	ProvisionalData provisionalData_;
+
 };

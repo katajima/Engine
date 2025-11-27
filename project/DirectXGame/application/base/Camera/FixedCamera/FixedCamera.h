@@ -19,5 +19,16 @@ public:
 	void Update() override;
 private:
 
+
+
+private: // 一旦
+
+	struct ProvisionalData {
+		Vector3 translate = { 0, 107, 0 };
+		Vector3 rotate = { 0.341f, 0.0f, 0.0f };
+		float farClip_ = 15000.0f;
+	};
+	ProvisionalData provisionalData_;
+
 };
 

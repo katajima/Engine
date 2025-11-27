@@ -33,4 +33,13 @@ private:
 	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
 	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
 
+
+private: // 一旦
+
+	struct ProvisionalData {
+		Vector3 translate = { 0, 107, 0 };
+		Vector3 rotate = { 0.341f, 0.0f, 0.0f };
+		float farClip_ = 15000.0f;
+	};
+	ProvisionalData provisionalData_;
 };

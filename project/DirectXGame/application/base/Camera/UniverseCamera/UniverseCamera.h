@@ -24,5 +24,18 @@ private:
 	float strScaleZCamera = 5.5f;
 	float endScaleZCamera = 1.0f;
 
+
+private: // 一旦
+
+	struct ProvisionalData {
+		Vector3 translate = { 3200, 107, 3820 };
+		Vector3 rotate = { -0.141f, 2.620f, 0.0f };
+		float farClip_ = 15000.0f;
+
+		float maxT = 1.25f;
+		float scaleZCamera = 2.0f;
+	};
+	ProvisionalData provisionalData_;
+
 };
 

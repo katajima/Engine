@@ -13,15 +13,15 @@ void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  G
     // カメラ初期化
     uniqueCamera_ = std::make_unique<Camera>();
     uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
-    uniqueCamera_->farClip_ = 15000.0f;
-    uniqueCamera_->transform_.rotate.x = Math::DegreesToRadians(20);
+    uniqueCamera_->farClip_ = provisionalData_.farClip_;
+    uniqueCamera_->transform_.rotate.x = provisionalData_.rotate.x;
 
    
     uniqueCamera_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
 
-    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = 10.0f;
-    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = 9;
-    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = 100.0f;
+    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = provisionalData_.bloomIndensity;
+    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
+    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
 }
 
 void FollowCamera::Update()
@@ -55,7 +55,7 @@ void FollowCamera::Update()
 
             // スムーズに補間（必要なら）
             uniqueCamera_->transform_.rotate.y = targetYaw;
-            uniqueCamera_->transform_.rotate.x = std::clamp(targetPitch, Math::DegreesToRadians(-15.0f), Math::DegreesToRadians(60.0f));
+            uniqueCamera_->transform_.rotate.x = std::clamp(targetPitch, Math::DegreesToRadians(provisionalData_.rotateMinX), Math::DegreesToRadians(provisionalData_.rotateMaxX));
         }
         else {
             // 通常の自由操作
@@ -63,19 +63,19 @@ void FollowCamera::Update()
                 uniqueCamera_->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
                 uniqueCamera_->transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
 
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(-15.0f), Math::DegreesToRadians(60.0f));
+                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(provisionalData_.rotateMinX), Math::DegreesToRadians(provisionalData_.rotateMaxX));
             }
             else {
                 // 回転移動
                 if (input_->IsPushKey(DIK_LEFT)) {
-                    uniqueCamera_->transform_.rotate.y -= 0.01f;
+                    uniqueCamera_->transform_.rotate.y -= kRotateSpeed;
                 }
                 // 回転移動
                 if (input_->IsPushKey(DIK_RIGHT)) {
-                    uniqueCamera_->transform_.rotate.y += 0.01f;
+                    uniqueCamera_->transform_.rotate.y += kRotateSpeed;
                 }
 
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(0.0f), Math::DegreesToRadians(60.0f));
+                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(0.0f), Math::DegreesToRadians(provisionalData_.rotateMaxX));
             }
         }
 
@@ -91,8 +91,8 @@ void FollowCamera::Update()
         // 地面への沈み補正
         if (desiredCameraPos.y < 0.0f) {
             float depth = -desiredCameraPos.y;
-            float maxZOffset = 30.0f;
-            float zAdjust = std::clamp(depth * 2.0f, 0.0f, maxZOffset);
+           
+            float zAdjust = std::clamp(depth * provisionalData_.depthScale, 0.0f, provisionalData_.maxZOffset);
 
             Vector3 direction = Normalize(Subtract(targetPos, desiredCameraPos));
             Vector3 zOffset = Multiply(direction, zAdjust);
@@ -107,7 +107,7 @@ void FollowCamera::Update()
 
     // 揺れ処理
     if (Camera::isShake_) {
-        uniqueCamera_->SetShake(0.2f, { 0.1f, 0.3f, 0.1f });
+        uniqueCamera_->SetShake(provisionalData_.shackTime, provisionalData_.shackWidth);
     }
 
     // カメラ更新

@@ -468,9 +468,6 @@
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerStanBullet.cpp">
-      <Filter>ソース ファイル\application\base</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
@@ -1672,9 +1669,6 @@
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Special\Base\BaseSpecial.h">
-      <Filter>ヘッダー ファイル\application\base\attack</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerStanBullet.h">
       <Filter>ヘッダー ファイル\application\base\attack</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h">

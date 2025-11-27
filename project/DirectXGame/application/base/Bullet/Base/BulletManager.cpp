@@ -1,12 +1,7 @@
 #include "BulletManager.h"
 
-
 #include "DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.h"
-#include "DirectXGame/application/base/Bullet/PlayerStanBullet.h"
 #include "DirectXGame/application/base/Bullet/PlayerBullet.h"
-
-
-
 
 BulletManager::~BulletManager()
 {
@@ -84,7 +79,6 @@ void BulletManager::GenerateBulletRange(BulletType type, Vector3 position, Vecto
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
 		break;
 	case BulletType::kPlayerStan:	// スタン弾
-		bullet = std::make_unique<PlayerStanBullet>();
 		break;
 	default:
 		break;
@@ -117,7 +111,6 @@ void BulletManager::GenerateBullet(BulletType type, const BulletInfo& info, Base
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
 		break;
 	case BulletType::kPlayerStan:	// スタン弾
-		bullet = std::make_unique<PlayerStanBullet>();
 		break;
 	default:
 		break;

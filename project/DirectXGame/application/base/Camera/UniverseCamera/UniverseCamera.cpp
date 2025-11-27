@@ -9,17 +9,17 @@ void UniverseCamera::Initialize(Input* input, Entity3DManager* entity3DManager, 
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Camera>();
 	uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = 15000.0f;
+	uniqueCamera_->farClip_ = provisionalData_.farClip_;
 	
 	// カメラ位置回転設定
-	uniqueCamera_->transform_.translate = { 3200, 107, 3820 };
-	uniqueCamera_->transform_.rotate = { -0.141f, 2.620f, 0.0f };
+	uniqueCamera_->transform_.translate = provisionalData_.translate;
+	uniqueCamera_->transform_.rotate = provisionalData_.rotate;
 
 	// 起動時間
-	timer_.maxT = 1.25f;
+	timer_.maxT = provisionalData_.maxT;
 	
 	// 補間設定
-	scaleLerp_.Initialize(strScaleZCamera,endScaleZCamera, 0.0f, 2.0f);
+	scaleLerp_.Initialize(strScaleZCamera,endScaleZCamera, 0.0f, provisionalData_.scaleZCamera);
 }
 
 void UniverseCamera::Update() {

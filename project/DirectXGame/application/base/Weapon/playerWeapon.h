@@ -45,5 +45,35 @@ private:
 	std::shared_ptr<ComboNodeState> attack2;
 	std::shared_ptr<ComboNodeState> attack3;
 	std::shared_ptr<ComboNodeState> heavy1;
+
+private: // 一旦
+
+	struct ProvisionalData {
+		Vector3 size = { 1.25f,1.25f ,1.25f };// サイズ
+		Vector3 scale_{ 3.0f,3.0f, 3.0f };// スケール
+
+		float trailLifeTime = 0.5f;// トレイルの寿命
+		Color color = { 1,1,1,0.25f };
+
+		Vector3 obbColliderSize = { 0.5f,2.0f,1.0f };// OBBコライダーサイズ
+		Vector3 obbCollider2Size = { 0.5f,5.5f,1.0f };// OBBコライダーサイズ
+
+		float damage1 = 20;
+		float damage2 = 21;
+		float damage3 = 35;
+
+		float knockbackPower1 = 30.0f;
+		float knockbackPowerY1 = 30.0f;
+
+		float knockbackPower2 = 130.0f;
+		float knockbackPowerY2 = 90.0f;
+
+
+		Vector3 collider1Pos = {0.0f,2.5f,0.5f};
+		Vector3 collider2Pos = {0,2.0f,0};
+
+
+	};
+	ProvisionalData provisionalData_;
 };
 
