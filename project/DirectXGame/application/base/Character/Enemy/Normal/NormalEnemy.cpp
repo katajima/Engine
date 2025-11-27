@@ -25,7 +25,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// 移動コンポーネント初期化
 	InitMoveComponent();
-
+	moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
@@ -147,14 +147,10 @@ void NormalEnemy::Update()
 		GetObjectComponent()->GetObjectStateFlags().isAlive = false;
 	}
 	else {
-		// 移動
-		moveComponent_->AddMove(GetTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
-		// 着地
-		moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
+		// 移動コンポーネント更新
+		moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(),nullptr);
 		// 視野
 		visionComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform().GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
-		// 移動制限
-		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
 		// 応答システム
 		responseSystem_->Update(GetTime());
 	}

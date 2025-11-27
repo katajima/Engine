@@ -1,6 +1,6 @@
 #include "ComboData.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
-#include"DirectXGame/application/base/Component/MoveComponent.h"
+#include"DirectXGame/application/base/Move/MoveComponent.h"
 #include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
 
 #pragma region ComboSequence
@@ -120,8 +120,8 @@ void ComboMotion::Update(const Input& input, float dt) {
 
 
 	if (isMove_) {
-		moveComponent->SetSpeed(data_.speed_);					// スピード設定
-		moveComponent->AddMove(dt, true, *worldTransform);	// 移動
+		moveComponent->SetSpeed(0.1f,data_.speed_);		// スピード設定
+		moveComponent->SetCanMove(true);				// 前進する
 	}
 
 }

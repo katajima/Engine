@@ -16,8 +16,8 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 	// オブジェクト生成
 	object_ = entity3DManager->CreateObject3D("playerStanBullet", ObjectModelType::kNormal, position, camera);
 	object_->SetModel("AnimatedCube.gltf");	// モデル設定
-	object_->GetWorldTransform().scale_ = { 0.2f,0.2f,0.2f }; // スケール設定
-	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,0.2f,0 }, { 0,-0.2f,0 }); // トレイル設定
+	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
+	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->Update();	// オブジェクト更新
 	object_->isEmitTrailEffect = false;	// トレイルの出現しないように
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
@@ -29,7 +29,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 	sphere->tag = CollisionTag::PlayerAttack;		// タグ設定
 	sphere->layer = CollisionLayer::PlayerAttack;	// レイヤー設定
 	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));// マスク設定
-	sphere->radius = 2.0f; // 半径を適宜設定
+	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable();	// 判定有効
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
 
@@ -77,7 +77,6 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 		};
 
 	timer_ = 0.0f;		// 時間初期化
-	deleTimer_ = 5.0f;	// 削除時間設定
 	isAlive_ = true;	// 生存フラグ設定
 
 };
@@ -93,9 +92,9 @@ void PlayerBullet::Update() {
 	timer_ += GetTimer();
 
 	// y軸が-3.0f以下になったら
-	if (object_->GetWorldTransform().translate_.y <= -3.0f) {
+	if (object_->GetWorldTransform().translate_.y <= groundHeight_) {
 		velocity_ = 0.0f;	// 速度0に
-		object_->GetWorldTransform().translate_.y = -3.0f;	// 位置固定
+		object_->GetWorldTransform().translate_.y = groundHeight_;	// 位置固定
 		hitDelete_ = true;	// 削除
 	}
 	else {

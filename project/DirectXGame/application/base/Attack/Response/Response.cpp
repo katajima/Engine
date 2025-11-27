@@ -73,7 +73,7 @@ void HitResponse::Hit(CollisionTag tag, Collider* self, Collider* other)
 			}
 			else {
 				// 双方が動く → 半分ずつ押し戻す（応用例）
-				transform->translate_ += pushVec * 0.5f;
+				transform->translate_ += pushVec * halfSize;
 			}
 
 			transform->Update();

@@ -144,7 +144,7 @@ private:
 
 // 前方宣言
 class AnimationComponent;
-class MoveComponent;
+class MovementComponent;
 class WorldTransform;
 
 /// <summary>
@@ -191,7 +191,7 @@ public:
 	void SetAnimation(AnimationComponent* anima) { animationComponent = anima; };
 
 	// 移動設定
-	void SetMove(MoveComponent* move) { moveComponent = move; };
+	void SetMove(MovementComponent* move) { moveComponent = move; };
 
 	// ワールドトランスフォーム設定
 	void SetWorld(WorldTransform* world) { worldTransform = world; };
@@ -205,7 +205,7 @@ private:
 	Data data_;
 private: // 貰いもの 
 	AnimationComponent* animationComponent;	// アニメーション
-	MoveComponent* moveComponent;			// 移動
+	MovementComponent* moveComponent;			// 移動
 	WorldTransform* worldTransform;			// ワールドトランスフォーム
 };
 

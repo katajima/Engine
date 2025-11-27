@@ -254,6 +254,9 @@ void GamePlayScene::Update()
 	ImGui::Begin("Debug");
 	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
 	ImGui::InputInt("playerID", &GetSceneData().playerID);
+
+	Vector2 inputPos = input_->GetGamePadLeftStick();
+	ImGui::InputFloat2("Input", &inputPos.x);
 	if (ImGui::Button("lockOn")) {
 		cameraManeger_->SetUseCamera("fixedCamera", 0.3f);
 	}

@@ -117,7 +117,7 @@ void EnemyStateDie::Update() {
 		}
 
 		// 着地処理
-		character_->GetMoveComponent()->Landing(character_->GetObjectComponent()->GetWorldTransform(), *character_->GetObjectComponent()->GetRigidBodyComponent());
+		//character_->GetMoveComponent()->Landing(character_->GetObjectComponent()->GetWorldTransform(), *character_->GetObjectComponent()->GetRigidBodyComponent());
 	}
 }
 

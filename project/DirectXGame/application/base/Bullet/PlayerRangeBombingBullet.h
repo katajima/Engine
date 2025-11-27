@@ -65,5 +65,29 @@ private: //パーティクルエミッター
 
 	Object3d* hitObject2_ = nullptr;
 
+
+
+private: // 一旦
+
+	struct ProvisionalData {
+		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
+		const float trailLifeTime = 0.15f; // トレイルの寿命
+		const float trailWidth = 0.2f; // トレイルの幅
+		const float collRadius = 10.0f; // 当たり判定の半径
+		const float damage = 50.0f; // ダメージ量
+		const float skyX = 1000.0f;
+		const float skyY = 600.0f;
+
+
+		const float height = 10.0f;
+		const float innerRadius = 6.0f;
+		const float innerRadiusHit2 = 12.0f;
+		const float outerRadius = 12.0f;
+		const int segments = 16;
+		const Color hit2Color = { 1.0f,0,0,0.5f };
+	};
+	ProvisionalData provisionalData_;
+
+
 };
 

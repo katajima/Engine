@@ -12,7 +12,7 @@ void RigidBodyComponent::Integrate(float deltaTime, WorldTransform& transform)
 
 	// 重力適用
 	if (useGravity) {
-		velocity_.y += -gravity /** deltaTime*/;
+		velocity_.y += -gravity * gravityScale;
 	}
 
 	// 位置更新
@@ -25,7 +25,6 @@ void RigidBodyComponent::Integrate(float deltaTime, WorldTransform& transform)
 	angularVelocity += angularAcceleration * deltaTime;
 
 	// 回転適用
-	//transform.rotation += angularVelocity * deltaTime;
 	transform.rotate_ += angularVelocity * deltaTime;
 
 

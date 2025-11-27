@@ -1,6 +1,6 @@
 #pragma once
 #include"CharacterData.h"
-#include"DirectXGame/application/base/Component/MoveComponent.h"
+#include"DirectXGame/application/base/Move/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Attack/Hit/HitComponent.h"
@@ -73,24 +73,6 @@ public:
 			objectComponent_->GetObjectStateFlags().isAlive = false; // 敵が死亡
 		}
 	}
-
-	// 移動制限
-	void LimitMove(Vector3 min, Vector3 max) {
-		WorldTransform world = objectComponent_->GetWorldTransform();
-
-		if (world.translate_.x > max.x) {
-			world.translate_.x = max.x;
-		}
-		if (world.translate_.x < min.x) {
-			world.translate_.x = min.x;
-		}
-		if (world.translate_.z > max.z) {
-			world.translate_.z = max.z;
-		}
-		if (world.translate_.z < min.z) {
-			world.translate_.z = min.z;
-		}
-	};
 
 public: // 取得系関数
 
@@ -187,7 +169,10 @@ protected: // 保存機能
 
 protected:
 	// 移動コンポーネント初期化
-	void InitMoveComponent() { moveComponent_ = std::make_unique<MoveComponent>(); }
+	void InitMoveComponent() {
+		moveComponent_ = std::make_unique<MovementComponent>();
+		moveComponent_->Initialize(MovementComponent::ControlType::Auto);
+	}
 	
 public:
 	// 速度
@@ -195,7 +180,7 @@ public:
 	// 速度取得
 	Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
 	// 移動コンポーネント取得
-	MoveComponent* GetMoveComponent() { return moveComponent_.get(); }
+	MovementComponent* GetMoveComponent() { return moveComponent_.get(); }
 
 public:
 	// 攻撃コンポーネント取得
@@ -211,7 +196,7 @@ protected:
 	std::unique_ptr<BaseWeapon> weapon_;						// 武器
 	std::unique_ptr<AttackInputHander> attackInputHander_;		// 攻撃入力系クラス
 	std::unique_ptr<CharacterStateMachine> stateMachine_;		// キャラクターの状態管理
-	std::unique_ptr<MoveComponent> moveComponent_;				// 移動コンポーネント
+	std::unique_ptr<MovementComponent> moveComponent_;				// 移動コンポーネント
 	std::unique_ptr<CombatStatComponent> combatStatComponent_;	// 攻撃パラメーター補正
 	std::unique_ptr<ResponseSystem> responseSystem_;			// 攻撃応答システムクラス
 

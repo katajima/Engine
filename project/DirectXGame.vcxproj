@@ -128,7 +128,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Component\MoveComponent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\MoveComponent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\MovementRestrictions.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\MovementState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\MoveSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\Manager\StageEventManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\BaseMainState.cpp" />
@@ -749,6 +753,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\AirMoveSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\JumpSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\MovementRestrictions.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\MovementState.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\MoveSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\Manager\StageEventManager.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseMainState.h" />
@@ -809,7 +818,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayer.h" />
-    <ClInclude Include="DirectXGame\application\base\Component\MoveComponent.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\MoveComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h" />

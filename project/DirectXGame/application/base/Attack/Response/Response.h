@@ -72,6 +72,7 @@ public:
 
 private:
 	WorldTransform* transform;	//　衝突応答用
+	float halfSize = 0.5f;		// 半分のサイズ
 
 };
 

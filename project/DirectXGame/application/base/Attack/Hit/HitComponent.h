@@ -33,8 +33,6 @@ public:
 	// 重力があるか設定
 	void UseGravity(ObjectComponent* object);
 
-
-
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;
 	// ヒットストップモーション

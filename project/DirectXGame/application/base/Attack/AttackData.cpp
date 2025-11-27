@@ -71,7 +71,7 @@ void AirStickData::Update(float dt) {
 	Vector3 dir = targetPos;// -data_.currentPos_;   // 現在 → ターゲット
 	float dist = dir.Length();
 
-	if (dist > 0.0001f) {
+	if (dist > 0.0f) {
 		dir.Normalize();
 	}
 

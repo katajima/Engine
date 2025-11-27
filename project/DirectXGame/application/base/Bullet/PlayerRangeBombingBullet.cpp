@@ -24,7 +24,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	//// オブジェクト設定
 	object_ = entity3DManager->CreateObject3D("playerbullet", ObjectModelType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");	// モデル設定
-	object_->UseTrailEffect("resources/Texture/Image.png", 0.15f, { 1.0f,1.0f,1.0f,1.0f }, { 0,0.5f,0 }, { 0,-0.5f,0 }); // トレイル設定
+	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->isEmitTrailEffect = false; // トレイルを出現させない
 	object_->Update();	// オブジェクト更新
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
@@ -40,7 +40,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	sphere->tag = CollisionTag::PlayerAttack;			// タグ設定
 	sphere->layer = CollisionLayer::PlayerAttack;		// レイヤー設定
 	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
-	sphere->radius = 10.0f; // 半径を適宜設定
+	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable(); // 初期状態では無効化
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダコンポーネントに追加	
 
@@ -84,7 +84,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
 
 	// ダメージ量
-	parameter_.damege = 30;
+	parameter_.damege = provisionalData_.damage;
 	// 生存フラグ
 	isAlive_ = true;
 	// 行動フェーズ
@@ -95,10 +95,10 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	str = object_->GetWorldTransform().translate_;
 
 	// ランダムな空中位置を設定
-	randPosSky = str + Vector3{ -1000,0,0 };
+	randPosSky = str + Vector3{ -provisionalData_.skyX,0,0 };
 
 	// 最大Y座標
-	max_y = 600.0f; 
+	max_y = provisionalData_.skyY;
 
 	// ランダム位置のY座標を設定
 	randPosSky.y = max_y;
@@ -115,10 +115,10 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	// シリンダーパラメーター設定
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = cilnderHeight_;
-	cylinderParam.innerRadius = 6.0f;
-	cylinderParam.outerRadius = 12.0f;
+	cylinderParam.innerRadius = provisionalData_.innerRadius;
+	cylinderParam.outerRadius = provisionalData_.outerRadius;
 	cylinderParam.isCover = false;
-	cylinderParam.segments = 16;
+	cylinderParam.segments = provisionalData_.segments;
 
 	// シリンダー生成
 	std::unique_ptr<CylinderPrimitive> cylinder2 = std::make_unique<CylinderPrimitive>();
@@ -126,9 +126,8 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	cylinder2->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
 
 
-	cylinderParam.height = 10.0f;
-	cylinderParam.innerRadius = 12.0f;
-	cylinderParam.outerRadius = 12.0f;
+	cylinderParam.height = provisionalData_.height;
+	cylinderParam.innerRadius = provisionalData_.innerRadiusHit2;
 	cylinderParam.isCover = true;
 
 	// 当たった時のオブジェクト生成
@@ -136,7 +135,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	hitObject2_->SetPrimitive(std::move(cylinder2));
 	hitObject2_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
-	hitObject2_->GetPrimitive()->GetMaterial()->color = { 1.0f,0.0f,0.0f,0.5f };
+	hitObject2_->GetPrimitive()->GetMaterial()->color = provisionalData_.hit2Color;
 
 	// 敵の位置捕捉
 	enemyPos_.x = targetRange_.position.x + Random::RandomFloat(-targetRange_.radius, targetRange_.radius);
@@ -208,18 +207,7 @@ void PlayerRangeBombingBullet::Update()
 				// エミッターON
 				emitterPoint->GetCommonData().emit = true;
 
-				// 長さによって出現する煙の量を設定
-				if (posLength > 500.0f) {
-					emitterPoint->GetCommonData().count = 5;
-
-				}
-				else if (posLength > 100.0f) {
-					emitterPoint->GetCommonData().count = 5;
-				}
-				else {
-					emitterPoint->GetCommonData().count = 5;
-
-				}
+				
 
 				// 方向指定
 				Vector3 pos2 = pos;
@@ -351,24 +339,7 @@ void PlayerRangeBombingBullet::Draw2D()
 // 移動中の煙初期化
 void PlayerRangeBombingBullet::InitMoveSmoke()
 {
-	// CPUエミッター追加
-	effectComponent_->AddEmitter("smokePlane04", "smokePlane04", EmitterShapeType::LINE);
-	
-	// GPUエミッター追加
-	effectComponent_->AddGPUParticleEmitter("MoveEmitte_" + std::to_string(countIndex_), "no3", EmitterType::Point);
-	emitterPoint = effectComponent_->GetGpuParticleManager()->GetGpuParticleEmitter<GpuParticleEmitterPoint>("MoveEmitte_" + std::to_string(countIndex_));
-	emitterPoint->GetCommonData().frequency = 0.0f;				// 出現頻度
-	emitterPoint->GetCommonData().count = 50;					// 出現量
-	emitterPoint->GetCommonData().useBillboard = true;			// ビルボードする
-	emitterPoint->GetCommonData().scale = { 5.8f ,5.8f ,5.8f };	// スケール設定
-	emitterPoint->GetCommonData().isAlhpa = true;				// 透明度あり
-	emitterPoint->GetCommonData().rotateRange = DegreesToRadians(Vector3{ 180,180,180 });	// 回転範囲
-	emitterPoint->GetCommonData().lifeTime = 0.4f;				// 生存時間
-	emitterPoint->GetCommonData().velocity = -velocity_;		// 方向
-	emitterPoint->GetCommonData().isScaling = true;				// 拡縮する
-	emitterPoint->GetCommonData().scaleAmount = 1.25f;			// 拡縮量
-	emitterPoint->GetCommonData().interpolation = EmitterInterpolation::Sequential;	// 補間方法
-	emitterPoint->GetCommonData().color = { 0.35f,0.35f,0.35f };// 色指定 
+
 }
 
 

@@ -36,7 +36,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	Parameters().HP.Initiaize(100, 0, 100, 0);
 	Parameters().stamina.Initiaize(100, 0, 50, 0);
 	HP() = 100; // 初期HP設定
-	Parameters().speed = 20.0f;// 移動速度設定
+	Parameters().speed = 40.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	
 	// 戦闘中の倍率・軽減率を扱う
@@ -45,8 +45,14 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// 移動コンポーネント初期化
 	InitMoveComponent();
+	moveComponent_->SetMoveType(MoveSystem::MoveType::ACCELERATE);
+	moveComponent_->SetIsStickToSpeed(true);
+	moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
+
 	moveComponent_->SetMaxJumpCount(2);
 	moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
+	moveComponent_->SetSpeed(0.1f, Parameters().speed);
+
 	// 保存項目初期化
 	InitializeBaseAddItem();
 
@@ -216,19 +222,14 @@ void NormalPlayer::Update()
 	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
-	// 移動コンポーネント移動
-	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
-	// 移動コンポーネント着地状態か
-	moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
+
+	// 移動コンポーネント更新
+	moveComponent_->Update(MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(), 
+		*GetObjectComponent()->GetRigidBodyComponent(),GetInput()); 
+
 	// 応答システム
 	responseSystem_->Update(GetTime());
 	
-	// クリエイティブモードではないなら移動制限を付ける
-	if (!isCreativeMode) {
-		// 移動制限
-		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
-	}
-
 	// ワールドトランスフォーム更新
 	GetObjectComponent()->GetWorldTransform().Update();
 	
@@ -289,9 +290,7 @@ void NormalPlayer::Move()
 
 	// 移動処理
 	if (is || is2) {
-		moveComponent_->SetSpeed(Parameters().speed);
-		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
-		moveComponent_->Move(GetObjectComponent()->GetWorldTransform(), input_);
+		moveComponent_->SetCanMove(true);
 	}
 }
 
