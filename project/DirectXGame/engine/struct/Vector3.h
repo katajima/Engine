@@ -160,7 +160,7 @@ struct Vector3 final {
 		return result;
 	};
 	// 長さ
-	float Length() {
+	float Length() const {
 		float result;
 
 		result = sqrtf((x * x) + (y * y) + (z * z));
@@ -217,6 +217,12 @@ struct Vector3 final {
 
 		return temp;
 	}
+
+	// 値設定
+	static Vector3 Set(float v) {
+		return { v,v,v };
+	}
+
 };
 
 

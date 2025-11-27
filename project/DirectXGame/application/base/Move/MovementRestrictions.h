@@ -1,0 +1,18 @@
+#pragma once
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+
+// 移動制限クラス
+class MovementRestrictions {
+public:
+	// 初期化
+	void Initialize(Vector3 min,Vector3 max);
+	// 更新
+	void Update(WorldTransform& world);
+
+private:
+	Vector3 min_ = { 0,0,0 }; // 最小座標 
+	Vector3 max_ = { 0,0,0 }; // 最大座標
+};
+
+
+

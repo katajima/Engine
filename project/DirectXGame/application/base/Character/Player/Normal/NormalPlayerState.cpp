@@ -165,21 +165,9 @@ void PlayerStateJump::Update() {
 	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
 	bool isAlive = character_->GetAlive();
 
-#ifdef _DEBUG
-	//ImGui::
-
-
-#endif // _DEBUG
-
-
 
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-
-
-
-
-
 
 		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
@@ -288,7 +276,7 @@ void PlayerStateSpecial::Update()
 	rengeSp->SetIsDraw(false);	// 描画
 	if (special->GetPhese() == 0) {	// 最初フェーズなら
 		// 移動
-		player->GetMoveComponent()->Move(player->GetObjectComponent()->GetWorldTransform(), player->GetInput());
+		player->GetMoveComponent()->SetCanMove(true);
 		// UI描画
 		player->GetPlayerUI()->SetIsTextRB(true);
 		// スペシャル描画

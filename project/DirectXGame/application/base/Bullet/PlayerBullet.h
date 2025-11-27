@@ -22,7 +22,21 @@ public:
 private:
 	void Final();
 	float timer_ = 0.0f;
-	float deleTimer_ = 0.0f;
+	float deleTimer_ = 5.0f;
 
 	bool hitDelete_ = false;
+
+
+
+private: // 一旦
+
+	struct ProvisionalData {
+		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
+		const float trailLifeTime = 0.15f; // トレイルの寿命
+		const float trailWidth = 0.2f; // トレイルの幅
+		const float collRadius = 2.0f; // 当たり判定の半径
+	};
+	ProvisionalData provisionalData_;
+
+	
 };

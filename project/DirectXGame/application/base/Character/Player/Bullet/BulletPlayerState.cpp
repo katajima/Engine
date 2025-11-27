@@ -240,7 +240,7 @@ void BulletPlayerStateSpecial::Update()
 	rengeSp->SetIsDraw(false);	// 描画
 	if (special->GetPhese() == 0) {	// 最初フェーズなら
 		// 移動
-		player->GetMoveComponent()->Move(player->GetObjectComponent()->GetWorldTransform(), player->GetInput());
+		player->GetMoveComponent()->SetCanMove(true);
 		// UI描画
 		player->GetPlayerUI()->SetIsTextRB(true);
 		// スペシャル描画

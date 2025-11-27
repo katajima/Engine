@@ -21,6 +21,8 @@ public:
 	// 統合
 	void Integrate(float deltaTime, WorldTransform& transform);
 
+	// 重力倍率設定
+	void SetGravityScale(float scale) { gravityScale = scale; }
 	// 重力あるか取得
 	bool IsGravity() const { return useGravity; }
 	//重力あるか設定
@@ -48,6 +50,7 @@ private:
 
 
 	float gravity = 9.8f;						// 重力
+	float gravityScale = 1.0f;					// 重力の強さの倍率
 
 	float friction = 0.3f;						// 摩擦係数（床とのすべり）
 	float restitution = 0.1f;					// 反発係数（跳ね返り）

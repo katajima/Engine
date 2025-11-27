@@ -10,7 +10,7 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	comboData_.motion.SetAnimation(anima);
 	comboData_.motion.SetMove(owner->GetMoveComponent());
 	comboData_.motion.SetWorld(&owner->GetObjectComponent()->GetWorldTransform());
-	comboData_.motion.animationName_ = animation;
+	comboData_.motion.GetData().animationName_ = animation;
 
 	// 武器設定
 	comboData_.Enter();								// コンボデータ開始

@@ -36,18 +36,23 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	Parameters().HP.Initiaize(100, 0, 100, 0);
 	Parameters().stamina.Initiaize(100, 0, 50, 0);
 	HP() = 100; // 初期HP設定
-	Parameters().speed = 20.0f;// 移動速度設定
+	Parameters().speed = 40.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	
 	// 戦闘中の倍率・軽減率を扱う
 	combatStatComponent_ = std::make_unique<CombatStatComponent>();
 	combatStatComponent_->Initialize(&characterParameterComponent_);
 
-
 	// 移動コンポーネント初期化
 	InitMoveComponent();
+	moveComponent_->SetMoveType(MoveSystem::MoveType::ACCELERATE);
+	moveComponent_->SetIsStickToSpeed(true);
+	moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
+
 	moveComponent_->SetMaxJumpCount(2);
 	moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
+	moveComponent_->SetSpeed(0.1f, Parameters().speed);
+
 	// 保存項目初期化
 	InitializeBaseAddItem();
 
@@ -75,49 +80,13 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 		uint32_t otherId = otherComponent->GetUniqueId();
 
-
-		Vector3 pushVec;
-
 		// 敵との衝突応答
-		if (other->tag == CollisionTag::Enemy) {
-			if (self->ResolveCollision(*other, pushVec)) {
-				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
+		responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy,self,other);
 
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-
-				}
-				GetWorldTransform().Update();
-			}
-		}
 		// 壁との衝突応答
-		if (other->tag == CollisionTag::Wall) {
-			if (self->ResolveCollision(*other, pushVec)) {
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
+		responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall,self,other);
 
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-
-				}
-				Velocity().y = 0;
-
-				//acceleration_.y = 0;
-				GetWorldTransform().Update();
-			}
-		}
+		
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;
@@ -136,6 +105,11 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		}
 		};
 
+
+	// 応答システム初期化
+	responseSystem_ = std::make_unique<ResponseSystem>();
+	responseSystem_->Initialize(&GetCharacterParameterComponent(), objectComponent_.get());
+	responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
 
 
 	// スペシャル攻撃
@@ -248,18 +222,14 @@ void NormalPlayer::Update()
 	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
-	// 移動コンポーネント移動
-	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
-	// 移動コンポーネント着地状態か
-	moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
-	
-	
-	// クリエイティブモードではないなら移動制限を付ける
-	if (!isCreativeMode) {
-		// 移動制限
-		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
-	}
 
+	// 移動コンポーネント更新
+	moveComponent_->Update(MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(), 
+		*GetObjectComponent()->GetRigidBodyComponent(),GetInput()); 
+
+	// 応答システム
+	responseSystem_->Update(GetTime());
+	
 	// ワールドトランスフォーム更新
 	GetObjectComponent()->GetWorldTransform().Update();
 	
@@ -320,9 +290,7 @@ void NormalPlayer::Move()
 
 	// 移動処理
 	if (is || is2) {
-		moveComponent_->SetSpeed(Parameters().speed);
-		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
-		moveComponent_->Move(GetObjectComponent()->GetWorldTransform(), input_);
+		moveComponent_->SetCanMove(true);
 	}
 }
 

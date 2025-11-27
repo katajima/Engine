@@ -1,335 +1,327 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/input/Input.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 // ノックバックデータクラス
 class KnockbackData{
 public:
+	// ノックバックタイプ
+	enum Type {
+		kDirection,				// 攻撃者→被撃者方向
+		kRandom,				// ランダム方向
+		kDirectionAndRandom,	// (攻撃者→被撃者)+ランダム
+	};
+
+	// データ構造体
+	struct Data {
+		/// <summary>
+		/// 方向 
+		/// </summary>
+		Vector3 normal{};					// 飛ぶ方向
+		Type type = Type::kDirection;		// ノックバックのタイプ
+
+
+		/// <summary>
+		/// 力・強さ
+		/// </summary>
+		float power_ = 0.0f;				// ノックバックの力
+		float verticalBoost_ = 0.0f;		// ノックバック垂直方向(敵をどれだけ上に吹き飛ばすか)
+		bool isVerticalBoost_ = false;		// Y方向にノックバックを与えるかどうか
+
+
+		/// <summary>
+		/// 時間
+		/// </summary>
+		float duration_ = 0.5f;				// ノックバック継続時間
+		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
+
+		/// <summary>
+		/// 制御
+		/// </summary>
+		bool gravityEnabled_ = false;		// ノックバック中に重力の影響を受けるか
+
+		/// <summary>
+		/// 衝突
+		/// </summary>
+		bool stopOnCollision_ = false;		// 当たって止まるか
+		float slideFloor_ = 0.0f;			// 床で滑る量
+	};
 
 	// 方向とパワーを合算した値(Vector3)
-	Vector3 DirectionPower() const {
-		Vector3 reslut{};
-		reslut = normal.Normalize();
-		
-		// y座標同士の高さが同じでもy方向に飛ばしたい場合は
-		if (isYpower_) {
-			// yを1に
-			reslut.y = 1.0f;
-		}
+	Vector3 DirectionPower() const;
 
-		// それぞれかける
-		reslut.x *= power_;
-		reslut.y *= yPower_;
-		reslut.z *= power_;
-		return reslut;
+	// 更新
+	void Update(float dt) { timer_ += dt; }
+
+	/// <summary>
+	/// ノックバック終了か
+	/// </summary>
+	/// <returns></returns>
+	bool IsFinish() const { return data_.duration_ < timer_; }
+
+
+	// 重力影響受けるか
+	bool IsGravityEnabled() const {
+		if (IsFinish()) return true; // 終了したら重力影響を受ける
+		return data_.gravityEnabled_;
 	}
+
+public:
+	// データ構造体
+	Data& GetData() { return data_; }
 
 	// ノックバックパワー設定
-	void SetPower(float power ,float powerY) {
-		power_ = power;		// パワー
-		yPower_ = powerY;	// パワーY方向
+	void SetPower(float power, float verticalBoost) {
+		data_.power_ = power;		// パワー
+		data_.verticalBoost_ = verticalBoost;	// パワーY方向
 	}
 
-
-public:
-	float power_ = 0.0f;				// ノックバックの力
-	float yPower_ = 0.0f;				// ノックバックY距離(敵をどれだけ上に吹き飛ばすか)
-	bool isYpower_ = false;				// Y方向にノックバックを与えるかどうか
-	Vector3 normal{};					// 飛ぶ方向
-private:
-
-};
-
-
-/// <summary>
-/// コンボ条件ボタン
-/// </summary>
-enum class ComboButtonInputType : uint32_t{
-	kPressed,				// 押したら
-	kTriggered,				// 押した瞬間
-	kReleased,				// 離した瞬間
-	kPressTriggerReleased,	// 押したor押した瞬間or離した瞬間
-	kPressTriggered,		// 押したor押した瞬間
-	kPressReleased,			// 押したor離した瞬間
-	kTriggerReleased,		// 押した瞬間or離した瞬間
-};
-
-/// <summary>
-/// コンボボタン1つ分
-/// </summary>
-class ComboButton {
-public:
-	// コンストラクタ
-	ComboButton(GamePadButton button, ComboButtonInputType type) : button_(button) , type_(type) {}
-
-	// 押したら
-	bool IsPressed(const Input& input) const {
-		return input.IsGamePadPressed(button_);
-	}
-
-	// 押した瞬間
-	bool IsTriggered(const Input& input) const {
-		return input.IsGamePadTriggered(button_);
-	}
-
-	// 離した瞬間
-	bool IsReleased(const Input& input) const {
-		return input.IsGamePadReleased(button_);
-	}
-
-
-	// 押して反応する条件
-	bool IsInput(const Input& input) const {
-
-		switch (type_)
-		{
-		case ComboButtonInputType::kPressed: // 押したら
-			return IsPressed(input);
-			break;
-		case ComboButtonInputType::kTriggered: // 押した瞬間
-			return IsTriggered(input);
-			break;
-		case ComboButtonInputType::kReleased: // 離した瞬間
-			return IsReleased(input);
-			break;
-		case ComboButtonInputType::kPressTriggerReleased: // 押す、押した瞬間、離した瞬間
-			return IsPressed(input) || IsTriggered(input) || IsReleased(input);
-			break;
-		case ComboButtonInputType::kPressTriggered:
-			return IsPressed(input) || IsTriggered(input); // 押す、押した瞬間
-			break;
-		case ComboButtonInputType::kPressReleased:
-			return IsPressed(input) || IsReleased(input); // 押す、離した瞬間
-			break;
-		case ComboButtonInputType::kTriggerReleased:
-			return IsTriggered(input) || IsReleased(input); // 押した瞬間、離した瞬間
-			break;
-		default:	// 指定されたtypeでないのなら
-			return false;
-			break;
-		}
-	}
-
-
-private:
-	GamePadButton button_;
-	ComboButtonInputType type_ = ComboButtonInputType::kPressed;
-};
-
-
-/// <summary>
-/// コンボ（ボタンの順番を管理）
-/// </summary>
-class ComboSequence {
-public:
-	/// <summary>
-	/// コンボボタンを順番に登録
-	/// </summary>
-	void RegisterCombo(const std::vector<ComboButton>& buttons);
-
-	/// <summary>
-	/// コンボ成立チェック
-	/// </summary>
-	bool Update(const Input& input, float deltaTime);
-
-private:
-	std::vector<ComboButton> comboButtons_;
-	size_t currentIndex_ = 0;
-};
-
-
-// コンボ受付条件クラス
-class ComboCondition {
-public:
-	// 開始
-	void Enter();
-
-	// 更新
-	void Update(const Input& input, float dt);
-
-	// 終了
-	void Exit();
-
-	// 次のコンボに移行するか
-	bool IsNextCombo() const { return isNextCombo_; };
-
-	// コンボ条件発動時間設定
-	void ConditionStartEnd(float start, float end) {
-		inputWindowStart_ = start;
-		inputWindowEnd_ = end;
-	};
-
-public:
-	float inputWindowStart_ = 0.1f;			// 入力受付スタート
-	float inputWindowEnd_ = 0.5f;			// 入力受付エンド
-
-	bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
-	ComboSequence comboSequence_;			// コンボボタン条件
-	float staminaCost = 0;					// スタミナ消費量
-	float mpCost = 0;                       // MP消費
-private:
-	float timer_ = 0.0f;				// 時間
-	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
-
-};
-
-
-// 前方宣言
-class AnimationComponent;
-class MoveComponent;
-class WorldTransform;
-
-/// <summary>
-/// コンボモーション
-/// </summary>
-class ComboMotion {
-public:
-	// 開始
-	void Enter();
-
-	// 更新
-	void Update(const Input& input, float dt);
-
-	// 終了
-	void Exit();
-
-	// 移動できるか
-	bool IsMove() const { return isMove_; }
-
-	// 移動可能時間設定
-	void MoveStartEnd(float start, float end) {
-		moveWindowStart_ = start;
-		moveWindowEnd_ = end;
-	};
-
-	// アニメーション設定
-	void SetAnimation(AnimationComponent* anima) { animationComponent = anima; };
-
-	// 移動設定
-	void SetMove(MoveComponent* move) { moveComponent = move; };
-
-	// ワールドトランスフォーム設定
-	void SetWorld(WorldTransform* world) { worldTransform = world; };
-
-public:
-	float moveWindowStart_ = 0.1f;			// 移動受付スタート
-	float moveWindowEnd_ = 0.5f;			// 移動受付エンド
-	float speed_ = 0;						// 移動速度
-
-	bool isCompulsionMove_ = true;			// 強制的に移動
-	bool isCompulsionDirection_ = false;	// 強制方向に移動
-
-
-	// アニメーション
-	std::string animationName_ = "no";		// アニメーション名前
-	bool animationLoop_ = false;			// アニメーションループ
-	float animationSpeed_ = 1.0f;			// アニメーションスピード
-private:
-	float timer_ = 1.0f;					// コンボ時に移動する時間
-	bool isMove_ = true;					// 移動出来るか
-private: // 貰いもの 
-	AnimationComponent* animationComponent;	// アニメーション
-	MoveComponent* moveComponent;			// 移動
-	WorldTransform* worldTransform;			// ワールドトランスフォーム
-};
-
-
-/// <summary>
-/// コンボダメージ
-/// </summary>
-class ComboDamage {
-public:
-	// 開始
-	void Enter();
-
-	// 更新
-	void Update(float dt);
-
-	// 終了
-	void Exit();
-
-	// ダメージが発生しているか
-	bool IsDamage() const { return isDamage_; }
-
-	// ダメージ発生時間設定 
-	void DamageStartEnd(float start, float end) {
-		damageWindowStart_ = start;
-		damageWindowEnd_ = end;
-	}
-
-public:
-	float damageWindowStart_ = 0.1f;		// ダメージ受付スタート
-	float damageWindowEnd_ = 0.5f;			// ダメージ受付エンド
-
-	float damage_ = 0;						// ダメージ
-
-	bool isWeaponColliderHit_ = true;		// 武器自体からダメージ判定があるか？
-	bool isWeaponImpactColliderHit_ = false;// 武器から出てくる衝撃波ダメージ判定があるか？
-private:
-	bool isDamage_ = false;					// ダメージ発生しているか
-	float timer_ = 1.0f;					// 時間
-};
-
-// 前方宣言
-class CameraManager;
-
-
-/// <summary>
-/// コンボ時のカメラ
-/// </summary>
-class ComboCamera {
-public:
-	// 開始
-	void Enter();
-
-	// 更新
-	void Update(float dt);
-
-	// 終了
-	void Exit();
-
-	// カメラ管理設定
-	void SetCameraManager(CameraManager* camera) { cameraManager = camera; }
-
-public:
-	std::string cameraName_ = "no";			// カメラ名
-	std::string baseCameraName_ = "no";		// 元のカメラ名
-	bool isChangeCamera_ = false;			// カメラを変更するか
-	float interpolation_ = 0.0f;			// 補間
-
+	// 方向設定
+	void SetNormal(Vector3 normal) { data_.normal = normal; }
 
 private:
 	float timer_ = 0.0f;					// 時間
-
-	CameraManager* cameraManager = nullptr;	// カメラ管理
+	Data data_;
 };
 
-
-// コンボデータ
-class ComboData {
+// 空中・地上固定データクラス
+class AirStickData {
 public:
+	// データ構造体
+	struct Data
+	{
+		Vector3 targetOffset_ = { 0,0,0 };	// 吸いつく位置
+		float duration_ = 0.5f;				// 吸いつく時間
+		bool useWorldSpace_ = false;		// ターゲット位置をワールド座標で扱うか
+		float followSpeed_ = 0.1f;			// ターゲット位置へ向かう追従スピード
+		float stickStrength_ = 1.0f;		// ターゲット位置へ貼りつく強さ(0.0f~1.0f)値が大きいほど貼りつく
 
-	// 開始
-	void Enter();
+		bool endOnHit_ = true;				// 次の攻撃が当たった瞬間にターゲット位置に貼りつきを解除するか
+		bool gravityEnabled_ = true;		// 吸着時だけ重力を
+		bool keepFacingAttacker_ = true;	// 被撃者の向きを攻撃者へ自動回転させるか。
+	};
+
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void Update(float dt);
+
+	/// <summary>
+	/// 攻撃者位置設定
+	/// </summary>
+	/// <param name="world"></param>
+	void SetAttackerWorldTransform(WorldTransform* world) { world_ = world; };
+
+	// データ構造体取得
+	Data& GetData() { return data_; }
+	
+	// 重力影響受けるか
+	bool IsGravityEnabled() const { 
+		if (IsFinish()) return true; // 終了したら重力影響を受ける
+		return data_.gravityEnabled_;
+	}
+
+	// 終了したか
+	bool IsFinish() const { return data_.duration_ < timer_; }
+
+private:
+	Data data_;
+	WorldTransform* world_ = nullptr;
+	float timer_ = 0.0f;	// 時間
+};
+
+// ヒットストップデータクラス
+class HitStopData {
+public:
+	struct Data {
+		float duration_ = 0.5f;				// 揺れ継続時間
+		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
+		bool isGroundVibrationY = false;	// 地面に着地しているときにY方向を揺らすか
+		bool gravityEnabled_ = false;		// ヒットストップ中に重力の影響を受けるか
+		Vector3 vibration = Vector3::Set(0.1f);	// 揺れ幅設定
+
+
+
+		// 揺れ幅取得
+		Vector3 Vibration(bool isGround) const {
+			Vector3 r{};
+			r = vibration;
+			// Y方向に揺らさない場合
+			if (!isGroundVibrationY && isGround) {
+				r = 0.0f;
+			}
+			return r;
+		};
+	};
 
 	// 更新
-	void Update(const Input& input, float dt);
+	void Update(float dt) { timer_ += dt; }
 
-	// 終了
-	void Exit();
+	// 終了したか
+	bool IsFinish() const { return data_.duration_ < timer_; }
 
-public:
-	KnockbackData knockbackData{};			// ノックバックデータ
-	ComboCondition comboCondition{};		// コンボ条件クラス
-	ComboMotion motion{};					// コンボ用モーションクラス
-	ComboDamage damage{};					// コンボ用ダメージクラス
-	ComboCamera camera{};					// コンボ用カメラクラス
+	// 重力影響受けるか
+	bool IsGravityEnabled() const {
+		if (IsFinish()) return true; // 終了したら重力影響を受ける
+		return data_.gravityEnabled_;
+	}
+
+	// データ構造体取得
+	Data GetData() const { return data_; }
+
+private:
+	float timer_ = 0.0f;					// 時間
+	Data data_;
 };
 
 
 
+/// <summary>
+/// ダメージデータ
+/// </summary>
+class DamageData {
+public:
+	// ダメージタイプ
+	enum Type {
+		kOne,		// 一回(一回の攻撃(コンボの1モーション)での)
+		kContinuous,// 連撃(一回の攻撃(コンボの1モーション)での)
+		kDuration,	// 持続(一回の攻撃(コンボの1モーション)での例: 毒)
+	};
+
+	// ダメージの数値を連撃の1つ1つで変えるのか
+	enum OneHitDamegeType {
+		kConstant,	// 一定のダメージ(変化がない)
+		kCustom,	// 1つ1つで変える
+	};
+
+	// 一回データ
+	class One {
+	public:
+		// 更新
+		void Update(float dt);
+		// ダメージが入るか
+		bool IsAttack() const { return isDamage; }
+		// 終わったか
+		bool IsFinish() const { return isFinish; }
+		// ダメージ取得 
+		float GetDamage() const;
+		// ダメージ設定
+		void SetDamage(float damage) { this->damage = damage; };
+
+	public:
+		float damage = 0;			// ダメージ(変化がない場合)
+	private:
+		float timer = 0.0f;		// 時間
+		bool isDamage = true;	// ダメージを入れるか
+		bool isFinish = false;	// 攻撃として終了したか
+	};
+
+	// 連撃データ
+	class Continuous {
+	public:
+		// 更新
+		void Update(float dt);
+		// カウントリセット
+		void Reset();
+		// ダメージが入るか
+		bool IsAttack() const { return isDamage; }
+		// 終わったか
+		bool IsFinish() const { return isFinish; }
+		// ダメージ取得 
+		float GetDamage() const;
+		// 一つ一つのダメージの変化タイプ取得
+		OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
+	public:
+		OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 一つ一つのダメージの変化タイプ
+		float interval = 0.1f;		// 連撃のダメージ入りる間隔
+		int num = 2;				// 連撃のダメージの回数
+		std::vector<float> damages;	// ダメージ一つ一つ
+		float damage = 0;			// ダメージ(変化がない場合)
+	private:
+		float timer = 0.0f;		// 時間
+		bool isDamage = true;	// ダメージを入れるか
+		bool isFinish = false;	// 攻撃として終了したか
+		int count = 0;			// カウント用
+	};
+
+	// 持続データ
+	class Duration {
+	public:
+
+		// 更新
+		void Update(float dt);
+		// カウントリセット
+		void Reset();
+		// ダメージが入るか
+		bool IsAttack() const { return isDamage; }
+		// 終わったか
+		bool IsFinish() const { return isFinish; }
+		// ダメージ取得 
+		float GetDamage() const;
+		// ダメージ設定
+		void SetDamage(float damage) { this->damage = damage; };
+	public:
+		float interval = 0.1f;	// 持続ダメージの入る間隔	
+		int num = 2;			// 持続ダメージの回数
+		float damage = 0;		// ダメージ
+		bool isDed = false;		// 持続ダメージでの死亡はするか
+	private:
+		float timer = 0.0f;		// 時間
+		bool isDamage = true;	// ダメージを入れるか
+		bool isFinish = false;	// 攻撃として終了したか
+		int count = 0;			// カウント用
+	};
+
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void Update(float dt);
+
+	// ダメージの与え方取得
+	Type GetType() const { return type; };
+	// ダメージ取得
+	float GetDamage();
+	// 終了しているか
+	bool IsFinish();
+	// ダメージが発生しているか
+	bool IsAttack();
+
+
+private:
+	Type type = Type::kOne;		// ダメージの与え方;
+	Continuous continuous{};	// 連撃ダメージデータ
+	Duration duration{};		// 持続ダメージデータ
+	One one{};					// 一回ダメージデータ
+	float damage = 0;			// ダメージ
+};
+
+/// <summary>
+/// 攻撃データ
+/// </summary>
+struct AttackData {
+
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void Update(float dt);
+
+	/// <summary>
+	/// 終了したか
+	/// </summary>
+	/// <returns></returns>
+	bool IsFinish();
 
 
 
-
+	KnockbackData knockback;	// ノックバックデータ
+	DamageData damageData;		// ダメージデータ
+	bool isFixed = false;		// 位置を固定するか
+};
 

@@ -75,28 +75,28 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 		GetObject3D()->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		// ヒット
-		enemy->GetHitMotionComponent()->SetIsHit(true);
+		//enemy->GetResponseSystem()->GetHitMotionComponent()->SetIsHit(true);
 
 
 
 
 		// ノックバック方向
-		comboData_.knockbackData.normal = player->GetMoveComponent()->GetDirection();
-		enemy->GetHitMotionComponent()->SetIsKnockback(true);		// ノックバックするか
+		comboData_.knockbackData.SetNormal(player->GetMoveComponent()->GetDirection());
+		//enemy->GetResponseSystem()->GetHitMotionComponent()->SetIsKnockback(true);		// ノックバックするか
 
 		// ダメージ設定
-		float damage = comboData_.damage.damage_;
+		float damage = comboData_.damage.GetDamage();
 		if (self->id == weaponColliderId_) {
-			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
-			enemy->GetHitMotionComponent()->SetKnockbackTime(0.3f);	// ノックバック時間設定
+			//enemy->GetResponseSystem()->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
+			//enemy->GetResponseSystem()->GetHitMotionComponent()->SetKnockbackTime(0.3f);	// ノックバック時間設定
 			damage *= 2;	// ダメージ設定
 		}
 		else if (self->id == weaponColliderId2_) {
-			enemy->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
-			enemy->GetHitMotionComponent()->SetKnockbackTime(0.3f);	// ノックバック時間設定
+			//enemy->GetResponseSystem()->GetHitMotionComponent()->SethitStopTime(1.1f);	// ヒットストップ時間設定
+			//enemy->GetResponseSystem()->GetHitMotionComponent()->SetKnockbackTime(0.3f);	// ノックバック時間設定
 			damage *= 1;	// ダメージ設定
 		}
-		enemy->GetHitMotionComponent()->SetKnockbackData(comboData_.knockbackData);	 // ノックバックデータ設定
+		enemy->GetResponseSystem()->GetHitMotionSystem()->SetKnockbackData(comboData_.knockbackData);	 // ノックバックデータ設定
 		enemy->AddDamage(DamageCalculator::ComputeDamageWeapon(*character->GetCombatStatComponent(), *enemy->GetCombatStatComponent(), damage));
 
 
@@ -110,18 +110,16 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// コンボデータ設定
 	ComboData data;
-	data.damage.damage_ = 20;
-	data.knockbackData.power_ = 30;
-	data.knockbackData.yPower_ = 30;
+	data.damage.SetDamage(20);
+	data.knockbackData.SetPower(30, 30);
 	
 
 	attack1 = std::make_shared<ComboNodeState>("Attack1", data);
-	data.damage.damage_ = 21;
+	data.damage.SetDamage(21);
 	attack2 = std::make_shared<ComboNodeState>("Attack2", data);
-	data.damage.damage_ = 35;
-	data.knockbackData.isYpower_ = true;
-	data.knockbackData.power_ = 130.0f;
-	data.knockbackData.yPower_ = 90.0f;
+	data.damage.SetDamage(35);
+	data.knockbackData.SetPower(130, 90);
+	data.knockbackData.GetData().isVerticalBoost_ = true;
 	attack3 = std::make_shared<ComboNodeState>("Attack3", data);
 	
 	AddComboNode("Attack1", attack1);	// コンボ追加

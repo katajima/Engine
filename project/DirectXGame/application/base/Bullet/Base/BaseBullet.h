@@ -135,6 +135,8 @@ protected:
 
 	// タイムスピード
 	float timeSpeed_ = 1.0f;
+
+	float groundHeight_ = -3.0f; // 地面の高さ
 protected:
 	BasePlayer* player_;
 	BaseEnemy* enemy_;

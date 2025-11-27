@@ -49,6 +49,7 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// 移動コンポーネント初期化
 	InitMoveComponent();
+	moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
 	moveComponent_->SetMaxJumpCount(3);
 	// 保存項目初期化
 	InitializeBaseAddItem();
@@ -263,17 +264,10 @@ void BulletPlayer::Update() {
 
 
 
-	// 移動コンポーネント移動
-	moveComponent_->AddMove(MyGame::GameTime(), GetAlive(), GetObjectComponent()->GetWorldTransform());
-	// 移動コンポーネント着地状態か
-	moveComponent_->Landing(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent());
+	// 移動コンポーネント更新
+	moveComponent_->Update(MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(),
+		*GetObjectComponent()->GetRigidBodyComponent(), GetInput());
 
-
-	// クリエイティブモードではないなら移動制限を付ける
-	if (!isCreativeMode) {
-		// 移動制限
-		LimitMove(-Vector3{ 200,200,200 }, Vector3{ 200,200,200 });
-	}
 
 	// ワールドトランスフォーム更新
 	GetObjectComponent()->GetWorldTransform().Update();
@@ -337,9 +331,9 @@ void BulletPlayer::Move() {
 	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
 
 	if (is || is2) {
-		moveComponent_->SetSpeed(Parameters().speed);
+		moveComponent_->SetSpeed(0.1f ,Parameters().speed);
 		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
-		moveComponent_->Move(GetObjectComponent()->GetWorldTransform(), input_);
+		moveComponent_->SetCanMove(true);
 	}
 };
 

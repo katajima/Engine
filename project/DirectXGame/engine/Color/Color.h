@@ -5,6 +5,10 @@
 // 色(RGBA)
 struct Color {
     float r, g, b, a;
+
+
+	static Color WHITE() { return Color(1.0f, 1.0f, 1.0f, 1.0f); }
+
 };
 
 // 色の名前を列挙型で定義
