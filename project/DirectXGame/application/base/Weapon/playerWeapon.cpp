@@ -8,15 +8,15 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	input_ = input;						// インプット
 	entity3DManager_ = entity3DManager; // エンティティ3d
 	entity2DManager_ = entity2DManager; // エンティティ2d
-	Vector3 size = { 1.25f,1.25f ,1.25f };// サイズ
+	
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerWeapon", "Sword.obj", true, false, this);
-	objectComponent_->SetSRT(size, {}, position);	// SRT設定
+	objectComponent_->SetSRT(provisionalData_.size, {}, position);	// SRT設定
 
 	// トレイルエフェクト設定
-	GetObject3D()->UseTrailEffect("resources/Texture/Image.png", 0.5f, { 1,1,1,0.25 },
+	GetObject3D()->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, provisionalData_.color,
 		GetObject3D()->GetModel()->modelData.mesh[0]->GetMin(),
 		GetObject3D()->GetModel()->modelData.mesh[0]->GetMax());
 	
@@ -25,12 +25,12 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
 	// スケール3
-	GetObject3D()->GetWorldTransform().scale_ = 3;
+	GetObject3D()->GetWorldTransform().scale_ = provisionalData_.scale_;
 
 
 	// コライダ根本(OBB)
 	auto obbCollider_ = std::make_unique<OBBCollider>();
-	obbCollider_->obb.size = { 0.5f,2.0f,1.0f };			// サイズ設定
+	obbCollider_->obb.size = provisionalData_.obbColliderSize;			// サイズ設定
 	obbCollider_->tag = CollisionTag::PlayerAttack;			// タグ設定
 	obbCollider_->layer = CollisionLayer::PlayerAttack;		// レイヤー設定
 	obbCollider_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
@@ -41,7 +41,7 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// コライダ先端(OBB)
 	auto obbCollider2_ = std::make_unique<OBBCollider>();
-	obbCollider2_->obb.size = { 0.5f,5.5f,1.0f };			// サイズ設定
+	obbCollider2_->obb.size = provisionalData_.obbCollider2Size;			// サイズ設定
 	obbCollider2_->tag = CollisionTag::PlayerAttack;		// タグ設定
 	obbCollider2_->layer = CollisionLayer::PlayerAttack;	// レイヤー設定
 	obbCollider2_->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
@@ -110,15 +110,15 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 	// コンボデータ設定
 	ComboData data;
-	data.damage.SetDamage(20);
-	data.knockbackData.SetPower(30, 30);
+	data.damage.SetDamage(provisionalData_.damage1);
+	data.knockbackData.SetPower(provisionalData_.knockbackPower1, provisionalData_.knockbackPowerY1);
 	
 
 	attack1 = std::make_shared<ComboNodeState>("Attack1", data);
-	data.damage.SetDamage(21);
+	data.damage.SetDamage(provisionalData_.damage2);
 	attack2 = std::make_shared<ComboNodeState>("Attack2", data);
-	data.damage.SetDamage(35);
-	data.knockbackData.SetPower(130, 90);
+	data.damage.SetDamage(provisionalData_.damage3);
+	data.knockbackData.SetPower(provisionalData_.knockbackPower2, provisionalData_.knockbackPowerY2);
 	data.knockbackData.GetData().isVerticalBoost_ = true;
 	attack3 = std::make_shared<ComboNodeState>("Attack3", data);
 	
@@ -134,13 +134,12 @@ void PlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	// コライダ位置初期化
 	colliderWorld_.Initialize();
 	colliderWorld_.parent_ = &GetObject3D()->GetWorldTransform();
-	colliderWorld_.translate_.z = 0.5f; // 武器の位置調整
-	colliderWorld_.translate_.y = 2.5f; // 武器の位置調整
-
+	colliderWorld_.translate_ = provisionalData_.collider1Pos; // 武器の位置調整
+	
 	// コライダ位置初期化
 	colliderWorld2_.Initialize();
 	colliderWorld2_.parent_ = &colliderWorld_;
-	colliderWorld2_.translate_.y = 2.0f; // 武器の位置調整
+	colliderWorld2_.translate_ = provisionalData_.collider2Pos; // 武器の位置調整
 
 }
 

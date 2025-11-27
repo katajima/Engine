@@ -13,19 +13,19 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 {
 	isSpecial_ = false;		// 使用不可にする
 
-	maxGauge_ = 100;		// 最大ゲージ設定
+	maxGauge_ = provisionalData_.maxGauge_;		// 最大ゲージ設定
 
-	clock_ = 1;				// 切り替え
-	maxBullet = 40;			// 発射数
-	bulletNum = 0;			// 弾番号
+	clock_ = provisionalData_.clock_;				// 切り替え
+	maxBullet = provisionalData_.maxBullet;			// 発射数
+	bulletNum = provisionalData_.bulletNum;			// 弾番号
 
 	// シリンダーパラメータ設定
 	ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = 5.0f;			// 高さ
+	cylinderParam.height = provisionalData_.cylinderHeight;			// 高さ
 	cylinderParam.innerRadius = reticleRad_;// 上底
 	cylinderParam.outerRadius = reticleRad_;// 下底
 	cylinderParam.isCover = false;			// 蓋するか
-	cylinderParam.segments = 16;			// セグメント数
+	cylinderParam.segments = provisionalData_.cylinderSegments;			// セグメント数
 
 	// シリンダー生成
 	ctlinder_ = std::make_unique<CylinderPrimitive>();
@@ -37,8 +37,8 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	objectReticle_->SetPrimitive(std::move(ctlinder_));
 	objectReticle_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
-	objectReticle_->GetWorldTransform().rotate_.x = Math::DegreesToRadians(-90);
-	objectReticle_->GetWorldTransform().translate_ = { 0,2,100 };
+	objectReticle_->GetWorldTransform().rotate_ = provisionalData_.rotate;
+	objectReticle_->GetWorldTransform().translate_ = provisionalData_.translate;
 }
 
 void RangeBombingSpecial::Update()
@@ -60,8 +60,7 @@ void RangeBombingSpecial::Draw()
 
 void RangeBombingSpecial::InAction()
 {
-	// 弾発射に使うインターバル（秒）
-	const float fireInterval = 0.01f; // 例：0.04秒ごとに1発ずつ発射
+	
 
 	int time = 0;
 	switch (phese_)
@@ -84,7 +83,7 @@ void RangeBombingSpecial::InAction()
 		shotTimer += MyGame::GameTime();
 		
 		// 発射タイマーが経過したらミサイルを発射
-		if (shotTimer >= 0.5f) {
+		if (shotTimer >= provisionalData_.shotTimer) {
 			// 経過時間を加算
 			time_ += MyGame::GameTime();
 

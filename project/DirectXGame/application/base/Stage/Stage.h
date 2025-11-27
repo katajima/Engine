@@ -102,27 +102,34 @@ private:
 	std::shared_ptr<DirectionalLight> directional;
 private:
 
-	// ステージに舞う埃
-	//std::unique_ptr<ParticleEmitter> emit_;
-
-	//// 列車の煙
-	//std::unique_ptr<ParticleEmitter> emitTrainDust_;
-
-	//// 船の水しぶき
-	//std::unique_ptr<ParticleEmitter> emitShipDust_;
-
-	//// 雲の粒子
-	//std::unique_ptr<ParticleEmitter> emitCloudDust_;
-	//std::unique_ptr<ParticleEmitter> emitCloudDust2_;
-	//std::unique_ptr<ParticleEmitter> emitCloudDust3_;
-
-
-
 private:
 	DirectXCommon* dxCommon_;
 	Entity3DManager* entity3DManager_;
 	Entity2DManager* entity2DManager_;
 
 	Camera* camera_ = nullptr;
+private: // 一旦
 
+	struct ProvisionalData {
+		Vector3 oceanTranslate = { 0, -30, 0 };
+		Vector3 oceanRotate = { Math::DegreesToRadians(90) ,0,0 };
+
+		Vector3 skyBoxScale = {100,100,100};
+
+
+		Vector2 oceanRange{ 8000.0f,8000.0f };
+		float oceanAmplitude = 16.5f;
+		Vector2 waveDirection = { 0.5f,0.5f };
+		float waveSpeed = 5.0f;
+		Color color = { 0.0f, 0.0f, 0.8f, 0.75f };
+
+		int missileNumX = 5;
+		int missileNumY = 2;
+
+		Vector3 missileTranslate = { 3500,106,3000 };
+		Vector2 missileInterval = { 120.0f,100.0f };
+		Vector3 missileRotate = { 0 ,Math::DegreesToRadians(-90),0 };
+		float  missileSize = 10.0f;
+	};
+	ProvisionalData provisionalData_;
 };

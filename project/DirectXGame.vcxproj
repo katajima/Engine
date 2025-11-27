@@ -137,7 +137,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Stage\Manager\StageEventManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\BaseMainState.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\CharacterStateMachine.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Bullet\PlayerStanBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
@@ -764,7 +763,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\State\CharacterStateMachine.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseSubState.h" />
     <ClInclude Include="DirectXGame\application\base\State\SubStateMachine.h" />
-    <ClInclude Include="DirectXGame\application\base\Bullet\PlayerStanBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />

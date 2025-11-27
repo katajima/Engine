@@ -85,5 +85,27 @@ private:
 	Stage* stage_ = nullptr;
 	FollowCamera* followCamera = nullptr;
 	BulletManager* bulletManager = nullptr;
+
+private: // 一旦
+
+	// 弾発射に使うインターバル（秒）
+	const float fireInterval = 0.01f; // 例：0.04秒ごとに1発ずつ発射
+
+	struct ProvisionalData {
+		Vector3 translate = { 0,2,100 };
+		Vector3 rotate = { Math::DegreesToRadians(-90), 0, 0 };
+
+
+		int maxGauge_ = 100;		// 最大ゲージ設定
+		int clock_ = 1;				// 切り替え
+		int maxBullet = 40;			// 発射数
+		int bulletNum = 0;			// 弾番号
+
+		int cylinderSegments = 16;
+		float cylinderHeight = 5.0f;
+
+		float shotTimer = 0.5f;
+	};
+	ProvisionalData provisionalData_;
 };
 

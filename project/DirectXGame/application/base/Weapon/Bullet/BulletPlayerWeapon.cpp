@@ -30,15 +30,15 @@ void BulletPlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManag
 	bulletMuzzleTransform_.Initialize();
 	// オブジェクトと親子付け
 	bulletMuzzleTransform_.parent_ = &objectComponent_->GetWorldTransform();
-	bulletMuzzleTransform_.translate_ = { 0,0,-5 };
+	bulletMuzzleTransform_.translate_ = provisionalData_.translateMuzzle;
 
 	// 弾倉位置初期化
 	bulletCartridgeTransform_.Initialize();
 	// オブジェクトと親子付け
 	bulletCartridgeTransform_.parent_ = &objectComponent_->GetWorldTransform();
-	bulletCartridgeTransform_.translate_ = { 0,0, 1 };
+	bulletCartridgeTransform_.translate_ = provisionalData_.translateCartridge;
 
-	rengedData_.bulletSpeed = 500.0f;
+	rengedData_.bulletSpeed = provisionalData_.bulletSpeed;
 };
 
 ///< summary>
@@ -57,9 +57,7 @@ void BulletPlayerWeapon::Update() {
 		targetPos = penetrationPos_;
 	}
 
-	// 補間係数（0.0f〜1.0f）
-	// 値が大きいほど速く移動します（例: 0.1f〜0.25fが自然）
-	const float moveLerpSpeed = 0.15f;
+	
 
 	// 線形補間（LERP）
 	bulletTransform_.translate_ = Lerp(currentPos, targetPos, moveLerpSpeed);
@@ -71,19 +69,6 @@ void BulletPlayerWeapon::Update() {
 
 	// 位置指定
 	objectComponent_->GetWorldTransform().translate_ = bulletTransform_.GetWorldPosition();
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	Vector3 objectPos = objectComponent_->GetWorldTransform().GetWorldPosition();
@@ -107,9 +92,7 @@ void BulletPlayerWeapon::Update() {
 		Quaternion qCurrent = MakeQuaternionFromEuler(currentRot);
 		Quaternion qTarget = MakeQuaternionFromEuler(targetRot);
 
-		// --- 補間率（0.0f〜1.0f）---
-		const float rotLerpSpeed = 0.15f;  // ← 回転スピード調整用（0.0〜1.0）
-
+		
 		// --- 球面線形補間 ---
 		Quaternion qResult = Slerp(qCurrent, qTarget, rotLerpSpeed);
 
@@ -132,9 +115,7 @@ void BulletPlayerWeapon::Update() {
 		Quaternion qCurrent = MakeQuaternionFromEuler(currentRot);
 		Quaternion qTarget = MakeQuaternionFromEuler(targetRot);
 
-		// --- 補間率（0.0f〜1.0f）---
-		const float rotLerpSpeed = 0.15f;  // ← 回転スピード調整用（0.0〜1.0）
-
+		
 		// --- 球面線形補間 ---
 		Quaternion qResult = Slerp(qCurrent, qTarget, rotLerpSpeed);
 
@@ -175,7 +156,7 @@ void BulletPlayerWeapon::Shoot()
 {
 	// 弾の情報
 	BulletInfo info{};
-	info.damage = 20;						// ダメージ
+	info.damage = provisionalData_.damage;						// ダメージ
 	info.speed = rengedData_.bulletSpeed;	// スピード
 	info.targetPos = targetPos_;			// ターゲット位置
 	info.position = objectComponent_->GetWorldTransform().GetWorldPosition(); // 開始位置
@@ -186,7 +167,7 @@ void BulletPlayerWeapon::Shoot()
 	}
 	else {
 		info.type = BulletType::PENETRATION;
-		info.speed = rengedData_.bulletSpeed * 2;
+		info.speed = rengedData_.bulletSpeed * provisionalData_.bulletSpeedScale;
 	}
 	
 

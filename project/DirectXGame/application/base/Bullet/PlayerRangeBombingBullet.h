@@ -36,16 +36,16 @@ private:
 	// 上に飛ぶ高さ
 	float max_y = 20.0f;
 	// 
-	Vector3 randPosSky;
-	Vector3 posGround;
-	Vector3 str;
+	Vector3 randPosSky{};
+	Vector3 posGround{};
+	Vector3 str{};
 	float count = 0;
 	float max_count = 0.5f;
-	float t;
+	float t = 0;
 
-	Vector3 targetPos;
+	Vector3 targetPos{};
 
-	Vector3 enemyPos_;
+	Vector3 enemyPos_{};
 
 	float cilnderHeight_ = 30.0f; // 円柱の高さ
 
@@ -85,6 +85,21 @@ private: // 一旦
 		const float outerRadius = 12.0f;
 		const int segments = 16;
 		const Color hit2Color = { 1.0f,0,0,0.5f };
+
+		const float timeSpeedPhase0 = 2.0f;
+
+
+		const float speedPhase1 = 1000.0f;
+		const float speedPhase2 = 3.0f;
+
+		const float hitCylinderY = 1.0f;
+		const float expPlaneY = 5.0f;
+
+		const float hitObjectY = -6.0f;
+		const float hitObjectRotateX = -90.0f;
+
+
+		const float distanceToEnemy = 5.0f;
 	};
 	ProvisionalData provisionalData_;
 

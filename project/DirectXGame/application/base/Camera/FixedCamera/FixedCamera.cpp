@@ -9,11 +9,11 @@ void FixedCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  Gl
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Camera>();
 	uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = 15000.0f;
+	uniqueCamera_->farClip_ = provisionalData_.farClip_;
 
 	// カメラ位置と回転設定
-	uniqueCamera_->transform_.translate = { 0, 107, 0 };
-	uniqueCamera_->transform_.rotate = { 0.341f, 0.0f, 0.0f };
+	uniqueCamera_->transform_.translate = provisionalData_.translate;
+	uniqueCamera_->transform_.rotate = provisionalData_.rotate;
 
 
 	// ポストエフェクト追加
