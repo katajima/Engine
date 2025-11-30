@@ -26,8 +26,8 @@ enum class GamePadButton
 	GAMEPAD_Y = XINPUT_GAMEPAD_Y,					// Y
 	GAMEPAD_LB = XINPUT_GAMEPAD_LEFT_SHOULDER,		// LB
 	GAMEPAD_RB = XINPUT_GAMEPAD_RIGHT_SHOULDER,		// RB
-	GAMEPAD_LT = XINPUT_GAMEPAD_LEFT_THUMB,			// LT
-	GAMEPAD_RT = XINPUT_GAMEPAD_RIGHT_THUMB,		// RT
+	GAMEPAD_LT = XINPUT_GAMEPAD_LEFT_THUMB,			// 左スティック押し込み
+	GAMEPAD_RT = XINPUT_GAMEPAD_RIGHT_THUMB,		// 右スティック押し込み
 	GAMEPAD_Start = XINPUT_GAMEPAD_START,			// Start
 	GAMEPAD_Back = XINPUT_GAMEPAD_BACK,			// Back
 	GAMEPAD_Max       // 最大ボタン数
@@ -128,6 +128,11 @@ public: //メンバ関数
 	Vector2 GetGamePadLeftStick() const;
 	// パッドの右スティックの値を取得
 	Vector2 GetGamePadRightStick() const;
+
+	// LTトリガーの値を取得
+	float GetGamePadLeftTrigger() const;
+	// RTトリガーの値を取得
+	float GetGamePadRightTrigger() const;
 
 	// コントローラ操作
 	bool IsControllerConnected() {

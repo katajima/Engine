@@ -42,6 +42,7 @@ struct ObjectStateFlags
 
 // 前方宣言
 class Entity3DManager;	
+class Entity2DManager;
 class ObjectInstans;
 
 /// <summary>

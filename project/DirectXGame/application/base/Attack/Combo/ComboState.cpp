@@ -1,6 +1,6 @@
 #include "ComboState.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
 // 開始
 void ComboNodeState::Enter(BaseCharacter* owner) {
@@ -14,8 +14,14 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 
 	// 武器設定
 	comboData_.Enter();								// コンボデータ開始
-	owner->GetWeapon()->SetComboData(comboData_);	// コンボデータ設定
-	owner->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true); // タグ設定
+
+	// ヒットボックスシステムを渡す
+	comboData_.hitBox.SetHitBoxSystem(owner->GetAttackController()->GetHitBoxSystem());
+
+
+	// コンボデータをコンボシステムに転送
+	owner->GetAttackController()->GetComboSystem()->SetComboData(&comboData_);	
+
 	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = true; // トレイル開始
 
 	timeInState = 0.0f;	// 時間初期化 
@@ -31,12 +37,6 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	}
 
 	
-
-	// 移動
-	//owner->GetMoveComponent()->Move(owner->GetObjectComponent()->GetWorldTransform(), owner->GetInput());
-	
-	
-
 	// 座標更新
 	owner->GetWorldTransform().Update();
 
@@ -55,10 +55,8 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 	bool isMove = comboData_.motion.IsMove();
 	bool hasNext = HasNextState();
 
-	// 移動できるなら
-	if (isMove) {
-		owner->Velocity() = dire_;	// 方向設定
-	}
+	owner->GetMoveComponent()->GetMoveSystem()->SetIsAttackCanMove(isMove);
+
 	// 入力受付がないのなら終了する
 	if ((isInputWindowOver)) {
 
@@ -67,6 +65,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 		// コンボ終了 → 通常ステートに戻す
 		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 		owner->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);  // ← BaseCharacterが持っている関数
+		owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
 	}
 	// コンボデータ更新
 	comboData_.Update(*owner->GetInput(), dt);
@@ -79,9 +78,6 @@ void ComboNodeState::Exit(BaseCharacter* owner)
 	timeInState = 0.0f;
 	// コンボデータ終了処理
 	comboData_.Exit();
-
-	// アニメ終了時の処理など
-	owner->GetWeapon()->GetColliderComponent()->contactRecord_.Clear();
-	owner->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
+	
 	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 }

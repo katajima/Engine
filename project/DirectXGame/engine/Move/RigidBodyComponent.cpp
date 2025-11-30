@@ -4,32 +4,43 @@ void RigidBodyComponent::Integrate(float deltaTime, WorldTransform& transform)
 {
 	if (isKinematic || isSleeping || inverseMass == 0.0f) return;
 
-	// 加速度計算
-	Vector3 acceleration = force * inverseMass;
+	// 並進運動の処理	
+	ProcessTranslation(deltaTime,transform);
 
-	// 速度更新
-	velocity_ += acceleration /** deltaTime*/;
+	// 回転運動の処理
+	ProcessRotation(deltaTime, transform);
+
+	// 変換行列の更新
+	transform.Update();
+}
+
+void RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransform& transform)
+{
+	// 加速度計算
+	acceleration_ = force * inverseMass;
 
 	// 重力適用
 	if (useGravity) {
-		velocity_.y += -gravity * gravityScale;
+		// Y=Up なので、マイナス方向に重力をかける
+		acceleration_.y += -gravity * gravityScale;
 	}
-
+	// 速度更新
+	velocity_ += acceleration_ * deltaTime;
 	// 位置更新
 	transform.translate_ += velocity_ * deltaTime;
 
+	// 力のリセット
+	force = { 0, 0, 0 };
+}
 
-
+void RigidBodyComponent::ProcessRotation(float deltaTime, WorldTransform& transform)
+{
 	// トルクによる回転（簡略化）
 	Vector3 angularAcceleration = torque * inverseMass; // 実際は慣性モーメントが必要
 	angularVelocity += angularAcceleration * deltaTime;
-
 	// 回転適用
 	transform.rotate_ += angularVelocity * deltaTime;
 
-
 	// 力のリセット
-	force = { 0, 0, 0 };
 	torque = { 0, 0, 0 };
-	transform.Update();
 }

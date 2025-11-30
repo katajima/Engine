@@ -10,7 +10,15 @@ void PlayerStateIdle::Update() {
 	Input* input = character_->GetInput();
 	BaseWeapon* weapon = character_->GetWeapon();
 	BaseSpecial* special = character_->GetSpecial();
-	
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	MoveSystem* move = character_->GetMoveComponent()->GetMoveSystem();
+
+	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
+	if (isTriggerLT) {
+		character_->GetMoveComponent()->GetDashSystem()->StartDash();
+	}
+
+
 	// 武器描画 
 	weapon->GetObject3D()->SetIsDraw(true);
 
@@ -60,6 +68,20 @@ void PlayerStateIdle::Update() {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
 	}
+
+
+	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
+	//	anima->SetIsLoop(false);
+	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
+	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
+	//}
+	//else {
+	//	anima->SetIsLoop(true);
+	//	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
+	//}
+
+
+
 };
 
 // 終了
@@ -73,6 +95,7 @@ void PlayerStateIdle::Enter() {
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
 	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
+	character_->GetMoveComponent()->SetCanMove(true);
 };
 
 #pragma endregion // 待機
@@ -84,19 +107,22 @@ void PlayerStateMove::Update()
 	Input* input = character_->GetInput();				// 入力
 	BaseWeapon* weapon = character_->GetWeapon();		// 武器
 	BaseSpecial* special = character_->GetSpecial();	// 必殺
-
+	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	character_->GetMoveComponent()->SetCanMove(true);
 	weapon->GetObject3D()->SetIsDraw(true); // 武器描画
+
+
+	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
+	if (isTriggerLT) {
+		character_->GetMoveComponent()->GetDashSystem()->StartDash();
+	}
+
 
 	// ゲームパッドがつながっているなら
 	if (input->IsControllerConnected()) {
 		// スペシャル発動
 		if (character_->GetSpecial()->GetIsSpecial()) {
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
-		}
-		// スキル発動
-		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
-			return;
 		}
 		// 防御発動
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
@@ -114,7 +140,7 @@ void PlayerStateMove::Update()
 
 	// 武器リキャストタイム更新
 	weapon->RecastTime(MyGame::GameTime());
-	
+
 	// 必殺がうてるなら
 	if (special->GetIsSpecial()) {
 		if (special->GetIsSpecialAttack()) {
@@ -128,6 +154,22 @@ void PlayerStateMove::Update()
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
 		return;
 	}
+
+
+
+
+	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
+	//	anima->SetIsLoop(false);
+	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
+	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
+	//}
+	//else {
+	//	anima->SetIsLoop(true);
+		// アニメーションスピード設定
+	float speed = character_->GetMoveComponent()->GetMoveSystem()->GetAnimationSpeed();
+
+	anima->SetAnimationSpeed(speed);
+	//}
 }
 
 void PlayerStateMove::Exit()
@@ -140,11 +182,11 @@ void PlayerStateMove::Enter()
 	BaseWeapon* weapon = character_->GetWeapon();
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	weapon->GetObject3D()->SetIsDraw(false);	// 武器描画しない
-	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);	// 武器コライダー無効
 	anima->SetIsLoop(true);				// ループ再生
 	anima->SetIsPlaying(true);			// 再生
 	anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
 	anima->SetAnimetion("Walk", 0.1f);	// 流すアニメーション設定
+	character_->GetMoveComponent()->SetCanMove(true);
 }
 
 #pragma endregion // 移動
@@ -155,6 +197,7 @@ void PlayerStateMove::Enter()
 void PlayerStateJump::Update() {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	Input* input = character_->GetInput();
+	JumpSystem* jump = character_->GetMoveComponent()->GetJumpSystem();
 
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
@@ -163,23 +206,28 @@ void PlayerStateJump::Update() {
 	// ジャンプ出来るか
 	bool isJamp = character_->GetMoveComponent()->GetIsJump();
 	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+	bool isPress = input->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+
+	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
+	if (isTriggerLT) {
+		character_->GetMoveComponent()->GetDashSystem()->StartDash();
+	}
+
+
 	bool isAlive = character_->GetAlive();
 
 
+
+	// ジャンプ入力をセット
+	jump->SetInputPressed(isPress);
+
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-
-		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
-		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
-		
-		// 着地状態なら
-		if (character_->GetMoveComponent()->GetIsLanding()) {
-
-		}
-		else {
-			character_->GetObjectComponent()->GetRigidBodyComponent()->AddForce({ 0,character_->GetCharacterParameterComponent().parameters_.jampPower * 2,0 });
-		}
 		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.05f);
+
+		// ジャンプ開始
+		anima->SetStratAnimeTime();		// アニメーション時間を初期化
+		jump->StartJump(*character_->GetObjectComponent()->GetRigidBodyComponent());
 	}
 	else {
 		// 着地状態なら
@@ -190,22 +238,20 @@ void PlayerStateJump::Update() {
 	}
 
 
-	// 降下しているならアニメーションを変える
-	if (character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y <= 0.0f) {
-		anima->SetIsLoop(true);
-		anima->SetAnimetion("Fall", 0.1f);
-	}
-	else {	// 上昇しているならアニメーションを変える
+	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
+	//	anima->SetIsLoop(false);
+	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
+	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
+	//}
+	//else 
+	if (jump->GetState() == JumpSystem::State::Jump) { // 上昇しているなら
 		anima->SetIsLoop(false);
 		anima->SetAnimetion("JumpStrat1", 0.05f);
 	}
-
-
-	
-
-	
-
-
+	else if (jump->GetState() == JumpSystem::State::Fall) { // 降下しているなら
+		anima->SetIsLoop(true);
+		anima->SetAnimetion("Fall", 0.15f);
+	}
 }
 
 // 終了
@@ -222,26 +268,21 @@ void PlayerStateJump::Enter() {
 
 #pragma region Attack
 
-void PlayerStateAttack::Update()
-{
-	BaseWeapon* weapon = character_->GetWeapon();
-	
-	// コンボ
-	weapon->GetComboStateMachine()->Update(character_->GetTime());
-}
+void PlayerStateAttack::Update() {}
 
 void PlayerStateAttack::Exit()
 {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	// 武器
-	character_->GetWeapon()->GetComboStateMachine()->HandleInput(AttackInput::Light); // 弱攻撃
+	character_->GetAttackController()->GetComboSystem()->GetComboStateMachine()->HandleInput(AttackInput::Light); // 弱攻撃
 	character_->GetWeapon()->GetObject3D()->SetIsDraw(false);// 武器描画しない
-	character_->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false); // 武器コライダ無効
 
 	// アニメーション
 	anima->SetIsLoop(true);		   // ループ再生
 	anima->SetIsPlaying(true);	   // 再生
 	anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
+	character_->GetMoveComponent()->SetCanMove(true);
+	character_->GetMoveComponent()->GetMoveSystem()->SetIsAttack(false);
 }
 
 void PlayerStateAttack::Enter()
@@ -249,10 +290,8 @@ void PlayerStateAttack::Enter()
 	BaseWeapon* weapon = character_->GetWeapon();
 
 	// 武器
-	weapon->GetComboStateMachine()->Update(character_->GetTime());	// コンボステートマシーン更新
 	weapon->GetObject3D()->SetIsDraw(true);	 // 武器描画
-	weapon->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, true);	// 武器コライダ有効
-	weapon->GetColliderComponent()->contactRecord_.Clear();	// 履歴削除
+	character_->GetMoveComponent()->GetMoveSystem()->SetIsAttack(true);
 }
 
 #pragma endregion // 攻撃
@@ -319,7 +358,6 @@ void PlayerStateSkill::Update() {
 	}
 
 };
-
 // 終了
 void PlayerStateSkill::Exit() {
 
@@ -332,7 +370,6 @@ void PlayerStateSkill::Enter() {
 	BulletInfo bulletInfo = {};
 	bulletInfo.position = player->GetWorldTransform().worldMat_.GetWorldPosition();
 	timer_ = 0.0f;
-	player->GetBulletManager()->GenerateBullet(BulletManager::BulletType::kPlayerStan, bulletInfo);
 };
 #pragma endregion // スキル
 
@@ -348,12 +385,12 @@ void PlayerStateDefense::Update() {
 		if (input->IsGamePadPressed(GamePadButton::GAMEPAD_A) && isDifense_) {
 			isDifense_ = true;
 
-			character_->GetCombatStatComponent()->damageReduction_ = 0.75;
+			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.75;
 
 			// スタミナがあるなら
 			if (character_->GetCharacterParameterComponent().IsGetStamina()) {
 				// スタミナ消費
-				character_->GetCharacterParameterComponent().Stamina().rateFluctuation = -5.0f; 
+				character_->GetCharacterParameterComponent().Stamina().rateFluctuation = -5.0f;
 			}
 			else {
 				isDifense_ = false;
@@ -365,7 +402,7 @@ void PlayerStateDefense::Update() {
 			character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
 			isDifense_ = false;
 			timer_ += character_->GetTime();
-			character_->GetCombatStatComponent()->damageReduction_ = 0.0f;
+			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
 		}
 	}
 
@@ -381,7 +418,7 @@ void PlayerStateDefense::Update() {
 // 終了
 void PlayerStateDefense::Exit() {
 	isDifense_ = false;
-	character_->GetCombatStatComponent()->damageReduction_ = 0.0f;
+	character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
 	character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
 };
 // 初期化
@@ -415,7 +452,7 @@ void PlayerStateFainting::Update() {
 		if (length >= 10.0f) {
 			subtime = 2.0f;
 		}
-		
+
 		// 復帰時間短縮
 		timer_ += character_->GetTime() * subtime;
 	}

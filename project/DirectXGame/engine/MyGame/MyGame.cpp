@@ -330,25 +330,6 @@ void MyGame::CreateParticle()
 	// ミサイルHitエフェクト
 	particleManager->CreateParticleGroup("missileHit", "resources/Texture/Image.png", primiStar.get());
 
-	
-	
-
-	//gpuParticleManager_->CreateGroup("no1", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/Image.png", 1024 * 100);
-	//gpuParticleManager_->CreateGroup("no2", modelManager->FindModel("plane.obj")->modelData.mesh[0].get(), "resources/Texture/effect/dust.png", 1024 * 100);
-	
-	//gpuParticleManager_->CreateGroup("no3", primiPlane->GetModelMesh(), "resources/Texture/smoke/no3.png", 1024 * 100);
-	//
-	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no1");
-	//gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>("emitte_no2");
-	//gpuParticleManager_->SetEmitteToGroup("emitte_no1","no1");
-	//gpuParticleManager_->SetEmitteToGroup("emitte_no2","no2");
-	//gpuParticleManager_->SetEmitteToGroup("emitte2_no1","no1");
-
-
-	//gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterSphere>("emitte_no1")->GetCommonData()->translate.x = 40.0f;
- //
-	//gpuParticleManager_->CreateField("AABBField");
-
 }
 
 void MyGame::LoadModel()

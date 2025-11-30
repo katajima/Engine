@@ -207,7 +207,7 @@ void BulletPlayerStateAttack::Exit()
 {
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	// 武器
-	character_->GetWeapon()->GetComboStateMachine()->HandleInput(AttackInput::Light);
+	character_->GetAttackController()->GetComboSystem()->GetComboStateMachine()->HandleInput(AttackInput::Light);
 	character_->GetWeapon()->GetObject3D()->SetIsDraw(false);
 	character_->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
 
@@ -305,7 +305,7 @@ void BulletPlayerStateDefense::Update() {
 		if (input->IsGamePadPressed(GamePadButton::GAMEPAD_A) && isDifense_) {
 			isDifense_ = true;
 
-			character_->GetCombatStatComponent()->damageReduction_ = 0.75;
+			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.75;
 
 			// スタミナがあるなら
 			if (character_->GetCharacterParameterComponent().IsGetStamina()) {
@@ -322,7 +322,7 @@ void BulletPlayerStateDefense::Update() {
 			character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
 			isDifense_ = false;
 			timer_ += character_->GetTime();
-			character_->GetCombatStatComponent()->damageReduction_ = 0.0f;
+			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
 		}
 	}
 
@@ -338,7 +338,7 @@ void BulletPlayerStateDefense::Update() {
 // 終了
 void BulletPlayerStateDefense::Exit() {
 	isDifense_ = false;
-	character_->GetCombatStatComponent()->damageReduction_ = 0.0f;
+	character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
 	character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
 };
 // 初期化

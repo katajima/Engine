@@ -42,9 +42,9 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	Parameters().speed = 20.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 
-	// 戦闘中の倍率・軽減率を扱う
-	combatStatComponent_ = std::make_unique<CombatStatComponent>();
-	combatStatComponent_->Initialize(&characterParameterComponent_);
+	// 戦闘
+	attackController_ = std::make_unique<AttackController>();
+	attackController_->Initialize(entity3DManager,&characterParameterComponent_,this);
 
 
 	// 移動コンポーネント初期化
@@ -136,7 +136,7 @@ void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 			objectComponent_->GetContactRecord().AddHistory(otherId, nowTime);
 
 			// ダメージ
-			AddDamage(DamageCalculator::ComputeDamage(*enemy->GetCombatStatComponent(), *GetCombatStatComponent(), 1.0f));
+			AddDamage(DamageCalculator::ComputeDamage(*enemy->GetAttackController()->GetCombatStat(), *GetAttackController()->GetCombatStat(), 1.0f));
 			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
 		}
 		};

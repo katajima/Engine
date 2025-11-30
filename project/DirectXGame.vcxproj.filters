@@ -756,7 +756,7 @@
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotion.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitComponent.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp">
@@ -769,6 +769,27 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Move\MovementState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1281,7 +1302,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\GPU\GpuParticleSystem.h">
       <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitComponent.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Base\Imgui\ImGuiJapaneseFont.h">
@@ -1762,6 +1783,30 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Move\MovementState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\DashSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitCounter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBox.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

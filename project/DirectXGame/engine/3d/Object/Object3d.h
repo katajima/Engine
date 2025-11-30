@@ -36,6 +36,8 @@ public:
 	// 更新
 	void Update();
 
+	// 物理更新
+	void RigidBodyUpdate();
 
 	// 描画通常
 	void Draw();
@@ -55,7 +57,8 @@ public:
 
 	// トレイルを出すかの設定
 	void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
-	// セッター
+	
+public:// セッター
 
 	// モデル設定(モデル)
 	void SetModel(Model* model) {

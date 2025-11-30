@@ -146,9 +146,9 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 void PlayerRangeBombingBullet::Update()
 {
 	// 出現させない
-	emitterPoint->GetCommonData().emit = false;
-	emitterPoint->GetWorldTransform().translate_ = object_->GetWorldTransform().worldMat_.GetWorldPosition();	// エミッター位置更新
-	emitterPoint->GetCommonData().prevTranslate = object_->GetWorldTransform().worldPreMat_.GetWorldPosition(); // エミッター位置更新
+	//emitterPoint->GetCommonData().emit = false;
+	//emitterPoint->GetWorldTransform().translate_ = object_->GetWorldTransform().worldMat_.GetWorldPosition();	// エミッター位置更新
+	//emitterPoint->GetCommonData().prevTranslate = object_->GetWorldTransform().worldPreMat_.GetWorldPosition(); // エミッター位置更新
 
 	// 当たったら死ぬ
 	if (Hit) {
@@ -204,7 +204,7 @@ void PlayerRangeBombingBullet::Update()
 				float posLength = Length(pos);
 
 				// エミッターON
-				emitterPoint->GetCommonData().emit = true;
+				//emitterPoint->GetCommonData().emit = true;
 
 				
 
@@ -229,8 +229,8 @@ void PlayerRangeBombingBullet::Update()
 					hitObject2_->SetIsDraw(true);
 
 					// エフェクト出現させない
-					emitterPoint->GetCommonData().emit = false;
-					emitterPoint->GetCommonData().lifeTime = 0.01f;
+					//emitterPoint->GetCommonData().emit = false;
+					//emitterPoint->GetCommonData().lifeTime = 0.01f;
 				}
 				
 			}

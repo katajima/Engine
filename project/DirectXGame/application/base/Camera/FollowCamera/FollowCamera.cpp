@@ -55,7 +55,7 @@ void FollowCamera::Update()
 
             // スムーズに補間（必要なら）
             uniqueCamera_->transform_.rotate.y = targetYaw;
-            uniqueCamera_->transform_.rotate.x = std::clamp(targetPitch, Math::DegreesToRadians(provisionalData_.rotateMinX), Math::DegreesToRadians(provisionalData_.rotateMaxX));
+            uniqueCamera_->transform_.rotate.x = std::clamp(targetPitch,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
         }
         else {
             // 通常の自由操作
@@ -63,7 +63,7 @@ void FollowCamera::Update()
                 uniqueCamera_->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
                 uniqueCamera_->transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
 
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(provisionalData_.rotateMinX), Math::DegreesToRadians(provisionalData_.rotateMaxX));
+                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
             }
             else {
                 // 回転移動
@@ -75,7 +75,7 @@ void FollowCamera::Update()
                     uniqueCamera_->transform_.rotate.y += kRotateSpeed;
                 }
 
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(0.0f), Math::DegreesToRadians(provisionalData_.rotateMaxX));
+                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(0.0f), provisionalData_.rotateMaxX);
             }
         }
 

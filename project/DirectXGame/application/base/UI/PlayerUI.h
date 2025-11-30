@@ -49,5 +49,71 @@ private:
 	bool isTextRB_ = false;
 	bool isTextMax_ = false;
 	float sizeSpecialGauge_ = 0;
+
+
+
+	struct HpSpriteData{
+		Vector2 pos_ = { 30,600 };
+
+		Color color_ = { 0,1,0,1 };
+		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
+
+		float maxMeter = 100.0f;
+		Vector2 offset_ = { 4.0f,4.0f };
+
+		Vector2 size_ = { 200.0f,30.0f };
+		Vector2 nameSize_ = { 60.0f,40.0f };
+
+	};
+	HpSpriteData hpSpriteData_;
+	
+	struct SpSpriteData {
+		Vector2 pos_ = { 30,650 };
+
+		Color color_ = { 0,0,1,1 };
+		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
+
+		float maxMeter = 100.0f;
+		Vector2 offset_ = { 4.0f,4.0f };
+
+		Vector2 size_ = { 200.0f,30.0f };
+		Vector2 nameSize_ = { 60.0f,40.0f };
+
+	};
+	SpSpriteData spSpriteData_;
+
+	struct StaminaSpriteData {
+		Vector2 pos_ = { 30,700 };
+
+		Color color_ = { 1,1,0,1 };
+		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
+
+		float maxMeter = 20.0f;
+		Vector2 offset_ = { 4.0f,4.0f };
+
+		Vector2 size_ = { 200.0f,30.0f };
+		Vector2 nameSize_ = { 60.0f,40.0f };
+
+	};
+	StaminaSpriteData staminaSpriteData;
+
+	struct MaxTextData {
+		float size_ = 0.25f;
+		Vector2 pos_ = { 30,700 };
+		float rotate_ = Math::DegreesToRadians(-30);
+		Vector2 anchorPoint_ = { 0.5f,0.5f };
+		Color color_ = { 1,0,0,1 };
+	};
+	MaxTextData maxTextData_;
+
+	struct RBData {
+		float size_ = 0.2f;
+		Vector2 pos_ = { 1280 / 2,550 };
+		float rotate_ = Math::DegreesToRadians(-30);
+		Vector2 anchorPoint_ = { 0.5f,0.5f };
+		Color color_ = { 1,1,1,1 };
+	};
+	RBData rbData_;
+
 };
 

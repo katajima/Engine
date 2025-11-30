@@ -1,6 +1,7 @@
 #pragma once
 #include "MoveSystem.h"
 #include "JumpSystem.h"
+#include "DashSystem.h"
 #include "AirMoveSystem.h"
 #include "MovementRestrictions.h"
 #include "MovementState.h"
@@ -12,25 +13,21 @@
 class MovementComponent
 {
 public:
-	
+	// 操作タイプ
 	enum class ControlType
 	{
 		Auto,			// 自動
 		Manual,			// 手動
 	};
 
-
 	// 初期化
 	void Initialize(ControlType type);
 	// 更新
 	void Update(float dt,WorldTransform& object, RigidBodyComponent& rigid, Input* input);
 
-
 public:
 	// 操作タイプ取得
 	void SetControlType(ControlType type) { controlType_ = type; }
-
-
 public: // 移動系統
 
 	// 速度取得
@@ -51,7 +48,6 @@ public: // 移動系統
 	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
 	// 移動出来るか設定
 	void SetCanMove(bool canMove) { moveSystem_->SetCanMove(canMove); }
-
 public: // ジャンプ系統
 
 	// ジャンプ回数現象
@@ -63,15 +59,26 @@ public: // ジャンプ系統
 	// 最大ジャンプカウント設定
 	void SetMaxJumpCount(int count) { jumpSystem_->SetMaxJumpCount(count); }
 
-
+public:
+	// 移動システム取得
+	MoveSystem* GetMoveSystem() { return moveSystem_.get(); }
+	// ジャンプシステム取得
+	JumpSystem* GetJumpSystem() { return jumpSystem_.get(); }
+	// ダッシュシステム取得
+	DashSystem* GetDashSystem() { return dashSystem_.get(); }
 public:
 	// カメラ設定
 	void SetCamera(Camera* camera) { moveSystem_->SetCamera(camera); }
 private:
 	std::unique_ptr<MoveSystem> moveSystem_ = nullptr; // 移動システム
 	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr; // ジャンプシステム
+	std::unique_ptr<DashSystem> dashSystem_ = nullptr; // ダッシュシステム
+
+	//
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; // 移動制限システム
 	std::unique_ptr<MovementStateMachine> movementStateMachine_ = nullptr; // 移動状態マシン
+
+
 
 
 	// 操作タイプ

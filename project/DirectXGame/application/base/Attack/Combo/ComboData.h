@@ -1,6 +1,13 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
+#include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
+
+// 前方宣言
+class AnimationComponent;
+class MovementComponent;
+class CameraManager;
+
 
 /// <summary>
 /// コンボ条件ボタン
@@ -141,12 +148,6 @@ private:
 	Data data_;
 };
 
-
-// 前方宣言
-class AnimationComponent;
-class MovementComponent;
-class WorldTransform;
-
 /// <summary>
 /// コンボモーション
 /// </summary>
@@ -205,10 +206,9 @@ private:
 	Data data_;
 private: // 貰いもの 
 	AnimationComponent* animationComponent;	// アニメーション
-	MovementComponent* moveComponent;			// 移動
+	MovementComponent* moveComponent;		// 移動
 	WorldTransform* worldTransform;			// ワールドトランスフォーム
 };
-
 
 /// <summary>
 /// コンボダメージ
@@ -261,8 +261,78 @@ private:
 	Data data_;
 };
 
-// 前方宣言
-class CameraManager;
+
+class ComboHitBox {
+public:
+
+	// ヒットボックスのタイプ
+	enum class Type {
+		kWeapom,		// 武器追従型
+		kFrontArea,		// 前方判定
+		kIndependent,	// 独立(飛び道具など)
+		kLockOnArea,	// ターゲット位置
+	};
+
+	enum class Shape {
+		kAABB,
+		kOBB,
+		kSphere
+	};
+
+	
+	// ヒットボックスデータ
+	struct Data {
+		float hitBpxWindowStart_ = 10.1f;		// ヒットボックス生成スタート
+		float lifeTime_ = 10.5f;					// ヒットボックス生存時間
+
+		HitBoxUseType hitBoxUseType_;			// ヒットボックス使用者タイプ
+	};
+
+	// 開始
+	void Enter();
+
+	// 更新
+	void Update(float dt);
+
+	// 終了
+	void Exit();
+
+	// データ取得
+	Data& GetData() { return data_; }
+	// コライダーデータ追加
+	void AddCollider(HitBoxCollData data) { collData_.push_back(data); };
+	// 使うヒットボックス名設定
+	void AddUseHitBox(const std::string& name) { useHitBox_.push_back(name); };
+	// 使うヒットボックス名クリーン
+	void ClearUseHitBox() { useHitBox_.clear(); }
+	// ヒットボックスシステム取得
+	void SetHitBoxSystem(HitBoxSystem* system) { hitBoxSystem_ = system; };
+	// 親子設定
+	void SetPerent(WorldTransform* perent) { perent_ = perent;};
+
+private:
+	// ヒットボックスシステム
+	HitBoxSystem* hitBoxSystem_ = nullptr;
+	// 親子
+	WorldTransform* perent_ = nullptr;
+	
+	// ヒットボックスデータ
+	Data data_;
+	// ヒットボックスタイプ
+	Type type_;
+	// コライダーデータ
+	std::vector<HitBoxCollData> collData_;
+	
+	// 使うヒットボックス名
+	std::vector<std::string> useHitBox_;
+
+private:
+	//
+	float timer_ = 0.0f;
+	//
+	bool isPopHitBox_ = false;
+	
+};
 
 /// <summary>
 /// コンボ時のカメラ
@@ -320,6 +390,7 @@ public:
 	ComboMotion motion{};					// コンボ用モーションクラス
 	ComboDamage damage{};					// コンボ用ダメージクラス
 	ComboCamera camera{};					// コンボ用カメラクラス
+	ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 };
 
 

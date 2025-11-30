@@ -7,8 +7,6 @@ void EffectField::Initialize(Entity3DManager* entity3DManager)
 {
 	entity3DManager_ = entity3DManager;
 
-
-
 	// コライダーコンポーネントの初期化
 	colliderComponent_ = std::make_unique<ColliderComponent>();
 	colliderComponent_->SetOwner(colliderComponent_.get());
@@ -16,6 +14,10 @@ void EffectField::Initialize(Entity3DManager* entity3DManager)
 	colliderComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
 	// 登録（IDを取得したければ変数で受ける）
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
+
+
+
+
 
 	// 固有の初期化
 	InitializeUniqe();
