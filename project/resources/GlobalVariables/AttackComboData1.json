@@ -1,0 +1,32 @@
+{
+    "AttackComboData1": {
+        "Y方向ノックバック": {
+            "type": "bool",
+            "value": false
+        },
+        "Y方向ノックバック力": {
+            "type": "float",
+            "value": 30.0
+        },
+        "ダメージ": {
+            "type": "float",
+            "value": 20.0
+        },
+        "ノックバック力": {
+            "type": "float",
+            "value": 30.0
+        },
+        "ノックバック持続時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "ヒットボックス生存時間": {
+            "type": "float",
+            "value": 0.5
+        },
+        "ヒットボックス発生時間": {
+            "type": "float",
+            "value": 0.05000000074505806
+        }
+    }
+}

@@ -107,12 +107,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectField.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectModule.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitComponent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotion.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Response\Response.cpp" />
@@ -128,6 +134,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MoveComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MovementRestrictions.cpp" />
@@ -726,10 +733,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectField.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectModule.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBox.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitCounter.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
@@ -753,6 +767,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Move\AirMoveSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\DashSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Move\JumpSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Move\MovementRestrictions.h" />
     <ClInclude Include="DirectXGame\application\base\Move\MovementState.h" />
@@ -817,7 +832,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Move\MoveComponent.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitComponent.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\PlayerWeapon.h" />

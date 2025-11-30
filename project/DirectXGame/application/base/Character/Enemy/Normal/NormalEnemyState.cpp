@@ -30,6 +30,7 @@ void EnemyStateMove::Exit() {
 
 void EnemyStateMove::Enter() {
 	timer_ = 0.0f;
+	character_->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 3.0f;
 }
 #pragma endregion // 移動
 
@@ -115,9 +116,6 @@ void EnemyStateDie::Update() {
 		if (character_->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
 			character_->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		}
-
-		// 着地処理
-		//character_->GetMoveComponent()->Landing(character_->GetObjectComponent()->GetWorldTransform(), *character_->GetObjectComponent()->GetRigidBodyComponent());
 	}
 }
 

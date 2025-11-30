@@ -1,8 +1,9 @@
 #pragma once
 #include "WeaponData.h"
-#include "DirectXGame/application/base/Attack/Combo/ComboData.h"
-#include "DirectXGame/application/base/Attack/Combo/ComboState.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
+
+class BaseCharacter; // 前方宣言
 
 // 武器のベースクラス
 class BaseWeapon : public IHitReceiver
@@ -20,7 +21,6 @@ public:
 	// 使っているキャラクター設定
 	void SetCharacter(BaseCharacter* character) {
 		this->character = character;
-		comboStateMachine_ = std::make_unique<ComboStateMachine>(this->character);
 	};
 	// タグによるコライダーの有効・無効を設定
 	void SetIsCollider(CollisionTag tag ,bool is) { GetObject3D()->GetColliderComponent()->SetEnableByTag(tag, is); };
@@ -30,19 +30,6 @@ public:
 	bool IsAutomatic() const { return data_.isAutomatic; };
 	// 攻撃中かどうかのフラグを設定
 	void SetIsActive(bool isActive) { data_.isActive = isActive; };
-	// ヒットデータを取得
-	AttackHitData& GetHitData() { return hitData_; }
-	
-	
-	// コンボデータ取得
-	ComboData GetComboData() const { return comboData_; }
-	ComboData& ComboDataUse(){ return comboData_; }
-
-	// コンボデータ設定
-	void SetComboData(ComboData data) { comboData_ = data; }
-	// コンボステートマシーン取得
-	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
-	
 	
 	// コライダーコンポーネント
 	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
@@ -51,55 +38,22 @@ public:
 	// ワールド変換取得
 	WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
 
-
 	// リキャストタイム取得
 	bool GetIsRecastTimeOver() const { return data_.MaxRecastTime <= data_.recastTime; }
 	// リキャストタイム設定
 	void RecastTime(float timer) { data_.recastTime += timer; }
 
+
+	//HitBox* GetHitBox() { return hitBox_.get();}
 public:
-	// ノード追加
-	void AddComboNode(const std::string& name, std::shared_ptr<ComboNodeState> node) {
-		comboNodes_[name] = node;
-	}
-	// コンボ接続
-	void ConnectCombo(const std::string& from, AttackInput input, const std::string& to) {
-		auto itFrom = comboNodes_.find(from);
-		auto itTo = comboNodes_.find(to);
-		if (itFrom != comboNodes_.end() && itTo != comboNodes_.end()) {
-			itFrom->second->SetNextState(input, itTo->second);
-		}
-	}
-	// 最初のコンボ
-	void StartCombo(const std::string& name) {
-		auto it = comboNodes_.find(name);
-		if (it != comboNodes_.end()) {
-			comboStateMachine_->SetRoot(it->second);
-		}
-	}
-	// コンボ更新
-	void UpdateCombo(float dt) {
-		comboStateMachine_->Update(dt);
-	}
-	// インプット
-	void InputCombo(AttackInput input) {
-		comboStateMachine_->HandleInput(input);
-	}
-	// コンボが終了したか
-	bool IsComboFinished() const {
-		return comboStateMachine_->IsComboFinished();
-	}
-protected:
-	WeaponData data_;						// 武器データ
-	AttackHitData hitData_;					// 攻撃ヒットデータ
-	ComboData comboData_;					// コンボデータ
-	std::unique_ptr<ComboStateMachine> comboStateMachine_;	// コンボステートマシーン
-	std::map<std::string, std::shared_ptr<ComboNodeState>> comboNodes_;
 	
+protected:
+	WeaponData data_;	// 武器データ
 protected:
 	BaseCharacter* character;	// 使っているキャラクター
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
+	std::unique_ptr<HitBox> hitBox_;
 protected:
 	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
 	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー

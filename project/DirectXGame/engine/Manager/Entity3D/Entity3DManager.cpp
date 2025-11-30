@@ -231,10 +231,15 @@ void Entity3DManager::Update()
 	// オブジェクトの更新
 	for (auto& object : object3d) {
 		if (object) {
+			// 物理更新
+			object->RigidBodyUpdate();
+		}
+	}
 
+	for (auto& object : object3d) {
+		if (object) {
 			// 更新
 			object->Update();
-			
 			// オブジェクトの描画順決定
 			switch (object->GetRenderComponent()->GetObjectDrawType()) {
 			case ObjectDrawType::kTranslucent01:

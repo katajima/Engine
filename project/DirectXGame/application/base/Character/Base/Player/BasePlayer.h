@@ -46,12 +46,6 @@ public:
 	// プレイヤUI取得
 	virtual PlayerUI* GetPlayerUI() = 0;
 
-	// ヒット数の取得
-	int GetHitCount() const { return weapon_->GetHitData().hitCount; }
-	// 攻撃がヒットしたら加算
-	void AddHit() { weapon_->GetHitData().AddHit(); };
-	// ヒットタイマーのリセット
-	void SetHitTime() { weapon_->GetHitData().ResetTimer(); }
 	// SPゲージ加算
 	void AddSpGauge(int d) { special_->AddGauge(d); };
 	// SP発動可能？

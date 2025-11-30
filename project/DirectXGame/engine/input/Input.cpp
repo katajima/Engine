@@ -222,3 +222,13 @@ Vector2 Input::GetGamePadRightStick() const
 		return Vector2();
 	}
 }
+
+float Input::GetGamePadLeftTrigger() const
+{
+	return  xInputState_.Gamepad.bLeftTrigger / 255.0f;
+}
+
+float Input::GetGamePadRightTrigger() const
+{
+	return xInputState_.Gamepad.bRightTrigger / 255.0f;
+}

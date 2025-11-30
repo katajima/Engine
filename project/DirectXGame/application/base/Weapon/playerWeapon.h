@@ -2,6 +2,7 @@
 #include "DirectXGame/application/base/Weapon/Base/MellWeapons.h"
 
 
+
 // 前方宣言
 class BasePlayer;
 class NormalPlayer;
@@ -34,18 +35,6 @@ public:
 	/// </summary>
 	void Draw2D() override;
 
-private:
-	WorldTransform colliderWorld_;
-	uint32_t weaponColliderId_ = 0;
-
-	WorldTransform colliderWorld2_;
-	uint32_t weaponColliderId2_ = 0;
-
-	std::shared_ptr<ComboNodeState> attack1;
-	std::shared_ptr<ComboNodeState> attack2;
-	std::shared_ptr<ComboNodeState> attack3;
-	std::shared_ptr<ComboNodeState> heavy1;
-
 private: // 一旦
 
 	struct ProvisionalData {
@@ -58,21 +47,9 @@ private: // 一旦
 		Vector3 obbColliderSize = { 0.5f,2.0f,1.0f };// OBBコライダーサイズ
 		Vector3 obbCollider2Size = { 0.5f,5.5f,1.0f };// OBBコライダーサイズ
 
-		float damage1 = 20;
-		float damage2 = 21;
-		float damage3 = 35;
 
-		float knockbackPower1 = 30.0f;
-		float knockbackPowerY1 = 30.0f;
-
-		float knockbackPower2 = 130.0f;
-		float knockbackPowerY2 = 90.0f;
-
-
-		Vector3 collider1Pos = {0.0f,2.5f,0.5f};
-		Vector3 collider2Pos = {0,2.0f,0};
-
-
+		Vector3 collider1Pos = {0.0f,0.5f,0.0f};
+		Vector3 collider2Pos = {0,3.5f,0.5f};
 	};
 	ProvisionalData provisionalData_;
 };

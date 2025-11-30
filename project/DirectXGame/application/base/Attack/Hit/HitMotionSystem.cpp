@@ -1,4 +1,4 @@
-#include "HitComponent.h"
+#include "HitMotionSystem.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 void HitMotionSystem::Update(float dt, ObjectComponent* object)

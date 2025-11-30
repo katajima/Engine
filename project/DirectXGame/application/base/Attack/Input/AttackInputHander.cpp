@@ -12,11 +12,11 @@ AttackICommand::~AttackICommand()
 
 void AttackLight::Exec(BaseCharacter& character) 
 {
-    character.GetWeapon()->GetComboStateMachine()->HandleInput(AttackInput::Light);
+    character.GetAttackController()->GetComboSystem()->GetComboStateMachine()->HandleInput(AttackInput::Light);
 }
 void AttackHeavy::Exec(BaseCharacter& character) 
 {
-    character.GetWeapon()->GetComboStateMachine()->HandleInput(AttackInput::Heavy);
+    character.GetAttackController()->GetComboSystem()->GetComboStateMachine()->HandleInput(AttackInput::Heavy);
 }
 
 

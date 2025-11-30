@@ -151,16 +151,12 @@ void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* line
 	minWorld = aabb.min_ + centerWorld;
 	maxWorld = aabb.max_ + centerWorld;
 
-	//Vector3 size = aabb.min_;//; +aabb.max_;
-
 #ifdef _DEBUG
 	if (lineCommon) {
 		if (isDebugLine) {
 			if (enabled) {
 				// AABBの最小・最大座標を使ってラインを描画
 				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
-				//OBB obb = { {centerWorld},{},{size} };
-				//lineCommon->AddLineOBB(obb, { 1,1,1,1 });
 			}
 			else {
 				// 無効な場合は透明にする

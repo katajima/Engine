@@ -120,7 +120,6 @@ void ComboMotion::Update(const Input& input, float dt) {
 
 
 	if (isMove_) {
-		moveComponent->SetSpeed(0.1f,data_.speed_);		// スピード設定
 		moveComponent->SetCanMove(true);				// 前進する
 	}
 
@@ -138,6 +137,35 @@ void ComboMotion::Exit() {
 }
 
 #pragma endregion // コンボモーション
+
+
+#pragma region ComboHitBox
+
+// 開始
+void ComboHitBox::Enter() {
+	timer_ = 0.0f;
+}
+
+// 更新
+void ComboHitBox::Update(float dt) {
+	timer_ += dt;
+
+	if (timer_ >= data_.hitBpxWindowStart_) {
+		if (!isPopHitBox_) {
+			hitBoxSystem_->AddHitBox(data_.hitBoxUseType_,collData_,useHitBox_,data_.lifeTime_, perent_);
+			isPopHitBox_ = true;
+		}
+	}
+}
+
+// 終了
+void ComboHitBox::Exit() {
+	isPopHitBox_ = false;
+	timer_ = 0.0f;
+}
+
+#pragma endregion // コンボヒットボックス
+
 
 
 #pragma region ComboDamage
@@ -209,6 +237,7 @@ void ComboData::Enter() {
 	motion.Enter();							// コンボ用モーションクラス開始
 	damage.Enter();							// コンボ用ダメージクラス開始
 	camera.Enter();							// コンボ用カメラクラス開始
+	hitBox.Enter();							// コンボ用ヒットボックスクラス開始
 }
 
 // 更新
@@ -217,6 +246,7 @@ void ComboData::Update(const Input& input, float dt) {
 	motion.Update(input, dt);				// コンボ用モーションクラス更新
 	damage.Update(dt);						// コンボ用ダメージクラス更新
 	camera.Update(dt);						// コンボ用カメラクラス更新
+	hitBox.Update(dt);						// コンボ用ヒットボックスクラス更新
 }
 
 // 終了
@@ -225,6 +255,7 @@ void ComboData::Exit() {
 	motion.Exit();							// コンボ用モーションクラス終了
 	damage.Exit();							// コンボ用ダメージクラス終了
 	camera.Exit();							// コンボ用カメラクラス終了
+	hitBox.Exit();							// コンボ用ヒットボックスクラス終了
 }
 
 #pragma endregion // コンボデータ

@@ -1,9 +1,13 @@
 #pragma once
-#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Attack/Combo/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHander.h"
 
+#include <optional>
+#include <memory>
+#include <map>
 
+// 前方宣言
+class BaseCharacter;
 
 /// <summary>
 /// コンボステートクラス
@@ -140,6 +144,7 @@ public:
 
 private:
     BaseCharacter* owner;                       // 
+private:
     std::shared_ptr<ComboState> currentState;   // 
     std::shared_ptr<ComboState> rootState;      // 
 

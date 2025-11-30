@@ -52,6 +52,9 @@ namespace Math {
 	float Clamp(float t, float min, float max);
 	// クランプ
 	float Clamp3(float value, float min, float max);
+	// 正規化クランプ
+	float NormalizeClamp(float value, float minValue, float maxValue);
+
 	// 反射関数
 	Vector3 Reflect(const Vector3& input, const Vector3& normal);
 	// 反射関数(反射率付き)

@@ -178,10 +178,7 @@ private:
 };
 
 
-
-/// <summary>
 /// ダメージデータ
-/// </summary>
 class DamageData {
 public:
 	// ダメージタイプ
@@ -300,9 +297,7 @@ private:
 	float damage = 0;			// ダメージ
 };
 
-/// <summary>
 /// 攻撃データ
-/// </summary>
 struct AttackData {
 
 

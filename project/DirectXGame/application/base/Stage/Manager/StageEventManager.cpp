@@ -18,7 +18,7 @@ void StageEventManager::Initialize(Entity3DManager* entity3DManager, GlobalVaria
 	characterSpawnManager_ = std::make_unique<CharacterSpawnManager>();
 	characterSpawnManager_->Initialize(characterManager_, entity3DManager_->Get3DLineCommon());
 
-	// スポーン情報初期化
+	//// スポーン情報初期化
 	SpawnInfo data;
 	data.Initialize("test",1,30);
 	data.size_ = { 50,1,50 };
@@ -27,7 +27,6 @@ void StageEventManager::Initialize(Entity3DManager* entity3DManager, GlobalVaria
 	characterSpawnManager_->AddCharacterSpawn(data);
 
 	characterSpawnManager_->GetCharacterSpawn("test")->GetSpawnTransform().translate_ = { 0,0,100 };
-
 }
 
 

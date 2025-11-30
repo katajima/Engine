@@ -26,7 +26,6 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	// 移動コンポーネント初期化
 	InitMoveComponent();
 	moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
-
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
 	sphere->Enable();					// コライダ有効
@@ -50,6 +49,8 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 		// 壁との衝突応答
 		responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall,self,other);
 
+		if (other->tag == CollisionTag::PlayerAttack)
+			responseSystem_;
 		};
 
 	// 視野
@@ -73,11 +74,14 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	Parameters().speed = 3.0f;
 	Parameters().strength = 10.0f;
 
+	moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters().speed;
+
 
 	// 戦闘中の倍率・軽減率を扱う
-	combatStatComponent_ = std::make_unique<CombatStatComponent>();
-	combatStatComponent_->Initialize(&characterParameterComponent_);
+	attackController_ = std::make_unique<AttackController>();
+	attackController_->Initialize(entity3DManager,&characterParameterComponent_,this);
 
+	
 
 	// 保存項目初期化
 	InitializeBaseAddItem();

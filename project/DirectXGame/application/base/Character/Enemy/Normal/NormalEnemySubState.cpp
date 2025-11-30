@@ -9,6 +9,8 @@ void NormalEnemyAttackReadySubState::Update(float deltaTime) {
     timer_ += deltaTime;
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     // 後ろに後退
+
+    enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = -30.0f;
     enemy->DirectionMoveVelocity(-30.0f);
     if (timer_ > readyTime_) {
         // 攻撃へ遷移
@@ -21,6 +23,7 @@ void NormalEnemyAttackSwingSubState::Enter() {
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     timer_ = 0.0f;
 
+    enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
     enemy->DirectionMoveVelocity(40.0f);
     dire_ = enemy->TargetDirection();
 }
@@ -30,7 +33,10 @@ void NormalEnemyAttackSwingSubState::Update(float deltaTime) {
     timer_ += deltaTime;
 
     // 前進
+
+    enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
     enemy->Velocity() = dire_ * 40.0f;
+
     if (timer_ > swingTime_) {
         fsm_->ChangeState(AttackSubState::End);
     }

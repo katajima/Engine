@@ -159,7 +159,9 @@ void GamePlayScene::CheckAllCollisions()
 
 	// IDが1なら
 	if (GetSceneData().playerID == 1) {
-		collisionManager_->Register(caracterManager_->GetPlayer()->GetWeapon()->GetColliderComponent());
+		for (auto& caracter : caracterManager_->GetPlayer()->GetAttackController()->GetHitBoxSystem()->GetData()) {
+			collisionManager_->Register(caracter.hitBox.get()->GetColliderComponent());
+		}
 	}
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
@@ -291,22 +293,18 @@ void GamePlayScene::Update()
 }
 
 #pragma endregion //更新関係
-// 終了
-void GamePlayScene::Finalize()
-{
 
-}
+// 終了
+void GamePlayScene::Finalize(){}
 
 // 3D描画
-void GamePlayScene::Draw3D()
-{
+void GamePlayScene::Draw3D(){
 	////3Dオブジェクトの描画
 	bulletManager_->DrawEffect();
 }
 
 // 2D描画
-void GamePlayScene::Draw2D()
-{
+void GamePlayScene::Draw2D(){
 	// ゲームUI
 	gameUI->Draw();
 	//

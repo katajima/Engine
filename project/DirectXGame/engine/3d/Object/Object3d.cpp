@@ -101,7 +101,6 @@ void Object3d::Update()
 	renderComponent_->Update();
 	renderComponent_->SetCamera(cameraPtr);
 
-
 	// トランスフォームコンポーネント
 	transformComponent_->Update();
 
@@ -163,10 +162,7 @@ void Object3d::Update()
 		break;
 	}
 
-	// 物理
-	if (rigidBodyComponent_) {
-		rigidBodyComponent_->Integrate(MyGame::GameTime(), transformComponent_->GetWorldTransform());
-	}
+	
 	// トレイル
 	if (trailEffect_) {
 		trailEffect_->SetIsEmit(isEmitTrailEffect);
@@ -183,6 +179,15 @@ void Object3d::Update()
 
 	direction_ = Subtract(direWorldTransform_.worldMat_.GetWorldPosition(), GetWorldPosition()).Normalize();
 
+}
+
+void Object3d::RigidBodyUpdate()
+{
+	if (isDelete) return;
+	// 物理
+	if (rigidBodyComponent_) {
+		rigidBodyComponent_->Integrate(MyGame::GameTime(), transformComponent_->GetWorldTransform());
+	}
 }
 
 #pragma endregion //更新系

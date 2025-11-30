@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include <DirectXGame/engine/Collider/CollisionTypeIdDef.h>
-#include "DirectXGame/application/base/Attack/Hit/HitComponent.h"
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 // 前方宣言
 class CharacterParameterComponent;	// キャラクターパラメータ設定

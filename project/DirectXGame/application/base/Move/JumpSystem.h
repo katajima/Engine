@@ -10,23 +10,18 @@ public:
 	/// ジャンプに関連するデータを格納する構造体。
 	/// </summary>
 	struct Data {
-		// ジャンプ中かどうか
-		bool isJump_ = false;
 		// ジャンプ力
-		float power_ = 0.0f;
-		// 重力係数(0.0f~1.0f間)0.0fで無重力、1.0fで通常の重力
-		float gravity_ = 1.0f;
-		// 現在の高さ
-		float height_ = 0.0f;
-		// 入力遅延時間
-		float inputDelay_ = 0.0f;
+		float power_ = 800.0f;
+		// 上昇時の重力係数
+		float upGravity_ = 15.0f;
+		// 落下時の重力係数
+		float fallGravity_ = 30.0f;
+		// 入力受付時間
+		float inputDelay_ = 0.1f;
 		// ジャンプ入力受付可能かどうか
 		bool canInput_ = true;
-		// ジャンプ回数
-		int jumpCount_ = 0;
 		// 最大ジャンプ回数
 		int maxJumpCount_ = 2;
-		
 	};
 
 	// ジャンプ状態列挙型
@@ -44,27 +39,73 @@ public:
 	// 更新
 	void Update(float dt,WorldTransform& world, RigidBodyComponent& rigid);
 
-	
+
+public:	// ジャンプ開始
+	void StartJump(RigidBodyComponent& rigid);
+	// ジャンプ回数現象
+	void DecrementJumpCount() { jumpCount_--; }
 public:
 	// ジャンプデータ取得
 	Data& GetData() { return data_; }
-
-	// ジャンプ回数現象
-	void DecrementJumpCount() { data_.jumpCount_--; }
+	// ジャンプ状態取得
+	State GetState() const { return state_; }
+	// ジャンプ可能か設定
+	void SetCanInput(bool canInput) { data_.canInput_ = canInput; }
 	//	ジャンプ出来るか
-	bool GetIsJump() const { return data_.jumpCount_ > 0; }
+	bool GetIsJump() const { return jumpCount_ > 0; }
 	// 着地状態か
 	bool GetIsLanding() const { return isLanding_; }
 	// 最大ジャンプカウント設定
 	void SetMaxJumpCount(int count) { data_.maxJumpCount_ = count; }
+	// 入力中か設定
+	void SetInputPressed(bool isPressed) { isInputPressed_ = isPressed; }
+	// ダッシュ中か設定
+	void SetIsDash(bool dash) { isDash_ = dash; }
+
+private:
+
+	// 状態処理
+	void StateProcess();
+
+	// 入力処理
+	void InputHoldProcess(float dt);
+
+	// ジャンプホールド処理
+	void JumpHoldProcess(float dt, RigidBodyComponent& rigid);
+
+	//
+
+
+private: // 貰うもの
+	// ダッシュ中かどうか
+	bool isDash_ = false;
 private:
 	// 地面の高さ
 	float groundHeight_ = 0.0f;
-	// 着地しているかどうか
-	bool isLanding_ = false;
-
+	// ジャンプ状態
+	State state_ = State::Wait;
 private:
 	// ジャンプデータ
-	Data data_;	
+	Data data_{};
+	// ジャンプ回数
+	int jumpCount_ = 0;
+	// 現在の高さ
+	float height_ = 0.0f;
+	// 速度
+	float velocity_ = 0.0f;
+private: // フラグ系統
+	// 着地しているかどうか
+	bool isLanding_ = false;
+	// ジャンプ中かどうか
+	bool isJumping_ = false;
+	// 地面かどうか
+	bool isGrounded_ = false;
+	// 入力ホールド中かどうか
+	bool isInputHeld_ = false;
+	// 入力が押されているかどうか
+	bool isInputPressed_ = false;
 
+private:
+	// 入力ホールドタイマー
+	float holdTimer_ = 0.0f;
 };

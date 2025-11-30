@@ -1,0 +1,49 @@
+#pragma once
+#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
+
+class BaseCharacter;
+
+// 使用者のタイプ
+enum class HitBoxUseType {
+	kPlayer,	// プレイヤー
+	kEnemy,		// 敵
+	kOther,		// その他
+};
+
+
+class HitBoxFunction {
+public:
+
+	// 初期化
+	void Initialize(ColliderComponent* owner, BaseCharacter* character, HitBoxUseType type) {
+		owner_ = owner; 
+		character_ = character;
+		type_ = type;
+	};
+
+	// 開始
+	void Begin(Collider* self, Collider* other);
+
+	// 更新
+	void Update();
+
+private:
+	// 使用者がプレイヤーの場合の更新処理
+	void UpdateTypePlayer();
+	// 使用者が敵の場合の更新処理
+	void UpdateTypeEnemy();
+	// 使用者がキャラクター以外の場合の更新処理
+	void UpdateTypeOther();
+
+private:
+	// 衝突履歴取得
+	ContactRecord& GetContactRecord() { return owner_->contactRecord_; }
+private:
+	ColliderComponent* owner_ = nullptr;	// コライダーコンポーネント(使用者)
+	ColliderComponent* other_ = nullptr;	// コライダーコンポーネント(相手)
+	BaseCharacter* character_ = nullptr;	// 使用キャラクター
+	HitBoxUseType type_;							// 使用者
+
+	Collider* otherColl_ = nullptr;
+};
+

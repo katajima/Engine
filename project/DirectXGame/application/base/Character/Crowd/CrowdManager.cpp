@@ -54,7 +54,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		// 範囲内に入ったら
 		if (distToTarget < attackRange_ * 3.0f) {
 			state_ = AgentState::PreparationAttack;	// 攻撃準備に入る
-			attackDelayTimer_ = Random::RandomFloat(4.0f, 6.0f);
+			attackDelayTimer_ = Random::RandomFloat(1.0f, 3.0f);
 		}
 		else if (distToTarget > engageDistance_ * 1.5f) {	// 範囲外なら
 			state_ = AgentState::Idle;	// 待機に戻る
@@ -168,6 +168,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	}
 
 	velocity_ = Lerp(velocity_, steer * targetSpeed, dt * 5.0f);
+	//velocity_.y = 0;
 	owner_->Velocity() = velocity_;
 }
 

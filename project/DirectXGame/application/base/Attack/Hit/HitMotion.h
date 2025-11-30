@@ -88,11 +88,3 @@ private:
 	AirStickData airStickData_;	// エアスティックデータ
 };
 
-
-// カメラモーション
-class CameraMotion {
-public:
-
-private:
-
-};

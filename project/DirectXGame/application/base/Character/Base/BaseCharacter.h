@@ -3,8 +3,8 @@
 #include"DirectXGame/application/base/Move/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/State/CharacterStateMachine.h"
-#include "DirectXGame/application/base/Attack/Hit/HitComponent.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
+#include <DirectXGame/application/base/Attack/AttackController.h>
 
 // 前方宣言
 class Effect;
@@ -183,12 +183,12 @@ public:
 	MovementComponent* GetMoveComponent() { return moveComponent_.get(); }
 
 public:
-	// 攻撃コンポーネント取得
-	CombatStatComponent* GetCombatStatComponent() { return combatStatComponent_.get(); }
 	// キャラクターパラメータコンポーネント取得
 	CharacterParameterComponent& GetCharacterParameterComponent() { return characterParameterComponent_; }
 	// 攻撃応答システム取得
 	ResponseSystem* GetResponseSystem() { return responseSystem_.get(); }
+	// 攻撃コントローラー取得
+	AttackController* GetAttackController() { return attackController_.get(); }
 
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;			// オブジェクトコンポーネント
@@ -197,7 +197,9 @@ protected:
 	std::unique_ptr<AttackInputHander> attackInputHander_;		// 攻撃入力系クラス
 	std::unique_ptr<CharacterStateMachine> stateMachine_;		// キャラクターの状態管理
 	std::unique_ptr<MovementComponent> moveComponent_;				// 移動コンポーネント
-	std::unique_ptr<CombatStatComponent> combatStatComponent_;	// 攻撃パラメーター補正
+
+	std::unique_ptr<AttackController> attackController_;		// 攻撃制御クラス
+
 	std::unique_ptr<ResponseSystem> responseSystem_;			// 攻撃応答システムクラス
 
 protected:

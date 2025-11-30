@@ -41,6 +41,16 @@ float Math::Clamp(float t, float min, float max) {
 float Math::Clamp3(float value, float min, float max) {
 	return (std::max)(min, (std::min)(value, max));
 }
+float Math::NormalizeClamp(float value, float minValue, float maxValue)
+
+{
+	if (maxValue - minValue == 0.0f) {
+		return 0.0f; // ゼロ除算防止
+	}
+
+	float t = (value - minValue) / (maxValue - minValue);
+	return Math::Clamp(t,0.0f, 1.0f);
+}
 // 反射
 Vector3 Math::Reflect(const Vector3& input, const Vector3& normal)
 {

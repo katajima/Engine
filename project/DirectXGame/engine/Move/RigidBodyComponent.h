@@ -27,8 +27,6 @@ public:
 	bool IsGravity() const { return useGravity; }
 	//重力あるか設定
 	void SetIsGravity(bool is) { useGravity = is; }
-	// 速度設定
-	void SetVelocity(const Vector3& v) { velocity_ = v; }
 	// 速度取得
 	Vector3 GetVelocity() const { return velocity_; }
 	// 速度取得
@@ -40,7 +38,14 @@ public:
 	}
 
 private:
+	// 移動処理
+	void ProcessTranslation(float deltaTime, WorldTransform& transform);
+
+	// 回転処理
+	void ProcessRotation(float deltaTime, WorldTransform& transform);
+private:
 	Vector3 velocity_ = {0,0,0};				// 速度
+	Vector3 acceleration_ = { 0, 0, 0 };		// 加速度
 	Vector3 angularVelocity = { 0, 0, 0 };		// 角速度（回転）
 	float mass_ = 1.0f;							// 質量
 	float inverseMass = 1.0f;					// 計算用の逆質量（質量0の除算対策）
