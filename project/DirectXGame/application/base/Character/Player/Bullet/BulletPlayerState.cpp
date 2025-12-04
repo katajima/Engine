@@ -8,9 +8,6 @@
 // 更新
 void BulletPlayerStateIdle::Update() {
 	Input* input = character_->GetInput();
-
-	// 武器描画 
-	
 	// ゲームパッドが繋いであるなら
 	if (input->IsControllerConnected()) {
 
@@ -21,14 +18,6 @@ void BulletPlayerStateIdle::Update() {
 		}
 	}
 
-#ifdef _DEBUG
-
-	// デバッグ用
-	if (input->IsTriggerKey(DIK_Z)) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-		return;
-	}
-#endif // _DEBUG
 
 	// 移動したら
 	if (input->GetGamePadLeftStick().Length() != 0) {
@@ -68,13 +57,6 @@ void BulletPlayerStateMove::Update()
 			return;
 		}
 	}
-
-	// 気絶
-	if (input->IsTriggerKey(DIK_Z)) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-		return;
-	}
-
 	// 止まったら
 	if (input->GetGamePadLeftStick().Length() == 0) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
@@ -146,13 +128,6 @@ void BulletPlayerStateJump::Update() {
 		anima->SetIsLoop(false);
 		anima->SetAnimetion("JumpStrat1", 0.05f);
 	}
-
-
-
-
-
-
-
 }
 
 // 終了
@@ -160,10 +135,7 @@ void BulletPlayerStateJump::Exit() {
 	character_->GetMoveComponent()->Velocity() = { 0,0,0 };
 }
 // 初期化
-void BulletPlayerStateJump::Enter() {
-
-
-}
+void BulletPlayerStateJump::Enter() {}
 
 #pragma endregion // ジャンプ
 
