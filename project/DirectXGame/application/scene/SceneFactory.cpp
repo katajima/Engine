@@ -2,27 +2,23 @@
 #include <DirectXGame/engine/Base/pch.h>
 
 
-BaseScene* SceneFactory::CreateScene(const std::string& sceneName)
+std::unique_ptr<BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
-	BaseScene* newScene = nullptr;
+    if (sceneName == "TITLE") {                 // タイトル
+        return std::make_unique<TitleScene>();
+    }
+    if (sceneName == "GAMEPLAY") {              // ゲームプレイ
+        return std::make_unique<GamePlayScene>();
+    }
+    if (sceneName == "TEST") {                  // テスト
+        return std::make_unique<TestScene>();
+    }
+    if (sceneName == "SELECT") {                // セレクト
+        return std::make_unique<SelectScene>();
+    }
+    if (sceneName == "SAMPLE") {                // サンプル
+        return std::make_unique<SampleScene>();
+    }
 
-	if (sceneName == "TITLE") {				// タイトル
-		newScene = new TitleScene();
-	}
-	if (sceneName == "GAMEPLAY") {			// ゲームプレイ
-		newScene = new GamePlayScene();
-	} 
-	if (sceneName == "TEST") {				// テスト
-		newScene = new TestScene();
-	}
-	if (sceneName == "SELECT") {			// セレクト
-		newScene = new SelectScene();
-	}	
-	if (sceneName == "SAMPLE") {			// サンプル
-		newScene = new SampleScene();
-	}
-
-
-
-	return newScene;
+    return nullptr;
 }
