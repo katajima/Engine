@@ -324,6 +324,35 @@ private:
 	CameraManager* cameraManager = nullptr;	// カメラ管理
 };
 
+/// <summary>
+/// コンボ用エフェクト
+/// </summary>
+class ComboEffect {
+public:
+	struct Data {
+		// 開始時間
+		float startTmer  = 0.0f;
+		// 終了時間
+		float endTime = 0.5f;
+
+
+	};
+
+
+	// 開始
+	void Enter();
+
+	// 更新
+	void Update(float dt);
+
+	// 終了
+	void Exit();
+
+
+private:
+	float timer_ = 0.0f;
+
+};
 
 // コンボデータ
 class ComboData {

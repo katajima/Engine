@@ -46,6 +46,7 @@ protected:
 
 
     bool isGravity = true;              // 重力はあるか？
+    float animationSpeed = 1.0f;        // アニメーションスピード
 };
 
 

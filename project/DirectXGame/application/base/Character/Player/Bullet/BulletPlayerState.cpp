@@ -21,10 +21,10 @@ void BulletPlayerStateIdle::Update() {
 		}
 
 		// 防御
-		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+		/*if (input->IsGamePadTriggered(GamePadButton::)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
 			return;
-		}
+		}*/
 
 	}
 
@@ -76,10 +76,10 @@ void BulletPlayerStateMove::Update()
 		}
 
 		// 防御発動
-		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+		/*if (input->IsGamePadTriggered(GamePadButton::)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
 			return;
-		}
+		}*/
 
 	}
 

@@ -118,6 +118,10 @@ private:
 
 		bool isGravity = true;				// 重力はあるか？
 
+
+		float animationSpeed_ = 1.0f;		// アニメーションスピード
+
+
 		Vector3 offsetPos_ = {};			// コライダー位置
 		Vector3 colliderSize = { 1.0f,1.0f,1.0f };	// コライダーサイズ
 	};

@@ -112,7 +112,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-	rengeSp->SetRadius(50);
+	rengeSp->SetRadius(100);
 	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
@@ -444,6 +444,8 @@ void NormalPlayer::ApplyGlobalComboData(const std::string& name, ComboGlovalData
 	globalVariables_->AddItem(name, "コンボ移行時間", data.stateNextTime);
 	globalVariables_->AddItem(name, "コンボ中の重力", data.isGravity);
 
+	globalVariables_->AddItem(name, "アニメーション速度", data.animationSpeed_);
+
 
 
 
@@ -465,7 +467,7 @@ void NormalPlayer::SetGlobalComboData(const std::string& name, ComboGlovalData& 
 	data.stateEndTime = globalVariables_->GetValue<float>(name, "コンボ終了時間");
 	data.stateNextTime = globalVariables_->GetValue<float>(name, "コンボ移行時間");
 	data.isGravity = globalVariables_->GetValue<bool>(name, "コンボ中の重力");
-
+	data.animationSpeed_ = globalVariables_->GetValue<float>(name, "アニメーション速度");
 }
 
 void NormalPlayer::ReloadComboData()
@@ -488,6 +490,7 @@ void NormalPlayer::ReloadComboData()
 	hitData1.offset = provisionalData_.collider1Pos;
 	hitData1.size = provisionalData_.obbColliderSize;
 
+
 	hitData1.damage = data1_.damage;
 	hitData1.knockbackData.GetData().duration_ = data1_.knockbackDuration_;
 	hitData1.knockbackData.GetData().power_ = data1_.knockbackPower;
@@ -501,7 +504,6 @@ void NormalPlayer::ReloadComboData()
 	hitData2.size = provisionalData_.obbCollider2Size;
 
 	
-
 	hitData3 = hitData1;
 	hitData3.name = "obb";
 	hitData3.offset = { 0,0,3 };
@@ -521,7 +523,7 @@ void NormalPlayer::ReloadComboData()
 	hitData2.knockbackData.GetData().power_ = data2_.knockbackPower;
 	hitData2.knockbackData.GetData().verticalBoost_ = data2_.knockbackPowerY;
 	hitData2.knockbackData.GetData().isVerticalBoost_ = data2_.isVerticalBoost_;
-
+	
 
 	// コンボ２のデータ送る
 	data2.hitBox.AddCollider(hitData1);
@@ -589,6 +591,8 @@ void NormalPlayer::SetData(ComboData& data,const ComboGlovalData& gData)
 
 	// 重力
 	data.motion.GetData().isGravity_ = gData.isGravity;
+	// アニメーションスピード
+	data.motion.GetData().animationSpeed_ = gData.animationSpeed_;
 
 }
 

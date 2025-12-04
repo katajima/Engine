@@ -15,8 +15,8 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	comboData_.motion.SetWorld(&owner->GetObjectComponent()->GetWorldTransform());
 	comboData_.motion.GetData().animationName_ = animation;
 
-	// 武器設定
-	comboData_.Enter();								// コンボデータ開始
+	// コンボデータ開始
+	comboData_.Enter();								
 
 	// ヒットボックスシステムを渡す
 	comboData_.hitBox.SetHitBoxSystem(owner->GetAttackController()->GetHitBoxSystem());
@@ -37,7 +37,9 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	inputWindowEnd = comboData_.comboCondition.GetData().inputWindowEnd_;
 	stateEndTime = comboData_.comboCondition.GetData().stateEndTime;
 	timeNextState = comboData_.comboCondition.GetData().stateNextTime;
-	
+
+	// アニメーションスピード
+	animationSpeed = comboData_.motion.GetData().animationSpeed_;
 	// 重力はあるか
 	isGravity = comboData_.motion.GetData().isGravity_;
 
@@ -60,6 +62,16 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 	
 	// 移動可能の場合は
 	owner->GetMoveComponent()->GetMoveSystem()->SetIsAttackCanMove(isMove);
+	
+	// アニメーションスピード
+	owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimationSpeed(animationSpeed);
+
+
+	if (IsInputAcceptable()) {
+		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = true;
+	}else{
+		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+	}
 
 	// 入力受付がないのなら終了する
 	if ((isInputWindowOver)) {
@@ -88,7 +100,7 @@ void ComboNodeState::Exit(BaseCharacter* owner)
 	timeInState = 0.0f;
 	// コンボデータ終了処理
 	comboData_.Exit();
-
+	owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimationSpeed(1.0f);
 	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 }
 
