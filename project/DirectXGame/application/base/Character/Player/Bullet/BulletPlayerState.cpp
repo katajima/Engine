@@ -8,9 +8,6 @@
 // 更新
 void BulletPlayerStateIdle::Update() {
 	Input* input = character_->GetInput();
-
-	// 武器描画 
-	
 	// ゲームパッドが繋いであるなら
 	if (input->IsControllerConnected()) {
 
@@ -19,23 +16,8 @@ void BulletPlayerStateIdle::Update() {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
-#ifdef _DEBUG
-
-	// デバッグ用
-	if (input->IsTriggerKey(DIK_Z)) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-		return;
-	}
-#endif // _DEBUG
 
 	// 移動したら
 	if (input->GetGamePadLeftStick().Length() != 0) {
@@ -74,21 +56,7 @@ void BulletPlayerStateMove::Update()
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御発動
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
-
-	// 気絶
-	if (input->IsTriggerKey(DIK_Z)) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-		return;
-	}
-
 	// 止まったら
 	if (input->GetGamePadLeftStick().Length() == 0) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
@@ -128,22 +96,8 @@ void BulletPlayerStateJump::Update() {
 	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
 	bool isAlive = character_->GetAlive();
 
-#ifdef _DEBUG
-	//ImGui::
-
-
-#endif // _DEBUG
-
-
-
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-
-
-
-
-
-
 		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
 
@@ -174,13 +128,6 @@ void BulletPlayerStateJump::Update() {
 		anima->SetIsLoop(false);
 		anima->SetAnimetion("JumpStrat1", 0.05f);
 	}
-
-
-
-
-
-
-
 }
 
 // 終了
@@ -188,10 +135,7 @@ void BulletPlayerStateJump::Exit() {
 	character_->GetMoveComponent()->Velocity() = { 0,0,0 };
 }
 // 初期化
-void BulletPlayerStateJump::Enter() {
-
-
-}
+void BulletPlayerStateJump::Enter() {}
 
 #pragma endregion // ジャンプ
 

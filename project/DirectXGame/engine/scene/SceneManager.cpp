@@ -131,7 +131,13 @@ void SceneManager::ChangeScene(const std::string& sceneName, float duration)
 {
 	assert(sceneFactory_);
 	if (nextScene_ == nullptr && phase_ == Phase::kMain) {
-		nextScene_.reset(sceneFactory_->CreateScene(sceneName));  // ★ unique_ptrで所有権管理
+		// ★ unique_ptr をそのまま受け取る（reset を使わない）
+		nextScene_ = sceneFactory_->CreateScene(sceneName);
+		if (!nextScene_) {
+			assert(false && "Invalid scene name");
+			return;
+		}
+
 		this->sceneName = sceneName;
 
 		// フェードアウト開始

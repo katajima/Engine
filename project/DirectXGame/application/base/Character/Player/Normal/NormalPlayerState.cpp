@@ -35,13 +35,6 @@ void PlayerStateIdle::Update() {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
 #ifdef _DEBUG
@@ -68,20 +61,6 @@ void PlayerStateIdle::Update() {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
 	}
-
-
-	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
-	//	anima->SetIsLoop(false);
-	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
-	//}
-	//else {
-	//	anima->SetIsLoop(true);
-	//	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
-	//}
-
-
-
 };
 
 // 終了
@@ -124,12 +103,6 @@ void PlayerStateMove::Update()
 		if (character_->GetSpecial()->GetIsSpecial()) {
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
 		}
-		// 防御発動
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
 	// 気絶発動
@@ -154,17 +127,6 @@ void PlayerStateMove::Update()
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
 		return;
 	}
-
-
-
-
-	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
-	//	anima->SetIsLoop(false);
-	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
-	//}
-	//else {
-	//	anima->SetIsLoop(true);
 		// アニメーションスピード設定
 	float speed = character_->GetMoveComponent()->GetMoveSystem()->GetAnimationSpeed();
 
@@ -238,12 +200,7 @@ void PlayerStateJump::Update() {
 	}
 
 
-	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
-	//	anima->SetIsLoop(false);
-	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
-	//}
-	//else 
+	
 	if (jump->GetState() == JumpSystem::State::Jump) { // 上昇しているなら
 		anima->SetIsLoop(false);
 		anima->SetAnimetion("JumpStrat1", 0.05f);
