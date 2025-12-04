@@ -19,13 +19,6 @@ void BulletPlayerStateIdle::Update() {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
 #ifdef _DEBUG
@@ -74,13 +67,6 @@ void BulletPlayerStateMove::Update()
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御発動
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
 	// 気絶
@@ -128,22 +114,8 @@ void BulletPlayerStateJump::Update() {
 	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
 	bool isAlive = character_->GetAlive();
 
-#ifdef _DEBUG
-	//ImGui::
-
-
-#endif // _DEBUG
-
-
-
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-
-
-
-
-
-
 		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
 
