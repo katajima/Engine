@@ -43,6 +43,44 @@ public:
 	// プレイヤUI取得
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };
 
+private:
+
+
+	struct MoveGlovalData {
+		// ジャンプ力
+		float power_ = 800.0f;
+		// 上昇時の重力係数
+		float upGravity_ = 15.0f;
+		// 落下時の重力係数
+		float fallGravity_ = 30.0f;
+		// 最小速度
+		float minSpeed_ = 0.1f;
+		// 最大速度
+		float maxSpeed_ = 1.0f;
+		// 加速度
+		float speedAcceleration_ = 0.1f;
+		// 回転速度
+		float rotationSpeed_ = 0.1f;
+		// スティックの角度によって速度が変化するか
+		bool isStickToSpeed_ = true;
+		// 空中での移動量制限を行うか
+		bool isLimitAirSpeed_ = true;
+		// 空中での移動変化量
+		float airSpeedRate_ = 0.85f;
+
+
+		// ダッシュ初速度
+		float dashStartSpeed = 100.0f;
+		// ダッシュ加速度
+		float  dashAcceleration = 0.0f;
+		// ダッシュ減衰度
+		float  dashFriction = 10.0f;
+		// 最大ダッシュ時間
+		float  dashMaxTime = 0.15f;
+		// ダッシュ中に重力適用させるかのフラグ
+		bool isDashGravity = false;
+	};
+	MoveGlovalData moveGlovalData_;
 
 private:
 	void InitAttack();
@@ -71,6 +109,17 @@ private:
 		bool isVerticalBoost_ = false;		// Y方向にノックバックするか
 
 		float damage = 20;					// ダメージ
+
+		float stateInputStartTime = 0.1f;	// 入力受付時間
+		float stateInputEndTime = 0.5f;		// 入力終了時間
+		float stateEndTime = 0.5f;			// ステート終了時間
+		float stateNextTime = 0.45f;		// ステート移行時間
+
+
+		bool isGravity = true;				// 重力はあるか？
+
+
+		float animationSpeed_ = 1.0f;		// アニメーションスピード
 
 
 		Vector3 offsetPos_ = {};			// コライダー位置

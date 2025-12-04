@@ -114,6 +114,9 @@ public:
 		float inputWindowStart_ = 0.1f;			// 入力受付スタート
 		float inputWindowEnd_ = 0.5f;			// 入力受付エンド
 
+		float stateEndTime = 0.5f;				// 終了時間
+		float stateNextTime = 0.45f;			// 移行時間
+
 		bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
 		ComboSequence comboSequence_;			// コンボボタン条件
 		float staminaCost = 0;					// スタミナ消費量
@@ -163,6 +166,7 @@ public:
 		bool isCompulsionMove_ = true;			// 強制的に移動
 		bool isCompulsionDirection_ = false;	// 強制方向に移動
 
+		bool isGravity_ = true;					// 空中でのコンボで重力はあるか？
 
 		// アニメーション
 		std::string animationName_ = "no";		// アニメーション名前
@@ -211,57 +215,8 @@ private: // 貰いもの
 };
 
 /// <summary>
-/// コンボダメージ
+/// ヒットボックス
 /// </summary>
-class ComboDamage {
-public:
-	// データ構造体
-	struct Data
-	{
-		float damageWindowStart_ = 0.1f;		// ダメージ受付スタート
-		float damageWindowEnd_ = 0.5f;			// ダメージ受付エンド
-
-		float damage_ = 0;						// ダメージ
-
-		bool isWeaponColliderHit_ = true;		// 武器自体からダメージ判定があるか？
-		bool isWeaponImpactColliderHit_ = false;// 武器から出てくる衝撃波ダメージ判定があるか？
-	};
-
-
-	// 開始
-	void Enter();
-
-	// 更新
-	void Update(float dt);
-
-	// 終了
-	void Exit();
-
-	// ダメージが発生しているか
-	bool IsDamage() const { return isDamage_; }
-
-	// ダメージ発生時間設定 
-	void DamageStartEnd(float start, float end) {
-		data_.damageWindowStart_ = start;
-		data_.damageWindowEnd_ = end;
-	}
-
-	// データ構造体取得
-	Data& GetData() { return data_; }
-
-	// ダメージ設定
-	void SetDamage(float damage) { data_.damage_ = damage; }
-
-	// ダメージ取得
-	float GetDamage() const { return data_.damage_; }
-
-private:
-	bool isDamage_ = false;					// ダメージ発生しているか
-	float timer_ = 1.0f;					// 時間
-	Data data_;
-};
-
-
 class ComboHitBox {
 public:
 
@@ -282,8 +237,8 @@ public:
 	
 	// ヒットボックスデータ
 	struct Data {
-		float hitBpxWindowStart_ = 10.1f;		// ヒットボックス生成スタート
-		float lifeTime_ = 10.5f;					// ヒットボックス生存時間
+		float hitBpxWindowStart_ = 1.0f;		// ヒットボックス生成スタート
+		float lifeTime_ = 1.0f;					// ヒットボックス生存時間
 
 		HitBoxUseType hitBoxUseType_;			// ヒットボックス使用者タイプ
 	};
@@ -315,7 +270,7 @@ private:
 	HitBoxSystem* hitBoxSystem_ = nullptr;
 	// 親子
 	WorldTransform* perent_ = nullptr;
-	
+private:
 	// ヒットボックスデータ
 	Data data_;
 	// ヒットボックスタイプ
@@ -327,9 +282,9 @@ private:
 	std::vector<std::string> useHitBox_;
 
 private:
-	//
+	// 時間
 	float timer_ = 0.0f;
-	//
+	// ヒットボックス出現
 	bool isPopHitBox_ = false;
 	
 };
@@ -369,6 +324,35 @@ private:
 	CameraManager* cameraManager = nullptr;	// カメラ管理
 };
 
+/// <summary>
+/// コンボ用エフェクト
+/// </summary>
+class ComboEffect {
+public:
+	struct Data {
+		// 開始時間
+		float startTmer  = 0.0f;
+		// 終了時間
+		float endTime = 0.5f;
+
+
+	};
+
+
+	// 開始
+	void Enter();
+
+	// 更新
+	void Update(float dt);
+
+	// 終了
+	void Exit();
+
+
+private:
+	float timer_ = 0.0f;
+
+};
 
 // コンボデータ
 class ComboData {
@@ -383,12 +367,8 @@ public:
 	// 終了
 	void Exit();
 
-//private:
-
-	KnockbackData knockbackData{};			// ノックバックデータ
 	ComboCondition comboCondition{};		// コンボ条件クラス
 	ComboMotion motion{};					// コンボ用モーションクラス
-	ComboDamage damage{};					// コンボ用ダメージクラス
 	ComboCamera camera{};					// コンボ用カメラクラス
 	ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 };

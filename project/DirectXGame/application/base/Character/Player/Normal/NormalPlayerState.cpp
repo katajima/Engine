@@ -37,10 +37,10 @@ void PlayerStateIdle::Update() {
 		}
 
 		// 防御
-		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+		/*if (input->IsGamePadTriggered(GamePadButton::)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
 			return;
-		}
+		}*/
 
 	}
 
@@ -125,10 +125,10 @@ void PlayerStateMove::Update()
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
 		}
 		// 防御発動
-		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
+		/*if (input->IsGamePadTriggered(GamePadButton::)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
 			return;
-		}
+		}*/
 
 	}
 
@@ -205,8 +205,8 @@ void PlayerStateJump::Update() {
 
 	// ジャンプ出来るか
 	bool isJamp = character_->GetMoveComponent()->GetIsJump();
-	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
-	bool isPress = input->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
+	bool isPress = input->IsGamePadPressed(GamePadButton::GAMEPAD_A);
 
 	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
 	if (isTriggerLT) {

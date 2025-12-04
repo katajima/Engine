@@ -99,7 +99,7 @@ private:
 
 	struct MaxTextData {
 		float size_ = 0.25f;
-		Vector2 pos_ = { 30,700 };
+		Vector2 pos_ = { 30,650 };
 		float rotate_ = Math::DegreesToRadians(-30);
 		Vector2 anchorPoint_ = { 0.5f,0.5f };
 		Color color_ = { 1,0,0,1 };

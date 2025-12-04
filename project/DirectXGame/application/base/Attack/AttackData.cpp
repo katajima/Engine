@@ -296,9 +296,6 @@ void AttackData::Update(float dt) {
 }
 
 
-bool AttackData::IsFinish(){
-	return damageData.IsFinish() && knockback.IsFinish();
-}
-;
+
 
 #pragma endregion // 攻撃データ

@@ -307,16 +307,10 @@ struct AttackData {
 	/// <param name="dt"></param>
 	void Update(float dt);
 
-	/// <summary>
-	/// 終了したか
-	/// </summary>
-	/// <returns></returns>
-	bool IsFinish();
-
+	
 
 
 	KnockbackData knockback;	// ノックバックデータ
 	DamageData damageData;		// ダメージデータ
-	bool isFixed = false;		// 位置を固定するか
 };
 

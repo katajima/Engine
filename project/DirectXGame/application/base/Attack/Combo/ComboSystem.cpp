@@ -6,7 +6,6 @@ void ComboSystem::Initialize(BaseCharacter* character) {
 
 void ComboSystem::ClearNode() {
 	comboNodes_.clear();
-	//comboStateMachine_->Reset();
 }
 
 void ComboSystem::AddComboNode(const std::string& name, std::shared_ptr<ComboNodeState> node) {

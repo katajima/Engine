@@ -41,16 +41,17 @@ void HitBoxFunction::UpdateTypePlayer(){
 	BasePlayer* player = static_cast<BasePlayer*>(character_);
 	if (!player) return;
 
-	ComboSystem* combo = player->GetAttackController()->GetComboSystem();
 
 	// ノックバック方向
-	combo->GetComboData()->knockbackData.SetNormal(player->GetMoveComponent()->GetDirection());
+	data_.knockbackData.SetNormal(player->GetMoveComponent()->GetDirection());
 
-	// ダメージ設定
-	float damage = combo->GetComboData()->damage.GetDamage();
-
-	enemy->GetResponseSystem()->GetHitMotionSystem()->SetKnockbackData(combo->GetComboData()->knockbackData);	 // ノックバックデータ設定
-	enemy->AddDamage(DamageCalculator::ComputeDamageWeapon(*player->GetAttackController()->GetCombatStat(), *enemy->GetAttackController()->GetCombatStat(), damage));
+	// ノックバックデータ
+	enemy->GetResponseSystem()->GetHitMotionSystem()->SetKnockbackData(data_.knockbackData);	 // ノックバックデータ設定
+	
+	// ダメージ量計算して送る
+	enemy->AddDamage(DamageCalculator::ComputeDamageWeapon(*player->GetAttackController()->GetCombatStat(), *enemy->GetAttackController()->GetCombatStat(), data_.damage));
+	
+	
 	enemy->Emit();	//	エフェクト出現
 	enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move); // 敵ステート設定
 

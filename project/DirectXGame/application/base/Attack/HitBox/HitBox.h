@@ -1,5 +1,6 @@
 #pragma once
 #include "HitBoxFunction.h"
+#include <DirectXGame/application/base/Attack/AttackData.h>
 
 class Entity3DManager; // 前方宣言
 class BaseCharacter;
@@ -14,19 +15,37 @@ enum class HitBoxShape {
 // コライダーデータ
 struct HitBoxCollData
 {
+	///
+	/// 判別用
+	///
+	
 	std::string name = "";
 	CollisionTag tag;
 	CollisionLayer layer;
 	CollisionLayer mask;
+	
+	/// <summary>
+	/// フラグ
+	/// </summary>
+	
 	bool isEneble = true;
 	bool isLine = false;
-	HitBoxShape shape = HitBoxShape::kOBB;
+
+	/// <summary>
+	/// 調整
+	/// </summary>
+
+	HitBoxShape shape = HitBoxShape::kOBB;	
 	Vector3 offset{};
 	Vector3 size = { 1.0f,1.0f,1.0f };
 	float radius = 1.0f;
 
+	/// <summary>
+	/// リアクション
+	/// </summary>
 
-
+	float damage = 0.0f;
+	KnockbackData knockbackData;
 };
 
 /// <summary>
@@ -43,7 +62,7 @@ public:
 public:
 
 	// コライダー追加
-	void AddCollider(std::unique_ptr<Collider> collider, const Vector3& offset);
+	void AddCollider(std::unique_ptr<Collider> collider, const Vector3& offset,const HitBoxFunction::Data& reaction);
 	// 有効化
 	void Enable();
 	// 無効化
@@ -55,7 +74,6 @@ public:
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
 	// コンポーネント取得
 	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
-
 private:
 	// 衝突履歴取得
 	ContactRecord& GetContactRecord() { return colliderComponent_->contactRecord_; }
@@ -74,6 +92,10 @@ private:
 	struct ColliderData {
 		WorldTransform worldTransform;
 		Collider* collider = nullptr;
+
+		float damage = 0.0f;
+		KnockbackData knockbackData;
+
 		int colliderID = -1;
 	};
 

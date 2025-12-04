@@ -1,5 +1,6 @@
 #pragma once
 #include "HitBox.h"
+#include <DirectXGame/application/base/Attack/AttackData.h>
 
 class Entity3DManager; // 前方宣言
 class BaseCharacter;
@@ -13,7 +14,6 @@ public:
 		std::unique_ptr<HitBox> hitBox = nullptr;
 		float lifeTime = 0.0f;
 		float timer = 0.0f;
-
 		// 生存時間を過ぎたら削除
 		bool IsDelete() const { return timer > lifeTime; }
 	};

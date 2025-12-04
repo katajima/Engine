@@ -26,15 +26,27 @@ public:
     virtual std::shared_ptr<ComboState> HandleInput(BaseCharacter* owner, AttackInput input) = 0;
 
     // 入力受付時間の範囲チェック
-    bool IsInputAcceptable(float timeInState) const {
+    bool IsInputAcceptable() const {
         return timeInState >= inputWindowStart && timeInState <= inputWindowEnd;
     }
+   
     // 時間
-    virtual float GetTimeInState() const = 0;
+    float GetTimeInState() const { return timeInState; }
+    // 次のステートえ移行受付する時間
+    float GetNextStateTime() const { return timeInState > timeNextState; }
+    // ステート終了時間
+    float GetEndStateTime() const { return timeInState > stateEndTime; }
 
 protected:
     float inputWindowStart = 0.1f;      // 入力受付スタート
     float inputWindowEnd = 0.5f;        // 入力受付エンド
+    float timeNextState = 0.5f;         // ステート移行時間
+    float stateEndTime = 0.5f;          // ステート終了時間
+    float timeInState = 0.0f;           // 時間
+
+
+    bool isGravity = true;              // 重力はあるか？
+    float animationSpeed = 1.0f;        // アニメーションスピード
 };
 
 
@@ -55,8 +67,6 @@ public:
 
     // 入力があったら
     std::shared_ptr<ComboState> HandleInput(BaseCharacter* owner, AttackInput input) override {
-        if (!IsInputAcceptable(timeInState)) return nullptr;
-
         auto it = nextStates.find(input);
         if (it != nextStates.end()) {
             return it->second;
@@ -73,15 +83,13 @@ public:
     bool HasNextState() const {
         return !nextStates.empty();
     }
-    // 時間内にステート
-    float GetTimeInState() const { return timeInState; }
-
+    
 private:
     std::string animation;
     ComboData comboData_;
 
 
-    float timeInState = 0.0f;
+   
     Vector3 dire_{};
 
     std::map<AttackInput, std::shared_ptr<ComboNodeState>> nextStates;
@@ -95,46 +103,18 @@ public:
     ComboStateMachine(BaseCharacter* entity) : owner(entity) {}
 
     // ステート設定
-    void SetState(std::shared_ptr<ComboState> state) {
-        if (currentState) currentState->Exit(owner);
-        currentState = state;
-        if (currentState) currentState->Enter(owner);
-        bufferedInput.reset(); // 状態遷移したら入力リセット
-    }
+    void SetState(std::shared_ptr<ComboState> state);
     // 更新
-    void Update(float dt) {
-        // ステートが無いなら早期リターン
-        if (!currentState) return;
-
-        // 現在のステート更新
-        currentState->Update(owner, dt);
-
-        // 入力がバッファされていて、入力受付時間内なら状態遷移
-        if (bufferedInput) {
-            auto next = currentState->HandleInput(owner, *bufferedInput);
-            // もし次のステートがあれば、遷移
-            if (next && currentState->IsInputAcceptable(currentState->GetTimeInState())) {
-                SetState(next);
-            }
-            bufferedInput.reset();
-        }
-    }
+    void Update(float dt);
 
     // 入力はバッファに保存のみ
-    void HandleInput(AttackInput input) {
+    void HandleInput(AttackInput input) { 
         bufferedInput = input;
     }
     // リセット
-    void Reset() {
-        SetState(rootState);
-    }
+    void Reset() { SetState(rootState); }
     // 設定
-    void SetRoot(std::shared_ptr<ComboState> state) {
-        rootState = state;
-        if (rootState) {
-            SetState(rootState);
-        }
-    }
+    void SetRoot(std::shared_ptr<ComboState> state);
     // コンボが終了したか
     bool IsComboFinished() const {
         auto node = std::dynamic_pointer_cast<ComboNodeState>(currentState);
@@ -143,10 +123,13 @@ public:
     }
 
 private:
-    BaseCharacter* owner;                       // 
+    BaseCharacter* owner;                       // 使用者
 private:
-    std::shared_ptr<ComboState> currentState;   // 
-    std::shared_ptr<ComboState> rootState;      // 
+    std::shared_ptr<ComboState> currentState;   // 現在のステート
+    std::shared_ptr<ComboState> rootState;      // 初期ステート
 
     std::optional<AttackInput> bufferedInput;   // 入力バッファ
+
+    // 次のステートに移行するか
+    bool isNextState = false;
 };

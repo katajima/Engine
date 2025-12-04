@@ -1,6 +1,6 @@
 #pragma once
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
-
+#include <DirectXGame/application/base/Attack/AttackData.h>
 class BaseCharacter;
 
 // 使用者のタイプ
@@ -13,6 +13,10 @@ enum class HitBoxUseType {
 
 class HitBoxFunction {
 public:
+	struct Data {
+		float damage = 0.0f;					// データ
+		KnockbackData knockbackData;			// ノックバックデータ
+	};
 
 	// 初期化
 	void Initialize(ColliderComponent* owner, BaseCharacter* character, HitBoxUseType type) {
@@ -27,6 +31,9 @@ public:
 	// 更新
 	void Update();
 
+
+	void SetData(Data data) { data_ = data; };
+
 private:
 	// 使用者がプレイヤーの場合の更新処理
 	void UpdateTypePlayer();
@@ -34,7 +41,6 @@ private:
 	void UpdateTypeEnemy();
 	// 使用者がキャラクター以外の場合の更新処理
 	void UpdateTypeOther();
-
 private:
 	// 衝突履歴取得
 	ContactRecord& GetContactRecord() { return owner_->contactRecord_; }
@@ -45,5 +51,6 @@ private:
 	HitBoxUseType type_;							// 使用者
 
 	Collider* otherColl_ = nullptr;
+	Data data_;
 };
 

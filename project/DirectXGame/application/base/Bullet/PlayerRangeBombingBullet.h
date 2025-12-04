@@ -27,6 +27,18 @@ private: // 演出関係
 	void InitMoveSmoke();
 private:
 
+	// phase0
+	float phase0Timer_ = 0.0f;
+	float phase0EndTime_ = 0.1f;
+
+	// phase1
+	float phase1Timer_ = 0.0f;
+	float phase1EndTime_ = 0.25f;
+	
+	// phase2
+	float phase2Timer_ = 0.0f;
+	float phase2EndTime_ = 0.25f;
+
 
 	Vector3 target;
 
@@ -39,10 +51,7 @@ private:
 	Vector3 randPosSky{};
 	Vector3 posGround{};
 	Vector3 str{};
-	float count = 0;
-	float max_count = 0.5f;
-	float t = 0;
-
+	
 	Vector3 targetPos{};
 
 	Vector3 enemyPos_{};
@@ -86,16 +95,15 @@ private: // 一旦
 		const int segments = 16;
 		const Color hit2Color = { 1.0f,0,0,0.5f };
 
-		const float timeSpeedPhase0 = 2.0f;
 
-
-		const float speedPhase1 = 1000.0f;
+		
+		const float speedPhase1 = 4000.0f;
 		const float speedPhase2 = 3.0f;
 
 		const float hitCylinderY = 1.0f;
 		const float expPlaneY = 5.0f;
 
-		const float hitObjectY = -6.0f;
+		const float hitObjectY = 12.0f;
 		const float hitObjectRotateX = -90.0f;
 
 

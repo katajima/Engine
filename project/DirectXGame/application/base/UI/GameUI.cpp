@@ -44,6 +44,42 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 	specialPair->GetSecondSprite()->SetColor(spTextData.color_);	// 色設定
 
 
+	
+	// 必殺技UI初期化
+	InitUIPair("jump", jumpTextData.pos_);
+	UIPair* jumpPair = GetUIPair("jump");
+	jumpPair->SetOffset(jumpTextData.offset_);
+	jumpPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	jumpPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_a.png");
+	jumpPair->GetFirstSprite()->SetAnchorPoint(jumpTextData.anchorPoint_);			// アンカーポイント設定
+	jumpPair->GetFirstSprite()->SetSize(jumpTextData.size_);				// サイズ設定
+	jumpPair->GetFirstSprite()->SetColor(jumpTextData.color_);	// 色設定
+
+	jumpPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Jump.png");
+	jumpPair->GetSecondSprite()->SetAnchorPoint(jumpTextData.anchorPoint2_);			// アンカーポイント設定
+	jumpPair->GetSecondSprite()->SetSize(jumpTextData.size2_);						// サイズ設定
+	jumpPair->GetSecondSprite()->SetColor(jumpTextData.color_);	// 色設定
+
+
+	// ダッシュUI初期化
+	InitUIPair("dush", dashTextData.pos_);
+	UIPair* dushPair = GetUIPair("dush");
+	dushPair->SetOffset(dashTextData.offset_);
+	dushPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_stick_l_press.png");
+	dushPair->GetFirstSprite()->SetAnchorPoint(dashTextData.anchorPoint_);			// アンカーポイント設定
+	dushPair->GetFirstSprite()->SetSize(dashTextData.size_);				// サイズ設定
+	dushPair->GetFirstSprite()->SetColor(dashTextData.color_);	// 色設定
+
+	dushPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.png");
+	dushPair->GetSecondSprite()->SetAnchorPoint(dashTextData.anchorPoint2_);			// アンカーポイント設定
+	dushPair->GetSecondSprite()->SetSize(dashTextData.size2_);						// サイズ設定
+	dushPair->GetSecondSprite()->SetColor(dashTextData.color_);	// 色設定
+
+
+
+
+
 	// クリアUI
 	text_clera = std::make_unique<Sprite>();
 	InitSprite(text_clera.get(), "resources/Texture/text/clear.png", cleraTextData_.pos_, cleraTextData_.scale_);

@@ -10,7 +10,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 
 	InitUIMeter("HPBer", hpSpriteData_.pos_, true);		// 初期化HP
 	InitUIMeter("SpecailBer",spSpriteData_.pos_, true);	// 初期化スペシャル
-	InitUIMeter("StaminaBer",staminaSpriteData.pos_, true);	// 初期化スタミナ
+	//InitUIMeter("StaminaBer",staminaSpriteData.pos_, true);	// 初期化スタミナ
 
 
 	// HPUI
@@ -33,15 +33,15 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	specailBer_->GetNameSprite()->SetSize(spSpriteData_.nameSize_);								// サイズ設定
 	specailBer_->GetNameSprite()->SetColor(spSpriteData_.nameColor_);			// 色指定
 
-	// スタミナUI
-	UIMeter* staminaBer_ = GetUIMeter("StaminaBer");
-	staminaBer_->SetMaxSize(staminaSpriteData.size_, staminaSpriteData.offset_);								// 最大サイズ
-	staminaBer_->SetMeterMinMax(0.0f, staminaSpriteData.maxMeter);										// メータ最大値最小値
-	staminaBer_->GetMeterSprite()->SetColor(staminaSpriteData.color_);							// 色指定
-	staminaBer_->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	staminaBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");	// 次のスプライト設定
-	staminaBer_->GetNameSprite()->SetSize(staminaSpriteData.nameSize_);								// サイズ設定
-	staminaBer_->GetNameSprite()->SetColor(staminaSpriteData.nameColor_);			// 色指定
+	//// スタミナUI
+	//UIMeter* staminaBer_ = GetUIMeter("StaminaBer");
+	//staminaBer_->SetMaxSize(staminaSpriteData.size_, staminaSpriteData.offset_);								// 最大サイズ
+	//staminaBer_->SetMeterMinMax(0.0f, staminaSpriteData.maxMeter);										// メータ最大値最小値
+	//staminaBer_->GetMeterSprite()->SetColor(staminaSpriteData.color_);							// 色指定
+	//staminaBer_->SetMeterType(UIMeterType::Left);									// メータの増える方向
+	//staminaBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");	// 次のスプライト設定
+	//staminaBer_->GetNameSprite()->SetSize(staminaSpriteData.nameSize_);								// サイズ設定
+	//staminaBer_->GetNameSprite()->SetColor(staminaSpriteData.nameColor_);			// 色指定
 
 
 	// maxテキストスプライト初期化
@@ -67,12 +67,12 @@ void PlayerUI::Update()
 {
 	UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
-	UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スタミナ
+	//UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スタミナ
 	hpber->SetMeterMinMax(hpBar_->minValue, hpBar_->maxValue);	// メータ最大値
 	hpber->SetMeter(hpBar_->value);								// メータ
 	
-	staminaBer->SetMeterMinMax(staminaBar_->minValue, staminaBar_->maxValue);	// メータ最大値
-	staminaBer->SetMeter(staminaBar_->value);									// メータ
+	//staminaBer->SetMeterMinMax(staminaBar_->minValue, staminaBar_->maxValue);	// メータ最大値
+	//staminaBer->SetMeter(staminaBar_->value);									// メータ
 
 
 	specailBer->SetMeter(sizeSpecialGauge_);// メータ

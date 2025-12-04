@@ -43,7 +43,7 @@ ICommand* InputHander::HandleInput()
 	// ゲームパッドがつながっているなら
 	if (input_->IsControllerConnected()) {
 		// ジャンプコマンド
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
 			return jampPad.get();
 		}
 		// 攻撃コマンド
