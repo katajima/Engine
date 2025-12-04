@@ -9340,9 +9340,6 @@ File Path: project/DirectXGame/application/base/Character/Player/Bullet/BulletPl
 // 更新
 void BulletPlayerStateIdle::Update() {
 	Input* input = character_->GetInput();
-
-	// 武器描画 
-	
 	// ゲームパッドが繋いであるなら
 	if (input->IsControllerConnected()) {
 
@@ -9351,23 +9348,8 @@ void BulletPlayerStateIdle::Update() {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
-#ifdef _DEBUG
-
-	// デバッグ用
-	if (input->IsTriggerKey(DIK_Z)) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-		return;
-	}
-#endif // _DEBUG
 
 	// 移動したら
 	if (input->GetGamePadLeftStick().Length() != 0) {
@@ -9406,21 +9388,7 @@ void BulletPlayerStateMove::Update()
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御発動
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
-
-	// 気絶
-	if (input->IsTriggerKey(DIK_Z)) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-		return;
-	}
-
 	// 止まったら
 	if (input->GetGamePadLeftStick().Length() == 0) {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
@@ -9460,22 +9428,8 @@ void BulletPlayerStateJump::Update() {
 	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
 	bool isAlive = character_->GetAlive();
 
-#ifdef _DEBUG
-	//ImGui::
-
-
-#endif // _DEBUG
-
-
-
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-
-
-
-
-
-
 		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
 		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
 
@@ -9506,13 +9460,6 @@ void BulletPlayerStateJump::Update() {
 		anima->SetIsLoop(false);
 		anima->SetAnimetion("JumpStrat1", 0.05f);
 	}
-
-
-
-
-
-
-
 }
 
 // 終了
@@ -9520,10 +9467,7 @@ void BulletPlayerStateJump::Exit() {
 	character_->GetMoveComponent()->Velocity() = { 0,0,0 };
 }
 // 初期化
-void BulletPlayerStateJump::Enter() {
-
-
-}
+void BulletPlayerStateJump::Enter() {}
 
 #pragma endregion // ジャンプ
 
@@ -10714,13 +10658,6 @@ void PlayerStateIdle::Update() {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
 			return;
 		}
-
-		// 防御
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
 #ifdef _DEBUG
@@ -10747,20 +10684,6 @@ void PlayerStateIdle::Update() {
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		return;
 	}
-
-
-	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
-	//	anima->SetIsLoop(false);
-	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
-	//}
-	//else {
-	//	anima->SetIsLoop(true);
-	//	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
-	//}
-
-
-
 };
 
 // 終了
@@ -10803,12 +10726,6 @@ void PlayerStateMove::Update()
 		if (character_->GetSpecial()->GetIsSpecial()) {
 			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
 		}
-		// 防御発動
-		/*if (input->IsGamePadTriggered(GamePadButton::)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Defense);
-			return;
-		}*/
-
 	}
 
 	// 気絶発動
@@ -10833,17 +10750,6 @@ void PlayerStateMove::Update()
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
 		return;
 	}
-
-
-
-
-	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
-	//	anima->SetIsLoop(false);
-	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
-	//}
-	//else {
-	//	anima->SetIsLoop(true);
 		// アニメーションスピード設定
 	float speed = character_->GetMoveComponent()->GetMoveSystem()->GetAnimationSpeed();
 
@@ -10917,12 +10823,7 @@ void PlayerStateJump::Update() {
 	}
 
 
-	//if (character_->GetMoveComponent()->GetDashSystem()->IsDash()) {
-	//	anima->SetIsLoop(false);
-	//	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	//	anima->SetAnimetion("dash1", 0.1f);	// 流すアニメーション設定
-	//}
-	//else 
+	
 	if (jump->GetState() == JumpSystem::State::Jump) { // 上昇しているなら
 		anima->SetIsLoop(false);
 		anima->SetAnimetion("JumpStrat1", 0.05f);
@@ -17900,29 +17801,25 @@ File Path: project/DirectXGame/application/scene/SceneFactory.cpp
 #include <DirectXGame/engine/Base/pch.h>
 
 
-BaseScene* SceneFactory::CreateScene(const std::string& sceneName)
+std::unique_ptr<BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
-	BaseScene* newScene = nullptr;
+    if (sceneName == "TITLE") {                 // タイトル
+        return std::make_unique<TitleScene>();
+    }
+    if (sceneName == "GAMEPLAY") {              // ゲームプレイ
+        return std::make_unique<GamePlayScene>();
+    }
+    if (sceneName == "TEST") {                  // テスト
+        return std::make_unique<TestScene>();
+    }
+    if (sceneName == "SELECT") {                // セレクト
+        return std::make_unique<SelectScene>();
+    }
+    if (sceneName == "SAMPLE") {                // サンプル
+        return std::make_unique<SampleScene>();
+    }
 
-	if (sceneName == "TITLE") {				// タイトル
-		newScene = new TitleScene();
-	}
-	if (sceneName == "GAMEPLAY") {			// ゲームプレイ
-		newScene = new GamePlayScene();
-	} 
-	if (sceneName == "TEST") {				// テスト
-		newScene = new TestScene();
-	}
-	if (sceneName == "SELECT") {			// セレクト
-		newScene = new SelectScene();
-	}	
-	if (sceneName == "SAMPLE") {			// サンプル
-		newScene = new SampleScene();
-	}
-
-
-
-	return newScene;
+    return nullptr;
 }
 
 
@@ -17947,7 +17844,7 @@ public:
 	/// </summary>
 	/// <param name="sceneName"></param>
 	/// <returns></returns>
-	BaseScene* CreateScene(const std::string& sceneName) override;
+	std::unique_ptr<BaseScene> CreateScene(const std::string& sceneName) override;
 
 };
 
@@ -54984,7 +54881,7 @@ public:
 	/// 仮想デストラクタ
 	virtual ~AbstractSceneFactory() = default;
 	/// シーン生成
-	virtual BaseScene* CreateScene(const std::string& sceneName) = 0;
+	virtual std::unique_ptr<BaseScene> CreateScene(const std::string& sceneName) = 0;
 
 };
 
@@ -55452,7 +55349,13 @@ void SceneManager::ChangeScene(const std::string& sceneName, float duration)
 {
 	assert(sceneFactory_);
 	if (nextScene_ == nullptr && phase_ == Phase::kMain) {
-		nextScene_.reset(sceneFactory_->CreateScene(sceneName));  // ★ unique_ptrで所有権管理
+		// ★ unique_ptr をそのまま受け取る（reset を使わない）
+		nextScene_ = sceneFactory_->CreateScene(sceneName);
+		if (!nextScene_) {
+			assert(false && "Invalid scene name");
+			return;
+		}
+
 		this->sceneName = sceneName;
 
 		// フェードアウト開始
