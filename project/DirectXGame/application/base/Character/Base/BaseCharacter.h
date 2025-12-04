@@ -195,8 +195,9 @@ protected:
 	std::unique_ptr<BaseSpecial> special_;						// スペシャル攻撃
 	std::unique_ptr<BaseWeapon> weapon_;						// 武器
 	std::unique_ptr<AttackInputHander> attackInputHander_;		// 攻撃入力系クラス
+
 	std::unique_ptr<CharacterStateMachine> stateMachine_;		// キャラクターの状態管理
-	std::unique_ptr<MovementComponent> moveComponent_;				// 移動コンポーネント
+	std::unique_ptr<MovementComponent> moveComponent_;			// 移動コンポーネント
 
 	std::unique_ptr<AttackController> attackController_;		// 攻撃制御クラス
 

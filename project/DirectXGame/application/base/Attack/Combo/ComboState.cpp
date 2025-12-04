@@ -2,6 +2,9 @@
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
+
+#pragma region NodeState
+
 // 開始
 void ComboNodeState::Enter(BaseCharacter* owner) {
 
@@ -19,24 +22,25 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	comboData_.hitBox.SetHitBoxSystem(owner->GetAttackController()->GetHitBoxSystem());
 
 
+	comboData_.comboCondition.GetData().inputWindowStart_;
+
+
 	// コンボデータをコンボシステムに転送
-	owner->GetAttackController()->GetComboSystem()->SetComboData(&comboData_);	
+	owner->GetAttackController()->GetComboSystem()->SetComboData(&comboData_);
 
 	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = true; // トレイル開始
 
 	timeInState = 0.0f;	// 時間初期化 
-	
 
-	// アニメーションが0.0fなら仮に1秒に設定
-	if (anima->GetEndAnimeTime(animation) == 0.0f) {
-		inputWindowEnd = 1.0f;
-	}
-	else {
-		// 終わる時間の設定
-		inputWindowEnd = anima->GetEndAnimeTime(animation);
-	}
-
+	// 終わる時間の設定
+	inputWindowStart = comboData_.comboCondition.GetData().inputWindowStart_;
+	inputWindowEnd = comboData_.comboCondition.GetData().inputWindowEnd_;
+	stateEndTime = comboData_.comboCondition.GetData().stateEndTime;
+	timeNextState = comboData_.comboCondition.GetData().stateNextTime;
 	
+	// 重力はあるか
+	isGravity = comboData_.motion.GetData().isGravity_;
+
 	// 座標更新
 	owner->GetWorldTransform().Update();
 
@@ -51,10 +55,10 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 	timeInState += dt;
 
 	// アニメが終了 or 入力受付時間が終わって、次のステートが無ければ終了
-	bool isInputWindowOver = timeInState > inputWindowEnd;
+	bool isInputWindowOver = GetEndStateTime();
 	bool isMove = comboData_.motion.IsMove();
-	bool hasNext = HasNextState();
-
+	
+	// 移動可能の場合は
 	owner->GetMoveComponent()->GetMoveSystem()->SetIsAttackCanMove(isMove);
 
 	// 入力受付がないのなら終了する
@@ -67,6 +71,12 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt)
 		owner->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);  // ← BaseCharacterが持っている関数
 		owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
 	}
+	else {
+		if (!isGravity) {
+			owner->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
+		}
+		owner->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(isGravity);
+	}
 	// コンボデータ更新
 	comboData_.Update(*owner->GetInput(), dt);
 }
@@ -78,6 +88,55 @@ void ComboNodeState::Exit(BaseCharacter* owner)
 	timeInState = 0.0f;
 	// コンボデータ終了処理
 	comboData_.Exit();
-	
+
 	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 }
+
+#pragma endregion // コンボノードステート
+
+
+#pragma region StateMachine
+
+void ComboStateMachine::SetState(std::shared_ptr<ComboState> state) {
+
+	if (currentState) currentState->Exit(owner);	// 終了処理
+	currentState = state;
+	if (currentState) currentState->Enter(owner);	// 開始処理
+	bufferedInput.reset(); // 状態遷移したら入力リセット
+}
+
+
+void ComboStateMachine::Update(float dt) {
+	// ステートが無いなら早期リターン
+	if (!currentState) return;
+
+	// 現在のステート更新
+	currentState->Update(owner, dt);
+
+	// 入力がバッファされていて、入力受付時間内なら状態遷移
+	if (bufferedInput) {
+		// 入力受付時間内に入力があれば次へ移行するのを予約
+		if (currentState->IsInputAcceptable()) {
+			isNextState = true;	// 次のステートに移行確定
+		}
+
+		if (currentState->GetNextStateTime() && isNextState) {
+			auto next = currentState->HandleInput(owner, *bufferedInput);
+			// もし次のステートがあれば、遷移
+			if (next) {
+				SetState(next);
+			}
+			bufferedInput.reset();
+		}
+	}
+}
+
+void ComboStateMachine::SetRoot(std::shared_ptr<ComboState> state) {
+	rootState = state;
+	if (rootState) {
+		SetState(rootState);
+	}
+}
+
+#pragma endregion // ステートマシーン
+

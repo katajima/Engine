@@ -50,32 +50,35 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 			if (!use) continue;
 		}
 
+		// 形状によっての設定項目
 		switch (data.shape)
 		{
 		case HitBoxShape::kOBB:
 			collObb = CreateCollider<OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collObb->obb.size = data.size;
-			d.hitBox->AddCollider(std::move(collObb), data.offset);
+			
+			d.hitBox->AddCollider(std::move(collObb), data.offset, { data.damage,data.knockbackData });
 			break;
 		case HitBoxShape::kAABB:
 			collAABB = CreateCollider<AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collAABB->aabb.min_ = -data.size / 2;
 			collAABB->aabb.max_ = data.size / 2;
-			d.hitBox->AddCollider(std::move(collAABB), data.offset);
+			d.hitBox->AddCollider(std::move(collAABB), data.offset, { data.damage,data.knockbackData });
 			break;
 		case HitBoxShape::kSphere:
 			collSphere = CreateCollider<SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collSphere->radius = data.radius;
-			d.hitBox->AddCollider(std::move(collSphere), data.offset);
+			d.hitBox->AddCollider(std::move(collSphere), data.offset, { data.damage,data.knockbackData });
 			break;
 		default:
 			break;
 		}
 	}
-	d.hitBox->GetWorldTransform().parent_ = parent;
 
 
-	d.lifeTime = lifeTime;
-	d.timer = 0.0f;
-	data_.push_back(std::move(d));
+
+	d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
+	d.lifeTime = lifeTime;							// 生存時間
+	d.timer = 0.0f;									// 時間
+	data_.push_back(std::move(d));					
 }

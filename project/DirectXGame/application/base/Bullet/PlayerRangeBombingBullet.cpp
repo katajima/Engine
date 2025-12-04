@@ -149,7 +149,6 @@ void PlayerRangeBombingBullet::Update()
 	//emitterPoint->GetCommonData().emit = false;
 	//emitterPoint->GetWorldTransform().translate_ = object_->GetWorldTransform().worldMat_.GetWorldPosition();	// エミッター位置更新
 	//emitterPoint->GetCommonData().prevTranslate = object_->GetWorldTransform().worldPreMat_.GetWorldPosition(); // エミッター位置更新
-
 	// 当たったら死ぬ
 	if (Hit) {
 		effect_->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
@@ -162,17 +161,17 @@ void PlayerRangeBombingBullet::Update()
 		switch (phase_)	// フェーズ
 		{
 		case 0:
-			if (t > 0.0f) {}
+		{
+			if (phase0Timer_ > 0.0f) {
+			}
 			else {
 				// 煙出す
 				effect_->Emit("stratSmoke01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 10.0f,-5.0f,0.0f });
 			}
+			// 時間更新
+			phase0Timer_ += GetTimer();
 
-			// カウント更新
-			count += GetTimer() * provisionalData_.timeSpeedPhase0;
-
-			// カウントをtに代入
-			t = count;
+			float t = phase0Timer_ / phase0EndTime_;
 
 			// 位置を線形補間
 			object_->GetWorldTransform().translate_ = Lerp(str, randPosSky, t);
@@ -183,31 +182,24 @@ void PlayerRangeBombingBullet::Update()
 
 			// tが1に達したら
 			if (t >= 1) {
-				t = 0;		// 初期化
-				count = 0;	// 初期化
 				phase_++;	// フェーズ移行
 			}
-
-
 			break;
+		}
 		case 1:
 
 			
 			// カウント更新
-			count += GetTimer();
+			phase1Timer_ += GetTimer();
 
 			// カウントが最大値を達したら
-			if (count >= max_count)
+			if (phase1Timer_ >= phase1EndTime_)
 			{
 				// 敵の位置に向かって落ちる
 				Vector3 pos = enemyPos_ - object_->GetWorldPosition();
 				float posLength = Length(pos);
 
-				// エミッターON
-				//emitterPoint->GetCommonData().emit = true;
-
 				
-
 				// 方向指定
 				Vector3 pos2 = pos;
 				velocity_ = pos2.Normalize() * provisionalData_.speedPhase1;
@@ -223,27 +215,22 @@ void PlayerRangeBombingBullet::Update()
 
 					// 
 					targetPos = posGround - object_->GetWorldPosition();
-					count = 0;	// カウント初期化
+					hitObject2_->GetWorldTransform().translate_ = posGround + Vector3{0,10,0};
 
 					// ヒットオブジェクト描画
 					hitObject2_->SetIsDraw(true);
-
-					// エフェクト出現させない
-					//emitterPoint->GetCommonData().emit = false;
-					//emitterPoint->GetCommonData().lifeTime = 0.01f;
 				}
-				
 			}
 			break;
 		case 2:
+			// カウント更新
+			phase2Timer_ += GetTimer();
+			
 			// リングエフェクトの位置を設定
 			effect_->Emit("ringEmit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
 
-			// カウント更新
-			count += GetTimer();
-
 			// カウントが最大値を達したら
-			if (count >= max_count)
+			if (phase2Timer_ >= phase2EndTime_)
 			{
 				velocity_ = targetPos * provisionalData_.speedPhase2;	// 速度設定
 				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();	// 位置更新
@@ -257,7 +244,6 @@ void PlayerRangeBombingBullet::Update()
 				
 				// 死亡
 				isAlive_ = false;
-				count = 0;	// カウント初期化
 				phase_ = 0;	// フェーズ初期化
 				
 				isEffectPlay_ = true;	// エフェクト再生

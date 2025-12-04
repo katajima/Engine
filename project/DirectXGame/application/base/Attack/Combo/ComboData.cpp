@@ -167,44 +167,6 @@ void ComboHitBox::Exit() {
 #pragma endregion // コンボヒットボックス
 
 
-
-#pragma region ComboDamage
-
-// 開始
-void ComboDamage::Enter() {
-	isDamage_ = false;
-	timer_ = 0.0f;
-}
-
-// 更新
-void ComboDamage::Update(float dt) {
-	// 時間加算
-	timer_ += dt;
-
-
-	bool isStart = data_.damageWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
-	bool isEnd = data_.damageWindowEnd_ >= timer_;			// 受付終了時間より前なら
-
-
-
-	// 受付時間内なら
-	if (isStart && isEnd) {
-		isDamage_ = true;
-	}
-	else {
-		isDamage_ = false;
-	}
-}
-
-// 終了
-void ComboDamage::Exit() {
-	isDamage_ = false;
-	timer_ = 0.0f;
-}
-
-#pragma endregion //ダメージ
-
-
 #pragma region ComboCamera
 
 // 開始
@@ -235,7 +197,6 @@ void ComboCamera::Exit() {
 void ComboData::Enter() {
 	comboCondition.Enter();					// コンボ用条件クラス開始
 	motion.Enter();							// コンボ用モーションクラス開始
-	damage.Enter();							// コンボ用ダメージクラス開始
 	camera.Enter();							// コンボ用カメラクラス開始
 	hitBox.Enter();							// コンボ用ヒットボックスクラス開始
 }
@@ -244,7 +205,6 @@ void ComboData::Enter() {
 void ComboData::Update(const Input& input, float dt) {
 	comboCondition.Update(input, dt);		// コンボ用条件クラス更新
 	motion.Update(input, dt);				// コンボ用モーションクラス更新
-	damage.Update(dt);						// コンボ用ダメージクラス更新
 	camera.Update(dt);						// コンボ用カメラクラス更新
 	hitBox.Update(dt);						// コンボ用ヒットボックスクラス更新
 }
@@ -253,7 +213,6 @@ void ComboData::Update(const Input& input, float dt) {
 void ComboData::Exit() {
 	comboCondition.Exit();					// 条件クラス終了
 	motion.Exit();							// コンボ用モーションクラス終了
-	damage.Exit();							// コンボ用ダメージクラス終了
 	camera.Exit();							// コンボ用カメラクラス終了
 	hitBox.Exit();							// コンボ用ヒットボックスクラス終了
 }

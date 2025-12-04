@@ -25,6 +25,13 @@ void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 	AttackProcess(world);
 
 	if (isAttack_ && !isAttackCanMove_) return;// 攻撃中は移動処理しない
+	if (isAttackCanMove_) {
+		//MoveProcess(dt, world, keepDirection_);
+		//return;
+	}
+	else {
+
+	}
 
 	// ダッシュ時の回転処理
 	DashProcess(world);
