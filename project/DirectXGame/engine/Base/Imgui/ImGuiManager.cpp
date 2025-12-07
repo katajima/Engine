@@ -102,7 +102,7 @@ void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camera, const
 		if (ImGui::BeginTabItem(name))
 		{
 
-
+			
 
 			static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
 			static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);

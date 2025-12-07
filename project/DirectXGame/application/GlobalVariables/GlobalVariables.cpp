@@ -344,8 +344,8 @@ void GlobalVariables::LoadFile(const std::string& groupName) {
 /// </summary>
 void GlobalVariables::Update() {
 #ifdef _DEBUG
-	ImGui::Begin("GlobalVariables", nullptr, ImGuiWindowFlags_MenuBar);
-	ImGui::BeginMenuBar();
+	ImGui::Begin("GlobalVariables"/*, nullptr, ImGuiWindowFlags_MenuBar*/);
+	//ImGui::BeginMenuBar();
 
 	static std::pair<std::string, std::string> pendingDeleteItem;
 	static bool confirmDelete = false;
@@ -458,7 +458,7 @@ void GlobalVariables::Update() {
 		ImGui::EndMenu();
 	}
 
-	ImGui::EndMenuBar();
+	//ImGui::EndMenuBar();
 	ImGui::End();
 
 

@@ -122,6 +122,10 @@ private:
 		float animationSpeed_ = 1.0f;		// アニメーションスピード
 
 
+		float trailEffectStartTime = 0.1f;	// トレイル発生時間
+		float trailEffectLifeTime = 1.0;	// トレイル生存時間
+
+
 		Vector3 offsetPos_ = {};			// コライダー位置
 		Vector3 colliderSize = { 1.0f,1.0f,1.0f };	// コライダーサイズ
 	};

@@ -366,7 +366,12 @@ void NormalPlayer::Attack()
 	else if (isMove || isIdle || isJump) {
 		GetAttackController()->SetIsAttack(true);
 		stateMachine_->ChangeState(CharacterMainState::Attack);
-		GetAttackController()->GetComboSystem()->StartCombo("Attack1");
+		if (isJump) {
+
+		}
+		else {
+			GetAttackController()->GetComboSystem()->StartCombo("Attack1");
+		}
 	}
 
 }
@@ -446,8 +451,11 @@ void NormalPlayer::ApplyGlobalComboData(const std::string& name, ComboGlovalData
 
 	globalVariables_->AddItem(name, "アニメーション速度", data.animationSpeed_);
 
+	globalVariables_->AddItem(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
+	globalVariables_->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
 
+	
 
 	SetGlobalComboData(name, data);
 }
@@ -468,6 +476,9 @@ void NormalPlayer::SetGlobalComboData(const std::string& name, ComboGlovalData& 
 	data.stateNextTime = globalVariables_->GetValue<float>(name, "コンボ移行時間");
 	data.isGravity = globalVariables_->GetValue<bool>(name, "コンボ中の重力");
 	data.animationSpeed_ = globalVariables_->GetValue<float>(name, "アニメーション速度");
+
+	data.trailEffectStartTime = globalVariables_->GetValue<float>(name, "エフェクト(トレイル)発生時間");
+	data.trailEffectLifeTime = globalVariables_->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 }
 
 void NormalPlayer::ReloadComboData()
@@ -593,6 +604,10 @@ void NormalPlayer::SetData(ComboData& data,const ComboGlovalData& gData)
 	data.motion.GetData().isGravity_ = gData.isGravity;
 	// アニメーションスピード
 	data.motion.GetData().animationSpeed_ = gData.animationSpeed_;
+
+	// トレイルエフェクト
+	data.effect.GetData().startTmer = gData.trailEffectStartTime;
+	data.effect.GetData().lifeTime = gData.trailEffectLifeTime;
 
 }
 

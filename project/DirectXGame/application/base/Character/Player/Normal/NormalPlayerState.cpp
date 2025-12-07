@@ -12,6 +12,9 @@ void PlayerStateIdle::Update() {
 	BaseSpecial* special = character_->GetSpecial();
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	MoveSystem* move = character_->GetMoveComponent()->GetMoveSystem();
+	character_->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+
+
 
 	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
 	if (isTriggerLT) {

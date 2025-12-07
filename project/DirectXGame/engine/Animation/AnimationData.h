@@ -42,6 +42,10 @@ struct Timer {
 	float LerpT() const {
 		return t / maxT; // タイマーの値を最大値で割って0から1の範囲に変換する
 	}
+	// 反対補間位置取得
+	float InvLerpT() const {
+		return 1.0f - LerpT();
+	}
 
 	// タイマーが超えているか判定
 	bool IsMaxOverT() const {

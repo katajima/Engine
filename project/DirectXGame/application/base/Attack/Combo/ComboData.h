@@ -4,10 +4,12 @@
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
 
 // 前方宣言
-class AnimationComponent;
-class MovementComponent;
-class CameraManager;
-
+class AnimationComponent;	// アニメーション
+class MovementComponent;	// 移動関係
+class CameraManager;		// カメラ
+class BaseCharacter;		// キャラクター
+class RigidBodyComponent;	// リジットボディー
+class BaseWeapon;			// 武器
 
 /// <summary>
 /// コンボ条件ボタン
@@ -119,8 +121,6 @@ public:
 
 		bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
 		ComboSequence comboSequence_;			// コンボボタン条件
-		float staminaCost = 0;					// スタミナ消費量
-		float mpCost = 0;                       // MP消費
 	};
 
 
@@ -128,25 +128,40 @@ public:
 	void Enter();
 
 	// 更新
-	void Update(const Input& input, float dt);
+	void Update(const Input& input,float timer ,float dt);
 
 	// 終了
 	void Exit();
 
-	// 次のコンボに移行するか
-	bool IsNextCombo() const { return isNextCombo_; };
+	
 
+public: //設定
 	// コンボ条件発動時間設定
 	void ConditionStartEnd(float start, float end) {
 		data_.inputWindowStart_ = start;
 		data_.inputWindowEnd_ = end;
 	};
+public: // 取得
 
+	// 次のコンボ移行する時間
+	float GetComboNextTime() const { return data_.stateNextTime; }
+	// コンボ終了時間
+	float GetComboEndTime() const { return data_.stateEndTime; }
+	// コンボ入力受付開始時間
+	float GetComboInputStart() const { return data_.inputWindowStart_; }
+	// コンボ入力受付終了時間
+	float GetComboInputEnd() const { return data_.inputWindowEnd_; }
+
+	// コンボ受付可能か
+	bool IsComdoInputWindow(float timer) const {
+		return timer >= GetComboInputStart() && timer <= GetComboInputEnd();
+	};
+	// 次のコンボに移行するか
+	bool IsNextCombo() const { return isNextCombo_; };
 	// データ構造体取得
 	Data& GetData() { return data_; }
 
 private:
-	float timer_ = 0.0f;				// 時間
 	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
 	Data data_;
 };
@@ -175,13 +190,13 @@ public:
 	};
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(const Input& input, float dt);
+	void Update(const Input& input, float timer, float dt);
 
 	// 終了
-	void Exit();
+	void Exit(BaseCharacter* owner);
 
 	// 移動できるか
 	bool IsMove() const { return isMove_; }
@@ -201,17 +216,20 @@ public:
 	// ワールドトランスフォーム設定
 	void SetWorld(WorldTransform* world) { worldTransform = world; };
 
+	// リジットボディー設定
+	void SetRigid(RigidBodyComponent* rigid) { rigidBodyComponent = rigid; };
+
 	// データ構造体取得
 	Data& GetData() { return data_; }
 
 private:
-	float timer_ = 1.0f;					// コンボ時に移動する時間
 	bool isMove_ = true;					// 移動出来るか
 	Data data_;
 private: // 貰いもの 
-	AnimationComponent* animationComponent;	// アニメーション
-	MovementComponent* moveComponent;		// 移動
-	WorldTransform* worldTransform;			// ワールドトランスフォーム
+	AnimationComponent* animationComponent = nullptr;	// アニメーション
+	MovementComponent* moveComponent = nullptr;			// 移動
+	WorldTransform* worldTransform = nullptr;			// ワールドトランスフォーム
+	RigidBodyComponent* rigidBodyComponent = nullptr;	// リジットボディー
 };
 
 /// <summary>
@@ -244,13 +262,16 @@ public:
 	};
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(float dt);
+	void Update(float timer,float dt);
 
 	// 終了
 	void Exit();
+
+
+public:
 
 	// データ取得
 	Data& GetData() { return data_; }
@@ -260,8 +281,6 @@ public:
 	void AddUseHitBox(const std::string& name) { useHitBox_.push_back(name); };
 	// 使うヒットボックス名クリーン
 	void ClearUseHitBox() { useHitBox_.clear(); }
-	// ヒットボックスシステム取得
-	void SetHitBoxSystem(HitBoxSystem* system) { hitBoxSystem_ = system; };
 	// 親子設定
 	void SetPerent(WorldTransform* perent) { perent_ = perent;};
 
@@ -282,8 +301,6 @@ private:
 	std::vector<std::string> useHitBox_;
 
 private:
-	// 時間
-	float timer_ = 0.0f;
 	// ヒットボックス出現
 	bool isPopHitBox_ = false;
 	
@@ -307,7 +324,7 @@ public:
 	void Enter();
 
 	// 更新
-	void Update(float dt);
+	void Update(float timer,float dt);
 
 	// 終了
 	void Exit();
@@ -319,7 +336,6 @@ public:
 	Data& GetData();
 
 private:
-	float timer_ = 0.0f;					// 時間
 	Data data_;
 	CameraManager* cameraManager = nullptr;	// カメラ管理
 };
@@ -331,27 +347,35 @@ class ComboEffect {
 public:
 	struct Data {
 		// 開始時間
-		float startTmer  = 0.0f;
-		// 終了時間
-		float endTime = 0.5f;
-
-
+		float startTmer  = 0.1f;
+		// 生存時間
+		float lifeTime = 0.5f;
 	};
 
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(float dt);
+	void Update(float timer, float dt);
 
 	// 終了
-	void Exit();
+	void Exit(BaseCharacter* owner);
 
+	// トレイルするか
+	bool IsEffectTrail(float timer) const {
+		return data_.startTmer <= timer && timer <= (data_.lifeTime + data_.startTmer);
+	}
+
+
+	// データ取得
+	Data& GetData() { return data_; }
 
 private:
-	float timer_ = 0.0f;
+	Data data_;
 
+
+	BaseWeapon* weapon = nullptr;
 };
 
 // コンボデータ
@@ -359,18 +383,21 @@ class ComboData {
 public:
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
 	void Update(const Input& input, float dt);
 
 	// 終了
-	void Exit();
+	void Exit(BaseCharacter* owner);
 
 	ComboCondition comboCondition{};		// コンボ条件クラス
 	ComboMotion motion{};					// コンボ用モーションクラス
 	ComboCamera camera{};					// コンボ用カメラクラス
 	ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
+	ComboEffect effect{};					// コンボ用エフェクト
+private:
+	float timer_ = 0.0f;					// 時間
 };
 
 

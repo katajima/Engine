@@ -22,14 +22,10 @@ public:
 		comboStateMachine_->Update(dt);
 	}
 
-
+	// クリア
 	void ClearNode();
 
 public: 
-	// コンボデータ取得
-	ComboData* GetComboData() { return comboData_; }
-	// コンボデータ設定
-	void SetComboData(ComboData* data) { comboData_ = data; }
 	// コンボステートマシーン取得
 	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
 public:
@@ -50,8 +46,6 @@ public:
 		return comboStateMachine_->IsComboFinished();
 	}
 private:
-	// コンボデータ
-	ComboData* comboData_ = nullptr;
 	// コンボステートマシーン
 	std::unique_ptr<ComboStateMachine> comboStateMachine_;
 	// コンボノードステートマップ

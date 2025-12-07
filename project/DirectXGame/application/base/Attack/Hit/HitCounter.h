@@ -113,6 +113,8 @@ public:
 		hitData_.hitTime.maxT = time;
 	}
 
+
+
 public:
 	// ヒット数の取得
 	int GetHitCount() const { return hitData_.hitCount; }

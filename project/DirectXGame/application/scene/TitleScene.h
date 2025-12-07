@@ -19,6 +19,48 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
+struct AttackEvent {
+	int startFrame;
+	int endFrame;
+	unsigned int color;
+	std::string name;
+};
+
+class AttackSequence : public ImSequencer::SequenceInterface {
+public:
+	std::vector<AttackEvent> events;
+
+	int GetFrameMin() const override { return 0; }
+	int GetFrameMax() const override { return 300; }   // 全体フレーム幅
+	int GetItemCount() const override { return (int)events.size(); }
+
+	// 開始フレーム、終了フレーム、タイプ、色を返す
+	void Get(int index, int** start, int** end, int* type, unsigned int* color) override {
+		if (start) *start = &events[index].startFrame;
+		if (end)   *end = &events[index].endFrame;
+		if (type)  *type = 0;
+		if (color) *color = events[index].color;
+	}
+
+	const char* GetItemLabel(int index) const override {
+		return events[index].name.c_str();
+	}
+
+	// [+] 追加ボタンで呼ばれる処理
+	void Add(int /*type*/) override {
+		events.push_back({ 0, 10, 0xFF00FF00, "NewEvent" });
+	}
+
+	void Del(int index) override {
+		events.erase(events.begin() + index);
+	}
+
+	void Duplicate(int index) override {
+		events.push_back(events[index]);
+	}
+};
+
+
 /// <summary>
 /// タイトルシーン
 /// </summary>
@@ -68,6 +110,15 @@ private:
 
 
 	std::unique_ptr<LoadLevelData> loadData_;
+
+
+	
+	AttackSequence attackSeq;
+	bool initialized = false;
+	int currentFrame = 0;
+	int selected = -1;
+	bool expanded = true;
+	int firstFrame = 0;
 };
 
 

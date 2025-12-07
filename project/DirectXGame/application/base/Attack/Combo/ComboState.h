@@ -22,31 +22,22 @@ public:
     // 終了
     virtual void Exit(BaseCharacter* owner) = 0;
 
+public:
     // 次のステートに遷移するかを判断する
     virtual std::shared_ptr<ComboState> HandleInput(BaseCharacter* owner, AttackInput input) = 0;
-
     // 入力受付時間の範囲チェック
-    bool IsInputAcceptable() const {
-        return timeInState >= inputWindowStart && timeInState <= inputWindowEnd;
-    }
-   
+    virtual bool IsInputAcceptable() const = 0;
+    // 次のステートえ移行受付する時間
+    virtual float GetNextStateTime() const = 0;
+    // ステート終了時間
+    virtual float GetEndStateTime() const = 0;
+
+
     // 時間
     float GetTimeInState() const { return timeInState; }
-    // 次のステートえ移行受付する時間
-    float GetNextStateTime() const { return timeInState > timeNextState; }
-    // ステート終了時間
-    float GetEndStateTime() const { return timeInState > stateEndTime; }
 
 protected:
-    float inputWindowStart = 0.1f;      // 入力受付スタート
-    float inputWindowEnd = 0.5f;        // 入力受付エンド
-    float timeNextState = 0.5f;         // ステート移行時間
-    float stateEndTime = 0.5f;          // ステート終了時間
     float timeInState = 0.0f;           // 時間
-
-
-    bool isGravity = true;              // 重力はあるか？
-    float animationSpeed = 1.0f;        // アニメーションスピード
 };
 
 
@@ -64,6 +55,11 @@ public:
     void Update(BaseCharacter* owner, float dt) override;
     // 終了
     void Exit(BaseCharacter* owner) override;
+
+    // 終了処理
+    void End(BaseCharacter* owner);
+
+public:
 
     // 入力があったら
     std::shared_ptr<ComboState> HandleInput(BaseCharacter* owner, AttackInput input) override {
@@ -83,15 +79,22 @@ public:
     bool HasNextState() const {
         return !nextStates.empty();
     }
-    
+    // 入力受付可能か
+    bool IsInputAcceptable() const override{
+        return comboData_.comboCondition.IsComdoInputWindow(timeInState);
+    }
+    // 次のステートえ移行受付する時間
+    float GetNextStateTime() const override{ 
+        return timeInState > comboData_.comboCondition.GetComboNextTime(); 
+    }
+    // ステート終了時間
+    float GetEndStateTime() const override{
+        return timeInState > comboData_.comboCondition.GetComboEndTime();
+    }
+
 private:
     std::string animation;
     ComboData comboData_;
-
-
-   
-    Vector3 dire_{};
-
     std::map<AttackInput, std::shared_ptr<ComboNodeState>> nextStates;
 };
 
