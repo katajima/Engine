@@ -13,6 +13,9 @@
 //#define IMOGIZMO_Z_UP;
 
 #include "ImGuizmo.h"
+#include "externals/imgui/ImSequencer.h"
+
+
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"

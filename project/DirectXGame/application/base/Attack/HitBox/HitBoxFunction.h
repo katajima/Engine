@@ -13,10 +13,6 @@ enum class HitBoxUseType {
 
 class HitBoxFunction {
 public:
-	struct Data {
-		float damage = 0.0f;					// データ
-		KnockbackData knockbackData;			// ノックバックデータ
-	};
 
 	// 初期化
 	void Initialize(ColliderComponent* owner, BaseCharacter* character, HitBoxUseType type) {
@@ -26,13 +22,13 @@ public:
 	};
 
 	// 開始
-	void Begin(Collider* self, Collider* other);
+	bool Begin(Collider* self, Collider* other);
 
 	// 更新
 	void Update();
 
 
-	void SetData(Data data) { data_ = data; };
+	void SetData(AttackReactionData data) { data_ = data; };
 
 private:
 	// 使用者がプレイヤーの場合の更新処理
@@ -51,6 +47,6 @@ private:
 	HitBoxUseType type_;							// 使用者
 
 	Collider* otherColl_ = nullptr;
-	Data data_;
+	AttackReactionData data_;
 };
 

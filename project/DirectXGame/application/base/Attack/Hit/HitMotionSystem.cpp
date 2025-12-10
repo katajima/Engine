@@ -1,8 +1,12 @@
 #include "HitMotionSystem.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <DirectXGame/application/base/Character/Base/CharacterData.h>
 
-void HitMotionSystem::Update(float dt, ObjectComponent* object)
+void HitMotionSystem::Update(float dt, ObjectComponent* object, CharacterParameterComponent& parameter)
 {
+	// ダメージモーション
+	DamageProcess(dt, parameter);
+
 	// 各ヒットモーションが再生中なら更新する
 	if (IsHitMotion()) {
 
@@ -16,6 +20,17 @@ void HitMotionSystem::Update(float dt, ObjectComponent* object)
 	else {	// 何もヒットモーションが発生していない場合は重力をオンにする
 		object->GetRigidBodyComponent()->SetIsGravity(true);
 	}
+}
+
+void HitMotionSystem::SetReactionData(const AttackReactionData& data)
+{
+	//hitStopMotion_.SetData(data.GetHitStopData());
+	//airStickMotion_.SetData(data.GetAirStickData());
+	knockbackMotion_.SetData(data.GetKnockbackData());
+
+	DamageMotion dama;
+	dama.SetData(data.GetDamageData());
+	damageMotions_.push_back(dama);
 }
 
 bool HitMotionSystem::IsHitMotion()
@@ -34,4 +49,23 @@ void HitMotionSystem::UseGravity(ObjectComponent* object)
 	bool isGravity = hitStopGravity && knockbackGravity && airStickGravity;
 
 	object->GetRigidBodyComponent()->SetIsGravity(isGravity);
+}
+
+void HitMotionSystem::DamageProcess(float dt, CharacterParameterComponent& parameter) {
+
+	for (auto& damage : damageMotions_) {
+		damage.Update(dt);
+
+		if (damage.GetDamageData().IsAttack()) {
+			parameter.parameters_.HP.value -= damage.GetDamageData().GetDamage();
+		}
+
+	}
+
+	// 終了していたら消す
+	damageMotions_.remove_if([](const DamageMotion& damage) { if (!damage.IsPlaying()) {
+		return true;
+	}
+	return false;
+		});
 }

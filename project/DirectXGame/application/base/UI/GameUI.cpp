@@ -126,6 +126,31 @@ void GameUI::Update()
 
 	UICount* hitCount = GetUICount("hitCount");
 	hitCount->SetCount(ConvertUtility::ToFloat(player_->GetAttackController()->GetHitCounter().GetHitCount()));
+	
+	
+	if (player_->GetAttackController()->GetHitCounter().GetHitCount() <= 0) {
+		
+		hitCount->SetCountColor({ 1,1,1,0.0f });
+		hitCount->GetNameSprite()->SetColor({ 1,1,1,0.0f });
+	}
+	else {
+		float t = player_->GetAttackController()->GetHitCounter().GetHitData().hitTime.LerpT();
+		bool isT = t >= 0.5f;
+
+		Color coNn = hitTextData.color_;
+		Color coNe = hitTextData.nameColor_;
+		
+		
+		if (isT) {
+			hitCount->SetCountColor({ coNn.r ,coNn.g ,coNn.b ,1.0f - t });
+			hitCount->GetNameSprite()->SetColor({ coNe.r ,coNe.g ,coNe.b ,1.0f - t });
+		}
+		else {
+			hitCount->SetCountColor(coNn);
+			hitCount->GetNameSprite()->SetColor(coNe);
+		}
+	}
+
 	// 更新
 	UpdateUIElement(0);
 }

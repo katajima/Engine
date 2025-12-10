@@ -12,6 +12,13 @@ enum class HitBoxShape {
 	kSphere,
 };
 
+// 保存項目用データ
+struct GlobalHitBoxdata {
+	Vector3 offset{};
+	Vector3 size = { 1.0f,1.0f,1.0f };
+	float radius = 1.0f;
+};
+
 // コライダーデータ
 struct HitBoxCollData
 {
@@ -43,9 +50,7 @@ struct HitBoxCollData
 	/// <summary>
 	/// リアクション
 	/// </summary>
-
-	float damage = 0.0f;
-	KnockbackData knockbackData;
+	AttackReactionData reactionData;
 };
 
 /// <summary>
@@ -62,7 +67,7 @@ public:
 public:
 
 	// コライダー追加
-	void AddCollider(std::unique_ptr<Collider> collider, const Vector3& offset,const HitBoxFunction::Data& reaction);
+	void AddCollider(std::unique_ptr<Collider> collider, const Vector3& offset,const AttackReactionData& reaction);
 	// 有効化
 	void Enable();
 	// 無効化
@@ -94,7 +99,7 @@ private:
 		Collider* collider = nullptr;
 
 		float damage = 0.0f;
-		KnockbackData knockbackData;
+		AttackReactionData reactionData;
 
 		int colliderID = -1;
 	};

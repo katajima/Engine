@@ -119,17 +119,18 @@ void AirStickData::Update(float dt) {
 #pragma endregion // エアスティックデータ
 
 #pragma region DamageData
-
 // 更新
 void DamageData::Update(float dt) {
 	switch (type)
 	{
 	case DamageData::kOne:
-
+		one.Update(dt);
 		break;
 	case DamageData::kContinuous:
+		continuous.Update(dt);
 		break;
 	case DamageData::kDuration:
+		duration.Update(dt);
 		break;
 	default:
 		break;
@@ -201,7 +202,7 @@ bool DamageData::IsAttack()
 #pragma region One
 // 更新
 void DamageData::One::Update(float dt) {
-
+	isFinish = true;
 }
 // ダメージ取得
 float DamageData::One::GetDamage() const {
@@ -290,7 +291,9 @@ float DamageData::Continuous::GetDamage() const
 
 #pragma region 
 
-void AttackData::Update(float dt) {
+void AttackReactionData::Update(float dt) {
+	airStickData.Update(dt);// 空中・地上固定データ更新
+	hitStopData.Update(dt);	// ヒットストップデータ更新
 	knockback.Update(dt);	// ノックバックデータ更新
 	damageData.Update(dt);	// ダメージデータ更新
 }

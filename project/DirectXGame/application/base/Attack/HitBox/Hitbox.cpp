@@ -32,12 +32,14 @@ void HitBox::Initialize(Entity3DManager* entity3dManager, BaseCharacter* charact
 	// 当たり判定コールバック設定
 	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
 		// 開始
-		hitBoxFunction_->Begin(self, other);
+		if (!hitBoxFunction_->Begin(self, other)) {
+			return;
+		};
 		
 		// 当たったコライダーによって相手に送るデータを決め転送
 		for (auto& data : colliders_) {
 			if (self->id == data.second.colliderID) {
-				hitBoxFunction_->SetData({ data.second.damage ,data.second.knockbackData });
+				hitBoxFunction_->SetData(data.second.reactionData);
 				break;
 			}
 		}
@@ -63,7 +65,7 @@ void HitBox::Update(float dt) {
 
 #pragma region MyRegion
 // コライダー追加
-void HitBox::AddCollider(std::unique_ptr<Collider> collider,const Vector3& offset, const HitBoxFunction::Data& reaction) {
+void HitBox::AddCollider(std::unique_ptr<Collider> collider,const Vector3& offset, const AttackReactionData& reaction) {
 	// 当たり判定コンポーネントにコライダー追加
 	ColliderData data;
 	data.colliderID = colliderComponent_->AddCollider(std::move(collider));
@@ -74,10 +76,9 @@ void HitBox::AddCollider(std::unique_ptr<Collider> collider,const Vector3& offse
 	data.worldTransform.translate_ = offset;
 	data.worldTransform.parent_ = &worldTransform_;
 
-
-	data.knockbackData = reaction.knockbackData;
-	data.damage = reaction.damage;
-
+	// リアクションデータ
+	data.reactionData = reaction;
+	
 	// コライダー情報を配列に追加
 	colliders_[data.colliderID] = data;
 	colliderCount++; // コライダー数増加

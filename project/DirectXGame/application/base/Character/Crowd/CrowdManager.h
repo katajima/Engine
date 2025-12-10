@@ -84,6 +84,7 @@ public:
 
 	// 表示用：インスタンスバッファに書き込むデータ
 	uint32_t animIndex = 0;
+	Vector3 slotTarget_;
 private:
 	
 	CrowdManager* manager_ = nullptr;

@@ -54,7 +54,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		// 範囲内に入ったら
 		if (distToTarget < attackRange_ * 3.0f) {
 			state_ = AgentState::PreparationAttack;	// 攻撃準備に入る
-			attackDelayTimer_ = Random::RandomFloat(1.0f, 3.0f);
+			attackDelayTimer_ = Random::RandomFloat(2.0f, 4.0f);
 		}
 		else if (distToTarget > engageDistance_ * 1.5f) {	// 範囲外なら
 			state_ = AgentState::Idle;	// 待機に戻る
@@ -68,7 +68,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		if (attackDelayTimer_ <= 0.0f) {
 			state_ = AgentState::Attack; // 攻撃
 			owner_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);// 攻撃ステート移行
-			attackCooldown_ = 1.0f + Random::RandomFloat(0.0f, 0.5f);
+			attackCooldown_ = 1.0f + Random::RandomFloat(3.0f, 0.5f);
 			animIndex = 1;
 		}
 		else if (distToTarget > attackRange_ * 3.0f) {	// 範囲外なら 
@@ -151,9 +151,12 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		else desired = { 0,0,0 };
 	}
 
+	
 	// Return時はグループ中心へ強く引っ張る
 	if (state_ == AgentState::Return) {
-		desired = Normalize(toCenter);
+		// ★修正：slotTarget へ戻るようにする
+		Vector3 toSlot = groupTarget - position_;
+		desired = Normalize(toSlot);
 	}
 
 	Vector3 steer = Normalize(desired + sep * 0.5f + cohesion * 0.8f);
@@ -168,7 +171,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	}
 
 	velocity_ = Lerp(velocity_, steer * targetSpeed, dt * 5.0f);
-	//velocity_.y = 0;
+	velocity_.y = 0;
 	owner_->Velocity() = velocity_;
 }
 
@@ -301,10 +304,17 @@ void CrowdGroupAgent::DistributeTargets(std::vector<CrowdAgent>& agents)
 	{
 		int idx = memberIndices[i];
 		if (idx < 0) continue;
+
 		Vector3 slot = CalcSlotTarget((int)i);
-		// 部隊目標へ向かうためにスロット位置を少し前方へオフセット
+
+		// ★前方方向（Z=Forward）
 		Vector3 dirToCmd = Normalize(command.targetPos - centerPos);
-		Vector3 finalTarget = { slot.x + dirToCmd.x * 0.5f, slot.y, slot.z + dirToCmd.z * 0.5f };
+
+		// ★スロットを部隊の進行方向に少しだけ前へ押す
+		Vector3 finalTarget = slot + dirToCmd * 0.5f;
+
+		// ★修正：エージェントにスロット目標を渡す（今まで欠落していた）
+		agents[idx].slotTarget_ = finalTarget;
 	}
 }
 
@@ -357,30 +367,27 @@ void CrowdManager::Update(float dt) {
 	for (size_t i = 0; i < agents.size(); ++i)
 	{
 		CrowdAgent& a = agents[i];
-		// 距離に応じたLOD: 遠い奴は更新間引き（簡略化）
+
+		// --- LOD ---
 		float d = Length(a.position_ - playerPos);
 		float lodFactor = (d < 15.0f) ? 1.0f : ((d < 40.0f) ? 0.5f : 0.25f);
-		// シンプルに更新をスキップする代わりに時間経過での補間は省略
 		if (Random::RandomFloat(0.0f, 1.0f) > lodFactor) continue;
 
-
+		// --- 近傍検索 ---
 		grid.QueryNeighbors(a.position_, neighbors);
-		// 部隊目標 + スロットオフセットを計算
-		CrowdGroupAgent& grp = groups[a.groupId];
-		// ローカルインデックスを求める（簡略な実装）
-		int localIndex = -1;
-		for (size_t k = 0; k < grp.memberIndices.size(); ++k) {
-			if (grp.memberIndices[k] == (int)i) {
-				localIndex = (int)k;
-				break;
-			}
-		}
-		Vector3 slotTarget = (localIndex >= 0) ? grp.CalcSlotTarget(localIndex) : grp.centerPos;
-		// 最終目標は部隊コマンドターゲットに向かうためのslotTarget
-		Vector3 finalTarget = { slotTarget.x + (grp.command.targetPos.x - grp.centerPos.x) * 0.5f,
-		slotTarget.y,
-		slotTarget.z + (grp.command.targetPos.z - grp.centerPos.z) * 0.5f };
 
+		// --- グループ ---
+		CrowdGroupAgent& grp = groups[a.groupId];
+
+		// ★修正：slotTarget_ は DistributeTargets が設定済み
+		Vector3 finalTarget = a.slotTarget_;
+
+		// ★Return 動作中はフォーメーションの中心へより寄せる
+		if (a.state_ == AgentState::Return)
+		{
+			Vector3 toCenter = grp.centerPos - a.position_;
+			finalTarget = grp.centerPos + Normalize(toCenter) * 1.0f;
+		}
 
 		a.Update(dt, finalTarget, grp.memberIndices, &agents);
 	}

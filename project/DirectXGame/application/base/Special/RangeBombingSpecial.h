@@ -51,7 +51,7 @@ public:
 	
 
 	// 半径設定
-	void SetRadius(float rad) { reticleRad_ = rad; }
+	void SetRadius(float rad);
 
 	// 半径爆心
 	float GetRadius() const { return reticleRad_; };
@@ -79,7 +79,7 @@ private:
 
 	float shotTimer = 0.0f;
 
-	float reticleRad_ = 100.0f;				// レティクルの半径　　　
+	float reticleRad_ = 50.0f;				// レティクルの半径　　　
 	Vector3 rangeBombingPos{};				// レンジボムの位置
 private:
 	Stage* stage_ = nullptr;
@@ -92,11 +92,11 @@ private: // 一旦
 	const float fireInterval = 0.01f; // 例：0.04秒ごとに1発ずつ発射
 
 	struct ProvisionalData {
-		Vector3 translate = { 0,2,100 };
+		Vector3 translate = { 0,2,50 };
 		Vector3 rotate = { Math::DegreesToRadians(-90), 0, 0 };
 
 
-		int maxGauge_ = 100;		// 最大ゲージ設定
+		int maxGauge_ = 40;			// 最大ゲージ設定
 		int clock_ = 1;				// 切り替え
 		int maxBullet = 40;			// 発射数
 		int bulletNum = 0;			// 弾番号

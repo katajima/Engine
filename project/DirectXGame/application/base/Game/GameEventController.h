@@ -43,9 +43,9 @@ private:
 
 
 /// <summary>
-/// ステージのイベントを管理するクラス
+/// ゲームのイベントを管理するクラス
 /// </summary>
-class StageEventManager {
+class GameEventController {
 public:
 
 	/// <summary>

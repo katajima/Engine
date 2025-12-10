@@ -344,8 +344,8 @@ void GlobalVariables::LoadFile(const std::string& groupName) {
 /// </summary>
 void GlobalVariables::Update() {
 #ifdef _DEBUG
-	ImGui::Begin("GlobalVariables", nullptr, ImGuiWindowFlags_MenuBar);
-	ImGui::BeginMenuBar();
+	ImGui::Begin("GlobalVariables"/*, nullptr, ImGuiWindowFlags_MenuBar*/);
+	//ImGui::BeginMenuBar();
 
 	static std::pair<std::string, std::string> pendingDeleteItem;
 	static bool confirmDelete = false;
@@ -404,41 +404,41 @@ void GlobalVariables::Update() {
 				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
 			}
 
-			// 複製ボタン
-			ImGui::SameLine();
-			if (ImGui::SmallButton("複製")) {
-				// 複製先のキー名を生成
-				std::string baseKey = itemName;
-				// ユニークキー生成（重複チェックと連番付与）
-				std::string newKey = MakeUniqueKey(baseKey, group);
+			//// 複製ボタン
+			//ImGui::SameLine();
+			//if (ImGui::SmallButton("複製")) {
+			//	// 複製先のキー名を生成
+			//	std::string baseKey = itemName;
+			//	// ユニークキー生成（重複チェックと連番付与）
+			//	std::string newKey = MakeUniqueKey(baseKey, group);
 
-				if (!DuplicateItem(groupName, itemName, groupName, newKey)) {
-					// 複製失敗時の対応（ログ出力や警告表示など）
-				}
-			}
+			//	if (!DuplicateItem(groupName, itemName, groupName, newKey)) {
+			//		// 複製失敗時の対応（ログ出力や警告表示など）
+			//	}
+			//}
 
-			// 削除ボタン + 確認
-			ImGui::SameLine();
-			if (pendingDeleteItem.first == groupName && pendingDeleteItem.second == itemName && confirmDelete) {
-				ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "削除しますか？");
-				ImGui::SameLine();
-				if (ImGui::SmallButton("はい")) {
-					itemsToRemove.emplace_back(groupName, itemName);
-					confirmDelete = false;
-					pendingDeleteItem = {};
-				}
-				ImGui::SameLine();
-				if (ImGui::SmallButton("いいえ")) {
-					confirmDelete = false;
-					pendingDeleteItem = {};
-				}
-			}
-			else {
-				if (ImGui::SmallButton("×")) {
-					pendingDeleteItem = { groupName, itemName };
-					confirmDelete = true;
-				}
-			}
+			//// 削除ボタン + 確認
+			//ImGui::SameLine();
+			//if (pendingDeleteItem.first == groupName && pendingDeleteItem.second == itemName && confirmDelete) {
+			//	ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "削除しますか？");
+			//	ImGui::SameLine();
+			//	if (ImGui::SmallButton("はい")) {
+			//		itemsToRemove.emplace_back(groupName, itemName);
+			//		confirmDelete = false;
+			//		pendingDeleteItem = {};
+			//	}
+			//	ImGui::SameLine();
+			//	if (ImGui::SmallButton("いいえ")) {
+			//		confirmDelete = false;
+			//		pendingDeleteItem = {};
+			//	}
+			//}
+			//else {
+			//	if (ImGui::SmallButton("×")) {
+			//		pendingDeleteItem = { groupName, itemName };
+			//		confirmDelete = true;
+			//	}
+			//}
 
 			ImGui::PopID();
 		}
@@ -458,7 +458,7 @@ void GlobalVariables::Update() {
 		ImGui::EndMenu();
 	}
 
-	ImGui::EndMenuBar();
+	//ImGui::EndMenuBar();
 	ImGui::End();
 
 

@@ -4,9 +4,13 @@
 #include <memory>
 
 #include "ComboState.h"
-
+#include "ComboGlobalData.h"
 
 class BaseCharacter; // 前方宣言
+class GlobalVariables;
+
+
+
 
 /// <summary>
 /// コンボシステム
@@ -15,21 +19,26 @@ class ComboSystem
 {
 public:
 	// 初期化
-	void Initialize(BaseCharacter* character);
+	void Initialize(BaseCharacter* character, GlobalVariables* globalVariables);
 
 	// コンボ更新
 	void UpdateCombo(float dt) {
 		comboStateMachine_->Update(dt);
 	}
 
-
+	// クリア
 	void ClearNode();
 
+public: // 保存や適応に関しての関数
+
+	// 保存項目の追加
+	void ApplyGlobalComboData(const std::string& name, ComboGlovalData& data);
+
+	// 保存項目の適応
+	void SetGlobalComboData(const std::string& name, ComboGlovalData& data);
+
+
 public: 
-	// コンボデータ取得
-	ComboData* GetComboData() { return comboData_; }
-	// コンボデータ設定
-	void SetComboData(ComboData* data) { comboData_ = data; }
 	// コンボステートマシーン取得
 	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
 public:
@@ -49,11 +58,16 @@ public:
 	bool IsComboFinished() const {
 		return comboStateMachine_->IsComboFinished();
 	}
+
+public:
+	// データ設定
+	void SetData(ComboData& data, const ComboGlovalData& gData);
 private:
-	// コンボデータ
-	ComboData* comboData_ = nullptr;
 	// コンボステートマシーン
 	std::unique_ptr<ComboStateMachine> comboStateMachine_;
 	// コンボノードステートマップ
 	std::map<std::string, std::shared_ptr<ComboNodeState>> comboNodes_;
+private:
+	GlobalVariables* globalVariables = nullptr;
+
 };

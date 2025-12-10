@@ -12,6 +12,9 @@ void PlayerStateIdle::Update() {
 	BaseSpecial* special = character_->GetSpecial();
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	MoveSystem* move = character_->GetMoveComponent()->GetMoveSystem();
+	character_->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+
+
 
 	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
 	if (isTriggerLT) {
@@ -73,7 +76,7 @@ void PlayerStateIdle::Enter() {
 	anima->SetIsLoop(true);			// ループさせる
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimetion("Idle2", 0.1f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 };
 
@@ -240,6 +243,7 @@ void PlayerStateAttack::Exit()
 	anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
 	character_->GetMoveComponent()->SetCanMove(true);
 	character_->GetMoveComponent()->GetMoveSystem()->SetIsAttack(false);
+	character_->GetMoveComponent()->GetJumpSystem()->SetIsAttack(false);
 }
 
 void PlayerStateAttack::Enter()
@@ -249,6 +253,7 @@ void PlayerStateAttack::Enter()
 	// 武器
 	weapon->GetObject3D()->SetIsDraw(true);	 // 武器描画
 	character_->GetMoveComponent()->GetMoveSystem()->SetIsAttack(true);
+	character_->GetMoveComponent()->GetJumpSystem()->SetIsAttack(true);
 }
 
 #pragma endregion // 攻撃

@@ -6,6 +6,10 @@
 #include "MovementRestrictions.h"
 #include "MovementState.h"
 
+// 前方宣言
+class GlobalVariables;
+
+
 
 /// <summary>
 /// 移動コンポーネント
@@ -21,10 +25,15 @@ public:
 	};
 
 	// 初期化
-	void Initialize(ControlType type);
+	void Initialize(GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
 	void Update(float dt,WorldTransform& object, RigidBodyComponent& rigid, Input* input);
+public:
+	// 保存項目の追加
+	void ApplyGlobalData(const std::string& name);
 
+	// 保存項目の適応
+	void SetGlobalData(const std::string& name);
 public:
 	// 操作タイプ取得
 	void SetControlType(ControlType type) { controlType_ = type; }
@@ -77,12 +86,14 @@ private:
 	//
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; // 移動制限システム
 	std::unique_ptr<MovementStateMachine> movementStateMachine_ = nullptr; // 移動状態マシン
-
-
-
-
 	// 操作タイプ
 	ControlType controlType_ = ControlType::Manual;	// 操作タイプ
+
+
+	std::string name_ = "";
+private:
+	GlobalVariables* globalVariables = nullptr;
+
 };
 
 

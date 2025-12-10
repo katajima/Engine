@@ -6,6 +6,7 @@
 
 
 class ObjectComponent;	// 前方宣言
+class CharacterParameterComponent;
 
 /// <summary>
 /// ヒットコンポーネント
@@ -23,15 +24,20 @@ public:
 
 
 	// 更新
-	void Update(float deltaTime, ObjectComponent* object);
+	void Update(float deltaTime, ObjectComponent* object, CharacterParameterComponent& parameter);
 
-	// ノックバックデータセット
-	void SetKnockbackData(const KnockbackData& data) { knockbackMotion_.SetData(data); }
-	
+	// リアクションデータ
+	void SetReactionData(const AttackReactionData& data);
+
 	// ヒットモーション中か
 	bool IsHitMotion();
 	// 重力があるか設定
 	void UseGravity(ObjectComponent* object);
+
+private:
+
+
+	void DamageProcess(float dt, CharacterParameterComponent& parameter);
 
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;
@@ -41,4 +47,10 @@ private:
 	KnockbackMotion knockbackMotion_;
 	// 吸い付きモーション
 	AirStickMotion airStickMotion_;
+	
+	// ダメージモーション
+	std::list<DamageMotion> damageMotions_;
+
+
+
 };

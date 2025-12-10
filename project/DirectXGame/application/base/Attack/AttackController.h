@@ -8,6 +8,7 @@ class CharacterParameterComponent;
 class BaseCharacter;
 class BaseWeapon;	
 class Entity3DManager;
+class GlobalVariables;
 
 /// <summary>
 /// 攻撃を管理するクラス。
@@ -15,11 +16,11 @@ class Entity3DManager;
 class AttackController {
 public:
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager,CharacterParameterComponent* base, BaseCharacter* owner);
+	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables,CharacterParameterComponent* base, BaseCharacter* owner);
 	// 更新
 	void Update(float dt);
 
-
+	
 public:
 	// 攻撃ヒットカウンタークラス取得
 	HitCounter& GetHitCounter() { return hitCounter_; }
@@ -49,4 +50,7 @@ private:
 private:
 	// 攻撃中か
 	bool isAttack_ = false;
+private:
+	GlobalVariables* globalVariables = nullptr;
+
 };

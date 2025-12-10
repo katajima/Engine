@@ -28,12 +28,6 @@ public:
 	/// <param name="dt">ゲーム内時間もしくはキャラクターの時間など</param>
 	void Update(float dt);
 
-
-	/// <summary>
-	/// 攻撃を受けたときに送るデータを挿入
-	/// </summary>
-	void SetHit(const AttackData& data);
-
 	/// <summary>
 	/// ヒットモーションクラス取得
 	/// </summary>
@@ -48,12 +42,8 @@ private:// 貰いもの
 	CharacterParameterComponent* paremeter = nullptr;
 	// オブジェクト
 	ObjectComponent* object = nullptr;
-	// 攻撃データ<vector>
-	std::vector<AttackData> datas_;
-	
 	// ヒットフラグ<タグ、フラグ>何かヒットしたときに使う用のやつ 
 	std::map<std::string, bool> hitFlags_;
-
 };
 
 
