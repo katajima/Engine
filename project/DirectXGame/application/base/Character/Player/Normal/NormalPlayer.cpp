@@ -39,8 +39,10 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	Parameters().speed = 40.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	
+	
 	// 移動コンポーネント初期化
-	InitMoveComponent();
+	moveComponent_ = std::make_unique<MovementComponent>();
+	moveComponent_->Initialize(globalVariables_, MovementComponent::ControlType::Manual,"");
 	moveComponent_->SetMoveType(MoveSystem::MoveType::ACCELERATE);
 	moveComponent_->SetIsStickToSpeed(true);
 	moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
@@ -112,7 +114,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-	rengeSp->SetRadius(100);
+	rengeSp->SetRadius(50);
 	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
@@ -124,30 +126,6 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	ui_->Initialize(input_, entity2DManager_, globalVariables_);
 	ui_->SetHP(&characterParameterComponent_.HP());
 	ui_->SetStamina(&characterParameterComponent_.Stamina());
-
-
-	std::string nam = "MoveData";
-
-	// ジャンプ
-	globalVariables_->AddItem(nam, "ジャンプ力", moveGlovalData_.power_);
-	globalVariables_->AddItem(nam, "ジャンプ上昇時の重力", moveGlovalData_.upGravity_);
-	globalVariables_->AddItem(nam, "ジャンプ下降時の重力", moveGlovalData_.fallGravity_);
-	
-	// 移動
-	globalVariables_->AddItem(nam, "移動最小速度", moveGlovalData_.minSpeed_);
-	globalVariables_->AddItem(nam, "移動最大速度", moveGlovalData_.maxSpeed_);
-	globalVariables_->AddItem(nam, "移動加速度", moveGlovalData_.speedAcceleration_);
-	globalVariables_->AddItem(nam, "回転速度", moveGlovalData_.rotationSpeed_);
-	globalVariables_->AddItem(nam, "スティック移動量変化", moveGlovalData_.isStickToSpeed_);
-	globalVariables_->AddItem(nam, "空中での移動量変化", moveGlovalData_.isLimitAirSpeed_);
-	globalVariables_->AddItem(nam, "空中移動量変化率", moveGlovalData_.airSpeedRate_);
-
-	// ダッシュ
-	globalVariables_->AddItem(nam, "ダッシュ時間", moveGlovalData_.dashMaxTime);
-	globalVariables_->AddItem(nam, "ダッシュ加速度", moveGlovalData_.dashAcceleration);
-	globalVariables_->AddItem(nam, "ダッシュ減速度", moveGlovalData_.dashFriction);
-	globalVariables_->AddItem(nam, "ダッシュ初速度", moveGlovalData_.dashStartSpeed);
-	globalVariables_->AddItem(nam, "ダッシュ中の重力", moveGlovalData_.isDashGravity);
 
 
 	// キャラクター行動ステート初期化
@@ -164,17 +142,19 @@ void NormalPlayer::InitAttack(){
 
 	// 戦闘
 	attackController_ = std::make_unique<AttackController>();
-	attackController_->Initialize(entity3DManager_,&characterParameterComponent_, this);
+	attackController_->Initialize(entity3DManager_,globalVariables_,&characterParameterComponent_, this);
 	attackController_->GetHitCounter().SetHitTimer(2.0f);
 	
+	ComboSystem* combo = attackController_->GetComboSystem();
 
 	//
-	ApplyGlobalComboData("AttackComboData1", data1_);
-	ApplyGlobalComboData("AttackComboData2", data2_);
-	ApplyGlobalComboData("AttackComboData3", data3_);
+	combo->ApplyGlobalComboData("AttackComboData1", data1_);
+	combo->ApplyGlobalComboData("AttackComboData2", data2_);
+	combo->ApplyGlobalComboData("AttackComboData3", data3_);
+	combo->ApplyGlobalComboData("AttackComboData(Jump)", data4_);
 
 	
-	//
+	// 
 	ReloadComboData();
 
 	// インプットハンドラー
@@ -306,7 +286,10 @@ void NormalPlayer::Draw2D()
 {
 	// UI表示
 	ui_->SetIsTextmax(special_->GetIsSpecial());
+	
+
 	ui_->SetIsTextRB(special_->GetIsSpecial());
+
 	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
 	ui_->Draw();
@@ -367,7 +350,7 @@ void NormalPlayer::Attack()
 		GetAttackController()->SetIsAttack(true);
 		stateMachine_->ChangeState(CharacterMainState::Attack);
 		if (isJump) {
-
+			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
 		}
 		else {
 			GetAttackController()->GetComboSystem()->StartCombo("Attack1");
@@ -376,239 +359,145 @@ void NormalPlayer::Attack()
 
 }
 
+void NormalPlayer::HeavyAttack()
+{
+	bool isMove = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
+	bool isIdle = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
+	bool isJump = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
+	bool isAttack = stateMachine_->GetCurrentMainState() == CharacterMainState::Attack;
+
+
+	// 攻撃
+	if (isAttack) {
+		GetAttackController()->SetIsAttack(true);
+		GetAttackController()->GetComboSystem()->InputCombo(AttackInput::Heavy);
+	}
+	else if (isMove || isIdle || isJump) {
+		GetAttackController()->SetIsAttack(true);
+		stateMachine_->ChangeState(CharacterMainState::Attack);
+		if (isJump) {
+			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
+		}
+		else {
+			GetAttackController()->GetComboSystem()->StartCombo("Attack1");
+		}
+	}
+}
+
 #pragma endregion //移動関係
 
 #pragma region MyRegion
 
 void NormalPlayer::ApplyGlobalVariables(){
+	ComboSystem* combo = attackController_->GetComboSystem();
 
-	SetGlobalComboData("AttackComboData1", data1_);
-	SetGlobalComboData("AttackComboData2", data2_);
-	SetGlobalComboData("AttackComboData3", data3_);
-
-
-	std::string nam = "MoveData";
-
-	moveGlovalData_.power_ = globalVariables_->GetValue<float>(nam, "ジャンプ力");
-	moveGlovalData_.upGravity_ = globalVariables_->GetValue<float>(nam, "ジャンプ上昇時の重力");
-	moveGlovalData_.fallGravity_ = globalVariables_->GetValue<float>(nam, "ジャンプ下降時の重力");
-	
-	moveGlovalData_.minSpeed_			= globalVariables_->GetValue<float>(nam, "移動最小速度");
-	moveGlovalData_.maxSpeed_			= globalVariables_->GetValue<float>(nam, "移動最大速度");
-	moveGlovalData_.speedAcceleration_	= globalVariables_->GetValue<float>(nam, "移動加速度");
-	moveGlovalData_.rotationSpeed_		= globalVariables_->GetValue<float>(nam, "回転速度");
-	moveGlovalData_.isStickToSpeed_		= globalVariables_->GetValue<bool>(nam, "スティック移動量変化");
-	moveGlovalData_.isLimitAirSpeed_	= globalVariables_->GetValue<bool>(nam, "空中での移動量変化");
-	moveGlovalData_.airSpeedRate_		= globalVariables_->GetValue<float>(nam, "空中移動量変化率");
-
-
-	moveGlovalData_.dashMaxTime			= globalVariables_->GetValue<float>(nam, "ダッシュ時間");
-	moveGlovalData_.dashAcceleration	= globalVariables_->GetValue<float>(nam, "ダッシュ加速度");
-	moveGlovalData_.dashFriction		= globalVariables_->GetValue<float>(nam, "ダッシュ減速度");
-	moveGlovalData_.dashStartSpeed		= globalVariables_->GetValue<float>(nam, "ダッシュ初速度");
-	moveGlovalData_.isDashGravity		= globalVariables_->GetValue<bool>(nam, "ダッシュ中の重力");
-
-
-	// ジャンプに関するパラメータ設定
-	moveComponent_->GetJumpSystem()->GetData().fallGravity_ = moveGlovalData_.fallGravity_;
-	moveComponent_->GetJumpSystem()->GetData().upGravity_ = moveGlovalData_.upGravity_;
-	moveComponent_->GetJumpSystem()->GetData().power_	= moveGlovalData_.power_;
-
-	// 移動パラメータ設定
-	moveComponent_->SetSpeed(moveGlovalData_.minSpeed_, moveGlovalData_.maxSpeed_);
-	moveComponent_->GetMoveSystem()->GetData().speedAcceleration = moveGlovalData_.speedAcceleration_;
-	moveComponent_->GetMoveSystem()->GetData().rotationSpeed	= moveGlovalData_.rotationSpeed_;
-	moveComponent_->GetMoveSystem()->GetData().isStickToSpeed	= moveGlovalData_.isStickToSpeed_;
-	moveComponent_->GetMoveSystem()->GetData().isLimitAirSpeed	= moveGlovalData_.isLimitAirSpeed_;
-	moveComponent_->GetMoveSystem()->GetData().airSpeedRate		= moveGlovalData_.airSpeedRate_;
-
-	// ダッシュパラメータ設定
-	moveComponent_->GetDashSystem()->GetData().maxTime		= moveGlovalData_.dashMaxTime;
-	moveComponent_->GetDashSystem()->GetData().acceleration = moveGlovalData_.dashAcceleration;
-	moveComponent_->GetDashSystem()->GetData().friction		= moveGlovalData_.dashFriction;
-	moveComponent_->GetDashSystem()->GetData().startSpeed	= moveGlovalData_.dashStartSpeed;
-	moveComponent_->GetDashSystem()->GetData().isDashGravity = moveGlovalData_.isDashGravity;
+	combo->SetGlobalComboData("AttackComboData1", data1_);
+	combo->SetGlobalComboData("AttackComboData2", data2_);
+	combo->SetGlobalComboData("AttackComboData3", data3_);
+	combo->SetGlobalComboData("AttackComboData(Jump)", data4_);
 }
 
-void NormalPlayer::ApplyGlobalComboData(const std::string& name, ComboGlovalData& data)
-{
-	globalVariables_->CreateGroup(name);
-
-	globalVariables_->AddItem(name, "ダメージ", data.damage);
-	globalVariables_->AddItem(name, "ヒットボックス発生時間", data.hitBoxWindowStart_);
-	globalVariables_->AddItem(name, "ヒットボックス生存時間", data.hitBoxLifeTime_);
-	
-	globalVariables_->AddItem(name, "Y方向ノックバック", data.isVerticalBoost_);
-	globalVariables_->AddItem(name, "ノックバック力", data.knockbackPower);
-	globalVariables_->AddItem(name, "Y方向ノックバック力", data.knockbackPowerY);
-	globalVariables_->AddItem(name, "ノックバック持続時間", data.knockbackDuration_);
-
-	globalVariables_->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
-	globalVariables_->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
-	globalVariables_->AddItem(name, "コンボ終了時間", data.stateEndTime);
-	globalVariables_->AddItem(name, "コンボ移行時間", data.stateNextTime);
-	globalVariables_->AddItem(name, "コンボ中の重力", data.isGravity);
-
-	globalVariables_->AddItem(name, "アニメーション速度", data.animationSpeed_);
-
-	globalVariables_->AddItem(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
-	globalVariables_->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
-
-
-	
-
-	SetGlobalComboData(name, data);
-}
-
-void NormalPlayer::SetGlobalComboData(const std::string& name, ComboGlovalData& data)
-{
-	data.damage = globalVariables_->GetValue<float>(name, "ダメージ");
-	data.hitBoxWindowStart_ = globalVariables_->GetValue<float>(name, "ヒットボックス発生時間");
-	data.hitBoxLifeTime_ = globalVariables_->GetValue<float>(name, "ヒットボックス生存時間");
-	data.isVerticalBoost_ = globalVariables_->GetValue<bool>(name, "Y方向ノックバック");
-	data.knockbackPower = globalVariables_->GetValue<float>(name, "ノックバック力");
-	data.knockbackPowerY = globalVariables_->GetValue<float>(name, "Y方向ノックバック力");
-	data.knockbackDuration_ = globalVariables_->GetValue<float>(name, "ノックバック持続時間");
-
-	data.stateInputStartTime = globalVariables_->GetValue<float>(name, "コンボ入力受付開始時間");
-	data.stateInputEndTime = globalVariables_->GetValue<float>(name, "コンボ入力受付終了時間");
-	data.stateEndTime = globalVariables_->GetValue<float>(name, "コンボ終了時間");
-	data.stateNextTime = globalVariables_->GetValue<float>(name, "コンボ移行時間");
-	data.isGravity = globalVariables_->GetValue<bool>(name, "コンボ中の重力");
-	data.animationSpeed_ = globalVariables_->GetValue<float>(name, "アニメーション速度");
-
-	data.trailEffectStartTime = globalVariables_->GetValue<float>(name, "エフェクト(トレイル)発生時間");
-	data.trailEffectLifeTime = globalVariables_->GetValue<float>(name, "エフェクト(トレイル)生存時間");
-}
 
 void NormalPlayer::ReloadComboData()
 {
 	GetAttackController()->GetComboSystem()->ClearNode();
+
+	HitBoxSystem* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
+	ComboSystem* comboSystem = GetAttackController()->GetComboSystem();
+
 	// コンボデータ設定
 	ComboData data1{};
 	ComboData data2{};
 	ComboData data3{};
+	ComboData data4{};
 	// ヒットボックスデータ
 	HitBoxCollData hitData1{};
 	HitBoxCollData hitData2{};
 	HitBoxCollData hitData3{};
-	hitData1.isEneble = true;
-	hitData1.isLine = true;
-	hitData1.layer = CollisionLayer::PlayerAttack;
-	hitData1.tag = CollisionTag::PlayerAttack;
-	hitData1.mask = CollisionLayer::Enemy;
-	hitData1.name = "obbColl1";
-	hitData1.offset = provisionalData_.collider1Pos;
-	hitData1.size = provisionalData_.obbColliderSize;
+	HitBoxCollData hitData4{};
 
 
-	hitData1.damage = data1_.damage;
-	hitData1.knockbackData.GetData().duration_ = data1_.knockbackDuration_;
-	hitData1.knockbackData.GetData().power_ = data1_.knockbackPower;
-	hitData1.knockbackData.GetData().verticalBoost_ = data1_.knockbackPowerY;
-	hitData1.knockbackData.GetData().isVerticalBoost_ = data1_.isVerticalBoost_;
+	GlobalHitBoxdata hitBoxdata;
+	hitBoxdata.size = provisionalData_.obbColliderSize;
+	hitBoxdata.offset = provisionalData_.collider1Pos;
+	GlobalHitBoxdata hitBoxdata2;
+	hitBoxdata2.offset = provisionalData_.collider2Pos;
+	hitBoxdata2.size = provisionalData_.obbCollider2Size;
+	GlobalHitBoxdata hitBoxdata3;
+	hitBoxdata3.offset = { 0,0,3 };
+	hitBoxdata3.size = { 10,10,10 };
+	GlobalHitBoxdata hitBoxdata4;
+	hitBoxdata4.offset = { 0,0,0 };
+	hitBoxdata4.radius = 20.0f;
 
 
-	hitData2 = hitData1;
-	hitData2.name = "obbColl2";
-	hitData2.offset = provisionalData_.collider2Pos;
-	hitData2.size = provisionalData_.obbCollider2Size;
-
-	
-	hitData3 = hitData1;
-	hitData3.name = "obb";
-	hitData3.offset = { 0,0,3 };
-	hitData3.size = { 10,10,10 };
-
-
-	// コンボ１のデータ送る
-	data1.hitBox.AddCollider(hitData3);
-	
-	hitData1.damage = data2_.damage;
-	hitData1.knockbackData.GetData().duration_ = data2_.knockbackDuration_;
-	hitData1.knockbackData.GetData().power_ = data2_.knockbackPower;
-	hitData1.knockbackData.GetData().verticalBoost_ = data2_.knockbackPowerY;
-	hitData1.knockbackData.GetData().isVerticalBoost_ = data2_.isVerticalBoost_;
-	hitData2.damage = data2_.damage;
-	hitData2.knockbackData.GetData().duration_ = data2_.knockbackDuration_;
-	hitData2.knockbackData.GetData().power_ = data2_.knockbackPower;
-	hitData2.knockbackData.GetData().verticalBoost_ = data2_.knockbackPowerY;
-	hitData2.knockbackData.GetData().isVerticalBoost_ = data2_.isVerticalBoost_;
-	
-
-	// コンボ２のデータ送る
-	data2.hitBox.AddCollider(hitData1);
-	data2.hitBox.AddCollider(hitData2);
-	
-	hitData1.damage = data3_.damage;
-	hitData1.knockbackData.GetData().duration_ = data3_.knockbackDuration_;
-	hitData1.knockbackData.GetData().power_ = data3_.knockbackPower;
-	hitData1.knockbackData.GetData().verticalBoost_ = data3_.knockbackPowerY;
-	hitData1.knockbackData.GetData().isVerticalBoost_ = data3_.isVerticalBoost_;
-	hitData2.damage = data3_.damage;
-	hitData2.knockbackData.GetData().duration_ = data3_.knockbackDuration_;
-	hitData2.knockbackData.GetData().power_ = data3_.knockbackPower;
-	hitData2.knockbackData.GetData().verticalBoost_ = data3_.knockbackPowerY;
-	hitData2.knockbackData.GetData().isVerticalBoost_ = data3_.isVerticalBoost_;
-
-
-	// コンボ３のデータ送る
-	data3.hitBox.AddCollider(hitData1);
-	data3.hitBox.AddCollider(hitData2);
+	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBoxShape::kOBB,HitBoxUseType::kPlayer, hitBoxdata, hitData1);
+	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata2, hitData2);
+	hitBoxSystem->CreateHitBoxCollData("obb", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata3, hitData3);
+	hitBoxSystem->CreateHitBoxCollData("obb2", HitBoxShape::kSphere, HitBoxUseType::kPlayer,hitBoxdata4, hitData4);
 	
 
 	// データ
+	// コンボ１のデータ送る
+	data1.hitBox.AddCollider(hitData3, data1_);
+
 	data1.hitBox.ClearUseHitBox();
 	data1.hitBox.AddUseHitBox("obb");
-	SetData(data1, data1_);
+
+
+	comboSystem->SetData(data1, data1_);
 	data1.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
 	GetAttackController()->GetComboSystem()->AddComboNode("Attack1", data1);	// コンボ追加
 
 
+	// コンボ２のデータ送る
+	data2.hitBox.AddCollider(hitData1, data2_);
+	data2.hitBox.AddCollider(hitData2, data2_);
 	// データ
 	data2.hitBox.ClearUseHitBox();
 	data2.hitBox.AddUseHitBox("obbColl1");
 	data2.hitBox.AddUseHitBox("obbColl2");
-	SetData(data2, data2_);
+	comboSystem->SetData(data2, data2_);
 	data2.hitBox.SetPerent(&weapon_->GetObject3D()->GetWorldTransform());
 	GetAttackController()->GetComboSystem()->AddComboNode("Attack2", data2);	// コンボ追加
 
 
+	// コンボ３のデータ送る
+	data3.hitBox.AddCollider(hitData1, data3_);
+	data3.hitBox.AddCollider(hitData2, data3_);
 	// データ
 	data3.hitBox.ClearUseHitBox();
 	data3.hitBox.AddUseHitBox("obbColl1");
 	data3.hitBox.AddUseHitBox("obbColl2");
-	SetData(data3, data3_);
+
+
+	comboSystem->SetData(data3, data3_);
 	data3.hitBox.SetPerent(&weapon_->GetObject3D()->GetWorldTransform());
 	GetAttackController()->GetComboSystem()->AddComboNode("Attack3", data3);	// コンボ追加
 
 
+	// ジャンプコンボのデータ送る
+	data4.hitBox.AddCollider(hitData4, data4_);
+	// データ(ジャンプ)
+	data4.hitBox.ClearUseHitBox();
+	data4.hitBox.AddUseHitBox("obb2");
+	data4.comboCondition.GetData().type = ComboCondition::EndConditionType::kOnGround;	// 着地したら終了
+	data4.hitBox.GetData().dependenceType_ = HitBoxSystem::Type::kParentIndependent;	// 依存関係なし独立
+	data4.hitBox.GetData().spawnType_ = ComboHitBox::HitBoxSpawnType::kOnGround;			// 着地したら発生
+	data4.hitBox.GetData().offset_ = { 0,0,5.5f };
+
+	comboSystem->SetData(data4, data4_);
+	data4.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
+	GetAttackController()->GetComboSystem()->AddComboNode("JumpAttack", data4);	// コンボ追加
+
+
+	
 
 	GetAttackController()->GetComboSystem()->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack1", AttackInput::Heavy, "Attack3"); // コンボ連結
 	GetAttackController()->GetComboSystem()->ConnectCombo("Attack2", AttackInput::Light, "Attack3"); // コンボ連結
+	GetAttackController()->GetComboSystem()->ConnectCombo("JumpAttack", AttackInput::Light, "Attack2"); // コンボ連結
 
-}
-
-void NormalPlayer::SetData(ComboData& data,const ComboGlovalData& gData)
-{
-	data.hitBox.GetData().hitBpxWindowStart_ = gData.hitBoxWindowStart_;	// 発生時間
-	data.hitBox.GetData().lifeTime_ = gData.hitBoxLifeTime_;				// 生成時間
-
-	// 入力受付時間設定
-	data.comboCondition.ConditionStartEnd(gData.stateInputStartTime, gData.stateInputEndTime);
-	data.comboCondition.GetData().stateNextTime = gData.stateNextTime;
-	data.comboCondition.GetData().stateEndTime = gData.stateEndTime;
-
-	// 重力
-	data.motion.GetData().isGravity_ = gData.isGravity;
-	// アニメーションスピード
-	data.motion.GetData().animationSpeed_ = gData.animationSpeed_;
-
-	// トレイルエフェクト
-	data.effect.GetData().startTmer = gData.trailEffectStartTime;
-	data.effect.GetData().lifeTime = gData.trailEffectLifeTime;
-
+	
 }
 
 #pragma endregion // そのほか

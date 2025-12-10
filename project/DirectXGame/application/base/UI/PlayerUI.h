@@ -73,7 +73,7 @@ private:
 		Color color_ = { 0,0,1,1 };
 		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
 
-		float maxMeter = 100.0f;
+		float maxMeter = 40.0f;
 		Vector2 offset_ = { 4.0f,4.0f };
 
 		Vector2 size_ = { 200.0f,30.0f };

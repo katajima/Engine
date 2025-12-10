@@ -70,13 +70,9 @@ void ComboStateMachine::Update(float dt) {
 
 	// 入力がバッファされていて、入力受付時間内なら状態遷移
 	if (bufferedInput) {
-		// 入力受付時間内に入力があれば次へ移行するのを予約
-		if (currentState->IsInputAcceptable()) {
-			isNextState = true;	// 次のステートに移行確定
-		}
-
+		
 		// コンボ移行時間に達して次のステートへ移行するなら
-		if (currentState->GetNextStateTime() && isNextState) {
+		if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
 			auto next = currentState->HandleInput(owner, *bufferedInput);
 			// もし次のステートがあれば、遷移
 			if (next) {

@@ -33,6 +33,14 @@ public:
 	void Exec(BaseCharacter& character) override;
 };
 
+// 攻撃コマンド
+class HeavyAttackCommand : public ICommand
+{
+public:
+	void Exec(BaseCharacter& character) override;
+};
+
+
 // 前方宣言
 class Input;
 // インプットハンドラー
@@ -49,6 +57,8 @@ public:
 	void AssignJampCommandPad();
 	// 割り当て攻撃
 	void AssignAttackCommandPad();
+	// 割り当て攻撃
+	void AssignHeavyAttackCommandPad();
 
 private:
 	Input* input_;
@@ -56,5 +66,6 @@ private:
 	std::unique_ptr<ICommand> movePad;
 	std::unique_ptr<ICommand> jampPad;
 	std::unique_ptr<ICommand> attackPad;
+	std::unique_ptr<ICommand> attackHeavyPad;
 
 };

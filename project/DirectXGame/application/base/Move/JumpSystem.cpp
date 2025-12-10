@@ -27,14 +27,16 @@ void JumpSystem::Update(float dt, WorldTransform& world, RigidBodyComponent& rig
 	}
 	else {
 		// ダッシュ中には重力の切り替えはダッシュシステムに任せる
-		if (!isDash_) {	 
+		if (!isDash_ || !isAttack_) {
 			rigid.SetIsGravity(true);					// 重力オン
 		}
-		if (state_ == State::Fall) {
-			rigid.SetGravityScale(data_.fallGravity_);	// 重力スケールセット
-		}
-		else {
-			rigid.SetGravityScale(data_.upGravity_);	// 重力スケールセット
+		if (!isAttack_) {
+			if (state_ == State::Fall) {
+				rigid.SetGravityScale(data_.fallGravity_);	// 重力スケールセット
+			}
+			else {
+				rigid.SetGravityScale(data_.upGravity_);	// 重力スケールセット
+			}
 		}
 		isLanding_ = false;							// 着地していない
 	}

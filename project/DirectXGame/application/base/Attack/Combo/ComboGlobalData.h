@@ -1,0 +1,49 @@
+#pragma once
+#include <DirectXGame/engine/struct/Structs3D.h>
+
+
+
+
+// 保存項目用コンボデータ
+struct ComboGlovalData {
+	float hitBoxWindowStart_ = 0.0f;	// ヒットボックスの生成タイミング時間
+	float hitBoxLifeTime_ = 0.5f;		// ヒットボックスの生存時間
+	Vector3 offsetPos_ = {};			// コライダー位置
+	Vector3 colliderSize = { 1.0f,1.0f,1.0f };	// コライダーサイズ
+
+	// 敵に送るリアクションデータ
+	struct Reaction {
+		float knockbackDuration_ = 0.1f;	// ノックバック持続時間
+		float knockbackPower = 30.0f;		// ノックバックパワー
+		float knockbackPowerY = 30.0f;		// ノックバックY方向パワー
+		bool isVerticalBoost_ = false;		// Y方向にノックバックするか
+
+		float damage = 0;					// ダメージ
+	};
+	// リアクションデータ
+	Reaction reaction;
+
+
+	// 移動関係
+	float moveSpeed_ = 1.0;				// 移動速度
+	float moveWindowStart_ = 0.0f;		// 移動開始
+	float moveWindowEnd_ = 1.0f;		// 移動終了
+	bool  isCompulsionMove_ = true;		// 強制移動
+
+
+
+	float stateInputStartTime = 0.1f;	// 入力受付時間
+	float stateInputEndTime = 0.5f;		// 入力終了時間
+	float stateEndTime = 0.5f;			// ステート終了時間
+	float stateNextTime = 0.45f;		// ステート移行時間
+
+
+	bool isGravity = true;				// 重力はあるか？
+	float gravityScale = 1.0f;			// 重力スケール
+
+	float animationSpeed_ = 1.0f;		// アニメーションスピード
+
+
+	float trailEffectStartTime = 0.1f;	// トレイル発生時間
+	float trailEffectLifeTime = 1.0;	// トレイル生存時間
+};

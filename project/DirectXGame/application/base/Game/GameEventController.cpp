@@ -1,4 +1,4 @@
-#include "StageEventManager.h"
+#include "GameEventController.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
@@ -7,7 +7,7 @@
 
 
 
-void StageEventManager::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
+void GameEventController::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
 {
 	entity3DManager_ = entity3DManager;		// エンティティ3d
 	globalVariables_ = globalVariables;		// 保存項目
@@ -30,7 +30,7 @@ void StageEventManager::Initialize(Entity3DManager* entity3DManager, GlobalVaria
 }
 
 
-void StageEventManager::Update() {
+void GameEventController::Update() {
 	// キャラクター出現管理更新
 	characterSpawnManager_->Update();
 

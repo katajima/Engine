@@ -41,6 +41,22 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	objectReticle_->GetWorldTransform().translate_ = provisionalData_.translate;
 }
 
+// 半径設定
+void RangeBombingSpecial::SetRadius(float rad) { 
+	reticleRad_ = rad; 
+	CylinderPrimitive* primi = static_cast<CylinderPrimitive*>(objectReticle_->GetPrimitive());
+	// シリンダーパラメータ設定
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = provisionalData_.cylinderHeight;			// 高さ
+	cylinderParam.innerRadius = reticleRad_;// 上底
+	cylinderParam.outerRadius = reticleRad_;// 下底
+	cylinderParam.isCover = false;			// 蓋するか
+	cylinderParam.segments = provisionalData_.cylinderSegments;			// セグメント数
+	primi->Data() = cylinderParam;
+
+}
+
+
 void RangeBombingSpecial::Update()
 {
 	// ゲージが超えているなら

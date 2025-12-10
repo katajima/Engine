@@ -52,9 +52,14 @@ public:
 	virtual void Jump() = 0;
 
 	/// <summary>
-	/// 攻撃
+	/// 攻撃(弱攻撃)
 	/// </summary>
 	virtual void Attack() = 0;
+	
+	/// <summary>
+	/// 攻撃(強攻撃)
+	/// </summary>
+	virtual void HeavyAttack() {};
 
 	/// <summary>
 	/// ステートマシーン初期化
@@ -168,11 +173,7 @@ protected: // 保存機能
 	}
 
 protected:
-	// 移動コンポーネント初期化
-	void InitMoveComponent() {
-		moveComponent_ = std::make_unique<MovementComponent>();
-		moveComponent_->Initialize(MovementComponent::ControlType::Auto);
-	}
+	
 	
 public:
 	// 速度

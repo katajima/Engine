@@ -31,8 +31,10 @@ public:
 	virtual void Move() = 0;
 	// ジャンプ
 	virtual void Jump() = 0;
-	// 攻撃
+	// 攻撃(弱攻撃)
 	virtual void Attack() = 0;
+	// 攻撃(強攻撃)
+	virtual void HeavyAttack() {};
 
 	// ターゲットキャラクターを設定
 	void SetTargetCharacters(const std::vector<BaseEnemy*>& targetCharacters) { targetCharacters_ = targetCharacters; }

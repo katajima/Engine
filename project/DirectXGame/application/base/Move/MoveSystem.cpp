@@ -6,6 +6,8 @@ void MoveSystem::Initialize() {
 
 void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 {
+	// 攻撃中は通常の移動処理しない
+	if (isAttack_) return;
 
 	Vector3 velo = GetVelocity();
 
@@ -21,18 +23,7 @@ void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 	// 移動方向を保存
 	DirectionProcess(velo);
 
-	// 攻撃中の回転処理
-	AttackProcess(world);
-
-	if (isAttack_ && !isAttackCanMove_) return;// 攻撃中は移動処理しない
-	if (isAttackCanMove_) {
-		//MoveProcess(dt, world, keepDirection_);
-		//return;
-	}
-	else {
-
-	}
-
+		
 	// ダッシュ時の回転処理
 	DashProcess(world);
 	
@@ -40,7 +31,6 @@ void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 
 	// 回転処理
 	RotateProcess(dt, world, direction_);
-
 
 	// 移動処理
 	MoveProcess(dt, world, velo);
@@ -149,6 +139,7 @@ void MoveSystem::MoveProcess(float dt, WorldTransform& world, Vector3& velo,bool
 		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
 		if (camera_) {
 			CameraDirectionToMoveDirection(velo);
+			velo = Multiply(velo, speed_);
 		}
 		else {
 			// 移動方向にスピードを掛ける
@@ -230,7 +221,7 @@ void MoveSystem::CameraDirectionToMoveDirection(Vector3& velo) {
 		velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
 	};
 
-	velo = Multiply(Normalize(worldDirection), speed_);
+	velo = Normalize(worldDirection);
 }
 
 void MoveSystem::DirectionProcess(const Vector3& velo)
@@ -264,16 +255,16 @@ void MoveSystem::DashProcess(WorldTransform& world)
 	currentYaw = targetYaw;
 }
 
-void MoveSystem::AttackProcess(WorldTransform& world)
+void MoveSystem::AttackProcess(WorldTransform& world, const Vector3& direction)
 {
 	// ダッシュ中は移動処理しない
 	if (!isAttack_) return;
 
 	// 移動ベクトルがゼロなら回転処理しない
-	if (keepDirection_.Length() == 0.0f) return;
+	if (direction.Length() == 0.0f) return;
 
 	// 目標方向（X=Right, Y=Up, Z=Forward）
-	float targetYaw = std::atan2(keepDirection_.x, keepDirection_.z);
+	float targetYaw = std::atan2(direction.x, direction.z);
 
 	float& currentYaw = world.rotate_.y;
 

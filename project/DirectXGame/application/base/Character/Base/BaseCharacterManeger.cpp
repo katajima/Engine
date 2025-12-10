@@ -131,7 +131,6 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 		player = std::make_unique<NormalPlayer>();
 		break;
 	case PlayerType::kBullet:	// 弾
-		player = std::make_unique<BulletPlayer>();
 		break;
 	case PlayerType::kAttacker:
 		break;

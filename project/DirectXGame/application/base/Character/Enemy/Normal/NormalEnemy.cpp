@@ -24,7 +24,8 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	CreateGroup("enemy");
 
 	// 移動コンポーネント初期化
-	InitMoveComponent();
+	moveComponent_ = std::make_unique<MovementComponent>();
+	moveComponent_->Initialize(globalVariables_, MovementComponent::ControlType::Manual, "_Enemy");
 	moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
@@ -79,7 +80,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// 戦闘中の倍率・軽減率を扱う
 	attackController_ = std::make_unique<AttackController>();
-	attackController_->Initialize(entity3DManager,&characterParameterComponent_,this);
+	attackController_->Initialize(entity3DManager,globalVariables_,&characterParameterComponent_,this);
 
 	
 

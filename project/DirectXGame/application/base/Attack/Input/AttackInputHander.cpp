@@ -28,7 +28,7 @@ AttackICommand* AttackInputHander::HandleInput()
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
 			return light.get();
 		}
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
 			return heavy.get();
 		}
 	}

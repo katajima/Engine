@@ -2,6 +2,7 @@
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
+#include "ComboGlobalData.h"
 
 // 前方宣言
 class AnimationComponent;	// アニメーション
@@ -10,6 +11,7 @@ class CameraManager;		// カメラ
 class BaseCharacter;		// キャラクター
 class RigidBodyComponent;	// リジットボディー
 class BaseWeapon;			// 武器
+class JumpSystem;			// ジャンプシステム
 
 /// <summary>
 /// コンボ条件ボタン
@@ -80,6 +82,8 @@ public:
 		}
 	}
 
+	// どのボタンに反応するか
+	void SetGamePadButton(GamePadButton button) { button_ = button; };
 
 private:
 	GamePadButton button_;
@@ -102,6 +106,8 @@ public:
 	/// </summary>
 	bool Update(const Input& input, float deltaTime);
 
+
+
 private:
 	std::vector<ComboButton> comboButtons_;
 	size_t currentIndex_ = 0;
@@ -111,21 +117,39 @@ private:
 // コンボ受付条件クラス
 class ComboCondition {
 public:
-	struct Data
+	
+	// 終了条件タイプ
+	enum class EndConditionType {
+		kOnGround,			// 着地したら
+		kOnButtonRelease,	// ボタンを離したら
+		kOnMeterEmpty,		// メータが空になったら
+		kOnTimer,			// 時間が過ぎたら
+		kOnHit,				// 何かに当たったら
+		kManual,			// 特殊ケース
+	};
+
+
+	// データ構造体
+	struct InputData
 	{
 		float inputWindowStart_ = 0.1f;			// 入力受付スタート
 		float inputWindowEnd_ = 0.5f;			// 入力受付エンド
-
-		float stateEndTime = 0.5f;				// 終了時間
-		float stateNextTime = 0.45f;			// 移行時間
 
 		bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
 		ComboSequence comboSequence_;			// コンボボタン条件
 	};
 
+	// 終了条件データ
+	struct EndData {
+		float stateEndTime = 0.5f;				// 終了時間
+		float stateNextTime = 0.45f;			// 移行時間
+		ComboButton button_;					// コンボボタン
+		EndConditionType type = EndConditionType::kOnTimer;	// 終了条件タイプ
+	};
+
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
 	void Update(const Input& input,float timer ,float dt);
@@ -133,37 +157,49 @@ public:
 	// 終了
 	void Exit();
 
-	
-
+private:
+	// 終了条件設定
+	void EndComboUpdate(const Input& input,float timer, float dt);
 public: //設定
 	// コンボ条件発動時間設定
 	void ConditionStartEnd(float start, float end) {
-		data_.inputWindowStart_ = start;
-		data_.inputWindowEnd_ = end;
+		inputData_.inputWindowStart_ = start;
+		inputData_.inputWindowEnd_ = end;
 	};
 public: // 取得
 
 	// 次のコンボ移行する時間
-	float GetComboNextTime() const { return data_.stateNextTime; }
+	float GetComboNextTime() const { return nextTime_; }
 	// コンボ終了時間
-	float GetComboEndTime() const { return data_.stateEndTime; }
+	float GetComboEndTime() const { return endTime_; }
 	// コンボ入力受付開始時間
-	float GetComboInputStart() const { return data_.inputWindowStart_; }
+	float GetComboInputStart() const { return inputData_.inputWindowStart_; }
 	// コンボ入力受付終了時間
-	float GetComboInputEnd() const { return data_.inputWindowEnd_; }
-
+	float GetComboInputEnd() const { return inputData_.inputWindowEnd_; }
 	// コンボ受付可能か
 	bool IsComdoInputWindow(float timer) const {
 		return timer >= GetComboInputStart() && timer <= GetComboInputEnd();
 	};
 	// 次のコンボに移行するか
 	bool IsNextCombo() const { return isNextCombo_; };
+public:
 	// データ構造体取得
-	Data& GetData() { return data_; }
-
+	EndData& GetData() { return data_; }
+	// 入力受付データ構造体取得
+	InputData& GetInput() { return inputData_; }
 private:
 	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
-	Data data_;
+	float endTime_ = 0.0f;				// コンボ終了時間
+	float nextTime_ = 0.0f;				// 次のコンボ移行時間
+	EndData data_{ 0.5f ,0.45f ,ComboButton(GamePadButton::GAMEPAD_B,ComboButtonInputType::kPressed)};// コンボ終了データ
+	InputData inputData_;				// コンボ入力受付データ
+
+
+	bool isPress_ = false;
+
+private:
+	JumpSystem* jumpSystem = nullptr;
+
 };
 
 /// <summary>
@@ -176,12 +212,12 @@ public:
 	{
 		float moveWindowStart_ = 0.1f;			// 移動受付スタート
 		float moveWindowEnd_ = 0.5f;			// 移動受付エンド
-		float speed_ = 0;						// 移動速度
+		float speed_ = 0.0f;					// 移動速度
 
 		bool isCompulsionMove_ = true;			// 強制的に移動
-		bool isCompulsionDirection_ = false;	// 強制方向に移動
-
+		
 		bool isGravity_ = true;					// 空中でのコンボで重力はあるか？
+		float gravityScale_ = 1.0f;				// 重力スケール
 
 		// アニメーション
 		std::string animationName_ = "no";		// アニメーション名前
@@ -197,6 +233,8 @@ public:
 
 	// 終了
 	void Exit(BaseCharacter* owner);
+
+public: // 取得 or 設定
 
 	// 移動できるか
 	bool IsMove() const { return isMove_; }
@@ -222,9 +260,16 @@ public:
 	// データ構造体取得
 	Data& GetData() { return data_; }
 
+	// 反応ボタン設定
+	void SetGamePadButton(GamePadButton pad) { button_.SetGamePadButton(pad); };
+
 private:
 	bool isMove_ = true;					// 移動出来るか
 	Data data_;
+	ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed); // コンボボタン
+	
+private:
+	Vector3 direction_ ={};
 private: // 貰いもの 
 	AnimationComponent* animationComponent = nullptr;	// アニメーション
 	MovementComponent* moveComponent = nullptr;			// 移動
@@ -238,13 +283,13 @@ private: // 貰いもの
 class ComboHitBox {
 public:
 
-	// ヒットボックスのタイプ
-	enum class Type {
-		kWeapom,		// 武器追従型
-		kFrontArea,		// 前方判定
-		kIndependent,	// 独立(飛び道具など)
-		kLockOnArea,	// ターゲット位置
+	enum class HitBoxSpawnType {
+		kOnTime,			// 時間で発生
+		kOnGround,		// 着地で発生
+		kOnAir,			// 空中から発生
+		kOnButtonRelease,// ボタンを離したら
 	};
+
 
 	enum class Shape {
 		kAABB,
@@ -257,15 +302,21 @@ public:
 	struct Data {
 		float hitBpxWindowStart_ = 1.0f;		// ヒットボックス生成スタート
 		float lifeTime_ = 1.0f;					// ヒットボックス生存時間
-
-		HitBoxUseType hitBoxUseType_;			// ヒットボックス使用者タイプ
+		// ヒットボックス使用者タイプ
+		HitBoxUseType hitBoxUseType_;			
+		// ヒットボックスの発生条件タイプ
+		HitBoxSpawnType spawnType_ = HitBoxSpawnType::kOnTime;	
+		// ヒットボックス依存先タイプ
+		HitBoxSystem::Type dependenceType_ = HitBoxSystem::Type::kParent;
+		// オフセット
+		Vector3 offset_{};
 	};
 
 	// 開始
 	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(float timer,float dt);
+	void Update(const Input& input, float timer,float dt);
 
 	// 終了
 	void Exit();
@@ -276,7 +327,7 @@ public:
 	// データ取得
 	Data& GetData() { return data_; }
 	// コライダーデータ追加
-	void AddCollider(HitBoxCollData data) { collData_.push_back(data); };
+	void AddCollider(const HitBoxCollData& hitBoxData, const ComboGlovalData& reaction);
 	// 使うヒットボックス名設定
 	void AddUseHitBox(const std::string& name) { useHitBox_.push_back(name); };
 	// 使うヒットボックス名クリーン
@@ -287,13 +338,14 @@ public:
 private:
 	// ヒットボックスシステム
 	HitBoxSystem* hitBoxSystem_ = nullptr;
+	// ジャンプシステム
+	JumpSystem* jumpSystem_ = nullptr;
 	// 親子
 	WorldTransform* perent_ = nullptr;
 private:
+	ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed); // コンボボタン
 	// ヒットボックスデータ
 	Data data_;
-	// ヒットボックスタイプ
-	Type type_;
 	// コライダーデータ
 	std::vector<HitBoxCollData> collData_;
 	

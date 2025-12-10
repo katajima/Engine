@@ -20,7 +20,7 @@
 
 
 #include "DirectXGame/application/base/Input/InputHander.h"
-#include <DirectXGame/application/base/Stage/Manager/StageEventManager.h>
+#include <DirectXGame/application/base/Game/GameFlowController.h>
 
 /// <summary>
 /// ゲームプレイシーン
@@ -57,9 +57,6 @@ public:
 	void CheckAllCollisions();
 
 private:
-
-	std::unique_ptr<StageEventManager> stageEventManager_;
-private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 
@@ -69,6 +66,9 @@ private:
 
 	static float nowTime;
 	float fps = 0.0f;
+
+	// ゲームの流れやルールの管理をするクラス
+	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
 private:
 	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
 	std::unique_ptr<UICount> sprite;

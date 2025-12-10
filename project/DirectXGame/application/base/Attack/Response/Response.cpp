@@ -39,18 +39,8 @@ void AttackResponse::Initialize(CharacterParameterComponent* paremeter, ObjectCo
 }
 
 void AttackResponse::Update(float dt) {
-	
-	// 攻撃データ更新
-	for (auto& data : datas_) {
-		data.Update(dt);
-	}
-
 	// 被撃モーション更新
-	hitMotionSystem_->Update(dt,object);
-}
-
-void AttackResponse::SetHit(const AttackData& data) {
-	datas_.push_back(data);
+	hitMotionSystem_->Update(dt,object, *paremeter);
 }
 
 #pragma endregion // 攻撃を受けたとき

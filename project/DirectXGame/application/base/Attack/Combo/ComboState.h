@@ -31,7 +31,8 @@ public:
     virtual float GetNextStateTime() const = 0;
     // ステート終了時間
     virtual float GetEndStateTime() const = 0;
-
+    // 次のステートへ移行可能か
+    virtual bool GetIsNextState() const = 0;
 
     // 時間
     float GetTimeInState() const { return timeInState; }
@@ -91,6 +92,10 @@ public:
     float GetEndStateTime() const override{
         return timeInState > comboData_.comboCondition.GetComboEndTime();
     }
+    // 次のステートへ移行可能か
+    bool GetIsNextState() const override {
+        return comboData_.comboCondition.IsNextCombo();
+    };
 
 private:
     std::string animation;
@@ -132,7 +137,4 @@ private:
     std::shared_ptr<ComboState> rootState;      // 初期ステート
 
     std::optional<AttackInput> bufferedInput;   // 入力バッファ
-
-    // 次のステートに移行するか
-    bool isNextState = false;
 };

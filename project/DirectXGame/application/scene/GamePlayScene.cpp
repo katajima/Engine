@@ -66,8 +66,8 @@ void GamePlayScene::Initialize()
 
 
 	// ステージイベントマネージャー
-	stageEventManager_ = std::make_unique<StageEventManager>();
-	stageEventManager_->Initialize(GetEntity3DManager(), GetGlobalVariables(), caracterManager_.get());
+	gameFlowController_ = std::make_unique<GameFlowController>();
+	gameFlowController_->Initialize(GetSceneManager(), GetGlobalVariables(), caracterManager_.get());
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
@@ -238,14 +238,7 @@ void GamePlayScene::Update()
 	// キャラクターマネージャー更新
 	caracterManager_->Update();
 
-	// ステージイベントマネージャー更新
-	stageEventManager_->Update();
-
-
-	if (stageEventManager_->IsEndEvent()) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
-	}
+	
 	
 #ifdef _DEBUG
 	if (input_->IsTriggerKey(DIK_P)) {
@@ -290,6 +283,9 @@ void GamePlayScene::Update()
 	loadData_->Update();
 	// Effect更新
 	effect_->Update();
+	// ゲーム進行マネージャー更新
+	gameFlowController_->Update(MyGame::GameTime());
+
 }
 
 #pragma endregion //更新関係
@@ -301,6 +297,8 @@ void GamePlayScene::Finalize(){}
 void GamePlayScene::Draw3D(){
 	////3Dオブジェクトの描画
 	bulletManager_->DrawEffect();
+	// ゲーム進行
+	gameFlowController_->Draw();
 }
 
 // 2D描画

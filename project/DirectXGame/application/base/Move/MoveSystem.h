@@ -86,14 +86,15 @@ private:
 	void StateProcess();
 	// アニメーション速度設定
 	void AnimationSpeedProcess();
-	// カメラ基づく移動方向設定
-	void CameraDirectionToMoveDirection(Vector3& velo);
 	// 方向処理
 	void DirectionProcess(const Vector3& velo);
 	// ダッシュ時の処理
 	void DashProcess(WorldTransform& world);
+public:
+	// カメラ基づく移動方向設定
+	void CameraDirectionToMoveDirection(Vector3& velo);
 	// 攻撃中の回転処理
-	void AttackProcess(WorldTransform& world);
+	void AttackProcess(WorldTransform& world, const Vector3& direction);
 
 public: // 取得
 	// 移動データの取得

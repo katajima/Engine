@@ -177,7 +177,6 @@ private:
 	Data data_;
 };
 
-
 /// ダメージデータ
 class DamageData {
 public:
@@ -289,6 +288,15 @@ public:
 	bool IsAttack();
 
 
+	// 一撃
+	One& GetOne() { return one; }
+
+	// 連撃
+	Continuous& GetContinuous() { return continuous; }
+
+	// 持続
+	Duration& GetDuration() { return duration; }
+
 private:
 	Type type = Type::kOne;		// ダメージの与え方;
 	Continuous continuous{};	// 連撃ダメージデータ
@@ -297,9 +305,9 @@ private:
 	float damage = 0;			// ダメージ
 };
 
-/// 攻撃データ
-struct AttackData {
-
+/// 攻撃リアクションデータ
+class AttackReactionData {
+public:
 
 	/// <summary>
 	/// 更新
@@ -307,10 +315,30 @@ struct AttackData {
 	/// <param name="dt"></param>
 	void Update(float dt);
 
-	
+public: // 読み取り
+	// ノックバックデータ取得
+	const KnockbackData& GetKnockbackData() const { return knockback; }
+	// ヒットストップデータ取得
+	const HitStopData& GetHitStopData() const { return hitStopData; }
+	// 空中・地上固定データ取得
+	const AirStickData& GetAirStickData() const { return airStickData; }
+	// ダメージデータ取得
+	const DamageData& GetDamageData() const { return damageData; }
 
+public: // 書き換え
+	// ノックバックデータ取得
+	KnockbackData& GetKnockbackData() { return knockback; }
+	// ヒットストップデータ取得
+	HitStopData& GetHitStopData() { return hitStopData; }
+	// 空中・地上固定データ取得
+	AirStickData& GetAirStickData() { return airStickData; }
+	// ダメージデータ取得
+	DamageData& GetDamageData() { return damageData; }
 
+private:
 	KnockbackData knockback;	// ノックバックデータ
+	HitStopData hitStopData;	// ヒットストップデータ
+	AirStickData airStickData;	// 空中・地上固定データ
 	DamageData damageData;		// ダメージデータ
 };
 

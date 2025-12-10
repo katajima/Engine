@@ -47,3 +47,18 @@ void AirStickMotion::Update(float dt, ObjectComponent* object) {
 };
 
 #pragma endregion // エアスティックモーション
+
+#pragma region DamageData
+
+
+void DamageMotion::Update(float dt) {
+
+	damageData_.Update(dt);
+
+	if (damageData_.IsFinish()) isPlaying_ = false;
+	else {
+
+	}
+}
+
+#pragma endregion // ダメージモーション

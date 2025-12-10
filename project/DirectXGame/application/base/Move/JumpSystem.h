@@ -61,6 +61,8 @@ public:
 	void SetInputPressed(bool isPressed) { isInputPressed_ = isPressed; }
 	// ダッシュ中か設定
 	void SetIsDash(bool dash) { isDash_ = dash; }
+	// 攻撃中か設定
+	void SetIsAttack(bool is) { isAttack_ = is; };
 
 private:
 
@@ -79,6 +81,8 @@ private:
 private: // 貰うもの
 	// ダッシュ中かどうか
 	bool isDash_ = false;
+	// 攻撃中かどうか
+	bool isAttack_ = false;
 private:
 	// 地面の高さ
 	float groundHeight_ = 0.0f;
