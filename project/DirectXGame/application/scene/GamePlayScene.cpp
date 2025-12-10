@@ -216,12 +216,7 @@ void GamePlayScene::Update()
 	if (input_->IsTriggerKey(DIK_R)) {
 		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
 	}
-	// タイトルへ
-	if (input_->IsTriggerKey(DIK_RETURN)) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
-	}
-
+	
 	// コマンド
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {

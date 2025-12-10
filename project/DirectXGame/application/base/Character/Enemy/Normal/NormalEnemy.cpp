@@ -25,6 +25,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// 移動コンポーネント初期化
 	moveComponent_ = std::make_unique<MovementComponent>();
+	moveComponent_->UseGlobal(false);
 	moveComponent_->Initialize(globalVariables_, MovementComponent::ControlType::Manual, "_Enemy");
 	moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 	// SphereColliderを追加

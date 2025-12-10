@@ -18,13 +18,19 @@ void GameEventController::Initialize(Entity3DManager* entity3DManager, GlobalVar
 	characterSpawnManager_ = std::make_unique<CharacterSpawnManager>();
 	characterSpawnManager_->Initialize(characterManager_, entity3DManager_->Get3DLineCommon());
 
+
+	waveManager_ = std::make_unique<WaveManager>();
+	//waveManager_->Initialize();
+
 	//// スポーン情報初期化
 	SpawnInfo data;
 	data.Initialize("test",1,30);
-	data.size_ = { 50,1,50 };
-	data.spawnInterval_ = 10.0f;
-	data.spawnTimer_ = 0.0f;
+	data.GetData().size_ = { 50,1,50 };
+	data.GetData().spawnInterval_ = 10.0f;
+	data.GetData().spawnTimer_ = 0.0f;
 	characterSpawnManager_->AddCharacterSpawn(data);
+
+
 
 	characterSpawnManager_->GetCharacterSpawn("test")->GetSpawnTransform().translate_ = { 0,0,100 };
 }
@@ -49,18 +55,3 @@ void GameEventController::Update() {
 
 };
 
-
-
-void Event::Initialize(const EventData& data)
-{
-	data_ = data;
-}
-
-void Event::Update() {
-	timer += MyGame::GameTime();
-
-
-	if (data_.maxTimer <= timer) {
-
-	}
-}

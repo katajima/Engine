@@ -57,6 +57,8 @@ public: // 移動系統
 	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
 	// 移動出来るか設定
 	void SetCanMove(bool canMove) { moveSystem_->SetCanMove(canMove); }
+	//
+	void UseGlobal(bool is) { useGlobal_ = is; };
 public: // ジャンプ系統
 
 	// ジャンプ回数現象
@@ -91,6 +93,8 @@ private:
 
 
 	std::string name_ = "";
+
+	bool useGlobal_ = true;
 private:
 	GlobalVariables* globalVariables = nullptr;
 

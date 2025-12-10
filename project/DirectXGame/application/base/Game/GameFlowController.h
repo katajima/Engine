@@ -32,6 +32,9 @@ private:
 private: // 
 	// ゲームイベント制御クラス
 	std::unique_ptr<GameEventController> gameEventController_ = nullptr;
+
+
+
 	// ゲームプレイデータ
 	GamePlayData gamePlayData_;
 

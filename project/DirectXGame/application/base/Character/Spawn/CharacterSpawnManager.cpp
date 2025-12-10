@@ -17,12 +17,12 @@ void CharacterSpawnManager::Update() {
 
 void CharacterSpawnManager::AddCharacterSpawn(const SpawnInfo& info)
 {
-	if(characterSpawns_.contains(info.name_)){ return;}
+	if(characterSpawns_.contains(info.GetData().name_)){ return;}
 
 	// キャラクタースポーン位置追加
 	std::unique_ptr<CharacterSpawn> spawn = std::make_unique<CharacterSpawn>();
 	spawn->Initialize(characterManager_, lineCommon_, info);
-	characterSpawns_[info.name_] = std::move(spawn);
+	characterSpawns_[info.GetData().name_] = std::move(spawn);
 }
 
 CharacterSpawn* CharacterSpawnManager::GetCharacterSpawn(const std::string& name)

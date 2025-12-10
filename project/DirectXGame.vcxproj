@@ -132,6 +132,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputMapper.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp" />

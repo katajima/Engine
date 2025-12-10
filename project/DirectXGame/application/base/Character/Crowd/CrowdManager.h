@@ -79,7 +79,7 @@ public:
 	bool isDed = false;						// 死んでいるか
 
 	float attackDelayTimer_ = 0.0f;			// 攻撃前の準備タイマー
-	float engageDistance_ = 20.0f;			// 攻撃を検討し始める距離
+	float engageDistance_ = 200.0f;			// 攻撃を検討し始める距離
 	float attackRange_ = 7.5f;				// 実際に攻撃できる距離
 
 	// 表示用：インスタンスバッファに書き込むデータ
