@@ -17,6 +17,7 @@
     └── └── └── └── ├── Combo/
     └── └── └── └── └── ├── ComboData.cpp
     └── └── └── └── └── ├── ComboData.h
+    └── └── └── └── └── ├── ComboGlobalData.h
     └── └── └── └── └── ├── ComboState.cpp
     └── └── └── └── └── ├── ComboState.h
     └── └── └── └── └── ├── ComboSystem.cpp
@@ -100,11 +101,6 @@
     └── └── └── └── └──     ├── NormalEnemySubState.cpp
     └── └── └── └── └──     └── NormalEnemySubState.h
     └── └── └── └── ├── Player/
-    └── └── └── └── └── ├── Bullet/
-    └── └── └── └── └── └── ├── BulletPlayer.cpp
-    └── └── └── └── └── └── ├── BulletPlayer.h
-    └── └── └── └── └── └── ├── BulletPlayerState.cpp
-    └── └── └── └── └── └── └── BulletPlayerState.h
     └── └── └── └── └── └── Normal/
     └── └── └── └── └──     ├── NormalPlayer.cpp
     └── └── └── └── └──     ├── NormalPlayer.h
@@ -121,6 +117,13 @@
     └── └── └── ├── Effect/
     └── └── └── └── ├── Effect.cpp
     └── └── └── └── └── Effect.h
+    └── └── └── ├── Game/
+    └── └── └── └── ├── GameData.h
+    └── └── └── └── ├── GameEventController.cpp
+    └── └── └── └── ├── GameEventController.h
+    └── └── └── └── ├── GameFlowController.cpp
+    └── └── └── └── ├── GameFlowController.h
+    └── └── └── └── └── GameWave.h
     └── └── └── ├── Input/
     └── └── └── └── ├── InputHander.cpp
     └── └── └── └── ├── InputHander.h
@@ -155,9 +158,6 @@
     └── └── └── └── ├── RangeBombingSpecial.cpp
     └── └── └── └── └── RangeBombingSpecial.h
     └── └── └── ├── Stage/
-    └── └── └── └── ├── Manager/
-    └── └── └── └── └── ├── StageEventManager.cpp
-    └── └── └── └── └── └── StageEventManager.h
     └── └── └── └── ├── Stage.cpp
     └── └── └── └── └── Stage.h
     └── └── └── ├── State/
@@ -909,8 +909,8 @@ void GlobalVariables::LoadFile(const std::string& groupName) {
 /// </summary>
 void GlobalVariables::Update() {
 #ifdef _DEBUG
-	ImGui::Begin("GlobalVariables", nullptr, ImGuiWindowFlags_MenuBar);
-	ImGui::BeginMenuBar();
+	ImGui::Begin("GlobalVariables"/*, nullptr, ImGuiWindowFlags_MenuBar*/);
+	//ImGui::BeginMenuBar();
 
 	static std::pair<std::string, std::string> pendingDeleteItem;
 	static bool confirmDelete = false;
@@ -969,41 +969,41 @@ void GlobalVariables::Update() {
 				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
 			}
 
-			// 複製ボタン
-			ImGui::SameLine();
-			if (ImGui::SmallButton("複製")) {
-				// 複製先のキー名を生成
-				std::string baseKey = itemName;
-				// ユニークキー生成（重複チェックと連番付与）
-				std::string newKey = MakeUniqueKey(baseKey, group);
+			//// 複製ボタン
+			//ImGui::SameLine();
+			//if (ImGui::SmallButton("複製")) {
+			//	// 複製先のキー名を生成
+			//	std::string baseKey = itemName;
+			//	// ユニークキー生成（重複チェックと連番付与）
+			//	std::string newKey = MakeUniqueKey(baseKey, group);
 
-				if (!DuplicateItem(groupName, itemName, groupName, newKey)) {
-					// 複製失敗時の対応（ログ出力や警告表示など）
-				}
-			}
+			//	if (!DuplicateItem(groupName, itemName, groupName, newKey)) {
+			//		// 複製失敗時の対応（ログ出力や警告表示など）
+			//	}
+			//}
 
-			// 削除ボタン + 確認
-			ImGui::SameLine();
-			if (pendingDeleteItem.first == groupName && pendingDeleteItem.second == itemName && confirmDelete) {
-				ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "削除しますか？");
-				ImGui::SameLine();
-				if (ImGui::SmallButton("はい")) {
-					itemsToRemove.emplace_back(groupName, itemName);
-					confirmDelete = false;
-					pendingDeleteItem = {};
-				}
-				ImGui::SameLine();
-				if (ImGui::SmallButton("いいえ")) {
-					confirmDelete = false;
-					pendingDeleteItem = {};
-				}
-			}
-			else {
-				if (ImGui::SmallButton("×")) {
-					pendingDeleteItem = { groupName, itemName };
-					confirmDelete = true;
-				}
-			}
+			//// 削除ボタン + 確認
+			//ImGui::SameLine();
+			//if (pendingDeleteItem.first == groupName && pendingDeleteItem.second == itemName && confirmDelete) {
+			//	ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "削除しますか？");
+			//	ImGui::SameLine();
+			//	if (ImGui::SmallButton("はい")) {
+			//		itemsToRemove.emplace_back(groupName, itemName);
+			//		confirmDelete = false;
+			//		pendingDeleteItem = {};
+			//	}
+			//	ImGui::SameLine();
+			//	if (ImGui::SmallButton("いいえ")) {
+			//		confirmDelete = false;
+			//		pendingDeleteItem = {};
+			//	}
+			//}
+			//else {
+			//	if (ImGui::SmallButton("×")) {
+			//		pendingDeleteItem = { groupName, itemName };
+			//		confirmDelete = true;
+			//	}
+			//}
 
 			ImGui::PopID();
 		}
@@ -1023,7 +1023,7 @@ void GlobalVariables::Update() {
 		ImGui::EndMenu();
 	}
 
-	ImGui::EndMenuBar();
+	//ImGui::EndMenuBar();
 	ImGui::End();
 
 
@@ -1308,8 +1308,10 @@ namespace GvFanction {
 File Path: project/DirectXGame/application/base/Attack/AttackController.cpp
 ============================================================
 #include "AttackController.h"
+#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 
-void AttackController::Initialize(Entity3DManager* entity3DManager, CharacterParameterComponent* base, BaseCharacter* owner) {
+void AttackController::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, CharacterParameterComponent* base, BaseCharacter* owner) {
+	this->globalVariables = globalVariables;
 
 	// ダメージ計算用ステータスの初期化
 	combatStat_ = std::make_unique<CombatStat>();
@@ -1320,7 +1322,7 @@ void AttackController::Initialize(Entity3DManager* entity3DManager, CharacterPar
 
 	// コンボシステムの初期化
 	comboSystem_ = std::make_unique<ComboSystem>();
-	comboSystem_->Initialize(owner);
+	comboSystem_->Initialize(owner,globalVariables);
 
 	// ヒットボックスシステム
 	hitBoxSystem_ = std::make_unique<HitBoxSystem>();
@@ -1353,6 +1355,7 @@ class CharacterParameterComponent;
 class BaseCharacter;
 class BaseWeapon;	
 class Entity3DManager;
+class GlobalVariables;
 
 /// <summary>
 /// 攻撃を管理するクラス。
@@ -1360,11 +1363,11 @@ class Entity3DManager;
 class AttackController {
 public:
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager,CharacterParameterComponent* base, BaseCharacter* owner);
+	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables,CharacterParameterComponent* base, BaseCharacter* owner);
 	// 更新
 	void Update(float dt);
 
-
+	
 public:
 	// 攻撃ヒットカウンタークラス取得
 	HitCounter& GetHitCounter() { return hitCounter_; }
@@ -1394,6 +1397,9 @@ private:
 private:
 	// 攻撃中か
 	bool isAttack_ = false;
+private:
+	GlobalVariables* globalVariables = nullptr;
+
 };
 
 
@@ -1521,17 +1527,18 @@ void AirStickData::Update(float dt) {
 #pragma endregion // エアスティックデータ
 
 #pragma region DamageData
-
 // 更新
 void DamageData::Update(float dt) {
 	switch (type)
 	{
 	case DamageData::kOne:
-
+		one.Update(dt);
 		break;
 	case DamageData::kContinuous:
+		continuous.Update(dt);
 		break;
 	case DamageData::kDuration:
+		duration.Update(dt);
 		break;
 	default:
 		break;
@@ -1603,7 +1610,7 @@ bool DamageData::IsAttack()
 #pragma region One
 // 更新
 void DamageData::One::Update(float dt) {
-
+	isFinish = true;
 }
 // ダメージ取得
 float DamageData::One::GetDamage() const {
@@ -1692,7 +1699,9 @@ float DamageData::Continuous::GetDamage() const
 
 #pragma region 
 
-void AttackData::Update(float dt) {
+void AttackReactionData::Update(float dt) {
+	airStickData.Update(dt);// 空中・地上固定データ更新
+	hitStopData.Update(dt);	// ヒットストップデータ更新
 	knockback.Update(dt);	// ノックバックデータ更新
 	damageData.Update(dt);	// ダメージデータ更新
 }
@@ -1885,7 +1894,6 @@ private:
 	Data data_;
 };
 
-
 /// ダメージデータ
 class DamageData {
 public:
@@ -1997,6 +2005,15 @@ public:
 	bool IsAttack();
 
 
+	// 一撃
+	One& GetOne() { return one; }
+
+	// 連撃
+	Continuous& GetContinuous() { return continuous; }
+
+	// 持続
+	Duration& GetDuration() { return duration; }
+
 private:
 	Type type = Type::kOne;		// ダメージの与え方;
 	Continuous continuous{};	// 連撃ダメージデータ
@@ -2005,9 +2022,9 @@ private:
 	float damage = 0;			// ダメージ
 };
 
-/// 攻撃データ
-struct AttackData {
-
+/// 攻撃リアクションデータ
+class AttackReactionData {
+public:
 
 	/// <summary>
 	/// 更新
@@ -2015,10 +2032,30 @@ struct AttackData {
 	/// <param name="dt"></param>
 	void Update(float dt);
 
-	
+public: // 読み取り
+	// ノックバックデータ取得
+	const KnockbackData& GetKnockbackData() const { return knockback; }
+	// ヒットストップデータ取得
+	const HitStopData& GetHitStopData() const { return hitStopData; }
+	// 空中・地上固定データ取得
+	const AirStickData& GetAirStickData() const { return airStickData; }
+	// ダメージデータ取得
+	const DamageData& GetDamageData() const { return damageData; }
 
+public: // 書き換え
+	// ノックバックデータ取得
+	KnockbackData& GetKnockbackData() { return knockback; }
+	// ヒットストップデータ取得
+	HitStopData& GetHitStopData() { return hitStopData; }
+	// 空中・地上固定データ取得
+	AirStickData& GetAirStickData() { return airStickData; }
+	// ダメージデータ取得
+	DamageData& GetDamageData() { return damageData; }
 
+private:
 	KnockbackData knockback;	// ノックバックデータ
+	HitStopData hitStopData;	// ヒットストップデータ
+	AirStickData airStickData;	// 空中・地上固定データ
 	DamageData damageData;		// ダメージデータ
 };
 
@@ -2059,9 +2096,11 @@ bool ComboSequence::Update(const Input& input, float deltaTime) {
 		currentIndex_++;
 		// 全て成功
 		if (currentIndex_ >= comboButtons_.size()) {
+			currentIndex_ = 0;
 			return true;
 		}
 	}
+	currentIndex_ = 0;
 	return false;
 }
 #pragma endregion // コンボボタン
@@ -2069,36 +2108,79 @@ bool ComboSequence::Update(const Input& input, float deltaTime) {
 
 #pragma region ComboCondition
 
-void ComboCondition::Update(const Input& input, float dt) {
-	// 時間加算
-	timer_ += dt;
-
-
-	bool isStart = data_.inputWindowStart_ <= timer_;	// 受付開始時間を過ぎたら
-	bool isEnd = data_.inputWindowEnd_ >= timer_;			// 受付終了時間より前なら
+void ComboCondition::Update(const Input& input, float timer, float dt) {
+	bool isStart = inputData_.inputWindowStart_ <= timer;		// 受付開始時間を過ぎたら
+	bool isEnd = inputData_.inputWindowEnd_ >= timer;			// 受付終了時間より前なら
 
 	// 受付時間内なら
 	if (isStart && isEnd) {
 
-		// ボタン条件を満たしているなら
-		isNextCombo_ = data_.comboSequence_.Update(input, dt);
+		// まだ移行フラグがONではなくボタン条件を満たしているなら移行させるフラグをONに
+		if (!isNextCombo_) {
+			isNextCombo_ = inputData_.comboSequence_.Update(input, dt);
+		}
 
-		// 強制的にコンボに移行
-		if (data_.isCompulsionNextCombo_) {
+		// 強制的にコンボに移行フラグNOに
+		if (inputData_.isCompulsionNextCombo_) {
 			isNextCombo_ = true;
 		}
 	}
+
+	// 終了処理
+	EndComboUpdate(input, timer, dt);
+
 }
 
-void ComboCondition::Enter() {
-	timer_ = 0.0f;
+void ComboCondition::Enter(BaseCharacter* owner) {
+	jumpSystem = owner->GetMoveComponent()->GetJumpSystem();
 	isNextCombo_ = false;
+	endTime_ = data_.stateEndTime;
+	nextTime_ = data_.stateNextTime;
+	isPress_ = true;
 };
 
 void ComboCondition::Exit() {
-	timer_ = 0.0f;
 	isNextCombo_ = false;
-};
+	isPress_ = false;
+}
+
+void ComboCondition::EndComboUpdate(const Input& input, float timer, float dt) {
+	// 終了タイプ
+	switch (data_.type)
+	{
+	case ComboCondition::EndConditionType::kOnGround:	// 着地したら
+		if (!jumpSystem->GetIsLanding()) {
+			endTime_ += dt;
+			nextTime_ += dt;
+		}
+		break;
+	case ComboCondition::EndConditionType::kOnButtonRelease:	// 押し続けているなら
+		if (data_.button_.IsPressed(input)) {
+			if (isPress_) {
+				endTime_ += dt;
+				nextTime_ += dt;
+			}
+		}
+		else {
+			isPress_ = false;
+		}
+		break;
+	case ComboCondition::EndConditionType::kOnMeterEmpty:	// 何かのメータが空なら
+
+		break;
+	case ComboCondition::EndConditionType::kOnTimer:	// 時間が過ぎたら
+		endTime_ = data_.stateEndTime;
+		break;
+	case ComboCondition::EndConditionType::kOnHit:	// 何かに当たったら
+
+		break;
+	case ComboCondition::EndConditionType::kManual:	// 特殊
+
+		break;
+	default:
+		break;
+	}
+}
 
 #pragma endregion // コンボ条件
 
@@ -2106,62 +2188,93 @@ void ComboCondition::Exit() {
 #pragma region ComboMotion
 
 // 開始
-void ComboMotion::Enter() {
-	timer_ = 0;			// 時間を初期化
+void ComboMotion::Enter(BaseCharacter* owner) {
 	isMove_ = false;	// 移動しない
+
+	// アニメーションの設定
+	AnimationComponent* anima = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	SetAnimation(anima);
+	SetMove(owner->GetMoveComponent());
+	SetWorld(&owner->GetObjectComponent()->GetWorldTransform());
+	SetRigid(owner->GetObjectComponent()->GetRigidBodyComponent());
+
 	// アニメーション設定
 	animationComponent->SetAnimetion(data_.animationName_, 0.0f);	// 再生するアニメーション設定
-	animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
+	animationComponent->SetStratAnimeTime();						// アニメーション時間初期化
 	animationComponent->SetIsLoop(data_.animationLoop_);			// ループ再生
 	animationComponent->SetAnimationSpeed(data_.animationSpeed_);	// アニメーションスピード設定
-	animationComponent->SetIsPlaying(true);					// アニメーション再生
+	animationComponent->SetIsPlaying(true);							// アニメーション再生
+
+
+
+	// 方向指定
+	Vector2 velo = owner->GetInput()->GetGamePadLeftStick();
+	if (velo.Length() != 0.0f) {
+		direction_ = { velo.x,0.0f,velo.y };
+	}
+	else {
+		direction_ = moveComponent->GetMoveSystem()->GetDirection();
+	}
+	// 方向
+	moveComponent->GetMoveSystem()->CameraDirectionToMoveDirection(direction_);
+	
+	// 回転
+	owner->GetMoveComponent()->GetMoveSystem()->AttackProcess(owner->GetWorldTransform(),direction_);
+
+	// 座標更新
+	owner->GetWorldTransform().Update();
 }
 
 // 更新
-void ComboMotion::Update(const Input& input, float dt) {
-
-	// 時間加算
-	timer_ += dt;
-
-	bool isStart = data_.moveWindowStart_ <= timer_;		// 受付開始時間を過ぎたら
-	bool isEnd = data_.moveWindowEnd_ >= timer_;			// 受付終了時間より前なら
+void ComboMotion::Update(const Input& input, float timer, float dt) {
+	bool isStart = data_.moveWindowStart_ <= timer;		// 受付開始時間を過ぎたら
+	bool isEnd = data_.moveWindowEnd_ >= timer;			// 受付終了時間より前なら
 
 	// ゲームパッドの左スティックを動かしているか
 	bool isMoveStick = input.GetGamePadLeftStick().Length() != 0;
 
-	// 受付時間内なら
-	if (isStart && isEnd) {
+	// アニメーションスピード設定
+	animationComponent->SetAnimationSpeed(data_.animationSpeed_);
 
+	// 移動可能か
+	moveComponent->GetMoveSystem()->SetIsAttackCanMove(IsMove());
+
+	// 受付時間内なら
+	// 強制的に移動
+	if (data_.isCompulsionMove_) {
+		isMove_ = true;
+	}
+	else {
 		// 動かしていたら
 		if (isMoveStick) {
 			isMove_ = true;
 		}
-
-
-		// 強制的に移動
-		if (data_.isCompulsionMove_) {
-			isMove_ = true;
-		}
-	}
-	else {
-		isMove_ = false;
 	}
 
+	// 移動
+	if (isMove_ && isStart && isEnd) {
+		worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+	}
 
+	// 重力の設定
+	if (!data_.isGravity_) {
+		rigidBodyComponent->Velocity().y = 0;
+	}
+	rigidBodyComponent->SetGravityScale(data_.gravityScale_);
+	rigidBodyComponent->SetIsGravity(data_.isGravity_);
+
+	// 移動可能なら
 	if (isMove_) {
 		moveComponent->SetCanMove(true);				// 前進する
 	}
-
 }
 
 // 終了
-void ComboMotion::Exit() {
-	timer_ = 0;
+void ComboMotion::Exit(BaseCharacter* owner) {
 	isMove_ = false;
-
 	animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
-	animationComponent->SetIsLoop(data_.animationLoop_);			// ループ再生
-	animationComponent->SetAnimationSpeed(data_.animationSpeed_);	// アニメーションスピード設定
+	animationComponent->SetIsLoop(data_.animationLoop_);	// ループ再生
+	animationComponent->SetAnimationSpeed(1.0f);			// アニメーションスピード設定
 	animationComponent->SetIsPlaying(true);					// アニメーション再生
 }
 
@@ -2171,27 +2284,71 @@ void ComboMotion::Exit() {
 #pragma region ComboHitBox
 
 // 開始
-void ComboHitBox::Enter() {
-	timer_ = 0.0f;
+void ComboHitBox::Enter(BaseCharacter* owner) {
+	// ヒットボックスシステムを渡す
+	hitBoxSystem_ = owner->GetAttackController()->GetHitBoxSystem();
+	// ジャンプシステムを渡す
+	jumpSystem_ = owner->GetMoveComponent()->GetJumpSystem();
 }
 
 // 更新
-void ComboHitBox::Update(float dt) {
-	timer_ += dt;
+void ComboHitBox::Update(const Input& input, float timer, float dt) {
 
-	if (timer_ >= data_.hitBpxWindowStart_) {
-		if (!isPopHitBox_) {
-			hitBoxSystem_->AddHitBox(data_.hitBoxUseType_,collData_,useHitBox_,data_.lifeTime_, perent_);
-			isPopHitBox_ = true;
+
+	switch (data_.spawnType_)
+	{
+	case ComboHitBox::HitBoxSpawnType::kOnTime: // 時間経過で
+		if (timer >= data_.hitBpxWindowStart_) {
+			if (!isPopHitBox_) {
+				hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+				isPopHitBox_ = true;
+			}
 		}
+		break;
+	case ComboHitBox::HitBoxSpawnType::kOnGround: // 着地したら
+		if (jumpSystem_->GetIsLanding()) {
+			if (!isPopHitBox_) {
+				hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+				isPopHitBox_ = true;
+			}
+		}
+		break;
+	case ComboHitBox::HitBoxSpawnType::kOnAir:
+		break;
+	case ComboHitBox::HitBoxSpawnType::kOnButtonRelease: // ボタンを離したら
+		if (button_.IsReleased(input)) {
+			if (!isPopHitBox_) {
+				hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+				isPopHitBox_ = true;
+			}
+		}
+		break;
+	default:
+		break;
 	}
+
+
+
 }
 
 // 終了
 void ComboHitBox::Exit() {
 	isPopHitBox_ = false;
-	timer_ = 0.0f;
+
 }
+
+void ComboHitBox::AddCollider(const HitBoxCollData& hitBoxData, const ComboGlovalData& combo) {
+	HitBoxCollData data = hitBoxData;
+
+	// リアクションデータ
+	data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
+	data.reactionData.GetKnockbackData().GetData().power_ = combo.reaction.knockbackPower;
+	data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.reaction.knockbackPowerY;
+	data.reactionData.GetKnockbackData().GetData().duration_ = combo.reaction.knockbackDuration_;
+	data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.reaction.isVerticalBoost_;
+
+	collData_.push_back(data);
+};
 
 #pragma endregion // コンボヒットボックス
 
@@ -2199,51 +2356,95 @@ void ComboHitBox::Exit() {
 #pragma region ComboCamera
 
 // 開始
-void ComboCamera::Enter() {
-	timer_ = 0.0f;
-}
+void ComboCamera::Enter() {}
 
 // 更新
-void ComboCamera::Update(float dt) {
-	timer_ += dt;
-
-
-
+void ComboCamera::Update(float timer, float dt) {
 
 }
 
 // 終了
-void ComboCamera::Exit() {
-	timer_ = 0.0f;
-}
+void ComboCamera::Exit() {}
 
 #pragma endregion // コンボカメラ
+
+
+#pragma region ComboEffect
+
+// 開始
+void ComboEffect::Enter(BaseCharacter* owner) {
+	// 武器情報取得
+	weapon = owner->GetWeapon();
+	// トレイル終了
+	weapon->GetObject3D()->isEmitTrailEffect = false;
+}
+
+// 更新
+void ComboEffect::Update(float timer, float dt) {
+	// トレイル使用可能か
+	bool isTrail = false;
+	if (IsEffectTrail(timer)) { isTrail = true; }
+	// トレイルを出すか設定
+	weapon->GetObject3D()->isEmitTrailEffect = isTrail;
+}
+
+// 終了
+void ComboEffect::Exit(BaseCharacter* owner) {
+	// トレイル終了
+	weapon->GetObject3D()->isEmitTrailEffect = false;
+}
+
+#pragma endregion //コンボエフェクト
 
 
 #pragma region ComboData
 
 // 開始
-void ComboData::Enter() {
-	comboCondition.Enter();					// コンボ用条件クラス開始
-	motion.Enter();							// コンボ用モーションクラス開始
-	camera.Enter();							// コンボ用カメラクラス開始
-	hitBox.Enter();							// コンボ用ヒットボックスクラス開始
+void ComboData::Enter(BaseCharacter* owner) {
+	// 時間初期化
+	timer_ = 0.0f;
+	// コンボ用モーションクラス開始
+	motion.Enter(owner);
+	// コンボ用条件クラス開始
+	comboCondition.Enter(owner);
+	// コンボ用カメラクラス開始
+	camera.Enter();
+	// コンボ用ヒットボックスクラス開始
+	hitBox.Enter(owner);
+	// コンボ用エフェクトクラス開始
+	effect.Enter(owner);
 }
 
 // 更新
 void ComboData::Update(const Input& input, float dt) {
-	comboCondition.Update(input, dt);		// コンボ用条件クラス更新
-	motion.Update(input, dt);				// コンボ用モーションクラス更新
-	camera.Update(dt);						// コンボ用カメラクラス更新
-	hitBox.Update(dt);						// コンボ用ヒットボックスクラス更新
+	// 時間更新
+	timer_ += dt;
+	// コンボ用モーションクラス更新
+	motion.Update(input, timer_, dt);
+	// コンボ用条件クラス更新
+	comboCondition.Update(input, timer_, dt);
+	// コンボ用カメラクラス更新
+	camera.Update(timer_, dt);
+	// コンボ用ヒットボックスクラス更新
+	hitBox.Update(input, timer_, dt);
+	// コンボ用エフェクトクラス更新
+	effect.Update(timer_, dt);
 }
 
 // 終了
-void ComboData::Exit() {
-	comboCondition.Exit();					// 条件クラス終了
-	motion.Exit();							// コンボ用モーションクラス終了
-	camera.Exit();							// コンボ用カメラクラス終了
-	hitBox.Exit();							// コンボ用ヒットボックスクラス終了
+void ComboData::Exit(BaseCharacter* owner) {
+	// 時間リセット
+	timer_ = 0.0f;
+	// コンボ用モーションクラス終了
+	motion.Exit(owner);
+	// 条件クラス終了
+	comboCondition.Exit();
+	// コンボ用カメラクラス終了
+	camera.Exit();
+	// コンボ用ヒットボックスクラス終了
+	hitBox.Exit();
+	// コンボ用エフェクトクラス終了
+	effect.Exit(owner);
 }
 
 #pragma endregion // コンボデータ
@@ -2255,12 +2456,16 @@ File Path: project/DirectXGame/application/base/Attack/Combo/ComboData.h
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
+#include "ComboGlobalData.h"
 
 // 前方宣言
-class AnimationComponent;
-class MovementComponent;
-class CameraManager;
-
+class AnimationComponent;	// アニメーション
+class MovementComponent;	// 移動関係
+class CameraManager;		// カメラ
+class BaseCharacter;		// キャラクター
+class RigidBodyComponent;	// リジットボディー
+class BaseWeapon;			// 武器
+class JumpSystem;			// ジャンプシステム
 
 /// <summary>
 /// コンボ条件ボタン
@@ -2331,6 +2536,8 @@ public:
 		}
 	}
 
+	// どのボタンに反応するか
+	void SetGamePadButton(GamePadButton button) { button_ = button; };
 
 private:
 	GamePadButton button_;
@@ -2353,6 +2560,8 @@ public:
 	/// </summary>
 	bool Update(const Input& input, float deltaTime);
 
+
+
 private:
 	std::vector<ComboButton> comboButtons_;
 	size_t currentIndex_ = 0;
@@ -2362,46 +2571,89 @@ private:
 // コンボ受付条件クラス
 class ComboCondition {
 public:
-	struct Data
+	
+	// 終了条件タイプ
+	enum class EndConditionType {
+		kOnGround,			// 着地したら
+		kOnButtonRelease,	// ボタンを離したら
+		kOnMeterEmpty,		// メータが空になったら
+		kOnTimer,			// 時間が過ぎたら
+		kOnHit,				// 何かに当たったら
+		kManual,			// 特殊ケース
+	};
+
+
+	// データ構造体
+	struct InputData
 	{
 		float inputWindowStart_ = 0.1f;			// 入力受付スタート
 		float inputWindowEnd_ = 0.5f;			// 入力受付エンド
 
-		float stateEndTime = 0.5f;				// 終了時間
-		float stateNextTime = 0.45f;			// 移行時間
-
 		bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
 		ComboSequence comboSequence_;			// コンボボタン条件
-		float staminaCost = 0;					// スタミナ消費量
-		float mpCost = 0;                       // MP消費
+	};
+
+	// 終了条件データ
+	struct EndData {
+		float stateEndTime = 0.5f;				// 終了時間
+		float stateNextTime = 0.45f;			// 移行時間
+		ComboButton button_;					// コンボボタン
+		EndConditionType type = EndConditionType::kOnTimer;	// 終了条件タイプ
 	};
 
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(const Input& input, float dt);
+	void Update(const Input& input,float timer ,float dt);
 
 	// 終了
 	void Exit();
 
-	// 次のコンボに移行するか
-	bool IsNextCombo() const { return isNextCombo_; };
-
+private:
+	// 終了条件設定
+	void EndComboUpdate(const Input& input,float timer, float dt);
+public: //設定
 	// コンボ条件発動時間設定
 	void ConditionStartEnd(float start, float end) {
-		data_.inputWindowStart_ = start;
-		data_.inputWindowEnd_ = end;
+		inputData_.inputWindowStart_ = start;
+		inputData_.inputWindowEnd_ = end;
 	};
+public: // 取得
 
+	// 次のコンボ移行する時間
+	float GetComboNextTime() const { return nextTime_; }
+	// コンボ終了時間
+	float GetComboEndTime() const { return endTime_; }
+	// コンボ入力受付開始時間
+	float GetComboInputStart() const { return inputData_.inputWindowStart_; }
+	// コンボ入力受付終了時間
+	float GetComboInputEnd() const { return inputData_.inputWindowEnd_; }
+	// コンボ受付可能か
+	bool IsComdoInputWindow(float timer) const {
+		return timer >= GetComboInputStart() && timer <= GetComboInputEnd();
+	};
+	// 次のコンボに移行するか
+	bool IsNextCombo() const { return isNextCombo_; };
+public:
 	// データ構造体取得
-	Data& GetData() { return data_; }
+	EndData& GetData() { return data_; }
+	// 入力受付データ構造体取得
+	InputData& GetInput() { return inputData_; }
+private:
+	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
+	float endTime_ = 0.0f;				// コンボ終了時間
+	float nextTime_ = 0.0f;				// 次のコンボ移行時間
+	EndData data_{ 0.5f ,0.45f ,ComboButton(GamePadButton::GAMEPAD_B,ComboButtonInputType::kPressed)};// コンボ終了データ
+	InputData inputData_;				// コンボ入力受付データ
+
+
+	bool isPress_ = false;
 
 private:
-	float timer_ = 0.0f;				// 時間
-	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
-	Data data_;
+	JumpSystem* jumpSystem = nullptr;
+
 };
 
 /// <summary>
@@ -2414,12 +2666,12 @@ public:
 	{
 		float moveWindowStart_ = 0.1f;			// 移動受付スタート
 		float moveWindowEnd_ = 0.5f;			// 移動受付エンド
-		float speed_ = 0;						// 移動速度
+		float speed_ = 0.0f;					// 移動速度
 
 		bool isCompulsionMove_ = true;			// 強制的に移動
-		bool isCompulsionDirection_ = false;	// 強制方向に移動
-
+		
 		bool isGravity_ = true;					// 空中でのコンボで重力はあるか？
+		float gravityScale_ = 1.0f;				// 重力スケール
 
 		// アニメーション
 		std::string animationName_ = "no";		// アニメーション名前
@@ -2428,13 +2680,15 @@ public:
 	};
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(const Input& input, float dt);
+	void Update(const Input& input, float timer, float dt);
 
 	// 終了
-	void Exit();
+	void Exit(BaseCharacter* owner);
+
+public: // 取得 or 設定
 
 	// 移動できるか
 	bool IsMove() const { return isMove_; }
@@ -2454,17 +2708,27 @@ public:
 	// ワールドトランスフォーム設定
 	void SetWorld(WorldTransform* world) { worldTransform = world; };
 
+	// リジットボディー設定
+	void SetRigid(RigidBodyComponent* rigid) { rigidBodyComponent = rigid; };
+
 	// データ構造体取得
 	Data& GetData() { return data_; }
 
+	// 反応ボタン設定
+	void SetGamePadButton(GamePadButton pad) { button_.SetGamePadButton(pad); };
+
 private:
-	float timer_ = 1.0f;					// コンボ時に移動する時間
 	bool isMove_ = true;					// 移動出来るか
 	Data data_;
+	ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed); // コンボボタン
+	
+private:
+	Vector3 direction_ ={};
 private: // 貰いもの 
-	AnimationComponent* animationComponent;	// アニメーション
-	MovementComponent* moveComponent;		// 移動
-	WorldTransform* worldTransform;			// ワールドトランスフォーム
+	AnimationComponent* animationComponent = nullptr;	// アニメーション
+	MovementComponent* moveComponent = nullptr;			// 移動
+	WorldTransform* worldTransform = nullptr;			// ワールドトランスフォーム
+	RigidBodyComponent* rigidBodyComponent = nullptr;	// リジットボディー
 };
 
 /// <summary>
@@ -2473,13 +2737,13 @@ private: // 貰いもの
 class ComboHitBox {
 public:
 
-	// ヒットボックスのタイプ
-	enum class Type {
-		kWeapom,		// 武器追従型
-		kFrontArea,		// 前方判定
-		kIndependent,	// 独立(飛び道具など)
-		kLockOnArea,	// ターゲット位置
+	enum class HitBoxSpawnType {
+		kOnTime,			// 時間で発生
+		kOnGround,		// 着地で発生
+		kOnAir,			// 空中から発生
+		kOnButtonRelease,// ボタンを離したら
 	};
+
 
 	enum class Shape {
 		kAABB,
@@ -2492,42 +2756,50 @@ public:
 	struct Data {
 		float hitBpxWindowStart_ = 1.0f;		// ヒットボックス生成スタート
 		float lifeTime_ = 1.0f;					// ヒットボックス生存時間
-
-		HitBoxUseType hitBoxUseType_;			// ヒットボックス使用者タイプ
+		// ヒットボックス使用者タイプ
+		HitBoxUseType hitBoxUseType_;			
+		// ヒットボックスの発生条件タイプ
+		HitBoxSpawnType spawnType_ = HitBoxSpawnType::kOnTime;	
+		// ヒットボックス依存先タイプ
+		HitBoxSystem::Type dependenceType_ = HitBoxSystem::Type::kParent;
+		// オフセット
+		Vector3 offset_{};
 	};
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(float dt);
+	void Update(const Input& input, float timer,float dt);
 
 	// 終了
 	void Exit();
 
+
+public:
+
 	// データ取得
 	Data& GetData() { return data_; }
 	// コライダーデータ追加
-	void AddCollider(HitBoxCollData data) { collData_.push_back(data); };
+	void AddCollider(const HitBoxCollData& hitBoxData, const ComboGlovalData& reaction);
 	// 使うヒットボックス名設定
 	void AddUseHitBox(const std::string& name) { useHitBox_.push_back(name); };
 	// 使うヒットボックス名クリーン
 	void ClearUseHitBox() { useHitBox_.clear(); }
-	// ヒットボックスシステム取得
-	void SetHitBoxSystem(HitBoxSystem* system) { hitBoxSystem_ = system; };
 	// 親子設定
 	void SetPerent(WorldTransform* perent) { perent_ = perent;};
 
 private:
 	// ヒットボックスシステム
 	HitBoxSystem* hitBoxSystem_ = nullptr;
+	// ジャンプシステム
+	JumpSystem* jumpSystem_ = nullptr;
 	// 親子
 	WorldTransform* perent_ = nullptr;
 private:
+	ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed); // コンボボタン
 	// ヒットボックスデータ
 	Data data_;
-	// ヒットボックスタイプ
-	Type type_;
 	// コライダーデータ
 	std::vector<HitBoxCollData> collData_;
 	
@@ -2535,8 +2807,6 @@ private:
 	std::vector<std::string> useHitBox_;
 
 private:
-	// 時間
-	float timer_ = 0.0f;
 	// ヒットボックス出現
 	bool isPopHitBox_ = false;
 	
@@ -2560,7 +2830,7 @@ public:
 	void Enter();
 
 	// 更新
-	void Update(float dt);
+	void Update(float timer,float dt);
 
 	// 終了
 	void Exit();
@@ -2572,7 +2842,6 @@ public:
 	Data& GetData();
 
 private:
-	float timer_ = 0.0f;					// 時間
 	Data data_;
 	CameraManager* cameraManager = nullptr;	// カメラ管理
 };
@@ -2584,27 +2853,35 @@ class ComboEffect {
 public:
 	struct Data {
 		// 開始時間
-		float startTmer  = 0.0f;
-		// 終了時間
-		float endTime = 0.5f;
-
-
+		float startTmer  = 0.1f;
+		// 生存時間
+		float lifeTime = 0.5f;
 	};
 
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(float dt);
+	void Update(float timer, float dt);
 
 	// 終了
-	void Exit();
+	void Exit(BaseCharacter* owner);
 
+	// トレイルするか
+	bool IsEffectTrail(float timer) const {
+		return data_.startTmer <= timer && timer <= (data_.lifeTime + data_.startTmer);
+	}
+
+
+	// データ取得
+	Data& GetData() { return data_; }
 
 private:
-	float timer_ = 0.0f;
+	Data data_;
 
+
+	BaseWeapon* weapon = nullptr;
 };
 
 // コンボデータ
@@ -2612,18 +2889,21 @@ class ComboData {
 public:
 
 	// 開始
-	void Enter();
+	void Enter(BaseCharacter* owner);
 
 	// 更新
 	void Update(const Input& input, float dt);
 
 	// 終了
-	void Exit();
+	void Exit(BaseCharacter* owner);
 
 	ComboCondition comboCondition{};		// コンボ条件クラス
 	ComboMotion motion{};					// コンボ用モーションクラス
 	ComboCamera camera{};					// コンボ用カメラクラス
 	ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
+	ComboEffect effect{};					// コンボ用エフェクト
+private:
+	float timer_ = 0.0f;					// 時間
 };
 
 
@@ -2631,6 +2911,59 @@ public:
 
 
 
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/ComboGlobalData.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/struct/Structs3D.h>
+
+
+
+
+// 保存項目用コンボデータ
+struct ComboGlovalData {
+	float hitBoxWindowStart_ = 0.0f;	// ヒットボックスの生成タイミング時間
+	float hitBoxLifeTime_ = 0.5f;		// ヒットボックスの生存時間
+	Vector3 offsetPos_ = {};			// コライダー位置
+	Vector3 colliderSize = { 1.0f,1.0f,1.0f };	// コライダーサイズ
+
+	// 敵に送るリアクションデータ
+	struct Reaction {
+		float knockbackDuration_ = 0.1f;	// ノックバック持続時間
+		float knockbackPower = 30.0f;		// ノックバックパワー
+		float knockbackPowerY = 30.0f;		// ノックバックY方向パワー
+		bool isVerticalBoost_ = false;		// Y方向にノックバックするか
+
+		float damage = 0;					// ダメージ
+	};
+	// リアクションデータ
+	Reaction reaction;
+
+
+	// 移動関係
+	float moveSpeed_ = 1.0;				// 移動速度
+	float moveWindowStart_ = 0.0f;		// 移動開始
+	float moveWindowEnd_ = 1.0f;		// 移動終了
+	bool  isCompulsionMove_ = true;		// 強制移動
+
+
+
+	float stateInputStartTime = 0.1f;	// 入力受付時間
+	float stateInputEndTime = 0.5f;		// 入力終了時間
+	float stateEndTime = 0.5f;			// ステート終了時間
+	float stateNextTime = 0.45f;		// ステート移行時間
+
+
+	bool isGravity = true;				// 重力はあるか？
+	float gravityScale = 1.0f;			// 重力スケール
+
+	float animationSpeed_ = 1.0f;		// アニメーションスピード
+
+
+	float trailEffectStartTime = 0.1f;	// トレイル発生時間
+	float trailEffectLifeTime = 1.0;	// トレイル生存時間
+};
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/ComboState.cpp
@@ -2644,102 +2977,45 @@ File Path: project/DirectXGame/application/base/Attack/Combo/ComboState.cpp
 
 // 開始
 void ComboNodeState::Enter(BaseCharacter* owner) {
-
+	// 時間初期化 
+	timeInState = 0.0f;
 	// アニメーションの設定
-	AnimationComponent* anima = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	comboData_.motion.SetAnimation(anima);
-	comboData_.motion.SetMove(owner->GetMoveComponent());
-	comboData_.motion.SetWorld(&owner->GetObjectComponent()->GetWorldTransform());
 	comboData_.motion.GetData().animationName_ = animation;
-
 	// コンボデータ開始
-	comboData_.Enter();								
-
-	// ヒットボックスシステムを渡す
-	comboData_.hitBox.SetHitBoxSystem(owner->GetAttackController()->GetHitBoxSystem());
-
-
-	comboData_.comboCondition.GetData().inputWindowStart_;
-
-
-	// コンボデータをコンボシステムに転送
-	owner->GetAttackController()->GetComboSystem()->SetComboData(&comboData_);
-
-	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = true; // トレイル開始
-
-	timeInState = 0.0f;	// 時間初期化 
-
-	// 終わる時間の設定
-	inputWindowStart = comboData_.comboCondition.GetData().inputWindowStart_;
-	inputWindowEnd = comboData_.comboCondition.GetData().inputWindowEnd_;
-	stateEndTime = comboData_.comboCondition.GetData().stateEndTime;
-	timeNextState = comboData_.comboCondition.GetData().stateNextTime;
-
-	// アニメーションスピード
-	animationSpeed = comboData_.motion.GetData().animationSpeed_;
-	// 重力はあるか
-	isGravity = comboData_.motion.GetData().isGravity_;
-
-	// 座標更新
-	owner->GetWorldTransform().Update();
-
-	// 方向指定
-	dire_ = owner->GetObjectComponent()->GetObject3D()->direction_;
+	comboData_.Enter(owner);
 }
 
 // 更新
-void ComboNodeState::Update(BaseCharacter* owner, float dt)
-{
+void ComboNodeState::Update(BaseCharacter* owner, float dt){
 	// 時間更新
 	timeInState += dt;
 
-	// アニメが終了 or 入力受付時間が終わって、次のステートが無ければ終了
-	bool isInputWindowOver = GetEndStateTime();
-	bool isMove = comboData_.motion.IsMove();
-	
-	// 移動可能の場合は
-	owner->GetMoveComponent()->GetMoveSystem()->SetIsAttackCanMove(isMove);
-	
-	// アニメーションスピード
-	owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimationSpeed(animationSpeed);
-
-
-	if (IsInputAcceptable()) {
-		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = true;
-	}else{
-		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
-	}
-
 	// 入力受付がないのなら終了する
-	if ((isInputWindowOver)) {
-
-		// 時間初期化
-		timeInState = 0.0f;
-		// コンボ終了 → 通常ステートに戻す
-		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
-		owner->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);  // ← BaseCharacterが持っている関数
-		owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
-	}
-	else {
-		if (!isGravity) {
-			owner->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
-		}
-		owner->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(isGravity);
+	if (GetEndStateTime()) {
+		// 終了処理
+		End(owner);
 	}
 	// コンボデータ更新
 	comboData_.Update(*owner->GetInput(), dt);
 }
 
 // 終了
-void ComboNodeState::Exit(BaseCharacter* owner)
-{
+void ComboNodeState::Exit(BaseCharacter* owner){
 	// 時間初期化
 	timeInState = 0.0f;
 	// コンボデータ終了処理
-	comboData_.Exit();
-	owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimationSpeed(1.0f);
-	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+	comboData_.Exit(owner);
 }
+
+void ComboNodeState::End(BaseCharacter* owner) {
+	// 時間初期化
+	timeInState = 0.0f;
+	// コンボ終了 → 通常ステートに戻す
+	owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+	owner->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);  // ← BaseCharacterが持っている関数
+	owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
+};
+
 
 #pragma endregion // コンボノードステート
 
@@ -2764,12 +3040,9 @@ void ComboStateMachine::Update(float dt) {
 
 	// 入力がバッファされていて、入力受付時間内なら状態遷移
 	if (bufferedInput) {
-		// 入力受付時間内に入力があれば次へ移行するのを予約
-		if (currentState->IsInputAcceptable()) {
-			isNextState = true;	// 次のステートに移行確定
-		}
-
-		if (currentState->GetNextStateTime() && isNextState) {
+		
+		// コンボ移行時間に達して次のステートへ移行するなら
+		if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
 			auto next = currentState->HandleInput(owner, *bufferedInput);
 			// もし次のステートがあれば、遷移
 			if (next) {
@@ -2818,31 +3091,23 @@ public:
     // 終了
     virtual void Exit(BaseCharacter* owner) = 0;
 
+public:
     // 次のステートに遷移するかを判断する
     virtual std::shared_ptr<ComboState> HandleInput(BaseCharacter* owner, AttackInput input) = 0;
-
     // 入力受付時間の範囲チェック
-    bool IsInputAcceptable() const {
-        return timeInState >= inputWindowStart && timeInState <= inputWindowEnd;
-    }
-   
+    virtual bool IsInputAcceptable() const = 0;
+    // 次のステートえ移行受付する時間
+    virtual float GetNextStateTime() const = 0;
+    // ステート終了時間
+    virtual float GetEndStateTime() const = 0;
+    // 次のステートへ移行可能か
+    virtual bool GetIsNextState() const = 0;
+
     // 時間
     float GetTimeInState() const { return timeInState; }
-    // 次のステートえ移行受付する時間
-    float GetNextStateTime() const { return timeInState > timeNextState; }
-    // ステート終了時間
-    float GetEndStateTime() const { return timeInState > stateEndTime; }
 
 protected:
-    float inputWindowStart = 0.1f;      // 入力受付スタート
-    float inputWindowEnd = 0.5f;        // 入力受付エンド
-    float timeNextState = 0.5f;         // ステート移行時間
-    float stateEndTime = 0.5f;          // ステート終了時間
     float timeInState = 0.0f;           // 時間
-
-
-    bool isGravity = true;              // 重力はあるか？
-    float animationSpeed = 1.0f;        // アニメーションスピード
 };
 
 
@@ -2860,6 +3125,11 @@ public:
     void Update(BaseCharacter* owner, float dt) override;
     // 終了
     void Exit(BaseCharacter* owner) override;
+
+    // 終了処理
+    void End(BaseCharacter* owner);
+
+public:
 
     // 入力があったら
     std::shared_ptr<ComboState> HandleInput(BaseCharacter* owner, AttackInput input) override {
@@ -2879,15 +3149,26 @@ public:
     bool HasNextState() const {
         return !nextStates.empty();
     }
-    
+    // 入力受付可能か
+    bool IsInputAcceptable() const override{
+        return comboData_.comboCondition.IsComdoInputWindow(timeInState);
+    }
+    // 次のステートえ移行受付する時間
+    float GetNextStateTime() const override{ 
+        return timeInState > comboData_.comboCondition.GetComboNextTime(); 
+    }
+    // ステート終了時間
+    float GetEndStateTime() const override{
+        return timeInState > comboData_.comboCondition.GetComboEndTime();
+    }
+    // 次のステートへ移行可能か
+    bool GetIsNextState() const override {
+        return comboData_.comboCondition.IsNextCombo();
+    };
+
 private:
     std::string animation;
     ComboData comboData_;
-
-
-   
-    Vector3 dire_{};
-
     std::map<AttackInput, std::shared_ptr<ComboNodeState>> nextStates;
 };
 
@@ -2925,9 +3206,6 @@ private:
     std::shared_ptr<ComboState> rootState;      // 初期ステート
 
     std::optional<AttackInput> bufferedInput;   // 入力バッファ
-
-    // 次のステートに移行するか
-    bool isNextState = false;
 };
 
 
@@ -2935,8 +3213,11 @@ private:
 File Path: project/DirectXGame/application/base/Attack/Combo/ComboSystem.cpp
 ============================================================
 #include "ComboSystem.h"
+#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 
-void ComboSystem::Initialize(BaseCharacter* character) {
+void ComboSystem::Initialize(BaseCharacter* character, GlobalVariables* globalVariables) {
+	this->globalVariables = globalVariables;
+	
 	comboStateMachine_ = std::make_unique<ComboStateMachine>(character);
 }
 
@@ -2977,6 +3258,137 @@ void ComboSystem::StartCombo(const std::string& name){
 }
 
 
+#pragma region Global
+
+void ComboSystem::ApplyGlobalComboData(const std::string& name, ComboGlovalData& data) {
+	globalVariables->CreateGroup(name);
+
+	globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBoxWindowStart_);
+	globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBoxLifeTime_);
+
+	// リアクション
+	globalVariables->AddItem(name, "ダメージ", data.reaction.damage);
+	globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost_);
+	globalVariables->AddItem(name, "ノックバック力", data.reaction.knockbackPower);
+	globalVariables->AddItem(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
+	globalVariables->AddItem(name, "ノックバック持続時間", data.reaction.knockbackDuration_);
+
+	globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
+	globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
+	globalVariables->AddItem(name, "コンボ終了時間", data.stateEndTime);
+	globalVariables->AddItem(name, "コンボ移行時間", data.stateNextTime);
+	globalVariables->AddItem(name, "コンボ中の重力", data.isGravity);
+	globalVariables->AddItem(name, "コンボ中の重力強度", data.gravityScale);
+
+
+	globalVariables->AddItem(name, "コンボ中の移動スピード",data.moveSpeed_);
+	globalVariables->AddItem(name, "コンボ中の移動開始時間", data.moveWindowStart_);
+	globalVariables->AddItem(name, "コンボ中の移動終了時間", data.moveWindowEnd_);
+	globalVariables->AddItem(name, "コンボ中の移動強制", data.isCompulsionMove_);
+
+
+	globalVariables->AddItem(name, "アニメーション速度", data.animationSpeed_);
+
+	globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
+	globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
+
+
+	// 保存項目の適応
+	SetGlobalComboData(name, data);
+};
+
+
+void ComboSystem::SetGlobalComboData(const std::string& name, ComboGlovalData& data) {
+	data.hitBoxWindowStart_ = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
+	data.hitBoxLifeTime_ = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+	
+	// リアクション
+	data.reaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
+	data.reaction.isVerticalBoost_ = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+	data.reaction.knockbackPower = globalVariables->GetValue<float>(name, "ノックバック力");
+	data.reaction.knockbackPowerY = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
+	data.reaction.knockbackDuration_ = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+
+
+	data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
+	data.stateInputEndTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
+	data.stateEndTime = globalVariables->GetValue<float>(name, "コンボ終了時間");
+	data.stateNextTime = globalVariables->GetValue<float>(name, "コンボ移行時間");
+	data.isGravity = globalVariables->GetValue<bool>(name, "コンボ中の重力");
+	data.gravityScale = globalVariables->GetValue<float>(name, "コンボ中の重力強度");
+
+	data.moveSpeed_ = globalVariables->GetValue<float>(name,"コンボ中の移動スピード");
+	data.moveWindowStart_ = globalVariables->GetValue<float>(name,"コンボ中の移動開始時間");
+	data.moveWindowEnd_ = globalVariables->GetValue<float>(name,"コンボ中の移動終了時間");
+	data.isCompulsionMove_ = globalVariables->GetValue<bool>(name,"コンボ中の移動強制");
+
+
+
+
+	data.animationSpeed_ = globalVariables->GetValue<float>(name, "アニメーション速度");
+
+	data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
+	data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
+};
+
+
+
+void ComboSystem::SetData(ComboData& data, const ComboGlovalData& gData)
+{
+	///
+	/// ヒットボックス
+	/// 
+
+	data.hitBox.GetData().hitBpxWindowStart_ = gData.hitBoxWindowStart_;	// 発生時間
+	data.hitBox.GetData().lifeTime_ = gData.hitBoxLifeTime_;				// 生成時間
+
+	
+	///
+	/// 受付
+	/// 
+	
+	
+	// 入力受付時間設定
+	data.comboCondition.ConditionStartEnd(gData.stateInputStartTime, gData.stateInputEndTime);
+	data.comboCondition.GetData().stateNextTime = gData.stateNextTime;
+	data.comboCondition.GetData().stateEndTime = gData.stateEndTime;
+	// コンボボタン設定
+	ComboButton bo = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
+	// 押し続ける
+	data.comboCondition.GetData().button_ = bo;
+	std::vector<ComboButton> button;
+	button.push_back(bo);
+	data.comboCondition.GetInput().comboSequence_.RegisterCombo(button);
+	
+	///
+	/// モーション
+	/// 
+	
+	// 重力
+	data.motion.GetData().isGravity_ = gData.isGravity;
+	data.motion.GetData().gravityScale_ = gData.gravityScale;
+	// アニメーションスピード
+	data.motion.GetData().animationSpeed_ = gData.animationSpeed_;
+	// 移動
+	data.motion.GetData().speed_ = gData.moveSpeed_;
+	data.motion.GetData().moveWindowStart_ = gData.moveWindowStart_;
+	data.motion.GetData().moveWindowEnd_ = gData.moveWindowEnd_;
+	data.motion.GetData().isCompulsionMove_ = gData.isCompulsionMove_;
+
+
+	///
+	/// エフェクト
+	/// 
+
+	// トレイルエフェクト
+	data.effect.GetData().startTmer = gData.trailEffectStartTime;
+	data.effect.GetData().lifeTime = gData.trailEffectLifeTime;
+}
+
+#pragma endregion // 保存　適応
+
+
+
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/ComboSystem.h
 ============================================================
@@ -2986,9 +3398,13 @@ File Path: project/DirectXGame/application/base/Attack/Combo/ComboSystem.h
 #include <memory>
 
 #include "ComboState.h"
-
+#include "ComboGlobalData.h"
 
 class BaseCharacter; // 前方宣言
+class GlobalVariables;
+
+
+
 
 /// <summary>
 /// コンボシステム
@@ -2997,21 +3413,26 @@ class ComboSystem
 {
 public:
 	// 初期化
-	void Initialize(BaseCharacter* character);
+	void Initialize(BaseCharacter* character, GlobalVariables* globalVariables);
 
 	// コンボ更新
 	void UpdateCombo(float dt) {
 		comboStateMachine_->Update(dt);
 	}
 
-
+	// クリア
 	void ClearNode();
 
+public: // 保存や適応に関しての関数
+
+	// 保存項目の追加
+	void ApplyGlobalComboData(const std::string& name, ComboGlovalData& data);
+
+	// 保存項目の適応
+	void SetGlobalComboData(const std::string& name, ComboGlovalData& data);
+
+
 public: 
-	// コンボデータ取得
-	ComboData* GetComboData() { return comboData_; }
-	// コンボデータ設定
-	void SetComboData(ComboData* data) { comboData_ = data; }
 	// コンボステートマシーン取得
 	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
 public:
@@ -3031,13 +3452,18 @@ public:
 	bool IsComboFinished() const {
 		return comboStateMachine_->IsComboFinished();
 	}
+
+public:
+	// データ設定
+	void SetData(ComboData& data, const ComboGlovalData& gData);
 private:
-	// コンボデータ
-	ComboData* comboData_ = nullptr;
 	// コンボステートマシーン
 	std::unique_ptr<ComboStateMachine> comboStateMachine_;
 	// コンボノードステートマップ
 	std::map<std::string, std::shared_ptr<ComboNodeState>> comboNodes_;
+private:
+	GlobalVariables* globalVariables = nullptr;
+
 };
 
 
@@ -3449,6 +3875,8 @@ public:
 		hitData_.hitTime.maxT = time;
 	}
 
+
+
 public:
 	// ヒット数の取得
 	int GetHitCount() const { return hitData_.hitCount; }
@@ -3568,6 +3996,21 @@ void AirStickMotion::Update(float dt, ObjectComponent* object) {
 
 #pragma endregion // エアスティックモーション
 
+#pragma region DamageData
+
+
+void DamageMotion::Update(float dt) {
+
+	damageData_.Update(dt);
+
+	if (damageData_.IsFinish()) isPlaying_ = false;
+	else {
+
+	}
+}
+
+#pragma endregion // ダメージモーション
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotion.h
@@ -3662,6 +4105,29 @@ private:
 	AirStickData airStickData_;	// エアスティックデータ
 };
 
+/// <summary>
+/// ダメージモーション
+/// </summary>
+class DamageMotion {
+public:
+
+	// 更新
+	void Update(float dt);
+	// ダメージデータ設定
+	void SetData(const DamageData& data) {
+		damageData_ = data;
+		isPlaying_ = true;
+	}
+	// ダメージデータ取得
+	DamageData GetDamageData() const { return damageData_; }
+	// 再生中か取得
+	bool IsPlaying() const { return isPlaying_; }
+
+private:
+	bool isPlaying_ = false;
+	DamageData damageData_;
+};
+
 
 
 ============================================================
@@ -3669,9 +4135,13 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 ============================================================
 #include "HitMotionSystem.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <DirectXGame/application/base/Character/Base/CharacterData.h>
 
-void HitMotionSystem::Update(float dt, ObjectComponent* object)
+void HitMotionSystem::Update(float dt, ObjectComponent* object, CharacterParameterComponent& parameter)
 {
+	// ダメージモーション
+	DamageProcess(dt, parameter);
+
 	// 各ヒットモーションが再生中なら更新する
 	if (IsHitMotion()) {
 
@@ -3685,6 +4155,17 @@ void HitMotionSystem::Update(float dt, ObjectComponent* object)
 	else {	// 何もヒットモーションが発生していない場合は重力をオンにする
 		object->GetRigidBodyComponent()->SetIsGravity(true);
 	}
+}
+
+void HitMotionSystem::SetReactionData(const AttackReactionData& data)
+{
+	//hitStopMotion_.SetData(data.GetHitStopData());
+	//airStickMotion_.SetData(data.GetAirStickData());
+	knockbackMotion_.SetData(data.GetKnockbackData());
+
+	DamageMotion dama;
+	dama.SetData(data.GetDamageData());
+	damageMotions_.push_back(dama);
 }
 
 bool HitMotionSystem::IsHitMotion()
@@ -3705,6 +4186,24 @@ void HitMotionSystem::UseGravity(ObjectComponent* object)
 	object->GetRigidBodyComponent()->SetIsGravity(isGravity);
 }
 
+void HitMotionSystem::DamageProcess(float dt, CharacterParameterComponent& parameter) {
+
+	for (auto& damage : damageMotions_) {
+		damage.Update(dt);
+
+		if (damage.GetDamageData().IsAttack()) {
+			parameter.parameters_.HP.value -= damage.GetDamageData().GetDamage();
+		}
+
+	}
+
+	// 終了していたら消す
+	damageMotions_.remove_if([](const DamageMotion& damage) { if (!damage.IsPlaying()) {
+		return true;
+	}
+	return false;
+		});
+}
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
@@ -3717,6 +4216,7 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
 
 
 class ObjectComponent;	// 前方宣言
+class CharacterParameterComponent;
 
 /// <summary>
 /// ヒットコンポーネント
@@ -3734,15 +4234,20 @@ public:
 
 
 	// 更新
-	void Update(float deltaTime, ObjectComponent* object);
+	void Update(float deltaTime, ObjectComponent* object, CharacterParameterComponent& parameter);
 
-	// ノックバックデータセット
-	void SetKnockbackData(const KnockbackData& data) { knockbackMotion_.SetData(data); }
-	
+	// リアクションデータ
+	void SetReactionData(const AttackReactionData& data);
+
 	// ヒットモーション中か
 	bool IsHitMotion();
 	// 重力があるか設定
 	void UseGravity(ObjectComponent* object);
+
+private:
+
+
+	void DamageProcess(float dt, CharacterParameterComponent& parameter);
 
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;
@@ -3752,6 +4257,12 @@ private:
 	KnockbackMotion knockbackMotion_;
 	// 吸い付きモーション
 	AirStickMotion airStickMotion_;
+	
+	// ダメージモーション
+	std::list<DamageMotion> damageMotions_;
+
+
+
 };
 
 
@@ -3770,6 +4281,13 @@ enum class HitBoxShape {
 	kOBB,
 	kAABB,
 	kSphere,
+};
+
+// 保存項目用データ
+struct GlobalHitBoxdata {
+	Vector3 offset{};
+	Vector3 size = { 1.0f,1.0f,1.0f };
+	float radius = 1.0f;
 };
 
 // コライダーデータ
@@ -3803,9 +4321,7 @@ struct HitBoxCollData
 	/// <summary>
 	/// リアクション
 	/// </summary>
-
-	float damage = 0.0f;
-	KnockbackData knockbackData;
+	AttackReactionData reactionData;
 };
 
 /// <summary>
@@ -3822,7 +4338,7 @@ public:
 public:
 
 	// コライダー追加
-	void AddCollider(std::unique_ptr<Collider> collider, const Vector3& offset,const HitBoxFunction::Data& reaction);
+	void AddCollider(std::unique_ptr<Collider> collider, const Vector3& offset,const AttackReactionData& reaction);
 	// 有効化
 	void Enable();
 	// 無効化
@@ -3854,7 +4370,7 @@ private:
 		Collider* collider = nullptr;
 
 		float damage = 0.0f;
-		KnockbackData knockbackData;
+		AttackReactionData reactionData;
 
 		int colliderID = -1;
 	};
@@ -3902,18 +4418,20 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxFunction.cpp
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 
-void HitBoxFunction::Begin(Collider* self, Collider* other){
+bool HitBoxFunction::Begin(Collider* self, Collider* other){
 	other_ = static_cast<ColliderComponent*>(other->owner);
 	otherColl_ = other;
-	if (!other_) return;
+	if (!other_) return false;
 
 	const uint32_t otherId = other_->GetUniqueId();	// ID取得
 	const float nowTime = MyGame::NowTime();		// 現在時間
 	if (GetContactRecord().CheckHistory(otherId)) {
-		return; // クールタイム中のため無視
+		return false; // クールタイム中のため無視
 	}
 	// 履歴追加
 	GetContactRecord().AddHistory(otherId, nowTime);
+
+	return true;
 }
 
 
@@ -3942,14 +4460,10 @@ void HitBoxFunction::UpdateTypePlayer(){
 
 
 	// ノックバック方向
-	data_.knockbackData.SetNormal(player->GetMoveComponent()->GetDirection());
+	data_.GetKnockbackData().SetNormal(player->GetMoveComponent()->GetDirection());
 
-	// ノックバックデータ
-	enemy->GetResponseSystem()->GetHitMotionSystem()->SetKnockbackData(data_.knockbackData);	 // ノックバックデータ設定
-	
-	// ダメージ量計算して送る
-	enemy->AddDamage(DamageCalculator::ComputeDamageWeapon(*player->GetAttackController()->GetCombatStat(), *enemy->GetAttackController()->GetCombatStat(), data_.damage));
-	
+	// リアクションデータ
+	enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);	 
 	
 	enemy->Emit();	//	エフェクト出現
 	enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move); // 敵ステート設定
@@ -3986,10 +4500,6 @@ enum class HitBoxUseType {
 
 class HitBoxFunction {
 public:
-	struct Data {
-		float damage = 0.0f;					// データ
-		KnockbackData knockbackData;			// ノックバックデータ
-	};
 
 	// 初期化
 	void Initialize(ColliderComponent* owner, BaseCharacter* character, HitBoxUseType type) {
@@ -3999,13 +4509,13 @@ public:
 	};
 
 	// 開始
-	void Begin(Collider* self, Collider* other);
+	bool Begin(Collider* self, Collider* other);
 
 	// 更新
 	void Update();
 
 
-	void SetData(Data data) { data_ = data; };
+	void SetData(AttackReactionData data) { data_ = data; };
 
 private:
 	// 使用者がプレイヤーの場合の更新処理
@@ -4024,7 +4534,7 @@ private:
 	HitBoxUseType type_;							// 使用者
 
 	Collider* otherColl_ = nullptr;
-	Data data_;
+	AttackReactionData data_;
 };
 
 
@@ -4060,7 +4570,8 @@ void HitBoxSystem::Update(float dt) {
 
 }
 
-void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas, const std::vector<std::string>& useHitBoxName, float lifeTime, WorldTransform* parent) {
+void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas, const std::vector<std::string>& useHitBoxName,
+	float lifeTime, Type dependenceType, const Vector3& offset, WorldTransform* parent) {
 	Data d;
 	d.hitBox = std::make_unique<HitBox>();
 	d.hitBox->Initialize(entity3dManager_, character_, type);
@@ -4068,6 +4579,37 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 	std::unique_ptr<OBBCollider> collObb = nullptr;
 	std::unique_ptr<AABBCollider> collAABB = nullptr;
 	std::unique_ptr<SphereCollider> collSphere = nullptr;
+
+
+	// 依存先設定
+	switch (dependenceType)
+	{
+	case HitBoxSystem::Type::kParent: // 親子付け 
+		d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
+		break;
+	case HitBoxSystem::Type::kIndependent: // 独立
+		d.hitBox->GetWorldTransform().translate_ = parent->GetPreWorldPosition();	// ワールド座標に設定
+		break;
+	case HitBoxSystem::Type::kParentIndependent: // 追従先独立
+		{
+			WorldTransform world;
+			world.Initialize();
+			world.parent_ = parent;	// ワールド座標に設定
+			world.translate_ = offset;	// オフセット設定
+			world.Update();
+
+			d.hitBox->GetWorldTransform().translate_ = world.GetWorldPosition();
+			break;
+		}
+	case HitBoxSystem::Type::kLockOnArea: // ターゲット位置へ(ターゲット位置のワールド座標を渡せば)
+		d.hitBox->GetWorldTransform().translate_ = parent->GetPreWorldPosition();	// ワールド座標に設定
+		break;
+	default:
+		break;
+	}
+
+
+
 
 	for (auto& data : datas) {
 
@@ -4084,25 +4626,27 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 			if (!use) continue;
 		}
 
+
+
 		// 形状によっての設定項目
 		switch (data.shape)
 		{
 		case HitBoxShape::kOBB:
 			collObb = CreateCollider<OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collObb->obb.size = data.size;
-			
-			d.hitBox->AddCollider(std::move(collObb), data.offset, { data.damage,data.knockbackData });
+
+			d.hitBox->AddCollider(std::move(collObb), data.offset, data.reactionData);
 			break;
 		case HitBoxShape::kAABB:
 			collAABB = CreateCollider<AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collAABB->aabb.min_ = -data.size / 2;
 			collAABB->aabb.max_ = data.size / 2;
-			d.hitBox->AddCollider(std::move(collAABB), data.offset, { data.damage,data.knockbackData });
+			d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
 			break;
 		case HitBoxShape::kSphere:
 			collSphere = CreateCollider<SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collSphere->radius = data.radius;
-			d.hitBox->AddCollider(std::move(collSphere), data.offset, { data.damage,data.knockbackData });
+			d.hitBox->AddCollider(std::move(collSphere), data.offset, data.reactionData);
 			break;
 		default:
 			break;
@@ -4111,11 +4655,40 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 
 
 
-	d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
 	d.lifeTime = lifeTime;							// 生存時間
 	d.timer = 0.0f;									// 時間
-	data_.push_back(std::move(d));					
+	data_.push_back(std::move(d));
 }
+
+void HitBoxSystem::CreateHitBoxCollData(const std::string& name, HitBoxShape shape, HitBoxUseType useType, 
+	const GlobalHitBoxdata& hitBoxData , HitBoxCollData& data){
+	data.isEneble = true;	// 有効化
+	data.isLine = true;		// ライン表示
+	data.shape = shape;		// 形状選択
+	data.name = name;		// 名前
+
+	// コライダーの位置と大きさの設定
+	data.offset = hitBoxData.offset;
+	data.radius = hitBoxData.radius;
+	data.size = hitBoxData.size;
+
+	// 使用者
+	switch (useType)
+	{
+	case HitBoxUseType::kPlayer:
+		data.layer = CollisionLayer::PlayerAttack;
+		data.tag = CollisionTag::PlayerAttack;
+		data.mask = CollisionLayer::Enemy;	
+		break;
+	case HitBoxUseType::kEnemy:
+		break;
+	case HitBoxUseType::kOther:
+		break;
+	default:
+		break;
+	}
+}
+
 
 
 ============================================================
@@ -4124,6 +4697,8 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h
 #pragma once
 #include "HitBox.h"
 #include <DirectXGame/application/base/Attack/AttackData.h>
+#include <DirectXGame/application/base/Attack/Combo/ComboGlobalData.h>
+
 
 class Entity3DManager; // 前方宣言
 class BaseCharacter;
@@ -4133,6 +4708,16 @@ class BaseCharacter;
 /// </summary>
 class HitBoxSystem {
 public:
+	// ヒットボックスのタイプ
+	enum class Type {
+		kParent,			// 追従型
+		kIndependent,		// 独立(飛び道具や範囲攻撃など)
+		kParentIndependent,	// 追従位置での独立(武器の中間位置で発生してその後独立)
+
+		kLockOnArea,	// ターゲット位置
+	};
+
+
 	struct Data {
 		std::unique_ptr<HitBox> hitBox = nullptr;
 		float lifeTime = 0.0f;
@@ -4149,7 +4734,11 @@ public:
 
 
 	// ヒットボックス追加
-	void AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas,const std::vector<std::string>& useHitBoxName ,float lifeTime,WorldTransform* parent = nullptr);
+	void AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas,const std::vector<std::string>& useHitBoxName 
+		,float lifeTime, Type dependenceType ,const Vector3& offset ,WorldTransform* parent = nullptr);
+
+
+	void CreateHitBoxCollData(const std::string& name, HitBoxShape shape, HitBoxUseType useType,const GlobalHitBoxdata& hitBoxData ,HitBoxCollData& data);
 
 	// 全体データ取得
 	std::vector<Data>& GetData() {return data_;}
@@ -4199,12 +4788,14 @@ void HitBox::Initialize(Entity3DManager* entity3dManager, BaseCharacter* charact
 	// 当たり判定コールバック設定
 	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
 		// 開始
-		hitBoxFunction_->Begin(self, other);
+		if (!hitBoxFunction_->Begin(self, other)) {
+			return;
+		};
 		
 		// 当たったコライダーによって相手に送るデータを決め転送
 		for (auto& data : colliders_) {
 			if (self->id == data.second.colliderID) {
-				hitBoxFunction_->SetData({ data.second.damage ,data.second.knockbackData });
+				hitBoxFunction_->SetData(data.second.reactionData);
 				break;
 			}
 		}
@@ -4230,7 +4821,7 @@ void HitBox::Update(float dt) {
 
 #pragma region MyRegion
 // コライダー追加
-void HitBox::AddCollider(std::unique_ptr<Collider> collider,const Vector3& offset, const HitBoxFunction::Data& reaction) {
+void HitBox::AddCollider(std::unique_ptr<Collider> collider,const Vector3& offset, const AttackReactionData& reaction) {
 	// 当たり判定コンポーネントにコライダー追加
 	ColliderData data;
 	data.colliderID = colliderComponent_->AddCollider(std::move(collider));
@@ -4241,10 +4832,9 @@ void HitBox::AddCollider(std::unique_ptr<Collider> collider,const Vector3& offse
 	data.worldTransform.translate_ = offset;
 	data.worldTransform.parent_ = &worldTransform_;
 
-
-	data.knockbackData = reaction.knockbackData;
-	data.damage = reaction.damage;
-
+	// リアクションデータ
+	data.reactionData = reaction;
+	
 	// コライダー情報を配列に追加
 	colliders_[data.colliderID] = data;
 	colliderCount++; // コライダー数増加
@@ -4300,7 +4890,7 @@ AttackICommand* AttackInputHander::HandleInput()
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
 			return light.get();
 		}
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
 			return heavy.get();
 		}
 	}
@@ -4444,18 +5034,8 @@ void AttackResponse::Initialize(CharacterParameterComponent* paremeter, ObjectCo
 }
 
 void AttackResponse::Update(float dt) {
-	
-	// 攻撃データ更新
-	for (auto& data : datas_) {
-		data.Update(dt);
-	}
-
 	// 被撃モーション更新
-	hitMotionSystem_->Update(dt,object);
-}
-
-void AttackResponse::SetHit(const AttackData& data) {
-	datas_.push_back(data);
+	hitMotionSystem_->Update(dt,object, *paremeter);
 }
 
 #pragma endregion // 攻撃を受けたとき
@@ -4523,12 +5103,6 @@ public:
 	/// <param name="dt">ゲーム内時間もしくはキャラクターの時間など</param>
 	void Update(float dt);
 
-
-	/// <summary>
-	/// 攻撃を受けたときに送るデータを挿入
-	/// </summary>
-	void SetHit(const AttackData& data);
-
 	/// <summary>
 	/// ヒットモーションクラス取得
 	/// </summary>
@@ -4543,12 +5117,8 @@ private:// 貰いもの
 	CharacterParameterComponent* paremeter = nullptr;
 	// オブジェクト
 	ObjectComponent* object = nullptr;
-	// 攻撃データ<vector>
-	std::vector<AttackData> datas_;
-	
 	// ヒットフラグ<タグ、フラグ>何かヒットしたときに使う用のやつ 
 	std::map<std::string, bool> hitFlags_;
-
 };
 
 
@@ -6574,9 +7144,14 @@ public:
 	virtual void Jump() = 0;
 
 	/// <summary>
-	/// 攻撃
+	/// 攻撃(弱攻撃)
 	/// </summary>
 	virtual void Attack() = 0;
+	
+	/// <summary>
+	/// 攻撃(強攻撃)
+	/// </summary>
+	virtual void HeavyAttack() {};
 
 	/// <summary>
 	/// ステートマシーン初期化
@@ -6690,11 +7265,7 @@ protected: // 保存機能
 	}
 
 protected:
-	// 移動コンポーネント初期化
-	void InitMoveComponent() {
-		moveComponent_ = std::make_unique<MovementComponent>();
-		moveComponent_->Initialize(MovementComponent::ControlType::Auto);
-	}
+	
 	
 public:
 	// 速度
@@ -6878,7 +7449,6 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 		player = std::make_unique<NormalPlayer>();
 		break;
 	case PlayerType::kBullet:	// 弾
-		player = std::make_unique<BulletPlayer>();
 		break;
 	case PlayerType::kAttacker:
 		break;
@@ -7202,7 +7772,6 @@ File Path: project/DirectXGame/application/base/Character/Base/Characters.h
 ============================================================
 #pragma once
 #include"DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
-#include"DirectXGame/application/base/Character/Player/Bullet/BulletPlayer.h"
 #include"DirectXGame/application/base/Character/Enemy/Normal/NormalEnemy.h"
 
 
@@ -7404,8 +7973,10 @@ public:
 	virtual void Move() = 0;
 	// ジャンプ
 	virtual void Jump() = 0;
-	// 攻撃
+	// 攻撃(弱攻撃)
 	virtual void Attack() = 0;
+	// 攻撃(強攻撃)
+	virtual void HeavyAttack() {};
 
 	// ターゲットキャラクターを設定
 	void SetTargetCharacters(const std::vector<BaseEnemy*>& targetCharacters) { targetCharacters_ = targetCharacters; }
@@ -7492,7 +8063,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		// 範囲内に入ったら
 		if (distToTarget < attackRange_ * 3.0f) {
 			state_ = AgentState::PreparationAttack;	// 攻撃準備に入る
-			attackDelayTimer_ = Random::RandomFloat(1.0f, 3.0f);
+			attackDelayTimer_ = Random::RandomFloat(2.0f, 4.0f);
 		}
 		else if (distToTarget > engageDistance_ * 1.5f) {	// 範囲外なら
 			state_ = AgentState::Idle;	// 待機に戻る
@@ -7506,7 +8077,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		if (attackDelayTimer_ <= 0.0f) {
 			state_ = AgentState::Attack; // 攻撃
 			owner_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);// 攻撃ステート移行
-			attackCooldown_ = 1.0f + Random::RandomFloat(0.0f, 0.5f);
+			attackCooldown_ = 1.0f + Random::RandomFloat(3.0f, 0.5f);
 			animIndex = 1;
 		}
 		else if (distToTarget > attackRange_ * 3.0f) {	// 範囲外なら 
@@ -7589,9 +8160,12 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		else desired = { 0,0,0 };
 	}
 
+	
 	// Return時はグループ中心へ強く引っ張る
 	if (state_ == AgentState::Return) {
-		desired = Normalize(toCenter);
+		// ★修正：slotTarget へ戻るようにする
+		Vector3 toSlot = groupTarget - position_;
+		desired = Normalize(toSlot);
 	}
 
 	Vector3 steer = Normalize(desired + sep * 0.5f + cohesion * 0.8f);
@@ -7606,7 +8180,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	}
 
 	velocity_ = Lerp(velocity_, steer * targetSpeed, dt * 5.0f);
-	//velocity_.y = 0;
+	velocity_.y = 0;
 	owner_->Velocity() = velocity_;
 }
 
@@ -7739,10 +8313,17 @@ void CrowdGroupAgent::DistributeTargets(std::vector<CrowdAgent>& agents)
 	{
 		int idx = memberIndices[i];
 		if (idx < 0) continue;
+
 		Vector3 slot = CalcSlotTarget((int)i);
-		// 部隊目標へ向かうためにスロット位置を少し前方へオフセット
+
+		// ★前方方向（Z=Forward）
 		Vector3 dirToCmd = Normalize(command.targetPos - centerPos);
-		Vector3 finalTarget = { slot.x + dirToCmd.x * 0.5f, slot.y, slot.z + dirToCmd.z * 0.5f };
+
+		// ★スロットを部隊の進行方向に少しだけ前へ押す
+		Vector3 finalTarget = slot + dirToCmd * 0.5f;
+
+		// ★修正：エージェントにスロット目標を渡す（今まで欠落していた）
+		agents[idx].slotTarget_ = finalTarget;
 	}
 }
 
@@ -7795,30 +8376,27 @@ void CrowdManager::Update(float dt) {
 	for (size_t i = 0; i < agents.size(); ++i)
 	{
 		CrowdAgent& a = agents[i];
-		// 距離に応じたLOD: 遠い奴は更新間引き（簡略化）
+
+		// --- LOD ---
 		float d = Length(a.position_ - playerPos);
 		float lodFactor = (d < 15.0f) ? 1.0f : ((d < 40.0f) ? 0.5f : 0.25f);
-		// シンプルに更新をスキップする代わりに時間経過での補間は省略
 		if (Random::RandomFloat(0.0f, 1.0f) > lodFactor) continue;
 
-
+		// --- 近傍検索 ---
 		grid.QueryNeighbors(a.position_, neighbors);
-		// 部隊目標 + スロットオフセットを計算
-		CrowdGroupAgent& grp = groups[a.groupId];
-		// ローカルインデックスを求める（簡略な実装）
-		int localIndex = -1;
-		for (size_t k = 0; k < grp.memberIndices.size(); ++k) {
-			if (grp.memberIndices[k] == (int)i) {
-				localIndex = (int)k;
-				break;
-			}
-		}
-		Vector3 slotTarget = (localIndex >= 0) ? grp.CalcSlotTarget(localIndex) : grp.centerPos;
-		// 最終目標は部隊コマンドターゲットに向かうためのslotTarget
-		Vector3 finalTarget = { slotTarget.x + (grp.command.targetPos.x - grp.centerPos.x) * 0.5f,
-		slotTarget.y,
-		slotTarget.z + (grp.command.targetPos.z - grp.centerPos.z) * 0.5f };
 
+		// --- グループ ---
+		CrowdGroupAgent& grp = groups[a.groupId];
+
+		// ★修正：slotTarget_ は DistributeTargets が設定済み
+		Vector3 finalTarget = a.slotTarget_;
+
+		// ★Return 動作中はフォーメーションの中心へより寄せる
+		if (a.state_ == AgentState::Return)
+		{
+			Vector3 toCenter = grp.centerPos - a.position_;
+			finalTarget = grp.centerPos + Normalize(toCenter) * 1.0f;
+		}
 
 		a.Update(dt, finalTarget, grp.memberIndices, &agents);
 	}
@@ -7934,6 +8512,7 @@ public:
 
 	// 表示用：インスタンスバッファに書き込むデータ
 	uint32_t animIndex = 0;
+	Vector3 slotTarget_;
 private:
 	
 	CrowdManager* manager_ = nullptr;
@@ -8130,7 +8709,8 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	CreateGroup("enemy");
 
 	// 移動コンポーネント初期化
-	InitMoveComponent();
+	moveComponent_ = std::make_unique<MovementComponent>();
+	moveComponent_->Initialize(globalVariables_, MovementComponent::ControlType::Manual, "_Enemy");
 	moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 	// SphereColliderを追加
 	auto sphere = std::make_unique<SphereCollider>();
@@ -8185,7 +8765,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 
 	// 戦闘中の倍率・軽減率を扱う
 	attackController_ = std::make_unique<AttackController>();
-	attackController_->Initialize(entity3DManager,&characterParameterComponent_,this);
+	attackController_->Initialize(entity3DManager,globalVariables_,&characterParameterComponent_,this);
 
 	
 
@@ -8843,1012 +9423,6 @@ private:
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Character/Player/Bullet/BulletPlayer.cpp
-============================================================
-#include "BulletPlayer.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include "DirectXGame/engine/Manager/Effect/EffectManager.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
-#include "assert.h"
-
-
-///< summary>
-/// 初期化
-///</summary>
-void BulletPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) {
-
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	entity2DManager_ = entity2DManager;	// エンティティ2d
-	globalVariables_ = globalVariables;	// 保存項目
-	camera_ = camera;					// カメラ
-	input_ = input;						// インプット
-
-
-
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-
-	// オブジェクトコンポーネント追加
-	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true, this, ObjectModelType::kSkinning);
-
-	// 保存項目追加
-	CreateGroup("Player");
-
-	objectComponent_->SetSRT({ 1,1,1 }, {}, position);				//　SRT設定
-	objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
-	objectComponent_->GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
-
-
-	// HP設定
-	Parameters().HP.Initiaize(100, 0, 100, 0);
-	Parameters().stamina.Initiaize(100, 0, 50, 0);
-	HP() = 100; // 初期HP設定
-	Parameters().speed = 20.0f;// 移動速度設定
-	Parameters().jampPower = 100.0f;
-
-	// 戦闘
-	attackController_ = std::make_unique<AttackController>();
-	attackController_->Initialize(entity3DManager,&characterParameterComponent_,this);
-
-
-	// 移動コンポーネント初期化
-	InitMoveComponent();
-	moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
-	moveComponent_->SetMaxJumpCount(3);
-	// 保存項目初期化
-	InitializeBaseAddItem();
-
-	// SphereColliderを追加
-	auto sphere = std::make_unique<SphereCollider>();
-	sphere->tag = CollisionTag::Player;
-	sphere->layer = CollisionLayer::Player;
-	sphere->collisionMask = 0xFFFFFFFF;
-	sphere->radius = 2.0f; // 半径を適宜設定
-	// コライダ追加
-	GetColliderComponent()->AddCollider(std::move(sphere));
-	// コンポーネント衝突インターフェース設定
-	GetColliderComponent()->SetHitReceiver(this);
-
-	// コライダ位置用トランスフォーム初期化
-	worldCollider_.Initialize();
-	worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
-	worldCollider_.translate_.y = 3.0f;
-
-	// 衝突時のコールバック登録
-	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
-		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
-		if (!otherComponent) return;
-
-		uint32_t otherId = otherComponent->GetUniqueId();
-
-
-		Vector3 pushVec;
-
-		// 敵との衝突応答
-		if (other->tag == CollisionTag::Enemy) {
-			if (self->ResolveCollision(*other, pushVec)) {
-				pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
-
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-
-				}
-				GetWorldTransform().Update();
-			}
-		}
-
-		// 壁との衝突応答
-		if (other->tag == CollisionTag::Wall) {
-			if (self->ResolveCollision(*other, pushVec)) {
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					GetWorldTransform().translate_ += pushVec;
-				}
-				else if (self->isStatic) {
-
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					GetWorldTransform().translate_ += pushVec * 0.5f;
-
-				}
-				Velocity().y = 0;
-
-				//acceleration_.y = 0;
-				GetWorldTransform().Update();
-			}
-		}
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
-
-		if (!enemy) return;
-
-		// 敵の攻撃状態なら
-		if (enemy->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Attack) {
-			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
-
-			if (objectComponent_->GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
-				return; // クールタイム中のため無視
-			}
-
-			objectComponent_->GetContactRecord().AddHistory(otherId, nowTime);
-
-			// ダメージ
-			AddDamage(DamageCalculator::ComputeDamage(*enemy->GetAttackController()->GetCombatStat(), *GetAttackController()->GetCombatStat(), 1.0f));
-			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
-		}
-		};
-
-
-	// 武器管理クラス初期化
-	weaponManager_ = std::make_unique<BulletWeaponManager>();
-	weaponManager_->SetOwner(this);
-	weaponManager_->SetEffect(effect_);
-	weaponManager_->Initialize(bulletManager_,input,entity3DManager_,entity2DManager_,globalVariables_);
-
-	// 右上
-	weaponManager_->AddBulletWeapon("UPRIGHT",Vector3{2.5f,6,0}, Vector3{ 1.5f,4,8 });
-	weaponManager_->AddBulletWeapon("UPLEFT",Vector3{-2.5f,6,0}, Vector3{ -1.5f,4,8 });
-	weaponManager_->AddBulletWeapon("DOWNRIGHT",Vector3{2.5f,3,0}, Vector3{ 1.5f,3,8 });
-	weaponManager_->AddBulletWeapon("DOWNLEFT",Vector3{-2.5f,3,0}, Vector3{ -1.5f,3,8 });
-
-
-
-	// スペシャル攻撃
-	special_ = std::make_unique<RangeBombingSpecial>();
-	special_->Initialize(entity3DManager, entity2DManager, camera_);
-	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
-	special_->SetInput(input);
-	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-	rengeSp->SetRadius(100);
-	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
-	rengeSp->Set(followCamera_, bulletManager_);
-
-	
-	// インプットハンドラー初期化
-	attackInputHander_ = std::make_unique<AttackInputHander>();
-	attackInputHander_->AssignAttack();
-
-	// UI
-	ui_ = std::make_unique<PlayerUI>();
-	ui_->Initialize(input_, entity2DManager_, globalVariables_);
-	ui_->SetHP(&characterParameterComponent_.HP());
-	ui_->SetStamina(&characterParameterComponent_.Stamina());
-
-	// キャラクター行動ステート初期化
-	InitStateMachine();
-};
-
-
-// ステートマシーン初期化
-void BulletPlayer::InitStateMachine() {
-	stateMachine_ = std::make_unique<CharacterStateMachine>();
-	stateMachine_->RegisterState(CharacterMainState::Idle, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateIdle>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateMove>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Attack, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateAttack>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Special, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateSpecial>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Skill, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateSkill>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Defense, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateDefense>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Fainting, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateFainting>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Jump, [](BaseCharacter* p) {
-		return std::make_unique<BulletPlayerStateJump>(p);
-		});
-	stateMachine_->Init(this, CharacterMainState::Move);
-};
-
-///< summary>
-/// 更新
-///</summary>
-void BulletPlayer::Update() {
-	UpdateBaseGetValue(); //保存機能 基本値の更新
-
-	// HPが0以下なら死亡
-	if (GetHP() <= 0) {
-		objectComponent_->GetObjectStateFlags().isAlive = false;
-	}
-
-
-
-#ifdef _DEBUG
-	ImGui::Begin("Debug");
-	ImGui::InputFloat("HP", &HP());
-	if (ImGui::Button("SP")) {
-		special_->SetGauge(100);
-	}
-
-	ImGui::End();
-	// クリエイティブモード
-	if (input_->IsTriggerKey(DIK_C)) {
-		if (!isCreativeMode) {
-			isCreativeMode = true;
-
-		}
-		else {
-			isCreativeMode = false;
-		}
-	}
-#endif // _DEBUG
-
-
-	// ノーマル状態
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
-		weaponManager_->Normal();
-	}
-	// 貫通弾状態
-	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Down)) {
-		weaponManager_->Penetration();
-	}
-
-
-	if (moveComponent_->GetIsLanding() &&
-		stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
-		input_->GetGamePadLeftStick().Length() == 0) {
-		moveComponent_->Velocity() = {};
-	}
-
-
-
-	// 移動コンポーネント更新
-	moveComponent_->Update(MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(),
-		*GetObjectComponent()->GetRigidBodyComponent(), GetInput());
-
-
-	// ワールドトランスフォーム更新
-	GetObjectComponent()->GetWorldTransform().Update();
-
-	// コライダのワールドトランスフォーム更新
-	worldCollider_.Update();
-
-	// コライダーコンポーネント更新
-	GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
-
-	// 必殺技
-	special_->Update();
-	
-#ifdef _DEBUG
-	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
-#endif // _DEBUG
-
-	// UI更新
-	ui_->Update();
-
-
-
-	// 武器マネージャー更新
-	LockOn();
-	weaponManager_->Update();
-
-	// キャラクターパラメーター更新
-	characterParameterComponent_.Update();
-
-	// ステート
-	stateMachine_->Update();
-};
-
-/// <summary>
-/// エフェクトの描画
-/// </summary>
-void BulletPlayer::DrawEffect() {
-};
-
-/// <summary>
-/// 描画2d
-/// </summary>
-void BulletPlayer::Draw2D() {
-
-	// UI表示
-	ui_->SetIsTextmax(special_->GetIsSpecial());	
-	ui_->SetIsTextRB(special_->GetIsSpecial());
-	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
-	ui_->Draw();
-};
-
-// 移動処理
-void BulletPlayer::Move() {
-	// 重力
-	if (stateMachine_->GetCurrentMainState() != CharacterMainState::Jump) {
-		Velocity() = { 0,0,0 };
-	}
-
-
-	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-
-	if (is || is2) {
-		moveComponent_->SetSpeed(0.1f ,Parameters().speed);
-		moveComponent_->SetCamera(followCamera_->GetUniqueCamera());
-		moveComponent_->SetCanMove(true);
-	}
-};
-
-// ジャンプ
-void BulletPlayer::Jump() {
-	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-
-
-	// 生きていてステートの状態が移動状態ならジャンプステートへ移動
-	if (GetAlive() && (is || is2) &&
-		moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
-		stateMachine_->ChangeState(CharacterMainState::Jump);
-		GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
-		moveComponent_->DecrementJumpCount(); // ジャンプ回数減少
-		GetObjectComponent()->GetRigidBodyComponent()->AddForce({ 0,characterParameterComponent_.parameters_.jampPower,0 });
-		GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
-	}
-};
-
-// 攻撃
-void BulletPlayer::Attack() {
-	bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-	bool is3 = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
-
-
-	if (stateMachine_->GetCurrentMainState() == CharacterMainState::Attack) {}
-	else if (is || is2 || is3) {	// 弾発射
-		stateMachine_->ChangeState(CharacterMainState::Attack);
-
-		weaponManager_->GetBulletWeapon("UPRIGHT")->Shoot();
-		weaponManager_->GetBulletWeapon("UPLEFT")->Shoot();
-		weaponManager_->GetBulletWeapon("DOWNRIGHT")->Shoot();
-		weaponManager_->GetBulletWeapon("DOWNLEFT")->Shoot();
-	}
-};
-
-void BulletPlayer::LockOn() {
-
-	// ターゲット選別
-
-	
-	std::vector<BaseEnemy*> enemys;
-	
-	// 範囲内に入った敵を抽出
-	for (auto& target : targetCharacters_) {
-		Vector2 posEne = target->GetObjectComponent()->GetScreenPosition();
-		float direction = target->GetTargetDistance();
-		Vector2 diff = Vector2{ 640,360 } - posEne;
-		float length = diff.Length();
-		target->SetIsLockOn(false);
-		if (length <= 300.0f && target->GetAlive() && direction < 300) {
-
-			
-
-			enemys.push_back(target);
-		}
-	}
-
-	// --- 範囲内に敵がいない場合は処理を抜ける ---
-	if (enemys.empty()) {
-		weaponManager_->SetTargets({});
-		return;
-	}
-
-	// 範囲内の入った敵を近い順にソートしてそれぞれの銃にターゲットを指定
-
-	// --- 距離が近い順にソート ---
-	std::sort(enemys.begin(), enemys.end(),
-		[](BaseEnemy* a, BaseEnemy* b) {
-			return a->GetTargetDistance() < b->GetTargetDistance();
-		});
-
-	// --- ソート後の敵リストを武器マネージャーへ渡す ---
-	weaponManager_->SetTargets(enemys);
-};
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Player/Bullet/BulletPlayer.h
-============================================================
-#pragma once
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
-#include <DirectXGame/application/base/Weapon/Bullet/BulletWeaponManager.h>
-#include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
-#include "BulletPlayerState.h"
-
-// 前方宣言
-class BaseEnemy;
-
-/// <summary>
-/// 銃プレイヤー
-/// </summary>
-class BulletPlayer : public BasePlayer {
-public:
-
-	///< summary>
-	/// 初期化
-	///</summary>
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
-
-	///< summary>
-	/// 更新
-	///</summary>
-	void Update() override;
-
-	/// <summary>
-	/// エフェクトの描画
-	/// </summary>
-	void DrawEffect() override;
-
-	/// <summary>
-	/// 描画2d
-	/// </summary>
-	void Draw2D() override;
-
-	// 移動処理
-	void Move() override;
-
-	// ジャンプ
-	void Jump() override;
-
-	// 攻撃
-	void Attack() override;
-
-	// プレイヤUI取得
-	PlayerUI* GetPlayerUI()override { return ui_.get(); };
-
-
-
-private:
-	// ステートマシーン初期化
-	void InitStateMachine() override;
-
-	// 調整項目の適用
-	void ApplyGlobalVariables();
-
-	WorldTransform worldCollider_;
-	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
-
-	std::unique_ptr<BulletWeaponManager> weaponManager_; // 武器マネージャー
-public:
-	// ロックオン
-	void LockOn();
-};
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Player/Bullet/BulletPlayerState.cpp
-============================================================
-#include "BulletPlayerState.h"
-#include "BulletPlayer.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-#include <DirectXGame/application/base/Bullet/Base/BulletManager.h>
-
-#pragma region Idle
-
-// 更新
-void BulletPlayerStateIdle::Update() {
-	Input* input = character_->GetInput();
-	// ゲームパッドが繋いであるなら
-	if (input->IsControllerConnected()) {
-
-		// スキル発動
-		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
-			return;
-		}
-	}
-
-
-	// 移動したら
-	if (input->GetGamePadLeftStick().Length() != 0) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
-};
-
-// 終了
-void BulletPlayerStateIdle::Exit() {
-};
-
-// 初期化
-void BulletPlayerStateIdle::Enter() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsLoop(true);			// ループさせる
-	anima->SetIsPlaying(true);		// アニメーション再生
-	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
-};
-
-#pragma endregion // 待機
-
-#pragma region Move
-
-void BulletPlayerStateMove::Update()
-{
-	Input* input = character_->GetInput();
-	
-	
-
-	if (input->IsControllerConnected()) {
-
-		// スキル発動
-		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
-			return;
-		}
-	}
-	// 止まったら
-	if (input->GetGamePadLeftStick().Length() == 0) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
-		return;
-	}
-}
-
-void BulletPlayerStateMove::Exit()
-{
-
-}
-
-void BulletPlayerStateMove::Enter()
-{
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsLoop(true);				// ループ再生
-	anima->SetIsPlaying(true);			// 再生
-	anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
-	anima->SetAnimetion("Walk", 0.1f);	// 流すアニメーション設定
-}
-
-#pragma endregion // 移動
-
-#pragma region Jump
-
-// 更新
-void BulletPlayerStateJump::Update() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	Input* input = character_->GetInput();
-
-	anima->SetIsPlaying(true);		// アニメーション再生
-	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
-
-
-	// ジャンプ出来るか
-	bool isJamp = character_->GetMoveComponent()->GetIsJump();
-	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
-	bool isAlive = character_->GetAlive();
-
-	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
-	if (isAlive && isJamp && isTrigger) {
-		character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y = 0;
-		character_->GetMoveComponent()->DecrementJumpCount(); // ジャンプ回数減少
-
-		// 着地状態なら
-		if (character_->GetMoveComponent()->GetIsLanding()) {
-
-		}
-		else {
-			character_->GetObjectComponent()->GetRigidBodyComponent()->AddForce({ 0,character_->GetCharacterParameterComponent().parameters_.jampPower * 2,0 });
-		}
-		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.05f);
-	}
-	else {
-		// 着地状態なら
-		if (character_->GetMoveComponent()->GetIsLanding()) {
-			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-			return;
-		}
-	}
-
-
-	// 降下しているならアニメーションを変える
-	if (character_->GetObjectComponent()->GetRigidBodyComponent()->Velocity().y <= 0.0f) {
-		anima->SetIsLoop(true);
-		anima->SetAnimetion("Fall", 0.1f);
-	}
-	else {	// 上昇しているならアニメーションを変える
-		anima->SetIsLoop(false);
-		anima->SetAnimetion("JumpStrat1", 0.05f);
-	}
-}
-
-// 終了
-void BulletPlayerStateJump::Exit() {
-	character_->GetMoveComponent()->Velocity() = { 0,0,0 };
-}
-// 初期化
-void BulletPlayerStateJump::Enter() {}
-
-#pragma endregion // ジャンプ
-
-#pragma region Attack
-
-void BulletPlayerStateAttack::Update()
-{
-	character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-	return;
-}
-
-void BulletPlayerStateAttack::Exit()
-{
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	// 武器
-	character_->GetAttackController()->GetComboSystem()->GetComboStateMachine()->HandleInput(AttackInput::Light);
-	character_->GetWeapon()->GetObject3D()->SetIsDraw(false);
-	character_->GetWeapon()->GetColliderComponent()->SetEnableByTag(CollisionTag::PlayerAttack, false);
-
-	// アニメーション
-	anima->SetIsLoop(true);
-	anima->SetIsPlaying(true);
-	anima->SetAnimationSpeed(1.0f);
-}
-
-void BulletPlayerStateAttack::Enter(){}
-
-#pragma endregion // 攻撃
-
-#pragma region MyRegion
-
-
-
-void BulletPlayerStateSpecial::Update()
-{
-	BaseSpecial* special = character_->GetSpecial();
-	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
-
-	// キャラクターの動きを止める
-	character_->Velocity() = {};
-	int time = 0;
-	// UIを表示しない
-	player->GetPlayerUI()->SetIsTextRB(false);
-	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
-	rengeSp->InAction();	// アクション中
-	rengeSp->SetIsDraw(false);	// 描画
-	if (special->GetPhese() == 0) {	// 最初フェーズなら
-		// 移動
-		player->GetMoveComponent()->SetCanMove(true);
-		// UI描画
-		player->GetPlayerUI()->SetIsTextRB(true);
-		// スペシャル描画
-		rengeSp->SetIsDraw(true);
-	}
-	if (special->GetPhese() == 2) {	// 最終フェーズなら
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
-}
-
-void BulletPlayerStateSpecial::Exit()
-{
-	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
-
-	player->GetPlayerUI()->SetIsTextRB(false);	// UI描画しない
-}
-
-void BulletPlayerStateSpecial::Enter()
-{
-	BasePlayer* player = dynamic_cast<BasePlayer*>(character_);
-
-	player->GetSpecial()->SetPhese(0);	// フェーズ初期化
-	player->GetSpecial()->SetGauge(0);	// ゲージ初期化
-	player->GetWeapon()->GetObject3D()->SetIsDraw(false);	// 描画しない
-}
-
-#pragma endregion // 必殺技
-
-#pragma region Skill
-// 更新
-void BulletPlayerStateSkill::Update() {
-
-	timer_ += character_->GetTime();
-
-	// 移動状態に移行
-	if (changeTimer_ <= timer_) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
-
-};
-
-// 終了
-void BulletPlayerStateSkill::Exit() {
-
-};
-// 初期化
-void BulletPlayerStateSkill::Enter() {};
-#pragma endregion // スキル
-
-#pragma region Defense
-
-// 更新
-void BulletPlayerStateDefense::Update() {
-	Input* input = character_->GetInput();
-
-
-	// ゲームパッドがつながっているなら
-	if (input->IsControllerConnected()) {
-		// 防御中
-		if (input->IsGamePadPressed(GamePadButton::GAMEPAD_A) && isDifense_) {
-			isDifense_ = true;
-
-			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.75;
-
-			// スタミナがあるなら
-			if (character_->GetCharacterParameterComponent().IsGetStamina()) {
-				// スタミナ消費
-				character_->GetCharacterParameterComponent().Stamina().rateFluctuation = -5.0f;
-			}
-			else {
-				isDifense_ = false;
-			}
-
-		}
-		else {
-			// スタミナ回復
-			character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
-			isDifense_ = false;
-			timer_ += character_->GetTime();
-			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
-		}
-	}
-
-
-	// 移動状態に移行
-	if (timer_ >= defenseTimer_) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
-
-};
-
-// 終了
-void BulletPlayerStateDefense::Exit() {
-	isDifense_ = false;
-	character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
-	character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
-};
-// 初期化
-void BulletPlayerStateDefense::Enter() {
-	isDifense_ = true;
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsPlaying(true);		// アニメーション再生
-	anima->SetIsLoop(false);		// アニメーションをループさせるか
-	anima->SetStratAnimeTime();		// アニメーション時間を初期化
-	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
-	anima->SetAnimetion("Defense1", 0.10f); // 流すアニメーション設定
-};
-
-#pragma endregion // 防御
-
-#pragma region Fainting
-
-// 更新
-void BulletPlayerStateFainting::Update() {
-	Input* input = character_->GetInput();
-	Vector2 left = input->GetGamePadLeftStick();
-
-	timer_ += character_->GetTime();
-
-	// スティックを動かしているなら
-	if (prevleftStick != left) {
-		Vector2 sub = prevleftStick - left;
-		float length = sub.Length();
-		float subtime = 1.0f;
-
-		if (length >= 10.0f) {
-			subtime = 2.0f;
-		}
-
-		// 復帰時間短縮
-		timer_ += character_->GetTime() * subtime;
-	}
-
-	// 復帰したら移動状態に移行
-	if (timer_ >= faintingTimer_) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
-
-
-	prevleftStick = left;
-}
-
-// 終了
-void BulletPlayerStateFainting::Exit() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsPlaying(true);		// アニメーション再生
-	anima->SetIsLoop(true);			// アニメーションをループさせるか
-	anima->SetStratAnimeTime();		// アニメーション時間を初期化
-	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
-};
-// 初期化
-void BulletPlayerStateFainting::Enter() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsPlaying(true);		// アニメーション再生
-	anima->SetIsLoop(true);			// アニメーションをループさせるか
-	anima->SetStratAnimeTime();		// アニメーション時間を初期化
-	anima->SetAnimationSpeed(0.75f); // アニメーションスピード設定
-	anima->SetAnimetion("Stan1", 0.10f); // 流すアニメーション設定
-	timer_ = 0;		// タイマーを0に設定
-
-
-	Input* input = character_->GetInput();
-	prevleftStick = input->GetGamePadLeftStick();
-};
-
-#pragma endregion // 気絶
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Player/Bullet/BulletPlayerState.h
-============================================================
-#pragma once
-#include "DirectXGame/application/base/State/BaseMainState.h"
-
-
-
-// 移動
-class BulletPlayerStateIdle : public IdleState
-{
-public:
-	// コンストラクタ
-	BulletPlayerStateIdle(BaseCharacter* player)
-		: IdleState(player) {
-	}
-
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit()override;
-
-	// 初期化
-	void Enter() override;
-};
-
-// 移動
-class BulletPlayerStateMove : public MoveState
-{
-public:
-	// コンストラクタ
-	BulletPlayerStateMove(BaseCharacter* player)
-		: MoveState(player) {
-	}
-
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit()override;
-
-	// 初期化
-	void Enter() override;
-};
-
-// ジャンプ
-class BulletPlayerStateJump : public JumpState {
-public:
-	// コンストラクタ
-	BulletPlayerStateJump(BaseCharacter* player)
-		: JumpState(player) {
-	}
-
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit()override;
-
-	// 初期化
-	void Enter() override;
-
-};
-
-// 攻撃
-class BulletPlayerStateAttack :public AttackState
-{
-public:
-	BulletPlayerStateAttack(BaseCharacter* player)
-		: AttackState(player) {
-	}
-
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-};
-
-// 必殺
-class BulletPlayerStateSpecial :public SpecialState
-{
-public:
-	BulletPlayerStateSpecial(BaseCharacter* player)
-		: SpecialState(player) {
-	}
-
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-};
-
-// スキル
-class BulletPlayerStateSkill : public SkillState
-{
-public:
-	BulletPlayerStateSkill(BaseCharacter* player)
-		: SkillState(player) {
-	}
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-
-private:
-	float timer_ = 0.0f;
-	float changeTimer_ = 0.2f;
-
-};
-
-// 防御
-class BulletPlayerStateDefense :public DefenseState {
-public:
-	BulletPlayerStateDefense(BaseCharacter* player)
-		: DefenseState(player) {
-	}
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-
-private:
-	float timer_ = 0.0f;
-	float defenseTimer_ = 0.25f;
-	bool isDifense_ = false;
-};
-
-// 気絶
-class BulletPlayerStateFainting : public FaintingState {
-public:
-	BulletPlayerStateFainting(BaseCharacter* player)
-		: FaintingState(player) {
-	}
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-
-private:
-	float faintingTimer_ = 5.0f;
-	float timer_ = 0.0f;
-	Vector2 prevleftStick = {};
-};
-
-============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.cpp
 ============================================================
 #include "NormalPlayer.h"
@@ -9892,8 +9466,10 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	Parameters().speed = 40.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	
+	
 	// 移動コンポーネント初期化
-	InitMoveComponent();
+	moveComponent_ = std::make_unique<MovementComponent>();
+	moveComponent_->Initialize(globalVariables_, MovementComponent::ControlType::Manual,"");
 	moveComponent_->SetMoveType(MoveSystem::MoveType::ACCELERATE);
 	moveComponent_->SetIsStickToSpeed(true);
 	moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
@@ -9965,7 +9541,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
-	rengeSp->SetRadius(100);
+	rengeSp->SetRadius(50);
 	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
 	rengeSp->Set(followCamera_, bulletManager_);
 
@@ -9977,30 +9553,6 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	ui_->Initialize(input_, entity2DManager_, globalVariables_);
 	ui_->SetHP(&characterParameterComponent_.HP());
 	ui_->SetStamina(&characterParameterComponent_.Stamina());
-
-
-	std::string nam = "MoveData";
-
-	// ジャンプ
-	globalVariables_->AddItem(nam, "ジャンプ力", moveGlovalData_.power_);
-	globalVariables_->AddItem(nam, "ジャンプ上昇時の重力", moveGlovalData_.upGravity_);
-	globalVariables_->AddItem(nam, "ジャンプ下降時の重力", moveGlovalData_.fallGravity_);
-	
-	// 移動
-	globalVariables_->AddItem(nam, "移動最小速度", moveGlovalData_.minSpeed_);
-	globalVariables_->AddItem(nam, "移動最大速度", moveGlovalData_.maxSpeed_);
-	globalVariables_->AddItem(nam, "移動加速度", moveGlovalData_.speedAcceleration_);
-	globalVariables_->AddItem(nam, "回転速度", moveGlovalData_.rotationSpeed_);
-	globalVariables_->AddItem(nam, "スティック移動量変化", moveGlovalData_.isStickToSpeed_);
-	globalVariables_->AddItem(nam, "空中での移動量変化", moveGlovalData_.isLimitAirSpeed_);
-	globalVariables_->AddItem(nam, "空中移動量変化率", moveGlovalData_.airSpeedRate_);
-
-	// ダッシュ
-	globalVariables_->AddItem(nam, "ダッシュ時間", moveGlovalData_.dashMaxTime);
-	globalVariables_->AddItem(nam, "ダッシュ加速度", moveGlovalData_.dashAcceleration);
-	globalVariables_->AddItem(nam, "ダッシュ減速度", moveGlovalData_.dashFriction);
-	globalVariables_->AddItem(nam, "ダッシュ初速度", moveGlovalData_.dashStartSpeed);
-	globalVariables_->AddItem(nam, "ダッシュ中の重力", moveGlovalData_.isDashGravity);
 
 
 	// キャラクター行動ステート初期化
@@ -10017,17 +9569,19 @@ void NormalPlayer::InitAttack(){
 
 	// 戦闘
 	attackController_ = std::make_unique<AttackController>();
-	attackController_->Initialize(entity3DManager_,&characterParameterComponent_, this);
+	attackController_->Initialize(entity3DManager_,globalVariables_,&characterParameterComponent_, this);
 	attackController_->GetHitCounter().SetHitTimer(2.0f);
 	
+	ComboSystem* combo = attackController_->GetComboSystem();
 
 	//
-	ApplyGlobalComboData("AttackComboData1", data1_);
-	ApplyGlobalComboData("AttackComboData2", data2_);
-	ApplyGlobalComboData("AttackComboData3", data3_);
+	combo->ApplyGlobalComboData("AttackComboData1", data1_);
+	combo->ApplyGlobalComboData("AttackComboData2", data2_);
+	combo->ApplyGlobalComboData("AttackComboData3", data3_);
+	combo->ApplyGlobalComboData("AttackComboData(Jump)", data4_);
 
 	
-	//
+	// 
 	ReloadComboData();
 
 	// インプットハンドラー
@@ -10159,7 +9713,10 @@ void NormalPlayer::Draw2D()
 {
 	// UI表示
 	ui_->SetIsTextmax(special_->GetIsSpecial());
+	
+
 	ui_->SetIsTextRB(special_->GetIsSpecial());
+
 	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
 	ui_->Draw();
@@ -10219,9 +9776,39 @@ void NormalPlayer::Attack()
 	else if (isMove || isIdle || isJump) {
 		GetAttackController()->SetIsAttack(true);
 		stateMachine_->ChangeState(CharacterMainState::Attack);
-		GetAttackController()->GetComboSystem()->StartCombo("Attack1");
+		if (isJump) {
+			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
+		}
+		else {
+			GetAttackController()->GetComboSystem()->StartCombo("Attack1");
+		}
 	}
 
+}
+
+void NormalPlayer::HeavyAttack()
+{
+	bool isMove = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
+	bool isIdle = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
+	bool isJump = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
+	bool isAttack = stateMachine_->GetCurrentMainState() == CharacterMainState::Attack;
+
+
+	// 攻撃
+	if (isAttack) {
+		GetAttackController()->SetIsAttack(true);
+		GetAttackController()->GetComboSystem()->InputCombo(AttackInput::Heavy);
+	}
+	else if (isMove || isIdle || isJump) {
+		GetAttackController()->SetIsAttack(true);
+		stateMachine_->ChangeState(CharacterMainState::Attack);
+		if (isJump) {
+			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
+		}
+		else {
+			GetAttackController()->GetComboSystem()->StartCombo("Attack1");
+		}
+	}
 }
 
 #pragma endregion //移動関係
@@ -10229,224 +9816,115 @@ void NormalPlayer::Attack()
 #pragma region MyRegion
 
 void NormalPlayer::ApplyGlobalVariables(){
+	ComboSystem* combo = attackController_->GetComboSystem();
 
-	SetGlobalComboData("AttackComboData1", data1_);
-	SetGlobalComboData("AttackComboData2", data2_);
-	SetGlobalComboData("AttackComboData3", data3_);
-
-
-	std::string nam = "MoveData";
-
-	moveGlovalData_.power_ = globalVariables_->GetValue<float>(nam, "ジャンプ力");
-	moveGlovalData_.upGravity_ = globalVariables_->GetValue<float>(nam, "ジャンプ上昇時の重力");
-	moveGlovalData_.fallGravity_ = globalVariables_->GetValue<float>(nam, "ジャンプ下降時の重力");
-	
-	moveGlovalData_.minSpeed_			= globalVariables_->GetValue<float>(nam, "移動最小速度");
-	moveGlovalData_.maxSpeed_			= globalVariables_->GetValue<float>(nam, "移動最大速度");
-	moveGlovalData_.speedAcceleration_	= globalVariables_->GetValue<float>(nam, "移動加速度");
-	moveGlovalData_.rotationSpeed_		= globalVariables_->GetValue<float>(nam, "回転速度");
-	moveGlovalData_.isStickToSpeed_		= globalVariables_->GetValue<bool>(nam, "スティック移動量変化");
-	moveGlovalData_.isLimitAirSpeed_	= globalVariables_->GetValue<bool>(nam, "空中での移動量変化");
-	moveGlovalData_.airSpeedRate_		= globalVariables_->GetValue<float>(nam, "空中移動量変化率");
-
-
-	moveGlovalData_.dashMaxTime			= globalVariables_->GetValue<float>(nam, "ダッシュ時間");
-	moveGlovalData_.dashAcceleration	= globalVariables_->GetValue<float>(nam, "ダッシュ加速度");
-	moveGlovalData_.dashFriction		= globalVariables_->GetValue<float>(nam, "ダッシュ減速度");
-	moveGlovalData_.dashStartSpeed		= globalVariables_->GetValue<float>(nam, "ダッシュ初速度");
-	moveGlovalData_.isDashGravity		= globalVariables_->GetValue<bool>(nam, "ダッシュ中の重力");
-
-
-	// ジャンプに関するパラメータ設定
-	moveComponent_->GetJumpSystem()->GetData().fallGravity_ = moveGlovalData_.fallGravity_;
-	moveComponent_->GetJumpSystem()->GetData().upGravity_ = moveGlovalData_.upGravity_;
-	moveComponent_->GetJumpSystem()->GetData().power_	= moveGlovalData_.power_;
-
-	// 移動パラメータ設定
-	moveComponent_->SetSpeed(moveGlovalData_.minSpeed_, moveGlovalData_.maxSpeed_);
-	moveComponent_->GetMoveSystem()->GetData().speedAcceleration = moveGlovalData_.speedAcceleration_;
-	moveComponent_->GetMoveSystem()->GetData().rotationSpeed	= moveGlovalData_.rotationSpeed_;
-	moveComponent_->GetMoveSystem()->GetData().isStickToSpeed	= moveGlovalData_.isStickToSpeed_;
-	moveComponent_->GetMoveSystem()->GetData().isLimitAirSpeed	= moveGlovalData_.isLimitAirSpeed_;
-	moveComponent_->GetMoveSystem()->GetData().airSpeedRate		= moveGlovalData_.airSpeedRate_;
-
-	// ダッシュパラメータ設定
-	moveComponent_->GetDashSystem()->GetData().maxTime		= moveGlovalData_.dashMaxTime;
-	moveComponent_->GetDashSystem()->GetData().acceleration = moveGlovalData_.dashAcceleration;
-	moveComponent_->GetDashSystem()->GetData().friction		= moveGlovalData_.dashFriction;
-	moveComponent_->GetDashSystem()->GetData().startSpeed	= moveGlovalData_.dashStartSpeed;
-	moveComponent_->GetDashSystem()->GetData().isDashGravity = moveGlovalData_.isDashGravity;
+	combo->SetGlobalComboData("AttackComboData1", data1_);
+	combo->SetGlobalComboData("AttackComboData2", data2_);
+	combo->SetGlobalComboData("AttackComboData3", data3_);
+	combo->SetGlobalComboData("AttackComboData(Jump)", data4_);
 }
 
-void NormalPlayer::ApplyGlobalComboData(const std::string& name, ComboGlovalData& data)
-{
-	globalVariables_->CreateGroup(name);
-
-	globalVariables_->AddItem(name, "ダメージ", data.damage);
-	globalVariables_->AddItem(name, "ヒットボックス発生時間", data.hitBoxWindowStart_);
-	globalVariables_->AddItem(name, "ヒットボックス生存時間", data.hitBoxLifeTime_);
-	
-	globalVariables_->AddItem(name, "Y方向ノックバック", data.isVerticalBoost_);
-	globalVariables_->AddItem(name, "ノックバック力", data.knockbackPower);
-	globalVariables_->AddItem(name, "Y方向ノックバック力", data.knockbackPowerY);
-	globalVariables_->AddItem(name, "ノックバック持続時間", data.knockbackDuration_);
-
-	globalVariables_->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
-	globalVariables_->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
-	globalVariables_->AddItem(name, "コンボ終了時間", data.stateEndTime);
-	globalVariables_->AddItem(name, "コンボ移行時間", data.stateNextTime);
-	globalVariables_->AddItem(name, "コンボ中の重力", data.isGravity);
-
-	globalVariables_->AddItem(name, "アニメーション速度", data.animationSpeed_);
-
-
-
-
-	SetGlobalComboData(name, data);
-}
-
-void NormalPlayer::SetGlobalComboData(const std::string& name, ComboGlovalData& data)
-{
-	data.damage = globalVariables_->GetValue<float>(name, "ダメージ");
-	data.hitBoxWindowStart_ = globalVariables_->GetValue<float>(name, "ヒットボックス発生時間");
-	data.hitBoxLifeTime_ = globalVariables_->GetValue<float>(name, "ヒットボックス生存時間");
-	data.isVerticalBoost_ = globalVariables_->GetValue<bool>(name, "Y方向ノックバック");
-	data.knockbackPower = globalVariables_->GetValue<float>(name, "ノックバック力");
-	data.knockbackPowerY = globalVariables_->GetValue<float>(name, "Y方向ノックバック力");
-	data.knockbackDuration_ = globalVariables_->GetValue<float>(name, "ノックバック持続時間");
-
-	data.stateInputStartTime = globalVariables_->GetValue<float>(name, "コンボ入力受付開始時間");
-	data.stateInputEndTime = globalVariables_->GetValue<float>(name, "コンボ入力受付終了時間");
-	data.stateEndTime = globalVariables_->GetValue<float>(name, "コンボ終了時間");
-	data.stateNextTime = globalVariables_->GetValue<float>(name, "コンボ移行時間");
-	data.isGravity = globalVariables_->GetValue<bool>(name, "コンボ中の重力");
-	data.animationSpeed_ = globalVariables_->GetValue<float>(name, "アニメーション速度");
-}
 
 void NormalPlayer::ReloadComboData()
 {
 	GetAttackController()->GetComboSystem()->ClearNode();
+
+	HitBoxSystem* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
+	ComboSystem* comboSystem = GetAttackController()->GetComboSystem();
+
 	// コンボデータ設定
 	ComboData data1{};
 	ComboData data2{};
 	ComboData data3{};
+	ComboData data4{};
 	// ヒットボックスデータ
 	HitBoxCollData hitData1{};
 	HitBoxCollData hitData2{};
 	HitBoxCollData hitData3{};
-	hitData1.isEneble = true;
-	hitData1.isLine = true;
-	hitData1.layer = CollisionLayer::PlayerAttack;
-	hitData1.tag = CollisionTag::PlayerAttack;
-	hitData1.mask = CollisionLayer::Enemy;
-	hitData1.name = "obbColl1";
-	hitData1.offset = provisionalData_.collider1Pos;
-	hitData1.size = provisionalData_.obbColliderSize;
+	HitBoxCollData hitData4{};
 
 
-	hitData1.damage = data1_.damage;
-	hitData1.knockbackData.GetData().duration_ = data1_.knockbackDuration_;
-	hitData1.knockbackData.GetData().power_ = data1_.knockbackPower;
-	hitData1.knockbackData.GetData().verticalBoost_ = data1_.knockbackPowerY;
-	hitData1.knockbackData.GetData().isVerticalBoost_ = data1_.isVerticalBoost_;
+	GlobalHitBoxdata hitBoxdata;
+	hitBoxdata.size = provisionalData_.obbColliderSize;
+	hitBoxdata.offset = provisionalData_.collider1Pos;
+	GlobalHitBoxdata hitBoxdata2;
+	hitBoxdata2.offset = provisionalData_.collider2Pos;
+	hitBoxdata2.size = provisionalData_.obbCollider2Size;
+	GlobalHitBoxdata hitBoxdata3;
+	hitBoxdata3.offset = { 0,0,3 };
+	hitBoxdata3.size = { 10,10,10 };
+	GlobalHitBoxdata hitBoxdata4;
+	hitBoxdata4.offset = { 0,0,0 };
+	hitBoxdata4.radius = 20.0f;
 
 
-	hitData2 = hitData1;
-	hitData2.name = "obbColl2";
-	hitData2.offset = provisionalData_.collider2Pos;
-	hitData2.size = provisionalData_.obbCollider2Size;
-
-	
-	hitData3 = hitData1;
-	hitData3.name = "obb";
-	hitData3.offset = { 0,0,3 };
-	hitData3.size = { 10,10,10 };
-
-
-	// コンボ１のデータ送る
-	data1.hitBox.AddCollider(hitData3);
-	
-	hitData1.damage = data2_.damage;
-	hitData1.knockbackData.GetData().duration_ = data2_.knockbackDuration_;
-	hitData1.knockbackData.GetData().power_ = data2_.knockbackPower;
-	hitData1.knockbackData.GetData().verticalBoost_ = data2_.knockbackPowerY;
-	hitData1.knockbackData.GetData().isVerticalBoost_ = data2_.isVerticalBoost_;
-	hitData2.damage = data2_.damage;
-	hitData2.knockbackData.GetData().duration_ = data2_.knockbackDuration_;
-	hitData2.knockbackData.GetData().power_ = data2_.knockbackPower;
-	hitData2.knockbackData.GetData().verticalBoost_ = data2_.knockbackPowerY;
-	hitData2.knockbackData.GetData().isVerticalBoost_ = data2_.isVerticalBoost_;
-	
-
-	// コンボ２のデータ送る
-	data2.hitBox.AddCollider(hitData1);
-	data2.hitBox.AddCollider(hitData2);
-	
-	hitData1.damage = data3_.damage;
-	hitData1.knockbackData.GetData().duration_ = data3_.knockbackDuration_;
-	hitData1.knockbackData.GetData().power_ = data3_.knockbackPower;
-	hitData1.knockbackData.GetData().verticalBoost_ = data3_.knockbackPowerY;
-	hitData1.knockbackData.GetData().isVerticalBoost_ = data3_.isVerticalBoost_;
-	hitData2.damage = data3_.damage;
-	hitData2.knockbackData.GetData().duration_ = data3_.knockbackDuration_;
-	hitData2.knockbackData.GetData().power_ = data3_.knockbackPower;
-	hitData2.knockbackData.GetData().verticalBoost_ = data3_.knockbackPowerY;
-	hitData2.knockbackData.GetData().isVerticalBoost_ = data3_.isVerticalBoost_;
-
-
-	// コンボ３のデータ送る
-	data3.hitBox.AddCollider(hitData1);
-	data3.hitBox.AddCollider(hitData2);
+	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBoxShape::kOBB,HitBoxUseType::kPlayer, hitBoxdata, hitData1);
+	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata2, hitData2);
+	hitBoxSystem->CreateHitBoxCollData("obb", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata3, hitData3);
+	hitBoxSystem->CreateHitBoxCollData("obb2", HitBoxShape::kSphere, HitBoxUseType::kPlayer,hitBoxdata4, hitData4);
 	
 
 	// データ
+	// コンボ１のデータ送る
+	data1.hitBox.AddCollider(hitData3, data1_);
+
 	data1.hitBox.ClearUseHitBox();
 	data1.hitBox.AddUseHitBox("obb");
-	SetData(data1, data1_);
+
+
+	comboSystem->SetData(data1, data1_);
 	data1.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
 	GetAttackController()->GetComboSystem()->AddComboNode("Attack1", data1);	// コンボ追加
 
 
+	// コンボ２のデータ送る
+	data2.hitBox.AddCollider(hitData1, data2_);
+	data2.hitBox.AddCollider(hitData2, data2_);
 	// データ
 	data2.hitBox.ClearUseHitBox();
 	data2.hitBox.AddUseHitBox("obbColl1");
 	data2.hitBox.AddUseHitBox("obbColl2");
-	SetData(data2, data2_);
+	comboSystem->SetData(data2, data2_);
 	data2.hitBox.SetPerent(&weapon_->GetObject3D()->GetWorldTransform());
 	GetAttackController()->GetComboSystem()->AddComboNode("Attack2", data2);	// コンボ追加
 
 
+	// コンボ３のデータ送る
+	data3.hitBox.AddCollider(hitData1, data3_);
+	data3.hitBox.AddCollider(hitData2, data3_);
 	// データ
 	data3.hitBox.ClearUseHitBox();
 	data3.hitBox.AddUseHitBox("obbColl1");
 	data3.hitBox.AddUseHitBox("obbColl2");
-	SetData(data3, data3_);
+
+
+	comboSystem->SetData(data3, data3_);
 	data3.hitBox.SetPerent(&weapon_->GetObject3D()->GetWorldTransform());
 	GetAttackController()->GetComboSystem()->AddComboNode("Attack3", data3);	// コンボ追加
 
 
+	// ジャンプコンボのデータ送る
+	data4.hitBox.AddCollider(hitData4, data4_);
+	// データ(ジャンプ)
+	data4.hitBox.ClearUseHitBox();
+	data4.hitBox.AddUseHitBox("obb2");
+	data4.comboCondition.GetData().type = ComboCondition::EndConditionType::kOnGround;	// 着地したら終了
+	data4.hitBox.GetData().dependenceType_ = HitBoxSystem::Type::kParentIndependent;	// 依存関係なし独立
+	data4.hitBox.GetData().spawnType_ = ComboHitBox::HitBoxSpawnType::kOnGround;			// 着地したら発生
+	data4.hitBox.GetData().offset_ = { 0,0,5.5f };
+
+	comboSystem->SetData(data4, data4_);
+	data4.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
+	GetAttackController()->GetComboSystem()->AddComboNode("JumpAttack", data4);	// コンボ追加
+
+
+	
 
 	GetAttackController()->GetComboSystem()->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack1", AttackInput::Heavy, "Attack3"); // コンボ連結
 	GetAttackController()->GetComboSystem()->ConnectCombo("Attack2", AttackInput::Light, "Attack3"); // コンボ連結
+	GetAttackController()->GetComboSystem()->ConnectCombo("JumpAttack", AttackInput::Light, "Attack2"); // コンボ連結
 
-}
-
-void NormalPlayer::SetData(ComboData& data,const ComboGlovalData& gData)
-{
-	data.hitBox.GetData().hitBpxWindowStart_ = gData.hitBoxWindowStart_;	// 発生時間
-	data.hitBox.GetData().lifeTime_ = gData.hitBoxLifeTime_;				// 生成時間
-
-	// 入力受付時間設定
-	data.comboCondition.ConditionStartEnd(gData.stateInputStartTime, gData.stateInputEndTime);
-	data.comboCondition.GetData().stateNextTime = gData.stateNextTime;
-	data.comboCondition.GetData().stateEndTime = gData.stateEndTime;
-
-	// 重力
-	data.motion.GetData().isGravity_ = gData.isGravity;
-	// アニメーションスピード
-	data.motion.GetData().animationSpeed_ = gData.animationSpeed_;
-
+	
 }
 
 #pragma endregion // そのほか
@@ -10494,50 +9972,16 @@ public:
 	// ジャンプ
 	void Jump() override;
 
-	// 攻撃
+	// 攻撃(弱攻撃)
 	void Attack() override;
+
+	/// 攻撃(強攻撃)
+	void HeavyAttack() override;
+
+
 
 	// プレイヤUI取得
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };
-
-private:
-
-
-	struct MoveGlovalData {
-		// ジャンプ力
-		float power_ = 800.0f;
-		// 上昇時の重力係数
-		float upGravity_ = 15.0f;
-		// 落下時の重力係数
-		float fallGravity_ = 30.0f;
-		// 最小速度
-		float minSpeed_ = 0.1f;
-		// 最大速度
-		float maxSpeed_ = 1.0f;
-		// 加速度
-		float speedAcceleration_ = 0.1f;
-		// 回転速度
-		float rotationSpeed_ = 0.1f;
-		// スティックの角度によって速度が変化するか
-		bool isStickToSpeed_ = true;
-		// 空中での移動量制限を行うか
-		bool isLimitAirSpeed_ = true;
-		// 空中での移動変化量
-		float airSpeedRate_ = 0.85f;
-
-
-		// ダッシュ初速度
-		float dashStartSpeed = 100.0f;
-		// ダッシュ加速度
-		float  dashAcceleration = 0.0f;
-		// ダッシュ減衰度
-		float  dashFriction = 10.0f;
-		// 最大ダッシュ時間
-		float  dashMaxTime = 0.15f;
-		// ダッシュ中に重力適用させるかのフラグ
-		bool isDashGravity = false;
-	};
-	MoveGlovalData moveGlovalData_;
 
 private:
 	void InitAttack();
@@ -10554,52 +9998,18 @@ private:
 	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 
 
-
-
-	struct ComboGlovalData {
-		float hitBoxWindowStart_ = 0.0f;	// ヒットボックスの生成タイミング時間
-		float hitBoxLifeTime_ = 0.5f;		// ヒットボックスの生存時間
-
-		float knockbackDuration_ = 0.1f;	// ノックバック持続時間
-		float knockbackPower = 30.0f;		// ノックバックパワー
-		float knockbackPowerY = 30.0f;		// ノックバックY方向パワー
-		bool isVerticalBoost_ = false;		// Y方向にノックバックするか
-
-		float damage = 20;					// ダメージ
-
-		float stateInputStartTime = 0.1f;	// 入力受付時間
-		float stateInputEndTime = 0.5f;		// 入力終了時間
-		float stateEndTime = 0.5f;			// ステート終了時間
-		float stateNextTime = 0.45f;		// ステート移行時間
-
-
-		bool isGravity = true;				// 重力はあるか？
-
-
-		float animationSpeed_ = 1.0f;		// アニメーションスピード
-
-
-		Vector3 offsetPos_ = {};			// コライダー位置
-		Vector3 colliderSize = { 1.0f,1.0f,1.0f };	// コライダーサイズ
-	};
 	ComboGlovalData data1_;
 	ComboGlovalData data2_;
 	ComboGlovalData data3_;
+	ComboGlovalData data4_;
 
 	ComboData comboData1{};
 	ComboData comboData2{};
 	ComboData comboData3{};
+	ComboData comboData4{};
 
-
-	//
-	void ApplyGlobalComboData(const std::string& name, ComboGlovalData& data);
-
-	void SetGlobalComboData(const std::string& name, ComboGlovalData& data);
 
 	void ReloadComboData();
-
-	//
-	void SetData(ComboData& data ,const ComboGlovalData& gData);
 
 	struct ProvisionalData {
 		Vector3 size = { 1.25f,1.25f ,1.25f };// サイズ
@@ -10615,7 +10025,6 @@ private:
 		Vector3 collider2Pos = { 0,3.5f,0.5f };
 	};
 	ProvisionalData provisionalData_;
-
 };
 
 ============================================================
@@ -10635,6 +10044,9 @@ void PlayerStateIdle::Update() {
 	BaseSpecial* special = character_->GetSpecial();
 	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	MoveSystem* move = character_->GetMoveComponent()->GetMoveSystem();
+	character_->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
+
+
 
 	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
 	if (isTriggerLT) {
@@ -10696,7 +10108,7 @@ void PlayerStateIdle::Enter() {
 	anima->SetIsLoop(true);			// ループさせる
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	anima->SetAnimetion("Idle1", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimetion("Idle2", 0.1f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 };
 
@@ -10863,6 +10275,7 @@ void PlayerStateAttack::Exit()
 	anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
 	character_->GetMoveComponent()->SetCanMove(true);
 	character_->GetMoveComponent()->GetMoveSystem()->SetIsAttack(false);
+	character_->GetMoveComponent()->GetJumpSystem()->SetIsAttack(false);
 }
 
 void PlayerStateAttack::Enter()
@@ -10872,6 +10285,7 @@ void PlayerStateAttack::Enter()
 	// 武器
 	weapon->GetObject3D()->SetIsDraw(true);	 // 武器描画
 	character_->GetMoveComponent()->GetMoveSystem()->SetIsAttack(true);
+	character_->GetMoveComponent()->GetJumpSystem()->SetIsAttack(true);
 }
 
 #pragma endregion // 攻撃
@@ -12030,6 +11444,331 @@ private: // 一旦
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Game/GameData.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/struct/Structs3D.h>
+
+
+
+/// <summary>
+/// ゲーム情報を格納したクラス
+/// </summary>
+struct GamePlayData {
+public:
+
+	// プレイヤーのデータ
+	struct PlayerData {
+		// プレイヤーの倒したカウント
+		int killCount = 0;
+		// プレイヤーのレベル
+		int level = 0;
+		// HP
+		float hp = 0;
+	};
+
+	// 敵のデータ
+	struct EnemyData {
+		// 今まで出た敵の数
+		int spawnCount = 0;
+		// 現在の出現数
+		int currentSpawnCount = 0;
+	};
+
+	// ステージデータ
+	struct StageData {
+		
+	};
+
+	// 進行データ
+	struct FlowData {
+		// 現在のウェーブ
+		int currentWave = 0; 
+		// ゲームを始めてからの時間
+		float elapsedTime = 0.0f;
+	};
+	PlayerData playerData_;
+	EnemyData enemyData_;
+	FlowData flowData_;
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/GameEventController.cpp
+============================================================
+#include "GameEventController.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
+#include "DirectXGame/engine/MyGame/MyGame.h"
+#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+
+
+
+void GameEventController::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
+{
+	entity3DManager_ = entity3DManager;		// エンティティ3d
+	globalVariables_ = globalVariables;		// 保存項目
+	characterManager_ = characterManager;	// キャラクター管理
+
+
+	// キャラクター出現管理クラス初期化
+	characterSpawnManager_ = std::make_unique<CharacterSpawnManager>();
+	characterSpawnManager_->Initialize(characterManager_, entity3DManager_->Get3DLineCommon());
+
+	//// スポーン情報初期化
+	SpawnInfo data;
+	data.Initialize("test",1,30);
+	data.size_ = { 50,1,50 };
+	data.spawnInterval_ = 10.0f;
+	data.spawnTimer_ = 0.0f;
+	characterSpawnManager_->AddCharacterSpawn(data);
+
+	characterSpawnManager_->GetCharacterSpawn("test")->GetSpawnTransform().translate_ = { 0,0,100 };
+}
+
+
+void GameEventController::Update() {
+	// キャラクター出現管理更新
+	characterSpawnManager_->Update();
+
+
+	bool isEndEvent = characterSpawnManager_->GetCharacterSpawn("test")->GetSpawnInfo().IsEnd();
+	bool isCharaPlayerDed = !characterManager_->GetPlayer()->GetAlive();
+	bool isCharaEnemyDed = characterManager_->GetCharacterCount(CharacterType::Enemy) <= 0;
+
+
+	if (isCharaPlayerDed) {
+		isEndEvent_ = true;
+	}
+	if (isEndEvent && isCharaEnemyDed) {
+		isEndEvent_ = true;
+	}
+
+};
+
+
+
+void Event::Initialize(const EventData& data)
+{
+	data_ = data;
+}
+
+void Event::Update() {
+	timer += MyGame::GameTime();
+
+
+	if (data_.maxTimer <= timer) {
+
+	}
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/GameEventController.h
+============================================================
+#pragma once
+#include <DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.h>
+
+
+// 前方宣言
+class Entity3DManager;
+class Entity2DManager;
+class GlobalVariables;
+
+
+/// <summary>
+/// イベントデータ構造体
+/// </summary>
+struct EventData {
+	int phase = 0;							// イベントフェーズ
+	float maxTimer = 0.0f;					// イベント最大タイマー
+};
+
+/// <summary>
+/// イベントクラス
+/// </summary>
+class Event {
+public:
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <param name="data"></param>
+	void Initialize(const EventData& data);
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update();
+
+private:
+	EventData data_;				// イベントデータ
+	bool isEventActive_ = false;	// イベントがアクティブかどうか
+	float timer = 0.0f;				// イベントタイマー
+	bool endFlag_ = false;			// イベント終了フラグ
+	bool isEndPhase_ = false;		// 最終フェーズか
+
+};
+
+
+/// <summary>
+/// ゲームのイベントを管理するクラス
+/// </summary>
+class GameEventController {
+public:
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables,  BaseCharacterManager* characterManager);
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	void Update();
+
+	
+	void Draw() {};
+
+
+	bool IsEndEvent() const { return isEndEvent_; };
+
+private:
+	std::unique_ptr<CharacterSpawnManager> characterSpawnManager_;
+
+	bool isEndEvent_ = false;	// イベント終了フラグ
+private:
+	Entity3DManager* entity3DManager_ = nullptr;
+	GlobalVariables* globalVariables_ = nullptr;
+	BaseCharacterManager* characterManager_ = nullptr;
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/GameFlowController.cpp
+============================================================
+#include "GameFlowController.h"
+#include <DirectXGame/engine/scene/SceneManager.h>
+
+void GameFlowController::Initialize(SceneManager* sceneManager, GlobalVariables* globalVariables, BaseCharacterManager* characterManager){
+	this->globalVariables = globalVariables;	// 保存項目
+	this->characterManager = characterManager;	// キャラクター管理するクラス
+	this->sceneManager = sceneManager;			// シーンマネージャー
+	entity3DManager = sceneManager->GetEntity3DManager();	// エンティティ3d
+	input  = sceneManager->GetInput();						// 入力
+
+	// ゲームイベント制御クラス初期化
+	gameEventController_ = std::make_unique<GameEventController>();
+	gameEventController_->Initialize(entity3DManager,globalVariables, characterManager);
+
+}
+
+void GameFlowController::Update(float dt) {
+	gameEventController_->Update();
+
+	// シーン変更処理
+	SceneChange();
+};
+
+void GameFlowController::Draw() {
+	gameEventController_->Draw();
+}
+
+void GameFlowController::SceneChange(){
+	if (gameEventController_->IsEndEvent()) {
+		sceneManager->ChangeScene("TITLE");
+	}
+}
+
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/GameFlowController.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/input/Input.h>
+#include "GameEventController.h"
+#include "GameData.h"
+
+// 前方宣言
+class BaseCharacterManager;
+class GlobalVariables;
+class SceneManager;
+class Entity3DManager;
+
+/// <summary>
+/// ゲームの流れやルールを制御するクラス
+/// </summary>
+class GameFlowController {
+public:
+
+	// 初期化
+	void Initialize(SceneManager* sceneManager,GlobalVariables* globalVariables, BaseCharacterManager* characterManager);
+
+	// 更新
+	void Update(float dt);
+
+	// 描画
+	void Draw();
+
+private:
+
+	// シーン変更
+	void SceneChange();
+
+private: // 
+	// ゲームイベント制御クラス
+	std::unique_ptr<GameEventController> gameEventController_ = nullptr;
+	// ゲームプレイデータ
+	GamePlayData gamePlayData_;
+
+private: // 貰いもの
+	Entity3DManager* entity3DManager = nullptr;
+	BaseCharacterManager* characterManager = nullptr;
+	GlobalVariables* globalVariables = nullptr;
+	SceneManager* sceneManager = nullptr;
+	Input* input = nullptr;
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Game/GameWave.h
+============================================================
+#pragma once
+#include <vector>
+
+/// <summary>
+/// ゲームのウェーブ
+/// </summary>
+class GameWave {
+public:
+
+    int waveIndex;
+   // std::vector<SpawnInfo> spawns; // このウェーブで出す敵
+    float nextWaveDelay;           // 次ウェーブまでの時間
+
+
+private:
+
+};
+
+// ウェーブ管理クラス
+class WaveManager
+{
+public:
+    void Initialize(const std::vector<GameWave>& waves);
+    void Update(float dt);
+    bool IsWaveActive() const;
+    int  GetCurrentWave() const;
+
+private:
+    int currentWaveIndex = 0;
+    float waveTimer = 0.0f;
+
+    std::vector<GameWave> waveList;
+    void StartWave(int index);
+    void UpdateWave(float dt);
+    void EndWave();
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Input/InputHander.cpp
 ============================================================
 #include "InputHander.h"
@@ -12053,7 +11792,10 @@ void AttackCommand::Exec(BaseCharacter& character)
 {
 	character.Attack();
 }
-
+void HeavyAttackCommand::Exec(BaseCharacter& character)
+{
+	character.HeavyAttack();
+}
 
 void InputHander::AssignMoveCommandPad()
 {
@@ -12069,6 +11811,10 @@ void InputHander::AssignAttackCommandPad()
 {
 	this->attackPad = std::make_unique<AttackCommand>();
 }
+void InputHander::AssignHeavyAttackCommandPad()
+{
+	this->attackHeavyPad = std::make_unique<HeavyAttackCommand>();
+}
 
 
 
@@ -12080,9 +11826,13 @@ ICommand* InputHander::HandleInput()
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
 			return jampPad.get();
 		}
-		// 攻撃コマンド
+		// 攻撃コマンド(弱攻撃)
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
 			return attackPad.get();
+		}
+		// 攻撃コマンド(強攻撃)
+		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
+			return attackHeavyPad.get();
 		}
 		// 移動コマンド
 		if (input_->GetGamePadLeftStick().Length() != 0) {
@@ -12131,6 +11881,14 @@ public:
 	void Exec(BaseCharacter& character) override;
 };
 
+// 攻撃コマンド
+class HeavyAttackCommand : public ICommand
+{
+public:
+	void Exec(BaseCharacter& character) override;
+};
+
+
 // 前方宣言
 class Input;
 // インプットハンドラー
@@ -12147,6 +11905,8 @@ public:
 	void AssignJampCommandPad();
 	// 割り当て攻撃
 	void AssignAttackCommandPad();
+	// 割り当て攻撃
+	void AssignHeavyAttackCommandPad();
 
 private:
 	Input* input_;
@@ -12154,6 +11914,7 @@ private:
 	std::unique_ptr<ICommand> movePad;
 	std::unique_ptr<ICommand> jampPad;
 	std::unique_ptr<ICommand> attackPad;
+	std::unique_ptr<ICommand> attackHeavyPad;
 
 };
 
@@ -12697,14 +12458,16 @@ void JumpSystem::Update(float dt, WorldTransform& world, RigidBodyComponent& rig
 	}
 	else {
 		// ダッシュ中には重力の切り替えはダッシュシステムに任せる
-		if (!isDash_) {	 
+		if (!isDash_ || !isAttack_) {
 			rigid.SetIsGravity(true);					// 重力オン
 		}
-		if (state_ == State::Fall) {
-			rigid.SetGravityScale(data_.fallGravity_);	// 重力スケールセット
-		}
-		else {
-			rigid.SetGravityScale(data_.upGravity_);	// 重力スケールセット
+		if (!isAttack_) {
+			if (state_ == State::Fall) {
+				rigid.SetGravityScale(data_.fallGravity_);	// 重力スケールセット
+			}
+			else {
+				rigid.SetGravityScale(data_.upGravity_);	// 重力スケールセット
+			}
 		}
 		isLanding_ = false;							// 着地していない
 	}
@@ -12843,6 +12606,8 @@ public:
 	void SetInputPressed(bool isPressed) { isInputPressed_ = isPressed; }
 	// ダッシュ中か設定
 	void SetIsDash(bool dash) { isDash_ = dash; }
+	// 攻撃中か設定
+	void SetIsAttack(bool is) { isAttack_ = is; };
 
 private:
 
@@ -12861,6 +12626,8 @@ private:
 private: // 貰うもの
 	// ダッシュ中かどうか
 	bool isDash_ = false;
+	// 攻撃中かどうか
+	bool isAttack_ = false;
 private:
 	// 地面の高さ
 	float groundHeight_ = 0.0f;
@@ -12898,7 +12665,12 @@ File Path: project/DirectXGame/application/base/Move/MoveComponent.cpp
 #include "MoveComponent.h"
 
 
-void MovementComponent::Initialize(ControlType type) {
+void MovementComponent::Initialize(GlobalVariables* globalVariables, ControlType type, const std::string& name) {
+	this->globalVariables = globalVariables;
+	
+	name_ = "MoveData" + name;
+
+
 	// 移動システムの生成
 	moveSystem_ = std::make_unique<MoveSystem>();
 	moveSystem_->Initialize();
@@ -12921,9 +12693,13 @@ void MovementComponent::Initialize(ControlType type) {
 
 	// 操作タイプの設定
 	controlType_ = type;
+
+	ApplyGlobalData(name_);
 };
 
 void MovementComponent::Update(float dt, WorldTransform& object, RigidBodyComponent& rigid, Input* input) {
+	SetGlobalData(name_);
+	
 	// ダッシュ時の移動方向を移動システムから取得してダッシュシステムに渡す
 	dashSystem_->SetDirection(moveSystem_->GetDirection());
 	// ダッシュシステムの更新
@@ -12947,6 +12723,67 @@ void MovementComponent::Update(float dt, WorldTransform& object, RigidBodyCompon
 	movementRestrictions_->Update(object);
 }
 
+#pragma region MyRegion
+
+void MovementComponent::ApplyGlobalData(const std::string& name) {
+	
+	globalVariables->CreateGroup(name);
+	
+	
+	// ジャンプ
+	globalVariables->AddItem(name, "ジャンプ力", jumpSystem_->GetData().power_);
+	globalVariables->AddItem(name, "ジャンプ上昇時の重力", jumpSystem_->GetData().upGravity_);
+	globalVariables->AddItem(name, "ジャンプ下降時の重力", jumpSystem_->GetData().fallGravity_);
+
+	// 移動
+	globalVariables->AddItem(name, "移動最小速度", moveSystem_->GetData().minSpeed);
+	globalVariables->AddItem(name, "移動最大速度", moveSystem_->GetData().maxSpeed);
+	globalVariables->AddItem(name, "移動加速度", moveSystem_->GetData().speedAcceleration);
+	globalVariables->AddItem(name, "回転速度", moveSystem_->GetData().rotationSpeed);
+	globalVariables->AddItem(name, "スティック移動量変化", moveSystem_->GetData().isStickToSpeed);
+	globalVariables->AddItem(name, "空中での移動量変化", moveSystem_->GetData().isLimitAirSpeed);
+	globalVariables->AddItem(name, "空中移動量変化率", moveSystem_->GetData().airSpeedRate);
+
+	// ダッシュ
+	globalVariables->AddItem(name, "ダッシュ時間", dashSystem_->GetData().maxTime);
+	globalVariables->AddItem(name, "ダッシュ加速度", dashSystem_->GetData().acceleration);
+	globalVariables->AddItem(name, "ダッシュ減速度", dashSystem_->GetData().friction);
+	globalVariables->AddItem(name, "ダッシュ初速度", dashSystem_->GetData().startSpeed);
+	globalVariables->AddItem(name, "ダッシュ中の重力", dashSystem_->GetData().isDashGravity);
+
+
+	SetGlobalData(name);
+}
+
+void MovementComponent::SetGlobalData(const std::string& name)
+{
+	// ジャンプ
+	jumpSystem_->GetData().power_ = globalVariables->GetValue<float>(name, "ジャンプ力");
+	jumpSystem_->GetData().upGravity_ = globalVariables->GetValue<float>(name, "ジャンプ上昇時の重力");
+	jumpSystem_->GetData().fallGravity_ = globalVariables->GetValue<float>(name, "ジャンプ下降時の重力");
+
+	// 移動
+	moveSystem_->GetData().minSpeed = globalVariables->GetValue<float>(name, "移動最小速度");
+	moveSystem_->GetData().maxSpeed = globalVariables->GetValue<float>(name, "移動最大速度");
+	moveSystem_->GetData().speedAcceleration = globalVariables->GetValue<float>(name, "移動加速度");
+	moveSystem_->GetData().rotationSpeed = globalVariables->GetValue<float>(name, "回転速度");
+	moveSystem_->GetData().isStickToSpeed = globalVariables->GetValue<bool>(name, "スティック移動量変化");
+	moveSystem_->GetData().isLimitAirSpeed = globalVariables->GetValue<bool>(name, "空中での移動量変化");
+	moveSystem_->GetData().airSpeedRate = globalVariables->GetValue<float>(name, "空中移動量変化率");
+
+	// ダッシュ
+	dashSystem_->GetData().maxTime = globalVariables->GetValue<float>(name, "ダッシュ時間");
+	dashSystem_->GetData().acceleration = globalVariables->GetValue<float>(name, "ダッシュ加速度");
+	dashSystem_->GetData().friction = globalVariables->GetValue<float>(name, "ダッシュ減速度");
+	dashSystem_->GetData().startSpeed = globalVariables->GetValue<float>(name, "ダッシュ初速度");
+	dashSystem_->GetData().isDashGravity = globalVariables->GetValue<bool>(name, "ダッシュ中の重力");
+
+}
+
+
+#pragma endregion // 保存と適応
+
+
 
 
 
@@ -12963,6 +12800,10 @@ File Path: project/DirectXGame/application/base/Move/MoveComponent.h
 #include "MovementRestrictions.h"
 #include "MovementState.h"
 
+// 前方宣言
+class GlobalVariables;
+
+
 
 /// <summary>
 /// 移動コンポーネント
@@ -12978,10 +12819,15 @@ public:
 	};
 
 	// 初期化
-	void Initialize(ControlType type);
+	void Initialize(GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
 	void Update(float dt,WorldTransform& object, RigidBodyComponent& rigid, Input* input);
+public:
+	// 保存項目の追加
+	void ApplyGlobalData(const std::string& name);
 
+	// 保存項目の適応
+	void SetGlobalData(const std::string& name);
 public:
 	// 操作タイプ取得
 	void SetControlType(ControlType type) { controlType_ = type; }
@@ -13034,12 +12880,14 @@ private:
 	//
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; // 移動制限システム
 	std::unique_ptr<MovementStateMachine> movementStateMachine_ = nullptr; // 移動状態マシン
-
-
-
-
 	// 操作タイプ
 	ControlType controlType_ = ControlType::Manual;	// 操作タイプ
+
+
+	std::string name_ = "";
+private:
+	GlobalVariables* globalVariables = nullptr;
+
 };
 
 
@@ -13058,6 +12906,8 @@ void MoveSystem::Initialize() {
 
 void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 {
+	// 攻撃中は通常の移動処理しない
+	if (isAttack_) return;
 
 	Vector3 velo = GetVelocity();
 
@@ -13073,18 +12923,7 @@ void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 	// 移動方向を保存
 	DirectionProcess(velo);
 
-	// 攻撃中の回転処理
-	AttackProcess(world);
-
-	if (isAttack_ && !isAttackCanMove_) return;// 攻撃中は移動処理しない
-	if (isAttackCanMove_) {
-		//MoveProcess(dt, world, keepDirection_);
-		//return;
-	}
-	else {
-
-	}
-
+		
 	// ダッシュ時の回転処理
 	DashProcess(world);
 	
@@ -13092,7 +12931,6 @@ void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 
 	// 回転処理
 	RotateProcess(dt, world, direction_);
-
 
 	// 移動処理
 	MoveProcess(dt, world, velo);
@@ -13201,6 +13039,7 @@ void MoveSystem::MoveProcess(float dt, WorldTransform& world, Vector3& velo,bool
 		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
 		if (camera_) {
 			CameraDirectionToMoveDirection(velo);
+			velo = Multiply(velo, speed_);
 		}
 		else {
 			// 移動方向にスピードを掛ける
@@ -13282,7 +13121,7 @@ void MoveSystem::CameraDirectionToMoveDirection(Vector3& velo) {
 		velo.x * cameraWorldMatrix.m[0][2] + velo.z * cameraWorldMatrix.m[2][2]
 	};
 
-	velo = Multiply(Normalize(worldDirection), speed_);
+	velo = Normalize(worldDirection);
 }
 
 void MoveSystem::DirectionProcess(const Vector3& velo)
@@ -13316,16 +13155,16 @@ void MoveSystem::DashProcess(WorldTransform& world)
 	currentYaw = targetYaw;
 }
 
-void MoveSystem::AttackProcess(WorldTransform& world)
+void MoveSystem::AttackProcess(WorldTransform& world, const Vector3& direction)
 {
 	// ダッシュ中は移動処理しない
 	if (!isAttack_) return;
 
 	// 移動ベクトルがゼロなら回転処理しない
-	if (keepDirection_.Length() == 0.0f) return;
+	if (direction.Length() == 0.0f) return;
 
 	// 目標方向（X=Right, Y=Up, Z=Forward）
-	float targetYaw = std::atan2(keepDirection_.x, keepDirection_.z);
+	float targetYaw = std::atan2(direction.x, direction.z);
 
 	float& currentYaw = world.rotate_.y;
 
@@ -13429,14 +13268,15 @@ private:
 	void StateProcess();
 	// アニメーション速度設定
 	void AnimationSpeedProcess();
-	// カメラ基づく移動方向設定
-	void CameraDirectionToMoveDirection(Vector3& velo);
 	// 方向処理
 	void DirectionProcess(const Vector3& velo);
 	// ダッシュ時の処理
 	void DashProcess(WorldTransform& world);
+public:
+	// カメラ基づく移動方向設定
+	void CameraDirectionToMoveDirection(Vector3& velo);
 	// 攻撃中の回転処理
-	void AttackProcess(WorldTransform& world);
+	void AttackProcess(WorldTransform& world, const Vector3& direction);
 
 public: // 取得
 	// 移動データの取得
@@ -14168,6 +14008,22 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	objectReticle_->GetWorldTransform().translate_ = provisionalData_.translate;
 }
 
+// 半径設定
+void RangeBombingSpecial::SetRadius(float rad) { 
+	reticleRad_ = rad; 
+	CylinderPrimitive* primi = static_cast<CylinderPrimitive*>(objectReticle_->GetPrimitive());
+	// シリンダーパラメータ設定
+	ShapeParameter::Cylinder cylinderParam;
+	cylinderParam.height = provisionalData_.cylinderHeight;			// 高さ
+	cylinderParam.innerRadius = reticleRad_;// 上底
+	cylinderParam.outerRadius = reticleRad_;// 下底
+	cylinderParam.isCover = false;			// 蓋するか
+	cylinderParam.segments = provisionalData_.cylinderSegments;			// セグメント数
+	primi->Data() = cylinderParam;
+
+}
+
+
 void RangeBombingSpecial::Update()
 {
 	// ゲージが超えているなら
@@ -14314,7 +14170,7 @@ public:
 	
 
 	// 半径設定
-	void SetRadius(float rad) { reticleRad_ = rad; }
+	void SetRadius(float rad);
 
 	// 半径爆心
 	float GetRadius() const { return reticleRad_; };
@@ -14342,7 +14198,7 @@ private:
 
 	float shotTimer = 0.0f;
 
-	float reticleRad_ = 100.0f;				// レティクルの半径　　　
+	float reticleRad_ = 50.0f;				// レティクルの半径　　　
 	Vector3 rangeBombingPos{};				// レンジボムの位置
 private:
 	Stage* stage_ = nullptr;
@@ -14355,11 +14211,11 @@ private: // 一旦
 	const float fireInterval = 0.01f; // 例：0.04秒ごとに1発ずつ発射
 
 	struct ProvisionalData {
-		Vector3 translate = { 0,2,100 };
+		Vector3 translate = { 0,2,50 };
 		Vector3 rotate = { Math::DegreesToRadians(-90), 0, 0 };
 
 
-		int maxGauge_ = 100;		// 最大ゲージ設定
+		int maxGauge_ = 40;			// 最大ゲージ設定
 		int clock_ = 1;				// 切り替え
 		int maxBullet = 40;			// 発射数
 		int bulletNum = 0;			// 弾番号
@@ -14372,156 +14228,6 @@ private: // 一旦
 	ProvisionalData provisionalData_;
 };
 
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Stage/Manager/StageEventManager.cpp
-============================================================
-#include "StageEventManager.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
-#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
-#include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
-
-
-
-void StageEventManager::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
-{
-	entity3DManager_ = entity3DManager;		// エンティティ3d
-	globalVariables_ = globalVariables;		// 保存項目
-	characterManager_ = characterManager;	// キャラクター管理
-
-
-	// キャラクター出現管理クラス初期化
-	characterSpawnManager_ = std::make_unique<CharacterSpawnManager>();
-	characterSpawnManager_->Initialize(characterManager_, entity3DManager_->Get3DLineCommon());
-
-	//// スポーン情報初期化
-	SpawnInfo data;
-	data.Initialize("test",1,30);
-	data.size_ = { 50,1,50 };
-	data.spawnInterval_ = 10.0f;
-	data.spawnTimer_ = 0.0f;
-	characterSpawnManager_->AddCharacterSpawn(data);
-
-	characterSpawnManager_->GetCharacterSpawn("test")->GetSpawnTransform().translate_ = { 0,0,100 };
-}
-
-
-void StageEventManager::Update() {
-	// キャラクター出現管理更新
-	characterSpawnManager_->Update();
-
-
-	bool isEndEvent = characterSpawnManager_->GetCharacterSpawn("test")->GetSpawnInfo().IsEnd();
-	bool isCharaPlayerDed = !characterManager_->GetPlayer()->GetAlive();
-	bool isCharaEnemyDed = characterManager_->GetCharacterCount(CharacterType::Enemy) <= 0;
-
-
-	if (isCharaPlayerDed) {
-		isEndEvent_ = true;
-	}
-	if (isEndEvent && isCharaEnemyDed) {
-		isEndEvent_ = true;
-	}
-
-};
-
-
-
-void Event::Initialize(const EventData& data)
-{
-	data_ = data;
-}
-
-void Event::Update() {
-	timer += MyGame::GameTime();
-
-
-	if (data_.maxTimer <= timer) {
-
-	}
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Stage/Manager/StageEventManager.h
-============================================================
-#pragma once
-#include <DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.h>
-
-
-// 前方宣言
-class Entity3DManager;
-class Entity2DManager;
-class GlobalVariables;
-
-
-/// <summary>
-/// イベントデータ構造体
-/// </summary>
-struct EventData {
-	int phase = 0;							// イベントフェーズ
-	float maxTimer = 0.0f;					// イベント最大タイマー
-};
-
-/// <summary>
-/// イベントクラス
-/// </summary>
-class Event {
-public:
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	/// <param name="data"></param>
-	void Initialize(const EventData& data);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update();
-
-private:
-	EventData data_;				// イベントデータ
-	bool isEventActive_ = false;	// イベントがアクティブかどうか
-	float timer = 0.0f;				// イベントタイマー
-	bool endFlag_ = false;			// イベント終了フラグ
-	bool isEndPhase_ = false;		// 最終フェーズか
-
-};
-
-
-/// <summary>
-/// ステージのイベントを管理するクラス
-/// </summary>
-class StageEventManager {
-public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables,  BaseCharacterManager* characterManager);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update();
-
-	
-	void Draw() {};
-
-
-	bool IsEndEvent() const { return isEndEvent_; };
-
-private:
-	std::unique_ptr<CharacterSpawnManager> characterSpawnManager_;
-
-	bool isEndEvent_ = false;	// イベント終了フラグ
-private:
-	Entity3DManager* entity3DManager_ = nullptr;
-	GlobalVariables* globalVariables_ = nullptr;
-	BaseCharacterManager* characterManager_ = nullptr;
-};
 
 
 ============================================================
@@ -15694,6 +15400,31 @@ void GameUI::Update()
 
 	UICount* hitCount = GetUICount("hitCount");
 	hitCount->SetCount(ConvertUtility::ToFloat(player_->GetAttackController()->GetHitCounter().GetHitCount()));
+	
+	
+	if (player_->GetAttackController()->GetHitCounter().GetHitCount() <= 0) {
+		
+		hitCount->SetCountColor({ 1,1,1,0.0f });
+		hitCount->GetNameSprite()->SetColor({ 1,1,1,0.0f });
+	}
+	else {
+		float t = player_->GetAttackController()->GetHitCounter().GetHitData().hitTime.LerpT();
+		bool isT = t >= 0.5f;
+
+		Color coNn = hitTextData.color_;
+		Color coNe = hitTextData.nameColor_;
+		
+		
+		if (isT) {
+			hitCount->SetCountColor({ coNn.r ,coNn.g ,coNn.b ,1.0f - t });
+			hitCount->GetNameSprite()->SetColor({ coNe.r ,coNe.g ,coNe.b ,1.0f - t });
+		}
+		else {
+			hitCount->SetCountColor(coNn);
+			hitCount->GetNameSprite()->SetColor(coNe);
+		}
+	}
+
 	// 更新
 	UpdateUIElement(0);
 }
@@ -16024,7 +15755,7 @@ private:
 		Color color_ = { 0,0,1,1 };
 		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
 
-		float maxMeter = 100.0f;
+		float maxMeter = 40.0f;
 		Vector2 offset_ = { 4.0f,4.0f };
 
 		Vector2 size_ = { 200.0f,30.0f };
@@ -17049,8 +16780,8 @@ void GamePlayScene::Initialize()
 
 
 	// ステージイベントマネージャー
-	stageEventManager_ = std::make_unique<StageEventManager>();
-	stageEventManager_->Initialize(GetEntity3DManager(), GetGlobalVariables(), caracterManager_.get());
+	gameFlowController_ = std::make_unique<GameFlowController>();
+	gameFlowController_->Initialize(GetSceneManager(), GetGlobalVariables(), caracterManager_.get());
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
@@ -17221,14 +16952,7 @@ void GamePlayScene::Update()
 	// キャラクターマネージャー更新
 	caracterManager_->Update();
 
-	// ステージイベントマネージャー更新
-	stageEventManager_->Update();
-
-
-	if (stageEventManager_->IsEndEvent()) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
-	}
+	
 	
 #ifdef _DEBUG
 	if (input_->IsTriggerKey(DIK_P)) {
@@ -17273,6 +16997,9 @@ void GamePlayScene::Update()
 	loadData_->Update();
 	// Effect更新
 	effect_->Update();
+	// ゲーム進行マネージャー更新
+	gameFlowController_->Update(MyGame::GameTime());
+
 }
 
 #pragma endregion //更新関係
@@ -17284,6 +17011,8 @@ void GamePlayScene::Finalize(){}
 void GamePlayScene::Draw3D(){
 	////3Dオブジェクトの描画
 	bulletManager_->DrawEffect();
+	// ゲーム進行
+	gameFlowController_->Draw();
 }
 
 // 2D描画
@@ -17325,7 +17054,7 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 
 
 #include "DirectXGame/application/base/Input/InputHander.h"
-#include <DirectXGame/application/base/Stage/Manager/StageEventManager.h>
+#include <DirectXGame/application/base/Game/GameFlowController.h>
 
 /// <summary>
 /// ゲームプレイシーン
@@ -17362,9 +17091,6 @@ public:
 	void CheckAllCollisions();
 
 private:
-
-	std::unique_ptr<StageEventManager> stageEventManager_;
-private:
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 
@@ -17374,6 +17100,9 @@ private:
 
 	static float nowTime;
 	float fps = 0.0f;
+
+	// ゲームの流れやルールの管理をするクラス
+	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
 private:
 	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
 	std::unique_ptr<UICount> sprite;
@@ -18764,25 +18493,66 @@ void TitleScene::Finalize()
 
 void TitleScene::Update()
 {
-	if (input_->IsTriggerKey(DIK_RETURN)) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("GAMEPLAY");
-	}
-	else if (input_->IsControllerConnected()) {
-		if (input_->IsTriggerKey(DIK_1)) {
-			GetSceneManager()->GetSceneData().playerID = 1;
-		}
-		if (input_->IsTriggerKey(DIK_2)) {
-			GetSceneManager()->GetSceneData().playerID = 2;
-		}
-
-
-
+	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
 			GetSceneManager()->ChangeScene("GAMEPLAY");
 		}
 	}
-	//loadData_->Update();
+
+
+#ifdef _DEBUG
+	if (!initialized) {
+		attackSeq.events.push_back({ 5, 15, 0xFF00FF00, "Startup" });
+		attackSeq.events.push_back({ 15, 25, 0xFFFFFF00, "Active" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		initialized = true;
+	}
+
+	ImGui::Begin("Attack Editor");
+
+
+
+	currentFrame++;
+
+	if (currentFrame >= attackSeq.GetFrameMax()) {
+		currentFrame = 0;
+	}
+
+	ImSequencer::Sequencer(
+		&attackSeq,
+		&currentFrame,
+		&expanded,
+		&selected,
+		&firstFrame,
+		ImSequencer::SEQUENCER_EDIT_ALL |
+		ImSequencer::SEQUENCER_ADD |
+		ImSequencer::SEQUENCER_DEL
+	);
+
+	ImGui::Text("Current Frame: %d", currentFrame);
+	ImGui::SliderFloat("Frame PixelWidthTarget",
+		&ImSequencer::g_framePixelWidthTarget,
+		1.0f, 40.0f, "%.1f px");
+	ImGui::SliderFloat("Frame PixelWidth",
+		&ImSequencer::g_framePixelWidth,
+		1.0f, 40.0f, "%.1f px");
+	ImGui::SliderInt("Frame LegendWidth",
+		&ImSequencer::g_legendWidth,
+		50, 500, "%d px");
+	if (selected != -1) {
+		ImGui::Text("Selected Event: %s", attackSeq.events[selected].name.c_str());
+	}
+
+	ImGui::End();
+#endif // _DEBUG
+
 	tail.Update();
 	camera->UpdateMatrix();
 }
@@ -18871,6 +18641,48 @@ File Path: project/DirectXGame/application/scene/TitleScene.h
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
+struct AttackEvent {
+	int startFrame;
+	int endFrame;
+	unsigned int color;
+	std::string name;
+};
+
+class AttackSequence : public ImSequencer::SequenceInterface {
+public:
+	std::vector<AttackEvent> events;
+
+	int GetFrameMin() const override { return 0; }
+	int GetFrameMax() const override { return 300; }   // 全体フレーム幅
+	int GetItemCount() const override { return (int)events.size(); }
+
+	// 開始フレーム、終了フレーム、タイプ、色を返す
+	void Get(int index, int** start, int** end, int* type, unsigned int* color) override {
+		if (start) *start = &events[index].startFrame;
+		if (end)   *end = &events[index].endFrame;
+		if (type)  *type = 0;
+		if (color) *color = events[index].color;
+	}
+
+	const char* GetItemLabel(int index) const override {
+		return events[index].name.c_str();
+	}
+
+	// [+] 追加ボタンで呼ばれる処理
+	void Add(int /*type*/) override {
+		events.push_back({ 0, 10, 0xFF00FF00, "NewEvent" });
+	}
+
+	void Del(int index) override {
+		events.erase(events.begin() + index);
+	}
+
+	void Duplicate(int index) override {
+		events.push_back(events[index]);
+	}
+};
+
+
 /// <summary>
 /// タイトルシーン
 /// </summary>
@@ -18920,6 +18732,15 @@ private:
 
 
 	std::unique_ptr<LoadLevelData> loadData_;
+
+
+	
+	AttackSequence attackSeq;
+	bool initialized = false;
+	int currentFrame = 0;
+	int selected = -1;
+	bool expanded = true;
+	int firstFrame = 0;
 };
 
 
@@ -24259,6 +24080,10 @@ struct Timer {
 	float LerpT() const {
 		return t / maxT; // タイマーの値を最大値で割って0から1の範囲に変換する
 	}
+	// 反対補間位置取得
+	float InvLerpT() const {
+		return 1.0f - LerpT();
+	}
 
 	// タイマーが超えているか判定
 	bool IsMaxOverT() const {
@@ -25442,7 +25267,7 @@ void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camera, const
 		if (ImGui::BeginTabItem(name))
 		{
 
-
+			
 
 			static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
 			static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
@@ -25634,6 +25459,9 @@ File Path: project/DirectXGame/engine/Base/Imgui/ImGuiManager.h
 //#define IMOGIZMO_Z_UP;
 
 #include "ImGuizmo.h"
+#include "externals/imgui/ImSequencer.h"
+
+
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -59129,8 +58957,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayerState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputMapper.cpp" />
@@ -59141,7 +58967,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Move\MovementState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MoveSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Stage\Manager\StageEventManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\BaseMainState.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.cpp" />
@@ -59734,6 +59561,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
@@ -59753,10 +59581,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\GameData.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\GameWave.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputMapper.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseDirectionalLight.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseLight.h" />
@@ -59774,7 +59602,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Move\MovementState.h" />
     <ClInclude Include="DirectXGame\application\base\Move\MoveSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h" />
-    <ClInclude Include="DirectXGame\application\base\Stage\Manager\StageEventManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\GameEventController.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseMainState.h" />
     <ClInclude Include="DirectXGame\application\base\State\CharacterStateMachine.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseSubState.h" />
@@ -60726,22 +60555,16 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Stage\Manager\StageEventManager.cpp">
+    <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayerState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp">
@@ -60808,6 +60631,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Input\InputMapper.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -61740,7 +61566,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Stage\Manager\StageEventManager.h">
+    <ClInclude Include="DirectXGame\application\base\Game\GameEventController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\scene\SceneData.h">
@@ -61749,16 +61575,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\UI\SelectUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Player\Bullet\BulletPlayerState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h">
@@ -61828,6 +61648,18 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Input\InputMapper.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\GameWave.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\GameData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboGlobalData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
