@@ -169,7 +169,7 @@ std::string Engine::GlobalVariables::MakeUniqueKey(const std::string& baseKey, c
 	std::string newKey = baseKey;
 	int count = 1;
 	while (group.find(newKey) != group.end()) {
-		newKey = baseKey + "("+ std::to_string(count++)+ ")";
+		newKey = baseKey + "(" + std::to_string(count++) + ")";
 	}
 	return newKey;
 }
@@ -205,7 +205,7 @@ void Engine::GlobalVariables::saveFile(const std::string& groupName) {
 		GvData::Item& item = itItem->second;
 
 		// 各型の値を保存
-		GvFanction::Save(groupName,root,item,itemName);
+		GvFanction::Save(groupName, root, item, itemName);
 
 	}
 	// ディレクトリがなければ作成する
@@ -344,7 +344,7 @@ void Engine::GlobalVariables::LoadFile(const std::string& groupName) {
 /// </summary>
 void Engine::GlobalVariables::Update() {
 #ifdef _DEBUG
-	ImGui::Begin("GlobalVariables"/*, nullptr, ImGuiWindowFlags_MenuBar*/);
+
 	//ImGui::BeginMenuBar();
 
 	static std::pair<std::string, std::string> pendingDeleteItem;
@@ -353,7 +353,10 @@ void Engine::GlobalVariables::Update() {
 	std::vector<std::string> groupsToRemove;
 	std::vector<std::pair<std::string, std::string>> itemsToRemove;
 
+	ImGui::Begin("GlobalVariables");
+
 	for (auto& [groupName, group] : datas_) {
+	
 
 		if (!ImGui::BeginMenu(groupName.c_str()))
 			continue;
@@ -404,42 +407,6 @@ void Engine::GlobalVariables::Update() {
 				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
 			}
 
-			//// 複製ボタン
-			//ImGui::SameLine();
-			//if (ImGui::SmallButton("複製")) {
-			//	// 複製先のキー名を生成
-			//	std::string baseKey = itemName;
-			//	// ユニークキー生成（重複チェックと連番付与）
-			//	std::string newKey = MakeUniqueKey(baseKey, group);
-
-			//	if (!DuplicateItem(groupName, itemName, groupName, newKey)) {
-			//		// 複製失敗時の対応（ログ出力や警告表示など）
-			//	}
-			//}
-
-			//// 削除ボタン + 確認
-			//ImGui::SameLine();
-			//if (pendingDeleteItem.first == groupName && pendingDeleteItem.second == itemName && confirmDelete) {
-			//	ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "削除しますか？");
-			//	ImGui::SameLine();
-			//	if (ImGui::SmallButton("はい")) {
-			//		itemsToRemove.emplace_back(groupName, itemName);
-			//		confirmDelete = false;
-			//		pendingDeleteItem = {};
-			//	}
-			//	ImGui::SameLine();
-			//	if (ImGui::SmallButton("いいえ")) {
-			//		confirmDelete = false;
-			//		pendingDeleteItem = {};
-			//	}
-			//}
-			//else {
-			//	if (ImGui::SmallButton("×")) {
-			//		pendingDeleteItem = { groupName, itemName };
-			//		confirmDelete = true;
-			//	}
-			//}
-
 			ImGui::PopID();
 		}
 
@@ -456,10 +423,13 @@ void Engine::GlobalVariables::Update() {
 		}
 
 		ImGui::EndMenu();
+
+		
 	}
+	ImGui::End();
 
 	//ImGui::EndMenuBar();
-	ImGui::End();
+
 
 
 

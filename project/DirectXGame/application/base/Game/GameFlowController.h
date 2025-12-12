@@ -39,6 +39,10 @@ private: //
 	// ゲームプレイデータ
 	GamePlayData gamePlayData_;
 
+private:
+	// ゲームが終わったか
+	bool isEndgame_ = false;
+
 private: // 貰いもの
 	Engine::Entity3DManager* entity3DManager = nullptr;
 	BaseCharacterManager* characterManager = nullptr;

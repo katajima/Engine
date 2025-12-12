@@ -301,7 +301,7 @@ void GamePlayScene::Draw2D(){
 	// ゲームUI
 	gameUI->Draw();
 	//
-	//rite->Draw();
+	sprite->Draw();
 	// キャラクター
 	caracterManager_->Draw2D();
 	// 弾マネージャ

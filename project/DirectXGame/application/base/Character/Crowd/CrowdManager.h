@@ -71,7 +71,9 @@ public:
 	float attackCooldown_ = 0.0f;			// 攻撃クールタイム
 	uint32_t id;							// 個人ID
 	uint32_t groupId;                       // 部隊ID
-	float speed = 30.0f;					// m/s
+	
+	
+	float speed = 300.0f;					// m/s
 	float radius = 0.5f;					// 衝突半径
 
 	Vector3 targetPos_ = {};				// ターゲット位置
@@ -80,6 +82,8 @@ public:
 
 	float attackDelayTimer_ = 0.0f;			// 攻撃前の準備タイマー
 	float engageDistance_ = 200.0f;			// 攻撃を検討し始める距離
+
+	float preparationAttack_ = 12.0f;		// 攻撃準備に入る距離
 	float attackRange_ = 3.5f;				// 実際に攻撃できる距離
 
 	// 表示用：インスタンスバッファに書き込むデータ

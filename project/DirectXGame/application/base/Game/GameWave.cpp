@@ -1,7 +1,25 @@
 #include "GameWave.h"
 
-void WaveManager::Initialize(const std::vector<GameWave>& waves)
-{
+
+
+
+// 初期化
+void GameWave::Initialize(int waveIndex, float nextWaveDelay) {
+	waveIndex_ = waveIndex;			// ウェーブ
+	nextWaveDelay_ = nextWaveDelay;	// 次のウェーブに行く時間
+}
+void GameWave::AddSpawns(const SpawnInfo& spawn){
+	spawns_.push_back(spawn);
+}
+
+// 更新
+void GameWave::Update(float dt) {
+
+};
+
+
+void WaveManager::Initialize(const std::vector<GameWave>& waves){
+	waveList = waves;
 }
 
 bool WaveManager::IsWaveActive() const{
@@ -22,6 +40,16 @@ void WaveManager::Update(float dt) {
 
 void WaveManager::UpdateWave(float dt){
 	waveTimer += dt;
+
+
+
+
+
+	for (auto& wave : waveList) {
+		wave.Update(dt);
+	}
+
+
 }
 
 void WaveManager::EndWave(){

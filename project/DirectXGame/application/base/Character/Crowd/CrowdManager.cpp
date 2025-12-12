@@ -46,7 +46,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	case AgentState::Approach:
 	{
 		// 一定距離に入ったら攻撃準備
-		if (distToTarget < attackRange_ * 3.0f) {
+		if (distToTarget < preparationAttack_) {
 			state_ = AgentState::PreparationAttack;
 			attackDelayTimer_ = Random::RandomFloat(2.0f, 4.0f);
 		}
@@ -61,7 +61,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 			attackCooldown_ = 1.0f + Random::RandomFloat(3.0f, 0.5f);
 			animIndex = 1;
 		}
-		else if (distToTarget > attackRange_ * 3.0f) {
+		else if (distToTarget > preparationAttack_) {
 			// 離れたら戻って接近し直す
 			state_ = AgentState::Approach;
 		}
@@ -70,7 +70,7 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 
 	case AgentState::Attack:
 	{
-		if (distToTarget > attackRange_ * 1.5f) {
+		if (distToTarget > preparationAttack_) {
 			state_ = AgentState::Return;
 			break;
 		}
@@ -88,9 +88,9 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 		float dist = Length(toCenter);
 
 		// Idle が無いので Approach に戻す
-		if (dist < 3.0f) {
+		//if (dist < 3.0f) {
 			state_ = AgentState::Approach;
-		}
+		//}
 		break;
 	}
 
@@ -148,7 +148,10 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	float targetSpeed = speed;
 
 	switch (state_) {
-	case AgentState::PreparationAttack: targetSpeed *= 0.3f; break;
+	case AgentState::PreparationAttack:
+		velocity_ = 0.0f;
+		targetSpeed = 0.0f; 
+		break;
 	case AgentState::Attack:            targetSpeed *= 0.1f; break;
 	case AgentState::Return:            targetSpeed *= 0.8f; break;
 	default: break; // Approach はそのまま

@@ -11,6 +11,7 @@ void CharacterSpawn::Initialize(BaseCharacterManager* characterManager, Engine::
 
 	// トランスフォーム初期化
 	spawnTransform_.Initialize();
+	spawnTransform_.translate_ = spawnInfo_.GetData().translate_;
 }
 
 void CharacterSpawn::Update(float time) {

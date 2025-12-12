@@ -29,7 +29,7 @@ void GameFlowController::Draw() {
 }
 
 void GameFlowController::SceneChange(){
-	if (gameEventController_->IsEndEvent()) {
+	if (isEndgame_) {
 		sceneManager->ChangeScene("TITLE");
 	}
 }

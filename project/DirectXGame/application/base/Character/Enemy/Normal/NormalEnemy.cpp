@@ -29,6 +29,8 @@ void NormalEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* enti
 	moveComponent_->UseGlobal(false);
 	moveComponent_->Initialize(globalVariables_, MovementComponent::ControlType::Manual, "_Enemy");
 	moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
+	
+
 	// SphereColliderを追加
 	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->Enable();					// コライダ有効
@@ -74,7 +76,7 @@ void NormalEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* enti
 
 	// パラメーター初期化
 	Parameters().HP.Initiaize(100, 0, 100, 0);
-	Parameters().speed = 3.0f;
+	Parameters().speed = 10.0f;
 	Parameters().strength = 10.0f;
 
 	moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters().speed;
