@@ -1,28 +1,28 @@
 #include "Collider2D.h"
 
-void SphereCollider2D::Update(const WorldTransform2d& worldTransform)
+void Engine::SphereCollider2D::Update(const WorldTransform2d& worldTransform)
 {
 }
 
-bool SphereCollider2D::CheckHit(const Collider2D& other) const
-{
-	return false;
-}
-
-bool SphereCollider2D::ResolveCollision(const Collider2D& other, Vector2& outPushVec) const
+bool Engine::SphereCollider2D::CheckHit(const Collider2D& other) const
 {
 	return false;
 }
 
+bool Engine::SphereCollider2D::ResolveCollision(const Collider2D& other, Vector2& outPushVec) const
+{
+	return false;
+}
 
-void AABBCollider2D::Update(const WorldTransform2d& worldTransform) {
+
+void Engine::AABBCollider2D::Update(const WorldTransform2d& worldTransform) {
 
 	minWorld = worldTransform.translate_ + box.min_;
 	maxWorld = worldTransform.translate_ + box.max_;
 
 
 };
-bool AABBCollider2D::CheckHit(const Collider2D& other) const {
+bool Engine::AABBCollider2D::CheckHit(const Collider2D& other) const {
 
 	if (!other.enabled) return false;
 
@@ -35,7 +35,7 @@ bool AABBCollider2D::CheckHit(const Collider2D& other) const {
 };
 
 
-bool AABBCollider2D::ResolveCollision(const Collider2D& other, Vector2& outPushVec) const {
+bool Engine::AABBCollider2D::ResolveCollision(const Collider2D& other, Vector2& outPushVec) const {
 
     if (!other.enabled) return false;
 

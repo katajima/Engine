@@ -2,7 +2,7 @@
 
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void TrailEffectCommon::Initialize(DirectXCommon* dxcommon)
+void Engine::TrailEffectCommon::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;		// DX共通クラス
 
@@ -14,7 +14,7 @@ void TrailEffectCommon::Initialize(DirectXCommon* dxcommon)
 	CreateGraphicsPipeline();
 }
 
-void TrailEffectCommon::DrawCommonSetting()
+void Engine::TrailEffectCommon::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -25,7 +25,7 @@ void TrailEffectCommon::DrawCommonSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void TrailEffectCommon::CreateRootSignature()
+void Engine::TrailEffectCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
@@ -51,7 +51,7 @@ void TrailEffectCommon::CreateRootSignature()
 	
 }
 
-void TrailEffectCommon::CreateGraphicsPipeline()
+void Engine::TrailEffectCommon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

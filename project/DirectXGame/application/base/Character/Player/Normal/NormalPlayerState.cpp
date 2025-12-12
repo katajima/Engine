@@ -7,10 +7,10 @@
 
 // 更新
 void PlayerStateIdle::Update() {
-	Input* input = character_->GetInput();
+	Engine::Input* input = character_->GetInput();
 	BaseWeapon* weapon = character_->GetWeapon();
 	BaseSpecial* special = character_->GetSpecial();
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	MoveSystem* move = character_->GetMoveComponent()->GetMoveSystem();
 	character_->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 
@@ -49,7 +49,7 @@ void PlayerStateIdle::Update() {
 	}
 #endif // _DEBUG
 
-	weapon->RecastTime(MyGame::GameTime());
+	weapon->RecastTime(Engine::MyGame::GameTime());
 
 	// 必殺技移行
 	if (special->GetIsSpecial()) {
@@ -72,7 +72,7 @@ void PlayerStateIdle::Exit() {
 
 // 初期化
 void PlayerStateIdle::Enter() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsLoop(true);			// ループさせる
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
@@ -86,10 +86,10 @@ void PlayerStateIdle::Enter() {
 
 void PlayerStateMove::Update()
 {
-	Input* input = character_->GetInput();				// 入力
+	Engine::Input* input = character_->GetInput();				// 入力
 	BaseWeapon* weapon = character_->GetWeapon();		// 武器
 	BaseSpecial* special = character_->GetSpecial();	// 必殺
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	character_->GetMoveComponent()->SetCanMove(true);
 	weapon->GetObject3D()->SetIsDraw(true); // 武器描画
 
@@ -115,7 +115,7 @@ void PlayerStateMove::Update()
 	}
 
 	// 武器リキャストタイム更新
-	weapon->RecastTime(MyGame::GameTime());
+	weapon->RecastTime(Engine::MyGame::GameTime());
 
 	// 必殺がうてるなら
 	if (special->GetIsSpecial()) {
@@ -145,7 +145,7 @@ void PlayerStateMove::Exit()
 void PlayerStateMove::Enter()
 {
 	BaseWeapon* weapon = character_->GetWeapon();
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	weapon->GetObject3D()->SetIsDraw(false);	// 武器描画しない
 	anima->SetIsLoop(true);				// ループ再生
 	anima->SetIsPlaying(true);			// 再生
@@ -160,8 +160,8 @@ void PlayerStateMove::Enter()
 
 // 更新
 void PlayerStateJump::Update() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	Input* input = character_->GetInput();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::Input* input = character_->GetInput();
 	JumpSystem* jump = character_->GetMoveComponent()->GetJumpSystem();
 
 	anima->SetIsPlaying(true);		// アニメーション再生
@@ -232,7 +232,7 @@ void PlayerStateAttack::Update() {}
 
 void PlayerStateAttack::Exit()
 {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	// 武器
 	character_->GetAttackController()->GetComboSystem()->GetComboStateMachine()->HandleInput(AttackInput::Light); // 弱攻撃
 	character_->GetWeapon()->GetObject3D()->SetIsDraw(false);// 武器描画しない
@@ -339,7 +339,7 @@ void PlayerStateSkill::Enter() {
 
 // 更新
 void PlayerStateDefense::Update() {
-	Input* input = character_->GetInput();
+	Engine::Input* input = character_->GetInput();
 
 	// ゲームパッドがつながっているなら
 	if (input->IsControllerConnected()) {
@@ -386,7 +386,7 @@ void PlayerStateDefense::Exit() {
 // 初期化
 void PlayerStateDefense::Enter() {
 	isDifense_ = true;
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(false);		// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -400,7 +400,7 @@ void PlayerStateDefense::Enter() {
 
 // 更新
 void PlayerStateFainting::Update() {
-	Input* input = character_->GetInput();
+	Engine::Input* input = character_->GetInput();
 	Vector2 left = input->GetGamePadLeftStick();
 
 	timer_ += character_->GetTime();
@@ -431,7 +431,7 @@ void PlayerStateFainting::Update() {
 
 // 終了
 void PlayerStateFainting::Exit() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -439,7 +439,7 @@ void PlayerStateFainting::Exit() {
 };
 // 初期化
 void PlayerStateFainting::Enter() {
-	AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -448,7 +448,7 @@ void PlayerStateFainting::Enter() {
 	timer_ = 0;		// タイマーを0に設定
 
 
-	Input* input = character_->GetInput();
+	Engine::Input* input = character_->GetInput();
 	prevleftStick = input->GetGamePadLeftStick();
 };
 

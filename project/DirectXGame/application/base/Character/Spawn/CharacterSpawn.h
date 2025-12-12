@@ -4,8 +4,10 @@
 
 // 前方宣言
 class BaseCharacterManager;
-class LineCommon;
 
+namespace Engine {
+	class LineCommon;
+}
 
 
 /// <summary>
@@ -87,7 +89,7 @@ private:
 class CharacterSpawn {
 public:
 	// 初期化
-	void Initialize(BaseCharacterManager* characterManager, LineCommon* line, const SpawnInfo& info);
+	void Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info);
 
 	// 更新
 	void Update(float time);
@@ -109,18 +111,18 @@ public: // 取得or設定
 	// 出現情報取得
 	SpawnInfo& GetSpawnInfo() { return spawnInfo_; }
 
-	WorldTransform& GetSpawnTransform() { return spawnTransform_; }
+	Engine::WorldTransform& GetSpawnTransform() { return spawnTransform_; }
 public:
 	// 出現処理
 	void SpawnProcess();
 private:
 	SpawnInfo spawnInfo_;				// 出現情報
 	AABB spawnAABBArea_;				// 出現エリアAABB	
-	WorldTransform spawnTransform_;		// 出現位置変換行列
+	Engine::WorldTransform spawnTransform_;		// 出現位置変換行列
 
 	float timer_ = 0.0f;                // タイマー
 private:
 	BaseCharacterManager* characterManager_ = nullptr;
-	LineCommon* lineCommon_ = nullptr;
+	Engine::LineCommon* lineCommon_ = nullptr;
 };
 

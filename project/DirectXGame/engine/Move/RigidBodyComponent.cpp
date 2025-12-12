@@ -1,6 +1,6 @@
 #include "RigidBodyComponent.h"
 
-void RigidBodyComponent::Integrate(float deltaTime, WorldTransform& transform)
+void Engine::RigidBodyComponent::Integrate(float deltaTime, WorldTransform& transform)
 {
 	if (isKinematic || isSleeping || inverseMass == 0.0f) return;
 
@@ -14,7 +14,7 @@ void RigidBodyComponent::Integrate(float deltaTime, WorldTransform& transform)
 	transform.Update();
 }
 
-void RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransform& transform)
+void Engine::RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransform& transform)
 {
 	// 加速度計算
 	acceleration_ = force * inverseMass;
@@ -33,7 +33,7 @@ void RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransform& tra
 	force = { 0, 0, 0 };
 }
 
-void RigidBodyComponent::ProcessRotation(float deltaTime, WorldTransform& transform)
+void Engine::RigidBodyComponent::ProcessRotation(float deltaTime, WorldTransform& transform)
 {
 	// トルクによる回転（簡略化）
 	Vector3 angularAcceleration = torque * inverseMass; // 実際は慣性モーメントが必要

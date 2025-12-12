@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 
-void DebugCamera::Initialize(CameraCommon* cameraCommon)
+void Engine::DebugCamera::Initialize(CameraCommon* cameraCommon)
 {
     // カメラ
 	camera_.Initialize(cameraCommon);
@@ -12,7 +12,7 @@ void DebugCamera::Initialize(CameraCommon* cameraCommon)
     input_ = cameraCommon->GetInput();
 }
 
-void DebugCamera::Update()
+void Engine::DebugCamera::Update()
 {
     
 

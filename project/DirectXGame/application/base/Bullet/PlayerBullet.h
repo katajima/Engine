@@ -7,7 +7,8 @@ class PlayerBullet : public BaseBullet
 {
 public:
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables,
+		Vector3 position, Engine::Camera* camera) override;
 
 	// 毎フレーム更新
 	void Update() override;

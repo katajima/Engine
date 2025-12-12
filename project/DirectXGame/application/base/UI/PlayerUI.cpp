@@ -1,7 +1,7 @@
 #include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, GlobalVariables* globalVariables)
+void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
 	entity2DManager_ = entity2DManager;	// エンティティ2d
 	globalVariables_ = globalVariables;	// 保存項目
@@ -14,7 +14,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 
 
 	// HPUI
-	UIMeter* hpber  = GetUIMeter("HPBer");
+	Engine::UIMeter* hpber  = GetUIMeter("HPBer");
 	hpber->SetMaxSize(hpSpriteData_.size_, hpSpriteData_.offset_);									// 最大サイズ
 	hpber->SetMeterMinMax(0.0f, hpSpriteData_.maxMeter);											// メータ最大値最小値
 	hpber->GetMeterSprite()->SetColor(hpSpriteData_.color_);								// 色指定
@@ -24,7 +24,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	hpber->GetNameSprite()->SetColor(hpSpriteData_.nameColor_);				// 色指定
 
 	// スペシャルUI
-	UIMeter* specailBer_ = GetUIMeter("SpecailBer");
+	Engine::UIMeter* specailBer_ = GetUIMeter("SpecailBer");
 	specailBer_->SetMaxSize(spSpriteData_.size_, spSpriteData_.offset_);								// 最大サイズ
 	specailBer_->SetMeterMinMax(0.0f, spSpriteData_.maxMeter);										// メータ最大値最小値
 	specailBer_->GetMeterSprite()->SetColor(spSpriteData_.color_);							// 色指定
@@ -33,19 +33,8 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	specailBer_->GetNameSprite()->SetSize(spSpriteData_.nameSize_);								// サイズ設定
 	specailBer_->GetNameSprite()->SetColor(spSpriteData_.nameColor_);			// 色指定
 
-	//// スタミナUI
-	//UIMeter* staminaBer_ = GetUIMeter("StaminaBer");
-	//staminaBer_->SetMaxSize(staminaSpriteData.size_, staminaSpriteData.offset_);								// 最大サイズ
-	//staminaBer_->SetMeterMinMax(0.0f, staminaSpriteData.maxMeter);										// メータ最大値最小値
-	//staminaBer_->GetMeterSprite()->SetColor(staminaSpriteData.color_);							// 色指定
-	//staminaBer_->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	//staminaBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");	// 次のスプライト設定
-	//staminaBer_->GetNameSprite()->SetSize(staminaSpriteData.nameSize_);								// サイズ設定
-	//staminaBer_->GetNameSprite()->SetColor(staminaSpriteData.nameColor_);			// 色指定
-
-
 	// maxテキストスプライト初期化
-	textMax_ = std::make_unique<Sprite>();
+	textMax_ = std::make_unique<Engine::Sprite>();
 	textMax_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/max.png");
 	textMax_->SetColor(maxTextData_.color_);					// 色設定
 	textMax_->SetPosition(maxTextData_.pos_);					// 位置設定
@@ -54,7 +43,7 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 	textMax_->SetSize(maxTextData_.size_);							// サイズ設定
 
 	// rbテキストスプライト初期化
-	textRB_ = std::make_unique<Sprite>();
+	textRB_ = std::make_unique<Engine::Sprite>();
 	textRB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/RB.png");
 	textRB_->SetColor(Color::WHITE());						// 色指定
 	textRB_->SetPosition(rbData_.pos_);				// 位置設定
@@ -65,16 +54,12 @@ void PlayerUI::Initialize(Input* input, Entity2DManager* entity2DManager, Global
 
 void PlayerUI::Update()
 {
-	UIMeter* hpber = GetUIMeter("HPBer");			// HP
-	UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
+	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
+	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
 	//UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スタミナ
 	hpber->SetMeterMinMax(hpBar_->minValue, hpBar_->maxValue);	// メータ最大値
 	hpber->SetMeter(hpBar_->value);								// メータ
 	
-	//staminaBer->SetMeterMinMax(staminaBar_->minValue, staminaBar_->maxValue);	// メータ最大値
-	//staminaBer->SetMeter(staminaBar_->value);									// メータ
-
-
 	specailBer->SetMeter(sizeSpecialGauge_);// メータ
 
 	// 更新

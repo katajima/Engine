@@ -3,7 +3,7 @@
 
 
 
-void UIBaseBoard::Init(Input* input,Entity2DManager* entity2DManager, const std::string& name, Vector2 pos, const Vector2& size, bool isStatic, std::string textureName)
+void Engine::UIBaseBoard::Init(Input* input,Entity2DManager* entity2DManager, const std::string& name, Vector2 pos, const Vector2& size, bool isStatic, std::string textureName)
 {
 	entity2DManager_ = entity2DManager;		// エンティティ2d
 	name_ = name;							// 名前設定
@@ -31,7 +31,7 @@ void UIBaseBoard::Init(Input* input,Entity2DManager* entity2DManager, const std:
 
 }
 
-void UIBaseBoard::Update(float deltaTime)
+void Engine::UIBaseBoard::Update(float deltaTime)
 {
 #ifdef _DEBUG
 	ImGui::Begin("UI");
@@ -77,7 +77,7 @@ void UIBaseBoard::Update(float deltaTime)
 
 }
 
-void UIBaseBoard::Draw() {
+void Engine::UIBaseBoard::Draw() {
 
 	// ボードを描画
 	if (useBoard_) {
@@ -100,7 +100,7 @@ void UIBaseBoard::Draw() {
 
 }
 
-void UIBaseBoard::CreateUIElement(UIType type, std::string name, Vector2 pos, int instance, bool useSprite)
+void Engine::UIBaseBoard::CreateUIElement(UIType type, std::string name, Vector2 pos, int instance, bool useSprite)
 {
 
 	std::unique_ptr<UIElement> sprite;

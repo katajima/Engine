@@ -8,15 +8,15 @@
 #include "DirectXGame/engine/Math/Random.h"
 
 #pragma region Point
-void PointParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::PointParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
 // デバック線描画
-void PointParticleEmitter::DrawEmitterLine() {}
+void Engine::PointParticleEmitter::DrawEmitterLine() {}
 // パーティクル発生
-void PointParticleEmitter::EmitUniqe() {
+void Engine::PointParticleEmitter::EmitUniqe() {
 
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
@@ -26,7 +26,7 @@ void PointParticleEmitter::EmitUniqe() {
 
 #pragma region AABB
 
-void AABBParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::AABBParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
@@ -40,15 +40,15 @@ void AABBParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVar
 	//ApplyGlobalVariablesUniqe();
 }
 
-void AABBParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::AABBParticleEmitter::ApplyGlobalVariablesUniqe() {
 	//range_.min = globalVariables_->GetValue<Vector3>(emitName_,"rangeAABB.min");
 	//range_.max = globalVariables_->GetValue<Vector3>(emitName_,"rangeAABB.max");
 }
 
 // デバック線描画
-void AABBParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
+void Engine::AABBParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
 // パーティクル発生
-void AABBParticleEmitter::EmitUniqe() {
+void Engine::AABBParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 	auto& rnd = particleManager_->GetRandomEngine();
 
@@ -151,7 +151,7 @@ void AABBParticleEmitter::EmitUniqe() {
 
 
 //
-void AABBParticleEmitter::DebugImGui()
+void Engine::AABBParticleEmitter::DebugImGui()
 {
 	ImGui::Separator();
 	ImGui::Text("AABB");
@@ -161,7 +161,7 @@ void AABBParticleEmitter::DebugImGui()
 	ImGui::DragFloat3("renge.min", &range_.min.x, 0.1f);
 }
 // 範囲設定
-void AABBParticleEmitter::SetRange(Vector3 min, Vector3 max)
+void Engine::AABBParticleEmitter::SetRange(Vector3 min, Vector3 max)
 {
 	range_.min = min;
 	range_.max = max;
@@ -171,7 +171,7 @@ void AABBParticleEmitter::SetRange(Vector3 min, Vector3 max)
 
 #pragma region Shpere
 
-void SphereParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::SphereParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
@@ -184,12 +184,12 @@ void SphereParticleEmitter::Initialize(ParticleManager* particleManager, GlobalV
 	//ApplyGlobalVariablesUniqe();
 }
 
-void SphereParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::SphereParticleEmitter::ApplyGlobalVariablesUniqe() {
 	//radius_ = globalVariables_->GetValue<float>(emitName_, "radiusShpere");
 }
 
 // デバック線描画
-void SphereParticleEmitter::DrawEmitterLine() {
+void Engine::SphereParticleEmitter::DrawEmitterLine() {
 	Sphere sphere{};
 
 	sphere.radius = radius_;
@@ -198,7 +198,7 @@ void SphereParticleEmitter::DrawEmitterLine() {
 	lineCommon_->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 1,1,1,1 });
 }
 // パーティクル発生
-void SphereParticleEmitter::EmitUniqe() {
+void Engine::SphereParticleEmitter::EmitUniqe() {
 	ApplyGlobalVariablesUniqe();
 
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
@@ -208,7 +208,7 @@ void SphereParticleEmitter::EmitUniqe() {
 	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
 }
 //
-void SphereParticleEmitter::DebugImGui()
+void Engine::SphereParticleEmitter::DebugImGui()
 {
 	ImGui::Separator();
 	ImGui::Text("Sphere");
@@ -221,7 +221,7 @@ void SphereParticleEmitter::DebugImGui()
 
 #pragma region Circle
 
-void CornerParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::CornerParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
@@ -238,21 +238,21 @@ void CornerParticleEmitter::Initialize(ParticleManager* particleManager, GlobalV
 	//ApplyGlobalVariablesUniqe();
 }
 
-void CornerParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::CornerParticleEmitter::ApplyGlobalVariablesUniqe() {
 	/*corner.segment = globalVariables_->GetValue<int>(emitName_, "corner.segment");
 	corner.radius = globalVariables_->GetValue<float>(emitName_, "radiusShpere");*/
 
 }
 
-void CornerParticleEmitter::UpdateUniqe() {
+void Engine::CornerParticleEmitter::UpdateUniqe() {
 	ApplyGlobalVariablesUniqe();
 	corner.center = transform_.worldMat_.GetWorldPosition();
 }
 
 // デバック線描画
-void CornerParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineCorner(corner, transform_); }
+void Engine::CornerParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineCorner(corner, transform_); }
 // パーティクル発生
-void CornerParticleEmitter::EmitUniqe() {
+void Engine::CornerParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 	float angleStep;
 	std::vector<Vector3> vertices;
@@ -285,7 +285,7 @@ void CornerParticleEmitter::EmitUniqe() {
 	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
 }
 
-void CornerParticleEmitter::DebugImGui()
+void Engine::CornerParticleEmitter::DebugImGui()
 {
 	ImGui::Separator();
 	ImGui::Text("Circle");
@@ -314,7 +314,7 @@ void CornerParticleEmitter::DebugImGui()
 
 #pragma region Line
 
-void LineParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::LineParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
@@ -329,26 +329,26 @@ void LineParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVar
 	//ApplyGlobalVariablesUniqe();
 }
 
-void LineParticleEmitter::ApplyGlobalVariablesUniqe() {
+void Engine::LineParticleEmitter::ApplyGlobalVariablesUniqe() {
 	/*segment_.origin = globalVariables_->GetValue<Vector3>(emitName_, "segment.origin");
 	segment_.end = globalVariables_->GetValue<Vector3>(emitName_, "segment.ends");*/
 
 }
 // デバック線描画
-void LineParticleEmitter::DrawEmitterLine() {
+void Engine::LineParticleEmitter::DrawEmitterLine() {
 	Vector3 str = segment_.origin + transform_.worldMat_.GetWorldPosition();
 
 	Vector3 end = segment_.end + transform_.worldMat_.GetWorldPosition();
 	lineCommon_->GetDebugLineMeshData().AddLine(str, end);
 }
 
-void LineParticleEmitter::SetSegment(Vector3 origin, Vector3 end)
+void Engine::LineParticleEmitter::SetSegment(Vector3 origin, Vector3 end)
 {
 	segment_.origin = origin;
 	segment_.end = end;
 }
 // パーティクル発生
-void LineParticleEmitter::EmitUniqe() {
+void Engine::LineParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 
@@ -360,7 +360,7 @@ void LineParticleEmitter::EmitUniqe() {
 	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
 }
 
-void LineParticleEmitter::DebugImGui()
+void Engine::LineParticleEmitter::DebugImGui()
 {
 	ImGui::Separator();
 	ImGui::Text("Line");
@@ -374,21 +374,22 @@ void LineParticleEmitter::DebugImGui()
 
 #pragma region Spline
 
-void SplineParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::SplineParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
-void SplineParticleEmitter::ApplyGlobalVariablesUniqe() {
+
+void Engine::SplineParticleEmitter::ApplyGlobalVariablesUniqe() {
 	
 }
 
 // デバック線描画
-void SplineParticleEmitter::DrawEmitterLine() {
+void Engine::SplineParticleEmitter::DrawEmitterLine() {
 	lineCommon_->GetDebugLineMeshData().AddSpline(controlPoints, transform_);
 }
 // ポイントの座標指定
-void SplineParticleEmitter::SetControlPos(int index, Vector3 pos)
+void Engine::SplineParticleEmitter::SetControlPos(int index, Vector3 pos)
 {
 	if (index < 0 || index >= controlPoints.size()) {
 		return;
@@ -398,7 +399,7 @@ void SplineParticleEmitter::SetControlPos(int index, Vector3 pos)
 	}
 }
 // パーティクル発生
-void SplineParticleEmitter::EmitUniqe() {
+void Engine::SplineParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 
@@ -414,7 +415,7 @@ void SplineParticleEmitter::EmitUniqe() {
 	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
 }
 
-void SplineParticleEmitter::DebugImGui()
+void Engine::SplineParticleEmitter::DebugImGui()
 {
 	ImGui::Separator();
 	ImGui::Text("Spline");
@@ -430,7 +431,7 @@ void SplineParticleEmitter::DebugImGui()
 
 #pragma region Triangle
 
-void TriangleParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::TriangleParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
@@ -440,16 +441,17 @@ void TriangleParticleEmitter::Initialize(ParticleManager* particleManager, Globa
 	triangle_.vertices[2] = { -0.5f,-0.5f,0 };
 
 }
-void TriangleParticleEmitter::ApplyGlobalVariablesUniqe() {
+
+void Engine::TriangleParticleEmitter::ApplyGlobalVariablesUniqe() {
 
 }
 
 // デバック線描画
-void TriangleParticleEmitter::DrawEmitterLine() {
+void Engine::TriangleParticleEmitter::DrawEmitterLine() {
 	lineCommon_->GetDebugLineMeshData().AddLineTriangle(triangle_, transform_);
 }
 // パーティクル発生
-void TriangleParticleEmitter::EmitUniqe() {
+void Engine::TriangleParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 	auto& rng = particleManager_->GetRandomEngine();
@@ -476,7 +478,7 @@ void TriangleParticleEmitter::EmitUniqe() {
 	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
 }
 
-void TriangleParticleEmitter::DebugImGui()
+void Engine::TriangleParticleEmitter::DebugImGui()
 {
 	ImGui::Separator();
 	ImGui::Text("Triangle");
@@ -492,23 +494,24 @@ void TriangleParticleEmitter::DebugImGui()
 #pragma region Mesh
 
 
-void MeshParticleEmitter::Initialize(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::MeshParticleEmitter::Initialize(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	// 共通部分初期化
 	CommonParticleInit(particleManager, globalVariables, emitName, particleName);
 }
-void MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
+
+void Engine::MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
 	
 }
 // デバック線描画
-void MeshParticleEmitter::DrawEmitterLine() {
+void Engine::MeshParticleEmitter::DrawEmitterLine() {
 
 	for (auto& tri : modelMesh_->triangle) {
 		lineCommon_->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
 	}
 }
 // パーティクル発生
-void MeshParticleEmitter::EmitUniqe() {
+void Engine::MeshParticleEmitter::EmitUniqe() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 	auto& rng = particleManager_->GetRandomEngine();
@@ -539,7 +542,7 @@ void MeshParticleEmitter::EmitUniqe() {
 	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
 }
 
-void MeshParticleEmitter::DebugImGui()
+void Engine::MeshParticleEmitter::DebugImGui()
 {
 	ImGui::Separator();
 	ImGui::Text("Mesh");

@@ -6,7 +6,7 @@ void MovementRestrictions::Initialize(Vector3 min, Vector3 max)
 	max_ = max;
 }
 
-void MovementRestrictions::Update(WorldTransform& world)
+void MovementRestrictions::Update(Engine::WorldTransform& world)
 {
 	if (world.translate_.x > max_.x) {
 		world.translate_.x = max_.x;

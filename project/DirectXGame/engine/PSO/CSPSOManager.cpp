@@ -4,14 +4,14 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.h"
 
-void CSPSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler)
+void Engine::CSPSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler)
 {
 	command_ = command;
 	DXGIDevice_ = DXGIDevice;
 	dxcCompiler_ = dxcCompiler;
 }
 
-void CSPSOManager::SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter, UINT numRootParameters)
+void Engine::CSPSOManager::SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter, UINT numRootParameters)
 {
 	//Roosignature作成
 	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
@@ -22,7 +22,7 @@ void CSPSOManager::SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter, UINT nu
 	PSOFanction::Blob(DXGIDevice_,descriptionSignature, computePSRS_.rootSignature);
 }
 
-void CSPSOManager::ComputePipelineState()
+void Engine::CSPSOManager::ComputePipelineState()
 {
 	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{};
 
@@ -38,18 +38,18 @@ void CSPSOManager::ComputePipelineState()
 
 }
 
-void CSPSOManager::PreComputePSRS()
+void Engine::CSPSOManager::PreComputePSRS()
 {
 	command_->GetList()->SetComputeRootSignature(computePSRS_.rootSignature.Get());
 	command_->GetList()->SetPipelineState(computePSRS_.computePipelineState.Get());
 }
 
-void CSPSOManager::SetShaderFileName(std::wstring filename)
+void Engine::CSPSOManager::SetShaderFileName(std::wstring filename)
 {
 	shderFile_.commpute.filePach = filename;
 }
 
-void CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline)
+void Engine::CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& graphicsPipeline)
 {
 	if (shderFile_.commpute.filePach != L"") {
 		// Shaderをコンパイルする

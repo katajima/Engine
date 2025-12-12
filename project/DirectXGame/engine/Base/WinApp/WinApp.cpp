@@ -11,7 +11,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "DirectXGame/engine/DirectX/SwapChain/SwapChain.h"
 
 
-LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK Engine::WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 
 	// ImGui用のウィンドウプロシージャ呼び出し
@@ -40,7 +40,7 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void WinApp::Initialize()
+void Engine::WinApp::Initialize()
 {
 	// システムタイマーの分解能を上げる
 	timeBeginPeriod(1);
@@ -91,13 +91,13 @@ void WinApp::Initialize()
 
 
 
-void WinApp::Finalize()
+void Engine::WinApp::Finalize()
 {
 	CloseWindow(hwnd);
 	CoUninitialize();
 }
 
-bool WinApp::ProcessMessage()
+bool Engine::WinApp::ProcessMessage()
 {
 	MSG msg{};
 
@@ -115,7 +115,7 @@ bool WinApp::ProcessMessage()
 	return false;
 }
 
-void WinApp::ToggleFullscreen()
+void Engine::WinApp::ToggleFullscreen()
 {
 	if (!hwnd || !swapChain) return;
 

@@ -3,10 +3,11 @@
 #include "GameWave.h"
 
 // 前方宣言
-class Entity3DManager;
-class Entity2DManager;
-class GlobalVariables;
-
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+	class GlobalVariables;
+}
 
 /// <summary>
 /// ゲームのイベントを管理するクラス
@@ -17,12 +18,12 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables,  BaseCharacterManager* characterManager);
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,  BaseCharacterManager* characterManager);
 
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update();
+	void Update(float dt);
 
 	
 	void Draw() {};
@@ -39,7 +40,7 @@ private:
 
 	bool isEndEvent_ = false;	// イベント終了フラグ
 private:
-	Entity3DManager* entity3DManager_ = nullptr;
-	GlobalVariables* globalVariables_ = nullptr;
+	Engine::Entity3DManager* entity3DManager_ = nullptr;
+	Engine::GlobalVariables* globalVariables_ = nullptr;
 	BaseCharacterManager* characterManager_ = nullptr;
 };

@@ -13,7 +13,7 @@
 #include "DirectXgame/engine/MyGame/MyGame.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 
-void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* effectManager)
+void Engine::GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* effectManager)
 {
 	effectManager_ = effectManager;					// エフェクト管理クラス
 	srvManager_ = dxCommon->GetSrvManager();		// SRV管理クラス
@@ -72,7 +72,7 @@ void GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* light
 }
 
 
-void GpuParticleManager::Update()
+void Engine::GpuParticleManager::Update()
 {
 	if (!camera_) return;
 
@@ -149,7 +149,7 @@ void GpuParticleManager::Update()
 
 }
 
-void GpuParticleManager::Draw()
+void Engine::GpuParticleManager::Draw()
 {
 	
 	for (auto& group : gpuParticleGroup_) {
@@ -183,17 +183,17 @@ void GpuParticleManager::Draw()
 }
 
 
-void GpuParticleManager::PreCsPso()
+void Engine::GpuParticleManager::PreCsPso()
 {
 	csPsoManager_->PreComputePSRS();
 }
 
-void GpuParticleManager::PreCsTrailPso()
+void Engine::GpuParticleManager::PreCsTrailPso()
 {
 	csTrailInitPsoManager_->PreComputePSRS();
 }
 
-void GpuParticleManager::CreateGroup(std::string name, ModelMesh* mesh, std::string textureName, int instance)
+void Engine::GpuParticleManager::CreateGroup(std::string name, ModelMesh* mesh, std::string textureName, int instance)
 {
 	// あるなら
 	if (gpuParticleGroup_.contains(name)) {
@@ -203,7 +203,7 @@ void GpuParticleManager::CreateGroup(std::string name, ModelMesh* mesh, std::str
 	gpuParticleGroup_[name].SetMesh(mesh);
 }
 
-void GpuParticleManager::SetEmitteToGroup(std::string emitteName, std::string particleGroupName)
+void Engine::GpuParticleManager::SetEmitteToGroup(std::string emitteName, std::string particleGroupName)
 {
 	// ないなら
 	if (!gpuParticleGroup_.contains(particleGroupName)) {
@@ -219,7 +219,7 @@ void GpuParticleManager::SetEmitteToGroup(std::string emitteName, std::string pa
 
 }
 
-void GpuParticleManager::CreateField(std::string name)
+void Engine::GpuParticleManager::CreateField(std::string name)
 {
 	if (gpuParticleField_.contains(name)) {
 		return;
@@ -229,34 +229,34 @@ void GpuParticleManager::CreateField(std::string name)
 
 }
 
-void GpuParticleManager::ClearEmitter(std::string nume)
+void Engine::GpuParticleManager::ClearEmitter(std::string nume)
 {
 	gpuParticleEmitter_.erase(nume);
 }
 
-void GpuParticleManager::ClearEmitterAll()
+void Engine::GpuParticleManager::ClearEmitterAll()
 {
 	gpuParticleEmitter_.clear();
 }
 
-void GpuParticleManager::ClearGroupParticle(std::string name)
+void Engine::GpuParticleManager::ClearGroupParticle(std::string name)
 {
 	gpuParticleGroup_[name].Reset();
 }
 
-void GpuParticleManager::ClearGroupParticleAll()
+void Engine::GpuParticleManager::ClearGroupParticleAll()
 {
 	for (auto& group : gpuParticleGroup_) {
 		group.second.Reset();
 	}
 }
 
-void GpuParticleManager::ClearField(std::string name)
+void Engine::GpuParticleManager::ClearField(std::string name)
 {
 	gpuParticleField_.erase(name);
 }
 
-void GpuParticleManager::CreateRootSignature()
+void Engine::GpuParticleManager::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
@@ -430,7 +430,7 @@ void GpuParticleManager::CreateRootSignature()
 };
 
 
-void GpuParticleManager::CreateGraphicsPipeline()
+void Engine::GpuParticleManager::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

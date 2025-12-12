@@ -36,7 +36,7 @@ void TestScene::Initialize()
 
 
 	
-	GlobalVariables* globalVariables = GetGlobalVariables();
+	Engine::GlobalVariables* globalVariables = GetGlobalVariables();
 	globalVariables->CreateGroup("ddd");
 	globalVariables->AddItem("ddd","g_bool",g_bool);
 	globalVariables->AddItem("ddd","g_int",g_int);
@@ -229,9 +229,9 @@ void TestScene::Draw2D()
 			sprite_[i]->UpdateAmimetion(0.05f);
 		}
 		sprite_[0]->Draw();
-		sprite_[1]->Draw(PSOType::NoUvInterpolation_MODE_SOLID_BACK);
-		sprite_[2]->Draw(PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
-		sprite_[3]->Draw(PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
+		sprite_[1]->Draw(Engine::PSOType::NoUvInterpolation_MODE_SOLID_BACK);
+		sprite_[2]->Draw(Engine::PSOType::UvInterpolation_MODE_WIREFRAME_BACK);
+		sprite_[3]->Draw(Engine::PSOType::NoUvInterpolation_MODE_WIREFRAME_BACK);
 
 
 
@@ -263,7 +263,7 @@ void TestScene::Draw2D()
 
 void TestScene::AppGlobalVariables()
 {
-	GlobalVariables* globalVariables = GetGlobalVariables();
+	Engine::GlobalVariables* globalVariables = GetGlobalVariables();
 	g_bool = globalVariables->GetValue<bool>("ddd", "g_bool");
 	g_int = globalVariables->GetValue<int>("ddd", "g_int");
 	g_uint = globalVariables->GetValue<uint32_t>("ddd", "g_uint");
@@ -289,33 +289,33 @@ void TestScene::InitializeObject3D()
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
 
 
-	ocean_ = std::make_unique<Ocean>();
+	ocean_ = std::make_unique<Engine::Ocean>();
 	ocean_->Initialize(GetEntity3DManager(), { 10000,10000 });
 	ocean_->GetMaterial()->enableLighting_ = false;
 
 
-	oceanObject = GetEntity3DManager()->CreateObject3D("ocean", ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
+	oceanObject = GetEntity3DManager()->CreateObject3D("ocean", Engine::ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
 	oceanObject->GetWorldTransform().rotate_.x = Math::DegreesToRadians(90);
-	oceanObject->GetRenderComponent()->SetObjectDrawType(ObjectDrawType::kTranslucent03);
+	oceanObject->GetRenderComponent()->SetObjectDrawType(Engine::ObjectDrawType::kTranslucent03);
 	oceanObject->SetIsDraw(true);
 	
 	
-	skyBox = std::make_unique<SkyBox>();
+	skyBox = std::make_unique<Engine::SkyBox>();
 	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
 	
-	skyBox2 = std::make_unique<SkyBox>();
+	skyBox2 = std::make_unique<Engine::SkyBox>();
 	skyBox2->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
 
 
-	skyBoxObject = GetEntity3DManager()->CreateObject3D("skyBox", ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	skyBoxObject = GetEntity3DManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
 	skyBoxObject->SetSkyBox(skyBox.get());
 	skyBoxObject->GetWorldTransform().scale_ = {10,10,10};
 	skyBoxObject->SetIsDraw(true);
 	
 	
-	skyBoxObject2 = GetEntity3DManager()->CreateObject3D("skyBox2", ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	skyBoxObject2 = GetEntity3DManager()->CreateObject3D("skyBox2", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
 	skyBoxObject2->SetSkyBox(skyBox2.get());
 	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
 	skyBoxObject2->SetIsDraw(false);
@@ -330,7 +330,7 @@ void TestScene::InitializeObject2D()
 	
 	for (int i = 0; i < 4; i++)
 	{
-		auto sprite = std::make_unique<Sprite>();
+		auto sprite = std::make_unique<Engine::Sprite>();
 
 		sprite->Initialize(GetEntity2DManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png", false);
 		sprite->SetTextureSize({ 64,64 });
@@ -373,7 +373,7 @@ void TestScene::InitializeLight()
 	pointLightData.lig = 0.2f;
 	pointLightData.isLight = true;
 	pointLightData.decay = 1.0f;
-	point = std::make_shared<PointLight>();
+	point = std::make_shared<Engine::PointLight>();
 
 	point->point = pointLightData;
 
@@ -387,7 +387,7 @@ void TestScene::InitializeLight()
 	spotLightData.isLight = true;
 	spotLightData.decay = 1.0f;
 
-	spot = std::make_shared<SpotLight>();
+	spot = std::make_shared<Engine::SpotLight>();
 
 	spot->spot = spotLightData;
 	//GetEntity3DManager()->GetLightManager()->AddLight(spot);
@@ -404,7 +404,7 @@ void TestScene::InitializeLight()
 
 
 
-	directional = std::make_shared<DirectionalLight>();
+	directional = std::make_shared<Engine::DirectionalLight>();
 	directional->directional = directionalLightData;
 
 	GetEntity3DManager()->GetLightManager()->AddLight(directional);

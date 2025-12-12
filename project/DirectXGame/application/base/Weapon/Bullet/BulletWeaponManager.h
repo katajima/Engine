@@ -6,8 +6,10 @@
 
 // 前方宣言
 class BulletManager;
-class Entity3DManager;
-class Entity2DManager;
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+}
 class Effect;
 
 class BulletWeaponManager
@@ -22,7 +24,8 @@ public:
 	/// <param name="entity3DManager"></param>
 	/// <param name="entity2DManager"></param>
 	/// <param name="globalVariables"></param>
-	void Initialize(BulletManager* bulletManager, Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables);
+	void Initialize(BulletManager* bulletManager, Engine::Input* input, Engine::Entity3DManager* entity3DManager,
+		Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables);
 
 	/// <summary>
 	/// 管理者設定
@@ -86,9 +89,9 @@ private:
 
 private:
 	BulletManager* bulletManager_ = nullptr;	// 弾管理クラス
-	Entity3DManager* entity3DManager_ = nullptr; // 3Dエンティティ管理クラス
-	Entity2DManager* entity2DManager_ = nullptr; // 2Dエンティティ管理クラス
-	Input* input_ = nullptr;                     // 入力クラス
+	Engine::Entity3DManager* entity3DManager_ = nullptr; // 3Dエンティティ管理クラス
+	Engine::Entity2DManager* entity2DManager_ = nullptr; // 2Dエンティティ管理クラス
+	Engine::Input* input_ = nullptr;                     // 入力クラス
 	BasePlayer* player_;
 	Effect* effect_;
 };

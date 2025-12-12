@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void LineMesh::Initialize(DirectXCommon* dxcommon)
+void Engine::LineMesh::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;
 
@@ -12,23 +12,23 @@ void LineMesh::Initialize(DirectXCommon* dxcommon)
 	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
 }
 
-void LineMesh::UpdateVertexBuffer()
+void Engine::LineMesh::UpdateVertexBuffer()
 {
 	vbvResorce_.UpdateBuffer(verticesline);
 }
 
-void LineMesh::UpdateIndexBuffer()
+void Engine::LineMesh::UpdateIndexBuffer()
 {
 	indexResorce_.UpdateBuffer(indices);
 }
 
-void LineMesh::Clear()
+void Engine::LineMesh::Clear()
 {
 	indices.clear();
 	verticesline.clear();
 }
 
-void LineMesh::GetCommandList()
+void Engine::LineMesh::GetCommandList()
 {
 	// 頂点バッファの設定
 	vbvResorce_.IASetVertexBuffers();
@@ -36,7 +36,7 @@ void LineMesh::GetCommandList()
 	indexResorce_.IASetIndexBuffer();
 }
 
-void LineMesh::DrawIndexedInstanced()
+void Engine::LineMesh::DrawIndexedInstanced()
 {
 	// バッファ設定
 	GetCommandList();
@@ -47,7 +47,7 @@ void LineMesh::DrawIndexedInstanced()
 	}
 }
 
-void LineMesh::MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum)
+void Engine::LineMesh::MeshLine(const std::vector<uint32_t>& indices, std::vector<uint32_t>& lineIndices, uint32_t lineNum)
 {
 	// エッジの重複管理用マップ
 	std::unordered_map<uint64_t, bool> edgeMap;

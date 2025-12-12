@@ -7,7 +7,7 @@
 /// Octree
 /// </summary>
 
-void Octree::drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset)
+void Engine::Octree::drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset)
 {
 	if (!node) return;
 
@@ -24,7 +24,7 @@ void Octree::drawOctree(OctreeNode* node, LineCommon& lineDrawer, Vector3 offset
 	}
 }
 
-void Octree::draw(LineCommon& lineDrawer, Vector3 offset)
+void Engine::Octree::draw(LineCommon& lineDrawer, Vector3 offset)
 {
 
 	drawOctree(root.get(), lineDrawer, offset);
@@ -39,7 +39,7 @@ void Octree::draw(LineCommon& lineDrawer, Vector3 offset)
 /// メッシュの三角形を入れる
 /// </summary>
 /// <param name="mesh"></param>
-void Octree::insert(const BaseMesh& mesh) {
+void Engine::Octree::insert(const BaseMesh& mesh) {
 	for (auto& triangle : mesh.triangle) {
 		insertTriangle(root.get(), triangle);
 	}
@@ -52,7 +52,7 @@ void Octree::insert(const BaseMesh& mesh) {
 /// OctreeNode
 /// </summary>
 
-void OctreeNode::subdivide(int divX, int divY, int divZ, int maxDepth)
+void Engine::OctreeNode::subdivide(int divX, int divY, int divZ, int maxDepth)
 {
 	clear();
 
@@ -82,7 +82,7 @@ void OctreeNode::subdivide(int divX, int divY, int divZ, int maxDepth)
 }
 
 
-void OctreeNode::clear()
+void Engine::OctreeNode::clear()
 {
 	for (OctreeNode* child : children) {
 		if (child) {
@@ -96,14 +96,14 @@ void OctreeNode::clear()
 }
 
 
-void Octree::queryNode(OctreeNode* node, const AABB& area, std::vector<Collider*>& results)
+void Engine::Octree::queryNode(OctreeNode* node, const AABB& area, std::vector<Collider*>& results)
 {
 
 
 }
 
 // OctreeNode 内でカプセルと三角形の衝突判定を行う
-bool Octree::checkCollisionWithNode(const Capsule& capsule, OctreeNode* node) {
+bool Engine::Octree::checkCollisionWithNode(const Capsule& capsule, OctreeNode* node) {
 	if (!node->bounds.intersects(capsule.computeAABB())) {
 		return false;  // AABBが交差していなければ衝突しない
 	}
@@ -139,7 +139,7 @@ bool Octree::checkCollisionWithNode(const Capsule& capsule, OctreeNode* node) {
 
 
 
-void OctreeCollider::Insert(Collider* collider)
+void Engine::OctreeCollider::Insert(Collider* collider)
 {
 	if (!collider || !collider->enabled) return;
 	AABB aabb = collider->GetAABB();
@@ -147,7 +147,7 @@ void OctreeCollider::Insert(Collider* collider)
 }
 
 
-void OctreeCollider::insertCollider(OctreeColliderNode* node, Collider* collider, const AABB& aabb) {
+void Engine::OctreeCollider::insertCollider(OctreeColliderNode* node, Collider* collider, const AABB& aabb) {
 	if (!node->bounds.intersects(aabb)) return;
 
 	// 子ノードを持たない場合、または最大深度に到達している場合はこのノードに保持
@@ -176,7 +176,7 @@ void OctreeCollider::insertCollider(OctreeColliderNode* node, Collider* collider
 	}
 }
 
-void OctreeCollider::queryNode(OctreeColliderNode* node, const AABB& area, std::vector<Collider*>& results)
+void Engine::OctreeCollider::queryNode(OctreeColliderNode* node, const AABB& area, std::vector<Collider*>& results)
 {
 	// ノードAABBとクエリアABBが交差しない場合はスキップ
 	if (!node->bounds.intersects(area)) return;

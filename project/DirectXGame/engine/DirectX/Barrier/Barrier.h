@@ -3,38 +3,40 @@
 #include <d3d12.h>
 #include <unordered_map>
 
-// 前方宣言
-class Command;
 
-/// <summary>
-/// バリアクラス
-/// </summary>
-class Barrier
-{
-public:
-	Barrier() = default;
-	~Barrier() = default;
+namespace Engine {
+	// 前方宣言
+	class Command;
 
-	// 初期化
-	void Initialize(Command* command);
+	/// <summary>
+	/// バリアクラス
+	/// </summary>
+	class Barrier
+	{
+	public:
+		Barrier() = default;
+		~Barrier() = default;
 
-public:
+		// 初期化
+		void Initialize(Command* command);
 
-	// トランジション
-	void TransitionResource(ID3D12Resource* res,D3D12_RESOURCE_STATES before,D3D12_RESOURCE_STATES after);
+	public:
 
-	// トランジション
-	void TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newState);
+		// トランジション
+		void TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
 
-	// Uav依存
-	void UavDependence(ID3D12Resource* res);
+		// トランジション
+		void TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newState);
 
-	// 初期状態を登録する
-	void RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state);
-private:
+		// Uav依存
+		void UavDependence(ID3D12Resource* res);
 
-	Command* command_;
-private:
-	std::unordered_map<ID3D12Resource*, D3D12_RESOURCE_STATES> resourceStates_;
-};
+		// 初期状態を登録する
+		void RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state);
+	private:
 
+		Command* command_;
+	private:
+		std::unordered_map<ID3D12Resource*, D3D12_RESOURCE_STATES> resourceStates_;
+	};
+}

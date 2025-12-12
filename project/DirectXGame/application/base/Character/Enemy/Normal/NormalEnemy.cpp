@@ -4,7 +4,8 @@
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
-void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
+void NormalEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	entity2DManager_ = entity2DManager;	// エンティティ2d
@@ -29,7 +30,7 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	moveComponent_->Initialize(globalVariables_, MovementComponent::ControlType::Manual, "_Enemy");
 	moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 	// SphereColliderを追加
-	auto sphere = std::make_unique<SphereCollider>();
+	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->Enable();					// コライダ有効
 	sphere->tag = CollisionTag::Enemy;	// タグ設定
 	sphere->layer = CollisionLayer::Enemy;// レイヤー設定
@@ -37,9 +38,9 @@ void NormalEnemy::Initialize(Input* input, Entity3DManager* entity3DManager, Ent
 	GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
-	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
+	GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 		// プレイヤーかチェック
-		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
 
 		//  敵同士の衝突応答
@@ -215,7 +216,7 @@ void NormalEnemy::Attack() {
 
 void NormalEnemy::InitParticle()
 {
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+	Engine::ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 
 	// エフェクト用のトランスフォーム初期化
 	worldEffect_.Initialize();

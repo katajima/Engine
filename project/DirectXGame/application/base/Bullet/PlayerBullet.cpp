@@ -8,13 +8,14 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 // 初期化
-void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) {
+void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	entity2DManager_ = entity2DManager;	// エンティティ2d
 	globalVariables_ = globalVariables;	// 保存項目
 
 	// オブジェクト生成
-	object_ = entity3DManager->CreateObject3D("playerStanBullet", ObjectModelType::kNormal, position, camera);
+	object_ = entity3DManager->CreateObject3D("playerStanBullet", Engine::ObjectModelType::kNormal, position, camera);
 	object_->SetModel("AnimatedCube.gltf");	// モデル設定
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
 	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
@@ -25,7 +26,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 
 
 	// コライダ設定(球)
-	auto sphere = std::make_unique<SphereCollider>();
+	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->tag = CollisionTag::PlayerAttack;		// タグ設定
 	sphere->layer = CollisionLayer::PlayerAttack;	// レイヤー設定
 	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));// マスク設定
@@ -43,8 +44,8 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 
 
 	// 衝突時のコールバック登録
-	object_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
-		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+	object_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
 		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
 		if (isAlive_ == false) return;
 		// 敵
@@ -55,7 +56,7 @@ void PlayerBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager*
 
 
 
-		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+		float nowTime = Engine::MyGame::NowTime(); // ← 時間取得関数（例）
 
 		if (object_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
 			return; // クールタイム中のため無視

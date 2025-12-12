@@ -3,11 +3,11 @@
 
 #pragma region Detection
 // AABBと点
-bool Collision::Detection::Check(const AABB& aabb, const Vector3& point) {
+bool Engine::Collision::Detection::Check(const AABB& aabb, const Vector3& point) {
 	return (point >= aabb.min_ && point <= aabb.max_);
 }
 //衝突判定(球と球)
-bool Collision::Detection::Check(const Sphere& s1, const Sphere& s2)
+bool Engine::Collision::Detection::Check(const Sphere& s1, const Sphere& s2)
 {
 	Vector3 result = s2.center - s1.center;
 	// 半径以内なら
@@ -19,7 +19,7 @@ bool Collision::Detection::Check(const Sphere& s1, const Sphere& s2)
 	}
 }
 //衝突判定(球と点)
-bool Collision::Detection::Check(const Sphere& s1, const Vector3& v1)
+bool Engine::Collision::Detection::Check(const Sphere& s1, const Vector3& v1)
 {
 	Vector3 result = v1 - s1.center;
 	// 半径以内なら
@@ -31,7 +31,7 @@ bool Collision::Detection::Check(const Sphere& s1, const Vector3& v1)
 	}
 }
 //衝突判定(球と平面)
-bool Collision::Detection::Check(const Sphere& sphere, const Plane& plane)
+bool Engine::Collision::Detection::Check(const Sphere& sphere, const Plane& plane)
 {
 	Vector3 dis = plane.normal.Normalize();
 
@@ -39,7 +39,7 @@ bool Collision::Detection::Check(const Sphere& sphere, const Plane& plane)
 	return std::abs(distance) < sphere.radius;
 }
 //衝突判定(線と平面)
-bool Collision::Detection::Check(const Segment& segment, const Plane& plane)
+bool Engine::Collision::Detection::Check(const Segment& segment, const Plane& plane)
 {
 	Vector3 diff = segment.diff();
 
@@ -60,7 +60,7 @@ bool Collision::Detection::Check(const Segment& segment, const Plane& plane)
 	return false;
 }
 //三角形と線の衝突判定
-bool Collision::Detection::Check(const Triangle& triangle, const Segment& segment) {
+bool Engine::Collision::Detection::Check(const Triangle& triangle, const Segment& segment) {
 	Vector3 diff = segment.diff();
 
 	// 三角形の平面を取得
@@ -108,7 +108,7 @@ bool Collision::Detection::Check(const Triangle& triangle, const Segment& segmen
 	return false;
 }
 // Triangle と Capsule の衝突判定関数
-bool Collision::Detection::Check(const Triangle& triangle, const Capsule& capsule)
+bool Engine::Collision::Detection::Check(const Triangle& triangle, const Capsule& capsule)
 {
 	// カプセルの半径の二乗
 	float radiusSquared = capsule.radius * capsule.radius;
@@ -137,7 +137,7 @@ bool Collision::Detection::Check(const Triangle& triangle, const Capsule& capsul
 	return false;
 }
 // Rayと球の衝突判定
-bool Collision::Detection::Check(const Ray& ray, const Sphere& sphere) {
+bool Engine::Collision::Detection::Check(const Ray& ray, const Sphere& sphere) {
 	Vector3 m = ray.origin - sphere.center;
 	float b = Dot(m, ray.diff);
 	float c = Dot(m, m) - sphere.radius * sphere.radius;
@@ -149,7 +149,7 @@ bool Collision::Detection::Check(const Ray& ray, const Sphere& sphere) {
 	return true; // 交差あり
 }
 // RayとAABBの衝突判定
-bool Collision::Detection::Check(const Ray& ray, const AABB& aabb) {
+bool Engine::Collision::Detection::Check(const Ray& ray, const AABB& aabb) {
 	float tMin = 0.0f;
 	float tMax = FLT_MAX;
 
@@ -179,7 +179,7 @@ bool Collision::Detection::Check(const Ray& ray, const AABB& aabb) {
 	return true;
 }
 //
-bool Collision::Detection::Check(const std::vector<Vector3>& controlPoints, float radius, const Vector3& point, int segmentPerCurve) {
+bool Engine::Collision::Detection::Check(const std::vector<Vector3>& controlPoints, float radius, const Vector3& point, int segmentPerCurve) {
 	if (controlPoints.size() < 4) return false;
 
 	int totalSegment = static_cast<int>(controlPoints.size() - 3) * segmentPerCurve;
@@ -198,7 +198,7 @@ bool Collision::Detection::Check(const std::vector<Vector3>& controlPoints, floa
 	return false;
 }
 // AABBとAABB
-bool Collision::Detection::Check(const AABB& aabb1, const AABB& aabb2)
+bool Engine::Collision::Detection::Check(const AABB& aabb1, const AABB& aabb2)
 {
 	if ((aabb1.min_.x <= aabb2.max_.x && aabb1.max_.x >= aabb2.min_.x) &&
 		(aabb1.min_.y <= aabb2.max_.y && aabb1.max_.y >= aabb2.min_.y) &&
@@ -210,7 +210,7 @@ bool Collision::Detection::Check(const AABB& aabb1, const AABB& aabb2)
 	return false;
 }
 // AABBと球
-bool Collision::Detection::Check(const AABB& aabb, const Sphere& sphere)
+bool Engine::Collision::Detection::Check(const AABB& aabb, const Sphere& sphere)
 {
 	Vector3 closestPoint = ClosestPoint::AABBSphere(sphere, aabb);
 
@@ -224,7 +224,7 @@ bool Collision::Detection::Check(const AABB& aabb, const Sphere& sphere)
 	}
 }
 //四角形と線の衝突判定
-bool Collision::Detection::Check(const AABB& aabb, const Segment& segment)
+bool Engine::Collision::Detection::Check(const AABB& aabb, const Segment& segment)
 {
 	//点がAABB内にあるなら
 	if (Check(aabb, segment.origin) || Check(aabb, segment.end)) {
@@ -291,7 +291,7 @@ bool Collision::Detection::Check(const AABB& aabb, const Segment& segment)
 	return false;
 }
 // 球と線
-bool Collision::Detection::Check(const Sphere& sphere, const Segment& segment) {
+bool Engine::Collision::Detection::Check(const Sphere& sphere, const Segment& segment) {
 	Vector3 m = Subtract(segment.origin, sphere.center);
 	//Vector3 segEnd = Add(segment.origin, segment.diff);
 
@@ -324,7 +324,7 @@ bool Collision::Detection::Check(const Sphere& sphere, const Segment& segment) {
 	return false;
 }
 // 球とカプセル
-bool Collision::Detection::Check(const Sphere& sphere, const Capsule& cap) {
+bool Engine::Collision::Detection::Check(const Sphere& sphere, const Capsule& cap) {
 	Vector3 closest = ClosestPoint::PointSegment(cap.segment, sphere.center);
 	Vector3 diff = closest - sphere.center;
 
@@ -332,7 +332,7 @@ bool Collision::Detection::Check(const Sphere& sphere, const Capsule& cap) {
 	return diff.LengthSq() <= (sumRadius * sumRadius);
 }
 // OBBと球
-bool Collision::Detection::Check(const OBB& obb, const Sphere& sphere)
+bool Engine::Collision::Detection::Check(const OBB& obb, const Sphere& sphere)
 {
 	// OBBのローカル座標系に球の中心を変換
 	Vector3 d = sphere.center - obb.center;
@@ -359,7 +359,7 @@ bool Collision::Detection::Check(const OBB& obb, const Sphere& sphere)
 	return distSquared <= (sphere.radius * sphere.radius);
 }
 // OBBとSegmentの衝突判定
-bool Collision::Detection::Check(const OBB& obb, const Segment& segment) {
+bool Engine::Collision::Detection::Check(const OBB& obb, const Segment& segment) {
 	// OBBの各軸に対して投影を行い、交差を確認
 	for (int i = 0; i < 3; ++i) {
 		// OBBの軸ベクトル
@@ -389,7 +389,7 @@ bool Collision::Detection::Check(const OBB& obb, const Segment& segment) {
 	return true; // 交差する
 }
 // OBBとAABBの衝突判定
-bool Collision::Detection::Check(const OBB& obb, const AABB& aabb) {
+bool Engine::Collision::Detection::Check(const OBB& obb, const AABB& aabb) {
 	// AABBの中心と半径
 	Vector3 aabbCenter = (aabb.min_ + aabb.max_) * 0.5f;
 	Vector3 aabbHalf = (aabb.max_ - aabb.min_) * 0.5f;
@@ -450,7 +450,7 @@ bool Collision::Detection::Check(const OBB& obb, const AABB& aabb) {
 	return true;
 };
 // OBBとカプセル
-bool Collision::Detection::Check(const OBB& obb, const Capsule& cap) {
+bool Engine::Collision::Detection::Check(const OBB& obb, const Capsule& cap) {
 	const int kSamples = 10;
 
 	for (int i = 0; i <= kSamples; ++i) {
@@ -466,7 +466,7 @@ bool Collision::Detection::Check(const OBB& obb, const Capsule& cap) {
 	return false;
 }
 // 分離軸定理による OBB vs OBB の衝突判定
-bool Collision::Detection::Check(const OBB& obb0, const OBB& obb1) {
+bool Engine::Collision::Detection::Check(const OBB& obb0, const OBB& obb1) {
 	const Vector3* A = obb0.orientations; // OBB0の軸ベクトル
 	const Vector3* B = obb1.orientations; // OBB1の軸ベクトル
 
@@ -527,7 +527,7 @@ bool Collision::Detection::Check(const OBB& obb0, const OBB& obb1) {
 	return true;
 }
 // 分離軸定理による OBB vs OBB の衝突判定
-bool Collision::Detection::Check2(const OBB& obb0, const OBB& obb1) {
+bool Engine::Collision::Detection::Check2(const OBB& obb0, const OBB& obb1) {
 	const Vector3* A = obb0.orientations;
 	const Vector3* B = obb1.orientations;
 
@@ -590,14 +590,14 @@ bool Collision::Detection::Check2(const OBB& obb0, const OBB& obb1) {
 	return true;
 }
 // カプセルとカプセル
-bool Collision::Detection::Check(const Capsule& cap0, const Capsule& cap1)
+bool Engine::Collision::Detection::Check(const Capsule& cap0, const Capsule& cap1)
 {
 	float distanceSq = SegmentClosestDistanceSq(cap0.segment, cap1.segment);
 	float radiusSum = cap0.radius + cap1.radius;
 	return distanceSq <= radiusSum * radiusSum;
 }
 //カプセルと三角形の衝突判定
-bool Collision::Detection::Check(const Capsule& capsule, const Triangle& tri) {
+bool Engine::Collision::Detection::Check(const Capsule& capsule, const Triangle& tri) {
 	// カプセルの端点と三角形の面との距離を判定
 	if (DistancePointToPlane(capsule.segment.origin, tri.vertices[0], tri.vertices[1], tri.vertices[2]) <= capsule.radius) {
 		return true;
@@ -620,7 +620,7 @@ bool Collision::Detection::Check(const Capsule& capsule, const Triangle& tri) {
 	return false; // 衝突していない場合
 }
 // AABB とカプセルの衝突判定
-bool Collision::Detection::Check(const Capsule& capsule, const AABB& box) {
+bool Engine::Collision::Detection::Check(const Capsule& capsule, const AABB& box) {
 	// AABB に対するカプセルの線分の最近接点を求める
 	Vector3 closestPoint = ClosestPoint::SegmentAABB(capsule.segment, box);
 
@@ -638,7 +638,7 @@ bool Collision::Detection::Check(const Capsule& capsule, const AABB& box) {
 
 #pragma region Response
 
-bool Collision::Response::ReflectVelocity(const Sphere& s1, const Sphere& s2, Vector3& outPushVec)
+bool Engine::Collision::Response::ReflectVelocity(const Sphere& s1, const Sphere& s2, Vector3& outPushVec)
 {
 	Vector3 delta = s1.center - s2.center;
 	float distSq = delta.LengthSq();

@@ -9,7 +9,7 @@
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 
 
-void OceanManager::Initialize(DirectXCommon* dxCommon)
+void Engine::OceanManager::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;	// DX共通クラス
 	// PSOマネージャー初期化
@@ -20,7 +20,7 @@ void OceanManager::Initialize(DirectXCommon* dxCommon)
 	CreateGraphicsPipeline();
 }
 
-void OceanManager::DrawCommonSetting()
+void Engine::OceanManager::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -31,7 +31,7 @@ void OceanManager::DrawCommonSetting()
 	
 }
 
-void OceanManager::CreateRootSignature()
+void Engine::OceanManager::CreateRootSignature()
 {
 	
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
@@ -90,7 +90,7 @@ void OceanManager::CreateRootSignature()
 
 }
 
-void OceanManager::CreateGraphicsPipeline()
+void Engine::OceanManager::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

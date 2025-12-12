@@ -2,7 +2,8 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/Characters.h"
 
-void BaseCharacterManager::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera)
+void BaseCharacterManager::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+	Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
 {
 	input_ = input;						// インプット
 	entity3DManager_ = entity3DManager;	// エンティティ3d
@@ -38,7 +39,7 @@ void BaseCharacterManager::Update()
 	crowdManager_->UpdateAgentsToInstancing();
 
 	// 群衆AI更新
-	crowdManager_->Update(MyGame::GameTime());
+	crowdManager_->Update(Engine::MyGame::GameTime());
 
 
 

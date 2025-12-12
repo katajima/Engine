@@ -13,12 +13,12 @@
 
 //Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	D3DResourceLeakchecker leakCheck;
+	Engine::D3DResourceLeakchecker leakCheck;
 	_CrtSetDbgFlag(
 		_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF
 	);
 
-	Framework* game = new MyGame();
+	Engine::Framework* game = new Engine::MyGame();
 
 	game->Run();
 

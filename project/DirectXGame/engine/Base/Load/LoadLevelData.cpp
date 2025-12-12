@@ -7,7 +7,8 @@
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
-void LoadLevelData::Initialize(Entity3DManager* entity3DManager, ModelManager* modelManager, Camera* camera,const std::string extensionName, const std::string fileName)
+void LoadLevelData::Initialize(Engine::Entity3DManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera,
+	const std::string extensionName, const std::string fileName)
 {
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	modelManager_ = modelManager;		// モデル管理クラス
@@ -108,7 +109,7 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 
 	for (auto& objectData : levelData->objects) {
 		// ファイル名から登録済みモデルを検索
-		Model* model = nullptr;
+		Engine::Model* model = nullptr;
 
 		// obj
 		if (model == nullptr) {
@@ -123,7 +124,7 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 		}
 
 		// モデルを指定して3Dオブジェクトを生成 
-		Object3d* newObject = entity3DManager_->CreateObject3D(objectData.fileName,ObjectModelType::kNormal,{},{});
+		Engine::Object3d* newObject = entity3DManager_->CreateObject3D(objectData.fileName, Engine::ObjectModelType::kNormal,{},{});
 		//newObject->Initialize(entity3DManager_);
 		newObject->SetModel(model);
 		newObject->SetIsDraw(true);
@@ -132,7 +133,7 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 			newObject->InitColliderComponent();
 
 			// SphereColliderを追加
-			auto aabb = std::make_unique<AABBCollider>();
+			auto aabb = std::make_unique<Engine::AABBCollider>();
 			aabb->tag = CollisionTag::Wall;
 			//sphere->layer = CollisionLayer::None;
 			aabb->collisionMask = 0xFFFFFFFF;
@@ -181,20 +182,20 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 void LoadLevelData::CreateLight(LevelData* levelData)
 {
 	for (auto& directionalData : levelData->directionalDatas) {
-		std::shared_ptr<DirectionalLight> directional = std::make_shared<DirectionalLight>();
+		std::shared_ptr<Engine::DirectionalLight> directional = std::make_shared<Engine::DirectionalLight>();
 		directionalData.intensity = 0.3f;
 		directional->directional = directionalData;
 
 		lights_.push_back(directional);
 	}
 	for (auto& pointData : levelData->pointDatas) {
-		std::shared_ptr<PointLight> point = std::make_shared<PointLight>();
+		std::shared_ptr<Engine::PointLight> point = std::make_shared<Engine::PointLight>();
 		point->point = pointData;
 		
 		lights_.push_back(point);
 	}
 	for (auto& spotData : levelData->spotDatas) {
-		std::shared_ptr<SpotLight> spot = std::make_shared<SpotLight>();
+		std::shared_ptr<Engine::SpotLight> spot = std::make_shared<Engine::SpotLight>();
 		spot->spot = spotData;
 		
 		lights_.push_back(spot);

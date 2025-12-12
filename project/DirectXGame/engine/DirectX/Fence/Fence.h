@@ -8,40 +8,42 @@ using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
 
-// 前方宣言
-class DXGIDevice;
-class Command;
 
-/// <summary>
-/// フェンスクラス
-/// </summary>
-class Fence
-{
-public:
-	Fence() = default;
-	~Fence() = default;
+namespace Engine {
+	// 前方宣言
+	class DXGIDevice;
+	class Command;
 
-	// 初期化
-	void Initialize(DXGIDevice* dxgi, Command* command);
-	// GPUを待機
-	void WaitGPU();
-private:
-	// フェンス作成
-	void CreateFence();
+	/// <summary>
+	/// フェンスクラス
+	/// </summary>
+	class Fence
+	{
+	public:
+		Fence() = default;
+		~Fence() = default;
 
-private:
-	DXGIDevice* dxgi_ = nullptr;
-	Command* command_ = nullptr;
+		// 初期化
+		void Initialize(DXGIDevice* dxgi, Command* command);
+		// GPUを待機
+		void WaitGPU();
+	private:
+		// フェンス作成
+		void CreateFence();
 
-	// フェンス
-	ComPtr<ID3D12Fence> fence_ = nullptr;
-	// フェンスバリュー
-	UINT64 fenceValue_ = 0;
-	// フェンスイベント
-	HANDLE fenceEvent_;
-	// エラー半別
-	HRESULT hr_ = S_FALSE;
-	
+	private:
+		DXGIDevice* dxgi_ = nullptr;
+		Command* command_ = nullptr;
 
-};
+		// フェンス
+		ComPtr<ID3D12Fence> fence_ = nullptr;
+		// フェンスバリュー
+		UINT64 fenceValue_ = 0;
+		// フェンスイベント
+		HANDLE fenceEvent_;
+		// エラー半別
+		HRESULT hr_ = S_FALSE;
 
+
+	};
+}

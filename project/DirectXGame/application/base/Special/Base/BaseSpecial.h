@@ -3,10 +3,11 @@
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 
 // 前方宣言
-class Input;
-class Entity3DManager;
-class Entity2DManager;
-
+namespace Engine {
+	class Input;
+	class Entity3DManager;
+	class Entity2DManager;
+}
 /// <summary>
 /// 必殺技クラス
 /// </summary>
@@ -17,7 +18,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-    virtual	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera) = 0;
+    virtual	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera) = 0;
 
 	///< summary>
 	/// 更新
@@ -55,9 +56,9 @@ public:
 	bool IsAction() const { return isAction_; }
 
 	// 入力をセット
-	void SetInput(Input* input) {input_ = input;};
+	void SetInput(Engine::Input* input) {input_ = input;};
 	// 親子付け
-	void SetParent(WorldTransform* parent) {};
+	void SetParent(Engine::WorldTransform* parent) {};
 protected:
 	// ゲージ
 	int gauge_ = 0;
@@ -79,6 +80,6 @@ protected:
 
 
 protected:
-	Input* input_;
+	Engine::Input* input_;
 };
 

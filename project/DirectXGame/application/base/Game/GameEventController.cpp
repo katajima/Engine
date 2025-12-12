@@ -7,7 +7,7 @@
 
 
 
-void GameEventController::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
+void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
 {
 	entity3DManager_ = entity3DManager;		// エンティティ3d
 	globalVariables_ = globalVariables;		// 保存項目
@@ -20,13 +20,13 @@ void GameEventController::Initialize(Entity3DManager* entity3DManager, GlobalVar
 
 
 	waveManager_ = std::make_unique<WaveManager>();
-	//waveManager_->Initialize();
+	waveManager_->Initialize({});
 
 	//// スポーン情報初期化
 	SpawnInfo data;
-	data.Initialize("test",1,30);
+	data.Initialize("test",3,30);
 	data.GetData().size_ = { 50,1,50 };
-	data.GetData().spawnInterval_ = 10.0f;
+	data.GetData().spawnInterval_ = 15.0f;
 	data.GetData().spawnTimer_ = 0.0f;
 	characterSpawnManager_->AddCharacterSpawn(data);
 
@@ -36,12 +36,18 @@ void GameEventController::Initialize(Entity3DManager* entity3DManager, GlobalVar
 }
 
 
-void GameEventController::Update() {
+void GameEventController::Update(float dt) {
 	// キャラクター出現管理更新
 	characterSpawnManager_->Update();
 
 
+	waveManager_->Update(dt);
+
 	bool isEndEvent = characterSpawnManager_->GetCharacterSpawn("test")->GetSpawnInfo().IsEnd();
+	
+	
+	
+	
 	bool isCharaPlayerDed = !characterManager_->GetPlayer()->GetAlive();
 	bool isCharaEnemyDed = characterManager_->GetCharacterCount(CharacterType::Enemy) <= 0;
 

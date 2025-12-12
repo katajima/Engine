@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-void BaseUI::InitSprite(Sprite* sprite, std::string texFile, Vector2 pos, Vector2 size)
+void BaseUI::InitSprite(Engine::Sprite* sprite, std::string texFile, Vector2 pos, Vector2 size)
 {
 	sprite->Initialize( entity2DManager_->GetSpriteCommon(), texFile);	// 初期化
 	sprite->SetPosition(pos);											// 位置設定
@@ -15,7 +15,7 @@ void BaseUI::InitUICheckBox(std::string name, Vector2 pos)
 	if (uiCheckBox_.contains(name)) {
 		return;
 	}
-	std::unique_ptr<UICheckBox> sprite = std::make_unique<UICheckBox>();
+	std::unique_ptr<Engine::UICheckBox> sprite = std::make_unique<Engine::UICheckBox>();
 	sprite->Init(entity2DManager_, name);	// 初期化
 	sprite->SetInput(input_);				// 入力設定
 	sprite->SetPos(pos);					// 位置設定
@@ -28,7 +28,7 @@ void BaseUI::InitUISlider(std::string name, Vector2 pos)
 	if (uiSlider_.contains(name)) {
 		return;
 	}
-	std::unique_ptr<UISlider> sprite = std::make_unique<UISlider>();
+	std::unique_ptr<Engine::UISlider> sprite = std::make_unique<Engine::UISlider>();
 	sprite->Init(entity2DManager_, name);	// 初期化
 	sprite->SetInput(input_);				// 入力設定
 	sprite->SetPos(pos);					// 位置設定
@@ -41,7 +41,7 @@ void BaseUI::InitUIMeter(std::string name, Vector2 pos, bool useSprite)
 	if (uiMeter_.contains(name)) {
 		return;
 	}
-	std::unique_ptr<UIMeter> sprite = std::make_unique<UIMeter>();
+	std::unique_ptr<Engine::UIMeter> sprite = std::make_unique<Engine::UIMeter>();
 	sprite->SetUseNameSprite(useSprite);	// 名前スプライトを追加するか
 	sprite->Init(entity2DManager_, name);	// 初期化
 	sprite->SetInput(input_);				// 入力設定
@@ -55,7 +55,7 @@ void BaseUI::InitUIPair(std::string name, Vector2 pos)
 	if (uiPair_.contains(name)) {
 		return;
 	}
-	std::unique_ptr<UIPair> sprite = std::make_unique<UIPair>();
+	std::unique_ptr<Engine::UIPair> sprite = std::make_unique<Engine::UIPair>();
 	sprite->Init(entity2DManager_, name);// 初期化
 	sprite->SetInput(input_);			 // 入力設定
 	sprite->SetPos(pos);				 // 位置設定
@@ -68,7 +68,7 @@ void BaseUI::InitUICount(std::string name, Vector2 pos, int instance, bool useSp
 	if (uiCount_.contains(name)) {
 		return;
 	}
-	std::unique_ptr<UICount> sprite = std::make_unique<UICount>();
+	std::unique_ptr<Engine::UICount> sprite = std::make_unique<Engine::UICount>();
 	sprite->SetUseNameSprite(useSprite);	// 名前スプライトを使うか
 	sprite->SetInstance(instance);			// 桁数
 	sprite->Init(entity2DManager_, name);	// 初期化
@@ -143,7 +143,7 @@ void BaseUI::DrawUIElement()
 
 }
 
-UICheckBox* BaseUI::GetUICheckBox(std::string name)
+Engine::UICheckBox* BaseUI::GetUICheckBox(std::string name)
 {
 	// 読み込み済みモデルを検索
 	if (uiCheckBox_.contains(name)) {
@@ -152,7 +152,7 @@ UICheckBox* BaseUI::GetUICheckBox(std::string name)
 	return nullptr;
 }
 
-UISlider* BaseUI::GetUISlider(std::string name)
+Engine::UISlider* BaseUI::GetUISlider(std::string name)
 {
 	// 読み込み済みモデルを検索
 	if (uiSlider_.contains(name)) {
@@ -161,7 +161,7 @@ UISlider* BaseUI::GetUISlider(std::string name)
 	return nullptr;
 }
 
-UIMeter* BaseUI::GetUIMeter(std::string name)
+Engine::UIMeter* BaseUI::GetUIMeter(std::string name)
 {
 	// 読み込み済みモデルを検索
 	if (uiMeter_.contains(name)) {
@@ -170,7 +170,7 @@ UIMeter* BaseUI::GetUIMeter(std::string name)
 	return nullptr;
 }
 
-UIPair* BaseUI::GetUIPair(std::string name)
+Engine::UIPair* BaseUI::GetUIPair(std::string name)
 {
 	// 読み込み済みモデルを検索
 	if (uiPair_.contains(name)) {
@@ -179,7 +179,7 @@ UIPair* BaseUI::GetUIPair(std::string name)
 	return nullptr;
 }
 
-UICount* BaseUI::GetUICount(std::string name)
+Engine::UICount* BaseUI::GetUICount(std::string name)
 {
 	// 読み込み済みモデルを検索
 	if (uiCount_.contains(name)) {

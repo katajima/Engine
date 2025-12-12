@@ -3,12 +3,12 @@
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
-void ScissorRect::Initialize(Command* command)
+void Engine::ScissorRect::Initialize(Command* command)
 {
 	command_ = command;	// コマンド
 }
 
-void ScissorRect::SettingScissorRect()
+void Engine::ScissorRect::SettingScissorRect()
 {
 	int32_t width = WinApp::GetClientWidth(false);
 	int32_t height = WinApp::GetClientHeight(false);

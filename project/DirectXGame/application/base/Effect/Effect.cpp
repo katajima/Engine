@@ -2,14 +2,14 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-void Effect::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables)
+void Effect::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables)
 {
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	globalVariables_ = globalVariables;	// 保存項目追加
 
 
 	// エフェクトコンポーネント初期化
-	effectComponent_ = std::make_unique<EffectComponent>();
+	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(entity3DManager_, globalVariables_);
 
 	// パーティクル初期化
@@ -23,7 +23,7 @@ void Effect::Initialize(Entity3DManager* entity3DManager, GlobalVariables* globa
 void Effect::InitParticle(){
 
 	effectComponent_->AddEmitter("starEmit","hitStar",EmitterShapeType::POINT);
-	PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("starEmit");
+	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("starEmit");
 	starEmit->GetFrequency() = 0.0f;
 	starEmit->SetCount(1, 0);
 	starEmit->SetPos({ 0,0.0f,0.0f });
@@ -37,7 +37,7 @@ void Effect::InitParticle(){
 	
 
 	effectComponent_->AddEmitter("traiEmit", "hitEffect", EmitterShapeType::AABB);
-	AABBParticleEmitter* traiEmit = effectComponent_->GetEmitterAs<AABBParticleEmitter>("traiEmit");
+	Engine::AABBParticleEmitter* traiEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("traiEmit");
 	traiEmit->GetFrequency() = 0.0f;
 	traiEmit->SetCount(5, 0);
 	traiEmit->SetPos({ 0,0.0f,0.0f });
@@ -53,7 +53,7 @@ void Effect::InitParticle(){
 
 
 	effectComponent_->AddEmitter("hitEmit", "hit", EmitterShapeType::POINT);
-	PointParticleEmitter* hitEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("hitEmit");
+	Engine::PointParticleEmitter* hitEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("hitEmit");
 
 	hitEmit->GetFrequency() = 0.0f;
 	hitEmit->SetCount(10, 0);
@@ -69,7 +69,7 @@ void Effect::InitParticle(){
 
 
 	effectComponent_->AddEmitter("hitEffect2", "hitEffect2", EmitterShapeType::POINT);
-	PointParticleEmitter* effectEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("hitEffect2");
+	Engine::PointParticleEmitter* effectEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("hitEffect2");
 
 	effectEmit->GetFrequency() = 0.0f;
 	effectEmit->SetCount(1, 0);
@@ -84,7 +84,7 @@ void Effect::InitParticle(){
 	effectEmit->SetAlphaClipping(0.15f);
 	
 	effectComponent_->AddEmitter("ringHit", "ringHit", EmitterShapeType::POINT);
-	PointParticleEmitter* hitRingEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("ringHit");
+	Engine::PointParticleEmitter* hitRingEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("ringHit");
 
 	hitRingEmit->GetFrequency() = 0.0f;
 	hitRingEmit->SetCount(1, 0);
@@ -106,7 +106,7 @@ void Effect::InitRangeBombingBullet()
 {
 
 	effectComponent_->AddEmitter("missileHitCylinder", "missileHitCylinder", EmitterShapeType::POINT);
-	PointParticleEmitter* missileHitCylinder = effectComponent_->GetEmitterAs<PointParticleEmitter>("missileHitCylinder");
+	Engine::PointParticleEmitter* missileHitCylinder = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("missileHitCylinder");
 	missileHitCylinder->GetFrequency() = 0.0f;
 	missileHitCylinder->SetCount(1, 0);
 	missileHitCylinder->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
@@ -126,8 +126,8 @@ void Effect::InitRangeBombingBullet()
 	
 	effectComponent_->AddEmitter("stratSmoke01", "smokePlane01", EmitterShapeType::POINT);
 	effectComponent_->AddEmitter("stratSmoke02", "smokePlane05", EmitterShapeType::POINT);
-	PointParticleEmitter* stratSmoke01_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("stratSmoke01");
-	PointParticleEmitter* stratSmoke02_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("stratSmoke02");
+	Engine::PointParticleEmitter* stratSmoke01_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("stratSmoke01");
+	Engine::PointParticleEmitter* stratSmoke02_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("stratSmoke02");
 
 
 	stratSmoke01_->SetFrequency(0);
@@ -156,7 +156,7 @@ void Effect::InitRangeBombingBullet()
 
 
 	effectComponent_->AddEmitter("smokePlaneExpSmoke", "smokePlane05", EmitterShapeType::POINT);
-	PointParticleEmitter* smokePlaneExpSmoke = effectComponent_->GetEmitterAs<PointParticleEmitter>("smokePlaneExpSmoke");
+	Engine::PointParticleEmitter* smokePlaneExpSmoke = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("smokePlaneExpSmoke");
 
 	smokePlaneExpSmoke->GetFrequency() = 0.00f;
 	smokePlaneExpSmoke->SetCount(30, 0);
@@ -174,7 +174,7 @@ void Effect::InitRangeBombingBullet()
 
 
 	effectComponent_->AddEmitter("expPlane01", "expPlane01", EmitterShapeType::POINT);
-	PointParticleEmitter* expPlane = effectComponent_->GetEmitterAs<PointParticleEmitter>("expPlane01");
+	Engine::PointParticleEmitter* expPlane = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("expPlane01");
 
 
 	expPlane->GetFrequency() = 0.00f;
@@ -192,7 +192,7 @@ void Effect::InitRangeBombingBullet()
 	expPlane->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
 	effectComponent_->AddEmitter("AnimatedCube", "AnimatedCube", EmitterShapeType::POINT);
-	PointParticleEmitter* animatedCube = effectComponent_->GetEmitterAs<PointParticleEmitter>("AnimatedCube");
+	Engine::PointParticleEmitter* animatedCube = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("AnimatedCube");
 
 	animatedCube->GetFrequency() = 0.00f;
 	animatedCube->SetCount(6, 0);
@@ -215,7 +215,7 @@ void Effect::InitRangeBombingBullet()
 
 
 	effectComponent_->AddEmitter("ringEmit", "ringEmit", EmitterShapeType::AABB);
-	AABBParticleEmitter* ringEmit = effectComponent_->GetEmitterAs<AABBParticleEmitter>("ringEmit");
+	Engine::AABBParticleEmitter* ringEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("ringEmit");
 
 	ringEmit->GetFrequency() = 0.00f;
 	ringEmit->SetCount(3, 0);
@@ -233,7 +233,7 @@ void Effect::InitRangeBombingBullet()
 	ringEmit->SetRotate(Math::DegreesToRadians(Vector3{ 90,0,0 }), Math::DegreesToRadians(Vector3{ 90,0,0 }));
 
 	effectComponent_->AddEmitter("expSpark", "expSpark", EmitterShapeType::POINT);
-	PointParticleEmitter* expSpark = effectComponent_->GetEmitterAs<PointParticleEmitter>("expSpark");
+	Engine::PointParticleEmitter* expSpark = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("expSpark");
 
 	expSpark->GetFrequency() = 0.00f;
 	expSpark->SetCount(1, 0);
@@ -247,7 +247,7 @@ void Effect::InitRangeBombingBullet()
 	expSpark->SetRotate(Math::DegreesToRadians(Vector3{ 90,0,0 }), Math::DegreesToRadians(Vector3{ 90,0,0 }));
 
 	effectComponent_->AddEmitter("missileHit", "missileHit", EmitterShapeType::POINT);
-	PointParticleEmitter* hitEmitter_ = effectComponent_->GetEmitterAs<PointParticleEmitter>("missileHit");
+	Engine::PointParticleEmitter* hitEmitter_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("missileHit");
 
 	Vector3 size = { 2.0f, 2.0f, 2.0f };
 	hitEmitter_->SetCount(2, 0);
@@ -266,7 +266,7 @@ void Effect::InitRangeBombingBullet()
 void Effect::InitBullet()
 {
 	effectComponent_->AddEmitter("bulletSmoke", "smokePlane03_2", EmitterShapeType::POINT);
-	PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("bulletSmoke");
+	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("bulletSmoke");
 	starEmit->GetFrequency() = 0.0f;
 	starEmit->SetCount(10, 0);
 	starEmit->SetPos({ 0,0.0f,0.0f });
@@ -283,7 +283,7 @@ void Effect::InitBullet()
 
 
 	effectComponent_->AddEmitter("cartridge", "cartridge", EmitterShapeType::POINT);
-	PointParticleEmitter* cartridgeEmit = effectComponent_->GetEmitterAs<PointParticleEmitter>("cartridge");
+	Engine::PointParticleEmitter* cartridgeEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("cartridge");
 	cartridgeEmit->GetFrequency() = 0.0f;
 	cartridgeEmit->SetCount(1, 0);
 	cartridgeEmit->SetPos({ 0,0.0f,0.0f });
@@ -312,7 +312,7 @@ void Effect::Update() {
 
 void Effect::Emit(const std::string& name, const Vector3& pos)
 {
-	BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
+	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
 	
 	// 出現
 	emit->SetPos(pos);		// 位置

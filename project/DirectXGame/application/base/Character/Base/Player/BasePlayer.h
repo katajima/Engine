@@ -19,7 +19,8 @@ class BasePlayer : public BaseCharacter
 {
 public:
 	// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 	// 毎フレーム更新
 	virtual void Update() = 0;

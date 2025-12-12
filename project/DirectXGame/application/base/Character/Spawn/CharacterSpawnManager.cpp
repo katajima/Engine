@@ -1,6 +1,6 @@
 #include "CharacterSpawnManager.h"
 
-void CharacterSpawnManager::Initialize(BaseCharacterManager* characterManager, LineCommon* line)
+void CharacterSpawnManager::Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line)
 {
 	characterManager_ = characterManager;	// キャラクター管理
 	lineCommon_ = line;						// ライン管理

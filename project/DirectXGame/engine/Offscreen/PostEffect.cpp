@@ -6,7 +6,7 @@
 
 #pragma region Data
 
-void PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType type)
+void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType type)
 {
 	type_ = type;
 	dxCommon_ = dxCommon;
@@ -28,38 +28,38 @@ void PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType type)
 	case PostEffectType::kSepia:
 		break;
 	case PostEffectType::kVignette:
-		cbVignette_ = std::make_unique<ConstantBuffer<VignetteGPU>>();
+		cbVignette_ = std::make_unique<Engine::ConstantBuffer<VignetteGPU>>();
 		cbVignette_->CreateBuffer(dxCommon);
 		cbVignette_->Data()->scale = 16.0f;
 		cbVignette_->Data()->squared = 0.8f;
 		break;
 	case PostEffectType::kSmoothing:
-		cbSmoothig_ = std::make_unique<ConstantBuffer<SmoothigGPU>>();
+		cbSmoothig_ = std::make_unique<Engine::ConstantBuffer<SmoothigGPU>>();
 		cbSmoothig_->CreateBuffer(dxCommon);
 		cbSmoothig_->Data()->num = 3;
 		break;
 	case PostEffectType::kGaussian:
-		cbGaussian_ = std::make_unique<ConstantBuffer<GaussianGPU>>();
+		cbGaussian_ = std::make_unique<Engine::ConstantBuffer<GaussianGPU>>();
 		cbGaussian_->CreateBuffer(dxCommon);
 		cbGaussian_->Data()->num = 3;
 		cbGaussian_->Data()->sigma = 2.0f;
 		break;
 	case PostEffectType::kOitline:
-		cbOutline_ = std::make_unique<ConstantBuffer<OutlineGPU>>();
+		cbOutline_ = std::make_unique<Engine::ConstantBuffer<OutlineGPU>>();
 		cbOutline_->CreateBuffer(dxCommon);
 		cbOutline_->Data()->num = 3;
 		cbOutline_->Data()->weightSquared = 0.002f;
 		cbOutline_->Data()->projectionInverse = Identity();
 		break;
 	case PostEffectType::kRadialBlur:
-		cbRadialBlur_ = std::make_unique<ConstantBuffer<RadialBlurGPU>>();
+		cbRadialBlur_ = std::make_unique<Engine::ConstantBuffer<RadialBlurGPU>>();
 		cbRadialBlur_->CreateBuffer(dxCommon);
 		cbRadialBlur_->Data()->center = Vector2{ 0.5f,0.5f };
 		cbRadialBlur_->Data()->numSamples = 10;
 		cbRadialBlur_->Data()->blurWidth = 0.01f;
 		break;
 	case PostEffectType::kDissovle:
-		cbDissovle_ = std::make_unique<ConstantBuffer<DissovleGPU>>();
+		cbDissovle_ = std::make_unique<Engine::ConstantBuffer<DissovleGPU>>();
 		cbDissovle_->CreateBuffer(dxCommon);
 		cbDissovle_->Data()->threshold = 0.5f;
 		cbDissovle_->Data()->edge = 0.03f;
@@ -68,12 +68,12 @@ void PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType type)
 		cbDissovle_->Data()->color.z = 0.3f;
 		break;
 	case PostEffectType::kRandom:
-		cbRandom_ = std::make_unique<ConstantBuffer<RandomGPU>>();
+		cbRandom_ = std::make_unique<Engine::ConstantBuffer<RandomGPU>>();
 		cbRandom_->CreateBuffer(dxCommon);
 		cbRandom_->Data()->time = 0.0f;
 		break;
 	case PostEffectType::kBloom:
-		cbBloom_ = std::make_unique<ConstantBuffer<BloomGPU>>();
+		cbBloom_ = std::make_unique<Engine::ConstantBuffer<BloomGPU>>();
 		cbBloom_->CreateBuffer(dxCommon);
 		cbBloom_->Data()->threshold = 0.9f;
 		cbBloom_->Data()->intensity = 1.0f;
@@ -86,7 +86,7 @@ void PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType type)
 
 }
 
-void PostEffectData::DrawRender()
+void Engine::PostEffectData::DrawRender()
 {
 	// 各タイプに応じてGPUに送るデータ設定
 	switch (type_)
@@ -136,7 +136,7 @@ void PostEffectData::DrawRender()
 	DrawColl();
 }
 
-void PostEffectData::UpdateImgui()
+void Engine::PostEffectData::UpdateImgui()
 {
 	// 各タイプに応じてImGui更新
 	switch (type_)
@@ -214,7 +214,7 @@ void PostEffectData::UpdateImgui()
 }
 
 
-void PostEffectData::DrawColl()
+void Engine::PostEffectData::DrawColl()
 {
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
 	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
@@ -224,7 +224,7 @@ void PostEffectData::DrawColl()
 
 #pragma region Base
 
-void IPostEffect::Initialize(DirectXCommon* dxCommon, std::string psName) {
+void Engine::IPostEffect::Initialize(DirectXCommon* dxCommon, std::string psName) {
 	dxCommon_ = dxCommon;	// DX共通クラス
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
@@ -236,7 +236,7 @@ void IPostEffect::Initialize(DirectXCommon* dxCommon, std::string psName) {
 };
 
 // 共通パイプライン生成
-void IPostEffect::CreateCommonPipeline(std::string psName)
+void Engine::IPostEffect::CreateCommonPipeline(std::string psName)
 {
 	CreateRootSignature();
 
@@ -277,7 +277,7 @@ void IPostEffect::CreateCommonPipeline(std::string psName)
 }
 
 // 描画設定
-void IPostEffect::DrawSetting()
+void Engine::IPostEffect::DrawSetting()
 {
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(posteffect_.rootSignature.Get());
 
@@ -290,13 +290,13 @@ void IPostEffect::DrawSetting()
 
 #pragma region Copy
 
-void PostEffectCopy::DrawRender(int index, int indexB)
+void Engine::PostEffectCopy::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectCopy::CreateRootSignature() {
+void Engine::PostEffectCopy::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -319,13 +319,13 @@ void PostEffectCopy::CreateRootSignature() {
 
 #pragma region GrayScale
 
-void PostEffectGrayScale::DrawRender(int index, int indexB)
+void Engine::PostEffectGrayScale::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectGrayScale::CreateRootSignature() {
+void Engine::PostEffectGrayScale::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -347,13 +347,13 @@ void PostEffectGrayScale::CreateRootSignature() {
 
 #pragma region Sepia
 
-void PostEffectSepia::DrawRender(int index, int indexB)
+void Engine::PostEffectSepia::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectSepia::CreateRootSignature() {
+void Engine::PostEffectSepia::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -375,13 +375,13 @@ void PostEffectSepia::CreateRootSignature() {
 
 #pragma region Vignette
 
-void PostEffectVignette::DrawRender(int index, int indexB)
+void Engine::PostEffectVignette::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectVignette::CreateRootSignature() {
+void Engine::PostEffectVignette::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -403,13 +403,13 @@ void PostEffectVignette::CreateRootSignature() {
 
 #pragma region Smoothing
 
-void PostEffectSmoothing::DrawRender(int index, int indexB)
+void Engine::PostEffectSmoothing::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectSmoothing::CreateRootSignature() {
+void Engine::PostEffectSmoothing::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -431,13 +431,13 @@ void PostEffectSmoothing::CreateRootSignature() {
 
 #pragma region Gaussian
 
-void PostEffectGaussian::DrawRender(int index, int indexB)
+void Engine::PostEffectGaussian::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectGaussian::CreateRootSignature() {
+void Engine::PostEffectGaussian::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -459,14 +459,14 @@ void PostEffectGaussian::CreateRootSignature() {
 
 #pragma region Outline
 
-void PostEffectOutline::DrawRender(int index, int indexB)
+void Engine::PostEffectOutline::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, dxCommon_->GetDepthStencil()->GetDepthSrvIndex());
 }
 
-void PostEffectOutline::CreateRootSignature() {
+void Engine::PostEffectOutline::CreateRootSignature() {
 	// アウトライン	
 	D3D12_DESCRIPTOR_RANGE descriptorRangeOutline[2] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRangeOutline[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ
@@ -493,13 +493,13 @@ void PostEffectOutline::CreateRootSignature() {
 
 #pragma region RadialBlur
 
-void PostEffectRadialBlur::DrawRender(int index, int indexB)
+void Engine::PostEffectRadialBlur::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectRadialBlur::CreateRootSignature() {
+void Engine::PostEffectRadialBlur::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -520,14 +520,14 @@ void PostEffectRadialBlur::CreateRootSignature() {
 
 #pragma region Dissovle
 
-void PostEffectDissovle::DrawRender(int index, int indexB)
+void Engine::PostEffectDissovle::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, dissovleIndex);
 }
 
-void PostEffectDissovle::CreateRootSignature() {
+void Engine::PostEffectDissovle::CreateRootSignature() {
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	PSOFanction::SetSampler(staticSamplers[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -557,13 +557,13 @@ void PostEffectDissovle::CreateRootSignature() {
 
 #pragma region Random
 
-void PostEffectRandom::DrawRender(int index, int indexB)
+void Engine::PostEffectRandom::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectRandom::CreateRootSignature() {
+void Engine::PostEffectRandom::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -591,13 +591,13 @@ void PostEffectRandom::CreateRootSignature() {
 
 #pragma region Bloom
 
-void PostEffectBloom::DrawRender(int index, int indexB)
+void Engine::PostEffectBloom::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 }
 
-void PostEffectBloom::CreateRootSignature() {
+void Engine::PostEffectBloom::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 
@@ -618,14 +618,14 @@ void PostEffectBloom::CreateRootSignature() {
 
 #pragma region Combin
 
-void PostEffectCombin::DrawRender(int index, int indexB)
+void Engine::PostEffectCombin::DrawRender(int index, int indexB)
 {
 	DrawSetting();
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(1, index);
 	dxCommon_->GetSrvManager()->SetGraphicsRootdescriptorTable(2, indexB);
 }
 
-void PostEffectCombin::CreateRootSignature() {
+void Engine::PostEffectCombin::CreateRootSignature() {
 	///Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplersBlur[1] = {};
 	PSOFanction::SetSampler(staticSamplersBlur[0], 0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_SHADER_VISIBILITY_PIXEL, TextureAddressMode::kCLAMP);

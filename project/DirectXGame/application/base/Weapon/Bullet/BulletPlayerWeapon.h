@@ -23,7 +23,8 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
+	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 	///< summary>
 	/// 更新
@@ -74,10 +75,10 @@ public:
 	void SetModePenetrationPos(Vector3 pos) { penetrationPos_ = pos; }
 
 private:
-	WorldTransform bulletTransform_;
+	Engine::WorldTransform bulletTransform_;
 
-	WorldTransform bulletMuzzleTransform_;
-	WorldTransform bulletCartridgeTransform_;
+	Engine::WorldTransform bulletMuzzleTransform_;
+	Engine::WorldTransform bulletCartridgeTransform_;
 
 	int maxTargetNum_ = 1;				// ターゲットの指定量
 	Vector3 targetPos_{ 0,0,0 };		// ターゲットの位置

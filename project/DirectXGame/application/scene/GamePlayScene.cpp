@@ -99,7 +99,7 @@ void GamePlayScene::Initialize()
 
 	// 衝突マネージャの生成
 	Vector3 sizeAABB = { 1000,1000,1000 };
-	collisionManager_ = std::make_unique<CollisionManager>();
+	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 
 
@@ -112,7 +112,7 @@ void GamePlayScene::Initialize()
 	gameUI->SetPlayer(caracterManager_->GetPlayer());
 
 	// FPS表示用スプライト
-	sprite = std::make_unique<UICount>();
+	sprite = std::make_unique<Engine::UICount>();
 	sprite->SetUseNameSprite(false);		// 使わない
 	sprite->SetInstance(2);					// 行数設定
 	sprite->Init(GetEntity2DManager(), "fps");	// 初期化
@@ -128,7 +128,7 @@ void GamePlayScene::Initialize()
 	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
 
 	// エフェクトコンポーネント初期化
-	effectComponent_ = std::make_unique<EffectComponent>();
+	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 
 }
@@ -204,13 +204,13 @@ void GamePlayScene::UpdateImGui()
 	sprite->SetCount(fps);
 
 	// fps用のスプライト更新
-	sprite->Update(MyGame::GameTime());
+	sprite->Update(Engine::MyGame::GameTime());
 }
 
 // 更新処理
 void GamePlayScene::Update()
 {
-	Camera::isShake_ = false;
+	Engine::Camera::isShake_ = false;
 
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
@@ -279,7 +279,7 @@ void GamePlayScene::Update()
 	// Effect更新
 	effect_->Update();
 	// ゲーム進行マネージャー更新
-	gameFlowController_->Update(MyGame::GameTime());
+	gameFlowController_->Update(Engine::MyGame::GameTime());
 
 }
 

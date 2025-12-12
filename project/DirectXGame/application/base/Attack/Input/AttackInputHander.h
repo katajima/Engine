@@ -39,8 +39,9 @@ class AttackHeavy : public AttackICommand
 	void Exec(BaseCharacter& character) override;
 };
 
-
-class Input;
+namespace Engine {
+	class Input;
+}
 
 /// <summary>
 /// 攻撃インプットハンドラークラス
@@ -49,7 +50,7 @@ class AttackInputHander
 {
 public:
 	// インプット設定
-	void SetInput(Input* input) { input_ = input; };
+	void SetInput(Engine::Input* input) { input_ = input; };
 	// ハンドルインプット取得
 	AttackICommand* HandleInput();
 	// 割り当てる
@@ -61,7 +62,7 @@ private:
 	// 割り当てる強攻撃
 	void AssignAttackHeavy();
 
-	Input* input_;
+	Engine::Input* input_;
 
 	std::unique_ptr<AttackICommand> light = nullptr;
 	std::unique_ptr<AttackICommand> heavy = nullptr;

@@ -3,11 +3,11 @@
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
 
-const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
-float MyGame::kTimeSpeed_ = 1.0f;
-float MyGame::nowTime = 0.0f;
+const float Engine::MyGame::kDeltaTime_ = 1.0f / 60.0f;
+float Engine::MyGame::kTimeSpeed_ = 1.0f;
+float Engine::MyGame::nowTime = 0.0f;
 
-void MyGame::Initialize()
+void Engine::MyGame::Initialize()
 {
 	debugTimer_.StartTimer();
 
@@ -40,7 +40,7 @@ void MyGame::Initialize()
 	debugTimer_.LogTimeSec("MyGameAllTime ");
 }
 
-void MyGame::Finalize()
+void Engine::MyGame::Finalize()
 {
 	//
 	//Audio::GetInstance()->Finalize();
@@ -54,7 +54,7 @@ void MyGame::Finalize()
 	Framework::Finalize();
 }
 
-void MyGame::Update()
+void Engine::MyGame::Update()
 {
 	entity3DManager_->Get3DLineCommon()->LineClear();
 	// ImGuiの受付開始
@@ -113,14 +113,14 @@ void MyGame::Update()
 	dxCommon->GetImGuiManager()->End();
 }
 
-void MyGame::Draw()
+void Engine::MyGame::Draw()
 {
 	dxCommon->Draw(sceneManager_.get(), entity3DManager_.get());
 }
 
 
 
-void MyGame::InitializeResource()
+void Engine::MyGame::InitializeResource()
 {
 	TextureManager* textureManager = dxCommon->GetTextureManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
@@ -191,7 +191,7 @@ void MyGame::InitializeResource()
 
 }
 
-void MyGame::CreateParticle()
+void Engine::MyGame::CreateParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
@@ -332,7 +332,7 @@ void MyGame::CreateParticle()
 
 }
 
-void MyGame::LoadModel()
+void Engine::MyGame::LoadModel()
 {
 	ModelManager* modelManager = dxCommon->GetModelManager();
 

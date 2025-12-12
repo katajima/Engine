@@ -10,52 +10,53 @@ using namespace Microsoft::WRL;
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 
-// 前方宣言
-class DXGIDevice;
-class Command;
+namespace Engine {
+	// 前方宣言
+	class DXGIDevice;
+	class Command;
 
-/// <summary>
-/// DSVマネージャー
-/// </summary>
-class DsvManager
-{
-public:
-	DsvManager() = default;
-	~DsvManager() = default;
+	/// <summary>
+	/// DSVマネージャー
+	/// </summary>
+	class DsvManager
+	{
+	public:
+		DsvManager() = default;
+		~DsvManager() = default;
 
-	// 初期化
-	void Initialize(DXGIDevice* dxgi, Command* command);
-	// アロケート
-	uint32_t Allocate();
+		// 初期化
+		void Initialize(DXGIDevice* dxgi, Command* command);
+		// アロケート
+		uint32_t Allocate();
 
-	// デスクリプタハンドル計算
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
-	// デスクリプタハンドル計算
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
-	
-	// DSV生成
-	void CreateDSV(uint32_t dsvIndex, ID3D12Resource* pResource, DXGI_FORMAT format);
+		// デスクリプタハンドル計算
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t index);
+		// デスクリプタハンドル計算
+		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t index);
 
-	// ディスクリプタヒープを取得
-	ID3D12DescriptorHeap* GetDescriptorHeap() const;
-	// ディスクリプタのサイズを取得
-	uint32_t GetDescriptorSize() const;
-public:
-	// 最大RTV数
-	static const uint32_t kMaxDsvCount;
+		// DSV生成
+		void CreateDSV(uint32_t dsvIndex, ID3D12Resource* pResource, DXGI_FORMAT format);
 
-private:
-	// RTV用のデスクリプタサイズ
-	uint32_t descriptorSize_;
-	// RTV用デスクリプタヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap_;
+		// ディスクリプタヒープを取得
+		ID3D12DescriptorHeap* GetDescriptorHeap() const;
+		// ディスクリプタのサイズを取得
+		uint32_t GetDescriptorSize() const;
+	public:
+		// 最大RTV数
+		static const uint32_t kMaxDsvCount;
 
-	// 次に使用するRTVインデックス
-	uint32_t useIndex_ = 0;
+	private:
+		// RTV用のデスクリプタサイズ
+		uint32_t descriptorSize_;
+		// RTV用デスクリプタヒープ
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap_;
 
-private:
+		// 次に使用するRTVインデックス
+		uint32_t useIndex_ = 0;
 
-	DXGIDevice* DXGIDevice_;
-	Command* command_;
-};
+	private:
 
+		DXGIDevice* DXGIDevice_;
+		Command* command_;
+	};
+}

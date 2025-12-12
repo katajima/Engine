@@ -2,16 +2,17 @@
 #include <DirectXGame/engine/Effect/EffectComponent.h>
 
 // 前方宣言
-class Entity3DManager;
-class Entity2DManager;
-
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+}
 /// <summary>
 /// エフェクトクラス
 /// </summary>
 class Effect {
 public:
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables);
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables);
 	// 更新
 	void Update();
 	// 出現
@@ -26,12 +27,12 @@ private:
 	void InitBullet();
 
 private:
-	std::unique_ptr<EffectComponent> effectComponent_;	// エフェクトコンポーネント
+	std::unique_ptr<Engine::EffectComponent> effectComponent_;	// エフェクトコンポーネント
 
 private:
-	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
 
 
 private: // 一旦

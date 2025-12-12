@@ -11,8 +11,10 @@ class Effect;
 class BaseSpecial;
 class BaseWeapon;
 class AttackInputHander;
-class Entity3DManager;
-class Entity2DManager;
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+}
 class BulletManager;
 
 /// <summary>
@@ -24,7 +26,8 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 	///< summary>
 	/// 更新
@@ -101,11 +104,11 @@ public: // 取得系関数
 	// キャラクター取得
 	CharacterType GetCharacterType() const { return characterParameterComponent_.characterType_; }
 	// コライダーコンポーネント
-	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
+	Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
 	ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
 	// ワールド変換取得
-	WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+	Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 	// 削除フラグ
 	bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 	// 削除する
@@ -113,7 +116,7 @@ public: // 取得系関数
 	// 時間
 	float GetTime() { return objectComponent_->GetTime(); }
 	// インプット取得
-	Input* GetInput() { return input_; };
+	Engine::Input* GetInput() { return input_; };
 	//エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; }
 
@@ -211,11 +214,11 @@ protected:
 	Effect* effect_;						// エフェクト
 	BulletManager* bulletManager_;			// 弾管理
 protected: // 貰ってくるもの
-	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Camera* camera_ = nullptr;						// カメラ
-	Input* input_ = nullptr;						// 入力(使わないならnullptr)
-	Audio* audio_ = nullptr;
+	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Camera* camera_ = nullptr;						// カメラ
+	Engine::Input* input_ = nullptr;						// 入力(使わないならnullptr)
+	Engine::Audio* audio_ = nullptr;
 };
 

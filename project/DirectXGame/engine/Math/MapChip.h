@@ -16,8 +16,9 @@ enum class MapCellType : uint8_t {
     // 必要に応じて拡張
 };
 // 前方宣言
-class LineCommon;
-
+namespace Engine {
+    class LineCommon;
+}
 
 /// <summary>
 /// マップチップ
@@ -51,7 +52,7 @@ public:
     // 縦幅取得
     int GetHeight() const { return m_height; }
     // 描画
-    void DrawMapChip(LineCommon* line,float yPos) const;
+    void DrawMapChip(Engine::LineCommon* line,float yPos) const;
 
     // セルが障害物かどうかを返す
     bool IsBlocked(int x, int z) const {

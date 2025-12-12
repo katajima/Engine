@@ -22,7 +22,7 @@
 /// <summary>
 /// セレクトシーン
 /// </summary>
-class SelectScene : public BaseScene
+class SelectScene : public Engine::BaseScene
 {
 public:
 	// 初期化

@@ -8,57 +8,58 @@ using namespace Microsoft::WRL;
 // DirectX
 #include <d3d12.h>
 
-// 前方宣言
-class DXGIDevice;
-class Command;
-class DsvManager;
-class SrvManager;
+namespace Engine {
+	// 前方宣言
+	class DXGIDevice;
+	class Command;
+	class DsvManager;
+	class SrvManager;
 
-/// <summary>
-/// デプスステンシルクラス
-/// </summary>
-class DepthStencil
-{
-public:
-	DepthStencil() = default;
-	~DepthStencil() = default;
+	/// <summary>
+	/// デプスステンシルクラス
+	/// </summary>
+	class DepthStencil
+	{
+	public:
+		DepthStencil() = default;
+		~DepthStencil() = default;
 
-	// 初期化
-	void Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager);
-	// デプスをクリア
-	void ClearDepthView();
-	// デプスステンシルリソースのCPUハンドルの取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthStencilResorce();
+		// 初期化
+		void Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager);
+		// デプスをクリア
+		void ClearDepthView();
+		// デプスステンシルリソースのCPUハンドルの取得
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthStencilResorce();
 
-	// デプスSRVハンドル取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthSRV();
+		// デプスSRVハンドル取得
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandleDepthSRV();
 
-	// デプスSRVインデックス取得
-	uint32_t GetDepthSrvIndex() const;
+		// デプスSRVインデックス取得
+		uint32_t GetDepthSrvIndex() const;
 
-	// リソースを取得
-	ID3D12Resource* GetResource();
-	// SRVGPUハンドル取得
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
+		// リソースを取得
+		ID3D12Resource* GetResource();
+		// SRVGPUハンドル取得
+		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
 
-private:
-	// デプスステンシルリソースの作成
-	void CreateDepthStencilView();
-private:
-	// デプスステンシル用リソース
-	ComPtr<ID3D12Resource> depthStencilResource_ = nullptr;
-	// デプスステンシル用リソースのDSVインデックス
-	uint32_t dsvIndex_ = 0;
-	// デプスステンシル用リソースのSRVインデックス
-	uint32_t srvIndex_ = 0;
+	private:
+		// デプスステンシルリソースの作成
+		void CreateDepthStencilView();
+	private:
+		// デプスステンシル用リソース
+		ComPtr<ID3D12Resource> depthStencilResource_ = nullptr;
+		// デプスステンシル用リソースのDSVインデックス
+		uint32_t dsvIndex_ = 0;
+		// デプスステンシル用リソースのSRVインデックス
+		uint32_t srvIndex_ = 0;
 
 
 
-	DXGIDevice* DXGIDevice_;
-	Command* command_;
-	DsvManager* dsvManager_;
-	SrvManager* srvManager_;
+		DXGIDevice* DXGIDevice_;
+		Command* command_;
+		DsvManager* dsvManager_;
+		SrvManager* srvManager_;
 
-};
-
+	};
+}
 

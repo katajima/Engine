@@ -18,8 +18,10 @@
 class Effect;
 class FollowCamera;
 class BulletManager;
-class Entity3DManager;
-class Entity2DManager;
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+}
 class CameraManager;
 
 /// <summary>
@@ -32,7 +34,8 @@ public:
 
 
 	// 初期化
-	void Initialize(Input* input ,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera);
+	void Initialize(Engine::Input* input , Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 	// 更新
 	void Update();
@@ -110,11 +113,11 @@ private:
 	std::unique_ptr<CrowdManager> crowdManager_;	// 群衆AI
 
 private: // 貰いもの
-	Camera* camera_;
-	Input* input_;
-	Entity3DManager* entity3DManager_ = nullptr;
-	Entity2DManager* entity2DManager_ = nullptr;
-	GlobalVariables* globalVariables_;			// グローバル変数
+	Engine::Camera* camera_;
+	Engine::Input* input_;
+	Engine::Entity3DManager* entity3DManager_ = nullptr;
+	Engine::Entity2DManager* entity2DManager_ = nullptr;
+	Engine::GlobalVariables* globalVariables_;			// グローバル変数
 	FollowCamera* followCamera_ = nullptr;		// フォローカメラ 
 	BulletManager* bulletManager_ = nullptr;	// 弾をマネジャー
 	CameraManager* cameraManager_ = nullptr;	// カメラ管理

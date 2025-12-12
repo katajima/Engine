@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
-void Fence::Initialize(DXGIDevice* dxgi, Command* command)
+void Engine::Fence::Initialize(DXGIDevice* dxgi, Command* command)
 {
 	dxgi_ = dxgi;		// デバイス
 	command_ = command;	// コマンド
@@ -11,7 +11,7 @@ void Fence::Initialize(DXGIDevice* dxgi, Command* command)
 	CreateFence();	// フェンス生成
 }
 
-void Fence::WaitGPU()
+void Engine::Fence::WaitGPU()
 {
 	// フェンスの値を更新し、GPUとの同期
 	fenceValue_++;
@@ -24,7 +24,7 @@ void Fence::WaitGPU()
 	}
 }
 
-void Fence::CreateFence()
+void Engine::Fence::CreateFence()
 {
 	//初期値0でFenceを作る
 	fenceValue_ = 0;

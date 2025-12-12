@@ -7,14 +7,15 @@
 class Effect;
 class BasePlayer;
 class BaseEnemy;
-class Entity3DManager;
-class Entity2DManager;
 class GlobalVariables;
-class Primitive;
-class Object3d;
-class Sprite;
-class Camera;
-
+namespace Engine{
+	class Entity3DManager;
+	class Entity2DManager;
+	class Primitive;
+	class Object3d;
+	class Sprite;
+	class Camera;
+}
 
 
 enum class BulletType {
@@ -56,7 +57,8 @@ public:
 	};
 	
 	// 初期化
-	virtual void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 
 	// 毎フレーム更新
@@ -91,7 +93,7 @@ public:
 	float GetTimer() const;
 
 	// オブジェクト
-	Object3d* GetObject3D() { return object_; }
+	Engine::Object3d* GetObject3D() { return object_; }
 	// プレイヤー設定
 	void SetPlayer(BasePlayer* player);
 	// 敵設定
@@ -99,7 +101,7 @@ public:
 	// 範囲設定
 	void SetTargerRange(Vector3 pos, float rad) { targetRange_ = { pos,rad }; };
 	// コライダコンポーネント取得
-	ColliderComponent* GetColliderComponent();
+	Engine::ColliderComponent* GetColliderComponent();
 	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; };
 
@@ -112,7 +114,7 @@ protected:
 public:
 	
 protected:
-	Object3d* object_;
+	Engine::Object3d* object_;
 	
 	// 各パラメータ
 	Parameters parameter_{};
@@ -144,9 +146,9 @@ protected:
 	BulletInfo info_;
 
 
-	GlobalVariables* globalVariables_ = nullptr;
-	Entity3DManager* entity3DManager_ = nullptr;
-	Entity2DManager* entity2DManager_ = nullptr;
+	Engine::GlobalVariables* globalVariables_ = nullptr;
+	Engine::Entity3DManager* entity3DManager_ = nullptr;
+	Engine::Entity2DManager* entity2DManager_ = nullptr;
 
 };
 

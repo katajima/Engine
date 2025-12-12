@@ -2,7 +2,7 @@
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "RenderingCommon.h"
 
-void RenderingCommon::Initialize(DirectXCommon* dxCommon)
+void Engine::RenderingCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;	// DX共通クラス
 
@@ -22,7 +22,7 @@ void RenderingCommon::Initialize(DirectXCommon* dxCommon)
 	
 }
 
-void RenderingCommon::DrawRender(PostEffectType type, int index, int indexB)
+void Engine::RenderingCommon::DrawRender(PostEffectType type, int index, int indexB)
 {
 	// 描画方法
 	switch (type)

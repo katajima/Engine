@@ -41,10 +41,11 @@ struct ObjectStateFlags
 
 
 // 前方宣言
-class Entity3DManager;	
-class Entity2DManager;
-class ObjectInstans;
-
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+	class ObjectInstans;
+}
 /// <summary>
 /// オブジェクトコンポーネントくクラス
 /// </summary>
@@ -54,12 +55,14 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Entity3DManager* entity3DManager, GlobalVariables* globalVariables,const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver,ObjectModelType modelType = ObjectModelType::kNormal);
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+		const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, 
+		IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType = Engine::ObjectModelType::kNormal);
 
 	/// <summary>
 	/// インスタンシング用初期化
 	/// </summary>
-	void InitializeInstancing(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver);
+	void InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver);
 
 	/// <summary>
 	/// 更新
@@ -69,11 +72,11 @@ public:
 
 public: // コライダー
 	// コライダーコンポーネント取得
-	ColliderComponent* GetColliderComponent();
+	Engine::ColliderComponent* GetColliderComponent();
 	// コライダー衝突履歴削除
 	void ColliderHistoryClear();
 	// 衝突履歴取得
-	ContactRecord& GetContactRecord();
+	Engine::ContactRecord& GetContactRecord();
 
 	// 描画するか
 	void SetIsDraw(bool is);
@@ -83,16 +86,16 @@ public: // コライダー
 
 public: // 取得
 	// オブジェクト3d取得
-	Object3d* GetObject3D() { return objectBase_; }
+	Engine::Object3d* GetObject3D() { return objectBase_; }
 	// ワールド変換取得
-	WorldTransform& GetWorldTransform();
+	Engine::WorldTransform& GetWorldTransform();
 	// ワールド座標取得
 	Vector3 GetWorldPosition() { return GetWorldTransform().GetWorldPosition(); };
 	// スクリーン座標取得
 	Vector2 GetScreenPosition();
 	// リジッドボディー取得
-	RigidBodyComponent* GetRigidBodyComponent();
-	
+	Engine::RigidBodyComponent* GetRigidBodyComponent();
+
 	// オブジェクト時間取得
 	float GetTime() const;
 	// 名前取得
@@ -106,7 +109,7 @@ public: // 取得
 	// ロックオン状態を設定
 	void SetLockOn(bool lock) { flags_.isLockonTarget = lock; }
 public: // 設定
-	
+
 	// 名前設定
 	void SetName(std::string name) { this->name_ = name; };
 
@@ -116,12 +119,12 @@ public: // 設定
 	// オブジェクト状態取得(設定可能)
 	ObjectStateFlags& GetObjectStateFlags() { return flags_; }
 	// SRT設定
-	void SetSRT(const Vector3& s = {1,1,1}, const Vector3& r = {0,0,0}, const Vector3& t = {0,0,0});
+	void SetSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
 	// インスタンシング用SRT設定
-	void SetInstancingSRT(const Vector3& s = {1,1,1}, const Vector3& r = {0,0,0}, const Vector3& t = {0,0,0});
+	void SetInstancingSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
 
 private:
-	Object3d* objectBase_ = nullptr;// オブジェクト3d(Entity3dManagerを使って)
+	Engine::Object3d* objectBase_ = nullptr;// オブジェクト3d(Entity3dManagerを使って)
 	ObjectType objectType_ = ObjectType::None; // オブジェクトの種類(キャラクター、武器など)
 	std::string name_ = "";		// オブジェクト名
 	std::string modelName_ = "";		// オブジェクト名
@@ -131,10 +134,10 @@ private:
 	bool useInstancing = false;	// インスタンシング描画にするか
 
 
-	ObjectInstans* objectInstance_ = nullptr;
+	Engine::ObjectInstans* objectInstance_ = nullptr;
 	int instanceId_ = 0;
 
 protected: // 貰ってくるもの
-	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
 };

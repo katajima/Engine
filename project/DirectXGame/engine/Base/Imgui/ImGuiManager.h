@@ -25,87 +25,88 @@
 
 #define ICON_MD_HOME u8"\uE88A"
 
-// 前方宣言
-class Camera;
-class WinApp;
-class DirectXCommon;
-class SrvManager;
+namespace Engine {
+	// 前方宣言
+	class Camera;
+	class WinApp;
+	class DirectXCommon;
+	class SrvManager;
 
-// ImGuiの管理
-class ImGuiManager
-{
-public:
+	// ImGuiの管理
+	class ImGuiManager
+	{
+	public:
+
+		/// <summary>
+		/// 初期化
+		/// </summary>
+		void Initialize(DirectXCommon* dxCommon);
+
+		/// <summary>
+		/// 終了
+		/// </summary>
+		void Finalize();
+
+		/// <summary>
+		/// ImGui受付開始
+		/// </summary>
+		void Begin();
+
+		/// <summary>
+		/// ImGui受付終了
+		/// </summary>
+		void End();
+
+		/// <summary>
+		/// 描画
+		/// </summary>
+		void Draw();
+
+		// ギズモの使用例
+		void RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name);
+
+		// ImGuiスタイル設定
+		void SetCustomColorScheme();
+		// インプット設定
+		void SetInput(Input* input) { input_ = input; }
+
+	public:
+
+	private:
+		// ImGuiスタイル
+		void InitImGuiStyle();
+		// AddFont
+		void AddFont();
+
+
+	private:
+
+		// DirectX基盤インスタンス（借りてくる）
+		DirectXCommon* dxCommon_ = nullptr;
+		SrvManager* srvManager_ = nullptr;
+
+		Input* input_;
+
+		Input::FlagXYZ flag;
+
+		uint32_t srvIndex = 0;
+
+	};
 
 	/// <summary>
-	/// 初期化
+	/// ImGuiウィンドウのスコープを管理するRAIIクラス。
 	/// </summary>
-	void Initialize(DirectXCommon* dxCommon);
-
-	/// <summary>
-	/// 終了
-	/// </summary>
-	void Finalize();
-
-	/// <summary>
-	/// ImGui受付開始
-	/// </summary>
-	void Begin();
-
-	/// <summary>
-	/// ImGui受付終了
-	/// </summary>
-	void End();
-
-	/// <summary>
-	/// 描画
-	/// </summary>
-	void Draw();
-
-	// ギズモの使用例
-	void RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name);
-
-	// ImGuiスタイル設定
-	void SetCustomColorScheme();
-	// インプット設定
-	void SetInput(Input* input) { input_ = input; }
-
-public:
-
-private:
-	// ImGuiスタイル
-	void InitImGuiStyle();
-	// AddFont
-	void AddFont();
-
-
-private:
-
-	// DirectX基盤インスタンス（借りてくる）
-	DirectXCommon* dxCommon_ = nullptr;
-	SrvManager* srvManager_ = nullptr;
-	
-	Input* input_;
-
-	Input::FlagXYZ flag;
-
-	uint32_t srvIndex = 0;
-
-};
-
-/// <summary>
-/// ImGuiウィンドウのスコープを管理するRAIIクラス。
-/// </summary>
-class ImGuiWindowScope {
-public:
-	// コンストラクタ
-	ImGuiWindowScope(const char* name, ImGuiWindowFlags flags = 0) {
-		ImGui::Begin(name, nullptr, flags);
-	}
-	// デストラクタ
-	~ImGuiWindowScope() {
-		ImGui::End();
-	}
-};
-
+	class ImGuiWindowScope {
+	public:
+		// コンストラクタ
+		ImGuiWindowScope(const char* name, ImGuiWindowFlags flags = 0) {
+			ImGui::Begin(name, nullptr, flags);
+		}
+		// デストラクタ
+		~ImGuiWindowScope() {
+			ImGui::End();
+		}
+	};
+}
 
 

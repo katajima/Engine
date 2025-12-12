@@ -64,7 +64,7 @@ public:
 /// <summary>
 /// タイトルシーン
 /// </summary>
-class TitleScene : public BaseScene
+class TitleScene : public Engine::BaseScene
 {
 public:
 	
@@ -90,23 +90,23 @@ private:
 	// カメラ初期化
 	void InitializeCamera();
 private:
-	Input* input_ = nullptr;
-	Audio* audio_ = nullptr;
+	Engine::Input* input_ = nullptr;
+	Engine::Audio* audio_ = nullptr;
 
 
 	// カメラ
-	std::unique_ptr < Camera> camera;
-	std::unique_ptr < DebugCamera> debugCamera;
+	std::unique_ptr <Engine::Camera> camera;
+	std::unique_ptr < Engine::DebugCamera> debugCamera;
 
 
-	std::unique_ptr<Sprite> icon_B;
-	std::unique_ptr<Sprite> title;
+	std::unique_ptr<Engine::Sprite> icon_B;
+	std::unique_ptr<Engine::Sprite> title;
 
 
-	Object3d tail;
+	Engine::Object3d tail;
 
 	// ライト
-	std::shared_ptr<DirectionalLight> directional;
+	std::shared_ptr<Engine::DirectionalLight> directional;
 
 
 	std::unique_ptr<LoadLevelData> loadData_;

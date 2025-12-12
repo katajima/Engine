@@ -9,7 +9,7 @@
 #include "DirectXGame/engine/DirectX/ViewPort/ViewPort.h"
 #include "DirectXGame/engine/DirectX/Fence/Fence.h"
 
-void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence)
+void Engine::SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence)
 {
 	winApp_ = winApp;			// WinApp
 	DXGIDevice_ = dxgi;			// デバイス
@@ -34,25 +34,25 @@ void SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, R
 
 }
 
-void SwapChain::Present()
+void Engine::SwapChain::Present()
 {
 	// GPUに画面交換を通知
 	swapChain_->Present(1, 0);
 }
 
-ID3D12Resource* SwapChain::GetCurrentBackBufferResource()
+ID3D12Resource* Engine::SwapChain::GetCurrentBackBufferResource()
 {
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 	return swapChainResources_[backBufferIndex_].Get();
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE SwapChain::GetCurrentBackBufferRTVHandle()
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::SwapChain::GetCurrentBackBufferRTVHandle()
 {
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 	return rtvManager_->GetCPUDescriptorHandle(rtvIndex_[backBufferIndex_]);
 }
 
-void SwapChain::PreDraw()
+void Engine::SwapChain::PreDraw()
 {
 	// スワップチェーン用
 	barrier_->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -70,7 +70,7 @@ void SwapChain::PreDraw()
 	scissorRect_->SettingScissorRect();
 }
 
-void SwapChain::PostDraw()
+void Engine::SwapChain::PostDraw()
 {
 	// スワップチェーン用
 	barrier_->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -88,7 +88,7 @@ void SwapChain::PostDraw()
 	command_->ResetCommand();
 }
 
-void SwapChain::Resize(int width, int height)
+void Engine::SwapChain::Resize(int width, int height)
 {
 	if (!swapChain_) return;
 
@@ -113,7 +113,7 @@ void SwapChain::Resize(int width, int height)
 	CreateRTV();
 }
 
-void SwapChain::CreateSwapChain()
+void Engine::SwapChain::CreateSwapChain()
 {
 	////------スワップチェーン------////
 	//スワップチェーンを生成する
@@ -141,7 +141,7 @@ void SwapChain::CreateSwapChain()
 	assert(SUCCEEDED(hr_));
 }
 
-void SwapChain::CreateSwapChainResource()
+void Engine::SwapChain::CreateSwapChainResource()
 {
 
 	// SwapChainからResourceを取得
@@ -156,7 +156,7 @@ void SwapChain::CreateSwapChainResource()
 	assert(SUCCEEDED(hr_));
 }
 
-void SwapChain::CreateRTV()
+void Engine::SwapChain::CreateRTV()
 {
 	// バックバッファの数に応じてサイズを調整
 	backBuffers_.resize(swcDesc_.BufferCount);

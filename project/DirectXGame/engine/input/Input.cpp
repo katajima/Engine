@@ -3,7 +3,7 @@
 #include <cassert>
 
 
-void Input::Intialize(WinApp* winApp)
+void Engine::Input::Intialize(WinApp* winApp)
 {
 	HRESULT result;
 
@@ -36,7 +36,7 @@ void Input::Intialize(WinApp* winApp)
 
 }
 
-void Input::Update()
+void Engine::Input::Update()
 {
 	HRESULT result;
 
@@ -57,7 +57,7 @@ void Input::Update()
 
 }
 
-bool Input::IsPushKey(BYTE keyNumber) const
+bool Engine::Input::IsPushKey(BYTE keyNumber) const
 {
 	// 指定キーを押していればtrueを返す
 	if (key[keyNumber]) {
@@ -67,7 +67,7 @@ bool Input::IsPushKey(BYTE keyNumber) const
 	return false;
 }
 
-bool Input::IsTriggerKey(BYTE keyNumber) const
+bool Engine::Input::IsTriggerKey(BYTE keyNumber) const
 {
 	// 指定されたキーが押された場合にtrueを返す
 	if (key[keyNumber] && !keyPre[keyNumber]) {
@@ -76,7 +76,7 @@ bool Input::IsTriggerKey(BYTE keyNumber) const
 	return false;
 }
 
-bool Input::IsKeyReleased(uint8_t _key) const
+bool Engine::Input::IsKeyReleased(uint8_t _key) const
 {
 	if (!key[_key] && keyPre[_key])
 		return true;
@@ -84,7 +84,7 @@ bool Input::IsKeyReleased(uint8_t _key) const
 	return false;
 }
 
-bool Input::IsMouseTriggered(uint8_t _buttonNum) const
+bool Engine::Input::IsMouseTriggered(uint8_t _buttonNum) const
 {
 	// マウスがトリガー
 	if (mouse_.rgbButtons[_buttonNum] && !preMouse_.rgbButtons[_buttonNum]) {
@@ -93,7 +93,7 @@ bool Input::IsMouseTriggered(uint8_t _buttonNum) const
 	return false;
 }
 
-bool Input::IsMousePressed(uint8_t _buttonNum) const
+bool Engine::Input::IsMousePressed(uint8_t _buttonNum) const
 {
 	if (mouse_.rgbButtons[_buttonNum] && preMouse_.rgbButtons[_buttonNum]) {
 		return true;
@@ -101,7 +101,7 @@ bool Input::IsMousePressed(uint8_t _buttonNum) const
 	return false;
 }
 
-bool Input::IsMouseReleased(uint8_t _buttonNum) const
+bool Engine::Input::IsMouseReleased(uint8_t _buttonNum) const
 {
 	if (!mouse_.rgbButtons[_buttonNum] && preMouse_.rgbButtons[_buttonNum])
 		return true;
@@ -112,7 +112,7 @@ bool Input::IsMouseReleased(uint8_t _buttonNum) const
 /// マウスの位置を取得
 /// </summary>
 /// <returns></returns>
-Vector2 Input::GetMousePosition() const
+Vector2 Engine::Input::GetMousePosition() const
 {
 	POINT mousePos;
 	GetCursorPos(&mousePos);
@@ -128,7 +128,7 @@ Vector2 Input::GetMousePosition() const
 
 
 // ゲームパッド
-bool Input::IsGamePadTriggered(GamePadButton button) const
+bool Engine::Input::IsGamePadTriggered(GamePadButton button) const
 {
 	if (xInputState_.Gamepad.wButtons & static_cast<WORD>(button) &&
 		!(preXInputState_.Gamepad.wButtons & static_cast<WORD>(button)))
@@ -140,7 +140,7 @@ bool Input::IsGamePadTriggered(GamePadButton button) const
 	}
 }
 
-bool Input::IsGamePadPressed(GamePadButton button) const
+bool Engine::Input::IsGamePadPressed(GamePadButton button) const
 {
 	if (xInputState_.Gamepad.wButtons & static_cast<WORD>(button) &&
 		preXInputState_.Gamepad.wButtons & static_cast<WORD>(button))
@@ -152,7 +152,7 @@ bool Input::IsGamePadPressed(GamePadButton button) const
 	}
 }
 
-bool Input::IsGamePadReleased(GamePadButton button) const
+bool Engine::Input::IsGamePadReleased(GamePadButton button) const
 {
 	if (!(xInputState_.Gamepad.wButtons & static_cast<WORD>(button)) &&
 		preXInputState_.Gamepad.wButtons & static_cast<WORD>(button))
@@ -165,7 +165,7 @@ bool Input::IsGamePadReleased(GamePadButton button) const
 
 }
 
-Vector2 Input::GetGamePadLeftStick() const
+Vector2 Engine::Input::GetGamePadLeftStick() const
 {
 	// 左スティック入力
 	if (xInputState_.Gamepad.sThumbLX || xInputState_.Gamepad.sThumbLY)
@@ -194,7 +194,7 @@ Vector2 Input::GetGamePadLeftStick() const
 	}
 }
 
-Vector2 Input::GetGamePadRightStick() const
+Vector2 Engine::Input::GetGamePadRightStick() const
 {
 	// 右スティック入力
 	if (xInputState_.Gamepad.sThumbRX || xInputState_.Gamepad.sThumbRY)
@@ -223,12 +223,12 @@ Vector2 Input::GetGamePadRightStick() const
 	}
 }
 
-float Input::GetGamePadLeftTrigger() const
+float Engine::Input::GetGamePadLeftTrigger() const
 {
 	return  xInputState_.Gamepad.bLeftTrigger / 255.0f;
 }
 
-float Input::GetGamePadRightTrigger() const
+float Engine::Input::GetGamePadRightTrigger() const
 {
 	return xInputState_.Gamepad.bRightTrigger / 255.0f;
 }

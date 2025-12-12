@@ -4,7 +4,7 @@
 
 
 
-void LightManager::Initialize(DirectXCommon* dxCommon)
+void Engine::LightManager::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;	// DX共通クラス
 
@@ -22,7 +22,7 @@ void LightManager::Initialize(DirectXCommon* dxCommon)
 }
 
 
-void LightManager::DrawLight(IsLight is, int dire, int point, int spot)
+void Engine::LightManager::DrawLight(IsLight is, int dire, int point, int spot)
 {
 	////------平行光源用------////
 	if (is.dire) {
@@ -40,7 +40,7 @@ void LightManager::DrawLight(IsLight is, int dire, int point, int spot)
 
 
 
-void LightManager::Update()
+void Engine::LightManager::Update()
 {
 	ZeroMemory(pointLightData, sizeof(PointLightData) * kNumMaxInstance);
 	ZeroMemory(directionalLightData, sizeof(DirectionalLightData) * kNumMaxInstance);
@@ -159,7 +159,7 @@ void LightManager::Update()
 
 
 
-void LightManager::ApplyGlobalVariables()
+void Engine::LightManager::ApplyGlobalVariables()
 {
 
 }

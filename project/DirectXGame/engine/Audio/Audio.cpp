@@ -2,7 +2,7 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
-void Audio::Initialize()
+void Engine::Audio::Initialize()
 {
 
 	HRESULT hr;
@@ -15,7 +15,7 @@ void Audio::Initialize()
 	assert(SUCCEEDED(hr));
 }
 
-void Audio::Finalize()
+void Engine::Audio::Finalize()
 {
 	// 再生中の全てのソースボイスを破棄
 	for (auto& kv : playingVoices) {
@@ -40,7 +40,7 @@ void Audio::Finalize()
 	xAudio2.Reset();
 }
 
-SoundData Audio::SoundLoadWave(const char* filename) {
+Engine::SoundData Engine::Audio::SoundLoadWave(const char* filename) {
 
 
 
@@ -110,7 +110,7 @@ SoundData Audio::SoundLoadWave(const char* filename) {
 }
 
 // 音声データ解放
-void Audio::SoundUnload(SoundData* soundData)
+void Engine::Audio::SoundUnload(SoundData* soundData)
 {
 	// バッファのメモリを解放
 	delete[] soundData->pBuffer;
@@ -119,7 +119,7 @@ void Audio::SoundUnload(SoundData* soundData)
 	soundData->wfex = {};
 }
 
-void Audio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
+void Engine::Audio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 
 	HRESULT result;
 
@@ -139,7 +139,7 @@ void Audio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	result = pSourceVoice->Start();
 }
 
-uint32_t Audio::LoadWave(const char* filename)
+uint32_t Engine::Audio::LoadWave(const char* filename)
 {
 	SoundData sd = SoundLoadWave(filename);
 	if (!sd.pBuffer || sd.bufferSize == 0) {
@@ -150,7 +150,7 @@ uint32_t Audio::LoadWave(const char* filename)
 	return handle;
 }
 
-void Audio::UnloadWave(uint32_t soundDataHandle)
+void Engine::Audio::UnloadWave(uint32_t soundDataHandle)
 {
 	auto it = soundDatas.find(soundDataHandle);
 	if (it == soundDatas.end()) return;
@@ -159,7 +159,7 @@ void Audio::UnloadWave(uint32_t soundDataHandle)
 }
 
 
-void Audio::PlayWave(uint32_t soundDataHandle, bool loop, float volume)
+void Engine::Audio::PlayWave(uint32_t soundDataHandle, bool loop, float volume)
 {
 	HRESULT hresult = S_FALSE;
 
@@ -201,7 +201,7 @@ void Audio::PlayWave(uint32_t soundDataHandle, bool loop, float volume)
 	playingVoices[soundDataHandle] = pSourceVoice;
 }
 
-void Audio::StopWave(uint32_t soundDataHandle) {
+void Engine::Audio::StopWave(uint32_t soundDataHandle) {
 	auto it = playingVoices.find(soundDataHandle);
 	if (it == playingVoices.end()) return;
 

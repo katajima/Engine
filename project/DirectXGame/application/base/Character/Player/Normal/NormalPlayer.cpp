@@ -8,7 +8,8 @@
 #include "assert.h"
 
 
-void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
+void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
 	entity3DManager_ = entity3DManager;	// エンティティ
 	entity2DManager_ = entity2DManager;	// エンティティ
@@ -18,11 +19,11 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	
 	
 	
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
+	Engine::ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 	
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true,this, ObjectModelType::kSkinning);
+	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true,this, Engine::ObjectModelType::kSkinning);
 
 	// 保存項目追加
 	CreateGroup("Player");
@@ -33,9 +34,9 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 
 	// HP設定
-	Parameters().HP.Initiaize(100, 0, 100, 0);
+	Parameters().HP.Initiaize(200, 0, 200, 0);
 	Parameters().stamina.Initiaize(100, 0, 50, 0);
-	HP() = 100; // 初期HP設定
+	HP() = 200; // 初期HP設定
 	Parameters().speed = 40.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	
@@ -54,7 +55,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	InitializeBaseAddItem();
 
 	// SphereColliderを追加
-	auto sphere = std::make_unique<SphereCollider>();
+	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->tag = CollisionTag::Player;
 	sphere->layer = CollisionLayer::Player;
 	sphere->collisionMask = 0xFFFFFFFF;
@@ -71,8 +72,8 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 	worldCollider_.translate_.y = 3.0f;
 
 	// 衝突時のコールバック登録
-	GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
-		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+	GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
 
 		uint32_t otherId = otherComponent->GetUniqueId();
@@ -88,7 +89,7 @@ void NormalPlayer::Initialize(Input* input, Entity3DManager* entity3DManager, En
 
 		if (!enemy) return;
 		if (enemy->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Attack) {
-			float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+			float nowTime = Engine::MyGame::NowTime(); // ← 時間取得関数（例）
 
 			if (objectComponent_->GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
 				return; // クールタイム中のため無視
@@ -233,6 +234,14 @@ void NormalPlayer::Update()
 	}
 #endif // _DEBUG
 
+
+	if (special_->GetPhese() == 1) {
+		attackController_->IsStopHitTimer(true);
+	}
+	else {
+		attackController_->IsStopHitTimer(false);
+	}
+
 	if (moveComponent_->GetIsLanding() && 
 		stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
 		input_->GetGamePadLeftStick().Length() == 0) {
@@ -261,14 +270,14 @@ void NormalPlayer::Update()
 	characterParameterComponent_.Update();
 
 	// 移動コンポーネント更新
-	moveComponent_->Update(MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(),
+	moveComponent_->Update(Engine::MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(),
 		*GetObjectComponent()->GetRigidBodyComponent(), GetInput());
 
 	// ステート
 	stateMachine_->Update();
 
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
 	// UI更新

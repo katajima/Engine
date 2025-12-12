@@ -1,7 +1,7 @@
 #include "HitBoxSystem.h"
 
 
-void HitBoxSystem::Initialize(BaseCharacter* character, Entity3DManager* entity3dManager) {
+void HitBoxSystem::Initialize(BaseCharacter* character, Engine::Entity3DManager* entity3dManager) {
 	character_ = character;
 	entity3dManager_ = entity3dManager;
 };
@@ -27,14 +27,14 @@ void HitBoxSystem::Update(float dt) {
 }
 
 void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas, const std::vector<std::string>& useHitBoxName,
-	float lifeTime, Type dependenceType, const Vector3& offset, WorldTransform* parent) {
+	float lifeTime, Type dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 	Data d;
 	d.hitBox = std::make_unique<HitBox>();
 	d.hitBox->Initialize(entity3dManager_, character_, type);
 
-	std::unique_ptr<OBBCollider> collObb = nullptr;
-	std::unique_ptr<AABBCollider> collAABB = nullptr;
-	std::unique_ptr<SphereCollider> collSphere = nullptr;
+	std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
+	std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
+	std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
 
 
 	// 依存先設定
@@ -48,7 +48,7 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 		break;
 	case HitBoxSystem::Type::kParentIndependent: // 追従先独立
 		{
-			WorldTransform world;
+		Engine::WorldTransform world;
 			world.Initialize();
 			world.parent_ = parent;	// ワールド座標に設定
 			world.translate_ = offset;	// オフセット設定
@@ -88,19 +88,19 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 		switch (data.shape)
 		{
 		case HitBoxShape::kOBB:
-			collObb = CreateCollider<OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collObb->obb.size = data.size;
 
 			d.hitBox->AddCollider(std::move(collObb), data.offset, data.reactionData);
 			break;
 		case HitBoxShape::kAABB:
-			collAABB = CreateCollider<AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collAABB->aabb.min_ = -data.size / 2;
 			collAABB->aabb.max_ = data.size / 2;
 			d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
 			break;
 		case HitBoxShape::kSphere:
-			collSphere = CreateCollider<SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collSphere->radius = data.radius;
 			d.hitBox->AddCollider(std::move(collSphere), data.offset, data.reactionData);
 			break;

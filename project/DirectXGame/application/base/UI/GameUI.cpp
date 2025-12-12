@@ -5,19 +5,19 @@
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
-void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVariables* globalVariables)
+void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
 	entity2DManager_ = entity2DManager;
 	globalVariables_ = globalVariables;
 	input_ = input;
 
 
-	board_ = std::make_unique<UIBaseBoard>();
+	board_ = std::make_unique<Engine::UIBaseBoard>();
 	board_->Init(input_,entity2DManager_, "bord", boardPos, boardSize);
 
 	// 通常攻撃UI初期化
 	InitUIPair("normalAttack", attackTextData_.pos_);
-	UIPair* normalAttackPair = GetUIPair("normalAttack");
+	Engine::UIPair* normalAttackPair = GetUIPair("normalAttack");
 	normalAttackPair->SetOffset(attackTextData_.offset_);	// 間隔設定
 	normalAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
 	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.png"); // 
@@ -30,7 +30,7 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 	InitUIPair("special", spTextData.pos_);
 
 	// 必殺技UI初期化
-	UIPair* specialPair = GetUIPair("special");
+	Engine::UIPair* specialPair = GetUIPair("special");
 	specialPair->SetOffset(spTextData.offset_);
 	specialPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
 	specialPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_rb.png");
@@ -47,7 +47,7 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 	
 	// 必殺技UI初期化
 	InitUIPair("jump", jumpTextData.pos_);
-	UIPair* jumpPair = GetUIPair("jump");
+	Engine::UIPair* jumpPair = GetUIPair("jump");
 	jumpPair->SetOffset(jumpTextData.offset_);
 	jumpPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
 	jumpPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_a.png");
@@ -63,7 +63,7 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 
 	// ダッシュUI初期化
 	InitUIPair("dush", dashTextData.pos_);
-	UIPair* dushPair = GetUIPair("dush");
+	Engine::UIPair* dushPair = GetUIPair("dush");
 	dushPair->SetOffset(dashTextData.offset_);
 	dushPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
 	dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_stick_l_press.png");
@@ -81,20 +81,20 @@ void GameUI::Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVar
 
 
 	// クリアUI
-	text_clera = std::make_unique<Sprite>();
+	text_clera = std::make_unique<Engine::Sprite>();
 	InitSprite(text_clera.get(), "resources/Texture/text/clear.png", cleraTextData_.pos_, cleraTextData_.scale_);
 	text_clera->SetSize(cleraTextData_.size_);
 	text_clera->SetColor(cleraTextData_.color_);
 
 	// ゲームオーバーUI
-	text_over = std::make_unique<Sprite>();
+	text_over = std::make_unique<Engine::Sprite>();
 	InitSprite(text_over.get(), "resources/Texture/text/over.png", cleraTextData_.pos_, cleraTextData_.scale_);
 	text_over->SetSize(cleraTextData_.size_);
 	text_over->SetColor(cleraTextData_.color_);
 
 	// カウントUI
 	InitUICount("hitCount", hitTextData.pos_, hitTextData.instance,true);
-	UICount* hitCount = GetUICount("hitCount");
+	Engine::UICount* hitCount = GetUICount("hitCount");
 	hitCount->SetMaxSize(hitTextData.size, hitTextData.offset);	// 最大サイズ
 	hitCount->SetTextuerSize(hitTextData.textuerSize);				// テクスチャサイズ
 	hitCount->SetCountMax(hitTextData.countmax);							// カウント最大数
@@ -116,7 +116,7 @@ void GameUI::Update()
 	board_->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
 
 	// スライダー位置
-	UISlider* slider = board_->GetUIElement<UISlider>(UIType::UISlider, "slider");
+	Engine::UISlider* slider = board_->GetUIElement<Engine::UISlider>(UIType::UISlider, "slider");
 	slider->SetPos(sliderPos);
 
 	// ボード更新
@@ -124,7 +124,7 @@ void GameUI::Update()
 	
 	
 
-	UICount* hitCount = GetUICount("hitCount");
+	Engine::UICount* hitCount = GetUICount("hitCount");
 	hitCount->SetCount(ConvertUtility::ToFloat(player_->GetAttackController()->GetHitCounter().GetHitCount()));
 	
 	

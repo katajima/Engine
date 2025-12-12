@@ -51,7 +51,7 @@ void BaseEnemy::Initialize2D()
 {
 
 	// ロックオン
-	icon_lockOn = std::make_unique<Sprite>();
+	icon_lockOn = std::make_unique<Engine::Sprite>();
 	icon_lockOn->Initialize(entity2DManager_->GetSpriteCommon(), "resources/Texture/icon/LockOnW.png", false);
 	icon_lockOn->SetSize(0.10f);		// サイズ指定
 	icon_lockOn->SetColor({ 1,0,1,1 });	// 色指定

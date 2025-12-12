@@ -1,7 +1,8 @@
 #include "GameFlowController.h"
 #include <DirectXGame/engine/scene/SceneManager.h>
 
-void GameFlowController::Initialize(SceneManager* sceneManager, GlobalVariables* globalVariables, BaseCharacterManager* characterManager){
+void GameFlowController::Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, 
+	BaseCharacterManager* characterManager){
 	this->globalVariables = globalVariables;	// 保存項目
 	this->characterManager = characterManager;	// キャラクター管理するクラス
 	this->sceneManager = sceneManager;			// シーンマネージャー
@@ -15,7 +16,9 @@ void GameFlowController::Initialize(SceneManager* sceneManager, GlobalVariables*
 }
 
 void GameFlowController::Update(float dt) {
-	gameEventController_->Update();
+	
+	// ゲームのイベント管理クラス更新
+	gameEventController_->Update(dt);
 
 	// シーン変更処理
 	SceneChange();

@@ -16,52 +16,54 @@
 
 #include "DirectXGame/engine/Utility/TimerUtility.h"
 
-// 前方宣言
-class ModelCommon;
-class DirectXCommon;
-class Material;
-
-/// <summary>
-/// モデルクラス
-/// </summary>
-class Model
-{
-public:
+namespace Engine {
+	// 前方宣言
+	class ModelCommon;
+	class DirectXCommon;
+	class Material;
 
 	/// <summary>
-	/// モデルの初期化
+	/// モデルクラス
 	/// </summary>
-	/// <param name="dxCommon">DirectXの共通クラス</param>
-	/// <param name="modelCommon">モデルの共通クラス</param>
-	/// <param name="directorypath">ディレクトリパス</param>
-	/// <param name="filename">ファイル名(モデルの名前(objやgltf))</param>
-	/// <param name="file">ファイル名(resources/models以降にファイルがあるならモデルの入っているファイル名を)</param>
-	void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file = "");
+	class Model
+	{
+	public:
 
-	// 通常描画
-	void Draw();
+		/// <summary>
+		/// モデルの初期化
+		/// </summary>
+		/// <param name="dxCommon">DirectXの共通クラス</param>
+		/// <param name="modelCommon">モデルの共通クラス</param>
+		/// <param name="directorypath">ディレクトリパス</param>
+		/// <param name="filename">ファイル名(モデルの名前(objやgltf))</param>
+		/// <param name="file">ファイル名(resources/models以降にファイルがあるならモデルの入っているファイル名を)</param>
+		void Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file = "");
 
-	// スキニング用描画
-	void DrawSkinning();
+		// 通常描画
+		void Draw();
 
-	// ModelData取得
-	ModelData& GetModelData() { return modelData; }
-	// モデルのが透過物しているかを計算して透明度を返す
-	float GetMaterialAlpha();
+		// スキニング用描画
+		void DrawSkinning();
 
-public:
-	// モデルのデータ
-	ModelData modelData;
-private:
-	ModelCommon* modelCommon_ = nullptr;
-	SrvManager* srvManager_ = nullptr;
-	DirectXCommon* dxCommon_;
-	DebugTimer timer_;
-public:
-	// 読み込んだモデルからモデルデータ生成
-	// ディレクトリパス
-	// ファイル名
-	ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
+		// ModelData取得
+		ModelData& GetModelData() { return modelData; }
+		// モデルのが透過物しているかを計算して透明度を返す
+		float GetMaterialAlpha();
+
+	public:
+		// モデルのデータ
+		ModelData modelData;
+	private:
+		ModelCommon* modelCommon_ = nullptr;
+		SrvManager* srvManager_ = nullptr;
+		DirectXCommon* dxCommon_;
+		DebugTimer timer_;
+	public:
+		// 読み込んだモデルからモデルデータ生成
+		// ディレクトリパス
+		// ファイル名
+		ModelData LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename);
 
 
-};
+	};
+}

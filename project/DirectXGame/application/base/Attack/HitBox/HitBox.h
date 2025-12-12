@@ -1,8 +1,9 @@
 #pragma once
 #include "HitBoxFunction.h"
 #include <DirectXGame/application/base/Attack/AttackData.h>
-
-class Entity3DManager; // 前方宣言
+namespace Engine {
+	class Entity3DManager; // 前方宣言
+}
 class BaseCharacter;
 
 
@@ -59,7 +60,7 @@ struct HitBoxCollData
 class HitBox : public IHitReceiver {
 public:
 	// 初期化
-	void Initialize(Entity3DManager* entity3dManager, BaseCharacter* character, HitBoxUseType type);
+	void Initialize(Engine::Entity3DManager* entity3dManager, BaseCharacter* character, HitBoxUseType type);
 
 	// 更新
 	void Update(float dt);
@@ -67,7 +68,7 @@ public:
 public:
 
 	// コライダー追加
-	void AddCollider(std::unique_ptr<Collider> collider, const Vector3& offset,const AttackReactionData& reaction);
+	void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset,const AttackReactionData& reaction);
 	// 有効化
 	void Enable();
 	// 無効化
@@ -76,27 +77,27 @@ public:
 	void Clear() { GetContactRecord().Clear(); }
 public:
 	// ワールドトランスフォーム取得
-	WorldTransform& GetWorldTransform() { return worldTransform_; }
+	Engine::WorldTransform& GetWorldTransform() { return worldTransform_; }
 	// コンポーネント取得
-	ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
+	Engine::ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
 private:
 	// 衝突履歴取得
-	ContactRecord& GetContactRecord() { return colliderComponent_->contactRecord_; }
+	Engine::ContactRecord& GetContactRecord() { return colliderComponent_->contactRecord_; }
 private:
 	// コライダーコンポーネント
-	std::unique_ptr<ColliderComponent> colliderComponent_;
+	std::unique_ptr<Engine::ColliderComponent> colliderComponent_;
 	// ヒットボックス衝突応答クラス
 	std::unique_ptr<HitBoxFunction> hitBoxFunction_;
 
 	// ワールドトランスフォーム
-	WorldTransform worldTransform_;
+	Engine::WorldTransform worldTransform_;
 	// 使用者タイプ
 	HitBoxUseType type_;
 
 	// コライダーデータ構造体
 	struct ColliderData {
-		WorldTransform worldTransform;
-		Collider* collider = nullptr;
+		Engine::WorldTransform worldTransform;
+		Engine::Collider* collider = nullptr;
 
 		float damage = 0.0f;
 		AttackReactionData reactionData;
@@ -110,7 +111,7 @@ private:
 	// コライダー数
 	int colliderCount = 0;
 	BaseCharacter* character_ = nullptr;
-	Entity3DManager* entity3dManager_ = nullptr;
+	Engine::Entity3DManager* entity3dManager_ = nullptr;
 };
 
 

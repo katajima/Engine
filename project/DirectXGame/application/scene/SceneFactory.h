@@ -7,7 +7,7 @@
 #include "SampleScene.h"
 
 // このゲーム用のシーン工場
-class SceneFactory : public AbstractSceneFactory 
+class SceneFactory : public Engine::AbstractSceneFactory
 {
 public:
 
@@ -16,7 +16,7 @@ public:
 	/// </summary>
 	/// <param name="sceneName"></param>
 	/// <returns></returns>
-	std::unique_ptr<BaseScene> CreateScene(const std::string& sceneName) override;
+	std::unique_ptr<Engine::BaseScene> CreateScene(const std::string& sceneName) override;
 
 };
 

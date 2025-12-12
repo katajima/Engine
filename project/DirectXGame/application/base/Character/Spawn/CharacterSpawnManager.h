@@ -12,7 +12,7 @@ public:
 	/// </summary>
 	/// <param name="characterManager"></param>
 	/// <param name="line"></param>
-	void Initialize(BaseCharacterManager* characterManager, LineCommon* line);
+	void Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line);
 
 
 	/// <summary>
@@ -44,5 +44,5 @@ private:
 
 private:
 	BaseCharacterManager* characterManager_ = nullptr;
-	LineCommon* lineCommon_ = nullptr;
+	Engine::LineCommon* lineCommon_ = nullptr;
 };

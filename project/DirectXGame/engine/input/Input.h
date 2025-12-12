@@ -37,135 +37,137 @@ enum class GamePadButton
 //XINPUT_GAMEPAD_LEFT_SHOULDER
 //XINPUT_GAMEPAD_RIGHT_SHOULDER
 
-/// <summary>
-/// 入力クラス
-/// </summary>
-class Input
-{
-public:
-	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
-
-	struct FlagXYZ
+namespace Engine {
+	/// <summary>
+	/// 入力クラス
+	/// </summary>
+	class Input
 	{
-		bool x;
-		bool y;
-		bool z;
+	public:
+		template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+		struct FlagXYZ
+		{
+			bool x;
+			bool y;
+			bool z;
+		};
+
+	public: //メンバ関数
+		//初期化
+		void Intialize(WinApp* winApp);
+		//更新
+		void Update();
+
+		/// <summary>
+		/// キーの押下をチェック
+		/// </summary>
+		bool IsPushKey(BYTE keyNumber) const;
+
+		/// <summary>
+		/// キーのトリガーをチェック
+		/// </summary>
+		bool IsTriggerKey(BYTE keyNumber) const;
+
+		/// <summary>
+		/// プレキー
+		/// </summary>
+		bool IsKeyReleased(uint8_t _key) const;
+
+
+		/// <summary>
+		///  マウス押した瞬間
+		/// </summary>
+		/// <param name="_buttonNum"></param>
+		/// <returns></returns>
+		bool IsMouseTriggered(uint8_t _buttonNum) const;
+
+		/// <summary>
+		/// マウス押している間
+		/// </summary>
+		/// <param name="_buttonNum"></param>
+		/// <returns></returns>
+		bool IsMousePressed(uint8_t _buttonNum) const;
+
+		/// <summary>
+		/// マウス離した瞬間
+		/// </summary>
+		/// <param name="_buttonNum"></param>
+		/// <returns></returns>
+		bool IsMouseReleased(uint8_t _buttonNum) const;
+
+
+		/// <summary>
+		/// マウス位置取得
+		/// </summary>
+		/// <returns></returns>
+		Vector2 GetMousePosition() const;
+
+
+		/// <summary>
+		/// ゲームパッド押した瞬間
+		/// </summary>
+		/// <param name="button"></param>
+		/// <returns></returns>
+		bool IsGamePadTriggered(GamePadButton button) const;
+
+		/// <summary>
+		/// ゲームパッド押している間
+		/// </summary>
+		/// <param name="button"></param>
+		/// <returns></returns>
+		bool IsGamePadPressed(GamePadButton button) const;
+
+		/// <summary>
+		/// ゲームパッド離した瞬間
+		/// </summary>
+		/// <param name="button"></param>
+		/// <returns></returns>
+		bool IsGamePadReleased(GamePadButton button) const;
+
+		// パッドの左スティックの値を取得
+		Vector2 GetGamePadLeftStick() const;
+		// パッドの右スティックの値を取得
+		Vector2 GetGamePadRightStick() const;
+
+		// LTトリガーの値を取得
+		float GetGamePadLeftTrigger() const;
+		// RTトリガーの値を取得
+		float GetGamePadRightTrigger() const;
+
+		// コントローラ操作
+		bool IsControllerConnected() {
+			XINPUT_STATE state; ZeroMemory(&state, sizeof(XINPUT_STATE));
+			// コントローラの状態を取得
+			DWORD result = XInputGetState(0, &state);
+			// コントローラが接続されている場合は true を返す
+			return (result == ERROR_SUCCESS);
+		}
+
+
+
+
+	private: //メンバ変数
+		//WindowsAPI
+		WinApp* winApp_ = nullptr;
+		//キーボードデバイス生成
+		Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard;
+		Microsoft::WRL::ComPtr<IDirectInput8> directInput = nullptr;
+		Microsoft::WRL::ComPtr <IDirectInputDevice8> mouseDevice_ = nullptr;
+
+		BYTE key[256] = {};
+		BYTE keyPre[256] = {};
+
+		DIMOUSESTATE mouse_ = {};
+		DIMOUSESTATE preMouse_ = {};
+
+		_XINPUT_STATE xInputState_ = {};
+		_XINPUT_STATE preXInputState_ = {};
+		float currentVibrateTime_ = 0.0f;
+		float vibrateTimeMax_ = 0.0f;
+		float deadZone_ = 0.1f;
+		bool enambleVibrate_ = false;
+
+
 	};
-
-public: //メンバ関数
-	//初期化
-	void Intialize(WinApp* winApp);
-	//更新
-	void Update();
-
-	/// <summary>
-	/// キーの押下をチェック
-	/// </summary>
-	bool IsPushKey(BYTE keyNumber) const;
-
-	/// <summary>
-	/// キーのトリガーをチェック
-	/// </summary>
-	bool IsTriggerKey(BYTE keyNumber) const;
-
-	/// <summary>
-	/// プレキー
-	/// </summary>
-	bool IsKeyReleased(uint8_t _key) const;
-
-
-	/// <summary>
-	///  マウス押した瞬間
-	/// </summary>
-	/// <param name="_buttonNum"></param>
-	/// <returns></returns>
-	bool IsMouseTriggered(uint8_t _buttonNum) const;
-
-	/// <summary>
-	/// マウス押している間
-	/// </summary>
-	/// <param name="_buttonNum"></param>
-	/// <returns></returns>
-	bool IsMousePressed(uint8_t _buttonNum) const;
-
-	/// <summary>
-	/// マウス離した瞬間
-	/// </summary>
-	/// <param name="_buttonNum"></param>
-	/// <returns></returns>
-	bool IsMouseReleased(uint8_t _buttonNum) const;
-
-
-	/// <summary>
-	/// マウス位置取得
-	/// </summary>
-	/// <returns></returns>
-	Vector2 GetMousePosition() const;
-
-
-	/// <summary>
-	/// ゲームパッド押した瞬間
-	/// </summary>
-	/// <param name="button"></param>
-	/// <returns></returns>
-	bool IsGamePadTriggered(GamePadButton button) const;
-	
-	/// <summary>
-	/// ゲームパッド押している間
-	/// </summary>
-	/// <param name="button"></param>
-	/// <returns></returns>
-	bool IsGamePadPressed(GamePadButton button) const;
-	
-	/// <summary>
-	/// ゲームパッド離した瞬間
-	/// </summary>
-	/// <param name="button"></param>
-	/// <returns></returns>
-	bool IsGamePadReleased(GamePadButton button) const;
-
-	// パッドの左スティックの値を取得
-	Vector2 GetGamePadLeftStick() const;
-	// パッドの右スティックの値を取得
-	Vector2 GetGamePadRightStick() const;
-
-	// LTトリガーの値を取得
-	float GetGamePadLeftTrigger() const;
-	// RTトリガーの値を取得
-	float GetGamePadRightTrigger() const;
-
-	// コントローラ操作
-	bool IsControllerConnected() {
-		XINPUT_STATE state; ZeroMemory(&state, sizeof(XINPUT_STATE));
-		// コントローラの状態を取得
-		DWORD result = XInputGetState(0, &state);
-		// コントローラが接続されている場合は true を返す
-		return (result == ERROR_SUCCESS);
-	}
-
-
-
-
-private: //メンバ変数
-	//WindowsAPI
-	WinApp* winApp_ = nullptr;
-	//キーボードデバイス生成
-	Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard;
-	Microsoft::WRL::ComPtr<IDirectInput8> directInput = nullptr;
-	Microsoft::WRL::ComPtr <IDirectInputDevice8> mouseDevice_ = nullptr;
-
-	BYTE key[256] = {};
-	BYTE keyPre[256] = {};
-
-	DIMOUSESTATE mouse_ = {};
-	DIMOUSESTATE preMouse_ = {};
-
-	_XINPUT_STATE xInputState_ = {};
-	_XINPUT_STATE preXInputState_ = {};
-	float currentVibrateTime_ = 0.0f;
-	float vibrateTimeMax_ = 0.0f;
-	float deadZone_ = 0.1f;
-	bool enambleVibrate_ = false;
-
-
-};
+}

@@ -8,7 +8,7 @@
 /// 初期化
 /// </summary>
 /// <param name="dxCommon"></param>
-void LineMeshData::Initialize(DirectXCommon* dxCommon) {
+void Engine::LineMeshData::Initialize(DirectXCommon* dxCommon) {
 
 	mesh_ = std::make_unique<LineMesh>();
 	mesh_->verticesline.push_back({ 0,0,0,0 });
@@ -26,7 +26,7 @@ void LineMeshData::Initialize(DirectXCommon* dxCommon) {
 /// <summary>
 /// 更新
 /// </summary>
-void LineMeshData::Update() {
+void Engine::LineMeshData::Update() {
 	mesh_->UpdateVertexBuffer();
 	mesh_->UpdateIndexBuffer();
 };
@@ -34,14 +34,14 @@ void LineMeshData::Update() {
 /// <summary>
 /// 描画
 /// </summary>
-void LineMeshData::Draw() {
+void Engine::LineMeshData::Draw() {
 	mesh_->DrawIndexedInstanced();
 }
 
 /// <summary>
 /// メッシュデータクリア
 /// </summary>
-void LineMeshData::Clear() {
+void Engine::LineMeshData::Clear() {
 	mesh_->Clear(); 
 	lineCount_ = 0;
 };
@@ -52,7 +52,7 @@ void LineMeshData::Clear() {
 /// <param name="start">視点</param>
 /// <param name="end">終点</param>
 /// <param name="color">色</param>
-void LineMeshData::AddLine(const Vector3& start, const Vector3& end, const Vector4& color) {
+void Engine::LineMeshData::AddLine(const Vector3& start, const Vector3& end, const Vector4& color) {
 	CreateLine::Line(*this, LineData{ start ,end,color });
 }
 
@@ -61,7 +61,7 @@ void LineMeshData::AddLine(const Vector3& start, const Vector3& end, const Vecto
 /// </summary>
 /// <param name="camera"></param>
 /// <param name="color"></param>
-void LineMeshData::AddCameraLine(const Camera& camera, const Vector4& color)
+void Engine::LineMeshData::AddCameraLine(const Camera& camera, const Vector4& color)
 {
 	// --- カメラのパラメータ取得 ---
 	float fovY = camera.fovY_;
@@ -124,7 +124,7 @@ void LineMeshData::AddCameraLine(const Camera& camera, const Vector4& color)
 /// ポイントライトのデータを追加します。
 /// </summary>
 /// <param name="data">追加するポイントライトのデータ。</param>
-void LineMeshData::AddLightLine(const PointLightData& data) {
+void Engine::LineMeshData::AddLightLine(const PointLightData& data) {
 	constexpr int segments = 16; // 1つの円を構成するセグメント数
 	const float radius = data.radius; // ポイントライトの届く距離
 
@@ -183,7 +183,7 @@ void LineMeshData::AddLightLine(const PointLightData& data) {
 /// スポットライトデータを追加します。
 /// </summary>
 /// <param name="data">追加するスポットライトのデータ。</param>
-void LineMeshData::AddLightLine(const SpotLightData& data) {
+void Engine::LineMeshData::AddLightLine(const SpotLightData& data) {
 	constexpr int segments = 16; // スポットライトの円を構成するセグメント数
 	const float distance = data.distance; // スポットライトの届く最大距離
 	Vector3 center = data.position; // スポットライトの位置
@@ -226,7 +226,7 @@ void LineMeshData::AddLightLine(const SpotLightData& data) {
 /// <param name="aabb"></param>
 /// <param name="pos"></param>
 /// <param name="color"></param>
-void LineMeshData::AddLineAABB(const AABB& aabb, const Vector3& pos, const Vector4& color) {
+void Engine::LineMeshData::AddLineAABB(const AABB& aabb, const Vector3& pos, const Vector4& color) {
 	// AABB の最小・最大範囲をワールド座標に適用
 	Vector3 min = aabb.min_ + pos;
 	Vector3 max = aabb.max_ + pos;
@@ -262,7 +262,7 @@ void LineMeshData::AddLineAABB(const AABB& aabb, const Vector3& pos, const Vecto
 /// </summary>
 /// <param name="obb"></param>
 /// <param name="color"></param>
-void LineMeshData::AddLineOBB(const OBB& obb, const Vector4& color) {
+void Engine::LineMeshData::AddLineOBB(const OBB& obb, const Vector4& color) {
 	// Half extents along each local axis
 	Vector3 halfSize = obb.size * 1.0f;
 
@@ -307,7 +307,7 @@ void LineMeshData::AddLineOBB(const OBB& obb, const Vector4& color) {
 /// <param name="color"></param>
 /// <param name="segmentW"></param>
 /// <param name="segmentH"></param>
-void LineMeshData::AddLineSphere(const Sphere& sphere, const Vector4& color, int segmentW, int segmentH)
+void Engine::LineMeshData::AddLineSphere(const Sphere& sphere, const Vector4& color, int segmentW, int segmentH)
 {
 	float radius = sphere.radius;
 	Vector3 center = sphere.center;
@@ -357,7 +357,7 @@ void LineMeshData::AddLineSphere(const Sphere& sphere, const Vector4& color, int
 /// </summary>
 /// <param name="corner"></param>
 /// <param name="pos"></param>
-void LineMeshData::AddLineCorner(const CornerSegment& corner, const WorldTransform& pos)
+void Engine::LineMeshData::AddLineCorner(const CornerSegment& corner, const WorldTransform& pos)
 {
 	std::vector<Vector3> vertices;
 	float angleStep = DirectX::XM_2PI / corner.segment; // 360° を segment 分割
@@ -400,7 +400,7 @@ void LineMeshData::AddLineCorner(const CornerSegment& corner, const WorldTransfo
 /// </summary>
 /// <param name="capsule"></param>
 /// <param name="color"></param>
-void LineMeshData::AddLineCapsule(const Capsule& capsule, const Vector4& color)
+void Engine::LineMeshData::AddLineCapsule(const Capsule& capsule, const Vector4& color)
 {
 	const int segmentCount = 8; // 半球と円の分割数
 	const Vector3& start = capsule.segment.origin;
@@ -469,7 +469,7 @@ void LineMeshData::AddLineCapsule(const Capsule& capsule, const Vector4& color)
 /// <param name="controlPoints"></param>
 /// <param name="pos"></param>
 /// <param name="color"></param>
-void LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, const WorldTransform& pos, const Vector4& color)
+void Engine::LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, const WorldTransform& pos, const Vector4& color)
 {
 	int SPLIT = static_cast<int>(4 * controlPoints.size());
 
@@ -494,7 +494,7 @@ void LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, const Wo
 /// <param name="controlPoints"></param>
 /// <param name="pos"></param>
 /// <param name="color"></param>
-void LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, const Vector3& pos, const Vector4& color)
+void Engine::LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, const Vector3& pos, const Vector4& color)
 {
 	int SPLIT = static_cast<int>(4 * controlPoints.size());
 
@@ -519,7 +519,7 @@ void LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, const Ve
 /// </summary>
 /// <param name="triangle"></param>
 /// <param name="pos"></param>
-void LineMeshData::AddLineTriangle(const Triangle& triangle, const WorldTransform& pos)
+void Engine::LineMeshData::AddLineTriangle(const Triangle& triangle, const WorldTransform& pos)
 {
 	// 三角形の3つの頂点
 	Vector3 p0 = triangle.vertices[0] + pos.worldMat_.GetWorldPosition();
@@ -535,7 +535,7 @@ void LineMeshData::AddLineTriangle(const Triangle& triangle, const WorldTransfor
 /// オクツリー状にライン加算
 /// </summary>
 /// <param name="node"></param>
-void LineMeshData::AddOctree(const OctreeNode& node)
+void Engine::LineMeshData::AddOctree(const OctreeNode& node)
 {
 	// AABB を描画
 
@@ -549,7 +549,7 @@ void LineMeshData::AddOctree(const OctreeNode& node)
 	}
 }
 
-void LineMeshData::AddGrid(float xRange, float zRange, float interval, const Vector4& color)
+void Engine::LineMeshData::AddGrid(float xRange, float zRange, float interval, const Vector4& color)
 {
 	if (interval <= 0.0f) return;
 
@@ -584,7 +584,7 @@ void LineMeshData::AddGrid(float xRange, float zRange, float interval, const Vec
 
 
 // ライン作成
-void CreateLine::Line(LineMeshData& meshData, const LineData& lineData) {
+void Engine::CreateLine::Line(LineMeshData& meshData, const LineData& lineData) {
 
 	// 始点と終点と色を設定
 	meshData.GetMesh()->verticesline.push_back({{lineData.start_.x, lineData.start_.y, lineData.start_.z, 1.0f}, lineData.color_});

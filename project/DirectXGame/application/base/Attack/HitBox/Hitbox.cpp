@@ -7,7 +7,7 @@
 #pragma region HitBox
 
 // 初期化
-void HitBox::Initialize(Entity3DManager* entity3dManager, BaseCharacter* character, HitBoxUseType type) {
+void HitBox::Initialize(Engine::Entity3DManager* entity3dManager, BaseCharacter* character, HitBoxUseType type) {
 	character_ = character;
 	entity3dManager_ = entity3dManager;
 	type_ = type;
@@ -17,7 +17,7 @@ void HitBox::Initialize(Entity3DManager* entity3dManager, BaseCharacter* charact
 
 
 	// 当たり判定コンポーネント生成	
-	colliderComponent_ = std::make_unique<ColliderComponent>();
+	colliderComponent_ = std::make_unique<Engine::ColliderComponent>();
 	colliderComponent_->SetOwner(colliderComponent_.get());
 	colliderComponent_->SetHitReceiver(this);   // 対象設定
 	// ラインコモンをセット
@@ -30,7 +30,7 @@ void HitBox::Initialize(Entity3DManager* entity3dManager, BaseCharacter* charact
 	hitBoxFunction_->Initialize(colliderComponent_.get(), character, type);
 
 	// 当たり判定コールバック設定
-	colliderComponent_->onHitCallback = [this](Collider* self, Collider* other) {
+	colliderComponent_->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 		// 開始
 		if (!hitBoxFunction_->Begin(self, other)) {
 			return;
@@ -65,7 +65,7 @@ void HitBox::Update(float dt) {
 
 #pragma region MyRegion
 // コライダー追加
-void HitBox::AddCollider(std::unique_ptr<Collider> collider,const Vector3& offset, const AttackReactionData& reaction) {
+void HitBox::AddCollider(std::unique_ptr<Engine::Collider> collider,const Vector3& offset, const AttackReactionData& reaction) {
 	// 当たり判定コンポーネントにコライダー追加
 	ColliderData data;
 	data.colliderID = colliderComponent_->AddCollider(std::move(collider));

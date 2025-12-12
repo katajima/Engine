@@ -3,7 +3,7 @@
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void CharacterSpawn::Initialize(BaseCharacterManager* characterManager, LineCommon* line, const SpawnInfo& info){
+void CharacterSpawn::Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info){
 	characterManager_ = characterManager;	// キャラクター管理クラス
 	lineCommon_ = line;						// ライン管理クラス
 		
@@ -48,7 +48,7 @@ void CharacterSpawn::SpawnProcess(){
 	if (spawnInfo_.IsEnd()) return;
 
 	// 情報更新
-	spawnInfo_.Update(MyGame::GameTime());
+	spawnInfo_.Update(Engine::MyGame::GameTime());
 
 	// 出し切ったら
 	if (spawnInfo_.IsSpawned()) return;

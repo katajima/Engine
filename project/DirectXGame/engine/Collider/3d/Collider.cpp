@@ -3,7 +3,7 @@
 
 #pragma region 球
 
-void SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
+void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
 
@@ -23,7 +23,7 @@ void SphereCollider::Update(const WorldTransform& worldTransform, LineCommon* li
 #endif // _DEBUG
 }
 
-bool SphereCollider::CheckHit(const Collider& other) const
+bool Engine::SphereCollider::CheckHit(const Collider& other) const
 {
 	if (!other.enabled) return false;
 
@@ -63,7 +63,7 @@ bool SphereCollider::CheckHit(const Collider& other) const
 	return false;
 }
 
-bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const
+bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const
 {
 	// 球
 	if (other.GetType() == ColliderType::Sphere) {
@@ -145,7 +145,7 @@ bool SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec
 #pragma endregion 
 
 #pragma region AABB
-void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
+void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
 	minWorld = aabb.min_ + centerWorld;
@@ -168,7 +168,7 @@ void AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* line
 
 }
 
-bool AABBCollider::CheckHit(const Collider& other) const
+bool Engine::AABBCollider::CheckHit(const Collider& other) const
 {
 	if (!other.enabled) return false;
 
@@ -209,7 +209,7 @@ bool AABBCollider::CheckHit(const Collider& other) const
 	return false;
 }
 
-bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
+bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
 	if (!other.enabled) return false;
 
 	if (other.GetType() == ColliderType::Sphere) {
@@ -293,7 +293,7 @@ bool AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) 
 
 #pragma region Capsule
 
-void CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
+void Engine::CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
 
@@ -316,7 +316,7 @@ void CapsuleCollider::Update(const WorldTransform& worldTransform, LineCommon* l
 
 }
 
-bool CapsuleCollider::CheckHit(const Collider& other) const
+bool Engine::CapsuleCollider::CheckHit(const Collider& other) const
 {
 	if (!other.enabled) return false;
 
@@ -349,7 +349,7 @@ bool CapsuleCollider::CheckHit(const Collider& other) const
 	return false;
 }
 
-bool CapsuleCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
+bool Engine::CapsuleCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
 	if (!other.enabled) return false;
 
 	if (other.GetType() == ColliderType::Sphere) {
@@ -367,7 +367,7 @@ bool CapsuleCollider::ResolveCollision(const Collider& other, Vector3& outPushVe
 
 #pragma region OBB
 
-void OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
+void Engine::OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
 
@@ -396,7 +396,7 @@ void OBBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
 
 }
 
-bool OBBCollider::CheckHit(const Collider& other) const
+bool Engine::OBBCollider::CheckHit(const Collider& other) const
 {
 	if (!other.enabled) return false;
 
@@ -427,7 +427,7 @@ bool OBBCollider::CheckHit(const Collider& other) const
 	return false;
 }
 
-bool OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
+bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
 	if (!other.enabled) return false;
 
 	if (other.GetType() == ColliderType::Sphere) {
@@ -501,7 +501,7 @@ bool OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) c
 #pragma endregion
 
 #pragma region Ray
-void RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
+void Engine::RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
 
@@ -517,7 +517,7 @@ void RayCollider::Update(const WorldTransform& worldTransform, LineCommon* lineC
 
 }
 
-bool RayCollider::CheckHit(const Collider& other) const
+bool Engine::RayCollider::CheckHit(const Collider& other) const
 {
 	if (!other.enabled) return false;
 
@@ -548,7 +548,7 @@ bool RayCollider::CheckHit(const Collider& other) const
 	return false;
 }
 
-bool RayCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
+bool Engine::RayCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
 	if (!other.enabled) return false;
 	return false;
 }

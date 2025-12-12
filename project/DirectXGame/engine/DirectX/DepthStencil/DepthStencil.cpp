@@ -6,7 +6,7 @@
 #include "DirectXGame/engine/Manager/DSV/DsvManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 
-void DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager)
+void Engine::DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager)
 {
 	DXGIDevice_ = dxgi;			// デバイス
 	command_ = command;			// コマンド
@@ -15,7 +15,7 @@ void DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvManager* ds
 	CreateDepthStencilView();	// デプスステンシルビュー生成
 }
 
-void DepthStencil::ClearDepthView()
+void Engine::DepthStencil::ClearDepthView()
 {
 	
 
@@ -27,27 +27,27 @@ void DepthStencil::ClearDepthView()
 	DXGIDevice_->GetDevice()->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvManager_->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart());
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE DepthStencil::GetCPUHandleDepthStencilResorce()
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetCPUHandleDepthStencilResorce()
 {
 	return dsvManager_->GetCPUDescriptorHandle(dsvIndex_);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE DepthStencil::GetCPUHandleDepthSRV()
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetCPUHandleDepthSRV()
 {
 	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
 }
 
-uint32_t DepthStencil::GetDepthSrvIndex() const
+uint32_t Engine::DepthStencil::GetDepthSrvIndex() const
 {
 	return srvIndex_;
 }
 
-ID3D12Resource* DepthStencil::GetResource()
+ID3D12Resource* Engine::DepthStencil::GetResource()
 {
 	return depthStencilResource_.Get();
 }
 
-void DepthStencil::CreateDepthStencilView()
+void Engine::DepthStencil::CreateDepthStencilView()
 {
 	//生成するResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -103,6 +103,6 @@ void DepthStencil::CreateDepthStencilView()
 }
 
 
-D3D12_GPU_DESCRIPTOR_HANDLE DepthStencil::GetSRVGPUHandle() {
+D3D12_GPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetSRVGPUHandle() {
 	return srvManager_->GetGPUDescriptorHandle(srvIndex_);
 }

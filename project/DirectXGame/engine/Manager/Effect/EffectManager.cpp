@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void EffectManager::Initialize(DirectXCommon* directXCommon, LightManager* lightManager, LineCommon* lineCommon)
+void Engine::EffectManager::Initialize(DirectXCommon* directXCommon, LightManager* lightManager, LineCommon* lineCommon)
 {
 	directXCommon_ = directXCommon;// DX共通クラス
 	lightManager_ = lightManager;  // ライト管理

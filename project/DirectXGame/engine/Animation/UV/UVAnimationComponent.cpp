@@ -1,11 +1,11 @@
 #include "UVAnimationComponent.h"
 
-void UVAnimationComponent::Init(Material* mateirial)
+void Engine::UVAnimationComponent::Init(Material* mateirial)
 {
 	mateirial_ = mateirial;
 }
 
-void UVAnimationComponent::Update(float deltaTime)
+void Engine::UVAnimationComponent::Update(float deltaTime)
 {
 	// スケールX方向に
 	if (uvAnimationData_.isScaleX) {

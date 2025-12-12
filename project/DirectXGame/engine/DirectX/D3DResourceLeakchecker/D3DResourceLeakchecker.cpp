@@ -4,7 +4,7 @@
 #include<dxgidebug.h>
 #include<wrl.h>
 
-D3DResourceLeakchecker::~D3DResourceLeakchecker()
+Engine::D3DResourceLeakchecker::~D3DResourceLeakchecker()
 {
 	//リソースリークチェック
 	Microsoft::WRL::ComPtr < IDXGIDebug> debug;

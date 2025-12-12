@@ -75,106 +75,111 @@ namespace ShapeParameter2D {
 };
 
 // 前方宣言
-class SpriteCommon;
-
-/// <summary>
-/// 2dでのプリミティブクラス
-/// </summary>
-class Primitive2D
-{
-public:
-	enum class ShapeType
-	{
-		Cube,			// 四角
-		Triangle,		// 三角形
-		Circle,			// 円
-		Star,			// 星
-		Ring,			// リング
-	};
+namespace Engine {
+	class SpriteCommon;
+}
+// エンジンネームスペース
+namespace Engine {
 
 	/// <summary>
-	/// スプライトの共通設定を初期化します。
+	/// 2dでのプリミティブクラス
 	/// </summary>
-	/// <param name="spriteCommon">初期化するスプライトの共通設定を指すポインタ。</param>
-	/// <param name="type">スプライトの形状タイプ。</param>
-	/// <param name="color">スプライトの初期色（デフォルト値は {1, 1, 1, 1} ）。</param>
-	void Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color = { 1,1,1,1 });
-	// 更新
-	void Update();
-	// 描画
-	void Draw();
+	class Primitive2D
+	{
+	public:
+		enum class ShapeType
+		{
+			Cube,			// 四角
+			Triangle,		// 三角形
+			Circle,			// 円
+			Star,			// 星
+			Ring,			// リング
+		};
+
+		/// <summary>
+		/// スプライトの共通設定を初期化します。
+		/// </summary>
+		/// <param name="spriteCommon">初期化するスプライトの共通設定を指すポインタ。</param>
+		/// <param name="type">スプライトの形状タイプ。</param>
+		/// <param name="color">スプライトの初期色（デフォルト値は {1, 1, 1, 1} ）。</param>
+		void Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color = { 1,1,1,1 });
+		// 更新
+		void Update();
+		// 描画
+		void Draw();
 
 
-	// 色取得
-	const Color& GetColor() const { return material->color; }
-	// 色設定
-	void SetColor(const Color& color) { material->color = color; }
+		// 色取得
+		const Color& GetColor() const { return material->color; }
+		// 色設定
+		void SetColor(const Color& color) { material->color = color; }
 
-	// アンカーポイント取得
-	const Vector2& GetAnchorPoint() const { return anchorPoint; };
-	// アンカーポイント設定
-	void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
-
-
-	// パラメーター設定(内半径、外半径、セグメント数)(星やリング)
-	void SetParametar(float innerRadius, float outerRadius, int segments);
-	// パラメーター設定(半径、セグメント数)(円)
-	void SetParametar(float radius, int segments);
-	// パラメーター設定(サイズ)(四角)
-	void SetParametar(Vector2 size);
-	// パラメーター設定(各点)(三角)
-	void SetParametar(Vector2 p0, Vector2 p1, Vector2 p2);
-private:
-	// 三角面生成
-	void CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2);
-	// 円生成
-	void CreateCircle(float radius, int segments);
-	// リング生成
-	void CreateRing(float innerRadius, float outerRadius, int segments);
-	// 星生成
-	void CreateStar(float innerRadius, float outerRadius, int segments);
-	// 四角生成
-	void CreateCube(Vector2 size);
+		// アンカーポイント取得
+		const Vector2& GetAnchorPoint() const { return anchorPoint; };
+		// アンカーポイント設定
+		void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
 
 
+		// パラメーター設定(内半径、外半径、セグメント数)(星やリング)
+		void SetParametar(float innerRadius, float outerRadius, int segments);
+		// パラメーター設定(半径、セグメント数)(円)
+		void SetParametar(float radius, int segments);
+		// パラメーター設定(サイズ)(四角)
+		void SetParametar(Vector2 size);
+		// パラメーター設定(各点)(三角)
+		void SetParametar(Vector2 p0, Vector2 p1, Vector2 p2);
+	private:
+		// 三角面生成
+		void CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2);
+		// 円生成
+		void CreateCircle(float radius, int segments);
+		// リング生成
+		void CreateRing(float innerRadius, float outerRadius, int segments);
+		// 星生成
+		void CreateStar(float innerRadius, float outerRadius, int segments);
+		// 四角生成
+		void CreateCube(Vector2 size);
 
-private:
-	ShapeParameter2D::Cube cabe_;
-	ShapeParameter2D::Sphere sphere_;
-	ShapeParameter2D::Triangle triangle_;
-	ShapeParameter2D::Star star_;
-	ShapeParameter2D::Ring ring_;
 
-public:
-	WorldTransform2d worldTransform;
-private:
-	SpriteCommon* spriteCommon_ = nullptr;
 
-	ShapeType type_;
+	private:
+		ShapeParameter2D::Cube cabe_;
+		ShapeParameter2D::Sphere sphere_;
+		ShapeParameter2D::Triangle triangle_;
+		ShapeParameter2D::Star star_;
+		ShapeParameter2D::Ring ring_;
 
-	//頂点データ
-	struct VertexData {
+	public:
+		WorldTransform2d worldTransform;
+	private:
+		Engine::SpriteCommon* spriteCommon_ = nullptr;
 
-		Vector4 position;
-		Vector2 texcoord;
-		Vector3 normal;
+		ShapeType type_;
+
+		//頂点データ
+		struct VertexData {
+
+			Vector4 position;
+			Vector2 texcoord;
+			Vector3 normal;
+		};
+		Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
+
+
+
+
+		// メッシュ
+		std::unique_ptr<ModelMesh> mesh;
+		// トランスフォーム
+		std::unique_ptr<Transfomation>transfomation = nullptr;
+		// マテリアル
+		std::unique_ptr<Material> material = nullptr;
+
+
+		// アンカーポイント
+		Vector2 anchorPoint = { 0.0f,0.0f };
+
 	};
-	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-
-
-
-
-	// メッシュ
-	std::unique_ptr<ModelMesh> mesh;
-	// トランスフォーム
-	std::unique_ptr<Transfomation>transfomation = nullptr;
-	// マテリアル
-	std::unique_ptr<Material> material = nullptr;
-
-
-	// アンカーポイント
-	Vector2 anchorPoint = { 0.0f,0.0f };
-
-};
-
+}

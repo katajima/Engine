@@ -10,7 +10,7 @@ BaseBullet::~BaseBullet() {
 
 float BaseBullet::GetTimer() const
 {
-	return  MyGame::GameTime() * timeSpeed_;
+	return  Engine::MyGame::GameTime() * timeSpeed_;
 }
 
 void BaseBullet::SetPlayer(BasePlayer* player)
@@ -24,4 +24,4 @@ void BaseBullet::SetEnemy(BaseEnemy* enemy)
 }
 
 // コライダコンポーネント取得
-ColliderComponent* BaseBullet::GetColliderComponent() { return object_->GetColliderComponent(); }
+Engine::ColliderComponent* BaseBullet::GetColliderComponent() { return object_->GetColliderComponent(); }

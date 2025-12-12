@@ -16,7 +16,7 @@ class InputMapper {
 public:
 
     // 初期化
-    void Initialize(Input* input) { input_ = input; };
+    void Initialize(Engine::Input* input) { input_ = input; };
 
     // アクションとキーコードを紐づける
     void Bind(GameAction action, int deviceKey)
@@ -51,7 +51,7 @@ public:
         return false;
     }
 private:
-    Input* input_ = nullptr;
+    Engine::Input* input_ = nullptr;
     std::unordered_map<GameAction, int> table_;
 };
 

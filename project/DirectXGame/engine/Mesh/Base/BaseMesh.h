@@ -17,45 +17,47 @@ using namespace Microsoft::WRL;
 #include <unordered_map>
 #include <vector>
 
-// 前方宣言
-class DirectXCommon;
+namespace Engine {
+	// 前方宣言
+	class DirectXCommon;
 
-/// <summary>
-/// メッシュの基底クラス
-/// </summary>
-class BaseMesh {
-public:
-	// 通常用
-	virtual void Initialize(DirectXCommon* dxcommon) = 0;
-public:
-	// 最小位置
-	Vector3 GetMin() const { return min_; }
+	/// <summary>
+	/// メッシュの基底クラス
+	/// </summary>
+	class BaseMesh {
+	public:
+		// 通常用
+		virtual void Initialize(DirectXCommon* dxcommon) = 0;
+	public:
+		// 最小位置
+		Vector3 GetMin() const { return min_; }
 
-	// 最大位置
-	Vector3 GetMax() const { return max_; }
+		// 最大位置
+		Vector3 GetMax() const { return max_; }
 
-	// 中心位置
-	Vector3 GetMiddle() const { return Vector3{ (max_.x + min_.x) / 2, (max_.y + min_.y) / 2, (max_.z + min_.z) / 2 }; }
+		// 中心位置
+		Vector3 GetMiddle() const { return Vector3{ (max_.x + min_.x) / 2, (max_.y + min_.y) / 2, (max_.z + min_.z) / 2 }; }
 
-	// 最小位置設定
-	void SetMin(const Vector3& min) { min_ = min; }
+		// 最小位置設定
+		void SetMin(const Vector3& min) { min_ = min; }
 
-	// 最大位置設定
-	void SetMax(const Vector3& max) { max_ = max; }
-
-
-	
-protected:
-	DirectXCommon* dxCommon_;
+		// 最大位置設定
+		void SetMax(const Vector3& max) { max_ = max; }
 
 
-	Vector3 min_;
-	Vector3 max_;
-public:
-	std::vector<Triangle> triangle;
-	std::vector<uint32_t> indices;
-	std::vector<float> verticesTimer;
-	std::vector<float> indicesTimer;
-	float maxTime = 0.2f;
-	uint32_t meshIndex = 0;
-};
+
+	protected:
+		DirectXCommon* dxCommon_;
+
+
+		Vector3 min_;
+		Vector3 max_;
+	public:
+		std::vector<Triangle> triangle;
+		std::vector<uint32_t> indices;
+		std::vector<float> verticesTimer;
+		std::vector<float> indicesTimer;
+		float maxTime = 0.2f;
+		uint32_t meshIndex = 0;
+	};
+}

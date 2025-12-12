@@ -4,8 +4,11 @@
 
 
 // 前方宣言
-class Entity3DManager;
-class Entity2DManager;
+
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+}
 class BulletManager;
 class FollowCamera;
 class BaseEnemy;
@@ -20,7 +23,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera) override;
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera) override;
 
 	///< summary>
 	/// 更新
@@ -39,7 +42,7 @@ public:
 	void InAction();
 
 	// レティクル親子付け
-	void SetReticleParent(WorldTransform* parent) { objectReticle_->GetWorldTransform().parent_ = parent; };
+	void SetReticleParent(Engine::WorldTransform* parent) { objectReticle_->GetWorldTransform().parent_ = parent; };
 
 public:
 
@@ -67,9 +70,9 @@ public:
 	}
 
 private:
-	Object3d* objectReticle_;				// オブジェクトレティクル
+	Engine::Object3d* objectReticle_;				// オブジェクトレティクル
 
-	std::unique_ptr<CylinderPrimitive> ctlinder_;
+	std::unique_ptr<Engine::CylinderPrimitive> ctlinder_;
 
 
 	int index_b = 0;

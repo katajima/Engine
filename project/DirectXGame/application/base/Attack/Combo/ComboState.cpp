@@ -11,6 +11,9 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	timeInState = 0.0f;
 	// アニメーションの設定
 	comboData_.motion.GetData().animationName_ = animation;
+
+	
+	comboData_.motion.SetDirection(direction_);
 	// コンボデータ開始
 	comboData_.Enter(owner);
 }
@@ -21,7 +24,7 @@ void ComboNodeState::Update(BaseCharacter* owner, float dt){
 	timeInState += dt;
 
 	// 入力受付がないのなら終了する
-	if (GetEndStateTime()) {
+	if (GetEndStateTime() || GetIsCansel()) {
 		// 終了処理
 		End(owner);
 	}
@@ -56,7 +59,19 @@ void ComboStateMachine::SetState(std::shared_ptr<ComboState> state) {
 
 	if (currentState) currentState->Exit(owner);	// 終了処理
 	currentState = state;
-	if (currentState) currentState->Enter(owner);	// 開始処理
+	if (currentState) {
+
+		// 方向指定
+		Vector2 velo = owner->GetInput()->GetGamePadLeftStick();
+		if (velo.Length() != 0.0f) {
+
+			direction_ = { velo.x,0.0f,velo.y };
+			// 方向
+			owner->GetMoveComponent()->GetMoveSystem()->CameraDirectionToMoveDirection(direction_);
+		}
+		currentState->Set(direction_);
+		currentState->Enter(owner);	// 開始処理
+	} 
 	bufferedInput.reset(); // 状態遷移したら入力リセット
 }
 

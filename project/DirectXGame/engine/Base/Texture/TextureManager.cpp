@@ -7,9 +7,9 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
 //ImGuiで0番目を使用するため,1番から使用
-uint32_t TextureManager::kSRVIndexTop = 1;
+uint32_t Engine::TextureManager::kSRVIndexTop = 1;
 
-void TextureManager::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager)
+void Engine::TextureManager::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager)
 {
 	DXGIDevice_ = DXGIDevice;	// デバイス
 	command_ = command;			// コマンド
@@ -19,7 +19,7 @@ void TextureManager::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvMan
 
 
 
-void TextureManager::LoadTexture(const std::string& filePath) {
+void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 	debugTimerTex_.StartTimer();
 
 	// 読み込み済みテクスチャを検索
@@ -101,7 +101,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	debugTimerTex_.EndTimer();
 }
 
-void TextureManager::LoadAllTexturesInDirectory(const std::string& directoryPath)
+void Engine::TextureManager::LoadAllTexturesInDirectory(const std::string& directoryPath)
 {
 	debugTimerTex_.StartTimer();
 
@@ -150,7 +150,7 @@ void TextureManager::LoadAllTexturesInDirectory(const std::string& directoryPath
 
 
 
-uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
+uint32_t Engine::TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 {
 	//読み込み済みテクスチャを検索
 	auto it = textureDatas.find(filePath);
@@ -161,7 +161,7 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 	return 0;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath)
+D3D12_GPU_DESCRIPTOR_HANDLE Engine::TextureManager::GetSrvHandleGPU(const std::string& filePath)
 {
 	// 範囲外指定チェック
 	auto it = textureDatas.find(filePath);
@@ -173,7 +173,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& f
 	return nullHandle;
 }
 
-const DirectX::TexMetadata& TextureManager::GetMataData(const std::string& filePath)
+const DirectX::TexMetadata& Engine::TextureManager::GetMataData(const std::string& filePath)
 {
 	// 範囲外指定チェック
 	auto it = textureDatas.find(filePath);
@@ -183,7 +183,7 @@ const DirectX::TexMetadata& TextureManager::GetMataData(const std::string& fileP
 	return textureData.metadata;
 }
 
-void TextureManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange)
+void Engine::TextureManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange)
 {
 	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う           
 	parameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
@@ -191,7 +191,7 @@ void TextureManager::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DES
 	parameter.DescriptorTable.NumDescriptorRanges = 1; // Tableで利用する数 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> TextureManager::CreateTextureResource(const DirectX::TexMetadata& metadata)
+Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::CreateTextureResource(const DirectX::TexMetadata& metadata)
 {
 	//1. metadataを基にResourceの設定
 
@@ -230,7 +230,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> TextureManager::CreateTextureResource(con
 
 //データを転送するUploadTextureData関数を作る
 [[nodiscard]]
-Microsoft::WRL::ComPtr<ID3D12Resource> TextureManager::UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages)
+Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages)
 {
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 	DirectX::PrepareUpload(DXGIDevice_->GetDevice(), mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);

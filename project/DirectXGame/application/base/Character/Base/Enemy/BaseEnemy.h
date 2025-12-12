@@ -17,7 +17,8 @@ class Entity2DManager;
 class BaseEnemy : public BaseCharacter {
 public:
 	// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 
 	// 毎フレーム更新
@@ -79,13 +80,13 @@ protected:
 protected:
 	
 protected: //2D
-	std::unique_ptr<Sprite> icon_lockOn;
-	std::unique_ptr<Sprite> hpBer_;
-	std::unique_ptr<Sprite> backHpBer_;
+	std::unique_ptr<Engine::Sprite> icon_lockOn;
+	std::unique_ptr<Engine::Sprite> hpBer_;
+	std::unique_ptr<Engine::Sprite> backHpBer_;
 protected:
 	BasePlayer* player_;
 	std::unique_ptr <VisionComponent> visionComponent_;			// 視界
-	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
+	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 	bool isLockOn_ = false; // ロックオンされているか
 
 };

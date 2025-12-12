@@ -2,7 +2,7 @@
 #include <DirectXGame/engine/DirectX/Common/DirectXCommon.h>
 #include <DirectXGame/engine/Manager/Entity3D/Entity3DManager.h>
 #include <DirectXGame/engine/MyGame/MyGame.h>
-void EffectComponent::Init(Entity3DManager* entity3dManager, GlobalVariables* globalVariables)
+void Engine::EffectComponent::Init(Entity3DManager* entity3dManager, GlobalVariables* globalVariables)
 {
 	assert(entity3dManager && globalVariables);
 	entity3dManager_ = entity3dManager;
@@ -12,7 +12,7 @@ void EffectComponent::Init(Entity3DManager* entity3dManager, GlobalVariables* gl
 	primitiveCommon_ = entity3dManager_->GetPrimitiveCommon();
 }
 
-void EffectComponent::AddEmitter(const std::string& name, const std::string& particleName, EmitterShapeType type, EmitData::EmitType emittype, WorldTransform* parent)
+void Engine::EffectComponent::AddEmitter(const std::string& name, const std::string& particleName, EmitterShapeType type, EmitData::EmitType emittype, WorldTransform* parent)
 {
 
 	// 既に同じ名前のEmitterが存在する場合は追加しない
@@ -75,7 +75,7 @@ void EffectComponent::AddEmitter(const std::string& name, const std::string& par
 
 }
 
-void EffectComponent::AddGPUParticleEmitter(const std::string& name, const std::string& particleName, EmitterType type, WorldTransform* parent)
+void Engine::EffectComponent::AddGPUParticleEmitter(const std::string& name, const std::string& particleName, EmitterType type, WorldTransform* parent)
 {
 	// タイプに合わせて各形状エミッタの初期化
 	switch (type)
@@ -104,7 +104,7 @@ void EffectComponent::AddGPUParticleEmitter(const std::string& name, const std::
 
 }
 
-void EffectComponent::AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+void Engine::EffectComponent::AddTrailEffect(const std::string name, const std::string tex, float maxTime, WorldTransform& parent, Color color, Vector3 offsetStr, Vector3 offsetEnd)
 {
 	// 既に同じ名前のTrailが存在する場合は追加しない
 	if (trails_.find(name) != trails_.end()) {
@@ -123,7 +123,7 @@ void EffectComponent::AddTrailEffect(const std::string name, const std::string t
 
 }
 
-void EffectComponent::AddPrimitive(const std::string& name, const std::string tex, ShapeParameter::ShapeType type)
+void Engine::EffectComponent::AddPrimitive(const std::string& name, const std::string tex, ShapeParameter::ShapeType type)
 {
 	// 既に同じtypeとnameのプリミティブが存在する場合はreturn
 	auto typeIt = primitives3D_.find(type);
@@ -195,7 +195,7 @@ void EffectComponent::AddPrimitive(const std::string& name, const std::string te
 	primitives3D_[type][name] = std::move(primitive);
 }
 
-void EffectComponent::RemovePrimitive(const std::string& name, ShapeParameter::ShapeType type)
+void Engine::EffectComponent::RemovePrimitive(const std::string& name, ShapeParameter::ShapeType type)
 {
 	// 指定typeが存在するか確認
 	auto typeIt = primitives3D_.find(type);
@@ -225,7 +225,7 @@ void EffectComponent::RemovePrimitive(const std::string& name, ShapeParameter::S
 
 
 
-void EffectComponent::Update() {
+void Engine::EffectComponent::Update() {
 
 	// エミッタ更新
 	for(auto& [name, emitter] : emitters_) {
@@ -246,7 +246,7 @@ void EffectComponent::Update() {
 
 };
 
-void EffectComponent::Draw() {
+void Engine::EffectComponent::Draw() {
 
 
 	// トレイルエフェクトの描画
@@ -256,7 +256,7 @@ void EffectComponent::Draw() {
 	
 };
 
-void EffectComponent::DrawEffect() {
+void Engine::EffectComponent::DrawEffect() {
 
 	// プリミティブ形状描画
 	for (auto& [type, primitiveMap] : primitives3D_) {

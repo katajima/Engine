@@ -55,13 +55,13 @@ class HitResponse {
 public:
 
 	// 衝突応答(タグごとの)
-	void Hit(CollisionTag tag, Collider* self, Collider* other);
+	void Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other);
 
 	// 使っているもののワールドトランスフォームを設定
-	void SetOwner(WorldTransform* owner) { transform = owner; };
+	void SetOwner(Engine::WorldTransform* owner) { transform = owner; };
 
 private:
-	WorldTransform* transform;	//　衝突応答用
+	Engine::WorldTransform* transform;	//　衝突応答用
 	float halfSize = 0.5f;		// 半分のサイズ
 
 };

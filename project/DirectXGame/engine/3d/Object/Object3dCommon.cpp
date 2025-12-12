@@ -1,6 +1,6 @@
 #include"Object3dCommon.h"
 
-void Object3dCommon::Initialize(DirectXCommon* dxCommon)
+void Engine::Object3dCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;	// DX共通クラス
 
@@ -12,7 +12,7 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon)
 	CreateGraphicsPipeline();
 }
 
-void Object3dCommon::CreateGraphicsPipeline()
+void Engine::Object3dCommon::CreateGraphicsPipeline()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[4] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用

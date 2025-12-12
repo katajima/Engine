@@ -11,7 +11,7 @@ class GameUI : public BaseUI
 {
 public:
 	//初期化
-	void Initialize(Input* input,Entity2DManager* entity2DManager, GlobalVariables* globalVariables) override;
+	void Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	//更新
 	void Update() override;
@@ -23,8 +23,8 @@ public:
 	void SetPlayer(BasePlayer* player);
 
 private:
-	std::unique_ptr<Sprite> text_clera;
-	std::unique_ptr<Sprite> text_over;
+	std::unique_ptr<Engine::Sprite> text_clera;
+	std::unique_ptr<Engine::Sprite> text_over;
 private:
 	BasePlayer* player_;
 

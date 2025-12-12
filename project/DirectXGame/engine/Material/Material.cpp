@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void Material::Initialize(DirectXCommon* dxcommon)
+void Engine::Material::Initialize(DirectXCommon* dxcommon)
 {
 	// DX共通クラス
 	dxCommon_ = dxcommon;
@@ -28,12 +28,12 @@ void Material::Initialize(DirectXCommon* dxcommon)
 	GPUData();
 }
 
-void Material::GetCommandListMaterial(int index)
+void Engine::Material::GetCommandListMaterial(int index)
 {
 	cbResource_.SetGraphicsRootConstantBufferView(0);
 }
 
-void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex, int environmentIndex)
+void Engine::Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex, int environmentIndex)
 {
 	// テクスチャのバインド
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(indexDiffuse, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.diffuseFilePath));
@@ -57,7 +57,7 @@ void Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int spec
 
 
 
-void Material::GPUData()
+void Engine::Material::GPUData()
 {
 
 	// 各データをGPUに送る
@@ -80,7 +80,7 @@ void Material::GPUData()
 	cbResource_.Data()->uvTransform = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 }
 
-void Material::LoadTex()
+void Engine::Material::LoadTex()
 {
 
 	// .objの参照しているテクスチャファイル読み込み

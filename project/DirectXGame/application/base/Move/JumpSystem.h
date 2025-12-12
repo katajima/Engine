@@ -37,11 +37,11 @@ public:
 	void Initialize();
 
 	// 更新
-	void Update(float dt,WorldTransform& world, RigidBodyComponent& rigid);
+	void Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
 
 
 public:	// ジャンプ開始
-	void StartJump(RigidBodyComponent& rigid);
+	void StartJump(Engine::RigidBodyComponent& rigid);
 	// ジャンプ回数現象
 	void DecrementJumpCount() { jumpCount_--; }
 public:
@@ -73,7 +73,7 @@ private:
 	void InputHoldProcess(float dt);
 
 	// ジャンプホールド処理
-	void JumpHoldProcess(float dt, RigidBodyComponent& rigid);
+	void JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid);
 
 	//
 

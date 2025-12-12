@@ -9,7 +9,7 @@
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXgame/application/base/Stage/Stage.h"
 
-void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, Camera* camera)
+void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera)
 {
 	isSpecial_ = false;		// 使用不可にする
 
@@ -20,7 +20,7 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	bulletNum = provisionalData_.bulletNum;			// 弾番号
 
 	// シリンダーパラメータ設定
-	ShapeParameter::Cylinder cylinderParam;
+	Engine::ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = provisionalData_.cylinderHeight;			// 高さ
 	cylinderParam.innerRadius = reticleRad_;// 上底
 	cylinderParam.outerRadius = reticleRad_;// 下底
@@ -28,14 +28,14 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 	cylinderParam.segments = provisionalData_.cylinderSegments;			// セグメント数
 
 	// シリンダー生成
-	ctlinder_ = std::make_unique<CylinderPrimitive>();
+	ctlinder_ = std::make_unique<Engine::CylinderPrimitive>();
 	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
 	ctlinder_->Data() = cylinderParam;	//　パラメータ代入
 
 	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("レティクルシリンダー","resources/Texture/effect/gradationLine.png",camera);
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー","resources/Texture/effect/gradationLine.png",camera);
 	objectReticle_->SetPrimitive(std::move(ctlinder_));
-	objectReticle_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kNoCullRingClamp);
+	objectReticle_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
 	objectReticle_->GetWorldTransform().rotate_ = provisionalData_.rotate;
 	objectReticle_->GetWorldTransform().translate_ = provisionalData_.translate;
@@ -44,9 +44,9 @@ void RangeBombingSpecial::Initialize(Entity3DManager* entity3DManager, Entity2DM
 // 半径設定
 void RangeBombingSpecial::SetRadius(float rad) { 
 	reticleRad_ = rad; 
-	CylinderPrimitive* primi = static_cast<CylinderPrimitive*>(objectReticle_->GetPrimitive());
+	Engine::CylinderPrimitive* primi = static_cast<Engine::CylinderPrimitive*>(objectReticle_->GetPrimitive());
 	// シリンダーパラメータ設定
-	ShapeParameter::Cylinder cylinderParam;
+	Engine::ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = provisionalData_.cylinderHeight;			// 高さ
 	cylinderParam.innerRadius = reticleRad_;// 上底
 	cylinderParam.outerRadius = reticleRad_;// 下底
@@ -82,7 +82,7 @@ void RangeBombingSpecial::InAction()
 	switch (phese_)
 	{
 	case 0:
-		time_ += MyGame::GameTime();
+		time_ += Engine::MyGame::GameTime();
 		// 移動
 
 		if (time_ >= 0.5f) {
@@ -96,12 +96,12 @@ void RangeBombingSpecial::InAction()
 		break;
 	case 1:
 		isAction_ = true;
-		shotTimer += MyGame::GameTime();
+		shotTimer += Engine::MyGame::GameTime();
 		
 		// 発射タイマーが経過したらミサイルを発射
 		if (shotTimer >= provisionalData_.shotTimer) {
 			// 経過時間を加算
-			time_ += MyGame::GameTime();
+			time_ += Engine::MyGame::GameTime();
 
 			// インターバルごとに1つのミサイルから発射
 			if (currentMissileIndex < stage_->missiles_.size()) {

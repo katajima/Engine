@@ -22,7 +22,7 @@
 /// <summary>
 /// サンプルシーン
 /// </summary>
-class SampleScene : public BaseScene
+class SampleScene : public Engine::BaseScene
 {
 public:
 	// 初期化
@@ -65,17 +65,17 @@ private:
 
 
 private:
-	Input* input_ = nullptr;									// 入力
+	Engine::Input* input_ = nullptr;									// 入力
 
-	std::unique_ptr<Audio> audioTest_;							// オーディオ
+	std::unique_ptr<Engine::Audio> audioTest_;							// オーディオ
 	uint32_t soundHandle_ = 0;									// サウンドハンドル
 private:
-	Object3d* testObject_ = nullptr;							// テスト用オブジェクト
+	Engine::Object3d* testObject_ = nullptr;							// テスト用オブジェクト
 
-	std::unique_ptr<SkyBox> skyBox;								// スカイボックス
-	Object3d* sky_;												// スカイボックス用オブジェクト
+	std::unique_ptr<Engine::SkyBox> skyBox;								// スカイボックス
+	Engine::Object3d* sky_;												// スカイボックス用オブジェクト
 
-	Object3dInstansManager* object3dInstansManager_ = nullptr;	// 3Dオブジェクトインスタンスマネージャ
+	Engine::Object3dInstansManager* object3dInstansManager_ = nullptr;	// 3Dオブジェクトインスタンスマネージャ
 private:
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
@@ -85,38 +85,38 @@ private:
 
 
 	// 衝突マネージャ
-	std::unique_ptr<CollisionManager> collisionManager_;
-	std::unique_ptr<CollisionManager2d> collisionManager2d_;
+	std::unique_ptr<Engine::CollisionManager> collisionManager_;
+	std::unique_ptr<Engine::CollisionManager2d> collisionManager2d_;
 
 	// ライト
-	std::shared_ptr<DirectionalLight> directional;
+	std::shared_ptr<Engine::DirectionalLight> directional;
 private:
 	// パーティクルエミッター
-	std::unique_ptr<AABBParticleEmitter> aabbParticleEmitter_ = nullptr;
+	std::unique_ptr<Engine::AABBParticleEmitter> aabbParticleEmitter_ = nullptr;
 	// パーティクルエミッター
-	std::unique_ptr<SphereParticleEmitter> sphereParticleEmitter = nullptr;
+	std::unique_ptr<Engine::SphereParticleEmitter> sphereParticleEmitter = nullptr;
 	// パーティクルエミッター
-	std::unique_ptr<CornerParticleEmitter> cornerParticleEmitter = nullptr;
+	std::unique_ptr<Engine::CornerParticleEmitter> cornerParticleEmitter = nullptr;
 	// パーティクルエミッター
-	std::unique_ptr<SplineParticleEmitter> splineParticleEmitter = nullptr;
+	std::unique_ptr<Engine::SplineParticleEmitter> splineParticleEmitter = nullptr;
 	// パーティクルエミッター
-	std::unique_ptr<LineParticleEmitter> lineParticleEmitter = nullptr;
+	std::unique_ptr<Engine::LineParticleEmitter> lineParticleEmitter = nullptr;
 	// パーティクルエミッター
-	std::unique_ptr<TriangleParticleEmitter> triangleParticleEmitter = nullptr;
+	std::unique_ptr<Engine::TriangleParticleEmitter> triangleParticleEmitter = nullptr;
 	// パーティクルエミッター
-	std::unique_ptr<MeshParticleEmitter> meshParticleEmitter = nullptr;
+	std::unique_ptr<Engine::MeshParticleEmitter> meshParticleEmitter = nullptr;
 
 
-	std::unique_ptr<ParticleEmitter2d> particleEmitter2d_ = nullptr;
+	std::unique_ptr<Engine::ParticleEmitter2d> particleEmitter2d_ = nullptr;
 
 private:
 	// スプライト
-	std::unique_ptr<Sprite> sprite_ = nullptr;
+	std::unique_ptr<Engine::Sprite> sprite_ = nullptr;
 
-	std::unique_ptr<PlanePrimitive> plane_;
+	std::unique_ptr<Engine::PlanePrimitive> plane_;
 
 	// スプライト
-	std::unique_ptr<Sprite> sprite2dP_ = nullptr;
+	std::unique_ptr<Engine::Sprite> sprite2dP_ = nullptr;
 
 };
 

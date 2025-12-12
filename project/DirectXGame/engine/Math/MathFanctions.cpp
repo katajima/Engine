@@ -315,7 +315,7 @@ bool IsInFrustum(const Matrix4x4& viewProjectionMatrix, const Vector3& position)
 	return true;
 }
 
-Vector2 GetScreenPos(WorldTransform worldTransform, Camera* camera)
+Vector2 GetScreenPos(Engine::WorldTransform worldTransform, Engine::Camera* camera)
 {
 	Vector3 wPos = worldTransform.worldMat_.GetWorldPosition();
 
@@ -329,7 +329,7 @@ Vector2 GetScreenPos(WorldTransform worldTransform, Camera* camera)
 	}
 
 	// ビューポート行列
-	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(WinApp::GetClientWidth()), static_cast<float> (WinApp::GetClientHeight()), 0, 1);
+	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(Engine::WinApp::GetClientWidth()), static_cast<float> (Engine::WinApp::GetClientHeight()), 0, 1);
 
 	// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
 	if (!IsInFrustum(matViewProjection, wPos)) {

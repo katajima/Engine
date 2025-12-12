@@ -4,7 +4,7 @@
 
 #include<cassert>
 
-void Command::Initialize(DXGIDevice* dxgi)
+void Engine::Command::Initialize(DXGIDevice* dxgi)
 {
 	dxgi_ = dxgi;	// デバイス
 	
@@ -39,7 +39,7 @@ void Command::Initialize(DXGIDevice* dxgi)
 	assert(SUCCEEDED(hr_));
 }
 
-void Command::KickCommand()
+void Engine::Command::KickCommand()
 {
 	// コマンドリストを確定させる
 	hr_ = commandList_->Close();
@@ -50,7 +50,7 @@ void Command::KickCommand()
 	commandQueue_->ExecuteCommandLists(1, commandLists->GetAddressOf());
 }
 
-void Command::ResetCommand()
+void Engine::Command::ResetCommand()
 {
 	// 次フレーム用のコマンドリストを準備
 	hr_ = commandAllocator_->Reset();
@@ -60,17 +60,17 @@ void Command::ResetCommand()
 	assert(SUCCEEDED(hr_));
 }
 
-ID3D12CommandQueue* Command::GetQueue()
+ID3D12CommandQueue* Engine::Command::GetQueue()
 {
 	return commandQueue_.Get();
 }
 
-ID3D12CommandAllocator* Command::GetAllocator()
+ID3D12CommandAllocator* Engine::Command::GetAllocator()
 {
 	return commandAllocator_.Get();
 }
 
-ID3D12GraphicsCommandList* Command::GetList()
+ID3D12GraphicsCommandList* Engine::Command::GetList()
 {
 	return commandList_.Get();
 }

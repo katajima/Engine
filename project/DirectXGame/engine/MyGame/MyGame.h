@@ -23,59 +23,60 @@
 
 #include"Framework.h"
 
-/// <summary>
-/// ゲームのフレームワークを拡張したクラスで、ゲームの初期化、更新、描画、リソース管理などを行う。
-/// </summary>
-class  MyGame : public Framework
-{
-public:
-	
-	// 初期化
-	void Initialize() override;
+namespace Engine {
+	/// <summary>
+	/// ゲームのフレームワークを拡張したクラスで、ゲームの初期化、更新、描画、リソース管理などを行う。
+	/// </summary>
+	class  MyGame : public Framework
+	{
+	public:
 
-	// 終了
-	void Finalize() override;
+		// 初期化
+		void Initialize() override;
 
-	// 毎フレーム更新
-	void Update() override;
+		// 終了
+		void Finalize() override;
 
-	// 描画
-	void Draw() override;
+		// 毎フレーム更新
+		void Update() override;
 
-	// リソース初期化
-	void InitializeResource();
+		// 描画
+		void Draw() override;
 
-	// パーティクル生成
-	void CreateParticle();
+		// リソース初期化
+		void InitializeResource();
 
-	// モデル読み込み
-	void LoadModel();
+		// パーティクル生成
+		void CreateParticle();
 
-public:
-	static float const kDeltaTime_;
-	static float kTimeSpeed_;
-	// ゲーム内時間取得
-	static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
-	// 現在の時間
-	static float NowTime() { return nowTime; };
-	static float nowTime;
-private:
-	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
+		// モデル読み込み
+		void LoadModel();
 
-	float fps = 0.0f;
-	
-	DebugTimer debugTimer_;
+	public:
+		static float const kDeltaTime_;
+		static float kTimeSpeed_;
+		// ゲーム内時間取得
+		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
+		// 現在の時間
+		static float NowTime() { return nowTime; };
+		static float nowTime;
+	private:
+		std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
 
-	std::unique_ptr<TorusPrimitive> primi = nullptr;
-	std::unique_ptr<PlanePrimitive> primiPlane = nullptr;
-	std::unique_ptr<StarPrimitive> primiStar = nullptr;
-	std::unique_ptr<TrianglePrimitive> primiTrai = nullptr;
-	
-	std::unique_ptr<RingPrimitive> primiRing = nullptr;
-	std::unique_ptr<CylinderPrimitive> cylinder_ = nullptr;
-	
-private:
-	// ゲーム終了フラグ
-	bool endRequst_ = false;
-};
+		float fps = 0.0f;
 
+		DebugTimer debugTimer_;
+
+		std::unique_ptr<TorusPrimitive> primi = nullptr;
+		std::unique_ptr<PlanePrimitive> primiPlane = nullptr;
+		std::unique_ptr<StarPrimitive> primiStar = nullptr;
+		std::unique_ptr<TrianglePrimitive> primiTrai = nullptr;
+
+		std::unique_ptr<RingPrimitive> primiRing = nullptr;
+		std::unique_ptr<CylinderPrimitive> cylinder_ = nullptr;
+
+	private:
+		// ゲーム終了フラグ
+		bool endRequst_ = false;
+	};
+}

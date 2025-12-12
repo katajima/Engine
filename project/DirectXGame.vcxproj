@@ -112,8 +112,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboSystem.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectField.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectModule.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.cpp" />
@@ -156,7 +154,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.cpp" />
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.cpp" />
     <ClCompile Include="DirectXGame\engine\Line\CreateLine.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\TrailMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Move\RigidBodyComponent.cpp" />
@@ -199,7 +196,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
-    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionFancion.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp" />
@@ -230,7 +226,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Math\MapChip.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\Noise.cpp" />
     <ClCompile Include="DirectXGame\engine\Math\Random.cpp" />
-    <ClCompile Include="DirectXGame\engine\Mesh\Base\BaseMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\LineMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\ModelMesh.cpp" />
     <ClCompile Include="DirectXGame\engine\Mesh\SkyBoxMesh.cpp" />
@@ -251,7 +246,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Camera\CameraCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\Collider.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionManager.cpp" />
-    <ClCompile Include="DirectXGame\engine\Collider\ContactRecord.cpp" />
     <ClCompile Include="DirectXGame\engine\Color\Color.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Ocean\Ocean.cpp" />
     <ClCompile Include="DirectXGame\engine\Effect\Ocean\OceanManager.cpp" />
@@ -740,8 +734,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboSystem.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectField.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectModule.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBox.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitCounter.h" />
@@ -801,7 +793,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\BaseParticleEmitter.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h" />
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.h" />
     <ClInclude Include="DirectXGame\engine\Line\CreateLine.h" />
     <ClInclude Include="DirectXGame\engine\Mesh\TrailMesh.h" />
     <ClInclude Include="DirectXGame\engine\PSO\psoData.h" />
@@ -811,11 +802,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Transform\WorldTransform\WorldTransform2d.h" />
     <ClInclude Include="DirectXGame\engine\UI\BaseSprite.h" />
     <ClInclude Include="DirectXGame\engine\UI\UIBoard.h" />
-    <ClInclude Include="DirectXGame\engine\UI\UICheckHit.h" />
     <ClInclude Include="DirectXGame\engine\UI\UIData.h" />
     <ClInclude Include="DirectXGame\engine\UI\UIElement.h" />
-    <ClInclude Include="DirectXGame\engine\UI\UIInputManager.h" />
-    <ClInclude Include="DirectXGame\engine\UI\UIManager.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\BaseWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacter.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacterManeger.h" />
@@ -863,7 +851,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\Base\Load\LoadLevelData.h" />
     <ClInclude Include="DirectXGame\engine\Base\pch.h" />
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderComponent.h" />
-    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Vision\VisionComponent.h" />
     <ClInclude Include="DirectXGame\engine\Color\ColorComponent.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />

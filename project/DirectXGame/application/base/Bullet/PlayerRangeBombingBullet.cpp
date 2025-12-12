@@ -17,12 +17,13 @@ PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 	effectComponent_->RemoveTrailEffectAll();	// トレイルエフェクト削除
 }
 //
-void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera)
+void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
 	globalVariables_ = globalVariables;	// 保存項目
 	entity3DManager_ = entity3DManager; // エンティティ3d
 	//// オブジェクト設定
-	object_ = entity3DManager->CreateObject3D("playerbullet", ObjectModelType::kNormal, position, camera);
+	object_ = entity3DManager->CreateObject3D("playerbullet", Engine::ObjectModelType::kNormal, position, camera);
 	object_->SetModel("player_bullet.obj");	// モデル設定
 	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->isEmitTrailEffect = false; // トレイルを出現させない
@@ -31,12 +32,12 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	
 
 	// エフェクトコンポーネント初期化
-	effectComponent_ = std::make_unique<EffectComponent>();	
+	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(entity3DManager_,globalVariables_);	
 
 
 	// コライダ設定
-	auto sphere = std::make_unique<SphereCollider>();
+	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->tag = CollisionTag::PlayerAttack;			// タグ設定
 	sphere->layer = CollisionLayer::PlayerAttack;		// レイヤー設定
 	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Enemy));	// マスク設定
@@ -47,8 +48,8 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 
 	// 衝突時のコールバック登録
-	object_->GetColliderComponent()->onHitCallback = [this](Collider* self, Collider* other) {
-		auto* otherComponent = static_cast<ColliderComponent*>(other->owner);
+	object_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
 		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
 
 		// 敵
@@ -60,7 +61,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 
 
 
-		float nowTime = MyGame::NowTime(); // ← 時間取得関数（例）
+		float nowTime = Engine::MyGame::NowTime(); // ← 時間取得関数（例）
 
 		if (object_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
 			return; // クールタイム中のため無視
@@ -72,6 +73,9 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 		enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		// ダメージ
 		enemy->AddDamage(parameter_.damege);
+
+		player_->GetAttackController()->GetHitCounter().Hit();
+		
 		// エフェクト出現
 		enemy->Emit();
 		};
@@ -113,7 +117,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	InitMoveSmoke();
 
 	// シリンダーパラメーター設定
-	ShapeParameter::Cylinder cylinderParam;
+	Engine::ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = cilnderHeight_;
 	cylinderParam.innerRadius = provisionalData_.innerRadius;
 	cylinderParam.outerRadius = provisionalData_.outerRadius;
@@ -121,7 +125,7 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	cylinderParam.segments = provisionalData_.segments;
 
 	// シリンダー生成
-	std::unique_ptr<CylinderPrimitive> cylinder2 = std::make_unique<CylinderPrimitive>();
+	std::unique_ptr<Engine::CylinderPrimitive> cylinder2 = std::make_unique<Engine::CylinderPrimitive>();
 	cylinder2->Data() = cylinderParam;
 	cylinder2->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
 
@@ -131,9 +135,9 @@ void PlayerRangeBombingBullet::Initialize(Entity3DManager* entity3DManager, Enti
 	cylinderParam.isCover = true;
 
 	// 当たった時のオブジェクト生成
-	hitObject2_ = entity3DManager->CreatePrimitiveObject3D<CylinderPrimitive>("cylinder", "resources/Texture/Image.png", camera);
+	hitObject2_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("cylinder", "resources/Texture/Image.png", camera);
 	hitObject2_->SetPrimitive(std::move(cylinder2));
-	hitObject2_->GetPrimitive()->SetPsoType(BasePrimitive::PsoType::kRingClamp);
+	hitObject2_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
 	hitObject2_->GetPrimitive()->GetMaterial()->color = provisionalData_.hit2Color;
 

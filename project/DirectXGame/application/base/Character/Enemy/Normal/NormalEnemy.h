@@ -13,7 +13,8 @@ public:
 	}
 
 	// 初期化
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables,Vector3 position, Camera* camera) override;
+	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables,Vector3 position, Engine::Camera* camera) override;
 
 	// 毎フレーム更新
 	void Update() override;
@@ -44,7 +45,7 @@ private:
 	void AttackByCrowdCommand();
 
 private:
-	WorldTransform worldEffect_;
+	Engine::WorldTransform worldEffect_;
 
 	bool isStopMove_ = false;
 	float stopMoveTimer_ = 0.0f;

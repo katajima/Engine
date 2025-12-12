@@ -2,9 +2,11 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
+using namespace Engine;
+
 std::mutex mutex;  // グローバルやスコープ内に必要
 
-void Entity3DManager::Initialize(DirectXCommon* directXCommon)
+void Engine::Entity3DManager::Initialize(DirectXCommon* directXCommon)
 {
 	directXCommon_ = directXCommon;	// DX共通クラス
 
@@ -53,7 +55,7 @@ void Entity3DManager::Initialize(DirectXCommon* directXCommon)
 	effectManager_->Initialize(directXCommon_, lightManager_.get(), lineCommon_.get());
 }
 
-void Entity3DManager::UpdateImgui()
+void Engine::Entity3DManager::UpdateImgui()
 {
 #ifdef _DEBUG
 	ImGui::Begin("EmitParticle");
@@ -214,7 +216,7 @@ void Entity3DManager::UpdateImgui()
 
 }
 
-void Entity3DManager::Update()
+void Engine::Entity3DManager::Update()
 {
 	// オブジェクトインスタンシング更新
 	object3dInstansManager_->Update();
@@ -264,12 +266,12 @@ void Entity3DManager::Update()
 	}
 }
 
-void Entity3DManager::ObjectClean()
+void Engine::Entity3DManager::ObjectClean()
 {
 	object3d.clear();
 }
 
-void Entity3DManager::ObjectDraw()
+void Engine::Entity3DManager::ObjectDraw()
 {
 	// インスタンシング描画
 	object3dInstansManager_->Draw();

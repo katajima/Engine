@@ -10,7 +10,8 @@ class BaseWeapon : public IHitReceiver
 {
 public:
 	// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	// 更新
 	virtual void Update() = 0;
 	// 描画エフェクト
@@ -32,11 +33,11 @@ public:
 	void SetIsActive(bool isActive) { data_.isActive = isActive; };
 	
 	// コライダーコンポーネント
-	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
+	Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
-	Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	Engine::Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
 	// ワールド変換取得
-	WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
+	Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetObject3D()->GetWorldTransform(); }
 
 	// リキャストタイム取得
 	bool GetIsRecastTimeOver() const { return data_.MaxRecastTime <= data_.recastTime; }
@@ -55,12 +56,12 @@ protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
 	std::unique_ptr<HitBox> hitBox_;
 protected:
-	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Camera* camera_ = nullptr;						// カメラ
-	Input* input_ = nullptr;						// 入力(使わないならnullptr)
-	Audio* audio_ = nullptr;
+	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Camera* camera_ = nullptr;						// カメラ
+	Engine::Input* input_ = nullptr;						// 入力(使わないならnullptr)
+	Engine::Audio* audio_ = nullptr;
 };
 
 // 近距離の武器クラス
@@ -68,7 +69,8 @@ class MellWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	/// 更新
 	virtual void Update() = 0;
 	/// エフェクトの描画
@@ -92,7 +94,8 @@ class RangedWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	/// 更新
 	virtual void Update() = 0;
 	/// エフェクトの描画

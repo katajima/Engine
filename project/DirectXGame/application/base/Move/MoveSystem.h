@@ -66,22 +66,22 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新(操作用)
-	void Update(float dt,WorldTransform& world, Input* input);
+	void Update(float dt, Engine::WorldTransform& world, Engine::Input* input);
 	// 更新(非操作用)
-	void Update(float dt, WorldTransform& world);
+	void Update(float dt, Engine::WorldTransform& world);
 	// 更新(敵用)
-	void UpdateEnemy(float dt, WorldTransform& world);
+	void UpdateEnemy(float dt, Engine::WorldTransform& world);
 
 	// isAttackMove(
-	void UpdateAttack(float dt, WorldTransform& world);
+	void UpdateAttack(float dt, Engine::WorldTransform& world);
 
 private:
 	// 速度処理
 	void SpeedProcess(float dt);
 	// 回転処理
-	void RotateProcess(float dt, WorldTransform& world,const Vector3& velo);
+	void RotateProcess(float dt, Engine::WorldTransform& world,const Vector3& velo);
 	// 移動処理
-	void MoveProcess(float dt, WorldTransform& world,Vector3& velo, bool isSpeed = true);
+	void MoveProcess(float dt, Engine::WorldTransform& world,Vector3& velo, bool isSpeed = true);
 	// 状態処理
 	void StateProcess();
 	// アニメーション速度設定
@@ -89,12 +89,12 @@ private:
 	// 方向処理
 	void DirectionProcess(const Vector3& velo);
 	// ダッシュ時の処理
-	void DashProcess(WorldTransform& world);
+	void DashProcess(Engine::WorldTransform& world);
 public:
 	// カメラ基づく移動方向設定
 	void CameraDirectionToMoveDirection(Vector3& velo);
 	// 攻撃中の回転処理
-	void AttackProcess(WorldTransform& world, const Vector3& direction);
+	void AttackProcess(Engine::WorldTransform& world, const Vector3& direction);
 
 public: // 取得
 	// 移動データの取得
@@ -130,10 +130,10 @@ public: //設定
 	void SetIsAttackCanMove(bool is) { isAttackCanMove_ = is; };
 
 	// カメラ設定
-	void SetCamera(Camera* camera) { camera_ = camera; }
+	void SetCamera(Engine::Camera* camera) { camera_ = camera; }
 private: // 貰いもの
 	// カメラ
-	Camera* camera_ = nullptr;
+	Engine::Camera* camera_ = nullptr;
 
 	// ダッシュしているかどうか
 	bool isDash_ = false;

@@ -2,7 +2,7 @@
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
 
-void SpriteCommon::Initialize(DirectXCommon* dxCommon)
+void Engine::SpriteCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;	// DX共通クラス
 
@@ -14,7 +14,7 @@ void SpriteCommon::Initialize(DirectXCommon* dxCommon)
 	CreateGraphicsPipeline();
 }
 
-void SpriteCommon::CreateGraphicsPipeline()
+void Engine::SpriteCommon::CreateGraphicsPipeline()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);

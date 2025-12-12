@@ -4,7 +4,9 @@
 #include "OceanManager.h"
 #include "imgui.h"
 
-void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
+
+
+void Engine::Ocean::Initialize(Engine::Entity3DManager* entity3dManager,Vector2 renge)
 {
 	entity3dManager_ = entity3dManager;	// エンティティ3d
 
@@ -78,7 +80,7 @@ void Ocean::Initialize(Entity3DManager* entity3dManager,Vector2 renge)
 	index_ = 3;
 }
 
-void Ocean::Update()
+void Engine::Ocean::Update()
 {
 	for (size_t i = 0; i < index_; ++i) {
 		cbWaveResource_.Data()[i].time += 1.0f / 60.0f;
@@ -86,7 +88,7 @@ void Ocean::Update()
 	material->GPUData();
 }
 
-void Ocean::UpdateImgui()
+void Engine::Ocean::UpdateImgui()
 {
 #ifdef _DEBUG
 	if (ImGui::CollapsingHeader("Wave")) {
@@ -126,7 +128,7 @@ void Ocean::UpdateImgui()
 #endif // _DEBUG
 }
 
-void Ocean::Draw()
+void Engine::Ocean::Draw()
 {
 
 	// ウェーブデータ
@@ -142,7 +144,7 @@ void Ocean::Draw()
 	directXCommon_->GetCommandList()->DrawInstanced(UINT(mesh_->vertices.size()), 1, 0, 0);
 }
 
-void Ocean::AddWave()
+void Engine::Ocean::AddWave()
 {
 	cbWaveResource_.Data()[index_].amplitude = 0.5f;
 	cbWaveResource_.Data()[index_].frequency = 2.0f;

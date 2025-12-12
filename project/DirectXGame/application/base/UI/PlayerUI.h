@@ -2,8 +2,9 @@
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
 
 // 前方宣言
-class Entity2DManager;
-
+namespace Engine {
+	class Entity2DManager;
+}
 /// <summary>
 /// プレイヤーUIクラス
 /// </summary>
@@ -11,7 +12,7 @@ class PlayerUI : public BaseUI{
 public:
 
 	// 初期化
-	void Initialize(Input* input, Entity2DManager* entity2DManager, GlobalVariables* globalVariables) override;
+	void Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	// 更新
 	void Update() override;
@@ -44,8 +45,8 @@ private:
 
 	float srideM_ = 0;
 
-	std::unique_ptr<Sprite> textMax_;
-	std::unique_ptr<Sprite> textRB_;
+	std::unique_ptr<Engine::Sprite> textMax_;
+	std::unique_ptr<Engine::Sprite> textRB_;
 	bool isTextRB_ = false;
 	bool isTextMax_ = false;
 	float sizeSpecialGauge_ = 0;

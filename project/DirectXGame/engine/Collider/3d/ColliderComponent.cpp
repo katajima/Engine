@@ -1,5 +1,7 @@
 #include "ColliderComponent.h"
 
+using namespace Engine;
+
 void ColliderComponent::UpdateAll(const WorldTransform& worldTransform)
 {
     // 更新

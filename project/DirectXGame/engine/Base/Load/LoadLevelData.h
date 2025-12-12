@@ -1,18 +1,15 @@
 #pragma once
 #include"LevelData.h"
-
-
-
 #include<json.hpp>
-
-
 #include<memory>
-
 #include "DirectXGame/engine/3d/Object/Object3d.h"
+
 
 class CameraManager;
 class BaseCamera;
-class Entity3DManager;
+namespace Engine {
+	class Entity3DManager;
+}
 
 /// <summary>
 /// レベルデータを管理するクラス。
@@ -22,7 +19,8 @@ class LoadLevelData
 public:
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, ModelManager* modelManager,Camera* camera, const std::string extensionName, const std::string fileName = "levelData/");
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera, 
+		const std::string extensionName, const std::string fileName = "levelData/");
 	// リロード
 	void ReLoad();
 
@@ -39,9 +37,9 @@ public:
 	// レベルデータ取得
 	LevelData* GetLevelData() { return levelData_.get(); };
 	// オブジェクト取得
-	std::vector<Object3d*>GetObjects() { return objects_; }
+	std::vector<Engine::Object3d*>GetObjects() { return objects_; }
 	// ライト取得
-	std::vector< std::shared_ptr<Lights>>GetLights() { return lights_; }
+	std::vector< std::shared_ptr<Engine::Lights>>GetLights() { return lights_; }
 
 
 private:
@@ -56,12 +54,12 @@ private:
 	void ClearData();
 
 private:
-	Entity3DManager* entity3DManager_ = nullptr;
-	ModelManager* modelManager_ = nullptr;
+	Engine::Entity3DManager* entity3DManager_ = nullptr;
+	Engine::ModelManager* modelManager_ = nullptr;
 	CameraManager* cameraManager_ = nullptr;
-	std::vector<Object3d*> objects_;					// オブジェクト
+	std::vector<Engine::Object3d*> objects_;					// オブジェクト
 	std::vector<std::unique_ptr<BaseCamera>> cameras_;	// カメラ
-	std::vector<std::shared_ptr<Lights>> lights_;		// ライト
+	std::vector<std::shared_ptr<Engine::Lights>> lights_;		// ライト
 
 private:
 	std::string kFileName;

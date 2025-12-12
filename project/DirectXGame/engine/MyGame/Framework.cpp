@@ -1,6 +1,6 @@
 #include"Framework.h"
 
-void Framework::Initialize()
+void Engine::Framework::Initialize()
 {
 	// WindowsAPI解放
 	winApp = std::make_unique<WinApp>();
@@ -14,7 +14,7 @@ void Framework::Initialize()
 	globalVariables_ = std::make_unique<GlobalVariables>();
 	
 	// DirectX
-	dxCommon = std::make_unique<DirectXCommon>();
+	dxCommon = std::make_unique<Engine::DirectXCommon>();
 	dxCommon->Intialize(winApp.get());
 	dxCommon->GetImGuiManager()->SetInput(input_.get());
 
@@ -31,7 +31,7 @@ void Framework::Initialize()
 
 }
 
-void Framework::Finalize()
+void Engine::Framework::Finalize()
 {
 	// WindowsAPIの終了処理
 	winApp->Finalize();
@@ -41,7 +41,7 @@ void Framework::Finalize()
 
 }
 
-void Framework::Update()
+void Engine::Framework::Update()
 {
 	// Input
 	input_->Update();
@@ -54,7 +54,7 @@ void Framework::Update()
 	};
 }
 
-void Framework::Run()
+void Engine::Framework::Run()
 {
 	// ゲームの初期化
 	Initialize();

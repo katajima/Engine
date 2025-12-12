@@ -6,11 +6,12 @@
 // 前方宣言
 class BasePlayer;
 class BaseEnemy;
-class Entity3DManager;
-class Entity2DManager;
-class GlobalVariables;
-class Camera;
-
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+	class GlobalVariables;
+	class Camera;
+}
 
 
 /// <summary>
@@ -41,7 +42,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera);
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 	
 
 	// 更新
@@ -84,8 +85,8 @@ private:
 private:
 	BasePlayer* player_;							// プレイヤー
 	Effect* effect_;								// 演出
-	Camera* camera_;								// カメラ
-	GlobalVariables* globalVariables_ = nullptr;	// 保存項目
-	Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
-	Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
+	Engine::Camera* camera_;								// カメラ
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// 保存項目
+	Engine::Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
+	Engine::Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
 };

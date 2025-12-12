@@ -1,7 +1,7 @@
 #include "MoveComponent.h"
 
 
-void MovementComponent::Initialize(GlobalVariables* globalVariables, ControlType type, const std::string& name) {
+void MovementComponent::Initialize(Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
 	this->globalVariables = globalVariables;
 	
 	name_ = "MoveData" + name;
@@ -34,7 +34,7 @@ void MovementComponent::Initialize(GlobalVariables* globalVariables, ControlType
 	}
 };
 
-void MovementComponent::Update(float dt, WorldTransform& object, RigidBodyComponent& rigid, Input* input) {
+void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input) {
 	if (useGlobal_) {
 		SetGlobalData(name_);
 	}

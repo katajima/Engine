@@ -2,12 +2,12 @@
 #include"DirectXGame/engine/Skinning/Skinning.h"
 
 
-void AnimationComponent::Init(LineCommon* lineCommon)
+void Engine::AnimationComponent::Init(LineCommon* lineCommon)
 {
 	this->lineCommon = lineCommon;
 }
 
-void AnimationComponent::UpdateSkin(float deltatime,WorldTransform worldTransform)
+void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform worldTransform)
 {
 
 	// モデルが存在する場合
@@ -163,7 +163,7 @@ void AnimationComponent::UpdateSkin(float deltatime,WorldTransform worldTransfor
 
 }
 
-void AnimationComponent::Update(float deltatime, WorldTransform worldTransform)
+void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTransform)
 {
 	if (model) {
 		const auto& animations = model->modelData.animations;
@@ -260,7 +260,7 @@ void AnimationComponent::Update(float deltatime, WorldTransform worldTransform)
 	}
 }
 
-bool AnimationComponent::IsAnimationFinished()
+bool Engine::AnimationComponent::IsAnimationFinished()
 {
 	if (!model) return false;
 

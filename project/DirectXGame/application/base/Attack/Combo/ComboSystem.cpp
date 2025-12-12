@@ -1,7 +1,7 @@
 #include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 
-void ComboSystem::Initialize(BaseCharacter* character, GlobalVariables* globalVariables) {
+void ComboSystem::Initialize(BaseCharacter* character, Engine::GlobalVariables* globalVariables) {
 	this->globalVariables = globalVariables;
 	
 	comboStateMachine_ = std::make_unique<ComboStateMachine>(character);

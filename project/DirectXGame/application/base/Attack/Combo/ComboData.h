@@ -5,11 +5,14 @@
 #include "ComboGlobalData.h"
 
 // 前方宣言
-class AnimationComponent;	// アニメーション
-class MovementComponent;	// 移動関係
+namespace Engine {
+	class AnimationComponent;	// アニメーション
+	class RigidBodyComponent;	// リジットボディー
+}
+
 class CameraManager;		// カメラ
+class MovementComponent;	// 移動関係
 class BaseCharacter;		// キャラクター
-class RigidBodyComponent;	// リジットボディー
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
 
@@ -35,23 +38,23 @@ public:
 	ComboButton(GamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
 
 	// 押したら
-	bool IsPressed(const Input& input) const {
+	bool IsPressed(const Engine::Input& input) const {
 		return input.IsGamePadPressed(button_);
 	}
 
 	// 押した瞬間
-	bool IsTriggered(const Input& input) const {
+	bool IsTriggered(const Engine::Input& input) const {
 		return input.IsGamePadTriggered(button_);
 	}
 
 	// 離した瞬間
-	bool IsReleased(const Input& input) const {
+	bool IsReleased(const Engine::Input& input) const {
 		return input.IsGamePadReleased(button_);
 	}
 
 
 	// 押して反応する条件
-	bool IsInput(const Input& input) const {
+	bool IsInput(const Engine::Input& input) const {
 
 		switch (type_)
 		{
@@ -104,7 +107,7 @@ public:
 	/// <summary>
 	/// コンボ成立チェック
 	/// </summary>
-	bool Update(const Input& input, float deltaTime);
+	bool Update(const Engine::Input& input, float deltaTime);
 
 
 
@@ -135,6 +138,13 @@ public:
 		float inputWindowStart_ = 0.1f;			// 入力受付スタート
 		float inputWindowEnd_ = 0.5f;			// 入力受付エンド
 
+		float cancelStart_ = 0.1f;				// キャンセル開始時間
+		float cancelEnd_ = 0.5f;				// キャンセル終了時間
+
+
+		bool isCancel_ = false;					// キャンセル可能かどうか
+
+
 		bool isCompulsionNextCombo_ = false;	// 強制的に次のコンボに移行するか 
 		ComboSequence comboSequence_;			// コンボボタン条件
 	};
@@ -152,14 +162,14 @@ public:
 	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(const Input& input,float timer ,float dt);
+	void Update(const Engine::Input& input,float timer ,float dt);
 
 	// 終了
 	void Exit();
 
 private:
 	// 終了条件設定
-	void EndComboUpdate(const Input& input,float timer, float dt);
+	void EndComboUpdate(const Engine::Input& input,float timer, float dt);
 public: //設定
 	// コンボ条件発動時間設定
 	void ConditionStartEnd(float start, float end) {
@@ -182,6 +192,8 @@ public: // 取得
 	};
 	// 次のコンボに移行するか
 	bool IsNextCombo() const { return isNextCombo_; };
+	// コンボキャンセルするか
+	bool IsComboCansel() const { return isCansel_; }
 public:
 	// データ構造体取得
 	EndData& GetData() { return data_; }
@@ -189,6 +201,8 @@ public:
 	InputData& GetInput() { return inputData_; }
 private:
 	bool isNextCombo_ = false;			// 次のコンボに移行フラグ
+	bool isCansel_ = false;				// キャンセルするかのフラグ
+
 	float endTime_ = 0.0f;				// コンボ終了時間
 	float nextTime_ = 0.0f;				// 次のコンボ移行時間
 	EndData data_{ 0.5f ,0.45f ,ComboButton(GamePadButton::GAMEPAD_B,ComboButtonInputType::kPressed)};// コンボ終了データ
@@ -229,7 +243,7 @@ public:
 	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(const Input& input, float timer, float dt);
+	void Update(const Engine::Input& input, float timer, float dt);
 
 	// 終了
 	void Exit(BaseCharacter* owner);
@@ -246,22 +260,27 @@ public: // 取得 or 設定
 	};
 
 	// アニメーション設定
-	void SetAnimation(AnimationComponent* anima) { animationComponent = anima; };
+	void SetAnimation(Engine::AnimationComponent* anima) { animationComponent = anima; };
 
 	// 移動設定
 	void SetMove(MovementComponent* move) { moveComponent = move; };
 
 	// ワールドトランスフォーム設定
-	void SetWorld(WorldTransform* world) { worldTransform = world; };
+	void SetWorld(Engine::WorldTransform* world) { worldTransform = world; };
 
 	// リジットボディー設定
-	void SetRigid(RigidBodyComponent* rigid) { rigidBodyComponent = rigid; };
+	void SetRigid(Engine::RigidBodyComponent* rigid) { rigidBodyComponent = rigid; };
 
 	// データ構造体取得
 	Data& GetData() { return data_; }
 
 	// 反応ボタン設定
 	void SetGamePadButton(GamePadButton pad) { button_.SetGamePadButton(pad); };
+
+	// 方向取得
+	Vector3 GetDirection() const { return direction_; }
+	// 方向指定
+	void SetDirection(const Vector3& dire) { direction_ = dire; }
 
 private:
 	bool isMove_ = true;					// 移動出来るか
@@ -271,10 +290,10 @@ private:
 private:
 	Vector3 direction_ ={};
 private: // 貰いもの 
-	AnimationComponent* animationComponent = nullptr;	// アニメーション
+	Engine::AnimationComponent* animationComponent = nullptr;	// アニメーション
 	MovementComponent* moveComponent = nullptr;			// 移動
-	WorldTransform* worldTransform = nullptr;			// ワールドトランスフォーム
-	RigidBodyComponent* rigidBodyComponent = nullptr;	// リジットボディー
+	Engine::WorldTransform* worldTransform = nullptr;			// ワールドトランスフォーム
+	Engine::RigidBodyComponent* rigidBodyComponent = nullptr;	// リジットボディー
 };
 
 /// <summary>
@@ -316,7 +335,7 @@ public:
 	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(const Input& input, float timer,float dt);
+	void Update(const Engine::Input& input, float timer,float dt);
 
 	// 終了
 	void Exit();
@@ -333,15 +352,16 @@ public:
 	// 使うヒットボックス名クリーン
 	void ClearUseHitBox() { useHitBox_.clear(); }
 	// 親子設定
-	void SetPerent(WorldTransform* perent) { perent_ = perent;};
-
+	void SetPerent(Engine::WorldTransform* perent) { perent_ = perent;};
+	//
+	void SetDirection(Vector3 direction) { direction_ = direction; };
 private:
 	// ヒットボックスシステム
 	HitBoxSystem* hitBoxSystem_ = nullptr;
 	// ジャンプシステム
 	JumpSystem* jumpSystem_ = nullptr;
 	// 親子
-	WorldTransform* perent_ = nullptr;
+	Engine::WorldTransform* perent_ = nullptr;
 private:
 	ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed); // コンボボタン
 	// ヒットボックスデータ
@@ -355,7 +375,8 @@ private:
 private:
 	// ヒットボックス出現
 	bool isPopHitBox_ = false;
-	
+	//
+	Vector3 direction_ = {};
 };
 
 /// <summary>
@@ -438,7 +459,7 @@ public:
 	void Enter(BaseCharacter* owner);
 
 	// 更新
-	void Update(const Input& input, float dt);
+	void Update(const Engine::Input& input, float dt);
 
 	// 終了
 	void Exit(BaseCharacter* owner);

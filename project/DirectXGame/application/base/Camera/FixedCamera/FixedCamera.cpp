@@ -2,12 +2,12 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-void FixedCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position)
+void FixedCamera::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
 {
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 
 	// カメラ初期化
-	uniqueCamera_ = std::make_unique<Camera>();
+	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
 	uniqueCamera_->farClip_ = provisionalData_.farClip_;
 
@@ -17,8 +17,8 @@ void FixedCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  Gl
 
 
 	// ポストエフェクト追加
-	uniqueCamera_->AddEffectBlock("out", PostEffectBlockType::kOitline, true);
-	uniqueCamera_->AddEffectBlock("copy", PostEffectBlockType::kCopy, true);
+	uniqueCamera_->AddEffectBlock("out", Engine::PostEffectBlockType::kOitline, true);
+	uniqueCamera_->AddEffectBlock("copy", Engine::PostEffectBlockType::kCopy, true);
 
 }
 

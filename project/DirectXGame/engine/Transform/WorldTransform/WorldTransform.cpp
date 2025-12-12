@@ -1,6 +1,6 @@
 #include "WorldTransform.h"
 
-void WorldTransform::Initialize()
+void Engine::WorldTransform::Initialize()
 {
 	// SRT
 	scale_ = { 1,1,1 };
@@ -14,7 +14,7 @@ void WorldTransform::Initialize()
 	worldPreMat_ = MakeIdentity4x4();
 }
 
-void WorldTransform::Update()
+void Engine::WorldTransform::Update()
 {
 	// 一個前の行列
 	worldPreMat_ = worldMat_;

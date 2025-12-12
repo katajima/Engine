@@ -16,56 +16,57 @@
 #include <DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.h>
 
 // 前方宣言
-class LightManager;
-class DirectXCommon;
-class LineCommon;
+namespace Engine {
+	class LightManager;
+	class DirectXCommon;
+	class LineCommon;
 
-/// <summary>
-/// エフェクトマネージャークラス
-/// </summary>
-class EffectManager
-{
-public:
-	EffectManager() = default;
-	~EffectManager() = default;
+	/// <summary>
+	/// エフェクトマネージャークラス
+	/// </summary>
+	class EffectManager
+	{
+	public:
+		EffectManager() = default;
+		~EffectManager() = default;
 
-	// 初期化
-	void Initialize(DirectXCommon* directXCommon, LightManager* lightManager, LineCommon* lineCommon);
+		// 初期化
+		void Initialize(DirectXCommon* directXCommon, LightManager* lightManager, LineCommon* lineCommon);
 
 
-public: // ゲッター
+	public: // ゲッター
 
-	// DirectXCommon取得
-	DirectXCommon* GetDxCommon() { return directXCommon_; }
-	// トレイルエフェクト用取得
-	TrailEffectCommon* GetTrailEffectCommon() { return trailEffectCommon_.get(); }
-	// パーティクルマネージャ取得
-	ParticleManager* GetParticleManager() { return particleManager_.get(); }
-	// パーティクルマネージャ取得
-	GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_.get(); }
-	// パーティクル2dマネージャー取得
-	ParticleManager2d* GetParticleManager2d() { return particleManager2d_.get(); }
+		// DirectXCommon取得
+		DirectXCommon* GetDxCommon() { return directXCommon_; }
+		// トレイルエフェクト用取得
+		TrailEffectCommon* GetTrailEffectCommon() { return trailEffectCommon_.get(); }
+		// パーティクルマネージャ取得
+		ParticleManager* GetParticleManager() { return particleManager_.get(); }
+		// パーティクルマネージャ取得
+		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_.get(); }
+		// パーティクル2dマネージャー取得
+		ParticleManager2d* GetParticleManager2d() { return particleManager2d_.get(); }
 
-	// ライン共通クラス取得
-	LineCommon* GetLineCommon() { return lineCommon_; }
+		// ライン共通クラス取得
+		LineCommon* GetLineCommon() { return lineCommon_; }
 
-private:
-	// トレイルエフェクト
-	std::unique_ptr<TrailEffectCommon> trailEffectCommon_;
+	private:
+		// トレイルエフェクト
+		std::unique_ptr<TrailEffectCommon> trailEffectCommon_;
 
-	// パーティクルマネージャー
-	std::unique_ptr<ParticleManager> particleManager_;
+		// パーティクルマネージャー
+		std::unique_ptr<ParticleManager> particleManager_;
 
-	// GPUパーティクルマネージャー
-	std::unique_ptr<GpuParticleManager> gpuParticleManager_;
+		// GPUパーティクルマネージャー
+		std::unique_ptr<GpuParticleManager> gpuParticleManager_;
 
-	std::unique_ptr<ParticleManager2d> particleManager2d_;
-private:
-	DirectXCommon* directXCommon_;
-	LightManager* lightManager_;
-	LineCommon* lineCommon_;
-};
-
+		std::unique_ptr<ParticleManager2d> particleManager2d_;
+	private:
+		DirectXCommon* directXCommon_;
+		LightManager* lightManager_;
+		LineCommon* lineCommon_;
+	};
+}
 
 
 

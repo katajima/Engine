@@ -24,7 +24,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
 
 	///< summary>
 	/// 更新
@@ -37,14 +37,14 @@ public:
 	/// カメラ取得
 	/// </summary>
 	/// <returns></returns>
-	Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
+	Engine::Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
 
 
 	/// <summary>
 	/// ロックオン対象を設定
 	/// </summary>
 	/// <param name="object"></param>
-	void LockOn(Object3d* object) { lockOnObject = object; };
+	void LockOn(Engine::Object3d* object) { lockOnObject = object; };
 
 	/// <summary>
 	/// カメラ管理を設定
@@ -68,18 +68,18 @@ public:
 	bool useCamera = false;
 
 protected:
-	std::unique_ptr<Camera> uniqueCamera_;	// 固有カメラ
+	std::unique_ptr<Engine::Camera> uniqueCamera_;	// 固有カメラ
 	
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	std::string name_;
 
 	CameraSRTSpeed srtSpeed_;				// SRTスピード
-	Object3d* lockOnObject = nullptr;		// ロックオン対象
+	Engine::Object3d* lockOnObject = nullptr;		// ロックオン対象
 	CameraManager* cameraManeger = nullptr;	// カメラ管理
 protected:
-	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Input* input_ = nullptr;						// 入力(使わないならnullptr)
+	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Input* input_ = nullptr;						// 入力(使わないならnullptr)
 
 };
 

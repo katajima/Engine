@@ -6,7 +6,7 @@
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
 
-void DXGIDevice::Initialize()
+void Engine::DXGIDevice::Initialize()
 {
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
@@ -95,7 +95,7 @@ void DXGIDevice::Initialize()
 #endif // _DEBUG
 }
 
-Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DXGIDevice::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> Engine::DXGIDevice::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
 {
 	// deviceがnullptrでないことを確認
 	if (!device_)
@@ -130,7 +130,7 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DXGIDevice::CreateDescriptorHeap(D3
 	return descriptorHeap;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> DXGIDevice::CreateBufferResource(size_t sizeInBytes)
+Microsoft::WRL::ComPtr<ID3D12Resource> Engine::DXGIDevice::CreateBufferResource(size_t sizeInBytes)
 {
 	////------VertexResourceを生成する------////
 	//頂点リソース用のヒープの設定
@@ -165,7 +165,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DXGIDevice::CreateBufferResource(size_t s
 	return resource;
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> DXGIDevice::CreateBufferResourceUAV(size_t sizeInBytes)
+Microsoft::WRL::ComPtr<ID3D12Resource> Engine::DXGIDevice::CreateBufferResourceUAV(size_t sizeInBytes)
 {
 	// UAV書き込み用：GPUアクセスに適したDefaultヒープ
 	D3D12_HEAP_PROPERTIES defaultHeapProperties{};

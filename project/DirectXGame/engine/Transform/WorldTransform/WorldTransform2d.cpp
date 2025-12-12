@@ -1,6 +1,6 @@
 #include "WorldTransform2d.h"
 
-void WorldTransform2d::Initialize()
+void Engine::WorldTransform2d::Initialize()
 {
 	// SRT
 	scale_ = { 1,1};
@@ -15,7 +15,7 @@ void WorldTransform2d::Initialize()
 }
 
 
-void WorldTransform2d::Update() {
+void Engine::WorldTransform2d::Update() {
 	// 前の行列設定
 	worldPreMat_ = worldMat_;
 

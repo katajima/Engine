@@ -3,13 +3,13 @@
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 
-bool HitBoxFunction::Begin(Collider* self, Collider* other){
-	other_ = static_cast<ColliderComponent*>(other->owner);
+bool HitBoxFunction::Begin(Engine::Collider* self, Engine::Collider* other){
+	other_ = static_cast<Engine::ColliderComponent*>(other->owner);
 	otherColl_ = other;
 	if (!other_) return false;
 
 	const uint32_t otherId = other_->GetUniqueId();	// ID取得
-	const float nowTime = MyGame::NowTime();		// 現在時間
+	const float nowTime = Engine::MyGame::NowTime();		// 現在時間
 	if (GetContactRecord().CheckHistory(otherId)) {
 		return false; // クールタイム中のため無視
 	}

@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void ModelManager::Initialize(DirectXCommon* dxCommon)
+void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;	// DX共通クラス
 
@@ -18,7 +18,7 @@ void ModelManager::Initialize(DirectXCommon* dxCommon)
 	modelCommon_->Initialize(command_, DXGIDevice_, srvManager_);
 }
 
-void ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
+void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
 {
 
 	std::string file = filePath;
@@ -39,7 +39,7 @@ void ModelManager::LoadModel(const std::string& filePath, const std::string& dir
 	models.insert(std::make_pair(filePath, std::move(model)));
 }
 
-void ModelManager::LoadModelAsync(const std::string& filePath, const std::string& dire)
+void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std::string& dire)
 {
 	// すでにロード済みかロックを使って確認
 	{
@@ -67,7 +67,7 @@ void ModelManager::LoadModelAsync(const std::string& filePath, const std::string
 		}));
 }
 
-void ModelManager::WaitAllLoadFinished()
+void Engine::ModelManager::WaitAllLoadFinished()
 {
 	for (auto& fut : loadingFutures_) {
 		fut.get();  // 完了待ち
@@ -81,7 +81,7 @@ void ModelManager::WaitAllLoadFinished()
 	command->ResetCommand();           // 次回描画準備
 }
 
-Model* ModelManager::FindModel(const std::string& filePath)
+Engine::Model* Engine::ModelManager::FindModel(const std::string& filePath)
 {
 	// 読み込み済みモデルを検索
 	if (models.contains(filePath)) {

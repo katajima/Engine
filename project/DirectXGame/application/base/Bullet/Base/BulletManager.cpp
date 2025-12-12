@@ -13,7 +13,7 @@ BulletManager::~BulletManager()
 	bullets_.clear();
 }
 
-void BulletManager::Initialize(Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera)
+void BulletManager::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
 {
 
 	// それぞれ

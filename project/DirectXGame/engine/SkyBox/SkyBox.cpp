@@ -1,7 +1,7 @@
 #include "SkyBox.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
-void SkyBox::Initialize(Entity3DManager* entity3DManager, std::string txtueName)
+void Engine::SkyBox::Initialize(Entity3DManager* entity3DManager, std::string txtueName)
 {
 	entity3DManager_ = entity3DManager;
 
@@ -62,12 +62,12 @@ void SkyBox::Initialize(Entity3DManager* entity3DManager, std::string txtueName)
 	mesh_->Initialize(entity3DManager_->GetSkyBoxCommon()->GetDxCommon());
 }
 
-void SkyBox::Update()
+void Engine::SkyBox::Update()
 {
 
 }
 
-void SkyBox::Draw()
+void Engine::SkyBox::Draw()
 {
 	mesh_->GetCommandList();
 

@@ -14,86 +14,86 @@
 
 #include"Lights.h"
 
+namespace Engine {
+	/// <summary>
+	/// ライトマネージャークラス
+	/// </summary>
+	class LightManager
+	{
+	public:
+		// ライト使うかの構造体
+		struct IsLight {
+			bool dire;
+			bool pount;
+			bool spot;
+		};
 
-/// <summary>
-/// ライトマネージャークラス
-/// </summary>
-class LightManager
-{
-public:
-	// ライト使うかの構造体
-	struct IsLight {
-		bool dire;
-		bool pount;
-		bool spot;
-	};
-
-	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
-	// ライン描画
-	void DrawLight(IsLight is = {true,true,true }, int dire = 3, int point = 5, int spot = 6);
-	// 更新
-	void Update();
-	// ライト追加
-	void AddLight(std::shared_ptr<Lights> light) {
-		light->SetNumber(int(m_lights.size()));
-		m_lights.push_back(light);
-		//count++;
-	}
-	// ライト数取得
-	int GetLightSize() const {return static_cast<int>(m_lights.size());}
-
-	// ライト取得
-	const std::vector<std::shared_ptr<Lights>>& GetLights() const {
-		return m_lights;
-	}
-
-	// ライト開放
-	void ClearLights() {
-		for (auto& m_light : m_lights) {
-			m_light.reset();
+		// 初期化
+		void Initialize(DirectXCommon* dxCommon);
+		// ライン描画
+		void DrawLight(IsLight is = { true,true,true }, int dire = 3, int point = 5, int spot = 6);
+		// 更新
+		void Update();
+		// ライト追加
+		void AddLight(std::shared_ptr<Lights> light) {
+			light->SetNumber(int(m_lights.size()));
+			m_lights.push_back(light);
+			//count++;
 		}
-		m_lights.clear();
-	}
+		// ライト数取得
+		int GetLightSize() const { return static_cast<int>(m_lights.size()); }
 
-	// ライト開放(インデクスで)
-	void ClearLight(int index) {
-		m_lights[index].reset();
-		m_lights.resize(m_lights.size());
-	}
+		// ライト取得
+		const std::vector<std::shared_ptr<Lights>>& GetLights() const {
+			return m_lights;
+		}
 
-private:
-	// グローバルバリアブル適応
-	void ApplyGlobalVariables();
+		// ライト開放
+		void ClearLights() {
+			for (auto& m_light : m_lights) {
+				m_light.reset();
+			}
+			m_lights.clear();
+		}
 
-	
-private:
-	std::vector<std::shared_ptr<Lights>> m_lights;
+		// ライト開放(インデクスで)
+		void ClearLight(int index) {
+			m_lights[index].reset();
+			m_lights.resize(m_lights.size());
+		}
 
-	DirectXCommon* dxCommon_ = nullptr;
-
-	const uint32_t kNumMaxInstance = 10;
-
-
-	Microsoft::WRL::ComPtr < ID3D12Resource> directionalLightResource;
-	DirectionalLightData* directionalLightData = nullptr;
-
-	
-
-	Microsoft::WRL::ComPtr < ID3D12Resource> pointLightResource;
-	PointLightData* pointLightData;
-	const int pointMax = 3;
+	private:
+		// グローバルバリアブル適応
+		void ApplyGlobalVariables();
 
 
-	Microsoft::WRL::ComPtr < ID3D12Resource> spotLightResource;
-	SpotLightData* spotLightData = nullptr;
-	const int spotMax = 3;
+	private:
+		std::vector<std::shared_ptr<Lights>> m_lights;
+
+		DirectXCommon* dxCommon_ = nullptr;
+
+		const uint32_t kNumMaxInstance = 10;
 
 
-	bool isLine = false;
+		Microsoft::WRL::ComPtr < ID3D12Resource> directionalLightResource;
+		DirectionalLightData* directionalLightData = nullptr;
 
 
-	int count_ = 0;
-};
 
+		Microsoft::WRL::ComPtr < ID3D12Resource> pointLightResource;
+		PointLightData* pointLightData;
+		const int pointMax = 3;
+
+
+		Microsoft::WRL::ComPtr < ID3D12Resource> spotLightResource;
+		SpotLightData* spotLightData = nullptr;
+		const int spotMax = 3;
+
+
+		bool isLine = false;
+
+
+		int count_ = 0;
+	};
+}
 
