@@ -135,6 +135,10 @@ namespace Engine {
 		// RTトリガーの値を取得
 		float GetGamePadRightTrigger() const;
 
+		bool IsLeftTriggerPressed() const;
+
+		bool IsRightTriggerPressed() const;
+
 		// コントローラ操作
 		bool IsControllerConnected() {
 			XINPUT_STATE state; ZeroMemory(&state, sizeof(XINPUT_STATE));
@@ -169,5 +173,11 @@ namespace Engine {
 		bool enambleVibrate_ = false;
 
 
+
+		float leftTrigger_ = 0.0f;
+		float rightTrigger_ = 0.0f;
+
+		float prevLeftTrigger_ = 0.0f;
+		float prevRightTrigger_ = 0.0f;
 	};
 }

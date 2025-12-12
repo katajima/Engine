@@ -373,6 +373,8 @@ void CrowdManager::Update(float dt) {
 			// それ以外はプレイヤーを追わせる
 			finalTarget = playerPos;
 		}
+		// それ以外はプレイヤーを追わせる
+		finalTarget = playerPos;
 
 		a.Update(dt, finalTarget, grp.memberIndices, &agents);
 	}

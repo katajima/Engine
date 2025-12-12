@@ -15,8 +15,9 @@ void PlayerStateIdle::Update() {
 	character_->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 
 
-
-	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
+	
+	
+	bool isTriggerLT = input->IsLeftTriggerPressed();
 	if (isTriggerLT) {
 		character_->GetMoveComponent()->GetDashSystem()->StartDash();
 	}
@@ -94,7 +95,7 @@ void PlayerStateMove::Update()
 	weapon->GetObject3D()->SetIsDraw(true); // 武器描画
 
 
-	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
+	bool isTriggerLT = input->IsLeftTriggerPressed();
 	if (isTriggerLT) {
 		character_->GetMoveComponent()->GetDashSystem()->StartDash();
 	}
@@ -139,7 +140,8 @@ void PlayerStateMove::Update()
 
 void PlayerStateMove::Exit()
 {
-
+	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
 }
 
 void PlayerStateMove::Enter()
@@ -173,7 +175,7 @@ void PlayerStateJump::Update() {
 	bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
 	bool isPress = input->IsGamePadPressed(GamePadButton::GAMEPAD_A);
 
-	bool isTriggerLT = input->IsGamePadTriggered(GamePadButton::GAMEPAD_LT);
+	bool isTriggerLT = input->IsLeftTriggerPressed();
 	if (isTriggerLT) {
 		character_->GetMoveComponent()->GetDashSystem()->StartDash();
 	}

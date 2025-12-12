@@ -68,11 +68,20 @@ private:
 	ComboGlovalData data2_;
 	ComboGlovalData data3_;
 	ComboGlovalData data4_;
+	ComboGlovalData data5_;	// コンボデータ(追加)横左
+	ComboGlovalData data6_; // コンボデータ(追加)横回転左
+	ComboGlovalData data7_; // コンボデータ(追加)横右
+	ComboGlovalData data8_; // コンボデータ(追加)突き
 
 	ComboData comboData1{};
 	ComboData comboData2{};
 	ComboData comboData3{};
 	ComboData comboData4{};
+	ComboData comboData5{};	// コンボ(追加)
+	ComboData comboData6{};	// コンボ(追加)
+	ComboData comboData7{};	// コンボ(追加)
+	ComboData comboData8{};	// コンボ(追加)
+
 
 
 	void ReloadComboData();

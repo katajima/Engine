@@ -66,7 +66,7 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	Engine::UIPair* dushPair = GetUIPair("dush");
 	dushPair->SetOffset(dashTextData.offset_);
 	dushPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_stick_l_press.png");
+	dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lt.png");
 	dushPair->GetFirstSprite()->SetAnchorPoint(dashTextData.anchorPoint_);			// アンカーポイント設定
 	dushPair->GetFirstSprite()->SetSize(dashTextData.size_);				// サイズ設定
 	dushPair->GetFirstSprite()->SetColor(dashTextData.color_);	// 色設定

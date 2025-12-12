@@ -49,6 +49,14 @@ void Engine::Input::Update()
 	preMouse_ = mouse_;
 
 
+	// トリガーの前フレーム値を保存
+	prevLeftTrigger_ = leftTrigger_;
+	prevRightTrigger_ = rightTrigger_;
+
+	// 新しい値を更新
+	leftTrigger_ = xInputState_.Gamepad.bLeftTrigger / 255.0f;
+	rightTrigger_ = xInputState_.Gamepad.bRightTrigger / 255.0f;
+
 	preXInputState_ = xInputState_;
 	XInputGetState(0, &xInputState_);
 
@@ -231,4 +239,19 @@ float Engine::Input::GetGamePadLeftTrigger() const
 float Engine::Input::GetGamePadRightTrigger() const
 {
 	return xInputState_.Gamepad.bRightTrigger / 255.0f;
+}
+
+bool Engine::Input::IsLeftTriggerPressed() const
+{
+	// 閾値（アナログの押し込み判断）
+	const float threshold = 0.2f;
+
+	return (leftTrigger_ > threshold && prevLeftTrigger_ <= threshold);
+}
+
+bool Engine::Input::IsRightTriggerPressed() const
+{
+	const float threshold = 0.2f;
+
+	return (rightTrigger_ > threshold && prevRightTrigger_ <= threshold);
 }

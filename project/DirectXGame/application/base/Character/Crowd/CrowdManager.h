@@ -83,7 +83,7 @@ public:
 	float attackDelayTimer_ = 0.0f;			// 攻撃前の準備タイマー
 	float engageDistance_ = 200.0f;			// 攻撃を検討し始める距離
 
-	float preparationAttack_ = 12.0f;		// 攻撃準備に入る距離
+	float preparationAttack_ = 15.0f;		// 攻撃準備に入る距離
 	float attackRange_ = 3.5f;				// 実際に攻撃できる距離
 
 	// 表示用：インスタンスバッファに書き込むデータ
