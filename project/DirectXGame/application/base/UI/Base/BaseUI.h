@@ -3,9 +3,10 @@
 
 
 // 前方宣言
-class Entity2DManager;
-class GlobalVariables;
-
+namespace Engine {
+	class Entity2DManager;
+	class GlobalVariables;
+}
 
 /// <summary>
 /// UI基底クラス
@@ -14,7 +15,7 @@ class BaseUI
 {
 public:
 	//初期化
-	virtual void Initialize(Input* input, Entity2DManager* entity2DManager, GlobalVariables* globalVariables) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) = 0;
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
@@ -31,7 +32,7 @@ public:
 
 protected:
 	// スプライト初期化
-	void InitSprite(Sprite* sprite,std::string texFile,Vector2 pos,Vector2 size);
+	void InitSprite(Engine::Sprite* sprite,std::string texFile,Vector2 pos,Vector2 size);
 	// チェックボックス初期化
 	void InitUICheckBox(std::string name,Vector2 pos);
 	// スライダー初期化
@@ -50,30 +51,30 @@ protected:
 	void DrawUIElement();
 	
 	// チェックボックス取得
-	UICheckBox* GetUICheckBox(std::string name);
+	Engine::UICheckBox* GetUICheckBox(std::string name);
 	// スライダー取得
-	UISlider* GetUISlider(std::string name);
+	Engine::UISlider* GetUISlider(std::string name);
 	// メータ取得
-	UIMeter* GetUIMeter(std::string name);
+	Engine::UIMeter* GetUIMeter(std::string name);
 	// ペア取得
-	UIPair* GetUIPair(std::string name);
+	Engine::UIPair* GetUIPair(std::string name);
 	// カウンター取得
-	UICount* GetUICount(std::string name);
+	Engine::UICount* GetUICount(std::string name);
 
 protected:
-	Entity2DManager* entity2DManager_;
-	GlobalVariables* globalVariables_;
-	Input* input_;
+	Engine::Entity2DManager* entity2DManager_;
+	Engine::GlobalVariables* globalVariables_;
+	Engine::Input* input_;
 
 
-	std::unique_ptr <UIBaseBoard> board_;
+	std::unique_ptr <Engine::UIBaseBoard> board_;
 
 
-	std::map<std::string,std::unique_ptr<UICheckBox>> uiCheckBox_;
-	std::map<std::string,std::unique_ptr<UISlider>> uiSlider_;
-	std::map<std::string,std::unique_ptr<UIMeter>> uiMeter_;
-	std::map<std::string,std::unique_ptr<UIPair>> uiPair_;
-	std::map<std::string,std::unique_ptr<UICount>> uiCount_;
+	std::map<std::string,std::unique_ptr<Engine::UICheckBox>> uiCheckBox_;
+	std::map<std::string,std::unique_ptr<Engine::UISlider>> uiSlider_;
+	std::map<std::string,std::unique_ptr<Engine::UIMeter>> uiMeter_;
+	std::map<std::string,std::unique_ptr<Engine::UIPair>> uiPair_;
+	std::map<std::string,std::unique_ptr<Engine::UICount>> uiCount_;
 
 	
 
@@ -83,7 +84,7 @@ protected:
 
 
 
-	std::vector<std::unique_ptr<Sprite>> sprite_;
+	std::vector<std::unique_ptr<Engine::Sprite>> sprite_;
 private:
 };
 

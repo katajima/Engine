@@ -42,7 +42,7 @@ public:
     // 進行方向を計算する関数
     Vector2 GetDirectionToNextNode();
     // 描画
-    void DrawPath(LineCommon* line,float yPos) const;
+    void DrawPath(Engine::LineCommon* line,float yPos) const;
 
 private:
     const MapChip* m_map;

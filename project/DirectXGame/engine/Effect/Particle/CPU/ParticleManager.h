@@ -24,119 +24,122 @@
 
 #include "DirectXGame/engine/Utility/MapUtility.h"
 
-// 前方宣言
-class LightManager;
-class Material;
-class BasePrimitive;
-class DirectXCommon;
-class SrvManager;
-class EffectManager;
-class LineCommon;
 
-/// <summary>
-/// パーティクル3dマネージャー
-/// </summary>
-class ParticleManager
-{
-public:
-	ParticleManager() = default;
-	~ParticleManager() = default;
-	ParticleManager(ParticleManager&) = delete;
-	ParticleManager& operator=(ParticleManager&) = delete;
+namespace Engine {
+	// 前方宣言
+	class LightManager;
+	class Material;
+	class BasePrimitive;
+	class DirectXCommon;
+	class SrvManager;
+	class EffectManager;
+	class LineCommon;
 
-	// 初期化
-	void Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager);
-	// 更新
-	void Update();
-	// 描画
-	void Draw();
-
-	// 描画準備
-	void DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType, bool uvClamp);
-
-	// パーティクルグループ取得
-	UnorderedMapContainer<std::string, ParticleGroup>& GetParticleGroups()
+	/// <summary>
+	/// パーティクル3dマネージャー
+	/// </summary>
+	class ParticleManager
 	{
-		return particleGroups;
-	}
-	// パーティクルグループ取得
-	ParticleGroup& GetParticleGroups(const std::string name)
-	{
-		return particleGroups[name];
-	}
-	// ライン共通クラス取得
-	LineCommon* GetLineCommon() { return lineCommon_; }
+	public:
+		ParticleManager() = default;
+		~ParticleManager() = default;
+		ParticleManager(ParticleManager&) = delete;
+		ParticleManager& operator=(ParticleManager&) = delete;
+
+		// 初期化
+		void Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager);
+		// 更新
+		void Update();
+		// 描画
+		void Draw();
+
+		// 描画準備
+		void DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType, bool uvClamp);
+
+		// パーティクルグループ取得
+		UnorderedMapContainer<std::string, ParticleGroup>& GetParticleGroups()
+		{
+			return particleGroups;
+		}
+		// パーティクルグループ取得
+		ParticleGroup& GetParticleGroups(const std::string name)
+		{
+			return particleGroups[name];
+		}
+		// ライン共通クラス取得
+		LineCommon* GetLineCommon() { return lineCommon_; }
 
 
-	// パーティクルグループ作り(モデル)
-	void CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model,
-		EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
+		// パーティクルグループ作り(モデル)
+		void CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model,
+			EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
-	// パーティクルグループ作り(プリミティブ)
-	void CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive,
-		EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
+		// パーティクルグループ作り(プリミティブ)
+		void CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive,
+			EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
-	// カメラセット
-	void SetCamera(Camera* camera) { this->camera_ = camera; }
+		// カメラセット
+		void SetCamera(Camera* camera) { this->camera_ = camera; }
 
-	// フィールドエフェクト追加
-	void AddFieldEffect(Field::FieldEffect* field) {
-		fieldEffect_.push_back(field);
-	}
+		// フィールドエフェクト追加
+		void AddFieldEffect(Field::FieldEffect* field) {
+			fieldEffect_.push_back(field);
+		}
 
-	// ランダムエンジン取得
-	std::mt19937& GetRandomEngine() { return randomEngine_; }
+		// ランダムエンジン取得
+		std::mt19937& GetRandomEngine() { return randomEngine_; }
 
-	// パーティクルクリア(名前で検索)
-	void ClearParticle(std::string name);
+		// パーティクルクリア(名前で検索)
+		void ClearParticle(std::string name);
 
-private:
-	// ルートシグネチャの作成
-	void CreateRootSignature();
-	// グラフィックスパイプラインの作成
-	void CreateGraphicsPipeline();
+	private:
+		// ルートシグネチャの作成
+		void CreateRootSignature();
+		// グラフィックスパイプラインの作成
+		void CreateGraphicsPipeline();
 
-	// ブレンド設定(加算)
-	void BlendAdd();
-	// ブレンド設定(減算)
-	void BlendSubtract();
-	// ブレンド設定(乗算)
-	void BlendMuliply();
+		// ブレンド設定(加算)
+		void BlendAdd();
+		// ブレンド設定(減算)
+		void BlendSubtract();
+		// ブレンド設定(乗算)
+		void BlendMuliply();
 
-private: // もらいもの
-	LightManager* lightManager_ = nullptr;	// ライト
-	DirectXCommon* dxCommon_ = nullptr;		// DirectX
-	SrvManager* srvManager_ = nullptr;		// SRV
-	EffectManager* efectManager_ = nullptr;	// エフェクト
-	LineCommon* lineCommon_ = nullptr;		// ライン
-	Camera* camera_ = nullptr;				// カメラ
-private:
-	// PSO設定
-	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+	private: // もらいもの
+		LightManager* lightManager_ = nullptr;	// ライト
+		DirectXCommon* dxCommon_ = nullptr;		// DirectX
+		SrvManager* srvManager_ = nullptr;		// SRV
+		EffectManager* efectManager_ = nullptr;	// エフェクト
+		LineCommon* lineCommon_ = nullptr;		// ライン
+		Camera* camera_ = nullptr;				// カメラ
+	private:
+		// PSO設定
+		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-	// ランダムエンジン
-	std::mt19937 randomEngine_;
+		// ランダムエンジン
+		std::mt19937 randomEngine_;
 
-	UnorderedMapContainer<std::string, ParticleGroup> particleGroups;
+		UnorderedMapContainer<std::string, ParticleGroup> particleGroups;
 
-	// 最大パーティクル量
-	const uint32_t kNumMaxInstance = 1024 * 4;
+		// 最大パーティクル量
+		const uint32_t kNumMaxInstance = 1024 * 4;
 
-	// フィールド関係
-	std::vector<Field::FieldEffect*> fieldEffect_;
+		// フィールド関係
+		std::vector<Field::FieldEffect*> fieldEffect_;
 
-private: //PSO関係 
-	////ルートシグネチャデスク
-	D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
-	////ルートシグネチャ
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
-	Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature2;
+	private: //PSO関係 
+		////ルートシグネチャデスク
+		D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
+		////ルートシグネチャ
+		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
+		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature2;
 
-	//// グラフィックスパイプラインステート
-	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[12];
+		//// グラフィックスパイプラインステート
+		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState[12];
 
-	D3D12_BLEND_DESC blendDesc{};
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
+		D3D12_BLEND_DESC blendDesc{};
+		D3D12_RASTERIZER_DESC rasterizerDesc{};
 
-	DebugTimer debugTimer_;
-};
+		DebugTimer debugTimer_;
+	};
+}

@@ -1,7 +1,7 @@
 #include "Primitive2D.h"
 #include "SpriteCommon.h"
 
-void Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color)
+void Engine::Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color)
 {
 	type_ = type;					// タイプ
 	spriteCommon_ = spriteCommon;	// スプライト共通クラス
@@ -51,7 +51,7 @@ void Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const C
 
 }
 
-void Primitive2D::Update()
+void Engine::Primitive2D::Update()
 {
 	// SRT設定
 	transform.scale = { worldTransform.scale_.x,worldTransform.scale_.y,1.0f };
@@ -76,7 +76,7 @@ void Primitive2D::Update()
 	material->GPUData();
 }
 
-void Primitive2D::Draw()
+void Engine::Primitive2D::Draw()
 {
 	spriteCommon_->DrawCommonSetting(PSOType::UvInterpolation_MODE_SOLID_BACK);
 
@@ -94,7 +94,7 @@ void Primitive2D::Draw()
 
 #pragma region Create
 
-void Primitive2D::CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2)
+void Engine::Primitive2D::CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
@@ -111,7 +111,7 @@ void Primitive2D::CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2)
 	mesh->indices.push_back(1);
 }
 
-void Primitive2D::CreateCircle(float radius, int segments)
+void Engine::Primitive2D::CreateCircle(float radius, int segments)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
@@ -149,7 +149,7 @@ void Primitive2D::CreateCircle(float radius, int segments)
 	mesh->indices.push_back(1); // 最初の円周頂点とつなげる
 }
 
-void Primitive2D::CreateRing(float innerRadius, float outerRadius, int segments)
+void Engine::Primitive2D::CreateRing(float innerRadius, float outerRadius, int segments)
 {
 	if (innerRadius > outerRadius || segments < 3) {
 		throw std::invalid_argument("Invalid parameters: innerRadius must be smaller than outerRadius, and segments must be >= 3.");
@@ -200,7 +200,7 @@ void Primitive2D::CreateRing(float innerRadius, float outerRadius, int segments)
 
 }
 
-void Primitive2D::CreateStar(float innerRadius, float outerRadius, int segments)
+void Engine::Primitive2D::CreateStar(float innerRadius, float outerRadius, int segments)
 {
 	if (segments < 3) {
 		throw std::invalid_argument("Segments must be >= 3.");
@@ -242,7 +242,7 @@ void Primitive2D::CreateStar(float innerRadius, float outerRadius, int segments)
 	}
 }
 
-void Primitive2D::CreateCube(Vector2 size)
+void Engine::Primitive2D::CreateCube(Vector2 size)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
@@ -267,7 +267,7 @@ void Primitive2D::CreateCube(Vector2 size)
 
 
 // セット
-void Primitive2D::SetParametar(float innerRadius, float outerRadius, int segments)
+void Engine::Primitive2D::SetParametar(float innerRadius, float outerRadius, int segments)
 {
 	switch (type_)
 	{
@@ -286,7 +286,7 @@ void Primitive2D::SetParametar(float innerRadius, float outerRadius, int segment
 	}
 }
 
-void Primitive2D::SetParametar(float radius, int segments)
+void Engine::Primitive2D::SetParametar(float radius, int segments)
 {
 	switch (type_)
 	{
@@ -300,7 +300,7 @@ void Primitive2D::SetParametar(float radius, int segments)
 	}
 }
 
-void Primitive2D::SetParametar(Vector2 size)
+void Engine::Primitive2D::SetParametar(Vector2 size)
 {
 	switch (type_)
 	{
@@ -315,7 +315,7 @@ void Primitive2D::SetParametar(Vector2 size)
 
 }
 
-void Primitive2D::SetParametar(Vector2 p0, Vector2 p1, Vector2 p2)
+void Engine::Primitive2D::SetParametar(Vector2 p0, Vector2 p1, Vector2 p2)
 {
 	switch (type_)
 	{

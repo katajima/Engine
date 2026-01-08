@@ -15,74 +15,77 @@ using namespace Microsoft::WRL;
 #include"externals/DirectXTex/d3dx12.h"
 #include "DirectXGame/engine/Utility/TimerUtility.h"
 
-// 前方宣言
-class Command;
-class DXGIDevice;
-class SrvManager;
-// テクスチャマネージャー
-class TextureManager {
-public:
-	TextureManager() = default;
-	~TextureManager() = default;
-	TextureManager(TextureManager&) = delete;
-	TextureManager& operator=(TextureManager&) = delete;
 
-	// 初期化
-	void Initialize(Command* command,DXGIDevice* DXGIDevice, SrvManager* srvManager);
-	
+namespace Engine {
+	// 前方宣言
+	class Command;
+	class DXGIDevice;
+	class SrvManager;
+	// テクスチャマネージャー
+	class TextureManager {
+	public:
+		TextureManager() = default;
+		~TextureManager() = default;
+		TextureManager(TextureManager&) = delete;
+		TextureManager& operator=(TextureManager&) = delete;
 
-	//DirectTexを使ってTextureを読むためのLoadTextur関数
-	void LoadTexture(const std::string& filePath);
-	
-	// 指定したディレクトリ内の全テクスチャを読み込む
-	void LoadAllTexturesInDirectory(const std::string& directoryPath);
+		// 初期化
+		void Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager);
 
-	// テクスチャ番号取得
-	uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
-	// テクスチャ番号からGPUハンドルを取得
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePach);
+		//DirectTexを使ってTextureを読むためのLoadTextur関数
+		void LoadTexture(const std::string& filePath);
 
-	// メタデータを取得
-	const DirectX::TexMetadata& GetMataData(const std::string& filePach);
+		// 指定したディレクトリ内の全テクスチャを読み込む
+		void LoadAllTexturesInDirectory(const std::string& directoryPath);
 
-	// SRVマネージャー取得
-	SrvManager* GetSrvManager(){ return srvManager_; }
+		// テクスチャ番号取得
+		uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
-	// ルートパラメーター設定
-	static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter,D3D12_DESCRIPTOR_RANGE& descriptorRange);
+		// テクスチャ番号からGPUハンドルを取得
+		D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePach);
 
-	// テクスチャリソース生成
-	Microsoft::WRL::ComPtr <ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
+		// メタデータを取得
+		const DirectX::TexMetadata& GetMataData(const std::string& filePach);
 
-	//データを転送するUploadTextureData関数を作る
-	[[nodiscard]]
-	Microsoft::WRL::ComPtr < ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr < ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
+		// SRVマネージャー取得
+		SrvManager* GetSrvManager() { return srvManager_; }
 
-private:
+		// ルートパラメーター設定
+		static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange);
 
-	
-	//テクスチャ一枚分のデータ
-	struct TextureData {
-		DirectX::TexMetadata metadata;
-		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-		uint32_t srvIndex;
-		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU;
-		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU;
-		Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
+		// テクスチャリソース生成
+		Microsoft::WRL::ComPtr <ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
+
+		//データを転送するUploadTextureData関数を作る
+		[[nodiscard]]
+		Microsoft::WRL::ComPtr < ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr < ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
+
+	private:
+
+
+		//テクスチャ一枚分のデータ
+		struct TextureData {
+			DirectX::TexMetadata metadata;
+			Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+			uint32_t srvIndex;
+			D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU;
+			D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU;
+			Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
+		};
+
+
+
+		//テクスチャデータ
+		std::unordered_map<std::string, TextureData> textureDatas;
+
+		static uint32_t kSRVIndexTop;
+
+		DebugTimer debugTimerTex_;
+	private:
+		Command* command_;
+		DXGIDevice* DXGIDevice_;
+		SrvManager* srvManager_ = nullptr;
+
 	};
-
-	
-
-	//テクスチャデータ
-	std::unordered_map<std::string, TextureData> textureDatas;
-
-	static uint32_t kSRVIndexTop;
-	
-	DebugTimer debugTimerTex_;
-private:
-	Command* command_;
-	DXGIDevice* DXGIDevice_;
-	SrvManager* srvManager_ = nullptr;
-
-};
+}

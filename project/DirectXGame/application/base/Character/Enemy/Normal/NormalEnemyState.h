@@ -1,5 +1,4 @@
 #pragma once
-//#include "DirectXGame/application/base/BaseClass/Character/Enemy/BaseEnemyState.h"
 #include "DirectXGame/application/base/State/BaseMainState.h"
 #include "NormalEnemySubState.h"
 
@@ -46,24 +45,6 @@ private:
 };
 
 /// <summary>
-/// 必殺技
-/// </summary>
-class EnemyStateSpecial :public SpecialState
-{
-public:
-	EnemyStateSpecial(BaseCharacter* enemy)
-		: SpecialState(enemy) {}
-	
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-};
-
-/// <summary>
 /// 死亡状態
 /// </summary>
 class EnemyStateDie :public DieState
@@ -85,23 +66,3 @@ private:
 	float timer_ = 0.0f;
 };
 
-/// <summary>
-/// 気絶状態
-/// </summary>
-class EenmyStateFainting :public FaintingState {
-public:
-	EenmyStateFainting(BaseCharacter* enemy)
-		: FaintingState(enemy) {
-	}
-
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-private:
-	float faintingTimer_ = 3.0f;
-	float timer_ = 0.0f;
-};

@@ -1,0 +1,64 @@
+{
+    "MoveData_Enemy": {
+        "ジャンプ上昇時の重力": {
+            "type": "float",
+            "value": 15.0
+        },
+        "ジャンプ下降時の重力": {
+            "type": "float",
+            "value": 30.0
+        },
+        "ジャンプ力": {
+            "type": "float",
+            "value": 800.0
+        },
+        "スティック移動量変化": {
+            "type": "bool",
+            "value": true
+        },
+        "ダッシュ中の重力": {
+            "type": "bool",
+            "value": false
+        },
+        "ダッシュ初速度": {
+            "type": "float",
+            "value": 100.0
+        },
+        "ダッシュ加速度": {
+            "type": "float",
+            "value": 0.0
+        },
+        "ダッシュ時間": {
+            "type": "float",
+            "value": 0.15000000596046448
+        },
+        "ダッシュ減速度": {
+            "type": "float",
+            "value": 10.0
+        },
+        "回転速度": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "移動加速度": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "移動最大速度": {
+            "type": "float",
+            "value": 1.909999966621399
+        },
+        "移動最小速度": {
+            "type": "float",
+            "value": 0.0
+        },
+        "空中での移動量変化": {
+            "type": "bool",
+            "value": true
+        },
+        "空中移動量変化率": {
+            "type": "float",
+            "value": 0.8500000238418579
+        }
+    }
+}

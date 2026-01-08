@@ -15,91 +15,92 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/Offscreen/PostEffectData.h"
 
-// 前方宣言
-class PostEffectData;
-class DXGIDevice;
-class Command;
-class SrvManager;
-class RtvManager;
-class RenderingCommon;
-class Camera;
+namespace Engine {
+	// 前方宣言
+	class PostEffectData;
+	class DXGIDevice;
+	class Command;
+	class SrvManager;
+	class RtvManager;
+	class RenderingCommon;
+	class Camera;
 
-/// <summary>
-/// レンダーテクスチャクラス
-/// </summary>
-class RenderTexture
-{
-public:
-	RenderTexture() = default;
-	~RenderTexture();
-	// 初期化
-	void Initialize(DXGIDevice* DXGIDevice,Command* command,SrvManager* srvManager,RtvManager* rvtManager,RenderingCommon* renderingCommonm,const std::string name, PostEffectType type);
-	// 更新
-	void Update();
-	// 描画
-	void Draw();
-	// カメラ設定
-	void SetCamera(Camera* camera) {camera_ = camera;}
-	// 他のSrvインデクス設定
-	void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
-
-
-	// SRVインデクス取得
-	uint32_t GetSrvIndex() const { return srvIndex_; }
-	// クリアカラーを取得
-	Vector4 GetClearColor()const;
-	// RTVハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHandle();
-	// リソースを取得
-	ID3D12Resource* GetResource();
-
-	// SRVGPUハンドル取得
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
-	// SRVCPUハンドル取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
-	// ポストエフェクトデータ取得
-	PostEffectData* GetPostEffectData();
-
-private:
-	// レンダーテクスチャのリソースを作成
-	void CreateResource();
-	// 
-	// レンダーテクスチャのリソースを作成
-	void CreateResourcePixel();
-
-	// RTVを作成
-	void CreateRTV();
-	// SRVを作成
-	void CreateSRV();
-private:
-	HRESULT hr_ = S_FALSE;
-	// レンダーテクスチャ用リソース
-	ComPtr<ID3D12Resource> resource_ = nullptr;
-	// RTVインデックス
-	uint32_t rtvIndex_ = 0;
-	// SRVインデックス
-	uint32_t srvIndex_ = 0;
-	// クリアカラー(赤)
-	const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
-
-	std::string name_;
-
-	// もらってくるSRVインデックス
-	uint32_t otherSrvIndex_ = 0;
-
-private:
-	DXGIDevice* DXGIDevice_;
-	Command* command_;
-	SrvManager* srvManager_;
-	RtvManager* rtvManager_;
-	RenderingCommon* renderingCommon_;
-	Camera* camera_;
-
-	std::unique_ptr<PostEffectData> postEffectData_;
-
-public:
-	PostEffectType type_;
+	/// <summary>
+	/// レンダーテクスチャクラス
+	/// </summary>
+	class RenderTexture
+	{
+	public:
+		RenderTexture() = default;
+		~RenderTexture();
+		// 初期化
+		void Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommonm, const std::string name, PostEffectType type);
+		// 更新
+		void Update();
+		// 描画
+		void Draw();
+		// カメラ設定
+		void SetCamera(Camera* camera) { camera_ = camera; }
+		// 他のSrvインデクス設定
+		void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
 
 
-};
+		// SRVインデクス取得
+		uint32_t GetSrvIndex() const { return srvIndex_; }
+		// クリアカラーを取得
+		Vector4 GetClearColor()const;
+		// RTVハンドルを取得
+		D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHandle();
+		// リソースを取得
+		ID3D12Resource* GetResource();
 
+		// SRVGPUハンドル取得
+		D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUHandle();
+		// SRVCPUハンドル取得
+		D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUHandle();
+		// ポストエフェクトデータ取得
+		PostEffectData* GetPostEffectData();
+
+	private:
+		// レンダーテクスチャのリソースを作成
+		void CreateResource();
+		// 
+		// レンダーテクスチャのリソースを作成
+		void CreateResourcePixel();
+
+		// RTVを作成
+		void CreateRTV();
+		// SRVを作成
+		void CreateSRV();
+	private:
+		HRESULT hr_ = S_FALSE;
+		// レンダーテクスチャ用リソース
+		ComPtr<ID3D12Resource> resource_ = nullptr;
+		// RTVインデックス
+		uint32_t rtvIndex_ = 0;
+		// SRVインデックス
+		uint32_t srvIndex_ = 0;
+		// クリアカラー(赤)
+		const Vector4 clearColor_ = { 1.0f,0.0f,0.0f,1.0f };
+
+		std::string name_;
+
+		// もらってくるSRVインデックス
+		uint32_t otherSrvIndex_ = 0;
+
+	private:
+		DXGIDevice* DXGIDevice_;
+		Command* command_;
+		SrvManager* srvManager_;
+		RtvManager* rtvManager_;
+		RenderingCommon* renderingCommon_;
+		Camera* camera_;
+
+		std::unique_ptr<PostEffectData> postEffectData_;
+
+	public:
+		PostEffectType type_;
+
+
+	};
+}

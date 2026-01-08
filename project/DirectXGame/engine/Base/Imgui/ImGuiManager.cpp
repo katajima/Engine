@@ -15,7 +15,7 @@
 static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値は移動
 
 
-void ImGuiManager::Initialize(DirectXCommon* dxCommon)
+void Engine::ImGuiManager::Initialize(DirectXCommon* dxCommon)
 {
 #ifdef _DEBUG
 	dxCommon_ = dxCommon;						// DX共通クラス
@@ -45,7 +45,7 @@ void ImGuiManager::Initialize(DirectXCommon* dxCommon)
 
 }
 
-void ImGuiManager::Finalize()
+void Engine::ImGuiManager::Finalize()
 {
 #ifdef _DEBUG
 	// 後始末
@@ -56,7 +56,7 @@ void ImGuiManager::Finalize()
 #endif // _DEBUG
 }
 
-void ImGuiManager::Begin()
+void Engine::ImGuiManager::Begin()
 {
 #ifdef _DEBUG
 	// ImGuiフレーム開始
@@ -76,7 +76,7 @@ void ImGuiManager::Begin()
 #endif // _DEBUG
 }
 
-void ImGuiManager::End()
+void Engine::ImGuiManager::End()
 {
 #ifdef _DEBUG
 	// 描画前準備
@@ -84,7 +84,7 @@ void ImGuiManager::End()
 #endif // _DEBUG
 }
 
-void ImGuiManager::Draw()
+void Engine::ImGuiManager::Draw()
 {
 #ifdef _DEBUG
 
@@ -95,7 +95,7 @@ void ImGuiManager::Draw()
 
 
 
-void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name)
+void Engine::ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camera, const char* name)
 {
 	if (ImGui::BeginTabBar("Gizmo"))
 	{
@@ -195,7 +195,7 @@ void ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camera, const
 	}
 }
 
-void ImGuiManager::SetCustomColorScheme()
+void Engine::ImGuiManager::SetCustomColorScheme()
 {
 	ImGuiStyle& style = ImGui::GetStyle();
 
@@ -213,7 +213,7 @@ void ImGuiManager::SetCustomColorScheme()
 	style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.1f, 0.2f, 0.6f, 1.0f);  // ダーク青
 }
 
-void ImGuiManager::InitImGuiStyle()
+void Engine::ImGuiManager::InitImGuiStyle()
 {
 	
 
@@ -244,7 +244,7 @@ void ImGuiManager::InitImGuiStyle()
 	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 }
 
-void ImGuiManager::AddFont()
+void Engine::ImGuiManager::AddFont()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msgothic.ttc", 10.0f, nullptr, glyphRangesJapanese);

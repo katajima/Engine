@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void SkyBoxMesh::Initialize(DirectXCommon* dxcommon)
+void Engine::SkyBoxMesh::Initialize(DirectXCommon* dxcommon)
 {
 	// DX共通クラス
 	dxCommon_ = dxcommon;	
@@ -13,7 +13,7 @@ void SkyBoxMesh::Initialize(DirectXCommon* dxcommon)
 
 }
 
-void SkyBoxMesh::GetCommandList()
+void Engine::SkyBoxMesh::GetCommandList()
 {
 	// 頂点バッファの設定
 	vbvResorce_.IASetVertexBuffers();

@@ -7,7 +7,7 @@ public:
 	// 初期化
 	void Initialize(Vector3 min,Vector3 max);
 	// 更新
-	void Update(WorldTransform& world);
+	void Update(Engine::WorldTransform& world);
 
 private:
 	Vector3 min_ = { 0,0,0 }; // 最小座標 

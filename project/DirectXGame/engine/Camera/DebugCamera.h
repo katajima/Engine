@@ -5,30 +5,32 @@
 #include"DirectXGame/engine/math/MathFanctions.h"
 #include"DirectXGame/engine/input/Input.h"
 
-// 前方宣言
-class CameraCommon;
 
-// デバッグカメラクラス
-class DebugCamera
-{
-public:
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize(CameraCommon* cameraCommon);
+namespace Engine {
+	// 前方宣言
+	class CameraCommon;
 
-	/// <summary>
-	/// 毎フレーム処理
-	/// </summary>
-	void Update();
+	// デバッグカメラクラス
+	class DebugCamera
+	{
+	public:
+		/// <summary>
+		/// 初期化
+		/// </summary>
+		void Initialize(CameraCommon* cameraCommon);
 
-	// カメラ取得
-	Camera& GetViewProjection() { return camera_; };
+		/// <summary>
+		/// 毎フレーム処理
+		/// </summary>
+		void Update();
 
-private:
-	// ビュープロジェクション
-	Camera camera_;
+		// カメラ取得
+		Camera& GetViewProjection() { return camera_; };
 
-	Input* input_;
-};
+	private:
+		// ビュープロジェクション
+		Camera camera_;
 
+		Input* input_;
+	};
+}

@@ -5,11 +5,11 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
-const uint32_t RtvManager::kMaxRTVCount = 32;
+const uint32_t Engine::RtvManager::kMaxRTVCount = 32;
 
 
 
-void RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
+void Engine::RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
 	DXGIDevice_ = DXGI;	// デバイス
 	command_ = Command;	// コマンド
@@ -22,7 +22,7 @@ void RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 
 
 
-uint32_t RtvManager::Allocate()
+uint32_t Engine::RtvManager::Allocate()
 {
 	assert(kMaxRTVCount > useIndex);
 
@@ -34,18 +34,18 @@ uint32_t RtvManager::Allocate()
 	return index;
 }
 
-void RtvManager::DecAllocate()
+void Engine::RtvManager::DecAllocate()
 {
 	useIndex--;
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE RtvManager::GetCPUDescriptorHandle(uint32_t index)
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::RtvManager::GetCPUDescriptorHandle(uint32_t index)
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE handle = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handle.ptr += index * descriptorSize;
 	return handle;
 }
-D3D12_GPU_DESCRIPTOR_HANDLE RtvManager::GetGPUDescriptorHandle(uint32_t index)
+D3D12_GPU_DESCRIPTOR_HANDLE Engine::RtvManager::GetGPUDescriptorHandle(uint32_t index)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE handle = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handle.ptr += index * descriptorSize;
@@ -53,7 +53,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE RtvManager::GetGPUDescriptorHandle(uint32_t index)
 }
 
 
-void RtvManager::CreateRTV(uint32_t rtvIndex, ID3D12Resource* pResource) { 
+void Engine::RtvManager::CreateRTV(uint32_t rtvIndex, ID3D12Resource* pResource) {
 	assert(pResource && "Resource is nullptr!");
 
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -64,7 +64,7 @@ void RtvManager::CreateRTV(uint32_t rtvIndex, ID3D12Resource* pResource) {
 	DXGIDevice_->GetDevice()->CreateRenderTargetView(pResource, &rtvDesc, handle);
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> RtvManager::CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color)
+Microsoft::WRL::ComPtr<ID3D12Resource> Engine::RtvManager::CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color)
 {
 	//生成するResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -103,7 +103,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RtvManager::CreateRenderTextureResource(D
 	return resource;
 }
 
-void RtvManager::Finalize()
+void Engine::RtvManager::Finalize()
 {
 	descriptorHeap.Reset();
 }

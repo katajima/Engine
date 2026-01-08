@@ -17,7 +17,7 @@ using namespace Microsoft::WRL;
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 
-void DirectXCommon::Intialize(WinApp* winApp) {
+void Engine::DirectXCommon::Intialize(WinApp* winApp) {
 
 	InitializeFixFPS();	// 固定FPS初期化
 
@@ -49,12 +49,12 @@ void DirectXCommon::Intialize(WinApp* winApp) {
 	imguiManager_->Initialize(this);
 }
 
-void DirectXCommon::Finalize()
+void Engine::DirectXCommon::Finalize()
 {
 	imguiManager_->Finalize();
 }
 
-void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
 	// 描画前処理
 	GetSrvManager()->PreDraw();
@@ -76,7 +76,7 @@ void DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entit
 	//postEffectManager_->PostDraw2dOffscreen();
 }
 
-void DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* renderTexture)
+void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* renderTexture)
 {
 	// スワップチェーン用の描画準備
 	swapChain_->PreDraw();
@@ -96,7 +96,7 @@ void DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* renderTe
 	UpdateFixFPS();
 }
 
-void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
@@ -107,7 +107,7 @@ void DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DMa
 	PassSwap(sceneManager, postEffectManager_->GetEndRenderTexture());
 }
 
-void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
 	sceneManager->DrawForeground2D();
 
@@ -135,13 +135,13 @@ void DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity
 
 }
 
-void DirectXCommon::InitializeFixFPS()
+void Engine::DirectXCommon::InitializeFixFPS()
 {
 	//現在時間を記録する
 	reference_ = std::chrono::steady_clock::now();
 }
 
-void DirectXCommon::UpdateFixFPS()
+void Engine::DirectXCommon::UpdateFixFPS()
 {
 	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
 
@@ -163,7 +163,7 @@ void DirectXCommon::UpdateFixFPS()
 	reference_ = std::chrono::steady_clock::now();
 }
 
-void DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3DManager)
 {
 	// ライト
 	entity3DManager->GetLightManager()->Update();

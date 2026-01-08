@@ -7,7 +7,7 @@ void DashSystem::Initialize() {
 
 
 // 更新
-void DashSystem::Update(float dt, WorldTransform& world, RigidBodyComponent& rigid) {
+void DashSystem::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 	// 速度処理
 	SpeedProcess(dt);
 	// 状態処理
@@ -89,7 +89,7 @@ void DashSystem::StateProcess(float dt){
 
 }
 
-void DashSystem::DashProcess(float dt, WorldTransform& world, RigidBodyComponent& rigid)
+void DashSystem::DashProcess(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
 {
 	if(isDash_) {
 		// 速度ベクトル計算
@@ -105,7 +105,7 @@ void DashSystem::DashProcess(float dt, WorldTransform& world, RigidBodyComponent
 
 }
 
-void DashSystem::GravityProcess(float dt, RigidBodyComponent& rigid)
+void DashSystem::GravityProcess(float dt, Engine::RigidBodyComponent& rigid)
 {
 	if (!data_.isDashGravity && isDash_) {
 		rigid.SetIsGravity(false);

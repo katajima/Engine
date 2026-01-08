@@ -14,7 +14,7 @@
 #include"imgui.h"
 
 // 初期化
-void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, 
+void Engine::PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon,
 	DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, 
 	const std::string name, PostEffectBlockType type)
 {
@@ -34,39 +34,39 @@ void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvMan
 	switch (type)
 	{
 	case PostEffectBlockType::kCopy:
-		AddRenderTexture("Copy_" + name, PostEffectType::kCopy);
+		AddRenderTexture("Copy_" + name, Engine::PostEffectType::kCopy);
 		break;
 	case PostEffectBlockType::kGrayScale:
-		AddRenderTexture("GrayScale_" + name, ::PostEffectType::kGrayScale);
+		AddRenderTexture("GrayScale_" + name, ::Engine::PostEffectType::kGrayScale);
 		break;
 	case PostEffectBlockType::kSepia:
-		AddRenderTexture("Sepia_" + name, PostEffectType::kSepia);
+		AddRenderTexture("Sepia_" + name, Engine::PostEffectType::kSepia);
 		break;
 	case PostEffectBlockType::kVignette:
-		AddRenderTexture("Vignette_" + name, PostEffectType::kVignette);
+		AddRenderTexture("Vignette_" + name, Engine::PostEffectType::kVignette);
 		break;
 	case PostEffectBlockType::kSmoothing:
-		AddRenderTexture("Smoothing_" + name, PostEffectType::kSmoothing);
+		AddRenderTexture("Smoothing_" + name, Engine::PostEffectType::kSmoothing);
 		break;
 	case PostEffectBlockType::kGaussian:
-		AddRenderTexture("Gaussian_" + name, PostEffectType::kGaussian);
+		AddRenderTexture("Gaussian_" + name, Engine::PostEffectType::kGaussian);
 		break;
 	case PostEffectBlockType::kOitline:
-		AddRenderTexture("Oitline_" + name, PostEffectType::kOitline);
+		AddRenderTexture("Oitline_" + name, Engine::PostEffectType::kOitline);
 		break;
 	case PostEffectBlockType::kRadialBlur:
-		AddRenderTexture("RadialBlur_" + name, PostEffectType::kRadialBlur);
+		AddRenderTexture("RadialBlur_" + name, Engine::PostEffectType::kRadialBlur);
 		break;
 	case PostEffectBlockType::kDissovle:
-		AddRenderTexture("Dissovle_" + name,PostEffectType::kDissovle);
+		AddRenderTexture("Dissovle_" + name, Engine::PostEffectType::kDissovle);
 		break;
 	case PostEffectBlockType::kRandom:
-		AddRenderTexture("Random_" + name,PostEffectType::kRandom);
+		AddRenderTexture("Random_" + name, Engine::PostEffectType::kRandom);
 		break;
 	case PostEffectBlockType::kBloom:
-		AddRenderTexture("BrightPassFilter" + name, PostEffectType::kBloom);
-		AddRenderTexture("Gaussian" + name, PostEffectType::kGaussian);
-		AddRenderTexture("BloomCombine" + name, PostEffectType::kBloomCombin);
+		AddRenderTexture("BrightPassFilter" + name, Engine::PostEffectType::kBloom);
+		AddRenderTexture("Gaussian" + name, Engine::PostEffectType::kGaussian);
+		AddRenderTexture("BloomCombine" + name, Engine::PostEffectType::kBloomCombin);
 		GetRenderTextures(2)->SetOtherSrvIndex(GetRenderTextures(0)->GetSrvIndex());
 
 		break;
@@ -76,7 +76,7 @@ void PostEffectBlock::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvMan
 }
 
 // 更新
-void PostEffectBlock::Update(Camera* camera)
+void Engine::PostEffectBlock::Update(Camera* camera)
 {
 	if (!renderTextures_.empty()) {
 		for (auto& renderTexture : renderTextures_) {
@@ -105,7 +105,7 @@ void PostEffectBlock::Update(Camera* camera)
 }
 
 // 追加
-void PostEffectBlock::AddRenderTexture(const std::string name, PostEffectType type)
+void Engine::PostEffectBlock::AddRenderTexture(const std::string name, PostEffectType type)
 {
 	auto renderTexture = std::make_unique<RenderTexture>();
 	renderTexture->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, name, type);
@@ -113,7 +113,7 @@ void PostEffectBlock::AddRenderTexture(const std::string name, PostEffectType ty
 	renderTextures_.push_back(std::move(renderTexture));
 }
 
-void PostEffectBlock::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* sourceRT)
+void Engine::PostEffectBlock::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* sourceRT)
 {
 
 	PreDraw(targetRT);
@@ -125,7 +125,7 @@ void PostEffectBlock::DrawRenderTexture(RenderTexture* targetRT, RenderTexture* 
 	PostDraw(targetRT);
 }
 
-void PostEffectBlock::DrawEffectBlock(RenderTexture* inputTexture)
+void Engine::PostEffectBlock::DrawEffectBlock(RenderTexture* inputTexture)
 {
 	if (renderTextures_.empty()) return;
 
@@ -148,14 +148,14 @@ void PostEffectBlock::DrawEffectBlock(RenderTexture* inputTexture)
 	
 }
 
-void PostEffectBlock::ConnectBlock(RenderTexture* input)
+void Engine::PostEffectBlock::ConnectBlock(RenderTexture* input)
 {
 	DrawEffectBlock(input);
 }
 
 
 // Pre
-void PostEffectBlock::PreDraw(RenderTexture* renderTexture)
+void Engine::PostEffectBlock::PreDraw(RenderTexture* renderTexture)
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -180,7 +180,7 @@ void PostEffectBlock::PreDraw(RenderTexture* renderTexture)
 }
 
 // Post
-void PostEffectBlock::PostDraw(RenderTexture* renderTexture)
+void Engine::PostEffectBlock::PostDraw(RenderTexture* renderTexture)
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);

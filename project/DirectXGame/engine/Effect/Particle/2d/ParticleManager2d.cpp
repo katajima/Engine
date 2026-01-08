@@ -11,7 +11,7 @@
 #include <limits>
 #include <windows.h>
 
-void ParticleManager2d::Initialize(DirectXCommon* dxCommon, EffectManager* effectManager)
+void Engine::ParticleManager2d::Initialize(DirectXCommon* dxCommon, EffectManager* effectManager)
 {
 	dxCommon_ = dxCommon;			// DX共通クラス
 	effectManager_ = effectManager;	// エフェクト管理クラス
@@ -29,7 +29,7 @@ void ParticleManager2d::Initialize(DirectXCommon* dxCommon, EffectManager* effec
 
 
 // 更新
-void ParticleManager2d::Update() {
+void Engine::ParticleManager2d::Update() {
 	float deltaTime = MyGame::GameTime(); // 毎フレーム一定時間と仮定
 
 
@@ -70,7 +70,7 @@ void ParticleManager2d::Update() {
 		});
 }
 // 描画
-void ParticleManager2d::Draw() {
+void Engine::ParticleManager2d::Draw() {
 	auto commandList = dxCommon_->GetCommandList();
 
 	for (auto& pair : particleGroups) {
@@ -95,7 +95,7 @@ void ParticleManager2d::Draw() {
 }
 
 
-void ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, Sprite* sprite)
+void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, Sprite* sprite)
 {
 	// ランダムエンジンの初期化
 	std::random_device seedGenerator;
@@ -110,12 +110,12 @@ void ParticleManager2d::CreateParticleGroup(const std::string name, const std::s
 	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, sprite);
 }
 
-void ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive2D* primitive2d)
+void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive2D* primitive2d)
 {
 
 }
 
-void ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, ModelMesh* modelMesh)
+void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, ModelMesh* modelMesh)
 {
 	// ランダムエンジンの初期化
 	std::random_device seedGenerator;
@@ -130,7 +130,7 @@ void ParticleManager2d::CreateParticleGroup(const std::string name, const std::s
 	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, modelMesh);
 }
 
-void ParticleManager2d::DrawCommonSetting() {
+void Engine::ParticleManager2d::DrawCommonSetting() {
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
 	//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -140,7 +140,7 @@ void ParticleManager2d::DrawCommonSetting() {
 
 
 // ルートシグネチャの作成
-void ParticleManager2d::CreateRootSignature() {
+void Engine::ParticleManager2d::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // インスタンシング用
@@ -165,7 +165,7 @@ void ParticleManager2d::CreateRootSignature() {
 
 }
 // グラフィックスパイプラインの作成
-void ParticleManager2d::CreateGraphicsPipeline() {
+void Engine::ParticleManager2d::CreateGraphicsPipeline() {
 	CreateRootSignature();
 
 	// DepthStencilStateの設定

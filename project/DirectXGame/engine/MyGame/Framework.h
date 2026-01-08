@@ -16,59 +16,59 @@
 #include"memory"
 
 
+namespace Engine {
+	// ゲーム全体
+	class Framework
+	{
+	public:
+		// 初期化
+		virtual void Initialize();
 
-// ゲーム全体
-class Framework
-{
-public:
-	// 初期化
-	virtual void Initialize();
+		// 終了
+		virtual void Finalize();
 
-	// 終了
-	virtual void Finalize();
+		// 毎フレーム更新
+		virtual void Update();
 
-	// 毎フレーム更新
-	virtual void Update();
+		// 描画
+		virtual void Draw() = 0;
 
-	// 描画
-	virtual void Draw() = 0;
+		// 終了フラグのチェック
+		virtual bool IsEndRequst() { return endRequst_; }
 
-	// 終了フラグのチェック
-	virtual bool IsEndRequst() { return endRequst_; }
-	
-	// デストラクタ
-	virtual ~Framework() = default;
+		// デストラクタ
+		virtual ~Framework() = default;
 
-	// 実行
-	void Run();
+		// 実行
+		void Run();
 
-protected:
-	// ゲーム終了フラグ
-	bool endRequst_ = false;
-	// ウィンアップ
-	
-	std::unique_ptr <WinApp> winApp;
-	
-	//
-	std::unique_ptr<Input> input_ = nullptr;
+	protected:
+		// ゲーム終了フラグ
+		bool endRequst_ = false;
+		// ウィンアップ
 
-	// ダイレクトX
-	std::unique_ptr <DirectXCommon> dxCommon = nullptr;
+		std::unique_ptr <WinApp> winApp;
 
-	// 3D全般
-	std::unique_ptr<Entity3DManager> entity3DManager_;
+		//
+		std::unique_ptr<Input> input_ = nullptr;
 
-	// 2D全般
-	std::unique_ptr<Entity2DManager> entity2DManager_;
+		// ダイレクトX
+		std::unique_ptr <DirectXCommon> dxCommon = nullptr;
 
-	// シーンマネージャー
-	std::unique_ptr<SceneManager> sceneManager_;
+		// 3D全般
+		std::unique_ptr<Entity3DManager> entity3DManager_;
 
-	// シーンファクトリー
-	std::unique_ptr<AbstractSceneFactory> sceneFactory_;
+		// 2D全般
+		std::unique_ptr<Entity2DManager> entity2DManager_;
 
-	// グローバル
-	std::unique_ptr<GlobalVariables> globalVariables_;
-	
-};
+		// シーンマネージャー
+		std::unique_ptr<SceneManager> sceneManager_;
 
+		// シーンファクトリー
+		std::unique_ptr<AbstractSceneFactory> sceneFactory_;
+
+		// グローバル
+		std::unique_ptr<GlobalVariables> globalVariables_;
+
+	};
+}

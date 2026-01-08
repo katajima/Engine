@@ -12,7 +12,7 @@
 #include"format"
 #include<vector>
 
-void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
+void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
 {
 	modelCommon_ = modelCommon;					// モデル共通クラス
 	dxCommon_ = dxCommon;						// DX共通クラス
@@ -61,11 +61,11 @@ void Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const 
 	timer_.LogTimeSec("All Load Time: ", filenameT);
 }
 
-void Model::Draw()
+void Engine::Model::Draw()
 {
 }
 
-void Model::DrawSkinning()
+void Engine::Model::DrawSkinning()
 {
 	auto commandList = modelCommon_->GetCommand()->GetList();
 
@@ -94,7 +94,7 @@ void Model::DrawSkinning()
 	}
 }
 
-float Model::GetMaterialAlpha()
+float Engine::Model::GetMaterialAlpha()
 {
 	float a = 1.000f;
 
@@ -107,7 +107,7 @@ float Model::GetMaterialAlpha()
 	return a;
 }
 
-ModelData Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
+Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& directoryPath, const std::string& filename) {
 	//必要な変数の宣言とファイルを開く
 	ModelData modelData;//構築するModelData
 

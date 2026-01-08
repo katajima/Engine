@@ -43,7 +43,7 @@
 /// <summary>
 /// テストシーン
 /// </summary>
-class TestScene : public BaseScene
+class TestScene : public Engine::BaseScene
 {
 public:
 
@@ -129,9 +129,9 @@ private:
 	void SwitchRoom();
 
 private:
-	Input* input_ = nullptr;
-	Audio* audio_ = nullptr;
-	ImGuiManager* imGuiManager = nullptr;
+	Engine::Input* input_ = nullptr;
+	Engine::Audio* audio_ = nullptr;
+	Engine::ImGuiManager* imGuiManager = nullptr;
 
 
 	/// <summary>
@@ -149,17 +149,17 @@ private:
 
 	
 
-	Object3d* skyBoxObject;
-	Object3d* skyBoxObject2;
-	Object3d* oceanObject;
+	Engine::Object3d* skyBoxObject;
+	Engine::Object3d* skyBoxObject2;
+	Engine::Object3d* oceanObject;
 
 	
-	std::unique_ptr<SkyBox> skyBox;
-	std::unique_ptr<SkyBox> skyBox2;
+	std::unique_ptr<Engine::SkyBox> skyBox;
+	std::unique_ptr<Engine::SkyBox> skyBox2;
 
 
 	// オーシャンシェーダー
-	std::unique_ptr < Ocean> ocean_ = nullptr;
+	std::unique_ptr < Engine::Ocean> ocean_ = nullptr;
 
 
 
@@ -167,7 +167,7 @@ private:
 	/// スプライト
 	/// </summary>
 	
-	std::vector<std::unique_ptr<Sprite>> sprite_;
+	std::vector<std::unique_ptr<Engine::Sprite>> sprite_;
 
 
 
@@ -181,11 +181,11 @@ private:
 	/// ライト
 	/// </summary>
 
-	std::shared_ptr<PointLight> point;
+	std::shared_ptr<Engine::PointLight> point;
 
-	std::shared_ptr<SpotLight> spot;
+	std::shared_ptr<Engine::SpotLight> spot;
 
-	std::shared_ptr<DirectionalLight> directional;
+	std::shared_ptr<Engine::DirectionalLight> directional;
 
 	/// <summary>
 	/// その他

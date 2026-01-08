@@ -12,18 +12,23 @@ public:
 	/// </summary>
 	/// <param name="characterManager"></param>
 	/// <param name="line"></param>
-	void Initialize(BaseCharacterManager* characterManager, LineCommon* line);
+	void Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, int maxCharactorCount );
 
 
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update();
+	void Update(float dt);
 
 	/// <summary>
 	/// キャラクターのスポナーを追加
 	/// </summary>
 	void AddCharacterSpawn(const SpawnInfo& info);
+
+	/// <summary>
+	/// キャラクターのスポーン情報をクリアします。
+	/// </summary>
+	void ClearSpawn() { characterSpawns_.clear(); };
 
 	/// <summary>
 	/// キャラクター出現エリアクラスを取得
@@ -39,10 +44,9 @@ private:
 	std::map<std::string, std::unique_ptr<CharacterSpawn>> characterSpawns_;
 
 	// キャラクター最大出現量
-	int maxCharactorCount_ = 100;
-
+	int maxCharactorCount_ = 300;
 
 private:
 	BaseCharacterManager* characterManager_ = nullptr;
-	LineCommon* lineCommon_ = nullptr;
+	Engine::LineCommon* lineCommon_ = nullptr;
 };

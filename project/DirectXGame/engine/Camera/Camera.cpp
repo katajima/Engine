@@ -9,10 +9,10 @@
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 
 
-bool Camera::isShake_ = false;
+bool Engine::Camera::isShake_ = false;
 
 
-Camera::Camera()
+Engine::Camera::Camera()
 
 	:transform_({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
 	, fovY_(0.45f)
@@ -30,7 +30,7 @@ Camera::Camera()
 
 }
 
-void Camera::Initialize(CameraCommon* cameraCommon)
+void Engine::Camera::Initialize(CameraCommon* cameraCommon)
 {
 	dxCommon_ = cameraCommon->GetDxCommon();				// DX共通クラス
 	postEffectManager_ = dxCommon_->GetPostEffectManager();	// ポストエフェクト管理クラス
@@ -47,13 +47,13 @@ void Camera::Initialize(CameraCommon* cameraCommon)
 	isProjection_ = true;
 }
 
-void Camera::GetCommandList(int index)
+void Engine::Camera::GetCommandList(int index)
 {
 	// Cameraのバインド
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource->GetGPUVirtualAddress());
 }
 
-void Camera::UpdateMatrix() {
+void Engine::Camera::UpdateMatrix() {
 	float winWidth = static_cast<float>(WinApp::GetClientWidth(false));
 	float winHeight = static_cast<float>(WinApp::GetClientHeight(false));
 
@@ -120,7 +120,7 @@ void Camera::UpdateMatrix() {
 	data->worldPosition = worldMatrix_.GetWorldPosition();
 }
 
-void Camera::UpdateMatrix(const Vector3& targetPosition)
+void Engine::Camera::UpdateMatrix(const Vector3& targetPosition)
 {
 	// カメラとターゲットの距離を設定
 	float distanceFromTarget = 2.0f; // 適切な距離に調整
@@ -141,7 +141,7 @@ void Camera::UpdateMatrix(const Vector3& targetPosition)
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
 
-void Camera::UpdateImGui()
+void Engine::Camera::UpdateImGui()
 {
 	 #ifdef _DEBUG
 	 	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
@@ -194,7 +194,7 @@ void Camera::UpdateImGui()
 	 #endif // _DEBUG
 }
 
-void Camera::TransferMatrix()
+void Engine::Camera::TransferMatrix()
 {
 	// ビュー行列の逆行列を計算してカメラの位置を抽出
 	Matrix4x4 iView = Inverse(worldMatrix_);
@@ -205,7 +205,7 @@ void Camera::TransferMatrix()
 }
 
 
-void Camera::LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector) {
+void Engine::Camera::LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector) {
 	Vector3 forward = Normalize(Subtract(targetPosition, cameraPosition)); // 前方向ベクトル
 	Vector3 right = Normalize(Cross(upVector, forward)); // 右方向ベクトル
 	Vector3 up = Cross(forward, right); // 上方向ベクトル
@@ -223,15 +223,15 @@ void Camera::LookAt(const Vector3& cameraPosition, const Vector3& targetPosition
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
 
-void Camera::SetShake(float time, Vector3 directionRange) {
+void Engine::Camera::SetShake(float time, Vector3 directionRange) {
 	shakeTime_ = time;
 	shakeDirectionRange_ = directionRange;
 }
 
 
-void Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
+void Engine::Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
 {
-	auto effectBlock = std::make_unique<PostEffectBlock>();
+	auto effectBlock = std::make_unique<Engine::PostEffectBlock>();
 	effectBlock->Intialize(dxCommon_->GetDXGIDevice(), dxCommon_->GetCommand(), dxCommon_->GetSrvManager(), dxCommon_->GetRtvManager(),
 		dxCommon_->GetRenderingCommon(), dxCommon_->GetDepthStencil(), dxCommon_->GetBarrier(), dxCommon_->GetScissorRect(), dxCommon_->GetViewPort(), name, type);
 	effectBlock->SetUse(use);			// 使うか
@@ -240,7 +240,7 @@ void Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bo
 	//indexCount_++; // 加算
 }
 
-std::vector<PostEffectBlock*> Camera::GetPostEffectBlocks()
+std::vector<Engine::PostEffectBlock*> Engine::Camera::GetPostEffectBlocks()
 {
 	std::vector<PostEffectBlock*> rawPtrs;
 	rawPtrs.reserve(effectBlocks_.size());

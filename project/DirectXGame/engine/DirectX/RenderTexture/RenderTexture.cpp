@@ -11,12 +11,12 @@
 
 #include "imgui.h"
 
-RenderTexture::~RenderTexture()
+Engine::RenderTexture::~RenderTexture()
 {
 	rtvManager_->DecAllocate();
 }
 
-void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
+void Engine::RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
 {
 	DXGIDevice_ = DXGIDevice;			// デバイス
 	command_ = command;					// コマンド
@@ -37,7 +37,7 @@ void RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvMana
 	postEffectData_->Initialize(renderingCommon->GetDxCommon(),type_);
 }
 
-void RenderTexture::Update()
+void Engine::RenderTexture::Update()
 {
 	renderingCommon_->SetCamera(camera_);
 	postEffectData_->SetCamera(camera_);
@@ -50,45 +50,45 @@ void RenderTexture::Update()
 #endif // _DEBUG
 }
 
-void RenderTexture::Draw()
+void Engine::RenderTexture::Draw()
 {
 	renderingCommon_->DrawRender(type_, srvIndex_, otherSrvIndex_);
 	postEffectData_->DrawRender();
 }
 
-Vector4 RenderTexture::GetClearColor() const
+Vector4 Engine::RenderTexture::GetClearColor() const
 {
 	return clearColor_;
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE RenderTexture::GetRTVHandle()
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::RenderTexture::GetRTVHandle()
 {
 	return rtvManager_->GetCPUDescriptorHandle(rtvIndex_);
 }
 
-ID3D12Resource* RenderTexture::GetResource()
+ID3D12Resource* Engine::RenderTexture::GetResource()
 {
 	return resource_.Get();
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVGPUHandle()
+D3D12_GPU_DESCRIPTOR_HANDLE Engine::RenderTexture::GetSRVGPUHandle()
 {
 	return srvManager_->GetGPUDescriptorHandle(srvIndex_);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE RenderTexture::GetSRVCPUHandle()
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::RenderTexture::GetSRVCPUHandle()
 {
 	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
 }
 
-PostEffectData* RenderTexture::GetPostEffectData()
+Engine::PostEffectData* Engine::RenderTexture::GetPostEffectData()
 {
 	return postEffectData_.get();
 }
 
 
 
-void RenderTexture::CreateResource()
+void Engine::RenderTexture::CreateResource()
 {
 	// リソースの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -125,7 +125,7 @@ void RenderTexture::CreateResource()
 	assert(SUCCEEDED(hr_));
 }
 
-void RenderTexture::CreateResourcePixel()
+void Engine::RenderTexture::CreateResourcePixel()
 {
 	// リソースの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -163,7 +163,7 @@ void RenderTexture::CreateResourcePixel()
 }
 
 
-void RenderTexture::CreateRTV()
+void Engine::RenderTexture::CreateRTV()
 {
 	// インデックスを割り当て
 	rtvIndex_ = rtvManager_->Allocate();
@@ -175,7 +175,7 @@ void RenderTexture::CreateRTV()
 
 
 
-void RenderTexture::CreateSRV()
+void Engine::RenderTexture::CreateSRV()
 {
 	// インデックス割りて
 	srvIndex_ = srvManager_->Allocate();

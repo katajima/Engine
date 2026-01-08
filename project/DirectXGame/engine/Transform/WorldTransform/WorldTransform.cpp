@@ -1,20 +1,20 @@
 #include "WorldTransform.h"
 
-void WorldTransform::Initialize()
+void Engine::WorldTransform::Initialize()
 {
 	// SRT
 	scale_ = { 1,1,1 };
 	rotate_ = {};
 	translate_ = { 0,0,0 };
 
-	isPearent = false;
+	isParent = false;
 
 	// 単位行列
 	worldMat_ = MakeIdentity4x4();
 	worldPreMat_ = MakeIdentity4x4();
 }
 
-void WorldTransform::Update()
+void Engine::WorldTransform::Update()
 {
 	// 一個前の行列
 	worldPreMat_ = worldMat_;
@@ -27,7 +27,7 @@ void WorldTransform::Update()
 	if (parent_) {
 		worldMat_ = worldMat_ * parent_->worldMat_;
 	}
-	if (isPearent) {
+	if (isParent) {
 		worldMat_ = Multiply(worldMat_,parentMatrix_);
 	}
 }

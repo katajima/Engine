@@ -300,9 +300,6 @@
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionFancion.cpp">
-      <Filter>ソース ファイル\engine\collider</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionManager.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
@@ -311,9 +308,6 @@
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\ContactRecord.cpp">
-      <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp">
       <Filter>ソース ファイル\engine\camera</Filter>
@@ -425,9 +419,6 @@
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Material\Material.cpp">
       <Filter>ソース ファイル\engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.cpp">
-      <Filter>ソース ファイル\engine\effect</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\CPU\ParticleData.cpp">
       <Filter>ソース ファイル\engine\effect</Filter>
@@ -609,9 +600,6 @@
     <ClCompile Include="DirectXGame\engine\3d\Object\Object3dInstansManager.cpp">
       <Filter>ソース ファイル\engine\3d\object</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Mesh\Base\BaseMesh.cpp">
-      <Filter>ソース ファイル\engine\3d\model</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp">
       <Filter>ソース ファイル\engine\base\dx</Filter>
     </ClCompile>
@@ -699,12 +687,6 @@
     <ClCompile Include="DirectXGame\engine\Line\CreateLine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectField.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\EffectField\EffectModule.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -790,6 +772,42 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemyState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Special\Base\BaseSpecial.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPoint.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1194,9 +1212,6 @@
     <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionFancion.h">
-      <Filter>ヘッダー ファイル\engine\collider</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionManager.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
@@ -1398,9 +1413,6 @@
     <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Effect\Particle\CPU\ParticleSystem.h">
-      <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\ParticleEmitter.h">
       <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
     </ClInclude>
@@ -1572,22 +1584,13 @@
     <ClInclude Include="DirectXGame\engine\struct\Vector3.h">
       <Filter>ヘッダー ファイル\engine\struct</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UIManager.h">
-      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\UI\UIBoard.h">
-      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UICheckHit.h">
       <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\UI\UIData.h">
       <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\UI\UIElement.h">
-      <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\UI\UIInputManager.h">
       <Filter>ヘッダー ファイル\engine\2d\UI</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\Base\BaseUI.h">
@@ -1710,12 +1713,6 @@
     <ClInclude Include="DirectXGame\engine\Line\CreateLine.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectField.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\EffectField\EffectModule.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -1816,6 +1813,42 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboGlobalData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemyState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\ResultScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Input\InputManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,7 +6,7 @@ void JumpSystem::Initialize()
 	groundHeight_ = -3.0f;
 }
 
-void JumpSystem::Update(float dt, WorldTransform& world, RigidBodyComponent& rigid)
+void JumpSystem::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
 {
 	// 現在のy速度取得
 	velocity_ = rigid.Velocity().y;
@@ -45,7 +45,7 @@ void JumpSystem::Update(float dt, WorldTransform& world, RigidBodyComponent& rig
 	StateProcess();
 }
 
-void JumpSystem::StartJump(RigidBodyComponent& rigid)
+void JumpSystem::StartJump(Engine::RigidBodyComponent& rigid)
 {
 	rigid.Velocity().y = 0;	// 移動速度リセット
 	DecrementJumpCount();	// ジャンプ回数減少
@@ -95,7 +95,7 @@ void JumpSystem::InputHoldProcess(float dt)
 	
 }
 
-void JumpSystem::JumpHoldProcess(float dt, RigidBodyComponent& rigid)
+void JumpSystem::JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid)
 {
 	if (!isInputHeld_) return;	// ホールド解除されているなら処理しない
 

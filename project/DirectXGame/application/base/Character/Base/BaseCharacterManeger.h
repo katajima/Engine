@@ -18,9 +18,14 @@
 class Effect;
 class FollowCamera;
 class BulletManager;
-class Entity3DManager;
-class Entity2DManager;
 class CameraManager;
+class SpecalPointManager;
+
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+}
+
 
 /// <summary>
 /// キャラクターマネージャークラス
@@ -32,7 +37,8 @@ public:
 
 
 	// 初期化
-	void Initialize(Input* input ,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Camera* camera);
+	void Initialize(Engine::Input* input , Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 	// 更新
 	void Update();
@@ -47,6 +53,8 @@ public:
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; }
 	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; }
+	// スペシャルポイント管理クラスの設定
+	void SetSpecialPointManager(SpecalPointManager* specalPointManager) { specalPointManager_ = specalPointManager; };
 public: // 取得系
 
 	// キャラクターのタイプによっての数を取得
@@ -96,7 +104,7 @@ public: // 生成系
 	// キャラクター生成(プレイヤー)
 	void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
-	void CreateEnemyGroup(int groupCount, int perGroup, Vector3 origin, AABB aabb);
+	void CreateEnemyGroup(EnemyType enemyType,int groupCount, int perGroup, Vector3 origin, AABB aabb);
 
 private:
 	
@@ -110,14 +118,15 @@ private:
 	std::unique_ptr<CrowdManager> crowdManager_;	// 群衆AI
 
 private: // 貰いもの
-	Camera* camera_;
-	Input* input_;
-	Entity3DManager* entity3DManager_ = nullptr;
-	Entity2DManager* entity2DManager_ = nullptr;
-	GlobalVariables* globalVariables_;			// グローバル変数
+	Engine::Camera* camera_;
+	Engine::Input* input_;
+	Engine::Entity3DManager* entity3DManager_ = nullptr;
+	Engine::Entity2DManager* entity2DManager_ = nullptr;
+	Engine::GlobalVariables* globalVariables_;			// グローバル変数
 	FollowCamera* followCamera_ = nullptr;		// フォローカメラ 
 	BulletManager* bulletManager_ = nullptr;	// 弾をマネジャー
 	CameraManager* cameraManager_ = nullptr;	// カメラ管理
 	Effect* effect_ = nullptr;
+	SpecalPointManager* specalPointManager_ = nullptr;
 };
 

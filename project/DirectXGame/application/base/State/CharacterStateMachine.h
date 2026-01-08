@@ -10,9 +10,7 @@ using CharacterMainStateFactory = std::function<std::unique_ptr<BaseCharacterSta
 /// </summary>
 class CharacterStateMachine {
 public:
-    CharacterStateMachine() {
-    
-    }
+    CharacterStateMachine() {}
 
 
     // 初期化

@@ -18,7 +18,7 @@ void ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons) {
 /// <summary>
 /// コンボ成立チェック
 /// </summary>
-bool ComboSequence::Update(const Input& input, float deltaTime) {
+bool ComboSequence::Update(const Engine::Input& input, float deltaTime) {
 	if (comboButtons_.empty()) return false;
 
 
@@ -42,21 +42,37 @@ bool ComboSequence::Update(const Input& input, float deltaTime) {
 
 #pragma region ComboCondition
 
-void ComboCondition::Update(const Input& input, float timer, float dt) {
-	bool isStart = inputData_.inputWindowStart_ <= timer;		// 受付開始時間を過ぎたら
-	bool isEnd = inputData_.inputWindowEnd_ >= timer;			// 受付終了時間より前なら
+void ComboCondition::Update(const Engine::Input& input, float timer, float dt) {
+	bool isInputStart = inputData_.inputWindowStart_ <= timer;		// 受付開始時間を過ぎたら
+	bool isInputEnd = inputData_.inputWindowEnd_ >= timer;			// 受付終了時間より前なら
+
+
+	bool isCanselStart = inputData_.cancelStart_ <= timer;			// キャンセル開始時間を過ぎたら
+	bool isCanselEnd = inputData_.cancelEnd_ >= timer;				// キャンセル終了時間より前なら
+
+
+	// キャンセル受付時間ないなら
+	if(isCanselStart && isCanselEnd && inputData_.isCancel_) {
+		isCansel_ = true;
+
+		return;
+	}
+
+
 
 	// 受付時間内なら
-	if (isStart && isEnd) {
+	if (!isCansel_) {
+		if (isInputStart && isInputEnd) {
 
-		// まだ移行フラグがONではなくボタン条件を満たしているなら移行させるフラグをONに
-		if (!isNextCombo_) {
-			isNextCombo_ = inputData_.comboSequence_.Update(input, dt);
-		}
+			// まだ移行フラグがONではなくボタン条件を満たしているなら移行させるフラグをONに
+			if (!isNextCombo_) {
+				isNextCombo_ = inputData_.comboSequence_.Update(input, dt);
+			}
 
-		// 強制的にコンボに移行フラグNOに
-		if (inputData_.isCompulsionNextCombo_) {
-			isNextCombo_ = true;
+			// 強制的にコンボに移行フラグNOに
+			if (inputData_.isCompulsionNextCombo_) {
+				isNextCombo_ = true;
+			}
 		}
 	}
 
@@ -68,6 +84,7 @@ void ComboCondition::Update(const Input& input, float timer, float dt) {
 void ComboCondition::Enter(BaseCharacter* owner) {
 	jumpSystem = owner->GetMoveComponent()->GetJumpSystem();
 	isNextCombo_ = false;
+	isCansel_ = false;
 	endTime_ = data_.stateEndTime;
 	nextTime_ = data_.stateNextTime;
 	isPress_ = true;
@@ -76,9 +93,10 @@ void ComboCondition::Enter(BaseCharacter* owner) {
 void ComboCondition::Exit() {
 	isNextCombo_ = false;
 	isPress_ = false;
+	isCansel_ = false;
 }
 
-void ComboCondition::EndComboUpdate(const Input& input, float timer, float dt) {
+void ComboCondition::EndComboUpdate(const Engine::Input& input, float timer, float dt) {
 	// 終了タイプ
 	switch (data_.type)
 	{
@@ -126,7 +144,7 @@ void ComboMotion::Enter(BaseCharacter* owner) {
 	isMove_ = false;	// 移動しない
 
 	// アニメーションの設定
-	AnimationComponent* anima = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+	Engine::AnimationComponent* anima = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 	SetAnimation(anima);
 	SetMove(owner->GetMoveComponent());
 	SetWorld(&owner->GetObjectComponent()->GetWorldTransform());
@@ -141,17 +159,6 @@ void ComboMotion::Enter(BaseCharacter* owner) {
 
 
 
-	// 方向指定
-	Vector2 velo = owner->GetInput()->GetGamePadLeftStick();
-	if (velo.Length() != 0.0f) {
-		direction_ = { velo.x,0.0f,velo.y };
-	}
-	else {
-		direction_ = moveComponent->GetMoveSystem()->GetDirection();
-	}
-	// 方向
-	moveComponent->GetMoveSystem()->CameraDirectionToMoveDirection(direction_);
-	
 	// 回転
 	owner->GetMoveComponent()->GetMoveSystem()->AttackProcess(owner->GetWorldTransform(),direction_);
 
@@ -160,7 +167,7 @@ void ComboMotion::Enter(BaseCharacter* owner) {
 }
 
 // 更新
-void ComboMotion::Update(const Input& input, float timer, float dt) {
+void ComboMotion::Update(const Engine::Input& input, float timer, float dt) {
 	bool isStart = data_.moveWindowStart_ <= timer;		// 受付開始時間を過ぎたら
 	bool isEnd = data_.moveWindowEnd_ >= timer;			// 受付終了時間より前なら
 
@@ -226,8 +233,13 @@ void ComboHitBox::Enter(BaseCharacter* owner) {
 }
 
 // 更新
-void ComboHitBox::Update(const Input& input, float timer, float dt) {
+void ComboHitBox::Update(const Engine::Input& input, float timer, float dt) {
 
+
+	for (auto& coll : collData_) {
+		coll.reactionData.GetKnockbackData().SetNormal(direction_);
+	}
+	
 
 	switch (data_.spawnType_)
 	{
@@ -241,9 +253,12 @@ void ComboHitBox::Update(const Input& input, float timer, float dt) {
 		break;
 	case ComboHitBox::HitBoxSpawnType::kOnGround: // 着地したら
 		if (jumpSystem_->GetIsLanding()) {
-			if (!isPopHitBox_) {
-				hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
-				isPopHitBox_ = true;
+			timer_ += dt;
+			if (timer >= data_.hitBpxWindowStart_) {
+				if (!isPopHitBox_) {
+					hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+					isPopHitBox_ = true;
+				}
 			}
 		}
 		break;
@@ -268,7 +283,7 @@ void ComboHitBox::Update(const Input& input, float timer, float dt) {
 // 終了
 void ComboHitBox::Exit() {
 	isPopHitBox_ = false;
-
+	timer_ = 0.0f;
 }
 
 void ComboHitBox::AddCollider(const HitBoxCollData& hitBoxData, const ComboGlovalData& combo) {
@@ -350,7 +365,7 @@ void ComboData::Enter(BaseCharacter* owner) {
 }
 
 // 更新
-void ComboData::Update(const Input& input, float dt) {
+void ComboData::Update(const Engine::Input& input, float dt) {
 	// 時間更新
 	timer_ += dt;
 	// コンボ用モーションクラス更新
@@ -360,6 +375,7 @@ void ComboData::Update(const Input& input, float dt) {
 	// コンボ用カメラクラス更新
 	camera.Update(timer_, dt);
 	// コンボ用ヒットボックスクラス更新
+	hitBox.SetDirection(motion.GetDirection());
 	hitBox.Update(input, timer_, dt);
 	// コンボ用エフェクトクラス更新
 	effect.Update(timer_, dt);

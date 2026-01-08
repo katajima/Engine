@@ -3,6 +3,7 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include <DirectXGame/application/base/Attack/Input/AttackInputHander.h>
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
 #pragma region Move
 
@@ -74,23 +75,7 @@ void EnemyStateAttack::Enter() {
 }
 
 
-#pragma endregion
-
-#pragma region Special
-
-void EnemyStateSpecial::Update() {
-
-}
-
-void EnemyStateSpecial::Exit() {
-
-}
-
-void EnemyStateSpecial::Enter() {
-
-}
-
-#pragma endregion
+#pragma endregion // 攻撃
 
 #pragma region Die
 
@@ -126,32 +111,7 @@ void EnemyStateDie::Exit() {
 void EnemyStateDie::Enter()
 {
 	timer_ = dieTimer_;
+	character_->GetSpecalPointManager()->AddPoint(character_->GetWorldTransform().GetWorldPosition() + Vector3{0,4.0f,0}, 1);
 }
 
-#pragma endregion
-
-#pragma region Fainting
-
-// 更新
-void EenmyStateFainting::Update() {
-	timer_ += character_->GetTime();
-
-	// 時間に達したら移動状態に
-	if (timer_ >= faintingTimer_) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
-};
-
-// 終了
-void EenmyStateFainting::Exit() {
-
-};
-// 初期化
-void EenmyStateFainting::Enter() {
-	timer_ = 0.0f;
-	character_->Velocity() = {0,0,0};
-};
-
-#pragma endregion
-
+#pragma endregion // 死亡

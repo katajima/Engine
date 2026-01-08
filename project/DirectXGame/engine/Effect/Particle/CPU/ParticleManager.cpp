@@ -14,7 +14,7 @@
 #include <limits>
 #include <windows.h>
 
-void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager)
+void Engine::ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager)
 {
 	dxCommon_ = dxCommon;							// DX共通クラス
 	efectManager_ = efectManager;					// エフェクト管理クラス
@@ -30,7 +30,7 @@ void ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightMan
 	CreateGraphicsPipeline();
 }
 
-void ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType, bool uvClamp)
+void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteType, EmitData::BlendType blendType, bool uvClamp)
 {
 	if (!uvClamp) {
 		switch (blendType)
@@ -104,7 +104,7 @@ void ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteType, Emit
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void ParticleManager::Update()
+void Engine::ParticleManager::Update()
 {
 #ifdef _DEBUG
 	ImGui::Begin("Field");
@@ -156,7 +156,7 @@ void ParticleManager::Update()
 		});
 }
 
-void ParticleManager::Draw()
+void Engine::ParticleManager::Draw()
 {
 	auto commandList = dxCommon_->GetCommandList();
 
@@ -183,7 +183,7 @@ void ParticleManager::Draw()
 	}
 }
 
-void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
+void Engine::ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, Model* model, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
 {
 	debugTimer_.StartTimer(); // デバッグ用タイマー開始
 	// ランダムエンジンの初期化
@@ -201,7 +201,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
 }
 
-void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
+void Engine::ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath, BasePrimitive* primitive, EmitData::RasterizerType rasteType, EmitData::BlendType blendType)
 {
 	debugTimer_.StartTimer(); // デバッグ用タイマー開始
 	// ランダムエンジンの初期化
@@ -222,12 +222,12 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 #pragma region PSO
 
-void ParticleManager::ClearParticle(std::string name)
+void Engine::ParticleManager::ClearParticle(std::string name)
 {
 	particleGroups[name].particle.clear();
 }
 
-void ParticleManager::CreateRootSignature()
+void Engine::ParticleManager::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // テクスチャ用
@@ -260,7 +260,7 @@ void ParticleManager::CreateRootSignature()
 
 }
 
-void ParticleManager::CreateGraphicsPipeline()
+void Engine::ParticleManager::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 
@@ -324,7 +324,7 @@ void ParticleManager::CreateGraphicsPipeline()
 
 #pragma region Blend
 
-void ParticleManager::BlendAdd()
+void Engine::ParticleManager::BlendAdd()
 {
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -336,7 +336,7 @@ void ParticleManager::BlendAdd()
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 }
 
-void ParticleManager::BlendSubtract()
+void Engine::ParticleManager::BlendSubtract()
 {
 	// 減算ブレンドの設定
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -353,7 +353,7 @@ void ParticleManager::BlendSubtract()
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 }
 
-void ParticleManager::BlendMuliply()
+void Engine::ParticleManager::BlendMuliply()
 {
 
 	// 加算ブレンドの設定

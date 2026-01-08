@@ -7,7 +7,7 @@
 
 #pragma region Object3dInstansManager
 
-void Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
+void Engine::Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;						// DX共通クラス
 	srvManager_ = dxCommon_->GetSrvManager();	// SRV管理クラス
 
@@ -24,7 +24,7 @@ void Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
 }
 
 
-void Object3dInstansManager::Update() {
+void Engine::Object3dInstansManager::Update() {
 
 	// カメラあるなら
 	if (camera_) {
@@ -65,10 +65,8 @@ void Object3dInstansManager::Update() {
 					group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
 					group.instanceData[group.instanceCount].worldInverseTranspose = Transpose(Inverse(worldMatrix));
 
-					group.instanceData[group.instanceCount].color = objectIterator->
-						color;
-					group.instanceData[group.instanceCount].textureIndex =
-						objectIterator->texIndex;
+					group.instanceData[group.instanceCount].color = objectIterator->color;
+					group.instanceData[group.instanceCount].textureIndex = objectIterator->texIndex;
 
 					// インスタンス数をカウント
 					++group.instanceCount;
@@ -80,7 +78,7 @@ void Object3dInstansManager::Update() {
 	}
 }
 
-void Object3dInstansManager::Draw() {
+void Engine::Object3dInstansManager::Draw() {
 	auto commandList = dxCommon_->GetCommandList();
 
 	for (auto& pair : objectGroups) {
@@ -120,7 +118,7 @@ void Object3dInstansManager::Draw() {
 }
 
 
-void Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
+void Engine::Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 	BlendType      blendType) {
 	switch (blendType) {
 	case BlendType::MODE_ADD:
@@ -167,7 +165,7 @@ void Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Object3dInstansManager::Clear(const std::string& name) {
+void Engine::Object3dInstansManager::Clear(const std::string& name) {
 	auto it = objectGroups.find(name);
 	if (it == objectGroups.end()) return;
 	it->second.object.clear();
@@ -177,7 +175,7 @@ void Object3dInstansManager::Clear(const std::string& name) {
 
 #pragma region Create
 
-void Object3dInstansManager::CreateObject3dGroup(
+void Engine::Object3dInstansManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, Model* model,
 	RasterizerType    rasteType, BlendType    blendType) {
 	if (objectGroups.contains(name)) {
@@ -227,7 +225,7 @@ void Object3dInstansManager::CreateObject3dGroup(
 	objectGroup.rasteType = rasteType;
 }
 
-void Object3dInstansManager::CreateObject3dGroup(
+void Engine::Object3dInstansManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
 	RasterizerType    rasteType, BlendType    blendType) {
 	if (objectGroups.contains(name)) {
@@ -277,7 +275,7 @@ void Object3dInstansManager::CreateObject3dGroup(
 }
 
 
-void Object3dInstansManager::AddObject(const std::string& name,
+void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	const std::string& texName,
 	ObjectInstans&& object, int& id, MeshType type) {
 
@@ -312,7 +310,7 @@ void Object3dInstansManager::AddObject(const std::string& name,
 	}
 }
 
-void Object3dInstansManager::CreateTileMap(const std::string& groupName,
+void Engine::Object3dInstansManager::CreateTileMap(const std::string& groupName,
 	const std::string& textureFilePath,
 	Model* tileModel,
 	int mapWidth, int mapHeight,
@@ -385,7 +383,7 @@ void Object3dInstansManager::CreateTileMap(const std::string& groupName,
 
 
 
-ObjectInstans* Object3dInstansManager::GetObjectById(
+Engine::ObjectInstans* Engine::Object3dInstansManager::GetObjectById(
 	const std::string& groupName, int id) {
 	auto itGroup = objectGroups.find(groupName);
 	if (itGroup == objectGroups.end()) {
@@ -409,7 +407,7 @@ ObjectInstans* Object3dInstansManager::GetObjectById(
 	return &group.object[index];
 }
 
-std::deque<ObjectInstans>& Object3dInstansManager::GetObjects(const std::string& groupName)
+std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(const std::string& groupName)
 {
 	auto itGroup = objectGroups.find(groupName);
 	if (itGroup == objectGroups.end()) {
@@ -420,7 +418,7 @@ std::deque<ObjectInstans>& Object3dInstansManager::GetObjects(const std::string&
 	return itGroup->second.object; // コピーして返す
 }
 
-Object3dInstansManager::ObjectGroup& Object3dInstansManager::GetObjectGroup(const std::string& groupName)
+Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GetObjectGroup(const std::string& groupName)
 {
 	auto itGroup = objectGroups.find(groupName);
 	if (itGroup == objectGroups.end())
@@ -436,7 +434,7 @@ Object3dInstansManager::ObjectGroup& Object3dInstansManager::GetObjectGroup(cons
 #pragma region PSO
 
 
-void Object3dInstansManager::CreateRootSignature() {
+void Engine::Object3dInstansManager::CreateRootSignature() {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[1], 1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // ノーマルマップ用
 	PSOFanction::SetDescriptorRenge(descriptorRange[2], 2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV); // スペキュラマップ用
@@ -485,7 +483,7 @@ void Object3dInstansManager::CreateRootSignature() {
 		_countof(staticSamplers));
 }
 
-void Object3dInstansManager::CreateGraphicsPipeline() {
+void Engine::Object3dInstansManager::CreateGraphicsPipeline() {
 	CreateRootSignature();
 
 	// DepthStencilStateの設定
@@ -543,7 +541,7 @@ void Object3dInstansManager::CreateGraphicsPipeline() {
 
 #pragma region Blend
 
-void Object3dInstansManager::BlendAdd() {
+void Engine::Object3dInstansManager::BlendAdd() {
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =
 		D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -555,7 +553,7 @@ void Object3dInstansManager::BlendAdd() {
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 }
 
-void Object3dInstansManager::BlendSubtract() {
+void Engine::Object3dInstansManager::BlendSubtract() {
 	// 減算ブレンドの設定
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =
@@ -572,7 +570,7 @@ void Object3dInstansManager::BlendSubtract() {
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 }
 
-void Object3dInstansManager::BlendMuliply() {
+void Engine::Object3dInstansManager::BlendMuliply() {
 	// 加算ブレンドの設定
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask =
@@ -595,7 +593,7 @@ void Object3dInstansManager::BlendMuliply() {
 
 #pragma region ObjectInstans
 
-void ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollider, Transform transfor) {
+void Engine::ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollider, Transform transfor) {
 	transform.Initialize();
 	transform.translate_ = transfor.translate;
 	transform.rotate_ = transfor.rotate;
@@ -619,7 +617,7 @@ void ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollide
 
 }
 
-void ObjectInstans::Update() {
+void Engine::ObjectInstans::Update() {
 	if (isDelete_) return;
 	transform.Update();
 	// コライダー
@@ -636,7 +634,7 @@ void ObjectInstans::Update() {
 }
 
 
-ContactRecord& ObjectInstans::GetContactRecord() { return colliderComponent_->contactRecord_; };
+Engine::ContactRecord& Engine::ObjectInstans::GetContactRecord() { return colliderComponent_->contactRecord_; };
 
 
 

@@ -1,30 +1,33 @@
 #pragma once
 #include "GpuParticleData.h"
 
-// 前方宣言
-class LineCommon;
-class DirectXCommon;
 
-/// <summary>
-/// GPUパーティクルフィールド
-/// </summary>
-class GpuParticleField
-{
-public:
-	// 初期化
-	void Init(DirectXCommon* dxCommon,LineCommon* lineCommon,std::string name);
-	// ImGui更新
-	void UpdateImgui();
-	// 更新
-	void Update();
+namespace Engine {
+	// 前方宣言
+	class LineCommon;
+	class DirectXCommon;
 
-private:
-	// パーティクル影響場所
-	ConstantBuffer<EffectFieldCS> cbEffectFieldResource_;
+	/// <summary>
+	/// GPUパーティクルフィールド
+	/// </summary>
+	class GpuParticleField
+	{
+	public:
+		// 初期化
+		void Init(DirectXCommon* dxCommon, LineCommon* lineCommon, std::string name);
+		// ImGui更新
+		void UpdateImgui();
+		// 更新
+		void Update();
+
+	private:
+		// パーティクル影響場所
+		ConstantBuffer<EffectFieldCS> cbEffectFieldResource_;
 
 
-	std::string name_;
-	LineCommon* lineCommon_;
-	DirectXCommon* dxCommon_;
-};
+		std::string name_;
+		LineCommon* lineCommon_;
+		DirectXCommon* dxCommon_;
+	};
+}
 

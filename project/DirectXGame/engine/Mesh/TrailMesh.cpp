@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void TrailMesh::CreateMesh(size_t instanse)
+void Engine::TrailMesh::CreateMesh(size_t instanse)
 {
 	size_t sise = instanse;
 
@@ -11,7 +11,7 @@ void TrailMesh::CreateMesh(size_t instanse)
 	indices.resize(sise);
 }
 
-void TrailMesh::Initialize(DirectXCommon* dxcommon)
+void Engine::TrailMesh::Initialize(DirectXCommon* dxcommon)
 {
 	// DX共通クラス
 	dxCommon_ = dxcommon;
@@ -23,7 +23,7 @@ void TrailMesh::Initialize(DirectXCommon* dxcommon)
 
 }
 
-void TrailMesh::GetCommandList()
+void Engine::TrailMesh::GetCommandList()
 {
 	// 頂点バッファの設定
 	vbvResorce_.IASetVertexBuffers();

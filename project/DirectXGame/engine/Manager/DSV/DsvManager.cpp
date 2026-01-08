@@ -6,9 +6,9 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
-const uint32_t DsvManager::kMaxDsvCount = 1;
+const uint32_t Engine::DsvManager::kMaxDsvCount = 1;
 
-void DsvManager::Initialize(DXGIDevice* dxgi, Command* command)
+void Engine::DsvManager::Initialize(DXGIDevice* dxgi, Command* command)
 {
 	DXGIDevice_ = dxgi;	// デバイス
 	command_ = command;	// コマンド
@@ -18,7 +18,7 @@ void DsvManager::Initialize(DXGIDevice* dxgi, Command* command)
 	descriptorSize_ = DXGIDevice_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
 
-uint32_t DsvManager::Allocate()
+uint32_t Engine::DsvManager::Allocate()
 {
 	assert(kMaxDsvCount > useIndex_);
 
@@ -30,21 +30,21 @@ uint32_t DsvManager::Allocate()
 	return index;
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE DsvManager::GetCPUDescriptorHandle(uint32_t index)
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::DsvManager::GetCPUDescriptorHandle(uint32_t index)
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE handle = descriptorHeap_->GetCPUDescriptorHandleForHeapStart();
 	handle.ptr += index * descriptorSize_;
 	return handle;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE DsvManager::GetGPUDescriptorHandle(uint32_t index)
+D3D12_GPU_DESCRIPTOR_HANDLE Engine::DsvManager::GetGPUDescriptorHandle(uint32_t index)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE handle = descriptorHeap_->GetGPUDescriptorHandleForHeapStart();
 	handle.ptr += index * descriptorSize_;
 	return handle;
 }
 
-void DsvManager::CreateDSV(uint32_t dsvIndex, ID3D12Resource* pResource, DXGI_FORMAT format)
+void Engine::DsvManager::CreateDSV(uint32_t dsvIndex, ID3D12Resource* pResource, DXGI_FORMAT format)
 {
 	// dsvの設定
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
@@ -57,12 +57,12 @@ void DsvManager::CreateDSV(uint32_t dsvIndex, ID3D12Resource* pResource, DXGI_FO
 	DXGIDevice_->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, GetCPUDescriptorHandle(dsvIndex));
 }
 
-ID3D12DescriptorHeap* DsvManager::GetDescriptorHeap() const
+ID3D12DescriptorHeap* Engine::DsvManager::GetDescriptorHeap() const
 {
 	return descriptorHeap_.Get();
 }
 
-uint32_t DsvManager::GetDescriptorSize() const
+uint32_t Engine::DsvManager::GetDescriptorSize() const
 {
 	return descriptorSize_;
 }

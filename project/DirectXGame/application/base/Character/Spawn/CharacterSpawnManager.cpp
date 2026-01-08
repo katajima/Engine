@@ -1,28 +1,29 @@
 #include "CharacterSpawnManager.h"
 
-void CharacterSpawnManager::Initialize(BaseCharacterManager* characterManager, LineCommon* line)
+void CharacterSpawnManager::Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, int maxCharactorCount)
 {
 	characterManager_ = characterManager;	// キャラクター管理
 	lineCommon_ = line;						// ライン管理
+	maxCharactorCount_ = maxCharactorCount;	// 最大存在数
 }
 
 
-void CharacterSpawnManager::Update() {
+void CharacterSpawnManager::Update(float dt) {
 
 	// 更新
 	for (auto& [name, spawn] : characterSpawns_) {
-		spawn->Update(0);
+		spawn->Update(dt);
 	}
 };
 
 void CharacterSpawnManager::AddCharacterSpawn(const SpawnInfo& info)
 {
-	if(characterSpawns_.contains(info.name_)){ return;}
+	if(characterSpawns_.contains(info.GetData().name_)){ return;}
 
 	// キャラクタースポーン位置追加
 	std::unique_ptr<CharacterSpawn> spawn = std::make_unique<CharacterSpawn>();
 	spawn->Initialize(characterManager_, lineCommon_, info);
-	characterSpawns_[info.name_] = std::move(spawn);
+	characterSpawns_[info.GetData().name_] = std::move(spawn);
 }
 
 CharacterSpawn* CharacterSpawnManager::GetCharacterSpawn(const std::string& name)

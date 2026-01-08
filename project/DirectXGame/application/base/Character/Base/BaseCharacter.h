@@ -5,15 +5,21 @@
 #include "DirectXGame/application/base/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 
 // 前方宣言
 class Effect;
 class BaseSpecial;
 class BaseWeapon;
-class AttackInputHander;
-class Entity3DManager;
-class Entity2DManager;
 class BulletManager;
+class CameraManager;
+class SpecalPointManager;
+class AttackInputHander;
+namespace Engine {
+	class Entity3DManager;
+	class Entity2DManager;
+}
+
 
 /// <summary>
 /// キャラクター基底クラス
@@ -21,10 +27,14 @@ class BulletManager;
 class BaseCharacter : public IHitReceiver
 {
 public:
+	~BaseCharacter() = default;
+
+
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 	///< summary>
 	/// 更新
@@ -87,10 +97,9 @@ public: // 取得系関数
 	BaseSpecial* GetSpecial() { return special_.get(); }
 	// 武器取得
 	BaseWeapon* GetWeapon() { return weapon_.get(); }
-	// 弾マネージャ取得
-	BulletManager* GetBulletManager() { return bulletManager_; }
-	// 弾マネージャーの設定
-	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
+	// 弾の出現
+	BulletSpawn* GetBulletSpawn() { return bulletSpawn_.get(); };
+	
 	// キャラクターの生存状態を取得
 	bool GetAlive() const { return objectComponent_->GetObjectStateFlags().isAlive; };
 	// キャラクターの生存状態を取得
@@ -101,22 +110,36 @@ public: // 取得系関数
 	// キャラクター取得
 	CharacterType GetCharacterType() const { return characterParameterComponent_.characterType_; }
 	// コライダーコンポーネント
-	ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
+	Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
 	ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
 	// ワールド変換取得
-	WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+	Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 	// 削除フラグ
 	bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 	// 削除する
 	void Delete() { objectComponent_->GetObjectStateFlags().isDeleted = true; };
 	// 時間
 	float GetTime() { return objectComponent_->GetTime(); }
+	
+public: // 貰いもの
 	// インプット取得
-	Input* GetInput() { return input_; };
+	Engine::Input* GetInput() { return input_; };
+	// 弾マネージャ取得
+	BulletManager* GetBulletManager() { return bulletManager_; }
+	// カメラ管理クラス取得
+	CameraManager* GetCameraManager() { return cameraManager_; }
+	// スペシャルポイント管理クラス取得
+	SpecalPointManager* GetSpecalPointManager() { return specalPointManager_; }
+
 	//エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; }
-
+	// 弾マネージャーの設定
+	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; };
+	// カメラ管理クラスの設定
+	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; };
+	// スペシャルポイント管理クラス設定
+	void SetSpecalPointManager(SpecalPointManager* specalPointManager) { specalPointManager_ = specalPointManager; }
 protected: // 取得系関数(変更可能)
 
 	// 基本パラメータ
@@ -204,18 +227,22 @@ protected:
 
 	std::unique_ptr<ResponseSystem> responseSystem_;			// 攻撃応答システムクラス
 
+
+	std::unique_ptr<BulletSpawn> bulletSpawn_;					// 弾出現
 protected:
 	// キャラクターパラメータコンポーネント
 	CharacterParameterComponent characterParameterComponent_;
-protected:
-	Effect* effect_;						// エフェクト
-	BulletManager* bulletManager_;			// 弾管理
-protected: // 貰ってくるもの
-	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Camera* camera_ = nullptr;						// カメラ
-	Input* input_ = nullptr;						// 入力(使わないならnullptr)
-	Audio* audio_ = nullptr;
+protected: // 貰いもの(アプリケーション層)
+	Effect* effect_ = nullptr;							// エフェクト
+	BulletManager* bulletManager_ = nullptr;			// 弾管理
+	CameraManager* cameraManager_ = nullptr;			// カメラ管理クラス
+	SpecalPointManager* specalPointManager_ = nullptr;	// 必殺技ポイント管理クラス
+protected: // 貰ってくるもの(エンジン層)
+	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Camera* camera_ = nullptr;						// カメラ
+	Engine::Input* input_ = nullptr;						// 入力(使わないならnullptr)
+	Engine::Audio* audio_ = nullptr;
 };
 

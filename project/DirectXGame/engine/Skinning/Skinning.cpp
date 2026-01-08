@@ -1,7 +1,7 @@
 #include "Skinning.h"
 
 
-void SkinningConmmon::Initialize(DirectXCommon* dxCommon)
+void Engine::SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
@@ -17,7 +17,7 @@ void SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 	CreateGraphicsPipeline();
 }
 
-void SkinningConmmon::CreateRootSignature()
+void Engine::SkinningConmmon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE computeDescriptorRange[4] = {};
 	PSOFanction::SetDescriptorRenge(computeDescriptorRange[0], 0, 1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV); //Palette
@@ -39,7 +39,7 @@ void SkinningConmmon::CreateRootSignature()
 	csPsoManager_->SetRootSignature(computeRootParameters, _countof(computeRootParameters));
 }
 
-void SkinningConmmon::CreateGraphicsPipeline()
+void Engine::SkinningConmmon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

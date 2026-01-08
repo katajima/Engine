@@ -41,8 +41,9 @@ enum class VisionMode {
 };
 
 // 前方宣言
-class LineCommon;
-
+namespace Engine {
+    class LineCommon;
+}
 /// <summary>
 /// 視界コンポーネントクラス
 /// </summary>
@@ -64,10 +65,10 @@ private:
     bool canSeePlayer = false;
 
 
-    LineCommon* gLineDrawer = nullptr;
+    Engine::LineCommon* gLineDrawer = nullptr;
 public:
     //ライン共通クラス設定
-    void SetLineCommon(LineCommon* line) { gLineDrawer = line; }
+    void SetLineCommon(Engine::LineCommon* line) { gLineDrawer = line; }
 
     // アングル設定
     void SetAlertView(float angle,float distance) { 

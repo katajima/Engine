@@ -3,8 +3,9 @@
 #include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Combo/ComboGlobalData.h>
 
-
-class Entity3DManager; // 前方宣言
+namespace Engine {
+	class Entity3DManager; // 前方宣言
+}
 class BaseCharacter;
 
 /// <summary>
@@ -32,14 +33,14 @@ public:
 
 
 	// 初期化
-	void Initialize(BaseCharacter* character , Entity3DManager* entity3dManager);
+	void Initialize(BaseCharacter* character , Engine::Entity3DManager* entity3dManager);
 	// 更新
 	void Update(float dt);
 
 
 	// ヒットボックス追加
 	void AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas,const std::vector<std::string>& useHitBoxName 
-		,float lifeTime, Type dependenceType ,const Vector3& offset ,WorldTransform* parent = nullptr);
+		,float lifeTime, Type dependenceType ,const Vector3& offset , Engine::WorldTransform* parent = nullptr);
 
 
 	void CreateHitBoxCollData(const std::string& name, HitBoxShape shape, HitBoxUseType useType,const GlobalHitBoxdata& hitBoxData ,HitBoxCollData& data);
@@ -52,5 +53,5 @@ private:
 
 private:
 	BaseCharacter* character_ = nullptr;
-	Entity3DManager* entity3dManager_ = nullptr;
+	Engine::Entity3DManager* entity3dManager_ = nullptr;
 };

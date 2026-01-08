@@ -5,12 +5,12 @@
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
 #include "DirectXGame/engine/DirectX/DepthStencil/DepthStencil.h"
 
-void Barrier::Initialize(Command* command)
+void Engine::Barrier::Initialize(Command* command)
 {
     command_ = command; // コマンド
 }
 
-void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
+void Engine::Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 {
     // 違うならバリアを張る
     if (before != after)
@@ -26,7 +26,7 @@ void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES befo
     }
 }
 
-void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newState)
+void Engine::Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newState)
 {
     auto it = resourceStates_.find(res);
     D3D12_RESOURCE_STATES currentState = D3D12_RESOURCE_STATE_COMMON; // 初期状態は仮に COMMON に
@@ -50,7 +50,7 @@ void Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES newS
     }
 }
 
-void Barrier::UavDependence(ID3D12Resource* res)
+void Engine::Barrier::UavDependence(ID3D12Resource* res)
 {
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
@@ -59,7 +59,7 @@ void Barrier::UavDependence(ID3D12Resource* res)
     command_->GetList()->ResourceBarrier(1, &barrier);
 }
 
-void Barrier::RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state)
+void Engine::Barrier::RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state)
 {
     resourceStates_[res] = state;
 }

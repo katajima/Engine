@@ -2,7 +2,7 @@
 
 #include"DirectXGame/engine/Effect/Primitive/Primitive.h"
 
-void Transfomation::Initialize(DirectXCommon* dxCommon)
+void Engine::Transfomation::Initialize(DirectXCommon* dxCommon)
 {
 	// ダイレクトX共通クラス
 	dxCommon_ = dxCommon;
@@ -16,7 +16,7 @@ void Transfomation::Initialize(DirectXCommon* dxCommon)
 	cbResource_.Data()->worldInverseTranspose = MakeIdentity4x4();
 }
 
-void Transfomation::Update(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
+void Engine::Transfomation::Update(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
@@ -53,7 +53,7 @@ void Transfomation::Update(Model* model, Camera* camera, Matrix4x4& local, Matri
 
 }
 
-void Transfomation::Update(BasePrimitive* primitive, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
+void Engine::Transfomation::Update(BasePrimitive* primitive, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
@@ -89,7 +89,7 @@ void Transfomation::Update(BasePrimitive* primitive, Camera* camera, Matrix4x4& 
 	cbResource_.Data()->worldInverseTranspose = Transpose(Inverse(mat));
 }
 
-void Transfomation::Update(SkyBox* skyBox, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
+void Engine::Transfomation::Update(SkyBox* skyBox, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
@@ -125,7 +125,7 @@ void Transfomation::Update(SkyBox* skyBox, Camera* camera, Matrix4x4& local, Mat
 	cbResource_.Data()->worldInverseTranspose = Transpose(Inverse(mat));
 }
 
-void Transfomation::Update(Ocean* ocean, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
+void Engine::Transfomation::Update(Ocean* ocean, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
@@ -161,7 +161,7 @@ void Transfomation::Update(Ocean* ocean, Camera* camera, Matrix4x4& local, Matri
 	cbResource_.Data()->worldInverseTranspose = Transpose(Inverse(mat));
 }
 
-void Transfomation::Update(Camera* camera, Matrix4x4& mat)
+void Engine::Transfomation::Update(Camera* camera, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
@@ -185,7 +185,7 @@ void Transfomation::Update(Camera* camera, Matrix4x4& mat)
 	cbResource_.Data()->worldInverseTranspose = Transpose(Inverse(mat));
 }
 
-void Transfomation::UpdateSkinning(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
+void Engine::Transfomation::UpdateSkinning(Model* model, Camera* camera, Matrix4x4& local, Matrix4x4& mat)
 {
 	Matrix4x4 worldViewProjectionMatrix{};
 
@@ -220,13 +220,13 @@ void Transfomation::UpdateSkinning(Model* model, Camera* camera, Matrix4x4& loca
 
 }
 
-void Transfomation::UpdateSprite(Matrix4x4& mat)
+void Engine::Transfomation::UpdateSprite(Matrix4x4& mat)
 {
 	cbResource_.Data()->World = mat;
 	cbResource_.Data()->WVP = mat;
 }
 
-void Transfomation::GetCommandList(int index)
+void Engine::Transfomation::GetCommandList(int index)
 {
 	cbResource_.SetGraphicsRootConstantBufferView(index);
 }

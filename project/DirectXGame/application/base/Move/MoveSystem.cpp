@@ -4,7 +4,7 @@
 void MoveSystem::Initialize() {
 }
 
-void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
+void MoveSystem::Update(float dt, Engine::WorldTransform& world, Engine::Input* input)
 {
 	// 攻撃中は通常の移動処理しない
 	if (isAttack_) return;
@@ -36,7 +36,7 @@ void MoveSystem::Update(float dt, WorldTransform& world, Input* input)
 	MoveProcess(dt, world, velo);
 }
 
-void MoveSystem::Update(float dt, WorldTransform& world)
+void MoveSystem::Update(float dt, Engine::WorldTransform& world)
 {
 	if (isDash_) return; // ダッシュ中は移動処理しない
 
@@ -47,7 +47,7 @@ void MoveSystem::Update(float dt, WorldTransform& world)
 	MoveProcess(dt, world, velo);
 }
 
-void MoveSystem::UpdateEnemy(float dt, WorldTransform& world)
+void MoveSystem::UpdateEnemy(float dt, Engine::WorldTransform& world)
 {
 	if (isDash_) return; // ダッシュ中は移動処理しない
 
@@ -58,7 +58,7 @@ void MoveSystem::UpdateEnemy(float dt, WorldTransform& world)
 	MoveProcess(dt, world, velo,false);
 }
 
-void MoveSystem::UpdateAttack(float dt, WorldTransform& world)
+void MoveSystem::UpdateAttack(float dt, Engine::WorldTransform& world)
 {
 	MoveProcess(dt, world,keepDirection_);
 }
@@ -101,7 +101,7 @@ void MoveSystem::SpeedProcess(float dt)
 
 }
 
-void MoveSystem::RotateProcess(float dt, WorldTransform& world, const Vector3& velo)
+void MoveSystem::RotateProcess(float dt, Engine::WorldTransform& world, const Vector3& velo)
 {
 	// 移動ベクトルがゼロなら回転処理しない
 	if (velo.Length() == 0.0f) return;
@@ -125,7 +125,7 @@ void MoveSystem::RotateProcess(float dt, WorldTransform& world, const Vector3& v
 	currentYaw += delta * data_.rotationSpeed;
 }
 
-void MoveSystem::MoveProcess(float dt, WorldTransform& world, Vector3& velo,bool isSpeed)
+void MoveSystem::MoveProcess(float dt, Engine::WorldTransform& world, Vector3& velo,bool isSpeed)
 {
 	// 動いているなら
 	if (velo.x != 0.0f || velo.z != 0.0f) {
@@ -239,7 +239,7 @@ void MoveSystem::DirectionProcess(const Vector3& velo)
 	direction_ = Multiply(Normalize(worldDirection), 1.0f);
 }
 
-void MoveSystem::DashProcess(WorldTransform& world)
+void MoveSystem::DashProcess(Engine::WorldTransform& world)
 {
 	// ダッシュ中は移動処理しない
 	if (!isDash_) return;
@@ -255,7 +255,7 @@ void MoveSystem::DashProcess(WorldTransform& world)
 	currentYaw = targetYaw;
 }
 
-void MoveSystem::AttackProcess(WorldTransform& world, const Vector3& direction)
+void MoveSystem::AttackProcess(Engine::WorldTransform& world, const Vector3& direction)
 {
 	// ダッシュ中は移動処理しない
 	if (!isAttack_) return;

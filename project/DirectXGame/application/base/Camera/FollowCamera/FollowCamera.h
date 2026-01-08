@@ -10,7 +10,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position) override;
+	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position) override;
 
 	///< summary>
 	/// 更新
@@ -31,8 +31,8 @@ private: // 一旦
 		float gaussianSigma = 100.0f;
 		float bloomIndensity = 10.0f;
 
-		float rotateMinX = Math::DegreesToRadians(-15);
-		float rotateMaxX = Math::DegreesToRadians(90);
+		float rotateMinX = Math::DegreesToRadians(-10);
+		float rotateMaxX = Math::DegreesToRadians(10);
 
 
 		float maxZOffset = 30.0f;

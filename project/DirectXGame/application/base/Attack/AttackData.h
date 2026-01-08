@@ -113,7 +113,7 @@ public:
 	/// 攻撃者位置設定
 	/// </summary>
 	/// <param name="world"></param>
-	void SetAttackerWorldTransform(WorldTransform* world) { world_ = world; };
+	void SetAttackerWorldTransform(Engine::WorldTransform* world) { world_ = world; };
 
 	// データ構造体取得
 	Data& GetData() { return data_; }
@@ -129,7 +129,7 @@ public:
 
 private:
 	Data data_;
-	WorldTransform* world_ = nullptr;
+	Engine::WorldTransform* world_ = nullptr;
 	float timer_ = 0.0f;	// 時間
 };
 

@@ -1,11 +1,14 @@
 #pragma once
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/application/base/Character/Base/CharacterData.h>
 
 // 前方宣言
 class BaseCharacterManager;
-class LineCommon;
 
+namespace Engine {
+	class LineCommon;
+}
 
 
 /// <summary>
@@ -14,11 +17,27 @@ class LineCommon;
 class SpawnInfo {
 public:
 
+
+	struct Data
+	{
+		EnemyType type_ = EnemyType::kNormal;// 敵タイプ
+		std::string name_ = "";				// 名前
+		int spawnMaxCount_ = 1;				// 出現最大回数
+		int spawnAmount_ = 0;				// 出現量
+		Vector3 translate_ = { 0,0,0 };		// 位置
+		Vector3 size_ = { 1.0f,1.0f,1.0f }; // 出現エリアサイズ
+		float spawnInterval_ = 1.0f;        // 出現間隔
+		float spawnTimer_ = 0.0f;           // 出現タイミングタイマー(フェーズが始まってから)
+	};
+
 	// 初期化
-	void Initialize(const std::string& name, int spawnMaxCount , int spawnAmount) {
-		name_ = name;					// 名前
-		spawnMaxCount_ = spawnMaxCount;	// 出現回数
-		spawnAmount_ = spawnAmount;		// 出現量
+	void Initialize(const std::string& name, int spawnMaxCount , int spawnAmount,Vector3 translate, Vector3 size = {10,1,10}, float interval = 1.0f) {
+		data_.name_ = name;					// 名前
+		data_.spawnMaxCount_ = spawnMaxCount;	// 出現回数
+		data_.spawnAmount_ = spawnAmount;		// 出現量
+		data_.size_ = size;						// サイズ
+		data_.translate_ = translate;			// 位置
+		data_.spawnInterval_ = interval;		// インターバル
 	}
 
 
@@ -26,7 +45,7 @@ public:
 	void Update(float timer) {
 		spawnDelay_ += timer;	//
 		// 出現インターバル
-		if (spawnDelay_ >= spawnInterval_) {
+		if (spawnDelay_ >= data_.spawnInterval_) {
 			spawnDelay_ = 0.0f;
 			isSpawned_ = false;
 		}
@@ -38,7 +57,7 @@ public:
 
 		isSpawned_ = true;
 
-		if (spawnCount_ >= spawnMaxCount_) {
+		if (spawnCount_ >= data_.spawnMaxCount_) {
 			isEnd_ = true;
 		}
 	}
@@ -55,17 +74,17 @@ public:
 	// 出現フラグ設定
 	void SetIsSpawn(bool isSpawn) { isSpawn_ = isSpawn; }
 
-public:
-	std::string name_ = "";				// 名前
-	int spawnMaxCount_ = 1;				// 出現最大回数
-	int spawnAmount_ = 0;				// 出現量
-	Vector3 size_ = { 1.0f,1.0f,1.0f }; // 出現エリアサイズ
-	float spawnInterval_ = 1.0f;        // 出現間隔
-	float spawnTimer_ = 0.0f;           // 出現タイミングタイマー(フェーズが始まってから)
+	// データ取得
+	Data& GetData() { return data_; }
+	
+	const Data& GetData() const { return data_; }
+
+private:
+	Data data_;
 private:
 	bool isSpawn_ = false;				// 出現フラグ
 	int spawnCount_ = 0;				// 出現回数
-	float spawnDelay_ = 0.0f;            // 出現遅延時間
+	float spawnDelay_ = 0.0f;           // 出現遅延時間
 	bool isSpawned_ = false;			// 出現済みフラグ
 	bool isEnd_ = false;				// 出現終了フラグ
 };
@@ -76,7 +95,7 @@ private:
 class CharacterSpawn {
 public:
 	// 初期化
-	void Initialize(BaseCharacterManager* characterManager, LineCommon* line, const SpawnInfo& info);
+	void Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info);
 
 	// 更新
 	void Update(float time);
@@ -85,31 +104,27 @@ public:
 	void Draw();
 
 public: // 取得or設定
-
 	// 名前取得
-	std::string GetName() const { return spawnInfo_.name_; }
-
+	std::string GetName() const { return spawnInfo_.GetData().name_; }
 	// 出現エリア設定
-	void SetSizeArea(const Vector3& size) { spawnInfo_.size_ = size; }
-
+	void SetSizeArea(const Vector3& size) { spawnInfo_.GetData().size_ = size; }
 	// 出現量設定
-	void SetSpawnAmount(int amount) { spawnInfo_.spawnAmount_ = amount; }
-
+	void SetSpawnAmount(int amount) { spawnInfo_.GetData().spawnAmount_ = amount; }
 	// 出現情報取得
 	SpawnInfo& GetSpawnInfo() { return spawnInfo_; }
-
-	WorldTransform& GetSpawnTransform() { return spawnTransform_; }
+	// 出現位置取得
+	Engine::WorldTransform& GetSpawnTransform() { return spawnTransform_; }
 public:
 	// 出現処理
 	void SpawnProcess();
 private:
 	SpawnInfo spawnInfo_;				// 出現情報
-	AABB spawnAABBArea_;				// 出現エリアAABB	
-	WorldTransform spawnTransform_;		// 出現位置変換行列
+	AABB spawnAABBArea_;					// 出現エリアAABB	
+	Engine::WorldTransform spawnTransform_;		// 出現位置変換行列
 
 	float timer_ = 0.0f;                // タイマー
 private:
 	BaseCharacterManager* characterManager_ = nullptr;
-	LineCommon* lineCommon_ = nullptr;
+	Engine::LineCommon* lineCommon_ = nullptr;
 };
 

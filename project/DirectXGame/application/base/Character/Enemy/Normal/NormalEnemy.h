@@ -13,41 +13,28 @@ public:
 	}
 
 	// 初期化
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables,Vector3 position, Camera* camera) override;
+	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables,Vector3 position, Engine::Camera* camera) override;
 
 	// 毎フレーム更新
 	void Update() override;
 
 	// エフェクト描画
-	void DrawEffect() override;
+	void DrawEffect() override {};
 	// 描画2d
 	void Draw2D() override;
-	// プレイヤ設定
-	void SetPlayer(BasePlayer* player) override;
 	// エミッター出現
 	void Emit() override;
 	// 移動
 	void Move() override;
 	// ジャンプ
-	void Jump() override;
+	void Jump() override {};
 	// 攻撃
-	void Attack() override;
+	void Attack() override {};
 
 private:
 	// ステートマシーン初期化
 	void InitStateMachine() override;
-
 	// パーティクル初期化
 	void InitParticle();
-
-
-	void AttackByCrowdCommand();
-
-private:
-	WorldTransform worldEffect_;
-
-	bool isStopMove_ = false;
-	float stopMoveTimer_ = 0.0f;
-
-	DebugTimer debugTimer_;
 };

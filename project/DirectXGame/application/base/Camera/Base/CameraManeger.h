@@ -15,7 +15,7 @@ class CameraManager
 public:
 
 	// 初期化
-	void Initialize(Input* input, Entity3DManager* entity3DManager, GlobalVariables* globalVariables);
+	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables);
 
 	// 更新
 	void Update();
@@ -28,7 +28,7 @@ public:
 	// ImGui更新
 	void UpadateImGui();
 	// カメラ取得
-	Camera* GetCamera() { return camera.get(); }
+	Engine::Camera* GetCamera() { return camera.get(); }
 	// カメラを管理対象から削除
 	void DeleteCamera(std::string name);
 	// カメラクリア
@@ -40,7 +40,7 @@ private:
 	// 全てのカメラ
 	std::map<std::string, BaseCamera*> cameras;
 	// カメラ
-	std::unique_ptr < Camera> camera;
+	std::unique_ptr < Engine::Camera> camera;
 	// ゲームでの画面か
 	bool isGameCamera = true;
 
@@ -58,8 +58,8 @@ private:
 
 
 private:
-	Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Camera* camera_ = nullptr;						// カメラ
-	Input* input_ = nullptr;						// 入力
+	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Camera* camera_ = nullptr;						// カメラ
+	Engine::Input* input_ = nullptr;						// 入力
 };

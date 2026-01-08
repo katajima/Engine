@@ -1,8 +1,8 @@
 #include "BaseScene.h"
 #include "SceneManager.h"
 
-void BaseScene::AllUpdate(){ Update();}
+void Engine::BaseScene::AllUpdate(){ Update();}
 
-void BaseScene::AllDraw2D(){ Draw2D();}
+void Engine::BaseScene::AllDraw2D(){ Draw2D();}
 
-SceneData& BaseScene::GetSceneData() { return sceneManager_->GetSceneData(); }
+SceneData& Engine::BaseScene::GetSceneData() { return sceneManager_->GetSceneData(); }

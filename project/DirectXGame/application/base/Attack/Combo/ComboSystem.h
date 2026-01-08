@@ -7,8 +7,9 @@
 #include "ComboGlobalData.h"
 
 class BaseCharacter; // 前方宣言
-class GlobalVariables;
-
+namespace Engine {
+	class GlobalVariables;
+}
 
 
 
@@ -19,7 +20,7 @@ class ComboSystem
 {
 public:
 	// 初期化
-	void Initialize(BaseCharacter* character, GlobalVariables* globalVariables);
+	void Initialize(BaseCharacter* character, Engine::GlobalVariables* globalVariables);
 
 	// コンボ更新
 	void UpdateCombo(float dt) {
@@ -68,6 +69,6 @@ private:
 	// コンボノードステートマップ
 	std::map<std::string, std::shared_ptr<ComboNodeState>> comboNodes_;
 private:
-	GlobalVariables* globalVariables = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
 
 };

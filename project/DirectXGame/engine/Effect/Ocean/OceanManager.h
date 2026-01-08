@@ -23,38 +23,38 @@ using namespace Microsoft::WRL;
 #include<random>
 #include<numbers>
 
+namespace Engine {
+	/// <summary>
+	/// 海マネージャー
+	/// </summary>
+	class OceanManager
+	{
+	public:
+		// 初期化
+		void Initialize(DirectXCommon* dxCommon);
+		// 描画設定
+		void DrawCommonSetting();
 
-/// <summary>
-/// 海マネージャー
-/// </summary>
-class OceanManager
-{
-public:
-	// 初期化
-	void Initialize(DirectXCommon* dxCommon);
-	// 描画設定
-	void DrawCommonSetting();
+		// DirectX共通クラス取得
+		DirectXCommon* GetDxCommon() const { return dxCommon_; }
 
-	// DirectX共通クラス取得
-	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-
-private:
-	// ルートシグネチャの作成
-	void CreateRootSignature();
-	// グラフィックスパイプラインの作成
-	void CreateGraphicsPipeline();
+	private:
+		// ルートシグネチャの作成
+		void CreateRootSignature();
+		// グラフィックスパイプラインの作成
+		void CreateGraphicsPipeline();
 
 
-private:
-	// ルートシグネチャ
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-	// パイプラインステートオブジェクト
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
+	private:
+		// ルートシグネチャ
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
+		// パイプラインステートオブジェクト
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
 
-	DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon_;
 
-	std::unique_ptr<PSOManager> psoManager_ = nullptr;
+		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 
-};
-
+	};
+}
 

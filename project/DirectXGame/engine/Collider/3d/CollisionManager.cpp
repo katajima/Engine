@@ -3,7 +3,7 @@
 
 
 
-void CollisionManager::Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
+void Engine::CollisionManager::Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
 	globalVariables_ = globalVariables;	// 保存項目
 
 	float size = (sceneBounds.max_ - sceneBounds.min_).Length();
@@ -18,7 +18,7 @@ void CollisionManager::Initialize(GlobalVariables* globalVariables, const AABB& 
 	octreeColliderStatic_ = std::make_unique<OctreeCollider>(sceneBounds, depth, 2, 2, 2);
 	}
 
-void CollisionManager::BuildStaticSceneOctree()
+void Engine::CollisionManager::BuildStaticSceneOctree()
 {
 	if (!octreeColliderStatic_) return;
 
@@ -32,14 +32,14 @@ void CollisionManager::BuildStaticSceneOctree()
 	}
 }
 
-void CollisionManager::Register(ColliderComponent* comp)
+void Engine::CollisionManager::Register(ColliderComponent* comp)
 {
 	if (comp && registeredDynamic_.insert(comp).second) {
 		dynamicColliders.push_back(comp);
 	}
 }
 
-void CollisionManager::RegisterStatic(ColliderComponent* comp)
+void Engine::CollisionManager::RegisterStatic(ColliderComponent* comp)
 {
 	if (comp && registeredStatic_.insert(comp).second) {
 		staticColliders.push_back(comp);
@@ -47,7 +47,7 @@ void CollisionManager::RegisterStatic(ColliderComponent* comp)
 
 }
 
-void CollisionManager::Clear(){
+void Engine::CollisionManager::Clear(){
 	dynamicColliders.clear();
 	staticColliders.clear();
 	registeredDynamic_.clear();
@@ -55,7 +55,7 @@ void CollisionManager::Clear(){
 }
 
 
-void CollisionManager::CheckAll() {
+void Engine::CollisionManager::CheckAll() {
 	debugTimer_.StartTimer();
 
 	// ==== 動的Octreeを再構築 ====

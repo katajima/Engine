@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.h"
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 
-void PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister, D3D12_SHADER_VISIBILITY shaderType, D3D12_ROOT_PARAMETER_TYPE rootType){
+void Engine::PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRegister, D3D12_SHADER_VISIBILITY shaderType, D3D12_ROOT_PARAMETER_TYPE rootType){
 	// どのシェーダを使うのか
 	parameter.ShaderVisibility = shaderType;
 
@@ -16,14 +16,14 @@ void PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, int ShaderRe
 	parameter.Descriptor.ShaderRegister = ShaderRegister;    // レジスタ番号0とバインド　　// b0の0と一致する。もしb11と紐づけたいなら11となる
 }
 
-void PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange, D3D12_SHADER_VISIBILITY shaderType) {
+void Engine::PSOFanction::SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange, D3D12_SHADER_VISIBILITY shaderType) {
 	parameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う           
 	parameter.ShaderVisibility = shaderType;
 	parameter.DescriptorTable.pDescriptorRanges = &descriptorRange; // Tableの中身の配列を指定
 	parameter.DescriptorTable.NumDescriptorRanges = 1; // Tableで利用する数 	
 };
 
-void PSOFanction::SetDescriptorRenge(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rengeType) {
+void Engine::PSOFanction::SetDescriptorRenge(D3D12_DESCRIPTOR_RANGE& descriptorRange, int ShaderRegister, int numDescriptors, D3D12_DESCRIPTOR_RANGE_TYPE rengeType) {
 	descriptorRange.BaseShaderRegister = ShaderRegister; //
 	descriptorRange.RegisterSpace = 0; // レジスタスペース (通常は0) 
 	descriptorRange.NumDescriptors = numDescriptors; // 数は1つ
@@ -31,7 +31,7 @@ void PSOFanction::SetDescriptorRenge(D3D12_DESCRIPTOR_RANGE& descriptorRange, in
 	descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 };
 
-void PSOFanction::SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, int shaderRegister, D3D12_FILTER filter, D3D12_SHADER_VISIBILITY shaderType, TextureAddressMode mode) {
+void Engine::PSOFanction::SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, int shaderRegister, D3D12_FILTER filter, D3D12_SHADER_VISIBILITY shaderType, TextureAddressMode mode) {
 	switch (mode)
 	{
 	case TextureAddressMode::kWRAP:
@@ -72,7 +72,7 @@ void PSOFanction::SetSampler(D3D12_STATIC_SAMPLER_DESC& staticSamplers, int shad
 
 };
 
-void PSOFanction::Blob(DXGIDevice* DXGIDevice,D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature) {
+void Engine::PSOFanction::Blob(DXGIDevice* DXGIDevice,D3D12_ROOT_SIGNATURE_DESC descriptionSignature, Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature) {
 	HRESULT hr;
 	// descriptionSignature が正しく設定されているか確認
 	if (descriptionSignature.pParameters == nullptr || descriptionSignature.NumParameters == 0)

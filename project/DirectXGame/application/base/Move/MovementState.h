@@ -14,7 +14,7 @@ public:
 	virtual ~MovementState() = default;
 
 	virtual void Enter() {}
-	virtual void Update(float dt, WorldTransform& object, RigidBodyComponent& rigid, Input* input, 
+	virtual void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input,
 		MoveSystem* moveSystem, JumpSystem* jumpSystem) = 0;
 	virtual void Exit() {}
 };
@@ -24,7 +24,7 @@ public:
 /// </summary>
 class GroundState : public MovementState {
 public:
-	void Update(float dt, WorldTransform& object, RigidBodyComponent& rigid, Input* input,
+	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input,
 		MoveSystem* moveSystem, JumpSystem* jumpSystem) override;
 };
 
@@ -34,7 +34,7 @@ public:
 /// </summary>
 class AirState : public MovementState {
 public:
-	void Update(float dt, WorldTransform& object, RigidBodyComponent& rigid, Input* input,
+	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input,
 		MoveSystem* moveSystem, JumpSystem* jumpSystem) override;
 };
 
@@ -55,7 +55,7 @@ public:
 
 	};
 
-	void Update(float dt, WorldTransform& object, RigidBodyComponent& rigid, Input* input,
+	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input,
 		MoveSystem* moveSystem, JumpSystem* jumpSystem);
 
 	

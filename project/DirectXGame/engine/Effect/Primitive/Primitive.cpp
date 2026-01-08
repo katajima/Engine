@@ -2,7 +2,7 @@
 
 #include"PrimitiveCommon.h"
 
-void BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const std::string& tex, const Color color, const std::string& name, bool isLine)
+void Engine::BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const std::string& tex, const Color color, const std::string& name, bool isLine)
 {
 	primitiveCommon_ = primitiveCommon;	// プリミティブ共通クラス
 
@@ -26,7 +26,7 @@ void BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const std::stri
 	}
 }
 
-void BasePrimitive::Update(float deltaTime)
+void Engine::BasePrimitive::Update(float deltaTime)
 {
 #ifdef _DEBUG
 	std::string str = name_ + "_translate";
@@ -87,7 +87,7 @@ void BasePrimitive::Update(float deltaTime)
 	UniqeUpdate();
 }
 
-void BasePrimitive::Draw()
+void Engine::BasePrimitive::Draw()
 {
 	// 頂点があるなら
 	if (mesh->vertices.size() != 0) {
@@ -107,7 +107,7 @@ void BasePrimitive::Draw()
 	}
 };
 
-void BasePrimitive::DrawSetting(PsoType type)
+void Engine::BasePrimitive::DrawSetting(PsoType type)
 {
 	switch (type)
 	{
@@ -132,18 +132,18 @@ void BasePrimitive::DrawSetting(PsoType type)
 	}
 }
 
-void PlanePrimitive::InvNormal()
+void Engine::PlanePrimitive::InvNormal()
 {
 	plane.Create(mesh.get(), true);
 
 }
 
-void PlanePrimitive::UniqeUpdate()
+void Engine::PlanePrimitive::UniqeUpdate()
 {
 	prePlane = plane;
 }
 
-void TrianglePrimitive::UniqeUpdate()
+void Engine::TrianglePrimitive::UniqeUpdate()
 {
 	if (triangle != preTriangle) {
 		triangle.Create(mesh.get());
@@ -152,7 +152,7 @@ void TrianglePrimitive::UniqeUpdate()
 	preTriangle = triangle;
 }
 
-void CirclePrimitive::UniqeUpdate()
+void Engine::CirclePrimitive::UniqeUpdate()
 {
 	if (preCircle != circle) {
 		circle.Create(mesh.get());
@@ -167,7 +167,7 @@ void CirclePrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void CubePrimitive::UniqeUpdate()
+void Engine::CubePrimitive::UniqeUpdate()
 {
 	if (preCube != cube) {
 		cube.Create(mesh.get());
@@ -182,7 +182,7 @@ void CubePrimitive::UniqeUpdate()
 
 }
 
-void StarPrimitive::UniqeUpdate()
+void Engine::StarPrimitive::UniqeUpdate()
 {
 	if ((preStar != star)) {
 		star.Create(mesh.get());
@@ -200,7 +200,7 @@ void StarPrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void CrescentPrimitive::UniqeUpdate()
+void Engine::CrescentPrimitive::UniqeUpdate()
 {
 	if ((preCrescent != crescent)) {
 		crescent.Create(mesh.get());
@@ -227,7 +227,7 @@ void CrescentPrimitive::UniqeUpdate()
 
 }
 
-void RingPrimitive::UniqeUpdate()
+void Engine::RingPrimitive::UniqeUpdate()
 {
 	if ((preRing != ring)) {
 		ring.Create(mesh.get());
@@ -247,7 +247,7 @@ void RingPrimitive::UniqeUpdate()
 
 }
 
-void CrossPrimitive::UniqeUpdate()
+void Engine::CrossPrimitive::UniqeUpdate()
 {
 	if ((preCross != cross)) {
 		cross.Create(mesh.get());
@@ -263,7 +263,7 @@ void CrossPrimitive::UniqeUpdate()
 
 }
 
-void CylinderPrimitive::UniqeUpdate()
+void Engine::CylinderPrimitive::UniqeUpdate()
 {
 	if ((preCylinder != cylinder)) {
 		cylinder.Create(mesh.get());
@@ -285,7 +285,7 @@ void CylinderPrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void SpherePrimitive::UniqeUpdate()
+void Engine::SpherePrimitive::UniqeUpdate()
 {
 	if ((sphere != preSphere)) {
 		sphere.Create(mesh.get());
@@ -303,7 +303,7 @@ void SpherePrimitive::UniqeUpdate()
 
 }
 
-void ArrowPrimitive::UniqeUpdate()
+void Engine::ArrowPrimitive::UniqeUpdate()
 {
 	if (preArrow != arrow) {
 		arrow.Create(mesh.get());
@@ -312,7 +312,7 @@ void ArrowPrimitive::UniqeUpdate()
 	preArrow = arrow;
 }
 
-void TubePrimitive::UniqeUpdate()
+void Engine::TubePrimitive::UniqeUpdate()
 {
 	if ((preTube != tube)) {
 		tube.Create(mesh.get());
@@ -332,7 +332,7 @@ void TubePrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void PyramidPrimitive::UniqeUpdate()
+void Engine::PyramidPrimitive::UniqeUpdate()
 {
 	if ((prePyramid != pyramid)) {
 		pyramid.Create(mesh.get());
@@ -352,7 +352,7 @@ void PyramidPrimitive::UniqeUpdate()
 #endif // _DEBUG
 }
 
-void TorusPrimitive::UniqeUpdate()
+void Engine::TorusPrimitive::UniqeUpdate()
 {
 	if ((torus != preTorus)) {
 		torus.Create(mesh.get());

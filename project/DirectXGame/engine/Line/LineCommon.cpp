@@ -6,7 +6,7 @@
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void LineCommon::Initialize(DirectXCommon* dxCommon)
+void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;	// DX共通クラス
 
@@ -40,7 +40,7 @@ void LineCommon::Initialize(DirectXCommon* dxCommon)
 	lineDebugMeshData_.Initialize(dxCommon_);
 }
 
-void LineCommon::Update()
+void Engine::LineCommon::Update()
 {
 	lineMeshData_.Update();
 #ifdef _DEBUG
@@ -53,7 +53,7 @@ void LineCommon::Update()
 	}
 }
 
-void LineCommon::DrawCommonSetting()
+void Engine::LineCommon::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -64,7 +64,7 @@ void LineCommon::DrawCommonSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
-void LineCommon::DrawCommonSetting2()
+void Engine::LineCommon::DrawCommonSetting2()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature2.Get());
@@ -75,7 +75,7 @@ void LineCommon::DrawCommonSetting2()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
-void LineCommon::Draw()
+void Engine::LineCommon::Draw()
 {
 	DrawCommonSetting();
 
@@ -101,13 +101,13 @@ void LineCommon::Draw()
 	lineMeshData_.Draw();
 }
 
-void LineCommon::LineClear()
+void Engine::LineCommon::LineClear()
 {
 	lineMeshData_.Clear();
 	lineDebugMeshData_.Clear();
 }
 
-void LineCommon::CreateRootSignature()
+void Engine::LineCommon::CreateRootSignature()
 {
 	D3D12_ROOT_PARAMETER rootParameters[2] = {};  // 2つのパラメーターを使う
 
@@ -128,7 +128,7 @@ void LineCommon::CreateRootSignature()
 
 }
 
-void LineCommon::CreateGraphicsPipeline()
+void Engine::LineCommon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

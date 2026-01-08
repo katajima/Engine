@@ -6,7 +6,7 @@
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "imgui.h"
 
-void Field::FieldEffect::Initialize(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon)
+void Engine::Field::FieldEffect::Initialize(const std::string& name, ShapeType shapeType, EffectType type, LineCommon* lineCommon)
 {
 	lineCommon_ = lineCommon;	// ライト共通クラス
 	name_ = name;				// 名前
@@ -83,12 +83,12 @@ void Field::FieldEffect::Initialize(const std::string& name, ShapeType shapeType
 
 }
 
-void Field::FieldEffect::Update()
+void Engine::Field::FieldEffect::Update()
 {
 	transform_.Update();
 }
 
-void Field::FieldEffect::DebugImgui()
+void Engine::Field::FieldEffect::DebugImgui()
 {
 	if (ImGui::TreeNode(name_.c_str())) {
 		ImGui::Text(nameType.c_str());
@@ -177,7 +177,7 @@ void Field::FieldEffect::DebugImgui()
 	}
 }
 
-bool Field::FieldEffect::IsCollisionAABB(const Vector3& point)
+bool Engine::Field::FieldEffect::IsCollisionAABB(const Vector3& point)
 {
 	Vector3 worldPos = transform_.worldMat_.GetWorldPosition();
 
@@ -201,7 +201,7 @@ bool Field::FieldEffect::IsCollisionAABB(const Vector3& point)
 	return false;
 }
 
-void Field::Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector<Field::FieldEffect*> fieldEffect, float deltaTime)
+void Engine::Field::Effect(ParticleGroup& grop, std::list<Particle>::iterator& particleIterator, std::vector<Field::FieldEffect*> fieldEffect, float deltaTime)
 {
 
 

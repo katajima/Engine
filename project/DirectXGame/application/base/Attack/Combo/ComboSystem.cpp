@@ -1,7 +1,7 @@
 #include "ComboSystem.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 
-void ComboSystem::Initialize(BaseCharacter* character, GlobalVariables* globalVariables) {
+void ComboSystem::Initialize(BaseCharacter* character, Engine::GlobalVariables* globalVariables) {
 	this->globalVariables = globalVariables;
 	
 	comboStateMachine_ = std::make_unique<ComboStateMachine>(character);
@@ -31,7 +31,8 @@ void ComboSystem::AddComboNode(const std::string& name, const ComboData& data){
 void ComboSystem::ConnectCombo(const std::string& from, AttackInput input, const std::string& to){
 	auto itFrom = comboNodes_.find(from);
 	auto itTo = comboNodes_.find(to);
-	if (itFrom != comboNodes_.end() && itTo != comboNodes_.end()) {
+	if (itFrom != comboNodes_.end()) {
+		if(itTo != comboNodes_.end())
 		itFrom->second->SetNextState(input, itTo->second);
 	}
 }

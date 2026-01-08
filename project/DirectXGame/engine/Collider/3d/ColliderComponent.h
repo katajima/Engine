@@ -10,157 +10,158 @@
 /// <summary>
 /// コライダコンポーネント
 /// </summary>
-class ColliderComponent {
-public:
-    // Colliderを保持
-    struct ColliderEntry {
-        uint32_t id = 0;
-        std::unique_ptr<Collider> collider = nullptr;
-    };
+namespace Engine {
+    class ColliderComponent {
+    public:
+        // Colliderを保持
+        struct ColliderEntry {
+            uint32_t id = 0;
+            std::unique_ptr<Collider> collider = nullptr;
+        };
 
-    std::vector<ColliderEntry> colliders;
+        std::vector<ColliderEntry> colliders;
 
-    // 所有オブジェクト（通知用）
-    void* owner = nullptr;
+        // 所有オブジェクト（通知用）
+        void* owner = nullptr;
 
-    // 衝突時に呼ばれる関数（任意）
-    std::function<void(Collider* self, Collider* other)> onHitCallback;
+        // 衝突時に呼ばれる関数（任意）
+        std::function<void(Collider* self, Collider* other)> onHitCallback;
 
-	// 衝突時に受け取るインターフェース（任意）
-    IHitReceiver* hitReceiver = nullptr;
+        // 衝突時に受け取るインターフェース（任意）
+        IHitReceiver* hitReceiver = nullptr;
 
-	// 履歴情報（衝突履歴）
-    ContactRecord contactRecord_{};
-private:
-    uint32_t nextId_ = 1; // IDは1から開始
+        // 履歴情報（衝突履歴）
+        ContactRecord contactRecord_{};
+    private:
+        uint32_t nextId_ = 1; // IDは1から開始
 
-    uint32_t uniqueId_ = 0; // 外部から一意な番号を割り当て
+        uint32_t uniqueId_ = 0; // 外部から一意な番号を割り当て
 
-	LineCommon* lineCommon = nullptr; // ライン描画用の共通オブジェクト
-public: // 更新or判定
-   
-    // ワールド変換に基づいて各Colliderの座標を更新
-    void UpdateAll(const WorldTransform& worldTransform);
-    // 特定のタグだけ更新
-    void UpdateByTag(const WorldTransform& worldTransform, CollisionTag tag);
+        LineCommon* lineCommon = nullptr; // ライン描画用の共通オブジェクト
+    public: // 更新or判定
 
-	// 特定のIDのコライダーだけ更新
-    void UpdateByID(const WorldTransform& worldTransform, uint32_t id);
+        // ワールド変換に基づいて各Colliderの座標を更新
+        void UpdateAll(const WorldTransform& worldTransform);
+        // 特定のタグだけ更新
+        void UpdateByTag(const WorldTransform& worldTransform, CollisionTag tag);
+
+        // 特定のIDのコライダーだけ更新
+        void UpdateByID(const WorldTransform& worldTransform, uint32_t id);
 
 
-    // 衝突チェック＋コールバック通知（このComponent vs 他のComponent）
-    void CheckAndNotify(ColliderComponent& other);
+        // 衝突チェック＋コールバック通知（このComponent vs 他のComponent）
+        void CheckAndNotify(ColliderComponent& other);
 
-    
 
-public: // 削除
 
-    // すべてのコライダーを削除
-    void ClearColliders() {
-        colliders.clear();
-    }
+    public: // 削除
 
-    // 指定したコライダーを削除
-    void RemoveCollider(Collider* target) {
-        auto it = std::remove_if(colliders.begin(), colliders.end(),
-            [target](const ColliderEntry& entry) {
-                return entry.collider.get() == target;
-            });
-        colliders.erase(it, colliders.end());
-    }
+        // すべてのコライダーを削除
+        void ClearColliders() {
+            colliders.clear();
+        }
 
-    // IDでのコライダー削除
-    void RemoveColliderById(uint32_t id) {
-        auto it = std::remove_if(colliders.begin(), colliders.end(),
-            [id](const ColliderEntry& entry) {
-                return entry.id == id;
-            });
-        colliders.erase(it, colliders.end());
-    }
+        // 指定したコライダーを削除
+        void RemoveCollider(Collider* target) {
+            auto it = std::remove_if(colliders.begin(), colliders.end(),
+                [target](const ColliderEntry& entry) {
+                    return entry.collider.get() == target;
+                });
+            colliders.erase(it, colliders.end());
+        }
 
-public: // 設定or追加
-    // ライン共通クラス設定
-    void SetLineCommon(LineCommon* line) { lineCommon = line; };
+        // IDでのコライダー削除
+        void RemoveColliderById(uint32_t id) {
+            auto it = std::remove_if(colliders.begin(), colliders.end(),
+                [id](const ColliderEntry& entry) {
+                    return entry.id == id;
+                });
+            colliders.erase(it, colliders.end());
+        }
 
-    // コライダー追加
-    uint32_t AddCollider(std::unique_ptr<Collider> collider);
+    public: // 設定or追加
+        // ライン共通クラス設定
+        void SetLineCommon(LineCommon* line) { lineCommon = line; };
 
-    // コライダー再設定
-    void SetOwner(void* newOwner);
+        // コライダー追加
+        uint32_t AddCollider(std::unique_ptr<Collider> collider);
 
-	// 衝突インターフェースをセット(※IHitReceiverを継承必須)
-    void SetHitReceiver(IHitReceiver* receiver) {
-        hitReceiver = receiver;
-    }
+        // コライダー再設定
+        void SetOwner(void* newOwner);
 
-    // タグでの有効or無効設定
-    void SetEnableByTag(CollisionTag tag, bool enable);
+        // 衝突インターフェースをセット(※IHitReceiverを継承必須)
+        void SetHitReceiver(IHitReceiver* receiver) {
+            hitReceiver = receiver;
+        }
 
-	// IDでの有効or無効設定
-    void SetEnableById(uint32_t id, bool enable);
+        // タグでの有効or無効設定
+        void SetEnableByTag(CollisionTag tag, bool enable);
 
-    // 初期化時に必ずセット
-    void SetUniqueId(uint32_t id) { uniqueId_ = id; }
+        // IDでの有効or無効設定
+        void SetEnableById(uint32_t id, bool enable);
 
-public: // 取得
+        // 初期化時に必ずセット
+        void SetUniqueId(uint32_t id) { uniqueId_ = id; }
 
-    // インターフェース取得
-    IHitReceiver* GetHitReceiver() const { return hitReceiver; }
+    public: // 取得
 
-    // コライダーコンポーネントID取得
-    uint32_t GetUniqueId() const { return uniqueId_; }
+        // インターフェース取得
+        IHitReceiver* GetHitReceiver() const { return hitReceiver; }
 
-	// コライダーID取得
-    uint32_t GetNextId() const {
-        return nextId_;
-	}
+        // コライダーコンポーネントID取得
+        uint32_t GetUniqueId() const { return uniqueId_; }
 
-    // ID検索でコライダー取得
-    Collider* FindColliderById(uint32_t id) {
-        for (auto& entry : colliders) {
-            if (entry.id == id) {
-                return entry.collider.get();
+        // コライダーID取得
+        uint32_t GetNextId() const {
+            return nextId_;
+        }
+
+        // ID検索でコライダー取得
+        Collider* FindColliderById(uint32_t id) {
+            for (auto& entry : colliders) {
+                if (entry.id == id) {
+                    return entry.collider.get();
+                }
             }
+            return nullptr;
         }
-        return nullptr;
-    }
 
-    // コライダをIDで取得
-    template <typename T>
-    T* FindColliderById(uint32_t id) {
-        for (auto& entry : colliders) {
-            if (entry.id == id) {
-                return  dynamic_cast<T*>(entry.collider.get());
+        // コライダをIDで取得
+        template <typename T>
+        T* FindColliderById(uint32_t id) {
+            for (auto& entry : colliders) {
+                if (entry.id == id) {
+                    return  dynamic_cast<T*>(entry.collider.get());
+                }
             }
+            return nullptr;
+
         }
-        return nullptr;
-       
-    }
 
 
-    // コライダ数取得
-    size_t GetColliderCount() const {
-        return colliders.size();
-    }
-
-    // 全コライダー取得
-    std::vector<Collider*> GetAllColliders() const {
-        std::vector<Collider*> results;
-        for (const auto& entry : colliders) {
-            results.push_back(entry.collider.get());
+        // コライダ数取得
+        size_t GetColliderCount() const {
+            return colliders.size();
         }
-        return results;
-    }
 
-    // 指定タグのコライダーを取得
-    std::vector<Collider*> FindByTag(CollisionTag tag) const {
-        std::vector<Collider*> results;
-        for (const auto& entry : colliders) {
-            if (entry.collider->tag == tag) {
+        // 全コライダー取得
+        std::vector<Collider*> GetAllColliders() const {
+            std::vector<Collider*> results;
+            for (const auto& entry : colliders) {
                 results.push_back(entry.collider.get());
             }
+            return results;
         }
-        return results;
-    }
-};
 
+        // 指定タグのコライダーを取得
+        std::vector<Collider*> FindByTag(CollisionTag tag) const {
+            std::vector<Collider*> results;
+            for (const auto& entry : colliders) {
+                if (entry.collider->tag == tag) {
+                    results.push_back(entry.collider.get());
+                }
+            }
+            return results;
+        }
+    };
+}

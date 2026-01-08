@@ -48,7 +48,7 @@ void AttackResponse::Update(float dt) {
 
 #pragma region HitResponse
 
-void HitResponse::Hit(CollisionTag tag, Collider* self, Collider* other)
+void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other)
 {
 	if (other->tag == tag) {
 		Vector3 pushVec;

@@ -5,23 +5,25 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void FollowCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position)
+void FollowCamera::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
 {
     // インプット
 	input_ = input;
 
     // カメラ初期化
-    uniqueCamera_ = std::make_unique<Camera>();
+    uniqueCamera_ = std::make_unique<Engine::Camera>();
     uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
     uniqueCamera_->farClip_ = provisionalData_.farClip_;
     uniqueCamera_->transform_.rotate.x = provisionalData_.rotate.x;
 
    
-    uniqueCamera_->AddEffectBlock("bloom", PostEffectBlockType::kBloom);
+    uniqueCamera_->AddEffectBlock("bloom", Engine::PostEffectBlockType::kBloom);
 
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = provisionalData_.bloomIndensity;
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
+
+    baseOffset.z = -75;
 }
 
 void FollowCamera::Update()
@@ -35,6 +37,7 @@ void FollowCamera::Update()
 
         // 回転速度
         const float kRotateSpeed = 0.03f;
+        const float kRotateSpeedX = 0.02f;
 
         // ロックオンするか
         if (lockOnObject) {
@@ -61,7 +64,7 @@ void FollowCamera::Update()
             // 通常の自由操作
             if (input_->IsControllerConnected()) {
                 uniqueCamera_->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
-                uniqueCamera_->transform_.rotate.x += input_->GetGamePadRightStick().y * kRotateSpeed;
+                uniqueCamera_->transform_.rotate.x -= input_->GetGamePadRightStick().y * kRotateSpeedX;
 
                 uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
             }
@@ -106,7 +109,7 @@ void FollowCamera::Update()
     }
 
     // 揺れ処理
-    if (Camera::isShake_) {
+    if (Engine::Camera::isShake_) {
         uniqueCamera_->SetShake(provisionalData_.shackTime, provisionalData_.shackWidth);
     }
 

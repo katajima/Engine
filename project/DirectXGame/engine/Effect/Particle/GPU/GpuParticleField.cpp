@@ -3,7 +3,7 @@
 
 
 
-void GpuParticleField::Init(DirectXCommon* dxCommon, LineCommon* lineCommon, std::string name)
+void Engine::GpuParticleField::Init(DirectXCommon* dxCommon, LineCommon* lineCommon, std::string name)
 {
 	dxCommon_ = dxCommon;		// DX共通クラス
 	name_ = name;				// 名前
@@ -17,7 +17,7 @@ void GpuParticleField::Init(DirectXCommon* dxCommon, LineCommon* lineCommon, std
 	cbEffectFieldResource_.Data()->range = { 30.0f,30.0f,30.0f };
 }
 
-void GpuParticleField::UpdateImgui() 
+void Engine::GpuParticleField::UpdateImgui()
 {
 	if (ImGui::TreeNode(name_.c_str())) {
 
@@ -34,7 +34,7 @@ void GpuParticleField::UpdateImgui()
 	lineCommon_->GetDebugLineMeshData().AddLineAABB({ -cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
 }
 
-void GpuParticleField::Update() 
+void Engine::GpuParticleField::Update()
 {
 	cbEffectFieldResource_.SetComputeRootConstantBufferView(5); // Field影響
 }

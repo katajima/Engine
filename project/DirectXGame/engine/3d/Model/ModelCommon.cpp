@@ -2,7 +2,7 @@
 
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 
-void ModelCommon::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager)
+void Engine::ModelCommon::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager)
 {
     DXGIDevice_ = DXGIDevice;   // デバイス
     command_ = command;         // コマンド

@@ -3,7 +3,7 @@
 #include<format>
 #include<cassert>
 
-void DXCCompiler::Initialize()
+void Engine::DXCCompiler::Initialize()
 {
 	//dxcCompilerを初期化
 	hr_ = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
@@ -17,7 +17,7 @@ void DXCCompiler::Initialize()
 	assert(SUCCEEDED(hr_));
 }
 
-Microsoft::WRL::ComPtr<IDxcBlob> DXCCompiler::CompileShader(const std::wstring& filePach, const wchar_t* profile)
+Microsoft::WRL::ComPtr<IDxcBlob> Engine::DXCCompiler::CompileShader(const std::wstring& filePach, const wchar_t* profile)
 {
 	////------hlslファイルを読み込む------////
 

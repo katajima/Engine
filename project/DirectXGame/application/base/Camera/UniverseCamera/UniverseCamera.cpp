@@ -4,10 +4,10 @@
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 
-void UniverseCamera::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, Vector3 position)
+void UniverseCamera::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
 {
 	// カメラ初期化
-	uniqueCamera_ = std::make_unique<Camera>();
+	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
 	uniqueCamera_->farClip_ = provisionalData_.farClip_;
 	

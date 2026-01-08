@@ -1,7 +1,7 @@
 #include "PrimitiveCommon.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void PrimitiveCommon::Initialize(DirectXCommon* dxcommon)
+void Engine::PrimitiveCommon::Initialize(DirectXCommon* dxcommon)
 {
 	dxCommon_ = dxcommon;	// DX共通クラス
 
@@ -13,7 +13,7 @@ void PrimitiveCommon::Initialize(DirectXCommon* dxcommon)
 	CreateGraphicsPipeline();
 }
 
-void PrimitiveCommon::DrawCommonSetting(PsoType type)
+void Engine::PrimitiveCommon::DrawCommonSetting(PsoType type)
 {
 	// タイプに合わせてパイプライン選択
 	switch (type)
@@ -60,7 +60,7 @@ void PrimitiveCommon::DrawCommonSetting(PsoType type)
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void PrimitiveCommon::CreateRootSignature()
+void Engine::PrimitiveCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0], 0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
@@ -92,7 +92,7 @@ void PrimitiveCommon::CreateRootSignature()
 
 }
 
-void PrimitiveCommon::CreateGraphicsPipeline()
+void Engine::PrimitiveCommon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

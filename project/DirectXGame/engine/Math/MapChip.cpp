@@ -130,7 +130,7 @@ bool MapChip::WorldToMap(float worldX, float worldZ, int& mapX, int& mapZ) const
 }
 
 // マップをデバッグ描画（ラインでグリッド表示）
-void MapChip::DrawMapChip(LineCommon* line, float yPos) const
+void MapChip::DrawMapChip(Engine::LineCommon* line, float yPos) const
 {
     float size = m_cellSize;
     int width = m_width;

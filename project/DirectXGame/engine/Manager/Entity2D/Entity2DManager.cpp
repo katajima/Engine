@@ -1,6 +1,6 @@
 #include "Entity2DManager.h"
 
-void Entity2DManager::Initialize(DirectXCommon* directXCommon)
+void Engine::Entity2DManager::Initialize(DirectXCommon* directXCommon)
 {
 	directXCommon_ = directXCommon;	// DX共通クラス 
 		

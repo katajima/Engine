@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& tex,float maxtime  ,const Color color)
+void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::string& tex,float maxtime  ,const Color color)
 {
 	// エフェクト管理クラス
 	effectManager_ = effectManager;
@@ -35,7 +35,7 @@ void TrailEffect::Initialize(EffectManager* effectManager ,const std::string& te
 	mat_.Identity();
 }
 
-void TrailEffect::Update()
+void Engine::TrailEffect::Update()
 {
 	material->GPUData();
 	worldtransformTstr_.Update();
@@ -97,7 +97,7 @@ void TrailEffect::Update()
 	transfomation->Update(camera_, parentTransform_);
 }
 
-void TrailEffect::Draw()
+void Engine::TrailEffect::Draw()
 {
 	// 頂点があるなら
 	if (mesh->vertices.size() != 0) {

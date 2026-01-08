@@ -7,5 +7,5 @@
 /// オブジェクトの時間取得
 /// </summary>
 /// <returns></returns>
-float BaseCamera::GetTime() const { return MyGame::GameTime() * timeSpeed_; }
+float BaseCamera::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
 

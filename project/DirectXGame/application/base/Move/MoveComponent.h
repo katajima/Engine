@@ -7,8 +7,9 @@
 #include "MovementState.h"
 
 // 前方宣言
-class GlobalVariables;
-
+namespace Engine {
+	class GlobalVariables;
+}
 
 
 /// <summary>
@@ -25,9 +26,9 @@ public:
 	};
 
 	// 初期化
-	void Initialize(GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
+	void Initialize(Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
-	void Update(float dt,WorldTransform& object, RigidBodyComponent& rigid, Input* input);
+	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input);
 public:
 	// 保存項目の追加
 	void ApplyGlobalData(const std::string& name);
@@ -57,6 +58,8 @@ public: // 移動系統
 	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
 	// 移動出来るか設定
 	void SetCanMove(bool canMove) { moveSystem_->SetCanMove(canMove); }
+	//
+	void UseGlobal(bool is) { useGlobal_ = is; };
 public: // ジャンプ系統
 
 	// ジャンプ回数現象
@@ -77,7 +80,7 @@ public:
 	DashSystem* GetDashSystem() { return dashSystem_.get(); }
 public:
 	// カメラ設定
-	void SetCamera(Camera* camera) { moveSystem_->SetCamera(camera); }
+	void SetCamera(Engine::Camera* camera) { moveSystem_->SetCamera(camera); }
 private:
 	std::unique_ptr<MoveSystem> moveSystem_ = nullptr; // 移動システム
 	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr; // ジャンプシステム
@@ -91,8 +94,10 @@ private:
 
 
 	std::string name_ = "";
+
+	bool useGlobal_ = true;
 private:
-	GlobalVariables* globalVariables = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
 
 };
 

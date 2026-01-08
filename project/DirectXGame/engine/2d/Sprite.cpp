@@ -4,7 +4,7 @@
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath, bool isTexLoad)
+void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath, bool isTexLoad)
 {
 	timer_.StartTimer();
 	textureFilePath_ = textureFilePath;
@@ -85,7 +85,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath,
 	timer_.LogTimeSec("InitSprite ", textureFilePath);
 }
 
-void Sprite::Update()
+void Engine::Sprite::Update()
 {
 	worldTransform2d.Update();  // scale_ は Transform の scale 値のみ使う
 
@@ -140,7 +140,7 @@ void Sprite::Update()
 	material->GPUData();
 }
 
-void Sprite::UpdateAmimetion(float time)
+void Engine::Sprite::UpdateAmimetion(float time)
 {
 	animeTime_ += MyGame::GameTime();
 
@@ -165,7 +165,7 @@ void Sprite::UpdateAmimetion(float time)
 	Update();
 }
 
-void Sprite::Draw(PSOType type)
+void Engine::Sprite::Draw(PSOType type)
 {
 	if (isActive_) {
 		SpriteTypeDiscrimination(type);
@@ -186,12 +186,12 @@ void Sprite::Draw(PSOType type)
 	}
 }
 
-void Sprite::GetCommandList() {
+void Engine::Sprite::GetCommandList() {
 	vbvResorce_.IASetVertexBuffers();
 	indexResorce_.IASetIndexBuffer();
 };
 
-void Sprite::AdjusttextureSize()
+void Engine::Sprite::AdjusttextureSize()
 {
 	// テクスチャメタデータを取得
 	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
@@ -202,7 +202,7 @@ void Sprite::AdjusttextureSize()
 	size = textureSize;
 }
 
-void Sprite::SpriteTypeDiscrimination(PSOType type)
+void Engine::Sprite::SpriteTypeDiscrimination(PSOType type)
 {
 	spriteCommon_->DrawCommonSetting(type);
 }

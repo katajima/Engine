@@ -4,7 +4,7 @@
 #include "DirectXGame/engine/DirectX/DXGIDevice/DXGIDevice.h"
 #include "DirectXGame/engine/DirectX/DXCCompiler/DXCCompiler.h"
 
-void PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler)
+void Engine::PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler)
 {
 	command_ = command;
 	DXGIDevice_ = DXGIDevice;
@@ -12,7 +12,7 @@ void PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompile
 	useInputLayout_ = true;
 }
 
-void PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
+void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsPipeline)
 {
 	ShaderBlob shaderBlob{};
 
@@ -63,7 +63,7 @@ void PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& graphicsP
 
 }
 
-void PSOManager::SetRootSignature(
+void Engine::PSOManager::SetRootSignature(
 	Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature,
 	D3D12_ROOT_PARAMETER* rootParameter, UINT numRootParameters,
 	D3D12_STATIC_SAMPLER_DESC* samplerDesc, UINT numSamplers)
@@ -81,7 +81,7 @@ void PSOManager::SetRootSignature(
 	PSOFanction::Blob(DXGIDevice_,descriptionSignature, rootSignature);
 }
 
-void PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& graphicsPipelineState, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType)
+void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& graphicsPipelineState, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType)
 {
 	HRESULT hr;
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
@@ -144,7 +144,7 @@ void PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignatur
 	assert(SUCCEEDED(hr));
 }
 
-void PSOManager::AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format, UINT slot)
+void Engine::PSOManager::AddInputElementDesc(const std::string& semanticName, UINT semanticIndex, DXGI_FORMAT format, UINT slot)
 {
 	// 文字列を vector に保持（ポインタが無効にならないようにする）
 	semanticNames_.push_back(semanticName);
@@ -156,7 +156,7 @@ void PSOManager::AddInputElementDesc(const std::string& semanticName, UINT seman
 	inputElementDesc_.push_back(elementDesc);
 }
 
-void PSOManager::SetShaderFileName(ShaderFileName shaderFileName, std::wstring filename)
+void Engine::PSOManager::SetShaderFileName(ShaderFileName shaderFileName, std::wstring filename)
 {
 	switch (shaderFileName)
 	{
@@ -188,7 +188,7 @@ void PSOManager::SetShaderFileName(ShaderFileName shaderFileName, std::wstring f
 
 }
 
-void PSOManager::SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D12_COMPARISON_FUNC func)
+void Engine::PSOManager::SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D12_COMPARISON_FUNC func)
 {
 	depthStencilDesc_ = {};
 
@@ -200,7 +200,7 @@ void PSOManager::SetDepthStencilDesc(bool flag, D3D12_DEPTH_WRITE_MASK mask, D3D
 	depthStencilDesc_.DepthFunc = func;
 }
 
-void PSOManager::SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill)
+void Engine::PSOManager::SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill)
 {
 	//裏面(時計回り)を表示しない
 	rasterizerDesc_.CullMode = cull;
@@ -209,7 +209,7 @@ void PSOManager::SetRasterizerDesc(D3D12_CULL_MODE cull, D3D12_FILL_MODE fill)
 	rasterizerDesc_.FillMode = fill;
 }
 
-void PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topology) {
+void Engine::PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topology) {
 
 	// 読み込み済みモデルを検索
 	if (psoRoots_.contains(type)) {
@@ -221,7 +221,7 @@ void PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topology) {
 	}
 }
 
-void PSOManager::CreatePso(	
+void Engine::PSOManager::CreatePso(
 	PSOType type, D3D12_ROOT_PARAMETER* rootParameter,UINT rootNum ,
 	D3D12_STATIC_SAMPLER_DESC* samplerDesc,UINT samplerNum, 
 	D3D12_CULL_MODE cull, D3D12_FILL_MODE fill, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc,

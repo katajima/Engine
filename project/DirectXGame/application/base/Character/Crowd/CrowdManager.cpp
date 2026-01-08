@@ -7,30 +7,31 @@
 
 #pragma region CrowdAgent
 
+
 void CrowdAgent::Initialize(uint32_t _id, uint32_t _group, const Vector3& pos)
 {
-	id = _id; groupId = _group;	// 個人Idとグループid設定
-	position_ = pos;	// 位置設定
-	velocity_ = { 0,0,0 };	// 速度
-	state_ = AgentState::Idle;	// 待機状態に
+	id = _id;
+	groupId = _group;     // 個人Idとグループid設定
+	position_ = pos;      // 位置設定
+	velocity_ = { 0,0,0 }; // 速度
+
+	// Idle 廃止 → 最初から接近
+	state_ = AgentState::Approach;
 }
+
 
 void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	const std::vector<int>& neighborIndices,
 	const std::vector<CrowdAgent>* allAgents)
 {
-	// 死んでいるなら早期リターン
 	if (isDed) return;
-	// 位置取得
+
 	position_ = owner_->GetObjectComponent()->GetWorldPosition();
 
-	// ターゲット
 	Vector3 toTarget = groupTarget - position_;
-	// ターゲット距離
 	float distToTarget = Length(toTarget);
 	if (distToTarget < 0.001f) return;
 
-	// 攻撃準備タイマー更新
 	if (attackDelayTimer_ > 0.0f) {
 		attackDelayTimer_ -= dt;
 	}
@@ -40,67 +41,56 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	// ===============================
 	switch (state_)
 	{
-	case AgentState::Idle:	// 待機
-	{	
-		// 範囲内の入ったら
-		if (distToTarget < engageDistance_) {
-			state_ = AgentState::Approach;	// 接近に移行
-		}
-		break;
-	}
+		// ----------- Idle 完全削除 -----------
 
-	case AgentState::Approach:	// 接近
+	case AgentState::Approach:
 	{
-		// 範囲内に入ったら
-		if (distToTarget < attackRange_ * 3.0f) {
-			state_ = AgentState::PreparationAttack;	// 攻撃準備に入る
+		// 一定距離に入ったら攻撃準備
+		if (distToTarget < preparationAttack_) {
+			state_ = AgentState::PreparationAttack;
 			attackDelayTimer_ = Random::RandomFloat(2.0f, 4.0f);
 		}
-		else if (distToTarget > engageDistance_ * 1.5f) {	// 範囲外なら
-			state_ = AgentState::Idle;	// 待機に戻る
-		}
 		break;
 	}
 
-	case AgentState::PreparationAttack:	// 攻撃準備
-	{	
-		// 攻撃に移行
+	case AgentState::PreparationAttack:
+	{
 		if (attackDelayTimer_ <= 0.0f) {
-			state_ = AgentState::Attack; // 攻撃
-			owner_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);// 攻撃ステート移行
+			state_ = AgentState::Attack;
+			owner_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 			attackCooldown_ = 1.0f + Random::RandomFloat(3.0f, 0.5f);
 			animIndex = 1;
 		}
-		else if (distToTarget > attackRange_ * 3.0f) {	// 範囲外なら 
-			state_ = AgentState::Approach;	// 接近
+		else if (distToTarget > preparationAttack_) {
+			// 離れたら戻って接近し直す
+			state_ = AgentState::Approach;
 		}
 		break;
 	}
 
-	case AgentState::Attack:	// 攻撃
+	case AgentState::Attack:
 	{
-		if (distToTarget > attackRange_ * 1.5f) {
-			state_ = AgentState::Return; // ★攻撃後はフォーメーションへ戻る
+		// プレイヤーに近すぎたら離脱
+		if (distToTarget < returnEnterDistance_) {
+			state_ = AgentState::Return;
 			break;
 		}
 
-		// 攻撃モーション終了時も戻る
-		if (owner_->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Move) {
-			state_ = AgentState::Return; // ★追加
+		if (owner_->GetCharacterStateMachine()->GetCurrentMainState()
+			== CharacterMainState::Move) {
+			state_ = AgentState::Return;
 		}
 		break;
 	}
 
-	// ★追加：Return（フォーメーションへ戻る）
 	case AgentState::Return:
 	{
-		const CrowdGroupAgent& group = manager_->GetGroup(groupId);
-		Vector3 toCenter = group.anchorCenter - position_;
-		float dist = Length(toCenter);
+		// プレイヤーからの距離を計測
+		float distFromPlayer = distToTarget;
 
-		// 中心付近まで戻ったら待機状態へ
-		if (dist < 3.0f) {
-			state_ = AgentState::Idle;
+		// 一定距離離れたら再び接近
+		if (distFromPlayer >= returnLeaveDistance_) {
+			state_ = AgentState::Approach;
 		}
 		break;
 	}
@@ -117,67 +107,61 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	Vector3 sep = { 0,0,0 };
 	Vector3 cohesion = { 0,0,0 };
 
-
-	// --- 分離（Separation） ---
-	if (state_ == AgentState::Approach || state_ == AgentState::Idle || state_ == AgentState::Return) {
+	// Idle を削除したので Idle の条件を除去
+	if (state_ == AgentState::Approach || state_ == AgentState::Return) {
 		for (int idx : neighborIndices) {
-			if (idx < 0) continue;			// idxが0以下なら次へ
+			if (idx < 0) continue;
 
 			const CrowdAgent& other = (*allAgents)[idx];
-			if (other.id == id) continue;	// idが同じなら次へ
-			if (other.isDed) continue;		// 死んでいたら次へ
-
+			if (other.id == id) continue;
+			if (other.isDed) continue;
 
 			Vector3 toOther = position_ - other.position_;
 			float d = Length(toOther);
-			if (d < radius * 2.0f) sep += Normalize(toOther) * ((radius * 2.0f - d) / radius);
+			if (d < radius * 2.0f)
+				sep += Normalize(toOther) * ((radius * 2.0f - d) / radius);
 		}
 	}
 
-
-	// --- 凝集（Cohesion）：Return時は強めに ---
 	const CrowdGroupAgent& group = manager_->GetGroup(groupId);
 	Vector3 toCenter = group.anchorCenter - position_;
 	if (Length(toCenter) > 5.0f) {
-		float strength = (state_ == AgentState::Return) ? 1.5f : 0.5f; // ★Return時は強め
+		float strength = (state_ == AgentState::Return) ? 1.5f : 0.5f;
 		cohesion = Normalize(toCenter) * strength;
 	}
 
-	// --- 攻撃準備中は距離維持 ---
 	if (state_ == AgentState::PreparationAttack) {
 		float idealDist = attackRange_ * 1.5f;
-		if (distToTarget < idealDist * 0.9f) desired = Normalize(-toTarget);
-		else if (distToTarget > idealDist * 1.1f) desired = Normalize(toTarget);
-		else desired = { 0,0,0 };
+		if (distToTarget < idealDist * 0.9f)
+			desired = Normalize(-toTarget);
+		else if (distToTarget > idealDist * 1.1f)
+			desired = Normalize(toTarget);
+		else
+			desired = { 0,0,0 };
 	}
 
-	
-	// Return時はグループ中心へ強く引っ張る
 	if (state_ == AgentState::Return) {
-		// ★修正：slotTarget へ戻るようにする
-		Vector3 toSlot = groupTarget - position_;
-		desired = Normalize(toSlot);
+		// プレイヤーから離れる方向へ
+		desired = Normalize(position_ - groupTarget);
 	}
 
 	Vector3 steer = Normalize(desired + sep * 0.5f + cohesion * 0.8f);
 	float targetSpeed = speed;
 
 	switch (state_) {
-	case AgentState::Idle:              targetSpeed = 0.0f; break;
-	case AgentState::PreparationAttack: targetSpeed *= 0.3f; break;
+	case AgentState::PreparationAttack:
+		velocity_ = 0.0f;
+		targetSpeed = 0.0f; 
+		break;
 	case AgentState::Attack:            targetSpeed *= 0.1f; break;
-	case AgentState::Return:            targetSpeed *= 0.8f; break; // ★素早く戻る
-	default: break;
+	case AgentState::Return:            targetSpeed *= 0.8f; break;
+	default: break; // Approach はそのまま
 	}
 
 	velocity_ = Lerp(velocity_, steer * targetSpeed, dt * 5.0f);
 	velocity_.y = 0;
 	owner_->Velocity() = velocity_;
 }
-
-
-
-
 
 #pragma endregion // 個
 
@@ -368,26 +352,27 @@ void CrowdManager::Update(float dt) {
 	{
 		CrowdAgent& a = agents[i];
 
-		// --- LOD ---
 		float d = Length(a.position_ - playerPos);
 		float lodFactor = (d < 15.0f) ? 1.0f : ((d < 40.0f) ? 0.5f : 0.25f);
 		if (Random::RandomFloat(0.0f, 1.0f) > lodFactor) continue;
 
-		// --- 近傍検索 ---
 		grid.QueryNeighbors(a.position_, neighbors);
 
-		// --- グループ ---
 		CrowdGroupAgent& grp = groups[a.groupId];
 
-		// ★修正：slotTarget_ は DistributeTargets が設定済み
-		Vector3 finalTarget = a.slotTarget_;
+		Vector3 finalTarget;
 
-		// ★Return 動作中はフォーメーションの中心へより寄せる
+		// ★★★ 修正：Return 以外はプレイヤーへ向かわせる ★★★
 		if (a.state_ == AgentState::Return)
 		{
-			Vector3 toCenter = grp.centerPos - a.position_;
-			finalTarget = grp.centerPos + Normalize(toCenter) * 1.0f;
+			finalTarget = playerPos; // Return でも playerPos を渡す（方向反転は Agent 側）
 		}
+		else
+		{
+			finalTarget = playerPos;
+		}
+		// それ以外はプレイヤーを追わせる
+		finalTarget = playerPos;
 
 		a.Update(dt, finalTarget, grp.memberIndices, &agents);
 	}

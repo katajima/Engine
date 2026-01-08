@@ -12,7 +12,7 @@
 /// <summary>
 /// グループ生成
 /// </summary>
-void GlobalVariables::CreateGroup(const std::string& groupName) {
+void Engine::GlobalVariables::CreateGroup(const std::string& groupName) {
 	// 指定名のオブジェクトがなければ追加する
 	datas_[groupName];
 }
@@ -20,7 +20,7 @@ void GlobalVariables::CreateGroup(const std::string& groupName) {
 /// <summary>
 /// グループ検索
 /// </summary>
-bool GlobalVariables::HasGroup(const std::string& groupName) const
+bool Engine::GlobalVariables::HasGroup(const std::string& groupName) const
 {
 	return datas_.find(groupName) != datas_.end();
 }
@@ -28,7 +28,7 @@ bool GlobalVariables::HasGroup(const std::string& groupName) const
 /// <summary>
 /// キー検索
 /// </summary>
-bool GlobalVariables::HasKey(const std::string& groupName, const std::string& key) const
+bool Engine::GlobalVariables::HasKey(const std::string& groupName, const std::string& key) const
 {
 	auto groupIt = datas_.find(groupName);
 	// 無いならfalse
@@ -42,7 +42,7 @@ bool GlobalVariables::HasKey(const std::string& groupName, const std::string& ke
 /// <summary>
 /// グループ名前取得
 /// </summary>
-std::vector<std::string> GlobalVariables::GetGroupNames() const
+std::vector<std::string> Engine::GlobalVariables::GetGroupNames() const
 {
 	std::vector<std::string> groupNames;
 	groupNames.reserve(datas_.size());
@@ -55,7 +55,7 @@ std::vector<std::string> GlobalVariables::GetGroupNames() const
 /// <summary>
 /// キー名前取得
 /// </summary>
-std::vector<std::string> GlobalVariables::GetKeys(const std::string& groupName) const
+std::vector<std::string> Engine::GlobalVariables::GetKeys(const std::string& groupName) const
 {
 	std::vector<std::string> keys;
 	auto it = datas_.find(groupName);
@@ -72,7 +72,7 @@ std::vector<std::string> GlobalVariables::GetKeys(const std::string& groupName) 
 /// <summary>
 /// 型タイプ取得
 /// </summary>
-std::string GlobalVariables::GetTypeName(const std::string& groupName, const std::string& key) const
+std::string Engine::GlobalVariables::GetTypeName(const std::string& groupName, const std::string& key) const
 {
 	auto groupIt = datas_.find(groupName);
 	if (groupIt == datas_.end()) {
@@ -104,7 +104,7 @@ std::string GlobalVariables::GetTypeName(const std::string& groupName, const std
 /// <summary>
 /// アイテム削除
 /// </summary>
-void GlobalVariables::RemoveItem(const std::string& groupName, const std::string& key)
+void Engine::GlobalVariables::RemoveItem(const std::string& groupName, const std::string& key)
 {
 	auto groupIt = datas_.find(groupName);
 	if (groupIt != datas_.end()) {
@@ -119,7 +119,7 @@ void GlobalVariables::RemoveItem(const std::string& groupName, const std::string
 /// <summary>
 /// グループ削除
 /// </summary>
-void GlobalVariables::RemoveGroup(const std::string& groupName)
+void Engine::GlobalVariables::RemoveGroup(const std::string& groupName)
 {
 	datas_.erase(groupName);
 	groupKeys_.erase(groupName);
@@ -128,7 +128,7 @@ void GlobalVariables::RemoveGroup(const std::string& groupName)
 /// <summary>
 /// 複製
 /// </summary>
-bool GlobalVariables::DuplicateItem(const std::string& srcGroupName, const std::string& srcKey, const std::string& dstGroupName, const std::string& dstKey)
+bool Engine::GlobalVariables::DuplicateItem(const std::string& srcGroupName, const std::string& srcKey, const std::string& dstGroupName, const std::string& dstKey)
 {
 	// コピー元グループの存在チェック
 	auto itSrcGroup = datas_.find(srcGroupName);
@@ -164,12 +164,12 @@ bool GlobalVariables::DuplicateItem(const std::string& srcGroupName, const std::
 /// <summary>
 /// 複製したときの重複対処
 /// </summary>
-std::string GlobalVariables::MakeUniqueKey(const std::string& baseKey, const GvData::Group& group)
+std::string Engine::GlobalVariables::MakeUniqueKey(const std::string& baseKey, const GvData::Group& group)
 {
 	std::string newKey = baseKey;
 	int count = 1;
 	while (group.find(newKey) != group.end()) {
-		newKey = baseKey + "("+ std::to_string(count++)+ ")";
+		newKey = baseKey + "(" + std::to_string(count++) + ")";
 	}
 	return newKey;
 }
@@ -184,7 +184,7 @@ std::string GlobalVariables::MakeUniqueKey(const std::string& baseKey, const GvD
 /// <summary>
 /// セーブ
 /// </summary>
-void GlobalVariables::saveFile(const std::string& groupName) {
+void Engine::GlobalVariables::saveFile(const std::string& groupName) {
 
 	// グループを検索
 	std::map<std::string, GvData::Group>::iterator itGroup = datas_.find(groupName);
@@ -205,7 +205,7 @@ void GlobalVariables::saveFile(const std::string& groupName) {
 		GvData::Item& item = itItem->second;
 
 		// 各型の値を保存
-		GvFanction::Save(groupName,root,item,itemName);
+		GvFanction::Save(groupName, root, item, itemName);
 
 	}
 	// ディレクトリがなければ作成する
@@ -239,7 +239,7 @@ void GlobalVariables::saveFile(const std::string& groupName) {
 /// <summary>
 /// 全ロード
 /// </summary>
-void GlobalVariables::LoadFiles() {
+void Engine::GlobalVariables::LoadFiles() {
 
 	std::filesystem::path dir(kDirectoryPath);
 	// ディレクトリがなければスキップする
@@ -267,7 +267,7 @@ void GlobalVariables::LoadFiles() {
 /// <summary>
 /// グループロード
 /// </summary>
-void GlobalVariables::LoadFile(const std::string& groupName) {
+void Engine::GlobalVariables::LoadFile(const std::string& groupName) {
 	std::string filePath = kDirectoryPath + groupName + ".json";
 	std::ifstream ifs(filePath);
 	if (ifs.fail()) {
@@ -342,9 +342,9 @@ void GlobalVariables::LoadFile(const std::string& groupName) {
 /// <summary>
 /// 更新
 /// </summary>
-void GlobalVariables::Update() {
+void Engine::GlobalVariables::Update() {
 #ifdef _DEBUG
-	ImGui::Begin("GlobalVariables"/*, nullptr, ImGuiWindowFlags_MenuBar*/);
+
 	//ImGui::BeginMenuBar();
 
 	static std::pair<std::string, std::string> pendingDeleteItem;
@@ -353,7 +353,10 @@ void GlobalVariables::Update() {
 	std::vector<std::string> groupsToRemove;
 	std::vector<std::pair<std::string, std::string>> itemsToRemove;
 
+	ImGui::Begin("GlobalVariables");
+
 	for (auto& [groupName, group] : datas_) {
+	
 
 		if (!ImGui::BeginMenu(groupName.c_str()))
 			continue;
@@ -404,42 +407,6 @@ void GlobalVariables::Update() {
 				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
 			}
 
-			//// 複製ボタン
-			//ImGui::SameLine();
-			//if (ImGui::SmallButton("複製")) {
-			//	// 複製先のキー名を生成
-			//	std::string baseKey = itemName;
-			//	// ユニークキー生成（重複チェックと連番付与）
-			//	std::string newKey = MakeUniqueKey(baseKey, group);
-
-			//	if (!DuplicateItem(groupName, itemName, groupName, newKey)) {
-			//		// 複製失敗時の対応（ログ出力や警告表示など）
-			//	}
-			//}
-
-			//// 削除ボタン + 確認
-			//ImGui::SameLine();
-			//if (pendingDeleteItem.first == groupName && pendingDeleteItem.second == itemName && confirmDelete) {
-			//	ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "削除しますか？");
-			//	ImGui::SameLine();
-			//	if (ImGui::SmallButton("はい")) {
-			//		itemsToRemove.emplace_back(groupName, itemName);
-			//		confirmDelete = false;
-			//		pendingDeleteItem = {};
-			//	}
-			//	ImGui::SameLine();
-			//	if (ImGui::SmallButton("いいえ")) {
-			//		confirmDelete = false;
-			//		pendingDeleteItem = {};
-			//	}
-			//}
-			//else {
-			//	if (ImGui::SmallButton("×")) {
-			//		pendingDeleteItem = { groupName, itemName };
-			//		confirmDelete = true;
-			//	}
-			//}
-
 			ImGui::PopID();
 		}
 
@@ -456,10 +423,13 @@ void GlobalVariables::Update() {
 		}
 
 		ImGui::EndMenu();
+
+		
 	}
+	ImGui::End();
 
 	//ImGui::EndMenuBar();
-	ImGui::End();
+
 
 
 

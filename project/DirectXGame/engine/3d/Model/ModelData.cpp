@@ -4,7 +4,7 @@
 #pragma region Laod
 
 // メッシュ読み込み
-void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
+void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
 {
 	uint32_t vertexOffset = 0;
 
@@ -97,7 +97,7 @@ void LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, DirectXComm
 }
 
 // ボーン読み込み
-void LoadModel::LoadBone(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
+void Engine::LoadModel::LoadBone(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon)
 {
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
@@ -140,7 +140,7 @@ void LoadModel::LoadBone(const aiScene* scene, ModelData& modelData, DirectXComm
 
 
 // マテリアル読み込み
-void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath)
+void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectXCommon* dxCommon, const std::string& directoryPath)
 {
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
@@ -210,7 +210,7 @@ void LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData, DirectX
 }
 
 // アニメーション読み込み
-void LoadModel::LoadAnimation(ModelData& modelData, const std::string& directoryPath, const std::string& filename)
+void Engine::LoadModel::LoadAnimation(ModelData& modelData, const std::string& directoryPath, const std::string& filename)
 {
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
@@ -270,7 +270,7 @@ void LoadModel::LoadAnimation(ModelData& modelData, const std::string& directory
 }
 
 // ノード読み込み
-Node LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& meshOffsetMap)
+Engine::Node Engine::LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& meshOffsetMap)
 {
 	Node result;
 
@@ -305,7 +305,7 @@ Node LoadModel::ReadNode(aiNode* node, std::unordered_map<uint32_t, Vector3>& me
 
 #pragma region Create
 
-void CreateModel::CreateMeshLine(ModelData& modelData, const std::vector<uint32_t>& indices)
+void Engine::CreateModel::CreateMeshLine(ModelData& modelData, const std::vector<uint32_t>& indices)
 {
 	if (indices.empty() || indices.size() % 3 != 0) {
 		// indicesが空 or 不正なサイズなら処理をスキップ
@@ -332,7 +332,7 @@ void CreateModel::CreateMeshLine(ModelData& modelData, const std::vector<uint32_
 	}
 }
 
-void CreateModel::CreateSkeleton(ModelData& modelData)
+void Engine::CreateModel::CreateSkeleton(ModelData& modelData)
 {
 	modelData.skeleton.root = CreateModel::CreateJoint(modelData.rootNode, {}, modelData.skeleton.joints);
 
@@ -344,7 +344,7 @@ void CreateModel::CreateSkeleton(ModelData& modelData)
 	Animetion::UpdateSkeleton(modelData.skeleton);
 }
 
-void CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon)
+void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon)
 {
 	for (size_t meshIndex = 0; meshIndex < modelData.mesh.size(); ++meshIndex) {
 		auto& mesh = modelData.mesh[meshIndex];
@@ -474,7 +474,7 @@ void CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelComm
 	}
 }
 
-int32_t CreateModel::CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
+int32_t Engine::CreateModel::CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints)
 {
 	Joint joint{};
 	joint.name = node.name;
@@ -497,7 +497,7 @@ int32_t CreateModel::CreateJoint(const Node& node, const std::optional<int32_t>&
 
 #pragma region Debug
 
-void DebugModel::ImguiSkin(ModelData& modelData)
+void Engine::DebugModel::ImguiSkin(ModelData& modelData)
 {
 	if (ImGui::CollapsingHeader("SkinnigData")) {
 		//int index = static_cast<int>(modelData.skinning.influencesIndex);
@@ -513,7 +513,7 @@ void DebugModel::ImguiSkin(ModelData& modelData)
 	}
 }
 
-void DebugModel::ImguiModel(ModelData& modelData)
+void Engine::DebugModel::ImguiModel(ModelData& modelData)
 {
 	if (ImGui::CollapsingHeader("Modeldata")) {
 		if (ImGui::TreeNode("rootNode")) {

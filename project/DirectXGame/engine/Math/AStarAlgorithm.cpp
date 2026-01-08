@@ -171,7 +171,7 @@ Vector2 AStarPathfinder::GetDirectionToNextNode() {
 //----------------------------------------
 // 経路を可視化（デバッグライン描画）
 //----------------------------------------
-void AStarPathfinder::DrawPath(LineCommon* line, float yPos) const
+void AStarPathfinder::DrawPath(Engine::LineCommon* line, float yPos) const
 {
 	// 経路が有効でない場合は描画しない
 	if (m_path.size() < 2) return;

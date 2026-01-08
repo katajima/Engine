@@ -1,7 +1,8 @@
 #include "BulletWeaponManager.h"
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 
-void BulletWeaponManager::Initialize(BulletManager* bulletManager, Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables)
+void BulletWeaponManager::Initialize(BulletManager* bulletManager, Engine::Input* input, Engine::Entity3DManager* entity3DManager, 
+	Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
 	bulletManager_ = bulletManager;		// 弾管理クラス更新
 	input_ = input;						// インプット

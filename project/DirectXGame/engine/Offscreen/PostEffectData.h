@@ -5,100 +5,103 @@
 #include "DirectXGame/engine/struct/Matrix4x4.h"
 
 #pragma region GPUData
-// ビネット
-struct VignetteGPU {
-	float scale;
-	float squared;
-	float padding[2];
-};
 
-// スムージング
-struct SmoothigGPU {
-	int num;
-	float padding[3];
-};
+namespace Engine {
+	// ビネット
+	struct VignetteGPU {
+		float scale;
+		float squared;
+		float padding[2];
+	};
 
-// ガウシアン
-struct GaussianGPU {
-	int num;
-	float sigma;
-	float padding[2];
-};
+	// スムージング
+	struct SmoothigGPU {
+		int num;
+		float padding[3];
+	};
 
-// アウトライン
-struct OutlineGPU {
-	Matrix4x4 projectionInverse;
-	int num;
-	float weightSquared;
-	float nearZ;
-	float farZ;
-};
+	// ガウシアン
+	struct GaussianGPU {
+		int num;
+		float sigma;
+		float padding[2];
+	};
 
-// ラジアルブラ
-struct RadialBlurGPU
-{
-	Vector2 center;
-	int numSamples;
-	float blurWidth;
-};
+	// アウトライン
+	struct OutlineGPU {
+		Matrix4x4 projectionInverse;
+		int num;
+		float weightSquared;
+		float nearZ;
+		float farZ;
+	};
 
-// ディゾルブ
-struct DissovleGPU
-{
-	float threshold;
-	Vector3 color;
-	float edge;
-	float pad[3];
-};
+	// ラジアルブラ
+	struct RadialBlurGPU
+	{
+		Vector2 center;
+		int numSamples;
+		float blurWidth;
+	};
 
-// ランダム
-struct RandomGPU
-{
-	float time;
-	float pad[3];
-};
+	// ディゾルブ
+	struct DissovleGPU
+	{
+		float threshold;
+		Vector3 color;
+		float edge;
+		float pad[3];
+	};
 
-// ブルーム
-struct BloomGPU
-{
-	float threshold;
-	float intensity;
-	float pad[2];
-};
+	// ランダム
+	struct RandomGPU
+	{
+		float time;
+		float pad[3];
+	};
 
+	// ブルーム
+	struct BloomGPU
+	{
+		float threshold;
+		float intensity;
+		float pad[2];
+	};
+
+
+	enum class PostEffectType {
+		kCopy,			// コピー
+		kGrayScale,		// グレースケール
+		kSepia,			// セピア
+		kVignette,      // ビネット
+		kSmoothing,     // スムージング
+		kGaussian,      // ガウス
+		kOitline,		// アウトライン
+		kRadialBlur,	// ラジアルブラー
+		kDissovle,      // ディゾルブ
+		kRandom,		// ランダム
+		kBloom,			// ブルーム
+		kBloomCombin,	// 合成ブルーム
+	};
+
+	enum class PostEffectBlockType {
+		kCopy,			// コピー
+		kGrayScale,		// グレースケール
+		kSepia,			// セピア
+		kVignette,      // ビネット
+		kSmoothing,     // スムージング
+		kGaussian,      // ガウス
+		kOitline,		// アウトライン
+		kRadialBlur,	// ラジアルブラー
+		kDissovle,      // ディゾルブ
+		kRandom,		// ランダム
+		kBloom,			// ブルーム
+		kDoF,			// 被写界深度
+	};
+}
 
 
 #pragma endregion // GPUに送るデータ
 
 
 
-
-enum class PostEffectType {
-	kCopy,			// コピー
-	kGrayScale,		// グレースケール
-	kSepia,			// セピア
-	kVignette,      // ビネット
-	kSmoothing,     // スムージング
-	kGaussian,      // ガウス
-	kOitline,		// アウトライン
-	kRadialBlur,	// ラジアルブラー
-	kDissovle,      // ディゾルブ
-	kRandom,		// ランダム
-	kBloom,			// ブルーム
-	kBloomCombin,	// 合成ブルーム
-};
-
-enum class PostEffectBlockType {
-	kCopy,			// コピー
-	kGrayScale,		// グレースケール
-	kSepia,			// セピア
-	kVignette,      // ビネット
-	kSmoothing,     // スムージング
-	kGaussian,      // ガウス
-	kOitline,		// アウトライン
-	kRadialBlur,	// ラジアルブラー
-	kDissovle,      // ディゾルブ
-	kRandom,		// ランダム
-	kBloom,			// ブルーム
-	kDoF,			// 被写界深度
-};

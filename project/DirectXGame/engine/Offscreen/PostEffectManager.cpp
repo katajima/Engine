@@ -13,7 +13,8 @@
 
 #include"imgui.h"
 
-void PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
+
+void Engine::PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
 {
 	DXGIDevice_ = DXGIDevice;				// デバイス
 	command_ = command;						// コマンド
@@ -36,7 +37,7 @@ void PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvM
 
 }
 
-void PostEffectManager::PreDrawOffscreen()
+void Engine::PostEffectManager::PreDrawOffscreen()
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -62,7 +63,7 @@ void PostEffectManager::PreDrawOffscreen()
 	scissorRect_->SettingScissorRect();
 }
 
-void PostEffectManager::PostDrawOffscreen()
+void Engine::PostEffectManager::PostDrawOffscreen()
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -73,7 +74,7 @@ void PostEffectManager::PostDrawOffscreen()
 
 
 
-void PostEffectManager::PreDraw2dOffscreen()
+void Engine::PostEffectManager::PreDraw2dOffscreen()
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTextureEnd_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -99,7 +100,7 @@ void PostEffectManager::PreDraw2dOffscreen()
 	scissorRect_->SettingScissorRect();
 }
 
-void PostEffectManager::PostDraw2dOffscreen()
+void Engine::PostEffectManager::PostDraw2dOffscreen()
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTextureEnd_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -109,7 +110,7 @@ void PostEffectManager::PostDraw2dOffscreen()
 }
 
 
-void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
+void Engine::PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 {
 
 	RenderTexture* previousTexture = renderTexture_.get();
@@ -146,7 +147,7 @@ void PostEffectManager::AllPostEffect(SceneManager* sceneManager)
 	PostDraw2dOffscreen();
 }
 
-void PostEffectManager::Update(Camera* camera)
+void Engine::PostEffectManager::Update(Camera* camera)
 {
 	imageRatio_ = { 1.0f,1.0f };
 	imageleftTopPos_ = { 0.0f,0.0f };
@@ -160,19 +161,19 @@ void PostEffectManager::Update(Camera* camera)
 
 
 
-void PostEffectManager::AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks)
+void Engine::PostEffectManager::AddEffectBlocks(std::vector<PostEffectBlock*> effectBlocks)
 {
 	for (auto& effect : effectBlocks) {
 		effectBlocks_.push_back(effect);
 	}
 }
 
-void PostEffectManager::ClearPostEffectBlock()
+void Engine::PostEffectManager::ClearPostEffectBlock()
 {
 	effectBlocks_.clear();
 }
 
-void PostEffectManager::RenderImGui()
+void Engine::PostEffectManager::RenderImGui()
 {
 	ImGui::Begin("GameScene");
 	float width = static_cast<float> (WinApp::GetClientWidth() / 1.5f);
@@ -200,13 +201,13 @@ void PostEffectManager::RenderImGui()
 	ImGui::End();
 }
 
-void PostEffectManager::RenderUpdate()
+void Engine::PostEffectManager::RenderUpdate()
 {
 	float width = static_cast<float> (WinApp::GetClientWidth());
 	float height = static_cast<float> (WinApp::GetClientHeight());
 }
 
-void PostEffectManager::PreEnd(RenderTexture* renderTexture)
+void Engine::PostEffectManager::PreEnd(RenderTexture* renderTexture)
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -229,7 +230,7 @@ void PostEffectManager::PreEnd(RenderTexture* renderTexture)
 	scissorRect_->SettingScissorRect();
 }
 
-void PostEffectManager::PostEnd(RenderTexture* renderTexture)
+void Engine::PostEffectManager::PostEnd(RenderTexture* renderTexture)
 {
 	// レンダーターゲット
 	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);

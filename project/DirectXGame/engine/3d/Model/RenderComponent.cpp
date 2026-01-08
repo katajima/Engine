@@ -10,7 +10,7 @@
 
 
 
-void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
+void Engine::RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	objectType_ = objectType;			// オブジェクトタイプ
@@ -47,7 +47,7 @@ void RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType obj
 
 }
 
-void RenderComponent::Update()
+void Engine::RenderComponent::Update()
 {
 	// なにかしら見た目があるなら
 	if (model || primitive_ || skyBox_ || ocean_) {
@@ -59,7 +59,7 @@ void RenderComponent::Update()
 
 }
 
-void RenderComponent::Draw()
+void Engine::RenderComponent::Draw()
 {
 	if (!isDraw) return;
 	if (!isSkin_) return;
@@ -184,7 +184,7 @@ void RenderComponent::Draw()
 	}
 }
 
-float RenderComponent::GetAlpha()
+float Engine::RenderComponent::GetAlpha()
 {
 	// モデルごとの透明度取得
 	float a;
@@ -216,14 +216,14 @@ float RenderComponent::GetAlpha()
 	return a;
 }
 
-void RenderComponent::ObjectNormalTypeDiscrimination(PSOType type)
+void Engine::RenderComponent::ObjectNormalTypeDiscrimination(PSOType type)
 {
 	Object3dCommon* object = entity3DManager_->GetObject3dCommon();
 
 	object->DrawCommonSetting(type);
 }
 
-void RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
+void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 {
 	SkinningConmmon* skinning = entity3DManager_->GetSkinningConmmon();
 
@@ -256,8 +256,7 @@ void RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 	skinning->DrawCommonSetting(type);
 }
 
-
-void RenderComponent::DrawSetting()
+void Engine::RenderComponent::DrawSetting()
 {
 	// ライト
 	entity3DManager_->GetLightManager()->DrawLight();
@@ -270,9 +269,7 @@ void RenderComponent::DrawSetting()
 	camera_->GetCommandList(4);
 }
 
-
-
-void RenderComponent::DrawSettingSkin()
+void Engine::RenderComponent::DrawSettingSkin()
 {
 	// ライト
 	entity3DManager_->GetLightManager()->DrawLight();
@@ -282,7 +279,7 @@ void RenderComponent::DrawSettingSkin()
 	camera_->GetCommandList(4);
 }
 
-void RenderComponent::DrawSettingOcean()
+void Engine::RenderComponent::DrawSettingOcean()
 {
 	// 描画前準備
 	entity3DManager_->GetOceanManager()->DrawCommonSetting();

@@ -7,7 +7,7 @@
 #include "DirectXGame/engine/Math/Random.h"
 
 
-void ParticleEmitter2d::Initialize(ParticleManager2d* particleManager, std::string emitName, std::string particleName)
+void Engine::ParticleEmitter2d::Initialize(ParticleManager2d* particleManager, std::string emitName, std::string particleName)
 {
 	particleManager_ = particleManager;					// パーティクルマネージャー
 	emitName_ = emitName;								// エミッタ名
@@ -31,7 +31,7 @@ void ParticleEmitter2d::Initialize(ParticleManager2d* particleManager, std::stri
 }
 
 
-void ParticleEmitter2d::Update() {
+void Engine::ParticleEmitter2d::Update() {
 	ParticleGroup2d& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 	// トランスフォーム更新
@@ -62,7 +62,7 @@ void ParticleEmitter2d::Update() {
 		});
 };
 
-void ParticleEmitter2d::Emit() {
+void Engine::ParticleEmitter2d::Emit() {
 	if (isEmit) {
 		particleManager_->GetParticleGroups(particleName_).material->alphaClipping_ = alphaClipping_; // αクリッピング
 		particleManager_->GetParticleGroups(particleName_).material->enableLighting_ = enableLighting_; // aライト
@@ -79,50 +79,50 @@ void ParticleEmitter2d::Emit() {
 	}
 }
 
-void ParticleEmitter2d::SetCount(int count, int range) {
+void Engine::ParticleEmitter2d::SetCount(int count, int range) {
 	emitData_.count.median = count;
 	emitData_.count.range = range;
 }
 
-void ParticleEmitter2d::SetRange(Vector2 min, Vector2 max)
+void Engine::ParticleEmitter2d::SetRange(Vector2 min, Vector2 max)
 {
 	range_.min = min;
 	range_.max = max;
 }
 
-void ParticleEmitter2d::SetSize(Vector2 size, Vector2 range)
+void Engine::ParticleEmitter2d::SetSize(Vector2 size, Vector2 range)
 {
 	emitData_.size.median = size;
 	emitData_.size.range = range;
 }
-void ParticleEmitter2d::SetRotate(float rotate, float range)
+void Engine::ParticleEmitter2d::SetRotate(float rotate, float range)
 {
 	emitData_.rotate.median = rotate;
 	emitData_.rotate.range = range;
 }
-void ParticleEmitter2d::SetLifeTime(float life, float range)
+void Engine::ParticleEmitter2d::SetLifeTime(float life, float range)
 {
 	emitData_.lifeTime.median = life;
 	emitData_.lifeTime.range = range;
 }
 
-void ParticleEmitter2d::SetVelocity(Vector2 velocity, Vector2 range)
+void Engine::ParticleEmitter2d::SetVelocity(Vector2 velocity, Vector2 range)
 {
 	emitData_.velocity.median = velocity;
 	emitData_.velocity.range = range;
 }
-void ParticleEmitter2d::SetRotateVelocity(float rotateVelocity, float range)
+void Engine::ParticleEmitter2d::SetRotateVelocity(float rotateVelocity, float range)
 {
 	emitData_.rotateVelocity.median = rotateVelocity;
 	emitData_.rotateVelocity.range = range;
 }
-void ParticleEmitter2d::SetAcceleration(Vector2 acceleration, Vector2 range)
+void Engine::ParticleEmitter2d::SetAcceleration(Vector2 acceleration, Vector2 range)
 {
 	emitData_.acceleration.median = acceleration;
 	emitData_.acceleration.range = range;
 }
 
-void ParticleEmitter2d::EmitUniqe() {
+void Engine::ParticleEmitter2d::EmitUniqe() {
 	ParticleGroup2d& particleGroup = particleManager_->GetParticleGroups(particleName_);
 	auto& rnd = particleManager_->GetRandomEngine();
 

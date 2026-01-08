@@ -5,10 +5,11 @@
 
 // 前方宣言
 class BaseCharacterManager;
-class GlobalVariables;
-class SceneManager;
-class Entity3DManager;
-
+namespace Engine {
+	class GlobalVariables;
+	class SceneManager;
+	class Entity3DManager;
+}
 /// <summary>
 /// ゲームの流れやルールを制御するクラス
 /// </summary>
@@ -16,13 +17,16 @@ class GameFlowController {
 public:
 
 	// 初期化
-	void Initialize(SceneManager* sceneManager,GlobalVariables* globalVariables, BaseCharacterManager* characterManager);
+	void Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, BaseCharacterManager* characterManager);
 
 	// 更新
 	void Update(float dt);
 
 	// 描画
 	void Draw();
+
+	// ゲームデータ
+	GamePlayData GetGamePlayData() const { return gamePlayData_; }
 
 private:
 
@@ -32,13 +36,20 @@ private:
 private: // 
 	// ゲームイベント制御クラス
 	std::unique_ptr<GameEventController> gameEventController_ = nullptr;
+
+
+
 	// ゲームプレイデータ
 	GamePlayData gamePlayData_;
 
+private:
+	// ゲームが終わったか
+	bool isEndgame_ = false;
+
 private: // 貰いもの
-	Entity3DManager* entity3DManager = nullptr;
+	Engine::Entity3DManager* entity3DManager = nullptr;
 	BaseCharacterManager* characterManager = nullptr;
-	GlobalVariables* globalVariables = nullptr;
-	SceneManager* sceneManager = nullptr;
-	Input* input = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
+	Engine::SceneManager* sceneManager = nullptr;
+	Engine::Input* input = nullptr;
 };

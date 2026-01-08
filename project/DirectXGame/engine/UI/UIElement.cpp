@@ -2,12 +2,12 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
-static Vector2 ToLocalSpace(const Vector2& worldPos, const WorldTransform2d& parentTransform) {
+static Vector2 ToLocalSpace(const Vector2& worldPos, const Engine::WorldTransform2d& parentTransform) {
 	Matrix3x3 invMat = Inverse(parentTransform.worldMat_);
 	return Transforms(worldPos, invMat);
 }
 
-void UIElement::Init(Entity2DManager* entity2DManager, std::string name)
+void Engine::UIElement::Init(Entity2DManager* entity2DManager, std::string name)
 {
 	entity2DManager_ = entity2DManager;	// エンティティ2d
 	mainName_ = name;					// 名前設定
@@ -22,7 +22,7 @@ void UIElement::Init(Entity2DManager* entity2DManager, std::string name)
 
 }
 
-void UIElement::AddSprite(std::string name, std::string textureName)
+void Engine::UIElement::AddSprite(std::string name, std::string textureName)
 {
 	// 読み込み済みモデルを検索
 	if (sprites_.contains(name)) {
@@ -34,7 +34,7 @@ void UIElement::AddSprite(std::string name, std::string textureName)
 	sprites_.insert(std::make_pair(name, std::move(sprite)));
 }
 
-BaseSprite* UIElement::GetSprite(std::string name)
+Engine::BaseSprite* Engine::UIElement::GetSprite(std::string name)
 {
 	// スプライトがあるなら返す
 	if (sprites_.contains(name)) {
@@ -45,7 +45,7 @@ BaseSprite* UIElement::GetSprite(std::string name)
 	}
 }
 
-void UIElement::Draw()
+void Engine::UIElement::Draw()
 {
 	// スプライト更新描画
 	for (auto& sprit : sprites_) {
@@ -60,17 +60,17 @@ void UIElement::Draw()
 
 #pragma region UINormal
 
-void UINormal::InitSprite() {}
+void Engine::UINormal::InitSprite() {}
 
-void UINormal::Update(float deltaTime) {}
+void Engine::UINormal::Update(float deltaTime) {}
 
 #pragma endregion
 
 #pragma region UIButton
 
-void UIButton::InitSprite(){}
+void Engine::UIButton::InitSprite(){}
 
-void UIButton::Update(float deltaTime) {
+void Engine::UIButton::Update(float deltaTime) {
 
 
 }
@@ -79,7 +79,7 @@ void UIButton::Update(float deltaTime) {
 
 #pragma region UICheckBox
 
-void UICheckBox::InitSprite()
+void Engine::UICheckBox::InitSprite()
 {
 	// チェックボタン初期化
 	checkSprite = std::make_unique<BaseSprite>();
@@ -104,7 +104,7 @@ void UICheckBox::InitSprite()
 }
 
 
-void UICheckBox::Update(float deltaTime) 
+void Engine::UICheckBox::Update(float deltaTime)
 {
 	// 各位置の更新
 	checkSprite->GetSprite()->SetPosition(pos_);
@@ -131,7 +131,7 @@ void UICheckBox::Update(float deltaTime)
 	backgroundSprite->Update();
 }
 
-void UICheckBox::UniqueDraw() {
+void Engine::UICheckBox::UniqueDraw() {
 	
 	// 描画
 	backgroundSprite->Draw();
@@ -144,7 +144,7 @@ void UICheckBox::UniqueDraw() {
 
 #pragma region UISlider
 
-void UISlider::InitSprite() {
+void Engine::UISlider::InitSprite() {
 
 	// スライダー初期化
 	slidSprite = std::make_unique<BaseSprite>();
@@ -168,7 +168,7 @@ void UISlider::InitSprite() {
 	}
 }
 
-void UISlider::Update(float deltaTime) {
+void Engine::UISlider::Update(float deltaTime) {
 
 	// 比率と位置の設定
 	backgroundSprite->GetSprite()->SetPosition(pos_);
@@ -260,7 +260,7 @@ void UISlider::Update(float deltaTime) {
 	slidSprite->Update();
 }
 
-void UISlider::UniqueDraw() {
+void Engine::UISlider::UniqueDraw() {
 	backgroundSprite->Draw();
 	slidSprite->Draw();
 }
@@ -269,7 +269,7 @@ void UISlider::UniqueDraw() {
 
 #pragma region UIMeter
 
-void UIMeter::InitSprite() {
+void Engine::UIMeter::InitSprite() {
 	// メータスプライト初期化
 	meterSprite = std::make_unique<BaseSprite>();
 	meterSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.png");
@@ -302,7 +302,7 @@ void UIMeter::InitSprite() {
 
 }
 
-void UIMeter::Update(float deltaTime) {
+void Engine::UIMeter::Update(float deltaTime) {
 
 	// 名前スプライトがあるなら
 	if (nameSprite_) {
@@ -383,7 +383,7 @@ void UIMeter::Update(float deltaTime) {
 	backgroundSprite->Update();
 }
 
-void UIMeter::UniqueDraw() {
+void Engine::UIMeter::UniqueDraw() {
 
 	// 描画
 	backgroundSprite->Draw();
@@ -397,7 +397,7 @@ void UIMeter::UniqueDraw() {
 
 #pragma region UIPair
 
-void UIPair::InitSprite() 
+void Engine::UIPair::InitSprite()
 {
 	// 最初のスプライト初期化
 	firstSprite = std::make_unique<BaseSprite>();
@@ -414,7 +414,7 @@ void UIPair::InitSprite()
 	
 }
 
-void UIPair::Update(float deltaTime) {
+void Engine::UIPair::Update(float deltaTime) {
 	firstSprite->GetSprite()->SetPosition(pos_);
 
 	Vector2 secondpos = pos_;
@@ -443,7 +443,7 @@ void UIPair::Update(float deltaTime) {
 	secondSprite->Update();
 }
 
-void UIPair::UniqueDraw() {
+void Engine::UIPair::UniqueDraw() {
 	/// 描画
 	firstSprite->Draw();
 	secondSprite->Draw();
@@ -453,7 +453,7 @@ void UIPair::UniqueDraw() {
 
 #pragma region UICount
 
-void UICount::InitSprite()
+void Engine::UICount::InitSprite()
 {
 	// 行数分初期化
 	for (int i = 0; i < instance_; i++) {
@@ -484,7 +484,7 @@ void UICount::InitSprite()
 }
 
 
-void UICount::Update(float deltaTime)
+void Engine::UICount::Update(float deltaTime)
 {
 	if (count_ >= countMax_) {
 		count_ = countMax_;
@@ -516,7 +516,7 @@ void UICount::Update(float deltaTime)
 }
 
 
-void UICount::UniqueDraw() {
+void Engine::UICount::UniqueDraw() {
 	const int count = (std::max)(0, static_cast<int>(count_)); // 念のためマイナス防止
 	const int numDigits = (count == 0) ? 1 : static_cast<int>(log10(static_cast<double>(count))) + 1;
 

@@ -3,14 +3,14 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
 
-void CameraManager::Initialize(Input* input, Entity3DManager* entity3DManager,  GlobalVariables* globalVariables)
+void CameraManager::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables)
 {
 	input_ = input;						// インプット
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	globalVariables_ = globalVariables;	// 保存項目
 
 	// カメラ初期化
-	camera = std::make_unique <Camera>();
+	camera = std::make_unique <Engine::Camera>();
 	camera->Initialize(entity3DManager_->GetCameraCommon());
 	camera->transform_.rotate = { 0.36f,0,0 };			// 回転指定
 	camera->transform_.translate = { 5,32.5f,-59.2f };	// 位置指定

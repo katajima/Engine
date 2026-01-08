@@ -6,13 +6,13 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include <algorithm>
 
-void SceneManager::Init() {
+void Engine::SceneManager::Init() {
 	fade_ = std::make_unique<Fade>();
 	fade_->Initialize(entity2DManager_);
 	finished_ = true;
 };
 
-void SceneManager::Update()
+void Engine::SceneManager::Update()
 {
 	// 通常シーン処理
 	if (scene_) {
@@ -80,13 +80,13 @@ void SceneManager::Update()
 
 }
 
-void SceneManager::Draw3D()
+void Engine::SceneManager::Draw3D()
 {
 	if (scene_)
 		scene_->Draw3D();
 }
 
-void SceneManager::Draw2D()
+void Engine::SceneManager::Draw2D()
 {
 	if (scene_) {
 		scene_->AllDraw2D();
@@ -114,20 +114,20 @@ void SceneManager::Draw2D()
 
 }
 
-void SceneManager::DrawForeground2D() {
+void Engine::SceneManager::DrawForeground2D() {
 	if (scene_) {
 		scene_->DrawForeground2D();
 	}
 };
 
-SceneManager::~SceneManager()
+Engine::SceneManager::~SceneManager()
 {
 	// 最後のシーンの終了と解放
 	scene_->Finalize();
 	scene_.reset();  // ★ delete不要
 }
 
-void SceneManager::ChangeScene(const std::string& sceneName, float duration)
+void Engine::SceneManager::ChangeScene(const std::string& sceneName, float duration)
 {
 	assert(sceneFactory_);
 	if (nextScene_ == nullptr && phase_ == Phase::kMain) {

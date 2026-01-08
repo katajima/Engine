@@ -30,15 +30,18 @@ public:
     // 次のステートえ移行受付する時間
     virtual float GetNextStateTime() const = 0;
     // ステート終了時間
-    virtual float GetEndStateTime() const = 0;
+    virtual bool GetEndStateTime() const = 0;
     // 次のステートへ移行可能か
     virtual bool GetIsNextState() const = 0;
 
     // 時間
     float GetTimeInState() const { return timeInState; }
 
+    void Set(const Vector3& dire) { direction_ = dire; };
+
 protected:
     float timeInState = 0.0f;           // 時間
+    Vector3 direction_{ 0,0,1 };
 };
 
 
@@ -89,13 +92,17 @@ public:
         return timeInState > comboData_.comboCondition.GetComboNextTime(); 
     }
     // ステート終了時間
-    float GetEndStateTime() const override{
+    bool GetEndStateTime() const override{
         return timeInState > comboData_.comboCondition.GetComboEndTime();
     }
     // 次のステートへ移行可能か
     bool GetIsNextState() const override {
         return comboData_.comboCondition.IsNextCombo();
     };
+    // キャンセルするか
+    bool GetIsCansel() const {
+        return comboData_.comboCondition.IsComboCansel();
+    }
 
 private:
     std::string animation;
@@ -137,4 +144,6 @@ private:
     std::shared_ptr<ComboState> rootState;      // 初期ステート
 
     std::optional<AttackInput> bufferedInput;   // 入力バッファ
+
+    Vector3 direction_{ 0,0,1 };
 };

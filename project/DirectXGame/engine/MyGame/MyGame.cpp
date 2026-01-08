@@ -3,11 +3,11 @@
 #include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/application/scene/SceneFactory.h"
 
-const float MyGame::kDeltaTime_ = 1.0f / 60.0f;
-float MyGame::kTimeSpeed_ = 1.0f;
-float MyGame::nowTime = 0.0f;
+const float Engine::MyGame::kDeltaTime_ = 1.0f / 60.0f;
+float Engine::MyGame::kTimeSpeed_ = 1.0f;
+float Engine::MyGame::nowTime = 0.0f;
 
-void MyGame::Initialize()
+void Engine::MyGame::Initialize()
 {
 	debugTimer_.StartTimer();
 
@@ -40,12 +40,8 @@ void MyGame::Initialize()
 	debugTimer_.LogTimeSec("MyGameAllTime ");
 }
 
-void MyGame::Finalize()
+void Engine::MyGame::Finalize()
 {
-	//
-	//Audio::GetInstance()->Finalize();
-	//
-	
 	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
 	gpuParticleManager_->ClearEmitterAll();
 	gpuParticleManager_->ClearGroupParticleAll();
@@ -54,7 +50,7 @@ void MyGame::Finalize()
 	Framework::Finalize();
 }
 
-void MyGame::Update()
+void Engine::MyGame::Update()
 {
 	entity3DManager_->Get3DLineCommon()->LineClear();
 	// ImGuiの受付開始
@@ -113,14 +109,14 @@ void MyGame::Update()
 	dxCommon->GetImGuiManager()->End();
 }
 
-void MyGame::Draw()
+void Engine::MyGame::Draw()
 {
 	dxCommon->Draw(sceneManager_.get(), entity3DManager_.get());
 }
 
 
 
-void MyGame::InitializeResource()
+void Engine::MyGame::InitializeResource()
 {
 	TextureManager* textureManager = dxCommon->GetTextureManager();
 	ModelManager* modelManager = dxCommon->GetModelManager();
@@ -128,6 +124,7 @@ void MyGame::InitializeResource()
 
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
+	textureManager->LoadTexture("resources/Texture/simasima.png");
 
 
 	textureManager->LoadTexture("resources/Texture/grass.png");
@@ -141,6 +138,8 @@ void MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/text/Hit.png");
 	textureManager->LoadTexture("resources/Texture/text/HP.png");
 	textureManager->LoadTexture("resources/Texture/text/SP.png");
+	textureManager->LoadTexture("resources/Texture/text/wave.png");
+	textureManager->LoadTexture("resources/Texture/text/seconds.png");
 
 
 
@@ -191,7 +190,7 @@ void MyGame::InitializeResource()
 
 }
 
-void MyGame::CreateParticle()
+void Engine::MyGame::CreateParticle()
 {
 	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
@@ -323,16 +322,14 @@ void MyGame::CreateParticle()
 	// 
 	particleManager->CreateParticleGroup("missileHitCylinder", "resources/Texture/effect/gradationLine.png", cylinder_.get());
 	particleManager->GetParticleGroups("missileHitCylinder").isUVClamp = true;
-	//particleManager->GetParticleGroups("missileHitCylinder").mesh->material->transform.scale.x = 10.0f;
-	//particleManager->GetParticleGroups("missileHitCylinder").mesh->material->transform.scale.y = 10.0f;
-
+	
 
 	// ミサイルHitエフェクト
 	particleManager->CreateParticleGroup("missileHit", "resources/Texture/Image.png", primiStar.get());
 
 }
 
-void MyGame::LoadModel()
+void Engine::MyGame::LoadModel()
 {
 	ModelManager* modelManager = dxCommon->GetModelManager();
 
@@ -359,6 +356,7 @@ void MyGame::LoadModel()
 	modelManager->LoadModel("Ground.obj", "Ground");
 	modelManager->LoadModel("stair.obj");
 	modelManager->LoadModel("BoxBox.obj", "BoxAABB");
+	modelManager->LoadModel("point.obj", "special");
 
 
 
@@ -425,5 +423,9 @@ void MyGame::LoadModel()
 	modelManager->LoadModel("enemyPlank.obj", "enemyAll/plank"); // 鋼板
 	modelManager->LoadModel("enemyGear.obj", "enemyAll/gear"); // 歯車
 	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
+
+
+	modelManager->LoadModel("enemyBullet.gltf", "enemyAll/enemyBullet"); // 本体
+
 
 }

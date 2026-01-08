@@ -2,12 +2,12 @@
 #include "DirectXGame/engine/DirectX/Command/Command.h"
 #include "DirectXGame/engine/base/WinApp/WinApp.h"
 
-void ViewPort::Initialize(Command* command)
+void Engine::ViewPort::Initialize(Command* command)
 {
 	command_ = command;	// コマンド
 }
 
-void ViewPort::SettingViewport()
+void Engine::ViewPort::SettingViewport()
 {
 	// ビューポートの設定
 	D3D12_VIEWPORT viewport{};

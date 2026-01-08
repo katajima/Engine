@@ -1,11 +1,15 @@
 #pragma once
 #include <iostream>
 #include <unordered_map>
+#include <DirectXGame/engine/struct/Vector4.h>
 
 // 色(RGBA)
 struct Color {
     float r, g, b, a;
 
+    Vector4 ToVector4() const {
+        return Vector4(r, g, b, a);
+	}
 
 	static Color WHITE() { return Color(1.0f, 1.0f, 1.0f, 1.0f); }
 

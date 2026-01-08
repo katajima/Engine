@@ -22,10 +22,12 @@
 #include "DirectXGame/application/base/Input/InputHander.h"
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
+
 /// <summary>
 /// ゲームプレイシーン
 /// </summary>
-class GamePlayScene : public BaseScene
+class GamePlayScene : public Engine::BaseScene
 {
 public:
 	
@@ -57,21 +59,21 @@ public:
 	void CheckAllCollisions();
 
 private:
-	Input* input_ = nullptr;
-	Audio* audio_ = nullptr;
+	Engine::Input* input_ = nullptr;
+	Engine::Audio* audio_ = nullptr;
 
 	// インプットハンドラ
 	std::unique_ptr < InputHander> inputHander_;
 	ICommand* iCommand_;
 
-	static float nowTime;
+	float nowTime = 0.0f;
 	float fps = 0.0f;
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
 private:
 	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
-	std::unique_ptr<UICount> sprite;
+	std::unique_ptr<Engine::UICount> sprite;
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
@@ -80,12 +82,16 @@ private:
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManeger_;
+	std::unique_ptr<CameraManager> cameraManager_;
 	
-	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
+	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 
 	// 
 	std::unique_ptr<Effect> effect_;
+
+	// スペシャルポイント管理クラス
+	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
+
 private:
 	// キャラクター管理
 	std::unique_ptr<BaseCharacterManager> caracterManager_;
@@ -99,7 +105,7 @@ private:
 	std::unique_ptr<LoadLevelData> loadData_;
 private:
 	// 衝突マネージャ
-	std::unique_ptr<CollisionManager> collisionManager_;
+	std::unique_ptr<Engine::CollisionManager> collisionManager_;
 	// シーン遷移用
 	int count = 0;
 	int sceneCount = 0;

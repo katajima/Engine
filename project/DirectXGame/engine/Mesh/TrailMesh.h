@@ -5,21 +5,23 @@
 #include "DirectXGame/engine/DirectX/Resource/IndexBufferResource.h"
 
 
-/// <summary>
-/// トレイルメッシュ
-/// </summary>
-class TrailMesh : public BaseMesh {
-public:
-	// メッシュ生成
-	void CreateMesh(size_t instanse);
-	// 初期化
-	void Initialize(DirectXCommon* dxcommon) override;
-	// コマンドリスト設定
-	void GetCommandList();
+namespace Engine {
+	/// <summary>
+	/// トレイルメッシュ
+	/// </summary>
+	class TrailMesh : public BaseMesh {
+	public:
+		// メッシュ生成
+		void CreateMesh(size_t instanse);
+		// 初期化
+		void Initialize(DirectXCommon* dxcommon) override;
+		// コマンドリスト設定
+		void GetCommandList();
 
-public:
-	std::vector<TrailVertexData> verticesTrail;
-private:
-	VertexBuffer<TrailVertexData> vbvResorce_;
-	IndexBuffer<uint32_t> indexResorce_;
-};
+	public:
+		std::vector<TrailVertexData> verticesTrail;
+	private:
+		VertexBuffer<TrailVertexData> vbvResorce_;
+		IndexBuffer<uint32_t> indexResorce_;
+	};
+}

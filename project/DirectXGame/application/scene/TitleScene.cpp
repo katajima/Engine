@@ -107,13 +107,13 @@ void TitleScene::InitializeResources()
 	// オブジェクト3D
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
 
-	icon_B = std::make_unique<Sprite>();
+	icon_B = std::make_unique<Engine::Sprite>();
 	icon_B->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/B.png");
 	icon_B->SetPosition({ 640,500 });
 	icon_B->SetAnchorPoint({ 0.5f,0.5f });
 	icon_B->SetSize({200,200});
 
-	title = std::make_unique<Sprite>();
+	title = std::make_unique<Engine::Sprite>();
 	title->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/title.png");
 	title->SetPosition({ 200,200 });
 	//title->SetAnchorPoint({ 0.5f,0.5f });
@@ -133,7 +133,7 @@ void TitleScene::InitializeResources()
 	directionalLightData.lig = 0.1f;
 
 
-	directional = std::make_shared<DirectionalLight>();
+	directional = std::make_shared<Engine::DirectionalLight>();
 	directional->directional = directionalLightData;
 
 	GetEntity3DManager()->GetLightManager()->AddLight(directional);
@@ -141,7 +141,7 @@ void TitleScene::InitializeResources()
 
 void TitleScene::InitializeCamera()
 {
-	camera = std::make_unique <Camera>();
+	camera = std::make_unique <Engine::Camera>();
 	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
 	camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };

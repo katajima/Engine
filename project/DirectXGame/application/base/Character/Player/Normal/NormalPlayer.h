@@ -14,7 +14,8 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input,Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables ,Vector3 position, Camera* camera) override;
+	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables ,Vector3 position, Engine::Camera* camera) override;
 
 	///< summary>
 	/// 更新
@@ -59,7 +60,7 @@ private:
 	// 調整項目の適用
 	void ApplyGlobalVariables();
 
-	WorldTransform worldCollider_;
+	Engine::WorldTransform worldCollider_;
 	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 
 
@@ -67,11 +68,20 @@ private:
 	ComboGlovalData data2_;
 	ComboGlovalData data3_;
 	ComboGlovalData data4_;
+	ComboGlovalData data5_;	// コンボデータ(追加)横左
+	ComboGlovalData data6_; // コンボデータ(追加)横回転左
+	ComboGlovalData data7_; // コンボデータ(追加)横右
+	ComboGlovalData data8_; // コンボデータ(追加)突き
 
 	ComboData comboData1{};
 	ComboData comboData2{};
 	ComboData comboData3{};
 	ComboData comboData4{};
+	ComboData comboData5{};	// コンボ(追加)
+	ComboData comboData6{};	// コンボ(追加)
+	ComboData comboData7{};	// コンボ(追加)
+	ComboData comboData8{};	// コンボ(追加)
+
 
 
 	void ReloadComboData();
@@ -85,9 +95,12 @@ private:
 
 		Vector3 obbColliderSize = { 0.5f,2.0f,1.0f };// OBBコライダーサイズ
 		Vector3 obbCollider2Size = { 0.5f,5.5f,1.0f };// OBBコライダーサイズ
+		Vector3 obbCollider3Size = { 0.5f,10.0f,1.0f };// OBBコライダーサイズ
 
 		Vector3 collider1Pos = { 0.0f,0.5f,0.0f };
 		Vector3 collider2Pos = { 0,3.5f,0.5f };
+		Vector3 collider3Pos = { 0,6.5f,0.5f };
+
 	};
 	ProvisionalData provisionalData_;
 };

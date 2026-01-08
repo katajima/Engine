@@ -18,7 +18,8 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) override;
+	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 	///< summary>
 	/// 更新
@@ -39,7 +40,7 @@ private: // 一旦
 
 	struct ProvisionalData {
 		Vector3 size = { 1.25f,1.25f ,1.25f };// サイズ
-		Vector3 scale_{ 3.0f,3.0f, 3.0f };// スケール
+		Vector3 scale_{ 1.0f,1.0f, 1.0f };// スケール
 
 		float trailLifeTime = 0.5f;// トレイルの寿命
 		Color color = { 1,1,1,0.25f };

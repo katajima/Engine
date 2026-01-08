@@ -11,7 +11,6 @@
 //前方宣言
 class FollowCamera;
 class BaseEnemy;
-class CameraManager;
 /// <summary>
 /// プレイヤクラス
 /// </summary>
@@ -19,7 +18,8 @@ class BasePlayer : public BaseCharacter
 {
 public:
 	// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
@@ -43,8 +43,6 @@ public:
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera;}
 
-	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; }
-
 	// プレイヤUI取得
 	virtual PlayerUI* GetPlayerUI() = 0;
 
@@ -56,7 +54,6 @@ public:
 protected:
 	std::vector<BaseEnemy*> targetCharacters_;				// 攻撃対象キャラクターリスト
 	FollowCamera* followCamera_ = nullptr;					// フォローカメラ
-	CameraManager* cameraManager_ = nullptr;				// カメラマネジャー
 	bool isCreativeMode = false;							// クリエイティブモードかどうか
 };
 

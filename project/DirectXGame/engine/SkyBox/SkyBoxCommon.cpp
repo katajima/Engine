@@ -6,7 +6,7 @@
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
+void Engine::SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 {
 	dxCommon_ = dxCommon;
 
@@ -21,7 +21,7 @@ void SkyBoxCommon::Initialize(DirectXCommon* dxCommon)
 
 
 
-void SkyBoxCommon::DrawCommonSetting()
+void Engine::SkyBoxCommon::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
@@ -32,7 +32,7 @@ void SkyBoxCommon::DrawCommonSetting()
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void SkyBoxCommon::CreateRootSignature()
+void Engine::SkyBoxCommon::CreateRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	PSOFanction::SetDescriptorRenge(descriptorRange[0],0,1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
@@ -63,7 +63,7 @@ void SkyBoxCommon::CreateRootSignature()
 
 }
 
-void SkyBoxCommon::CreateGraphicsPipeline()
+void Engine::SkyBoxCommon::CreateGraphicsPipeline()
 {
 	CreateRootSignature();
 

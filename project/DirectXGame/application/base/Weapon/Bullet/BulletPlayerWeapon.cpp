@@ -3,11 +3,13 @@
 #include"DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include<DirectXGame/application/base/Bullet/Base/BulletManager.h>
 #include"DirectXGame/application/base/Effect/Effect.h"
+#include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 
 ///< summary>
 /// 初期化
 ///</summary>
-void BulletPlayerWeapon::Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) {
+void BulletPlayerWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	entity2DManager_ = entity2DManager;	// エンティティ2d
 	globalVariables_ = globalVariables;	// 保存項目
@@ -163,10 +165,10 @@ void BulletPlayerWeapon::Shoot()
 
 	// モードによって弾の状態変更
 	if (modeType_ == ModeType::Normal) {
-		info.type = BulletType::NORMAL;
+		info.type = ProjectileType::NORMAL;
 	}
 	else {
-		info.type = BulletType::PENETRATION;
+		info.type = ProjectileType::PENETRATION;
 		info.speed = rengedData_.bulletSpeed * provisionalData_.bulletSpeedScale;
 	}
 	
@@ -175,6 +177,7 @@ void BulletPlayerWeapon::Shoot()
 	effect_->Emit("bulletSmoke", bulletMuzzleTransform_.GetWorldPosition());
 	effect_->Emit("cartridge", bulletCartridgeTransform_.GetPreWorldPosition());
 
+
 	// 弾生成
-	bulletManager_->GenerateBullet(BulletManager::BulletType::kPlayerBullet, info);
+	player_->GetBulletSpawn()->GenerateBullet(BulletType::kPlayerBullet, info);
 };

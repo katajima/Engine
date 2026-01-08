@@ -18,7 +18,7 @@ enum RootIndex {
 	ROOT_CBV_DISPATCHCOUNT = 8      // b2
 };
 
-void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName)
+void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName)
 {
 	dxCommon_ = dxCommon;						// DX共通クラス
 	gpuParticleManager_ = gpuParticleManager;	// GPUパーティクル管理クラス
@@ -134,7 +134,7 @@ void GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCom
 
 }
 
-void GpuParticleGroup::Update()
+void Engine::GpuParticleGroup::Update()
 {
 
 	cbCameraPos_.Data()->x = camera_->transform_.translate.x;
@@ -168,7 +168,7 @@ void GpuParticleGroup::Update()
 	}
 }
 
-void GpuParticleGroup::Draw() {
+void Engine::GpuParticleGroup::Draw() {
 
 	if (mesh_) {
 		sbParticleResource_.SetGraphicsRootDescriptorTable(1);
@@ -185,7 +185,7 @@ void GpuParticleGroup::Draw() {
 
 #pragma region Emit
 
-void GpuParticleGroup::UpdateEmitte(float deltaTime)
+void Engine::GpuParticleGroup::UpdateEmitte(float deltaTime)
 {
 	// time 更新（そのまま）
 	cbPerFrame_.Data()->time += deltaTime;
@@ -271,7 +271,7 @@ void GpuParticleGroup::UpdateEmitte(float deltaTime)
 
 
 // エミッター追加
-void GpuParticleGroup::AddEmitter(BaseGpuParticleEmitter* emit) {
+void Engine::GpuParticleGroup::AddEmitter(BaseGpuParticleEmitter* emit) {
 
 	emitters[emit->GetName()] = emit;
 	emitters[emit->GetName()]->GetCommonData();
@@ -281,7 +281,7 @@ void GpuParticleGroup::AddEmitter(BaseGpuParticleEmitter* emit) {
 
 #pragma region Field
 
-void GpuParticleGroup::UpdateField()
+void Engine::GpuParticleGroup::UpdateField()
 {
 	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
 	cbPerFrame_.SetComputeRootConstantBufferView(1);			// 乱数用時間
@@ -307,7 +307,7 @@ void GpuParticleGroup::UpdateField()
 
 #pragma region Trail
 
-void GpuParticleGroup::UpateTrailEmitte(float deltaTime)
+void Engine::GpuParticleGroup::UpateTrailEmitte(float deltaTime)
 {
 	const uint32_t threadsPerGroup = 256;
 	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
@@ -329,7 +329,7 @@ void GpuParticleGroup::UpateTrailEmitte(float deltaTime)
 }
 
 
-void GpuParticleGroup::UpdateTrail()
+void Engine::GpuParticleGroup::UpdateTrail()
 {
 	const uint32_t threadsPerGroup = 256;
 	const uint32_t dispatchCount = (cbMaxTrailVertexInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
@@ -345,7 +345,7 @@ void GpuParticleGroup::UpdateTrail()
 
 }
 
-void GpuParticleGroup::DrawTrail()
+void Engine::GpuParticleGroup::DrawTrail()
 {
 
 	sbTrailVertexResource_.SetGraphicsRootDescriptorTable(1);

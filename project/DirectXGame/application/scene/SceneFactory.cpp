@@ -2,7 +2,7 @@
 #include <DirectXGame/engine/Base/pch.h>
 
 
-std::unique_ptr<BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
+std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {
     if (sceneName == "TITLE") {                 // タイトル
         return std::make_unique<TitleScene>();

@@ -5,7 +5,7 @@
 /// <summary>
 /// 初期化
 /// </summary>
-void Fade::Initialize(Entity2DManager* entity2DManager) {
+void Engine::Fade::Initialize(Entity2DManager* entity2DManager) {
 	entity2DManager_ = entity2DManager;
 
 	// 背景スプライト初期化
@@ -22,7 +22,7 @@ void Fade::Initialize(Entity2DManager* entity2DManager) {
 /// <summary>
 /// 毎フレーム処理
 /// </summary>
-void Fade::Update() {
+void Engine::Fade::Update() {
 	if (status_ == Status::None) return;
 
 	// 時間更新
@@ -65,14 +65,14 @@ void Fade::Update() {
 /// <summary>
 /// 描画
 /// </summary>
-void Fade::Draw() {
+void Engine::Fade::Draw() {
 
 };
 
 /// <summary>
 /// 描画
 /// </summary>
-void Fade::Draw2D() {
+void Engine::Fade::Draw2D() {
 	if (status_ == Status::None) {
 		return;
 	}
@@ -80,14 +80,14 @@ void Fade::Draw2D() {
 	sprite_->Draw();
 
 }
-void Fade::DrawCompulsion2D()
+void Engine::Fade::DrawCompulsion2D()
 {
 	// 描画
 	sprite_->Draw();
 }
 
 // フェード開始
-void Fade::Start(Status status, float duration, const Color& color) {
+void Engine::Fade::Start(Status status, float duration, const Color& color) {
 	status_ = status;
 	duration_ = duration;
 	counter_ = 0.0f;
@@ -97,7 +97,7 @@ void Fade::Start(Status status, float duration, const Color& color) {
 
 
 // フェード終了判定
-bool Fade::IsFinished() const {
+bool Engine::Fade::IsFinished() const {
 	switch (status_) {
 	case Fade::Status::FadeIn:
 	case Fade::Status::FadeOut:
@@ -112,12 +112,12 @@ bool Fade::IsFinished() const {
 
 	return true;
 }
-void Fade::SetColorUpdate(Color color)
+void Engine::Fade::SetColorUpdate(Color color)
 {
 	sprite_->SetColor(color);
 	sprite_->Update();
 }
-void Fade::SetSize(Vector2 size)
+void Engine::Fade::SetSize(Vector2 size)
 {
 	sprite_->SetSize({ static_cast<float>(WinApp::GetClientWidth()),static_cast<float>(WinApp::GetClientHeight()) });
 }

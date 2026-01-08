@@ -10,7 +10,8 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, GlobalVariables* globalVariables, Vector3 position) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
 
 	///< summary>
 	/// 更新
@@ -29,7 +30,7 @@ public:
 
 protected:
 	// ライト
-	std::shared_ptr<DirectionalLight> directionalLight_;
+	std::shared_ptr<Engine::DirectionalLight> directionalLight_;
 	// 平行ライトデータ
 	DirectionalLightData directionalLightData{};
 };

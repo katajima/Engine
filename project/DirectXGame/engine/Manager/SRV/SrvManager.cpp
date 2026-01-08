@@ -8,11 +8,11 @@
 
 
 
-const uint32_t SrvManager::kMaxSRVCount = 2048;
+const uint32_t Engine::SrvManager::kMaxSRVCount = 2048;
 
 
 
-void SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
+void Engine::SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
 	DXGIDevice_ = DXGI;	// デバイス
 	command_ = Command;	// コマンド
@@ -26,28 +26,28 @@ void SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 
 
 
-uint32_t SrvManager::Allocate()
+uint32_t Engine::SrvManager::Allocate()
 {
 	uint32_t index = useIndex_.fetch_add(1, std::memory_order_relaxed);
 	assert(index < kMaxSRVCount);
 	return index;
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE SrvManager::GetCPUDescriptorHandle(uint32_t index)
+D3D12_CPU_DESCRIPTOR_HANDLE Engine::SrvManager::GetCPUDescriptorHandle(uint32_t index)
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handleCPU.ptr += (descriptorSize * index);
 	return handleCPU;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE SrvManager::GetGPUDescriptorHandle(uint32_t index)
+D3D12_GPU_DESCRIPTOR_HANDLE Engine::SrvManager::GetGPUDescriptorHandle(uint32_t index)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handleGPU.ptr += (descriptorSize * index);
 	return handleGPU;
 }
 
-void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata matadata)
+void Engine::SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DirectX::TexMetadata matadata)
 {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = matadata.format;
@@ -67,7 +67,7 @@ void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResou
 	DXGIDevice_->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
-void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride)
+void Engine::SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride)
 {
 	// SRVの記述を設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -83,7 +83,7 @@ void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource*
 	DXGIDevice_->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
-void SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride)
+void Engine::SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride)
 {
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -97,7 +97,7 @@ void SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource*
 	DXGIDevice_->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
 }
 
-void SrvManager::CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResource, DXGI_FORMAT format)
+void Engine::SrvManager::CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResource, DXGI_FORMAT format)
 {
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 	uavDesc.Format = format;
@@ -110,7 +110,7 @@ void SrvManager::CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResou
 
 
 
-void SrvManager::PreDraw()
+void Engine::SrvManager::PreDraw()
 {
 	// 描画用のDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
@@ -118,12 +118,12 @@ void SrvManager::PreDraw()
 
 }
 
-void SrvManager::SetGraphicsRootdescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
+void Engine::SrvManager::SetGraphicsRootdescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
 {
 	command_->GetList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
 }
 
-bool SrvManager::IsMaxTextuer()
+bool Engine::SrvManager::IsMaxTextuer()
 {
 	if (kMaxSRVCount > useIndex_) {
 		return true;
@@ -131,7 +131,7 @@ bool SrvManager::IsMaxTextuer()
 	return false;
 }
 
-void SrvManager::Finalize()
+void Engine::SrvManager::Finalize()
 {
 	descriptorHeap.Reset();
 }

@@ -6,7 +6,7 @@
 /// オブジェクトの時間取得
 /// </summary>
 /// <returns></returns>
-float ObjectComponent::GetTime() const { return MyGame::GameTime() * timeSpeed_; }
+float ObjectComponent::GetTime() const { return Engine::MyGame::GameTime() * timeSpeed_; }
 
 /// <summary>
 /// オブジェクトの時間設定
@@ -39,11 +39,20 @@ void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const
     objectInstance_->transform.translate_ = t;// 位置
 }
 
+// 色の設定
+void ObjectComponent::SetColor(const Color& color) {
+    if(useInstancing){
+        objectInstance_->color = color.ToVector4();
+    }
+    else {
+        objectBase_->GetMaterial(0)->color = color;
+	}
 
+};
 
 
 // ワールド変換取得
-WorldTransform& ObjectComponent::GetWorldTransform() {
+Engine::WorldTransform& ObjectComponent::GetWorldTransform() {
     
     // インスタンシング描画なら
     if (useInstancing) {
@@ -54,7 +63,7 @@ WorldTransform& ObjectComponent::GetWorldTransform() {
     }
 }
 
-RigidBodyComponent* ObjectComponent::GetRigidBodyComponent() {
+Engine::RigidBodyComponent* ObjectComponent::GetRigidBodyComponent() {
     // インスタンシング描画なら
     if (useInstancing) {
         return objectInstance_->GetRigidBodyComponent();
@@ -87,7 +96,7 @@ void ObjectComponent::IsDelete() {
 
 
 // コライダーコンポーネント取得
-ColliderComponent* ObjectComponent::GetColliderComponent() {
+Engine::ColliderComponent* ObjectComponent::GetColliderComponent() {
     // インスタンシング描画なら
     if (useInstancing) {
         return objectInstance_->GetColliderComponent();
@@ -107,7 +116,7 @@ void ObjectComponent::ColliderHistoryClear() {
     }
 }
 // 衝突履歴取得
-ContactRecord& ObjectComponent::GetContactRecord() {
+Engine::ContactRecord& ObjectComponent::GetContactRecord() {
     // インスタンシング描画なら
     if (useInstancing) {
         return objectInstance_->GetColliderComponent()->contactRecord_;
@@ -134,7 +143,10 @@ Vector2 ObjectComponent::GetScreenPosition() {
 /// </summary>
 /// <param name="entity3DManager"></param>
 /// <param name="globalVariables"></param>
-void ObjectComponent::Initialize(Entity3DManager* entity3DManager,  GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName,bool useCollider, bool useRigidBody,IHitReceiver* iHitReceiver, ObjectModelType modelType) {
+void ObjectComponent::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+    const std::string& objectName, const std::string& modelName,bool useCollider, bool useRigidBody,
+    IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType) {
+
     this->entity3DManager_ = entity3DManager;   // エンティティ3d
     this->globalVariables_ = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
@@ -156,7 +168,9 @@ void ObjectComponent::Initialize(Entity3DManager* entity3DManager,  GlobalVariab
 
 }
 
-void ObjectComponent::InitializeInstancing(Entity3DManager* entity3DManager, GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver)
+void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+    const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, 
+    IHitReceiver* iHitReceiver)
 {
     this->entity3DManager_ = entity3DManager;   // エンティティ3d
     this->globalVariables_ = globalVariables;   // 保存項目
@@ -167,7 +181,7 @@ void ObjectComponent::InitializeInstancing(Entity3DManager* entity3DManager, Glo
     useInstancing = true;                       // インスタンシング描画にする
    
     // インスタンス初期化
-    ObjectInstans object;
+    Engine::ObjectInstans object;
     object.Initialize(entity3DManager_,true);
     // オブジェクト追加
     entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_);

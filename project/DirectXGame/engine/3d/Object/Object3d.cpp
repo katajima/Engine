@@ -16,7 +16,7 @@
 
 #pragma region Init
 
-void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
+void Engine::Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
 {
 	entity3DManager_ = entity3DManager;														// エンティティ3d
 	object3dCommon_ = entity3DManager_->GetObject3dCommon();								// オブジェクト共通クラス
@@ -59,7 +59,7 @@ void Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType obje
 	object3dCommon_->count++;
 }
 
-void Object3d::InitColliderComponent()
+void Engine::Object3d::InitColliderComponent()
 {
 	// コライダーコンポーネントの初期化
 	colliderComponent_ = std::make_unique<ColliderComponent>();
@@ -71,7 +71,7 @@ void Object3d::InitColliderComponent()
 	isColliderComponenyUpdate_ = true;
 }
 
-void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
+void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
 {
 	trailEffect_ = std::make_unique<TrailEffect>();
 	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
@@ -83,7 +83,7 @@ void Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color,
 
 #pragma region Update
 
-void Object3d::Update()
+void Engine::Object3d::Update()
 {
 	if (isDelete) return;
 
@@ -181,7 +181,7 @@ void Object3d::Update()
 
 }
 
-void Object3d::RigidBodyUpdate()
+void Engine::Object3d::RigidBodyUpdate()
 {
 	if (isDelete) return;
 	// 物理
@@ -194,14 +194,14 @@ void Object3d::RigidBodyUpdate()
 
 #pragma region Draw
 
-void Object3d::Draw()
+void Engine::Object3d::Draw()
 {
 	if (isDelete) return;
 
 	renderComponent_->Draw();
 }
 
-void Object3d::DrawTrailEffect()
+void Engine::Object3d::DrawTrailEffect()
 {
 	if (trailEffect_) {
 		// トレイルエフェクトの描画
@@ -209,7 +209,7 @@ void Object3d::DrawTrailEffect()
 	}
 }
 
-void Object3d::DebugImguiSkin()
+void Engine::Object3d::DebugImguiSkin()
 {
 	DebugModel::ImguiSkin(model->modelData);
 }
@@ -218,7 +218,7 @@ void Object3d::DebugImguiSkin()
 
 #pragma region Other
 
-Vector2 Object3d::GetScreenPosition()
+Vector2 Engine::Object3d::GetScreenPosition()
 {
 	if (transformComponent_.get()) {
 		if (isIndividualCamera_) {
@@ -233,12 +233,12 @@ Vector2 Object3d::GetScreenPosition()
 	}
 }
 
-void Object3d::DebugImguiModel()
+void Engine::Object3d::DebugImguiModel()
 {
 	DebugModel::ImguiModel(model->modelData);
 }
 
-void Object3d::SetModel(const std::string& filePath)
+void Engine::Object3d::SetModel(const std::string& filePath)
 {
 	//モデルを検索してセット
 
@@ -249,7 +249,7 @@ void Object3d::SetModel(const std::string& filePath)
 #pragma endregion // その他
 
 
-Vector2 ScreenPosition(const WorldTransform world, Camera* camera)
+Vector2 Engine::ScreenPosition(const Engine::WorldTransform world, Engine::Camera* camera)
 {
 
 	Vector3 wPos = world.GetWorldPosition();
@@ -260,7 +260,7 @@ Vector2 ScreenPosition(const WorldTransform world, Camera* camera)
 	matViewProjection = Multiply( camera->GetViewMatrix(), camera->GetProjectionMatrix());
 
 	// ビューポート行列
-	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(WinApp::GetClientWidth()), static_cast<float>(WinApp::GetClientHeight()), 0, 1);
+	Matrix4x4 matViewport = MakeViewportMatrix(0, 0, static_cast<float>(Engine::WinApp::GetClientWidth()), static_cast<float>(Engine::WinApp::GetClientHeight()), 0, 1);
 
 	// 視錐台内にオブジェクトがあるかチェック (matViewProjection を渡す)
 	if (!IsInFrustum(matViewProjection, wPos)) {

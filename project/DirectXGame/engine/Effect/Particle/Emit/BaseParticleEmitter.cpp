@@ -7,7 +7,7 @@
 #include "DirectXGame/engine/Math/Random.h"
 
 
-void BaseParticleEmitter::CommonParticleInit(ParticleManager* particleManager, GlobalVariables* globalVariables, std::string emitName, std::string particleName)
+void Engine::BaseParticleEmitter::CommonParticleInit(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
 	particleManager_ = particleManager;					// パーティクルマネージャー
 	globalVariables_ = globalVariables;					// グローバル変数
@@ -42,13 +42,13 @@ void BaseParticleEmitter::CommonParticleInit(ParticleManager* particleManager, G
 
 }
 
-void BaseParticleEmitter::ApplyGlobalVariables() {
+void Engine::BaseParticleEmitter::ApplyGlobalVariables() {
 	
 }
 
 
 // 共通発生処理
-void BaseParticleEmitter::Emit()
+void Engine::BaseParticleEmitter::Emit()
 {
 	if (isEmit) {
 		particleManager_->GetParticleGroups(particleName_).isFlag = isFlag;
@@ -72,7 +72,7 @@ void BaseParticleEmitter::Emit()
 }
 
 
-void BaseParticleEmitter::Update() {
+void Engine::BaseParticleEmitter::Update() {
 	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
 
 	ApplyGlobalVariables(); // グローバル変数適用
@@ -192,7 +192,7 @@ void BaseParticleEmitter::Update() {
 };
 
 // 最小最大値算出
-void BaseParticleEmitter::EmitMinMax() {
+void Engine::BaseParticleEmitter::EmitMinMax() {
 	//	範囲 
 	ConversionRange(emitData_.colorRange);
 };
@@ -201,50 +201,50 @@ void BaseParticleEmitter::EmitMinMax() {
 #pragma region 設定
 
 // 発生頻度設定
-void BaseParticleEmitter::SetCount(int count, int range)
+void Engine::BaseParticleEmitter::SetCount(int count, int range)
 {
 	emitData_.count.median = count;
 	emitData_.count.range = range;
 }
 // サイズ設定
-void BaseParticleEmitter::SetSize(Vector3 size, Vector3 range)
+void Engine::BaseParticleEmitter::SetSize(Vector3 size, Vector3 range)
 {
 	emitData_.size.median = size;
 	emitData_.size.range = range;
 }
 // 回転設定
-void BaseParticleEmitter::SetRotate(Vector3 rotate, Vector3 range)
+void Engine::BaseParticleEmitter::SetRotate(Vector3 rotate, Vector3 range)
 {
 	emitData_.rotate.median = rotate;
 	emitData_.rotate.range = range;
 }
 // 生存時間設定
-void BaseParticleEmitter::SetLifeTime(float life, float range)
+void Engine::BaseParticleEmitter::SetLifeTime(float life, float range)
 {
 	emitData_.lifeTime.median = life;
 	emitData_.lifeTime.range = range;
 }
 
 // 速度設定
-void BaseParticleEmitter::SetVelocity(Vector3 velocity, Vector3 range)
+void Engine::BaseParticleEmitter::SetVelocity(Vector3 velocity, Vector3 range)
 {
 	emitData_.velocity.median = velocity;
 	emitData_.velocity.range = range;
 }
 // 回転速度設定
-void BaseParticleEmitter::SetRotateVelocity(Vector3 rotateVelocity, Vector3 range)
+void Engine::BaseParticleEmitter::SetRotateVelocity(Vector3 rotateVelocity, Vector3 range)
 {
 	emitData_.rotateVelocity.median = rotateVelocity;
 	emitData_.rotateVelocity.range = range;
 }
 // 加速度設定
-void BaseParticleEmitter::SetAcceleration(Vector3 acceleration, Vector3 range)
+void Engine::BaseParticleEmitter::SetAcceleration(Vector3 acceleration, Vector3 range)
 {
 	emitData_.acceleration.median = acceleration;
 	emitData_.acceleration.range = range;
 }
 
-void BaseParticleEmitter::SetSizeAmount(Vector3 size, Vector3 range)
+void Engine::BaseParticleEmitter::SetSizeAmount(Vector3 size, Vector3 range)
 {
 	emitData_.sizeAmount.median = size;
 	emitData_.sizeAmount.range = range;

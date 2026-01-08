@@ -12,46 +12,48 @@
 #include <wrl.h>
 using namespace Microsoft::WRL;
 
-// 前方宣言
-class DXGIDevice;
 
-/// <summary>
-/// コマンドクラス
-/// </summary>
-class Command
-{
-public:
-	Command() = default;
-	~Command() = default;
+namespace Engine {
+	// 前方宣言
+	class DXGIDevice;
 
-	// 初期化
-	void Initialize(DXGIDevice* dxgi);
+	/// <summary>
+	/// コマンドクラス
+	/// </summary>
+	class Command
+	{
+	public:
+		Command() = default;
+		~Command() = default;
 
-	// コマンドの実行
-	void KickCommand();
+		// 初期化
+		void Initialize(DXGIDevice* dxgi);
 
-	// コマンドのリセット
-	void ResetCommand();
+		// コマンドの実行
+		void KickCommand();
 
-	// キューの取得
-	ID3D12CommandQueue* GetQueue();
-	// アロケータの取得
-	ID3D12CommandAllocator* GetAllocator();
-	// リストの取得
-	ID3D12GraphicsCommandList* GetList();
+		// コマンドのリセット
+		void ResetCommand();
 
-private:
+		// キューの取得
+		ID3D12CommandQueue* GetQueue();
+		// アロケータの取得
+		ID3D12CommandAllocator* GetAllocator();
+		// リストの取得
+		ID3D12GraphicsCommandList* GetList();
 
-	HRESULT hr_ = S_FALSE;
+	private:
 
-	// DXGI
-	DXGIDevice* dxgi_ = nullptr;
+		HRESULT hr_ = S_FALSE;
 
-	// コマンドキュー
-	ComPtr<ID3D12CommandQueue> commandQueue_ = nullptr;
-	// コマンドアロケータ
-	ComPtr<ID3D12CommandAllocator> commandAllocator_ = nullptr;
-	// コマンドリスト
-	ComPtr<ID3D12GraphicsCommandList> commandList_ = nullptr;
-};
+		// DXGI
+		DXGIDevice* dxgi_ = nullptr;
 
+		// コマンドキュー
+		ComPtr<ID3D12CommandQueue> commandQueue_ = nullptr;
+		// コマンドアロケータ
+		ComPtr<ID3D12CommandAllocator> commandAllocator_ = nullptr;
+		// コマンドリスト
+		ComPtr<ID3D12GraphicsCommandList> commandList_ = nullptr;
+	};
+}

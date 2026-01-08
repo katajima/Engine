@@ -42,13 +42,15 @@ public:
 
 
 // 前方宣言
-class Input;
+namespace Engine {
+	class Input;
+}
 // インプットハンドラー
 class InputHander 
 {
 public:
 	// インプット設定
-	void SetInput(Input* input) { input_ = input; };
+	void SetInput(Engine::Input* input) { input_ = input; };
 	// ハンドルインプット取得
 	ICommand* HandleInput();
 	// 割り当て移動
@@ -61,7 +63,7 @@ public:
 	void AssignHeavyAttackCommandPad();
 
 private:
-	Input* input_;
+	Engine::Input* input_;
 
 	std::unique_ptr<ICommand> movePad;
 	std::unique_ptr<ICommand> jampPad;

@@ -15,14 +15,14 @@ class HitBoxFunction {
 public:
 
 	// 初期化
-	void Initialize(ColliderComponent* owner, BaseCharacter* character, HitBoxUseType type) {
+	void Initialize(Engine::ColliderComponent* owner, BaseCharacter* character, HitBoxUseType type) {
 		owner_ = owner; 
 		character_ = character;
 		type_ = type;
 	};
 
 	// 開始
-	bool Begin(Collider* self, Collider* other);
+	bool Begin(Engine::Collider* self, Engine::Collider* other);
 
 	// 更新
 	void Update();
@@ -39,14 +39,14 @@ private:
 	void UpdateTypeOther();
 private:
 	// 衝突履歴取得
-	ContactRecord& GetContactRecord() { return owner_->contactRecord_; }
+	Engine::ContactRecord& GetContactRecord() { return owner_->contactRecord_; }
 private:
-	ColliderComponent* owner_ = nullptr;	// コライダーコンポーネント(使用者)
-	ColliderComponent* other_ = nullptr;	// コライダーコンポーネント(相手)
+	Engine::ColliderComponent* owner_ = nullptr;	// コライダーコンポーネント(使用者)
+	Engine::ColliderComponent* other_ = nullptr;	// コライダーコンポーネント(相手)
 	BaseCharacter* character_ = nullptr;	// 使用キャラクター
 	HitBoxUseType type_;							// 使用者
 
-	Collider* otherColl_ = nullptr;
+	Engine::Collider* otherColl_ = nullptr;
 	AttackReactionData data_;
 };
 

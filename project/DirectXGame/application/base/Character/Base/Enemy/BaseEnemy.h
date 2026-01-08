@@ -17,11 +17,21 @@ class Entity2DManager;
 class BaseEnemy : public BaseCharacter {
 public:
 	// 初期化
-	virtual void Initialize(Input* input, Entity3DManager* entity3DManager, Entity2DManager* entity2DManager, GlobalVariables* globalVariables, Vector3 position, Camera* camera) = 0;
+	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
+	// 基盤となる初期化
+	void BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
+		const std::string& modelName,const std::string& charaName);
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
+	
+	// 基盤の更新
+	void BaseUpdate();
+	
+	
 	// 描画エフェクト
 	virtual void DrawEffect() = 0;
 	// 描画2d
@@ -33,8 +43,8 @@ public:
 	// 攻撃
 	virtual void Attack() = 0;
 	// プレイヤー設定
-	virtual void SetPlayer(BasePlayer* player) = 0;
-
+	void SetPlayer(BasePlayer* player) { player_ = player; }// プレイヤ設定
+		
 public:
 	// パーティクル発生
 	virtual void Emit() = 0;
@@ -75,17 +85,21 @@ protected:
 	EnemyType type_ = EnemyType::kNormal; // 敵の種類
 	uint32_t id_ = 0; // ID
 
-	AgentState agentState_ = AgentState::Idle;
+	AgentState agentState_ = AgentState::Approach;
 protected:
 	
 protected: //2D
-	std::unique_ptr<Sprite> icon_lockOn;
-	std::unique_ptr<Sprite> hpBer_;
-	std::unique_ptr<Sprite> backHpBer_;
+	std::unique_ptr<Engine::Sprite> icon_lockOn;
+	std::unique_ptr<Engine::Sprite> hpBer_;
+	std::unique_ptr<Engine::Sprite> backHpBer_;
 protected:
 	BasePlayer* player_;
 	std::unique_ptr <VisionComponent> visionComponent_;			// 視界
-	std::unique_ptr<EffectComponent> effectComponent_ = nullptr;
+	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 	bool isLockOn_ = false; // ロックオンされているか
 
+
+protected:
+	Engine::WorldTransform worldEffect_;
+	DebugTimer debugTimer_;
 };

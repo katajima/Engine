@@ -36,7 +36,7 @@ public:
 	/// </summary>
 	void Initialize();
 	// 更新
-	void Update(float dt, WorldTransform& world, RigidBodyComponent& rigid);
+	void Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
 	// ダッシュ開始
 	void StartDash();
 
@@ -59,9 +59,9 @@ private:
 	// 状態処理
 	void StateProcess(float dt);
 	// ダッシュ処理
-	void DashProcess(float dt, WorldTransform& world, RigidBodyComponent& rigid);
+	void DashProcess(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
 	// ダッシュ時の重力処理
-	void GravityProcess(float dt, RigidBodyComponent& rigid);
+	void GravityProcess(float dt, Engine::RigidBodyComponent& rigid);
 private:
 	// ダッシュ用データ
 	Data data_{};

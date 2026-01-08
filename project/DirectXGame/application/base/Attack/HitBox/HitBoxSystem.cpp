@@ -1,7 +1,7 @@
 #include "HitBoxSystem.h"
 
 
-void HitBoxSystem::Initialize(BaseCharacter* character, Entity3DManager* entity3dManager) {
+void HitBoxSystem::Initialize(BaseCharacter* character, Engine::Entity3DManager* entity3dManager) {
 	character_ = character;
 	entity3dManager_ = entity3dManager;
 };
@@ -27,15 +27,16 @@ void HitBoxSystem::Update(float dt) {
 }
 
 void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas, const std::vector<std::string>& useHitBoxName,
-	float lifeTime, Type dependenceType, const Vector3& offset, WorldTransform* parent) {
+	float lifeTime, Type dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 	Data d;
 	d.hitBox = std::make_unique<HitBox>();
 	d.hitBox->Initialize(entity3dManager_, character_, type);
-
-	std::unique_ptr<OBBCollider> collObb = nullptr;
-	std::unique_ptr<AABBCollider> collAABB = nullptr;
-	std::unique_ptr<SphereCollider> collSphere = nullptr;
-
+	d.hitBox->GetWorldTransform().Update();
+	std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
+	std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
+	std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
+	Engine::WorldTransform world;
+	world.Initialize();
 
 	// 依存先設定
 	switch (dependenceType)
@@ -44,28 +45,26 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 		d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
 		break;
 	case HitBoxSystem::Type::kIndependent: // 独立
-		d.hitBox->GetWorldTransform().translate_ = parent->GetPreWorldPosition();	// ワールド座標に設定
+		d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
 		break;
 	case HitBoxSystem::Type::kParentIndependent: // 追従先独立
-		{
-			WorldTransform world;
-			world.Initialize();
-			world.parent_ = parent;	// ワールド座標に設定
-			world.translate_ = offset;	// オフセット設定
-			world.Update();
+	{
+		world.parent_ = parent;	// ワールド座標に設定
+		world.translate_ = offset;	// オフセット設定
+		world.Update();
 
-			d.hitBox->GetWorldTransform().translate_ = world.GetWorldPosition();
-			break;
-		}
+		d.hitBox->GetWorldTransform().translate_ = world.GetWorldPosition();
+		break;
+	}
 	case HitBoxSystem::Type::kLockOnArea: // ターゲット位置へ(ターゲット位置のワールド座標を渡せば)
-		d.hitBox->GetWorldTransform().translate_ = parent->GetPreWorldPosition();	// ワールド座標に設定
+		d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
 		break;
 	default:
 		break;
 	}
+	d.hitBox->GetWorldTransform().Update();
 
-
-
+	
 
 	for (auto& data : datas) {
 
@@ -88,19 +87,19 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 		switch (data.shape)
 		{
 		case HitBoxShape::kOBB:
-			collObb = CreateCollider<OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collObb->obb.size = data.size;
 
 			d.hitBox->AddCollider(std::move(collObb), data.offset, data.reactionData);
 			break;
 		case HitBoxShape::kAABB:
-			collAABB = CreateCollider<AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collAABB->aabb.min_ = -data.size / 2;
 			collAABB->aabb.max_ = data.size / 2;
 			d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
 			break;
 		case HitBoxShape::kSphere:
-			collSphere = CreateCollider<SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
 			collSphere->radius = data.radius;
 			d.hitBox->AddCollider(std::move(collSphere), data.offset, data.reactionData);
 			break;
@@ -116,8 +115,8 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 	data_.push_back(std::move(d));
 }
 
-void HitBoxSystem::CreateHitBoxCollData(const std::string& name, HitBoxShape shape, HitBoxUseType useType, 
-	const GlobalHitBoxdata& hitBoxData , HitBoxCollData& data){
+void HitBoxSystem::CreateHitBoxCollData(const std::string& name, HitBoxShape shape, HitBoxUseType useType,
+	const GlobalHitBoxdata& hitBoxData, HitBoxCollData& data) {
 	data.isEneble = true;	// 有効化
 	data.isLine = true;		// ライン表示
 	data.shape = shape;		// 形状選択
@@ -134,7 +133,7 @@ void HitBoxSystem::CreateHitBoxCollData(const std::string& name, HitBoxShape sha
 	case HitBoxUseType::kPlayer:
 		data.layer = CollisionLayer::PlayerAttack;
 		data.tag = CollisionTag::PlayerAttack;
-		data.mask = CollisionLayer::Enemy;	
+		data.mask = CollisionLayer::Enemy;
 		break;
 	case HitBoxUseType::kEnemy:
 		break;

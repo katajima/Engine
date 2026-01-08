@@ -1,7 +1,7 @@
 #include "MoveComponent.h"
 
 
-void MovementComponent::Initialize(GlobalVariables* globalVariables, ControlType type, const std::string& name) {
+void MovementComponent::Initialize(Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
 	this->globalVariables = globalVariables;
 	
 	name_ = "MoveData" + name;
@@ -21,7 +21,7 @@ void MovementComponent::Initialize(GlobalVariables* globalVariables, ControlType
 
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
-	movementRestrictions_->Initialize({ Vector3::Set(-200.0f) }, { Vector3::Set(200.0f) });
+	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });
 
 	// 状態遷移機械の生成
 	movementStateMachine_ = std::make_unique<MovementStateMachine>();
@@ -29,13 +29,15 @@ void MovementComponent::Initialize(GlobalVariables* globalVariables, ControlType
 
 	// 操作タイプの設定
 	controlType_ = type;
-
-	ApplyGlobalData(name_);
+	if (useGlobal_) {
+		ApplyGlobalData(name_);
+	}
 };
 
-void MovementComponent::Update(float dt, WorldTransform& object, RigidBodyComponent& rigid, Input* input) {
-	SetGlobalData(name_);
-	
+void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input) {
+	if (useGlobal_) {
+		SetGlobalData(name_);
+	}
 	// ダッシュ時の移動方向を移動システムから取得してダッシュシステムに渡す
 	dashSystem_->SetDirection(moveSystem_->GetDirection());
 	// ダッシュシステムの更新

@@ -1,12 +1,14 @@
 #pragma once
 
 // リソースのリークチェッククラス
-class D3DResourceLeakchecker 
-{
-public:
+namespace Engine {
+	class D3DResourceLeakchecker
+	{
+	public:
 
-	/// <summary>
-	/// デストラクタ
-	/// </summary>
-	~D3DResourceLeakchecker();
-};
+		/// <summary>
+		/// デストラクタ
+		/// </summary>
+		~D3DResourceLeakchecker();
+	};
+}
