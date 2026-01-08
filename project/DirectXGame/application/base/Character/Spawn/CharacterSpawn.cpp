@@ -14,7 +14,7 @@ void CharacterSpawn::Initialize(BaseCharacterManager* characterManager, Engine::
 	spawnTransform_.translate_ = spawnInfo_.GetData().translate_;
 }
 
-void CharacterSpawn::Update(float time) {
+void CharacterSpawn::Update(float dt) {
 
 	// トランスフォーム更新
 	spawnTransform_.Update();
@@ -26,8 +26,6 @@ void CharacterSpawn::Update(float time) {
 #ifdef _DEBUG
 	lineCommon_->GetDebugLineMeshData().AddLineAABB(AABB{-spawnInfo_.GetData().size_,spawnInfo_.GetData().size_}, spawnTransform_.GetWorldPosition());
 #endif // _DEBUG
-
-	timer_ = time;
 
 	// 時間が来たら
 	if (timer_ >= spawnInfo_.GetData().spawnTimer_) {
@@ -58,7 +56,7 @@ void CharacterSpawn::SpawnProcess(){
 	spawnAABBArea_.max_ = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
 
 	// グループ生成
-	characterManager_->CreateEnemyGroup(0, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
+	characterManager_->CreateEnemyGroup(spawnInfo_.GetData().type_, 0, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
 
 	// 出現した
 	spawnInfo_.Spawned();

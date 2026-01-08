@@ -286,7 +286,8 @@ namespace Engine {
 		SkyBoxCommon* skyBoxCommon_;
 		OceanManager* oceanManager_;
 	};
+
+	// スクリーン座標計算取得
+	Vector2 ScreenPosition(const Engine::WorldTransform world, Engine::Camera* camera);
 }
 
-// スクリーン座標計算取得
-Vector2 ScreenPosition(const Engine::WorldTransform world, Engine::Camera* camera);

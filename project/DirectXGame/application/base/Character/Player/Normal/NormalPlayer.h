@@ -95,9 +95,12 @@ private:
 
 		Vector3 obbColliderSize = { 0.5f,2.0f,1.0f };// OBBコライダーサイズ
 		Vector3 obbCollider2Size = { 0.5f,5.5f,1.0f };// OBBコライダーサイズ
+		Vector3 obbCollider3Size = { 0.5f,10.0f,1.0f };// OBBコライダーサイズ
 
 		Vector3 collider1Pos = { 0.0f,0.5f,0.0f };
 		Vector3 collider2Pos = { 0,3.5f,0.5f };
+		Vector3 collider3Pos = { 0,6.5f,0.5f };
+
 	};
 	ProvisionalData provisionalData_;
 };

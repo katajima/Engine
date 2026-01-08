@@ -377,6 +377,8 @@ private:
 	bool isPopHitBox_ = false;
 	//
 	Vector3 direction_ = {};
+	//
+	float timer_ = 0.0f;
 };
 
 /// <summary>

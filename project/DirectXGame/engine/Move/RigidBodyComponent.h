@@ -37,7 +37,10 @@ namespace Engine {
 			mass_ = m;
 			inverseMass = (m != 0.0f) ? 1.0f / m : 0.0f;
 		}
-
+		// 加速度リセット
+		void ResetAcceleration() { acceleration_ = {0.0f,0.0f,0.0f}; }
+		// 速度リセット
+		void ResetVelocity() { velocity_ = { 0.0f,0.0f ,0.0f }; };
 	private:
 		// 移動処理
 		void ProcessTranslation(float deltaTime, WorldTransform& transform);

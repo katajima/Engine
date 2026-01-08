@@ -7,7 +7,7 @@ void Engine::WorldTransform::Initialize()
 	rotate_ = {};
 	translate_ = { 0,0,0 };
 
-	isPearent = false;
+	isParent = false;
 
 	// 単位行列
 	worldMat_ = MakeIdentity4x4();
@@ -27,7 +27,7 @@ void Engine::WorldTransform::Update()
 	if (parent_) {
 		worldMat_ = worldMat_ * parent_->worldMat_;
 	}
-	if (isPearent) {
+	if (isParent) {
 		worldMat_ = Multiply(worldMat_,parentMatrix_);
 	}
 }

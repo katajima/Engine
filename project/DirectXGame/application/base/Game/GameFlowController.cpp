@@ -20,6 +20,9 @@ void GameFlowController::Update(float dt) {
 	// ゲームのイベント管理クラス更新
 	gameEventController_->Update(dt);
 
+
+	gamePlayData_.flowData_.currentWave = gameEventController_->GetCurrentWave();
+	gamePlayData_.flowData_.elapsedTime = gameEventController_->GetCurrentWaveTime();
 	// シーン変更処理
 	SceneChange();
 };
@@ -29,7 +32,7 @@ void GameFlowController::Draw() {
 }
 
 void GameFlowController::SceneChange(){
-	if (isEndgame_) {
+	if (gameEventController_->IsEndEvent()) {
 		sceneManager->ChangeScene("TITLE");
 	}
 }

@@ -47,6 +47,8 @@ void HitBox::Initialize(Engine::Entity3DManager* entity3dManager, BaseCharacter*
 		// 更新
 		hitBoxFunction_->Update();
 		};
+
+	worldTransform_.Update();
 };
 
 // 更新
@@ -71,11 +73,14 @@ void HitBox::AddCollider(std::unique_ptr<Engine::Collider> collider,const Vector
 	data.colliderID = colliderComponent_->AddCollider(std::move(collider));
 	data.collider = colliderComponent_->FindColliderById(data.colliderID);
 
+
+	worldTransform_.Update();
+
 	// ワールド変換設定
 	data.worldTransform.Initialize();
 	data.worldTransform.translate_ = offset;
 	data.worldTransform.parent_ = &worldTransform_;
-
+	data.worldTransform.Update();
 	// リアクションデータ
 	data.reactionData = reaction;
 	

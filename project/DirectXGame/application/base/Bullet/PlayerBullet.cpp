@@ -10,13 +10,10 @@
 // 初期化
 void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	entity2DManager_ = entity2DManager;	// エンティティ2d
-	globalVariables_ = globalVariables;	// 保存項目
+	// 基盤の初期化
+	BaseInitialize(entity3DManager, entity2DManager, globalVariables, position, camera, "playerStanBullet", "AnimatedCube.gltf");
 
 	// オブジェクト生成
-	object_ = entity3DManager->CreateObject3D("playerStanBullet", Engine::ObjectModelType::kNormal, position, camera);
-	object_->SetModel("AnimatedCube.gltf");	// モデル設定
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
 	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->Update();	// オブジェクト更新
@@ -35,7 +32,7 @@ void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
 
 	// ダメージ設定
-	parameter_.damege = info_.damage;
+	parameter_.damage = info_.damage;
 
 
 
@@ -66,13 +63,13 @@ void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 
 		// 敵にダメージ
-		enemy->AddDamage(parameter_.damege);
+		enemy->AddDamage(parameter_.damage);
 
 		if (enemy->GetCharacterParameterComponent().GetHP() > 0) {
 			enemy->Emit();	// エフェクト出現
 		}
 		// 弾が当たったら消えるか
-		if (info_.type == BulletType::NORMAL) {
+		if (info_.type == ProjectileType::NORMAL) {
 			hitDelete_ = true;	// 当たったら消える
 		}
 		};

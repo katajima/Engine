@@ -22,6 +22,8 @@
 #include "DirectXGame/application/base/Input/InputHander.h"
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
+
 /// <summary>
 /// ゲームプレイシーン
 /// </summary>
@@ -64,7 +66,7 @@ private:
 	std::unique_ptr < InputHander> inputHander_;
 	ICommand* iCommand_;
 
-	static float nowTime;
+	float nowTime = 0.0f;
 	float fps = 0.0f;
 
 	// ゲームの流れやルールの管理をするクラス
@@ -80,12 +82,16 @@ private:
 	// 固定カメラ
 	std::unique_ptr <FixedCamera> fixedCamera_;
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManeger_;
+	std::unique_ptr<CameraManager> cameraManager_;
 	
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 
 	// 
 	std::unique_ptr<Effect> effect_;
+
+	// スペシャルポイント管理クラス
+	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
+
 private:
 	// キャラクター管理
 	std::unique_ptr<BaseCharacterManager> caracterManager_;

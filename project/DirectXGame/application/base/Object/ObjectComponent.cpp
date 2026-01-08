@@ -39,7 +39,16 @@ void ObjectComponent::SetInstancingSRT(const Vector3& s, const Vector3& r, const
     objectInstance_->transform.translate_ = t;// 位置
 }
 
+// 色の設定
+void ObjectComponent::SetColor(const Color& color) {
+    if(useInstancing){
+        objectInstance_->color = color.ToVector4();
+    }
+    else {
+        objectBase_->GetMaterial(0)->color = color;
+	}
 
+};
 
 
 // ワールド変換取得

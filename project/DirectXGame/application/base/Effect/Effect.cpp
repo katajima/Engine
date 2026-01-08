@@ -110,7 +110,7 @@ void Effect::InitRangeBombingBullet()
 	missileHitCylinder->GetFrequency() = 0.0f;
 	missileHitCylinder->SetCount(1, 0);
 	missileHitCylinder->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
-	missileHitCylinder->SetPos({ 0,0.0f,0.0f });
+	missileHitCylinder->SetPos({ 0,12.0f,0.0f });
 	missileHitCylinder->SetLifeTime(0.5f, 0.0f);
 	missileHitCylinder->SetRotate({ -Math::DegreesToRadians(90),Math::DegreesToRadians(0) ,0 }, {});
 	missileHitCylinder->SetIsAlpha(true);

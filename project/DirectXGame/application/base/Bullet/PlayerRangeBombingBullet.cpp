@@ -20,11 +20,9 @@ PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
-	globalVariables_ = globalVariables;	// 保存項目
-	entity3DManager_ = entity3DManager; // エンティティ3d
+	// 基盤の初期化
+	BaseInitialize(entity3DManager, entity2DManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
 	//// オブジェクト設定
-	object_ = entity3DManager->CreateObject3D("playerbullet", Engine::ObjectModelType::kNormal, position, camera);
-	object_->SetModel("player_bullet.obj");	// モデル設定
 	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->isEmitTrailEffect = false; // トレイルを出現させない
 	object_->Update();	// オブジェクト更新
@@ -58,9 +56,6 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 		// ID取得
 		uint32_t otherId = otherComponent->GetUniqueId();
 
-
-
-
 		float nowTime = Engine::MyGame::NowTime(); // ← 時間取得関数（例）
 
 		if (object_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
@@ -72,9 +67,9 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 		// 敵ステート変更
 		enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		// ダメージ
-		enemy->AddDamage(parameter_.damege);
+		enemy->AddDamage(parameter_.damage);
 
-		player_->GetAttackController()->GetHitCounter().Hit();
+		owner_->GetAttackController()->GetHitCounter().Hit();
 		
 		// エフェクト出現
 		enemy->Emit();
@@ -88,7 +83,7 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 	object_->GetWorldTransform().rotate_.x = std::atan2(velocity_.y, -length);
 
 	// ダメージ量
-	parameter_.damege = provisionalData_.damage;
+	parameter_.damage = provisionalData_.damage;
 	// 生存フラグ
 	isAlive_ = true;
 	// 行動フェーズ
@@ -113,12 +108,9 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 	//// ミサイル移動中の煙パーティクルエミッター
 	countIndex_ = UniqueIdGenerator::Generate();
 
-	// 移動中の煙エフェクト初期化
-	InitMoveSmoke();
-
 	// シリンダーパラメーター設定
 	Engine::ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = cilnderHeight_;
+	cylinderParam.height = cylinderHeight_;
 	cylinderParam.innerRadius = provisionalData_.innerRadius;
 	cylinderParam.outerRadius = provisionalData_.outerRadius;
 	cylinderParam.isCover = false;
@@ -149,10 +141,6 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 // 更新
 void PlayerRangeBombingBullet::Update()
 {
-	// 出現させない
-	//emitterPoint->GetCommonData().emit = false;
-	//emitterPoint->GetWorldTransform().translate_ = object_->GetWorldTransform().worldMat_.GetWorldPosition();	// エミッター位置更新
-	//emitterPoint->GetCommonData().prevTranslate = object_->GetWorldTransform().worldPreMat_.GetWorldPosition(); // エミッター位置更新
 	// 当たったら死ぬ
 	if (Hit) {
 		effect_->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
@@ -162,7 +150,7 @@ void PlayerRangeBombingBullet::Update()
 	// 生きているなら
 	if (isAlive_) {
 		Vector3 norm;
-		switch (phase_)	// フェーズ
+		switch (phase_)	// フェーズ(移動)
 		{
 		case 0:
 		{
@@ -190,7 +178,7 @@ void PlayerRangeBombingBullet::Update()
 			}
 			break;
 		}
-		case 1:
+		case 1:	// フェーズ(落下待機)
 
 			
 			// カウント更新
@@ -226,7 +214,7 @@ void PlayerRangeBombingBullet::Update()
 				}
 			}
 			break;
-		case 2:
+		case 2:	// フェーズ(落下)
 			// カウント更新
 			phase2Timer_ += GetTimer();
 			
@@ -321,12 +309,6 @@ void PlayerRangeBombingBullet::DrawP()
 // 2D描画
 void PlayerRangeBombingBullet::Draw2D()
 {
-}
-
-// 移動中の煙初期化
-void PlayerRangeBombingBullet::InitMoveSmoke()
-{
-
 }
 
 

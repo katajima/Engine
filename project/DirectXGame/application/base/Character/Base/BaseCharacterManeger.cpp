@@ -1,6 +1,7 @@
 #include "BaseCharacterManeger.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/Characters.h"
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
 void BaseCharacterManager::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
 	Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
@@ -33,6 +34,7 @@ void BaseCharacterManager::Update()
 	// プレイヤー座標をセット
 	if (GetPlayer()) {
 		crowdManager_->playerPos = GetPlayer()->GetObjectComponent()->GetWorldPosition();
+		specalPointManager_->SetTarget(GetPlayer());
 	}
 
 	// 群衆の結果を敵モデルに反映
@@ -82,32 +84,24 @@ void BaseCharacterManager::Draw2D()
 
 void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
 {
-	std::unique_ptr<BaseEnemy> enemy;
-	// 敵タイプ
-	switch (enemyType)
+	using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
+
+	// EnemyType → 生成関数
+	static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
 	{
-	case EnemyType::kNormal: // 通常
-		enemy = std::make_unique<NormalEnemy>();
+		{ EnemyType::kNormal,   []() { return std::make_unique<NormalEnemy>(); } },
+		{ EnemyType::kBullet,   []() { return std::make_unique<BulletEnemy>(); } },
+	};
 
-		break;
-	case EnemyType::kBullet:
-		break;
-	case EnemyType::kAttacker:
-		break;
-	case EnemyType::kTank:
-		break;
-	case EnemyType::kElite:
-		break;
-	case EnemyType::kBoss:
-		break;
-	default:
+	auto it = enemyFactoryMap.find(enemyType);
+	assert(it != enemyFactoryMap.end() && "未対応のEnemyTypeです");
 
-		break;
-	}
-
+	std::unique_ptr<BaseEnemy> enemy = it->second();
 
 	enemy->SetCharacterType(CharacterType::Enemy);	// キャラクタータイプを敵に設定
 	enemy->SetID(characterCount_);					// ID設定
+	enemy->SetBulletManager(bulletManager_);	// 弾管理クラス設定
+	enemy->SetSpecalPointManager(specalPointManager_);	// スペシャルポイント管理クラス設定
 	enemy->SetPlayer(GetPlayer());					// ターゲット指定
 	enemy->SetEffect(effect_);						// エフェクト設定
 	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
@@ -125,32 +119,18 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 {
 	std::unique_ptr<BasePlayer> player;
 
-	// プレイヤータイプ
-	switch (playerType)
-	{
-	case PlayerType::kNormal:	// 通常(剣)
-		player = std::make_unique<NormalPlayer>();
-		break;
-	case PlayerType::kBullet:	// 弾
-		break;
-	case PlayerType::kAttacker:
-		break;
-	case PlayerType::kTank:
-		break;
-	default:
-		break;
-	}
-	
+	player = std::make_unique<NormalPlayer>();
 	player->SetCharacterType(CharacterType::Player);// キャラクターのタイプをプレイヤーに
 	player->SetFollowCamera(followCamera_);		// フォローカメラ設定
 	player->SetCameraManager(cameraManager_);	// カメラ管理クラス設定
 	player->SetBulletManager(bulletManager_);	// 弾管理クラス設定
+	player->SetSpecalPointManager(specalPointManager_);	// スペシャルポイント管理クラス設定
 	player->SetEffect(effect_);					// エフェクト設定
 	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
 	character_.push_back(std::move(player));	// キャラクターに追加 
 }
 
-void BaseCharacterManager::CreateEnemyGroup(int groupIds, int perGroup, Vector3 origin,AABB aabb)
+void BaseCharacterManager::CreateEnemyGroup(EnemyType enemyType,int groupIds, int perGroup, Vector3 origin,AABB aabb)
 {
 
 	// グループId
@@ -161,7 +141,7 @@ void BaseCharacterManager::CreateEnemyGroup(int groupIds, int perGroup, Vector3 
 	for (int i = 0; i < perGroup; ++i) {
 		Vector3 pos = Random::RandomVector3(aabb.min_, aabb.max_);
 		pos.y = 0.0f;
-		CreateCharacter(EnemyType::kNormal, "enemy", groupId, Transform{ {1,1,1}, {},pos });
+		CreateCharacter(enemyType, "enemy", groupId, Transform{ {1,1,1}, {},pos });
 	}
 
 	// 群衆管理クラスに追加

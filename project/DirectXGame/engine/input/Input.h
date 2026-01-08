@@ -26,10 +26,12 @@ enum class GamePadButton
 	GAMEPAD_Y = XINPUT_GAMEPAD_Y,					// Y
 	GAMEPAD_LB = XINPUT_GAMEPAD_LEFT_SHOULDER,		// LB
 	GAMEPAD_RB = XINPUT_GAMEPAD_RIGHT_SHOULDER,		// RB
-	GAMEPAD_LT = XINPUT_GAMEPAD_LEFT_THUMB,			// 左スティック押し込み
-	GAMEPAD_RT = XINPUT_GAMEPAD_RIGHT_THUMB,		// 右スティック押し込み
+
+	GAMEPAD_LS = XINPUT_GAMEPAD_LEFT_THUMB,			// 左スティック押し込み
+	GAMEPAD_RS = XINPUT_GAMEPAD_RIGHT_THUMB,		// 右スティック押し込み
+
 	GAMEPAD_Start = XINPUT_GAMEPAD_START,			// Start
-	GAMEPAD_Back = XINPUT_GAMEPAD_BACK,			// Back
+	GAMEPAD_Back = XINPUT_GAMEPAD_BACK,				// Back
 	GAMEPAD_Max       // 最大ボタン数
 };
 //XINPUT_GAMEPAD_LEFT_THUMB
@@ -135,10 +137,22 @@ namespace Engine {
 		// RTトリガーの値を取得
 		float GetGamePadRightTrigger() const;
 
-		bool IsLeftTriggerPressed() const;
 
-		bool IsRightTriggerPressed() const;
 
+
+		// “押している”判定（閾値つき）
+		bool IsLeftTriggerPressed(float threshold = 0.5f) const;
+		bool IsRightTriggerPressed(float threshold = 0.5f) const;
+
+		// “押した瞬間”
+		bool IsLeftTriggerTriggered(float threshold = 0.5f) const;
+		bool IsRightTriggerTriggered(float threshold = 0.5f) const;
+
+		// “離した瞬間”
+		bool IsLeftTriggerReleased(float threshold = 0.5f) const;
+		bool IsRightTriggerReleased(float threshold = 0.5f) const;
+
+		
 		// コントローラ操作
 		bool IsControllerConnected() {
 			XINPUT_STATE state; ZeroMemory(&state, sizeof(XINPUT_STATE));

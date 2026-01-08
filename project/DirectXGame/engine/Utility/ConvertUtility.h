@@ -3,6 +3,7 @@
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Structs.h"
+#include <DirectXGame/engine/Color/Color.h>
 
 // 変換
 namespace ConvertUtility

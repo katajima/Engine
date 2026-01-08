@@ -108,6 +108,31 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	board_->CreateUIElement(UIType::CheckBox, "botton", boardPos);
 	board_->CreateUIElement(UIType::UISlider, "slider", boardPos);
 
+
+
+	// カウントUI
+	InitUICount("WaveCount", waveTextData.pos_, waveTextData.instance, true);
+	Engine::UICount* waveCount = GetUICount("WaveCount");
+	waveCount->SetMaxSize(waveTextData.size, waveTextData.offset);	// 最大サイズ
+	waveCount->SetTextuerSize(waveTextData.textuerSize);				// テクスチャサイズ
+	waveCount->SetCountMax(waveTextData.countmax);							// カウント最大数
+	waveCount->SetCountColor(waveTextData.color_);	// 色指定
+	waveCount->GetNameSprite()->SetTextureName("resources/Texture/text/wave.png");
+	waveCount->GetNameSprite()->SetSize(waveTextData.nameSize);	// サイズ指定
+	waveCount->GetNameSprite()->SetColor(waveTextData.nameColor_);	// 色指定
+
+
+	// カウントUI
+	InitUICount("WaveSecondsCount", secondTextData.pos_, secondTextData.instance, true);
+	Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
+	waveSecondsCount->SetMaxSize(secondTextData.size, secondTextData.offset);	// 最大サイズ
+	waveSecondsCount->SetTextuerSize(secondTextData.textuerSize);				// テクスチャサイズ
+	waveSecondsCount->SetCountMax(secondTextData.countmax);							// カウント最大数
+	waveSecondsCount->SetCountColor(secondTextData.color_);	// 色指定
+	waveSecondsCount->GetNameSprite()->SetTextureName("resources/Texture/text/seconds.png");
+	waveSecondsCount->GetNameSprite()->SetSize(secondTextData.nameSize);	// サイズ指定
+	waveSecondsCount->GetNameSprite()->SetColor(secondTextData.nameColor_);	// 色指定
+
 }
 
 void GameUI::Update()
@@ -150,6 +175,15 @@ void GameUI::Update()
 			hitCount->GetNameSprite()->SetColor(coNe);
 		}
 	}
+
+
+	Engine::UICount* waveCount = GetUICount("WaveCount");
+	waveCount->SetCount(ConvertUtility::ToFloat(data_.flowData_.currentWave));
+
+	Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
+	waveSecondsCount->SetCount(data_.flowData_.elapsedTime);
+
+
 
 	// 更新
 	UpdateUIElement(0);

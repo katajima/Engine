@@ -9,9 +9,6 @@ void AttackController::Initialize(Engine::Entity3DManager* entity3DManager, Engi
 	combatStat_ = std::make_unique<CombatStat>();
 	combatStat_->Initialize(base);
 
-	// ヒットカウンターの初期化
-	hitCounter_;
-
 	// コンボシステムの初期化
 	comboSystem_ = std::make_unique<ComboSystem>();
 	comboSystem_->Initialize(owner,globalVariables);

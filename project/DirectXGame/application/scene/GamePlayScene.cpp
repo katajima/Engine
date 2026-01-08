@@ -11,7 +11,6 @@
 
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 
-float GamePlayScene::nowTime = 0.0f;
 #pragma region Initialize
 
 // 初期化
@@ -42,12 +41,12 @@ void GamePlayScene::Initialize()
 	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
-	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
 	// カメラ追加
-	cameraManeger_->AddCamera({ followCamera_.get(),true }, "followCamera");
-	cameraManeger_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
-	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
+	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
+	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
 
 
@@ -56,14 +55,19 @@ void GamePlayScene::Initialize()
 	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	bulletManager_->SetEffect(effect_.get());
 
+	// スペシャルポイント管理クラス
+	specalPointManager_ = std::make_unique<SpecalPointManager>();
+	specalPointManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables());
+
+
 	// キャラクター管理 
 	caracterManager_ = std::make_unique<BaseCharacterManager>();
 	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	caracterManager_->SetEffect(effect_.get());
-	caracterManager_;
 	caracterManager_->SetFollowCamera(followCamera_.get());
 	caracterManager_->SetBulletManager(bulletManager_.get());
-
+	caracterManager_->SetCameraManager(cameraManager_.get());
+	caracterManager_->SetSpecialPointManager(specalPointManager_.get());
 
 	// ステージイベントマネージャー
 	gameFlowController_ = std::make_unique<GameFlowController>();
@@ -77,13 +81,10 @@ void GamePlayScene::Initialize()
 		caracterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
-	// 弾にプレイヤーセット
-	bulletManager_->SetPlayer(caracterManager_->GetPlayer());
-
-
+	
 	// レベルデータロード
 	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->SetCameraManager(cameraManeger_.get());
+	loadData_->SetCameraManager(cameraManager_.get());
 	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
 
 
@@ -123,9 +124,9 @@ void GamePlayScene::Initialize()
 	sprite->SetCountMax(999);			// カウント量設定
 
 	// カメラ設定
-	SetCamera(cameraManeger_->GetCamera());
+	SetCamera(cameraManager_->GetCamera());
 
-	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
@@ -170,6 +171,13 @@ void GamePlayScene::CheckAllCollisions()
 		}
 	}
 
+	// SPポイントのコライダー追加
+	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
+		if (point->GetColliderComponent()) {
+			collisionManager_->Register(point->GetColliderComponent());
+		}
+	}
+
 
 	collisionManager_->CheckAll();
 	collisionManager_->ClearDynamic();
@@ -185,8 +193,28 @@ void GamePlayScene::CheckAllCollisions()
 void GamePlayScene::UpdateImGui()
 {
 #ifdef _DEBUG
+	if (input_->IsTriggerKey(DIK_P)) {
+		// シーン切り替え
+		GetSceneManager()->ChangeScene("TITLE");
+	}
 
-	
+	ImGui::Begin("Debug");
+	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
+	ImGui::InputInt("playerID", &GetSceneData().playerID);
+
+	Vector2 inputPos = input_->GetGamePadLeftStick();
+	ImGui::InputFloat2("Input", &inputPos.x);
+	if (ImGui::Button("lockOn")) {
+		cameraManager_->SetUseCamera("fixedCamera", 0.3f);
+	}
+	if (ImGui::Button("noLockOn")) {
+		cameraManager_->SetUseCamera("followCamera", 0.3f);
+	}
+
+
+	ImGui::End();
+
+
 #endif // _DEBUG
 
 	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
@@ -204,7 +232,7 @@ void GamePlayScene::UpdateImGui()
 	sprite->SetCount(fps);
 
 	// fps用のスプライト更新
-	sprite->Update(Engine::MyGame::GameTime());
+	//sprite->Update(Engine::MyGame::GameTime());
 }
 
 // 更新処理
@@ -215,6 +243,9 @@ void GamePlayScene::Update()
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
 		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+	}
+	if (input_->IsTriggerKey(DIK_T)) {
+		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	
 	// コマンド
@@ -230,44 +261,17 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
+	
 	// キャラクターマネージャー更新
 	caracterManager_->Update();
 
+	// 必殺技ポイント管理クラス
+	specalPointManager_->Update(Engine::MyGame::GameTime());
+
 	
-	
-#ifdef _DEBUG
-	if (input_->IsTriggerKey(DIK_P)) {
-		// シーン切り替え
-		GetSceneManager()->ChangeScene("TITLE");
-	}
 
-	ImGui::Begin("Debug");
-	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
-	ImGui::InputInt("playerID", &GetSceneData().playerID);
-
-	Vector2 inputPos = input_->GetGamePadLeftStick();
-	ImGui::InputFloat2("Input", &inputPos.x);
-	if (ImGui::Button("lockOn")) {
-		cameraManeger_->SetUseCamera("fixedCamera", 0.3f);
-	}
-	if (ImGui::Button("noLockOn")) {
-		cameraManeger_->SetUseCamera("followCamera", 0.3f);
-	}
-
-
-	ImGui::End();
-
-
-#endif // _DEBUG
-	
-	// スペシャル
-	if (caracterManager_->GetPlayer()->GetSpecial()->IsAction()) {
-		cameraManeger_->SetUseCamera("universeCamera", 0.0f);
-	}
-
-	gameUI->Update();
 	// カメラ管理の更新
-	cameraManeger_->Update();
+	cameraManager_->Update();
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
@@ -280,6 +284,9 @@ void GamePlayScene::Update()
 	effect_->Update();
 	// ゲーム進行マネージャー更新
 	gameFlowController_->Update(Engine::MyGame::GameTime());
+
+	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
+	gameUI->Update();
 
 }
 

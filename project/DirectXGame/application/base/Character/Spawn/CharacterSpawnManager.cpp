@@ -1,17 +1,18 @@
 #include "CharacterSpawnManager.h"
 
-void CharacterSpawnManager::Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line)
+void CharacterSpawnManager::Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, int maxCharactorCount)
 {
 	characterManager_ = characterManager;	// キャラクター管理
 	lineCommon_ = line;						// ライン管理
+	maxCharactorCount_ = maxCharactorCount;	// 最大存在数
 }
 
 
-void CharacterSpawnManager::Update() {
+void CharacterSpawnManager::Update(float dt) {
 
 	// 更新
 	for (auto& [name, spawn] : characterSpawns_) {
-		spawn->Update(0);
+		spawn->Update(dt);
 	}
 };
 

@@ -28,12 +28,6 @@ void PlayerStateIdle::Update() {
 
 	// ゲームパッドが繋いであるなら
 	if (input->IsControllerConnected()) {
-
-		// 必殺技が使えるようになったら
-		if (character_->GetSpecial()->GetIsSpecial()) {
-			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
-		}
-
 		// スキル発動
 		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
@@ -54,7 +48,7 @@ void PlayerStateIdle::Update() {
 
 	// 必殺技移行
 	if (special->GetIsSpecial()) {
-		if (special->GetIsSpecialAttack()) {
+		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 			return;
 		}
@@ -101,13 +95,7 @@ void PlayerStateMove::Update()
 	}
 
 
-	// ゲームパッドがつながっているなら
-	if (input->IsControllerConnected()) {
-		// スペシャル発動
-		if (character_->GetSpecial()->GetIsSpecial()) {
-			special->SetIsSpecialAttack(input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB));
-		}
-	}
+	
 
 	// 気絶発動
 	if (input->IsTriggerKey(DIK_Z)) {
@@ -120,7 +108,7 @@ void PlayerStateMove::Update()
 
 	// 必殺がうてるなら
 	if (special->GetIsSpecial()) {
-		if (special->GetIsSpecialAttack()) {
+		if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
 			character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 			return;
 		}
@@ -271,10 +259,10 @@ void PlayerStateSpecial::Update()
 
 	// キャラクターの動きを止める
 	character_->Velocity() = {};
-	int time = 0;
 	// UIを表示しない
 	player->GetPlayerUI()->SetIsTextRB(false);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
+	
 	rengeSp->InAction();	// アクション中
 	rengeSp->SetIsDraw(false);	// 描画
 	if (special->GetPhese() == 0) {	// 最初フェーズなら

@@ -18,11 +18,14 @@
 class Effect;
 class FollowCamera;
 class BulletManager;
+class CameraManager;
+class SpecalPointManager;
+
 namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
 }
-class CameraManager;
+
 
 /// <summary>
 /// キャラクターマネージャークラス
@@ -50,6 +53,8 @@ public:
 	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; }
 	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; }
+	// スペシャルポイント管理クラスの設定
+	void SetSpecialPointManager(SpecalPointManager* specalPointManager) { specalPointManager_ = specalPointManager; };
 public: // 取得系
 
 	// キャラクターのタイプによっての数を取得
@@ -99,7 +104,7 @@ public: // 生成系
 	// キャラクター生成(プレイヤー)
 	void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
-	void CreateEnemyGroup(int groupCount, int perGroup, Vector3 origin, AABB aabb);
+	void CreateEnemyGroup(EnemyType enemyType,int groupCount, int perGroup, Vector3 origin, AABB aabb);
 
 private:
 	
@@ -122,5 +127,6 @@ private: // 貰いもの
 	BulletManager* bulletManager_ = nullptr;	// 弾をマネジャー
 	CameraManager* cameraManager_ = nullptr;	// カメラ管理
 	Effect* effect_ = nullptr;
+	SpecalPointManager* specalPointManager_ = nullptr;
 };
 

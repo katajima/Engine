@@ -65,10 +65,8 @@ void Engine::Object3dInstansManager::Update() {
 					group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
 					group.instanceData[group.instanceCount].worldInverseTranspose = Transpose(Inverse(worldMatrix));
 
-					group.instanceData[group.instanceCount].color = objectIterator->
-						color;
-					group.instanceData[group.instanceCount].textureIndex =
-						objectIterator->texIndex;
+					group.instanceData[group.instanceCount].color = objectIterator->color;
+					group.instanceData[group.instanceCount].textureIndex = objectIterator->texIndex;
 
 					// インスタンス数をカウント
 					++group.instanceCount;

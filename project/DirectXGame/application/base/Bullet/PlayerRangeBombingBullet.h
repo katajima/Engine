@@ -22,10 +22,6 @@ public:
 	// 描画2D
 	void Draw2D() override;
 
-private: // 演出関係
-
-	//// ミサイル移動中煙初期化
-	void InitMoveSmoke();
 private:
 
 	// phase0
@@ -57,7 +53,7 @@ private:
 
 	Vector3 enemyPos_{};
 
-	float cilnderHeight_ = 30.0f; // 円柱の高さ
+	float cylinderHeight_ = 30.0f; // 円柱の高さ
 
 	float radius_ = 0.5f; // 半径
 
@@ -99,7 +95,7 @@ private: // 一旦
 		const float speedPhase1 = 4000.0f;
 		const float speedPhase2 = 3.0f;
 
-		const float hitCylinderY = 1.0f;
+		const float hitCylinderY = 8.0f;
 		const float expPlaneY = 5.0f;
 
 		const float hitObjectY = 12.0f;

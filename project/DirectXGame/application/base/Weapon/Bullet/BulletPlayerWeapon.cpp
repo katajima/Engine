@@ -3,6 +3,7 @@
 #include"DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include<DirectXGame/application/base/Bullet/Base/BulletManager.h>
 #include"DirectXGame/application/base/Effect/Effect.h"
+#include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 
 ///< summary>
 /// 初期化
@@ -164,10 +165,10 @@ void BulletPlayerWeapon::Shoot()
 
 	// モードによって弾の状態変更
 	if (modeType_ == ModeType::Normal) {
-		info.type = BulletType::NORMAL;
+		info.type = ProjectileType::NORMAL;
 	}
 	else {
-		info.type = BulletType::PENETRATION;
+		info.type = ProjectileType::PENETRATION;
 		info.speed = rengedData_.bulletSpeed * provisionalData_.bulletSpeedScale;
 	}
 	
@@ -176,6 +177,7 @@ void BulletPlayerWeapon::Shoot()
 	effect_->Emit("bulletSmoke", bulletMuzzleTransform_.GetWorldPosition());
 	effect_->Emit("cartridge", bulletCartridgeTransform_.GetPreWorldPosition());
 
+
 	// 弾生成
-	bulletManager_->GenerateBullet(BulletManager::BulletType::kPlayerBullet, info);
+	player_->GetBulletSpawn()->GenerateBullet(BulletType::kPlayerBullet, info);
 };

@@ -108,6 +108,7 @@ public: // 取得
 	bool GetLockOn() const { return flags_.isLockonTarget; }
 	// ロックオン状態を設定
 	void SetLockOn(bool lock) { flags_.isLockonTarget = lock; }
+	
 public: // 設定
 
 	// 名前設定
@@ -122,7 +123,8 @@ public: // 設定
 	void SetSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
 	// インスタンシング用SRT設定
 	void SetInstancingSRT(const Vector3& s = { 1,1,1 }, const Vector3& r = { 0,0,0 }, const Vector3& t = { 0,0,0 });
-
+	// 色の設定
+	void SetColor(const Color& color);
 private:
 	Engine::Object3d* objectBase_ = nullptr;// オブジェクト3d(Entity3dManagerを使って)
 	ObjectType objectType_ = ObjectType::None; // オブジェクトの種類(キャラクター、武器など)

@@ -249,7 +249,7 @@ void Engine::Object3d::SetModel(const std::string& filePath)
 #pragma endregion // その他
 
 
-Vector2 ScreenPosition(const Engine::WorldTransform world, Engine::Camera* camera)
+Vector2 Engine::ScreenPosition(const Engine::WorldTransform world, Engine::Camera* camera)
 {
 
 	Vector3 wPos = world.GetWorldPosition();

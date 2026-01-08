@@ -25,6 +25,9 @@ public:
 	// 描画
 	void Draw();
 
+	// ゲームデータ
+	GamePlayData GetGamePlayData() const { return gamePlayData_; }
+
 private:
 
 	// シーン変更

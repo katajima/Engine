@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/application/base/Character/Base/CharacterData.h>
 
 // 前方宣言
 class BaseCharacterManager;
@@ -19,6 +20,7 @@ public:
 
 	struct Data
 	{
+		EnemyType type_ = EnemyType::kNormal;// 敵タイプ
 		std::string name_ = "";				// 名前
 		int spawnMaxCount_ = 1;				// 出現最大回数
 		int spawnAmount_ = 0;				// 出現量

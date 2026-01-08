@@ -2,16 +2,14 @@
 #include "DirectXGame/application/base/Special/Base/BaseSpecial.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
-
 // 前方宣言
 
 namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
 }
-class BulletManager;
+class BulletSpawn;
 class FollowCamera;
-class BaseEnemy;
 class Stage;
 
 /// <summary>
@@ -45,11 +43,12 @@ public:
 	void SetReticleParent(Engine::WorldTransform* parent) { objectReticle_->GetWorldTransform().parent_ = parent; };
 
 public:
+	
 
 	// 描画するか
 	void SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };
 	// ステージ設定
-	void SetStage(Stage* stage);
+	void SetStage(Stage* stage) { stage_ = stage;};
 
 	
 
@@ -57,38 +56,41 @@ public:
 	void SetRadius(float rad);
 
 	// 半径爆心
-	float GetRadius() const { return reticleRad_; };
+	float GetRadius() const { return dataRange_.reticleRad_; };
 
 	// 爆心位置 
-	Vector3 GetRangeBombingPos() const { return rangeBombingPos; }
+	Vector3 GetRangeBombingPos() const { return dataRange_.rangeBombingPos; }
 
 	// フォローカメラと弾マネージャー設定
-	void Set(FollowCamera* followCamera, BulletManager* bulletManager) 
-	{
+	void Set(FollowCamera* followCamera, BulletSpawn* bulletSpawn){
 		this->followCamera = followCamera;
-		this->bulletManager = bulletManager;
+		this->spawn = bulletSpawn;
 	}
 
+private:
+	
 private:
 	Engine::Object3d* objectReticle_;				// オブジェクトレティクル
 
 	std::unique_ptr<Engine::CylinderPrimitive> ctlinder_;
 
+	struct Data {
+		int maxBullet = 1;
+		int bulletNum = 0;
+		int currentMissileIndex = 0;
 
-	int index_b = 0;
-	int maxBullet = 1;
-	int bulletNum = 0;
-	int currentMissileIndex = 0;
+		float shotTimer = 0.0f;
 
-	float shotTimer = 0.0f;
-
-	float reticleRad_ = 50.0f;				// レティクルの半径　　　
-	Vector3 rangeBombingPos{};				// レンジボムの位置
+		float reticleRad_ = 50.0f;				// レティクルの半径　　　
+		Vector3 rangeBombingPos{};				// レンジボムの位置
+	};
+	Data dataRange_;
+	
 private:
+	BulletSpawn* spawn = nullptr;			// 弾の出現
+
 	Stage* stage_ = nullptr;
 	FollowCamera* followCamera = nullptr;
-	BulletManager* bulletManager = nullptr;
-
 private: // 一旦
 
 	// 弾発射に使うインターバル（秒）
@@ -100,11 +102,10 @@ private: // 一旦
 
 
 		int maxGauge_ = 40;			// 最大ゲージ設定
-		int clock_ = 1;				// 切り替え
 		int maxBullet = 40;			// 発射数
 		int bulletNum = 0;			// 弾番号
 
-		int cylinderSegments = 16;
+		int cylinderSegments = 32;
 		float cylinderHeight = 5.0f;
 
 		float shotTimer = 0.5f;

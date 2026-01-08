@@ -1,10 +1,12 @@
 #include "NormalPlayer.h"
+
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+
+#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "assert.h"
 
 
@@ -88,6 +90,8 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		if (!enemy) return;
+		if (other->tag == CollisionTag::Item) return;
+
 		if (enemy->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Attack) {
 			float nowTime = Engine::MyGame::NowTime(); // ← 時間取得関数（例）
 
@@ -108,16 +112,20 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 	responseSystem_->Initialize(&GetCharacterParameterComponent(), objectComponent_.get());
 	responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
 
+	// 弾出現
+	bulletSpawn_ = std::make_unique<BulletSpawn>();
+	bulletSpawn_->Initialize(this,entity3DManager,entity2DManager,globalVariables,camera,effect_);
 
 	// スペシャル攻撃
 	special_ = std::make_unique<RangeBombingSpecial>();
 	special_->Initialize(entity3DManager, entity2DManager, camera_);
+	special_->SetOwner(this);
 	special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 	special_->SetInput(input);
 	RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
 	rengeSp->SetRadius(50);
 	rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
-	rengeSp->Set(followCamera_, bulletManager_);
+	rengeSp->Set(followCamera_, bulletSpawn_.get());
 
 	// 攻撃系初期化
 	InitAttack();
@@ -301,7 +309,7 @@ void NormalPlayer::Draw2D()
 	ui_->SetIsTextmax(special_->GetIsSpecial());
 	
 
-	ui_->SetIsTextRB(special_->GetIsSpecial());
+	ui_->SetIsTextRB(special_->GetIsSpecial() || special_->IsAction());
 
 	ui_->SetSpecialGaugeSize(static_cast<float>(special_->GetGauge()));
 
@@ -437,6 +445,7 @@ void NormalPlayer::ReloadComboData()
 	HitBoxCollData hitData2{};
 	HitBoxCollData hitData3{};
 	HitBoxCollData hitData4{};
+	HitBoxCollData hitData5{};
 
 
 	GlobalHitBoxdata hitBoxdata;
@@ -451,12 +460,16 @@ void NormalPlayer::ReloadComboData()
 	GlobalHitBoxdata hitBoxdata4;
 	hitBoxdata4.offset = { 0,0,0 };
 	hitBoxdata4.radius = 20.0f;
+	GlobalHitBoxdata hitBoxdata5;
+	hitBoxdata5.size = provisionalData_.obbCollider3Size;
+	hitBoxdata5.offset = provisionalData_.collider3Pos;
 
 
 	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBoxShape::kOBB,HitBoxUseType::kPlayer, hitBoxdata, hitData1);
 	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata2, hitData2);
 	hitBoxSystem->CreateHitBoxCollData("obb", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata3, hitData3);
 	hitBoxSystem->CreateHitBoxCollData("obb2", HitBoxShape::kSphere, HitBoxUseType::kPlayer,hitBoxdata4, hitData4);
+	hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata5, hitData5);
 	
 
 	// データ
@@ -485,12 +498,12 @@ void NormalPlayer::ReloadComboData()
 
 
 	// コンボ３のデータ送る
+	data3.hitBox.AddCollider(hitData5, data3_);
 	data3.hitBox.AddCollider(hitData1, data3_);
-	data3.hitBox.AddCollider(hitData2, data3_);
 	// データ
 	data3.hitBox.ClearUseHitBox();
 	data3.hitBox.AddUseHitBox("obbColl1");
-	data3.hitBox.AddUseHitBox("obbColl2");
+	data3.hitBox.AddUseHitBox("obbColl1_1");
 
 
 	comboSystem->SetData(data3, data3_);

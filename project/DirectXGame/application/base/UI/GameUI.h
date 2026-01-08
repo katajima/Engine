@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
+#include "DirectXGame/application/base/Game/GameData.h"
 
 // 前方宣言
 class BasePlayer;
@@ -22,12 +23,15 @@ public:
 	// プレイヤ設定
 	void SetPlayer(BasePlayer* player);
 
+	// ゲームデータ取得
+	void SetGamePlayData(const GamePlayData data) { data_ = data; };
+
 private:
 	std::unique_ptr<Engine::Sprite> text_clera;
 	std::unique_ptr<Engine::Sprite> text_over;
 private:
 	BasePlayer* player_;
-
+	GamePlayData data_;
 
 private:
 
@@ -119,6 +123,36 @@ private:
 		Color nameColor_ = { 0.9f,0.9f ,0.9f ,1.0f };
 	};
 	HitTextData hitTextData;
+
+	struct WaveTextData {
+		Vector2 pos_ = { 650,50 };
+		int instance = 1;
+		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
+		Vector2 nameSize = { 100 * 1.5f,33 * 1.5f };
+		Vector2 offset = { 20.0f,0.0f };
+		Vector2 textuerSize = { 64,96 };
+		float countmax = 9;
+
+
+		Color color_ = { 0.9f,0.9f ,0.9f ,1.0f };
+		Color nameColor_ = { 0.9f,0.9f ,0.9f ,1.0f };
+	};
+	WaveTextData waveTextData;
+	
+	struct WaveTimeTextData {
+		Vector2 pos_ = { 400,50 };
+		int instance = 3;
+		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
+		Vector2 nameSize = { 64 ,64  };
+		Vector2 offset = { 20.0f,0.0f };
+		Vector2 textuerSize = { 64,96 };
+		float countmax = 999;
+
+
+		Color color_ = { 0.9f,0.9f ,0.9f ,1.0f };
+		Color nameColor_ = { 0.9f,0.9f ,0.9f ,1.0f };
+	};
+	WaveTimeTextData secondTextData;
 
 
 

@@ -10,8 +10,7 @@ void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2
 
 	InitUIMeter("HPBer", hpSpriteData_.pos_, true);		// 初期化HP
 	InitUIMeter("SpecailBer",spSpriteData_.pos_, true);	// 初期化スペシャル
-	//InitUIMeter("StaminaBer",staminaSpriteData.pos_, true);	// 初期化スタミナ
-
+	
 
 	// HPUI
 	Engine::UIMeter* hpber  = GetUIMeter("HPBer");
@@ -56,7 +55,6 @@ void PlayerUI::Update()
 {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
-	//UIMeter* staminaBer = GetUIMeter("StaminaBer");	// スタミナ
 	hpber->SetMeterMinMax(hpBar_->minValue, hpBar_->maxValue);	// メータ最大値
 	hpber->SetMeter(hpBar_->value);								// メータ
 	

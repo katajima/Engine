@@ -42,10 +42,6 @@ void Engine::MyGame::Initialize()
 
 void Engine::MyGame::Finalize()
 {
-	//
-	//Audio::GetInstance()->Finalize();
-	//
-	
 	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
 	gpuParticleManager_->ClearEmitterAll();
 	gpuParticleManager_->ClearGroupParticleAll();
@@ -128,6 +124,7 @@ void Engine::MyGame::InitializeResource()
 
 	textureManager->LoadTexture("resources/Texture/uvChecker.png");
 	textureManager->LoadTexture("resources/Texture/Image.png");
+	textureManager->LoadTexture("resources/Texture/simasima.png");
 
 
 	textureManager->LoadTexture("resources/Texture/grass.png");
@@ -141,6 +138,8 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/text/Hit.png");
 	textureManager->LoadTexture("resources/Texture/text/HP.png");
 	textureManager->LoadTexture("resources/Texture/text/SP.png");
+	textureManager->LoadTexture("resources/Texture/text/wave.png");
+	textureManager->LoadTexture("resources/Texture/text/seconds.png");
 
 
 
@@ -323,9 +322,7 @@ void Engine::MyGame::CreateParticle()
 	// 
 	particleManager->CreateParticleGroup("missileHitCylinder", "resources/Texture/effect/gradationLine.png", cylinder_.get());
 	particleManager->GetParticleGroups("missileHitCylinder").isUVClamp = true;
-	//particleManager->GetParticleGroups("missileHitCylinder").mesh->material->transform.scale.x = 10.0f;
-	//particleManager->GetParticleGroups("missileHitCylinder").mesh->material->transform.scale.y = 10.0f;
-
+	
 
 	// ミサイルHitエフェクト
 	particleManager->CreateParticleGroup("missileHit", "resources/Texture/Image.png", primiStar.get());
@@ -359,6 +356,7 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("Ground.obj", "Ground");
 	modelManager->LoadModel("stair.obj");
 	modelManager->LoadModel("BoxBox.obj", "BoxAABB");
+	modelManager->LoadModel("point.obj", "special");
 
 
 
@@ -425,5 +423,9 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("enemyPlank.obj", "enemyAll/plank"); // 鋼板
 	modelManager->LoadModel("enemyGear.obj", "enemyAll/gear"); // 歯車
 	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
+
+
+	modelManager->LoadModel("enemyBullet.gltf", "enemyAll/enemyBullet"); // 本体
+
 
 }

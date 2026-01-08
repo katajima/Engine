@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/Input/Input.h"
+#include <unordered_map>
 
 enum class GameAction {
     Move,

@@ -1,14 +1,16 @@
 #include "GameWave.h"
+#include <DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.h>
 
 
 
+#pragma region GameWave
 
 // 初期化
 void GameWave::Initialize(int waveIndex, float nextWaveDelay) {
 	waveIndex_ = waveIndex;			// ウェーブ
 	nextWaveDelay_ = nextWaveDelay;	// 次のウェーブに行く時間
 }
-void GameWave::AddSpawns(const SpawnInfo& spawn){
+void GameWave::AddSpawns(const SpawnInfo& spawn) {
 	spawns_.push_back(spawn);
 }
 
@@ -17,40 +19,74 @@ void GameWave::Update(float dt) {
 
 };
 
+#pragma endregion // ゲームウェーブ
+
+
+#pragma region WaveManager
 
 void WaveManager::Initialize(const std::vector<GameWave>& waves){
 	waveList = waves;
+
+	// 出現
+	for (auto& sp : waveList[currentWaveIndex].GetSpawnInfo()) {
+		spawnManager->AddCharacterSpawn(sp);
+	}
 }
 
-bool WaveManager::IsWaveActive() const{
-	return false;
-}
-
-int WaveManager::GetCurrentWave() const{
-	return 0;
-}
-
-void WaveManager::StartWave(int index){
-}
-
-
-void WaveManager::Update(float dt) {
-
-}
-
-void WaveManager::UpdateWave(float dt){
-	waveTimer += dt;
-
-
-
-
-
-	for (auto& wave : waveList) {
-		wave.Update(dt);
+void WaveManager::Update(float dt){
+	
+	// サイズ
+	if (waveList.size() <= currentWaveIndex) {
+		isEndWave = true;
+		return;
 	}
 
+	if (waveList.size() <= currentWaveIndex - 1) {
+		isCurrentEndWave = true;
+	}
 
+	
+	waveTimer += dt;
+	// 更新現在のウェーブ更新
+	waveList[currentWaveIndex].Update(dt);
+	// 次のウェーブまでの時間
+	if (waveTimer >= waveList[currentWaveIndex].GetNextWaveDelay()) {
+		waveTimer = 0.0f;
+
+		spawnManager->ClearSpawn();
+		currentWaveIndex++;
+
+		// サイズ
+		if (waveList.size() <= currentWaveIndex) {
+			isEndWave = true;
+			return;
+		}
+
+		for (auto& sp : waveList[currentWaveIndex].GetSpawnInfo()) {
+			spawnManager->AddCharacterSpawn(sp);
+		}
+	}
 }
 
-void WaveManager::EndWave(){
+float WaveManager::GetCurrentWaveTime() const{
+
+	if (waveList.size() <= currentWaveIndex) {
+		return  0;
+	}
+	else {
+		return  waveList[currentWaveIndex].GetNextWaveDelay() - waveTimer;
+	}
 }
+
+GameWave WaveManager::CreateGameWave(int waveIndex, float nextWaveDelay, const std::vector<SpawnInfo>& spawns){
+
+	GameWave wave;
+	wave.Initialize(waveIndex,nextWaveDelay);
+
+	for (auto& sp : spawns) {
+		wave.AddSpawns(sp);
+	}
+	return wave;
+}
+
+#pragma endregion //　ウェーブ管理クラス

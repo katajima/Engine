@@ -70,12 +70,14 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 
 	case AgentState::Attack:
 	{
-		if (distToTarget > preparationAttack_) {
+		// プレイヤーに近すぎたら離脱
+		if (distToTarget < returnEnterDistance_) {
 			state_ = AgentState::Return;
 			break;
 		}
 
-		if (owner_->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Move) {
+		if (owner_->GetCharacterStateMachine()->GetCurrentMainState()
+			== CharacterMainState::Move) {
 			state_ = AgentState::Return;
 		}
 		break;
@@ -83,14 +85,13 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 
 	case AgentState::Return:
 	{
-		const CrowdGroupAgent& group = manager_->GetGroup(groupId);
-		Vector3 toCenter = group.anchorCenter - position_;
-		float dist = Length(toCenter);
+		// プレイヤーからの距離を計測
+		float distFromPlayer = distToTarget;
 
-		// Idle が無いので Approach に戻す
-		//if (dist < 3.0f) {
+		// 一定距離離れたら再び接近
+		if (distFromPlayer >= returnLeaveDistance_) {
 			state_ = AgentState::Approach;
-		//}
+		}
 		break;
 	}
 
@@ -140,8 +141,8 @@ void CrowdAgent::Update(float dt, const Vector3& groupTarget,
 	}
 
 	if (state_ == AgentState::Return) {
-		Vector3 toSlot = groupTarget - position_;
-		desired = Normalize(toSlot);
+		// プレイヤーから離れる方向へ
+		desired = Normalize(position_ - groupTarget);
 	}
 
 	Vector3 steer = Normalize(desired + sep * 0.5f + cohesion * 0.8f);
@@ -364,13 +365,10 @@ void CrowdManager::Update(float dt) {
 		// ★★★ 修正：Return 以外はプレイヤーへ向かわせる ★★★
 		if (a.state_ == AgentState::Return)
 		{
-			// フォーメーションへ戻す
-			Vector3 toCenter = grp.centerPos - a.position_;
-			finalTarget = grp.centerPos + Normalize(toCenter) * 1.0f;
+			finalTarget = playerPos; // Return でも playerPos を渡す（方向反転は Agent 側）
 		}
 		else
 		{
-			// それ以外はプレイヤーを追わせる
 			finalTarget = playerPos;
 		}
 		// それ以外はプレイヤーを追わせる

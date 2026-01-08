@@ -12,7 +12,6 @@ class BaseCharacter;
 /// エージェントの状態
 /// </summary>
 enum class AgentState {
-	Idle,				// 待機 ->Approach
 	Approach,			// 接近 ->Attack
 	PreparationAttack,	// 攻撃準備
 	Attack,				// 攻撃 ->Evade or Idle
@@ -65,7 +64,7 @@ public:
 	BaseEnemy* owner_ = nullptr;
 
 
-	AgentState state_ = AgentState::Idle;	// 状態
+	AgentState state_ = AgentState::Approach;	// 状態
 	Vector3 position_ = {};					// 位置
 	Vector3 velocity_ = {};					// 速度
 	float attackCooldown_ = 0.0f;			// 攻撃クールタイム
@@ -85,6 +84,9 @@ public:
 
 	float preparationAttack_ = 15.0f;		// 攻撃準備に入る距離
 	float attackRange_ = 3.5f;				// 実際に攻撃できる距離
+
+	float returnLeaveDistance_ = 10.0f; // プレイヤーから離れたい距離
+	float returnEnterDistance_ = 6.0f;  // これ以下なら Return に入る
 
 	// 表示用：インスタンスバッファに書き込むデータ
 	uint32_t animIndex = 0;

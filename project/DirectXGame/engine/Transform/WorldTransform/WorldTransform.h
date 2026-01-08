@@ -15,7 +15,7 @@ namespace Engine {
 		void Update();
 		// 親子関係
 		void SetParent(const Matrix4x4& parent) {
-			isPearent = true;
+			isParent = true;
 			parentMatrix_ = parent;
 		};
 
@@ -42,7 +42,7 @@ namespace Engine {
 		WorldTransform* parent_ = nullptr;
 
 	private:
-		bool isPearent = false;
+		bool isParent = false;
 		Matrix4x4 parentMatrix_;
 	};
 }

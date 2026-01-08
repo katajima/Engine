@@ -1,7 +1,46 @@
 #include"Input.h"
-
+#include <algorithm> // std::clamp
+#include <cstring>   // memcpy
 #include <cassert>
 
+namespace
+{
+	Vector2 ApplyCircularDeadZone(
+		SHORT rawX,
+		SHORT rawY,
+		SHORT deadZone)
+	{
+		Vector2 result{};
+
+		const float fx = static_cast<float>(rawX);
+		const float fy = static_cast<float>(rawY);
+
+		const float length = std::sqrt(fx * fx + fy * fy);
+
+		// デッドゾーン内
+		if (length <= static_cast<float>(deadZone))
+		{
+			return result; // (0,0)
+		}
+
+		// 最大値（XInput の仕様）
+		constexpr float MAX_VALUE = 32767.0f;
+
+		// 正規化された方向
+		const float nx = fx / length;
+		const float ny = fy / length;
+
+		// デッドゾーン外を 0〜1 に再スケール
+		const float normalizedLength =
+			((std::min)(length, MAX_VALUE) - deadZone) /
+			(MAX_VALUE - deadZone);
+
+		result.x = nx * normalizedLength;
+		result.y = ny * normalizedLength;
+
+		return result;
+	}
+}
 
 void Engine::Input::Intialize(WinApp* winApp)
 {
@@ -34,86 +73,89 @@ void Engine::Input::Intialize(WinApp* winApp)
 	result = mouseDevice_->SetCooperativeLevel(winApp_->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	assert(SUCCEEDED(result));
 
+	// XInput 初期化（安全のため）
+	ZeroMemory(&xInputState_, sizeof(XINPUT_STATE));
+	ZeroMemory(&preXInputState_, sizeof(XINPUT_STATE));
+	leftTrigger_ = rightTrigger_ = 0.0f;
+	prevLeftTrigger_ = prevRightTrigger_ = 0.0f;
+
 }
 
 void Engine::Input::Update()
 {
-	HRESULT result;
-
+	// -----------------------------
+	// キーボード入力
+	// -----------------------------
 	memcpy(keyPre, key, sizeof(key));
-	//キーボード情報の取得開始
 	keyboard->Acquire();
-	//　全キーの入力情報を取得する
 	keyboard->GetDeviceState(sizeof(key), key);
 
+	// -----------------------------
+	// マウス
+	// -----------------------------
 	preMouse_ = mouse_;
+	mouseDevice_->Acquire();
+	mouseDevice_->GetDeviceState(sizeof(DIMOUSESTATE), &mouse_);
 
 
-	// トリガーの前フレーム値を保存
+	// -----------------------------
+	// Gamepad (XInput)
+	// -----------------------------
+	// 前フレームの状態を退避
+	preXInputState_ = xInputState_;
+
+	// 前フレームのトリガー値を退避（※leftTrigger_は前フレーム値）
 	prevLeftTrigger_ = leftTrigger_;
 	prevRightTrigger_ = rightTrigger_;
 
-	// 新しい値を更新
-	leftTrigger_ = xInputState_.Gamepad.bLeftTrigger / 255.0f;
-	rightTrigger_ = xInputState_.Gamepad.bRightTrigger / 255.0f;
+	// 新しい状態を取得
+	XINPUT_STATE newState{};
+	const DWORD result = XInputGetState(0, &newState);
 
-	preXInputState_ = xInputState_;
-	XInputGetState(0, &xInputState_);
+	if (result == ERROR_SUCCESS)
+	{
+		xInputState_ = newState;
+	}
+	else
+	{
+		// 未接続：ゼロ扱いにして安全に
+		ZeroMemory(&xInputState_, sizeof(XINPUT_STATE));
+	}
 
-	result = mouseDevice_->Acquire();
-	result = mouseDevice_->GetDeviceState(sizeof(DIMOUSESTATE), &mouse_);
+	// 新しい状態からトリガーを更新（0..1）
+	leftTrigger_ = static_cast<float>(xInputState_.Gamepad.bLeftTrigger) / 255.0f;
+	rightTrigger_ = static_cast<float>(xInputState_.Gamepad.bRightTrigger) / 255.0f;
 
 }
 
 bool Engine::Input::IsPushKey(BYTE keyNumber) const
 {
-	// 指定キーを押していればtrueを返す
-	if (key[keyNumber]) {
-		return true;
-	}
-
-	return false;
+	return key[keyNumber] != 0;
 }
 
 bool Engine::Input::IsTriggerKey(BYTE keyNumber) const
 {
-	// 指定されたキーが押された場合にtrueを返す
-	if (key[keyNumber] && !keyPre[keyNumber]) {
-		return true;
-	}
-	return false;
+	return (key[keyNumber] != 0) && (keyPre[keyNumber] == 0);
 }
 
 bool Engine::Input::IsKeyReleased(uint8_t _key) const
 {
-	if (!key[_key] && keyPre[_key])
-		return true;
-
-	return false;
+	return (key[_key] == 0) && (keyPre[_key] != 0);
 }
 
 bool Engine::Input::IsMouseTriggered(uint8_t _buttonNum) const
 {
-	// マウスがトリガー
-	if (mouse_.rgbButtons[_buttonNum] && !preMouse_.rgbButtons[_buttonNum]) {
-		return true;
-	}
-	return false;
+	return (mouse_.rgbButtons[_buttonNum] != 0) && (preMouse_.rgbButtons[_buttonNum] == 0);
 }
 
 bool Engine::Input::IsMousePressed(uint8_t _buttonNum) const
 {
-	if (mouse_.rgbButtons[_buttonNum] && preMouse_.rgbButtons[_buttonNum]) {
-		return true;
-	}
-	return false;
+	return (mouse_.rgbButtons[_buttonNum] != 0);
 }
 
 bool Engine::Input::IsMouseReleased(uint8_t _buttonNum) const
 {
-	if (!mouse_.rgbButtons[_buttonNum] && preMouse_.rgbButtons[_buttonNum])
-		return true;
-	return false;
+	return (mouse_.rgbButtons[_buttonNum] == 0) && (preMouse_.rgbButtons[_buttonNum] != 0);
 }
 
 /// <summary>
@@ -138,120 +180,85 @@ Vector2 Engine::Input::GetMousePosition() const
 // ゲームパッド
 bool Engine::Input::IsGamePadTriggered(GamePadButton button) const
 {
-	if (xInputState_.Gamepad.wButtons & static_cast<WORD>(button) &&
-		!(preXInputState_.Gamepad.wButtons & static_cast<WORD>(button)))
-	{
-		return true;
-	}
-	else {
-		return false;
-	}
+	const WORD mask = static_cast<WORD>(button);
+	return (xInputState_.Gamepad.wButtons & mask) && !(preXInputState_.Gamepad.wButtons & mask);
 }
 
 bool Engine::Input::IsGamePadPressed(GamePadButton button) const
 {
-	if (xInputState_.Gamepad.wButtons & static_cast<WORD>(button) &&
-		preXInputState_.Gamepad.wButtons & static_cast<WORD>(button))
-	{
-		return true;
-	}
-	else {
-		return false;
-	}
+	const WORD mask = static_cast<WORD>(button);
+	return (xInputState_.Gamepad.wButtons & mask) != 0;
 }
 
 bool Engine::Input::IsGamePadReleased(GamePadButton button) const
 {
-	if (!(xInputState_.Gamepad.wButtons & static_cast<WORD>(button)) &&
-		preXInputState_.Gamepad.wButtons & static_cast<WORD>(button))
-	{
-		return true;
-	}
-	else {
-		return false;
-	}
-
+	const WORD mask = static_cast<WORD>(button);
+	return !(xInputState_.Gamepad.wButtons & mask) && (preXInputState_.Gamepad.wButtons & mask);
 }
 
 Vector2 Engine::Input::GetGamePadLeftStick() const
 {
-	// 左スティック入力
-	if (xInputState_.Gamepad.sThumbLX || xInputState_.Gamepad.sThumbLY)
-	{
-		Vector2 result{};
-		result.x = static_cast<float>(xInputState_.Gamepad.sThumbLX) / 32767.0f;
-		result.y = static_cast<float>(xInputState_.Gamepad.sThumbLY) / 32767.0f;
-
-		if (result.x< deadZone_ && result.x > -deadZone_)
-		{
-			result.x = 0.0f;
-		}
-		if (result.y < deadZone_ && result.y > -deadZone_)
-		{
-			result.y = 0.0f;
-		}
-
-
-		result.x = std::clamp(result.x, -1.0f, 1.0f);
-		result.y = std::clamp(result.y, -1.0f, 1.0f);
-
-		return result;
-	}
-	else {
-		return Vector2();
-	}
+	return ApplyCircularDeadZone(
+		xInputState_.Gamepad.sThumbLX,
+		xInputState_.Gamepad.sThumbLY,
+		XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 }
 
 Vector2 Engine::Input::GetGamePadRightStick() const
 {
-	// 右スティック入力
-	if (xInputState_.Gamepad.sThumbRX || xInputState_.Gamepad.sThumbRY)
-	{
-		Vector2 result{};
-		result.x = static_cast<float>(xInputState_.Gamepad.sThumbRX) / 32767.0f;
-		result.y = static_cast<float>(xInputState_.Gamepad.sThumbRY) / 32767.0f;
-
-		if (result.x < deadZone_ && result.x > -deadZone_)
-		{
-			result.x = 0.0f;
-		}
-		if (result.y < deadZone_ && result.y > -deadZone_)
-		{
-			result.y = 0.0f;
-		}
-
-
-		result.x = std::clamp(result.x, -1.0f, 1.0f);
-		result.y = std::clamp(result.y, -1.0f, 1.0f);
-
-		return result;
-	}
-	else {
-		return Vector2();
-	}
+	return ApplyCircularDeadZone(
+		xInputState_.Gamepad.sThumbRX,
+		xInputState_.Gamepad.sThumbRY,
+		XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 }
 
 float Engine::Input::GetGamePadLeftTrigger() const
 {
-	return  xInputState_.Gamepad.bLeftTrigger / 255.0f;
+	return static_cast<float>(xInputState_.Gamepad.bLeftTrigger) / 255.0f;
 }
 
 float Engine::Input::GetGamePadRightTrigger() const
 {
-	return xInputState_.Gamepad.bRightTrigger / 255.0f;
+	return static_cast<float>(xInputState_.Gamepad.bRightTrigger) / 255.0f;
 }
 
-bool Engine::Input::IsLeftTriggerPressed() const
-{
-	// 閾値（アナログの押し込み判断）
-	const float threshold = 0.2f;
 
-	return (leftTrigger_ > threshold && prevLeftTrigger_ <= threshold);
+
+
+bool Engine::Input::IsLeftTriggerPressed(float threshold) const
+{
+	return leftTrigger_ >= threshold;
 }
 
-bool Engine::Input::IsRightTriggerPressed() const
+bool Engine::Input::IsRightTriggerPressed(float threshold) const
 {
-	const float threshold = 0.2f;
+	return rightTrigger_ >= threshold;
+}
 
-	return (rightTrigger_ > threshold && prevRightTrigger_ <= threshold);
+bool Engine::Input::IsLeftTriggerTriggered(float threshold) const
+{
+	const bool now = (leftTrigger_ >= threshold);
+	const bool prev = (prevLeftTrigger_ >= threshold);
+	return now && !prev;
+}
+
+bool Engine::Input::IsRightTriggerTriggered(float threshold) const
+{
+	const bool now = (rightTrigger_ >= threshold);
+	const bool prev = (prevRightTrigger_ >= threshold);
+	return now && !prev;
+}
+
+bool Engine::Input::IsLeftTriggerReleased(float threshold) const
+{
+	const bool now = (leftTrigger_ >= threshold);
+	const bool prev = (prevLeftTrigger_ >= threshold);
+	return !now && prev;
+}
+
+bool Engine::Input::IsRightTriggerReleased(float threshold) const
+{
+	const bool now = (rightTrigger_ >= threshold);
+	const bool prev = (prevRightTrigger_ >= threshold);
+	return !now && prev;
 }

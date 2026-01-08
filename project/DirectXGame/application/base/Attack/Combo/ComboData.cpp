@@ -253,9 +253,12 @@ void ComboHitBox::Update(const Engine::Input& input, float timer, float dt) {
 		break;
 	case ComboHitBox::HitBoxSpawnType::kOnGround: // 着地したら
 		if (jumpSystem_->GetIsLanding()) {
-			if (!isPopHitBox_) {
-				hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
-				isPopHitBox_ = true;
+			timer_ += dt;
+			if (timer >= data_.hitBpxWindowStart_) {
+				if (!isPopHitBox_) {
+					hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+					isPopHitBox_ = true;
+				}
 			}
 		}
 		break;
@@ -280,7 +283,7 @@ void ComboHitBox::Update(const Engine::Input& input, float timer, float dt) {
 // 終了
 void ComboHitBox::Exit() {
 	isPopHitBox_ = false;
-
+	timer_ = 0.0f;
 }
 
 void ComboHitBox::AddCollider(const HitBoxCollData& hitBoxData, const ComboGlovalData& combo) {

@@ -56,7 +56,7 @@ void HitBoxFunction::UpdateTypePlayer(){
 	// ヒットカウンターにヒットを通知
 	player->GetAttackController()->GetHitCounter().Hit();
 	// スペシャルゲージ増化
-	player->AddSpGauge(1);
+	//player->AddSpGauge(1);
 }
 
 void HitBoxFunction::UpdateTypeEnemy(){

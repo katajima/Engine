@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Weapon/Base/RangedWeapons.h"
-
+#include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 
 // 前方宣言
 class BasePlayer;
