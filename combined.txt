@@ -38,8 +38,8 @@
     └── └── └── └── └── ├── HitBoxSystem.h
     └── └── └── └── └── └── Hitbox.cpp
     └── └── └── └── ├── Input/
-    └── └── └── └── └── ├── AttackInputHander.cpp
-    └── └── └── └── └── └── AttackInputHander.h
+    └── └── └── └── └── ├── AttackInputHandler.cpp
+    └── └── └── └── └── └── AttackInputHandler.h
     └── └── └── └── └── Response/
     └── └── └── └──     ├── Response.cpp
     └── └── └── └──     ├── Response.h
@@ -137,9 +137,7 @@
     └── └── └── └── ├── InputHander.cpp
     └── └── └── └── ├── InputHander.h
     └── └── └── └── ├── InputManager.cpp
-    └── └── └── └── ├── InputManager.h
-    └── └── └── └── ├── InputMapper.cpp
-    └── └── └── └── └── InputMapper.h
+    └── └── └── └── └── InputManager.h
     └── └── └── ├── Light/
     └── └── └── └── ├── BaseDirectionalLight.h
     └── └── └── └── ├── BaseLight.h
@@ -200,7 +198,7 @@
     └── └── └── └── Weapon/
     └── └── └──     ├── Base/
     └── └── └──     └── ├── BaseWeapon.h
-    └── └── └──     └── ├── MellWeapons.h
+    └── └── └──     └── ├── MeleeWeapons.h
     └── └── └──     └── ├── RangedWeapons.h
     └── └── └──     └── └── WeaponData.h
     └── └── └──     ├── Bullet/
@@ -302,16 +300,16 @@
     └──     └── └── ├── Collider2D.cpp
     └──     └── └── ├── Collider2D.h
     └──     └── └── ├── ColliderComponent2D.h
-    └──     └── └── ├── ColliderFanction2D.cpp
-    └──     └── └── ├── ColliderFanction2D.h
+    └──     └── └── ├── ColliderFunction2D.cpp
+    └──     └── └── ├── ColliderFunction2D.h
     └──     └── └── └── CollisionManager2D.h
     └──     └── ├── 3d/
     └──     └── └── ├── Collider.cpp
     └──     └── └── ├── Collider.h
     └──     └── └── ├── ColliderComponent.cpp
     └──     └── └── ├── ColliderComponent.h
-    └──     └── └── ├── ColliderFanction3D.cpp
-    └──     └── └── ├── ColliderFanction3D.h
+    └──     └── └── ├── ColliderFunction3D.cpp
+    └──     └── └── ├── ColliderFunction3D.h
     └──     └── └── ├── CollisionManager.cpp
     └──     └── └── └── CollisionManager.h
     └──     └── ├── ColliderData.h
@@ -458,8 +456,8 @@
     └──     └── ├── LineCurveMath.h
     └──     └── ├── MapChip.cpp
     └──     └── ├── MapChip.h
-    └──     └── ├── MathFanctions.cpp
-    └──     └── ├── MathFanctions.h
+    └──     └── ├── MathFunctions.cpp
+    └──     └── ├── MathFunctions.h
     └──     └── ├── Noise.cpp
     └──     └── ├── Noise.h
     └──     └── ├── ProbabilityUtils.h
@@ -1260,7 +1258,7 @@ void GvFanction::SetValue(const std::string& groupName, const std::string& itemN
 File Path: project/DirectXGame/application/GlobalVariables/GlobalVariablesFanction.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include <iostream>
 #include <fstream>
 #include <variant>
@@ -2214,7 +2212,7 @@ void ComboMotion::Enter(BaseCharacter* owner) {
 	SetRigid(owner->GetObjectComponent()->GetRigidBodyComponent());
 
 	// アニメーション設定
-	animationComponent->SetAnimetion(data_.animationName_, 0.0f);	// 再生するアニメーション設定
+	animationComponent->SetAnimation(data_.animationName_, 0.0f);	// 再生するアニメーション設定
 	animationComponent->SetStratAnimeTime();						// アニメーション時間初期化
 	animationComponent->SetIsLoop(data_.animationLoop_);			// ループ再生
 	animationComponent->SetAnimationSpeed(data_.animationSpeed_);	// アニメーションスピード設定
@@ -3120,7 +3118,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/ComboState.h
 ============================================================
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/ComboData.h"
-#include "DirectXGame/application/base/Attack/Input/AttackInputHander.h"
+#include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 
 #include <optional>
 #include <memory>
@@ -4668,9 +4666,9 @@ void HitBox::Disable() {
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Attack/Input/AttackInputHander.cpp
+File Path: project/DirectXGame/application/base/Attack/Input/AttackInputHandler.cpp
 ============================================================
-#include "AttackInputHander.h"  
+#include "AttackInputHandler.h"  
 #include "DirectXGame/application/base/Character/base/BaseCharacter.h"
 #include "DirectXGame/application/base/Weapon/base/BaseWeapon.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -4694,7 +4692,7 @@ void AttackHeavy::Exec(BaseCharacter& character)
 
 
 
-AttackICommand* AttackInputHander::HandleInput()
+AttackICommand* AttackInputHandler::HandleInput()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
@@ -4707,7 +4705,7 @@ AttackICommand* AttackInputHander::HandleInput()
 	return nullptr;
 }
 
-void AttackInputHander::AssignAttack()
+void AttackInputHandler::AssignAttack()
 {
 	AssignAttackLight();
 	AssignAttackHeavy();
@@ -4715,19 +4713,19 @@ void AttackInputHander::AssignAttack()
 
 
 
-void AttackInputHander::AssignAttackLight()
+void AttackInputHandler::AssignAttackLight()
 {
 	this->light = std::make_unique<AttackLight>();
 }
 
-void AttackInputHander::AssignAttackHeavy()
+void AttackInputHandler::AssignAttackHeavy()
 {
 	this->heavy = std::make_unique<AttackHeavy>();
 }
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Attack/Input/AttackInputHander.h
+File Path: project/DirectXGame/application/base/Attack/Input/AttackInputHandler.h
 ============================================================
 #pragma once
 #include<memory>
@@ -4777,7 +4775,7 @@ namespace Engine {
 /// <summary>
 /// 攻撃インプットハンドラークラス
 /// </summary>
-class AttackInputHander 
+class AttackInputHandler 
 {
 public:
 	// インプット設定
@@ -7116,7 +7114,7 @@ class BaseWeapon;
 class BulletManager;
 class CameraManager;
 class SpecalPointManager;
-class AttackInputHander;
+class AttackInputHandler;
 namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
@@ -7320,7 +7318,7 @@ protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;			// オブジェクトコンポーネント
 	std::unique_ptr<BaseSpecial> special_;						// スペシャル攻撃
 	std::unique_ptr<BaseWeapon> weapon_;						// 武器
-	std::unique_ptr<AttackInputHander> attackInputHander_;		// 攻撃入力系クラス
+	std::unique_ptr<AttackInputHandler> attackInputHandler_;		// 攻撃入力系クラス
 
 	std::unique_ptr<CharacterStateMachine> stateMachine_;		// キャラクターの状態管理
 	std::unique_ptr<MovementComponent> moveComponent_;			// 移動コンポーネント
@@ -7441,7 +7439,7 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 {
 	using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
-	// EnemyType → 生成関数
+	// EnemyTypeから生成関数
 	static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
 	{
 		{ EnemyType::kNormal,   []() { return std::make_unique<NormalEnemy>(); } },
@@ -7655,7 +7653,7 @@ private: // 貰いもの
 File Path: project/DirectXGame/application/base/Character/Base/CharacterData.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "optional"
 #include <DirectXGame/engine/struct/Structs.h>
 #include <DirectXGame/engine/Math/Random.h>
@@ -8938,7 +8936,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Bullet/BulletEne
 #include "BulletEnemyState.h"
 #include "BulletEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include <DirectXGame/application/base/Attack/Input/AttackInputHander.h>
+
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 
@@ -9253,7 +9251,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Normal/NormalEne
 #include "NormalEnemyState.h"
 #include "NormalEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include <DirectXGame/application/base/Attack/Input/AttackInputHander.h>
+
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
@@ -9448,7 +9446,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Normal/NormalEne
 #include "NormalEnemySubState.h"
 #include "NormalEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include <DirectXGame/application/base/Attack/Input/AttackInputHander.h>
+
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 
@@ -9790,8 +9788,48 @@ void NormalPlayer::InitAttack(){
 	ReloadComboData();
 
 	// インプットハンドラー
-	attackInputHander_ = std::make_unique<AttackInputHander>();
-	attackInputHander_->AssignAttack();
+	attackInputHandler_ = std::make_unique<AttackInputHandler>();
+	attackInputHandler_->AssignAttack();
+}
+
+void NormalPlayer::RequestAttack(AttackInput input)
+{
+	const auto s = stateMachine_->GetCurrentMainState();
+	const bool canStart = (s == CharacterMainState::Move) ||
+		(s == CharacterMainState::Idle) ||
+		(s == CharacterMainState::Jump);
+	const bool isAttack = (s == CharacterMainState::Attack);
+
+	auto* ac = GetAttackController();
+	ac->SetIsAttack(true);
+
+	if (isAttack)
+	{
+		ac->GetComboSystem()->InputCombo(input);
+		return;
+	}
+
+	if (canStart)
+	{
+		stateMachine_->ChangeState(CharacterMainState::Attack);
+
+		// 開始コンボ名の決定を「入力種類×状況」でまとめる
+		if (s == CharacterMainState::Jump)
+		{
+			ac->GetComboSystem()->StartCombo("JumpAttack");
+		}
+		else
+		{
+			// ここをテーブル化するとスキル追加が楽
+			switch (input)
+			{
+			case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack4"); break;
+			case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("Attack1"); break;
+				// case AttackInput::Skill1: ac->GetComboSystem()->StartCombo("Skill1"); break;
+			default: break;
+			}
+		}
+	}
 }
 
 // ステート初期化and追加
@@ -9908,7 +9946,7 @@ void NormalPlayer::Update()
 	stateMachine_->Update();
 
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
 	// UI更新
@@ -9968,60 +10006,9 @@ void NormalPlayer::Jump()
 		moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
 
 		stateMachine_->ChangeState(CharacterMainState::Jump);
-		GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
+		GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.01f);
 	}
 
-}
-
-void NormalPlayer::Attack()
-{
-	bool isMove   = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool isIdle   = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-	bool isJump   = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
-	bool isAttack = stateMachine_->GetCurrentMainState() == CharacterMainState::Attack;
-
-
-	// 攻撃
-	if (isAttack) {
-		GetAttackController()->SetIsAttack(true);
-		GetAttackController()->GetComboSystem()->InputCombo(AttackInput::Light);
-	}
-	else if (isMove || isIdle || isJump) {
-		GetAttackController()->SetIsAttack(true);
-		stateMachine_->ChangeState(CharacterMainState::Attack);
-		if (isJump) {
-			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
-		}
-		else {
-			GetAttackController()->GetComboSystem()->StartCombo("Attack4");
-		}
-	}
-
-}
-
-void NormalPlayer::HeavyAttack()
-{
-	bool isMove = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool isIdle = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-	bool isJump = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
-	bool isAttack = stateMachine_->GetCurrentMainState() == CharacterMainState::Attack;
-
-
-	// 攻撃
-	if (isAttack) {
-		GetAttackController()->SetIsAttack(true);
-		GetAttackController()->GetComboSystem()->InputCombo(AttackInput::Heavy);
-	}
-	else if (isMove || isIdle || isJump) {
-		GetAttackController()->SetIsAttack(true);
-		stateMachine_->ChangeState(CharacterMainState::Attack);
-		if (isJump) {
-			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
-		}
-		else {
-			GetAttackController()->GetComboSystem()->StartCombo("Attack1");
-		}
-	}
 }
 
 #pragma endregion //移動関係
@@ -10247,10 +10234,10 @@ public:
 	void Jump() override;
 
 	// 攻撃(弱攻撃)
-	void Attack() override;
+	void Attack() override { RequestAttack(AttackInput::Light); };
 
 	/// 攻撃(強攻撃)
-	void HeavyAttack() override;
+	void HeavyAttack() override { RequestAttack(AttackInput::Heavy); };
 
 
 
@@ -10260,6 +10247,8 @@ public:
 private:
 	void InitAttack();
 
+	// 攻撃要求
+	void RequestAttack(AttackInput input);
 	
 private: 
 	// ステートマシーン初期化
@@ -10389,7 +10378,7 @@ void PlayerStateIdle::Enter() {
 	anima->SetIsLoop(true);			// ループさせる
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	anima->SetAnimetion("Idle2", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimation("Idle2", 0.1f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 };
 
@@ -10458,7 +10447,7 @@ void PlayerStateMove::Enter()
 	anima->SetIsLoop(true);				// ループ再生
 	anima->SetIsPlaying(true);			// 再生
 	anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
-	anima->SetAnimetion("Walk", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimation("Walk", 0.1f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 }
 
@@ -10496,7 +10485,7 @@ void PlayerStateJump::Update() {
 
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.05f);
+		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.05f);
 
 		// ジャンプ開始
 		anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -10514,11 +10503,11 @@ void PlayerStateJump::Update() {
 	
 	if (jump->GetState() == JumpSystem::State::Jump) { // 上昇しているなら
 		anima->SetIsLoop(false);
-		anima->SetAnimetion("JumpStrat1", 0.05f);
+		anima->SetAnimation("JumpStrat1", 0.05f);
 	}
 	else if (jump->GetState() == JumpSystem::State::Fall) { // 降下しているなら
 		anima->SetIsLoop(true);
-		anima->SetAnimetion("Fall", 0.15f);
+		anima->SetAnimation("Fall", 0.15f);
 	}
 }
 
@@ -10699,7 +10688,7 @@ void PlayerStateDefense::Enter() {
 	anima->SetIsLoop(false);		// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
 	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
-	anima->SetAnimetion("Defense1", 0.10f);	// 流すアニメーション設定
+	anima->SetAnimation("Defense1", 0.10f);	// 流すアニメーション設定
 };
 
 #pragma endregion // 防御
@@ -10752,7 +10741,7 @@ void PlayerStateFainting::Enter() {
 	anima->SetIsLoop(true);			// アニメーションをループさせるか
 	anima->SetStratAnimeTime();		// アニメーション時間を初期化
 	anima->SetAnimationSpeed(0.75f); // アニメーションスピード設定
-	anima->SetAnimetion("Stan1", 0.10f);
+	anima->SetAnimation("Stan1", 0.10f);
 	timer_ = 0;		// タイマーを0に設定
 
 
@@ -11239,8 +11228,7 @@ void VisionComponent::DrawDireLine(Vector3 selfPos, Vector3 selfDir, Vector3 tar
 File Path: project/DirectXGame/application/base/Character/Vision/VisionComponent.h
 ============================================================
 #pragma once
-//#include "DirectXGame/engine/line/lineCommon.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 #include"functional"
 
@@ -12265,48 +12253,19 @@ void HeavyAttackCommand::Exec(BaseCharacter& character)
 	character.HeavyAttack();
 }
 
-void InputHander::AssignMoveCommandPad()
-{
-	this->movePad = std::make_unique<MoveCommand>();
-}
-
-void InputHander::AssignJampCommandPad()
-{
-	this->jampPad = std::make_unique<JampCommand>();
-}
-
-void InputHander::AssignAttackCommandPad()
-{
-	this->attackPad = std::make_unique<AttackCommand>();
-}
-void InputHander::AssignHeavyAttackCommandPad()
-{
-	this->attackHeavyPad = std::make_unique<HeavyAttackCommand>();
-}
-
-
 
 ICommand* InputHander::HandleInput()
 {
-	// ゲームパッドがつながっているなら
-	if (input_->IsControllerConnected()) {
-		// ジャンプコマンド
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-			return jampPad.get();
-		}
-		// 攻撃コマンド(弱攻撃)
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			return attackPad.get();
-		}
-		// 攻撃コマンド(強攻撃)
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
-			return attackHeavyPad.get();
-		}
-		// 移動コマンド
-		if (input_->GetGamePadLeftStick().Length() != 0) {
-			return movePad.get();
-		}
-		
+	if (!input_) return nullptr;
+
+	// 未接続なら何もしない（必要ならキーマウも混ぜる）
+	if (!input_->IsControllerConnected()) return nullptr;
+
+	// 上から順に評価して、最初に成立したコマンドを返す
+	for (auto& b : bindings_)
+	{
+		if (b.condition())
+			return b.cmd.get();
 	}
 	return nullptr;
 }
@@ -12315,7 +12274,9 @@ ICommand* InputHander::HandleInput()
 File Path: project/DirectXGame/application/base/Input/InputHander.h
 ============================================================
 #pragma once
-#include<memory>
+#include <vector>
+#include <memory>
+#include <functional>
 
 // 前方宣言
 class BaseCharacter;
@@ -12365,27 +12326,28 @@ namespace Engine {
 class InputHander 
 {
 public:
-	// インプット設定
-	void SetInput(Engine::Input* input) { input_ = input; };
+	// 初期化
+	void Initialize(Engine::Input* input) { input_ = input; }
+
+
+	// 追加：条件とコマンドを登録（優先度順に並べる）
+	void Bind(std::function<bool()>&& condition, std::unique_ptr<ICommand> cmd)
+	{
+		bindings_.push_back({ std::move(condition), std::move(cmd) });
+	}
+
 	// ハンドルインプット取得
 	ICommand* HandleInput();
-	// 割り当て移動
-	void AssignMoveCommandPad();
-	// 割り当てジャンプ
-	void AssignJampCommandPad();
-	// 割り当て攻撃
-	void AssignAttackCommandPad();
-	// 割り当て攻撃
-	void AssignHeavyAttackCommandPad();
-
 private:
-	Engine::Input* input_;
+	Engine::Input* input_ = nullptr;
 
-	std::unique_ptr<ICommand> movePad;
-	std::unique_ptr<ICommand> jampPad;
-	std::unique_ptr<ICommand> attackPad;
-	std::unique_ptr<ICommand> attackHeavyPad;
+	struct Binding
+	{
+		std::function<bool()> condition;
+		std::unique_ptr<ICommand> cmd;
+	};
 
+	std::vector<Binding> bindings_;
 };
 
 ============================================================
@@ -12396,7 +12358,7 @@ File Path: project/DirectXGame/application/base/Input/InputManager.cpp
 
 
 
-void InputManager::Intialize(Engine::Input* input){
+void InputManager::Initialize(Engine::Input* input){
 	input_ = input;
 }
 
@@ -12592,7 +12554,7 @@ public:
 	};
 
 	// 初期化
-	void Intialize(Engine::Input* input); 
+	void Initialize(Engine::Input* input); 
 	// 更新
 	void Update(float dt);
 
@@ -12745,131 +12707,6 @@ private:
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Input/InputMapper.cpp
-============================================================
-#include "InputMapper.h"
-
-#pragma region InputMapper
-
-
-#pragma endregion
-
-void ActionInputBuilder::Update(float dt, ActionInputState& outState)
-{
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Input/InputMapper.h
-============================================================
-#pragma once
-#include "DirectXGame/engine/struct/Vector3.h"
-#include "DirectXGame/engine/Input/Input.h"
-#include <unordered_map>
-
-enum class GameAction {
-    Move,
-    Jump,
-    Attack,
-    Dash,
-    Skill,
-    Special
-};
-
-
-class InputMapper {
-public:
-
-    // 初期化
-    void Initialize(Engine::Input* input) { input_ = input; };
-
-    // アクションとキーコードを紐づける
-    void Bind(GameAction action, int deviceKey)
-    {
-        table_[action] = deviceKey;
-    }
-
-    // 押した瞬間
-    bool IsTrigger(GameAction action)
-    {
-        if (table_.contains(action)) {
-            return input_->IsTriggerKey(table_[action]);
-        }
-        return false;
-    }
-
-    // 押しっぱなし
-    bool IsPress(GameAction action)
-    {
-        if (table_.contains(action)) {
-            return input_->IsPushKey(table_[action]);
-        }
-        return false;
-    }
-
-    // 離した瞬間
-    bool IsRelease(GameAction action)
-    {
-        if (table_.contains(action)) {
-            return input_->IsKeyReleased(table_[action]);
-        }
-        return false;
-    }
-private:
-    Engine::Input* input_ = nullptr;
-    std::unordered_map<GameAction, int> table_;
-};
-
-struct ActionInputState
-{
-    // ----------- 攻撃入力（複数ボタン） -----------
-    bool attackLightTrigger = false;   // 弱攻撃（押した瞬間）
-    bool attackHeavyTrigger = false;   // 強攻撃（押した瞬間）
-    bool attackSpecialTrigger = false;  // 必殺技
-
-    bool attackLightHold = false;   // 長押し中
-    bool attackHeavyHold = false;
-
-    float attackLightHoldTime = 0.0f;
-    float attackHeavyHoldTime = 0.0f;
-
-    // ----------- 移動 -----------
-    Vector3 moveDir{ 0,0,0 };
-    float moveAmount = 0.0f;
-
-    // ----------- ジャンプ -----------
-    bool jumpTrigger = false;
-    bool bufferedJump = false; // ジャンプバッファ
-
-    // ----------- ダッシュ -----------
-    bool dashTrigger = false;
-    bool dashHold = false;
-
-    // ----------- コンボ向け履歴 -----------
-    int attackSequence = 0;  // 1段目/2段目/3段目
-};
-
-class ActionInputBuilder
-{
-public:
-
-    void Initialize(InputMapper* mapper) { mapper_ = mapper;};
-
-    void Update(float dt, ActionInputState& outState);
-
-private:
-    InputMapper* mapper_ = nullptr;
-
-    float attackHoldTimer_ = 0.0f;
-
-    int attackSequence_ = 0;
-    float comboTimer_ = 0.0f;
-
-    float lastDirInputTime_ = 0.0f;
-    int dashTapCount_ = 0;
-};
-
-============================================================
 File Path: project/DirectXGame/application/base/Light/BaseDirectionalLight.h
 ============================================================
 #pragma once
@@ -12915,7 +12752,7 @@ protected:
 File Path: project/DirectXGame/application/base/Light/BaseLight.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 
 /// <summary>
@@ -14587,7 +14424,7 @@ File Path: project/DirectXGame/application/base/Object/ObjectComponent.h
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/audio/Audio.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include"DirectXGame/engine/Animation/AnimationData.h"
@@ -15808,7 +15645,7 @@ File Path: project/DirectXGame/application/base/Stage/Stage.h
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
 
@@ -15949,7 +15786,7 @@ File Path: project/DirectXGame/application/base/State/BaseMainState.h
 #include<string>
 #include <memory>
 #include <functional>
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "SubStateMachine.h"
 
 
@@ -16221,7 +16058,7 @@ File Path: project/DirectXGame/application/base/State/BaseSubState.h
 #include<string>
 #include <memory>
 #include <functional>
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 
 
@@ -17435,7 +17272,7 @@ protected:
 };
 
 // 近距離の武器クラス
-class MellWeapon : public BaseWeapon
+class MeleeWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
@@ -17452,7 +17289,7 @@ public:
 	// ヒットストップ時間を取得
 	float GetHitStopTime() const { return mellData_.hitStopTime; } 
 protected:
-	MellWeaponData mellData_; // 近距離武器データ
+	MeleeWeaponData mellData_; // 近距離武器データ
 
 };
 
@@ -17481,14 +17318,14 @@ protected:
 };
 
 ============================================================
-File Path: project/DirectXGame/application/base/Weapon/Base/MellWeapons.h
+File Path: project/DirectXGame/application/base/Weapon/Base/MeleeWeapons.h
 ============================================================
 #pragma once
 #include "BaseWeapon.h"
 
 
 // 剣武器のクラス
-class SwordWeapon : public MellWeapon
+class SwordWeapon : public MeleeWeapon
 {
 public:
 	/// 初期化
@@ -17506,7 +17343,7 @@ protected:
 };
 
 // ハンマー武器のクラス
-class HammerWeapon : public MellWeapon
+class HammerWeapon : public MeleeWeapon
 {
 public:
 	/// 初期化
@@ -17524,7 +17361,7 @@ protected:
 };
 
 // 槍武器のクラス
-class SpearWeapon : public MellWeapon
+class SpearWeapon : public MeleeWeapon
 {
 public:
 	/// 初期化
@@ -17582,7 +17419,7 @@ struct WeaponData
 };
 
 // 近距離武器専用のデータ構造体(近距離武器クラス用)
-struct MellWeaponData
+struct MeleeWeaponData
 {
 	bool isCharging = false;				// チャージ中かのフラグ
 	float chargeTime = 0.0f;				// チャージ時間(チャージ開始からの時間)
@@ -18180,7 +18017,7 @@ void PlayerWeapon::DrawEffect()
 File Path: project/DirectXGame/application/base/Weapon/playerWeapon.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Weapon/Base/MellWeapons.h"
+#include "DirectXGame/application/base/Weapon/Base/MeleeWeapons.h"
 
 
 
@@ -18268,12 +18105,34 @@ void GamePlayScene::Initialize()
 	// Input
 	input_ = GetInput();
 
+	// インプットマネージャー初期化
+	inputManager_ = std::make_unique<InputManager>();
+	inputManager_->Initialize(input_);
+	
+
 	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<InputHander>();	
-	inputHander_->SetInput(input_);			// インプット設定
-	inputHander_->AssignMoveCommandPad();	// 移動コマンド追加
-	inputHander_->AssignJampCommandPad();	// ジャンプコマンド追加
-	inputHander_->AssignAttackCommandPad();	// 攻撃コマンド追加
+	inputHander_ = std::make_unique<InputHander>();
+	inputHander_->Initialize(input_);
+
+
+	inputManager_->Triggered(InputManager::Action::Jump);
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
+		std::make_unique<JampCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
+		std::make_unique<AttackCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
+		std::make_unique<HeavyAttackCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
+		std::make_unique<MoveCommand>());
+
 
 	// エフェクト
 	effect_ = std::make_unique<Effect>();
@@ -18381,6 +18240,9 @@ void GamePlayScene::Initialize()
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 
+
+
+	inputManager_->SetOwner(caracterManager_->GetPlayer());
 }
 
 // 調整項目
@@ -18497,6 +18359,9 @@ void GamePlayScene::Update()
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	
+	// インプットマネージャー更新
+	inputManager_->Update(Engine::MyGame::GameTime());
+
 	// コマンド
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
@@ -18591,6 +18456,7 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 
 
 #include "DirectXGame/application/base/Input/InputHander.h"
+#include <DirectXGame/application/base/Input/InputManager.h>
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
@@ -18636,6 +18502,10 @@ private:
 	// インプットハンドラ
 	std::unique_ptr < InputHander> inputHander_;
 	ICommand* iCommand_;
+
+	// インプットマネージャ
+	std::unique_ptr<InputManager> inputManager_;
+
 
 	float nowTime = 0.0f;
 	float fps = 0.0f;
@@ -19131,7 +19001,7 @@ private:
 File Path: project/DirectXGame/application/scene/SceneData.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include <map>
 #include <string>
 
@@ -19892,8 +19762,8 @@ File Path: project/DirectXGame/application/scene/TestScene.h
 
 
 #include "DirectXGame/engine/collider/Octree/Octree.h"
-#include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
-#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+#include "DirectXGame/engine/collider/2d/ColliderFunction2D.h"
+#include "DirectXGame/engine/collider/3d/ColliderFunction3D.h"
 
 #include "DirectXGame/engine/math/MapChip.h"
 #include "DirectXGame/engine/math/AStarAlgorithm.h"
@@ -20711,7 +20581,7 @@ File Path: project/DirectXGame/engine/2d/Primitive2D.h
 #include"DirectXGame/engine/struct/Structs2D.h"
 #include"DirectXGame/engine/struct/Material.h"
 
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
 
@@ -21112,7 +20982,7 @@ File Path: project/DirectXGame/engine/2d/Sprite.h
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
@@ -21511,7 +21381,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 
 		auto it = modelData.animations.find(modelData.currentAnimName);
 		if (it != modelData.animations.end()) {
-			Animetion::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
+			AnimationFunction::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
 		}
 	}
 
@@ -22081,7 +21951,7 @@ void Engine::CreateModel::CreateSkeleton(ModelData& modelData)
 		modelData.skeleton.jointMap.emplace(joint.name, joint.index);
 	}
 
-	Animetion::UpdateSkeleton(modelData.skeleton);
+	AnimationFunction::UpdateSkeleton(modelData.skeleton);
 }
 
 void Engine::CreateModel::CreateSkinCluster(ModelData& modelData, ModelCommon* modelCommon)
@@ -22280,7 +22150,7 @@ File Path: project/DirectXGame/engine/3d/Model/ModelData.h
 #pragma once
 
 // engine
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 \
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
@@ -23017,7 +22887,7 @@ File Path: project/DirectXGame/engine/3d/Object/Object3d.cpp
 
 #include"DirectXGame/engine/base/Texture/TextureManager.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
 
@@ -24473,7 +24343,7 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -24742,7 +24612,7 @@ File Path: project/DirectXGame/engine/Animation/Animation.cpp
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include <execution> // C++17 以降
 
-void Engine::Animetion::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
+void Engine::AnimationFunction::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
 	
 	for (Joint& joint : skeleton.joints) {
@@ -24756,7 +24626,7 @@ void Engine::Animetion::ApplyAnimation(Skeleton& skeleton, const Animation& anim
 	}
 }
 
-Vector3 Engine::Animetion::CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time)
+Vector3 Engine::AnimationFunction::CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time)
 {
 	assert(!keyframes.empty()); // キーがないものは返す値がわからないのでダメ
 	if (keyframes.size() == 1 || time <= keyframes[0].time) { // キーが一つか、時刻がキーフレーム前なら最初の値を返す
@@ -24765,7 +24635,7 @@ Vector3 Engine::Animetion::CalculateValue(const std::vector<KeyframeVector3>& ke
 
 	for (size_t index = 0; index < keyframes.size() - 1; ++index) {
 		size_t nextIndex = index + 1;
-		// indexとnextIndexの2つのkeyframeを取得して範囲内に時刻があるかを判断
+		// indexとnextIndexの2つの keyFrameを取得して範囲内に時刻があるかを判断
 		if (keyframes[index].time <= time && time <= keyframes[nextIndex].time) {
 			// 範囲内を補間する
 			float t = (time - keyframes[index].time) / (keyframes[nextIndex].time - keyframes[index].time);
@@ -24776,7 +24646,7 @@ Vector3 Engine::Animetion::CalculateValue(const std::vector<KeyframeVector3>& ke
 	return (*keyframes.rbegin()).value;
 }
 
-Quaternion Engine::Animetion::CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, float time)
+Quaternion Engine::AnimationFunction::CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, float time)
 {
 	assert(!keyframes.empty()); // キーがないものは返す値がわからないのでダメ
 	if (keyframes.size() == 1 || time <= keyframes[0].time) {
@@ -24801,7 +24671,7 @@ Quaternion Engine::Animetion::CalculateValue(const std::vector<KeyframeQuaternio
 	return (*keyframes.rbegin()).value;
 }
 
-void Engine::Animetion::UpdateSkeleton(Skeleton& skeleton)
+void Engine::AnimationFunction::UpdateSkeleton(Skeleton& skeleton)
 {
 	// すべてのJointを更新。親が先に処理されるので通常ループで処理可能になっている
 	for (Joint& joint : skeleton.joints) {
@@ -24821,7 +24691,7 @@ void Engine::Animetion::UpdateSkeleton(Skeleton& skeleton)
 	}
 }
 
-void Engine::Animetion::BlendSkeletons(Skeleton& outSkeleton,
+void Engine::AnimationFunction::BlendSkeletons(Skeleton& outSkeleton,
 	const Skeleton& fromSkeleton,
 	const Skeleton& toSkeleton,
 	float t)
@@ -24848,10 +24718,10 @@ void Engine::Animetion::BlendSkeletons(Skeleton& outSkeleton,
 	}
 
 	// 補間後、localMatrix / skeletonSpaceMatrix を更新する
-	Animetion::UpdateSkeleton(outSkeleton);
+	AnimationFunction::UpdateSkeleton(outSkeleton);
 }
 
-void Engine::Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scaleconst ,const Matrix4x4& rotationMatrix)
+void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scaleconst ,const Matrix4x4& rotationMatrix)
 {
 	std::vector<int> depths(joints.size(), 0);
 	int maxDepth = 0;
@@ -24887,7 +24757,7 @@ void Engine::Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Jo
 
 }
 
-void Engine::Animetion::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
+void Engine::AnimationFunction::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
 {
 	const auto& animations = modelData.animations;
 	auto it = animations.find(newAnimName);
@@ -24904,7 +24774,7 @@ void Engine::Animetion::SetAnimation(ModelData& modelData, const std::string& ne
 	
 }
 
-Engine::Joint* Engine::Animetion::FindJointByName(Skeleton& skeleton, const std::string& name)
+Engine::Joint* Engine::AnimationFunction::FindJointByName(Skeleton& skeleton, const std::string& name)
 {
 	auto it = skeleton.jointMap.find(name);
 	if (it != skeleton.jointMap.end()) {
@@ -24916,7 +24786,7 @@ Engine::Joint* Engine::Animetion::FindJointByName(Skeleton& skeleton, const std:
 	return nullptr;
 }
 
-const Engine::Joint* Engine::Animetion::FindJointByNameConst(const Skeleton& skeleton, const std::string& name)
+const Engine::Joint* Engine::AnimationFunction::FindJointByNameConst(const Skeleton& skeleton, const std::string& name)
 {
 	auto it = skeleton.jointMap.find(name);
 	if (it != skeleton.jointMap.end()) {
@@ -24928,7 +24798,7 @@ const Engine::Joint* Engine::Animetion::FindJointByNameConst(const Skeleton& ske
 	return nullptr;
 }
 
-Matrix4x4 Engine::Animetion::GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix)
+Matrix4x4 Engine::AnimationFunction::GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix)
 {
 	auto it = skeleton.jointMap.find(jointName);
 	if (it != skeleton.jointMap.end()) {
@@ -24939,7 +24809,7 @@ Matrix4x4 Engine::Animetion::GetWorldMatrixOfJoint(const Skeleton& skeleton, con
 	return Matrix4x4::Identity(); // 見つからなければ単位行列
 }
 
-void Engine::Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices)
+void Engine::AnimationFunction::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices)
 {
 	if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
 		cachedSkeletonMatrices.resize(skeleton.joints.size());
@@ -24962,7 +24832,7 @@ void Engine::Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skelet
 		});
 }
 
-void Engine::Animetion::ValidateTransform(Joint& joint)
+void Engine::AnimationFunction::ValidateTransform(Joint& joint)
 {
 	if (joint.transform.scale.x == 0.0f || joint.transform.scale.y == 0.0f || joint.transform.scale.z == 0.0f) {
 		//Logger::Log("Warning: Zero scale detected. Adjusting to default value.");
@@ -24970,7 +24840,7 @@ void Engine::Animetion::ValidateTransform(Joint& joint)
 	}
 }
 
-void Engine::Animetion::ImGuiJoint(const std::vector<Joint>& joints)
+void Engine::AnimationFunction::ImGuiJoint(const std::vector<Joint>& joints)
 {
 	ImGui::Begin("Joint Info");
 	for (const Joint& joint : joints) {
@@ -24994,7 +24864,7 @@ void Engine::Animetion::ImGuiJoint(const std::vector<Joint>& joints)
 	ImGui::End();
 }
 
-void Engine::Animetion::ImGuiNode(const std::vector<Node>& nodes)
+void Engine::AnimationFunction::ImGuiNode(const std::vector<Node>& nodes)
 {
 	ImGui::Begin("Node Info");
 	for (const Node& node : nodes) {
@@ -25013,13 +24883,13 @@ void Engine::Animetion::ImGuiNode(const std::vector<Node>& nodes)
 	ImGui::End();
 }
 
-int Engine::Animetion::CalculateDepth(const std::vector<Joint>& joints, int index)
+int Engine::AnimationFunction::CalculateDepth(const std::vector<Joint>& joints, int index)
 {
 	const Joint& joint = joints[index];
 	if (!joint.parent.has_value()) {
 		return 0; // ルートジョイントの深さは0
 	}
-	return 1 + Animetion::CalculateDepth(joints, joint.parent.value());
+	return 1 + AnimationFunction::CalculateDepth(joints, joint.parent.value());
 }
 
 
@@ -25027,7 +24897,7 @@ int Engine::Animetion::CalculateDepth(const std::vector<Joint>& joints, int inde
 File Path: project/DirectXGame/engine/Animation/Animation.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/struct/VertexDeta.h"
 
@@ -25233,7 +25103,7 @@ namespace Engine {
 	};
 
 	struct ModelData;
-	namespace Animetion {
+	namespace AnimationFunction {
 
 		// スケルトンに対してアニメーションを適用させる関数
 		void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
@@ -25367,8 +25237,8 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 					// ① 各スケルトン姿勢を取得
 					Skeleton prevSkeleton = modelData.skeleton;
 					Skeleton currSkeleton = modelData.skeleton;
-					Animetion::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
-					Animetion::ApplyAnimation(currSkeleton, currAnim, currTime);
+					AnimationFunction::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
+					AnimationFunction::ApplyAnimation(currSkeleton, currAnim, currTime);
 
 					// ② 補間割合を更新（EaseInOutでなめらかに）
 					modelData.blendTime += deltaTime;
@@ -25377,7 +25247,7 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 					t = t * t * (3.0f - 2.0f * t); // Hermite補間（EaseInOut）
 
 					// ③ スケルトン補間
-					Animetion::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
+					AnimationFunction::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
 
 					// ブレンド完了判定
 					if (modelData.blendTime >= modelData.blendDuration) {
@@ -25387,29 +25257,29 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 				}
 				else {
 					// 前アニメーションが見つからなければ通常再生
-					Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+					AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
 				}
 			}
 			else {
 				// ブレンドしていない通常の再生
-				Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+				AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
 			}
 
 
 
 
 			// スケルトン姿勢更新
-			Animetion::UpdateSkeleton(modelData.skeleton);
+			AnimationFunction::UpdateSkeleton(modelData.skeleton);
 
 			std::vector<Matrix4x4> cachedSkeletonMatrices;
 			for (auto& mesh : modelData.mesh) {
-				Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
 			}
 
 			// ルートの変換行列反映
 			localMatrix_ = modelData.skeleton.joints[0].skeletonSpaceMatrix;
 			// デバッグ用：スケルトン描画
-			Animetion::DrawSkeleton(
+			AnimationFunction::DrawSkeleton(
 				lineCommon,
 				modelData.skeleton.joints,
 				worldTransform.worldMat_.GetWorldPosition(),
@@ -25423,11 +25293,11 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 
 			std::vector<Matrix4x4> cachedSkeletonMatrices;
 			for (auto& mesh : modelData.mesh) {
-				Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
 			}
 
 			// デバッグ用：スケルトン描画
-			Animetion::DrawSkeleton(
+			AnimationFunction::DrawSkeleton(
 				lineCommon,
 				modelData.skeleton.joints,
 				worldTransform.worldMat_.GetWorldPosition(),
@@ -25520,9 +25390,9 @@ void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTra
 			// 各ノード（ボーンではなく、単なるノード）のトランスフォーム補間
 			for (auto& [nodeName, nodeAnim] : itCurrent->second.nodeAnimations) {
 				// 時間に対応する補間結果を取得
-				Vector3 interpTranslate = Animetion::CalculateValue(nodeAnim.translate.keyframes, modelData.animationTime);
-				Quaternion interpRotate = Animetion::CalculateValue(nodeAnim.rotate.keyframes,modelData.animationTime);
-				Vector3 interpScale = Animetion::CalculateValue(nodeAnim.scale.keyframes,modelData.animationTime);
+				Vector3 interpTranslate = AnimationFunction::CalculateValue(nodeAnim.translate.keyframes, modelData.animationTime);
+				Quaternion interpRotate = AnimationFunction::CalculateValue(nodeAnim.rotate.keyframes,modelData.animationTime);
+				Vector3 interpScale = AnimationFunction::CalculateValue(nodeAnim.scale.keyframes,modelData.animationTime);
 
 				// TRSマトリクスの生成
 				Matrix4x4 localMatrix = MakeAffineMatrix(interpScale, interpRotate, interpTranslate);
@@ -25581,7 +25451,7 @@ bool Engine::AnimationComponent::IsAnimationFinished()
 File Path: project/DirectXGame/engine/Animation/AnimationComponent.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include "DirectXGame/engine/3d/Model/ModelData.h"
@@ -25618,8 +25488,8 @@ namespace Engine {
 		// ローカル行列取得
 		Matrix4x4 GetLocalMatrix() const { return localMatrix_; }
 		// アニメーション変更
-		void SetAnimetion(const std::string& name, float time) {
-			Animetion::SetAnimation(model->modelData, name, time);
+		void SetAnimation(const std::string& name, float time) {
+			AnimationFunction::SetAnimation(model->modelData, name, time);
 		}
 		// アニメーションが終了しているか
 		bool IsAnimationFinished();
@@ -25674,7 +25544,7 @@ File Path: project/DirectXGame/engine/Animation/AnimationData.h
 #pragma once
 #include "imgui.h"
 #include<string>
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 // タイマーの構造体
 struct Timer {
@@ -27101,7 +26971,7 @@ File Path: project/DirectXGame/engine/Base/Imgui/ImGuiManager.h
 
 
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/input/Input.h"
 
@@ -27200,7 +27070,7 @@ namespace Engine {
 File Path: project/DirectXGame/engine/Base/Load/LevelData.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <string>
 #include "DirectXGame/engine/Light/Lights.h"
@@ -28958,7 +28828,7 @@ File Path: project/DirectXGame/engine/Camera/Camera.h
 ============================================================
 #pragma once
 #include "DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 #include<wrl.h>
 #include<d3d12.h>
@@ -29211,7 +29081,7 @@ File Path: project/DirectXGame/engine/Camera/DebugCamera.h
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
 
 
@@ -29336,11 +29206,11 @@ File Path: project/DirectXGame/engine/Collider/2d/Collider2D.h
 #pragma once
 
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
-#include "ColliderFanction2D.h"
+#include "ColliderFunction2D.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
 
 namespace Engine {
@@ -29622,9 +29492,9 @@ namespace Engine {
 }
 
 ============================================================
-File Path: project/DirectXGame/engine/Collider/2d/ColliderFanction2D.cpp
+File Path: project/DirectXGame/engine/Collider/2d/ColliderFunction2D.cpp
 ============================================================
-#include "ColliderFanction2D.h"
+#include "ColliderFunction2D.h"
 
 
 bool PointInTriangle(const Vector2& pt, const Triangle2D& triangle) {
@@ -29677,7 +29547,7 @@ bool IsCollision(const Triangle2D& triangle, const Sphere2D& sphere) {
 
 
 ============================================================
-File Path: project/DirectXGame/engine/Collider/2d/ColliderFanction2D.h
+File Path: project/DirectXGame/engine/Collider/2d/ColliderFunction2D.h
 ============================================================
 #pragma once
 // c++
@@ -29688,7 +29558,7 @@ File Path: project/DirectXGame/engine/Collider/2d/ColliderFanction2D.h
 #include <math.h>
 
 // engine
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 
 
 
@@ -29796,7 +29666,7 @@ float DistancePointToSegment(const Vector2& p, const Vector2& a, const Vector2& 
 File Path: project/DirectXGame/engine/Collider/2d/CollisionManager2D.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "ColliderComponent2D.h"
 #include"list"
 #include"Collider2D.h"
@@ -30453,10 +30323,10 @@ bool Engine::RayCollider::ResolveCollision(const Collider& other, Vector3& outPu
 File Path: project/DirectXGame/engine/Collider/3d/Collider.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
-#include "ColliderFanction3D.h"
+#include "ColliderFunction3D.h"
 
 constexpr float kFloatMax = 3.4028235e+38f;
 
@@ -30974,9 +30844,9 @@ namespace Engine {
 
 
 ============================================================
-File Path: project/DirectXGame/engine/Collider/3d/ColliderFanction3D.cpp
+File Path: project/DirectXGame/engine/Collider/3d/ColliderFunction3D.cpp
 ============================================================
-#include "ColliderFanction3D.h"
+#include "ColliderFunction3D.h"
 
 
 #pragma region Detection
@@ -31647,7 +31517,7 @@ bool Engine::Collision::Response::ReflectVelocity(const Sphere& s1, const Sphere
 
 
 ============================================================
-File Path: project/DirectXGame/engine/Collider/3d/ColliderFanction3D.h
+File Path: project/DirectXGame/engine/Collider/3d/ColliderFunction3D.h
 ============================================================
 #pragma once
 
@@ -31659,7 +31529,7 @@ File Path: project/DirectXGame/engine/Collider/3d/ColliderFanction3D.h
 #include <math.h>
 
 // engine
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/math/LineCurveMath.h"
 #include "DirectXGame/engine/collider/Octree/Octree.h"
 
@@ -31929,7 +31799,7 @@ void Engine::CollisionManager::CheckAll() {
 File Path: project/DirectXGame/engine/Collider/3d/CollisionManager.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "ColliderComponent.h"
 #include"list"
 #include"Collider.h"
@@ -32118,7 +31988,7 @@ enum class ColliderType
 File Path: project/DirectXGame/engine/Collider/ContactRecord.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include<vector>
 #include <algorithm> // std::any_of を使用するために必要
 
@@ -32395,11 +32265,9 @@ File Path: project/DirectXGame/engine/Collider/Octree/Octree.h
 #include <vector>
 #include <iostream>
 
-#include "DirectXGame/engine/math/MathFanctions.h"
-#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
+#include "DirectXGame/engine/collider/3d/ColliderFunction3D.h"
 #include "DirectXGame/engine/Base/pch.h"
-//#include "DirectXGame/engine/collider/3d/Collider.h"
-
 
 namespace Engine {
     // オクツリーのノード
@@ -35979,7 +35847,7 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -36239,7 +36107,7 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
@@ -36439,7 +36307,7 @@ File Path: project/DirectXGame/engine/Effect/Particle/2d/ParticleEmitter2d.h
 #include<numbers>
 
 // engine
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -36751,7 +36619,7 @@ File Path: project/DirectXGame/engine/Effect/Particle/2d/ParticleManager2d.h
 #include"externals/DirectXTex/d3dx12.h"
 
 // engine
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
@@ -37603,7 +37471,7 @@ void Engine::Field::Effect(ParticleGroup& grop, std::list<Particle>::iterator& p
 File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleField.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
@@ -38098,7 +37966,7 @@ File Path: project/DirectXGame/engine/Effect/Particle/CPU/ParticleManager.h
 #include"externals/DirectXTex/d3dx12.h"
 
 // engine
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
@@ -38502,7 +38370,7 @@ File Path: project/DirectXGame/engine/Effect/Particle/Emit/BaseParticleEmitter.h
 #include<numbers>
 
 // engine
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/Effect/Particle/CPU/ParticleManager.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -39033,7 +38901,7 @@ namespace Engine {
 File Path: project/DirectXGame/engine/Effect/Particle/Emit/EmitShape.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
@@ -40243,7 +40111,7 @@ namespace Engine {
 File Path: project/DirectXGame/engine/Effect/Particle/GPU/GpuParticleData.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/Math/MathFanctions.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include "DirectXGame/engine/DirectX/Resource/StructuredBuffer.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
@@ -42150,7 +42018,7 @@ File Path: project/DirectXGame/engine/Effect/Primitive/Primitive.h
 #include<format>
 #include<variant>
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 
@@ -42617,7 +42485,7 @@ File Path: project/DirectXGame/engine/Effect/Primitive/PrimitiveCommon.h
 #include<vector>
 #include<format>
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
 
@@ -43509,7 +43377,7 @@ File Path: project/DirectXGame/engine/Effect/Primitive/ShapeParameter.h
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 namespace Engine {
 	// 各シェイプのパラメーター
@@ -43986,7 +43854,7 @@ File Path: project/DirectXGame/engine/Effect/Trail/TrailEffect.h
 #include<vector>
 #include<format>
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 
@@ -44192,7 +44060,7 @@ File Path: project/DirectXGame/engine/Effect/Trail/TrailEffectManager.h
 #include<vector>
 #include<format>
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"
 
@@ -47068,7 +46936,7 @@ void Engine::Material::LoadTex()
 File Path: project/DirectXGame/engine/Material/Material.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Color/Color.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
@@ -47468,7 +47336,7 @@ namespace Easing {
 File Path: project/DirectXGame/engine/Math/LineCurveMath.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 
 #pragma region 線や曲線などの汎用的な計算
 
@@ -48067,9 +47935,9 @@ private:
 
 
 ============================================================
-File Path: project/DirectXGame/engine/Math/MathFanctions.cpp
+File Path: project/DirectXGame/engine/Math/MathFunctions.cpp
 ============================================================
-#include"MathFanctions.h"
+#include"MathFunctions.h"
 #include<cmath>
 #include"assert.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
@@ -48429,7 +48297,7 @@ Vector2 GetScreenPos(Engine::WorldTransform worldTransform, Engine::Camera* came
 
 
 ============================================================
-File Path: project/DirectXGame/engine/Math/MathFanctions.h
+File Path: project/DirectXGame/engine/Math/MathFunctions.h
 ============================================================
 #pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
@@ -48697,7 +48565,7 @@ File Path: project/DirectXGame/engine/Math/Noise.h
 #include"DirectXGame/engine/struct/Vector2.h"
 #include"DirectXGame/engine/struct/Vector3.h"
 #include"DirectXGame/engine/struct/Vector4.h"
-#include"MathFanctions.h"
+#include"MathFunctions.h"
 
 
 #define HASH_SIZE 512
@@ -49194,7 +49062,7 @@ File Path: project/DirectXGame/engine/Mesh/Base/BaseMesh.h
 ============================================================
 #pragma once
 
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include "DirectXGame/engine/struct/VertexDeta.h"
 
@@ -49683,7 +49551,7 @@ void Engine::RigidBodyComponent::ProcessRotation(float deltaTime, WorldTransform
 File Path: project/DirectXGame/engine/Move/RigidBodyComponent.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Transform/TransformComponent.h"
 
 
@@ -49839,7 +49707,7 @@ File Path: project/DirectXGame/engine/MyGame/Framework.h
 ============================================================
 #pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
@@ -52343,7 +52211,7 @@ File Path: project/DirectXGame/engine/PSO/CSPSOManager.h
 
 
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 
 namespace Engine {
@@ -52943,7 +52811,7 @@ File Path: project/DirectXGame/engine/PSO/psoData.h
 
 
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 namespace Engine {
 	// 
@@ -53301,7 +53169,7 @@ void Engine::SkyBox::Draw()
 File Path: project/DirectXGame/engine/SkyBox/SkyBox.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Light.h"
 #include<d3d12.h>
 #include<dxgi1_6.h>
@@ -53753,7 +53621,7 @@ void Engine::Transfomation::GetCommandList(int index)
 File Path: project/DirectXGame/engine/Transform/Transfomation/Transfomation.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
@@ -53821,7 +53689,7 @@ namespace Engine {
 File Path: project/DirectXGame/engine/Transform/TransformComponent.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 
@@ -53915,7 +53783,7 @@ void Engine::WorldTransform::Update()
 File Path: project/DirectXGame/engine/Transform/WorldTransform/WorldTransform.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 
 namespace Engine {
@@ -54004,7 +53872,7 @@ void Engine::WorldTransform2d::Update() {
 File Path: project/DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 
 namespace Engine {
@@ -60545,7 +60413,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotion.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Response\Response.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp" />
@@ -60564,7 +60432,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Input\InputMapper.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MoveComponent.cpp" />
@@ -60632,8 +60499,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
-    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp" />
-    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp" />
@@ -60721,7 +60588,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\input\Input.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp" />
+    <ClCompile Include="DirectXGame\engine\Math\MathFunctions.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\Model.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelManager.cpp" />
@@ -61177,7 +61044,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitCounter.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Response\Response.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Response\ResponseData.h" />
@@ -61196,7 +61063,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Game\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameWave.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputManager.h" />
-    <ClInclude Include="DirectXGame\application\base\Input\InputMapper.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseDirectionalLight.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseLight.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseLights.h" />
@@ -61260,7 +61126,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\RangedWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\WeaponData.h" />
-    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MellWeapons.h" />
+    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MeleeWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h" />
@@ -61306,8 +61172,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
-    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h" />
-    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.h" />
     <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Command\Command.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.h" />
@@ -61424,7 +61290,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="DirectXGame\engine\input\Input.h" />
     <ClInclude Include="DirectXGame\engine\Base\Logger.h" />
-    <ClInclude Include="DirectXGame\engine\Math\MathFanctions.h" />
+    <ClInclude Include="DirectXGame\engine\Math\MathFunctions.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\Model.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h" />
@@ -61701,7 +61567,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\engine\2d\SpriteCommon.cpp">
       <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp">
+    <ClCompile Include="DirectXGame\engine\Math\MathFunctions.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\input\Input.cpp">
@@ -61716,7 +61582,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\engine\Math\AStarAlgorithm.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp">
@@ -61749,10 +61615,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp">
+    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp">
+    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionManager.cpp">
@@ -62223,9 +62089,6 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Input\InputMapper.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -62529,7 +62392,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\input\Input.h">
       <Filter>ヘッダー ファイル\engine\input</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\MathFanctions.h">
+    <ClInclude Include="DirectXGame\engine\Math\MathFunctions.h">
       <Filter>ヘッダー ファイル\engine\math</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\Structs3D.h">
@@ -62661,10 +62524,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\Collider\ColliderData.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h">
+    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h">
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionManager.h">
@@ -62835,7 +62698,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h">
       <Filter>ヘッダー ファイル\engine\struct</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MellWeapons.h">
+    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MeleeWeapons.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h">
@@ -63129,7 +62992,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h">
       <Filter>ヘッダー ファイル\application\base\attack</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.h">
       <Filter>ヘッダー ファイル\application\base\attack</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseBullet.h">
@@ -63253,9 +63116,6 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Input\InputMapper.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h">
