@@ -46,7 +46,7 @@ namespace Engine {
 /// <summary>
 /// 攻撃インプットハンドラークラス
 /// </summary>
-class AttackInputHander 
+class AttackInputHandler 
 {
 public:
 	// インプット設定

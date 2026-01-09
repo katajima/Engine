@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "ColliderComponent2D.h"
 #include"list"
 #include"Collider2D.h"

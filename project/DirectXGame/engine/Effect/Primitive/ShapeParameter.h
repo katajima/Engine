@@ -2,7 +2,7 @@
 
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 namespace Engine {
 	// 各シェイプのパラメーター

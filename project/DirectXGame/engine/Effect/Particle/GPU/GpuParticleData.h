@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/engine/Math/MathFanctions.h"
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 #include "DirectXGame/engine/DirectX/Resource/StructuredBuffer.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"

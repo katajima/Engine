@@ -23,7 +23,7 @@ struct WeaponData
 };
 
 // 近距離武器専用のデータ構造体(近距離武器クラス用)
-struct MellWeaponData
+struct MeleeWeaponData
 {
 	bool isCharging = false;				// チャージ中かのフラグ
 	float chargeTime = 0.0f;				// チャージ時間(チャージ開始からの時間)

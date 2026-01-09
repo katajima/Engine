@@ -118,7 +118,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotion.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Response\Response.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp" />
@@ -137,7 +137,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Input\InputMapper.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MoveComponent.cpp" />
@@ -205,8 +204,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadDataFanction.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Load\LoadLevelData.cpp" />
     <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp" />
-    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp" />
-    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.cpp" />
+    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\Octree\Octree.cpp" />
     <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\DirectX\Barrier\Barrier.cpp" />
@@ -294,7 +293,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\engine\input\Input.cpp" />
     <ClCompile Include="DirectXGame\engine\Base\Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp" />
+    <ClCompile Include="DirectXGame\engine\Math\MathFunctions.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\Model.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelCommon.cpp" />
     <ClCompile Include="DirectXGame\engine\3d\Model\ModelManager.cpp" />
@@ -750,7 +749,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitCounter.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Response\Response.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Response\ResponseData.h" />
@@ -769,7 +768,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Game\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameWave.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputManager.h" />
-    <ClInclude Include="DirectXGame\application\base\Input\InputMapper.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseDirectionalLight.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseLight.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseLights.h" />
@@ -833,7 +831,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\RangedWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\WeaponData.h" />
-    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MellWeapons.h" />
+    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MeleeWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemyState.h" />
@@ -879,8 +877,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\DirectX\Barrier\Barrier.h" />
     <ClInclude Include="DirectXGame\engine\Base\Load\LevelData.h" />
     <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h" />
-    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h" />
-    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.h" />
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.h" />
     <ClInclude Include="DirectXGame\engine\Collider\Octree\Octree.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\Command\Command.h" />
     <ClInclude Include="DirectXGame\engine\DirectX\DepthStencil\DepthStencil.h" />
@@ -997,7 +995,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="DirectXGame\engine\input\Input.h" />
     <ClInclude Include="DirectXGame\engine\Base\Logger.h" />
-    <ClInclude Include="DirectXGame\engine\Math\MathFanctions.h" />
+    <ClInclude Include="DirectXGame\engine\Math\MathFunctions.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\Model.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelCommon.h" />
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelManager.h" />

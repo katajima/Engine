@@ -47,7 +47,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 
 		auto it = modelData.animations.find(modelData.currentAnimName);
 		if (it != modelData.animations.end()) {
-			Animetion::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
+			AnimationFunction::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
 		}
 	}
 

@@ -246,7 +246,7 @@
     <ClCompile Include="DirectXGame\engine\2d\SpriteCommon.cpp">
       <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Math\MathFanctions.cpp">
+    <ClCompile Include="DirectXGame\engine\Math\MathFunctions.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\input\Input.cpp">
@@ -261,7 +261,7 @@
     <ClCompile Include="DirectXGame\engine\Math\AStarAlgorithm.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHander.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp">
@@ -294,10 +294,10 @@
     <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.cpp">
+    <ClCompile Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.cpp">
+    <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.cpp">
       <Filter>ソース ファイル\engine\collider</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\CollisionManager.cpp">
@@ -768,9 +768,6 @@
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Input\InputMapper.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1074,7 +1071,7 @@
     <ClInclude Include="DirectXGame\engine\input\Input.h">
       <Filter>ヘッダー ファイル\engine\input</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Math\MathFanctions.h">
+    <ClInclude Include="DirectXGame\engine\Math\MathFunctions.h">
       <Filter>ヘッダー ファイル\engine\math</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\Structs3D.h">
@@ -1206,10 +1203,10 @@
     <ClInclude Include="DirectXGame\engine\Collider\ColliderData.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFanction2D.h">
+    <ClInclude Include="DirectXGame\engine\Collider\2d\ColliderFunction2D.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFanction3D.h">
+    <ClInclude Include="DirectXGame\engine\Collider\3d\ColliderFunction3D.h">
       <Filter>ヘッダー ファイル\engine\collider</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Collider\3d\CollisionManager.h">
@@ -1380,7 +1377,7 @@
     <ClInclude Include="DirectXGame\engine\struct\Matrix4x4.h">
       <Filter>ヘッダー ファイル\engine\struct</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MellWeapons.h">
+    <ClInclude Include="DirectXGame\application\base\Weapon\Base\MeleeWeapons.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Model\ModelData.h">
@@ -1674,7 +1671,7 @@
     <ClInclude Include="DirectXGame\application\base\Attack\AttackData.h">
       <Filter>ヘッダー ファイル\application\base\attack</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHander.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.h">
       <Filter>ヘッダー ファイル\application\base\attack</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseBullet.h">
@@ -1798,9 +1795,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Input\InputMapper.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h">

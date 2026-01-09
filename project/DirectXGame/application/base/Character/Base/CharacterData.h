@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "optional"
 #include <DirectXGame/engine/struct/Structs.h>
 #include <DirectXGame/engine/Math/Random.h>

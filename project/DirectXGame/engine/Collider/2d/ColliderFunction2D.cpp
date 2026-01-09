@@ -1,4 +1,4 @@
-#include "ColliderFanction2D.h"
+#include "ColliderFunction2D.h"
 
 
 bool PointInTriangle(const Vector2& pt, const Triangle2D& triangle) {

@@ -1,8 +1,8 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
-#include "ColliderFanction3D.h"
+#include "ColliderFunction3D.h"
 
 constexpr float kFloatMax = 3.4028235e+38f;
 

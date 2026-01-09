@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/engine/struct/VertexDeta.h"
 
@@ -205,7 +205,7 @@ namespace Engine {
 	};
 
 	struct ModelData;
-	namespace Animetion {
+	namespace AnimationFunction {
 
 		// スケルトンに対してアニメーションを適用させる関数
 		void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);

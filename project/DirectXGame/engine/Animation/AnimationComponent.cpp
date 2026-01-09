@@ -75,8 +75,8 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 					// ① 各スケルトン姿勢を取得
 					Skeleton prevSkeleton = modelData.skeleton;
 					Skeleton currSkeleton = modelData.skeleton;
-					Animetion::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
-					Animetion::ApplyAnimation(currSkeleton, currAnim, currTime);
+					AnimationFunction::ApplyAnimation(prevSkeleton, prevAnim, prevTime);
+					AnimationFunction::ApplyAnimation(currSkeleton, currAnim, currTime);
 
 					// ② 補間割合を更新（EaseInOutでなめらかに）
 					modelData.blendTime += deltaTime;
@@ -85,7 +85,7 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 					t = t * t * (3.0f - 2.0f * t); // Hermite補間（EaseInOut）
 
 					// ③ スケルトン補間
-					Animetion::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
+					AnimationFunction::BlendSkeletons(modelData.skeleton, prevSkeleton, currSkeleton, t);
 
 					// ブレンド完了判定
 					if (modelData.blendTime >= modelData.blendDuration) {
@@ -95,29 +95,29 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 				}
 				else {
 					// 前アニメーションが見つからなければ通常再生
-					Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+					AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
 				}
 			}
 			else {
 				// ブレンドしていない通常の再生
-				Animetion::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+				AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
 			}
 
 
 
 
 			// スケルトン姿勢更新
-			Animetion::UpdateSkeleton(modelData.skeleton);
+			AnimationFunction::UpdateSkeleton(modelData.skeleton);
 
 			std::vector<Matrix4x4> cachedSkeletonMatrices;
 			for (auto& mesh : modelData.mesh) {
-				Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
 			}
 
 			// ルートの変換行列反映
 			localMatrix_ = modelData.skeleton.joints[0].skeletonSpaceMatrix;
 			// デバッグ用：スケルトン描画
-			Animetion::DrawSkeleton(
+			AnimationFunction::DrawSkeleton(
 				lineCommon,
 				modelData.skeleton.joints,
 				worldTransform.worldMat_.GetWorldPosition(),
@@ -131,11 +131,11 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 
 			std::vector<Matrix4x4> cachedSkeletonMatrices;
 			for (auto& mesh : modelData.mesh) {
-				Animetion::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
+				AnimationFunction::UpdateSkinCluster(*mesh->skinCluster, modelData.skeleton, cachedSkeletonMatrices);
 			}
 
 			// デバッグ用：スケルトン描画
-			Animetion::DrawSkeleton(
+			AnimationFunction::DrawSkeleton(
 				lineCommon,
 				modelData.skeleton.joints,
 				worldTransform.worldMat_.GetWorldPosition(),
@@ -228,9 +228,9 @@ void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTra
 			// 各ノード（ボーンではなく、単なるノード）のトランスフォーム補間
 			for (auto& [nodeName, nodeAnim] : itCurrent->second.nodeAnimations) {
 				// 時間に対応する補間結果を取得
-				Vector3 interpTranslate = Animetion::CalculateValue(nodeAnim.translate.keyframes, modelData.animationTime);
-				Quaternion interpRotate = Animetion::CalculateValue(nodeAnim.rotate.keyframes,modelData.animationTime);
-				Vector3 interpScale = Animetion::CalculateValue(nodeAnim.scale.keyframes,modelData.animationTime);
+				Vector3 interpTranslate = AnimationFunction::CalculateValue(nodeAnim.translate.keyframes, modelData.animationTime);
+				Quaternion interpRotate = AnimationFunction::CalculateValue(nodeAnim.rotate.keyframes,modelData.animationTime);
+				Vector3 interpScale = AnimationFunction::CalculateValue(nodeAnim.scale.keyframes,modelData.animationTime);
 
 				// TRSマトリクスの生成
 				Matrix4x4 localMatrix = MakeAffineMatrix(interpScale, interpRotate, interpTranslate);

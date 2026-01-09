@@ -7,7 +7,7 @@
 #include <math.h>
 
 // engine
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 
 
 

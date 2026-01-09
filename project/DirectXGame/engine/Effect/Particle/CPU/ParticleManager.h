@@ -10,7 +10,7 @@
 #include"externals/DirectXTex/d3dx12.h"
 
 // engine
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/PSO/PSOManager.h"

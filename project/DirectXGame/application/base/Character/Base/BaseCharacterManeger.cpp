@@ -86,7 +86,7 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 {
 	using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
-	// EnemyType → 生成関数
+	// EnemyTypeから生成関数
 	static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
 	{
 		{ EnemyType::kNormal,   []() { return std::make_unique<NormalEnemy>(); } },

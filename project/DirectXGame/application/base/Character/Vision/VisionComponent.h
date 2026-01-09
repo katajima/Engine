@@ -1,6 +1,5 @@
 #pragma once
-//#include "DirectXGame/engine/line/lineCommon.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 #include"functional"
 

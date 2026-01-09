@@ -171,8 +171,48 @@ void NormalPlayer::InitAttack(){
 	ReloadComboData();
 
 	// インプットハンドラー
-	attackInputHander_ = std::make_unique<AttackInputHander>();
-	attackInputHander_->AssignAttack();
+	attackInputHandler_ = std::make_unique<AttackInputHandler>();
+	attackInputHandler_->AssignAttack();
+}
+
+void NormalPlayer::RequestAttack(AttackInput input)
+{
+	const auto s = stateMachine_->GetCurrentMainState();
+	const bool canStart = (s == CharacterMainState::Move) ||
+		(s == CharacterMainState::Idle) ||
+		(s == CharacterMainState::Jump);
+	const bool isAttack = (s == CharacterMainState::Attack);
+
+	auto* ac = GetAttackController();
+	ac->SetIsAttack(true);
+
+	if (isAttack)
+	{
+		ac->GetComboSystem()->InputCombo(input);
+		return;
+	}
+
+	if (canStart)
+	{
+		stateMachine_->ChangeState(CharacterMainState::Attack);
+
+		// 開始コンボ名の決定を「入力種類×状況」でまとめる
+		if (s == CharacterMainState::Jump)
+		{
+			ac->GetComboSystem()->StartCombo("JumpAttack");
+		}
+		else
+		{
+			// ここをテーブル化するとスキル追加が楽
+			switch (input)
+			{
+			case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack4"); break;
+			case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("Attack1"); break;
+				// case AttackInput::Skill1: ac->GetComboSystem()->StartCombo("Skill1"); break;
+			default: break;
+			}
+		}
+	}
 }
 
 // ステート初期化and追加
@@ -289,7 +329,7 @@ void NormalPlayer::Update()
 	stateMachine_->Update();
 
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::Animetion::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
 	// UI更新
@@ -349,60 +389,9 @@ void NormalPlayer::Jump()
 		moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
 
 		stateMachine_->ChangeState(CharacterMainState::Jump);
-		GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimetion("JumpStrat1", 0.01f);
+		GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.01f);
 	}
 
-}
-
-void NormalPlayer::Attack()
-{
-	bool isMove   = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool isIdle   = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-	bool isJump   = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
-	bool isAttack = stateMachine_->GetCurrentMainState() == CharacterMainState::Attack;
-
-
-	// 攻撃
-	if (isAttack) {
-		GetAttackController()->SetIsAttack(true);
-		GetAttackController()->GetComboSystem()->InputCombo(AttackInput::Light);
-	}
-	else if (isMove || isIdle || isJump) {
-		GetAttackController()->SetIsAttack(true);
-		stateMachine_->ChangeState(CharacterMainState::Attack);
-		if (isJump) {
-			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
-		}
-		else {
-			GetAttackController()->GetComboSystem()->StartCombo("Attack4");
-		}
-	}
-
-}
-
-void NormalPlayer::HeavyAttack()
-{
-	bool isMove = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-	bool isIdle = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-	bool isJump = stateMachine_->GetCurrentMainState() == CharacterMainState::Jump;
-	bool isAttack = stateMachine_->GetCurrentMainState() == CharacterMainState::Attack;
-
-
-	// 攻撃
-	if (isAttack) {
-		GetAttackController()->SetIsAttack(true);
-		GetAttackController()->GetComboSystem()->InputCombo(AttackInput::Heavy);
-	}
-	else if (isMove || isIdle || isJump) {
-		GetAttackController()->SetIsAttack(true);
-		stateMachine_->ChangeState(CharacterMainState::Attack);
-		if (isJump) {
-			GetAttackController()->GetComboSystem()->StartCombo("JumpAttack");
-		}
-		else {
-			GetAttackController()->GetComboSystem()->StartCombo("Attack1");
-		}
-	}
 }
 
 #pragma endregion //移動関係

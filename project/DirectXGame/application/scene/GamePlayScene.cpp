@@ -19,12 +19,34 @@ void GamePlayScene::Initialize()
 	// Input
 	input_ = GetInput();
 
+	// インプットマネージャー初期化
+	inputManager_ = std::make_unique<InputManager>();
+	inputManager_->Initialize(input_);
+	
+
 	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<InputHander>();	
-	inputHander_->SetInput(input_);			// インプット設定
-	inputHander_->AssignMoveCommandPad();	// 移動コマンド追加
-	inputHander_->AssignJampCommandPad();	// ジャンプコマンド追加
-	inputHander_->AssignAttackCommandPad();	// 攻撃コマンド追加
+	inputHander_ = std::make_unique<InputHander>();
+	inputHander_->Initialize(input_);
+
+
+	inputManager_->Triggered(InputManager::Action::Jump);
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
+		std::make_unique<JampCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
+		std::make_unique<AttackCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
+		std::make_unique<HeavyAttackCommand>());
+
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
+		std::make_unique<MoveCommand>());
+
 
 	// エフェクト
 	effect_ = std::make_unique<Effect>();
@@ -132,6 +154,9 @@ void GamePlayScene::Initialize()
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 
+
+
+	inputManager_->SetOwner(caracterManager_->GetPlayer());
 }
 
 // 調整項目
@@ -248,6 +273,9 @@ void GamePlayScene::Update()
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	
+	// インプットマネージャー更新
+	inputManager_->Update(Engine::MyGame::GameTime());
+
 	// コマンド
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {

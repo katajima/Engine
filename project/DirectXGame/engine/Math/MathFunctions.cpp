@@ -1,4 +1,4 @@
-#include"MathFanctions.h"
+#include"MathFunctions.h"
 #include<cmath>
 #include"assert.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"

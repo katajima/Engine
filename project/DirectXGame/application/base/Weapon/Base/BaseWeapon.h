@@ -65,7 +65,7 @@ protected:
 };
 
 // 近距離の武器クラス
-class MellWeapon : public BaseWeapon
+class MeleeWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
@@ -82,7 +82,7 @@ public:
 	// ヒットストップ時間を取得
 	float GetHitStopTime() const { return mellData_.hitStopTime; } 
 protected:
-	MellWeaponData mellData_; // 近距離武器データ
+	MeleeWeaponData mellData_; // 近距離武器データ
 
 };
 

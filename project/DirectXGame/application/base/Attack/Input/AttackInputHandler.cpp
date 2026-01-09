@@ -1,4 +1,4 @@
-#include "AttackInputHander.h"  
+#include "AttackInputHandler.h"  
 #include "DirectXGame/application/base/Character/base/BaseCharacter.h"
 #include "DirectXGame/application/base/Weapon/base/BaseWeapon.h"
 #include "DirectXGame/engine/input/Input.h"
@@ -22,7 +22,7 @@ void AttackHeavy::Exec(BaseCharacter& character)
 
 
 
-AttackICommand* AttackInputHander::HandleInput()
+AttackICommand* AttackInputHandler::HandleInput()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
@@ -35,7 +35,7 @@ AttackICommand* AttackInputHander::HandleInput()
 	return nullptr;
 }
 
-void AttackInputHander::AssignAttack()
+void AttackInputHandler::AssignAttack()
 {
 	AssignAttackLight();
 	AssignAttackHeavy();
@@ -43,12 +43,12 @@ void AttackInputHander::AssignAttack()
 
 
 
-void AttackInputHander::AssignAttackLight()
+void AttackInputHandler::AssignAttackLight()
 {
 	this->light = std::make_unique<AttackLight>();
 }
 
-void AttackInputHander::AssignAttackHeavy()
+void AttackInputHandler::AssignAttackHeavy()
 {
 	this->heavy = std::make_unique<AttackHeavy>();
 }

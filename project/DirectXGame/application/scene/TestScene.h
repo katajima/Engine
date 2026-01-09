@@ -26,8 +26,8 @@
 
 
 #include "DirectXGame/engine/collider/Octree/Octree.h"
-#include "DirectXGame/engine/collider/2d/ColliderFanction2D.h"
-#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+#include "DirectXGame/engine/collider/2d/ColliderFunction2D.h"
+#include "DirectXGame/engine/collider/3d/ColliderFunction3D.h"
 
 #include "DirectXGame/engine/math/MapChip.h"
 #include "DirectXGame/engine/math/AStarAlgorithm.h"

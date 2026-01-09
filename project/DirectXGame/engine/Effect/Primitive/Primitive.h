@@ -9,7 +9,7 @@
 #include<format>
 #include<variant>
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 
