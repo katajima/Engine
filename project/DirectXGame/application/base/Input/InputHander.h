@@ -1,5 +1,7 @@
 #pragma once
-#include<memory>
+#include <vector>
+#include <memory>
+#include <functional>
 
 // 前方宣言
 class BaseCharacter;
@@ -49,25 +51,26 @@ namespace Engine {
 class InputHander 
 {
 public:
-	// インプット設定
-	void SetInput(Engine::Input* input) { input_ = input; };
+	// 初期化
+	void Initialize(Engine::Input* input) { input_ = input; }
+
+
+	// 追加：条件とコマンドを登録（優先度順に並べる）
+	void Bind(std::function<bool()>&& condition, std::unique_ptr<ICommand> cmd)
+	{
+		bindings_.push_back({ std::move(condition), std::move(cmd) });
+	}
+
 	// ハンドルインプット取得
 	ICommand* HandleInput();
-	// 割り当て移動
-	void AssignMoveCommandPad();
-	// 割り当てジャンプ
-	void AssignJampCommandPad();
-	// 割り当て攻撃
-	void AssignAttackCommandPad();
-	// 割り当て攻撃
-	void AssignHeavyAttackCommandPad();
-
 private:
-	Engine::Input* input_;
+	Engine::Input* input_ = nullptr;
 
-	std::unique_ptr<ICommand> movePad;
-	std::unique_ptr<ICommand> jampPad;
-	std::unique_ptr<ICommand> attackPad;
-	std::unique_ptr<ICommand> attackHeavyPad;
+	struct Binding
+	{
+		std::function<bool()> condition;
+		std::unique_ptr<ICommand> cmd;
+	};
 
+	std::vector<Binding> bindings_;
 };

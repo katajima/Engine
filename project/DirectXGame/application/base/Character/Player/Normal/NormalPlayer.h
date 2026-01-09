@@ -39,10 +39,10 @@ public:
 	void Jump() override;
 
 	// 攻撃(弱攻撃)
-	void Attack() override;
+	void Attack() override { RequestAttack(AttackInput::Light); };
 
 	/// 攻撃(強攻撃)
-	void HeavyAttack() override;
+	void HeavyAttack() override { RequestAttack(AttackInput::Heavy); };
 
 
 
@@ -52,6 +52,8 @@ public:
 private:
 	void InitAttack();
 
+	// 攻撃要求
+	void RequestAttack(AttackInput input);
 	
 private: 
 	// ステートマシーン初期化

@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include<vector>
 #include <algorithm> // std::any_of を使用するために必要
 

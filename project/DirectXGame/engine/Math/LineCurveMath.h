@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 
 #pragma region 線や曲線などの汎用的な計算
 

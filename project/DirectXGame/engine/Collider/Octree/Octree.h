@@ -2,11 +2,9 @@
 #include <vector>
 #include <iostream>
 
-#include "DirectXGame/engine/math/MathFanctions.h"
-#include "DirectXGame/engine/collider/3d/ColliderFanction3D.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
+#include "DirectXGame/engine/collider/3d/ColliderFunction3D.h"
 #include "DirectXGame/engine/Base/pch.h"
-//#include "DirectXGame/engine/collider/3d/Collider.h"
-
 
 namespace Engine {
     // オクツリーのノード

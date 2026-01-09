@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/engine/math/MathFanctions.h"
+#include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 #include "DirectXGame/engine/3d/Model/ModelData.h"
@@ -36,8 +36,8 @@ namespace Engine {
 		// ローカル行列取得
 		Matrix4x4 GetLocalMatrix() const { return localMatrix_; }
 		// アニメーション変更
-		void SetAnimetion(const std::string& name, float time) {
-			Animetion::SetAnimation(model->modelData, name, time);
+		void SetAnimation(const std::string& name, float time) {
+			AnimationFunction::SetAnimation(model->modelData, name, time);
 		}
 		// アニメーションが終了しているか
 		bool IsAnimationFinished();

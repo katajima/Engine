@@ -24,48 +24,19 @@ void HeavyAttackCommand::Exec(BaseCharacter& character)
 	character.HeavyAttack();
 }
 
-void InputHander::AssignMoveCommandPad()
-{
-	this->movePad = std::make_unique<MoveCommand>();
-}
-
-void InputHander::AssignJampCommandPad()
-{
-	this->jampPad = std::make_unique<JampCommand>();
-}
-
-void InputHander::AssignAttackCommandPad()
-{
-	this->attackPad = std::make_unique<AttackCommand>();
-}
-void InputHander::AssignHeavyAttackCommandPad()
-{
-	this->attackHeavyPad = std::make_unique<HeavyAttackCommand>();
-}
-
-
 
 ICommand* InputHander::HandleInput()
 {
-	// ゲームパッドがつながっているなら
-	if (input_->IsControllerConnected()) {
-		// ジャンプコマンド
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_A)) {
-			return jampPad.get();
-		}
-		// 攻撃コマンド(弱攻撃)
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			return attackPad.get();
-		}
-		// 攻撃コマンド(強攻撃)
-		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y)) {
-			return attackHeavyPad.get();
-		}
-		// 移動コマンド
-		if (input_->GetGamePadLeftStick().Length() != 0) {
-			return movePad.get();
-		}
-		
+	if (!input_) return nullptr;
+
+	// 未接続なら何もしない（必要ならキーマウも混ぜる）
+	if (!input_->IsControllerConnected()) return nullptr;
+
+	// 上から順に評価して、最初に成立したコマンドを返す
+	for (auto& b : bindings_)
+	{
+		if (b.condition())
+			return b.cmd.get();
 	}
 	return nullptr;
 }

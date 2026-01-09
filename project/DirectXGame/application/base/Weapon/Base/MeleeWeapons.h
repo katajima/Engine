@@ -3,7 +3,7 @@
 
 
 // 剣武器のクラス
-class SwordWeapon : public MellWeapon
+class SwordWeapon : public MeleeWeapon
 {
 public:
 	/// 初期化
@@ -21,7 +21,7 @@ protected:
 };
 
 // ハンマー武器のクラス
-class HammerWeapon : public MellWeapon
+class HammerWeapon : public MeleeWeapon
 {
 public:
 	/// 初期化
@@ -39,7 +39,7 @@ protected:
 };
 
 // 槍武器のクラス
-class SpearWeapon : public MellWeapon
+class SpearWeapon : public MeleeWeapon
 {
 public:
 	/// 初期化

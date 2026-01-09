@@ -20,6 +20,7 @@
 
 
 #include "DirectXGame/application/base/Input/InputHander.h"
+#include <DirectXGame/application/base/Input/InputManager.h>
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
@@ -65,6 +66,10 @@ private:
 	// インプットハンドラ
 	std::unique_ptr < InputHander> inputHander_;
 	ICommand* iCommand_;
+
+	// インプットマネージャ
+	std::unique_ptr<InputManager> inputManager_;
+
 
 	float nowTime = 0.0f;
 	float fps = 0.0f;

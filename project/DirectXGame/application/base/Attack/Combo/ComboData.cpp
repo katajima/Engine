@@ -151,7 +151,7 @@ void ComboMotion::Enter(BaseCharacter* owner) {
 	SetRigid(owner->GetObjectComponent()->GetRigidBodyComponent());
 
 	// アニメーション設定
-	animationComponent->SetAnimetion(data_.animationName_, 0.0f);	// 再生するアニメーション設定
+	animationComponent->SetAnimation(data_.animationName_, 0.0f);	// 再生するアニメーション設定
 	animationComponent->SetStratAnimeTime();						// アニメーション時間初期化
 	animationComponent->SetIsLoop(data_.animationLoop_);			// ループ再生
 	animationComponent->SetAnimationSpeed(data_.animationSpeed_);	// アニメーションスピード設定

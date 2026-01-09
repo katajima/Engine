@@ -2,7 +2,7 @@
 #include<string>
 #include <memory>
 #include <functional>
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "SubStateMachine.h"
 
 

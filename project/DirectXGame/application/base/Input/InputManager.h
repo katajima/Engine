@@ -47,7 +47,7 @@ public:
 	};
 
 	// 初期化
-	void Intialize(Engine::Input* input); 
+	void Initialize(Engine::Input* input); 
 	// 更新
 	void Update(float dt);
 

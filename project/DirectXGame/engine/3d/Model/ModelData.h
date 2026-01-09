@@ -1,7 +1,7 @@
 #pragma once
 
 // engine
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 \
 #include "DirectXGame/engine/Mesh/ModelMesh.h"

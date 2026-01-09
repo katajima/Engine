@@ -4,7 +4,7 @@
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 #include"DirectXGame/engine/2d/Sprite.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/audio/Audio.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include"DirectXGame/engine/Animation/AnimationData.h"

@@ -2,7 +2,7 @@
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include <execution> // C++17 以降
 
-void Engine::Animetion::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
+void Engine::AnimationFunction::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
 {
 	
 	for (Joint& joint : skeleton.joints) {
@@ -16,7 +16,7 @@ void Engine::Animetion::ApplyAnimation(Skeleton& skeleton, const Animation& anim
 	}
 }
 
-Vector3 Engine::Animetion::CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time)
+Vector3 Engine::AnimationFunction::CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time)
 {
 	assert(!keyframes.empty()); // キーがないものは返す値がわからないのでダメ
 	if (keyframes.size() == 1 || time <= keyframes[0].time) { // キーが一つか、時刻がキーフレーム前なら最初の値を返す
@@ -25,7 +25,7 @@ Vector3 Engine::Animetion::CalculateValue(const std::vector<KeyframeVector3>& ke
 
 	for (size_t index = 0; index < keyframes.size() - 1; ++index) {
 		size_t nextIndex = index + 1;
-		// indexとnextIndexの2つのkeyframeを取得して範囲内に時刻があるかを判断
+		// indexとnextIndexの2つの keyFrameを取得して範囲内に時刻があるかを判断
 		if (keyframes[index].time <= time && time <= keyframes[nextIndex].time) {
 			// 範囲内を補間する
 			float t = (time - keyframes[index].time) / (keyframes[nextIndex].time - keyframes[index].time);
@@ -36,7 +36,7 @@ Vector3 Engine::Animetion::CalculateValue(const std::vector<KeyframeVector3>& ke
 	return (*keyframes.rbegin()).value;
 }
 
-Quaternion Engine::Animetion::CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, float time)
+Quaternion Engine::AnimationFunction::CalculateValue(const std::vector<KeyframeQuaternion>& keyframes, float time)
 {
 	assert(!keyframes.empty()); // キーがないものは返す値がわからないのでダメ
 	if (keyframes.size() == 1 || time <= keyframes[0].time) {
@@ -61,7 +61,7 @@ Quaternion Engine::Animetion::CalculateValue(const std::vector<KeyframeQuaternio
 	return (*keyframes.rbegin()).value;
 }
 
-void Engine::Animetion::UpdateSkeleton(Skeleton& skeleton)
+void Engine::AnimationFunction::UpdateSkeleton(Skeleton& skeleton)
 {
 	// すべてのJointを更新。親が先に処理されるので通常ループで処理可能になっている
 	for (Joint& joint : skeleton.joints) {
@@ -81,7 +81,7 @@ void Engine::Animetion::UpdateSkeleton(Skeleton& skeleton)
 	}
 }
 
-void Engine::Animetion::BlendSkeletons(Skeleton& outSkeleton,
+void Engine::AnimationFunction::BlendSkeletons(Skeleton& outSkeleton,
 	const Skeleton& fromSkeleton,
 	const Skeleton& toSkeleton,
 	float t)
@@ -108,10 +108,10 @@ void Engine::Animetion::BlendSkeletons(Skeleton& outSkeleton,
 	}
 
 	// 補間後、localMatrix / skeletonSpaceMatrix を更新する
-	Animetion::UpdateSkeleton(outSkeleton);
+	AnimationFunction::UpdateSkeleton(outSkeleton);
 }
 
-void Engine::Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scaleconst ,const Matrix4x4& rotationMatrix)
+void Engine::AnimationFunction::DrawSkeleton(LineCommon* lineCommon,const std::vector<Joint>& joints, const Vector3& pos, const Vector3& scaleconst ,const Matrix4x4& rotationMatrix)
 {
 	std::vector<int> depths(joints.size(), 0);
 	int maxDepth = 0;
@@ -147,7 +147,7 @@ void Engine::Animetion::DrawSkeleton(LineCommon* lineCommon,const std::vector<Jo
 
 }
 
-void Engine::Animetion::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
+void Engine::AnimationFunction::SetAnimation(ModelData& modelData, const std::string& newAnimName, float blendDuration)
 {
 	const auto& animations = modelData.animations;
 	auto it = animations.find(newAnimName);
@@ -164,7 +164,7 @@ void Engine::Animetion::SetAnimation(ModelData& modelData, const std::string& ne
 	
 }
 
-Engine::Joint* Engine::Animetion::FindJointByName(Skeleton& skeleton, const std::string& name)
+Engine::Joint* Engine::AnimationFunction::FindJointByName(Skeleton& skeleton, const std::string& name)
 {
 	auto it = skeleton.jointMap.find(name);
 	if (it != skeleton.jointMap.end()) {
@@ -176,7 +176,7 @@ Engine::Joint* Engine::Animetion::FindJointByName(Skeleton& skeleton, const std:
 	return nullptr;
 }
 
-const Engine::Joint* Engine::Animetion::FindJointByNameConst(const Skeleton& skeleton, const std::string& name)
+const Engine::Joint* Engine::AnimationFunction::FindJointByNameConst(const Skeleton& skeleton, const std::string& name)
 {
 	auto it = skeleton.jointMap.find(name);
 	if (it != skeleton.jointMap.end()) {
@@ -188,7 +188,7 @@ const Engine::Joint* Engine::Animetion::FindJointByNameConst(const Skeleton& ske
 	return nullptr;
 }
 
-Matrix4x4 Engine::Animetion::GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix)
+Matrix4x4 Engine::AnimationFunction::GetWorldMatrixOfJoint(const Skeleton& skeleton, const std::string& jointName, const Matrix4x4& modelWorldMatrix)
 {
 	auto it = skeleton.jointMap.find(jointName);
 	if (it != skeleton.jointMap.end()) {
@@ -199,7 +199,7 @@ Matrix4x4 Engine::Animetion::GetWorldMatrixOfJoint(const Skeleton& skeleton, con
 	return Matrix4x4::Identity(); // 見つからなければ単位行列
 }
 
-void Engine::Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices)
+void Engine::AnimationFunction::UpdateSkinCluster(SkinCluster& skinCluster, const Skeleton& skeleton, std::vector<Matrix4x4>& cachedSkeletonMatrices)
 {
 	if (cachedSkeletonMatrices.size() != skeleton.joints.size()) {
 		cachedSkeletonMatrices.resize(skeleton.joints.size());
@@ -222,7 +222,7 @@ void Engine::Animetion::UpdateSkinCluster(SkinCluster& skinCluster, const Skelet
 		});
 }
 
-void Engine::Animetion::ValidateTransform(Joint& joint)
+void Engine::AnimationFunction::ValidateTransform(Joint& joint)
 {
 	if (joint.transform.scale.x == 0.0f || joint.transform.scale.y == 0.0f || joint.transform.scale.z == 0.0f) {
 		//Logger::Log("Warning: Zero scale detected. Adjusting to default value.");
@@ -230,7 +230,7 @@ void Engine::Animetion::ValidateTransform(Joint& joint)
 	}
 }
 
-void Engine::Animetion::ImGuiJoint(const std::vector<Joint>& joints)
+void Engine::AnimationFunction::ImGuiJoint(const std::vector<Joint>& joints)
 {
 	ImGui::Begin("Joint Info");
 	for (const Joint& joint : joints) {
@@ -254,7 +254,7 @@ void Engine::Animetion::ImGuiJoint(const std::vector<Joint>& joints)
 	ImGui::End();
 }
 
-void Engine::Animetion::ImGuiNode(const std::vector<Node>& nodes)
+void Engine::AnimationFunction::ImGuiNode(const std::vector<Node>& nodes)
 {
 	ImGui::Begin("Node Info");
 	for (const Node& node : nodes) {
@@ -273,11 +273,11 @@ void Engine::Animetion::ImGuiNode(const std::vector<Node>& nodes)
 	ImGui::End();
 }
 
-int Engine::Animetion::CalculateDepth(const std::vector<Joint>& joints, int index)
+int Engine::AnimationFunction::CalculateDepth(const std::vector<Joint>& joints, int index)
 {
 	const Joint& joint = joints[index];
 	if (!joint.parent.has_value()) {
 		return 0; // ルートジョイントの深さは0
 	}
-	return 1 + Animetion::CalculateDepth(joints, joint.parent.value());
+	return 1 + AnimationFunction::CalculateDepth(joints, joint.parent.value());
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "imgui.h"
 #include<string>
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 
 // タイマーの構造体
 struct Timer {

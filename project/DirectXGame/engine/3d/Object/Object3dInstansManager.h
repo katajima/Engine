@@ -14,7 +14,7 @@ using namespace Microsoft::WRL;
 #include<vector>
 #include"externals/DirectXTex/DirectXTex.h"
 #include"externals/DirectXTex/d3dx12.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"

@@ -4,7 +4,7 @@
 #include"DirectXGame/engine/struct/Vector2.h"
 #include"DirectXGame/engine/struct/Vector3.h"
 #include"DirectXGame/engine/struct/Vector4.h"
-#include"MathFanctions.h"
+#include"MathFunctions.h"
 
 
 #define HASH_SIZE 512

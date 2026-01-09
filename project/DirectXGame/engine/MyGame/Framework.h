@@ -1,6 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/struct/Structs3D.h"
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"

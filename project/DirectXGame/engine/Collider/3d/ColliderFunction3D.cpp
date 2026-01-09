@@ -1,4 +1,4 @@
-#include "ColliderFanction3D.h"
+#include "ColliderFunction3D.h"
 
 
 #pragma region Detection

@@ -3,7 +3,7 @@
 
 
 
-void InputManager::Intialize(Engine::Input* input){
+void InputManager::Initialize(Engine::Input* input){
 	input_ = input;
 }
 

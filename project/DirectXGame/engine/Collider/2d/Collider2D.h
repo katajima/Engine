@@ -1,11 +1,11 @@
 #pragma once
 
 #pragma once
-#include"DirectXGame/engine/math/MathFanctions.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
-#include "ColliderFanction2D.h"
+#include "ColliderFunction2D.h"
 #include"DirectXGame/engine/Transform/WorldTransform/WorldTransform2d.h"
 
 namespace Engine {

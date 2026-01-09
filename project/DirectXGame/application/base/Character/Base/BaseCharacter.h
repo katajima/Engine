@@ -14,7 +14,7 @@ class BaseWeapon;
 class BulletManager;
 class CameraManager;
 class SpecalPointManager;
-class AttackInputHander;
+class AttackInputHandler;
 namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
@@ -218,7 +218,7 @@ protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;			// オブジェクトコンポーネント
 	std::unique_ptr<BaseSpecial> special_;						// スペシャル攻撃
 	std::unique_ptr<BaseWeapon> weapon_;						// 武器
-	std::unique_ptr<AttackInputHander> attackInputHander_;		// 攻撃入力系クラス
+	std::unique_ptr<AttackInputHandler> attackInputHandler_;		// 攻撃入力系クラス
 
 	std::unique_ptr<CharacterStateMachine> stateMachine_;		// キャラクターの状態管理
 	std::unique_ptr<MovementComponent> moveComponent_;			// 移動コンポーネント
