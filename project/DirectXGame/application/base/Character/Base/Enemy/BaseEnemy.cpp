@@ -106,8 +106,6 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 		// 壁との衝突応答
 		responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall, self, other);
 
-		if (other->tag == CollisionTag::PlayerAttack)
-			responseSystem_;
 		};
 
 

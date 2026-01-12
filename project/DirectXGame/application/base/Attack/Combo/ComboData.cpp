@@ -1,7 +1,7 @@
 #include "ComboData.h"
 #include "DirectXGame/engine/Animation/AnimationComponent.h"
 #include"DirectXGame/application/base/Move/MoveComponent.h"
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 
 #pragma region ComboSequence
 

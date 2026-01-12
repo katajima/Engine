@@ -3,11 +3,11 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 
 
 
-void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
+void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, CharacterManager* characterManager)
 {
 	entity3DManager_ = entity3DManager;		// エンティティ3d
 	globalVariables_ = globalVariables;		// 保存項目
@@ -28,24 +28,24 @@ void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, E
 	waveManager_->SetCharacterSpawnManager(characterSpawnManager_.get());
 
 
-	CreateSpawn(EnemyType::kNormal,"test", 1, 20, { 0,0,100 }, { 50,1,25 }, 15.0f);
-	CreateSpawn(EnemyType::kNormal,"test1", 3, 10, { 100,0,-100 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal,"test2", 3, 10, { -100,0,-100 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test3", 10, 3, { 100,0,-100 }, { 20,1,20 }, 3.0f);
-	CreateSpawn(EnemyType::kNormal, "test4", 10, 3, { -100,0,-100 }, { 20,1,20 }, 3.0f);
+	CreateSpawn(EnemyType::kNormal,"test", 1, 2, { 0,0,100 }, { 50,1,25 }, 15.0f);
+	CreateSpawn(EnemyType::kNormal,"test1", 3, 1, { 100,0,-100 }, { 25,1,25 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal,"test2", 3, 1, { -100,0,-100 }, { 25,1,25 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test3", 2, 3, { 100,0,-100 }, { 20,1,20 }, 3.0f);
+	CreateSpawn(EnemyType::kNormal, "test4", 2, 3, { -100,0,-100 }, { 20,1,20 }, 3.0f);
 	CreateWave(0,40);
-	CreateSpawn(EnemyType::kNormal,"test", 1, 20, { 0,0,100 }, { 50,1,20 }, 15.0f);
-	CreateSpawn(EnemyType::kNormal, "test1", 3, 10, { 30,0,-100 }, { 20,1,20 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test2", 3, 10, { -30,0,-100 }, { 20,1,20 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test3", 10, 4, { 30,0,-100 }, { 20,1,20 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test4", 10, 4, { -30,0,-100 }, { 20,1,20 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal,"test", 1, 2, { 0,0,100 }, { 50,1,20 }, 15.0f);
+	CreateSpawn(EnemyType::kNormal, "test1", 3, 1, { 30,0,-100 }, { 20,1,20 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test2", 3, 1, { -30,0,-100 }, { 20,1,20 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test3", 10, 3, { 30,0,-100 }, { 20,1,20 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test4", 10, 3, { -30,0,-100 }, { 20,1,20 }, 5.0f);
 	CreateWave(1,40);
-	CreateSpawn(EnemyType::kNormal, "test", 1, 30, { 0,0,50 }, { 50,1,25 }, 15.0f);
-	CreateSpawn(EnemyType::kNormal, "test1", 3, 20, { 100,0,50 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test2", 3, 20, { -100,0,-50 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test3", 10, 7, { 0,0,50 }, { 50,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test4", 10, 7, { 100,0,50 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test5", 10, 7, { -100,0,-50 }, { 25,1,25 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test", 1, 3, { 0,0,50 }, { 50,1,25 }, 15.0f);
+	CreateSpawn(EnemyType::kNormal, "test1", 3, 2, { 100,0,50 }, { 25,1,25 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test2", 3, 2, { -100,0,-50 }, { 25,1,25 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test3", 10, 3, { 0,0,50 }, { 50,1,25 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test4", 10, 3, { 100,0,50 }, { 25,1,25 }, 5.0f);
+	CreateSpawn(EnemyType::kNormal, "test5", 10, 3, { -100,0,-50 }, { 25,1,25 }, 5.0f);
 	CreateWave(2,50);
 
 	waveManager_->Initialize(gameWaves_);

@@ -1,0 +1,2 @@
+最初は大きさSはsmall(小型)、Mはmedium(中型)、Lはlarge(大型)
+次は空中・地上などSはsky(空中)、Gはground(地上)

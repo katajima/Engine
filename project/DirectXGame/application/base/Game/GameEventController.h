@@ -18,7 +18,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,  BaseCharacterManager* characterManager);
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,  CharacterManager* characterManager);
 
 	/// <summary>
 	/// 更新
@@ -60,5 +60,5 @@ private:
 private:
 	Engine::Entity3DManager* entity3DManager_ = nullptr;
 	Engine::GlobalVariables* globalVariables_ = nullptr;
-	BaseCharacterManager* characterManager_ = nullptr;
+	CharacterManager* characterManager_ = nullptr;
 };

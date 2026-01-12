@@ -1,9 +1,9 @@
-#include "BaseCharacterManeger.h"
+#include "CharacterManeger.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/Characters.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
-void BaseCharacterManager::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+void CharacterManager::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
 	Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
 {
 	input_ = input;						// インプット
@@ -17,7 +17,7 @@ void BaseCharacterManager::Initialize(Engine::Input* input, Engine::Entity3DMana
 	crowdManager_->CreateGroup();
 }
 
-void BaseCharacterManager::Update()
+void CharacterManager::Update()
 {
 	// 死亡したキャラクター(敵)を削除
 	character_.erase(
@@ -33,15 +33,15 @@ void BaseCharacterManager::Update()
 
 	// プレイヤー座標をセット
 	if (GetPlayer()) {
-		crowdManager_->playerPos = GetPlayer()->GetObjectComponent()->GetWorldPosition();
+		//crowdManager_->playerPos = GetPlayer()->GetObjectComponent()->GetWorldPosition();
 		specalPointManager_->SetTarget(GetPlayer());
 	}
 
 	// 群衆の結果を敵モデルに反映
-	crowdManager_->UpdateAgentsToInstancing();
+	//crowdManager_->UpdateAgentsToInstancing();
 
 	// 群衆AI更新
-	crowdManager_->Update(Engine::MyGame::GameTime());
+	//crowdManager_->Update(Engine::MyGame::GameTime());
 
 
 
@@ -67,7 +67,7 @@ void BaseCharacterManager::Update()
 }
 
 
-void BaseCharacterManager::Draw2D()
+void CharacterManager::Draw2D()
 {
 	// スプライト描画
 	for (auto& character : character_) {
@@ -82,7 +82,7 @@ void BaseCharacterManager::Draw2D()
 	}
 }
 
-void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
+void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
 {
 	using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
@@ -110,12 +110,12 @@ void BaseCharacterManager::CreateCharacter(EnemyType enemyType, const std::strin
 
 
 	// 群衆AI
-	crowdManager_->CreateAgent(groupId, enemy.get(), transform.translate);
+	//crowdManager_->CreateAgent(groupId, enemy.get(), transform.translate);
 
 	character_.push_back(std::move(enemy));
 }
 
-void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
+void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
 {
 	std::unique_ptr<BasePlayer> player;
 
@@ -130,7 +130,7 @@ void BaseCharacterManager::CreateCharacter(PlayerType playerType, const std::str
 	character_.push_back(std::move(player));	// キャラクターに追加 
 }
 
-void BaseCharacterManager::CreateEnemyGroup(EnemyType enemyType,int groupIds, int perGroup, Vector3 origin,AABB aabb)
+void CharacterManager::CreateEnemyGroup(EnemyType enemyType,int groupIds, int perGroup, Vector3 origin,AABB aabb)
 {
 
 	// グループId

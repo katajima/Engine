@@ -18,11 +18,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF
 	);
 
-	Engine::Framework* game = new Engine::MyGame();
+	std::unique_ptr<Engine::Framework> game = std::make_unique<Engine::MyGame>();
 
 	game->Run();
 
-	delete game;
-	
 	return 0;
 }

@@ -4,7 +4,7 @@
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 
 // 前方宣言
-class BaseCharacterManager;
+class CharacterManager;
 
 namespace Engine {
 	class LineCommon;
@@ -95,7 +95,7 @@ private:
 class CharacterSpawn {
 public:
 	// 初期化
-	void Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info);
+	void Initialize(CharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info);
 
 	// 更新
 	void Update(float time);
@@ -124,7 +124,7 @@ private:
 
 	float timer_ = 0.0f;                // タイマー
 private:
-	BaseCharacterManager* characterManager_ = nullptr;
+	CharacterManager* characterManager_ = nullptr;
 	Engine::LineCommon* lineCommon_ = nullptr;
 };
 

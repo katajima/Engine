@@ -126,13 +126,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Base\BaseCharacterManeger.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemyState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemy.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp" />
@@ -154,6 +156,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
@@ -763,6 +766,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Bullet\BulletEnemyState.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemy.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameData.h" />
@@ -797,6 +802,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Normal\NormalEnemySubState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\FpsUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\SelectUI.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.h" />
@@ -827,7 +833,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\engine\UI\UIElement.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\BaseWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacter.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacterManeger.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\RangedWeapons.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Base\WeaponData.h" />

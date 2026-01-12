@@ -6,7 +6,7 @@
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
@@ -47,7 +47,7 @@ public:
 	// 描画2d
 	void Draw2D() override;
 
-
+private:
 	// ImGui更新
 	void UpdateImGui();
 
@@ -70,15 +70,8 @@ private:
 	// インプットマネージャ
 	std::unique_ptr<InputManager> inputManager_;
 
-
-	float nowTime = 0.0f;
-	float fps = 0.0f;
-
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
-private:
-	std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
-	std::unique_ptr<Engine::UICount> sprite;
 private:
 	//追従カメラ
 	std::unique_ptr<FollowCamera> followCamera_;
@@ -99,9 +92,7 @@ private:
 
 private:
 	// キャラクター管理
-	std::unique_ptr<BaseCharacterManager> caracterManager_;
-	// 敵ポジション
-	Vector3 enemyPosition = Vector3(0, 0, 0);
+	std::unique_ptr<CharacterManager> characterManager_;
 	// ステージ
 	std::unique_ptr<Stage> stage_;
 	// 弾
@@ -111,12 +102,6 @@ private:
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
-	// シーン遷移用
-	int count = 0;
-	int sceneCount = 0;
-	int clock = 1;
-
-	float tumeee_ = 0.0f;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;

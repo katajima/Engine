@@ -83,24 +83,24 @@ void GamePlayScene::Initialize()
 
 
 	// キャラクター管理 
-	caracterManager_ = std::make_unique<BaseCharacterManager>();
-	caracterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
-	caracterManager_->SetEffect(effect_.get());
-	caracterManager_->SetFollowCamera(followCamera_.get());
-	caracterManager_->SetBulletManager(bulletManager_.get());
-	caracterManager_->SetCameraManager(cameraManager_.get());
-	caracterManager_->SetSpecialPointManager(specalPointManager_.get());
+	characterManager_ = std::make_unique<CharacterManager>();
+	characterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	characterManager_->SetEffect(effect_.get());
+	characterManager_->SetFollowCamera(followCamera_.get());
+	characterManager_->SetBulletManager(bulletManager_.get());
+	characterManager_->SetCameraManager(cameraManager_.get());
+	characterManager_->SetSpecialPointManager(specalPointManager_.get());
 
 	// ステージイベントマネージャー
 	gameFlowController_ = std::make_unique<GameFlowController>();
-	gameFlowController_->Initialize(GetSceneManager(), GetGlobalVariables(), caracterManager_.get());
+	gameFlowController_->Initialize(GetSceneManager(), GetGlobalVariables(), characterManager_.get());
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
-		caracterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
 	}
 	else {
-		caracterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
 	
@@ -111,13 +111,13 @@ void GamePlayScene::Initialize()
 
 
 	// 追従カメラtarget設定
-	followCamera_->SetTarget(&caracterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
+	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
 	// ステージ
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
 	
-	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(caracterManager_->GetPlayer()->GetSpecial());
+	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
 
 	// 衝突マネージャの生成
@@ -132,18 +132,7 @@ void GamePlayScene::Initialize()
 	// UI
 	gameUI = std::make_unique<GameUI>();
 	gameUI->Initialize(GetInput(), GetEntity2DManager(), GetGlobalVariables());
-	gameUI->SetPlayer(caracterManager_->GetPlayer());
-
-	// FPS表示用スプライト
-	sprite = std::make_unique<Engine::UICount>();
-	sprite->SetUseNameSprite(false);		// 使わない
-	sprite->SetInstance(2);					// 行数設定
-	sprite->Init(GetEntity2DManager(), "fps");	// 初期化
-	sprite->SetInput(input_);					// 入力設定
-	sprite->SetPos({ 32,48 });					// 位置設定
-	sprite->SetMaxSize({ 64 * 2 / 3, 96 * 2 / 3 }, { 20.0f,0.0f });	// 最大値サイズ設定
-	sprite->SetTextuerSize({ 64,96 });	// テクスチャサイズ設定
-	sprite->SetCountMax(999);			// カウント量設定
+	gameUI->SetPlayer(characterManager_->GetPlayer());
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -155,8 +144,7 @@ void GamePlayScene::Initialize()
 	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
 
 
-
-	inputManager_->SetOwner(caracterManager_->GetPlayer());
+	inputManager_->SetOwner(characterManager_->GetPlayer());
 }
 
 // 調整項目
@@ -167,16 +155,13 @@ void GamePlayScene::ApplyGlobalVariables()
 
 void GamePlayScene::CheckAllCollisions()
 {
-	// 衝突マネージャのリセット
-	collisionManager_->ClearDynamic();
-	
 	for (auto objects : loadData_->GetObjects()) {
 		if (objects->GetColliderComponent()) {
 			collisionManager_->Register(objects->GetColliderComponent());
 		}
 	}
 	// キャラクターセット
-	for (auto caracter : caracterManager_->GetCharacters()) {
+	for (auto caracter : characterManager_->GetCharacters()) {
 		if (caracter->GetColliderComponent()) {
 			if (caracter->GetHP() <= 0) continue;
 			collisionManager_->Register(caracter->GetColliderComponent());
@@ -185,7 +170,7 @@ void GamePlayScene::CheckAllCollisions()
 
 	// IDが1なら
 	if (GetSceneData().playerID == 1) {
-		for (auto& caracter : caracterManager_->GetPlayer()->GetAttackController()->GetHitBoxSystem()->GetData()) {
+		for (auto& caracter : characterManager_->GetPlayer()->GetAttackController()->GetHitBoxSystem()->GetData()) {
 			collisionManager_->Register(caracter.hitBox.get()->GetColliderComponent());
 		}
 	}
@@ -224,7 +209,6 @@ void GamePlayScene::UpdateImGui()
 	}
 
 	ImGui::Begin("Debug");
-	ImGui::DragFloat3("enePos", &enemyPosition.x, 0.1f);
 	ImGui::InputInt("playerID", &GetSceneData().playerID);
 
 	Vector2 inputPos = input_->GetGamePadLeftStick();
@@ -244,20 +228,6 @@ void GamePlayScene::UpdateImGui()
 
 	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-	nowTime += deltaTime;
-	if (deltaTime > 0) {
-		fps = 1.0f / deltaTime;
-	}
-	lastTime = currentTime;
-
-	// fpsカウント設定
-	sprite->SetCount(fps);
-
-	// fps用のスプライト更新
-	//sprite->Update(Engine::MyGame::GameTime());
 }
 
 // 更新処理
@@ -279,7 +249,7 @@ void GamePlayScene::Update()
 	// コマンド
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
-		iCommand_->Exec(*caracterManager_->GetPlayer());
+		iCommand_->Exec(*characterManager_->GetPlayer());
 	}
 
 
@@ -291,7 +261,7 @@ void GamePlayScene::Update()
 
 	
 	// キャラクターマネージャー更新
-	caracterManager_->Update();
+	characterManager_->Update();
 
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(Engine::MyGame::GameTime());
@@ -335,10 +305,8 @@ void GamePlayScene::Draw3D(){
 void GamePlayScene::Draw2D(){
 	// ゲームUI
 	gameUI->Draw();
-	//
-	sprite->Draw();
 	// キャラクター
-	caracterManager_->Draw2D();
+	characterManager_->Draw2D();
 	// 弾マネージャ
 	bulletManager_->Draw2D();
 }

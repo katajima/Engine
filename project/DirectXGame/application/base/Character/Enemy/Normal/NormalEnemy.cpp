@@ -8,9 +8,9 @@ void NormalEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* enti
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
 	// 基盤初期化
-	BaseInitialize(input,entity3DManager,entity2DManager,globalVariables,position,camera, "enemy.gltf", "enemy");
+	BaseInitialize(input,entity3DManager,entity2DManager,globalVariables,position,camera, "enemyBodySG01.obj", "enemy");
 	// サイズ
-	Vector3 size = { 1.7f,1.7f,1.7f };
+	Vector3 size = { 1.0f,1.0f,1.0f };
 	objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 	
 	

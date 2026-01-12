@@ -1,9 +1,9 @@
 #include "CharacterSpawn.h"
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void CharacterSpawn::Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info){
+void CharacterSpawn::Initialize(CharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info){
 	characterManager_ = characterManager;	// キャラクター管理クラス
 	lineCommon_ = line;						// ライン管理クラス
 		

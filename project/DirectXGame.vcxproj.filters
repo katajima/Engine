@@ -345,7 +345,7 @@
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Base\BaseCharacterManeger.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.cpp">
@@ -805,6 +805,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1632,7 +1641,7 @@
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h">
       <Filter>ヘッダー ファイル\application\base\camera</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacterManeger.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterManeger.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacter.h">
@@ -1843,6 +1852,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Input\InputManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\FpsUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\SmallMeleeEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

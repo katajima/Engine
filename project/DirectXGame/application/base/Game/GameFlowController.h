@@ -4,7 +4,7 @@
 #include "GameData.h"
 
 // 前方宣言
-class BaseCharacterManager;
+class CharacterManager;
 namespace Engine {
 	class GlobalVariables;
 	class SceneManager;
@@ -17,7 +17,7 @@ class GameFlowController {
 public:
 
 	// 初期化
-	void Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, BaseCharacterManager* characterManager);
+	void Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, CharacterManager* characterManager);
 
 	// 更新
 	void Update(float dt);
@@ -48,7 +48,7 @@ private:
 
 private: // 貰いもの
 	Engine::Entity3DManager* entity3DManager = nullptr;
-	BaseCharacterManager* characterManager = nullptr;
+	CharacterManager* characterManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::SceneManager* sceneManager = nullptr;
 	Engine::Input* input = nullptr;
