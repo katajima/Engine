@@ -10,8 +10,15 @@ void NormalEnemyAttackReadySubState::Update(float deltaTime) {
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     // 後ろに後退
 
-    enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = -30.0f;
-    enemy->DirectionMoveVelocity(-30.0f);
+    if (enemy->GetTargetDistance() <= 10.0f) {
+        enemy->DirectionMove(-5.0f);
+    }
+    else {
+        enemy->DirectionMove(3.0f);
+    }
+
+
+    
     if (timer_ > readyTime_) {
         // 攻撃へ遷移
         fsm_->ChangeState(AttackSubState::Swing);
@@ -22,10 +29,22 @@ void NormalEnemyAttackReadySubState::Update(float deltaTime) {
 void NormalEnemyAttackSwingSubState::Enter() {
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     timer_ = 0.0f;
-
     enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
     enemy->DirectionMoveVelocity(40.0f);
     dire_ = enemy->TargetDirection();
+
+
+    HitBoxCollData data_;
+    data_.isEneble = true;
+    data_.isLine = true;
+    data_.tag = CollisionTag::Enemy;
+	data_.layer = CollisionLayer::Enemy;
+	data_.mask = CollisionLayer::Player;
+	data_.size = { 2.0f,4.0f,2.0f };
+	data_.name = "NormalEnemy_SwingHitBox";
+    data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
+    
+    enemy->GetAttackController()->GetHitBoxSystem()->AddHitBox(HitBoxUseType::kEnemy, { data_ },{},2.0f,HitBoxSystem::Type::kParent,{}, &enemy->GetWorldTransform());
 }
 
 void NormalEnemyAttackSwingSubState::Update(float deltaTime) {
@@ -36,6 +55,9 @@ void NormalEnemyAttackSwingSubState::Update(float deltaTime) {
 
     enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
     enemy->Velocity() = dire_ * 40.0f;
+    enemy->TargetMove(enemy->Velocity());
+
+
 
     if (timer_ > swingTime_) {
         fsm_->ChangeState(AttackSubState::End);

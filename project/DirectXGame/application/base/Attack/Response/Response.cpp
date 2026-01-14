@@ -40,7 +40,7 @@ void AttackResponse::Initialize(CharacterParameterComponent* paremeter, ObjectCo
 
 void AttackResponse::Update(float dt) {
 	// 被撃モーション更新
-	hitMotionSystem_->Update(dt,object, *paremeter);
+	hitMotionSystem_->Update(dt,object, paremeter);
 }
 
 #pragma endregion // 攻撃を受けたとき

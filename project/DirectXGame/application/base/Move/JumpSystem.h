@@ -63,7 +63,8 @@ public:
 	void SetIsDash(bool dash) { isDash_ = dash; }
 	// 攻撃中か設定
 	void SetIsAttack(bool is) { isAttack_ = is; };
-
+	// ジャンプの処理を使うか設定
+	void SetIsUseJump(bool isUse) { isUseJump = isUse; }
 private:
 
 	// 状態処理
@@ -109,6 +110,8 @@ private: // フラグ系統
 	// 入力が押されているかどうか
 	bool isInputPressed_ = false;
 
+	//
+	bool isUseJump = true;
 private:
 	// 入力ホールドタイマー
 	float holdTimer_ = 0.0f;

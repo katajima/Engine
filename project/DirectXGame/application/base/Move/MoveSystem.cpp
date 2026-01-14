@@ -47,15 +47,7 @@ void MoveSystem::Update(float dt, Engine::WorldTransform& world)
 	MoveProcess(dt, world, velo);
 }
 
-void MoveSystem::UpdateEnemy(float dt, Engine::WorldTransform& world)
-{
-	if (isDash_) return; // ダッシュ中は移動処理しない
-
-	Vector3 velo = GetVelocity();
-	velo = Normalize(velo);
-
-	// 移動処理
-	MoveProcess(dt, world, velo,false);
+void MoveSystem::UpdateEnemy(float dt, Engine::WorldTransform& world){
 }
 
 void MoveSystem::UpdateAttack(float dt, Engine::WorldTransform& world)

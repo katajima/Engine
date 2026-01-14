@@ -136,6 +136,9 @@ void HitBoxSystem::CreateHitBoxCollData(const std::string& name, HitBoxShape sha
 		data.mask = CollisionLayer::Enemy;
 		break;
 	case HitBoxUseType::kEnemy:
+		data.layer = CollisionLayer::EnemyAttack;
+		data.tag = CollisionTag::EnemyAttack;
+		data.mask = CollisionLayer::Player;
 		break;
 	case HitBoxUseType::kOther:
 		break;

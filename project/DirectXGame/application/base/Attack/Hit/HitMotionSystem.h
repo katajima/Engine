@@ -24,7 +24,7 @@ public:
 
 
 	// 更新
-	void Update(float deltaTime, ObjectComponent* object, CharacterParameterComponent& parameter);
+	void Update(float deltaTime, ObjectComponent* object, CharacterParameterComponent* parameter);
 
 	// リアクションデータ
 	void SetReactionData(const AttackReactionData& data);
@@ -37,7 +37,7 @@ public:
 private:
 
 
-	void DamageProcess(float dt, CharacterParameterComponent& parameter);
+	void DamageProcess(float dt, CharacterParameterComponent* parameter);
 
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;

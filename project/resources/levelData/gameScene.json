@@ -21,7 +21,7 @@
                     0.5
                 ]
             },
-            "file_name": "field",
+            "file_name": "testField",
             "collider": {
                 "collider_disabled": 0,
                 "collider": 0,

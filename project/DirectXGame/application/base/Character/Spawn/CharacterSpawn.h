@@ -28,16 +28,19 @@ public:
 		Vector3 size_ = { 1.0f,1.0f,1.0f }; // 出現エリアサイズ
 		float spawnInterval_ = 1.0f;        // 出現間隔
 		float spawnTimer_ = 0.0f;           // 出現タイミングタイマー(フェーズが始まってから)
+		int maxEnemyCount_ = 30;			// 最大敵出現量
+		float startDelay_ = 0.0f;           // フェーズ開始からの遅延時間
 	};
 
 	// 初期化
-	void Initialize(const std::string& name, int spawnMaxCount , int spawnAmount,Vector3 translate, Vector3 size = {10,1,10}, float interval = 1.0f) {
-		data_.name_ = name;					// 名前
+	void Initialize(const std::string& name, int spawnMaxCount , int spawnAmount,Vector3 translate, Vector3 size = {10,1,10}, float interval = 1.0f,float startDelay = 0.0f) {
+		data_.name_ = name;						// 名前
 		data_.spawnMaxCount_ = spawnMaxCount;	// 出現回数
 		data_.spawnAmount_ = spawnAmount;		// 出現量
 		data_.size_ = size;						// サイズ
 		data_.translate_ = translate;			// 位置
 		data_.spawnInterval_ = interval;		// インターバル
+		data_.startDelay_ = startDelay;			// 開始遅延時間
 	}
 
 
@@ -114,6 +117,9 @@ public: // 取得or設定
 	SpawnInfo& GetSpawnInfo() { return spawnInfo_; }
 	// 出現位置取得
 	Engine::WorldTransform& GetSpawnTransform() { return spawnTransform_; }
+	// 最大敵出現量設定
+	void SetMaxEnemyCount(int count) { maxEnemyCount_ = count; }
+
 public:
 	// 出現処理
 	void SpawnProcess();
@@ -123,6 +129,7 @@ private:
 	Engine::WorldTransform spawnTransform_;		// 出現位置変換行列
 
 	float timer_ = 0.0f;                // タイマー
+	int maxEnemyCount_ = 30;			// 最大敵出現量
 private:
 	CharacterManager* characterManager_ = nullptr;
 	Engine::LineCommon* lineCommon_ = nullptr;

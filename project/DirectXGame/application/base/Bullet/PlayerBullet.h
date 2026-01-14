@@ -35,7 +35,7 @@ private: // 一旦
 		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
 		const float trailLifeTime = 0.15f; // トレイルの寿命
 		const float trailWidth = 0.2f; // トレイルの幅
-		const float collRadius = 2.0f; // 当たり判定の半径
+		const float collRadius = 0.2f; // 当たり判定の半径
 	};
 	ProvisionalData provisionalData_;
 

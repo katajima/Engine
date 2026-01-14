@@ -1,12 +1,19 @@
 #pragma once
 #include "DirectXGame/application/base/State/BaseMainState.h"
 
-class BulletEnemyStateMove : public MoveState {
+
+
+class BaseCharacter;
+
+// 移動
+class SmallRangeEnemyMoveState : public MoveState
+{
 public:
 	// コンストラクタ
-	BulletEnemyStateMove(BaseCharacter* enemy)
+	SmallRangeEnemyMoveState(BaseCharacter* enemy)
 		: MoveState(enemy) {
 	}
+
 
 	// 更新
 	void Update() override;
@@ -21,14 +28,13 @@ private:
 	float timer_ = 0.0f;
 };
 
-
 /// <summary>
 /// 攻撃
 /// </summary>
-class BulletEnemyStateAttack :public AttackState
+class SmallRangeEnemyAttackState :public AttackState
 {
 public:
-	BulletEnemyStateAttack(BaseCharacter* enemy)
+	SmallRangeEnemyAttackState(BaseCharacter* enemy)
 		: AttackState(enemy) {
 	}
 	// 更新
@@ -39,16 +45,16 @@ public:
 	// 初期化
 	void Enter() override;
 private:
-	std::unique_ptr<SubStateMachine<AttackSubState, BaseAttackSubState>> subStateMachine_;
+	float timer_ = 0.0f;
 };
 
 /// <summary>
 /// 死亡状態
 /// </summary>
-class BulletEnemyStateDie :public DieState
+class SmallRangeEnemyDieState :public DieState
 {
 public:
-	BulletEnemyStateDie(BaseCharacter* enemy)
+	SmallRangeEnemyDieState(BaseCharacter* enemy)
 		: DieState(enemy) {
 	}
 
@@ -64,4 +70,6 @@ private:
 	float dieTimer_ = 2.0f;
 	float timer_ = 0.0f;
 };
+
+
 

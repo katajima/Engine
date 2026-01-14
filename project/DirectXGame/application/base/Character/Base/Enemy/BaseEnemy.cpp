@@ -6,13 +6,25 @@
 Vector3 BaseEnemy::GetTargetPos()
 {
 	// ターゲット位置
-	return player_->GetObjectComponent()->GetWorldTransform().GetWorldPosition();
+	return target_->GetObjectComponent()->GetWorldTransform().GetWorldPosition();
 }
 
 float BaseEnemy::GetTargetDistance()
 {
 	// ターゲットとの距離
-	return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(player_->GetObjectComponent()->GetWorldTransform().GetWorldPosition());
+	return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(target_->GetObjectComponent()->GetWorldTransform().GetWorldPosition());
+}
+
+Vector3 BaseEnemy::TargetDirection()
+{
+	// ターゲットの方向
+	return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+}
+
+void BaseEnemy::TargetMove(const Vector3 velocity)
+{
+	Vector3 move = velocity * GetTime();
+	GetWorldTransform().translate_ += move;
 }
 
 void BaseEnemy::DirectionMoveVelocity(float speed)
@@ -39,13 +51,16 @@ void BaseEnemy::DirectionMove(float speed)
 
 	// Y軸周り角度
 	GetWorldTransform().rotate_.y = rotate.y;
+
+
+	Vector3 move = dire * speed * GetTime();
+
+	GetWorldTransform().translate_ += move;
 }
 
-Vector3 BaseEnemy::TargetDirection()
-{
-	// ターゲットの方向
-	return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-}
+
+
+#pragma region
 
 void BaseEnemy::Initialize2D()
 {
@@ -74,6 +89,10 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 
 
+	// キャラクターのパラメータコンポーネントを生成
+	characterParameterComponent_ = std::make_unique<CharacterParameterComponent>();
+
+
 	// 移動コンポーネント初期化
 	moveComponent_ = std::make_unique<MovementComponent>();
 	moveComponent_->UseGlobal(false);
@@ -100,9 +119,6 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 		//  敵同士の衝突応答
 		responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
 
-		// プレイヤーとの衝突応答
-		responseSystem_->GetHitResponse()->Hit(CollisionTag::Player, self, other);
-
 		// 壁との衝突応答
 		responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall, self, other);
 
@@ -119,15 +135,15 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 
 	// 攻撃応答システムクラス初期化
 	responseSystem_ = std::make_unique<ResponseSystem>();
-	responseSystem_->Initialize(&GetCharacterParameterComponent(), objectComponent_.get());
+	responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
 	responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
 
 	// オブジェクト状態生存
 	objectComponent_->GetObjectStateFlags().isAlive = true;
 
-	// 戦闘中の倍率・軽減率を扱う
+	// 戦闘
 	attackController_ = std::make_unique<AttackController>();
-	attackController_->Initialize(entity3DManager, globalVariables_, &characterParameterComponent_, this);
+	attackController_->Initialize(entity3DManager, globalVariables_, GetCharacterParameterComponent(), this);
 
 
 	// ステートマシーン初期化
@@ -153,9 +169,9 @@ void BaseEnemy::BaseUpdate(){
 	else {
 		// 移動コンポーネント更新
 		moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(), nullptr);
-		// 視野
-		visionComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform().GetWorldPosition(), moveComponent_->GetDirection(), player_->GetWorldTransform().translate_);
 		// 応答システム
 		responseSystem_->Update(GetTime());
 	}
 }
+
+#pragma endregion // 基本処理

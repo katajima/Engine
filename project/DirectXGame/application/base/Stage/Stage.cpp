@@ -7,7 +7,7 @@
 
 
 
-void Stage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera)
+void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera)
 {
 	dxCommon_ = dxcommon;				// ダイレクトX共通クラス
 	entity3DManager_ = entity3DManager;	// エンティティ3d
@@ -60,32 +60,32 @@ void Stage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager*
 	
 }
 
-void Stage::Update()
+void MainStage::Update()
 {
 	
 }
 
-void Stage::Draw()
+void MainStage::Draw()
 {
 
 }
 
-void Stage::DrawP()
+void MainStage::DrawP()
 {
 
 }
 
-void Stage::Draw2D()
+void MainStage::Draw2D()
 {
 
 }
 
-void Stage::InitEmit()
+void MainStage::InitEmit()
 {
 	
 }
 
-void Stage::EmitUpdate()
+void MainStage::EmitUpdate()
 {
 	
 }

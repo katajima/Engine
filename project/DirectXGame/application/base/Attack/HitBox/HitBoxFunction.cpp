@@ -55,11 +55,23 @@ void HitBoxFunction::UpdateTypePlayer(){
 
 	// ヒットカウンターにヒットを通知
 	player->GetAttackController()->GetHitCounter().Hit();
-	// スペシャルゲージ増化
-	//player->AddSpGauge(1);
 }
 
 void HitBoxFunction::UpdateTypeEnemy(){
+	if (otherColl_->tag != CollisionTag::Player) return;
+
+	BaseEnemy* enemy = static_cast<BaseEnemy*>(character_);
+	if (!enemy) return;
+
+	BasePlayer* player = static_cast<BasePlayer*>(other_->GetHitReceiver());
+	if (!player) return;
+
+
+	// ノックバック方向
+	data_.GetKnockbackData().SetNormal(enemy->GetMoveComponent()->GetDirection());
+
+	// リアクションデータ
+	player->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
 }
 
 void HitBoxFunction::UpdateTypeOther(){

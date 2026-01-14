@@ -107,6 +107,8 @@ void DashSystem::DashProcess(float dt, Engine::WorldTransform& world, Engine::Ri
 
 void DashSystem::GravityProcess(float dt, Engine::RigidBodyComponent& rigid)
 {
+	if (isUseGravity_ == false) return;
+
 	if (!data_.isDashGravity && isDash_) {
 		rigid.SetIsGravity(false);
 		rigid.Velocity() = Vector3(0, 0, 0); // 速度リセット

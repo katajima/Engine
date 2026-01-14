@@ -94,7 +94,7 @@ private:
 	// キャラクター管理
 	std::unique_ptr<CharacterManager> characterManager_;
 	// ステージ
-	std::unique_ptr<Stage> stage_;
+	std::unique_ptr<MainStage> stage_;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
 	// レベルデータ

@@ -52,6 +52,8 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 	moveSystem_->SetIsDash(dashSystem_->IsDash());
 	// 移動システムの更新
 	if (controlType_ == ControlType::Manual) {	// 手動操作なら入力を渡す
+		
+
 		moveSystem_->Update(dt, object, input);
 	}
 	else {

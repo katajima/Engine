@@ -27,16 +27,9 @@ void CharacterSpawn::Update(float dt) {
 	lineCommon_->GetDebugLineMeshData().AddLineAABB(AABB{-spawnInfo_.GetData().size_,spawnInfo_.GetData().size_}, spawnTransform_.GetWorldPosition());
 #endif // _DEBUG
 
-	// 時間が来たら
-	if (timer_ >= spawnInfo_.GetData().spawnTimer_) {
-		spawnInfo_.SetIsSpawn(true);
-	}
-
 	// 出現
-	if (spawnInfo_.IsSpawn()) {
-		SpawnProcess();
-	}
-
+	SpawnProcess();
+	
 }
 
 void CharacterSpawn::Draw() {
@@ -47,7 +40,9 @@ void CharacterSpawn::SpawnProcess(){
 	if (spawnInfo_.IsEnd()) return;
 
 	// 情報更新
-	spawnInfo_.Update(Engine::MyGame::GameTime());
+	if (characterManager_->GetCharacterCount(CharacterType::Enemy) <= maxEnemyCount_) {
+		spawnInfo_.Update(Engine::MyGame::GameTime());
+	}
 
 	// 出し切ったら
 	if (spawnInfo_.IsSpawned()) return;

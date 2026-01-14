@@ -10,7 +10,7 @@ namespace Engine {
 }
 class BulletSpawn;
 class FollowCamera;
-class Stage;
+class MainStage;
 
 /// <summary>
 /// 範囲攻撃必殺技
@@ -48,7 +48,7 @@ public:
 	// 描画するか
 	void SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };
 	// ステージ設定
-	void SetStage(Stage* stage) { stage_ = stage;};
+	void SetStage(MainStage* stage) { stage_ = stage;};
 
 	
 
@@ -89,7 +89,7 @@ private:
 private:
 	BulletSpawn* spawn = nullptr;			// 弾の出現
 
-	Stage* stage_ = nullptr;
+	MainStage* stage_ = nullptr;
 	FollowCamera* followCamera = nullptr;
 private: // 一旦
 

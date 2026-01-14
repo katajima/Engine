@@ -1,11 +1,12 @@
 #pragma once
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include"SmallMeleeEnemyState.h"
+#include"SmallCartEnemyState.h"
+#include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
-class SmallMeleeEnemy : public BaseEnemy {
+class SmallCartEnemy : public BaseEnemy {
 public:
 	// コンストラクタ
-	SmallMeleeEnemy() {
+	SmallCartEnemy() {
 
 	}
 
@@ -31,4 +32,8 @@ public:
 private:
 	// ステートマシーン初期化
 	void InitStateMachine() override;
+
+private:
+	//
+	float attackTimer_ = 0.0f;
 };

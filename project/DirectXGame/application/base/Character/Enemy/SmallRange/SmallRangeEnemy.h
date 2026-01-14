@@ -1,10 +1,13 @@
 #pragma once
-#include "DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "BulletEnemyState.h"
+#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include "SmallRangeEnemyState.h"
+#include <DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h>
 
-class BulletEnemy : public BaseEnemy
-{
+class SmallRangeEnemy : public BaseEnemy {
 public:
+	// コンストラクタ
+	SmallRangeEnemy() {}
+
 	// 初期化
 	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
@@ -24,13 +27,14 @@ public:
 	void Jump() override {};
 	// 攻撃
 	void Attack() override {};
-
 private:
 	// ステートマシーン初期化
 	void InitStateMachine() override;
-	// パーティクル初期化
-	void InitParticle();
 
-
+private:
+	float skyHeight_ = 5.0f;
+	//
+	float attackTimer_ = 0.0f;
+	std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
 
 };

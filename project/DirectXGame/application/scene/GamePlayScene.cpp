@@ -114,7 +114,7 @@ void GamePlayScene::Initialize()
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
 	// ステージ
-	stage_ = std::make_unique<Stage>();
+	stage_ = std::make_unique<MainStage>();
 	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
 	
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
@@ -165,15 +165,15 @@ void GamePlayScene::CheckAllCollisions()
 		if (caracter->GetColliderComponent()) {
 			if (caracter->GetHP() <= 0) continue;
 			collisionManager_->Register(caracter->GetColliderComponent());
+			
+		}
+		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetData();
+		for (auto& caracterHitBox : hit) {
+			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
 		}
 	}
 
-	// IDが1なら
-	if (GetSceneData().playerID == 1) {
-		for (auto& caracter : characterManager_->GetPlayer()->GetAttackController()->GetHitBoxSystem()->GetData()) {
-			collisionManager_->Register(caracter.hitBox.get()->GetColliderComponent());
-		}
-	}
+
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
 		if (bullet->GetColliderComponent()) {

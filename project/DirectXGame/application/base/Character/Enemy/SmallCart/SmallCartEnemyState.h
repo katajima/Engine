@@ -1,12 +1,17 @@
 #pragma once
 #include "DirectXGame/application/base/State/BaseMainState.h"
 
+
+
+
+class BaseCharacter;
+
 // 移動
-class SmallMeleeEnemyMoveState : public MoveState
+class SmallCartEnemyMoveState : public MoveState
 {
 public:
 	// コンストラクタ
-	SmallMeleeEnemyMoveState(BaseCharacter* enemy)
+	SmallCartEnemyMoveState(BaseCharacter* enemy)
 		: MoveState(enemy) {
 	}
 
@@ -25,32 +30,12 @@ private:
 };
 
 /// <summary>
-/// 攻撃
-/// </summary>
-class SmallMeleeEnemyAttackState :public AttackState
-{
-public:
-	SmallMeleeEnemyAttackState(BaseCharacter* enemy)
-		: AttackState(enemy) {
-	}
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-private:
-	
-};
-
-/// <summary>
 /// 死亡状態
 /// </summary>
-class SmallMeleeEnemyDieState :public DieState
+class SmallCartEnemyDieState :public DieState
 {
 public:
-	SmallMeleeEnemyDieState(BaseCharacter* enemy)
+	SmallCartEnemyDieState(BaseCharacter* enemy)
 		: DieState(enemy) {
 	}
 

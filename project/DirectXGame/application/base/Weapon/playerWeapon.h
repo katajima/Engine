@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Weapon/Base/MeleeWeapons.h"
+#include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 
 
@@ -11,7 +11,7 @@ class NormalPlayer;
 /// <summary>
 ///  プレイヤー武器クラス
 /// </summary>
-class PlayerWeapon : public SwordWeapon
+class PlayerWeapon : public MeleeWeapon
 {
 public:
 

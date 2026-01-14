@@ -34,11 +34,13 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 	objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
 	objectComponent_->GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
+	// キャラクターのパラメータコンポーネントを生成
+	characterParameterComponent_ = std::make_unique<CharacterParameterComponent>();
+
 
 	// HP設定
 	Parameters().HP.Initiaize(200, 0, 200, 0);
 	Parameters().stamina.Initiaize(100, 0, 50, 0);
-	HP() = 200; // 初期HP設定
 	Parameters().speed = 40.0f;// 移動速度設定
 	Parameters().jampPower = 100.0f;
 	
@@ -85,32 +87,15 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 
 		// 壁との衝突応答
 		responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall,self,other);
-
-		
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
-
-		if (!enemy) return;
-		if (other->tag == CollisionTag::Item) return;
-
-		if (enemy->GetCharacterStateMachine()->GetCurrentMainState() == CharacterMainState::Attack) {
-			float nowTime = Engine::MyGame::NowTime(); // ← 時間取得関数（例）
-
-			if (objectComponent_->GetContactRecord().CheckHistory(otherId, nowTime, 1.0f)) {
-				return; // クールタイム中のため無視
-			}
-
-			objectComponent_->GetContactRecord().AddHistory(otherId, nowTime);
-
-			AddDamage(DamageCalculator::ComputeDamage(*enemy->GetAttackController()->GetCombatStat(), *GetAttackController()->GetCombatStat(), 1.0f));
-			followCamera_->GetUniqueCamera()->SetShake(0.25f, { 0.1f,0.1f,0.1f });
-		}
 		};
 
 
 	// 応答システム初期化
 	responseSystem_ = std::make_unique<ResponseSystem>();
-	responseSystem_->Initialize(&GetCharacterParameterComponent(), objectComponent_.get());
+	responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
 	responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
+
+
 
 	// 弾出現
 	bulletSpawn_ = std::make_unique<BulletSpawn>();
@@ -133,9 +118,8 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 	// UI
 	ui_ = std::make_unique<PlayerUI>();
 	ui_->Initialize(input_, entity2DManager_, globalVariables_);
-	ui_->SetHP(&characterParameterComponent_.HP());
-	ui_->SetStamina(&characterParameterComponent_.Stamina());
-
+	ui_->SetCharacterParameter(GetCharacterParameterComponent());
+	
 
 	// キャラクター行動ステート初期化
 	InitStateMachine();
@@ -151,7 +135,7 @@ void NormalPlayer::InitAttack(){
 
 	// 戦闘
 	attackController_ = std::make_unique<AttackController>();
-	attackController_->Initialize(entity3DManager_,globalVariables_,&characterParameterComponent_, this);
+	attackController_->Initialize(entity3DManager_,globalVariables_, GetCharacterParameterComponent(), this);
 	attackController_->GetHitCounter().SetHitTimer(2.0f);
 	
 	ComboSystem* combo = attackController_->GetComboSystem();
@@ -208,7 +192,7 @@ void NormalPlayer::RequestAttack(AttackInput input)
 			{
 			case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack4"); break;
 			case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("Attack1"); break;
-				// case AttackInput::Skill1: ac->GetComboSystem()->StartCombo("Skill1"); break;
+			case AttackInput::Skill: ac->GetComboSystem()->StartCombo("Skill1"); break;
 			default: break;
 			}
 		}
@@ -256,7 +240,6 @@ void NormalPlayer::Update()
 	if (GetHP() <= 0) {
 		objectComponent_->GetObjectStateFlags().isAlive = false;
 	}
-	
 
 
 #ifdef _DEBUG
@@ -319,7 +302,7 @@ void NormalPlayer::Update()
 	GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 	// キャラクターパラメーター更新
-	characterParameterComponent_.Update();
+	characterParameterComponent_->Update();
 
 	// 移動コンポーネント更新
 	moveComponent_->Update(Engine::MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(),

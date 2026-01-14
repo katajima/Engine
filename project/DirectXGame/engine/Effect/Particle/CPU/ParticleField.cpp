@@ -1,7 +1,7 @@
 #include "ParticleField.h"
 
 #include "DirectXGame/engine/Line/LineCommon.h"
-#include "DirectXGame/engine/Collider/3d/ColliderFanction3D.h"
+#include "DirectXGame/engine/Collider/3d/ColliderFunction3D.h"
 #include "DirectXGame/engine/Math/Random.h"
 #include "DirectXGame/engine/Utility/RangeUtility.h"
 #include "imgui.h"

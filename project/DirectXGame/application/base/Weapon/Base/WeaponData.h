@@ -11,9 +11,7 @@ enum class WeaonType
 // 遠近どちらにもあるパラメータ持つ武器データ構造体
 struct WeaponData
 {
-	//float damage = 0;					// ダメージ 
 	WeaonType type = WeaonType::MELL;	// 武器の種類(遠近)
-	//Timer animetionTimer;				// アニメーションタイマー(攻撃アニメーションの管理用)
 	bool isAutomatic = false;			// オート連射(入力しっぱなしで攻撃)可能かのフラグ
 	bool isActive = false;				// 武器が有効かどうかのフラグ(攻撃中か)
 

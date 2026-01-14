@@ -33,17 +33,8 @@ void CharacterManager::Update()
 
 	// プレイヤー座標をセット
 	if (GetPlayer()) {
-		//crowdManager_->playerPos = GetPlayer()->GetObjectComponent()->GetWorldPosition();
 		specalPointManager_->SetTarget(GetPlayer());
 	}
-
-	// 群衆の結果を敵モデルに反映
-	//crowdManager_->UpdateAgentsToInstancing();
-
-	// 群衆AI更新
-	//crowdManager_->Update(Engine::MyGame::GameTime());
-
-
 
 	// キャラクター更新(敵)
 	std::vector<BaseEnemy*> target;
@@ -90,7 +81,8 @@ void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& c
 	static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
 	{
 		{ EnemyType::kNormal,   []() { return std::make_unique<NormalEnemy>(); } },
-		{ EnemyType::kBullet,   []() { return std::make_unique<BulletEnemy>(); } },
+		{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
+		{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
 	};
 
 	auto it = enemyFactoryMap.find(enemyType);
@@ -98,19 +90,15 @@ void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& c
 
 	std::unique_ptr<BaseEnemy> enemy = it->second();
 
-	enemy->SetCharacterType(CharacterType::Enemy);	// キャラクタータイプを敵に設定
 	enemy->SetID(characterCount_);					// ID設定
-	enemy->SetBulletManager(bulletManager_);	// 弾管理クラス設定
+	enemy->SetBulletManager(bulletManager_);		// 弾管理クラス設定
 	enemy->SetSpecalPointManager(specalPointManager_);	// スペシャルポイント管理クラス設定
-	enemy->SetPlayer(GetPlayer());					// ターゲット指定
+	enemy->SetTarget(GetPlayer());					// ターゲット指定
 	enemy->SetEffect(effect_);						// エフェクト設定
 	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
+	enemy->SetCharacterType(CharacterType::Enemy);	// キャラクタータイプを敵に設定
 	enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
 	enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
-
-
-	// 群衆AI
-	//crowdManager_->CreateAgent(groupId, enemy.get(), transform.translate);
 
 	character_.push_back(std::move(enemy));
 }
@@ -120,13 +108,13 @@ void CharacterManager::CreateCharacter(PlayerType playerType, const std::string&
 	std::unique_ptr<BasePlayer> player;
 
 	player = std::make_unique<NormalPlayer>();
-	player->SetCharacterType(CharacterType::Player);// キャラクターのタイプをプレイヤーに
 	player->SetFollowCamera(followCamera_);		// フォローカメラ設定
 	player->SetCameraManager(cameraManager_);	// カメラ管理クラス設定
 	player->SetBulletManager(bulletManager_);	// 弾管理クラス設定
 	player->SetSpecalPointManager(specalPointManager_);	// スペシャルポイント管理クラス設定
 	player->SetEffect(effect_);					// エフェクト設定
 	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
+	player->SetCharacterType(CharacterType::Player);// キャラクターのタイプをプレイヤーに
 	character_.push_back(std::move(player));	// キャラクターに追加 
 }
 
