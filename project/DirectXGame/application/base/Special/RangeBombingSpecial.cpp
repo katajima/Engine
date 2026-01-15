@@ -32,9 +32,9 @@ void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, E
 	ctlinder_ = std::make_unique<Engine::CylinderPrimitive>();
 	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/simasima.png");
 	ctlinder_->Data() = cylinderParam;	//　パラメータ代入
-	
+
 	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー","resources/Texture/effect/gradationLine.png",camera);
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.png", camera);
 	objectReticle_->SetPrimitive(std::move(ctlinder_));
 	objectReticle_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
@@ -46,7 +46,7 @@ void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, E
 
 
 // 半径設定
-void RangeBombingSpecial::SetRadius(float rad) { 
+void RangeBombingSpecial::SetRadius(float rad) {
 	dataRange_.reticleRad_ = rad;
 	Engine::CylinderPrimitive* primi = static_cast<Engine::CylinderPrimitive*>(objectReticle_->GetPrimitive());
 	// シリンダーパラメータ設定
@@ -90,27 +90,25 @@ void RangeBombingSpecial::InAction()
 	case 0:
 		data_.isAction_ = true;
 		time_ += GetTime();
-		
-		if (time_ >= 0.1f) {
-			if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
-				data_.AddPhase();
-				time_ = 0;
-				dataRange_.rangeBombingPos = objectReticle_->GetWorldTransform().worldMat_.GetWorldPosition();
-			}
+		if (time_ >= 0.25f) {
+
+			data_.AddPhase();
+			time_ = 0;
+			dataRange_.rangeBombingPos = objectReticle_->GetWorldTransform().worldMat_.GetWorldPosition();
+
 		}
-		
+
 		data_.isMove_ = true;
 
 		objectReticle_->GetPrimitive()->GetMaterial()->transform.translate.x += GetTime() * 0.10f;
-
 		break;
 	case 1:
 		data_.isAction_ = true;
 		data_.isMove_ = false;
 		dataRange_.shotTimer += GetTime();
-		
 
-		
+
+
 
 		// 発射タイマーが経過したらミサイルを発射
 		if (dataRange_.shotTimer >= provisionalData_.shotTimer) {

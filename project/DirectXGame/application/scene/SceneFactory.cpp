@@ -19,6 +19,9 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
     if (sceneName == "SAMPLE") {                // サンプル
         return std::make_unique<SampleScene>();
     }
+	if (sceneName == "RESULT") {                // リザルト
+		return std::make_unique<ResultScene>();
+    }
 
     return nullptr;
 }

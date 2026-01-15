@@ -63,6 +63,32 @@ public:
 public:
 	// データ設定
 	void SetData(ComboData& data, const ComboGlovalData& gData);
+public:
+	// 追加ヒットボックスデータ
+	struct AddHitBoxData {
+		HitBoxCollData hitBoxData;
+		ComboGlovalData comboGlovalData;
+	};
+
+	// コンボ条件データ
+	struct ComboConditionData {
+		ComboCondition::EndConditionType type = ComboCondition::EndConditionType::kOnTimer;
+	};
+
+	// ヒットボックスデータ
+	struct HitBoxData {
+		// ヒットボックスの発生条件タイプ
+		ComboHitBox::HitBoxSpawnType spawnType_ = ComboHitBox::HitBoxSpawnType::kOnTime;
+		// ヒットボックス依存先タイプ
+		HitBoxSystem::Type dependenceType_ = HitBoxSystem::Type::kParent;
+		// オフセット
+		Vector3 offset_ = { 0.0f,0.0f,0.0f };
+	};
+	
+	void CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData> addHitBoxData, Engine::WorldTransform* perent, 
+		const ComboConditionData comboConditionData = {}, const HitBoxData hitBoxData = {});
+
+
 private:
 	// コンボステートマシーン
 	std::unique_ptr<ComboStateMachine> comboStateMachine_;

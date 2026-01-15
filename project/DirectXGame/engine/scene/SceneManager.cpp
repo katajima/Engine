@@ -37,8 +37,7 @@ void Engine::SceneManager::Update()
 			// フェードアウト完了 → シーン切り替え
 			if (scene_) {
 				scene_->Finalize();
-				scene_.reset();  // ★ unique_ptrなのでdelete不要
-				//scene_ = nullptr;
+				scene_.reset();
 			}
 
 			scene_ = std::move(nextScene_);
@@ -124,7 +123,7 @@ Engine::SceneManager::~SceneManager()
 {
 	// 最後のシーンの終了と解放
 	scene_->Finalize();
-	scene_.reset();  // ★ delete不要
+	scene_.reset();  
 }
 
 void Engine::SceneManager::ChangeScene(const std::string& sceneName, float duration)

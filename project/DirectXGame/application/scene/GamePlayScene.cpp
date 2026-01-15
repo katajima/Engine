@@ -6,10 +6,10 @@
 #include <exception>
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include "DirectXGame/engine/Math/Random.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 
 #pragma region Initialize
 
@@ -244,7 +244,7 @@ void GamePlayScene::Update()
 	}
 	
 	// インプットマネージャー更新
-	inputManager_->Update(Engine::MyGame::GameTime());
+	inputManager_->Update(GetTime());
 
 	// コマンド
 	iCommand_ = inputHander_->HandleInput();
@@ -264,7 +264,7 @@ void GamePlayScene::Update()
 	characterManager_->Update();
 
 	// 必殺技ポイント管理クラス
-	specalPointManager_->Update(Engine::MyGame::GameTime());
+	specalPointManager_->Update(GetTime());
 
 	
 
@@ -281,7 +281,7 @@ void GamePlayScene::Update()
 	// Effect更新
 	effect_->Update();
 	// ゲーム進行マネージャー更新
-	gameFlowController_->Update(Engine::MyGame::GameTime());
+	gameFlowController_->Update(GetTime());
 
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update();

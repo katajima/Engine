@@ -72,5 +72,4 @@ void SmallCartEnemyDieState::Enter()
 	character_->GetSpecalPointManager()->AddPoint(character_->GetWorldTransform().GetWorldPosition() + Vector3{ -4,4.0f,0 }, 1);
 	character_->GetSpecalPointManager()->AddPoint(character_->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,4 }, 1);
 	character_->GetSpecalPointManager()->AddPoint(character_->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,-4 }, 1);
-
 }

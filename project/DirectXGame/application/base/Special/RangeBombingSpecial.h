@@ -97,7 +97,7 @@ private: // 一旦
 	const float fireInterval = 0.01f; // 例：0.04秒ごとに1発ずつ発射
 
 	struct ProvisionalData {
-		Vector3 translate = { 0,2,50 };
+		Vector3 translate = { 0,2,0 };
 		Vector3 rotate = { Math::DegreesToRadians(-90), 0, 0 };
 
 

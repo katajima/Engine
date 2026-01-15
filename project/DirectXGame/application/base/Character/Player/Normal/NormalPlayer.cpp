@@ -305,7 +305,7 @@ void NormalPlayer::Update()
 	characterParameterComponent_->Update();
 
 	// 移動コンポーネント更新
-	moveComponent_->Update(Engine::MyGame::GameTime(), GetObjectComponent()->GetWorldTransform(),
+	moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(),
 		*GetObjectComponent()->GetRigidBodyComponent(), GetInput());
 
 	// ステート
@@ -398,45 +398,20 @@ void NormalPlayer::ApplyGlobalVariables(){
 
 void NormalPlayer::ReloadComboData()
 {
+	// コンボノードクリア
 	GetAttackController()->GetComboSystem()->ClearNode();
-
 	HitBoxSystem* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
 	ComboSystem* comboSystem = GetAttackController()->GetComboSystem();
-
-	// コンボデータ設定
-	ComboData data1{};
-	ComboData data2{};
-	ComboData data3{};
-	ComboData data4{};
-	ComboData data5{};
-	ComboData data6{};
-	ComboData data7{};
-	ComboData data8{};
 	// ヒットボックスデータ
-	HitBoxCollData hitData1{};
-	HitBoxCollData hitData2{};
-	HitBoxCollData hitData3{};
-	HitBoxCollData hitData4{};
-	HitBoxCollData hitData5{};
-
-
-	GlobalHitBoxdata hitBoxdata;
-	hitBoxdata.size = provisionalData_.obbColliderSize;
-	hitBoxdata.offset = provisionalData_.collider1Pos;
-	GlobalHitBoxdata hitBoxdata2;
-	hitBoxdata2.offset = provisionalData_.collider2Pos;
-	hitBoxdata2.size = provisionalData_.obbCollider2Size;
-	GlobalHitBoxdata hitBoxdata3;
-	hitBoxdata3.offset = { 0,0,3 };
-	hitBoxdata3.size = { 10,10,10 };
-	GlobalHitBoxdata hitBoxdata4;
-	hitBoxdata4.offset = { 0,0,0 };
-	hitBoxdata4.radius = 20.0f;
-	GlobalHitBoxdata hitBoxdata5;
-	hitBoxdata5.size = provisionalData_.obbCollider3Size;
-	hitBoxdata5.offset = provisionalData_.collider3Pos;
-
-
+	HitBoxCollData hitData1 = {}, hitData2 = {}, hitData3 = {}, hitData4 = {}, hitData5 = {};
+	
+	// ヒットボックスデータ作成
+	GlobalHitBoxdata hitBoxdata  = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
+	GlobalHitBoxdata hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
+	GlobalHitBoxdata hitBoxdata3 = { { 0,0,3 } ,{ 10,10,10 } };
+	GlobalHitBoxdata hitBoxdata4 = { { 0,0,0 },{},20.0f };
+	GlobalHitBoxdata hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
+	
 	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBoxShape::kOBB,HitBoxUseType::kPlayer, hitBoxdata, hitData1);
 	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata2, hitData2);
 	hitBoxSystem->CreateHitBoxCollData("obb", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata3, hitData3);
@@ -446,111 +421,35 @@ void NormalPlayer::ReloadComboData()
 
 	// データ
 	// コンボ１のデータ送る
-	data1.hitBox.AddCollider(hitData3, data1_);
-
-	data1.hitBox.ClearUseHitBox();
-	data1.hitBox.AddUseHitBox("obb");
-
-
-	comboSystem->SetData(data1, data1_);
-	data1.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("Attack1", data1);	// コンボ追加
-
-
+	comboSystem->CreateCombo("Attack1",{{ hitData3 ,data1_ }}, &objectComponent_->GetObject3D()->GetWorldTransform());
 	// コンボ２のデータ送る
-	data2.hitBox.AddCollider(hitData1, data2_);
-	data2.hitBox.AddCollider(hitData2, data2_);
-	// データ
-	data2.hitBox.ClearUseHitBox();
-	data2.hitBox.AddUseHitBox("obbColl1");
-	data2.hitBox.AddUseHitBox("obbColl2");
-	comboSystem->SetData(data2, data2_);
-	data2.hitBox.SetPerent(&weapon_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("Attack2", data2);	// コンボ追加
-
-
+	comboSystem->CreateCombo("Attack2", { { hitData1 ,data2_ },{ hitData2 ,data2_ } }, &weapon_->GetObject3D()->GetWorldTransform());
 	// コンボ３のデータ送る
-	data3.hitBox.AddCollider(hitData5, data3_);
-	data3.hitBox.AddCollider(hitData1, data3_);
-	// データ
-	data3.hitBox.ClearUseHitBox();
-	data3.hitBox.AddUseHitBox("obbColl1");
-	data3.hitBox.AddUseHitBox("obbColl1_1");
-
-
-	comboSystem->SetData(data3, data3_);
-	data3.hitBox.SetPerent(&weapon_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("Attack3", data3);	// コンボ追加
-
-
+	comboSystem->CreateCombo("Attack3", { { hitData5 ,data3_ },{ hitData1 ,data3_ } }, &weapon_->GetObject3D()->GetWorldTransform());
 	// ジャンプコンボのデータ送る
-	data4.hitBox.AddCollider(hitData4, data4_);
-	// データ(ジャンプ)
-	data4.hitBox.ClearUseHitBox();
-	data4.hitBox.AddUseHitBox("obb2");
-	data4.comboCondition.GetData().type = ComboCondition::EndConditionType::kOnGround;	// 着地したら終了
-	data4.hitBox.GetData().dependenceType_ = HitBoxSystem::Type::kParentIndependent;	// 依存関係なし独立
-	data4.hitBox.GetData().spawnType_ = ComboHitBox::HitBoxSpawnType::kOnGround;			// 着地したら発生
-	data4.hitBox.GetData().offset_ = { 0,0,5.5f };
-
-	comboSystem->SetData(data4, data4_);
-	data4.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("JumpAttack", data4);	// コンボ追加
-
-
-	// データ
+	comboSystem->CreateCombo("JumpAttack", { { hitData4 ,data4_ } }, &objectComponent_->GetObject3D()->GetWorldTransform(),
+		{ ComboCondition::EndConditionType::kOnGround },
+		{ComboHitBox::HitBoxSpawnType::kOnGround, HitBoxSystem::Type::kParentIndependent,{ 0,0,5.5f } });
 	// コンボ4のデータ送る
-	data5.hitBox.AddCollider(hitData3, data5_);
-
-	data5.hitBox.ClearUseHitBox();
-	data5.hitBox.AddUseHitBox("obb");
-
-
-	comboSystem->SetData(data5, data5_);
-	data5.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("Attack4", data5);	// コンボ追加
-
-	// データ
+	comboSystem->CreateCombo("Attack4", { { hitData3 ,data5_ }}, &objectComponent_->GetObject3D()->GetWorldTransform());
 	// コンボ5のデータ送る
-	data6.hitBox.AddCollider(hitData3, data6_);
-	data6.hitBox.ClearUseHitBox();
-	data6.hitBox.AddUseHitBox("obb");
-	comboSystem->SetData(data6, data6_);
-	data6.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("Attack5", data6);	// コンボ追加
-	
-
-	// データ
+	comboSystem->CreateCombo("Attack5", { { hitData3 ,data6_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
 	// コンボ6のデータ送る
-	data7.hitBox.AddCollider(hitData3, data7_);
-	data7.hitBox.ClearUseHitBox();
-	data7.hitBox.AddUseHitBox("obb");
-	comboSystem->SetData(data7, data7_);
-	data7.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("Attack6", data7);	// コンボ追加
-
-	// データ
+	comboSystem->CreateCombo("Attack6", { { hitData3 ,data7_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
 	// コンボ7のデータ送る
-	data8.hitBox.AddCollider(hitData3, data8_);
-	data8.hitBox.ClearUseHitBox();
-	data8.hitBox.AddUseHitBox("obb");
-	comboSystem->SetData(data8, data8_);
-	data8.hitBox.SetPerent(&objectComponent_->GetObject3D()->GetWorldTransform());
-	GetAttackController()->GetComboSystem()->AddComboNode("Attack7", data8);	// コンボ追加
+	comboSystem->CreateCombo("Attack7", { { hitData3 ,data8_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
 
 
-	
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack4", AttackInput::Light, "Attack5"); // コンボ連結
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack5", AttackInput::Light, "Attack6"); // コンボ連結
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack7", AttackInput::Light, "Attack1"); // コンボ連結
 
+	// コンボ連結設定
+	comboSystem->ConnectCombo("Attack4", AttackInput::Light, "Attack5"); // コンボ連結
+	comboSystem->ConnectCombo("Attack5", AttackInput::Light, "Attack6"); // コンボ連結
+	comboSystem->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
+	comboSystem->ConnectCombo("Attack7", AttackInput::Light, "Attack1"); // コンボ連結
 
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
-	GetAttackController()->GetComboSystem()->ConnectCombo("Attack2", AttackInput::Light, "Attack3"); // コンボ連結
-	GetAttackController()->GetComboSystem()->ConnectCombo("JumpAttack", AttackInput::Light, "Attack2"); // コンボ連結
-
-	
+	comboSystem->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
+	comboSystem->ConnectCombo("Attack2", AttackInput::Light, "Attack3"); // コンボ連結
+	comboSystem->ConnectCombo("JumpAttack", AttackInput::Light, "Attack2"); // コンボ連結	
 }
 
 #pragma endregion // そのほか

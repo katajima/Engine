@@ -5,6 +5,7 @@
 #include"TestScene.h"
 #include "SelectScene.h"
 #include "SampleScene.h"
+#include "ResultScene.h"
 
 // このゲーム用のシーン工場
 class SceneFactory : public Engine::AbstractSceneFactory

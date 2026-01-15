@@ -74,6 +74,10 @@ namespace Engine {
 		// シーンデータ取得
 		SceneData& GetSceneData();
 
+		// 時間取得
+		float GetTime() const;
+
+
 	private:
 		// シーンマネージャ(借りてくる)
 		Engine::SceneManager* sceneManager_ = nullptr;
