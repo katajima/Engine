@@ -10,10 +10,10 @@ void NormalEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* enti
 	// 基盤初期化
 	BaseInitialize(input,entity3DManager,entity2DManager,globalVariables,position,camera, "enemy.gltf", "enemy");
 	// サイズ
-	Vector3 size = { 1.7f,1.7f,1.7f };
+	Vector3 size = { 1.75f,1.75f,1.75f };
 	objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 	
-	
+
 	// パラメーター初期化
 	Parameters().HP.Initiaize(100, 0, 100, 0);
 	Parameters().speed = 10.0f;
@@ -47,8 +47,11 @@ void NormalEnemy::InitStateMachine() {
 }
 
 void NormalEnemy::Update(){
+	// 攻撃制御更新
+	attackController_->Update(GetTime());
 	// 基盤の更新
 	BaseUpdate();
+	
 }
 
 void NormalEnemy::Draw2D()
@@ -79,8 +82,22 @@ void NormalEnemy::Emit()
 
 void NormalEnemy::Move()
 {
-	// 移動
-	DirectionMove(Parameters().speed);
+	if (GetTargetDistance() <= 20.0f) {
+		attackTimer_ += GetTime();
+		if (attackTimer_ >= 3.0f) {
+			GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
+			attackTimer_ = 0.0f;
+			return;
+		}
+		if (GetTargetDistance() <= 15.0f) {
+			DirectionMove(-Parameters().speed);
+		}
+	}
+	else {
+		attackTimer_ = 0.0f;
+		// 移動
+		DirectionMove(Parameters().speed);
+	}
 }
 
 void NormalEnemy::InitParticle()

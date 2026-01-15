@@ -5,6 +5,8 @@
 namespace Engine {
 	class Entity2DManager;
 }
+class CharacterParameterComponent;
+
 /// <summary>
 /// プレイヤーUIクラス
 /// </summary>
@@ -25,10 +27,7 @@ public:
 
 public:
 
-	// HP設定
-	void SetHP(Gage* hp) { hpBar_ = hp; };
-	// スタミナ設定
-	void SetStamina(Gage* stamina) { staminaBar_ = stamina; }
+	void SetCharacterParameter(CharacterParameterComponent* parameter) { parameterComponent_ = parameter; };
 
 	// スペシャルゲージサイズ設定
 	void SetSpecialGaugeSize(float size) { sizeSpecialGauge_ = size; }
@@ -37,14 +36,9 @@ public:
 	// RBボタンテクスチャ映すか
 	void SetIsTextRB(bool is) { isTextRB_ = is; }
 private:
-
-	Gage* hpBar_;
-	Gage* staminaBar_;
-
-
-
-	float srideM_ = 0;
-
+	CharacterParameterComponent* parameterComponent_ = nullptr;
+	
+	
 	std::unique_ptr<Engine::Sprite> textMax_;
 	std::unique_ptr<Engine::Sprite> textRB_;
 	bool isTextRB_ = false;

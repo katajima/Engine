@@ -340,9 +340,9 @@ void PlayerStateDefense::Update() {
 			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.75;
 
 			// スタミナがあるなら
-			if (character_->GetCharacterParameterComponent().IsGetStamina()) {
+			if (character_->GetCharacterParameterComponent()->IsGetStamina()) {
 				// スタミナ消費
-				character_->GetCharacterParameterComponent().Stamina().rateFluctuation = -5.0f;
+				character_->GetCharacterParameterComponent()->Stamina().rateFluctuation = -5.0f;
 			}
 			else {
 				isDifense_ = false;
@@ -351,7 +351,7 @@ void PlayerStateDefense::Update() {
 		}
 		else {
 			// スタミナ回復
-			character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
+			character_->GetCharacterParameterComponent()->Stamina().rateFluctuation = 5.0f;
 			isDifense_ = false;
 			timer_ += character_->GetTime();
 			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
@@ -371,7 +371,7 @@ void PlayerStateDefense::Update() {
 void PlayerStateDefense::Exit() {
 	isDifense_ = false;
 	character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
-	character_->GetCharacterParameterComponent().Stamina().rateFluctuation = 5.0f;
+	character_->GetCharacterParameterComponent()->Stamina().rateFluctuation = 5.0f;
 };
 // 初期化
 void PlayerStateDefense::Enter() {

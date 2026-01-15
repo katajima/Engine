@@ -27,7 +27,7 @@ namespace Engine{
 /// <summary>
 /// ステージクラス
 /// </summary>
-class Stage {
+class MainStage {
 public:
 	// 初期化
 	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera);
@@ -94,11 +94,9 @@ private:
 	std::unique_ptr<Engine::Ocean> ocean_ = nullptr;
 	Engine::Object3d* oceanObject;
 
-
 	// スカイボックス
 	std::unique_ptr<Engine::SkyBox> skyBox;
 	
-
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
 private:

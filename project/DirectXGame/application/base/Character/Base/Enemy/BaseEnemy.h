@@ -43,8 +43,10 @@ public:
 	// 攻撃
 	virtual void Attack() = 0;
 	// プレイヤー設定
-	void SetPlayer(BasePlayer* player) { player_ = player; }// プレイヤ設定
+	void SetTarget(BasePlayer* target) { target_ = target; }// プレイヤ設定
 		
+	BasePlayer* GetTarget() { return target_; } // ターゲット取得
+
 public:
 	// パーティクル発生
 	virtual void Emit() = 0;
@@ -63,20 +65,16 @@ public:
 	void DirectionMoveVelocity(float speed);
 	// 移動向き
 	void DirectionMove(float speed);
-	// 
+	// ターゲット方向取得
 	Vector3 TargetDirection();
+	//
+	void TargetMove(const Vector3 velocity);
+
 
 	// ロックオンされているか
 	bool GetIsLockOn() const { return isLockOn_; }
 	//　ロックオンされているか設定
 	void SetIsLockOn(bool isLockOn) { isLockOn_ = isLockOn; }
-
-	
-
-	void SetCrowdState(AgentState state) { agentState_ = state; }
-
-
-
 protected:
 	// スプライト初期化
 	void Initialize2D();
@@ -93,7 +91,7 @@ protected: //2D
 	std::unique_ptr<Engine::Sprite> hpBer_;
 	std::unique_ptr<Engine::Sprite> backHpBer_;
 protected:
-	BasePlayer* player_;
+	BasePlayer* target_;
 	std::unique_ptr <VisionComponent> visionComponent_;			// 視界
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 	bool isLockOn_ = false; // ロックオンされているか

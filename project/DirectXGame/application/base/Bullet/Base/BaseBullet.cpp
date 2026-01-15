@@ -5,7 +5,7 @@
 
 BaseBullet::~BaseBullet() {
 	// オブジェクトを削除
-	objectComponent_->IsDelete();
+	//objectComponent_->IsDelete();
 }
 
 void BaseBullet::BaseInitialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 

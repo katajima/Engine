@@ -78,7 +78,7 @@ public:
 	}
 
 	// 方向設定
-	void SetNormal(Vector3 normal) { data_.normal = normal; }
+	void SetNormal(const Vector3 normal) { data_.normal = normal; }
 
 private:
 	float timer_ = 0.0f;					// 時間

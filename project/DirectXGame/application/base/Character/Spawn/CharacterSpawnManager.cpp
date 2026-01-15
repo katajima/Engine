@@ -1,6 +1,6 @@
 #include "CharacterSpawnManager.h"
 
-void CharacterSpawnManager::Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, int maxCharactorCount)
+void CharacterSpawnManager::Initialize(CharacterManager* characterManager, Engine::LineCommon* line, int maxCharactorCount)
 {
 	characterManager_ = characterManager;	// キャラクター管理
 	lineCommon_ = line;						// ライン管理
@@ -22,6 +22,7 @@ void CharacterSpawnManager::AddCharacterSpawn(const SpawnInfo& info)
 
 	// キャラクタースポーン位置追加
 	std::unique_ptr<CharacterSpawn> spawn = std::make_unique<CharacterSpawn>();
+	spawn->SetMaxEnemyCount(info.GetData().spawnMaxCount_);
 	spawn->Initialize(characterManager_, lineCommon_, info);
 	characterSpawns_[info.GetData().name_] = std::move(spawn);
 }

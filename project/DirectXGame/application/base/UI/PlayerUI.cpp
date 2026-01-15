@@ -1,5 +1,6 @@
 #include "PlayerUI.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
 void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
@@ -55,8 +56,8 @@ void PlayerUI::Update()
 {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
-	hpber->SetMeterMinMax(hpBar_->minValue, hpBar_->maxValue);	// メータ最大値
-	hpber->SetMeter(hpBar_->value);								// メータ
+	hpber->SetMeterMinMax(parameterComponent_->HP().minValue, parameterComponent_->HP().maxValue);	// メータ最大値
+	hpber->SetMeter(parameterComponent_->HP().value);								// メータ
 	
 	specailBer->SetMeter(sizeSpecialGauge_);// メータ
 

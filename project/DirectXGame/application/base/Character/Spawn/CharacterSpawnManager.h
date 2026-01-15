@@ -12,7 +12,7 @@ public:
 	/// </summary>
 	/// <param name="characterManager"></param>
 	/// <param name="line"></param>
-	void Initialize(BaseCharacterManager* characterManager, Engine::LineCommon* line, int maxCharactorCount );
+	void Initialize(CharacterManager* characterManager, Engine::LineCommon* line, int maxCharactorCount );
 
 
 	/// <summary>
@@ -47,6 +47,6 @@ private:
 	int maxCharactorCount_ = 300;
 
 private:
-	BaseCharacterManager* characterManager_ = nullptr;
+	CharacterManager* characterManager_ = nullptr;
 	Engine::LineCommon* lineCommon_ = nullptr;
 };

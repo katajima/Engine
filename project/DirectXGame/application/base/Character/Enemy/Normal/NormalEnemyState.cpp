@@ -9,19 +9,17 @@
 
 void EnemyStateMove::Update()
 {
-	BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-	
+	// 時間更新
+	timer_ += character_->GetTime();
+
 	// HPが0以上なら
 	if (character_->GetHP() > 0) {
 		// 移動
 		character_->Move();
-		// 時間更新
-		timer_ += character_->GetTime();
 	}
 	else {
 		// 死亡状態に移行
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
-
 	}
 }
 

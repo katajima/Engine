@@ -51,7 +51,8 @@ public:
 	bool IsCanDash() const { return canDash_; }
 	// 方向設定
 	void SetDirection(const Vector3& direction);
-	
+	//
+	void SetIsUseGravity(bool isUse) { isUseGravity_ = isUse; }
 
 private:
 	// 速度処理
@@ -73,6 +74,8 @@ private:
 	bool isDash_ = false;
 	// ダッシュ可能かどうか
 	bool canDash_ = true;
+	//
+	bool isUseGravity_ = false;
 
 	// 方向
 	Vector3 direction_ = {};

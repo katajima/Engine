@@ -18,7 +18,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,  BaseCharacterManager* characterManager);
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,  CharacterManager* characterManager);
 
 	/// <summary>
 	/// 更新
@@ -38,9 +38,9 @@ public:
 	// 現在の時間
 	float GetCurrentWaveTime() const { return time_; }
 	// ウェーブ生成
-	void CreateWave(int waveIndex, float nextWaveDelay);
+	void CreateWave(int waveIndex, float nextWaveDelay, WaveEndType endType, int maxEnemyCount);
 	// スポーン生成
-	void CreateSpawn(EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f);
+	void CreateSpawn(EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f);
 
 
 
@@ -60,5 +60,5 @@ private:
 private:
 	Engine::Entity3DManager* entity3DManager_ = nullptr;
 	Engine::GlobalVariables* globalVariables_ = nullptr;
-	BaseCharacterManager* characterManager_ = nullptr;
+	CharacterManager* characterManager_ = nullptr;
 };

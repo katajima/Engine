@@ -1,62 +1,64 @@
-#include "BulletEnemyState.h"
-#include "BulletEnemy.h"
+#include "SmallRangeEnemyState.h"
+#include "SmallRangeEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include "DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h"
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
-#pragma region Move
 
-// 更新
-void BulletEnemyStateMove::Update() {
-	BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+void SmallRangeEnemyMoveState::Update()
+{
+	// 時間更新
+	timer_ += character_->GetTime();
 
 	// HPが0以上なら
 	if (character_->GetHP() > 0) {
 		// 移動
 		character_->Move();
-		// 時間更新
-		timer_ += character_->GetTime();
+		return;
 	}
 	else {
 		// 死亡状態に移行
 		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
-
 	}
-};
+}
 
-// 終了
-void BulletEnemyStateMove::Exit() {
-};
+void SmallRangeEnemyMoveState::Exit()
+{
+}
 
-// 初期化
-void BulletEnemyStateMove::Enter() {
-	timer_ = 0.0f;
-	character_->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 3.0f;
-};
+void SmallRangeEnemyMoveState::Enter()
+{
+}
 
-#pragma endregion // 移動
 
-#pragma region Attack
+void SmallRangeEnemyAttackState::Update()
+{
+	SmallRangeWeapon* weapon = static_cast<SmallRangeWeapon*>(character_->GetWeapon());
 
-void BulletEnemyStateAttack::Update() {
+	BaseEnemy* enemy = static_cast<BaseEnemy*>(character_);
 
-	//character_->GetBulletManager()->GenerateBullet();
-};
 
-// 終了
-void BulletEnemyStateAttack::Exit() {
-};
-// 初期化
-void BulletEnemyStateAttack::Enter() {
-};
+	weapon->SetCharacter(character_);
+	weapon->SetParent(enemy);
+	weapon->SetTarget(enemy->GetTarget());
+	weapon->Shot();
 
-#pragma endregion // 攻撃
+	character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+}
 
-#pragma region Die
+void SmallRangeEnemyAttackState::Exit()
+{
+}
 
-// 更新
-void BulletEnemyStateDie::Update() {
+void SmallRangeEnemyAttackState::Enter()
+{
+}
+
+
+void SmallRangeEnemyDieState::Update()
+{
 	// 時間更新
 	timer_ -= character_->GetTime();
 	if (timer_ <= 0.0f) {
@@ -78,16 +80,14 @@ void BulletEnemyStateDie::Update() {
 			character_->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
 		}
 	}
-};
+}
 
-// 終了
-void BulletEnemyStateDie::Exit() {
-};
-// 初期化
-void BulletEnemyStateDie::Enter() {
+void SmallRangeEnemyDieState::Exit()
+{
+}
+
+void SmallRangeEnemyDieState::Enter()
+{
 	timer_ = dieTimer_;
-};
-
-#pragma endregion // 死亡
-
-
+	character_->GetSpecalPointManager()->AddPoint(character_->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+}

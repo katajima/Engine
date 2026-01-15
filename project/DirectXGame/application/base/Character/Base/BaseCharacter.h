@@ -78,7 +78,7 @@ public:
 
 public:
 	// キャラクタータイプ設定
-	void SetCharacterType(CharacterType type) { characterParameterComponent_.characterType_ = type; }
+	void SetCharacterType(CharacterType type) { characterParameterComponent_->characterType_ = type; }
 
 	// ダメージ
 	void AddDamage(float damage) {
@@ -106,9 +106,9 @@ public: // 取得系関数
 	void SetAlive(bool is) { objectComponent_->GetObjectStateFlags().isAlive = is; };
 
 	// HP取得
-	float GetHP() const { return characterParameterComponent_.parameters_.HP.value; }
+	float GetHP() const { return characterParameterComponent_->parameters_.HP.value; }
 	// キャラクター取得
-	CharacterType GetCharacterType() const { return characterParameterComponent_.characterType_; }
+	CharacterType GetCharacterType() const { return characterParameterComponent_->characterType_; }
 	// コライダーコンポーネント
 	Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
@@ -143,9 +143,9 @@ public: // 貰いもの
 protected: // 取得系関数(変更可能)
 
 	// 基本パラメータ
-	BasicParameters& Parameters() { return characterParameterComponent_.parameters_; }
+	BasicParameters& Parameters() { return characterParameterComponent_->parameters_; }
 	// HP
-	float& HP() { return characterParameterComponent_.parameters_.HP.value; }
+	float& HP() { return characterParameterComponent_->parameters_.HP.value; }
 
 protected: // 保存機能
 
@@ -169,30 +169,30 @@ protected: // 保存機能
 
 	// ベースの保存項目を追加
 	void InitializeBaseAddItem() {
-		AddItem("speed", characterParameterComponent_.parameters_.speed);
-		AddItem("HP", characterParameterComponent_.parameters_.HP.value);
-		AddItem("MaxHP", characterParameterComponent_.parameters_.HP.maxValue);
-		AddItem("MP", characterParameterComponent_.parameters_.MP.value);
-		AddItem("MaxMP", characterParameterComponent_.parameters_.MP.maxValue);
-		AddItem("stamina", characterParameterComponent_.parameters_.stamina.value);
-		AddItem("MaxStamina", characterParameterComponent_.parameters_.stamina.maxValue);
-		AddItem("jampPower", characterParameterComponent_.parameters_.jampPower);
+		AddItem("speed", characterParameterComponent_->parameters_.speed);
+		AddItem("HP", characterParameterComponent_->parameters_.HP.value);
+		AddItem("MaxHP", characterParameterComponent_->parameters_.HP.maxValue);
+		AddItem("MP", characterParameterComponent_->parameters_.MP.value);
+		AddItem("MaxMP", characterParameterComponent_->parameters_.MP.maxValue);
+		AddItem("stamina", characterParameterComponent_->parameters_.stamina.value);
+		AddItem("MaxStamina", characterParameterComponent_->parameters_.stamina.maxValue);
+		AddItem("jampPower", characterParameterComponent_->parameters_.jampPower);
 
 
 
-		characterParameterComponent_.parameters_.speed = GetValue<float>("speed");
-		characterParameterComponent_.parameters_.HP.value = GetValue<float>("HP");
-		characterParameterComponent_.parameters_.HP.maxValue = GetValue<float>("MaxHP");
-		characterParameterComponent_.parameters_.MP.value = GetValue<float>("MP");
-		characterParameterComponent_.parameters_.MP.maxValue = GetValue<float>("MaxMP");
-		characterParameterComponent_.parameters_.stamina.value = GetValue<float>("stamina");
-		characterParameterComponent_.parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
-		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
+		characterParameterComponent_->parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_->parameters_.HP.value = GetValue<float>("HP");
+		characterParameterComponent_->parameters_.HP.maxValue = GetValue<float>("MaxHP");
+		characterParameterComponent_->parameters_.MP.value = GetValue<float>("MP");
+		characterParameterComponent_->parameters_.MP.maxValue = GetValue<float>("MaxMP");
+		characterParameterComponent_->parameters_.stamina.value = GetValue<float>("stamina");
+		characterParameterComponent_->parameters_.stamina.maxValue = GetValue<float>("MaxStamina");
+		characterParameterComponent_->parameters_.jampPower = GetValue<float>("jampPower");
 	}
 	// 更新保存項目
 	void UpdateBaseGetValue() {
-		characterParameterComponent_.parameters_.speed = GetValue<float>("speed");
-		characterParameterComponent_.parameters_.jampPower = GetValue<float>("jampPower");
+		characterParameterComponent_->parameters_.speed = GetValue<float>("speed");
+		characterParameterComponent_->parameters_.jampPower = GetValue<float>("jampPower");
 	}
 
 protected:
@@ -208,7 +208,7 @@ public:
 
 public:
 	// キャラクターパラメータコンポーネント取得
-	CharacterParameterComponent& GetCharacterParameterComponent() { return characterParameterComponent_; }
+	CharacterParameterComponent* GetCharacterParameterComponent() { return characterParameterComponent_.get(); }
 	// 攻撃応答システム取得
 	ResponseSystem* GetResponseSystem() { return responseSystem_.get(); }
 	// 攻撃コントローラー取得
@@ -231,7 +231,7 @@ protected:
 	std::unique_ptr<BulletSpawn> bulletSpawn_;					// 弾出現
 protected:
 	// キャラクターパラメータコンポーネント
-	CharacterParameterComponent characterParameterComponent_;
+	std::unique_ptr <CharacterParameterComponent> characterParameterComponent_;
 protected: // 貰いもの(アプリケーション層)
 	Effect* effect_ = nullptr;							// エフェクト
 	BulletManager* bulletManager_ = nullptr;			// 弾管理

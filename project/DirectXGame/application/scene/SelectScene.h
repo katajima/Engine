@@ -6,7 +6,7 @@
 #include"DirectXGame/engine/base/Load/LoadLevelData.h"
 
 // application
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"

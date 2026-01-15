@@ -406,9 +406,9 @@ void Engine::MyGame::LoadModel()
 
 
 	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
-	//modelManager->LoadModel("trainBridge.obj", "stage/Bridge"); // ステージ(橋)
 	modelManager->LoadModel("field.obj", "stage/Field"); // フィールド()
 	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
+	modelManager->LoadModel("testField.obj", "stage/test"); // フィールド()
 
 
 	/// <summary>
@@ -426,6 +426,16 @@ void Engine::MyGame::LoadModel()
 
 
 	modelManager->LoadModel("enemyBullet.gltf", "enemyAll/enemyBullet"); // 本体
+
+
+
+	modelManager->LoadModel("enemyBodySG01.obj", "enemy/enemySG01"); // 本体
+	modelManager->LoadModel("enemyWeaponSG01.obj", "enemy/enemySG01"); // 武器
+
+	modelManager->LoadModel("enemyBodySS01.obj", "enemy/enemySS01"); // 本体
+	modelManager->LoadModel("enemyPropellerSS01.obj", "enemy/enemySS01"); // プロペラ
+	modelManager->LoadModel("enemyMuzzleSS01.obj", "enemy/enemySS01"); // 武器
+	
 
 
 }

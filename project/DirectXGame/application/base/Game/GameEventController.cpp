@@ -3,11 +3,11 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/Character/Base/BaseCharacterManeger.h"
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 
 
 
-void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, BaseCharacterManager* characterManager)
+void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, CharacterManager* characterManager)
 {
 	entity3DManager_ = entity3DManager;		// エンティティ3d
 	globalVariables_ = globalVariables;		// 保存項目
@@ -19,48 +19,40 @@ void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, E
 	characterSpawnManager_->Initialize(characterManager_, entity3DManager_->Get3DLineCommon(),300);
 
 
-
-	
-
-
 	// ウェーブ管理クラス初期化
 	waveManager_ = std::make_unique<WaveManager>();
 	waveManager_->SetCharacterSpawnManager(characterSpawnManager_.get());
+	waveManager_->SetCharacterManager(characterManager_);
 
 
-	CreateSpawn(EnemyType::kNormal,"test", 1, 20, { 0,0,100 }, { 50,1,25 }, 15.0f);
-	CreateSpawn(EnemyType::kNormal,"test1", 3, 10, { 100,0,-100 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal,"test2", 3, 10, { -100,0,-100 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test3", 10, 3, { 100,0,-100 }, { 20,1,20 }, 3.0f);
-	CreateSpawn(EnemyType::kNormal, "test4", 10, 3, { -100,0,-100 }, { 20,1,20 }, 3.0f);
-	CreateWave(0,40);
-	CreateSpawn(EnemyType::kNormal,"test", 1, 20, { 0,0,100 }, { 50,1,20 }, 15.0f);
-	CreateSpawn(EnemyType::kNormal, "test1", 3, 10, { 30,0,-100 }, { 20,1,20 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test2", 3, 10, { -30,0,-100 }, { 20,1,20 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test3", 10, 4, { 30,0,-100 }, { 20,1,20 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test4", 10, 4, { -30,0,-100 }, { 20,1,20 }, 5.0f);
-	CreateWave(1,40);
-	CreateSpawn(EnemyType::kNormal, "test", 1, 30, { 0,0,50 }, { 50,1,25 }, 15.0f);
-	CreateSpawn(EnemyType::kNormal, "test1", 3, 20, { 100,0,50 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test2", 3, 20, { -100,0,-50 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test3", 10, 7, { 0,0,50 }, { 50,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test4", 10, 7, { 100,0,50 }, { 25,1,25 }, 5.0f);
-	CreateSpawn(EnemyType::kNormal, "test5", 10, 7, { -100,0,-50 }, { 25,1,25 }, 5.0f);
-	CreateWave(2,50);
+	CreateSpawn(EnemyType::kNormal,"normal", 1, 2, { 0,0,0 }, { 100,1,100 }, 10.0f);
+	CreateSpawn(EnemyType::kSmallRanged,"smallRanged", 3, 5, { 0,0,0 }, { 100,1,100 }, 5.0f);
+	CreateSpawn(EnemyType::kSmallMelee,"smallMelee", 3, 15, { 0,0,0 }, { 100,1,100 }, 5.0f);
+	CreateWave(0,10, WaveEndType::kKill,35);
+	CreateSpawn(EnemyType::kNormal, "normal", 2, 3, { 0,0,0 }, { 100,1,100 }, 10.0f);
+	CreateSpawn(EnemyType::kSmallRanged, "smallRanged", 2, 5, { 0,0,0 }, { 100,1,100 }, 5.0f);
+	CreateSpawn(EnemyType::kSmallMelee, "smallMelee", 2, 20, { 0,0,0 }, { 100,1,100 }, 5.0f);
+	CreateWave(1,10, WaveEndType::kKill,35);
+	CreateSpawn(EnemyType::kNormal, "normal", 2, 3, { 0,0,0 }, { 100,1,100 }, 10.0f);
+	CreateSpawn(EnemyType::kSmallRanged, "smallRanged", 5, 5, { 0,0,0 }, { 100,1,100 }, 5.0f);
+	CreateSpawn(EnemyType::kSmallMelee, "smallMelee", 5, 15, { 0,0,0 }, { 100,1,100 }, 5.0f);
+	CreateWave(2,10, WaveEndType::kKill,45);
 
 	waveManager_->Initialize(gameWaves_);
 }
 
-void GameEventController::CreateWave(int waveIndex, float nextWaveDelay) {
+void GameEventController::CreateWave(int waveIndex, float nextWaveDelay,WaveEndType endType, int maxEnemyCount) {
 	GameWave wave;
-	wave = WaveManager::CreateGameWave(waveIndex, nextWaveDelay,spawnInfos_);
+	wave = WaveManager::CreateGameWave(waveIndex, nextWaveDelay, endType, characterManager_ ,spawnInfos_);
+	wave.SetEnemyMaxCount(maxEnemyCount);
 	gameWaves_.push_back(wave);
 	spawnInfos_.clear();
 }
 
-void GameEventController::CreateSpawn(EnemyType type,const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval){
+void GameEventController::CreateSpawn(EnemyType type,const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval,float startDelay){
 	SpawnInfo data;
 	data.GetData().type_ = type;
+
 	data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval);
 	spawnInfos_.push_back(data);
 };

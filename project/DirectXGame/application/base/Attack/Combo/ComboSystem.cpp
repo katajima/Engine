@@ -172,5 +172,39 @@ void ComboSystem::SetData(ComboData& data, const ComboGlovalData& gData)
 	data.effect.GetData().lifeTime = gData.trailEffectLifeTime;
 }
 
+void ComboSystem::CreateCombo(const std::string comboNodeName,const std::vector<AddHitBoxData> addHitBoxDatas, Engine::WorldTransform* perent, 
+	const ComboConditionData comboConditionData, const HitBoxData hitBoxData)
+{
+	ComboData data{};
+
+	// ヒットボックス追加
+	for(AddHitBoxData addHitBoxData : addHitBoxDatas){
+		data.hitBox.AddCollider(addHitBoxData.hitBoxData, addHitBoxData.comboGlovalData);
+	}
+	// 使うヒットボックスクリア
+	data.hitBox.ClearUseHitBox();
+	// 使うヒットボックス追加
+	for (AddHitBoxData addHitBoxData : addHitBoxDatas){
+		data.hitBox.AddUseHitBox(addHitBoxData.hitBoxData.name);
+	}
+
+	// データ設定
+	SetData(data, addHitBoxDatas[0].comboGlovalData);
+
+	// 親子付けの設定
+	data.hitBox.SetPerent(perent);
+
+	// コンボの終了条件設定
+	data.comboCondition.GetData().type = comboConditionData.type;	
+
+	data.hitBox.GetData().dependenceType_ = hitBoxData.dependenceType_;	// 依存関係
+	data.hitBox.GetData().spawnType_ = hitBoxData.spawnType_;			// 発生条件
+	data.hitBox.GetData().offset_ = hitBoxData.offset_;
+
+
+	// コンボノード追加
+	AddComboNode(comboNodeName, data);	
+}
+
 #pragma endregion // 保存　適応
 

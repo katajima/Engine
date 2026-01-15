@@ -60,12 +60,9 @@ enum class RootBehavior {
 // 敵キャラクターの種類を定義する列挙型
 enum class EnemyType
 {
-	kNormal,	// 通常
-	kBullet,	// 弾撃ち
-	kAttacker,	// アタッカー 
-	kTank,		// タンク
-	kElite,     // エリート
-	kBoss,		// ボス 
+	kNormal,		// 通常
+	kSmallMelee,	// 小型近接
+	kSmallRanged,	// 小型遠距離
 };
 
 // プレイヤーキャラクターの種類を定義する列挙型
@@ -73,8 +70,6 @@ enum class PlayerType
 {
 	kNormal,	// 通常
 	kBullet,	// 弾撃ち
-	kAttacker,	// アタッカー 
-	kTank,		// タンク
 };
 
 

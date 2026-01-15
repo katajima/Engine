@@ -97,6 +97,16 @@ void InputManager::BuildGameplayActions(){
     released_[Idx(Action::Special)] =
         input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB);
 
+    // ---- Attack（Pad RB）----
+    triggered_[Idx(Action::Skill)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+
+    pressed_[Idx(Action::Skill)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+
+    released_[Idx(Action::Skill)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
+
 
    
 

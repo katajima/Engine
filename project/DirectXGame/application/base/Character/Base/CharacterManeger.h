@@ -30,7 +30,7 @@ namespace Engine {
 /// <summary>
 /// キャラクターマネージャークラス
 /// </summary>
-class BaseCharacterManager
+class CharacterManager
 {
 public:
 	

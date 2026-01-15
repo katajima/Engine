@@ -1,6 +1,7 @@
 #pragma once
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include"NormalEnemyState.h"
+#include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
 /// <summary>
 /// 通常敵クラス
@@ -8,9 +9,7 @@
 class NormalEnemy : public BaseEnemy {
 public:
 	// コンストラクタ
-	NormalEnemy() {
-		
-	}
+	NormalEnemy() {}
 
 	// 初期化
 	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
@@ -37,4 +36,9 @@ private:
 	void InitStateMachine() override;
 	// パーティクル初期化
 	void InitParticle();
+
+private:
+	float cooldownTime_ = 5.0f;
+	//
+	float attackTimer_ = 0.0f;
 };

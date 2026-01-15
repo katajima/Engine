@@ -8,6 +8,11 @@ void JumpSystem::Initialize()
 
 void JumpSystem::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
 {
+	if (isUseJump == false) {
+		rigid.SetIsGravity(false);			// 重力をオフ
+		return;
+	} 
+
 	// 現在のy速度取得
 	velocity_ = rigid.Velocity().y;
 
