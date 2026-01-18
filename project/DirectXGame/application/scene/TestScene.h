@@ -147,7 +147,12 @@ private:
 	/// 3Dオブジェクト
 	/// </summary>
 
-	
+
+	std::vector<Engine::Object3d*> skinObjects;
+
+	Engine::Object3d* skinObject;
+	Engine::Object3d* skinObject2;
+
 
 	Engine::Object3d* skyBoxObject;
 	Engine::Object3d* skyBoxObject2;
@@ -194,22 +199,6 @@ private:
 	
 
 	std::unique_ptr<LoadLevelData> loadData_;
-
-	bool g_bool = false;
-	int g_int = 0;
-	uint32_t g_uint = 0;
-	float g_float = 0.0f;
-	Vector2 g_v2 = {};
-	Vector3 g_v3 = {};
-	Vector4 g_v4 = {};
-	std::string g_string = "name";
-	Transform g_transform = {};
-
-
-	bool g_aaaa = false;
-
-
-	Vector3 velo;
 };
 
 

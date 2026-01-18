@@ -47,7 +47,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 
 		auto it = modelData.animations.find(modelData.currentAnimName);
 		if (it != modelData.animations.end()) {
-			AnimationFunction::ApplyAnimation(modelData.skeleton, it->second, modelData.animationTime);
+			AnimationFunction::ApplyAnimation(modelData.skeleton, it->second, 1.0f);
 		}
 	}
 
@@ -65,13 +65,16 @@ void Engine::Model::Draw()
 {
 }
 
-void Engine::Model::DrawSkinning()
+void Engine::Model::DrawSkinning(std::vector<MaterialInstance> matetials)
 {
 	auto commandList = modelCommon_->GetCommand()->GetList();
 
-
+	int i = 0;
 	for (auto& mesh : modelData.mesh)
 	{
+
+		mesh->material->SetMaterialInstance(matetials[i]);
+
 		mesh->material->GetCommandListMaterial(0);
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
@@ -91,6 +94,7 @@ void Engine::Model::DrawSkinning()
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		commandList->ResourceBarrier(1, &barrier);
+		i++;
 	}
 }
 
@@ -100,8 +104,8 @@ float Engine::Model::GetMaterialAlpha()
 
 	for (auto& mesh : modelData.mesh)
 	{
-		if (mesh->material->color.a < a || mesh->material->alpha_ < a) {
-			a = mesh->material->color.a * mesh->material->alpha_;
+		if (mesh->material->GetMaterialInstance().color.a < a || mesh->material->GetMaterialInstance().alpha_ < a) {
+			a = mesh->material->GetMaterialInstance().color.a * mesh->material->GetMaterialInstance().alpha_;
 		}
 	}
 	return a;

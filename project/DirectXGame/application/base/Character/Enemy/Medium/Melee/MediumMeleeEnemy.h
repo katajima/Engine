@@ -1,15 +1,15 @@
 #pragma once
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include"NormalEnemyState.h"
+#include "MediumMeleeEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
 /// <summary>
 /// 通常敵クラス
 /// </summary>
-class NormalEnemy : public BaseEnemy {
+class MediumMeleeEnemy : public BaseEnemy {
 public:
 	// コンストラクタ
-	NormalEnemy() {}
+	MediumMeleeEnemy() {}
 
 	// 初期化
 	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 

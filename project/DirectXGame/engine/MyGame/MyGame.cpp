@@ -27,7 +27,8 @@ void Engine::MyGame::Initialize()
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->Init();
-	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("TITLE");
+	sceneManager_->ChangeScene("TEST");
 
 	// リソース初期化
 	InitializeResource();
@@ -281,8 +282,8 @@ void Engine::MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("ringEmit", "resources/Texture/effect/ring.png", primiPlane.get());
 	particleManager->CreateParticleGroup("ringHit", "resources/Texture/effect/gradationLine.png", primiRing.get()); // 柵
 	particleManager->GetParticleGroups("ringHit").isUVClamp = true;
-	particleManager->GetParticleGroups("ringHit").mesh->material->transform.scale.x = 10.0f;
-	particleManager->GetParticleGroups("ringHit").mesh->material->transform.scale.y = 10.0f;
+	particleManager->GetParticleGroups("ringHit").mesh->material->GetMaterialInstance().transform.scale.x = 10.0f;
+	particleManager->GetParticleGroups("ringHit").mesh->material->GetMaterialInstance().transform.scale.y = 10.0f;
 
 
 	// 敵関係

@@ -1,6 +1,5 @@
 #pragma once
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
-#include "DirectXGame/engine/3d/Model/ModelData.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
@@ -58,15 +57,25 @@ namespace Engine {
 		void SetTransfomation(Transfomation* transfomation) { transfomation_ = transfomation; }
 
 		// モデル設定
-		void SetModel(Model* model) { this->model = model; }
+		void SetModel(Model* model);
 		// スカイボックス設定
 		void SetSkyBox(SkyBox* skyBox) { skyBox_ = skyBox; }
 		// 波セット設定
 		void SetOcean(Ocean* ocean) { ocean_ = ocean; }
 		// プリミティブ設定
-		void SetPrimitive(BasePrimitive* primitive) { primitive_ = primitive; }
+		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive) { primitive_ = std::move(primitive); }
 
+		
 
+	public:
+		// モデル取得
+		Model* GetModel() const { return model; }
+		// 波取得
+		Ocean* GetOcean() { return ocean_; }
+		// スカイボックス取得
+		SkyBox* GetSkyBox() { return skyBox_; }
+		// プリミティブ形状取得
+		BasePrimitive* GetPrimitive() { return primitive_.get(); }
 	public:
 		// 何かしらの見た目があるか
 		bool GetIsSkin() const { return isSkin_; }
@@ -82,7 +91,8 @@ namespace Engine {
 		void SetObjectRasterizerType(PSOType type) { rasterizerType_ = type; }
 		// オブジェクト型名前取得
 		std::string GetObjectTypeName() const { return objectTypeName; }
-
+		// マテリアルインスタンス
+		std::vector<MaterialInstance>& GetMaterialInstance() { return materialInstances_; }
 
 	public:
 		// 透明度取得
@@ -114,14 +124,19 @@ namespace Engine {
 		bool isSkin_ = false;
 		// 描画するかのフラグ
 		bool isDraw = true;
-
 		// オブジェクトタイプ名前
 		std::string objectTypeName = "";
-	private:
+
+		// マテリアルインスタンス
+		std::vector<MaterialInstance> materialInstances_{};
+		
+	private: // 貰いもの
+		// 3Dエンティティマネージャー
 		Entity3DManager* entity3DManager_ = nullptr;
+		// モデル
 		Model* model = nullptr;
 		// プリミティブ
-		BasePrimitive* primitive_ = nullptr;
+		std::unique_ptr<BasePrimitive> primitive_ = nullptr;
 		// スカイボックス
 		SkyBox* skyBox_ = nullptr;
 		// 波

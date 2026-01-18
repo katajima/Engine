@@ -4,6 +4,7 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include "DirectXGame/engine/3d/Model/Model.h"
 
 #pragma region Object3dInstansManager
 

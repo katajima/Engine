@@ -80,7 +80,7 @@ void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& c
 	// EnemyTypeから生成関数
 	static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
 	{
-		{ EnemyType::kNormal,   []() { return std::make_unique<NormalEnemy>(); } },
+		{ EnemyType::kNormal,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
 		{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
 		{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
 	};

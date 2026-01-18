@@ -1,16 +1,16 @@
-#include "NormalEnemy.h"
+#include "MediumMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
-void NormalEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
+void MediumMeleeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
 	// 基盤初期化
-	BaseInitialize(input,entity3DManager,entity2DManager,globalVariables,position,camera, "enemy.gltf", "enemy");
+	BaseInitialize(input,entity3DManager,entity2DManager,globalVariables,position,camera, "enemy.gltf", "enemy",4);
 	// サイズ
-	Vector3 size = { 1.75f,1.75f,1.75f };
+	Vector3 size = { 2.75f,2.75f,2.75f };
 	objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 	
 
@@ -31,22 +31,22 @@ void NormalEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* enti
 	GetWorldTransform().Update();
 }
 
-void NormalEnemy::InitStateMachine() {
+void MediumMeleeEnemy::InitStateMachine() {
 	// ステートマシーン初期化
 	stateMachine_ = std::make_unique<CharacterStateMachine>();
 	stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {
-		return std::make_unique<EnemyStateMove>(p);
+		return std::make_unique<MediumMeleeEnemyMoveState>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Attack, [](BaseCharacter* p) {
-		return std::make_unique<EnemyStateAttack>(p);
+		return std::make_unique<MediumMeleeEnemyAttackState>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
-		return std::make_unique<EnemyStateDie>(p);
+		return std::make_unique<MediumMeleeEnemyDieState>(p);
 		});
 	stateMachine_->Init(this, CharacterMainState::Move);
 }
 
-void NormalEnemy::Update(){
+void MediumMeleeEnemy::Update(){
 	// 攻撃制御更新
 	attackController_->Update(GetTime());
 	// 基盤の更新
@@ -54,7 +54,7 @@ void NormalEnemy::Update(){
 	
 }
 
-void NormalEnemy::Draw2D()
+void MediumMeleeEnemy::Draw2D()
 {
 	if (GetObjectComponent() == nullptr) { return; }
 
@@ -68,7 +68,7 @@ void NormalEnemy::Draw2D()
 	}
 }
 
-void NormalEnemy::Emit()
+void MediumMeleeEnemy::Emit()
 {
 	// エフェクト座標更新
 	worldEffect_.Update();
@@ -80,7 +80,7 @@ void NormalEnemy::Emit()
 	effect_->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
 }
 
-void NormalEnemy::Move()
+void MediumMeleeEnemy::Move()
 {
 	if (GetTargetDistance() <= 20.0f) {
 		attackTimer_ += GetTime();
@@ -100,7 +100,7 @@ void NormalEnemy::Move()
 	}
 }
 
-void NormalEnemy::InitParticle()
+void MediumMeleeEnemy::InitParticle()
 {
 	Engine::ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
 

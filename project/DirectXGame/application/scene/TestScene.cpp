@@ -35,22 +35,6 @@ void TestScene::Initialize()
 	InitializeOthers();
 
 
-	
-	Engine::GlobalVariables* globalVariables = GetGlobalVariables();
-	globalVariables->CreateGroup("ddd");
-	globalVariables->AddItem("ddd","g_bool",g_bool);
-	globalVariables->AddItem("ddd","g_int",g_int);
-	globalVariables->AddItem("ddd","g_uint", g_uint);
-	globalVariables->AddItem("ddd","g_float",g_float);
-	globalVariables->AddItem("ddd","g_v2",g_v2);
-	globalVariables->AddItem("ddd","g_v3",g_v3);
-	globalVariables->AddItem("ddd","g_v4",g_v4);
-	globalVariables->AddItem("ddd","g_string", g_string);
-	globalVariables->AddItem("ddd","g_transform", g_transform);
-	
-	
-	globalVariables->AddItem("aaa","g_aaaa", g_aaaa);
-
 	AppGlobalVariables();
 }
 
@@ -64,11 +48,15 @@ void TestScene::Update()
 	SwitchRoom(); // 部屋切り替え
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
 
-	//loadData_->Update();
-
+	
 #ifdef _DEBUG
 
-	
+	int count = 0;
+	for (auto skin : skinObjects) {
+		
+		skin->GetAnimationComponent()->SetAnimationSpeed(static_cast<float>(count) / 10.0f);
+		count++;
+	}
 
 	
 #endif // _DEBUG
@@ -157,67 +145,6 @@ void TestScene::Update()
 
 void TestScene::Draw3D()
 {
-	
-	switch (behavior_)
-	{
-	case TestScene::SceneBehavior::kSceneRoom01:
-		
-		//skyBoxObject->Draw();
-		//skyBoxObject2->Draw();
-		//
-		//tail.Draw();
-		//
-		//oceanObject->Draw();
-
-		//multiy->Draw();
-
-
-
-		break;
-	case TestScene::SceneBehavior::kSceneRoom02:
-		//tail.Draw();
-
-		//primitiveObject3d->Draw();
-
-		break;
-	case TestScene::SceneBehavior::kSceneRoom03:
-		//taleObject->Draw();
-		break;
-	case TestScene::SceneBehavior::kSceneRoom04:
-		//tail.Draw();
-
-		//skinningObject->Draw();
-		//skinningObject2->Draw();
-		//skinningObject3->Draw();
-		break;
-	case TestScene::SceneBehavior::kSceneRoom05:
-		break;
-	case TestScene::SceneBehavior::kSceneRoom06:
-
-		break;
-	case TestScene::SceneBehavior::kSceneRoom07:
-
-		//// プレイヤー
-		//playerObject->Draw();
-
-		//// ゴール
-		//goalObject->Draw();
-
-
-		break;
-	case TestScene::SceneBehavior::kSceneRoom08:
-
-		break;
-	case TestScene::SceneBehavior::kSceneRoom09:
-		break;
-	case TestScene::SceneBehavior::kSceneRoom10:
-		break;
-	default:
-		break;
-	}
-
-
-
 }
 
 void TestScene::Draw2D()
@@ -261,22 +188,7 @@ void TestScene::Draw2D()
 
 }
 
-void TestScene::AppGlobalVariables()
-{
-	Engine::GlobalVariables* globalVariables = GetGlobalVariables();
-	g_bool = globalVariables->GetValue<bool>("ddd", "g_bool");
-	g_int = globalVariables->GetValue<int>("ddd", "g_int");
-	g_uint = globalVariables->GetValue<uint32_t>("ddd", "g_uint");
-	g_float = globalVariables->GetValue<float>("ddd", "g_float");
-	g_v2 = globalVariables->GetValue<Vector2>("ddd", "g_v2");
-	g_v3 = globalVariables->GetValue<Vector3>("ddd", "g_v3");
-	g_v4 = globalVariables->GetValue<Vector4>("ddd", "g_v4");
-	g_string = globalVariables->GetValue<std::string>("ddd", "g_string");
-	g_transform = globalVariables->GetValue<Transform>("ddd", "g_transform");
-	
-	g_aaaa = globalVariables->GetValue<bool>("aaa", "g_aaaa");
-
-}
+void TestScene::AppGlobalVariables(){}
 
 
 #pragma region Initialize
@@ -291,7 +203,7 @@ void TestScene::InitializeObject3D()
 
 	ocean_ = std::make_unique<Engine::Ocean>();
 	ocean_->Initialize(GetEntity3DManager(), { 10000,10000 });
-	ocean_->GetMaterial()->enableLighting_ = false;
+	ocean_->GetMaterial()->GetMaterialInstance().enableLighting_ = false;
 
 
 	oceanObject = GetEntity3DManager()->CreateObject3D("ocean", Engine::ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
@@ -320,6 +232,17 @@ void TestScene::InitializeObject3D()
 	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
 	skyBoxObject2->SetIsDraw(false);
 
+
+
+	for(int i = 0; i < 10; i++)
+	{
+		auto obj = GetEntity3DManager()->CreateObject3D("skinObject_" + std::to_string(i), Engine::ObjectModelType::kSkinning, { static_cast<float>(i * 10),0,30 }, cameraManeger_->GetCamera());
+		obj->SetModel("origin.gltf");
+		obj->InitAnimationComponent();
+		obj->GetAnimationComponent()->SetAnimation("Attack3", static_cast<float>(i) / 10.0f );
+		obj->SetIsDraw(true);
+		skinObjects.push_back(obj);
+	}
 }
 
 /// <summary>
@@ -352,11 +275,6 @@ void TestScene::InitializeParticle()
 {
 	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
 	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
-	
-	//GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetMesh(primiPlane->GetMesh());
-	
-	
-
 }
 
 /// <summary>

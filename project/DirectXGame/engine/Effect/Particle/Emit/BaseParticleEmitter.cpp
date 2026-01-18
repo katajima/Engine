@@ -52,8 +52,8 @@ void Engine::BaseParticleEmitter::Emit()
 {
 	if (isEmit) {
 		particleManager_->GetParticleGroups(particleName_).isFlag = isFlag;
-		particleManager_->GetParticleGroups(particleName_).material->alphaClipping_ = alphaClipping_; // αクリッピング
-		particleManager_->GetParticleGroups(particleName_).material->enableLighting_ = enableLighting_; // aライト
+		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().alphaClipping_ = alphaClipping_; // αクリッピング
+		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().enableLighting_ = enableLighting_; // aライト
 		particleManager_->GetParticleGroups(particleName_).topBottom = topBottom_; // 拡縮方向
 		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.scale = uvTransformVeloctiy_.scale; // UV
 		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.rotate = uvTransformVeloctiy_.rotate; // UV

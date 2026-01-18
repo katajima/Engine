@@ -61,7 +61,7 @@ private:
 
 	// 調整項目の適用
 	void ApplyGlobalVariables();
-
+private:
 	Engine::WorldTransform worldCollider_;
 	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 

@@ -1,13 +1,13 @@
 #pragma once
 #include "DirectXGame/application/base/State/BaseMainState.h"
-#include "NormalEnemySubState.h"
+#include "MediumMeleeEnemySubState.h"
 
 // 移動
-class EnemyStateMove : public MoveState
+class MediumMeleeEnemyMoveState : public MoveState
 {
 public:
 	// コンストラクタ
-	EnemyStateMove(BaseCharacter* enemy)
+	MediumMeleeEnemyMoveState(BaseCharacter* enemy)
 		: MoveState(enemy){}
 
 
@@ -27,10 +27,10 @@ private:
 /// <summary>
 /// 攻撃
 /// </summary>
-class EnemyStateAttack :public AttackState
+class MediumMeleeEnemyAttackState :public AttackState
 {
 public:
-	EnemyStateAttack(BaseCharacter* enemy)
+	MediumMeleeEnemyAttackState(BaseCharacter* enemy)
 		: AttackState(enemy) {
 	}
 	// 更新
@@ -47,10 +47,10 @@ private:
 /// <summary>
 /// 死亡状態
 /// </summary>
-class EnemyStateDie :public DieState
+class MediumMeleeEnemyDieState :public DieState
 {
 public:
-	EnemyStateDie(BaseCharacter* enemy)
+	MediumMeleeEnemyDieState(BaseCharacter* enemy)
 		: DieState(enemy) {}
 
 	// 更新

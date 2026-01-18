@@ -9,9 +9,9 @@ class SubStateMachine;
 /// <summary>
 /// 攻撃準備
 /// </summary>
-class NormalEnemyAttackReadySubState :public BaseAttackSubState{
+class MediumMeleeEnemyAttackReadySubState :public BaseAttackSubState{
 public:
-    NormalEnemyAttackReadySubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
+    MediumMeleeEnemyAttackReadySubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
         : BaseAttackSubState(AttackSubState::Ready, c, fsm) {
     }
 
@@ -32,9 +32,9 @@ private:
 };
 
 // 攻撃本体
-class NormalEnemyAttackSwingSubState : public BaseAttackSubState {
+class MediumMeleeEnemyAttackSwingSubState : public BaseAttackSubState {
 public:
-    NormalEnemyAttackSwingSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
+    MediumMeleeEnemyAttackSwingSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
         : BaseAttackSubState(AttackSubState::Swing, c, fsm) {
     }
     // 開始
@@ -56,9 +56,9 @@ private:
 
 
 // 終了状態（後隙）
-class NormalEnemyAttackEndSubState : public BaseAttackSubState {
+class MediumMeleeEnemyAttackEndSubState : public BaseAttackSubState {
 public:
-    NormalEnemyAttackEndSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
+    MediumMeleeEnemyAttackEndSubState(BaseCharacter* c, SubStateMachine<AttackSubState, BaseAttackSubState>* fsm)
         : BaseAttackSubState(AttackSubState::End, c, fsm) {
     }
     // 開始

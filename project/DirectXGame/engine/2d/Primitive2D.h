@@ -110,9 +110,9 @@ namespace Engine {
 
 
 		// 色取得
-		const Color& GetColor() const { return material->color; }
+		const Color& GetColor() const { return material->GetMaterialInstance().color; }
 		// 色設定
-		void SetColor(const Color& color) { material->color = color; }
+		void SetColor(const Color& color) { material->GetMaterialInstance().color = color; }
 
 		// アンカーポイント取得
 		const Vector2& GetAnchorPoint() const { return anchorPoint; };

@@ -13,7 +13,6 @@ using namespace Microsoft::WRL;
 #include "DirectXGame/engine/Transform/TransformComponent.h"
 #include "DirectXGame/engine/Move/RigidBodyComponent.h"
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
-
 #include <future>
 
 // 前方宣言
@@ -26,7 +25,7 @@ namespace Engine {
 	class SkyBox;
 	class SkyBoxCommon;
 	class OceanManager;
-
+	
 	/// <summary>
 	/// オブジェクトクラス
 	/// </summary>
@@ -61,68 +60,43 @@ namespace Engine {
 		void SetIsEmitTrailEffect(bool isTrailEffect) { isEmitTrailEffect = isTrailEffect; }
 
 	public:// セッター
-
 		// モデル設定(モデル)
-		void SetModel(Model* model) {
-			this->model = model;
-			renderComponent_->SetModel(model);
-		}
-
+		void SetModel(Model* model);
 		// モデル設定(モデル名での)
 		void SetModel(const std::string& filePath);
-
 		// カメラ設定
 		void SetCamera(Camera* camera) { this->individualCamera_ = camera; }
-
 		// 名前設定
 		void SetName(const std::string& name) { this->name = name; }
 		// タグ設定
 		void SetNameTag(const std::string& name) { nameTag = name; }
-
-
-
 		// プリミティブ形状
-		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive)
-		{
-			primitive_ = std::move(primitive);
-			renderComponent_->SetPrimitive(primitive_.get());
-		};
+		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive){renderComponent_->SetPrimitive(std::move(primitive));};
 		// スカイボックス
-		void SetSkyBox(SkyBox* skyBox) {
-			skyBox_ = skyBox;
-			renderComponent_->SetSkyBox(skyBox_);
-		}
-
+		void SetSkyBox(SkyBox* skyBox) {renderComponent_->SetSkyBox(skyBox);}
 		// 波セット
-		void SetOcean(Ocean* ocean) {
-			ocean_ = ocean;
-			renderComponent_->SetOcean(ocean_);
-		}
-
+		void SetOcean(Ocean* ocean) {renderComponent_->SetOcean(ocean);}
 		// オブジェクト固有に映すカメラを使用するか設定
 		void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera; }
-
 		// メッシュ取得
-		ModelMesh* GetMesh(int index) { return model->modelData.mesh[index].get(); }
-
+		ModelMesh* GetMesh(int index) { return renderComponent_->GetModel()->modelData.mesh[index].get(); }
 		// マテリアル取得
-		Material* GetMaterial(int index) { return model->modelData.mesh[index]->material.get(); }
-
+		Material* GetMaterial(int index) { return renderComponent_->GetModel()->modelData.mesh[index]->material.get(); }
 		// モデル取得
-		Model* GetModel() const { return model; }
-
+		Model* GetModel() const { return renderComponent_->GetModel(); }
 		// プリミティブ取得
-		BasePrimitive* GetPrimitive() const { return primitive_.get(); };
+		BasePrimitive* GetPrimitive() const { return renderComponent_->GetPrimitive(); };
 		// 波取得
-		Ocean* GetOcean() const { return ocean_; }
-		// トレイルエフェクト
+		Ocean* GetOcean() const { return renderComponent_->GetOcean(); }
+		// スカイボックス取得
+		SkyBox* GetSkyBox() const { return renderComponent_->GetSkyBox(); }
+		// マテリアルインスタンス取得
+		std::vector<MaterialInstance>& GetMaterialInstance() { return renderComponent_->GetMaterialInstance(); }
 
 		// タグ取得
 		std::string GetNameTag() const { return nameTag; }
-
 		// 描画するか設定
 		void SetIsDraw(bool is) { renderComponent_->SetIsDraw(is); }
-
 		// モデルのデバッグ用ImGui
 		void DebugImguiModel();
 		// スキンモデルのデバッグ用
@@ -236,7 +210,7 @@ namespace Engine {
 		void InitAnimationComponent() {
 			animationComponent_ = std::make_unique<AnimationComponent>();
 			animationComponent_->Init(lineCommon_);
-			animationComponent_->SetModel(model);
+			animationComponent_->SetModel(renderComponent_->GetModel());
 		}
 		// アニメーションコンポーネント取得
 		AnimationComponent* GetAnimationComponent() { return animationComponent_.get(); }
@@ -249,23 +223,11 @@ namespace Engine {
 		RenderComponent* GetRenderComponent() { return renderComponent_.get(); }
 
 	public:
-
-
-		// モデル
-		Model* model = nullptr;
-		// プリミティブ
-		std::unique_ptr<BasePrimitive> primitive_ = nullptr;
-
 		//
 		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 		// trailエフェクトを使用するかのフラグ
 		bool isEmitTrailEffect = false;
 
-
-		// スカイボックス
-		SkyBox* skyBox_ = nullptr;
-		// 波
-		Ocean* ocean_ = nullptr;
 
 		// オブジェクト名前
 		std::string name = "";

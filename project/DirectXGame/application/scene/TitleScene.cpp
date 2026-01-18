@@ -33,16 +33,9 @@ void TitleScene::Update()
 
 #ifdef _DEBUG
 	if (!initialized) {
-		attackSeq.events.push_back({ 5, 15, 0xFF00FF00, "Startup" });
-		attackSeq.events.push_back({ 15, 25, 0xFFFFFF00, "Active" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
-		attackSeq.events.push_back({ 25, 45, 0xFFFF0000, "Recovery" });
+		attackSeq.AddEvent({ 5, 15, 0xFF00FF00, "Startup" });
+		attackSeq.AddEvent({ 15, 25, 0xFFFFFF00, "Active" });
+		attackSeq.AddEvent({ 25, 45, 0xFFFF0000, "Recovery" });
 		initialized = true;
 	}
 
@@ -77,8 +70,10 @@ void TitleScene::Update()
 	ImGui::SliderInt("Frame LegendWidth",
 		&ImSequencer::g_legendWidth,
 		50, 500, "%d px");
+
+
 	if (selected != -1) {
-		ImGui::Text("Selected Event: %s", attackSeq.events[selected].name.c_str());
+		ImGui::Text("Selected Event: %s", attackSeq.GetEventName(selected).c_str());
 	}
 
 	ImGui::End();

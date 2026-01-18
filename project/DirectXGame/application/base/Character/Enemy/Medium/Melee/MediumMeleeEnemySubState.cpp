@@ -1,11 +1,11 @@
-#include "NormalEnemySubState.h"
-#include "NormalEnemy.h"
+#include "MediumMeleeEnemySubState.h"
+#include "MediumMeleeEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 
-void NormalEnemyAttackReadySubState::Update(float deltaTime) {
+void MediumMeleeEnemyAttackReadySubState::Update(float deltaTime) {
     timer_ += deltaTime;
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     // 後ろに後退
@@ -26,7 +26,7 @@ void NormalEnemyAttackReadySubState::Update(float deltaTime) {
 }
 
 
-void NormalEnemyAttackSwingSubState::Enter() {
+void MediumMeleeEnemyAttackSwingSubState::Enter() {
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     timer_ = 0.0f;
     enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
@@ -47,7 +47,7 @@ void NormalEnemyAttackSwingSubState::Enter() {
     enemy->GetAttackController()->GetHitBoxSystem()->AddHitBox(HitBoxUseType::kEnemy, { data_ },{},2.0f,HitBoxSystem::Type::kParent,{}, &enemy->GetWorldTransform());
 }
 
-void NormalEnemyAttackSwingSubState::Update(float deltaTime) {
+void MediumMeleeEnemyAttackSwingSubState::Update(float deltaTime) {
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     timer_ += deltaTime;
 
@@ -64,11 +64,11 @@ void NormalEnemyAttackSwingSubState::Update(float deltaTime) {
     }
 }
 
-void NormalEnemyAttackSwingSubState::Exit() {
+void MediumMeleeEnemyAttackSwingSubState::Exit() {
 }
 
 
-void NormalEnemyAttackEndSubState::Enter() {
+void MediumMeleeEnemyAttackEndSubState::Enter() {
     timer_ = 0.0f;
     rotate_ = character_->GetObjectComponent()->GetWorldTransform().rotate_;
 
@@ -82,7 +82,7 @@ void NormalEnemyAttackEndSubState::Enter() {
     targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
 }
 
-void NormalEnemyAttackEndSubState::Update(float deltaTime) {
+void MediumMeleeEnemyAttackEndSubState::Update(float deltaTime) {
     BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
     Vector3 playerPos = enemy->GetTargetPos();
 

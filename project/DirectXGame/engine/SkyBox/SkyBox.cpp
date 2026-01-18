@@ -11,8 +11,8 @@ void Engine::SkyBox::Initialize(Entity3DManager* entity3DManager, std::string tx
 	material->Initialize(entity3DManager_->GetSkyBoxCommon()->GetDxCommon());
 	material->tex_.diffuseFilePath = txtueName;	// テクスチャ名設定
 	material->LoadTex();			// テクスチャ読み込み
-	material->color = { 1,1,1,1 };	// 色
-	material->enableLighting_ = false;	// ライティングしない
+	material->GetMaterialInstance().color = { 1,1,1,1 };	// 色
+	material->GetMaterialInstance().enableLighting_ = false;	// ライティングしない
 
 
 

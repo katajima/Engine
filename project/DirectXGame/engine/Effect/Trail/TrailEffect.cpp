@@ -24,7 +24,7 @@ void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::st
 	material = std::make_unique<Material>();
 	material->Initialize(effectManager_->GetDxCommon());
 	material->tex_.diffuseFilePath = tex;
-	material->color = color;
+	material->GetMaterialInstance().color = color;
 
 	// トランスフォーム初期化
 	transfomation = std::make_unique<Transfomation>();

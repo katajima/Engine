@@ -312,7 +312,7 @@ void NormalPlayer::Update()
 	stateMachine_->Update();
 
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
 	// UI更新
@@ -418,8 +418,6 @@ void NormalPlayer::ReloadComboData()
 	hitBoxSystem->CreateHitBoxCollData("obb2", HitBoxShape::kSphere, HitBoxUseType::kPlayer,hitBoxdata4, hitData4);
 	hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata5, hitData5);
 	
-
-	// データ
 	// コンボ１のデータ送る
 	comboSystem->CreateCombo("Attack1",{{ hitData3 ,data1_ }}, &objectComponent_->GetObject3D()->GetWorldTransform());
 	// コンボ２のデータ送る
@@ -438,7 +436,6 @@ void NormalPlayer::ReloadComboData()
 	comboSystem->CreateCombo("Attack6", { { hitData3 ,data7_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
 	// コンボ7のデータ送る
 	comboSystem->CreateCombo("Attack7", { { hitData3 ,data8_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
-
 
 
 	// コンボ連結設定

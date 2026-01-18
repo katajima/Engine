@@ -1,5 +1,5 @@
-#include "NormalEnemyState.h"
-#include "NormalEnemy.h"
+#include "MediumMeleeEnemyState.h"
+#include "MediumMeleeEnemy.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
@@ -7,7 +7,7 @@
 
 #pragma region Move
 
-void EnemyStateMove::Update()
+void MediumMeleeEnemyMoveState::Update()
 {
 	// 時間更新
 	timer_ += character_->GetTime();
@@ -23,11 +23,11 @@ void EnemyStateMove::Update()
 	}
 }
 
-void EnemyStateMove::Exit() {
+void MediumMeleeEnemyMoveState::Exit() {
 
 }
 
-void EnemyStateMove::Enter() {
+void MediumMeleeEnemyMoveState::Enter() {
 	timer_ = 0.0f;
 	character_->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 3.0f;
 }
@@ -36,7 +36,7 @@ void EnemyStateMove::Enter() {
 #pragma region Attack
 
 
-void EnemyStateAttack::Update()
+void MediumMeleeEnemyAttackState::Update()
 {
 	// サブステート更新
 	subStateMachine_->Update(character_->GetTime());
@@ -53,21 +53,21 @@ void EnemyStateAttack::Update()
 	}
 }
 
-void EnemyStateAttack::Exit() {
+void MediumMeleeEnemyAttackState::Exit() {
 
 }
 
-void EnemyStateAttack::Enter() {
+void MediumMeleeEnemyAttackState::Enter() {
 	subStateMachine_ = std::make_unique<SubStateMachine<AttackSubState, BaseAttackSubState>>(character_);
 	// 攻撃用サブステート登録
 	subStateMachine_->RegisterState(AttackSubState::Ready, [](BaseCharacter* enemy, auto* fsm) {
-		return std::make_unique<NormalEnemyAttackReadySubState>(enemy, fsm);
+		return std::make_unique<MediumMeleeEnemyAttackReadySubState>(enemy, fsm);
 		});
 	subStateMachine_->RegisterState(AttackSubState::Swing, [](BaseCharacter* enemy, auto* fsm) {
-		return std::make_unique<NormalEnemyAttackSwingSubState>(enemy, fsm);
+		return std::make_unique<MediumMeleeEnemyAttackSwingSubState>(enemy, fsm);
 		});
 	subStateMachine_->RegisterState(AttackSubState::End, [](BaseCharacter* enemy, auto* fsm) {
-		return std::make_unique<NormalEnemyAttackEndSubState>(enemy, fsm);
+		return std::make_unique<MediumMeleeEnemyAttackEndSubState>(enemy, fsm);
 		});
 	subStateMachine_->ChangeState(AttackSubState::Ready);
 }
@@ -77,7 +77,7 @@ void EnemyStateAttack::Enter() {
 
 #pragma region Die
 
-void EnemyStateDie::Update() {
+void MediumMeleeEnemyDieState::Update() {
 
 	// 時間更新
 	timer_ -= character_->GetTime();
@@ -102,11 +102,11 @@ void EnemyStateDie::Update() {
 	}
 }
 
-void EnemyStateDie::Exit() {
+void MediumMeleeEnemyDieState::Exit() {
 
 }
 
-void EnemyStateDie::Enter()
+void MediumMeleeEnemyDieState::Enter()
 {
 	timer_ = dieTimer_;
 	character_->GetSpecalPointManager()->AddPoint(character_->GetWorldTransform().GetWorldPosition() + Vector3{0,4.0f,0}, 1);

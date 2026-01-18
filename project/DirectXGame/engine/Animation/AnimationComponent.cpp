@@ -1,6 +1,6 @@
 #include "AnimationComponent.h"
 #include"DirectXGame/engine/Skinning/Skinning.h"
-
+#include"DirectXGame/engine/3d/Model/Model.h"
 
 void Engine::AnimationComponent::Init(LineCommon* lineCommon)
 {
@@ -23,32 +23,32 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 			float deltaTime = deltatime * animationSpeed;
 			if (isPlaying) {
 				if (isReversePlayback) { // 逆再生なら
-					modelData.animationTime -= deltaTime;
+					animationTime -= deltaTime;
 				}
 				else {
-					modelData.animationTime += deltaTime;
+					animationTime += deltaTime;
 				}
 			}
 
 			// ループするなら
 			if (isLoop) {
-				modelData.animationTime = std::fmod(modelData.animationTime, itCurrent->second.duration);
+				animationTime = std::fmod(animationTime, itCurrent->second.duration);
 
 				// 負の値を返す可能性があるので
-				if (modelData.animationTime < 0.0f) {
-					modelData.animationTime += itCurrent->second.duration;
+				if (animationTime < 0.0f) {
+					animationTime += itCurrent->second.duration;
 				}
 			}
 			else { // しないなら
 				if (isReversePlayback) {
-					if (modelData.animationTime <= 0) {
-						modelData.animationTime = 0; // 最終フレームで止める
+					if (animationTime <= 0) {
+						animationTime = 0; // 最終フレームで止める
 						isPlaying = false; // 自動停止
 					}
 				}
 				else {
-					if (modelData.animationTime >= itCurrent->second.duration) {
-						modelData.animationTime = itCurrent->second.duration; // 最終フレームで止める
+					if (animationTime >= itCurrent->second.duration) {
+						animationTime = itCurrent->second.duration; // 最終フレームで止める
 						isPlaying = false; // 自動停止
 					}
 				}
@@ -68,8 +68,8 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 						return wrapped;
 						};
 
-					float prevTime = WrapTime(modelData.animationTime, prevAnim.duration);
-					float currTime = WrapTime(modelData.animationTime, currAnim.duration);
+					float prevTime = WrapTime(animationTime, prevAnim.duration);
+					float currTime = WrapTime(animationTime, currAnim.duration);
 
 
 					// ① 各スケルトン姿勢を取得
@@ -95,12 +95,12 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 				}
 				else {
 					// 前アニメーションが見つからなければ通常再生
-					AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+					AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, animationTime);
 				}
 			}
 			else {
 				// ブレンドしていない通常の再生
-				AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, modelData.animationTime);
+				AnimationFunction::ApplyAnimation(modelData.skeleton, itCurrent->second, animationTime);
 			}
 
 
@@ -177,32 +177,32 @@ void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTra
 			float deltaTime = deltatime * animationSpeed;
 			if (isPlaying) {
 				if (isReversePlayback) { // 逆再生なら
-					modelData.animationTime -= deltaTime;
+					animationTime -= deltaTime;
 				}
 				else {
-					modelData.animationTime += deltaTime;
+					animationTime += deltaTime;
 				}
 			}
 
 			// ループするなら
 			if (isLoop) {
-				modelData.animationTime = std::fmod(modelData.animationTime, itCurrent->second.duration);
+				animationTime = std::fmod(animationTime, itCurrent->second.duration);
 
 				// 負の値を返す可能性があるので
-				if (modelData.animationTime < 0.0f) {
-					modelData.animationTime += itCurrent->second.duration;
+				if (animationTime < 0.0f) {
+					animationTime += itCurrent->second.duration;
 				}
 			}
 			else { // しないなら
 				if (isReversePlayback) {
-					if (modelData.animationTime <= 0) {
-						modelData.animationTime = 0; // 最終フレームで止める
+					if (animationTime <= 0) {
+						animationTime = 0; // 最終フレームで止める
 						isPlaying = false; // 自動停止
 					}
 				}
 				else {
-					if (modelData.animationTime >= itCurrent->second.duration) {
-						modelData.animationTime = itCurrent->second.duration; // 最終フレームで止める
+					if (animationTime >= itCurrent->second.duration) {
+						animationTime = itCurrent->second.duration; // 最終フレームで止める
 						isPlaying = false; // 自動停止
 					}
 				}
@@ -220,17 +220,17 @@ void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTra
 						return wrapped;
 						};
 
-					float prevTime = WrapTime(modelData.animationTime, prevAnim.duration);
-					float currTime = WrapTime(modelData.animationTime, currAnim.duration);
+					float prevTime = WrapTime(animationTime, prevAnim.duration);
+					float currTime = WrapTime(animationTime, currAnim.duration);
 				}
 			}
 
 			// 各ノード（ボーンではなく、単なるノード）のトランスフォーム補間
 			for (auto& [nodeName, nodeAnim] : itCurrent->second.nodeAnimations) {
 				// 時間に対応する補間結果を取得
-				Vector3 interpTranslate = AnimationFunction::CalculateValue(nodeAnim.translate.keyframes, modelData.animationTime);
-				Quaternion interpRotate = AnimationFunction::CalculateValue(nodeAnim.rotate.keyframes,modelData.animationTime);
-				Vector3 interpScale = AnimationFunction::CalculateValue(nodeAnim.scale.keyframes,modelData.animationTime);
+				Vector3 interpTranslate = AnimationFunction::CalculateValue(nodeAnim.translate.keyframes, animationTime);
+				Quaternion interpRotate = AnimationFunction::CalculateValue(nodeAnim.rotate.keyframes, animationTime);
+				Vector3 interpScale = AnimationFunction::CalculateValue(nodeAnim.scale.keyframes, animationTime);
 
 				// TRSマトリクスの生成
 				Matrix4x4 localMatrix = MakeAffineMatrix(interpScale, interpRotate, interpTranslate);
@@ -278,9 +278,33 @@ bool Engine::AnimationComponent::IsAnimationFinished()
 	// アニメ再生中かつアニメ時間が duration に達していれば終了
 	if (isReversePlayback) {
 
-		return !isPlaying && modelData.animationTime <= 0;
+		return !isPlaying && animationTime <= 0;
 	}
 	else {
-		return !isPlaying && modelData.animationTime >= itCurrent->second.duration;
+		return !isPlaying && animationTime >= itCurrent->second.duration;
 	}
+}
+
+
+void Engine::AnimationComponent::SetAnimation(const std::string& name, float time) {
+	AnimationFunction::SetAnimation(model->modelData, name, time);
+}
+
+void Engine::AnimationComponent::SetEndAnimeTime() {
+	const auto& animations = model->modelData.animations;
+	auto& modelData = model->modelData;
+	const std::string& currentName = modelData.currentAnimName;
+	auto itCurrent = animations.find(currentName);
+
+	animationTime = itCurrent->second.duration;
+}
+
+float Engine::AnimationComponent::GetEndAnimeTime(std::string name) const {
+	const auto& animations = model->modelData.animations;
+	auto it = animations.find(name);
+	if (it != animations.end()) {
+		return it->second.duration;
+	}
+	// 見つからない場合は 0.0f や -1.0f を返す
+	return 0.0f;
 }

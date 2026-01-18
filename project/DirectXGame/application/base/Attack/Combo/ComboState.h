@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/Combo/ComboData.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 
 #include <optional>

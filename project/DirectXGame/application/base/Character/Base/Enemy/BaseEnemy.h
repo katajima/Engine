@@ -23,7 +23,7 @@ public:
 	// 基盤となる初期化
 	void BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-		const std::string& modelName,const std::string& charaName);
+		const std::string& modelName,const std::string& charaName,float colliderRadius = 3.0f);
 
 	// 毎フレーム更新
 	virtual void Update() = 0;

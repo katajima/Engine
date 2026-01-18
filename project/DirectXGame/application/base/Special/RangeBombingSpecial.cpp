@@ -40,8 +40,8 @@ void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, E
 	objectReticle_->SetIsDraw(false);
 	objectReticle_->GetWorldTransform().rotate_ = provisionalData_.rotate;
 	objectReticle_->GetWorldTransform().translate_ = provisionalData_.translate;
-	objectReticle_->GetPrimitive()->GetMaterial()->transform.scale.x = 2.0f;
-	objectReticle_->GetPrimitive()->GetMaterial()->color = { 1,0,0,1 };
+	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().transform.scale.x = 2.0f;
+	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().color = { 1,0,0,1 };
 }
 
 
@@ -100,7 +100,7 @@ void RangeBombingSpecial::InAction()
 
 		data_.isMove_ = true;
 
-		objectReticle_->GetPrimitive()->GetMaterial()->transform.translate.x += GetTime() * 0.10f;
+		objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().transform.translate.x += GetTime() * 0.10f;
 		break;
 	case 1:
 		data_.isAction_ = true;

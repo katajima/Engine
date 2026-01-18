@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "ComboState.h"
-#include "ComboGlobalData.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 
 class BaseCharacter; // 前方宣言
 namespace Engine {

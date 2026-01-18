@@ -15,7 +15,7 @@ void Engine::BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const s
 	mesh->material = std::make_unique<Material>();
 	mesh->material->Initialize(primitiveCommon_->GetDxCommon());
 	mesh->material->tex_.diffuseFilePath = tex;
-	mesh->material->color = color;
+	mesh->material->GetMaterialInstance().color = color;
 
 	// 名前があるなら
 	if (name == "") {
@@ -34,9 +34,9 @@ void Engine::BasePrimitive::Update(float deltaTime)
 	int i = (int)mesh->vertices.size();
 	ImGui::InputInt("index2", &i);
 	str = name_ + "material";
-	ImGui::DragFloat3(str.c_str(), &mesh->material->transform.scale.x, 0.01f);
+	ImGui::DragFloat3(str.c_str(), &mesh->material->GetMaterialInstance().transform.scale.x, 0.01f);
 	str += "rotate";
-	ImGui::DragFloat3(str.c_str(), &mesh->material->transform.rotate.x, 0.01f);
+	ImGui::DragFloat3(str.c_str(), &mesh->material->GetMaterialInstance().transform.rotate.x, 0.01f);
 
 	ImGui::Checkbox("isScaleX", &aimetion_.isScaleX);
 	ImGui::Checkbox("isScaleY", &aimetion_.isScaleY);
@@ -51,33 +51,33 @@ void Engine::BasePrimitive::Update(float deltaTime)
 
 	// アニメーションスケールX
 	if (aimetion_.isScaleX) {
-		mesh->material->transform.scale.x += aimetion_.speed.x;
-		if (mesh->material->transform.scale.x >= aimetion_.maxCount.x) {
-			mesh->material->transform.scale.x = 0;
+		mesh->material->GetMaterialInstance().transform.scale.x += aimetion_.speed.x;
+		if (mesh->material->GetMaterialInstance().transform.scale.x >= aimetion_.maxCount.x) {
+			mesh->material->GetMaterialInstance().transform.scale.x = 0;
 		}
 
 	}
 	// アニメーションスケールY
 	if (aimetion_.isScaleY) {
-		mesh->material->transform.scale.y += aimetion_.speed.y;
-		if (mesh->material->transform.scale.y >= aimetion_.maxCount.y) {
-			mesh->material->transform.scale.y = 0;
+		mesh->material->GetMaterialInstance().transform.scale.y += aimetion_.speed.y;
+		if (mesh->material->GetMaterialInstance().transform.scale.y >= aimetion_.maxCount.y) {
+			mesh->material->GetMaterialInstance().transform.scale.y = 0;
 		}
 	}
 
 	// アニメーション回転X
 	if (aimetion_.isRotateX) {
-		mesh->material->transform.rotate.x += aimetion_.rotateSpeed.x;
-		if (mesh->material->transform.rotate.x >= aimetion_.maxRotate.x) {
-			mesh->material->transform.rotate.x = 0;
+		mesh->material->GetMaterialInstance().transform.rotate.x += aimetion_.rotateSpeed.x;
+		if (mesh->material->GetMaterialInstance().transform.rotate.x >= aimetion_.maxRotate.x) {
+			mesh->material->GetMaterialInstance().transform.rotate.x = 0;
 		}
 
 	}
 	// アニメーション回転Y
 	if (aimetion_.isRotateY) {
-		mesh->material->transform.rotate.y += aimetion_.rotateSpeed.y;
-		if (mesh->material->transform.rotate.y >= aimetion_.maxRotate.y) {
-			mesh->material->transform.rotate.y = 0;
+		mesh->material->GetMaterialInstance().transform.rotate.y += aimetion_.rotateSpeed.y;
+		if (mesh->material->GetMaterialInstance().transform.rotate.y >= aimetion_.maxRotate.y) {
+			mesh->material->GetMaterialInstance().transform.rotate.y = 0;
 		}
 	}
 

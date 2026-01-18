@@ -38,7 +38,7 @@ void Engine::Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type,
 	material = std::make_unique<Material>();
 	material->Initialize(spriteCommon_->GetDxCommon());
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
-	material->color = color;
+	material->GetMaterialInstance().color = color;
 
 	// トランスフォーム
 	transfomation = std::make_unique<Transfomation>();

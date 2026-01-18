@@ -45,9 +45,8 @@ void ObjectComponent::SetColor(const Color& color) {
         objectInstance_->color = color.ToVector4();
     }
     else {
-        objectBase_->GetMaterial(0)->color = color;
+        objectBase_->GetMaterial(0)->GetMaterialInstance().color = color;
 	}
-
 };
 
 

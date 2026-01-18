@@ -1,6 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include "DirectXGame/engine/Color/Color.h"
+#include "MaterialInstance.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
 #include "vector"
@@ -9,8 +8,7 @@
 #include<dxgi1_6.h>
 #include<dxcapi.h>
 using namespace Microsoft::WRL;
-#include<d3d12.h>
-#include<dxgi1_6.h>
+
 
 namespace Engine {
 	// 前方宣言
@@ -36,21 +34,14 @@ namespace Engine {
 
 		// テクスチャ読み込み
 		void LoadTex();
+
+		void SetMaterialInstance(const MaterialInstance& materialInstance);
+
+		// マテリアルインスタンス取得
+		MaterialInstance& GetMaterialInstance() { return materialInstance_; }
+
 	public:
-		Transform transform;
-		Color color;
-
-		int32_t enableLighting_ = false;
-		float  environmentCoefficient_ = 0.5f;
-		float shininess_ = 64.0f;
-		int32_t useLig_ = false;
-
-		int32_t useNormalMap_ = 0;
-		int32_t useSpeculerMap_ = 0;
-		bool useEnvironment_ = 0;
-		float alphaClipping_ = 0.5f;
-		float alpha_ = 1.0f;
-
+		
 		// テクスチャ構造体
 		struct Tex {
 			std::string diffuseFilePath;
@@ -67,7 +58,6 @@ namespace Engine {
 		};
 		Tex tex_;
 
-	private:
 		// GPUに送るデータ
 		struct DataGPU
 		{
@@ -84,10 +74,15 @@ namespace Engine {
 			int32_t useSpeculerMap;
 			float padding2[3];
 		};
+
+	private:
+
+		MaterialInstance materialInstance_;
+
+	private:
+		
 		DirectXCommon* dxCommon_ = nullptr;
-
-
-		ConstantBuffer<Material::DataGPU> cbResource_;
+		std::unique_ptr<ConstantBuffer<Material::DataGPU>> cbResource_;
 
 		// テクスチャ数
 		uint32_t texDiffuseNum = 0;

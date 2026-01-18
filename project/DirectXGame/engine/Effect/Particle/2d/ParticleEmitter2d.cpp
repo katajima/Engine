@@ -64,8 +64,8 @@ void Engine::ParticleEmitter2d::Update() {
 
 void Engine::ParticleEmitter2d::Emit() {
 	if (isEmit) {
-		particleManager_->GetParticleGroups(particleName_).material->alphaClipping_ = alphaClipping_; // αクリッピング
-		particleManager_->GetParticleGroups(particleName_).material->enableLighting_ = enableLighting_; // aライト
+		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().alphaClipping_ = alphaClipping_; // αクリッピング
+		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().enableLighting_ = enableLighting_; // aライト
 
 		auto& rng = particleManager_->GetRandomEngine();
 

@@ -131,7 +131,7 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 	hitObject2_->SetPrimitive(std::move(cylinder2));
 	hitObject2_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
-	hitObject2_->GetPrimitive()->GetMaterial()->color = provisionalData_.hit2Color;
+	hitObject2_->GetPrimitive()->GetMaterial()->GetMaterialInstance().color = provisionalData_.hit2Color;
 
 	// 敵の位置捕捉
 	enemyPos_.x = targetRange_.position.x + Random::RandomFloat(-targetRange_.radius, targetRange_.radius);

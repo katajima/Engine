@@ -23,7 +23,6 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
@@ -51,6 +50,7 @@ namespace Engine {
 	class RigidBodyComponent;
 	class ColliderComponent;
 	class ContactRecord;
+	class Model;
 
 	// オブジェクトのインスタスクラス
 	class ObjectInstans

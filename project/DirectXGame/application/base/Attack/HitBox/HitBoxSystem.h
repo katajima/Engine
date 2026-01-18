@@ -1,7 +1,7 @@
 #pragma once
 #include "HitBox.h"
 #include <DirectXGame/application/base/Attack/AttackData.h>
-#include <DirectXGame/application/base/Attack/Combo/ComboGlobalData.h>
+#include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
 
 namespace Engine {
 	class Entity3DManager; // 前方宣言

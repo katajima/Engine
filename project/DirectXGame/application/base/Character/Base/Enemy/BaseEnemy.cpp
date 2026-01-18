@@ -76,7 +76,7 @@ void BaseEnemy::Initialize2D()
 
 void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, 
 	Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-	const std::string& modelName, const std::string& charaName){
+	const std::string& modelName, const std::string& charaName, float colliderRadius){
 
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	entity2DManager_ = entity2DManager;	// エンティティ2d
@@ -107,7 +107,7 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 	sphere->Enable();					// コライダ有効
 	sphere->tag = CollisionTag::Enemy;	// タグ設定
 	sphere->layer = CollisionLayer::Enemy;// レイヤー設定
-	sphere->radius = 3.0f; // 半径を適宜設定
+	sphere->radius = colliderRadius; // 半径を適宜設定
 	GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
