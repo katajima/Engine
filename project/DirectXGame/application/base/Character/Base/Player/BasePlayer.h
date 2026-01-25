@@ -7,6 +7,9 @@
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
 
+// 前方宣言
+class ComboEditor;
+
 
 //前方宣言
 class FollowCamera;
@@ -41,6 +44,9 @@ public:
 
 	// リロード
 	virtual void Reload() {};
+	// コンボデータをシーケンサー適応
+	virtual void ApplyComboData(ComboEditor* comboEditor) {};
+
 
 public:
 	// フォローカメラの設定
@@ -62,6 +68,5 @@ protected:
 
 	// 影用オブジェクトコンポーネント
 	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
-
 };
 

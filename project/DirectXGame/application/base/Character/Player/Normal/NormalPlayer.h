@@ -4,6 +4,8 @@
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "NormalPlayerState.h"
 
+
+
 ///< summary>
 /// 自キャラ
 ///</summary>
@@ -45,7 +47,9 @@ public:
 	void HeavyAttack() override { RequestAttack(AttackInput::Heavy); };
 
 	// リロード
-	void Reload() override { ReloadComboData(); };
+	void Reload() override;
+
+	void ApplyComboData(ComboEditor* comboEditor) override;
 
 	// プレイヤUI取得
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };
@@ -76,20 +80,13 @@ private:
 	ComboGlovalData data7; // コンボデータ(追加)横右
 	ComboGlovalData data8; // コンボデータ(追加)突き
 
-	ComboData comboData1{};
-	ComboData comboData2{};
-	ComboData comboData3{};
-	ComboData comboData4{};
-	ComboData comboData5{};	// コンボ(追加)
-	ComboData comboData6{};	// コンボ(追加)
-	ComboData comboData7{};	// コンボ(追加)
-	ComboData comboData8{};	// コンボ(追加)
-
-
+	
+	
 	ComboGlovalData data9; // コンボデータ(追加)突き
-	ComboData comboData9{};	// コンボ(追加)強
+	ComboGlovalData data10; // コンボデータ(追加)突き
+	ComboGlovalData data11; // コンボデータ(追加)突き
 
-
+	
 
 
 	void ReloadComboData();

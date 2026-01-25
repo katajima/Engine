@@ -34,6 +34,10 @@ struct ComboGlovalData {
 
 	float stateInputStartTime = 0.1f;	// 入力受付時間
 	float stateInputEndTime = 0.5f;		// 入力終了時間
+
+	float stateCancelStartTime = 0.3f;	// キャンセル開始時間
+	float stateCancelEndTime = 0.5f;	// キャンセル終了時間
+
 	float stateEndTime = 0.5f;			// ステート終了時間
 	float stateNextTime = 0.45f;		// ステート移行時間
 
@@ -42,7 +46,7 @@ struct ComboGlovalData {
 	float gravityScale = 1.0f;			// 重力スケール
 
 	float animationSpeed_ = 1.0f;		// アニメーションスピード
-
+	float animationBlendTime_ = 0.1f;	// アニメーションブレンド時間
 
 	float trailEffectStartTime = 0.1f;	// トレイル発生時間
 	float trailEffectLifeTime = 1.0;	// トレイル生存時間

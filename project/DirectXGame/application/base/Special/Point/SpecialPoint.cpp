@@ -73,7 +73,7 @@ void SpecalPoint::Initialize(Engine::Entity3DManager* entity3DManager, Engine::G
 	sphere->Enable();					// コライダ有効
 	sphere->tag = CollisionTag::Item;	// タグ設定
 	sphere->layer = CollisionLayer::Environment;// レイヤー設定
-	sphere->radius = 2.0f; // 半径を適宜設定
+	sphere->radius = 4.0f; // 半径を適宜設定
 	colliderComponent->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）

@@ -83,6 +83,7 @@ void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& c
 		{ EnemyType::kNormal,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
 		{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
 		{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
+		{ EnemyType::kDummy,   []() { return std::make_unique<DummyEnemy>(); } },
 	};
 
 	auto it = enemyFactoryMap.find(enemyType);

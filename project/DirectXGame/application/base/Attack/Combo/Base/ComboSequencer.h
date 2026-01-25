@@ -84,7 +84,7 @@ public: // 取得系
 		}
 
 		/// 見つからなかった場合は空のイベントを返す
-		return AttackEvent{};;
+		return events[0];
 	}
 
 	// イベント名取得

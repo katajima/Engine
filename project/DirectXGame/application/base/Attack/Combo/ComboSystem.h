@@ -36,6 +36,9 @@ public: // 保存や適応に関しての関数
 	void ApplyGlobalComboData(const std::string& name, ComboGlovalData& data);
 
 	// 保存項目の適応
+	void GetGlobalComboData(const std::string& name, ComboGlovalData& data);
+
+	// 保存項目に設定
 	void SetGlobalComboData(const std::string& name, ComboGlovalData& data);
 
 

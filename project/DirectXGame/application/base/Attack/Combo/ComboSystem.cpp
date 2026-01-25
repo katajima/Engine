@@ -70,6 +70,10 @@ void ComboSystem::ApplyGlobalComboData(const std::string& name, ComboGlovalData&
 	globalVariables->AddItem(name, "コンボ中の重力強度", data.gravityScale);
 
 
+	globalVariables->AddItem(name, "コンボキャンセル受付開始時間", data.stateCancelStartTime);
+	globalVariables->AddItem(name, "コンボキャンセル受付終了時間", data.stateCancelEndTime);
+
+
 	globalVariables->AddItem(name, "コンボ中の移動スピード",data.moveSpeed_);
 	globalVariables->AddItem(name, "コンボ中の移動開始時間", data.moveWindowStart_);
 	globalVariables->AddItem(name, "コンボ中の移動終了時間", data.moveWindowEnd_);
@@ -77,17 +81,18 @@ void ComboSystem::ApplyGlobalComboData(const std::string& name, ComboGlovalData&
 
 
 	globalVariables->AddItem(name, "アニメーション速度", data.animationSpeed_);
+	globalVariables->AddItem(name, "アニメーション遷移時間", data.animationBlendTime_);
 
 	globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 	globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
 
 	// 保存項目の適応
-	SetGlobalComboData(name, data);
+	GetGlobalComboData(name, data);
 };
 
 
-void ComboSystem::SetGlobalComboData(const std::string& name, ComboGlovalData& data) {
+void ComboSystem::GetGlobalComboData(const std::string& name, ComboGlovalData& data) {
 	data.hitBoxWindowStart_ = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 	data.hitBoxLifeTime_ = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
 	
@@ -112,12 +117,46 @@ void ComboSystem::SetGlobalComboData(const std::string& name, ComboGlovalData& d
 	data.isCompulsionMove_ = globalVariables->GetValue<bool>(name,"コンボ中の移動強制");
 
 
-
+	data.stateCancelStartTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付開始時間");
+	data.stateCancelEndTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付終了時間");
 
 	data.animationSpeed_ = globalVariables->GetValue<float>(name, "アニメーション速度");
+	data.animationBlendTime_ = globalVariables->GetValue<float>(name, "アニメーション遷移時間");
+
 
 	data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 	data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
+}
+void ComboSystem::SetGlobalComboData(const std::string& name, ComboGlovalData& data){
+	globalVariables->SetValue(name, "コンボ入力受付開始時間", data.stateInputStartTime);
+	globalVariables->SetValue(name, "コンボ入力受付終了時間", data.stateInputEndTime);
+
+	globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBoxWindowStart_);
+	globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBoxLifeTime_);
+
+	globalVariables->SetValue(name, "コンボ終了時間", data.stateEndTime);
+	globalVariables->SetValue(name, "コンボ移行時間", data.stateNextTime);
+
+	globalVariables->SetValue(name, "コンボ中の移動開始時間", data.moveWindowStart_);
+	globalVariables->SetValue(name, "コンボ中の移動終了時間", data.moveWindowEnd_);
+	
+	globalVariables->SetValue(name, "コンボ中の移動スピード", data.moveSpeed_);
+	globalVariables->SetValue(name, "コンボ中の移動強制", data.isCompulsionMove_);
+
+
+	globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.stateCancelStartTime);
+	globalVariables->SetValue(name, "コンボキャンセル受付終了時間", data.stateCancelEndTime);
+
+
+	globalVariables->SetValue(name, "アニメーション速度", data.animationSpeed_);
+	globalVariables->SetValue(name, "アニメーション遷移時間", data.animationBlendTime_);
+
+	
+	globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
+	globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
+
+
+
 };
 
 

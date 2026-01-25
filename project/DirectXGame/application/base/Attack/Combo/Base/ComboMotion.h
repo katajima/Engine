@@ -36,6 +36,7 @@ public:
 		std::string animationName_ = "no";		// アニメーション名前
 		bool animationLoop_ = false;			// アニメーションループ
 		float animationSpeed_ = 1.0f;			// アニメーションスピード
+		float animationBlendTime_ = 0.1f;		// アニメーションブレンド時間
 	};
 
 	// 開始

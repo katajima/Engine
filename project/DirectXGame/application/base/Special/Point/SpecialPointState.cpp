@@ -86,6 +86,7 @@ void SpecialPointIdleState::Exit() {
 // 開始
 void SpecialPointMoveState::Enter() {
 	timer = 0.0f;
+	object_->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);
 };
 // 更新
 void SpecialPointMoveState::Update(float dt) {
@@ -94,6 +95,13 @@ void SpecialPointMoveState::Update(float dt) {
 	Vector3 dire = Normalize(object_->GetTargetPos() - object_->GetObjectComponent()->GetWorldPosition());
 
 	object_->GetObjectComponent()->GetWorldTransform().translate_ += dire * speed_ * dt;
+
+	// 目標位置に到達したら位置を固定
+	if (2.0f  > object_->GetObjectComponent()->GetWorldPosition().Distance(object_->GetTargetPos())) {
+		object_->GetObjectComponent()->GetWorldPosition() = object_->GetTargetPos() + Vector3{0,3,0};
+	}
+
+
 };
 // 終了
 void SpecialPointMoveState::Exit() {

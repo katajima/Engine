@@ -1,5 +1,4 @@
 #include "ComboEditor.h"
-#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
@@ -98,11 +97,15 @@ void ComboEditorBlock::ImGuiCurrentFrame(float dt) {
 	// 現在のフレーム表示
 	ImGui::Checkbox("再生するか", &isPlaying);
 	ImGui::Checkbox("ループ再生", &loopPlay);
+	ImGui::Separator();
 	ImGui::Text("Current Frame: %d", currentFrame);
 	ImGui::DragInt("最大フレーム", &maxFrame);
 	ImGui::SliderInt("Current Frame", &currentFrame,0,maxFrame);
-
-
+	ImGui::Separator();
+	ImGui::SliderFloat("アニメーションスピード", &data_.animationSpeed_, 0.1f, 10.0f, "%.2f");
+	ImGui::SliderFloat("アニメーションブレンド時間", &data_.animationBlendTime_, 0.1f, 10.0f, "%.2f");
+	ImGui::Checkbox("強制移動", &data_.isCompulsionMove_);
+	ImGui::SliderFloat("移動速度", &data_.moveSpeed_, 0.0f, 100.0f, "%.2f");
 	if(isPlaying){
 		currentFrame += static_cast<int>(dt * 60.0f); // 60FPS換算
 	}
@@ -157,7 +160,8 @@ void ComboEditorBlock::AnimationApplyToState(){
 	// アニメーション設定
 	animation->SetAnimation(state->GetAnimationName(), 0);
 	// ステートのアニメーション時間設定
-	animation->SetAnimationTime(ConvertUtility::FramesToSeconds(currentFrame));
+	float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * data_.animationSpeed_;
+	animation->SetAnimationTime(animationTime);
 }
 
 void ComboEditorBlock::ApplyComboDataToState(){
@@ -186,7 +190,7 @@ void ComboEditorBlock::SequencerApplyToState(){
 
 	// ヒットボックス生成時間
 	float hitBoxStart = comboData.GetComboHitBox().GetData().hitBpxWindowStart_;
-	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetData().lifeTime_ + comboData.GetComboHitBox().GetData().hitBpxWindowStart_;
+	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetData().lifeTime_;
 
 	// コンボ終了時間
 	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
@@ -195,6 +199,16 @@ void ComboEditorBlock::SequencerApplyToState(){
 	// 移動時間
 	float moveStart = comboData.GetComboMotion().GetData().moveWindowStart_;
 	float moveEnd = comboData.GetComboMotion().GetData().moveWindowEnd_;
+	data_.moveSpeed_ = comboData.GetComboMotion().GetData().speed_;						// 移動速度
+	data_.isCompulsionMove_ = comboData.GetComboMotion().GetData().isCompulsionMove_;	// 強制移動
+
+	// アニメーションスピード
+	data_.animationSpeed_ = comboData.GetComboMotion().GetData().animationSpeed_;
+
+
+	// トレイルエフェクト
+	float trailStart = comboData.GetComboEffect().GetData().startTmer;
+	float trailEnd = trailStart + comboData.GetComboEffect().GetData().lifeTime;
 
 
 	AddSequencerEvent(inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
@@ -202,6 +216,7 @@ void ComboEditorBlock::SequencerApplyToState(){
 	AddSequencerEvent(nextComboTime, endComboTime, 0xFFFF0000, "コンボ移行開始時間");
 	AddSequencerEvent(hitBoxStart, hitBoxEnd, 0xFFFF0000, "ヒットボックス生成時間");
 	AddSequencerEvent(moveStart, moveEnd, 0xFFFF0000, "移動時間");
+	AddSequencerEvent(trailStart, trailEnd, 0xFFFF0000, "トレイルエフェクト時間");
 
 }
 
@@ -294,6 +309,51 @@ void ComboEditor::ApplyComboEditorToSystem(){
 	else {
 		selectedComboEditorBlockName_.clear();
 	}
+}
+
+void ComboEditor::SetGlobalData(const std::string& nameGlobal,const std::string& name, ComboGlovalData& data){
+	// 既に存在する場合は追加しない
+	if (comboEditorBlocks_.find(name) == comboEditorBlocks_.end()) {
+		return;
+	}
+	AttackSequence combo = comboEditorBlocks_[name].GetAttackSequence();
+
+	// 入力の時間
+	data.stateInputStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
+	data.stateInputEndTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);
+
+	// キャンセル可能時間
+	data.stateCancelEndTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").startFrame);
+	data.stateCancelEndTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").endFrame);
+
+	// コンボ移行時間
+	data.stateNextTime = ConvertUtility::FramesToSeconds(combo.GetEvent("コンボ移行開始時間").startFrame);
+
+	// ステート終了時間
+	data.stateEndTime = comboEditorBlocks_[name].GetMaxFrame();
+
+	// ヒットボックス生成時間
+	float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
+	data.hitBoxWindowStart_ = hitBoxStart;
+	data.hitBoxLifeTime_ = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
+
+
+	// 移動時間
+	data.moveWindowStart_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
+	data.moveWindowEnd_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+	data.moveSpeed_ = comboEditorBlocks_[name].GetData().moveSpeed_;
+	data.isCompulsionMove_ = comboEditorBlocks_[name].GetData().isCompulsionMove_;
+
+	// アニメーションスピード
+	data.animationSpeed_ = comboEditorBlocks_[name].GetData().animationSpeed_;
+	data.animationBlendTime_ = comboEditorBlocks_[name].GetData().animationBlendTime_;
+
+	// エフェクト
+	data.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
+	data.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.trailEffectStartTime;
+
+
+	comboSystem->SetGlobalComboData(nameGlobal, data);
 }
 
 void ComboEditor::CreateComboEditorBlock(const std::string& comboName, ComboSystem* comboSystem, std::shared_ptr<ComboNodeState> state, BaseCharacter* owner){

@@ -4,6 +4,9 @@
 
 // 敵キャラクター
 
+// ダミー
+#include"DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.h"
+
 // 大
 #include"DirectXGame/application/base/Character/Enemy/Large/Melee/LargeMeleeEnemy.h"
 

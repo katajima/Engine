@@ -16,7 +16,7 @@ void ComboMotion::Enter(BaseCharacter* owner) {
 	SetRigid(owner->GetObjectComponent()->GetRigidBodyComponent());
 
 	// アニメーション設定
-	animationComponent->SetAnimation(data_.animationName_, 0.0f);	// 再生するアニメーション設定
+	animationComponent->SetAnimation(data_.animationName_, data_.animationBlendTime_);	// 再生するアニメーション設定
 	animationComponent->SetStratAnimeTime();						// アニメーション時間初期化
 	animationComponent->SetIsLoop(data_.animationLoop_);			// ループ再生
 	animationComponent->SetAnimationSpeed(data_.animationSpeed_);	// アニメーションスピード設定
@@ -43,7 +43,8 @@ void ComboMotion::Update(const Engine::Input& input, float timer, float dt) {
 	animationComponent->SetAnimationSpeed(data_.animationSpeed_);
 
 	// アニメーション時間設定
-	animationComponent->SetAnimationTime(timer);
+	animationComponent->SetAnimationTime(timer * data_.animationSpeed_);
+
 	// 移動可能か
 	moveComponent->GetMoveSystem()->SetIsAttackCanMove(IsMove());
 

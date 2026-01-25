@@ -28,8 +28,8 @@ void AttackController::Update(float dt) {
 	}
 	// ヒットボックスシステムの更新
 	hitBoxSystem_->Update(dt);
-	//if (IsAttack()) {
+	if (IsAttack() || isDebugEditor_) {
 		// コンボシステムの更新
-	comboSystem_->UpdateCombo(dt);
-	//}
+		comboSystem_->UpdateCombo(dt);
+	}
 };

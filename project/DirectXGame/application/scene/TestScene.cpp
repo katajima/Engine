@@ -240,7 +240,7 @@ void TestScene::InitializeObject3D()
 		auto obj = GetEntity3DManager()->CreateObject3D("skinObject_" + std::to_string(i), Engine::ObjectModelType::kSkinning, { static_cast<float>(i * 10),0,30 }, cameraManeger_->GetCamera());
 		obj->SetModel("testCharacter.gltf");
 		obj->InitAnimationComponent();
-		obj->GetAnimationComponent()->SetAnimation("Attack02", static_cast<float>(i) / 10.0f );
+		obj->GetAnimationComponent()->SetAnimation("Idle01", static_cast<float>(i) / 10.0f );
 		obj->SetIsDraw(true);
 		skinObjects.push_back(obj);
 	}

@@ -91,6 +91,18 @@ void Engine::MyGame::Update()
 
 		ImGui::EndMenu();
 	}
+
+	if (ImGui::BeginMenu("Scene")) {
+		if (ImGui::Button("TestScene")) {
+			sceneManager_->ChangeScene("CHARACTER");
+		}
+		if (ImGui::Button("TitleScene")) {
+			sceneManager_->ChangeScene("TITLE");
+		}
+		ImGui::EndMenu();
+	}
+
+	
 	ImGui::EndMenuBar();
 	ImGui::End();
 

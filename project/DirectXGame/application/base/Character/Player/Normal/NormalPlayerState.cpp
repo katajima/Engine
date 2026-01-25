@@ -71,7 +71,7 @@ void PlayerStateIdle::Enter() {
 	anima->SetIsLoop(true);			// ループさせる
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	anima->SetAnimation("Idle2", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimation("SwordIdle01", 0.5f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 };
 
@@ -140,7 +140,7 @@ void PlayerStateMove::Enter()
 	anima->SetIsLoop(true);				// ループ再生
 	anima->SetIsPlaying(true);			// 再生
 	anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
-	anima->SetAnimation("Walk", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 }
 
@@ -178,7 +178,7 @@ void PlayerStateJump::Update() {
 
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.05f);
+		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStart01", 0.05f);
 
 		// ジャンプ開始
 		anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -196,11 +196,11 @@ void PlayerStateJump::Update() {
 	
 	if (jump->GetState() == JumpSystem::State::Jump) { // 上昇しているなら
 		anima->SetIsLoop(false);
-		anima->SetAnimation("JumpStrat1", 0.05f);
+		anima->SetAnimation("JumpStart01", 0.05f);
 	}
 	else if (jump->GetState() == JumpSystem::State::Fall) { // 降下しているなら
 		anima->SetIsLoop(true);
-		anima->SetAnimation("Fall", 0.15f);
+		anima->SetAnimation("Jump01", 0.15f);
 	}
 }
 

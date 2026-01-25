@@ -136,6 +136,11 @@ void CharacterDebugScene::Initialize()
 
 
 
+	// ダミー敵生成
+	characterManager_->CreateCharacter(EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+
+	// デバッグモード設定
+	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(isComboEditorActive_);
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<ComboEditor>();
 	comboEditor_->Initialize(characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
@@ -291,7 +296,11 @@ void CharacterDebugScene::CheckAllCollisions() {
 void CharacterDebugScene::ComboEditorUpdate(float dt){
 #ifdef _DEBUG
 	ImGui::Begin("Comdo");
+	ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
+
+
 	if (ImGui::Button("Relord")) {
+		characterManager_->GetPlayer()->ApplyComboData(comboEditor_.get());
 		// リロード
 		characterManager_->GetPlayer()->Reload();
 		// コンボエディター
@@ -300,6 +309,7 @@ void CharacterDebugScene::ComboEditorUpdate(float dt){
 	ImGui::End();
 
 	// コンボエディター更新
+	if(isComboEditorActive_)
 	comboEditor_->UpdateImGui(GetTime());
 #endif // _DEBUG
 }

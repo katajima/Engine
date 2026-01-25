@@ -1,11 +1,12 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboSequencer.h"
 #include "ComboSystem.h"
+#include "DirectXGame/engine/Utility/ConvertUtility.h"
 
 // コンボ数に応じてシーケンサーを増やす
 // 
-//
-// 
+
+
 
 namespace Engine {
 	class GlobalVariables;
@@ -15,6 +16,18 @@ class BaseCharacter;
 
 class ComboEditorBlock {
 public:
+	struct Data {
+		// アニメーションスピード
+		float animationSpeed_ = 1.0f;
+		// アニメーションのブレンド時間
+		float animationBlendTime_ = 0.1f;
+		// 移動速度
+		float moveSpeed_ = 0.0f;
+		// 強制移動
+		bool isCompulsionMove_ = false;
+		
+	};
+
 	// 初期化
 	void Initialize(Engine::GlobalVariables* globalVariables, ComboSystem* comboSystem, std::shared_ptr<ComboNodeState> state,BaseCharacter* owner);
 	// 更新
@@ -28,6 +41,15 @@ public:
 public:
 	// エディタ上で選択中か取得
 	void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
+
+	// シーケンサー取得
+	AttackSequence GetAttackSequence() const { return sequence_; }
+
+	// 最大フレーム取得
+	float GetMaxFrame() const { return ConvertUtility::FramesToSeconds(maxFrame); }
+
+	// データ取得
+	Data GetData() const { return data_; }
 private:
 	// 最初のフレーム設定
 	void ImGuiFirstFrame();
@@ -66,9 +88,9 @@ private:
 	int currentFrame = 0;
 
 	// 再生中か
-	bool isPlaying = false;
+	bool isPlaying = true;
 	// ループ再生するか
-	bool loopPlay = false;
+	bool loopPlay = true;
 
 	// 最初のフレーム
 	int firstFrame = 0;
@@ -84,6 +106,9 @@ private:
 
 	// 今選択中か
 	bool nowChoice_ = false;
+private:
+	
+	Data data_;
 };
 
 
@@ -99,6 +124,9 @@ public:
 
 	// コンボエディターブロックをコンボシステムに適応
 	void ApplyComboEditorToSystem();
+public:
+
+	void SetGlobalData(const std::string& nameGlobal,const std::string& name, ComboGlovalData& data);
 
 private:
 
@@ -118,4 +146,6 @@ private:
 
 	// 選択中のコンボエディターブロック名
 	std::string selectedComboEditorBlockName_;
+
+	ComboGlovalData data;
 };
