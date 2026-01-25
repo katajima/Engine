@@ -44,7 +44,8 @@ public:
 	/// 攻撃(強攻撃)
 	void HeavyAttack() override { RequestAttack(AttackInput::Heavy); };
 
-
+	// リロード
+	void Reload() override { ReloadComboData(); };
 
 	// プレイヤUI取得
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };
@@ -66,14 +67,14 @@ private:
 	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 
 
-	ComboGlovalData data1_;
-	ComboGlovalData data2_;
-	ComboGlovalData data3_;
-	ComboGlovalData data4_;
-	ComboGlovalData data5_;	// コンボデータ(追加)横左
-	ComboGlovalData data6_; // コンボデータ(追加)横回転左
-	ComboGlovalData data7_; // コンボデータ(追加)横右
-	ComboGlovalData data8_; // コンボデータ(追加)突き
+	ComboGlovalData data1;
+	ComboGlovalData data2;
+	ComboGlovalData data3;
+	ComboGlovalData data4;
+	ComboGlovalData data5;	// コンボデータ(追加)横左
+	ComboGlovalData data6; // コンボデータ(追加)横回転左
+	ComboGlovalData data7; // コンボデータ(追加)横右
+	ComboGlovalData data8; // コンボデータ(追加)突き
 
 	ComboData comboData1{};
 	ComboData comboData2{};
@@ -83,6 +84,11 @@ private:
 	ComboData comboData6{};	// コンボ(追加)
 	ComboData comboData7{};	// コンボ(追加)
 	ComboData comboData8{};	// コンボ(追加)
+
+
+	ComboGlovalData data9; // コンボデータ(追加)突き
+	ComboData comboData9{};	// コンボ(追加)強
+
 
 
 

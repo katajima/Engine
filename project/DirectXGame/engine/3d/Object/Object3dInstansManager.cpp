@@ -76,6 +76,50 @@ void Engine::Object3dInstansManager::Update() {
 				++objectIterator;
 			}
 		}
+
+		// 全パーティクルグループに対する処理
+		for (auto& val : objectTranslucentGroups | std::views::values) // 各オブジェクトグループに対して
+		{
+			ObjectGroup& group = val;
+			group.instanceCount = 0; // 描画すべきインスタンスのカウント
+			group.mesh->material->GPUData();
+
+
+			for (auto objectIterator = group.object.begin(); objectIterator != group
+				.object.end();) {
+				// 描画されていないもしくはオブジェクトがない場合はスキップ
+				if (!objectIterator->is_ || !objectIterator->isDraw_) {
+					++objectIterator;
+					continue;
+				}
+
+
+
+				if (group.instanceCount < kNumMaxInstance) {
+					// ワールド行列を計算
+					objectIterator->Update();
+
+					Matrix4x4 worldMatrix = objectIterator->transform.worldMat_;
+
+					// ワールドビュー射影行列を合成
+					Matrix4x4 worldViewProjectionMatrix = Multiply(
+						worldMatrix, viewprojection);
+
+					// インスタンシング用データに情報を書き込み
+					group.instanceData[group.instanceCount].World = worldMatrix;
+					group.instanceData[group.instanceCount].WVP = worldViewProjectionMatrix;
+					group.instanceData[group.instanceCount].worldInverseTranspose = Transpose(Inverse(worldMatrix));
+
+					group.instanceData[group.instanceCount].color = objectIterator->color;
+					group.instanceData[group.instanceCount].textureIndex = objectIterator->texIndex;
+
+					// インスタンス数をカウント
+					++group.instanceCount;
+				}
+
+				++objectIterator;
+			}
+		}
 	}
 }
 
@@ -83,6 +127,45 @@ void Engine::Object3dInstansManager::Draw() {
 	auto commandList = dxCommon_->GetCommandList();
 
 	for (auto& pair : objectGroups) {
+		ObjectGroup& group = pair.second;
+		if (group.instanceCount == 0) {
+			continue;
+		}
+
+
+		DrawCommonSetting(group.rasteType, group.blendType);
+
+		entity3DManager_->GetLightManager()->DrawLight({ true,true,true });
+
+		group.mesh->material->GetCommandListMaterial(0);
+
+		group.mesh->material->GetCommandListTexture(2, 7, 8);
+
+		camera_->GetCommandList(4);
+
+		// インスタンシングデータのSRVのDescriptorTableを設定
+		commandList->SetGraphicsRootDescriptorTable(
+			1, group.instancingSrvHandleGPU);
+
+		commandList->SetGraphicsRootDescriptorTable(
+			2, srvManager_->GetGPUDescriptorHandle());
+
+
+		group.mesh->GetCommandList();
+
+		// インスタンシング描画
+		uint32_t instanceCount = (std::min)(group.instanceCount,
+			kNumMaxInstance);
+		commandList->DrawIndexedInstanced(
+			static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0,
+			0);
+	}
+}
+
+void Engine::Object3dInstansManager::DrawTransparency(){
+	auto commandList = dxCommon_->GetCommandList();
+
+	for (auto& pair : objectTranslucentGroups) {
 		ObjectGroup& group = pair.second;
 		if (group.instanceCount == 0) {
 			continue;
@@ -172,18 +255,28 @@ void Engine::Object3dInstansManager::Clear(const std::string& name) {
 	it->second.object.clear();
 	it->second.idMap.clear();
 	it->second.instanceCount = 0;
+
+
+	auto it2 = objectTranslucentGroups.find(name);
+	if (it2 == objectTranslucentGroups.end()) return;
+	it2->second.object.clear();
+	it2->second.idMap.clear();
+	it2->second.instanceCount = 0;
 }
 
 #pragma region Create
 
 void Engine::Object3dInstansManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, Model* model,
-	RasterizerType    rasteType, BlendType    blendType) {
-	if (objectGroups.contains(name)) {
+	RasterizerType    rasteType, BlendType    blendType, TransparencyType transparencyType) {
+
+	bool isReturn = false;
+
+	ObjectGroup& objectGroup = GroupContains(name, transparencyType, isReturn);
+
+	if (isReturn) {
 		return;
 	}
-
-	ObjectGroup& objectGroup = objectGroups[name];
 
 	// 名前
 	objectGroup.name = name;
@@ -228,12 +321,16 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 
 void Engine::Object3dInstansManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
-	RasterizerType    rasteType, BlendType    blendType) {
-	if (objectGroups.contains(name)) {
+	RasterizerType    rasteType, BlendType    blendType, TransparencyType transparencyType) {
+	
+
+	bool isReturn = false;
+
+	ObjectGroup& objectGroup = GroupContains(name, transparencyType, isReturn);
+
+	if (isReturn) {
 		return;
 	}
-
-	ObjectGroup& objectGroup = objectGroups[name];
 
 	// 名前
 	objectGroup.name = name;
@@ -278,10 +375,10 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 
 void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	const std::string& texName,
-	ObjectInstans&& object, int& id, MeshType type) {
+	ObjectInstans&& object, int& id, MeshType type, TransparencyType transparencyType) {
 
 	if (MeshType::kModel == type) {
-		CreateObject3dGroup(name, texName, modelManager_->FindModel(name));
+		CreateObject3dGroup(name, texName, modelManager_->FindModel(name),RasterizerType::MODE_SOLID_BACK,BlendType::MODE_ADD, transparencyType);
 	}
 
 	object.color = { 1, 1, 1, 1 };
@@ -289,7 +386,12 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	object.isDraw_ = true;
 
 	if (texName.empty()) {
-		object.texIndex = objectGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
+		if (transparencyType == TransparencyType::kNo) {
+			object.texIndex = objectGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
+		}
+		else {
+			object.texIndex = objectTranslucentGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
+		}
 	}
 	else {
 		object.texIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(texName);
@@ -299,135 +401,151 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	int objectId = object.id;
 
 	// ✅ 完全に右辺値としてムーブされる
-	objectGroups[name].object.emplace_back(std::move(object));
-
-	// 追加した要素のインデックスを取得
-	size_t index = objectGroups[name].object.size() - 1;
-
-	// ID → インデックスで登録
-	if (objectId == -1) {
-		objectGroups[name].idMap[ConvertUtility::ToInt(index)] = index;
-		id = ConvertUtility::ToInt(index);
+	if (transparencyType == TransparencyType::kNo) {
+		objectGroups[name].object.emplace_back(std::move(object));
 	}
-}
-
-void Engine::Object3dInstansManager::CreateTileMap(const std::string& groupName,
-	const std::string& textureFilePath,
-	Model* tileModel,
-	int mapWidth, int mapHeight,
-	Vector3 tileSize,
-	Vector2 tileInterval,
-	const std::vector<int>& tileIndices,
-	const std::vector<MapId>& mapIds,
-	MapAxis axis) {
-	// グループを作成
-	CreateObject3dGroup(groupName, textureFilePath, tileModel);
-
-	// タイル配置を生成
-	for (int y = 0; y < mapHeight; y++) {
-		for (int x = 0; x < mapWidth; x++) {
-			int idx = y * mapWidth + x;
-			int tileType = tileIndices[idx];
-			if (tileType <= 0) continue; // 0以下 = 空
-
-			ObjectInstans tile;
-			tile.Initialize(entity3DManager_,false);
-
-			Vector3 pos{};
-
-			// --- 配置方向を MapAxis で切り替え ---
-			switch (axis) {
-			case MapAxis::XY:
-				// Z = 0、XY 平面に敷く
-				pos = { x * tileInterval.x, y * tileInterval.y, 0.0f };
-				break;
-
-			case MapAxis::ZX:
-				// Y = 0、XZ 平面に敷く（Z が縦、X が横）
-				pos = { x * tileInterval.x, 0.0f, y * tileInterval.y };
-				break;
-
-			case MapAxis::YZ:
-				// X = 0、YZ 平面に敷く（Y が縦、Z が横）
-				pos = { 0.0f, y * tileInterval.y, x * tileInterval.x };
-				break;
-			}
-
-			tile.transform.translate_ = pos;
-			tile.transform.scale_ = tileSize;
-
-			// テクスチャインデックス設定
-			tile.texIndex = tileType; // spriteシートの場合はインデックス切替で管理可能
-			tile.is_ = true;
-			tile.isDraw_ = true;
-			// タイルID（オプション、必要なら）
-			tile.id = y * mapWidth + x;
-			// グループにタイルを追加
+	else {
+		objectTranslucentGroups[name].object.emplace_back(std::move(object));
+	}
 
 
-			std::string texPath = textureFilePath;
-			if (mapIds.size() > 0) {
-				for (const auto& id : mapIds) {
-					if (id.id == tileType) {
-						texPath = id.tex;
-						break;
-					}
-				}
-			}
-
-			AddObject(groupName, texPath, std::move(tile), id_,MeshType::kModel);
+	if (transparencyType == TransparencyType::kNo) {
+		// 追加した要素のインデックスを取得
+		size_t index = objectGroups[name].object.size() - 1;
+		// ID → インデックスで登録
+		if (objectId == -1) {
+			objectGroups[name].idMap[ConvertUtility::ToInt(index)] = index;
+			id = ConvertUtility::ToInt(index);
 		}
 	}
+	else {
+		// 追加した要素のインデックスを取得
+		size_t index = objectTranslucentGroups[name].object.size() - 1;
+		// ID → インデックスで登録
+		if (objectId == -1) {
+			objectTranslucentGroups[name].idMap[ConvertUtility::ToInt(index)] = index;
+			id = ConvertUtility::ToInt(index);
+		}
+	}
+
+
+
 }
+
 
 #pragma endregion // 生成or追加系
 
 
 
 Engine::ObjectInstans* Engine::Object3dInstansManager::GetObjectById(
-	const std::string& groupName, int id) {
-	auto itGroup = objectGroups.find(groupName);
-	if (itGroup == objectGroups.end()) {
-		std::terminate(); // 即座にプログラム停止
-		return nullptr;
-	}
+	const std::string& groupName, int id, TransparencyType transparencyType) {
+	if (transparencyType == TransparencyType::kNo) {
+		auto itGroup = objectGroups.find(groupName);
+		if (itGroup == objectGroups.end()) {
+			std::terminate(); // 即座にプログラム停止
+			return nullptr;
+		}
 
-	auto& group = itGroup->second;
-	auto  it = group.idMap.find(id);
-	if (it == group.idMap.end()) {
-		std::terminate(); // 即座にプログラム停止
-		return nullptr;
-	}
+		auto& group = itGroup->second;
+		auto  it = group.idMap.find(id);
+		if (it == group.idMap.end()) {
+			std::terminate(); // 即座にプログラム停止
+			return nullptr;
+		}
 
-	size_t index = it->second;
-	if (index >= group.object.size()) {
-		std::terminate(); // 即座にプログラム停止
-		return nullptr; // 念のため安全確認
-	}
+		size_t index = it->second;
+		if (index >= group.object.size()) {
+			std::terminate(); // 即座にプログラム停止
+			return nullptr; // 念のため安全確認
+		}
 
-	return &group.object[index];
+		return &group.object[index];
+	}
+	else {
+		auto itGroup = objectTranslucentGroups.find(groupName);
+		if (itGroup == objectTranslucentGroups.end()) {
+			std::terminate(); // 即座にプログラム停止
+			return nullptr;
+		}
+
+		auto& group = itGroup->second;
+		auto  it = group.idMap.find(id);
+		if (it == group.idMap.end()) {
+			std::terminate(); // 即座にプログラム停止
+			return nullptr;
+		}
+
+		size_t index = it->second;
+		if (index >= group.object.size()) {
+			std::terminate(); // 即座にプログラム停止
+			return nullptr; // 念のため安全確認
+		}
+
+		return &group.object[index];
+	}
 }
 
-std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(const std::string& groupName)
+std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(const std::string& groupName, TransparencyType transparencyType)
 {
-	auto itGroup = objectGroups.find(groupName);
-	if (itGroup == objectGroups.end()) {
-		static std::deque<ObjectInstans> empty; // 空のベクタを static で用意
-		return empty; // 空参照を返す
+	if (transparencyType == TransparencyType::kNo) {
+		auto itGroup = objectGroups.find(groupName);
+		if (itGroup == objectGroups.end()) {
+			static std::deque<ObjectInstans> empty; // 空のベクタを static で用意
+			return empty; // 空参照を返す
+		}
+		return itGroup->second.object; // コピーして返す
 	}
-
-	return itGroup->second.object; // コピーして返す
+	else {
+		auto itGroup = objectTranslucentGroups.find(groupName);
+		if (itGroup == objectTranslucentGroups.end()) {
+			static std::deque<ObjectInstans> empty; // 空のベクタを static で用意
+			return empty; // 空参照を返す
+		}
+		return itGroup->second.object; // コピーして返す
+	}
 }
 
-Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GetObjectGroup(const std::string& groupName)
+Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GetObjectGroup(const std::string& groupName, TransparencyType transparencyType)
 {
-	auto itGroup = objectGroups.find(groupName);
-	if (itGroup == objectGroups.end())
-	{
-		throw std::runtime_error("Object group not found: " + groupName);
+	if (transparencyType == TransparencyType::kNo) {
+		auto itGroup = objectGroups.find(groupName);
+		if (itGroup == objectGroups.end()){
+			throw std::runtime_error("Object group not found: " + groupName);
+		}
+		return itGroup->second;
 	}
+	else {
+		auto itGroup = objectTranslucentGroups.find(groupName);
+		if (itGroup == objectTranslucentGroups.end()){
+			throw std::runtime_error("Object group not found: " + groupName);
+		}
+		return itGroup->second;
+	}
+}
 
-	return itGroup->second;
+
+Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GroupContains(const std::string& groupName, TransparencyType transparencyType, bool& isReturn)
+{
+	if (transparencyType == TransparencyType::kNo) {
+		if (objectGroups.contains(groupName)) {
+			isReturn = true;
+			return objectGroups[groupName];
+		}
+		else {
+			isReturn = false;
+			return objectGroups[groupName];
+		}
+	}
+	else {
+		if (objectTranslucentGroups.contains(groupName)) {
+			isReturn = true;
+			return objectTranslucentGroups[groupName];
+		}
+		else {
+			isReturn = false;
+			return objectTranslucentGroups[groupName];
+		}
+	}
 }
 
 #pragma endregion

@@ -99,8 +99,14 @@ namespace ConvertUtility
 	static float TimeToSeconds(int timeInMilliseconds) {
 		return static_cast<float>(timeInMilliseconds) / 1000.0f;
 	}
-	// フレーム
+	// フレームから秒数に変換
 	static float FramesToSeconds(int frameCount, float fps = 60.0f) {
 		return static_cast<float>(frameCount) / fps;
 	}
+	// フレーム数に変換
+	static int SecondsToFrames(float seconds, float fps)
+	{
+		return static_cast<int>(seconds * fps);
+	}
+
 }

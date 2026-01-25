@@ -9,6 +9,10 @@ void MediumMeleeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager*
 {
 	// 基盤初期化
 	BaseInitialize(input,entity3DManager,entity2DManager,globalVariables,position,camera, "enemy.gltf", "enemy",4);
+	
+	objectComponentShadow_->GetWorldTransform().scale_ = { 10.0f,10.0f ,10.0f };
+
+
 	// サイズ
 	Vector3 size = { 2.75f,2.75f,2.75f };
 	objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定

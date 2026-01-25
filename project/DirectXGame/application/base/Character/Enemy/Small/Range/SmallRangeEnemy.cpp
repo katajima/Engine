@@ -15,7 +15,8 @@ void SmallRangeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* 
 	objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 
 	objectComponentPropeller_ = std::make_unique<ObjectComponent>();
-	objectComponentPropeller_->InitializeInstancing(entity3DManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "", false, false, this);
+	objectComponentPropeller_->InitializeInstancing(entity3DManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "", 
+		false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
 	objectComponentPropeller_->SetInstancingSRT({1,1,1}, {}, {});
 	objectComponentPropeller_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 

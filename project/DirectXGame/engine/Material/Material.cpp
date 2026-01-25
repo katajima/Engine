@@ -67,17 +67,17 @@ void Engine::Material::GPUData()
 	cbResource_->Data()->shininess = GetMaterialInstance().shininess_;
 	cbResource_->Data()->useLig = GetMaterialInstance().useLig_;
 	cbResource_->Data()->alpha = GetMaterialInstance().alpha_;
+	cbResource_->Data()->color = GetMaterialInstance().color;
+	cbResource_->Data()->uvTransform = MakeAffineMatrix(GetMaterialInstance().transform.scale, GetMaterialInstance().transform.rotate, GetMaterialInstance().transform.translate);
+	cbResource_->Data()->alphaClipping = GetMaterialInstance().alphaClipping_;
+
+
 	if (GetMaterialInstance().useNormalMap_) {
 		cbResource_->Data()->useNormalMap = GetMaterialInstance().useNormalMap_;
 	}
 	if (GetMaterialInstance().useSpeculerMap_) {
 		cbResource_->Data()->useSpeculerMap = GetMaterialInstance().useSpeculerMap_;
 	}
-
-	cbResource_->Data()->alphaClipping = GetMaterialInstance().alphaClipping_;
-
-	cbResource_->Data()->color = GetMaterialInstance().color;
-	cbResource_->Data()->uvTransform = MakeAffineMatrix(GetMaterialInstance().transform.scale, GetMaterialInstance().transform.rotate, GetMaterialInstance().transform.translate);
 }
 
 void Engine::Material::LoadTex()
@@ -133,23 +133,26 @@ void Engine::Material::LoadTex()
 
 }
 
-void Engine::Material::SetMaterialInstance(const MaterialInstance& materialInstance)
+void Engine::Material::SetGPUMaterialInstance(const MaterialInstance& materialInstance, ConstantBuffer < Material::DataGPU>* cbResourcePtr)
 {
 	// 各データをGPUに送る
-	cbResource_->Data()->environmentCoefficient = materialInstance.environmentCoefficient_;
-	cbResource_->Data()->enableLighting = materialInstance.enableLighting_;
-	cbResource_->Data()->shininess = materialInstance.shininess_;
-	cbResource_->Data()->useLig = materialInstance.useLig_;
-	cbResource_->Data()->alpha = materialInstance.alpha_;
+	cbResourcePtr->Data()->environmentCoefficient = materialInstance.environmentCoefficient_;
+	cbResourcePtr->Data()->enableLighting = materialInstance.enableLighting_;
+	cbResourcePtr->Data()->shininess = materialInstance.shininess_;
+	cbResourcePtr->Data()->useLig = materialInstance.useLig_;
+	cbResourcePtr->Data()->alpha = materialInstance.alpha_;
+	cbResourcePtr->Data()->alphaClipping = materialInstance.alphaClipping_;
+	cbResourcePtr->Data()->color = materialInstance.color;
+	cbResourcePtr->Data()->uvTransform = MakeAffineMatrix(materialInstance.transform.scale, materialInstance.transform.rotate, materialInstance.transform.translate);
+
 	if (materialInstance.useNormalMap_) {
-		cbResource_->Data()->useNormalMap = materialInstance.useNormalMap_;
+		cbResourcePtr->Data()->useNormalMap = materialInstance.useNormalMap_;
 	}
 	if (materialInstance.useSpeculerMap_) {
-		cbResource_->Data()->useSpeculerMap = materialInstance.useSpeculerMap_;
+		cbResourcePtr->Data()->useSpeculerMap = materialInstance.useSpeculerMap_;
 	}
 
-	cbResource_->Data()->alphaClipping = materialInstance.alphaClipping_;
 
-	cbResource_->Data()->color = materialInstance.color;
-	cbResource_->Data()->uvTransform = MakeAffineMatrix(materialInstance.transform.scale, materialInstance.transform.rotate, materialInstance.transform.translate);
+
+	cbResourcePtr->SetGraphicsRootConstantBufferView(0);
 }

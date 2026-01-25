@@ -76,7 +76,8 @@ void Engine::RenderComponent::Draw()
 
 			int i = 0;
 			for (auto& mesh : model->modelData.mesh) {
-				mesh->material->SetMaterialInstance(materialInstances_[i]);
+				
+				//mesh->material->SetGPUMaterialInstance(materialInstances_[i], cbResources_[i].get());
 
 
 				if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
@@ -88,6 +89,7 @@ void Engine::RenderComponent::Draw()
 				i++;
 			}
 
+			int j = 0;
 			for (auto& mesh : opa) {
 				if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
 					ObjectNormalTypeDiscrimination(PSOType::Transparent);
@@ -154,7 +156,16 @@ void Engine::RenderComponent::Draw()
 
 			// 3Dモデルが割り当てれていれば描画する
 
-			model->DrawSkinning(materialInstances_);
+
+
+			std::vector<ConstantBuffer<Material::DataGPU>*> datas;
+
+			for(auto& cb : cbResources_) {
+				datas.push_back(cb.get());
+			}
+
+
+			model->DrawSkinning(materialInstances_,datas);
 		}
 		break;
 	case ObjectModelType::kPrimitive:
@@ -307,7 +318,12 @@ void Engine::RenderComponent::SetModel(Model* model) {
 	for (auto& mesh : model->modelData.mesh){
 		MaterialInstance matInst;
 
-		
+		std::unique_ptr<ConstantBuffer<Material::DataGPU>> cb =
+			std::make_unique<ConstantBuffer<Material::DataGPU>>();
+		cb->CreateBuffer(entity3DManager_->GetCameraCommon()->GetDxCommon());
+		cbResources_.push_back(std::move(cb));
+
+
 		matInst = mesh->material->GetMaterialInstance();
 		materialInstances_.push_back(matInst);
 	}

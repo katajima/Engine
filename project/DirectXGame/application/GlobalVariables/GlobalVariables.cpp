@@ -97,6 +97,7 @@ std::string Engine::GlobalVariables::GetTypeName(const std::string& groupName, c
 	if (std::holds_alternative<bool>(item)) return "bool";				// 
 	if (std::holds_alternative<std::string>(item)) return "string";		// 
 	if (std::holds_alternative<Transform>(item)) return "Transform";	// 
+	if (std::holds_alternative<GvData::EnumItem>(item)) return "enum";
 
 	return "UnknownType";
 }
@@ -332,6 +333,15 @@ void Engine::GlobalVariables::LoadFile(const std::string& groupName) {
 				}
 				SetValue(groupName, itemName, t);
 			}
+			else if (typeStr == "enum") {
+				GvData::EnumItem e;
+				if (itItem->contains("enumType")) {
+					e.enumType = (*itItem)["enumType"].get<std::string>();
+				}
+				e.value = val.get<int64_t>(); // "value" は int64 で読む
+				// enum は内部表現として EnumItem を SetValue で入れる
+				SetValue(groupName, itemName, e);
+			}
 			else {
 				assert(false && "Unknown type found in JSON");
 			}
@@ -406,6 +416,47 @@ void Engine::GlobalVariables::Update() {
 				ImGui::DragFloat3(("Rotate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->rotate), 0.1f);
 				ImGui::DragFloat3(("Translate##" + itemName).c_str(), reinterpret_cast<float*>(&ptr->translate), 0.1f);
 			}
+			else if (std::holds_alternative<GvData::EnumItem>(item)) {
+				auto* e = std::get_if<GvData::EnumItem>(&item);
+
+				// enumType 表示（必要なら編集も可）
+				ImGui::Text("%s", itemName.c_str());
+				ImGui::SameLine();
+				ImGui::TextDisabled("(%s)", e->enumType.c_str());
+
+				// 登録済み候補を探す
+				const auto* entries = EnumRegistry::Instance().Find(e->enumType);
+
+				if (entries && !entries->empty()) {
+					// 現在の value に一致する index を探す
+					int currentIndex = 0;
+					for (int i = 0; i < (int)entries->size(); ++i) {
+						if ((*entries)[i].value == e->value) {
+							currentIndex = i;
+							break;
+						}
+					}
+
+					// Combo 用の表示名配列を作る（毎フレーム作るのが嫌ならキャッシュしてOK）
+					std::vector<const char*> names;
+					names.reserve(entries->size());
+					for (auto& it : *entries) names.push_back(it.name);
+
+					if (ImGui::Combo(itemName.c_str(), &currentIndex, names.data(), (int)names.size())) {
+						e->value = (*entries)[currentIndex].value; // ★名前選択→値更新
+					}
+				}
+				else {
+					// 未登録なら仕方ないので数値編集（保険）
+					int tmp = (int)e->value;
+					if (ImGui::DragInt(itemName.c_str(), &tmp, 1.0f)) {
+						e->value = (int64_t)tmp;
+					}
+					ImGui::SameLine();
+					ImGui::TextDisabled("No enum entries registered.");
+				}
+			}
+
 
 			ImGui::PopID();
 		}

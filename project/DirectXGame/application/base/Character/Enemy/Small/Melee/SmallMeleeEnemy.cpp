@@ -13,6 +13,8 @@ void SmallMeleeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* 
 	objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 
 
+	objectComponentShadow_->GetWorldTransform().scale_ = {5.0f,5.0f ,5.0f };
+
 	// パラメーター初期化
 	Parameters().HP.Initiaize(50, 0, 100, 0);
 	Parameters().speed = 10.0f;

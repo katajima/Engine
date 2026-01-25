@@ -58,7 +58,8 @@ void SpecalPoint::Initialize(Engine::Entity3DManager* entity3DManager, Engine::G
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
-	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, "" + std::to_string(id), "point.obj", "", true, true, this);
+	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, "" + std::to_string(id), "point.obj", "", 
+		true, true, this, Engine::Object3dInstansManager::TransparencyType::kNo);
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 	objectComponent_->SetInstancingSRT({0.5f,0.5f,0.5f },{}, pos);
 

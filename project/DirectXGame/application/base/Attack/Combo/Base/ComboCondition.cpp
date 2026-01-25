@@ -54,7 +54,6 @@ void ComboCondition::Update(const Engine::Input& input, float timer, float dt) {
 	// キャンセル受付時間ないなら
 	if (isCanselStart && isCanselEnd && inputData_.isCancel_) {
 		isCansel_ = true;
-
 		return;
 	}
 
@@ -82,12 +81,12 @@ void ComboCondition::Update(const Engine::Input& input, float timer, float dt) {
 }
 
 void ComboCondition::Enter(BaseCharacter* owner) {
-	jumpSystem = owner->GetMoveComponent()->GetJumpSystem();
-	isNextCombo_ = false;
-	isCansel_ = false;
-	endTime_ = data_.stateEndTime;
-	nextTime_ = data_.stateNextTime;
-	isPress_ = true;
+	jumpSystem = owner->GetMoveComponent()->GetJumpSystem();	// ジャンプシステム取得
+	isNextCombo_ = false;			// 次回
+	isCansel_ = false;				// キャンセルフラグをfalseに
+	endTime_ = data_.stateEndTime;	// 終了時間
+	nextTime_ = data_.stateNextTime;// 移行タイミング時間
+	isPress_ = true;				// おし
 };
 
 void ComboCondition::Exit() {

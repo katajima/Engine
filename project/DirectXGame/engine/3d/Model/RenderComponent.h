@@ -129,7 +129,8 @@ namespace Engine {
 
 		// マテリアルインスタンス
 		std::vector<MaterialInstance> materialInstances_{};
-		
+		// マテリアル用定数バッファ
+		std::vector<std::unique_ptr<ConstantBuffer<Material::DataGPU>>> cbResources_;
 	private: // 貰いもの
 		// 3Dエンティティマネージャー
 		Entity3DManager* entity3DManager_ = nullptr;

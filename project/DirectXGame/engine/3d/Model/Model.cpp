@@ -65,17 +65,14 @@ void Engine::Model::Draw()
 {
 }
 
-void Engine::Model::DrawSkinning(std::vector<MaterialInstance> matetials)
+void Engine::Model::DrawSkinning(std::vector<MaterialInstance> matetials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr)
 {
 	auto commandList = modelCommon_->GetCommand()->GetList();
 
 	int i = 0;
 	for (auto& mesh : modelData.mesh)
 	{
-
-		mesh->material->SetMaterialInstance(matetials[i]);
-
-		mesh->material->GetCommandListMaterial(0);
+		mesh->material->SetGPUMaterialInstance(matetials[i], cbResourcePtr[i]);
 
 		mesh->material->GetCommandListTexture(2, 7, 8);
 

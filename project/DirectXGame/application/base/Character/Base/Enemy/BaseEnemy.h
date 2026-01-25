@@ -79,6 +79,10 @@ protected:
 	// スプライト初期化
 	void Initialize2D();
 
+private:
+	//
+	void InitShadowObjectComponent(const std::string& charaName);
+
 protected:
 	EnemyType type_ = EnemyType::kNormal; // 敵の種類
 	uint32_t id_ = 0; // ID
@@ -100,4 +104,8 @@ protected:
 protected:
 	Engine::WorldTransform worldEffect_;
 	DebugTimer debugTimer_;
+
+	// 影用オブジェクトコンポーネント
+	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
+
 };

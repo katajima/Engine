@@ -43,6 +43,8 @@ namespace Engine {
 		bool IsAnimationFinished();
 		// 初期時間に戻す
 		void SetStratAnimeTime() { animationTime = 0.0f; }
+		// アニメーション時間設定
+		void SetAnimationTime(float time) { animationTime = time; }
 		// 終了時間に合わせる
 		void SetEndAnimeTime();
 		// 終了時間取得

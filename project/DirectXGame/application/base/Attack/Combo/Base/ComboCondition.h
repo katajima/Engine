@@ -103,6 +103,7 @@ public:
 
 
 private:
+	// コンボ移行ボタン
 	std::vector<ComboButton> comboButtons_;
 	size_t currentIndex_ = 0;
 };
@@ -167,12 +168,23 @@ public: //設定
 		inputData_.inputWindowStart_ = start;
 		inputData_.inputWindowEnd_ = end;
 	};
+	// コンボキャンセル時間設定
+	void SetCancelTime(float start, float end) {
+		inputData_.cancelStart_ = start;
+		inputData_.cancelEnd_ = end;
+	}
+	// コンボ移行時間設定
+	void SetComboNextTime(float time) { nextTime_ = time; }
+	// コンボ終了時間設定
+	void SetComboEndTime(float time) { endTime_ = time; }
 public: // 取得
 
 	// 次のコンボ移行する時間
 	float GetComboNextTime() const { return nextTime_; }
 	// コンボ終了時間
 	float GetComboEndTime() const { return endTime_; }
+	//
+
 	// コンボ入力受付開始時間
 	float GetComboInputStart() const { return inputData_.inputWindowStart_; }
 	// コンボ入力受付終了時間
@@ -196,13 +208,12 @@ private:
 
 	float endTime_ = 0.0f;				// コンボ終了時間
 	float nextTime_ = 0.0f;				// 次のコンボ移行時間
+	
+
+	
 	EndData data_{ 0.5f ,0.45f ,ComboButton(GamePadButton::GAMEPAD_B,ComboButtonInputType::kPressed) };// コンボ終了データ
 	InputData inputData_;				// コンボ入力受付データ
-
-
 	bool isPress_ = false;
-
 private:
 	JumpSystem* jumpSystem = nullptr;
-
 };

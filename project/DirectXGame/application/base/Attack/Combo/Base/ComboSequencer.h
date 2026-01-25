@@ -16,7 +16,7 @@ public:
 	// 最小フレーム
 	int GetFrameMin() const override { return 0; }		
 	// 全体フレーム幅
-	int GetFrameMax() const override { return 300; }	
+	int GetFrameMax() const override { return maxFrame_; }
 	// アイテム数
 	int GetItemCount() const override { return (int)events.size(); }	
 
@@ -53,12 +53,38 @@ public:
 		events.push_back(event);
 	}
 
-	
+	// イベントのクリア
+	void ClearEvents() {
+		events.clear();
+	}
+
+public: // 編集系
+	// 最大フレーム設定
+	void  SetFrameMax(int frame) { maxFrame_ = frame; }
+
 public: // 取得系
 
 	// イベント一覧取得
 	const std::vector<AttackEvent>& GetEvents() const {
 		return events;
+	}
+
+	// イベント取得
+	const AttackEvent& GetEvent(int index) const {
+		return events[index];
+	}
+
+	// 名前でイベント取得
+	const AttackEvent& GetEvent(const std::string name) const {
+		// / 名前で検索
+		for(int i = 0; i < static_cast<int>(events.size()); ++i) {
+			if (events[i].name == name) {
+				return events[i];
+			}
+		}
+
+		/// 見つからなかった場合は空のイベントを返す
+		return AttackEvent{};;
 	}
 
 	// イベント名取得
@@ -71,5 +97,9 @@ public: // 取得系
 
 
 private:
+	// イベント一覧
 	std::vector<AttackEvent> events;
+	// 最大フレーム
+	int maxFrame_ = 300;
+
 };

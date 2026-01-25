@@ -42,11 +42,23 @@ public: // 保存や適応に関しての関数
 public: 
 	// コンボステートマシーン取得
 	ComboStateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
+
+	// コンボノードステートマップ取得
+	std::map<std::string, std::shared_ptr<ComboNodeState>>  GetComboNodeStates() { return comboNodes_; };
+
+	// コンボノードステート取得
+	std::shared_ptr<ComboNodeState> GetComboNodeState(const std::string& name) {
+		auto it = comboNodes_.find(name);
+		if (it != comboNodes_.end()) {
+			return it->second;
+		}
+		return nullptr;
+	}
 public:
 	// ノード追加
 	void AddComboNode(const std::string& name, std::shared_ptr<ComboNodeState> node);
 	// ノード追加(データから生成)
-	void AddComboNode(const std::string& name, const ComboData& data);
+	void AddComboNode(const std::string& nodeName, const std::string animationName ,const ComboData& data);
 	// コンボ接続
 	void ConnectCombo(const std::string& from, AttackInput input, const std::string& to);
 	// 最初のコンボ
@@ -85,8 +97,8 @@ public:
 		Vector3 offset_ = { 0.0f,0.0f,0.0f };
 	};
 	
-	void CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData> addHitBoxData, Engine::WorldTransform* perent, 
-		const ComboConditionData comboConditionData = {}, const HitBoxData hitBoxData = {});
+	void CreateCombo(const std::string comboNodeName, const std::string animationName, const std::vector<AddHitBoxData> addHitBoxData, Engine::WorldTransform* perent,
+		const ComboConditionData comboConditionData = {}, const HitBoxData hitBoxData = {}, GamePadButton button = GamePadButton::GAMEPAD_B);
 
 
 private:

@@ -302,6 +302,9 @@ void Engine::Entity3DManager::ObjectDraw()
 	}
 	opaqueObjects.clear();
 
+
+	object3dInstansManager_->DrawTransparency();
+
 	// 半透明最初
 	for (auto& object : transparentObjects01) {
 		object->Draw();

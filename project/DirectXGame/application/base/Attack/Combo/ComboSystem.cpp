@@ -19,13 +19,15 @@ void ComboSystem::AddComboNode(const std::string& name, std::shared_ptr<ComboNod
 	comboNodes_[name] = node;
 }
 
-void ComboSystem::AddComboNode(const std::string& name, const ComboData& data){
+void ComboSystem::AddComboNode(const std::string& nodeName, const std::string animationName , const ComboData& data){
 	// 既に存在する場合は追加しない
-	if (comboNodes_.find(name) != comboNodes_.end()) {
+	if (comboNodes_.find(nodeName) != comboNodes_.end()) {
 		return;
 	}
-	std::shared_ptr<ComboNodeState> node = std::make_shared<ComboNodeState>(name, data);
-	comboNodes_[name] = node;
+	// ノード生成
+	std::shared_ptr<ComboNodeState> node = std::make_shared<ComboNodeState>(animationName, data);
+	comboNodes_[nodeName] = node;				// ノード追加
+	comboNodes_[nodeName]->SetName(nodeName);	// ノード名設定
 }
 
 void ComboSystem::ConnectCombo(const std::string& from, AttackInput input, const std::string& to){
@@ -126,8 +128,8 @@ void ComboSystem::SetData(ComboData& data, const ComboGlovalData& gData)
 	/// ヒットボックス
 	/// 
 
-	data.hitBox.GetData().hitBpxWindowStart_ = gData.hitBoxWindowStart_;	// 発生時間
-	data.hitBox.GetData().lifeTime_ = gData.hitBoxLifeTime_;				// 生成時間
+	data.GetComboHitBox().GetData().hitBpxWindowStart_ = gData.hitBoxWindowStart_;	// 発生時間
+	data.GetComboHitBox().GetData().lifeTime_ = gData.hitBoxLifeTime_;				// 生成時間
 
 	
 	///
@@ -136,31 +138,31 @@ void ComboSystem::SetData(ComboData& data, const ComboGlovalData& gData)
 	
 	
 	// 入力受付時間設定
-	data.comboCondition.ConditionStartEnd(gData.stateInputStartTime, gData.stateInputEndTime);
-	data.comboCondition.GetData().stateNextTime = gData.stateNextTime;
-	data.comboCondition.GetData().stateEndTime = gData.stateEndTime;
+	data.GetComboCondition().ConditionStartEnd(gData.stateInputStartTime, gData.stateInputEndTime);
+	data.GetComboCondition().GetData().stateNextTime = gData.stateNextTime;
+	data.GetComboCondition().GetData().stateEndTime = gData.stateEndTime;
 	// コンボボタン設定
 	ComboButton bo = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 	// 押し続ける
-	data.comboCondition.GetData().button_ = bo;
+	data.GetComboCondition().GetData().button_ = bo;
 	std::vector<ComboButton> button;
 	button.push_back(bo);
-	data.comboCondition.GetInput().comboSequence_.RegisterCombo(button);
+	data.GetComboCondition().GetInput().comboSequence_.RegisterCombo(button);
 	
 	///
 	/// モーション
 	/// 
 	
 	// 重力
-	data.motion.GetData().isGravity_ = gData.isGravity;
-	data.motion.GetData().gravityScale_ = gData.gravityScale;
+	data.GetComboMotion().GetData().isGravity_ = gData.isGravity;
+	data.GetComboMotion().GetData().gravityScale_ = gData.gravityScale;
 	// アニメーションスピード
-	data.motion.GetData().animationSpeed_ = gData.animationSpeed_;
+	data.GetComboMotion().GetData().animationSpeed_ = gData.animationSpeed_;
 	// 移動
-	data.motion.GetData().speed_ = gData.moveSpeed_;
-	data.motion.GetData().moveWindowStart_ = gData.moveWindowStart_;
-	data.motion.GetData().moveWindowEnd_ = gData.moveWindowEnd_;
-	data.motion.GetData().isCompulsionMove_ = gData.isCompulsionMove_;
+	data.GetComboMotion().GetData().speed_ = gData.moveSpeed_;
+	data.GetComboMotion().GetData().moveWindowStart_ = gData.moveWindowStart_;
+	data.GetComboMotion().GetData().moveWindowEnd_ = gData.moveWindowEnd_;
+	data.GetComboMotion().GetData().isCompulsionMove_ = gData.isCompulsionMove_;
 
 
 	///
@@ -168,42 +170,53 @@ void ComboSystem::SetData(ComboData& data, const ComboGlovalData& gData)
 	/// 
 
 	// トレイルエフェクト
-	data.effect.GetData().startTmer = gData.trailEffectStartTime;
-	data.effect.GetData().lifeTime = gData.trailEffectLifeTime;
+	data.GetComboEffect().GetData().startTmer = gData.trailEffectStartTime;
+	data.GetComboEffect().GetData().lifeTime = gData.trailEffectLifeTime;
 }
 
-void ComboSystem::CreateCombo(const std::string comboNodeName,const std::vector<AddHitBoxData> addHitBoxDatas, Engine::WorldTransform* perent, 
-	const ComboConditionData comboConditionData, const HitBoxData hitBoxData)
+void ComboSystem::CreateCombo(const std::string comboNodeName, const std::string animationName,const std::vector<AddHitBoxData> addHitBoxDatas, Engine::WorldTransform* perent,
+	const ComboConditionData comboConditionData, const HitBoxData hitBoxData, GamePadButton button)
 {
 	ComboData data{};
 
 	// ヒットボックス追加
 	for(AddHitBoxData addHitBoxData : addHitBoxDatas){
-		data.hitBox.AddCollider(addHitBoxData.hitBoxData, addHitBoxData.comboGlovalData);
+		data.GetComboHitBox().AddCollider(addHitBoxData.hitBoxData, addHitBoxData.comboGlovalData);
 	}
 	// 使うヒットボックスクリア
-	data.hitBox.ClearUseHitBox();
+	data.GetComboHitBox().ClearUseHitBox();
 	// 使うヒットボックス追加
 	for (AddHitBoxData addHitBoxData : addHitBoxDatas){
-		data.hitBox.AddUseHitBox(addHitBoxData.hitBoxData.name);
+		data.GetComboHitBox().AddUseHitBox(addHitBoxData.hitBoxData.name);
 	}
 
 	// データ設定
 	SetData(data, addHitBoxDatas[0].comboGlovalData);
 
 	// 親子付けの設定
-	data.hitBox.SetPerent(perent);
+	data.GetComboHitBox().SetPerent(perent);
 
 	// コンボの終了条件設定
-	data.comboCondition.GetData().type = comboConditionData.type;	
+	data.GetComboCondition().GetData().type = comboConditionData.type;
 
-	data.hitBox.GetData().dependenceType_ = hitBoxData.dependenceType_;	// 依存関係
-	data.hitBox.GetData().spawnType_ = hitBoxData.spawnType_;			// 発生条件
-	data.hitBox.GetData().offset_ = hitBoxData.offset_;
+
+
+	// コンボボタン設定
+	ComboButton bo = ComboButton(button, ComboButtonInputType::kPressed);
+	// 押し続ける
+	data.GetComboCondition().GetData().button_ = bo;
+	std::vector<ComboButton> buttons;
+	buttons.push_back(bo);
+	data.GetComboCondition().GetInput().comboSequence_.RegisterCombo(buttons);
+
+
+	data.GetComboHitBox().GetData().dependenceType_ = hitBoxData.dependenceType_;	// 依存関係
+	data.GetComboHitBox().GetData().spawnType_ = hitBoxData.spawnType_;			// 発生条件
+	data.GetComboHitBox().GetData().offset_ = hitBoxData.offset_;
 
 
 	// コンボノード追加
-	AddComboNode(comboNodeName, data);	
+	AddComboNode(comboNodeName,animationName, data);	
 }
 
 #pragma endregion // 保存　適応

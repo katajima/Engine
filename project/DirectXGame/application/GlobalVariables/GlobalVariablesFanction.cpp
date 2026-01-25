@@ -63,6 +63,14 @@ void GvFanction::Save(const std::string& groupName, GvData::json& root, GvData::
 				{"translate", { v.translate.x, v.translate.y, v.translate.z }}
 			}}
 		};
+	} 
+	else if (std::holds_alternative<GvData::EnumItem>(item)) { // ★ EnumItem
+		const auto& e = std::get<GvData::EnumItem>(item);
+		root[groupName][itemName] = {
+			{"type", "enum"},
+			{"enumType", e.enumType},
+			{"value", e.value}
+		};
 	}
 }
 

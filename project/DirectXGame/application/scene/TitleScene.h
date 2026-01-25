@@ -62,15 +62,6 @@ private:
 
 
 	std::unique_ptr<LoadLevelData> loadData_;
-
-
-	
-	AttackSequence attackSeq;
-	bool initialized = false;
-	int currentFrame = 0;
-	int selected = -1;
-	bool expanded = true;
-	int firstFrame = 0;
 };
 
 

@@ -2,8 +2,7 @@
 #include"DirectXGame/engine/Skinning/Skinning.h"
 #include"DirectXGame/engine/3d/Model/Model.h"
 
-void Engine::AnimationComponent::Init(LineCommon* lineCommon)
-{
+void Engine::AnimationComponent::Init(LineCommon* lineCommon) {
 	this->lineCommon = lineCommon;
 }
 
@@ -284,7 +283,6 @@ bool Engine::AnimationComponent::IsAnimationFinished()
 		return !isPlaying && animationTime >= itCurrent->second.duration;
 	}
 }
-
 
 void Engine::AnimationComponent::SetAnimation(const std::string& name, float time) {
 	AnimationFunction::SetAnimation(model->modelData, name, time);

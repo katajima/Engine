@@ -114,6 +114,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEffect.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboHitBox.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboMotion.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp" />
@@ -171,6 +172,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
     <ClCompile Include="DIRECTXGAME\APPLICATION\BASE\WEAPON\ENEMY\SmallMeleeWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Enemy\SmallRangeWeapon.cpp" />
+    <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
@@ -759,6 +761,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboHitBox.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboMotion.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSequencer.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />

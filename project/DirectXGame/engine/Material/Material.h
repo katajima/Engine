@@ -29,17 +29,17 @@ namespace Engine {
 		// テクスチャコマンドリスト設定
 		void GetCommandListTexture(int indexDiffuse, int normalIndex = 0, int speculerIndex = 0, int environmentIndex = 0);
 
-		// GPUデータ更新
-		void GPUData();
-
+		
 		// テクスチャ読み込み
 		void LoadTex();
 
-		void SetMaterialInstance(const MaterialInstance& materialInstance);
-
+		
 		// マテリアルインスタンス取得
 		MaterialInstance& GetMaterialInstance() { return materialInstance_; }
 
+
+		// GPUデータ更新
+		void GPUData();
 	public:
 		
 		// テクスチャ構造体
@@ -75,6 +75,10 @@ namespace Engine {
 			float padding2[3];
 		};
 
+
+		void SetGPUMaterialInstance(const MaterialInstance& materialInstance, ConstantBuffer < Material::DataGPU>* cbResourcePtr);
+
+
 	private:
 
 		MaterialInstance materialInstance_;
@@ -83,7 +87,6 @@ namespace Engine {
 		
 		DirectXCommon* dxCommon_ = nullptr;
 		std::unique_ptr<ConstantBuffer<Material::DataGPU>> cbResource_;
-
 		// テクスチャ数
 		uint32_t texDiffuseNum = 0;
 	};

@@ -31,54 +31,6 @@ void TitleScene::Update()
 	}
 
 
-#ifdef _DEBUG
-	if (!initialized) {
-		attackSeq.AddEvent({ 5, 15, 0xFF00FF00, "Startup" });
-		attackSeq.AddEvent({ 15, 25, 0xFFFFFF00, "Active" });
-		attackSeq.AddEvent({ 25, 45, 0xFFFF0000, "Recovery" });
-		initialized = true;
-	}
-
-	ImGui::Begin("Attack Editor");
-
-
-
-	currentFrame++;
-
-	if (currentFrame >= attackSeq.GetFrameMax()) {
-		currentFrame = 0;
-	}
-
-	ImSequencer::Sequencer(
-		&attackSeq,
-		&currentFrame,
-		&expanded,
-		&selected,
-		&firstFrame,
-		ImSequencer::SEQUENCER_EDIT_ALL |
-		ImSequencer::SEQUENCER_ADD |
-		ImSequencer::SEQUENCER_DEL
-	);
-
-	ImGui::Text("Current Frame: %d", currentFrame);
-	ImGui::SliderFloat("Frame PixelWidthTarget",
-		&ImSequencer::g_framePixelWidthTarget,
-		1.0f, 40.0f, "%.1f px");
-	ImGui::SliderFloat("Frame PixelWidth",
-		&ImSequencer::g_framePixelWidth,
-		1.0f, 40.0f, "%.1f px");
-	ImGui::SliderInt("Frame LegendWidth",
-		&ImSequencer::g_legendWidth,
-		50, 500, "%d px");
-
-
-	if (selected != -1) {
-		ImGui::Text("Selected Event: %s", attackSeq.GetEventName(selected).c_str());
-	}
-
-	ImGui::End();
-#endif // _DEBUG
-
 	tail.Update();
 	camera->UpdateMatrix();
 }

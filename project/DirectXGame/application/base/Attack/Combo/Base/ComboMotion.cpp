@@ -42,6 +42,8 @@ void ComboMotion::Update(const Engine::Input& input, float timer, float dt) {
 	// アニメーションスピード設定
 	animationComponent->SetAnimationSpeed(data_.animationSpeed_);
 
+	// アニメーション時間設定
+	animationComponent->SetAnimationTime(timer);
 	// 移動可能か
 	moveComponent->GetMoveSystem()->SetIsAttackCanMove(IsMove());
 

@@ -28,7 +28,8 @@ void Engine::MyGame::Initialize()
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->Init();
 	//sceneManager_->ChangeScene("TITLE");
-	sceneManager_->ChangeScene("TEST");
+	sceneManager_->ChangeScene("CHARACTER");
+	//sceneManager_->ChangeScene("TEST");
 
 	// リソース初期化
 	InitializeResource();
@@ -344,6 +345,7 @@ void Engine::MyGame::LoadModel()
 
 
 	modelManager->LoadModel("origin.gltf", "Character");
+	modelManager->LoadModel("testCharacter.gltf", "Character");
 	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
 
 

@@ -54,7 +54,8 @@ void TestScene::Update()
 	int count = 0;
 	for (auto skin : skinObjects) {
 		
-		skin->GetAnimationComponent()->SetAnimationSpeed(static_cast<float>(count) / 10.0f);
+		skin->GetAnimationComponent()->SetAnimationSpeed(1.0);
+		skin->GetAnimationComponent()->SetIsLoop(true);
 		count++;
 	}
 
@@ -234,12 +235,12 @@ void TestScene::InitializeObject3D()
 
 
 
-	for(int i = 0; i < 10; i++)
+	for(int i = 0; i < 1; i++)
 	{
 		auto obj = GetEntity3DManager()->CreateObject3D("skinObject_" + std::to_string(i), Engine::ObjectModelType::kSkinning, { static_cast<float>(i * 10),0,30 }, cameraManeger_->GetCamera());
-		obj->SetModel("origin.gltf");
+		obj->SetModel("testCharacter.gltf");
 		obj->InitAnimationComponent();
-		obj->GetAnimationComponent()->SetAnimation("Attack3", static_cast<float>(i) / 10.0f );
+		obj->GetAnimationComponent()->SetAnimation("Attack02", static_cast<float>(i) / 10.0f );
 		obj->SetIsDraw(true);
 		skinObjects.push_back(obj);
 	}
