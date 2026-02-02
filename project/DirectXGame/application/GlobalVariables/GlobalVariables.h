@@ -30,15 +30,15 @@ namespace Engine {
 		T GetValue(const std::string& groupName, const std::string& key) const;
 
 
-		// ★ enum 専用：追加
+		// enum 専用：追加
 		template<typename E>
 		void AddEnumItem(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
 
-		// ★ enum 専用：上書き
+		// enum 専用：上書き
 		template<typename E>
 		void SetEnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
 
-		// ★ enum 専用：取得
+		// enum 専用：取得
 		template<typename E>
 		E GetEnumValue(const std::string& groupName, const std::string& key) const;
 
@@ -75,7 +75,7 @@ namespace Engine {
 		/// ファイルに書き出し
 		/// </summary>
 		/// <param name="groupName"></param>
-		void saveFile(const std::string& groupName);
+		void SaveFile(const std::string& groupName);
 
 		/// <summary>
 		/// ディレクトリの全ファイル読み込み
@@ -88,6 +88,8 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void LoadFile(const std::string& groupName);
 
+
+	public:
 		/// <summary>
 		/// 毎フレーム処理
 		/// </summary>

@@ -1,5 +1,5 @@
 {
-    "AttackComboData9": {
+    "JumpAttack": {
         "Y方向ノックバック": {
             "type": "bool",
             "value": false
@@ -8,15 +8,31 @@
             "type": "float",
             "value": 30.0
         },
+        "アニメーション名前": {
+            "type": "string",
+            "value": "Attack09"
+        },
         "アニメーション速度": {
             "type": "float",
-            "value": 1.0
+            "value": 1.8899999856948853
+        },
+        "アニメーション遷移時間": {
+            "type": "float",
+            "value": 0.10000000149011612
         },
         "エフェクト(トレイル)生存時間": {
             "type": "float",
-            "value": 1.0
+            "value": 0.21666663885116577
         },
         "エフェクト(トレイル)発生時間": {
+            "type": "float",
+            "value": 0.6000000238418579
+        },
+        "コンボキャンセル受付終了時間": {
+            "type": "float",
+            "value": 0.5
+        },
+        "コンボキャンセル受付開始時間": {
             "type": "float",
             "value": 0.10000000149011612
         },
@@ -30,7 +46,7 @@
         },
         "コンボ中の移動終了時間": {
             "type": "float",
-            "value": 1.0
+            "value": 0.3499999940395355
         },
         "コンボ中の移動開始時間": {
             "type": "float",
@@ -46,19 +62,19 @@
         },
         "コンボ入力受付終了時間": {
             "type": "float",
-            "value": 4.03000020980835
+            "value": 1.1833332777023315
         },
         "コンボ入力受付開始時間": {
             "type": "float",
-            "value": 0.10000000149011612
+            "value": 0.3333333432674408
         },
         "コンボ移行時間": {
             "type": "float",
-            "value": 0.44999998807907104
+            "value": 0.4166666567325592
         },
         "コンボ終了時間": {
             "type": "float",
-            "value": 1.4299999475479126
+            "value": 1.2000000476837158
         },
         "ダメージ": {
             "type": "float",
@@ -72,13 +88,32 @@
             "type": "float",
             "value": 0.10000000149011612
         },
+        "ヒットボックス依存先タイプ": {
+            "enumType": "HitBoxParentType",
+            "type": "enum",
+            "value": 2
+        },
         "ヒットボックス生存時間": {
             "type": "float",
-            "value": 0.5
+            "value": 0.16666662693023682
         },
         "ヒットボックス発生時間": {
             "type": "float",
-            "value": 0.0
+            "value": 0.8666666746139526
+        },
+        "ヒットボックス発生条件タイプ": {
+            "enumType": "HitBoxSpawnType",
+            "type": "enum",
+            "value": 1
+        },
+        "終了条件タイプ": {
+            "enumType": "EndConditionType",
+            "type": "enum",
+            "value": 0
+        },
+        "親オブジェクト名前": {
+            "type": "string",
+            "value": "Weapon"
         }
     }
 }

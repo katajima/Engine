@@ -99,13 +99,13 @@ void ComboCondition::EndComboUpdate(const Engine::Input& input, float timer, flo
 	// 終了タイプ
 	switch (data_.type)
 	{
-	case ComboCondition::EndConditionType::kOnGround:	// 着地したら
+	case EndConditionType::kOnGround:	// 着地したら
 		if (!jumpSystem->GetIsLanding()) {
 			endTime_ += dt;
 			nextTime_ += dt;
 		}
 		break;
-	case ComboCondition::EndConditionType::kOnButtonRelease:	// 押し続けているなら
+	case EndConditionType::kOnButtonRelease:	// 押し続けているなら
 		if (data_.button_.IsPressed(input)) {
 			if (isPress_) {
 				endTime_ += dt;
@@ -116,16 +116,16 @@ void ComboCondition::EndComboUpdate(const Engine::Input& input, float timer, flo
 			isPress_ = false;
 		}
 		break;
-	case ComboCondition::EndConditionType::kOnMeterEmpty:	// 何かのメータが空なら
+	case EndConditionType::kOnMeterEmpty:	// 何かのメータが空なら
 
 		break;
-	case ComboCondition::EndConditionType::kOnTimer:	// 時間が過ぎたら
+	case EndConditionType::kOnTimer:	// 時間が過ぎたら
 		endTime_ = data_.stateEndTime;
 		break;
-	case ComboCondition::EndConditionType::kOnHit:	// 何かに当たったら
+	case EndConditionType::kOnHit:	// 何かに当たったら
 
 		break;
-	case ComboCondition::EndConditionType::kManual:	// 特殊
+	case EndConditionType::kManual:	// 特殊
 
 		break;
 	default:

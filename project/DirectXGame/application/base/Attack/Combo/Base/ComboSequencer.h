@@ -1,7 +1,7 @@
 #pragma once
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
-
+// イベント構造体
 struct AttackEvent {
 	int startFrame;
 	int endFrame;

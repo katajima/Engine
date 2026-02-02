@@ -27,7 +27,7 @@ void HitBoxSystem::Update(float dt) {
 }
 
 void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollData>& datas, const std::vector<std::string>& useHitBoxName,
-	float lifeTime, Type dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
+	float lifeTime, HitBoxParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 	Data d;
 	d.hitBox = std::make_unique<HitBox>();
 	d.hitBox->Initialize(entity3dManager_, character_, type);
@@ -41,13 +41,13 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 	// 依存先設定
 	switch (dependenceType)
 	{
-	case HitBoxSystem::Type::kParent: // 親子付け 
+	case HitBoxParentType::kParent: // 親子付け 
 		d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
 		break;
-	case HitBoxSystem::Type::kIndependent: // 独立
+	case HitBoxParentType::kIndependent: // 独立
 		d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
 		break;
-	case HitBoxSystem::Type::kParentIndependent: // 追従先独立
+	case HitBoxParentType::kParentIndependent: // 追従先独立
 	{
 		world.parent_ = parent;	// ワールド座標に設定
 		world.translate_ = offset;	// オフセット設定
@@ -56,7 +56,7 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 		d.hitBox->GetWorldTransform().translate_ = world.GetWorldPosition();
 		break;
 	}
-	case HitBoxSystem::Type::kLockOnArea: // ターゲット位置へ(ターゲット位置のワールド座標を渡せば)
+	case HitBoxParentType::kLockOnArea: // ターゲット位置へ(ターゲット位置のワールド座標を渡せば)
 		d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
 		break;
 	default:
@@ -116,7 +116,15 @@ void HitBoxSystem::AddHitBox(HitBoxUseType type, const std::vector<HitBoxCollDat
 }
 
 void HitBoxSystem::CreateHitBoxCollData(const std::string& name, HitBoxShape shape, HitBoxUseType useType,
-	const GlobalHitBoxdata& hitBoxData, HitBoxCollData& data) {
+	const GlobalHitBoxdata& hitBoxData) {
+
+
+	if (hitBoxCollDatas_.contains(name)) {
+		return; // すでに存在する場合は何もしない
+	}
+
+
+	HitBoxCollData data;
 	data.isEneble = true;	// 有効化
 	data.isLine = true;		// ライン表示
 	data.shape = shape;		// 形状選択
@@ -145,5 +153,6 @@ void HitBoxSystem::CreateHitBoxCollData(const std::string& name, HitBoxShape sha
 	default:
 		break;
 	}
+	hitBoxCollDatas_[name] = data;
 }
 

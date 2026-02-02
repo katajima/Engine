@@ -180,29 +180,6 @@ void Engine::Entity3DManager::UpdateImgui()
 					materialIndex++;
 				}
 
-				/*for (auto& mesh : entity->GetModel()->modelData.mesh) {
-					nameMaterial = "Material" + std::to_string(materialIndex);
-
-					if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
-						
-
-						ImGui::DragFloat3("M_scale", &mesh->material->GetMaterialInstance().transform.scale.x, 0.1f);
-						ImGui::DragFloat3("M_rotate", &mesh->material->GetMaterialInstance().transform.rotate.x, 0.1f);
-						ImGui::DragFloat3("M_translate", &mesh->material->GetMaterialInstance().transform.translate.x, 0.1f);
-						ImGui::ColorEdit4("color", &mesh->material->GetMaterialInstance().color.r);
-						ImGui::SliderInt("enableLighting", &mesh->material->GetMaterialInstance().enableLighting_, 0, 1);
-						ImGui::SliderFloat("alphaClipping", &mesh->material->GetMaterialInstance().alphaClipping_, 0, 1);
-						ImGui::DragFloat("shininess", &mesh->material->GetMaterialInstance().shininess_, 0.01f);
-						ImGui::SliderFloat("alpha", &mesh->material->GetMaterialInstance().alpha_, 0, 1);
-						float width = static_cast<float> (100);
-						float height = static_cast<float> (100);
-
-						ImTextureID imguiTexture = (ImTextureID)(directXCommon_->GetTextureManager()->GetSrvHandleGPU(mesh->material->tex_.diffuseFilePath).ptr);
-						ImGui::Image(imguiTexture, ImVec2(width, height));
-
-					}
-					materialIndex++;
-				}*/
 				if (ImGui::CollapsingHeader("Animetion")) {
 					for (auto& anima : entity->GetModel()->modelData.animations) {
 						ImGui::Text(anima.first.c_str());

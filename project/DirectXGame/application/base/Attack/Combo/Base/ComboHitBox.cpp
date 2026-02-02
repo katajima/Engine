@@ -23,7 +23,7 @@ void ComboHitBox::Update(const Engine::Input& input, float timer, float dt) {
 
 	switch (data_.spawnType_)
 	{
-	case ComboHitBox::HitBoxSpawnType::kOnTime: // 時間経過で
+	case HitBoxSpawnType::kOnTime: // 時間経過で
 		if (timer >= data_.hitBpxWindowStart_) {
 			if (!isPopHitBox_) {
 				hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
@@ -31,7 +31,7 @@ void ComboHitBox::Update(const Engine::Input& input, float timer, float dt) {
 			}
 		}
 		break;
-	case ComboHitBox::HitBoxSpawnType::kOnGround: // 着地したら
+	case HitBoxSpawnType::kOnGround: // 着地したら
 		if (jumpSystem_->GetIsLanding()) {
 			timer_ += dt;
 			if (timer >= data_.hitBpxWindowStart_) {
@@ -42,9 +42,9 @@ void ComboHitBox::Update(const Engine::Input& input, float timer, float dt) {
 			}
 		}
 		break;
-	case ComboHitBox::HitBoxSpawnType::kOnAir:
+	case HitBoxSpawnType::kOnAir:
 		break;
-	case ComboHitBox::HitBoxSpawnType::kOnButtonRelease: // ボタンを離したら
+	case HitBoxSpawnType::kOnButtonRelease: // ボタンを離したら
 		if (button_.IsReleased(input)) {
 			if (!isPopHitBox_) {
 				hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);

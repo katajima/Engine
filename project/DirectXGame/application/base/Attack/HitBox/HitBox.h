@@ -43,6 +43,7 @@ struct HitBoxCollData
 	/// 調整
 	/// </summary>
 
+	std::string parentName = "";
 	HitBoxShape shape = HitBoxShape::kOBB;	
 	Vector3 offset{};
 	Vector3 size = { 1.0f,1.0f,1.0f };

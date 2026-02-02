@@ -185,7 +185,7 @@ std::string Engine::GlobalVariables::MakeUniqueKey(const std::string& baseKey, c
 /// <summary>
 /// セーブ
 /// </summary>
-void Engine::GlobalVariables::saveFile(const std::string& groupName) {
+void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
 
 	// グループを検索
 	std::map<std::string, GvData::Group>::iterator itGroup = datas_.find(groupName);
@@ -464,7 +464,7 @@ void Engine::GlobalVariables::Update() {
 		ImGui::Text("\n");
 
 		if (ImGui::Button("Save")) {
-			saveFile(groupName);
+			SaveFile(groupName);
 			std::string message = std::format("{}.json saved.", groupName);
 			MessageBoxA(nullptr, message.c_str(), "GlobalVariables", 0);
 		}

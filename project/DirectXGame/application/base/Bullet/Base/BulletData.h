@@ -53,7 +53,7 @@ public:
 		// ヒットボックス使用者タイプ
 		HitBoxUseType hitBoxUseType_;
 		// ヒットボックス依存先タイプ
-		HitBoxSystem::Type dependenceType_ = HitBoxSystem::Type::kParent;
+		HitBoxParentType dependenceType_ = HitBoxParentType::kParent;
 		// オフセット
 		Vector3 offset_{};
 	};

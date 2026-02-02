@@ -27,8 +27,14 @@ void Engine::MyGame::Initialize()
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->Init();
-	//sceneManager_->ChangeScene("TITLE");
+
+#ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");
+#endif // _DEBUG
+	//sceneManager_->ChangeScene("TITLE");
+	
+	
+	
 	//sceneManager_->ChangeScene("TEST");
 
 	// リソース初期化

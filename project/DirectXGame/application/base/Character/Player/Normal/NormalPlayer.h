@@ -49,7 +49,7 @@ public:
 	// リロード
 	void Reload() override;
 
-	void ApplyComboData(ComboEditor* comboEditor) override;
+	void ApplyComboData(ComboEditor* comboEditor) override {};
 
 	// プレイヤUI取得
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };
@@ -69,25 +69,6 @@ private:
 private:
 	Engine::WorldTransform worldCollider_;
 	std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
-
-
-	ComboGlovalData data1;
-	ComboGlovalData data2;
-	ComboGlovalData data3;
-	ComboGlovalData data4;
-	ComboGlovalData data5;	// コンボデータ(追加)横左
-	ComboGlovalData data6; // コンボデータ(追加)横回転左
-	ComboGlovalData data7; // コンボデータ(追加)横右
-	ComboGlovalData data8; // コンボデータ(追加)突き
-
-	
-	
-	ComboGlovalData data9; // コンボデータ(追加)突き
-	ComboGlovalData data10; // コンボデータ(追加)突き
-	ComboGlovalData data11; // コンボデータ(追加)突き
-
-	
-
 
 	void ReloadComboData();
 

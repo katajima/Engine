@@ -117,6 +117,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.cpp" />
@@ -764,6 +765,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboMotion.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSequencer.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboEditor.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />

@@ -13,14 +13,6 @@ class JumpSystem;			// ジャンプシステム
 class ComboHitBox {
 public:
 
-	enum class HitBoxSpawnType {
-		kOnTime,			// 時間で発生
-		kOnGround,		// 着地で発生
-		kOnAir,			// 空中から発生
-		kOnButtonRelease,// ボタンを離したら
-	};
-
-
 	enum class Shape {
 		kAABB,
 		kOBB,
@@ -37,9 +29,11 @@ public:
 		// ヒットボックスの発生条件タイプ
 		HitBoxSpawnType spawnType_ = HitBoxSpawnType::kOnTime;
 		// ヒットボックス依存先タイプ
-		HitBoxSystem::Type dependenceType_ = HitBoxSystem::Type::kParent;
+		HitBoxParentType dependenceType_ = HitBoxParentType::kParent;
 		// オフセット
 		Vector3 offset_{};
+		// 親子名
+		std::string	parentName_ = "";
 	};
 
 	// 開始
@@ -53,7 +47,7 @@ public:
 
 
 public:
-
+	HitBoxCollData& GetCollData(int index) { return collData_[index]; }
 	// データ取得
 	Data& GetData() { return data_; }
 	// コライダーデータ追加

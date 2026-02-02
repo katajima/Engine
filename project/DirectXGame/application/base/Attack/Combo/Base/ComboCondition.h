@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
-
+#include "ComboGlobalData.h"
 
 class BaseCharacter;		// キャラクター
 class JumpSystem;			// ジャンプシステム
@@ -113,16 +113,7 @@ private:
 class ComboCondition {
 public:
 
-	// 終了条件タイプ
-	enum class EndConditionType {
-		kOnGround,			// 着地したら
-		kOnButtonRelease,	// ボタンを離したら
-		kOnMeterEmpty,		// メータが空になったら
-		kOnTimer,			// 時間が過ぎたら
-		kOnHit,				// 何かに当たったら
-		kManual,			// 特殊ケース
-	};
-
+	
 
 	// データ構造体
 	struct InputData

@@ -2,10 +2,37 @@
 #include <DirectXGame/engine/struct/Structs3D.h>
 
 
+enum class HitBoxSpawnType {
+	kOnTime,			// 時間で発生
+	kOnGround,			// 着地で発生
+	kOnAir,				// 空中から発生
+	kOnButtonRelease,	// ボタンを離したら
+};
 
+enum class  HitBoxParentType {
+	kParent,			// 追従型
+	kIndependent,		// 独立(飛び道具や範囲攻撃など)
+	kParentIndependent,	// 追従位置での独立(武器の中間位置で発生してその後独立)
+
+	kLockOnArea,		// ターゲット位置
+};
+
+// 終了条件タイプ
+enum class EndConditionType {
+	kOnGround,			// 着地したら
+	kOnButtonRelease,	// ボタンを離したら
+	kOnMeterEmpty,		// メータが空になったら
+	kOnTimer,			// 時間が過ぎたら
+	kOnHit,				// 何かに当たったら
+	kManual,			// 特殊ケース
+};
 
 // 保存項目用コンボデータ
 struct ComboGlovalData {
+
+	std::string animationName = "";	// アニメーション名
+
+
 	float hitBoxWindowStart_ = 0.0f;	// ヒットボックスの生成タイミング時間
 	float hitBoxLifeTime_ = 0.5f;		// ヒットボックスの生存時間
 	Vector3 offsetPos_ = {};			// コライダー位置
@@ -50,4 +77,20 @@ struct ComboGlovalData {
 
 	float trailEffectStartTime = 0.1f;	// トレイル発生時間
 	float trailEffectLifeTime = 1.0;	// トレイル生存時間
+
+	/// 親子付け設定  ///　 
+	std::string parentName_ = "なし";
+	Vector3 parentOffset_ = { 0.0f,0.0f,0.0f };
+
+	
+
+	// ヒットボックスの発生条件タイプ
+	HitBoxSpawnType spawnType_ = HitBoxSpawnType::kOnTime;
+	// ヒットボックス依存先タイプ
+	HitBoxParentType dependenceType_ = HitBoxParentType::kParent;
+
+
+	///	終了条件 ///
+	EndConditionType endConditionType = EndConditionType::kOnTimer;
+
 };

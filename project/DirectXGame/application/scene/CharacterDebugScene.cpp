@@ -146,17 +146,11 @@ void CharacterDebugScene::Initialize()
 	comboEditor_->Initialize(characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
 }
 
-void CharacterDebugScene::Finalize()
-{
-}
+void CharacterDebugScene::Finalize(){}
 
 void CharacterDebugScene::Update()
 {
 	Engine::Camera::isShake_ = false;
-
-
-	ComboEditorUpdate(GetTime());
-
 
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
@@ -165,6 +159,9 @@ void CharacterDebugScene::Update()
 	if (input_->IsTriggerKey(DIK_T)) {
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
+
+	// コンボエディター更新
+	comboEditor_->Update(GetTime());
 
 	// インプットマネージャー更新
 	inputManager_->Update(GetTime());
@@ -293,23 +290,3 @@ void CharacterDebugScene::CheckAllCollisions() {
 	collisionManager_->ClearDynamic();
 }
 
-void CharacterDebugScene::ComboEditorUpdate(float dt){
-#ifdef _DEBUG
-	ImGui::Begin("Comdo");
-	ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
-
-
-	if (ImGui::Button("Relord")) {
-		characterManager_->GetPlayer()->ApplyComboData(comboEditor_.get());
-		// リロード
-		characterManager_->GetPlayer()->Reload();
-		// コンボエディター
-		comboEditor_->ApplyComboEditorToSystem();
-	}
-	ImGui::End();
-
-	// コンボエディター更新
-	if(isComboEditorActive_)
-	comboEditor_->UpdateImGui(GetTime());
-#endif // _DEBUG
-}

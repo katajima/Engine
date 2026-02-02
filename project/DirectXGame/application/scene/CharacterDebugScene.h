@@ -55,9 +55,6 @@ private:
 	/// </summary>
 	void CheckAllCollisions();
 
-
-	void ComboEditorUpdate(float dt);
-
 private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;

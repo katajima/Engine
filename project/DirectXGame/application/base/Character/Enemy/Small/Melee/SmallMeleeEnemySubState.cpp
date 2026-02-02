@@ -44,7 +44,7 @@ void SmallMeleeAttackSwingSubState::Enter(){
     data_.name = "NormalEnemy_SwingHitBox";
     data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
 
-    enemy->GetAttackController()->GetHitBoxSystem()->AddHitBox(HitBoxUseType::kEnemy, { data_ }, {}, 2.0f, HitBoxSystem::Type::kParent, {}, &enemy->GetWorldTransform());
+    enemy->GetAttackController()->GetHitBoxSystem()->AddHitBox(HitBoxUseType::kEnemy, { data_ }, {}, 2.0f, HitBoxParentType::kParent, {}, &enemy->GetWorldTransform());
 }
 
 void SmallMeleeAttackSwingSubState::Update(float deltaTime){
