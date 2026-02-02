@@ -71,7 +71,7 @@ void PlayerStateIdle::Enter() {
 	anima->SetIsLoop(true);			// ループさせる
 	anima->SetIsPlaying(true);		// アニメーション再生
 	anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-	anima->SetAnimation("Idle2", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimation("SwordIdle01", 0.5f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 };
 
@@ -140,7 +140,7 @@ void PlayerStateMove::Enter()
 	anima->SetIsLoop(true);				// ループ再生
 	anima->SetIsPlaying(true);			// 再生
 	anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
-	anima->SetAnimation("Walk", 0.1f);	// 流すアニメーション設定
+	anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
 	character_->GetMoveComponent()->SetCanMove(true);
 }
 
@@ -178,7 +178,7 @@ void PlayerStateJump::Update() {
 
 	// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 	if (isAlive && isJamp && isTrigger) {
-		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.05f);
+		character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStart01", 0.05f);
 
 		// ジャンプ開始
 		anima->SetStratAnimeTime();		// アニメーション時間を初期化
@@ -196,11 +196,11 @@ void PlayerStateJump::Update() {
 	
 	if (jump->GetState() == JumpSystem::State::Jump) { // 上昇しているなら
 		anima->SetIsLoop(false);
-		anima->SetAnimation("JumpStrat1", 0.05f);
+		anima->SetAnimation("JumpStart01", 0.05f);
 	}
 	else if (jump->GetState() == JumpSystem::State::Fall) { // 降下しているなら
 		anima->SetIsLoop(true);
-		anima->SetAnimation("Fall", 0.15f);
+		anima->SetAnimation("Jump01", 0.15f);
 	}
 }
 
@@ -324,67 +324,6 @@ void PlayerStateSkill::Enter() {
 	timer_ = 0.0f;
 };
 #pragma endregion // スキル
-
-#pragma region Defense
-
-// 更新
-void PlayerStateDefense::Update() {
-	Engine::Input* input = character_->GetInput();
-
-	// ゲームパッドがつながっているなら
-	if (input->IsControllerConnected()) {
-		// 防御中
-		if (input->IsGamePadPressed(GamePadButton::GAMEPAD_A) && isDifense_) {
-			isDifense_ = true;
-
-			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.75;
-
-			// スタミナがあるなら
-			if (character_->GetCharacterParameterComponent()->IsGetStamina()) {
-				// スタミナ消費
-				character_->GetCharacterParameterComponent()->Stamina().rateFluctuation = -5.0f;
-			}
-			else {
-				isDifense_ = false;
-			}
-
-		}
-		else {
-			// スタミナ回復
-			character_->GetCharacterParameterComponent()->Stamina().rateFluctuation = 5.0f;
-			isDifense_ = false;
-			timer_ += character_->GetTime();
-			character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
-		}
-	}
-
-
-	// 移動状態に移行
-	if (timer_ >= defenseTimer_) {
-		character_->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-		return;
-	}
-
-};
-
-// 終了
-void PlayerStateDefense::Exit() {
-	isDifense_ = false;
-	character_->GetAttackController()->GetCombatStat()->GetDataRef().damageReduction_ = 0.0f;
-	character_->GetCharacterParameterComponent()->Stamina().rateFluctuation = 5.0f;
-};
-// 初期化
-void PlayerStateDefense::Enter() {
-	isDifense_ = true;
-	Engine::AnimationComponent* anima = character_->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-	anima->SetIsPlaying(true);		// アニメーション再生
-	anima->SetIsLoop(false);		// アニメーションをループさせるか
-	anima->SetStratAnimeTime();		// アニメーション時間を初期化
-	anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
-	anima->SetAnimation("Defense1", 0.10f);	// 流すアニメーション設定
-};
-
-#pragma endregion // 防御
 
 #pragma region Fainting
 

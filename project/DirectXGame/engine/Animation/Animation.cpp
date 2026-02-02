@@ -193,7 +193,6 @@ Matrix4x4 Engine::AnimationFunction::GetWorldMatrixOfJoint(const Skeleton& skele
 	auto it = skeleton.jointMap.find(jointName);
 	if (it != skeleton.jointMap.end()) {
 		const Joint& joint = skeleton.joints[it->second];
-		//return Multiply(modelWorldMatrix ,joint.skeletonSpaceMatrix);
 		return Multiply(joint.skeletonSpaceMatrix,modelWorldMatrix);
 	}
 	return Matrix4x4::Identity(); // 見つからなければ単位行列

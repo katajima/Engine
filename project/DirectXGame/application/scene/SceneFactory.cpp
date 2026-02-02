@@ -22,6 +22,9 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
 	if (sceneName == "RESULT") {                // リザルト
 		return std::make_unique<ResultScene>();
     }
+    if (sceneName == "CHARACTER") {             // キャラクターのデバッグシーン
+        return std::make_unique<CharacterDebugScene>();
+    }
 
     return nullptr;
 }

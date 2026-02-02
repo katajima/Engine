@@ -8,7 +8,7 @@
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "assert.h"
-
+#include "DirectXGame/application/base/Attack/Combo/ComboEditor.h"
 
 void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
@@ -25,12 +25,11 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 	
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "origin.gltf", true, true,this, Engine::ObjectModelType::kSkinning);
-
+	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerBase", "testCharacter.gltf", true, true,this, Engine::ObjectModelType::kSkinning);
 	// 保存項目追加
 	CreateGroup("Player");
 
-	objectComponent_->SetSRT({1,1,1}, {}, position);				//　SRT設定
+	objectComponent_->SetSRT({3,3,3}, {}, position);				//　SRT設定
 	objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
 	objectComponent_->GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
@@ -73,7 +72,7 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 	// コライダ位置用トランスフォーム初期化
 	worldCollider_.Initialize();
 	worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
-	worldCollider_.translate_.y = 3.0f;
+	worldCollider_.translate_.y = 1.0f;
 
 	// 衝突時のコールバック登録
 	GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
@@ -121,6 +120,18 @@ void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
 	ui_->SetCharacterParameter(GetCharacterParameterComponent());
 	
 
+
+
+	// オブジェクトコンポーネント追加
+	objectComponentShadow_ = std::make_unique<ObjectComponent>();
+	// オブジェクトインスタンシング初期化
+	objectComponentShadow_->InitializeInstancing(entity3DManager_, globalVariables_, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.png",
+		false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
+	objectComponentShadow_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
+
+	objectComponentShadow_->SetInstancingSRT({ 3.0f,3.0f,3.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
+
 	// キャラクター行動ステート初期化
 	InitStateMachine();
 }
@@ -130,26 +141,13 @@ void NormalPlayer::InitAttack(){
 	weapon_ = std::make_unique<PlayerWeapon>();
 	weapon_->SetCharacter(this);
 	weapon_->Initialize(input_, entity3DManager_, nullptr, globalVariables_, {}, camera_);
-	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(-90),0.0f,0.0f };
+	weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
 
 
 	// 戦闘
 	attackController_ = std::make_unique<AttackController>();
 	attackController_->Initialize(entity3DManager_,globalVariables_, GetCharacterParameterComponent(), this);
 	attackController_->GetHitCounter().SetHitTimer(2.0f);
-	
-	ComboSystem* combo = attackController_->GetComboSystem();
-
-	//
-	combo->ApplyGlobalComboData("AttackComboData1", data1_);
-	combo->ApplyGlobalComboData("AttackComboData2", data2_);
-	combo->ApplyGlobalComboData("AttackComboData3", data3_);
-	combo->ApplyGlobalComboData("AttackComboData(Jump)", data4_);
-	combo->ApplyGlobalComboData("AttackComboData5", data5_);
-	combo->ApplyGlobalComboData("AttackComboData6", data6_);
-	combo->ApplyGlobalComboData("AttackComboData7", data7_);
-	combo->ApplyGlobalComboData("AttackComboData8", data8_);
-
 	
 	// 
 	ReloadComboData();
@@ -190,8 +188,8 @@ void NormalPlayer::RequestAttack(AttackInput input)
 			// ここをテーブル化するとスキル追加が楽
 			switch (input)
 			{
-			case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack4"); break;
-			case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("Attack1"); break;
+			case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack1"); break;
+			case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("HeavyAttack01"); break;
 			case AttackInput::Skill: ac->GetComboSystem()->StartCombo("Skill1"); break;
 			default: break;
 			}
@@ -217,9 +215,6 @@ void NormalPlayer::InitStateMachine() {
 		});
 	stateMachine_->RegisterState(CharacterMainState::Skill, [](BaseCharacter* p) {
 		return std::make_unique<PlayerStateSkill>(p);
-		});
-	stateMachine_->RegisterState(CharacterMainState::Defense, [](BaseCharacter* p) {
-		return std::make_unique<PlayerStateDefense>(p);
 		});
 	stateMachine_->RegisterState(CharacterMainState::Fainting, [](BaseCharacter* p) {
 		return std::make_unique<PlayerStateFainting>(p);
@@ -249,24 +244,6 @@ void NormalPlayer::Update()
 		special_->SetGauge(100);
 	}
 	ImGui::End();
-
-
-	ImGui::Begin("Comdo");
-	if (ImGui::Button("Relord")) {
-		ReloadComboData();
-	}
-	ImGui::End();
-
-	// クリエイティブモード切替
-	if (input_->IsTriggerKey(DIK_C)) {
-		if (!isCreativeMode) {
-			isCreativeMode = true;
-
-		}
-		else {
-			isCreativeMode = false;
-		}
-	}
 #endif // _DEBUG
 
 
@@ -312,12 +289,18 @@ void NormalPlayer::Update()
 	stateMachine_->Update();
 
 	//武器更新
-	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->model->modelData.skeleton, "rightHand", GetObjectComponent()->GetWorldTransform().worldMat_));
+	GetObjectComponent()->GetWorldTransform().Update();
+	weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->modelData.skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 	weapon_->Update();
 
 	// UI更新
 	ui_->SetImageLeftTopPosAndRatio(entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 	ui_->Update();
+
+
+	objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
+	objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
+	objectComponentShadow_->GetWorldTransform().translate_.y = -3.0f;
 }
 
 #pragma region Draw
@@ -381,29 +364,18 @@ void NormalPlayer::Jump()
 
 #pragma region MyRegion
 
-void NormalPlayer::ApplyGlobalVariables(){
-	ComboSystem* combo = attackController_->GetComboSystem();
-
-	combo->SetGlobalComboData("AttackComboData1", data1_);
-	combo->SetGlobalComboData("AttackComboData2", data2_);
-	combo->SetGlobalComboData("AttackComboData3", data3_);
-	combo->SetGlobalComboData("AttackComboData(Jump)", data4_);
-	combo->SetGlobalComboData("AttackComboData5", data5_);
-	combo->SetGlobalComboData("AttackComboData6", data6_);
-	combo->SetGlobalComboData("AttackComboData7", data7_);
-	combo->SetGlobalComboData("AttackComboData8", data8_);
-
-}
-
+void NormalPlayer::ApplyGlobalVariables(){}
 
 void NormalPlayer::ReloadComboData()
 {
 	// コンボノードクリア
 	GetAttackController()->GetComboSystem()->ClearNode();
+	GetAttackController()->GetComboSystem()->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
+	GetAttackController()->GetComboSystem()->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
+	GetAttackController()->GetComboSystem()->SetParentTransform("NoParent", nullptr);
+
 	HitBoxSystem* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
 	ComboSystem* comboSystem = GetAttackController()->GetComboSystem();
-	// ヒットボックスデータ
-	HitBoxCollData hitData1 = {}, hitData2 = {}, hitData3 = {}, hitData4 = {}, hitData5 = {};
 	
 	// ヒットボックスデータ作成
 	GlobalHitBoxdata hitBoxdata  = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
@@ -412,44 +384,59 @@ void NormalPlayer::ReloadComboData()
 	GlobalHitBoxdata hitBoxdata4 = { { 0,0,0 },{},20.0f };
 	GlobalHitBoxdata hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
 	
-	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBoxShape::kOBB,HitBoxUseType::kPlayer, hitBoxdata, hitData1);
-	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata2, hitData2);
-	hitBoxSystem->CreateHitBoxCollData("obb", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata3, hitData3);
-	hitBoxSystem->CreateHitBoxCollData("obb2", HitBoxShape::kSphere, HitBoxUseType::kPlayer,hitBoxdata4, hitData4);
-	hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata5, hitData5);
+	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBoxShape::kOBB,HitBoxUseType::kPlayer, hitBoxdata);
+	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata2);
+	hitBoxSystem->CreateHitBoxCollData("obb", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata3);
+	hitBoxSystem->CreateHitBoxCollData("obb2", HitBoxShape::kSphere, HitBoxUseType::kPlayer,hitBoxdata4);
+	hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata5);
 	
-
-	// データ
 	// コンボ１のデータ送る
-	comboSystem->CreateCombo("Attack1",{{ hitData3 ,data1_ }}, &objectComponent_->GetObject3D()->GetWorldTransform());
+	comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("obb")}});
 	// コンボ２のデータ送る
-	comboSystem->CreateCombo("Attack2", { { hitData1 ,data2_ },{ hitData2 ,data2_ } }, &weapon_->GetObject3D()->GetWorldTransform());
+	comboSystem->CreateCombo("Attack2", {{hitBoxSystem->GetHitBoxCollData("obbColl1")},{hitBoxSystem->GetHitBoxCollData("obbColl2")}});
 	// コンボ３のデータ送る
-	comboSystem->CreateCombo("Attack3", { { hitData5 ,data3_ },{ hitData1 ,data3_ } }, &weapon_->GetObject3D()->GetWorldTransform());
+	comboSystem->CreateCombo("Attack3", {{hitBoxSystem->GetHitBoxCollData("obb") }});
 	// ジャンプコンボのデータ送る
-	comboSystem->CreateCombo("JumpAttack", { { hitData4 ,data4_ } }, &objectComponent_->GetObject3D()->GetWorldTransform(),
-		{ ComboCondition::EndConditionType::kOnGround },
-		{ComboHitBox::HitBoxSpawnType::kOnGround, HitBoxSystem::Type::kParentIndependent,{ 0,0,5.5f } });
+	comboSystem->CreateCombo("JumpAttack", { { hitBoxSystem->GetHitBoxCollData("obb2") }});
 	// コンボ4のデータ送る
-	comboSystem->CreateCombo("Attack4", { { hitData3 ,data5_ }}, &objectComponent_->GetObject3D()->GetWorldTransform());
+	comboSystem->CreateCombo("Attack4", { { hitBoxSystem->GetHitBoxCollData("obb") }});
 	// コンボ5のデータ送る
-	comboSystem->CreateCombo("Attack5", { { hitData3 ,data6_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
+	comboSystem->CreateCombo("Attack5", { { hitBoxSystem->GetHitBoxCollData("obb") }});
 	// コンボ6のデータ送る
-	comboSystem->CreateCombo("Attack6", { { hitData3 ,data7_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
+	comboSystem->CreateCombo("Attack6", { { hitBoxSystem->GetHitBoxCollData("obb") }});
 	// コンボ7のデータ送る
-	comboSystem->CreateCombo("Attack7", { { hitData3 ,data8_ } }, &objectComponent_->GetObject3D()->GetWorldTransform());
+	comboSystem->CreateCombo("Attack7", { { hitBoxSystem->GetHitBoxCollData("obb") }});
+
+
+
+	// コンボ8のデータ送る
+	comboSystem->CreateCombo("HeavyAttack01", { { hitBoxSystem->GetHitBoxCollData("obb")  } }, GamePadButton::GAMEPAD_X);
+	// コンボ9のデータ送る
+	comboSystem->CreateCombo("HeavyAttack02", { { hitBoxSystem->GetHitBoxCollData("obb")  } }, GamePadButton::GAMEPAD_X);
+	// コンボ8のデータ送る
+	comboSystem->CreateCombo("HeavyAttack03", { { hitBoxSystem->GetHitBoxCollData("obb") } }, GamePadButton::GAMEPAD_X);
+
 
 
 
 	// コンボ連結設定
-	comboSystem->ConnectCombo("Attack4", AttackInput::Light, "Attack5"); // コンボ連結
-	comboSystem->ConnectCombo("Attack5", AttackInput::Light, "Attack6"); // コンボ連結
-	comboSystem->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
-	comboSystem->ConnectCombo("Attack7", AttackInput::Light, "Attack1"); // コンボ連結
-
 	comboSystem->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
 	comboSystem->ConnectCombo("Attack2", AttackInput::Light, "Attack3"); // コンボ連結
 	comboSystem->ConnectCombo("JumpAttack", AttackInput::Light, "Attack2"); // コンボ連結	
+
+	comboSystem->ConnectCombo("Attack3", AttackInput::Light, "Attack4"); // コンボ連結
+	comboSystem->ConnectCombo("Attack4", AttackInput::Light, "Attack5"); // コンボ連結
+	comboSystem->ConnectCombo("Attack5", AttackInput::Light, "Attack6"); // コンボ連結
+	comboSystem->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
+	
+
+	comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Heavy, "HeavyAttack02"); // コンボ連結	
+	comboSystem->ConnectCombo("HeavyAttack02", AttackInput::Heavy, "HeavyAttack03"); // コンボ連結	
 }
+
+void NormalPlayer::Reload() {
+	ReloadComboData();
+}
+
 
 #pragma endregion // そのほか

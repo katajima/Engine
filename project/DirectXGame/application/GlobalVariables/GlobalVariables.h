@@ -29,6 +29,21 @@ namespace Engine {
 		template<typename T>
 		T GetValue(const std::string& groupName, const std::string& key) const;
 
+
+		// enum 専用：追加
+		template<typename E>
+		void AddEnumItem(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
+
+		// enum 専用：上書き
+		template<typename E>
+		void SetEnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType);
+
+		// enum 専用：取得
+		template<typename E>
+		E GetEnumValue(const std::string& groupName, const std::string& key) const;
+
+
+
 		// グループが存在するか？
 		bool HasGroup(const std::string& groupName) const;
 
@@ -60,7 +75,7 @@ namespace Engine {
 		/// ファイルに書き出し
 		/// </summary>
 		/// <param name="groupName"></param>
-		void saveFile(const std::string& groupName);
+		void SaveFile(const std::string& groupName);
 
 		/// <summary>
 		/// ディレクトリの全ファイル読み込み
@@ -73,6 +88,8 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void LoadFile(const std::string& groupName);
 
+
+	public:
 		/// <summary>
 		/// 毎フレーム処理
 		/// </summary>
@@ -148,4 +165,50 @@ namespace Engine {
 		// std::variantから型Tを取得。型が違うと例外 std::bad_variant_access が投げられるので注意
 		return std::get<T>(group.at(key));
 	}
+
+
+	template<typename E>
+	void GlobalVariables::AddEnumItem(const std::string& groupName, const std::string& key, E value, const std::string& enumType)
+	{
+		static_assert(std::is_enum_v<E>, "AddEnumItem requires enum type.");
+
+		CreateGroup(groupName);
+
+		GvData::Group& group = datas_[groupName];
+		if (group.find(key) == group.end()) {
+			GvData::EnumItem e;
+			e.enumType = enumType;
+			e.value = static_cast<int64_t>(static_cast<std::underlying_type_t<E>>(value));
+			group[key] = e;
+		}
+	}
+
+	template<typename E>
+	void GlobalVariables::SetEnumValue(const std::string& groupName, const std::string& key, E value, const std::string& enumType)
+	{
+		static_assert(std::is_enum_v<E>, "SetEnumValue requires enum type.");
+
+		GvData::Group& group = datas_[groupName];
+
+		GvData::EnumItem e;
+		e.enumType = enumType;
+		e.value = static_cast<int64_t>(static_cast<std::underlying_type_t<E>>(value));
+		group[key] = e;
+	}
+
+	template<typename E>
+	E GlobalVariables::GetEnumValue(const std::string& groupName, const std::string& key) const
+	{
+		static_assert(std::is_enum_v<E>, "GetEnumValue requires enum type.");
+
+		assert(datas_.find(groupName) != datas_.end());
+		const GvData::Group& group = datas_.at(groupName);
+
+		assert(group.find(key) != group.end());
+
+		const auto& item = group.at(key);
+		const auto& e = std::get<GvData::EnumItem>(item);
+		return static_cast<E>(static_cast<std::underlying_type_t<E>>(e.value));
+	}
+
 }

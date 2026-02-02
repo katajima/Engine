@@ -43,7 +43,7 @@ namespace Engine {
 		void Draw();
 
 		// スキニング用描画
-		void DrawSkinning();
+		void DrawSkinning(std::vector<MaterialInstance> matetials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr);
 
 		// ModelData取得
 		ModelData& GetModelData() { return modelData; }

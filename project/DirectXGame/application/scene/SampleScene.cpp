@@ -151,12 +151,7 @@ void SampleScene::InitObject() {
 		{3, "resources/Texture/renga.png"}
 	};
 
-	// タイルマップの生成(オブジェクト名、テクスチャパス、モデル、マップサイズX、マップサイズY、タイルサイズ、タイル間隔、マップデータ、テクスチャ名前<MapId>、マップの向き)
-	object3dInstansManager_->CreateTileMap("test", "", GetDxCommon()->GetModelManager()->FindModel("stair.obj"), 10, 10, Vector3{ 1,1,3 }, { 10,20 }, map, mapId, MapAxis::XY);
-
-
-
-
+	
 	// スカイボックスの生成
 	skyBox = std::make_unique<Engine::SkyBox>();
 	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
@@ -196,15 +191,6 @@ void SampleScene::Update() {
 	// カメラ管理の更新
 	cameraManeger_->Update();
 	SetCamera(cameraManeger_->GetCamera());
-
-
-	// インスタンスの検索
-	Engine::ObjectInstans* obj = object3dInstansManager_->GetObjectById("test", 5);
-	if (obj) {
-		obj->transform.translate_.y += 0.01f; // 1マス持ち上げる
-		obj->Update();
-	}
-
 	
 	aabbParticleEmitter_->Update();
 	

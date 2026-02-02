@@ -43,7 +43,7 @@ void Engine::Ocean::Initialize(Engine::Entity3DManager* entity3dManager,Vector2 
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
 	material->tex_.environmentFilePath = "resources/Texture/hdr/sky.dds";
 	material->LoadTex();
-	material->color = { 0,0,1,1.0f };
+	material->GetMaterialInstance().color = { 0,0,1,1.0f };
 
 
 	// ノイズリソース生成

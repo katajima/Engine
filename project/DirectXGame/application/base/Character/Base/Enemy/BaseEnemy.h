@@ -23,7 +23,7 @@ public:
 	// 基盤となる初期化
 	void BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-		const std::string& modelName,const std::string& charaName);
+		const std::string& modelName,const std::string& charaName,float colliderRadius = 3.0f);
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
@@ -79,6 +79,10 @@ protected:
 	// スプライト初期化
 	void Initialize2D();
 
+private:
+	//
+	void InitShadowObjectComponent(const std::string& charaName);
+
 protected:
 	EnemyType type_ = EnemyType::kNormal; // 敵の種類
 	uint32_t id_ = 0; // ID
@@ -100,4 +104,8 @@ protected:
 protected:
 	Engine::WorldTransform worldEffect_;
 	DebugTimer debugTimer_;
+
+	// 影用オブジェクトコンポーネント
+	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
+
 };

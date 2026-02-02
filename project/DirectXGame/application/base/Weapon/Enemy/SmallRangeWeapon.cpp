@@ -13,7 +13,8 @@ void SmallRangeWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager*
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->InitializeInstancing(entity3DManager_, globalVariables_, "enemyMuzzleSS01", "enemyMuzzleSS01.obj", "", false, false, this);
+	objectComponent_->InitializeInstancing(entity3DManager_, globalVariables_, "enemyMuzzleSS01", "enemyMuzzleSS01.obj", "",
+		false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
 	objectComponent_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, {Math::DegreesToRadians(10),0,0}, position);	// SRT設定
 	objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 }

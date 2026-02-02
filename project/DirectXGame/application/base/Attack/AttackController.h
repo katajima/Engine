@@ -43,6 +43,8 @@ public:
 	void IsStopHitTimer(bool is) { isStopHitTimer_ = is; };
 
 public:
+	// デバッグ中か設定
+	void SetIsDebug(bool isDebug) { isDebugEditor_ = isDebug; };
 
 private:
 	// 攻撃ヒットカウンター
@@ -62,5 +64,9 @@ private:
 
 private:
 	Engine::GlobalVariables* globalVariables = nullptr;
+
+
+	// デバッグ中か
+	bool isDebugEditor_ = false;
 
 };

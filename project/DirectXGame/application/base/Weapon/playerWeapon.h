@@ -39,8 +39,8 @@ public:
 private: // 一旦
 
 	struct ProvisionalData {
-		Vector3 size = { 1.25f,1.25f ,1.25f };// サイズ
-		Vector3 scale_{ 1.0f,1.0f, 1.0f };// スケール
+		Vector3 size = { 1.00f,1.00f ,1.00f };// サイズ
+		Vector3 scale_{ 0.5f,0.5f, 0.5f };// スケール
 
 		float trailLifeTime = 0.5f;// トレイルの寿命
 		Color color = { 1,1,1,0.25f };

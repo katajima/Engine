@@ -1,0 +1,119 @@
+{
+    "HeavyAttack01": {
+        "Y方向ノックバック": {
+            "type": "bool",
+            "value": false
+        },
+        "Y方向ノックバック力": {
+            "type": "float",
+            "value": 30.0
+        },
+        "アニメーション名前": {
+            "type": "string",
+            "value": "Attack08"
+        },
+        "アニメーション速度": {
+            "type": "float",
+            "value": 1.4800000190734863
+        },
+        "アニメーション遷移時間": {
+            "type": "float",
+            "value": 0.3799999952316284
+        },
+        "エフェクト(トレイル)生存時間": {
+            "type": "float",
+            "value": 0.1833333671092987
+        },
+        "エフェクト(トレイル)発生時間": {
+            "type": "float",
+            "value": 0.3499999940395355
+        },
+        "コンボキャンセル受付終了時間": {
+            "type": "float",
+            "value": 0.5
+        },
+        "コンボキャンセル受付開始時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "コンボ中の移動スピード": {
+            "type": "float",
+            "value": 1.0
+        },
+        "コンボ中の移動強制": {
+            "type": "bool",
+            "value": true
+        },
+        "コンボ中の移動終了時間": {
+            "type": "float",
+            "value": 0.18333333730697632
+        },
+        "コンボ中の移動開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボ中の重力": {
+            "type": "bool",
+            "value": true
+        },
+        "コンボ中の重力強度": {
+            "type": "float",
+            "value": 1.0
+        },
+        "コンボ入力受付終了時間": {
+            "type": "float",
+            "value": 1.2666666507720947
+        },
+        "コンボ入力受付開始時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "コンボ移行時間": {
+            "type": "float",
+            "value": 0.44999998807907104
+        },
+        "コンボ終了時間": {
+            "type": "float",
+            "value": 1.5666667222976685
+        },
+        "ダメージ": {
+            "type": "float",
+            "value": 33.75
+        },
+        "ノックバック力": {
+            "type": "float",
+            "value": 69.02999877929688
+        },
+        "ノックバック持続時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "ヒットボックス依存先タイプ": {
+            "enumType": "HitBoxParentType",
+            "type": "enum",
+            "value": 0
+        },
+        "ヒットボックス生存時間": {
+            "type": "float",
+            "value": 0.2500000298023224
+        },
+        "ヒットボックス発生時間": {
+            "type": "float",
+            "value": 0.3499999940395355
+        },
+        "ヒットボックス発生条件タイプ": {
+            "enumType": "HitBoxSpawnType",
+            "type": "enum",
+            "value": 0
+        },
+        "終了条件タイプ": {
+            "enumType": "EndConditionType",
+            "type": "enum",
+            "value": 3
+        },
+        "親オブジェクト名前": {
+            "type": "string",
+            "value": "Player"
+        }
+    }
+}

@@ -62,7 +62,10 @@ public:
 	/// <summary>
 	/// インスタンシング用初期化
 	/// </summary>
-	void InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, IHitReceiver* iHitReceiver);
+	void InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
+		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
+		bool useRigidBody, IHitReceiver* iHitReceiver,
+		Engine::Object3dInstansManager::TransparencyType transparencyType);
 
 	/// <summary>
 	/// 更新

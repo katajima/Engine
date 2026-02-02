@@ -58,7 +58,8 @@ void SpecalPoint::Initialize(Engine::Entity3DManager* entity3DManager, Engine::G
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
-	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, "" + std::to_string(id), "point.obj", "", true, true, this);
+	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, "" + std::to_string(id), "point.obj", "", 
+		true, true, this, Engine::Object3dInstansManager::TransparencyType::kNo);
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 	objectComponent_->SetInstancingSRT({0.5f,0.5f,0.5f },{}, pos);
 
@@ -72,7 +73,7 @@ void SpecalPoint::Initialize(Engine::Entity3DManager* entity3DManager, Engine::G
 	sphere->Enable();					// コライダ有効
 	sphere->tag = CollisionTag::Item;	// タグ設定
 	sphere->layer = CollisionLayer::Environment;// レイヤー設定
-	sphere->radius = 2.0f; // 半径を適宜設定
+	sphere->radius = 4.0f; // 半径を適宜設定
 	colliderComponent->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）

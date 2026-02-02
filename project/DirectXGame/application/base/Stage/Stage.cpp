@@ -19,7 +19,7 @@ void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMana
 	ocean_->GetWaveParameters()[0].amplitude = provisionalData_.oceanAmplitude;
 	ocean_->GetWaveParameters()[0].waveDirection = provisionalData_.waveDirection;
 	ocean_->GetWaveParameters()[0].speed = provisionalData_.waveSpeed;
-	ocean_->GetMaterial()->color = provisionalData_.color;
+	ocean_->GetMaterial()->GetMaterialInstance().color = provisionalData_.color;
 
 	// 海オブジェクト追加
 	oceanObject = entity3DManager_->CreateObject3D("oceanObject", Engine::ObjectModelType::kOcean, {}, camera_);

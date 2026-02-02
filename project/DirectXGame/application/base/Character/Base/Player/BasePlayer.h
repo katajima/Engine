@@ -7,6 +7,9 @@
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
 
+// 前方宣言
+class ComboEditor;
+
 
 //前方宣言
 class FollowCamera;
@@ -39,6 +42,12 @@ public:
 	// ターゲットキャラクターを設定
 	void SetTargetCharacters(const std::vector<BaseEnemy*>& targetCharacters) { targetCharacters_ = targetCharacters; }
 
+	// リロード
+	virtual void Reload() {};
+	// コンボデータをシーケンサー適応
+	virtual void ApplyComboData(ComboEditor* comboEditor) {};
+
+
 public:
 	// フォローカメラの設定
 	void SetFollowCamera(FollowCamera* followCamera) { followCamera_ = followCamera;}
@@ -55,5 +64,9 @@ protected:
 	std::vector<BaseEnemy*> targetCharacters_;				// 攻撃対象キャラクターリスト
 	FollowCamera* followCamera_ = nullptr;					// フォローカメラ
 	bool isCreativeMode = false;							// クリエイティブモードかどうか
+
+
+	// 影用オブジェクトコンポーネント
+	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 };
 

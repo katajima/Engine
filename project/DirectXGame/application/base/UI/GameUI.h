@@ -42,6 +42,8 @@ private:
 
 	struct AttackTextData {
 		Vector2 pos_ = { 1120,520 };
+		Vector2 pos2_ = { 1120,470 };
+
 
 		Vector2 anchorPoint_ = { 0.5f,0.5f };
 		Vector2 anchorPoint2_ = { 0.0f,0.5f };
@@ -52,7 +54,7 @@ private:
 		float offset_ = 20.0f;
 	};
 	AttackTextData attackTextData_;
-
+	
 	struct SpTextData {
 		Vector2 pos_ = { 1120,570 };
 

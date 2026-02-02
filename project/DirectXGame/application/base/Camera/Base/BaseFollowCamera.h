@@ -24,7 +24,7 @@ protected:
 	//追従対象
 	Engine::WorldTransform* target_ = nullptr;
 	// ベースのオフセット（固定距離）
-	Vector3 baseOffset = { 0.0f, 5.0f, -50.0f };
+	Vector3 baseOffset = { 0.0f, 5.0f, -40.0f };
 	// カメラ回転速度
 	const float rotateSpeed = 0.03f;
 };

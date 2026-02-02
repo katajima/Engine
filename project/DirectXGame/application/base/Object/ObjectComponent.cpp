@@ -45,9 +45,8 @@ void ObjectComponent::SetColor(const Color& color) {
         objectInstance_->color = color.ToVector4();
     }
     else {
-        objectBase_->GetMaterial(0)->color = color;
+        objectBase_->GetMaterial(0)->GetMaterialInstance().color = color;
 	}
-
 };
 
 
@@ -168,9 +167,9 @@ void ObjectComponent::Initialize(Engine::Entity3DManager* entity3DManager, Engin
 
 }
 
-void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
-    const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody, 
-    IHitReceiver* iHitReceiver)
+void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
+    const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody,
+    IHitReceiver* iHitReceiver, Engine::Object3dInstansManager::TransparencyType transparencyType)
 {
     this->entity3DManager_ = entity3DManager;   // エンティティ3d
     this->globalVariables_ = globalVariables;   // 保存項目
@@ -184,10 +183,11 @@ void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DMana
     Engine::ObjectInstans object;
     object.Initialize(entity3DManager_,true);
     // オブジェクト追加
-    entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_);
+    entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_,
+        Engine::Object3dInstansManager::MeshType::kModel,transparencyType);
 
     // インスタンス
-    objectInstance_ = entity3DManager_->GetObject3dInstansManager()->GetObjectById(modelName_, instanceId_);
+    objectInstance_ = entity3DManager_->GetObject3dInstansManager()->GetObjectById(modelName_, instanceId_, transparencyType);
 }
 
 /// <summary>

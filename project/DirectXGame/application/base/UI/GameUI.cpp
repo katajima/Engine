@@ -27,6 +27,20 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	normalAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData_.anchorPoint2_); // アンカーポイント設定
 	normalAttackPair->GetSecondSprite()->SetSize(attackTextData_.size2_);			// サイズ設定
 	
+	// 通常攻撃UI初期化
+	InitUIPair("havyAttack", attackTextData_.pos2_);
+	Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
+	havyAttackPair->SetOffset(attackTextData_.offset_);	// 間隔設定
+	havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
+	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.png"); // 
+	havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData_.anchorPoint_);	// アンカーポイント設定
+	havyAttackPair->GetFirstSprite()->SetSize(attackTextData_.size_);		// サイズ設定
+	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.png");
+	havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData_.anchorPoint2_); // アンカーポイント設定
+	havyAttackPair->GetSecondSprite()->SetSize(attackTextData_.size2_);			// サイズ設定
+
+
+
 	InitUIPair("special", spTextData.pos_);
 
 	// 必殺技UI初期化

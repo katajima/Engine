@@ -120,38 +120,38 @@ void Engine::Entity3DManager::UpdateImgui()
 			std::string nameMesh = "";
 
 			if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kSkyBox) {
-				material = entity->skyBox_->GetMaterial();
+				material = entity->GetSkyBox()->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
-					ImGui::DragFloat3("M_scale", &material->transform.scale.x, 0.1f);
-					ImGui::DragFloat3("M_rotate", &material->transform.rotate.x, 0.1f);
-					ImGui::DragFloat3("M_translate", &material->transform.translate.x, 0.1f);
-					ImGui::ColorEdit4("color", &material->color.r);
-					ImGui::SliderInt("enableLighting", &material->enableLighting_, 0, 1);
-					ImGui::SliderFloat("alphaClipping", &material->alphaClipping_, 0, 1);
-					ImGui::DragFloat("shininess", &material->shininess_, 0.01f);
+					ImGui::DragFloat3("M_scale", &material->GetMaterialInstance().transform.scale.x, 0.1f);
+					ImGui::DragFloat3("M_rotate", &material->GetMaterialInstance().transform.rotate.x, 0.1f);
+					ImGui::DragFloat3("M_translate", &material->GetMaterialInstance().transform.translate.x, 0.1f);
+					ImGui::ColorEdit4("color", &material->GetMaterialInstance().color.r);
+					ImGui::SliderInt("enableLighting", &material->GetMaterialInstance().enableLighting_, 0, 1);
+					ImGui::SliderFloat("alphaClipping", &material->GetMaterialInstance().alphaClipping_, 0, 1);
+					ImGui::DragFloat("shininess", &material->GetMaterialInstance().shininess_, 0.01f);
 				}
 
 			}
 			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kPrimitive) {
 			}
 			else if (entity->GetRenderComponent()->GetObjectType() == ObjectModelType::kOcean) {
-				material = entity->ocean_->GetMaterial();
+				material = entity->GetOcean()->GetMaterial();
 				nameMaterial = "Material" + std::to_string(materialIndex);
 				if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
-					ImGui::DragFloat3("M_scale", &material->transform.scale.x, 0.1f);
-					ImGui::DragFloat3("M_rotate", &material->transform.rotate.x, 0.1f);
-					ImGui::DragFloat3("M_translate", &material->transform.translate.x, 0.1f);
-					ImGui::ColorEdit4("color", &material->color.r);
-					ImGui::DragFloat("alpha", &material->alpha_);
-					ImGui::SliderInt("enableLighting", &material->enableLighting_, 0, 1);
-					ImGui::SliderFloat("alphaClipping", &material->alphaClipping_, 0, 1);
-					ImGui::DragFloat("shininess", &material->shininess_, 0.01f);
+					ImGui::DragFloat3("M_scale", &material->GetMaterialInstance().transform.scale.x, 0.1f);
+					ImGui::DragFloat3("M_rotate", &material->GetMaterialInstance().transform.rotate.x, 0.1f);
+					ImGui::DragFloat3("M_translate", &material->GetMaterialInstance().transform.translate.x, 0.1f);
+					ImGui::ColorEdit4("color", &material->GetMaterialInstance().color.r);
+					ImGui::DragFloat("alpha", &material->GetMaterialInstance().alpha_);
+					ImGui::SliderInt("enableLighting", &material->GetMaterialInstance().enableLighting_, 0, 1);
+					ImGui::SliderFloat("alphaClipping", &material->GetMaterialInstance().alphaClipping_, 0, 1);
+					ImGui::DragFloat("shininess", &material->GetMaterialInstance().shininess_, 0.01f);
 				}
 
 			}
 			else {
-				for (auto& mesh : entity->model->modelData.mesh) {
+				for (auto& mesh : entity->GetModel()->modelData.mesh) {
 					nameMesh = "Mesh" + mesh->name;
 					if (ImGui::CollapsingHeader(nameMesh.c_str())) {
 						int verticesCount = static_cast<int>(mesh->vertices.size());
@@ -162,29 +162,26 @@ void Engine::Entity3DManager::UpdateImgui()
 					}
 				}
 				ImGui::Separator();
-				for (auto& mesh : entity->model->modelData.mesh) {
+
+
+				for (auto& material : entity->GetMaterialInstance()) {
+
 					nameMaterial = "Material" + std::to_string(materialIndex);
-
 					if (ImGui::CollapsingHeader(nameMaterial.c_str())) {
-						ImGui::DragFloat3("M_scale", &mesh->material->transform.scale.x, 0.1f);
-						ImGui::DragFloat3("M_rotate", &mesh->material->transform.rotate.x, 0.1f);
-						ImGui::DragFloat3("M_translate", &mesh->material->transform.translate.x, 0.1f);
-						ImGui::ColorEdit4("color", &mesh->material->color.r);
-						ImGui::SliderInt("enableLighting", &mesh->material->enableLighting_, 0, 1);
-						ImGui::SliderFloat("alphaClipping", &mesh->material->alphaClipping_, 0, 1);
-						ImGui::DragFloat("shininess", &mesh->material->shininess_, 0.01f);
-						ImGui::SliderFloat("alpha", &mesh->material->alpha_, 0, 1);
-						float width = static_cast<float> (100);
-						float height = static_cast<float> (100);
-
-						ImTextureID imguiTexture = (ImTextureID)(directXCommon_->GetTextureManager()->GetSrvHandleGPU(mesh->material->tex_.diffuseFilePath).ptr);
-						ImGui::Image(imguiTexture, ImVec2(width, height));
-
+						ImGui::DragFloat3("M_scale", &material.transform.scale.x, 0.1f);
+						ImGui::DragFloat3("M_rotate", &material.transform.rotate.x, 0.1f);
+						ImGui::DragFloat3("M_translate", &material.transform.translate.x, 0.1f);
+						ImGui::ColorEdit4("color", &material.color.r);
+						ImGui::SliderInt("enableLighting", &material.enableLighting_, 0, 1);
+						ImGui::SliderFloat("alphaClipping", &material.alphaClipping_, 0, 1);
+						ImGui::DragFloat("shininess", &material.shininess_, 0.01f);
+						ImGui::SliderFloat("alpha", &material.alpha_, 0, 1);
 					}
 					materialIndex++;
 				}
+
 				if (ImGui::CollapsingHeader("Animetion")) {
-					for (auto& anima : entity->model->modelData.animations) {
+					for (auto& anima : entity->GetModel()->modelData.animations) {
 						ImGui::Text(anima.first.c_str());
 					}
 				}
@@ -281,6 +278,9 @@ void Engine::Entity3DManager::ObjectDraw()
 		object->Draw();
 	}
 	opaqueObjects.clear();
+
+
+	object3dInstansManager_->DrawTransparency();
 
 	// 半透明最初
 	for (auto& object : transparentObjects01) {

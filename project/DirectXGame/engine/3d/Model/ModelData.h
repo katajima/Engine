@@ -3,7 +3,6 @@
 // engine
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
-\
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
 
 #include"DirectXGame/engine/struct/Material.h"
@@ -37,17 +36,19 @@ namespace Engine {
 		bool isAmimetion;										// アニメーションするか
 		bool isTangent;											// タンジェント
 		std::vector<std::unique_ptr<ModelMesh>> mesh;			// メッシュデータ
-		std::unique_ptr<ModelMesh> allMesh;
 		std::vector<uint32_t> cachedLineIndices_;				// ライン
+
+		
+		
 		std::map<std::string, Animation> animations;			// 名前付きアニメーション
 		std::string currentAnimName = "Idle";					// 現在のアニメーション名前
-
-		std::string previousAnimName = "";
+		std::string previousAnimName = "";						// 過去のアニメーション名前
 		float blendTime = 0.0f;									// ブレンドに使う経過時間
 		float blendDuration = 0.3f;								// ブレンドにかける合計時間
 		bool isBlending = false;
-		float animationTime = 0.0f;								// アニメーション時間
 		Skeleton skeleton;										// スケルトン
+
+		int pad;												// パディング
 	};
 
 

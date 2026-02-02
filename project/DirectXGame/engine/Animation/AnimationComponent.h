@@ -2,10 +2,12 @@
 #include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Animation/Animation.h"
 #include "DirectXGame/engine/Mesh/ModelMesh.h"
-#include "DirectXGame/engine/3d/Model/ModelData.h"
-#include"DirectXGame/engine/3d/Model/Model.h"
+
 
 namespace Engine {
+
+	class Model;
+
 	// アニメーションコンポーネント
 	class AnimationComponent
 	{
@@ -36,32 +38,17 @@ namespace Engine {
 		// ローカル行列取得
 		Matrix4x4 GetLocalMatrix() const { return localMatrix_; }
 		// アニメーション変更
-		void SetAnimation(const std::string& name, float time) {
-			AnimationFunction::SetAnimation(model->modelData, name, time);
-		}
+		void SetAnimation(const std::string& name, float time);
 		// アニメーションが終了しているか
 		bool IsAnimationFinished();
 		// 初期時間に戻す
-		void SetStratAnimeTime() { model->modelData.animationTime = 0.0f; }
+		void SetStratAnimeTime() { animationTime = 0.0f; }
+		// アニメーション時間設定
+		void SetAnimationTime(float time) { animationTime = time; }
 		// 終了時間に合わせる
-		void SetEndAnimeTime() {
-			const auto& animations = model->modelData.animations;
-			auto& modelData = model->modelData;
-			const std::string& currentName = modelData.currentAnimName;
-			auto itCurrent = animations.find(currentName);
-
-			modelData.animationTime = itCurrent->second.duration;
-		}
+		void SetEndAnimeTime();
 		// 終了時間取得
-		float GetEndAnimeTime(std::string name) const {
-			const auto& animations = model->modelData.animations;
-			auto it = animations.find(name);
-			if (it != animations.end()) {
-				return it->second.duration;
-			}
-			// 見つからない場合は 0.0f や -1.0f を返す
-			return 0.0f;
-		}
+		float GetEndAnimeTime(std::string name) const;
 
 	private:
 		// アニメーション再生しているか
@@ -77,6 +64,8 @@ namespace Engine {
 
 		// ローカル行列
 		Matrix4x4 localMatrix_;
+		//
+		float animationTime = 0.0f;
 
 	private:
 		// モデル

@@ -7,7 +7,7 @@
 
 #include "DirectXGame/engine/3d/Model/ModelCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-
+#include "DirectXGame/engine/3d/Model/ModelData.h"
 
 
 void Engine::RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
@@ -74,19 +74,24 @@ void Engine::RenderComponent::Draw()
 			std::vector<ModelMesh*> tra;
 			std::vector<ModelMesh*> opa;
 
-
+			int i = 0;
 			for (auto& mesh : model->modelData.mesh) {
+				
+				//mesh->material->SetGPUMaterialInstance(materialInstances_[i], cbResources_[i].get());
 
-				if (mesh->material->alpha_ < 1.0f) {
+
+				if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
 					tra.push_back(mesh.get());
 				}
 				else {
 					opa.push_back(mesh.get());
 				}
+				i++;
 			}
 
+			int j = 0;
 			for (auto& mesh : opa) {
-				if (mesh->material->alpha_ < 1.0f) {
+				if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
 					ObjectNormalTypeDiscrimination(PSOType::Transparent);
 				}
 				else {
@@ -96,6 +101,7 @@ void Engine::RenderComponent::Draw()
 
 				DrawSetting();
 
+				
 				mesh->material->GetCommandListMaterial(0);
 
 				mesh->material->GetCommandListTexture(2, 7, 8);
@@ -108,7 +114,7 @@ void Engine::RenderComponent::Draw()
 			}
 
 			for (auto& mesh : tra) {
-				if (mesh->material->alpha_ < 1.0f) {
+				if (mesh->material->GetMaterialInstance().alpha_ < 1.0f) {
 					ObjectNormalTypeDiscrimination(PSOType::Transparent);
 				}
 				else {
@@ -150,7 +156,16 @@ void Engine::RenderComponent::Draw()
 
 			// 3Dモデルが割り当てれていれば描画する
 
-			model->DrawSkinning();
+
+
+			std::vector<ConstantBuffer<Material::DataGPU>*> datas;
+
+			for(auto& cb : cbResources_) {
+				datas.push_back(cb.get());
+			}
+
+
+			model->DrawSkinning(materialInstances_,datas);
 		}
 		break;
 	case ObjectModelType::kPrimitive:
@@ -200,13 +215,13 @@ float Engine::RenderComponent::GetAlpha()
 		a = model->GetMaterialAlpha();
 		break;
 	case ObjectModelType::kPrimitive:
-		a = primitive_->GetMaterial()->color.a;
+		a = primitive_->GetMaterial()->GetMaterialInstance().color.a;
 		break;
 	case ObjectModelType::kSkyBox:
-		a = skyBox_->GetMaterial()->color.a;
+		a = skyBox_->GetMaterial()->GetMaterialInstance().color.a;
 		break;
 	case ObjectModelType::kOcean:
-		a = ocean_->GetMaterial()->color.a;
+		a = ocean_->GetMaterial()->GetMaterialInstance().color.a;
 		break;
 	default:
 		a = 1.0f;
@@ -292,3 +307,29 @@ void Engine::RenderComponent::DrawSettingOcean()
 	// カメラ
 	camera_->GetCommandList(4);
 }
+
+#pragma region MyRegion
+
+void Engine::RenderComponent::SetModel(Model* model) { 
+	this->model = model; 
+
+	materialInstances_.clear();
+	int i = 0;
+	for (auto& mesh : model->modelData.mesh){
+		MaterialInstance matInst;
+
+		std::unique_ptr<ConstantBuffer<Material::DataGPU>> cb =
+			std::make_unique<ConstantBuffer<Material::DataGPU>>();
+		cb->CreateBuffer(entity3DManager_->GetCameraCommon()->GetDxCommon());
+		cbResources_.push_back(std::move(cb));
+
+
+		matInst = mesh->material->GetMaterialInstance();
+		materialInstances_.push_back(matInst);
+	}
+}
+
+
+#pragma endregion
+
+

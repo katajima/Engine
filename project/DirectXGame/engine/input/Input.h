@@ -34,10 +34,6 @@ enum class GamePadButton
 	GAMEPAD_Back = XINPUT_GAMEPAD_BACK,				// Back
 	GAMEPAD_Max       // 最大ボタン数
 };
-//XINPUT_GAMEPAD_LEFT_THUMB
-//XINPUT_GAMEPAD_RIGHT_THUMB
-//XINPUT_GAMEPAD_LEFT_SHOULDER
-//XINPUT_GAMEPAD_RIGHT_SHOULDER
 
 namespace Engine {
 	/// <summary>

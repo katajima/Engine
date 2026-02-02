@@ -63,6 +63,8 @@ enum class EnemyType
 	kNormal,		// 通常
 	kSmallMelee,	// 小型近接
 	kSmallRanged,	// 小型遠距離
+
+	kDummy,			// ダミー
 };
 
 // プレイヤーキャラクターの種類を定義する列挙型

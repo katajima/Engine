@@ -7,12 +7,13 @@
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/MyGame/MyGame.h"
 
-
-
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
+
+
+
 
 #pragma region Init
 
@@ -52,6 +53,7 @@ void Engine::Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelT
 	renderComponent_ = std::make_unique<RenderComponent>();
 	renderComponent_->Init(entity3DManager_, objectType, rasterizerType);
 	renderComponent_->SetTransfomation(transformation.get());
+
 
 	isColliderComponenyUpdate_ = true;
 
@@ -108,16 +110,16 @@ void Engine::Object3d::Update()
 	{
 	case ObjectModelType::kNormal:
 		// モデルが存在する場合
-		if (model) {
-			localMatrix = model->modelData.rootNode.localMatrix;
+		if (renderComponent_->GetModel()) {
+			localMatrix = renderComponent_->GetModel()->modelData.rootNode.localMatrix;
 
-			for (auto& mesh : model->modelData.mesh) {
+			for (auto& mesh : renderComponent_->GetModel()->modelData.mesh) {
 				mesh->material->GPUData();
 			}
 		}
 
 		// トランスフォームデータ
-		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
+		transformation->Update(GetModel(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case ObjectModelType::kAnimation:
 
@@ -126,7 +128,7 @@ void Engine::Object3d::Update()
 		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
-		transformation->Update(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
+		transformation->Update(GetModel(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case ObjectModelType::kSkinning:
 
@@ -135,27 +137,27 @@ void Engine::Object3d::Update()
 		localMatrix = animationComponent_->GetLocalMatrix();
 
 		// トランスフォームデータ
-		transformation->UpdateSkinning(model, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
+		transformation->UpdateSkinning(GetModel(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		break;
 	case ObjectModelType::kPrimitive:
-		if (primitive_) {
-			primitive_->Update(MyGame::GameTime());
+		if (GetPrimitive()) {
+			GetPrimitive()->Update(MyGame::GameTime());
 
-			transformation->Update(primitive_.get(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
+			transformation->Update(GetPrimitive(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
 		break;
 	case ObjectModelType::kSkyBox:
-		if (skyBox_) {
-			skyBox_->Update();
+		if (renderComponent_->GetSkyBox()) {
+			renderComponent_->GetSkyBox()->Update();
 
-			transformation->Update(primitive_.get(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
+			transformation->Update(GetSkyBox(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
 		break;
 	case ObjectModelType::kOcean:
-		if (ocean_) {
-			ocean_->Update();
+		if (renderComponent_->GetOcean()) {
+			renderComponent_->GetOcean()->Update();
 
-			transformation->Update(ocean_, cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
+			transformation->Update(renderComponent_->GetOcean(), cameraPtr, localMatrix, transformComponent_->GetWorldTransform().worldMat_);
 		}
 		break;
 	default:
@@ -211,7 +213,7 @@ void Engine::Object3d::DrawTrailEffect()
 
 void Engine::Object3d::DebugImguiSkin()
 {
-	DebugModel::ImguiSkin(model->modelData);
+	DebugModel::ImguiSkin(renderComponent_->GetModel()->modelData);
 }
 
 #pragma endregion // 描画系
@@ -235,15 +237,18 @@ Vector2 Engine::Object3d::GetScreenPosition()
 
 void Engine::Object3d::DebugImguiModel()
 {
-	DebugModel::ImguiModel(model->modelData);
+	DebugModel::ImguiModel(renderComponent_->GetModel()->modelData);
+}
+
+void Engine::Object3d::SetModel(Model* model){
+	renderComponent_->SetModel(model);
 }
 
 void Engine::Object3d::SetModel(const std::string& filePath)
 {
 	//モデルを検索してセット
-
-	model = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
-	renderComponent_->SetModel(model);
+	Model* findModel = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
+	renderComponent_->SetModel(findModel);
 }
 
 #pragma endregion // その他

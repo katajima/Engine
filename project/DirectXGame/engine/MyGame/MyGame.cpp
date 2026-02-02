@@ -27,7 +27,15 @@ void Engine::MyGame::Initialize()
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
 	sceneManager_->SetEntity2DManager(entity2DManager_.get());
 	sceneManager_->Init();
-	sceneManager_->ChangeScene("TITLE");
+
+#ifdef _DEBUG
+	sceneManager_->ChangeScene("CHARACTER");
+#endif // _DEBUG
+	//sceneManager_->ChangeScene("TITLE");
+	
+	
+	
+	//sceneManager_->ChangeScene("TEST");
 
 	// リソース初期化
 	InitializeResource();
@@ -89,6 +97,18 @@ void Engine::MyGame::Update()
 
 		ImGui::EndMenu();
 	}
+
+	if (ImGui::BeginMenu("Scene")) {
+		if (ImGui::Button("TestScene")) {
+			sceneManager_->ChangeScene("CHARACTER");
+		}
+		if (ImGui::Button("TitleScene")) {
+			sceneManager_->ChangeScene("TITLE");
+		}
+		ImGui::EndMenu();
+	}
+
+	
 	ImGui::EndMenuBar();
 	ImGui::End();
 
@@ -281,8 +301,8 @@ void Engine::MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("ringEmit", "resources/Texture/effect/ring.png", primiPlane.get());
 	particleManager->CreateParticleGroup("ringHit", "resources/Texture/effect/gradationLine.png", primiRing.get()); // 柵
 	particleManager->GetParticleGroups("ringHit").isUVClamp = true;
-	particleManager->GetParticleGroups("ringHit").mesh->material->transform.scale.x = 10.0f;
-	particleManager->GetParticleGroups("ringHit").mesh->material->transform.scale.y = 10.0f;
+	particleManager->GetParticleGroups("ringHit").mesh->material->GetMaterialInstance().transform.scale.x = 10.0f;
+	particleManager->GetParticleGroups("ringHit").mesh->material->GetMaterialInstance().transform.scale.y = 10.0f;
 
 
 	// 敵関係
@@ -343,6 +363,7 @@ void Engine::MyGame::LoadModel()
 
 
 	modelManager->LoadModel("origin.gltf", "Character");
+	modelManager->LoadModel("testCharacter.gltf", "Character");
 	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
 
 

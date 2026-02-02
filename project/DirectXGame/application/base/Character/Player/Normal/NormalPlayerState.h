@@ -112,26 +112,6 @@ private:
 
 };
 
-// 防御
-class PlayerStateDefense :public DefenseState {
-public:
-	PlayerStateDefense(BaseCharacter* player)
-		: DefenseState(player) {
-	}
-	// 更新
-	void Update() override;
-
-	// 終了
-	void Exit() override;
-	// 初期化
-	void Enter() override;
-
-private:
-	float timer_ = 0.0f;
-	float defenseTimer_ = 0.25f;
-	bool isDifense_ = false;
-};
-
 // 気絶
 class PlayerStateFainting : public FaintingState {
 public:

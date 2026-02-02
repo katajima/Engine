@@ -206,9 +206,9 @@ void Engine::ParticleFanction::WorldDataForGPU(ParticleGroup2d& group, std::list
 
 void Engine::ParticleFanction::MaterialEffect(ParticleGroup& group)
 {
-	group.material->transform.translate += group.uvTransformVeloctiy_.translate;
-	group.material->transform.rotate += group.uvTransformVeloctiy_.rotate;
-	group.material->transform.scale += group.uvTransformVeloctiy_.scale;
+	group.material->GetMaterialInstance().transform.translate += group.uvTransformVeloctiy_.translate;
+	group.material->GetMaterialInstance().transform.rotate += group.uvTransformVeloctiy_.rotate;
+	group.material->GetMaterialInstance().transform.scale += group.uvTransformVeloctiy_.scale;
 	group.material->GPUData();
 }
 
@@ -227,8 +227,8 @@ void Engine::ParticleFanction::Create(ParticleGroup& particleGroup, const std::s
 	particleGroup.material->Initialize(dxCommon);
 	particleGroup.material->tex_.diffuseFilePath = textureFilePath;
 	particleGroup.material->LoadTex();
-	particleGroup.material->enableLighting_ = false;
-	particleGroup.material->useEnvironment_ = false;
+	particleGroup.material->GetMaterialInstance().enableLighting_ = false;
+	particleGroup.material->GetMaterialInstance().useEnvironment_ = false;
 
 
 	// パーティクルリソース生成
@@ -260,8 +260,8 @@ void Engine::ParticleFanction::Create(ParticleGroup2d& particleGroup, const std:
 	particleGroup.material->Initialize(dxCommon);
 	particleGroup.material->tex_.diffuseFilePath = textureFilePath;
 	particleGroup.material->LoadTex();
-	particleGroup.material->enableLighting_ = false;
-	particleGroup.material->useEnvironment_ = false;
+	particleGroup.material->GetMaterialInstance().enableLighting_ = false;
+	particleGroup.material->GetMaterialInstance().useEnvironment_ = false;
 
 
 	// パーティクルリソース生成
@@ -290,8 +290,8 @@ void Engine::ParticleFanction::Create(ParticleGroup2d& particleGroup, const std:
 	particleGroup.material->Initialize(dxCommon);
 	particleGroup.material->tex_.diffuseFilePath = textureFilePath;
 	particleGroup.material->LoadTex();
-	particleGroup.material->enableLighting_ = false;
-	particleGroup.material->useEnvironment_ = false;
+	particleGroup.material->GetMaterialInstance().enableLighting_ = false;
+	particleGroup.material->GetMaterialInstance().useEnvironment_ = false;
 
 
 	// パーティクルリソース生成

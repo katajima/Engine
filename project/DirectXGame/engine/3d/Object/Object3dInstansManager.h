@@ -23,7 +23,6 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include "DirectXGame/engine/3d/Model/Model.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include "DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
@@ -51,6 +50,7 @@ namespace Engine {
 	class RigidBodyComponent;
 	class ColliderComponent;
 	class ContactRecord;
+	class Model;
 
 	// オブジェクトのインスタスクラス
 	class ObjectInstans
@@ -125,6 +125,13 @@ namespace Engine {
 			kPrimitiv,
 			kModel,
 		};
+		// 透明度タイプ
+		enum class TransparencyType
+		{
+			kYes,
+			kNo,
+		};
+
 		// オブジェクト構造体
 		struct Object
 		{
@@ -168,18 +175,25 @@ namespace Engine {
 		void Update();
 		// 描画
 		void Draw();
+
+		// 描画
+		void DrawTransparency();
+
+
 		// 描画準備
 		void DrawCommonSetting(RasterizerType rasteType, BlendType blendType);
 
 		// オブジェクトグループ作り(モデル)
-		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, Model* model, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, Model* model,
+			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, TransparencyType transparencyType = TransparencyType::kNo);
 		// オブジェクトグループ作り(モデル)
-		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, ModelMesh* mesh, RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD);
+		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
+			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, TransparencyType transparencyType = TransparencyType::kNo);
 
 		// カメラセット
 		void SetCamera(Camera* camera) { this->camera_ = camera; }
 		// オブジェクトの追加
-		void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object, int& id, MeshType type = MeshType::kModel);
+		void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object, int& id, MeshType type = MeshType::kModel, TransparencyType transparencyType = TransparencyType::kNo);
 		// オブジェクトのグループ数取得
 		int GetSize() { return static_cast<int>(objectGroups.size()); };
 		// オブジェクトグループ名前でオブジェクトクリーン
@@ -189,32 +203,32 @@ namespace Engine {
 			for (auto& obj : objectGroups) {
 				obj.second.object.clear();
 			}
+
+			for (auto& obj : objectTranslucentGroups) {
+				obj.second.object.clear();
+			}
+
 		}
 		// 全てクリーン
-		void AllClear() { objectGroups.clear(); }
+		void AllClear() {
+			objectTranslucentGroups.clear();
+			objectGroups.clear();
+		}
 
-		// タイルマップ作成
-		void CreateTileMap(const std::string& groupName,
-			const std::string& textureFilePath,
-			Model* tileModel,
-			int mapWidth,
-			int mapHeight,
-			Vector3 tileSize,
-			Vector2 tileInterval,
-			const std::vector<int>& tileIndices,
-			const std::vector<MapId>& mapIds,
-			MapAxis axis = MapAxis::ZX); // テクスチャIndexや種類を表すID
 
 	public: //取得
 		// オブジェクトインスタンスをIDで取得
-		ObjectInstans* GetObjectById(const std::string& groupName, int id);
+		ObjectInstans* GetObjectById(const std::string& groupName, int id, TransparencyType transparencyType);
 		// 全てのオブジェクトインスタンス取得
-		std::deque<ObjectInstans>& GetObjects(const std::string& groupName);
+		std::deque<ObjectInstans>& GetObjects(const std::string& groupName, TransparencyType transparencyType);
 		// オブジェクトグループ取得
-		ObjectGroup& GetObjectGroup(const std::string& groupName);
+		ObjectGroup& GetObjectGroup(const std::string& groupName, TransparencyType transparencyType);
 
 	private:
 
+		ObjectGroup& GroupContains(const std::string& groupName, TransparencyType transparencyType, bool& isReturn);
+
+	private:
 		// ルートシグネチャの作成
 		void CreateRootSignature();
 		// グラフィックスパイプラインの作成
@@ -229,8 +243,11 @@ namespace Engine {
 
 
 
-
+		// オブジェクトグループ
 		std::unordered_map<std::string, ObjectGroup> objectGroups;
+
+		// 半透明オブジェクトグループ
+		std::unordered_map<std::string, ObjectGroup> objectTranslucentGroups;
 
 
 		const uint32_t kNumMaxInstance = 10000;

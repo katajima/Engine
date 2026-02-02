@@ -169,17 +169,17 @@ void Engine::LoadModel::LoadMaterial(const aiScene* scene, ModelData& modelData,
 			aiColor3D baseColor(1.0f, 1.0f, 1.0f); // デフォルト白
 			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, baseColor)) {
 				std::cout << "Mesh[" << meshIndex << "] BaseColor: " << baseColor.r << "," << baseColor.g << "," << baseColor.b << std::endl;
-				pMaterial->color = { baseColor.r, baseColor.g, baseColor.b, 1.0f };
+				pMaterial->GetMaterialInstance().color = { baseColor.r, baseColor.g, baseColor.b, 1.0f };
 				pMaterial->tex_.diffuseFilePath = "resources/Texture/Image.png";
 			}
 		}
 
 		// Opacity（透過）
 		float opacity = 1.0f;
-		pMaterial->alpha_ = opacity;
+		pMaterial->GetMaterialInstance().alpha_ = opacity;
 		if (AI_SUCCESS == material->Get(AI_MATKEY_OPACITY, opacity)) {
 			std::cout << "Mesh[" << meshIndex << "] Opacity: " << opacity << std::endl;
-			pMaterial->alpha_ = opacity;  // αに格納
+			pMaterial->GetMaterialInstance().alpha_ = opacity;  // αに格納
 		}
 
 		// Specular

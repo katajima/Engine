@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/Combo/ComboData.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
 
 #include <optional>
@@ -26,18 +26,22 @@ public:
     // 次のステートに遷移するかを判断する
     virtual std::shared_ptr<ComboState> HandleInput(BaseCharacter* owner, AttackInput input) = 0;
     // 入力受付時間の範囲チェック
-    virtual bool IsInputAcceptable() const = 0;
+    virtual bool IsInputAcceptable() = 0;
     // 次のステートえ移行受付する時間
-    virtual float GetNextStateTime() const = 0;
+    virtual float GetNextStateTime() = 0;
     // ステート終了時間
-    virtual bool GetEndStateTime() const = 0;
+    virtual bool GetEndStateTime() = 0;
     // 次のステートへ移行可能か
-    virtual bool GetIsNextState() const = 0;
-
+    virtual bool GetIsNextState() = 0;
+public:
     // 時間
     float GetTimeInState() const { return timeInState; }
-
+	// 時間設定
+	void SetTimeInState(float time) { timeInState = time; }
+    // 方向取得
     void Set(const Vector3& dire) { direction_ = dire; };
+
+
 
 protected:
     float timeInState = 0.0f;           // 時間
@@ -84,29 +88,43 @@ public:
         return !nextStates.empty();
     }
     // 入力受付可能か
-    bool IsInputAcceptable() const override{
-        return comboData_.comboCondition.IsComdoInputWindow(timeInState);
+    bool IsInputAcceptable() override{
+        return comboData_.GetComboCondition().IsComdoInputWindow(timeInState);
     }
     // 次のステートえ移行受付する時間
-    float GetNextStateTime() const override{ 
-        return timeInState > comboData_.comboCondition.GetComboNextTime(); 
+    float GetNextStateTime() override{ 
+        return timeInState > comboData_.GetComboCondition().GetComboNextTime();
     }
     // ステート終了時間
-    bool GetEndStateTime() const override{
-        return timeInState > comboData_.comboCondition.GetComboEndTime();
+    bool GetEndStateTime() override{
+        return timeInState > comboData_.GetComboCondition().GetComboEndTime();
     }
     // 次のステートへ移行可能か
-    bool GetIsNextState() const override {
-        return comboData_.comboCondition.IsNextCombo();
+    bool GetIsNextState() override {
+        return comboData_.GetComboCondition().IsNextCombo();
     };
     // キャンセルするか
-    bool GetIsCansel() const {
-        return comboData_.comboCondition.IsComboCansel();
+    bool GetIsCansel() {
+        return comboData_.GetComboCondition().IsComboCansel();
     }
+    // コンボ名取得
+    std::string GetName() const { return name; }
+	// アニメーション名取得
+	std::string GetAnimationName() const { return animation; }
+	// コンボ名設定
+	void SetName(const std::string& comboName) { name = comboName; }
+
+	// コンボデータ取得
+	ComboData& GetComboData() { return comboData_; }
 
 private:
+    // コンボ名
+	std::string name;
+	// アニメーション名
     std::string animation;
+	// コンボデータ
     ComboData comboData_;
+	// 次のステートマップ
     std::map<AttackInput, std::shared_ptr<ComboNodeState>> nextStates;
 };
 

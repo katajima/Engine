@@ -74,9 +74,26 @@ void BaseEnemy::Initialize2D()
 	icon_lockOn->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
 }
 
+void BaseEnemy::InitShadowObjectComponent(const std::string& charaName)
+{
+
+	// オブジェクトコンポーネント追加
+	objectComponentShadow_ = std::make_unique<ObjectComponent>();
+	// オブジェクトインスタンシング初期化
+	objectComponentShadow_->InitializeInstancing(entity3DManager_, globalVariables_, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.png",
+		false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
+	objectComponentShadow_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
+	
+	objectComponentShadow_->SetColor({ 0,0,0,1.0f });
+	
+	objectComponentShadow_->SetInstancingSRT({ 3.0f,3.0f,3.0f }, {Math::DegreesToRadians(-90),0.0f,0.0f}, {0.0f,0.1f,0.0f});
+	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
+
+}
+
 void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, 
 	Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-	const std::string& modelName, const std::string& charaName){
+	const std::string& modelName, const std::string& charaName, float colliderRadius){
 
 	entity3DManager_ = entity3DManager;	// エンティティ3d
 	entity2DManager_ = entity2DManager;	// エンティティ2d
@@ -85,7 +102,8 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
-	objectComponent_->InitializeInstancing(entity3DManager_, globalVariables_, charaName + std::to_string(id_), modelName, "", true, true, this);
+	objectComponent_->InitializeInstancing(entity3DManager_, globalVariables_, charaName + std::to_string(id_), modelName, "", true, true, this
+	,Engine::Object3dInstansManager::TransparencyType::kNo);
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 
 
@@ -107,7 +125,7 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 	sphere->Enable();					// コライダ有効
 	sphere->tag = CollisionTag::Enemy;	// タグ設定
 	sphere->layer = CollisionLayer::Enemy;// レイヤー設定
-	sphere->radius = 3.0f; // 半径を適宜設定
+	sphere->radius = colliderRadius; // 半径を適宜設定
 	GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 	// コールバック登録（例：プレイヤーと衝突したらダメージ）
@@ -145,6 +163,8 @@ void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* en
 	attackController_ = std::make_unique<AttackController>();
 	attackController_->Initialize(entity3DManager, globalVariables_, GetCharacterParameterComponent(), this);
 
+	// 丸影用オブジェクトコンポーネント初期化
+	InitShadowObjectComponent(charaName);
 
 	// ステートマシーン初期化
 	InitStateMachine();
@@ -165,12 +185,19 @@ void BaseEnemy::BaseUpdate(){
 	if (GetHP() <= 0) {
 		GetObjectComponent()->GetObjectStateFlags().isLockonTarget = false;
 		GetObjectComponent()->GetObjectStateFlags().isAlive = false;
+
+		objectComponentShadow_->GetWorldTransform().scale_ = {};
 	}
 	else {
 		// 移動コンポーネント更新
 		moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(), nullptr);
 		// 応答システム
 		responseSystem_->Update(GetTime());
+
+
+		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
+		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
+		objectComponentShadow_->GetWorldTransform().translate_.y = -3.0f;
 	}
 }
 

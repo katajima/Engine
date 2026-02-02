@@ -10,10 +10,10 @@ void ComboNodeState::Enter(BaseCharacter* owner) {
 	// 時間初期化 
 	timeInState = 0.0f;
 	// アニメーションの設定
-	comboData_.motion.GetData().animationName_ = animation;
+	comboData_.GetComboMotion().GetData().animationName_ = animation;
 
 	
-	comboData_.motion.SetDirection(direction_);
+	comboData_.GetComboMotion().SetDirection(direction_);
 	// コンボデータ開始
 	comboData_.Enter(owner);
 }
