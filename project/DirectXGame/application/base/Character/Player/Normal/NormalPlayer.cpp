@@ -374,21 +374,21 @@ void NormalPlayer::ReloadComboData()
 	GetAttackController()->GetComboSystem()->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 	GetAttackController()->GetComboSystem()->SetParentTransform("NoParent", nullptr);
 
-	HitBoxSystem* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
-	ComboSystem* comboSystem = GetAttackController()->GetComboSystem();
+	HitBox::System* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
+	Combo::System* comboSystem = GetAttackController()->GetComboSystem();
 	
 	// ヒットボックスデータ作成
-	GlobalHitBoxdata hitBoxdata  = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
-	GlobalHitBoxdata hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
-	GlobalHitBoxdata hitBoxdata3 = { { 0,0,3 } ,{ 10,10,10 } };
-	GlobalHitBoxdata hitBoxdata4 = { { 0,0,0 },{},20.0f };
-	GlobalHitBoxdata hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
+	HitBox::GlobalData hitBoxdata  = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
+	HitBox::GlobalData hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
+	HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 10,10,10 } };
+	HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},20.0f };
+	HitBox::GlobalData hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
 	
-	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBoxShape::kOBB,HitBoxUseType::kPlayer, hitBoxdata);
-	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata2);
-	hitBoxSystem->CreateHitBoxCollData("obb", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata3);
-	hitBoxSystem->CreateHitBoxCollData("obb2", HitBoxShape::kSphere, HitBoxUseType::kPlayer,hitBoxdata4);
-	hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBoxShape::kOBB, HitBoxUseType::kPlayer,hitBoxdata5);
+	hitBoxSystem->CreateHitBoxCollData("obbColl1",HitBox::Shape::kOBB,HitBox::UseType::kPlayer, hitBoxdata);
+	hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBox::Shape::kOBB, HitBox::UseType::kPlayer,hitBoxdata2);
+	hitBoxSystem->CreateHitBoxCollData("obb", HitBox::Shape::kOBB, HitBox::UseType::kPlayer,hitBoxdata3);
+	hitBoxSystem->CreateHitBoxCollData("obb2", HitBox::Shape::kSphere, HitBox::UseType::kPlayer,hitBoxdata4);
+	hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer,hitBoxdata5);
 	
 	// コンボ１のデータ送る
 	comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("obb")}});

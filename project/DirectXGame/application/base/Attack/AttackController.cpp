@@ -10,11 +10,11 @@ void AttackController::Initialize(Engine::Entity3DManager* entity3DManager, Engi
 	combatStat_->Initialize(base);
 
 	// コンボシステムの初期化
-	comboSystem_ = std::make_unique<ComboSystem>();
+	comboSystem_ = std::make_unique<Combo::System>();
 	comboSystem_->Initialize(owner, globalVariables);
 
 	// ヒットボックスシステム
-	hitBoxSystem_ = std::make_unique<HitBoxSystem>();
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
 	hitBoxSystem_->Initialize(owner, entity3DManager);
 };
 

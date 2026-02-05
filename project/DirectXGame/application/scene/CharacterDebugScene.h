@@ -106,7 +106,7 @@ private:
 
 private:
 	// コンボエディター
-	std::unique_ptr<ComboEditor> comboEditor_;
+	std::unique_ptr<Combo::Editor> comboEditor_;
 	// コンボエディターがアクティブか
 	bool isComboEditorActive_ = true;
 };

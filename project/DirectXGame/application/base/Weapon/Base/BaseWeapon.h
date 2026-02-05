@@ -55,7 +55,7 @@ protected:
 	BulletManager* bulletManager_ = nullptr;	// 弾管理クラス
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
-	std::unique_ptr<HitBox> hitBox_;
+	std::unique_ptr<HitBox::HitBoxInstance> hitBox_;
 protected:
 	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
 	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー

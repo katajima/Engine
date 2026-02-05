@@ -48,7 +48,7 @@ public:
 	// 描画するか
 	void SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };
 	// ステージ設定
-	void SetStage(MainStage* stage) { stage_ = stage;};
+	void SetStage(MainStage* stage) { this->stage = stage;};
 
 	
 
@@ -66,13 +66,16 @@ public:
 		this->followCamera = followCamera;
 		this->spawn = bulletSpawn;
 	}
-
+private:
+	FollowCamera* followCamera = nullptr;
+	BulletSpawn* spawn = nullptr;
+	MainStage* stage = nullptr;
+private:
+	Engine::Object3d* objectReticle_ = nullptr;				// オブジェクトレティクル
+	std::unique_ptr<Engine::CylinderPrimitive> ctlinder_ = nullptr;
 private:
 	
-private:
-	Engine::Object3d* objectReticle_;				// オブジェクトレティクル
 
-	std::unique_ptr<Engine::CylinderPrimitive> ctlinder_;
 
 	struct Data {
 		int maxBullet = 1;
@@ -86,11 +89,7 @@ private:
 	};
 	Data dataRange_;
 	
-private:
-	BulletSpawn* spawn = nullptr;			// 弾の出現
 
-	MainStage* stage_ = nullptr;
-	FollowCamera* followCamera = nullptr;
 private: // 一旦
 
 	// 弾発射に使うインターバル（秒）

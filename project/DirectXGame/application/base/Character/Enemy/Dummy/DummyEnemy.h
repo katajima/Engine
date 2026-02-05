@@ -4,7 +4,9 @@
 
 class DummyEnemy : public BaseEnemy {
 public:
-	DummyEnemy() {}
+	DummyEnemy() {
+	
+	}
 
 	///< summary>
 	/// 初期化
@@ -32,5 +34,5 @@ private:
 	void InitStateMachine() override;
 
 private:
-	float hp = 10000000.0f;
+	float hp = 100.0f;
 };

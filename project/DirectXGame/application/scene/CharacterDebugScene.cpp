@@ -126,6 +126,7 @@ void CharacterDebugScene::Initialize()
 	SetCamera(cameraManager_->GetCamera());
 
 	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
@@ -142,11 +143,13 @@ void CharacterDebugScene::Initialize()
 	// デバッグモード設定
 	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(isComboEditorActive_);
 	// コンボエディター初期化
-	comboEditor_ = std::make_unique<ComboEditor>();
+	comboEditor_ = std::make_unique<Combo::Editor>();
 	comboEditor_->Initialize(characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
 }
 
-void CharacterDebugScene::Finalize(){}
+void CharacterDebugScene::Finalize(){
+	GetEntity3DManager()->GetObject3dInstansManager()->AllClear();
+}
 
 void CharacterDebugScene::Update()
 {

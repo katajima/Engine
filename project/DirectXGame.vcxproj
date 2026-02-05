@@ -109,14 +109,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboCondition.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEffect.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboHitBox.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboMotion.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboEditor.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\HitBox\ComboHitBox.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMotion.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp" />
@@ -162,6 +165,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Base\BaseSpecial.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Special\Base\SpecialEditor.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Special\Base\SpecialState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp" />
@@ -758,18 +763,22 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboCondition.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboEffect.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboGlobalData.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboHitBox.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboMotion.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\HitBox\ComboHitBox.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMotion.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSequencer.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboEditor.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboState.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBox.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitCounter.h" />
@@ -823,6 +832,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameEventController.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialData.h" />
+    <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialEditor.h" />
+    <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialState.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointState.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.h" />

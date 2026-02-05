@@ -8,7 +8,12 @@
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
 
 // 前方宣言
-class ComboEditor;
+
+namespace Combo {
+	class Editor;
+}
+
+
 
 
 //前方宣言
@@ -45,7 +50,7 @@ public:
 	// リロード
 	virtual void Reload() {};
 	// コンボデータをシーケンサー適応
-	virtual void ApplyComboData(ComboEditor* comboEditor) {};
+	virtual void ApplyComboData(Combo::Editor* comboEditor) {};
 
 
 public:

@@ -49,7 +49,7 @@ public:
 	// リロード
 	void Reload() override;
 
-	void ApplyComboData(ComboEditor* comboEditor) override {};
+	void ApplyComboData(Combo::Editor* comboEditor) override {};
 
 	// プレイヤUI取得
 	PlayerUI* GetPlayerUI()override { return ui_.get(); };

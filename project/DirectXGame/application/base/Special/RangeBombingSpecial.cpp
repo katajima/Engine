@@ -58,7 +58,6 @@ void RangeBombingSpecial::SetRadius(float rad) {
 	cylinderParam.isCover = false;			// 蓋するか
 	cylinderParam.segments = provisionalData_.cylinderSegments;			// セグメント数
 	primi->Data() = cylinderParam;
-
 }
 
 
@@ -117,11 +116,11 @@ void RangeBombingSpecial::InAction()
 			time_ += GetTime();
 
 			// インターバルごとに1つのミサイルから発射
-			if (dataRange_.currentMissileIndex < stage_->missiles_.size()) {
+			if (dataRange_.currentMissileIndex < stage->missiles_.size()) {
 				if (time_ >= fireInterval) {
 					spawn->GenerateBulletRange(
 						BulletType::kRangeBombingSpecial,
-						stage_->missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
+						stage->missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
 						dataRange_.rangeBombingPos,
 						dataRange_.reticleRad_
 					);
@@ -131,7 +130,7 @@ void RangeBombingSpecial::InAction()
 					dataRange_.bulletNum++;            // 発射数カウント
 				}
 
-				if (dataRange_.currentMissileIndex >= stage_->missiles_.size()) {
+				if (dataRange_.currentMissileIndex >= stage->missiles_.size()) {
 					dataRange_.currentMissileIndex = 0; // インデックスをリセット
 				}
 			}

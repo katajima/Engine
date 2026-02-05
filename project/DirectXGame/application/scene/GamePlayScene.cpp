@@ -70,6 +70,7 @@ void GamePlayScene::Initialize()
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
 
 	// 弾管理クラス

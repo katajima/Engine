@@ -1,6 +1,6 @@
 #pragma once
 #include <DirectXGame/application/base/Attack/Hit/HitCounter.h>
-#include <DirectXGame/application/base/Attack/Combo/ComboSystem.h>
+#include <DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
 
 // 前方宣言
@@ -31,9 +31,9 @@ public:
 	// 攻撃パラメーター補正クラス取得
 	CombatStat* GetCombatStat() { return combatStat_.get(); }
 	// コンボシステムクラス取得
-	ComboSystem* GetComboSystem() { return comboSystem_.get(); }
+	Combo::System* GetComboSystem() { return comboSystem_.get(); }
 	// ヒットボックスシステム取得
-	HitBoxSystem* GetHitBoxSystem() { return hitBoxSystem_.get(); };
+	HitBox::System* GetHitBoxSystem() { return hitBoxSystem_.get(); };
 	// 攻撃中か取得
 	bool IsAttack() const { return isAttack_; }
 	// 攻撃中か設定
@@ -52,9 +52,9 @@ private:
 	// 攻撃パラメーター補正
 	std::unique_ptr<CombatStat> combatStat_;	
 	// コンボシステム
-	std::unique_ptr<ComboSystem> comboSystem_;
+	std::unique_ptr<Combo::System> comboSystem_;
 	// ヒットボックスシステム
-	std::unique_ptr<HitBoxSystem> hitBoxSystem_;
+	std::unique_ptr<HitBox::System> hitBoxSystem_;
 
 private:
 	// 攻撃中か

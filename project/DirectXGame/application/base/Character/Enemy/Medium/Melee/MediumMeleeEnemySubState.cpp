@@ -34,7 +34,7 @@ void MediumMeleeEnemyAttackSwingSubState::Enter() {
     dire_ = enemy->TargetDirection();
 
 
-    HitBoxCollData data_;
+    HitBox::CollData data_;
     data_.isEneble = true;
     data_.isLine = true;
     data_.tag = CollisionTag::Enemy;
@@ -44,7 +44,7 @@ void MediumMeleeEnemyAttackSwingSubState::Enter() {
 	data_.name = "NormalEnemy_SwingHitBox";
     data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
     
-    enemy->GetAttackController()->GetHitBoxSystem()->AddHitBox(HitBoxUseType::kEnemy, { data_ },{},2.0f, HitBoxParentType::kParent,{}, &enemy->GetWorldTransform());
+    enemy->GetAttackController()->GetHitBoxSystem()->AddHitBox(HitBox::UseType::kEnemy, { data_ },{},2.0f, HitBox::ParentType::kParent,{}, &enemy->GetWorldTransform());
 }
 
 void MediumMeleeEnemyAttackSwingSubState::Update(float deltaTime) {
