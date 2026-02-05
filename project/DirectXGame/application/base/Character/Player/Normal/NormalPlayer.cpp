@@ -8,7 +8,7 @@
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "assert.h"
-#include "DirectXGame/application/base/Attack/Combo/ComboEditor.h"
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboEditor.h"
 
 void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
