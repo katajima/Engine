@@ -87,21 +87,21 @@ namespace Combo {
 
 
 			// 初回：未選択なら先頭を選択
-			if (data_.animationName_.empty()) {
-				data_.animationName_ = owner->GetObjectComponent()->GetObject3D()->GetModel()->modelData.animations.begin()->first;
+			if (data_.animationName.empty()) {
+				data_.animationName = owner->GetObjectComponent()->GetObject3D()->GetModel()->modelData.animations.begin()->first;
 			}
 
 			// --- 選択UI（コンボボックス） ---
 			{
-				const char* preview = data_.animationName_.c_str();
+				const char* preview = data_.animationName.c_str();
 				if (ImGui::BeginCombo("Selected Combo", preview)) {
 
 					for (auto& it : owner->GetObjectComponent()->GetObject3D()->GetModel()->modelData.animations) {
 						const std::string& name = it.first;
 
-						const bool isSelected = (name == data_.animationName_);
+						const bool isSelected = (name == data_.animationName);
 						if (ImGui::Selectable(name.c_str(), isSelected)) {
-							data_.animationName_ = name;
+							data_.animationName = name;
 						}
 						if (isSelected) {
 							ImGui::SetItemDefaultFocus();
@@ -164,6 +164,32 @@ namespace Combo {
 
 	void EditorBlock::ImGuiMove() {
 		if (ImGui::CollapsingHeader("移動関係")) {
+			static const char* MoveTypeLabels[] = {
+			"無し",
+			"ターゲットに向かって",
+			"前方",
+			};
+
+			int current = static_cast<int>(data_.moveType);
+			if (ImGui::BeginCombo(
+				"移動タイプ",
+				MoveTypeLabels[current]
+			)) {
+				for (int i = 0; i < IM_ARRAYSIZE(MoveTypeLabels); ++i) {
+					bool isSelected = (current == i);
+
+					if (ImGui::Selectable(MoveTypeLabels[i], isSelected)) {
+						data_.moveType = static_cast<Combo::MoveType>(i);
+					}
+
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+
 			ImGui::Checkbox("強制移動", &data_.isCompulsionMove_);
 			ImGui::SliderFloat("移動速度", &data_.moveSpeed_, 0.0f, 100.0f, "%.2f");
 			ImGui::Checkbox("重力", &data_.isGravity);
@@ -362,16 +388,21 @@ namespace Combo {
 		ComboData& comboData = state->GetComboData();
 
 		// コンボ入力可能時間
-		float inputStart = comboData.GetComboCondition().GetComboInputStart();
-		float inputEnd = comboData.GetComboCondition().GetComboInputEnd();
+		float inputStart = comboData.GetComboCondition().GetNextReceiver().GetInputStart();
+		float inputEnd = comboData.GetComboCondition().GetNextReceiver().GetInputEnd();
 
 		// コンボキャンセル時間
-		float cancelStart = comboData.GetComboCondition().GetInput().cancelStart_;
-		float cancelEnd = comboData.GetComboCondition().GetInput().cancelEnd_;
+		float cancelStart = comboData.GetComboCondition().GetCancelReceiver().GetInputStart();
+		float cancelEnd = comboData.GetComboCondition().GetCancelReceiver().GetInputEnd();
+		// コンボキャンセル時間
+		float cancelMoveStart = comboData.GetComboCondition().GetCancelReceiver().GetInputMoveStart();
+		float cancelMoveEnd = comboData.GetComboCondition().GetCancelReceiver().GetInputMoveEnd();
+
+
 
 		// コンボ移行時間
-		float nextComboTime = comboData.GetComboCondition().GetData().stateNextTime;
-		float endComboTime = comboData.GetComboCondition().GetData().stateEndTime;
+		float nextComboTime = comboData.GetComboCondition().GetNextCondition().GetData().stateTime;
+		float endComboTime = comboData.GetComboCondition().GetEndCondition().GetData().stateTime;
 
 		// ヒットボックス生成時間
 		float hitBoxStart = comboData.GetComboHitBox().GetData().hitBpxWindowStart_;
@@ -382,12 +413,12 @@ namespace Combo {
 
 
 		// 移動時間
-		float moveStart = comboData.GetComboMotion().GetData().moveWindowStart_;
-		float moveEnd = comboData.GetComboMotion().GetData().moveWindowEnd_;
-		data_.moveSpeed_ = comboData.GetComboMotion().GetData().speed_;						// 移動速度
-		data_.isCompulsionMove_ = comboData.GetComboMotion().GetData().isCompulsionMove_;	// 強制移動
-		data_.isGravity = comboData.GetComboMotion().GetData().isGravity_;					// 重力
-		data_.gravityScale = comboData.GetComboMotion().GetData().gravityScale_;			// 重力スケール
+		float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart_;
+		float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd_;
+		data_.moveSpeed_ = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
+		data_.isCompulsionMove_ = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
+		data_.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity_;					// 重力
+		data_.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;			// 重力スケール
 
 		// リアクション
 		data_.knockbackDuration_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration_;	// ノックバック持続時間
@@ -397,10 +428,10 @@ namespace Combo {
 		data_.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.GetDamageData().GetOne().damage;						// ダメージ
 
 		// アニメーションスピード
-		data_.animationSpeed_ = comboData.GetComboMotion().GetData().animationSpeed_;
-		data_.animationBlendTime_ = comboData.GetComboMotion().GetData().animationBlendTime_;
+		data_.animationSpeed_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
+		data_.animationBlendTime_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_;
 		// アニメーション名前
-		data_.animationName_ = comboData.GetComboMotion().GetData().animationName_;
+		data_.animationName = comboData.GetComboMotion().GetComboAnimation().GetData().animationName_;
 
 		// トレイルエフェクト
 		float trailStart = comboData.GetComboEffect().GetData().startTmer;
@@ -413,15 +444,19 @@ namespace Combo {
 		data_.dependenceType_ = comboData.GetComboHitBox().GetData().dependenceType_;
 
 		// 終了条件
-		data_.endConditionType = comboData.GetComboCondition().GetData().type;
+		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
+
+
+		
+
 
 		AddSequencerEvent(inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
 		AddSequencerEvent(cancelStart, cancelEnd, 0xFFFFFF00, "キャンセル可能時間");
+		AddSequencerEvent(cancelMoveStart, cancelMoveEnd, 0xFFFFFF00, "移動キャンセル可能時間");
 		AddSequencerEvent(nextComboTime, endComboTime, 0xFFFF0000, "コンボ移行開始時間");
 		AddSequencerEvent(hitBoxStart, hitBoxEnd, 0x00FF0000, "ヒットボックス生成時間");
 		AddSequencerEvent(moveStart, moveEnd, 0xFF000000, "移動時間");
 		AddSequencerEvent(trailStart, trailEnd, 0x0000FF00, "トレイルエフェクト時間");
-
 	}
 
 #pragma endregion // ImGui管理
@@ -561,6 +596,11 @@ namespace Combo {
 			data.stateCancelStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").startFrame);
 			data.stateCancelEndTime = ConvertUtility::FramesToSeconds(combo.GetEvent("キャンセル可能時間").endFrame);
 
+			// キャンセル可能時間(移動)
+			data.stateMoveCancelStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").startFrame);
+			data.stateMoveCancelEndTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").endFrame);
+
+
 			// コンボ移行時間
 			data.stateNextTime = ConvertUtility::FramesToSeconds(combo.GetEvent("コンボ移行開始時間").startFrame);
 
@@ -573,11 +613,11 @@ namespace Combo {
 			data.hitBoxLifeTime_ = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
 
 			// リアクション
-			data.reaction.knockbackDuration_ = comboEditorBlocks_[it.first].GetData().knockbackDuration_;
-			data.reaction.knockbackPower = comboEditorBlocks_[it.first].GetData().knockbackPower;
-			data.reaction.knockbackPowerY = comboEditorBlocks_[it.first].GetData().knockbackPowerY;
-			data.reaction.isVerticalBoost_ = comboEditorBlocks_[it.first].GetData().isVerticalBoost_;
-			data.reaction.damage = comboEditorBlocks_[it.first].GetData().damage;
+			data.knockbackDuration_ = comboEditorBlocks_[it.first].GetData().knockbackDuration_;
+			data.knockbackPower = comboEditorBlocks_[it.first].GetData().knockbackPower;
+			data.knockbackPowerY = comboEditorBlocks_[it.first].GetData().knockbackPowerY;
+			data.isVerticalBoost_ = comboEditorBlocks_[it.first].GetData().isVerticalBoost_;
+			data.damage = comboEditorBlocks_[it.first].GetData().damage;
 
 			// 移動時間
 			data.moveWindowStart_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
@@ -592,7 +632,7 @@ namespace Combo {
 			// アニメーションスピード
 			data.animationSpeed_ = comboEditorBlocks_[it.first].GetData().animationSpeed_;
 			data.animationBlendTime_ = comboEditorBlocks_[it.first].GetData().animationBlendTime_;
-			data.animationName = comboEditorBlocks_[it.first].GetData().animationName_;
+			data.animationName = comboEditorBlocks_[it.first].GetData().animationName;
 
 			// エフェクト
 			data.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);

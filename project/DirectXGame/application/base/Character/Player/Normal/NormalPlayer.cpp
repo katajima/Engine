@@ -263,6 +263,7 @@ void NormalPlayer::Update()
 	// 必殺技
 	special_->Update();
 	
+	attackController_->GeyLockOnSysutem()->SetTargets(targetCharacters_);
 	// 攻撃制御更新
 	attackController_->Update(GetTime());
 

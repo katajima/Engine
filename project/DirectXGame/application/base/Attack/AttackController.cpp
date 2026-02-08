@@ -13,9 +13,14 @@ void AttackController::Initialize(Engine::Entity3DManager* entity3DManager, Engi
 	comboSystem_ = std::make_unique<Combo::System>();
 	comboSystem_->Initialize(owner, globalVariables);
 
-	// ヒットボックスシステム
+	// ヒットボックスシステム初期化
 	hitBoxSystem_ = std::make_unique<HitBox::System>();
 	hitBoxSystem_->Initialize(owner, entity3DManager);
+
+	// ロックオンシステム初期化
+	lockOnSystem_ = std::make_unique<LockOnSystem>();
+	lockOnSystem_->Initialize(owner);
+
 };
 
 
@@ -26,6 +31,10 @@ void AttackController::Update(float dt) {
 	if (!isStopHitTimer_) {
 		hitCounter_.Update(dt);
 	}
+
+	// ロックオンシステム更新
+	lockOnSystem_->Update(dt);
+
 	// ヒットボックスシステムの更新
 	hitBoxSystem_->Update(dt);
 	if (IsAttack() || isDebugEditor_) {

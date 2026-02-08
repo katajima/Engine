@@ -121,7 +121,7 @@ void SmallRangeEnemy::Move()
 		}
 		if (GetTargetDistance() <= 20.0f) {
 			Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
-			TargetMove(velo);
+			TargetMove(velo * 0.9f);
 		}
 	}
 	else {

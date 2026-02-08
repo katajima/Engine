@@ -76,7 +76,7 @@ void SmallMeleeEnemy::Move(){
 			return;
 		}
 		if (GetTargetDistance() <= 20.0f) {
-			DirectionMove(-Parameters().speed * 1.5f);
+			DirectionMove(-Parameters().speed * 1.2f);
 		}
 	}
 	else {

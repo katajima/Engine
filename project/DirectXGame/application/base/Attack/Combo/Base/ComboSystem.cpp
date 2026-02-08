@@ -64,11 +64,11 @@ namespace Combo {
 		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBoxLifeTime_);
 
 		// リアクション
-		globalVariables->AddItem(name, "ダメージ", data.reaction.damage);
-		globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost_);
-		globalVariables->AddItem(name, "ノックバック力", data.reaction.knockbackPower);
-		globalVariables->AddItem(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->AddItem(name, "ノックバック持続時間", data.reaction.knockbackDuration_);
+		globalVariables->AddItem(name, "ダメージ", data.damage);
+		globalVariables->AddItem(name, "Y方向ノックバック", data.isVerticalBoost_);
+		globalVariables->AddItem(name, "ノックバック力", data.knockbackPower);
+		globalVariables->AddItem(name, "Y方向ノックバック力", data.knockbackPowerY);
+		globalVariables->AddItem(name, "ノックバック持続時間", data.knockbackDuration_);
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -80,6 +80,8 @@ namespace Combo {
 
 		globalVariables->AddItem(name, "コンボキャンセル受付開始時間", data.stateCancelStartTime);
 		globalVariables->AddItem(name, "コンボキャンセル受付終了時間", data.stateCancelEndTime);
+		globalVariables->AddItem(name, "コンボ移動キャンセル受付開始時間", data.stateMoveCancelStartTime);
+		globalVariables->AddItem(name, "コンボ移動キャンセル受付終了時間", data.stateMoveCancelEndTime);
 
 
 		globalVariables->AddItem(name, "コンボ中の移動スピード", data.moveSpeed_);
@@ -113,11 +115,11 @@ namespace Combo {
 		data.hitBoxLifeTime_ = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
 
 		// リアクション
-		data.reaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
-		data.reaction.isVerticalBoost_ = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
-		data.reaction.knockbackPower = globalVariables->GetValue<float>(name, "ノックバック力");
-		data.reaction.knockbackPowerY = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
-		data.reaction.knockbackDuration_ = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+		data.damage = globalVariables->GetValue<float>(name, "ダメージ");
+		data.isVerticalBoost_ = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+		data.knockbackPower = globalVariables->GetValue<float>(name, "ノックバック力");
+		data.knockbackPowerY = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
+		data.knockbackDuration_ = globalVariables->GetValue<float>(name, "ノックバック持続時間");
 
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
@@ -135,6 +137,10 @@ namespace Combo {
 
 		data.stateCancelStartTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付開始時間");
 		data.stateCancelEndTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付終了時間");
+
+		data.stateMoveCancelStartTime = globalVariables->GetValue<float>(name, "コンボ移動キャンセル受付開始時間");
+		data.stateMoveCancelEndTime = globalVariables->GetValue<float>(name, "コンボ移動キャンセル受付終了時間");
+
 
 
 		data.animationName = globalVariables->GetValue<std::string>(name, "アニメーション名前");
@@ -175,6 +181,8 @@ namespace Combo {
 
 		globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.stateCancelStartTime);
 		globalVariables->SetValue(name, "コンボキャンセル受付終了時間", data.stateCancelEndTime);
+		globalVariables->SetValue(name, "コンボ移動キャンセル受付開始時間", data.stateMoveCancelStartTime);
+		globalVariables->SetValue(name, "コンボ移動キャンセル受付終了時間", data.stateMoveCancelEndTime);
 
 
 		globalVariables->SetValue(name, "アニメーション名前", data.animationName);
@@ -185,11 +193,11 @@ namespace Combo {
 		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
-		globalVariables->SetValue(name, "ノックバック持続時間", data.reaction.knockbackDuration_);
-		globalVariables->SetValue(name, "ノックバック力", data.reaction.knockbackPower);
-		globalVariables->SetValue(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->SetValue(name, "Y方向ノックバック", data.reaction.isVerticalBoost_);
-		globalVariables->SetValue(name, "ダメージ", data.reaction.damage);
+		globalVariables->SetValue(name, "ノックバック持続時間", data.knockbackDuration_);
+		globalVariables->SetValue(name, "ノックバック力", data.knockbackPower);
+		globalVariables->SetValue(name, "Y方向ノックバック力", data.knockbackPowerY);
+		globalVariables->SetValue(name, "Y方向ノックバック", data.isVerticalBoost_);
+		globalVariables->SetValue(name, "ダメージ", data.damage);
 
 
 
@@ -222,33 +230,47 @@ namespace Combo {
 
 
 		// 入力受付時間設定
-		data.GetComboCondition().ConditionStartEnd(gData.stateInputStartTime, gData.stateInputEndTime);
-		data.GetComboCondition().GetData().stateNextTime = gData.stateNextTime;
-		data.GetComboCondition().GetData().stateEndTime = gData.stateEndTime;
+		data.GetComboCondition().GetNextReceiver().ConditionStartEnd(gData.stateInputStartTime, gData.stateInputEndTime);
+		data.GetComboCondition().GetNextCondition().GetData().stateTime = gData.stateNextTime;
+		data.GetComboCondition().GetEndCondition().GetData().stateTime = gData.stateEndTime;
+		
+		// キャンセル
+		data.GetComboCondition().GetCancelReceiver().GetData().inputStart = gData.stateCancelStartTime;
+		data.GetComboCondition().GetCancelReceiver().GetData().inputEnd = gData.stateCancelEndTime;
+
+		// 移動キャンセル
+		data.GetComboCondition().GetCancelReceiver().GetData().inputMoveStart = gData.stateMoveCancelStartTime;
+		data.GetComboCondition().GetCancelReceiver().GetData().inputMoveEnd = gData.stateMoveCancelEndTime;
+
+
+		
 		// コンボボタン設定
 		ComboButton bo = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		// 押し続ける
-		data.GetComboCondition().GetData().button_ = bo;
 		std::vector<ComboButton> button;
 		button.push_back(bo);
-		data.GetComboCondition().GetInput().comboSequence_.RegisterCombo(button);
+		data.GetComboCondition().GetNextReceiver().GetData().comboSequence_.RegisterCombo(button);
+
+
+		data.GetComboCondition().GetNextCondition().GetData().type = gData.endConditionType;
+		data.GetComboCondition().GetEndCondition().GetData().type = gData.endConditionType;
 
 		///
 		/// モーション
 		/// 
 
 		// 重力
-		data.GetComboMotion().GetData().isGravity_ = gData.isGravity;
-		data.GetComboMotion().GetData().gravityScale_ = gData.gravityScale;
+		data.GetComboMotion().GetComboMove().GetData().isGravity_ = gData.isGravity;
+		data.GetComboMotion().GetComboMove().GetData().gravityScale_ = gData.gravityScale;
 		// アニメーションスピード
-		data.GetComboMotion().GetData().animationBlendTime_ = gData.animationBlendTime_;
-		data.GetComboMotion().GetData().animationSpeed_ = gData.animationSpeed_;
-		data.GetComboMotion().GetData().animationName_ = gData.animationName;
+		data.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_ = gData.animationBlendTime_;
+		data.GetComboMotion().GetComboAnimation().GetData().animationSpeed_ = gData.animationSpeed_;
+		data.GetComboMotion().GetComboAnimation().GetData().animationName_ = gData.animationName;
 		// 移動
-		data.GetComboMotion().GetData().speed_ = gData.moveSpeed_;
-		data.GetComboMotion().GetData().moveWindowStart_ = gData.moveWindowStart_;
-		data.GetComboMotion().GetData().moveWindowEnd_ = gData.moveWindowEnd_;
-		data.GetComboMotion().GetData().isCompulsionMove_ = gData.isCompulsionMove_;
+		data.GetComboMotion().GetComboMove().GetData().speed_ = gData.moveSpeed_;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowStart_ = gData.moveWindowStart_;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd_ = gData.moveWindowEnd_;
+		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove_ = gData.isCompulsionMove_;
 
 
 		///
@@ -266,9 +288,6 @@ namespace Combo {
 		data.GetComboHitBox().GetData().offset_ = gData.parentOffset_;
 		data.GetComboHitBox().GetData().dependenceType_ = gData.dependenceType_;
 		data.GetComboHitBox().GetData().spawnType_ = gData.spawnType_;
-
-		// 終了条件
-		data.GetComboCondition().GetData().type = gData.endConditionType;
 
 	}
 
@@ -297,16 +316,8 @@ namespace Combo {
 			data.GetComboHitBox().AddUseHitBox(addHitBoxData.hitBoxData.name);
 		}
 
-		// コンボボタン設定
-		ComboButton bo = ComboButton(button, ComboButtonInputType::kPressed);
-		// 押し続ける
-		data.GetComboCondition().GetData().button_ = bo;
-		std::vector<ComboButton> buttons;
-		buttons.push_back(bo);
-		data.GetComboCondition().GetInput().comboSequence_.RegisterCombo(buttons);
-
 		// コンボノード追加
-		AddComboNode(comboNodeName, data.GetComboMotion().GetData().animationName_, data);
+		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName_, data);
 	}
 
 	void System::CreateGlobalData(const std::string comboNodeName) {

@@ -70,11 +70,11 @@ namespace Combo {
 		HitBox::CollData data = hitBoxData;
 
 		// リアクションデータ
-		data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
-		data.reactionData.GetKnockbackData().GetData().power_ = combo.reaction.knockbackPower;
-		data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.reaction.knockbackPowerY;
-		data.reactionData.GetKnockbackData().GetData().duration_ = combo.reaction.knockbackDuration_;
-		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.reaction.isVerticalBoost_;
+		data.reactionData.GetDamageData().GetOne().damage = combo.damage;
+		data.reactionData.GetKnockbackData().GetData().power_ = combo.knockbackPower;
+		data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.knockbackPowerY;
+		data.reactionData.GetKnockbackData().GetData().duration_ = combo.knockbackDuration_;
+		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.isVerticalBoost_;
 
 		collData_.push_back(data);
 	};

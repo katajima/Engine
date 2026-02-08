@@ -39,6 +39,8 @@ void DummyEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entit
 void DummyEnemy::Update(){
 	// 基盤の更新
 	BaseUpdate();
+
+	Parameters().HP.value = 100.0f;
 }
 
 

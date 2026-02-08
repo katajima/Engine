@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 
 namespace Combo {
-	
+
 	// 終了条件タイプ
 	enum class EndConditionType {
 		kOnGround,			// 着地したら
@@ -14,17 +14,13 @@ namespace Combo {
 	};
 
 	// 移動方法
-	enum class Move {
+	enum class MoveType {
 		kNone,		// 特になし
 		kTraget,	// ターゲットに向かって
 		kForward,	// 前方
-		kCamera,	// カメラ方向
 	};
 
-	// 入力受付タイプ
-	enum class InputReceierType {
-
-	};
+	
 
 
 
@@ -40,16 +36,12 @@ namespace Combo {
 		Vector3 colliderSize = { 1.0f,1.0f,1.0f };	// コライダーサイズ
 
 		// 敵に送るリアクションデータ
-		struct Reaction {
-			float knockbackDuration_ = 0.1f;	// ノックバック持続時間
-			float knockbackPower = 30.0f;		// ノックバックパワー
-			float knockbackPowerY = 30.0f;		// ノックバックY方向パワー
-			bool isVerticalBoost_ = false;		// Y方向にノックバックするか
+		float knockbackDuration_ = 0.1f;	// ノックバック持続時間
+		float knockbackPower = 30.0f;		// ノックバックパワー
+		float knockbackPowerY = 30.0f;		// ノックバックY方向パワー
+		bool isVerticalBoost_ = false;		// Y方向にノックバックするか
 
-			float damage = 0;					// ダメージ
-		};
-		// リアクションデータ
-		Reaction reaction;
+		float damage = 0;					// ダメージ
 
 
 		// 移動関係
@@ -65,6 +57,11 @@ namespace Combo {
 
 		float stateCancelStartTime = 0.3f;	// キャンセル開始時間
 		float stateCancelEndTime = 0.5f;	// キャンセル終了時間
+
+		float stateMoveCancelStartTime = 0.3f;	// キャンセル開始時間(移動)
+		float stateMoveCancelEndTime = 0.5f;	// キャンセル終了時間(移動)
+
+
 
 		float stateEndTime = 0.5f;			// ステート終了時間
 		float stateNextTime = 0.45f;		// ステート移行時間
@@ -93,6 +90,9 @@ namespace Combo {
 
 		///	終了条件 ///
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
+
+		// 移動方向条件
+		MoveType moveType = MoveType::kForward;
 
 	};
 };

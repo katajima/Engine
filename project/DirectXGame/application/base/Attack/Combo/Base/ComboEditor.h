@@ -19,60 +19,6 @@ class BasePlayer;
 namespace Combo {
 	class EditorBlock {
 	public:
-		struct Data {
-			///  アニメーション設定  ///
-
-			// アニメーション名
-			std::string animationName_ = "no";
-			// アニメーションスピード
-			float animationSpeed_ = 1.0f;
-			// アニメーションのブレンド時間
-			float animationBlendTime_ = 0.1f;
-
-			/// 移動設定  ///
-
-			// 移動速度
-			float moveSpeed_ = 0.0f;
-			// 強制移動
-			bool isCompulsionMove_ = false;
-
-			/// 重力設定  ///
-
-			// 重力はあるか？
-			bool isGravity = true;
-			// 重力スケール
-			float gravityScale = 1.0f;
-
-
-			/// ノックバック設定  ///
-
-			// ノックバック持続時間
-			float knockbackDuration_ = 0.1f;
-			// ノックバックパワー
-			float knockbackPower = 30.0f;
-			// ノックバックY方向パワー
-			float knockbackPowerY = 30.0f;
-			// Y方向にノックバックするか
-			bool isVerticalBoost_ = false;
-			// ダメージ
-			float damage = 0;
-
-
-			/// 親子付け設定  ///　 
-			std::string parentName_ = "なし";
-			// オフセット
-			Vector3 parentOffset_ = { 0.0f,0.0f,0.0f };
-			// ヒットボックスの発生条件タイプ
-			HitBox::SpawnType spawnType_ = HitBox::SpawnType::kOnTime;
-			// ヒットボックス依存先タイプ
-			HitBox::ParentType dependenceType_ = HitBox::ParentType::kParent;
-
-
-			///	終了条件 ///
-			Combo::EndConditionType endConditionType = Combo::EndConditionType::kOnTimer;
-
-		};
-
 		// 初期化
 		void Initialize(Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, BaseCharacter* owner);
 		// 更新
@@ -92,7 +38,7 @@ namespace Combo {
 		float GetMaxFrame() const { return ConvertUtility::FramesToSeconds(maxFrame); }
 
 		// データ取得
-		Data GetData() const { return data_; }
+		GlovalData GetData() const { return data_; }
 	private:
 		// アニメーション設定
 		void ImGuiApplyAnimationToState();
@@ -169,7 +115,7 @@ namespace Combo {
 		bool nowChoice_ = false;
 	private:
 		// データ
-		Data data_;
+		GlovalData data_;
 	};
 
 

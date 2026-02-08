@@ -37,14 +37,14 @@ void CharacterManager::Update()
 	}
 
 	// キャラクター更新(敵)
-	std::vector<BaseEnemy*> target;
+	std::vector<BaseCharacter*> target;
 	for (auto& character : character_) {
 		if (character->GetCharacterType() == CharacterType::Enemy) {
 			if (character) {
 				character->Update();
 
 
-				target.push_back(static_cast<BaseEnemy*>(character.get()));
+				target.push_back(static_cast<BaseCharacter*>(character.get()));
 			}
 		}
 	}

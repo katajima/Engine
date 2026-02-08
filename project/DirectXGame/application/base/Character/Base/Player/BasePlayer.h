@@ -45,7 +45,7 @@ public:
 	virtual void HeavyAttack() {};
 
 	// ターゲットキャラクターを設定
-	void SetTargetCharacters(const std::vector<BaseEnemy*>& targetCharacters) { targetCharacters_ = targetCharacters; }
+	void SetTargetCharacters(const std::vector<BaseCharacter*>& targetCharacters) { targetCharacters_ = targetCharacters; }
 
 	// リロード
 	virtual void Reload() {};
@@ -66,7 +66,7 @@ public:
 	bool GetIsSpecial() const { return special_->GetIsSpecial(); }
 
 protected:
-	std::vector<BaseEnemy*> targetCharacters_;				// 攻撃対象キャラクターリスト
+	std::vector<BaseCharacter*> targetCharacters_;				// 攻撃対象キャラクターリスト
 	FollowCamera* followCamera_ = nullptr;					// フォローカメラ
 	bool isCreativeMode = false;							// クリエイティブモードかどうか
 

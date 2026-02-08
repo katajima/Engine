@@ -29,7 +29,7 @@ namespace Combo {
         // 入力受付時間の範囲チェック
         virtual bool IsInputAcceptable() = 0;
         // 次のステートえ移行受付する時間
-        virtual float GetNextStateTime() = 0;
+        virtual bool GetNextStateTime() = 0;
         // ステート終了時間
         virtual bool GetEndStateTime() = 0;
         // 次のステートへ移行可能か
@@ -90,10 +90,10 @@ namespace Combo {
         }
         // 入力受付可能か
         bool IsInputAcceptable() override {
-            return comboData_.GetComboCondition().IsComdoInputWindow(timeInState);
+            return comboData_.GetComboCondition().IsComdoNextInputWindow(timeInState);
         }
         // 次のステートえ移行受付する時間
-        float GetNextStateTime() override {
+        bool GetNextStateTime() override {
             return timeInState > comboData_.GetComboCondition().GetComboNextTime();
         }
         // ステート終了時間
@@ -102,11 +102,11 @@ namespace Combo {
         }
         // 次のステートへ移行可能か
         bool GetIsNextState() override {
-            return comboData_.GetComboCondition().IsNextCombo();
+            return comboData_.GetComboCondition().GetNextReceiver().GetIsNext();
         };
         // キャンセルするか
         bool GetIsCansel() {
-            return comboData_.GetComboCondition().IsComboCansel();
+            return comboData_.GetComboCondition().GetCancelReceiver().GetIsCancel();
         }
         // コンボ名取得
         std::string GetName() const { return name; }

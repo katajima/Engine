@@ -2,6 +2,7 @@
 #include <DirectXGame/application/base/Attack/Hit/HitCounter.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
+#include <DirectXGame/application/base/Attack/LockOn/LockOnSystem.h>
 
 // 前方宣言
 class CharacterParameterComponent;
@@ -34,6 +35,9 @@ public:
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
 	// ヒットボックスシステム取得
 	HitBox::System* GetHitBoxSystem() { return hitBoxSystem_.get(); };
+	// ロックオンシステム更新
+	LockOnSystem* GeyLockOnSysutem() { return lockOnSystem_.get(); }
+
 	// 攻撃中か取得
 	bool IsAttack() const { return isAttack_; }
 	// 攻撃中か設定
@@ -55,7 +59,8 @@ private:
 	std::unique_ptr<Combo::System> comboSystem_;
 	// ヒットボックスシステム
 	std::unique_ptr<HitBox::System> hitBoxSystem_;
-
+	// ロックオンシステム
+	std::unique_ptr<LockOnSystem> lockOnSystem_;
 private:
 	// 攻撃中か
 	bool isAttack_ = false;

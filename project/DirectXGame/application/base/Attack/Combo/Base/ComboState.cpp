@@ -11,10 +11,10 @@ namespace Combo {
 		// 時間初期化 
 		timeInState = 0.0f;
 		// アニメーションの設定
-		comboData_.GetComboMotion().GetData().animationName_ = animation;
+		comboData_.GetComboMotion().GetComboAnimation().GetData().animationName_ = animation;
 
 
-		comboData_.GetComboMotion().SetDirection(direction_);
+		comboData_.GetComboMotion().GetComboMove().SetDirection(direction_);
 		// コンボデータ開始
 		comboData_.Enter(owner);
 	}

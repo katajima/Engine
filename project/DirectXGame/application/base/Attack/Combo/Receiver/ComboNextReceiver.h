@@ -13,10 +13,16 @@ namespace Combo {
 		// データ構造体
 		struct Data
 		{
+			// コンボ移行入力受付開始時間
+			float inputStart = 0.1f;				
+			// コンボ移行入力受付終了時間
+			float inputEnd = 0.5f;				
+			// コンボ移行可能かどうか
+			bool isNext = false;			
 
-			float inputStart = 0.1f;				// コンボ移行入力受付開始時間
-			float inputEnd = 0.5f;				// コンボ移行入力受付終了時間
-			bool isNext = false;			// コンボ移行可能かどうか
+			// 強制的に次のコンボに移行するか 
+			bool isCompulsionNext = false;	
+
 
 			ComboSequence comboSequence_;			// ボタン条件
 		};
@@ -26,14 +32,29 @@ namespace Combo {
 		//　終了
 		void Exit();
 		// 更新
-		void Update(float time);
-	public:
+		void Update(const Engine::Input& input,float time);
+
+	public: // 設定
+		// コンボ条件発動時間設定
+		void ConditionStartEnd(float start, float end) {
+			data_.inputStart = start;
+			data_.inputEnd = end;
+		};
+	public: // 取得
 		// データ取得
 		Data& GetData() { return data_; };
 		// 受付可能か取得
 		bool GetIsActive() const { return isActive_; }
 		// 次のコンボに移行するか
 		bool GetIsNext() const { return isNext_; }
+		// コンボ受付可能か
+		bool IsInputWindow(float timer) const {
+			return timer >= data_.inputStart && timer <= data_.inputEnd;
+		};
+		// 入力受付開始時間取得
+		float GetInputStart() const { return data_.inputStart; }
+		// 入力受付終了時間取得
+		float GetInputEnd() const { return data_.inputEnd; }
 	private:
 		// データ
 		Data data_;

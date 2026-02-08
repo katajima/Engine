@@ -32,7 +32,7 @@ namespace Combo {
 		// コンボ用カメラクラス更新
 		camera.Update(timer_, dt);
 		// コンボ用ヒットボックスクラス更新
-		hitBox.SetDirection(motion.GetDirection());
+		hitBox.SetDirection(motion.GetComboMove().GetDirection());
 		hitBox.Update(input, timer_, dt);
 		// コンボ用エフェクトクラス更新
 		effect.Update(timer_, dt);
