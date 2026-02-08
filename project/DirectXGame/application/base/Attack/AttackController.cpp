@@ -33,7 +33,7 @@ void AttackController::Update(float dt) {
 	}
 
 	// ロックオンシステム更新
-	lockOnSystem_->Update(dt);
+	//lockOnSystem_->Update(dt);
 
 	// ヒットボックスシステムの更新
 	hitBoxSystem_->Update(dt);

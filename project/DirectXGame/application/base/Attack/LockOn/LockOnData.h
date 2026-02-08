@@ -1,4 +1,5 @@
 #pragma once
+#include "DirectXGame/engine/Math/MathFunctions.h"
 
 struct LockOnData {
 	// ロックオン開始時間

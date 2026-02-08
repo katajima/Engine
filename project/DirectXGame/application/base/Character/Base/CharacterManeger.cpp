@@ -44,7 +44,7 @@ void CharacterManager::Update()
 				character->Update();
 
 
-				target.push_back(static_cast<BaseCharacter*>(character.get()));
+				target.push_back(character.get());
 			}
 		}
 	}

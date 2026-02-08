@@ -9,6 +9,8 @@ namespace Combo {
 		moveComponent = owner->GetMoveComponent();
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
+		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
+
 		// 回転
 		owner->GetMoveComponent()->GetMoveSystem()->AttackProcess(owner->GetWorldTransform(), direction_);
 		// 座標更新
@@ -38,7 +40,7 @@ namespace Combo {
 
 
 
-		
+
 
 
 		//
@@ -74,6 +76,11 @@ namespace Combo {
 			}
 			break;
 		case MoveType::kTraget:
+			if (isMove_ && isStart && isEnd) {
+				lockOnSystem;
+
+				worldTransform->translate_;
+			}
 			break;
 		default:
 			break;
@@ -86,6 +93,5 @@ namespace Combo {
 		}
 		rigidBodyComponent->SetGravityScale(data_.gravityScale_);
 		rigidBodyComponent->SetIsGravity(data_.isGravity_);
-
 	}
 };

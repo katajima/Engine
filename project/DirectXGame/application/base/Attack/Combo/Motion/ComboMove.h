@@ -11,6 +11,7 @@ class MovementComponent;	// 移動関係
 class BaseCharacter;		// キャラクター
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
+class LockOnSystem;			// ロックオンシステム
 
 namespace Combo {
 
@@ -70,6 +71,8 @@ namespace Combo {
 		Engine::WorldTransform* worldTransform = nullptr;
 		// リジットボディー
 		Engine::RigidBodyComponent* rigidBodyComponent = nullptr;
+		// ロックオンシステム
+		LockOnSystem* lockOnSystem = nullptr;
 	private:
 		// データ
 		Data data_;

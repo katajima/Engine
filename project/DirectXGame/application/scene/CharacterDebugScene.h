@@ -24,7 +24,7 @@
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
-#include <DirectXGame/application/base/Attack/Combo/ComboEditor.h>
+#include <DirectXGame/application/base/Attack/Combo//Base/ComboEditor.h>
 
 class CharacterDebugScene : public Engine::BaseScene {
 public:
