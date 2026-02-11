@@ -88,7 +88,7 @@ private:
 
 private:
 	// キャラクター管理
-	std::unique_ptr<CharacterManager> characterManager_;
+	std::unique_ptr<Character::CharacterManager> characterManager_;
 	// ステージ
 	std::unique_ptr<MainStage> stage_;
 	// 弾

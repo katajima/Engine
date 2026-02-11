@@ -2,9 +2,7 @@
 #include "MoveSystem.h"
 #include "JumpSystem.h"
 #include "DashSystem.h"
-#include "AirMoveSystem.h"
 #include "MovementRestrictions.h"
-#include "MovementState.h"
 
 // 前方宣言
 namespace Engine {
@@ -53,7 +51,7 @@ public: // 移動系統
 	// 速度設定
 	void SetSpeed(float min, float max) { moveSystem_->SetSpeed(min, max); };
 	// 移動タイプ設定
-	void SetMoveType(MoveSystem::MoveType type) { moveSystem_->GetData().moveType = type;};
+	void SetMoveType(MoveType type) { moveSystem_->GetData().moveType = type;};
 	// スティックによる移動速度固定設定
 	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
 	// 移動出来るか設定
@@ -88,7 +86,6 @@ private:
 
 	//
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; // 移動制限システム
-	std::unique_ptr<MovementStateMachine> movementStateMachine_ = nullptr; // 移動状態マシン
 	// 操作タイプ
 	ControlType controlType_ = ControlType::Manual;	// 操作タイプ
 

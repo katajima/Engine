@@ -4,7 +4,9 @@
 
 
 // 前方宣言
-class BaseCharacter;
+namespace Character {
+	class BaseCharacter;
+}
 class BulletManager;
 namespace Engine {
 	class Entity3DManager;
@@ -21,7 +23,7 @@ public:
 	~BulletSpawn() = default;
 
 	// 初期化＋持ち主設定
-	void Initialize(BaseCharacter* owner, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void Initialize(Character::BaseCharacter* owner, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, Effect* effect);
 
 	void Generate();
@@ -30,16 +32,16 @@ public:
 	void GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad);
 
 	// 弾を生成
-	void GenerateBullet(BulletType type, const BulletInfo& info, BaseCharacter* target = nullptr);
+	void GenerateBullet(BulletType type, const BulletInfo& info, Character::BaseCharacter* target = nullptr);
 private:
-	BaseCharacter* owner_ = nullptr;
-	BulletManager* bulletManager_ = nullptr;
+	Character::BaseCharacter* owner = nullptr;
+	BulletManager* bulletManager = nullptr;
 
 
 private:
-	Effect* effect_;								// 演出
-	Engine::Camera* camera_;								// カメラ
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// 保存項目
-	Engine::Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
-	Engine::Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
+	Effect* effect;								// 演出
+	Engine::Camera* camera;								// カメラ
+	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
+	Engine::Entity3DManager* entity3DManager;	// 3dオブジェクト管理
+	Engine::Entity2DManager* entity2DManager;  // 2Dオブジェクト管理
 };

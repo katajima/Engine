@@ -51,7 +51,7 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
 
 		// 敵
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
+		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());
 
 		// ID取得
 		uint32_t otherId = otherComponent->GetUniqueId();
@@ -65,11 +65,11 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 		// 衝突履歴追加
 		object_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
 		// 敵ステート変更
-		enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Move);
 		// ダメージ
 		enemy->AddDamage(parameter_.damage);
 
-		owner_->GetAttackController()->GetHitCounter().Hit();
+		this->owner->GetAttackController()->GetHitCounter().Hit();
 		
 		// エフェクト出現
 		enemy->Emit();

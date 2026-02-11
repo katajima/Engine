@@ -11,7 +11,7 @@ void GameWave::Initialize(int waveIndex, float nextWaveDelay, WaveEndType endTyp
 	nextWaveDelay_ = nextWaveDelay;	// 次のウェーブに行く時間
 	endType_ = endType;			// 終了方法
 }
-void GameWave::AddSpawns(const SpawnInfo& spawn) {
+void GameWave::AddSpawns(const Character::SpawnInfo& spawn) {
 	spawns_.push_back(spawn);
 }
 
@@ -24,7 +24,7 @@ void GameWave::Update(float dt) {
 			isEndWave_ = true;
 		}
 	} else {
-		if (0 >= characterManager->GetCharacterCount(CharacterType::Enemy) && waveTimer >= GetNextWaveDelay()) {
+		if (0 >= characterManager->GetCharacterCount(Character::Type::Enemy) && waveTimer >= GetNextWaveDelay()) {
 			isEndWave_ = true;
 		}
 	}
@@ -91,7 +91,8 @@ float WaveManager::GetCurrentWaveTime() const{
 	}
 }
 
-GameWave WaveManager::CreateGameWave(int waveIndex, float nextWaveDelay, WaveEndType endType,CharacterManager* characterManager, const std::vector<SpawnInfo>& spawns){
+GameWave WaveManager::CreateGameWave(int waveIndex, float nextWaveDelay, WaveEndType endType, 
+	Character::CharacterManager* characterManager, const std::vector<Character::SpawnInfo>& spawns){
 
 	GameWave wave;
 	wave.Initialize(waveIndex,nextWaveDelay, endType);

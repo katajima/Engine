@@ -1,27 +1,12 @@
 #pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
-
+#include "DashData.h"
 
 /// <summary>
 /// ダッシュに関するシステムクラス
 /// </summary>
 class DashSystem {
 public:
-
-	// ダッシュ用データ
-	struct Data {
-		// ダッシュ初速度
-		float startSpeed = 100.0f;
-		// 加速
-		float acceleration = 0.0f;
-		// 減衰
-		float friction = 10.0f;
-		// 最大ダッシュ時間
-		float maxTime = 0.15f;
-		// ダッシュ中に重力適用させるかのフラグ
-		bool isDashGravity = false;
-	};
-
 	// ダッシュ状態
 	enum class State {
 		kStart,	// 開始
@@ -29,7 +14,6 @@ public:
 		kEnd,	// 最後
 		kNone,	// 無し
 	};
-
 
 	/// <summary>
 	/// 初期化
@@ -42,13 +26,15 @@ public:
 
 public:
 	// ダッシュ用データの取得
-	Data& GetData() { return data_; };
+	DashData& GetData() { return data_; };
 	// 状態取得
 	State GetState() const { return state_; }
 	// ダッシュしているかどうか取得
 	bool IsDash() const { return isDash_; }
 	// ダッシュ可能かどうか取得
 	bool IsCanDash() const { return canDash_; }
+	// データ設定
+	void SetData(const DashData& data) { data_ = data; }
 	// 方向設定
 	void SetDirection(const Vector3& direction);
 	//
@@ -65,7 +51,7 @@ private:
 	void GravityProcess(float dt, Engine::RigidBodyComponent& rigid);
 private:
 	// ダッシュ用データ
-	Data data_{};
+	DashData data_{};
 	// 状態取得
 	State state_{};
 	// 速度

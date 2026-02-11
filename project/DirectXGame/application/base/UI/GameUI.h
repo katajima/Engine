@@ -3,7 +3,9 @@
 #include "DirectXGame/application/base/Game/GameData.h"
 
 // 前方宣言
-class BasePlayer;
+namespace Character {
+	class BasePlayer;
+}
 
 /// <summary>
 /// ゲームUIクラス
@@ -21,7 +23,7 @@ public:
 	void Draw() override;
 
 	// プレイヤ設定
-	void SetPlayer(BasePlayer* player);
+	void SetPlayer(Character::BasePlayer* player);
 
 	// ゲームデータ取得
 	void SetGamePlayData(const GamePlayData data) { data_ = data; };
@@ -30,7 +32,7 @@ private:
 	std::unique_ptr<Engine::Sprite> text_clera;
 	std::unique_ptr<Engine::Sprite> text_over;
 private:
-	BasePlayer* player_;
+	Character::BasePlayer* player;
 	GamePlayData data_;
 
 private:

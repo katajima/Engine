@@ -23,10 +23,6 @@ void MovementComponent::Initialize(Engine::GlobalVariables* globalVariables, Con
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
 	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });
 
-	// 状態遷移機械の生成
-	movementStateMachine_ = std::make_unique<MovementStateMachine>();
-	movementStateMachine_->Initialize();
-
 	// 操作タイプの設定
 	controlType_ = type;
 	if (useGlobal_) {

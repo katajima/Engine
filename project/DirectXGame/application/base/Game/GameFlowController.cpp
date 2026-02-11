@@ -2,7 +2,7 @@
 #include <DirectXGame/engine/scene/SceneManager.h>
 
 void GameFlowController::Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, 
-	CharacterManager* characterManager){
+	Character::CharacterManager* characterManager){
 	this->globalVariables = globalVariables;	// 保存項目
 	this->characterManager = characterManager;	// キャラクター管理するクラス
 	this->sceneManager = sceneManager;			// シーンマネージャー

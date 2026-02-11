@@ -3,38 +3,40 @@
 #include "SmallRangeEnemyState.h"
 #include <DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h>
 
-class SmallRangeEnemy : public BaseEnemy {
-public:
-	// コンストラクタ
-	SmallRangeEnemy() {}
+namespace Character {
+	class SmallRangeEnemy : public BaseEnemy {
+	public:
+		// コンストラクタ
+		SmallRangeEnemy() {}
 
-	// 初期化
-	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
-		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
+		// 初期化
+		void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-	// 毎フレーム更新
-	void Update() override;
+		// 毎フレーム更新
+		void Update() override;
 
-	// エフェクト描画
-	void DrawEffect() override {};
-	// 描画2d
-	void Draw2D() override;
-	// エミッター出現
-	void Emit() override;
-	// 移動
-	void Move() override;
-	// ジャンプ
-	void Jump() override {};
-	// 攻撃
-	void Attack() override {};
-private:
-	// ステートマシーン初期化
-	void InitStateMachine() override;
+		// エフェクト描画
+		void DrawEffect() override {};
+		// 描画2d
+		void Draw2D() override;
+		// エミッター出現
+		void Emit() override;
+		// 移動
+		void Move() override;
+		// ジャンプ
+		void Jump() override {};
+		// 攻撃
+		void Attack() override {};
+	private:
+		// ステートマシーン初期化
+		void InitStateMachine() override;
 
-private:
-	float skyHeight_ = 5.0f;
-	//
-	float attackTimer_ = 0.0f;
-	std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
+	private:
+		float skyHeight_ = 5.0f;
+		//
+		float attackTimer_ = 0.0f;
+		std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
 
-};
+	};
+}

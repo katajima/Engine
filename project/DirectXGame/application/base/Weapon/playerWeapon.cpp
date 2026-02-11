@@ -6,13 +6,13 @@
 void PlayerWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
-	input_ = input;						// インプット
-	entity3DManager_ = entity3DManager; // エンティティ3d
-	entity2DManager_ = entity2DManager; // エンティティ2d
+	this->input = input;						// インプット
+	this->entity3DManager = entity3DManager; // エンティティ3d
+	this->entity2DManager = entity2DManager; // エンティティ2d
 	
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager_, globalVariables_, "PlayerWeapon", "Sword.obj", false, false, this);
+	objectComponent_->Initialize(entity3DManager, globalVariables, "PlayerWeapon", "Sword.obj", false, false, this);
 	objectComponent_->SetSRT(provisionalData_.size, {}, position);	// SRT設定
 
 	// トレイルエフェクト設定

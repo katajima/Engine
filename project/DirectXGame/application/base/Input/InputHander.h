@@ -4,15 +4,16 @@
 #include <functional>
 
 // 前方宣言
-class BaseCharacter;
-
+namespace Character {
+	class BaseCharacter;
+};
 
 // コマンド
 class ICommand 
 {
 public:
 	virtual ~ICommand();
-	virtual void Exec(BaseCharacter& character) = 0;
+	virtual void Exec(Character::BaseCharacter& character) = 0;
 
 };
 
@@ -20,26 +21,26 @@ public:
 class MoveCommand :public ICommand 
 {
 public:
-	void Exec(BaseCharacter& character) override;
+	void Exec(Character::BaseCharacter& character) override;
 };
 // ジャンプコマンド
 class JampCommand : public ICommand
 {
 public:
-	void Exec(BaseCharacter& character) override;
+	void Exec(Character::BaseCharacter& character) override;
 };
 // 攻撃コマンド
 class AttackCommand : public ICommand
 {
 public:
-	void Exec(BaseCharacter& character) override;
+	void Exec(Character::BaseCharacter& character) override;
 };
 
 // 攻撃コマンド
 class HeavyAttackCommand : public ICommand
 {
 public:
-	void Exec(BaseCharacter& character) override;
+	void Exec(Character::BaseCharacter& character) override;
 };
 
 

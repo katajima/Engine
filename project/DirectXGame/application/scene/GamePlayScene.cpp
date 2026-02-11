@@ -84,7 +84,7 @@ void GamePlayScene::Initialize()
 
 
 	// キャラクター管理 
-	characterManager_ = std::make_unique<CharacterManager>();
+	characterManager_ = std::make_unique<Character::CharacterManager>();
 	characterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
@@ -98,10 +98,10 @@ void GamePlayScene::Initialize()
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
-		characterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	}
 	else {
-		characterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
 	

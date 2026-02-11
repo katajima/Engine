@@ -29,11 +29,6 @@ void FixedCamera::Update()
 		uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
 	}
 #ifdef _DEBUG
-	ImGui::Begin("FixedCamera");
-	ImGui::DragFloat3("translate", &uniqueCamera_->transform_.translate.x, 0.1f);	// 位置
-	ImGui::DragFloat3("rotate", &uniqueCamera_->transform_.rotate.x, 0.01f);		// 回転
-	ImGui::End();
-
 	// デバッグラインを表示
 	entity3DManager_->Get3DLineCommon()->GetLineMeshData().AddCameraLine(*uniqueCamera_.get());
 #endif // _DEBUG

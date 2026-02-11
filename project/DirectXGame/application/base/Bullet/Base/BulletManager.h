@@ -4,9 +4,11 @@
 
 
 // 前方宣言
-class BasePlayer;
-class BaseEnemy;
-class BaseCharacter;
+namespace Character {
+	class BasePlayer;
+	class BaseEnemy;
+	class BaseCharacter;
+}
 namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
@@ -45,7 +47,7 @@ public: // 取得or設定
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
 		
 	// エフェクトの設定
-	void SetEffect(Effect* effect) { effect_ = effect; }
+	void SetEffect(Effect* effect) { this->effect = effect; }
 private:
 
 	// 弾
@@ -53,9 +55,9 @@ private:
 
 
 private:
-	Effect* effect_;								// 演出
-	Engine::Camera* camera_;								// カメラ
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// 保存項目
-	Engine::Entity3DManager* entity3DManager_;	// 3dオブジェクト管理
-	Engine::Entity2DManager* entity2DManager_;  // 2Dオブジェクト管理
+	Effect* effect;								// 演出
+	Engine::Camera* camera;								// カメラ
+	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
+	Engine::Entity3DManager* entity3DManager;	// 3dオブジェクト管理
+	Engine::Entity2DManager* entity2DManager;  // 2Dオブジェクト管理
 };

@@ -10,8 +10,9 @@ namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
 }
-class BaseCharacter;
-
+namespace Character {
+	class BaseCharacter;
+}
 /// <summary>
 /// 必殺技クラス
 /// </summary>
@@ -60,9 +61,9 @@ public:
 	float GetTime();
 public: // 貰いもの
 	//持ち主設定
-	void SetOwner(BaseCharacter* owner) { this->owner = owner; }
+	void SetOwner(Character::BaseCharacter* owner) { this->owner = owner; }
 	// 入力をセット
-	void SetInput(Engine::Input* input) {input_ = input;};
+	void SetInput(Engine::Input* input) {this->input = input;};
 	// 親子付け
 	void SetParent(Engine::WorldTransform* parent) {};
 protected:
@@ -71,7 +72,7 @@ protected:
 	// 時間
 	float time_ = 0;
 protected:
-	BaseCharacter* owner = nullptr;			// オーナー
-	Engine::Input* input_;					// 入力
+	Character::BaseCharacter* owner = nullptr;			// オーナー
+	Engine::Input* input;					// 入力
 };
 

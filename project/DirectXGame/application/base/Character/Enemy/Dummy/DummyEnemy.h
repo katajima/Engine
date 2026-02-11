@@ -2,37 +2,39 @@
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DummyEnemyState.h"
 
-class DummyEnemy : public BaseEnemy {
-public:
-	DummyEnemy() {
-	
-	}
+namespace Character {
+	class DummyEnemy : public BaseEnemy {
+	public:
+		DummyEnemy() {
 
-	///< summary>
-	/// 初期化
-	///</summary>
-	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
-		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
+		}
 
-	// 毎フレーム更新
-	void Update() override;
+		///< summary>
+		/// 初期化
+		///</summary>
+		void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-	// エフェクト描画
-	void DrawEffect() override {};
-	// 描画2d
-	void Draw2D() override {};
-	// エミッター出現
-	void Emit() override;
-	// 移動
-	void Move() override {};
-	// ジャンプ
-	void Jump() override {};
-	// 攻撃
-	void Attack() override {};
-private:
-	// ステートマシーン初期化
-	void InitStateMachine() override;
+		// 毎フレーム更新
+		void Update() override;
 
-private:
-	float hp = 100.0f;
-};
+		// エフェクト描画
+		void DrawEffect() override {};
+		// 描画2d
+		void Draw2D() override {};
+		// エミッター出現
+		void Emit() override;
+		// 移動
+		void Move() override {};
+		// ジャンプ
+		void Jump() override {};
+		// 攻撃
+		void Attack() override {};
+	private:
+		// ステートマシーン初期化
+		void InitStateMachine() override;
+
+	private:
+		float hp = 100.0f;
+	};
+}

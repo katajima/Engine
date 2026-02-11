@@ -1,29 +1,12 @@
 #pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "JumpData.h"
 
 /// <summary>
 /// ジャンプシステムクラス
 /// </summary>
 class JumpSystem {
 public:
-	/// <summary>
-	/// ジャンプに関連するデータを格納する構造体。
-	/// </summary>
-	struct Data {
-		// ジャンプ力
-		float power_ = 800.0f;
-		// 上昇時の重力係数
-		float upGravity_ = 15.0f;
-		// 落下時の重力係数
-		float fallGravity_ = 30.0f;
-		// 入力受付時間
-		float inputDelay_ = 0.1f;
-		// ジャンプ入力受付可能かどうか
-		bool canInput_ = true;
-		// 最大ジャンプ回数
-		int maxJumpCount_ = 2;
-	};
-
 	// ジャンプ状態列挙型
 	enum class State {
 		Wait,	// 待機
@@ -32,29 +15,25 @@ public:
 		Land,	// 着地
 	};
 
-
 	// 初期化
 	void Initialize();
-
 	// 更新
 	void Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
-
-
 public:	// ジャンプ開始
 	void StartJump(Engine::RigidBodyComponent& rigid);
 	// ジャンプ回数現象
 	void DecrementJumpCount() { jumpCount_--; }
 public:
 	// ジャンプデータ取得
-	Data& GetData() { return data_; }
+	JumpData& GetData() { return data_; }
 	// ジャンプ状態取得
 	State GetState() const { return state_; }
-	// ジャンプ可能か設定
-	void SetCanInput(bool canInput) { data_.canInput_ = canInput; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }
 	// 着地状態か
 	bool GetIsLanding() const { return isLanding_; }
+	// データ設定
+	void SetData(const JumpData& data) { data_ = data; }
 	// 最大ジャンプカウント設定
 	void SetMaxJumpCount(int count) { data_.maxJumpCount_ = count; }
 	// 入力中か設定
@@ -91,7 +70,7 @@ private:
 	State state_ = State::Wait;
 private:
 	// ジャンプデータ
-	Data data_{};
+	JumpData data_{};
 	// ジャンプ回数
 	int jumpCount_ = 0;
 	// 現在の高さ

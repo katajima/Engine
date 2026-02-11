@@ -8,9 +8,10 @@ namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
 }
-class BaseCharacter;
-class BasePlayer;
-
+namespace Character {
+	class BaseCharacter;
+	class BasePlayer;
+}
 /// <summary>
 /// スペシャルポイント
 /// </summary>
@@ -75,7 +76,7 @@ public:
 	// ポイント出現
 	void AddPoint(const Vector3& pos, int point);
 	// ターゲット設定
-	void SetTarget(BasePlayer* target) { target_ = target; };
+	void SetTarget(Character::BasePlayer* target) { this->target = target; };
 
 	// SPポイントたち取得
 	std::vector<SpecalPoint*> GetSpecalPoints() {
@@ -89,10 +90,10 @@ private:
 	std::vector<std::unique_ptr<SpecalPoint>> points;	// SPポイントたち
 	int count_ = 0;			// 出現回数カウント用
 private:
-	BasePlayer* target_ = nullptr;		// ターゲット
+	Character::BasePlayer* target = nullptr;		// ターゲット
 private:
-	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Engine::Camera* camera_ = nullptr;						// カメラ
+	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
+	Engine::Camera* camera = nullptr;						// カメラ
 };

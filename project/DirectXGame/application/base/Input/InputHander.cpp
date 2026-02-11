@@ -7,19 +7,19 @@ ICommand::~ICommand()
 {
 }
 
-void MoveCommand::Exec(BaseCharacter& character)
+void MoveCommand::Exec(Character::BaseCharacter& character)
 {
 	character.Move();
 }
-void JampCommand::Exec(BaseCharacter& character)
+void JampCommand::Exec(Character::BaseCharacter& character)
 {
 	character.Jump();
 }
-void AttackCommand::Exec(BaseCharacter& character)
+void AttackCommand::Exec(Character::BaseCharacter& character)
 {
 	character.Attack();
 }
-void HeavyAttackCommand::Exec(BaseCharacter& character)
+void HeavyAttackCommand::Exec(Character::BaseCharacter& character)
 {
 	character.HeavyAttack();
 }

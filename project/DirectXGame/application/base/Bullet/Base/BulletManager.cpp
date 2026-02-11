@@ -14,10 +14,10 @@ BulletManager::~BulletManager()
 
 void BulletManager::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera){
 	// それぞれ
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	entity2DManager_ = entity2DManager;	// エンティティ2d
-	globalVariables_ = globalVariables;	// 保存項目
-	camera_ = camera;					// カメラ
+	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->globalVariables = globalVariables;	// 保存項目
+	this->camera = camera;					// カメラ
 }
 
 void BulletManager::Update()

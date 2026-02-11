@@ -3,8 +3,10 @@
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 
 // 前方宣言
-class BasePlayer;
-class BaseEnemy;
+namespace Character {
+	class BasePlayer;
+	class BaseEnemy;
+}
 class Effect;
 
 
@@ -47,13 +49,13 @@ public:
 	/// 狙うターゲット指定
 	/// </summary>
 	/// <param name="target"></param>
-	void SetTarget(BaseEnemy* target) { target_ = target; }
+	void SetTarget(Character::BaseEnemy* target) { this->target = target; }
 
 	/// <summary>
 	/// プレイヤー設定
 	/// </summary>
 	/// <param name="player"></param>
-	void SetParent(BasePlayer* player) { player_ = player; }
+	void SetParent(Character::BasePlayer* player) { this->player = player; }
 
 
 	int MaxTargetNum() const { return maxTargetNum_; }
@@ -65,7 +67,7 @@ public:
 	void Shoot();
 
 	// エフェクト設定
-	void SetEffect(Effect* effect) { effect_ = effect; };
+	void SetEffect(Effect* effect) { this->effect = effect; };
 
 	// モードタイプ設定
 	void SetModeType(ModeType mode) { modeType_ = mode; }
@@ -90,9 +92,9 @@ private:
 
 	ModeType modeType_ = ModeType::Normal;	// 弾のモード
 private:
-	Effect* effect_ = nullptr;
-	BaseEnemy* target_ = nullptr;
-	BasePlayer* player_ = nullptr;
+	Effect* effect = nullptr;
+	Character::BaseEnemy* target = nullptr;
+	Character::BasePlayer* player = nullptr;
 
 
 private: // 一旦

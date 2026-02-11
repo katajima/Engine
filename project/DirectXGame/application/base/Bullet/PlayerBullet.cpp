@@ -46,7 +46,7 @@ void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::
 		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
 		if (isAlive_ == false) return;
 		// 敵
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
+		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());
 		// ID取得
 		uint32_t otherId = otherComponent->GetUniqueId();
 

@@ -249,3 +249,17 @@ std::vector<Engine::PostEffectBlock*> Engine::Camera::GetPostEffectBlocks()
 	}
 	return rawPtrs;
 }
+
+Vector3 Engine::Camera::GetForward() const {
+	float cp = std::cos(transform_.rotate.x);
+	float sp = std::sin(transform_.rotate.x);
+	float cy = std::cos(transform_.rotate.y);
+	float sy = std::sin(transform_.rotate.y);
+
+	return Vector3(
+		sy * cp, // X
+		sp,      // Y
+		cy * cp  // Z
+	);
+}
+

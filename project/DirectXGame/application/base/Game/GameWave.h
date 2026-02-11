@@ -8,11 +8,11 @@ enum class WaveEndType {
 	kTime,      // 時間で
 	kKill,      // 全部倒したら
 };
-
-// 前方宣言
-class CharacterSpawnManager;
-class CharacterManager;
-
+namespace Character {
+	// 前方宣言
+	class CharacterSpawnManager;
+	class CharacterManager;
+}
 /// <summary>
 /// ゲームのウェーブ
 /// </summary>
@@ -22,9 +22,9 @@ public:
 	// 初期化
 	void Initialize(int waveIndex, float nextWaveDelay, WaveEndType endType);
 	// スポーン追加
-	void AddSpawns(const SpawnInfo& spawn);
+	void AddSpawns(const Character::SpawnInfo& spawn);
 
-	void SetCharacterManager(CharacterManager* characterManager) { this->characterManager = characterManager; }
+	void SetCharacterManager(Character::CharacterManager* characterManager) { this->characterManager = characterManager; }
 
 
 	// 更新
@@ -43,15 +43,15 @@ public:
 	void SetEnemyMaxCount(int count) { maxEnemyCount_ = count; }
 
 	// 出現情報
-	std::vector<SpawnInfo> GetSpawnInfo() { return spawns_; }
+	std::vector<Character::SpawnInfo> GetSpawnInfo() { return spawns_; }
 private:
 	int waveIndex_;                     // ウェーブ
-	std::vector<SpawnInfo> spawns_;     // 出現情報
+	std::vector<Character::SpawnInfo> spawns_;     // 出現情報
 	float nextWaveDelay_ = 10.0f;       // 次ウェーブまでの時間
 	float  waveTimer = 0.0f;            // 時間計測
 	int maxEnemyCount_ = 30;			// 最大敵出現量
 	bool isEndWave_ = false;            // ウェーブ終了フラグ
-	CharacterManager* characterManager = nullptr;
+	Character::CharacterManager* characterManager = nullptr;
 
 	WaveEndType endType_ = WaveEndType::kTime;   // 終了方法
 };
@@ -63,9 +63,9 @@ public:
 
 	void Initialize(const std::vector<GameWave>& waves);
 	void Update(float dt);
-	void SetCharacterSpawnManager(CharacterSpawnManager* spawnManager) { this->spawnManager = spawnManager; }
+	void SetCharacterSpawnManager(Character::CharacterSpawnManager* spawnManager) { this->spawnManager = spawnManager; }
 
-	void SetCharacterManager(CharacterManager* characterManager) { this->characterManager = characterManager; }
+	void SetCharacterManager(Character::CharacterManager* characterManager) { this->characterManager = characterManager; }
 
 	// 全てのウェーブ終了
 	bool IsEndWave() const { return isEndWave; }
@@ -80,12 +80,12 @@ public:
 	/// ゲームウェーブ生成
 	/// </summary>
 	/// <returns></returns>
-	static GameWave CreateGameWave(int waveIndex, float nextWaveDelay, WaveEndType endType, CharacterManager* characterManager, const std::vector<SpawnInfo>& spawns);
+	static GameWave CreateGameWave(int waveIndex, float nextWaveDelay, WaveEndType endType, Character::CharacterManager* characterManager, const std::vector<Character::SpawnInfo>& spawns);
 
 
 private:
-	CharacterManager* characterManager = nullptr;
-	CharacterSpawnManager* spawnManager = nullptr;
+	Character::CharacterManager* characterManager = nullptr;
+	Character::CharacterSpawnManager* spawnManager = nullptr;
 	int currentWaveIndex = 0;
 	float waveTimer = 0.0f;
 	bool isEndWave = false;

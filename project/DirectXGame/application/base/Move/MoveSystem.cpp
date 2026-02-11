@@ -47,8 +47,7 @@ void MoveSystem::Update(float dt, Engine::WorldTransform& world)
 	MoveProcess(dt, world, velo);
 }
 
-void MoveSystem::UpdateEnemy(float dt, Engine::WorldTransform& world){
-}
+void MoveSystem::UpdateEnemy(float dt, Engine::WorldTransform& world){}
 
 void MoveSystem::UpdateAttack(float dt, Engine::WorldTransform& world)
 {
@@ -129,7 +128,7 @@ void MoveSystem::MoveProcess(float dt, Engine::WorldTransform& world, Vector3& v
 			SpeedProcess(dt);
 		}
 		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-		if (camera_) {
+		if (camera) {
 			CameraDirectionToMoveDirection(velo);
 			velo = Multiply(velo, speed_);
 		}
@@ -163,7 +162,7 @@ void MoveSystem::MoveProcess(float dt, Engine::WorldTransform& world, Vector3& v
 	AnimationSpeedProcess();
 
 	// 移動可能かどうか
-	if (data_.canMove) {
+	if (canMove_) {
 		world.translate_ += Multiply(velocity_, dt);
 	}
 }
@@ -204,7 +203,7 @@ void MoveSystem::AnimationSpeedProcess()
 }
 
 void MoveSystem::CameraDirectionToMoveDirection(Vector3& velo) {
-	Matrix4x4 cameraWorldMatrix = Inverse(camera_->GetViewMatrix());
+	Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
 
 	// カメラの向きに基づいて移動方向をワールド座標系に変換
 	Vector3 worldDirection = {
@@ -219,7 +218,7 @@ void MoveSystem::CameraDirectionToMoveDirection(Vector3& velo) {
 void MoveSystem::DirectionProcess(const Vector3& velo)
 {
 	if (velo.Length() == 0.0f) return;
-	Matrix4x4 cameraWorldMatrix = Inverse(camera_->GetViewMatrix());
+	Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
 
 	// カメラの向きに基づいて移動方向をワールド座標系に変換
 	Vector3 worldDirection = {

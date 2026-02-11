@@ -165,7 +165,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MoveComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MovementRestrictions.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\MovementState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\MoveSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
@@ -806,6 +805,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterEditor.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
@@ -835,11 +836,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\AirMoveSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\DashData.h" />
     <ClInclude Include="DirectXGame\application\base\Move\DashSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\JumpData.h" />
     <ClInclude Include="DirectXGame\application\base\Move\JumpSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\MoveData.h" />
     <ClInclude Include="DirectXGame\application\base\Move\MovementRestrictions.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\MovementState.h" />
     <ClInclude Include="DirectXGame\application\base\Move\MoveSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h" />

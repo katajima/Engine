@@ -1,21 +1,12 @@
 #pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
-
+#include "MoveData.h"
 
 /// <summary>
 /// 移動に関するシステム
 /// </summary>
 class MoveSystem {
 public:
-
-	// 移動タイプ
-	enum class MoveType
-	{
-		LINEAR,		// 線形移動
-		ACCELERATE, // 加速移動
-		DECELERATE, // 減速移動
-	};
-
 	// 移動状態(アニメーションやアニメーション速度変更用)
 	enum class State {
 		kIdle,		// 静止中
@@ -24,44 +15,7 @@ public:
 	};
 
 	
-	// 移動データ
-	struct Data
-	{
-		// 移動可能フラグ
-		bool canMove = true;
-		// 加速度
-		float speedAcceleration = 0.1f;
-		// 最大速度
-		float maxSpeed = 0.0f;
-		// 最小速度
-		float minSpeed = 0.0f;
-		// 移動タイプ
-		MoveType moveType = MoveType::LINEAR;
-		// 回転補間速度
-		float rotationSpeed = 0.1f;
-		// スティックの倒し方で速度を変化するかどうか
-		bool isStickToSpeed = true;
-		// 空中での速度制限をするかどうか
-		bool isLimitAirSpeed = true;
-		// 空中での速度係数 
-		float airSpeedRate = 0.85f;
-
-		// 歩きから走り状態への境界指定
-		float moveStateThreshold = 10.0f; // 移動状態のしきい値
-
-		// 歩きアニメーション最小速度
-		float animetionSpeedMinWalk = 0.1f; 
-		// 歩きアニメーション最大速度
-		float animetionSpeedMaxWalk = 2.0f;
-		
-		// 走りアニメーション最小速度
-		float animetionSpeedMinRun = 1.0f;
-		// 走りアニメーション最大速度
-		float animetionSpeedMaxRun = 3.0f;
-
-		// 走りと歩きで同じアニメーションか
-		bool isSameAnimation = true;
-	};
+	
 
 	// 初期化
 	void Initialize();
@@ -98,7 +52,7 @@ public:
 
 public: // 取得
 	// 移動データの取得
-	Data& GetData() { return data_; }
+	MoveData& GetData() { return data_; }
 	// 速度の取得
 	Vector3 GetVelocity() const { return velocity_; }
 	// 速度
@@ -113,8 +67,11 @@ public: // 取得
 	float GetAnimationSpeed() const { return animationSpeed_; }
 
 public: //設定
+	// データ設定
+	void SetData(const MoveData& data) { data_ = data; };
+
 	// 移動可能かどうか設定
-	void SetCanMove(bool canMove) { data_.canMove = canMove; }
+	void SetCanMove(bool canMove) { canMove_ = canMove; }
 	// 空中かどうか設定
 	void SetIsAir(bool isAir) { isAir_ = isAir; }
 	// スピード設定
@@ -130,20 +87,20 @@ public: //設定
 	void SetIsAttackCanMove(bool is) { isAttackCanMove_ = is; };
 
 	// カメラ設定
-	void SetCamera(Engine::Camera* camera) { camera_ = camera; }
+	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
 private: // 貰いもの
 	// カメラ
-	Engine::Camera* camera_ = nullptr;
+	Engine::Camera* camera = nullptr;
 
 	// ダッシュしているかどうか
 	bool isDash_ = false;
 	// 攻撃中か
 	bool isAttack_ = false;
-	// 攻撃痛に動かせるか
+	// 攻撃中に動かせるか
 	bool isAttackCanMove_ = false;
 private:
 	// 移動データ
-	Data data_{};
+	MoveData data_{};
 	// 速度
 	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
 	// 移動方向
@@ -165,6 +122,8 @@ private:
 	State state_ = State::kIdle;
 	// 空中か？
 	bool isAir_ = false;
+	// 移動可能フラグ
+	bool canMove_ = true;
 private:
 
 

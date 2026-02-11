@@ -18,7 +18,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,  CharacterManager* characterManager);
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Character::CharacterManager* characterManager);
 
 	/// <summary>
 	/// 更新
@@ -40,25 +40,25 @@ public:
 	// ウェーブ生成
 	void CreateWave(int waveIndex, float nextWaveDelay, WaveEndType endType, int maxEnemyCount);
 	// スポーン生成
-	void CreateSpawn(EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f);
+	void CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f);
 
 
 
 private:
 
 	// キャラクター出現管理クラス
-	std::unique_ptr<CharacterSpawnManager> characterSpawnManager_ = nullptr;
+	std::unique_ptr<Character::CharacterSpawnManager> characterSpawnManager_ = nullptr;
 	// ウェーブ管理クラス
 	std::unique_ptr<WaveManager> waveManager_ = nullptr;
 	// ウェーブ情報
 	std::vector<GameWave> gameWaves_;
 	// スポーン情報
-	std::vector<SpawnInfo> spawnInfos_;
+	std::vector<Character::SpawnInfo> spawnInfos_;
 	bool isEndEvent_ = false;	// イベント終了フラグ
 	int curretWave_ = 0;		// ウェーブ
 	float time_ = 0.0f;			// 時間
 private:
-	Engine::Entity3DManager* entity3DManager_ = nullptr;
-	Engine::GlobalVariables* globalVariables_ = nullptr;
-	CharacterManager* characterManager_ = nullptr;
+	Engine::Entity3DManager* entity3DManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
+	Character::CharacterManager* characterManager = nullptr;
 };

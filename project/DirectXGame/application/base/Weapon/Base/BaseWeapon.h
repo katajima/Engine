@@ -6,7 +6,9 @@
 
 // 前方宣言
 class BulletManager;
-class BaseCharacter; 
+namespace Character {
+	class BaseCharacter;
+}
 
 // 武器のベースクラス
 class BaseWeapon : public IHitReceiver
@@ -23,7 +25,7 @@ public:
 	virtual void Draw2D() = 0;
 public:
 	// 使っているキャラクター設定
-	void SetCharacter(BaseCharacter* character) {
+	void SetCharacter(Character::BaseCharacter* character) {
 		this->character = character;
 	};
 	// タグによるコライダーの有効・無効を設定
@@ -46,23 +48,23 @@ public:
 	// リキャストタイム設定
 	void RecastTime(float timer) { data_.recastTime += timer; }
 	// 弾管理クラス設定
-	void SetBulletManager(BulletManager* bulletManager) { bulletManager_ = bulletManager; }
+	void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
 
 protected:
 	WeaponData data_;	// 武器データ
 protected:
-	BaseCharacter* character;	// 使っているキャラクター
-	BulletManager* bulletManager_ = nullptr;	// 弾管理クラス
+	Character::BaseCharacter* character;		// 使っているキャラクター
+	BulletManager* bulletManager = nullptr;	// 弾管理クラス
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
 	std::unique_ptr<HitBox::HitBoxInstance> hitBox_;
 protected:
-	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Engine::Camera* camera_ = nullptr;						// カメラ
-	Engine::Input* input_ = nullptr;						// 入力(使わないならnullptr)
-	Engine::Audio* audio_ = nullptr;
+	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
+	Engine::Camera* camera = nullptr;						// カメラ
+	Engine::Input* input = nullptr;						// 入力(使わないならnullptr)
+	Engine::Audio* audio = nullptr;
 };
 
 // 近距離の武器クラス

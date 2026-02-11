@@ -4,9 +4,9 @@
 
 void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
-	entity2DManager_ = entity2DManager;	// エンティティ2d
-	globalVariables_ = globalVariables;	// 保存項目
-	input_ = input;						// インプット
+	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->globalVariables = globalVariables;	// 保存項目
+	this->input = input;						// インプット
 
 
 	InitUIMeter("HPBer", hpSpriteData_.pos_, true);		// 初期化HP
@@ -56,8 +56,8 @@ void PlayerUI::Update()
 {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
-	hpber->SetMeterMinMax(parameterComponent_->HP().minValue, parameterComponent_->HP().maxValue);	// メータ最大値
-	hpber->SetMeter(parameterComponent_->HP().value);								// メータ
+	hpber->SetMeterMinMax(parameterComponent->HP().minValue, parameterComponent->HP().maxValue);	// メータ最大値
+	hpber->SetMeter(parameterComponent->HP().value);								// メータ
 	
 	specailBer->SetMeter(sizeSpecialGauge_);// メータ
 

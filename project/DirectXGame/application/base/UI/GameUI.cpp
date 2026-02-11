@@ -7,13 +7,13 @@
 
 void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
-	input_ = input;
+	this->entity2DManager = entity2DManager;
+	this->globalVariables = globalVariables;
+	this->input = input;
 
 
 	board_ = std::make_unique<Engine::UIBaseBoard>();
-	board_->Init(input_,entity2DManager_, "bord", boardPos, boardSize);
+	board_->Init(input,entity2DManager, "bord", boardPos, boardSize);
 
 	// 通常攻撃UI初期化
 	InitUIPair("normalAttack", attackTextData_.pos_);
@@ -164,16 +164,16 @@ void GameUI::Update()
 	
 
 	Engine::UICount* hitCount = GetUICount("hitCount");
-	hitCount->SetCount(ConvertUtility::ToFloat(player_->GetAttackController()->GetHitCounter().GetHitCount()));
+	hitCount->SetCount(ConvertUtility::ToFloat(player->GetAttackController()->GetHitCounter().GetHitCount()));
 	
 	
-	if (player_->GetAttackController()->GetHitCounter().GetHitCount() <= 0) {
+	if (player->GetAttackController()->GetHitCounter().GetHitCount() <= 0) {
 		
 		hitCount->SetCountColor({ 1,1,1,0.0f });
 		hitCount->GetNameSprite()->SetColor({ 1,1,1,0.0f });
 	}
 	else {
-		float t = player_->GetAttackController()->GetHitCounter().GetHitData().hitTime.LerpT();
+		float t = player->GetAttackController()->GetHitCounter().GetHitData().hitTime.LerpT();
 		bool isT = t >= 0.5f;
 
 		Color coNn = hitTextData.color_;
@@ -194,10 +194,7 @@ void GameUI::Update()
 	Engine::UICount* waveCount = GetUICount("WaveCount");
 	waveCount->SetCount(ConvertUtility::ToFloat(data_.flowData_.currentWave));
 
-	//Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
-	//waveSecondsCount->SetCount(data_.flowData_.elapsedTime);
-
-
+	
 
 	// 更新
 	UpdateUIElement(0);
@@ -209,7 +206,7 @@ void GameUI::Draw()
 	DrawUIElement();
 }
 
-void GameUI::SetPlayer(BasePlayer* player)
+void GameUI::SetPlayer(Character::BasePlayer* player)
 {
-	player_ = player;
+	this->player = player;
 }

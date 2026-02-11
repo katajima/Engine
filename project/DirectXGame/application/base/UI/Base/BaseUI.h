@@ -62,9 +62,9 @@ protected:
 	Engine::UICount* GetUICount(std::string name);
 
 protected:
-	Engine::Entity2DManager* entity2DManager_;
-	Engine::GlobalVariables* globalVariables_;
-	Engine::Input* input_;
+	Engine::Entity2DManager* entity2DManager;
+	Engine::GlobalVariables* globalVariables;
+	Engine::Input* input;
 
 
 	std::unique_ptr <Engine::UIBaseBoard> board_;
