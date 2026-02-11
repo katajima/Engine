@@ -2,7 +2,7 @@
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 
 void AttackController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
-	CharacterParameterComponent* base, BaseCharacter* owner) {
+	Character::ParameterComponent* base, Character::BaseCharacter* owner) {
 	this->globalVariables = globalVariables;
 
 	// ダメージ計算用ステータスの初期化
@@ -31,9 +31,6 @@ void AttackController::Update(float dt) {
 	if (!isStopHitTimer_) {
 		hitCounter_.Update(dt);
 	}
-
-	// ロックオンシステム更新
-	//lockOnSystem_->Update(dt);
 
 	// ヒットボックスシステムの更新
 	hitBoxSystem_->Update(dt);

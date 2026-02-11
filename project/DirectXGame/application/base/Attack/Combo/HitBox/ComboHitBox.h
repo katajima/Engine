@@ -37,7 +37,7 @@ namespace Combo {
 		};
 
 		// 開始
-		void Enter(BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
 		void Update(const Engine::Input& input, float timer, float dt);
@@ -51,7 +51,7 @@ namespace Combo {
 		// データ取得
 		Data& GetData() { return data_; }
 		// コライダーデータ追加
-		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlovalData& reaction);
+		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& reaction);
 		// 使うヒットボックス名設定
 		void AddUseHitBox(const std::string& name) { useHitBox_.push_back(name); };
 		// 使うヒットボックス名クリーン

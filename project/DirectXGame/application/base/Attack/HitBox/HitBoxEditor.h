@@ -6,8 +6,9 @@ namespace Engine {
 	class GlobalVariables;
 }
 // 前方宣言
-class BaseCharacter;
-
+namespace Character {
+	class BaseCharacter;
+}
 
 namespace HitBox {
 
@@ -18,7 +19,7 @@ namespace HitBox {
 	public:
 
 		// 初期化
-		void Initialize(Engine::GlobalVariables* globalVariables, BaseCharacter* owner);
+		void Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
 
 		// ImGui更新
 		void ImGuiUpdate(float dt);
@@ -45,8 +46,8 @@ namespace HitBox {
 
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
-		BaseCharacter* owner = nullptr;
-		HitBox::System* hitBoxSystem_ = nullptr;
+		Character::BaseCharacter* owner = nullptr;
+		HitBox::System* hitBoxSystem = nullptr;
 	};
 
 
@@ -57,7 +58,7 @@ namespace HitBox {
 	public:
 
 		// 初期化
-		void Initialize(Engine::GlobalVariables* globalVariables, BaseCharacter* owner);
+		void Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
 
 		// ImGui更新
 		void ImGuiUpdate(float dt);
@@ -72,7 +73,7 @@ namespace HitBox {
 		std::string selectedHitBoxCollName_ = "";
 	private: // もらいもの
 		Engine::GlobalVariables* globalVariables = nullptr;
-		BaseCharacter* owner = nullptr;
-		System* hitBoxSystem_ = nullptr;
+		Character::BaseCharacter* owner = nullptr;
+		System* hitBoxSystem = nullptr;
 	};
 };

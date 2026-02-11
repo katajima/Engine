@@ -6,8 +6,9 @@
 
 
 class ObjectComponent;	// 前方宣言
-class CharacterParameterComponent;
-
+namespace Character {
+	class ParameterComponent;
+}
 /// <summary>
 /// ヒットコンポーネント
 /// </summary>
@@ -24,7 +25,7 @@ public:
 
 
 	// 更新
-	void Update(float deltaTime, ObjectComponent* object, CharacterParameterComponent* parameter);
+	void Update(float deltaTime, ObjectComponent* object, Character::ParameterComponent* parameter);
 
 	// リアクションデータ
 	void SetReactionData(const AttackReactionData& data);
@@ -37,7 +38,7 @@ public:
 private:
 
 
-	void DamageProcess(float dt, CharacterParameterComponent* parameter);
+	void DamageProcess(float dt, Character::ParameterComponent* parameter);
 
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;

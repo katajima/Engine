@@ -4,7 +4,9 @@
 #include "ComboEndCondition.h"
 #include "ComboNextCondition.h"
 
-class BaseCharacter;		// キャラクター
+namespace Character {
+	class BaseCharacter;		// キャラクター
+}
 class JumpSystem;			// ジャンプシステム
 
 
@@ -14,7 +16,7 @@ namespace Combo {
 	class ComboCondition {
 	public:
 		// 開始
-		void Enter(BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
 		void Update(const Engine::Input& input, float timer, float dt);

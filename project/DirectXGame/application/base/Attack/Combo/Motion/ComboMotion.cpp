@@ -8,7 +8,7 @@ namespace Combo {
 #pragma region ComboMotion
 
 	// 開始
-	void ComboMotion::Enter(BaseCharacter* owner) {
+	void ComboMotion::Enter(Character::BaseCharacter* owner) {
 		// コンボ用アニメーションクラス
 		comboAnimation_.Enter(owner);
 		// 移動クラス
@@ -24,7 +24,7 @@ namespace Combo {
 	}
 
 	// 終了
-	void ComboMotion::Exit(BaseCharacter* owner) {
+	void ComboMotion::Exit(Character::BaseCharacter* owner) {
 		// アニメーションクラス
 		comboAnimation_.Exit(owner);
 		// 移動クラス

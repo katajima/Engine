@@ -6,10 +6,10 @@ namespace HitBox {
 #pragma region HItBoxColl
 
 	// 初期化
-	void HitBoxColl::Initialize(Engine::GlobalVariables* globalVariables, BaseCharacter* owner) {
+	void HitBoxColl::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-		hitBoxSystem_ = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
 	};
 
 	// ImGui更新
@@ -102,10 +102,10 @@ namespace HitBox {
 
 #pragma region HitBoxEditor
 
-	void HitBoxEditor::Initialize(Engine::GlobalVariables* globalVariables, BaseCharacter* owner) {
+	void HitBoxEditor::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-		hitBoxSystem_ = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
 	}
 
 	void HitBoxEditor::ImGuiUpdate(float dt) {

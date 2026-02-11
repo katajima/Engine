@@ -5,7 +5,7 @@ namespace Combo {
 
 #pragma region main
 
-	void System::Initialize(BaseCharacter* character, Engine::GlobalVariables* globalVariables) {
+	void System::Initialize(Character::BaseCharacter* character, Engine::GlobalVariables* globalVariables) {
 		this->globalVariables = globalVariables;
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
@@ -54,7 +54,7 @@ namespace Combo {
 
 #pragma region Global
 
-	void Combo::System::ApplyGlobalComboData(const std::string& name, GlovalData& data) {
+	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
 
@@ -110,7 +110,7 @@ namespace Combo {
 		GetGlobalComboData(name, data);
 	};
 
-	void Combo::System::GetGlobalComboData(const std::string& name, GlovalData& data) {
+	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
 		data.hitBoxWindowStart_ = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 		data.hitBoxLifeTime_ = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
 
@@ -160,7 +160,7 @@ namespace Combo {
 		data.endConditionType = globalVariables->GetEnumValue<Combo::EndConditionType>(name, "終了条件タイプ");
 	}
 
-	void System::SetGlobalComboData(const std::string& name, GlovalData& data) {
+	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->SetValue(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->SetValue(name, "コンボ入力受付終了時間", data.stateInputEndTime);
 
@@ -215,7 +215,7 @@ namespace Combo {
 		}
 	};
 
-	void System::SetData(ComboData& data, const GlovalData& gData)
+	void System::SetData(ComboData& data, const GlobalData& gData)
 	{
 		///
 		/// ヒットボックス
@@ -325,7 +325,7 @@ namespace Combo {
 		if (comboGlobalDatas_.find(comboNodeName) != comboGlobalDatas_.end()) {
 			return;
 		}
-		comboGlobalDatas_[comboNodeName] = GlovalData(); // グローバルデータ追加
+		comboGlobalDatas_[comboNodeName] = GlobalData(); // グローバルデータ追加
 		ApplyGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ適応
 		GetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ取得
 	}

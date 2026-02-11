@@ -6,7 +6,7 @@ namespace Combo {
 #pragma region ComboData
 
 	// 開始
-	void ComboData::Enter(BaseCharacter* owner) {
+	void ComboData::Enter(Character::BaseCharacter* owner) {
 		// 時間初期化
 		timer_ = 0.0f;
 		// コンボ用モーションクラス開始
@@ -39,7 +39,7 @@ namespace Combo {
 	}
 
 	// 終了
-	void ComboData::Exit(BaseCharacter* owner) {
+	void ComboData::Exit(Character::BaseCharacter* owner) {
 		// 時間リセット
 		timer_ = 0.0f;
 		// コンボ用モーションクラス終了

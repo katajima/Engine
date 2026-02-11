@@ -7,9 +7,9 @@ namespace HitBox {
 
 #pragma region HitBox
 	// 初期化
-	void HitBoxInstance::Initialize(Engine::Entity3DManager* entity3dManager, BaseCharacter* character, UseType type) {
-		character_ = character;
-		entity3dManager_ = entity3dManager;
+	void HitBoxInstance::Initialize(Engine::Entity3DManager* entity3dManager, Character::BaseCharacter* character, UseType type) {
+		this->character = character;
+		this->entity3dManager = entity3dManager;
 		type_ = type;
 
 		// ワールド変換初期化

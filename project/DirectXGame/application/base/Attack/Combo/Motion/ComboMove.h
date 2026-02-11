@@ -1,6 +1,8 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+#include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
+
 // 前方宣言
 namespace Engine {
 	class AnimationComponent;	// アニメーション
@@ -8,7 +10,9 @@ namespace Engine {
 }
 
 class MovementComponent;	// 移動関係
-class BaseCharacter;		// キャラクター
+namespace Character {
+	class BaseCharacter;		// キャラクター
+}
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
 class LockOnSystem;			// ロックオンシステム
@@ -32,18 +36,23 @@ namespace Combo {
 			// 重力スケール
 			float gravityScale_ = 1.0f;				
 
+			// ターゲットの距離でどこまで近づくか
+			float moveRadius_ = 5.0f;
+
 			// 移動タイプ
-			MoveType moveType = MoveType::kForward;	
+			MoveType moveType = MoveType::kTraget;	
+
+			LockOnData lockOnData_;
 		};
 
 		// 開始
-		void Enter(BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
 		void Update(const Engine::Input& input, float timer, float dt);
 
 		// 終了
-		void Exit(BaseCharacter* owner);
+		void Exit(Character::BaseCharacter* owner);
 
 	public:
 		// 移動できるか
@@ -64,6 +73,8 @@ namespace Combo {
 		void MoveTypeProcess(const Engine::Input& input, float timer, float dt);
 		// 重力処理
 		void GravityProcess();
+		// 移動タイプによる方向指定処理
+		void MoveTypeDirectionProcess();
 	private:
 		// 移動
 		MovementComponent* moveComponent = nullptr;
@@ -73,6 +84,8 @@ namespace Combo {
 		Engine::RigidBodyComponent* rigidBodyComponent = nullptr;
 		// ロックオンシステム
 		LockOnSystem* lockOnSystem = nullptr;
+		// ターゲット
+		Character::BaseCharacter* traget = nullptr;
 	private:
 		// データ
 		Data data_;
@@ -80,5 +93,7 @@ namespace Combo {
 		Vector3 direction_ = {};
 		// 移動出来るか
 		bool isMove_ = true;
+	private:
+		Vector3 targetPos_ = {};
 	};
 }

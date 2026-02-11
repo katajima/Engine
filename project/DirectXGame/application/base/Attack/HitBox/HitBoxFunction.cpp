@@ -6,12 +6,12 @@
 
 namespace HitBox {
 
-	bool HitBoxFunction::Begin(Engine::Collider* self, Engine::Collider* other) {
-		other_ = static_cast<Engine::ColliderComponent*>(other->owner);
-		otherColl_ = other;
-		if (!other_) return false;
+	bool HitBoxFunction::Begin(Engine::Collider* self, Engine::Collider* otherColl) {
+		other = static_cast<Engine::ColliderComponent*>(otherColl->owner);
+		this->otherColl = otherColl;
+		if (!other) return false;
 
-		const uint32_t otherId = other_->GetUniqueId();	// ID取得
+		const uint32_t otherId = other->GetUniqueId();	// ID取得
 		const float nowTime = Engine::MyGame::NowTime();		// 現在時間
 		if (GetContactRecord().CheckHistory(otherId)) {
 			return false; // クールタイム中のため無視
@@ -38,12 +38,12 @@ namespace HitBox {
 
 	void HitBoxFunction::UpdateTypePlayer() {
 
-		if (otherColl_->tag != CollisionTag::Enemy) return;
+		if (otherColl->tag != CollisionTag::Enemy) return;
 
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(other_->GetHitReceiver());
+		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
 
-		BasePlayer* player = static_cast<BasePlayer*>(character_);
+		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
 
 
@@ -54,19 +54,19 @@ namespace HitBox {
 		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
 
 		enemy->Emit();	//	エフェクト出現
-		enemy->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move); // 敵ステート設定
+		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Move); // 敵ステート設定
 
 		// ヒットカウンターにヒットを通知
 		player->GetAttackController()->GetHitCounter().Hit();
 	}
 
 	void HitBoxFunction::UpdateTypeEnemy() {
-		if (otherColl_->tag != CollisionTag::Player) return;
+		if (otherColl->tag != CollisionTag::Player) return;
 
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(character_);
+		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;
 
-		BasePlayer* player = static_cast<BasePlayer*>(other_->GetHitReceiver());
+		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(other->GetHitReceiver());
 		if (!player) return;
 
 

@@ -7,7 +7,7 @@ namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, BaseCharacter* owner) {
+	void EditorBlock::Initialize(Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;	// 保存項目
 		this->state = state;						// ステート
 		this->owner = owner;						// オーナー
@@ -466,7 +466,7 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, BaseCharacter* owner) {
+	void Editor::Initialize(Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->comboSystem = comboSystem;
 		this->globalVariables = globalVariables;
 		this->owner = owner;
@@ -483,7 +483,7 @@ namespace Combo {
 
 		// リロード
 		if (ImGui::Button("Relord")) {
-			BasePlayer* player = dynamic_cast<BasePlayer*>(owner);
+			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
 			// グローバルデータ設定
 			SetGlobalData();
 			// リロード
@@ -498,10 +498,12 @@ namespace Combo {
 				globalVariables->SaveFile(it.first);
 			}
 		}
-		ImGui::End();
+		
 
 		if (isComboEditorActive_)
 			UpdateImGui(dt);
+
+		ImGui::End();
 #endif // _DEBUG
 	};
 
@@ -510,9 +512,6 @@ namespace Combo {
 
 		// 何もなければ何もしない
 		if (comboEditorBlocks_.empty()) return;
-
-		ImGui::Begin("Combo Editor");
-
 		// 初回：未選択なら先頭を選択
 		if (selectedComboEditorBlockName_.empty()) {
 			selectedComboEditorBlockName_ = comboEditorBlocks_.begin()->first;
@@ -542,7 +541,6 @@ namespace Combo {
 		ImGui::Separator();
 		ImGui::Text("Editing: %s", selectedComboEditorBlockName_.c_str());
 
-		ImGui::End();
 
 		// --- 選択されているブロックだけ表示 ---
 		for (auto& combo : comboEditorBlocks_) {
@@ -585,7 +583,7 @@ namespace Combo {
 		for (auto& it : comboSystem->GetComboNodeStates()) {
 
 			AttackSequence combo = comboEditorBlocks_[it.first].GetAttackSequence();
-			GlovalData& data = comboSystem->GetComboGlobalData(it.first);
+			GlobalData& data = comboSystem->GetComboGlobalData(it.first);
 
 
 			// 入力の時間
@@ -652,7 +650,7 @@ namespace Combo {
 		comboSystem->SetGlobalComboDatas();
 	}
 
-	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, BaseCharacter* owner) {
+	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
 
 		// 既に存在する場合は追加しない
 		if (comboEditorBlocks_.find(comboName) != comboEditorBlocks_.end()) {

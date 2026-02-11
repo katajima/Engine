@@ -7,8 +7,9 @@
 #include <map>
 
 // 前方宣言
-class BaseCharacter;
-
+namespace Character {
+    class BaseCharacter;
+}
 namespace Combo {
     /// <summary>
     /// コンボステートクラス
@@ -17,15 +18,15 @@ namespace Combo {
     public:
         virtual ~State() = default;
         // 開始
-        virtual void Enter(BaseCharacter* owner) = 0;
+        virtual void Enter(Character::BaseCharacter* owner) = 0;
         // 更新
-        virtual void Update(BaseCharacter* owner, float deltaTime) = 0;
+        virtual void Update(Character::BaseCharacter* owner, float deltaTime) = 0;
         // 終了
-        virtual void Exit(BaseCharacter* owner) = 0;
+        virtual void Exit(Character::BaseCharacter* owner) = 0;
 
     public:
         // 次のステートに遷移するかを判断する
-        virtual std::shared_ptr<State> HandleInput(BaseCharacter* owner, AttackInput input) = 0;
+        virtual std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, AttackInput input) = 0;
         // 入力受付時間の範囲チェック
         virtual bool IsInputAcceptable() = 0;
         // 次のステートえ移行受付する時間
@@ -59,19 +60,19 @@ namespace Combo {
             : animation(anim), comboData_(combo) {
         }
         // 開始
-        void Enter(BaseCharacter* owner) override;
+        void Enter(Character::BaseCharacter* owner) override;
         // 更新
-        void Update(BaseCharacter* owner, float dt) override;
+        void Update(Character::BaseCharacter* owner, float dt) override;
         // 終了
-        void Exit(BaseCharacter* owner) override;
+        void Exit(Character::BaseCharacter* owner) override;
 
         // 終了処理
-        void End(BaseCharacter* owner);
+        void End(Character::BaseCharacter* owner);
 
     public:
 
         // 入力があったら
-        std::shared_ptr<State> HandleInput(BaseCharacter* owner, AttackInput input) override {
+        std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, AttackInput input) override {
             auto it = nextStates.find(input);
             if (it != nextStates.end()) {
                 return it->second;
@@ -134,7 +135,7 @@ namespace Combo {
     /// </summary>
     class StateMachine {
     public:
-        StateMachine(BaseCharacter* entity) : owner(entity) {}
+        StateMachine(Character::BaseCharacter* entity) : owner(entity) {}
 
         // ステート設定
         void SetState(std::shared_ptr<State> state);
@@ -157,13 +158,11 @@ namespace Combo {
         }
 
     private:
-        BaseCharacter* owner;                       // 使用者
+        Character::BaseCharacter* owner;                       // 使用者
     private:
         std::shared_ptr<State> currentState;   // 現在のステート
         std::shared_ptr<State> rootState;      // 初期ステート
 
         std::optional<AttackInput> bufferedInput;   // 入力バッファ
-
-        Vector3 direction_{ 0,0,1 };
     };
 }

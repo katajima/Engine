@@ -5,8 +5,11 @@
 #pragma region ComboCondition
 
 void Combo::ComboCondition::Update(const Engine::Input& input, float timer, float dt) {
+
 	// キャンセル受付クラス更新
-	cancelReceiver_.Update(input, timer);
+	if (!nextRecever_.GetIsNext()) {
+		cancelReceiver_.Update(input, timer);
+	}
 	// コンボ入力受付クラス更新
 	if (!cancelReceiver_.GetIsCancel()) {
 		nextRecever_.Update(input, timer);
@@ -17,7 +20,7 @@ void Combo::ComboCondition::Update(const Engine::Input& input, float timer, floa
 	nextCondition_.Update(input, jumpSystem, timer, dt);
 }
 
-void Combo::ComboCondition::Enter(BaseCharacter* owner) {
+void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {
 	jumpSystem = owner->GetMoveComponent()->GetJumpSystem();	// ジャンプシステム取得
 	// キャンセル受付クラス
 	cancelReceiver_.Enter();

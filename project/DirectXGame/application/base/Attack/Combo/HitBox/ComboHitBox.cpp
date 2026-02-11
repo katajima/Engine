@@ -5,7 +5,7 @@ namespace Combo {
 #pragma region ComboHitBox
 
 	// 開始
-	void ComboHitBox::Enter(BaseCharacter* owner) {
+	void ComboHitBox::Enter(Character::BaseCharacter* owner) {
 		// ヒットボックスシステムを渡す
 		hitBoxSystem_ = owner->GetAttackController()->GetHitBoxSystem();
 		// ジャンプシステムを渡す
@@ -66,7 +66,7 @@ namespace Combo {
 		timer_ = 0.0f;
 	}
 
-	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlovalData& combo) {
+	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& combo) {
 		HitBox::CollData data = hitBoxData;
 
 		// リアクションデータ

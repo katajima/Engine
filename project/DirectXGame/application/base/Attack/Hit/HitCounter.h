@@ -3,8 +3,9 @@
 #include <DirectXGame/engine/Math/Random.h>
 
 // 前方宣言
-class CharacterParameterComponent;
-
+namespace Character{
+	class ParameterComponent;
+}
 // 戦闘中の倍率・軽減率を扱う
 class CombatStat
 {
@@ -19,7 +20,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(CharacterParameterComponent* base) {
+	void Initialize(Character::ParameterComponent* base) {
 		baseParams_ = base;
 	}
 	// 攻撃力
@@ -35,7 +36,7 @@ public:
 private:
 	Data data_;	// 戦闘用データ
 private:
-	CharacterParameterComponent* baseParams_ = nullptr;
+	Character::ParameterComponent* baseParams_ = nullptr;
 };
 
 // ダメージ計算

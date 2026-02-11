@@ -4,7 +4,9 @@
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 // 前方宣言
-class CharacterParameterComponent;	// キャラクターパラメータ設定
+namespace Character {
+	class ParameterComponent;	// キャラクターパラメータ設定
+}
 class ObjectComponent;				// オブジェクト
 class WorldTransform;				// オブジェクト位置
 class Collider;						// コライダー
@@ -20,7 +22,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object);
+	void Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object);
 
 	/// <summary>
 	/// 更新
@@ -39,7 +41,7 @@ private:
 	std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
 private:// 貰いもの
 	// キャラクターパラメータ
-	CharacterParameterComponent* paremeter = nullptr;
+	Character::ParameterComponent* paremeter = nullptr;
 	// オブジェクト
 	ObjectComponent* object = nullptr;
 	// ヒットフラグ<タグ、フラグ>何かヒットしたときに使う用のやつ 
@@ -78,7 +80,7 @@ public:
 	/// </summary>
 	/// <param name="paremeter">kキャラクターパラメータクラス</param>
 	/// <param name="object">オブジェクトクラス</param>
-	void Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object);
+	void Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object);
 
 
 	/// <summary>

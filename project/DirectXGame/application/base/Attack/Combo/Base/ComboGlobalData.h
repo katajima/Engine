@@ -18,6 +18,7 @@ namespace Combo {
 		kNone,		// 特になし
 		kTraget,	// ターゲットに向かって
 		kForward,	// 前方
+		kLockAt,	// カメラ方向
 	};
 
 	
@@ -25,7 +26,7 @@ namespace Combo {
 
 
 	// 保存項目用コンボデータ
-	struct GlovalData {
+	struct GlobalData {
 
 		std::string animationName = "";	// アニメーション名
 

@@ -7,7 +7,7 @@
 #pragma region ResponseSystem
 
 
-void ResponseSystem::Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object) {
+void ResponseSystem::Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object) {
 
 	// 攻撃衝突応答クラス初期化
 	attackResponse_ = std::make_unique<AttackResponse>();
@@ -28,7 +28,7 @@ void ResponseSystem::Update(float dt) {
 
 #pragma region AttackResponse
 
-void AttackResponse::Initialize(CharacterParameterComponent* paremeter, ObjectComponent* object) {
+void AttackResponse::Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object) {
 	assert(paremeter && object);
 	this->paremeter = paremeter;
 	this->object = object;

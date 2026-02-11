@@ -6,9 +6,9 @@
 #include "DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h"
 #include "ComboSequencer.h"
 
-
-class BaseCharacter;		// キャラクター
-
+namespace Character {
+	class BaseCharacter;		// キャラクター
+}
 
 namespace Combo {
 	// コンボデータ
@@ -16,13 +16,13 @@ namespace Combo {
 	public:
 
 		// 開始
-		void Enter(BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
 		void Update(const Engine::Input& input, float dt);
 
 		// 終了
-		void Exit(BaseCharacter* owner);
+		void Exit(Character::BaseCharacter* owner);
 	public:
 		// コンボ条件クラス
 		ComboCondition& GetComboCondition() { return comboCondition; }

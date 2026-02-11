@@ -1,17 +1,18 @@
 #pragma once
 #include "HitBoxData.h"
 
-class BaseCharacter;
-
+namespace Character {
+	class BaseCharacter;
+}
 namespace HitBox {
 
 	class HitBoxFunction {
 	public:
 
 		// 初期化
-		void Initialize(Engine::ColliderComponent* owner, BaseCharacter* character, UseType type) {
-			owner_ = owner;
-			character_ = character;
+		void Initialize(Engine::ColliderComponent* owner, Character::BaseCharacter* character, UseType type) {
+			this->owner = owner;
+			this->character = character;
 			type_ = type;
 		};
 
@@ -33,14 +34,14 @@ namespace HitBox {
 		void UpdateTypeOther();
 	private:
 		// 衝突履歴取得
-		Engine::ContactRecord& GetContactRecord() { return owner_->contactRecord_; }
+		Engine::ContactRecord& GetContactRecord() { return owner->contactRecord_; }
 	private:
-		Engine::ColliderComponent* owner_ = nullptr;	// コライダーコンポーネント(使用者)
-		Engine::ColliderComponent* other_ = nullptr;	// コライダーコンポーネント(相手)
-		BaseCharacter* character_ = nullptr;	// 使用キャラクター
+		Engine::ColliderComponent* owner = nullptr;	// コライダーコンポーネント(使用者)
+		Engine::ColliderComponent* other = nullptr;	// コライダーコンポーネント(相手)
+		Character::BaseCharacter* character = nullptr;	// 使用キャラクター
 		UseType type_;							// 使用者
 
-		Engine::Collider* otherColl_ = nullptr;
+		Engine::Collider* otherColl = nullptr;
 		AttackReactionData data_;
 	};
 };

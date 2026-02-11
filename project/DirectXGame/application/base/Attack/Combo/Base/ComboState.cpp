@@ -7,7 +7,7 @@ namespace Combo {
 #pragma region NodeState
 
 	// 開始
-	void NodeState::Enter(BaseCharacter* owner) {
+	void NodeState::Enter(Character::BaseCharacter* owner) {
 		// 時間初期化 
 		timeInState = 0.0f;
 		// アニメーションの設定
@@ -20,7 +20,7 @@ namespace Combo {
 	}
 
 	// 更新
-	void NodeState::Update(BaseCharacter* owner, float dt) {
+	void NodeState::Update(Character::BaseCharacter* owner, float dt) {
 		// 時間更新
 		timeInState += dt;
 
@@ -34,19 +34,19 @@ namespace Combo {
 	}
 
 	// 終了
-	void NodeState::Exit(BaseCharacter* owner) {
+	void NodeState::Exit(Character::BaseCharacter* owner) {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボデータ終了処理
 		comboData_.Exit(owner);
 	}
 
-	void NodeState::End(BaseCharacter* owner) {
+	void NodeState::End(Character::BaseCharacter* owner) {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
 		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
-		owner->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);  // ← BaseCharacterが持っている関数
+		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Idle);  // ← BaseCharacterが持っている関数
 		owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
 	};
 
@@ -61,16 +61,6 @@ namespace Combo {
 		if (currentState) currentState->Exit(owner);	// 終了処理
 		currentState = state;
 		if (currentState) {
-
-			// 方向指定
-			Vector2 velo = owner->GetInput()->GetGamePadLeftStick();
-			if (velo.Length() != 0.0f) {
-
-				direction_ = { velo.x,0.0f,velo.y };
-				// 方向
-				owner->GetMoveComponent()->GetMoveSystem()->CameraDirectionToMoveDirection(direction_);
-			}
-			currentState->Set(direction_);
 			currentState->Enter(owner);	// 開始処理
 		}
 		bufferedInput.reset(); // 状態遷移したら入力リセット

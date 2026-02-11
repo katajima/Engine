@@ -8,8 +8,9 @@ namespace Engine {
 	class Entity3DManager; // 前方宣言
 	class GlobalVariables;
 }
-class BaseCharacter;
-
+namespace Character {
+	class BaseCharacter;
+}
 namespace HitBox {
 	/// <summary>
 	/// 当たり判定を管理するシステム
@@ -27,7 +28,7 @@ namespace HitBox {
 
 
 		// 初期化
-		void Initialize(BaseCharacter* character, Engine::Entity3DManager* entity3dManager);
+		void Initialize(Character::BaseCharacter* character, Engine::Entity3DManager* entity3dManager);
 		// 更新
 		void Update(float dt);
 
@@ -63,7 +64,7 @@ namespace HitBox {
 		// ヒットボックスコライダーデータ群
 		std::map<std::string, CollData> hitBoxCollDatas_;
 	private:
-		BaseCharacter* character_ = nullptr;
-		Engine::Entity3DManager* entity3dManager_ = nullptr;
+		Character::BaseCharacter* character = nullptr;
+		Engine::Entity3DManager* entity3dManager = nullptr;
 	};
 }

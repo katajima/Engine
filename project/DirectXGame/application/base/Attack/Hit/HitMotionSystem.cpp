@@ -2,7 +2,7 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 
-void HitMotionSystem::Update(float dt, ObjectComponent* object, CharacterParameterComponent* parameter)
+void HitMotionSystem::Update(float dt, ObjectComponent* object, Character::ParameterComponent* parameter)
 {
 	// ダメージモーション
 	DamageProcess(dt, parameter);
@@ -51,13 +51,13 @@ void HitMotionSystem::UseGravity(ObjectComponent* object)
 	object->GetRigidBodyComponent()->SetIsGravity(isGravity);
 }
 
-void HitMotionSystem::DamageProcess(float dt, CharacterParameterComponent* parameter) {
+void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* parameter) {
 
 	for (auto& damage : damageMotions_) {
 		damage.Update(dt);
 
 		if (damage.GetDamageData().IsAttack()) {
-			parameter->parameters_.HP.value -= damage.GetDamageData().GetDamage();
+			parameter->parameters_->HP.value -= damage.GetDamageData().GetDamage();
 		}
 
 	}

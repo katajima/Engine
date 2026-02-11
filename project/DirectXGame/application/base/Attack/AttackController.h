@@ -5,8 +5,10 @@
 #include <DirectXGame/application/base/Attack/LockOn/LockOnSystem.h>
 
 // 前方宣言
-class CharacterParameterComponent;
-class BaseCharacter;
+namespace Character {
+	class ParameterComponent;
+	class BaseCharacter;
+}
 class BaseWeapon;	
 namespace Engine {
 	class Entity3DManager;
@@ -21,7 +23,7 @@ class AttackController {
 public:
 	// 初期化
 	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
-		CharacterParameterComponent* base, BaseCharacter* owner);
+		Character::ParameterComponent* base, Character::BaseCharacter* owner);
 	// 更新
 	void Update(float dt);
 

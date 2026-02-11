@@ -15,8 +15,9 @@ enum class AttackInput {
 };
 
 // 前方宣言
-class BaseCharacter;
-
+namespace Character {
+	class BaseCharacter;
+}
 /// <summary>
 /// 攻撃コマンドクラス
 /// </summary>
@@ -25,19 +26,19 @@ class AttackICommand
 public:
 	virtual ~AttackICommand();
 	
-	virtual void Exec(BaseCharacter& character) = 0;
+	virtual void Exec(Character::BaseCharacter& character) = 0;
 
 };
 
 // 弱攻撃
 class AttackLight : public AttackICommand
 {
-	void Exec(BaseCharacter& character) override;
+	void Exec(Character::BaseCharacter& character) override;
 };
 // 強攻撃
 class AttackHeavy : public AttackICommand
 {
-	void Exec(BaseCharacter& character) override;
+	void Exec(Character::BaseCharacter& character) override;
 };
 
 namespace Engine {

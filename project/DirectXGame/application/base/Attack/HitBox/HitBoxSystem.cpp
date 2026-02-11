@@ -1,9 +1,9 @@
 #include "HitBoxSystem.h"
 
 namespace HitBox {
-	void System::Initialize(BaseCharacter* character, Engine::Entity3DManager* entity3dManager) {
-		character_ = character;
-		entity3dManager_ = entity3dManager;
+	void System::Initialize(Character::BaseCharacter* character, Engine::Entity3DManager* entity3dManager) {
+		this->character = character;
+		this->entity3dManager = entity3dManager;
 	};
 
 	void System::Update(float dt) {
@@ -30,7 +30,7 @@ namespace HitBox {
 		float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entity3dManager_, character_, type);
+		d.hitBox->Initialize(entity3dManager, character, type);
 		d.hitBox->GetWorldTransform().Update();
 		std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
 		std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;

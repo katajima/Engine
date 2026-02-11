@@ -12,15 +12,17 @@ namespace Engine {
 	class GlobalVariables;
 }
 // 前方宣言
-class BaseCharacter;
-class BasePlayer;
+namespace Character {
+	class BaseCharacter;
+	class BasePlayer;
+}
 
 
 namespace Combo {
 	class EditorBlock {
 	public:
 		// 初期化
-		void Initialize(Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, BaseCharacter* owner);
+		void Initialize(Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
 		// 更新
 		void UpdateImGui(float dt);
 	public:
@@ -38,7 +40,7 @@ namespace Combo {
 		float GetMaxFrame() const { return ConvertUtility::FramesToSeconds(maxFrame); }
 
 		// データ取得
-		GlovalData GetData() const { return data_; }
+		GlobalData GetData() const { return data_; }
 	private:
 		// アニメーション設定
 		void ImGuiApplyAnimationToState();
@@ -84,7 +86,7 @@ namespace Combo {
 
 	private: // もらいもの
 		// 所有者
-		BaseCharacter* owner = nullptr;
+		Character::BaseCharacter* owner = nullptr;
 		// コンボシステム
 		Combo::System* comboSystem = nullptr;
 		// 接続可能なコンボ名リスト
@@ -115,7 +117,7 @@ namespace Combo {
 		bool nowChoice_ = false;
 	private:
 		// データ
-		GlovalData data_;
+		GlobalData data_;
 	};
 
 
@@ -125,7 +127,7 @@ namespace Combo {
 	public:
 
 		// 初期化
-		void Initialize(Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, BaseCharacter* owner);
+		void Initialize(Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
 		// 更新 
 		void Update(float dt);
 	private:
@@ -137,12 +139,12 @@ namespace Combo {
 		void SetGlobalData();
 	private:
 		// コンボエディターブロック作成
-		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, BaseCharacter* owner);
+		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
 	private: // もらいもの
 		// コンボシステム
 		Combo::System* comboSystem = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
-		BaseCharacter* owner = nullptr;
+		Character::BaseCharacter* owner = nullptr;
 
 	private:
 		// コンボエディターブロックマップ
@@ -154,7 +156,7 @@ namespace Combo {
 		// 選択中のコンボエディターブロック名
 		std::string selectedComboEditorBlockName_;
 
-		GlovalData data;
+		GlobalData data;
 
 		// コンボエディターがアクティブか
 		bool isComboEditorActive_ = true;

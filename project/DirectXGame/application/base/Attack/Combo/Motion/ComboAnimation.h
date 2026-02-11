@@ -9,7 +9,9 @@ namespace Engine {
 
 
 class MovementComponent;	// 移動関係
-class BaseCharacter;		// キャラクター
+namespace Character {
+	class BaseCharacter;		// キャラクター
+}
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
 
@@ -30,13 +32,13 @@ namespace Combo {
 
 
 		// 開始
-		void Enter(BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
 		void Update(const Engine::Input& input, float timer, float dt);
 
 		// 終了
-		void Exit(BaseCharacter* owner);
+		void Exit(Character::BaseCharacter* owner);
 
 	public:
 		// データ構造体取得

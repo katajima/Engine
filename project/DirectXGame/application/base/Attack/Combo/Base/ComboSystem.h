@@ -6,7 +6,9 @@
 #include "ComboState.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 
-class BaseCharacter; // 前方宣言
+namespace Character {
+	class BaseCharacter; // 前方宣言
+}
 namespace Engine {
 	class GlobalVariables;
 }
@@ -19,7 +21,7 @@ namespace Combo {
 	{
 	public:
 		// 初期化
-		void Initialize(BaseCharacter* character, Engine::GlobalVariables* globalVariables);
+		void Initialize(Character::BaseCharacter* character, Engine::GlobalVariables* globalVariables);
 
 		// コンボ更新
 		void UpdateCombo(float dt) {
@@ -32,13 +34,13 @@ namespace Combo {
 	public: // 保存や適応に関しての関数
 
 		// 保存項目の追加
-		void ApplyGlobalComboData(const std::string& name, Combo::GlovalData& data);
+		void ApplyGlobalComboData(const std::string& name, Combo::GlobalData& data);
 
 		// 保存項目の適応
-		void GetGlobalComboData(const std::string& name, Combo::GlovalData& data);
+		void GetGlobalComboData(const std::string& name, Combo::GlobalData& data);
 
 		// 保存項目に設定
-		void SetGlobalComboData(const std::string& name, Combo::GlovalData& data);
+		void SetGlobalComboData(const std::string& name, Combo::GlobalData& data);
 
 		// 全保存項目の設定
 		void SetGlobalComboDatas();
@@ -100,10 +102,10 @@ namespace Combo {
 
 	public:
 		// データ設定
-		void SetData(ComboData& data, const GlovalData& gData);
+		void SetData(ComboData& data, const GlobalData& gData);
 
 		// グローバルデータ取得
-		GlovalData& GetComboGlobalData(const std::string& comboNodeName) {
+		GlobalData& GetComboGlobalData(const std::string& comboNodeName) {
 			auto it = comboGlobalDatas_.find(comboNodeName);
 			assert(it != comboGlobalDatas_.end());
 			return it->second;
@@ -132,7 +134,7 @@ namespace Combo {
 		// コンボノードステートマップ
 		std::map<std::string, std::shared_ptr<NodeState>> comboNodes_;
 		// 保存データマップ 
-		std::map<std::string, GlovalData> comboGlobalDatas_;
+		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
 	private:

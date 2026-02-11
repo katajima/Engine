@@ -4,7 +4,7 @@
 namespace Combo {
 
 	// 開始
-	void ComboAnimation::Enter(BaseCharacter* owner) {
+	void ComboAnimation::Enter(Character::BaseCharacter* owner) {
 		// アニメーションの設定
 		animationComponent = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		// アニメーション設定
@@ -26,7 +26,7 @@ namespace Combo {
 	}
 
 	// 終了
-	void ComboAnimation::Exit(BaseCharacter* owner) {
+	void ComboAnimation::Exit(Character::BaseCharacter* owner) {
 		animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
 		animationComponent->SetIsLoop(data_.animationLoop_);	// ループ再生
 		animationComponent->SetAnimationSpeed(1.0f);			// アニメーションスピード設定

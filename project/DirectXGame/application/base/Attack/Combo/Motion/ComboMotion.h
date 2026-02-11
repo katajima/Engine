@@ -10,11 +10,11 @@ namespace Combo {
 	class ComboMotion {
 	public:
 		// 開始
-		void Enter(BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner);
 		// 更新
 		void Update(const Engine::Input& input, float timer, float dt);
 		// 終了
-		void Exit(BaseCharacter* owner);
+		void Exit(Character::BaseCharacter* owner);
 	public:
 		// コンボ用アニメーションクラス取得
 		ComboAnimation& GetComboAnimation() { return comboAnimation_; }
