@@ -30,11 +30,11 @@ void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, E
 
 	// シリンダー生成
 	ctlinder_ = std::make_unique<Engine::CylinderPrimitive>();
-	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/simasima.png");
+	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/simasima.dds");
 	ctlinder_->Data() = cylinderParam;	//　パラメータ代入
 
 	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.png", camera);
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.dds", camera);
 	objectReticle_->SetPrimitive(std::move(ctlinder_));
 	objectReticle_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);

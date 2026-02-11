@@ -69,7 +69,7 @@ namespace Character {
 
 		// ロックオン
 		icon_lockOn = std::make_unique<Engine::Sprite>();
-		icon_lockOn->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/LockOnW.png", false);
+		icon_lockOn->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/LockOnW.dds", false);
 		icon_lockOn->SetSize(0.10f);		// サイズ指定
 		icon_lockOn->SetColor({ 1,0,1,1 });	// 色指定
 		icon_lockOn->SetPosition({ -100,650 });	// 位置指定
@@ -82,7 +82,7 @@ namespace Character {
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.png",
+		objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
 		objectComponentShadow_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 

@@ -83,13 +83,13 @@ void Engine::UICheckBox::InitSprite()
 {
 	// チェックボタン初期化
 	checkSprite = std::make_unique<BaseSprite>();
-	checkSprite->Init(entity2DManager_, "check", "resources/Texture/Image.png");
+	checkSprite->Init(entity2DManager_, "check", "resources/Texture/Image.dds");
 	checkSprite->GetSprite()->SetSize({24.0f,24.0f});		// サイズ設定
 	checkSprite->GetSprite()->SetAnchorPoint({0.5f,0.5f});	// アンカーポイント設定
 	
 	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();
-	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.png");
+	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.dds");
 	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });		// アンカーポイント設定
 	backgroundSprite->GetSprite()->SetColor({0.5f,0.5f ,0.5f ,1.0f});	//色指定
 	backgroundSprite->GetSprite()->SetSize({ 30.0f,30.0f });			// サイズ設定
@@ -148,14 +148,14 @@ void Engine::UISlider::InitSprite() {
 
 	// スライダー初期化
 	slidSprite = std::make_unique<BaseSprite>();
-	slidSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.png");
+	slidSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.dds");
 	slidSprite->GetSprite()->SetSize({ 24.0f,24.0f });		// サイズ設定
 	slidSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
 	slidSprite->SetUseColl(true);							// コライダー使うか設定
 
 	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();
-	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.png");
+	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.dds");
 	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });		// アンカーポイント設定
 	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });	// 色設定
 	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });			// サイズ設定
@@ -272,13 +272,13 @@ void Engine::UISlider::UniqueDraw() {
 void Engine::UIMeter::InitSprite() {
 	// メータスプライト初期化
 	meterSprite = std::make_unique<BaseSprite>();
-	meterSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.png");
+	meterSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.dds");
 	meterSprite->GetSprite()->SetSize({ 494.0f,24.0f });			// サイズ設定
 	meterSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });		// アンカーポイント設定
 
 	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();				
-	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.png");
+	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.dds");
 	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });		// アンカーポイント設定
 	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });	// 色設定
 	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });			// サイズ設定
@@ -286,7 +286,7 @@ void Engine::UIMeter::InitSprite() {
 	// 名前スプライトを使うなら
 	if (useNameSprite_) {
 		nameSprite_ = std::make_unique<BaseSprite>();
-		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.png");
+		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.dds");
 		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));	// アンカーポイント設定
 		nameSprite_->SetSize({ 24.0f,24.0f });				// サイズ設定
 	}
@@ -401,10 +401,10 @@ void Engine::UIPair::InitSprite()
 {
 	// 最初のスプライト初期化
 	firstSprite = std::make_unique<BaseSprite>();
-	firstSprite->Init(entity2DManager_, "first", "resources/Texture/Image.png");
+	firstSprite->Init(entity2DManager_, "first", "resources/Texture/Image.dds");
 	// 次のスプライト初期化
 	secondSprite = std::make_unique<BaseSprite>();
-	secondSprite->Init(entity2DManager_, "second", "resources/Texture/Image.png");
+	secondSprite->Init(entity2DManager_, "second", "resources/Texture/Image.dds");
 	
 	// 親子付け
 	if (parent_) {
@@ -458,7 +458,7 @@ void Engine::UICount::InitSprite()
 	// 行数分初期化
 	for (int i = 0; i < instance_; i++) {
 		auto sprite = std::make_unique<BaseSprite>();
-		sprite->Init(entity2DManager_, "count", "resources/Texture/num/Number_x64y96.png");
+		sprite->Init(entity2DManager_, "count", "resources/Texture/num/Number_x64y96.dds");
 		sprite->SetSize({ 24.0f,24.0f });		// サイズ設定
 		sprite->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
 
@@ -467,7 +467,7 @@ void Engine::UICount::InitSprite()
 	// 名前スプライトがあるなら初期化
 	if (useNameSprite_) {
 		nameSprite_ = std::make_unique<BaseSprite>();
-		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.png");
+		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.dds");
 		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));	// アンカーポイント設定
 		nameSprite_->SetSize({ 24.0f,24.0f });				// サイズ設定
 	}

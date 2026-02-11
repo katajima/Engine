@@ -77,11 +77,18 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 	}
 	else if (isDds) {
 		textureData.metadata = mipImages.GetMetadata();
-		//// キューブマップとして設定
-		textureData.metadata.arraySize = 6; // キューブマップには6つの面がある
+        // 変更後:
+        const bool isCube = textureData.metadata.IsCubemap();
+		if (isCube) {
+			//// キューブマップとして設定
+			textureData.metadata.arraySize = 6; // キューブマップには6つの面がある
 
-		// TEX_MISC_TEXTURECUBE フラグを追加して、キューブマップであることを指定
-		textureData.metadata.miscFlags = DirectX::TEX_MISC_TEXTURECUBE;
+			// TEX_MISC_TEXTURECUBE フラグを追加して、キューブマップであることを指定
+			textureData.metadata.miscFlags = DirectX::TEX_MISC_TEXTURECUBE;
+		}
+		else {
+			textureData.metadata = mipImages.GetMetadata();
+		}
 	}
 	else {
 		textureData.metadata = mipImages.GetMetadata();

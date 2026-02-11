@@ -142,55 +142,55 @@ void Engine::MyGame::InitializeResource()
 	ModelManager* modelManager = dxCommon->GetModelManager();
 	
 
-	textureManager->LoadTexture("resources/Texture/uvChecker.png");
-	textureManager->LoadTexture("resources/Texture/Image.png");
-	textureManager->LoadTexture("resources/Texture/simasima.png");
+	textureManager->LoadTexture("resources/Texture/uvChecker.dds");
+	textureManager->LoadTexture("resources/Texture/Image.dds");
+	textureManager->LoadTexture("resources/Texture/simasima.dds");
 
 
-	textureManager->LoadTexture("resources/Texture/grass.png");
-	textureManager->LoadTexture("resources/Texture/ground.png");
-	textureManager->LoadTexture("resources/Texture/icon/LockOnW.png");
-	textureManager->LoadTexture("resources/Texture/renga.png");
-	textureManager->LoadTexture("resources/Texture/enemy.png");
+	textureManager->LoadTexture("resources/Texture/grass.dds");
+	textureManager->LoadTexture("resources/Texture/ground.dds");
+	textureManager->LoadTexture("resources/Texture/icon/LockOnW.dds");
+	textureManager->LoadTexture("resources/Texture/renga.dds");
+	textureManager->LoadTexture("resources/Texture/enemy.dds");
 
-	textureManager->LoadTexture("resources/Texture/text/normalAttack.png");
-	textureManager->LoadTexture("resources/Texture/text/special.png");
-	textureManager->LoadTexture("resources/Texture/text/Hit.png");
-	textureManager->LoadTexture("resources/Texture/text/HP.png");
-	textureManager->LoadTexture("resources/Texture/text/SP.png");
-	textureManager->LoadTexture("resources/Texture/text/wave.png");
-	textureManager->LoadTexture("resources/Texture/text/seconds.png");
-
-
+	textureManager->LoadTexture("resources/Texture/text/normalAttack.dds");
+	textureManager->LoadTexture("resources/Texture/text/special.dds");
+	textureManager->LoadTexture("resources/Texture/text/Hit.dds");
+	textureManager->LoadTexture("resources/Texture/text/HP.dds");
+	textureManager->LoadTexture("resources/Texture/text/SP.dds");
+	textureManager->LoadTexture("resources/Texture/text/wave.dds");
+	textureManager->LoadTexture("resources/Texture/text/seconds.dds");
 
 
-	textureManager->LoadTexture("resources/Texture/effect/aa.png");
-	textureManager->LoadTexture("resources/Texture/effect/aa2.png");
+
+
+	textureManager->LoadTexture("resources/Texture/effect/aa.dds");
+	textureManager->LoadTexture("resources/Texture/effect/aa2.dds");
 	for (int i = 0; i < 10; i++) {
-		std::string label = "resources/Texture/num/" + std::to_string(i) + ".png";
+		std::string label = "resources/Texture/num/" + std::to_string(i) + ".dds";
 		textureManager->LoadTexture(label);
 	}
-	textureManager->LoadTexture("resources/Texture/num/Number_x64y96.png");
+	textureManager->LoadTexture("resources/Texture/num/Number_x64y96.dds");
 
 
-	textureManager->LoadTexture("resources/Texture/text/max.png");
+	textureManager->LoadTexture("resources/Texture/text/max.dds");
 
 	
-	textureManager->LoadTexture("resources/Texture/effect/circle2.png");
-	textureManager->LoadTexture("resources/Texture/effect/gradationLine.png");
-	textureManager->LoadTexture("resources/Texture/effect/dust.png");
-	textureManager->LoadTexture("resources/Texture/effect/hit.png");
-	textureManager->LoadTexture("resources/Texture/effect/ring.png");
+	textureManager->LoadTexture("resources/Texture/effect/circle2.dds");
+	textureManager->LoadTexture("resources/Texture/effect/gradationLine.dds");
+	textureManager->LoadTexture("resources/Texture/effect/dust.dds");
+	textureManager->LoadTexture("resources/Texture/effect/hit.dds");
+	textureManager->LoadTexture("resources/Texture/effect/ring.dds");
 
 	// 煙
-	textureManager->LoadTexture("resources/Texture/smoke/no1.png");
-	textureManager->LoadTexture("resources/Texture/smoke/no2.png");
-	textureManager->LoadTexture("resources/Texture/smoke/no3.png");
+	textureManager->LoadTexture("resources/Texture/smoke/no1.dds");
+	textureManager->LoadTexture("resources/Texture/smoke/no2.dds");
+	textureManager->LoadTexture("resources/Texture/smoke/no3.dds");
 	
 	//
-	textureManager->LoadTexture("resources/Texture/effect/exp.png");
+	textureManager->LoadTexture("resources/Texture/effect/exp.dds");
 	
-	textureManager->LoadTexture("resources/Texture/effect/spark.png");
+	textureManager->LoadTexture("resources/Texture/effect/spark.dds");
 	
 	// XBOXコントローラボタンテクスチャ全て読み込み
 	textureManager->LoadAllTexturesInDirectory("resources/Texture/XBOX");
@@ -218,14 +218,14 @@ void Engine::MyGame::CreateParticle()
 
 
 	primi = std::make_unique<TorusPrimitive>();
-	primi->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/uvChecker.png");
+	primi->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/uvChecker.dds");
 	
 
 	primiTrai = std::make_unique<TrianglePrimitive>();
-	primiTrai->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/Image.png");
+	primiTrai->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/Image.dds");
 
 	primiPlane = std::make_unique<PlanePrimitive>();
-	primiPlane->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/uvChecker.png");
+	primiPlane->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/uvChecker.dds");
 
 
 	ShapeParameter::Star star;
@@ -233,7 +233,7 @@ void Engine::MyGame::CreateParticle()
 	star.outerRadius = 7.0f;
 	star.segments = 4;
 	primiStar = std::make_unique<StarPrimitive>();
-	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/Image.png");
+	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/Image.dds");
 	primiStar->Data() = star;
 
 
@@ -244,86 +244,86 @@ void Engine::MyGame::CreateParticle()
 
 
 	primiRing = std::make_unique<RingPrimitive>();
-	primiRing->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/effect/gradationLine.png");
+	primiRing->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/effect/gradationLine.dds");
 	primiRing->Data() = ring;
 	primiRing->MeshInitialize();
 
 
-	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.dds", modelManager->FindModel("plane.obj"));
 
-	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"), {}, EmitData::BlendType::MODE_ADD);
+	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"), {}, EmitData::BlendType::MODE_ADD);
 
-	particleManager->CreateParticleGroup("dustt", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
-
-
-	particleManager->CreateParticleGroup("primi", "resources/Texture/uvChecker.png", primi.get());
-
-	particleManager->CreateParticleGroup("primiPlane", "resources/Texture/effect/circle2.png", primiPlane.get());
+	particleManager->CreateParticleGroup("dustt", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"));
 
 
-	particleManager->CreateParticleGroup("smoke", "resources/Texture/effect/aa.png", modelManager->FindModel("plane.obj"));
-	particleManager->CreateParticleGroup("explosionSmoke", "resources/Texture/effect/aa.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("primi", "resources/Texture/uvChecker.dds", primi.get());
 
-	particleManager->CreateParticleGroup("dashEmit", "resources/Texture/effect/aa.png", modelManager->FindModel("plane.obj"));
-	particleManager->CreateParticleGroup("moveLimit", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("primiPlane", "resources/Texture/effect/circle2.dds", primiPlane.get());
+
+
+	particleManager->CreateParticleGroup("smoke", "resources/Texture/effect/aa.dds", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("explosionSmoke", "resources/Texture/effect/aa.dds", modelManager->FindModel("plane.obj"));
+
+	particleManager->CreateParticleGroup("dashEmit", "resources/Texture/effect/aa.dds", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("moveLimit", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"));
 
 	// 煙
-	particleManager->CreateParticleGroup("smokePlane01", "resources/Texture/smoke/no1.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane02", "resources/Texture/smoke/no2.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane03", "resources/Texture/smoke/no3.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane04", "resources/Texture/smoke/no4.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane05", "resources/Texture/smoke/no3.png", primiPlane.get());
-	particleManager->CreateParticleGroup("expPlane01", "resources/Texture/effect/exp2.png", primiPlane.get());
-	particleManager->CreateParticleGroup("expSpark", "resources/Texture/effect/spark.png", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane01", "resources/Texture/smoke/no1.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane02", "resources/Texture/smoke/no2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane03", "resources/Texture/smoke/no3.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane04", "resources/Texture/smoke/no4.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane05", "resources/Texture/smoke/no3.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("expPlane01", "resources/Texture/effect/exp2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("expSpark", "resources/Texture/effect/spark.dds", primiPlane.get());
 
-	particleManager->CreateParticleGroup("smokePlane01_1", "resources/Texture/smoke/no1.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane02_1", "resources/Texture/smoke/no2.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane03_1", "resources/Texture/smoke/no3.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane01_2", "resources/Texture/smoke/no1.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane02_2", "resources/Texture/smoke/no2.png", primiPlane.get());
-	particleManager->CreateParticleGroup("smokePlane03_2", "resources/Texture/smoke/no3.png", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane01_1", "resources/Texture/smoke/no1.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane02_1", "resources/Texture/smoke/no2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane03_1", "resources/Texture/smoke/no3.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane01_2", "resources/Texture/smoke/no1.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane02_2", "resources/Texture/smoke/no2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("smokePlane03_2", "resources/Texture/smoke/no3.dds", primiPlane.get());
 
-	particleManager->CreateParticleGroup("AnimatedCube", "resources/Texture/Image.png", modelManager->FindModel("AnimatedCube.gltf"));
+	particleManager->CreateParticleGroup("AnimatedCube", "resources/Texture/Image.dds", modelManager->FindModel("AnimatedCube.gltf"));
 
 	// 列車煙
-	particleManager->CreateParticleGroup("trainDust", "resources/Texture/smoke/no3.png", primiPlane.get());
+	particleManager->CreateParticleGroup("trainDust", "resources/Texture/smoke/no3.dds", primiPlane.get());
 	// 船の水しぶき
-	particleManager->CreateParticleGroup("shipDust", "resources/Texture/effect/ink.png", primiPlane.get());
+	particleManager->CreateParticleGroup("shipDust", "resources/Texture/effect/ink.dds", primiPlane.get());
 	// 雲
-	particleManager->CreateParticleGroup("cloudDust", "resources/Texture/effect/cloud.png", primiPlane.get());
-	particleManager->CreateParticleGroup("cloudDust2", "resources/Texture/effect/cloud2.png", primiPlane.get());
-	particleManager->CreateParticleGroup("cloudDust3", "resources/Texture/effect/cloud3.png", primiPlane.get());
+	particleManager->CreateParticleGroup("cloudDust", "resources/Texture/effect/cloud.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("cloudDust2", "resources/Texture/effect/cloud2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("cloudDust3", "resources/Texture/effect/cloud3.dds", primiPlane.get());
 
 
 	// ヒット
-	particleManager->CreateParticleGroup("hitEffect", "resources/Texture/effect/effect.png", primiPlane.get());
-	particleManager->CreateParticleGroup("hitEffect2", "resources/Texture/effect/effect2.png", primiPlane.get());
-	particleManager->CreateParticleGroup("ringEmit", "resources/Texture/effect/ring.png", primiPlane.get());
-	particleManager->CreateParticleGroup("ringHit", "resources/Texture/effect/gradationLine.png", primiRing.get()); // 柵
+	particleManager->CreateParticleGroup("hitEffect", "resources/Texture/effect/effect.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("hitEffect2", "resources/Texture/effect/effect2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("ringEmit", "resources/Texture/effect/ring.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("ringHit", "resources/Texture/effect/gradationLine.dds", primiRing.get()); // 柵
 	particleManager->GetParticleGroups("ringHit").isUVClamp = true;
 	particleManager->GetParticleGroups("ringHit").mesh->material->GetMaterialInstance().transform.scale.x = 10.0f;
 	particleManager->GetParticleGroups("ringHit").mesh->material->GetMaterialInstance().transform.scale.y = 10.0f;
 
 
 	// 敵関係
-	particleManager->CreateParticleGroup("hitStar", "resources/Texture/Image.png", primiStar.get());
-	particleManager->CreateParticleGroup("hitTrai", "resources/Texture/Image.png", primiTrai.get());
-	particleManager->CreateParticleGroup("hit", "resources/Texture/effect/hit.png", modelManager->FindModel("plane.obj"));
-	particleManager->CreateParticleGroup("enemyGround", "resources/Texture/Image.png", modelManager->FindModel("plane.obj"));
-	particleManager->CreateParticleGroup("enemyDust", "resources/Texture/effect/dust.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("hitStar", "resources/Texture/Image.dds", primiStar.get());
+	particleManager->CreateParticleGroup("hitTrai", "resources/Texture/Image.dds", primiTrai.get());
+	particleManager->CreateParticleGroup("hit", "resources/Texture/effect/hit.dds", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("enemyGround", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("enemyDust", "resources/Texture/effect/dust.dds", modelManager->FindModel("plane.obj"));
 
 	// 敵部品
-	particleManager->CreateParticleGroup("enemyTire", "resources/Texture/enemy.png", modelManager->FindModel("enemyTire.obj")); // タイヤ
-	particleManager->CreateParticleGroup("enemyDuct", "resources/Texture/enemy.png", modelManager->FindModel("enemyDuct.obj")); // ダクト
-	particleManager->CreateParticleGroup("enemyPlank", "resources/Texture/enemy.png", modelManager->FindModel("enemyPlank.obj")); // 板
-	particleManager->CreateParticleGroup("enemyGear", "resources/Texture/enemy.png", modelManager->FindModel("enemyGear.obj")); // 歯車
-	particleManager->CreateParticleGroup("enemyFence", "resources/Texture/enemy.png", modelManager->FindModel("enemyFence.obj")); // 柵
+	particleManager->CreateParticleGroup("enemyTire", "resources/Texture/enemy.dds", modelManager->FindModel("enemyTire.obj")); // タイヤ
+	particleManager->CreateParticleGroup("enemyDuct", "resources/Texture/enemy.dds", modelManager->FindModel("enemyDuct.obj")); // ダクト
+	particleManager->CreateParticleGroup("enemyPlank", "resources/Texture/enemy.dds", modelManager->FindModel("enemyPlank.obj")); // 板
+	particleManager->CreateParticleGroup("enemyGear", "resources/Texture/enemy.dds", modelManager->FindModel("enemyGear.obj")); // 歯車
+	particleManager->CreateParticleGroup("enemyFence", "resources/Texture/enemy.dds", modelManager->FindModel("enemyFence.obj")); // 柵
 
 
-	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.png", modelManager->FindModel("plane.obj"));
+	particleManager->CreateParticleGroup("dust", "resources/Texture/uvChecker.dds", modelManager->FindModel("plane.obj"));
 	
 	
-	particleManager->CreateParticleGroup("cartridge", "resources/Texture/Image.png", modelManager->FindModel("cartridge.obj"));
+	particleManager->CreateParticleGroup("cartridge", "resources/Texture/Image.dds", modelManager->FindModel("cartridge.obj"));
 
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 30.0f;
@@ -336,16 +336,16 @@ void Engine::MyGame::CreateParticle()
 
 
 	cylinder_ = std::make_unique<CylinderPrimitive>();
-	cylinder_->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
+	cylinder_->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.dds");
 	cylinder_->Data() = cylinderParam;
 	cylinder_->MeshInitialize();
 	// 
-	particleManager->CreateParticleGroup("missileHitCylinder", "resources/Texture/effect/gradationLine.png", cylinder_.get());
+	particleManager->CreateParticleGroup("missileHitCylinder", "resources/Texture/effect/gradationLine.dds", cylinder_.get());
 	particleManager->GetParticleGroups("missileHitCylinder").isUVClamp = true;
 	
 
 	// ミサイルHitエフェクト
-	particleManager->CreateParticleGroup("missileHit", "resources/Texture/Image.png", primiStar.get());
+	particleManager->CreateParticleGroup("missileHit", "resources/Texture/Image.dds", primiStar.get());
 
 }
 

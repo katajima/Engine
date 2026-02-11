@@ -549,8 +549,8 @@ void Engine::PostEffectDissovle::CreateRootSignature() {
 	psoManager_->SetRootSignature(posteffect_.rootSignature, dissovleRootParameters, _countof(dissovleRootParameters), staticSamplers, _countof(staticSamplers));
 
 	// ノイズテクスチャ
-	dxCommon_->GetTextureManager()->LoadTexture("resources/Texture/noise.jpg");
-	dissovleIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath("resources/Texture/noise.jpg");
+	dxCommon_->GetTextureManager()->LoadTexture("resources/Texture/noise.dds");
+	dissovleIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath("resources/Texture/noise.dds");
 }
 
 #pragma endregion

@@ -127,7 +127,7 @@ namespace Character {
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.png",
+		objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.dds",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
 		objectComponentShadow_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 

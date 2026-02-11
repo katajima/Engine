@@ -10,7 +10,7 @@ void Engine::Fade::Initialize(Entity2DManager* entity2DManager) {
 
 	// 背景スプライト初期化
 	sprite_ = std::make_unique<Sprite>();
-	sprite_->Initialize(entity2DManager_->GetSpriteCommon(), "resources/Texture/Image.png");
+	sprite_->Initialize(entity2DManager_->GetSpriteCommon(), "resources/Texture/Image.dds");
 	sprite_->SetSize({ static_cast<float>(WinApp::GetClientWidth()),static_cast<float>(WinApp::GetClientHeight()) });
 	// フェード持続時間
 	duration_ = 0.0f;

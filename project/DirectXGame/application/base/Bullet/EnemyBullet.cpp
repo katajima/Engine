@@ -14,7 +14,7 @@ void EnemyBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::E
 
 	// オブジェクト生成
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
-	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), { 0,provisionalData_.trailWidth,0 }, { 0,-provisionalData_.trailWidth,0 }); // トレイル設定
+	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), { 0,provisionalData_.trailWidth,0 }, { 0,-provisionalData_.trailWidth,0 }); // トレイル設定
 	object_->Update();	// オブジェクト更新
 	object_->isEmitTrailEffect = false;	// トレイルの出現しないように
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
