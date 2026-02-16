@@ -7,8 +7,9 @@ namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;	// 保存項目
+		this->lineCommon = lineCommon;
 		this->state = state;						// ステート
 		this->owner = owner;						// オーナー
 		this->comboSystem = comboSystem;			// コンボシステム
@@ -32,13 +33,18 @@ namespace Combo {
 
 		// 選択中でなければ処理しない
 		if (!nowChoice_) return;
-
 		if (currentFrame == 0 && isPlaying) {
 			comboSystem->GetComboStateMachine()->SetRoot(state);
 		}
 		state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 
 #ifdef _DEBUG
+
+		// ロックオンライン
+		lineCommon->GetLineMeshData().AddLineSphere(Sphere{ owner->GetWorldTransform().GetWorldPosition(),data_.lockOnRadius},{0,1,0,1},8,8);
+
+
+
 		ImGui::Begin("Attack Editor");
 		ImGui::Separator();
 		ImGui::Text("Combo Name: %s", comboName_.c_str());
@@ -56,6 +62,8 @@ namespace Combo {
 		SequencerProgress();
 		// 移動関係設定
 		ImGuiMove();
+		// ロックオン関係設定
+		ImGuiLockOn();
 		// リアクション設定
 		ImGuiReaction();
 		// 終了条件
@@ -194,6 +202,35 @@ namespace Combo {
 			ImGui::SliderFloat("移動速度", &data_.moveSpeed_, 0.0f, 100.0f, "%.2f");
 			ImGui::Checkbox("重力", &data_.isGravity);
 			ImGui::SliderFloat("重力倍率", &data_.gravityScale, 0.0f, 100.0f, "%.2f");
+		}
+	}
+
+	void EditorBlock::ImGuiLockOn() {
+		if (ImGui::CollapsingHeader("ロックオン関係")) {
+			static const char* LockOnTypeLabels[] = {
+			"当てた相手",
+			"近い相手",
+			};
+
+			int current = static_cast<int>(data_.lockOnType);
+			if (ImGui::BeginCombo(
+				"ロックオンタイプ",
+				LockOnTypeLabels[current]
+			)) {
+				for (int i = 0; i < IM_ARRAYSIZE(LockOnTypeLabels); ++i) {
+					bool isSelected = (current == i);
+
+					if (ImGui::Selectable(LockOnTypeLabels[i], isSelected)) {
+						data_.lockOnType = static_cast<LockOnType>(i);
+					}
+
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::SliderFloat("ソフトロックオン範囲", &data_.lockOnRadius, 0.0f, 100.0f);
 		}
 	}
 
@@ -446,8 +483,10 @@ namespace Combo {
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
 
+		// ロックオン
+		data_.lockOnRadius = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.radius;
+		data_.lockOnType = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.type;
 
-		
 
 
 		AddSequencerEvent(inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
@@ -466,8 +505,9 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
+	void Editor::Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->comboSystem = comboSystem;
+		this->lineCommon = lineCommon;
 		this->globalVariables = globalVariables;
 		this->owner = owner;
 
@@ -645,6 +685,10 @@ namespace Combo {
 			// 終了条件
 			data.endConditionType = comboEditorBlocks_[it.first].GetData().endConditionType;
 
+			// ロックオン
+			data.lockOnRadius = comboEditorBlocks_[it.first].GetData().lockOnRadius;
+			data.lockOnType = comboEditorBlocks_[it.first].GetData().lockOnType;
+
 		}
 
 		comboSystem->SetGlobalComboDatas();
@@ -659,7 +703,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(globalVariables, comboSystem, state, owner);
+		block.Initialize(lineCommon,globalVariables, comboSystem, state, owner);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);

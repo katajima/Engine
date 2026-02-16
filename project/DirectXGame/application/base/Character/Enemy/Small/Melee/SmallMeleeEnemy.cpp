@@ -8,7 +8,10 @@ namespace Character {
 	void SmallMeleeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySG01.obj", "enemy");
+		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySG01.obj", "smallMeleeEnemy");
+		
+		
+		
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
@@ -16,11 +19,7 @@ namespace Character {
 
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 
-		// パラメーター初期化
-		parameterComponent_->parameters_->HP.Initiaize(30, 0, 100, 0);
-		parameterComponent_->parameters_->speed = 10.0f;
-		parameterComponent_->parameters_->strength = 10.0f;
-
+		
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
 
 
@@ -37,8 +36,6 @@ namespace Character {
 		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
 		worldEffect_.translate_ = { 0,1,0 };
 
-		// 保存項目初期化
-		InitializeBaseAddItem();
 		// スプライト初期化
 		Initialize2D();
 		// トランスフォーム更新
@@ -69,15 +66,15 @@ namespace Character {
 	}
 
 	void SmallMeleeEnemy::Move() {
-		if (GetTargetDistance() <= 10.0f) {
+		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
-			if (attackTimer_ >= 3.0f) {
+			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
-			if (GetTargetDistance() <= 5.0f) {
-				DirectionMove(-Parameters()->speed * 0.3f);
+			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
+				DirectionMove(-globalData_.retreatSpeed);
 			}
 		}
 		else {

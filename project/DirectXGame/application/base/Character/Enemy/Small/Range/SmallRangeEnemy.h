@@ -33,7 +33,7 @@ namespace Character {
 		void InitStateMachine() override;
 
 	private:
-		float skyHeight_ = 2.0f;
+		float skyHeight_ = 1.5f;
 		//
 		float attackTimer_ = 0.0f;
 		std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;

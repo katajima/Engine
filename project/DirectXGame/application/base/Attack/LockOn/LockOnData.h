@@ -16,7 +16,7 @@ struct LockOnData {
 	// ロックオン終了時間
 	float endTime = 1.0f;
 	// 半径
-	float radius = 50.0f;
+	float radius = 7.0f;
 	//
 	LockOnType type = LockOnType::kNear;
 };

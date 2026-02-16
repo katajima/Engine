@@ -37,7 +37,7 @@ namespace Combo {
 			float gravityScale_ = 1.0f;				
 
 			// ターゲットの距離でどこまで近づくか
-			float moveRadius_ = 5.0f;
+			float moveRadius_ = 2.0f;
 
 			// 移動タイプ
 			MoveType moveType = MoveType::kTraget;	

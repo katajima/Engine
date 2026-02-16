@@ -23,7 +23,7 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 	// 基盤の初期化
 	BaseInitialize(entity3DManager, entity2DManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
 	//// オブジェクト設定
-	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
+	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->isEmitTrailEffect = false; // トレイルを出現させない
 	object_->Update();	// オブジェクト更新
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
@@ -110,24 +110,22 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 
 	// シリンダーパラメーター設定
 	Engine::ShapeParameter::Cylinder cylinderParam;
-	cylinderParam.height = cylinderHeight_;
+	cylinderParam.height = provisionalData_.cylinderHeight_;
 	cylinderParam.innerRadius = provisionalData_.innerRadius;
 	cylinderParam.outerRadius = provisionalData_.outerRadius;
-	cylinderParam.isCover = false;
+	cylinderParam.isCover = true;
 	cylinderParam.segments = provisionalData_.segments;
+
 
 	// シリンダー生成
 	std::unique_ptr<Engine::CylinderPrimitive> cylinder2 = std::make_unique<Engine::CylinderPrimitive>();
 	cylinder2->Data() = cylinderParam;
-	cylinder2->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.png");
+	cylinder2->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/Image.dds");
 
 
-	cylinderParam.height = provisionalData_.height;
-	cylinderParam.innerRadius = provisionalData_.innerRadiusHit2;
-	cylinderParam.isCover = true;
-
+	
 	// 当たった時のオブジェクト生成
-	hitObject2_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("cylinder", "resources/Texture/Image.png", camera);
+	hitObject2_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("cylinder", "resources/Texture/Image.dds", camera);
 	hitObject2_->SetPrimitive(std::move(cylinder2));
 	hitObject2_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
@@ -207,8 +205,6 @@ void PlayerRangeBombingBullet::Update()
 
 					// 
 					targetPos = posGround - object_->GetWorldPosition();
-					hitObject2_->GetWorldTransform().translate_ = posGround + Vector3{0,10,0};
-
 					// ヒットオブジェクト描画
 					hitObject2_->SetIsDraw(true);
 				}

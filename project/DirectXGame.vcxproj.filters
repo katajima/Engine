@@ -2052,6 +2052,9 @@
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\EnemyData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

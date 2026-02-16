@@ -84,7 +84,7 @@ private:
 
 		float shotTimer = 0.0f;
 
-		float reticleRad_ = 50.0f;				// レティクルの半径　　　
+		float reticleRad_ = 30.0f;				// レティクルの半径　　　
 		Vector3 rangeBombingPos{};				// レンジボムの位置
 	};
 	Data dataRange_;

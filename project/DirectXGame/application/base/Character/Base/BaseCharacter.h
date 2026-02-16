@@ -110,6 +110,11 @@ namespace Character {
 		// 時間
 		float GetTime() { return objectComponent_->GetTime(); }
 
+	public:
+		// タグ番号取得
+		uint32_t GetTagNumber() const { return tagNumber_; }
+		// タグ番号設定
+		void SetTagNumber(uint32_t tag) { tagNumber_ = tag; };
 	public: // 貰いもの
 		// インプット取得
 		Engine::Input* GetInput() { return this->input; };
@@ -203,23 +208,29 @@ namespace Character {
 		AttackController* GetAttackController() { return attackController_.get(); }
 
 	protected:
-		std::unique_ptr<ObjectComponent> objectComponent_;			// オブジェクトコンポーネント
-		std::unique_ptr<BaseSpecial> special_;						// スペシャル攻撃
-		std::unique_ptr<BaseWeapon> weapon_;						// 武器
-		std::unique_ptr<AttackInputHandler> attackInputHandler_;		// 攻撃入力系クラス
-
-		std::unique_ptr<CharacterStateMachine> stateMachine_;		// キャラクターの状態管理
-		std::unique_ptr<MovementComponent> moveComponent_;			// 移動コンポーネント
-
-		std::unique_ptr<AttackController> attackController_;		// 攻撃制御クラス
-
-		std::unique_ptr<ResponseSystem> responseSystem_;			// 攻撃応答システムクラス
-
-
-		std::unique_ptr<BulletSpawn> bulletSpawn_;					// 弾出現
+		// オブジェクトコンポーネント
+		std::unique_ptr<ObjectComponent> objectComponent_;			
+		// スペシャル攻撃
+		std::unique_ptr<BaseSpecial> special_;						
+		// 武器
+		std::unique_ptr<BaseWeapon> weapon_;						
+		// 攻撃入力系クラス
+		std::unique_ptr<AttackInputHandler> attackInputHandler_;		
+		// キャラクターの状態管理
+		std::unique_ptr<CharacterStateMachine> stateMachine_;		
+		// 移動コンポーネント
+		std::unique_ptr<MovementComponent> moveComponent_;			
+		// 攻撃制御クラス
+		std::unique_ptr<AttackController> attackController_;	
+		// 攻撃応答システムクラス
+		std::unique_ptr<ResponseSystem> responseSystem_;			
+		// 弾出現
+		std::unique_ptr<BulletSpawn> bulletSpawn_;					
 	protected:
 		// キャラクターパラメータコンポーネント
 		std::unique_ptr <ParameterComponent> parameterComponent_;
+		// キャラクタータグ
+		uint32_t tagNumber_ = 0;
 	protected: // 貰いもの(アプリケーション層)
 		Effect* effect = nullptr;							// エフェクト
 		BulletManager* bulletManager = nullptr;			// 弾管理

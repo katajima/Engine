@@ -144,7 +144,7 @@ void CharacterDebugScene::Initialize()
 	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(isComboEditorActive_);
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
-	comboEditor_->Initialize(characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
+	comboEditor_->Initialize(GetEntity3DManager()->Get3DLineCommon(), characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
 }
 
 void CharacterDebugScene::Finalize(){

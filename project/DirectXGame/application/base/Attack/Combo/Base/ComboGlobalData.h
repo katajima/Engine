@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
+#include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 
 namespace Combo {
 
@@ -94,6 +95,12 @@ namespace Combo {
 
 		// 移動方向条件
 		MoveType moveType = MoveType::kForward;
+
+		// ロックオンタイプ
+		LockOnType lockOnType = LockOnType::kHit;
+		
+		// ロックオン半径
+		float lockOnRadius = 7.0f;
 
 	};
 };

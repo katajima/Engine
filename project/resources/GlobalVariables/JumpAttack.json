@@ -114,6 +114,15 @@
             "type": "enum",
             "value": 1
         },
+        "ロックオンタイプ": {
+            "enumType": "LockOnType",
+            "type": "enum",
+            "value": 0
+        },
+        "ロックオン半径": {
+            "type": "float",
+            "value": 7.0
+        },
         "終了条件タイプ": {
             "enumType": "EndConditionType",
             "type": "enum",

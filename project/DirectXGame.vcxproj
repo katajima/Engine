@@ -810,6 +810,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\EnemyData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />

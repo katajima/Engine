@@ -384,7 +384,7 @@ namespace Character {
 		// ヒットボックスデータ作成
 		HitBox::GlobalData hitBoxdata = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
 		HitBox::GlobalData hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
-		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 2,2,2 } };
+		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
 		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},4.0f };
 		HitBox::GlobalData hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
 
@@ -397,7 +397,7 @@ namespace Character {
 		// コンボ１のデータ送る
 		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("obb")} });
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2", { {hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack2", {{hitBoxSystem->GetHitBoxCollData("obb") } });
 		// コンボ３のデータ送る
 		comboSystem->CreateCombo("Attack3", { {hitBoxSystem->GetHitBoxCollData("obb") } });
 		// ジャンプコンボのデータ送る

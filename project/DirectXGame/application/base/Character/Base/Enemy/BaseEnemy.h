@@ -4,6 +4,8 @@
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
 #include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
+#include "EnemyData.h"
+
 
 //前方宣言
 
@@ -82,6 +84,29 @@ namespace Character {
 		void Initialize2D();
 
 	private:
+
+		void InitializeBaseEnemyAddItem() {
+			AddItem("後退スピード", globalData_.retreatSpeed);
+			AddItem("攻撃猶予時間", globalData_.attackTimer);
+			AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
+			AddItem("後退開始範囲", globalData_.startRetreatingRadius);
+
+
+
+			globalData_.retreatSpeed = GetValue<float>("後退スピード");
+			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
+			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
+			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+
+		}
+		// 更新保存項目
+		void UpdateBaseEnemyGetValue() {
+			globalData_.retreatSpeed = GetValue<float>("後退スピード");
+			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
+			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
+			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+		}
+
 		//
 		void InitShadowObjectComponent(const std::string& charaName);
 
@@ -102,7 +127,8 @@ namespace Character {
 		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 		bool isLockOn_ = false; // ロックオンされているか
 
-
+		// グローバルデータ
+		EnemyGlobalData globalData_;
 	protected:
 		Engine::WorldTransform worldEffect_;
 		DebugTimer debugTimer_;

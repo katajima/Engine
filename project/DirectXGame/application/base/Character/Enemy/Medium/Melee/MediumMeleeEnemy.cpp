@@ -26,8 +26,6 @@ namespace Character {
 
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
 
-		// 保存項目初期化
-		InitializeBaseAddItem();
 		// スプライト初期化
 		Initialize2D();
 		// パーティクル初期化
@@ -87,15 +85,15 @@ namespace Character {
 
 	void MediumMeleeEnemy::Move()
 	{
-		if (GetTargetDistance() <= 10.0f) {
+		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
-			if (attackTimer_ >= 3.0f) {
+			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
-			if (GetTargetDistance() <= 5.0f) {
-				DirectionMove(-Parameters()->speed * 0.3f);
+			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
+				DirectionMove(-globalData_.retreatSpeed);
 			}
 		}
 		else {

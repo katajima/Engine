@@ -8,7 +8,10 @@ namespace Character {
 	void SmallRangeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySS01.obj", "enemy");
+		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy");
+		
+		
+		
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
@@ -35,11 +38,7 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
-		// パラメーター初期化
-		parameterComponent_->parameters_->HP.Initiaize(25, 0, 40, 0);
-		parameterComponent_->parameters_->speed = 10.0f;
-		parameterComponent_->parameters_->strength = 10.0f;
-
+		
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
 		moveComponent_->GetJumpSystem()->SetIsUseJump(false);
 		moveComponent_->GetDashSystem()->SetIsUseGravity(false);
@@ -50,8 +49,6 @@ namespace Character {
 		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
 		worldEffect_.translate_ = { 0,1,0 };
 
-		// 保存項目初期化
-		InitializeBaseAddItem();
 		// スプライト初期化
 		Initialize2D();
 		// トランスフォーム更新
@@ -98,10 +95,10 @@ namespace Character {
 		DirectionMoveVelocity(Parameters()->speed);
 
 		if (GetWorldTransform().GetWorldPosition().y < skyHeight_) {
-			Velocity().y = 1.5f; // Y軸速度上昇
+			Velocity().y = 1.2f; // Y軸速度上昇
 		}
 		else if (GetWorldTransform().GetWorldPosition().y > skyHeight_) {
-			Velocity().y = -1.5f; // Y軸速度降下
+			Velocity().y = -1.2f; // Y軸速度降下
 		}
 		else {
 			Velocity().y = 0.0f; // Y軸速度リセット
@@ -111,17 +108,17 @@ namespace Character {
 
 
 
-		if (GetTargetDistance() <= 15.0f) {
+		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
-			if (attackTimer_ >= 2.0f) {
+			if (attackTimer_ >= globalData_.attackTimer) {
 				attackTimer_ = 0.0f;
 				// 攻撃ステートへ
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				return;
 			}
-			if (GetTargetDistance() <= 5.0f) {
+			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
 				Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
-				TargetMove(velo * 0.3f);
+				TargetMove(velo.Normalize() * globalData_.retreatSpeed);
 			}
 		}
 		else {

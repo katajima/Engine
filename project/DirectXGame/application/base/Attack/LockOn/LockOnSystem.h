@@ -33,9 +33,16 @@ public:
 
 	// 所有者の位置取得
 	Vector3 GetOwnerPos();
-private:
 
+	// 当てた相手のタグを設定
+	void SetHitTag(uint32_t tag) { hitTag = tag; }
+
+
+private:
+	// 範囲内の近くの相手を取得
 	Character::BaseCharacter* GetNearLockOn();
+	// 最後に当てた相手を取得
+	Character::BaseCharacter* GetHitLockOn();
 
 	float CalcSoftLockScore(
 		const Vector3& playerPos,
@@ -53,4 +60,6 @@ private:
 	LockOnData data_;
 	//
 	bool isLockOn_ = false;
+	// 当てた相手
+	uint32_t hitTag = -1;
 };

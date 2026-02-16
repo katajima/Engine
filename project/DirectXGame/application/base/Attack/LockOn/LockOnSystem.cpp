@@ -15,10 +15,10 @@ Character::BaseCharacter* LockOnSystem::SoftLockOn(){
 	
     switch (data_.type)
     {
-    case LockOnType::kHit:
-
+    case LockOnType::kHit: // 以前ヒットした相手にロックオン
+        return GetHitLockOn();
         break;
-    case LockOnType::kNear:
+    case LockOnType::kNear: // 近くの敵
         return GetNearLockOn();
         break;
     default:
@@ -32,8 +32,7 @@ Vector3 LockOnSystem::GetOwnerPos() {
 }
 
 
-Character::BaseCharacter* LockOnSystem::GetNearLockOn()
-{
+Character::BaseCharacter* LockOnSystem::GetNearLockOn() {
     if (targetCharacters.empty())
     {
         return nullptr;
@@ -70,6 +69,24 @@ Character::BaseCharacter* LockOnSystem::GetNearLockOn()
     else {
         return nullptr;
     }
+}
+
+Character::BaseCharacter* LockOnSystem::GetHitLockOn() {
+    if (targetCharacters.empty())
+    {
+        return nullptr;
+    }
+    Vector3 ownerPos = GetOwnerPos();
+    for (auto& target : targetCharacters) {
+        if (target->GetTagNumber() == hitTag) {
+            if (data_.radius >= target->GetWorldTransform().GetWorldPosition().Distance(ownerPos)) {
+                return target;
+            }
+        }
+    }
+
+    // もし最後に当てた相手がいない場合は近くの敵にロックオンする
+    return GetNearLockOn();
 }
 
 float LockOnSystem::CalcSoftLockScore(

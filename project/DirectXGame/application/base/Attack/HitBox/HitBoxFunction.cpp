@@ -55,7 +55,9 @@ namespace HitBox {
 
 		enemy->Emit();	//	エフェクト出現
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Move); // 敵ステート設定
-
+		
+		// プレイヤーのロックオンシステムに相手タグを設定
+		player->GetAttackController()->GeyLockOnSysutem()->SetHitTag(enemy->GetTagNumber());
 		// ヒットカウンターにヒットを通知
 		player->GetAttackController()->GetHitCounter().Hit();
 	}

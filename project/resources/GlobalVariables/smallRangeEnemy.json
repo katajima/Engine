@@ -1,0 +1,52 @@
+{
+    "smallRangeEnemy": {
+        "HP": {
+            "type": "float",
+            "value": 25.0
+        },
+        "MP": {
+            "type": "float",
+            "value": 0.0
+        },
+        "MaxHP": {
+            "type": "float",
+            "value": 25.0
+        },
+        "MaxMP": {
+            "type": "float",
+            "value": 0.0
+        },
+        "MaxStamina": {
+            "type": "float",
+            "value": 0.0
+        },
+        "jampPower": {
+            "type": "float",
+            "value": 180.0
+        },
+        "speed": {
+            "type": "float",
+            "value": 2.0
+        },
+        "stamina": {
+            "type": "float",
+            "value": 0.0
+        },
+        "後退スピード": {
+            "type": "float",
+            "value": 1.0
+        },
+        "後退開始範囲": {
+            "type": "float",
+            "value": 3.0
+        },
+        "攻撃猶予時間": {
+            "type": "float",
+            "value": 3.0
+        },
+        "攻撃猶予範囲": {
+            "type": "float",
+            "value": 10.0
+        }
+    }
+}

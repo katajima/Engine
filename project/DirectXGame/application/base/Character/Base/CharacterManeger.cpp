@@ -93,6 +93,8 @@ namespace Character {
 
 		std::unique_ptr<BaseEnemy> enemy = it->second();
 
+
+		enemy->SetTagNumber(characterCount_);
 		enemy->SetID(characterCount_);					// ID設定
 		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
@@ -104,6 +106,7 @@ namespace Character {
 		enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
 
 		character_.push_back(std::move(enemy));
+		characterCount_++;
 	}
 
 	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
@@ -111,6 +114,7 @@ namespace Character {
 		std::unique_ptr<BasePlayer> player;
 
 		player = std::make_unique<NormalPlayer>();
+		player->SetTagNumber(characterCount_);
 		player->SetFollowCamera(followCamera);		// フォローカメラ設定
 		player->SetCameraManager(cameraManager);	// カメラ管理クラス設定
 		player->SetBulletManager(bulletManager);	// 弾管理クラス設定
@@ -119,6 +123,7 @@ namespace Character {
 		player->Initialize(input, entity3DManager, entity2DManager, globalVariables, transform.translate, camera); // 初期化
 		player->SetCharacterType(Type::Player);// キャラクターのタイプをプレイヤーに
 		character_.push_back(std::move(player));	// キャラクターに追加 
+		characterCount_++;
 	}
 
 	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb)

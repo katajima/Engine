@@ -10,6 +10,7 @@
 
 namespace Engine {
 	class GlobalVariables;
+	class LineCommon;
 }
 // 前方宣言
 namespace Character {
@@ -22,7 +23,7 @@ namespace Combo {
 	class EditorBlock {
 	public:
 		// 初期化
-		void Initialize(Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
 		// 更新
 		void UpdateImGui(float dt);
 	public:
@@ -50,6 +51,9 @@ namespace Combo {
 		void ImGuiEndConditionType();
 		// 移動関係設定
 		void ImGuiMove();
+		// ロックオン関係
+		void ImGuiLockOn();
+
 		// リアクション設定
 		void ImGuiReaction();
 
@@ -83,7 +87,7 @@ namespace Combo {
 
 	private: // 貰いもの
 		Engine::GlobalVariables* globalVariables = nullptr;
-
+		Engine::LineCommon* lineCommon = nullptr;
 	private: // もらいもの
 		// 所有者
 		Character::BaseCharacter* owner = nullptr;
@@ -127,7 +131,7 @@ namespace Combo {
 	public:
 
 		// 初期化
-		void Initialize(Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
 		// 更新 
 		void Update(float dt);
 	private:
@@ -144,6 +148,7 @@ namespace Combo {
 		// コンボシステム
 		Combo::System* comboSystem = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
+		Engine::LineCommon* lineCommon = nullptr;
 		Character::BaseCharacter* owner = nullptr;
 
 	private:

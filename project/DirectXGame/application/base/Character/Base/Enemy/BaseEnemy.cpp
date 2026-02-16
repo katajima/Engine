@@ -88,7 +88,7 @@ namespace Character {
 
 		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
 
-		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 
 	}
@@ -122,13 +122,18 @@ namespace Character {
 		// 保存項目追加
 		CreateGroup(charaName);
 
+		// 保存項目初期化(キャラクター全体)
+		InitializeBaseAddItem();
+		// 保存項目初期化(敵全体)
+		InitializeBaseEnemyAddItem();
+
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->Enable();					// コライダ有効
 		sphere->tag = CollisionTag::Enemy;	// タグ設定
 		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
 		sphere->radius = colliderRadius; // 半径を適宜設定
-		sphere->isDebugLine = true;
+		//sphere->isDebugLine = true;
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 		// コールバック登録（例：プレイヤーと衝突したらダメージ）
@@ -178,8 +183,10 @@ namespace Character {
 		if (GetObjectComponent() == nullptr) { return; }
 		assert(this);
 
-		// 保存項目更新
+		// 保存項目更新(キャラクター全体)
 		UpdateBaseGetValue();
+		// 保存項目更新(敵全体)
+		UpdateBaseEnemyGetValue();
 
 		// ステート
 		stateMachine_->Update();

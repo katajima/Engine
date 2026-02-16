@@ -53,8 +53,6 @@ private:
 
 	Vector3 enemyPos_{};
 
-	float cylinderHeight_ = 30.0f; // 円柱の高さ
-
 	float radius_ = 0.5f; // 半径
 
 	float time_ = 0.0f; // 時間
@@ -77,30 +75,29 @@ private: // 一旦
 		const Vector3 objectSize = Vector3::Set(0.2f); // オブジェクトの大きさ
 		const float trailLifeTime = 0.15f; // トレイルの寿命
 		const float trailWidth = 0.2f; // トレイルの幅
-		const float collRadius = 10.0f; // 当たり判定の半径
+		const float collRadius = 8.0f; // 当たり判定の半径
 		const float damage = 50.0f; // ダメージ量
 		const float skyX = 1000.0f;
 		const float skyY = 600.0f;
 
-
-		const float height = 10.0f;
-		const float innerRadius = 6.0f;
-		const float innerRadiusHit2 = 12.0f;
-		const float outerRadius = 12.0f;
+		const float cylinderHeight_ = 2.0f; // 円柱の高さ
+		const float innerRadius = 4.0f;
+		const float outerRadius = 4.0f;
 		const int segments = 16;
-		const Color hit2Color = { 1.0f,0,0,0.5f };
-
+		const Color hit2Color = { 1.0f,0,1.0f,0.75f };
+		const float hitCylinderY = 8.0f;
+		
+		const float hitObjectY = -3.0f;
+		const float hitObjectRotateX = -90.0f;
 
 		
 		const float speedPhase1 = 4000.0f;
 		const float speedPhase2 = 3.0f;
 
-		const float hitCylinderY = 8.0f;
+
 		const float expPlaneY = 5.0f;
 
-		const float hitObjectY = 12.0f;
-		const float hitObjectRotateX = -90.0f;
-
+		
 
 		const float distanceToEnemy = 5.0f;
 	};

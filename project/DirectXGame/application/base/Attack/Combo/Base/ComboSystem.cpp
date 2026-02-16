@@ -106,6 +106,10 @@ namespace Combo {
 		globalVariables->AddEnumItem(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
 
+		globalVariables->AddItem(name, "ロックオン半径", data.lockOnRadius);
+		globalVariables->AddEnumItem(name, "ロックオンタイプ", data.lockOnType, "LockOnType");
+
+
 		// 保存項目の適応
 		GetGlobalComboData(name, data);
 	};
@@ -158,6 +162,10 @@ namespace Combo {
 		data.dependenceType_ = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
 
 		data.endConditionType = globalVariables->GetEnumValue<Combo::EndConditionType>(name, "終了条件タイプ");
+
+		data.lockOnRadius = globalVariables->GetValue<float>(name, "ロックオン半径");
+		data.lockOnType = globalVariables->GetEnumValue<LockOnType>(name, "ロックオンタイプ");
+
 	}
 
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
@@ -200,13 +208,14 @@ namespace Combo {
 		globalVariables->SetValue(name, "ダメージ", data.damage);
 
 
-
-
 		globalVariables->SetValue(name, "親オブジェクト名前", data.parentName_);
 
 		globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.spawnType_, "HitBoxSpawnType");
 		globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.dependenceType_, "HitBoxParentType");
 		globalVariables->SetEnumValue(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
+
+		globalVariables->SetValue(name, "ロックオン半径", data.lockOnRadius);
+		globalVariables->SetEnumValue(name, "ロックオンタイプ", data.lockOnType, "LockOnType");
 	}
 
 	void System::SetGlobalComboDatas() {
@@ -289,6 +298,9 @@ namespace Combo {
 		data.GetComboHitBox().GetData().dependenceType_ = gData.dependenceType_;
 		data.GetComboHitBox().GetData().spawnType_ = gData.spawnType_;
 
+		// ロックオン
+		data.GetComboMotion().GetComboMove().GetData().lockOnData_.type = gData.lockOnType;
+		data.GetComboMotion().GetComboMove().GetData().lockOnData_.radius = gData.lockOnRadius;
 	}
 
 	void System::CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData> addHitBoxDatas,

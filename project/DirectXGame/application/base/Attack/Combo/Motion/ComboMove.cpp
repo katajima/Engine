@@ -12,6 +12,7 @@ namespace Combo {
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
 
 		// ターゲット指定
+		lockOnSystem->GetData() = data_.lockOnData_;
 		traget = lockOnSystem->SoftLockOn();
 		// 方向指定
 		MoveTypeDirectionProcess();
