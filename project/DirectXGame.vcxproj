@@ -159,6 +159,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp" />
@@ -822,7 +823,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
-    <ClInclude Include="DirectXGame\application\base\Game\GameData.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h" />
+    <ClInclude Include="DirectXGame\application\base\Game\Base\GameState.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameWave.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputManager.h" />
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapData.h" />

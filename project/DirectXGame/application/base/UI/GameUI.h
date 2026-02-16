@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
-#include "DirectXGame/application/base/Game/GameData.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
 
 // 前方宣言
 namespace Character {
@@ -26,14 +26,14 @@ public:
 	void SetPlayer(Character::BasePlayer* player);
 
 	// ゲームデータ取得
-	void SetGamePlayData(const GamePlayData data) { data_ = data; };
+	void SetGamePlayData(const Game::GameData data) { data_ = data; };
 
 private:
 	std::unique_ptr<Engine::Sprite> text_clera;
 	std::unique_ptr<Engine::Sprite> text_over;
 private:
 	Character::BasePlayer* player;
-	GamePlayData data_;
+	Game::GameData data_;
 
 private:
 

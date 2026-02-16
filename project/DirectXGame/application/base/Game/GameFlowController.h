@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXGame/engine/input/Input.h>
 #include "GameEventController.h"
-#include "GameData.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
 
 // 前方宣言
 namespace Character {
@@ -28,7 +28,7 @@ public:
 	void Draw();
 
 	// ゲームデータ
-	GamePlayData GetGamePlayData() const { return gamePlayData_; }
+	Game::GameData GetGamePlayData() const { return gamePlayData_; }
 
 private:
 
@@ -42,7 +42,7 @@ private: //
 
 
 	// ゲームプレイデータ
-	GamePlayData gamePlayData_;
+	Game::GameData gamePlayData_;
 
 private:
 	// ゲームが終わったか

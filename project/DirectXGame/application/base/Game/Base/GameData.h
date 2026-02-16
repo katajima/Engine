@@ -2,13 +2,7 @@
 #include <DirectXGame/engine/struct/Structs3D.h>
 
 
-
-/// <summary>
-/// ゲーム情報を格納したクラス
-/// </summary>
-struct GamePlayData {
-public:
-
+namespace Game {
 	// プレイヤーのデータ
 	struct PlayerData {
 		// プレイヤーの倒したカウント
@@ -29,17 +23,26 @@ public:
 
 	// ステージデータ
 	struct StageData {
-		
+
 	};
 
 	// 進行データ
 	struct FlowData {
 		// 現在のウェーブ
-		int currentWave = 0; 
+		int currentWave = 0;
 		// ゲームを始めてからの時間
 		float elapsedTime = 0.0f;
 	};
-	PlayerData playerData_;
-	EnemyData enemyData_;
-	FlowData flowData_;
-};
+
+
+	/// <summary>
+	/// ゲーム情報を格納したクラス
+	/// </summary>
+	struct GameData {
+		PlayerData playerData_;
+		EnemyData enemyData_;
+		FlowData flowData_;
+	};
+}
+
+
