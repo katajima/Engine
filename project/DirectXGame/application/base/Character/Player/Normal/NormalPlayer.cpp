@@ -31,7 +31,7 @@ namespace Character {
 		// 保存項目追加
 		CreateGroup("Player");
 
-		objectComponent_->SetSRT({ 3,3,3 }, {}, position);				//　SRT設定
+		objectComponent_->SetSRT({1,1,1}, {}, position);					//　SRT設定
 		objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
 		objectComponent_->GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
@@ -40,10 +40,10 @@ namespace Character {
 		parameterComponent_->Initialize();
 
 		// HP設定
-		Parameters()->HP.Initiaize(200, 0, 200, 0);
-		Parameters()->stamina.Initiaize(100, 0, 50, 0);
-		Parameters()->speed = 40.0f;// 移動速度設定
-		Parameters()->jampPower = 100.0f;
+		parameterComponent_->parameters_->HP.Initiaize(200, 0, 200, 0);
+		parameterComponent_->parameters_->stamina.Initiaize(100, 0, 50, 0);
+		parameterComponent_->parameters_->speed = 40.0f;// 移動速度設定
+		parameterComponent_->parameters_->jampPower = 100.0f;
 
 
 		// 移動コンポーネント初期化
@@ -64,7 +64,7 @@ namespace Character {
 		sphere->tag = CollisionTag::Player;
 		sphere->layer = CollisionLayer::Player;
 		sphere->collisionMask = 0xFFFFFFFF;
-		sphere->radius = 2.0f; // 半径を適宜設定
+		sphere->radius = 1.0f; // 半径を適宜設定
 		sphere->Enable();
 		// コライダ追加
 		GetColliderComponent()->AddCollider(std::move(sphere));
@@ -131,7 +131,7 @@ namespace Character {
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
 		objectComponentShadow_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 
-		objectComponentShadow_->SetInstancingSRT({ 3.0f,3.0f,3.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 
 		// キャラクター行動ステート初期化
@@ -384,8 +384,8 @@ namespace Character {
 		// ヒットボックスデータ作成
 		HitBox::GlobalData hitBoxdata = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
 		HitBox::GlobalData hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
-		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 10,10,10 } };
-		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},20.0f };
+		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 2,2,2 } };
+		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},4.0f };
 		HitBox::GlobalData hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
 
 		hitBoxSystem->CreateHitBoxCollData("obbColl1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata);
@@ -397,7 +397,7 @@ namespace Character {
 		// コンボ１のデータ送る
 		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("obb")} });
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2", { {hitBoxSystem->GetHitBoxCollData("obbColl1")},{hitBoxSystem->GetHitBoxCollData("obbColl2")} });
+		comboSystem->CreateCombo("Attack2", { {hitBoxSystem->GetHitBoxCollData("obb") } });
 		// コンボ３のデータ送る
 		comboSystem->CreateCombo("Attack3", { {hitBoxSystem->GetHitBoxCollData("obb") } });
 		// ジャンプコンボのデータ送る

@@ -28,11 +28,11 @@ void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, E
 	CreateSpawn(Character::EnemyType::kNormal,"normal", 1, 2, { 0,0,0 }, { 100,1,100 }, 10.0f);
 	CreateSpawn(Character::EnemyType::kSmallRanged,"smallRanged", 1, 5, { 0,0,0 }, { 100,1,100 }, 5.0f);
 	CreateSpawn(Character::EnemyType::kSmallMelee,"smallMelee", 1, 15, { 0,0,0 }, { 100,1,100 }, 5.0f);
-	CreateWave(0,10, WaveEndType::kKill,20);
+	CreateWave(0,30, WaveEndType::kTime,60);
 	CreateSpawn(Character::EnemyType::kNormal, "normal", 1, 3, { 0,0,0 }, { 100,1,100 }, 10.0f);
 	CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 5, { 0,0,0 }, { 100,1,100 }, 5.0f);
 	CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 20, { 0,0,0 }, { 100,1,100 }, 5.0f);
-	CreateWave(1,10, WaveEndType::kKill,20);
+	CreateWave(1,30, WaveEndType::kTime,60);
 	//CreateSpawn(EnemyType::kNormal, "normal", 1, 3, { 0,0,0 }, { 100,1,100 }, 10.0f);
 	//CreateSpawn(EnemyType::kSmallRanged, "smallRanged", 1, 5, { 0,0,0 }, { 100,1,100 }, 5.0f);
 	//CreateSpawn(EnemyType::kSmallMelee, "smallMelee", 1, 15, { 0,0,0 }, { 100,1,100 }, 5.0f);

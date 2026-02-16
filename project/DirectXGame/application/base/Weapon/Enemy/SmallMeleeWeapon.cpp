@@ -10,7 +10,7 @@ void SmallMeleeWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager*
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, "enemyWeaponSG01", "enemyWeaponSG01.obj", "", 
 		false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
-	objectComponent_->SetInstancingSRT({4,4,4}, {}, position);	// SRT設定
+	objectComponent_->SetInstancingSRT({1,1,1}, {}, position);	// SRT設定
 	objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 
 }

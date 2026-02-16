@@ -33,12 +33,12 @@ namespace Character {
 		weapon_->SetBulletManager(bulletManager);
 		weapon_->Initialize(input, entity3DManager, nullptr, globalVariables, {}, nullptr);
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
-		weapon_->GetWorldTransform().translate_ = { 0.0f,-2.5f,1.5f };
+		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
 		// パラメーター初期化
-		Parameters()->HP.Initiaize(40, 0, 100, 0);
-		Parameters()->speed = 10.0f;
-		Parameters()->strength = 10.0f;
+		parameterComponent_->parameters_->HP.Initiaize(25, 0, 40, 0);
+		parameterComponent_->parameters_->speed = 10.0f;
+		parameterComponent_->parameters_->strength = 10.0f;
 
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
 		moveComponent_->GetJumpSystem()->SetIsUseJump(false);
@@ -111,7 +111,7 @@ namespace Character {
 
 
 
-		if (GetTargetDistance() <= 25.0f) {
+		if (GetTargetDistance() <= 15.0f) {
 			attackTimer_ += GetTime();
 			if (attackTimer_ >= 2.0f) {
 				attackTimer_ = 0.0f;
@@ -119,9 +119,9 @@ namespace Character {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				return;
 			}
-			if (GetTargetDistance() <= 20.0f) {
+			if (GetTargetDistance() <= 5.0f) {
 				Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
-				TargetMove(velo * 0.9f);
+				TargetMove(velo * 0.3f);
 			}
 		}
 		else {

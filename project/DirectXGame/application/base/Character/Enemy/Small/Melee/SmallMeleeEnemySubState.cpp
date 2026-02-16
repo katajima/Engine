@@ -10,7 +10,7 @@ namespace Character {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
 
 
-        if (enemy->GetTargetDistance() <= 10.0f) {
+        if (enemy->GetTargetDistance() <= 7.0f) {
             enemy->DirectionMove(-5.0f);
         }
         else {
@@ -40,7 +40,7 @@ namespace Character {
         data_.tag = CollisionTag::Enemy;
         data_.layer = CollisionLayer::Enemy;
         data_.mask = CollisionLayer::Player;
-        data_.size = { 2.0f,4.0f,2.0f };
+        data_.size = { 1.0f,2.0f,1.0f };
         data_.name = "NormalEnemy_SwingHitBox";
         data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
 
@@ -53,8 +53,8 @@ namespace Character {
 
         // 前進
 
-        enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
-        enemy->Velocity() = dire_ * 40.0f;
+        enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 20.0f;
+        enemy->Velocity() = dire_ * 20.0f;
         enemy->TargetMove(enemy->Velocity());
 
 

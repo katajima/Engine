@@ -9,20 +9,20 @@ namespace Character {
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemy.gltf", "enemy", 4);
+		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemy.gltf", "enemy", 2);
 
-		objectComponentShadow_->GetWorldTransform().scale_ = { 10.0f,10.0f ,10.0f };
+		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 
 
 		// サイズ
-		Vector3 size = { 2.75f,2.75f,2.75f };
+		Vector3 size = { 1.0f,1.0f,1.0f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 
 
 		// パラメーター初期化
-		Parameters()->HP.Initiaize(100, 0, 100, 0);
-		Parameters()->speed = 10.0f;
-		Parameters()->strength = 10.0f;
+		parameterComponent_->parameters_->HP.Initiaize(50, 0, 50, 0);
+		parameterComponent_->parameters_->speed = 10.0f;
+		parameterComponent_->parameters_->strength = 10.0f;
 
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
 
@@ -87,15 +87,15 @@ namespace Character {
 
 	void MediumMeleeEnemy::Move()
 	{
-		if (GetTargetDistance() <= 20.0f) {
+		if (GetTargetDistance() <= 10.0f) {
 			attackTimer_ += GetTime();
 			if (attackTimer_ >= 3.0f) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
-			if (GetTargetDistance() <= 15.0f) {
-				DirectionMove(-Parameters()->speed);
+			if (GetTargetDistance() <= 5.0f) {
+				DirectionMove(-Parameters()->speed * 0.3f);
 			}
 		}
 		else {
