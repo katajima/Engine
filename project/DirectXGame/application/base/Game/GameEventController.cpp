@@ -19,6 +19,9 @@ void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, E
 	characterSpawnManager_->Initialize(characterManager, entity3DManager->Get3DLineCommon(),300);
 
 
+	eventStateMachine_ = std::make_unique<Game::EventStateMachine>();
+	eventStateMachine_->Initialize(characterManager, characterSpawnManager_.get());
+
 	// ウェーブ管理クラス初期化
 	waveManager_ = std::make_unique<WaveManager>();
 	waveManager_->SetCharacterSpawnManager(characterSpawnManager_.get());
@@ -33,10 +36,6 @@ void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, E
 	CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,-400 }, { 10,1,10 }, 4.0f);
 	CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 2, { 0,0,-400 }, { 10,1,10 }, 1.0f);
 	CreateWave(1,30, WaveEndType::kTime,60);
-	//CreateSpawn(EnemyType::kNormal, "normal", 1, 3, { 0,0,0 }, { 100,1,100 }, 10.0f);
-	//CreateSpawn(EnemyType::kSmallRanged, "smallRanged", 1, 5, { 0,0,0 }, { 100,1,100 }, 5.0f);
-	//CreateSpawn(EnemyType::kSmallMelee, "smallMelee", 1, 15, { 0,0,0 }, { 100,1,100 }, 5.0f);
-	//CreateWave(2,10, WaveEndType::kKill,45);
 
 	waveManager_->Initialize(gameWaves_);
 }
@@ -55,7 +54,47 @@ void GameEventController::CreateSpawn(Character::EnemyType type,const std::strin
 
 	data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval);
 	spawnInfos_.push_back(data);
+}
+
+#pragma region  Event
+
+void GameEventController::AddNode(const std::string& nodeName, const Game::GameEventData& data)
+{
+	// 既に存在する場合は追加しない
+	if (eventStateNodes_.find(nodeName) != eventStateNodes_.end()) {
+		return;
+	}
+	// ノード生成
+	std::shared_ptr<Game::GameEventState> node = std::make_shared<Game::GameEventState>();
+	eventStateNodes_[nodeName] = node;				// ノード追加
+
+	// 出現情報追加
+	for (auto& sp : spawnInfos_) {
+		eventStateNodes_[nodeName]->AddSpawn(sp);
+	}
+	eventStateNodes_[nodeName]->SetData(data);			// データ設定
+	eventStateNodes_[nodeName]->SetName(nodeName);	// ノード名設定
+}
+
+
+void GameEventController::ConnectNode(const std::string& from, const std::string& name, const std::string& to)
+{
+	auto itFrom = eventStateNodes_.find(from);
+	auto itTo = eventStateNodes_.find(to);
+	if (itFrom != eventStateNodes_.end()) {
+		if (itTo != eventStateNodes_.end())
+			itFrom->second->SetNextState(itTo->second);
+	}
+}
+
+
+void GameEventController::CreateGameEvent(const std::string& nodeName, const Game::GameEventData& data) {
+	AddNode(nodeName, data);
+	spawnInfos_.clear();
 };
+
+#pragma endregion // イベント系
+
 
 
 void GameEventController::Update(float dt) {

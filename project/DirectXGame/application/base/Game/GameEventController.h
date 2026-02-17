@@ -1,5 +1,6 @@
 #pragma once
 #include <DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.h>
+#include "DirectXGame/application/base/Game/Base/GameEvent.h"
 #include "GameWave.h"
 
 // 前方宣言
@@ -43,8 +44,24 @@ public:
 	void CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f);
 
 
+public: // イベント系
 
+	// ノード追加(データから生成)
+	void AddNode(const std::string& nodeName,const Game::GameEventData& data);
+	// ノード連結
+	void ConnectNode(const std::string& from, const std::string& name, const std::string& to);
+
+	/// <summary>
+	/// イベント生成
+	/// </summary>
+	void CreateGameEvent(const std::string& nodeName, const Game::GameEventData& data);
 private:
+	// ゲームイベントステートマシン
+	std::unique_ptr<Game::EventStateMachine> eventStateMachine_ = nullptr;
+	// ゲームイベントステートマップ
+	std::map<std::string, std::shared_ptr<Game::GameEventState>> eventStateNodes_;
+
+
 
 	// キャラクター出現管理クラス
 	std::unique_ptr<Character::CharacterSpawnManager> characterSpawnManager_ = nullptr;
