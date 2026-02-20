@@ -157,6 +157,9 @@ namespace Combo {
             return !node->HasNextState();
         }
 
+        // 現在のステートを取得
+        std::shared_ptr<NodeState> GetCurrentState() const { return std::dynamic_pointer_cast<NodeState>(currentState); }
+
     private:
         Character::BaseCharacter* owner;                       // 使用者
     private:

@@ -27,15 +27,6 @@ namespace Character {
 		// 武器描画 
 		weapon->GetObject3D()->SetIsDraw(true);
 
-		// ゲームパッドが繋いであるなら
-		if (input->IsControllerConnected()) {
-			// スキル発動
-			if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_X)) {
-				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Skill);
-				return;
-			}
-		}
-
 #ifdef _DEBUG
 
 		// デバッグ用
@@ -297,34 +288,6 @@ namespace Character {
 	}
 
 #pragma endregion // 必殺技
-
-#pragma region Skill
-	// 更新
-	void PlayerStateSkill::Update() {
-		// 時間更新
-		timer_ += character->GetTime();
-
-		// 移動に移行
-		if (changeTimer_ <= timer_) {
-			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-			return;
-		}
-
-	};
-	// 終了
-	void PlayerStateSkill::Exit() {
-
-	};
-	// 初期化
-	void PlayerStateSkill::Enter() {
-		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
-
-		// スタン弾発射
-		BulletInfo bulletInfo = {};
-		bulletInfo.position = player->GetWorldTransform().worldMat_.GetWorldPosition();
-		timer_ = 0.0f;
-	};
-#pragma endregion // スキル
 
 #pragma region Fainting
 

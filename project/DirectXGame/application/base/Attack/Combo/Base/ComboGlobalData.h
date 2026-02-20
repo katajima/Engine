@@ -101,6 +101,8 @@ namespace Combo {
 		
 		// ロックオン半径
 		float lockOnRadius = 7.0f;
+		// ターゲットにどこまで近づくか半径
+		float moveTragetRadius = 1.0f;
 
 	};
 };

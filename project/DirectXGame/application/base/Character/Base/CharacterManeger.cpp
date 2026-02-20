@@ -82,9 +82,11 @@ namespace Character {
 		// EnemyTypeから生成関数
 		static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
 		{
-			{ EnemyType::kNormal,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
 			{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
 			{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
+		
+			{ EnemyType::kMediumMelee,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
+
 			{ EnemyType::kDummy,   []() { return std::make_unique<DummyEnemy>(); } },
 		};
 
@@ -149,6 +151,17 @@ namespace Character {
 		}
 
 		crowdManager_->BindAgentsToEnemies(enemys);
+	}
+
+	void CharacterManager::Clear(Type type) {
+		for (auto& character : character_) {
+			if (character->GetCharacterType() == type) {
+				character->GetObjectComponent()->GetObjectStateFlags().isAlive = false;
+				character->Delete();
+				character->GetObjectComponent()->GetWorldTransform().scale_ = 0.0f;
+				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = 0.0f;;
+			}
+		}
 	}
 
 }

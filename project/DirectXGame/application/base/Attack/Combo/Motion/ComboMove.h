@@ -27,21 +27,17 @@ namespace Combo {
 			float moveWindowStart_ = 0.1f;			// 移動受付スタート
 			float moveWindowEnd_ = 0.5f;			// 移動受付エンド
 			float speed_ = 0.0f;					// 移動速度
-
 			// 強制的に移動
 			bool isCompulsionMove_ = true;			
-
 			// 空中でのコンボで重力はあるか？
 			bool isGravity_ = true;					
 			// 重力スケール
 			float gravityScale_ = 1.0f;				
-
 			// ターゲットの距離でどこまで近づくか
-			float moveRadius_ = 2.0f;
-
+			float moveTargetRadius_ = 1.0f;
 			// 移動タイプ
 			MoveType moveType = MoveType::kTraget;	
-
+			// ロックオンデータ
 			LockOnData lockOnData_;
 		};
 
@@ -68,6 +64,8 @@ namespace Combo {
 		Vector3 GetDirection() const { return direction_; }
 		// 方向指定
 		void SetDirection(const Vector3& dire) { direction_ = dire; }
+		// ターゲット位置取得
+		Vector3 GetTargetPosition() const { return targetPos_; }
 	private:
 		// 移動タイプによる処理
 		void MoveTypeProcess(const Engine::Input& input, float timer, float dt);
@@ -94,6 +92,9 @@ namespace Combo {
 		// 移動出来るか
 		bool isMove_ = true;
 	private:
+		// ターゲット位置
 		Vector3 targetPos_ = {};
+		// スティック方向
+		Vector2 stickDirection_ = {};
 	};
 }

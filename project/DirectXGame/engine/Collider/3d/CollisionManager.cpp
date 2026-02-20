@@ -154,5 +154,5 @@ void Engine::CollisionManager::CheckAll() {
 	}
 
 	debugTimer_.EndTimer();
-	debugTimer_.LogTimeSec("");
+	//debugTimer_.LogTimeSec("");
 }

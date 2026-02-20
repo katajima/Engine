@@ -1,5 +1,5 @@
 #include "ComboMotion.h"
-#include"DirectXGame/application/base/Move/MoveComponent.h"
+#include"DirectXGame/application/base/Move/Base/MoveComponent.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "MoveSystem.h"
-#include "JumpSystem.h"
-#include "DashSystem.h"
-#include "MovementRestrictions.h"
+#include "DirectXGame/application/base/Move/Move/MoveSystem.h"
+#include "DirectXGame/application/base/Move/Jump/JumpSystem.h"
+#include "DirectXGame/application/base/Move/Dash/DashSystem.h"
+#include "DirectXGame/application/base/Move/Move/MovementRestrictions.h"
 
 // 前方宣言
 namespace Engine {
@@ -80,22 +80,26 @@ public:
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { moveSystem_->SetCamera(camera); }
 private:
-	std::unique_ptr<MoveSystem> moveSystem_ = nullptr; // 移動システム
-	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr; // ジャンプシステム
-	std::unique_ptr<DashSystem> dashSystem_ = nullptr; // ダッシュシステム
+	// 移動システム
+	std::unique_ptr<MoveSystem> moveSystem_ = nullptr;
+	// ジャンプシステム
+	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr;
+	// ダッシュシステム
+	std::unique_ptr<DashSystem> dashSystem_ = nullptr; 
 
-	//
-	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; // 移動制限システム
+	// 移動制限システム
+	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 
+	
+private:
 	// 操作タイプ
-	ControlType controlType_ = ControlType::Manual;	// 操作タイプ
-
-
+	ControlType controlType_ = ControlType::Manual;
+	// 名前
 	std::string name_ = "";
-
+	// 保存項目を使うか
 	bool useGlobal_ = true;
 private:
+	// 保存項目
 	Engine::GlobalVariables* globalVariables = nullptr;
-
 };
 
 

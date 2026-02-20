@@ -2,7 +2,7 @@
 #include "GameData.h"
 #include "map"
 #include "vector"
-
+#include "DirectXGame/engine/input/Input.h"
 
 // 前方宣言
 namespace Character {
@@ -26,6 +26,7 @@ namespace Game {
 		kNone,		// 無し
 		kBattle,	// 戦い
 		kBreakTime,	// 休憩時間
+		kEnd,		// 終了
 	};
 
 	/// <summary>
@@ -35,6 +36,7 @@ namespace Game {
 		kTime,	// 時間経過で
 		kKill,	// 全滅させたら
 		kTake,	// 何かを取得したら
+		kInput,	// 何か入力があったら
 	};
 
 	/// <summary>
@@ -62,7 +64,7 @@ namespace Game {
 		// 倒して変更するタイプ
 		GameEvemtKillChangeType type;
 		// 倒すキャラクターの数
-		int* killCharacterCount;
+		int killCharacterCount;
 	};
 
 	/// <summary>
@@ -77,7 +79,12 @@ namespace Game {
 		GameEventKillChange killChange_;
 		// ゲームイベント内での時間に関する構造体
 		GameEventTime time_;
-
+		// バトルウェーブ番号
+		int battleWaveIndex_ = 0;
+		// 入力
+		GamePadButton buttom = GamePadButton::GAMEPAD_B;
+		// 敵削除
+		bool enemyDelete = false;
 	};
 
 
@@ -88,8 +95,13 @@ namespace Game {
 	/// </summary>
 	class GameEventState {
 	public:
+		~GameEventState() {
+			spawns_.clear();
+		}
+
 		// 開始
-		void Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager);
+		void Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
+			, Engine::Input* input);
 		// 終了
 		void Exit();
 
@@ -118,12 +130,16 @@ namespace Game {
 		bool HasNextState() const {	return !nextStates.empty();}
 		// データ設定
 		void SetData(const GameEventData& data) { data_ = data; };
+		// データ取得
+		GameEventData GetData() const { return data_; };
 		// コンボ名取得
 		std::string GetName() const { return name; }
 		// コンボ名設定
 		void SetName(const std::string& comboName) { name = comboName; }
 		// スポーン追加
-		void AddSpawn(const Character::SpawnInfo& spawn);
+		void AddSpawns(std::vector<Character::SpawnInfo>&& spawns);
+		// 
+		float GetCurrentTimer() const;
 	public:
 		// 終了したか
 		bool IsFinish() const { return isFinish_; };
@@ -164,7 +180,8 @@ namespace Game {
 	class EventStateMachine {
 	public:
 		// 初期化
-		void Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager);
+		void Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
+			,Engine::Input* input);
 
 
 		// ステート設定
@@ -183,6 +200,8 @@ namespace Game {
 			if (!node) return true;
 			return !node->HasNextState();
 		}
+
+		std::shared_ptr<GameEventState> GetCurrentState() { return currentState; }
 	private:
 		std::shared_ptr<GameEventState> currentState;   // 現在のステート
 		std::shared_ptr<GameEventState> rootState;      // 初期ステート

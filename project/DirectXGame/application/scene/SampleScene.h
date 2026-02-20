@@ -66,6 +66,8 @@ private:
 
 private:
 	Engine::Input* input_ = nullptr;									// 入力
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_;
 
 	std::unique_ptr<Engine::Audio> audioTest_;							// オーディオ
 	uint32_t soundHandle_ = 0;									// サウンドハンドル

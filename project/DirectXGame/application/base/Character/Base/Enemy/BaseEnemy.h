@@ -28,14 +28,10 @@ namespace Character {
 		void BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f);
-
 		// 毎フレーム更新
 		virtual void Update() = 0;
-
 		// 基盤の更新
 		void BaseUpdate();
-
-
 		// 描画エフェクト
 		virtual void DrawEffect() = 0;
 		// 描画2d
@@ -48,7 +44,7 @@ namespace Character {
 		virtual void Attack() = 0;
 		// プレイヤー設定
 		void SetTarget(BasePlayer* target) { target_ = target; }// プレイヤ設定
-
+		// ターゲット取得
 		BasePlayer* GetTarget() { return target_; } // ターゲット取得
 
 	public:
@@ -111,16 +107,12 @@ namespace Character {
 		void InitShadowObjectComponent(const std::string& charaName);
 
 	protected:
-		EnemyType type_ = EnemyType::kNormal; // 敵の種類
+		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
-
-		AgentState agentState_ = AgentState::Approach;
 	protected:
 
 	protected: //2D
 		std::unique_ptr<Engine::Sprite> icon_lockOn;
-		std::unique_ptr<Engine::Sprite> hpBer_;
-		std::unique_ptr<Engine::Sprite> backHpBer_;
 	protected:
 		BasePlayer* target_;
 		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
@@ -131,10 +123,5 @@ namespace Character {
 		EnemyGlobalData globalData_;
 	protected:
 		Engine::WorldTransform worldEffect_;
-		DebugTimer debugTimer_;
-
-		// 影用オブジェクトコンポーネント
-		std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
-
 	};
 }

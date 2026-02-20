@@ -5,120 +5,145 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 
+namespace Game {
+
+	void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+		Character::CharacterManager* characterManager, Engine::Input* input)
+	{
+		this->entity3DManager = entity3DManager;		// エンティティ3d
+		this->globalVariables = globalVariables;		// 保存項目
+		this->characterManager = characterManager;	// キャラクター管理
 
 
-void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Character::CharacterManager* characterManager)
-{
-	this->entity3DManager = entity3DManager;		// エンティティ3d
-	this->globalVariables = globalVariables;		// 保存項目
-	this->characterManager = characterManager;	// キャラクター管理
+		// キャラクター出現管理クラス初期化
+		characterSpawnManager_ = std::make_unique<Character::CharacterSpawnManager>();
+		characterSpawnManager_->Initialize(characterManager, entity3DManager->Get3DLineCommon(), 300);
+
+		// イベントステート
+		eventStateMachine_ = std::make_unique<Game::EventStateMachine>();
+		eventStateMachine_->Initialize(characterManager, characterSpawnManager_.get(),input);
 
 
-	// キャラクター出現管理クラス初期化
-	characterSpawnManager_ = std::make_unique<Character::CharacterSpawnManager>();
-	characterSpawnManager_->Initialize(characterManager, entity3DManager->Get3DLineCommon(),300);
+		Game::GameEventData data;
+		data.eventType_ = GameEventType::kBreakTime;
+		data.time_.max = 5.0f;
+		CreateGameEvent("start", data);
+
+		CreateSpawn(Character::EnemyType::kMediumMelee,"normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,500 }, { 10,1,10 }, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,1,500 }, { 10,1,10 }, 0.75f);
+
+		data.eventType_ = GameEventType::kBattle;
+		data.battleWaveIndex_ = 1;
+		data.time_.max = 30.0f;
+
+		CreateGameEvent("battle01", data);
+
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,-400 }, { 10,1,10 }, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,0,-400 }, { 10,1,10 }, 0.75f);
+
+		data.eventType_ = GameEventType::kBattle;
+		data.battleWaveIndex_ = 2;
+		data.time_.max = 60.0f;
+
+		CreateGameEvent("battle02", data);
+
+		data.changeType_ = GameEventChangeType::kTime;
+		data.eventType_ = GameEventType::kEnd;
+		data.time_.max = 3.0f;
+		data.enemyDelete = true;
+
+		CreateGameEvent("result", data);
 
 
-	eventStateMachine_ = std::make_unique<Game::EventStateMachine>();
-	eventStateMachine_->Initialize(characterManager, characterSpawnManager_.get());
+		/*data.changeType_ = GameEventChangeType::kInput;
+		data.eventType_ = GameEventType::kEnd;
+		data.time_.max = 10.0f;
 
-	// ウェーブ管理クラス初期化
-	waveManager_ = std::make_unique<WaveManager>();
-	waveManager_->SetCharacterSpawnManager(characterSpawnManager_.get());
-	waveManager_->SetCharacterManager(characterManager);
+		CreateGameEvent("end", data);*/
+
+		ConnectNode("start","","battle01");
+		ConnectNode("battle01", "", "battle02");
+		ConnectNode("battle02", "", "result");
+		//ConnectNode("result", "", "end");
+
+		eventStateMachine_->SetRoot(GetNodeState("start"));
+	}
 
 
-	//CreateSpawn(Character::EnemyType::kNormal,"normal", 1, 2, { 0,0,0 }, { 100,1,500 }, 10.0f);
-	CreateSpawn(Character::EnemyType::kSmallRanged,"smallRanged", 100, 1, { 0,1,500 }, { 10,1,10 }, 4.0f);
-	CreateSpawn(Character::EnemyType::kSmallMelee,"smallMelee", 100, 1, { 0,1,500 }, { 10,1,10 }, 1.0f);
-	CreateWave(0,30, WaveEndType::kTime,60);
-	//CreateSpawn(Character::EnemyType::kNormal, "normal", 1, 3, { 0,0,0 }, { 100,1,100 }, 10.0f);
-	CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,-400 }, { 10,1,10 }, 4.0f);
-	CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 2, { 0,0,-400 }, { 10,1,10 }, 1.0f);
-	CreateWave(1,30, WaveEndType::kTime,60);
+	void GameEventController::CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval, float startDelay) {
+		Character::SpawnInfo data;
+		data.GetData().type_ = type;
 
-	waveManager_->Initialize(gameWaves_);
-}
-
-void GameEventController::CreateWave(int waveIndex, float nextWaveDelay,WaveEndType endType, int maxEnemyCount) {
-	GameWave wave;
-	wave = WaveManager::CreateGameWave(waveIndex, nextWaveDelay, endType, characterManager ,spawnInfos_);
-	wave.SetEnemyMaxCount(maxEnemyCount);
-	gameWaves_.push_back(wave);
-	spawnInfos_.clear();
-}
-
-void GameEventController::CreateSpawn(Character::EnemyType type,const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval,float startDelay){
-	Character::SpawnInfo data;
-	data.GetData().type_ = type;
-
-	data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval);
-	spawnInfos_.push_back(data);
-}
+		data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval);
+		spawnInfos_.push_back(data);
+	}
 
 #pragma region  Event
 
-void GameEventController::AddNode(const std::string& nodeName, const Game::GameEventData& data)
-{
-	// 既に存在する場合は追加しない
-	if (eventStateNodes_.find(nodeName) != eventStateNodes_.end()) {
-		return;
+	void GameEventController::AddNode(const std::string& nodeName, const Game::GameEventData& data)
+	{
+		// 既に存在する場合は追加しない
+		if (eventStateNodes_.find(nodeName) != eventStateNodes_.end()) {
+			return;
+		}
+		// ノード生成
+		std::shared_ptr<Game::GameEventState> node = std::make_shared<Game::GameEventState>();
+		eventStateNodes_[nodeName] = node;				// ノード追加
+
+		// 出現情報追加
+		eventStateNodes_[nodeName]->AddSpawns(std::move(spawnInfos_));
+		spawnInfos_.clear();
+		eventStateNodes_[nodeName]->SetData(data);			// データ設定
+		eventStateNodes_[nodeName]->SetName(nodeName);	// ノード名設定
 	}
-	// ノード生成
-	std::shared_ptr<Game::GameEventState> node = std::make_shared<Game::GameEventState>();
-	eventStateNodes_[nodeName] = node;				// ノード追加
 
-	// 出現情報追加
-	for (auto& sp : spawnInfos_) {
-		eventStateNodes_[nodeName]->AddSpawn(sp);
+
+	void GameEventController::ConnectNode(const std::string& from, const std::string& name, const std::string& to)
+	{
+		auto itFrom = eventStateNodes_.find(from);
+		auto itTo = eventStateNodes_.find(to);
+		if (itFrom != eventStateNodes_.end()) {
+			if (itTo != eventStateNodes_.end())
+				itFrom->second->SetNextState(itTo->second);
+		}
 	}
-	eventStateNodes_[nodeName]->SetData(data);			// データ設定
-	eventStateNodes_[nodeName]->SetName(nodeName);	// ノード名設定
-}
 
 
-void GameEventController::ConnectNode(const std::string& from, const std::string& name, const std::string& to)
-{
-	auto itFrom = eventStateNodes_.find(from);
-	auto itTo = eventStateNodes_.find(to);
-	if (itFrom != eventStateNodes_.end()) {
-		if (itTo != eventStateNodes_.end())
-			itFrom->second->SetNextState(itTo->second);
-	}
-}
-
-
-void GameEventController::CreateGameEvent(const std::string& nodeName, const Game::GameEventData& data) {
-	AddNode(nodeName, data);
-	spawnInfos_.clear();
-};
+	void GameEventController::CreateGameEvent(const std::string& nodeName, const Game::GameEventData& data) {
+		AddNode(nodeName, data);
+	};
 
 #pragma endregion // イベント系
 
 
 
-void GameEventController::Update(float dt) {
-	// キャラクター出現管理更新
-	characterSpawnManager_->Update(dt);
-	// ウェーブ管理クラス
-	waveManager_->Update(dt);
+	void GameEventController::Update(float dt) {
+		// キャラクター出現管理更新
+		characterSpawnManager_->Update(dt);
+
+		// イベントステートマシン更新
+		eventStateMachine_->Update(dt);
 
 
-	curretWave_ = waveManager_->GetCurrentWave() + 1;
-	time_ = waveManager_->GetCurrentWaveTime();
+		curretWave_ = eventStateMachine_->GetCurrentState()->GetData().battleWaveIndex_;
+		time_ = eventStateMachine_->GetCurrentState()->GetCurrentTimer();
 
+		bool isCharaPlayerDed = !characterManager->GetPlayer()->GetAlive();
+		bool isCharaEnemyDed = characterManager->GetCharacterCount(Character::Type::Enemy) <= 0;
 
-	bool isEndWave = waveManager_->IsEndWave();
-	bool isCharaPlayerDed = !characterManager->GetPlayer()->GetAlive();
-	bool isCharaEnemyDed = characterManager->GetCharacterCount(Character::Type::Enemy) <= 0;
+		bool isEndState = eventStateMachine_->IsEventFinished();
+		bool isFinish = eventStateMachine_->GetCurrentState()->IsFinish();
+		if (isCharaPlayerDed) {
+			isEndEvent_ = true;
+		}
 
+		// 最後のステートでなおかつ終了状態なら
+		if (isEndState && isFinish) {
+			isEndEvent_ = true;
+		}
 
-	if (isCharaPlayerDed) {
-		isEndEvent_ = true;
-	}
-	if (isEndWave) {
-		isEndEvent_ = true;
 	}
 
 }
-

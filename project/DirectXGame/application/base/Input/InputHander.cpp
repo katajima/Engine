@@ -40,3 +40,8 @@ ICommand* InputHander::HandleInput()
 	}
 	return nullptr;
 }
+
+void SkillAttackCommand::Exec(Character::BaseCharacter& character)
+{
+	character.SkillAttack();
+}

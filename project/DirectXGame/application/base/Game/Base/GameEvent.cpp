@@ -5,13 +5,19 @@
 #pragma region GameEventState
 
 // 開始
-void Game::GameEventState::Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager){
+void Game::GameEventState::Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
+	, Engine::Input* input){
 	this->characterManager = characterManager;
 	this->characterSpawnManager = characterSpawnManager;
+	this->input = input;
 
 	stateTime = 0.0f;
 	// 出現情報を元に出現処理
 	SpawnProcess();
+
+	if (data_.enemyDelete) {
+		this->characterManager->Clear(Character::Type::Enemy);
+	}
 }
 // 終了
 void Game::GameEventState::Exit() {
@@ -37,8 +43,14 @@ std::string Game::GameEventState::GetNextStateName() const {
     return "";
 }
 
-void Game::GameEventState::AddSpawn(const Character::SpawnInfo& spawn){
-	spawns_.push_back(spawn);
+void Game::GameEventState::AddSpawns(std::vector<Character::SpawnInfo>&& spawns){
+	spawns_.insert(spawns_.end(),
+		std::make_move_iterator(spawns.begin()),
+		std::make_move_iterator(spawns.end()));
+}
+
+float Game::GameEventState::GetCurrentTimer() const{
+	return  data_.time_.max - stateTime;
 }
 
 // 終了したか
@@ -48,6 +60,7 @@ bool Game::GameEventState::FinishProcess() {
 	case Game::GameEventChangeType::kTime:
 
 		if (data_.time_.max < stateTime) {
+			data_.time_.max = stateTime;
 			return true;
 		}
 		break;
@@ -57,6 +70,11 @@ bool Game::GameEventState::FinishProcess() {
 		}
 		break;
 	case Game::GameEventChangeType::kTake:
+		break;
+	case Game::GameEventChangeType::kInput:
+		if (input->IsGamePadTriggered(data_.buttom)) {
+			return true;
+		}
 		break;
 	default:
 		break;
@@ -79,13 +97,21 @@ void Game::GameEventState::SpawnProcess() {
 #pragma region EventStateMachine
 
 
-void Game::EventStateMachine::Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager){
+void Game::EventStateMachine::Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
+	, Engine::Input* input){
+	
 	this->characterManager = characterManager;
 	this->characterSpawnManager = characterSpawnManager;
+	this->input = input;
 }
 
 // ステート設定
 void Game::EventStateMachine::SetState(std::shared_ptr<GameEventState> state) {
+	if (currentState) currentState->Exit();	// 終了処理
+	currentState = state;
+	if (currentState) {
+		currentState->Enter(characterManager, characterSpawnManager, input);	// 開始処理
+	}
 };
 // 更新
 void Game::EventStateMachine::Update(float dt) {

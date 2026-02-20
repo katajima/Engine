@@ -5,20 +5,15 @@ void MovementComponent::Initialize(Engine::GlobalVariables* globalVariables, Con
 	this->globalVariables = globalVariables;
 	
 	name_ = "MoveData" + name;
-
-
 	// 移動システムの生成
 	moveSystem_ = std::make_unique<MoveSystem>();
 	moveSystem_->Initialize();
-
 	// ジャンプシステムの生成
 	jumpSystem_ = std::make_unique<JumpSystem>();
 	jumpSystem_->Initialize();
-
 	// ダッシュシステムの生成
 	dashSystem_ = std::make_unique<DashSystem>();
 	dashSystem_->Initialize();
-
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
 	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });

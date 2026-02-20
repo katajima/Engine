@@ -2,16 +2,11 @@
 #include <map>
 #include <string>
 #include <memory>
-
-#include "ComboState.h"
-#include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
-
+#include "ComboDebug.h"
 namespace Character {
 	class BaseCharacter; // 前方宣言
 }
-namespace Engine {
-	class GlobalVariables;
-}
+
 
 namespace Combo {
 	/// <summary>
@@ -21,11 +16,12 @@ namespace Combo {
 	{
 	public:
 		// 初期化
-		void Initialize(Character::BaseCharacter* character, Engine::GlobalVariables* globalVariables);
+		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables);
 
 		// コンボ更新
 		void UpdateCombo(float dt) {
 			comboStateMachine_->Update(dt);
+			comboDebug_->Update(dt);
 		}
 
 		// クリア
@@ -66,7 +62,7 @@ namespace Combo {
 		//	トランスフォーム取得
 		std::map<std::string, Engine::WorldTransform*> GetParentTransforms() { return parentTransforms_; };
 
-
+		
 	public:
 		// コンボステートマシーン取得
 		StateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
@@ -130,7 +126,9 @@ namespace Combo {
 
 	private:
 		// コンボステートマシーン
-		std::unique_ptr<StateMachine> comboStateMachine_;
+		std::unique_ptr<StateMachine> comboStateMachine_ = nullptr;
+		//
+		std::unique_ptr<ComboDebug> comboDebug_ = nullptr;
 		// コンボノードステートマップ
 		std::map<std::string, std::shared_ptr<NodeState>> comboNodes_;
 		// 保存データマップ 

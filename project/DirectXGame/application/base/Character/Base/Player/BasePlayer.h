@@ -48,6 +48,10 @@ namespace Character {
 		virtual void Attack() = 0;
 		// 攻撃(強攻撃)
 		virtual void HeavyAttack() {};
+		/// 攻撃(スキル攻撃)
+		virtual void SkillAttack() {};
+
+
 
 		// ターゲットキャラクターを設定
 		void SetTargetCharacters(const std::vector<BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
@@ -74,9 +78,5 @@ namespace Character {
 		std::vector<BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
 		FollowCamera* followCamera = nullptr;					// フォローカメラ
 		bool isCreativeMode = false;							// クリエイティブモードかどうか
-
-
-		// 影用オブジェクトコンポーネント
-		std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 	};
 }

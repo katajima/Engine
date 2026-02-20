@@ -71,17 +71,6 @@ namespace Character {
 		kJump,		// ジャンプ状態
 	};
 
-
-	// 敵キャラクターの種類を定義する列挙型
-	enum class EnemyType
-	{
-		kNormal,		// 通常
-		kSmallMelee,	// 小型近接
-		kSmallRanged,	// 小型遠距離
-
-		kDummy,			// ダミー
-	};
-
 	// プレイヤーキャラクターの種類を定義する列挙型
 	enum class PlayerType
 	{
@@ -134,11 +123,11 @@ namespace Character {
 		// 
 
 		// HP取得
-		Gage& HP() const { return parameters_->HP; };				// ヒットポイント
+		Gage& HP() const { return parameters_->HP; };
 		// MP取得
-		Gage& MP() const { return  parameters_->MP; };				// マジックポイント
+		Gage& MP() const { return  parameters_->MP; };
 		// スタミナ取得
-		Gage& Stamina() const { return parameters_->stamina; };		// スタミナ
+		Gage& Stamina() const { return parameters_->stamina; };
 
 
 

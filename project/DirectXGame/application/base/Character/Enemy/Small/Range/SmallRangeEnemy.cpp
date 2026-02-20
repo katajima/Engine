@@ -8,7 +8,7 @@ namespace Character {
 	void SmallRangeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy");
+		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy",1.5f);
 		
 		
 		

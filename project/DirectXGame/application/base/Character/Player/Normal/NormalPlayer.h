@@ -48,6 +48,9 @@ namespace Character {
 		/// 攻撃(強攻撃)
 		void HeavyAttack() override { RequestAttack(AttackInput::Heavy); };
 
+		// 攻撃(スキル)
+		void SkillAttack() override { RequestAttack(AttackInput::Skill); };
+
 		// リロード
 		void Reload() override;
 

@@ -40,6 +40,11 @@
             "type": "float",
             "value": 35.31999969482422
         },
+        "コンボ中の移動タイプ": {
+            "enumType": "MoveType",
+            "type": "enum",
+            "value": 1
+        },
         "コンボ中の移動強制": {
             "type": "bool",
             "value": true
@@ -82,7 +87,7 @@
         },
         "コンボ終了時間": {
             "type": "float",
-            "value": 2.049999952316284
+            "value": 1.7666666507720947
         },
         "ダメージ": {
             "type": "float",

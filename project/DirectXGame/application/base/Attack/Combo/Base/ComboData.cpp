@@ -25,10 +25,10 @@ namespace Combo {
 	void ComboData::Update(const Engine::Input& input, float dt) {
 		// 時間更新
 		timer_ += dt;
-		// コンボ用モーションクラス更新
-		motion.Update(input, timer_, dt);
 		// コンボ用条件クラス更新
 		comboCondition.Update(input, timer_, dt);
+		// コンボ用モーションクラス更新
+		motion.Update(input, timer_, dt);
 		// コンボ用カメラクラス更新
 		camera.Update(timer_, dt);
 		// コンボ用ヒットボックスクラス更新

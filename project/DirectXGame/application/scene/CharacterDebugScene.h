@@ -66,6 +66,9 @@ private:
 	// インプットマネージャ
 	std::unique_ptr<InputManager> inputManager_;
 
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_;
+
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
 private:

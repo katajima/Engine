@@ -9,7 +9,7 @@ namespace Character {
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemy.gltf", "enemy", 2);
+		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemy.gltf", "MediumMeleeEnemy", 2);
 
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 

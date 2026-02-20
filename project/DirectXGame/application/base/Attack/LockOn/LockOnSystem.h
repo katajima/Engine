@@ -15,9 +15,6 @@ class CameraManager;
 /// </summary>
 class LockOnSystem {
 public:
-
-
-
 	// 初期化
 	void Initialize(Character::BaseCharacter* owner);
 
@@ -37,6 +34,8 @@ public:
 	// 当てた相手のタグを設定
 	void SetHitTag(uint32_t tag) { hitTag = tag; }
 
+	// ロックオンタグクリア
+	void ClearTag() { hitTag = -1; }
 
 private:
 	// 範囲内の近くの相手を取得

@@ -1,0 +1,141 @@
+{
+    "SkillAttack01": {
+        "Y方向ノックバック": {
+            "type": "bool",
+            "value": false
+        },
+        "Y方向ノックバック力": {
+            "type": "float",
+            "value": 118.08999633789063
+        },
+        "アニメーション名前": {
+            "type": "string",
+            "value": "Rig|Roll"
+        },
+        "アニメーション速度": {
+            "type": "float",
+            "value": 1.0099999904632568
+        },
+        "アニメーション遷移時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "エフェクト(トレイル)生存時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "エフェクト(トレイル)発生時間": {
+            "type": "float",
+            "value": 0.28333333134651184
+        },
+        "コンボキャンセル受付終了時間": {
+            "type": "float",
+            "value": 0.5
+        },
+        "コンボキャンセル受付開始時間": {
+            "type": "float",
+            "value": 0.30000001192092896
+        },
+        "コンボ中の移動スピード": {
+            "type": "float",
+            "value": 53.40999984741211
+        },
+        "コンボ中の移動タイプ": {
+            "enumType": "MoveType",
+            "type": "enum",
+            "value": 2
+        },
+        "コンボ中の移動強制": {
+            "type": "bool",
+            "value": true
+        },
+        "コンボ中の移動終了時間": {
+            "type": "float",
+            "value": 1.1333333253860474
+        },
+        "コンボ中の移動開始時間": {
+            "type": "float",
+            "value": 0.0
+        },
+        "コンボ中の重力": {
+            "type": "bool",
+            "value": true
+        },
+        "コンボ中の重力強度": {
+            "type": "float",
+            "value": 1.0
+        },
+        "コンボ入力受付終了時間": {
+            "type": "float",
+            "value": 1.649999976158142
+        },
+        "コンボ入力受付開始時間": {
+            "type": "float",
+            "value": 0.4166666567325592
+        },
+        "コンボ移動キャンセル受付終了時間": {
+            "type": "float",
+            "value": 1.6666666269302368
+        },
+        "コンボ移動キャンセル受付開始時間": {
+            "type": "float",
+            "value": 1.1833332777023315
+        },
+        "コンボ移行時間": {
+            "type": "float",
+            "value": 0.6000000238418579
+        },
+        "コンボ終了時間": {
+            "type": "float",
+            "value": 1.649999976158142
+        },
+        "ダメージ": {
+            "type": "float",
+            "value": 20.0
+        },
+        "ノックバック力": {
+            "type": "float",
+            "value": 115.12000274658203
+        },
+        "ノックバック持続時間": {
+            "type": "float",
+            "value": 0.25999999046325684
+        },
+        "ヒットボックス依存先タイプ": {
+            "enumType": "HitBoxParentType",
+            "type": "enum",
+            "value": 0
+        },
+        "ヒットボックス生存時間": {
+            "type": "float",
+            "value": 1.0499999523162842
+        },
+        "ヒットボックス発生時間": {
+            "type": "float",
+            "value": 0.11666666716337204
+        },
+        "ヒットボックス発生条件タイプ": {
+            "enumType": "HitBoxSpawnType",
+            "type": "enum",
+            "value": 0
+        },
+        "ロックオンタイプ": {
+            "enumType": "LockOnType",
+            "type": "enum",
+            "value": 1
+        },
+        "ロックオン半径": {
+            "type": "float",
+            "value": 7.0
+        },
+        "終了条件タイプ": {
+            "enumType": "EndConditionType",
+            "type": "enum",
+            "value": 3
+        },
+        "親オブジェクト名前": {
+            "type": "string",
+            "value": "Player"
+        }
+    }
+}

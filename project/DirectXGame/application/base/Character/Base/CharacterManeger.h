@@ -103,9 +103,8 @@ namespace Character {
 		void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
 		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb);
-
-	private:
-
+	public:
+		void Clear(Type type);
 	private:
 		std::vector<std::unique_ptr<BaseCharacter>> character_;	// キャラクター
 

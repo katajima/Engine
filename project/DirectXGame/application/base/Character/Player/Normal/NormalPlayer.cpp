@@ -167,6 +167,13 @@ namespace Character {
 			(s == CharacterMainState::Jump);
 		const bool isAttack = (s == CharacterMainState::Attack);
 
+		if (input == AttackInput::Skill) {
+			if (special_->GetGauge() < 15) {
+				return;
+			}
+		}
+
+
 		auto* ac = GetAttackController();
 		ac->SetIsAttack(true);
 
@@ -192,7 +199,11 @@ namespace Character {
 				{
 				case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack1"); break;
 				case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("HeavyAttack01"); break;
-				case AttackInput::Skill: ac->GetComboSystem()->StartCombo("Skill1"); break;
+
+				case AttackInput::Skill:
+					ac->GetComboSystem()->StartCombo("SkillAttack01"); 
+					special_->AddGauge(-15);
+					break;
 				default: break;
 				}
 			}
@@ -214,9 +225,6 @@ namespace Character {
 			});
 		stateMachine_->RegisterState(CharacterMainState::Special, [](BaseCharacter* p) {
 			return std::make_unique<PlayerStateSpecial>(p);
-			});
-		stateMachine_->RegisterState(CharacterMainState::Skill, [](BaseCharacter* p) {
-			return std::make_unique<PlayerStateSkill>(p);
 			});
 		stateMachine_->RegisterState(CharacterMainState::Fainting, [](BaseCharacter* p) {
 			return std::make_unique<PlayerStateFainting>(p);
@@ -385,14 +393,19 @@ namespace Character {
 		HitBox::GlobalData hitBoxdata = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
 		HitBox::GlobalData hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
 		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
-		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},4.0f };
+		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},6.0f };
 		HitBox::GlobalData hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
+		HitBox::GlobalData hitBoxdata6 = { {0,0,2} ,  {2,2,2} };
+		HitBox::GlobalData hitBoxdata7 = { {0,0,0} ,  {4,4,2} };
+
 
 		hitBoxSystem->CreateHitBoxCollData("obbColl1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata);
 		hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata2);
 		hitBoxSystem->CreateHitBoxCollData("obb", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata3);
 		hitBoxSystem->CreateHitBoxCollData("obb2", HitBox::Shape::kSphere, HitBox::UseType::kPlayer, hitBoxdata4);
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata5);
+		hitBoxSystem->CreateHitBoxCollData("obbColl1_2", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata6);
+		hitBoxSystem->CreateHitBoxCollData("obbColl1_3", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata7);
 
 		// コンボ１のデータ送る
 		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("obb")} });
@@ -414,11 +427,14 @@ namespace Character {
 
 
 		// コンボ8のデータ送る
-		comboSystem->CreateCombo("HeavyAttack01", { { hitBoxSystem->GetHitBoxCollData("obb")  } }, GamePadButton::GAMEPAD_X);
+		comboSystem->CreateCombo("HeavyAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_2")  } }, GamePadButton::GAMEPAD_X);
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("HeavyAttack02", { { hitBoxSystem->GetHitBoxCollData("obb")  } }, GamePadButton::GAMEPAD_X);
 		// コンボ8のデータ送る
 		comboSystem->CreateCombo("HeavyAttack03", { { hitBoxSystem->GetHitBoxCollData("obb") } }, GamePadButton::GAMEPAD_X);
+		
+		// コンボ9のデータ送る
+		comboSystem->CreateCombo("SkillAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_3") } }, GamePadButton::GAMEPAD_Y);
 
 
 
@@ -435,7 +451,13 @@ namespace Character {
 
 
 		comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Heavy, "HeavyAttack02"); // コンボ連結	
+		comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Light, "Attack7"); // コンボ連結	
+
 		comboSystem->ConnectCombo("HeavyAttack02", AttackInput::Heavy, "HeavyAttack03"); // コンボ連結	
+
+		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Skill, "SkillAttack01"); // コンボ連結
+		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Light, "Attack6"); // コンボ連結
+
 	}
 
 	void NormalPlayer::Reload() {

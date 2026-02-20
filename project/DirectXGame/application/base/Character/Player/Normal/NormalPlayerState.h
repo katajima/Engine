@@ -94,27 +94,6 @@ namespace Character {
 		void Enter() override;
 	};
 
-	// スキル
-	class PlayerStateSkill : public SkillState
-	{
-	public:
-		PlayerStateSkill(BaseCharacter* player)
-			: SkillState(player) {
-		}
-		// 更新
-		void Update() override;
-
-		// 終了
-		void Exit() override;
-		// 初期化
-		void Enter() override;
-
-	private:
-		float timer_ = 0.0f;
-		float changeTimer_ = 0.2f;
-
-	};
-
 	// 気絶
 	class PlayerStateFainting : public FaintingState {
 	public:

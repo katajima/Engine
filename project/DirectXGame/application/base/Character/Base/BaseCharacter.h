@@ -1,6 +1,6 @@
 #pragma once
 #include"CharacterData.h"
-#include"DirectXGame/application/base/Move/MoveComponent.h"
+#include"DirectXGame/application/base/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
@@ -60,6 +60,12 @@ namespace Character {
 		virtual void HeavyAttack() {};
 
 		/// <summary>
+		/// 攻撃(スキル攻撃)
+		/// </summary>
+		virtual void SkillAttack() {};
+
+
+		/// <summary>
 		/// ステートマシーン初期化
 		/// </summary>
 		virtual void InitStateMachine() {};
@@ -101,6 +107,9 @@ namespace Character {
 		Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 		// オブジェクト3d取得
 		ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
+		// オブジェクト3d取得
+		ObjectComponent* GetObjectComponentShadow() { return objectComponentShadow_.get(); }
+
 		// ワールド変換取得
 		Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
 		// 削除フラグ
@@ -187,10 +196,6 @@ namespace Character {
 			parameterComponent_->parameters_->speed = GetValue<float>("speed");
 			parameterComponent_->parameters_->jampPower = GetValue<float>("jampPower");
 		}
-
-	protected:
-
-
 	public:
 		// 速度
 		Vector3& Velocity() { return moveComponent_->Velocity(); }
@@ -209,7 +214,9 @@ namespace Character {
 
 	protected:
 		// オブジェクトコンポーネント
-		std::unique_ptr<ObjectComponent> objectComponent_;			
+		std::unique_ptr<ObjectComponent> objectComponent_;
+		// 影用オブジェクトコンポーネント
+		std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 		// スペシャル攻撃
 		std::unique_ptr<BaseSpecial> special_;						
 		// 武器

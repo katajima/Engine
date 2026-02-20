@@ -44,6 +44,13 @@ public:
 };
 
 
+// 攻撃コマンド
+class SkillAttackCommand : public ICommand
+{
+public:
+	void Exec(Character::BaseCharacter& character) override;
+};
+
 // 前方宣言
 namespace Engine {
 	class Input;

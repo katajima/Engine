@@ -40,11 +40,6 @@ namespace Combo {
 
 #ifdef _DEBUG
 
-		// ロックオンライン
-		lineCommon->GetLineMeshData().AddLineSphere(Sphere{ owner->GetWorldTransform().GetWorldPosition(),data_.lockOnRadius},{0,1,0,1},8,8);
-
-
-
 		ImGui::Begin("Attack Editor");
 		ImGui::Separator();
 		ImGui::Text("Combo Name: %s", comboName_.c_str());
@@ -176,6 +171,7 @@ namespace Combo {
 			"無し",
 			"ターゲットに向かって",
 			"前方",
+			"カメラ方向",
 			};
 
 			int current = static_cast<int>(data_.moveType);
@@ -455,7 +451,9 @@ namespace Combo {
 		data_.moveSpeed_ = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
 		data_.isCompulsionMove_ = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
 		data_.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity_;					// 重力
-		data_.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;			// 重力スケール
+		data_.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;				// 重力スケール
+		data_.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
+
 
 		// リアクション
 		data_.knockbackDuration_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration_;	// ノックバック持続時間
@@ -625,7 +623,6 @@ namespace Combo {
 			AttackSequence combo = comboEditorBlocks_[it.first].GetAttackSequence();
 			GlobalData& data = comboSystem->GetComboGlobalData(it.first);
 
-
 			// 入力の時間
 			data.stateInputStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").startFrame);
 			data.stateInputEndTime = ConvertUtility::FramesToSeconds(combo.GetEvent("入力の可能時間").endFrame);
@@ -666,6 +663,7 @@ namespace Combo {
 			// 重力
 			data.isGravity = comboEditorBlocks_[it.first].GetData().isGravity;
 			data.gravityScale = comboEditorBlocks_[it.first].GetData().gravityScale;
+			data.moveType = comboEditorBlocks_[it.first].GetData().moveType;
 
 			// アニメーションスピード
 			data.animationSpeed_ = comboEditorBlocks_[it.first].GetData().animationSpeed_;

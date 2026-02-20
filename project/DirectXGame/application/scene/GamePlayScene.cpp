@@ -42,11 +42,16 @@ void GamePlayScene::Initialize()
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
 		std::make_unique<HeavyAttackCommand>());
-
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
+		std::make_unique<SkillAttackCommand>());
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
 		std::make_unique<MoveCommand>());
 
+	// 入力システム初期化
+	inputSystem_ = std::make_unique<InputSystem>();
+	inputSystem_->Initialize(GetInput());
 
 	// エフェクト
 	effect_ = std::make_unique<Effect>();
@@ -54,17 +59,17 @@ void GamePlayScene::Initialize()
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
@@ -223,8 +228,6 @@ void GamePlayScene::UpdateImGui()
 
 
 	ImGui::End();
-
-
 #endif // _DEBUG
 
 	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
@@ -234,6 +237,9 @@ void GamePlayScene::UpdateImGui()
 // 更新処理
 void GamePlayScene::Update()
 {
+	// 入力システム更新
+	inputSystem_->Update(GetTime());
+
 	Engine::Camera::isShake_ = false;
 
 	// リトライ

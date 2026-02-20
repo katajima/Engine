@@ -109,6 +109,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.cpp" />
@@ -150,6 +151,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Melee\LargeMeleeEnemy.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Melee\SmallMeleeEnemy.cpp" />
@@ -160,13 +162,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\MoveComponent.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\MovementRestrictions.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\MoveSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Base\MoveComponent.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Move\MovementRestrictions.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp" />
@@ -769,6 +771,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.h" />
@@ -815,6 +818,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Melee\LargeMeleeEnemy.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Melee\SmallMeleeEnemy.h" />
@@ -826,9 +830,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h" />
-    <ClInclude Include="DirectXGame\application\base\Game\Base\GameState.h" />
-    <ClInclude Include="DirectXGame\application\base\Game\GameWave.h" />
+    <ClInclude Include="DirectXGame\application\base\Input\InputData.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Input\InputSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapData.h" />
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapItem.h" />
     <ClInclude Include="DirectXGame\application\base\Light\BaseDirectionalLight.h" />
@@ -840,13 +844,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\DashData.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\DashSystem.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\JumpData.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\JumpSystem.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\MoveData.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\MovementRestrictions.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\MoveSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MoveInput.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashData.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpData.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveData.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MovementRestrictions.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameEventController.h" />
@@ -914,7 +920,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayer.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\MoveComponent.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MoveComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h" />

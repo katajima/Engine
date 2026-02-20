@@ -5,10 +5,14 @@ namespace Combo {
 
 #pragma region main
 
-	void System::Initialize(Character::BaseCharacter* character, Engine::GlobalVariables* globalVariables) {
+	void System::Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables) {
 		this->globalVariables = globalVariables;
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
+
+		comboDebug_ = std::make_unique<ComboDebug>();
+		comboDebug_->Initialize(lineCommon, character);
+
 	}
 
 	void System::ClearNode() {
@@ -88,6 +92,7 @@ namespace Combo {
 		globalVariables->AddItem(name, "コンボ中の移動開始時間", data.moveWindowStart_);
 		globalVariables->AddItem(name, "コンボ中の移動終了時間", data.moveWindowEnd_);
 		globalVariables->AddItem(name, "コンボ中の移動強制", data.isCompulsionMove_);
+		globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.moveType, "MoveType");
 
 
 		globalVariables->AddItem(name, "アニメーション名前", data.animationName);
@@ -137,6 +142,7 @@ namespace Combo {
 		data.moveWindowStart_ = globalVariables->GetValue<float>(name, "コンボ中の移動開始時間");
 		data.moveWindowEnd_ = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
 		data.isCompulsionMove_ = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
+		data.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
 
 
 		data.stateCancelStartTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付開始時間");
@@ -185,6 +191,7 @@ namespace Combo {
 		globalVariables->SetValue(name, "コンボ中の移動強制", data.isCompulsionMove_);
 		globalVariables->SetValue(name, "コンボ中の重力", data.isGravity);
 		globalVariables->SetValue(name, "コンボ中の重力強度", data.gravityScale);
+		globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.moveType, "MoveType");
 
 
 		globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.stateCancelStartTime);
@@ -280,6 +287,7 @@ namespace Combo {
 		data.GetComboMotion().GetComboMove().GetData().moveWindowStart_ = gData.moveWindowStart_;
 		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd_ = gData.moveWindowEnd_;
 		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove_ = gData.isCompulsionMove_;
+		data.GetComboMotion().GetComboMove().GetData().moveType = gData.moveType;
 
 
 		///

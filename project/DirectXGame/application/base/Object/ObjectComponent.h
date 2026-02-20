@@ -10,7 +10,7 @@
 #include"DirectXGame/engine/Animation/AnimationData.h"
 #include"DirectXGame/engine/collider/3d/ColliderComponent.h"
 
-
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 //オブジェクトタイプ
 enum class ObjectType
@@ -45,6 +45,7 @@ namespace Engine {
 	class Entity3DManager;
 	class Entity2DManager;
 	class ObjectInstans;
+	class Camera;
 }
 /// <summary>
 /// オブジェクトコンポーネントくクラス

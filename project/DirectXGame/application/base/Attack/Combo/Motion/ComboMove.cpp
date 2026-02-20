@@ -6,6 +6,7 @@ namespace Combo {
 	// 開始
 	void ComboMove::Enter(Character::BaseCharacter* owner) {
 		isMove_ = false;
+		stickDirection_ = {};
 		moveComponent = owner->GetMoveComponent();
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
@@ -37,8 +38,9 @@ namespace Combo {
 		}
 		else {
 			// 動かしていたら
-			if (isMoveStick) {
+			if (!isMove_ && isMoveStick) {
 				isMove_ = true;
+				stickDirection_ = input.GetGamePadLeftStick().Normalize();
 			}
 		}
 
@@ -50,13 +52,17 @@ namespace Combo {
 		// 移動可能なら
 		if (isMove_) {
 			// 前進する
-			moveComponent->SetCanMove(true);				
+			moveComponent->SetCanMove(true);
 		}
 	}
 
 	// 終了
 	void ComboMove::Exit(Character::BaseCharacter* owner) {
 		isMove_ = false;
+		// 
+		lockOnSystem->ClearTag();
+		//
+		stickDirection_ = {};
 	}
 
 	void ComboMove::MoveTypeProcess(const Engine::Input& input, float timer, float dt) {
@@ -69,13 +75,15 @@ namespace Combo {
 			switch (data_.moveType)
 			{
 			case MoveType::kNone:
+				worldTransform->translate_ += Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed_;
 				break;
 			case MoveType::kForward:
 				worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
 				break;
 			case MoveType::kTraget:
+
 				if (traget) {
-					if (data_.moveRadius_ <= targetPos_.Distance(worldTransform->translate_)) {
+					if (data_.moveTargetRadius_ <= targetPos_.Distance(worldTransform->translate_)) {
 						worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
 					}
 				}
@@ -91,6 +99,7 @@ namespace Combo {
 			}
 		}
 	}
+
 	void ComboMove::GravityProcess() {
 		// 重力の設定
 		if (!data_.isGravity_) {
@@ -99,10 +108,12 @@ namespace Combo {
 		rigidBodyComponent->SetGravityScale(data_.gravityScale_);
 		rigidBodyComponent->SetIsGravity(data_.isGravity_);
 	}
+	
 	void ComboMove::MoveTypeDirectionProcess() {
 		switch (data_.moveType)
 		{
 		case MoveType::kNone: // 特に無し
+			//direction_
 			break;
 		case MoveType::kForward: // 所有者の向いている方向
 			// 方向指定
