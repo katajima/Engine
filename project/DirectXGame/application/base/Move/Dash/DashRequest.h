@@ -5,7 +5,7 @@
 /// <summary>
 /// ダッシュに関するシステムクラス
 /// </summary>
-class DashSystem {
+class DashRequest {
 public:
 	// ダッシュ状態
 	enum class State {

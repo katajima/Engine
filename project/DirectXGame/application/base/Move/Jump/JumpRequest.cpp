@@ -1,12 +1,12 @@
-#include "JumpSystem.h"
+#include "JumpRequest.h"
 
 
-void JumpSystem::Initialize()
+void JumpRequest::Initialize()
 {
 	groundHeight_ = -3.0f;
 }
 
-void JumpSystem::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
+void JumpRequest::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
 {
 	if (isUseJump == false) {
 		rigid.SetIsGravity(false);			// 重力をオフ
@@ -50,7 +50,7 @@ void JumpSystem::Update(float dt, Engine::WorldTransform& world, Engine::RigidBo
 	StateProcess();
 }
 
-void JumpSystem::StartJump(Engine::RigidBodyComponent& rigid)
+void JumpRequest::StartJump(Engine::RigidBodyComponent& rigid)
 {
 	rigid.Velocity().y = 0;	// 移動速度リセット
 	DecrementJumpCount();	// ジャンプ回数減少
@@ -68,7 +68,7 @@ void JumpSystem::StartJump(Engine::RigidBodyComponent& rigid)
 
 #pragma region Process
 
-void JumpSystem::StateProcess() {
+void JumpRequest::StateProcess() {
 
 	if (isLanding_) {
 		state_ = State::Land;
@@ -83,7 +83,7 @@ void JumpSystem::StateProcess() {
 	}
 }
 
-void JumpSystem::InputHoldProcess(float dt)
+void JumpRequest::InputHoldProcess(float dt)
 {
 	if (!isInputHeld_) return;
 
@@ -100,7 +100,7 @@ void JumpSystem::InputHoldProcess(float dt)
 	
 }
 
-void JumpSystem::JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid)
+void JumpRequest::JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid)
 {
 	if (!isInputHeld_) return;	// ホールド解除されているなら処理しない
 

@@ -1,13 +1,13 @@
-#include "DashSystem.h"
+#include "DashRequest.h"
 
 
-void DashSystem::Initialize() {
+void DashRequest::Initialize() {
 
 }
 
 
 // 更新
-void DashSystem::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
+void DashRequest::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 	// 速度処理
 	SpeedProcess(dt);
 	// 状態処理
@@ -18,7 +18,7 @@ void DashSystem::Update(float dt, Engine::WorldTransform& world, Engine::RigidBo
 	GravityProcess(dt, rigid);
 }
 
-void DashSystem::StartDash()
+void DashRequest::StartDash()
 {
 	if (!IsCanDash()) return;	// ダッシュ不可なら抜ける
 
@@ -29,13 +29,13 @@ void DashSystem::StartDash()
 	timer_ = 0.0f;			// タイマーリセット
 }
 
-void DashSystem::SetDirection(const Vector3& direction) {
+void DashRequest::SetDirection(const Vector3& direction) {
 	if (IsCanDash()) direction_ = direction; // ダッシュ可能なら方向設定
 }
 
 #pragma region Process
 
-void DashSystem::SpeedProcess(float dt) {
+void DashRequest::SpeedProcess(float dt) {
 
 	if (!isDash_) return; // ダッシュ中でなければ抜ける
 
@@ -62,7 +62,7 @@ void DashSystem::SpeedProcess(float dt) {
 
 }
 
-void DashSystem::StateProcess(float dt){
+void DashRequest::StateProcess(float dt){
 
 	timer_ += dt; // タイマー更新
 
@@ -89,7 +89,7 @@ void DashSystem::StateProcess(float dt){
 
 }
 
-void DashSystem::DashProcess(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
+void DashRequest::DashProcess(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
 {
 	if(isDash_) {
 		// 速度ベクトル計算
@@ -105,7 +105,7 @@ void DashSystem::DashProcess(float dt, Engine::WorldTransform& world, Engine::Ri
 
 }
 
-void DashSystem::GravityProcess(float dt, Engine::RigidBodyComponent& rigid)
+void DashRequest::GravityProcess(float dt, Engine::RigidBodyComponent& rigid)
 {
 	if (isUseGravity_ == false) return;
 

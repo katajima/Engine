@@ -1,10 +1,10 @@
-#include "MoveSystem.h"
+#include "MoveRequest.h"
 
 
-void MoveSystem::Initialize() {
+void MoveRequest::Initialize() {
 }
 
-void MoveSystem::Update(float dt, Engine::WorldTransform& world, InputSystem* input)
+void MoveRequest::Update(float dt, Engine::WorldTransform& world, InputSystem* input)
 {
 	// 攻撃中は通常の移動処理しない
 	if (isAttack_) return;
@@ -36,7 +36,7 @@ void MoveSystem::Update(float dt, Engine::WorldTransform& world, InputSystem* in
 	MoveProcess(dt, world, velo);
 }
 
-void MoveSystem::Update(float dt, Engine::WorldTransform& world)
+void MoveRequest::Update(float dt, Engine::WorldTransform& world)
 {
 	if (isDash_) return; // ダッシュ中は移動処理しない
 
@@ -47,9 +47,9 @@ void MoveSystem::Update(float dt, Engine::WorldTransform& world)
 	MoveProcess(dt, world, velo);
 }
 
-void MoveSystem::UpdateEnemy(float dt, Engine::WorldTransform& world){}
+void MoveRequest::UpdateEnemy(float dt, Engine::WorldTransform& world){}
 
-void MoveSystem::UpdateAttack(float dt, Engine::WorldTransform& world)
+void MoveRequest::UpdateAttack(float dt, Engine::WorldTransform& world)
 {
 	MoveProcess(dt, world,keepDirection_);
 }
@@ -57,7 +57,7 @@ void MoveSystem::UpdateAttack(float dt, Engine::WorldTransform& world)
 
 #pragma region Process
 
-void MoveSystem::SpeedProcess(float dt)
+void MoveRequest::SpeedProcess(float dt)
 {
 
 	if (data_.moveType == MoveType::LINEAR) { // 一定
@@ -92,7 +92,7 @@ void MoveSystem::SpeedProcess(float dt)
 
 }
 
-void MoveSystem::RotateProcess(float dt, Engine::WorldTransform& world, const Vector3& velo)
+void MoveRequest::RotateProcess(float dt, Engine::WorldTransform& world, const Vector3& velo)
 {
 	// 移動ベクトルがゼロなら回転処理しない
 	if (velo.Length() == 0.0f) return;
@@ -116,7 +116,7 @@ void MoveSystem::RotateProcess(float dt, Engine::WorldTransform& world, const Ve
 	currentYaw += delta * data_.rotationSpeed;
 }
 
-void MoveSystem::MoveProcess(float dt, Engine::WorldTransform& world, Vector3& velo,bool isSpeed)
+void MoveRequest::MoveProcess(float dt, Engine::WorldTransform& world, Vector3& velo,bool isSpeed)
 {
 	// 動いているなら
 	if (velo.x != 0.0f || velo.z != 0.0f) {
@@ -167,7 +167,7 @@ void MoveSystem::MoveProcess(float dt, Engine::WorldTransform& world, Vector3& v
 	}
 }
 
-void MoveSystem::StateProcess()
+void MoveRequest::StateProcess()
 {
 	float len = GetVelocity().Length();
 
@@ -184,7 +184,7 @@ void MoveSystem::StateProcess()
 	}
 }
 
-void MoveSystem::AnimationSpeedProcess()
+void MoveRequest::AnimationSpeedProcess()
 {
 	// 速度を正規化して 0〜1 に収める
 	float t = Math::NormalizeClamp(speed_, data_.minSpeed, data_.maxSpeed);
@@ -202,7 +202,7 @@ void MoveSystem::AnimationSpeedProcess()
 	}
 }
 
-void MoveSystem::CameraDirectionToMoveDirection(Vector3& velo) {
+void MoveRequest::CameraDirectionToMoveDirection(Vector3& velo) {
 	Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
 
 	// カメラの向きに基づいて移動方向をワールド座標系に変換
@@ -215,7 +215,7 @@ void MoveSystem::CameraDirectionToMoveDirection(Vector3& velo) {
 	velo = Normalize(worldDirection);
 }
 
-void MoveSystem::DirectionProcess(const Vector3& velo)
+void MoveRequest::DirectionProcess(const Vector3& velo)
 {
 	if (velo.Length() == 0.0f) return;
 	Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
@@ -230,7 +230,7 @@ void MoveSystem::DirectionProcess(const Vector3& velo)
 	direction_ = Multiply(Normalize(worldDirection), 1.0f);
 }
 
-void MoveSystem::DashProcess(Engine::WorldTransform& world)
+void MoveRequest::DashProcess(Engine::WorldTransform& world)
 {
 	// ダッシュ中は移動処理しない
 	if (!isDash_) return;
@@ -246,7 +246,7 @@ void MoveSystem::DashProcess(Engine::WorldTransform& world)
 	currentYaw = targetYaw;
 }
 
-void MoveSystem::AttackProcess(Engine::WorldTransform& world, const Vector3& direction)
+void MoveRequest::AttackProcess(Engine::WorldTransform& world, const Vector3& direction)
 {
 	// ダッシュ中は移動処理しない
 	if (!isAttack_) return;

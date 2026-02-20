@@ -7,7 +7,7 @@
 namespace Character {
 	class BaseCharacter;		// キャラクター
 }
-class JumpSystem;			// ジャンプシステム
+class JumpRequest;			// ジャンプシステム
 
 
 namespace Combo {
@@ -58,7 +58,7 @@ namespace Combo {
 		// 移行条件クラス
 		NextCondition nextCondition_;
 	private:
-		JumpSystem* jumpSystem = nullptr;
+		JumpRequest* jumpSystem = nullptr;
 	};
 
 }

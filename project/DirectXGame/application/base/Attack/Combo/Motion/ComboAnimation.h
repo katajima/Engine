@@ -13,7 +13,7 @@ namespace Character {
 	class BaseCharacter;		// キャラクター
 }
 class BaseWeapon;			// 武器
-class JumpSystem;			// ジャンプシステム
+class JumpRequest;			// ジャンプシステム
 
 namespace Combo {
 

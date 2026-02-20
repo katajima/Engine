@@ -1,8 +1,8 @@
 #pragma once
-#include "DirectXGame/application/base/Move/Move/MoveSystem.h"
-#include "DirectXGame/application/base/Move/Jump/JumpSystem.h"
-#include "DirectXGame/application/base/Move/Dash/DashSystem.h"
-#include "DirectXGame/application/base/Move/Move/MovementRestrictions.h"
+#include "DirectXGame/application/base/Move/Move/MoveRequest.h"
+#include "DirectXGame/application/base/Move/Jump/JumpRequest.h"
+#include "DirectXGame/application/base/Move/Dash/DashRequest.h"
+#include "MovementRestrictions.h"
 
 // 前方宣言
 namespace Engine {
@@ -71,21 +71,21 @@ public: // ジャンプ系統
 
 public:
 	// 移動システム取得
-	MoveSystem* GetMoveSystem() { return moveSystem_.get(); }
+	MoveRequest* GetMoveSystem() { return moveSystem_.get(); }
 	// ジャンプシステム取得
-	JumpSystem* GetJumpSystem() { return jumpSystem_.get(); }
+	JumpRequest* GetJumpSystem() { return jumpSystem_.get(); }
 	// ダッシュシステム取得
-	DashSystem* GetDashSystem() { return dashSystem_.get(); }
+	DashRequest* GetDashSystem() { return dashSystem_.get(); }
 public:
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { moveSystem_->SetCamera(camera); }
 private:
 	// 移動システム
-	std::unique_ptr<MoveSystem> moveSystem_ = nullptr;
+	std::unique_ptr<MoveRequest> moveSystem_ = nullptr;
 	// ジャンプシステム
-	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr;
+	std::unique_ptr<JumpRequest> jumpSystem_ = nullptr;
 	// ダッシュシステム
-	std::unique_ptr<DashSystem> dashSystem_ = nullptr; 
+	std::unique_ptr<DashRequest> dashSystem_ = nullptr; 
 
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 

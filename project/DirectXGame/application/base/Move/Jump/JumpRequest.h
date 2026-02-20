@@ -5,7 +5,7 @@
 /// <summary>
 /// ジャンプシステムクラス
 /// </summary>
-class JumpSystem {
+class JumpRequest {
 public:
 	// ジャンプ状態列挙型
 	enum class State {

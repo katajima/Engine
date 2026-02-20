@@ -735,16 +735,16 @@
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpRequest.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveRequest.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Move\MovementRestrictions.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Base\MovementRestrictions.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashRequest.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp">
@@ -901,6 +901,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1851,16 +1854,16 @@
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveRequest.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpRequest.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Move\MovementRestrictions.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementRestrictions.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashRequest.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.h">

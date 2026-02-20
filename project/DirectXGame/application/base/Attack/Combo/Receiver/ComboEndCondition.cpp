@@ -13,7 +13,7 @@ namespace Combo {
 	};
 	
 	// 更新
-	void EndCondition::Update(const InputSystem& inputSystem, JumpSystem* jumpSystem, float time,float dt) {
-		ConditionFunction::ConditionTypeUpdate(inputSystem, jumpSystem, data_.type,data_.button_, endTime_, data_.stateTime,isPress_,dt);
+	void EndCondition::Update(const InputSystem& inputSystem, JumpRequest* jumpRequest, float time,float dt) {
+		ConditionFunction::ConditionTypeUpdate(inputSystem, jumpRequest, data_.type,data_.button_, endTime_, data_.stateTime,isPress_,dt);
 	};
 };

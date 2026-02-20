@@ -12,7 +12,7 @@ namespace Character {
 		BaseWeapon* weapon = character->GetWeapon();
 		BaseSpecial* special = character->GetSpecial();
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		MoveSystem* move = character->GetMoveComponent()->GetMoveSystem();
+		MoveRequest* move = character->GetMoveComponent()->GetMoveSystem();
 		character->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 
 
@@ -126,7 +126,7 @@ namespace Character {
 	void PlayerStateJump::Update() {
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		InputSystem* inputSystem = character->GetInputSystem();
-		JumpSystem* jump = character->GetMoveComponent()->GetJumpSystem();
+		JumpRequest* jump = character->GetMoveComponent()->GetJumpSystem();
 
 		anima->SetIsPlaying(true);		// アニメーション再生
 		anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
@@ -169,11 +169,11 @@ namespace Character {
 
 
 
-		if (jump->GetState() == JumpSystem::State::Jump) { // 上昇しているなら
+		if (jump->GetState() == JumpRequest::State::Jump) { // 上昇しているなら
 			anima->SetIsLoop(false);
 			anima->SetAnimation("JumpStart01", 0.05f);
 		}
-		else if (jump->GetState() == JumpSystem::State::Fall) { // 降下しているなら
+		else if (jump->GetState() == JumpRequest::State::Fall) { // 降下しているなら
 			anima->SetIsLoop(true);
 			anima->SetAnimation("Jump01", 0.15f);
 		}

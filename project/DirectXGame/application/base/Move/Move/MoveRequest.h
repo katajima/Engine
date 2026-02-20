@@ -6,7 +6,7 @@
 /// <summary>
 /// 移動に関するシステム
 /// </summary>
-class MoveSystem {
+class MoveRequest {
 public:
 	// 移動状態(アニメーションやアニメーション速度変更用)
 	enum class State {
