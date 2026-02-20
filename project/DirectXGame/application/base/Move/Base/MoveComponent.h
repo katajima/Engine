@@ -1,8 +1,7 @@
 #pragma once
-#include "DirectXGame/application/base/Move/Move/MoveRequest.h"
-#include "DirectXGame/application/base/Move/Jump/JumpRequest.h"
-#include "DirectXGame/application/base/Move/Dash/DashRequest.h"
 #include "MovementRestrictions.h"
+#include "MovementSystem.h"
+#include "DirectXGame/application/base/Move/Base/LocomotionCoordinator.h"
 
 // 前方宣言
 namespace Engine {
@@ -24,7 +23,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
+	void Initialize(InputSystem* input,Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
 	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, InputSystem* input);
 public:
@@ -90,6 +89,12 @@ private:
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 
 	
+	// 行動リクエストを元に行動を集約→選択するクラス
+	std::unique_ptr<LocomotionCoordinator> locomotionCoordinator_ = nullptr;
+
+	// 行動リクエストを元に移動速度→トランスフォーム更新を行うクラス
+	std::unique_ptr<MovementSystem> movementSystem_ = nullptr;
+
 private:
 	// 操作タイプ
 	ControlType controlType_ = ControlType::Manual;

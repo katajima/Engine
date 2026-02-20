@@ -1,7 +1,7 @@
 #include "MoveComponent.h"
 
 
-void MovementComponent::Initialize(Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
+void MovementComponent::Initialize(InputSystem* input,Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
 	this->globalVariables = globalVariables;
 	
 	name_ = "MoveData" + name;
@@ -17,6 +17,14 @@ void MovementComponent::Initialize(Engine::GlobalVariables* globalVariables, Con
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
 	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });
+
+	// 移動リクエスト集約選択クラス
+	locomotionCoordinator_ = std::make_unique<LocomotionCoordinator>();
+	locomotionCoordinator_->Initialize(input);
+
+	// 移動反映クラス初期化
+	movementSystem_ = std::make_unique<MovementSystem>();
+	movementSystem_->Initialize();
 
 	// 操作タイプの設定
 	controlType_ = type;
@@ -50,6 +58,13 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 	else {
 		moveSystem_->UpdateEnemy(dt, object);
 	}
+
+	// リクエスト集約選択クラス更新
+	locomotionCoordinator_->Update(dt);
+
+	// 移動反映クラス更新
+	movementSystem_->Update(dt);
+
 	// 移動制限の更新
 	movementRestrictions_->Update(object);
 }

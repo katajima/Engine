@@ -48,7 +48,7 @@ namespace Character {
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
-		moveComponent_->Initialize(globalVariables, MovementComponent::ControlType::Manual, "");
+		moveComponent_->Initialize(inputSystem,globalVariables, MovementComponent::ControlType::Manual, "");
 		moveComponent_->SetMoveType(MoveType::ACCELERATE);
 		moveComponent_->SetIsStickToSpeed(true);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Manual);

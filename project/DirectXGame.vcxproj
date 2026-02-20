@@ -165,6 +165,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Base\MovementSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Dash\DashRequest.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpRequest.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\MoveComponent.cpp" />
@@ -846,6 +847,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MoveInput.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementData.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Dash\DashData.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Dash\DashRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpData.h" />
