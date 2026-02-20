@@ -3,6 +3,12 @@
 #include "InputData.h"
 
 
+enum class InputButton {
+	kPressed,
+	kTriggered,
+	kReleased,
+};
+
 /// <summary>
 /// 入力の値の管理
 /// </summary>
@@ -23,6 +29,8 @@ public:
 	
 	// 入力データ取得
 	InputData GetData() const { return data_; }
+
+	bool GetButtom(InputButton press, GamePadButton button) const;
 
 private:
 	InputData data_;

@@ -15,7 +15,7 @@ class BaseWeapon : public IHitReceiver
 {
 public:
 	// 初期化
-	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	// 更新
 	virtual void Update() = 0;
@@ -63,7 +63,7 @@ protected:
 	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	Engine::Camera* camera = nullptr;						// カメラ
-	Engine::Input* input = nullptr;						// 入力(使わないならnullptr)
+	InputSystem* inputSystem = nullptr;					// 入力(使わないならnullptr)
 	Engine::Audio* audio = nullptr;
 };
 
@@ -72,7 +72,7 @@ class MeleeWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
-	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	/// 更新
 	virtual void Update() = 0;
@@ -94,7 +94,7 @@ class RangedWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
-	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	/// 更新
 	virtual void Update() = 0;

@@ -30,7 +30,7 @@ namespace Combo {
 			End(owner);
 		}
 		// コンボデータ更新
-		comboData_.Update(*owner->GetInput(), dt);
+		comboData_.Update(*owner->GetInputSystem(), dt);
 	}
 
 	// 終了

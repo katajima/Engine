@@ -112,20 +112,20 @@ void Engine::UICheckBox::Update(float deltaTime)
 
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
 	
-	// 入っているなら
-	if (backgroundSprite->GetBox().intersects(input_->GetMousePosition())) {
-		if (input_->IsMouseTriggered(0)){
-			if (!isCheck_) {
-				isCheck_ = true;
-			}
-			else {
-				isCheck_ = false;
-			}
-		}
-	}
-	else {
+	//// 入っているなら
+	//if (backgroundSprite->GetBox().intersects(input_->GetMousePosition())) {
+	//	if (input_->IsMouseTriggered(0)){
+	//		if (!isCheck_) {
+	//			isCheck_ = true;
+	//		}
+	//		else {
+	//			isCheck_ = false;
+	//		}
+	//	}
+	//}
+	//else {
 
-	}
+	//}
 	// 更新
 	checkSprite->Update();
 	backgroundSprite->Update();
@@ -175,7 +175,7 @@ void Engine::UISlider::Update(float deltaTime) {
 	backgroundSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 	slidSprite->SetImageLeftTopPosAndRatio(leftTopPos_, ratio_);
 
-	preMousePos = input_->GetMousePosition();
+	//preMousePos = input_->GetMousePosition();
 
 	Box box = backgroundSprite->GetBox();
 	Vector2 size = backgroundSprite->GetSize();
@@ -207,17 +207,17 @@ void Engine::UISlider::Update(float deltaTime) {
 
 
 
-	// スライダーのクリック判定
-	if (slidSprite->GetBox().intersects(preMousePos)) {
-		if (input_->IsMousePressed(0)) {
-			isClick = true;
-		}
-	}
-	else {
-		if (input_->IsMouseReleased(0)) {
-			isClick = false;
-		}
-	}
+	//// スライダーのクリック判定
+	//if (slidSprite->GetBox().intersects(preMousePos)) {
+	//	if (input_->IsMousePressed(0)) {
+	//		isClick = true;
+	//	}
+	//}
+	//else {
+	//	if (input_->IsMouseReleased(0)) {
+	//		isClick = false;
+	//	}
+	//}
 
 	// スライダーの移動処理（背景Boxの範囲に制限）
 	if (isClick) {

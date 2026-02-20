@@ -12,14 +12,14 @@
 
 namespace Character {
 
-	void NormalPlayer::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void NormalPlayer::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		this->entity3DManager = entity3DManager;	// エンティティ
 		this->entity2DManager = entity2DManager;	// エンティティ
 		this->globalVariables = globalVariables;	// 保存項目
 		this->camera = camera;					// カメラ
-		this->input = input;						// 入力
+		this->inputSystem = inputSystem;						// 入力
 
 
 
@@ -107,7 +107,7 @@ namespace Character {
 		special_->Initialize(entity3DManager, entity2DManager, camera);
 		special_->SetOwner(this);
 		special_->SetParent(&GetObjectComponent()->GetWorldTransform());
-		special_->SetInput(input);
+		special_->SetInputSystem(inputSystem);
 		RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special_.get());
 		rengeSp->SetRadius(50);
 		rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
@@ -118,7 +118,7 @@ namespace Character {
 
 		// UI
 		ui_ = std::make_unique<PlayerUI>();
-		ui_->Initialize(input, entity2DManager, globalVariables);
+		ui_->Initialize(inputSystem, entity2DManager, globalVariables);
 		ui_->SetCharacterParameter(GetCharacterParameterComponent());
 
 
@@ -142,7 +142,7 @@ namespace Character {
 		// 武器
 		weapon_ = std::make_unique<PlayerWeapon>();
 		weapon_->SetCharacter(this);
-		weapon_->Initialize(input, entity3DManager, nullptr, globalVariables, {}, camera);
+		weapon_->Initialize(inputSystem, entity3DManager, nullptr, globalVariables, {}, camera);
 		weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
 
 
@@ -266,7 +266,7 @@ namespace Character {
 
 		if (moveComponent_->GetIsLanding() &&
 			stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
-			input->GetGamePadLeftStick().Length() == 0) {
+			inputSystem->GetData().moveShick.Length() == 0) {
 			moveComponent_->Velocity() = {};
 		}
 
@@ -294,7 +294,7 @@ namespace Character {
 
 		// 移動コンポーネント更新
 		moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(),
-			*GetObjectComponent()->GetRigidBodyComponent(), GetInput());
+			*GetObjectComponent()->GetRigidBodyComponent(), inputSystem);
 
 		// ステート
 		stateMachine_->Update();

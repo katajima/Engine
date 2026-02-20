@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/UI/UIBoard.h"
 
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 // 前方宣言
 namespace Engine {
@@ -15,7 +16,7 @@ class BaseUI
 {
 public:
 	//初期化
-	virtual void Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) = 0;
+	virtual void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) = 0;
 
 	// 毎フレーム更新
 	virtual void Update() = 0;
@@ -64,7 +65,7 @@ protected:
 protected:
 	Engine::Entity2DManager* entity2DManager;
 	Engine::GlobalVariables* globalVariables;
-	Engine::Input* input;
+	InputSystem* inputSystem = nullptr;
 
 
 	std::unique_ptr <Engine::UIBaseBoard> board_;

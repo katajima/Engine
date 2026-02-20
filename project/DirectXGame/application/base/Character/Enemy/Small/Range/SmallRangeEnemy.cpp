@@ -5,10 +5,10 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void SmallRangeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
+	void SmallRangeEnemy::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy",1.5f);
+		BaseInitialize(inputSystem, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy",1.5f);
 		
 		
 		
@@ -34,7 +34,7 @@ namespace Character {
 		weapon_ = std::make_unique<SmallRangeWeapon>();
 		weapon_->SetCharacter(this);
 		weapon_->SetBulletManager(bulletManager);
-		weapon_->Initialize(input, entity3DManager, nullptr, globalVariables, {}, nullptr);
+		weapon_->Initialize(inputSystem, entity3DManager, nullptr, globalVariables, {}, nullptr);
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 

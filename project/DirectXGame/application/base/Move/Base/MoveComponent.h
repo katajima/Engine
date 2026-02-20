@@ -26,7 +26,7 @@ public:
 	// 初期化
 	void Initialize(Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
-	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input);
+	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, InputSystem* input);
 public:
 	// 保存項目の追加
 	void ApplyGlobalData(const std::string& name);

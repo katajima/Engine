@@ -9,7 +9,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 	///< summary>

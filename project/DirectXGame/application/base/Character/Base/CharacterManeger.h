@@ -35,7 +35,7 @@ namespace Character {
 	{
 	public:
 		// 初期化
-		void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 			Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 		// 更新
@@ -118,7 +118,8 @@ namespace Character {
 		std::map<std::string, GlobalData> globalDatas_;
 	private: // 貰いもの
 		Engine::Camera* camera;
-		Engine::Input* input;
+		// 入力システム
+		InputSystem* inputSystem = nullptr;
 		Engine::Entity3DManager* entity3DManager = nullptr;
 		Engine::Entity2DManager* entity2DManager = nullptr;
 		Engine::GlobalVariables* globalVariables;			// グローバル変数

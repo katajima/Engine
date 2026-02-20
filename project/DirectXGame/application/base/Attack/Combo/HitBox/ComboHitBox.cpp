@@ -13,7 +13,7 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboHitBox::Update(const Engine::Input& input, float timer, float dt) {
+	void ComboHitBox::Update(const InputSystem& inputSystem, float timer, float dt) {
 
 
 		for (auto& coll : collData_) {
@@ -45,7 +45,7 @@ namespace Combo {
 		case HitBox::SpawnType::kOnAir:
 			break;
 		case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
-			if (button_.IsReleased(input)) {
+			if (button_.IsReleased(inputSystem)) {
 				if (!isPopHitBox_) {
 					hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
 					isPopHitBox_ = true;

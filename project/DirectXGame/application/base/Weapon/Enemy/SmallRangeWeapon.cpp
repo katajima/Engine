@@ -5,9 +5,9 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 
-void SmallRangeWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
+void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
-	this->input = input;						// インプット
+	this->inputSystem = inputSystem;						// インプット
 	this->entity3DManager = entity3DManager; // エンティティ3d
 	this->entity2DManager = entity2DManager; // エンティティ2d
 

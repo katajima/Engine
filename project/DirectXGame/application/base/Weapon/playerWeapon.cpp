@@ -3,10 +3,10 @@
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 
-void PlayerWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
-	this->input = input;						// インプット
+	this->inputSystem = inputSystem;						// インプット
 	this->entity3DManager = entity3DManager; // エンティティ3d
 	this->entity2DManager = entity2DManager; // エンティティ2d
 	

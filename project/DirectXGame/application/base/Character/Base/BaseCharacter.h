@@ -21,7 +21,7 @@ namespace Character {
 		///< summary>
 		/// 初期化
 		///</summary>
-		virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 		///< summary>
@@ -125,14 +125,14 @@ namespace Character {
 		// タグ番号設定
 		void SetTagNumber(uint32_t tag) { tagNumber_ = tag; };
 	public: // 貰いもの
-		// インプット取得
-		Engine::Input* GetInput() { return this->input; };
 		// 弾マネージャ取得
 		BulletManager* GetBulletManager() { return this->bulletManager; }
 		// カメラ管理クラス取得
 		CameraManager* GetCameraManager() { return this->cameraManager; }
 		// スペシャルポイント管理クラス取得
 		SpecalPointManager* GetSpecalPointManager() { return this->specalPointManager; }
+		// 入力システム取得
+		InputSystem* GetInputSystem() { return inputSystem; };
 
 		//エフェクト設定
 		void SetEffect(Effect* effect) { this->effect = effect; }
@@ -218,21 +218,21 @@ namespace Character {
 		// 影用オブジェクトコンポーネント
 		std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 		// スペシャル攻撃
-		std::unique_ptr<BaseSpecial> special_;						
+		std::unique_ptr<BaseSpecial> special_;
 		// 武器
-		std::unique_ptr<BaseWeapon> weapon_;						
+		std::unique_ptr<BaseWeapon> weapon_;
 		// 攻撃入力系クラス
-		std::unique_ptr<AttackInputHandler> attackInputHandler_;		
+		std::unique_ptr<AttackInputHandler> attackInputHandler_;
 		// キャラクターの状態管理
-		std::unique_ptr<CharacterStateMachine> stateMachine_;		
+		std::unique_ptr<CharacterStateMachine> stateMachine_;
 		// 移動コンポーネント
-		std::unique_ptr<MovementComponent> moveComponent_;			
+		std::unique_ptr<MovementComponent> moveComponent_;
 		// 攻撃制御クラス
-		std::unique_ptr<AttackController> attackController_;	
+		std::unique_ptr<AttackController> attackController_;
 		// 攻撃応答システムクラス
-		std::unique_ptr<ResponseSystem> responseSystem_;			
+		std::unique_ptr<ResponseSystem> responseSystem_;
 		// 弾出現
-		std::unique_ptr<BulletSpawn> bulletSpawn_;					
+		std::unique_ptr<BulletSpawn> bulletSpawn_;
 	protected:
 		// キャラクターパラメータコンポーネント
 		std::unique_ptr <ParameterComponent> parameterComponent_;
@@ -248,7 +248,8 @@ namespace Character {
 		Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
 		Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 		Engine::Camera* camera = nullptr;						// カメラ
-		Engine::Input* input = nullptr;						// 入力(使わないならnullptr)
 		Engine::Audio* audio = nullptr;
+
+		InputSystem* inputSystem = nullptr;						// 入力(使わないならnullptr)
 	};
 }

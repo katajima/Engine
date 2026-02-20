@@ -6,6 +6,7 @@
 #include "DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h"
 #include "ComboSequencer.h"
 
+
 namespace Character {
 	class BaseCharacter;		// キャラクター
 }
@@ -19,7 +20,7 @@ namespace Combo {
 		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
-		void Update(const Engine::Input& input, float dt);
+		void Update(const InputSystem& inputSystem, float dt);
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);

@@ -90,7 +90,7 @@ void GamePlayScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	characterManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -137,7 +137,7 @@ void GamePlayScene::Initialize()
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(GetInput(), GetEntity2DManager(), GetGlobalVariables());
+	gameUI->Initialize(inputSystem_.get(), GetEntity2DManager(), GetGlobalVariables());
 	gameUI->SetPlayer(characterManager_->GetPlayer());
 
 	// カメラ設定

@@ -10,7 +10,7 @@ namespace Combo {
 	class ConditionFunction {
 	public:
 		// 終了条件によっての処理
-		static void ConditionTypeUpdate(const Engine::Input& input, JumpSystem* jumpSystem,  EndConditionType type, ComboButton button,
+		static void ConditionTypeUpdate(const InputSystem& inputSystem, JumpSystem* jumpSystem,  EndConditionType type, ComboButton button,
 		float timer, float endTime, bool isPress, float dt);
 	};
 

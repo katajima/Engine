@@ -5,11 +5,11 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void MediumMeleeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void MediumMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemy.gltf", "MediumMeleeEnemy", 2);
+		BaseInitialize(inputSystem, entity3DManager, entity2DManager, globalVariables, position, camera, "enemy.gltf", "MediumMeleeEnemy", 2);
 
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 

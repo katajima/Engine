@@ -18,7 +18,7 @@ namespace Combo {
 		//　終了
 		void Exit();
 		// 更新
-		void Update(const Engine::Input& input, JumpSystem* jumpSystem, float time, float dt);
+		void Update(const InputSystem& inputSystem, JumpSystem* jumpSystem, float time, float dt);
 	public:
 		//
 		Data& GetData() { return data_; }

@@ -1,11 +1,11 @@
 #include "BulletWeaponManager.h"
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 
-void BulletWeaponManager::Initialize(BulletManager* bulletManager, Engine::Input* input, Engine::Entity3DManager* entity3DManager, 
+void BulletWeaponManager::Initialize(BulletManager* bulletManager, InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager,
 	Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
 	this->bulletManager = bulletManager;		// 弾管理クラス更新
-	this->input = input;						// インプット
+	this->inputSystem = inputSystem;			// インプット
 	this->entity3DManager = entity3DManager;	// エンティティ3d
 	this->entity2DManager = entity2DManager;	// エンティティ2d
 }
@@ -40,7 +40,7 @@ void BulletWeaponManager::AddBulletWeapon(const std::string& name, const Vector3
 	weapon->SetParent(player);				// 使用者設定
 	weapon->SetEffect(effect);				// エフェクト設定
 	weapon->SetModePenetrationPos(pos2);	// 位置設定
-	weapon->Initialize(input, entity3DManager, entity2DManager, nullptr, pos, nullptr);
+	weapon->Initialize(inputSystem, entity3DManager, entity2DManager, nullptr, pos, nullptr);
 	weapon->SetBulletManager(bulletManager);
 	bulletWeapons_[name] = std::move(weapon);
 }

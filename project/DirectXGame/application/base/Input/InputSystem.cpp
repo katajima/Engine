@@ -10,10 +10,10 @@ void InputSystem::Update(float dt) {
 	data_.isControllerConnected = input->IsControllerConnected();
 
 	// 移動スティック取得
-	data_.moveShick = input->GetGamePadLeftStick().Normalize();
+	data_.moveShick = input->GetGamePadLeftStick();
 
 	// 視点スティック取得
-	data_.lookStick = input->GetGamePadRightStick().Normalize();
+	data_.lookStick = input->GetGamePadRightStick();
 
 	// ジャンプ入力押している間
 	data_.jumpPressed = input->IsGamePadPressed(GamePadButton::GAMEPAD_A);
@@ -38,4 +38,24 @@ void InputSystem::Update(float dt) {
 	// 必殺技入力押した瞬間
 	data_.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
 
+}
+
+bool InputSystem::GetButtom(InputButton press, GamePadButton button) const
+{
+	switch (press)
+	{
+	case InputButton::kPressed:
+		return input->IsGamePadPressed(button);
+		break;
+	case InputButton::kTriggered:
+		return input->IsGamePadTriggered(button);
+		break;
+	case InputButton::kReleased:
+		return input->IsGamePadReleased(button);
+		break;
+	default:
+		break;
+	}
+
+	return false;
 }

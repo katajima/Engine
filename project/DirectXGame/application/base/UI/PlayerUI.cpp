@@ -2,11 +2,11 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
-void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
+void PlayerUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
 	this->entity2DManager = entity2DManager;	// エンティティ2d
 	this->globalVariables = globalVariables;	// 保存項目
-	this->input = input;						// インプット
+	this->inputSystem = inputSystem;						// インプット
 
 
 	InitUIMeter("HPBer", hpSpriteData_.pos_, true);		// 初期化HP

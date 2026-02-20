@@ -5,10 +5,10 @@
 
 
 namespace Character {
-	void CharacterManager::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
 	{
-		this->input = input;						// インプット
+		this->inputSystem = inputSystem;						// インプット
 		this->entity3DManager = entity3DManager;	// エンティティ3d
 		this->entity2DManager = entity2DManager; // エンティティ2d
 		this->globalVariables = globalVariables; // 保存項目
@@ -122,7 +122,7 @@ namespace Character {
 		player->SetBulletManager(bulletManager);	// 弾管理クラス設定
 		player->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		player->SetEffect(effect);					// エフェクト設定
-		player->Initialize(input, entity3DManager, entity2DManager, globalVariables, transform.translate, camera); // 初期化
+		player->Initialize(inputSystem, entity3DManager, entity2DManager, globalVariables, transform.translate, camera); // 初期化
 		player->SetCharacterType(Type::Player);// キャラクターのタイプをプレイヤーに
 		character_.push_back(std::move(player));	// キャラクターに追加 
 		characterCount_++;

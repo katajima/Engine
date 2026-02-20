@@ -5,10 +5,10 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void SmallMeleeEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void SmallMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySG01.obj", "smallMeleeEnemy");
+		BaseInitialize(inputSystem, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySG01.obj", "smallMeleeEnemy");
 		
 		
 		
@@ -26,7 +26,7 @@ namespace Character {
 		// 武器
 		weapon_ = std::make_unique<SmallMeleeWeapon>();
 		weapon_->SetCharacter(this);
-		weapon_->Initialize(input, entity3DManager, nullptr, globalVariables, {}, nullptr);
+		weapon_->Initialize(inputSystem, entity3DManager, nullptr, globalVariables, {}, nullptr);
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,0.0f,1.0f };
 

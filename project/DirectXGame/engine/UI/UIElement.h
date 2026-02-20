@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseSprite.h"
 #include "UIData.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 namespace Engine {
 	// 前方宣言
@@ -24,7 +25,7 @@ namespace Engine {
 		// 位置設定
 		void SetPos(const Vector2& pos) { pos_ = pos; }
 		// Input設定
-		void SetInput(Input* input) { input_ = input; }
+		void SetInput(InputSystem* inputSystem) { this->inputSystem = inputSystem; }
 		// スプライト追加
 		void AddSprite(std::string name, std::string textureName);
 		// スプライト取得
@@ -45,7 +46,7 @@ namespace Engine {
 		// スプライト初期化
 		virtual void InitSprite() = 0;
 	protected:
-		Input* input_;
+		InputSystem* inputSystem;
 		std::map<std::string, std::unique_ptr<BaseSprite>> sprites_;
 		std::string mainName_;
 		Entity2DManager* entity2DManager_ = nullptr;

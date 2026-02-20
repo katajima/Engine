@@ -12,7 +12,7 @@ namespace Combo {
 		// 開始
 		void Enter(Character::BaseCharacter* owner);
 		// 更新
-		void Update(const Engine::Input& input, float timer, float dt);
+		void Update(const InputSystem& inputSystem, float timer, float dt);
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
 	public:

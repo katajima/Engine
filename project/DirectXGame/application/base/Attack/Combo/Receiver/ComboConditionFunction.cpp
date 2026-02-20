@@ -1,7 +1,7 @@
 #include "ComboConditionFunction.h"
 #include"DirectXGame/application/base/Move/Base/MoveComponent.h"
 
-void Combo::ConditionFunction::ConditionTypeUpdate(const Engine::Input& input, JumpSystem* jumpSystem, EndConditionType type, ComboButton button, float timer, float endTime, bool isPress, float dt){
+void Combo::ConditionFunction::ConditionTypeUpdate(const InputSystem& inputSystem, JumpSystem* jumpSystem, EndConditionType type, ComboButton button, float timer, float endTime, bool isPress, float dt){
 	// 終了タイプ
 	switch (type)
 	{
@@ -11,7 +11,7 @@ void Combo::ConditionFunction::ConditionTypeUpdate(const Engine::Input& input, J
 		}
 		break;
 	case Combo::EndConditionType::kOnButtonRelease:	// 押し続けているなら
-		if (button.IsPressed(input)) {
+		if (button.IsPressed(inputSystem)) {
 			if (isPress) {
 				timer += dt;
 			}

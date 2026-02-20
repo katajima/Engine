@@ -27,46 +27,46 @@ namespace Combo {
 		ComboButton(GamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
 
 		// 押したら
-		bool IsPressed(const Engine::Input& input) const {
-			return input.IsGamePadPressed(button_);
+		bool IsPressed(const InputSystem& inputSystem) const {
+			return inputSystem.GetButtom(InputButton::kPressed,button_);
 		}
 
 		// 押した瞬間
-		bool IsTriggered(const Engine::Input& input) const {
-			return input.IsGamePadTriggered(button_);
+		bool IsTriggered(const InputSystem& inputSystem) const {
+			return inputSystem.GetButtom(InputButton::kTriggered, button_);
 		}
 
 		// 離した瞬間
-		bool IsReleased(const Engine::Input& input) const {
-			return input.IsGamePadReleased(button_);
+		bool IsReleased(const InputSystem& inputSystem) const {
+			return inputSystem.GetButtom(InputButton::kReleased, button_);
 		}
 
 
 		// 押して反応する条件
-		bool IsInput(const Engine::Input& input) const {
+		bool IsInput(const InputSystem& inputSystem) const {
 
 			switch (type_)
 			{
 			case ComboButtonInputType::kPressed: // 押したら
-				return IsPressed(input);
+				return IsPressed(inputSystem);
 				break;
 			case ComboButtonInputType::kTriggered: // 押した瞬間
-				return IsTriggered(input);
+				return IsTriggered(inputSystem);
 				break;
 			case ComboButtonInputType::kReleased: // 離した瞬間
-				return IsReleased(input);
+				return IsReleased(inputSystem);
 				break;
 			case ComboButtonInputType::kPressTriggerReleased: // 押す、押した瞬間、離した瞬間
-				return IsPressed(input) || IsTriggered(input) || IsReleased(input);
+				return IsPressed(inputSystem) || IsTriggered(inputSystem) || IsReleased(inputSystem);
 				break;
 			case ComboButtonInputType::kPressTriggered:
-				return IsPressed(input) || IsTriggered(input); // 押す、押した瞬間
+				return IsPressed(inputSystem) || IsTriggered(inputSystem); // 押す、押した瞬間
 				break;
 			case ComboButtonInputType::kPressReleased:
-				return IsPressed(input) || IsReleased(input); // 押す、離した瞬間
+				return IsPressed(inputSystem) || IsReleased(inputSystem); // 押す、離した瞬間
 				break;
 			case ComboButtonInputType::kTriggerReleased:
-				return IsTriggered(input) || IsReleased(input); // 押した瞬間、離した瞬間
+				return IsTriggered(inputSystem) || IsReleased(inputSystem); // 押した瞬間、離した瞬間
 				break;
 			default:	// 指定されたtypeでないのなら
 				return false;
@@ -96,7 +96,7 @@ namespace Combo {
 		/// <summary>
 		/// コンボ成立チェック
 		/// </summary>
-		bool Update(const Engine::Input& input, float deltaTime);
+		bool Update(const InputSystem& inputSystem, float deltaTime);
 
 
 

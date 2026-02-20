@@ -89,7 +89,7 @@ void CharacterDebugScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	characterManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());

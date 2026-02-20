@@ -16,11 +16,11 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboMotion::Update(const Engine::Input& input, float timer, float dt) {
+	void ComboMotion::Update(const InputSystem& inputSystem, float timer, float dt) {
 		// コンボ用アニメーションクラス更新
-		comboAnimation_.Update(input, timer, dt);
+		comboAnimation_.Update(inputSystem, timer, dt);
 		// コンボ用移動クラス更新
-		comboMove_.Update(input, timer, dt);
+		comboMove_.Update(inputSystem, timer, dt);
 	}
 
 	// 終了

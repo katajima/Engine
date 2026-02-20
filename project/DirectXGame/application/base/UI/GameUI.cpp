@@ -5,15 +5,15 @@
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
-void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
+void GameUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
 	this->entity2DManager = entity2DManager;
 	this->globalVariables = globalVariables;
-	this->input = input;
+	this->inputSystem = inputSystem;
 
 
 	board_ = std::make_unique<Engine::UIBaseBoard>();
-	board_->Init(input,entity2DManager, "bord", boardPos, boardSize);
+	board_->Init(inputSystem,entity2DManager, "bord", boardPos, boardSize);
 
 	// 通常攻撃UI初期化
 	InitUIPair("normalAttack", attackTextData_.pos_);

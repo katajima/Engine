@@ -10,7 +10,7 @@ namespace Combo {
 		isCancel_ = false;				// キャンセルフラグをfalseに
 	};
 
-	void CancelReceiver::Update(const Engine::Input& input,float timer) {
+	void CancelReceiver::Update(const InputSystem& inputSystem,float timer) {
 		bool isCancelStart = data_.inputStart <= timer;			// キャンセル開始時間を過ぎたら
 		bool isCancelEnd = data_.inputEnd >= timer;				// キャンセル終了時間より前なら
 
@@ -18,7 +18,7 @@ namespace Combo {
 		bool isCancelMoveEnd = data_.inputMoveEnd >= timer;				// キャンセル終了時間より前なら
 		
 		// ゲームパッドの左スティックを動かしているか
-		bool isMoveStick = input.GetGamePadLeftStick().Length() != 0;
+		bool isMoveStick = inputSystem.GetData().moveShick.Length() != 0;
 
 
 		// 移動スティックによる
@@ -32,7 +32,7 @@ namespace Combo {
 		// キャンセル受付時間内なら
 		if (isCancelStart && isCancelEnd && data_.isCancel) {
 			if (!isCancel_) {
-				isCancel_ = data_.comboSequence_.Update(input, 0);
+				isCancel_ = data_.comboSequence_.Update(inputSystem, 0);
 			}
 			return;
 		}

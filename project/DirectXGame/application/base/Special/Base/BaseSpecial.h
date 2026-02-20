@@ -3,6 +3,7 @@
 
 #include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 // 前方宣言
 namespace Engine {
@@ -63,7 +64,7 @@ public: // 貰いもの
 	//持ち主設定
 	void SetOwner(Character::BaseCharacter* owner) { this->owner = owner; }
 	// 入力をセット
-	void SetInput(Engine::Input* input) {this->input = input;};
+	void SetInputSystem(InputSystem* inputSystem) {this->inputSystem = inputSystem;};
 	// 親子付け
 	void SetParent(Engine::WorldTransform* parent) {};
 protected:
@@ -73,6 +74,6 @@ protected:
 	float time_ = 0;
 protected:
 	Character::BaseCharacter* owner = nullptr;			// オーナー
-	Engine::Input* input;					// 入力
+	InputSystem* inputSystem = nullptr;					// 入力
 };
 

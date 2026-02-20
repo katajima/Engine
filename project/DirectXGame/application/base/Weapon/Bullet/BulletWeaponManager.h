@@ -24,7 +24,7 @@ public:
 	/// <param name="entity3DManager"></param>
 	/// <param name="entity2DManager"></param>
 	/// <param name="globalVariables"></param>
-	void Initialize(BulletManager* bulletManager, Engine::Input* input, Engine::Entity3DManager* entity3DManager,
+	void Initialize(BulletManager* bulletManager, InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager,
 		Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables);
 
 	/// <summary>
@@ -91,7 +91,7 @@ private:
 	BulletManager* bulletManager = nullptr;	// 弾管理クラス
 	Engine::Entity3DManager* entity3DManager = nullptr; // 3Dエンティティ管理クラス
 	Engine::Entity2DManager* entity2DManager = nullptr; // 2Dエンティティ管理クラス
-	Engine::Input* input = nullptr;                     // 入力クラス
+	InputSystem* inputSystem = nullptr;                     // 入力クラス
 	Character::BasePlayer* player = nullptr;
 	Effect* effect = nullptr;
 };

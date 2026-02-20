@@ -93,7 +93,7 @@ namespace Character {
 
 	}
 
-	void BaseEnemy::BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager,
+	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager,
 		Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 		const std::string& modelName, const std::string& charaName, float colliderRadius) {
 

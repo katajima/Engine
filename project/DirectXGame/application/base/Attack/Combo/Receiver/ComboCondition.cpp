@@ -1,23 +1,23 @@
 #include "ComboCondition.h"
-#include"DirectXGame/application/base/Move/MoveComponent.h"
+#include"DirectXGame/application/base/Move/Base/MoveComponent.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 
 #pragma region ComboCondition
 
-void Combo::ComboCondition::Update(const Engine::Input& input, float timer, float dt) {
+void Combo::ComboCondition::Update(const InputSystem& inputSystem, float timer, float dt) {
 
 	// キャンセル受付クラス更新
 	if (!nextRecever_.GetIsNext()) {
-		cancelReceiver_.Update(input, timer);
+		cancelReceiver_.Update(inputSystem, timer);
 	}
 	// コンボ入力受付クラス更新
 	if (!cancelReceiver_.GetIsCancel()) {
-		nextRecever_.Update(input, timer);
+		nextRecever_.Update(inputSystem, timer);
 	}
 	// 終了条件
-	endCondition_.Update(input, jumpSystem, timer, dt);
+	endCondition_.Update(inputSystem, jumpSystem, timer, dt);
 	// 移行条件
-	nextCondition_.Update(input, jumpSystem, timer, dt);
+	nextCondition_.Update(inputSystem, jumpSystem, timer, dt);
 }
 
 void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {

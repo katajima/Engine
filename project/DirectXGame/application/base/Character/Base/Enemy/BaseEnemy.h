@@ -21,11 +21,11 @@ namespace Character {
 	class BaseEnemy : public BaseCharacter {
 	public:
 		// 初期化
-		virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 		// 基盤となる初期化
-		void BaseInitialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		void BaseInitialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f);
 		// 毎フレーム更新

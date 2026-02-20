@@ -1,6 +1,7 @@
 #pragma once
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "MoveData.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 /// <summary>
 /// 移動に関するシステム
@@ -20,7 +21,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新(操作用)
-	void Update(float dt, Engine::WorldTransform& world, Engine::Input* input);
+	void Update(float dt, Engine::WorldTransform& world, InputSystem* input);
 	// 更新(非操作用)
 	void Update(float dt, Engine::WorldTransform& world);
 	// 更新(敵用)

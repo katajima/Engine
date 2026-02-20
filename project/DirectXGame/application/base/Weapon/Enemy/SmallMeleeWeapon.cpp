@@ -1,10 +1,10 @@
 #include "SmallMeleeWeapon.h"
 
-void SmallMeleeWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
+void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
-	this->input = input;						// インプット
-	this->entity3DManager = entity3DManager; // エンティティ3d
-	this->entity2DManager = entity2DManager; // エンティティ2d
+	this->inputSystem = inputSystem;			// インプット
+	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->entity2DManager = entity2DManager;	// エンティティ2d
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();

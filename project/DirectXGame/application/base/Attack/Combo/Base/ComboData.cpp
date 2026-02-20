@@ -22,18 +22,18 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboData::Update(const Engine::Input& input, float dt) {
+	void ComboData::Update(const InputSystem& inputSystem, float dt) {
 		// 時間更新
 		timer_ += dt;
 		// コンボ用条件クラス更新
-		comboCondition.Update(input, timer_, dt);
+		comboCondition.Update(inputSystem, timer_, dt);
 		// コンボ用モーションクラス更新
-		motion.Update(input, timer_, dt);
+		motion.Update(inputSystem, timer_, dt);
 		// コンボ用カメラクラス更新
 		camera.Update(timer_, dt);
 		// コンボ用ヒットボックスクラス更新
 		hitBox.SetDirection(motion.GetComboMove().GetDirection());
-		hitBox.Update(input, timer_, dt);
+		hitBox.Update(inputSystem, timer_, dt);
 		// コンボ用エフェクトクラス更新
 		effect.Update(timer_, dt);
 	}

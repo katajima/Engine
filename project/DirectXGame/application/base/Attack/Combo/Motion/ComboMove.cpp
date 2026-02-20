@@ -25,9 +25,9 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboMove::Update(const Engine::Input& input, float timer, float dt) {
+	void ComboMove::Update(const InputSystem& inputSystem, float timer, float dt) {
 		// ゲームパッドの左スティックを動かしているか
-		bool isMoveStick = input.GetGamePadLeftStick().Length() != 0;
+		bool isMoveStick = inputSystem.GetData().moveShick.Length() != 0;
 
 		// 移動可能か
 		moveComponent->GetMoveSystem()->SetIsAttackCanMove(IsMove());
@@ -40,12 +40,12 @@ namespace Combo {
 			// 動かしていたら
 			if (!isMove_ && isMoveStick) {
 				isMove_ = true;
-				stickDirection_ = input.GetGamePadLeftStick().Normalize();
+				stickDirection_ = inputSystem.GetData().moveShick;
 			}
 		}
 
 		// 移動処理
-		MoveTypeProcess(input, timer, dt);
+		MoveTypeProcess(inputSystem, timer, dt);
 		// 重力処理
 		GravityProcess();
 
@@ -65,7 +65,7 @@ namespace Combo {
 		stickDirection_ = {};
 	}
 
-	void ComboMove::MoveTypeProcess(const Engine::Input& input, float timer, float dt) {
+	void ComboMove::MoveTypeProcess(const InputSystem& inputSystem, float timer, float dt) {
 		bool isStart = data_.moveWindowStart_ <= timer;		// 受付開始時間を過ぎたら
 		bool isEnd = data_.moveWindowEnd_ >= timer;			// 受付終了時間より前なら
 

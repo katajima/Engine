@@ -8,7 +8,7 @@ namespace Character {
 
 	// 更新
 	void PlayerStateIdle::Update() {
-		Engine::Input* input = character->GetInput();
+		InputSystem* inputSystem = character->GetInputSystem();
 		BaseWeapon* weapon = character->GetWeapon();
 		BaseSpecial* special = character->GetSpecial();
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
@@ -18,7 +18,7 @@ namespace Character {
 
 
 
-		bool isTriggerLT = input->IsLeftTriggerPressed();
+		bool isTriggerLT = inputSystem->GetData().dashHeld;
 		if (isTriggerLT) {
 			character->GetMoveComponent()->GetDashSystem()->StartDash();
 		}
@@ -27,27 +27,18 @@ namespace Character {
 		// 武器描画 
 		weapon->GetObject3D()->SetIsDraw(true);
 
-#ifdef _DEBUG
-
-		// デバッグ用
-		if (input->IsTriggerKey(DIK_Z)) {
-			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-			return;
-		}
-#endif // _DEBUG
-
 		weapon->RecastTime(Engine::MyGame::GameTime());
 
 		// 必殺技移行
 		if (special->GetIsSpecial()) {
-			if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
+			if (inputSystem->GetData().specialTrigger) {
 				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 				return;
 			}
 		}
 
 		// 移動したら
-		if (input->GetGamePadLeftStick().Length() != 0) {
+		if (inputSystem->GetData().moveShick.Length() != 0) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 			return;
 		}
@@ -73,7 +64,7 @@ namespace Character {
 
 	void PlayerStateMove::Update()
 	{
-		Engine::Input* input = character->GetInput();				// 入力
+		InputSystem* inputSystem = character->GetInputSystem();				// 入力
 		BaseWeapon* weapon = character->GetWeapon();		// 武器
 		BaseSpecial* special = character->GetSpecial();	// 必殺
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
@@ -81,18 +72,9 @@ namespace Character {
 		weapon->GetObject3D()->SetIsDraw(true); // 武器描画
 		anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
 
-		bool isTriggerLT = input->IsLeftTriggerPressed();
+		bool isTriggerLT = inputSystem->GetData().dashHeld;
 		if (isTriggerLT) {
 			character->GetMoveComponent()->GetDashSystem()->StartDash();
-		}
-
-
-
-
-		// 気絶発動
-		if (input->IsTriggerKey(DIK_Z)) {
-			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Fainting);
-			return;
 		}
 
 		// 武器リキャストタイム更新
@@ -100,14 +82,14 @@ namespace Character {
 
 		// 必殺がうてるなら
 		if (special->GetIsSpecial()) {
-			if (input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB)) {
+			if (inputSystem->GetData().specialTrigger) {
 				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 				return;
 			}
 		}
 
 		// 止まったら
-		if (input->GetGamePadLeftStick().Length() == 0) {
+		if (inputSystem->GetData().moveShick.Length() == 0) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
 			return;
 		}
@@ -143,7 +125,7 @@ namespace Character {
 	// 更新
 	void PlayerStateJump::Update() {
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		Engine::Input* input = character->GetInput();
+		InputSystem* inputSystem = character->GetInputSystem();
 		JumpSystem* jump = character->GetMoveComponent()->GetJumpSystem();
 
 		anima->SetIsPlaying(true);		// アニメーション再生
@@ -152,10 +134,11 @@ namespace Character {
 
 		// ジャンプ出来るか
 		bool isJamp = character->GetMoveComponent()->GetIsJump();
-		bool isTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_A);
-		bool isPress = input->IsGamePadPressed(GamePadButton::GAMEPAD_A);
+		bool isTrigger = inputSystem->GetData().jumpTrigger;
+		bool isPress = inputSystem->GetData().jumpPressed;
 
-		bool isTriggerLT = input->IsLeftTriggerPressed();
+
+		bool isTriggerLT = inputSystem->GetData().dashHeld;
 		if (isTriggerLT) {
 			character->GetMoveComponent()->GetDashSystem()->StartDash();
 		}
@@ -293,33 +276,6 @@ namespace Character {
 
 	// 更新
 	void PlayerStateFainting::Update() {
-		Engine::Input* input = character->GetInput();
-		Vector2 left = input->GetGamePadLeftStick();
-
-		timer_ += character->GetTime();
-
-		// スティックを動かしているなら
-		if (prevleftStick != left) {
-			Vector2 sub = prevleftStick - left;
-			float length = sub.Length();
-			float subtime = 1.0f;
-
-			if (length >= 10.0f) {
-				subtime = 2.0f;
-			}
-
-			// 復帰時間短縮
-			timer_ += character->GetTime() * subtime;
-		}
-
-		// 復帰したら移動状態に移行
-		if (timer_ >= faintingTimer_) {
-			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-			return;
-		}
-
-
-		prevleftStick = left;
 	}
 
 	// 終了
@@ -339,10 +295,6 @@ namespace Character {
 		anima->SetAnimationSpeed(0.75f); // アニメーションスピード設定
 		anima->SetAnimation("Stan1", 0.10f);
 		timer_ = 0;		// タイマーを0に設定
-
-
-		Engine::Input* input = character->GetInput();
-		prevleftStick = input->GetGamePadLeftStick();
 	};
 
 #pragma endregion // 気絶

@@ -5,10 +5,10 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void SmallCartEnemy::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
+	void SmallCartEnemy::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(input, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySG01.obj", "enemy");
+		BaseInitialize(inputSystem, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySG01.obj", "enemy");
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f, };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定

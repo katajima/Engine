@@ -25,7 +25,7 @@ void MovementComponent::Initialize(Engine::GlobalVariables* globalVariables, Con
 	}
 };
 
-void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, Engine::Input* input) {
+void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, InputSystem* input) {
 	if (useGlobal_) {
 		SetGlobalData(name_);
 	}

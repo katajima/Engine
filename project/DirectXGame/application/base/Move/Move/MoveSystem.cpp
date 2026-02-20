@@ -4,7 +4,7 @@
 void MoveSystem::Initialize() {
 }
 
-void MoveSystem::Update(float dt, Engine::WorldTransform& world, Engine::Input* input)
+void MoveSystem::Update(float dt, Engine::WorldTransform& world, InputSystem* input)
 {
 	// 攻撃中は通常の移動処理しない
 	if (isAttack_) return;
@@ -12,13 +12,13 @@ void MoveSystem::Update(float dt, Engine::WorldTransform& world, Engine::Input* 
 	Vector3 velo = GetVelocity();
 
 	// スティックを動かした方向
-	velo.x = input->GetGamePadLeftStick().x;
-	velo.z = input->GetGamePadLeftStick().y;
+	velo.x = input->GetData().moveShick.x;
+	velo.z = input->GetData().moveShick.y;
 	// 入力方向を正規化
 	velo = Normalize(velo);
 
 	// スティック入力を保存
-	stickInput_ = input->GetGamePadLeftStick();
+	stickInput_ = input->GetData().moveShick;
 
 	// 移動方向を保存
 	DirectionProcess(velo);

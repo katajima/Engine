@@ -8,7 +8,7 @@
 ///< summary>
 /// 初期化
 ///</summary>
-void BulletPlayerWeapon::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+void BulletPlayerWeapon::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 	this->entity3DManager = entity3DManager;	// エンティティ3d
 	this->entity2DManager = entity2DManager;	// エンティティ2d
