@@ -846,6 +846,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionContext.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MoveInput.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MovementData.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MovementSystem.h" />

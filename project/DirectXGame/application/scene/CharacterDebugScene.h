@@ -60,8 +60,8 @@ private:
 	Engine::Audio* audio_ = nullptr;
 
 	// インプットハンドラ
-	std::unique_ptr < InputHander> inputHander_;
-	ICommand* iCommand_;
+	std::unique_ptr <Character::InputHander> inputHander_;
+	Character::ICommand* iCommand_;
 
 	// インプットマネージャ
 	std::unique_ptr<InputManager> inputManager_;

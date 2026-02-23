@@ -48,12 +48,12 @@ namespace Character {
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
-		moveComponent_->Initialize(inputSystem,globalVariables, MovementComponent::ControlType::Manual, "");
+		moveComponent_->Initialize(this,inputSystem,globalVariables, MovementComponent::ControlType::Manual, "");
 		moveComponent_->SetMoveType(MoveType::ACCELERATE);
 		moveComponent_->SetIsStickToSpeed(true);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
 
-		moveComponent_->SetMaxJumpCount(2);
+		moveComponent_->SetMaxJumpCount(1);
 		moveComponent_->SetCamera(followCamera->GetUniqueCamera());
 
 		// 保存項目初期化

@@ -1,8 +1,6 @@
 #pragma once
+#include "LocomotionContext.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
-#include "DirectXGame/application/base/Move/Move/MoveRequest.h"
-#include "DirectXGame/application/base/Move/Jump/JumpRequest.h"
-#include "DirectXGame/application/base/Move/Dash/DashRequest.h"
 /// <summary>
 /// 移動関連の調停役クラス
 /// </summary>
@@ -12,17 +10,16 @@ public:
 	/// 初期化
 	/// </summary>
 	/// <param name="inputSystem"></param>
-	void Initialize(InputSystem* inputSystem);
-
+	void BeginFrame(const LocomotionContext& ctx) {
+		ctx_ = &ctx;
+		built_ = false;
+	}
 	/// <summary>
-	/// 更新
+	/// 移動コマンド生成
 	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
+	/// <returns></returns>
+	MoveCommand BuildCommand();
 private:
-
-
-private:
-	InputSystem* inputSystem = nullptr;
-
+	const LocomotionContext* ctx_ = nullptr;
+	bool built_ = false;
 };

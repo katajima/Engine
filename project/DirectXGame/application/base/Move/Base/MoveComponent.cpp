@@ -1,9 +1,10 @@
 #include "MoveComponent.h"
 
 
-void MovementComponent::Initialize(InputSystem* input,Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
+void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* input,Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
 	this->globalVariables = globalVariables;
-	
+	this->owner = owner;
+
 	name_ = "MoveData" + name;
 	// 移動システムの生成
 	moveSystem_ = std::make_unique<MoveRequest>();
@@ -20,8 +21,7 @@ void MovementComponent::Initialize(InputSystem* input,Engine::GlobalVariables* g
 
 	// 移動リクエスト集約選択クラス
 	locomotionCoordinator_ = std::make_unique<LocomotionCoordinator>();
-	locomotionCoordinator_->Initialize(input);
-
+	
 	// 移動反映クラス初期化
 	movementSystem_ = std::make_unique<MovementSystem>();
 	movementSystem_->Initialize();
@@ -37,33 +37,47 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 	if (useGlobal_) {
 		SetGlobalData(name_);
 	}
-	// ダッシュ時の移動方向を移動システムから取得してダッシュシステムに渡す
-	dashSystem_->SetDirection(moveSystem_->GetDirection());
+
+	// コンテキスト
+	LocomotionContext ctx;
+	if (input) {
+		ctx.input = *input;						// 入力状態
+	}
+	ctx.position = object.GetWorldPosition();	// 位置
+	ctx.dt = dt;								// デルタタイム
+	ctx.isAttacking = false;					// 攻撃
+	ctx.isHitStun = false;						// スタン
+	ctx.onGround = movementSystem_->IsOnGround();// 着地しているか
+	ctx.fallGravity = jumpSystem_->GetData().fallGravity_;
+	ctx.upGravity = jumpSystem_->GetData().upGravity_;
+	ctx.attackingGravity = attackingGravity;
+
+
+	// リクエスト集約選択クラス開始
+	locomotionCoordinator_->BeginFrame(ctx);
+
 	// ダッシュシステムの更新
-	dashSystem_->Update(dt, object, rigid);
-	// ジャンプシステムにダッシュ状態を伝える
-	jumpSystem_->SetIsDash(dashSystem_->IsDash());
+	dashSystem_->Update(ctx, *locomotionCoordinator_.get());
+
 	// ジャンプシステムの更新
-	jumpSystem_->Update(dt, object, rigid);
-	// 移動システムに空中状態を伝える
-	moveSystem_->SetIsAir(!jumpSystem_->GetIsLanding());
-	// ダッシュしているかを移動システムに伝える
-	moveSystem_->SetIsDash(dashSystem_->IsDash());
+	jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), object, rigid);
+
+
 	// 移動システムの更新
 	if (controlType_ == ControlType::Manual) {	// 手動操作なら入力を渡す
-		
-
 		moveSystem_->Update(dt, object, input);
 	}
 	else {
-		moveSystem_->UpdateEnemy(dt, object);
+		moveSystem_->UpdateEnemy(dt);
 	}
 
-	// リクエスト集約選択クラス更新
-	locomotionCoordinator_->Update(dt);
+
+
+	// リクエスト集約選択クラスで移動コマンド生成
+ 	MoveCommand cmd = locomotionCoordinator_->BuildCommand();
 
 	// 移動反映クラス更新
-	movementSystem_->Update(dt);
+	movementSystem_->Update(ctx,cmd,object,rigid);
 
 	// 移動制限の更新
 	movementRestrictions_->Update(object);

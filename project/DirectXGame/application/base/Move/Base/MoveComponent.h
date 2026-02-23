@@ -2,12 +2,19 @@
 #include "MovementRestrictions.h"
 #include "MovementSystem.h"
 #include "DirectXGame/application/base/Move/Base/LocomotionCoordinator.h"
+#include "DirectXGame/application/base/Move/Move/MoveRequest.h"
+#include "DirectXGame/application/base/Move/Jump/JumpRequest.h"
+#include "DirectXGame/application/base/Move/Dash/DashRequest.h"
 
 // 前方宣言
 namespace Engine {
 	class GlobalVariables;
 }
 
+
+namespace Character {
+	class BaseCharacter;
+}
 
 /// <summary>
 /// 移動コンポーネント
@@ -23,7 +30,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(InputSystem* input,Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
+	void Initialize(Character::BaseCharacter* owner ,InputSystem* input,Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
 	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, InputSystem* input);
 public:
@@ -64,10 +71,11 @@ public: // ジャンプ系統
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpSystem_->GetIsJump(); }
 	// 着地状態か
-	bool GetIsLanding() const { return jumpSystem_->GetIsLanding(); }
+	bool GetIsLanding() const { return movementSystem_->IsOnGround(); }
 	// 最大ジャンプカウント設定
 	void SetMaxJumpCount(int count) { jumpSystem_->SetMaxJumpCount(count); }
-
+	// 
+	void SetAttackingGravity(float gravity) { attackingGravity = gravity; }
 public:
 	// 移動システム取得
 	MoveRequest* GetMoveSystem() { return moveSystem_.get(); }
@@ -75,6 +83,8 @@ public:
 	JumpRequest* GetJumpSystem() { return jumpSystem_.get(); }
 	// ダッシュシステム取得
 	DashRequest* GetDashSystem() { return dashSystem_.get(); }
+	// 移動システム取得
+	MovementSystem* GetMovementSystem() { return movementSystem_.get(); }
 public:
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { moveSystem_->SetCamera(camera); }
@@ -85,13 +95,10 @@ private:
 	std::unique_ptr<JumpRequest> jumpSystem_ = nullptr;
 	// ダッシュシステム
 	std::unique_ptr<DashRequest> dashSystem_ = nullptr; 
-
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 
-	
 	// 行動リクエストを元に行動を集約→選択するクラス
 	std::unique_ptr<LocomotionCoordinator> locomotionCoordinator_ = nullptr;
-
 	// 行動リクエストを元に移動速度→トランスフォーム更新を行うクラス
 	std::unique_ptr<MovementSystem> movementSystem_ = nullptr;
 
@@ -105,6 +112,10 @@ private:
 private:
 	// 保存項目
 	Engine::GlobalVariables* globalVariables = nullptr;
+	Character::BaseCharacter* owner = nullptr;
+
+	// 攻撃中の重力係数
+	float attackingGravity = 1.0f;
 };
 
 

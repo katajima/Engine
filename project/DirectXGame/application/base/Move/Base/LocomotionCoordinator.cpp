@@ -1,9 +1,7 @@
 #include "LocomotionCoordinator.h"
 
 
-void LocomotionCoordinator::Initialize(InputSystem* inputSystem) {
+MoveCommand LocomotionCoordinator::BuildCommand()
+{
+	return MoveCommand();
 }
-
-void LocomotionCoordinator::Update(float dt) {
-
-};

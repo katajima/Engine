@@ -11,8 +11,8 @@ namespace Combo {
 	void NextCondition::Exit() {
 	}
 	// 更新
-	void NextCondition::Update(const InputSystem& inputSystem, JumpRequest* jumpRequest, float time, float dt) {
-		ConditionFunction::ConditionTypeUpdate(inputSystem, jumpRequest, data_.type, data_.button_, nextTime_, data_.stateTime, isPress_, dt);
+	void NextCondition::Update(const InputSystem& inputSystem, MovementComponent* movementComponent, float time, float dt) {
+		ConditionFunction::ConditionTypeUpdate(inputSystem, movementComponent, data_.type, data_.button_, nextTime_, data_.stateTime, isPress_, dt);
 	}
 
 

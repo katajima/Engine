@@ -22,13 +22,8 @@ public:
 	void Initialize();
 	// 更新(操作用)
 	void Update(float dt, Engine::WorldTransform& world, InputSystem* input);
-	// 更新(非操作用)
-	void Update(float dt, Engine::WorldTransform& world);
 	// 更新(敵用)
-	void UpdateEnemy(float dt, Engine::WorldTransform& world);
-
-	// isAttackMove(
-	void UpdateAttack(float dt, Engine::WorldTransform& world);
+	void UpdateEnemy(float dt);
 
 private:
 	// 速度処理
@@ -43,8 +38,6 @@ private:
 	void AnimationSpeedProcess();
 	// 方向処理
 	void DirectionProcess(const Vector3& velo);
-	// ダッシュ時の処理
-	void DashProcess(Engine::WorldTransform& world);
 public:
 	// カメラ基づく移動方向設定
 	void CameraDirectionToMoveDirection(Vector3& velo);
@@ -80,25 +73,15 @@ public: //設定
 		data_.minSpeed = min;
 		data_.maxSpeed = max;
 	};
-	// ダッシュしているか設定
-	void SetIsDash(bool isDash) { isDash_ = isDash; }
 	// 攻撃中か設定
 	void SetIsAttack(bool is) { isAttack_ = is; };
-	// 攻撃中か設定
-	void SetIsAttackCanMove(bool is) { isAttackCanMove_ = is; };
-
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
 private: // 貰いもの
 	// カメラ
 	Engine::Camera* camera = nullptr;
-
-	// ダッシュしているかどうか
-	bool isDash_ = false;
 	// 攻撃中か
 	bool isAttack_ = false;
-	// 攻撃中に動かせるか
-	bool isAttackCanMove_ = false;
 private:
 	// 移動データ
 	MoveData data_{};

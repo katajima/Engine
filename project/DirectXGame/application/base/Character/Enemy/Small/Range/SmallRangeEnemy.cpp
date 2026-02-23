@@ -40,9 +40,8 @@ namespace Character {
 
 		
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-		moveComponent_->GetJumpSystem()->SetIsUseJump(false);
-		moveComponent_->GetDashSystem()->SetIsUseGravity(false);
-
+		moveComponent_->GetMovementSystem()->SetUseGravity(false);
+		
 
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();

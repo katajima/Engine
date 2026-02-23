@@ -23,12 +23,6 @@ void MoveRequest::Update(float dt, Engine::WorldTransform& world, InputSystem* i
 	// 移動方向を保存
 	DirectionProcess(velo);
 
-		
-	// ダッシュ時の回転処理
-	DashProcess(world);
-	
-	if (isDash_) return; // ダッシュ中は移動処理しない
-
 	// 回転処理
 	RotateProcess(dt, world, direction_);
 
@@ -36,24 +30,7 @@ void MoveRequest::Update(float dt, Engine::WorldTransform& world, InputSystem* i
 	MoveProcess(dt, world, velo);
 }
 
-void MoveRequest::Update(float dt, Engine::WorldTransform& world)
-{
-	if (isDash_) return; // ダッシュ中は移動処理しない
-
-	Vector3 velo = GetVelocity();
-	velo = Normalize(velo);
-
-	// 移動処理
-	MoveProcess(dt, world, velo);
-}
-
-void MoveRequest::UpdateEnemy(float dt, Engine::WorldTransform& world){}
-
-void MoveRequest::UpdateAttack(float dt, Engine::WorldTransform& world)
-{
-	MoveProcess(dt, world,keepDirection_);
-}
-
+void MoveRequest::UpdateEnemy(float dt){}
 
 #pragma region Process
 
@@ -228,22 +205,6 @@ void MoveRequest::DirectionProcess(const Vector3& velo)
 	};
 
 	direction_ = Multiply(Normalize(worldDirection), 1.0f);
-}
-
-void MoveRequest::DashProcess(Engine::WorldTransform& world)
-{
-	// ダッシュ中は移動処理しない
-	if (!isDash_) return;
-
-	// 移動ベクトルがゼロなら回転処理しない
-	if (keepDirection_.Length() == 0.0f) return;
-
-	// 目標方向（X=Right, Y=Up, Z=Forward）
-	float targetYaw = std::atan2(keepDirection_.x, keepDirection_.z);
-
-	float& currentYaw = world.rotate_.y;
-
-	currentYaw = targetYaw;
 }
 
 void MoveRequest::AttackProcess(Engine::WorldTransform& world, const Vector3& direction)

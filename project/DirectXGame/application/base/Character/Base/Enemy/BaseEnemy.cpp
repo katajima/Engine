@@ -116,7 +116,7 @@ namespace Character {
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
 		moveComponent_->UseGlobal(false);
-		moveComponent_->Initialize(nullptr,globalVariables, MovementComponent::ControlType::Manual, "_" + charaName);
+		moveComponent_->Initialize(this,nullptr,globalVariables, MovementComponent::ControlType::Manual, "_" + charaName);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 
 		// 保存項目追加

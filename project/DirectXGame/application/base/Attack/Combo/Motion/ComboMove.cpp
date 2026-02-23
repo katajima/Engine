@@ -29,9 +29,6 @@ namespace Combo {
 		// ゲームパッドの左スティックを動かしているか
 		bool isMoveStick = inputSystem.GetData().moveShick.Length() != 0;
 
-		// 移動可能か
-		moveComponent->GetMoveSystem()->SetIsAttackCanMove(IsMove());
-
 		// 強制的に移動
 		if (data_.isCompulsionMove_) {
 			isMove_ = true;
@@ -48,12 +45,6 @@ namespace Combo {
 		MoveTypeProcess(inputSystem, timer, dt);
 		// 重力処理
 		GravityProcess();
-
-		// 移動可能なら
-		if (isMove_) {
-			// 前進する
-			moveComponent->SetCanMove(true);
-		}
 	}
 
 	// 終了
@@ -105,7 +96,7 @@ namespace Combo {
 		if (!data_.isGravity_) {
 			rigidBodyComponent->Velocity().y = 0;
 		}
-		rigidBodyComponent->SetGravityScale(data_.gravityScale_);
+		moveComponent->SetAttackingGravity(data_.gravityScale_);
 		rigidBodyComponent->SetIsGravity(data_.isGravity_);
 	}
 	

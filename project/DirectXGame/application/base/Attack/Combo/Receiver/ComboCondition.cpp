@@ -15,13 +15,13 @@ void Combo::ComboCondition::Update(const InputSystem& inputSystem, float timer, 
 		nextRecever_.Update(inputSystem, timer);
 	}
 	// 終了条件
-	endCondition_.Update(inputSystem, jumpSystem, timer, dt);
+	endCondition_.Update(inputSystem, movementComponent, timer, dt);
 	// 移行条件
-	nextCondition_.Update(inputSystem, jumpSystem, timer, dt);
+	nextCondition_.Update(inputSystem, movementComponent, timer, dt);
 }
 
 void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {
-	jumpSystem = owner->GetMoveComponent()->GetJumpSystem();	// ジャンプシステム取得
+	movementComponent = owner->GetMoveComponent();	// 移動システム取得
 	// キャンセル受付クラス
 	cancelReceiver_.Enter();
 	// 移行受付クラス

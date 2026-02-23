@@ -4,7 +4,7 @@
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 
 
-class JumpRequest;			// ジャンプシステム
+class MovementComponent;			// ジャンプシステム
 
 namespace Combo {
 	/// <summary>
@@ -63,8 +63,8 @@ namespace Combo {
 	private:
 		// ヒットボックスシステム
 		HitBox::System* hitBoxSystem_ = nullptr;
-		// ジャンプシステム
-		JumpRequest* jumpSystem_ = nullptr;
+		// 移動システム
+		MovementComponent* movementComponent = nullptr;
 		// 親子
 		Engine::WorldTransform* perent_ = nullptr;
 	private:

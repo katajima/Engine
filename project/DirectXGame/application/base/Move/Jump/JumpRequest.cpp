@@ -1,53 +1,21 @@
 #include "JumpRequest.h"
 
 
-void JumpRequest::Initialize()
+void JumpRequest::Initialize(){}
+
+void JumpRequest::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
 {
-	groundHeight_ = -3.0f;
-}
-
-void JumpRequest::Update(float dt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
-{
-	if (isUseJump == false) {
-		rigid.SetIsGravity(false);			// 重力をオフ
-		return;
-	} 
-
-	// 現在のy速度取得
-	velocity_ = rigid.Velocity().y;
-
 	// 入力ホールド処理
-	InputHoldProcess(dt);
+	InputHoldProcess(ctx.dt);
 	// ジャンプホールド処理
-	JumpHoldProcess(dt,rigid);
+	JumpHoldProcess(ctx.dt,rigid);
+
+	int j = jumpCount_;
 
 	// 着地
-	if (world.GetWorldPosition().y <= groundHeight_) {
-		world.translate_.y = groundHeight_;	// 地面位置に
-		rigid.Velocity().y = 0.0f;			// y速度を0に
-		rigid.SetIsGravity(false);			// 重力をオフ
-		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
+	if (ctx.onGround) {
 		jumpCount_ = data_.maxJumpCount_;	// ジャンプ回数リセット
-		isLanding_ = true;					// 着地
 	}
-	else {
-		// ダッシュ中には重力の切り替えはダッシュシステムに任せる
-		if (!isDash_ || !isAttack_) {
-			rigid.SetIsGravity(true);					// 重力オン
-		}
-		if (!isAttack_) {
-			if (state_ == State::Fall) {
-				rigid.SetGravityScale(data_.fallGravity_);	// 重力スケールセット
-			}
-			else {
-				rigid.SetGravityScale(data_.upGravity_);	// 重力スケールセット
-			}
-		}
-		isLanding_ = false;							// 着地していない
-	}
-
-	/// 状態処理
-	StateProcess();
 }
 
 void JumpRequest::StartJump(Engine::RigidBodyComponent& rigid)
@@ -56,7 +24,6 @@ void JumpRequest::StartJump(Engine::RigidBodyComponent& rigid)
 	DecrementJumpCount();	// ジャンプ回数減少
 
 
-	isGrounded_ = false;	// 地面に接していない
 	isJumping_ = true;		// ジャンプ中
 	isInputHeld_ = true;	// 入力ホールド
 	isInputPressed_ = true;	// 入力プレス
@@ -67,21 +34,6 @@ void JumpRequest::StartJump(Engine::RigidBodyComponent& rigid)
 
 
 #pragma region Process
-
-void JumpRequest::StateProcess() {
-
-	if (isLanding_) {
-		state_ = State::Land;
-	}
-	else {
-		if(velocity_ > 0.0f) {
-			state_ = State::Jump;
-		}
-		else {
-			state_ = State::Fall;
-		}
-	}
-}
 
 void JumpRequest::InputHoldProcess(float dt)
 {

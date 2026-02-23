@@ -31,7 +31,9 @@ namespace Game {
 
 		CreateSpawn(Character::EnemyType::kMediumMelee,"normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,500 }, { 10,1,10 }, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,1,500 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 3, { -500,1,500 }, { 10,1,10 }, 0.75f);
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -43,9 +45,13 @@ namespace Game {
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,-400 }, { 10,1,10 }, 4.0f);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,0,-400 }, { 10,1,10 }, 0.75f);
 
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,0 }, { 10,1,10 }, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 3, { -500,1,0 }, { 10,1,10 }, 0.75f);
+
+
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 2;
-		data.time_.max = 60.0f;
+		data.time_.max = 40.0f;
 
 		CreateGameEvent("battle02", data);
 

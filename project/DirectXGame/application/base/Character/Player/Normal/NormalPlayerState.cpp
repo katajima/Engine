@@ -20,7 +20,7 @@ namespace Character {
 
 		bool isTriggerLT = inputSystem->GetData().dashHeld;
 		if (isTriggerLT) {
-			character->GetMoveComponent()->GetDashSystem()->StartDash();
+			//character->GetMoveComponent()->GetDashSystem()->StartDash();
 		}
 
 
@@ -74,7 +74,7 @@ namespace Character {
 
 		bool isTriggerLT = inputSystem->GetData().dashHeld;
 		if (isTriggerLT) {
-			character->GetMoveComponent()->GetDashSystem()->StartDash();
+			//character->GetMoveComponent()->GetDashSystem()->StartDash();
 		}
 
 		// 武器リキャストタイム更新
@@ -139,9 +139,7 @@ namespace Character {
 
 
 		bool isTriggerLT = inputSystem->GetData().dashHeld;
-		if (isTriggerLT) {
-			character->GetMoveComponent()->GetDashSystem()->StartDash();
-		}
+		
 
 
 		bool isAlive = character->GetAlive();
@@ -153,8 +151,7 @@ namespace Character {
 
 		// キャラクターが生きていてジャンプ回数が残っていて着地状態じゃないのなら
 		if (isAlive && isJamp && isTrigger) {
-			character->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStart01", 0.05f);
-
+			character->GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStart01", 0.1f);
 			// ジャンプ開始
 			anima->SetStratAnimeTime();		// アニメーション時間を初期化
 			jump->StartJump(*character->GetObjectComponent()->GetRigidBodyComponent());
@@ -169,11 +166,11 @@ namespace Character {
 
 
 
-		if (jump->GetState() == JumpRequest::State::Jump) { // 上昇しているなら
+		if (character->GetMoveComponent()->Velocity().y > 0.0f) { // 上昇しているなら
 			anima->SetIsLoop(false);
 			anima->SetAnimation("JumpStart01", 0.05f);
 		}
-		else if (jump->GetState() == JumpRequest::State::Fall) { // 降下しているなら
+		else { // 降下しているなら
 			anima->SetIsLoop(true);
 			anima->SetAnimation("Jump01", 0.15f);
 		}
@@ -208,7 +205,6 @@ namespace Character {
 		anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
 		character->GetMoveComponent()->SetCanMove(true);
 		character->GetMoveComponent()->GetMoveSystem()->SetIsAttack(false);
-		character->GetMoveComponent()->GetJumpSystem()->SetIsAttack(false);
 	}
 
 	void PlayerStateAttack::Enter()
@@ -218,7 +214,6 @@ namespace Character {
 		// 武器
 		weapon->GetObject3D()->SetIsDraw(true);	 // 武器描画
 		character->GetMoveComponent()->GetMoveSystem()->SetIsAttack(true);
-		character->GetMoveComponent()->GetJumpSystem()->SetIsAttack(true);
 	}
 
 #pragma endregion // 攻撃

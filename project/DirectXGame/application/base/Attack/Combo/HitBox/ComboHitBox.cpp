@@ -8,8 +8,8 @@ namespace Combo {
 	void ComboHitBox::Enter(Character::BaseCharacter* owner) {
 		// ヒットボックスシステムを渡す
 		hitBoxSystem_ = owner->GetAttackController()->GetHitBoxSystem();
-		// ジャンプシステムを渡す
-		jumpSystem_ = owner->GetMoveComponent()->GetJumpSystem();
+		// 移動システムを渡す
+		movementComponent = owner->GetMoveComponent();
 	}
 
 	// 更新
@@ -32,7 +32,7 @@ namespace Combo {
 			}
 			break;
 		case HitBox::SpawnType::kOnGround: // 着地したら
-			if (jumpSystem_->GetIsLanding()) {
+			if (movementComponent->GetIsLanding()) {
 				timer_ += dt;
 				if (timer >= data_.hitBpxWindowStart_) {
 					if (!isPopHitBox_) {

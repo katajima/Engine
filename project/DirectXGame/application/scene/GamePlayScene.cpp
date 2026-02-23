@@ -25,7 +25,7 @@ void GamePlayScene::Initialize()
 	
 
 	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<InputHander>();
+	inputHander_ = std::make_unique<Character::InputHander>();
 	inputHander_->Initialize(input_);
 
 
@@ -33,21 +33,21 @@ void GamePlayScene::Initialize()
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<JampCommand>());
+		std::make_unique<Character::JampCommand>());
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<AttackCommand>());
+		std::make_unique<Character::AttackCommand>());
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<HeavyAttackCommand>());
+		std::make_unique<Character::HeavyAttackCommand>());
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
-		std::make_unique<SkillAttackCommand>());
+		std::make_unique<Character::SkillAttackCommand>());
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<MoveCommand>());
+		std::make_unique<Character::MoveCommand>());
 
 	// 入力システム初期化
 	inputSystem_ = std::make_unique<InputSystem>();

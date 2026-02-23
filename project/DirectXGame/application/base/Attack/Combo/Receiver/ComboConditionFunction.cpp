@@ -1,12 +1,12 @@
 #include "ComboConditionFunction.h"
 #include"DirectXGame/application/base/Move/Base/MoveComponent.h"
 
-void Combo::ConditionFunction::ConditionTypeUpdate(const InputSystem& inputSystem, JumpRequest* jumpSystem, EndConditionType type, ComboButton button, float timer, float endTime, bool isPress, float dt){
+void Combo::ConditionFunction::ConditionTypeUpdate(const InputSystem& inputSystem, MovementComponent* movementComponent, EndConditionType type, ComboButton button, float timer, float endTime, bool isPress, float dt){
 	// 終了タイプ
 	switch (type)
 	{
 	case Combo::EndConditionType::kOnGround:	// 着地したら
-		if (!jumpSystem->GetIsLanding()) {
+		if (!movementComponent->GetIsLanding()) {
 			timer += dt;
 		}
 		break;
