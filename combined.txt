@@ -293,7 +293,9 @@
     └── └── └── └── ├── PlayerUI.cpp
     └── └── └── └── ├── PlayerUI.h
     └── └── └── └── ├── SelectUI.cpp
-    └── └── └── └── └── SelectUI.h
+    └── └── └── └── ├── SelectUI.h
+    └── └── └── └── ├── TitleUI.cpp
+    └── └── └── └── └── TitleUI.h
     └── └── └── └── Weapon/
     └── └── └──     ├── Base/
     └── └── └──     └── ├── BaseWeapon.h
@@ -14562,7 +14564,7 @@ namespace Character {
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entity3DManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), 
 			entity3DManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
-		ui_->Update();
+		ui_->Update(GetTime());
 
 
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
@@ -20624,18 +20626,21 @@ void TitleStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMan
 	sky_->GetWorldTransform().scale_ = provisionalData_.skyBoxScale;
 	sky_->SetSkyBox(skyBox.get());
 
+	// タイル
+	tail = entity3DManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
+	tail->SetModel("Ground.obj");
+	tail->GetWorldTransform().scale_ = { 100,100,100 };
+	tail->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
 
+	// ライト
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
 	directionalLightData.intensity = 1.5f;
 	directionalLightData.isLight = true;
 	directionalLightData.lig = 0.1f;
-
-
 	directional = std::make_shared<Engine::DirectionalLight>();
 	directional->directional = directionalLightData;
-
 	entity3DManager->GetLightManager()->AddLight(directional);
 };
 
@@ -20739,12 +20744,16 @@ private:
 	std::unique_ptr<Engine::SkyBox> skyBox;
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
+
+	// タイル
+	Engine::Object3d* tail;
+
 private:
 	struct ProvisionalData {
 		Vector3 oceanTranslate = { 0, -30, 0 };
 		Vector3 oceanRotate = { Math::DegreesToRadians(90) ,0,0 };
 
-		Vector3 skyBoxScale = { 100,100,100 };
+		Vector3 skyBoxScale = { 1000,1000,1000 };
 
 
 		Vector2 oceanRange{ 8000.0f,8000.0f };
@@ -21500,7 +21509,7 @@ public:
 	virtual void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) = 0;
 
 	// 毎フレーム更新
-	virtual void Update() = 0;
+	virtual void Update(float dt) = 0;
 
 	// 描画
 	virtual void Draw() = 0;
@@ -21598,7 +21607,7 @@ void FpsUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity
 
 
 // 更新
-void FpsUI::Update() {
+void FpsUI::Update(float dt) {
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
@@ -21642,7 +21651,7 @@ public:
 	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	// 更新
-	void Update() override;
+	void Update(float dt) override;
 
 	// 描画
 	void Draw() override;
@@ -21815,7 +21824,7 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entit
 
 }
 
-void GameUI::Update()
+void GameUI::Update(float dt)
 {
 	// ボード画面比率画面左上座標指定
 	board_->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
@@ -21905,7 +21914,7 @@ public:
 	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	//更新
-	void Update() override;
+	void Update(float dt) override;
 
 	// 描画
 	void Draw() override;
@@ -22119,7 +22128,7 @@ void PlayerUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* ent
 
 }
 
-void PlayerUI::Update()
+void PlayerUI::Update(float dt)
 {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
@@ -22175,7 +22184,7 @@ public:
 	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	// 更新
-	void Update() override;
+	void Update(float dt) override;
 
 	// 描画
 	void Draw() override;
@@ -22281,7 +22290,7 @@ void SelectUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* ent
 };
 
 //更新
-void SelectUI::Update() {
+void SelectUI::Update(float dt) {
 };
 
 // 描画
@@ -22305,7 +22314,7 @@ public:
 	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	//更新
-	void Update() override;
+	void Update(float dt) override;
 
 	// 描画
 	void Draw() override;
@@ -22316,6 +22325,113 @@ private:
 private:
 
 };
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/TitleUI.cpp
+============================================================
+#include "TitleUI.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include <DirectXGame/engine/Utility/ConvertUtility.h>
+
+void TitleUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables){
+	iconB_ = std::make_unique<Engine::Sprite>();
+	iconB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/B.png");
+	iconB_->SetPosition({ 640,500 });
+	iconB_->SetAnchorPoint({ 0.5f,0.5f });
+	iconB_->SetSize({ 200,200 });
+
+	title_ = std::make_unique<Engine::Sprite>();
+	title_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/title.png");
+	title_->SetPosition({ 640,200 });
+	title_->SetAnchorPoint({ 0.5f,0.5f });
+	title_->SetSize(2);
+}
+
+void TitleUI::Update(float dt){
+	// ボタンUI処理
+	ButtonUiProcess(dt);
+
+	// タイトルUI更新
+	title_->Update();
+}
+
+void TitleUI::Draw(){
+	iconB_->Draw();
+	title_->Draw();
+}
+
+void TitleUI::ButtonUiProcess(float dt) {
+
+	//buttonTimer_ += dt;
+
+	if (buttonColor_.a >= 1.0f) {
+		buttonColor_.a = 1.0f;
+		buttonClock_ *= -1;
+	}
+	else if (buttonColor_.a <= 0.0f) {
+		buttonColor_.a = 0.0f;
+		buttonClock_ *= -1;
+	}
+
+	if (buttonClock_ == 1) {
+		buttonColor_.a += 0.015f;
+	}
+	else {
+		buttonColor_.a -= 0.015f;
+	}
+
+	// 色設定
+	iconB_->SetColor(buttonColor_);
+	// UI更新
+	iconB_->Update();
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/TitleUI.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/UI/Base/BaseUI.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
+
+// 前方宣言
+namespace Character {
+	class BasePlayer;
+}
+
+/// <summary>
+/// タイトルUI
+/// </summary>
+class TitleUI : public BaseUI {
+public:
+
+	//初期化
+	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
+
+	//更新
+	void Update(float dt) override;
+
+	// 描画
+	void Draw() override;
+
+	// ゲームデータ取得
+	void SetGamePlayData(const Game::GameData data) { data_ = data; };
+private:
+	// ボタンUI処理
+	void ButtonUiProcess(float dt);
+private:
+	Game::GameData data_;
+private:
+	std::unique_ptr<Engine::Sprite> iconB_;
+	std::unique_ptr<Engine::Sprite> title_;
+private:
+	// ボタン色
+	Color buttonColor_{1,1,1,1};
+	float buttonTimer_ = 0.0f;
+	int buttonClock_ = 1;
+};
+
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Base/BaseWeapon.h
@@ -24061,7 +24177,7 @@ void GamePlayScene::Update()
 	gameFlowController_->Update(GetTime());
 
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
-	gameUI->Update();
+	gameUI->Update(GetTime());
 
 }
 
@@ -25522,22 +25638,22 @@ File Path: project/DirectXGame/application/scene/TitleScene.cpp
 
 void TitleScene::Initialize()
 {
-	//オーディオの初期化
-	//audio_ = Audio::GetInstance();
 	// 入力初期化
 	input_ = GetInput();
-
 	// カメラ
 	InitializeCamera();
 	// リソース
 	InitializeResources();
-
-
+	// 
 	GetSceneData().playerID = 1;
 
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
 	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
+
+	// UI
+	titleUI_ = std::make_unique<TitleUI>();
+	titleUI_->Initialize(nullptr, GetEntity2DManager(), GetGlobalVariables());
 
 }
 
@@ -25555,48 +25671,23 @@ void TitleScene::Update()
 
 	// ステージ更新
 	titleStage_->Update();
-
-	tail.Update();
-
+	// UI更新
+	titleUI_->Update(GetTime());
+	// カメラ更新
 	camera->UpdateMatrix();
 }
 
-void TitleScene::Draw3D()
-{
-	
-	tail.Draw();
-}
+void TitleScene::Draw3D(){}
 
-void TitleScene::Draw2D()
-{
-	icon_B->Update();
-	icon_B->Draw();
-	title->Update();
-	title->Draw();
+void TitleScene::Draw2D(){
+	// UI更新
+	titleUI_->Draw();
 }
 
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-
-	icon_B = std::make_unique<Engine::Sprite>();
-	icon_B->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/B.png");
-	icon_B->SetPosition({ 640,500 });
-	icon_B->SetAnchorPoint({ 0.5f,0.5f });
-	icon_B->SetSize({200,200});
-
-	title = std::make_unique<Engine::Sprite>();
-	title->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/title.png");
-	title->SetPosition({ 640,200 });
-	title->SetAnchorPoint({ 0.5f,0.5f });
-	title->SetSize(2);
-
-
-	tail.Initialize(GetEntity3DManager());
-	tail.SetModel("renga.gltf");
-	tail.SetCamera(camera.get());
-	tail.GetWorldTransform().scale_ = { 10,10,10 };
 }
 
 void TitleScene::InitializeCamera()
@@ -25618,6 +25709,7 @@ File Path: project/DirectXGame/application/scene/TitleScene.h
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 #include"DirectXGame/application/base/Stage/TitleStage.h"
+#include "DirectXGame/application/base/UI/TitleUI.h"
 
 /// <summary>
 /// タイトルシーン
@@ -25653,14 +25745,12 @@ private:
 	// カメラ
 	std::unique_ptr <Engine::Camera> camera;
 private:
-	Engine::Object3d tail;
 	// ステージ
 	std::unique_ptr<TitleStage> titleStage_ = nullptr;
+	// UI
+	std::unique_ptr<TitleUI> titleUI_ = nullptr;
+	// レベルデータ
 	std::unique_ptr<LoadLevelData> loadData_;
-
-private:
-	std::unique_ptr<Engine::Sprite> icon_B;
-	std::unique_ptr<Engine::Sprite> title;
 };
 
 
@@ -66195,6 +66285,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\TitleUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
     <ClCompile Include="DIRECTXGAME\APPLICATION\BASE\WEAPON\ENEMY\SmallMeleeWeapon.cpp" />
@@ -66886,6 +66977,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />
     <ClInclude Include="DirectXGame\application\base\UI\FpsUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\SelectUI.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\TitleUI.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Enemy\SmallMeleeWeapon.h" />
@@ -68027,6 +68119,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Stage\TitleStage.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\TitleUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69209,6 +69304,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\TitleUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
