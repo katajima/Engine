@@ -3,146 +3,166 @@
 #include "DirectXGame/application/base/Character/Base/Characters.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
-void CharacterManager::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, 
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
-{
-	input_ = input;						// インプット
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	entity2DManager_ = entity2DManager; // エンティティ2d
-	globalVariables_ = globalVariables; // 保存項目
-	camera_ = camera;					// カメラ
 
-	// 群衆AI
-	crowdManager_ = std::make_unique<CrowdManager>();
-	crowdManager_->CreateGroup();
-}
+namespace Character {
+	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
+	{
+		this->inputSystem = inputSystem;						// インプット
+		this->entity3DManager = entity3DManager;	// エンティティ3d
+		this->entity2DManager = entity2DManager; // エンティティ2d
+		this->globalVariables = globalVariables; // 保存項目
+		this->camera = camera;					// カメラ
 
-void CharacterManager::Update()
-{
-	// 死亡したキャラクター(敵)を削除
-	character_.erase(
-		std::remove_if(character_.begin(), character_.end(),
-			[](const std::unique_ptr<BaseCharacter>& character) {
-				auto enemy = dynamic_cast<BaseEnemy*>(character.get());
-				if (!enemy) { return false; } // 敵じゃない
-				return !enemy->GetAlive() && enemy->GetDelete();
-			}),
-		character_.end());
-
-
-
-	// プレイヤー座標をセット
-	if (GetPlayer()) {
-		specalPointManager_->SetTarget(GetPlayer());
+		// 群衆AI
+		crowdManager_ = std::make_unique<CrowdManager>();
+		crowdManager_->CreateGroup();
 	}
 
-	// キャラクター更新(敵)
-	std::vector<BaseEnemy*> target;
-	for (auto& character : character_) {
-		if (character->GetCharacterType() == CharacterType::Enemy) {
-			if (character) {
-				character->Update();
+	void CharacterManager::Update()
+	{
+		// 死亡したキャラクター(敵)を削除
+		character_.erase(
+			std::remove_if(character_.begin(), character_.end(),
+				[](const std::unique_ptr<BaseCharacter>& character) {
+					auto enemy = dynamic_cast<BaseEnemy*>(character.get());
+					if (!enemy) { return false; } // 敵じゃない
+					return !enemy->GetAlive() && enemy->GetDelete();
+				}),
+			character_.end());
 
 
-				target.push_back(static_cast<BaseEnemy*>(character.get()));
+
+		// プレイヤー座標をセット
+		if (GetPlayer()) {
+			specalPointManager->SetTarget(GetPlayer());
+		}
+
+		// キャラクター更新(敵)
+		std::vector<BaseCharacter*> target;
+		for (auto& character : character_) {
+			if (character->GetCharacterType() == Type::Enemy) {
+				if (character) {
+					character->Update();
+
+
+					target.push_back(character.get());
+				}
 			}
+		}
+
+		// キャラクター更新(プレイヤー)
+		if (GetPlayer()) {
+			// ターゲット設定
+			GetPlayer()->SetTargetCharacters(target);
+			GetPlayer()->Update();
 		}
 	}
 
-	// キャラクター更新(プレイヤー)
-	if (GetPlayer()) {
-		// ターゲット設定
-		GetPlayer()->SetTargetCharacters(target);
-		GetPlayer()->Update();
-	}
-}
 
-
-void CharacterManager::Draw2D()
-{
-	// スプライト描画
-	for (auto& character : character_) {
-		if (character) {
-			// 死んでいなければ
-			if (character->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {	
-				if (character->GetAlive()) {
-					character->Draw2D();
+	void CharacterManager::Draw2D()
+	{
+		// スプライト描画
+		for (auto& character : character_) {
+			if (character) {
+				// 死んでいなければ
+				if (character->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
+					if (character->GetAlive()) {
+						character->Draw2D();
+					}
 				}
 			}
 		}
 	}
-}
 
-void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
-{
-	using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
-
-	// EnemyTypeから生成関数
-	static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
+	void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
 	{
-		{ EnemyType::kNormal,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
-		{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
-		{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
-		{ EnemyType::kDummy,   []() { return std::make_unique<DummyEnemy>(); } },
-	};
+		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
-	auto it = enemyFactoryMap.find(enemyType);
-	assert(it != enemyFactoryMap.end() && "未対応のEnemyTypeです");
+		// EnemyTypeから生成関数
+		static const std::unordered_map<EnemyType, EnemyFactory> enemyFactoryMap =
+		{
+			{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
+			{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
+		
+			{ EnemyType::kMediumMelee,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
 
-	std::unique_ptr<BaseEnemy> enemy = it->second();
+			{ EnemyType::kDummy,   []() { return std::make_unique<DummyEnemy>(); } },
+		};
 
-	enemy->SetID(characterCount_);					// ID設定
-	enemy->SetBulletManager(bulletManager_);		// 弾管理クラス設定
-	enemy->SetSpecalPointManager(specalPointManager_);	// スペシャルポイント管理クラス設定
-	enemy->SetTarget(GetPlayer());					// ターゲット指定
-	enemy->SetEffect(effect_);						// エフェクト設定
-	enemy->Initialize(nullptr, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
-	enemy->SetCharacterType(CharacterType::Enemy);	// キャラクタータイプを敵に設定
-	enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
-	enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
+		auto it = enemyFactoryMap.find(enemyType);
+		assert(it != enemyFactoryMap.end() && "未対応のEnemyTypeです");
 
-	character_.push_back(std::move(enemy));
-}
+		std::unique_ptr<BaseEnemy> enemy = it->second();
 
-void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
-{
-	std::unique_ptr<BasePlayer> player;
 
-	player = std::make_unique<NormalPlayer>();
-	player->SetFollowCamera(followCamera_);		// フォローカメラ設定
-	player->SetCameraManager(cameraManager_);	// カメラ管理クラス設定
-	player->SetBulletManager(bulletManager_);	// 弾管理クラス設定
-	player->SetSpecalPointManager(specalPointManager_);	// スペシャルポイント管理クラス設定
-	player->SetEffect(effect_);					// エフェクト設定
-	player->Initialize(input_, entity3DManager_, entity2DManager_, globalVariables_, transform.translate, camera_); // 初期化
-	player->SetCharacterType(CharacterType::Player);// キャラクターのタイプをプレイヤーに
-	character_.push_back(std::move(player));	// キャラクターに追加 
-}
+		enemy->SetTagNumber(characterCount_);
+		enemy->SetID(characterCount_);					// ID設定
+		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
+		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
+		enemy->SetTarget(GetPlayer());					// ターゲット指定
+		enemy->SetEffect(effect);						// エフェクト設定
+		enemy->Initialize(nullptr, entity3DManager, entity2DManager, globalVariables, transform.translate, camera); // 初期化
+		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
+		enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
+		enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
 
-void CharacterManager::CreateEnemyGroup(EnemyType enemyType,int groupIds, int perGroup, Vector3 origin,AABB aabb)
-{
-
-	// グループId
-	int groupId = crowdManager_->CreateGroup();
-	crowdManager_->groups[groupId].Initialize(origin);
-
-	// 敵を出現させる
-	for (int i = 0; i < perGroup; ++i) {
-		Vector3 pos = Random::RandomVector3(aabb.min_, aabb.max_);
-		pos.y = 0.0f;
-		CreateCharacter(enemyType, "enemy", groupId, Transform{ {1,1,1}, {},pos });
+		character_.push_back(std::move(enemy));
+		characterCount_++;
 	}
 
-	// 群衆管理クラスに追加
-	std::vector<BaseEnemy*> enemys;
-	for (auto& character : character_) {
-		if (character->GetCharacterType() == CharacterType::Enemy) {
-			enemys.push_back(static_cast<BaseEnemy*>(character.get()));
+	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
+	{
+		std::unique_ptr<BasePlayer> player;
+
+		player = std::make_unique<NormalPlayer>();
+		player->SetTagNumber(characterCount_);
+		player->SetFollowCamera(followCamera);		// フォローカメラ設定
+		player->SetCameraManager(cameraManager);	// カメラ管理クラス設定
+		player->SetBulletManager(bulletManager);	// 弾管理クラス設定
+		player->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
+		player->SetEffect(effect);					// エフェクト設定
+		player->Initialize(inputSystem, entity3DManager, entity2DManager, globalVariables, transform.translate, camera); // 初期化
+		player->SetCharacterType(Type::Player);// キャラクターのタイプをプレイヤーに
+		character_.push_back(std::move(player));	// キャラクターに追加 
+		characterCount_++;
+	}
+
+	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb)
+	{
+
+		// グループId
+		int groupId = crowdManager_->CreateGroup();
+		crowdManager_->groups[groupId].Initialize(origin);
+
+		// 敵を出現させる
+		for (int i = 0; i < perGroup; ++i) {
+			Vector3 pos = Random::RandomVector3(aabb.min_, aabb.max_);
+			pos.y = 0.0f;
+			CreateCharacter(enemyType, "enemy", groupId, Transform{ {1,1,1}, {},pos });
+		}
+
+		// 群衆管理クラスに追加
+		std::vector<BaseEnemy*> enemys;
+		for (auto& character : character_) {
+			if (character->GetCharacterType() == Type::Enemy) {
+				enemys.push_back(static_cast<BaseEnemy*>(character.get()));
+			}
+		}
+
+		crowdManager_->BindAgentsToEnemies(enemys);
+	}
+
+	void CharacterManager::Clear(Type type) {
+		for (auto& character : character_) {
+			if (character->GetCharacterType() == type) {
+				character->GetObjectComponent()->GetObjectStateFlags().isAlive = false;
+				character->Delete();
+				character->GetObjectComponent()->GetWorldTransform().scale_ = 0.0f;
+				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = 0.0f;;
+			}
 		}
 	}
 
-	crowdManager_->BindAgentsToEnemies(enemys);
 }
-
-
 

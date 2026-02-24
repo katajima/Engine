@@ -24,7 +24,7 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 	gpuParticleManager_ = gpuParticleManager;	// GPUパーティクル管理クラス
 	// テクスチャ
 	textureName_ = textureName;
-	trailTextureName_ = "resources/Texture/Image.png";
+	trailTextureName_ = "resources/Texture/Image.dds";
 
 	// 名前
 	name_ = name;

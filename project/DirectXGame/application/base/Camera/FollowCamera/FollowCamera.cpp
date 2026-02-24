@@ -5,10 +5,10 @@
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void FollowCamera::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
+void FollowCamera::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
 {
     // インプット
-	input_ = input;
+   this->inputSystem = inputSystem;
 
     // カメラ初期化
     uniqueCamera_ = std::make_unique<Engine::Camera>();
@@ -23,7 +23,7 @@ void FollowCamera::Initialize(Engine::Input* input, Engine::Entity3DManager* ent
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
 
-    baseOffset.z = -75;
+    baseOffset.z = -22.5;
 }
 
 void FollowCamera::Update()
@@ -62,23 +62,11 @@ void FollowCamera::Update()
         }
         else {
             // 通常の自由操作
-            if (input_->IsControllerConnected()) {
-                uniqueCamera_->transform_.rotate.y += input_->GetGamePadRightStick().x * kRotateSpeed;
-                uniqueCamera_->transform_.rotate.x -= input_->GetGamePadRightStick().y * kRotateSpeedX;
+            if (inputSystem->GetData().isControllerConnected) {
+                uniqueCamera_->transform_.rotate.y += inputSystem->GetData().lookStick.x * kRotateSpeed;
+                uniqueCamera_->transform_.rotate.x -= inputSystem->GetData().lookStick.y * kRotateSpeedX;
 
                 uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
-            }
-            else {
-                // 回転移動
-                if (input_->IsPushKey(DIK_LEFT)) {
-                    uniqueCamera_->transform_.rotate.y -= kRotateSpeed;
-                }
-                // 回転移動
-                if (input_->IsPushKey(DIK_RIGHT)) {
-                    uniqueCamera_->transform_.rotate.y += kRotateSpeed;
-                }
-
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x, Math::DegreesToRadians(0.0f), provisionalData_.rotateMaxX);
             }
         }
 

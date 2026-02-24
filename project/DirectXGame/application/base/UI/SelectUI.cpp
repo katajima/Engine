@@ -1,6 +1,6 @@
 #include "SelectUI.h"
 
-void SelectUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) {
+void SelectUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) {
 };
 
 //更新

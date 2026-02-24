@@ -144,12 +144,13 @@ Vector2 ObjectComponent::GetScreenPosition() {
 /// <param name="globalVariables"></param>
 void ObjectComponent::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
     const std::string& objectName, const std::string& modelName,bool useCollider, bool useRigidBody,
-    IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType) {
+    IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType,bool rigidUpdate) {
 
     this->entity3DManager_ = entity3DManager;   // エンティティ3d
     this->globalVariables_ = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
     useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
+    rigidUpdate_ = rigidUpdate;
     name_ = objectName;
 
     // オブジェクト生成
@@ -160,11 +161,12 @@ void ObjectComponent::Initialize(Engine::Entity3DManager* entity3DManager, Engin
     if (useCollider) {
         objectBase_->InitColliderComponent();                   // コライダコンポーネント初期化
         GetColliderComponent()->SetHitReceiver(iHitReceiver);   // 対象設定
-        if(useRigidBody)
-        objectBase_->InitRigidBodyComponent();                  // 
+       
     }
-
-
+    if (useRigidBody) {
+        objectBase_->InitRigidBodyComponent();                  // 
+        objectBase_->SetIsRigidUpdate(rigidUpdate); 
+    }
 }
 
 void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
@@ -181,7 +183,7 @@ void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DMana
    
     // インスタンス初期化
     Engine::ObjectInstans object;
-    object.Initialize(entity3DManager_,true);
+    object.Initialize(entity3DManager_,true,true);
     // オブジェクト追加
     entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_,
         Engine::Object3dInstansManager::MeshType::kModel,transparencyType);

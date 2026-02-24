@@ -2,8 +2,10 @@
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 // 前方宣言
-class BasePlayer;
-class BaseEnemy;
+namespace Character {
+	class BasePlayer;
+	class BaseEnemy;
+}
 class Effect;
 
 class SmallRangeWeapon : public RangedWeapon
@@ -19,7 +21,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 	///< summary>
@@ -44,18 +46,18 @@ public:
 	/// 狙うターゲット指定
 	/// </summary>
 	/// <param name="target"></param>
-	void SetTarget(BasePlayer* target) { target_ = target; }
+	void SetTarget(Character::BasePlayer* target) { this->target = target; }
 
 	/// <summary>
 	/// プレイヤー設定
 	/// </summary>
 	/// <param name="player"></param>
-	void SetParent(BaseEnemy* player) { enemy_ = player; }
+	void SetParent(Character::BaseEnemy* player) { this->enemy = player; }
 
 
 private:
-	BaseEnemy* enemy_ = nullptr;
-	BasePlayer* target_ = nullptr;
+	Character::BaseEnemy* enemy = nullptr;
+	Character::BasePlayer* target = nullptr;
 
 
 	int maxTargetNum_ = 1;				// ターゲットの指定量

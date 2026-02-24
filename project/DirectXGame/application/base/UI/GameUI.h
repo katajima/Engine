@@ -1,9 +1,11 @@
 #pragma once
 #include "DirectXGame/application/base/UI/Base/BaseUI.h"
-#include "DirectXGame/application/base/Game/GameData.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
 
 // 前方宣言
-class BasePlayer;
+namespace Character {
+	class BasePlayer;
+}
 
 /// <summary>
 /// ゲームUIクラス
@@ -12,7 +14,7 @@ class GameUI : public BaseUI
 {
 public:
 	//初期化
-	void Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
+	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	//更新
 	void Update() override;
@@ -21,17 +23,18 @@ public:
 	void Draw() override;
 
 	// プレイヤ設定
-	void SetPlayer(BasePlayer* player);
+	void SetPlayer(Character::BasePlayer* player);
 
 	// ゲームデータ取得
-	void SetGamePlayData(const GamePlayData data) { data_ = data; };
+	void SetGamePlayData(const Game::GameData data) { data_ = data; };
 
 private:
 	std::unique_ptr<Engine::Sprite> text_clera;
 	std::unique_ptr<Engine::Sprite> text_over;
+	std::unique_ptr<Engine::Sprite> text_bar;
 private:
-	BasePlayer* player_;
-	GamePlayData data_;
+	Character::BasePlayer* player;
+	Game::GameData data_;
 
 private:
 
@@ -110,7 +113,7 @@ private:
 	};
 	CleraTextData cleraTextData_;
 
-
+	
 	struct HitTextData {
 		Vector2 pos_ = { 950,100 };
 		int instance = 3;
@@ -127,7 +130,7 @@ private:
 	HitTextData hitTextData;
 
 	struct WaveTextData {
-		Vector2 pos_ = { 650,50 };
+		Vector2 pos_ = { 1100,50 };
 		int instance = 1;
 		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
 		Vector2 nameSize = { 100 * 1.5f,33 * 1.5f };
@@ -142,7 +145,7 @@ private:
 	WaveTextData waveTextData;
 	
 	struct WaveTimeTextData {
-		Vector2 pos_ = { 400,50 };
+		Vector2 pos_ = { 850,50 };
 		int instance = 3;
 		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
 		Vector2 nameSize = { 64 ,64  };
@@ -156,6 +159,15 @@ private:
 	};
 	WaveTimeTextData secondTextData;
 
+
+	struct BarTextData {
+		Vector2 pos_ = { 825,20 };
+		Vector2 scale_ = { 250,32 };
+		float size_ = 2.0f;
+
+		Color color_ = { 0,0,0,1 };
+	};
+	BarTextData barTextData_;
 
 
 };

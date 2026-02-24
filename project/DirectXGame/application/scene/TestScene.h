@@ -132,6 +132,8 @@ private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
 	Engine::ImGuiManager* imGuiManager = nullptr;
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_;
 
 
 	/// <summary>

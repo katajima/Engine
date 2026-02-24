@@ -2,8 +2,28 @@
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 
+namespace Special {
+	enum class Type {
+		Melee,	// 近距離
+		Renged,	// 遠距離
+		Mix,	// 両方
+	};
+
+	// 保存用データ
+	struct GlobalData {
+		// 発動条件
+		int maxGauge_ = 0;
+		// アニメーション
+		std::string animationName_ = "";
+		// アニメーション速度
+		float animationSpeed = 1.0f;
+		// 技の攻撃方法
+		Type type;
+	};
+};
 
 
+// 必殺技データ
 struct SpecialData{
 	// ゲージ
 	int gauge_ = 0;
@@ -23,3 +43,4 @@ struct SpecialData{
 	// フェーズ移行
 	void AddPhase() { phase_++;}
 };
+

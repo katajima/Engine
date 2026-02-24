@@ -12,7 +12,7 @@
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
-#include"DirectXGame/application/base/Stage/Stage.h"
+#include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
@@ -21,6 +21,7 @@
 
 #include "DirectXGame/application/base/Input/InputHander.h"
 #include <DirectXGame/application/base/Input/InputManager.h>
+#include "DirectXGame/application/base/Input/InputSystem.h"
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
@@ -64,11 +65,14 @@ private:
 	Engine::Audio* audio_ = nullptr;
 
 	// インプットハンドラ
-	std::unique_ptr < InputHander> inputHander_;
-	ICommand* iCommand_;
+	std::unique_ptr < Character::InputHander> inputHander_;
+	Character::ICommand* iCommand_;
 
 	// インプットマネージャ
 	std::unique_ptr<InputManager> inputManager_;
+
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_;
 
 	// ゲームの流れやルールの管理をするクラス
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
@@ -92,7 +96,7 @@ private:
 
 private:
 	// キャラクター管理
-	std::unique_ptr<CharacterManager> characterManager_;
+	std::unique_ptr<Character::CharacterManager> characterManager_;
 	// ステージ
 	std::unique_ptr<MainStage> stage_;
 	// 弾

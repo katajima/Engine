@@ -10,7 +10,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
+	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
 
 	///< summary>
 	/// 更新
@@ -24,7 +24,7 @@ protected:
 	//追従対象
 	Engine::WorldTransform* target_ = nullptr;
 	// ベースのオフセット（固定距離）
-	Vector3 baseOffset = { 0.0f, 5.0f, -40.0f };
+	Vector3 baseOffset = { 0.0f, 4.0f, -10.0f };
 	// カメラ回転速度
 	const float rotateSpeed = 0.03f;
 };

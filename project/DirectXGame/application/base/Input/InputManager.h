@@ -2,9 +2,9 @@
 #include <DirectXGame/engine/input/Input.h>
 #include <limits>
 
-
-class BaseCharacter; // 前方宣言
-
+namespace Character {
+	class BaseCharacter; // 前方宣言
+}
 
 
 /// <summary>
@@ -47,12 +47,12 @@ public:
 	};
 
 	// 初期化
-	void Initialize(Engine::Input* input); 
+	void Initialize(Engine::Input* input);
 	// 更新
 	void Update(float dt);
 
 	// キャラクターの設定
-	void SetOwner(BaseCharacter* character) { this->character = character; } 
+	void SetOwner(Character::BaseCharacter* character) { this->character = character; }
 
 
 
@@ -151,7 +151,7 @@ private:
 		bufferHead_ = (bufferHead_ + 1) % kBufferSize;
 	}
 
-	
+
 
 	// 同時押し
 	bool HasPressInWindow(Action a, uint32_t fromFrame, uint32_t toFrame) const
@@ -169,7 +169,7 @@ private:
 private:
 	// 入力クラスのポインタ
 	Engine::Input* input_ = nullptr;
-	BaseCharacter* character = nullptr; // キャラクターのポインタ
+	Character::BaseCharacter* character = nullptr; // キャラクターのポインタ
 
 private:
 	Context context_ = Context::Gameplay;

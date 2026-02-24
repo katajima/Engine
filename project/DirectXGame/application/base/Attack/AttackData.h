@@ -1,7 +1,8 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
-#include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+
+#include "DirectXGame//application/base/Input/InputSystem.h"
 
 // ノックバックデータクラス
 class KnockbackData{

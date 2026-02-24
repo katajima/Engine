@@ -41,7 +41,7 @@ struct BulletInfo {
 class BulletData {
 public:
 	// 初期化
-	void Initialize(HitBoxUseType useType, ProjectileType projectileType ,const HitBoxCollData& hitBoxData);
+	void Initialize(HitBox::UseType useType, ProjectileType projectileType ,const HitBox::CollData& hitBoxData);
 
 
 
@@ -51,9 +51,9 @@ public:
 		float hitBpxWindowStart_ = 1.0f;		// ヒットボックス生成スタート
 		float lifeTime_ = 1.0f;					// ヒットボックス生存時間
 		// ヒットボックス使用者タイプ
-		HitBoxUseType hitBoxUseType_;
+		HitBox::UseType hitBoxUseType_;
 		// ヒットボックス依存先タイプ
-		HitBoxParentType dependenceType_ = HitBoxParentType::kParent;
+		HitBox::ParentType dependenceType_ = HitBox::ParentType::kParent;
 		// オフセット
 		Vector3 offset_{};
 	};
@@ -62,7 +62,7 @@ private:
 	// 発射物タイプ
 	ProjectileType projectileType_;
 	// ヒットボックスデータ
-	HitBoxCollData hitBoxdata_;
+	HitBox::CollData hitBoxdata_;
 	//
 	Data data_;
 private:

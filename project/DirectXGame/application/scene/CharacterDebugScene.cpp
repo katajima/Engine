@@ -23,7 +23,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<InputHander>();
+	inputHander_ = std::make_unique<Character::InputHander>();
 	inputHander_->Initialize(input_);
 
 
@@ -31,19 +31,26 @@ void CharacterDebugScene::Initialize()
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<JampCommand>());
+		std::make_unique<Character::JampCommand>());
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<AttackCommand>());
+		std::make_unique<Character::AttackCommand>());
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<HeavyAttackCommand>());
+		std::make_unique<Character::HeavyAttackCommand>());
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
+		std::make_unique<Character::SkillAttackCommand>());
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<MoveCommand>());
+		std::make_unique<Character::MoveCommand>());
+	
+	// 入力システム初期化
+	inputSystem_ = std::make_unique<InputSystem>();
+	inputSystem_->Initialize(GetInput());
 
 
 	// エフェクト
@@ -52,17 +59,17 @@ void CharacterDebugScene::Initialize()
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
@@ -81,8 +88,8 @@ void CharacterDebugScene::Initialize()
 
 
 	// キャラクター管理 
-	characterManager_ = std::make_unique<CharacterManager>();
-	characterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	characterManager_ = std::make_unique<Character::CharacterManager>();
+	characterManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -91,10 +98,10 @@ void CharacterDebugScene::Initialize()
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
-		characterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	}
 	else {
-		characterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
 
@@ -126,6 +133,7 @@ void CharacterDebugScene::Initialize()
 	SetCamera(cameraManager_->GetCamera());
 
 	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
@@ -137,16 +145,18 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	characterManager_->CreateCharacter(EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
 	// デバッグモード設定
 	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(isComboEditorActive_);
 	// コンボエディター初期化
-	comboEditor_ = std::make_unique<ComboEditor>();
-	comboEditor_->Initialize(characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
+	comboEditor_ = std::make_unique<Combo::Editor>();
+	comboEditor_->Initialize(GetEntity3DManager()->Get3DLineCommon(), characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
 }
 
-void CharacterDebugScene::Finalize(){}
+void CharacterDebugScene::Finalize(){
+	GetEntity3DManager()->GetObject3dInstansManager()->AllClear();
+}
 
 void CharacterDebugScene::Update()
 {

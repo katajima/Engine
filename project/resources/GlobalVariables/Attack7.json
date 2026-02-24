@@ -38,7 +38,12 @@
         },
         "コンボ中の移動スピード": {
             "type": "float",
-            "value": 59.220001220703125
+            "value": 48.599998474121094
+        },
+        "コンボ中の移動タイプ": {
+            "enumType": "MoveType",
+            "type": "enum",
+            "value": 1
         },
         "コンボ中の移動強制": {
             "type": "bool",
@@ -62,11 +67,19 @@
         },
         "コンボ入力受付終了時間": {
             "type": "float",
-            "value": 1.2999999523162842
+            "value": 1.0
         },
         "コンボ入力受付開始時間": {
             "type": "float",
             "value": 0.10000000149011612
+        },
+        "コンボ移動キャンセル受付終了時間": {
+            "type": "float",
+            "value": 1.4166666269302368
+        },
+        "コンボ移動キャンセル受付開始時間": {
+            "type": "float",
+            "value": 0.7166666388511658
         },
         "コンボ移行時間": {
             "type": "float",
@@ -74,7 +87,7 @@
         },
         "コンボ終了時間": {
             "type": "float",
-            "value": 1.7000000476837158
+            "value": 1.0833333730697632
         },
         "ダメージ": {
             "type": "float",
@@ -105,6 +118,15 @@
             "enumType": "HitBoxSpawnType",
             "type": "enum",
             "value": 0
+        },
+        "ロックオンタイプ": {
+            "enumType": "LockOnType",
+            "type": "enum",
+            "value": 0
+        },
+        "ロックオン半径": {
+            "type": "float",
+            "value": 7.0
         },
         "終了条件タイプ": {
             "enumType": "EndConditionType",

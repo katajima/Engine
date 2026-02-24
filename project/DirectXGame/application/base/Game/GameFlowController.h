@@ -1,10 +1,12 @@
 #pragma once
 #include <DirectXGame/engine/input/Input.h>
 #include "GameEventController.h"
-#include "GameData.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
 
 // 前方宣言
-class CharacterManager;
+namespace Character {
+	class CharacterManager;
+}
 namespace Engine {
 	class GlobalVariables;
 	class SceneManager;
@@ -17,7 +19,7 @@ class GameFlowController {
 public:
 
 	// 初期化
-	void Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, CharacterManager* characterManager);
+	void Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, Character::CharacterManager* characterManager);
 
 	// 更新
 	void Update(float dt);
@@ -26,7 +28,7 @@ public:
 	void Draw();
 
 	// ゲームデータ
-	GamePlayData GetGamePlayData() const { return gamePlayData_; }
+	Game::GameData GetGamePlayData() const { return gamePlayData_; }
 
 private:
 
@@ -35,12 +37,12 @@ private:
 
 private: // 
 	// ゲームイベント制御クラス
-	std::unique_ptr<GameEventController> gameEventController_ = nullptr;
+	std::unique_ptr<Game::GameEventController> gameEventController_ = nullptr;
 
 
 
 	// ゲームプレイデータ
-	GamePlayData gamePlayData_;
+	Game::GameData gamePlayData_;
 
 private:
 	// ゲームが終わったか
@@ -48,7 +50,7 @@ private:
 
 private: // 貰いもの
 	Engine::Entity3DManager* entity3DManager = nullptr;
-	CharacterManager* characterManager = nullptr;
+	Character::CharacterManager* characterManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::SceneManager* sceneManager = nullptr;
 	Engine::Input* input = nullptr;

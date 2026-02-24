@@ -121,9 +121,14 @@ void Engine::SceneManager::DrawForeground2D() {
 
 Engine::SceneManager::~SceneManager()
 {
-	// 最後のシーンの終了と解放
-	scene_->Finalize();
-	scene_.reset();  
+	// Finalize中に scene_ が変更・reset されても安全なように、所有権を退避
+	std::unique_ptr<BaseScene> dying = std::move(scene_);
+	if (dying)
+	{
+		dying->Finalize();
+		// dying がスコープを抜けるときに確実に delete される
+	}
+	// scene_ は既に nullptr（move済み）
 }
 
 void Engine::SceneManager::ChangeScene(const std::string& sceneName, float duration)

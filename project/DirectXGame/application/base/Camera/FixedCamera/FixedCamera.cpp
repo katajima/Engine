@@ -2,9 +2,9 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
-void FixedCamera::Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
+void FixedCamera::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
 {
-	entity3DManager_ = entity3DManager;	// エンティティ3d
+	this->entity3DManager = entity3DManager;	// エンティティ3d
 
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
@@ -29,13 +29,8 @@ void FixedCamera::Update()
 		uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
 	}
 #ifdef _DEBUG
-	ImGui::Begin("FixedCamera");
-	ImGui::DragFloat3("translate", &uniqueCamera_->transform_.translate.x, 0.1f);	// 位置
-	ImGui::DragFloat3("rotate", &uniqueCamera_->transform_.rotate.x, 0.01f);		// 回転
-	ImGui::End();
-
 	// デバッグラインを表示
-	entity3DManager_->Get3DLineCommon()->GetLineMeshData().AddCameraLine(*uniqueCamera_.get());
+	entity3DManager->Get3DLineCommon()->GetLineMeshData().AddCameraLine(*uniqueCamera_.get());
 #endif // _DEBUG
 
 	// カメラ更新

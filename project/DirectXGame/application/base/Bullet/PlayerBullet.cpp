@@ -15,7 +15,7 @@ void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::
 
 	// オブジェクト生成
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定
-	object_->UseTrailEffect("resources/Texture/Image.png", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
+	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->Update();	// オブジェクト更新
 	object_->isEmitTrailEffect = false;	// トレイルの出現しないように
 	object_->InitColliderComponent();	// コライダコンポーネント初期化
@@ -46,7 +46,7 @@ void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::
 		if (!otherComponent || other->tag != CollisionTag::Enemy) return;
 		if (isAlive_ == false) return;
 		// 敵
-		BaseEnemy* enemy = static_cast<BaseEnemy*>(otherComponent->GetHitReceiver());
+		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());
 		// ID取得
 		uint32_t otherId = otherComponent->GetUniqueId();
 

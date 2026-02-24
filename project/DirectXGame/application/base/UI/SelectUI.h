@@ -9,7 +9,7 @@ class SelectUI :public BaseUI {
 public:
 
 	//初期化
-	void Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
+	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	//更新
 	void Update() override;

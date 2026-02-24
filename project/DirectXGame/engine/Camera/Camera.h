@@ -72,7 +72,8 @@ namespace Engine {
 		const float& GetNearZ() const { return nearClip_; }
 		// Farクリップ取得
 		const float& GetFarZ() const { return farClip_; }
-
+		//
+		Vector3 GetForward() const;
 		// ポストエフェクトマネージャー取得
 		PostEffectManager* GetPostEffectManager() { return postEffectManager_; }
 

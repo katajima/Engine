@@ -15,7 +15,7 @@ class CameraManager
 public:
 
 	// 初期化
-	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables);
+	void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables);
 
 	// 更新
 	void Update();
@@ -58,8 +58,7 @@ private:
 
 
 private:
-	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
-	Engine::Camera* camera_ = nullptr;						// カメラ
-	Engine::Input* input_ = nullptr;						// 入力
+	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
+	InputSystem* inputSystem = nullptr;						// 入力
 };

@@ -360,7 +360,7 @@
     <ClCompile Include="DirectXGame\application\base\State\CharacterStateMachine.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboState.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboState.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp">
@@ -519,7 +519,7 @@
     <ClCompile Include="DirectXGame\application\scene\SelectScene.cpp">
       <Filter>ソース ファイル\application\scene</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp">
+    <ClCompile Include="DirectXGame\application\base\Stage\MainStage.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp">
@@ -717,7 +717,7 @@
     <ClCompile Include="DirectXGame\engine\Move\RigidBodyComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\MoveComponent.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Base\MoveComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderComponent.cpp">
@@ -735,19 +735,16 @@
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\JumpSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\MoveSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\MovementRestrictions.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Base\MovementRestrictions.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\MovementState.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\DashSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp">
@@ -756,7 +753,7 @@
     <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp">
@@ -769,9 +766,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Game\GameWave.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp">
@@ -837,22 +831,22 @@
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Melee\LargeMeleeEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboCondition.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboMotion.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMotion.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboHitBox.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\HitBox\ComboHitBox.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEffect.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Combo\ComboEditor.cpp">
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp">
@@ -862,6 +856,60 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Special\Base\SpecialEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Special\Base\SpecialState.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboEndCondition.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboConditionFunction.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextCondition.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\LockOn\LockOnSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Move\Base\MovementSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\TitleStage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1440,7 +1488,7 @@
     <ClInclude Include="DirectXGame\engine\Mesh\ModelMesh.h">
       <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\MoveComponent.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MoveComponent.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\MyGame\MyGame.h">
@@ -1548,7 +1596,7 @@
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h">
       <Filter>ヘッダー ファイル\engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Stage\Stage.h">
+    <ClInclude Include="DirectXGame\application\base\Stage\MainStage.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\Structs.h">
@@ -1737,7 +1785,7 @@
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletManager.h">
       <Filter>ヘッダー ファイル\application\base\attack</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboState.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboState.h">
       <Filter>ヘッダー ファイル\application\base\attack</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Weapon\PlayerWeapon.h">
@@ -1812,25 +1860,19 @@
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\MoveSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\JumpSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\MovementRestrictions.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementRestrictions.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\AirMoveSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\MovementState.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\DashSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h">
@@ -1854,10 +1896,7 @@
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Game\GameWave.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Game\GameData.h">
+    <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboGlobalData.h">
@@ -1938,22 +1977,22 @@
     <ClInclude Include="DirectXGame\application\scene\CharacterDebugScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboCondition.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboMotion.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMotion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboHitBox.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\HitBox\ComboHitBox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboEffect.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\Material\MaterialInstance.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\Combo\ComboEditor.h">
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h">
@@ -1963,6 +2002,96 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboEndCondition.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboConditionFunction.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextCondition.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\LockOn\LockOnSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\LockOn\LockOnData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\EnemyData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MoveInput.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Input\InputSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Input\InputData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionContext.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

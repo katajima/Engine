@@ -16,7 +16,7 @@ namespace Engine {
 	class UIBaseBoard {
 	public:
 		// 初期化
-		void Init(Input* input, Entity2DManager* entity2DManager, const std::string& name, Vector2 pos, const Vector2& size, bool isStatic = true, std::string textureName = "resources/Texture/Image.png");
+		void Init(InputSystem* inputSystem, Entity2DManager* entity2DManager, const std::string& name, Vector2 pos, const Vector2& size, bool isStatic = true, std::string textureName = "resources/Texture/Image.png");
 
 		// 更新
 		void Update(float deltaTime);
@@ -58,8 +58,8 @@ namespace Engine {
 		};
 
 	private:
-		Entity2DManager* entity2DManager_;
-		Input* input_;
+		Entity2DManager* entity2DManager;
+		InputSystem* inputSystem;
 
 		// ボードスプライト
 		std::unique_ptr<BaseSprite> spriteBoard_ = nullptr;

@@ -25,7 +25,7 @@ void GamePlayScene::Initialize()
 	
 
 	// インプットハンドラー初期化
-	inputHander_ = std::make_unique<InputHander>();
+	inputHander_ = std::make_unique<Character::InputHander>();
 	inputHander_->Initialize(input_);
 
 
@@ -33,20 +33,25 @@ void GamePlayScene::Initialize()
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Jump); },
-		std::make_unique<JampCommand>());
+		std::make_unique<Character::JampCommand>());
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
-		std::make_unique<AttackCommand>());
+		std::make_unique<Character::AttackCommand>());
 
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<HeavyAttackCommand>());
-
+		std::make_unique<Character::HeavyAttackCommand>());
+	inputHander_->Bind(
+		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
+		std::make_unique<Character::SkillAttackCommand>());
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Move); },
-		std::make_unique<MoveCommand>());
+		std::make_unique<Character::MoveCommand>());
 
+	// 入力システム初期化
+	inputSystem_ = std::make_unique<InputSystem>();
+	inputSystem_->Initialize(GetInput());
 
 	// エフェクト
 	effect_ = std::make_unique<Effect>();
@@ -54,22 +59,23 @@ void GamePlayScene::Initialize()
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
 
 	// 弾管理クラス
@@ -83,8 +89,8 @@ void GamePlayScene::Initialize()
 
 
 	// キャラクター管理 
-	characterManager_ = std::make_unique<CharacterManager>();
-	characterManager_->Initialize(input_, GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	characterManager_ = std::make_unique<Character::CharacterManager>();
+	characterManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -97,10 +103,10 @@ void GamePlayScene::Initialize()
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
-		characterManager_->CreateCharacter(PlayerType::kNormal, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(Character::PlayerType::kNormal, "", { 0,2,-40 });
 	}
 	else {
-		characterManager_->CreateCharacter(PlayerType::kBullet, "", { 0,2,-40 });
+		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
 	
@@ -131,7 +137,7 @@ void GamePlayScene::Initialize()
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(GetInput(), GetEntity2DManager(), GetGlobalVariables());
+	gameUI->Initialize(inputSystem_.get(), GetEntity2DManager(), GetGlobalVariables());
 	gameUI->SetPlayer(characterManager_->GetPlayer());
 
 	// カメラ設定
@@ -222,8 +228,6 @@ void GamePlayScene::UpdateImGui()
 
 
 	ImGui::End();
-
-
 #endif // _DEBUG
 
 	gameUI->SetImageLeftTopPosAndRatio(GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), GetDxCommon()->GetPostEffectManager()->GetImageRatio());
@@ -233,6 +237,9 @@ void GamePlayScene::UpdateImGui()
 // 更新処理
 void GamePlayScene::Update()
 {
+	// 入力システム更新
+	inputSystem_->Update(GetTime());
+
 	Engine::Camera::isShake_ = false;
 
 	// リトライ

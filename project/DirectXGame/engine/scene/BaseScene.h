@@ -1,7 +1,9 @@
 #pragma once
 #include "Fade.h"
 #include <DirectXGame/application/scene/SceneData.h>
-
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 namespace Engine {
 	// 前方宣言

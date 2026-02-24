@@ -5,25 +5,25 @@
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
-void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
+void GameUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
-	input_ = input;
+	this->entity2DManager = entity2DManager;
+	this->globalVariables = globalVariables;
+	this->inputSystem = inputSystem;
 
 
 	board_ = std::make_unique<Engine::UIBaseBoard>();
-	board_->Init(input_,entity2DManager_, "bord", boardPos, boardSize);
+	board_->Init(inputSystem,entity2DManager, "bord", boardPos, boardSize);
 
 	// 通常攻撃UI初期化
 	InitUIPair("normalAttack", attackTextData_.pos_);
 	Engine::UIPair* normalAttackPair = GetUIPair("normalAttack");
 	normalAttackPair->SetOffset(attackTextData_.offset_);	// 間隔設定
 	normalAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.png"); // 
+	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.dds"); // 
 	normalAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData_.anchorPoint_);	// アンカーポイント設定
 	normalAttackPair->GetFirstSprite()->SetSize(attackTextData_.size_);		// サイズ設定
-	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.png");
+	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
 	normalAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData_.anchorPoint2_); // アンカーポイント設定
 	normalAttackPair->GetSecondSprite()->SetSize(attackTextData_.size2_);			// サイズ設定
 	
@@ -32,10 +32,10 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
 	havyAttackPair->SetOffset(attackTextData_.offset_);	// 間隔設定
 	havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.png"); // 
+	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
 	havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData_.anchorPoint_);	// アンカーポイント設定
 	havyAttackPair->GetFirstSprite()->SetSize(attackTextData_.size_);		// サイズ設定
-	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.png");
+	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
 	havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData_.anchorPoint2_); // アンカーポイント設定
 	havyAttackPair->GetSecondSprite()->SetSize(attackTextData_.size2_);			// サイズ設定
 
@@ -47,12 +47,12 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	Engine::UIPair* specialPair = GetUIPair("special");
 	specialPair->SetOffset(spTextData.offset_);
 	specialPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	specialPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_rb.png");
+	specialPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_rb.dds");
 	specialPair->GetFirstSprite()->SetAnchorPoint(spTextData.anchorPoint_);			// アンカーポイント設定
 	specialPair->GetFirstSprite()->SetSize(spTextData.size_);				// サイズ設定
 	specialPair->GetFirstSprite()->SetColor(spTextData.color_);	// 色設定
 
-	specialPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Special.png");
+	specialPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Special.dds");
 	specialPair->GetSecondSprite()->SetAnchorPoint(spTextData.anchorPoint2_);			// アンカーポイント設定
 	specialPair->GetSecondSprite()->SetSize(spTextData.size2_);						// サイズ設定
 	specialPair->GetSecondSprite()->SetColor(spTextData.color_);	// 色設定
@@ -64,12 +64,12 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	Engine::UIPair* jumpPair = GetUIPair("jump");
 	jumpPair->SetOffset(jumpTextData.offset_);
 	jumpPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	jumpPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_a.png");
+	jumpPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_a.dds");
 	jumpPair->GetFirstSprite()->SetAnchorPoint(jumpTextData.anchorPoint_);			// アンカーポイント設定
 	jumpPair->GetFirstSprite()->SetSize(jumpTextData.size_);				// サイズ設定
 	jumpPair->GetFirstSprite()->SetColor(jumpTextData.color_);	// 色設定
 
-	jumpPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Jump.png");
+	jumpPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Jump.dds");
 	jumpPair->GetSecondSprite()->SetAnchorPoint(jumpTextData.anchorPoint2_);			// アンカーポイント設定
 	jumpPair->GetSecondSprite()->SetSize(jumpTextData.size2_);						// サイズ設定
 	jumpPair->GetSecondSprite()->SetColor(jumpTextData.color_);	// 色設定
@@ -80,12 +80,12 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	Engine::UIPair* dushPair = GetUIPair("dush");
 	dushPair->SetOffset(dashTextData.offset_);
 	dushPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lt.png");
+	dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lt.dds");
 	dushPair->GetFirstSprite()->SetAnchorPoint(dashTextData.anchorPoint_);			// アンカーポイント設定
 	dushPair->GetFirstSprite()->SetSize(dashTextData.size_);				// サイズ設定
 	dushPair->GetFirstSprite()->SetColor(dashTextData.color_);	// 色設定
 
-	dushPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.png");
+	dushPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
 	dushPair->GetSecondSprite()->SetAnchorPoint(dashTextData.anchorPoint2_);			// アンカーポイント設定
 	dushPair->GetSecondSprite()->SetSize(dashTextData.size2_);						// サイズ設定
 	dushPair->GetSecondSprite()->SetColor(dashTextData.color_);	// 色設定
@@ -96,15 +96,20 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 
 	// クリアUI
 	text_clera = std::make_unique<Engine::Sprite>();
-	InitSprite(text_clera.get(), "resources/Texture/text/clear.png", cleraTextData_.pos_, cleraTextData_.scale_);
+	InitSprite(text_clera.get(), "resources/Texture/text/clear.dds", cleraTextData_.pos_, cleraTextData_.scale_);
 	text_clera->SetSize(cleraTextData_.size_);
 	text_clera->SetColor(cleraTextData_.color_);
 
 	// ゲームオーバーUI
 	text_over = std::make_unique<Engine::Sprite>();
-	InitSprite(text_over.get(), "resources/Texture/text/over.png", cleraTextData_.pos_, cleraTextData_.scale_);
+	InitSprite(text_over.get(), "resources/Texture/text/over.dds", cleraTextData_.pos_, cleraTextData_.scale_);
 	text_over->SetSize(cleraTextData_.size_);
 	text_over->SetColor(cleraTextData_.color_);
+
+	text_bar = std::make_unique<Engine::Sprite>();
+	InitSprite(text_bar.get(), "resources/Texture/Image.dds", barTextData_.pos_, barTextData_.scale_);
+	text_bar->SetSize(barTextData_.size_);
+	text_bar->SetColor(barTextData_.color_);
 
 	// カウントUI
 	InitUICount("hitCount", hitTextData.pos_, hitTextData.instance,true);
@@ -113,7 +118,7 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 	hitCount->SetTextuerSize(hitTextData.textuerSize);				// テクスチャサイズ
 	hitCount->SetCountMax(hitTextData.countmax);							// カウント最大数
 	hitCount->SetCountColor(hitTextData.color_);	// 色指定
-	hitCount->GetNameSprite()->SetTextureName("resources/Texture/text/Hit.png");	
+	hitCount->GetNameSprite()->SetTextureName("resources/Texture/text/Hit.dds");	
 	hitCount->GetNameSprite()->SetSize(hitTextData.nameSize);	// サイズ指定
 	hitCount->GetNameSprite()->SetColor(hitTextData.nameColor_);	// 色指定
 
@@ -124,28 +129,28 @@ void GameUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DM
 
 
 
-	// カウントUI
+	// カウントUI(ウェーブ)
 	InitUICount("WaveCount", waveTextData.pos_, waveTextData.instance, true);
 	Engine::UICount* waveCount = GetUICount("WaveCount");
 	waveCount->SetMaxSize(waveTextData.size, waveTextData.offset);	// 最大サイズ
 	waveCount->SetTextuerSize(waveTextData.textuerSize);				// テクスチャサイズ
 	waveCount->SetCountMax(waveTextData.countmax);							// カウント最大数
 	waveCount->SetCountColor(waveTextData.color_);	// 色指定
-	waveCount->GetNameSprite()->SetTextureName("resources/Texture/text/wave.png");
+	waveCount->GetNameSprite()->SetTextureName("resources/Texture/text/wave.dds");
 	waveCount->GetNameSprite()->SetSize(waveTextData.nameSize);	// サイズ指定
 	waveCount->GetNameSprite()->SetColor(waveTextData.nameColor_);	// 色指定
 
 
-	//// カウントUI
-	//InitUICount("WaveSecondsCount", secondTextData.pos_, secondTextData.instance, true);
-	//Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
-	//waveSecondsCount->SetMaxSize(secondTextData.size, secondTextData.offset);	// 最大サイズ
-	//waveSecondsCount->SetTextuerSize(secondTextData.textuerSize);				// テクスチャサイズ
-	//waveSecondsCount->SetCountMax(secondTextData.countmax);							// カウント最大数
-	//waveSecondsCount->SetCountColor(secondTextData.color_);	// 色指定
-	//waveSecondsCount->GetNameSprite()->SetTextureName("resources/Texture/text/seconds.png");
-	//waveSecondsCount->GetNameSprite()->SetSize(secondTextData.nameSize);	// サイズ指定
-	//waveSecondsCount->GetNameSprite()->SetColor(secondTextData.nameColor_);	// 色指定
+	//// カウントUI(秒数)
+	InitUICount("WaveSecondsCount", secondTextData.pos_, secondTextData.instance, true);
+	Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
+	waveSecondsCount->SetMaxSize(secondTextData.size, secondTextData.offset);	// 最大サイズ
+	waveSecondsCount->SetTextuerSize(secondTextData.textuerSize);				// テクスチャサイズ
+	waveSecondsCount->SetCountMax(secondTextData.countmax);							// カウント最大数
+	waveSecondsCount->SetCountColor(secondTextData.color_);	// 色指定
+	waveSecondsCount->GetNameSprite()->SetTextureName("resources/Texture/text/seconds.dds");
+	waveSecondsCount->GetNameSprite()->SetSize(secondTextData.nameSize);	// サイズ指定
+	waveSecondsCount->GetNameSprite()->SetColor(secondTextData.nameColor_);	// 色指定
 
 }
 
@@ -164,16 +169,16 @@ void GameUI::Update()
 	
 
 	Engine::UICount* hitCount = GetUICount("hitCount");
-	hitCount->SetCount(ConvertUtility::ToFloat(player_->GetAttackController()->GetHitCounter().GetHitCount()));
+	hitCount->SetCount(ConvertUtility::ToFloat(player->GetAttackController()->GetHitCounter().GetHitCount()));
 	
 	
-	if (player_->GetAttackController()->GetHitCounter().GetHitCount() <= 0) {
+	if (player->GetAttackController()->GetHitCounter().GetHitCount() <= 0) {
 		
 		hitCount->SetCountColor({ 1,1,1,0.0f });
 		hitCount->GetNameSprite()->SetColor({ 1,1,1,0.0f });
 	}
 	else {
-		float t = player_->GetAttackController()->GetHitCounter().GetHitData().hitTime.LerpT();
+		float t = player->GetAttackController()->GetHitCounter().GetHitData().hitTime.LerpT();
 		bool isT = t >= 0.5f;
 
 		Color coNn = hitTextData.color_;
@@ -194,22 +199,25 @@ void GameUI::Update()
 	Engine::UICount* waveCount = GetUICount("WaveCount");
 	waveCount->SetCount(ConvertUtility::ToFloat(data_.flowData_.currentWave));
 
-	//Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
-	//waveSecondsCount->SetCount(data_.flowData_.elapsedTime);
+	
+	Engine::UICount* waveSecondsCount = GetUICount("WaveSecondsCount");
+	waveSecondsCount->SetCount(data_.flowData_.elapsedTime);
 
 
-
+	text_bar->Update();
 	// 更新
 	UpdateUIElement(0);
 }
 
 void GameUI::Draw()
 {
+	text_bar->Draw();
+
 	// 描画
 	DrawUIElement();
 }
 
-void GameUI::SetPlayer(BasePlayer* player)
+void GameUI::SetPlayer(Character::BasePlayer* player)
 {
-	player_ = player;
+	this->player = player;
 }

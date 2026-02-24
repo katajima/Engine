@@ -712,13 +712,14 @@ void Engine::Object3dInstansManager::BlendMuliply() {
 
 #pragma region ObjectInstans
 
-void Engine::ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollider, Transform transfor) {
+void Engine::ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollider, bool rigidUpdate, Transform transfor) {
 	transform.Initialize();
 	transform.translate_ = transfor.translate;
 	transform.rotate_ = transfor.rotate;
 	transform.scale_ = transfor.scale;
 	color = { 1,1,1,1 };
 	useCollider_ = useCollider;
+	rigidUpdate_ = rigidUpdate;
 	isDelete_ = false;
 	is_ = false;
 
@@ -747,7 +748,7 @@ void Engine::ObjectInstans::Update() {
 	}
 
 	// 物理
-	if (GetRigidBodyComponent()) {
+	if (GetRigidBodyComponent() && rigidUpdate_) {
 		rigidBodyComponent_->Integrate(MyGame::GameTime(), transform);
 	}
 }

@@ -5,71 +5,72 @@
 #include <memory>
 #include <cassert>
 
+namespace Character {
+    /// <summary>
+    /// サブステートマシーン
+    /// </summary>
+    /// <typeparam name="SubStateEnum"></typeparam>
+    /// <typeparam name="BaseSubStateType"></typeparam>
+    template<class SubStateEnum, class BaseSubStateType>
+    class SubStateMachine
+    {
+    public:
+        using FactoryType = std::function<std::unique_ptr<BaseSubStateType>(BaseCharacter*, SubStateMachine*)>;
 
-/// <summary>
-/// サブステートマシーン
-/// </summary>
-/// <typeparam name="SubStateEnum"></typeparam>
-/// <typeparam name="BaseSubStateType"></typeparam>
-template<class SubStateEnum, class BaseSubStateType>
-class SubStateMachine
-{
-public:
-    using FactoryType = std::function<std::unique_ptr<BaseSubStateType>(BaseCharacter*, SubStateMachine*)>;
 
+        explicit SubStateMachine(BaseCharacter* character)
+            : character_(character) {
+        }
 
-    explicit SubStateMachine(BaseCharacter* character)
-        : character_(character) {
-    }
-    
-    // 登録
-    void RegisterState(SubStateEnum type, FactoryType factory) {
-        factories_[type] = factory;
-    }
-    // 変更
-    void ChangeState(const AttackSubState& name) {
-        auto it = factories_.find(name);
-        if (it != factories_.end()) {
-            nowState_ = name;
-            ChangeState(it->second(character_, this));
+        // 登録
+        void RegisterState(SubStateEnum type, FactoryType factory) {
+            factories_[type] = factory;
         }
-        else {
-            assert(false && "SubState not registered!");
+        // 変更
+        void ChangeState(const AttackSubState& name) {
+            auto it = factories_.find(name);
+            if (it != factories_.end()) {
+                nowState_ = name;
+                ChangeState(it->second(character_, this));
+            }
+            else {
+                assert(false && "SubState not registered!");
+            }
         }
-    }
 
-    // 更新
-    void Update(float deltaTime = 1.0f / 60.0f) {
-        if (state_) state_->Update(deltaTime);
-    }
-    // 現在のステート取得
-    AttackSubState GetAttackSubState() const {
-        if (state_) {
-            return state_->GetAttackSubState();
+        // 更新
+        void Update(float deltaTime = 1.0f / 60.0f) {
+            if (state_) state_->Update(deltaTime);
         }
-        // 状態が無い場合は無効値を返す
-        return SubStateEnum::Invalid;
-    }
-    // 終了したか取得
-    bool IsFinished() const { return isFinished_; }
-    // 終了したか設定
-    void SetFinished(bool flag) { isFinished_ = flag; }
-private:
-    // ステート変更
-    void ChangeState(std::unique_ptr<BaseAttackSubState> newState) {
-        if (state_) {
-            state_->Exit(); // 終了
+        // 現在のステート取得
+        AttackSubState GetAttackSubState() const {
+            if (state_) {
+                return state_->GetAttackSubState();
+            }
+            // 状態が無い場合は無効値を返す
+            return SubStateEnum::Invalid;
         }
-        state_ = std::move(newState);
-        if (state_) {
-            state_->Enter();// 開始
+        // 終了したか取得
+        bool IsFinished() const { return isFinished_; }
+        // 終了したか設定
+        void SetFinished(bool flag) { isFinished_ = flag; }
+    private:
+        // ステート変更
+        void ChangeState(std::unique_ptr<BaseAttackSubState> newState) {
+            if (state_) {
+                state_->Exit(); // 終了
+            }
+            state_ = std::move(newState);
+            if (state_) {
+                state_->Enter();// 開始
+            }
         }
-    }
-private:
-    bool isFinished_ = false;
-private:
-    std::unordered_map<SubStateEnum, FactoryType> factories_;
-    std::unique_ptr<BaseSubStateType> state_;
-    SubStateEnum nowState_ = SubStateEnum::Invalid;
-    BaseCharacter* character_ = nullptr;
-};
+    private:
+        bool isFinished_ = false;
+    private:
+        std::unordered_map<SubStateEnum, FactoryType> factories_;
+        std::unique_ptr<BaseSubStateType> state_;
+        SubStateEnum nowState_ = SubStateEnum::Invalid;
+        BaseCharacter* character_ = nullptr;
+    };
+}

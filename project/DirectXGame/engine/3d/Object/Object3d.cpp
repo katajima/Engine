@@ -187,7 +187,7 @@ void Engine::Object3d::RigidBodyUpdate()
 {
 	if (isDelete) return;
 	// 物理
-	if (rigidBodyComponent_) {
+	if (rigidBodyComponent_ && isRigidUpdate_) {
 		rigidBodyComponent_->Integrate(MyGame::GameTime(), transformComponent_->GetWorldTransform());
 	}
 }

@@ -9,7 +9,7 @@
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
-#include "DirectXgame/application/base/Stage/Stage.h"
+#include "DirectXgame/application/base/Stage/MainStage.h"
 
 void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera)
 {
@@ -30,17 +30,17 @@ void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, E
 
 	// シリンダー生成
 	ctlinder_ = std::make_unique<Engine::CylinderPrimitive>();
-	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/simasima.png");
+	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/simasima.dds");
 	ctlinder_->Data() = cylinderParam;	//　パラメータ代入
 
 	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.png", camera);
+	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.dds", camera);
 	objectReticle_->SetPrimitive(std::move(ctlinder_));
 	objectReticle_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);
 	objectReticle_->GetWorldTransform().rotate_ = provisionalData_.rotate;
 	objectReticle_->GetWorldTransform().translate_ = provisionalData_.translate;
-	objectReticle_->GetWorldTransform().scale_ = { 0.5f,0.5f ,0.5f };
+	objectReticle_->GetWorldTransform().scale_ = { 1.0f,1.0f ,1.0f };
 	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().transform.scale.x = 2.0f;
 	objectReticle_->GetPrimitive()->GetMaterial()->GetMaterialInstance().color = { 1,0,0,1 };
 }
@@ -58,7 +58,6 @@ void RangeBombingSpecial::SetRadius(float rad) {
 	cylinderParam.isCover = false;			// 蓋するか
 	cylinderParam.segments = provisionalData_.cylinderSegments;			// セグメント数
 	primi->Data() = cylinderParam;
-
 }
 
 
@@ -117,11 +116,11 @@ void RangeBombingSpecial::InAction()
 			time_ += GetTime();
 
 			// インターバルごとに1つのミサイルから発射
-			if (dataRange_.currentMissileIndex < stage_->missiles_.size()) {
+			if (dataRange_.currentMissileIndex < stage->missiles_.size()) {
 				if (time_ >= fireInterval) {
 					spawn->GenerateBulletRange(
 						BulletType::kRangeBombingSpecial,
-						stage_->missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
+						stage->missiles_[dataRange_.currentMissileIndex]->GetWorldTransform().translate_ + Vector3{ 0,30,0 },
 						dataRange_.rangeBombingPos,
 						dataRange_.reticleRad_
 					);
@@ -131,7 +130,7 @@ void RangeBombingSpecial::InAction()
 					dataRange_.bulletNum++;            // 発射数カウント
 				}
 
-				if (dataRange_.currentMissileIndex >= stage_->missiles_.size()) {
+				if (dataRange_.currentMissileIndex >= stage->missiles_.size()) {
 					dataRange_.currentMissileIndex = 0; // インデックスをリセット
 				}
 			}

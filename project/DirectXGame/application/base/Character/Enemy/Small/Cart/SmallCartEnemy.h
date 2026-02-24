@@ -3,37 +3,40 @@
 #include"SmallCartEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
-class SmallCartEnemy : public BaseEnemy {
-public:
-	// コンストラクタ
-	SmallCartEnemy() {
+namespace Character {
 
-	}
+	class SmallCartEnemy : public BaseEnemy {
+	public:
+		// コンストラクタ
+		SmallCartEnemy() {
 
-	// 初期化
-	void Initialize(Engine::Input* input, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
-		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
+		}
 
-	// 毎フレーム更新
-	void Update() override;
+		// 初期化
+		void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-	// エフェクト描画
-	void DrawEffect() override {};
-	// 描画2d
-	void Draw2D() override;
-	// エミッター出現
-	void Emit() override;
-	// 移動
-	void Move() override;
-	// ジャンプ
-	void Jump() override {};
-	// 攻撃
-	void Attack() override {};
-private:
-	// ステートマシーン初期化
-	void InitStateMachine() override;
+		// 毎フレーム更新
+		void Update() override;
 
-private:
-	//
-	float attackTimer_ = 0.0f;
-};
+		// エフェクト描画
+		void DrawEffect() override {};
+		// 描画2d
+		void Draw2D() override;
+		// エミッター出現
+		void Emit() override;
+		// 移動
+		void Move() override;
+		// ジャンプ
+		void Jump() override {};
+		// 攻撃
+		void Attack() override {};
+	private:
+		// ステートマシーン初期化
+		void InitStateMachine() override;
+
+	private:
+		//
+		float attackTimer_ = 0.0f;
+	};
+}

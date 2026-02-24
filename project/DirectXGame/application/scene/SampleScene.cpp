@@ -24,15 +24,17 @@ void SampleScene::Initialize() {
 
 // カメラ
 void SampleScene::InitCamera() {
-	// オーディオ
-	
+	// 入力システム初期化
+	inputSystem_ = std::make_unique<InputSystem>();
+	inputSystem_->Initialize(GetInput());
+
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
 	fixedCamera_->Update();
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(input_, GetEntity3DManager(), GetGlobalVariables());
+	cameraManeger_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 

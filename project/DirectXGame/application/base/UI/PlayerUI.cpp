@@ -2,11 +2,11 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
-void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
+void PlayerUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
 {
-	entity2DManager_ = entity2DManager;	// エンティティ2d
-	globalVariables_ = globalVariables;	// 保存項目
-	input_ = input;						// インプット
+	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->globalVariables = globalVariables;	// 保存項目
+	this->inputSystem = inputSystem;						// インプット
 
 
 	InitUIMeter("HPBer", hpSpriteData_.pos_, true);		// 初期化HP
@@ -19,7 +19,7 @@ void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2
 	hpber->SetMeterMinMax(0.0f, hpSpriteData_.maxMeter);											// メータ最大値最小値
 	hpber->GetMeterSprite()->SetColor(hpSpriteData_.color_);								// 色指定
 	hpber->SetMeterType(UIMeterType::Left);										// メータの増える方向
-	hpber->GetNameSprite()->SetTextureName("resources/Texture/text/HP.png");	// 次のスプライト設定
+	hpber->GetNameSprite()->SetTextureName("resources/Texture/text/HP.dds");	// 次のスプライト設定
 	hpber->GetNameSprite()->SetSize(hpSpriteData_.nameSize_);									// サイズ設定
 	hpber->GetNameSprite()->SetColor(hpSpriteData_.nameColor_);				// 色指定
 
@@ -29,13 +29,13 @@ void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2
 	specailBer_->SetMeterMinMax(0.0f, spSpriteData_.maxMeter);										// メータ最大値最小値
 	specailBer_->GetMeterSprite()->SetColor(spSpriteData_.color_);							// 色指定
 	specailBer_->SetMeterType(UIMeterType::Left);									// メータの増える方向
-	specailBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.png");	// 次のスプライト設定
+	specailBer_->GetNameSprite()->SetTextureName("resources/Texture/text/SP.dds");	// 次のスプライト設定
 	specailBer_->GetNameSprite()->SetSize(spSpriteData_.nameSize_);								// サイズ設定
 	specailBer_->GetNameSprite()->SetColor(spSpriteData_.nameColor_);			// 色指定
 
 	// maxテキストスプライト初期化
 	textMax_ = std::make_unique<Engine::Sprite>();
-	textMax_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/max.png");
+	textMax_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/max.dds");
 	textMax_->SetColor(maxTextData_.color_);					// 色設定
 	textMax_->SetPosition(maxTextData_.pos_);					// 位置設定
 	textMax_->SetRotation(maxTextData_.rotate_);	// 回転設定
@@ -44,7 +44,7 @@ void PlayerUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2
 
 	// rbテキストスプライト初期化
 	textRB_ = std::make_unique<Engine::Sprite>();
-	textRB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/RB.png");
+	textRB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/RB.dds");
 	textRB_->SetColor(Color::WHITE());						// 色指定
 	textRB_->SetPosition(rbData_.pos_);				// 位置設定
 	textRB_->SetAnchorPoint(rbData_.anchorPoint_);				// アンカーポイント設定
@@ -56,8 +56,8 @@ void PlayerUI::Update()
 {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル
-	hpber->SetMeterMinMax(parameterComponent_->HP().minValue, parameterComponent_->HP().maxValue);	// メータ最大値
-	hpber->SetMeter(parameterComponent_->HP().value);								// メータ
+	hpber->SetMeterMinMax(parameterComponent->HP().minValue, parameterComponent->HP().maxValue);	// メータ最大値
+	hpber->SetMeter(parameterComponent->HP().value);								// メータ
 	
 	specailBer->SetMeter(sizeSpecialGauge_);// メータ
 

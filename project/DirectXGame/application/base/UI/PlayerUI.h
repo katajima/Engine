@@ -5,8 +5,9 @@
 namespace Engine {
 	class Entity2DManager;
 }
-class CharacterParameterComponent;
-
+namespace Character {
+	class ParameterComponent;
+}
 /// <summary>
 /// プレイヤーUIクラス
 /// </summary>
@@ -14,7 +15,7 @@ class PlayerUI : public BaseUI{
 public:
 
 	// 初期化
-	void Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
+	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	// 更新
 	void Update() override;
@@ -27,7 +28,7 @@ public:
 
 public:
 
-	void SetCharacterParameter(CharacterParameterComponent* parameter) { parameterComponent_ = parameter; };
+	void SetCharacterParameter(Character::ParameterComponent* parameter) { parameterComponent = parameter; };
 
 	// スペシャルゲージサイズ設定
 	void SetSpecialGaugeSize(float size) { sizeSpecialGauge_ = size; }
@@ -36,7 +37,7 @@ public:
 	// RBボタンテクスチャ映すか
 	void SetIsTextRB(bool is) { isTextRB_ = is; }
 private:
-	CharacterParameterComponent* parameterComponent_ = nullptr;
+	Character::ParameterComponent* parameterComponent = nullptr;
 	
 	
 	std::unique_ptr<Engine::Sprite> textMax_;

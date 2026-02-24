@@ -58,9 +58,9 @@ protected:
 
 public:
 	// 持ち主の設定
-	void SetOwner(BaseCharacter* owner) { owner_ = owner; };
+	void SetOwner(Character::BaseCharacter* owner) { this->owner = owner; };
 	// ターゲット設定
-	void SetTarget(BaseCharacter* target) { target_ = target; }
+	void SetTarget(Character::BaseCharacter* target) { this->target = target; }
 	// エフェクト設定
 	void SetEffect(Effect* effect) { effect_ = effect; };
 	// ターゲットの位置取得
@@ -125,8 +125,8 @@ protected:
 
 	float groundHeight_ = -3.0f; // 地面の高さ
 protected:
-	BaseCharacter* owner_ = nullptr;	// 持ち主
-	BaseCharacter* target_ = nullptr;	// 標的
+	Character::BaseCharacter* owner = nullptr;	// 持ち主
+	Character::BaseCharacter* target = nullptr;	// 標的
 protected:
 	Effect* effect_;
 	BulletInfo info_;

@@ -1,17 +1,17 @@
 #include "FpsUI.h"
 
-void FpsUI::Initialize(Engine::Input* input, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables){
-	entity2DManager_ = entity2DManager;	// エンティティ2d
-	globalVariables_ = globalVariables;	// 保存項目
-	input_ = input;						// インプット
+void FpsUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables){
+	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->globalVariables = globalVariables;	// 保存項目
+	this->inputSystem = inputSystem;			// インプット
 
 
 
 	// カウントUI
 	InitUICount("fps", {}, 2);
 	Engine::UICount* fpsCount = GetUICount("fps");
-	fpsCount->Init(entity2DManager_, "fps");	// 初期化
-	fpsCount->SetInput(input_);					// 入力設定
+	fpsCount->Init(entity2DManager, "fps");	// 初期化
+	fpsCount->SetInput(inputSystem);					// 入力設定
 	fpsCount->SetPos({ 32,48 });				// 位置設定
 	fpsCount->SetMaxSize({ 64 * 2 / 3, 96 * 2 / 3 }, { 20.0f,0.0f });	// 最大値サイズ設定
 	fpsCount->SetTextuerSize({ 64,96 });	// テクスチャサイズ設定

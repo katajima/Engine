@@ -13,9 +13,9 @@
 void SpecalPointManager::Initialize(Engine::Entity3DManager* entity3DManager,
 	Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) {
 
-	entity3DManager_ = entity3DManager;
-	entity2DManager_ = entity2DManager;
-	globalVariables_ = globalVariables;
+	this->entity3DManager = entity3DManager;
+	this->entity2DManager = entity2DManager;
+	this->globalVariables = globalVariables;
 
 }
 
@@ -32,7 +32,7 @@ void SpecalPointManager::Update(float dt) {
 
 	// 更新
 	for (auto& point : points) {
-		point->SetTargetPos(target_->GetObjectComponent()->GetWorldPosition());
+		point->SetTargetPos(target->GetObjectComponent()->GetWorldPosition());
 		point->Update(dt);
 	}
 
@@ -40,7 +40,7 @@ void SpecalPointManager::Update(float dt) {
 
 void SpecalPointManager::AddPoint(const Vector3& pos, int point){
 	std::unique_ptr<SpecalPoint> spPoint = std::make_unique<SpecalPoint>();
-	spPoint->Initialize(entity3DManager_,globalVariables_,pos, point,count_);
+	spPoint->Initialize(entity3DManager,globalVariables,pos, point,count_);
 	points.push_back(std::move(spPoint));
 	count_++;
 };
@@ -87,7 +87,7 @@ void SpecalPoint::Initialize(Engine::Entity3DManager* entity3DManager, Engine::G
 			objectComponent_->GetWorldTransform().scale_ = { 0,0,0 };
 			objectComponent_->Delete();
 			Die();
-			BasePlayer* player = static_cast<BasePlayer*>(otherComponent->GetHitReceiver());
+			Character::BasePlayer* player = static_cast<Character::BasePlayer*>(otherComponent->GetHitReceiver());
 			player->AddSpGauge(point_);
 		};
 

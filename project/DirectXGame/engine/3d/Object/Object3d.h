@@ -199,7 +199,8 @@ namespace Engine {
 		}
 		// 物理取得
 		RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
-
+		//
+		void SetIsRigidUpdate(bool isRigidUpdate) { isRigidUpdate_ = isRigidUpdate; };
 
 		/// <summary>
 		/// アニメーション
@@ -227,7 +228,8 @@ namespace Engine {
 		std::unique_ptr<TrailEffect> trailEffect_ = nullptr;
 		// trailエフェクトを使用するかのフラグ
 		bool isEmitTrailEffect = false;
-
+		//
+		bool isRigidUpdate_ = true;
 
 		// オブジェクト名前
 		std::string name = "";
