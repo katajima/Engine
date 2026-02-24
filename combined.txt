@@ -116,13 +116,18 @@
     └── └── └── └── └── └── CameraManeger.h
     └── └── └── └── ├── FixedCamera/
     └── └── └── └── └── ├── FixedCamera.cpp
-    └── └── └── └── └── └── FixedCamera.h
+    └── └── └── └── └── ├── FixedCamera.h
+    └── └── └── └── └── ├── TitleCamera.cpp
+    └── └── └── └── └── └── TitleCamera.h
     └── └── └── └── ├── FollowCamera/
     └── └── └── └── └── ├── FollowCamera.cpp
     └── └── └── └── └── └── FollowCamera.h
     └── └── └── └── └── UniverseCamera/
     └── └── └── └──     ├── UniverseCamera.cpp
     └── └── └── └──     └── UniverseCamera.h
+    └── └── └── ├── Car/
+    └── └── └── └── ├── PlayerCar.cpp
+    └── └── └── └── └── PlayerCar.h
     └── └── └── ├── Character/
     └── └── └── └── ├── Base/
     └── └── └── └── └── ├── BaseCharacter.h
@@ -9880,6 +9885,57 @@ private: // 一旦
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/TitleCamera.cpp
+============================================================
+#include "TitleCamera.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+
+void TitleCamera::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, 
+	Engine::GlobalVariables* globalVariables, Vector3 position){
+	this->entity3DManager = entity3DManager;	// エンティティ3d
+
+	// カメラ初期化
+	uniqueCamera_ = std::make_unique<Engine::Camera>();
+	uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
+	uniqueCamera_->farClip_ = 10000.0f;
+
+	// カメラ位置と回転設定
+	uniqueCamera_->transform_.translate = position;
+	uniqueCamera_->transform_.rotate = {Math::DegreesToRadians(7),0,0};
+
+
+}
+
+void TitleCamera::Update(){
+	// カメラ更新
+	uniqueCamera_->UpdateMatrix();
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+
+class TitleCamera : public BaseFixedCamera {
+public:
+	///< summary>
+	/// 初期化
+	///</summary>
+	void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position) override;
+
+	///< summary>
+	/// 更新
+	///</summary>
+	void Update() override;
+
+private:
+
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/FollowCamera/FollowCamera.cpp
 ============================================================
 #include "FollowCamera.h"
@@ -10148,6 +10204,241 @@ private: // 一旦
 
 };
 
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Car/PlayerCar.cpp
+============================================================
+#include "PlayerCar.h"
+#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Math/Random.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
+
+
+void PlayerCar::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, const Vector3& rotate) {
+	this->entity3DManager = entity3DManager;
+	this->globalVariables = globalVariables;
+	pos_ = pos;
+	// 車体
+	objectComponent_ = std::make_unique<ObjectComponent>();
+	objectComponent_->Initialize(entity3DManager, globalVariables,"TrackCarBoby","TrackCarBody.obj",false,false,nullptr);
+	objectComponent_->SetSRT({1,1,1}, rotate, pos_);
+
+
+	// タイヤ
+	objectComponentTire01_ = std::make_unique<ObjectComponent>();
+	objectComponentTire01_->Initialize(entity3DManager, globalVariables, "TrackCarTire01", "TrackCarTire.obj", false, false, nullptr);
+	objectComponentTire01_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
+	objectComponentTire01_->GetWorldTransform().translate_ = { 1.0f ,0.3f,-1.3f};
+
+	// タイヤ
+	objectComponentTire02_ = std::make_unique<ObjectComponent>();
+	objectComponentTire02_->Initialize(entity3DManager, globalVariables, "TrackCarTire02", "TrackCarTire.obj", false, false, nullptr);
+	objectComponentTire02_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
+	objectComponentTire02_->GetWorldTransform().translate_ = { 1.0f ,0.3f, 2.3f };
+
+	// タイヤ
+	objectComponentTire03_ = std::make_unique<ObjectComponent>();
+	objectComponentTire03_->Initialize(entity3DManager, globalVariables, "TrackCarTire03", "TrackCarTire.obj", false, false, nullptr);
+	objectComponentTire03_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
+	objectComponentTire03_->GetWorldTransform().translate_ = { -1.0f ,0.3f,-1.3f };
+
+	// タイヤ
+	objectComponentTire04_ = std::make_unique<ObjectComponent>();
+	objectComponentTire04_->Initialize(entity3DManager, globalVariables, "TrackCarTire04", "TrackCarTire.obj", false, false, nullptr);
+	objectComponentTire04_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
+	objectComponentTire04_->GetWorldTransform().translate_ = { -1.0f ,0.3f,2.3f };
+
+	// オブジェクトコンポーネント追加
+	objectComponentShadow_ = std::make_unique<ObjectComponent>();
+	// オブジェクトインスタンシング初期化
+	objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, "PlayerBase2", "plane.obj", "resources/Texture/smoke/no4.dds",
+		false, false, nullptr, Engine::Object3dInstansManager::TransparencyType::kYes);
+	
+	objectComponentShadow_->SetInstancingSRT({ 5.0f,5.0f,5.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
+
+
+	spotLightTransform01_.Initialize();
+	spotLightTransform01_.parent_ = &objectComponent_->GetWorldTransform();
+	spotLightTransform01_.translate_ = { -1.0f ,0.8f,-1.5f };
+	spotLightTransform02_.Initialize();
+	spotLightTransform02_.parent_ = &objectComponent_->GetWorldTransform();
+	spotLightTransform02_.translate_ = { 1.0f ,0.8f,-1.5f };
+
+
+
+
+	SpotLightData spotData{};
+	spotData.color = { 1,1,1,1 };
+	spotData.direction = { 1,0,0 };
+	spotData.isLight = false;
+	spotData.distance = 5.0f;
+	spotData.intensity = 2.0f;
+	spotData.position = pos_ + Vector3{ 0.0f,1.0f,0.0f };
+	spotData.cosAngle = 0.72f;
+	spotData.decay = 0.8f;
+	spotData.cosFalloffStart = 0.9f;
+
+	spotLight01_ = std::make_shared<Engine::SpotLight>();
+	spotLight01_->spot = spotData;
+	entity3DManager->GetLightManager()->AddLight(spotLight01_);
+	spotLight02_ = std::make_shared<Engine::SpotLight>();
+	spotLight02_->spot = spotData;
+	entity3DManager->GetLightManager()->AddLight(spotLight02_);
+
+
+}
+
+void PlayerCar::Update(float dt) {
+
+
+	if (isMoving_) {
+		moveTimer_ += dt;
+
+		
+		if (moveTimer_ >= 0.3f) {
+			spotLight01_->spot.isLight = true;
+			spotLight02_->spot.isLight = true;
+		}
+
+
+		if (moveTimer_ >= 0.5f) {
+			velocity_.x += 0.5f;
+
+		
+
+			objectComponent_->GetWorldTransform().translate_.x += velocity_.x * dt;
+			objectComponent_->GetWorldTransform().translate_.y = pos_.y;
+
+			objectComponentTire01_->GetWorldTransform().rotate_.x += velocity_.x * dt * 0.1f;
+			objectComponentTire02_->GetWorldTransform().rotate_.x += velocity_.x * dt * 0.1f;
+			objectComponentTire03_->GetWorldTransform().rotate_.x += velocity_.x * dt * 0.1f;
+			objectComponentTire04_->GetWorldTransform().rotate_.x += velocity_.x * dt * 0.1f;
+
+
+			effect->Emit("dust2", objectComponentTire01_->GetWorldTransform().GetWorldPosition() + Vector3{ 0,-0.1f,0 });
+			effect->Emit("dust2", objectComponentTire02_->GetWorldTransform().GetWorldPosition() + Vector3{ 0,-0.1f,0 });
+			effect->Emit("dust2", objectComponentTire03_->GetWorldTransform().GetWorldPosition() + Vector3{ 0,-0.1f,0 });
+			effect->Emit("dust2", objectComponentTire04_->GetWorldTransform().GetWorldPosition() + Vector3{ 0,-0.1f,0 });
+		}
+		else {
+			objectComponent_->GetWorldTransform().translate_.y = pos_.y + Random::RandomFloat(-0.03f, 0.03f);
+		}
+	}
+	
+
+
+	objectComponent_->Update();
+
+
+	spotLightTransform01_.Update();
+	spotLightTransform02_.Update();
+
+	spotLight01_->spot.position = spotLightTransform01_.GetWorldPosition();
+	spotLight02_->spot.position = spotLightTransform02_.GetWorldPosition();
+
+
+	objectComponentTire01_->Update();
+	objectComponentTire02_->Update();
+	objectComponentTire03_->Update();
+	objectComponentTire04_->Update();
+
+
+	objectComponentShadow_->GetWorldTransform().translate_.x = objectComponent_->GetWorldTransform().translate_.x + -0.5f;
+	objectComponentShadow_->GetWorldTransform().translate_.z = objectComponent_->GetWorldTransform().translate_.z + 0.0f;
+	objectComponentShadow_->GetWorldTransform().translate_.y = height_;
+
+	objectComponentShadow_->Update();
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Car/PlayerCar.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+
+class Effect;
+/// <summary>
+/// プレイヤー車
+/// </summary>
+class PlayerCar
+{
+public:
+	
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <param name="entity3DManager"></param>
+	/// <param name="globalVariables"></param>
+	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,const Vector3& pos, const Vector3& rotate);
+
+
+	void SetGroungHeight(float height) { height_ = height; }
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void Update(float dt);
+
+	/// <summary>
+	/// エフェクト
+	/// </summary>
+	/// <param name="effect"></param>
+	void SetEffect(Effect* effect) { this->effect = effect; }
+
+
+	/// <summary>
+	/// 車位置
+	/// </summary>
+	/// <returns></returns>
+	Vector3 GetPosition() { return objectComponent_->GetWorldPosition(); }
+	
+	// 動く
+	void Action() { isMoving_ = true; }
+
+private:
+	std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
+
+	// 影用オブジェクトコンポーネント
+	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
+
+
+	std::unique_ptr<ObjectComponent> objectComponentTire01_ = nullptr;
+	std::unique_ptr<ObjectComponent> objectComponentTire02_ = nullptr;
+	std::unique_ptr<ObjectComponent> objectComponentTire03_ = nullptr;
+	std::unique_ptr<ObjectComponent> objectComponentTire04_ = nullptr;
+
+
+	Engine::WorldTransform spotLightTransform01_;
+	Engine::WorldTransform spotLightTransform02_;
+
+
+	std::shared_ptr<Engine::SpotLight> spotLight01_ = nullptr;
+	std::shared_ptr<Engine::SpotLight> spotLight02_ = nullptr;
+
+
+	// 位置
+	Vector3 pos_ = { -1.25f,0.05f,12.0f };
+
+	// 速度
+	Vector3 velocity_ = { 4.0f,0.0f,0.0f };
+
+	// 
+	bool isMoving_ = false;
+	//
+	float moveTimer_ = 0.0f;
+
+	float height_ = 0.0f;
+
+private:
+	Engine::Entity3DManager* entity3DManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
+	// エフェクト
+	Effect* effect = nullptr;
+};
 
 
 ============================================================
@@ -14569,7 +14860,7 @@ namespace Character {
 
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-		objectComponentShadow_->GetWorldTransform().translate_.y = -3.0f;
+		objectComponentShadow_->GetWorldTransform().translate_.y = -2.9f;
 	}
 
 #pragma region Draw
@@ -15700,15 +15991,16 @@ File Path: project/DirectXGame/application/base/Effect/Effect.cpp
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
+
 void Effect::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables)
 {
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	globalVariables_ = globalVariables;	// 保存項目追加
+	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->globalVariables = globalVariables;	// 保存項目追加
 
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(entity3DManager_, globalVariables_);
+	effectComponent_->Init(entity3DManager, globalVariables);
 
 	// パーティクル初期化
 	InitParticle();
@@ -15717,6 +16009,7 @@ void Effect::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Global
 	// 通常弾初期化
 	InitBullet();
 }
+
 
 void Effect::InitParticle(){
 
@@ -15798,6 +16091,42 @@ void Effect::InitParticle(){
 	hitRingEmit->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
 	hitRingEmit->SetAlphaClipping(0.15f);
 	
+	// 
+	effectComponent_->AddEmitter("dust3", "dust3", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* dust2Emit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("dust3");
+
+	dust2Emit->GetFrequency() = 0.0f;
+	dust2Emit->SetCount(10, 0);
+	dust2Emit->SetPos({ 0,0.0f,0.0f });
+	dust2Emit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
+	dust2Emit->SetVelocity({ 200,0,0 }, { 50, 0, 0 });
+	dust2Emit->SetLifeTime(3.0f, 0.0f);
+	dust2Emit->SetIsAlpha(true);
+	dust2Emit->SetUsebillboard(true);
+	dust2Emit->SetSize({ 5,5,1 }, {});
+	dust2Emit->SetColorMinMax({ 1, 0.843f, 0 }, { 1, 0.843f, 0 });
+	dust2Emit->SetAlphaClipping(0.0f);
+	dust2Emit->SetRange(Vector3{ -2000,-200,-2000 }, Vector3{ 2000,200,2000 });
+
+
+
+	effectComponent_->AddEmitter("dust2", "dust3", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* dust3Emit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("dust2");
+
+	dust3Emit->GetFrequency() = 0.0f;
+	dust3Emit->SetCount(5, 0);
+	dust3Emit->SetPos({ 0,0.0f,0.0f });
+	dust3Emit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
+	dust3Emit->SetVelocity({ -10,0,0 }, { 3, 0, 0 });
+	dust3Emit->SetLifeTime(0.5f, 0.0f);
+	dust3Emit->SetIsAlpha(true);
+	dust3Emit->SetUsebillboard(true);
+	dust3Emit->SetSize({ 0.1f,0.1f,1 }, {});
+	dust3Emit->SetColorMinMax({ 1, 0.843f, 0 }, { 1, 0.843f, 0 });
+	dust3Emit->SetAlphaClipping(0.0f);
+	dust3Emit->SetRange(Vector3{ -0.15f,-0.15f,-0.15f }, Vector3{ 0.15f,0.15f,0.15f });
+
+
 }
 
 void Effect::InitRangeBombingBullet()
@@ -15998,7 +16327,7 @@ void Effect::InitBullet()
 	cartridgeEmit->SetSize(Vector3{ 0.8f,0.8f,0.8f }, {});
 	cartridgeEmit->SetColorMinMax({ 1,1, 0 }, { 1,1, 0 });
 
-
+	// 
 
 
 }
@@ -16058,9 +16387,9 @@ private:
 	std::unique_ptr<Engine::EffectComponent> effectComponent_;	// エフェクトコンポーネント
 
 private:
-	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 
 
 private: // 一旦
@@ -20427,14 +20756,17 @@ void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMana
 	}
 
 	
-
+	// 車
+	playerCar_ = std::make_unique<PlayerCar>();
+	playerCar_->Initialize(entity3DManager, {},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
+	playerCar_->SetGroungHeight(-2.9f);
 	
 	
 }
 
-void MainStage::Update()
+void MainStage::Update(float dt)
 {
-	
+	playerCar_->Update(dt);
 }
 
 void MainStage::Draw()
@@ -20488,6 +20820,8 @@ File Path: project/DirectXGame/application/base/Stage/MainStage.h
 
 #include "DirectXGame/application/base/Light/BaseLights.h"
 
+#include "DirectXGame/application/base/Car/PlayerCar.h"
+
 // 前方宣言
 namespace Engine{
 	class DirectXCommon;
@@ -20503,7 +20837,7 @@ public:
 	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera);
 
 	// 更新
-	void Update();
+	void Update(float dt);
 
 	///< summary>
 	/// 描画
@@ -20569,6 +20903,12 @@ private:
 	
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
+
+	// プレイヤー車
+	std::unique_ptr<PlayerCar> playerCar_;
+	// 位置
+	Vector3 playerCarPos_ = { 120.0f,-3.00f,0.0f };
+
 private:
 	Engine::DirectXCommon* dxCommon;
 	Engine::Entity3DManager* entity3DManager;
@@ -20608,14 +20948,17 @@ File Path: project/DirectXGame/application/base/Stage/TitleStage.cpp
 #include "TitleStage.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-
 #include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
+
 
 void TitleStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, 
-	Engine::Entity2DManager* entity2DManager, Engine::Camera* camera) {
+	Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
 	this->dxCommon = dxcommon;				// ダイレクトX共通クラス
 	this->entity3DManager = entity3DManager;	// エンティティ3d
 	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->globalVariables = globalVariables;	// 保存項目
+	this->camera = camera;						// カメラ
 
 	// スカイボックス初期化
 	skyBox = std::make_unique<Engine::SkyBox>();
@@ -20632,20 +20975,74 @@ void TitleStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMan
 	tail->GetWorldTransform().scale_ = { 100,100,100 };
 	tail->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
 
+	// 車
+	playerCar_ = std::make_unique<PlayerCar>();
+	playerCar_->Initialize(entity3DManager, globalVariables,playerCarPos_, { 0,Math::DegreesToRadians(-90),0 });
+	playerCar_->SetGroungHeight(0.1f);
+	
+
+	// 石初期化
+	InitializeStone();
+
 	// ライト
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 1.5f;
+	directionalLightData.intensity = 0.9f;
 	directionalLightData.isLight = true;
 	directionalLightData.lig = 0.1f;
 	directional = std::make_shared<Engine::DirectionalLight>();
 	directional->directional = directionalLightData;
 	entity3DManager->GetLightManager()->AddLight(directional);
+
+	PointLightData pointLightData{};
+	pointLightData.color = { 1,1,1,1 };
+	pointLightData.position = { 0,100,0 };
+	pointLightData.intensity = 1.0f;
+	pointLightData.radius = 100000;
+	pointLightData.isLight = true;
+	//
+	pointLight = std::make_shared<Engine::PointLight>();
+	pointLight->point = pointLightData;
 };
 
-void TitleStage::Update() {
+void TitleStage::InitializeStone(){
+	stone1_ = entity3DManager->CreateObject3D("Stone1", Engine::ObjectModelType::kNormal, {}, camera);
+	stone1_->SetModel("Stone.obj");
+	stone1_->GetWorldTransform().scale_ = { 1,1,1 };
+	stone1_->GetWorldTransform().translate_ = { -260,-20,700 };
 
+	stone2_ = entity3DManager->CreateObject3D("Stone2", Engine::ObjectModelType::kNormal, {}, camera);
+	stone2_->SetModel("Stone.obj");
+	stone2_->GetWorldTransform().scale_ = { 1,1,1 };
+	stone2_->GetWorldTransform().translate_ = { 260,-20,500 };
+
+	stone3_ = entity3DManager->CreateObject3D("Stone3", Engine::ObjectModelType::kNormal, {}, camera);
+	stone3_->SetModel("Stone.obj");
+	stone3_->GetWorldTransform().scale_ = { 1,1,1 };
+	stone3_->GetWorldTransform().translate_ = { -160,-25,1000 };
+
+	stone4_ = entity3DManager->CreateObject3D("Stone4", Engine::ObjectModelType::kNormal, {}, camera);
+	stone4_->SetModel("Stone.obj");
+	stone4_->GetWorldTransform().scale_ = { 1,1,1 };
+	stone4_->GetWorldTransform().translate_ = { 200,-28,900 };
+
+	stone5_ = entity3DManager->CreateObject3D("Stone5", Engine::ObjectModelType::kNormal, {}, camera);
+	stone5_->SetModel("Stone.obj");
+	stone5_->GetWorldTransform().scale_ = { 1,1,1 };
+	stone5_->GetWorldTransform().translate_ = { 0,-28,2000 };
+
+
+};
+
+void TitleStage::Update(float dt) {
+
+	// エフェクト
+	effect->Emit("dust3", {-50,10,100});
+	effect->Emit("dust3", { -50,10,100 });
+
+
+	playerCar_->Update(dt);
 };
 
 void TitleStage::Draw() {
@@ -20663,7 +21060,8 @@ void TitleStage::InitEmit() {
 
 void TitleStage::EmitUpdate() {
 
-};
+}
+
 
 
 ============================================================
@@ -20684,17 +21082,21 @@ File Path: project/DirectXGame/application/base/Stage/TitleStage.h
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
-
 #include<DirectXGame/engine/Effect/EffectComponent.h>
-
 #include "DirectXGame/application/base/Light/BaseLights.h"
+
+
+#include "DirectXGame/application/base/Car/PlayerCar.h"
 
 // 前方宣言
 namespace Engine {
 	class DirectXCommon;
 	class Entity3DManager;
 	class Entity2DManager;
+	class GlobalVariables;
 }
+class Effect;
+
 
 /// <summary>
 /// タイトルシーンステージ
@@ -20702,10 +21104,11 @@ namespace Engine {
 class TitleStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera);
+	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager,
+		Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 	// 更新
-	void Update();
+	void Update(float dt);
 
 	///< summary>
 	/// 描画
@@ -20721,6 +21124,21 @@ public:
 	/// 描画2d
 	/// </summary>
 	void Draw2D();
+
+	/// <summary>
+	/// エフェクト
+	/// </summary>
+	/// <param name="effect"></param>
+	void SetEffect(Effect* effect) {
+		this->effect = effect;
+		playerCar_->SetEffect(effect);
+	}
+
+	/// <summary>
+	/// 車
+	/// </summary>
+	/// <returns></returns>
+	PlayerCar* GetPlayerCar() { return playerCar_.get(); }
 private:
 	/// <summary>
 	/// エミッター初期化
@@ -20732,11 +21150,16 @@ private:
 	/// </summary>
 	void EmitUpdate();
 
+	//
+	void InitializeStone();
 private:
-	Engine::DirectXCommon* dxCommon;
-	Engine::Entity3DManager* entity3DManager;
-	Engine::Entity2DManager* entity2DManager;
+	Engine::DirectXCommon* dxCommon = nullptr;
+	Engine::Entity3DManager* entity3DManager = nullptr;
+	Engine::Entity2DManager* entity2DManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::Camera* camera = nullptr;
+	// エフェクト
+	Effect* effect = nullptr;
 private:
 	// 空
 	Engine::Object3d* sky_;
@@ -20744,9 +21167,23 @@ private:
 	std::unique_ptr<Engine::SkyBox> skyBox;
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
-
+	std::shared_ptr<Engine::PointLight> pointLight;
 	// タイル
 	Engine::Object3d* tail;
+
+
+	// 石
+	Engine::Object3d* stone1_;
+	Engine::Object3d* stone2_;
+	Engine::Object3d* stone3_;
+	Engine::Object3d* stone4_;
+	Engine::Object3d* stone5_;
+
+	
+	// プレイヤー車
+	std::unique_ptr<PlayerCar> playerCar_;
+	// 位置
+	Vector3 playerCarPos_ = { -1.25f,0.05f,12.0f };
 
 private:
 	struct ProvisionalData {
@@ -22333,36 +22770,44 @@ File Path: project/DirectXGame/application/base/UI/TitleUI.cpp
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
-void TitleUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables){
+void TitleUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) {
 	iconB_ = std::make_unique<Engine::Sprite>();
-	iconB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/B.png");
-	iconB_->SetPosition({ 640,500 });
+	iconB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/B.dds");
+	iconB_->SetPosition({ 640,600 });
 	iconB_->SetAnchorPoint({ 0.5f,0.5f });
 	iconB_->SetSize({ 200,200 });
 
 	title_ = std::make_unique<Engine::Sprite>();
-	title_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/title.png");
-	title_->SetPosition({ 640,200 });
+	title_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/title.dds");
+	title_->SetPosition(titlePos_);
 	title_->SetAnchorPoint({ 0.5f,0.5f });
 	title_->SetSize(2);
+	title_->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
 }
 
-void TitleUI::Update(float dt){
+void TitleUI::Update(float dt) {
 	// ボタンUI処理
 	ButtonUiProcess(dt);
-
-	// タイトルUI更新
-	title_->Update();
+	// タイトルUI処理
+	TitleUiProcess(dt);
 }
 
-void TitleUI::Draw(){
+void TitleUI::Draw() {
 	iconB_->Draw();
 	title_->Draw();
 }
 
 void TitleUI::ButtonUiProcess(float dt) {
 
-	//buttonTimer_ += dt;
+	if (isAction_) {
+		titlePos_.y -= 300.0f * dt;
+
+		title_->SetPosition(titlePos_);
+
+		if (buttonColor_.a <= 0.0f) {
+			return;
+		}
+	}
 
 	if (buttonColor_.a >= 1.0f) {
 		buttonColor_.a = 1.0f;
@@ -22384,6 +22829,11 @@ void TitleUI::ButtonUiProcess(float dt) {
 	iconB_->SetColor(buttonColor_);
 	// UI更新
 	iconB_->Update();
+}
+
+void TitleUI::TitleUiProcess(float dt) {
+	// タイトルUI更新
+	title_->Update();
 }
 
 
@@ -22416,19 +22866,33 @@ public:
 
 	// ゲームデータ取得
 	void SetGamePlayData(const Game::GameData data) { data_ = data; };
+
+	// 動く
+	void Action() { isAction_ = true; }
+
 private:
 	// ボタンUI処理
 	void ButtonUiProcess(float dt);
+	// タイトルUI
+	void TitleUiProcess(float dt);
+
 private:
 	Game::GameData data_;
 private:
-	std::unique_ptr<Engine::Sprite> iconB_;
+	// タイトルスプライト
 	std::unique_ptr<Engine::Sprite> title_;
+	//
+	Vector2 titlePos_ = { 640,200 };
 private:
+	// ボタンスプライト
+	std::unique_ptr<Engine::Sprite> iconB_;
 	// ボタン色
 	Color buttonColor_{1,1,1,1};
-	float buttonTimer_ = 0.0f;
 	int buttonClock_ = 1;
+private:
+	// 
+	bool isAction_ = false;
+
 };
 
 
@@ -23656,7 +24120,7 @@ void CharacterDebugScene::Update()
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
-	stage_->Update();
+	stage_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
 	// レベルデータアップデート
@@ -24166,7 +24630,7 @@ void GamePlayScene::Update()
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
-	stage_->Update();
+	stage_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
 	// レベルデータアップデート
@@ -25647,34 +26111,105 @@ void TitleScene::Initialize()
 	// 
 	GetSceneData().playerID = 1;
 
+	// エフェクト
+	effect_ = std::make_unique<Effect>();
+	effect_->Initialize(GetEntity3DManager(), GetGlobalVariables());
+
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
-	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
+	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	titleStage_->SetEffect(effect_.get());
 
 	// UI
 	titleUI_ = std::make_unique<TitleUI>();
 	titleUI_->Initialize(nullptr, GetEntity2DManager(), GetGlobalVariables());
 
+	// プレイヤー
+	objectComponent_ = std::make_unique<ObjectComponent>();
+	objectComponent_->Initialize(GetEntity3DManager(), GetGlobalVariables(), "player", "testCharacter.gltf", 
+		false, false, nullptr,Engine::ObjectModelType::kSkinning);
+	objectComponent_->GetObject3D()->InitAnimationComponent();
+	objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop",0.0f);
+	objectComponent_->GetWorldTransform().translate_ = { 0,0,6 };
+
+	// オブジェクトコンポーネント追加
+	objectComponentShadow_ = std::make_unique<ObjectComponent>();
+	// オブジェクトインスタンシング初期化
+	objectComponentShadow_->InitializeInstancing(GetEntity3DManager(), GetGlobalVariables(), "PlayerBase1", "plane.obj", "resources/Texture/smoke/no4.dds",
+		false, false, nullptr, Engine::Object3dInstansManager::TransparencyType::kYes);
+
+	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
+
+
+	// 武器
+	//weapon_ = std::make_unique<PlayerWeapon>();
+	//weapon_->Initialize(nullptr, GetEntity3DManager(), GetEntity2DManager(), 
+	//	GetGlobalVariables(),{}, cameraManager_->GetCamera());
+	//->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
+	//weapon_->GetWorldTransform().translate_ = { 0.04f,0.09f,-0.2f };
 }
 
-void TitleScene::Finalize()
-{
+void TitleScene::Finalize(){
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
+
 }
 
 void TitleScene::Update()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			GetSceneManager()->ChangeScene("GAMEPLAY");
+			//GetSceneManager()->ChangeScene("GAMEPLAY");
+			titleUI_->Action();
+			isStart_ = true;
+			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
+		}
+	}
+	if (isStart_) {
+		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetPosition().z) {
+			objectComponent_->GetWorldTransform().translate_.z = titleStage_->GetPlayerCar()->GetPosition().z;
+			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop", 0.1f);
+			objectComponent_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
+			objectComponentShadow_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
+			//
+			startTimer_ += GetTime();
+
+			if (startTimer_ >= 1.0f) {
+				GetSceneManager()->ChangeScene("GAMEPLAY");
+			}
+
+			// 動く
+			titleStage_->GetPlayerCar()->Action();
+		}
+		else {
+			objectComponent_->GetWorldTransform().translate_.z += 0.1f;
 		}
 	}
 
+	// プレイヤー
+	objectComponent_->Update();
+
+	objectComponentShadow_->GetWorldTransform().translate_.x = objectComponent_->GetWorldTransform().translate_.x;
+	objectComponentShadow_->GetWorldTransform().translate_.z = objectComponent_->GetWorldTransform().translate_.z;
+	objectComponentShadow_->GetWorldTransform().translate_.y = 0.1f;
+
+	objectComponentShadow_->Update();
+
+	//// 位置
+	//weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(
+	//	objectComponent_->GetObject3D()->GetModel()->modelData.skeleton, "DEF-hand.R",
+	//	objectComponent_->GetWorldTransform().worldMat_));
+	//// 武器
+	//weapon_->Update();
 	// ステージ更新
-	titleStage_->Update();
+	titleStage_->Update(GetTime());
+	// エフェクト
+	effect_->Update();
 	// UI更新
 	titleUI_->Update(GetTime());
-	// カメラ更新
-	camera->UpdateMatrix();
+	// カメラ管理更新
+	cameraManager_->Update();
 }
 
 void TitleScene::Draw3D(){}
@@ -25687,15 +26222,26 @@ void TitleScene::Draw2D(){
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+
 }
 
 void TitleScene::InitializeCamera()
 {
-	camera = std::make_unique <Engine::Camera>();
-	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
-	//camera->transform_.rotate = { 1.0f,0,0 };
-	camera->transform_.translate = { 0,100,-60.0f };
+	// タイトルシーン用カメラ
+	titleCamera_ = std::make_unique<TitleCamera>();
+	titleCamera_->Initialize(nullptr, GetEntity3DManager(), GetGlobalVariables(), { 0,3.7f,-4.5f });
+
+
+	// カメラ管理クラス初期化
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(nullptr, GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_->AddCamera({ titleCamera_.get(), true}, "titleCamera");
+	
+	SetCamera(cameraManager_->GetCamera());
 }
 
 
@@ -25710,7 +26256,10 @@ File Path: project/DirectXGame/application/scene/TitleScene.h
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 #include"DirectXGame/application/base/Stage/TitleStage.h"
 #include "DirectXGame/application/base/UI/TitleUI.h"
-
+#include "DirectXGame/application/base/Effect/Effect.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h"
+#include "DirectXGame/application/base/Weapon/playerWeapon.h"
 /// <summary>
 /// タイトルシーン
 /// </summary>
@@ -25734,7 +26283,6 @@ public:
 	void Draw2D() override;
 
 private:
-private:
 	// リソース初期化
 	void InitializeResources();
 	// カメラ初期化
@@ -25742,8 +26290,6 @@ private:
 private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
-	// カメラ
-	std::unique_ptr <Engine::Camera> camera;
 private:
 	// ステージ
 	std::unique_ptr<TitleStage> titleStage_ = nullptr;
@@ -25751,6 +26297,22 @@ private:
 	std::unique_ptr<TitleUI> titleUI_ = nullptr;
 	// レベルデータ
 	std::unique_ptr<LoadLevelData> loadData_;
+	// エフェクト
+	std::unique_ptr<Effect> effect_;
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_;
+	// タイトルシーン用カメラ
+	std::unique_ptr<TitleCamera> titleCamera_;
+	// プレイヤー
+	std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
+	// 影用オブジェクトコンポーネント
+	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
+
+	// 武器
+	std::unique_ptr<BaseWeapon> weapon_;
+private:
+	bool isStart_ = false;
+	float startTimer_ = 0.0f;
 };
 
 
@@ -55813,14 +56375,9 @@ void Engine::MyGame::CreateParticle()
 
 
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.dds", modelManager->FindModel("plane.obj"));
-
 	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"), {}, EmitData::BlendType::MODE_ADD);
-
 	particleManager->CreateParticleGroup("dustt", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"));
-
-
 	particleManager->CreateParticleGroup("primi", "resources/Texture/uvChecker.dds", primi.get());
-
 	particleManager->CreateParticleGroup("primiPlane", "resources/Texture/effect/circle2.dds", primiPlane.get());
 
 
@@ -55845,8 +56402,11 @@ void Engine::MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("smokePlane01_2", "resources/Texture/smoke/no1.dds", primiPlane.get());
 	particleManager->CreateParticleGroup("smokePlane02_2", "resources/Texture/smoke/no2.dds", primiPlane.get());
 	particleManager->CreateParticleGroup("smokePlane03_2", "resources/Texture/smoke/no3.dds", primiPlane.get());
-
 	particleManager->CreateParticleGroup("AnimatedCube", "resources/Texture/Image.dds", modelManager->FindModel("AnimatedCube.gltf"));
+
+	particleManager->CreateParticleGroup("dust2", "resources/Texture/effect/dust2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("dust3", "resources/Texture/effect/dust4.dds", primiPlane.get());
+
 
 	// 列車煙
 	particleManager->CreateParticleGroup("trainDust", "resources/Texture/smoke/no3.dds", primiPlane.get());
@@ -55888,16 +56448,16 @@ void Engine::MyGame::CreateParticle()
 	
 	particleManager->CreateParticleGroup("cartridge", "resources/Texture/Image.dds", modelManager->FindModel("cartridge.obj"));
 
+
+
+
+
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 30.0f;
 	cylinderParam.innerRadius = 6.0f;
 	cylinderParam.outerRadius = 12.0f;
 	cylinderParam.isCover = false;
 	cylinderParam.segments = 16;
-	
-
-
-
 	cylinder_ = std::make_unique<CylinderPrimitive>();
 	cylinder_->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.dds");
 	cylinder_->Data() = cylinderParam;
@@ -55938,6 +56498,10 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("train.gltf",	"Vehicle/train");
 	modelManager->LoadModel("ship.gltf",	"Vehicle/ship");
 
+	modelManager->LoadModel("TrackCarBody.obj", "Vehicle/track");
+	modelManager->LoadModel("TrackCarTire.obj", "Vehicle/track");
+
+
 	/// <summary>
 	/// 地形
 	/// </summary>
@@ -55960,6 +56524,10 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("field.obj", "stage/Field"); // フィールド()
 	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
 	modelManager->LoadModel("testField.obj", "stage/test"); // フィールド()
+
+
+	modelManager->LoadModel("Stone.obj", "stage/Title/Stone"); // フィールド()
+
 
 	/// <summary>
 	/// プレイヤー
@@ -66241,6 +66809,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
@@ -66911,6 +67481,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\Car\PlayerCar.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
@@ -68124,6 +68696,12 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\UI\TitleUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -69307,6 +69885,12 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\UI\TitleUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Car\PlayerCar.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
