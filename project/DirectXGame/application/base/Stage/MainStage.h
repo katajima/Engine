@@ -18,6 +18,8 @@
 
 #include "DirectXGame/application/base/Light/BaseLights.h"
 
+#include "DirectXGame/application/base/Car/PlayerCar.h"
+
 // 前方宣言
 namespace Engine{
 	class DirectXCommon;
@@ -33,7 +35,7 @@ public:
 	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera);
 
 	// 更新
-	void Update();
+	void Update(float dt);
 
 	///< summary>
 	/// 描画
@@ -99,6 +101,12 @@ private:
 	
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
+
+	// プレイヤー車
+	std::unique_ptr<PlayerCar> playerCar_;
+	// 位置
+	Vector3 playerCarPos_ = { 120.0f,-3.00f,0.0f };
+
 private:
 	Engine::DirectXCommon* dxCommon;
 	Engine::Entity3DManager* entity3DManager;

@@ -280,7 +280,7 @@ void GamePlayScene::Update()
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
-	stage_->Update();
+	stage_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
 	// レベルデータアップデート

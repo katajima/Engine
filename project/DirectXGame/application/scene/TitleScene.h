@@ -6,7 +6,10 @@
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 #include"DirectXGame/application/base/Stage/TitleStage.h"
 #include "DirectXGame/application/base/UI/TitleUI.h"
-
+#include "DirectXGame/application/base/Effect/Effect.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h"
+#include "DirectXGame/application/base/Weapon/playerWeapon.h"
 /// <summary>
 /// タイトルシーン
 /// </summary>
@@ -30,7 +33,6 @@ public:
 	void Draw2D() override;
 
 private:
-private:
 	// リソース初期化
 	void InitializeResources();
 	// カメラ初期化
@@ -38,8 +40,6 @@ private:
 private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
-	// カメラ
-	std::unique_ptr <Engine::Camera> camera;
 private:
 	// ステージ
 	std::unique_ptr<TitleStage> titleStage_ = nullptr;
@@ -47,6 +47,22 @@ private:
 	std::unique_ptr<TitleUI> titleUI_ = nullptr;
 	// レベルデータ
 	std::unique_ptr<LoadLevelData> loadData_;
+	// エフェクト
+	std::unique_ptr<Effect> effect_;
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_;
+	// タイトルシーン用カメラ
+	std::unique_ptr<TitleCamera> titleCamera_;
+	// プレイヤー
+	std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
+	// 影用オブジェクトコンポーネント
+	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
+
+	// 武器
+	std::unique_ptr<BaseWeapon> weapon_;
+private:
+	bool isStart_ = false;
+	float startTimer_ = 0.0f;
 };
 
 

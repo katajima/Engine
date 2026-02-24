@@ -245,14 +245,9 @@ void Engine::MyGame::CreateParticle()
 
 
 	particleManager->CreateParticleGroup("test", "resources/Texture/uvChecker.dds", modelManager->FindModel("plane.obj"));
-
 	particleManager->CreateParticleGroup("cc", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"), {}, EmitData::BlendType::MODE_ADD);
-
 	particleManager->CreateParticleGroup("dustt", "resources/Texture/Image.dds", modelManager->FindModel("plane.obj"));
-
-
 	particleManager->CreateParticleGroup("primi", "resources/Texture/uvChecker.dds", primi.get());
-
 	particleManager->CreateParticleGroup("primiPlane", "resources/Texture/effect/circle2.dds", primiPlane.get());
 
 
@@ -277,8 +272,11 @@ void Engine::MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("smokePlane01_2", "resources/Texture/smoke/no1.dds", primiPlane.get());
 	particleManager->CreateParticleGroup("smokePlane02_2", "resources/Texture/smoke/no2.dds", primiPlane.get());
 	particleManager->CreateParticleGroup("smokePlane03_2", "resources/Texture/smoke/no3.dds", primiPlane.get());
-
 	particleManager->CreateParticleGroup("AnimatedCube", "resources/Texture/Image.dds", modelManager->FindModel("AnimatedCube.gltf"));
+
+	particleManager->CreateParticleGroup("dust2", "resources/Texture/effect/dust2.dds", primiPlane.get());
+	particleManager->CreateParticleGroup("dust3", "resources/Texture/effect/dust4.dds", primiPlane.get());
+
 
 	// 列車煙
 	particleManager->CreateParticleGroup("trainDust", "resources/Texture/smoke/no3.dds", primiPlane.get());
@@ -320,16 +318,16 @@ void Engine::MyGame::CreateParticle()
 	
 	particleManager->CreateParticleGroup("cartridge", "resources/Texture/Image.dds", modelManager->FindModel("cartridge.obj"));
 
+
+
+
+
 	ShapeParameter::Cylinder cylinderParam;
 	cylinderParam.height = 30.0f;
 	cylinderParam.innerRadius = 6.0f;
 	cylinderParam.outerRadius = 12.0f;
 	cylinderParam.isCover = false;
 	cylinderParam.segments = 16;
-	
-
-
-
 	cylinder_ = std::make_unique<CylinderPrimitive>();
 	cylinder_->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.dds");
 	cylinder_->Data() = cylinderParam;
@@ -370,6 +368,10 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("train.gltf",	"Vehicle/train");
 	modelManager->LoadModel("ship.gltf",	"Vehicle/ship");
 
+	modelManager->LoadModel("TrackCarBody.obj", "Vehicle/track");
+	modelManager->LoadModel("TrackCarTire.obj", "Vehicle/track");
+
+
 	/// <summary>
 	/// 地形
 	/// </summary>
@@ -392,6 +394,10 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("field.obj", "stage/Field"); // フィールド()
 	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
 	modelManager->LoadModel("testField.obj", "stage/test"); // フィールド()
+
+
+	modelManager->LoadModel("Stone.obj", "stage/Title/Stone"); // フィールド()
+
 
 	/// <summary>
 	/// プレイヤー

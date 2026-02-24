@@ -13,17 +13,21 @@
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/effect/Ocean/Ocean.h"
-
 #include<DirectXGame/engine/Effect/EffectComponent.h>
-
 #include "DirectXGame/application/base/Light/BaseLights.h"
+
+
+#include "DirectXGame/application/base/Car/PlayerCar.h"
 
 // 前方宣言
 namespace Engine {
 	class DirectXCommon;
 	class Entity3DManager;
 	class Entity2DManager;
+	class GlobalVariables;
 }
+class Effect;
+
 
 /// <summary>
 /// タイトルシーンステージ
@@ -31,10 +35,11 @@ namespace Engine {
 class TitleStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera);
+	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager,
+		Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 	// 更新
-	void Update();
+	void Update(float dt);
 
 	///< summary>
 	/// 描画
@@ -50,6 +55,21 @@ public:
 	/// 描画2d
 	/// </summary>
 	void Draw2D();
+
+	/// <summary>
+	/// エフェクト
+	/// </summary>
+	/// <param name="effect"></param>
+	void SetEffect(Effect* effect) {
+		this->effect = effect;
+		playerCar_->SetEffect(effect);
+	}
+
+	/// <summary>
+	/// 車
+	/// </summary>
+	/// <returns></returns>
+	PlayerCar* GetPlayerCar() { return playerCar_.get(); }
 private:
 	/// <summary>
 	/// エミッター初期化
@@ -61,11 +81,16 @@ private:
 	/// </summary>
 	void EmitUpdate();
 
+	//
+	void InitializeStone();
 private:
-	Engine::DirectXCommon* dxCommon;
-	Engine::Entity3DManager* entity3DManager;
-	Engine::Entity2DManager* entity2DManager;
+	Engine::DirectXCommon* dxCommon = nullptr;
+	Engine::Entity3DManager* entity3DManager = nullptr;
+	Engine::Entity2DManager* entity2DManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::Camera* camera = nullptr;
+	// エフェクト
+	Effect* effect = nullptr;
 private:
 	// 空
 	Engine::Object3d* sky_;
@@ -73,9 +98,23 @@ private:
 	std::unique_ptr<Engine::SkyBox> skyBox;
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
-
+	std::shared_ptr<Engine::PointLight> pointLight;
 	// タイル
 	Engine::Object3d* tail;
+
+
+	// 石
+	Engine::Object3d* stone1_;
+	Engine::Object3d* stone2_;
+	Engine::Object3d* stone3_;
+	Engine::Object3d* stone4_;
+	Engine::Object3d* stone5_;
+
+	
+	// プレイヤー車
+	std::unique_ptr<PlayerCar> playerCar_;
+	// 位置
+	Vector3 playerCarPos_ = { -1.25f,0.05f,12.0f };
 
 private:
 	struct ProvisionalData {

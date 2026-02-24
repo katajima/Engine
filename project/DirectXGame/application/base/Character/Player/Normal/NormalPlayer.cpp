@@ -314,7 +314,7 @@ namespace Character {
 
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-		objectComponentShadow_->GetWorldTransform().translate_.y = -3.0f;
+		objectComponentShadow_->GetWorldTransform().translate_.y = -2.9f;
 	}
 
 #pragma region Draw

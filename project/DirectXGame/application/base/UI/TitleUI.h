@@ -24,18 +24,32 @@ public:
 
 	// ゲームデータ取得
 	void SetGamePlayData(const Game::GameData data) { data_ = data; };
+
+	// 動く
+	void Action() { isAction_ = true; }
+
 private:
 	// ボタンUI処理
 	void ButtonUiProcess(float dt);
+	// タイトルUI
+	void TitleUiProcess(float dt);
+
 private:
 	Game::GameData data_;
 private:
-	std::unique_ptr<Engine::Sprite> iconB_;
+	// タイトルスプライト
 	std::unique_ptr<Engine::Sprite> title_;
+	//
+	Vector2 titlePos_ = { 640,200 };
 private:
+	// ボタンスプライト
+	std::unique_ptr<Engine::Sprite> iconB_;
 	// ボタン色
 	Color buttonColor_{1,1,1,1};
-	float buttonTimer_ = 0.0f;
 	int buttonClock_ = 1;
+private:
+	// 
+	bool isAction_ = false;
+
 };
 

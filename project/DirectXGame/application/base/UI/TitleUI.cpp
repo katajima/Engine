@@ -2,36 +2,44 @@
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
-void TitleUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables){
+void TitleUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) {
 	iconB_ = std::make_unique<Engine::Sprite>();
-	iconB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/B.png");
-	iconB_->SetPosition({ 640,500 });
+	iconB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/B.dds");
+	iconB_->SetPosition({ 640,600 });
 	iconB_->SetAnchorPoint({ 0.5f,0.5f });
 	iconB_->SetSize({ 200,200 });
 
 	title_ = std::make_unique<Engine::Sprite>();
-	title_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/title.png");
-	title_->SetPosition({ 640,200 });
+	title_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/title.dds");
+	title_->SetPosition(titlePos_);
 	title_->SetAnchorPoint({ 0.5f,0.5f });
 	title_->SetSize(2);
+	title_->SetColor({ 0.75f,0.75f ,0.75f ,1.0f });
 }
 
-void TitleUI::Update(float dt){
+void TitleUI::Update(float dt) {
 	// ボタンUI処理
 	ButtonUiProcess(dt);
-
-	// タイトルUI更新
-	title_->Update();
+	// タイトルUI処理
+	TitleUiProcess(dt);
 }
 
-void TitleUI::Draw(){
+void TitleUI::Draw() {
 	iconB_->Draw();
 	title_->Draw();
 }
 
 void TitleUI::ButtonUiProcess(float dt) {
 
-	//buttonTimer_ += dt;
+	if (isAction_) {
+		titlePos_.y -= 300.0f * dt;
+
+		title_->SetPosition(titlePos_);
+
+		if (buttonColor_.a <= 0.0f) {
+			return;
+		}
+	}
 
 	if (buttonColor_.a >= 1.0f) {
 		buttonColor_.a = 1.0f;
@@ -53,4 +61,9 @@ void TitleUI::ButtonUiProcess(float dt) {
 	iconB_->SetColor(buttonColor_);
 	// UI更新
 	iconB_->Update();
+}
+
+void TitleUI::TitleUiProcess(float dt) {
+	// タイトルUI更新
+	title_->Update();
 }

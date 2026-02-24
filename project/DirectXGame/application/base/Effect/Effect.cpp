@@ -2,15 +2,16 @@
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 
+
 void Effect::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables)
 {
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	globalVariables_ = globalVariables;	// 保存項目追加
+	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->globalVariables = globalVariables;	// 保存項目追加
 
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(entity3DManager_, globalVariables_);
+	effectComponent_->Init(entity3DManager, globalVariables);
 
 	// パーティクル初期化
 	InitParticle();
@@ -19,6 +20,7 @@ void Effect::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Global
 	// 通常弾初期化
 	InitBullet();
 }
+
 
 void Effect::InitParticle(){
 
@@ -100,6 +102,42 @@ void Effect::InitParticle(){
 	hitRingEmit->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
 	hitRingEmit->SetAlphaClipping(0.15f);
 	
+	// 
+	effectComponent_->AddEmitter("dust3", "dust3", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* dust2Emit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("dust3");
+
+	dust2Emit->GetFrequency() = 0.0f;
+	dust2Emit->SetCount(10, 0);
+	dust2Emit->SetPos({ 0,0.0f,0.0f });
+	dust2Emit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
+	dust2Emit->SetVelocity({ 200,0,0 }, { 50, 0, 0 });
+	dust2Emit->SetLifeTime(3.0f, 0.0f);
+	dust2Emit->SetIsAlpha(true);
+	dust2Emit->SetUsebillboard(true);
+	dust2Emit->SetSize({ 5,5,1 }, {});
+	dust2Emit->SetColorMinMax({ 1, 0.843f, 0 }, { 1, 0.843f, 0 });
+	dust2Emit->SetAlphaClipping(0.0f);
+	dust2Emit->SetRange(Vector3{ -2000,-200,-2000 }, Vector3{ 2000,200,2000 });
+
+
+
+	effectComponent_->AddEmitter("dust2", "dust3", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* dust3Emit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("dust2");
+
+	dust3Emit->GetFrequency() = 0.0f;
+	dust3Emit->SetCount(5, 0);
+	dust3Emit->SetPos({ 0,0.0f,0.0f });
+	dust3Emit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
+	dust3Emit->SetVelocity({ -10,0,0 }, { 3, 0, 0 });
+	dust3Emit->SetLifeTime(0.5f, 0.0f);
+	dust3Emit->SetIsAlpha(true);
+	dust3Emit->SetUsebillboard(true);
+	dust3Emit->SetSize({ 0.1f,0.1f,1 }, {});
+	dust3Emit->SetColorMinMax({ 1, 0.843f, 0 }, { 1, 0.843f, 0 });
+	dust3Emit->SetAlphaClipping(0.0f);
+	dust3Emit->SetRange(Vector3{ -0.15f,-0.15f,-0.15f }, Vector3{ 0.15f,0.15f,0.15f });
+
+
 }
 
 void Effect::InitRangeBombingBullet()
@@ -300,7 +338,7 @@ void Effect::InitBullet()
 	cartridgeEmit->SetSize(Vector3{ 0.8f,0.8f,0.8f }, {});
 	cartridgeEmit->SetColorMinMax({ 1,1, 0 }, { 1,1, 0 });
 
-
+	// 
 
 
 }

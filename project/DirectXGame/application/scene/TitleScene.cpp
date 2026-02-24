@@ -13,34 +13,105 @@ void TitleScene::Initialize()
 	// 
 	GetSceneData().playerID = 1;
 
+	// エフェクト
+	effect_ = std::make_unique<Effect>();
+	effect_->Initialize(GetEntity3DManager(), GetGlobalVariables());
+
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
-	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
+	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	titleStage_->SetEffect(effect_.get());
 
 	// UI
 	titleUI_ = std::make_unique<TitleUI>();
 	titleUI_->Initialize(nullptr, GetEntity2DManager(), GetGlobalVariables());
 
+	// プレイヤー
+	objectComponent_ = std::make_unique<ObjectComponent>();
+	objectComponent_->Initialize(GetEntity3DManager(), GetGlobalVariables(), "player", "testCharacter.gltf", 
+		false, false, nullptr,Engine::ObjectModelType::kSkinning);
+	objectComponent_->GetObject3D()->InitAnimationComponent();
+	objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop",0.0f);
+	objectComponent_->GetWorldTransform().translate_ = { 0,0,6 };
+
+	// オブジェクトコンポーネント追加
+	objectComponentShadow_ = std::make_unique<ObjectComponent>();
+	// オブジェクトインスタンシング初期化
+	objectComponentShadow_->InitializeInstancing(GetEntity3DManager(), GetGlobalVariables(), "PlayerBase1", "plane.obj", "resources/Texture/smoke/no4.dds",
+		false, false, nullptr, Engine::Object3dInstansManager::TransparencyType::kYes);
+
+	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
+	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
+
+
+	// 武器
+	//weapon_ = std::make_unique<PlayerWeapon>();
+	//weapon_->Initialize(nullptr, GetEntity3DManager(), GetEntity2DManager(), 
+	//	GetGlobalVariables(),{}, cameraManager_->GetCamera());
+	//->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
+	//weapon_->GetWorldTransform().translate_ = { 0.04f,0.09f,-0.2f };
 }
 
-void TitleScene::Finalize()
-{
+void TitleScene::Finalize(){
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
+
 }
 
 void TitleScene::Update()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			GetSceneManager()->ChangeScene("GAMEPLAY");
+			//GetSceneManager()->ChangeScene("GAMEPLAY");
+			titleUI_->Action();
+			isStart_ = true;
+			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
+		}
+	}
+	if (isStart_) {
+		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetPosition().z) {
+			objectComponent_->GetWorldTransform().translate_.z = titleStage_->GetPlayerCar()->GetPosition().z;
+			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop", 0.1f);
+			objectComponent_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
+			objectComponentShadow_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
+			//
+			startTimer_ += GetTime();
+
+			if (startTimer_ >= 1.0f) {
+				GetSceneManager()->ChangeScene("GAMEPLAY");
+			}
+
+			// 動く
+			titleStage_->GetPlayerCar()->Action();
+		}
+		else {
+			objectComponent_->GetWorldTransform().translate_.z += 0.1f;
 		}
 	}
 
+	// プレイヤー
+	objectComponent_->Update();
+
+	objectComponentShadow_->GetWorldTransform().translate_.x = objectComponent_->GetWorldTransform().translate_.x;
+	objectComponentShadow_->GetWorldTransform().translate_.z = objectComponent_->GetWorldTransform().translate_.z;
+	objectComponentShadow_->GetWorldTransform().translate_.y = 0.1f;
+
+	objectComponentShadow_->Update();
+
+	//// 位置
+	//weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(
+	//	objectComponent_->GetObject3D()->GetModel()->modelData.skeleton, "DEF-hand.R",
+	//	objectComponent_->GetWorldTransform().worldMat_));
+	//// 武器
+	//weapon_->Update();
 	// ステージ更新
-	titleStage_->Update();
+	titleStage_->Update(GetTime());
+	// エフェクト
+	effect_->Update();
 	// UI更新
 	titleUI_->Update(GetTime());
-	// カメラ更新
-	camera->UpdateMatrix();
+	// カメラ管理更新
+	cameraManager_->Update();
 }
 
 void TitleScene::Draw3D(){}
@@ -53,13 +124,24 @@ void TitleScene::Draw2D(){
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+
 }
 
 void TitleScene::InitializeCamera()
 {
-	camera = std::make_unique <Engine::Camera>();
-	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
-	//camera->transform_.rotate = { 1.0f,0,0 };
-	camera->transform_.translate = { 0,100,-60.0f };
+	// タイトルシーン用カメラ
+	titleCamera_ = std::make_unique<TitleCamera>();
+	titleCamera_->Initialize(nullptr, GetEntity3DManager(), GetGlobalVariables(), { 0,3.7f,-4.5f });
+
+
+	// カメラ管理クラス初期化
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(nullptr, GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_->AddCamera({ titleCamera_.get(), true}, "titleCamera");
+	
+	SetCamera(cameraManager_->GetCamera());
 }

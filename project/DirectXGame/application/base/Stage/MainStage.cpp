@@ -55,14 +55,17 @@ void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMana
 	}
 
 	
-
+	// 車
+	playerCar_ = std::make_unique<PlayerCar>();
+	playerCar_->Initialize(entity3DManager, {},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
+	playerCar_->SetGroungHeight(-2.9f);
 	
 	
 }
 
-void MainStage::Update()
+void MainStage::Update(float dt)
 {
-	
+	playerCar_->Update(dt);
 }
 
 void MainStage::Draw()

@@ -30,9 +30,9 @@ private:
 	std::unique_ptr<Engine::EffectComponent> effectComponent_;	// エフェクトコンポーネント
 
 private:
-	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Engine::Entity2DManager* entity2DManager_ = nullptr;	// 2Dエンティティマネージャー
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 
 
 private: // 一旦
