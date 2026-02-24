@@ -4,7 +4,7 @@ void SelectUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* ent
 };
 
 //更新
-void SelectUI::Update() {
+void SelectUI::Update(float dt) {
 };
 
 // 描画

@@ -73,12 +73,16 @@ private:
 	std::unique_ptr<Engine::SkyBox> skyBox;
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
+
+	// タイル
+	Engine::Object3d* tail;
+
 private:
 	struct ProvisionalData {
 		Vector3 oceanTranslate = { 0, -30, 0 };
 		Vector3 oceanRotate = { Math::DegreesToRadians(90) ,0,0 };
 
-		Vector3 skyBoxScale = { 100,100,100 };
+		Vector3 skyBoxScale = { 1000,1000,1000 };
 
 
 		Vector2 oceanRange{ 8000.0f,8000.0f };

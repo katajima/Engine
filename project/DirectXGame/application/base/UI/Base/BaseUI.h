@@ -19,7 +19,7 @@ public:
 	virtual void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) = 0;
 
 	// 毎フレーム更新
-	virtual void Update() = 0;
+	virtual void Update(float dt) = 0;
 
 	// 描画
 	virtual void Draw() = 0;

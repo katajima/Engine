@@ -52,7 +52,7 @@ void PlayerUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* ent
 
 }
 
-void PlayerUI::Update()
+void PlayerUI::Update(float dt)
 {
 	Engine::UIMeter* hpber = GetUIMeter("HPBer");			// HP
 	Engine::UIMeter* specailBer = GetUIMeter("SpecailBer");	// スペシャル

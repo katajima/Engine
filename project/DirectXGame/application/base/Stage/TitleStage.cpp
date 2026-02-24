@@ -19,18 +19,21 @@ void TitleStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMan
 	sky_->GetWorldTransform().scale_ = provisionalData_.skyBoxScale;
 	sky_->SetSkyBox(skyBox.get());
 
+	// タイル
+	tail = entity3DManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
+	tail->SetModel("Ground.obj");
+	tail->GetWorldTransform().scale_ = { 100,100,100 };
+	tail->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
 
+	// ライト
 	DirectionalLightData directionalLightData{};
 	directionalLightData.color = { 1,1,1,1 };
 	directionalLightData.direction = { 0,-1,0 };
 	directionalLightData.intensity = 1.5f;
 	directionalLightData.isLight = true;
 	directionalLightData.lig = 0.1f;
-
-
 	directional = std::make_shared<Engine::DirectionalLight>();
 	directional->directional = directionalLightData;
-
 	entity3DManager->GetLightManager()->AddLight(directional);
 };
 

@@ -187,6 +187,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\TitleUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
     <ClCompile Include="DIRECTXGAME\APPLICATION\BASE\WEAPON\ENEMY\SmallMeleeWeapon.cpp" />
@@ -878,6 +879,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />
     <ClInclude Include="DirectXGame\application\base\UI\FpsUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\SelectUI.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\TitleUI.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Enemy\SmallMeleeWeapon.h" />

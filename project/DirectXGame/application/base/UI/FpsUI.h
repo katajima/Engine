@@ -14,7 +14,7 @@ public:
 	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
 
 	// 更新
-	void Update() override;
+	void Update(float dt) override;
 
 	// 描画
 	void Draw() override;

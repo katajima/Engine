@@ -291,7 +291,7 @@ void GamePlayScene::Update()
 	gameFlowController_->Update(GetTime());
 
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
-	gameUI->Update();
+	gameUI->Update(GetTime());
 
 }
 

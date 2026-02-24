@@ -309,7 +309,7 @@ namespace Character {
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entity3DManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), 
 			entity3DManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
-		ui_->Update();
+		ui_->Update(GetTime());
 
 
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;

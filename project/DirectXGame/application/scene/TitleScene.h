@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 #include"DirectXGame/application/base/Stage/TitleStage.h"
+#include "DirectXGame/application/base/UI/TitleUI.h"
 
 /// <summary>
 /// タイトルシーン
@@ -40,14 +41,12 @@ private:
 	// カメラ
 	std::unique_ptr <Engine::Camera> camera;
 private:
-	Engine::Object3d tail;
 	// ステージ
 	std::unique_ptr<TitleStage> titleStage_ = nullptr;
+	// UI
+	std::unique_ptr<TitleUI> titleUI_ = nullptr;
+	// レベルデータ
 	std::unique_ptr<LoadLevelData> loadData_;
-
-private:
-	std::unique_ptr<Engine::Sprite> icon_B;
-	std::unique_ptr<Engine::Sprite> title;
 };
 
 

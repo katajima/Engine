@@ -21,7 +21,7 @@ void FpsUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity
 
 
 // 更新
-void FpsUI::Update() {
+void FpsUI::Update(float dt) {
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();

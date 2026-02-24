@@ -154,7 +154,7 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entit
 
 }
 
-void GameUI::Update()
+void GameUI::Update(float dt)
 {
 	// ボード画面比率画面左上座標指定
 	board_->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);

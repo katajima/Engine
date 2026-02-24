@@ -4,22 +4,22 @@
 
 void TitleScene::Initialize()
 {
-	//オーディオの初期化
-	//audio_ = Audio::GetInstance();
 	// 入力初期化
 	input_ = GetInput();
-
 	// カメラ
 	InitializeCamera();
 	// リソース
 	InitializeResources();
-
-
+	// 
 	GetSceneData().playerID = 1;
 
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
 	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
+
+	// UI
+	titleUI_ = std::make_unique<TitleUI>();
+	titleUI_->Initialize(nullptr, GetEntity2DManager(), GetGlobalVariables());
 
 }
 
@@ -37,48 +37,23 @@ void TitleScene::Update()
 
 	// ステージ更新
 	titleStage_->Update();
-
-	tail.Update();
-
+	// UI更新
+	titleUI_->Update(GetTime());
+	// カメラ更新
 	camera->UpdateMatrix();
 }
 
-void TitleScene::Draw3D()
-{
-	
-	tail.Draw();
-}
+void TitleScene::Draw3D(){}
 
-void TitleScene::Draw2D()
-{
-	icon_B->Update();
-	icon_B->Draw();
-	title->Update();
-	title->Draw();
+void TitleScene::Draw2D(){
+	// UI更新
+	titleUI_->Draw();
 }
 
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
 	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(camera.get());
-
-	icon_B = std::make_unique<Engine::Sprite>();
-	icon_B->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/icon/B.png");
-	icon_B->SetPosition({ 640,500 });
-	icon_B->SetAnchorPoint({ 0.5f,0.5f });
-	icon_B->SetSize({200,200});
-
-	title = std::make_unique<Engine::Sprite>();
-	title->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/title.png");
-	title->SetPosition({ 640,200 });
-	title->SetAnchorPoint({ 0.5f,0.5f });
-	title->SetSize(2);
-
-
-	tail.Initialize(GetEntity3DManager());
-	tail.SetModel("renga.gltf");
-	tail.SetCamera(camera.get());
-	tail.GetWorldTransform().scale_ = { 10,10,10 };
 }
 
 void TitleScene::InitializeCamera()
