@@ -348,47 +348,18 @@ void Engine::MyGame::LoadModel()
 {
 	ModelManager* modelManager = dxCommon->GetModelManager();
 
-	modelManager->LoadModel("a.obj");
-
-	modelManager->LoadModel("multiMaterial.obj", "multiMaterial");
-
-	modelManager->LoadModel("multiMaterial.gltf", "multiMaterial");
-
-	modelManager->LoadModel("multiMesh.obj", "multiMesh");
-
-
-	modelManager->LoadModel("origin.gltf", "Character");
-	modelManager->LoadModel("testCharacter.gltf", "Character");
-	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
-
-
-
-	modelManager->LoadModel("player_bullet.obj", "player_bullet");
-	modelManager->LoadModel("cartridge.obj", "player_bullet");
-	modelManager->LoadModel("Sword.obj", "Sword");
-	modelManager->LoadModel("plane.obj", "plane");
-	modelManager->LoadModel("AnimatedCube.gltf", "AnimatedCube");
-
-	modelManager->LoadModel("Ground.obj", "Ground");
-	modelManager->LoadModel("stair.obj");
-	modelManager->LoadModel("BoxBox.obj", "BoxAABB");
-	modelManager->LoadModel("point.obj", "special");
-
-
-
-	modelManager->LoadModel("plane.obj", "plane");
-	modelManager->LoadModel("axis.obj", "axis");
-
-
-	modelManager->LoadModel("teapot.obj", "teapot");
-
-
-
-	modelManager->LoadModel("rail.obj", "rail");
-	modelManager->LoadModel("Sphere.obj", "sphere");
-	modelManager->LoadModel("Sphere2.obj", "sphere");
-	modelManager->LoadModel("Sphere3.obj", "sphere");
-	modelManager->LoadModel("skydome.obj", "skydome");
+	
+	/// <summary>
+	/// テスト用フリーモデル
+	/// </summary>
+	modelManager->LoadModel("multiMaterial.obj", "TestModel/multiMaterial");
+	modelManager->LoadModel("multiMaterial.gltf", "TestModel/multiMaterial");
+	modelManager->LoadModel("multiMesh.obj", "TestModel/multiMesh");
+	modelManager->LoadModel("plane.obj", "TestModel/plane");
+	modelManager->LoadModel("AnimatedCube.gltf", "TestModel/AnimatedCube");
+	modelManager->LoadModel("axis.obj", "TestModel/axis");
+	modelManager->LoadModel("teapot.obj", "TestModel/teapot");
+	modelManager->LoadModel("stair.obj", "TestModel");			// 階段
 
 
 
@@ -396,29 +367,25 @@ void Engine::MyGame::LoadModel()
 	/// 乗り物
 	/// </summary>
 
-	modelManager->LoadModel("train.gltf", "train");
-	modelManager->LoadModel("ship.gltf", "ship");
+	modelManager->LoadModel("train.gltf",	"Vehicle/train");
+	modelManager->LoadModel("ship.gltf",	"Vehicle/ship");
 
 	/// <summary>
 	/// 地形
 	/// </summary>
-	modelManager->LoadModel("renga.gltf", "renga");
-
-
-	modelManager->LoadModel("coast.gltf", "terrain/coast");
-	modelManager->LoadModel("black.obj", "terrain/black");
-	modelManager->LoadModel("terrain.obj", "terrain/terrain");
-	modelManager->LoadModel("stair.obj");
-
+	modelManager->LoadModel("renga.gltf", "stage/renga");				// 地形
+	modelManager->LoadModel("Ground.obj", "stage/Ground");				// 地形
+	modelManager->LoadModel("coast.gltf", "stage/terrain/coast");		// 地形
+	modelManager->LoadModel("black.obj", "stage/terrain/black");		// 地形(底)
+	modelManager->LoadModel("terrain.obj", "stage/terrain/terrain");	// 地形
+	modelManager->LoadModel("rail.obj", "stage/rail");					// 線路
 
 
 	/// <summary>
 	/// 建物
 	/// </summary>
-	modelManager->LoadModel("building.obj", "buildingAll/building"); // ビル
-	modelManager->LoadModel("warehouse.gltf", "buildingAll/warehouse"); // 倉庫
 	modelManager->LoadModel("stage.gltf", "stage"); // ステージ
-	modelManager->LoadModel("Missile.gltf", "Missile"); // ミサイル発射台
+	modelManager->LoadModel("Missile.gltf", "stage/Missile"); // ミサイル発射台
 
 
 	modelManager->LoadModel("trainBridge.gltf", "stage/Bridge"); // ステージ(橋)
@@ -426,32 +393,44 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("hasira.obj", "stage/objects"); // 柱()
 	modelManager->LoadModel("testField.obj", "stage/test"); // フィールド()
 
+	/// <summary>
+	/// プレイヤー
+	/// </summary>
+	modelManager->LoadModel("player_bullet.obj", "Bullet/player_bullet");	// プレイヤー弾
+	modelManager->LoadModel("cartridge.obj", "Bullet/player_bullet");	// プレイヤー弾
+
+	modelManager->LoadModel("Sword.obj", "Weapon/Sword");				// プレイヤー武器
+	modelManager->LoadModel("bulletWeapon.obj", "Weapon");
+
+	modelManager->LoadModel("origin.gltf", "Character/Player");		// プレイヤー
+	modelManager->LoadModel("testCharacter.gltf", "Character/Player");	// プレイヤー
+
+	modelManager->LoadModel("point.obj", "special");			// ポイント
+
 
 	/// <summary>
 	/// 敵
 	/// </summary>
 
-	modelManager->LoadModel("enemy.obj", "enemyAll/enemy"); // 的
-	modelManager->LoadModel("enemy.gltf", "enemyAll/enemy2"); // 本体
-	modelManager->LoadModel("enemy2.obj", "enemyAll/enemy2"); // 本体
-	modelManager->LoadModel("enemyTire.obj", "enemyAll/tire"); // タイヤ
-	modelManager->LoadModel("enemyDuct.obj", "enemyAll/duct"); // ダクト
-	modelManager->LoadModel("enemyPlank.obj", "enemyAll/plank"); // 鋼板
-	modelManager->LoadModel("enemyGear.obj", "enemyAll/gear"); // 歯車
-	modelManager->LoadModel("enemyFence.obj", "enemyAll/fence"); // 柵
+	modelManager->LoadModel("enemy.obj",		"Character/enemyAll/enemy"); // 的
+	modelManager->LoadModel("enemy.gltf",		"Character/enemyAll/enemy2"); // 本体
+	modelManager->LoadModel("enemy2.obj",		"Character/enemyAll/enemy2"); // 本体
+	modelManager->LoadModel("enemyTire.obj",	"Character/enemyAll/tire"); // タイヤ
+	modelManager->LoadModel("enemyDuct.obj",	"Character/enemyAll/duct"); // ダクト
+	modelManager->LoadModel("enemyPlank.obj",	"Character/enemyAll/plank"); // 鋼板
+	modelManager->LoadModel("enemyGear.obj",	"Character/enemyAll/gear"); // 歯車
+	modelManager->LoadModel("enemyFence.obj",	"Character/enemyAll/fence"); // 柵
 
 
-	modelManager->LoadModel("enemyBullet.gltf", "enemyAll/enemyBullet"); // 本体
+	modelManager->LoadModel("enemyBullet.gltf", "Character/enemyAll/enemyBullet"); // 本体
 
 
 
-	modelManager->LoadModel("enemyBodySG01.obj", "enemy/enemySG01"); // 本体
-	modelManager->LoadModel("enemyWeaponSG01.obj", "enemy/enemySG01"); // 武器
+	modelManager->LoadModel("enemyBodySG01.obj",		"Character/enemy/enemySG01"); // 本体
+	modelManager->LoadModel("enemyWeaponSG01.obj",		"Character/enemy/enemySG01"); // 武器
 
-	modelManager->LoadModel("enemyBodySS01.obj", "enemy/enemySS01"); // 本体
-	modelManager->LoadModel("enemyPropellerSS01.obj", "enemy/enemySS01"); // プロペラ
-	modelManager->LoadModel("enemyMuzzleSS01.obj", "enemy/enemySS01"); // 武器
+	modelManager->LoadModel("enemyBodySS01.obj",		"Character/enemy/enemySS01"); // 本体
+	modelManager->LoadModel("enemyPropellerSS01.obj",	"Character/enemy/enemySS01"); // プロペラ
+	modelManager->LoadModel("enemyMuzzleSS01.obj",		"Character/enemy/enemySS01"); // 武器
 	
-
-
 }
