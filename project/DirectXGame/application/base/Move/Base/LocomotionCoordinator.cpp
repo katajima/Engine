@@ -3,5 +3,14 @@
 
 MoveCommand LocomotionCoordinator::BuildCommand()
 {
-	return MoveCommand();
+	MoveCommand cmd{};
+
+	if (!ctx_) return cmd;
+
+	for (auto& request : requests_) {
+		cmd.finalVelocity += request.velocity;
+	}
+
+
+	return cmd;
 }

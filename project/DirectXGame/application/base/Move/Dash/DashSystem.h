@@ -6,7 +6,7 @@
 /// <summary>
 /// ダッシュに関するシステムクラス
 /// </summary>
-class DashRequest {
+class DashSystem {
 public:
 	/// <summary>
 	/// 初期化

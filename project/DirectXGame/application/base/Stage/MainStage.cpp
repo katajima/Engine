@@ -1,4 +1,4 @@
-#include "Stage.h"
+#include "MainStage.h"
 
 #include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
@@ -9,20 +9,20 @@
 
 void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera)
 {
-	dxCommon_ = dxcommon;				// ダイレクトX共通クラス
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	entity2DManager_ = entity2DManager;	// エンティティ2d
+	this->dxCommon = dxcommon;				// ダイレクトX共通クラス
+	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->entity2DManager = entity2DManager;	// エンティティ2d
 	
 	// 海初期化
 	ocean_ = std::make_unique<Engine::Ocean>();
-	ocean_->Initialize(entity3DManager_, provisionalData_.oceanRange);
+	ocean_->Initialize(entity3DManager, provisionalData_.oceanRange);
 	ocean_->GetWaveParameters()[0].amplitude = provisionalData_.oceanAmplitude;
 	ocean_->GetWaveParameters()[0].waveDirection = provisionalData_.waveDirection;
 	ocean_->GetWaveParameters()[0].speed = provisionalData_.waveSpeed;
 	ocean_->GetMaterial()->GetMaterialInstance().color = provisionalData_.color;
 
 	// 海オブジェクト追加
-	oceanObject = entity3DManager_->CreateObject3D("oceanObject", Engine::ObjectModelType::kOcean, {}, camera_);
+	oceanObject = entity3DManager->CreateObject3D("oceanObject", Engine::ObjectModelType::kOcean, {}, camera);
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = provisionalData_.oceanTranslate;
 	oceanObject->GetWorldTransform().rotate_ = provisionalData_.oceanRotate;
@@ -30,10 +30,10 @@ void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMana
 	
 	// スカイボックス初期化
 	skyBox = std::make_unique<Engine::SkyBox>();
-	skyBox->Initialize(entity3DManager_, "resources/Texture/hdr/sky.dds");
+	skyBox->Initialize(entity3DManager, "resources/Texture/hdr/sky.dds");
 	
 	// 空
-	sky_ = entity3DManager_->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {},camera_);
+	sky_ = entity3DManager->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {},camera);
 	sky_->GetWorldTransform().scale_ = provisionalData_.skyBoxScale;
 	sky_->SetSkyBox(skyBox.get());
 	
@@ -45,7 +45,7 @@ void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DMana
 			auto object = entity3DManager->CreateObject3D("Missile" + std::to_string(j) + "_" + std::to_string(i), Engine::ObjectModelType::kNormal,
 				{ provisionalData_.missileTranslate.x + static_cast<float>(j) * provisionalData_.missileInterval.x ,
 				  provisionalData_.missileTranslate.y,
-				  provisionalData_.missileTranslate.z + static_cast<float>(i) * provisionalData_.missileInterval.y },camera_);
+				  provisionalData_.missileTranslate.z + static_cast<float>(i) * provisionalData_.missileInterval.y },camera);
 			object->SetModel("Missile.gltf");
 			object->GetWorldTransform().rotate_ = provisionalData_.missileRotate;
 			

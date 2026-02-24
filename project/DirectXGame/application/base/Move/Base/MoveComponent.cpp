@@ -7,13 +7,13 @@ void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* 
 
 	name_ = "MoveData" + name;
 	// 移動システムの生成
-	moveSystem_ = std::make_unique<MoveRequest>();
+	moveSystem_ = std::make_unique<MoveSystem>();
 	moveSystem_->Initialize();
 	// ジャンプシステムの生成
-	jumpSystem_ = std::make_unique<JumpRequest>();
+	jumpSystem_ = std::make_unique<JumpSystem>();
 	jumpSystem_->Initialize();
 	// ダッシュシステムの生成
-	dashSystem_ = std::make_unique<DashRequest>();
+	dashSystem_ = std::make_unique<DashSystem>();
 	dashSystem_->Initialize();
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
@@ -51,33 +51,41 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 	ctx.fallGravity = jumpSystem_->GetData().fallGravity_;
 	ctx.upGravity = jumpSystem_->GetData().upGravity_;
 	ctx.attackingGravity = attackingGravity;
+	ctx.camera = camera;						// カメラ;
+	ctx.cameraDirection = movementSystem_->GetDirection();	// 方向
 
-
-	// リクエスト集約選択クラス開始
-	locomotionCoordinator_->BeginFrame(ctx);
-
-	// ダッシュシステムの更新
-	dashSystem_->Update(ctx, *locomotionCoordinator_.get());
-
-	// ジャンプシステムの更新
-	jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), object, rigid);
-
+	
 
 	// 移動システムの更新
 	if (controlType_ == ControlType::Manual) {	// 手動操作なら入力を渡す
-		moveSystem_->Update(dt, object, input);
+		// リクエスト集約選択クラス開始
+		locomotionCoordinator_->BeginFrame(ctx);
+
+		// ダッシュシステムの更新
+		dashSystem_->Update(ctx, *locomotionCoordinator_.get());
+
+		// ジャンプシステムの更新
+		jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), object, rigid);
+
+		// 移動システム更新
+		moveSystem_->Update(ctx, *locomotionCoordinator_.get(), object, input);
+
+		// リクエスト集約選択クラスで移動コマンド生成
+		MoveCommand cmd = locomotionCoordinator_->BuildCommand();
+
+		// 移動反映クラス更新
+		movementSystem_->Update(ctx, cmd, object, rigid);
 	}
 	else {
 		moveSystem_->UpdateEnemy(dt);
+
+		if (object.GetWorldPosition().y <= -3.0f) {
+			object.translate_.y = -3.0f;	// 地面位置に
+			rigid.Velocity().y = 0.0f;			// y速度を0に
+			rigid.SetIsGravity(false);			// 重力をオフ
+			rigid.SetGravityScale(1.0f);		// 重力スケールリセット
+		}
 	}
-
-
-
-	// リクエスト集約選択クラスで移動コマンド生成
- 	MoveCommand cmd = locomotionCoordinator_->BuildCommand();
-
-	// 移動反映クラス更新
-	movementSystem_->Update(ctx,cmd,object,rigid);
 
 	// 移動制限の更新
 	movementRestrictions_->Update(object);

@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "LocomotionContext.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 /// <summary>
@@ -13,7 +14,15 @@ public:
 	void BeginFrame(const LocomotionContext& ctx) {
 		ctx_ = &ctx;
 		built_ = false;
+		requests_.clear();
 	}
+
+	/// <summary>
+	/// リクエスト
+	/// </summary>
+	/// <param name="request"></param>
+	void Request(MoveRequest request) { requests_.push_back(request); }
+
 	/// <summary>
 	/// 移動コマンド生成
 	/// </summary>
@@ -22,4 +31,5 @@ public:
 private:
 	const LocomotionContext* ctx_ = nullptr;
 	bool built_ = false;
+	std::vector<MoveRequest> requests_;
 };

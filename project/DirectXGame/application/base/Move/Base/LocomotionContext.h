@@ -1,6 +1,11 @@
 #pragma once
 #include "DirectXGame/application/base/Input/InputSystem.h"
 
+
+namespace Engine {
+    class Camera;
+}
+
 /// <summary>
 /// 現在の状態
 /// </summary>
@@ -10,6 +15,10 @@ struct LocomotionContext
 
     // ===== 入力 =====
     InputSystem input;
+
+    //  ===== カメラ =====
+    const Engine::Camera* camera = nullptr;
+    Vector3 cameraDirection{};
 
     // ===== 現在の状態 =====
     bool onGround = false;
@@ -50,4 +59,24 @@ struct LocomotionContext
 struct MoveCommand {
     // 最終的な速度
     Vector3 finalVelocity;
+};
+
+enum class MoveLayer : uint8_t { 
+    kBase, 
+    kAdditive, 
+    kOverride 
+};
+
+/// <summary>
+/// 移動リクエスト
+/// </summary>
+struct MoveRequest {
+    // 
+    MoveLayer layer = MoveLayer::kBase;
+    // 速度倍率(Base)
+    float speedMultiplier = 1.0f;
+    // Additive/Override
+    Vector3 velocity{};
+    int priority = 0;     // Override競合用
+    bool invincible = false;
 };

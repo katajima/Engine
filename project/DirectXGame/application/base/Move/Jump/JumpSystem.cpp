@@ -1,9 +1,9 @@
-#include "JumpRequest.h"
+#include "JumpSystem.h"
 
 
-void JumpRequest::Initialize(){}
+void JumpSystem::Initialize(){}
 
-void JumpRequest::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
+void JumpSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid)
 {
 	// 入力ホールド処理
 	InputHoldProcess(ctx.dt);
@@ -18,7 +18,7 @@ void JumpRequest::Update(const LocomotionContext& ctx, LocomotionCoordinator& co
 	}
 }
 
-void JumpRequest::StartJump(Engine::RigidBodyComponent& rigid)
+void JumpSystem::StartJump(Engine::RigidBodyComponent& rigid)
 {
 	rigid.Velocity().y = 0;	// 移動速度リセット
 	DecrementJumpCount();	// ジャンプ回数減少
@@ -35,7 +35,7 @@ void JumpRequest::StartJump(Engine::RigidBodyComponent& rigid)
 
 #pragma region Process
 
-void JumpRequest::InputHoldProcess(float dt)
+void JumpSystem::InputHoldProcess(float dt)
 {
 	if (!isInputHeld_) return;
 
@@ -52,7 +52,7 @@ void JumpRequest::InputHoldProcess(float dt)
 	
 }
 
-void JumpRequest::JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid)
+void JumpSystem::JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid)
 {
 	if (!isInputHeld_) return;	// ホールド解除されているなら処理しない
 

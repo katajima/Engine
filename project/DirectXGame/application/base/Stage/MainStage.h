@@ -100,13 +100,11 @@ private:
 	// ライト
 	std::shared_ptr<Engine::DirectionalLight> directional;
 private:
+	Engine::DirectXCommon* dxCommon;
+	Engine::Entity3DManager* entity3DManager;
+	Engine::Entity2DManager* entity2DManager;
 
-private:
-	Engine::DirectXCommon* dxCommon_;
-	Engine::Entity3DManager* entity3DManager_;
-	Engine::Entity2DManager* entity2DManager_;
-
-	Engine::Camera* camera_ = nullptr;
+	Engine::Camera* camera = nullptr;
 private: // 一旦
 
 	struct ProvisionalData {

@@ -166,11 +166,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\MovementSystem.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashRequest.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpRequest.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\MoveComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\MovementRestrictions.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveRequest.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Object\ObjectComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameFlowController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\GameEventController.cpp" />
@@ -180,6 +180,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\TitleStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\BaseMainState.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.cpp" />
@@ -221,7 +222,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\PlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\MainStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\Base\BaseUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\GameUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.cpp" />
@@ -851,13 +852,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Move\Base\MovementData.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MovementSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Dash\DashData.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashRequest.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpData.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpRequest.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Move\MoveData.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MovementRestrictions.h" />
-    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveRequest.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Object\ObjectComponent.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameFlowController.h" />
     <ClInclude Include="DirectXGame\application\base\Game\GameEventController.h" />
@@ -867,6 +868,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointState.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseMainState.h" />
     <ClInclude Include="DirectXGame\application\base\State\CharacterStateMachine.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseSubState.h" />
@@ -931,7 +933,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\PlayerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h" />
-    <ClInclude Include="DirectXGame\application\base\Stage\Stage.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\MainStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\Base\BaseUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\GameUI.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\UniverseCamera\UniverseCamera.h" />

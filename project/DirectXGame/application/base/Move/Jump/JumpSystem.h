@@ -6,7 +6,7 @@
 /// <summary>
 /// ジャンプシステムクラス
 /// </summary>
-class JumpRequest {
+class JumpSystem {
 public:
 	// 初期化
 	void Initialize();

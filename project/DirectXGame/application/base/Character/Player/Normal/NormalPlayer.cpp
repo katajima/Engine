@@ -27,7 +27,7 @@ namespace Character {
 
 		// オブジェクトコンポーネント追加
 		objectComponent_ = std::make_unique<ObjectComponent>();
-		objectComponent_->Initialize(entity3DManager, globalVariables, "PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning);
+		objectComponent_->Initialize(entity3DManager, globalVariables, "PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning,false);
 		// 保存項目追加
 		CreateGroup("Player");
 
@@ -296,13 +296,15 @@ namespace Character {
 		moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(),
 			*GetObjectComponent()->GetRigidBodyComponent(), inputSystem);
 
+		
+		//武器更新
+		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->modelData.skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
+		weapon_->Update();
+
+
 		// ステート
 		stateMachine_->Update();
 
-		//武器更新
-		GetObjectComponent()->GetWorldTransform().Update();
-		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->modelData.skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
-		weapon_->Update();
 
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entity3DManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), 

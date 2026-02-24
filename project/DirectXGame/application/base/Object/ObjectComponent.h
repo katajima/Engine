@@ -58,7 +58,7 @@ public:
 	///</summary>
 	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
 		const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, 
-		IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType = Engine::ObjectModelType::kNormal);
+		IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType = Engine::ObjectModelType::kNormal,bool rigidUpdate = true);
 
 	/// <summary>
 	/// インスタンシング用初期化
@@ -138,7 +138,7 @@ private:
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	bool useCollider_ = false;	// コライダーコンポーネントを使うか
 	bool useInstancing = false;	// インスタンシング描画にするか
-
+	bool rigidUpdate_ = true;
 
 	Engine::ObjectInstans* objectInstance_ = nullptr;
 	int instanceId_ = 0;

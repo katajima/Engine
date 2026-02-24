@@ -1,18 +1,10 @@
 #pragma once
 #include"DirectXGame/engine/scene/BaseScene.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
-
-
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-
 #include<DirectXGame/engine/Effect/EffectComponent.h>
-
-
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
+#include"DirectXGame/application/base/Stage/TitleStage.h"
 
 /// <summary>
 /// タイトルシーン
@@ -45,23 +37,17 @@ private:
 private:
 	Engine::Input* input_ = nullptr;
 	Engine::Audio* audio_ = nullptr;
-
-
 	// カメラ
 	std::unique_ptr <Engine::Camera> camera;
-	
+private:
+	Engine::Object3d tail;
+	// ステージ
+	std::unique_ptr<TitleStage> titleStage_ = nullptr;
+	std::unique_ptr<LoadLevelData> loadData_;
 
+private:
 	std::unique_ptr<Engine::Sprite> icon_B;
 	std::unique_ptr<Engine::Sprite> title;
-
-
-	Engine::Object3d tail;
-
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-
-
-	std::unique_ptr<LoadLevelData> loadData_;
 };
 
 

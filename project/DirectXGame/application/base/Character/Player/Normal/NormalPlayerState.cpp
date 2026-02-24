@@ -12,7 +12,7 @@ namespace Character {
 		BaseWeapon* weapon = character->GetWeapon();
 		BaseSpecial* special = character->GetSpecial();
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		MoveRequest* move = character->GetMoveComponent()->GetMoveSystem();
+		MoveSystem* move = character->GetMoveComponent()->GetMoveSystem();
 		character->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 
 
@@ -126,7 +126,7 @@ namespace Character {
 	void PlayerStateJump::Update() {
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		InputSystem* inputSystem = character->GetInputSystem();
-		JumpRequest* jump = character->GetMoveComponent()->GetJumpSystem();
+		JumpSystem* jump = character->GetMoveComponent()->GetJumpSystem();
 
 		anima->SetIsPlaying(true);		// アニメーション再生
 		anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定

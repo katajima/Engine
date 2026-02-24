@@ -16,6 +16,11 @@ void TitleScene::Initialize()
 
 
 	GetSceneData().playerID = 1;
+
+	// ステージ
+	titleStage_ = std::make_unique<TitleStage>();
+	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), camera.get());
+
 }
 
 void TitleScene::Finalize()
@@ -30,8 +35,11 @@ void TitleScene::Update()
 		}
 	}
 
+	// ステージ更新
+	titleStage_->Update();
 
 	tail.Update();
+
 	camera->UpdateMatrix();
 }
 
@@ -62,8 +70,8 @@ void TitleScene::InitializeResources()
 
 	title = std::make_unique<Engine::Sprite>();
 	title->Initialize(GetEntity2DManager()->GetSpriteCommon(),"resources/Texture/text/title.png");
-	title->SetPosition({ 200,200 });
-	//title->SetAnchorPoint({ 0.5f,0.5f });
+	title->SetPosition({ 640,200 });
+	title->SetAnchorPoint({ 0.5f,0.5f });
 	title->SetSize(2);
 
 
@@ -71,25 +79,12 @@ void TitleScene::InitializeResources()
 	tail.SetModel("renga.gltf");
 	tail.SetCamera(camera.get());
 	tail.GetWorldTransform().scale_ = { 10,10,10 };
-
-	DirectionalLightData directionalLightData{};
-	directionalLightData.color = { 1,1,1,1 };
-	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 1.5f;
-	directionalLightData.isLight = true;
-	directionalLightData.lig = 0.1f;
-
-
-	directional = std::make_shared<Engine::DirectionalLight>();
-	directional->directional = directionalLightData;
-
-	GetEntity3DManager()->GetLightManager()->AddLight(directional);
 }
 
 void TitleScene::InitializeCamera()
 {
 	camera = std::make_unique <Engine::Camera>();
 	camera->Initialize(GetEntity3DManager()->GetCameraCommon());
-	camera->transform_.rotate = { 1.0f,0,0 };
+	//camera->transform_.rotate = { 1.0f,0,0 };
 	camera->transform_.translate = { 0,100,-60.0f };
 }

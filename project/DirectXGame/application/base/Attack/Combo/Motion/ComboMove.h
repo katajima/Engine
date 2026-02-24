@@ -14,7 +14,7 @@ namespace Character {
 	class BaseCharacter;		// キャラクター
 }
 class BaseWeapon;			// 武器
-class JumpRequest;			// ジャンプシステム
+class JumpSystem;			// ジャンプシステム
 class LockOnSystem;			// ロックオンシステム
 
 namespace Combo {

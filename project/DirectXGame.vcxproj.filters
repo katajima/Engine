@@ -519,7 +519,7 @@
     <ClCompile Include="DirectXGame\application\scene\SelectScene.cpp">
       <Filter>ソース ファイル\application\scene</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Stage\Stage.cpp">
+    <ClCompile Include="DirectXGame\application\base\Stage\MainStage.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\scene\TestScene.cpp">
@@ -735,16 +735,16 @@
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpRequest.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveRequest.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Move\Base\MovementRestrictions.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashRequest.cpp">
+    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp">
@@ -907,6 +907,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Move\Base\MovementSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\TitleStage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1593,7 +1596,7 @@
     <ClInclude Include="DirectXGame\application\scene\SceneFactory.h">
       <Filter>ヘッダー ファイル\engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Stage\Stage.h">
+    <ClInclude Include="DirectXGame\application\base\Stage\MainStage.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\struct\Structs.h">
@@ -1857,16 +1860,16 @@
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveRequest.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpRequest.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Move\Base\MovementRestrictions.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashRequest.h">
+    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.h">
@@ -2086,6 +2089,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionContext.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

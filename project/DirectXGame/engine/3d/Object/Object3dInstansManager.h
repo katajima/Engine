@@ -57,7 +57,7 @@ namespace Engine {
 	{
 	public:
 		// 初期化
-		void Initialize(Entity3DManager* entity3DManager, bool useCollider = false, Transform transform = { {1,1,1},{},{} });
+		void Initialize(Entity3DManager* entity3DManager, bool useCollider = false, bool rigidUpdate = true,  Transform transform = { {1,1,1},{},{} });
 		// 更新
 		void Update();
 
@@ -83,7 +83,7 @@ namespace Engine {
 		// コライダーコンポーネントをObject3d内で更新するかのフラグ
 		bool isColliderComponenyUpdate_ = false;
 		bool useCollider_ = false;
-
+		bool rigidUpdate_ = true;
 	private:
 		std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
 		bool isDelete_ = false;

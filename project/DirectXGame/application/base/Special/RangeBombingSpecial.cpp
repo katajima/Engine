@@ -9,7 +9,7 @@
 #include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
-#include "DirectXgame/application/base/Stage/Stage.h"
+#include "DirectXgame/application/base/Stage/MainStage.h"
 
 void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera)
 {

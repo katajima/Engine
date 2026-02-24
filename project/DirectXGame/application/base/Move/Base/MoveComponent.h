@@ -2,9 +2,9 @@
 #include "MovementRestrictions.h"
 #include "MovementSystem.h"
 #include "DirectXGame/application/base/Move/Base/LocomotionCoordinator.h"
-#include "DirectXGame/application/base/Move/Move/MoveRequest.h"
-#include "DirectXGame/application/base/Move/Jump/JumpRequest.h"
-#include "DirectXGame/application/base/Move/Dash/DashRequest.h"
+#include "DirectXGame/application/base/Move/Move/MoveSystem.h"
+#include "DirectXGame/application/base/Move/Jump/JumpSystem.h"
+#include "DirectXGame/application/base/Move/Dash/DashSystem.h"
 
 // 前方宣言
 namespace Engine {
@@ -36,7 +36,6 @@ public:
 public:
 	// 保存項目の追加
 	void ApplyGlobalData(const std::string& name);
-
 	// 保存項目の適応
 	void SetGlobalData(const std::string& name);
 public:
@@ -48,10 +47,8 @@ public: // 移動系統
 	Vector3 GetVelocity() const { return moveSystem_->GetVelocity(); }
 	// 速度
 	Vector3& Velocity() { return moveSystem_->Velocity(); }
-	// 加速度
-	Vector3& Acceleration() { return moveSystem_->Acceleration(); }
 	// 向いている方向
-	Vector3 GetDirection() const { return moveSystem_->GetDirection(); }
+	Vector3 GetDirection() const { return movementSystem_->GetDirection(); }
 	
 
 	// 速度設定
@@ -62,7 +59,7 @@ public: // 移動系統
 	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
 	// 移動出来るか設定
 	void SetCanMove(bool canMove) { moveSystem_->SetCanMove(canMove); }
-	//
+	// 保存項目を使うか
 	void UseGlobal(bool is) { useGlobal_ = is; };
 public: // ジャンプ系統
 
@@ -78,23 +75,23 @@ public: // ジャンプ系統
 	void SetAttackingGravity(float gravity) { attackingGravity = gravity; }
 public:
 	// 移動システム取得
-	MoveRequest* GetMoveSystem() { return moveSystem_.get(); }
+	MoveSystem* GetMoveSystem() { return moveSystem_.get(); }
 	// ジャンプシステム取得
-	JumpRequest* GetJumpSystem() { return jumpSystem_.get(); }
+	JumpSystem* GetJumpSystem() { return jumpSystem_.get(); }
 	// ダッシュシステム取得
-	DashRequest* GetDashSystem() { return dashSystem_.get(); }
+	DashSystem* GetDashSystem() { return dashSystem_.get(); }
 	// 移動システム取得
 	MovementSystem* GetMovementSystem() { return movementSystem_.get(); }
 public:
 	// カメラ設定
-	void SetCamera(Engine::Camera* camera) { moveSystem_->SetCamera(camera); }
+	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
 private:
 	// 移動システム
-	std::unique_ptr<MoveRequest> moveSystem_ = nullptr;
+	std::unique_ptr<MoveSystem> moveSystem_ = nullptr;
 	// ジャンプシステム
-	std::unique_ptr<JumpRequest> jumpSystem_ = nullptr;
+	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr;
 	// ダッシュシステム
-	std::unique_ptr<DashRequest> dashSystem_ = nullptr; 
+	std::unique_ptr<DashSystem> dashSystem_ = nullptr; 
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 
 	// 行動リクエストを元に行動を集約→選択するクラス
@@ -112,8 +109,10 @@ private:
 private:
 	// 保存項目
 	Engine::GlobalVariables* globalVariables = nullptr;
+	// 所有者
 	Character::BaseCharacter* owner = nullptr;
-
+	// カメラ
+	const Engine::Camera* camera = nullptr;
 	// 攻撃中の重力係数
 	float attackingGravity = 1.0f;
 };

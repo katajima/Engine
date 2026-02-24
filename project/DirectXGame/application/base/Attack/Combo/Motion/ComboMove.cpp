@@ -123,7 +123,7 @@ namespace Combo {
 			break;
 		case MoveType::kLockAt: // カメラ方向
 			// 方向指定
-			moveComponent->GetMoveSystem()->CameraDirectionToMoveDirection(direction_);
+			direction_ = moveComponent->GetDirection();
 			break;
 		default:
 			break;
