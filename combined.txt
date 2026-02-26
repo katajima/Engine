@@ -117,6 +117,8 @@
     └── └── └── └── ├── FixedCamera/
     └── └── └── └── └── ├── FixedCamera.cpp
     └── └── └── └── └── ├── FixedCamera.h
+    └── └── └── └── └── ├── SelectCamera.cpp
+    └── └── └── └── └── ├── SelectCamera.h
     └── └── └── └── └── ├── TitleCamera.cpp
     └── └── └── └── └── └── TitleCamera.h
     └── └── └── └── ├── FollowCamera/
@@ -230,6 +232,9 @@
     └── └── └── └── ├── BasePointLight.h
     └── └── └── └── └── BaseSpotLight.h
     └── └── └── ├── Move/
+    └── └── └── └── ├── Attack/
+    └── └── └── └── └── ├── AttackMoveSystem.cpp
+    └── └── └── └── └── └── AttackMoveSystem.h
     └── └── └── └── ├── Base/
     └── └── └── └── └── ├── LocomotionContext.h
     └── └── └── └── └── ├── LocomotionCoordinator.cpp
@@ -278,8 +283,11 @@
     └── └── └── ├── Stage/
     └── └── └── └── ├── MainStage.cpp
     └── └── └── └── ├── MainStage.h
+    └── └── └── └── ├── SelectStage.cpp
+    └── └── └── └── ├── SelectStage.h
     └── └── └── └── ├── TitleStage.cpp
-    └── └── └── └── └── TitleStage.h
+    └── └── └── └── ├── TitleStage.h
+    └── └── └── └── └── TutorialStage.h
     └── └── └── ├── State/
     └── └── └── └── ├── BaseMainState.cpp
     └── └── └── └── ├── BaseMainState.h
@@ -337,7 +345,9 @@
     └── └──     ├── TestScene.cpp
     └── └──     ├── TestScene.h
     └── └──     ├── TitleScene.cpp
-    └── └──     └── TitleScene.h
+    └── └──     ├── TitleScene.h
+    └── └──     ├── TutorialScene.cpp
+    └── └──     └── TutorialScene.h
     └── └── engine/
     └──     ├── 2d/
     └──     └── ├── Primitive2D.cpp
@@ -5126,6 +5136,7 @@ namespace Combo {
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
+		attackMoveSystem = owner->GetMoveComponent()->GetAttackMoveSystem();
 
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData_;
@@ -5133,6 +5144,7 @@ namespace Combo {
 		// 方向指定
 		MoveTypeDirectionProcess();
 
+		
 		// 回転
 		owner->GetMoveComponent()->GetMoveSystem()->AttackProcess(owner->GetWorldTransform(), direction_);
 		// 座標更新
@@ -5178,6 +5190,7 @@ namespace Combo {
 		float t = timer / data_.moveWindowEnd_ - data_.moveWindowStart_;
 
 		if (isMove_ && isStart && isEnd) {
+			MoveRequest request;
 			switch (data_.moveType)
 			{
 			case MoveType::kNone:
@@ -5190,19 +5203,21 @@ namespace Combo {
 
 				if (traget) {
 					if (data_.moveTargetRadius_ <= targetPos_.Distance(worldTransform->translate_)) {
-						worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+						request.velocity = Multiply(direction_, dt) * data_.speed_;
 					}
 				}
 				else {
-					worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+					request.velocity = Multiply(direction_, dt) * data_.speed_;
 				}
 				break;
 			case MoveType::kLockAt: // カメラ方向
-				worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed_;
 				break;
 			default:
 				break;
 			}
+
+			attackMoveSystem->SetRequest(request);
 		}
 	}
 
@@ -5214,7 +5229,7 @@ namespace Combo {
 		moveComponent->SetAttackingGravity(data_.gravityScale_);
 		rigidBodyComponent->SetIsGravity(data_.isGravity_);
 	}
-	
+
 	void ComboMove::MoveTypeDirectionProcess() {
 		switch (data_.moveType)
 		{
@@ -5266,6 +5281,7 @@ namespace Character {
 }
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
+class AttackMoveSystem;		// 攻撃移動システム
 class LockOnSystem;			// ロックオンシステム
 
 namespace Combo {
@@ -5335,6 +5351,9 @@ namespace Combo {
 		LockOnSystem* lockOnSystem = nullptr;
 		// ターゲット
 		Character::BaseCharacter* traget = nullptr;
+		// 攻撃移動システム
+		AttackMoveSystem* attackMoveSystem = nullptr;
+
 	private:
 		// データ
 		Data data_;
@@ -9885,6 +9904,36 @@ private: // 一旦
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/SelectCamera.cpp
+============================================================
+#include "SelectCamera.h"
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+
+
+class SelectCamera : public BaseFixedCamera {
+public:
+	///< summary>
+	/// 初期化
+	///</summary>
+	void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position) override;
+
+	///< summary>
+	/// 更新
+	///</summary>
+	void Update() override;
+
+private:
+
+};
+
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/FixedCamera/TitleCamera.cpp
 ============================================================
 #include "TitleCamera.h"
@@ -10405,17 +10454,18 @@ private:
 	// 影用オブジェクトコンポーネント
 	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 
-
+	// タイヤ用オブジェクトコンポーネント
 	std::unique_ptr<ObjectComponent> objectComponentTire01_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectComponentTire02_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectComponentTire03_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectComponentTire04_ = nullptr;
 
 
+	// スポットライト用ワールド変換
 	Engine::WorldTransform spotLightTransform01_;
 	Engine::WorldTransform spotLightTransform02_;
 
-
+	// スポットライト
 	std::shared_ptr<Engine::SpotLight> spotLight01_ = nullptr;
 	std::shared_ptr<Engine::SpotLight> spotLight02_ = nullptr;
 
@@ -10426,13 +10476,12 @@ private:
 	// 速度
 	Vector3 velocity_ = { 4.0f,0.0f,0.0f };
 
-	// 
+	// 動いているか
 	bool isMoving_ = false;
-	//
+	// 動いている時間
 	float moveTimer_ = 0.0f;
-
+	// 地面の高さ
 	float height_ = 0.0f;
-
 private:
 	Engine::Entity3DManager* entity3DManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
@@ -10533,6 +10582,8 @@ namespace Character {
 
 		// キャラクターステートマシーン取得
 		CharacterStateMachine* GetCharacterStateMachine() { return stateMachine_.get(); }
+		// 現在の状態取得
+		CharacterMainState GetCurrentMainState() const { return stateMachine_->GetCurrentMainState(); }
 		// 必殺技取得
 		BaseSpecial* GetSpecial() { return special_.get(); }
 		// 武器取得
@@ -15312,7 +15363,9 @@ namespace Character {
 
 #pragma region Attack
 
-	void PlayerStateAttack::Update() {}
+	void PlayerStateAttack::Update() {
+	
+	}
 
 	void PlayerStateAttack::Exit()
 	{
@@ -15326,16 +15379,13 @@ namespace Character {
 		anima->SetIsPlaying(true);	   // 再生
 		anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
 		character->GetMoveComponent()->SetCanMove(true);
-		character->GetMoveComponent()->GetMoveSystem()->SetIsAttack(false);
 	}
 
 	void PlayerStateAttack::Enter()
 	{
 		BaseWeapon* weapon = character->GetWeapon();
-
 		// 武器
 		weapon->GetObject3D()->SetIsDraw(true);	 // 武器描画
-		character->GetMoveComponent()->GetMoveSystem()->SetIsAttack(true);
 	}
 
 #pragma endregion // 攻撃
@@ -18013,11 +18063,51 @@ protected:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Move/Attack/AttackMoveSystem.cpp
+============================================================
+#include "AttackMoveSystem.h"
+
+
+void AttackMoveSystem::Initialize() {
+
+}
+
+void AttackMoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input) {
+	if (ctx.state == Character::CharacterMainState::Attack) {
+		coordinator.Request(reuest);
+	}
+	reuest.velocity = 0.0f;
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Move/Attack/AttackMoveSystem.h
+============================================================
+#pragma once
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "DirectXGame/application/base/Input/InputSystem.h"
+#include "DirectXGame/application/base/Move/Base/LocomotionCoordinator.h"
+
+
+class AttackMoveSystem {
+public:
+	// 初期化
+	void Initialize();
+	// 更新(操作用)
+	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input);
+
+	void SetRequest(const MoveRequest& request) { reuest = request; }
+
+private:
+	MoveRequest reuest;
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Move/Base/LocomotionContext.h
 ============================================================
 #pragma once
 #include "DirectXGame/application/base/Input/InputSystem.h"
-
+#include "DirectXGame/application/base/State/BaseMainState.h"
 
 namespace Engine {
     class Camera;
@@ -18041,6 +18131,7 @@ struct LocomotionContext
     bool onGround = false;
     bool isAttacking = false;
     bool isHitStun = false;
+	Character::CharacterMainState state = Character::CharacterMainState::Idle;
 
     // ===== 物理情報 =====
     Vector3 position{};
@@ -18076,6 +18167,8 @@ struct LocomotionContext
 struct MoveCommand {
     // 最終的な速度
     Vector3 finalVelocity;
+    // 最終的な方向
+    Vector3 finalDirection;
 };
 
 enum class MoveLayer : uint8_t { 
@@ -18162,7 +18255,7 @@ private:
 File Path: project/DirectXGame/application/base/Move/Base/MoveComponent.cpp
 ============================================================
 #include "MoveComponent.h"
-
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
 void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* input,Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
 	this->globalVariables = globalVariables;
@@ -18178,6 +18271,9 @@ void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* 
 	// ダッシュシステムの生成
 	dashSystem_ = std::make_unique<DashSystem>();
 	dashSystem_->Initialize();
+	// 攻撃移動システムの生成
+	attackMoveSystem_ = std::make_unique<AttackMoveSystem>();
+	attackMoveSystem_->Initialize();
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
 	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });
@@ -18207,8 +18303,11 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 		ctx.input = *input;						// 入力状態
 	}
 	ctx.position = object.GetWorldPosition();	// 位置
+	ctx.state = owner->GetCurrentMainState();				// 状態
 	ctx.dt = dt;								// デルタタイム
-	ctx.isAttacking = false;					// 攻撃
+	if (ctx.state == Character::CharacterMainState::Attack) {
+		ctx.isAttacking = true;					// 攻撃
+	}
 	ctx.isHitStun = false;						// スタン
 	ctx.onGround = movementSystem_->IsOnGround();// 着地しているか
 	ctx.fallGravity = jumpSystem_->GetData().fallGravity_;
@@ -18216,7 +18315,6 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 	ctx.attackingGravity = attackingGravity;
 	ctx.camera = camera;						// カメラ;
 	ctx.cameraDirection = movementSystem_->GetDirection();	// 方向
-
 	
 
 	// 移動システムの更新
@@ -18229,6 +18327,9 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 
 		// ジャンプシステムの更新
 		jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), object, rigid);
+
+		// 攻撃移動システム更新
+		attackMoveSystem_->Update(ctx, *locomotionCoordinator_.get(), object, input);
 
 		// 移動システム更新
 		moveSystem_->Update(ctx, *locomotionCoordinator_.get(), object, input);
@@ -18330,6 +18431,7 @@ File Path: project/DirectXGame/application/base/Move/Base/MoveComponent.h
 #include "DirectXGame/application/base/Move/Move/MoveSystem.h"
 #include "DirectXGame/application/base/Move/Jump/JumpSystem.h"
 #include "DirectXGame/application/base/Move/Dash/DashSystem.h"
+#include "DirectXGame/application/base/Move/Attack/AttackMoveSystem.h"
 
 // 前方宣言
 namespace Engine {
@@ -18405,11 +18507,15 @@ public:
 	JumpSystem* GetJumpSystem() { return jumpSystem_.get(); }
 	// ダッシュシステム取得
 	DashSystem* GetDashSystem() { return dashSystem_.get(); }
+	// 攻撃移動システム取得
+	AttackMoveSystem* GetAttackMoveSystem() { return attackMoveSystem_.get(); }
 	// 移動システム取得
 	MovementSystem* GetMovementSystem() { return movementSystem_.get(); }
 public:
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
+private:
+
 private:
 	// 移動システム
 	std::unique_ptr<MoveSystem> moveSystem_ = nullptr;
@@ -18417,6 +18523,8 @@ private:
 	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr;
 	// ダッシュシステム
 	std::unique_ptr<DashSystem> dashSystem_ = nullptr; 
+	// 攻撃移動システム
+	std::unique_ptr<AttackMoveSystem> attackMoveSystem_ = nullptr;
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 
 	// 行動リクエストを元に行動を集約→選択するクラス
@@ -18997,7 +19105,7 @@ void MoveSystem::Initialize() {}
 
 void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input){
 	// 攻撃中は通常の移動処理しない
-	if (isAttack_) return;
+	if (ctx.isAttacking) return;
 
 	MoveRequest request{};
 
@@ -19108,9 +19216,6 @@ void MoveSystem::AnimationSpeedProcess()
 
 void MoveSystem::AttackProcess(Engine::WorldTransform& world, const Vector3& direction)
 {
-	// ダッシュ中は移動処理しない
-	if (!isAttack_) return;
-
 	// 移動ベクトルがゼロなら回転処理しない
 	if (direction.Length() == 0.0f) return;
 
@@ -19191,11 +19296,6 @@ public: //設定
 		data_.minSpeed = min;
 		data_.maxSpeed = max;
 	};
-	// 攻撃中か設定
-	void SetIsAttack(bool is) { isAttack_ = is; };
-private: // 貰いもの
-	// 攻撃中か
-	bool isAttack_ = false;
 private:
 	// 移動データ
 	MoveData data_{};
@@ -20943,6 +21043,127 @@ private: // 一旦
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Stage/SelectStage.cpp
+============================================================
+#include "SelectStage.h"
+
+void SelectStage::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
+	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->globalVariables = globalVariables;	// 保存項目
+	this->camera = camera;						// カメラ
+
+	// 車
+	playerCar_ = std::make_unique<PlayerCar>();
+	playerCar_->Initialize(entity3DManager, globalVariables, {}, { 0,Math::DegreesToRadians(-90),0 });
+	playerCar_->SetGroungHeight(0.1f);
+
+}
+
+void SelectStage::Update(float dt) {
+
+}
+
+void SelectStage::Draw() {
+
+}
+
+void SelectStage::DrawP() {
+
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Stage/SelectStage.h
+============================================================
+#pragma once
+
+// C++
+#include <imgui.h>
+#include <list>
+
+
+// engine
+#include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/2d/Sprite.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
+#include"DirectXGame/engine/input/Input.h"
+#include"DirectXGame/engine/effect/Ocean/Ocean.h"
+#include<DirectXGame/engine/Effect/EffectComponent.h>
+#include "DirectXGame/application/base/Light/BaseLights.h"
+
+
+#include "DirectXGame/application/base/Car/PlayerCar.h"
+
+// 前方宣言
+namespace Engine {
+	class DirectXCommon;
+	class Entity3DManager;
+	class Entity2DManager;
+	class GlobalVariables;
+}
+class Effect;
+
+/// <summary>
+/// セレクト用ステージ
+/// </summary>
+class SelectStage {
+public:
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <param name="entity3DManager"></param>
+	/// <param name="entity2DManager"></param>
+	/// <param name="globalVariables"></param>
+	/// <param name="camera"></param>
+	void Initialize(Engine::Entity3DManager* entity3DManager,Engine::Entity2DManager* entity2DManager, 
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
+
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void Update(float dt);
+
+	///< summary>
+	/// 描画
+	///</summary>
+	void Draw();
+
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
+	void DrawP();
+
+
+	/// <summary>
+	/// エフェクト
+	/// </summary>
+	/// <param name="effect"></param>
+	void SetEffect(Effect* effect) {
+		this->effect = effect;
+		playerCar_->SetEffect(effect);
+	}
+
+private:
+	Engine::DirectXCommon* dxCommon = nullptr;
+	Engine::Entity3DManager* entity3DManager = nullptr;
+	Engine::Entity2DManager* entity2DManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
+	Engine::Camera* camera = nullptr;
+	// エフェクト
+	Effect* effect = nullptr;
+private:
+	// プレイヤー車
+	std::unique_ptr<PlayerCar> playerCar_;
+
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Stage/TitleStage.cpp
 ============================================================
 #include "TitleStage.h"
@@ -21208,6 +21429,51 @@ private:
 		float  missileSize = 10.0f;
 	};
 	ProvisionalData provisionalData_;
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Stage/TutorialStage.h
+============================================================
+#pragma once
+
+// C++
+#include <imgui.h>
+#include <list>
+
+
+// engine
+#include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/2d/Sprite.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
+#include"DirectXGame/engine/input/Input.h"
+#include"DirectXGame/engine/effect/Ocean/Ocean.h"
+#include<DirectXGame/engine/Effect/EffectComponent.h>
+#include "DirectXGame/application/base/Light/BaseLights.h"
+
+
+#include "DirectXGame/application/base/Car/PlayerCar.h"
+
+// 前方宣言
+namespace Engine {
+	class DirectXCommon;
+	class Entity3DManager;
+	class Entity2DManager;
+	class GlobalVariables;
+}
+class Effect;
+
+/// <summary>
+/// チュートリアル用ステージ
+/// </summary>
+class TutorialStage {
+public:
+
+
+
+private:
+
 };
 
 ============================================================
@@ -25256,9 +25522,13 @@ std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& 
 	if (sceneName == "RESULT") {                // リザルト
 		return std::make_unique<ResultScene>();
     }
+    if(sceneName == "TUTORIAL") {              // チュートリアル
+        return std::make_unique<TutorialScene>();
+	}
     if (sceneName == "CHARACTER") {             // キャラクターのデバッグシーン
         return std::make_unique<CharacterDebugScene>();
     }
+
 
     return nullptr;
 }
@@ -25275,6 +25545,7 @@ File Path: project/DirectXGame/application/scene/SceneFactory.h
 #include "SelectScene.h"
 #include "SampleScene.h"
 #include "ResultScene.h"
+#include "TutorialScene.h"
 #include "CharacterDebugScene.h"
 
 // このゲーム用のシーン工場
@@ -25300,27 +25571,48 @@ File Path: project/DirectXGame/application/scene/SelectScene.cpp
 
 
 void SelectScene::Initialize() {
+	// カメラ管理クラス初期化
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(nullptr, GetEntity3DManager(), GetGlobalVariables());
+	//cameraManager_->AddCamera({ titleCamera_.get(), true }, "titleCamera");
 
+	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	SetCamera(cameraManager_->GetCamera());
+
+	// ステージ生成
+	selectStage_ = std::make_unique<SelectStage>();
+	selectStage_->Initialize(GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), GetCamara());
+	// UI生成
+	selectUI_ = std::make_unique<SelectUI>();
+	selectUI_->Initialize(nullptr, GetEntity2DManager(), GetGlobalVariables());
 }
 
 
 // 終了
-void SelectScene::Finalize() {
-
-}
+void SelectScene::Finalize() {}
 
 // 毎フレーム更新
 void SelectScene::Update() {
 
+
+	// ステージ更新
+	selectStage_->Update(GetTime());
+	// UI更新
+	selectUI_->Update(GetTime());
 }
 
 // 描画
 void SelectScene::Draw3D() {
-
+	// ステージ描画
+	selectStage_->Draw();
 }
 
 void SelectScene::Draw2D() {
-
+	// UI描画
+	selectUI_->Draw();
 }
 
 ============================================================
@@ -25346,6 +25638,9 @@ File Path: project/DirectXGame/application/scene/SelectScene.h
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 #include "DirectXGame/application/base/Input/InputHander.h"
+#include "DirectXGame/application/base/Stage/SelectStage.h"
+#include "DirectXGame/application/base/UI/SelectUI.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 /// <summary>
 /// セレクトシーン
@@ -25368,7 +25663,12 @@ public:
 	void Draw2D()   override;
 
 private:
-
+	// セレクトシーン用ステージ
+	std::unique_ptr<SelectStage> selectStage_ = nullptr;
+	// セレクトシーン用UI
+	std::unique_ptr<SelectUI> selectUI_ = nullptr;
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_;
 };
 
 
@@ -26317,6 +26617,66 @@ private:
 
 
 
+
+============================================================
+File Path: project/DirectXGame/application/scene/TutorialScene.cpp
+============================================================
+#include "TutorialScene.h"
+
+void TutorialScene::Initialize()
+{
+}
+
+void TutorialScene::Finalize()
+{
+}
+
+void TutorialScene::Update()
+{
+}
+
+void TutorialScene::Draw3D()
+{
+}
+
+void TutorialScene::Draw2D()
+{
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/scene/TutorialScene.h
+============================================================
+#pragma once
+// engine
+#include"DirectXGame/engine/scene/SceneManager.h"
+#include"DirectXGame/engine/collider/3d/CollisionManager.h"
+#include"DirectXGame/engine/Utility/TimerUtility.h"
+#include"DirectXGame/engine/base/Load/LoadLevelData.h"
+
+
+class TutorialScene : public Engine::BaseScene {
+public:
+
+	// 初期化
+	void Initialize() override;
+
+	// 終了
+	void Finalize() override;
+
+	// 毎フレーム更新
+	void Update() override;
+
+	// 描画3d
+	void Draw3D() override;
+	// 描画2d
+	void Draw2D() override;
+
+private:
+
+
+
+};
 
 ============================================================
 File Path: project/DirectXGame/engine/2d/Primitive2D.cpp
@@ -31783,14 +32143,14 @@ namespace Engine {
 		bool isDebug = true;
 
 		// ローカル行列
-		Matrix4x4 localMatrix_;
-		//
+		Matrix4x4 localMatrix_{};
+		// アニメーション時間
 		float animationTime = 0.0f;
-
 	private:
 		// モデル
 		Model* model;
-		LineCommon* lineCommon;
+		// デバッグ用のライン描画クラスへのポインタ
+		LineCommon* lineCommon = nullptr;
 	};
 }
 
@@ -44327,6 +44687,13 @@ namespace Engine {
 		// パーティクルクリア(名前で検索)
 		void ClearParticle(std::string name);
 
+		// パーティクルクリア(全て)
+		void ClearParticle() {
+			for (auto& group : particleGroups) {
+				group.second.particle.clear();
+			}
+		}
+		
 	private:
 		// ルートシグネチャの作成
 		void CreateRootSignature();
@@ -56159,9 +56526,9 @@ void Engine::MyGame::Initialize()
 	sceneManager_->Init();
 
 #ifdef _DEBUG
-	//sceneManager_->ChangeScene("CHARACTER");
+	sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("TITLE");
 	// リソース初期化
 	InitializeResource();
 
@@ -62940,6 +63307,7 @@ void Engine::SceneManager::Update()
 			directXCommon_->GetPostEffectManager()->ClearPostEffectBlock();
 			entity3DManager_->GetObject3dInstansManager()->ClearObject();
 			entity3DManager_->GetObject3dInstansManager()->AllClear();
+			entity3DManager_->GetEffectManager()->GetParticleManager()->ClearParticle();
 			entity3DManager_->ObjectClean();
 			entity3DManager_->GetLightManager()->ClearLights();
 			scene_->SetEntity2DManager(entity2DManager_);
@@ -66809,6 +67177,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
@@ -66832,6 +67201,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Move\Attack\AttackMoveSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Base\MovementSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Move\Dash\DashSystem.cpp" />
@@ -66848,6 +67218,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\TitleStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\BaseMainState.cpp" />
     <ClCompile Include="DirectXGame\application\base\State\CharacterStateMachine.cpp" />
@@ -66863,6 +67234,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
+    <ClCompile Include="DirectXGame\application\scene\TutorialScene.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderComponent.cpp" />
@@ -67481,6 +67853,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCar.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterEditor.h" />
@@ -67518,6 +67891,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseFollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\BaseRailCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\Move\Attack\AttackMoveSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionContext.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MoveInput.h" />
     <ClInclude Include="DirectXGame\application\base\Move\Base\MovementData.h" />
@@ -67539,7 +67913,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointState.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\SelectStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\TutorialStage.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseMainState.h" />
     <ClInclude Include="DirectXGame\application\base\State\CharacterStateMachine.h" />
     <ClInclude Include="DirectXGame\application\base\State\BaseSubState.h" />
@@ -67559,6 +67935,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\scene\ResultScene.h" />
     <ClInclude Include="DirectXGame\application\scene\SampleScene.h" />
     <ClInclude Include="DirectXGame\application\scene\SceneData.h" />
+    <ClInclude Include="DirectXGame\application\scene\TutorialScene.h" />
     <ClInclude Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.h" />
     <ClInclude Include="DirectXGame\engine\Base\Editor\Editor.h" />
     <ClInclude Include="DirectXGame\engine\Collider\2d\Collider2D.h" />
@@ -68700,6 +69077,18 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Move\Attack\AttackMoveSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\TutorialScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69891,6 +70280,21 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCar.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Attack\AttackMoveSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\SelectStage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\TutorialStage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\TutorialScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
