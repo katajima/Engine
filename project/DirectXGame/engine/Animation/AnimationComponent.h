@@ -63,13 +63,13 @@ namespace Engine {
 		bool isDebug = true;
 
 		// ローカル行列
-		Matrix4x4 localMatrix_;
-		//
+		Matrix4x4 localMatrix_{};
+		// アニメーション時間
 		float animationTime = 0.0f;
-
 	private:
 		// モデル
 		Model* model;
-		LineCommon* lineCommon;
+		// デバッグ用のライン描画クラスへのポインタ
+		LineCommon* lineCommon = nullptr;
 	};
 }

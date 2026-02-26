@@ -47,17 +47,18 @@ private:
 	// 影用オブジェクトコンポーネント
 	std::unique_ptr<ObjectComponent> objectComponentShadow_ = nullptr;
 
-
+	// タイヤ用オブジェクトコンポーネント
 	std::unique_ptr<ObjectComponent> objectComponentTire01_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectComponentTire02_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectComponentTire03_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectComponentTire04_ = nullptr;
 
 
+	// スポットライト用ワールド変換
 	Engine::WorldTransform spotLightTransform01_;
 	Engine::WorldTransform spotLightTransform02_;
 
-
+	// スポットライト
 	std::shared_ptr<Engine::SpotLight> spotLight01_ = nullptr;
 	std::shared_ptr<Engine::SpotLight> spotLight02_ = nullptr;
 
@@ -68,13 +69,12 @@ private:
 	// 速度
 	Vector3 velocity_ = { 4.0f,0.0f,0.0f };
 
-	// 
+	// 動いているか
 	bool isMoving_ = false;
-	//
+	// 動いている時間
 	float moveTimer_ = 0.0f;
-
+	// 地面の高さ
 	float height_ = 0.0f;
-
 private:
 	Engine::Entity3DManager* entity3DManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;

@@ -1,5 +1,5 @@
 #include "MoveComponent.h"
-
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
 void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* input,Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
 	this->globalVariables = globalVariables;
@@ -15,6 +15,9 @@ void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* 
 	// ダッシュシステムの生成
 	dashSystem_ = std::make_unique<DashSystem>();
 	dashSystem_->Initialize();
+	// 攻撃移動システムの生成
+	attackMoveSystem_ = std::make_unique<AttackMoveSystem>();
+	attackMoveSystem_->Initialize();
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
 	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });
@@ -44,8 +47,11 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 		ctx.input = *input;						// 入力状態
 	}
 	ctx.position = object.GetWorldPosition();	// 位置
+	ctx.state = owner->GetCurrentMainState();				// 状態
 	ctx.dt = dt;								// デルタタイム
-	ctx.isAttacking = false;					// 攻撃
+	if (ctx.state == Character::CharacterMainState::Attack) {
+		ctx.isAttacking = true;					// 攻撃
+	}
 	ctx.isHitStun = false;						// スタン
 	ctx.onGround = movementSystem_->IsOnGround();// 着地しているか
 	ctx.fallGravity = jumpSystem_->GetData().fallGravity_;
@@ -53,7 +59,6 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 	ctx.attackingGravity = attackingGravity;
 	ctx.camera = camera;						// カメラ;
 	ctx.cameraDirection = movementSystem_->GetDirection();	// 方向
-
 	
 
 	// 移動システムの更新
@@ -66,6 +71,9 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 
 		// ジャンプシステムの更新
 		jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), object, rigid);
+
+		// 攻撃移動システム更新
+		attackMoveSystem_->Update(ctx, *locomotionCoordinator_.get(), object, input);
 
 		// 移動システム更新
 		moveSystem_->Update(ctx, *locomotionCoordinator_.get(), object, input);

@@ -11,6 +11,7 @@ namespace Combo {
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
+		attackMoveSystem = owner->GetMoveComponent()->GetAttackMoveSystem();
 
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData_;
@@ -18,6 +19,7 @@ namespace Combo {
 		// 方向指定
 		MoveTypeDirectionProcess();
 
+		
 		// 回転
 		owner->GetMoveComponent()->GetMoveSystem()->AttackProcess(owner->GetWorldTransform(), direction_);
 		// 座標更新
@@ -63,6 +65,7 @@ namespace Combo {
 		float t = timer / data_.moveWindowEnd_ - data_.moveWindowStart_;
 
 		if (isMove_ && isStart && isEnd) {
+			MoveRequest request;
 			switch (data_.moveType)
 			{
 			case MoveType::kNone:
@@ -75,19 +78,21 @@ namespace Combo {
 
 				if (traget) {
 					if (data_.moveTargetRadius_ <= targetPos_.Distance(worldTransform->translate_)) {
-						worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+						request.velocity = Multiply(direction_, dt) * data_.speed_;
 					}
 				}
 				else {
-					worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+					request.velocity = Multiply(direction_, dt) * data_.speed_;
 				}
 				break;
 			case MoveType::kLockAt: // カメラ方向
-				worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed_;
 				break;
 			default:
 				break;
 			}
+
+			attackMoveSystem->SetRequest(request);
 		}
 	}
 
@@ -99,7 +104,7 @@ namespace Combo {
 		moveComponent->SetAttackingGravity(data_.gravityScale_);
 		rigidBodyComponent->SetIsGravity(data_.isGravity_);
 	}
-	
+
 	void ComboMove::MoveTypeDirectionProcess() {
 		switch (data_.moveType)
 		{

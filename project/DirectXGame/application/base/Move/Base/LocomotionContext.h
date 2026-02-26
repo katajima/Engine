@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Input/InputSystem.h"
-
+#include "DirectXGame/application/base/State/BaseMainState.h"
 
 namespace Engine {
     class Camera;
@@ -24,6 +24,7 @@ struct LocomotionContext
     bool onGround = false;
     bool isAttacking = false;
     bool isHitStun = false;
+	Character::CharacterMainState state = Character::CharacterMainState::Idle;
 
     // ===== 物理情報 =====
     Vector3 position{};
@@ -59,6 +60,8 @@ struct LocomotionContext
 struct MoveCommand {
     // 最終的な速度
     Vector3 finalVelocity;
+    // 最終的な方向
+    Vector3 finalDirection;
 };
 
 enum class MoveLayer : uint8_t { 

@@ -92,6 +92,13 @@ namespace Engine {
 		// パーティクルクリア(名前で検索)
 		void ClearParticle(std::string name);
 
+		// パーティクルクリア(全て)
+		void ClearParticle() {
+			for (auto& group : particleGroups) {
+				group.second.particle.clear();
+			}
+		}
+		
 	private:
 		// ルートシグネチャの作成
 		void CreateRootSignature();

@@ -5,7 +5,7 @@ void MoveSystem::Initialize() {}
 
 void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input){
 	// 攻撃中は通常の移動処理しない
-	if (isAttack_) return;
+	if (ctx.isAttacking) return;
 
 	MoveRequest request{};
 
@@ -116,9 +116,6 @@ void MoveSystem::AnimationSpeedProcess()
 
 void MoveSystem::AttackProcess(Engine::WorldTransform& world, const Vector3& direction)
 {
-	// ダッシュ中は移動処理しない
-	if (!isAttack_) return;
-
 	// 移動ベクトルがゼロなら回転処理しない
 	if (direction.Length() == 0.0f) return;
 

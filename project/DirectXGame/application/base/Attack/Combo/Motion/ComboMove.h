@@ -15,6 +15,7 @@ namespace Character {
 }
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
+class AttackMoveSystem;		// 攻撃移動システム
 class LockOnSystem;			// ロックオンシステム
 
 namespace Combo {
@@ -84,6 +85,9 @@ namespace Combo {
 		LockOnSystem* lockOnSystem = nullptr;
 		// ターゲット
 		Character::BaseCharacter* traget = nullptr;
+		// 攻撃移動システム
+		AttackMoveSystem* attackMoveSystem = nullptr;
+
 	private:
 		// データ
 		Data data_;

@@ -6,6 +6,7 @@
 #include "SelectScene.h"
 #include "SampleScene.h"
 #include "ResultScene.h"
+#include "TutorialScene.h"
 #include "CharacterDebugScene.h"
 
 // このゲーム用のシーン工場

@@ -18,6 +18,9 @@
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 #include "DirectXGame/application/base/Input/InputHander.h"
+#include "DirectXGame/application/base/Stage/SelectStage.h"
+#include "DirectXGame/application/base/UI/SelectUI.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 /// <summary>
 /// セレクトシーン
@@ -40,6 +43,11 @@ public:
 	void Draw2D()   override;
 
 private:
-
+	// セレクトシーン用ステージ
+	std::unique_ptr<SelectStage> selectStage_ = nullptr;
+	// セレクトシーン用UI
+	std::unique_ptr<SelectUI> selectUI_ = nullptr;
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_;
 };
 

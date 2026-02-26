@@ -53,6 +53,7 @@ void Engine::SceneManager::Update()
 			directXCommon_->GetPostEffectManager()->ClearPostEffectBlock();
 			entity3DManager_->GetObject3dInstansManager()->ClearObject();
 			entity3DManager_->GetObject3dInstansManager()->AllClear();
+			entity3DManager_->GetEffectManager()->GetParticleManager()->ClearParticle();
 			entity3DManager_->ObjectClean();
 			entity3DManager_->GetLightManager()->ClearLights();
 			scene_->SetEntity2DManager(entity2DManager_);

@@ -190,7 +190,9 @@ namespace Character {
 
 #pragma region Attack
 
-	void PlayerStateAttack::Update() {}
+	void PlayerStateAttack::Update() {
+	
+	}
 
 	void PlayerStateAttack::Exit()
 	{
@@ -204,16 +206,13 @@ namespace Character {
 		anima->SetIsPlaying(true);	   // 再生
 		anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
 		character->GetMoveComponent()->SetCanMove(true);
-		character->GetMoveComponent()->GetMoveSystem()->SetIsAttack(false);
 	}
 
 	void PlayerStateAttack::Enter()
 	{
 		BaseWeapon* weapon = character->GetWeapon();
-
 		// 武器
 		weapon->GetObject3D()->SetIsDraw(true);	 // 武器描画
-		character->GetMoveComponent()->GetMoveSystem()->SetIsAttack(true);
 	}
 
 #pragma endregion // 攻撃

@@ -59,11 +59,6 @@ public: //設定
 		data_.minSpeed = min;
 		data_.maxSpeed = max;
 	};
-	// 攻撃中か設定
-	void SetIsAttack(bool is) { isAttack_ = is; };
-private: // 貰いもの
-	// 攻撃中か
-	bool isAttack_ = false;
 private:
 	// 移動データ
 	MoveData data_{};

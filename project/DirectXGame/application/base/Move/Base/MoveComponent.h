@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Move/Move/MoveSystem.h"
 #include "DirectXGame/application/base/Move/Jump/JumpSystem.h"
 #include "DirectXGame/application/base/Move/Dash/DashSystem.h"
+#include "DirectXGame/application/base/Move/Attack/AttackMoveSystem.h"
 
 // 前方宣言
 namespace Engine {
@@ -80,11 +81,15 @@ public:
 	JumpSystem* GetJumpSystem() { return jumpSystem_.get(); }
 	// ダッシュシステム取得
 	DashSystem* GetDashSystem() { return dashSystem_.get(); }
+	// 攻撃移動システム取得
+	AttackMoveSystem* GetAttackMoveSystem() { return attackMoveSystem_.get(); }
 	// 移動システム取得
 	MovementSystem* GetMovementSystem() { return movementSystem_.get(); }
 public:
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
+private:
+
 private:
 	// 移動システム
 	std::unique_ptr<MoveSystem> moveSystem_ = nullptr;
@@ -92,6 +97,8 @@ private:
 	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr;
 	// ダッシュシステム
 	std::unique_ptr<DashSystem> dashSystem_ = nullptr; 
+	// 攻撃移動システム
+	std::unique_ptr<AttackMoveSystem> attackMoveSystem_ = nullptr;
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 
 	// 行動リクエストを元に行動を集約→選択するクラス
