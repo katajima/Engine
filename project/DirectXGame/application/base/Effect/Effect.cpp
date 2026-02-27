@@ -361,3 +361,16 @@ void Effect::Emit(const std::string& name, const Vector3& pos)
 	emit->SetIsEmit(false); // 出さない
 }
 
+void Effect::Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range) {
+	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
+
+	// 出現
+	emit->SetPos(pos);		// 位置
+	emit->SetVelocity(dir, range);	// 速度
+	emit->SetIsEmit(false); // 出さない
+	emit->Update();			// 更新
+	emit->SetIsEmit(true);	// 出す
+	emit->Emit();			// エフェクト出現
+	emit->SetIsEmit(false); // 出さない
+}
+

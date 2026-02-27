@@ -17,6 +17,8 @@ public:
 	void Update();
 	// 出現
 	void Emit(const std::string& name, const Vector3& pos);
+	// 出現(方向付き)
+	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
 
 private:
 	// パーティクル初期化

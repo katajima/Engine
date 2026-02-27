@@ -146,6 +146,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Car\PlayerCarState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Car\PlayerCarStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
@@ -822,6 +824,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCar.h" />
+    <ClInclude Include="DirectXGame\application\base\Car\PlayerCarState.h" />
+    <ClInclude Include="DirectXGame\application\base\Car\PlayerCarStateMachine.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />

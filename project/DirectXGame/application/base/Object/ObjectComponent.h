@@ -137,6 +137,7 @@ private:
 	ObjectStateFlags flags_;	// オブジェクトの状態
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	bool useCollider_ = false;	// コライダーコンポーネントを使うか
+	bool useRigidBody_ = false;	// リジッドボディーコンポーネントを使うか
 	bool useInstancing = false;	// インスタンシング描画にするか
 	bool rigidUpdate_ = true;
 

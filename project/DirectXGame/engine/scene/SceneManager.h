@@ -8,6 +8,7 @@
 namespace Engine {
 	// 前方宣言
 	class Input;
+	class WinApp;
 	class DirectXCommon;
 	class Entity3DManager;
 	class Entity2DManager;
@@ -38,6 +39,8 @@ namespace Engine {
 		void SetSceneFactory(AbstractSceneFactory* sceneFactory) { sceneFactory_ = sceneFactory; };
 		// DirectX共通クラス設定
 		void SetDirectXCommon(DirectXCommon* directXCommon) { directXCommon_ = directXCommon; }
+		// DirectX共通クラス設定
+		void SetWinApp(WinApp* winApp) { this->winApp = winApp; }
 		// エンティティ3dマネージャー設定
 		void SetEntity3DManager(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
 		// エンティティ2dマネージャー設定
@@ -99,7 +102,7 @@ namespace Engine {
 		Input* input_;
 		GlobalVariables* globalVariables_;
 		Camera* camera_;
-
+		WinApp* winApp;
 
 		SceneData sceneData_;
 

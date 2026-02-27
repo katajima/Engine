@@ -22,6 +22,7 @@ void Engine::MyGame::Initialize()
 	// シーンマネージャーに最初のシーンをセット
 	sceneManager_->SetSceneFactory(sceneFactory_.get());
 	sceneManager_->SetInput(input_.get());
+	sceneManager_->SetWinApp(winApp.get());
 	sceneManager_->SetGlobalVariables(globalVariables_.get());
 	sceneManager_->SetDirectXCommon(dxCommon.get());
 	sceneManager_->SetEntity3DManager(entity3DManager_.get());
@@ -29,9 +30,9 @@ void Engine::MyGame::Initialize()
 	sceneManager_->Init();
 
 #ifdef _DEBUG
-	sceneManager_->ChangeScene("CHARACTER");
+	//sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	//sceneManager_->ChangeScene("TITLE");
+	sceneManager_->ChangeScene("TITLE");
 	// リソース初期化
 	InitializeResource();
 

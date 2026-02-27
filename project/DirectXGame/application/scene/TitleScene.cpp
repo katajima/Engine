@@ -62,15 +62,14 @@ void TitleScene::Update()
 {
 	if (input_->IsControllerConnected()) {
 		if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B)) {
-			//GetSceneManager()->ChangeScene("GAMEPLAY");
 			titleUI_->Action();
 			isStart_ = true;
 			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("SwordRun01", 0.1f);
 		}
 	}
 	if (isStart_) {
-		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetPosition().z) {
-			objectComponent_->GetWorldTransform().translate_.z = titleStage_->GetPlayerCar()->GetPosition().z;
+		if (objectComponent_->GetWorldTransform().translate_.z >= titleStage_->GetPlayerCar()->GetBodyWorldPosition().z) {
+			objectComponent_->GetWorldTransform().translate_.z = titleStage_->GetPlayerCar()->GetBodyWorldPosition().z;
 			objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop", 0.1f);
 			objectComponent_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
 			objectComponentShadow_->GetWorldTransform().scale_ = { 0.0f,0.0f,0.0f };
@@ -78,7 +77,7 @@ void TitleScene::Update()
 			startTimer_ += GetTime();
 
 			if (startTimer_ >= 1.0f) {
-				GetSceneManager()->ChangeScene("GAMEPLAY");
+				GetSceneManager()->ChangeScene("SELECT");
 			}
 
 			// 動く

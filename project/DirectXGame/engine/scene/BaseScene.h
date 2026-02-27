@@ -55,6 +55,8 @@ namespace Engine {
 		void SetGlobalVariables(Engine::GlobalVariables* globalVariables) { globalVariables_ = globalVariables; }
 		// Input設定
 		void SetInput(Engine::Input* input) { input_ = input; }
+		// winApp設定
+		void SetWinApp(Engine::WinApp* winApp) { winApp_ = winApp; }
 		// DirectX共通クラス取得
 		virtual Engine::DirectXCommon* GetDxCommon() { return directXCommon_; }
 		// エンティティ3dマネージャー取得
@@ -67,6 +69,8 @@ namespace Engine {
 		GlobalVariables* GetGlobalVariables() { return globalVariables_; }
 		// Input取得
 		Engine::Input* GetInput() { return input_; }
+		//
+		Engine::WinApp* GetWinApp() { return winApp_; }
 		// カメラ設定
 		void SetCamera(Engine::Camera* camera) { camera_ = camera; };
 		// カメラ取得
@@ -88,6 +92,7 @@ namespace Engine {
 		Engine::Entity3DManager* entity3DManager_;
 		Engine::Entity2DManager* entity2DManager_;
 		Engine::Input* input_;
+		Engine::WinApp* winApp_;
 		Engine::GlobalVariables* globalVariables_;
 		Engine::Camera* camera_;
 	protected:

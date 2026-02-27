@@ -177,13 +177,13 @@ void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DMana
     this->globalVariables_ = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
     useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
+    useRigidBody_ = useRigidBody;
     name_ = objectName;                         // 名前
     modelName_ = modelName;                     // モデル名
     useInstancing = true;                       // インスタンシング描画にする
-   
     // インスタンス初期化
     Engine::ObjectInstans object;
-    object.Initialize(entity3DManager_,true,true);
+    object.Initialize(entity3DManager_, useCollider_, useRigidBody_);
     // オブジェクト追加
     entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_,
         Engine::Object3dInstansManager::MeshType::kModel,transparencyType);

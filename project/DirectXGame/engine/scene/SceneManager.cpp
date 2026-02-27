@@ -49,6 +49,7 @@ void Engine::SceneManager::Update()
 			scene_->SetGlobalVariables(globalVariables_);
 			scene_->SetDirectXCommon(directXCommon_);
 			scene_->SetEntity3DManager(entity3DManager_);
+			scene_->SetWinApp(winApp);
 
 			directXCommon_->GetPostEffectManager()->ClearPostEffectBlock();
 			entity3DManager_->GetObject3dInstansManager()->ClearObject();

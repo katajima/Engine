@@ -69,6 +69,13 @@ public:
 		this->effect = effect;
 		playerCar_->SetEffect(effect);
 	}
+	/// <summary>
+	/// 車
+	/// </summary>
+	/// <returns></returns>
+	PlayerCar* GetPlayerCar() { return playerCar_.get(); }
+
+	void SetRatio(float ratio) { ratio_ = ratio; }
 
 private:
 	Engine::DirectXCommon* dxCommon = nullptr;
@@ -81,5 +88,20 @@ private:
 private:
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
+	// 空
+	Engine::Object3d* sky_;
+	// スカイボックス
+	std::unique_ptr<Engine::SkyBox> skyBox;
+	// ライト
+	std::shared_ptr<Engine::DirectionalLight> directional;
+	// タイル
+	Engine::Object3d* tail;
 
+
+	std::vector<std::unique_ptr<ObjectComponent>> stoneComponents_;
+private:
+	// 位置
+	Vector3 playerCarPos_ = { -1.25f,0.05f,12.0f };
+	//
+	float ratio_ = 1.0f;
 };
