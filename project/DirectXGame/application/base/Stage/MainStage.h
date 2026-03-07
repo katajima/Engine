@@ -1,131 +1,52 @@
 #pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
+#include "BaseStage.h"
 
 
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
-
-// 前方宣言
-namespace Engine{
-	class DirectXCommon;
-	class EntityManager;
-}
 /// <summary>
 /// ステージクラス
 /// </summary>
-class MainStage {
+class MainStage : public BaseStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager,  Engine::Camera* camera);
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
 	// 更新
-	void Update(float dt);
+	void Update(float dt) override;
 
 	///< summary>
 	/// 描画
 	///</summary>
-	void Draw();
+	void Draw() override {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	void DrawP();
+	void DrawEffect() override {};
 
 	/// <summary>
 	/// 描画2d
 	/// </summary>
-	void Draw2D();
+	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化
 	/// </summary>
-	void InitEmit();
+	void InitEmit() {};
 
 	/// <summary>
 	/// エミッター更新
 	/// </summary>
-	void EmitUpdate();
+	void EmitUpdate() {};
 
 public:
 	std::vector<Engine::Object3d*> missiles_;
 private:
-	// 空
-	Engine::Object3d* sky_;
-
-	
-	// 地面
-	Engine::Object3d* tail_;
-	
-
-	// 列車
-	Engine::Object3d* train_;
-	float trainSpeed_ = 300.0f;
-	float trainStartX_ = -3110.0f;
-	float trainEndX_ = 4000.0f;
-	float trainWarpTime_ = 0.0f;
-	float trainWarpTimeMax_ = 20.0f;
-
-	// 船
-	Engine::Object3d* ship_;
-	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
-
-	// 円運動のパラメータ
-	float radius = 1000.0f; // 円の半径
-	float angularSpeed = DirectX::XM_PI * 0.5f * 0.25f; // ラジアン/秒（90度/秒）
-	
-	Vector3 center = { -3111,-50,3040 }; // 中心座標を指定
-
-
-	// オーシャンシェーダー
-	std::unique_ptr<Engine::Ocean> ocean_ = nullptr;
-	Engine::Object3d* oceanObject;
-
-	// スカイボックス
-	std::unique_ptr<Engine::SkyBox> skyBox;
-	
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
 	// 位置
 	Vector3 playerCarPos_ = { 120.0f,-3.00f,0.0f };
-
-private:
-	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::EntityManager* entityManager = nullptr;
-	
-	Engine::Camera* camera = nullptr;
 private: // 一旦
-
 	struct ProvisionalData {
-		Vector3 oceanTranslate = { 0, -30, 0 };
-		Vector3 oceanRotate = { Math::DegreesToRadians(90) ,0,0 };
-
-		Vector3 skyBoxScale = {100,100,100};
-
-
-		Vector2 oceanRange{ 8000.0f,8000.0f };
-		float oceanAmplitude = 16.5f;
-		Vector2 waveDirection = { 0.5f,0.5f };
-		float waveSpeed = 5.0f;
-		Color color = { 0.0f, 0.0f, 0.8f, 0.75f };
-
 		int missileNumX = 5;
 		int missileNumY = 2;
 

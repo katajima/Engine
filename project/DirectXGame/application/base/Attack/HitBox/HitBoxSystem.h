@@ -17,6 +17,10 @@ namespace HitBox {
 	/// </summary>
 	class System {
 	public:
+		~System() {
+			data_.clear();
+			hitBoxCollDatas_.clear();
+		}
 
 		struct Data {
 			std::unique_ptr<HitBoxInstance> hitBox = nullptr;

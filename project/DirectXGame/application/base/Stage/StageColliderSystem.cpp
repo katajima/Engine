@@ -15,7 +15,6 @@ void StageColliderSystem::CreateCollider() {
 	for (auto& obj : objects) {
 		for (auto& mesh : obj->GetModel()->GetModelData().mesh) {
 			for (auto& triangle : mesh->triangle) {
-				auto collidetCom = std::make_unique<Engine::ColliderComponent>();
 				auto triangleColl = std::make_unique<Engine::TriangleCollider>();
 				triangleColl->triangle01 = triangle.vertices[0];
 				triangleColl->triangle02 = triangle.vertices[1];
@@ -23,7 +22,6 @@ void StageColliderSystem::CreateCollider() {
 				triangleColl->tag = CollisionTag::Wall;
 				triangleColl->layer = CollisionLayer::Environment;
 				triangleColl->collisionMask = 0xFFFFFFFF;
-				//triangleColl->isDebugLine = true;
 				triangleColl->isStatic = true;
 				triangleColl->Enable();
 				colliderComponent_->AddCollider(std::move(triangleColl));

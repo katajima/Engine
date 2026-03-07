@@ -17,6 +17,8 @@ namespace Combo {
 
 	void System::ClearNode() {
 		comboNodes_.clear();
+		comboGlobalDatas_.clear();
+		parentTransforms_.clear();
 	}
 
 	void System::AddComboNode(const std::string& name, std::shared_ptr<NodeState> node) {
@@ -311,7 +313,7 @@ namespace Combo {
 		data.GetComboMotion().GetComboMove().GetData().lockOnData_.radius = gData.lockOnRadius;
 	}
 
-	void System::CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData> addHitBoxDatas,
+	void System::CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData>& addHitBoxDatas,
 		GamePadButton button)
 	{
 		ComboData data{};

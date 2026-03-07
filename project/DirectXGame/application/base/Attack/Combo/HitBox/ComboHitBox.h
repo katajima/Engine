@@ -12,6 +12,10 @@ namespace Combo {
 	/// </summary>
 	class ComboHitBox {
 	public:
+		~ComboHitBox() { 
+			collData_.clear();
+			useHitBox_.clear();
+		}
 
 		enum class Shape {
 			kAABB,

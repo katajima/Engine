@@ -96,17 +96,12 @@ private:
 	std::unique_ptr<MainStage> stage_;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
-	// レベルデータ
-	std::unique_ptr<LoadLevelData> loadData_;
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;
-
-
-
 private:
 	// コンボエディター
 	std::unique_ptr<Combo::Editor> comboEditor_;

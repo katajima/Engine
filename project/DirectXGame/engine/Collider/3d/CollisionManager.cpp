@@ -66,10 +66,8 @@ void Engine::CollisionManager::RegisterStatic(ColliderComponent* comp)
 }
 
 void Engine::CollisionManager::Clear(){
-	dynamicColliders.clear();
-	staticColliders.clear();
-	registeredDynamic_.clear();
-	registeredStatic_.clear();
+	ClearDynamic();
+	ClearStatic();
 }
 
 void Engine::CollisionManager::CheckAll() {

@@ -191,6 +191,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\BaseStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\ResultStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp" />
@@ -895,6 +896,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointState.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\BaseStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\ResultStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\SelectStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\StageColliderSystem.h" />

@@ -90,7 +90,7 @@ private:
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 
 	// 
-	std::unique_ptr<Effect> effect_;
+	std::unique_ptr<Effect> effect_ = nullptr;
 
 	// スペシャルポイント管理クラス
 	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
@@ -102,13 +102,11 @@ private:
 	std::unique_ptr<MainStage> stage_;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
-	// レベルデータ
-	std::unique_ptr<LoadLevelData> loadData_;
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
 	// ステージコライダーシステム
-	std::unique_ptr<StageColliderSystem> stageColliderSystem_;
+	//std::unique_ptr<StageColliderSystem> stageColliderSystem_;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;

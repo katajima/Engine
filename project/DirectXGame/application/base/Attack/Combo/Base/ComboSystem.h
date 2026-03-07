@@ -15,6 +15,10 @@ namespace Combo {
 	class System
 	{
 	public:
+		~System() {
+			ClearNode();
+		}
+
 		// 初期化
 		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables);
 
@@ -118,7 +122,7 @@ namespace Combo {
 		};
 
 		// コンボ作成
-		void CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData> addHitBoxData,
+		void CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData>& addHitBoxData,
 			GamePadButton button = GamePadButton::GAMEPAD_B);
 	private:
 		// グローバルデータ作成

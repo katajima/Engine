@@ -41,7 +41,8 @@ public:
 	// ライト取得
 	std::vector< std::shared_ptr<Engine::Lights>>GetLights() { return lights_; }
 
-
+	// データクリア
+	void ClearData();
 private:
 	// オブジェクト3D生成
 	void CreateObject3d(LevelData* levelData);
@@ -49,10 +50,6 @@ private:
 	void CreateCamera(LevelData* levelData);
 	// ライト生成
 	void CreateLight(LevelData* levelData);
-
-	// データクリア
-	void ClearData();
-
 private:
 	Engine::EntityManager* entityManager = nullptr;
 	Engine::ModelManager* modelManager = nullptr;

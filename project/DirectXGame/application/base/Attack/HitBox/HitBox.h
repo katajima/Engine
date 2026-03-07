@@ -17,6 +17,10 @@ namespace HitBox {
 	/// </summary>
 	class HitBoxInstance : public IHitReceiver {
 	public:
+		~HitBoxInstance() {
+			colliders_.clear();
+		}
+
 		// 初期化
 		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type);
 

@@ -64,6 +64,10 @@ namespace Engine {
             root = std::make_unique<OctreeColliderNode>(bounds, 0);
         }
 
+        ~OctreeCollider() {
+            Clear();
+        }
+
         // クリア
         void Clear() const { root->Clear(); }
 

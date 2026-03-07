@@ -389,8 +389,6 @@ namespace Character {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
 
 		// ヒットボックスデータ作成
-		HitBox::GlobalData hitBoxdata = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
-		HitBox::GlobalData hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
 		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
 		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},6.0f };
 		HitBox::GlobalData hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
@@ -398,39 +396,37 @@ namespace Character {
 		HitBox::GlobalData hitBoxdata7 = { {0,0,0} ,  {4,4,2} };
 
 
-		hitBoxSystem->CreateHitBoxCollData("obbColl1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata);
-		hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata2);
-		hitBoxSystem->CreateHitBoxCollData("obb", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata3);
-		hitBoxSystem->CreateHitBoxCollData("obb2", HitBox::Shape::kSphere, HitBox::UseType::kPlayer, hitBoxdata4);
+		hitBoxSystem->CreateHitBoxCollData("attackObb", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata3);
+		hitBoxSystem->CreateHitBoxCollData("attackSphere", HitBox::Shape::kSphere, HitBox::UseType::kPlayer, hitBoxdata4);
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata5);
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_2", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata6);
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_3", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata7);
 
 		// コンボ１のデータ送る
-		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("obb")} });
+		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("attackObb")} });
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2", {{hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack2", {{hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ３のデータ送る
-		comboSystem->CreateCombo("Attack3", { {hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack3", { {hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// ジャンプコンボのデータ送る
-		comboSystem->CreateCombo("JumpAttack", { { hitBoxSystem->GetHitBoxCollData("obb2") } });
+		comboSystem->CreateCombo("JumpAttack", { { hitBoxSystem->GetHitBoxCollData("attackSphere") } });
 		// コンボ4のデータ送る
-		comboSystem->CreateCombo("Attack4", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack4", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ5のデータ送る
-		comboSystem->CreateCombo("Attack5", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack5", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ6のデータ送る
-		comboSystem->CreateCombo("Attack6", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack6", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ7のデータ送る
-		comboSystem->CreateCombo("Attack7", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack7", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 
 
 
 		// コンボ8のデータ送る
 		comboSystem->CreateCombo("HeavyAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_2")  } }, GamePadButton::GAMEPAD_X);
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("HeavyAttack02", { { hitBoxSystem->GetHitBoxCollData("obb")  } }, GamePadButton::GAMEPAD_X);
+		comboSystem->CreateCombo("HeavyAttack02", { { hitBoxSystem->GetHitBoxCollData("attackObb")  } }, GamePadButton::GAMEPAD_X);
 		// コンボ8のデータ送る
-		comboSystem->CreateCombo("HeavyAttack03", { { hitBoxSystem->GetHitBoxCollData("obb") } }, GamePadButton::GAMEPAD_X);
+		comboSystem->CreateCombo("HeavyAttack03", { { hitBoxSystem->GetHitBoxCollData("attackObb") } }, GamePadButton::GAMEPAD_X);
 		
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("SkillAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_3") } }, GamePadButton::GAMEPAD_Y);

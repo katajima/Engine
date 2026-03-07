@@ -11,7 +11,10 @@ namespace Engine {
 /// </summary>
 class StageColliderSystem : public IHitReceiver {
 public:
-
+	// デストラクタ
+	~StageColliderSystem() {
+		colliderComponent_->ClearColliders();
+	}
 	// 初期化
 	void Initialize(Engine::LineCommon* lineCommon);
 

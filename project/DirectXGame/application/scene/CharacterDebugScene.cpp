@@ -103,20 +103,12 @@ void CharacterDebugScene::Initialize()
 	else {
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
-
-
-	// レベルデータロード
-	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->SetCameraManager(cameraManager_.get());
-	loadData_->Initialize(GetEntityManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
-
-
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetDxCommon(), GetEntityManager(), followCamera_->GetUniqueCamera());
+	stage_->Initialize(GetEntityManager(), cameraManager_.get());
 
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
@@ -125,8 +117,7 @@ void CharacterDebugScene::Initialize()
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-
-
+	collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	collisionManager_->BuildStaticSceneOctree();
 
 	// カメラ設定
@@ -156,6 +147,7 @@ void CharacterDebugScene::Initialize()
 
 void CharacterDebugScene::Finalize(){
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	collisionManager_->Clear();
 }
 
 void CharacterDebugScene::Update()
@@ -206,8 +198,6 @@ void CharacterDebugScene::Update()
 	stage_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
-	// レベルデータアップデート
-	loadData_->Update();
 	// Effect更新
 	effect_->Update();
 }
@@ -262,7 +252,7 @@ void CharacterDebugScene::ApplyGlobalVariables() {
 /// 衝突判定と応答
 /// </summary>
 void CharacterDebugScene::CheckAllCollisions() {
-	for (auto objects : loadData_->GetObjects()) {
+	for (auto objects : stage_->GetLoadLevelData()->GetObjects()) {
 		if (objects->GetColliderComponent()) {
 			collisionManager_->Register(objects->GetColliderComponent());
 		}

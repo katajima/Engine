@@ -109,28 +109,13 @@ void GamePlayScene::Initialize()
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
-	// ステージコライダーシステム初期化
-	stageColliderSystem_ = std::make_unique<StageColliderSystem>();
-	stageColliderSystem_->Initialize(GetEntityManager()->Get3DLineCommon());
-	
-	// レベルデータロード
-	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->SetCameraManager(cameraManager_.get());
-	loadData_->Initialize(GetEntityManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
-	
-	for (auto& obj : loadData_->GetObjects()) {
-		stageColliderSystem_->AddObject(obj);
-	}
-	stageColliderSystem_->CreateCollider();
-	
-
 
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetDxCommon(), GetEntityManager(), followCamera_->GetUniqueCamera());
+	stage_->Initialize(GetEntityManager(), cameraManager_.get());
 	
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
@@ -139,11 +124,9 @@ void GamePlayScene::Initialize()
 	Vector3 sizeAABB = { 300,25,300 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-
-	
-	collisionManager_->RegisterStatic(stageColliderSystem_->GetColliderComponent());
+	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	// 静的Octreeコライダー
-	collisionManager_->BuildStaticSceneOctree();
+	//collisionManager_->BuildStaticSceneOctree();
 
 
 	// UI
@@ -172,9 +155,9 @@ void GamePlayScene::ApplyGlobalVariables()
 
 void GamePlayScene::CheckAllCollisions()
 {
-	for (auto objects : loadData_->GetObjects()) {
+	for (auto objects : stage_->GetLoadLevelData()->GetObjects()) {
 		if (objects->GetColliderComponent()) {
-			collisionManager_->Register(objects->GetColliderComponent());
+	//		collisionManager_->Register(objects->GetColliderComponent());
 		}
 	}
 	// キャラクターセット
@@ -280,16 +263,10 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	
-	stageColliderSystem_->Update();
 	// キャラクターマネージャー更新
 	characterManager_->Update();
-
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());
-
-	
-
 	// カメラ管理の更新
 	cameraManager_->Update();
 	// 弾マネージャ
@@ -298,8 +275,6 @@ void GamePlayScene::Update()
 	stage_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
-	// レベルデータアップデート
-	loadData_->Update();
 	// Effect更新
 	effect_->Update();
 	// ゲーム進行マネージャー更新
@@ -313,7 +288,10 @@ void GamePlayScene::Update()
 #pragma endregion //更新関係
 
 // 終了
-void GamePlayScene::Finalize(){}
+void GamePlayScene::Finalize(){
+	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	collisionManager_->Clear();
+}
 
 // 3D描画
 void GamePlayScene::Draw3D(){
