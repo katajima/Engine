@@ -47,7 +47,7 @@ namespace Engine {
 
 
 	protected:
-		DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
 
 		Vector3 min_;

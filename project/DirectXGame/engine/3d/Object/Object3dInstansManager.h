@@ -57,7 +57,7 @@ namespace Engine {
 	{
 	public:
 		// 初期化
-		void Initialize(Entity3DManager* entity3DManager, bool useCollider = false, bool rigidUpdate = true,  Transform transform = { {1,1,1},{},{} });
+		void Initialize(EntityManager* entity3DManager, bool useCollider = false, bool rigidUpdate = true,  Transform transform = { {1,1,1},{},{} });
 		// 更新
 		void Update();
 
@@ -97,7 +97,7 @@ namespace Engine {
 	};
 
 	// 前方宣言
-	class Entity3DManager;
+	class EntityManager;
 
 	// オブジェクトインスタンシングクラス(大量描画用)
 	class Object3dInstansManager
@@ -169,7 +169,7 @@ namespace Engine {
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
 		// エンティティ3dの設定
-		void SetEntity3D(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; };
+		void SetEntity3D(EntityManager* entity3DManager) { this->entity3DManager = entity3DManager; };
 
 		// 更新
 		void Update();
@@ -263,11 +263,12 @@ namespace Engine {
 		int id_;
 
 	private:
-		DirectXCommon* dxCommon_ = nullptr;
-		SrvManager* srvManager_ = nullptr;
+		DirectXCommon* dxCommon = nullptr;
+		SrvManager* srvManager = nullptr;
+		ModelManager* modelManager = nullptr;
+		EntityManager* entity3DManager = nullptr;
+
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
-		ModelManager* modelManager_;
-		Entity3DManager* entity3DManager_;
 	private:
 		const float kGravitationalAcceleration = 9.8f;
 		////ルートシグネチャデスク

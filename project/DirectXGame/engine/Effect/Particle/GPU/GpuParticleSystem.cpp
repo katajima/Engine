@@ -1,6 +1,6 @@
 #include "GpuParticleSystem.h"
 
-#include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/DirectX/common/DirectXCommon.h"
@@ -20,8 +20,8 @@ enum RootIndex {
 
 void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, DirectXCommon* dxCommon, int MaxInstance, std::string name, std::string textureName)
 {
-	dxCommon_ = dxCommon;						// DX共通クラス
-	gpuParticleManager_ = gpuParticleManager;	// GPUパーティクル管理クラス
+	this->dxCommon = dxCommon;						// DX共通クラス
+	this->gpuParticleManager = gpuParticleManager;	// GPUパーティクル管理クラス
 	// テクスチャ
 	textureName_ = textureName;
 	trailTextureName_ = "resources/Texture/Image.dds";
@@ -30,27 +30,27 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 	name_ = name;
 
 	// 最大値設定CB
-	cbMaxInstance_.CreateBuffer(dxCommon_, 1);
+	cbMaxInstance_.CreateBuffer(dxCommon, 1);
 	cbMaxInstance_.Data()->maxInstance = MaxInstance;
 	// パーティクルインスタンシングVS
-	sbParticleResource_.CreateBuffer(dxCommon_, cbMaxInstance_.Data()->maxInstance, true);
+	sbParticleResource_.CreateBuffer(dxCommon, cbMaxInstance_.Data()->maxInstance, true);
 	// カウンターインデックス
-	sbFreeListIndexResource_.CreateBuffer(dxCommon_, 1, true);
+	sbFreeListIndexResource_.CreateBuffer(dxCommon, 1, true);
 	// カウンター
-	sbFreeListResource_.CreateBuffer(dxCommon_, cbMaxInstance_.Data()->maxInstance, true);
+	sbFreeListResource_.CreateBuffer(dxCommon, cbMaxInstance_.Data()->maxInstance, true);
 	// 時間
-	cbPerFrame_.CreateBuffer(dxCommon_, 1);
+	cbPerFrame_.CreateBuffer(dxCommon, 1);
 	// カメラ位置
-	cbCameraPos_.CreateBuffer(dxCommon_, 1);
+	cbCameraPos_.CreateBuffer(dxCommon, 1);
 	// エミッタ発生数
-	emitterDispatchBuffer_.CreateBuffer(dxCommon_, 1);
+	emitterDispatchBuffer_.CreateBuffer(dxCommon, 1);
 	emitterDispatchBuffer_.Data()->totalThreadCount = 0; // 初期化
 	// 削除フラグ
-	cbDeleteParticleCS_.CreateBuffer(dxCommon_, 1);
+	cbDeleteParticleCS_.CreateBuffer(dxCommon, 1);
 	cbDeleteParticleCS_.Data()->isDelete = false; // 初期化
 
 
-	gpuParticleManager_->PreCsPso();
+	gpuParticleManager->PreCsPso();
 	sbParticleResource_.SetComputeRootDescriptorTable(0);		// パーティクル
 	sbFreeListIndexResource_.SetComputeRootDescriptorTable(1);	// フリーリストインデックス
 	sbFreeListResource_.SetComputeRootDescriptorTable(2);		// フリーリスト
@@ -74,12 +74,12 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 	int totalVertexCount = MaxInstance * maxSegments * verticesPerSegment;
 
 	// トレイル用最大値設定CB
-	cbMaxTrailVertexInstance_.CreateBuffer(dxCommon_, 1);
+	cbMaxTrailVertexInstance_.CreateBuffer(dxCommon, 1);
 	cbMaxTrailVertexInstance_.Data()->maxInstance = totalVertexCount;
 	// トレイル頂点バッファ
-	sbTrailVertexResource_.CreateBuffer(dxCommon_, cbMaxTrailVertexInstance_.Data()->maxInstance, true);
+	sbTrailVertexResource_.CreateBuffer(dxCommon, cbMaxTrailVertexInstance_.Data()->maxInstance, true);
 	
-	gpuParticleManager_->PreCsTrailPso();
+	gpuParticleManager->PreCsTrailPso();
 	sbTrailVertexResource_.SetComputeRootDescriptorTable(0);				// トレイル頂点
 	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(1);			// Maxインスタンス
 	{
@@ -92,15 +92,15 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 	sbTrailVertexResource_.UavDependence();
 
 
-	emitterDispatchBuffer_.CreateBuffer(dxCommon_, 20);
+	emitterDispatchBuffer_.CreateBuffer(dxCommon, 20);
 
 	// ディスパッチカウント
-	cbDispatchCount_.CreateBuffer(dxCommon_, 1);
+	cbDispatchCount_.CreateBuffer(dxCommon, 1);
 	cbDispatchCount_.Data()->gEmitterDispatchCount = 0;
 
 
 	// エミッター
-	cbEmitterCommon_.CreateBuffer(dxCommon_, 20);
+	cbEmitterCommon_.CreateBuffer(dxCommon, 20);
 	cbEmitterCommon_.Data()->translate = Vector3(0.0f, 0.0f, 0.0f);
 	cbEmitterCommon_.Data()->prevTranslate = cbEmitterCommon_.Data()->translate;
 	cbEmitterCommon_.Data()->count = 10;
@@ -126,7 +126,7 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 	cbEmitterCommon_.Data()->useBillboard = true;
 
 	// トレイル
-	cbEmitterTrail_.CreateBuffer(dxCommon_, 20);
+	cbEmitterTrail_.CreateBuffer(dxCommon, 20);
 	cbEmitterTrail_.Data()->trailcolor = { 1.0f,1.0f ,1.0f };
 	cbEmitterTrail_.Data()->trailLifeTime = 0.5f;
 	cbEmitterTrail_.Data()->isTrail = false;
@@ -137,9 +137,9 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 void Engine::GpuParticleGroup::Update()
 {
 
-	cbCameraPos_.Data()->x = camera_->transform_.translate.x;
-	cbCameraPos_.Data()->y = camera_->transform_.translate.y;
-	cbCameraPos_.Data()->z = camera_->transform_.translate.z;
+	cbCameraPos_.Data()->x = camera->transform_.translate.x;
+	cbCameraPos_.Data()->y = camera->transform_.translate.y;
+	cbCameraPos_.Data()->z = camera->transform_.translate.z;
 
 
 	const uint32_t threadsPerGroup = 256;
@@ -153,7 +153,7 @@ void Engine::GpuParticleGroup::Update()
 	cbMaxInstance_.SetComputeRootConstantBufferView(4);			// Maxインスタンス
 	cbDeleteParticleCS_.SetComputeRootConstantBufferView(5); 	// 削除フラグ
 
-	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	dxCommon->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 
 	sbParticleResource_.UavDependence();
 	sbFreeListIndexResource_.UavDependence();
@@ -170,16 +170,16 @@ void Engine::GpuParticleGroup::Update()
 
 void Engine::GpuParticleGroup::Draw() {
 
-	if (mesh_) {
+	if (mesh) {
 		sbParticleResource_.SetGraphicsRootDescriptorTable(1);
 
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon_->GetTextureManager()->GetSrvHandleGPU(textureName_));
+		dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon->GetTextureManager()->GetSrvHandleGPU(textureName_));
 
 
-		mesh_->GetCommandList();
+		mesh->GetCommandList();
 
 		// インスタンシング描画
-		dxCommon_->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh_->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
+		dxCommon->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
 	}
 }
 
@@ -260,7 +260,7 @@ void Engine::GpuParticleGroup::UpdateEmitte(float deltaTime)
 
 	// --- 7) DispatchCountCB（cbDispatchCount_） を Root にセット済み（上で） ---
 	// --- 8) 実際に Dispatch ---
-	dxCommon_->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
+	dxCommon->GetCommandList()->Dispatch(threadGroupCount, 1, 1);
 
 	// --- 9) UAVバリア等（既存コード） ---
 	sbParticleResource_.UavDependence();
@@ -293,7 +293,7 @@ void Engine::GpuParticleGroup::UpdateField()
 	const uint32_t threadsPerGroup = 256;
 	const uint32_t dispatchCount = (cbMaxInstance_.Data()->maxInstance + threadsPerGroup - 1) / threadsPerGroup;
 
-	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	dxCommon->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 
 
 
@@ -321,13 +321,12 @@ void Engine::GpuParticleGroup::UpateTrailEmitte(float deltaTime)
 
 
 
-	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	dxCommon->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 
 	sbParticleResource_.UavDependence();
 	sbTrailVertexResource_.UavDependence();
 
 }
-
 
 void Engine::GpuParticleGroup::UpdateTrail()
 {
@@ -338,7 +337,7 @@ void Engine::GpuParticleGroup::UpdateTrail()
 	cbPerFrame_.SetComputeRootConstantBufferView(1);						// 乱数用時間
 	cbMaxTrailVertexInstance_.SetComputeRootConstantBufferView(2);			// Maxインスタンス(トレイル頂点)
 
-	dxCommon_->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
+	dxCommon->GetCommandList()->Dispatch(UINT(dispatchCount), 1, 1);
 
 
 	sbTrailVertexResource_.UavDependence();
@@ -349,16 +348,16 @@ void Engine::GpuParticleGroup::DrawTrail()
 {
 
 	sbTrailVertexResource_.SetGraphicsRootDescriptorTable(1);
-	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon_->GetTextureManager()->GetSrvHandleGPU(trailTextureName_));
+	dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon->GetTextureManager()->GetSrvHandleGPU(trailTextureName_));
 	D3D12_VERTEX_BUFFER_VIEW emptyVB = {};
 	emptyVB.BufferLocation = 0;
 	emptyVB.SizeInBytes = 0;
 	emptyVB.StrideInBytes = 0;
 
-	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &emptyVB);
-	dxCommon_->GetCommandList()->IASetIndexBuffer(nullptr);
+	dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &emptyVB);
+	dxCommon->GetCommandList()->IASetIndexBuffer(nullptr);
 	// インスタンシング描画
-	dxCommon_->GetCommandList()->DrawInstanced(static_cast<UINT>(cbMaxTrailVertexInstance_.Data()->maxInstance), 1, 0, 0);
+	dxCommon->GetCommandList()->DrawInstanced(static_cast<UINT>(cbMaxTrailVertexInstance_.Data()->maxInstance), 1, 0, 0);
 }
 
 #pragma endregion

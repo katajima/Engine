@@ -30,11 +30,11 @@ void SampleScene::InitCamera() {
 
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
 	fixedCamera_->Update();
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables());
+	cameraManeger_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
@@ -59,27 +59,27 @@ void SampleScene::InitLight() {
 	directional->directional = directionalLightData;
 
 	// ライト管理クラスに追加
-	GetEntity3DManager()->GetLightManager()->AddLight(directional);
+	GetEntityManager()->GetLightManager()->AddLight(directional);
 };
 // パーティクル
 void SampleScene::InitParticle() {
 	// パーティクルエミッターの生成
 	aabbParticleEmitter_ = std::make_unique<Engine::AABBParticleEmitter>();
-	aabbParticleEmitter_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(),GetGlobalVariables(), "testAABBEmit", "testParticle");
+	aabbParticleEmitter_->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager(),GetGlobalVariables(), "testAABBEmit", "testParticle");
 
 	// パーティクルエミッターの生成
 	sphereParticleEmitter = std::make_unique<Engine::SphereParticleEmitter>();
-	sphereParticleEmitter->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testSphereEmit", "testParticle");
+	sphereParticleEmitter->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testSphereEmit", "testParticle");
 	sphereParticleEmitter->transform_.translate_.x = 5;
 
 	// パーティクルエミッターの生成
 	cornerParticleEmitter = std::make_unique<Engine::CornerParticleEmitter>();
-	cornerParticleEmitter->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testCornerEmit", "testParticle");
+	cornerParticleEmitter->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testCornerEmit", "testParticle");
 	cornerParticleEmitter->transform_.translate_.x = 10;
 
 	// パーティクルエミッターの生成
 	splineParticleEmitter = std::make_unique<Engine::SplineParticleEmitter>();
-	splineParticleEmitter->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testSplineEmit", "testParticle");
+	splineParticleEmitter->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testSplineEmit", "testParticle");
 	splineParticleEmitter->AddControlPoints({ 0,0,0 });
 	splineParticleEmitter->AddControlPoints({ 1,1,1 });
 	splineParticleEmitter->AddControlPoints({ 2,2,3 });
@@ -88,30 +88,30 @@ void SampleScene::InitParticle() {
 
 	// パーティクルエミッターの生成
 	lineParticleEmitter = std::make_unique<Engine::LineParticleEmitter>();
-	lineParticleEmitter->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testLineEmit", "testParticle");
+	lineParticleEmitter->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testLineEmit", "testParticle");
 	lineParticleEmitter->transform_.translate_.x = 20;
 
 	// パーティクルエミッターの生成
 	triangleParticleEmitter = std::make_unique<Engine::TriangleParticleEmitter>();
-	triangleParticleEmitter->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testTriangleEmit", "testParticle");
+	triangleParticleEmitter->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testTriangleEmit", "testParticle");
 	triangleParticleEmitter->transform_.translate_.x = -5;
 
 	// パーティクルエミッターの生成
 	meshParticleEmitter = std::make_unique<Engine::MeshParticleEmitter>();
-	meshParticleEmitter->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testMeshEmit", "testParticle");
-	meshParticleEmitter->SetMesh(GetDxCommon()->GetModelManager()->FindModel("teapot.obj")->modelData.mesh[0].get());
+	meshParticleEmitter->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager(), GetGlobalVariables(), "testMeshEmit", "testParticle");
+	meshParticleEmitter->SetMesh(GetDxCommon()->GetModelManager()->FindModel("teapot.obj")->GetModelData().mesh[0].get());
 	meshParticleEmitter->transform_.translate_.x = -10;
 	meshParticleEmitter->SetSize({ 0.05f,0.05f ,0.05f }, {});
 
 
 	sprite2dP_ = std::make_unique<Engine::Sprite>();
-	sprite2dP_->Initialize(GetEntity2DManager()->GetSpriteCommon(), "resources/Texture/icon/Clear_Sponge.png");
+	sprite2dP_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/icon/Clear_Sponge.png");
 	sprite2dP_->Update();
 
 
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager2d()->SetCamera(GetCamara());
+	GetEntityManager()->GetEffectManager()->GetParticleManager2d()->SetCamera(GetCamara());
 	particleEmitter2d_ = std::make_unique<Engine::ParticleEmitter2d>();
-	particleEmitter2d_->Initialize(GetEntity3DManager()->GetEffectManager()->GetParticleManager2d(), "2d", "testParticle2d");
+	particleEmitter2d_->Initialize(GetEntityManager()->GetEffectManager()->GetParticleManager2d(), "2d", "testParticle2d");
 	particleEmitter2d_->SetCount(10, 0);
 	particleEmitter2d_->SetAcceleration({ 0,9.8f }, {});
 	particleEmitter2d_->GetEmitData().isEmit = true;
@@ -120,7 +120,7 @@ void SampleScene::InitParticle() {
 };
 // オブジェクト
 void SampleScene::InitObject() {
-	object3dInstansManager_ = GetEntity3DManager()->GetObject3dInstansManager();
+	object3dInstansManager_ = GetEntityManager()->GetObject3dInstansManager();
 
 
 	// カメラセット
@@ -128,7 +128,7 @@ void SampleScene::InitObject() {
 
 
 	// 3Dオブジェクトの生成(オブジェクト名、モデルタイプ、位置、カメラ)
-	testObject_ = GetEntity3DManager()->CreateObject3D("test1", Engine::ObjectModelType::kNormal, {}, nullptr);
+	testObject_ = GetEntityManager()->CreateObject3D("test1", Engine::ObjectModelType::kNormal, {}, nullptr);
 	testObject_->SetModel("Player.obj");
 
 
@@ -156,10 +156,10 @@ void SampleScene::InitObject() {
 	
 	// スカイボックスの生成
 	skyBox = std::make_unique<Engine::SkyBox>();
-	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
+	skyBox->Initialize(GetEntityManager(), "resources/Texture/hdr/sky.dds");
 
 	// 空
-	sky_ = GetEntity3DManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	sky_ = GetEntityManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
 	sky_->GetWorldTransform().scale_ = { 100,100,100 };
 	sky_->SetSkyBox(skyBox.get());
 };
@@ -170,7 +170,7 @@ void SampleScene::InitSprite() {
 	
 	
 	// スプライトの初期化
-	sprite_->Initialize(GetEntity2DManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png");
+	sprite_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png");
 	sprite_->SetColor({1,1,1,1});			// 色
 	sprite_->SetPosition({ 10,10 });		// 位置
 	sprite_->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント

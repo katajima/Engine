@@ -39,9 +39,9 @@ namespace Engine {
 		void SetShaderFileName(std::wstring filename);
 
 	private:
-		Command* command_;
-		DXGIDevice* DXGIDevice_;
-		DXCCompiler* dxcCompiler_;
+		Command* command = nullptr;
+		DXGIDevice* dxgiDevice = nullptr;
+		DXCCompiler* dxcCompiler = nullptr;
 
 		// ファイル名
 		struct fileName {

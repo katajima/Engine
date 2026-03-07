@@ -71,10 +71,11 @@ namespace Engine {
 		// 排他制御
 		std::mutex modelsMutex_;  // modelsへの書き込みを守るmutex
 
-		Command* command_;
-		DXGIDevice* DXGIDevice_;
-		SrvManager* srvManager_;
-		DirectXCommon* dxCommon_;
+	private:
+		Command* command;
+		DXGIDevice* dxgiDevice;
+		SrvManager* srvManager;
+		DirectXCommon* dxCommon;
 
 		std::unique_ptr<ModelCommon> modelCommon_;
 

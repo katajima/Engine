@@ -1,48 +1,53 @@
 #include "PlayerCar.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Math/Random.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 
 
-void PlayerCar::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, const Vector3& rotate) {
-	this->entity3DManager = entity3DManager;
+void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, const Vector3& rotate) {
+	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	pos_ = pos;
 	// 車体
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager, globalVariables, "TrackCarBoby", "TrackCarBody.obj", false, false, nullptr);
+	objectComponent_->Initialize(entityManager, globalVariables, "TrackCarBoby", "TrackCarBody.obj", false, false, nullptr);
 	objectComponent_->SetSRT({ 1,1,1 }, rotate, pos_);
 
 
 	// タイヤ
 	objectLFTier_ = std::make_unique<ObjectComponent>();
-	objectLFTier_->Initialize(entity3DManager, globalVariables, "TrackCarTireLF", "TrackCarTire.obj", false, false, nullptr);
+	objectLFTier_->Initialize(entityManager, globalVariables, "TrackCarTireLF", "TrackCarTire.obj", false, false, nullptr);
 	objectLFTier_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 	objectLFTier_->GetWorldTransform().translate_ = { 1.0f ,0.3f,-1.3f };
 
 	//// タイヤ
 	objectLBTire_ = std::make_unique<ObjectComponent>();
-	objectLBTire_->Initialize(entity3DManager, globalVariables, "TrackCarTireLB", "TrackCarTire.obj", false, false, nullptr);
+	objectLBTire_->Initialize(entityManager, globalVariables, "TrackCarTireLB", "TrackCarTire.obj", false, false, nullptr);
 	objectLBTire_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 	objectLBTire_->GetWorldTransform().translate_ = { 1.0f ,0.3f, 2.0f };
 
 	//// タイヤ
 	objectRFTire_ = std::make_unique<ObjectComponent>();
-	objectRFTire_->Initialize(entity3DManager, globalVariables, "TrackCarTireRF", "TrackCarTire.obj", false, false, nullptr);
+	objectRFTire_->Initialize(entityManager, globalVariables, "TrackCarTireRF", "TrackCarTire.obj", false, false, nullptr);
 	objectRFTire_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 	objectRFTire_->GetWorldTransform().translate_ = { -1.0f ,0.3f,-1.3f };
 
 	//// タイヤ
 	objectRBTire_ = std::make_unique<ObjectComponent>();
-	objectRBTire_->Initialize(entity3DManager, globalVariables, "TrackCarTireRB", "TrackCarTire.obj", false, false, nullptr);
+	objectRBTire_->Initialize(entityManager, globalVariables, "TrackCarTireRB", "TrackCarTire.obj", false, false, nullptr);
 	objectRBTire_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 	objectRBTire_->GetWorldTransform().translate_ = { -1.0f ,0.3f,2.0f };
+
+	// スクラップボックス
+	objectScrapBox_ = std::make_unique<ObjectComponent>();
+	objectScrapBox_->Initialize(entityManager, globalVariables, "TrackCarScrapBox", "scrapBox.obj", false, false, nullptr);
+	objectScrapBox_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
+	objectScrapBox_->GetWorldTransform().translate_ = { 0.0f ,0.4f,1.25f };
 
 	// オブジェクトコンポーネント追加
 	objectComponentShadow_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
-	objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, "PlayerBase2", "plane.obj", "resources/Texture/smoke/no4.dds",
+	objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase2", "plane.obj", "resources/Texture/smoke/no4.dds",
 		false, false, nullptr, Engine::Object3dInstansManager::TransparencyType::kYes);
 
 	objectComponentShadow_->SetInstancingSRT({ 5.0f,5.0f,5.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
@@ -73,10 +78,10 @@ void PlayerCar::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Glo
 
 	spotLightRF_ = std::make_shared<Engine::SpotLight>();
 	spotLightRF_->spot = spotData;
-	entity3DManager->GetLightManager()->AddLight(spotLightRF_);
+	entityManager->GetLightManager()->AddLight(spotLightRF_);
 	spotLightLF_ = std::make_shared<Engine::SpotLight>();
 	spotLightLF_->spot = spotData;
-	entity3DManager->GetLightManager()->AddLight(spotLightLF_);
+	entityManager->GetLightManager()->AddLight(spotLightLF_);
 
 	// ステートマシン初期化
 	stateMachine_ = std::make_unique<PlayerCarStateMachine>();
@@ -91,6 +96,9 @@ void PlayerCar::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Glo
 		});
 	stateMachine_->RegisterState(CarMainState::SelectMove, [](PlayerCar* p) {
 		return std::make_unique<CarSelectMove>(CarMainState::SelectMove, p);
+		});
+	stateMachine_->RegisterState(CarMainState::ResultCashExchange, [](PlayerCar* p) {
+		return std::make_unique<ResultCashExchangeState>(CarMainState::ResultCashExchange, p);
 		});
 	stateMachine_->Initialize(this);
 
@@ -150,4 +158,12 @@ void PlayerCar::Emit(const Vector3& pos) {
 
 void PlayerCar::Emit(const Vector3& pos, const Vector3& dir, const Vector3& range) {
 	effect->Emit("dust2", pos, dir, range);
+}
+
+void PlayerCar::EmitScrapBox(const Vector3& pos, const Vector3& dir, const Vector3& range){
+	effect->Emit("scrapBasis", pos, dir, range);
+	effect->Emit("scrapGear", pos, dir, range);
+	effect->Emit("scrapIronRod", pos, dir, range);
+	effect->Emit("scrapScrew", pos, dir, range);
+	effect->Emit("scrapTire", pos, dir, range);
 }

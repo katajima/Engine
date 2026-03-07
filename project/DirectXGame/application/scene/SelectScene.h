@@ -22,6 +22,7 @@
 #include "DirectXGame/application/base/UI/SelectUI.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Game/Select/SelectSystem.h"
 
 /// <summary>
 /// セレクトシーン
@@ -55,6 +56,10 @@ private:
 	// セレクトカメラ
 	std::unique_ptr<SelectCamera> selectCamera_ = nullptr;
 	// エフェクト
-	std::unique_ptr<Effect> effect_;
+	std::unique_ptr<Effect> effect_ = nullptr;
+	// セレクトシーンの管理クラス
+	std::unique_ptr<SelectSystem> selectSystem_ = nullptr;
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
 };
 

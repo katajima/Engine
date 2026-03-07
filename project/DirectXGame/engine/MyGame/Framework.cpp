@@ -3,41 +3,34 @@
 void Engine::Framework::Initialize()
 {
 	// WindowsAPI解放
-	winApp = std::make_unique<WinApp>();
-	winApp->Initialize();
+	winApp_ = std::make_unique<WinApp>();
+	winApp_->Initialize();
 
 	// Input
 	input_ = std::make_unique<Input>();
-	input_->Intialize(winApp.get());
+	input_->Intialize(winApp_.get());
 
 	// グローバル
 	globalVariables_ = std::make_unique<GlobalVariables>();
 	
 	// DirectX
-	dxCommon = std::make_unique<Engine::DirectXCommon>();
-	dxCommon->Intialize(winApp.get());
-	dxCommon->GetImGuiManager()->SetInput(input_.get());
+	dxCommon_ = std::make_unique<Engine::DirectXCommon>();
+	dxCommon_->Intialize(winApp_.get());
+	dxCommon_->GetImGuiManager()->SetInput(input_.get());
 
 	// 3D全般
-	entity3DManager_ = std::make_unique<Entity3DManager>();
-	entity3DManager_->Initialize(dxCommon.get());
-	entity3DManager_->GetCameraCommon()->SetInput(input_.get());
-
-	// 2D全般
-	entity2DManager_ = std::make_unique<Entity2DManager>();
-	entity2DManager_->Initialize(dxCommon.get());
-
-
-
+	entityManager_ = std::make_unique<EntityManager>();
+	entityManager_->Initialize(dxCommon_.get());
+	entityManager_->GetCameraCommon()->SetInput(input_.get());
 }
 
 void Engine::Framework::Finalize()
 {
 	// WindowsAPIの終了処理
-	winApp->Finalize();
+	winApp_->Finalize();
 	
 	// DirectX
-	dxCommon->Finalize();
+	dxCommon_->Finalize();
 
 }
 
@@ -48,7 +41,7 @@ void Engine::Framework::Update()
 
 	
 	// Windowsのメッセージ処理
-	if(winApp->ProcessMessage()) {
+	if(winApp_->ProcessMessage()) {
 		// ゲームループを抜ける
 		endRequst_ = true;
 	};

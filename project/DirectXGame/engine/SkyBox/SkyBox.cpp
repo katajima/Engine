@@ -1,14 +1,14 @@
 #include "SkyBox.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-void Engine::SkyBox::Initialize(Entity3DManager* entity3DManager, std::string txtueName)
+void Engine::SkyBox::Initialize(EntityManager* entityManager, std::string txtueName)
 {
-	entity3DManager_ = entity3DManager;
+	this->entityManager = entityManager;
 
 
 	// マテリアル初期化
 	material = std::make_unique<Material>();
-	material->Initialize(entity3DManager_->GetSkyBoxCommon()->GetDxCommon());
+	material->Initialize(entityManager->GetSkyBoxCommon()->GetDxCommon());
 	material->tex_.diffuseFilePath = txtueName;	// テクスチャ名設定
 	material->LoadTex();			// テクスチャ読み込み
 	material->GetMaterialInstance().color = { 1,1,1,1 };	// 色
@@ -59,7 +59,7 @@ void Engine::SkyBox::Initialize(Entity3DManager* entity3DManager, std::string tx
 		vertexOffset += 4; // 次の面に移動
 	}
 
-	mesh_->Initialize(entity3DManager_->GetSkyBoxCommon()->GetDxCommon());
+	mesh_->Initialize(entityManager->GetSkyBoxCommon()->GetDxCommon());
 }
 
 void Engine::SkyBox::Update()
@@ -76,5 +76,5 @@ void Engine::SkyBox::Draw()
 	material->GetCommandListTexture(2, 7, 8);
 
 	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-	entity3DManager_->GetSkyBoxCommon()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
+	entityManager->GetSkyBoxCommon()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
 }

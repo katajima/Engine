@@ -6,18 +6,18 @@
 
 void Engine::LightManager::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;	// DX共通クラス
+	this->dxCommon = dxCommon;	// DX共通クラス
 
 	//平行光源用のリソースを作る
-	directionalLightResource = dxCommon_->GetDXGIDevice()->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
+	directionalLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource((sizeof(DirectionalLightData) * kNumMaxInstance));
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 
 	// ポイントライト用のリソース
-	pointLightResource = dxCommon_->GetDXGIDevice()->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
+	pointLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource((sizeof(PointLightData) * kNumMaxInstance));
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
 	//スポットライト用のリソースを作る
-	spotLightResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
+	spotLightResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(SpotLightData) * kNumMaxInstance);
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
 }
 
@@ -26,15 +26,15 @@ void Engine::LightManager::DrawLight(IsLight is, int dire, int point, int spot)
 {
 	////------平行光源用------////
 	if (is.dire) {
-		dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(dire, directionalLightResource->GetGPUVirtualAddress());
+		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(dire, directionalLightResource->GetGPUVirtualAddress());
 	}
 	////------ポイントライト用------////
 	if (is.pount) {
-		dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(point, pointLightResource->GetGPUVirtualAddress());
+		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(point, pointLightResource->GetGPUVirtualAddress());
 	}
 	////------スポットライト用------////
 	if (is.spot) {
-		dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(spot, spotLightResource->GetGPUVirtualAddress());
+		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(spot, spotLightResource->GetGPUVirtualAddress());
 	}
 }
 

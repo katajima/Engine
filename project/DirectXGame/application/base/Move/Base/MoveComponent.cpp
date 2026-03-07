@@ -18,6 +18,13 @@ void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* 
 	// 攻撃移動システムの生成
 	attackMoveSystem_ = std::make_unique<AttackMoveSystem>();
 	attackMoveSystem_->Initialize();
+	// リアクション移動システムの生成
+	reactionMoveSystem_ = std::make_unique<ReactionMoveSystem>();
+	reactionMoveSystem_->Initialize();
+	// 応答移動システムの生成
+	responseMoveSystem_ = std::make_unique<ResponseMoveSystem>();
+	responseMoveSystem_->Initialize();
+
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
 	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });
@@ -57,9 +64,10 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 	ctx.fallGravity = jumpSystem_->GetData().fallGravity_;
 	ctx.upGravity = jumpSystem_->GetData().upGravity_;
 	ctx.attackingGravity = attackingGravity;
-	ctx.camera = camera;						// カメラ;
-	ctx.cameraDirection = movementSystem_->GetDirection();	// 方向
-	
+	if (camera) {
+		ctx.camera = camera;// カメラ;
+		ctx.cameraDirection = camera->GetForward();	// 方向
+	}
 
 	// 移動システムの更新
 	if (controlType_ == ControlType::Manual) {	// 手動操作なら入力を渡す
@@ -70,13 +78,19 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 		dashSystem_->Update(ctx, *locomotionCoordinator_.get());
 
 		// ジャンプシステムの更新
-		jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), object, rigid);
+		jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), rigid);
 
 		// 攻撃移動システム更新
-		attackMoveSystem_->Update(ctx, *locomotionCoordinator_.get(), object, input);
+		attackMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
 
 		// 移動システム更新
-		moveSystem_->Update(ctx, *locomotionCoordinator_.get(), object, input);
+		moveSystem_->Update(ctx, *locomotionCoordinator_.get());
+
+		// リアクション移動システム更新
+		reactionMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
+
+		// 応答移動システム更新
+		responseMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
 
 		// リクエスト集約選択クラスで移動コマンド生成
 		MoveCommand cmd = locomotionCoordinator_->BuildCommand();

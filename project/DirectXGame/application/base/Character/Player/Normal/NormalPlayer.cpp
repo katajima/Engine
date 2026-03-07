@@ -2,8 +2,7 @@
 
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 #include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
@@ -12,22 +11,21 @@
 
 namespace Character {
 
-	void NormalPlayer::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void NormalPlayer::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
-		this->entity3DManager = entity3DManager;	// エンティティ
-		this->entity2DManager = entity2DManager;	// エンティティ
+		this->entityManager = entityManager;	// エンティティ
 		this->globalVariables = globalVariables;	// 保存項目
 		this->camera = camera;					// カメラ
 		this->inputSystem = inputSystem;						// 入力
 
 
 
-		Engine::ParticleManager* particleManager = entity3DManager->GetEffectManager()->GetParticleManager();
+		Engine::ParticleManager* particleManager = entityManager->GetEffectManager()->GetParticleManager();
 
 		// オブジェクトコンポーネント追加
 		objectComponent_ = std::make_unique<ObjectComponent>();
-		objectComponent_->Initialize(entity3DManager, globalVariables, "PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning,false);
+		objectComponent_->Initialize(entityManager, globalVariables, "PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning,false);
 		// 保存項目追加
 		CreateGroup("Player");
 
@@ -64,7 +62,8 @@ namespace Character {
 		sphere->tag = CollisionTag::Player;
 		sphere->layer = CollisionLayer::Player;
 		sphere->collisionMask = 0xFFFFFFFF;
-		sphere->radius = 1.0f; // 半径を適宜設定
+		sphere->radius = 2.0f; // 半径を適宜設定
+		sphere->isDebugLine = true;
 		sphere->Enable();
 		// コライダ追加
 		GetColliderComponent()->AddCollider(std::move(sphere));
@@ -94,17 +93,16 @@ namespace Character {
 		// 応答システム初期化
 		responseSystem_ = std::make_unique<ResponseSystem>();
 		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
-		responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
-
+		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
 
 
 		// 弾出現
 		bulletSpawn_ = std::make_unique<BulletSpawn>();
-		bulletSpawn_->Initialize(this, entity3DManager, entity2DManager, globalVariables, camera, effect);
+		bulletSpawn_->Initialize(this, entityManager, globalVariables, camera, effect);
 
 		// スペシャル攻撃
 		special_ = std::make_unique<RangeBombingSpecial>();
-		special_->Initialize(entity3DManager, entity2DManager, camera);
+		special_->Initialize(entityManager, camera);
 		special_->SetOwner(this);
 		special_->SetParent(&GetObjectComponent()->GetWorldTransform());
 		special_->SetInputSystem(inputSystem);
@@ -118,7 +116,7 @@ namespace Character {
 
 		// UI
 		ui_ = std::make_unique<PlayerUI>();
-		ui_->Initialize(inputSystem, entity2DManager, globalVariables);
+		ui_->Initialize(inputSystem, entityManager, globalVariables);
 		ui_->SetCharacterParameter(GetCharacterParameterComponent());
 
 
@@ -127,7 +125,7 @@ namespace Character {
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.dds",
+		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.dds",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
 		
 		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
@@ -141,13 +139,13 @@ namespace Character {
 		// 武器
 		weapon_ = std::make_unique<PlayerWeapon>();
 		weapon_->SetCharacter(this);
-		weapon_->Initialize(inputSystem, entity3DManager, nullptr, globalVariables, {}, camera);
+		weapon_->Initialize(inputSystem, entityManager, globalVariables, {}, camera);
 		weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
 
 
 		// 戦闘
 		attackController_ = std::make_unique<AttackController>();
-		attackController_->Initialize(entity3DManager, globalVariables, GetCharacterParameterComponent(), this);
+		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
 		attackController_->GetHitCounter().SetHitTimer(2.0f);
 
 		// 
@@ -265,7 +263,7 @@ namespace Character {
 
 		if (moveComponent_->GetIsLanding() &&
 			stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
-			inputSystem->GetData().moveShick.Length() == 0) {
+			inputSystem->GetPlayerInputData().moveShick.Length() == 0) {
 			moveComponent_->Velocity() = {};
 		}
 
@@ -297,7 +295,7 @@ namespace Character {
 
 		
 		//武器更新
-		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->modelData.skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
+		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
 
 
@@ -306,8 +304,8 @@ namespace Character {
 
 
 		// UI更新
-		ui_->SetImageLeftTopPosAndRatio(entity3DManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), 
-			entity3DManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), 
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
 		ui_->Update(GetTime());
 
 

@@ -13,7 +13,7 @@ namespace Character {
 		MediumMeleeEnemy() {}
 
 		// 初期化
-		void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 		// 毎フレーム更新

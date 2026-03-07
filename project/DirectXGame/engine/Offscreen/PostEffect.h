@@ -31,7 +31,7 @@ namespace Engine {
 		// 描画
 		void DrawColl();
 		// カメラ設定
-		void SetCamera(Camera* camera) { camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 
 
 
@@ -59,9 +59,7 @@ namespace Engine {
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 		Microsoft::WRL::ComPtr < ID3D12Resource> vertexResource;
-		DirectXCommon* dxCommon_ = nullptr;
-		Camera* camera_ = nullptr;
-
+		
 		std::unique_ptr	<ConstantBuffer<VignetteGPU>>	cbVignette_;
 		std::unique_ptr <ConstantBuffer<SmoothigGPU>>	cbSmoothig_;
 		std::unique_ptr <ConstantBuffer<GaussianGPU>>	cbGaussian_;
@@ -70,6 +68,9 @@ namespace Engine {
 		std::unique_ptr <ConstantBuffer<DissovleGPU>>	cbDissovle_;
 		std::unique_ptr <ConstantBuffer<RandomGPU>>		cbRandom_;
 		std::unique_ptr <ConstantBuffer<BloomGPU>>		cbBloom_;
+	private:
+		DirectXCommon* dxCommon = nullptr;
+		Camera* camera = nullptr;
 	};
 
 

@@ -47,7 +47,7 @@ namespace Engine {
 		HRESULT hr_ = S_FALSE;
 
 		// DXGI
-		DXGIDevice* dxgi_ = nullptr;
+		DXGIDevice* dxgi = nullptr;
 
 		// コマンドキュー
 		ComPtr<ID3D12CommandQueue> commandQueue_ = nullptr;

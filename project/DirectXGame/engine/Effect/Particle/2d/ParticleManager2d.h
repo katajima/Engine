@@ -49,7 +49,7 @@ namespace Engine {
 
 
 		// カメラセット
-		void SetCamera(Camera* camera) { this->camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 
 		// ランダムエンジン
 		std::mt19937& GetRandomEngine() { return randomEngine_; }
@@ -86,10 +86,10 @@ namespace Engine {
 		void CreateGraphicsPipeline();
 
 	private:
-		DirectXCommon* dxCommon_ = nullptr;		// DirectX
-		SrvManager* srvManager_ = nullptr;		// SRV
-		EffectManager* effectManager_ = nullptr;	// エフェクト
-		Camera* camera_ = nullptr;				// カメラ
+		DirectXCommon* dxCommon = nullptr;		// DirectX
+		SrvManager* srvManager = nullptr;		// SRV
+		EffectManager* effectManager = nullptr;	// エフェクト
+		Camera* camera = nullptr;				// カメラ
 	private:
 		// PSO設定
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;

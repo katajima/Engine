@@ -102,4 +102,20 @@ void CarSelectMove::Exit(){
 
 #pragma endregion
 
+void ResultCashExchangeState::Enter()
+{
+	GetPlayerCar()->GetBodyWorldTransform().translate_ = pos_;
+}
 
+void ResultCashExchangeState::Update(float dt)
+{
+	scrapTimer_ += dt;
+	if(scrapTimer_ >= scrapInterval_) {
+		scrapTimer_ = 0.0f;
+		GetPlayerCar()->EmitScrapBox(GetPlayerCar()->GetScrapBoxWorldPosition() + scrapOffset_, { 0,15, 0}, { 0,5,0 });
+	}
+}
+
+void ResultCashExchangeState::Exit()
+{
+}

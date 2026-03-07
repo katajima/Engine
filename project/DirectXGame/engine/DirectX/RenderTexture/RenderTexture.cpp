@@ -13,16 +13,16 @@
 
 Engine::RenderTexture::~RenderTexture()
 {
-	rtvManager_->DecAllocate();
+	rtvManager->DecAllocate();
 }
 
 void Engine::RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rvtManager, RenderingCommon* renderingCommon, const std::string name, PostEffectType type)
 {
-	DXGIDevice_ = DXGIDevice;			// デバイス
-	command_ = command;					// コマンド
-	srvManager_ = srvManager;			// SRV管理クラス
-	rtvManager_ = rvtManager;			// RTV管理クラス
-	renderingCommon_ = renderingCommon;	// レンダリング共通クラス
+	this->dxgiDevice = DXGIDevice;			// デバイス
+	this->command = command;					// コマンド
+	this->srvManager = srvManager;			// SRV管理クラス
+	this->rtvManager = rvtManager;			// RTV管理クラス
+	this->renderingCommon = renderingCommon;	// レンダリング共通クラス
 
 
 	CreateResourcePixel();
@@ -39,8 +39,8 @@ void Engine::RenderTexture::Initialize(DXGIDevice* DXGIDevice, Command* command,
 
 void Engine::RenderTexture::Update()
 {
-	renderingCommon_->SetCamera(camera_);
-	postEffectData_->SetCamera(camera_);
+	renderingCommon->SetCamera(camera);
+	postEffectData_->SetCamera(camera);
 #ifdef _DEBUG
 
 	if (ImGui::TreeNode(name_.c_str())) {
@@ -52,7 +52,7 @@ void Engine::RenderTexture::Update()
 
 void Engine::RenderTexture::Draw()
 {
-	renderingCommon_->DrawRender(type_, srvIndex_, otherSrvIndex_);
+	renderingCommon->DrawRender(type_, srvIndex_, otherSrvIndex_);
 	postEffectData_->DrawRender();
 }
 
@@ -63,7 +63,7 @@ Vector4 Engine::RenderTexture::GetClearColor() const
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::RenderTexture::GetRTVHandle()
 {
-	return rtvManager_->GetCPUDescriptorHandle(rtvIndex_);
+	return rtvManager->GetCPUDescriptorHandle(rtvIndex_);
 }
 
 ID3D12Resource* Engine::RenderTexture::GetResource()
@@ -73,20 +73,18 @@ ID3D12Resource* Engine::RenderTexture::GetResource()
 
 D3D12_GPU_DESCRIPTOR_HANDLE Engine::RenderTexture::GetSRVGPUHandle()
 {
-	return srvManager_->GetGPUDescriptorHandle(srvIndex_);
+	return srvManager->GetGPUDescriptorHandle(srvIndex_);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::RenderTexture::GetSRVCPUHandle()
 {
-	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
+	return srvManager->GetCPUDescriptorHandle(srvIndex_);
 }
 
 Engine::PostEffectData* Engine::RenderTexture::GetPostEffectData()
 {
 	return postEffectData_.get();
 }
-
-
 
 void Engine::RenderTexture::CreateResource()
 {
@@ -114,7 +112,7 @@ void Engine::RenderTexture::CreateResource()
 
 	// リソースの作成
 	resource_ = nullptr;
-	hr_ = DXGIDevice_->GetDevice()->CreateCommittedResource(
+	hr_ = dxgiDevice->GetDevice()->CreateCommittedResource(
 		&heapProperties,								// Heapの設定
 		D3D12_HEAP_FLAG_NONE,							// Heapの特殊な設定。特になし。
 		&resourceDesc,									// リソースの設定
@@ -151,7 +149,7 @@ void Engine::RenderTexture::CreateResourcePixel()
 
 	// リソースの作成
 	resource_ = nullptr;
-	hr_ = DXGIDevice_->GetDevice()->CreateCommittedResource(
+	hr_ = dxgiDevice->GetDevice()->CreateCommittedResource(
 		&heapProperties,								// Heapの設定
 		D3D12_HEAP_FLAG_NONE,							// Heapの特殊な設定。特になし。
 		&resourceDesc,									// リソースの設定
@@ -166,9 +164,9 @@ void Engine::RenderTexture::CreateResourcePixel()
 void Engine::RenderTexture::CreateRTV()
 {
 	// インデックスを割り当て
-	rtvIndex_ = rtvManager_->Allocate();
+	rtvIndex_ = rtvManager->Allocate();
 	// RTVを作成
-	rtvManager_->CreateRTV(rtvIndex_, resource_.Get());
+	rtvManager->CreateRTV(rtvIndex_, resource_.Get());
 
 
 }
@@ -178,10 +176,10 @@ void Engine::RenderTexture::CreateRTV()
 void Engine::RenderTexture::CreateSRV()
 {
 	// インデックス割りて
-	srvIndex_ = srvManager_->Allocate();
+	srvIndex_ = srvManager->Allocate();
 	// SRVを作成
 	DirectX::TexMetadata matadata{};
 	matadata.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	matadata.mipLevels = 1;
-	srvManager_->CreateSRVforTexture2D(srvIndex_, resource_.Get(), matadata);
+	srvManager->CreateSRVforTexture2D(srvIndex_, resource_.Get(), matadata);
 }

@@ -8,8 +8,8 @@ class AttackMoveSystem {
 public:
 	// 初期化
 	void Initialize();
-	// 更新(操作用)
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input);
+	// 更新
+	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
 
 	void SetRequest(const MoveRequest& request) { reuest = request; }
 

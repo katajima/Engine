@@ -14,7 +14,7 @@ class GameUI : public BaseUI
 {
 public:
 	//初期化
-	void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) override;
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
 
 	//更新
 	void Update(float dt) override;
@@ -102,6 +102,21 @@ private:
 		Color color_ = { 0.75f,0.75f ,0.75f ,1.0f };
 	};
 	DashTextData dashTextData;
+
+	struct SkillTextData {
+		Vector2 pos_ = { 1120,670 };
+
+		Vector2 anchorPoint_ = { 0.5f,0.5f };
+		Vector2 anchorPoint2_ = { 0.0f,0.5f };
+
+		Vector2 size_ = { 64.0f,64.0f };
+		Vector2 size2_ = { 48.0f,48.0f };
+
+		float offset_ = 20.0f;
+
+		Color color_ = { 0.75f,0.75f ,0.75f ,1.0f };
+	};
+	SkillTextData skillTextData;
 
 
 	struct CleraTextData {

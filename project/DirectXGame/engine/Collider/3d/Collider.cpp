@@ -26,37 +26,44 @@ void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCo
 bool Engine::SphereCollider::CheckHit(const Collider& other) const
 {
 	if (!other.enabled) return false;
+	ColliderType otherType = other.GetType();
 
 	// 球
-	if (other.GetType() == ColliderType::Sphere) {
+	if (otherType == ColliderType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
 		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius });
 	}
 
 	// AABB
-	else if (other.GetType() == ColliderType::AABB) {
+	else if (otherType == ColliderType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
 		return Collision::Detection::Check(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld ,radius });
 	}
 
 	// カプセル
-	else if (other.GetType() == ColliderType::Capsule) {
+	else if (otherType == ColliderType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
 		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, o.capWorld_);
 	}
 
 	// OBB
-	else if (other.GetType() == ColliderType::OBB) {
+	else if (otherType == ColliderType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
 		return Collision::Detection::Check(o.obb, Sphere{ centerWorld ,radius });
 	}
 
 	// Ray
-	else if (other.GetType() == ColliderType::Ray) {
+	else if (otherType == ColliderType::Ray) {
 		auto& o = static_cast<const RayCollider&>(other);
 		return Collision::Detection::Check(o.ray_, Sphere{ centerWorld ,radius });
 	}
 
+	// 三角面
+	else if (otherType == ColliderType::Triangle) {
+		auto& o = static_cast<const TriangleCollider&>(other);
+		bool is = Collision::Detection::Check(o.GetWorldTriangle(), Sphere{ centerWorld ,radius });
+		return is;
+	}
 
 
 	// AABBとの衝突など他の型は別で判定
@@ -68,7 +75,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 	// 球
 	if (other.GetType() == ColliderType::Sphere) {
 		const SphereCollider& o = static_cast<const SphereCollider&>(other);
-		return Collision::Response::ReflectVelocity(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius },outPushVec);
+		return Collision::Response::ReflectVelocity(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius }, outPushVec);
 	}
 
 	// AABB
@@ -140,6 +147,129 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 		}
 	}
 
+	if (other.GetType() == ColliderType::Sphere) {
+		const TriangleCollider& triangleColl = static_cast<const TriangleCollider&>(other);
+
+		const Triangle triangle = triangleColl.GetWorldTriangle();
+		const Vector3 sphereCenter = centerWorld;
+		const float sphereRadius = radius;
+
+		const Vector3 a = triangle.vertices[0];
+		const Vector3 b = triangle.vertices[1];
+		const Vector3 c = triangle.vertices[2];
+
+		// 線分上最近点
+		auto ClosestPointOnSegment = [](const Vector3& p, const Vector3& s0, const Vector3& s1) -> Vector3
+			{
+				const Vector3 seg = s1 - s0;
+				const float segLenSq = seg.Dot(seg);
+
+				if (segLenSq <= 1e-6f) {
+					return s0;
+				}
+
+				float t = (p - s0).Dot(seg) / segLenSq;
+				t = std::clamp(t, 0.0f, 1.0f);
+				return s0 + seg * t;
+			};
+
+		// 三角形上最近点
+		auto ClosestPointOnTriangle = [&](const Vector3& p) -> Vector3
+			{
+				const Vector3 ab = b - a;
+				const Vector3 ac = c - a;
+				const Vector3 ap = p - a;
+
+				const float d1 = ab.Dot(ap);
+				const float d2 = ac.Dot(ap);
+				if (d1 <= 0.0f && d2 <= 0.0f) {
+					return a; // 頂点 A 領域
+				}
+
+				const Vector3 bp = p - b;
+				const float d3 = ab.Dot(bp);
+				const float d4 = ac.Dot(bp);
+				if (d3 >= 0.0f && d4 <= d3) {
+					return b; // 頂点 B 領域
+				}
+
+				const float vc = d1 * d4 - d3 * d2;
+				if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) {
+					const float v = d1 / (d1 - d3);
+					return a + ab * v; // 辺 AB
+				}
+
+				const Vector3 cp = p - c;
+				const float d5 = ab.Dot(cp);
+				const float d6 = ac.Dot(cp);
+				if (d6 >= 0.0f && d5 <= d6) {
+					return c; // 頂点 C 領域
+				}
+
+				const float vb = d5 * d2 - d1 * d6;
+				if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
+					const float w = d2 / (d2 - d6);
+					return a + ac * w; // 辺 AC
+				}
+
+				const float va = d3 * d6 - d5 * d4;
+				if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
+					const Vector3 bc = c - b;
+					const float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+					return b + bc * w; // 辺 BC
+				}
+
+				// 面内部
+				const float denom = 1.0f / (va + vb + vc);
+				const float v = vb * denom;
+				const float w = vc * denom;
+				return a + ab * v + ac * w;
+			};
+
+		const Vector3 closest = ClosestPointOnTriangle(sphereCenter);
+		Vector3 diff = sphereCenter - closest;
+
+		const float distSq = diff.Dot(diff);
+		const float radiusSq = sphereRadius * sphereRadius;
+
+		if (distSq > radiusSq) {
+			return false;
+		}
+
+		// 侵入している
+		const float epsilon = 1e-6f;
+
+		if (distSq > epsilon) {
+			const float dist = std::sqrt(distSq);
+			const float penetration = sphereRadius - dist;
+			outPushVec = diff / dist * penetration;
+			return true;
+		}
+
+		// 球中心が最近点とほぼ一致しているケース
+		// = 中心がちょうど面上 / 辺上 / 頂点上に近い
+		// この場合は三角形法線方向へ押し出す
+		Vector3 normal = (b - a).Cross(c - a);
+		const float normalLenSq = normal.Dot(normal);
+
+		if (normalLenSq <= epsilon) {
+			// 退化三角形
+			return false;
+		}
+
+		normal /= std::sqrt(normalLenSq);
+
+		// 球中心が法線のどちら側にいるかで押し出し方向を決める
+		const float signedDist = (sphereCenter - a).Dot(normal);
+		if (signedDist < 0.0f) {
+			normal = -normal;
+		}
+
+		outPushVec = normal * sphereRadius;
+		return true;
+	}
+
+
 	return false;
 }
 #pragma endregion 
@@ -148,8 +278,8 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon)
 {
 	centerWorld = worldTransform.worldMat_.GetWorldPosition();
-	minWorld = aabb.min_ + centerWorld;
-	maxWorld = aabb.max_ + centerWorld;
+	minWorld = aabb.min + centerWorld;
+	maxWorld = aabb.max + centerWorld;
 
 #ifdef _DEBUG
 	if (lineCommon) {
@@ -239,16 +369,16 @@ bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outP
 		if (!aabb.intersects(o.aabb)) return false;
 
 		// 各軸の重なり量を求める
-		float dx1 = aabb.max_.x - o.aabb.min_.x;
-		float dx2 = o.aabb.max_.x - aabb.min_.x;
+		float dx1 = aabb.max.x - o.aabb.min.x;
+		float dx2 = o.aabb.max.x - aabb.min.x;
 		float dx = (dx1 < dx2) ? dx1 : -dx2;
 
-		float dy1 = aabb.max_.y - o.aabb.min_.y;
-		float dy2 = o.aabb.max_.y - aabb.min_.y;
+		float dy1 = aabb.max.y - o.aabb.min.y;
+		float dy2 = o.aabb.max.y - aabb.min.y;
 		float dy = (dy1 < dy2) ? dy1 : -dy2;
 
-		float dz1 = aabb.max_.z - o.aabb.min_.z;
-		float dz2 = o.aabb.max_.z - aabb.min_.z;
+		float dz1 = aabb.max.z - o.aabb.min.z;
+		float dz2 = o.aabb.max.z - aabb.min.z;
 		float dz = (dz1 < dz2) ? dz1 : -dz2;
 
 		// 最も小さい押し戻し方向を使う
@@ -461,8 +591,8 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 	}
 	if (other.GetType() == ColliderType::AABB) {
 		const AABBCollider& aabb = static_cast<const AABBCollider&>(other);
-		Vector3 aabbCenter = (aabb.aabb.min_ + aabb.aabb.max_) * 0.5f;
-		Vector3 halfExtents = (aabb.aabb.max_ - aabb.aabb.min_) * 0.5f;
+		Vector3 aabbCenter = (aabb.aabb.min + aabb.aabb.max) * 0.5f;
+		Vector3 halfExtents = (aabb.aabb.max - aabb.aabb.min) * 0.5f;
 
 		// AABBを仮想球として扱う（近似）
 		SphereCollider tempSphere;
@@ -554,3 +684,165 @@ bool Engine::RayCollider::ResolveCollision(const Collider& other, Vector3& outPu
 }
 #pragma endregion
 
+#pragma region Triangle
+
+void Engine::TriangleCollider::Update(const WorldTransform& worldTransform, LineCommon* lineCommon) {
+	centerWorld = worldTransform.worldMat_.GetWorldPosition();
+#ifdef _DEBUG
+	if (lineCommon) {
+		if (isDebugLine) {
+			if (enabled) {
+				// カプセルの線分と半径を使ってラインを描画
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform);
+			}
+			else {
+				// 無効な場合は透明にする
+				
+			}
+		}
+	}
+#endif // _DEBUG
+}
+
+bool Engine::TriangleCollider::CheckHit(const Collider& other) const
+{
+	if (!other.enabled) return false;
+
+	// 球
+	else if (other.GetType() == ColliderType::Sphere) {
+		auto& o = static_cast<const SphereCollider&>(other);
+		return Collision::Detection::Check(GetWorldTriangle(), Sphere{o.centerWorld,o.radius});
+	}
+
+	return false;
+}
+
+bool Engine::TriangleCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const
+{
+
+	if (other.GetType() == ColliderType::Sphere) {
+		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
+
+		const Triangle triangle = GetWorldTriangle();
+		const Vector3 sphereCenter = sphere.centerWorld;
+		const float sphereRadius = sphere.radius;
+
+		const Vector3 a = triangle.vertices[0];
+		const Vector3 b = triangle.vertices[1];
+		const Vector3 c = triangle.vertices[2];
+
+		// 線分上最近点
+		auto ClosestPointOnSegment = [](const Vector3& p, const Vector3& s0, const Vector3& s1) -> Vector3
+			{
+				const Vector3 seg = s1 - s0;
+				const float segLenSq = seg.Dot(seg);
+
+				if (segLenSq <= 1e-6f) {
+					return s0;
+				}
+
+				float t = (p - s0).Dot(seg) / segLenSq;
+				t = std::clamp(t, 0.0f, 1.0f);
+				return s0 + seg * t;
+			};
+
+		// 三角形上最近点
+		auto ClosestPointOnTriangle = [&](const Vector3& p) -> Vector3
+			{
+				const Vector3 ab = b - a;
+				const Vector3 ac = c - a;
+				const Vector3 ap = p - a;
+
+				const float d1 = ab.Dot(ap);
+				const float d2 = ac.Dot(ap);
+				if (d1 <= 0.0f && d2 <= 0.0f) {
+					return a; // 頂点 A 領域
+				}
+
+				const Vector3 bp = p - b;
+				const float d3 = ab.Dot(bp);
+				const float d4 = ac.Dot(bp);
+				if (d3 >= 0.0f && d4 <= d3) {
+					return b; // 頂点 B 領域
+				}
+
+				const float vc = d1 * d4 - d3 * d2;
+				if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) {
+					const float v = d1 / (d1 - d3);
+					return a + ab * v; // 辺 AB
+				}
+
+				const Vector3 cp = p - c;
+				const float d5 = ab.Dot(cp);
+				const float d6 = ac.Dot(cp);
+				if (d6 >= 0.0f && d5 <= d6) {
+					return c; // 頂点 C 領域
+				}
+
+				const float vb = d5 * d2 - d1 * d6;
+				if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
+					const float w = d2 / (d2 - d6);
+					return a + ac * w; // 辺 AC
+				}
+
+				const float va = d3 * d6 - d5 * d4;
+				if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
+					const Vector3 bc = c - b;
+					const float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+					return b + bc * w; // 辺 BC
+				}
+
+				// 面内部
+				const float denom = 1.0f / (va + vb + vc);
+				const float v = vb * denom;
+				const float w = vc * denom;
+				return a + ab * v + ac * w;
+			};
+
+		const Vector3 closest = ClosestPointOnTriangle(sphereCenter);
+		Vector3 diff = sphereCenter - closest;
+
+		const float distSq = diff.Dot(diff);
+		const float radiusSq = sphereRadius * sphereRadius;
+
+		if (distSq > radiusSq) {
+			return false;
+		}
+
+		// 侵入している
+		const float epsilon = 1e-6f;
+
+		if (distSq > epsilon) {
+			const float dist = std::sqrt(distSq);
+			const float penetration = sphereRadius - dist;
+			outPushVec = diff / dist * penetration;
+			return true;
+		}
+
+		// 球中心が最近点とほぼ一致しているケース
+		// = 中心がちょうど面上 / 辺上 / 頂点上に近い
+		// この場合は三角形法線方向へ押し出す
+		Vector3 normal = (b - a).Cross(c - a);
+		const float normalLenSq = normal.Dot(normal);
+
+		if (normalLenSq <= epsilon) {
+			// 退化三角形
+			return false;
+		}
+
+		normal /= std::sqrt(normalLenSq);
+
+		// 球中心が法線のどちら側にいるかで押し出し方向を決める
+		const float signedDist = (sphereCenter - a).Dot(normal);
+		if (signedDist < 0.0f) {
+			normal = -normal;
+		}
+
+		outPushVec = normal * sphereRadius;
+		return true;
+	}
+
+	return false;
+}
+
+#pragma endregion // 三角面

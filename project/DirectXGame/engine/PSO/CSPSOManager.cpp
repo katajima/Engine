@@ -6,9 +6,9 @@
 
 void Engine::CSPSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler)
 {
-	command_ = command;
-	DXGIDevice_ = DXGIDevice;
-	dxcCompiler_ = dxcCompiler;
+	this->command = command;
+	this->dxgiDevice = DXGIDevice;
+	this->dxcCompiler = dxcCompiler;
 }
 
 void Engine::CSPSOManager::SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter, UINT numRootParameters)
@@ -19,7 +19,7 @@ void Engine::CSPSOManager::SetRootSignature(D3D12_ROOT_PARAMETER* rootParameter,
 	descriptionSignature.pParameters = rootParameter;
 	descriptionSignature.NumParameters = numRootParameters;
 
-	PSOFanction::Blob(DXGIDevice_,descriptionSignature, computePSRS_.rootSignature);
+	PSOFanction::Blob(dxgiDevice,descriptionSignature, computePSRS_.rootSignature);
 }
 
 void Engine::CSPSOManager::ComputePipelineState()
@@ -33,15 +33,15 @@ void Engine::CSPSOManager::ComputePipelineState()
 
 
 	
-	hr_ = DXGIDevice_->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc,
+	hr_ = dxgiDevice->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc,
 		IID_PPV_ARGS(&computePSRS_.computePipelineState));
 
 }
 
 void Engine::CSPSOManager::PreComputePSRS()
 {
-	command_->GetList()->SetComputeRootSignature(computePSRS_.rootSignature.Get());
-	command_->GetList()->SetPipelineState(computePSRS_.computePipelineState.Get());
+	command->GetList()->SetComputeRootSignature(computePSRS_.rootSignature.Get());
+	command->GetList()->SetPipelineState(computePSRS_.computePipelineState.Get());
 }
 
 void Engine::CSPSOManager::SetShaderFileName(std::wstring filename)
@@ -53,7 +53,7 @@ void Engine::CSPSOManager::SetShederCompute(D3D12_COMPUTE_PIPELINE_STATE_DESC& g
 {
 	if (shderFile_.commpute.filePach != L"") {
 		// Shaderをコンパイルする
-		CS = dxcCompiler_->CompileShader(shderFile_.commpute.filePach,
+		CS = dxcCompiler->CompileShader(shderFile_.commpute.filePach,
 			L"cs_6_0");
 		assert(CS != nullptr);
 		graphicsPipeline.CS = { CS->GetBufferPointer(),

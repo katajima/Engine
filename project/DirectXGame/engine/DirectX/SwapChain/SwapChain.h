@@ -85,13 +85,13 @@ namespace Engine {
 
 		DXGI_SWAP_CHAIN_DESC swcDesc_;
 	private:
-		DXGIDevice* DXGIDevice_;
-		Command* command_;
-		WinApp* winApp_;
-		RtvManager* rtvManager_;
-		Barrier* barrier_;
-		ScissorRect* scissorRect_;
-		ViewPort* viewPort_;
-		Fence* fence_;
+		DXGIDevice* dxgiDevice = nullptr;
+		Command* command = nullptr;
+		WinApp* winApp = nullptr;
+		RtvManager* rtvManager = nullptr;
+		Barrier* barrier = nullptr;
+		ScissorRect* scissorRect = nullptr;
+		ViewPort* viewPort = nullptr;
+		Fence* fence = nullptr;
 	};
 }

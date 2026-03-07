@@ -17,11 +17,11 @@ PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 	effectComponent_->RemoveTrailEffectAll();	// トレイルエフェクト削除
 }
 //
-void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
 	// 基盤の初期化
-	BaseInitialize(entity3DManager, entity2DManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
+	BaseInitialize(entityManager, globalVariables, position,camera, "playerbullet", "player_bullet.obj");
 	//// オブジェクト設定
 	object_->UseTrailEffect("resources/Texture/Image.dds", provisionalData_.trailLifeTime, Color::WHITE(), {0,provisionalData_.trailWidth,0}, {0,-provisionalData_.trailWidth,0}); // トレイル設定
 	object_->isEmitTrailEffect = false; // トレイルを出現させない
@@ -31,7 +31,7 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(entity3DManager_,globalVariables_);	
+	effectComponent_->Init(entityManager,globalVariables);	
 
 
 	// コライダ設定
@@ -120,12 +120,12 @@ void PlayerRangeBombingBullet::Initialize(Engine::Entity3DManager* entity3DManag
 	// シリンダー生成
 	std::unique_ptr<Engine::CylinderPrimitive> cylinder2 = std::make_unique<Engine::CylinderPrimitive>();
 	cylinder2->Data() = cylinderParam;
-	cylinder2->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/Image.dds");
+	cylinder2->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/Image.dds");
 
 
 	
 	// 当たった時のオブジェクト生成
-	hitObject2_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("cylinder", "resources/Texture/Image.dds", camera);
+	hitObject2_ = entityManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("cylinder", "resources/Texture/Image.dds", camera);
 	hitObject2_->SetPrimitive(std::move(cylinder2));
 	hitObject2_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kRingClamp);
 	hitObject2_->SetIsDraw(false);
@@ -141,7 +141,7 @@ void PlayerRangeBombingBullet::Update()
 {
 	// 当たったら死ぬ
 	if (Hit) {
-		effect_->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+		effect->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
 		isAlive_ = false;
 	}
 	
@@ -156,7 +156,7 @@ void PlayerRangeBombingBullet::Update()
 			}
 			else {
 				// 煙出す
-				effect_->Emit("stratSmoke01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 10.0f,-5.0f,0.0f });
+				effect->Emit("stratSmoke01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 10.0f,-5.0f,0.0f });
 			}
 			// 時間更新
 			phase0Timer_ += GetTimer();
@@ -215,7 +215,7 @@ void PlayerRangeBombingBullet::Update()
 			phase2Timer_ += GetTimer();
 			
 			// リングエフェクトの位置を設定
-			effect_->Emit("ringEmit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+			effect->Emit("ringEmit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
 
 			// カウントが最大値を達したら
 			if (phase2Timer_ >= phase2EndTime_)
@@ -243,12 +243,12 @@ void PlayerRangeBombingBullet::Update()
 
 
 				// それぞれのパーティクル出現
-				effect_->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect_->Emit("missileHitCylinder", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.hitCylinderY,0 });
-				effect_->Emit("smokePlaneExpSmoke", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect_->Emit("AnimatedCube", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect_->Emit("expPlane01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.expPlaneY,0 });
-				effect_->Emit("expSpark", object_->GetWorldTransform().worldMat_.GetWorldPosition() );
+				effect->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+				effect->Emit("missileHitCylinder", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.hitCylinderY,0 });
+				effect->Emit("smokePlaneExpSmoke", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+				effect->Emit("AnimatedCube", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+				effect->Emit("expPlane01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.expPlaneY,0 });
+				effect->Emit("expSpark", object_->GetWorldTransform().worldMat_.GetWorldPosition() );
 			}
 
 			break;

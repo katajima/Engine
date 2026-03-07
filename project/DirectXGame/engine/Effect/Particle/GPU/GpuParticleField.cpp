@@ -5,12 +5,12 @@
 
 void Engine::GpuParticleField::Init(DirectXCommon* dxCommon, LineCommon* lineCommon, std::string name)
 {
-	dxCommon_ = dxCommon;		// DX共通クラス
+	this->dxCommon = dxCommon;		// DX共通クラス
 	name_ = name;				// 名前
-	lineCommon_ = lineCommon;	// ライト管理クラス
+	this->lineCommon = lineCommon;	// ライト管理クラス
 
 	// 影響
-	cbEffectFieldResource_.CreateBuffer(dxCommon_, 1);
+	cbEffectFieldResource_.CreateBuffer(dxCommon, 1);
 	cbEffectFieldResource_.Data()->force = -0.01f;
 	cbEffectFieldResource_.Data()->translate = { 0.0f,10.0f,0.0f };
 	cbEffectFieldResource_.Data()->isEffect = 0;
@@ -31,7 +31,7 @@ void Engine::GpuParticleField::UpdateImgui()
 		ImGui::TreePop();
 	}
 
-	lineCommon_->GetDebugLineMeshData().AddLineAABB({ -cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
+	lineCommon->GetDebugLineMeshData().AddLineAABB({ -cbEffectFieldResource_.Data()->range,cbEffectFieldResource_.Data()->range }, cbEffectFieldResource_.Data()->translate);
 }
 
 void Engine::GpuParticleField::Update()

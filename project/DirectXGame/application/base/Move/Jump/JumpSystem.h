@@ -11,7 +11,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
+	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::RigidBodyComponent& rigid);
 
 	void Update();
 public:	// ジャンプ開始

@@ -18,7 +18,7 @@ namespace Engine {
 		// 生成
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> vertex, size_t num = 1)
 		{
-			dxCommon_ = dxCommon;	// DX共通クラス
+			this->dxCommon = dxCommon;	// DX共通クラス
 
 			// リソース生成
 			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);
@@ -51,7 +51,7 @@ namespace Engine {
 					D3D12_HEAP_PROPERTIES heapProps = {};
 					heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 					D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(requiredSize);
-					HRESULT hr = dxCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
+					HRESULT hr = dxCommon->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
 						&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource_));
 
 					if (FAILED(hr)) {
@@ -76,13 +76,13 @@ namespace Engine {
 		// 一つのスロット
 		void IASetVertexBuffers() {
 			// 頂点バッファの設定
-			dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 1, &bufferView);
+			dxCommon->GetCommand()->GetList()->IASetVertexBuffers(0, 1, &bufferView);
 		};
 
 		// 一つのスロット
 		void IASetVertexBuffers(const D3D12_VERTEX_BUFFER_VIEW& vbv) {
 			// 頂点バッファの設定
-			dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 1, &vbv);
+			dxCommon->GetCommand()->GetList()->IASetVertexBuffers(0, 1, &vbv);
 		};
 
 		// 二つのスロット
@@ -92,7 +92,7 @@ namespace Engine {
 			vbv
 			};
 			// 頂点バッファの設定
-			dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
+			dxCommon->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
 		};
 
 		// 二つのスロット
@@ -104,7 +104,7 @@ namespace Engine {
 			};
 
 			// 頂点バッファの設定
-			dxCommon_->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
+			dxCommon->GetCommand()->GetList()->IASetVertexBuffers(0, 2, vbvs);
 		}
 
 		// データ取得
@@ -115,7 +115,7 @@ namespace Engine {
 		// バッファビュー取得
 		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return bufferView; }
 	private:
-		DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
 		Type* data_;

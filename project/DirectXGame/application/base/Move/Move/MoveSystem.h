@@ -20,7 +20,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新(操作用)
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input);
+	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
 	// 更新(敵用)
 	void UpdateEnemy(float dt);
 
@@ -31,10 +31,6 @@ private:
 	void StateProcess();
 	// アニメーション速度設定
 	void AnimationSpeedProcess();
-public:
-	// 攻撃中の回転処理
-	void AttackProcess(Engine::WorldTransform& world, const Vector3& direction);
-
 public: // 取得
 	// 移動データの取得
 	MoveData& GetData() { return data_; }

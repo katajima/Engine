@@ -14,7 +14,7 @@ namespace Engine {
 	};
 
 	// 前方宣言
-	class Entity2DManager;
+	class EntityManager;
 
 	/// <summary>
 	/// フェードクラス
@@ -31,7 +31,7 @@ namespace Engine {
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		void Initialize(Entity2DManager* entity2DManager);
+		void Initialize(EntityManager* entityManager);
 
 		/// <summary>
 		/// 毎フレーム処理
@@ -82,7 +82,7 @@ namespace Engine {
 
 		Color baseColor_ = { 0,0,0,1 };
 	private:
-		Entity2DManager* entity2DManager_;
+		EntityManager* entityManager = nullptr;
 
 	};
 }

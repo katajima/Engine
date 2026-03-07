@@ -6,7 +6,6 @@
 #include"DirectXGame/engine/Camera/DebugCamera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
-#include "DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/audio/Audio.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include"DirectXGame/engine/2d/Sprite.h"
@@ -14,12 +13,15 @@
 
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 
-
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
-
+#include "DirectXGame/application/base/UI/ResultUI.h"
+#include "DirectXGame/application/base/Stage/ResultStage.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+#include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
+#include "DirectXGame/application/base/Game/Result/ResultSystem.h"
 
 class ResultScene : public Engine::BaseScene {
 public:
@@ -38,7 +40,21 @@ public:
 
 	// 描画2d
 	void Draw2D() override;
-
 private:
 
+private:
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
+	// エフェクト
+	std::unique_ptr<Effect> effect_;
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_;
+	// リザルトカメラ
+	std::unique_ptr<ResultCamera> resultCamera_;
+	// リザルトステージ
+	std::unique_ptr<ResultStage> resultStage_;
+	// リザルトUI
+	std::unique_ptr<ResultUI> resultUI_;
+	// リザルトシステム
+	std::unique_ptr<ResultSystem> resultSystem_;
 };

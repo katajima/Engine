@@ -16,7 +16,7 @@ namespace Engine {
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
 		// DirectX共通クラス取得
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 		// 描画前準備
 		void DrawCommonSetting();
 
@@ -27,18 +27,15 @@ namespace Engine {
 		void CreateGraphicsPipeline();
 
 	private:// メンバ変数
-
-		DirectXCommon* dxCommon_;
-
+		//
 		std::unique_ptr<PSOManager> psoManager_;
-
 		//ルートシグネチャデスク
 		D3D12_ROOT_SIGNATURE_DESC descriptionSignature{};
 		//ルートシグネチャ
 		Microsoft::WRL::ComPtr < ID3D12RootSignature> rootSignature;
 		// グラフィックスパイプラインステート
 		Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState;
-
-
+	private:
+		DirectXCommon* dxCommon = nullptr;
 	};
 }

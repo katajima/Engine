@@ -14,7 +14,7 @@ using namespace Microsoft::WRL;
 
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 #include "DirectXGame/engine/DirectX/RenderTexture/RenderTexture.h"
-#include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/scene/SceneManager.h"
 
 void Engine::DirectXCommon::Intialize(WinApp* winApp) {
@@ -54,7 +54,7 @@ void Engine::DirectXCommon::Finalize()
 	imguiManager_->Finalize();
 }
 
-void Engine::DirectXCommon::SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::SceneDraw(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
 	// 描画前処理
 	GetSrvManager()->PreDraw();
@@ -96,7 +96,7 @@ void Engine::DirectXCommon::PassSwap(SceneManager* sceneManager, RenderTexture* 
 	UpdateFixFPS();
 }
 
-void Engine::DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::Draw(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
 	// シーンを書き出す
 	SceneDraw(sceneManager, entity3DManager);
@@ -107,7 +107,7 @@ void Engine::DirectXCommon::Draw(SceneManager* sceneManager, Entity3DManager* en
 	PassSwap(sceneManager, postEffectManager_->GetEndRenderTexture());
 }
 
-void Engine::DirectXCommon::Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::Draw3D2D(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
 	sceneManager->DrawForeground2D();
 
@@ -163,7 +163,7 @@ void Engine::DirectXCommon::UpdateFixFPS()
 	reference_ = std::chrono::steady_clock::now();
 }
 
-void Engine::DirectXCommon::Update(SceneManager* sceneManager, Entity3DManager* entity3DManager)
+void Engine::DirectXCommon::Update(SceneManager* sceneManager, EntityManager* entity3DManager)
 {
 	// ライト
 	entity3DManager->GetLightManager()->Update();

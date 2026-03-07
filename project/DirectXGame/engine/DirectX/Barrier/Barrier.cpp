@@ -7,7 +7,7 @@
 
 void Engine::Barrier::Initialize(Command* command)
 {
-    command_ = command; // コマンド
+    this->command = command; // コマンド
 }
 
 void Engine::Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
@@ -22,7 +22,7 @@ void Engine::Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STA
         barrier.Transition.StateAfter = after;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
         barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        command_->GetList()->ResourceBarrier(1, &barrier);
+        command->GetList()->ResourceBarrier(1, &barrier);
     }
 }
 
@@ -44,7 +44,7 @@ void Engine::Barrier::TransitionResource(ID3D12Resource* res, D3D12_RESOURCE_STA
         barrier.Transition.StateAfter = newState;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
         barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        command_->GetList()->ResourceBarrier(1, &barrier);
+        command->GetList()->ResourceBarrier(1, &barrier);
 
         resourceStates_[res] = newState; // 状態更新
     }
@@ -56,7 +56,7 @@ void Engine::Barrier::UavDependence(ID3D12Resource* res)
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
     barrier.UAV.pResource = res;
-    command_->GetList()->ResourceBarrier(1, &barrier);
+    command->GetList()->ResourceBarrier(1, &barrier);
 }
 
 void Engine::Barrier::RegisterInitialState(ID3D12Resource* res, D3D12_RESOURCE_STATES state)

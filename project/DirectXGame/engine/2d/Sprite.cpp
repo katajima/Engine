@@ -9,7 +9,7 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 	timer_.StartTimer();
 	textureFilePath_ = textureFilePath;
 	// 引数で受け取ってメンバ変数にする
-	this->spriteCommon_ = spriteCommon;
+	this->spriteCommon = spriteCommon;
 
 
 	// インデックスデータ設定
@@ -20,7 +20,7 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 	indices.push_back(3);
 	indices.push_back(2);
 	// インデックスリソース生成
-	indexResorce_.CreateBufferView(spriteCommon_->GetDxCommon(), indices, indices.size());
+	indexResorce_.CreateBufferView(spriteCommon->GetDxCommon(), indices, indices.size());
 
 	// 頂点データ設定
 	vertices.push_back({});
@@ -28,12 +28,12 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 	vertices.push_back({});
 	vertices.push_back({});
 	// 頂点リソース生成
-	vbvResorce_.CreateBufferView(spriteCommon_->GetDxCommon(), vertices, vertices.size());
+	vbvResorce_.CreateBufferView(spriteCommon->GetDxCommon(), vertices, vertices.size());
 
 
 	// マテリアル
 	material = std::make_unique<Material>();
-	material->Initialize(spriteCommon_->GetDxCommon());
+	material->Initialize(spriteCommon->GetDxCommon());
 	material->tex_.diffuseFilePath = textureFilePath;
 	if (isTexLoad) {
 		material->LoadTex();
@@ -42,7 +42,7 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 
 	// トランスフォーム
 	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(spriteCommon_->GetDxCommon());
+	transfomation->Initialize(spriteCommon->GetDxCommon());
 
 	// ワールドトランスフォーム初期化
 	worldTransform2d.Initialize();
@@ -71,7 +71,7 @@ void Engine::Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureF
 	}
 
 	/// テクスチャ範囲指定-反映処理-
-	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = spriteCommon->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
 	float tex_top = textureLeftTop.y / metadata.height;
@@ -109,7 +109,7 @@ void Engine::Sprite::Update()
 	}
 
 	// テクスチャUV
-	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = spriteCommon->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
 	float tex_top = textureLeftTop.y / metadata.height;
@@ -182,7 +182,7 @@ void Engine::Sprite::Draw(PSOType type)
 		transfomation->GetCommandList(1);
 
 
-		spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		spriteCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 	}
 }
 
@@ -194,7 +194,7 @@ void Engine::Sprite::GetCommandList() {
 void Engine::Sprite::AdjusttextureSize()
 {
 	// テクスチャメタデータを取得
-	const DirectX::TexMetadata& metadata = spriteCommon_->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = spriteCommon->GetDxCommon()->GetTextureManager()->GetMataData(textureFilePath_);
 
 	textureSize.x = static_cast<float>(metadata.width);
 	textureSize.y = static_cast<float>(metadata.height);
@@ -204,5 +204,5 @@ void Engine::Sprite::AdjusttextureSize()
 
 void Engine::Sprite::SpriteTypeDiscrimination(PSOType type)
 {
-	spriteCommon_->DrawCommonSetting(type);
+	spriteCommon->DrawCommonSetting(type);
 }

@@ -137,7 +137,7 @@ namespace Engine {
 
 	private:
 		// スプライト用
-		SpriteCommon* spriteCommon_ = nullptr;
+		SpriteCommon* spriteCommon = nullptr;
 
 		// インデクスデータ
 		IndexBuffer<uint32_t> indexResorce_;

@@ -1,20 +1,15 @@
 #include "SpecialPoint.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
-
-
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 #include <DirectXGame/application/base/Character/Base/Player/BasePlayer.h>
 
 #pragma region Manager
 
-void SpecalPointManager::Initialize(Engine::Entity3DManager* entity3DManager,
-	Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) {
+void SpecalPointManager::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) {
 
-	this->entity3DManager = entity3DManager;
-	this->entity2DManager = entity2DManager;
+	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 
 }
@@ -40,7 +35,7 @@ void SpecalPointManager::Update(float dt) {
 
 void SpecalPointManager::AddPoint(const Vector3& pos, int point){
 	std::unique_ptr<SpecalPoint> spPoint = std::make_unique<SpecalPoint>();
-	spPoint->Initialize(entity3DManager,globalVariables,pos, point,count_);
+	spPoint->Initialize(entityManager,globalVariables,pos, point,count_);
 	points.push_back(std::move(spPoint));
 	count_++;
 };
@@ -51,14 +46,14 @@ void SpecalPointManager::AddPoint(const Vector3& pos, int point){
 
 #pragma region Point
 
-void SpecalPoint::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, int point, int id) {
+void SpecalPoint::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, int point, int id) {
 	id_ = id;			// ID
 	point_ = point;		// ポイント量
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
-	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, "" + std::to_string(id), "point.obj", "", 
+	objectComponent_->InitializeInstancing(entityManager, globalVariables, "" + std::to_string(id), "point.obj", "", 
 		true, true, this, Engine::Object3dInstansManager::TransparencyType::kNo);
 	objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 	objectComponent_->SetInstancingSRT({0.5f,0.5f,0.5f },{}, pos);

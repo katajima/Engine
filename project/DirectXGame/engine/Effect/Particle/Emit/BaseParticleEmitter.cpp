@@ -9,9 +9,9 @@
 
 void Engine::BaseParticleEmitter::CommonParticleInit(Engine::ParticleManager* particleManager, Engine::GlobalVariables* globalVariables, std::string emitName, std::string particleName)
 {
-	particleManager_ = particleManager;					// パーティクルマネージャー
-	globalVariables_ = globalVariables;					// グローバル変数
-	lineCommon_ = particleManager_->GetLineCommon();	// ライン共通
+	this->particleManager = particleManager;					// パーティクルマネージャー
+	this->globalVariables = globalVariables;					// グローバル変数
+	this->lineCommon = particleManager->GetLineCommon();	// ライン共通
 	emitName_ = emitName;								// エミッタ名
 	particleName_ = particleName;						// パーティクル名
 
@@ -51,15 +51,17 @@ void Engine::BaseParticleEmitter::ApplyGlobalVariables() {
 void Engine::BaseParticleEmitter::Emit()
 {
 	if (isEmit) {
-		particleManager_->GetParticleGroups(particleName_).isFlag = isFlag;
-		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().alphaClipping_ = alphaClipping_; // αクリッピング
-		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().enableLighting_ = enableLighting_; // aライト
-		particleManager_->GetParticleGroups(particleName_).topBottom = topBottom_; // 拡縮方向
-		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.scale = uvTransformVeloctiy_.scale; // UV
-		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.rotate = uvTransformVeloctiy_.rotate; // UV
-		particleManager_->GetParticleGroups(particleName_).uvTransformVeloctiy_.translate = uvTransformVeloctiy_.translate; // UV
+		ParticleGroup& group = particleManager->GetParticleGroups(particleName_);
 
-		auto& rng = particleManager_->GetRandomEngine();
+		group.isFlag = isFlag;
+		group.material->GetMaterialInstance().alphaClipping_ = alphaClipping_; // αクリッピング
+		group.material->GetMaterialInstance().enableLighting_ = enableLighting_; // aライト
+		group.topBottom = topBottom_; // 拡縮方向
+		group.uvTransformVeloctiy_.scale = uvTransformVeloctiy_.scale; // UV
+		group.uvTransformVeloctiy_.rotate = uvTransformVeloctiy_.rotate; // UV
+		group.uvTransformVeloctiy_.translate = uvTransformVeloctiy_.translate; // UV
+
+		auto& rng = particleManager->GetRandomEngine();
 
 		int index = static_cast<int>(Random::RandomInt32_t(static_cast<int32_t>(emitData_.count.Min()), static_cast<int32_t>(emitData_.count.Max())));
 		if (index <= 0) {
@@ -73,7 +75,7 @@ void Engine::BaseParticleEmitter::Emit()
 
 
 void Engine::BaseParticleEmitter::Update() {
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	ApplyGlobalVariables(); // グローバル変数適用
 

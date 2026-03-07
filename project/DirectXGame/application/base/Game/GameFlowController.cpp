@@ -6,12 +6,12 @@ void GameFlowController::Initialize(Engine::SceneManager* sceneManager, Engine::
 	this->globalVariables = globalVariables;	// 保存項目
 	this->characterManager = characterManager;	// キャラクター管理するクラス
 	this->sceneManager = sceneManager;			// シーンマネージャー
-	entity3DManager = sceneManager->GetEntity3DManager();	// エンティティ3d
+	entityManager = sceneManager->GetEntityManager();	// エンティティ3d
 	input  = sceneManager->GetInput();						// 入力
 
 	// ゲームイベント制御クラス初期化
 	gameEventController_ = std::make_unique<Game::GameEventController>();
-	gameEventController_->Initialize(entity3DManager,globalVariables, characterManager, input);
+	gameEventController_->Initialize(entityManager,globalVariables, characterManager, input);
 
 }
 
@@ -33,7 +33,7 @@ void GameFlowController::Draw() {
 
 void GameFlowController::SceneChange(){
 	if (gameEventController_->IsEndEvent()) {
-		sceneManager->ChangeScene("TITLE");
+		sceneManager->ChangeScene("RESULT");
 	}
 }
 

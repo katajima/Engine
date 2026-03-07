@@ -4,16 +4,16 @@
 
 void Engine::BasePrimitive::Initialize(PrimitiveCommon* primitiveCommon, const std::string& tex, const Color color, const std::string& name, bool isLine)
 {
-	primitiveCommon_ = primitiveCommon;	// プリミティブ共通クラス
+	this->primitiveCommon = primitiveCommon;	// プリミティブ共通クラス
 
 	// メッシュ初期化
 	mesh = std::make_unique<ModelMesh>();
 	MeshInitialize();
-	mesh->Initialize(primitiveCommon_->GetDxCommon());
+	mesh->Initialize(primitiveCommon->GetDxCommon());
 
 	// マテリアル初期化
 	mesh->material = std::make_unique<Material>();
-	mesh->material->Initialize(primitiveCommon_->GetDxCommon());
+	mesh->material->Initialize(primitiveCommon->GetDxCommon());
 	mesh->material->tex_.diffuseFilePath = tex;
 	mesh->material->GetMaterialInstance().color = color;
 
@@ -103,7 +103,7 @@ void Engine::BasePrimitive::Draw()
 		mesh->GetCommandList();
 
 		// Draw
-		primitiveCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		primitiveCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 	}
 };
 
@@ -112,22 +112,22 @@ void Engine::BasePrimitive::DrawSetting(PsoType type)
 	switch (type)
 	{
 	case BasePrimitive::PsoType::kDefalt:
-		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);
 		break;
 	case BasePrimitive::PsoType::kRingClamp:
-		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kRingClamp);
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kRingClamp);
 		break;
 	case BasePrimitive::PsoType::kNoCull:
-		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCull);
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCull);
 		break;
 	case BasePrimitive::PsoType::kNoCullRingClamp:
-		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCullRingClamp);
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCullRingClamp);
 		break;
 	case BasePrimitive::PsoType::kNoCullWireFrame:
-		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCullWireFrame);
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kNoCullWireFrame);
 		break;
 	default:
-		primitiveCommon_->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);
+		primitiveCommon->DrawCommonSetting(PrimitiveCommon::PsoType::kDefalt);
 		break;
 	}
 }

@@ -1,10 +1,10 @@
 #include "PlayerUI.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
-void PlayerUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
+void PlayerUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
-	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->entityManager = entityManager;	// エンティティ
 	this->globalVariables = globalVariables;	// 保存項目
 	this->inputSystem = inputSystem;						// インプット
 
@@ -35,7 +35,7 @@ void PlayerUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* ent
 
 	// maxテキストスプライト初期化
 	textMax_ = std::make_unique<Engine::Sprite>();
-	textMax_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/max.dds");
+	textMax_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/max.dds");
 	textMax_->SetColor(maxTextData_.color_);					// 色設定
 	textMax_->SetPosition(maxTextData_.pos_);					// 位置設定
 	textMax_->SetRotation(maxTextData_.rotate_);	// 回転設定
@@ -44,7 +44,7 @@ void PlayerUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* ent
 
 	// rbテキストスプライト初期化
 	textRB_ = std::make_unique<Engine::Sprite>();
-	textRB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/RB.dds");
+	textRB_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/icon/RB.dds");
 	textRB_->SetColor(Color::WHITE());						// 色指定
 	textRB_->SetPosition(rbData_.pos_);				// 位置設定
 	textRB_->SetAnchorPoint(rbData_.anchorPoint_);				// アンカーポイント設定

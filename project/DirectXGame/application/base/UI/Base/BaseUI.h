@@ -5,7 +5,7 @@
 
 // 前方宣言
 namespace Engine {
-	class Entity2DManager;
+	class EntityManager;
 	class GlobalVariables;
 }
 
@@ -16,7 +16,7 @@ class BaseUI
 {
 public:
 	//初期化
-	virtual void Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) = 0;
+	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) = 0;
 
 	// 毎フレーム更新
 	virtual void Update(float dt) = 0;
@@ -63,8 +63,8 @@ protected:
 	Engine::UICount* GetUICount(std::string name);
 
 protected:
-	Engine::Entity2DManager* entity2DManager;
-	Engine::GlobalVariables* globalVariables;
+	Engine::EntityManager* entityManager = nullptr;
+	Engine::GlobalVariables* globalVariables = nullptr;
 	InputSystem* inputSystem = nullptr;
 
 

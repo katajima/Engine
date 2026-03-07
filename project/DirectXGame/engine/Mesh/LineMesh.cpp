@@ -4,12 +4,12 @@
 
 void Engine::LineMesh::Initialize(DirectXCommon* dxcommon)
 {
-	dxCommon_ = dxcommon;
+	this->dxCommon = dxcommon;
 
 	// 頂点バッファ生成
-	vbvResorce_.CreateBufferView(dxCommon_, verticesline, verticesline.size());
+	vbvResorce_.CreateBufferView(dxCommon, verticesline, verticesline.size());
 	// インデクスバッファ生成
-	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
+	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
 }
 
 void Engine::LineMesh::UpdateVertexBuffer()
@@ -43,7 +43,7 @@ void Engine::LineMesh::DrawIndexedInstanced()
 
 	// 描画コマンド
 	if (indices.size() != 0) {
-		dxCommon_->GetCommandList()->DrawIndexedInstanced(UINT(indices.size()), 1, 0, 0, 0);
+		dxCommon->GetCommandList()->DrawIndexedInstanced(UINT(indices.size()), 1, 0, 0, 0);
 	}
 }
 

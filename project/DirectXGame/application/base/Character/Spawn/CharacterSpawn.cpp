@@ -5,8 +5,8 @@
 
 namespace Character {
 	void CharacterSpawn::Initialize(CharacterManager* characterManager, Engine::LineCommon* line, const SpawnInfo& info) {
-		characterManager_ = characterManager;	// キャラクター管理クラス
-		lineCommon_ = line;						// ライン管理クラス
+		this->characterManager = characterManager;	// キャラクター管理クラス
+		this->lineCommon = line;						// ライン管理クラス
 
 		spawnInfo_ = info;	// スポーン情報
 
@@ -21,11 +21,11 @@ namespace Character {
 		spawnTransform_.Update();
 
 		// 出現エリア設定
-		spawnAABBArea_.min_ = spawnTransform_.GetWorldPosition() - (spawnInfo_.GetData().size_ / 2.0f);
-		spawnAABBArea_.max_ = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
+		spawnAABBArea_.min = spawnTransform_.GetWorldPosition() - (spawnInfo_.GetData().size_ / 2.0f);
+		spawnAABBArea_.max = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
 
 #ifdef _DEBUG
-		lineCommon_->GetDebugLineMeshData().AddLineAABB(AABB{ -spawnInfo_.GetData().size_,spawnInfo_.GetData().size_ }, spawnTransform_.GetWorldPosition());
+		lineCommon->GetDebugLineMeshData().AddLineAABB(AABB{ -spawnInfo_.GetData().size_,spawnInfo_.GetData().size_ }, spawnTransform_.GetWorldPosition());
 #endif // _DEBUG
 
 		// 出現
@@ -41,18 +41,18 @@ namespace Character {
 		if (spawnInfo_.IsEnd()) return;
 
 		// 情報更新
-		if (characterManager_->GetCharacterCount(Type::Enemy) <= maxEnemyCount_) {
+		if (characterManager->GetCharacterCount(Type::Enemy) <= maxEnemyCount_) {
 			spawnInfo_.Update(Engine::MyGame::GameTime());
 		}
 
 		// 出し切ったら
 		if (spawnInfo_.IsSpawned()) return;
 		spawnTransform_.Update();
-		spawnAABBArea_.min_ = spawnTransform_.GetWorldPosition() - (spawnInfo_.GetData().size_ / 2.0f);
-		spawnAABBArea_.max_ = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
+		spawnAABBArea_.min = spawnTransform_.GetWorldPosition() - (spawnInfo_.GetData().size_ / 2.0f);
+		spawnAABBArea_.max = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
 
 		// グループ生成
-		characterManager_->CreateEnemyGroup(spawnInfo_.GetData().type_, 0, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
+		characterManager->CreateEnemyGroup(spawnInfo_.GetData().type_, 0, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
 
 		// 出現した
 		spawnInfo_.Spawned();

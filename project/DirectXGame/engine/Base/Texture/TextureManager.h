@@ -30,7 +30,7 @@ namespace Engine {
 		TextureManager& operator=(TextureManager&) = delete;
 
 		// 初期化
-		void Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager);
+		void Initialize(Command* command, DXGIDevice* dxgiDevice, SrvManager* srvManager);
 
 
 		//DirectTexを使ってTextureを読むためのLoadTextur関数
@@ -49,7 +49,7 @@ namespace Engine {
 		const DirectX::TexMetadata& GetMataData(const std::string& filePach);
 
 		// SRVマネージャー取得
-		SrvManager* GetSrvManager() { return srvManager_; }
+		SrvManager* GetSrvManager() { return srvManager; }
 
 		// ルートパラメーター設定
 		static void SetRootParameter(D3D12_ROOT_PARAMETER& parameter, D3D12_DESCRIPTOR_RANGE& descriptorRange);
@@ -83,9 +83,9 @@ namespace Engine {
 
 		DebugTimer debugTimerTex_;
 	private:
-		Command* command_;
-		DXGIDevice* DXGIDevice_;
-		SrvManager* srvManager_ = nullptr;
+		Command* command = nullptr;
+		DXGIDevice* dxgiDevice = nullptr;
+		SrvManager* srvManager = nullptr;
 
 	};
 }

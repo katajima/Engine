@@ -1,15 +1,14 @@
 #include "Hitbox.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/MyGame/MyGame.h>
 
 namespace HitBox {
 
 #pragma region HitBox
 	// 初期化
-	void HitBoxInstance::Initialize(Engine::Entity3DManager* entity3dManager, Character::BaseCharacter* character, UseType type) {
+	void HitBoxInstance::Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type) {
 		this->character = character;
-		this->entity3dManager = entity3dManager;
+		this->entityManager = entityManager;
 		type_ = type;
 
 		// ワールド変換初期化
@@ -21,7 +20,7 @@ namespace HitBox {
 		colliderComponent_->SetOwner(colliderComponent_.get());
 		colliderComponent_->SetHitReceiver(this);   // 対象設定
 		// ラインコモンをセット
-		colliderComponent_->SetLineCommon(entity3dManager->Get3DLineCommon());
+		colliderComponent_->SetLineCommon(entityManager->Get3DLineCommon());
 		// 登録（IDを取得したければ変数で受ける）
 		colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 

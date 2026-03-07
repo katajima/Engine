@@ -48,7 +48,7 @@ namespace Character {
 		int maxCharactorCount_ = 300;
 
 	private:
-		CharacterManager* characterManager_ = nullptr;
-		Engine::LineCommon* lineCommon_ = nullptr;
+		CharacterManager* characterManager = nullptr;
+		Engine::LineCommon* lineCommon = nullptr;
 	};
 }

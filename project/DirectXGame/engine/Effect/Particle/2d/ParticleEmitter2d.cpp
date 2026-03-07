@@ -9,7 +9,7 @@
 
 void Engine::ParticleEmitter2d::Initialize(ParticleManager2d* particleManager, std::string emitName, std::string particleName)
 {
-	particleManager_ = particleManager;					// パーティクルマネージャー
+	this->particleManager = particleManager;					// パーティクルマネージャー
 	emitName_ = emitName;								// エミッタ名
 	particleName_ = particleName;						// パーティクル名
 
@@ -32,7 +32,7 @@ void Engine::ParticleEmitter2d::Initialize(ParticleManager2d* particleManager, s
 
 
 void Engine::ParticleEmitter2d::Update() {
-	ParticleGroup2d& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup2d& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 	// トランスフォーム更新
 	transform_.Update();
@@ -64,10 +64,10 @@ void Engine::ParticleEmitter2d::Update() {
 
 void Engine::ParticleEmitter2d::Emit() {
 	if (isEmit) {
-		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().alphaClipping_ = alphaClipping_; // αクリッピング
-		particleManager_->GetParticleGroups(particleName_).material->GetMaterialInstance().enableLighting_ = enableLighting_; // aライト
+		particleManager->GetParticleGroups(particleName_).material->GetMaterialInstance().alphaClipping_ = alphaClipping_; // αクリッピング
+		particleManager->GetParticleGroups(particleName_).material->GetMaterialInstance().enableLighting_ = enableLighting_; // aライト
 
-		auto& rng = particleManager_->GetRandomEngine();
+		auto& rng = particleManager->GetRandomEngine();
 
 		int index = static_cast<int>(Random::RandomInt32_t(static_cast<int32_t>(emitData_.count.Min()), static_cast<int32_t>(emitData_.count.Max())));
 		if (index <= 0) {
@@ -123,17 +123,17 @@ void Engine::ParticleEmitter2d::SetAcceleration(Vector2 acceleration, Vector2 ra
 }
 
 void Engine::ParticleEmitter2d::EmitUniqe() {
-	ParticleGroup2d& particleGroup = particleManager_->GetParticleGroups(particleName_);
-	auto& rnd = particleManager_->GetRandomEngine();
+	ParticleGroup2d& particleGroup = particleManager->GetParticleGroups(particleName_);
+	auto& rnd = particleManager->GetRandomEngine();
 
 
 	Vector3 pos{};
 
 	Vector2 pa = transform_.worldMat_.GetWorldPosition();
-	Vector2 ran = Random::RandVector2(range_, particleManager_->GetRandomEngine());
+	Vector2 ran = Random::RandVector2(range_, particleManager->GetRandomEngine());
 	pos.x = pa.x + ran.x;
 	pos.y = pa.y + ran.y;
 	pos.z = 0.0f;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 };

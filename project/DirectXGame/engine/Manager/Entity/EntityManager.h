@@ -5,6 +5,7 @@
 #include <future>
 #include <mutex>
 // engine
+#include"DirectXGame/engine/2d/SpriteCommon.h"
 #include"DirectXGame/engine/effect/Ocean/OceanManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 #include"DirectXGame/engine/3d/Object/Object3dCommon.h"
@@ -35,9 +36,9 @@ namespace Engine {
 	class DirectXCommon;
 
 	/// <summary>
-	/// エンティティ3dマネージャー
+	/// エンティティマネージャー
 	/// </summary>
-	class Entity3DManager
+	class EntityManager
 	{
 	public:
 
@@ -122,13 +123,11 @@ namespace Engine {
 		// エフェクトマネージャークラス取得
 		EffectManager* GetEffectManager() { return effectManager_.get(); }
 	public:
-		//void SetCollisionManager(CollisionManager* collisionManager) {collisionManager_ = collisionManager;}
+		// スプライト共通クラス取得
+		SpriteCommon* GetSpriteCommon() { return spriteCommon_.get(); }
 
 
 	private:
-		//CollisionManager* collisionManager_;
-
-
 		std::vector<std::unique_ptr<Object3d>> object3d;
 
 		std::vector<Object3d*> opaqueObjects;
@@ -138,7 +137,7 @@ namespace Engine {
 
 	private:
 		// DirectX
-		DirectXCommon* directXCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
 		// オーシャンシェーダー
 		std::unique_ptr<OceanManager> oceanManager_ = nullptr;
@@ -169,6 +168,10 @@ namespace Engine {
 
 		// エフェクトマネージャー
 		std::unique_ptr<EffectManager> effectManager_ = nullptr;
+
+	private:
+		// スプライト共通クラス
+		std::unique_ptr<SpriteCommon> spriteCommon_ = nullptr;
 
 	};
 }

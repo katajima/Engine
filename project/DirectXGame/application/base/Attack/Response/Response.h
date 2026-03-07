@@ -10,7 +10,7 @@ namespace Character {
 class ObjectComponent;				// オブジェクト
 class WorldTransform;				// オブジェクト位置
 class Collider;						// コライダー
-
+class ResponseMoveSystem;			// 応答移動システム
 
 
 /// <summary>
@@ -62,8 +62,11 @@ public:
 	// 使っているもののワールドトランスフォームを設定
 	void SetOwner(Engine::WorldTransform* owner) { transform = owner; };
 
+	void SetOwner(ResponseMoveSystem* owner) { this->responseMoveSystem = owner; };
+
 private:
 	Engine::WorldTransform* transform;	//　衝突応答用
+	ResponseMoveSystem* responseMoveSystem = nullptr;	// 衝突応答
 	float halfSize = 0.5f;		// 半分のサイズ
 
 };

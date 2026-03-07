@@ -11,13 +11,13 @@ const uint32_t Engine::RtvManager::kMaxRTVCount = 32;
 
 void Engine::RtvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
-	DXGIDevice_ = DXGI;	// デバイス
-	command_ = Command;	// コマンド
+	this->dxgiDevice = DXGI;	// デバイス
+	this->command = Command;	// コマンド
 
 	// デスクリプタヒープ
-	descriptorHeap = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kMaxRTVCount, false);
+	descriptorHeap = dxgiDevice->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, kMaxRTVCount, false);
 	// デスクリプタ一個分のサイズを取得して記録
-	descriptorSize = DXGIDevice_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	descriptorSize = dxgiDevice->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 }
 
 
@@ -61,7 +61,7 @@ void Engine::RtvManager::CreateRTV(uint32_t rtvIndex, ID3D12Resource* pResource)
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE handle = GetCPUDescriptorHandle(rtvIndex);
-	DXGIDevice_->GetDevice()->CreateRenderTargetView(pResource, &rtvDesc, handle);
+	dxgiDevice->GetDevice()->CreateRenderTargetView(pResource, &rtvDesc, handle);
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> Engine::RtvManager::CreateRenderTextureResource(DXGI_FORMAT format, const Vector4& color)
@@ -91,7 +91,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::RtvManager::CreateRenderTextureRe
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 
-	HRESULT hr = DXGIDevice_->GetDevice()->CreateCommittedResource(
+	HRESULT hr = dxgiDevice->GetDevice()->CreateCommittedResource(
 		&heapProperties,
 		D3D12_HEAP_FLAG_NONE,
 		&resourceDesc,

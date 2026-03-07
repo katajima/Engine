@@ -228,8 +228,8 @@ void Engine::LineMeshData::AddLightLine(const SpotLightData& data) {
 /// <param name="color"></param>
 void Engine::LineMeshData::AddLineAABB(const AABB& aabb, const Vector3& pos, const Vector4& color) {
 	// AABB の最小・最大範囲をワールド座標に適用
-	Vector3 min = aabb.min_ + pos;
-	Vector3 max = aabb.max_ + pos;
+	Vector3 min = aabb.min + pos;
+	Vector3 max = aabb.max + pos;
 
 	// AABB の 8 頂点を計算
 	Vector3 vertices[8] = {
@@ -535,14 +535,14 @@ void Engine::LineMeshData::AddLineTriangle(const Triangle& triangle, const World
 /// オクツリー状にライン加算
 /// </summary>
 /// <param name="node"></param>
-void Engine::LineMeshData::AddOctree(const OctreeNode& node)
+void Engine::LineMeshData::AddOctree(const OctreeColliderNode& node)
 {
 	// AABB を描画
 
 	AddLineAABB(node.bounds, { 0,0,0 });
 
 	// 子ノードがある場合は再帰的に描画
-	for (OctreeNode* child : node.children) {
+	for (auto& child : node.children) {
 		if (child) {  // nullptr チェック
 			AddOctree(*child);
 		}

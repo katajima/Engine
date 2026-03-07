@@ -1,5 +1,5 @@
 #include "UIElement.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
 static Vector2 ToLocalSpace(const Vector2& worldPos, const Engine::WorldTransform2d& parentTransform) {
@@ -7,9 +7,9 @@ static Vector2 ToLocalSpace(const Vector2& worldPos, const Engine::WorldTransfor
 	return Transforms(worldPos, invMat);
 }
 
-void Engine::UIElement::Init(Entity2DManager* entity2DManager, std::string name)
+void Engine::UIElement::Init(EntityManager* entityManager, std::string name)
 {
-	entity2DManager_ = entity2DManager;	// エンティティ2d
+	this->entityManager = entityManager;	// エンティティ管理
 	mainName_ = name;					// 名前設定
 
 	// スプライト初期化
@@ -29,7 +29,7 @@ void Engine::UIElement::AddSprite(std::string name, std::string textureName)
 		return;
 	}
 	std::unique_ptr<BaseSprite> sprite = std::make_unique<BaseSprite>();
-	sprite->Init(entity2DManager_, name, textureName);
+	sprite->Init(entityManager, name, textureName);
 
 	sprites_.insert(std::make_pair(name, std::move(sprite)));
 }
@@ -83,22 +83,22 @@ void Engine::UICheckBox::InitSprite()
 {
 	// チェックボタン初期化
 	checkSprite = std::make_unique<BaseSprite>();
-	checkSprite->Init(entity2DManager_, "check", "resources/Texture/Image.dds");
+	checkSprite->Init(entityManager, "check", "resources/Texture/Image.dds");
 	checkSprite->GetSprite()->SetSize({24.0f,24.0f});		// サイズ設定
 	checkSprite->GetSprite()->SetAnchorPoint({0.5f,0.5f});	// アンカーポイント設定
 	
 	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();
-	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.dds");
+	backgroundSprite->Init(entityManager, "background", "resources/Texture/Image.dds");
 	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });		// アンカーポイント設定
 	backgroundSprite->GetSprite()->SetColor({0.5f,0.5f ,0.5f ,1.0f});	//色指定
 	backgroundSprite->GetSprite()->SetSize({ 30.0f,30.0f });			// サイズ設定
 	backgroundSprite->SetUseColl(true);									// コライダーを使うか
 
 	// 親子
-	if (parent_) {
-		checkSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
-		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+	if (parent) {
+		checkSprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
+		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
 	}
 
 }
@@ -148,14 +148,14 @@ void Engine::UISlider::InitSprite() {
 
 	// スライダー初期化
 	slidSprite = std::make_unique<BaseSprite>();
-	slidSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.dds");
+	slidSprite->Init(entityManager, "slid", "resources/Texture/Image.dds");
 	slidSprite->GetSprite()->SetSize({ 24.0f,24.0f });		// サイズ設定
 	slidSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
 	slidSprite->SetUseColl(true);							// コライダー使うか設定
 
 	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();
-	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.dds");
+	backgroundSprite->Init(entityManager, "background", "resources/Texture/Image.dds");
 	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });		// アンカーポイント設定
 	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });	// 色設定
 	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });			// サイズ設定
@@ -163,8 +163,8 @@ void Engine::UISlider::InitSprite() {
 	backgroundSprite->GetSprite()->GetWorldTransform2d().SetChild(&slidSprite->GetSprite()->GetWorldTransform2d());
 	
 	//	親子付け
-	if (parent_) {
-		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+	if (parent) {
+		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
 	}
 }
 
@@ -272,13 +272,13 @@ void Engine::UISlider::UniqueDraw() {
 void Engine::UIMeter::InitSprite() {
 	// メータスプライト初期化
 	meterSprite = std::make_unique<BaseSprite>();
-	meterSprite->Init(entity2DManager_, "slid", "resources/Texture/Image.dds");
+	meterSprite->Init(entityManager, "slid", "resources/Texture/Image.dds");
 	meterSprite->GetSprite()->SetSize({ 494.0f,24.0f });			// サイズ設定
 	meterSprite->GetSprite()->SetAnchorPoint({ 0.5f,0.5f });		// アンカーポイント設定
 
 	// 背景スプライト初期化
 	backgroundSprite = std::make_unique<BaseSprite>();				
-	backgroundSprite->Init(entity2DManager_, "background", "resources/Texture/Image.dds");
+	backgroundSprite->Init(entityManager, "background", "resources/Texture/Image.dds");
 	backgroundSprite->GetSprite()->SetAnchorPoint({ 0.0f,0.5f });		// アンカーポイント設定
 	backgroundSprite->GetSprite()->SetColor({ 0.5f,0.5f ,0.5f ,1.0f });	// 色設定
 	backgroundSprite->GetSprite()->SetSize({ 500.0f,30.0f });			// サイズ設定
@@ -286,17 +286,17 @@ void Engine::UIMeter::InitSprite() {
 	// 名前スプライトを使うなら
 	if (useNameSprite_) {
 		nameSprite_ = std::make_unique<BaseSprite>();
-		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.dds");
+		nameSprite_->Init(entityManager, "name", "resources/Texture/Image.dds");
 		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));	// アンカーポイント設定
 		nameSprite_->SetSize({ 24.0f,24.0f });				// サイズ設定
 	}
 
 	// 親子付け
-	if (parent_) {
-		meterSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
-		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+	if (parent) {
+		meterSprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
+		backgroundSprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
 		if (useNameSprite_) {
-			nameSprite_->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+			nameSprite_->GetSprite()->GetWorldTransform2d().parent_ = parent;
 		}
 	}
 
@@ -401,15 +401,15 @@ void Engine::UIPair::InitSprite()
 {
 	// 最初のスプライト初期化
 	firstSprite = std::make_unique<BaseSprite>();
-	firstSprite->Init(entity2DManager_, "first", "resources/Texture/Image.dds");
+	firstSprite->Init(entityManager, "first", "resources/Texture/Image.dds");
 	// 次のスプライト初期化
 	secondSprite = std::make_unique<BaseSprite>();
-	secondSprite->Init(entity2DManager_, "second", "resources/Texture/Image.dds");
+	secondSprite->Init(entityManager, "second", "resources/Texture/Image.dds");
 	
 	// 親子付け
-	if (parent_) {
-		firstSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
-		secondSprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+	if (parent) {
+		firstSprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
+		secondSprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
 	}
 	
 }
@@ -458,7 +458,7 @@ void Engine::UICount::InitSprite()
 	// 行数分初期化
 	for (int i = 0; i < instance_; i++) {
 		auto sprite = std::make_unique<BaseSprite>();
-		sprite->Init(entity2DManager_, "count", "resources/Texture/num/Number_x64y96.dds");
+		sprite->Init(entityManager, "count", "resources/Texture/num/Number_x64y96.dds");
 		sprite->SetSize({ 24.0f,24.0f });		// サイズ設定
 		sprite->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
 
@@ -467,18 +467,18 @@ void Engine::UICount::InitSprite()
 	// 名前スプライトがあるなら初期化
 	if (useNameSprite_) {
 		nameSprite_ = std::make_unique<BaseSprite>();
-		nameSprite_->Init(entity2DManager_, "name", "resources/Texture/Image.dds");
+		nameSprite_->Init(entityManager, "name", "resources/Texture/Image.dds");
 		nameSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));	// アンカーポイント設定
 		nameSprite_->SetSize({ 24.0f,24.0f });				// サイズ設定
 	}
 
 	// 親子付け
-	if (parent_) {
+	if (parent) {
 		for (auto& sprite : countSprite_) {
-			sprite->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+			sprite->GetSprite()->GetWorldTransform2d().parent_ = parent;
 		}
 		if (useNameSprite_) {
-			nameSprite_->GetSprite()->GetWorldTransform2d().parent_ = parent_;
+			nameSprite_->GetSprite()->GetWorldTransform2d().parent_ = parent;
 		}
 	}
 }

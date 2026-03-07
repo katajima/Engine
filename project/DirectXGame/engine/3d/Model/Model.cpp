@@ -14,9 +14,9 @@
 
 void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename, const std::string& file)
 {
-	modelCommon_ = modelCommon;					// モデル共通クラス
-	dxCommon_ = dxCommon;						// DX共通クラス
-	srvManager_ = modelCommon_->GetSrvManager();// SRV管理クラス
+	this->modelCommon = modelCommon;					// モデル共通クラス
+	this->dxCommon = dxCommon;						// DX共通クラス
+	this->srvManager = modelCommon->GetSrvManager();// SRV管理クラス
 
 	
 	std::string dire = directorypath;
@@ -43,7 +43,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 		CreateModel::CreateSkeleton(modelData);
 
 		// スキンクラスター生成
-		CreateModel::CreateSkinCluster(modelData, modelCommon_);
+		CreateModel::CreateSkinCluster(modelData, modelCommon);
 
 		auto it = modelData.animations.find(modelData.currentAnimName);
 		if (it != modelData.animations.end()) {
@@ -67,7 +67,7 @@ void Engine::Model::Draw()
 
 void Engine::Model::DrawSkinning(std::vector<MaterialInstance> matetials, std::vector<ConstantBuffer<Material::DataGPU>*> cbResourcePtr)
 {
-	auto commandList = modelCommon_->GetCommand()->GetList();
+	auto commandList = modelCommon->GetCommand()->GetList();
 
 	int i = 0;
 	for (auto& mesh : modelData.mesh)
@@ -133,16 +133,16 @@ Engine::ModelData Engine::Model::LoadOdjFileAssimpAmime(const std::string& direc
 	modelData.rootNode = LoadModel::ReadNode(scene->mRootNode, modelData.meshOffsetMap);
 
 	// メッシュ読み込み
-	LoadModel::LoadMesh(scene, modelData, dxCommon_);
+	LoadModel::LoadMesh(scene, modelData, dxCommon);
 	// Assimp読み込みやメッシュ生成
 
 	timer_.EndTimer();
 
 	// ボーン読み込み
-	LoadModel::LoadBone(scene, modelData, dxCommon_);
+	LoadModel::LoadBone(scene, modelData, dxCommon);
 
 	// マテリアル読み込み
-	LoadModel::LoadMaterial(scene, modelData, dxCommon_, directoryPath);
+	LoadModel::LoadMaterial(scene, modelData, dxCommon, directoryPath);
 
 	timer_.EndTimer();
 

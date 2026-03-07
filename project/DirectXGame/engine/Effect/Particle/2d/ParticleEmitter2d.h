@@ -92,6 +92,6 @@ namespace Engine {
 
 		EffectEmitData2d emitData_{}; // エミットデータ
 
-		ParticleManager2d* particleManager_;
+		ParticleManager2d* particleManager;
 	};
 }

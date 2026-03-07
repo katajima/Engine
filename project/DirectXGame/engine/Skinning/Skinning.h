@@ -14,7 +14,7 @@ namespace Engine {
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
 		// DirectX共通クラス取得
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 
 		// 描画前準備
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type); }
@@ -37,7 +37,7 @@ namespace Engine {
 
 
 	private:// メンバ変数
-		DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 

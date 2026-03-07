@@ -4,19 +4,20 @@
 #include "BulletData.h"
 
 // 前方宣言
-class Effect;
 namespace Engine{
 	class GlobalVariables;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class Primitive;
 	class Object3d;
 	class Sprite;
 	class Camera;
 }
-
-
-
+// 前方宣言
+namespace Character {
+	class BaseCharacter;
+}
+class BulletManager;
+class Effect;
 
 /// <summary>
 /// 弾の基底クラス
@@ -35,7 +36,7 @@ public:
 	};
 	
 	// 初期化
-	virtual void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	virtual void Initialize(Engine::EntityManager* entity3DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	// 毎フレーム更新
 	virtual void Update() = 0;
@@ -52,7 +53,7 @@ public:
 	}
 protected:
 	// 基盤の初期化
-	void BaseInitialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void BaseInitialize(Engine::EntityManager* entity3DManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 		const std::string name,const std::string modelName);
 
@@ -62,7 +63,7 @@ public:
 	// ターゲット設定
 	void SetTarget(Character::BaseCharacter* target) { this->target = target; }
 	// エフェクト設定
-	void SetEffect(Effect* effect) { effect_ = effect; };
+	void SetEffect(Effect* effect) { this->effect = effect; };
 	// ターゲットの位置取得
 	void SetInfo(const BulletInfo& info) { info_ = info; }
 	// 範囲設定
@@ -128,14 +129,14 @@ protected:
 	Character::BaseCharacter* owner = nullptr;	// 持ち主
 	Character::BaseCharacter* target = nullptr;	// 標的
 protected:
-	Effect* effect_;
+	// エフェクト
+	Effect* effect = nullptr;
 	BulletInfo info_;
 
 
-	Engine::GlobalVariables* globalVariables_ = nullptr;
-	Engine::Entity3DManager* entity3DManager_ = nullptr;
-	Engine::Entity2DManager* entity2DManager_ = nullptr;
-
+	Engine::GlobalVariables* globalVariables = nullptr;
+	Engine::EntityManager* entityManager = nullptr;
+	
 };
 
 

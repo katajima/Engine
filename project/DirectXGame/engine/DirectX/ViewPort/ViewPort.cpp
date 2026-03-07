@@ -4,7 +4,7 @@
 
 void Engine::ViewPort::Initialize(Command* command)
 {
-	command_ = command;	// コマンド
+	this->command = command;	// コマンド
 }
 
 void Engine::ViewPort::SettingViewport()
@@ -24,5 +24,5 @@ void Engine::ViewPort::SettingViewport()
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
-	command_->GetList()->RSSetViewports(1, &viewport);
+	command->GetList()->RSSetViewports(1, &viewport);
 }

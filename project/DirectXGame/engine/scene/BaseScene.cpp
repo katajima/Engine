@@ -6,6 +6,6 @@ void Engine::BaseScene::AllUpdate(){ Update();}
 
 void Engine::BaseScene::AllDraw2D(){ Draw2D();}
 
-SceneData& Engine::BaseScene::GetSceneData() { return sceneManager_->GetSceneData(); }
+SceneData& Engine::BaseScene::GetSceneData() { return sceneManager->GetSceneData(); }
 
 float Engine::BaseScene::GetTime() const { return MyGame::GameTime();}

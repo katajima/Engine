@@ -8,12 +8,16 @@
 // 前方宣言
 namespace Engine {
 	class Input;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 }
+//
 namespace Character {
 	class BaseCharacter;
 }
+class BulletSpawn;
+class FollowCamera;
+
+
 /// <summary>
 /// 必殺技クラス
 /// </summary>
@@ -24,7 +28,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-    virtual	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera) = 0;
+    virtual	void Initialize(Engine::EntityManager* entity3DManager, Engine::Camera* camera) = 0;
 
 	///< summary>
 	/// 更新

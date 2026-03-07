@@ -4,8 +4,7 @@
 // 前方宣言
 namespace Engine {
 	class Input;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 }
 class BaseCharacter;
 class BasePlayer;

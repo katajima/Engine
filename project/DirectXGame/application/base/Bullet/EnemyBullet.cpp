@@ -7,10 +7,10 @@
 #include "DirectXGame/engine/math/random.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 // 初期化
-void EnemyBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
+void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 {
 	// 基盤の初期化
-	BaseInitialize(entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBullet", "AnimatedCube.gltf");
+	BaseInitialize(entityManager, globalVariables, position, camera, "enemyBullet", "AnimatedCube.gltf");
 
 	// オブジェクト生成
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定

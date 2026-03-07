@@ -13,7 +13,7 @@ namespace Character {
 namespace Engine {
 	class GlobalVariables;
 	class SceneManager;
-	class Entity3DManager;
+	class EntityManager;
 	class Input;
 }
 
@@ -166,7 +166,7 @@ namespace Game {
 		// 出現情報
 		std::vector<Character::SpawnInfo> spawns_;
 		// 
-		Engine::Entity3DManager* entity3DManager = nullptr;
+		Engine::EntityManager* entityManager = nullptr;
 		Character::CharacterManager* characterManager = nullptr;
 		Character::CharacterSpawnManager* characterSpawnManager = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
@@ -207,7 +207,7 @@ namespace Game {
 		std::shared_ptr<GameEventState> rootState;      // 初期ステート
 
 
-		Engine::Entity3DManager* entity3DManager = nullptr;
+		Engine::EntityManager* entityManager = nullptr;
 		Character::CharacterManager* characterManager = nullptr;
 		Character::CharacterSpawnManager* characterSpawnManager = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;

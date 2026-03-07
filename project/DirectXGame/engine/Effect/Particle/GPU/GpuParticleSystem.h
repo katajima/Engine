@@ -42,10 +42,10 @@ namespace Engine {
 		// エミッター追加
 		void AddEmitter(BaseGpuParticleEmitter* emit);
 		// メッシュ設定
-		void SetMesh(ModelMesh* mesh) { this->mesh_ = mesh; }	// メッシュセット
+		void SetMesh(ModelMesh* mesh) { this->mesh = mesh; }	// メッシュセット
 
 		// カメラセット
-		void SetCamera(Camera* camera) { this->camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 
 		// 名前で取得
 		std::string GetName() const { return name_; }
@@ -58,7 +58,7 @@ namespace Engine {
 		void Reset() { cbDeleteParticleCS_.Data()->isDelete = true; };
 
 	private:
-		ModelMesh* mesh_ = nullptr;		// モデルメッシュ
+		ModelMesh* mesh = nullptr;		// モデルメッシュ
 		std::string textureName_ = "";	// テクスチャ名前(パーティクル)
 		std::string trailTextureName_ = "";	// テクスチャ名前(トレイル)
 
@@ -111,9 +111,9 @@ namespace Engine {
 		float deleteTimer_ = 0.0f;	// パーティクル削除タイマー
 
 	private:
-		SrvManager* srvManager_ = nullptr;		// SRVマネージャー
-		DirectXCommon* dxCommon_ = nullptr;		// DirectX共通クラス
-		Camera* camera_ = nullptr;				// カメラ
-		GpuParticleManager* gpuParticleManager_;
+		SrvManager* srvManager = nullptr;		// SRVマネージャー
+		DirectXCommon* dxCommon = nullptr;		// DirectX共通クラス
+		Camera* camera = nullptr;				// カメラ
+		GpuParticleManager* gpuParticleManager = nullptr;
 	};
 }

@@ -25,6 +25,7 @@
 #include <DirectXGame/application/base/Game/GameFlowController.h>
 
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
+#include "DirectXGame/application/base/Stage/StageColliderSystem.h"
 
 /// <summary>
 /// ゲームプレイシーン
@@ -61,9 +62,9 @@ private:
 	void CheckAllCollisions();
 
 private:
-	Engine::Input* input_ = nullptr;
-	Engine::Audio* audio_ = nullptr;
-
+	Engine::Input* input = nullptr;
+	Engine::Audio* audio = nullptr;
+	DebugTimer debugTimer_;
 	// インプットハンドラ
 	std::unique_ptr < Character::InputHander> inputHander_;
 	Character::ICommand* iCommand_;
@@ -106,6 +107,8 @@ private:
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
+	// ステージコライダーシステム
+	std::unique_ptr<StageColliderSystem> stageColliderSystem_;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;

@@ -18,8 +18,8 @@ static ImGuizmo::OPERATION currentOperation = ImGuizmo::TRANSLATE; // 初期値�
 void Engine::ImGuiManager::Initialize(DirectXCommon* dxCommon)
 {
 #ifdef _DEBUG
-	dxCommon_ = dxCommon;						// DX共通クラス
-	srvManager_ = dxCommon_->GetSrvManager();	// SRV管理クラス
+	this->dxCommon = dxCommon;						// DX共通クラス
+	this->srvManager = dxCommon->GetSrvManager();	// SRV管理クラス
 
 	// コンテキストの生成
 	ImGui::CreateContext();
@@ -32,10 +32,10 @@ void Engine::ImGuiManager::Initialize(DirectXCommon* dxCommon)
 	// プラットフォームとレンダラーのバックエンドを設定する
 	ImGui_ImplWin32_Init(WinApp::GetHwnd());
 	ImGui_ImplDX12_Init(
-		dxCommon_->GetDevice().Get(), static_cast<int>(dxCommon_->GetBackBufferCount()),
-		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, srvManager_->GetDescriptorHeap(),
-		srvManager_->GetCPUDescriptorHandle(0),
-		srvManager_->GetGPUDescriptorHandle(0));
+		dxCommon->GetDevice().Get(), static_cast<int>(dxCommon->GetBackBufferCount()),
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, srvManager->GetDescriptorHeap(),
+		srvManager->GetCPUDescriptorHandle(0),
+		srvManager->GetGPUDescriptorHandle(0));
 
 
 	
@@ -89,7 +89,7 @@ void Engine::ImGuiManager::Draw()
 #ifdef _DEBUG
 
 	// 描画コマンドを発行
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon_->GetCommandList().Get());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList().Get());
 #endif // _DEBUG
 }
 
@@ -141,13 +141,13 @@ void Engine::ImGuiManager::RenderGizmo2(WorldTransform& obj, const Camera* camer
 			if (ImGui::Button("ROTATE")) mCurrentGizmoOperation = ImGuizmo::ROTATE;
 			if (ImGui::Button("SCALE")) mCurrentGizmoOperation = ImGuizmo::SCALE;
 
-			if (input_->IsTriggerKey(DIK_G)) {
+			if (input->IsTriggerKey(DIK_G)) {
 				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 			}
-			if (input_->IsTriggerKey(DIK_R)) {
+			if (input->IsTriggerKey(DIK_R)) {
 				mCurrentGizmoOperation = ImGuizmo::ROTATE;
 			}
-			if (input_->IsTriggerKey(DIK_S)) {
+			if (input->IsTriggerKey(DIK_S)) {
 				mCurrentGizmoOperation = ImGuizmo::SCALE;
 			}
 

@@ -150,7 +150,7 @@ namespace Engine {
 	public:
 
 	private:
-		Triangle triangle_ = Triangle({}, {}, {});
+		Triangle triangle_;
 	};
 
 	// メッシュ

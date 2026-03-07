@@ -1,19 +1,19 @@
 #include "GameUI.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
-void GameUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables)
+void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
-	this->entity2DManager = entity2DManager;
+	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	this->inputSystem = inputSystem;
 
 
 	board_ = std::make_unique<Engine::UIBaseBoard>();
-	board_->Init(inputSystem,entity2DManager, "bord", boardPos, boardSize);
+	board_->Init(inputSystem,entityManager, "bord", boardPos, boardSize);
 
 	// 通常攻撃UI初期化
 	InitUIPair("normalAttack", attackTextData_.pos_);
@@ -75,22 +75,36 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entit
 	jumpPair->GetSecondSprite()->SetColor(jumpTextData.color_);	// 色設定
 
 
-	// ダッシュUI初期化
-	InitUIPair("dush", dashTextData.pos_);
-	Engine::UIPair* dushPair = GetUIPair("dush");
-	dushPair->SetOffset(dashTextData.offset_);
-	dushPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lt.dds");
-	dushPair->GetFirstSprite()->SetAnchorPoint(dashTextData.anchorPoint_);			// アンカーポイント設定
-	dushPair->GetFirstSprite()->SetSize(dashTextData.size_);				// サイズ設定
-	dushPair->GetFirstSprite()->SetColor(dashTextData.color_);	// 色設定
+	//// ダッシュUI初期化
+	//InitUIPair("dush", dashTextData.pos_);
+	//Engine::UIPair* dushPair = GetUIPair("dush");
+	//dushPair->SetOffset(dashTextData.offset_);
+	//dushPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	//dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lt.dds");
+	//dushPair->GetFirstSprite()->SetAnchorPoint(dashTextData.anchorPoint_);			// アンカーポイント設定
+	//dushPair->GetFirstSprite()->SetSize(dashTextData.size_);				// サイズ設定
+	//dushPair->GetFirstSprite()->SetColor(dashTextData.color_);	// 色設定
 
-	dushPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
-	dushPair->GetSecondSprite()->SetAnchorPoint(dashTextData.anchorPoint2_);			// アンカーポイント設定
-	dushPair->GetSecondSprite()->SetSize(dashTextData.size2_);						// サイズ設定
-	dushPair->GetSecondSprite()->SetColor(dashTextData.color_);	// 色設定
+	//dushPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
+	//dushPair->GetSecondSprite()->SetAnchorPoint(dashTextData.anchorPoint2_);			// アンカーポイント設定
+	//dushPair->GetSecondSprite()->SetSize(dashTextData.size2_);						// サイズ設定
+	//dushPair->GetSecondSprite()->SetColor(dashTextData.color_);	// 色設定
 
 
+	// スキルUI初期化
+	InitUIPair("skill", skillTextData.pos_);
+	Engine::UIPair* skillPair = GetUIPair("skill");
+	skillPair->SetOffset(skillTextData.offset_);
+	skillPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
+	skillPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds");
+	skillPair->GetFirstSprite()->SetAnchorPoint(skillTextData.anchorPoint_);			// アンカーポイント設定
+	skillPair->GetFirstSprite()->SetSize(skillTextData.size_);				// サイズ設定
+	skillPair->GetFirstSprite()->SetColor(skillTextData.color_);	// 色設定
+
+	skillPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
+	skillPair->GetSecondSprite()->SetAnchorPoint(skillTextData.anchorPoint2_);			// アンカーポイント設定
+	skillPair->GetSecondSprite()->SetSize(skillTextData.size2_);						// サイズ設定
+	skillPair->GetSecondSprite()->SetColor(skillTextData.color_);	// 色設定
 
 
 

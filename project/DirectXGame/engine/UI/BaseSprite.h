@@ -12,13 +12,13 @@ namespace Engine {
 	};
 
 	// 前方宣言
-	class Entity2DManager;
+	class EntityManager;
 
 	// スプライト基底クラス
 	class BaseSprite {
 	public:
 		// 初期化
-		void Init(Entity2DManager* entity2DManager, std::string name, std::string texturName);
+		void Init(EntityManager* entityManager, std::string name, std::string texturName);
 		// 更新
 		void Update() {
 			// コライダーあるか

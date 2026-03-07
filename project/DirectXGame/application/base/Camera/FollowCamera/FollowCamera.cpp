@@ -1,18 +1,18 @@
 #include "FollowCamera.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/input/Input.h"
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void FollowCamera::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
+void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+    Engine::GlobalVariables* globalVariables, Vector3 position)
 {
     // インプット
    this->inputSystem = inputSystem;
 
     // カメラ初期化
     uniqueCamera_ = std::make_unique<Engine::Camera>();
-    uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
+    uniqueCamera_->Initialize(entityManager->GetCameraCommon());
     uniqueCamera_->farClip_ = provisionalData_.farClip_;
     uniqueCamera_->transform_.rotate.x = provisionalData_.rotate.x;
 
@@ -62,9 +62,9 @@ void FollowCamera::Update()
         }
         else {
             // 通常の自由操作
-            if (inputSystem->GetData().isControllerConnected) {
-                uniqueCamera_->transform_.rotate.y += inputSystem->GetData().lookStick.x * kRotateSpeed;
-                uniqueCamera_->transform_.rotate.x -= inputSystem->GetData().lookStick.y * kRotateSpeedX;
+            if (inputSystem->GetPlayerInputData().isControllerConnected) {
+                uniqueCamera_->transform_.rotate.y += inputSystem->GetPlayerInputData().lookStick.x * kRotateSpeed;
+                uniqueCamera_->transform_.rotate.x -= inputSystem->GetPlayerInputData().lookStick.y * kRotateSpeedX;
 
                 uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
             }

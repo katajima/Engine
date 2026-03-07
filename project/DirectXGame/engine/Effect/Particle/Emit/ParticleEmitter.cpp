@@ -18,9 +18,9 @@ void Engine::PointParticleEmitter::DrawEmitterLine() {}
 // パーティクル発生
 void Engine::PointParticleEmitter::EmitUniqe() {
 
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), transform_.worldMat_.GetWorldPosition());
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), transform_.worldMat_.GetWorldPosition());
 }
 #pragma endregion
 
@@ -46,17 +46,17 @@ void Engine::AABBParticleEmitter::ApplyGlobalVariablesUniqe() {
 }
 
 // デバック線描画
-void Engine::AABBParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
+void Engine::AABBParticleEmitter::DrawEmitterLine() { lineCommon->GetDebugLineMeshData().AddLineAABB({ range_.min,range_.max }, transform_.worldMat_.GetWorldPosition(), Vector4{ 1,1,1,1 }); }
 // パーティクル発生
 void Engine::AABBParticleEmitter::EmitUniqe() {
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
-	auto& rnd = particleManager_->GetRandomEngine();
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
+	auto& rnd = particleManager->GetRandomEngine();
 
 	ApplyGlobalVariablesUniqe();
 
 	Vector3 pos{};
 	if (emitType_ == EmitData::EmitType::kRandom) {	// ランダム
-		pos = transform_.worldMat_.GetWorldPosition() + Random::RandVector3(range_, particleManager_->GetRandomEngine());
+		pos = transform_.worldMat_.GetWorldPosition() + Random::RandVector3(range_, particleManager->GetRandomEngine());
 	}
 	else if (emitType_ == EmitData::EmitType::kSurface) { // 表面
 		// AABBの最小・最大座標
@@ -138,14 +138,14 @@ void Engine::AABBParticleEmitter::EmitUniqe() {
 
 	Vector3 dire{};
 	if (directionType_ == EmitData::DirectionType::kRandom) {
-		dire = Random::RandVector3(emitData_.velocity, particleManager_->GetRandomEngine());
+		dire = Random::RandVector3(emitData_.velocity, particleManager->GetRandomEngine());
 	}
 	else if (directionType_ == EmitData::DirectionType::kNormal) {
 
 	}
 
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 
@@ -195,17 +195,17 @@ void Engine::SphereParticleEmitter::DrawEmitterLine() {
 	sphere.radius = radius_;
 	sphere.center = transform_.worldMat_.GetWorldPosition();
 
-	lineCommon_->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 1,1,1,1 });
+	lineCommon->GetDebugLineMeshData().AddLineSphere(sphere, Vector4{ 1,1,1,1 });
 }
 // パーティクル発生
 void Engine::SphereParticleEmitter::EmitUniqe() {
 	ApplyGlobalVariablesUniqe();
 
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
-	Vector3 pos = transform_.worldMat_.GetWorldPosition() + Random::RandomUnitVector3(particleManager_->GetRandomEngine()) * radius_;
+	Vector3 pos = transform_.worldMat_.GetWorldPosition() + Random::RandomUnitVector3(particleManager->GetRandomEngine()) * radius_;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 //
 void Engine::SphereParticleEmitter::DebugImGui()
@@ -250,10 +250,10 @@ void Engine::CornerParticleEmitter::UpdateUniqe() {
 }
 
 // デバック線描画
-void Engine::CornerParticleEmitter::DrawEmitterLine() { lineCommon_->GetDebugLineMeshData().AddLineCorner(corner, transform_); }
+void Engine::CornerParticleEmitter::DrawEmitterLine() { lineCommon->GetDebugLineMeshData().AddLineCorner(corner, transform_); }
 // パーティクル発生
 void Engine::CornerParticleEmitter::EmitUniqe() {
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 	float angleStep;
 	std::vector<Vector3> vertices;
 	// 頂点を計算
@@ -278,11 +278,11 @@ void Engine::CornerParticleEmitter::EmitUniqe() {
 	}
 	int32_t index = Random::RandomInt32_t(0, corner.segment - 1);
 
-	Vector3 pos = Lerp(vertices[index], vertices[(index + 1) % corner.segment], Random::RandFloat(Range{ 0.0f,1.0f }, particleManager_->GetRandomEngine()))
+	Vector3 pos = Lerp(vertices[index], vertices[(index + 1) % corner.segment], Random::RandFloat(Range{ 0.0f,1.0f }, particleManager->GetRandomEngine()))
 		+ transform_.worldMat_.GetWorldPosition();
 
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 void Engine::CornerParticleEmitter::DebugImGui()
@@ -339,7 +339,7 @@ void Engine::LineParticleEmitter::DrawEmitterLine() {
 	Vector3 str = segment_.origin + transform_.worldMat_.GetWorldPosition();
 
 	Vector3 end = segment_.end + transform_.worldMat_.GetWorldPosition();
-	lineCommon_->GetDebugLineMeshData().AddLine(str, end);
+	lineCommon->GetDebugLineMeshData().AddLine(str, end);
 }
 
 void Engine::LineParticleEmitter::SetSegment(Vector3 origin, Vector3 end)
@@ -349,15 +349,15 @@ void Engine::LineParticleEmitter::SetSegment(Vector3 origin, Vector3 end)
 }
 // パーティクル発生
 void Engine::LineParticleEmitter::EmitUniqe() {
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 
-	float t = Random::RandFloat(Range{ 0.0f, 1.0f }, particleManager_->GetRandomEngine());
+	float t = Random::RandFloat(Range{ 0.0f, 1.0f }, particleManager->GetRandomEngine());
 	Vector3 diff = segment_.origin + segment_.diff() * t;
 
 	Vector3 pos = transform_.worldMat_.GetWorldPosition() + diff;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 void Engine::LineParticleEmitter::DebugImGui()
@@ -386,7 +386,7 @@ void Engine::SplineParticleEmitter::ApplyGlobalVariablesUniqe() {
 
 // デバック線描画
 void Engine::SplineParticleEmitter::DrawEmitterLine() {
-	lineCommon_->GetDebugLineMeshData().AddSpline(controlPoints, transform_);
+	lineCommon->GetDebugLineMeshData().AddSpline(controlPoints, transform_);
 }
 // ポイントの座標指定
 void Engine::SplineParticleEmitter::SetControlPos(int index, Vector3 pos)
@@ -400,10 +400,10 @@ void Engine::SplineParticleEmitter::SetControlPos(int index, Vector3 pos)
 }
 // パーティクル発生
 void Engine::SplineParticleEmitter::EmitUniqe() {
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
 
-	float t = Random::RandFloat(Range{ 0.0f, 1.0f }, particleManager_->GetRandomEngine());
+	float t = Random::RandFloat(Range{ 0.0f, 1.0f }, particleManager->GetRandomEngine());
 	Vector3 pos{};
 
 	if (controlPoints.size() < 4) {
@@ -412,7 +412,7 @@ void Engine::SplineParticleEmitter::EmitUniqe() {
 
 	pos = CatmullRom(controlPoints, t) + transform_.worldMat_.GetWorldPosition();
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 void Engine::SplineParticleEmitter::DebugImGui()
@@ -448,13 +448,13 @@ void Engine::TriangleParticleEmitter::ApplyGlobalVariablesUniqe() {
 
 // デバック線描画
 void Engine::TriangleParticleEmitter::DrawEmitterLine() {
-	lineCommon_->GetDebugLineMeshData().AddLineTriangle(triangle_, transform_);
+	lineCommon->GetDebugLineMeshData().AddLineTriangle(triangle_, transform_);
 }
 // パーティクル発生
 void Engine::TriangleParticleEmitter::EmitUniqe() {
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
-	auto& rng = particleManager_->GetRandomEngine();
+	auto& rng = particleManager->GetRandomEngine();
 
 	// 三角形の頂点 (ローカル空間想定)
 	Vector3 A = triangle_.vertices[0];
@@ -475,7 +475,7 @@ void Engine::TriangleParticleEmitter::EmitUniqe() {
 
 	Vector3 pos = transform_.worldMat_.GetWorldPosition() + localPos;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 void Engine::TriangleParticleEmitter::DebugImGui()
@@ -507,14 +507,14 @@ void Engine::MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
 void Engine::MeshParticleEmitter::DrawEmitterLine() {
 
 	for (auto& tri : modelMesh_->triangle) {
-		lineCommon_->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
+		lineCommon->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
 	}
 }
 // パーティクル発生
 void Engine::MeshParticleEmitter::EmitUniqe() {
-	ParticleGroup& particleGroup = particleManager_->GetParticleGroups(particleName_);
+	ParticleGroup& particleGroup = particleManager->GetParticleGroups(particleName_);
 
-	auto& rng = particleManager_->GetRandomEngine();
+	auto& rng = particleManager->GetRandomEngine();
 
 	int index = static_cast<int>(Random::RandomSize_t(0, modelMesh_->triangle.size() - 1));
 
@@ -539,7 +539,7 @@ void Engine::MeshParticleEmitter::EmitUniqe() {
 
 	Vector3 pos = transform_.worldMat_.GetWorldPosition() + localPos;
 
-	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager_->GetRandomEngine(), pos);
+	EmitFanction::CreateParticle(particleGroup, emitData_, particleManager->GetRandomEngine(), pos);
 }
 
 void Engine::MeshParticleEmitter::DebugImGui()

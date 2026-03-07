@@ -11,7 +11,7 @@ namespace Character {
 }
 class BaseWeapon;	
 namespace Engine {
-	class Entity3DManager;
+	class EntityManager;
 	class GlobalVariables;
 }
 
@@ -22,7 +22,7 @@ namespace Engine {
 class AttackController {
 public:
 	// 初期化
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
+	void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables,
 		Character::ParameterComponent* base, Character::BaseCharacter* owner);
 	// 更新
 	void Update(float dt);

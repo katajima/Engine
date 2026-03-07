@@ -56,7 +56,7 @@ namespace Engine {
 
 	private:
 
-		DXGIDevice* DXGIDevice_;
-		Command* command_;
+		DXGIDevice* dxgiDevice = nullptr;
+		Command* command = nullptr;
 	};
 }

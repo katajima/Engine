@@ -52,8 +52,8 @@ void Engine::Field::FieldEffect::Initialize(const std::string& name, ShapeType s
 	case Field::ShapeType::kAABB:
 		name_ = name_ + "AABB";
 
-		renge_.min_ = -Vector3{ 1.0f,1.0f,1.0f };
-		renge_.max_ = Vector3{ 1.0f,1.0f,1.0f };
+		renge_.min = -Vector3{ 1.0f,1.0f,1.0f };
+		renge_.max = Vector3{ 1.0f,1.0f,1.0f };
 
 
 		break;
@@ -100,8 +100,8 @@ void Engine::Field::FieldEffect::DebugImgui()
 		switch (shapeType_)
 		{
 		case Field::ShapeType::kAABB:
-			ImGui::DragFloat3("renge.max", &renge_.max_.x, 0.1f);
-			ImGui::DragFloat3("renge.min", &renge_.min_.x, 0.1f);
+			ImGui::DragFloat3("renge.max", &renge_.max.x, 0.1f);
+			ImGui::DragFloat3("renge.min", &renge_.min.x, 0.1f);
 			break;
 		case Field::ShapeType::kSphere:
 			ImGui::DragFloat("rad", &rad, 0.1f);
@@ -184,16 +184,16 @@ bool Engine::Field::FieldEffect::IsCollisionAABB(const Vector3& point)
 	switch (shapeType_)
 	{
 	case Field::ShapeType::kAABB:
-		return Collision::Detection::Check(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
+		return Collision::Detection::Check(AABB{ renge_.min + worldPos,renge_.max + worldPos }, point);
 		break;
 	case Field::ShapeType::kSphere:
 		return Collision::Detection::Check(Sphere{ worldPos,rad }, point);
 		break;
 	case Field::ShapeType::kCapsule:
-		return Collision::Detection::Check(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
+		return Collision::Detection::Check(AABB{ renge_.min + worldPos,renge_.max + worldPos }, point);
 		break;
 	case Field::ShapeType::kCapsuleSpline:
-		return Collision::Detection::Check(AABB{ renge_.min_ + worldPos,renge_.max_ + worldPos }, point);
+		return Collision::Detection::Check(AABB{ renge_.min + worldPos,renge_.max + worldPos }, point);
 		break;
 	default:
 		break;

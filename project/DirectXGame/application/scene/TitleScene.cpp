@@ -15,20 +15,20 @@ void TitleScene::Initialize()
 
 	// エフェクト
 	effect_ = std::make_unique<Effect>();
-	effect_->Initialize(GetEntity3DManager(), GetGlobalVariables());
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
-	titleStage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	titleStage_->Initialize(GetDxCommon(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	titleStage_->SetEffect(effect_.get());
 
 	// UI
 	titleUI_ = std::make_unique<TitleUI>();
-	titleUI_->Initialize(nullptr, GetEntity2DManager(), GetGlobalVariables());
+	titleUI_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
 
 	// プレイヤー
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(GetEntity3DManager(), GetGlobalVariables(), "player", "testCharacter.gltf", 
+	objectComponent_->Initialize(GetEntityManager(), GetGlobalVariables(), "player", "testCharacter.gltf", 
 		false, false, nullptr,Engine::ObjectModelType::kSkinning);
 	objectComponent_->GetObject3D()->InitAnimationComponent();
 	objectComponent_->GetObject3D()->GetAnimationComponent()->SetAnimation("Rig|Idle_Loop",0.0f);
@@ -37,24 +37,16 @@ void TitleScene::Initialize()
 	// オブジェクトコンポーネント追加
 	objectComponentShadow_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
-	objectComponentShadow_->InitializeInstancing(GetEntity3DManager(), GetGlobalVariables(), "PlayerBase1", "plane.obj", "resources/Texture/smoke/no4.dds",
+	objectComponentShadow_->InitializeInstancing(GetEntityManager(), GetGlobalVariables(), "PlayerBase1", "plane.obj", "resources/Texture/smoke/no4.dds",
 		false, false, nullptr, Engine::Object3dInstansManager::TransparencyType::kYes);
 
 	objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
 	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
-
-
-	// 武器
-	//weapon_ = std::make_unique<PlayerWeapon>();
-	//weapon_->Initialize(nullptr, GetEntity3DManager(), GetEntity2DManager(), 
-	//	GetGlobalVariables(),{}, cameraManager_->GetCamera());
-	//->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
-	//weapon_->GetWorldTransform().translate_ = { 0.04f,0.09f,-0.2f };
 }
 
 void TitleScene::Finalize(){
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust2");
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->ClearParticle("dust3");
 
 }
 
@@ -123,10 +115,10 @@ void TitleScene::Draw2D(){
 void TitleScene::InitializeResources()
 {
 	// オブジェクト3D
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
-	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
-	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
 }
 
@@ -134,12 +126,12 @@ void TitleScene::InitializeCamera()
 {
 	// タイトルシーン用カメラ
 	titleCamera_ = std::make_unique<TitleCamera>();
-	titleCamera_->Initialize(nullptr, GetEntity3DManager(), GetGlobalVariables(), { 0,3.7f,-4.5f });
+	titleCamera_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), { 0,3.7f,-4.5f });
 
 
 	// カメラ管理クラス初期化
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(nullptr, GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
 	cameraManager_->AddCamera({ titleCamera_.get(), true}, "titleCamera");
 	
 	SetCamera(cameraManager_->GetCamera());

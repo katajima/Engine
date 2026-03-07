@@ -1,14 +1,14 @@
 #include "UniverseCamera.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 
-void UniverseCamera::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position)
+void UniverseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+	Engine::GlobalVariables* globalVariables, Vector3 position)
 {
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
-	uniqueCamera_->Initialize(entity3DManager->GetCameraCommon());
+	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
 	uniqueCamera_->farClip_ = provisionalData_.farClip_;
 	
 	// カメラ位置回転設定

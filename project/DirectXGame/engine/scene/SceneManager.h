@@ -10,8 +10,7 @@ namespace Engine {
 	class Input;
 	class WinApp;
 	class DirectXCommon;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class GlobalVariables;
 	class Camera;
 
@@ -36,31 +35,29 @@ namespace Engine {
 		// デストラクタ
 		~SceneManager();
 
-		void SetSceneFactory(AbstractSceneFactory* sceneFactory) { sceneFactory_ = sceneFactory; };
+		void SetSceneFactory(AbstractSceneFactory* sceneFactory) { this->sceneFactory = sceneFactory; };
 		// DirectX共通クラス設定
-		void SetDirectXCommon(DirectXCommon* directXCommon) { directXCommon_ = directXCommon; }
+		void SetDirectXCommon(DirectXCommon* directXCommon) { dxCommon = directXCommon; }
 		// DirectX共通クラス設定
 		void SetWinApp(WinApp* winApp) { this->winApp = winApp; }
-		// エンティティ3dマネージャー設定
-		void SetEntity3DManager(Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
-		// エンティティ2dマネージャー設定
-		void SetEntity2DManager(Entity2DManager* entity2DManager) { entity2DManager_ = entity2DManager; }
+		// エンティティマネージャー設定
+		void SetEntityManager(EntityManager* entity3DManager) { this->entityManager = entity3DManager; }
 		// グローバルバリアブル設定
-		void SetGlobalVariables(GlobalVariables* globalVariables) { globalVariables_ = globalVariables; }
+		void SetGlobalVariables(GlobalVariables* globalVariables) { this->globalVariables = globalVariables; }
 		// DirectX共通クラス取得
-		DirectXCommon* GetDirectXCommon() { return directXCommon_; };
+		DirectXCommon* GetDirectXCommon() { return dxCommon; };
 		// エンティティ3dマネージャー取得
-		Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
+		EntityManager* GetEntityManager() { return entityManager; }
 		// グローバルバリアブル取得
-		GlobalVariables* GetGlobalVariables() { return globalVariables_; }
+		GlobalVariables* GetGlobalVariables() { return globalVariables; }
 		// Input設定
-		void SetInput(Input* input) { input_ = input; }
+		void SetInput(Input* input) { this->input = input; }
 		// Input取得
-		Input* GetInput() { return input_; }
+		Input* GetInput() { return input; }
 		// カメラ設定
-		void SetCamera(Camera* camera) { camera_ = camera; };
+		void SetCamera(Camera* camera) { this->camera = camera; };
 		// カメラ取得
-		Camera* GetCamara() { return camera_; }
+		Camera* GetCamara() { return camera; }
 		// シーンデータ取得
 		SceneData& GetSceneData() { return sceneData_; }
 
@@ -88,27 +85,22 @@ namespace Engine {
 		// 次のシーン
 		std::unique_ptr<BaseScene> nextScene_ = nullptr;
 
-
-
-
-
-
 		std::string sceneName = "";
-		// シーンファクトリー (借りてくる)
-		AbstractSceneFactory* sceneFactory_ = nullptr;
-		DirectXCommon* directXCommon_;
-		Entity3DManager* entity3DManager_;
-		Entity2DManager* entity2DManager_;
-		Input* input_;
-		GlobalVariables* globalVariables_;
-		Camera* camera_;
-		WinApp* winApp;
-
+		
 		SceneData sceneData_;
 
 		// 終了フラグ
 		bool                  finished_ = false;
 		std::unique_ptr<Fade> fade_;
 		Phase                 phase_ = Phase::kMain;
+	private:
+		// シーンファクトリー (借りてくる)
+		AbstractSceneFactory* sceneFactory = nullptr;
+		DirectXCommon* dxCommon = nullptr;
+		EntityManager* entityManager = nullptr;
+		Input* input = nullptr;
+		GlobalVariables* globalVariables = nullptr;
+		Camera* camera = nullptr;
+		WinApp* winApp = nullptr;
 	};
 }

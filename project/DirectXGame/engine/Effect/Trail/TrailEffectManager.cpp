@@ -4,11 +4,11 @@
 
 void Engine::TrailEffectCommon::Initialize(DirectXCommon* dxcommon)
 {
-	dxCommon_ = dxcommon;		// DX共通クラス
+	this->dxCommon = dxcommon;		// DX共通クラス
 
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(), dxCommon->GetDXCCompiler());
 	
 	// パイプライン生成
 	CreateGraphicsPipeline();
@@ -17,12 +17,12 @@ void Engine::TrailEffectCommon::Initialize(DirectXCommon* dxcommon)
 void Engine::TrailEffectCommon::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
+	dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Engine::TrailEffectCommon::CreateRootSignature()

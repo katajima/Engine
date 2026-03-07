@@ -8,7 +8,7 @@
 
 namespace Engine {
 	// 前方宣言
-	struct OctreeNode;
+	struct OctreeColliderNode;
 	class DirectXCommon;
 
 
@@ -134,7 +134,7 @@ namespace Engine {
 		/// オクツリー状にライン加算
 		/// </summary>
 		/// <param name="node"></param>
-		void AddOctree(const OctreeNode& node);
+		void AddOctree(const OctreeColliderNode& node);
 
 		// グリッド線
 		void AddGrid(float xRange, float zRange, float interval, const Vector4& color);

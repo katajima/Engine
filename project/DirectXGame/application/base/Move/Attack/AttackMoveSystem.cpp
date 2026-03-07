@@ -5,9 +5,10 @@ void AttackMoveSystem::Initialize() {
 
 }
 
-void AttackMoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input) {
+void AttackMoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator) {
 	if (ctx.state == Character::CharacterMainState::Attack) {
 		coordinator.Request(reuest);
 	}
 	reuest.velocity = 0.0f;
+	reuest.priority = 999;
 };

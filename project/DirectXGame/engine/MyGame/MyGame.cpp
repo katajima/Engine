@@ -22,17 +22,18 @@ void Engine::MyGame::Initialize()
 	// シーンマネージャーに最初のシーンをセット
 	sceneManager_->SetSceneFactory(sceneFactory_.get());
 	sceneManager_->SetInput(input_.get());
-	sceneManager_->SetWinApp(winApp.get());
+	sceneManager_->SetWinApp(winApp_.get());
 	sceneManager_->SetGlobalVariables(globalVariables_.get());
-	sceneManager_->SetDirectXCommon(dxCommon.get());
-	sceneManager_->SetEntity3DManager(entity3DManager_.get());
-	sceneManager_->SetEntity2DManager(entity2DManager_.get());
+	sceneManager_->SetDirectXCommon(dxCommon_.get());
+	sceneManager_->SetEntityManager(entityManager_.get());
 	sceneManager_->Init();
 
 #ifdef _DEBUG
 	//sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("TITLE");
+	sceneManager_->ChangeScene("GAMEPLAY");
+
 	// リソース初期化
 	InitializeResource();
 
@@ -46,7 +47,7 @@ void Engine::MyGame::Initialize()
 
 void Engine::MyGame::Finalize()
 {
-	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
+	GpuParticleManager* gpuParticleManager_ = entityManager_->GetEffectManager()->GetGpuParticleManager();
 	gpuParticleManager_->ClearEmitterAll();
 	gpuParticleManager_->ClearGroupParticleAll();
 
@@ -56,9 +57,9 @@ void Engine::MyGame::Finalize()
 
 void Engine::MyGame::Update()
 {
-	entity3DManager_->Get3DLineCommon()->LineClear();
+	entityManager_->Get3DLineCommon()->LineClear();
 	// ImGuiの受付開始
-	dxCommon->GetImGuiManager()->Begin();
+	dxCommon_->GetImGuiManager()->Begin();
 
 	Framework::Update();
 
@@ -73,10 +74,10 @@ void Engine::MyGame::Update()
 #ifdef _DEBUG
 
 	if(input_->IsTriggerKey(DIK_M)){
-		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearEmitterAll();
+		entityManager_->GetEffectManager()->GetGpuParticleManager()->ClearEmitterAll();
 	}
 	if(input_->IsTriggerKey(DIK_N)){
-		entity3DManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
+		entityManager_->GetEffectManager()->GetGpuParticleManager()->ClearGroupParticleAll();
 	}
 	// FPS表示用ウィジェット
 	if (!ImGui::Begin("File", nullptr, ImGuiWindowFlags_MenuBar)) {
@@ -113,29 +114,29 @@ void Engine::MyGame::Update()
 	// グローバル変数の更新
 	globalVariables_->Update();
 
-	dxCommon->Update(sceneManager_.get(), entity3DManager_.get());
+	dxCommon_->Update(sceneManager_.get(), entityManager_.get());
 
 
 
 
 #ifdef _DEBUG
-	dxCommon->GetPostEffectManager()->RenderImGui();
+	dxCommon_->GetPostEffectManager()->RenderImGui();
 #endif // _DEBUG
 	// ImGuiの受付終了
-	dxCommon->GetImGuiManager()->End();
+	dxCommon_->GetImGuiManager()->End();
 }
 
 void Engine::MyGame::Draw()
 {
-	dxCommon->Draw(sceneManager_.get(), entity3DManager_.get());
+	dxCommon_->Draw(sceneManager_.get(), entityManager_.get());
 }
 
 
 
 void Engine::MyGame::InitializeResource()
 {
-	TextureManager* textureManager = dxCommon->GetTextureManager();
-	ModelManager* modelManager = dxCommon->GetModelManager();
+	TextureManager* textureManager = dxCommon_->GetTextureManager();
+	ModelManager* modelManager = dxCommon_->GetModelManager();
 	
 
 	textureManager->LoadTexture("resources/Texture/uvChecker.dds");
@@ -156,6 +157,9 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/text/SP.dds");
 	textureManager->LoadTexture("resources/Texture/text/wave.dds");
 	textureManager->LoadTexture("resources/Texture/text/seconds.dds");
+	textureManager->LoadTexture("resources/Texture/text/preparation.dds");
+	textureManager->LoadTexture("resources/Texture/text/selectGamePlay.dds");
+	textureManager->LoadTexture("resources/Texture/text/selectTitle.dds");
 
 
 
@@ -208,20 +212,20 @@ void Engine::MyGame::InitializeResource()
 
 void Engine::MyGame::CreateParticle()
 {
-	ParticleManager* particleManager = entity3DManager_->GetEffectManager()->GetParticleManager();
-	GpuParticleManager* gpuParticleManager_ = entity3DManager_->GetEffectManager()->GetGpuParticleManager();
-	ModelManager* modelManager = dxCommon->GetModelManager();
-
+	ParticleManager* particleManager = entityManager_->GetEffectManager()->GetParticleManager();
+	GpuParticleManager* gpuParticleManager_ = entityManager_->GetEffectManager()->GetGpuParticleManager();
+	ModelManager* modelManager = dxCommon_->GetModelManager();
+	PrimitiveCommon* primitiveCommon = entityManager_->GetPrimitiveCommon();
 
 	primi = std::make_unique<TorusPrimitive>();
-	primi->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/uvChecker.dds");
+	primi->Initialize(primitiveCommon, "resources/Texture/uvChecker.dds");
 	
 
 	primiTrai = std::make_unique<TrianglePrimitive>();
-	primiTrai->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/Image.dds");
+	primiTrai->Initialize(primitiveCommon,"resources/Texture/Image.dds");
 
 	primiPlane = std::make_unique<PlanePrimitive>();
-	primiPlane->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/uvChecker.dds");
+	primiPlane->Initialize(primitiveCommon, "resources/Texture/uvChecker.dds");
 
 
 	ShapeParameter::Star star;
@@ -229,7 +233,7 @@ void Engine::MyGame::CreateParticle()
 	star.outerRadius = 7.0f;
 	star.segments = 4;
 	primiStar = std::make_unique<StarPrimitive>();
-	primiStar->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/Image.dds");
+	primiStar->Initialize(primitiveCommon,"resources/Texture/Image.dds");
 	primiStar->Data() = star;
 
 
@@ -240,7 +244,7 @@ void Engine::MyGame::CreateParticle()
 
 
 	primiRing = std::make_unique<RingPrimitive>();
-	primiRing->Initialize(entity3DManager_->GetPrimitiveCommon(),"resources/Texture/effect/gradationLine.dds");
+	primiRing->Initialize(primitiveCommon,"resources/Texture/effect/gradationLine.dds");
 	primiRing->Data() = ring;
 	primiRing->MeshInitialize();
 
@@ -320,7 +324,12 @@ void Engine::MyGame::CreateParticle()
 	particleManager->CreateParticleGroup("cartridge", "resources/Texture/Image.dds", modelManager->FindModel("cartridge.obj"));
 
 
-
+	// スクラップ部品
+	particleManager->CreateParticleGroup("scrapBasis", "resources/Models/Scrap/Basis/color.png", modelManager->FindModel("basis.obj")); // タイヤ
+	particleManager->CreateParticleGroup("scrapGear", "resources/Models/Scrap/Gear/color.png", modelManager->FindModel("gear.obj")); // ダクト
+	particleManager->CreateParticleGroup("scrapIronRod", "resources/Models/Scrap/IronRod/color.png", modelManager->FindModel("ironRod.obj")); // 板
+	particleManager->CreateParticleGroup("scrapScrew", "resources/Models/Scrap/Screw/color.png", modelManager->FindModel("screw.obj")); // 歯車
+	particleManager->CreateParticleGroup("scrapTire", "resources/Models/Scrap/Tire/color.png", modelManager->FindModel("tire.obj")); // 柵
 
 
 	ShapeParameter::Cylinder cylinderParam;
@@ -330,7 +339,7 @@ void Engine::MyGame::CreateParticle()
 	cylinderParam.isCover = false;
 	cylinderParam.segments = 16;
 	cylinder_ = std::make_unique<CylinderPrimitive>();
-	cylinder_->Initialize(entity3DManager_->GetPrimitiveCommon(), "resources/Texture/effect/gradationLine.dds");
+	cylinder_->Initialize(primitiveCommon, "resources/Texture/effect/gradationLine.dds");
 	cylinder_->Data() = cylinderParam;
 	cylinder_->MeshInitialize();
 	// 
@@ -345,7 +354,7 @@ void Engine::MyGame::CreateParticle()
 
 void Engine::MyGame::LoadModel()
 {
-	ModelManager* modelManager = dxCommon->GetModelManager();
+	ModelManager* modelManager = dxCommon_->GetModelManager();
 
 	
 	/// <summary>
@@ -371,6 +380,7 @@ void Engine::MyGame::LoadModel()
 
 	modelManager->LoadModel("TrackCarBody.obj", "Vehicle/track");
 	modelManager->LoadModel("TrackCarTire.obj", "Vehicle/track");
+	modelManager->LoadModel("scrapBox.obj", "Vehicle/track");
 
 
 	/// <summary>
@@ -398,6 +408,7 @@ void Engine::MyGame::LoadModel()
 
 
 	modelManager->LoadModel("Stone.obj", "stage/Title/Stone"); // フィールド()
+	modelManager->LoadModel("MoneyExchangePlace.obj", "stage/MoneyExchangePlace"); // フィールド(換金所)
 
 
 	/// <summary>
@@ -413,6 +424,15 @@ void Engine::MyGame::LoadModel()
 	modelManager->LoadModel("testCharacter.gltf", "Character/Player");	// プレイヤー
 
 	modelManager->LoadModel("point.obj", "special");			// ポイント
+
+	/// <summary>
+	/// スプラップ
+	/// </summary>
+	modelManager->LoadModel("basis.obj", "Scrap/Basis"); // スクラップ（基盤）
+	modelManager->LoadModel("gear.obj", "Scrap/Gear"); // スクラップ（歯車）
+	modelManager->LoadModel("ironRod.obj", "Scrap/IronRod"); // スクラップ（鉄の棒）
+	modelManager->LoadModel("screw.obj", "Scrap/Screw"); // スクラップ（ねじ）
+	modelManager->LoadModel("tire.obj", "Scrap/Tire"); // スクラップ（タイヤ）
 
 
 	/// <summary>

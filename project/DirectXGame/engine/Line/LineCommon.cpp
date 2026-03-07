@@ -8,11 +8,11 @@
 
 void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;	// DX共通クラス
+	this->dxCommon = dxCommon;	// DX共通クラス
 
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(), dxCommon->GetDXCCompiler());
 	
 	// パイプライン生成
 	CreateGraphicsPipeline();
@@ -21,7 +21,7 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 
 
 	// マテリアル
-	materialResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Material));
+	materialResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Material));
 	// 書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
@@ -30,14 +30,14 @@ void Engine::LineCommon::Initialize(DirectXCommon* dxCommon)
 
 
 	// ビューリソース生成
-	viewResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(Matrix4x4));
+	viewResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Matrix4x4));
 	viewResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraWVP));
 
 	*cameraWVP = MakeIdentity4x4();
 
 	// 初期化
-	lineMeshData_.Initialize(dxCommon_);
-	lineDebugMeshData_.Initialize(dxCommon_);
+	lineMeshData_.Initialize(dxCommon);
+	lineDebugMeshData_.Initialize(dxCommon);
 }
 
 void Engine::LineCommon::Update()
@@ -48,38 +48,38 @@ void Engine::LineCommon::Update()
 #endif // _DEBUG
 
 
-	if (camera_ && cameraWVP) {
-		*cameraWVP = camera_->viewProjectionMatrix_;  // データをコピー
+	if (camera && cameraWVP) {
+		*cameraWVP = camera->viewProjectionMatrix_;  // データをコピー
 	}
 }
 
 void Engine::LineCommon::DrawCommonSetting()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
+	dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
 void Engine::LineCommon::DrawCommonSetting2()
 {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature2.Get());
+	dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature2.Get());
 
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState2.Get()); //PSOを設定
+	dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState2.Get()); //PSOを設定
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
 void Engine::LineCommon::Draw()
 {
 	DrawCommonSetting();
 
-	auto commandList = dxCommon_->GetCommandList();
+	auto commandList = dxCommon->GetCommandList();
 
 #ifdef _DEBUG
 	// SRV (インスタンシングデータ) をルートパラメータ [0] に設定

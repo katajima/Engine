@@ -32,8 +32,8 @@ namespace Engine {
 		void CreateFence();
 
 	private:
-		DXGIDevice* dxgi_ = nullptr;
-		Command* command_ = nullptr;
+		DXGIDevice* dxgi = nullptr;
+		Command* command = nullptr;
 
 		// フェンス
 		ComPtr<ID3D12Fence> fence_ = nullptr;

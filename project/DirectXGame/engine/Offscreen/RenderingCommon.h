@@ -20,13 +20,13 @@ namespace Engine {
 		// 描画
 		void DrawRender(PostEffectType type, int index, int indexB = 0);
 		// DirectX共通クラス取得
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 		// カメラ設定
-		void SetCamera(Camera* camera) { camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 
 	private:
-		DirectXCommon* dxCommon_;
-		Camera* camera_;
+		DirectXCommon* dxCommon = nullptr;
+		Camera* camera = nullptr;
 
 		PostEffectType type_ = PostEffectType::kCopy;
 

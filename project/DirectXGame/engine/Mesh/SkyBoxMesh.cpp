@@ -5,11 +5,11 @@
 void Engine::SkyBoxMesh::Initialize(DirectXCommon* dxcommon)
 {
 	// DX共通クラス
-	dxCommon_ = dxcommon;	
+	this->dxCommon = dxcommon;	
 	// 頂点リソース生成
-	vbvResorce_.CreateBufferView(dxCommon_, verticesskyBox, verticesskyBox.size());
+	vbvResorce_.CreateBufferView(dxCommon, verticesskyBox, verticesskyBox.size());
 	// インデックスリソース生成
-	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
+	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
 
 }
 

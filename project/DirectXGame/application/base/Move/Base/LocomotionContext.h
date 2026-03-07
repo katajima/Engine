@@ -62,6 +62,8 @@ struct MoveCommand {
     Vector3 finalVelocity;
     // 最終的な方向
     Vector3 finalDirection;
+	// final回転
+	Vector3 finalRotation;
 };
 
 enum class MoveLayer : uint8_t { 
@@ -80,6 +82,8 @@ struct MoveRequest {
     float speedMultiplier = 1.0f;
     // Additive/Override
     Vector3 velocity{};
-    int priority = 0;     // Override競合用
+	Vector3 direction{};
+	Vector3 rotation{};
+    int priority = 999;     // Override競合用
     bool invincible = false;
 };

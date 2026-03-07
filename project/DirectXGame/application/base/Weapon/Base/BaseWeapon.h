@@ -5,9 +5,13 @@
 
 
 // 前方宣言
+class Effect;
 class BulletManager;
 namespace Character {
 	class BaseCharacter;
+}
+namespace Engine {
+	class EntityManager;
 }
 
 // 武器のベースクラス
@@ -15,7 +19,7 @@ class BaseWeapon : public IHitReceiver
 {
 public:
 	// 初期化
-	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	// 更新
 	virtual void Update() = 0;
@@ -53,14 +57,13 @@ public:
 protected:
 	WeaponData data_;	// 武器データ
 protected:
-	Character::BaseCharacter* character;		// 使っているキャラクター
+	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
 	BulletManager* bulletManager = nullptr;	// 弾管理クラス
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
 	std::unique_ptr<HitBox::HitBoxInstance> hitBox_;
 protected:
-	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
-	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	Engine::Camera* camera = nullptr;						// カメラ
 	InputSystem* inputSystem = nullptr;					// 入力(使わないならnullptr)
@@ -72,7 +75,7 @@ class MeleeWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
-	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	/// 更新
 	virtual void Update() = 0;
@@ -94,7 +97,7 @@ class RangedWeapon : public BaseWeapon
 {
 public:
 	/// 初期化
-	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 	/// 更新
 	virtual void Update() = 0;

@@ -1,14 +1,13 @@
 #include "SmallRangeEnemy.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void SmallRangeEnemy::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
+	void SmallRangeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(inputSystem, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy",1.5f);
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy",1.5f);
 		
 		
 		
@@ -18,7 +17,7 @@ namespace Character {
 		objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 
 		objectComponentPropeller_ = std::make_unique<ObjectComponent>();
-		objectComponentPropeller_->InitializeInstancing(entity3DManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
+		objectComponentPropeller_->InitializeInstancing(entityManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
 		objectComponentPropeller_->SetInstancingSRT({ 1,1,1 }, {}, {});
 		objectComponentPropeller_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
@@ -27,14 +26,14 @@ namespace Character {
 		objectComponentPropeller_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 
 		bulletSpawn_ = std::make_unique<BulletSpawn>();
-		bulletSpawn_->Initialize(this, entity3DManager, entity2DManager, globalVariables, nullptr, effect);
+		bulletSpawn_->Initialize(this, entityManager,globalVariables, nullptr, effect);
 
 
 		// 武器
 		weapon_ = std::make_unique<SmallRangeWeapon>();
 		weapon_->SetCharacter(this);
 		weapon_->SetBulletManager(bulletManager);
-		weapon_->Initialize(inputSystem, entity3DManager, nullptr, globalVariables, {}, nullptr);
+		weapon_->Initialize(inputSystem, entityManager, globalVariables, {}, nullptr);
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 

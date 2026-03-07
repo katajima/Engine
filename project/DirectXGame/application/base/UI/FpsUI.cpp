@@ -1,7 +1,7 @@
 #include "FpsUI.h"
 
-void FpsUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables){
-	this->entity2DManager = entity2DManager;	// エンティティ2d
+void FpsUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables){
+	this->entityManager = entityManager;	// エンティティ
 	this->globalVariables = globalVariables;	// 保存項目
 	this->inputSystem = inputSystem;			// インプット
 
@@ -10,7 +10,7 @@ void FpsUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity
 	// カウントUI
 	InitUICount("fps", {}, 2);
 	Engine::UICount* fpsCount = GetUICount("fps");
-	fpsCount->Init(entity2DManager, "fps");	// 初期化
+	fpsCount->Init(entityManager, "fps");	// 初期化
 	fpsCount->SetInput(inputSystem);					// 入力設定
 	fpsCount->SetPos({ 32,48 });				// 位置設定
 	fpsCount->SetMaxSize({ 64 * 2 / 3, 96 * 2 / 3 }, { 20.0f,0.0f });	// 最大値サイズ設定

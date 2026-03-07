@@ -6,11 +6,11 @@
 void Engine::Material::Initialize(DirectXCommon* dxcommon)
 {
 	// DX共通クラス
-	dxCommon_ = dxcommon;
+	this->dxCommon = dxcommon;
 
 	// リソース生成
 	cbResource_ = std::make_unique<ConstantBuffer<Material::DataGPU>>();
-	cbResource_->CreateBuffer(dxCommon_);
+	cbResource_->CreateBuffer(dxCommon);
 
 	// SRTと色設定
 	GetMaterialInstance().transform.scale = { 1.0f,1.0f,1.0f };
@@ -36,23 +36,26 @@ void Engine::Material::GetCommandListMaterial(int index)
 
 void Engine::Material::GetCommandListTexture(int indexDiffuse, int normalIndex, int speculerIndex, int environmentIndex)
 {
+	TextureManager* tex = dxCommon->GetTextureManager();
+	auto command = dxCommon->GetCommandList();
+
 	// テクスチャのバインド
-	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(indexDiffuse, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.diffuseFilePath));
+	command->SetGraphicsRootDescriptorTable(indexDiffuse, tex->GetSrvHandleGPU(tex_.diffuseFilePath));
 	
 	// ノーマルマップ
 	if (GetMaterialInstance().useNormalMap_) {
 
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(normalIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.normalFilePath));
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(9, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.normalFilePath));
+		command->SetGraphicsRootDescriptorTable(normalIndex, tex->GetSrvHandleGPU(tex_.normalFilePath));
+		command->SetGraphicsRootDescriptorTable(9, tex->GetSrvHandleGPU(tex_.normalFilePath));
 	}
 	// スペキュラーマップ
 	if (GetMaterialInstance().useSpeculerMap_) {
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(speculerIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.speculerFilePath));
+		command->SetGraphicsRootDescriptorTable(speculerIndex, tex->GetSrvHandleGPU(tex_.speculerFilePath));
 	}
 
 	// 環境マップ
 	if (GetMaterialInstance().useEnvironment_) {
-		dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(environmentIndex, dxCommon_->GetTextureManager()->GetSrvHandleGPU(tex_.environmentFilePath));
+		command->SetGraphicsRootDescriptorTable(environmentIndex, tex->GetSrvHandleGPU(tex_.environmentFilePath));
 	}
 }
 
@@ -82,11 +85,12 @@ void Engine::Material::GPUData()
 
 void Engine::Material::LoadTex()
 {
+	TextureManager* tex = dxCommon->GetTextureManager();
 
 	// .objの参照しているテクスチャファイル読み込み
-	dxCommon_->GetTextureManager()->LoadTexture(tex_.diffuseFilePath);
+	tex->LoadTexture(tex_.diffuseFilePath);
 	// 読み込んだテクスチャの番号を取得
-	tex_.diffuseIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.diffuseFilePath);
+	tex_.diffuseIndex = tex->GetTextureIndexByFilePath(tex_.diffuseFilePath);
 
 	if (tex_.normalFilePath == "") {
 		GetMaterialInstance().useNormalMap_ = false;
@@ -97,9 +101,9 @@ void Engine::Material::LoadTex()
 
 	// ノーマルマップ
 	if (GetMaterialInstance().useNormalMap_) {
-		dxCommon_->GetTextureManager()->LoadTexture(tex_.normalFilePath);
+		tex->LoadTexture(tex_.normalFilePath);
 
-		tex_.normalIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.normalFilePath);
+		tex_.normalIndex = tex->GetTextureIndexByFilePath(tex_.normalFilePath);
 	}
 
 	
@@ -113,9 +117,9 @@ void Engine::Material::LoadTex()
 	// スペキュラーマップ
 	if (GetMaterialInstance().useSpeculerMap_) {
 
-		dxCommon_->GetTextureManager()->LoadTexture(tex_.speculerFilePath);
+		tex->LoadTexture(tex_.speculerFilePath);
 
-		tex_.speculerIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.speculerFilePath);
+		tex_.speculerIndex = tex->GetTextureIndexByFilePath(tex_.speculerFilePath);
 	}
 
 	if (tex_.environmentFilePath == "") {
@@ -124,13 +128,10 @@ void Engine::Material::LoadTex()
 	else {
 		GetMaterialInstance().useEnvironment_ = true;
 
-		dxCommon_->GetTextureManager()->LoadTexture(tex_.environmentFilePath);
+		tex->LoadTexture(tex_.environmentFilePath);
 
-		tex_.environmentIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(tex_.environmentFilePath);
+		tex_.environmentIndex = tex->GetTextureIndexByFilePath(tex_.environmentFilePath);
 	}
-
-
-
 }
 
 void Engine::Material::SetGPUMaterialInstance(const MaterialInstance& materialInstance, ConstantBuffer < Material::DataGPU>* cbResourcePtr)

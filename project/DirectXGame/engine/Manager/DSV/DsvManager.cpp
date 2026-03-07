@@ -10,12 +10,12 @@ const uint32_t Engine::DsvManager::kMaxDsvCount = 1;
 
 void Engine::DsvManager::Initialize(DXGIDevice* dxgi, Command* command)
 {
-	DXGIDevice_ = dxgi;	// デバイス
-	command_ = command;	// コマンド
+	this->dxgiDevice = dxgi;	// デバイス
+	this->command = command;	// コマンド
 	// ディスクリプタヒープの作成
-	descriptorHeap_ = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, kMaxDsvCount, false);
+	descriptorHeap_ = dxgiDevice->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, kMaxDsvCount, false);
 	// デスクリプタ一個分のサイズを取得して記録
-	descriptorSize_ = DXGIDevice_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	descriptorSize_ = dxgiDevice->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 }
 
 uint32_t Engine::DsvManager::Allocate()
@@ -54,7 +54,7 @@ void Engine::DsvManager::CreateDSV(uint32_t dsvIndex, ID3D12Resource* pResource,
 
 
 	// dsv作成
-	DXGIDevice_->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, GetCPUDescriptorHandle(dsvIndex));
+	dxgiDevice->GetDevice()->CreateDepthStencilView(pResource, &dsvDesc, GetCPUDescriptorHandle(dsvIndex));
 }
 
 ID3D12DescriptorHeap* Engine::DsvManager::GetDescriptorHeap() const

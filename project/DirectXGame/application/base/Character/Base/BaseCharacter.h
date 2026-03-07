@@ -21,7 +21,7 @@ namespace Character {
 		///< summary>
 		/// 初期化
 		///</summary>
-		virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 		///< summary>
@@ -246,8 +246,7 @@ namespace Character {
 		CameraManager* cameraManager = nullptr;			// カメラ管理クラス
 		SpecalPointManager* specalPointManager = nullptr;	// 必殺技ポイント管理クラス
 	protected: // 貰ってくるもの(エンジン層)
-		Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
-		Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+		Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
 		Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 		Engine::Camera* camera = nullptr;						// カメラ
 		Engine::Audio* audio = nullptr;

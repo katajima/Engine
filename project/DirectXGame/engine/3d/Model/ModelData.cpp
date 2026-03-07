@@ -84,7 +84,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 
 				vert[element] = pMesh->vertices[vertexIndex].position.xyz();
 			}
-			pMesh->triangle.push_back({ {vert[0]},{vert[1]},{vert[2]} });
+			pMesh->triangle.push_back(Triangle{ vert[0],vert[1],vert[2] });
 
 		}
 

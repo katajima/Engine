@@ -5,10 +5,10 @@
 void Engine::Transfomation::Initialize(DirectXCommon* dxCommon)
 {
 	// ダイレクトX共通クラス
-	dxCommon_ = dxCommon;
+	this->dxCommon = dxCommon;
 
 	// リソース生成
-	cbResource_.CreateBuffer(dxCommon_);
+	cbResource_.CreateBuffer(dxCommon);
 
 	//単位行列を書き込んでおく
 	cbResource_.Data()->WVP = MakeIdentity4x4();

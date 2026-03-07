@@ -70,7 +70,7 @@ namespace Engine {
 	private:
 		std::vector<std::shared_ptr<Lights>> m_lights;
 
-		DirectXCommon* dxCommon_ = nullptr;
+		DirectXCommon* dxCommon = nullptr;
 
 		const uint32_t kNumMaxInstance = 10;
 

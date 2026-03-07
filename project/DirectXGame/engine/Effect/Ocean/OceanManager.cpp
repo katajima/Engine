@@ -11,24 +11,22 @@
 
 void Engine::OceanManager::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;	// DX共通クラス
+	this->dxCommon = dxCommon;	// DX共通クラス
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(), dxCommon->GetDXCCompiler());
 	
 	// パイプライン生成
 	CreateGraphicsPipeline();
 }
 
-void Engine::OceanManager::DrawCommonSetting()
-{
+void Engine::OceanManager::DrawCommonSetting() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
+	dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get()); //PSOを設定
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
-	
+	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);	
 }
 
 void Engine::OceanManager::CreateRootSignature()
@@ -90,8 +88,7 @@ void Engine::OceanManager::CreateRootSignature()
 
 }
 
-void Engine::OceanManager::CreateGraphicsPipeline()
-{
+void Engine::OceanManager::CreateGraphicsPipeline() {
 	CreateRootSignature();
 
 #pragma region BlendState

@@ -1,14 +1,13 @@
 #include "SmallMeleeEnemy.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void SmallMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void SmallMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
-		BaseInitialize(inputSystem, entity3DManager, entity2DManager, globalVariables, position, camera, "enemyBodySG01.obj", "smallMeleeEnemy");
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySG01.obj", "smallMeleeEnemy");
 		
 		
 		
@@ -26,7 +25,7 @@ namespace Character {
 		// 武器
 		weapon_ = std::make_unique<SmallMeleeWeapon>();
 		weapon_->SetCharacter(this);
-		weapon_->Initialize(inputSystem, entity3DManager, nullptr, globalVariables, {}, nullptr);
+		weapon_->Initialize(inputSystem, entityManager, globalVariables, {}, nullptr);
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,0.0f,1.0f };
 

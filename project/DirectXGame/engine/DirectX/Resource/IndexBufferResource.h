@@ -18,7 +18,7 @@ namespace Engine {
 		// 生成
 		void CreateBufferView(DirectXCommon* dxCommon, std::vector<Type> index, size_t num = 1)
 		{
-			dxCommon_ = dxCommon;	// DX共通クラス
+			this->dxCommon = dxCommon;	// DX共通クラス
 
 			// リソース生成
 			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);
@@ -49,7 +49,7 @@ namespace Engine {
 					D3D12_HEAP_PROPERTIES heapProps = {};
 					heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 					D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(requiredSize);
-					HRESULT hr = dxCommon_->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
+					HRESULT hr = dxCommon->GetDXGIDevice()->GetDevice()->CreateCommittedResource(
 						&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource_));
 
 					if (FAILED(hr)) {
@@ -73,7 +73,7 @@ namespace Engine {
 		// 頂点バッファの設定
 		void IASetIndexBuffer() {
 			// 頂点バッファの設定
-			dxCommon_->GetCommand()->GetList()->IASetIndexBuffer(&bufferView);
+			dxCommon->GetCommand()->GetList()->IASetIndexBuffer(&bufferView);
 		};
 
 
@@ -85,7 +85,7 @@ namespace Engine {
 		// バッファビュー取得
 		D3D12_INDEX_BUFFER_VIEW GetIndexxBufferView() { return bufferView; }
 	private:
-		DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
 		Type* data_;

@@ -51,12 +51,18 @@ namespace Engine {
 		float GetMaterialAlpha();
 
 	public:
+		
+	private:
+		// モデル共通クラス
+		ModelCommon* modelCommon = nullptr;
+		// SRV管理クラス
+		SrvManager* srvManager = nullptr;
+		// DirectX共通クラス
+		DirectXCommon* dxCommon = nullptr;
+	private:
 		// モデルのデータ
 		ModelData modelData;
-	private:
-		ModelCommon* modelCommon_ = nullptr;
-		SrvManager* srvManager_ = nullptr;
-		DirectXCommon* dxCommon_;
+		// 時間計測用
 		DebugTimer timer_;
 	public:
 		// 読み込んだモデルからモデルデータ生成

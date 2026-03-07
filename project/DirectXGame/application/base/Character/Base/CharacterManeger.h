@@ -23,8 +23,7 @@ class CameraManager;
 class SpecalPointManager;
 
 namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 }
 
 namespace Character {
@@ -35,7 +34,7 @@ namespace Character {
 	{
 	public:
 		// 初期化
-		void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 		// 更新
@@ -120,9 +119,8 @@ namespace Character {
 		Engine::Camera* camera;
 		// 入力システム
 		InputSystem* inputSystem = nullptr;
-		Engine::Entity3DManager* entity3DManager = nullptr;
-		Engine::Entity2DManager* entity2DManager = nullptr;
-		Engine::GlobalVariables* globalVariables;			// グローバル変数
+		Engine::EntityManager* entityManager = nullptr;
+		Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 		FollowCamera* followCamera = nullptr;		// フォローカメラ 
 		BulletManager* bulletManager = nullptr;	// 弾をマネジャー
 		CameraManager* cameraManager = nullptr;	// カメラ管理

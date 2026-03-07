@@ -4,7 +4,7 @@
 
 
 namespace Engine {
-	class Entity3DManager; // 前方宣言
+	class EntityManager; // 前方宣言
 }
 namespace Character {
 	class BaseCharacter;
@@ -18,7 +18,7 @@ namespace HitBox {
 	class HitBoxInstance : public IHitReceiver {
 	public:
 		// 初期化
-		void Initialize(Engine::Entity3DManager* entity3dManager, Character::BaseCharacter* character, UseType type);
+		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type);
 
 		// 更新
 		void Update(float dt);
@@ -69,7 +69,7 @@ namespace HitBox {
 		// コライダー数
 		int colliderCount = 0;
 		Character::BaseCharacter* character = nullptr;
-		Engine::Entity3DManager* entity3dManager = nullptr;
+		Engine::EntityManager* entityManager = nullptr;
 	};
 
 

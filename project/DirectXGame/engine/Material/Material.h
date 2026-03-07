@@ -85,7 +85,7 @@ namespace Engine {
 
 	private:
 		
-		DirectXCommon* dxCommon_ = nullptr;
+		DirectXCommon* dxCommon = nullptr;
 		std::unique_ptr<ConstantBuffer<Material::DataGPU>> cbResource_;
 		// テクスチャ数
 		uint32_t texDiffuseNum = 0;

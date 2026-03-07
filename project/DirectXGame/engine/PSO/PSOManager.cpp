@@ -6,9 +6,9 @@
 
 void Engine::PSOManager::Initialize(Command* command, DXGIDevice* DXGIDevice, DXCCompiler* dxcCompiler)
 {
-	command_ = command;
-	DXGIDevice_ = DXGIDevice;
-	dxcCompiler_ = dxcCompiler;
+	this->command = command;
+	this->dxgiDevice = DXGIDevice;
+	this->dxcCompiler = dxcCompiler;
 	useInputLayout_ = true;
 }
 
@@ -19,35 +19,35 @@ void Engine::PSOManager::SetShederGraphics(D3D12_GRAPHICS_PIPELINE_STATE_DESC& g
 
 	if (shderFile_.vertex.filePach != L"") {
 		// Shaderをコンパイルする
-		shaderBlob.VS = dxcCompiler_->CompileShader(shderFile_.vertex.filePach,
+		shaderBlob.VS = dxcCompiler->CompileShader(shderFile_.vertex.filePach,
 			L"vs_6_0");
 		assert(shaderBlob.VS != nullptr);
 		graphicsPipeline.VS = { shaderBlob.VS->GetBufferPointer(),
 		shaderBlob.VS->GetBufferSize() }; // VertexShader
 	}
 	if (shderFile_.pixel.filePach != L"") {
-		shaderBlob.PS = dxcCompiler_->CompileShader(shderFile_.pixel.filePach,
+		shaderBlob.PS = dxcCompiler->CompileShader(shderFile_.pixel.filePach,
 			L"ps_6_0");
 		assert(shaderBlob.PS != nullptr);
 		graphicsPipeline.PS = { shaderBlob.PS->GetBufferPointer(),
 		shaderBlob.PS->GetBufferSize() }; // PixelShader
 	}
 	if (shderFile_.domain.filePach != L"") {
-		shaderBlob.DS = dxcCompiler_->CompileShader(shderFile_.domain.filePach,
+		shaderBlob.DS = dxcCompiler->CompileShader(shderFile_.domain.filePach,
 			L"ds_6_0");
 		assert(shaderBlob.DS != nullptr);
 		graphicsPipeline.DS = { shaderBlob.DS->GetBufferPointer(),
 		shaderBlob.DS->GetBufferSize() }; // DomainShader
 	}
 	if (shderFile_.hull.filePach != L"") {
-		shaderBlob.HS = dxcCompiler_->CompileShader(shderFile_.hull.filePach,
+		shaderBlob.HS = dxcCompiler->CompileShader(shderFile_.hull.filePach,
 			L"hs_6_0");
 		assert(shaderBlob.HS != nullptr);
 		graphicsPipeline.HS = { shaderBlob.HS->GetBufferPointer(),
 		shaderBlob.HS->GetBufferSize() }; // HullShader
 	}
 	if (shderFile_.geometry.filePach != L"") {
-		shaderBlob.GS = dxcCompiler_->CompileShader(shderFile_.geometry.filePach,
+		shaderBlob.GS = dxcCompiler->CompileShader(shderFile_.geometry.filePach,
 			L"gs_6_0");
 		assert(shaderBlob.GS != nullptr);
 		graphicsPipeline.GS = { shaderBlob.GS->GetBufferPointer(),
@@ -78,7 +78,7 @@ void Engine::PSOManager::SetRootSignature(
 	descriptionSignature.pStaticSamplers = samplerDesc;
 	descriptionSignature.NumStaticSamplers = numSamplers;
 
-	PSOFanction::Blob(DXGIDevice_,descriptionSignature, rootSignature);
+	PSOFanction::Blob(dxgiDevice,descriptionSignature, rootSignature);
 }
 
 void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature, Microsoft::WRL::ComPtr<ID3D12PipelineState>& graphicsPipelineState, D3D12_BLEND_DESC blendDesc, D3D12_DEPTH_STENCIL_DESC depthStencilDesc, D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyType)
@@ -137,7 +137,7 @@ void Engine::PSOManager::GraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Root
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	
-	hr = DXGIDevice_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
+	hr = dxgiDevice->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
 		IID_PPV_ARGS(&graphicsPipelineState));
 
 	
@@ -213,11 +213,11 @@ void Engine::PSOManager::DrawSetting(PSOType type,D3D12_PRIMITIVE_TOPOLOGY topol
 
 	// 読み込み済みモデルを検索
 	if (psoRoots_.contains(type)) {
-		command_->GetList()->SetPipelineState(psoRoots_[type].graphicsPipelineState.Get());
+		command->GetList()->SetPipelineState(psoRoots_[type].graphicsPipelineState.Get());
 		// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		command_->GetList()->SetGraphicsRootSignature(psoRoots_[type].rootSignature.Get());
+		command->GetList()->SetGraphicsRootSignature(psoRoots_[type].rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-		command_->GetList()->IASetPrimitiveTopology(topology);
+		command->GetList()->IASetPrimitiveTopology(topology);
 	}
 }
 

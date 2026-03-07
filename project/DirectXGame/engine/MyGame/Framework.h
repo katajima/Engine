@@ -3,8 +3,7 @@
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include"DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/3d/Model/ModelCommon.h"
 #include "DirectXGame/engine/Offscreen/RenderingCommon.h"
 
@@ -47,28 +46,26 @@ namespace Engine {
 		bool endRequst_ = false;
 		// ウィンアップ
 
-		std::unique_ptr <WinApp> winApp;
+		std::unique_ptr <WinApp> winApp_ = nullptr;
 
 		//
 		std::unique_ptr<Input> input_ = nullptr;
 
 		// ダイレクトX
-		std::unique_ptr <DirectXCommon> dxCommon = nullptr;
+		std::unique_ptr <DirectXCommon> dxCommon_ = nullptr;
 
-		// 3D全般
-		std::unique_ptr<Entity3DManager> entity3DManager_;
+		// エンティティ全般
+		std::unique_ptr<EntityManager> entityManager_ = nullptr;
 
-		// 2D全般
-		std::unique_ptr<Entity2DManager> entity2DManager_;
-
+		
 		// シーンマネージャー
-		std::unique_ptr<SceneManager> sceneManager_;
+		std::unique_ptr<SceneManager> sceneManager_ = nullptr;
 
 		// シーンファクトリー
-		std::unique_ptr<AbstractSceneFactory> sceneFactory_;
+		std::unique_ptr<AbstractSceneFactory> sceneFactory_ = nullptr;
 
 		// グローバル
-		std::unique_ptr<GlobalVariables> globalVariables_;
+		std::unique_ptr<GlobalVariables> globalVariables_ = nullptr;
 
 	};
 }

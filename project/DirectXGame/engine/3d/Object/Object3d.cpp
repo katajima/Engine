@@ -9,7 +9,7 @@
 
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
 
 
@@ -17,26 +17,26 @@
 
 #pragma region Init
 
-void Engine::Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
+void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType)
 {
-	entity3DManager_ = entity3DManager;														// エンティティ3d
-	object3dCommon_ = entity3DManager_->GetObject3dCommon();								// オブジェクト共通クラス
-	skinningConmmon_ = entity3DManager_->GetSkinningConmmon();								// スキニング共通クラス
-	imGuiManager_ = entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();// ImGui管理クラス
-	skyBoxCommon_ = entity3DManager_->GetSkyBoxCommon();									// スカイボックス共通クラス
-	oceanManager_ = entity3DManager_->GetOceanManager();									// 波管理クラス
-	lineCommon_ = entity3DManager_->Get3DLineCommon();										// ライン共通クラス
+	this->entityManager = entityManager;														// エンティティ3d
+	this->object3dCommon = entityManager->GetObject3dCommon();								// オブジェクト共通クラス
+	this->skinningConmmon = entityManager->GetSkinningConmmon();								// スキニング共通クラス
+	this->imGuiManager = entityManager->GetObject3dCommon()->GetDxCommon()->GetImGuiManager();// ImGui管理クラス
+	this->skyBoxCommon = entityManager->GetSkyBoxCommon();									// スカイボックス共通クラス
+	this->oceanManager = entityManager->GetOceanManager();									// 波管理クラス
+	this->lineCommon = entityManager->Get3DLineCommon();										// ライン共通クラス
 
 	// 位置コンポーネント初期化
 	transformComponent_ = std::make_unique<TransformComponent>();
 	transformComponent_->Init();
 
 
-	name = "object" + std::to_string(object3dCommon_->count);
+	name = "object" + std::to_string(object3dCommon->GetObjectCount());
 
 	// 位置初期化
 	transformation = std::make_unique<Transfomation>();
-	transformation->Initialize(object3dCommon_->GetDxCommon());
+	transformation->Initialize(object3dCommon->GetDxCommon());
 
 
 	// 方向用トランスフォーム初期化
@@ -44,21 +44,21 @@ void Engine::Object3d::Initialize(Entity3DManager* entity3DManager, ObjectModelT
 	direWorldTransform_.translate_.z = 1.0f;
 	direWorldTransform_.parent_ = &transformComponent_->GetWorldTransform();
 
-	defaltCamera = entity3DManager_->GetObject3dCommon()->GetDefaltCamera();
+	defaltCamera = entityManager->GetObject3dCommon()->GetDefaltCamera();
 
 
 
 
 	// レンダーコンポーネント初期化
 	renderComponent_ = std::make_unique<RenderComponent>();
-	renderComponent_->Init(entity3DManager_, objectType, rasterizerType);
+	renderComponent_->Init(entityManager, objectType, rasterizerType);
 	renderComponent_->SetTransfomation(transformation.get());
 
 
 	isColliderComponenyUpdate_ = true;
 
 	// オブジェクト数
-	object3dCommon_->count++;
+	object3dCommon->AddObjectCount();
 }
 
 void Engine::Object3d::InitColliderComponent()
@@ -67,7 +67,7 @@ void Engine::Object3d::InitColliderComponent()
 	colliderComponent_ = std::make_unique<ColliderComponent>();
 	colliderComponent_->SetOwner(colliderComponent_.get());
 	// ラインコモンをセット
-	colliderComponent_->SetLineCommon(entity3DManager_->Get3DLineCommon());
+	colliderComponent_->SetLineCommon(entityManager->Get3DLineCommon());
 	// 登録（IDを取得したければ変数で受ける）
 	colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
 	isColliderComponenyUpdate_ = true;
@@ -76,7 +76,7 @@ void Engine::Object3d::InitColliderComponent()
 void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Color color, Vector3 offsetStr, Vector3 offsetEnd)
 {
 	trailEffect_ = std::make_unique<TrailEffect>();
-	trailEffect_->Initialize(entity3DManager_->GetEffectManager(), tex, maxTime, color);
+	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
 	trailEffect_->SetCamera(defaltCamera);
 	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
 }
@@ -95,7 +95,7 @@ void Engine::Object3d::Update()
 
 	Camera* cameraPtr;
 	if (isIndividualCamera_) {
-		cameraPtr = individualCamera_;
+		cameraPtr = individualCamera;
 	}
 	else {
 		cameraPtr = defaltCamera;
@@ -111,9 +111,9 @@ void Engine::Object3d::Update()
 	case ObjectModelType::kNormal:
 		// モデルが存在する場合
 		if (renderComponent_->GetModel()) {
-			localMatrix = renderComponent_->GetModel()->modelData.rootNode.localMatrix;
+			localMatrix = renderComponent_->GetModel()->GetModelData().rootNode.localMatrix;
 
-			for (auto& mesh : renderComponent_->GetModel()->modelData.mesh) {
+			for (auto& mesh : renderComponent_->GetModel()->GetModelData().mesh) {
 				mesh->material->GPUData();
 			}
 		}
@@ -213,7 +213,7 @@ void Engine::Object3d::DrawTrailEffect()
 
 void Engine::Object3d::DebugImguiSkin()
 {
-	DebugModel::ImguiSkin(renderComponent_->GetModel()->modelData);
+	DebugModel::ImguiSkin(renderComponent_->GetModel()->GetModelData());
 }
 
 #pragma endregion // 描画系
@@ -224,7 +224,7 @@ Vector2 Engine::Object3d::GetScreenPosition()
 {
 	if (transformComponent_.get()) {
 		if (isIndividualCamera_) {
-			return ScreenPosition(transformComponent_->GetWorldTransform(), individualCamera_);
+			return ScreenPosition(transformComponent_->GetWorldTransform(), individualCamera);
 		}
 		else {
 			return ScreenPosition(transformComponent_->GetWorldTransform(), defaltCamera);
@@ -237,7 +237,7 @@ Vector2 Engine::Object3d::GetScreenPosition()
 
 void Engine::Object3d::DebugImguiModel()
 {
-	DebugModel::ImguiModel(renderComponent_->GetModel()->modelData);
+	DebugModel::ImguiModel(renderComponent_->GetModel()->GetModelData());
 }
 
 void Engine::Object3d::SetModel(Model* model){
@@ -247,7 +247,7 @@ void Engine::Object3d::SetModel(Model* model){
 void Engine::Object3d::SetModel(const std::string& filePath)
 {
 	//モデルを検索してセット
-	Model* findModel = object3dCommon_->GetDxCommon()->GetModelManager()->FindModel(filePath);
+	Model* findModel = object3dCommon->GetDxCommon()->GetModelManager()->FindModel(filePath);
 	renderComponent_->SetModel(findModel);
 }
 

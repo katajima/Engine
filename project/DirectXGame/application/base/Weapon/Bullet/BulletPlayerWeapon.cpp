@@ -8,10 +8,9 @@
 ///< summary>
 /// 初期化
 ///</summary>
-void BulletPlayerWeapon::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+void BulletPlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
-	this->entity3DManager = entity3DManager;	// エンティティ3d
-	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->entityManager = entityManager;	// エンティティ3d
 	this->globalVariables = globalVariables;	// 保存項目
 
 
@@ -19,7 +18,7 @@ void BulletPlayerWeapon::Initialize(InputSystem* inputSystem, Engine::Entity3DMa
 
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->Initialize(entity3DManager, globalVariables, "PlayerWeapon", "bulletWeapon.obj", true, false, this);
+	objectComponent_->Initialize(entityManager, globalVariables, "PlayerWeapon", "bulletWeapon.obj", true, false, this);
 
 
 	// 銃の初期化

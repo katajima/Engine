@@ -26,8 +26,9 @@ namespace Engine {
 
 
 		std::string name_;
-		LineCommon* lineCommon_;
-		DirectXCommon* dxCommon_;
+	private:
+		LineCommon* lineCommon = nullptr;
+		DirectXCommon* dxCommon = nullptr;
 	};
 }
 

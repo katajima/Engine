@@ -42,8 +42,7 @@ struct ObjectStateFlags
 
 // 前方宣言
 namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class ObjectInstans;
 	class Camera;
 }
@@ -56,14 +55,14 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
 		const std::string& objectName, const std::string& modelName, bool useCollider, bool useRigidBody, 
 		IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType = Engine::ObjectModelType::kNormal,bool rigidUpdate = true);
 
 	/// <summary>
 	/// インスタンシング用初期化
 	/// </summary>
-	void InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
+	void InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
 		bool useRigidBody, IHitReceiver* iHitReceiver,
 		Engine::Object3dInstansManager::TransparencyType transparencyType);
@@ -145,6 +144,6 @@ private:
 	int instanceId_ = 0;
 
 protected: // 貰ってくるもの
-	Engine::Entity3DManager* entity3DManager_ = nullptr;	// 3Dエンティティマネージャー
-	Engine::GlobalVariables* globalVariables_ = nullptr;	// グローバル変数
+	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 };

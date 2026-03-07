@@ -33,8 +33,10 @@ namespace Engine {
 			bool Check(const Segment& segment, const Plane& plane);
 			//三角形と線の衝突判定
 			bool Check(const Triangle& triangle, const Segment& segment);
-			// Triangle と Capsule の衝突判定関数
+			// Triangle と Capsule の衝突判定
 			bool Check(const Triangle& triangle, const Capsule& capsule);
+			// 三角面と球の衝突判定
+			bool Check(const Triangle& triangle, const Sphere& sphere);
 			// Rayと球の衝突判定
 			bool Check(const Ray& ray, const Sphere& sphere);
 			// RayとAABBの衝突判定

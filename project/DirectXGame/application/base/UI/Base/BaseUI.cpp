@@ -1,10 +1,10 @@
 #include "BaseUI.h"
 
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 void BaseUI::InitSprite(Engine::Sprite* sprite, std::string texFile, Vector2 pos, Vector2 size)
 {
-	sprite->Initialize(entity2DManager->GetSpriteCommon(), texFile);	// 初期化
+	sprite->Initialize(entityManager->GetSpriteCommon(), texFile);	// 初期化
 	sprite->SetPosition(pos);											// 位置設定
 	sprite->SetSize(size);												// サイズ設定
 }
@@ -16,7 +16,7 @@ void BaseUI::InitUICheckBox(std::string name, Vector2 pos)
 		return;
 	}
 	std::unique_ptr<Engine::UICheckBox> sprite = std::make_unique<Engine::UICheckBox>();
-	sprite->Init(entity2DManager, name);	// 初期化
+	sprite->Init(entityManager, name);	// 初期化
 	sprite->SetInput(inputSystem);				// 入力設定
 	sprite->SetPos(pos);					// 位置設定
 	uiCheckBox_.insert(std::make_pair(name, std::move(sprite)));
@@ -29,7 +29,7 @@ void BaseUI::InitUISlider(std::string name, Vector2 pos)
 		return;
 	}
 	std::unique_ptr<Engine::UISlider> sprite = std::make_unique<Engine::UISlider>();
-	sprite->Init(entity2DManager, name);	// 初期化
+	sprite->Init(entityManager, name);	// 初期化
 	sprite->SetInput(inputSystem);				// 入力設定
 	sprite->SetPos(pos);					// 位置設定
 	uiSlider_.insert(std::make_pair(name, std::move(sprite)));
@@ -43,7 +43,7 @@ void BaseUI::InitUIMeter(std::string name, Vector2 pos, bool useSprite)
 	}
 	std::unique_ptr<Engine::UIMeter> sprite = std::make_unique<Engine::UIMeter>();
 	sprite->SetUseNameSprite(useSprite);	// 名前スプライトを追加するか
-	sprite->Init(entity2DManager, name);	// 初期化
+	sprite->Init(entityManager, name);	// 初期化
 	sprite->SetInput(inputSystem);				// 入力設定
 	sprite->SetPos(pos);					// 位置設定
 	uiMeter_.insert(std::make_pair(name, std::move(sprite)));
@@ -56,7 +56,7 @@ void BaseUI::InitUIPair(std::string name, Vector2 pos)
 		return;
 	}
 	std::unique_ptr<Engine::UIPair> sprite = std::make_unique<Engine::UIPair>();
-	sprite->Init(entity2DManager, name);// 初期化
+	sprite->Init(entityManager, name);// 初期化
 	sprite->SetInput(inputSystem);			 // 入力設定
 	sprite->SetPos(pos);				 // 位置設定
 	uiPair_.insert(std::make_pair(name, std::move(sprite)));
@@ -71,7 +71,7 @@ void BaseUI::InitUICount(std::string name, Vector2 pos, int instance, bool useSp
 	std::unique_ptr<Engine::UICount> sprite = std::make_unique<Engine::UICount>();
 	sprite->SetUseNameSprite(useSprite);	// 名前スプライトを使うか
 	sprite->SetInstance(instance);			// 桁数
-	sprite->Init(entity2DManager, name);	// 初期化
+	sprite->Init(entityManager, name);	// 初期化
 	sprite->SetInput(inputSystem);				// 入力設定
 	sprite->SetPos(pos);					// 位置設定
 	uiCount_.insert(std::make_pair(name, std::move(sprite)));

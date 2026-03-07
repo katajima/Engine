@@ -18,10 +18,6 @@ namespace Combo {
 		traget = lockOnSystem->SoftLockOn();
 		// 方向指定
 		MoveTypeDirectionProcess();
-
-		
-		// 回転
-		owner->GetMoveComponent()->GetMoveSystem()->AttackProcess(owner->GetWorldTransform(), direction_);
 		// 座標更新
 		owner->GetWorldTransform().Update();
 	}
@@ -29,7 +25,7 @@ namespace Combo {
 	// 更新
 	void ComboMove::Update(const InputSystem& inputSystem, float timer, float dt) {
 		// ゲームパッドの左スティックを動かしているか
-		bool isMoveStick = inputSystem.GetData().moveShick.Length() != 0;
+		bool isMoveStick = inputSystem.GetPlayerInputData().moveShick.Length() != 0;
 
 		// 強制的に移動
 		if (data_.isCompulsionMove_) {
@@ -39,7 +35,7 @@ namespace Combo {
 			// 動かしていたら
 			if (!isMove_ && isMoveStick) {
 				isMove_ = true;
-				stickDirection_ = inputSystem.GetData().moveShick;
+				stickDirection_ = inputSystem.GetPlayerInputData().moveShick;
 			}
 		}
 
@@ -87,11 +83,14 @@ namespace Combo {
 				break;
 			case MoveType::kLockAt: // カメラ方向
 				request.velocity = Multiply(direction_, dt) * data_.speed_;
+				
 				break;
 			default:
 				break;
 			}
 
+			request.priority = 0;
+			request.direction = direction_;
 			attackMoveSystem->SetRequest(request);
 		}
 	}

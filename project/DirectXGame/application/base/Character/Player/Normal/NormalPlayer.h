@@ -1,6 +1,5 @@
 #pragma once
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
-#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayerState.h"
 #include "DirectXGame/application/base/Weapon/playerWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "NormalPlayerState.h"
@@ -18,7 +17,7 @@ namespace Character {
 		///< summary>
 		/// 初期化
 		///</summary>
-		void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 		///< summary>

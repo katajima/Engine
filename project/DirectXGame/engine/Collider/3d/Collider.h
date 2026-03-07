@@ -75,6 +75,37 @@ namespace Engine {
 
 	};
 
+	// 三角形コライダークラス
+	class TriangleCollider : public Collider {
+	public:
+		Vector3 triangle01{};
+		Vector3 triangle02{};
+		Vector3 triangle03{};
+
+
+		// 更新
+		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;
+		// 判定
+		bool CheckHit(const Collider& other) const override;
+		// 押し出し
+		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
+		// コライダタイプ取得
+		ColliderType GetType() const override {
+			return ColliderType::Triangle;
+		}
+
+		// 三角面取得
+		Triangle GetWorldTriangle() const {
+			return Triangle{ triangle01 + centerWorld,triangle02 + centerWorld, triangle03 + centerWorld};
+		}
+
+		AABB GetAABB() const override {
+			// 基底は点AABB（派生でオーバーライド推奨）
+			return GetWorldTriangle().GetAABB();
+		}
+	private:
+	};
+
 	// AABBコライダークラス
 	class AABBCollider : public Collider
 	{

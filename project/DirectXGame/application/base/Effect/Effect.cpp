@@ -1,17 +1,16 @@
 #include "Effect.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
-void Effect::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables)
+void Effect::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
-	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->entityManager = entityManager;	// エンティティ3d
 	this->globalVariables = globalVariables;	// 保存項目追加
 
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(entity3DManager, globalVariables);
+	effectComponent_->Init(entityManager, globalVariables);
 
 	// パーティクル初期化
 	InitParticle();
@@ -19,6 +18,8 @@ void Effect::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Global
 	InitRangeBombingBullet();
 	// 通常弾初期化
 	InitBullet();
+	// スクラップ初期化
+	InitScrap();
 }
 
 
@@ -343,6 +344,92 @@ void Effect::InitBullet()
 
 }
 
+void Effect::InitScrap() {
+
+	effectComponent_->AddEmitter("scrapTire", "scrapTire", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* scrapTireEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapTire");
+
+	// タイヤエミッター
+	scrapTireEmit->GetFrequency() = 0.0f;
+	scrapTireEmit->SetCount(1, 0);
+	scrapTireEmit->SetPos(scrapPos_);
+	scrapTireEmit->SetRotate({}, scrapRotateRange_);
+	scrapTireEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
+	scrapTireEmit->SetLifeTime(scrapLifeTime_, 0.0f);
+	scrapTireEmit->SetIsAlpha(true);
+	scrapTireEmit->SetUsebillboard(false);
+	scrapTireEmit->SetSize(scrapSize_, {});
+	scrapTireEmit->SetColorMinMax(scrapColor_, scrapColor_);
+	scrapTireEmit->SetAlphaClipping(0.0f);
+	scrapTireEmit->SetRange(-scrapRange_, scrapRange_);
+
+	// ねじエミッター
+	effectComponent_->AddEmitter("scrapScrew", "scrapScrew", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* scrapScrewEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapScrew");
+	scrapScrewEmit->GetFrequency() = 0.0f;
+	scrapScrewEmit->SetCount(1, 0);
+	scrapScrewEmit->SetPos(scrapPos_);
+	scrapScrewEmit->SetRotate({}, scrapRotateRange_);
+	scrapScrewEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
+	scrapScrewEmit->SetLifeTime(scrapLifeTime_, 0.0f);
+	scrapScrewEmit->SetIsAlpha(true);
+	scrapScrewEmit->SetUsebillboard(false);
+	scrapScrewEmit->SetSize(scrapSize_, {});
+	scrapScrewEmit->SetColorMinMax(scrapColor_, scrapColor_);
+	scrapScrewEmit->SetAlphaClipping(0.0f);
+	scrapScrewEmit->SetRange(-scrapRange_, scrapRange_);
+
+	// 鉄の棒エミッター
+	effectComponent_->AddEmitter("scrapIronRod", "scrapIronRod", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* scrapIronRodEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapIronRod");
+	scrapIronRodEmit->GetFrequency() = 0.0f;
+	scrapIronRodEmit->SetCount(1, 0);
+	scrapIronRodEmit->SetPos(scrapPos_);
+	scrapIronRodEmit->SetRotate({}, scrapRotateRange_);
+	scrapIronRodEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
+	scrapIronRodEmit->SetLifeTime(scrapLifeTime_, 0.0f);
+	scrapIronRodEmit->SetIsAlpha(true);
+	scrapIronRodEmit->SetUsebillboard(false);
+	scrapIronRodEmit->SetSize(scrapSize_, {});
+	scrapIronRodEmit->SetColorMinMax(scrapColor_, scrapColor_);
+	scrapIronRodEmit->SetAlphaClipping(0.0f);
+	scrapIronRodEmit->SetRange(-scrapRange_, scrapRange_);
+
+	// 歯車エミッター
+	effectComponent_->AddEmitter("scrapGear", "scrapGear", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* scrapGearEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapGear");
+	scrapGearEmit->GetFrequency() = 0.0f;
+	scrapGearEmit->SetCount(1, 0);
+	scrapGearEmit->SetPos(scrapPos_);
+	scrapGearEmit->SetRotate({}, scrapRotateRange_);
+	scrapGearEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
+	scrapGearEmit->SetLifeTime(scrapLifeTime_, 0.0f);
+	scrapGearEmit->SetIsAlpha(true);
+	scrapGearEmit->SetUsebillboard(false);
+	scrapGearEmit->SetSize(scrapSize_, {});
+	scrapGearEmit->SetColorMinMax(scrapColor_, scrapColor_);
+	scrapGearEmit->SetAlphaClipping(0.0f);
+	scrapGearEmit->SetRange(-scrapRange_, scrapRange_);
+
+
+	effectComponent_->AddEmitter("scrapBasis", "scrapBasis", EmitterShapeType::AABB);
+	Engine::AABBParticleEmitter* scrapBasisEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapBasis");
+	// タイヤエミッター
+	scrapBasisEmit->GetFrequency() = 0.0f;
+	scrapBasisEmit->SetCount(1, 0);
+	scrapBasisEmit->SetPos(scrapPos_);
+	scrapBasisEmit->SetRotate({}, scrapRotateRange_);
+	scrapBasisEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
+	scrapBasisEmit->SetLifeTime(scrapLifeTime_, 0.0f);
+	scrapBasisEmit->SetIsAlpha(true);
+	scrapBasisEmit->SetUsebillboard(false);
+	scrapBasisEmit->SetSize(scrapSize_, {});
+	scrapBasisEmit->SetColorMinMax(scrapColor_, scrapColor_);
+	scrapBasisEmit->SetAlphaClipping(0.0f);
+	scrapBasisEmit->SetRange(-scrapRange_, scrapRange_);
+
+}
+
 void Effect::Update() {
 	// 更新
 	effectComponent_->Update();
@@ -363,7 +450,7 @@ void Effect::Emit(const std::string& name, const Vector3& pos)
 
 void Effect::Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range) {
 	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
-
+	assert(emit != nullptr);
 	// 出現
 	emit->SetPos(pos);		// 位置
 	emit->SetVelocity(dir, range);	// 速度

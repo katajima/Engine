@@ -1,17 +1,17 @@
 #include "LoadLevelData.h"
 #include "DirectXGame/engine/3d/Model/ModelManager.h"
-#include "DirectXGame/engine/manager/entity3d/Entity3DManager.h"
+#include "DirectXGame/engine/manager/entity/EntityManager.h"
 
 #include "LoadDataFanction.h"
 
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 
-void LoadLevelData::Initialize(Engine::Entity3DManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera,
+void LoadLevelData::Initialize(Engine::EntityManager* entityManager, Engine::ModelManager* modelManager, Engine::Camera* camera,
 	const std::string extensionName, const std::string fileName)
 {
-	entity3DManager_ = entity3DManager;	// エンティティ3d
-	modelManager_ = modelManager;		// モデル管理クラス
+	this->entityManager = entityManager;	// エンティティ
+	this->modelManager = modelManager;		// モデル管理クラス
 
 	kFileName = fileName;
 	kExtension = extensionName;
@@ -104,7 +104,7 @@ void LoadLevelData::Draw3D()
 
 void LoadLevelData::CreateObject3d(LevelData* levelData)
 {
-	const auto& models = modelManager_->GetModel();
+	const auto& models = modelManager->GetModel();
 
 
 	for (auto& objectData : levelData->objects) {
@@ -124,7 +124,7 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 		}
 
 		// モデルを指定して3Dオブジェクトを生成 
-		Engine::Object3d* newObject = entity3DManager_->CreateObject3D(objectData.fileName, Engine::ObjectModelType::kNormal,{},{});
+		Engine::Object3d* newObject = entityManager->CreateObject3D(objectData.fileName, Engine::ObjectModelType::kNormal,{},{});
 		//newObject->Initialize(entity3DManager_);
 		newObject->SetModel(model);
 		newObject->SetIsDraw(true);
@@ -138,8 +138,8 @@ void LoadLevelData::CreateObject3d(LevelData* levelData)
 			//sphere->layer = CollisionLayer::None;
 			aabb->collisionMask = 0xFFFFFFFF;
 			//aabb->radius = objectData.size.x;
-			aabb->aabb.min_ = -((objectData.size) / 2)* objectData.scale;
-			aabb->aabb.max_ = ((objectData.size) / 2)* objectData.scale;
+			aabb->aabb.min = -((objectData.size) / 2)* objectData.scale;
+			aabb->aabb.max = ((objectData.size) / 2)* objectData.scale;
 			aabb->isStatic = true;
 			newObject->GetColliderComponent()->AddCollider(std::move(aabb));
 		}
@@ -160,7 +160,7 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 
 	for (auto& cameraData : levelData->cameras) {
 		std::unique_ptr<BaseCamera> camera = std::make_unique<FixedCamera>();
-		camera->Initialize(nullptr, entity3DManager_, nullptr, {});
+		camera->Initialize(nullptr, entityManager, nullptr, {});
 		camera->GetUniqueCamera()->transform_.translate = cameraData.position;
 		camera->GetUniqueCamera()->transform_.rotate = DegreesToRadians(cameraData.rotation);
 		camera->GetUniqueCamera()->transform_.scale = cameraData.scale;
@@ -174,7 +174,7 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 	
 	// カメラマネージャーに追加
 	for (auto& camera : cameras_) {
-		cameraManager_->AddCamera({ camera.get() ,false}, camera->GetName());
+		cameraManager->AddCamera({ camera.get() ,false}, camera->GetName());
 	}
 
 }
@@ -203,7 +203,7 @@ void LoadLevelData::CreateLight(LevelData* levelData)
 	
 
 	for (auto& light : lights_) {
-		entity3DManager_->GetLightManager()->AddLight(light);
+		entityManager->GetLightManager()->AddLight(light);
 	}
 
 	
@@ -213,7 +213,7 @@ void LoadLevelData::CreateLight(LevelData* levelData)
 void LoadLevelData::ClearData()  
 {  
 	// "LevelObject" タグを持つオブジェクトを全削除  
-	entity3DManager_->EraseObject3DByTag("LevelObject");  
+	entityManager->EraseObject3DByTag("LevelObject");  
 	levelData_->objects.clear();  
 	levelData_->players.clear();  
 	levelData_->enemys.clear();  
@@ -228,13 +228,13 @@ void LoadLevelData::ClearData()
 	for (auto& light : lights_) {
 		light.reset();
 	}
-	entity3DManager_->GetLightManager()->ClearLights();
+	entityManager->GetLightManager()->ClearLights();
 	lights_.clear();
 
 
 	// カメラの削除処理を修正  
 	for (auto& camera : cameras_) {  
-		cameraManager_->DeleteCamera(camera->GetName());
+		cameraManager->DeleteCamera(camera->GetName());
 		camera.release();
 	}  
 	cameras_.clear();  

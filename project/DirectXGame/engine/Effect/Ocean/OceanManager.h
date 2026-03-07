@@ -36,7 +36,7 @@ namespace Engine {
 		void DrawCommonSetting();
 
 		// DirectX共通クラス取得
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 
 	private:
 		// ルートシグネチャの作成
@@ -50,11 +50,10 @@ namespace Engine {
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
 		// パイプラインステートオブジェクト
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState;
-
-		DirectXCommon* dxCommon_;
-
+		//
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
-
+	private:
+		DirectXCommon* dxCommon = nullptr;
 	};
 }
 

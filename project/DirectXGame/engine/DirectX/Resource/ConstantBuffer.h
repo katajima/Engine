@@ -28,7 +28,7 @@ namespace Engine {
 		//生成
 		void CreateBuffer(DirectXCommon* dxCommon, int num = 1)
 		{
-			dxCommon_ = dxCommon;
+			this->dxCommon = dxCommon;
 
 			// リソース生成
 			resource_ = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(Type) * num);
@@ -43,20 +43,20 @@ namespace Engine {
 		// グラフィックパイプラインにバッファを設定
 		void SetGraphicsRootConstantBufferView(int index)
 		{
-			dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
+			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
 		}
 
 		// コンピュートパイプラインにバッファを設定
 		void SetComputeRootConstantBufferView(int index)
 		{
-			dxCommon_->GetCommandList()->SetComputeRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
+			dxCommon->GetCommandList()->SetComputeRootConstantBufferView(index, resource_->GetGPUVirtualAddress());
 		}
 
 		// データ取得
 		Type* Data() const { return data_; };
 
 	private:
-		DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
 		Type* data_;

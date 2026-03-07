@@ -22,8 +22,7 @@
 // 前方宣言
 namespace Engine {
 	class DirectXCommon;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class GlobalVariables;
 }
 class Effect;
@@ -41,7 +40,7 @@ public:
 	/// <param name="entity2DManager"></param>
 	/// <param name="globalVariables"></param>
 	/// <param name="camera"></param>
-	void Initialize(Engine::Entity3DManager* entity3DManager,Engine::Entity2DManager* entity2DManager, 
+	void Initialize(Engine::EntityManager* entityManager, 
 		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 	/// <summary>
@@ -79,8 +78,7 @@ public:
 
 private:
 	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::Entity3DManager* entity3DManager = nullptr;
-	Engine::Entity2DManager* entity2DManager = nullptr;
+	Engine::EntityManager* entityManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::Camera* camera = nullptr;
 	// エフェクト

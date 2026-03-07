@@ -95,14 +95,14 @@ namespace Engine {
 
 
 	private:
-		DXGIDevice* DXGIDevice_;
-		Command* command_;
-		SrvManager* srvManager_;
-		RtvManager* rtvManager_;
-		RenderingCommon* renderingCommon_;
-		DepthStencil* depthStencil_;
-		Barrier* barrier_;
-		ScissorRect* scissorRect_;
-		ViewPort* viewPort_;
+		DXGIDevice* dxgiDevice = nullptr;
+		Command* command = nullptr;
+		SrvManager* srvManager = nullptr;
+		RtvManager* rtvManager = nullptr;
+		RenderingCommon* renderingCommon = nullptr;
+		DepthStencil* depthStencil = nullptr;
+		Barrier* barrier = nullptr;
+		ScissorRect* scissorRect = nullptr;
+		ViewPort* viewPort = nullptr;
 	};
 }

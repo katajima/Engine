@@ -3,7 +3,7 @@
 
 void Engine::CameraCommon::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;	// DX共通クラス
+	this->dxCommon = dxCommon;	// DX共通クラス
 }
 
 

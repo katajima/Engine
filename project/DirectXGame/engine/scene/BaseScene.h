@@ -1,16 +1,14 @@
 #pragma once
 #include "Fade.h"
 #include <DirectXGame/application/scene/SceneData.h>
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
 
 namespace Engine {
 	// 前方宣言
 	class Input;
 	class SceneManager;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class DirectXCommon;
 	class GlobalVariables;
 	class Camera;
@@ -44,37 +42,33 @@ namespace Engine {
 		// 2D全体描画
 		void AllDraw2D();
 		// シーンマネージャー設定
-		virtual void SetSceneManader(Engine::SceneManager* sceneManager) { sceneManager_ = sceneManager; }
+		virtual void SetSceneManader(Engine::SceneManager* sceneManager) { this->sceneManager = sceneManager; }
 		// DirectX共通クラス設定
-		virtual void SetDirectXCommon(Engine::DirectXCommon* dxCommon) { directXCommon_ = dxCommon; }
-		// エンティティ3dマネージャー設定
-		void SetEntity3DManager(Engine::Entity3DManager* entity3DManager) { entity3DManager_ = entity3DManager; }
-		// エンティティ2dマネージャー設定
-		void SetEntity2DManager(Engine::Entity2DManager* entity2DManager) { entity2DManager_ = entity2DManager; }
+		virtual void SetDirectXCommon(Engine::DirectXCommon* dxCommon) { this->dxCommon = dxCommon; }
+		// エンティティマネージャー設定
+		void SetEntityManager(Engine::EntityManager* entityManager) { this->entityManager = entityManager; }
 		// グローバルバリアブル設定
-		void SetGlobalVariables(Engine::GlobalVariables* globalVariables) { globalVariables_ = globalVariables; }
+		void SetGlobalVariables(Engine::GlobalVariables* globalVariables) { this->globalVariables = globalVariables; }
 		// Input設定
-		void SetInput(Engine::Input* input) { input_ = input; }
+		void SetInput(Engine::Input* input) { this->input = input; }
 		// winApp設定
-		void SetWinApp(Engine::WinApp* winApp) { winApp_ = winApp; }
+		void SetWinApp(Engine::WinApp* winApp) { this->winApp = winApp; }
 		// DirectX共通クラス取得
-		virtual Engine::DirectXCommon* GetDxCommon() { return directXCommon_; }
-		// エンティティ3dマネージャー取得
-		Engine::Entity3DManager* GetEntity3DManager() { return entity3DManager_; }
-		// エンティティ2dマネージャー取得
-		Engine::Entity2DManager* GetEntity2DManager() { return entity2DManager_; }
+		virtual Engine::DirectXCommon* GetDxCommon() { return dxCommon; }
+		// エンティティマネージャー取得
+		Engine::EntityManager* GetEntityManager() { return entityManager; }
 		// シーンマネージャー取得
-		Engine::SceneManager* GetSceneManager() { return sceneManager_; }
+		Engine::SceneManager* GetSceneManager() { return sceneManager; }
 		// グローバルバリアブル取得
-		GlobalVariables* GetGlobalVariables() { return globalVariables_; }
+		GlobalVariables* GetGlobalVariables() { return globalVariables; }
 		// Input取得
-		Engine::Input* GetInput() { return input_; }
+		Engine::Input* GetInput() { return input; }
 		//
-		Engine::WinApp* GetWinApp() { return winApp_; }
+		Engine::WinApp* GetWinApp() { return winApp; }
 		// カメラ設定
-		void SetCamera(Engine::Camera* camera) { camera_ = camera; };
+		void SetCamera(Engine::Camera* camera) { this->camera = camera; };
 		// カメラ取得
-		Engine::Camera* GetCamara() { return camera_; }
+		Engine::Camera* GetCamara() { return camera; }
 		// 終了したか
 		bool IsInitialized() const { return initialized_; }
 		// シーンデータ取得
@@ -86,15 +80,14 @@ namespace Engine {
 
 	private:
 		// シーンマネージャ(借りてくる)
-		Engine::SceneManager* sceneManager_ = nullptr;
+		Engine::SceneManager* sceneManager = nullptr;
 
-		Engine::DirectXCommon* directXCommon_ = nullptr;
-		Engine::Entity3DManager* entity3DManager_;
-		Engine::Entity2DManager* entity2DManager_;
-		Engine::Input* input_;
-		Engine::WinApp* winApp_;
-		Engine::GlobalVariables* globalVariables_;
-		Engine::Camera* camera_;
+		Engine::DirectXCommon* dxCommon = nullptr;
+		Engine::EntityManager* entityManager = nullptr;
+		Engine::Input* input = nullptr;
+		Engine::WinApp* winApp = nullptr;
+		Engine::GlobalVariables* globalVariables = nullptr;
+		Engine::Camera* camera = nullptr;
 	protected:
 		bool initialized_ = false;
 	};

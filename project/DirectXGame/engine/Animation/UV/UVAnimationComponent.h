@@ -34,11 +34,11 @@ namespace Engine {
 		// UVアニメーションデータ取得
 		UVAnimetionData& GetUVAnimetionData() { return uvAnimationData_; }
 		// マテリアルセット
-		void Setmaterial(Material* mateiria) { mateirial_ = mateiria; };
+		void Setmaterial(Material* mateiria) { this->mateirial = mateiria; };
 	private:
 		// 
 		UVAnimetionData uvAnimationData_;
 	private:
-		Material* mateirial_;
+		Material* mateirial;
 	};
 }

@@ -3,12 +3,12 @@
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <algorithm>
 
 void Engine::SceneManager::Init() {
 	fade_ = std::make_unique<Fade>();
-	fade_->Initialize(entity2DManager_);
+	fade_->Initialize(entityManager);
 	finished_ = true;
 };
 
@@ -45,20 +45,19 @@ void Engine::SceneManager::Update()
 
 			// シーンマネージャをセット
 			scene_->SetSceneManader(this);
-			scene_->SetInput(input_);
-			scene_->SetGlobalVariables(globalVariables_);
-			scene_->SetDirectXCommon(directXCommon_);
-			scene_->SetEntity3DManager(entity3DManager_);
+			scene_->SetInput(input);
+			scene_->SetGlobalVariables(globalVariables);
+			scene_->SetDirectXCommon(dxCommon);
+			scene_->SetEntityManager(entityManager);
 			scene_->SetWinApp(winApp);
 
-			directXCommon_->GetPostEffectManager()->ClearPostEffectBlock();
-			entity3DManager_->GetObject3dInstansManager()->ClearObject();
-			entity3DManager_->GetObject3dInstansManager()->AllClear();
-			entity3DManager_->GetEffectManager()->GetParticleManager()->ClearParticle();
-			entity3DManager_->ObjectClean();
-			entity3DManager_->GetLightManager()->ClearLights();
-			scene_->SetEntity2DManager(entity2DManager_);
-
+			dxCommon->GetPostEffectManager()->ClearPostEffectBlock();
+			entityManager->GetObject3dInstansManager()->ClearObject();
+			entityManager->GetObject3dInstansManager()->AllClear();
+			entityManager->GetEffectManager()->GetParticleManager()->ClearParticle();
+			entityManager->ObjectClean();
+			entityManager->GetLightManager()->ClearLights();
+			
 			
 			scene_->Initialize();
 			SetCamera(scene_->GetCamara());
@@ -135,10 +134,10 @@ Engine::SceneManager::~SceneManager()
 
 void Engine::SceneManager::ChangeScene(const std::string& sceneName, float duration)
 {
-	assert(sceneFactory_);
+	assert(sceneFactory);
 	if (nextScene_ == nullptr && phase_ == Phase::kMain) {
 		// ★ unique_ptr をそのまま受け取る（reset を使わない）
-		nextScene_ = sceneFactory_->CreateScene(sceneName);
+		nextScene_ = sceneFactory->CreateScene(sceneName);
 		if (!nextScene_) {
 			assert(false && "Invalid scene name");
 			return;

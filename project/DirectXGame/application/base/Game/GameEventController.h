@@ -4,8 +4,7 @@
 
 // 前方宣言
 namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class GlobalVariables;
 	class Input;
 }
@@ -23,7 +22,7 @@ namespace Game {
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+		void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
 			Character::CharacterManager* characterManager, Engine::Input* input);
 
 		/// <summary>
@@ -80,7 +79,7 @@ namespace Game {
 		int curretWave_ = 0;		// ウェーブ
 		float time_ = 0.0f;			// 時間
 	private:
-		Engine::Entity3DManager* entity3DManager = nullptr;
+		Engine::EntityManager* entityManager = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Character::CharacterManager* characterManager = nullptr;
 	};

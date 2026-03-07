@@ -18,7 +18,7 @@ using namespace Microsoft::WRL;
 // 前方宣言
 
 namespace Engine {
-	class Entity3DManager;
+	class EntityManager;
 	class Object3dCommon;
 	class SkinningConmmon;
 	class ImGuiManager;
@@ -33,7 +33,7 @@ namespace Engine {
 	{
 	public:
 		// 初期化
-		void Initialize(Entity3DManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK);
+		void Initialize(EntityManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		// 更新
 		void Update();
 
@@ -65,7 +65,7 @@ namespace Engine {
 		// モデル設定(モデル名での)
 		void SetModel(const std::string& filePath);
 		// カメラ設定
-		void SetCamera(Camera* camera) { this->individualCamera_ = camera; }
+		void SetCamera(Camera* camera) { this->individualCamera = camera; }
 		// 名前設定
 		void SetName(const std::string& name) { this->name = name; }
 		// タグ設定
@@ -79,9 +79,9 @@ namespace Engine {
 		// オブジェクト固有に映すカメラを使用するか設定
 		void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera; }
 		// メッシュ取得
-		ModelMesh* GetMesh(int index) { return renderComponent_->GetModel()->modelData.mesh[index].get(); }
+		ModelMesh* GetMesh(int index) { return renderComponent_->GetModel()->GetModelData().mesh[index].get(); }
 		// マテリアル取得
-		Material* GetMaterial(int index) { return renderComponent_->GetModel()->modelData.mesh[index]->material.get(); }
+		Material* GetMaterial(int index) { return renderComponent_->GetModel()->GetModelData().mesh[index]->material.get(); }
 		// モデル取得
 		Model* GetModel() const { return renderComponent_->GetModel(); }
 		// プリミティブ取得
@@ -111,7 +111,7 @@ namespace Engine {
 	private:
 		// カメラ
 		Camera* defaltCamera = nullptr;
-		Camera* individualCamera_ = nullptr;
+		Camera* individualCamera = nullptr;
 		// 個人的にカメラを使用するか
 		bool isIndividualCamera_ = false;
 
@@ -210,7 +210,7 @@ namespace Engine {
 
 		void InitAnimationComponent() {
 			animationComponent_ = std::make_unique<AnimationComponent>();
-			animationComponent_->Init(lineCommon_);
+			animationComponent_->Init(lineCommon);
 			animationComponent_->SetModel(renderComponent_->GetModel());
 		}
 		// アニメーションコンポーネント取得
@@ -242,13 +242,13 @@ namespace Engine {
 		WorldTransform direWorldTransform_;
 		Vector3 direction_ = {};
 	private:
-		Object3dCommon* object3dCommon_;
-		SkinningConmmon* skinningConmmon_;
-		ImGuiManager* imGuiManager_;
-		Entity3DManager* entity3DManager_;
-		LineCommon* lineCommon_;
-		SkyBoxCommon* skyBoxCommon_;
-		OceanManager* oceanManager_;
+		Object3dCommon*		object3dCommon = nullptr;
+		SkinningConmmon*	skinningConmmon = nullptr;
+		ImGuiManager*		imGuiManager = nullptr;
+		EntityManager*	entityManager	= nullptr;
+		LineCommon*			lineCommon = nullptr;
+		SkyBoxCommon*		skyBoxCommon = nullptr;
+		OceanManager *		oceanManager = nullptr;
 	};
 
 	// スクリーン座標計算取得

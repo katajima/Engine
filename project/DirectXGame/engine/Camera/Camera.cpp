@@ -32,13 +32,13 @@ Engine::Camera::Camera()
 
 void Engine::Camera::Initialize(CameraCommon* cameraCommon)
 {
-	dxCommon_ = cameraCommon->GetDxCommon();				// DX共通クラス
-	postEffectManager_ = dxCommon_->GetPostEffectManager();	// ポストエフェクト管理クラス
+	dxCommon = cameraCommon->GetDxCommon();				// DX共通クラス
+	postEffectManager = dxCommon->GetPostEffectManager();	// ポストエフェクト管理クラス
 
 	input_ = cameraCommon->GetInput();		// インプット
 
 	// リソース生成
-	resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
+	resource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
 	//書き込むためのアドレスを取得
 	resource->Map(0, nullptr, reinterpret_cast<void**>(&data));
 
@@ -50,7 +50,7 @@ void Engine::Camera::Initialize(CameraCommon* cameraCommon)
 void Engine::Camera::GetCommandList(int index)
 {
 	// Cameraのバインド
-	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource->GetGPUVirtualAddress());
+	dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource->GetGPUVirtualAddress());
 }
 
 void Engine::Camera::UpdateMatrix() {
@@ -187,10 +187,6 @@ void Engine::Camera::UpdateImGui()
 	 	if (input_->IsPushKey(DIK_J)) {
 	 		transform_.rotate.y -= sp;
 	 	}
-	
-	 	if (input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Up)) {
-	 		SetShake(debugShakeTime_, debugShakeDirectionRange_);
-	 	}
 	 #endif // _DEBUG
 }
 
@@ -232,8 +228,8 @@ void Engine::Camera::SetShake(float time, Vector3 directionRange) {
 void Engine::Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
 {
 	auto effectBlock = std::make_unique<Engine::PostEffectBlock>();
-	effectBlock->Intialize(dxCommon_->GetDXGIDevice(), dxCommon_->GetCommand(), dxCommon_->GetSrvManager(), dxCommon_->GetRtvManager(),
-		dxCommon_->GetRenderingCommon(), dxCommon_->GetDepthStencil(), dxCommon_->GetBarrier(), dxCommon_->GetScissorRect(), dxCommon_->GetViewPort(), name, type);
+	effectBlock->Intialize(dxCommon->GetDXGIDevice(), dxCommon->GetCommand(), dxCommon->GetSrvManager(), dxCommon->GetRtvManager(),
+		dxCommon->GetRenderingCommon(), dxCommon->GetDepthStencil(), dxCommon->GetBarrier(), dxCommon->GetScissorRect(), dxCommon->GetViewPort(), name, type);
 	effectBlock->SetUse(use);			// 使うか
 	effectBlock->SetIndex(0); // 順番
 	effectBlocks_.push_back(std::move(effectBlock));

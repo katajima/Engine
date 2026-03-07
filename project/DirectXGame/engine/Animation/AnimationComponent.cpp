@@ -11,8 +11,8 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 
 	// モデルが存在する場合
 	if (model) {
-		const auto& animations = model->modelData.animations;
-		auto& modelData = model->modelData;
+		const auto& animations = model->GetModelData().animations;
+		auto& modelData = model->GetModelData();
 
 		const std::string& currentName = modelData.currentAnimName;
 		auto itCurrent = animations.find(currentName);
@@ -126,7 +126,7 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 		}
 		else {
 			// アニメーションが見つからない場合のフォールバック
-			localMatrix_ = model->modelData.rootNode.localMatrix;
+			localMatrix_ = model->GetModelData().rootNode.localMatrix;
 
 			std::vector<Matrix4x4> cachedSkeletonMatrices;
 			for (auto& mesh : modelData.mesh) {
@@ -146,7 +146,7 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 
 
 		std::vector<std::future<void>> futures;
-		for (auto& mesh : model->modelData.mesh) {
+		for (auto& mesh : model->GetModelData().mesh) {
 			futures.push_back(std::async(std::launch::async, [&mesh]() {
 				mesh->material->GPUData();
 				}));
@@ -165,8 +165,8 @@ void Engine::AnimationComponent::UpdateSkin(float deltatime,WorldTransform world
 void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTransform)
 {
 	if (model) {
-		const auto& animations = model->modelData.animations;
-		auto& modelData = model->modelData;
+		const auto& animations = model->GetModelData().animations;
+		auto& modelData = model->GetModelData();
 
 		const std::string& currentName = modelData.currentAnimName;
 		auto itCurrent = animations.find(currentName);
@@ -241,11 +241,11 @@ void Engine::AnimationComponent::Update(float deltatime, WorldTransform worldTra
 		else {
 
 			// アニメーションが見つからない場合のフォールバック
-			localMatrix_ = model->modelData.rootNode.localMatrix;
+			localMatrix_ = model->GetModelData().rootNode.localMatrix;
 		}
 
 		std::vector<std::future<void>> futures;
-		for (auto& mesh : model->modelData.mesh) {
+		for (auto& mesh : model->GetModelData().mesh) {
 			futures.push_back(std::async(std::launch::async, [&mesh]() {
 				mesh->material->GPUData();
 				}));
@@ -263,8 +263,8 @@ bool Engine::AnimationComponent::IsAnimationFinished()
 {
 	if (!model) return false;
 
-	const auto& animations = model->modelData.animations;
-	auto& modelData = model->modelData;
+	const auto& animations = model->GetModelData().animations;
+	auto& modelData = model->GetModelData();
 
 	const std::string& currentName = modelData.currentAnimName;
 	auto itCurrent = animations.find(currentName);
@@ -285,12 +285,12 @@ bool Engine::AnimationComponent::IsAnimationFinished()
 }
 
 void Engine::AnimationComponent::SetAnimation(const std::string& name, float time) {
-	AnimationFunction::SetAnimation(model->modelData, name, time);
+	AnimationFunction::SetAnimation(model->GetModelData(), name, time);
 }
 
 void Engine::AnimationComponent::SetEndAnimeTime() {
-	const auto& animations = model->modelData.animations;
-	auto& modelData = model->modelData;
+	const auto& animations = model->GetModelData().animations;
+	auto& modelData = model->GetModelData();
 	const std::string& currentName = modelData.currentAnimName;
 	auto itCurrent = animations.find(currentName);
 
@@ -298,7 +298,7 @@ void Engine::AnimationComponent::SetEndAnimeTime() {
 }
 
 float Engine::AnimationComponent::GetEndAnimeTime(std::string name) const {
-	const auto& animations = model->modelData.animations;
+	const auto& animations = model->GetModelData().animations;
 	auto it = animations.find(name);
 	if (it != animations.end()) {
 		return it->second.duration;

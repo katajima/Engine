@@ -18,7 +18,7 @@ namespace Combo {
 		bool isCancelMoveEnd = data_.inputMoveEnd >= timer;				// キャンセル終了時間より前なら
 		
 		// ゲームパッドの左スティックを動かしているか
-		bool isMoveStick = inputSystem.GetData().moveShick.Length() != 0;
+		bool isMoveStick = inputSystem.GetPlayerInputData().moveShick.Length() != 0;
 
 
 		// 移動スティックによる

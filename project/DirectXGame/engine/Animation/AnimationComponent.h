@@ -68,7 +68,7 @@ namespace Engine {
 		float animationTime = 0.0f;
 	private:
 		// モデル
-		Model* model;
+		Model* model = nullptr;
 		// デバッグ用のライン描画クラスへのポインタ
 		LineCommon* lineCommon = nullptr;
 	};

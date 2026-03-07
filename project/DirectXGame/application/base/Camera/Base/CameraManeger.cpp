@@ -1,26 +1,25 @@
 #include "CameraManeger.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
-void CameraManager::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables)
+void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
 	this->inputSystem = inputSystem;						// インプット
-	this->entity3DManager = entity3DManager;	// エンティティ3d
+	this->entityManager = entityManager;	// エンティティ3d
 	this->globalVariables = globalVariables;	// 保存項目
 
 	// カメラ初期化
 	camera = std::make_unique <Engine::Camera>();
-	camera->Initialize(entity3DManager->GetCameraCommon());
+	camera->Initialize(entityManager->GetCameraCommon());
 	camera->transform_.rotate = { 0.36f,0,0 };			// 回転指定
 	camera->transform_.translate = { 5,32.5f,-59.2f };	// 位置指定
 	camera->SetFarClip(10000.0f);						// farZを10000に
 	isGameCamera = true;								// ゲームに使用する
 
-	entity3DManager->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
-	entity3DManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
-	entity3DManager->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
-	entity3DManager->Get3DLineCommon()->SetDefaltCamera(camera.get());						// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());	// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->Get3DLineCommon()->SetDefaltCamera(camera.get());						// デフォルトカメラ設定
 }
 
 void CameraManager::Update()
@@ -63,10 +62,10 @@ void CameraManager::Update()
 	}
 	
 
-	entity3DManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());// デフォルトカメラ設定
-	entity3DManager->GetObject3dCommon()->SetDefaltCamera(camera.get());				// デフォルトカメラ設定
-	entity3DManager->Get3DLineCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
-	entity3DManager->GetObject3dInstansManager()->SetCamera(camera.get());				// デフォルトカメラ設定
+	entityManager->GetEffectManager()->GetParticleManager()->SetCamera(camera.get());// デフォルトカメラ設定
+	entityManager->GetObject3dCommon()->SetDefaltCamera(camera.get());				// デフォルトカメラ設定
+	entityManager->Get3DLineCommon()->SetDefaltCamera(camera.get());					// デフォルトカメラ設定
+	entityManager->GetObject3dInstansManager()->SetCamera(camera.get());				// デフォルトカメラ設定
 	// カメラ更新
 	camera->UpdateMatrix();
 }

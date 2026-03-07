@@ -28,7 +28,7 @@ namespace Engine {
 	class SkyBox;
 	class Ocean;
 	class Transfomation;
-	class Entity3DManager;
+	class EntityManager;
 
 	/// <summary>
 	/// 描画に関するコンポーネントクラス
@@ -40,10 +40,10 @@ namespace Engine {
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		/// <param name="entity3DManager">3dオブジェクトに関係するマネージャー</param>
+		/// <param name="entityManager">オブジェクトに関係するマネージャー</param>
 		/// <param name="objectType">オブジェクトのモデルタイプ(スキニング、アニメーション、プリミティブ、スカイボックスなど)</param>
 		/// <param name="rasterizerType">モデルのうつり方を設定</param>
-		void Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType);
+		void Init(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType);
 
 		// 更新
 		void Update();
@@ -52,18 +52,18 @@ namespace Engine {
 		void Draw();
 
 		// カメラ設定
-		void SetCamera(Camera* camera) { camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 		// トランスフォーム設定
-		void SetTransfomation(Transfomation* transfomation) { transfomation_ = transfomation; }
+		void SetTransfomation(Transfomation* transfomation) { this->transfomation = transfomation; }
 
 		// モデル設定
 		void SetModel(Model* model);
 		// スカイボックス設定
-		void SetSkyBox(SkyBox* skyBox) { skyBox_ = skyBox; }
+		void SetSkyBox(SkyBox* skyBox) { this->skyBox = skyBox; }
 		// 波セット設定
-		void SetOcean(Ocean* ocean) { ocean_ = ocean; }
+		void SetOcean(Ocean* ocean) { this->ocean = ocean; }
 		// プリミティブ設定
-		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive) { primitive_ = std::move(primitive); }
+		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive) { this->primitive = std::move(primitive); }
 
 		
 
@@ -71,11 +71,11 @@ namespace Engine {
 		// モデル取得
 		Model* GetModel() const { return model; }
 		// 波取得
-		Ocean* GetOcean() { return ocean_; }
+		Ocean* GetOcean() { return ocean; }
 		// スカイボックス取得
-		SkyBox* GetSkyBox() { return skyBox_; }
+		SkyBox* GetSkyBox() { return skyBox; }
 		// プリミティブ形状取得
-		BasePrimitive* GetPrimitive() { return primitive_.get(); }
+		BasePrimitive* GetPrimitive() { return primitive.get(); }
 	public:
 		// 何かしらの見た目があるか
 		bool GetIsSkin() const { return isSkin_; }
@@ -133,18 +133,18 @@ namespace Engine {
 		std::vector<std::unique_ptr<ConstantBuffer<Material::DataGPU>>> cbResources_;
 	private: // 貰いもの
 		// 3Dエンティティマネージャー
-		Entity3DManager* entity3DManager_ = nullptr;
+		EntityManager* entityManager = nullptr;
 		// モデル
 		Model* model = nullptr;
 		// プリミティブ
-		std::unique_ptr<BasePrimitive> primitive_ = nullptr;
+		std::unique_ptr<BasePrimitive> primitive = nullptr;
 		// スカイボックス
-		SkyBox* skyBox_ = nullptr;
+		SkyBox* skyBox = nullptr;
 		// 波
-		Ocean* ocean_ = nullptr;
+		Ocean* ocean = nullptr;
 		// トランスフォーム
-		Transfomation* transfomation_ = nullptr;
+		Transfomation* transfomation = nullptr;
 		// カメラ
-		Camera* camera_ = nullptr;
+		Camera* camera = nullptr;
 	};
 }

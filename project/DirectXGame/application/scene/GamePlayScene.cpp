@@ -9,7 +9,7 @@
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 #pragma region Initialize
 
@@ -17,16 +17,16 @@
 void GamePlayScene::Initialize()
 {
 	// Input
-	input_ = GetInput();
+	input = GetInput();
 
 	// インプットマネージャー初期化
 	inputManager_ = std::make_unique<InputManager>();
-	inputManager_->Initialize(input_);
+	inputManager_->Initialize(input);
 	
 
 	// インプットハンドラー初期化
 	inputHander_ = std::make_unique<Character::InputHander>();
-	inputHander_->Initialize(input_);
+	inputHander_->Initialize(input);
 
 
 	inputManager_->Triggered(InputManager::Action::Jump);
@@ -55,42 +55,42 @@ void GamePlayScene::Initialize()
 
 	// エフェクト
 	effect_ = std::make_unique<Effect>();
-	effect_->Initialize(GetEntity3DManager(), GetGlobalVariables());
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// フォローカメラ
 	followCamera_ = std::make_unique<FollowCamera>();
-	followCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
+	followCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
 	// 宇宙カメラ
 	universeCamera_ = std::make_unique<UniverseCamera>();
-	universeCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
+	universeCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
-	cameraManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetGlobalVariables());
+	cameraManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 	// カメラ追加
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 
-	GetEntity3DManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
 
 	// 弾管理クラス
 	bulletManager_ = std::make_unique<BulletManager>();
-	bulletManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	bulletManager_->Initialize(GetEntityManager(), GetGlobalVariables(), nullptr);
 	bulletManager_->SetEffect(effect_.get());
 
 	// スペシャルポイント管理クラス
 	specalPointManager_ = std::make_unique<SpecalPointManager>();
-	specalPointManager_->Initialize(GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables());
+	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntity3DManager(), GetEntity2DManager(), GetGlobalVariables(), nullptr);
+	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), nullptr);
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -109,11 +109,20 @@ void GamePlayScene::Initialize()
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
+	// ステージコライダーシステム初期化
+	stageColliderSystem_ = std::make_unique<StageColliderSystem>();
+	stageColliderSystem_->Initialize(GetEntityManager()->Get3DLineCommon());
 	
 	// レベルデータロード
 	loadData_ = std::make_unique<LoadLevelData>();
 	loadData_->SetCameraManager(cameraManager_.get());
-	loadData_->Initialize(GetEntity3DManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
+	loadData_->Initialize(GetEntityManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
+	
+	for (auto& obj : loadData_->GetObjects()) {
+		stageColliderSystem_->AddObject(obj);
+	}
+	stageColliderSystem_->CreateCollider();
+	
 
 
 	// 追従カメラtarget設定
@@ -121,33 +130,35 @@ void GamePlayScene::Initialize()
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetDxCommon(), GetEntity3DManager(), GetEntity2DManager(), followCamera_->GetUniqueCamera());
+	stage_->Initialize(GetDxCommon(), GetEntityManager(), followCamera_->GetUniqueCamera());
 	
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
 
 	// 衝突マネージャの生成
-	Vector3 sizeAABB = { 1000,1000,1000 };
+	Vector3 sizeAABB = { 300,25,300 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 
-
+	
+	collisionManager_->RegisterStatic(stageColliderSystem_->GetColliderComponent());
+	// 静的Octreeコライダー
 	collisionManager_->BuildStaticSceneOctree();
 
 
 	// UI
 	gameUI = std::make_unique<GameUI>();
-	gameUI->Initialize(inputSystem_.get(), GetEntity2DManager(), GetGlobalVariables());
+	gameUI->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 	gameUI->SetPlayer(characterManager_->GetPlayer());
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
 
-	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(GetEntity3DManager(), GetGlobalVariables());
+	effectComponent_->Init(GetEntityManager(), GetGlobalVariables());
 
 
 	inputManager_->SetOwner(characterManager_->GetPlayer());
@@ -194,8 +205,11 @@ void GamePlayScene::CheckAllCollisions()
 		}
 	}
 
-
+	// 描画
+	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
+	// 判定チェック
 	collisionManager_->CheckAll();
+	// 動的コライダー削除
 	collisionManager_->ClearDynamic();
 	
 }
@@ -209,7 +223,7 @@ void GamePlayScene::CheckAllCollisions()
 void GamePlayScene::UpdateImGui()
 {
 #ifdef _DEBUG
-	if (input_->IsTriggerKey(DIK_P)) {
+	if (input->IsTriggerKey(DIK_P)) {
 		// シーン切り替え
 		GetSceneManager()->ChangeScene("TITLE");
 	}
@@ -217,7 +231,7 @@ void GamePlayScene::UpdateImGui()
 	ImGui::Begin("Debug");
 	ImGui::InputInt("playerID", &GetSceneData().playerID);
 
-	Vector2 inputPos = input_->GetGamePadLeftStick();
+	Vector2 inputPos = input->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	if (ImGui::Button("lockOn")) {
 		cameraManager_->SetUseCamera("fixedCamera", 0.3f);
@@ -243,10 +257,10 @@ void GamePlayScene::Update()
 	Engine::Camera::isShake_ = false;
 
 	// リトライ
-	if (input_->IsTriggerKey(DIK_R)) {
+	if (input->IsTriggerKey(DIK_R)) {
 		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
 	}
-	if (input_->IsTriggerKey(DIK_T)) {
+	if (input->IsTriggerKey(DIK_T)) {
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	
@@ -267,6 +281,7 @@ void GamePlayScene::Update()
 	UpdateImGui();
 
 	
+	stageColliderSystem_->Update();
 	// キャラクターマネージャー更新
 	characterManager_->Update();
 

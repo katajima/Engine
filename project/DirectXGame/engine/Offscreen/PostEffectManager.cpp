@@ -16,23 +16,23 @@
 
 void Engine::PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* command, SrvManager* srvManager, RtvManager* rtvManager, RenderingCommon* renderingCommon, DepthStencil* depthStencil, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort)
 {
-	DXGIDevice_ = DXGIDevice;				// デバイス
-	command_ = command;						// コマンド
-	srvManager_ = srvManager;				// SRV管理
-	rtvManager_ = rtvManager;				// RTV管理
-	renderingCommon_ = renderingCommon;		// レンダリング共通クラス
-	depthStencil_ = depthStencil;			// デプスステンシル
-	barrier_ = barrier;						// バリア
-	scissorRect_ = scissorRect;				// シザー
-	viewPort_ = viewPort;					// ビューポート
+	this->dxgiDevice = DXGIDevice;				// デバイス
+	this->command = command;						// コマンド
+	this->srvManager = srvManager;				// SRV管理
+	this->rtvManager = rtvManager;				// RTV管理
+	this->renderingCommon = renderingCommon;		// レンダリング共通クラス
+	this->depthStencil = depthStencil;			// デプスステンシル
+	this->barrier = barrier;						// バリア
+	this->scissorRect = scissorRect;				// シザー
+	this->viewPort = viewPort;					// ビューポート
 
 	// レンダーテクスチャ初期化
 	renderTexture_ = std::make_unique<RenderTexture>();
-	renderTexture_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainStr", PostEffectType::kCopy);
+	renderTexture_->Initialize(dxgiDevice, command, srvManager, rtvManager, renderingCommon, "mainStr", PostEffectType::kCopy);
 
 	// 最終レンダーテクスチャテクスチャ初期化
 	renderTextureEnd_ = std::make_unique<RenderTexture>();
-	renderTextureEnd_->Initialize(DXGIDevice_, command_, srvManager_, rtvManager_, renderingCommon_, "mainEnd", PostEffectType::kCopy);
+	renderTextureEnd_->Initialize(dxgiDevice, command, srvManager, rtvManager, renderingCommon, "mainEnd", PostEffectType::kCopy);
 
 
 }
@@ -40,36 +40,36 @@ void Engine::PostEffectManager::Intialize(DXGIDevice* DXGIDevice, Command* comma
 void Engine::PostEffectManager::PreDrawOffscreen()
 {
 	// レンダーターゲット
-	barrier_->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	barrier->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// デプスステンシル
-	barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	barrier->TransitionResource(depthStencil->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResorce();
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture_->GetRTVHandle();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
+	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 
 	//// レンダーターゲットと深度バッファをクリア
 	float clearColor[] = { renderTexture_->GetClearColor().x,  renderTexture_->GetClearColor().y, renderTexture_->GetClearColor().z,  renderTexture_->GetClearColor().w }; // 任意のクリアカラー（赤）
-	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	command->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	command->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	//
-	viewPort_->SettingViewport();
-	scissorRect_->SettingScissorRect();
+	viewPort->SettingViewport();
+	scissorRect->SettingScissorRect();
 }
 
 void Engine::PostEffectManager::PostDrawOffscreen()
 {
 	// レンダーターゲット
-	barrier_->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barrier->TransitionResource(renderTexture_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// デプスステンシル
-	barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barrier->TransitionResource(depthStencil->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
 
@@ -77,36 +77,36 @@ void Engine::PostEffectManager::PostDrawOffscreen()
 void Engine::PostEffectManager::PreDraw2dOffscreen()
 {
 	// レンダーターゲット
-	barrier_->TransitionResource(renderTextureEnd_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	barrier->TransitionResource(renderTextureEnd_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// デプスステンシル
-	barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	barrier->TransitionResource(depthStencil->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResorce();
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTextureEnd_->GetRTVHandle();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
+	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 
 	//// レンダーターゲットと深度バッファをクリア
 	float clearColor[] = { renderTextureEnd_->GetClearColor().x,  renderTextureEnd_->GetClearColor().y, renderTextureEnd_->GetClearColor().z,  renderTextureEnd_->GetClearColor().w }; // 任意のクリアカラー（赤）
-	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	command_->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	command->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	command->GetList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	//
-	viewPort_->SettingViewport();
-	scissorRect_->SettingScissorRect();
+	viewPort->SettingViewport();
+	scissorRect->SettingScissorRect();
 }
 
 void Engine::PostEffectManager::PostDraw2dOffscreen()
 {
 	// レンダーターゲット
-	barrier_->TransitionResource(renderTextureEnd_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barrier->TransitionResource(renderTextureEnd_->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// デプスステンシル
-	barrier_->TransitionResource(depthStencil_->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barrier->TransitionResource(depthStencil->GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
 
@@ -151,7 +151,7 @@ void Engine::PostEffectManager::Update(Camera* camera)
 {
 	imageRatio_ = { 1.0f,1.0f };
 	imageleftTopPos_ = { 0.0f,0.0f };
-	renderingCommon_->SetCamera(camera);
+	renderingCommon->SetCamera(camera);
 	renderTexture_->SetCamera(camera);
 	renderTexture_->Update();
 	for (auto& effect : effectBlocks_) {
@@ -210,28 +210,28 @@ void Engine::PostEffectManager::RenderUpdate()
 void Engine::PostEffectManager::PreEnd(RenderTexture* renderTexture)
 {
 	// レンダーターゲット
-	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	barrier->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 
 	//// 描画先の設定
 	// 描画先のRTVとDSVを設定する
 	// このポストエフェクトでは深度バッファを使用しないため、DSVは設定しない
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = renderTexture->GetRTVHandle();
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil_->GetCPUHandleDepthStencilResorce();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = depthStencil->GetCPUHandleDepthStencilResorce();
+	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 
 	//// レンダーターゲットと深度バッファをクリア
 	float clearColor[] = { renderTexture->GetClearColor().x,  renderTexture->GetClearColor().y, renderTexture->GetClearColor().z,  renderTexture->GetClearColor().w }; // 任意のクリアカラー（赤）
-	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	command->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 	//
-	viewPort_->SettingViewport();
-	scissorRect_->SettingScissorRect();
+	viewPort->SettingViewport();
+	scissorRect->SettingScissorRect();
 }
 
 void Engine::PostEffectManager::PostEnd(RenderTexture* renderTexture)
 {
 	// レンダーターゲット
-	barrier_->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barrier->TransitionResource(renderTexture->GetResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }

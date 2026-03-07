@@ -69,7 +69,7 @@ namespace Character {
 
 		// ロックオン
 		icon_lockOn = std::make_unique<Engine::Sprite>();
-		icon_lockOn->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/LockOnW.dds", false);
+		icon_lockOn->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/icon/LockOnW.dds", false);
 		icon_lockOn->SetSize(0.10f);		// サイズ指定
 		icon_lockOn->SetColor({ 1,0,1,1 });	// 色指定
 		icon_lockOn->SetPosition({ -100,650 });	// 位置指定
@@ -78,31 +78,28 @@ namespace Character {
 
 	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName)
 	{
-
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entity3DManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
+		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
 		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
-
 		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
-
+		objectComponentShadow_->Update();
 	}
 
-	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager,
-		Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
+	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 		const std::string& modelName, const std::string& charaName, float colliderRadius) {
 
-		this->entity3DManager = entity3DManager;	// エンティティ3d
-		this->entity2DManager = entity2DManager;	// エンティティ2d
+		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables;	// 保存項目
 
 		// オブジェクトコンポーネント追加
 		objectComponent_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
-		objectComponent_->InitializeInstancing(entity3DManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
+		objectComponent_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
 			, Engine::Object3dInstansManager::TransparencyType::kNo);
 		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 
@@ -153,7 +150,7 @@ namespace Character {
 		visionComponent_ = std::make_unique<VisionComponent>();
 		visionComponent_->SetAlertView(120.0f, 100.0f);
 		visionComponent_->SetCombatView(90.0f, 100.0f);
-		visionComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
+		visionComponent_->SetLineCommon(entityManager->Get3DLineCommon());
 		visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
 
 
@@ -167,7 +164,7 @@ namespace Character {
 
 		// 戦闘
 		attackController_ = std::make_unique<AttackController>();
-		attackController_->Initialize(entity3DManager, globalVariables, GetCharacterParameterComponent(), this);
+		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
 
 		// 丸影用オブジェクトコンポーネント初期化
 		InitShadowObjectComponent(charaName);
@@ -207,7 +204,9 @@ namespace Character {
 			objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
 			objectComponentShadow_->GetWorldTransform().translate_.y = -3.0f;
 		}
+	
+		objectComponentShadow_->Update();
 	}
-
+	
 #pragma endregion // 基本処理
 }

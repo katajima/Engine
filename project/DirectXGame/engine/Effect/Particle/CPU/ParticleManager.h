@@ -67,7 +67,7 @@ namespace Engine {
 			return particleGroups[name];
 		}
 		// ライン共通クラス取得
-		LineCommon* GetLineCommon() { return lineCommon_; }
+		LineCommon* GetLineCommon() { return lineCommon; }
 
 
 		// パーティクルグループ作り(モデル)
@@ -79,7 +79,7 @@ namespace Engine {
 			EmitData::RasterizerType rasteType = EmitData::RasterizerType::MODE_SOLID_BACK, EmitData::BlendType blendType = EmitData::BlendType::MODE_ADD);
 
 		// カメラセット
-		void SetCamera(Camera* camera) { this->camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 
 		// フィールドエフェクト追加
 		void AddFieldEffect(Field::FieldEffect* field) {
@@ -113,12 +113,12 @@ namespace Engine {
 		void BlendMuliply();
 
 	private: // もらいもの
-		LightManager* lightManager_ = nullptr;	// ライト
-		DirectXCommon* dxCommon_ = nullptr;		// DirectX
-		SrvManager* srvManager_ = nullptr;		// SRV
-		EffectManager* efectManager_ = nullptr;	// エフェクト
-		LineCommon* lineCommon_ = nullptr;		// ライン
-		Camera* camera_ = nullptr;				// カメラ
+		LightManager* lightManager = nullptr;	// ライト
+		DirectXCommon* dxCommon = nullptr;		// DirectX
+		SrvManager* srvManager = nullptr;		// SRV
+		EffectManager* efectManager = nullptr;	// エフェクト
+		LineCommon* lineCommon = nullptr;		// ライン
+		Camera* camera = nullptr;				// カメラ
 	private:
 		// PSO設定
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;

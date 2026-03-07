@@ -152,7 +152,7 @@ namespace Engine {
 	public:
 		WorldTransform2d worldTransform;
 	private:
-		Engine::SpriteCommon* spriteCommon_ = nullptr;
+		Engine::SpriteCommon* spriteCommon = nullptr;
 
 		ShapeType type_;
 

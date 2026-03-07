@@ -1,7 +1,7 @@
 #include "Object3dInstansManager.h"
 
 #include"DirectXGame/engine/MyGame/MyGame.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 #include "DirectXGame/engine/3d/Model/Model.h"
@@ -9,17 +9,16 @@
 #pragma region Object3dInstansManager
 
 void Engine::Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
-	dxCommon_ = dxCommon;						// DX共通クラス
-	srvManager_ = dxCommon_->GetSrvManager();	// SRV管理クラス
+	this->dxCommon = dxCommon;						// DX共通クラス
+	this->srvManager = dxCommon->GetSrvManager();	// SRV管理クラス
+	modelManager = dxCommon->GetModelManager();		// モデル管理クラス
 
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(),
-		dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(),
+		dxCommon->GetDXCCompiler());
 
-	// モデル管理クラス
-	modelManager_ = dxCommon_->GetModelManager();
-
+	
 	// パイプライン生成
 	CreateGraphicsPipeline();
 }
@@ -124,7 +123,7 @@ void Engine::Object3dInstansManager::Update() {
 }
 
 void Engine::Object3dInstansManager::Draw() {
-	auto commandList = dxCommon_->GetCommandList();
+	auto commandList = dxCommon->GetCommandList();
 
 	for (auto& pair : objectGroups) {
 		ObjectGroup& group = pair.second;
@@ -135,7 +134,7 @@ void Engine::Object3dInstansManager::Draw() {
 
 		DrawCommonSetting(group.rasteType, group.blendType);
 
-		entity3DManager_->GetLightManager()->DrawLight({ true,true,true });
+		entity3DManager->GetLightManager()->DrawLight({ true,true,true });
 
 		group.mesh->material->GetCommandListMaterial(0);
 
@@ -148,7 +147,7 @@ void Engine::Object3dInstansManager::Draw() {
 			1, group.instancingSrvHandleGPU);
 
 		commandList->SetGraphicsRootDescriptorTable(
-			2, srvManager_->GetGPUDescriptorHandle());
+			2, srvManager->GetGPUDescriptorHandle());
 
 
 		group.mesh->GetCommandList();
@@ -163,7 +162,7 @@ void Engine::Object3dInstansManager::Draw() {
 }
 
 void Engine::Object3dInstansManager::DrawTransparency(){
-	auto commandList = dxCommon_->GetCommandList();
+	auto commandList = dxCommon->GetCommandList();
 
 	for (auto& pair : objectTranslucentGroups) {
 		ObjectGroup& group = pair.second;
@@ -174,7 +173,7 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 
 		DrawCommonSetting(group.rasteType, group.blendType);
 
-		entity3DManager_->GetLightManager()->DrawLight({ true,true,true });
+		entity3DManager->GetLightManager()->DrawLight({ true,true,true });
 
 		group.mesh->material->GetCommandListMaterial(0);
 
@@ -187,7 +186,7 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 			1, group.instancingSrvHandleGPU);
 
 		commandList->SetGraphicsRootDescriptorTable(
-			2, srvManager_->GetGPUDescriptorHandle());
+			2, srvManager->GetGPUDescriptorHandle());
 
 
 		group.mesh->GetCommandList();
@@ -207,31 +206,31 @@ void Engine::Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 	switch (blendType) {
 	case BlendType::MODE_ADD:
 		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
-			dxCommon_->GetCommandList()->SetPipelineState(
+			dxCommon->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[0].Get());
 		}
 		else {
-			dxCommon_->GetCommandList()->SetPipelineState(
+			dxCommon->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[1].Get());
 		}
 		break;
 	case BlendType::MODE_SUBTRACT:
 		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
-			dxCommon_->GetCommandList()->SetPipelineState(
+			dxCommon->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[2].Get());
 		}
 		else {
-			dxCommon_->GetCommandList()->SetPipelineState(
+			dxCommon->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[3].Get());
 		}
 		break;
 	case BlendType::MODE_MUlLIPLY:
 		if (rasteType == RasterizerType::MODE_SOLID_BACK) {
-			dxCommon_->GetCommandList()->SetPipelineState(
+			dxCommon->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[4].Get());
 		}
 		else {
-			dxCommon_->GetCommandList()->SetPipelineState(
+			dxCommon->GetCommandList()->SetPipelineState(
 				graphicsPipelineState[5].Get());
 		}
 		break;
@@ -241,11 +240,11 @@ void Engine::Object3dInstansManager::DrawCommonSetting(RasterizerType rasteType,
 
 
 	//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(
+	dxCommon->GetCommandList()->IASetPrimitiveTopology(
 		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -281,14 +280,14 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 	// 名前
 	objectGroup.name = name;
 	// モデル
-	objectGroup.mesh = model->modelData.mesh[0].get();
+	objectGroup.mesh = model->GetModelData().mesh[0].get();
 	objectGroup.mesh->UpdateVertexBuffer();
 	objectGroup.mesh->UpdateIndexBuffer();
 
 	objectGroup.model = model;
 
 	// GPUリソースの作成
-	objectGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(
+	objectGroup.resource = dxCommon->GetDXGIDevice()->CreateBufferResource(
 		sizeof(ObjectGPU) * kNumMaxInstance);
 	// マッピング
 	objectGroup.resource->Map(0, nullptr,
@@ -303,12 +302,12 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = srvManager_->Allocate();
-	objectGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(
+	objectGroup.srvIndex = srvManager->Allocate();
+	objectGroup.instancingSrvHandleCPU = srvManager->GetCPUDescriptorHandle(
 		objectGroup.srvIndex);
-	objectGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(
+	objectGroup.instancingSrvHandleGPU = srvManager->GetGPUDescriptorHandle(
 		objectGroup.srvIndex);
-	srvManager_->CreateSRVforStructuredBuffer(objectGroup.srvIndex,
+	srvManager->CreateSRVforStructuredBuffer(objectGroup.srvIndex,
 		objectGroup.resource.Get(),
 		kNumMaxInstance,
 		sizeof(ObjectGPU));
@@ -341,7 +340,7 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 
 
 	// GPUリソースの作成
-	objectGroup.resource = dxCommon_->GetDXGIDevice()->CreateBufferResource(
+	objectGroup.resource = dxCommon->GetDXGIDevice()->CreateBufferResource(
 		sizeof(ObjectGPU) * kNumMaxInstance);
 	// マッピング
 	objectGroup.resource->Map(0, nullptr,
@@ -356,12 +355,12 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 
 	// SRVの設定
 	// SRVインデックスの取得と設定
-	objectGroup.srvIndex = srvManager_->Allocate();
-	objectGroup.instancingSrvHandleCPU = srvManager_->GetCPUDescriptorHandle(
+	objectGroup.srvIndex = srvManager->Allocate();
+	objectGroup.instancingSrvHandleCPU = srvManager->GetCPUDescriptorHandle(
 		objectGroup.srvIndex);
-	objectGroup.instancingSrvHandleGPU = srvManager_->GetGPUDescriptorHandle(
+	objectGroup.instancingSrvHandleGPU = srvManager->GetGPUDescriptorHandle(
 		objectGroup.srvIndex);
-	srvManager_->CreateSRVforStructuredBuffer(objectGroup.srvIndex,
+	srvManager->CreateSRVforStructuredBuffer(objectGroup.srvIndex,
 		objectGroup.resource.Get(),
 		kNumMaxInstance,
 		sizeof(ObjectGPU));
@@ -378,7 +377,7 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	ObjectInstans&& object, int& id, MeshType type, TransparencyType transparencyType) {
 
 	if (MeshType::kModel == type) {
-		CreateObject3dGroup(name, texName, modelManager_->FindModel(name),RasterizerType::MODE_SOLID_BACK,BlendType::MODE_ADD, transparencyType);
+		CreateObject3dGroup(name, texName, modelManager->FindModel(name),RasterizerType::MODE_SOLID_BACK,BlendType::MODE_ADD, transparencyType);
 	}
 
 	object.color = { 1, 1, 1, 1 };
@@ -387,14 +386,14 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 
 	if (texName.empty()) {
 		if (transparencyType == TransparencyType::kNo) {
-			object.texIndex = objectGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
+			object.texIndex = objectGroups[name].model->GetModelData().mesh[0]->material->tex_.diffuseIndex;
 		}
 		else {
-			object.texIndex = objectTranslucentGroups[name].model->modelData.mesh[0]->material->tex_.diffuseIndex;
+			object.texIndex = objectTranslucentGroups[name].model->GetModelData().mesh[0]->material->tex_.diffuseIndex;
 		}
 	}
 	else {
-		object.texIndex = dxCommon_->GetTextureManager()->GetTextureIndexByFilePath(texName);
+		object.texIndex = dxCommon->GetTextureManager()->GetTextureIndexByFilePath(texName);
 	}
 
 	// ✅ ムーブ前にidを保存
@@ -712,7 +711,7 @@ void Engine::Object3dInstansManager::BlendMuliply() {
 
 #pragma region ObjectInstans
 
-void Engine::ObjectInstans::Initialize(Entity3DManager* entity3DManager, bool useCollider, bool rigidUpdate, Transform transfor) {
+void Engine::ObjectInstans::Initialize(EntityManager* entity3DManager, bool useCollider, bool rigidUpdate, Transform transfor) {
 	transform.Initialize();
 	transform.translate_ = transfor.translate;
 	transform.rotate_ = transfor.rotate;

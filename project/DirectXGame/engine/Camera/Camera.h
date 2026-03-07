@@ -38,7 +38,7 @@ namespace Engine {
 		void UpdateMatrix();
 		// 更新
 		void UpdateMatrix(const Vector3& targetPosition);
-		// いｍぐい更新
+		// ImGui更新
 		void UpdateImGui();
 		// トランスファー更新
 		void TransferMatrix();
@@ -75,7 +75,7 @@ namespace Engine {
 		//
 		Vector3 GetForward() const;
 		// ポストエフェクトマネージャー取得
-		PostEffectManager* GetPostEffectManager() { return postEffectManager_; }
+		PostEffectManager* GetPostEffectManager() { return postEffectManager; }
 
 		// カメラシェイクさせる
 		void SetShake(float time, Vector3 diectionRange);
@@ -128,8 +128,8 @@ namespace Engine {
 		};
 		DataGPU* data;
 	private:
-		DirectXCommon* dxCommon_;
-		PostEffectManager* postEffectManager_;
+		DirectXCommon* dxCommon = nullptr;
+		PostEffectManager* postEffectManager = nullptr;
 		std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
 		Input* input_;
 

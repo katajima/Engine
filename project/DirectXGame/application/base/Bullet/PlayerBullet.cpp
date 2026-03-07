@@ -8,10 +8,10 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 // 初期化
-void PlayerBullet::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 	// 基盤の初期化
-	BaseInitialize(entity3DManager, entity2DManager, globalVariables, position, camera, "playerStanBullet", "AnimatedCube.gltf");
+	BaseInitialize(entity3DManager, globalVariables, position, camera, "playerStanBullet", "AnimatedCube.gltf");
 
 	// オブジェクト生成
 	object_->GetWorldTransform().scale_ = provisionalData_.objectSize; // スケール設定

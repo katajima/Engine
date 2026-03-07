@@ -55,10 +55,10 @@ namespace Engine {
 
 
 
-		DXGIDevice* DXGIDevice_;
-		Command* command_;
-		DsvManager* dsvManager_;
-		SrvManager* srvManager_;
+		DXGIDevice* dxgiDevice = nullptr;
+		Command* command = nullptr;
+		DsvManager* dsvManager = nullptr;
+		SrvManager* srvManager = nullptr;
 
 	};
 }

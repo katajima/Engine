@@ -15,7 +15,7 @@
 namespace Engine {
 	// 前方宣言
 	class DirectXCommon;
-	class Entity3DManager;
+	class EntityManager;
 	class GlobalVariables;
 	class PrimitiveCommon;
 
@@ -29,9 +29,9 @@ namespace Engine {
 		~EffectComponent() = default;
 
 		// 初期化
-		void Init(Entity3DManager* entity3dManager, GlobalVariables* globalVariables);
+		void Init(EntityManager* entityManager, GlobalVariables* globalVariables);
 		// カメラ設定
-		void SetCamera(Camera* camera) { camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 		// 更新
 		void Update();
 		// 描画
@@ -39,7 +39,7 @@ namespace Engine {
 		// 描画エフェクト
 		void DrawEffect();
 		// GPUパーティクルマネージャー取得
-		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager_; }
+		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager; }
 
 	public: // パーティクルエミッター(CPU)
 
@@ -76,7 +76,7 @@ namespace Engine {
 		// 取得
 		template<typename T>
 		T* GetGpuEmitter(const std::string& name) {
-			return gpuParticleManager_->GetGpuParticleEmitter(name);
+			return gpuParticleManager->GetGpuParticleEmitter(name);
 		}
 
 
@@ -139,11 +139,11 @@ namespace Engine {
 
 
 	private:
-		Entity3DManager* entity3dManager_ = nullptr;
-		ParticleManager* particleManager_ = nullptr;
-		GlobalVariables* globalVariables_ = nullptr;
-		PrimitiveCommon* primitiveCommon_ = nullptr;
-		Engine::GpuParticleManager* gpuParticleManager_ = nullptr;
-		Engine::Camera* camera_ = nullptr;
+		EntityManager* entityManager = nullptr;
+		ParticleManager* particleManager = nullptr;
+		GlobalVariables* globalVariables = nullptr;
+		PrimitiveCommon* primitiveCommon = nullptr;
+		Engine::GpuParticleManager* gpuParticleManager = nullptr;
+		Engine::Camera* camera = nullptr;
 	};
 }

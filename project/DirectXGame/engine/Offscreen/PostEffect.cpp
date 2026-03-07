@@ -9,9 +9,9 @@
 void Engine::PostEffectData::Initialize(DirectXCommon* dxCommon, PostEffectType type)
 {
 	type_ = type;
-	dxCommon_ = dxCommon;
+	this->dxCommon = dxCommon;
 
-	vertexResource = dxCommon_->GetDXGIDevice()->CreateBufferResource(sizeof(ScreenVertexData) * 4);
+	vertexResource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(ScreenVertexData) * 4);
 	//リソースの先頭のアドレスを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点6つの分のサイズ
@@ -107,10 +107,10 @@ void Engine::PostEffectData::DrawRender()
 		cbGaussian_->SetGraphicsRootConstantBufferView(0);
 		break;
 	case PostEffectType::kOitline:
-		if (camera_) {
-			cbOutline_->Data()->projectionInverse = Inverse(camera_->GetProjectionMatrix());
-			cbOutline_->Data()->nearZ = camera_->GetNearZ();
-			cbOutline_->Data()->farZ = camera_->GetFarZ();
+		if (camera) {
+			cbOutline_->Data()->projectionInverse = Inverse(camera->GetProjectionMatrix());
+			cbOutline_->Data()->nearZ = camera->GetNearZ();
+			cbOutline_->Data()->farZ = camera->GetFarZ();
 		}
 		cbOutline_->SetGraphicsRootConstantBufferView(0);
 		break;
@@ -216,8 +216,8 @@ void Engine::PostEffectData::UpdateImgui()
 
 void Engine::PostEffectData::DrawColl()
 {
-	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
-	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+	dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); //VBVを設定
+	dxCommon->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }
 
 #pragma endregion

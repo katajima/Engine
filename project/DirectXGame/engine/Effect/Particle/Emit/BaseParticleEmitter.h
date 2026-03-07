@@ -171,8 +171,10 @@ namespace Engine {
 
 
 		EffectEmitData emitData_{}; // エミットデータ
-		GlobalVariables* globalVariables_ = nullptr;
-		ParticleManager* particleManager_ = nullptr;
-		LineCommon* lineCommon_ = nullptr;
+
+	protected:
+		GlobalVariables* globalVariables = nullptr;
+		ParticleManager* particleManager = nullptr;
+		LineCommon* lineCommon = nullptr;
 	};
 }

@@ -5,8 +5,7 @@
 // 前方宣言
 namespace Engine {
 	class Input;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 }
 namespace Character {
 	class BaseCharacter;
@@ -19,7 +18,7 @@ class SpecalPoint : public IHitReceiver {
 public:
 
 	// 初期化
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, int point,int id);
+	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, const Vector3& pos, int point,int id);
 	// 更新
 	void Update(float dt);
 	// 描画
@@ -70,7 +69,7 @@ private:
 class SpecalPointManager {
 public:
 	// 初期化
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables);
+	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
 	// 更新
 	void Update(float dt);
 	// ポイント出現
@@ -92,8 +91,7 @@ private:
 private:
 	Character::BasePlayer* target = nullptr;		// ターゲット
 private:
-	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
-	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	Engine::Camera* camera = nullptr;						// カメラ
 };

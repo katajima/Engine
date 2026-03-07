@@ -8,9 +8,7 @@ void MovementSystem::Update(const LocomotionContext& cxt, const MoveCommand& cmd
 
 
 	world.translate_ += cmd.finalVelocity;
-
-	// 方向処理
-	DirectionProcess(cxt);
+	direction_ = cmd.finalDirection;
 
 	// 回転処理
 	RotateProcess(cxt,world);
@@ -76,25 +74,4 @@ void MovementSystem::RotateProcess(const LocomotionContext& cxt, Engine::WorldTr
 	// rotationSpeed = 0.1f なら 10% だけ近づく
 	// ----------------------------
 	currentYaw += delta * rotationSpeed;
-}
-
-void MovementSystem::DirectionProcess(const LocomotionContext& cxt) {
-	if (!cxt.camera) {
-		return;
-	}
-	
-	Vector2 velo = cxt.input.GetData().moveShick;
-
-
-	if (velo.Length() == 0.0f) return;
-	Matrix4x4 cameraWorldMatrix = Inverse(cxt.camera->GetViewMatrix());
-
-	// カメラの向きに基づいて移動方向をワールド座標系に変換
-	Vector3 worldDirection = {
-		velo.x * cameraWorldMatrix.m[0][0] + velo.y * cameraWorldMatrix.m[2][0],
-		0.0f,
-		velo.x * cameraWorldMatrix.m[0][2] + velo.y * cameraWorldMatrix.m[2][2]
-	};
-
-	direction_ = Normalize(worldDirection);
 }

@@ -13,15 +13,15 @@
 
 void Engine::ParticleManager2d::Initialize(DirectXCommon* dxCommon, EffectManager* effectManager)
 {
-	dxCommon_ = dxCommon;			// DX共通クラス
-	effectManager_ = effectManager;	// エフェクト管理クラス
+	this->dxCommon = dxCommon;			// DX共通クラス
+	this->effectManager = effectManager;	// エフェクト管理クラス
 
 	// SRV管理クラス
-	srvManager_ = dxCommon_->GetSrvManager();
+	srvManager = dxCommon->GetSrvManager();
 	
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(), dxCommon->GetDXCCompiler());
 
 	// パイプライン生成
 	CreateGraphicsPipeline();
@@ -58,7 +58,7 @@ void Engine::ParticleManager2d::Update() {
 					ParticleFanction::Effect(group, particleIterator, deltaTime);
 
 					// パーティクルデータをGPUに送る
-					ParticleFanction::WorldDataForGPU(group, particleIterator, camera_);
+					ParticleFanction::WorldDataForGPU(group, particleIterator, camera);
 
 					// 加算 
 					++group.instanceCount;
@@ -71,7 +71,7 @@ void Engine::ParticleManager2d::Update() {
 }
 // 描画
 void Engine::ParticleManager2d::Draw() {
-	auto commandList = dxCommon_->GetCommandList();
+	auto commandList = dxCommon->GetCommandList();
 
 	for (auto& pair : particleGroups) {
 		ParticleGroup2d& group = pair.second;
@@ -107,7 +107,7 @@ void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, cons
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, sprite);
+	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, sprite);
 }
 
 void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, const std::string textureFilePath, Primitive2D* primitive2d)
@@ -127,15 +127,15 @@ void Engine::ParticleManager2d::CreateParticleGroup(const std::string name, cons
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, modelMesh);
+	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, modelMesh);
 }
 
 void Engine::ParticleManager2d::DrawCommonSetting() {
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+	dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
 	//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 };
 
 

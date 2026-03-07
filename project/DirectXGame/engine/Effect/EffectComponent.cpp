@@ -1,15 +1,15 @@
 #include "EffectComponent.h"
 #include <DirectXGame/engine/DirectX/Common/DirectXCommon.h>
-#include <DirectXGame/engine/Manager/Entity3D/Entity3DManager.h>
+#include <DirectXGame/engine/Manager/Entity/EntityManager.h>
 #include <DirectXGame/engine/MyGame/MyGame.h>
-void Engine::EffectComponent::Init(Entity3DManager* entity3dManager, GlobalVariables* globalVariables)
+void Engine::EffectComponent::Init(EntityManager* entityManager, GlobalVariables* globalVariables)
 {
-	assert(entity3dManager && globalVariables);
-	entity3dManager_ = entity3dManager;
-	globalVariables_ = globalVariables;
-	particleManager_ = entity3dManager_->GetEffectManager()->GetParticleManager();
-	gpuParticleManager_ = entity3dManager_->GetEffectManager()->GetGpuParticleManager();
-	primitiveCommon_ = entity3dManager_->GetPrimitiveCommon();
+	assert(entityManager && globalVariables);
+	this->entityManager = entityManager;
+	this->globalVariables = globalVariables;
+	this->particleManager = entityManager->GetEffectManager()->GetParticleManager();
+	this->gpuParticleManager = entityManager->GetEffectManager()->GetGpuParticleManager();
+	this->primitiveCommon = entityManager->GetPrimitiveCommon();
 }
 
 void Engine::EffectComponent::AddEmitter(const std::string& name, const std::string& particleName, EmitterShapeType type, EmitData::EmitType emittype, WorldTransform* parent)
@@ -60,7 +60,7 @@ void Engine::EffectComponent::AddEmitter(const std::string& name, const std::str
 	}
 
 	// 初期化
-	emitter->Initialize(particleManager_, globalVariables_, name, particleName);
+	emitter->Initialize(particleManager, globalVariables, name, particleName);
 
 	// 親子関係を設定
 	if(parent) {
@@ -81,20 +81,20 @@ void Engine::EffectComponent::AddGPUParticleEmitter(const std::string& name, con
 	switch (type)
 	{
 	case EmitterType::Sphere:
-		gpuParticleManager_->CreateEmitter<GpuParticleEmitterSphere>(name);
-		gpuParticleManager_->SetEmitteToGroup(name, particleName);
+		gpuParticleManager->CreateEmitter<GpuParticleEmitterSphere>(name);
+		gpuParticleManager->SetEmitteToGroup(name, particleName);
 
-		gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterSphere>(name)->GetWorldTransform().parent_ = parent;
+		gpuParticleManager->GetGpuParticleEmitter<GpuParticleEmitterSphere>(name)->GetWorldTransform().parent_ = parent;
 		break;
 	case EmitterType::AABB:
-		gpuParticleManager_->CreateEmitter<GpuParticleEmitterAABB>(name);
-		gpuParticleManager_->SetEmitteToGroup(name, particleName);
-		gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterAABB>(name)->GetWorldTransform().parent_ = parent;
+		gpuParticleManager->CreateEmitter<GpuParticleEmitterAABB>(name);
+		gpuParticleManager->SetEmitteToGroup(name, particleName);
+		gpuParticleManager->GetGpuParticleEmitter<GpuParticleEmitterAABB>(name)->GetWorldTransform().parent_ = parent;
 		break;
 	case EmitterType::Point:
-		gpuParticleManager_->CreateEmitter<GpuParticleEmitterPoint>(name);
-		gpuParticleManager_->SetEmitteToGroup(name, particleName);
-		gpuParticleManager_->GetGpuParticleEmitter<GpuParticleEmitterPoint>(name)->GetWorldTransform().parent_ = parent;
+		gpuParticleManager->CreateEmitter<GpuParticleEmitterPoint>(name);
+		gpuParticleManager->SetEmitteToGroup(name, particleName);
+		gpuParticleManager->GetGpuParticleEmitter<GpuParticleEmitterPoint>(name)->GetWorldTransform().parent_ = parent;
 		break;
 	default:
 		break;
@@ -114,8 +114,8 @@ void Engine::EffectComponent::AddTrailEffect(const std::string name, const std::
 
 	// トレイルエフェクトの生成
 	std::unique_ptr<TrailEffect> trail = std::make_unique<TrailEffect>();
-	trail->Initialize(entity3dManager_->GetEffectManager(), tex, maxTime, color);
-	trail->SetCamera(camera_);
+	trail->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
+	trail->SetCamera(camera);
 	trail->SetOffset(offsetStr, offsetEnd, parent);
 
 	// マップに追加
@@ -189,7 +189,7 @@ void Engine::EffectComponent::AddPrimitive(const std::string& name, const std::s
 	}
 
 	// 初期化
-	primitive->Initialize(primitiveCommon_, tex, Color(1, 1, 1, 1));
+	primitive->Initialize(primitiveCommon, tex, Color(1, 1, 1, 1));
 	
 	// マップに格納
 	primitives3D_[type][name] = std::move(primitive);

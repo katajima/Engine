@@ -58,8 +58,8 @@ namespace Engine {
         // 次に使用するRTVインデックス
         uint32_t useIndex = 0;
     private:
-        DXGIDevice* DXGIDevice_;
-        Command* command_;
+        DXGIDevice* dxgiDevice = nullptr;
+        Command* command = nullptr;
 
     };
 }

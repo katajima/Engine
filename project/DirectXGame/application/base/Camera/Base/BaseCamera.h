@@ -24,7 +24,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
+	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position) = 0;
 
 	///< summary>
 	/// 更新
@@ -77,7 +77,7 @@ protected:
 	Engine::Object3d* lockOnObject = nullptr;		// ロックオン対象
 	CameraManager* cameraManeger = nullptr;	// カメラ管理
 protected:
-	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
+	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	InputSystem* inputSystem = nullptr;						// 入力(使わないならnullptr)
 

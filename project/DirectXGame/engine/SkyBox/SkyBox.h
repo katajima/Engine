@@ -14,7 +14,7 @@
 
 // 前方宣言
 namespace Engine {
-	class Entity3DManager;
+	class EntityManager;
 
 	/// <summary>
 	/// スカイボックスクラス
@@ -23,7 +23,7 @@ namespace Engine {
 	{
 	public:
 		// 初期化
-		void Initialize(Entity3DManager* entity3DManager, std::string txtueName);
+		void Initialize(EntityManager* entity3DManager, std::string txtueName);
 		// 更新
 		void Update();
 		// 描画
@@ -38,7 +38,7 @@ namespace Engine {
 		std::unique_ptr<Material> material;
 
 	private:
-		Entity3DManager* entity3DManager_;
+		EntityManager* entityManager = nullptr;
 
 	};
 }

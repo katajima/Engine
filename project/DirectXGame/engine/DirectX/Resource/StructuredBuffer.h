@@ -26,12 +26,12 @@ namespace Engine {
 		// 生成
 		void CreateBuffer(DirectXCommon* dxCommon, int num = 1, bool useUav = false)
 		{
-			dxCommon_ = dxCommon;	// DX共通クラス
+			this->dxCommon = dxCommon;	// DX共通クラス
 			useUav_ = useUav;	// uavを使うか
 			num_ = num;			// 生成個数
 
 			barrier_ = std::make_unique<Barrier>();
-			barrier_->Initialize(dxCommon_->GetCommand());
+			barrier_->Initialize(dxCommon->GetCommand());
 
 			// リソース生成
 			if (useUav_) {
@@ -51,16 +51,16 @@ namespace Engine {
 
 
 
-			srvIndex_ = dxCommon_->GetSrvManager()->Allocate();
-			srvHandleCPU_ = dxCommon_->GetSrvManager()->GetCPUDescriptorHandle(srvIndex_);
-			srvHandleGPU_ = dxCommon_->GetSrvManager()->GetGPUDescriptorHandle(srvIndex_);
-			dxCommon_->GetSrvManager()->CreateSRVforStructuredBuffer(srvIndex_, resource_.Get(), num_, sizeof(Type));
+			srvIndex_ = dxCommon->GetSrvManager()->Allocate();
+			srvHandleCPU_ = dxCommon->GetSrvManager()->GetCPUDescriptorHandle(srvIndex_);
+			srvHandleGPU_ = dxCommon->GetSrvManager()->GetGPUDescriptorHandle(srvIndex_);
+			dxCommon->GetSrvManager()->CreateSRVforStructuredBuffer(srvIndex_, resource_.Get(), num_, sizeof(Type));
 
 			if (useUav_) {
-				uavIndex_ = dxCommon_->GetSrvManager()->Allocate();
-				uavHandleCPU_ = dxCommon_->GetSrvManager()->GetCPUDescriptorHandle(uavIndex_);
-				uavHandleGPU_ = dxCommon_->GetSrvManager()->GetGPUDescriptorHandle(uavIndex_);
-				dxCommon_->GetSrvManager()->CreateUAVforStructuredBuffer(uavIndex_, resource_.Get(), num_, sizeof(Type));
+				uavIndex_ = dxCommon->GetSrvManager()->Allocate();
+				uavHandleCPU_ = dxCommon->GetSrvManager()->GetCPUDescriptorHandle(uavIndex_);
+				uavHandleGPU_ = dxCommon->GetSrvManager()->GetGPUDescriptorHandle(uavIndex_);
+				dxCommon->GetSrvManager()->CreateUAVforStructuredBuffer(uavIndex_, resource_.Get(), num_, sizeof(Type));
 
 				//
 				barrier_->RegisterInitialState(resource_.Get(), D3D12_RESOURCE_STATE_COMMON);
@@ -76,7 +76,7 @@ namespace Engine {
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			}
 
-			dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(index, srvHandleGPU_);
+			dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(index, srvHandleGPU_);
 
 			if (useUav_) {
 				// SRV → UAV に戻す
@@ -88,12 +88,12 @@ namespace Engine {
 		{
 			if (useUav_) {
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-				dxCommon_->GetCommandList()->SetComputeRootDescriptorTable(index, uavHandleGPU_);
+				dxCommon->GetCommandList()->SetComputeRootDescriptorTable(index, uavHandleGPU_);
 				barrier_->TransitionResource(resource_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			}
 			else {
 				// SRV としてバインド（ComputeShader が t# で読み取る場合）
-				dxCommon_->GetCommandList()->SetComputeRootDescriptorTable(index, srvHandleGPU_);
+				dxCommon->GetCommandList()->SetComputeRootDescriptorTable(index, srvHandleGPU_);
 			}
 		}
 		// UAV依存
@@ -110,7 +110,7 @@ namespace Engine {
 		// StructuredBuffer クラス内に追加するメソッド
 		void CopyFrom(const void* srcData, size_t byteSize)
 		{
-			assert(dxCommon_ && "StructuredBuffer::CopyFrom: dxCommon_ is null");
+			assert(dxCommon && "StructuredBuffer::CopyFrom: dxCommon is null");
 			assert(srcData && "StructuredBuffer::CopyFrom: srcData is null");
 			size_t capacity = static_cast<size_t>(num_) * sizeof(Type);
 			assert(byteSize <= capacity && "StructuredBuffer::CopyFrom: copy size exceeds buffer capacity");
@@ -126,8 +126,8 @@ namespace Engine {
 
 			// ---------- UAV (DefaultHeap) 用バッファへのアップロード ----------
 			// Upload 用バッファを作成してから CopyResource / CopyBufferRegion
-			ComPtr<ID3D12Device> device = dxCommon_->GetDevice(); // dxCommon に GetDevice() を公開している想定
-			ComPtr<ID3D12GraphicsCommandList> cmd = dxCommon_->GetCommandList(); //  コマンドリスト取得
+			ComPtr<ID3D12Device> device = dxCommon->GetDevice(); // dxCommon に GetDevice() を公開している想定
+			ComPtr<ID3D12GraphicsCommandList> cmd = dxCommon->GetCommandList(); //  コマンドリスト取得
 
 			// Upload バッファを作成
 			ComPtr<ID3D12Resource> uploadBuffer;
@@ -203,7 +203,7 @@ namespace Engine {
 		}
 
 	private:
-		DirectXCommon* dxCommon_ = nullptr;
+		DirectXCommon* dxCommon = nullptr;
 
 		std::unique_ptr<Barrier> barrier_ = nullptr;	// バリア
 

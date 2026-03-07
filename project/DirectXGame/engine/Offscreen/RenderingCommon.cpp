@@ -4,21 +4,21 @@
 
 void Engine::RenderingCommon::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;	// DX共通クラス
+	this->dxCommon = dxCommon;	// DX共通クラス
 
 	// 各ポストエフェクト初期化
-	copy_.Initialize(dxCommon_,"CopyImage");		
-	grayScale_.Initialize(dxCommon_, "GrayScale");
-	sepia_.Initialize(dxCommon_,"Sepia");
-	vignette_.Initialize(dxCommon_, "Vignette");
-	smoothing_.Initialize(dxCommon_, "Smoothing");
-	gaussian_.Initialize(dxCommon_, "Gaussian");
-	outline_.Initialize(dxCommon_, "Outline");
-	radialBlur_.Initialize(dxCommon_, "RadialBlur");
-	dissovle_.Initialize(dxCommon_, "Dissovle");
-	random_.Initialize(dxCommon_, "Random");
-	bloom_.Initialize(dxCommon_, "BloomExtract");
-	cimbin_.Initialize(dxCommon_, "BloomCombine");
+	copy_.Initialize(dxCommon,"CopyImage");		
+	grayScale_.Initialize(dxCommon, "GrayScale");
+	sepia_.Initialize(dxCommon, "Sepia");
+	vignette_.Initialize(dxCommon, "Vignette");
+	smoothing_.Initialize(dxCommon, "Smoothing");
+	gaussian_.Initialize(dxCommon, "Gaussian");
+	outline_.Initialize(dxCommon, "Outline");
+	radialBlur_.Initialize(dxCommon, "RadialBlur");
+	dissovle_.Initialize(dxCommon, "Dissovle");
+	random_.Initialize(dxCommon, "Random");
+	bloom_.Initialize(dxCommon, "BloomExtract");
+	cimbin_.Initialize(dxCommon, "BloomCombine");
 	
 }
 

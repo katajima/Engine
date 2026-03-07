@@ -163,7 +163,7 @@ namespace Engine {
 
 	private: //メンバ変数
 		//WindowsAPI
-		WinApp* winApp_ = nullptr;
+		WinApp* winApp = nullptr;
 		//キーボードデバイス生成
 		Microsoft::WRL::ComPtr<IDirectInputDevice8> keyboard;
 		Microsoft::WRL::ComPtr<IDirectInput8> directInput = nullptr;

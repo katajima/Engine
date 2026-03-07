@@ -7,15 +7,15 @@
 
 void Engine::ModelManager::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;	// DX共通クラス
+	this->dxCommon = dxCommon;	// DX共通クラス
 
-	command_ = dxCommon_->GetCommand();			// コマンド
-	DXGIDevice_ = dxCommon_->GetDXGIDevice();	// デバイス
-	srvManager_ = dxCommon_->GetSrvManager();	// SRV管理クラス
+	command = dxCommon->GetCommand();			// コマンド
+	dxgiDevice = dxCommon->GetDXGIDevice();	// デバイス
+	srvManager = dxCommon->GetSrvManager();	// SRV管理クラス
 
 	// モデル共通クラス初期化
 	modelCommon_ = std::make_unique<ModelCommon>();
-	modelCommon_->Initialize(command_, DXGIDevice_, srvManager_);
+	modelCommon_->Initialize(command, dxgiDevice, srvManager);
 }
 
 void Engine::ModelManager::LoadModel(const std::string& filePath, const std::string& dire)
@@ -33,7 +33,7 @@ void Engine::ModelManager::LoadModel(const std::string& filePath, const std::str
 	}
 	//モデルの生成とファイル読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(dxCommon_,modelCommon_.get(), "./resources/Models", filePath, dire);
+	model->Initialize(dxCommon,modelCommon_.get(), "./resources/Models", filePath, dire);
 
 	// モデルをmapコンテナに格納
 	models.insert(std::make_pair(filePath, std::move(model)));
@@ -52,12 +52,12 @@ void Engine::ModelManager::LoadModelAsync(const std::string& filePath, const std
 	// 非同期に読み込み開始
 	loadingFutures_.push_back(std::async(std::launch::async, [this, filePath, dire]() {
 		std::unique_ptr<Model> model = std::make_unique<Model>();
-		model->Initialize(dxCommon_, modelCommon_.get(), "./resources/Models", filePath, dire);
+		model->Initialize(dxCommon, modelCommon_.get(), "./resources/Models", filePath, dire);
 
 		// GPUにリソース記録が終わったあと、必ずキックして完了を待つ（非同期内）
-		auto* command = dxCommon_->GetCommand();
+		auto* command = dxCommon->GetCommand();
 		command->KickCommand();
-		dxCommon_->GetFence()->WaitGPU();
+		dxCommon->GetFence()->WaitGPU();
 		command->ResetCommand();
 
 		{
@@ -75,9 +75,9 @@ void Engine::ModelManager::WaitAllLoadFinished()
 	loadingFutures_.clear();
 
 	
-	auto* command = dxCommon_->GetCommand();
+	auto* command = dxCommon->GetCommand();
 	command->KickCommand();            // Close & ExecuteCommandLists
-	dxCommon_->GetFence()->WaitGPU();  // 完了待ち
+	dxCommon->GetFence()->WaitGPU();  // 完了待ち
 	command->ResetCommand();           // 次回描画準備
 }
 

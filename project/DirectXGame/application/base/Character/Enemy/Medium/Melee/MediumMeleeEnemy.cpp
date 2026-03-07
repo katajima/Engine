@@ -1,15 +1,14 @@
 #include "MediumMeleeEnemy.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void MediumMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void MediumMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(inputSystem, entity3DManager, entity2DManager, globalVariables, position, camera, "enemy.gltf", "MediumMeleeEnemy", 2);
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemy.gltf", "MediumMeleeEnemy", 2);
 
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 
@@ -105,7 +104,7 @@ namespace Character {
 
 	void MediumMeleeEnemy::InitParticle()
 	{
-		Engine::ParticleManager* particleManager = entity3DManager->GetEffectManager()->GetParticleManager();
+		Engine::ParticleManager* particleManager = entityManager->GetEffectManager()->GetParticleManager();
 
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();

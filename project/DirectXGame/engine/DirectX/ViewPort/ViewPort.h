@@ -19,6 +19,6 @@ namespace Engine {
 		void SettingViewport();
 	private:
 		// コマンドのインスタンスを受け取る箱
-		Command* command_ = nullptr;
+		Command* command = nullptr;
 	};
 }

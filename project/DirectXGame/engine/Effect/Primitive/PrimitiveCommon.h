@@ -35,7 +35,7 @@ namespace Engine {
 		// 描画準備
 		void DrawCommonSetting(PsoType type = PsoType::kDefalt);
 		// DirectX共通クラス取得
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 	private:
 		// ルートシグネチャの作成
 		void CreateRootSignature();
@@ -43,7 +43,7 @@ namespace Engine {
 		void CreateGraphicsPipeline();
 
 	private:
-		DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 

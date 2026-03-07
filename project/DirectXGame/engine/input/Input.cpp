@@ -47,10 +47,10 @@ void Engine::Input::Intialize(WinApp* winApp)
 	HRESULT result;
 
 	// 借りてきたWinAppのインスタンスを記録
-	this->winApp_ = winApp;
+	this->winApp = winApp;
 
 	//　DirectInputのインスタンス生成
-	result = DirectInput8Create(winApp_->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
+	result = DirectInput8Create(winApp->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
 	assert(SUCCEEDED(result));
 
 	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
@@ -59,7 +59,7 @@ void Engine::Input::Intialize(WinApp* winApp)
 	result = keyboard->SetDataFormat(&c_dfDIKeyboard);
 	assert(SUCCEEDED(result));
 	//排他制御レベルセット
-	result = keyboard->SetCooperativeLevel(winApp_->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	result = keyboard->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 
 
@@ -70,7 +70,7 @@ void Engine::Input::Intialize(WinApp* winApp)
 	result = mouseDevice_->SetDataFormat(&c_dfDIMouse);
 	assert(SUCCEEDED(result));
 
-	result = mouseDevice_->SetCooperativeLevel(winApp_->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	result = mouseDevice_->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	assert(SUCCEEDED(result));
 
 	// XInput 初期化（安全のため）
@@ -167,7 +167,7 @@ Vector2 Engine::Input::GetMousePosition() const
 	POINT mousePos;
 	GetCursorPos(&mousePos);
 
-	ScreenToClient(winApp_->GetHwnd(), &mousePos);
+	ScreenToClient(winApp->GetHwnd(), &mousePos);
 
 	Vector2 result;
 	result.x = static_cast<float>(mousePos.x);

@@ -6,13 +6,13 @@
 #include "DirectXGame/engine/Effect/Primitive/Primitive.h"
 
 #include "DirectXGame/engine/3d/Model/ModelCommon.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelData.h"
 
 
-void Engine::RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModelType objectType, PSOType rasterizerType)
+void Engine::RenderComponent::Init(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType)
 {
-	entity3DManager_ = entity3DManager;	// エンティティ3d
+	this->entityManager = entityManager;	// エンティティ3d
 	objectType_ = objectType;			// オブジェクトタイプ
 	rasterizerType_ = rasterizerType;	// ラスタライザタイプ
 
@@ -50,7 +50,7 @@ void Engine::RenderComponent::Init(Entity3DManager* entity3DManager, ObjectModel
 void Engine::RenderComponent::Update()
 {
 	// なにかしら見た目があるなら
-	if (model || primitive_ || skyBox_ || ocean_) {
+	if (model || primitive || skyBox || ocean) {
 		isSkin_ = true;
 	}
 	else {
@@ -64,8 +64,8 @@ void Engine::RenderComponent::Draw()
 	if (!isDraw) return;
 	if (!isSkin_) return;
 
-	SkyBoxCommon* skyBoxCommon = entity3DManager_->GetSkyBoxCommon();
-	OceanManager* oceanManager = entity3DManager_->GetOceanManager();
+	SkyBoxCommon* skyBoxCommon = entityManager->GetSkyBoxCommon();
+	OceanManager* oceanManager = entityManager->GetOceanManager();
 
 	switch (objectType_)
 	{
@@ -75,7 +75,7 @@ void Engine::RenderComponent::Draw()
 			std::vector<ModelMesh*> opa;
 
 			int i = 0;
-			for (auto& mesh : model->modelData.mesh) {
+			for (auto& mesh : model->GetModelData().mesh) {
 				
 				//mesh->material->SetGPUMaterialInstance(materialInstances_[i], cbResources_[i].get());
 
@@ -109,7 +109,7 @@ void Engine::RenderComponent::Draw()
 				mesh->GetCommandList();
 
 				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-				entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+				entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
 					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 			}
 
@@ -131,7 +131,7 @@ void Engine::RenderComponent::Draw()
 				mesh->GetCommandList();
 
 				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-				entity3DManager_->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
+				entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
 					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 			}
 		}
@@ -169,31 +169,31 @@ void Engine::RenderComponent::Draw()
 		}
 		break;
 	case ObjectModelType::kPrimitive:
-		if (primitive_) {
+		if (primitive) {
 
-			primitive_->DrawSetting(primitive_->GetPsoType());
+			primitive->DrawSetting(primitive->GetPsoType());
 
-			transfomation_->GetCommandList(1);
+			transfomation->GetCommandList(1);
 
-			primitive_->Draw();
+			primitive->Draw();
 		}
 		break;
 	case ObjectModelType::kSkyBox:
-		if (skyBox_) {
+		if (skyBox) {
 			skyBoxCommon->DrawCommonSetting();
 
-			transfomation_->GetCommandList(1);
+			transfomation->GetCommandList(1);
 
-			skyBox_->Draw();
+			skyBox->Draw();
 		}
 		break;
 	case ObjectModelType::kOcean:
-		if (ocean_) {
+		if (ocean) {
 			oceanManager->DrawCommonSetting();
 
 			DrawSettingOcean();
 
-			ocean_->Draw();
+			ocean->Draw();
 		}
 		break;
 	}
@@ -215,13 +215,13 @@ float Engine::RenderComponent::GetAlpha()
 		a = model->GetMaterialAlpha();
 		break;
 	case ObjectModelType::kPrimitive:
-		a = primitive_->GetMaterial()->GetMaterialInstance().color.a;
+		a = primitive->GetMaterial()->GetMaterialInstance().color.a;
 		break;
 	case ObjectModelType::kSkyBox:
-		a = skyBox_->GetMaterial()->GetMaterialInstance().color.a;
+		a = skyBox->GetMaterial()->GetMaterialInstance().color.a;
 		break;
 	case ObjectModelType::kOcean:
-		a = ocean_->GetMaterial()->GetMaterialInstance().color.a;
+		a = ocean->GetMaterial()->GetMaterialInstance().color.a;
 		break;
 	default:
 		a = 1.0f;
@@ -233,20 +233,20 @@ float Engine::RenderComponent::GetAlpha()
 
 void Engine::RenderComponent::ObjectNormalTypeDiscrimination(PSOType type)
 {
-	Object3dCommon* object = entity3DManager_->GetObject3dCommon();
+	Object3dCommon* object = entityManager->GetObject3dCommon();
 
 	object->DrawCommonSetting(type);
 }
 
 void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 {
-	SkinningConmmon* skinning = entity3DManager_->GetSkinningConmmon();
+	SkinningConmmon* skinning = entityManager->GetSkinningConmmon();
 
 	// 描画前準備
 	skinning->DrawComputeSetting();
 
 	// メッシュごとに
-	for (auto& mesh : model->modelData.mesh) {
+	for (auto& mesh : model->GetModelData().mesh) {
 
 		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(1, mesh->skinCluster->paletteSrvHandle.second);
 		skinning->GetDxCommon()->GetCommandList()->SetComputeRootDescriptorTable(2, mesh->skinCluster->inputVertexSrvHandle.second);
@@ -274,38 +274,38 @@ void Engine::RenderComponent::ObjectSkinningTypeDiscrimination(PSOType type)
 void Engine::RenderComponent::DrawSetting()
 {
 	// ライト
-	entity3DManager_->GetLightManager()->DrawLight();
+	entityManager->GetLightManager()->DrawLight();
 
 	// 位置
-	transfomation_->GetCommandList(1);
-	transfomation_->GetCommandList(10);
+	transfomation->GetCommandList(1);
+	transfomation->GetCommandList(10);
 
 	// カメラ
-	camera_->GetCommandList(4);
+	camera->GetCommandList(4);
 }
 
 void Engine::RenderComponent::DrawSettingSkin()
 {
 	// ライト
-	entity3DManager_->GetLightManager()->DrawLight();
+	entityManager->GetLightManager()->DrawLight();
 	// 位置
-	transfomation_->GetCommandList(1);
+	transfomation->GetCommandList(1);
 	// カメラ
-	camera_->GetCommandList(4);
+	camera->GetCommandList(4);
 }
 
 void Engine::RenderComponent::DrawSettingOcean()
 {
 	// 描画前準備
-	entity3DManager_->GetOceanManager()->DrawCommonSetting();
+	entityManager->GetOceanManager()->DrawCommonSetting();
 
 	// ライト
-	entity3DManager_->GetLightManager()->DrawLight();
+	entityManager->GetLightManager()->DrawLight();
 	// 位置
-	transfomation_->GetCommandList(1);
-	transfomation_->GetCommandList(9);
+	transfomation->GetCommandList(1);
+	transfomation->GetCommandList(9);
 	// カメラ
-	camera_->GetCommandList(4);
+	camera->GetCommandList(4);
 }
 
 #pragma region MyRegion
@@ -315,12 +315,12 @@ void Engine::RenderComponent::SetModel(Model* model) {
 
 	materialInstances_.clear();
 	int i = 0;
-	for (auto& mesh : model->modelData.mesh){
+	for (auto& mesh : model->GetModelData().mesh) {
 		MaterialInstance matInst;
 
 		std::unique_ptr<ConstantBuffer<Material::DataGPU>> cb =
 			std::make_unique<ConstantBuffer<Material::DataGPU>>();
-		cb->CreateBuffer(entity3DManager_->GetCameraCommon()->GetDxCommon());
+		cb->CreateBuffer(entityManager->GetCameraCommon()->GetDxCommon());
 		cbResources_.push_back(std::move(cb));
 
 

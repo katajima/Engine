@@ -18,9 +18,7 @@ namespace Engine {
         // 初期化
         // 初期化
         void Initialize(GlobalVariables* globalVariables, const AABB& sceneBounds) {
-            globalVariables_ = globalVariables;
-            // オクツリー初期化（シーン全体のAABBと深さなど指定）
-            octree_ = std::make_unique<Octree>(sceneBounds, 4, 2, 2, 2);
+            this->globalVariables = globalVariables;
         }
 
         // 動的コライダーコンポーネント追加
@@ -82,9 +80,7 @@ namespace Engine {
         std::unordered_set<ColliderComponent2D*> registeredDynamic_;
         std::unordered_set<ColliderComponent2D*> registeredStatic_;
 
-        GlobalVariables* globalVariables_ = nullptr;      // 保存
-
-        std::unique_ptr<Octree> octree_; // オクツリー管理
+        GlobalVariables* globalVariables = nullptr;      // 保存
     public:
 
         CollisionManager2d() = default;

@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/struct/Structs3D.h"
 
-struct InputData {
+struct PlayerInputData {
 	// 移動スティック(左スティック)
 	Vector2 moveShick;
 	// 視点スティック(右スティック)
@@ -27,4 +27,16 @@ struct InputData {
 
 	// コントローラが接続されているか
 	bool isControllerConnected = false;
+};
+
+/// <summary>
+/// ゲーム操作に使う入力データの構造体
+/// </summary>
+struct GameInputData {
+	// 移動スティック(左スティック)
+	Vector2 moveShick;
+	// 決定
+	bool decisionTrigger = false;
+	// ポーズ
+	bool pauseTrigger = false;
 };

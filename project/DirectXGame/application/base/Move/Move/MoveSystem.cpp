@@ -3,26 +3,37 @@
 
 void MoveSystem::Initialize() {}
 
-void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::WorldTransform& world, InputSystem* input){
+void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator){
 	// 攻撃中は通常の移動処理しない
 	if (ctx.isAttacking) return;
 
 	MoveRequest request{};
 
 	// 移動処理
-	Vector3 velo{};
+	Vector2 dire = ctx.input.GetPlayerInputData().moveShick;
+	Vector3 moveVelo{};
+
+	if (dire.Length() == 0.0f) return;
+	Matrix4x4 cameraWorldMatrix = Inverse(ctx.camera->GetViewMatrix());
+
+	// カメラの向きに基づいて移動方向をワールド座標系に変換
+	Vector3 worldDirection = {
+		dire.x * cameraWorldMatrix.m[0][0] + dire.y * cameraWorldMatrix.m[2][0],
+		0.0f,
+		dire.x * cameraWorldMatrix.m[0][2] + dire.y * cameraWorldMatrix.m[2][2]
+	};
 
 	// 動いているなら
-	if (ctx.input.GetData().moveShick.x != 0.0f || ctx.input.GetData().moveShick.y != 0.0f) {
+	if (dire.Length() != 0.0f) {
 		// スピード処理
 		SpeedProcess(ctx);
 		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-		velo = Multiply(ctx.cameraDirection, speed_);
+		moveVelo = Multiply(worldDirection, speed_);
 	}
 
 	// 移動速度をセット
-	velocity_.x = velo.x;
-	velocity_.z = velo.z;
+	velocity_.x = moveVelo.x;
+	velocity_.z = moveVelo.z;
 
 	// 状態処理
 	StateProcess();
@@ -30,9 +41,18 @@ void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coo
 	// アニメーション速度処理
 	AnimationSpeedProcess();
 
+	
+
+	
+
+
+
 	// 移動可能かどうか
 	if (canMove_) {
 		request.velocity = velocity_ * ctx.dt;
+		request.direction = Normalize(worldDirection);
+		request.priority = 1;
+
 		coordinator.Request(request);
 	}
 	else {
@@ -68,7 +88,7 @@ void MoveSystem::SpeedProcess(const LocomotionContext& ctx)
 
 	// スティックの倒し方に応じてスピードを変化させる
 	if (data_.isStickToSpeed) {
-		float stickLen = Math::Clamp(std::abs(ctx.input.GetData().moveShick.Length()), 0.0f, 1.0f);
+		float stickLen = Math::Clamp(std::abs(ctx.input.GetPlayerInputData().moveShick.Length()), 0.0f, 1.0f);
 		speed_ *= stickLen;
 	}
 
@@ -114,19 +134,4 @@ void MoveSystem::AnimationSpeedProcess()
 	}
 }
 
-void MoveSystem::AttackProcess(Engine::WorldTransform& world, const Vector3& direction)
-{
-	// 移動ベクトルがゼロなら回転処理しない
-	if (direction.Length() == 0.0f) return;
-
-	// 目標方向（X=Right, Y=Up, Z=Forward）
-	float targetYaw = std::atan2(direction.x, direction.z);
-
-	float& currentYaw = world.rotate_.y;
-
-	currentYaw = targetYaw;
-}
-
 #pragma endregion // 処理
-
-

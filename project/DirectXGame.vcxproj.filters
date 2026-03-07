@@ -318,11 +318,8 @@
     <ClCompile Include="DirectXGame\engine\Manager\Effect\EffectManager.cpp">
       <Filter>ソース ファイル\engine\effect</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.cpp">
+    <ClCompile Include="DirectXGame\engine\Manager\Entity\EntityManager.cpp">
       <Filter>ソース ファイル\engine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.cpp">
-      <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\Particle\Emit\EmitFanction.cpp">
       <Filter>ソース ファイル\engine\effect</Filter>
@@ -939,6 +936,30 @@
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCarStateMachine.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\ResultUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\ResultStage.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Move\Reaction\ReactionMoveSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Move\Reaction\ResponseMoveSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -1401,13 +1422,7 @@
     <ClInclude Include="DirectXGame\engine\Effect\Particle\Emit\EmitShape.h">
       <Filter>ヘッダー ファイル\engine\effect\particle</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\Entity2D\Entity2DManager.h">
-      <Filter>ヘッダー ファイル\engine\2d</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3DManager.h">
-      <Filter>ヘッダー ファイル\engine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Manager\Entity3D\Entity3D.h">
+    <ClInclude Include="DirectXGame\engine\Manager\Entity\EntityManager.h">
       <Filter>ヘッダー ファイル\engine\3d</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\scene\Fade.h">
@@ -2149,6 +2164,30 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCarStateMachine.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\Select\SelectSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\ResultUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\ResultStage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Game\Result\ResultSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Reaction\ReactionMoveSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Move\Reaction\ResponseMoveSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\StageColliderSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

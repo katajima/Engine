@@ -1,6 +1,5 @@
 #include "RangeBombingSpecial.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/input/Input.h"
 
 
@@ -11,7 +10,7 @@
 #include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
 #include "DirectXgame/application/base/Stage/MainStage.h"
 
-void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera)
+void RangeBombingSpecial::Initialize(Engine::EntityManager* entityManager, Engine::Camera* camera)
 {
 	data_.isUse_ = false;		// 使用不可にする
 
@@ -30,11 +29,11 @@ void RangeBombingSpecial::Initialize(Engine::Entity3DManager* entity3DManager, E
 
 	// シリンダー生成
 	ctlinder_ = std::make_unique<Engine::CylinderPrimitive>();
-	ctlinder_->Initialize(entity3DManager->GetPrimitiveCommon(), "resources/Texture/simasima.dds");
+	ctlinder_->Initialize(entityManager->GetPrimitiveCommon(), "resources/Texture/simasima.dds");
 	ctlinder_->Data() = cylinderParam;	//　パラメータ代入
 
 	// レティクル
-	objectReticle_ = entity3DManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.dds", camera);
+	objectReticle_ = entityManager->CreatePrimitiveObject3D<Engine::CylinderPrimitive>("レティクルシリンダー", "resources/Texture/effect/gradationLine.dds", camera);
 	objectReticle_->SetPrimitive(std::move(ctlinder_));
 	objectReticle_->GetPrimitive()->SetPsoType(Engine::BasePrimitive::PsoType::kNoCullRingClamp);
 	objectReticle_->SetIsDraw(false);

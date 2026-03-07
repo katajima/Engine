@@ -91,7 +91,7 @@ namespace Combo {
 
 			// 初回：未選択なら先頭を選択
 			if (data_.animationName.empty()) {
-				data_.animationName = owner->GetObjectComponent()->GetObject3D()->GetModel()->modelData.animations.begin()->first;
+				data_.animationName = owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations.begin()->first;
 			}
 
 			// --- 選択UI（コンボボックス） ---
@@ -99,7 +99,7 @@ namespace Combo {
 				const char* preview = data_.animationName.c_str();
 				if (ImGui::BeginCombo("Selected Combo", preview)) {
 
-					for (auto& it : owner->GetObjectComponent()->GetObject3D()->GetModel()->modelData.animations) {
+					for (auto& it : owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations) {
 						const std::string& name = it.first;
 
 						const bool isSelected = (name == data_.animationName);
@@ -245,7 +245,7 @@ namespace Combo {
 
 		// 初回：未選択なら先頭を選択
 		if (data_.parentName_.empty()) {
-			data_.parentName_ = owner->GetObjectComponent()->GetObject3D()->GetModel()->modelData.animations.begin()->first;
+			data_.parentName_ = owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations.begin()->first;
 		}
 
 		// --- 選択UI（コンボボックス） ---

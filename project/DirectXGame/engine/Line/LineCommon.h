@@ -27,9 +27,9 @@ namespace Engine {
         // 描画前準備2  
         void DrawCommonSetting2();
         // DitectXCommonの取得  
-        DirectXCommon* GetDxCommon() const { return dxCommon_; }
+        DirectXCommon* GetDxCommon() const { return dxCommon; }
         // カメラ設定  
-        void SetDefaltCamera(Camera* camera) { camera_ = camera; }
+        void SetDefaltCamera(Camera* camera) { this->camera = camera; }
 
         // デバッグラインメッシュデータの取得  
         LineMeshData& GetDebugLineMeshData() { return lineDebugMeshData_; }
@@ -54,8 +54,7 @@ namespace Engine {
         void CreateGraphicsPipeline();
     private:
         std::unique_ptr<PSOManager> psoManager_ = nullptr;
-        Camera* camera_ = nullptr;
-
+        
         // ルートシグネチャ  
         Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
         // パイプラインステートオブジェクト  
@@ -83,6 +82,7 @@ namespace Engine {
         // ラインメッシュデータ  
         LineMeshData lineMeshData_;
     private:
-        DirectXCommon* dxCommon_;
+        DirectXCommon* dxCommon = nullptr;
+        Camera* camera = nullptr;
     };
 }

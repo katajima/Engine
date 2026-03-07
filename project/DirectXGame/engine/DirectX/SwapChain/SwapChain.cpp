@@ -11,21 +11,21 @@
 
 void Engine::SwapChain::Initialize(WinApp* winApp, DXGIDevice* dxgi, Command* command, RtvManager* rtvManager, Barrier* barrier, ScissorRect* scissorRect, ViewPort* viewPort, Fence* fence)
 {
-	winApp_ = winApp;			// WinApp
-	DXGIDevice_ = dxgi;			// デバイス
-	command_ = command;			// コマンド
-	rtvManager_ = rtvManager;	// RTV管理クラス
-	barrier_ = barrier;			// バリア
-	scissorRect_ = scissorRect;	// シザー
-	viewPort_ = viewPort;		// ビューポート
-	fence_ = fence;				// フェンス
+	this->winApp = winApp;			// WinApp
+	this->dxgiDevice = dxgi;			// デバイス
+	this->command = command;			// コマンド
+	this->rtvManager = rtvManager;	// RTV管理クラス
+	this->barrier = barrier;			// バリア
+	this->scissorRect = scissorRect;	// シザー
+	this->viewPort = viewPort;		// ビューポート
+	this->fence = fence;				// フェンス
 	// スワップチェーン作成
 	CreateSwapChain();
 	// スワップチェーンリソースの作成
 	CreateSwapChainResource();
 
-	rtvIndex_[0] = rtvManager_->Allocate();
-	rtvIndex_[1] = rtvManager_->Allocate();
+	rtvIndex_[0] = rtvManager->Allocate();
+	rtvIndex_[1] = rtvManager->Allocate();
 	// RTV作成
 	CreateRTV();
 
@@ -49,43 +49,43 @@ ID3D12Resource* Engine::SwapChain::GetCurrentBackBufferResource()
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::SwapChain::GetCurrentBackBufferRTVHandle()
 {
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
-	return rtvManager_->GetCPUDescriptorHandle(rtvIndex_[backBufferIndex_]);
+	return rtvManager->GetCPUDescriptorHandle(rtvIndex_[backBufferIndex_]);
 }
 
 void Engine::SwapChain::PreDraw()
 {
 	// スワップチェーン用
-	barrier_->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	barrier->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	// 描画先のRTVを設定する
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = GetCurrentBackBufferRTVHandle();
-	command_->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+	command->GetList()->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
 	// 指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };  // 任意のクリアカラー（青）
-	command_->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	command->GetList()->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 	// コマンドを積む
-	viewPort_->SettingViewport();
-	scissorRect_->SettingScissorRect();
+	viewPort->SettingViewport();
+	scissorRect->SettingScissorRect();
 }
 
 void Engine::SwapChain::PostDraw()
 {
 	// スワップチェーン用
-	barrier_->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	barrier->TransitionResource(GetCurrentBackBufferResource(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 	// コマンドキック
-	command_->KickCommand();
+	command->KickCommand();
 
 	// GPUに画面交換を通知
 	Present();
 
 	// フェンス
-	fence_->WaitGPU();
+	fence->WaitGPU();
 
 	// コマンドリセット
-	command_->ResetCommand();
+	command->ResetCommand();
 }
 
 void Engine::SwapChain::Resize(int width, int height)
@@ -93,7 +93,7 @@ void Engine::SwapChain::Resize(int width, int height)
 	if (!swapChain_) return;
 
 	// GPUの使用完了を待つ（安全のため）
-	fence_->WaitGPU();
+	fence->WaitGPU();
 
 	// バックバッファを解放
 	for (auto& res : swapChainResources_) {
@@ -137,7 +137,7 @@ void Engine::SwapChain::CreateSwapChain()
 	swapChainDesc_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;  //モニターにうつしたら、中身を確認
 
 	//コマンドキュー、ウィンドウハンドル
-	hr_ = DXGIDevice_->GetFactory()->CreateSwapChainForHwnd(command_->GetQueue(), WinApp::GetHwnd(), &swapChainDesc_, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
+	hr_ = dxgiDevice->GetFactory()->CreateSwapChainForHwnd(command->GetQueue(), WinApp::GetHwnd(), &swapChainDesc_, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
 	assert(SUCCEEDED(hr_));
 }
 
@@ -170,7 +170,7 @@ void Engine::SwapChain::CreateRTV()
 
 
 
-	rtvManager_->CreateRTV(rtvIndex_[0], swapChainResources_[0].Get());
+	rtvManager->CreateRTV(rtvIndex_[0], swapChainResources_[0].Get());
 
-	rtvManager_->CreateRTV(rtvIndex_[1], swapChainResources_[1].Get());
+	rtvManager->CreateRTV(rtvIndex_[1], swapChainResources_[1].Get());
 }

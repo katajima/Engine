@@ -92,11 +92,29 @@ struct Vector3 final {
 	}
 
 	// * 演算子のオーバーロード
-	Vector3& operator*=(const float& other) {
+	Vector3& operator*=(const float other) {
 
 		x *= other;
 		y *= other;
 		z *= other;
+		return *this;
+	}
+
+	// * 演算子のオーバーロード
+	Vector3& operator/=(const Vector3& other) {
+
+		x /= other.x;
+		y /= other.y;
+		z /= other.z;
+		return *this;
+	}
+
+	// * 演算子のオーバーロード
+	Vector3& operator/=(const float other) {
+
+		x /= other;
+		y /= other;
+		z /= other;
 		return *this;
 	}
 

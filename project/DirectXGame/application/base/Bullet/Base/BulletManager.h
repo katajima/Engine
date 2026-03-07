@@ -10,8 +10,7 @@ namespace Character {
 	class BaseCharacter;
 }
 namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class GlobalVariables;
 	class Camera;
 }
@@ -24,7 +23,7 @@ class BulletManager {
 public:
 	~BulletManager();
 	// 初期化
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
+	void Initialize(Engine::EntityManager* entityManager,Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 	
 
 	// 更新
@@ -58,6 +57,5 @@ private:
 	Effect* effect;								// 演出
 	Engine::Camera* camera;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
-	Engine::Entity3DManager* entity3DManager;	// 3dオブジェクト管理
-	Engine::Entity2DManager* entity2DManager;  // 2Dオブジェクト管理
+	Engine::EntityManager* entityManager;	// 3dオブジェクト管理
 };

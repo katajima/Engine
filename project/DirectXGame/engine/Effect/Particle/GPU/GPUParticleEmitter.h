@@ -24,7 +24,7 @@ namespace Engine {
 		// ImGui更新
 		void UpdateImGui();
 		// グループ設定
-		void SetParticleGroup(GpuParticleGroup* group) { group_ = group; }
+		void SetParticleGroup(GpuParticleGroup* group) { this->group = group; }
 		// エミッターデータ
 		EmitterCommon& GetCommonData() { return cbEmitterCommon_; }
 		// トレイルデータ
@@ -70,9 +70,9 @@ namespace Engine {
 		WorldTransform worldTransform_;	// ワールド変換情報
 
 
-		DirectXCommon* dxCommon_ = nullptr;		// DirectX共通クラス
-		Engine::GpuParticleGroup* group_ = nullptr;		// GPUパーティクルグループ
-		LineCommon* lineCommon_ = nullptr;		// ライン共通クラス
+		DirectXCommon* dxCommon = nullptr;		// DirectX共通クラス
+		Engine::GpuParticleGroup* group = nullptr;		// GPUパーティクルグループ
+		LineCommon* lineCommon = nullptr;		// ライン共通クラス
 	};
 
 	// 球エミッター
@@ -107,7 +107,7 @@ namespace Engine {
 	private:
 	};
 
-	// 球エミッター
+	// AABBエミッター
 	class GpuParticleEmitterAABB : public BaseGpuParticleEmitter
 	{
 	public:

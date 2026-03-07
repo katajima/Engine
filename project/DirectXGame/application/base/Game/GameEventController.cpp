@@ -1,23 +1,22 @@
 #include "GameEventController.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 
 namespace Game {
 
-	void GameEventController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+	void GameEventController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
 		Character::CharacterManager* characterManager, Engine::Input* input)
 	{
-		this->entity3DManager = entity3DManager;		// エンティティ3d
+		this->entityManager = entityManager;		// エンティティ3d
 		this->globalVariables = globalVariables;		// 保存項目
 		this->characterManager = characterManager;	// キャラクター管理
 
 
 		// キャラクター出現管理クラス初期化
 		characterSpawnManager_ = std::make_unique<Character::CharacterSpawnManager>();
-		characterSpawnManager_->Initialize(characterManager, entity3DManager->Get3DLineCommon(), 300);
+		characterSpawnManager_->Initialize(characterManager, entityManager->Get3DLineCommon(), 400);
 
 		// イベントステート
 		eventStateMachine_ = std::make_unique<Game::EventStateMachine>();
@@ -72,7 +71,7 @@ namespace Game {
 		ConnectNode("start","","battle01");
 		ConnectNode("battle01", "", "battle02");
 		ConnectNode("battle02", "", "result");
-		//ConnectNode("result", "", "end");
+		ConnectNode("result", "", "end");
 
 		eventStateMachine_->SetRoot(GetNodeState("start"));
 	}

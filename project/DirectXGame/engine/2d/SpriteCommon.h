@@ -23,7 +23,7 @@ namespace Engine {
 		void Initialize(DirectXCommon* dxCommon);
 
 		// DxCommon取得
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 		// 描画のうつり方設定
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type); }
 
@@ -33,7 +33,7 @@ namespace Engine {
 		void CreateGraphicsPipeline();
 
 	private:// メンバ変数
-		Engine::DirectXCommon* dxCommon_;
+		Engine::DirectXCommon* dxCommon;
 
 		std::unique_ptr<PSOManager> psoManager_ = nullptr;
 

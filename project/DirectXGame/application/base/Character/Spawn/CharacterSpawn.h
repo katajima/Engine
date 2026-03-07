@@ -132,7 +132,7 @@ namespace Character {
 		float timer_ = 0.0f;                // タイマー
 		int maxEnemyCount_ = 30;			// 最大敵出現量
 	private:
-		CharacterManager* characterManager_ = nullptr;
-		Engine::LineCommon* lineCommon_ = nullptr;
+		CharacterManager* characterManager = nullptr;
+		Engine::LineCommon* lineCommon = nullptr;
 	};
 }

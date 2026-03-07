@@ -14,7 +14,7 @@ public:
 	/// </summary>
 	/// <param name="entity3DManager"></param>
 	/// <param name="globalVariables"></param>
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,const Vector3& pos, const Vector3& rotate);
+	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,const Vector3& pos, const Vector3& rotate);
 
 
 	void SetGroungHeight(float height) { height_ = height; }
@@ -63,6 +63,11 @@ public:
 	// 右後タイヤのワールド座標取得
 	Vector3 GetRBTierWorldPosition() const { return objectRBTire_->GetWorldTransform().GetWorldPosition(); }
 
+	// スクラップボックスのワールド変換を取得
+	Engine::WorldTransform& GetScrapBoxWorldTransform() { return objectScrapBox_->GetWorldTransform(); }
+	// スクラップボックスのワールド座標取得
+	Vector3 GetScrapBoxWorldPosition() const { return objectScrapBox_->GetWorldTransform().GetWorldPosition(); }
+
 	// 右前スポットライトのワールド変換を取得
 	Engine::WorldTransform& GetRFSpotLightWorldTransform() { return spotLightTransformRF_; }
 	// 左前スポットライトのワールド変換を取得
@@ -81,6 +86,8 @@ public:
 	// 埃を出す(方向付き)
 	void Emit(const Vector3& pos, const Vector3& dir, const Vector3& range);
 
+	void EmitScrapBox(const Vector3& pos, const Vector3& dir, const Vector3& range);
+
 	// ステートマシン取得
 	PlayerCarStateMachine* GetStateMachine() { return stateMachine_.get(); }
 private:
@@ -98,6 +105,9 @@ private:
 	std::unique_ptr<ObjectComponent> objectLBTire_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectRFTire_ = nullptr;
 	std::unique_ptr<ObjectComponent> objectRBTire_ = nullptr;
+
+	// スクラップボックス用オブジェクトコンポーネント
+	std::unique_ptr<ObjectComponent> objectScrapBox_ = nullptr;
 
 
 	// スポットライト用ワールド変換
@@ -122,7 +132,7 @@ private:
 	// 地面の高さ
 	float height_ = 0.0f;
 private:
-	Engine::Entity3DManager* entity3DManager = nullptr;
+	Engine::EntityManager* entityManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	// エフェクト
 	Effect* effect = nullptr;

@@ -3,15 +3,15 @@
 
 void Engine::SkinningConmmon::Initialize(DirectXCommon* dxCommon)
 {
-	dxCommon_ = dxCommon;
+	this->dxCommon = dxCommon;
 
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(),dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(),dxCommon->GetDXCCompiler());
 
 	// コンピュート用PSOマネージャー初期化
 	csPsoManager_ = std::make_unique <CSPSOManager>();
-	csPsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csPsoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(), dxCommon->GetDXCCompiler());
 
 	// パイプライン生成
 	CreateGraphicsPipeline();

@@ -40,7 +40,7 @@ namespace Engine {
 		// 描画
 		void Draw();
 		// カメラ設定
-		void SetCamera(Camera* camera) { camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 		// 他のSrvインデクス設定
 		void SetOtherSrvIndex(uint32_t index) { otherSrvIndex_ = index; };
 
@@ -89,12 +89,12 @@ namespace Engine {
 		uint32_t otherSrvIndex_ = 0;
 
 	private:
-		DXGIDevice* DXGIDevice_;
-		Command* command_;
-		SrvManager* srvManager_;
-		RtvManager* rtvManager_;
-		RenderingCommon* renderingCommon_;
-		Camera* camera_;
+		DXGIDevice* dxgiDevice = nullptr;
+		Command* command = nullptr;
+		SrvManager* srvManager = nullptr;
+		RtvManager* rtvManager = nullptr;
+		RenderingCommon* renderingCommon = nullptr;
+		Camera* camera = nullptr;
 
 		std::unique_ptr<PostEffectData> postEffectData_;
 

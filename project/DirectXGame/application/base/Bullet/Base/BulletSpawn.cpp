@@ -8,10 +8,9 @@
 #include "DirectXGame/application/base/Bullet/PlayerBullet.h"
 
 
-void BulletSpawn::Initialize(Character::BaseCharacter* owner, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+void BulletSpawn::Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, Effect* effect) {
-	this->entity3DManager = entity3DManager;
-	this->entity2DManager = entity2DManager;
+	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	this->camera = camera;
 	this->effect = effect;
@@ -28,7 +27,7 @@ void BulletSpawn::GenerateBulletRange(BulletType type, Vector3 position, Vector3
 	bullet->SetTargetRange(targetPos, rad);	// 範囲とターゲット設定
 	bullet->SetEffect(effect);	// エフェクトセット
 	bullet->SetOwner(owner);	// 持ち主設定
-	bullet->Initialize(entity3DManager, entity2DManager, globalVariables, position, camera);// 弾の初期化
+	bullet->Initialize(entityManager, globalVariables, position, camera);// 弾の初期化
 
 	bulletManager->AddBullet(std::move(bullet));
 }
@@ -42,7 +41,7 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 		bullet->SetEffect(effect);	// エフェクトセット
 		bullet->SetTarget(target);	// 敵セット
 		bullet->SetOwner(owner);	// 持ち主設定
-		bullet->Initialize(entity3DManager, entity2DManager, globalVariables, info.position, camera); // 弾の初期化
+		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
 	}
 	else {
 		bullet = std::make_unique<PlayerRangeBombingBullet>();
@@ -50,7 +49,7 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 		bullet->SetEffect(effect);	// エフェクトセット
 		bullet->SetTarget(target);	// 敵セット
 		bullet->SetOwner(owner);	// 持ち主設定
-		bullet->Initialize(entity3DManager, entity2DManager, globalVariables, info.position, camera); // 弾の初期化
+		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
 	}
 	bulletManager->AddBullet(std::move(bullet));
 }

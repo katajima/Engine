@@ -13,8 +13,7 @@ class CameraManager;
 class SpecalPointManager;
 class AttackInputHandler;
 namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 }
 
 // キャラクター

@@ -1,9 +1,6 @@
 #include"TestScene.h"
-//#include"DirectXGame/engine/struct/Quaternion.h"
 #include "DirectXGame/engine/SkyBox/SkyBoxCommon.h"
-
 #include "DirectXGame/engine/math/Random.h"
-
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
 void TestScene::Initialize()
@@ -46,7 +43,7 @@ void TestScene::Finalize()
 void TestScene::Update()
 {
 	SwitchRoom(); // 部屋切り替え
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
 
 	
 #ifdef _DEBUG
@@ -199,15 +196,15 @@ void TestScene::AppGlobalVariables(){}
 /// </summary>
 void TestScene::InitializeObject3D()
 {
-	GetEntity3DManager()->GetObject3dCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
 
 
 	ocean_ = std::make_unique<Engine::Ocean>();
-	ocean_->Initialize(GetEntity3DManager(), { 10000,10000 });
+	ocean_->Initialize(GetEntityManager(), { 10000,10000 });
 	ocean_->GetMaterial()->GetMaterialInstance().enableLighting_ = false;
 
 
-	oceanObject = GetEntity3DManager()->CreateObject3D("ocean", Engine::ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
+	oceanObject = GetEntityManager()->CreateObject3D("ocean", Engine::ObjectModelType::kOcean, {}, cameraManeger_->GetCamera());
 	oceanObject->SetOcean(ocean_.get());
 	oceanObject->GetWorldTransform().translate_ = { 0,-30,0 };
 	oceanObject->GetWorldTransform().rotate_.x = Math::DegreesToRadians(90);
@@ -216,19 +213,19 @@ void TestScene::InitializeObject3D()
 	
 	
 	skyBox = std::make_unique<Engine::SkyBox>();
-	skyBox->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
+	skyBox->Initialize(GetEntityManager(), "resources/Texture/hdr/sky.dds");
 	
 	skyBox2 = std::make_unique<Engine::SkyBox>();
-	skyBox2->Initialize(GetEntity3DManager(), "resources/Texture/hdr/sky.dds");
+	skyBox2->Initialize(GetEntityManager(), "resources/Texture/hdr/sky.dds");
 
 
-	skyBoxObject = GetEntity3DManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	skyBoxObject = GetEntityManager()->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
 	skyBoxObject->SetSkyBox(skyBox.get());
 	skyBoxObject->GetWorldTransform().scale_ = {10,10,10};
 	skyBoxObject->SetIsDraw(true);
 	
 	
-	skyBoxObject2 = GetEntity3DManager()->CreateObject3D("skyBox2", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
+	skyBoxObject2 = GetEntityManager()->CreateObject3D("skyBox2", Engine::ObjectModelType::kSkyBox, {}, cameraManeger_->GetCamera());
 	skyBoxObject2->SetSkyBox(skyBox2.get());
 	skyBoxObject2->GetWorldTransform().scale_ = {1,1,1};
 	skyBoxObject2->SetIsDraw(false);
@@ -237,7 +234,7 @@ void TestScene::InitializeObject3D()
 
 	for(int i = 0; i < 1; i++)
 	{
-		auto obj = GetEntity3DManager()->CreateObject3D("skinObject_" + std::to_string(i), Engine::ObjectModelType::kSkinning, { static_cast<float>(i * 10),0,30 }, cameraManeger_->GetCamera());
+		auto obj = GetEntityManager()->CreateObject3D("skinObject_" + std::to_string(i), Engine::ObjectModelType::kSkinning, { static_cast<float>(i * 10),0,30 }, cameraManeger_->GetCamera());
 		obj->SetModel("testCharacter.gltf");
 		obj->InitAnimationComponent();
 		obj->GetAnimationComponent()->SetAnimation("Idle01", static_cast<float>(i) / 10.0f );
@@ -256,7 +253,7 @@ void TestScene::InitializeObject2D()
 	{
 		auto sprite = std::make_unique<Engine::Sprite>();
 
-		sprite->Initialize(GetEntity2DManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png", false);
+		sprite->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png", false);
 		sprite->SetTextureSize({ 64,64 });
 		sprite->SetSize({ 128,128 });
 		sprite->SetAnimeSize({ 64,64 });
@@ -274,8 +271,8 @@ void TestScene::InitializeObject2D()
 /// </summary>
 void TestScene::InitializeParticle()
 {
-	GetEntity3DManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
-	GetEntity3DManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManeger_->GetCamera());
 }
 
 /// <summary>
@@ -311,7 +308,7 @@ void TestScene::InitializeLight()
 	spot->spot = spotLightData;
 	//GetEntity3DManager()->GetLightManager()->AddLight(spot);
 
-	GetEntity3DManager()->Get3DLineCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
+	GetEntityManager()->Get3DLineCommon()->SetDefaltCamera(cameraManeger_->GetCamera());
 
 	SetCamera(cameraManeger_->GetCamera());
 	
@@ -326,7 +323,7 @@ void TestScene::InitializeLight()
 	directional = std::make_shared<Engine::DirectionalLight>();
 	directional->directional = directionalLightData;
 
-	GetEntity3DManager()->GetLightManager()->AddLight(directional);
+	GetEntityManager()->GetLightManager()->AddLight(directional);
 
 }
 
@@ -342,11 +339,11 @@ void TestScene::InitializeCamera()
 
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
-	fixedCamera_->Initialize(inputSystem_.get(), GetEntity3DManager(),  GetGlobalVariables(), {});
+	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(),  GetGlobalVariables(), {});
 	
 	// カメラ管理
 	cameraManeger_ = std::make_unique<CameraManager>();
-	cameraManeger_->Initialize(inputSystem_.get(), GetEntity3DManager(),GetGlobalVariables());
+	cameraManeger_->Initialize(inputSystem_.get(), GetEntityManager(),GetGlobalVariables());
 	// カメラ追加
 	cameraManeger_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
 	cameraManeger_->SetUseCamera("fixedCamera", 0.0f);
@@ -430,7 +427,7 @@ void TestScene::UpdateRoom04()
 
 void TestScene::UpdateRoom05()
 {
-	GetEntity3DManager()->Get3DLineCommon()->GetDebugLineMeshData().AddGrid(1000, 1000, 10, { 1,1,1,1 });
+	GetEntityManager()->Get3DLineCommon()->GetDebugLineMeshData().AddGrid(1000, 1000, 10, { 1,1,1,1 });
 }
 
 void TestScene::UpdateRoom06()

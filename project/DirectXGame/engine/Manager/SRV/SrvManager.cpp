@@ -14,13 +14,13 @@ const uint32_t Engine::SrvManager::kMaxSRVCount = 2048;
 
 void Engine::SrvManager::Initialize(DXGIDevice* DXGI, Command* Command)
 {
-	DXGIDevice_ = DXGI;	// デバイス
-	command_ = Command;	// コマンド
+	this->dxgiDevice = DXGI;	// デバイス
+	this->command = Command;	// コマンド
 
 	// デスクリプタヒープ
-	descriptorHeap = DXGIDevice_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
+	descriptorHeap = dxgiDevice->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 	// デスクリプタ一個分のサイズを取得して記録
-	descriptorSize = DXGIDevice_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	descriptorSize = dxgiDevice->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 }
 
@@ -64,7 +64,7 @@ void Engine::SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource
 	}
 
 	
-	DXGIDevice_->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
+	dxgiDevice->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
 void Engine::SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride)
@@ -80,7 +80,7 @@ void Engine::SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12R
 	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE; // フラグなし
 
 	// デバイスの取得とSRVの作成
-	DXGIDevice_->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
+	dxgiDevice->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
 void Engine::SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride)
@@ -94,7 +94,7 @@ void Engine::SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, ID3D12R
 	uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 	uavDesc.Buffer.CounterOffsetInBytes = 0;
 
-	DXGIDevice_->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
+	dxgiDevice->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
 }
 
 void Engine::SrvManager::CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource* pResource, DXGI_FORMAT format)
@@ -105,7 +105,7 @@ void Engine::SrvManager::CreateUAVforTexture2D(uint32_t uavIndex, ID3D12Resource
 	uavDesc.Texture2D.MipSlice = 0;
 	uavDesc.Texture2D.PlaneSlice = 0;
 
-	DXGIDevice_->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
+	dxgiDevice->GetDevice()->CreateUnorderedAccessView(pResource, nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
 }
 
 
@@ -114,13 +114,13 @@ void Engine::SrvManager::PreDraw()
 {
 	// 描画用のDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
-	command_->GetList()->SetDescriptorHeaps(1, descriptorHeaps);
+	command->GetList()->SetDescriptorHeaps(1, descriptorHeaps);
 
 }
 
 void Engine::SrvManager::SetGraphicsRootdescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
 {
-	command_->GetList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
+	command->GetList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
 }
 
 bool Engine::SrvManager::IsMaxTextuer()

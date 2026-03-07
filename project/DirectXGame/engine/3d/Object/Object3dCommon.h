@@ -13,29 +13,29 @@ namespace Engine {
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
 		// DirectXの共通クラス
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 		// 描画設定
 		void DrawCommonSetting(PSOType type) { psoManager_->DrawSetting(type, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); }
 		// デフォルトカメラ設定
 		void SetDefaltCamera(Camera* camera) { this->defaultCamera = camera; }
 		// デフォルトカメラ取得
 		Camera* GetDefaltCamera() const { return defaultCamera; }
-
-		int32_t count = 0;
+		// オブジェクトカウント取得
+		int32_t GetObjectCount() const { return objectCount; }
+		// オブジェクトカウント加算
+		void AddObjectCount() { objectCount++; }
+		// オブジェクトカウントクリア
+		void ClearObjectCount() { objectCount = 0; }
 	private:
 		// グラフィックスパイプラインの作成
 		void CreateGraphicsPipeline();
 	private:// メンバ変数
-		DirectXCommon* dxCommon_;
-
+		DirectXCommon* dxCommon = nullptr;
+		// カメラ
 		Camera* defaultCamera = nullptr;
-
-		std::unique_ptr<PSOManager> psoManager_ = nullptr;
-
-
-
 	private:// メンバ変数
-
-
+		std::unique_ptr<PSOManager> psoManager_ = nullptr;
+		// オブジェクトカウント用
+		int32_t objectCount = 0;
 	};
 }

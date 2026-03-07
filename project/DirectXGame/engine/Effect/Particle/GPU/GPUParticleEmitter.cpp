@@ -9,10 +9,10 @@
 
 void Engine::BaseGpuParticleEmitter::Init(DirectXCommon* dxCommon, LineCommon* lineCommon, GpuParticleGroup* group, std::string name)
 {
-	dxCommon_ = dxCommon;		// DX共通クラス
-	group_ = group;				// グループ
-	name_ = name;				// 名前
-	lineCommon_ = lineCommon;	// ライン共通クラス
+	this->dxCommon = dxCommon;		// DX共通クラス
+	this->group = group;				// グループ
+	this->name_ = name;				// 名前
+	this->lineCommon = lineCommon;	// ライン共通クラス
 
 	// 共通データ
 	cbEmitterCommon_.translate = Vector3(0.0f, 0.0f, 0.0f);
@@ -62,8 +62,8 @@ void Engine::BaseGpuParticleEmitter::UpdateImGui()
 #ifdef _DEBUG
 	if (ImGui::TreeNode(name_.c_str())) {
 		ImGui::Separator();
-		ImGui::Text(group_->GetName().c_str());
-		int instance = group_->GetMaxInstance();
+		ImGui::Text(group->GetName().c_str());
+		int instance = group->GetMaxInstance();
 		ImGui::InputInt("MaxInstance", &instance);
 		ImGui::Separator();
 		ImGui::Checkbox("isEmtter", &isEmitte_);
@@ -167,7 +167,7 @@ void Engine::BaseGpuParticleEmitter::UpdateImGui()
 		ImGui::Separator();
 
 
-		ImTextureID imguiTexture = (ImTextureID)(dxCommon_->GetTextureManager()->GetSrvHandleGPU(group_->GetTextureName()).ptr);
+		ImTextureID imguiTexture = (ImTextureID)(dxCommon->GetTextureManager()->GetSrvHandleGPU(group->GetTextureName()).ptr);
 		ImGui::Image(imguiTexture, ImVec2(100, 100));
 		// 派生クラス固有の更新
 		UpdateImGuiUniqe();
@@ -202,7 +202,7 @@ void Engine::BaseGpuParticleEmitter::Update(float deltaTime)
 	}
 
 	// グループがあるなら
-	if (group_) {
+	if (group) {
 		// 派生クラス固有の更新
 		UpdateUniqe(deltaTime);
 		int count = int(cbEmitterCommon_.count);
@@ -242,7 +242,7 @@ void Engine::GpuParticleEmitterSphere::DrawLine()
 {
 	Sphere sphere = { cbEmitterCommon_.translate,cbEmitterCommon_.sphereRadius };
 
-	lineCommon_->GetDebugLineMeshData().AddLineSphere(sphere, { 1,1,1,1 }, 16, 16);
+	lineCommon->GetDebugLineMeshData().AddLineSphere(sphere, { 1,1,1,1 }, 16, 16);
 }
 #pragma endregion
 
@@ -277,7 +277,7 @@ void Engine::GpuParticleEmitterAABB::DrawLine()
 
 	AABB aabb = { cbEmitterCommon_.translate - cbEmitterCommon_.size,cbEmitterCommon_.translate + cbEmitterCommon_.size };
 
-	lineCommon_->GetDebugLineMeshData().AddLineAABB(aabb, cbEmitterCommon_.translate);
+	lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, cbEmitterCommon_.translate);
 }
 #pragma endregion
 

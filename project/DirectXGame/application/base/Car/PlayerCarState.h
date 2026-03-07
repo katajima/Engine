@@ -10,6 +10,7 @@ enum class CarMainState {
 	Move,				// 移動
 	PreparationMove,	// 移動準備
 	SelectMove,			// 移動(セレクトシーン)
+	ResultCashExchange	// 結果シーンのキャッシュ交換
 };
 
 
@@ -133,5 +134,29 @@ private:
 	// タイマー
 	float timer_ = 0.0f;
 	// 埃オフセット
-	Vector3 dustOffset_ = { 0,-0.2f,0 };
+	Vector3 dustOffset_ = { 0,-0.4f,0 };
+};
+
+
+class ResultCashExchangeState : public PlayerCarState {
+public:
+	ResultCashExchangeState(const CarMainState& state, PlayerCar* car) :
+		PlayerCarState(state, car) {
+	};
+
+	// 開始
+	void Enter() override;
+	// 更新
+	void Update(float dt) override;
+	// 終了
+	void Exit() override;
+
+
+private:
+	// 位置
+	Vector3 pos_ = { -2.65f,0.05f,-4.0f };
+	// 埃オフセット
+	Vector3 scrapOffset_ = { 0,0.4f,0 };
+	float scrapTimer_ = 0.0f;
+	float scrapInterval_ = 0.15f;
 };

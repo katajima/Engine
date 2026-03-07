@@ -32,7 +32,7 @@ using namespace Microsoft::WRL;
 namespace Engine {
 
 	class OceanManager;
-	class Entity3DManager;
+	class EntityManager;
 	class DirectXCommon;
 
 	/// <summary>
@@ -55,7 +55,7 @@ namespace Engine {
 
 
 		// 初期化
-		void Initialize(Entity3DManager* entity3dManager, Vector2 renge);
+		void Initialize(EntityManager* entityManager, Vector2 renge);
 		// 更新
 		void Update();
 		// ImGui更新
@@ -105,8 +105,8 @@ namespace Engine {
 		// 波の合成数
 		uint32_t index_ = 0;
 
-
-		Entity3DManager* entity3dManager_;
-		DirectXCommon* directXCommon_;
+	private:
+		EntityManager* entityManager = nullptr;
+		DirectXCommon* dxCommon = nullptr;
 	};
 }

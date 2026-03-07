@@ -68,7 +68,7 @@ namespace Engine {
 		// ImGuiスタイル設定
 		void SetCustomColorScheme();
 		// インプット設定
-		void SetInput(Input* input) { input_ = input; }
+		void SetInput(Input* input) { this->input = input; }
 
 	public:
 
@@ -82,10 +82,11 @@ namespace Engine {
 	private:
 
 		// DirectX基盤インスタンス（借りてくる）
-		DirectXCommon* dxCommon_ = nullptr;
-		SrvManager* srvManager_ = nullptr;
-
-		Input* input_;
+		DirectXCommon* dxCommon = nullptr;
+		// SRV管理クラス
+		SrvManager* srvManager = nullptr;
+		// 入力クラス
+		Input* input = nullptr;
 
 		Input::FlagXYZ flag;
 

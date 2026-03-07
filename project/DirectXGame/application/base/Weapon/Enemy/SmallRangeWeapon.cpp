@@ -5,15 +5,14 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
 
-void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
-{
+void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 	this->inputSystem = inputSystem;						// インプット
-	this->entity3DManager = entity3DManager; // エンティティ3d
-	this->entity2DManager = entity2DManager; // エンティティ2d
-
+	this->entityManager = entityManager; // エンティティ3d
+	
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
-	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, "enemyMuzzleSS01", "enemyMuzzleSS01.obj", "",
+	objectComponent_->InitializeInstancing(entityManager, globalVariables, "enemyMuzzleSS01", "enemyMuzzleSS01.obj", "",
 		false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
 	objectComponent_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, {Math::DegreesToRadians(10),0,0}, position);	// SRT設定
 	objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化

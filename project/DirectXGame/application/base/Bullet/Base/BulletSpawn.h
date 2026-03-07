@@ -1,20 +1,6 @@
 #pragma once
 #include"DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 
-
-
-// 前方宣言
-namespace Character {
-	class BaseCharacter;
-}
-class BulletManager;
-namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
-	class GlobalVariables;
-	class Camera;
-}
-
 /// <summary>
 /// 弾の出現処理を扱うクラス
 /// </summary>
@@ -23,7 +9,7 @@ public:
 	~BulletSpawn() = default;
 
 	// 初期化＋持ち主設定
-	void Initialize(Character::BaseCharacter* owner, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, Effect* effect);
 
 	void Generate();
@@ -39,9 +25,8 @@ private:
 
 
 private:
-	Effect* effect;								// 演出
-	Engine::Camera* camera;								// カメラ
+	Effect* effect = nullptr;								// 演出
+	Engine::Camera* camera = nullptr;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
-	Engine::Entity3DManager* entity3DManager;	// 3dオブジェクト管理
-	Engine::Entity2DManager* entity2DManager;  // 2Dオブジェクト管理
+	Engine::EntityManager* entityManager = nullptr;	// 3dオブジェクト管理
 };

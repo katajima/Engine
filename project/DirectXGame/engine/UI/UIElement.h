@@ -5,7 +5,7 @@
 
 namespace Engine {
 	// 前方宣言
-	class Entity2DManager;
+	class EntityManager;
 
 	// UI要素基底クラス
 	class UIElement
@@ -15,7 +15,7 @@ namespace Engine {
 		// インスタンス設定
 		void SetInstance(int instance) { instance_ = instance; }
 		// 初期化
-		void Init(Entity2DManager* entity2DManager, std::string name);
+		void Init(EntityManager* entityManager, std::string name);
 		// 描画
 		void Draw();
 		// 更新
@@ -37,7 +37,7 @@ namespace Engine {
 		};
 		// 親子付け
 		void SetParent(WorldTransform2d* parent) {
-			parent_ = parent;
+			this->parent = parent;
 		}
 
 	protected:
@@ -46,18 +46,19 @@ namespace Engine {
 		// スプライト初期化
 		virtual void InitSprite() = 0;
 	protected:
-		InputSystem* inputSystem;
+		InputSystem* inputSystem = nullptr;
+		EntityManager* entityManager = nullptr;
+		WorldTransform2d* parent = nullptr;
+	protected:
 		std::map<std::string, std::unique_ptr<BaseSprite>> sprites_;
 		std::string mainName_;
-		Entity2DManager* entity2DManager_ = nullptr;
 		Vector2 leftTopPos_{};	// 画面左上位置(ImGuiImage)
 		Vector2 ratio_{};		// 画面サイズとImGuiImageにした比率
 		bool isDebuck_ = false;	// デバッグか
 		int instance_ = 1;		// 生成量
 		Vector2 pos_ = {};		// 位置
 		bool useNameSprite_ = false;
-		WorldTransform2d* parent_;
-
+		
 	};
 
 	// 通常

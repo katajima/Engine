@@ -30,6 +30,7 @@ enum class ColliderType
 	Capsule,
 	AABB,
 	OBB,
+	Triangle,
 	Mesh,		// 追加予定
 	Segment,
 	Ray,

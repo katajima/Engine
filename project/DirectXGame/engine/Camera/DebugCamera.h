@@ -31,6 +31,6 @@ namespace Engine {
 		// ビュープロジェクション
 		Camera camera_;
 
-		Input* input_;
+		Input* input = nullptr;
 	};
 }

@@ -16,15 +16,15 @@
 
 void Engine::ParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* efectManager)
 {
-	dxCommon_ = dxCommon;							// DX共通クラス
-	efectManager_ = efectManager;					// エフェクト管理クラス
-	lineCommon_ = efectManager_->GetLineCommon();	// ライン共通クラス
-	srvManager_ = dxCommon_->GetSrvManager();		// SRV管理クラス
-	lightManager_ = lightManager;					// ライト管理クラス
+	this->dxCommon = dxCommon;							// DX共通クラス
+	this->efectManager = efectManager;					// エフェクト管理クラス
+	this->lineCommon = efectManager->GetLineCommon();	// ライン共通クラス
+	this->srvManager = dxCommon->GetSrvManager();		// SRV管理クラス
+	this->lightManager = lightManager;					// ライト管理クラス
 
 	// PSOマネージャー初期化
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(dxCommon->GetCommand(), dxCommon->GetDXGIDevice(), dxCommon->GetDXCCompiler());
 	
 	// パイプライン生成
 	CreateGraphicsPipeline();
@@ -37,33 +37,33 @@ void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteTy
 		{
 		case EmitData::BlendType::MODE_ADD:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[0].Get());
 			}
 			else {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[1].Get());
 			}
 			break;
 		case EmitData::BlendType::MODE_SUBTRACT:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[2].Get());
 			}
 			else {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[3].Get());
 			}
 			break;
 		case EmitData::BlendType::MODE_MUlLIPLY:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[4].Get());
 			}
 			else {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[5].Get());
 			}
 			break;
 		default:
 			break;
 		}
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+		dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	}
 	else {
 
@@ -71,37 +71,37 @@ void Engine::ParticleManager::DrawCommonSetting(EmitData::RasterizerType rasteTy
 		{
 		case EmitData::BlendType::MODE_ADD:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[6].Get());
 			}
 			else {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[7].Get());
 			}
 			break;
 		case EmitData::BlendType::MODE_SUBTRACT:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[8].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[8].Get());
 			}
 			else {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[9].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[9].Get());
 			}
 			break;
 		case EmitData::BlendType::MODE_MUlLIPLY:
 			if (rasteType == EmitData::RasterizerType::MODE_SOLID_BACK) {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[10].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[10].Get());
 			}
 			else {
-				dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState[11].Get());
+				dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState[11].Get());
 			}
 			break;
 		default:
 			break;
 		}
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature2.Get());
+		dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature2.Get());
 	}
 
 	//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Engine::ParticleManager::Update()
@@ -143,7 +143,7 @@ void Engine::ParticleManager::Update()
 					ParticleFanction::Effect(group, particleIterator, deltaTime);
 
 					// パーティクルデータをGPUに送る
-					ParticleFanction::WorldDataForGPU(group, particleIterator, camera_);
+					ParticleFanction::WorldDataForGPU(group, particleIterator, camera);
 
 					// 加算 
 					++group.instanceCount;
@@ -158,7 +158,7 @@ void Engine::ParticleManager::Update()
 
 void Engine::ParticleManager::Draw()
 {
-	auto commandList = dxCommon_->GetCommandList();
+	auto commandList = dxCommon->GetCommandList();
 
 	for (auto& pair : particleGroups) {
 		ParticleGroup& group = pair.second;
@@ -171,7 +171,7 @@ void Engine::ParticleManager::Draw()
 
 		group.material->GetCommandListMaterial(0);
 
-		lightManager_->DrawLight({ true,false,false }, 3);
+		lightManager->DrawLight({ true,false,false }, 3);
 
 		group.sbParticleResource_.SetGraphicsRootDescriptorTable(1);
 
@@ -196,7 +196,7 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, model->modelData.mesh[0].get(), rasteType, blendType);
+	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, model->GetModelData().mesh[0].get(), rasteType, blendType);
 	debugTimer_.EndTimer(); // デバッグ用タイマー終了
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");
 }
@@ -214,7 +214,7 @@ void Engine::ParticleManager::CreateParticleGroup(const std::string name, const 
 	}
 
 	// パーティクルグループ生成
-	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon_, primitive->GetModelMesh(), rasteType, blendType);
+	ParticleFanction::Create(particleGroups[name], name, textureFilePath, kNumMaxInstance, dxCommon, primitive->GetModelMesh(), rasteType, blendType);
 
 	debugTimer_.EndTimer(); // デバッグ用タイマー終了
 	debugTimer_.LogTimeSec("CreateParticleGroup ", " name");

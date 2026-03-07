@@ -5,12 +5,11 @@
 
 
 namespace Character {
-	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
 	{
 		this->inputSystem = inputSystem;						// インプット
-		this->entity3DManager = entity3DManager;	// エンティティ3d
-		this->entity2DManager = entity2DManager; // エンティティ2d
+		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables; // 保存項目
 		this->camera = camera;					// カメラ
 
@@ -102,11 +101,12 @@ namespace Character {
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		enemy->SetTarget(GetPlayer());					// ターゲット指定
 		enemy->SetEffect(effect);						// エフェクト設定
-		enemy->Initialize(nullptr, entity3DManager, entity2DManager, globalVariables, transform.translate, camera); // 初期化
+		enemy->Initialize(nullptr, entityManager,globalVariables, transform.translate, camera); // 初期化
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
 		enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
 		enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
-
+		enemy->GetObjectComponent()->Update();	// ワールド行列更新
+		enemy->GetObjectComponentShadow()->Update();	// ワールド行列更新
 		character_.push_back(std::move(enemy));
 		characterCount_++;
 	}
@@ -122,7 +122,7 @@ namespace Character {
 		player->SetBulletManager(bulletManager);	// 弾管理クラス設定
 		player->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		player->SetEffect(effect);					// エフェクト設定
-		player->Initialize(inputSystem, entity3DManager, entity2DManager, globalVariables, transform.translate, camera); // 初期化
+		player->Initialize(inputSystem, entityManager, globalVariables, transform.translate, camera); // 初期化
 		player->SetCharacterType(Type::Player);// キャラクターのタイプをプレイヤーに
 		character_.push_back(std::move(player));	// キャラクターに追加 
 		characterCount_++;
@@ -137,7 +137,7 @@ namespace Character {
 
 		// 敵を出現させる
 		for (int i = 0; i < perGroup; ++i) {
-			Vector3 pos = Random::RandomVector3(aabb.min_, aabb.max_);
+			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
 			pos.y = 0.0f;
 			CreateCharacter(enemyType, "enemy", groupId, Transform{ {1,1,1}, {},pos });
 		}

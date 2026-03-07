@@ -8,10 +8,10 @@
 
 void Engine::DepthStencil::Initialize(DXGIDevice* dxgi, Command* command, DsvManager* dsvManager, SrvManager* srvManager)
 {
-	DXGIDevice_ = dxgi;			// デバイス
-	command_ = command;			// コマンド
-	dsvManager_ = dsvManager;	// DSV管理クラス
-	srvManager_ = srvManager;	// SRV管理クラス
+	dxgiDevice = dxgi;			// デバイス
+	this->command = command;			// コマンド
+	this->dsvManager = dsvManager;	// DSV管理クラス
+	this->srvManager = srvManager;	// SRV管理クラス
 	CreateDepthStencilView();	// デプスステンシルビュー生成
 }
 
@@ -24,17 +24,17 @@ void Engine::DepthStencil::ClearDepthView()
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // 2dTexture
 
 	// DSVHeapの先頭にDSVを作る
-	DXGIDevice_->GetDevice()->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvManager_->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart());
+	dxgiDevice->GetDevice()->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvManager->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart());
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetCPUHandleDepthStencilResorce()
 {
-	return dsvManager_->GetCPUDescriptorHandle(dsvIndex_);
+	return dsvManager->GetCPUDescriptorHandle(dsvIndex_);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetCPUHandleDepthSRV()
 {
-	return srvManager_->GetCPUDescriptorHandle(srvIndex_);
+	return srvManager->GetCPUDescriptorHandle(srvIndex_);
 }
 
 uint32_t Engine::DepthStencil::GetDepthSrvIndex() const
@@ -73,7 +73,7 @@ void Engine::DepthStencil::CreateDepthStencilView()
 
 	//Resourceの生成
 
-	HRESULT hr = DXGIDevice_->GetDevice()->CreateCommittedResource(
+	HRESULT hr = dxgiDevice->GetDevice()->CreateCommittedResource(
 		&heapProperties, // Heapの設定
 		D3D12_HEAP_FLAG_NONE, // Heapの特殊な設定。特に無し
 		&resourceDesc, // Resourceの設定
@@ -83,26 +83,26 @@ void Engine::DepthStencil::CreateDepthStencilView()
 	assert(SUCCEEDED(hr));
 
 	// インデックス割り当て
-	dsvIndex_ = dsvManager_->Allocate();
+	dsvIndex_ = dsvManager->Allocate();
 	// dsv作成
-	dsvManager_->CreateDSV(
+	dsvManager->CreateDSV(
 		dsvIndex_,
 		depthStencilResource_.Get(),
 		DXGI_FORMAT_D24_UNORM_S8_UINT
 	);
 
-	srvIndex_ = srvManager_->Allocate();
-	srvIndex_ = srvManager_->Allocate();
+	srvIndex_ = srvManager->Allocate();
+	srvIndex_ = srvManager->Allocate();
 
 	// SRVを作成
 	DirectX::TexMetadata matadata{};
 	matadata.format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 	matadata.mipLevels = 1;
-	srvManager_->CreateSRVforTexture2D(srvIndex_, depthStencilResource_.Get(), matadata);
+	srvManager->CreateSRVforTexture2D(srvIndex_, depthStencilResource_.Get(), matadata);
 
 }
 
 
 D3D12_GPU_DESCRIPTOR_HANDLE Engine::DepthStencil::GetSRVGPUHandle() {
-	return srvManager_->GetGPUDescriptorHandle(srvIndex_);
+	return srvManager->GetGPUDescriptorHandle(srvIndex_);
 }

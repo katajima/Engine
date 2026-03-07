@@ -46,7 +46,7 @@ namespace Engine {
 	// 前方宣言
 	class RenderTexture;
 	class RenderingCommon;
-	class Entity3DManager;
+	class EntityManager;
 	class SceneManager;
 
 	/// <summary>
@@ -63,19 +63,19 @@ namespace Engine {
 		//終了処理
 		void Finalize();
 		// 更新
-		void Update(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+		void Update(SceneManager* sceneManager, EntityManager* entity3DManager);
 		// 描画
-		void Draw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+		void Draw(SceneManager* sceneManager, EntityManager* entity3DManager);
 
 	private:
 		// シーンの画面を書き出す
-		void SceneDraw(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+		void SceneDraw(SceneManager* sceneManager, EntityManager* entity3DManager);
 	private:
 		// スワップチェーンにレンダーターゲットを渡す
 		void PassSwap(SceneManager* sceneManager, RenderTexture* renderTexture);
 	private:
 		// 3D2D描画
-		void Draw3D2D(SceneManager* sceneManager, Entity3DManager* entity3DManager);
+		void Draw3D2D(SceneManager* sceneManager, EntityManager* entity3DManager);
 
 		//FPS固定初期化
 		void InitializeFixFPS();

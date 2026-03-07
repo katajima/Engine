@@ -14,15 +14,15 @@ namespace Engine {
 		// 初期化
 		void Initialize(DirectXCommon* dxCommon);
 		// DxCommon取得
-		DirectXCommon* GetDxCommon() const { return dxCommon_; }
+		DirectXCommon* GetDxCommon() const { return dxCommon; }
 		// インプット設定
-		void SetInput(Input* input) { input_ = input; };
+		void SetInput(Input* input) { this->input = input; };
 		// インプット取得
-		Input* GetInput() { return input_; };
+		Input* GetInput() { return input; };
 
 	private:
-		DirectXCommon* dxCommon_;
+		DirectXCommon* dxCommon = nullptr;
 
-		Input* input_;
+		Input* input = nullptr;
 	};
 }

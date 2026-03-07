@@ -6,7 +6,8 @@
 #include "DirectXGame/application/base/Move/Jump/JumpSystem.h"
 #include "DirectXGame/application/base/Move/Dash/DashSystem.h"
 #include "DirectXGame/application/base/Move/Attack/AttackMoveSystem.h"
-
+#include "DirectXGame/application/base/Move/Reaction/ReactionMoveSystem.h"
+#include "DirectXGame/application/base/Move/Reaction/ResponseMoveSystem.h"
 // 前方宣言
 namespace Engine {
 	class GlobalVariables;
@@ -85,11 +86,13 @@ public:
 	AttackMoveSystem* GetAttackMoveSystem() { return attackMoveSystem_.get(); }
 	// 移動システム取得
 	MovementSystem* GetMovementSystem() { return movementSystem_.get(); }
+	// リアクション移動システム取得
+	ReactionMoveSystem* GetReactionMoveSystem() { return reactionMoveSystem_.get(); }
+	// 応答移動システム取得
+	ResponseMoveSystem* GetResponseMoveSystem() { return responseMoveSystem_.get(); }
 public:
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
-private:
-
 private:
 	// 移動システム
 	std::unique_ptr<MoveSystem> moveSystem_ = nullptr;
@@ -99,6 +102,11 @@ private:
 	std::unique_ptr<DashSystem> dashSystem_ = nullptr; 
 	// 攻撃移動システム
 	std::unique_ptr<AttackMoveSystem> attackMoveSystem_ = nullptr;
+	// リアクション移動システム
+	std::unique_ptr<ReactionMoveSystem> reactionMoveSystem_ = nullptr;
+	// 応答移動システム
+	std::unique_ptr<ResponseMoveSystem> responseMoveSystem_ = nullptr;
+private:
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 
 	// 行動リクエストを元に行動を集約→選択するクラス

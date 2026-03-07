@@ -6,13 +6,13 @@
 void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::string& tex,float maxtime  ,const Color color)
 {
 	// エフェクト管理クラス
-	effectManager_ = effectManager;
+	this->effectManager = effectManager;
 
 	// メッシュ生成
 	mesh = std::make_unique<ModelMesh>();
 	mesh->vertices.push_back({ 0,0,0 });
 	mesh->indices.push_back(1);
-	mesh->Initialize(effectManager_->GetDxCommon());
+	mesh->Initialize(effectManager->GetDxCommon());
 	mesh->indices.clear();
 	mesh->vertices.clear();
 	mesh->maxTime = maxtime;
@@ -22,13 +22,13 @@ void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::st
 
 	// マテリアル初期化
 	material = std::make_unique<Material>();
-	material->Initialize(effectManager_->GetDxCommon());
+	material->Initialize(effectManager->GetDxCommon());
 	material->tex_.diffuseFilePath = tex;
 	material->GetMaterialInstance().color = color;
 
 	// トランスフォーム初期化
 	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(effectManager_->GetDxCommon());
+	transfomation->Initialize(effectManager->GetDxCommon());
 
 
 	parentTransform_.Identity();
@@ -103,7 +103,7 @@ void Engine::TrailEffect::Draw()
 	if (mesh->vertices.size() != 0) {
 		
 		// 描画前準備
-		effectManager_->GetTrailEffectCommon()->DrawCommonSetting();
+		effectManager->GetTrailEffectCommon()->DrawCommonSetting();
 		
 		// 位置
 		transfomation->GetCommandList(1);
@@ -118,7 +118,7 @@ void Engine::TrailEffect::Draw()
 		mesh->GetCommandList();
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-		effectManager_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh->vertices.size()), 1, 0, 0);
+		effectManager->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(mesh->vertices.size()), 1, 0, 0);
 
 	}
 }

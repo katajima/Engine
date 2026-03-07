@@ -14,12 +14,12 @@ void Engine::TrailMesh::CreateMesh(size_t instanse)
 void Engine::TrailMesh::Initialize(DirectXCommon* dxcommon)
 {
 	// DX共通クラス
-	dxCommon_ = dxcommon;
+	this->dxCommon = dxcommon;
 
 	// 頂点リソース生成
-	vbvResorce_.CreateBufferView(dxCommon_, verticesTrail, verticesTrail.size());
+	vbvResorce_.CreateBufferView(dxCommon, verticesTrail, verticesTrail.size());
 	// インデックスリソース生成
-	indexResorce_.CreateBufferView(dxCommon_, indices, indices.size());
+	indexResorce_.CreateBufferView(dxCommon, indices, indices.size());
 
 }
 

@@ -7,7 +7,6 @@ namespace Character {
 	class BasePlayer;
 	class BaseEnemy;
 }
-class Effect;
 
 
 
@@ -25,7 +24,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
 	///< summary>

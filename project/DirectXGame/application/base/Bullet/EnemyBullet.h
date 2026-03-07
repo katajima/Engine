@@ -6,7 +6,7 @@ class Effect;
 class EnemyBullet : public BaseBullet {
 public:
 	// 初期化
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables,
+	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		Vector3 position, Engine::Camera* camera) override;
 
 	// 毎フレーム更新

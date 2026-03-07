@@ -1,16 +1,16 @@
 
 #include "Fade.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 /// <summary>
 /// 初期化
 /// </summary>
-void Engine::Fade::Initialize(Entity2DManager* entity2DManager) {
-	entity2DManager_ = entity2DManager;
+void Engine::Fade::Initialize(EntityManager* entityManager) {
+	this->entityManager = entityManager;
 
 	// 背景スプライト初期化
 	sprite_ = std::make_unique<Sprite>();
-	sprite_->Initialize(entity2DManager_->GetSpriteCommon(), "resources/Texture/Image.dds");
+	sprite_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/Image.dds");
 	sprite_->SetSize({ static_cast<float>(WinApp::GetClientWidth()),static_cast<float>(WinApp::GetClientHeight()) });
 	// フェード持続時間
 	duration_ = 0.0f;

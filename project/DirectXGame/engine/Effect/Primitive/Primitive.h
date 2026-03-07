@@ -86,7 +86,7 @@ namespace Engine {
 
 		UVAnimetionData aimetion_{};
 	private:
-		PrimitiveCommon* primitiveCommon_;
+		PrimitiveCommon* primitiveCommon = nullptr;
 	};
 
 

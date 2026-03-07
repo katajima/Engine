@@ -3,8 +3,7 @@
 
 // 前方宣言
 namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 }
 /// <summary>
 /// エフェクトクラス
@@ -12,7 +11,7 @@ namespace Engine {
 class Effect {
 public:
 	// 初期化
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables);
+	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
 	// 更新
 	void Update();
 	// 出現
@@ -27,13 +26,13 @@ private:
 	void InitRangeBombingBullet();
 	// パーティクル初期化(弾)
 	void InitBullet();
-
+	// パーティクル初期化(スクラップ)
+	void InitScrap();
 private:
 	std::unique_ptr<Engine::EffectComponent> effectComponent_;	// エフェクトコンポーネント
 
 private:
-	Engine::Entity3DManager* entity3DManager = nullptr;	// 3Dエンティティマネージャー
-	Engine::Entity2DManager* entity2DManager = nullptr;	// 2Dエンティティマネージャー
+	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 
 
@@ -45,4 +44,14 @@ private: // 一旦
 		float farClip_ = 15000.0f;
 	};
 	ProvisionalData provisionalData_;
+
+private:
+	Vector3 scrapRotateRange_ = Math::DegreesToRadians({ 360,360,360 });	// スクラップのオフセット
+	Vector3 scrapPos_{};
+	Vector3 scrapSize_{ 0.25f,0.25f,0.25f };
+	Vector3 scrapRange_{ 0.5f,0.5f,0.5f };
+	Vector4 scrapColor_{ 1,1,1,1};
+	Vector3 scrapVelocity_{};
+	Vector3 scrapVelocityRange_{ 0.0f,0.0f,0.0f };
+	float scrapLifeTime_ = 1.0f;	// スクラップの寿命
 };

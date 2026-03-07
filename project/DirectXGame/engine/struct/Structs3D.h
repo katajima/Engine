@@ -131,40 +131,38 @@ struct QuaternionTransform
 
 //AABB
 struct AABB {
-	Vector3 min_; //!< 最小点
-	Vector3 max_; //!< 最大点
-
-	AABB(Vector3 min = Vector3(), Vector3 max = Vector3()) : min_(min), max_(max) {}
+	Vector3 min; //!< 最小点
+	Vector3 max; //!< 最大点
 
 	// 判定
 	bool intersects(const AABB& other) const {
-		return (min_.x <= other.max_.x && max_.x >= other.min_.x &&
-			min_.y <= other.max_.y && max_.y >= other.min_.y &&
-			min_.z <= other.max_.z && max_.z >= other.min_.z);
+		return (min.x <= other.max.x && max.x >= other.min.x &&
+			min.y <= other.max.y && max.y >= other.min.y &&
+			min.z <= other.max.z && max.z >= other.min.z);
 	}
 
 	// 点がAABBを完全に内包しているか判定
 	bool Contains(const Vector3& point) const {
-		return (point.x >= min_.x && point.x <= max_.x) &&
-			(point.y >= min_.y && point.y <= max_.y) &&
-			(point.z >= min_.z && point.z <= max_.z);
+		return (point.x >= min.x && point.x <= max.x) &&
+			(point.y >= min.y && point.y <= max.y) &&
+			(point.z >= min.z && point.z <= max.z);
 	}
 
 	// AABBが別のAABBを完全に内包しているか判定
 	bool Contains(const AABB& other) const {
-		return (other.min_.x >= min_.x && other.max_.x <= max_.x) &&
-			(other.min_.y >= min_.y && other.max_.y <= max_.y) &&
-			(other.min_.z >= min_.z && other.max_.z <= max_.z);
+		return (other.min.x >= min.x && other.max.x <= max.x) &&
+			(other.min.y >= min.y && other.max.y <= max.y) &&
+			(other.min.z >= min.z && other.max.z <= max.z);
 	}
 
 	// 中心点
 	Vector3 Center() const {
-		return (min_ + max_) * 0.5f;
+		return (min + max) * 0.5f;
 	}
 
 	// サイズ取得
 	Vector3 Size() const {
-		return max_ - min_;
+		return max - min;
 	}
 	// 半径
 	Vector3 Extents() const {
@@ -173,15 +171,15 @@ struct AABB {
 	// 最近接点
 	Vector3 ClosestPoint(const Vector3& point) const {
 		return {
-			std::clamp(point.x, min_.x, max_.x),
-			std::clamp(point.y, min_.y, max_.y),
-			std::clamp(point.z, min_.z, max_.z)
+			std::clamp(point.x, min.x, max.x),
+			std::clamp(point.y, min.y, max.y),
+			std::clamp(point.z, min.z, max.z)
 		};
 	}
 
 	// AABBの有効性チェック
 	bool IsValid() const {
-		return (min_.x <= max_.x) && (min_.y <= max_.y) && (min_.z <= max_.z);
+		return (min.x <= max.x) && (min.y <= max.y) && (min.z <= max.z);
 	}
 };
 
@@ -320,8 +318,7 @@ struct CornerSegment {
 struct Triangle
 {
 	Vector3 vertices[3]; // !頂点
-	AABB bounds;
-
+	
 	// +=オペレーターのオーバーロード 
 	Triangle& operator+=(const Vector3& offset) {
 		for (auto& vertex : vertices) {
@@ -406,11 +403,13 @@ struct Triangle
 
 		return false;
 	}
-
-	// コンストラクタ
-	Triangle(Vector3 v0, Vector3 v1, Vector3 v2) : vertices{ v0, v1, v2 } {
-		bounds.min_ = Min(Min(v0, v1), v2);
-		bounds.max_ = Max(Max(v0, v1), v2);
+	
+	// AABB 取得
+	AABB GetAABB() const {
+		AABB result{};
+		result.min = Min(Min(vertices[0], vertices[1]), vertices[2]);
+		result.max = Max(Max(vertices[0], vertices[1]), vertices[2]);
+		return result;
 	}
 };
 

@@ -9,11 +9,11 @@
 //ImGuiで0番目を使用するため,1番から使用
 uint32_t Engine::TextureManager::kSRVIndexTop = 1;
 
-void Engine::TextureManager::Initialize(Command* command, DXGIDevice* DXGIDevice, SrvManager* srvManager)
+void Engine::TextureManager::Initialize(Command* command, DXGIDevice* dxgiDevice, SrvManager* srvManager)
 {
-	DXGIDevice_ = DXGIDevice;	// デバイス
-	command_ = command;			// コマンド
-	srvManager_ = srvManager;	// SRV管理クラス
+	this->dxgiDevice = dxgiDevice;	// デバイス
+	this->command = command;			// コマンド
+	this->srvManager = srvManager;	// SRV管理クラス
 	textureDatas.reserve(SrvManager::kMaxSRVCount); // 最大個数にリサイズ
 }
 
@@ -27,7 +27,7 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 		return;
 	}
 	// テクスチャ枚数上限チェック
-	assert(srvManager_->IsMaxTextuer());
+	assert(srvManager->IsMaxTextuer());
 
 	// テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
@@ -98,11 +98,11 @@ void Engine::TextureManager::LoadTexture(const std::string& filePath) {
 
 
 
-	textureData.srvIndex = srvManager_->Allocate();
-	textureData.srvHandleCPU = srvManager_->GetCPUDescriptorHandle(textureData.srvIndex);
-	textureData.srvHandleGPU = srvManager_->GetGPUDescriptorHandle(textureData.srvIndex);
+	textureData.srvIndex = srvManager->Allocate();
+	textureData.srvHandleCPU = srvManager->GetCPUDescriptorHandle(textureData.srvIndex);
+	textureData.srvHandleGPU = srvManager->GetGPUDescriptorHandle(textureData.srvIndex);
 
-	srvManager_->CreateSRVforTexture2D(textureData.srvIndex, textureData.resource.Get(), textureData.metadata);
+	srvManager->CreateSRVforTexture2D(textureData.srvIndex, textureData.resource.Get(), textureData.metadata);
 
 
 	debugTimerTex_.EndTimer();
@@ -222,7 +222,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::CreateTextureReso
 	//3. Resourceを生成する
 
 	Microsoft::WRL::ComPtr <ID3D12Resource> resource = nullptr;
-	HRESULT hr = DXGIDevice_->GetDevice()->CreateCommittedResource(
+	HRESULT hr =dxgiDevice->GetDevice()->CreateCommittedResource(
 		&heapProperties, // Heapの設定
 		D3D12_HEAP_FLAG_NONE, // Heapの特殊な設定。特になし
 		&resourceDesc, // Resourceの設定
@@ -240,10 +240,10 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::CreateTextureReso
 Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages)
 {
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-	DirectX::PrepareUpload(DXGIDevice_->GetDevice(), mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
+	DirectX::PrepareUpload(dxgiDevice->GetDevice(), mipImages.GetImages(), mipImages.GetImageCount(), mipImages.GetMetadata(), subresources);
 	uint64_t intermediateSize = GetRequiredIntermediateSize(texture.Get(), 0, UINT(subresources.size()));
-	Microsoft::WRL::ComPtr < ID3D12Resource> intermediateResource = DXGIDevice_->CreateBufferResource(intermediateSize);
-	UpdateSubresources(command_->GetList(), texture.Get(), intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
+	Microsoft::WRL::ComPtr < ID3D12Resource> intermediateResource = dxgiDevice->CreateBufferResource(intermediateSize);
+	UpdateSubresources(command->GetList(), texture.Get(), intermediateResource.Get(), 0, 0, UINT(subresources.size()), subresources.data());
 	// Textureへの転送後は利用できるよう、D3D12_RESORCE_STATE_COPYからD3D12_RESOURCE_STATE_GENERIC_READへResourceStateを変更する
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -252,6 +252,6 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Engine::TextureManager::UploadTextureData
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-	command_->GetList()->ResourceBarrier(1, &barrier);
+	command->GetList()->ResourceBarrier(1, &barrier);
 	return intermediateResource;
 }

@@ -129,7 +129,7 @@ Engine::ContactRecord& ObjectComponent::GetContactRecord() {
 Vector2 ObjectComponent::GetScreenPosition() {
     // インスタンシング描画なら
     if (useInstancing) {
-        return ScreenPosition(objectInstance_->transform, entity3DManager_->GetObject3dCommon()->GetDefaltCamera());
+        return ScreenPosition(objectInstance_->transform, entityManager->GetObject3dCommon()->GetDefaltCamera());
     }
     else {
         return objectBase_->GetScreenPosition();
@@ -142,19 +142,19 @@ Vector2 ObjectComponent::GetScreenPosition() {
 /// </summary>
 /// <param name="entity3DManager"></param>
 /// <param name="globalVariables"></param>
-void ObjectComponent::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
+void ObjectComponent::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
     const std::string& objectName, const std::string& modelName,bool useCollider, bool useRigidBody,
     IHitReceiver* iHitReceiver, Engine::ObjectModelType modelType,bool rigidUpdate) {
 
-    this->entity3DManager_ = entity3DManager;   // エンティティ3d
-    this->globalVariables_ = globalVariables;   // 保存項目
+    this->entityManager = entityManager;   // エンティティ3d
+    this->globalVariables = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
     useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
     rigidUpdate_ = rigidUpdate;
     name_ = objectName;
 
     // オブジェクト生成
-    objectBase_ = entity3DManager_->CreateObject3D(name_, modelType, {}, nullptr);
+    objectBase_ = entityManager->CreateObject3D(name_, modelType, {}, nullptr);
     objectBase_->SetModel(modelName);                           // モデル指定
     SetSRT({1,1,1},{0,0,0},{0,0,0});
     // コライダ使うか
@@ -169,12 +169,12 @@ void ObjectComponent::Initialize(Engine::Entity3DManager* entity3DManager, Engin
     }
 }
 
-void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
+void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
     const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody,
     IHitReceiver* iHitReceiver, Engine::Object3dInstansManager::TransparencyType transparencyType)
 {
-    this->entity3DManager_ = entity3DManager;   // エンティティ3d
-    this->globalVariables_ = globalVariables;   // 保存項目
+    this->entityManager = entityManager;   // エンティティ3d
+    this->globalVariables = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
     useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
     useRigidBody_ = useRigidBody;
@@ -183,13 +183,13 @@ void ObjectComponent::InitializeInstancing(Engine::Entity3DManager* entity3DMana
     useInstancing = true;                       // インスタンシング描画にする
     // インスタンス初期化
     Engine::ObjectInstans object;
-    object.Initialize(entity3DManager_, useCollider_, useRigidBody_);
+    object.Initialize(entityManager, useCollider_, useRigidBody_);
     // オブジェクト追加
-    entity3DManager_->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_,
+    entityManager->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_,
         Engine::Object3dInstansManager::MeshType::kModel,transparencyType);
 
     // インスタンス
-    objectInstance_ = entity3DManager_->GetObject3dInstansManager()->GetObjectById(modelName_, instanceId_, transparencyType);
+    objectInstance_ = entityManager->GetObject3dInstansManager()->GetObjectById(modelName_, instanceId_, transparencyType);
 }
 
 /// <summary>

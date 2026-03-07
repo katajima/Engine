@@ -37,7 +37,7 @@ namespace Engine {
 	public: // ゲッター
 
 		// DirectXCommon取得
-		DirectXCommon* GetDxCommon() { return directXCommon_; }
+		DirectXCommon* GetDxCommon() { return dxCommon; }
 		// トレイルエフェクト用取得
 		TrailEffectCommon* GetTrailEffectCommon() { return trailEffectCommon_.get(); }
 		// パーティクルマネージャ取得
@@ -48,7 +48,7 @@ namespace Engine {
 		ParticleManager2d* GetParticleManager2d() { return particleManager2d_.get(); }
 
 		// ライン共通クラス取得
-		LineCommon* GetLineCommon() { return lineCommon_; }
+		LineCommon* GetLineCommon() { return lineCommon; }
 
 	private:
 		// トレイルエフェクト
@@ -62,9 +62,9 @@ namespace Engine {
 
 		std::unique_ptr<ParticleManager2d> particleManager2d_;
 	private:
-		DirectXCommon* directXCommon_;
-		LightManager* lightManager_;
-		LineCommon* lineCommon_;
+		DirectXCommon* dxCommon = nullptr;
+		LightManager* lightManager = nullptr;
+		LineCommon* lineCommon = nullptr;
 	};
 }
 

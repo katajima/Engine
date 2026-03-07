@@ -1,16 +1,16 @@
 #include "TitleUI.h"
-#include "DirectXGame/engine/Manager/Entity2D/Entity2DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
 
-void TitleUI::Initialize(InputSystem* inputSystem, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables) {
+void TitleUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) {
 	iconB_ = std::make_unique<Engine::Sprite>();
-	iconB_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/icon/B.dds");
+	iconB_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/icon/B.dds");
 	iconB_->SetPosition({ 640,600 });
 	iconB_->SetAnchorPoint({ 0.5f,0.5f });
 	iconB_->SetSize({ 200,200 });
 
 	title_ = std::make_unique<Engine::Sprite>();
-	title_->Initialize(entity2DManager->GetSpriteCommon(), "resources/Texture/text/title.dds");
+	title_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/title.dds");
 	title_->SetPosition(titlePos_);
 	title_->SetAnchorPoint({ 0.5f,0.5f });
 	title_->SetSize(2);

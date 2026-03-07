@@ -12,10 +12,9 @@ BulletManager::~BulletManager()
 	bullets_.clear();
 }
 
-void BulletManager::Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera){
+void BulletManager::Initialize(Engine::EntityManager* entityManager,  Engine::GlobalVariables* globalVariables, Engine::Camera* camera){
 	// それぞれ
-	this->entity3DManager = entity3DManager;	// エンティティ3d
-	this->entity2DManager = entity2DManager;	// エンティティ2d
+	this->entityManager = entityManager;	// エンティティ
 	this->globalVariables = globalVariables;	// 保存項目
 	this->camera = camera;					// カメラ
 }

@@ -55,7 +55,7 @@ namespace Engine {
 		};
 
 	private:
-		DirectXCommon* dxCommon_ = nullptr;
+		DirectXCommon* dxCommon = nullptr;
 
 		ConstantBuffer<TransfomationMatrix> cbResource_;
 

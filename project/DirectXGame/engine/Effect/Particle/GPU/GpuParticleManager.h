@@ -23,7 +23,7 @@ namespace Engine {
 	// 前方宣言
 	class LineCommon;
 	class LightManager;
-	class Entity3DManager;
+	class EntityManager;
 	class EffectManager;
 	class SrvManager;
 	class DirectXCommon;
@@ -46,7 +46,7 @@ namespace Engine {
 
 
 		// カメラセット
-		void SetCamera(Camera* camera) { this->camera_ = camera; }
+		void SetCamera(Camera* camera) { this->camera = camera; }
 		// コンピュートシェーダでのPSO設定
 		void PreCsPso();
 		// コンピュートシェーダトレイルのPSO設定
@@ -83,7 +83,7 @@ namespace Engine {
 			}
 
 			auto emitter = std::make_unique<EmitterType>();
-			emitter->Init(dxCommon_, lineCommon_, nullptr, name);
+			emitter->Init(dxCommon, lineCommon, nullptr, name);
 			gpuParticleEmitter_[name] = std::move(emitter);
 		}
 
@@ -156,11 +156,11 @@ namespace Engine {
 
 
 	private:
-		Entity3DManager* entity3DManager_;		// エンティティマネージャー
-		EffectManager* effectManager_;			// エフェクトマネージャー
-		SrvManager* srvManager_ = nullptr;		// SRVマネージャー
-		DirectXCommon* dxCommon_ = nullptr;		// DirectX共通クラス
-		LineCommon* lineCommon_ = nullptr;		// ライン
-		Camera* camera_ = nullptr;				// カメラ
+		EntityManager* entity3DManager = nullptr;		// エンティティマネージャー
+		EffectManager* effectManager = nullptr;			// エフェクトマネージャー
+		SrvManager* srvManager = nullptr;		// SRVマネージャー
+		DirectXCommon* dxCommon = nullptr;		// DirectX共通クラス
+		LineCommon* lineCommon = nullptr;		// ライン
+		Camera* camera = nullptr;				// カメラ
 	};
 }

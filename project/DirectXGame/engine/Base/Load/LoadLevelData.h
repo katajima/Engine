@@ -8,7 +8,7 @@
 class CameraManager;
 class BaseCamera;
 namespace Engine {
-	class Entity3DManager;
+	class EntityManager;
 }
 
 /// <summary>
@@ -19,7 +19,7 @@ class LoadLevelData
 public:
 
 	// 初期化
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera, 
+	void Initialize(Engine::EntityManager* entity3DManager, Engine::ModelManager* modelManager, Engine::Camera* camera, 
 		const std::string extensionName, const std::string fileName = "levelData/");
 	// リロード
 	void ReLoad();
@@ -31,7 +31,7 @@ public:
 	void Draw3D();
 
 	// カメラマネージャー設定
-	void SetCameraManager(CameraManager* cameraManager) { cameraManager_ = cameraManager; };
+	void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 
 public:
 	// レベルデータ取得
@@ -54,11 +54,11 @@ private:
 	void ClearData();
 
 private:
-	Engine::Entity3DManager* entity3DManager_ = nullptr;
-	Engine::ModelManager* modelManager_ = nullptr;
-	CameraManager* cameraManager_ = nullptr;
+	Engine::EntityManager* entityManager = nullptr;
+	Engine::ModelManager* modelManager = nullptr;
+	CameraManager* cameraManager = nullptr;
 	std::vector<Engine::Object3d*> objects_;					// オブジェクト
-	std::vector<std::unique_ptr<BaseCamera>> cameras_;	// カメラ
+	std::vector<std::unique_ptr<BaseCamera>> cameras_;			// カメラ
 	std::vector<std::shared_ptr<Engine::Lights>> lights_;		// ライト
 
 private:

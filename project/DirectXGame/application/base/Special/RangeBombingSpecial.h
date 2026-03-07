@@ -3,13 +3,6 @@
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 // 前方宣言
-
-namespace Engine {
-	class Entity3DManager;
-	class Entity2DManager;
-}
-class BulletSpawn;
-class FollowCamera;
 class MainStage;
 
 /// <summary>
@@ -21,7 +14,7 @@ public:
 	///< summary>
 	/// 初期化
 	///</summary>
-	void Initialize(Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera) override;
+	void Initialize(Engine::EntityManager* entityManager, Engine::Camera* camera) override;
 
 	///< summary>
 	/// 更新

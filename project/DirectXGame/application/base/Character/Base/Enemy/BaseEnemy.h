@@ -6,12 +6,6 @@
 #include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include "EnemyData.h"
 
-
-//前方宣言
-
-class Entity3DManager;
-class Entity2DManager;
-
 namespace Character {
 	class BasePlayer;
 
@@ -21,11 +15,11 @@ namespace Character {
 	class BaseEnemy : public BaseCharacter {
 	public:
 		// 初期化
-		virtual void Initialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
 
 		// 基盤となる初期化
-		void BaseInitialize(InputSystem* inputSystem, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager,
+		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
 			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f);
 		// 毎フレーム更新

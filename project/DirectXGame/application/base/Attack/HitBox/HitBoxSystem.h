@@ -5,7 +5,7 @@
 #include "HitBoxEditor.h"
 
 namespace Engine {
-	class Entity3DManager; // 前方宣言
+	class EntityManager; // 前方宣言
 	class GlobalVariables;
 }
 namespace Character {
@@ -28,7 +28,7 @@ namespace HitBox {
 
 
 		// 初期化
-		void Initialize(Character::BaseCharacter* character, Engine::Entity3DManager* entity3dManager);
+		void Initialize(Character::BaseCharacter* character, Engine::EntityManager* entityManager);
 		// 更新
 		void Update(float dt);
 
@@ -65,6 +65,6 @@ namespace HitBox {
 		std::map<std::string, CollData> hitBoxCollDatas_;
 	private:
 		Character::BaseCharacter* character = nullptr;
-		Engine::Entity3DManager* entity3dManager = nullptr;
+		Engine::EntityManager* entityManager = nullptr;
 	};
 }

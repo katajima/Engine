@@ -22,8 +22,7 @@
 // 前方宣言
 namespace Engine {
 	class DirectXCommon;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class GlobalVariables;
 }
 class Effect;

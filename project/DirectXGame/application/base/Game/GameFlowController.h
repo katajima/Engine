@@ -10,7 +10,7 @@ namespace Character {
 namespace Engine {
 	class GlobalVariables;
 	class SceneManager;
-	class Entity3DManager;
+	class EntityManager;
 }
 /// <summary>
 /// ゲームの流れやルールを制御するクラス
@@ -49,7 +49,7 @@ private:
 	bool isEndgame_ = false;
 
 private: // 貰いもの
-	Engine::Entity3DManager* entity3DManager = nullptr;
+	Engine::EntityManager* entityManager = nullptr;
 	Character::CharacterManager* characterManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::SceneManager* sceneManager = nullptr;

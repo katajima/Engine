@@ -22,8 +22,7 @@
 // 前方宣言
 namespace Engine {
 	class DirectXCommon;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 	class GlobalVariables;
 }
 class Effect;
@@ -35,8 +34,8 @@ class Effect;
 class TitleStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager,
-		Engine::Entity2DManager* entity2DManager, Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
+	void Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 	// 更新
 	void Update(float dt);
@@ -85,8 +84,7 @@ private:
 	void InitializeStone();
 private:
 	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::Entity3DManager* entity3DManager = nullptr;
-	Engine::Entity2DManager* entity2DManager = nullptr;
+	Engine::EntityManager* entityManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::Camera* camera = nullptr;
 	// エフェクト

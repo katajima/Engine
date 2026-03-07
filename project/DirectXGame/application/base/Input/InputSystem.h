@@ -26,15 +26,24 @@ public:
 	/// </summary>
 	/// <param name="dt"></param>
 	void Update(float dt);
-	
+private:
+	// プレイヤー操作の入力データの更新
+	void PlayerInputUpdate(float dt);
+	// ゲーム操作の入力データの更新
+	void GameInputUpdate(float dt);
+public:
 	// 入力データ取得
-	InputData GetData() const { return data_; }
+	PlayerInputData GetPlayerInputData() const { return playerInputData_; }
+	// ゲーム操作の入力データ取得
+	GameInputData GetGameInputData() const { return gameInputData_; }
 
 	bool GetButtom(InputButton press, GamePadButton button) const;
 
 private:
-	InputData data_;
-
+	// プレイヤー操作の入力データ
+	PlayerInputData playerInputData_;
+	// 
+	GameInputData gameInputData_;
 private:
 	// 入力クラス
 	Engine::Input* input = nullptr;

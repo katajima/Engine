@@ -54,7 +54,6 @@ uint32_t ColliderComponent::AddCollider(std::unique_ptr<Collider> collider) {
     return id;
 }
 
-
 void ColliderComponent::SetOwner(void* newOwner){
     owner = newOwner;
     for (auto& entry : colliders) {

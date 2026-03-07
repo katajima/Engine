@@ -166,9 +166,9 @@ Vector3 Math::RadiansToDegrees(Vector3 radians)
 Vector3 ClosestPoint::AABBSphere(const Sphere& sphere, const AABB& aabb)
 {
 	Vector3 closestPoint;
-	closestPoint.x = Math::Clamp(sphere.center.x, aabb.min_.x, aabb.max_.x);
-	closestPoint.y = Math::Clamp(sphere.center.y, aabb.min_.y, aabb.max_.y);
-	closestPoint.z = Math::Clamp(sphere.center.z, aabb.min_.z, aabb.max_.z);
+	closestPoint.x = Math::Clamp(sphere.center.x, aabb.min.x, aabb.max.x);
+	closestPoint.y = Math::Clamp(sphere.center.y, aabb.min.y, aabb.max.y);
+	closestPoint.z = Math::Clamp(sphere.center.z, aabb.min.z, aabb.max.z);
 
 	return closestPoint;
 }
@@ -256,8 +256,8 @@ Vector3 ClosestPoint::SegmentAABB(const Segment& segment, const AABB& box) {
 	Vector3 closestPoint = segment.origin;
 
 	for (int i = 0; i < 3; i++) { // X, Y, Z 各軸
-		if (closestPoint[i] < box.min_[i]) closestPoint[i] = box.min_[i];
-		if (closestPoint[i] > box.max_[i]) closestPoint[i] = box.max_[i];
+		if (closestPoint[i] < box.min[i]) closestPoint[i] = box.min[i];
+		if (closestPoint[i] > box.max[i]) closestPoint[i] = box.max[i];
 	}
 
 	return closestPoint;
@@ -283,14 +283,14 @@ Vector3 ClosestPoint::SegmentAABB(const Vector3& segStart, const Vector3& segEnd
 	float t = 0.0f;
 	float abLenSq = ab.LengthSq();
 	if (abLenSq > 0.0001f) {
-		Vector3 aabbCenter = (aabb.min_ + aabb.max_) * 0.5f;
+		Vector3 aabbCenter = (aabb.min + aabb.max) * 0.5f;
 		t = (aabbCenter - segStart).Dot(ab) / abLenSq;
 		t = std::clamp(t, 0.0f, 1.0f);
 	}
 	Vector3 closest = segStart + ab * t;
 
 	// AABB内にクランプ（closest点がAABBの内外どちらでも動作する）
-	return Vector3::Clamp(closest, aabb.min_, aabb.max_);
+	return Vector3::Clamp(closest, aabb.min, aabb.max);
 }
 
 

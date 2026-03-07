@@ -18,7 +18,7 @@ namespace Character {
 
 
 
-		bool isTriggerLT = inputSystem->GetData().dashHeld;
+		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
 		if (isTriggerLT) {
 			//character->GetMoveComponent()->GetDashSystem()->StartDash();
 		}
@@ -31,14 +31,14 @@ namespace Character {
 
 		// 必殺技移行
 		if (special->GetIsSpecial()) {
-			if (inputSystem->GetData().specialTrigger) {
+			if (inputSystem->GetPlayerInputData().specialTrigger) {
 				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 				return;
 			}
 		}
 
 		// 移動したら
-		if (inputSystem->GetData().moveShick.Length() != 0) {
+		if (inputSystem->GetPlayerInputData().moveShick.Length() != 0) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 			return;
 		}
@@ -72,7 +72,7 @@ namespace Character {
 		weapon->GetObject3D()->SetIsDraw(true); // 武器描画
 		anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
 
-		bool isTriggerLT = inputSystem->GetData().dashHeld;
+		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
 		if (isTriggerLT) {
 			//character->GetMoveComponent()->GetDashSystem()->StartDash();
 		}
@@ -82,14 +82,14 @@ namespace Character {
 
 		// 必殺がうてるなら
 		if (special->GetIsSpecial()) {
-			if (inputSystem->GetData().specialTrigger) {
+			if (inputSystem->GetPlayerInputData().specialTrigger) {
 				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 				return;
 			}
 		}
 
 		// 止まったら
-		if (inputSystem->GetData().moveShick.Length() == 0) {
+		if (inputSystem->GetPlayerInputData().moveShick.Length() == 0) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
 			return;
 		}
@@ -134,11 +134,11 @@ namespace Character {
 
 		// ジャンプ出来るか
 		bool isJamp = character->GetMoveComponent()->GetIsJump();
-		bool isTrigger = inputSystem->GetData().jumpTrigger;
-		bool isPress = inputSystem->GetData().jumpPressed;
+		bool isTrigger = inputSystem->GetPlayerInputData().jumpTrigger;
+		bool isPress = inputSystem->GetPlayerInputData().jumpPressed;
 
 
-		bool isTriggerLT = inputSystem->GetData().dashHeld;
+		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
 		
 
 

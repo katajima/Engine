@@ -5,7 +5,7 @@
 
 void Engine::ScissorRect::Initialize(Command* command)
 {
-	command_ = command;	// コマンド
+	this->command = command;	// コマンド
 }
 
 void Engine::ScissorRect::SettingScissorRect()
@@ -20,5 +20,5 @@ void Engine::ScissorRect::SettingScissorRect()
 	scissorRect.right = width;
 	scissorRect.top = 0;
 	scissorRect.bottom = height;
-	command_->GetList()->RSSetScissorRects(1, &scissorRect);
+	this->command->GetList()->RSSetScissorRects(1, &scissorRect);
 }

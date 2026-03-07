@@ -1,4 +1,4 @@
-#include "Entity3DManager.h"
+#include "EntityManager.h"
 
 #include "DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
@@ -6,56 +6,61 @@ using namespace Engine;
 
 std::mutex mutex;  // グローバルやスコープ内に必要
 
-void Engine::Entity3DManager::Initialize(DirectXCommon* directXCommon)
+void Engine::EntityManager::Initialize(DirectXCommon* directXCommon)
 {
-	directXCommon_ = directXCommon;	// DX共通クラス
+	dxCommon = directXCommon;	// DX共通クラス
 
 	// ライト共通クラス初期化
 	lightManager_ = std::make_unique<LightManager>();
-	lightManager_->Initialize(directXCommon_);
+	lightManager_->Initialize(dxCommon);
 
 	// カメラ共通クラス初期化
 	cameraCommon_ = std::make_unique<CameraCommon>();
-	cameraCommon_->Initialize(directXCommon_);
+	cameraCommon_->Initialize(dxCommon);
 
 	// オーシャンシェーダー初期化
 	oceanManager_ = std::make_unique<OceanManager>();
-	oceanManager_->Initialize(directXCommon_);
+	oceanManager_->Initialize(dxCommon);
 
 	// オブジェクトのインスタンシング初期化
 	object3dInstansManager_ = std::make_unique<Object3dInstansManager>();
-	object3dInstansManager_->Initialize(directXCommon_);
+	object3dInstansManager_->Initialize(dxCommon);
 	object3dInstansManager_->SetEntity3D(this);
 
 	// オブジェクト共通クラス初期化
 	object3dCommon_ = std::make_unique<Object3dCommon>();
-	object3dCommon_->Initialize(directXCommon_);
+	object3dCommon_->Initialize(dxCommon);
 
 	// スカイボックス共通クラス初期化
 	skyBoxCommon_ = std::make_unique<SkyBoxCommon>();
-	skyBoxCommon_->Initialize(directXCommon_);
+	skyBoxCommon_->Initialize(dxCommon);
 
 
 
 	// スキニング共通クラス初期化
 	skinningCommon_ = std::make_unique<SkinningConmmon>();
-	skinningCommon_->Initialize(directXCommon_);
+	skinningCommon_->Initialize(dxCommon);
 
 	// ライン共通クラス初期化
 	lineCommon_ = std::make_unique<LineCommon>();
-	lineCommon_->Initialize(directXCommon_);
+	lineCommon_->Initialize(dxCommon);
 
 	// プリミティブ共通クラス初期化
 	primitiveCommon_ = std::make_unique<PrimitiveCommon>();
-	primitiveCommon_->Initialize(directXCommon_);
+	primitiveCommon_->Initialize(dxCommon);
 
 
 	// エフェクトマネージャー初期化
 	effectManager_ = std::make_unique<EffectManager>();
-	effectManager_->Initialize(directXCommon_, lightManager_.get(), lineCommon_.get());
+	effectManager_->Initialize(dxCommon, lightManager_.get(), lineCommon_.get());
+
+	// スプライト共通クラス初期化
+	spriteCommon_ = std::make_unique<SpriteCommon>();
+	spriteCommon_->Initialize(dxCommon);
+
 }
 
-void Engine::Entity3DManager::UpdateImgui()
+void Engine::EntityManager::UpdateImgui()
 {
 #ifdef _DEBUG
 	ImGui::Begin("EmitParticle");
@@ -151,7 +156,7 @@ void Engine::Entity3DManager::UpdateImgui()
 
 			}
 			else {
-				for (auto& mesh : entity->GetModel()->modelData.mesh) {
+				for (auto& mesh : entity->GetModel()->GetModelData().mesh) {
 					nameMesh = "Mesh" + mesh->name;
 					if (ImGui::CollapsingHeader(nameMesh.c_str())) {
 						int verticesCount = static_cast<int>(mesh->vertices.size());
@@ -181,7 +186,7 @@ void Engine::Entity3DManager::UpdateImgui()
 				}
 
 				if (ImGui::CollapsingHeader("Animetion")) {
-					for (auto& anima : entity->GetModel()->modelData.animations) {
+					for (auto& anima : entity->GetModel()->GetModelData().animations) {
 						ImGui::Text(anima.first.c_str());
 					}
 				}
@@ -213,7 +218,7 @@ void Engine::Entity3DManager::UpdateImgui()
 
 }
 
-void Engine::Entity3DManager::Update()
+void Engine::EntityManager::Update()
 {
 	// オブジェクトインスタンシング更新
 	object3dInstansManager_->Update();
@@ -263,12 +268,12 @@ void Engine::Entity3DManager::Update()
 	}
 }
 
-void Engine::Entity3DManager::ObjectClean()
+void Engine::EntityManager::ObjectClean()
 {
 	object3d.clear();
 }
 
-void Engine::Entity3DManager::ObjectDraw()
+void Engine::EntityManager::ObjectDraw()
 {
 	// インスタンシング描画
 	object3dInstansManager_->Draw();

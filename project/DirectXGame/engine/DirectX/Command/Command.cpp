@@ -6,14 +6,14 @@
 
 void Engine::Command::Initialize(DXGIDevice* dxgi)
 {
-	dxgi_ = dxgi;	// デバイス
+	this->dxgi = dxgi;	// デバイス
 	
 	////------コマンドキュー------////
 
 	//コマンドキューを生成する
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
 
-	hr_ = dxgi_->GetDevice()->CreateCommandQueue(&commandQueueDesc,
+	hr_ = dxgi->GetDevice()->CreateCommandQueue(&commandQueueDesc,
 		IID_PPV_ARGS(&commandQueue_));
 
 	//コマンドキューの生成がうまくいかなかったので起動できない
@@ -23,7 +23,7 @@ void Engine::Command::Initialize(DXGIDevice* dxgi)
 	////------コマンドアロケータ------////
 
 	//コマンドアロケータを生成する
-	hr_ = dxgi_->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator_));
+	hr_ = dxgi->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator_));
 
 	//コマンドアロケータの生成がうまくいかなかったので起動できない
 	assert(SUCCEEDED(hr_));
@@ -32,7 +32,7 @@ void Engine::Command::Initialize(DXGIDevice* dxgi)
 	////------コマンドリスト------////
 
 	//コマンドリストを生成する
-	hr_ = dxgi_->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_.Get(), nullptr,
+	hr_ = dxgi->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_.Get(), nullptr,
 		IID_PPV_ARGS(&commandList_));
 
 	//コマンドリストの生成がうまくいかなかったので起動できない

@@ -1,9 +1,9 @@
 #include "HitBoxSystem.h"
 
 namespace HitBox {
-	void System::Initialize(Character::BaseCharacter* character, Engine::Entity3DManager* entity3dManager) {
+	void System::Initialize(Character::BaseCharacter* character, Engine::EntityManager* entityManager) {
 		this->character = character;
-		this->entity3dManager = entity3dManager;
+		this->entityManager = entityManager;
 	};
 
 	void System::Update(float dt) {
@@ -30,7 +30,7 @@ namespace HitBox {
 		float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entity3dManager, character, type);
+		d.hitBox->Initialize(entityManager, character, type);
 		d.hitBox->GetWorldTransform().Update();
 		std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
 		std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
@@ -94,8 +94,8 @@ namespace HitBox {
 				break;
 			case Shape::kAABB:
 				collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collAABB->aabb.min_ = -data.size / 2;
-				collAABB->aabb.max_ = data.size / 2;
+				collAABB->aabb.min = -data.size / 2;
+				collAABB->aabb.max = data.size / 2;
 				d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
 				break;
 			case Shape::kSphere:

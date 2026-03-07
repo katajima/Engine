@@ -4,7 +4,7 @@
 void Engine::Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type, const Color color)
 {
 	type_ = type;					// タイプ
-	spriteCommon_ = spriteCommon;	// スプライト共通クラス
+	this->spriteCommon = spriteCommon;	// スプライト共通クラス
 
 	// メッシュ
 	mesh = std::make_unique<ModelMesh>();
@@ -32,17 +32,17 @@ void Engine::Primitive2D::Initialize(SpriteCommon* spriteCommon, ShapeType type,
 	}
 
 	// メッシュ	
-	mesh->Initialize(spriteCommon_->GetDxCommon());
+	mesh->Initialize(spriteCommon->GetDxCommon());
 
 	// マテリアル
 	material = std::make_unique<Material>();
-	material->Initialize(spriteCommon_->GetDxCommon());
+	material->Initialize(spriteCommon->GetDxCommon());
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
 	material->GetMaterialInstance().color = color;
 
 	// トランスフォーム
 	transfomation = std::make_unique<Transfomation>();
-	transfomation->Initialize(spriteCommon_->GetDxCommon());
+	transfomation->Initialize(spriteCommon->GetDxCommon());
 
 
 
@@ -78,7 +78,7 @@ void Engine::Primitive2D::Update()
 
 void Engine::Primitive2D::Draw()
 {
-	spriteCommon_->DrawCommonSetting(PSOType::UvInterpolation_MODE_SOLID_BACK);
+	spriteCommon->DrawCommonSetting(PSOType::UvInterpolation_MODE_SOLID_BACK);
 
 	material->GetCommandListMaterial(0);
 
@@ -89,7 +89,7 @@ void Engine::Primitive2D::Draw()
 
 	mesh->GetCommandList();
 
-	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+	spriteCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
 }
 
 #pragma region Create

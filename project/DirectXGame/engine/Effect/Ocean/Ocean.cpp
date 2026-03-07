@@ -1,17 +1,17 @@
 #include "Ocean.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "OceanManager.h"
 #include "imgui.h"
 
 
 
-void Engine::Ocean::Initialize(Engine::Entity3DManager* entity3dManager,Vector2 renge)
+void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 renge)
 {
-	entity3dManager_ = entity3dManager;	// エンティティ3d
+	this->entityManager = entityManager;	// エンティティ3d
 
 	// DX共通クラス
-	directXCommon_ = entity3dManager_->GetOceanManager()->GetDxCommon();
+	this->dxCommon = entityManager->GetOceanManager()->GetDxCommon();
 
 	// 範囲
 	renge_.renge = renge;
@@ -31,7 +31,7 @@ void Engine::Ocean::Initialize(Engine::Entity3DManager* entity3dManager,Vector2 
 	mesh_->indices.push_back(3);
 	mesh_->indices.push_back(2);
 
-	mesh_->Initialize(directXCommon_);
+	mesh_->Initialize(dxCommon);
 
 
 
@@ -39,7 +39,7 @@ void Engine::Ocean::Initialize(Engine::Entity3DManager* entity3dManager,Vector2 
 
 	// マテリアル生成
 	material = std::make_unique<Material>();
-	material->Initialize(entity3dManager_->GetOceanManager()->GetDxCommon());
+	material->Initialize(dxCommon);
 	material->tex_.diffuseFilePath = "resources/Texture/Image.png";
 	material->tex_.environmentFilePath = "resources/Texture/hdr/sky.dds";
 	material->LoadTex();
@@ -47,7 +47,7 @@ void Engine::Ocean::Initialize(Engine::Entity3DManager* entity3dManager,Vector2 
 
 
 	// ノイズリソース生成
-	cbNoiseResource_.CreateBuffer(directXCommon_);
+	cbNoiseResource_.CreateBuffer(dxCommon);
 	cbNoiseResource_.Data()[0].noiseScale = 10.0f;
 	cbNoiseResource_.Data()[0].noiseStrength = 1.0f;
 	cbNoiseResource_.Data()[0].octaves = 37;
@@ -55,7 +55,7 @@ void Engine::Ocean::Initialize(Engine::Entity3DManager* entity3dManager,Vector2 
 
 
 	// ウェーブリソース生成
-	cbWaveResource_.CreateBuffer(directXCommon_,10);
+	cbWaveResource_.CreateBuffer(dxCommon,10);
 	cbWaveResource_.Data()[0].amplitude = 1.500f;
 	cbWaveResource_.Data()[0].frequency = 3.340f;
 	cbWaveResource_.Data()[0].speed = 1.0f;
@@ -141,7 +141,7 @@ void Engine::Ocean::Draw()
 
 	mesh_->GetCommandList();
 
-	directXCommon_->GetCommandList()->DrawInstanced(UINT(mesh_->vertices.size()), 1, 0, 0);
+	dxCommon->GetCommandList()->DrawInstanced(UINT(mesh_->vertices.size()), 1, 0, 0);
 }
 
 void Engine::Ocean::AddWave()

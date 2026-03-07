@@ -23,8 +23,7 @@
 // 前方宣言
 namespace Engine{
 	class DirectXCommon;
-	class Entity3DManager;
-	class Entity2DManager;
+	class EntityManager;
 }
 /// <summary>
 /// ステージクラス
@@ -32,7 +31,7 @@ namespace Engine{
 class MainStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::Entity3DManager* entity3DManager, Engine::Entity2DManager* entity2DManager, Engine::Camera* camera);
+	void Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager,  Engine::Camera* camera);
 
 	// 更新
 	void Update(float dt);
@@ -108,10 +107,9 @@ private:
 	Vector3 playerCarPos_ = { 120.0f,-3.00f,0.0f };
 
 private:
-	Engine::DirectXCommon* dxCommon;
-	Engine::Entity3DManager* entity3DManager;
-	Engine::Entity2DManager* entity2DManager;
-
+	Engine::DirectXCommon* dxCommon = nullptr;
+	Engine::EntityManager* entityManager = nullptr;
+	
 	Engine::Camera* camera = nullptr;
 private: // 一旦
 

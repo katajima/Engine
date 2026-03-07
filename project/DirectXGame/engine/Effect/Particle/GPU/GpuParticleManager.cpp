@@ -1,6 +1,6 @@
 #include "GpuParticleManager.h"
 
-#include"DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include"DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/SRV/SrvManager.h"
 #include "DirectXGame/engine/DirectX/common/DirectXCommon.h"
@@ -15,52 +15,56 @@
 
 void Engine::GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManager* lightManager, EffectManager* effectManager)
 {
-	effectManager_ = effectManager;					// エフェクト管理クラス
-	srvManager_ = dxCommon->GetSrvManager();		// SRV管理クラス
-	lineCommon_ = effectManager_->GetLineCommon();	// ライン共通クラス
-	dxCommon_ = dxCommon;							// DX共通クラス
+	this->effectManager = effectManager;					// エフェクト管理クラス
+	this->srvManager = dxCommon->GetSrvManager();		// SRV管理クラス
+	this->lineCommon = effectManager->GetLineCommon();	// ライン共通クラス
+	this->dxCommon = dxCommon;							// DX共通クラス
 
 	// パーティクルビュー
-	cbPreViewResource_.CreateBuffer(dxCommon_, 1);
+	cbPreViewResource_.CreateBuffer(dxCommon, 1);
 
+
+	Command* cmd = dxCommon->GetCommand();
+	DXGIDevice* dxgi = dxCommon->GetDXGIDevice();
+	DXCCompiler* dxcCompiler = dxCommon->GetDXCCompiler();
 
 	// Compute用のパイプラインステートオブジェクトを作成(初期化)
 	csPsoManager_ = std::make_unique<CSPSOManager>();
-	csPsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csPsoManager_->Initialize(cmd, dxgi, dxcCompiler);
 
 	// Compute用のパイプラインステートオブジェクトを作成(エミッター)
 
 	csEmitPsoManagers_[EmitterType::AABB] = std::make_unique<CSPSOManager>();
-	csEmitPsoManagers_[EmitterType::AABB]->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csEmitPsoManagers_[EmitterType::AABB]->Initialize(cmd, dxgi, dxcCompiler);
 
 	
 
 	// Compute用のパイプラインステートオブジェクトを作成(更新)
 	csUpdatePsoManager_ = std::make_unique<CSPSOManager>();
-	csUpdatePsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csUpdatePsoManager_->Initialize(cmd, dxgi, dxcCompiler);
 
 	// Compute用のパイプラインステートオブジェクトを作成(影響場所)
 	csFieldPsoManager_ = std::make_unique<CSPSOManager>();
-	csFieldPsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csFieldPsoManager_->Initialize(cmd, dxgi, dxcCompiler);
 
 	// グラフィック用のパイプラインステートオブジェクトを作成
 	psoManager_ = std::make_unique<PSOManager>();
-	psoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	psoManager_->Initialize(cmd, dxgi, dxcCompiler);
 
 
 
 	// グラフィックパイプライン(トレイル用)
 	psoTrailManager_ = std::make_unique<PSOManager>();
-	psoTrailManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	psoTrailManager_->Initialize(cmd, dxgi, dxcCompiler);
 	// コンピュートパイプライン(トレイル初期化)
 	csTrailInitPsoManager_ = std::make_unique<CSPSOManager>();
-	csTrailInitPsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csTrailInitPsoManager_->Initialize(cmd, dxgi, dxcCompiler);
 	// コンピュートパイプライン(トレイルエミッタ)
 	csTrailEmitPsoManager_ = std::make_unique<CSPSOManager>();
-	csTrailEmitPsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csTrailEmitPsoManager_->Initialize(cmd, dxgi, dxcCompiler);
 	// コンピュートパイプライン(トレイル更新)
 	csTrailUpdatePsoManager_ = std::make_unique<CSPSOManager>();
-	csTrailUpdatePsoManager_->Initialize(dxCommon_->GetCommand(), dxCommon_->GetDXGIDevice(), dxCommon_->GetDXCCompiler());
+	csTrailUpdatePsoManager_->Initialize(cmd, dxgi, dxcCompiler);
 
 
 	// パイプライン作成
@@ -68,15 +72,15 @@ void Engine::GpuParticleManager::Initialize(DirectXCommon* dxCommon, LightManage
 
 
 	/// 初期化
-	srvManager_->PreDraw();
+	srvManager->PreDraw();
 }
 
 
 void Engine::GpuParticleManager::Update()
 {
-	if (!camera_) return;
+	if (!camera) return;
 
-	Matrix4x4 cameraWorldMatrix = camera_->GetWorldMatrix();
+	Matrix4x4 cameraWorldMatrix = camera->GetWorldMatrix();
 
 	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraWorldMatrix);
@@ -87,11 +91,11 @@ void Engine::GpuParticleManager::Update()
 
 	cbPreViewResource_.Data()->billboardMatrix = billboardMatrix;
 	cbPreViewResource_.Data()->billboardMatrixY = billboardMatrixY;
-	cbPreViewResource_.Data()->viewProjection = camera_->GetViewProjectionMatrix();
+	cbPreViewResource_.Data()->viewProjection = camera->GetViewProjectionMatrix();
 
 
 	// パーティクルエミッター
-	srvManager_->PreDraw();
+	srvManager->PreDraw();
 	// エミッター更新(パラメーター)
 	for (auto& emitte : gpuParticleEmitter_) {
 #ifdef _DEBUG
@@ -130,7 +134,7 @@ void Engine::GpuParticleManager::Update()
 	csUpdatePsoManager_->PreComputePSRS();
 
 	for (auto& group : gpuParticleGroup_) {
-		group.second.SetCamera(camera_);
+		group.second.SetCamera(camera);
 		group.second.Update();
 	}
 
@@ -156,11 +160,11 @@ void Engine::GpuParticleManager::Draw()
 
 		// パーティクル描画
 
-		dxCommon_->GetCommandList()->SetPipelineState(particleDraw.graphicsPipelineState.Get());
+		dxCommon->GetCommandList()->SetPipelineState(particleDraw.graphicsPipelineState.Get());
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(particleDraw.rootSignature.Get());
+		dxCommon->GetCommandList()->SetGraphicsRootSignature(particleDraw.rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-		dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		
 		cbPreViewResource_.SetGraphicsRootConstantBufferView(0);
@@ -169,11 +173,11 @@ void Engine::GpuParticleManager::Draw()
 
 		// トレイル描画
 
-		dxCommon_->GetCommandList()->SetPipelineState(trailDraw.graphicsPipelineState.Get());
+		dxCommon->GetCommandList()->SetPipelineState(trailDraw.graphicsPipelineState.Get());
 		//// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		dxCommon_->GetCommandList()->SetGraphicsRootSignature(trailDraw.rootSignature.Get());
+		dxCommon->GetCommandList()->SetGraphicsRootSignature(trailDraw.rootSignature.Get());
 		//形状を設定。PSOに設定している物とはまた別。同じものを設定すると考えておけば良い
-		dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		group.second.DrawTrail();
 
@@ -199,7 +203,7 @@ void Engine::GpuParticleManager::CreateGroup(std::string name, ModelMesh* mesh, 
 	if (gpuParticleGroup_.contains(name)) {
 		return;
 	}
-	gpuParticleGroup_[name].Create(this, dxCommon_, instance, name, textureName);
+	gpuParticleGroup_[name].Create(this, dxCommon, instance, name, textureName);
 	gpuParticleGroup_[name].SetMesh(mesh);
 }
 
@@ -225,7 +229,7 @@ void Engine::GpuParticleManager::CreateField(std::string name)
 		return;
 	}
 
-	gpuParticleField_[name].Init(dxCommon_, lineCommon_, name);
+	gpuParticleField_[name].Init(dxCommon, lineCommon, name);
 
 }
 

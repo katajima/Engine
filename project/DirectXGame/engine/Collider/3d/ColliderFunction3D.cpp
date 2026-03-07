@@ -4,7 +4,7 @@
 #pragma region Detection
 // AABBと点
 bool Engine::Collision::Detection::Check(const AABB& aabb, const Vector3& point) {
-	return (point >= aabb.min_ && point <= aabb.max_);
+	return (point >= aabb.min && point <= aabb.max);
 }
 //衝突判定(球と球)
 bool Engine::Collision::Detection::Check(const Sphere& s1, const Sphere& s2)
@@ -136,6 +136,69 @@ bool Engine::Collision::Detection::Check(const Triangle& triangle, const Capsule
 
 	return false;
 }
+// Triangle と 球の衝突判定
+bool Engine::Collision::Detection::Check(const Triangle& triangle, const Sphere& sphere)
+{
+	constexpr float kEpsilon = 1e-6f;
+
+	const Vector3& A = triangle.vertices[0];
+	const Vector3& B = triangle.vertices[1];
+	const Vector3& C = triangle.vertices[2];
+
+	const Vector3& P = sphere.center;
+	const float r = sphere.radius;
+	const float rr = r + kEpsilon;
+	const float r2 = rr * rr;
+
+	const Vector3 AB = B - A;
+	const Vector3 AC = C - A;
+	const Vector3 AP = P - A;
+
+	// 三角形法線
+	Vector3 N = AB.Cross(AC);
+	const float nLenSq = N.LengthSq();
+
+	// 退化三角形
+	if (nLenSq <= kEpsilon) {
+		if (PointLineDistanceSquared(P, A, B) <= r2) return true;
+		if (PointLineDistanceSquared(P, B, C) <= r2) return true;
+		if (PointLineDistanceSquared(P, C, A) <= r2) return true;
+		return false;
+	}
+
+	N /= std::sqrt(nLenSq);
+
+	// 球中心から平面までの符号付き距離
+	const float dist = AP.Dot(N);
+
+	// 平面上への射影点
+	const Vector3 Q = P - N * dist;
+
+	// 三角形内部判定
+	const Vector3 AQ = Q - A;
+	const Vector3 BQ = Q - B;
+	const Vector3 CQ = Q - C;
+
+	const Vector3 BC = C - B;
+	const Vector3 CA = A - C;
+
+	const float c0 = (AB.Cross(AQ)).Dot(N);
+	const float c1 = (BC.Cross(BQ)).Dot(N);
+	const float c2 = (CA.Cross(CQ)).Dot(N);
+
+	if ((c0 >= -kEpsilon && c1 >= -kEpsilon && c2 >= -kEpsilon) ||
+		(c0 <= kEpsilon && c1 <= kEpsilon && c2 <= kEpsilon))
+	{
+		return std::fabs(dist) <= rr;
+	}
+
+	// 三角形外部なら各辺との最近距離
+	if (PointLineDistanceSquared(P, A, B) <= r2) return true;
+	if (PointLineDistanceSquared(P, B, C) <= r2) return true;
+	if (PointLineDistanceSquared(P, C, A) <= r2) return true;
+
+	return false;
+}
 // Rayと球の衝突判定
 bool Engine::Collision::Detection::Check(const Ray& ray, const Sphere& sphere) {
 	Vector3 m = ray.origin - sphere.center;
@@ -156,8 +219,8 @@ bool Engine::Collision::Detection::Check(const Ray& ray, const AABB& aabb) {
 	for (int i = 0; i < 3; ++i) {
 		float rayOrig = (&ray.origin.x)[i];
 		float rayDir = (&ray.diff.x)[i];
-		float aabbMin = (&aabb.min_.x)[i];
-		float aabbMax = (&aabb.max_.x)[i];
+		float aabbMin = (&aabb.min.x)[i];
+		float aabbMax = (&aabb.max.x)[i];
 
 		if (fabsf(rayDir) < 1e-6f) {
 			// レイが軸と平行 → 原点が範囲外なら交差なし
@@ -200,9 +263,9 @@ bool Engine::Collision::Detection::Check(const std::vector<Vector3>& controlPoin
 // AABBとAABB
 bool Engine::Collision::Detection::Check(const AABB& aabb1, const AABB& aabb2)
 {
-	if ((aabb1.min_.x <= aabb2.max_.x && aabb1.max_.x >= aabb2.min_.x) &&
-		(aabb1.min_.y <= aabb2.max_.y && aabb1.max_.y >= aabb2.min_.y) &&
-		(aabb1.min_.z <= aabb2.max_.z && aabb1.max_.z >= aabb2.min_.z)) {
+	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
+		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) &&
+		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) {
 
 		return true;
 	}
@@ -246,25 +309,25 @@ bool Engine::Collision::Detection::Check(const AABB& aabb, const Segment& segmen
 
 	// 特異点チェック: 線分が軸に平行である場合
 	if (std::abs(dotX) < 1e-6) {
-		if (segment.origin.x < aabb.min_.x || segment.origin.x > aabb.max_.x) return false;
+		if (segment.origin.x < aabb.min.x || segment.origin.x > aabb.max.x) return false;
 	}
 	if (std::abs(dotY) < 1e-6) {
-		if (segment.origin.y < aabb.min_.y || segment.origin.y > aabb.max_.y) return false;
+		if (segment.origin.y < aabb.min.y || segment.origin.y > aabb.max.y) return false;
 	}
 	if (std::abs(dotZ) < 1e-6) {
-		if (segment.origin.z < aabb.min_.z || segment.origin.z > aabb.max_.z) return false;
+		if (segment.origin.z < aabb.min.z || segment.origin.z > aabb.max.z) return false;
 	}
 
 
 	Vector3 tMin, tMax;
 
-	tMin.x = (aabb.min_.x - Dot(segment.origin, planeX1.normal)) / dotX;
-	tMin.y = (aabb.min_.y - Dot(segment.origin, planeY1.normal)) / dotY;
-	tMin.z = (aabb.min_.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
+	tMin.x = (aabb.min.x - Dot(segment.origin, planeX1.normal)) / dotX;
+	tMin.y = (aabb.min.y - Dot(segment.origin, planeY1.normal)) / dotY;
+	tMin.z = (aabb.min.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
 
-	tMax.x = (aabb.max_.x - Dot(segment.origin, planeX1.normal)) / dotX;
-	tMax.y = (aabb.max_.y - Dot(segment.origin, planeY1.normal)) / dotY;
-	tMax.z = (aabb.max_.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
+	tMax.x = (aabb.max.x - Dot(segment.origin, planeX1.normal)) / dotX;
+	tMax.y = (aabb.max.y - Dot(segment.origin, planeY1.normal)) / dotY;
+	tMax.z = (aabb.max.z - Dot(segment.origin, planeZ1.normal)) / dotZ;
 
 
 	Vector3 tNear, tFar;
@@ -391,8 +454,8 @@ bool Engine::Collision::Detection::Check(const OBB& obb, const Segment& segment)
 // OBBとAABBの衝突判定
 bool Engine::Collision::Detection::Check(const OBB& obb, const AABB& aabb) {
 	// AABBの中心と半径
-	Vector3 aabbCenter = (aabb.min_ + aabb.max_) * 0.5f;
-	Vector3 aabbHalf = (aabb.max_ - aabb.min_) * 0.5f;
+	Vector3 aabbCenter = (aabb.min + aabb.max) * 0.5f;
+	Vector3 aabbHalf = (aabb.max - aabb.min) * 0.5f;
 
 	// AABBの軸（固定）
 	Vector3 aabbAxes[3] = {

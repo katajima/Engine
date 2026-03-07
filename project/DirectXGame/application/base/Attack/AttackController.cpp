@@ -1,8 +1,8 @@
 #include "AttackController.h"
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
-#include "DirectXGame/engine/Manager/Entity3D/Entity3DManager.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-void AttackController::Initialize(Engine::Entity3DManager* entity3DManager, Engine::GlobalVariables* globalVariables,
+void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 	Character::ParameterComponent* base, Character::BaseCharacter* owner) {
 	this->globalVariables = globalVariables;
 
@@ -12,11 +12,11 @@ void AttackController::Initialize(Engine::Entity3DManager* entity3DManager, Engi
 
 	// コンボシステムの初期化
 	comboSystem_ = std::make_unique<Combo::System>();
-	comboSystem_->Initialize(owner, entity3DManager->Get3DLineCommon(), globalVariables);
+	comboSystem_->Initialize(owner, entityManager->Get3DLineCommon(), globalVariables);
 
 	// ヒットボックスシステム初期化
 	hitBoxSystem_ = std::make_unique<HitBox::System>();
-	hitBoxSystem_->Initialize(owner, entity3DManager);
+	hitBoxSystem_->Initialize(owner, entityManager);
 
 	// ロックオンシステム初期化
 	lockOnSystem_ = std::make_unique<LockOnSystem>();

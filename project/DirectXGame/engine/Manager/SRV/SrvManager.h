@@ -76,7 +76,7 @@ namespace Engine {
 		std::atomic<uint32_t> useIndex_{ 0 };
 
 	private:
-		DXGIDevice* DXGIDevice_;
-		Command* command_;
+		DXGIDevice* dxgiDevice = nullptr;
+		Command* command = nullptr;
 	};
 }

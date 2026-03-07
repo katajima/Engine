@@ -34,11 +34,9 @@ private:
 	void GravityProess(const LocomotionContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 	// 回転処理
 	void RotateProcess(const LocomotionContext& cxt, Engine::WorldTransform& world);
-	// 方向処理
-	void DirectionProcess(const LocomotionContext& cxt);
 private:
 	// 高さ
-	float groundHeight_ = -3.0f;
+	float groundHeight_ = -3.5f;
 	Engine::WorldTransform* world;
 	Engine::RigidBodyComponent* rigid;
 

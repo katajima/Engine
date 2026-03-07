@@ -88,7 +88,7 @@ namespace Engine {
 		float timer = 0;
 
 	private:
-		EffectManager* effectManager_;
+		EffectManager* effectManager = nullptr;
 
 		WorldTransform worldtransformTstr_;
 		WorldTransform worldtransformTend_;
