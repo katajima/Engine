@@ -121,6 +121,8 @@
     └── └── └── └── └── ├── ResultCamera.h
     └── └── └── └── └── ├── SelectCamera.cpp
     └── └── └── └── └── ├── SelectCamera.h
+    └── └── └── └── └── ├── StageCamera.cpp
+    └── └── └── └── └── ├── StageCamera.h
     └── └── └── └── └── ├── TitleCamera.cpp
     └── └── └── └── └── └── TitleCamera.h
     └── └── └── └── ├── FollowCamera/
@@ -139,6 +141,8 @@
     └── └── └── ├── Character/
     └── └── └── └── ├── Base/
     └── └── └── └── └── ├── BaseCharacter.h
+    └── └── └── └── └── ├── CharacterContext.cpp
+    └── └── └── └── └── ├── CharacterContext.h
     └── └── └── └── └── ├── CharacterData.h
     └── └── └── └── └── ├── CharacterEditor.h
     └── └── └── └── └── ├── CharacterGlobalData.h
@@ -202,6 +206,8 @@
     └── └── └── └── ├── Spawn/
     └── └── └── └── └── ├── CharacterSpawn.cpp
     └── └── └── └── └── ├── CharacterSpawn.h
+    └── └── └── └── └── ├── CharacterSpawnDirector.cpp
+    └── └── └── └── └── ├── CharacterSpawnDirector.h
     └── └── └── └── └── ├── CharacterSpawnManager.cpp
     └── └── └── └── └── └── CharacterSpawnManager.h
     └── └── └── └── └── Vision/
@@ -298,6 +304,8 @@
     └── └── └── └── ├── RangeBombingSpecial.cpp
     └── └── └── └── └── RangeBombingSpecial.h
     └── └── └── ├── Stage/
+    └── └── └── └── ├── BaseStage.cpp
+    └── └── └── └── ├── BaseStage.h
     └── └── └── └── ├── MainStage.cpp
     └── └── └── └── ├── MainStage.h
     └── └── └── └── ├── ResultStage.cpp
@@ -322,6 +330,8 @@
     └── └── └── └── └── └── BaseUI.h
     └── └── └── └── ├── FpsUI.cpp
     └── └── └── └── ├── FpsUI.h
+    └── └── └── └── ├── GameStartUI.cpp
+    └── └── └── └── ├── GameStartUI.h
     └── └── └── └── ├── GameUI.cpp
     └── └── └── └── ├── GameUI.h
     └── └── └── └── ├── PlayerUI.cpp
@@ -2520,7 +2530,7 @@ namespace Combo {
 	void ComboDebug::Update(float dt) {
 #ifdef _DEBUG
 		if (owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()) {
-			ComboData data = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()->GetComboData();
+			ComboData data = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine()->GetCurrentState()->Data();
 			Vector3 ownerPos = owner->GetWorldTransform().GetWorldPosition();
 
 
@@ -2993,7 +3003,7 @@ namespace Combo {
 
 	void EditorBlock::ApplyComboDataToState() {
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->GetComboData();
+		ComboData& comboData = state->Data();
 		// ステートの時間設定
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 	}
@@ -3001,7 +3011,7 @@ namespace Combo {
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->GetComboData();
+		ComboData& comboData = state->Data();
 
 		// コンボ入力可能時間
 		float inputStart = comboData.GetComboCondition().GetNextReceiver().GetInputStart();
@@ -3880,9 +3890,11 @@ namespace Combo {
         // 入力があったら
         std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, AttackInput input) override {
             auto it = nextStates.find(input);
+
             if (it != nextStates.end()) {
-                return it->second;
+                return it->second.lock();
             }
+
             return nullptr;
         }
 
@@ -3923,7 +3935,9 @@ namespace Combo {
         void SetName(const std::string& comboName) { name = comboName; }
 
         // コンボデータ取得
-        ComboData& GetComboData() { return comboData_; }
+        ComboData& Data() { return comboData_; }
+
+        ComboData GetData() const { return comboData_; }
 
     private:
         // コンボ名
@@ -3933,7 +3947,7 @@ namespace Combo {
         // コンボデータ
         ComboData comboData_;
         // 次のステートマップ
-        std::map<AttackInput, std::shared_ptr<NodeState>> nextStates;
+        std::map<AttackInput, std::weak_ptr<NodeState>> nextStates;
     };
 
     /// <summary>
@@ -3989,6 +4003,7 @@ namespace Combo {
 
 	void System::Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables) {
 		this->globalVariables = globalVariables;
+		owner = character;	// 所有者設定
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
@@ -3998,7 +4013,16 @@ namespace Combo {
 	}
 
 	void System::ClearNode() {
+
+		// StateMachineの状態を完全リセット
+		if (comboStateMachine_) {
+			comboStateMachine_.reset();
+			comboStateMachine_ = std::make_unique<StateMachine>(owner);
+		}
+
 		comboNodes_.clear();
+		comboGlobalDatas_.clear();
+		parentTransforms_.clear();
 	}
 
 	void System::AddComboNode(const std::string& name, std::shared_ptr<NodeState> node) {
@@ -4009,7 +4033,7 @@ namespace Combo {
 		comboNodes_[name] = node;
 	}
 
-	void System::AddComboNode(const std::string& nodeName, const std::string animationName, const ComboData& data) {
+	void System::AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data) {
 		// 既に存在する場合は追加しない
 		if (comboNodes_.find(nodeName) != comboNodes_.end()) {
 			return;
@@ -4293,7 +4317,7 @@ namespace Combo {
 		data.GetComboMotion().GetComboMove().GetData().lockOnData_.radius = gData.lockOnRadius;
 	}
 
-	void System::CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData> addHitBoxDatas,
+	void System::CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxDatas,
 		GamePadButton button)
 	{
 		ComboData data{};
@@ -4322,7 +4346,7 @@ namespace Combo {
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName_, data);
 	}
 
-	void System::CreateGlobalData(const std::string comboNodeName) {
+	void System::CreateGlobalData(const std::string& comboNodeName) {
 		// 既に存在する場合は追加しない
 		if (comboGlobalDatas_.find(comboNodeName) != comboGlobalDatas_.end()) {
 			return;
@@ -4357,6 +4381,11 @@ namespace Combo {
 	class System
 	{
 	public:
+		~System() {
+			ClearNode();
+			comboStateMachine_.reset();
+		}
+
 		// 初期化
 		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables);
 
@@ -4398,7 +4427,10 @@ namespace Combo {
 
 		std::string GetParentName(const std::string& comboNodeName) {
 			auto it = comboNodes_.find(comboNodeName);
-			return it->first;
+			if (it != comboNodes_.end()) {
+				return it->first;
+			}
+			return "";
 		}
 
 		//	トランスフォーム取得
@@ -4424,7 +4456,7 @@ namespace Combo {
 		// ノード追加
 		void AddComboNode(const std::string& name, std::shared_ptr<NodeState> node);
 		// ノード追加(データから生成)
-		void AddComboNode(const std::string& nodeName, const std::string animationName, const ComboData& data);
+		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
 		// コンボ接続
 		void ConnectCombo(const std::string& from, AttackInput input, const std::string& to);
 		// 最初のコンボ
@@ -4460,11 +4492,11 @@ namespace Combo {
 		};
 
 		// コンボ作成
-		void CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData> addHitBoxData,
+		void CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxData,
 			GamePadButton button = GamePadButton::GAMEPAD_B);
 	private:
 		// グローバルデータ作成
-		void CreateGlobalData(const std::string comboNodeName);
+		void CreateGlobalData(const std::string& comboNodeName);
 
 	private:
 		// コンボステートマシーン
@@ -4479,7 +4511,7 @@ namespace Combo {
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
-
+		Character::BaseCharacter* owner = nullptr;
 	};
 };
 
@@ -4731,6 +4763,10 @@ namespace Combo {
 	/// </summary>
 	class ComboHitBox {
 	public:
+		~ComboHitBox() { 
+			collData_.clear();
+			useHitBox_.clear();
+		}
 
 		enum class Shape {
 			kAABB,
@@ -5144,6 +5180,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.cp
 ============================================================
 #include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 namespace Combo {
 
@@ -5156,7 +5193,7 @@ namespace Combo {
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
 		attackMoveSystem = owner->GetMoveComponent()->GetAttackMoveSystem();
-
+		camera = owner->GetCameraManager()->GetCamera();
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData_;
 		traget = lockOnSystem->SoftLockOn();
@@ -5168,8 +5205,19 @@ namespace Combo {
 
 	// 更新
 	void ComboMove::Update(const InputSystem& inputSystem, float timer, float dt) {
+		// スティック方向取得
+		Vector2 stick = inputSystem.GetPlayerInputData().moveShick;
 		// ゲームパッドの左スティックを動かしているか
-		bool isMoveStick = inputSystem.GetPlayerInputData().moveShick.Length() != 0;
+		bool isMoveStick = stick.Length() != 0;
+
+		Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
+
+		// カメラの向きに基づいて移動方向をワールド座標系に変換
+		Vector2 worldDirection = {
+			stick.x * cameraWorldMatrix.m[0][0] + stick.y * cameraWorldMatrix.m[2][0],
+			stick.x * cameraWorldMatrix.m[0][2] + stick.y * cameraWorldMatrix.m[2][2]
+		};
+
 
 		// 強制的に移動
 		if (data_.isCompulsionMove_) {
@@ -5179,7 +5227,7 @@ namespace Combo {
 			// 動かしていたら
 			if (!isMove_ && isMoveStick) {
 				isMove_ = true;
-				stickDirection_ = inputSystem.GetPlayerInputData().moveShick;
+				stickDirection_ = worldDirection;
 			}
 		}
 
@@ -5209,10 +5257,10 @@ namespace Combo {
 			switch (data_.moveType)
 			{
 			case MoveType::kNone:
-				worldTransform->translate_ += Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed_;
+				request.velocity = Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed_;
 				break;
 			case MoveType::kForward:
-				worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed_;
 				break;
 			case MoveType::kTraget:
 
@@ -5244,7 +5292,6 @@ namespace Combo {
 		if (!data_.isGravity_) {
 			rigidBodyComponent->Velocity().y = 0;
 		}
-		moveComponent->SetAttackingGravity(data_.gravityScale_);
 		rigidBodyComponent->SetIsGravity(data_.isGravity_);
 	}
 
@@ -5260,10 +5307,10 @@ namespace Combo {
 			break;
 		case MoveType::kTraget: // ターゲット方向
 			if (traget) {
-				direction_ = Subtract(traget->GetWorldTransform().GetWorldPosition(), worldTransform->translate_).Normalize();
+				direction_ = Subtract(traget->GetWorldPosition(), worldTransform->translate_).Normalize();
 				direction_.y = 0.0f;
 
-				targetPos_ = traget->GetWorldTransform().GetWorldPosition();
+				targetPos_ = traget->GetWorldPosition();
 			}
 			else {
 				direction_ = moveComponent->GetDirection();
@@ -5297,6 +5344,7 @@ class MovementComponent;	// 移動関係
 namespace Character {
 	class BaseCharacter;		// キャラクター
 }
+
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
 class AttackMoveSystem;		// 攻撃移動システム
@@ -5368,10 +5416,11 @@ namespace Combo {
 		// ロックオンシステム
 		LockOnSystem* lockOnSystem = nullptr;
 		// ターゲット
-		Character::BaseCharacter* traget = nullptr;
+		const Character::BaseCharacter* traget = nullptr;
 		// 攻撃移動システム
 		AttackMoveSystem* attackMoveSystem = nullptr;
-
+		//
+		const Engine::Camera* camera = nullptr;
 	private:
 		// データ
 		Data data_;
@@ -6490,6 +6539,10 @@ namespace HitBox {
 	/// </summary>
 	class HitBoxInstance : public IHitReceiver {
 	public:
+		~HitBoxInstance() {
+			colliders_.clear();
+		}
+
 		// 初期化
 		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type);
 
@@ -7234,6 +7287,10 @@ namespace HitBox {
 	/// </summary>
 	class System {
 	public:
+		~System() {
+			data_.clear();
+			hitBoxCollDatas_.clear();
+		}
 
 		struct Data {
 			std::unique_ptr<HitBoxInstance> hitBox = nullptr;
@@ -7571,14 +7628,12 @@ void LockOnSystem::Initialize(Character::BaseCharacter* owner) {
     cameraManager = owner->GetCameraManager();
 }
 
-Character::BaseCharacter* LockOnSystem::SoftLockOn(){
-	if (targetCharacters.empty())
-	{
+const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
+	if (targetCharacters.empty()){
 		return nullptr;
 	}
 	
-    switch (data_.type)
-    {
+    switch (data_.type){
     case LockOnType::kHit: // 以前ヒットした相手にロックオン
         return GetHitLockOn();
         break;
@@ -7591,19 +7646,28 @@ Character::BaseCharacter* LockOnSystem::SoftLockOn(){
     return nullptr;
 }
 
-Vector3 LockOnSystem::GetOwnerPos() {
-	return owner->GetWorldTransform().GetWorldPosition();
+const Character::BaseCharacter* LockOnSystem::GetTarget() const {
+    if (!targetCharacters.empty()) {
+       return targetCharacters.front();
+    }
+    else {
+        return nullptr;
+    }
+};
+
+
+Vector3 LockOnSystem::GetOwnerPos() const {
+	return owner->GetWorldPosition();
 }
 
 
-Character::BaseCharacter* LockOnSystem::GetNearLockOn() {
+const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
     if (targetCharacters.empty())
     {
         return nullptr;
     }
+
     Vector3 ownerPos = GetOwnerPos();
-
-
 
     // カメラ前 or 入力方向
     Vector3 aimDir = cameraManager->GetCamera()->GetForward();
@@ -7615,10 +7679,10 @@ Character::BaseCharacter* LockOnSystem::GetNearLockOn() {
     }
     aimDir.Normalize();
 
-    std::sort(
+    auto it = std::min_element(
         targetCharacters.begin(),
         targetCharacters.end(),
-        [&](Character::BaseCharacter* a, Character::BaseCharacter* b)
+        [&](const Character::BaseCharacter* a, const Character::BaseCharacter* b)
         {
             float scoreA = CalcSoftLockScore(ownerPos, aimDir, a);
             float scoreB = CalcSoftLockScore(ownerPos, aimDir, b);
@@ -7626,16 +7690,20 @@ Character::BaseCharacter* LockOnSystem::GetNearLockOn() {
         }
     );
 
-    if (data_.radius >= targetCharacters.front()->GetWorldTransform().GetWorldPosition().Distance(ownerPos)) {
-        //// 先頭が最適なロックオン相手
-        return targetCharacters.front();
-    }
-    else {
+    if (it == targetCharacters.end())
+    {
         return nullptr;
     }
+
+    const Character::BaseCharacter* bestTarget = *it;
+    if (bestTarget && data_.radius >= bestTarget->GetWorldPosition().Distance(ownerPos)) {
+        return bestTarget;
+    }
+
+    return nullptr;
 }
 
-Character::BaseCharacter* LockOnSystem::GetHitLockOn() {
+const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
     if (targetCharacters.empty())
     {
         return nullptr;
@@ -7643,7 +7711,7 @@ Character::BaseCharacter* LockOnSystem::GetHitLockOn() {
     Vector3 ownerPos = GetOwnerPos();
     for (auto& target : targetCharacters) {
         if (target->GetTagNumber() == hitTag) {
-            if (data_.radius >= target->GetWorldTransform().GetWorldPosition().Distance(ownerPos)) {
+            if (data_.radius >= target->GetWorldPosition().Distance(ownerPos)) {
                 return target;
             }
         }
@@ -7656,9 +7724,9 @@ Character::BaseCharacter* LockOnSystem::GetHitLockOn() {
 float LockOnSystem::CalcSoftLockScore(
     const Vector3& playerPos,
     const Vector3& aimDir,
-    Character::BaseCharacter* enemy)
+    const Character::BaseCharacter* enemy)const
 {
-    Vector3 toEnemy = enemy->GetWorldTransform().GetWorldPosition() - playerPos;
+    Vector3 toEnemy = enemy->GetWorldPosition() - playerPos;
     toEnemy.y = 0.0f;
 
     float distSq = toEnemy.LengthSq();
@@ -7701,17 +7769,19 @@ public:
 	void Initialize(Character::BaseCharacter* owner);
 
 	// ロックオン相手を選別
-	Character::BaseCharacter* SoftLockOn();
+	const Character::BaseCharacter* SoftLockOn() const;
+	// ターゲット取得
+	const Character::BaseCharacter* GetTarget() const;
 public:
 
 	// ターゲット指定
-	void SetTargets(const std::vector<Character::BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; };
+	void SetTargets(const std::vector<const Character::BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; };
 
 	// ロックオンデータ取得
 	LockOnData& GetData() { return data_; }
 
 	// 所有者の位置取得
-	Vector3 GetOwnerPos();
+	Vector3 GetOwnerPos() const;
 
 	// 当てた相手のタグを設定
 	void SetHitTag(uint32_t tag) { hitTag = tag; }
@@ -7721,21 +7791,21 @@ public:
 
 private:
 	// 範囲内の近くの相手を取得
-	Character::BaseCharacter* GetNearLockOn();
+	const Character::BaseCharacter* GetNearLockOn() const;
 	// 最後に当てた相手を取得
-	Character::BaseCharacter* GetHitLockOn();
+	const Character::BaseCharacter* GetHitLockOn() const;
 
 	float CalcSoftLockScore(
 		const Vector3& playerPos,
 		const Vector3& aimDir,
-		Character::BaseCharacter* enemy);
+		const Character::BaseCharacter* enemy) const;
 private:
 	// 所有者
 	Character::BaseCharacter* owner = nullptr;
 	// カメラマネージャー
 	CameraManager* cameraManager = nullptr;
 	// 攻撃対象キャラクターリスト
-	std::vector<Character::BaseCharacter*> targetCharacters;
+	std::vector<const Character::BaseCharacter*> targetCharacters;
 private:
 	// ロックオンデータ
 	LockOnData data_;
@@ -7822,22 +7892,6 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 				}
 				responseMoveSystem->SetRequest(request);
 				return;
-			}
-			
-			if (transform) {
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					transform->translate_ += pushVec;
-				}
-				else if (self->isStatic) {
-					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					transform->translate_ += pushVec * halfSize;
-				}
-
-				transform->Update();
 			}
 		}
 	}
@@ -8034,7 +8088,7 @@ namespace Character {
 	class BaseCharacter;
 }
 class BulletManager;
-class Effect;
+class EffectSystem;
 
 /// <summary>
 /// 弾の基底クラス
@@ -8080,7 +8134,7 @@ public:
 	// ターゲット設定
 	void SetTarget(Character::BaseCharacter* target) { this->target = target; }
 	// エフェクト設定
-	void SetEffect(Effect* effect) { this->effect = effect; };
+	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 	// ターゲットの位置取得
 	void SetInfo(const BulletInfo& info) { info_ = info; }
 	// 範囲設定
@@ -8147,7 +8201,7 @@ protected:
 	Character::BaseCharacter* target = nullptr;	// 標的
 protected:
 	// エフェクト
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 	BulletInfo info_;
 
 
@@ -8365,7 +8419,7 @@ public: // 取得or設定
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
 		
 	// エフェクトの設定
-	void SetEffect(Effect* effect) { this->effect = effect; }
+	void SetEffect(EffectSystem* effect) { this->effect = effect; }
 private:
 
 	// 弾
@@ -8373,7 +8427,7 @@ private:
 
 
 private:
-	Effect* effect;								// 演出
+	EffectSystem* effect;								// 演出
 	Engine::Camera* camera;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
 	Engine::EntityManager* entityManager;	// 3dオブジェクト管理
@@ -8394,7 +8448,7 @@ File Path: project/DirectXGame/application/base/Bullet/Base/BulletSpawn.cpp
 
 
 void BulletSpawn::Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, Effect* effect) {
+	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect) {
 	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	this->camera = camera;
@@ -8455,7 +8509,7 @@ public:
 
 	// 初期化＋持ち主設定
 	void Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, Effect* effect);
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect);
 
 	void Generate();
 
@@ -8470,7 +8524,7 @@ private:
 
 
 private:
-	Effect* effect = nullptr;								// 演出
+	EffectSystem* effect = nullptr;								// 演出
 	Engine::Camera* camera = nullptr;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
 	Engine::EntityManager* entityManager = nullptr;	// 3dオブジェクト管理
@@ -8611,7 +8665,7 @@ File Path: project/DirectXGame/application/base/Bullet/EnemyBullet.h
 #pragma once
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 
-class Effect;
+class EffectSystem;
 
 class EnemyBullet : public BaseBullet {
 public:
@@ -8791,7 +8845,7 @@ File Path: project/DirectXGame/application/base/Bullet/PlayerBullet.h
 #pragma once
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
 
-class Effect;
+class EffectSystem;
 
 class PlayerBullet : public BaseBullet
 {
@@ -10024,6 +10078,74 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/StageCamera.cpp
+============================================================
+#include "StageCamera.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+void StageCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+	Engine::GlobalVariables* globalVariables, Vector3 position) {
+	this->entityManager = entityManager;	// エンティティ3d
+
+	// カメラ初期化
+	uniqueCamera_ = std::make_unique<Engine::Camera>();
+	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
+	uniqueCamera_->farClip_ = 10000.0f;
+
+	// カメラ位置と回転設定
+	uniqueCamera_->transform_.translate = position;
+	uniqueCamera_->transform_.rotate = { Math::DegreesToRadians(60),0,0 };
+
+
+	offsetPos = { 0,0,-2000 };
+}
+
+void StageCamera::Update() {
+	const float kRotateSpeedX = 0.002f;
+
+	uniqueCamera_->transform_.rotate.y -= kRotateSpeedX;
+
+
+	// 回転適用 → カメラ位置を計算
+	Matrix4x4 rotY = MakeRotateYMatrix(uniqueCamera_->transform_.rotate.y);
+	Matrix4x4 rotX = MakeRotateXMatrix(uniqueCamera_->transform_.rotate.x);
+	Matrix4x4 rotateMatrix = rotX * rotY;
+	Vector3 offset = TransformNormal(offsetPos, rotateMatrix);
+
+	Vector3 targetPos = anchorPoint;
+	Vector3 desiredCameraPos = Add(targetPos, offset);
+
+	uniqueCamera_->transform_.translate = desiredCameraPos;
+
+	uniqueCamera_->UpdateMatrix();
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/FixedCamera/StageCamera.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Camera/Base/BaseFixedCamera.h"
+
+class StageCamera : public BaseFixedCamera {
+public:
+	///< summary>
+	/// 初期化
+	///</summary>
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position) override;
+
+	///< summary>
+	/// 更新
+	///</summary>
+	void Update() override;
+
+
+private:
+	Vector3 anchorPoint{};
+	Vector3 offsetPos{};
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/FixedCamera/TitleCamera.cpp
 ============================================================
 #include "TitleCamera.h"
@@ -10527,7 +10649,7 @@ File Path: project/DirectXGame/application/base/Car/PlayerCar.h
 #pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "PlayerCarStateMachine.h"
-class Effect;
+class EffectSystem;
 /// <summary>
 /// プレイヤー車
 /// </summary>
@@ -10555,7 +10677,7 @@ public:
 	/// エフェクト
 	/// </summary>
 	/// <param name="effect"></param>
-	void SetEffect(Effect* effect) { this->effect = effect; }
+	void SetEffect(EffectSystem* effect) { this->effect = effect; }
 
 	// 動く
 	void Action() { isMoving_ = true; }
@@ -10661,7 +10783,7 @@ private:
 	Engine::EntityManager* entityManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	// エフェクト
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 };
 
 
@@ -11056,6 +11178,7 @@ File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.h
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include "CharacterContext.h"
 
 namespace Character {
 
@@ -11164,6 +11287,8 @@ namespace Character {
 
 		// ワールド変換取得
 		Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+		// ワールド座標取得
+		Vector3 GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
 		// 削除フラグ
 		bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 		// 削除する
@@ -11171,6 +11296,10 @@ namespace Character {
 		// 時間
 		float GetTime() { return objectComponent_->GetTime(); }
 
+	public: // 取得
+		Engine::Camera* GetCamera() const { return camera; }
+		// パラメータ取得
+		BasicParameters* GetBasicParameters() const { return parameterComponent_->parameters_.get(); }
 	public:
 		// タグ番号取得
 		uint32_t GetTagNumber() const { return tagNumber_; }
@@ -11187,7 +11316,7 @@ namespace Character {
 		InputSystem* GetInputSystem() { return inputSystem; };
 
 		//エフェクト設定
-		void SetEffect(Effect* effect) { this->effect = effect; }
+		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		// 弾マネージャーの設定
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; };
 		// カメラ管理クラスの設定
@@ -11249,8 +11378,6 @@ namespace Character {
 			parameterComponent_->parameters_->jampPower = GetValue<float>("jampPower");
 		}
 	public:
-		// 速度
-		Vector3& Velocity() { return moveComponent_->Velocity(); }
 		// 速度取得
 		Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
 		// 移動コンポーネント取得
@@ -11290,19 +11417,220 @@ namespace Character {
 		std::unique_ptr <ParameterComponent> parameterComponent_;
 		// キャラクタータグ
 		uint32_t tagNumber_ = 0;
+		// コンテキストシステム
+		std::unique_ptr<CharacterContextSystem> contextSystem_ = nullptr;
 	protected: // 貰いもの(アプリケーション層)
-		Effect* effect = nullptr;							// エフェクト
-		BulletManager* bulletManager = nullptr;			// 弾管理
-		CameraManager* cameraManager = nullptr;			// カメラ管理クラス
-		SpecalPointManager* specalPointManager = nullptr;	// 必殺技ポイント管理クラス
+		// エフェクト
+		EffectSystem* effect = nullptr;							
+		// 弾管理
+		BulletManager* bulletManager = nullptr;					
+		// カメラ管理クラス
+		CameraManager* cameraManager = nullptr;					
+		// 必殺技ポイント管理クラス
+		SpecalPointManager* specalPointManager = nullptr;			
 	protected: // 貰ってくるもの(エンジン層)
-		Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
-		Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
-		Engine::Camera* camera = nullptr;						// カメラ
+		// 3Dエンティティマネージャー
+		Engine::EntityManager* entityManager = nullptr;		
+		// グローバル変数
+		Engine::GlobalVariables* globalVariables = nullptr;	
+		// カメラ
+		Engine::Camera* camera = nullptr;	
+		// 音
 		Engine::Audio* audio = nullptr;
-
-		InputSystem* inputSystem = nullptr;						// 入力(使わないならnullptr)
+		// 入力(使わないならnullptr)
+		InputSystem* inputSystem = nullptr;					
 	};
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Base/CharacterContext.cpp
+============================================================
+#include "CharacterContext.h"
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Attack/AttackController.h"
+
+void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {
+	this->owner = owner;	// 所有者
+	this->input = input;	// 入力データ
+	this->worldTransform = &owner->GetObjectComponent()->GetWorldTransform();	// ワールドトランスフォーム
+	this->rigidBody = owner->GetObjectComponent()->GetRigidBodyComponent();		// リジットボディー
+	this->movementComponent = owner->GetMoveComponent();						// 移動
+	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
+	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
+	this->comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
+}
+
+Character::CharacterContext Character::CharacterContextSystem::CreateContext(float dt) {
+	CharacterContext ctx{};
+	// 時間
+	ctx.dt = dt;
+	// 入力データ
+	if (input) {
+		ctx.inputData = input->GetPlayerInputData();
+	}
+	// パラメータ;
+	ctx.parameters = owner->GetBasicParameters();
+	// カメラ
+	if (owner->GetCamera()) {
+		ctx.camera = owner->GetCamera();
+		// カメラ方向
+		ctx.cameraDirection = owner->GetCamera()->GetForward();
+		// カメラ行列取得
+		Matrix4x4 cameraWorldMatrix = Inverse(ctx.camera->GetViewMatrix());
+		// スティック方向
+		Vector2 stick = ctx.inputData.moveShick;
+
+		// カメラの向きに基づいて移動方向をワールド座標系に変換
+		Vector2 worldDirection = {
+			stick.x * cameraWorldMatrix.m[0][0] + stick.y * cameraWorldMatrix.m[2][0],
+			stick.x * cameraWorldMatrix.m[0][2] + stick.y * cameraWorldMatrix.m[2][2]
+		};
+		// スティック入力方向をワールド座標系で
+		ctx.worldStickDirection = worldDirection;
+	}
+
+
+	// 方向
+	ctx.direction = worldTransform->GetForward();
+	// 位置
+	ctx.position = worldTransform->GetWorldPosition();
+	// 現在のステート
+	ctx.state = owner->GetCurrentMainState();
+	// 攻撃中なら
+	if (ctx.state == CharacterMainState::Attack) {
+		ctx.isAttacking = true;
+	}
+
+	// 重力
+	ctx.isGravity = rigidBody->IsGravity();
+
+	// 着地状態か
+	ctx.onGround = movementComponent->GetIsLanding();
+
+	// 攻撃時の重力
+	if (comboStateMachine->GetCurrentState()) {
+		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale_;
+	}
+	// 上昇時の重力
+	ctx.upGravity = jumpSystem->GetData().upGravity_;
+	// 落下時の重力
+	ctx.fallGravity = jumpSystem->GetData().fallGravity_;
+
+	// ターゲット取得
+	ctx.target = lockOnSystem->GetTarget();
+	// 移動速度
+	ctx.moveSpeed = ctx.parameters->speed;
+
+
+	return ctx;
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Base/CharacterContext.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
+#include "CharacterData.h"									// キャラクターのパラメータ
+#include "DirectXGame/application/base/Object/ObjectComponent.h"	// オブジェクト
+#include "DirectXGame/application/base/State/BaseMainState.h"
+
+// 前方宣言
+class MovementComponent;
+class JumpSystem;
+class LockOnSystem;
+
+namespace Combo {
+	class StateMachine;
+}
+
+
+namespace Character {
+
+	// 前方宣言
+	class BaseCharacter;
+	
+	/// <summary>
+	/// キャラクターコンテキスト
+	/// </summary>
+	struct CharacterContext {
+		// 入力データ
+		PlayerInputData inputData;
+		// スティック方向
+		Vector2 worldStickDirection{};
+		// 基礎パラメータ
+		const BasicParameters* parameters = nullptr;
+		// 時間取得
+		float dt = 0.0f;
+		// カメラ
+		const Engine::Camera* camera = nullptr;
+		Vector3 cameraDirection{};
+		// 位置
+		Vector3 position{};
+		// 方向
+		Vector3 direction{};
+		// 速度
+		Vector3 velocity{};
+		// ステート 
+		Character::CharacterMainState state = Character::CharacterMainState::Idle;
+
+		// 着地状態か
+		bool onGround = false;
+		// 攻撃中
+		bool isAttacking = false;
+		// スタン状態か
+		bool isHitStun = false;
+		// 重力有効か
+		bool isGravity = true;
+
+		// 
+		float skyHeight = 0.0f;
+
+		// 上昇時の重力係数
+		float upGravity = 15.0f;
+		// 落下時の重力係数
+		float fallGravity = 30.0f;
+		// 攻撃中の重力係数
+		float attackingGravity = 20.0f;
+
+		// 移動スピード
+		float moveSpeed = 1.0f;
+		// ターゲット指定
+		const BaseCharacter* target = nullptr;
+	};
+
+	/// <summary>
+	/// キャラクターのコンテキストを管理するクラス
+	/// </summary>
+	class CharacterContextSystem {
+	public:
+
+		// 初期化
+		void Initialize(BaseCharacter* owner,const InputSystem* input);
+
+		CharacterContext CreateContext(float dt);
+
+	private:
+		// キャラクター（所有者）
+		const BaseCharacter* owner = nullptr;
+		// 入力データ
+		const InputSystem* input = nullptr;
+		// ワールドトランスフォーム
+		const Engine::WorldTransform* worldTransform = nullptr;
+		// リジットボディー
+		const Engine::RigidBodyComponent* rigidBody = nullptr;
+		// 移動
+		const MovementComponent* movementComponent = nullptr;
+		// ジャンプシステム
+		const JumpSystem* jumpSystem = nullptr;
+		// ロックオンシステム
+	 	const LockOnSystem* lockOnSystem = nullptr;
+		// コンボステートマシン
+		const Combo::StateMachine* comboStateMachine = nullptr;
+	};
+
+
 }
 
 ============================================================
@@ -11315,7 +11643,7 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterData.h
 #include <DirectXGame/engine/Math/Random.h>
 
 // 前方宣言
-class Effect;
+class EffectSystem;
 class BaseSpecial;
 class BaseWeapon;
 class BulletManager;
@@ -11583,16 +11911,11 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 
 namespace Character {
 	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
-	{
-		this->inputSystem = inputSystem;						// インプット
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
+		this->inputSystem = inputSystem;		// インプット
 		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables; // 保存項目
 		this->camera = camera;					// カメラ
-
-		// 群衆AI
-		crowdManager_ = std::make_unique<CrowdManager>();
-		crowdManager_->CreateGroup();
 	}
 
 	void CharacterManager::Update()
@@ -11615,14 +11938,14 @@ namespace Character {
 		}
 
 		// キャラクター更新(敵)
-		std::vector<BaseCharacter*> target;
+		std::vector<const BaseCharacter*> target;
 		for (auto& character : character_) {
-			if (character->GetCharacterType() == Type::Enemy) {
-				if (character) {
+			if (character) {
+				if (character->GetCharacterType() == Type::Enemy) {
 					character->Update();
-
-
-					target.push_back(character.get());
+					if (character->GetAlive()) {
+						target.push_back(character.get());
+					}
 				}
 			}
 		}
@@ -11660,7 +11983,7 @@ namespace Character {
 		{
 			{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
 			{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
-		
+
 			{ EnemyType::kMediumMelee,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
 
 			{ EnemyType::kDummy,   []() { return std::make_unique<DummyEnemy>(); } },
@@ -11676,9 +11999,9 @@ namespace Character {
 		enemy->SetID(characterCount_);					// ID設定
 		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
-		enemy->SetTarget(GetPlayer());					// ターゲット指定
 		enemy->SetEffect(effect);						// エフェクト設定
-		enemy->Initialize(nullptr, entityManager,globalVariables, transform.translate, camera); // 初期化
+		enemy->Initialize(nullptr, entityManager, globalVariables, transform.translate, camera); // 初期化
+		enemy->SetTargetCharacters(GetPlayer());					// ターゲット指定
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
 		enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
 		enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
@@ -11705,29 +12028,13 @@ namespace Character {
 		characterCount_++;
 	}
 
-	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb)
-	{
-
-		// グループId
-		int groupId = crowdManager_->CreateGroup();
-		crowdManager_->groups[groupId].Initialize(origin);
-
+	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb) {
 		// 敵を出現させる
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
 			pos.y = 0.0f;
-			CreateCharacter(enemyType, "enemy", groupId, Transform{ {1,1,1}, {},pos });
+			CreateCharacter(enemyType, "enemy", {}, Transform{ {1,1,1}, {},pos });
 		}
-
-		// 群衆管理クラスに追加
-		std::vector<BaseEnemy*> enemys;
-		for (auto& character : character_) {
-			if (character->GetCharacterType() == Type::Enemy) {
-				enemys.push_back(static_cast<BaseEnemy*>(character.get()));
-			}
-		}
-
-		crowdManager_->BindAgentsToEnemies(enemys);
 	}
 
 	void CharacterManager::Clear(Type type) {
@@ -11766,7 +12073,7 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 #include "CharacterGlobalData.h"
 
 //前方宣言
-class Effect;
+class EffectSystem;
 class FollowCamera;
 class BulletManager;
 class CameraManager;
@@ -11799,7 +12106,7 @@ namespace Character {
 		// 弾マネージャー設定
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
 		// エフェクト設定
-		void SetEffect(Effect* effect) { this->effect = effect; }
+		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		// スペシャルポイント管理クラスの設定
 		void SetSpecialPointManager(SpecalPointManager* specalPointManager) { this->specalPointManager = specalPointManager; };
 	public: // 取得系
@@ -11874,7 +12181,7 @@ namespace Character {
 		FollowCamera* followCamera = nullptr;		// フォローカメラ 
 		BulletManager* bulletManager = nullptr;	// 弾をマネジャー
 		CameraManager* cameraManager = nullptr;	// カメラ管理
-		Effect* effect = nullptr;
+		EffectSystem* effect = nullptr;
 		SpecalPointManager* specalPointManager = nullptr;
 	};
 }
@@ -11917,13 +12224,13 @@ namespace Character {
 	Vector3 BaseEnemy::GetTargetPos()
 	{
 		// ターゲット位置
-		return target_->GetObjectComponent()->GetWorldTransform().GetWorldPosition();
+		return GetTarget()->GetWorldPosition();
 	}
 
 	float BaseEnemy::GetTargetDistance()
 	{
 		// ターゲットとの距離
-		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(target_->GetObjectComponent()->GetWorldTransform().GetWorldPosition());
+		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(GetTarget()->GetWorldPosition());
 	}
 
 	Vector3 BaseEnemy::TargetDirection()
@@ -11931,45 +12238,6 @@ namespace Character {
 		// ターゲットの方向
 		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 	}
-
-	void BaseEnemy::TargetMove(const Vector3 velocity)
-	{
-		Vector3 move = velocity * GetTime();
-		GetWorldTransform().translate_ += move;
-	}
-
-	void BaseEnemy::DirectionMoveVelocity(float speed)
-	{
-		// 距離
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-
-		// 回転設定
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
-
-		// 速度設定
-		Velocity() = dire * speed;
-	}
-
-	void BaseEnemy::DirectionMove(float speed)
-	{
-		// 距離設定
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-		// 回転設定
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
-
-
-		Vector3 move = dire * speed * GetTime();
-
-		GetWorldTransform().translate_ += move;
-	}
-
-
 
 #pragma region
 
@@ -12066,14 +12334,17 @@ namespace Character {
 		// 攻撃応答システムクラス初期化
 		responseSystem_ = std::make_unique<ResponseSystem>();
 		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
-		responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
-
+		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;
 
 		// 戦闘
 		attackController_ = std::make_unique<AttackController>();
 		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
+
+		// コンテキストシステム
+		contextSystem_ = std::make_unique<CharacterContextSystem>();
+		contextSystem_->Initialize(this, inputSystem);
 
 		// 丸影用オブジェクトコンポーネント初期化
 		InitShadowObjectComponent(charaName);
@@ -12086,6 +12357,8 @@ namespace Character {
 
 		if (GetObjectComponent() == nullptr) { return; }
 		assert(this);
+
+		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
 
 		// 保存項目更新(キャラクター全体)
 		UpdateBaseGetValue();
@@ -12104,7 +12377,7 @@ namespace Character {
 		}
 		else {
 			// 移動コンポーネント更新
-			moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(), nullptr);
+			moveComponent_->Update(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(),ctx);
 			// 応答システム
 			responseSystem_->Update(GetTime());
 
@@ -12117,7 +12390,17 @@ namespace Character {
 		objectComponentShadow_->Update();
 	}
 	
-#pragma endregion // 基本処理
+#pragma endregion 
+
+
+	const BaseCharacter* BaseEnemy::GetTarget() {
+		return GetAttackController()->GeyLockOnSysutem()->GetTarget();
+	}
+
+	void BaseEnemy::SetTargetCharacters(BaseCharacter* target) {
+		GetAttackController()->GeyLockOnSysutem()->SetTargets({target});
+	}
+	
 }
 
 
@@ -12162,10 +12445,11 @@ namespace Character {
 		virtual void Jump() = 0;
 		// 攻撃
 		virtual void Attack() = 0;
-		// プレイヤー設定
-		void SetTarget(BasePlayer* target) { target_ = target; }// プレイヤ設定
 		// ターゲット取得
-		BasePlayer* GetTarget() { return target_; } // ターゲット取得
+		const BaseCharacter* GetTarget();
+
+		void SetTargetCharacters(BaseCharacter* target);
+
 
 	public:
 		// パーティクル発生
@@ -12181,15 +12465,9 @@ namespace Character {
 		Vector3 GetTargetPos();
 		// 対象との距離(プレイヤー)
 		float GetTargetDistance();
-		// 移動方向＋移動
-		void DirectionMoveVelocity(float speed);
-		// 移動向き
-		void DirectionMove(float speed);
 		// ターゲット方向取得
 		Vector3 TargetDirection();
-		//
-		void TargetMove(const Vector3 velocity);
-
+		
 
 		// ロックオンされているか
 		bool GetIsLockOn() const { return isLockOn_; }
@@ -12234,7 +12512,6 @@ namespace Character {
 	protected: //2D
 		std::unique_ptr<Engine::Sprite> icon_lockOn;
 	protected:
-		BasePlayer* target_;
 		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
 		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 		bool isLockOn_ = false; // ロックオンされているか
@@ -12343,7 +12620,7 @@ namespace Character {
 
 
 		// ターゲットキャラクターを設定
-		void SetTargetCharacters(const std::vector<BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
+		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
 
 		// リロード
 		virtual void Reload() {};
@@ -12364,7 +12641,7 @@ namespace Character {
 		bool GetIsSpecial() const { return special_->GetIsSpecial(); }
 
 	protected:
-		std::vector<BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
+		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
 		FollowCamera* followCamera = nullptr;					// フォローカメラ
 		bool isCreativeMode = false;							// クリエイティブモードかどうか
 	};
@@ -12536,7 +12813,7 @@ namespace Character {
 
 		velocity_ = Lerp(velocity_, steer * targetSpeed, dt * 5.0f);
 		velocity_.y = 0;
-		owner->Velocity() = velocity_;
+		//owner->Velocity() = velocity_;
 	}
 
 #pragma endregion // 個
@@ -13384,11 +13661,11 @@ namespace Character {
 
 		// パラメーター初期化
 		parameterComponent_->parameters_->HP.Initiaize(50, 0, 50, 0);
-		parameterComponent_->parameters_->speed = 10.0f;
+		parameterComponent_->parameters_->speed = 5.0f;
 		parameterComponent_->parameters_->strength = 10.0f;
 
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-
+		moveSpeed_ = Parameters()->speed;
 		// スプライト初期化
 		Initialize2D();
 		// パーティクル初期化
@@ -13448,21 +13725,28 @@ namespace Character {
 
 	void MediumMeleeEnemy::Move()
 	{
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
+
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
+			Parameters()->speed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				DirectionMove(-globalData_.retreatSpeed);
+				Parameters()->speed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			// 移動
-			DirectionMove(Parameters()->speed);
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 
@@ -13525,6 +13809,8 @@ namespace Character {
 		float cooldownTime_ = 5.0f;
 		//
 		float attackTimer_ = 0.0f;
+		//
+		float moveSpeed_ = 1.0f;
 	};
 }
 
@@ -13740,14 +14026,24 @@ namespace Character {
         timer_ += deltaTime;
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
         // 後ろに後退
+        // 距離設定
+        Vector3 dire = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_).Normalize();
+        // 回転設定
+        Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
 
+        // Y軸周り角度
+        enemy->GetWorldTransform().rotate_.y = rotate.y;
+
+        MoveRequest request;
         if (enemy->GetTargetDistance() <= 10.0f) {
-            enemy->DirectionMove(-5.0f);
+            request.velocity = dire * -5.0f * deltaTime;
         }
         else {
-            enemy->DirectionMove(3.0f);
+            request.velocity = dire * 3.0f * deltaTime;
         }
-
+        request.direction = dire;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
 
         if (timer_ > readyTime_) {
@@ -13761,7 +14057,7 @@ namespace Character {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
         timer_ = 0.0f;
         enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
-        enemy->DirectionMoveVelocity(40.0f);
+       // enemy->DirectionMoveVelocity(40.0f);
         dire_ = enemy->TargetDirection();
 
 
@@ -13783,12 +14079,11 @@ namespace Character {
         timer_ += deltaTime;
 
         // 前進
-
-        enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
-        enemy->Velocity() = dire_ * 40.0f;
-        enemy->TargetMove(enemy->Velocity());
-
-
+        MoveRequest request;
+        request.velocity = dire_ * 40.0f * deltaTime;
+        request.direction = dire_;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
         if (timer_ > swingTime_) {
             fsm_->ChangeState(AttackSubState::End);
@@ -13946,7 +14241,7 @@ namespace Character {
 		Parameters()->strength = 10.0f;
 
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();
 		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
@@ -13986,6 +14281,12 @@ namespace Character {
 
 	void SmallCartEnemy::Move()
 	{
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
 		if (GetTargetDistance() <= 25.0f) {
 			attackTimer_ += GetTime();
 			if (attackTimer_ >= 3.0f) {
@@ -13994,13 +14295,12 @@ namespace Character {
 				return;
 			}
 			if (GetTargetDistance() <= 20.0f) {
-				DirectionMove(-Parameters()->speed * 1.5f);
+				Parameters()->speed = -moveSpeed_ * 1.5f;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			// 移動
-			DirectionMove(Parameters()->speed);
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 
@@ -14061,6 +14361,8 @@ namespace Character {
 	private:
 		//
 		float attackTimer_ = 0.0f;
+		//
+		float moveSpeed_ = 1.0f;
 	};
 }
 
@@ -14228,6 +14530,7 @@ namespace Character {
 
 		
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 
 
 		// 武器
@@ -14273,21 +14576,27 @@ namespace Character {
 	}
 
 	void SmallMeleeEnemy::Move() {
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
+			Parameters()->speed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				DirectionMove(-globalData_.retreatSpeed);
+				Parameters()->speed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			// 移動
-			DirectionMove(Parameters()->speed);
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 
@@ -14350,6 +14659,8 @@ namespace Character {
 	private:
 		//
 		float attackTimer_ = 0.0f;
+		//
+		float moveSpeed_ = 1.0f;
 	};
 }
 
@@ -14571,14 +14882,16 @@ namespace Character {
         timer_ += deltaTime;
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
 
-
+        MoveRequest request;
         if (enemy->GetTargetDistance() <= 7.0f) {
-            enemy->DirectionMove(-5.0f);
+            request.velocity = dire * -5.0f * deltaTime;
         }
         else {
-            enemy->DirectionMove(3.0f);
+            request.velocity = dire * 3.0f * deltaTime;
         }
-
+        request.direction = dire;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
         if (timer_ > readyTime_) {
             // 攻撃へ遷移
@@ -14592,7 +14905,7 @@ namespace Character {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
         timer_ = 0.0f;
         enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
-        enemy->DirectionMoveVelocity(40.0f);
+        //enemy->DirectionMoveVelocity(40.0f);
         dire_ = enemy->TargetDirection();
 
 
@@ -14615,10 +14928,11 @@ namespace Character {
 
         // 前進
 
-        enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 20.0f;
-        enemy->Velocity() = dire_ * 20.0f;
-        enemy->TargetMove(enemy->Velocity());
-
+        MoveRequest request;
+        request.velocity = dire_ * 20.0f * deltaTime;
+        request.direction = dire_;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
 
         if (timer_ > swingTime_) {
@@ -14800,6 +15114,7 @@ namespace Character {
 
 		
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		moveComponent_->GetMovementSystem()->SetUseGravity(false);
 		
 
@@ -14850,25 +15165,16 @@ namespace Character {
 
 	void SmallRangeEnemy::Move()
 	{
-		// 移動
-		DirectionMoveVelocity(Parameters()->speed);
-
-		if (GetWorldTransform().GetWorldPosition().y < skyHeight_) {
-			Velocity().y = 1.2f; // Y軸速度上昇
-		}
-		else if (GetWorldTransform().GetWorldPosition().y > skyHeight_) {
-			Velocity().y = -1.2f; // Y軸速度降下
-		}
-		else {
-			Velocity().y = 0.0f; // Y軸速度リセット
-		}
-
-
-
-
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
 
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
+			Parameters()->speed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				attackTimer_ = 0.0f;
 				// 攻撃ステートへ
@@ -14876,14 +15182,13 @@ namespace Character {
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
-				TargetMove(velo.Normalize() * globalData_.retreatSpeed);
+				//Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
+				Parameters()->speed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-
-			TargetMove(GetVelocity());
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 
@@ -14946,7 +15251,8 @@ namespace Character {
 		//
 		float attackTimer_ = 0.0f;
 		std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
-
+		//
+		float moveSpeed_ = 1.0f;
 	};
 }
 
@@ -15195,7 +15501,7 @@ namespace Character {
 		sphere->tag = CollisionTag::Player;
 		sphere->layer = CollisionLayer::Player;
 		sphere->collisionMask = 0xFFFFFFFF;
-		sphere->radius = 2.0f; // 半径を適宜設定
+		sphere->radius = 1.5f; // 半径を適宜設定
 		sphere->isDebugLine = true;
 		sphere->Enable();
 		// コライダ追加
@@ -15253,7 +15559,9 @@ namespace Character {
 		ui_->SetCharacterParameter(GetCharacterParameterComponent());
 
 
-
+		// コンテキストシステム
+		contextSystem_ = std::make_unique<CharacterContextSystem>();
+		contextSystem_->Initialize(this, inputSystem);
 
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
@@ -15375,9 +15683,18 @@ namespace Character {
 		if (GetHP() <= 0) {
 			objectComponent_->GetObjectStateFlags().isAlive = false;
 		}
-
+		
+		
 
 #ifdef _DEBUG
+		// コンテキストシステム
+		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
+
+
+		entityManager->Get3DLineCommon()->GetLineMeshData().AddLine(ctx.position, ctx.position
+			+ Vector3{ ctx.worldStickDirection.x,0, ctx.worldStickDirection.y } *20.0f);
+
+
 		ImGui::Begin("Debug");
 		ImGui::InputFloat("HP", &HP());
 		if (ImGui::Button("SP")) {
@@ -15394,39 +15711,29 @@ namespace Character {
 			attackController_->IsStopHitTimer(false);
 		}
 
-		if (moveComponent_->GetIsLanding() &&
-			stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
-			inputSystem->GetPlayerInputData().moveShick.Length() == 0) {
-			moveComponent_->Velocity() = {};
-		}
-
+		
 		// 必殺技
 		special_->Update();
 
 		attackController_->GeyLockOnSysutem()->SetTargets(targetCharacters);
 		// 攻撃制御更新
 		attackController_->Update(GetTime());
-
 		// 応答システム
 		responseSystem_->Update(GetTime());
-
-		// ワールドトランスフォーム更新
-		GetObjectComponent()->GetWorldTransform().Update();
-
-		// コライダのワールドトランスフォーム更新
-		worldCollider_.Update();
-
-		// コライダーコンポーネント更新
-		GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 
 		// 移動コンポーネント更新
-		moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(),
-			*GetObjectComponent()->GetRigidBodyComponent(), inputSystem);
+		moveComponent_->Update(GetObjectComponent()->GetWorldTransform(),
+			*GetObjectComponent()->GetRigidBodyComponent(), ctx);
 
-		
+
+
+		// コライダのワールドトランスフォーム更新
+		worldCollider_.Update();
+		// コライダーコンポーネント更新
+		GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);		
 		//武器更新
 		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
@@ -15435,26 +15742,23 @@ namespace Character {
 		// ステート
 		stateMachine_->Update();
 
-
-		// UI更新
-		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), 
-			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
-		ui_->Update(GetTime());
-
-
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
 		objectComponentShadow_->GetWorldTransform().translate_.y = -2.9f;
+		objectComponentShadow_->Update();
+	
+		// UI更新
+		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(),
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+		ui_->Update(GetTime());
+
 	}
 
 #pragma region Draw
 
-	void NormalPlayer::DrawEffect()
-	{
-	}
+	void NormalPlayer::DrawEffect(){}
 
-	void NormalPlayer::Draw2D()
-	{
+	void NormalPlayer::Draw2D(){
 		// UI表示
 		ui_->SetIsTextmax(special_->GetIsSpecial());
 
@@ -15471,29 +15775,14 @@ namespace Character {
 
 #pragma region Move
 
-	void NormalPlayer::Move()
-	{
-		// 重力
-		if (stateMachine_->GetCurrentMainState() != CharacterMainState::Jump) {
-			Velocity() = { 0,0,0 };
-		}
-
-
+	void NormalPlayer::Move() {
 		bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
 		bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-
-		// 移動処理
-		if (is || is2) {
-			moveComponent_->SetCanMove(true);
-		}
 	}
 
-	void NormalPlayer::Jump()
-	{
+	void NormalPlayer::Jump() {
 		bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
 		bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-
-
 		// 生きていてステートの状態が移動状態ならジャンプステートへ移動
 		if (GetAlive() && (is || is2) &&
 			moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
@@ -15501,7 +15790,6 @@ namespace Character {
 			stateMachine_->ChangeState(CharacterMainState::Jump);
 			GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.01f);
 		}
-
 	}
 
 #pragma endregion //移動関係
@@ -15510,8 +15798,7 @@ namespace Character {
 
 	void NormalPlayer::ApplyGlobalVariables() {}
 
-	void NormalPlayer::ReloadComboData()
-	{
+	void NormalPlayer::ReloadComboData() {
 		// コンボノードクリア
 		GetAttackController()->GetComboSystem()->ClearNode();
 		GetAttackController()->GetComboSystem()->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
@@ -15522,8 +15809,6 @@ namespace Character {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
 
 		// ヒットボックスデータ作成
-		HitBox::GlobalData hitBoxdata = { provisionalData_.collider1Pos ,provisionalData_.obbColliderSize };
-		HitBox::GlobalData hitBoxdata2 = { provisionalData_.collider2Pos ,provisionalData_.obbCollider2Size };
 		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
 		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},6.0f };
 		HitBox::GlobalData hitBoxdata5 = { provisionalData_.collider3Pos ,  provisionalData_.obbCollider3Size };
@@ -15531,39 +15816,37 @@ namespace Character {
 		HitBox::GlobalData hitBoxdata7 = { {0,0,0} ,  {4,4,2} };
 
 
-		hitBoxSystem->CreateHitBoxCollData("obbColl1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata);
-		hitBoxSystem->CreateHitBoxCollData("obbColl2", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata2);
-		hitBoxSystem->CreateHitBoxCollData("obb", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata3);
-		hitBoxSystem->CreateHitBoxCollData("obb2", HitBox::Shape::kSphere, HitBox::UseType::kPlayer, hitBoxdata4);
+		hitBoxSystem->CreateHitBoxCollData("attackObb", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata3);
+		hitBoxSystem->CreateHitBoxCollData("attackSphere", HitBox::Shape::kSphere, HitBox::UseType::kPlayer, hitBoxdata4);
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_1", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata5);
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_2", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata6);
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_3", HitBox::Shape::kOBB, HitBox::UseType::kPlayer, hitBoxdata7);
 
 		// コンボ１のデータ送る
-		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("obb")} });
+		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("attackObb")} });
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2", {{hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack2", {{hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ３のデータ送る
-		comboSystem->CreateCombo("Attack3", { {hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack3", { {hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// ジャンプコンボのデータ送る
-		comboSystem->CreateCombo("JumpAttack", { { hitBoxSystem->GetHitBoxCollData("obb2") } });
+		comboSystem->CreateCombo("JumpAttack", { { hitBoxSystem->GetHitBoxCollData("attackSphere") } });
 		// コンボ4のデータ送る
-		comboSystem->CreateCombo("Attack4", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack4", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ5のデータ送る
-		comboSystem->CreateCombo("Attack5", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack5", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ6のデータ送る
-		comboSystem->CreateCombo("Attack6", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack6", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 		// コンボ7のデータ送る
-		comboSystem->CreateCombo("Attack7", { { hitBoxSystem->GetHitBoxCollData("obb") } });
+		comboSystem->CreateCombo("Attack7", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
 
 
 
 		// コンボ8のデータ送る
 		comboSystem->CreateCombo("HeavyAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_2")  } }, GamePadButton::GAMEPAD_X);
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("HeavyAttack02", { { hitBoxSystem->GetHitBoxCollData("obb")  } }, GamePadButton::GAMEPAD_X);
+		comboSystem->CreateCombo("HeavyAttack02", { { hitBoxSystem->GetHitBoxCollData("attackObb")  } }, GamePadButton::GAMEPAD_X);
 		// コンボ8のデータ送る
-		comboSystem->CreateCombo("HeavyAttack03", { { hitBoxSystem->GetHitBoxCollData("obb") } }, GamePadButton::GAMEPAD_X);
+		comboSystem->CreateCombo("HeavyAttack03", { { hitBoxSystem->GetHitBoxCollData("attackObb") } }, GamePadButton::GAMEPAD_X);
 		
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("SkillAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_3") } }, GamePadButton::GAMEPAD_Y);
@@ -15592,9 +15875,7 @@ namespace Character {
 
 	}
 
-	void NormalPlayer::Reload() {
-		ReloadComboData();
-	}
+	void NormalPlayer::Reload() { ReloadComboData();}
 
 
 #pragma endregion // そのほか
@@ -15721,14 +16002,6 @@ namespace Character {
 		character->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 
 
-
-
-		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
-		if (isTriggerLT) {
-			//character->GetMoveComponent()->GetDashSystem()->StartDash();
-		}
-
-
 		// 武器描画 
 		weapon->GetObject3D()->SetIsDraw(true);
 
@@ -15760,7 +16033,6 @@ namespace Character {
 		anima->SetIsPlaying(true);		// アニメーション再生
 		anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
 		anima->SetAnimation("SwordIdle01", 0.5f);	// 流すアニメーション設定
-		character->GetMoveComponent()->SetCanMove(true);
 	};
 
 #pragma endregion // 待機
@@ -15773,14 +16045,8 @@ namespace Character {
 		BaseWeapon* weapon = character->GetWeapon();		// 武器
 		BaseSpecial* special = character->GetSpecial();	// 必殺
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		character->GetMoveComponent()->SetCanMove(true);
 		weapon->GetObject3D()->SetIsDraw(true); // 武器描画
 		anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
-
-		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
-		if (isTriggerLT) {
-			//character->GetMoveComponent()->GetDashSystem()->StartDash();
-		}
 
 		// 武器リキャストタイム更新
 		weapon->RecastTime(Engine::MyGame::GameTime());
@@ -15820,7 +16086,6 @@ namespace Character {
 		anima->SetIsPlaying(true);			// 再生
 		anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
 		anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
-		character->GetMoveComponent()->SetCanMove(true);
 	}
 
 #pragma endregion // 移動
@@ -15871,7 +16136,7 @@ namespace Character {
 
 
 
-		if (character->GetMoveComponent()->Velocity().y > 0.0f) { // 上昇しているなら
+		if (character->GetMoveComponent()->GetVelocity().y > 0.0f) { // 上昇しているなら
 			anima->SetIsLoop(false);
 			anima->SetAnimation("JumpStart01", 0.05f);
 		}
@@ -15883,7 +16148,7 @@ namespace Character {
 
 	// 終了
 	void PlayerStateJump::Exit() {
-		character->GetMoveComponent()->Velocity() = { 0,0,0 };
+		character->GetMoveComponent()->GetVelocity() = { 0,0,0 };
 	}
 	// 初期化
 	void PlayerStateJump::Enter() {
@@ -15910,7 +16175,6 @@ namespace Character {
 		anima->SetIsLoop(true);		   // ループ再生
 		anima->SetIsPlaying(true);	   // 再生
 		anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
-		character->GetMoveComponent()->SetCanMove(true);
 	}
 
 	void PlayerStateAttack::Enter()
@@ -15931,8 +16195,6 @@ namespace Character {
 		BaseSpecial* special = character->GetSpecial();
 		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
 
-		// キャラクターの動きを止める
-		character->Velocity() = {};
 		// UIを表示しない
 		player->GetPlayerUI()->SetIsTextRB(false);
 		RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
@@ -15940,8 +16202,6 @@ namespace Character {
 		rengeSp->InAction();	// アクション中
 		rengeSp->SetIsDraw(false);	// 描画
 		if (special->GetPhese() == 0) {	// 最初フェーズなら
-			// 移動
-			player->GetMoveComponent()->SetCanMove(true);
 			// UI描画
 			player->GetPlayerUI()->SetIsTextRB(true);
 			// スペシャル描画
@@ -16331,6 +16591,34 @@ namespace Character {
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Character/Spawn/CharacterSpawnDirector.cpp
+============================================================
+#include "CharacterSpawnDirector.h"
+
+void CharacterSpawnDirector::nvvnvn()
+{
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Spawn/CharacterSpawnDirector.h
+============================================================
+#pragma once
+
+/// <summary>
+/// キャラクターの出現を管理のするクラス
+/// </summary>
+class CharacterSpawnDirector {
+public:
+
+	void nvvnvn();
+
+private:
+
+
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.cpp
 ============================================================
 #include "CharacterSpawnManager.h"
@@ -16573,16 +16861,13 @@ File Path: project/DirectXGame/application/base/Effect/Effect.cpp
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
-void Effect::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
+void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
 	this->entityManager = entityManager;	// エンティティ3d
 	this->globalVariables = globalVariables;	// 保存項目追加
-
-
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(entityManager, globalVariables);
-
 	// パーティクル初期化
 	InitParticle();
 	// 範囲弾パーティクル初期化 
@@ -16594,7 +16879,7 @@ void Effect::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVari
 }
 
 
-void Effect::InitParticle(){
+void EffectSystem::InitParticle(){
 
 	effectComponent_->AddEmitter("starEmit","hitStar",EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("starEmit");
@@ -16712,7 +16997,7 @@ void Effect::InitParticle(){
 
 }
 
-void Effect::InitRangeBombingBullet()
+void EffectSystem::InitRangeBombingBullet()
 {
 
 	effectComponent_->AddEmitter("missileHitCylinder", "missileHitCylinder", EmitterShapeType::POINT);
@@ -16873,7 +17158,7 @@ void Effect::InitRangeBombingBullet()
 	hitEmitter_->SetIsEmit(false);
 }
 
-void Effect::InitBullet()
+void EffectSystem::InitBullet()
 {
 	effectComponent_->AddEmitter("bulletSmoke", "smokePlane03_2", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("bulletSmoke");
@@ -16915,7 +17200,7 @@ void Effect::InitBullet()
 
 }
 
-void Effect::InitScrap() {
+void EffectSystem::InitScrap() {
 
 	effectComponent_->AddEmitter("scrapTire", "scrapTire", EmitterShapeType::AABB);
 	Engine::AABBParticleEmitter* scrapTireEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapTire");
@@ -17001,12 +17286,14 @@ void Effect::InitScrap() {
 
 }
 
-void Effect::Update() {
+void EffectSystem::Update() {
 	// 更新
 	effectComponent_->Update();
 }
 
-void Effect::Emit(const std::string& name, const Vector3& pos)
+#pragma region Emit
+
+void EffectSystem::Emit(const std::string& name, const Vector3& pos)
 {
 	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
 	
@@ -17019,7 +17306,7 @@ void Effect::Emit(const std::string& name, const Vector3& pos)
 	emit->SetIsEmit(false); // 出さない
 }
 
-void Effect::Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range) {
+void EffectSystem::Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range) {
 	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
 	assert(emit != nullptr);
 	// 出現
@@ -17032,6 +17319,7 @@ void Effect::Emit(const std::string& name, const Vector3& pos, const Vector3& di
 	emit->SetIsEmit(false); // 出さない
 }
 
+#pragma endregion // 出現
 
 
 ============================================================
@@ -17047,7 +17335,7 @@ namespace Engine {
 /// <summary>
 /// エフェクトクラス
 /// </summary>
-class Effect {
+class EffectSystem {
 public:
 	// 初期化
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
@@ -17057,7 +17345,6 @@ public:
 	void Emit(const std::string& name, const Vector3& pos);
 	// 出現(方向付き)
 	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
-
 private:
 	// パーティクル初期化
 	void InitParticle();
@@ -17160,7 +17447,7 @@ File Path: project/DirectXGame/application/base/Game/Base/GameEvent.cpp
 
 // 開始
 void Game::GameEventState::Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-	, Engine::Input* input){
+	, InputSystem* input){
 	this->characterManager = characterManager;
 	this->characterSpawnManager = characterSpawnManager;
 	this->input = input;
@@ -17207,6 +17494,10 @@ float Game::GameEventState::GetCurrentTimer() const{
 	return  data_.time_.max - stateTime;
 }
 
+float Game::GameEventState::RemainingTime() const {
+	return data_.time_.max - stateTime;
+}
+
 // 終了したか
 bool Game::GameEventState::FinishProcess() {
 	switch (data_.changeType_)
@@ -17226,7 +17517,7 @@ bool Game::GameEventState::FinishProcess() {
 	case Game::GameEventChangeType::kTake:
 		break;
 	case Game::GameEventChangeType::kInput:
-		if (input->IsGamePadTriggered(data_.buttom)) {
+		if (input->GetGameInputData().decisionTrigger) {
 			return true;
 		}
 		break;
@@ -17252,7 +17543,7 @@ void Game::GameEventState::SpawnProcess() {
 
 
 void Game::EventStateMachine::Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-	, Engine::Input* input){
+	, InputSystem* input){
 	
 	this->characterManager = characterManager;
 	this->characterSpawnManager = characterSpawnManager;
@@ -17319,6 +17610,7 @@ namespace Engine {
 	class EntityManager;
 	class Input;
 }
+class InputSystem;
 
 namespace Game {
 
@@ -17329,6 +17621,7 @@ namespace Game {
 		kNone,		// 無し
 		kBattle,	// 戦い
 		kBreakTime,	// 休憩時間
+		kStart,		// スタート
 		kEnd,		// 終了
 	};
 
@@ -17404,7 +17697,7 @@ namespace Game {
 
 		// 開始
 		void Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-			, Engine::Input* input);
+			, InputSystem* input);
 		// 終了
 		void Exit();
 
@@ -17441,8 +17734,10 @@ namespace Game {
 		void SetName(const std::string& comboName) { name = comboName; }
 		// スポーン追加
 		void AddSpawns(std::vector<Character::SpawnInfo>&& spawns);
-		// 
+		// 現在の経過時間
 		float GetCurrentTimer() const;
+		// 残り時間
+		float RemainingTime() const;
 	public:
 		// 終了したか
 		bool IsFinish() const { return isFinish_; };
@@ -17474,7 +17769,7 @@ namespace Game {
 		Character::CharacterSpawnManager* characterSpawnManager = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::SceneManager* sceneManager = nullptr;
-		Engine::Input* input = nullptr;
+		InputSystem* input = nullptr;
 	};
 
 	/// <summary>
@@ -17484,7 +17779,7 @@ namespace Game {
 	public:
 		// 初期化
 		void Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-			,Engine::Input* input);
+			, InputSystem* input);
 
 
 		// ステート設定
@@ -17515,7 +17810,7 @@ namespace Game {
 		Character::CharacterSpawnManager* characterSpawnManager = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::SceneManager* sceneManager = nullptr;
-		Engine::Input* input = nullptr;
+		InputSystem* input = nullptr;
 	};
 
 
@@ -17530,36 +17825,45 @@ File Path: project/DirectXGame/application/base/Game/GameEventController.cpp
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 namespace Game {
 
 	void GameEventController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
-		Character::CharacterManager* characterManager, Engine::Input* input)
+		CameraManager* cameraManager, Character::CharacterManager* characterManager, InputSystem* input)
 	{
 		this->entityManager = entityManager;		// エンティティ3d
 		this->globalVariables = globalVariables;		// 保存項目
 		this->characterManager = characterManager;	// キャラクター管理
-
+		this->cameraManager = cameraManager;		// カメラ管理
 
 		// キャラクター出現管理クラス初期化
 		characterSpawnManager_ = std::make_unique<Character::CharacterSpawnManager>();
 		characterSpawnManager_->Initialize(characterManager, entityManager->Get3DLineCommon(), 400);
 
-		// イベントステート
+		// イベントステート初期化
 		eventStateMachine_ = std::make_unique<Game::EventStateMachine>();
 		eventStateMachine_->Initialize(characterManager, characterSpawnManager_.get(),input);
 
+		// ゲームスタートUI初期化
+		gameStartUI_ = std::make_unique<GameStartUI>();
+		gameStartUI_->Initialize(nullptr,entityManager,globalVariables);
 
 		Game::GameEventData data;
-		data.eventType_ = GameEventType::kBreakTime;
+		data.eventType_ = GameEventType::kStart;
 		data.time_.max = 5.0f;
 		CreateGameEvent("start", data);
+
+
+		data.eventType_ = GameEventType::kBreakTime;
+		data.time_.max = 5.0f;
+		CreateGameEvent("breakTime", data);
 
 		CreateSpawn(Character::EnemyType::kMediumMelee,"normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,500 }, { 10,1,10 }, 4.0f);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,1,500 }, { 10,1,10 }, 0.75f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 3, { -500,1,500 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, { 0,1,500 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, { -500,1,500 }, { 10,1,10 }, 0.75f);
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -17567,12 +17871,12 @@ namespace Game {
 
 		CreateGameEvent("battle01", data);
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		/*CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,-400 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,0,-400 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, { 0,0,-400 }, { 10,1,10 }, 0.75f);
 
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,0 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 3, { -500,1,0 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, { -500,1,0 }, { 10,1,10 }, 0.75f);*/
 
 
 		data.eventType_ = GameEventType::kBattle;
@@ -17595,7 +17899,8 @@ namespace Game {
 
 		CreateGameEvent("end", data);*/
 
-		ConnectNode("start","","battle01");
+		ConnectNode("start", "", "breakTime");
+		ConnectNode("breakTime","","battle01");
 		ConnectNode("battle01", "", "battle02");
 		ConnectNode("battle02", "", "result");
 		ConnectNode("result", "", "end");
@@ -17614,8 +17919,7 @@ namespace Game {
 
 #pragma region  Event
 
-	void GameEventController::AddNode(const std::string& nodeName, const Game::GameEventData& data)
-	{
+	void GameEventController::AddNode(const std::string& nodeName, const Game::GameEventData& data) {
 		// 既に存在する場合は追加しない
 		if (eventStateNodes_.find(nodeName) != eventStateNodes_.end()) {
 			return;
@@ -17632,8 +17936,7 @@ namespace Game {
 	}
 
 
-	void GameEventController::ConnectNode(const std::string& from, const std::string& name, const std::string& to)
-	{
+	void GameEventController::ConnectNode(const std::string& from, const std::string& name, const std::string& to) {
 		auto itFrom = eventStateNodes_.find(from);
 		auto itTo = eventStateNodes_.find(to);
 		if (itFrom != eventStateNodes_.end()) {
@@ -17649,8 +17952,6 @@ namespace Game {
 
 #pragma endregion // イベント系
 
-
-
 	void GameEventController::Update(float dt) {
 		// キャラクター出現管理更新
 		characterSpawnManager_->Update(dt);
@@ -17658,7 +17959,24 @@ namespace Game {
 		// イベントステートマシン更新
 		eventStateMachine_->Update(dt);
 
+		// ゲーム開始UI
+		gameStartUI_->Update(dt);
 
+		if (eventStateMachine_->GetCurrentState()->GetData().eventType_ == GameEventType::kStart) {
+			cameraManager->SetUseCamera("stageCamera",0.0f);
+			isStart = true;
+			if (eventStateMachine_->GetCurrentState()->RemainingTime() <= 0.5f) {
+				gameStartUI_->IsFade();
+			}
+		}
+		else {
+			if (isStart) {
+				gameStartUI_->IsNofade();
+				isStart = false;
+				cameraManager->SetUseCamera("followCamera", 0.0f);
+			}
+		}
+		
 		curretWave_ = eventStateMachine_->GetCurrentState()->GetData().battleWaveIndex_;
 		time_ = eventStateMachine_->GetCurrentState()->GetCurrentTimer();
 
@@ -17678,6 +17996,17 @@ namespace Game {
 
 	}
 
+	void GameEventController::Draw() {
+	
+	};
+
+	void GameEventController::Draw2D() {
+		//if (eventStateMachine_->GetCurrentState()->GetData().eventType_ == GameEventType::kStart) {
+			gameStartUI_->Draw();
+		//}
+	};
+
+
 }
 
 ============================================================
@@ -17686,6 +18015,7 @@ File Path: project/DirectXGame/application/base/Game/GameEventController.h
 #pragma once
 #include <DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.h>
 #include "DirectXGame/application/base/Game/Base/GameEvent.h"
+#include "DirectXGame/application/base/UI/GameStartUI.h"
 
 // 前方宣言
 namespace Engine {
@@ -17708,7 +18038,7 @@ namespace Game {
 		/// 初期化
 		/// </summary>
 		void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
-			Character::CharacterManager* characterManager, Engine::Input* input);
+			CameraManager* cameraManager, Character::CharacterManager* characterManager, InputSystem* input);
 
 		/// <summary>
 		/// 更新
@@ -17718,8 +18048,14 @@ namespace Game {
 		/// <summary>
 		/// 描画
 		/// </summary>
-		void Draw() {};
+		void Draw();
 
+		/// <summary>
+		/// 描画2d
+		/// </summary>
+		void Draw2D();
+
+	public:
 		// イベント終了通知
 		bool IsEndEvent() const { return isEndEvent_; };
 
@@ -17755,7 +18091,6 @@ namespace Game {
 		std::unique_ptr<EventStateMachine> eventStateMachine_ = nullptr;
 		// ゲームイベントステートマップ
 		std::map<std::string, std::shared_ptr<GameEventState>> eventStateNodes_;
-
 		// キャラクター出現管理クラス
 		std::unique_ptr<Character::CharacterSpawnManager> characterSpawnManager_ = nullptr;
 		// スポーン情報
@@ -17764,9 +18099,19 @@ namespace Game {
 		int curretWave_ = 0;		// ウェーブ
 		float time_ = 0.0f;			// 時間
 	private:
+		// スタートUI
+		std::unique_ptr<GameStartUI> gameStartUI_ = nullptr;
+		//
+		bool isStart = false;
+	private:
+		// エンティティ管理
 		Engine::EntityManager* entityManager = nullptr;
+		// 保存項目
 		Engine::GlobalVariables* globalVariables = nullptr;
+		// キャラクター管理
 		Character::CharacterManager* characterManager = nullptr;
+		// カメラ管理
+		CameraManager* cameraManager = nullptr;
 	};
 
 }
@@ -17777,17 +18122,18 @@ File Path: project/DirectXGame/application/base/Game/GameFlowController.cpp
 #include "GameFlowController.h"
 #include <DirectXGame/engine/scene/SceneManager.h>
 
-void GameFlowController::Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, 
+void GameFlowController::Initialize(Engine::SceneManager* sceneManager, InputSystem* input, CameraManager* cameraManager, Engine::GlobalVariables* globalVariables,
 	Character::CharacterManager* characterManager){
 	this->globalVariables = globalVariables;	// 保存項目
 	this->characterManager = characterManager;	// キャラクター管理するクラス
 	this->sceneManager = sceneManager;			// シーンマネージャー
+	this->cameraManager = cameraManager;		// カメラ管理
 	entityManager = sceneManager->GetEntityManager();	// エンティティ3d
-	input  = sceneManager->GetInput();						// 入力
+	input = input;						// 入力
 
 	// ゲームイベント制御クラス初期化
 	gameEventController_ = std::make_unique<Game::GameEventController>();
-	gameEventController_->Initialize(entityManager,globalVariables, characterManager, input);
+	gameEventController_->Initialize(entityManager,globalVariables, cameraManager, characterManager, input);
 
 }
 
@@ -17806,6 +18152,11 @@ void GameFlowController::Update(float dt) {
 void GameFlowController::Draw() {
 	gameEventController_->Draw();
 }
+
+void GameFlowController::Draw2D() {
+	gameEventController_->Draw2D();
+};
+
 
 void GameFlowController::SceneChange(){
 	if (gameEventController_->IsEndEvent()) {
@@ -17832,6 +18183,8 @@ namespace Engine {
 	class SceneManager;
 	class EntityManager;
 }
+class InputSystem;
+
 /// <summary>
 /// ゲームの流れやルールを制御するクラス
 /// </summary>
@@ -17839,13 +18192,16 @@ class GameFlowController {
 public:
 
 	// 初期化
-	void Initialize(Engine::SceneManager* sceneManager, Engine::GlobalVariables* globalVariables, Character::CharacterManager* characterManager);
+	void Initialize(Engine::SceneManager* sceneManager, InputSystem* input, CameraManager* cameraManager, Engine::GlobalVariables* globalVariables, Character::CharacterManager* characterManager);
 
 	// 更新
 	void Update(float dt);
 
 	// 描画
 	void Draw();
+
+	// 描画2d
+	void Draw2D();
 
 	// ゲームデータ
 	Game::GameData GetGamePlayData() const { return gamePlayData_; }
@@ -17858,12 +18214,8 @@ private:
 private: // 
 	// ゲームイベント制御クラス
 	std::unique_ptr<Game::GameEventController> gameEventController_ = nullptr;
-
-
-
 	// ゲームプレイデータ
 	Game::GameData gamePlayData_;
-
 private:
 	// ゲームが終わったか
 	bool isEndgame_ = false;
@@ -17871,6 +18223,7 @@ private:
 private: // 貰いもの
 	Engine::EntityManager* entityManager = nullptr;
 	Character::CharacterManager* characterManager = nullptr;
+	CameraManager* cameraManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	Engine::SceneManager* sceneManager = nullptr;
 	Engine::Input* input = nullptr;
@@ -17951,7 +18304,7 @@ namespace Engine {
 	class GlobalVariables;
 	class SceneManager;
 }
-class Effect;
+class EffectSystem;
 class InputSystem;
 
 class ResultSystem {
@@ -18075,7 +18428,7 @@ namespace Engine {
 	class GlobalVariables;
 	class SceneManager;
 }
-class Effect;
+class EffectSystem;
 class InputSystem;
 
 /// <summary>
@@ -18987,7 +19340,7 @@ void AttackMoveSystem::Initialize() {
 
 }
 
-void AttackMoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator) {
+void AttackMoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	if (ctx.state == Character::CharacterMainState::Attack) {
 		coordinator.Request(reuest);
 	}
@@ -19010,7 +19363,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
 	void SetRequest(const MoveRequest& request) { reuest = request; }
 
@@ -19025,57 +19378,11 @@ File Path: project/DirectXGame/application/base/Move/Base/LocomotionContext.h
 #include "DirectXGame/application/base/Input/InputSystem.h"
 #include "DirectXGame/application/base/State/BaseMainState.h"
 
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+
 namespace Engine {
     class Camera;
 }
-
-/// <summary>
-/// 現在の状態
-/// </summary>
-struct LocomotionContext
-{
-    float dt = 0.0f;
-
-    // ===== 入力 =====
-    InputSystem input;
-
-    //  ===== カメラ =====
-    const Engine::Camera* camera = nullptr;
-    Vector3 cameraDirection{};
-
-    // ===== 現在の状態 =====
-    bool onGround = false;
-    bool isAttacking = false;
-    bool isHitStun = false;
-	Character::CharacterMainState state = Character::CharacterMainState::Idle;
-
-    // ===== 物理情報 =====
-    Vector3 position{};
-    Vector3 velocity{};
-    Vector3 forward{}; // Z+
-    Vector3 right{};   // X+
-    Vector3 up{};      // Y+
-
-    // 上昇時の重力係数
-    float upGravity = 15.0f;
-    // 落下時の重力係数
-    float fallGravity = 30.0f;
-    // 攻撃中の重力係数
-    float attackingGravity = 20.0f;
-
-    // ===== パラメータ =====
-    float moveSpeed = 6.0f;
-    float dashSpeed = 10.0f;
-    float jumpPower = 12.0f;
-
-    // ===== スタミナ =====
-    float stamina = 100.0f;
-    float maxStamina = 100.0f;
-
-    // ===== ロックオン =====
-    bool isLockOn = false;
-    Vector3 lockOnTargetDir{}; // 正規化済み
-};
 
 /// <summary>
 /// 移動コマンド
@@ -19121,7 +19428,7 @@ MoveCommand LocomotionCoordinator::BuildCommand()
 {
 	MoveCommand cmd{};
 
-	if (!ctx_) return cmd;
+	if (!ctx) return cmd;
 	int pro = 999;
 	for (auto& request : requests_) {
 		cmd.finalVelocity += request.velocity;
@@ -19144,6 +19451,8 @@ File Path: project/DirectXGame/application/base/Move/Base/LocomotionCoordinator.
 #include <vector>
 #include "LocomotionContext.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
+
+
 /// <summary>
 /// 移動関連の調停役クラス
 /// </summary>
@@ -19153,8 +19462,8 @@ public:
 	/// 初期化
 	/// </summary>
 	/// <param name="inputSystem"></param>
-	void BeginFrame(const LocomotionContext& ctx) {
-		ctx_ = &ctx;
+	void BeginFrame(const Character::CharacterContext& ctx) {
+		this->ctx = &ctx;
 		built_ = false;
 		requests_.clear();
 	}
@@ -19171,7 +19480,7 @@ public:
 	/// <returns></returns>
 	MoveCommand BuildCommand();
 private:
-	const LocomotionContext* ctx_ = nullptr;
+	const Character::CharacterContext* ctx = nullptr;
 	bool built_ = false;
 	std::vector<MoveRequest> requests_;
 };
@@ -19182,7 +19491,7 @@ File Path: project/DirectXGame/application/base/Move/Base/MoveComponent.cpp
 #include "MoveComponent.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
-void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* input,Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
+void MovementComponent::Initialize(Character::BaseCharacter* owner, InputSystem* input, Engine::GlobalVariables* globalVariables, ControlType type, const std::string& name) {
 	this->globalVariables = globalVariables;
 	this->owner = owner;
 
@@ -19212,7 +19521,7 @@ void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* 
 
 	// 移動リクエスト集約選択クラス
 	locomotionCoordinator_ = std::make_unique<LocomotionCoordinator>();
-	
+
 	// 移動反映クラス初期化
 	movementSystem_ = std::make_unique<MovementSystem>();
 	movementSystem_->Initialize();
@@ -19224,71 +19533,40 @@ void MovementComponent::Initialize(Character::BaseCharacter* owner,InputSystem* 
 	}
 };
 
-void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, InputSystem* input) {
+void MovementComponent::Update(Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid,const Character::CharacterContext& ctx) {
 	if (useGlobal_) {
 		SetGlobalData(name_);
 	}
+	// リクエスト集約選択クラス開始
+	locomotionCoordinator_->BeginFrame(ctx);
 
-	// コンテキスト
-	LocomotionContext ctx;
-	if (input) {
-		ctx.input = *input;						// 入力状態
-	}
-	ctx.position = object.GetWorldPosition();	// 位置
-	ctx.state = owner->GetCurrentMainState();				// 状態
-	ctx.dt = dt;								// デルタタイム
-	if (ctx.state == Character::CharacterMainState::Attack) {
-		ctx.isAttacking = true;					// 攻撃
-	}
-	ctx.isHitStun = false;						// スタン
-	ctx.onGround = movementSystem_->IsOnGround();// 着地しているか
-	ctx.fallGravity = jumpSystem_->GetData().fallGravity_;
-	ctx.upGravity = jumpSystem_->GetData().upGravity_;
-	ctx.attackingGravity = attackingGravity;
-	if (camera) {
-		ctx.camera = camera;// カメラ;
-		ctx.cameraDirection = camera->GetForward();	// 方向
-	}
+	// ダッシュシステムの更新
+	dashSystem_->Update(ctx, *locomotionCoordinator_.get());
 
-	// 移動システムの更新
+	// ジャンプシステムの更新
+	jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), rigid);
+
+	// 攻撃移動システム更新
+	attackMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
 	if (controlType_ == ControlType::Manual) {	// 手動操作なら入力を渡す
-		// リクエスト集約選択クラス開始
-		locomotionCoordinator_->BeginFrame(ctx);
-
-		// ダッシュシステムの更新
-		dashSystem_->Update(ctx, *locomotionCoordinator_.get());
-
-		// ジャンプシステムの更新
-		jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), rigid);
-
-		// 攻撃移動システム更新
-		attackMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
-
 		// 移動システム更新
 		moveSystem_->Update(ctx, *locomotionCoordinator_.get());
-
-		// リアクション移動システム更新
-		reactionMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
-
-		// 応答移動システム更新
-		responseMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
-
-		// リクエスト集約選択クラスで移動コマンド生成
-		MoveCommand cmd = locomotionCoordinator_->BuildCommand();
-
-		// 移動反映クラス更新
-		movementSystem_->Update(ctx, cmd, object, rigid);
 	}
 	else {
-		moveSystem_->UpdateEnemy(dt);
-
-		if (object.GetWorldPosition().y <= -3.0f) {
-			object.translate_.y = -3.0f;	// 地面位置に
-			rigid.Velocity().y = 0.0f;			// y速度を0に
-			rigid.SetIsGravity(false);			// 重力をオフ
-			rigid.SetGravityScale(1.0f);		// 重力スケールリセット
-		}
+		// 移動システム更新(非操作)
+		moveSystem_->UpdateEnemy(ctx, *locomotionCoordinator_.get());
 	}
+	// リアクション移動システム更新
+	reactionMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
+
+	// 応答移動システム更新
+	responseMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
+
+	// リクエスト集約選択クラスで移動コマンド生成
+	MoveCommand cmd = locomotionCoordinator_->BuildCommand();
+
+	// 移動反映クラス更新
+	movementSystem_->Update(ctx, cmd, object, rigid);
 
 	// 移動制限の更新
 	movementRestrictions_->Update(object);
@@ -19297,10 +19575,10 @@ void MovementComponent::Update(float dt, Engine::WorldTransform& object, Engine:
 #pragma region MyRegion
 
 void MovementComponent::ApplyGlobalData(const std::string& name) {
-	
+
 	globalVariables->CreateGroup(name);
-	
-	
+
+
 	// ジャンプ
 	globalVariables->AddItem(name, "ジャンプ力", jumpSystem_->GetData().power_);
 	globalVariables->AddItem(name, "ジャンプ上昇時の重力", jumpSystem_->GetData().upGravity_);
@@ -19329,9 +19607,9 @@ void MovementComponent::ApplyGlobalData(const std::string& name) {
 void MovementComponent::SetGlobalData(const std::string& name)
 {
 	// ジャンプ
-	jumpSystem_->GetData().power_ = globalVariables->GetValue<float>(name, "ジャンプ力");
-	jumpSystem_->GetData().upGravity_ = globalVariables->GetValue<float>(name, "ジャンプ上昇時の重力");
-	jumpSystem_->GetData().fallGravity_ = globalVariables->GetValue<float>(name, "ジャンプ下降時の重力");
+	jumpSystem_->Data().power_ = globalVariables->GetValue<float>(name, "ジャンプ力");
+	jumpSystem_->Data().upGravity_ = globalVariables->GetValue<float>(name, "ジャンプ上昇時の重力");
+	jumpSystem_->Data().fallGravity_ = globalVariables->GetValue<float>(name, "ジャンプ下降時の重力");
 
 	// 移動
 	moveSystem_->GetData().minSpeed = globalVariables->GetValue<float>(name, "移動最小速度");
@@ -19383,6 +19661,8 @@ namespace Character {
 	class BaseCharacter;
 }
 
+
+
 /// <summary>
 /// 移動コンポーネント
 /// </summary>
@@ -19399,7 +19679,7 @@ public:
 	// 初期化
 	void Initialize(Character::BaseCharacter* owner ,InputSystem* input,Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
-	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, InputSystem* input);
+	void Update(Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, const Character::CharacterContext& ctx);
 public:
 	// 保存項目の追加
 	void ApplyGlobalData(const std::string& name);
@@ -19409,11 +19689,8 @@ public:
 	// 操作タイプ取得
 	void SetControlType(ControlType type) { controlType_ = type; }
 public: // 移動系統
-
 	// 速度取得
 	Vector3 GetVelocity() const { return moveSystem_->GetVelocity(); }
-	// 速度
-	Vector3& Velocity() { return moveSystem_->Velocity(); }
 	// 向いている方向
 	Vector3 GetDirection() const { return movementSystem_->GetDirection(); }
 	
@@ -19424,8 +19701,6 @@ public: // 移動系統
 	void SetMoveType(MoveType type) { moveSystem_->GetData().moveType = type;};
 	// スティックによる移動速度固定設定
 	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
-	// 移動出来るか設定
-	void SetCanMove(bool canMove) { moveSystem_->SetCanMove(canMove); }
 	// 保存項目を使うか
 	void UseGlobal(bool is) { useGlobal_ = is; };
 public: // ジャンプ系統
@@ -19615,12 +19890,16 @@ void MovementSystem::Initialize()
 {
 }
 
-void MovementSystem::Update(const LocomotionContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
+void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 
 
 	world.translate_ += cmd.finalVelocity;
-	direction_ = cmd.finalDirection;
-
+	if (cmd.finalDirection.Length() != 0.0f) {
+		direction_ = cmd.finalDirection;
+	}
+	else {
+		direction_ = world.GetForward();
+	}
 	// 回転処理
 	RotateProcess(cxt,world);
 
@@ -19631,7 +19910,7 @@ void MovementSystem::Update(const LocomotionContext& cxt, const MoveCommand& cmd
 }
 
 
-void MovementSystem::GravityProess(const LocomotionContext& cxt,Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid){
+void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid){
 
 	if (!useGravity) {
 		rigid.SetIsGravity(!useGravity);
@@ -19651,7 +19930,7 @@ void MovementSystem::GravityProess(const LocomotionContext& cxt,Engine::WorldTra
 	else {
 		if (!cxt.isAttacking) {
 			if (rigid.GetVelocity().y < 0.0f) {
-				rigid.SetGravityScale(cxt.fallGravity);	// 重力スケールセット
+				rigid.SetGravityScale(cxt.fallGravity);		// 重力スケールセット
 			}
 			else {
 				rigid.SetGravityScale(cxt.upGravity);		// 重力スケールセット
@@ -19664,7 +19943,7 @@ void MovementSystem::GravityProess(const LocomotionContext& cxt,Engine::WorldTra
 	}
 }
 
-void MovementSystem::RotateProcess(const LocomotionContext& cxt, Engine::WorldTransform& world) {
+void MovementSystem::RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world) {
 	// 移動ベクトルがゼロなら回転処理しない
 	if (direction_.Length() == 0.0f) return;
 
@@ -19710,7 +19989,7 @@ public:
 	/// 更新
 	/// </summary>
 	/// <param name="dt"></param>
-	void Update(const LocomotionContext& cxt,const MoveCommand& cmd,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
+	void Update(const Character::CharacterContext& ctx,const MoveCommand& cmd,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 
 public:
 
@@ -19724,12 +20003,12 @@ public:
 private:
 
 	// 重力処理
-	void GravityProess(const LocomotionContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
+	void GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 	// 回転処理
-	void RotateProcess(const LocomotionContext& cxt, Engine::WorldTransform& world);
+	void RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world);
 private:
 	// 高さ
-	float groundHeight_ = -3.5f;
+	float groundHeight_ = -3.0f;
 	Engine::WorldTransform* world;
 	Engine::RigidBodyComponent* rigid;
 
@@ -19773,7 +20052,7 @@ void DashSystem::Initialize() {
 
 
 // 更新
-void DashSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator) {
+void DashSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	
 }
 
@@ -19801,7 +20080,7 @@ public:
 	/// </summary>
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 public:
 	// ダッシュ用データの取得
 	DashData& GetData() { return data_; };
@@ -19846,7 +20125,7 @@ File Path: project/DirectXGame/application/base/Move/Jump/JumpSystem.cpp
 
 void JumpSystem::Initialize(){}
 
-void JumpSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator,Engine::RigidBodyComponent& rigid)
+void JumpSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator,Engine::RigidBodyComponent& rigid)
 {
 	// 入力ホールド処理
 	InputHoldProcess(ctx.dt);
@@ -19925,7 +20204,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::RigidBodyComponent& rigid);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator, Engine::RigidBodyComponent& rigid);
 
 	void Update();
 public:	// ジャンプ開始
@@ -19934,7 +20213,9 @@ public:	// ジャンプ開始
 	void DecrementJumpCount() { jumpCount_--; }
 public:
 	// ジャンプデータ取得
-	JumpData& GetData() { return data_; }
+	JumpData GetData() const { return data_; }
+	//
+	JumpData& Data() { return data_; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }
 	// データ設定
@@ -20022,28 +20303,26 @@ struct MoveData
 File Path: project/DirectXGame/application/base/Move/Move/MoveSystem.cpp
 ============================================================
 #include "MoveSystem.h"
-
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
 void MoveSystem::Initialize() {}
 
-void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator){
+void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	// 攻撃中は通常の移動処理しない
 	if (ctx.isAttacking) return;
 
 	MoveRequest request{};
 
 	// 移動処理
-	Vector2 dire = ctx.input.GetPlayerInputData().moveShick;
+	Vector2 dire = ctx.inputData.moveShick;
 	Vector3 moveVelo{};
 
 	if (dire.Length() == 0.0f) return;
-	Matrix4x4 cameraWorldMatrix = Inverse(ctx.camera->GetViewMatrix());
 
-	// カメラの向きに基づいて移動方向をワールド座標系に変換
 	Vector3 worldDirection = {
-		dire.x * cameraWorldMatrix.m[0][0] + dire.y * cameraWorldMatrix.m[2][0],
+		ctx.worldStickDirection.x,
 		0.0f,
-		dire.x * cameraWorldMatrix.m[0][2] + dire.y * cameraWorldMatrix.m[2][2]
+		ctx.worldStickDirection.y
 	};
 
 	// 動いているなら
@@ -20064,30 +20343,43 @@ void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coo
 	// アニメーション速度処理
 	AnimationSpeedProcess();
 
-	
-
-	
-
-
-
 	// 移動可能かどうか
-	if (canMove_) {
-		request.velocity = velocity_ * ctx.dt;
-		request.direction = Normalize(worldDirection);
-		request.priority = 1;
-
-		coordinator.Request(request);
-	}
-	else {
-		coordinator.Request(request);
-	}
+	request.velocity = velocity_ * ctx.dt;
+	request.direction = Normalize(worldDirection);
+	request.priority = 1;
+	coordinator.Request(request);
 }
 
-void MoveSystem::UpdateEnemy(float dt) {}
+void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
+	// 攻撃中は通常の移動処理しない
+	if (ctx.isAttacking) return;
+	MoveRequest request{};
+	// 距離設定
+	Vector3 dire = Subtract(ctx.target->GetWorldPosition(), ctx.position).Normalize();
+	// 回転設定
+	Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+
+	if (!ctx.isGravity) {
+		if (ctx.position.y < ctx.skyHeight) {
+			dire.y = 1.2f; // Y軸速度上昇
+		}
+		else if (ctx.position.y > ctx.skyHeight) {
+			dire.y = -1.2f; // Y軸速度降下
+		}
+		else {
+			dire.y = 0.0f; // Y軸速度リセット
+		}
+		//dire = { -dire.x, dire.y, -dire.z };
+	}
+	request.velocity = dire * ctx.dt * ctx.moveSpeed;
+	request.direction = dire;
+	request.priority = 1;
+	coordinator.Request(request);
+}
 
 #pragma region Process
 
-void MoveSystem::SpeedProcess(const LocomotionContext& ctx)
+void MoveSystem::SpeedProcess(const Character::CharacterContext& ctx)
 {
 
 	if (data_.moveType == MoveType::LINEAR) { // 一定
@@ -20111,12 +20403,12 @@ void MoveSystem::SpeedProcess(const LocomotionContext& ctx)
 
 	// スティックの倒し方に応じてスピードを変化させる
 	if (data_.isStickToSpeed) {
-		float stickLen = Math::Clamp(std::abs(ctx.input.GetPlayerInputData().moveShick.Length()), 0.0f, 1.0f);
+		float stickLen = Math::Clamp(std::abs(ctx.inputData.moveShick.Length()), 0.0f, 1.0f);
 		speed_ *= stickLen;
 	}
 
 	// 空中での速度制限
-	if (data_.isLimitAirSpeed && isAir_) {
+	if (data_.isLimitAirSpeed && !ctx.onGround) {
 		speed_ *= data_.airSpeedRate;	// 空中速度倍率をかける(0.0f以上~1.0f以下での使用をおすすめ)
 	}
 
@@ -20185,13 +20477,13 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新(操作用)
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 	// 更新(敵用)
-	void UpdateEnemy(float dt);
+	void UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
 private:
 	// 速度処理
-	void SpeedProcess(const LocomotionContext& ctx);
+	void SpeedProcess(const Character::CharacterContext& ctx);
 	// 状態処理
 	void StateProcess();
 	// アニメーション速度設定
@@ -20201,8 +20493,6 @@ public: // 取得
 	MoveData& GetData() { return data_; }
 	// 速度の取得
 	Vector3 GetVelocity() const { return velocity_; }
-	// 速度
-	Vector3& Velocity() { return velocity_; }
 	// 状態の取得
 	State GetState() const { return state_;}
 	// アニメーション速度の取得
@@ -20210,11 +20500,6 @@ public: // 取得
 public: //設定
 	// データ設定
 	void SetData(const MoveData& data) { data_ = data; };
-
-	// 移動可能かどうか設定
-	void SetCanMove(bool canMove) { canMove_ = canMove; }
-	// 空中かどうか設定
-	void SetIsAir(bool isAir) { isAir_ = isAir; }
 	// スピード設定
 	void SetSpeed(float min, float max) {
 		data_.minSpeed = min;
@@ -20232,10 +20517,6 @@ private:
 	float animationSpeed_ = 1.0f;
 	// 状態
 	State state_ = State::kIdle;
-	// 空中か？
-	bool isAir_ = false;
-	// 移動可能フラグ
-	bool canMove_ = true;
 private:
 
 
@@ -20253,7 +20534,7 @@ void ReactionMoveSystem::Initialize() {
 
 }
 // 更新
-void ReactionMoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator) {
+void ReactionMoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	coordinator.Request(reuest);
 	reuest.velocity = 0.0f;
 }
@@ -20277,7 +20558,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
 	void SetRequest(const MoveRequest& request) { reuest = request; }
 
@@ -20291,14 +20572,12 @@ File Path: project/DirectXGame/application/base/Move/Reaction/ResponseMoveSystem
 ============================================================
 #include "ResponseMoveSystem.h"
 
-void ResponseMoveSystem::Initialize(){
+void ResponseMoveSystem::Initialize() {
 
 }
 
-void ResponseMoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator) {
-	if (ctx.state == Character::CharacterMainState::Attack) {
-		coordinator.Request(reuest);
-	}
+void ResponseMoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
+	coordinator.Request(reuest);
 	reuest.velocity = 0.0f;
 	reuest.priority = 999;
 }
@@ -20320,7 +20599,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
 	void SetRequest(const MoveRequest& request) { reuest = request; }
 
@@ -21796,44 +22075,242 @@ private: // 一旦
 
 
 ============================================================
-File Path: project/DirectXGame/application/base/Stage/MainStage.cpp
+File Path: project/DirectXGame/application/base/Stage/BaseStage.cpp
 ============================================================
-#include "MainStage.h"
-
+#include "BaseStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
-
-
-void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager,  Engine::Camera* camera)
-{
-	this->dxCommon = dxcommon;				// ダイレクトX共通クラス
-	this->entityManager = entityManager;	// エンティティ3d
-	
+void BaseStage::InitializeOcean(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
 	// 海初期化
 	ocean_ = std::make_unique<Engine::Ocean>();
-	ocean_->Initialize(entityManager, provisionalData_.oceanRange);
-	ocean_->GetWaveParameters()[0].amplitude = provisionalData_.oceanAmplitude;
-	ocean_->GetWaveParameters()[0].waveDirection = provisionalData_.waveDirection;
-	ocean_->GetWaveParameters()[0].speed = provisionalData_.waveSpeed;
-	ocean_->GetMaterial()->GetMaterialInstance().color = provisionalData_.color;
+	ocean_->Initialize(entityManager, oceanParameters_.range);
+	ocean_->GetWaveParameters()[0].amplitude = oceanParameters_.amplitude;
+	ocean_->GetWaveParameters()[0].waveDirection = oceanParameters_.waveDirection;
+	ocean_->GetWaveParameters()[0].speed = oceanParameters_.waveSpeed;
+	ocean_->GetMaterial()->GetMaterialInstance().color = oceanParameters_.color;
 
 	// 海オブジェクト追加
-	oceanObject = entityManager->CreateObject3D("oceanObject", Engine::ObjectModelType::kOcean, {}, camera);
+	oceanObject = entityManager->CreateObject3D("oceanObject", Engine::ObjectModelType::kOcean, {}, cameraManager->GetCamera());
 	oceanObject->SetOcean(ocean_.get());
-	oceanObject->GetWorldTransform().translate_ = provisionalData_.oceanTranslate;
-	oceanObject->GetWorldTransform().rotate_ = provisionalData_.oceanRotate;
+	oceanObject->GetWorldTransform().translate_ = oceanParameters_.translate;
+	oceanObject->GetWorldTransform().rotate_ = oceanParameters_.rotate;
 	oceanObject->GetRenderComponent()->SetObjectDrawType(Engine::ObjectDrawType::kTranslucent03);
-	
+}
+
+void BaseStage::InitializeSky(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
 	// スカイボックス初期化
 	skyBox = std::make_unique<Engine::SkyBox>();
 	skyBox->Initialize(entityManager, "resources/Texture/hdr/sky.dds");
-	
+
 	// 空
-	sky_ = entityManager->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {},camera);
-	sky_->GetWorldTransform().scale_ = provisionalData_.skyBoxScale;
+	sky_ = entityManager->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, cameraManager->GetCamera());
+	sky_->GetWorldTransform().scale_ = skyBoxScale_;
 	sky_->SetSkyBox(skyBox.get());
+}
+
+void BaseStage::InitializeLight(Engine::EntityManager* entityManager) {
+	// ライト
+	DirectionalLightData directionalLightData{};
+	directionalLightData.color = { 1,1,1,1 };
+	directionalLightData.direction = { 0,-1,0 };
+	directionalLightData.intensity = 0.9f;
+	directionalLightData.isLight = true;
+	directionalLightData.lig = 0.1f;
+	directional = std::make_shared<Engine::DirectionalLight>();
+	directional->directional = directionalLightData;
+	entityManager->GetLightManager()->AddLight(directional);
+}
+
+void BaseStage::InitializeLevelData(Engine::EntityManager* entityManager, CameraManager* cameraManager, const std::string& name) {
+	// レベルデータロード
+	loadData_ = std::make_unique<LoadLevelData>();
+	loadData_->SetCameraManager(cameraManager);
+	loadData_->Initialize(entityManager, entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager(), nullptr, name);
+}
+
+void BaseStage::InitializeStageColliderSystem(Engine::EntityManager* entityManager) {
+	// ステージコライダーシステム初期化
+	stageColliderSystem_ = std::make_unique<StageColliderSystem>();
+	stageColliderSystem_->Initialize(entityManager->Get3DLineCommon());
 	
+	// レベルデータだ存在するなら
+	if (loadData_) {
+		for (auto& obj : loadData_->GetObjects()) {
+			stageColliderSystem_->AddObject(obj);
+		}
+		stageColliderSystem_->CreateCollider();
+	}
+}
+
+void BaseStage::BaseUpdate(float dt) {
+	
+	// ステージコライダーシステムがあるなら
+	if (stageColliderSystem_) {
+		stageColliderSystem_->Update();
+	}
+	// レベルデータがあるなら更新
+	if (loadData_) {
+		loadData_->Update();
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Stage/BaseStage.h
+============================================================
+#pragma once
+// engine
+#include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include"DirectXGame/engine/2d/Sprite.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
+#include"DirectXGame/engine/input/Input.h"
+#include"DirectXGame/engine/effect/Ocean/Ocean.h"
+#include<DirectXGame/engine/Effect/EffectComponent.h>
+#include "DirectXGame/application/base/Light/BaseLights.h"
+#include "DirectXGame/application/base/Car/PlayerCar.h"
+#include "DirectXGame/engine/Base/Load/LoadLevelData.h"
+#include "DirectXGame/application/base/Stage/StageColliderSystem.h"
+#include "DirectXGame/engine/Math/Random.h"
+/// <summary>
+/// ステージ基礎クラス
+/// </summary>
+class BaseStage {
+public:
+	~BaseStage() {
+		if (loadData_) {
+			loadData_->ClearData();
+		}
+	}
+
+	// 初期化
+	virtual void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) = 0;
+
+	// 更新
+	virtual void Update(float dt) = 0;
+
+	///< summary>
+	/// 描画
+	///</summary>
+	virtual void Draw() = 0;
+
+	/// <summary>
+	/// 描画エフェクト
+	/// </summary>
+	virtual void DrawEffect() = 0;
+
+	/// <summary>
+	/// 描画2d
+	/// </summary>
+	virtual void Draw2D() = 0;
+
+
+public:
+	// レベルデータ取得
+	LoadLevelData* GetLoadLevelData() { return loadData_.get(); }
+	// ステージコライダーシステム取得
+	StageColliderSystem* GetStageColliderSystem() { return stageColliderSystem_.get(); }
+protected:
+
+	/// <summary>
+	/// 海初期化
+	/// </summary>
+	void InitializeOcean(Engine::EntityManager* entityManager, CameraManager* cameraManager);
+
+	/// <summary>
+	/// 空初期化
+	/// </summary>
+	void InitializeSky(Engine::EntityManager* entityManager, CameraManager* cameraManager);
+
+	/// <summary>
+	/// ライト初期化
+	/// </summary>
+	void InitializeLight(Engine::EntityManager* entityManager);
+
+	/// <summary>
+	/// レベルデータ初期化
+	/// </summary>
+	void InitializeLevelData(Engine::EntityManager* entityManager, CameraManager* cameraManager,const std::string& name);
+
+	/// <summary>
+	/// ステージコライダーシステム初期化
+	/// </summary>
+	/// <param name="entityManager"></param>
+	void InitializeStageColliderSystem(Engine::EntityManager* entityManager);
+
+protected:
+	/// <summary>
+	/// 基礎更新
+	/// </summary>
+	/// <param name="dt"></param>
+	void BaseUpdate(float dt);
+
+protected:
+	// エンティティ管理クラス取得
+	Engine::EntityManager* GetEntityManager() { return entityManager; }
+protected: // 基礎オブジェクト
+	// オーシャンシェーダー
+	std::unique_ptr<Engine::Ocean> ocean_ = nullptr;
+	// オーシャンオブジェクト
+	Engine::Object3d* oceanObject = nullptr;
+	// スカイボックス
+	std::unique_ptr<Engine::SkyBox> skyBox = nullptr;
+	// 空
+	Engine::Object3d* sky_ = nullptr;
+	// 地面
+	Engine::Object3d* tail_ = nullptr;
+	// ライト
+	std::shared_ptr<Engine::DirectionalLight> directional = nullptr;
+	// レベルデータ
+	std::unique_ptr<LoadLevelData> loadData_ = nullptr;
+	// ステージコライダーシステム
+	std::unique_ptr<StageColliderSystem> stageColliderSystem_ = nullptr;
+protected:	// パラメータ系
+
+	// 海パラメータ
+	struct OceanParameters {
+		Vector3 translate = { 0, -30, 0 };
+		Vector3 rotate = { Math::DegreesToRadians(90) ,0,0 };
+		Vector2 range{ 8000.0f,8000.0f };
+		float amplitude = 16.5f;
+		Vector2 waveDirection = { 0.5f,0.5f };
+		float waveSpeed = 5.0f;
+		Color color = { 0.0f, 0.0f, 0.8f, 0.75f };
+	};
+	// 海パラメータ
+	OceanParameters oceanParameters_;
+	// 空スケール
+	Vector3 skyBoxScale_ = { 100,100,100 };
+protected: // 貰いもの
+	Engine::EntityManager* entityManager = nullptr;
+	Engine::Camera* camera = nullptr;
+	CameraManager* cameraManager = nullptr;
+	// エフェクト
+	EffectSystem* effect = nullptr;
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Stage/MainStage.cpp
+============================================================
+#include "MainStage.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
+
+void MainStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
+	this->entityManager = entityManager;	// エンティティ3d
+	this->camera = cameraManager->GetCamera();	// カメラ取得
+	// 海初期化
+	InitializeOcean(entityManager, cameraManager);
+	// 空初期化
+	InitializeSky(entityManager, cameraManager);
+	// レベルデータ初期化
+	InitializeLevelData(entityManager, cameraManager, "gameScene.json");
+	// ステージコライダーシステム初期化
+	InitializeStageColliderSystem(entityManager);
+
 	// ミサイル発射台追加
 	for(int i = 0; i < provisionalData_.missileNumX; ++i)
 	{
@@ -21855,39 +22332,13 @@ void MainStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManage
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
 	playerCar_->Initialize(entityManager, {},playerCarPos_, { 0,Math::DegreesToRadians(0),0 });
-	playerCar_->SetGroungHeight(-2.9f);
-	
-	
+	playerCar_->SetGroungHeight(-2.9f);	
 }
 
-void MainStage::Update(float dt)
-{
+void MainStage::Update(float dt) {
+	BaseUpdate(dt);
+
 	playerCar_->Update(dt);
-}
-
-void MainStage::Draw()
-{
-
-}
-
-void MainStage::DrawP()
-{
-
-}
-
-void MainStage::Draw2D()
-{
-
-}
-
-void MainStage::InitEmit()
-{
-	
-}
-
-void MainStage::EmitUpdate()
-{
-	
 }
 
 
@@ -21897,133 +22348,54 @@ void MainStage::EmitUpdate()
 File Path: project/DirectXGame/application/base/Stage/MainStage.h
 ============================================================
 #pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
+#include "BaseStage.h"
 
 
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
-
-// 前方宣言
-namespace Engine{
-	class DirectXCommon;
-	class EntityManager;
-}
 /// <summary>
 /// ステージクラス
 /// </summary>
-class MainStage {
+class MainStage : public BaseStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager,  Engine::Camera* camera);
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
 	// 更新
-	void Update(float dt);
+	void Update(float dt) override;
 
 	///< summary>
 	/// 描画
 	///</summary>
-	void Draw();
+	void Draw() override {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	void DrawP();
+	void DrawEffect() override {};
 
 	/// <summary>
 	/// 描画2d
 	/// </summary>
-	void Draw2D();
+	void Draw2D() override {};
 private:
 	/// <summary>
 	/// エミッター初期化
 	/// </summary>
-	void InitEmit();
+	void InitEmit() {};
 
 	/// <summary>
 	/// エミッター更新
 	/// </summary>
-	void EmitUpdate();
+	void EmitUpdate() {};
 
 public:
 	std::vector<Engine::Object3d*> missiles_;
 private:
-	// 空
-	Engine::Object3d* sky_;
-
-	
-	// 地面
-	Engine::Object3d* tail_;
-	
-
-	// 列車
-	Engine::Object3d* train_;
-	float trainSpeed_ = 300.0f;
-	float trainStartX_ = -3110.0f;
-	float trainEndX_ = 4000.0f;
-	float trainWarpTime_ = 0.0f;
-	float trainWarpTimeMax_ = 20.0f;
-
-	// 船
-	Engine::Object3d* ship_;
-	Vector3 velocity_ = { 0.0f,0.0f,0.0f };
-
-	// 円運動のパラメータ
-	float radius = 1000.0f; // 円の半径
-	float angularSpeed = DirectX::XM_PI * 0.5f * 0.25f; // ラジアン/秒（90度/秒）
-	
-	Vector3 center = { -3111,-50,3040 }; // 中心座標を指定
-
-
-	// オーシャンシェーダー
-	std::unique_ptr<Engine::Ocean> ocean_ = nullptr;
-	Engine::Object3d* oceanObject;
-
-	// スカイボックス
-	std::unique_ptr<Engine::SkyBox> skyBox;
-	
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
 	// 位置
 	Vector3 playerCarPos_ = { 120.0f,-3.00f,0.0f };
-
-private:
-	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::EntityManager* entityManager = nullptr;
-	
-	Engine::Camera* camera = nullptr;
 private: // 一旦
-
 	struct ProvisionalData {
-		Vector3 oceanTranslate = { 0, -30, 0 };
-		Vector3 oceanRotate = { Math::DegreesToRadians(90) ,0,0 };
-
-		Vector3 skyBoxScale = {100,100,100};
-
-
-		Vector2 oceanRange{ 8000.0f,8000.0f };
-		float oceanAmplitude = 16.5f;
-		Vector2 waveDirection = { 0.5f,0.5f };
-		float waveSpeed = 5.0f;
-		Color color = { 0.0f, 0.0f, 0.8f, 0.75f };
-
 		int missileNumX = 5;
 		int missileNumY = 2;
 
@@ -22041,69 +22413,43 @@ File Path: project/DirectXGame/application/base/Stage/ResultStage.cpp
 ============================================================
 #include "ResultStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/engine/Math/Random.h"
 
-void ResultStage::Initialize(Engine::EntityManager* entityManager, 
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
+
+void ResultStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;	// エンティティ3d
-	this->globalVariables = globalVariables;	// 保存項目
-	this->camera = camera;						// カメラ
+	this->camera = cameraManager->GetCamera();	// カメラ取得
+	// 空初期化
+	InitializeSky(entityManager, cameraManager);
+	// ライト初期化
+	InitializeLight(entityManager);
 
-
-	// スカイボックス初期化
-	skyBox = std::make_unique<Engine::SkyBox>();
-	skyBox->Initialize(entityManager, "resources/Texture/hdr/sky.dds");
-
-	// 空
-	sky_ = entityManager->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, camera);
-	sky_->GetWorldTransform().scale_ = { 100,100,100 };
-	sky_->SetSkyBox(skyBox.get());
 
 	// タイル
-	tail = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
-	tail->SetModel("Ground.obj");
-	tail->GetWorldTransform().scale_ = { 100,100,100 };
-	tail->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
+	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
+	tail_->SetModel("Ground.obj");
+	tail_->GetWorldTransform().scale_ = { 100,100,100 };
+	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
 
 	// 換金所
-	moneyExchangePlace = entityManager->CreateObject3D("MoneyExchangePlace", Engine::ObjectModelType::kNormal, {0,0.06f,0}, camera);
+	moneyExchangePlace = entityManager->CreateObject3D("MoneyExchangePlace", Engine::ObjectModelType::kNormal, { 0,0.06f,0 }, camera);
 	moneyExchangePlace->SetModel("MoneyExchangePlace.obj");
 	moneyExchangePlace->GetWorldTransform().rotate_ = { 0,Math::DegreesToRadians(-90),0 };
 
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, globalVariables, playerCarPos_, { 0,Math::DegreesToRadians(-90),0});
+	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,Math::DegreesToRadians(-90),0});
 	playerCar_->SetGroungHeight(0.1f);
 
 	// ステート変更
 	playerCar_->GetStateMachine()->ChangeState(CarMainState::ResultCashExchange);
-	// ライト
-	DirectionalLightData directionalLightData{};
-	directionalLightData.color = { 1,1,1,1 };
-	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 0.9f;
-	directionalLightData.isLight = true;
-	directionalLightData.lig = 0.1f;
-	directional = std::make_shared<Engine::DirectionalLight>();
-	directional->directional = directionalLightData;
-	entityManager->GetLightManager()->AddLight(directional);
 }
 
 void ResultStage::Update(float dt) {
+	BaseUpdate(dt);
 	// プレイヤー車更新
 	playerCar_->Update(dt);
-}
-
-void ResultStage::Draw() {
-
-}
-
-void ResultStage::DrawP() {
-}
-
-void ResultStage::Draw2D() {
 }
 
 
@@ -22111,69 +22457,50 @@ void ResultStage::Draw2D() {
 File Path: project/DirectXGame/application/base/Stage/ResultStage.h
 ============================================================
 #pragma once
-// C++
-#include <imgui.h>
-#include <list>
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-
-#include "DirectXGame/application/base/Light/BaseLights.h"
-#include "DirectXGame/application/base/Car/PlayerCar.h"
-#include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/application/base/Game/Select/SelectSystem.h"
-
-// 前方宣言
-namespace Engine {
-	class DirectXCommon;
-	class EntityManager;
-}
+#include "BaseStage.h"
 
 /// <summary>
 /// リザルト用ステージクラス
 /// </summary>
-class ResultStage {
+class ResultStage : public BaseStage {
 public:
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	/// <param name="entity3DManager"></param>
-	/// <param name="entity2DManager"></param>
-	/// <param name="globalVariables"></param>
-	/// <param name="camera"></param>
-	void Initialize(Engine::EntityManager* entity3DManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
-
+	// 初期化
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
 	// 更新
-	void Update(float dt);
+	void Update(float dt) override;
 
 	///< summary>
 	/// 描画
 	///</summary>
-	void Draw();
+	void Draw() override {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	void DrawP();
+	void DrawEffect() override {};
 
 	/// <summary>
 	/// 描画2d
 	/// </summary>
-	void Draw2D();
+	void Draw2D() override {};
+private:
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
+	void InitEmit() {};
 
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
+	void EmitUpdate() {};
+
+public:
 	/// <summary>
 	/// エフェクト
 	/// </summary>
 	/// <param name="effect"></param>
-	void SetEffect(Effect* effect) {
+	void SetEffect(EffectSystem* effect) {
 		this->effect = effect;
 		playerCar_->SetEffect(effect);
 	}
@@ -22186,28 +22513,11 @@ public:
 private:
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
-	// 空
-	Engine::Object3d* sky_;
-	// スカイボックス
-	std::unique_ptr<Engine::SkyBox> skyBox;
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-	// タイル
-	Engine::Object3d* tail;
-
-
 	// 換金所
 	Engine::Object3d* moneyExchangePlace;
 private:
 	// 位置
 	Vector3 playerCarPos_ = { -1.25f,0.05f,-4.0f };
-
-private:
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::Camera* camera = nullptr;
-	// エフェクト
-	Effect* effect = nullptr;
 };
 
 ============================================================
@@ -22215,68 +22525,47 @@ File Path: project/DirectXGame/application/base/Stage/SelectStage.cpp
 ============================================================
 #include "SelectStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-#include "DirectXGame/engine/Math/Random.h"
 
-void SelectStage::Initialize(Engine::EntityManager* entityManager, 
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
+void SelectStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;	// エンティティ3d
-	this->globalVariables = globalVariables;	// 保存項目
-	this->camera = camera;						// カメラ
-
-
-	// スカイボックス初期化
-	skyBox = std::make_unique<Engine::SkyBox>();
-	skyBox->Initialize(entityManager, "resources/Texture/hdr/sky.dds");
-
-	// 空
-	sky_ = entityManager->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, camera);
-	sky_->GetWorldTransform().scale_ = { 100,100,100 };
-	sky_->SetSkyBox(skyBox.get());
-
+	this->camera = cameraManager->GetCamera();	// カメラ取得
+	// 空初期化
+	InitializeSky(entityManager, cameraManager);
+	// ライト初期化
+	InitializeLight(entityManager);
+	
 	// タイル
-	tail = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
-	tail->SetModel("Ground.obj");
-	tail->GetWorldTransform().scale_ = { 100,100,100 };
-	tail->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
+	tail_ = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
+	tail_->SetModel("Ground.obj");
+	tail_->GetWorldTransform().scale_ = { 100,100,100 };
+	tail_->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
 
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, globalVariables, playerCarPos_, { 0,0,0 });
+	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,0,0});
 	playerCar_->SetGroungHeight(0.1f);
-
-	
 
 	for (int i = 0; i < 300; i++) {
 		std::unique_ptr<ObjectComponent> stone = std::make_unique<ObjectComponent>();
-		stone->InitializeInstancing(entityManager, 
-			globalVariables, "Stone" + std::to_string(i), "Stone.obj", "",false, false, nullptr,
+		stone->InitializeInstancing(entityManager,
+			{}, "Stone" + std::to_string(i), "Stone.obj", "", false, false, nullptr,
 			Engine::Object3dInstansManager::TransparencyType::kNo);
 		stone->GetWorldTransform().translate_ = { Random::RandomFloat(-6000, -400.0f) , -20.0f, Random::RandomFloat(-100, 7000.0f) };
 		stone->GetWorldTransform().rotate_.y = Random::RandomFloat(0, 360.0f);
-		stone->GetWorldTransform().scale_ = Random::RandomFloat(0.5f,2.25f);
+		stone->GetWorldTransform().scale_ = Random::RandomFloat(0.5f, 2.25f);
 		stoneComponents_.push_back(std::move(stone));
 	}
-
-	
-
-	// ライト
-	DirectionalLightData directionalLightData{};
-	directionalLightData.color = { 1,1,1,1 };
-	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 0.9f;
-	directionalLightData.isLight = true;
-	directionalLightData.lig = 0.1f;
-	directional = std::make_shared<Engine::DirectionalLight>();
-	directional->directional = directionalLightData;
-	entityManager->GetLightManager()->AddLight(directional);
 }
 
 void SelectStage::Update(float dt) {
-	tail->GetMaterial(0)->GetMaterialInstance().transform.translate.y += 0.05f * dt;
-	if (tail->GetMaterial(0)->GetMaterialInstance().transform.translate.y >= 1.0f) {
-		tail->GetMaterial(0)->GetMaterialInstance().transform.translate.y = 0.0f;
+	BaseUpdate(dt);
+
+
+	tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y += 0.05f * dt;
+	if (tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y >= 1.0f) {
+		tail_->GetMaterial(0)->GetMaterialInstance().transform.translate.y = 0.0f;
 	}
 
 	// プレイヤー車更新
@@ -22298,85 +22587,55 @@ void SelectStage::Update(float dt) {
 	}
 }
 
-void SelectStage::Draw() {
-
-}
-
-void SelectStage::DrawP() {
-
-}
-
 
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/SelectStage.h
 ============================================================
 #pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
-
-
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
-
-// 前方宣言
-namespace Engine {
-	class DirectXCommon;
-	class EntityManager;
-	class GlobalVariables;
-}
-class Effect;
+#include "BaseStage.h"
 
 /// <summary>
 /// セレクト用ステージ
 /// </summary>
-class SelectStage {
+class SelectStage : public BaseStage {
 public:
+	// 初期化
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	/// <param name="entity3DManager"></param>
-	/// <param name="entity2DManager"></param>
-	/// <param name="globalVariables"></param>
-	/// <param name="camera"></param>
-	void Initialize(Engine::EntityManager* entityManager, 
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
+	// 更新
+	void Update(float dt) override;
 
 	///< summary>
 	/// 描画
 	///</summary>
-	void Draw();
+	void Draw() override {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	void DrawP();
+	void DrawEffect() override {};
 
+	/// <summary>
+	/// 描画2d
+	/// </summary>
+	void Draw2D() override {};
+private:
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
+	void InitEmit() {};
 
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
+	void EmitUpdate() {};
+
+public:
 	/// <summary>
 	/// エフェクト
 	/// </summary>
 	/// <param name="effect"></param>
-	void SetEffect(Effect* effect) {
+	void SetEffect(EffectSystem* effect) {
 		this->effect = effect;
 		playerCar_->SetEffect(effect);
 	}
@@ -22387,27 +22646,10 @@ public:
 	PlayerCar* GetPlayerCar() { return playerCar_.get(); }
 
 	void SetRatio(float ratio) { ratio_ = ratio; }
-
-private:
-	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::Camera* camera = nullptr;
-	// エフェクト
-	Effect* effect = nullptr;
 private:
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
-	// 空
-	Engine::Object3d* sky_;
-	// スカイボックス
-	std::unique_ptr<Engine::SkyBox> skyBox;
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-	// タイル
-	Engine::Object3d* tail;
-
-
+	// 石
 	std::vector<std::unique_ptr<ObjectComponent>> stoneComponents_;
 private:
 	// 位置
@@ -22436,7 +22678,6 @@ void StageColliderSystem::CreateCollider() {
 	for (auto& obj : objects) {
 		for (auto& mesh : obj->GetModel()->GetModelData().mesh) {
 			for (auto& triangle : mesh->triangle) {
-				auto collidetCom = std::make_unique<Engine::ColliderComponent>();
 				auto triangleColl = std::make_unique<Engine::TriangleCollider>();
 				triangleColl->triangle01 = triangle.vertices[0];
 				triangleColl->triangle02 = triangle.vertices[1];
@@ -22444,9 +22685,8 @@ void StageColliderSystem::CreateCollider() {
 				triangleColl->tag = CollisionTag::Wall;
 				triangleColl->layer = CollisionLayer::Environment;
 				triangleColl->collisionMask = 0xFFFFFFFF;
-				//triangleColl->isDebugLine = true;
 				triangleColl->isStatic = true;
-				triangleColl->Enable();
+				triangleColl->isDebugLine = false;
 				colliderComponent_->AddCollider(std::move(triangleColl));
 			}
 		}
@@ -22456,9 +22696,27 @@ void StageColliderSystem::CreateCollider() {
 
 void StageColliderSystem::Update() {
 
+	DebugImGui();
+
 	colliderComponent_->UpdateAll(objects[0]->GetWorldTransform());
 };
 
+void StageColliderSystem::DebugImGui() {
+#ifdef _DEBUG
+	ImGui::Begin("Collider");
+	if (ImGui::Button("isDebugLine")) {
+		for (auto& coll : colliderComponent_->GetAllColliders()) {
+			if (coll->isDebugLine) {
+				coll->isDebugLine = false;
+			}
+			else {
+				coll->isDebugLine = true;
+			}
+		}
+	}
+	ImGui::End();
+#endif // _DEBUG
+};
 
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/StageColliderSystem.h
@@ -22476,7 +22734,10 @@ namespace Engine {
 /// </summary>
 class StageColliderSystem : public IHitReceiver {
 public:
-
+	// デストラクタ
+	~StageColliderSystem() {
+		colliderComponent_->ClearColliders();
+	}
 	// 初期化
 	void Initialize(Engine::LineCommon* lineCommon);
 
@@ -22491,6 +22752,8 @@ public:
 
 	Engine::ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
 private:
+	void DebugImGui();
+private:
 	std::vector<Engine::Object3d*> objects;
 	std::unique_ptr<Engine::ColliderComponent> colliderComponent_;
 	Engine::LineCommon* lineCommon;
@@ -22502,62 +22765,8 @@ File Path: project/DirectXGame/application/base/Stage/TitleStage.cpp
 ============================================================
 #include "TitleStage.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-
-
-void TitleStage::Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager, 
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
-	this->dxCommon = dxcommon;				// ダイレクトX共通クラス
-	this->entityManager = entityManager;	// エンティティ
-	this->globalVariables = globalVariables;	// 保存項目
-	this->camera = camera;						// カメラ
-
-	// スカイボックス初期化
-	skyBox = std::make_unique<Engine::SkyBox>();
-	skyBox->Initialize(entityManager, "resources/Texture/hdr/sky.dds");
-
-	// 空
-	sky_ = entityManager->CreateObject3D("skyBox", Engine::ObjectModelType::kSkyBox, {}, camera);
-	sky_->GetWorldTransform().scale_ = provisionalData_.skyBoxScale;
-	sky_->SetSkyBox(skyBox.get());
-
-	// タイル
-	tail = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
-	tail->SetModel("Ground.obj");
-	tail->GetWorldTransform().scale_ = { 100,100,100 };
-	tail->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
-
-	// 車
-	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, globalVariables,playerCarPos_, { 0,Math::DegreesToRadians(-90),0 });
-	playerCar_->SetGroungHeight(0.1f);
-	
-
-	// 石初期化
-	InitializeStone();
-
-	// ライト
-	DirectionalLightData directionalLightData{};
-	directionalLightData.color = { 1,1,1,1 };
-	directionalLightData.direction = { 0,-1,0 };
-	directionalLightData.intensity = 0.9f;
-	directionalLightData.isLight = true;
-	directionalLightData.lig = 0.1f;
-	directional = std::make_shared<Engine::DirectionalLight>();
-	directional->directional = directionalLightData;
-	entityManager->GetLightManager()->AddLight(directional);
-
-	PointLightData pointLightData{};
-	pointLightData.color = { 1,1,1,1 };
-	pointLightData.position = { 0,100,0 };
-	pointLightData.intensity = 1.0f;
-	pointLightData.radius = 100000;
-	pointLightData.isLight = true;
-	//
-	pointLight = std::make_shared<Engine::PointLight>();
-	pointLight->point = pointLightData;
-};
 
 void TitleStage::InitializeStone(){
 	stone1_ = entityManager->CreateObject3D("Stone1", Engine::ObjectModelType::kNormal, {}, camera);
@@ -22584,11 +22793,33 @@ void TitleStage::InitializeStone(){
 	stone5_->SetModel("Stone.obj");
 	stone5_->GetWorldTransform().scale_ = { 1,1,1 };
 	stone5_->GetWorldTransform().translate_ = { 0,-28,2000 };
-
-
 };
 
+void TitleStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
+	this->entityManager = entityManager;	// エンティティ3d
+	this->camera = cameraManager->GetCamera();	// カメラ取得
+	// 空初期化
+	InitializeSky(entityManager, cameraManager);
+	// ライト初期化
+	InitializeLight(entityManager);
+	// 石初期化
+	InitializeStone();
+
+	// タイル
+	tail = entityManager->CreateObject3D("tail", Engine::ObjectModelType::kNormal, {}, camera);
+	tail->SetModel("Ground.obj");
+	tail->GetWorldTransform().scale_ = { 100,100,100 };
+	tail->GetMaterial(0)->GetMaterialInstance().transform.scale = { 100,100,100 };
+
+	// 車
+	playerCar_ = std::make_unique<PlayerCar>();
+	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,Math::DegreesToRadians(-90),0});
+	playerCar_->SetGroungHeight(0.1f);
+
+}
+
 void TitleStage::Update(float dt) {
+	BaseUpdate(dt);
 
 	// エフェクト
 	effect->Emit("dust3", {-50,10,100});
@@ -22598,90 +22829,56 @@ void TitleStage::Update(float dt) {
 	playerCar_->Update(dt);
 };
 
-void TitleStage::Draw() {
-};
-
-void TitleStage::DrawP() {
-};
-
-void TitleStage::Draw2D() {
-};
-
-
-void TitleStage::InitEmit() {
-};
-
-void TitleStage::EmitUpdate() {
-
-}
-
 
 
 ============================================================
 File Path: project/DirectXGame/application/base/Stage/TitleStage.h
 ============================================================
 #pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
-
-
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
-
-// 前方宣言
-namespace Engine {
-	class DirectXCommon;
-	class EntityManager;
-	class GlobalVariables;
-}
-class Effect;
-
+#include "BaseStage.h"
 
 /// <summary>
 /// タイトルシーンステージ
 /// </summary>
-class TitleStage {
+class TitleStage : public BaseStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
 	// 更新
-	void Update(float dt);
+	void Update(float dt) override;
 
 	///< summary>
 	/// 描画
 	///</summary>
-	void Draw();
+	void Draw() override {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	void DrawP();
+	void DrawEffect() override {};
 
 	/// <summary>
 	/// 描画2d
 	/// </summary>
-	void Draw2D();
+	void Draw2D() override {};
+private:
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
+	void InitEmit() {};
 
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
+	void EmitUpdate() {};
+
+public:
 	/// <summary>
 	/// エフェクト
 	/// </summary>
 	/// <param name="effect"></param>
-	void SetEffect(Effect* effect) {
+	void SetEffect(EffectSystem* effect) {
 		this->effect = effect;
 		playerCar_->SetEffect(effect);
 	}
@@ -22692,50 +22889,21 @@ public:
 	/// <returns></returns>
 	PlayerCar* GetPlayerCar() { return playerCar_.get(); }
 private:
-	/// <summary>
-	/// エミッター初期化
-	/// </summary>
-	void InitEmit();
-
-	/// <summary>
-	/// エミッター更新
-	/// </summary>
-	void EmitUpdate();
-
 	//
 	void InitializeStone();
 private:
-	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::Camera* camera = nullptr;
-	// エフェクト
-	Effect* effect = nullptr;
-private:
-	// 空
-	Engine::Object3d* sky_;
-	// スカイボックス
-	std::unique_ptr<Engine::SkyBox> skyBox;
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-	std::shared_ptr<Engine::PointLight> pointLight;
 	// タイル
 	Engine::Object3d* tail;
-
-
 	// 石
 	Engine::Object3d* stone1_;
 	Engine::Object3d* stone2_;
 	Engine::Object3d* stone3_;
 	Engine::Object3d* stone4_;
 	Engine::Object3d* stone5_;
-
-	
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
 	// 位置
 	Vector3 playerCarPos_ = { -1.25f,0.05f,12.0f };
-
 private:
 	struct ProvisionalData {
 		Vector3 oceanTranslate = { 0, -30, 0 };
@@ -22791,7 +22959,7 @@ namespace Engine {
 	class EntityManager;
 	class GlobalVariables;
 }
-class Effect;
+class EffectSystem;
 
 /// <summary>
 /// チュートリアル用ステージ
@@ -23692,6 +23860,96 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/UI/GameStartUI.cpp
+============================================================
+#include "GameStartUI.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include <DirectXGame/engine/Utility/ConvertUtility.h>
+
+void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+	Engine::GlobalVariables* globalVariables) {
+	this->entityManager = entityManager;
+	this->globalVariables = globalVariables;
+	this->inputSystem = inputSystem;
+
+	// UI
+	fade_ = std::make_unique<Engine::Sprite>();
+	fade_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/Image.dds");
+	fade_->SetPosition(position_);
+	fade_->SetAnchorPoint(uiAnchorPoint_);
+	fade_->SetTextureSize(uiSize_);
+	fade_->SetSize(uiSize_);
+	fade_->SetColor(uiColor_);
+
+}
+
+void GameStartUI::Update(float dt) {
+	if (isfade_) {
+		uiColor_.a += 2.0f * dt;
+		if (uiColor_.a >= 1.0f) {
+			uiColor_.a = 1.0f;
+		}
+	}
+	else {
+		uiColor_.a -= 2.0f * dt;
+		if (uiColor_.a <= 0.0f) {
+			uiColor_.a = 0.0f;
+		}
+	}
+
+	fade_->SetColor(uiColor_);
+	fade_->Update();
+}
+
+void GameStartUI::Draw() {
+	fade_->Draw();
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/GameStartUI.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/UI/Base/BaseUI.h"
+#include "DirectXGame/application/base/Game/Base/GameData.h"
+
+
+// 前方宣言
+namespace Character {
+	class BasePlayer;
+}
+
+/// <summary>
+/// ゲーム開始UI
+/// </summary>
+class GameStartUI : public BaseUI {
+public:
+	//初期化
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
+
+	//更新
+	void Update(float dt) override;
+
+	// 描画
+	void Draw() override;
+
+	// フェード開始
+	void IsFade() { isfade_ = true; }
+	// フェード
+	void IsNofade() { isfade_ = false; }
+private:
+	// フェード
+	std::unique_ptr<Engine::Sprite> fade_;
+private:
+	// 位置
+	Vector2 position_ = { 640, 360 };
+	Vector2 uiSize_ = { 1280,720 };
+	Vector2 uiAnchorPoint_ = { 0.5f,0.5f };
+	Color uiColor_ = { 1.0f,1.0f ,1.0f ,0.0f };
+	bool isfade_ = false;
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/UI/GameUI.cpp
 ============================================================
 #include "GameUI.h"
@@ -23947,8 +24205,7 @@ namespace Character {
 /// <summary>
 /// ゲームUIクラス
 /// </summary>
-class GameUI : public BaseUI
-{
+class GameUI : public BaseUI {
 public:
 	//初期化
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
@@ -24796,9 +25053,11 @@ File Path: project/DirectXGame/application/base/Weapon/Base/BaseWeapon.h
 
 
 // 前方宣言
-class Effect;
+class EffectSystem;
 class BulletManager;
 namespace Character {
+	class BasePlayer;
+	class BaseEnemy;
 	class BaseCharacter;
 }
 namespace Engine {
@@ -24849,6 +25108,8 @@ protected:
 	WeaponData data_;	// 武器データ
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
+	const Character::BaseCharacter* target = nullptr;			// ターゲット
+
 	BulletManager* bulletManager = nullptr;	// 弾管理クラス
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
@@ -25216,7 +25477,7 @@ public:
 	void Shoot();
 
 	// エフェクト設定
-	void SetEffect(Effect* effect) { this->effect = effect; };
+	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 
 	// モードタイプ設定
 	void SetModeType(ModeType mode) { modeType_ = mode; }
@@ -25241,7 +25502,7 @@ private:
 
 	ModeType modeType_ = ModeType::Normal;	// 弾のモード
 private:
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 	Character::BaseEnemy* target = nullptr;
 	Character::BasePlayer* player = nullptr;
 
@@ -25454,7 +25715,7 @@ public:
 		void Penetration();
 
 	// エフェクト設定
-	void SetEffect(Effect* effect) { this->effect = effect; };
+	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 private:
 	// 銃コンテナ
 	std::map<std::string, std::unique_ptr<BulletPlayerWeapon>> bulletWeapons_;
@@ -25469,7 +25730,7 @@ private:
 	Engine::EntityManager* entityManager = nullptr; // エンティティ管理クラス
 	InputSystem* inputSystem = nullptr;                     // 入力クラス
 	Character::BasePlayer* player = nullptr;
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 };
 
 ============================================================
@@ -25570,7 +25831,7 @@ void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManage
 void SmallRangeWeapon::Update()
 {
 	if (target) {
-		targetPos_ = target->GetObjectComponent()->GetWorldPosition();
+		targetPos_ = target->GetWorldPosition();
 	}
 	
 	objectComponent_->Update();
@@ -25599,7 +25860,7 @@ void SmallRangeWeapon::Shot()
 	}
 	
 	// 弾生成
-	enemy->GetBulletSpawn()->GenerateBullet(BulletType::kEnemyBullet, info);
+	character->GetBulletSpawn()->GenerateBullet(BulletType::kEnemyBullet, info);
 }
 
 
@@ -25608,12 +25869,6 @@ File Path: project/DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h
 ============================================================
 #pragma once
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-
-// 前方宣言
-namespace Character {
-	class BasePlayer;
-	class BaseEnemy;
-}
 
 class SmallRangeWeapon : public RangedWeapon
 {
@@ -25653,19 +25908,17 @@ public:
 	/// 狙うターゲット指定
 	/// </summary>
 	/// <param name="target"></param>
-	void SetTarget(Character::BasePlayer* target) { this->target = target; }
+	void SetTarget(const Character::BaseCharacter* target) { this->target = target; }
 
 	/// <summary>
-	/// プレイヤー設定
+	/// 所有者設定
 	/// </summary>
 	/// <param name="player"></param>
-	void SetParent(Character::BaseEnemy* player) { this->enemy = player; }
+	void SetParent(Character::BaseCharacter* player) { this->character = player; }
 
 
 private:
-	Character::BaseEnemy* enemy = nullptr;
-	Character::BasePlayer* target = nullptr;
-
+	
 
 	int maxTargetNum_ = 1;				// ターゲットの指定量
 	Vector3 targetPos_{ 0,0,0 };		// ターゲットの位置
@@ -25849,7 +26102,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// フォローカメラ
@@ -25898,20 +26151,12 @@ void CharacterDebugScene::Initialize()
 	else {
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
-
-
-	// レベルデータロード
-	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->SetCameraManager(cameraManager_.get());
-	loadData_->Initialize(GetEntityManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
-
-
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetDxCommon(), GetEntityManager(), followCamera_->GetUniqueCamera());
+	stage_->Initialize(GetEntityManager(), cameraManager_.get());
 
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
@@ -25920,8 +26165,7 @@ void CharacterDebugScene::Initialize()
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-
-
+	collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	collisionManager_->BuildStaticSceneOctree();
 
 	// カメラ設定
@@ -25951,6 +26195,7 @@ void CharacterDebugScene::Initialize()
 
 void CharacterDebugScene::Finalize(){
 	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	collisionManager_->Clear();
 }
 
 void CharacterDebugScene::Update()
@@ -26001,8 +26246,6 @@ void CharacterDebugScene::Update()
 	stage_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
-	// レベルデータアップデート
-	loadData_->Update();
 	// Effect更新
 	effect_->Update();
 }
@@ -26057,7 +26300,7 @@ void CharacterDebugScene::ApplyGlobalVariables() {
 /// 衝突判定と応答
 /// </summary>
 void CharacterDebugScene::CheckAllCollisions() {
-	for (auto objects : loadData_->GetObjects()) {
+	for (auto objects : stage_->GetLoadLevelData()->GetObjects()) {
 		if (objects->GetColliderComponent()) {
 			collisionManager_->Register(objects->GetColliderComponent());
 		}
@@ -26186,7 +26429,7 @@ private:
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 
 	// 
-	std::unique_ptr<Effect> effect_;
+	std::unique_ptr<EffectSystem> effect_;
 
 	// スペシャルポイント管理クラス
 	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
@@ -26198,17 +26441,12 @@ private:
 	std::unique_ptr<MainStage> stage_;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
-	// レベルデータ
-	std::unique_ptr<LoadLevelData> loadData_;
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
 private:
 	// ゲームUI
 	std::unique_ptr<GameUI> gameUI;
-
-
-
 private:
 	// コンボエディター
 	std::unique_ptr<Combo::Editor> comboEditor_;
@@ -26240,7 +26478,6 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.cpp
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 #pragma region Initialize
-
 // 初期化
 void GamePlayScene::Initialize()
 {
@@ -26282,7 +26519,7 @@ void GamePlayScene::Initialize()
 	inputSystem_->Initialize(GetInput());
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// フォローカメラ
@@ -26294,6 +26531,9 @@ void GamePlayScene::Initialize()
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
 	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	// ステージカメラ
+	stageCamera_ = std::make_unique<StageCamera>();
+	stageCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
@@ -26302,6 +26542,8 @@ void GamePlayScene::Initialize()
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager_->AddCamera({ stageCamera_.get(),false }, "stageCamera");
+
 
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
@@ -26318,7 +26560,7 @@ void GamePlayScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), nullptr);
+	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -26327,7 +26569,7 @@ void GamePlayScene::Initialize()
 
 	// ステージイベントマネージャー
 	gameFlowController_ = std::make_unique<GameFlowController>();
-	gameFlowController_->Initialize(GetSceneManager(), GetGlobalVariables(), characterManager_.get());
+	gameFlowController_->Initialize(GetSceneManager(),inputSystem_.get(), cameraManager_.get(), GetGlobalVariables(), characterManager_.get());
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
@@ -26337,28 +26579,13 @@ void GamePlayScene::Initialize()
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
 
-	// ステージコライダーシステム初期化
-	stageColliderSystem_ = std::make_unique<StageColliderSystem>();
-	stageColliderSystem_->Initialize(GetEntityManager()->Get3DLineCommon());
-	
-	// レベルデータロード
-	loadData_ = std::make_unique<LoadLevelData>();
-	loadData_->SetCameraManager(cameraManager_.get());
-	loadData_->Initialize(GetEntityManager(), GetDxCommon()->GetModelManager(), nullptr, "gameScene.json");
-	
-	for (auto& obj : loadData_->GetObjects()) {
-		stageColliderSystem_->AddObject(obj);
-	}
-	stageColliderSystem_->CreateCollider();
-	
-
 
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
 	// ステージ
 	stage_ = std::make_unique<MainStage>();
-	stage_->Initialize(GetDxCommon(), GetEntityManager(), followCamera_->GetUniqueCamera());
+	stage_->Initialize(GetEntityManager(), cameraManager_.get());
 	
 	RangeBombingSpecial* sp = static_cast<RangeBombingSpecial*>(characterManager_->GetPlayer()->GetSpecial());
 	sp->SetStage(stage_.get());
@@ -26367,9 +26594,7 @@ void GamePlayScene::Initialize()
 	Vector3 sizeAABB = { 300,25,300 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-
-	
-	collisionManager_->RegisterStatic(stageColliderSystem_->GetColliderComponent());
+	collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	// 静的Octreeコライダー
 	collisionManager_->BuildStaticSceneOctree();
 
@@ -26384,62 +26609,13 @@ void GamePlayScene::Initialize()
 
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
-	// エフェクトコンポーネント初期化
-	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(GetEntityManager(), GetGlobalVariables());
-
-
 	inputManager_->SetOwner(characterManager_->GetPlayer());
 }
 
-// 調整項目
-void GamePlayScene::ApplyGlobalVariables()
-{
-
-}
-
-void GamePlayScene::CheckAllCollisions()
-{
-	for (auto objects : loadData_->GetObjects()) {
-		if (objects->GetColliderComponent()) {
-			collisionManager_->Register(objects->GetColliderComponent());
-		}
-	}
-	// キャラクターセット
-	for (auto caracter : characterManager_->GetCharacters()) {
-		if (caracter->GetColliderComponent()) {
-			if (caracter->GetHP() <= 0) continue;
-			collisionManager_->Register(caracter->GetColliderComponent());
-			
-		}
-		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetData();
-		for (auto& caracterHitBox : hit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
-	}
-
-
-	// 弾のコライダー追加
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-
-	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
-		if (point->GetColliderComponent()) {
-			collisionManager_->Register(point->GetColliderComponent());
-		}
-	}
-
-	// 描画
-	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
-	// 判定チェック
-	collisionManager_->CheckAll();
-	// 動的コライダー削除
-	collisionManager_->ClearDynamic();
-	
+// 終了
+void GamePlayScene::Finalize() {
+	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	collisionManager_->Clear();
 }
 
 #pragma endregion 初期化関係
@@ -26508,16 +26684,10 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 
-	
-	stageColliderSystem_->Update();
 	// キャラクターマネージャー更新
 	characterManager_->Update();
-
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());
-
-	
-
 	// カメラ管理の更新
 	cameraManager_->Update();
 	// 弾マネージャ
@@ -26526,8 +26696,6 @@ void GamePlayScene::Update()
 	stage_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
-	// レベルデータアップデート
-	loadData_->Update();
 	// Effect更新
 	effect_->Update();
 	// ゲーム進行マネージャー更新
@@ -26540,8 +26708,7 @@ void GamePlayScene::Update()
 
 #pragma endregion //更新関係
 
-// 終了
-void GamePlayScene::Finalize(){}
+
 
 // 3D描画
 void GamePlayScene::Draw3D(){
@@ -26559,8 +26726,51 @@ void GamePlayScene::Draw2D(){
 	characterManager_->Draw2D();
 	// 弾マネージャ
 	bulletManager_->Draw2D();
+	// ゲーム進行UI
+	gameFlowController_->Draw2D();
 }
 
+// 調整項目
+void GamePlayScene::ApplyGlobalVariables() {}
+
+void GamePlayScene::CheckAllCollisions()
+{
+	// キャラクターセット
+	for (auto caracter : characterManager_->GetCharacters()) {
+		if (caracter->GetColliderComponent()) {
+			if (caracter->GetHP() <= 0) continue;
+			collisionManager_->Register(caracter->GetColliderComponent());
+
+		}
+		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetData();
+		for (auto& caracterHitBox : hit) {
+			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
+		}
+	}
+
+
+	// 弾のコライダー追加
+	for (const auto& bullet : bulletManager_->GetBullets()) {
+		if (bullet->GetColliderComponent()) {
+			collisionManager_->Register(bullet->GetColliderComponent());
+		}
+	}
+
+	// SPポイントのコライダー追加
+	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
+		if (point->GetColliderComponent()) {
+			collisionManager_->Register(point->GetColliderComponent());
+		}
+	}
+
+	// 描画
+	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
+	// 判定チェック
+	collisionManager_->CheckAll();
+	// 動的コライダー削除
+	collisionManager_->ClearDynamic();
+
+}
 
 
 ============================================================
@@ -26579,6 +26789,7 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.h
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/StageCamera.h"
 
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
@@ -26647,39 +26858,36 @@ private:
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
 private:
 	//追従カメラ
-	std::unique_ptr<FollowCamera> followCamera_;
+	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
 	// 宇宙カメラ
-	std::unique_ptr<UniverseCamera> universeCamera_;
+	std::unique_ptr<UniverseCamera> universeCamera_ = nullptr;
 	// 固定カメラ
-	std::unique_ptr <FixedCamera> fixedCamera_;
+	std::unique_ptr <FixedCamera> fixedCamera_ = nullptr;
+	// ステージカメラ
+	std::unique_ptr<StageCamera> stageCamera_ = nullptr;
+
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_;
-	
-	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
-
-	// 
-	std::unique_ptr<Effect> effect_;
-
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+	// エフェクト
+	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// スペシャルポイント管理クラス
 	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
 
 private:
 	// キャラクター管理
-	std::unique_ptr<Character::CharacterManager> characterManager_;
+	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
 	// ステージ
-	std::unique_ptr<MainStage> stage_;
+	std::unique_ptr<MainStage> stage_ = nullptr;
 	// 弾
-	std::unique_ptr<BulletManager> bulletManager_;
-	// レベルデータ
-	std::unique_ptr<LoadLevelData> loadData_;
+	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
 private:
 	// 衝突マネージャ
-	std::unique_ptr<Engine::CollisionManager> collisionManager_;
-	// ステージコライダーシステム
-	std::unique_ptr<StageColliderSystem> stageColliderSystem_;
+	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
 private:
 	// ゲームUI
-	std::unique_ptr<GameUI> gameUI;
+	std::unique_ptr<GameUI> gameUI = nullptr;
+	//
+
 };
 
 
@@ -26718,12 +26926,12 @@ void ResultScene::Initialize() {
 	SetCamera(cameraManager_->GetCamera());
 
 	// エフェクト初期化
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ初期化
 	resultStage_ = std::make_unique<ResultStage>();
-	resultStage_->Initialize(GetEntityManager(), GetGlobalVariables(), GetCamara());
+	resultStage_->Initialize(GetEntityManager(), cameraManager_.get());
 	resultStage_->SetEffect(effect_.get());
 
 	// リザルトUI初期化
@@ -26821,7 +27029,7 @@ private:
 	// インプットシステム
 	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
 	// エフェクト
-	std::unique_ptr<Effect> effect_;
+	std::unique_ptr<EffectSystem> effect_;
 	// カメラ管理
 	std::unique_ptr<CameraManager> cameraManager_;
 	// リザルトカメラ
@@ -27292,12 +27500,12 @@ void SelectScene::Initialize() {
 
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ生成
 	selectStage_ = std::make_unique<SelectStage>();
-	selectStage_->Initialize(GetEntityManager(), GetGlobalVariables(), GetCamara());
+	selectStage_->Initialize(GetEntityManager(), cameraManager_.get());
 	selectStage_->SetEffect(effect_.get());
 	selectStage_->GetPlayerCar()->GetStateMachine()->ChangeState(CarMainState::SelectMove);
 	// UI生成
@@ -27405,7 +27613,7 @@ private:
 	// セレクトカメラ
 	std::unique_ptr<SelectCamera> selectCamera_ = nullptr;
 	// エフェクト
-	std::unique_ptr<Effect> effect_ = nullptr;
+	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// セレクトシーンの管理クラス
 	std::unique_ptr<SelectSystem> selectSystem_ = nullptr;
 	// インプットシステム
@@ -28149,12 +28357,12 @@ void TitleScene::Initialize()
 	GetSceneData().playerID = 1;
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
-	titleStage_->Initialize(GetDxCommon(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	titleStage_->Initialize( GetEntityManager(),cameraManager_.get());
 	titleStage_->SetEffect(effect_.get());
 
 	// UI
@@ -28326,7 +28534,7 @@ private:
 	// レベルデータ
 	std::unique_ptr<LoadLevelData> loadData_;
 	// エフェクト
-	std::unique_ptr<Effect> effect_;
+	std::unique_ptr<EffectSystem> effect_;
 	// カメラ管理
 	std::unique_ptr<CameraManager> cameraManager_;
 	// タイトルシーン用カメラ
@@ -36176,7 +36384,8 @@ public:
 	// ライト取得
 	std::vector< std::shared_ptr<Engine::Lights>>GetLights() { return lights_; }
 
-
+	// データクリア
+	void ClearData();
 private:
 	// オブジェクト3D生成
 	void CreateObject3d(LevelData* levelData);
@@ -36184,10 +36393,6 @@ private:
 	void CreateCamera(LevelData* levelData);
 	// ライト生成
 	void CreateLight(LevelData* levelData);
-
-	// データクリア
-	void ClearData();
-
 private:
 	Engine::EntityManager* entityManager = nullptr;
 	Engine::ModelManager* modelManager = nullptr;
@@ -40457,10 +40662,8 @@ void Engine::CollisionManager::RegisterStatic(ColliderComponent* comp)
 }
 
 void Engine::CollisionManager::Clear(){
-	dynamicColliders.clear();
-	staticColliders.clear();
-	registeredDynamic_.clear();
-	registeredStatic_.clear();
+	ClearDynamic();
+	ClearStatic();
 }
 
 void Engine::CollisionManager::CheckAll() {
@@ -40726,7 +40929,8 @@ void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider*
 	}
 	if (other->owner) {
 		auto* otherComp = reinterpret_cast<ColliderComponent*>(other->owner);
-		if (otherComp && otherComp->onHitCallback) {
+		if (otherComp) {
+			if(otherComp->onHitCallback)
 			otherComp->onHitCallback(other, self);
 		};
 	}
@@ -41133,6 +41337,10 @@ namespace Engine {
         OctreeCollider(const AABB& bounds, int maxDepth = 4, int divX = 2, int divY = 2, int divZ = 2)
             : maxDepth(maxDepth), divX(divX), divY(divY), divZ(divZ) {
             root = std::make_unique<OctreeColliderNode>(bounds, 0);
+        }
+
+        ~OctreeCollider() {
+            Clear();
         }
 
         // クリア
@@ -58505,8 +58713,8 @@ void Engine::MyGame::Initialize()
 #ifdef _DEBUG
 	//sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	//sceneManager_->ChangeScene("TITLE");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -62528,6 +62736,18 @@ namespace Engine {
 		// 1フレーム前ワールド座標取得
 		Vector3 GetPreWorldPosition() const {
 			return worldPreMat_.GetWorldPosition();
+		}
+
+		// 向いている方向取得
+		Vector3 GetForward() const {
+			Matrix4x4 rotMat = MakeRotateXYZ(rotate_);
+
+			// Z軸がForward
+			return Vector3{
+				rotMat.m[2][0],
+				rotMat.m[2][1],
+				rotMat.m[2][2]
+			};
 		}
 
 	public:
@@ -68361,7 +68581,7 @@ struct Vector2 final {
 		return result;
 	};
 	// 長さ
-	float Length() {
+	float Length() const{
 		float result;
 
 		result = sqrtf((x * x) + (y * y));
@@ -69186,10 +69406,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp" />
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCarState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCarStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterContext.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
@@ -69207,6 +69429,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp" />
@@ -69232,6 +69455,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPoint.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Stage\BaseStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\ResultStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp" />
@@ -69244,6 +69468,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\UI\ResultUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\TitleUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\GameStartUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
     <ClCompile Include="DIRECTXGAME\APPLICATION\BASE\WEAPON\ENEMY\SmallMeleeWeapon.cpp" />
@@ -69871,10 +70096,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\TitleCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCar.h" />
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCarState.h" />
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCarStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterContext.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
@@ -69893,6 +70120,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h" />
@@ -69936,6 +70164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPoint.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointState.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Point\SpecialPointStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Stage\BaseStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\ResultStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\SelectStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\StageColliderSystem.h" />
@@ -69949,6 +70178,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />
     <ClInclude Include="DirectXGame\application\base\UI\FpsUI.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\GameStartUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\SelectUI.h" />
     <ClInclude Include="DirectXGame\application\base\UI\TitleUI.h" />
@@ -71140,6 +71370,21 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Stage\BaseStage.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterContext.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\GameStartUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72370,6 +72615,21 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\StageColliderSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Stage\BaseStage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterContext.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\GameStartUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
