@@ -1,65 +1,48 @@
 #pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
-
-
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
-
-// 前方宣言
-namespace Engine {
-	class DirectXCommon;
-	class EntityManager;
-	class GlobalVariables;
-}
-class Effect;
-
+#include "BaseStage.h"
 
 /// <summary>
 /// タイトルシーンステージ
 /// </summary>
-class TitleStage {
+class TitleStage : public BaseStage {
 public:
 	// 初期化
-	void Initialize(Engine::DirectXCommon* dxcommon, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
 	// 更新
-	void Update(float dt);
+	void Update(float dt) override;
 
 	///< summary>
 	/// 描画
 	///</summary>
-	void Draw();
+	void Draw() override {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	void DrawP();
+	void DrawEffect() override {};
 
 	/// <summary>
 	/// 描画2d
 	/// </summary>
-	void Draw2D();
+	void Draw2D() override {};
+private:
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
+	void InitEmit() {};
 
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
+	void EmitUpdate() {};
+
+public:
 	/// <summary>
 	/// エフェクト
 	/// </summary>
 	/// <param name="effect"></param>
-	void SetEffect(Effect* effect) {
+	void SetEffect(EffectSystem* effect) {
 		this->effect = effect;
 		playerCar_->SetEffect(effect);
 	}
@@ -70,50 +53,21 @@ public:
 	/// <returns></returns>
 	PlayerCar* GetPlayerCar() { return playerCar_.get(); }
 private:
-	/// <summary>
-	/// エミッター初期化
-	/// </summary>
-	void InitEmit();
-
-	/// <summary>
-	/// エミッター更新
-	/// </summary>
-	void EmitUpdate();
-
 	//
 	void InitializeStone();
 private:
-	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::Camera* camera = nullptr;
-	// エフェクト
-	Effect* effect = nullptr;
-private:
-	// 空
-	Engine::Object3d* sky_;
-	// スカイボックス
-	std::unique_ptr<Engine::SkyBox> skyBox;
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-	std::shared_ptr<Engine::PointLight> pointLight;
 	// タイル
 	Engine::Object3d* tail;
-
-
 	// 石
 	Engine::Object3d* stone1_;
 	Engine::Object3d* stone2_;
 	Engine::Object3d* stone3_;
 	Engine::Object3d* stone4_;
 	Engine::Object3d* stone5_;
-
-	
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
 	// 位置
 	Vector3 playerCarPos_ = { -1.25f,0.05f,12.0f };
-
 private:
 	struct ProvisionalData {
 		Vector3 oceanTranslate = { 0, -30, 0 };

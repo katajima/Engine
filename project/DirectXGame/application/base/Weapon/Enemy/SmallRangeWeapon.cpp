@@ -21,7 +21,7 @@ void SmallRangeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManage
 void SmallRangeWeapon::Update()
 {
 	if (target) {
-		targetPos_ = target->GetObjectComponent()->GetWorldPosition();
+		targetPos_ = target->GetWorldPosition();
 	}
 	
 	objectComponent_->Update();
@@ -50,5 +50,5 @@ void SmallRangeWeapon::Shot()
 	}
 	
 	// 弾生成
-	enemy->GetBulletSpawn()->GenerateBullet(BulletType::kEnemyBullet, info);
+	character->GetBulletSpawn()->GenerateBullet(BulletType::kEnemyBullet, info);
 }

@@ -8,13 +8,13 @@ namespace Character {
 	Vector3 BaseEnemy::GetTargetPos()
 	{
 		// ターゲット位置
-		return target_->GetObjectComponent()->GetWorldTransform().GetWorldPosition();
+		return GetTarget()->GetWorldPosition();
 	}
 
 	float BaseEnemy::GetTargetDistance()
 	{
 		// ターゲットとの距離
-		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(target_->GetObjectComponent()->GetWorldTransform().GetWorldPosition());
+		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(GetTarget()->GetWorldPosition());
 	}
 
 	Vector3 BaseEnemy::TargetDirection()
@@ -22,45 +22,6 @@ namespace Character {
 		// ターゲットの方向
 		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 	}
-
-	void BaseEnemy::TargetMove(const Vector3 velocity)
-	{
-		Vector3 move = velocity * GetTime();
-		GetWorldTransform().translate_ += move;
-	}
-
-	void BaseEnemy::DirectionMoveVelocity(float speed)
-	{
-		// 距離
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-
-		// 回転設定
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
-
-		// 速度設定
-		Velocity() = dire * speed;
-	}
-
-	void BaseEnemy::DirectionMove(float speed)
-	{
-		// 距離設定
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-		// 回転設定
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
-
-
-		Vector3 move = dire * speed * GetTime();
-
-		GetWorldTransform().translate_ += move;
-	}
-
-
 
 #pragma region
 
@@ -157,14 +118,17 @@ namespace Character {
 		// 攻撃応答システムクラス初期化
 		responseSystem_ = std::make_unique<ResponseSystem>();
 		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
-		responseSystem_->GetHitResponse()->SetOwner(&objectComponent_->GetWorldTransform());
-
+		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;
 
 		// 戦闘
 		attackController_ = std::make_unique<AttackController>();
 		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
+
+		// コンテキストシステム
+		contextSystem_ = std::make_unique<CharacterContextSystem>();
+		contextSystem_->Initialize(this, inputSystem);
 
 		// 丸影用オブジェクトコンポーネント初期化
 		InitShadowObjectComponent(charaName);
@@ -177,6 +141,8 @@ namespace Character {
 
 		if (GetObjectComponent() == nullptr) { return; }
 		assert(this);
+
+		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
 
 		// 保存項目更新(キャラクター全体)
 		UpdateBaseGetValue();
@@ -195,7 +161,7 @@ namespace Character {
 		}
 		else {
 			// 移動コンポーネント更新
-			moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(), nullptr);
+			moveComponent_->Update(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(),ctx);
 			// 応答システム
 			responseSystem_->Update(GetTime());
 
@@ -208,5 +174,15 @@ namespace Character {
 		objectComponentShadow_->Update();
 	}
 	
-#pragma endregion // 基本処理
+#pragma endregion 
+
+
+	const BaseCharacter* BaseEnemy::GetTarget() {
+		return GetAttackController()->GeyLockOnSysutem()->GetTarget();
+	}
+
+	void BaseEnemy::SetTargetCharacters(BaseCharacter* target) {
+		GetAttackController()->GeyLockOnSysutem()->SetTargets({target});
+	}
+	
 }

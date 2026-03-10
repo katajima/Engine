@@ -54,7 +54,7 @@ namespace Character {
 
 
 		// ターゲットキャラクターを設定
-		void SetTargetCharacters(const std::vector<BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
+		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
 
 		// リロード
 		virtual void Reload() {};
@@ -75,7 +75,7 @@ namespace Character {
 		bool GetIsSpecial() const { return special_->GetIsSpecial(); }
 
 	protected:
-		std::vector<BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
+		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
 		FollowCamera* followCamera = nullptr;					// フォローカメラ
 		bool isCreativeMode = false;							// クリエイティブモードかどうか
 	};

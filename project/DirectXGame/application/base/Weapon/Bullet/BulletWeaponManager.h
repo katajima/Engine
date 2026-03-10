@@ -71,7 +71,7 @@ public:
 		void Penetration();
 
 	// エフェクト設定
-	void SetEffect(Effect* effect) { this->effect = effect; };
+	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 private:
 	// 銃コンテナ
 	std::map<std::string, std::unique_ptr<BulletPlayerWeapon>> bulletWeapons_;
@@ -86,5 +86,5 @@ private:
 	Engine::EntityManager* entityManager = nullptr; // エンティティ管理クラス
 	InputSystem* inputSystem = nullptr;                     // 入力クラス
 	Character::BasePlayer* player = nullptr;
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 };

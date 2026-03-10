@@ -19,17 +19,19 @@ public:
 	void Initialize(Character::BaseCharacter* owner);
 
 	// ロックオン相手を選別
-	Character::BaseCharacter* SoftLockOn();
+	const Character::BaseCharacter* SoftLockOn() const;
+	// ターゲット取得
+	const Character::BaseCharacter* GetTarget() const;
 public:
 
 	// ターゲット指定
-	void SetTargets(const std::vector<Character::BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; };
+	void SetTargets(const std::vector<const Character::BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; };
 
 	// ロックオンデータ取得
 	LockOnData& GetData() { return data_; }
 
 	// 所有者の位置取得
-	Vector3 GetOwnerPos();
+	Vector3 GetOwnerPos() const;
 
 	// 当てた相手のタグを設定
 	void SetHitTag(uint32_t tag) { hitTag = tag; }
@@ -39,21 +41,21 @@ public:
 
 private:
 	// 範囲内の近くの相手を取得
-	Character::BaseCharacter* GetNearLockOn();
+	const Character::BaseCharacter* GetNearLockOn() const;
 	// 最後に当てた相手を取得
-	Character::BaseCharacter* GetHitLockOn();
+	const Character::BaseCharacter* GetHitLockOn() const;
 
 	float CalcSoftLockScore(
 		const Vector3& playerPos,
 		const Vector3& aimDir,
-		Character::BaseCharacter* enemy);
+		const Character::BaseCharacter* enemy) const;
 private:
 	// 所有者
 	Character::BaseCharacter* owner = nullptr;
 	// カメラマネージャー
 	CameraManager* cameraManager = nullptr;
 	// 攻撃対象キャラクターリスト
-	std::vector<Character::BaseCharacter*> targetCharacters;
+	std::vector<const Character::BaseCharacter*> targetCharacters;
 private:
 	// ロックオンデータ
 	LockOnData data_;

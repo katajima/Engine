@@ -66,7 +66,7 @@ public:
 	void Shoot();
 
 	// エフェクト設定
-	void SetEffect(Effect* effect) { this->effect = effect; };
+	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 
 	// モードタイプ設定
 	void SetModeType(ModeType mode) { modeType_ = mode; }
@@ -91,7 +91,7 @@ private:
 
 	ModeType modeType_ = ModeType::Normal;	// 弾のモード
 private:
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 	Character::BaseEnemy* target = nullptr;
 	Character::BasePlayer* player = nullptr;
 

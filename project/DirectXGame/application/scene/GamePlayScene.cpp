@@ -12,7 +12,6 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 #pragma region Initialize
-
 // 初期化
 void GamePlayScene::Initialize()
 {
@@ -54,7 +53,7 @@ void GamePlayScene::Initialize()
 	inputSystem_->Initialize(GetInput());
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// フォローカメラ
@@ -66,6 +65,9 @@ void GamePlayScene::Initialize()
 	// 固定カメラ
 	fixedCamera_ = std::make_unique<FixedCamera>();
 	fixedCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
+	// ステージカメラ
+	stageCamera_ = std::make_unique<StageCamera>();
+	stageCamera_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), {});
 
 	// カメラ管理
 	cameraManager_ = std::make_unique<CameraManager>();
@@ -74,6 +76,8 @@ void GamePlayScene::Initialize()
 	cameraManager_->AddCamera({ followCamera_.get(),true }, "followCamera");
 	cameraManager_->AddCamera({ universeCamera_.get(),false }, "universeCamera");
 	cameraManager_->AddCamera({ fixedCamera_.get(),false }, "fixedCamera");
+	cameraManager_->AddCamera({ stageCamera_.get(),false }, "stageCamera");
+
 
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
@@ -90,7 +94,7 @@ void GamePlayScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), nullptr);
+	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -99,7 +103,7 @@ void GamePlayScene::Initialize()
 
 	// ステージイベントマネージャー
 	gameFlowController_ = std::make_unique<GameFlowController>();
-	gameFlowController_->Initialize(GetSceneManager(), GetGlobalVariables(), characterManager_.get());
+	gameFlowController_->Initialize(GetSceneManager(),inputSystem_.get(), cameraManager_.get(), GetGlobalVariables(), characterManager_.get());
 
 	// プレイヤー生成
 	if (GetSceneData().playerID == 1) {
@@ -124,9 +128,9 @@ void GamePlayScene::Initialize()
 	Vector3 sizeAABB = { 300,25,300 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
+	collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	// 静的Octreeコライダー
-	//collisionManager_->BuildStaticSceneOctree();
+	collisionManager_->BuildStaticSceneOctree();
 
 
 	// UI
@@ -139,62 +143,13 @@ void GamePlayScene::Initialize()
 
 	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
 
-	// エフェクトコンポーネント初期化
-	effectComponent_ = std::make_unique<Engine::EffectComponent>();
-	effectComponent_->Init(GetEntityManager(), GetGlobalVariables());
-
-
 	inputManager_->SetOwner(characterManager_->GetPlayer());
 }
 
-// 調整項目
-void GamePlayScene::ApplyGlobalVariables()
-{
-
-}
-
-void GamePlayScene::CheckAllCollisions()
-{
-	for (auto objects : stage_->GetLoadLevelData()->GetObjects()) {
-		if (objects->GetColliderComponent()) {
-	//		collisionManager_->Register(objects->GetColliderComponent());
-		}
-	}
-	// キャラクターセット
-	for (auto caracter : characterManager_->GetCharacters()) {
-		if (caracter->GetColliderComponent()) {
-			if (caracter->GetHP() <= 0) continue;
-			collisionManager_->Register(caracter->GetColliderComponent());
-			
-		}
-		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetData();
-		for (auto& caracterHitBox : hit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
-	}
-
-
-	// 弾のコライダー追加
-	for (const auto& bullet : bulletManager_->GetBullets()) {
-		if (bullet->GetColliderComponent()) {
-			collisionManager_->Register(bullet->GetColliderComponent());
-		}
-	}
-
-	// SPポイントのコライダー追加
-	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
-		if (point->GetColliderComponent()) {
-			collisionManager_->Register(point->GetColliderComponent());
-		}
-	}
-
-	// 描画
-	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
-	// 判定チェック
-	collisionManager_->CheckAll();
-	// 動的コライダー削除
-	collisionManager_->ClearDynamic();
-	
+// 終了
+void GamePlayScene::Finalize() {
+	GetEntityManager()->GetObject3dInstansManager()->AllClear();
+	collisionManager_->Clear();
 }
 
 #pragma endregion 初期化関係
@@ -287,11 +242,7 @@ void GamePlayScene::Update()
 
 #pragma endregion //更新関係
 
-// 終了
-void GamePlayScene::Finalize(){
-	GetEntityManager()->GetObject3dInstansManager()->AllClear();
-	collisionManager_->Clear();
-}
+
 
 // 3D描画
 void GamePlayScene::Draw3D(){
@@ -309,5 +260,48 @@ void GamePlayScene::Draw2D(){
 	characterManager_->Draw2D();
 	// 弾マネージャ
 	bulletManager_->Draw2D();
+	// ゲーム進行UI
+	gameFlowController_->Draw2D();
 }
 
+// 調整項目
+void GamePlayScene::ApplyGlobalVariables() {}
+
+void GamePlayScene::CheckAllCollisions()
+{
+	// キャラクターセット
+	for (auto caracter : characterManager_->GetCharacters()) {
+		if (caracter->GetColliderComponent()) {
+			if (caracter->GetHP() <= 0) continue;
+			collisionManager_->Register(caracter->GetColliderComponent());
+
+		}
+		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetData();
+		for (auto& caracterHitBox : hit) {
+			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
+		}
+	}
+
+
+	// 弾のコライダー追加
+	for (const auto& bullet : bulletManager_->GetBullets()) {
+		if (bullet->GetColliderComponent()) {
+			collisionManager_->Register(bullet->GetColliderComponent());
+		}
+	}
+
+	// SPポイントのコライダー追加
+	for (const auto& point : specalPointManager_->GetSpecalPoints()) {
+		if (point->GetColliderComponent()) {
+			collisionManager_->Register(point->GetColliderComponent());
+		}
+	}
+
+	// 描画
+	collisionManager_->DrawLine(GetEntityManager()->Get3DLineCommon());
+	// 判定チェック
+	collisionManager_->CheckAll();
+	// 動的コライダー削除
+	collisionManager_->ClearDynamic();
+
+}

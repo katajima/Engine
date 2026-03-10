@@ -29,6 +29,8 @@ public:
 
 	Engine::ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); }
 private:
+	void DebugImGui();
+private:
 	std::vector<Engine::Object3d*> objects;
 	std::unique_ptr<Engine::ColliderComponent> colliderComponent_;
 	Engine::LineCommon* lineCommon;

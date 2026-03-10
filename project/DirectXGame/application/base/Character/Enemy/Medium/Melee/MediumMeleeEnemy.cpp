@@ -20,11 +20,11 @@ namespace Character {
 
 		// パラメーター初期化
 		parameterComponent_->parameters_->HP.Initiaize(50, 0, 50, 0);
-		parameterComponent_->parameters_->speed = 10.0f;
+		parameterComponent_->parameters_->speed = 5.0f;
 		parameterComponent_->parameters_->strength = 10.0f;
 
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-
+		moveSpeed_ = Parameters()->speed;
 		// スプライト初期化
 		Initialize2D();
 		// パーティクル初期化
@@ -84,21 +84,28 @@ namespace Character {
 
 	void MediumMeleeEnemy::Move()
 	{
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
+
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
+			Parameters()->speed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				DirectionMove(-globalData_.retreatSpeed);
+				Parameters()->speed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			// 移動
-			DirectionMove(Parameters()->speed);
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 

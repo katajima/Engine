@@ -410,7 +410,7 @@ namespace Combo {
 
 	void EditorBlock::ApplyComboDataToState() {
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->GetComboData();
+		ComboData& comboData = state->Data();
 		// ステートの時間設定
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 	}
@@ -418,7 +418,7 @@ namespace Combo {
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->GetComboData();
+		ComboData& comboData = state->Data();
 
 		// コンボ入力可能時間
 		float inputStart = comboData.GetComboCondition().GetNextReceiver().GetInputStart();

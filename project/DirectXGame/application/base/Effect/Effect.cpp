@@ -2,16 +2,13 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 
-void Effect::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
+void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {
 	this->entityManager = entityManager;	// エンティティ3d
 	this->globalVariables = globalVariables;	// 保存項目追加
-
-
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(entityManager, globalVariables);
-
 	// パーティクル初期化
 	InitParticle();
 	// 範囲弾パーティクル初期化 
@@ -23,7 +20,7 @@ void Effect::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVari
 }
 
 
-void Effect::InitParticle(){
+void EffectSystem::InitParticle(){
 
 	effectComponent_->AddEmitter("starEmit","hitStar",EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("starEmit");
@@ -141,7 +138,7 @@ void Effect::InitParticle(){
 
 }
 
-void Effect::InitRangeBombingBullet()
+void EffectSystem::InitRangeBombingBullet()
 {
 
 	effectComponent_->AddEmitter("missileHitCylinder", "missileHitCylinder", EmitterShapeType::POINT);
@@ -302,7 +299,7 @@ void Effect::InitRangeBombingBullet()
 	hitEmitter_->SetIsEmit(false);
 }
 
-void Effect::InitBullet()
+void EffectSystem::InitBullet()
 {
 	effectComponent_->AddEmitter("bulletSmoke", "smokePlane03_2", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("bulletSmoke");
@@ -344,7 +341,7 @@ void Effect::InitBullet()
 
 }
 
-void Effect::InitScrap() {
+void EffectSystem::InitScrap() {
 
 	effectComponent_->AddEmitter("scrapTire", "scrapTire", EmitterShapeType::AABB);
 	Engine::AABBParticleEmitter* scrapTireEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapTire");
@@ -430,12 +427,14 @@ void Effect::InitScrap() {
 
 }
 
-void Effect::Update() {
+void EffectSystem::Update() {
 	// 更新
 	effectComponent_->Update();
 }
 
-void Effect::Emit(const std::string& name, const Vector3& pos)
+#pragma region Emit
+
+void EffectSystem::Emit(const std::string& name, const Vector3& pos)
 {
 	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
 	
@@ -448,7 +447,7 @@ void Effect::Emit(const std::string& name, const Vector3& pos)
 	emit->SetIsEmit(false); // 出さない
 }
 
-void Effect::Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range) {
+void EffectSystem::Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range) {
 	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
 	assert(emit != nullptr);
 	// 出現
@@ -461,3 +460,4 @@ void Effect::Emit(const std::string& name, const Vector3& pos, const Vector3& di
 	emit->SetIsEmit(false); // 出さない
 }
 
+#pragma endregion // 出現

@@ -48,7 +48,7 @@ private:
 	// レベルデータ
 	std::unique_ptr<LoadLevelData> loadData_;
 	// エフェクト
-	std::unique_ptr<Effect> effect_;
+	std::unique_ptr<EffectSystem> effect_;
 	// カメラ管理
 	std::unique_ptr<CameraManager> cameraManager_;
 	// タイトルシーン用カメラ

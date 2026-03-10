@@ -36,10 +36,11 @@ namespace Character {
 		virtual void Jump() = 0;
 		// 攻撃
 		virtual void Attack() = 0;
-		// プレイヤー設定
-		void SetTarget(BasePlayer* target) { target_ = target; }// プレイヤ設定
 		// ターゲット取得
-		BasePlayer* GetTarget() { return target_; } // ターゲット取得
+		const BaseCharacter* GetTarget();
+
+		void SetTargetCharacters(BaseCharacter* target);
+
 
 	public:
 		// パーティクル発生
@@ -55,15 +56,9 @@ namespace Character {
 		Vector3 GetTargetPos();
 		// 対象との距離(プレイヤー)
 		float GetTargetDistance();
-		// 移動方向＋移動
-		void DirectionMoveVelocity(float speed);
-		// 移動向き
-		void DirectionMove(float speed);
 		// ターゲット方向取得
 		Vector3 TargetDirection();
-		//
-		void TargetMove(const Vector3 velocity);
-
+		
 
 		// ロックオンされているか
 		bool GetIsLockOn() const { return isLockOn_; }
@@ -108,7 +103,6 @@ namespace Character {
 	protected: //2D
 		std::unique_ptr<Engine::Sprite> icon_lockOn;
 	protected:
-		BasePlayer* target_;
 		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
 		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 		bool isLockOn_ = false; // ロックオンされているか

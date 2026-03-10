@@ -5,7 +5,7 @@
 #include <DirectXGame/engine/Math/Random.h>
 
 // 前方宣言
-class Effect;
+class EffectSystem;
 class BaseSpecial;
 class BaseWeapon;
 class BulletManager;

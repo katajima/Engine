@@ -8,7 +8,7 @@ namespace Engine {
 /// <summary>
 /// エフェクトクラス
 /// </summary>
-class Effect {
+class EffectSystem {
 public:
 	// 初期化
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
@@ -18,7 +18,6 @@ public:
 	void Emit(const std::string& name, const Vector3& pos);
 	// 出現(方向付き)
 	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
-
 private:
 	// パーティクル初期化
 	void InitParticle();

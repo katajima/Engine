@@ -6,16 +6,11 @@
 
 namespace Character {
 	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera)
-	{
-		this->inputSystem = inputSystem;						// インプット
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
+		this->inputSystem = inputSystem;		// インプット
 		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables; // 保存項目
 		this->camera = camera;					// カメラ
-
-		// 群衆AI
-		crowdManager_ = std::make_unique<CrowdManager>();
-		crowdManager_->CreateGroup();
 	}
 
 	void CharacterManager::Update()
@@ -38,14 +33,14 @@ namespace Character {
 		}
 
 		// キャラクター更新(敵)
-		std::vector<BaseCharacter*> target;
+		std::vector<const BaseCharacter*> target;
 		for (auto& character : character_) {
-			if (character->GetCharacterType() == Type::Enemy) {
-				if (character) {
+			if (character) {
+				if (character->GetCharacterType() == Type::Enemy) {
 					character->Update();
-
-
-					target.push_back(character.get());
+					if (character->GetAlive()) {
+						target.push_back(character.get());
+					}
 				}
 			}
 		}
@@ -83,7 +78,7 @@ namespace Character {
 		{
 			{ EnemyType::kSmallMelee,   []() { return std::make_unique<SmallMeleeEnemy>(); } },
 			{ EnemyType::kSmallRanged,   []() { return std::make_unique<SmallRangeEnemy>(); } },
-		
+
 			{ EnemyType::kMediumMelee,   []() { return std::make_unique<MediumMeleeEnemy>(); } },
 
 			{ EnemyType::kDummy,   []() { return std::make_unique<DummyEnemy>(); } },
@@ -99,9 +94,9 @@ namespace Character {
 		enemy->SetID(characterCount_);					// ID設定
 		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
-		enemy->SetTarget(GetPlayer());					// ターゲット指定
 		enemy->SetEffect(effect);						// エフェクト設定
-		enemy->Initialize(nullptr, entityManager,globalVariables, transform.translate, camera); // 初期化
+		enemy->Initialize(nullptr, entityManager, globalVariables, transform.translate, camera); // 初期化
+		enemy->SetTargetCharacters(GetPlayer());					// ターゲット指定
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
 		enemy->GetObjectComponent()->GetWorldTransform().translate_ = transform.translate;	// 位置指定
 		enemy->GetObjectComponent()->GetWorldTransform().rotate_ = transform.rotate;		// 回転指定
@@ -128,29 +123,13 @@ namespace Character {
 		characterCount_++;
 	}
 
-	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb)
-	{
-
-		// グループId
-		int groupId = crowdManager_->CreateGroup();
-		crowdManager_->groups[groupId].Initialize(origin);
-
+	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb) {
 		// 敵を出現させる
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
 			pos.y = 0.0f;
-			CreateCharacter(enemyType, "enemy", groupId, Transform{ {1,1,1}, {},pos });
+			CreateCharacter(enemyType, "enemy", {}, Transform{ {1,1,1}, {},pos });
 		}
-
-		// 群衆管理クラスに追加
-		std::vector<BaseEnemy*> enemys;
-		for (auto& character : character_) {
-			if (character->GetCharacterType() == Type::Enemy) {
-				enemys.push_back(static_cast<BaseEnemy*>(character.get()));
-			}
-		}
-
-		crowdManager_->BindAgentsToEnemies(enemys);
 	}
 
 	void CharacterManager::Clear(Type type) {

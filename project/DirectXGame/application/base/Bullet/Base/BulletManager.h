@@ -46,7 +46,7 @@ public: // 取得or設定
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
 		
 	// エフェクトの設定
-	void SetEffect(Effect* effect) { this->effect = effect; }
+	void SetEffect(EffectSystem* effect) { this->effect = effect; }
 private:
 
 	// 弾
@@ -54,7 +54,7 @@ private:
 
 
 private:
-	Effect* effect;								// 演出
+	EffectSystem* effect;								// 演出
 	Engine::Camera* camera;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
 	Engine::EntityManager* entityManager;	// 3dオブジェクト管理

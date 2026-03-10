@@ -23,12 +23,12 @@ void ResultScene::Initialize() {
 	SetCamera(cameraManager_->GetCamera());
 
 	// エフェクト初期化
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ初期化
 	resultStage_ = std::make_unique<ResultStage>();
-	resultStage_->Initialize(GetEntityManager(), GetGlobalVariables(), GetCamara());
+	resultStage_->Initialize(GetEntityManager(), cameraManager_.get());
 	resultStage_->SetEffect(effect_.get());
 
 	// リザルトUI初期化

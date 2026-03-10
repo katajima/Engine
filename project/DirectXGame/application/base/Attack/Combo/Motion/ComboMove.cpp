@@ -1,5 +1,6 @@
 #include "ComboMove.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 namespace Combo {
 
@@ -12,7 +13,7 @@ namespace Combo {
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
 		attackMoveSystem = owner->GetMoveComponent()->GetAttackMoveSystem();
-
+		camera = owner->GetCameraManager()->GetCamera();
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData_;
 		traget = lockOnSystem->SoftLockOn();
@@ -24,8 +25,19 @@ namespace Combo {
 
 	// 更新
 	void ComboMove::Update(const InputSystem& inputSystem, float timer, float dt) {
+		// スティック方向取得
+		Vector2 stick = inputSystem.GetPlayerInputData().moveShick;
 		// ゲームパッドの左スティックを動かしているか
-		bool isMoveStick = inputSystem.GetPlayerInputData().moveShick.Length() != 0;
+		bool isMoveStick = stick.Length() != 0;
+
+		Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
+
+		// カメラの向きに基づいて移動方向をワールド座標系に変換
+		Vector2 worldDirection = {
+			stick.x * cameraWorldMatrix.m[0][0] + stick.y * cameraWorldMatrix.m[2][0],
+			stick.x * cameraWorldMatrix.m[0][2] + stick.y * cameraWorldMatrix.m[2][2]
+		};
+
 
 		// 強制的に移動
 		if (data_.isCompulsionMove_) {
@@ -35,7 +47,7 @@ namespace Combo {
 			// 動かしていたら
 			if (!isMove_ && isMoveStick) {
 				isMove_ = true;
-				stickDirection_ = inputSystem.GetPlayerInputData().moveShick;
+				stickDirection_ = worldDirection;
 			}
 		}
 
@@ -65,10 +77,10 @@ namespace Combo {
 			switch (data_.moveType)
 			{
 			case MoveType::kNone:
-				worldTransform->translate_ += Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed_;
+				request.velocity = Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed_;
 				break;
 			case MoveType::kForward:
-				worldTransform->translate_ += Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed_;
 				break;
 			case MoveType::kTraget:
 
@@ -100,7 +112,6 @@ namespace Combo {
 		if (!data_.isGravity_) {
 			rigidBodyComponent->Velocity().y = 0;
 		}
-		moveComponent->SetAttackingGravity(data_.gravityScale_);
 		rigidBodyComponent->SetIsGravity(data_.isGravity_);
 	}
 
@@ -116,10 +127,10 @@ namespace Combo {
 			break;
 		case MoveType::kTraget: // ターゲット方向
 			if (traget) {
-				direction_ = Subtract(traget->GetWorldTransform().GetWorldPosition(), worldTransform->translate_).Normalize();
+				direction_ = Subtract(traget->GetWorldPosition(), worldTransform->translate_).Normalize();
 				direction_.y = 0.0f;
 
-				targetPos_ = traget->GetWorldTransform().GetWorldPosition();
+				targetPos_ = traget->GetWorldPosition();
 			}
 			else {
 				direction_ = moveComponent->GetDirection();

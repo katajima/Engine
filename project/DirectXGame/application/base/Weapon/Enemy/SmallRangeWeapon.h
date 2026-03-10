@@ -1,12 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
-// 前方宣言
-namespace Character {
-	class BasePlayer;
-	class BaseEnemy;
-}
-
 class SmallRangeWeapon : public RangedWeapon
 {
 public:
@@ -45,19 +39,17 @@ public:
 	/// 狙うターゲット指定
 	/// </summary>
 	/// <param name="target"></param>
-	void SetTarget(Character::BasePlayer* target) { this->target = target; }
+	void SetTarget(const Character::BaseCharacter* target) { this->target = target; }
 
 	/// <summary>
-	/// プレイヤー設定
+	/// 所有者設定
 	/// </summary>
 	/// <param name="player"></param>
-	void SetParent(Character::BaseEnemy* player) { this->enemy = player; }
+	void SetParent(Character::BaseCharacter* player) { this->character = player; }
 
 
 private:
-	Character::BaseEnemy* enemy = nullptr;
-	Character::BasePlayer* target = nullptr;
-
+	
 
 	int maxTargetNum_ = 1;				// ターゲットの指定量
 	Vector3 targetPos_{ 0,0,0 };		// ターゲットの位置

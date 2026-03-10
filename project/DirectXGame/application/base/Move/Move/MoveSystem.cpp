@@ -1,26 +1,24 @@
 #include "MoveSystem.h"
-
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 
 void MoveSystem::Initialize() {}
 
-void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator){
+void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	// 攻撃中は通常の移動処理しない
 	if (ctx.isAttacking) return;
 
 	MoveRequest request{};
 
 	// 移動処理
-	Vector2 dire = ctx.input.GetPlayerInputData().moveShick;
+	Vector2 dire = ctx.inputData.moveShick;
 	Vector3 moveVelo{};
 
 	if (dire.Length() == 0.0f) return;
-	Matrix4x4 cameraWorldMatrix = Inverse(ctx.camera->GetViewMatrix());
 
-	// カメラの向きに基づいて移動方向をワールド座標系に変換
 	Vector3 worldDirection = {
-		dire.x * cameraWorldMatrix.m[0][0] + dire.y * cameraWorldMatrix.m[2][0],
+		ctx.worldStickDirection.x,
 		0.0f,
-		dire.x * cameraWorldMatrix.m[0][2] + dire.y * cameraWorldMatrix.m[2][2]
+		ctx.worldStickDirection.y
 	};
 
 	// 動いているなら
@@ -41,30 +39,43 @@ void MoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coo
 	// アニメーション速度処理
 	AnimationSpeedProcess();
 
-	
-
-	
-
-
-
 	// 移動可能かどうか
-	if (canMove_) {
-		request.velocity = velocity_ * ctx.dt;
-		request.direction = Normalize(worldDirection);
-		request.priority = 1;
-
-		coordinator.Request(request);
-	}
-	else {
-		coordinator.Request(request);
-	}
+	request.velocity = velocity_ * ctx.dt;
+	request.direction = Normalize(worldDirection);
+	request.priority = 1;
+	coordinator.Request(request);
 }
 
-void MoveSystem::UpdateEnemy(float dt) {}
+void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
+	// 攻撃中は通常の移動処理しない
+	if (ctx.isAttacking) return;
+	MoveRequest request{};
+	// 距離設定
+	Vector3 dire = Subtract(ctx.target->GetWorldPosition(), ctx.position).Normalize();
+	// 回転設定
+	Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+
+	if (!ctx.isGravity) {
+		if (ctx.position.y < ctx.skyHeight) {
+			dire.y = 1.2f; // Y軸速度上昇
+		}
+		else if (ctx.position.y > ctx.skyHeight) {
+			dire.y = -1.2f; // Y軸速度降下
+		}
+		else {
+			dire.y = 0.0f; // Y軸速度リセット
+		}
+		//dire = { -dire.x, dire.y, -dire.z };
+	}
+	request.velocity = dire * ctx.dt * ctx.moveSpeed;
+	request.direction = dire;
+	request.priority = 1;
+	coordinator.Request(request);
+}
 
 #pragma region Process
 
-void MoveSystem::SpeedProcess(const LocomotionContext& ctx)
+void MoveSystem::SpeedProcess(const Character::CharacterContext& ctx)
 {
 
 	if (data_.moveType == MoveType::LINEAR) { // 一定
@@ -88,12 +99,12 @@ void MoveSystem::SpeedProcess(const LocomotionContext& ctx)
 
 	// スティックの倒し方に応じてスピードを変化させる
 	if (data_.isStickToSpeed) {
-		float stickLen = Math::Clamp(std::abs(ctx.input.GetPlayerInputData().moveShick.Length()), 0.0f, 1.0f);
+		float stickLen = Math::Clamp(std::abs(ctx.inputData.moveShick.Length()), 0.0f, 1.0f);
 		speed_ *= stickLen;
 	}
 
 	// 空中での速度制限
-	if (data_.isLimitAirSpeed && isAir_) {
+	if (data_.isLimitAirSpeed && !ctx.onGround) {
 		speed_ *= data_.airSpeedRate;	// 空中速度倍率をかける(0.0f以上~1.0f以下での使用をおすすめ)
 	}
 

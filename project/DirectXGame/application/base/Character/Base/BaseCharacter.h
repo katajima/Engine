@@ -6,6 +6,7 @@
 #include <DirectXGame/application/base/Attack/Response/Response.h>
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include "CharacterContext.h"
 
 namespace Character {
 
@@ -114,6 +115,8 @@ namespace Character {
 
 		// ワールド変換取得
 		Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+		// ワールド座標取得
+		Vector3 GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
 		// 削除フラグ
 		bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
 		// 削除する
@@ -121,6 +124,10 @@ namespace Character {
 		// 時間
 		float GetTime() { return objectComponent_->GetTime(); }
 
+	public: // 取得
+		Engine::Camera* GetCamera() const { return camera; }
+		// パラメータ取得
+		BasicParameters* GetBasicParameters() const { return parameterComponent_->parameters_.get(); }
 	public:
 		// タグ番号取得
 		uint32_t GetTagNumber() const { return tagNumber_; }
@@ -137,7 +144,7 @@ namespace Character {
 		InputSystem* GetInputSystem() { return inputSystem; };
 
 		//エフェクト設定
-		void SetEffect(Effect* effect) { this->effect = effect; }
+		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		// 弾マネージャーの設定
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; };
 		// カメラ管理クラスの設定
@@ -199,8 +206,6 @@ namespace Character {
 			parameterComponent_->parameters_->jampPower = GetValue<float>("jampPower");
 		}
 	public:
-		// 速度
-		Vector3& Velocity() { return moveComponent_->Velocity(); }
 		// 速度取得
 		Vector3 GetVelocity() const { return moveComponent_->GetVelocity(); }
 		// 移動コンポーネント取得
@@ -240,17 +245,27 @@ namespace Character {
 		std::unique_ptr <ParameterComponent> parameterComponent_;
 		// キャラクタータグ
 		uint32_t tagNumber_ = 0;
+		// コンテキストシステム
+		std::unique_ptr<CharacterContextSystem> contextSystem_ = nullptr;
 	protected: // 貰いもの(アプリケーション層)
-		Effect* effect = nullptr;							// エフェクト
-		BulletManager* bulletManager = nullptr;			// 弾管理
-		CameraManager* cameraManager = nullptr;			// カメラ管理クラス
-		SpecalPointManager* specalPointManager = nullptr;	// 必殺技ポイント管理クラス
+		// エフェクト
+		EffectSystem* effect = nullptr;							
+		// 弾管理
+		BulletManager* bulletManager = nullptr;					
+		// カメラ管理クラス
+		CameraManager* cameraManager = nullptr;					
+		// 必殺技ポイント管理クラス
+		SpecalPointManager* specalPointManager = nullptr;			
 	protected: // 貰ってくるもの(エンジン層)
-		Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
-		Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
-		Engine::Camera* camera = nullptr;						// カメラ
+		// 3Dエンティティマネージャー
+		Engine::EntityManager* entityManager = nullptr;		
+		// グローバル変数
+		Engine::GlobalVariables* globalVariables = nullptr;	
+		// カメラ
+		Engine::Camera* camera = nullptr;	
+		// 音
 		Engine::Audio* audio = nullptr;
-
-		InputSystem* inputSystem = nullptr;						// 入力(使わないならnullptr)
+		// 入力(使わないならnullptr)
+		InputSystem* inputSystem = nullptr;					
 	};
 }

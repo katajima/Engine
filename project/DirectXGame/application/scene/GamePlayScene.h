@@ -11,6 +11,7 @@
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/StageCamera.h"
 
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"
@@ -79,36 +80,35 @@ private:
 	std::unique_ptr<GameFlowController> gameFlowController_ = nullptr;
 private:
 	//追従カメラ
-	std::unique_ptr<FollowCamera> followCamera_;
+	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
 	// 宇宙カメラ
-	std::unique_ptr<UniverseCamera> universeCamera_;
+	std::unique_ptr<UniverseCamera> universeCamera_ = nullptr;
 	// 固定カメラ
-	std::unique_ptr <FixedCamera> fixedCamera_;
+	std::unique_ptr <FixedCamera> fixedCamera_ = nullptr;
+	// ステージカメラ
+	std::unique_ptr<StageCamera> stageCamera_ = nullptr;
+
 	// カメラ管理
-	std::unique_ptr<CameraManager> cameraManager_;
-	
-	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
-
-	// 
-	std::unique_ptr<Effect> effect_ = nullptr;
-
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+	// エフェクト
+	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// スペシャルポイント管理クラス
 	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;
 
 private:
 	// キャラクター管理
-	std::unique_ptr<Character::CharacterManager> characterManager_;
+	std::unique_ptr<Character::CharacterManager> characterManager_ = nullptr;
 	// ステージ
-	std::unique_ptr<MainStage> stage_;
+	std::unique_ptr<MainStage> stage_ = nullptr;
 	// 弾
-	std::unique_ptr<BulletManager> bulletManager_;
+	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
 private:
 	// 衝突マネージャ
-	std::unique_ptr<Engine::CollisionManager> collisionManager_;
-	// ステージコライダーシステム
-	//std::unique_ptr<StageColliderSystem> stageColliderSystem_;
+	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
 private:
 	// ゲームUI
-	std::unique_ptr<GameUI> gameUI;
+	std::unique_ptr<GameUI> gameUI = nullptr;
+	//
+
 };
 

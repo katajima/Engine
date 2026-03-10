@@ -37,6 +37,7 @@ namespace Character {
 		//
 		float attackTimer_ = 0.0f;
 		std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
-
+		//
+		float moveSpeed_ = 1.0f;
 	};
 }

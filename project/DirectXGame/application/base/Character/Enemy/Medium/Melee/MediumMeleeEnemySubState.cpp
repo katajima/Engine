@@ -9,14 +9,24 @@ namespace Character {
         timer_ += deltaTime;
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
         // 後ろに後退
+        // 距離設定
+        Vector3 dire = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_).Normalize();
+        // 回転設定
+        Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
 
+        // Y軸周り角度
+        enemy->GetWorldTransform().rotate_.y = rotate.y;
+
+        MoveRequest request;
         if (enemy->GetTargetDistance() <= 10.0f) {
-            enemy->DirectionMove(-5.0f);
+            request.velocity = dire * -5.0f * deltaTime;
         }
         else {
-            enemy->DirectionMove(3.0f);
+            request.velocity = dire * 3.0f * deltaTime;
         }
-
+        request.direction = dire;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
 
         if (timer_ > readyTime_) {
@@ -30,7 +40,7 @@ namespace Character {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
         timer_ = 0.0f;
         enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
-        enemy->DirectionMoveVelocity(40.0f);
+       // enemy->DirectionMoveVelocity(40.0f);
         dire_ = enemy->TargetDirection();
 
 
@@ -52,12 +62,11 @@ namespace Character {
         timer_ += deltaTime;
 
         // 前進
-
-        enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
-        enemy->Velocity() = dire_ * 40.0f;
-        enemy->TargetMove(enemy->Velocity());
-
-
+        MoveRequest request;
+        request.velocity = dire_ * 40.0f * deltaTime;
+        request.direction = dire_;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
         if (timer_ > swingTime_) {
             fsm_->ChangeState(AttackSubState::End);

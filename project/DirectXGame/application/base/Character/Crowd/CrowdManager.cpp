@@ -160,7 +160,7 @@ namespace Character {
 
 		velocity_ = Lerp(velocity_, steer * targetSpeed, dt * 5.0f);
 		velocity_.y = 0;
-		owner->Velocity() = velocity_;
+		//owner->Velocity() = velocity_;
 	}
 
 #pragma endregion // 個

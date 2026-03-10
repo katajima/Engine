@@ -10,7 +10,7 @@ public:
 
 	// 初期化＋持ち主設定
 	void Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, Effect* effect);
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect);
 
 	void Generate();
 
@@ -25,7 +25,7 @@ private:
 
 
 private:
-	Effect* effect = nullptr;								// 演出
+	EffectSystem* effect = nullptr;								// 演出
 	Engine::Camera* camera = nullptr;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
 	Engine::EntityManager* entityManager = nullptr;	// 3dオブジェクト管理

@@ -12,7 +12,7 @@
 #include "DirectXGame/application/base/Car/PlayerCar.h"
 #include "DirectXGame/engine/Base/Load/LoadLevelData.h"
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"
-
+#include "DirectXGame/engine/Math/Random.h"
 /// <summary>
 /// ステージ基礎クラス
 /// </summary>
@@ -62,6 +62,11 @@ protected:
 	/// 空初期化
 	/// </summary>
 	void InitializeSky(Engine::EntityManager* entityManager, CameraManager* cameraManager);
+
+	/// <summary>
+	/// ライト初期化
+	/// </summary>
+	void InitializeLight(Engine::EntityManager* entityManager);
 
 	/// <summary>
 	/// レベルデータ初期化
@@ -121,4 +126,6 @@ protected: // 貰いもの
 	Engine::EntityManager* entityManager = nullptr;
 	Engine::Camera* camera = nullptr;
 	CameraManager* cameraManager = nullptr;
+	// エフェクト
+	EffectSystem* effect = nullptr;
 };

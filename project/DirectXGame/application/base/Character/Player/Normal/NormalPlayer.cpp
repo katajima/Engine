@@ -62,7 +62,7 @@ namespace Character {
 		sphere->tag = CollisionTag::Player;
 		sphere->layer = CollisionLayer::Player;
 		sphere->collisionMask = 0xFFFFFFFF;
-		sphere->radius = 2.0f; // 半径を適宜設定
+		sphere->radius = 1.5f; // 半径を適宜設定
 		sphere->isDebugLine = true;
 		sphere->Enable();
 		// コライダ追加
@@ -120,7 +120,9 @@ namespace Character {
 		ui_->SetCharacterParameter(GetCharacterParameterComponent());
 
 
-
+		// コンテキストシステム
+		contextSystem_ = std::make_unique<CharacterContextSystem>();
+		contextSystem_->Initialize(this, inputSystem);
 
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
@@ -242,9 +244,18 @@ namespace Character {
 		if (GetHP() <= 0) {
 			objectComponent_->GetObjectStateFlags().isAlive = false;
 		}
-
+		
+		
 
 #ifdef _DEBUG
+		// コンテキストシステム
+		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
+
+
+		entityManager->Get3DLineCommon()->GetLineMeshData().AddLine(ctx.position, ctx.position
+			+ Vector3{ ctx.worldStickDirection.x,0, ctx.worldStickDirection.y } *20.0f);
+
+
 		ImGui::Begin("Debug");
 		ImGui::InputFloat("HP", &HP());
 		if (ImGui::Button("SP")) {
@@ -261,39 +272,29 @@ namespace Character {
 			attackController_->IsStopHitTimer(false);
 		}
 
-		if (moveComponent_->GetIsLanding() &&
-			stateMachine_->GetCurrentMainState() != CharacterMainState::Jump &&
-			inputSystem->GetPlayerInputData().moveShick.Length() == 0) {
-			moveComponent_->Velocity() = {};
-		}
-
+		
 		// 必殺技
 		special_->Update();
 
 		attackController_->GeyLockOnSysutem()->SetTargets(targetCharacters);
 		// 攻撃制御更新
 		attackController_->Update(GetTime());
-
 		// 応答システム
 		responseSystem_->Update(GetTime());
-
-		// ワールドトランスフォーム更新
-		GetObjectComponent()->GetWorldTransform().Update();
-
-		// コライダのワールドトランスフォーム更新
-		worldCollider_.Update();
-
-		// コライダーコンポーネント更新
-		GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 
 		// 移動コンポーネント更新
-		moveComponent_->Update(GetTime(), GetObjectComponent()->GetWorldTransform(),
-			*GetObjectComponent()->GetRigidBodyComponent(), inputSystem);
+		moveComponent_->Update(GetObjectComponent()->GetWorldTransform(),
+			*GetObjectComponent()->GetRigidBodyComponent(), ctx);
 
-		
+
+
+		// コライダのワールドトランスフォーム更新
+		worldCollider_.Update();
+		// コライダーコンポーネント更新
+		GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);		
 		//武器更新
 		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
@@ -302,26 +303,23 @@ namespace Character {
 		// ステート
 		stateMachine_->Update();
 
-
-		// UI更新
-		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(), 
-			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
-		ui_->Update(GetTime());
-
-
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
 		objectComponentShadow_->GetWorldTransform().translate_.y = -2.9f;
+		objectComponentShadow_->Update();
+	
+		// UI更新
+		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(),
+			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
+		ui_->Update(GetTime());
+
 	}
 
 #pragma region Draw
 
-	void NormalPlayer::DrawEffect()
-	{
-	}
+	void NormalPlayer::DrawEffect(){}
 
-	void NormalPlayer::Draw2D()
-	{
+	void NormalPlayer::Draw2D(){
 		// UI表示
 		ui_->SetIsTextmax(special_->GetIsSpecial());
 
@@ -338,29 +336,14 @@ namespace Character {
 
 #pragma region Move
 
-	void NormalPlayer::Move()
-	{
-		// 重力
-		if (stateMachine_->GetCurrentMainState() != CharacterMainState::Jump) {
-			Velocity() = { 0,0,0 };
-		}
-
-
+	void NormalPlayer::Move() {
 		bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
 		bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-
-		// 移動処理
-		if (is || is2) {
-			moveComponent_->SetCanMove(true);
-		}
 	}
 
-	void NormalPlayer::Jump()
-	{
+	void NormalPlayer::Jump() {
 		bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
 		bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-
-
 		// 生きていてステートの状態が移動状態ならジャンプステートへ移動
 		if (GetAlive() && (is || is2) &&
 			moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
@@ -368,7 +351,6 @@ namespace Character {
 			stateMachine_->ChangeState(CharacterMainState::Jump);
 			GetObjectComponent()->GetObject3D()->GetAnimationComponent()->SetAnimation("JumpStrat1", 0.01f);
 		}
-
 	}
 
 #pragma endregion //移動関係
@@ -377,8 +359,7 @@ namespace Character {
 
 	void NormalPlayer::ApplyGlobalVariables() {}
 
-	void NormalPlayer::ReloadComboData()
-	{
+	void NormalPlayer::ReloadComboData() {
 		// コンボノードクリア
 		GetAttackController()->GetComboSystem()->ClearNode();
 		GetAttackController()->GetComboSystem()->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
@@ -455,9 +436,7 @@ namespace Character {
 
 	}
 
-	void NormalPlayer::Reload() {
-		ReloadComboData();
-	}
+	void NormalPlayer::Reload() { ReloadComboData();}
 
 
 #pragma endregion // そのほか

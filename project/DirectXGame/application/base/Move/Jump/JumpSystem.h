@@ -11,7 +11,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator, Engine::RigidBodyComponent& rigid);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator, Engine::RigidBodyComponent& rigid);
 
 	void Update();
 public:	// ジャンプ開始
@@ -20,7 +20,9 @@ public:	// ジャンプ開始
 	void DecrementJumpCount() { jumpCount_--; }
 public:
 	// ジャンプデータ取得
-	JumpData& GetData() { return data_; }
+	JumpData GetData() const { return data_; }
+	//
+	JumpData& Data() { return data_; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }
 	// データ設定

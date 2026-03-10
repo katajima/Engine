@@ -5,7 +5,7 @@ MoveCommand LocomotionCoordinator::BuildCommand()
 {
 	MoveCommand cmd{};
 
-	if (!ctx_) return cmd;
+	if (!ctx) return cmd;
 	int pro = 999;
 	for (auto& request : requests_) {
 		cmd.finalVelocity += request.velocity;

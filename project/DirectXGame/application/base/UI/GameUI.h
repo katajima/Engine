@@ -10,8 +10,7 @@ namespace Character {
 /// <summary>
 /// ゲームUIクラス
 /// </summary>
-class GameUI : public BaseUI
-{
+class GameUI : public BaseUI {
 public:
 	//初期化
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;

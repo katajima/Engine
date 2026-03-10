@@ -5,9 +5,11 @@
 
 
 // 前方宣言
-class Effect;
+class EffectSystem;
 class BulletManager;
 namespace Character {
+	class BasePlayer;
+	class BaseEnemy;
 	class BaseCharacter;
 }
 namespace Engine {
@@ -58,6 +60,8 @@ protected:
 	WeaponData data_;	// 武器データ
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
+	const Character::BaseCharacter* target = nullptr;			// ターゲット
+
 	BulletManager* bulletManager = nullptr;	// 弾管理クラス
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント

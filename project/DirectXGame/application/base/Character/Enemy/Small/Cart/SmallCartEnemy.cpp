@@ -19,7 +19,7 @@ namespace Character {
 		Parameters()->strength = 10.0f;
 
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();
 		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
@@ -59,6 +59,12 @@ namespace Character {
 
 	void SmallCartEnemy::Move()
 	{
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
 		if (GetTargetDistance() <= 25.0f) {
 			attackTimer_ += GetTime();
 			if (attackTimer_ >= 3.0f) {
@@ -67,13 +73,12 @@ namespace Character {
 				return;
 			}
 			if (GetTargetDistance() <= 20.0f) {
-				DirectionMove(-Parameters()->speed * 1.5f);
+				Parameters()->speed = -moveSpeed_ * 1.5f;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			// 移動
-			DirectionMove(Parameters()->speed);
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 

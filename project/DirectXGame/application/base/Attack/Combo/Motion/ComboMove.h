@@ -13,6 +13,7 @@ class MovementComponent;	// 移動関係
 namespace Character {
 	class BaseCharacter;		// キャラクター
 }
+
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
 class AttackMoveSystem;		// 攻撃移動システム
@@ -84,10 +85,11 @@ namespace Combo {
 		// ロックオンシステム
 		LockOnSystem* lockOnSystem = nullptr;
 		// ターゲット
-		Character::BaseCharacter* traget = nullptr;
+		const Character::BaseCharacter* traget = nullptr;
 		// 攻撃移動システム
 		AttackMoveSystem* attackMoveSystem = nullptr;
-
+		//
+		const Engine::Camera* camera = nullptr;
 	private:
 		// データ
 		Data data_;

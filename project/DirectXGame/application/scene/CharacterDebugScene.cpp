@@ -54,7 +54,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// フォローカメラ

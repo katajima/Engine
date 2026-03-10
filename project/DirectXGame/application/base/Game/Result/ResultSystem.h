@@ -20,7 +20,7 @@ namespace Engine {
 	class GlobalVariables;
 	class SceneManager;
 }
-class Effect;
+class EffectSystem;
 class InputSystem;
 
 class ResultSystem {

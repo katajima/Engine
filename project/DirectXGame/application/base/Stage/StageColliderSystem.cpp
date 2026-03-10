@@ -23,7 +23,7 @@ void StageColliderSystem::CreateCollider() {
 				triangleColl->layer = CollisionLayer::Environment;
 				triangleColl->collisionMask = 0xFFFFFFFF;
 				triangleColl->isStatic = true;
-				triangleColl->Enable();
+				triangleColl->isDebugLine = false;
 				colliderComponent_->AddCollider(std::move(triangleColl));
 			}
 		}
@@ -33,5 +33,24 @@ void StageColliderSystem::CreateCollider() {
 
 void StageColliderSystem::Update() {
 
+	DebugImGui();
+
 	colliderComponent_->UpdateAll(objects[0]->GetWorldTransform());
+};
+
+void StageColliderSystem::DebugImGui() {
+#ifdef _DEBUG
+	ImGui::Begin("Collider");
+	if (ImGui::Button("isDebugLine")) {
+		for (auto& coll : colliderComponent_->GetAllColliders()) {
+			if (coll->isDebugLine) {
+				coll->isDebugLine = false;
+			}
+			else {
+				coll->isDebugLine = true;
+			}
+		}
+	}
+	ImGui::End();
+#endif // _DEBUG
 };

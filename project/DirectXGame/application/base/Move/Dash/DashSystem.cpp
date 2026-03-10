@@ -7,7 +7,7 @@ void DashSystem::Initialize() {
 
 
 // 更新
-void DashSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator) {
+void DashSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	
 }
 

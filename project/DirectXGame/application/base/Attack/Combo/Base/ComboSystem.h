@@ -17,6 +17,7 @@ namespace Combo {
 	public:
 		~System() {
 			ClearNode();
+			comboStateMachine_.reset();
 		}
 
 		// 初期化
@@ -60,7 +61,10 @@ namespace Combo {
 
 		std::string GetParentName(const std::string& comboNodeName) {
 			auto it = comboNodes_.find(comboNodeName);
-			return it->first;
+			if (it != comboNodes_.end()) {
+				return it->first;
+			}
+			return "";
 		}
 
 		//	トランスフォーム取得
@@ -86,7 +90,7 @@ namespace Combo {
 		// ノード追加
 		void AddComboNode(const std::string& name, std::shared_ptr<NodeState> node);
 		// ノード追加(データから生成)
-		void AddComboNode(const std::string& nodeName, const std::string animationName, const ComboData& data);
+		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
 		// コンボ接続
 		void ConnectCombo(const std::string& from, AttackInput input, const std::string& to);
 		// 最初のコンボ
@@ -122,11 +126,11 @@ namespace Combo {
 		};
 
 		// コンボ作成
-		void CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData>& addHitBoxData,
+		void CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxData,
 			GamePadButton button = GamePadButton::GAMEPAD_B);
 	private:
 		// グローバルデータ作成
-		void CreateGlobalData(const std::string comboNodeName);
+		void CreateGlobalData(const std::string& comboNodeName);
 
 	private:
 		// コンボステートマシーン
@@ -141,6 +145,6 @@ namespace Combo {
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
-
+		Character::BaseCharacter* owner = nullptr;
 	};
 };

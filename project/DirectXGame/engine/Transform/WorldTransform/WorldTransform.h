@@ -28,6 +28,18 @@ namespace Engine {
 			return worldPreMat_.GetWorldPosition();
 		}
 
+		// 向いている方向取得
+		Vector3 GetForward() const {
+			Matrix4x4 rotMat = MakeRotateXYZ(rotate_);
+
+			// Z軸がForward
+			return Vector3{
+				rotMat.m[2][0],
+				rotMat.m[2][1],
+				rotMat.m[2][2]
+			};
+		}
+
 	public:
 		Vector3 scale_ = { 1,1,1 };		// 拡縮
 		Vector3 rotate_ = { 0,0,0 };		// 回転

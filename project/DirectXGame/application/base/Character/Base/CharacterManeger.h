@@ -16,7 +16,7 @@
 #include "CharacterGlobalData.h"
 
 //前方宣言
-class Effect;
+class EffectSystem;
 class FollowCamera;
 class BulletManager;
 class CameraManager;
@@ -49,7 +49,7 @@ namespace Character {
 		// 弾マネージャー設定
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
 		// エフェクト設定
-		void SetEffect(Effect* effect) { this->effect = effect; }
+		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		// スペシャルポイント管理クラスの設定
 		void SetSpecialPointManager(SpecalPointManager* specalPointManager) { this->specalPointManager = specalPointManager; };
 	public: // 取得系
@@ -124,7 +124,7 @@ namespace Character {
 		FollowCamera* followCamera = nullptr;		// フォローカメラ 
 		BulletManager* bulletManager = nullptr;	// 弾をマネジャー
 		CameraManager* cameraManager = nullptr;	// カメラ管理
-		Effect* effect = nullptr;
+		EffectSystem* effect = nullptr;
 		SpecalPointManager* specalPointManager = nullptr;
 	};
 }

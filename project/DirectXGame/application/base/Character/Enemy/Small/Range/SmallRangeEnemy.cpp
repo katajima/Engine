@@ -39,6 +39,7 @@ namespace Character {
 
 		
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		moveComponent_->GetMovementSystem()->SetUseGravity(false);
 		
 
@@ -89,25 +90,16 @@ namespace Character {
 
 	void SmallRangeEnemy::Move()
 	{
-		// 移動
-		DirectionMoveVelocity(Parameters()->speed);
-
-		if (GetWorldTransform().GetWorldPosition().y < skyHeight_) {
-			Velocity().y = 1.2f; // Y軸速度上昇
-		}
-		else if (GetWorldTransform().GetWorldPosition().y > skyHeight_) {
-			Velocity().y = -1.2f; // Y軸速度降下
-		}
-		else {
-			Velocity().y = 0.0f; // Y軸速度リセット
-		}
-
-
-
-
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
 
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
+			Parameters()->speed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				attackTimer_ = 0.0f;
 				// 攻撃ステートへ
@@ -115,14 +107,13 @@ namespace Character {
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
-				TargetMove(velo.Normalize() * globalData_.retreatSpeed);
+				//Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
+				Parameters()->speed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-
-			TargetMove(GetVelocity());
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 

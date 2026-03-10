@@ -6,7 +6,7 @@
 
 // 開始
 void Game::GameEventState::Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-	, Engine::Input* input){
+	, InputSystem* input){
 	this->characterManager = characterManager;
 	this->characterSpawnManager = characterSpawnManager;
 	this->input = input;
@@ -53,6 +53,10 @@ float Game::GameEventState::GetCurrentTimer() const{
 	return  data_.time_.max - stateTime;
 }
 
+float Game::GameEventState::RemainingTime() const {
+	return data_.time_.max - stateTime;
+}
+
 // 終了したか
 bool Game::GameEventState::FinishProcess() {
 	switch (data_.changeType_)
@@ -72,7 +76,7 @@ bool Game::GameEventState::FinishProcess() {
 	case Game::GameEventChangeType::kTake:
 		break;
 	case Game::GameEventChangeType::kInput:
-		if (input->IsGamePadTriggered(data_.buttom)) {
+		if (input->GetGameInputData().decisionTrigger) {
 			return true;
 		}
 		break;
@@ -98,7 +102,7 @@ void Game::GameEventState::SpawnProcess() {
 
 
 void Game::EventStateMachine::Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-	, Engine::Input* input){
+	, InputSystem* input){
 	
 	this->characterManager = characterManager;
 	this->characterSpawnManager = characterSpawnManager;

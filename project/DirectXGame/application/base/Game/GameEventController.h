@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.h>
 #include "DirectXGame/application/base/Game/Base/GameEvent.h"
+#include "DirectXGame/application/base/UI/GameStartUI.h"
 
 // 前方宣言
 namespace Engine {
@@ -23,7 +24,7 @@ namespace Game {
 		/// 初期化
 		/// </summary>
 		void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables, 
-			Character::CharacterManager* characterManager, Engine::Input* input);
+			CameraManager* cameraManager, Character::CharacterManager* characterManager, InputSystem* input);
 
 		/// <summary>
 		/// 更新
@@ -33,8 +34,14 @@ namespace Game {
 		/// <summary>
 		/// 描画
 		/// </summary>
-		void Draw() {};
+		void Draw();
 
+		/// <summary>
+		/// 描画2d
+		/// </summary>
+		void Draw2D();
+
+	public:
 		// イベント終了通知
 		bool IsEndEvent() const { return isEndEvent_; };
 
@@ -70,7 +77,6 @@ namespace Game {
 		std::unique_ptr<EventStateMachine> eventStateMachine_ = nullptr;
 		// ゲームイベントステートマップ
 		std::map<std::string, std::shared_ptr<GameEventState>> eventStateNodes_;
-
 		// キャラクター出現管理クラス
 		std::unique_ptr<Character::CharacterSpawnManager> characterSpawnManager_ = nullptr;
 		// スポーン情報
@@ -79,9 +85,19 @@ namespace Game {
 		int curretWave_ = 0;		// ウェーブ
 		float time_ = 0.0f;			// 時間
 	private:
+		// スタートUI
+		std::unique_ptr<GameStartUI> gameStartUI_ = nullptr;
+		//
+		bool isStart = false;
+	private:
+		// エンティティ管理
 		Engine::EntityManager* entityManager = nullptr;
+		// 保存項目
 		Engine::GlobalVariables* globalVariables = nullptr;
+		// キャラクター管理
 		Character::CharacterManager* characterManager = nullptr;
+		// カメラ管理
+		CameraManager* cameraManager = nullptr;
 	};
 
 }

@@ -20,13 +20,13 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新(操作用)
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 	// 更新(敵用)
-	void UpdateEnemy(float dt);
+	void UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
 private:
 	// 速度処理
-	void SpeedProcess(const LocomotionContext& ctx);
+	void SpeedProcess(const Character::CharacterContext& ctx);
 	// 状態処理
 	void StateProcess();
 	// アニメーション速度設定
@@ -36,8 +36,6 @@ public: // 取得
 	MoveData& GetData() { return data_; }
 	// 速度の取得
 	Vector3 GetVelocity() const { return velocity_; }
-	// 速度
-	Vector3& Velocity() { return velocity_; }
 	// 状態の取得
 	State GetState() const { return state_;}
 	// アニメーション速度の取得
@@ -45,11 +43,6 @@ public: // 取得
 public: //設定
 	// データ設定
 	void SetData(const MoveData& data) { data_ = data; };
-
-	// 移動可能かどうか設定
-	void SetCanMove(bool canMove) { canMove_ = canMove; }
-	// 空中かどうか設定
-	void SetIsAir(bool isAir) { isAir_ = isAir; }
 	// スピード設定
 	void SetSpeed(float min, float max) {
 		data_.minSpeed = min;
@@ -67,10 +60,6 @@ private:
 	float animationSpeed_ = 1.0f;
 	// 状態
 	State state_ = State::kIdle;
-	// 空中か？
-	bool isAir_ = false;
-	// 移動可能フラグ
-	bool canMove_ = true;
 private:
 
 

@@ -9,7 +9,7 @@
 
 
 void BulletSpawn::Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, Effect* effect) {
+	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect) {
 	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	this->camera = camera;

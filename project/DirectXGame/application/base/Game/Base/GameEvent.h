@@ -16,6 +16,7 @@ namespace Engine {
 	class EntityManager;
 	class Input;
 }
+class InputSystem;
 
 namespace Game {
 
@@ -26,6 +27,7 @@ namespace Game {
 		kNone,		// 無し
 		kBattle,	// 戦い
 		kBreakTime,	// 休憩時間
+		kStart,		// スタート
 		kEnd,		// 終了
 	};
 
@@ -101,7 +103,7 @@ namespace Game {
 
 		// 開始
 		void Enter(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-			, Engine::Input* input);
+			, InputSystem* input);
 		// 終了
 		void Exit();
 
@@ -138,8 +140,10 @@ namespace Game {
 		void SetName(const std::string& comboName) { name = comboName; }
 		// スポーン追加
 		void AddSpawns(std::vector<Character::SpawnInfo>&& spawns);
-		// 
+		// 現在の経過時間
 		float GetCurrentTimer() const;
+		// 残り時間
+		float RemainingTime() const;
 	public:
 		// 終了したか
 		bool IsFinish() const { return isFinish_; };
@@ -171,7 +175,7 @@ namespace Game {
 		Character::CharacterSpawnManager* characterSpawnManager = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::SceneManager* sceneManager = nullptr;
-		Engine::Input* input = nullptr;
+		InputSystem* input = nullptr;
 	};
 
 	/// <summary>
@@ -181,7 +185,7 @@ namespace Game {
 	public:
 		// 初期化
 		void Initialize(Character::CharacterManager* characterManager, Character::CharacterSpawnManager* characterSpawnManager
-			,Engine::Input* input);
+			, InputSystem* input);
 
 
 		// ステート設定
@@ -212,7 +216,7 @@ namespace Game {
 		Character::CharacterSpawnManager* characterSpawnManager = nullptr;
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::SceneManager* sceneManager = nullptr;
-		Engine::Input* input = nullptr;
+		InputSystem* input = nullptr;
 	};
 
 

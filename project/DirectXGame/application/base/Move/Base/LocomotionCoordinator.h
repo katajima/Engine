@@ -2,6 +2,8 @@
 #include <vector>
 #include "LocomotionContext.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
+
+
 /// <summary>
 /// 移動関連の調停役クラス
 /// </summary>
@@ -11,8 +13,8 @@ public:
 	/// 初期化
 	/// </summary>
 	/// <param name="inputSystem"></param>
-	void BeginFrame(const LocomotionContext& ctx) {
-		ctx_ = &ctx;
+	void BeginFrame(const Character::CharacterContext& ctx) {
+		this->ctx = &ctx;
 		built_ = false;
 		requests_.clear();
 	}
@@ -29,7 +31,7 @@ public:
 	/// <returns></returns>
 	MoveCommand BuildCommand();
 private:
-	const LocomotionContext* ctx_ = nullptr;
+	const Character::CharacterContext* ctx = nullptr;
 	bool built_ = false;
 	std::vector<MoveRequest> requests_;
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "PlayerCarStateMachine.h"
-class Effect;
+class EffectSystem;
 /// <summary>
 /// プレイヤー車
 /// </summary>
@@ -29,7 +29,7 @@ public:
 	/// エフェクト
 	/// </summary>
 	/// <param name="effect"></param>
-	void SetEffect(Effect* effect) { this->effect = effect; }
+	void SetEffect(EffectSystem* effect) { this->effect = effect; }
 
 	// 動く
 	void Action() { isMoving_ = true; }
@@ -135,5 +135,5 @@ private:
 	Engine::EntityManager* entityManager = nullptr;
 	Engine::GlobalVariables* globalVariables = nullptr;
 	// エフェクト
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 };

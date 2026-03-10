@@ -1,70 +1,48 @@
 #pragma once
-
-// C++
-#include <imgui.h>
-#include <list>
-
-
-// engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
-#include "DirectXGame/application/base/Light/BaseLights.h"
-
-
-#include "DirectXGame/application/base/Car/PlayerCar.h"
-
-// 前方宣言
-namespace Engine {
-	class DirectXCommon;
-	class EntityManager;
-	class GlobalVariables;
-}
-class Effect;
+#include "BaseStage.h"
 
 /// <summary>
 /// セレクト用ステージ
 /// </summary>
-class SelectStage {
+class SelectStage : public BaseStage {
 public:
+	// 初期化
+	void Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) override;
 
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	/// <param name="entity3DManager"></param>
-	/// <param name="entity2DManager"></param>
-	/// <param name="globalVariables"></param>
-	/// <param name="camera"></param>
-	void Initialize(Engine::EntityManager* entityManager, 
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
+	// 更新
+	void Update(float dt) override;
 
 	///< summary>
 	/// 描画
 	///</summary>
-	void Draw();
+	void Draw() override {};
 
 	/// <summary>
 	/// 描画エフェクト
 	/// </summary>
-	void DrawP();
+	void DrawEffect() override {};
 
+	/// <summary>
+	/// 描画2d
+	/// </summary>
+	void Draw2D() override {};
+private:
+	/// <summary>
+	/// エミッター初期化
+	/// </summary>
+	void InitEmit() {};
 
+	/// <summary>
+	/// エミッター更新
+	/// </summary>
+	void EmitUpdate() {};
+
+public:
 	/// <summary>
 	/// エフェクト
 	/// </summary>
 	/// <param name="effect"></param>
-	void SetEffect(Effect* effect) {
+	void SetEffect(EffectSystem* effect) {
 		this->effect = effect;
 		playerCar_->SetEffect(effect);
 	}
@@ -75,27 +53,10 @@ public:
 	PlayerCar* GetPlayerCar() { return playerCar_.get(); }
 
 	void SetRatio(float ratio) { ratio_ = ratio; }
-
-private:
-	Engine::DirectXCommon* dxCommon = nullptr;
-	Engine::EntityManager* entityManager = nullptr;
-	Engine::GlobalVariables* globalVariables = nullptr;
-	Engine::Camera* camera = nullptr;
-	// エフェクト
-	Effect* effect = nullptr;
 private:
 	// プレイヤー車
 	std::unique_ptr<PlayerCar> playerCar_;
-	// 空
-	Engine::Object3d* sky_;
-	// スカイボックス
-	std::unique_ptr<Engine::SkyBox> skyBox;
-	// ライト
-	std::shared_ptr<Engine::DirectionalLight> directional;
-	// タイル
-	Engine::Object3d* tail;
-
-
+	// 石
 	std::vector<std::unique_ptr<ObjectComponent>> stoneComponents_;
 private:
 	// 位置

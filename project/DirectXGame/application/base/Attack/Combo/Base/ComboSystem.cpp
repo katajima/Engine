@@ -7,6 +7,7 @@ namespace Combo {
 
 	void System::Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables) {
 		this->globalVariables = globalVariables;
+		owner = character;	// 所有者設定
 
 		comboStateMachine_ = std::make_unique<StateMachine>(character);
 
@@ -16,6 +17,13 @@ namespace Combo {
 	}
 
 	void System::ClearNode() {
+
+		// StateMachineの状態を完全リセット
+		if (comboStateMachine_) {
+			comboStateMachine_.reset();
+			comboStateMachine_ = std::make_unique<StateMachine>(owner);
+		}
+
 		comboNodes_.clear();
 		comboGlobalDatas_.clear();
 		parentTransforms_.clear();
@@ -29,7 +37,7 @@ namespace Combo {
 		comboNodes_[name] = node;
 	}
 
-	void System::AddComboNode(const std::string& nodeName, const std::string animationName, const ComboData& data) {
+	void System::AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data) {
 		// 既に存在する場合は追加しない
 		if (comboNodes_.find(nodeName) != comboNodes_.end()) {
 			return;
@@ -313,7 +321,7 @@ namespace Combo {
 		data.GetComboMotion().GetComboMove().GetData().lockOnData_.radius = gData.lockOnRadius;
 	}
 
-	void System::CreateCombo(const std::string comboNodeName, const std::vector<AddHitBoxData>& addHitBoxDatas,
+	void System::CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxDatas,
 		GamePadButton button)
 	{
 		ComboData data{};
@@ -342,7 +350,7 @@ namespace Combo {
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName_, data);
 	}
 
-	void System::CreateGlobalData(const std::string comboNodeName) {
+	void System::CreateGlobalData(const std::string& comboNodeName) {
 		// 既に存在する場合は追加しない
 		if (comboGlobalDatas_.find(comboNodeName) != comboGlobalDatas_.end()) {
 			return;

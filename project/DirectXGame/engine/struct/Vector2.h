@@ -74,7 +74,7 @@ struct Vector2 final {
 		return result;
 	};
 	// 長さ
-	float Length() {
+	float Length() const{
 		float result;
 
 		result = sqrtf((x * x) + (y * y));

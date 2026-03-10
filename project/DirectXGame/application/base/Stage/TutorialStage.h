@@ -25,7 +25,7 @@ namespace Engine {
 	class EntityManager;
 	class GlobalVariables;
 }
-class Effect;
+class EffectSystem;
 
 /// <summary>
 /// チュートリアル用ステージ

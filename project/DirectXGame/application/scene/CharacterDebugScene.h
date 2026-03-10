@@ -84,7 +84,7 @@ private:
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 
 	// 
-	std::unique_ptr<Effect> effect_;
+	std::unique_ptr<EffectSystem> effect_;
 
 	// スペシャルポイント管理クラス
 	std::unique_ptr<SpecalPointManager> specalPointManager_ = nullptr;

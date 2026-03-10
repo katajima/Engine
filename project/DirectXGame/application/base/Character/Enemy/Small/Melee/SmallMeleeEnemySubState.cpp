@@ -9,14 +9,16 @@ namespace Character {
         timer_ += deltaTime;
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
 
-
+        MoveRequest request;
         if (enemy->GetTargetDistance() <= 7.0f) {
-            enemy->DirectionMove(-5.0f);
+            request.velocity = dire * -5.0f * deltaTime;
         }
         else {
-            enemy->DirectionMove(3.0f);
+            request.velocity = dire * 3.0f * deltaTime;
         }
-
+        request.direction = dire;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
         if (timer_ > readyTime_) {
             // 攻撃へ遷移
@@ -30,7 +32,7 @@ namespace Character {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
         timer_ = 0.0f;
         enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
-        enemy->DirectionMoveVelocity(40.0f);
+        //enemy->DirectionMoveVelocity(40.0f);
         dire_ = enemy->TargetDirection();
 
 
@@ -53,10 +55,11 @@ namespace Character {
 
         // 前進
 
-        enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 20.0f;
-        enemy->Velocity() = dire_ * 20.0f;
-        enemy->TargetMove(enemy->Velocity());
-
+        MoveRequest request;
+        request.velocity = dire_ * 20.0f * deltaTime;
+        request.direction = dire_;
+        request.priority = 1;
+        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
 
         if (timer_ > swingTime_) {

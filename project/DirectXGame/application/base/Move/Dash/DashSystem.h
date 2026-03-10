@@ -13,7 +13,7 @@ public:
 	/// </summary>
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 public:
 	// ダッシュ用データの取得
 	DashData& GetData() { return data_; };

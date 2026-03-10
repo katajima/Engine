@@ -5,7 +5,7 @@ void AttackMoveSystem::Initialize() {
 
 }
 
-void AttackMoveSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator) {
+void AttackMoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
 	if (ctx.state == Character::CharacterMainState::Attack) {
 		coordinator.Request(reuest);
 	}

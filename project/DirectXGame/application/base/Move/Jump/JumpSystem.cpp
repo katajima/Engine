@@ -3,7 +3,7 @@
 
 void JumpSystem::Initialize(){}
 
-void JumpSystem::Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator,Engine::RigidBodyComponent& rigid)
+void JumpSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator,Engine::RigidBodyComponent& rigid)
 {
 	// 入力ホールド処理
 	InputHoldProcess(ctx.dt);

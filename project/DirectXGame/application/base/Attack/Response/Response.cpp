@@ -72,22 +72,6 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 				responseMoveSystem->SetRequest(request);
 				return;
 			}
-			
-			if (transform) {
-				if (other->isStatic) {
-					// 相手が動かないなら自分だけ押し戻す
-					transform->translate_ += pushVec;
-				}
-				else if (self->isStatic) {
-					// 自分が動かない → 相手だけが押し戻される（通常ここでは何もしない）
-				}
-				else {
-					// 双方が動く → 半分ずつ押し戻す（応用例）
-					transform->translate_ += pushVec * halfSize;
-				}
-
-				transform->Update();
-			}
 		}
 	}
 }

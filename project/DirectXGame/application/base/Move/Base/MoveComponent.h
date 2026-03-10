@@ -18,6 +18,8 @@ namespace Character {
 	class BaseCharacter;
 }
 
+
+
 /// <summary>
 /// 移動コンポーネント
 /// </summary>
@@ -34,7 +36,7 @@ public:
 	// 初期化
 	void Initialize(Character::BaseCharacter* owner ,InputSystem* input,Engine::GlobalVariables* globalVariables,ControlType type,const std::string& name = "");
 	// 更新
-	void Update(float dt, Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, InputSystem* input);
+	void Update(Engine::WorldTransform& object, Engine::RigidBodyComponent& rigid, const Character::CharacterContext& ctx);
 public:
 	// 保存項目の追加
 	void ApplyGlobalData(const std::string& name);
@@ -44,11 +46,8 @@ public:
 	// 操作タイプ取得
 	void SetControlType(ControlType type) { controlType_ = type; }
 public: // 移動系統
-
 	// 速度取得
 	Vector3 GetVelocity() const { return moveSystem_->GetVelocity(); }
-	// 速度
-	Vector3& Velocity() { return moveSystem_->Velocity(); }
 	// 向いている方向
 	Vector3 GetDirection() const { return movementSystem_->GetDirection(); }
 	
@@ -59,8 +58,6 @@ public: // 移動系統
 	void SetMoveType(MoveType type) { moveSystem_->GetData().moveType = type;};
 	// スティックによる移動速度固定設定
 	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
-	// 移動出来るか設定
-	void SetCanMove(bool canMove) { moveSystem_->SetCanMove(canMove); }
 	// 保存項目を使うか
 	void UseGlobal(bool is) { useGlobal_ = is; };
 public: // ジャンプ系統

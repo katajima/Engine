@@ -23,12 +23,12 @@ void SelectScene::Initialize() {
 
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ生成
 	selectStage_ = std::make_unique<SelectStage>();
-	selectStage_->Initialize(GetEntityManager(), GetGlobalVariables(), GetCamara());
+	selectStage_->Initialize(GetEntityManager(), cameraManager_.get());
 	selectStage_->SetEffect(effect_.get());
 	selectStage_->GetPlayerCar()->GetStateMachine()->ChangeState(CarMainState::SelectMove);
 	// UI生成

@@ -3,36 +3,45 @@
 #include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
 namespace Game {
 
 	void GameEventController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
-		Character::CharacterManager* characterManager, Engine::Input* input)
+		CameraManager* cameraManager, Character::CharacterManager* characterManager, InputSystem* input)
 	{
 		this->entityManager = entityManager;		// エンティティ3d
 		this->globalVariables = globalVariables;		// 保存項目
 		this->characterManager = characterManager;	// キャラクター管理
-
+		this->cameraManager = cameraManager;		// カメラ管理
 
 		// キャラクター出現管理クラス初期化
 		characterSpawnManager_ = std::make_unique<Character::CharacterSpawnManager>();
 		characterSpawnManager_->Initialize(characterManager, entityManager->Get3DLineCommon(), 400);
 
-		// イベントステート
+		// イベントステート初期化
 		eventStateMachine_ = std::make_unique<Game::EventStateMachine>();
 		eventStateMachine_->Initialize(characterManager, characterSpawnManager_.get(),input);
 
+		// ゲームスタートUI初期化
+		gameStartUI_ = std::make_unique<GameStartUI>();
+		gameStartUI_->Initialize(nullptr,entityManager,globalVariables);
 
 		Game::GameEventData data;
-		data.eventType_ = GameEventType::kBreakTime;
+		data.eventType_ = GameEventType::kStart;
 		data.time_.max = 5.0f;
 		CreateGameEvent("start", data);
+
+
+		data.eventType_ = GameEventType::kBreakTime;
+		data.time_.max = 5.0f;
+		CreateGameEvent("breakTime", data);
 
 		CreateSpawn(Character::EnemyType::kMediumMelee,"normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,500 }, { 10,1,10 }, 4.0f);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,1,500 }, { 10,1,10 }, 0.75f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 3, { -500,1,500 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, { 0,1,500 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, { -500,1,500 }, { 10,1,10 }, 0.75f);
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -40,12 +49,12 @@ namespace Game {
 
 		CreateGameEvent("battle01", data);
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		/*CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,-400 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 3, { 0,0,-400 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, { 0,0,-400 }, { 10,1,10 }, 0.75f);
 
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,0 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 3, { -500,1,0 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, { -500,1,0 }, { 10,1,10 }, 0.75f);*/
 
 
 		data.eventType_ = GameEventType::kBattle;
@@ -68,7 +77,8 @@ namespace Game {
 
 		CreateGameEvent("end", data);*/
 
-		ConnectNode("start","","battle01");
+		ConnectNode("start", "", "breakTime");
+		ConnectNode("breakTime","","battle01");
 		ConnectNode("battle01", "", "battle02");
 		ConnectNode("battle02", "", "result");
 		ConnectNode("result", "", "end");
@@ -87,8 +97,7 @@ namespace Game {
 
 #pragma region  Event
 
-	void GameEventController::AddNode(const std::string& nodeName, const Game::GameEventData& data)
-	{
+	void GameEventController::AddNode(const std::string& nodeName, const Game::GameEventData& data) {
 		// 既に存在する場合は追加しない
 		if (eventStateNodes_.find(nodeName) != eventStateNodes_.end()) {
 			return;
@@ -105,8 +114,7 @@ namespace Game {
 	}
 
 
-	void GameEventController::ConnectNode(const std::string& from, const std::string& name, const std::string& to)
-	{
+	void GameEventController::ConnectNode(const std::string& from, const std::string& name, const std::string& to) {
 		auto itFrom = eventStateNodes_.find(from);
 		auto itTo = eventStateNodes_.find(to);
 		if (itFrom != eventStateNodes_.end()) {
@@ -122,8 +130,6 @@ namespace Game {
 
 #pragma endregion // イベント系
 
-
-
 	void GameEventController::Update(float dt) {
 		// キャラクター出現管理更新
 		characterSpawnManager_->Update(dt);
@@ -131,7 +137,24 @@ namespace Game {
 		// イベントステートマシン更新
 		eventStateMachine_->Update(dt);
 
+		// ゲーム開始UI
+		gameStartUI_->Update(dt);
 
+		if (eventStateMachine_->GetCurrentState()->GetData().eventType_ == GameEventType::kStart) {
+			cameraManager->SetUseCamera("stageCamera",0.0f);
+			isStart = true;
+			if (eventStateMachine_->GetCurrentState()->RemainingTime() <= 0.5f) {
+				gameStartUI_->IsFade();
+			}
+		}
+		else {
+			if (isStart) {
+				gameStartUI_->IsNofade();
+				isStart = false;
+				cameraManager->SetUseCamera("followCamera", 0.0f);
+			}
+		}
+		
 		curretWave_ = eventStateMachine_->GetCurrentState()->GetData().battleWaveIndex_;
 		time_ = eventStateMachine_->GetCurrentState()->GetCurrentTimer();
 
@@ -150,5 +173,16 @@ namespace Game {
 		}
 
 	}
+
+	void GameEventController::Draw() {
+	
+	};
+
+	void GameEventController::Draw2D() {
+		//if (eventStateMachine_->GetCurrentState()->GetData().eventType_ == GameEventType::kStart) {
+			gameStartUI_->Draw();
+		//}
+	};
+
 
 }

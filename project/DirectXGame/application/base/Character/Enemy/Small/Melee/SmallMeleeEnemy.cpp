@@ -20,6 +20,7 @@ namespace Character {
 
 		
 		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 
 
 		// 武器
@@ -65,21 +66,27 @@ namespace Character {
 	}
 
 	void SmallMeleeEnemy::Move() {
+		// 距離設定
+		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		// 回転設定
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+		// Y軸周り角度
+		GetWorldTransform().rotate_.y = rotate.y;
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
+			Parameters()->speed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				DirectionMove(-globalData_.retreatSpeed);
+				Parameters()->speed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			// 移動
-			DirectionMove(Parameters()->speed);
+			Parameters()->speed = moveSpeed_;
 		}
 	}
 

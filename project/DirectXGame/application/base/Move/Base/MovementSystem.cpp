@@ -4,12 +4,16 @@ void MovementSystem::Initialize()
 {
 }
 
-void MovementSystem::Update(const LocomotionContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
+void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 
 
 	world.translate_ += cmd.finalVelocity;
-	direction_ = cmd.finalDirection;
-
+	if (cmd.finalDirection.Length() != 0.0f) {
+		direction_ = cmd.finalDirection;
+	}
+	else {
+		direction_ = world.GetForward();
+	}
 	// 回転処理
 	RotateProcess(cxt,world);
 
@@ -20,7 +24,7 @@ void MovementSystem::Update(const LocomotionContext& cxt, const MoveCommand& cmd
 }
 
 
-void MovementSystem::GravityProess(const LocomotionContext& cxt,Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid){
+void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid){
 
 	if (!useGravity) {
 		rigid.SetIsGravity(!useGravity);
@@ -40,7 +44,7 @@ void MovementSystem::GravityProess(const LocomotionContext& cxt,Engine::WorldTra
 	else {
 		if (!cxt.isAttacking) {
 			if (rigid.GetVelocity().y < 0.0f) {
-				rigid.SetGravityScale(cxt.fallGravity);	// 重力スケールセット
+				rigid.SetGravityScale(cxt.fallGravity);		// 重力スケールセット
 			}
 			else {
 				rigid.SetGravityScale(cxt.upGravity);		// 重力スケールセット
@@ -53,7 +57,7 @@ void MovementSystem::GravityProess(const LocomotionContext& cxt,Engine::WorldTra
 	}
 }
 
-void MovementSystem::RotateProcess(const LocomotionContext& cxt, Engine::WorldTransform& world) {
+void MovementSystem::RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world) {
 	// 移動ベクトルがゼロなら回転処理しない
 	if (direction_.Length() == 0.0f) return;
 

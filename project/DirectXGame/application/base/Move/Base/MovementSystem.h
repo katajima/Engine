@@ -17,7 +17,7 @@ public:
 	/// 更新
 	/// </summary>
 	/// <param name="dt"></param>
-	void Update(const LocomotionContext& cxt,const MoveCommand& cmd,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
+	void Update(const Character::CharacterContext& ctx,const MoveCommand& cmd,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 
 public:
 
@@ -31,12 +31,12 @@ public:
 private:
 
 	// 重力処理
-	void GravityProess(const LocomotionContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
+	void GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 	// 回転処理
-	void RotateProcess(const LocomotionContext& cxt, Engine::WorldTransform& world);
+	void RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world);
 private:
 	// 高さ
-	float groundHeight_ = -3.5f;
+	float groundHeight_ = -3.0f;
 	Engine::WorldTransform* world;
 	Engine::RigidBodyComponent* rigid;
 

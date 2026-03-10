@@ -74,9 +74,11 @@ namespace Combo {
         // 入力があったら
         std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, AttackInput input) override {
             auto it = nextStates.find(input);
+
             if (it != nextStates.end()) {
-                return it->second;
+                return it->second.lock();
             }
+
             return nullptr;
         }
 
@@ -117,7 +119,9 @@ namespace Combo {
         void SetName(const std::string& comboName) { name = comboName; }
 
         // コンボデータ取得
-        ComboData& GetComboData() { return comboData_; }
+        ComboData& Data() { return comboData_; }
+
+        ComboData GetData() const { return comboData_; }
 
     private:
         // コンボ名
@@ -127,7 +131,7 @@ namespace Combo {
         // コンボデータ
         ComboData comboData_;
         // 次のステートマップ
-        std::map<AttackInput, std::shared_ptr<NodeState>> nextStates;
+        std::map<AttackInput, std::weak_ptr<NodeState>> nextStates;
     };
 
     /// <summary>

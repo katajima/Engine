@@ -17,7 +17,7 @@ namespace Character {
 	class BaseCharacter;
 }
 class BulletManager;
-class Effect;
+class EffectSystem;
 
 /// <summary>
 /// 弾の基底クラス
@@ -63,7 +63,7 @@ public:
 	// ターゲット設定
 	void SetTarget(Character::BaseCharacter* target) { this->target = target; }
 	// エフェクト設定
-	void SetEffect(Effect* effect) { this->effect = effect; };
+	void SetEffect(EffectSystem* effect) { this->effect = effect; };
 	// ターゲットの位置取得
 	void SetInfo(const BulletInfo& info) { info_ = info; }
 	// 範囲設定
@@ -130,7 +130,7 @@ protected:
 	Character::BaseCharacter* target = nullptr;	// 標的
 protected:
 	// エフェクト
-	Effect* effect = nullptr;
+	EffectSystem* effect = nullptr;
 	BulletInfo info_;
 
 

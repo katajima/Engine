@@ -11,7 +11,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const LocomotionContext& ctx, LocomotionCoordinator& coordinator);
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
 	void SetRequest(const MoveRequest& request) { reuest = request; }
 

@@ -7,14 +7,12 @@ void LockOnSystem::Initialize(Character::BaseCharacter* owner) {
     cameraManager = owner->GetCameraManager();
 }
 
-Character::BaseCharacter* LockOnSystem::SoftLockOn(){
-	if (targetCharacters.empty())
-	{
+const Character::BaseCharacter* LockOnSystem::SoftLockOn() const {
+	if (targetCharacters.empty()){
 		return nullptr;
 	}
 	
-    switch (data_.type)
-    {
+    switch (data_.type){
     case LockOnType::kHit: // 以前ヒットした相手にロックオン
         return GetHitLockOn();
         break;
@@ -27,19 +25,28 @@ Character::BaseCharacter* LockOnSystem::SoftLockOn(){
     return nullptr;
 }
 
-Vector3 LockOnSystem::GetOwnerPos() {
-	return owner->GetWorldTransform().GetWorldPosition();
+const Character::BaseCharacter* LockOnSystem::GetTarget() const {
+    if (!targetCharacters.empty()) {
+       return targetCharacters.front();
+    }
+    else {
+        return nullptr;
+    }
+};
+
+
+Vector3 LockOnSystem::GetOwnerPos() const {
+	return owner->GetWorldPosition();
 }
 
 
-Character::BaseCharacter* LockOnSystem::GetNearLockOn() {
+const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
     if (targetCharacters.empty())
     {
         return nullptr;
     }
+
     Vector3 ownerPos = GetOwnerPos();
-
-
 
     // カメラ前 or 入力方向
     Vector3 aimDir = cameraManager->GetCamera()->GetForward();
@@ -51,10 +58,10 @@ Character::BaseCharacter* LockOnSystem::GetNearLockOn() {
     }
     aimDir.Normalize();
 
-    std::sort(
+    auto it = std::min_element(
         targetCharacters.begin(),
         targetCharacters.end(),
-        [&](Character::BaseCharacter* a, Character::BaseCharacter* b)
+        [&](const Character::BaseCharacter* a, const Character::BaseCharacter* b)
         {
             float scoreA = CalcSoftLockScore(ownerPos, aimDir, a);
             float scoreB = CalcSoftLockScore(ownerPos, aimDir, b);
@@ -62,16 +69,20 @@ Character::BaseCharacter* LockOnSystem::GetNearLockOn() {
         }
     );
 
-    if (data_.radius >= targetCharacters.front()->GetWorldTransform().GetWorldPosition().Distance(ownerPos)) {
-        //// 先頭が最適なロックオン相手
-        return targetCharacters.front();
-    }
-    else {
+    if (it == targetCharacters.end())
+    {
         return nullptr;
     }
+
+    const Character::BaseCharacter* bestTarget = *it;
+    if (bestTarget && data_.radius >= bestTarget->GetWorldPosition().Distance(ownerPos)) {
+        return bestTarget;
+    }
+
+    return nullptr;
 }
 
-Character::BaseCharacter* LockOnSystem::GetHitLockOn() {
+const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
     if (targetCharacters.empty())
     {
         return nullptr;
@@ -79,7 +90,7 @@ Character::BaseCharacter* LockOnSystem::GetHitLockOn() {
     Vector3 ownerPos = GetOwnerPos();
     for (auto& target : targetCharacters) {
         if (target->GetTagNumber() == hitTag) {
-            if (data_.radius >= target->GetWorldTransform().GetWorldPosition().Distance(ownerPos)) {
+            if (data_.radius >= target->GetWorldPosition().Distance(ownerPos)) {
                 return target;
             }
         }
@@ -92,9 +103,9 @@ Character::BaseCharacter* LockOnSystem::GetHitLockOn() {
 float LockOnSystem::CalcSoftLockScore(
     const Vector3& playerPos,
     const Vector3& aimDir,
-    Character::BaseCharacter* enemy)
+    const Character::BaseCharacter* enemy)const
 {
-    Vector3 toEnemy = enemy->GetWorldTransform().GetWorldPosition() - playerPos;
+    Vector3 toEnemy = enemy->GetWorldPosition() - playerPos;
     toEnemy.y = 0.0f;
 
     float distSq = toEnemy.LengthSq();

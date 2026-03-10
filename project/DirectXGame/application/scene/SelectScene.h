@@ -56,7 +56,7 @@ private:
 	// セレクトカメラ
 	std::unique_ptr<SelectCamera> selectCamera_ = nullptr;
 	// エフェクト
-	std::unique_ptr<Effect> effect_ = nullptr;
+	std::unique_ptr<EffectSystem> effect_ = nullptr;
 	// セレクトシーンの管理クラス
 	std::unique_ptr<SelectSystem> selectSystem_ = nullptr;
 	// インプットシステム

@@ -31,8 +31,8 @@ void Engine::MyGame::Initialize()
 #ifdef _DEBUG
 	//sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	//sceneManager_->ChangeScene("TITLE");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();

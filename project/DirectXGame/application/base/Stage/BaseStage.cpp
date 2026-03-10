@@ -30,6 +30,19 @@ void BaseStage::InitializeSky(Engine::EntityManager* entityManager, CameraManage
 	sky_->SetSkyBox(skyBox.get());
 }
 
+void BaseStage::InitializeLight(Engine::EntityManager* entityManager) {
+	// ライト
+	DirectionalLightData directionalLightData{};
+	directionalLightData.color = { 1,1,1,1 };
+	directionalLightData.direction = { 0,-1,0 };
+	directionalLightData.intensity = 0.9f;
+	directionalLightData.isLight = true;
+	directionalLightData.lig = 0.1f;
+	directional = std::make_shared<Engine::DirectionalLight>();
+	directional->directional = directionalLightData;
+	entityManager->GetLightManager()->AddLight(directional);
+}
+
 void BaseStage::InitializeLevelData(Engine::EntityManager* entityManager, CameraManager* cameraManager, const std::string& name) {
 	// レベルデータロード
 	loadData_ = std::make_unique<LoadLevelData>();

@@ -333,7 +333,8 @@ void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider*
 	}
 	if (other->owner) {
 		auto* otherComp = reinterpret_cast<ColliderComponent*>(other->owner);
-		if (otherComp && otherComp->onHitCallback) {
+		if (otherComp) {
+			if(otherComp->onHitCallback)
 			otherComp->onHitCallback(other, self);
 		};
 	}

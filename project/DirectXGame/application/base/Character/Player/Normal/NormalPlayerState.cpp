@@ -16,14 +16,6 @@ namespace Character {
 		character->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 
 
-
-
-		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
-		if (isTriggerLT) {
-			//character->GetMoveComponent()->GetDashSystem()->StartDash();
-		}
-
-
 		// 武器描画 
 		weapon->GetObject3D()->SetIsDraw(true);
 
@@ -55,7 +47,6 @@ namespace Character {
 		anima->SetIsPlaying(true);		// アニメーション再生
 		anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
 		anima->SetAnimation("SwordIdle01", 0.5f);	// 流すアニメーション設定
-		character->GetMoveComponent()->SetCanMove(true);
 	};
 
 #pragma endregion // 待機
@@ -68,14 +59,8 @@ namespace Character {
 		BaseWeapon* weapon = character->GetWeapon();		// 武器
 		BaseSpecial* special = character->GetSpecial();	// 必殺
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		character->GetMoveComponent()->SetCanMove(true);
 		weapon->GetObject3D()->SetIsDraw(true); // 武器描画
 		anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
-
-		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
-		if (isTriggerLT) {
-			//character->GetMoveComponent()->GetDashSystem()->StartDash();
-		}
 
 		// 武器リキャストタイム更新
 		weapon->RecastTime(Engine::MyGame::GameTime());
@@ -115,7 +100,6 @@ namespace Character {
 		anima->SetIsPlaying(true);			// 再生
 		anima->SetAnimationSpeed(1.0f);		// アニメーションスピード設定
 		anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
-		character->GetMoveComponent()->SetCanMove(true);
 	}
 
 #pragma endregion // 移動
@@ -166,7 +150,7 @@ namespace Character {
 
 
 
-		if (character->GetMoveComponent()->Velocity().y > 0.0f) { // 上昇しているなら
+		if (character->GetMoveComponent()->GetVelocity().y > 0.0f) { // 上昇しているなら
 			anima->SetIsLoop(false);
 			anima->SetAnimation("JumpStart01", 0.05f);
 		}
@@ -178,7 +162,7 @@ namespace Character {
 
 	// 終了
 	void PlayerStateJump::Exit() {
-		character->GetMoveComponent()->Velocity() = { 0,0,0 };
+		character->GetMoveComponent()->GetVelocity() = { 0,0,0 };
 	}
 	// 初期化
 	void PlayerStateJump::Enter() {
@@ -205,7 +189,6 @@ namespace Character {
 		anima->SetIsLoop(true);		   // ループ再生
 		anima->SetIsPlaying(true);	   // 再生
 		anima->SetAnimationSpeed(1.0f);// アニメーションスピード設定
-		character->GetMoveComponent()->SetCanMove(true);
 	}
 
 	void PlayerStateAttack::Enter()
@@ -226,8 +209,6 @@ namespace Character {
 		BaseSpecial* special = character->GetSpecial();
 		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
 
-		// キャラクターの動きを止める
-		character->Velocity() = {};
 		// UIを表示しない
 		player->GetPlayerUI()->SetIsTextRB(false);
 		RangeBombingSpecial* rengeSp = static_cast<RangeBombingSpecial*>(special);
@@ -235,8 +216,6 @@ namespace Character {
 		rengeSp->InAction();	// アクション中
 		rengeSp->SetIsDraw(false);	// 描画
 		if (special->GetPhese() == 0) {	// 最初フェーズなら
-			// 移動
-			player->GetMoveComponent()->SetCanMove(true);
 			// UI描画
 			player->GetPlayerUI()->SetIsTextRB(true);
 			// スペシャル描画

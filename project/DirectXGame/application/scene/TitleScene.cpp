@@ -14,12 +14,12 @@ void TitleScene::Initialize()
 	GetSceneData().playerID = 1;
 
 	// エフェクト
-	effect_ = std::make_unique<Effect>();
+	effect_ = std::make_unique<EffectSystem>();
 	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
 
 	// ステージ
 	titleStage_ = std::make_unique<TitleStage>();
-	titleStage_->Initialize(GetDxCommon(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	titleStage_->Initialize( GetEntityManager(),cameraManager_.get());
 	titleStage_->SetEffect(effect_.get());
 
 	// UI

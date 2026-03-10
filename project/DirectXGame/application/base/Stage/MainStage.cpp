@@ -12,7 +12,7 @@ void MainStage::Initialize(Engine::EntityManager* entityManager, CameraManager* 
 	// レベルデータ初期化
 	InitializeLevelData(entityManager, cameraManager, "gameScene.json");
 	// ステージコライダーシステム初期化
-	//InitializeStageColliderSystem(entityManager);
+	InitializeStageColliderSystem(entityManager);
 
 	// ミサイル発射台追加
 	for(int i = 0; i < provisionalData_.missileNumX; ++i)
