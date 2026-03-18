@@ -59,6 +59,7 @@ namespace HitBox {
 			}
 		}
 
+		void Clear();
 
 
 

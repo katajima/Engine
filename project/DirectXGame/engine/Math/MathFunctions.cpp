@@ -223,6 +223,64 @@ Vector3 ClosestPoint::SegmentTriangle(const Segment& segment, const Triangle& tr
 
 	return closest;
 }
+// 球と三角
+Vector3 ClosestPoint::SphereTriangle(const Sphere& sphere, const Triangle& triangle) {
+	
+	const Vector3 sphereCenter = sphere.center;
+
+	const Vector3 a = triangle.vertices[0];
+	const Vector3 b = triangle.vertices[1];
+	const Vector3 c = triangle.vertices[2];
+
+
+	const Vector3 ab = b - a;
+	const Vector3 ac = c - a;
+	const Vector3 ap = sphereCenter - a;
+
+	const float d1 = ab.Dot(ap);
+	const float d2 = ac.Dot(ap);
+	if (d1 <= 0.0f && d2 <= 0.0f) {
+		return a;
+	}
+
+	const Vector3 bp = sphereCenter - b;
+	const float d3 = ab.Dot(bp);
+	const float d4 = ac.Dot(bp);
+	if (d3 >= 0.0f && d4 <= d3) {
+		return b;
+	}
+
+	const float vc = d1 * d4 - d3 * d2;
+	if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) {
+		const float v = d1 / (d1 - d3);
+		return a + ab * v;
+	}
+
+	const Vector3 cp = sphereCenter - c;
+	const float d5 = ab.Dot(cp);
+	const float d6 = ac.Dot(cp);
+	if (d6 >= 0.0f && d5 <= d6) {
+		return c;
+	}
+
+	const float vb = d5 * d2 - d1 * d6;
+	if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
+		const float w = d2 / (d2 - d6);
+		return a + ac * w;
+	}
+
+	const float va = d3 * d6 - d5 * d4;
+	if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
+		const Vector3 bc = c - b;
+		const float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+		return b + bc * w;
+	}
+
+	const float denom = 1.0f / (va + vb + vc);
+	const float v = vb * denom;
+	const float w = vc * denom;
+	return a + ab * v + ac * w;
+}
 // 線と線
 Vector3 ClosestPoint::SegmentSegment(const Segment& seg1, const Segment& seg2, Vector3 currentClosest) {
 	Vector3 u = seg1.diff();

@@ -3,11 +3,9 @@
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
 #include <DirectXGame/application/base/Attack/LockOn/LockOnSystem.h>
-
 // 前方宣言
 namespace Character {
 	class ParameterComponent;
-	class BaseCharacter;
 }
 class BaseWeapon;	
 namespace Engine {
@@ -25,7 +23,7 @@ public:
 	void Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables,
 		Character::ParameterComponent* base, Character::BaseCharacter* owner);
 	// 更新
-	void Update(float dt);
+	void Update(const Character::CharacterContext& ctx);
 
 	
 public:

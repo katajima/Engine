@@ -6,7 +6,10 @@ void ReactionMoveSystem::Initialize() {
 }
 // 更新
 void ReactionMoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
-	coordinator.Request(reuest);
-	reuest.velocity = 0.0f;
+	
+	for (auto& re : requests) {
+		coordinator.Request(re);
+	}
+	requests.clear();
 }
 

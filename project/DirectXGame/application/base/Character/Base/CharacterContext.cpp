@@ -10,6 +10,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->rigidBody = owner->GetObjectComponent()->GetRigidBodyComponent();		// リジットボディー
 	this->movementComponent = owner->GetMoveComponent();						// 移動
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
+	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
 	this->comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
 }
@@ -20,12 +21,13 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(flo
 	ctx.dt = dt;
 	// 入力データ
 	if (input) {
+		ctx.input = input;
 		ctx.inputData = input->GetPlayerInputData();
 	}
 	// パラメータ;
 	ctx.parameters = owner->GetBasicParameters();
 	// カメラ
-	if (owner->GetCamera()) {
+	if (owner->GetCamera() && input) {
 		ctx.camera = owner->GetCamera();
 		// カメラ方向
 		ctx.cameraDirection = owner->GetCamera()->GetForward();
@@ -50,31 +52,36 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(flo
 	ctx.position = worldTransform->GetWorldPosition();
 	// 現在のステート
 	ctx.state = owner->GetCurrentMainState();
-	// 攻撃中なら
-	if (ctx.state == CharacterMainState::Attack) {
-		ctx.isAttacking = true;
-	}
+	
+	ctx.isStop = !owner->GetIsMove();
 
 	// 重力
 	ctx.isGravity = rigidBody->IsGravity();
 
 	// 着地状態か
 	ctx.onGround = movementComponent->GetIsLanding();
-
+	// 攻撃中なら
+	if (ctx.state == CharacterMainState::Attack) {
+		ctx.isAttacking = true;
+		if (!ctx.onGround) {
+			ctx.isJumpAttacking = true;
+		}
+	}
+	if (ctx.state == CharacterMainState::Jump) {
+		ctx.isJumping = true;
+	}
 	// 攻撃時の重力
 	if (comboStateMachine->GetCurrentState()) {
 		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale_;
 	}
 	// 上昇時の重力
-	ctx.upGravity = jumpSystem->GetData().upGravity_;
+	ctx.upGravity = jumpSystem->GetData().upGravity;
 	// 落下時の重力
-	ctx.fallGravity = jumpSystem->GetData().fallGravity_;
-
+	ctx.fallGravity = jumpSystem->GetData().fallGravity;
 	// ターゲット取得
 	ctx.target = lockOnSystem->GetTarget();
 	// 移動速度
-	ctx.moveSpeed = ctx.parameters->speed;
-
-
+	ctx.moveSpeed = moveSystem->GetData().maxSpeed;
+	
 	return ctx;
 }

@@ -17,6 +17,13 @@ void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	fade_->SetSize(uiSize_);
 	fade_->SetColor(uiColor_);
 
+	// カウントUI
+	InitUICount("numCount", numPosition_, 1, false);
+	Engine::UICount* hitCount = GetUICount("numCount");
+	hitCount->SetMaxSize(numUiSize_, {});	// 最大サイズ
+	hitCount->SetTextuerSize({64,96});				// テクスチャサイズ
+	hitCount->SetCountMax(9);							// カウント最大数
+	hitCount->SetCountColor(numUiColor_);	// 色指定
 }
 
 void GameStartUI::Update(float dt) {
@@ -33,10 +40,22 @@ void GameStartUI::Update(float dt) {
 		}
 	}
 
+	Engine::UICount* hitCount = GetUICount("numCount");
+	hitCount->SetMaxSize(numUiSize_, {});
+	hitCount->SetCountColor(numUiColor_);
+	hitCount->SetCount(num);
+	hitCount->Update(dt);
+
 	fade_->SetColor(uiColor_);
 	fade_->Update();
+
+	
 }
 
 void GameStartUI::Draw() {
+	Engine::UICount* hitCount = GetUICount("numCount");
+	if (isNum) {
+	//	hitCount->Draw();
+	}
 	fade_->Draw();
 }

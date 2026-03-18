@@ -150,6 +150,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp" />
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCarState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCarStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Base\BaseCharacter.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterContext.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
@@ -199,8 +200,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\TitleStage.cpp" />
-    <ClCompile Include="DirectXGame\application\base\State\BaseMainState.cpp" />
-    <ClCompile Include="DirectXGame\application\base\State\CharacterStateMachine.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\State\BaseMainState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
@@ -212,6 +213,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
     <ClCompile Include="DIRECTXGAME\APPLICATION\BASE\WEAPON\ENEMY\SmallMeleeWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Enemy\SmallRangeWeapon.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
@@ -242,7 +244,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Input\InputHander.cpp" />
     <ClCompile Include="DirectXGame\application\base\Special\RangeBombingSpecial.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Vision\VisionComponent.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Weapon\PlayerWeapon.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\PlayerUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\Stage\MainStage.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\Base\BaseUI.cpp" />
@@ -861,6 +863,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\State\MainState.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Result\ResultSystem.h" />
@@ -909,10 +912,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Stage\StageColliderSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\TutorialStage.h" />
-    <ClInclude Include="DirectXGame\application\base\State\BaseMainState.h" />
-    <ClInclude Include="DirectXGame\application\base\State\CharacterStateMachine.h" />
-    <ClInclude Include="DirectXGame\application\base\State\BaseSubState.h" />
-    <ClInclude Include="DirectXGame\application\base\State\SubStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\State\BaseMainState.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\State\CharacterStateMachine.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\State\BaseSubState.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\State\SubStateMachine.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\Effect.h" />
@@ -925,6 +928,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Enemy\SmallMeleeWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Enemy\SmallRangeWeapon.h" />
+    <ClInclude Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.h" />
     <ClInclude Include="DirectXGame\application\scene\CharacterDebugScene.h" />
     <ClInclude Include="DirectXGame\application\scene\ModelScene.h" />
     <ClInclude Include="DirectXGame\application\scene\ResultScene.h" />
@@ -975,7 +979,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Input\InputHander.h" />
     <ClInclude Include="DirectXGame\application\base\Special\RangeBombingSpecial.h" />
-    <ClInclude Include="DirectXGame\application\base\Weapon\PlayerWeapon.h" />
+    <ClInclude Include="DirectXGame\application\base\Weapon\Player\PlayerWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\UI\PlayerUI.h" />
     <ClInclude Include="DirectXGame\application\base\Stage\MainStage.h" />
     <ClInclude Include="DirectXGame\application\base\UI\Base\BaseUI.h" />

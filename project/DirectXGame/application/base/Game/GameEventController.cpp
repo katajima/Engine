@@ -7,7 +7,7 @@
 
 namespace Game {
 
-	void GameEventController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, 
+	void GameEventController::Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		CameraManager* cameraManager, Character::CharacterManager* characterManager, InputSystem* input)
 	{
 		this->entityManager = entityManager;		// エンティティ3d
@@ -21,27 +21,41 @@ namespace Game {
 
 		// イベントステート初期化
 		eventStateMachine_ = std::make_unique<Game::EventStateMachine>();
-		eventStateMachine_->Initialize(characterManager, characterSpawnManager_.get(),input);
+		eventStateMachine_->Initialize(characterManager, characterSpawnManager_.get(), input);
 
 		// ゲームスタートUI初期化
 		gameStartUI_ = std::make_unique<GameStartUI>();
-		gameStartUI_->Initialize(nullptr,entityManager,globalVariables);
+		gameStartUI_->Initialize(nullptr, entityManager, globalVariables);
 
 		Game::GameEventData data;
 		data.eventType_ = GameEventType::kStart;
 		data.time_.max = 5.0f;
+		data.isMove = false;
 		CreateGameEvent("start", data);
 
-
+		data.isMove = true;
 		data.eventType_ = GameEventType::kBreakTime;
-		data.time_.max = 5.0f;
+		data.time_.max = 3.0f;
 		CreateGameEvent("breakTime", data);
 
-		CreateSpawn(Character::EnemyType::kMediumMelee,"normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,500 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, { 0,1,500 }, { 10,1,10 }, 0.75f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, { -500,1,500 }, { 10,1,10 }, 0.75f);
+		Vector3 popPos = { 0,1,100 };
+		Vector3 popPos2 = { 100,1,100 };
+		Vector3 popPos3 = { 0,1,100 };
+		Vector3 popPos4 = { -100,1,100 };
+		Vector3 popPos5 = { 0,1,-100 };
+		Vector3 popPos6 = { 100,1,0 };
+		Vector3 popPos7 = { -100,1,0 };
+
+		Vector3 size = {50,1,50};
+
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 1, popPos, size, 10.0f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos, size, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos2, size, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, popPos, size, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, popPos4, size, 0.75f);
+		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
+		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -49,12 +63,12 @@ namespace Game {
 
 		CreateGameEvent("battle01", data);
 
-		/*CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, { 0,1,500 }, { 10,1,10 }, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, { 0,1,-400 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, { 0,0,-400 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
 
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, { 500,1,0 }, { 10,1,10 }, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, { -500,1,0 }, { 10,1,10 }, 0.75f);*/
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
 
 
 		data.eventType_ = GameEventType::kBattle;
@@ -78,10 +92,10 @@ namespace Game {
 		CreateGameEvent("end", data);*/
 
 		ConnectNode("start", "", "breakTime");
-		ConnectNode("breakTime","","battle01");
+		ConnectNode("breakTime", "", "battle01");
 		ConnectNode("battle01", "", "battle02");
 		ConnectNode("battle02", "", "result");
-		ConnectNode("result", "", "end");
+		//ConnectNode("result", "", "end");
 
 		eventStateMachine_->SetRoot(GetNodeState("start"));
 	}
@@ -131,17 +145,22 @@ namespace Game {
 #pragma endregion // イベント系
 
 	void GameEventController::Update(float dt) {
+		
+		
 		// キャラクター出現管理更新
 		characterSpawnManager_->Update(dt);
 
 		// イベントステートマシン更新
 		eventStateMachine_->Update(dt);
+		curretWave_ = eventStateMachine_->GetCurrentState()->GetData().battleWaveIndex_;
+		time_ = eventStateMachine_->GetCurrentState()->GetCurrentTimer();
 
 		// ゲーム開始UI
+		gameStartUI_->SetNum(time_);
 		gameStartUI_->Update(dt);
 
 		if (eventStateMachine_->GetCurrentState()->GetData().eventType_ == GameEventType::kStart) {
-			cameraManager->SetUseCamera("stageCamera",0.0f);
+			cameraManager->SetUseCamera("stageCamera", 0.0f);
 			isStart = true;
 			if (eventStateMachine_->GetCurrentState()->RemainingTime() <= 0.5f) {
 				gameStartUI_->IsFade();
@@ -154,10 +173,16 @@ namespace Game {
 				cameraManager->SetUseCamera("followCamera", 0.0f);
 			}
 		}
-		
-		curretWave_ = eventStateMachine_->GetCurrentState()->GetData().battleWaveIndex_;
-		time_ = eventStateMachine_->GetCurrentState()->GetCurrentTimer();
 
+		if (eventStateMachine_->GetCurrentState()->GetData().eventType_ == GameEventType::kBreakTime) {
+			gameStartUI_->IsNum(true);
+		}
+		else {
+			gameStartUI_->IsNum(false);
+		}
+
+
+		
 		bool isCharaPlayerDed = !characterManager->GetPlayer()->GetAlive();
 		bool isCharaEnemyDed = characterManager->GetCharacterCount(Character::Type::Enemy) <= 0;
 
@@ -175,13 +200,11 @@ namespace Game {
 	}
 
 	void GameEventController::Draw() {
-	
+
 	};
 
 	void GameEventController::Draw2D() {
-		//if (eventStateMachine_->GetCurrentState()->GetData().eventType_ == GameEventType::kStart) {
-			gameStartUI_->Draw();
-		//}
+		gameStartUI_->Draw();
 	};
 
 

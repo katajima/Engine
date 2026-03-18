@@ -20,21 +20,16 @@ void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 		GetObject3D()->GetModel()->GetModelData().mesh[0]->GetMax());
 	// 描画する
 	GetObject3D()->SetIsDraw(true);
-	// スケール3
+	// スケール
 	GetObject3D()->GetWorldTransform().scale_ = provisionalData_.scale_;
 }
 
-void PlayerWeapon::Update()
-{
+void PlayerWeapon::Update(){
 	// ワールドトランスフォーム更新
 	GetObject3D()->UpdateWorldTransform();
 }
 
-void PlayerWeapon::Draw2D()
-{
-}
+void PlayerWeapon::Draw2D(){}
 
-void PlayerWeapon::DrawEffect()
-{
-}
+void PlayerWeapon::DrawEffect(){}
 

@@ -5,12 +5,10 @@
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
 namespace Character {
-	void SmallCartEnemyMoveState::Update()
+	void SmallCartEnemyMoveState::Update(const CharacterContext& ctx)
 	{
-		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character);
-
 		// 時間更新
-		timer_ += character->GetTime();
+		timer_ += ctx.dt;
 
 		// HPが0以上なら
 		if (character->GetHP() > 0) {
@@ -32,13 +30,13 @@ namespace Character {
 	void SmallCartEnemyMoveState::Enter()
 	{
 		timer_ = 0.0f;
-		character->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 3.0f;
+		character->GetMoveComponent()->GetMoveSystem()->Data().maxSpeed = 3.0f;
 	}
 
-	void SmallCartEnemyDieState::Update()
+	void SmallCartEnemyDieState::Update(const CharacterContext& ctx)
 	{
 		// 時間更新
-		timer_ -= character->GetTime();
+		timer_ -= ctx.dt;
 		if (timer_ <= 0.0f) {
 			// 死亡判定に
 			character->SetAlive(false);

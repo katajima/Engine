@@ -37,8 +37,7 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
-		
-		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
+
 		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		moveComponent_->GetMovementSystem()->SetUseGravity(false);
 		
@@ -47,18 +46,12 @@ namespace Character {
 		worldEffect_.Initialize();
 		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
 		worldEffect_.translate_ = { 0,1,0 };
-
-		// スプライト初期化
-		Initialize2D();
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
 
 	void SmallRangeEnemy::Update()
 	{
-
-		// 攻撃制御更新
-		attackController_->Update(GetTime());
 		// 基盤の更新
 		BaseUpdate();
 
@@ -99,7 +92,7 @@ namespace Character {
 
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
-			Parameters()->speed = 0;
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				attackTimer_ = 0.0f;
 				// 攻撃ステートへ
@@ -107,13 +100,12 @@ namespace Character {
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				//Vector3 velo = { -GetVelocity().x, GetVelocity().y, -GetVelocity().z };
-				Parameters()->speed = -globalData_.retreatSpeed;
+				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			Parameters()->speed = moveSpeed_;
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
 		}
 	}
 

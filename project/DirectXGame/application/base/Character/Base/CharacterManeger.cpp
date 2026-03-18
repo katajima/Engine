@@ -13,15 +13,13 @@ namespace Character {
 		this->camera = camera;					// カメラ
 	}
 
-	void CharacterManager::Update()
-	{
-		// 死亡したキャラクター(敵)を削除
+	void CharacterManager::Update(bool isMove) {
+		// 死亡したキャラクターを削除
 		character_.erase(
 			std::remove_if(character_.begin(), character_.end(),
 				[](const std::unique_ptr<BaseCharacter>& character) {
-					auto enemy = dynamic_cast<BaseEnemy*>(character.get());
-					if (!enemy) { return false; } // 敵じゃない
-					return !enemy->GetAlive() && enemy->GetDelete();
+					if (!character) { return false; } // 敵じゃない
+					return !character->GetAlive() && character->GetDelete();
 				}),
 			character_.end());
 
@@ -37,6 +35,7 @@ namespace Character {
 		for (auto& character : character_) {
 			if (character) {
 				if (character->GetCharacterType() == Type::Enemy) {
+					character->IsMove(isMove);
 					character->Update();
 					if (character->GetAlive()) {
 						target.push_back(character.get());
@@ -48,14 +47,14 @@ namespace Character {
 		// キャラクター更新(プレイヤー)
 		if (GetPlayer()) {
 			// ターゲット設定
+			GetPlayer()->IsMove(isMove);
 			GetPlayer()->SetTargetCharacters(target);
 			GetPlayer()->Update();
 		}
 	}
 
 
-	void CharacterManager::Draw2D()
-	{
+	void CharacterManager::Draw2D() {
 		// スプライト描画
 		for (auto& character : character_) {
 			if (character) {

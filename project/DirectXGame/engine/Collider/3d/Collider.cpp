@@ -147,128 +147,73 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 		}
 	}
 
-	if (other.GetType() == ColliderType::Sphere) {
+	else if (other.GetType() == ColliderType::Triangle) {
 		const TriangleCollider& triangleColl = static_cast<const TriangleCollider&>(other);
 
 		const Triangle triangle = triangleColl.GetWorldTriangle();
 		const Vector3 sphereCenter = centerWorld;
 		const float sphereRadius = radius;
-
 		const Vector3 a = triangle.vertices[0];
 		const Vector3 b = triangle.vertices[1];
 		const Vector3 c = triangle.vertices[2];
-
-		// 線分上最近点
-		auto ClosestPointOnSegment = [](const Vector3& p, const Vector3& s0, const Vector3& s1) -> Vector3
-			{
-				const Vector3 seg = s1 - s0;
-				const float segLenSq = seg.Dot(seg);
-
-				if (segLenSq <= 1e-6f) {
-					return s0;
-				}
-
-				float t = (p - s0).Dot(seg) / segLenSq;
-				t = std::clamp(t, 0.0f, 1.0f);
-				return s0 + seg * t;
-			};
-
-		// 三角形上最近点
-		auto ClosestPointOnTriangle = [&](const Vector3& p) -> Vector3
-			{
-				const Vector3 ab = b - a;
-				const Vector3 ac = c - a;
-				const Vector3 ap = p - a;
-
-				const float d1 = ab.Dot(ap);
-				const float d2 = ac.Dot(ap);
-				if (d1 <= 0.0f && d2 <= 0.0f) {
-					return a; // 頂点 A 領域
-				}
-
-				const Vector3 bp = p - b;
-				const float d3 = ab.Dot(bp);
-				const float d4 = ac.Dot(bp);
-				if (d3 >= 0.0f && d4 <= d3) {
-					return b; // 頂点 B 領域
-				}
-
-				const float vc = d1 * d4 - d3 * d2;
-				if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) {
-					const float v = d1 / (d1 - d3);
-					return a + ab * v; // 辺 AB
-				}
-
-				const Vector3 cp = p - c;
-				const float d5 = ab.Dot(cp);
-				const float d6 = ac.Dot(cp);
-				if (d6 >= 0.0f && d5 <= d6) {
-					return c; // 頂点 C 領域
-				}
-
-				const float vb = d5 * d2 - d1 * d6;
-				if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
-					const float w = d2 / (d2 - d6);
-					return a + ac * w; // 辺 AC
-				}
-
-				const float va = d3 * d6 - d5 * d4;
-				if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
-					const Vector3 bc = c - b;
-					const float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-					return b + bc * w; // 辺 BC
-				}
-
-				// 面内部
-				const float denom = 1.0f / (va + vb + vc);
-				const float v = vb * denom;
-				const float w = vc * denom;
-				return a + ab * v + ac * w;
-			};
-
-		const Vector3 closest = ClosestPointOnTriangle(sphereCenter);
+		const float epsilon = 1e-6f;
+		// 最近接点
+		const Vector3 closest = ClosestPoint::SphereTriangle(Sphere{ sphereCenter,sphereRadius }, triangle);
 		Vector3 diff = sphereCenter - closest;
-
 		const float distSq = diff.Dot(diff);
 		const float radiusSq = sphereRadius * sphereRadius;
-
 		if (distSq > radiusSq) {
 			return false;
 		}
 
-		// 侵入している
-		const float epsilon = 1e-6f;
+		Vector3 normal = (b - a).Cross(c - a);
+		const float normalLenSq = normal.Dot(normal);
+		if (normalLenSq <= epsilon) {
+			return false;
+		}
+		normal /= std::sqrt(normalLenSq);
 
-		if (distSq > epsilon) {
-			const float dist = std::sqrt(distSq);
-			const float penetration = sphereRadius - dist;
-			outPushVec = diff / dist * penetration;
+		// 法線方向押し戻し
+		if (triangleColl.isNormal) {
+			float signedDist = (sphereCenter - a).Dot(normal);
+
+			if (signedDist < 0.0f) {
+				normal = -normal;
+				signedDist = -signedDist;
+			}
+
+			const float penetration = sphereRadius - signedDist;
+			if (penetration <= 0.0f) {
+				return false;
+			}
+
+			outPushVec = normal * penetration;
 			return true;
 		}
 
-		// 球中心が最近点とほぼ一致しているケース
-		// = 中心がちょうど面上 / 辺上 / 頂点上に近い
-		// この場合は三角形法線方向へ押し出す
-		Vector3 normal = (b - a).Cross(c - a);
-		const float normalLenSq = normal.Dot(normal);
+		// 最近点方向押し戻し
+		if (distSq > epsilon) {
+			const float dist = std::sqrt(distSq);
+			const float penetration = sphereRadius - dist;
+			outPushVec = (diff / dist) * penetration;
+			return true;
+		}
 
-		if (normalLenSq <= epsilon) {
-			// 退化三角形
+		// diff が潰れるケースだけ法線フォールバック
+		float signedDist = (sphereCenter - a).Dot(normal);
+		if (signedDist < 0.0f) {
+			normal = -normal;
+			signedDist = -signedDist;
+		}
+
+		const float penetration = sphereRadius - signedDist;
+		if (penetration <= 0.0f) {
 			return false;
 		}
 
-		normal /= std::sqrt(normalLenSq);
-
-		// 球中心が法線のどちら側にいるかで押し出し方向を決める
-		const float signedDist = (sphereCenter - a).Dot(normal);
-		if (signedDist < 0.0f) {
-			normal = -normal;
-		}
-
-		outPushVec = normal * sphereRadius;
+		outPushVec = normal * penetration;
 		return true;
 	}
-
 
 	return false;
 }

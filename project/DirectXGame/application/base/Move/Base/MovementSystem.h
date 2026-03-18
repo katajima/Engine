@@ -20,16 +20,13 @@ public:
 	void Update(const Character::CharacterContext& ctx,const MoveCommand& cmd,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 
 public:
-
 	// 着地状態か？
-	bool IsOnGround() const{ return onGround_; }
+	bool IsOnGround() const{ return isLinding_; }
 	// 
 	Vector3 GetDirection() const { return direction_;}
 	// ジャンプの処理を使うか設定
 	void SetUseGravity(bool isUse) { useGravity = isUse; }
-
 private:
-
 	// 重力処理
 	void GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
 	// 回転処理
@@ -37,11 +34,9 @@ private:
 private:
 	// 高さ
 	float groundHeight_ = -3.0f;
-	Engine::WorldTransform* world;
-	Engine::RigidBodyComponent* rigid;
-
-	bool onGround_ = false;
 	bool useGravity = true;
+
+	bool isLinding_ = false;
 	// 移動方向
 	Vector3 direction_ = { 0.0f,0.0f,1.0f };
 	// 回転補間速度

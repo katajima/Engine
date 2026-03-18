@@ -13,9 +13,7 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboHitBox::Update(const InputSystem& inputSystem, float timer, float dt) {
-
-
+	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
 		for (auto& coll : collData_) {
 			coll.reactionData.GetKnockbackData().SetNormal(direction_);
 		}
@@ -33,36 +31,25 @@ namespace Combo {
 			break;
 		case HitBox::SpawnType::kOnGround: // 着地したら
 			if (movementComponent->GetIsLanding()) {
-				timer_ += dt;
-				if (timer >= data_.hitBpxWindowStart_) {
-					if (!isPopHitBox_) {
-						hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
-						isPopHitBox_ = true;
-					}
-				}
-			}
-			break;
-		case HitBox::SpawnType::kOnAir:
-			break;
-		case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
-			if (button_.IsReleased(inputSystem)) {
 				if (!isPopHitBox_) {
 					hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
 					isPopHitBox_ = true;
 				}
 			}
 			break;
+		case HitBox::SpawnType::kOnAir:
+			break;
+		case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
+			break;
 		default:
 			break;
 		}
-
-
-
 	}
 
 	// 終了
 	void ComboHitBox::Exit() {
 		isPopHitBox_ = false;
+		hitBoxSystem_->Clear();
 		timer_ = 0.0f;
 	}
 

@@ -4,24 +4,23 @@
 
 #pragma region ComboCondition
 
-void Combo::ComboCondition::Update(const InputSystem& inputSystem, float timer, float dt) {
+void Combo::ComboCondition::Update(const Character::CharacterContext& ctx, float timer) {
 
 	// キャンセル受付クラス更新
 	if (!nextRecever_.GetIsNext()) {
-		cancelReceiver_.Update(inputSystem, timer);
+		cancelReceiver_.Update(ctx, timer);
 	}
 	// コンボ入力受付クラス更新
 	if (!cancelReceiver_.GetIsCancel()) {
-		nextRecever_.Update(inputSystem, timer);
+		nextRecever_.Update(ctx, timer);
 	}
 	// 終了条件
-	endCondition_.Update(inputSystem, movementComponent, timer, dt);
+	endCondition_.Update(ctx, timer);
 	// 移行条件
-	nextCondition_.Update(inputSystem, movementComponent, timer, dt);
+	nextCondition_.Update(ctx, timer);
 }
 
 void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {
-	movementComponent = owner->GetMoveComponent();	// 移動システム取得
 	// キャンセル受付クラス
 	cancelReceiver_.Enter();
 	// 移行受付クラス

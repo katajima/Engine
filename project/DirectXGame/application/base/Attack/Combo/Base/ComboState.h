@@ -1,15 +1,8 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboData.h"
 #include "DirectXGame/application/base/Attack/Input/AttackInputHandler.h"
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
-#include <optional>
-#include <memory>
-#include <map>
-
-// 前方宣言
-namespace Character {
-    class BaseCharacter;
-}
 namespace Combo {
     /// <summary>
     /// コンボステートクラス
@@ -18,11 +11,11 @@ namespace Combo {
     public:
         virtual ~State() = default;
         // 開始
-        virtual void Enter(Character::BaseCharacter* owner) = 0;
+        virtual void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) = 0;
         // 更新
-        virtual void Update(Character::BaseCharacter* owner, float deltaTime) = 0;
+        virtual void Update(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) = 0;
         // 終了
-        virtual void Exit(Character::BaseCharacter* owner) = 0;
+        virtual void Exit(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) = 0;
 
     public:
         // 次のステートに遷移するかを判断する
@@ -57,17 +50,17 @@ namespace Combo {
     class NodeState : public State {
     public:
         NodeState(std::string anim, ComboData combo)
-            : animation(anim), comboData_(combo) {
+            : animation(anim), comboData(combo) {
         }
         // 開始
-        void Enter(Character::BaseCharacter* owner) override;
+        void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) override;
         // 更新
-        void Update(Character::BaseCharacter* owner, float dt) override;
+        void Update(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) override;
         // 終了
-        void Exit(Character::BaseCharacter* owner) override;
+        void Exit(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) override;
 
         // 終了処理
-        void End(Character::BaseCharacter* owner);
+        void End(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 
     public:
 
@@ -93,23 +86,23 @@ namespace Combo {
         }
         // 入力受付可能か
         bool IsInputAcceptable() override {
-            return comboData_.GetComboCondition().IsComdoNextInputWindow(timeInState);
+            return comboData.GetComboCondition().IsComdoNextInputWindow(timeInState);
         }
         // 次のステートえ移行受付する時間
         bool GetNextStateTime() override {
-            return timeInState > comboData_.GetComboCondition().GetComboNextTime();
+            return timeInState > comboData.GetComboCondition().GetComboNextTime();
         }
         // ステート終了時間
         bool GetEndStateTime() override {
-            return timeInState > comboData_.GetComboCondition().GetComboEndTime();
+            return timeInState > comboData.GetComboCondition().GetComboEndTime();
         }
         // 次のステートへ移行可能か
         bool GetIsNextState() override {
-            return comboData_.GetComboCondition().GetNextReceiver().GetIsNext();
+            return comboData.GetComboCondition().GetNextReceiver().GetIsNext();
         };
         // キャンセルするか
         bool GetIsCansel() {
-            return comboData_.GetComboCondition().GetCancelReceiver().GetIsCancel();
+            return comboData.GetComboCondition().GetCancelReceiver().GetIsCancel();
         }
         // コンボ名取得
         std::string GetName() const { return name; }
@@ -119,9 +112,9 @@ namespace Combo {
         void SetName(const std::string& comboName) { name = comboName; }
 
         // コンボデータ取得
-        ComboData& Data() { return comboData_; }
+        ComboData& Data() { return comboData; }
 
-        ComboData GetData() const { return comboData_; }
+        ComboData GetData() const { return comboData; }
 
     private:
         // コンボ名
@@ -129,7 +122,7 @@ namespace Combo {
         // アニメーション名
         std::string animation;
         // コンボデータ
-        ComboData comboData_;
+        ComboData comboData;
         // 次のステートマップ
         std::map<AttackInput, std::weak_ptr<NodeState>> nextStates;
     };
@@ -142,16 +135,16 @@ namespace Combo {
         StateMachine(Character::BaseCharacter* entity) : owner(entity) {}
 
         // ステート設定
-        void SetState(std::shared_ptr<State> state);
+        void SetState(std::shared_ptr<State> state, const Character::CharacterContext& ctx);
         // 更新
-        void Update(float dt);
+        void Update(const Character::CharacterContext& ctx);
 
         // 入力はバッファに保存のみ
         void HandleInput(AttackInput input) {
             bufferedInput = input;
         }
         // リセット
-        void Reset() { SetState(rootState); }
+        void Reset() { SetState(rootState,{}); }
         // 設定
         void SetRoot(std::shared_ptr<State> state);
         // コンボが終了したか
@@ -162,7 +155,14 @@ namespace Combo {
         }
 
         // 現在のステートを取得
-        std::shared_ptr<NodeState> GetCurrentState() const { return std::dynamic_pointer_cast<NodeState>(currentState); }
+        std::shared_ptr<NodeState> GetCurrentState() const { 
+            if (currentState) {
+                return std::dynamic_pointer_cast<NodeState>(currentState);
+            }
+            else {
+                return nullptr;
+            }
+        }
 
     private:
         Character::BaseCharacter* owner;                       // 使用者

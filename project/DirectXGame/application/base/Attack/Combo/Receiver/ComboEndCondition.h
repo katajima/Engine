@@ -18,7 +18,7 @@ namespace Combo {
 		//　終了
 		void Exit();
 		// 更新
-		void Update(const InputSystem& inputSystem, MovementComponent* movementComponent, float time, float dt);
+		void Update(const Character::CharacterContext& ctx,float time);
 	public:
 		//
 		Data& GetData() { return data_; }

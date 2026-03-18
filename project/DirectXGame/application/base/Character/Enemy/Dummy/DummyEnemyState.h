@@ -1,7 +1,7 @@
 #pragma once
 
 #pragma once
-#include "DirectXGame/application/base/State/BaseMainState.h"
+#include "DirectXGame/application/base/Character/State/BaseMainState.h"
 
 
 namespace Character {
@@ -18,7 +18,7 @@ namespace Character {
 
 
 		// 更新
-		void Update() override {};
+		void Update(const CharacterContext& ctx) override {};
 
 		// 終了
 		void Exit() override {};
@@ -41,7 +41,7 @@ namespace Character {
 		}
 
 		// 更新
-		void Update() override {};
+		void Update(const CharacterContext& ctx) override {};
 
 		// 終了
 		void Exit() override {};

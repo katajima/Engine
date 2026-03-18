@@ -4,24 +4,10 @@
 #include <functional>
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "SubStateMachine.h"
+#include "MainState.h"
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Character {
-	// キャラクター行動(一段階)
-	enum class CharacterMainState {
-		Idle,		// 待機
-		Move,       // 移動
-		Jump,       // ジャンプ
-		Avoidance,  // 回避
-		Defense,    // 防御
-		Attack,     // 攻撃
-		Skill,      // スキル
-		Special,    // 必殺技
-		Die,        // 死亡
-		Fainting,   // 気絶
-		Damage,     // 被弾
-		Dash,       // ダッシュ
-	};
-
 	//前方宣言
 	class BaseCharacter;
 
@@ -35,7 +21,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 
@@ -59,7 +45,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -74,7 +60,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -89,7 +75,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -104,7 +90,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -119,7 +105,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -134,7 +120,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 
@@ -155,7 +141,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -170,7 +156,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -185,7 +171,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 	};
@@ -200,7 +186,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 
@@ -226,7 +212,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 
@@ -254,7 +240,7 @@ namespace Character {
 		// 開始
 		virtual void Enter() {}
 		// 更新
-		virtual void Update() {}
+		virtual void Update(const CharacterContext& ctx) {}
 		// 終了
 		virtual void Exit() {}
 

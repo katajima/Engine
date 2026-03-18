@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
-#include "DirectXGame/application/base/Weapon/playerWeapon.h"
+#include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
+#include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "NormalPlayerState.h"
 
@@ -71,7 +72,6 @@ namespace Character {
 		// 調整項目の適用
 		void ApplyGlobalVariables();
 	private:
-		Engine::WorldTransform worldCollider_;
 		std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 
 		void ReloadComboData();

@@ -43,7 +43,7 @@ void Engine::Object3dInstansManager::Update() {
 			for (auto objectIterator = group.object.begin(); objectIterator != group
 				.object.end();) {
 				// 描画されていないもしくはオブジェクトがない場合はスキップ
-				if (!objectIterator->is_ || !objectIterator->isDraw_) {
+				if (!objectIterator->is_ || objectIterator->GetIsDelete() || !objectIterator->isDraw_) {
 					++objectIterator;
 					continue;
 				}
@@ -87,7 +87,7 @@ void Engine::Object3dInstansManager::Update() {
 			for (auto objectIterator = group.object.begin(); objectIterator != group
 				.object.end();) {
 				// 描画されていないもしくはオブジェクトがない場合はスキップ
-				if (!objectIterator->is_ || !objectIterator->isDraw_) {
+				if (!objectIterator->is_ || objectIterator->GetIsDelete() || !objectIterator->isDraw_) {
 					++objectIterator;
 					continue;
 				}

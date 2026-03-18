@@ -58,16 +58,6 @@ namespace Character {
 		float GetTargetDistance();
 		// ターゲット方向取得
 		Vector3 TargetDirection();
-		
-
-		// ロックオンされているか
-		bool GetIsLockOn() const { return isLockOn_; }
-		//　ロックオンされているか設定
-		void SetIsLockOn(bool isLockOn) { isLockOn_ = isLockOn; }
-	protected:
-		// スプライト初期化
-		void Initialize2D();
-
 	private:
 
 		void InitializeBaseEnemyAddItem() {
@@ -99,14 +89,9 @@ namespace Character {
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
 	protected:
-
-	protected: //2D
-		std::unique_ptr<Engine::Sprite> icon_lockOn;
-	protected:
 		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
 		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
-		bool isLockOn_ = false; // ロックオンされているか
-
+		
 		// グローバルデータ
 		EnemyGlobalData globalData_;
 	protected:

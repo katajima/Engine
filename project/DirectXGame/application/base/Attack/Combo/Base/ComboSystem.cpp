@@ -16,6 +16,11 @@ namespace Combo {
 
 	}
 
+	void System::Update(const Character::CharacterContext& ctx) {
+		comboStateMachine_->Update(ctx);
+		comboDebug_->Update(ctx.dt);
+	}
+
 	void System::ClearNode() {
 
 		// StateMachineの状態を完全リセット

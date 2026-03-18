@@ -9,15 +9,8 @@ enum class WeaonType
 };
 
 // 遠近どちらにもあるパラメータ持つ武器データ構造体
-struct WeaponData
-{
+struct WeaponData{
 	WeaonType type = WeaonType::MELL;	// 武器の種類(遠近)
-	bool isAutomatic = false;			// オート連射(入力しっぱなしで攻撃)可能かのフラグ
-	bool isActive = false;				// 武器が有効かどうかのフラグ(攻撃中か)
-
-	// 攻撃再発動時間
-	float recastTime = 0;
-	const float MaxRecastTime = 0.5f;
 };
 
 // 近距離武器専用のデータ構造体(近距離武器クラス用)

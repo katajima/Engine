@@ -22,7 +22,13 @@ namespace Combo {
 		kLockAt,	// カメラ方向
 	};
 
-	
+	// 攻撃タイプ
+	enum class AttackType{
+		kNone,		// なし
+		kMelle,		// 近距離
+		kRange,		// 遠距離
+		kMix,		// 合わせ
+	};
 
 
 
@@ -30,7 +36,7 @@ namespace Combo {
 	struct GlobalData {
 
 		std::string animationName = "";	// アニメーション名
-
+		AttackType attackType = AttackType::kMelle;	// 攻撃タイプ
 
 		float hitBoxWindowStart_ = 0.0f;	// ヒットボックスの生成タイミング時間
 		float hitBoxLifeTime_ = 0.5f;		// ヒットボックスの生存時間

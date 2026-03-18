@@ -44,8 +44,6 @@ private:// 貰いもの
 	Character::ParameterComponent* paremeter = nullptr;
 	// オブジェクト
 	ObjectComponent* object = nullptr;
-	// ヒットフラグ<タグ、フラグ>何かヒットしたときに使う用のやつ 
-	std::map<std::string, bool> hitFlags_;
 };
 
 
@@ -58,7 +56,10 @@ public:
 
 	// 衝突応答(タグごとの)
 	void Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other);
-
+	// 壁や床
+	void HitWall(Engine::Collider* self, Engine::Collider* other);
+	// 影響
+	void HitEffect(Engine::Collider* self, Engine::Collider* other);
 	// 使っているもののワールドトランスフォームを設定
 	void SetOwner(Engine::WorldTransform* owner) { transform = owner; };
 

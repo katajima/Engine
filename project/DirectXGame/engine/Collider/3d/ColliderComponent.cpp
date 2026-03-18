@@ -47,14 +47,14 @@ void ColliderComponent::CheckAndNotify(ColliderComponent& other)
 }
 
 uint32_t ColliderComponent::AddCollider(std::unique_ptr<Collider> collider) {
-    collider->owner = owner;
+    collider->owner = this;
     collider->id = nextId_;
     uint32_t id = nextId_++;
     colliders.push_back({ id, std::move(collider) });
     return id;
 }
 
-void ColliderComponent::SetOwner(void* newOwner){
+void ColliderComponent::SetOwner(ColliderComponent* newOwner){
     owner = newOwner;
     for (auto& entry : colliders) {
         entry.collider->owner = newOwner;

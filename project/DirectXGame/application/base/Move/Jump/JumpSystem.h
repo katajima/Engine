@@ -25,10 +25,12 @@ public:
 	JumpData& Data() { return data_; }
 	//	ジャンプ出来るか
 	bool GetIsJump() const { return jumpCount_ > 0; }
+	//
+	bool GetIsJumping() const { return isJumping_;}
 	// データ設定
 	void SetData(const JumpData& data) { data_ = data; }
 	// 最大ジャンプカウント設定
-	void SetMaxJumpCount(int count) { data_.maxJumpCount_ = count; }
+	void SetMaxJumpCount(int count) { data_.maxJumpCount = count; }
 	// 入力中か設定
 	void SetInputPressed(bool isPressed) { isInputPressed_ = isPressed; }
 private:

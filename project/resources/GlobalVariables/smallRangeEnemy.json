@@ -26,7 +26,7 @@
         },
         "speed": {
             "type": "float",
-            "value": 2.0
+            "value": 3.059999942779541
         },
         "stamina": {
             "type": "float",

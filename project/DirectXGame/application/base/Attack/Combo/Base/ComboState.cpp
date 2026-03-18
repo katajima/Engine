@@ -7,46 +7,52 @@ namespace Combo {
 #pragma region NodeState
 
 	// 開始
-	void NodeState::Enter(Character::BaseCharacter* owner) {
+	void NodeState::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化 
 		timeInState = 0.0f;
 		// アニメーションの設定
-		comboData_.GetComboMotion().GetComboAnimation().GetData().animationName_ = animation;
+		comboData.GetComboMotion().GetComboAnimation().GetData().animationName_ = animation;
 
 
-		comboData_.GetComboMotion().GetComboMove().SetDirection(direction_);
+		comboData.GetComboMotion().GetComboMove().SetDirection(direction_);
 		// コンボデータ開始
-		comboData_.Enter(owner);
+		comboData.Enter(owner, ctx);
 	}
 
 	// 更新
-	void NodeState::Update(Character::BaseCharacter* owner, float dt) {
+	void NodeState::Update(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間更新
-		timeInState += dt;
+		timeInState += ctx.dt;
+
+		// コンボデータ更新
+		comboData.Update(ctx);
 
 		// 入力受付がないのなら終了する
 		if (GetEndStateTime() || GetIsCansel()) {
 			// 終了処理
-			End(owner);
+			End(owner, ctx);
 		}
-		// コンボデータ更新
-		comboData_.Update(*owner->GetInputSystem(), dt);
 	}
 
 	// 終了
-	void NodeState::Exit(Character::BaseCharacter* owner) {
+	void NodeState::Exit(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボデータ終了処理
-		comboData_.Exit(owner);
+		comboData.Exit(owner);
 	}
 
-	void NodeState::End(Character::BaseCharacter* owner) {
+	void NodeState::End(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// 時間初期化
 		timeInState = 0.0f;
 		// コンボ終了 → 通常ステートに戻す
 		owner->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
-		owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Idle);  // ← BaseCharacterが持っている関数
+		if (ctx.inputData.jumpTrigger) {
+			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Jump); 
+		}
+		else {
+			owner->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Idle);
+		}
 		owner->GetAttackController()->SetIsAttack(false);	 // 攻撃終了
 	};
 
@@ -56,23 +62,23 @@ namespace Combo {
 
 #pragma region StateMachine
 
-	void StateMachine::SetState(std::shared_ptr<State> state) {
+	void StateMachine::SetState(std::shared_ptr<State> state, const Character::CharacterContext& ctx) {
 
-		if (currentState) currentState->Exit(owner);	// 終了処理
+		if (currentState) currentState->Exit(owner, ctx);	// 終了処理
 		currentState = state;
 		if (currentState) {
-			currentState->Enter(owner);	// 開始処理
+			currentState->Enter(owner, ctx);	// 開始処理
 		}
 		bufferedInput.reset(); // 状態遷移したら入力リセット
 	}
 
 
-	void StateMachine::Update(float dt) {
+	void StateMachine::Update(const Character::CharacterContext& ctx) {
 		// ステートが無いなら早期リターン
 		if (!currentState) return;
 
 		// 現在のステート更新
-		currentState->Update(owner, dt);
+		currentState->Update(owner, ctx);
 
 		// 入力がバッファされていて、入力受付時間内なら状態遷移
 		if (bufferedInput) {
@@ -82,7 +88,7 @@ namespace Combo {
 				auto next = currentState->HandleInput(owner, *bufferedInput);
 				// もし次のステートがあれば、遷移
 				if (next) {
-					SetState(next);
+					SetState(next, ctx);
 				}
 				bufferedInput.reset();
 			}
@@ -92,7 +98,7 @@ namespace Combo {
 	void StateMachine::SetRoot(std::shared_ptr<State> state) {
 		rootState = state;
 		if (rootState) {
-			SetState(rootState);
+			SetState(rootState,{});
 		}
 	}
 

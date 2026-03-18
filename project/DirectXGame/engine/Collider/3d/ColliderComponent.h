@@ -87,7 +87,7 @@ namespace Engine {
         uint32_t AddCollider(std::unique_ptr<Collider> collider);
 
         // コライダー再設定
-        void SetOwner(void* newOwner);
+        void SetOwner(ColliderComponent* newOwner);
 
         // 衝突インターフェースをセット(※IHitReceiverを継承必須)
         void SetHitReceiver(IHitReceiver* receiver) {

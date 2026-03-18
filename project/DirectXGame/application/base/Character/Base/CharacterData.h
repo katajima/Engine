@@ -11,7 +11,6 @@ class BaseWeapon;
 class BulletManager;
 class CameraManager;
 class SpecalPointManager;
-class AttackInputHandler;
 namespace Engine {
 	class EntityManager;
 }
@@ -36,10 +35,7 @@ namespace Character {
 		Gage MP;				// マジックポイント
 		Gage stamina;			// スタミナ
 		float strength = 1.0f;	// 力
-		float speed = 1.0f;		// 速さ
 		float defense = 1.0f;	// 防御力
-		float jampPower = 180.0f;// ジャンプ力
-		int intelligence = 1;	// 知力
 	};
 
 
@@ -85,48 +81,44 @@ namespace Character {
 	{
 	public:
 		void Initialize() {
-			parameters_ = std::make_unique<BasicParameters>();
+			parameters = std::make_unique<BasicParameters>();
 		}
 
 
 		// 更新
 		void Update() {
-			parameters_->stamina.useRate = true;	// スタミナ変化
-			parameters_->HP.Update(deltaTime_);	// HP更新
-			parameters_->MP.Update(deltaTime_);	// MP更新
-			parameters_->stamina.Update(deltaTime_);	// スタミナ更新
+			parameters->stamina.useRate = true;	// スタミナ変化
+			parameters->HP.Update(deltaTime_);	// HP更新
+			parameters->MP.Update(deltaTime_);	// MP更新
+			parameters->stamina.Update(deltaTime_);	// スタミナ更新
 		}
 
 
 	public:
 		// HP取得
-		float GetHP() const { return parameters_->HP.value; }
+		float GetHP() const { return parameters->HP.value; }
 		// MP取得
-		float GetMP() const { return parameters_->MP.value; }
+		float GetMP() const { return parameters->MP.value; }
 		// スタミナ取得
-		float GetStamina() const { return parameters_->stamina.value; }
+		float GetStamina() const { return parameters->stamina.value; }
 		// パワー取得
-		float GetStrength() const { return parameters_->strength; }
+		float GetStrength() const { return parameters->strength; }
 		// 防御力取得
-		float GetDefense() const { return parameters_->defense; }
-		// 知力取得
-		int GetIntelligence() const { return parameters_->intelligence; }
-		// 速度取得
-		float GetSpeed() const { return parameters_->speed; }
-
+		float GetDefense() const { return parameters->defense; }
+		
 		// スタミナがあるか
 		bool IsGetStamina() const {
-			return !parameters_->stamina.IsEmpty();
+			return !parameters->stamina.IsEmpty();
 		}
 
 		// 
 
 		// HP取得
-		Gage& HP() const { return parameters_->HP; };
+		Gage& HP() const { return parameters->HP; };
 		// MP取得
-		Gage& MP() const { return  parameters_->MP; };
+		Gage& MP() const { return  parameters->MP; };
 		// スタミナ取得
-		Gage& Stamina() const { return parameters_->stamina; };
+		Gage& Stamina() const { return parameters->stamina; };
 
 
 
@@ -137,7 +129,7 @@ namespace Character {
 	public:
 		Personality personality = Personality::kNormal;
 		Type characterType_ = Type::None;							// キャラクターの種類
-		std::unique_ptr<BasicParameters> parameters_;				// 基本パラメータ
+		std::unique_ptr<BasicParameters> parameters;				// 基本パラメータ
 
 		float deltaTime_ = 1.0f / 60.0f;
 

@@ -89,7 +89,7 @@ void CharacterDebugScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), nullptr);
+	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -154,6 +154,8 @@ void CharacterDebugScene::Update()
 {
 	Engine::Camera::isShake_ = false;
 
+	inputSystem_->Update(GetTime());
+
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
 		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
@@ -183,7 +185,7 @@ void CharacterDebugScene::Update()
 
 
 	// キャラクターマネージャー更新
-	characterManager_->Update();
+	characterManager_->Update(true);
 
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());

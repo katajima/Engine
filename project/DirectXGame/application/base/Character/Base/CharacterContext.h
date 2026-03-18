@@ -2,11 +2,12 @@
 #include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
 #include "CharacterData.h"									// キャラクターのパラメータ
 #include "DirectXGame/application/base/Object/ObjectComponent.h"	// オブジェクト
-#include "DirectXGame/application/base/State/BaseMainState.h"
+#include "DirectXGame/application/base/Character/State/MainState.h"
 
 // 前方宣言
 class MovementComponent;
 class JumpSystem;
+class MoveSystem;
 class LockOnSystem;
 
 namespace Combo {
@@ -23,6 +24,7 @@ namespace Character {
 	/// キャラクターコンテキスト
 	/// </summary>
 	struct CharacterContext {
+		const InputSystem* input = nullptr;
 		// 入力データ
 		PlayerInputData inputData;
 		// スティック方向
@@ -51,9 +53,14 @@ namespace Character {
 		bool isHitStun = false;
 		// 重力有効か
 		bool isGravity = true;
-
-		// 
-		float skyHeight = 0.0f;
+		// 停止するか
+		bool isStop = false;
+		// ジャンプ中か
+		bool isJumping = false;
+		// ジャンプ攻撃中か
+		bool isJumpAttacking = false;
+		// 高さ
+		float skyHeight = 1.5f;
 
 		// 上昇時の重力係数
 		float upGravity = 15.0f;
@@ -92,6 +99,8 @@ namespace Character {
 		const MovementComponent* movementComponent = nullptr;
 		// ジャンプシステム
 		const JumpSystem* jumpSystem = nullptr;
+		// 移動システム
+		const MoveSystem* moveSystem = nullptr;
 		// ロックオンシステム
 	 	const LockOnSystem* lockOnSystem = nullptr;
 		// コンボステートマシン

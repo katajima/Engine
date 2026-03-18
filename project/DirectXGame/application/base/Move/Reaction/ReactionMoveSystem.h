@@ -14,9 +14,9 @@ public:
 	// 更新
 	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 
-	void SetRequest(const MoveRequest& request) { reuest = request; }
+	void SetRequest(const MoveRequest& request) { requests.push_back(request); }
 
 private:
-	MoveRequest reuest;
+	std::vector<MoveRequest> requests;
 
 };

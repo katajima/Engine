@@ -75,7 +75,7 @@ public:
 	// ポイント出現
 	void AddPoint(const Vector3& pos, int point);
 	// ターゲット設定
-	void SetTarget(Character::BasePlayer* target) { this->target = target; };
+	void SetTarget(Character::BaseCharacter* target) { this->target = target; };
 
 	// SPポイントたち取得
 	std::vector<SpecalPoint*> GetSpecalPoints() {
@@ -89,7 +89,7 @@ private:
 	std::vector<std::unique_ptr<SpecalPoint>> points;	// SPポイントたち
 	int count_ = 0;			// 出現回数カウント用
 private:
-	Character::BasePlayer* target = nullptr;		// ターゲット
+	Character::BaseCharacter* target = nullptr;		// ターゲット
 private:
 	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数

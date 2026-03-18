@@ -10,8 +10,8 @@ namespace Combo {
 	class ConditionFunction {
 	public:
 		// 終了条件によっての処理
-		static void ConditionTypeUpdate(const InputSystem& inputSystem, MovementComponent* movementComponent,  EndConditionType type, ComboButton button,
-		float timer, float endTime, bool isPress, float dt);
+		static void ConditionTypeUpdate(const Character::CharacterContext& ctx, EndConditionType type, ComboButton button,
+		float timer, float endTime, bool isPress);
 	};
 
 }

@@ -5,7 +5,7 @@
 namespace Combo {
 
 	// 開始
-	void ComboMove::Enter(Character::BaseCharacter* owner) {
+	void ComboMove::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		isMove_ = false;
 		stickDirection_ = {};
 		moveComponent = owner->GetMoveComponent();
@@ -17,6 +17,7 @@ namespace Combo {
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData_;
 		traget = lockOnSystem->SoftLockOn();
+		stickDirection_ = ctx.worldStickDirection;
 		// 方向指定
 		MoveTypeDirectionProcess();
 		// 座標更新
@@ -24,21 +25,9 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboMove::Update(const InputSystem& inputSystem, float timer, float dt) {
-		// スティック方向取得
-		Vector2 stick = inputSystem.GetPlayerInputData().moveShick;
+	void ComboMove::Update(const Character::CharacterContext& ctx, float timer) {
 		// ゲームパッドの左スティックを動かしているか
-		bool isMoveStick = stick.Length() != 0;
-
-		Matrix4x4 cameraWorldMatrix = Inverse(camera->GetViewMatrix());
-
-		// カメラの向きに基づいて移動方向をワールド座標系に変換
-		Vector2 worldDirection = {
-			stick.x * cameraWorldMatrix.m[0][0] + stick.y * cameraWorldMatrix.m[2][0],
-			stick.x * cameraWorldMatrix.m[0][2] + stick.y * cameraWorldMatrix.m[2][2]
-		};
-
-
+		bool isMoveStick = ctx.worldStickDirection.Length() != 0;
 		// 強制的に移動
 		if (data_.isCompulsionMove_) {
 			isMove_ = true;
@@ -47,12 +36,11 @@ namespace Combo {
 			// 動かしていたら
 			if (!isMove_ && isMoveStick) {
 				isMove_ = true;
-				stickDirection_ = worldDirection;
+				stickDirection_ = ctx.worldStickDirection;
 			}
 		}
-
 		// 移動処理
-		MoveTypeProcess(inputSystem, timer, dt);
+		MoveTypeProcess(timer, ctx.dt);
 		// 重力処理
 		GravityProcess();
 	}
@@ -66,7 +54,7 @@ namespace Combo {
 		stickDirection_ = {};
 	}
 
-	void ComboMove::MoveTypeProcess(const InputSystem& inputSystem, float timer, float dt) {
+	void ComboMove::MoveTypeProcess(float timer, float dt) {
 		bool isStart = data_.moveWindowStart_ <= timer;		// 受付開始時間を過ぎたら
 		bool isEnd = data_.moveWindowEnd_ >= timer;			// 受付終了時間より前なら
 
@@ -83,7 +71,6 @@ namespace Combo {
 				request.velocity = Multiply(direction_, dt) * data_.speed_;
 				break;
 			case MoveType::kTraget:
-
 				if (traget) {
 					if (data_.moveTargetRadius_ <= targetPos_.Distance(worldTransform->translate_)) {
 						request.velocity = Multiply(direction_, dt) * data_.speed_;
@@ -95,7 +82,7 @@ namespace Combo {
 				break;
 			case MoveType::kLockAt: // カメラ方向
 				request.velocity = Multiply(direction_, dt) * data_.speed_;
-				
+
 				break;
 			default:
 				break;
@@ -119,7 +106,7 @@ namespace Combo {
 		switch (data_.moveType)
 		{
 		case MoveType::kNone: // 特に無し
-			//direction_
+			direction_;
 			break;
 		case MoveType::kForward: // 所有者の向いている方向
 			// 方向指定
@@ -133,7 +120,12 @@ namespace Combo {
 				targetPos_ = traget->GetWorldPosition();
 			}
 			else {
-				direction_ = moveComponent->GetDirection();
+				if (stickDirection_.Length() != 0.0f) {
+					direction_ = Vector3{ stickDirection_.x,0,stickDirection_.y };
+				}
+				else {
+					direction_ = moveComponent->GetDirection();
+				}
 			}
 			break;
 		case MoveType::kLockAt: // カメラ方向

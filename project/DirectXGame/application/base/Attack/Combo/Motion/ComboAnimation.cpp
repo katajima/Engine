@@ -18,7 +18,7 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboAnimation::Update(const InputSystem& inputSystem, float timer, float dt) {
+	void ComboAnimation::Update(float timer, float dt) {
 		// アニメーションスピード設定
 		animationComponent->SetAnimationSpeed(data_.animationSpeed_);
 		// アニメーション時間設定

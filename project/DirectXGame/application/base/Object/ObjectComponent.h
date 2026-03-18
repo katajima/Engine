@@ -65,7 +65,7 @@ public:
 	void InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
 		bool useRigidBody, IHitReceiver* iHitReceiver,
-		Engine::Object3dInstansManager::TransparencyType transparencyType);
+		Engine::Object3dInstansManager::TransparencyType transparencyType, bool rigidUpdate = true);
 
 	/// <summary>
 	/// 更新
@@ -98,7 +98,8 @@ public: // 取得
 	Vector2 GetScreenPosition();
 	// リジッドボディー取得
 	Engine::RigidBodyComponent* GetRigidBodyComponent();
-
+	// リジットボディーを別の場所で更新するか
+	void SetIsUpdateColliderComponent(bool is);
 	// オブジェクト時間取得
 	float GetTime() const;
 	// 名前取得

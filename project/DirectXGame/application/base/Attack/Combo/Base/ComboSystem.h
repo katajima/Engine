@@ -3,10 +3,7 @@
 #include <string>
 #include <memory>
 #include "ComboDebug.h"
-namespace Character {
-	class BaseCharacter; // 前方宣言
-}
-
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
 	/// <summary>
@@ -24,11 +21,7 @@ namespace Combo {
 		void Initialize(Character::BaseCharacter* character, Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables);
 
 		// コンボ更新
-		void UpdateCombo(float dt) {
-			comboStateMachine_->Update(dt);
-			comboDebug_->Update(dt);
-		}
-
+		void Update(const Character::CharacterContext& ctx);
 		// クリア
 		void ClearNode();
 

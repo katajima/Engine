@@ -328,14 +328,24 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 }
 
 void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const {
-	if (ownerComp->onHitCallback) {
-		ownerComp->onHitCallback(self, other);
+	if (!self || !other) {
+		return;
 	}
-	if (other->owner) {
-		auto* otherComp = reinterpret_cast<ColliderComponent*>(other->owner);
-		if (otherComp) {
-			if(otherComp->onHitCallback)
-			otherComp->onHitCallback(other, self);
-		};
+
+	if (ownerComp) {
+		auto& callback = ownerComp->onHitCallback;
+		if (callback) {
+			callback(self, other);
+		}
+	}
+
+	ColliderComponent* otherComp = other->owner;
+	if (!otherComp) {
+		return;
+	}
+
+	auto& callback = otherComp->onHitCallback;
+	if (callback) {
+		callback(other, self);
 	}
 }

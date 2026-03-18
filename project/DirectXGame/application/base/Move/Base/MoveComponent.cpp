@@ -90,18 +90,18 @@ void MovementComponent::ApplyGlobalData(const std::string& name) {
 
 
 	// ジャンプ
-	globalVariables->AddItem(name, "ジャンプ力", jumpSystem_->GetData().power_);
-	globalVariables->AddItem(name, "ジャンプ上昇時の重力", jumpSystem_->GetData().upGravity_);
-	globalVariables->AddItem(name, "ジャンプ下降時の重力", jumpSystem_->GetData().fallGravity_);
+	globalVariables->AddItem(name, "ジャンプ力", jumpSystem_->GetData().power);
+	globalVariables->AddItem(name, "ジャンプ上昇時の重力", jumpSystem_->GetData().upGravity);
+	globalVariables->AddItem(name, "ジャンプ下降時の重力", jumpSystem_->GetData().fallGravity);
 
 	// 移動
-	globalVariables->AddItem(name, "移動最小速度", moveSystem_->GetData().minSpeed);
-	globalVariables->AddItem(name, "移動最大速度", moveSystem_->GetData().maxSpeed);
-	globalVariables->AddItem(name, "移動加速度", moveSystem_->GetData().speedAcceleration);
-	globalVariables->AddItem(name, "回転速度", moveSystem_->GetData().rotationSpeed);
-	globalVariables->AddItem(name, "スティック移動量変化", moveSystem_->GetData().isStickToSpeed);
-	globalVariables->AddItem(name, "空中での移動量変化", moveSystem_->GetData().isLimitAirSpeed);
-	globalVariables->AddItem(name, "空中移動量変化率", moveSystem_->GetData().airSpeedRate);
+	globalVariables->AddItem(name, "移動最小速度", moveSystem_->Data().minSpeed);
+	globalVariables->AddItem(name, "移動最大速度", moveSystem_->Data().maxSpeed);
+	globalVariables->AddItem(name, "移動加速度", moveSystem_->Data().speedAcceleration);
+	globalVariables->AddItem(name, "回転速度", moveSystem_->Data().rotationSpeed);
+	globalVariables->AddItem(name, "スティック移動量変化", moveSystem_->Data().isStickToSpeed);
+	globalVariables->AddItem(name, "空中での移動量変化", moveSystem_->Data().isLimitAirSpeed);
+	globalVariables->AddItem(name, "空中移動量変化率", moveSystem_->Data().airSpeedRate);
 
 	// ダッシュ
 	globalVariables->AddItem(name, "ダッシュ時間", dashSystem_->GetData().maxTime);
@@ -117,18 +117,18 @@ void MovementComponent::ApplyGlobalData(const std::string& name) {
 void MovementComponent::SetGlobalData(const std::string& name)
 {
 	// ジャンプ
-	jumpSystem_->Data().power_ = globalVariables->GetValue<float>(name, "ジャンプ力");
-	jumpSystem_->Data().upGravity_ = globalVariables->GetValue<float>(name, "ジャンプ上昇時の重力");
-	jumpSystem_->Data().fallGravity_ = globalVariables->GetValue<float>(name, "ジャンプ下降時の重力");
+	jumpSystem_->Data().power = globalVariables->GetValue<float>(name, "ジャンプ力");
+	jumpSystem_->Data().upGravity = globalVariables->GetValue<float>(name, "ジャンプ上昇時の重力");
+	jumpSystem_->Data().fallGravity = globalVariables->GetValue<float>(name, "ジャンプ下降時の重力");
 
 	// 移動
-	moveSystem_->GetData().minSpeed = globalVariables->GetValue<float>(name, "移動最小速度");
-	moveSystem_->GetData().maxSpeed = globalVariables->GetValue<float>(name, "移動最大速度");
-	moveSystem_->GetData().speedAcceleration = globalVariables->GetValue<float>(name, "移動加速度");
-	moveSystem_->GetData().rotationSpeed = globalVariables->GetValue<float>(name, "回転速度");
-	moveSystem_->GetData().isStickToSpeed = globalVariables->GetValue<bool>(name, "スティック移動量変化");
-	moveSystem_->GetData().isLimitAirSpeed = globalVariables->GetValue<bool>(name, "空中での移動量変化");
-	moveSystem_->GetData().airSpeedRate = globalVariables->GetValue<float>(name, "空中移動量変化率");
+	moveSystem_->Data().minSpeed = globalVariables->GetValue<float>(name, "移動最小速度");
+	moveSystem_->Data().maxSpeed = globalVariables->GetValue<float>(name, "移動最大速度");
+	moveSystem_->Data().speedAcceleration = globalVariables->GetValue<float>(name, "移動加速度");
+	moveSystem_->Data().rotationSpeed = globalVariables->GetValue<float>(name, "回転速度");
+	moveSystem_->Data().isStickToSpeed = globalVariables->GetValue<bool>(name, "スティック移動量変化");
+	moveSystem_->Data().isLimitAirSpeed = globalVariables->GetValue<bool>(name, "空中での移動量変化");
+	moveSystem_->Data().airSpeedRate = globalVariables->GetValue<float>(name, "空中移動量変化率");
 
 	// ダッシュ
 	dashSystem_->GetData().maxTime = globalVariables->GetValue<float>(name, "ダッシュ時間");

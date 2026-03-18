@@ -7,7 +7,8 @@ namespace Character {
 	void SmallMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
-		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySG01.obj", "smallMeleeEnemy");
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, 
+			"enemyBodySG01.obj", "smallMeleeEnemy",0.75f);
 		
 		
 		
@@ -19,8 +20,7 @@ namespace Character {
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 
 		
-		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->Data().maxSpeed;
 
 
 		// 武器
@@ -35,16 +35,11 @@ namespace Character {
 		worldEffect_.Initialize();
 		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
 		worldEffect_.translate_ = { 0,1,0 };
-
-		// スプライト初期化
-		Initialize2D();
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
 
 	void SmallMeleeEnemy::Update() {
-		// 攻撃制御更新
-		attackController_->Update(GetTime());
 		// 基盤の更新
 		BaseUpdate();
 		//
@@ -68,25 +63,26 @@ namespace Character {
 	void SmallMeleeEnemy::Move() {
 		// 距離設定
 		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		dire.y = 0.0f;
 		// 回転設定
 		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
 		// Y軸周り角度
 		GetWorldTransform().rotate_.y = rotate.y;
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
-			Parameters()->speed = 0;
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				Parameters()->speed = -globalData_.retreatSpeed;
+				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			Parameters()->speed = moveSpeed_;
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
 		}
 	}
 

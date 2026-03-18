@@ -32,7 +32,7 @@ namespace Combo {
 		//　終了
 		void Exit();
 		// 更新
-		void Update(const InputSystem& inputSystem,float time);
+		void Update(const Character::CharacterContext& ctx,float time);
 
 	public: // 設定
 		// コンボ条件発動時間設定

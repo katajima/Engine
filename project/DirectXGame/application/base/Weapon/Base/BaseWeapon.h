@@ -31,33 +31,17 @@ public:
 	virtual void Draw2D() = 0;
 public:
 	// 使っているキャラクター設定
-	void SetCharacter(Character::BaseCharacter* character) {
-		this->character = character;
-	};
+	void SetCharacter(Character::BaseCharacter* character) {this->character = character;}
 	// タグによるコライダーの有効・無効を設定
 	void SetIsCollider(CollisionTag tag ,bool is) { GetObject3D()->GetColliderComponent()->SetEnableByTag(tag, is); };
-	// 攻撃中かどうかのフラグを取得
-	bool IsActive() const { return data_.isActive; };
-	// オートマチックかどうかのフラグを取得
-	bool IsAutomatic() const { return data_.isAutomatic; };
-	// 攻撃中かどうかのフラグを設定
-	void SetIsActive(bool isActive) { data_.isActive = isActive; };
-	
 	// コライダーコンポーネント
 	Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得
 	Engine::Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
 	// ワールド変換取得
 	Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
-	// リキャストタイム取得
-	bool GetIsRecastTimeOver() const { return data_.MaxRecastTime <= data_.recastTime; }
-	// リキャストタイム設定
-	void RecastTime(float timer) { data_.recastTime += timer; }
 	// 弾管理クラス設定
 	void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
-
-protected:
-	WeaponData data_;	// 武器データ
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
 	const Character::BaseCharacter* target = nullptr;			// ターゲット

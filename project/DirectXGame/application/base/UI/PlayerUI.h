@@ -10,7 +10,6 @@ namespace Character {
 /// </summary>
 class PlayerUI : public BaseUI{
 public:
-
 	// 初期化
 	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables) override;
 
@@ -20,8 +19,15 @@ public:
 	// 描画
 	void Draw() override;
 
+private:
 
+	// 操作UI
+	void InitializeOperationUI();
 
+	// プレイヤーUI
+	void InitializePlayerUI();
+
+	void UpdatePlayerUI(float dt);
 
 public:
 
@@ -36,59 +42,46 @@ public:
 private:
 	Character::ParameterComponent* parameterComponent = nullptr;
 	
-	
 	std::unique_ptr<Engine::Sprite> textMax_;
 	std::unique_ptr<Engine::Sprite> textRB_;
 	bool isTextRB_ = false;
 	bool isTextMax_ = false;
 	float sizeSpecialGauge_ = 0;
-
-
-
-	struct HpSpriteData{
-		Vector2 pos_ = { 30,600 };
-
-		Color color_ = { 0,1,0,1 };
-		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
+private:
+	// メータUIデータ
+	struct MeterUIData {
+		Vector2 pos = { 30,600 };
+		Color color = { 0,1,0,1 };
+		Color nameColor = { 0.75f,0.75f ,0.75f ,1.0f };
 
 		float maxMeter = 100.0f;
-		Vector2 offset_ = { 4.0f,4.0f };
+		Vector2 offset = { 4.0f,4.0f };
 
-		Vector2 size_ = { 200.0f,30.0f };
-		Vector2 nameSize_ = { 60.0f,40.0f };
-
+		Vector2 size = { 200.0f,30.0f };
+		Vector2 nameSize = { 60.0f,40.0f };
 	};
-	HpSpriteData hpSpriteData_;
-	
-	struct SpSpriteData {
-		Vector2 pos_ = { 30,650 };
+	MeterUIData hpSpriteData;
+	MeterUIData spSpriteData;
+	MeterUIData staminaSpriteData;
 
-		Color color_ = { 0,0,1,1 };
-		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
+	struct TextData {
+		Vector2 pos = { 1120,520 };
+		Vector2 pos2 = { 1120,470 };
 
-		float maxMeter = 40.0f;
-		Vector2 offset_ = { 4.0f,4.0f };
+		Vector2 anchorPoint = { 0.5f,0.5f };
+		Vector2 anchorPoint2 = { 0.0f,0.5f };
 
-		Vector2 size_ = { 200.0f,30.0f };
-		Vector2 nameSize_ = { 60.0f,40.0f };
+		Vector2 size = { 64.0f,64.0f };
+		Vector2 size2 = { 48.0f,48.0f };
 
+		float offset = 20.0f;
+
+		Color color = { 0.75f,0.75f ,0.75f ,1.0f };
 	};
-	SpSpriteData spSpriteData_;
-
-	struct StaminaSpriteData {
-		Vector2 pos_ = { 30,700 };
-
-		Color color_ = { 1,1,0,1 };
-		Color nameColor_ = { 0.75f,0.75f ,0.75f ,1.0f };
-
-		float maxMeter = 20.0f;
-		Vector2 offset_ = { 4.0f,4.0f };
-
-		Vector2 size_ = { 200.0f,30.0f };
-		Vector2 nameSize_ = { 60.0f,40.0f };
-
-	};
-	StaminaSpriteData staminaSpriteData;
+	TextData attackTextData;
+	TextData spTextData;
+	TextData jumpTextData;
+	TextData skillTextData;
 
 	struct MaxTextData {
 		float size_ = 0.25f;

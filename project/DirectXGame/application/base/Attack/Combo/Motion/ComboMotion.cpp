@@ -8,19 +8,19 @@ namespace Combo {
 #pragma region ComboMotion
 
 	// 開始
-	void ComboMotion::Enter(Character::BaseCharacter* owner) {
+	void ComboMotion::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// コンボ用アニメーションクラス
 		comboAnimation_.Enter(owner);
 		// 移動クラス
-		comboMove_.Enter(owner);
+		comboMove_.Enter(owner, ctx);
 	}
 
 	// 更新
-	void ComboMotion::Update(const InputSystem& inputSystem, float timer, float dt) {
+	void ComboMotion::Update(const Character::CharacterContext& ctx, float timer) {
 		// コンボ用アニメーションクラス更新
-		comboAnimation_.Update(inputSystem, timer, dt);
+		comboAnimation_.Update(timer, ctx.dt);
 		// コンボ用移動クラス更新
-		comboMove_.Update(inputSystem, timer, dt);
+		comboMove_.Update(ctx, timer);
 	}
 
 	// 終了

@@ -15,7 +15,7 @@ void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons
 /// <summary>
 /// コンボ成立チェック
 /// </summary>
-bool Combo::ComboSequence::Update(const InputSystem& inputSystem, float deltaTime) {
+bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 	if (comboButtons_.empty()) return false;
 
 
@@ -23,7 +23,7 @@ bool Combo::ComboSequence::Update(const InputSystem& inputSystem, float deltaTim
 	const ComboButton& target = comboButtons_[currentIndex_];
 
 	// 入力判定
-	if (target.IsInput(inputSystem)) {
+	if (target.IsInput(*ctx.input)) {
 		currentIndex_++;
 		// 全て成功
 		if (currentIndex_ >= comboButtons_.size()) {

@@ -33,7 +33,9 @@ private:
 	void AnimationSpeedProcess();
 public: // 取得
 	// 移動データの取得
-	MoveData& GetData() { return data_; }
+	MoveData& Data() { return data_; }
+	//
+	MoveData GetData() const { return data_; }
 	// 速度の取得
 	Vector3 GetVelocity() const { return velocity_; }
 	// 状態の取得

@@ -18,31 +18,25 @@ namespace Character {
 		this->globalVariables = globalVariables;	// 保存項目
 		this->camera = camera;					// カメラ
 		this->inputSystem = inputSystem;						// 入力
-
-
-
-		Engine::ParticleManager* particleManager = entityManager->GetEffectManager()->GetParticleManager();
-
 		// オブジェクトコンポーネント追加
 		objectComponent_ = std::make_unique<ObjectComponent>();
-		objectComponent_->Initialize(entityManager, globalVariables, "PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning,false);
+		objectComponent_->Initialize(entityManager, globalVariables,
+			"PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning,false);
 		// 保存項目追加
 		CreateGroup("Player");
 
 		objectComponent_->SetSRT({1,1,1}, {}, position);					//　SRT設定
 		objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
-		objectComponent_->GetObject3D()->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
+		objectComponent_->SetIsUpdateColliderComponent(false);		
 
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
 		parameterComponent_->Initialize();
 
 		// HP設定
-		parameterComponent_->parameters_->HP.Initiaize(200, 0, 200, 0);
-		parameterComponent_->parameters_->stamina.Initiaize(100, 0, 50, 0);
-		parameterComponent_->parameters_->speed = 40.0f;// 移動速度設定
-		parameterComponent_->parameters_->jampPower = 100.0f;
-
+		parameterComponent_->parameters->HP.Initiaize(200, 0, 200, 0);
+		parameterComponent_->parameters->stamina.Initiaize(100, 0, 100, 2);
+		
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
@@ -50,7 +44,7 @@ namespace Character {
 		moveComponent_->SetMoveType(MoveType::ACCELERATE);
 		moveComponent_->SetIsStickToSpeed(true);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
-
+		moveComponent_->GetJumpSystem()->Data().power = 0.0f;
 		moveComponent_->SetMaxJumpCount(1);
 		moveComponent_->SetCamera(followCamera->GetUniqueCamera());
 
@@ -62,7 +56,7 @@ namespace Character {
 		sphere->tag = CollisionTag::Player;
 		sphere->layer = CollisionLayer::Player;
 		sphere->collisionMask = 0xFFFFFFFF;
-		sphere->radius = 1.5f; // 半径を適宜設定
+		sphere->radius = 1.0f; // 半径を適宜設定
 		sphere->isDebugLine = true;
 		sphere->Enable();
 		// コライダ追加
@@ -86,7 +80,7 @@ namespace Character {
 			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
 
 			// 壁との衝突応答
-			responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall, self, other);
+			//responseSystem_->GetHitResponse()->HitWall(self, other);
 			};
 
 
@@ -144,6 +138,10 @@ namespace Character {
 		weapon_->Initialize(inputSystem, entityManager, globalVariables, {}, camera);
 		weapon_->GetObject3D()->GetWorldTransform().rotate_ = { Math::DegreesToRadians(90),0.0f,Math::DegreesToRadians(180) };
 
+		// サブ武器
+		subWeapon_ = std::make_unique<PlayerSubWeapon>();
+		subWeapon_->SetCharacter(this);
+		subWeapon_->Initialize(inputSystem, entityManager, globalVariables, {}, camera);
 
 		// 戦闘
 		attackController_ = std::make_unique<AttackController>();
@@ -152,10 +150,6 @@ namespace Character {
 
 		// 
 		ReloadComboData();
-
-		// インプットハンドラー
-		attackInputHandler_ = std::make_unique<AttackInputHandler>();
-		attackInputHandler_->AssignAttack();
 	}
 
 	void NormalPlayer::RequestAttack(AttackInput input)
@@ -167,7 +161,7 @@ namespace Character {
 		const bool isAttack = (s == CharacterMainState::Attack);
 
 		if (input == AttackInput::Skill) {
-			if (special_->GetGauge() < 15) {
+			if (parameterComponent_->GetStamina() < 30) {
 				return;
 			}
 		}
@@ -187,7 +181,7 @@ namespace Character {
 			stateMachine_->ChangeState(CharacterMainState::Attack);
 
 			// 開始コンボ名の決定を「入力種類×状況」でまとめる
-			if (s == CharacterMainState::Jump)
+			if (!moveComponent_->GetIsLanding())
 			{
 				ac->GetComboSystem()->StartCombo("JumpAttack");
 			}
@@ -201,7 +195,7 @@ namespace Character {
 
 				case AttackInput::Skill:
 					ac->GetComboSystem()->StartCombo("SkillAttack01"); 
-					special_->AddGauge(-15);
+					parameterComponent_->Stamina().Add(-30);
 					break;
 				default: break;
 				}
@@ -240,29 +234,17 @@ namespace Character {
 		UpdateBaseGetValue(); //保存機能 基本値の更新
 		ApplyGlobalVariables();
 
-		// HPが0以下なら死亡
-		if (GetHP() <= 0) {
-			objectComponent_->GetObjectStateFlags().isAlive = false;
-		}
-		
-		
-
-#ifdef _DEBUG
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
 
-
-		entityManager->Get3DLineCommon()->GetLineMeshData().AddLine(ctx.position, ctx.position
-			+ Vector3{ ctx.worldStickDirection.x,0, ctx.worldStickDirection.y } *20.0f);
-
-
+#ifdef _DEBUG
 		ImGui::Begin("Debug");
-		ImGui::InputFloat("HP", &HP());
 		if (ImGui::Button("SP")) {
 			special_->SetGauge(100);
 		}
 		ImGui::End();
 #endif // _DEBUG
+
 
 
 		if (special_->GetPhese() == 1) {
@@ -272,24 +254,30 @@ namespace Character {
 			attackController_->IsStopHitTimer(false);
 		}
 
-		
+		if (ctx.isStop) return;
 		// 必殺技
 		special_->Update();
 
 		attackController_->GeyLockOnSysutem()->SetTargets(targetCharacters);
 		// 攻撃制御更新
-		attackController_->Update(GetTime());
+		attackController_->Update(ctx);
 		// 応答システム
-		responseSystem_->Update(GetTime());
+		responseSystem_->Update(ctx.dt);
 
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 
+
+		// ステート
+		stateMachine_->Update(ctx);
 		// 移動コンポーネント更新
 		moveComponent_->Update(GetObjectComponent()->GetWorldTransform(),
 			*GetObjectComponent()->GetRigidBodyComponent(), ctx);
 
-
+#ifdef _DEBUG
+		entityManager->Get3DLineCommon()->GetLineMeshData().AddLine(ctx.position, ctx.position
+			+ Vector3{ ctx.worldStickDirection.x,0, ctx.worldStickDirection.y } *20.0f);
+#endif // _DEBUG
 
 		// コライダのワールドトランスフォーム更新
 		worldCollider_.Update();
@@ -299,13 +287,13 @@ namespace Character {
 		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
 
+		// サブ武器更新
+		subWeapon_->Update();
 
-		// ステート
-		stateMachine_->Update();
-
+		
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-		objectComponentShadow_->GetWorldTransform().translate_.y = -2.9f;
+		objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
 		objectComponentShadow_->Update();
 	
 		// UI更新
@@ -360,15 +348,17 @@ namespace Character {
 	void NormalPlayer::ApplyGlobalVariables() {}
 
 	void NormalPlayer::ReloadComboData() {
-		// コンボノードクリア
-		GetAttackController()->GetComboSystem()->ClearNode();
-		GetAttackController()->GetComboSystem()->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
-		GetAttackController()->GetComboSystem()->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
-		GetAttackController()->GetComboSystem()->SetParentTransform("NoParent", nullptr);
-
-		HitBox::System* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
 
+		// コンボノードクリア
+		comboSystem->ClearNode();
+		comboSystem->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
+		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
+		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
+		comboSystem->SetParentTransform("NoParent", nullptr);
+
+		HitBox::System* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
+		
 		// ヒットボックスデータ作成
 		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
 		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},6.0f };

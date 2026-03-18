@@ -26,7 +26,7 @@ void SelectStage::Initialize(Engine::EntityManager* entityManager, CameraManager
 		std::unique_ptr<ObjectComponent> stone = std::make_unique<ObjectComponent>();
 		stone->InitializeInstancing(entityManager,
 			{}, "Stone" + std::to_string(i), "Stone.obj", "", false, false, nullptr,
-			Engine::Object3dInstansManager::TransparencyType::kNo);
+			Engine::Object3dInstansManager::TransparencyType::kNo,false);
 		stone->GetWorldTransform().translate_ = { Random::RandomFloat(-6000, -400.0f) , -20.0f, Random::RandomFloat(-100, 7000.0f) };
 		stone->GetWorldTransform().rotate_.y = Random::RandomFloat(0, 360.0f);
 		stone->GetWorldTransform().scale_ = Random::RandomFloat(0.5f, 2.25f);

@@ -44,10 +44,10 @@ namespace Combo {
 		};
 
 		// 開始
-		void Enter(Character::BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 
 		// 更新
-		void Update(const InputSystem& inputSystem, float timer, float dt);
+		void Update(const Character::CharacterContext& ctx, float timer);
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
@@ -70,7 +70,7 @@ namespace Combo {
 		Vector3 GetTargetPosition() const { return targetPos_; }
 	private:
 		// 移動タイプによる処理
-		void MoveTypeProcess(const InputSystem& inputSystem, float timer, float dt);
+		void MoveTypeProcess(float timer, float dt);
 		// 重力処理
 		void GravityProcess();
 		// 移動タイプによる方向指定処理

@@ -26,6 +26,10 @@ public:
 	void IsFade() { isfade_ = true; }
 	// フェード
 	void IsNofade() { isfade_ = false; }
+
+	void SetNum(float num) { this->num = num; };
+	//
+	void IsNum(bool is) { isNum = is; }
 private:
 	// フェード
 	std::unique_ptr<Engine::Sprite> fade_;
@@ -36,4 +40,11 @@ private:
 	Vector2 uiAnchorPoint_ = { 0.5f,0.5f };
 	Color uiColor_ = { 1.0f,1.0f ,1.0f ,0.0f };
 	bool isfade_ = false;
+private:
+	Vector2 numPosition_ = { 640, 360 };
+	Vector2 numUiSize_ = { 150,300 };
+	Vector2 numUiAnchorPoint_ = { 0.5f,0.5f };
+	Color numUiColor_ = { 0.9f,0.9f ,0.9f ,1.0f };
+	bool isNum = false;
+	float num = 0;
 };

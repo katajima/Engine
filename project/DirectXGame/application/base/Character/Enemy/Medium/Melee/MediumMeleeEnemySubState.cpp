@@ -39,7 +39,7 @@ namespace Character {
     void MediumMeleeEnemyAttackSwingSubState::Enter() {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
         timer_ = 0.0f;
-        enemy->GetMoveComponent()->GetMoveSystem()->GetData().maxSpeed = 40.0f;
+        enemy->GetMoveComponent()->GetMoveSystem()->Data().maxSpeed = 40.0f;
        // enemy->DirectionMoveVelocity(40.0f);
         dire_ = enemy->TargetDirection();
 

@@ -4,12 +4,6 @@
 #include "ComboEndCondition.h"
 #include "ComboNextCondition.h"
 
-namespace Character {
-	class BaseCharacter;		// キャラクター
-}
-class MovementComponent;			// ジャンプシステム
-
-
 namespace Combo {
 
 	// コンボ受付条件クラス
@@ -19,7 +13,7 @@ namespace Combo {
 		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
-		void Update(const InputSystem& inputSystem, float timer, float dt);
+		void Update(const Character::CharacterContext& ctx, float timer);
 
 		// 終了
 		void Exit();
@@ -57,8 +51,6 @@ namespace Combo {
 		EndCondition endCondition_;
 		// 移行条件クラス
 		NextCondition nextCondition_;
-	private:
-		MovementComponent* movementComponent = nullptr;
 	};
 
 }

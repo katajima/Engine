@@ -35,6 +35,7 @@ public:
 	// ゲームデータ
 	Game::GameData GetGamePlayData() const { return gamePlayData_; }
 
+	bool IsMove() const { return gameEventController_->IsMove(); }
 private:
 
 	// シーン変更

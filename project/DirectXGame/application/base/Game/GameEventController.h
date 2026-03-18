@@ -44,6 +44,8 @@ namespace Game {
 	public:
 		// イベント終了通知
 		bool IsEndEvent() const { return isEndEvent_; };
+		// 移動可能か
+		bool IsMove() const { return eventStateMachine_->GetCurrentState()->GetData().isMove; }
 
 		// 現在のウェーブ
 		int GetCurrentWave() const { return curretWave_; }

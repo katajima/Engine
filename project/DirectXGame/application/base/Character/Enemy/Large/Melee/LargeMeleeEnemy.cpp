@@ -14,41 +14,26 @@ namespace Character {
 
 		// パラメーター初期化
 		Parameters()->HP.Initiaize(100, 0, 100, 0);
-		Parameters()->speed = 10.0f;
 		Parameters()->strength = 10.0f;
 
-		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-
+		
 		// 保存項目初期化
 		InitializeBaseAddItem();
-		// スプライト初期化
-		Initialize2D();
 		// パーティクル初期化
 		InitParticle();
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
 
-	void LargeMeleeEnemy::Update()
-	{
-	}
+	void LargeMeleeEnemy::Update() {}
 
-	void LargeMeleeEnemy::Draw2D()
-	{
-	}
+	void LargeMeleeEnemy::Draw2D() {}
 
-	void LargeMeleeEnemy::Emit()
-	{
-	}
+	void LargeMeleeEnemy::Emit() {}
 
-	void LargeMeleeEnemy::Move()
-	{
-	}
+	void LargeMeleeEnemy::Move() {}
 
-	void LargeMeleeEnemy::InitStateMachine()
-	{
-	}
+	void LargeMeleeEnemy::InitStateMachine() {}
 
-	void LargeMeleeEnemy::InitParticle() {
-	};
+	void LargeMeleeEnemy::InitParticle() {}
 }

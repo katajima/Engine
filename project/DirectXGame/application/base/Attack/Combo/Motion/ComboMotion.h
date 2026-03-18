@@ -10,9 +10,9 @@ namespace Combo {
 	class ComboMotion {
 	public:
 		// 開始
-		void Enter(Character::BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 		// 更新
-		void Update(const InputSystem& inputSystem, float timer, float dt);
+		void Update(const Character::CharacterContext& ctx,float timer);
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
 	public:

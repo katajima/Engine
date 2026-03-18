@@ -25,18 +25,18 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 };
 
 
-void AttackController::Update(float dt) {
+void AttackController::Update(const Character::CharacterContext& ctx) {
 
 
 	// ヒットカウンターの更新
 	if (!isStopHitTimer_) {
-		hitCounter_.Update(dt);
+		hitCounter_.Update(ctx.dt);
 	}
 
 	// ヒットボックスシステムの更新
-	hitBoxSystem_->Update(dt);
+	hitBoxSystem_->Update(ctx.dt);
 	if (IsAttack() || isDebugEditor_) {
 		// コンボシステムの更新
-		comboSystem_->UpdateCombo(dt);
+		comboSystem_->Update(ctx);
 	}
 };

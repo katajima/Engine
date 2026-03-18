@@ -8,6 +8,8 @@ constexpr float kFloatMax = 3.4028235e+38f;
 
 
 namespace Engine {
+	class ColliderComponent;
+
 	// SRTリザルト
 	struct SATResult {
 		bool hit;
@@ -18,7 +20,7 @@ namespace Engine {
 	class Collider
 	{
 	public:
-		void* owner = nullptr; // 通知先ポインタ
+		ColliderComponent* owner = nullptr; // 通知先ポインタ
 		bool enabled = true;
 		bool isStatic = false;  // 動かさない
 		bool isDebugLine = false;// ライン描画するか	
@@ -81,7 +83,7 @@ namespace Engine {
 		Vector3 triangle01{};
 		Vector3 triangle02{};
 		Vector3 triangle03{};
-
+		bool isNormal = false;
 
 		// 更新
 		void Update(const WorldTransform& worldTransform, LineCommon* lineCommon) override;

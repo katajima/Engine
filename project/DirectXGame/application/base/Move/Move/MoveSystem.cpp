@@ -52,6 +52,7 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 	MoveRequest request{};
 	// 距離設定
 	Vector3 dire = Subtract(ctx.target->GetWorldPosition(), ctx.position).Normalize();
+	dire.y = 0;
 	// 回転設定
 	Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
 
@@ -65,7 +66,6 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 		else {
 			dire.y = 0.0f; // Y軸速度リセット
 		}
-		//dire = { -dire.x, dire.y, -dire.z };
 	}
 	request.velocity = dire * ctx.dt * ctx.moveSpeed;
 	request.direction = dire;

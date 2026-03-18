@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
-
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
 
@@ -96,7 +96,7 @@ namespace Combo {
 		/// <summary>
 		/// コンボ成立チェック
 		/// </summary>
-		bool Update(const InputSystem& inputSystem, float deltaTime);
+		bool Update(const Character::CharacterContext& ctx);
 
 
 

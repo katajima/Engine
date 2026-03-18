@@ -17,14 +17,14 @@ namespace Character {
         void Init(BaseCharacter* character, CharacterMainState initialState = CharacterMainState::Move);
 
         // 更新
-        void Update();
+        void Update(const CharacterContext& ctx);
 
         // 変更
         void ChangeState(const CharacterMainState& name) {
             auto it = stateFactoryMap_.find(name);
             if (it != stateFactoryMap_.end()) {
                 nowState_ = name;
-                ChangeState(it->second(character_));
+                ChangeState(it->second(character));
             }
             else {
                 assert(true);
@@ -64,7 +64,7 @@ namespace Character {
         //
         CharacterMainState nowState_;
         // 操作状態
-        BaseCharacter* character_ = nullptr;
+        BaseCharacter* character = nullptr;
         // ステート変更が1フレーム中に何度も起らないようにするフラグ
         bool isOneFrameOneState_ = false;
     };

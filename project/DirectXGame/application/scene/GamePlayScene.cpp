@@ -128,7 +128,7 @@ void GamePlayScene::Initialize()
 	Vector3 sizeAABB = { 300,25,300 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
+	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	// 静的Octreeコライダー
 	collisionManager_->BuildStaticSceneOctree();
 
@@ -217,9 +217,8 @@ void GamePlayScene::Update()
 
 	// ImGuiの更新
 	UpdateImGui();
-
 	// キャラクターマネージャー更新
-	characterManager_->Update();
+	characterManager_->Update(gameFlowController_->IsMove());
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());
 	// カメラ管理の更新
@@ -235,6 +234,7 @@ void GamePlayScene::Update()
 	// ゲーム進行マネージャー更新
 	gameFlowController_->Update(GetTime());
 
+	
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
 

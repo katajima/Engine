@@ -7,10 +7,10 @@
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
 namespace Character {
-	void SmallRangeEnemyMoveState::Update()
+	void SmallRangeEnemyMoveState::Update(const CharacterContext& ctx)
 	{
 		// 時間更新
-		timer_ += character->GetTime();
+		timer_ += ctx.dt;
 
 		// HPが0以上なら
 		if (character->GetHP() > 0) {
@@ -33,7 +33,7 @@ namespace Character {
 	}
 
 
-	void SmallRangeEnemyAttackState::Update()
+	void SmallRangeEnemyAttackState::Update(const CharacterContext& ctx)
 	{
 		SmallRangeWeapon* weapon = static_cast<SmallRangeWeapon*>(character->GetWeapon());
 
@@ -57,10 +57,10 @@ namespace Character {
 	}
 
 
-	void SmallRangeEnemyDieState::Update()
+	void SmallRangeEnemyDieState::Update(const CharacterContext& ctx)
 	{
 		// 時間更新
-		timer_ -= character->GetTime();
+		timer_ -= ctx.dt;
 		if (timer_ <= 0.0f) {
 			// 死亡判定に
 			character->SetAlive(false);

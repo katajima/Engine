@@ -57,7 +57,7 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 		damage.Update(dt);
 
 		if (damage.GetDamageData().IsAttack()) {
-			parameter->parameters_->HP.value -= damage.GetDamageData().GetDamage();
+			parameter->parameters->HP.value -= damage.GetDamageData().GetDamage();
 		}
 
 	}

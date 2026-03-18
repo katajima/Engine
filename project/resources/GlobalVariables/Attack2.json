@@ -126,7 +126,7 @@
         },
         "ロックオン半径": {
             "type": "float",
-            "value": 7.0
+            "value": 10.34000015258789
         },
         "終了条件タイプ": {
             "enumType": "EndConditionType",

@@ -3,7 +3,6 @@
 void StageColliderSystem::Initialize(Engine::LineCommon* lineCommon) {
 	colliderComponent_ = std::make_unique<Engine::ColliderComponent>();
 	colliderComponent_->SetLineCommon(lineCommon);
-	colliderComponent_->SetOwner(this);
 	GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
 		if (!otherComponent) return;
@@ -24,6 +23,7 @@ void StageColliderSystem::CreateCollider() {
 				triangleColl->collisionMask = 0xFFFFFFFF;
 				triangleColl->isStatic = true;
 				triangleColl->isDebugLine = false;
+				triangleColl->isNormal = true;
 				colliderComponent_->AddCollider(std::move(triangleColl));
 			}
 		}

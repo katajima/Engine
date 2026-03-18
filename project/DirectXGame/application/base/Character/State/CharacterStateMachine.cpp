@@ -4,13 +4,13 @@
 namespace Character {
 	void CharacterStateMachine::Init(BaseCharacter* character, CharacterMainState initialState)
 	{
-		character_ = character;
+		this->character = character;
 		ChangeState(initialState);
 	}
 
-	void CharacterStateMachine::Update() {
+	void CharacterStateMachine::Update(const CharacterContext& ctx) {
 		// 更新
-		state_->Update();
+		state_->Update(ctx);
 		isOneFrameOneState_ = false;
 	}
 }

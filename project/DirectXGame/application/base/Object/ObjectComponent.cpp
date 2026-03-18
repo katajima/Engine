@@ -136,6 +136,16 @@ Vector2 ObjectComponent::GetScreenPosition() {
     }
 }
 
+void ObjectComponent::SetIsUpdateColliderComponent(bool is) {
+    // インスタンシング描画なら
+    if (useInstancing) {
+        return objectInstance_->SetIsUpdateColliderComponent(is);
+    }
+    else {
+        return objectBase_->SetIsUpdateColliderComponent(is);
+    }
+};
+
 
 /// <summary>
 /// 初期化
@@ -171,19 +181,20 @@ void ObjectComponent::Initialize(Engine::EntityManager* entityManager, Engine::G
 
 void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
     const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody,
-    IHitReceiver* iHitReceiver, Engine::Object3dInstansManager::TransparencyType transparencyType)
+    IHitReceiver* iHitReceiver, Engine::Object3dInstansManager::TransparencyType transparencyType, bool rigidUpdate)
 {
     this->entityManager = entityManager;   // エンティティ3d
     this->globalVariables = globalVariables;   // 保存項目
     timeSpeed_ = 1.0f;                          // タイムスピードを1.0fに設定
     useCollider_ = useCollider;                 // コライダーコンポーネントを使うか
     useRigidBody_ = useRigidBody;
+    rigidUpdate_ = rigidUpdate;
     name_ = objectName;                         // 名前
     modelName_ = modelName;                     // モデル名
     useInstancing = true;                       // インスタンシング描画にする
     // インスタンス初期化
     Engine::ObjectInstans object;
-    object.Initialize(entityManager, useCollider_, useRigidBody_);
+    object.Initialize(entityManager, useCollider_, rigidUpdate_);
     // オブジェクト追加
     entityManager->GetObject3dInstansManager()->AddObject(modelName, texName, std::move(object), instanceId_,
         Engine::Object3dInstansManager::MeshType::kModel,transparencyType);

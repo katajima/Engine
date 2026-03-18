@@ -25,18 +25,6 @@ namespace Character {
 
 #pragma region
 
-	void BaseEnemy::Initialize2D()
-	{
-
-		// ロックオン
-		icon_lockOn = std::make_unique<Engine::Sprite>();
-		icon_lockOn->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/icon/LockOnW.dds", false);
-		icon_lockOn->SetSize(0.10f);		// サイズ指定
-		icon_lockOn->SetColor({ 1,0,1,1 });	// 色指定
-		icon_lockOn->SetPosition({ -100,650 });	// 位置指定
-		icon_lockOn->SetAnchorPoint({ 0.5f,0.5f });	// アンカーポイント設定
-	}
-
 	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName)
 	{
 		// オブジェクトコンポーネント追加
@@ -61,20 +49,26 @@ namespace Character {
 		objectComponent_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
 		objectComponent_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
-			, Engine::Object3dInstansManager::TransparencyType::kNo);
+			, Engine::Object3dInstansManager::TransparencyType::kNo,false);
 		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
+		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
+
+		// コライダ位置用トランスフォーム初期化
+		worldCollider_.Initialize();
+		worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
+		worldCollider_.translate_.y = colliderRadius / 2.0f;
 
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
 		parameterComponent_->Initialize();
-
+		
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
 		moveComponent_->UseGlobal(false);
 		moveComponent_->Initialize(this,nullptr,globalVariables, MovementComponent::ControlType::Manual, "_" + charaName);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
-
+		moveComponent_->GetMoveSystem()->Data().minSpeed = -100;
 		// 保存項目追加
 		CreateGroup(charaName);
 
@@ -89,7 +83,6 @@ namespace Character {
 		sphere->tag = CollisionTag::Enemy;	// タグ設定
 		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
 		sphere->radius = colliderRadius; // 半径を適宜設定
-		//sphere->isDebugLine = true;
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 		// コールバック登録（例：プレイヤーと衝突したらダメージ）
@@ -102,7 +95,11 @@ namespace Character {
 			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
 
 			// 壁との衝突応答
-			responseSystem_->GetHitResponse()->Hit(CollisionTag::Wall, self, other);
+			//responseSystem_->GetHitResponse()->HitWall(self, other);
+
+			// 影響
+			//responseSystem_->GetHitResponse()->HitEffect(self, other);
+
 
 			};
 
@@ -139,7 +136,7 @@ namespace Character {
 
 	void BaseEnemy::BaseUpdate() {
 
-		if (GetObjectComponent() == nullptr) { return; }
+		if (objectComponent_ == nullptr) { return; }
 		assert(this);
 
 		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
@@ -149,28 +146,35 @@ namespace Character {
 		// 保存項目更新(敵全体)
 		UpdateBaseEnemyGetValue();
 
-		// ステート
-		stateMachine_->Update();
-
+		
 		// HPが0以下なら
 		if (GetHP() <= 0) {
-			GetObjectComponent()->GetObjectStateFlags().isLockonTarget = false;
-			GetObjectComponent()->GetObjectStateFlags().isAlive = false;
-
 			objectComponentShadow_->GetWorldTransform().scale_ = {};
 		}
 		else {
-			// 移動コンポーネント更新
-			moveComponent_->Update(GetObjectComponent()->GetWorldTransform(), *GetObjectComponent()->GetRigidBodyComponent(),ctx);
+			//　攻撃更新
+			attackController_->Update(ctx);
 			// 応答システム
-			responseSystem_->Update(GetTime());
-
+			responseSystem_->Update(ctx.dt);
+			// キャラクターパラメーター更新
+			parameterComponent_->Update();
+			// 移動コンポーネント更新
+			moveComponent_->Update(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent(),ctx);
+			
+			// コライダのワールドトランスフォーム更新
+			worldCollider_.Update();
+			// コライダーコンポーネント更新
+			objectComponent_->GetColliderComponent()->UpdateAll(worldCollider_);
 
 			objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 			objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-			objectComponentShadow_->GetWorldTransform().translate_.y = -3.0f;
+			objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
 		}
 	
+		// ステート
+		stateMachine_->Update(ctx);
+
+
 		objectComponentShadow_->Update();
 	}
 	

@@ -11,103 +11,6 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 	this->globalVariables = globalVariables;
 	this->inputSystem = inputSystem;
 
-
-	board_ = std::make_unique<Engine::UIBaseBoard>();
-	board_->Init(inputSystem,entityManager, "bord", boardPos, boardSize);
-
-	// 通常攻撃UI初期化
-	InitUIPair("normalAttack", attackTextData_.pos_);
-	Engine::UIPair* normalAttackPair = GetUIPair("normalAttack");
-	normalAttackPair->SetOffset(attackTextData_.offset_);	// 間隔設定
-	normalAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.dds"); // 
-	normalAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData_.anchorPoint_);	// アンカーポイント設定
-	normalAttackPair->GetFirstSprite()->SetSize(attackTextData_.size_);		// サイズ設定
-	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
-	normalAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData_.anchorPoint2_); // アンカーポイント設定
-	normalAttackPair->GetSecondSprite()->SetSize(attackTextData_.size2_);			// サイズ設定
-	
-	// 通常攻撃UI初期化
-	InitUIPair("havyAttack", attackTextData_.pos2_);
-	Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
-	havyAttackPair->SetOffset(attackTextData_.offset_);	// 間隔設定
-	havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
-	havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData_.anchorPoint_);	// アンカーポイント設定
-	havyAttackPair->GetFirstSprite()->SetSize(attackTextData_.size_);		// サイズ設定
-	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
-	havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData_.anchorPoint2_); // アンカーポイント設定
-	havyAttackPair->GetSecondSprite()->SetSize(attackTextData_.size2_);			// サイズ設定
-
-
-
-	InitUIPair("special", spTextData.pos_);
-
-	// 必殺技UI初期化
-	Engine::UIPair* specialPair = GetUIPair("special");
-	specialPair->SetOffset(spTextData.offset_);
-	specialPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	specialPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_rb.dds");
-	specialPair->GetFirstSprite()->SetAnchorPoint(spTextData.anchorPoint_);			// アンカーポイント設定
-	specialPair->GetFirstSprite()->SetSize(spTextData.size_);				// サイズ設定
-	specialPair->GetFirstSprite()->SetColor(spTextData.color_);	// 色設定
-
-	specialPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Special.dds");
-	specialPair->GetSecondSprite()->SetAnchorPoint(spTextData.anchorPoint2_);			// アンカーポイント設定
-	specialPair->GetSecondSprite()->SetSize(spTextData.size2_);						// サイズ設定
-	specialPair->GetSecondSprite()->SetColor(spTextData.color_);	// 色設定
-
-
-	
-	// 必殺技UI初期化
-	InitUIPair("jump", jumpTextData.pos_);
-	Engine::UIPair* jumpPair = GetUIPair("jump");
-	jumpPair->SetOffset(jumpTextData.offset_);
-	jumpPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	jumpPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_a.dds");
-	jumpPair->GetFirstSprite()->SetAnchorPoint(jumpTextData.anchorPoint_);			// アンカーポイント設定
-	jumpPair->GetFirstSprite()->SetSize(jumpTextData.size_);				// サイズ設定
-	jumpPair->GetFirstSprite()->SetColor(jumpTextData.color_);	// 色設定
-
-	jumpPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Jump.dds");
-	jumpPair->GetSecondSprite()->SetAnchorPoint(jumpTextData.anchorPoint2_);			// アンカーポイント設定
-	jumpPair->GetSecondSprite()->SetSize(jumpTextData.size2_);						// サイズ設定
-	jumpPair->GetSecondSprite()->SetColor(jumpTextData.color_);	// 色設定
-
-
-	//// ダッシュUI初期化
-	//InitUIPair("dush", dashTextData.pos_);
-	//Engine::UIPair* dushPair = GetUIPair("dush");
-	//dushPair->SetOffset(dashTextData.offset_);
-	//dushPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	//dushPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_lt.dds");
-	//dushPair->GetFirstSprite()->SetAnchorPoint(dashTextData.anchorPoint_);			// アンカーポイント設定
-	//dushPair->GetFirstSprite()->SetSize(dashTextData.size_);				// サイズ設定
-	//dushPair->GetFirstSprite()->SetColor(dashTextData.color_);	// 色設定
-
-	//dushPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
-	//dushPair->GetSecondSprite()->SetAnchorPoint(dashTextData.anchorPoint2_);			// アンカーポイント設定
-	//dushPair->GetSecondSprite()->SetSize(dashTextData.size2_);						// サイズ設定
-	//dushPair->GetSecondSprite()->SetColor(dashTextData.color_);	// 色設定
-
-
-	// スキルUI初期化
-	InitUIPair("skill", skillTextData.pos_);
-	Engine::UIPair* skillPair = GetUIPair("skill");
-	skillPair->SetOffset(skillTextData.offset_);
-	skillPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	skillPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds");
-	skillPair->GetFirstSprite()->SetAnchorPoint(skillTextData.anchorPoint_);			// アンカーポイント設定
-	skillPair->GetFirstSprite()->SetSize(skillTextData.size_);				// サイズ設定
-	skillPair->GetFirstSprite()->SetColor(skillTextData.color_);	// 色設定
-
-	skillPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Dush.dds");
-	skillPair->GetSecondSprite()->SetAnchorPoint(skillTextData.anchorPoint2_);			// アンカーポイント設定
-	skillPair->GetSecondSprite()->SetSize(skillTextData.size2_);						// サイズ設定
-	skillPair->GetSecondSprite()->SetColor(skillTextData.color_);	// 色設定
-
-
-
 	// クリアUI
 	text_clera = std::make_unique<Engine::Sprite>();
 	InitSprite(text_clera.get(), "resources/Texture/text/clear.dds", cleraTextData_.pos_, cleraTextData_.scale_);
@@ -137,11 +40,6 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 	hitCount->GetNameSprite()->SetColor(hitTextData.nameColor_);	// 色指定
 
 
-	// UIボード
-	board_->CreateUIElement(UIType::CheckBox, "botton", boardPos);
-	board_->CreateUIElement(UIType::UISlider, "slider", boardPos);
-
-
 
 	// カウントUI(ウェーブ)
 	InitUICount("WaveCount", waveTextData.pos_, waveTextData.instance, true);
@@ -168,20 +66,7 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 
 }
 
-void GameUI::Update(float dt)
-{
-	// ボード画面比率画面左上座標指定
-	board_->SetImageLeftTopPosAndRatio(leftTopPos_,ratio_);
-
-	// スライダー位置
-	Engine::UISlider* slider = board_->GetUIElement<Engine::UISlider>(UIType::UISlider, "slider");
-	slider->SetPos(sliderPos);
-
-	// ボード更新
-	board_->Update(0);
-	
-	
-
+void GameUI::Update(float dt){
 	Engine::UICount* hitCount = GetUICount("hitCount");
 	hitCount->SetCount(ConvertUtility::ToFloat(player->GetAttackController()->GetHitCounter().GetHitCount()));
 	

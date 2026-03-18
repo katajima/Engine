@@ -38,7 +38,7 @@ namespace Character {
 			Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 		// 更新
-		void Update();
+		void Update(bool isMove);
 		// 描画2d
 		void Draw2D();
 	public:

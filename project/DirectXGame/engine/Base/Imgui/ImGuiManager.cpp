@@ -89,6 +89,7 @@ void Engine::ImGuiManager::Draw()
 #ifdef _DEBUG
 
 	// 描画コマンドを発行
+	if(ImGui::GetDrawData())
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList().Get());
 #endif // _DEBUG
 }

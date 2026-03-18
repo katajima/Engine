@@ -14,8 +14,10 @@ namespace HitBox {
 			Data& d = data_[i];
 
 			// 更新
-			d.hitBox->Update(dt);
-			d.timer += dt;
+			if (d.hitBox) {
+				d.hitBox->Update(dt);
+				d.timer += dt;
+			}
 
 			// 削除判定
 			if (d.IsDelete()) {
@@ -155,4 +157,14 @@ namespace HitBox {
 		}
 		hitBoxCollDatas_[name] = data;
 	}
+
+
+	void System::Clear() {
+		for (auto& hit : data_) {
+			hit.hitBox.reset();
+		}
+		data_.clear();
+	};
+
 }
+

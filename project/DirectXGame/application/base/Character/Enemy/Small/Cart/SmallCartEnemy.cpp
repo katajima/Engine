@@ -4,8 +4,8 @@
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
-	void SmallCartEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
-	{
+	void SmallCartEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySG01.obj", "enemy");
 		// サイズ
@@ -15,11 +15,9 @@ namespace Character {
 
 		// パラメーター初期化
 		Parameters()->HP.Initiaize(75, 0, 100, 0);
-		Parameters()->speed = 10.0f;
 		Parameters()->strength = 10.0f;
 
-		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->Data().maxSpeed;
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();
 		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
@@ -27,26 +25,18 @@ namespace Character {
 
 		// 保存項目初期化
 		InitializeBaseAddItem();
-		// スプライト初期化
-		Initialize2D();
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
 
-	void SmallCartEnemy::Update()
-	{
-		// 攻撃制御更新
-		attackController_->Update(GetTime());
+	void SmallCartEnemy::Update() {
 		// 基盤の更新
 		BaseUpdate();
 	}
 
-	void SmallCartEnemy::Draw2D()
-	{
-	}
+	void SmallCartEnemy::Draw2D() {}
 
-	void SmallCartEnemy::Emit()
-	{
+	void SmallCartEnemy::Emit() {
 		// エフェクト座標更新
 		worldEffect_.Update();
 
@@ -57,8 +47,7 @@ namespace Character {
 		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
 	}
 
-	void SmallCartEnemy::Move()
-	{
+	void SmallCartEnemy::Move() {
 		// 距離設定
 		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 		// 回転設定
@@ -73,17 +62,16 @@ namespace Character {
 				return;
 			}
 			if (GetTargetDistance() <= 20.0f) {
-				Parameters()->speed = -moveSpeed_ * 1.5f;
+				moveComponent_->GetMoveSystem()->Data().maxSpeed = -moveSpeed_ * 1.5f;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			Parameters()->speed = moveSpeed_;
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
 		}
 	}
 
-	void SmallCartEnemy::InitStateMachine()
-	{
+	void SmallCartEnemy::InitStateMachine() {
 		// ステートマシーン初期化
 		stateMachine_ = std::make_unique<CharacterStateMachine>();
 		stateMachine_->RegisterState(CharacterMainState::Move, [](BaseCharacter* p) {

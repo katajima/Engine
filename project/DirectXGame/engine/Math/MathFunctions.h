@@ -85,6 +85,8 @@ namespace ClosestPoint {
 	Vector3 PointOnPlane(const Plane& plane, const Vector3& point);
 	// 線と三角
 	Vector3 SegmentTriangle(const Segment& segment, const Triangle& triangle);
+	// 球と三角
+	Vector3 SphereTriangle(const Sphere& sphere,const Triangle& triangle);
 	// 線と線の最近接点
 	Vector3 SegmentSegment(const Segment& seg1, const Segment& seg2, Vector3 currentClosest);
 	// 線とAABB

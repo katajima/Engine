@@ -1,0 +1,36 @@
+{
+    "Player": {
+        "HP": {
+            "type": "float",
+            "value": 200.0
+        },
+        "MP": {
+            "type": "float",
+            "value": 0.0
+        },
+        "MaxHP": {
+            "type": "float",
+            "value": 200.0
+        },
+        "MaxMP": {
+            "type": "float",
+            "value": 0.0
+        },
+        "MaxStamina": {
+            "type": "float",
+            "value": 100.0
+        },
+        "jampPower": {
+            "type": "float",
+            "value": 30.0
+        },
+        "speed": {
+            "type": "float",
+            "value": 40.0
+        },
+        "stamina": {
+            "type": "float",
+            "value": 100.0
+        }
+    }
+}

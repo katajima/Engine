@@ -73,10 +73,12 @@ namespace Character {
 		void AddSpGauge(int d) { special_->AddGauge(d); };
 		// SP発動可能？
 		bool GetIsSpecial() const { return special_->GetIsSpecial(); }
-
 	protected:
 		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
 		FollowCamera* followCamera = nullptr;					// フォローカメラ
 		bool isCreativeMode = false;							// クリエイティブモードかどうか
+		// サブ武器
+		std::unique_ptr<BaseWeapon> subWeapon_ = nullptr;
+
 	};
 }

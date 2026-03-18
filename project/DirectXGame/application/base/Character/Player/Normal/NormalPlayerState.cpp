@@ -7,30 +7,25 @@ namespace Character {
 #pragma region Idle
 
 	// 更新
-	void PlayerStateIdle::Update() {
-		InputSystem* inputSystem = character->GetInputSystem();
+	void PlayerStateIdle::Update(const CharacterContext& ctx) {
 		BaseWeapon* weapon = character->GetWeapon();
 		BaseSpecial* special = character->GetSpecial();
-		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		MoveSystem* move = character->GetMoveComponent()->GetMoveSystem();
 		character->GetWeapon()->GetObject3D()->isEmitTrailEffect = false;
 
 
 		// 武器描画 
 		weapon->GetObject3D()->SetIsDraw(true);
 
-		weapon->RecastTime(Engine::MyGame::GameTime());
-
 		// 必殺技移行
 		if (special->GetIsSpecial()) {
-			if (inputSystem->GetPlayerInputData().specialTrigger) {
+			if (ctx.inputData.specialTrigger) {
 				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 				return;
 			}
 		}
 
 		// 移動したら
-		if (inputSystem->GetPlayerInputData().moveShick.Length() != 0) {
+		if (ctx.inputData.moveShick.Length() != 0) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 			return;
 		}
@@ -53,28 +48,24 @@ namespace Character {
 
 #pragma region Move
 
-	void PlayerStateMove::Update()
+	void PlayerStateMove::Update(const CharacterContext& ctx)
 	{
-		InputSystem* inputSystem = character->GetInputSystem();				// 入力
 		BaseWeapon* weapon = character->GetWeapon();		// 武器
 		BaseSpecial* special = character->GetSpecial();	// 必殺
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		weapon->GetObject3D()->SetIsDraw(true); // 武器描画
 		anima->SetAnimation("SwordRun01", 0.1f);	// 流すアニメーション設定
 
-		// 武器リキャストタイム更新
-		weapon->RecastTime(Engine::MyGame::GameTime());
-
 		// 必殺がうてるなら
 		if (special->GetIsSpecial()) {
-			if (inputSystem->GetPlayerInputData().specialTrigger) {
+			if (ctx.inputData.specialTrigger) {
 				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Special);
 				return;
 			}
 		}
 
 		// 止まったら
-		if (inputSystem->GetPlayerInputData().moveShick.Length() == 0) {
+		if (ctx.inputData.moveShick.Length() == 0) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
 			return;
 		}
@@ -107,10 +98,10 @@ namespace Character {
 #pragma region Jump
 
 	// 更新
-	void PlayerStateJump::Update() {
+	void PlayerStateJump::Update(const CharacterContext& ctx) {
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		InputSystem* inputSystem = character->GetInputSystem();
 		JumpSystem* jump = character->GetMoveComponent()->GetJumpSystem();
+		timer += ctx.dt;
 
 		anima->SetIsPlaying(true);		// アニメーション再生
 		anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
@@ -118,11 +109,11 @@ namespace Character {
 
 		// ジャンプ出来るか
 		bool isJamp = character->GetMoveComponent()->GetIsJump();
-		bool isTrigger = inputSystem->GetPlayerInputData().jumpTrigger;
-		bool isPress = inputSystem->GetPlayerInputData().jumpPressed;
+		bool isTrigger = ctx.inputData.jumpTrigger;
+		bool isPress = ctx.inputData.jumpPressed;
 
 
-		bool isTriggerLT = inputSystem->GetPlayerInputData().dashHeld;
+		bool isTriggerLT = ctx.inputData.dashHeld;
 		
 
 
@@ -142,9 +133,11 @@ namespace Character {
 		}
 		else {
 			// 着地状態なら
-			if (character->GetMoveComponent()->GetIsLanding()) {
-				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
-				return;
+			if (maxTimer <= timer) {
+				if (character->GetMoveComponent()->GetIsLanding()) {
+					character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+					return;
+				}
 			}
 		}
 
@@ -163,18 +156,18 @@ namespace Character {
 	// 終了
 	void PlayerStateJump::Exit() {
 		character->GetMoveComponent()->GetVelocity() = { 0,0,0 };
+		timer = 0.0f;
 	}
 	// 初期化
 	void PlayerStateJump::Enter() {
-
-
+		timer = 0.0f;
 	}
 
 #pragma endregion // ジャンプ
 
 #pragma region Attack
 
-	void PlayerStateAttack::Update() {
+	void PlayerStateAttack::Update(const CharacterContext& ctx) {
 	
 	}
 
@@ -204,7 +197,7 @@ namespace Character {
 
 
 
-	void PlayerStateSpecial::Update()
+	void PlayerStateSpecial::Update(const CharacterContext& ctx)
 	{
 		BaseSpecial* special = character->GetSpecial();
 		BasePlayer* player = dynamic_cast<BasePlayer*>(character);
@@ -248,7 +241,7 @@ namespace Character {
 #pragma region Fainting
 
 	// 更新
-	void PlayerStateFainting::Update() {
+	void PlayerStateFainting::Update(const CharacterContext& ctx) {
 	}
 
 	// 終了

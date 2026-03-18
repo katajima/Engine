@@ -5,10 +5,10 @@
 
 namespace Character {
 	void MediumMeleeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
-	{
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
-		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemy.gltf", "MediumMeleeEnemy", 2);
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera,
+			"enemy.gltf", "MediumMeleeEnemy", 1.5f);
 
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 
@@ -19,14 +19,10 @@ namespace Character {
 
 
 		// パラメーター初期化
-		parameterComponent_->parameters_->HP.Initiaize(50, 0, 50, 0);
-		parameterComponent_->parameters_->speed = 5.0f;
-		parameterComponent_->parameters_->strength = 10.0f;
+		parameterComponent_->parameters->HP.Initiaize(50, 0, 50, 0);
+		parameterComponent_->parameters->strength = 10.0f;
 
-		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
-		moveSpeed_ = Parameters()->speed;
-		// スプライト初期化
-		Initialize2D();
+		moveSpeed_ = moveComponent_->GetMoveSystem()->Data().maxSpeed;
 		// パーティクル初期化
 		InitParticle();
 		// トランスフォーム更新
@@ -49,29 +45,13 @@ namespace Character {
 	}
 
 	void MediumMeleeEnemy::Update() {
-		// 攻撃制御更新
-		attackController_->Update(GetTime());
 		// 基盤の更新
 		BaseUpdate();
-
 	}
 
-	void MediumMeleeEnemy::Draw2D()
-	{
-		if (GetObjectComponent() == nullptr) { return; }
+	void MediumMeleeEnemy::Draw2D(){}
 
-		// ロックオンされているなら
-		if (GetIsLockOn()) {
-			Vector2 screenPos = objectComponent_->GetScreenPosition();	// スクリーン座標取得
-			icon_lockOn->SetPosition(screenPos + Vector2{ 0.0f,-40.0f });// 位置設定
-
-			icon_lockOn->Update();	// 更新
-			icon_lockOn->Draw();	// 描画
-		}
-	}
-
-	void MediumMeleeEnemy::Emit()
-	{
+	void MediumMeleeEnemy::Emit(){
 		// エフェクト座標更新
 		worldEffect_.Update();
 
@@ -82,10 +62,10 @@ namespace Character {
 		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
 	}
 
-	void MediumMeleeEnemy::Move()
-	{
+	void MediumMeleeEnemy::Move(){
 		// 距離設定
 		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		dire.y = 0.0f;
 		// 回転設定
 		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
 		// Y軸周り角度
@@ -93,24 +73,23 @@ namespace Character {
 
 		if (GetTargetDistance() <= globalData_.attackStartRadius) {
 			attackTimer_ += GetTime();
-			Parameters()->speed = 0;
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
 			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				Parameters()->speed = -globalData_.retreatSpeed;
+				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
 			}
 		}
 		else {
 			attackTimer_ = 0.0f;
-			Parameters()->speed = moveSpeed_;
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
 		}
 	}
 
-	void MediumMeleeEnemy::InitParticle()
-	{
+	void MediumMeleeEnemy::InitParticle(){
 		Engine::ParticleManager* particleManager = entityManager->GetEffectManager()->GetParticleManager();
 
 		// エフェクト用のトランスフォーム初期化

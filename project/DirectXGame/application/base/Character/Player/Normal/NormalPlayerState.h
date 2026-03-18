@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/State/BaseMainState.h"
+#include "DirectXGame/application/base/Character/State/BaseMainState.h"
 
 
 namespace Character {
@@ -13,7 +13,7 @@ namespace Character {
 		}
 
 		// 更新
-		void Update() override;
+		void Update(const CharacterContext& ctx) override;
 
 		// 終了
 		void Exit()override;
@@ -32,7 +32,7 @@ namespace Character {
 		}
 
 		// 更新
-		void Update() override;
+		void Update(const CharacterContext& ctx) override;
 
 		// 終了
 		void Exit()override;
@@ -50,14 +50,16 @@ namespace Character {
 		}
 
 		// 更新
-		void Update() override;
+		void Update(const CharacterContext& ctx) override;
 
 		// 終了
 		void Exit()override;
 
 		// 初期化
 		void Enter() override;
-
+	private:
+		float timer = 0.0f;
+		float maxTimer = 0.1f;
 	};
 
 	// 攻撃
@@ -69,7 +71,7 @@ namespace Character {
 		}
 
 		// 更新
-		void Update() override;
+		void Update(const CharacterContext& ctx) override;
 
 		// 終了
 		void Exit() override;
@@ -86,7 +88,7 @@ namespace Character {
 		}
 
 		// 更新
-		void Update() override;
+		void Update(const CharacterContext& ctx) override;
 
 		// 終了
 		void Exit() override;
@@ -101,7 +103,7 @@ namespace Character {
 			: FaintingState(player) {
 		}
 		// 更新
-		void Update() override;
+		void Update(const CharacterContext& ctx) override;
 
 		// 終了
 		void Exit() override;

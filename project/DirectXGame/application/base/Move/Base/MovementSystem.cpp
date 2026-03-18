@@ -14,9 +14,12 @@ void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCo
 	else {
 		direction_ = world.GetForward();
 	}
+	//isLinding_ = cmd.isLanding;
+	groundHeight_ = cmd.groundHeight;
 	// 回転処理
 	RotateProcess(cxt,world);
-
+	
+	world.Update();
 	// 重力処理
 	GravityProess(cxt,world,rigid);
 
@@ -31,16 +34,19 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 		return;
 	}
 
-	// 重力
-	rigid.Integrate(cxt.dt, world);
-
-	if (world.GetWorldPosition().y <= groundHeight_) {
-		world.translate_.y = groundHeight_;	// 地面位置に
+	if (world.translate_.y <= 0.02f) {
+		isLinding_ = true;
+	}
+	else {
+		isLinding_ = false;
+	}
+	
+	if (isLinding_) {
+		world.translate_.y = -0.01f;
 		rigid.Velocity().y = 0.0f;			// y速度を0に
 		rigid.SetIsGravity(false);			// 重力をオフ
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
-		onGround_ = true;					// 着地
-	}
+	} 
 	else {
 		if (!cxt.isAttacking) {
 			if (rigid.GetVelocity().y < 0.0f) {
@@ -53,8 +59,10 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 		else {
 			rigid.SetGravityScale(cxt.attackingGravity);	// 重力スケールセット
 		}
-		onGround_ = false;			// 着地状態を解除
 	}
+
+	// 重力
+	rigid.Integrate(cxt.dt, world);
 }
 
 void MovementSystem::RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world) {

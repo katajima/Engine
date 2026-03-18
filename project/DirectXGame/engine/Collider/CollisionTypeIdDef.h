@@ -4,13 +4,15 @@
 
 // コリジョン種別ID定義
 enum class CollisionTag {
-	None,
-	Player,
-	Enemy,
-	PlayerAttack,
-	EnemyAttack,
-	Wall,
-	Item,
+	None,			// 何もなし
+	Player,			// プレイヤー
+	Enemy,			// 敵
+	PlayerAttack,	// プレイヤー攻撃
+	EnemyAttack,	// 敵攻撃
+	Wall,			// 障害物(壁や床)
+	Item,			// アイテム
+	PlayerEffect,	// プレイヤーによる影響
+	EnemyEffect,	// 敵による影響
 };
 
 // レイヤー

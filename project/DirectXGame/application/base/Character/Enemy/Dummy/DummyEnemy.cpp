@@ -17,10 +17,7 @@ namespace Character {
 
 		// パラメーター初期化
 		Parameters()->HP.Initiaize(hp, 0, hp, 0);
-		Parameters()->speed = 10.0f;
 		Parameters()->strength = 10.0f;
-
-		moveComponent_->GetMoveSystem()->GetData().maxSpeed = Parameters()->speed;
 
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();
@@ -29,8 +26,6 @@ namespace Character {
 
 		// 保存項目初期化
 		InitializeBaseAddItem();
-		// スプライト初期化
-		Initialize2D();
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}

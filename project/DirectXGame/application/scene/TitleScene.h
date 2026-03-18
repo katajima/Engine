@@ -9,7 +9,7 @@
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h"
-#include "DirectXGame/application/base/Weapon/playerWeapon.h"
+#include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 /// <summary>
 /// タイトルシーン
 /// </summary>

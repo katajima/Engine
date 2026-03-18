@@ -55,9 +55,9 @@ public: // 移動系統
 	// 速度設定
 	void SetSpeed(float min, float max) { moveSystem_->SetSpeed(min, max); };
 	// 移動タイプ設定
-	void SetMoveType(MoveType type) { moveSystem_->GetData().moveType = type;};
+	void SetMoveType(MoveType type) { moveSystem_->Data().moveType = type;};
 	// スティックによる移動速度固定設定
-	void SetIsStickToSpeed(bool is) { moveSystem_->GetData().isStickToSpeed = is; };
+	void SetIsStickToSpeed(bool is) { moveSystem_->Data().isStickToSpeed = is; };
 	// 保存項目を使うか
 	void UseGlobal(bool is) { useGlobal_ = is; };
 public: // ジャンプ系統

@@ -87,6 +87,8 @@ namespace Game {
 		GamePadButton buttom = GamePadButton::GAMEPAD_B;
 		// 敵削除
 		bool enemyDelete = false;
+		// 移動可能か
+		bool isMove = true;
 	};
 
 

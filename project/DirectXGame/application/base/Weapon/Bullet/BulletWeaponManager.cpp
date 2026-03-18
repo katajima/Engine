@@ -57,7 +57,6 @@ void BulletWeaponManager::SetTargets(std::vector<Character::BaseEnemy*> targets)
 	int i = 0;
 	for (auto& weapon : bulletWeapons_) {
 		for (int j = 0; j < weapon.second->MaxTargetNum();j++) {
-			targets[i]->SetIsLockOn(true);
 			weapon.second->SetTarget(targets[i]);
 			i++;
 			// ターゲットの量が足りなくなったら終了

@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Input/InputSystem.h"
-#include "DirectXGame/application/base/State/BaseMainState.h"
+#include "DirectXGame/application/base/Character/State/BaseMainState.h"
 
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
@@ -13,11 +13,15 @@ namespace Engine {
 /// </summary>
 struct MoveCommand {
     // 最終的な速度
-    Vector3 finalVelocity;
+    Vector3 finalVelocity{};
     // 最終的な方向
-    Vector3 finalDirection;
+    Vector3 finalDirection{};
 	// final回転
-	Vector3 finalRotation;
+    Vector3 finalRotation{};
+    // 着地しているか
+    bool isLanding = false;
+    // 地面高さ
+    float groundHeight = 0.0f;
 };
 
 enum class MoveLayer : uint8_t { 
@@ -35,9 +39,13 @@ struct MoveRequest {
     // 速度倍率(Base)
     float speedMultiplier = 1.0f;
     // Additive/Override
-    Vector3 velocity{};
+    Vector3 velocity{0,0,0};
 	Vector3 direction{};
 	Vector3 rotation{};
     int priority = 999;     // Override競合用
     bool invincible = false;
+
+    bool isLanding = false;
+
+    float groundHeight = 0.0f;
 };
