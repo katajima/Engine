@@ -35,7 +35,8 @@ namespace Character {
 
 		// HP設定
 		parameterComponent_->parameters->HP.Initiaize(200, 0, 200, 0);
-		parameterComponent_->parameters->stamina.Initiaize(100, 0, 100, 2);
+		// スタミナ設定
+		parameterComponent_->parameters->stamina.Initiaize(100, 0, 100, 5);
 		
 
 		// 移動コンポーネント初期化
@@ -170,29 +171,23 @@ namespace Character {
 		auto* ac = GetAttackController();
 		ac->SetIsAttack(true);
 
-		if (isAttack)
-		{
+		if (isAttack){
 			ac->GetComboSystem()->InputCombo(input);
 			return;
 		}
 
-		if (canStart)
-		{
+		if (canStart){
 			stateMachine_->ChangeState(CharacterMainState::Attack);
 
 			// 開始コンボ名の決定を「入力種類×状況」でまとめる
-			if (!moveComponent_->GetIsLanding())
-			{
+			if (!moveComponent_->GetIsLanding()){
 				ac->GetComboSystem()->StartCombo("JumpAttack");
 			}
-			else
-			{
+			else		{
 				// ここをテーブル化するとスキル追加が楽
-				switch (input)
-				{
+				switch (input){
 				case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack1"); break;
 				case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("HeavyAttack01"); break;
-
 				case AttackInput::Skill:
 					ac->GetComboSystem()->StartCombo("SkillAttack01"); 
 					parameterComponent_->Stamina().Add(-30);
@@ -225,6 +220,13 @@ namespace Character {
 		stateMachine_->RegisterState(CharacterMainState::Jump, [](BaseCharacter* p) {
 			return std::make_unique<PlayerStateJump>(p);
 			});
+		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
+			return std::make_unique<PlayerStateDie>(p);
+			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<PlayerStateDamage>(p);
+			});
+
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
 
@@ -236,7 +238,7 @@ namespace Character {
 
 		// コンテキストシステム
 		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
-
+		isCanJump = ctx.isCanJump;
 #ifdef _DEBUG
 		ImGui::Begin("Debug");
 		if (ImGui::Button("SP")) {
@@ -244,8 +246,6 @@ namespace Character {
 		}
 		ImGui::End();
 #endif // _DEBUG
-
-
 
 		if (special_->GetPhese() == 1) {
 			attackController_->IsStopHitTimer(true);
@@ -267,9 +267,13 @@ namespace Character {
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 
+		if (parameterComponent_->GetHP() <= 0 && stateMachine_->GetCurrentMainState() != CharacterMainState::Die) {
+			stateMachine_->ChangeState(CharacterMainState::Die);
+		}
 
 		// ステート
 		stateMachine_->Update(ctx);
+
 		// 移動コンポーネント更新
 		moveComponent_->Update(GetObjectComponent()->GetWorldTransform(),
 			*GetObjectComponent()->GetRigidBodyComponent(), ctx);
@@ -324,16 +328,9 @@ namespace Character {
 
 #pragma region Move
 
-	void NormalPlayer::Move() {
-		bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-		bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
-	}
-
 	void NormalPlayer::Jump() {
-		bool is = stateMachine_->GetCurrentMainState() == CharacterMainState::Move;
-		bool is2 = stateMachine_->GetCurrentMainState() == CharacterMainState::Idle;
 		// 生きていてステートの状態が移動状態ならジャンプステートへ移動
-		if (GetAlive() && (is || is2) &&
+		if (GetAlive() && isCanJump &&
 			moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
 
 			stateMachine_->ChangeState(CharacterMainState::Jump);

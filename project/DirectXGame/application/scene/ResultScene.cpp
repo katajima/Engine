@@ -35,6 +35,13 @@ void ResultScene::Initialize() {
 	resultUI_ = std::make_unique<ResultUI>();
 	resultUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 
+	overUI_ = std::make_unique<Engine::Sprite>();
+	overUI_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/text/over.dds");
+	overUI_->SetPosition({640,200});
+	overUI_->SetAnchorPoint({0.5f,0.5f });
+	//overUI_->SetTextureSize({256,64});
+	overUI_->SetSize({ 256,64 });
+
 	// リザルトシステム初期化
 	resultSystem_ = std::make_unique<ResultSystem>();
 	resultSystem_->Initialize(GetSceneManager(),inputSystem_.get(),
@@ -62,6 +69,8 @@ void ResultScene::Update() {
 	resultUI_->SetSelectedIndex(resultSystem_->GetSelectedIndex());
 	resultUI_->Update(GetTime());
 
+	overUI_->Update();
+
 	// カメラ更新
 	cameraManager_->Update();
 };
@@ -73,4 +82,9 @@ void ResultScene::Draw3D() {
 // 描画2d
 void ResultScene::Draw2D() {
 	resultUI_->Draw();
+
+
+	if (GetSceneData().playerDie) {
+		overUI_->Draw();
+	}
 };

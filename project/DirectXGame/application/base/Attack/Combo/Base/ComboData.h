@@ -31,8 +31,8 @@ namespace Combo {
 		ComboHitBox& GetComboHitBox() { return hitBox; }
 		// コンボエフェクトクラス取得
 		ComboEffect& GetComboEffect() { return effect; }
-		// 攻撃タイプ取得
-		AttackType GetAttackType() const { return attackType; }
+		// コンボタイプ取得
+		Type GetType() const { return type; }
 	public:	// 時間
 		// 経過時間取得
 		float GetTimer() const { return timer_; }
@@ -41,7 +41,7 @@ namespace Combo {
 		// 経過時間設定
 		void SetTimer(float time) { timer_ = time; } 
 		// 攻撃タイプ設定
-		void SetAttackType(AttackType type) { attackType = type; }
+		void SetType(Type type) { this->type = type; }
 	private:
 		ComboCondition comboCondition{};		// コンボ条件クラス
 		ComboMotion motion{};					// コンボ用モーションクラス
@@ -49,7 +49,7 @@ namespace Combo {
 		ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 		ComboEffect effect{};					// コンボ用エフェクト
 		float timer_ = 0.0f;					// 時間
-		AttackType attackType = AttackType::kMelle;// 攻撃タイプ
+		Type type = Type::kMelle;// 攻撃タイプ
 	};
 };
 

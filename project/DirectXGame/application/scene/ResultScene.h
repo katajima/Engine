@@ -57,4 +57,6 @@ private:
 	std::unique_ptr<ResultUI> resultUI_;
 	// リザルトシステム
 	std::unique_ptr<ResultSystem> resultSystem_;
+	//
+	std::unique_ptr<Engine::Sprite> overUI_;
 };

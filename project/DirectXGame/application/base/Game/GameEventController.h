@@ -91,6 +91,9 @@ namespace Game {
 		std::unique_ptr<GameStartUI> gameStartUI_ = nullptr;
 		//
 		bool isStart = false;
+
+
+		float playerDieTime = 0.0f;
 	private:
 		// エンティティ管理
 		Engine::EntityManager* entityManager = nullptr;

@@ -70,6 +70,7 @@ namespace HitBox {
 
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(other->GetHitReceiver());
 		if (!player) return;
+		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // 敵ステート設定
 
 
 		// ノックバック方向

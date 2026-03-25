@@ -115,4 +115,42 @@ namespace Character {
 		float timer_ = 0.0f;
 		Vector2 prevleftStick = {};
 	};
+
+	// 死亡
+	class PlayerStateDie : public DieState {
+	public:
+		PlayerStateDie(BaseCharacter* player)
+			: DieState(player) {
+		}
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+		// 初期化
+		void Enter() override;
+
+	private:
+
+	};
+
+	// 被弾
+	class PlayerStateDamage : public DamageState {
+	public:
+		PlayerStateDamage(BaseCharacter* player)
+			: DamageState(player) {
+		}
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+		// 初期化
+		void Enter() override;
+	private:
+		float timer = 0.0f;
+
+	};
+
+
 }

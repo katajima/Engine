@@ -242,6 +242,7 @@ namespace Character {
 
 	// 更新
 	void PlayerStateFainting::Update(const CharacterContext& ctx) {
+		///Rig|Death01
 	}
 
 	// 終了
@@ -263,7 +264,48 @@ namespace Character {
 		timer_ = 0;		// タイマーを0に設定
 	};
 
-#pragma endregion // 気絶
+#pragma endregion 
+
+#pragma region Die
+
+	void PlayerStateDie::Update(const CharacterContext& ctx) {
+	}
+
+	void PlayerStateDie::Exit() {
+	}
+	
+	void PlayerStateDie::Enter() {
+		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+		anima->SetIsPlaying(true);		// アニメーション再生
+		anima->SetIsLoop(false);			// アニメーションをループさせるか
+		anima->SetStratAnimeTime();		// アニメーション時間を初期化
+		anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
+		anima->SetAnimation("Rig|Death01", 0.1f);	// 流すアニメーション設定
+	}
+
+#pragma endregion // 死亡
+
+	void PlayerStateDamage::Update(const CharacterContext& ctx) {
+		timer += ctx.dt;
+		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+		if (timer >= anima->GetEndAnimeTime("Rig|Hit_Chest")) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Idle);
+		}
+	}
+
+	void PlayerStateDamage::Exit() {
+	}
+
+	void PlayerStateDamage::Enter() {
+		timer = 0.0f;
+		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
+		anima->SetIsPlaying(true);		// アニメーション再生
+		anima->SetIsLoop(false);			// アニメーションをループさせるか
+		anima->SetStratAnimeTime();		// アニメーション時間を初期化
+		anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
+		anima->SetAnimation("Rig|Hit_Chest", 0.1f);	// 流すアニメーション設定
+	}
+
 }
 
 

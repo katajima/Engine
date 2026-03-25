@@ -110,6 +110,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\AttackController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.cpp" />
@@ -798,6 +799,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="DirectXGame\application\base\Attack\AttackController.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.h" />

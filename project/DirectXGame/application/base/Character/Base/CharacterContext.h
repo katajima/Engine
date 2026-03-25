@@ -59,6 +59,11 @@ namespace Character {
 		bool isJumping = false;
 		// ジャンプ攻撃中か
 		bool isJumpAttacking = false;
+		// 移動可能か
+		bool isCanMove = true;
+		// ジャンプ可能か
+		bool isCanJump = false;
+
 		// 高さ
 		float skyHeight = 1.5f;
 

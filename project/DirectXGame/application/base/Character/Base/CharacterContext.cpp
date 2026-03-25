@@ -70,6 +70,12 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(flo
 	if (ctx.state == CharacterMainState::Jump) {
 		ctx.isJumping = true;
 	}
+	if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Die || ctx.state == CharacterMainState::Fainting) {
+		ctx.isCanMove = false;
+	}
+	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
+		ctx.isCanJump = true;
+	}
 	// 攻撃時の重力
 	if (comboStateMachine->GetCurrentState()) {
 		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale_;

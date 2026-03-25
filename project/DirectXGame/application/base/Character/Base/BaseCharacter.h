@@ -77,7 +77,7 @@ namespace Character {
 		// キャラクター取得
 		Type GetCharacterType() const { return parameterComponent_->characterType_; }
 		// キャラクターの生存状態を取得
-		bool GetAlive() const { return objectComponent_->GetObjectStateFlags().isAlive; }
+		bool GetAlive() const { return stateMachine_->GetCurrentMainState() !=  CharacterMainState::Die; }
 		// キャラクターの生存状態を取得
 		void SetAlive(bool is) { objectComponent_->GetObjectStateFlags().isAlive = is; }
 		// HP取得

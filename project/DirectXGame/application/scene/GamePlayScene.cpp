@@ -234,6 +234,12 @@ void GamePlayScene::Update()
 	// ゲーム進行マネージャー更新
 	gameFlowController_->Update(GetTime());
 
+	if (characterManager_->GetPlayer()->GetAlive()) {
+		GetSceneData().playerDie = false;
+	}
+	else {
+		GetSceneData().playerDie = true;
+	}
 	
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());

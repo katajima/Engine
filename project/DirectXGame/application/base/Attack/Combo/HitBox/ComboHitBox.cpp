@@ -5,7 +5,8 @@ namespace Combo {
 #pragma region ComboHitBox
 
 	// 開始
-	void ComboHitBox::Enter(Character::BaseCharacter* owner) {
+	void ComboHitBox::Enter(Character::BaseCharacter* owner, Type type) {
+		this->type = type;
 		// ヒットボックスシステムを渡す
 		hitBoxSystem_ = owner->GetAttackController()->GetHitBoxSystem();
 		// 移動システムを渡す
@@ -18,31 +19,32 @@ namespace Combo {
 			coll.reactionData.GetKnockbackData().SetNormal(direction_);
 		}
 
-
-		switch (data_.spawnType_)
-		{
-		case HitBox::SpawnType::kOnTime: // 時間経過で
-			if (timer >= data_.hitBpxWindowStart_) {
-				if (!isPopHitBox_) {
-					hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
-					isPopHitBox_ = true;
+		if (Type::kMelle == type || Type::kMix == type) {
+			switch (data_.spawnType_)
+			{
+			case HitBox::SpawnType::kOnTime: // 時間経過で
+				if (timer >= data_.hitBpxWindowStart_) {
+					if (!isPopHitBox_) {
+						hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+						isPopHitBox_ = true;
+					}
 				}
-			}
-			break;
-		case HitBox::SpawnType::kOnGround: // 着地したら
-			if (movementComponent->GetIsLanding()) {
-				if (!isPopHitBox_) {
-					hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
-					isPopHitBox_ = true;
+				break;
+			case HitBox::SpawnType::kOnGround: // 着地したら
+				if (movementComponent->GetIsLanding()) {
+					if (!isPopHitBox_) {
+						hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+						isPopHitBox_ = true;
+					}
 				}
+				break;
+			case HitBox::SpawnType::kOnAir:
+				break;
+			case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
+				break;
+			default:
+				break;
 			}
-			break;
-		case HitBox::SpawnType::kOnAir:
-			break;
-		case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
-			break;
-		default:
-			break;
 		}
 	}
 
@@ -57,11 +59,11 @@ namespace Combo {
 		HitBox::CollData data = hitBoxData;
 
 		// リアクションデータ
-		data.reactionData.GetDamageData().GetOne().damage = combo.damage;
-		data.reactionData.GetKnockbackData().GetData().power_ = combo.knockbackPower;
-		data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.knockbackPowerY;
-		data.reactionData.GetKnockbackData().GetData().duration_ = combo.knockbackDuration_;
-		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.isVerticalBoost_;
+		data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
+		data.reactionData.GetKnockbackData().GetData().power_ = combo.reaction.knockbackPower;
+		data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.reaction.knockbackPowerY;
+		data.reactionData.GetKnockbackData().GetData().duration_ = combo.reaction.knockbackDuration_;
+		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.reaction.isVerticalBoost_;
 
 		collData_.push_back(data);
 	};

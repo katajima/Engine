@@ -39,11 +39,13 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 	// アニメーション速度処理
 	AnimationSpeedProcess();
 
-	// 移動可能かどうか
-	request.velocity = velocity_ * ctx.dt;
-	request.direction = Normalize(worldDirection);
-	request.priority = 1;
-	coordinator.Request(request);
+	if (ctx.isCanMove) {
+		// 移動可能かどうか
+		request.velocity = velocity_ * ctx.dt;
+		request.direction = Normalize(worldDirection);
+		request.priority = 1;
+		coordinator.Request(request);
+	}
 }
 
 void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
@@ -67,10 +69,13 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 			dire.y = 0.0f; // Y軸速度リセット
 		}
 	}
-	request.velocity = dire * ctx.dt * ctx.moveSpeed;
-	request.direction = dire;
-	request.priority = 1;
-	coordinator.Request(request);
+
+	if (ctx.isCanMove) {
+		request.velocity = dire * ctx.dt * ctx.moveSpeed;
+		request.direction = dire;
+		request.priority = 1;
+		coordinator.Request(request);
+	}
 }
 
 #pragma region Process

@@ -41,7 +41,7 @@ namespace Combo {
 		};
 
 		// 開始
-		void Enter(Character::BaseCharacter* owner);
+		void Enter(Character::BaseCharacter* owner , Type type);
 
 		// 更新
 		void Update(const Character::CharacterContext& ctx, float timer);
@@ -88,5 +88,7 @@ namespace Combo {
 		Vector3 direction_ = {};
 		//
 		float timer_ = 0.0f;
+		// コンボタイプ
+		Type type;
 	};
 };

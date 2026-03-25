@@ -8,7 +8,7 @@ void PlayerSubWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->Initialize(entityManager, globalVariables, "PlayerWeapon", "Sword.obj", false, false, this);
-	objectComponent_->SetSRT({1,1,1}, {}, position);	// SRT設定
+	objectComponent_->SetSRT({0,0,0}, {}, position);	// SRT設定
 
 	// 描画する
 	GetObject3D()->SetIsDraw(true);

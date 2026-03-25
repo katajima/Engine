@@ -29,9 +29,9 @@ void Engine::MyGame::Initialize()
 	sceneManager_->Init();
 
 #ifdef _DEBUG
-	sceneManager_->ChangeScene("CHARACTER");
+	//sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	//sceneManager_->ChangeScene("TITLE");
+	sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
@@ -161,6 +161,7 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/text/selectGamePlay.dds");
 	textureManager->LoadTexture("resources/Texture/text/selectTitle.dds");
 	textureManager->LoadTexture("resources/Texture/text/stamina.dds");
+	textureManager->LoadTexture("resources/Texture/text/over.dds");
 
 
 

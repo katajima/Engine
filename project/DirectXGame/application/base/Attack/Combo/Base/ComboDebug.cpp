@@ -2,10 +2,6 @@
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
 namespace Combo {
-
-
-
-
 	// 初期化
 	void ComboDebug::Initialize(Engine::LineCommon* lineCommon,Character::BaseCharacter* owner) {
 		this->owner = owner;

@@ -13,10 +13,11 @@ namespace Combo {
 		motion.Enter(owner, ctx);
 		// コンボ用条件クラス開始
 		comboCondition.Enter(owner);
+		// コンボ用ヒットボックスクラス開始
+		hitBox.Enter(owner,type);
+		
 		// コンボ用カメラクラス開始
 		camera.Enter();
-		// コンボ用ヒットボックスクラス開始
-		hitBox.Enter(owner);
 		// コンボ用エフェクトクラス開始
 		effect.Enter(owner);
 	}
@@ -29,11 +30,12 @@ namespace Combo {
 		comboCondition.Update(ctx, timer_);
 		// コンボ用モーションクラス更新
 		motion.Update(ctx, timer_);
-		// コンボ用カメラクラス更新
-		camera.Update(timer_, ctx.dt);
 		// コンボ用ヒットボックスクラス更新
 		hitBox.SetDirection(motion.GetComboMove().GetDirection());
 		hitBox.Update(ctx, timer_);
+		
+		// コンボ用カメラクラス更新
+		camera.Update(timer_, ctx.dt);
 		// コンボ用エフェクトクラス更新
 		effect.Update(timer_, ctx.dt);
 	}
@@ -42,14 +44,14 @@ namespace Combo {
 	void ComboData::Exit(Character::BaseCharacter* owner) {
 		// 時間リセット
 		timer_ = 0.0f;
-		// コンボ用モーションクラス終了
-		motion.Exit(owner);
 		// 条件クラス終了
 		comboCondition.Exit();
-		// コンボ用カメラクラス終了
-		camera.Exit();
+		// コンボ用モーションクラス終了
+		motion.Exit(owner);
 		// コンボ用ヒットボックスクラス終了
 		hitBox.Exit();
+		// コンボ用カメラクラス終了
+		camera.Exit();
 		// コンボ用エフェクトクラス終了
 		effect.Exit(owner);
 	}

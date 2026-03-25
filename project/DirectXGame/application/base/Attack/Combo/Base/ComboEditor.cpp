@@ -7,7 +7,7 @@ namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;	// 保存項目
 		this->lineCommon = lineCommon;
 		this->state = state;						// ステート
@@ -25,8 +25,10 @@ namespace Combo {
 
 		// シーケンサーにコンボデータを適用させる
 		SequencerApplyToState();
-		// コンボデータを読み込んでステートに適応
-		ApplyComboDataToState();
+		// ステートのコンボデータ取得	
+		ComboData& comboData = state->Data();
+		// ステートの時間設定
+		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 	}
 
 	void EditorBlock::UpdateImGui(float dt) {
@@ -45,16 +47,18 @@ namespace Combo {
 		ImGui::Text("Combo Name: %s", comboName_.c_str());
 		ImGui::Separator();
 
+		// 現在の時間
+		ComboImGui::CurrentFrame(dt, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
 
-		// 最大フレーム設定
-		sequence_.SetFrameMax(maxFrame);
+		// シーケンサーの設定と表示
+		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
 
-		// 現在のフレーム管理
-		ImGuiCurrentFrame(dt);
-		// シーケンサー設定
-		ImGuiSequenceSettings();
-		// シーケンサー表示
-		SequencerProgress();
+		// アニメーション
+		ComboImGui::ApplyAnimationToState("アニメーション", data_.animation.animationName, currentFrame, data_.animation.animationSpeed_,
+			data_.animation.animationBlendTime_, owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
+			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
+
+
 		// 移動関係設定
 		ImGuiMove();
 		// ロックオン関係設定
@@ -63,17 +67,14 @@ namespace Combo {
 		ImGuiReaction();
 		// 終了条件
 		ImGuiEndConditionType();
-		// アニメーション
-		ImGuiApplyAnimationToState();
 		// ヒットボックス設定
 		ImGuiApplyHitBox();
 
 
-		// コンボデータを読み込んでステートに適応
-		ApplyComboDataToState();
-		// アニメーションの設定
-		AnimationApplyToState();
-
+		// ステートのコンボデータ取得	
+		ComboData& comboData = state->Data();
+		// ステートの時間設定
+		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 		ImGui::End();
 
 #endif // _DEBUG
@@ -81,53 +82,31 @@ namespace Combo {
 
 #pragma region ImGui
 
-	void EditorBlock::ImGuiApplyAnimationToState() {
-#ifdef _DEBUG
-		if (ImGui::CollapsingHeader("アニメーション")) {
-			ImGui::SliderFloat("アニメーションスピード", &data_.animationSpeed_, 0.1f, 10.0f, "%.2f");
-			ImGui::SliderFloat("アニメーションブレンド時間", &data_.animationBlendTime_, 0.1f, 10.0f, "%.2f");
-
-
-
-			// 初回：未選択なら先頭を選択
-			if (data_.animationName.empty()) {
-				data_.animationName = owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations.begin()->first;
-			}
-
-			// --- 選択UI（コンボボックス） ---
-			{
-				const char* preview = data_.animationName.c_str();
-				if (ImGui::BeginCombo("Selected Combo", preview)) {
-
-					for (auto& it : owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations) {
-						const std::string& name = it.first;
-
-						const bool isSelected = (name == data_.animationName);
-						if (ImGui::Selectable(name.c_str(), isSelected)) {
-							data_.animationName = name;
-						}
-						if (isSelected) {
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-
-					ImGui::EndCombo();
-				}
-			}
-		}
-#endif // _DEBUG
-	}
-
 	void EditorBlock::ImGuiApplyHitBox() {
 		if (ImGui::CollapsingHeader("ヒットボックス")) {
 			// ペアレント設定
-			ImGuiApplyParentToState();
+			ComboImGui::Select("依存先", data_.hitBox.parentName_, comboSystem->GetParentTransforms());
+
 			// ヒットボックス出現条件
-			ImGuiHitBoxSpawnType();
+			static const char* HitBoxSpawnTypeLabels[] = {
+				"時間経過",
+				"着地",
+				"空中",
+				"ボタンを離したら",
+			};
+			ComboImGui::Select("ヒットボックス出現条件", HitBoxSpawnTypeLabels, data_.hitBox.spawnType_);
+
 			// 依存先タイプ
-			ImGuiHitBoxParentType();
+			static const char* HitBoxParentTypeLabels[] = {
+				"親子付け",
+				"孤立",
+				"追従先からの孤立",
+				"ターゲットの位置",
+			};
+			ComboImGui::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType_);
+
 			// オフセット
-			ImGui::DragFloat3("オフセット", &data_.parentOffset_.x, 0.1f);
+			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset_.x, 0.1f);
 		}
 	}
 
@@ -141,27 +120,7 @@ namespace Combo {
 			"当たったら",
 			"特殊ケース",
 			};
-
-
-			int current = static_cast<int>(data_.endConditionType);
-
-			if (ImGui::BeginCombo(
-				"End Condition Type",
-				EndConditionTypeLabels[current]
-			)) {
-				for (int i = 0; i < IM_ARRAYSIZE(EndConditionTypeLabels); ++i) {
-					bool isSelected = (current == i);
-
-					if (ImGui::Selectable(EndConditionTypeLabels[i], isSelected)) {
-						data_.endConditionType = static_cast<Combo::EndConditionType>(i);
-					}
-
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
+			ComboImGui::Select("終了条件タイプ", EndConditionTypeLabels, data_.endConditionType);
 		}
 	}
 
@@ -173,31 +132,12 @@ namespace Combo {
 			"前方",
 			"カメラ方向",
 			};
+			ComboImGui::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
 
-			int current = static_cast<int>(data_.moveType);
-			if (ImGui::BeginCombo(
-				"移動タイプ",
-				MoveTypeLabels[current]
-			)) {
-				for (int i = 0; i < IM_ARRAYSIZE(MoveTypeLabels); ++i) {
-					bool isSelected = (current == i);
-
-					if (ImGui::Selectable(MoveTypeLabels[i], isSelected)) {
-						data_.moveType = static_cast<Combo::MoveType>(i);
-					}
-
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-
-
-			ImGui::Checkbox("強制移動", &data_.isCompulsionMove_);
-			ImGui::SliderFloat("移動速度", &data_.moveSpeed_, 0.0f, 100.0f, "%.2f");
-			ImGui::Checkbox("重力", &data_.isGravity);
-			ImGui::SliderFloat("重力倍率", &data_.gravityScale, 0.0f, 100.0f, "%.2f");
+			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove_);
+			ImGui::SliderFloat("移動速度", &data_.move.moveSpeed_, 0.0f, 100.0f, "%.2f");
+			ImGui::Checkbox("重力", &data_.move.isGravity);
+			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
 		}
 	}
 
@@ -207,293 +147,64 @@ namespace Combo {
 			"当てた相手",
 			"近い相手",
 			};
-
-			int current = static_cast<int>(data_.lockOnType);
-			if (ImGui::BeginCombo(
-				"ロックオンタイプ",
-				LockOnTypeLabels[current]
-			)) {
-				for (int i = 0; i < IM_ARRAYSIZE(LockOnTypeLabels); ++i) {
-					bool isSelected = (current == i);
-
-					if (ImGui::Selectable(LockOnTypeLabels[i], isSelected)) {
-						data_.lockOnType = static_cast<LockOnType>(i);
-					}
-
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
-			ImGui::SliderFloat("ソフトロックオン範囲", &data_.lockOnRadius, 0.0f, 100.0f);
+			ComboImGui::Select("ロックオンタイプ", LockOnTypeLabels, data_.lockOn.lockOnType);
+			ImGui::SliderFloat("ソフトロックオン範囲", &data_.lockOn.lockOnRadius, 0.0f, 100.0f);
 		}
 	}
 
 	void EditorBlock::ImGuiReaction() {
 		if (ImGui::CollapsingHeader("リアクション")) {
-			ImGui::SliderFloat("ノックバック持続時間", &data_.knockbackDuration_, 0.0f, 5.0f, "%.2f");
-			ImGui::SliderFloat("ノックバックパワー", &data_.knockbackPower, 0.0f, 999.0f, "%.2f");
-			ImGui::SliderFloat("ノックバックY方向パワー", &data_.knockbackPowerY, 0.0f, 999.0f, "%.2f");
-			ImGui::Checkbox("Y方向にノックバック", &data_.isVerticalBoost_);
-			ImGui::SliderFloat("ダメージ", &data_.damage, 0.0f, 1000.0f, "%.2f");
+			ImGui::SliderFloat("ノックバック持続時間", &data_.reaction.knockbackDuration_, 0.0f, 5.0f, "%.2f");
+			ImGui::SliderFloat("ノックバックパワー", &data_.reaction.knockbackPower, 0.0f, 999.0f, "%.2f");
+			ImGui::SliderFloat("ノックバックY方向パワー", &data_.reaction.knockbackPowerY, 0.0f, 999.0f, "%.2f");
+			ImGui::Checkbox("Y方向にノックバック", &data_.reaction.isVerticalBoost_);
+			ImGui::SliderFloat("ダメージ", &data_.reaction.damage, 0.0f, 1000.0f, "%.2f");
 		}
 	}
 
-	void EditorBlock::ImGuiApplyParentToState() {
-
-
-		// 初回：未選択なら先頭を選択
-		if (data_.parentName_.empty()) {
-			data_.parentName_ = owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations.begin()->first;
-		}
-
-		// --- 選択UI（コンボボックス） ---
-		{
-			const char* preview = data_.parentName_.c_str();
-			if (ImGui::BeginCombo("依存先", preview)) {
-
-				for (auto& it : comboSystem->GetParentTransforms()) {
-					const std::string& name = it.first;
-
-					const bool isSelected = (name == data_.parentName_);
-					if (ImGui::Selectable(name.c_str(), isSelected)) {
-						data_.parentName_ = name;
-					}
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-		}
-	}
-
-	void EditorBlock::ImGuiFirstFrame() {
-
-		// 最初フレーム設定
-		ImGui::DragInt("firstFrame ", &firstFrame, 1.0f, 0, maxFrame);
-		// 最初のフレームが0未満にならないようにする
-		if (0 > firstFrame) {
-			firstFrame = 0;
-		}
-	}
-
-	void EditorBlock::ImGuiCurrentFrame(float dt) {
-		// 現在のフレーム表示
-		ImGui::Checkbox("再生するか", &isPlaying);
-		ImGui::Checkbox("ループ再生", &loopPlay);
-		ImGui::Separator();
-		ImGui::Text("Current Frame: %d", currentFrame);
-		ImGui::DragInt("最大フレーム", &maxFrame);
-		ImGui::SliderInt("Current Frame", &currentFrame, 0, maxFrame);
-		// 最初フレーム設定
-		ImGuiFirstFrame();
-		ImGui::Separator();
-
-		if (isPlaying) {
-			currentFrame += static_cast<int>(dt * 60.0f); // 60FPS換算
-		}
-
-		// 最大値に行ったら戻す
-		if (currentFrame >= sequence_.GetFrameMax() && loopPlay) {
-			currentFrame = 0;
-		}
-		else if (currentFrame >= sequence_.GetFrameMax()) {
-			currentFrame = sequence_.GetFrameMax();
-		}
-	}
-
-	void EditorBlock::ImGuiHitBoxSpawnType() {
-		static const char* HitBoxSpawnTypeLabels[] = {
-		"時間経過",
-		"着地",
-		"空中",
-		"ボタンを離したら",
-		};
-		int current = static_cast<int>(data_.spawnType_);
-
-		if (ImGui::BeginCombo(
-			"ヒットボックス出現条件",
-			HitBoxSpawnTypeLabels[current]
-		)) {
-			for (int i = 0; i < IM_ARRAYSIZE(HitBoxSpawnTypeLabels); ++i) {
-				bool isSelected = (current == i);
-
-				if (ImGui::Selectable(HitBoxSpawnTypeLabels[i], isSelected)) {
-					data_.spawnType_ = static_cast<HitBox::SpawnType>(i);
-				}
-
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-			ImGui::EndCombo();
-		}
-
-	}
-
-	void EditorBlock::ImGuiHitBoxParentType() {
-		static const char* HitBoxParentTypeLabels[] = {
-		"親子付け",
-		"孤立",
-		"追従先からの孤立",
-		"ターゲットの位置",
-		};
-
-		int current = static_cast<int>(data_.dependenceType_);
-
-		if (ImGui::BeginCombo(
-			"ヒットボックス依存先",
-			HitBoxParentTypeLabels[current]
-		)) {
-			for (int i = 0; i < IM_ARRAYSIZE(HitBoxParentTypeLabels); ++i) {
-				bool isSelected = (current == i);
-
-				if (ImGui::Selectable(HitBoxParentTypeLabels[i], isSelected)) {
-					data_.dependenceType_ = static_cast<HitBox::ParentType>(i);
-				}
-
-				if (isSelected) {
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-			ImGui::EndCombo();
-		}
-
-	}
-
-	void EditorBlock::ImGuiSequenceSettings() {
-		if (ImGui::CollapsingHeader("シーケンサー設定")) {
-			ImGui::SliderFloat("Frame PixelWidthTarget",
-				&ImSequencer::g_framePixelWidthTarget,
-				1.0f, 40.0f, "%.1f px");
-			ImGui::SliderFloat("Frame PixelWidth",
-				&ImSequencer::g_framePixelWidth,
-				1.0f, 40.0f, "%.1f px");
-			ImGui::SliderInt("Frame LegendWidth",
-				&ImSequencer::g_legendWidth,
-				50, 500, "%d px");
-		}
-	}
-
-	void EditorBlock::AddSequencerEvent(float startFrame, float endFrame, unsigned int color, const std::string& name) {
-		sequence_.AddEvent({ ConvertUtility::SecondsToFrames(startFrame,60.0f) , ConvertUtility::SecondsToFrames(endFrame,60.0f), color, name });
-	}
-
-	void EditorBlock::SequencerProgress() {
-		ImGui::Separator();
-		ImSequencer::Sequencer(
-			&sequence_,
-			&currentFrame,
-			&expanded,
-			&selected,
-			&firstFrame,
-			ImSequencer::SEQUENCER_EDIT_ALL |
-			ImSequencer::SEQUENCER_ADD |
-			ImSequencer::SEQUENCER_DEL
-		);
-		ImGui::Separator();
-	}
-
-	void EditorBlock::AnimationApplyToState() {
-		Engine::AnimationComponent* animation = owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
-		// ループ再生
-		animation->SetIsLoop(false);
-		// アニメーション設定
-		animation->SetAnimation(state->GetAnimationName(), 0); // data_.animationName_;
-		// ステートのアニメーション時間設定
-		float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * data_.animationSpeed_;
-		animation->SetAnimationTime(animationTime);
-	}
-
-	void EditorBlock::ApplyComboDataToState() {
-		// ステートのコンボデータ取得	
-		ComboData& comboData = state->Data();
-		// ステートの時間設定
-		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
-	}
-
+	
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
 		ComboData& comboData = state->Data();
 
-		// コンボ入力可能時間
-		float inputStart = comboData.GetComboCondition().GetNextReceiver().GetInputStart();
-		float inputEnd = comboData.GetComboCondition().GetNextReceiver().GetInputEnd();
 
-		// コンボキャンセル時間
-		float cancelStart = comboData.GetComboCondition().GetCancelReceiver().GetInputStart();
-		float cancelEnd = comboData.GetComboCondition().GetCancelReceiver().GetInputEnd();
-		// コンボキャンセル時間
-		float cancelMoveStart = comboData.GetComboCondition().GetCancelReceiver().GetInputMoveStart();
-		float cancelMoveEnd = comboData.GetComboCondition().GetCancelReceiver().GetInputMoveEnd();
-
-
-
-		// コンボ移行時間
-		float nextComboTime = comboData.GetComboCondition().GetNextCondition().GetData().stateTime;
-		float endComboTime = comboData.GetComboCondition().GetEndCondition().GetData().stateTime;
-
-		// ヒットボックス生成時間
-		float hitBoxStart = comboData.GetComboHitBox().GetData().hitBpxWindowStart_;
-		float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetData().lifeTime_;
-
-		// コンボ終了時間
-		maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
-
-
-		// 移動時間
-		float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart_;
-		float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd_;
-		data_.moveSpeed_ = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
-		data_.isCompulsionMove_ = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
-		data_.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity_;					// 重力
-		data_.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;				// 重力スケール
-		data_.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
+		data_.move.moveSpeed_ = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
+		data_.move.isCompulsionMove_ = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
+		data_.move.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity_;					// 重力
+		data_.move.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;				// 重力スケール
+		data_.move.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
 
 
 		// リアクション
-		data_.knockbackDuration_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration_;	// ノックバック持続時間
-		data_.knockbackPower = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().power_;			// ノックバックパワー
-		data_.knockbackPowerY = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().verticalBoost_;		// ノックバックY方向パワー
-		data_.isVerticalBoost_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost_;	// Y方向にノックバック
-		data_.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.GetDamageData().GetOne().damage;						// ダメージ
+		data_.reaction.knockbackDuration_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration_;	// ノックバック持続時間
+		data_.reaction.knockbackPower = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().power_;			// ノックバックパワー
+		data_.reaction.knockbackPowerY = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().verticalBoost_;		// ノックバックY方向パワー
+		data_.reaction.isVerticalBoost_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost_;	// Y方向にノックバック
+		data_.reaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.GetDamageData().GetOne().damage;						// ダメージ
 
 		// アニメーションスピード
-		data_.animationSpeed_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
-		data_.animationBlendTime_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_;
+		data_.animation.animationSpeed_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
+		data_.animation.animationBlendTime_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_;
 		// アニメーション名前
-		data_.animationName = comboData.GetComboMotion().GetComboAnimation().GetData().animationName_;
+		data_.animation.animationName = comboData.GetComboMotion().GetComboAnimation().GetData().animationName_;
 
-		// トレイルエフェクト
-		float trailStart = comboData.GetComboEffect().GetData().startTmer;
-		float trailEnd = trailStart + comboData.GetComboEffect().GetData().lifeTime;
 
 		// 親
-		data_.parentName_ = comboData.GetComboHitBox().GetData().parentName_;
-		data_.parentOffset_ = comboData.GetComboHitBox().GetData().offset_;
-		data_.spawnType_ = comboData.GetComboHitBox().GetData().spawnType_;
-		data_.dependenceType_ = comboData.GetComboHitBox().GetData().dependenceType_;
+		data_.hitBox.parentName_ = comboData.GetComboHitBox().GetData().parentName_;
+		data_.hitBox.parentOffset_ = comboData.GetComboHitBox().GetData().offset_;
+		data_.hitBox.spawnType_ = comboData.GetComboHitBox().GetData().spawnType_;
+		data_.hitBox.dependenceType_ = comboData.GetComboHitBox().GetData().dependenceType_;
 
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
 
 		// ロックオン
-		data_.lockOnRadius = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.radius;
-		data_.lockOnType = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.type;
+		data_.lockOn.lockOnRadius = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.radius;
+		data_.lockOn.lockOnType = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.type;
 
-
-
-		AddSequencerEvent(inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
-		AddSequencerEvent(cancelStart, cancelEnd, 0xFFFFFF00, "キャンセル可能時間");
-		AddSequencerEvent(cancelMoveStart, cancelMoveEnd, 0xFFFFFF00, "移動キャンセル可能時間");
-		AddSequencerEvent(nextComboTime, endComboTime, 0xFFFF0000, "コンボ移行開始時間");
-		AddSequencerEvent(hitBoxStart, hitBoxEnd, 0x00FF0000, "ヒットボックス生成時間");
-		AddSequencerEvent(moveStart, moveEnd, 0xFF000000, "移動時間");
-		AddSequencerEvent(trailStart, trailEnd, 0x0000FF00, "トレイルエフェクト時間");
+		// シーケンサー適応
+		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
 
 #pragma endregion // ImGui管理
@@ -503,7 +214,7 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
+	void Editor::Initialize(Engine::LineCommon* lineCommon, Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->comboSystem = comboSystem;
 		this->lineCommon = lineCommon;
 		this->globalVariables = globalVariables;
@@ -536,7 +247,7 @@ namespace Combo {
 				globalVariables->SaveFile(it.first);
 			}
 		}
-		
+
 
 		if (isComboEditorActive_)
 			UpdateImGui(dt);
@@ -550,31 +261,9 @@ namespace Combo {
 
 		// 何もなければ何もしない
 		if (comboEditorBlocks_.empty()) return;
-		// 初回：未選択なら先頭を選択
-		if (selectedComboEditorBlockName_.empty()) {
-			selectedComboEditorBlockName_ = comboEditorBlocks_.begin()->first;
-		}
-
-		// --- 選択UI（コンボボックス） ---
-		{
-			const char* preview = selectedComboEditorBlockName_.c_str();
-			if (ImGui::BeginCombo("Selected Combo", preview)) {
-
-				for (auto& it : comboEditorBlocks_) {
-					const std::string& name = it.first;
-
-					const bool isSelected = (name == selectedComboEditorBlockName_);
-					if (ImGui::Selectable(name.c_str(), isSelected)) {
-						selectedComboEditorBlockName_ = name;
-					}
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-		}
+		
+		// 
+		ComboImGui::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
 
 		ImGui::Separator();
 		ImGui::Text("Editing: %s", selectedComboEditorBlockName_.c_str());
@@ -635,58 +324,41 @@ namespace Combo {
 			data.stateMoveCancelStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").startFrame);
 			data.stateMoveCancelEndTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動キャンセル可能時間").endFrame);
 
-
 			// コンボ移行時間
 			data.stateNextTime = ConvertUtility::FramesToSeconds(combo.GetEvent("コンボ移行開始時間").startFrame);
 
 			// ステート終了時間
 			data.stateEndTime = comboEditorBlocks_[it.first].GetMaxFrame();
 
+			
+			// リアクション
+			data.reaction = comboEditorBlocks_[it.first].GetData().reaction;
+			
 			// ヒットボックス生成時間
 			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
-			data.hitBoxWindowStart_ = hitBoxStart;
-			data.hitBoxLifeTime_ = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
-
-			// リアクション
-			data.knockbackDuration_ = comboEditorBlocks_[it.first].GetData().knockbackDuration_;
-			data.knockbackPower = comboEditorBlocks_[it.first].GetData().knockbackPower;
-			data.knockbackPowerY = comboEditorBlocks_[it.first].GetData().knockbackPowerY;
-			data.isVerticalBoost_ = comboEditorBlocks_[it.first].GetData().isVerticalBoost_;
-			data.damage = comboEditorBlocks_[it.first].GetData().damage;
+			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
+			data.hitBox.hitBoxWindowStart_ = hitBoxStart;
+			data.hitBox.hitBoxLifeTime_ = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
 
 			// 移動時間
-			data.moveWindowStart_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
-			data.moveWindowEnd_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
-			data.moveSpeed_ = comboEditorBlocks_[it.first].GetData().moveSpeed_;
-			data.isCompulsionMove_ = comboEditorBlocks_[it.first].GetData().isCompulsionMove_;
-
-			// 重力
-			data.isGravity = comboEditorBlocks_[it.first].GetData().isGravity;
-			data.gravityScale = comboEditorBlocks_[it.first].GetData().gravityScale;
-			data.moveType = comboEditorBlocks_[it.first].GetData().moveType;
-
+			data.move = comboEditorBlocks_[it.first].GetData().move;
+			data.move.moveWindowStart_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
+			data.move.moveWindowEnd_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+		
+			
 			// アニメーションスピード
-			data.animationSpeed_ = comboEditorBlocks_[it.first].GetData().animationSpeed_;
-			data.animationBlendTime_ = comboEditorBlocks_[it.first].GetData().animationBlendTime_;
-			data.animationName = comboEditorBlocks_[it.first].GetData().animationName;
-
+			data.animation = comboEditorBlocks_[it.first].GetData().animation;
+		
 			// エフェクト
 			data.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.trailEffectStartTime;
 
-			// ペアレント
-			data.parentName_ = comboEditorBlocks_[it.first].GetData().parentName_;
-			data.parentOffset_ = comboEditorBlocks_[it.first].GetData().parentOffset_;
-			data.spawnType_ = comboEditorBlocks_[it.first].GetData().spawnType_;
-			data.dependenceType_ = comboEditorBlocks_[it.first].GetData().dependenceType_;
-
+		
 			// 終了条件
 			data.endConditionType = comboEditorBlocks_[it.first].GetData().endConditionType;
 
 			// ロックオン
-			data.lockOnRadius = comboEditorBlocks_[it.first].GetData().lockOnRadius;
-			data.lockOnType = comboEditorBlocks_[it.first].GetData().lockOnType;
-
+			data.lockOn = comboEditorBlocks_[it.first].GetData().lockOn;
 		}
 
 		comboSystem->SetGlobalComboDatas();
@@ -701,7 +373,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(lineCommon,globalVariables, comboSystem, state, owner);
+		block.Initialize(lineCommon, globalVariables, comboSystem, state, owner);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);

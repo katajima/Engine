@@ -1,11 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/Combo/Base/ComboSequencer.h"
-#include "ComboSystem.h"
-#include "DirectXGame/engine/Utility/ConvertUtility.h"
-
-// コンボ数に応じてシーケンサーを増やす
-// 
-
+#include  "ComboImGui.h"
 
 
 namespace Engine {
@@ -43,8 +37,6 @@ namespace Combo {
 		// データ取得
 		GlobalData GetData() const { return data_; }
 	private:
-		// アニメーション設定
-		void ImGuiApplyAnimationToState();
 		// ヒットボックス設定
 		void ImGuiApplyHitBox();
 		// 終了条件
@@ -53,34 +45,8 @@ namespace Combo {
 		void ImGuiMove();
 		// ロックオン関係
 		void ImGuiLockOn();
-
 		// リアクション設定
 		void ImGuiReaction();
-
-		// 親子付け設定
-		void ImGuiApplyParentToState();
-
-		// 最初のフレーム設定
-		void ImGuiFirstFrame();
-		// 現在のフレーム設定
-		void ImGuiCurrentFrame(float dt);
-		// HitBoxSpawnType
-		void ImGuiHitBoxSpawnType();
-		// HitBoxParentType
-		void ImGuiHitBoxParentType();
-
-		// シーケンサー設定
-		void ImGuiSequenceSettings();
-		// シーケンサー追加
-		void AddSequencerEvent(float startFrame, float endFrame, unsigned int color, const std::string& name);
-		// シーケンサー表示
-		void SequencerProgress();
-	private:
-		// アニメーションをステートに適応
-		void AnimationApplyToState();
-		// 
-		void ApplyComboDataToState();
-
 	private:
 		// シーケンサーの状態をステートに適応
 		void SequencerApplyToState();

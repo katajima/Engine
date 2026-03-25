@@ -37,7 +37,7 @@ namespace Character {
 		void Draw2D() override;
 
 		// 移動処理
-		void Move() override;
+		void Move() override {};
 
 		// ジャンプ
 		void Jump() override;
@@ -90,6 +90,9 @@ namespace Character {
 
 		};
 		ProvisionalData provisionalData_;
+
+		// ジャンプ可能か
+		bool isCanJump = false;
 	};
 
 }

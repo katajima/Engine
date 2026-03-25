@@ -27,6 +27,8 @@ namespace Game {
 		gameStartUI_ = std::make_unique<GameStartUI>();
 		gameStartUI_->Initialize(nullptr, entityManager, globalVariables);
 
+		playerDieTime = 0.0f;
+
 		Game::GameEventData data;
 		data.eventType_ = GameEventType::kStart;
 		data.time_.max = 5.0f;
@@ -188,8 +190,12 @@ namespace Game {
 
 		bool isEndState = eventStateMachine_->IsEventFinished();
 		bool isFinish = eventStateMachine_->GetCurrentState()->IsFinish();
+
+
 		if (isCharaPlayerDed) {
-			isEndEvent_ = true;
+			playerDieTime += dt;
+			if (playerDieTime >= 1.0f)
+ 			isEndEvent_ = true;
 		}
 
 		// 最後のステートでなおかつ終了状態なら
