@@ -4,27 +4,37 @@
 
 namespace HitBox {
 
+	// 生存タイプ
+	enum class LifetimeType {
+		kInfinite,   // 無期限（常時存在）
+		kTimed       // 期限付き
+	};
+	// ヒットボックスの影響タイプ
+	enum class HitEffectType {
+		kDamage,        // ダメージのみ
+		kForce,         // ノックバック・引き寄せなど
+		kDamageAndForce // 両方
+	};
 	// 形状
-	enum class Shape {
+	enum class ShapeType {
 		kOBB,
 		kAABB,
 		kSphere,
 	};
-
 	// 使用者のタイプ
 	enum class UseType {
 		kPlayer,	// プレイヤー
 		kEnemy,		// 敵
 		kOther,		// その他
 	};
-
+	// 出現方法
 	enum class SpawnType {
 		kOnTime,			// 時間で発生
 		kOnGround,			// 着地で発生
 		kOnAir,				// 空中から発生
 		kOnButtonRelease,	// ボタンを離したら
 	};
-
+	// 親子付けタイプ
 	enum class ParentType {
 		kParent,			// 追従型
 		kIndependent,		// 独立(飛び道具や範囲攻撃など)
@@ -41,37 +51,32 @@ namespace HitBox {
 	};
 
 	// コライダーデータ
-	struct CollData
-	{
-		///
-		/// 判別用
-		///
-
+	struct CollData	{
+		// 名前
 		std::string name = "";
+		// タグ
 		CollisionTag tag;
+		// レイヤー
 		CollisionLayer layer;
+		// マスク
 		CollisionLayer mask;
-
-		/// <summary>
-		/// フラグ
-		/// </summary>
-
+		// 有効か？
 		bool isEneble = true;
+		// デバック用ライン描画をするか
 		bool isLine = false;
-
-		/// <summary>
-		/// 調整
-		/// </summary>
-
-		std::string parentName = "";
-		Shape shape = Shape::kOBB;
+		// 親子付け対象名前
+		std::string parentName = "";	
+		// コライダー形状
+		ShapeType shape = ShapeType::kOBB;
+		// コライダーの内容
+		HitEffectType hitEffectType = HitEffectType::kDamageAndForce;
+		// オフセット
 		Vector3 offset{};
+		// AABBやOBB用サイズ 
 		Vector3 size = { 1.0f,1.0f,1.0f };
+		// 球用サイズ
 		float radius = 1.0f;
-
-		/// <summary>
-		/// リアクション
-		/// </summary>
+		// リアクションデータ
 		AttackReactionData reactionData;
 	};
 

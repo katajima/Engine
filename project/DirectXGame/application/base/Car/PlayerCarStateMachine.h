@@ -36,7 +36,7 @@ public:
 
 	// 現在のステート取得
 	CarMainState GetCurrentMainState() const {
-		return state_ ? state_->GetCerMainState() : CarMainState::Move;
+		return state_ ? state_->GetCerMainState() : CarMainState::TitleMove;
 	}
 
 	// 登録

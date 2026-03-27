@@ -8,42 +8,54 @@ namespace Combo {
 	void ComboHitBox::Enter(Character::BaseCharacter* owner, Type type) {
 		this->type = type;
 		// ヒットボックスシステムを渡す
-		hitBoxSystem_ = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
 		// 移動システムを渡す
 		movementComponent = owner->GetMoveComponent();
+
+		// 常時なら
+		if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
+			hitBoxSystem->AddHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.dependenceType, data_.offset, perent);
+		}
 	}
 
 	// 更新
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
+		// ノックバック方向
 		for (auto& coll : collData_) {
-			coll.reactionData.GetKnockbackData().SetNormal(direction_);
+			coll.reactionData.GetKnockbackData().SetNormal(direction);
 		}
 
+		// 近距離か複合なら
 		if (Type::kMelle == type || Type::kMix == type) {
-			switch (data_.spawnType_)
-			{
-			case HitBox::SpawnType::kOnTime: // 時間経過で
-				if (timer >= data_.hitBpxWindowStart_) {
-					if (!isPopHitBox_) {
-						hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+			// 一時的なコライダーなら
+			if (data_.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
+				// 出現方法によっての処理
+				switch (data_.spawnType)
+				{
+				case HitBox::SpawnType::kOnTime: // 時間経過で
+					if (timer >= data_.hitBpxWindowStart) {
+						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.lifeTime, data_.dependenceType, data_.offset, perent);
 						isPopHitBox_ = true;
 					}
-				}
-				break;
-			case HitBox::SpawnType::kOnGround: // 着地したら
-				if (movementComponent->GetIsLanding()) {
-					if (!isPopHitBox_) {
-						hitBoxSystem_->AddHitBox(data_.hitBoxUseType_, collData_, useHitBox_, data_.lifeTime_, data_.dependenceType_, data_.offset_, perent_);
+					break;
+				case HitBox::SpawnType::kOnGround: // 着地したら
+					if (movementComponent->GetIsLanding()) {
+						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.lifeTime, data_.dependenceType, data_.offset, perent);
 						isPopHitBox_ = true;
 					}
+					break;
+				case HitBox::SpawnType::kOnAir:
+					break;
+				case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
+					break;
+				default:
+					break;
 				}
-				break;
-			case HitBox::SpawnType::kOnAir:
-				break;
-			case HitBox::SpawnType::kOnButtonRelease: // ボタンを離したら
-				break;
-			default:
-				break;
+			}
+			// 常時なら
+			else if(data_.lifetimeType == HitBox::LifetimeType::kInfinite){
+				if (timer >= data_.hitBpxWindowStart) {
+				}
 			}
 		}
 	}
@@ -51,8 +63,7 @@ namespace Combo {
 	// 終了
 	void ComboHitBox::Exit() {
 		isPopHitBox_ = false;
-		hitBoxSystem_->Clear();
-		timer_ = 0.0f;
+		hitBoxSystem->Clear();
 	}
 
 	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& combo) {
@@ -62,8 +73,8 @@ namespace Combo {
 		data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
 		data.reactionData.GetKnockbackData().GetData().power_ = combo.reaction.knockbackPower;
 		data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.reaction.knockbackPowerY;
-		data.reactionData.GetKnockbackData().GetData().duration_ = combo.reaction.knockbackDuration_;
-		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.reaction.isVerticalBoost_;
+		data.reactionData.GetKnockbackData().GetData().duration_ = combo.reaction.knockbackDuration;
+		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.reaction.isVerticalBoost;
 
 		collData_.push_back(data);
 	};

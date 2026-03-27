@@ -7,7 +7,7 @@
 enum class CarMainState {
 	NotSet,
 	Idle,				// 待機
-	Move,				// 移動
+	TitleMove,				// 移動
 	PreparationMove,	// 移動準備
 	SelectMove,			// 移動(セレクトシーン)
 	ResultCashExchange	// 結果シーンのキャッシュ交換
@@ -64,9 +64,9 @@ private:
 
 };
 
-class CarMoveState : public PlayerCarState {
+class CarTitleMoveState : public PlayerCarState {
 public:
-	CarMoveState(const CarMainState& state, PlayerCar* car) :
+	CarTitleMoveState(const CarMainState& state, PlayerCar* car) :
 		PlayerCarState(state, car) {
 	};
 

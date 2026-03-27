@@ -27,7 +27,7 @@ bool Engine::AABBCollider2D::CheckHit(const Collider2D& other) const {
 	if (!other.enabled) return false;
 
 	// AABB
-	if (other.GetType() == ColliderType::AABB) {
+	if (other.GetType() == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider2D&>(other);
 		return IsCollision(Box(o.minWorld, o.maxWorld), Box{ minWorld ,maxWorld });
 	}
@@ -39,7 +39,7 @@ bool Engine::AABBCollider2D::ResolveCollision(const Collider2D& other, Vector2& 
 
     if (!other.enabled) return false;
 
-    if (other.GetType() == ColliderType::AABB) {
+    if (other.GetType() == ColliderShapeType::AABB) {
         auto& o = static_cast<const AABBCollider2D&>(other);
 
         if (!IsCollision(Box(o.minWorld, o.maxWorld), Box{ minWorld, maxWorld })) {

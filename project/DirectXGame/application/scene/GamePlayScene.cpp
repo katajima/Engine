@@ -282,7 +282,11 @@ void GamePlayScene::CheckAllCollisions()
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}
-		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetData();
+		auto& lifeTimehit = caracter->GetAttackController()->GetHitBoxSystem()->GetLifeTimeHitBoxData();
+		for (auto& caracterHitBox : lifeTimehit) {
+			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
+		}
+		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetHitBoxData();
 		for (auto& caracterHitBox : hit) {
 			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
 		}

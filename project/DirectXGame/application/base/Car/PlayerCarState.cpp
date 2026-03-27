@@ -20,13 +20,13 @@ void CarIdleState::Exit()
 
 #pragma region Move
 
-void CarMoveState::Enter()
+void CarTitleMoveState::Enter()
 {
 	// 速度
 	velocity_ = { 4.0f,0.0f,0.0f };
 }
 
-void CarMoveState::Update(float dt)
+void CarTitleMoveState::Update(float dt)
 {
 	velocity_.x += 0.5f;
 	// 移動
@@ -46,7 +46,7 @@ void CarMoveState::Update(float dt)
 	GetPlayerCar()->Emit(GetPlayerCar()->GetRBTierWorldPosition() + dustOffset_);
 }
 
-void CarMoveState::Exit()
+void CarTitleMoveState::Exit()
 {
 }
 

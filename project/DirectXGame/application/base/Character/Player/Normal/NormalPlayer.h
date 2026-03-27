@@ -76,21 +76,6 @@ namespace Character {
 
 		void ReloadComboData();
 
-		struct ProvisionalData {
-			float trailLifeTime = 0.5f;// トレイルの寿命
-			Color color = { 1,1,1,0.25f };
-
-			Vector3 obbColliderSize = { 0.05f,0.2f,0.1f };// OBBコライダーサイズ
-			Vector3 obbCollider2Size = { 0.05f,0.55f,0.1f };// OBBコライダーサイズ
-			Vector3 obbCollider3Size = { 0.05f,1.0f,0.1f };// OBBコライダーサイズ
-
-			Vector3 collider1Pos = { 0.0f,0.5f,0.0f };
-			Vector3 collider2Pos = { 0,3.5f,0.5f };
-			Vector3 collider3Pos = { 0,6.5f,0.5f };
-
-		};
-		ProvisionalData provisionalData_;
-
 		// ジャンプ可能か
 		bool isCanJump = false;
 	};

@@ -88,8 +88,8 @@ void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalV
 	stateMachine_->RegisterState(CarMainState::Idle, [](PlayerCar* p) {
 		return std::make_unique<CarIdleState>(CarMainState::Idle,p);
 		}); 
-	stateMachine_->RegisterState(CarMainState::Move, [](PlayerCar* p) {
-		return std::make_unique<CarMoveState>(CarMainState::Move,p);
+	stateMachine_->RegisterState(CarMainState::TitleMove, [](PlayerCar* p) {
+		return std::make_unique<CarTitleMoveState>(CarMainState::TitleMove,p);
 		});
 	stateMachine_->RegisterState(CarMainState::PreparationMove, [](PlayerCar* p) {
 		return std::make_unique<CarPreparationMoveState>(CarMainState::PreparationMove, p);
@@ -112,7 +112,7 @@ void PlayerCar::Update(float dt) {
 	if (isMoving_) {
 		moveTimer_ += dt;
 		if (moveTimer_ >= 0.5f) {
-			stateMachine_->ChangeState(CarMainState::Move);
+			stateMachine_->ChangeState(CarMainState::TitleMove);
 		}
 		else {
 			stateMachine_->ChangeState(CarMainState::PreparationMove);

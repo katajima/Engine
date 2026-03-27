@@ -16,28 +16,25 @@ namespace Combo {
 			collData_.clear();
 			useHitBox_.clear();
 		}
-
-		enum class Shape {
-			kAABB,
-			kOBB,
-			kSphere
-		};
-
-
 		// ヒットボックスデータ
 		struct Data {
-			float hitBpxWindowStart_ = 1.0f;		// ヒットボックス生成スタート
-			float lifeTime_ = 1.0f;					// ヒットボックス生存時間
+			float hitBpxWindowStart = 1.0f;		// ヒットボックス生成スタート
+			float lifeTime = 1.0f;					// ヒットボックス生存時間
 			// ヒットボックス使用者タイプ
-			HitBox::UseType hitBoxUseType_;
+			HitBox::UseType hitBoxUseType;
 			// ヒットボックスの発生条件タイプ
-			HitBox::SpawnType spawnType_ = HitBox::SpawnType::kOnTime;
+			HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
 			// ヒットボックス依存先タイプ
-			HitBox::ParentType dependenceType_ = HitBox::ParentType::kParent;
+			HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
+			// ヒットボックス生存タイプ
+			HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
+			// ヒットボックス影響タイプ
+			HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
+
 			// オフセット
-			Vector3 offset_{};
+			Vector3 offset{};
 			// 親子名
-			std::string	parentName_ = "";
+			std::string	parentName = "";
 		};
 
 		// 開始
@@ -61,34 +58,30 @@ namespace Combo {
 		// 使うヒットボックス名クリーン
 		void ClearUseHitBox() { useHitBox_.clear(); }
 		// 親子設定
-		void SetPerent(Engine::WorldTransform* perent) { perent_ = perent; };
+		void SetPerent(Engine::WorldTransform* perent) { this->perent = perent; };
 		//
-		void SetDirection(Vector3 direction) { direction_ = direction; };
-	private:
+		void SetDirection(Vector3 direction) { this->direction = direction; };
+	private: // 貰いもの
 		// ヒットボックスシステム
-		HitBox::System* hitBoxSystem_ = nullptr;
+		HitBox::System* hitBoxSystem = nullptr;
 		// 移動システム
 		MovementComponent* movementComponent = nullptr;
 		// 親子
-		Engine::WorldTransform* perent_ = nullptr;
+		Engine::WorldTransform* perent = nullptr;
+		// 方向
+		Vector3 direction = {};
+		// コンボタイプ
+		Type type;
 	private:
-		ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed); // コンボボタン
 		// ヒットボックスデータ
 		Data data_;
 		// コライダーデータ
 		std::vector<HitBox::CollData> collData_;
-
 		// 使うヒットボックス名
 		std::vector<std::string> useHitBox_;
 
 	private:
 		// ヒットボックス出現
 		bool isPopHitBox_ = false;
-		//
-		Vector3 direction_ = {};
-		//
-		float timer_ = 0.0f;
-		// コンボタイプ
-		Type type;
 	};
 };

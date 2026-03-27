@@ -43,7 +43,7 @@ namespace Engine {
 		// 押し戻し
 		virtual bool ResolveCollision(const Collider& other, Vector3& outPushVec) const = 0;
 		// コライダータイプ取得
-		virtual ColliderType GetType() const = 0;
+		virtual ColliderShapeType GetType() const = 0;
 		virtual ~Collider() = default;
 
 		// 追加: このコライダーのワールド空間AABBを返す（Broad Phase用）
@@ -66,8 +66,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::Sphere;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::Sphere;
 		}
 		// AABB取得
 		AABB GetAABB() const override {
@@ -92,8 +92,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::Triangle;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::Triangle;
 		}
 
 		// 三角面取得
@@ -123,8 +123,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::AABB;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::AABB;
 		}
 		// AABB取得
 		AABB GetAABB() const override {
@@ -147,8 +147,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::Capsule;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::Capsule;
 		}
 		// AABB取得
 		AABB GetAABB() const override {
@@ -171,8 +171,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::OBB;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::OBB;
 		}
 		// AABB取得
 		AABB GetAABB() const override {
@@ -211,8 +211,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider& other, Vector3& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::Ray;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::Ray;
 		}
 		// AABB取得
 		AABB GetAABB() const override {

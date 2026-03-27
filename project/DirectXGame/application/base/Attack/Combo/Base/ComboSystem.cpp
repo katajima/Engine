@@ -79,15 +79,15 @@ namespace Combo {
 
 
 
-		globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart_);
-		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime_);
+		globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
+		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
 
 		// リアクション
 		globalVariables->AddItem(name, "ダメージ", data.reaction.damage);
-		globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost_);
+		globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
 		globalVariables->AddItem(name, "ノックバック力", data.reaction.knockbackPower);
 		globalVariables->AddItem(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->AddItem(name, "ノックバック持続時間", data.reaction.knockbackDuration_);
+		globalVariables->AddItem(name, "ノックバック持続時間", data.reaction.knockbackDuration);
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -103,26 +103,29 @@ namespace Combo {
 		globalVariables->AddItem(name, "コンボ移動キャンセル受付終了時間", data.stateMoveCancelEndTime);
 
 
-		globalVariables->AddItem(name, "コンボ中の移動スピード", data.move.moveSpeed_);
-		globalVariables->AddItem(name, "コンボ中の移動開始時間", data.move.moveWindowStart_);
-		globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindowEnd_);
-		globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove_);
+		globalVariables->AddItem(name, "コンボ中の移動スピード", data.move.moveSpeed);
+		globalVariables->AddItem(name, "コンボ中の移動開始時間", data.move.moveWindowStart);
+		globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindowEnd);
+		globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 		globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
 
 
 		globalVariables->AddItem(name, "アニメーション名前", data.animation.animationName);
-		globalVariables->AddItem(name, "アニメーション速度", data.animation.animationSpeed_);
-		globalVariables->AddItem(name, "アニメーション遷移時間", data.animation.animationBlendTime_);
+		globalVariables->AddItem(name, "アニメーション速度", data.animation.animationSpeed);
+		globalVariables->AddItem(name, "アニメーション遷移時間", data.animation.animationBlendTime);
 
 		globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 		globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
 
-		globalVariables->AddItem(name, "親オブジェクト名前", data.hitBox.parentName_);
+		globalVariables->AddItem(name, "親オブジェクト名前", data.hitBox.parentName);
 
-		globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType_, "HitBoxSpawnType");
-		globalVariables->AddEnumItem(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType_, "HitBoxParentType");
+		globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
+		globalVariables->AddEnumItem(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
+		globalVariables->AddEnumItem(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType,"HitBoxHitEffectType");
+		globalVariables->AddEnumItem(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
 
+		
 		globalVariables->AddEnumItem(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
 
@@ -135,15 +138,15 @@ namespace Combo {
 	};
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
-		data.hitBox.hitBoxWindowStart_ = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
-		data.hitBox.hitBoxLifeTime_ = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+		data.hitBox.hitBoxWindowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
+		data.hitBox.hitBoxLifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
 
 		// リアクション
 		data.reaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
-		data.reaction.isVerticalBoost_ = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+		data.reaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
 		data.reaction.knockbackPower = globalVariables->GetValue<float>(name, "ノックバック力");
 		data.reaction.knockbackPowerY = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
-		data.reaction.knockbackDuration_ = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+		data.reaction.knockbackDuration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
 
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
@@ -153,10 +156,10 @@ namespace Combo {
 		data.move.isGravity = globalVariables->GetValue<bool>(name, "コンボ中の重力");
 		data.move.gravityScale = globalVariables->GetValue<float>(name, "コンボ中の重力強度");
 
-		data.move.moveSpeed_ = globalVariables->GetValue<float>(name, "コンボ中の移動スピード");
-		data.move.moveWindowStart_ = globalVariables->GetValue<float>(name, "コンボ中の移動開始時間");
-		data.move.moveWindowEnd_ = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
-		data.move.isCompulsionMove_ = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
+		data.move.moveSpeed = globalVariables->GetValue<float>(name, "コンボ中の移動スピード");
+		data.move.moveWindowStart = globalVariables->GetValue<float>(name, "コンボ中の移動開始時間");
+		data.move.moveWindowEnd = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
+		data.move.isCompulsionMove = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
 		data.move.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
 
 
@@ -169,20 +172,26 @@ namespace Combo {
 
 
 		data.animation.animationName = globalVariables->GetValue<std::string>(name, "アニメーション名前");
-		data.animation.animationSpeed_ = globalVariables->GetValue<float>(name, "アニメーション速度");
-		data.animation.animationBlendTime_ = globalVariables->GetValue<float>(name, "アニメーション遷移時間");
+		data.animation.animationSpeed = globalVariables->GetValue<float>(name, "アニメーション速度");
+		data.animation.animationBlendTime = globalVariables->GetValue<float>(name, "アニメーション遷移時間");
 
 
 		data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 		data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 
 
-		data.hitBox.parentName_ = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
+		data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
 
-		data.hitBox.spawnType_ = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
-		data.hitBox.dependenceType_ = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
+		data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
+		data.hitBox.dependenceType = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
+		data.hitBox.hitEffectType= globalVariables->GetEnumValue<HitBox::HitEffectType>(name,"ヒットボックス影響タイプ");
+		data.hitBox.lifetimeType = globalVariables->GetEnumValue<HitBox::LifetimeType>(name, "ヒットボックス生存タイプ");
+
+
 
 		data.endConditionType = globalVariables->GetEnumValue<Combo::EndConditionType>(name, "終了条件タイプ");
+
+		
 
 		data.lockOn.lockOnRadius = globalVariables->GetValue<float>(name, "ロックオン半径");
 		data.lockOn.lockOnType = globalVariables->GetEnumValue<LockOnType>(name, "ロックオンタイプ");
@@ -193,17 +202,17 @@ namespace Combo {
 		globalVariables->SetValue(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->SetValue(name, "コンボ入力受付終了時間", data.stateInputEndTime);
 
-		globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart_);
-		globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime_);
+		globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
+		globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
 
 		globalVariables->SetValue(name, "コンボ終了時間", data.stateEndTime);
 		globalVariables->SetValue(name, "コンボ移行時間", data.stateNextTime);
 
-		globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindowStart_);
-		globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindowEnd_);
+		globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindowStart);
+		globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindowEnd);
 
-		globalVariables->SetValue(name, "コンボ中の移動スピード", data.move.moveSpeed_);
-		globalVariables->SetValue(name, "コンボ中の移動強制", data.move.isCompulsionMove_);
+		globalVariables->SetValue(name, "コンボ中の移動スピード", data.move.moveSpeed);
+		globalVariables->SetValue(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 		globalVariables->SetValue(name, "コンボ中の重力", data.move.isGravity);
 		globalVariables->SetValue(name, "コンボ中の重力強度", data.move.gravityScale);
 		globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
@@ -216,24 +225,27 @@ namespace Combo {
 
 
 		globalVariables->SetValue(name, "アニメーション名前", data.animation.animationName);
-		globalVariables->SetValue(name, "アニメーション速度", data.animation.animationSpeed_);
-		globalVariables->SetValue(name, "アニメーション遷移時間", data.animation.animationBlendTime_);
+		globalVariables->SetValue(name, "アニメーション速度", data.animation.animationSpeed);
+		globalVariables->SetValue(name, "アニメーション遷移時間", data.animation.animationBlendTime);
 
 
 		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
-		globalVariables->SetValue(name, "ノックバック持続時間", data.reaction.knockbackDuration_);
+		globalVariables->SetValue(name, "ノックバック持続時間", data.reaction.knockbackDuration);
 		globalVariables->SetValue(name, "ノックバック力", data.reaction.knockbackPower);
 		globalVariables->SetValue(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->SetValue(name, "Y方向ノックバック", data.reaction.isVerticalBoost_);
+		globalVariables->SetValue(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
 		globalVariables->SetValue(name, "ダメージ", data.reaction.damage);
 
 
-		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName_);
+		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
 
-		globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType_, "HitBoxSpawnType");
-		globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType_, "HitBoxParentType");
+		globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
+		globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
+		globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
+		globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+
 		globalVariables->SetEnumValue(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
 		globalVariables->SetValue(name, "ロックオン半径", data.lockOn.lockOnRadius);
@@ -251,14 +263,15 @@ namespace Combo {
 		///
 		/// ヒットボックス
 		/// 
-		data.GetComboHitBox().GetData().hitBpxWindowStart_ = gData.hitBox.hitBoxWindowStart_;	// 発生時間
-		data.GetComboHitBox().GetData().lifeTime_ = gData.hitBox.hitBoxLifeTime_;				// 生成時間
-		data.GetComboHitBox().GetData().parentName_ = gData.hitBox.parentName_;
-		data.GetComboHitBox().SetPerent(GetParentTransform(gData.hitBox.parentName_));
-		data.GetComboHitBox().GetData().offset_ = gData.hitBox.parentOffset_;
-		data.GetComboHitBox().GetData().dependenceType_ = gData.hitBox.dependenceType_;
-		data.GetComboHitBox().GetData().spawnType_ = gData.hitBox.spawnType_;
-
+		data.GetComboHitBox().GetData().hitBpxWindowStart = gData.hitBox.hitBoxWindowStart;	// 発生時間
+		data.GetComboHitBox().GetData().lifeTime = gData.hitBox.hitBoxLifeTime;				// 生成時間
+		data.GetComboHitBox().GetData().parentName = gData.hitBox.parentName;
+		data.GetComboHitBox().SetPerent(GetParentTransform(gData.hitBox.parentName));
+		data.GetComboHitBox().GetData().offset = gData.hitBox.parentOffset;
+		data.GetComboHitBox().GetData().dependenceType = gData.hitBox.dependenceType;
+		data.GetComboHitBox().GetData().spawnType = gData.hitBox.spawnType;
+		data.GetComboHitBox().GetData().lifetimeType = gData.hitBox.lifetimeType;
+		data.GetComboHitBox().GetData().hitEffectType = gData.hitBox.hitEffectType;
 		///
 		/// 受付
 		/// 
@@ -298,15 +311,15 @@ namespace Combo {
 		data.GetComboMotion().GetComboMove().GetData().isGravity_ = gData.move.isGravity;
 		data.GetComboMotion().GetComboMove().GetData().gravityScale_ = gData.move.gravityScale;
 		// 移動
-		data.GetComboMotion().GetComboMove().GetData().speed_ = gData.move.moveSpeed_;
-		data.GetComboMotion().GetComboMove().GetData().moveWindowStart_ = gData.move.moveWindowStart_;
-		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd_ = gData.move.moveWindowEnd_;
-		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove_ = gData.move.isCompulsionMove_;
+		data.GetComboMotion().GetComboMove().GetData().speed_ = gData.move.moveSpeed;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowStart_ = gData.move.moveWindowStart;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd_ = gData.move.moveWindowEnd;
+		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove_ = gData.move.isCompulsionMove;
 		data.GetComboMotion().GetComboMove().GetData().moveType = gData.move.moveType;
 
 		// アニメーションスピード
-		data.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_ = gData.animation.animationBlendTime_;
-		data.GetComboMotion().GetComboAnimation().GetData().animationSpeed_ = gData.animation.animationSpeed_;
+		data.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_ = gData.animation.animationBlendTime;
+		data.GetComboMotion().GetComboAnimation().GetData().animationSpeed_ = gData.animation.animationSpeed;
 		data.GetComboMotion().GetComboAnimation().GetData().animationName_ = gData.animation.animationName;
 
 
@@ -327,6 +340,7 @@ namespace Combo {
 
 	void System::CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxDatas,
 		GamePadButton button) {
+		// コンボデータ
 		ComboData data{};
 		// グローバルデータ作成
 		CreateGlobalData(comboNodeName);

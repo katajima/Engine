@@ -106,6 +106,16 @@
             "type": "enum",
             "value": 0
         },
+        "ヒットボックス影響タイプ": {
+            "enumType": "HitBoxHitEffectType",
+            "type": "enum",
+            "value": 2
+        },
+        "ヒットボックス生存タイプ": {
+            "enumType": "HitBoxLifetimeType",
+            "type": "enum",
+            "value": 1
+        },
         "ヒットボックス生存時間": {
             "type": "float",
             "value": 0.38333335518836975

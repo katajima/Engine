@@ -35,7 +35,7 @@ namespace Engine {
 		// 押し戻し
 		virtual bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const = 0;
 		// コライダータイプ取得
-		virtual ColliderType GetType() const = 0;
+		virtual ColliderShapeType GetType() const = 0;
 		virtual ~Collider2D() = default;
 	};
 
@@ -51,8 +51,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::Sphere;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::Sphere;
 		}
 
 	};
@@ -72,8 +72,8 @@ namespace Engine {
 		// 押し出し
 		bool ResolveCollision(const Collider2D& other, Vector2& outPushVec) const override;
 		// コライダタイプ取得
-		ColliderType GetType() const override {
-			return ColliderType::AABB;
+		ColliderShapeType GetType() const override {
+			return ColliderShapeType::AABB;
 		}
 
 	};

@@ -8,116 +8,61 @@ namespace HitBox {
 
 	void System::Update(float dt) {
 
+
+		// 期限付きヒットボックス更新
 		// 逆ループで安全に削除
-		for (int i = (int)data_.size() - 1; i >= 0; i--) {
-
-			Data& d = data_[i];
-
+		for (int i = (int)lifeTimeHitBoxDatas_.size() - 1; i >= 0; i--) {
+			Data& d = lifeTimeHitBoxDatas_[i];
 			// 更新
 			if (d.hitBox) {
 				d.hitBox->Update(dt);
 				d.timer += dt;
 			}
-
 			// 削除判定
 			if (d.IsDelete()) {
 				d.hitBox.reset();
-				data_.erase(data_.begin() + i);
+				lifeTimeHitBoxDatas_.erase(lifeTimeHitBoxDatas_.begin() + i);
 			}
 		}
-
+		// 無期限ヒットボックス更新
+		for (auto& hit : hitBoxDatas_) {
+			hit.hitBox->Update(dt);
+		}
 	}
 
-	void System::AddHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+	// ヒットボックス追加
+	void System::AddLifeTimeHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
 		float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, type);
 		d.hitBox->GetWorldTransform().Update();
-		std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
-		std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
-		std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
-		Engine::WorldTransform world;
-		world.Initialize();
-
 		// 依存先設定
-		switch (dependenceType)
-		{
-		case ParentType::kParent: // 親子付け 
-			d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
-			break;
-		case ParentType::kIndependent: // 独立
-			d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
-			break;
-		case ParentType::kParentIndependent: // 追従先独立
-		{
-			world.parent_ = parent;	// ワールド座標に設定
-			world.translate_ = offset;	// オフセット設定
-			world.Update();
-
-			d.hitBox->GetWorldTransform().translate_ = world.GetWorldPosition();
-			break;
-		}
-		case ParentType::kLockOnArea: // ターゲット位置へ(ターゲット位置のワールド座標を渡せば)
-			d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
-			break;
-		default:
-			break;
-		}
-		d.hitBox->GetWorldTransform().Update();
-
-
-
-		for (auto& data : datas) {
-
-			// ここで "名前が使われるコライダーかどうか" を判定する
-			if (!useHitBoxName.empty()) {
-				bool use = false;
-				for (const auto& name : useHitBoxName) {
-					if (data.name == name) {
-						use = true;
-						break;
-					}
-				}
-				// 対象外ならスキップ
-				if (!use) continue;
-			}
-
-
-
-			// 形状によっての設定項目
-			switch (data.shape)
-			{
-			case Shape::kOBB:
-				collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collObb->obb.size = data.size;
-
-				d.hitBox->AddCollider(std::move(collObb), data.offset, data.reactionData);
-				break;
-			case Shape::kAABB:
-				collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collAABB->aabb.min = -data.size / 2;
-				collAABB->aabb.max = data.size / 2;
-				d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
-				break;
-			case Shape::kSphere:
-				collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collSphere->radius = data.radius;
-				d.hitBox->AddCollider(std::move(collSphere), data.offset, data.reactionData);
-				break;
-			default:
-				break;
-			}
-		}
-
-
-
+		CreateParent(d, dependenceType,offset,parent);
+		// コライダー生成
+		CreateHitBoxCollider(d, datas, useHitBoxName);
 		d.lifeTime = lifeTime;							// 生存時間
 		d.timer = 0.0f;									// 時間
-		data_.push_back(std::move(d));
+		// ヒットボックス(期限付き)データに挿入
+		lifeTimeHitBoxDatas_.push_back(std::move(d));
 	}
 
-	void System::CreateHitBoxCollData(const std::string& name, HitBox::Shape shape, UseType useType,
+	void System::AddHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
+		Data d;
+		d.hitBox = std::make_unique<HitBoxInstance>();
+		d.hitBox->Initialize(entityManager, character, type);
+		d.hitBox->GetWorldTransform().Update();
+
+		// 依存先設定
+		CreateParent(d, dependenceType, offset, parent);
+		// コライダー生成
+		CreateHitBoxCollider(d, datas, useHitBoxName);
+		// ヒットボックス(無期限)データに挿入
+		hitBoxDatas_.push_back(std::move(d));
+	}
+
+	// コライダーデータ生成
+	void System::CreateHitBoxCollData(const std::string& name, HitBox::ShapeType shape, UseType useType,
 		const GlobalData& hitBoxData) {
 
 
@@ -159,12 +104,91 @@ namespace HitBox {
 	}
 
 
+	
+	// 親子付け生成
+	void System::CreateParent(Data& d, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
+		// 依存先設定
+		switch (dependenceType){
+		case ParentType::kParent: // 親子付け 
+			d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
+			break;
+		case ParentType::kIndependent: // 独立
+			d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
+			break;
+		case ParentType::kParentIndependent: // 追従先独立
+		{
+			Engine::WorldTransform world;
+			world.Initialize();
+			world.parent_ = parent;	// ワールド座標に設定
+			world.translate_ = offset;	// オフセット設定
+			world.Update();
+
+			d.hitBox->GetWorldTransform().translate_ = world.GetWorldPosition();
+			break;
+		}
+		case ParentType::kLockOnArea: // ターゲット位置へ(ターゲット位置のワールド座標を渡せば)
+			d.hitBox->GetWorldTransform().translate_ = parent->GetWorldPosition();	// ワールド座標に設定
+			break;
+		default:
+			break;
+		}
+	}
+	// コライダー生成
+	void System::CreateHitBoxCollider(Data& d, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName) {
+		for (auto& data : datas) {
+
+			// ここで "名前が使われるコライダーかどうか" を判定する
+			if (!useHitBoxName.empty()) {
+				bool use = false;
+				for (const auto& name : useHitBoxName) {
+					if (data.name == name) {
+						use = true;
+						break;
+					}
+				}
+				// 対象外ならスキップ
+				if (!use) continue;
+			}
+
+			// 形状によっての設定項目
+			switch (data.shape){
+			case ShapeType::kOBB:
+			{
+				std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
+				collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+				collObb->obb.size = data.size;
+				d.hitBox->AddCollider(std::move(collObb), data.offset, data.reactionData);
+				break;
+			}
+			case ShapeType::kAABB:
+			{
+				std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
+				collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+				collAABB->aabb.min = -data.size / 2;
+				collAABB->aabb.max = data.size / 2;
+				d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
+				break;
+			}
+			case ShapeType::kSphere:
+			{
+				std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
+				collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+				collSphere->radius = data.radius;
+				d.hitBox->AddCollider(std::move(collSphere), data.offset, data.reactionData);
+				break;
+			}
+			default:
+				break;
+			}
+		}
+
+	}
+	// クリア
 	void System::Clear() {
-		for (auto& hit : data_) {
+		for (auto& hit : lifeTimeHitBoxDatas_) {
 			hit.hitBox.reset();
 		}
-		data_.clear();
-	};
-
+		lifeTimeHitBoxDatas_.clear();
+	}
 }
 

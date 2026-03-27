@@ -26,40 +26,40 @@ void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCo
 bool Engine::SphereCollider::CheckHit(const Collider& other) const
 {
 	if (!other.enabled) return false;
-	ColliderType otherType = other.GetType();
+	ColliderShapeType otherType = other.GetType();
 
 	// 球
-	if (otherType == ColliderType::Sphere) {
+	if (otherType == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
 		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius });
 	}
 
 	// AABB
-	else if (otherType == ColliderType::AABB) {
+	else if (otherType == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
 		return Collision::Detection::Check(AABB(o.minWorld, o.maxWorld), Sphere{ centerWorld ,radius });
 	}
 
 	// カプセル
-	else if (otherType == ColliderType::Capsule) {
+	else if (otherType == ColliderShapeType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
 		return Collision::Detection::Check(Sphere{ centerWorld ,radius }, o.capWorld_);
 	}
 
 	// OBB
-	else if (otherType == ColliderType::OBB) {
+	else if (otherType == ColliderShapeType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
 		return Collision::Detection::Check(o.obb, Sphere{ centerWorld ,radius });
 	}
 
 	// Ray
-	else if (otherType == ColliderType::Ray) {
+	else if (otherType == ColliderShapeType::Ray) {
 		auto& o = static_cast<const RayCollider&>(other);
 		return Collision::Detection::Check(o.ray_, Sphere{ centerWorld ,radius });
 	}
 
 	// 三角面
-	else if (otherType == ColliderType::Triangle) {
+	else if (otherType == ColliderShapeType::Triangle) {
 		auto& o = static_cast<const TriangleCollider&>(other);
 		bool is = Collision::Detection::Check(o.GetWorldTriangle(), Sphere{ centerWorld ,radius });
 		return is;
@@ -73,13 +73,13 @@ bool Engine::SphereCollider::CheckHit(const Collider& other) const
 bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const
 {
 	// 球
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& o = static_cast<const SphereCollider&>(other);
 		return Collision::Response::ReflectVelocity(Sphere{ centerWorld ,radius }, Sphere{ o.centerWorld, o.radius }, outPushVec);
 	}
 
 	// AABB
-	else if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderShapeType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 		Vector3 closest = {
 			std::clamp(centerWorld.x, o.minWorld.x, o.maxWorld.x),
@@ -100,7 +100,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 	}
 
 	// Capsule
-	else if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderShapeType::Capsule) {
 		const CapsuleCollider& o = static_cast<const CapsuleCollider&>(other);
 
 		// 球の中心とカプセルの線分の最近接点を求める
@@ -119,7 +119,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 	}
 
 	// OBB
-	else if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderShapeType::OBB) {
 		const OBBCollider& o = static_cast<const OBBCollider&>(other);
 
 		// 球の中心をOBBのローカル空間に変換
@@ -147,7 +147,7 @@ bool Engine::SphereCollider::ResolveCollision(const Collider& other, Vector3& ou
 		}
 	}
 
-	else if (other.GetType() == ColliderType::Triangle) {
+	else if (other.GetType() == ColliderShapeType::Triangle) {
 		const TriangleCollider& triangleColl = static_cast<const TriangleCollider&>(other);
 
 		const Triangle triangle = triangleColl.GetWorldTriangle();
@@ -248,13 +248,13 @@ bool Engine::AABBCollider::CheckHit(const Collider& other) const
 	if (!other.enabled) return false;
 
 	// 球
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
 		return Collision::Detection::Check(AABB(minWorld, maxWorld), Sphere{ o.centerWorld ,o.radius });
 	}
 
 	// AABB
-	else if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
 		return (minWorld.x <= o.maxWorld.x && maxWorld.x >= o.minWorld.x) &&
 			(minWorld.y <= o.maxWorld.y && maxWorld.y >= o.minWorld.y) &&
@@ -262,21 +262,21 @@ bool Engine::AABBCollider::CheckHit(const Collider& other) const
 	}
 
 	// カプセル
-	else if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderShapeType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
 
 		return Collision::Detection::Check(o.capWorld_, AABB(minWorld, maxWorld));
 	}
 
 	// OBB
-	else  if (other.GetType() == ColliderType::OBB) {
+	else  if (other.GetType() == ColliderShapeType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
 
 		return Collision::Detection::Check(o.obb, AABB(minWorld, maxWorld));
 	}
 
 	// OBB
-	else if (other.GetType() == ColliderType::Ray) {
+	else if (other.GetType() == ColliderShapeType::Ray) {
 		auto& o = static_cast<const RayCollider&>(other);
 		return Collision::Detection::Check(o.ray_, AABB(minWorld, maxWorld));
 	}
@@ -287,7 +287,7 @@ bool Engine::AABBCollider::CheckHit(const Collider& other) const
 bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
 	if (!other.enabled) return false;
 
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		// AABBの最近接点を求める
@@ -307,7 +307,7 @@ bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outP
 			}
 		}
 	}
-	else if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderShapeType::AABB) {
 		const AABBCollider& o = static_cast<const AABBCollider&>(other);
 
 		// 交差してなければスキップ
@@ -338,7 +338,7 @@ bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outP
 		}
 		return true;
 	}
-	else if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderShapeType::Capsule) {
 		const CapsuleCollider& capsule = static_cast<const CapsuleCollider&>(other);
 		const Segment& seg = capsule.capsule.segment;
 
@@ -359,7 +359,7 @@ bool Engine::AABBCollider::ResolveCollision(const Collider& other, Vector3& outP
 			}
 		}
 	}
-	else if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderShapeType::OBB) {
 	}
 
 	return false;
@@ -397,25 +397,25 @@ bool Engine::CapsuleCollider::CheckHit(const Collider& other) const
 
 
 	// 球
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
 		return Collision::Detection::Check(Sphere{ {o.centerWorld} ,{o.radius} }, capWorld_);
 	}
 
 	// AABB
-	else if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
 		return Collision::Detection::Check(capWorld_, AABB{ o.minWorld,o.maxWorld });
 	}
 
 	// カプセル
-	else if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderShapeType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
 		return Collision::Detection::Check(capWorld_, o.capWorld_);
 	}
 
 	// OBB
-	else if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderShapeType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
 		return Collision::Detection::Check(o.obb, capWorld_);
 	}
@@ -427,13 +427,13 @@ bool Engine::CapsuleCollider::CheckHit(const Collider& other) const
 bool Engine::CapsuleCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
 	if (!other.enabled) return false;
 
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 	}
-	if (other.GetType() == ColliderType::AABB) {
+	if (other.GetType() == ColliderShapeType::AABB) {
 	}
-	if (other.GetType() == ColliderType::Capsule) {
+	if (other.GetType() == ColliderShapeType::Capsule) {
 	}
-	if (other.GetType() == ColliderType::OBB) {
+	if (other.GetType() == ColliderShapeType::OBB) {
 	}
 
 	return false;
@@ -476,25 +476,25 @@ bool Engine::OBBCollider::CheckHit(const Collider& other) const
 	if (!other.enabled) return false;
 
 	// 球
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
 		return Collision::Detection::Check(obb, Sphere{ o.centerWorld,o.radius });
 	}
 
 	// AABB
-	else if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
 		return Collision::Detection::Check(obb, AABB(o.minWorld, o.maxWorld));
 	}
 
 	// カプセル
-	else if (other.GetType() == ColliderType::Capsule) {
+	else if (other.GetType() == ColliderShapeType::Capsule) {
 		auto& o = static_cast<const CapsuleCollider&>(other);
 		return Collision::Detection::Check(obb, o.capWorld_);
 	}
 
 	// OBB
-	else if (other.GetType() == ColliderType::OBB) {
+	else if (other.GetType() == ColliderShapeType::OBB) {
 		auto& o = static_cast<const OBBCollider&>(other);
 		return Collision::Detection::Check2(obb, o.obb);
 	}
@@ -505,7 +505,7 @@ bool Engine::OBBCollider::CheckHit(const Collider& other) const
 bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const {
 	if (!other.enabled) return false;
 
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		Matrix4x4 obbWorld = OBB::MakeOBBMatrix(obb);
@@ -534,7 +534,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 			return true;
 		}
 	}
-	if (other.GetType() == ColliderType::AABB) {
+	if (other.GetType() == ColliderShapeType::AABB) {
 		const AABBCollider& aabb = static_cast<const AABBCollider&>(other);
 		Vector3 aabbCenter = (aabb.aabb.min + aabb.aabb.max) * 0.5f;
 		Vector3 halfExtents = (aabb.aabb.max - aabb.aabb.min) * 0.5f;
@@ -546,7 +546,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 
 		return this->ResolveCollision(tempSphere, outPushVec); // 再帰的に使う
 	}
-	if (other.GetType() == ColliderType::Capsule) {
+	if (other.GetType() == ColliderShapeType::Capsule) {
 		const CapsuleCollider& cap = static_cast<const CapsuleCollider&>(other);
 		Vector3 closest = ClosestPoint::PointSegment(cap.capsule.segment, obb.center); // OBB中心から最接近点
 		SphereCollider tempSphere;
@@ -555,7 +555,7 @@ bool Engine::OBBCollider::ResolveCollision(const Collider& other, Vector3& outPu
 
 		return this->ResolveCollision(tempSphere, outPushVec); // 再利用
 	}
-	if (other.GetType() == ColliderType::OBB) {
+	if (other.GetType() == ColliderShapeType::OBB) {
 		//const OBBCollider& otherObb = static_cast<const OBBCollider&>(other);
 		//SATResult sat = CheckOBBCollisionSAT(this->obb, otherObb.obb);
 
@@ -597,13 +597,13 @@ bool Engine::RayCollider::CheckHit(const Collider& other) const
 	if (!other.enabled) return false;
 
 	// 球
-	else if (other.GetType() == ColliderType::Sphere) {
+	else if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
 		return Collision::Detection::Check(ray_, Sphere{ o.centerWorld,o.radius });
 	}
 
 	// AABB
-	else if (other.GetType() == ColliderType::AABB) {
+	else if (other.GetType() == ColliderShapeType::AABB) {
 		auto& o = static_cast<const AABBCollider&>(other);
 		return Collision::Detection::Check(ray_, AABB(o.minWorld, o.maxWorld));
 	}
@@ -654,7 +654,7 @@ bool Engine::TriangleCollider::CheckHit(const Collider& other) const
 	if (!other.enabled) return false;
 
 	// 球
-	else if (other.GetType() == ColliderType::Sphere) {
+	else if (other.GetType() == ColliderShapeType::Sphere) {
 		auto& o = static_cast<const SphereCollider&>(other);
 		return Collision::Detection::Check(GetWorldTriangle(), Sphere{o.centerWorld,o.radius});
 	}
@@ -665,7 +665,7 @@ bool Engine::TriangleCollider::CheckHit(const Collider& other) const
 bool Engine::TriangleCollider::ResolveCollision(const Collider& other, Vector3& outPushVec) const
 {
 
-	if (other.GetType() == ColliderType::Sphere) {
+	if (other.GetType() == ColliderShapeType::Sphere) {
 		const SphereCollider& sphere = static_cast<const SphereCollider&>(other);
 
 		const Triangle triangle = GetWorldTriangle();

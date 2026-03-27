@@ -34,13 +34,13 @@ namespace Combo {
 	// 保存項目移動データ
 	struct GlobalMove {
 		// 移動速度
-		float moveSpeed_ = 1.0;			
+		float moveSpeed = 1.0;			
 		// 移動開始
-		float moveWindowStart_ = 0.0f;	
+		float moveWindowStart = 0.0f;	
 		// 移動終了
-		float moveWindowEnd_ = 1.0f;		
+		float moveWindowEnd = 1.0f;		
 		// 強制移動
-		bool  isCompulsionMove_ = true;		
+		bool  isCompulsionMove = true;		
 		
 		// 重力はあるか？
 		bool isGravity = true;				
@@ -54,32 +54,36 @@ namespace Combo {
 	// 保存項目ヒットボックス
 	struct GlobalHitBox {
 		// ヒットボックスの生成タイミング時間
-		float hitBoxWindowStart_ = 0.0f;	
+		float hitBoxWindowStart = 0.0f;	
 		// ヒットボックスの生存時間
-		float hitBoxLifeTime_ = 0.5f;		
+		float hitBoxLifeTime = 0.5f;		
 		// コライダー位置
-		Vector3 offsetPos_ = {};			
+		Vector3 offsetPos = {};			
 		// コライダーサイズ
 		Vector3 colliderSize = { 1.0f,1.0f,1.0f };	
 		/// 親子付け設定  ///　 
-		std::string parentName_ = "なし";
-		Vector3 parentOffset_ = { 0.0f,0.0f,0.0f };
+		std::string parentName = "なし";
+		Vector3 parentOffset = { 0.0f,0.0f,0.0f };
 		// ヒットボックスの発生条件タイプ
-		HitBox::SpawnType spawnType_ = HitBox::SpawnType::kOnTime;
+		HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
 		// ヒットボックス依存先タイプ
-		HitBox::ParentType dependenceType_ = HitBox::ParentType::kParent;
+		HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
+		// ヒットボックス生存タイプ
+		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
+		// ヒットボックス影響タイプ
+		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
 	};
 
 	// 保存項目リアクション
 	struct GlobalReaction {
 		// ノックバック持続時間
-		float knockbackDuration_ = 0.1f;	
+		float knockbackDuration = 0.1f;	
 		// ノックバックパワー
 		float knockbackPower = 30.0f;		
 		// ノックバックY方向パワー
 		float knockbackPowerY = 30.0f;		
 		// Y方向にノックバックするか
-		bool isVerticalBoost_ = false;		
+		bool isVerticalBoost = false;		
 		// ダメージ
 		float damage = 0;					
 	};
@@ -99,9 +103,9 @@ namespace Combo {
 		// アニメーション名
 		std::string animationName = "";	
 		// アニメーションスピード
-		float animationSpeed_ = 1.0f;		
+		float animationSpeed = 1.0f;		
 		// アニメーションブレンド時間
-		float animationBlendTime_ = 0.1f;	
+		float animationBlendTime = 0.1f;	
 
 	};
 

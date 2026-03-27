@@ -63,7 +63,7 @@ namespace HitBox {
 		int current = static_cast<int>(shape);
 		if (ImGui::Combo("Shape", &current, kShapeLabels, IM_ARRAYSIZE(kShapeLabels))) {
 			if (0 <= current && current < static_cast<int>(IM_ARRAYSIZE(kShapeLabels))) {
-				shape = static_cast<Shape>(current);
+				shape = static_cast<ShapeType>(current);
 			}
 		}
 #endif // _DEBUG
@@ -82,7 +82,7 @@ namespace HitBox {
 	void HitBoxColl::ImGuiHitBoxSize() {
 #ifdef _DEBUG
 		// Sphere のときは Radius、それ以外は Size を出す
-		if (shape == Shape::kSphere) {
+		if (shape == ShapeType::kSphere) {
 			ImGui::DragFloat("Radius", &radius, 0.01f, 0.0f, 10000.0f);
 			if (radius < 0.0f) { radius = 0.0f; }
 		}

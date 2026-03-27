@@ -18,7 +18,7 @@ namespace HitBox {
 	class System {
 	public:
 		~System() {
-			data_.clear();
+			lifeTimeHitBoxDatas_.clear();
 			hitBoxCollDatas_.clear();
 		}
 
@@ -37,16 +37,23 @@ namespace HitBox {
 		void Update(float dt);
 
 
-		// ヒットボックス追加
+		// ヒットボックス追加（期限付き）
+		void AddLifeTimeHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
+			, float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent = nullptr);
+
+		// ヒットボックス追加（無期限）
 		void AddHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			,float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent = nullptr);
+			, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent = nullptr);
 
 
 		// ヒットボックスコライダーデータ作成
-		void CreateHitBoxCollData(const std::string& name, Shape shape, UseType useType, const GlobalData& hitBoxData);
+		void CreateHitBoxCollData(const std::string& name, ShapeType shape, UseType useType, const GlobalData& hitBoxData);
 
-		// 全体データ取得
-		std::vector<Data>& GetData() { return data_; }
+		// 全体データ取得(期限付きヒットボックス)
+		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
+		// 全体データ取得(無期限ヒットボックス)
+		std::vector<Data>& GetHitBoxData() { return hitBoxDatas_; }
+
 
 		// 名前からヒットボックスコライダーデータ取得
 		CollData GetHitBoxCollData(const std::string& name) {
@@ -61,10 +68,20 @@ namespace HitBox {
 
 		void Clear();
 
-
-
 	private:
-		std::vector<Data> data_;
+		// 親子付け生成処理
+		void CreateParent(Data& d, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent);
+
+		// コライダーの生成処理
+		void CreateHitBoxCollider(Data& d, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName);
+		// コライダー生成
+		template <typename T>
+		static std::unique_ptr<T> CreateCollider(CollisionTag tag, CollisionLayer layer, CollisionLayer mask, bool isEneble = true, bool isLine = false);
+	private:
+		// 期限付きヒットボックスデータ
+		std::vector<Data> lifeTimeHitBoxDatas_;
+		// 無期限ヒットボックスデータ
+		std::vector<Data> hitBoxDatas_;
 
 		// ヒットボックスコライダーデータ群
 		std::map<std::string, CollData> hitBoxCollDatas_;
@@ -72,4 +89,29 @@ namespace HitBox {
 		Character::BaseCharacter* character = nullptr;
 		Engine::EntityManager* entityManager = nullptr;
 	};
+
+
+	template <typename T>
+	static std::unique_ptr<T> System::CreateCollider(CollisionTag tag, CollisionLayer layer, CollisionLayer mask, bool isEneble, bool isLine)
+	{
+		std::unique_ptr<T> coll = std::make_unique<T>();
+
+		// 有効化
+		if (isEneble) {
+			coll->Enable();
+		}
+		else {
+			coll->Disable();
+		}
+		// デバック用表示
+		if (isLine) {
+			coll->isDebugLine = true;
+		}
+
+		coll->tag = tag;			// タグ設定
+		coll->layer = layer;		// レイヤー設定
+		coll->collisionMask = (1 << static_cast<uint32_t>(mask));	// マスク設定
+
+		return std::move(coll);
+	}
 }

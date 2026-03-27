@@ -38,7 +38,7 @@ namespace HitBox {
 	private:
 		std::string hitBoxName = "HitBox";
 		UseType useType =UseType::kPlayer;
-		Shape shape = Shape::kOBB;
+		ShapeType shape = ShapeType::kOBB;
 		Vector3 offset{};
 		Vector3 size = { 1.0f,1.0f,1.0f };
 		float radius = 1.0f;

@@ -36,7 +36,7 @@ namespace HitBox {
 		// 無効化
 		void Disable();
 		// 履歴削除
-		void Clear() { GetContactRecord().Clear(); }
+		void ClearContactRecord() { GetContactRecord().Clear(); }
 	public:
 		// ワールドトランスフォーム取得
 		Engine::WorldTransform& GetWorldTransform() { return worldTransform_; }
@@ -75,29 +75,4 @@ namespace HitBox {
 		Character::BaseCharacter* character = nullptr;
 		Engine::EntityManager* entityManager = nullptr;
 	};
-
-
-	template <typename T>
-	static std::unique_ptr<T> CreateCollider(CollisionTag tag, CollisionLayer layer, CollisionLayer mask, bool isEneble = true, bool isLine = false)
-	{
-		std::unique_ptr<T> coll = std::make_unique<T>();
-
-		// 有効化
-		if (isEneble) {
-			coll->Enable();
-		}
-		else {
-			coll->Disable();
-		}
-		// デバック用表示
-		if (isLine) {
-			coll->isDebugLine = true;
-		}
-
-		coll->tag = tag;			// タグ設定
-		coll->layer = layer;		// レイヤー設定
-		coll->collisionMask = (1 << static_cast<uint32_t>(mask));	// マスク設定
-
-		return std::move(coll);
-	}
 };

@@ -54,8 +54,8 @@ namespace Combo {
 		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
 
 		// アニメーション
-		ComboImGui::ApplyAnimationToState("アニメーション", data_.animation.animationName, currentFrame, data_.animation.animationSpeed_,
-			data_.animation.animationBlendTime_, owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
+		ComboImGui::ApplyAnimationToState("アニメーション", data_.animation.animationName, currentFrame, data_.animation.animationSpeed,
+			data_.animation.animationBlendTime, owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
 			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
 
 
@@ -85,7 +85,7 @@ namespace Combo {
 	void EditorBlock::ImGuiApplyHitBox() {
 		if (ImGui::CollapsingHeader("ヒットボックス")) {
 			// ペアレント設定
-			ComboImGui::Select("依存先", data_.hitBox.parentName_, comboSystem->GetParentTransforms());
+			ComboImGui::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
 
 			// ヒットボックス出現条件
 			static const char* HitBoxSpawnTypeLabels[] = {
@@ -94,7 +94,7 @@ namespace Combo {
 				"空中",
 				"ボタンを離したら",
 			};
-			ComboImGui::Select("ヒットボックス出現条件", HitBoxSpawnTypeLabels, data_.hitBox.spawnType_);
+			ComboImGui::Select("ヒットボックス出現条件", HitBoxSpawnTypeLabels, data_.hitBox.spawnType);
 
 			// 依存先タイプ
 			static const char* HitBoxParentTypeLabels[] = {
@@ -103,10 +103,25 @@ namespace Combo {
 				"追従先からの孤立",
 				"ターゲットの位置",
 			};
-			ComboImGui::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType_);
+			ComboImGui::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
+			
+			// 影響タイプ
+			static const char* HitBoxHitEffectTypeLabels[] = {
+				"ダメージのみ",
+				"力の影響のみ",
+				"ダメージと力の影響",
+			};
+			ComboImGui::Select("ヒットボックス影響", HitBoxHitEffectTypeLabels, data_.hitBox.hitEffectType);
+
+			// 生存タイプ
+			static const char* HitBoxLifetimeTypeLabels[] = {
+				"無期限",
+				"期限付き",
+			};
+			ComboImGui::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
 			// オフセット
-			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset_.x, 0.1f);
+			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset.x, 0.1f);
 		}
 	}
 
@@ -134,8 +149,8 @@ namespace Combo {
 			};
 			ComboImGui::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
 
-			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove_);
-			ImGui::SliderFloat("移動速度", &data_.move.moveSpeed_, 0.0f, 100.0f, "%.2f");
+			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
+			ImGui::SliderFloat("移動速度", &data_.move.moveSpeed, 0.0f, 100.0f, "%.2f");
 			ImGui::Checkbox("重力", &data_.move.isGravity);
 			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
 		}
@@ -154,10 +169,10 @@ namespace Combo {
 
 	void EditorBlock::ImGuiReaction() {
 		if (ImGui::CollapsingHeader("リアクション")) {
-			ImGui::SliderFloat("ノックバック持続時間", &data_.reaction.knockbackDuration_, 0.0f, 5.0f, "%.2f");
+			ImGui::SliderFloat("ノックバック持続時間", &data_.reaction.knockbackDuration, 0.0f, 5.0f, "%.2f");
 			ImGui::SliderFloat("ノックバックパワー", &data_.reaction.knockbackPower, 0.0f, 999.0f, "%.2f");
 			ImGui::SliderFloat("ノックバックY方向パワー", &data_.reaction.knockbackPowerY, 0.0f, 999.0f, "%.2f");
-			ImGui::Checkbox("Y方向にノックバック", &data_.reaction.isVerticalBoost_);
+			ImGui::Checkbox("Y方向にノックバック", &data_.reaction.isVerticalBoost);
 			ImGui::SliderFloat("ダメージ", &data_.reaction.damage, 0.0f, 1000.0f, "%.2f");
 		}
 	}
@@ -169,32 +184,34 @@ namespace Combo {
 		ComboData& comboData = state->Data();
 
 
-		data_.move.moveSpeed_ = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
-		data_.move.isCompulsionMove_ = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
+		data_.move.moveSpeed = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
+		data_.move.isCompulsionMove = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
 		data_.move.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity_;					// 重力
 		data_.move.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;				// 重力スケール
 		data_.move.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
 
 
 		// リアクション
-		data_.reaction.knockbackDuration_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration_;	// ノックバック持続時間
+		data_.reaction.knockbackDuration = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration_;	// ノックバック持続時間
 		data_.reaction.knockbackPower = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().power_;			// ノックバックパワー
 		data_.reaction.knockbackPowerY = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().verticalBoost_;		// ノックバックY方向パワー
-		data_.reaction.isVerticalBoost_ = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost_;	// Y方向にノックバック
+		data_.reaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost_;	// Y方向にノックバック
 		data_.reaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.GetDamageData().GetOne().damage;						// ダメージ
 
 		// アニメーションスピード
-		data_.animation.animationSpeed_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
-		data_.animation.animationBlendTime_ = comboData.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_;
+		data_.animation.animationSpeed = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
+		data_.animation.animationBlendTime = comboData.GetComboMotion().GetComboAnimation().GetData().animationBlendTime_;
 		// アニメーション名前
 		data_.animation.animationName = comboData.GetComboMotion().GetComboAnimation().GetData().animationName_;
 
 
 		// 親
-		data_.hitBox.parentName_ = comboData.GetComboHitBox().GetData().parentName_;
-		data_.hitBox.parentOffset_ = comboData.GetComboHitBox().GetData().offset_;
-		data_.hitBox.spawnType_ = comboData.GetComboHitBox().GetData().spawnType_;
-		data_.hitBox.dependenceType_ = comboData.GetComboHitBox().GetData().dependenceType_;
+		data_.hitBox.parentName = comboData.GetComboHitBox().GetData().parentName;
+		data_.hitBox.parentOffset = comboData.GetComboHitBox().GetData().offset;
+		data_.hitBox.spawnType = comboData.GetComboHitBox().GetData().spawnType;
+		data_.hitBox.dependenceType = comboData.GetComboHitBox().GetData().dependenceType;
+		data_.hitBox.hitEffectType = comboData.GetComboHitBox().GetData().hitEffectType;
+		data_.hitBox.lifetimeType = comboData.GetComboHitBox().GetData().lifetimeType;
 
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
@@ -337,13 +354,13 @@ namespace Combo {
 			// ヒットボックス生成時間
 			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
 			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
-			data.hitBox.hitBoxWindowStart_ = hitBoxStart;
-			data.hitBox.hitBoxLifeTime_ = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
+			data.hitBox.hitBoxWindowStart = hitBoxStart;
+			data.hitBox.hitBoxLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
 
 			// 移動時間
 			data.move = comboEditorBlocks_[it.first].GetData().move;
-			data.move.moveWindowStart_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
-			data.move.moveWindowEnd_ = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+			data.move.moveWindowStart = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
+			data.move.moveWindowEnd = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
 		
 			
 			// アニメーションスピード
