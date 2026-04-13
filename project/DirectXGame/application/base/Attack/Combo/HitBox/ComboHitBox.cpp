@@ -7,14 +7,18 @@ namespace Combo {
 	// 開始
 	void ComboHitBox::Enter(Character::BaseCharacter* owner, Type type) {
 		this->type = type;
+		this->owner = owner;
 		// ヒットボックスシステムを渡す
-		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetHitBoxSystem();
 		// 移動システムを渡す
 		movementComponent = owner->GetMoveComponent();
 
 		// 常時なら
 		if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
-			hitBoxSystem->AddHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.dependenceType, data_.offset, perent);
+			hitBoxSystem->AddHitBox(id,data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.dependenceType, data_.offset,data_.useContactRecord, perent);
+			hitBox = hitBoxSystem->GetHitBoxInstance(id);
+			hitBox->Disable(Vector4{ 1,1,1,0.0f });
+			hitBox->ClearContactRecord();
 		}
 	}
 
@@ -34,13 +38,13 @@ namespace Combo {
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
 					if (timer >= data_.hitBpxWindowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.lifeTime, data_.dependenceType, data_.offset, perent);
+						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.lifeTime, data_.dependenceType, data_.offset, perent);
+						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
@@ -54,7 +58,13 @@ namespace Combo {
 			}
 			// 常時なら
 			else if(data_.lifetimeType == HitBox::LifetimeType::kInfinite){
-				if (timer >= data_.hitBpxWindowStart) {
+				if (hitBox) {
+					if (timer >= data_.hitBpxWindowStart && timer <= data_.hitBpxWindowStart + data_.lifeTime) {
+						hitBox->Enable();
+					}
+					else {
+						hitBox->Disable(Vector4{1,1,1,0.0f});
+					}
 				}
 			}
 		}
@@ -64,6 +74,10 @@ namespace Combo {
 	void ComboHitBox::Exit() {
 		isPopHitBox_ = false;
 		hitBoxSystem->Clear();
+		if (hitBox) {
+			hitBox->Disable();
+			hitBox->ClearContactRecord();
+		}
 	}
 
 	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& combo) {

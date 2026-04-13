@@ -31,33 +31,64 @@ void BulletManager::Update()
 	}
 	return false;
 		});
+
+	// 各発射物更新
+	for(auto& projectile : projectiles_) {
+		projectile->Update();
+	}
+
+	projectiles_.remove_if([](const std::unique_ptr<Projectile::BaseProjectile>& projectile) {
+		if (!projectile->GetIsAlive()) {
+			return true;
+		}
+		return false;
+		});
+
 }
 
-void BulletManager::Draw()
-{
+void BulletManager::Draw() {
 	// 描画
 	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
+
+
+	for (auto& projectile : projectiles_) {
+		projectile->Draw();
+	}
+
 }
 
-void BulletManager::DrawEffect()
-{
+void BulletManager::DrawEffect() {
 	// エフェクト描画
 	for (auto& bullet : bullets_) {
 		bullet->DrawP();
 	}
+
+	for (auto& projectile : projectiles_) {
+		projectile->DrawEffect();
+	}
+
 }
 
-void BulletManager::Draw2D()
-{
+void BulletManager::Draw2D() {
 	// スプライト描画
 	for (auto& bullet : bullets_) {
 		bullet->Draw2D();
+	}
+
+
+	for (auto& projectile : projectiles_) {
+		projectile->Draw2D();
 	}
 }
 
 void BulletManager::AddBullet(std::unique_ptr<BaseBullet> bullet){
 	// 格納
 	bullets_.push_back(std::move(bullet));
+}
+
+void BulletManager::AddProjectile(std::unique_ptr<Projectile::BaseProjectile> projectile) {
+	// 格納
+	projectiles_.push_back(std::move(projectile));
 }

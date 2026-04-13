@@ -102,6 +102,9 @@ private:
 	std::unique_ptr<MainStage> stage_ = nullptr;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
+	// ヒットボックスシステム
+	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
+
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;

@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Attack/Combo/Motion/ComboMotion.h"
 #include "DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.h"
 #include "DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h"
+#include "DirectXGame/application/base/Attack/Combo/Range/ComboRange.h"
 #include "ComboSequencer.h"
 
 
@@ -31,6 +32,8 @@ namespace Combo {
 		ComboHitBox& GetComboHitBox() { return hitBox; }
 		// コンボエフェクトクラス取得
 		ComboEffect& GetComboEffect() { return effect; }
+		// コンボ遠距離クラス取得
+		ComboRange& GetComboRange() { return range; }
 		// コンボタイプ取得
 		Type GetType() const { return type; }
 	public:	// 時間
@@ -40,6 +43,8 @@ namespace Combo {
 		void ResetTimer() { timer_ = 0.0f; }
 		// 経過時間設定
 		void SetTimer(float time) { timer_ = time; } 
+		// デバック中か
+		void SetIsDebug(bool is) { isDebug = is; }
 		// 攻撃タイプ設定
 		void SetType(Type type) { this->type = type; }
 	private:
@@ -48,7 +53,9 @@ namespace Combo {
 		ComboCamera camera{};					// コンボ用カメラクラス
 		ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 		ComboEffect effect{};					// コンボ用エフェクト
+		ComboRange range{};						// コンボ用遠距離クラス（弾など）
 		float timer_ = 0.0f;					// 時間
+		bool isDebug = false;					// エディターを使用したデバック中か
 		Type type = Type::kMelle;// 攻撃タイプ
 	};
 };

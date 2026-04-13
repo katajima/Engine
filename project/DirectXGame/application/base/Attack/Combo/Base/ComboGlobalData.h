@@ -56,7 +56,9 @@ namespace Combo {
 		// ヒットボックスの生成タイミング時間
 		float hitBoxWindowStart = 0.0f;	
 		// ヒットボックスの生存時間
-		float hitBoxLifeTime = 0.5f;		
+		float hitBoxLifeTime = 0.5f;
+		// ヒット記録を使用するか（使用した場合連続ヒットしない）
+		bool useContactRecord = true;
 		// コライダー位置
 		Vector3 offsetPos = {};			
 		// コライダーサイズ

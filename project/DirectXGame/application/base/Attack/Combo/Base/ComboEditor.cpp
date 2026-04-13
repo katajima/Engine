@@ -1,16 +1,16 @@
 #include "ComboEditor.h"
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,const std::string& stateName, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;	// 保存項目
 		this->lineCommon = lineCommon;
-		this->state = state;						// ステート
+		this->stateName = stateName;						// ステート
 		this->owner = owner;						// オーナー
 		this->comboSystem = comboSystem;			// コンボシステム
 
@@ -21,18 +21,19 @@ namespace Combo {
 		sequence_.SetFrameMax(maxFrame);
 
 		// コンボ名設定
-		comboName_ = "Combo_" + state->GetName();
+		comboName_ = "Combo_" + stateName;
 
 		// シーケンサーにコンボデータを適用させる
 		SequencerApplyToState();
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->Data();
+		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
 		// ステートの時間設定
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 	}
 
 	void EditorBlock::UpdateImGui(float dt) {
 
+		auto state = comboSystem->GetComboNodeState(stateName);
 		// 選択中でなければ処理しない
 		if (!nowChoice_) return;
 		if (currentFrame == 0 && isPlaying) {
@@ -75,6 +76,7 @@ namespace Combo {
 		ComboData& comboData = state->Data();
 		// ステートの時間設定
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+		comboData.SetIsDebug(true);
 		ImGui::End();
 
 #endif // _DEBUG
@@ -120,6 +122,8 @@ namespace Combo {
 			};
 			ComboImGui::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
+			// ヒット記録を使用
+			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
 			// オフセット
 			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset.x, 0.1f);
 		}
@@ -181,13 +185,14 @@ namespace Combo {
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->Data();
+		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
 
+		
 
-		data_.move.moveSpeed = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
-		data_.move.isCompulsionMove = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
-		data_.move.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity_;					// 重力
-		data_.move.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;				// 重力スケール
+		data_.move.moveSpeed = comboData.GetComboMotion().GetComboMove().GetData().speed;						// 移動速度
+		data_.move.isCompulsionMove = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove;		// 強制移動
+		data_.move.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity;					// 重力
+		data_.move.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale;				// 重力スケール
 		data_.move.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
 
 
@@ -212,13 +217,13 @@ namespace Combo {
 		data_.hitBox.dependenceType = comboData.GetComboHitBox().GetData().dependenceType;
 		data_.hitBox.hitEffectType = comboData.GetComboHitBox().GetData().hitEffectType;
 		data_.hitBox.lifetimeType = comboData.GetComboHitBox().GetData().lifetimeType;
-
+		data_.hitBox.useContactRecord = comboData.GetComboHitBox().GetData().useContactRecord;
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
 
 		// ロックオン
-		data_.lockOn.lockOnRadius = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.radius;
-		data_.lockOn.lockOnType = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.type;
+		data_.lockOn.lockOnRadius = comboData.GetComboMotion().GetComboMove().GetData().lockOnData.radius;
+		data_.lockOn.lockOnType = comboData.GetComboMotion().GetComboMove().GetData().lockOnData.type;
 
 		// シーケンサー適応
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
@@ -269,6 +274,7 @@ namespace Combo {
 		if (isComboEditorActive_)
 			UpdateImGui(dt);
 
+
 		ImGui::End();
 #endif // _DEBUG
 	};
@@ -307,7 +313,7 @@ namespace Combo {
 
 		// コンボシステムからコンボノードステートを取得してコンボエディターブロックを作成
 		for (auto& comboState : comboSystem->GetComboNodeStates()) {
-			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.second, owner);
+			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.first, owner);
 		}
 
 		// コンボ再構築後、選択が消えてたら補正
@@ -381,7 +387,7 @@ namespace Combo {
 		comboSystem->SetGlobalComboDatas();
 	}
 
-	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
+	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner) {
 
 		// 既に存在する場合は追加しない
 		if (comboEditorBlocks_.find(comboName) != comboEditorBlocks_.end()) {
@@ -390,7 +396,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(lineCommon, globalVariables, comboSystem, state, owner);
+		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);

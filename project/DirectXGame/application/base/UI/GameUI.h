@@ -46,7 +46,7 @@ private:
 
 	
 	struct HitTextData {
-		Vector2 pos_ = { 950,100 };
+		Vector2 pos_ = { 1000,180 };
 		int instance = 3;
 		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
 		Vector2 nameSize = { 100 * 1.5f,33 * 1.5f };

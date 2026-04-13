@@ -357,7 +357,7 @@ void Engine::LineMeshData::AddLineSphere(const Sphere& sphere, const Vector4& co
 /// </summary>
 /// <param name="corner"></param>
 /// <param name="pos"></param>
-void Engine::LineMeshData::AddLineCorner(const CornerSegment& corner, const WorldTransform& pos)
+void Engine::LineMeshData::AddLineCorner(const CornerSegment& corner, const WorldTransform& pos, const Vector4& color)
 {
 	std::vector<Vector3> vertices;
 	float angleStep = DirectX::XM_2PI / corner.segment; // 360° を segment 分割
@@ -384,8 +384,6 @@ void Engine::LineMeshData::AddLineCorner(const CornerSegment& corner, const Worl
 		vertices.push_back(worldVertex);
 	}
 
-	// 各辺をラインで描画
-	Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色のライン
 	for (int i = 0; i < corner.segment; ++i)
 	{
 		Vector3 start = vertices[i];
@@ -519,16 +517,16 @@ void Engine::LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, 
 /// </summary>
 /// <param name="triangle"></param>
 /// <param name="pos"></param>
-void Engine::LineMeshData::AddLineTriangle(const Triangle& triangle, const WorldTransform& pos)
+void Engine::LineMeshData::AddLineTriangle(const Triangle& triangle, const WorldTransform& pos, const Vector4& color)
 {
 	// 三角形の3つの頂点
 	Vector3 p0 = triangle.vertices[0] + pos.worldMat_.GetWorldPosition();
 	Vector3 p1 = triangle.vertices[1] + pos.worldMat_.GetWorldPosition();
 	Vector3 p2 = triangle.vertices[2] + pos.worldMat_.GetWorldPosition();
 
-	AddLine(p0, p1, Vector4{ 1,1,1,1 });
-	AddLine(p1, p2, Vector4{ 1,1,1,1 });
-	AddLine(p2, p0, Vector4{ 1,1,1,1 });
+	AddLine(p0, p1, color);
+	AddLine(p1, p2, color);
+	AddLine(p2, p0, color);
 }
 
 /// <summary>

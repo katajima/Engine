@@ -116,8 +116,8 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
 
 	// 移動時間
-	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart_;
-	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd_;
+	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart;
+	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd;
 
 	// トレイルエフェクト
 	float trailStart = comboData.GetComboEffect().GetData().startTmer;

@@ -17,7 +17,7 @@ namespace Combo {
 	class EditorBlock {
 	public:
 		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
 		// 更新
 		void UpdateImGui(float dt);
 	public:
@@ -63,7 +63,7 @@ namespace Combo {
 		std::vector<std::string> conectComboNames_;
 	private:
 		// ノードステート
-		std::shared_ptr<NodeState> state = nullptr;
+		std::string stateName = "";
 		// シーケンサー
 		AttackSequence sequence_;
 	private:
@@ -100,6 +100,10 @@ namespace Combo {
 		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
 		// 更新 
 		void Update(float dt);
+
+		// コンボエディターがアクティブか取得
+		bool IsActive() const { return isComboEditorActive_; }
+
 	private:
 		// 更新
 		void UpdateImGui(float dt);
@@ -109,7 +113,7 @@ namespace Combo {
 		void SetGlobalData();
 	private:
 		// コンボエディターブロック作成
-		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
+		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
 	private: // もらいもの
 		// コンボシステム
 		Combo::System* comboSystem = nullptr;

@@ -38,12 +38,12 @@
         },
         "コンボ中の移動スピード": {
             "type": "float",
-            "value": 40.130001068115234
+            "value": 23.360000610351563
         },
         "コンボ中の移動タイプ": {
             "enumType": "MoveType",
             "type": "enum",
-            "value": 1
+            "value": 2
         },
         "コンボ中の移動強制": {
             "type": "bool",
@@ -100,6 +100,10 @@
         "ノックバック持続時間": {
             "type": "float",
             "value": 0.10000000149011612
+        },
+        "ヒットボックスヒット記録を使用": {
+            "type": "bool",
+            "value": true
         },
         "ヒットボックス依存先タイプ": {
             "enumType": "HitBoxParentType",

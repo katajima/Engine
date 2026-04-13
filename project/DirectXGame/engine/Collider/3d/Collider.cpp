@@ -12,11 +12,11 @@ void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCo
 		if (isDebugLine) {
 			if (enabled) {
 				// 球の中心位置と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, { 0.5f,0.5f,0.5f,1.0f }, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
 			}
 		}
 	}
@@ -231,11 +231,11 @@ void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineComm
 		if (isDebugLine) {
 			if (enabled) {
 				// AABBの最小・最大座標を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, { 0.5f,0.5f,0.5f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
 			}
 		}
 	}
@@ -379,11 +379,11 @@ void Engine::CapsuleCollider::Update(const WorldTransform& worldTransform, LineC
 		if (isDebugLine) {
 			if (enabled) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, { 0.5f,0.5f,0.5f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
 			}
 		}
 	}
@@ -459,11 +459,11 @@ void Engine::OBBCollider::Update(const WorldTransform& worldTransform, LineCommo
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
 			if (obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
 				// OBBのサイズを使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, { 0.0f,0.0f,0.0f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
 			}
 		}
 	}
@@ -638,11 +638,11 @@ void Engine::TriangleCollider::Update(const WorldTransform& worldTransform, Line
 		if (isDebugLine) {
 			if (enabled) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform);
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({ triangle01,triangle02 ,triangle03 }, worldTransform, lineColor);
 			}
 		}
 	}

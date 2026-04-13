@@ -108,19 +108,13 @@ namespace Combo {
 			return it->second;
 		}
 	public:
-		// 追加ヒットボックスデータ
-		struct AddHitBoxData {
-			HitBox::CollData hitBoxData;
-		};
-
 		// コンボ条件データ
 		struct ComboConditionData {
 			Combo::EndConditionType type = Combo::EndConditionType::kOnTimer;
 		};
 
 		// コンボ作成
-		void CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxData,
-			GamePadButton button = GamePadButton::GAMEPAD_B);
+		void CreateCombo(const std::string& comboNodeName, const std::vector< HitBox::CollData>& addHitBoxData);
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);

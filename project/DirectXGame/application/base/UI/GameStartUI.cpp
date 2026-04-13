@@ -17,6 +17,15 @@ void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	fade_->SetSize(uiSize_);
 	fade_->SetColor(uiColor_);
 
+	// ゲーム準備前UI
+	gameStartPreparationUI_ = std::make_unique<Engine::Sprite>();
+	gameStartPreparationUI_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/gameStartPreparation.dds");
+	gameStartPreparationUI_->SetPosition(gameStartPosition_);
+	gameStartPreparationUI_->SetAnchorPoint(uiAnchorPoint_);
+	gameStartPreparationUI_->SetTextureSize(gameStartUiSize_);
+	gameStartPreparationUI_->SetSize(gameStartUiSize_);
+	gameStartPreparationUI_->SetColor(numUiColor_);
+	
 	// カウントUI
 	InitUICount("numCount", numPosition_, 1, false);
 	Engine::UICount* hitCount = GetUICount("numCount");
@@ -49,7 +58,7 @@ void GameStartUI::Update(float dt) {
 	fade_->SetColor(uiColor_);
 	fade_->Update();
 
-	
+	gameStartPreparationUI_->Update();
 }
 
 void GameStartUI::Draw() {
@@ -57,5 +66,8 @@ void GameStartUI::Draw() {
 	if (isNum) {
 	//	hitCount->Draw();
 	}
+
+	gameStartPreparationUI_->Draw();
+
 	fade_->Draw();
 }

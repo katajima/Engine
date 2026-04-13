@@ -91,7 +91,8 @@ namespace Character {
 	protected:
 		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
 		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
-		
+		//
+		bool isStopping_ = false;
 		// グローバルデータ
 		EnemyGlobalData globalData_;
 	protected:

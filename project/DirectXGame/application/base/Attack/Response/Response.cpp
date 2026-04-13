@@ -125,7 +125,5 @@ void HitResponse::HitEffect(Engine::Collider* self, Engine::Collider* other) {
 	}
 }
 
-
-
 #pragma endregion	// 衝突応答
 

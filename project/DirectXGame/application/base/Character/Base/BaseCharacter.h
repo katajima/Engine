@@ -77,7 +77,7 @@ namespace Character {
 		// キャラクター取得
 		Type GetCharacterType() const { return parameterComponent_->characterType_; }
 		// キャラクターの生存状態を取得
-		bool GetAlive() const { return stateMachine_->GetCurrentMainState() !=  CharacterMainState::Die; }
+		bool GetAlive() const { return stateMachine_->GetCurrentMainState() != CharacterMainState::Die; }
 		// キャラクターの生存状態を取得
 		void SetAlive(bool is) { objectComponent_->GetObjectStateFlags().isAlive = is; }
 		// HP取得
@@ -135,6 +135,8 @@ namespace Character {
 		BulletManager* GetBulletManager() { return this->bulletManager; }
 		// カメラ管理クラス取得
 		CameraManager* GetCameraManager() { return this->cameraManager; }
+		// ヒットボックス管理取得
+		HitBox::System* GetHitBoxSystem() { return this->hitBoxSystem; }
 		// スペシャルポイント管理クラス取得
 		SpecalPointManager* GetSpecalPointManager() { return this->specalPointManager; }
 		// 入力システム取得
@@ -145,6 +147,8 @@ namespace Character {
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		// 弾マネージャーの設定
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; };
+		// ヒットボックス管理の設定
+		void SetHitBoxSystem(HitBox::System* hitBoxSystem) { this->hitBoxSystem = hitBoxSystem; }
 		// カメラ管理クラスの設定
 		void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 		// スペシャルポイント管理クラス設定
@@ -213,6 +217,8 @@ namespace Character {
 		EffectSystem* effect = nullptr;
 		// 弾管理
 		BulletManager* bulletManager = nullptr;
+		// ヒットボックス管理
+		HitBox::System* hitBoxSystem = nullptr;
 		// カメラ管理クラス
 		CameraManager* cameraManager = nullptr;
 		// 必殺技ポイント管理クラス

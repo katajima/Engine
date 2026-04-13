@@ -7,10 +7,10 @@
 // ベースキャラクター
 #include"BaseCharacter.h"
 // アプリケーション(敵)
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 // アプリケーション(プレイヤー)
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 #include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include "CharacterGlobalData.h"
@@ -34,7 +34,7 @@ namespace Character {
 	{
 	public:
 		// 初期化
-		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
+		void Initialize(InputSystem* inputSystem,HitBox::System* hitBoxSystem,Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 		// 更新
@@ -126,5 +126,6 @@ namespace Character {
 		CameraManager* cameraManager = nullptr;	// カメラ管理
 		EffectSystem* effect = nullptr;
 		SpecalPointManager* specalPointManager = nullptr;
+		HitBox::System* hitBoxSystem = nullptr;		// ヒットボックスシステム
 	};
 }

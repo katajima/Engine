@@ -1,6 +1,6 @@
 #include "SmallMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -9,20 +9,11 @@ namespace Character {
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, 
 			"enemyBodySG01.obj", "smallMeleeEnemy",0.75f);
-		
-		
-		
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-
-
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
-
-		
 		moveSpeed_ = moveComponent_->GetMoveSystem()->Data().maxSpeed;
-
-
 		// 武器
 		weapon_ = std::make_unique<SmallMeleeWeapon>();
 		weapon_->SetCharacter(this);
@@ -40,14 +31,14 @@ namespace Character {
 	}
 
 	void SmallMeleeEnemy::Update() {
+		isStopping_ = false;
 		// 基盤の更新
 		BaseUpdate();
 		//
 		weapon_->Update(); // 武器更新
 	}
 
-	void SmallMeleeEnemy::Draw2D() {
-	}
+	void SmallMeleeEnemy::Draw2D() {}
 
 	void SmallMeleeEnemy::Emit() {
 		// エフェクト座標更新
@@ -61,6 +52,7 @@ namespace Character {
 	}
 
 	void SmallMeleeEnemy::Move() {
+		if (isStopping_) return;
 		// 距離設定
 		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 		dire.y = 0.0f;
@@ -99,6 +91,10 @@ namespace Character {
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<SmallMeleeEnemyDieState>(p);
 			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<SmallMeleeEnemyDamageState>(p);
+			});
+
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
 }

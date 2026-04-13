@@ -6,8 +6,7 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
-	class SmallRangeEnemyMoveState : public MoveState
-	{
+	class SmallRangeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
 		SmallRangeEnemyMoveState(BaseCharacter* enemy)
@@ -31,8 +30,7 @@ namespace Character {
 	/// <summary>
 	/// 攻撃
 	/// </summary>
-	class SmallRangeEnemyAttackState :public AttackState
-	{
+	class SmallRangeEnemyAttackState :public AttackState	{
 	public:
 		SmallRangeEnemyAttackState(BaseCharacter* enemy)
 			: AttackState(enemy) {
@@ -51,8 +49,7 @@ namespace Character {
 	/// <summary>
 	/// 死亡状態
 	/// </summary>
-	class SmallRangeEnemyDieState :public DieState
-	{
+	class SmallRangeEnemyDieState :public DieState {
 	public:
 		SmallRangeEnemyDieState(BaseCharacter* enemy)
 			: DieState(enemy) {
@@ -70,6 +67,29 @@ namespace Character {
 		float dieTimer_ = 2.0f;
 		float timer_ = 0.0f;
 	};
+
+	/// <summary>
+	/// 被弾状態
+	/// </summary>
+	class SmallRangeEnemyDamageState : public DamageState {
+	public:
+		SmallRangeEnemyDamageState(BaseCharacter* enemy)
+			: DamageState(enemy) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+		// 初期化
+		void Enter() override;
+	private:
+		float timer_ = 0.0f;
+		float damageTime_ = 0.5f;
+	};
+
+
 }
 
 

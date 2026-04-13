@@ -32,7 +32,10 @@ public:
 	void IsNum(bool is) { isNum = is; }
 private:
 	// フェード
-	std::unique_ptr<Engine::Sprite> fade_;
+	std::unique_ptr<Engine::Sprite> fade_ = nullptr;
+	// ゲーム開始準備UI
+	std::unique_ptr<Engine::Sprite> gameStartPreparationUI_ = nullptr;
+
 private:
 	// 位置
 	Vector2 position_ = { 640, 360 };
@@ -40,6 +43,9 @@ private:
 	Vector2 uiAnchorPoint_ = { 0.5f,0.5f };
 	Color uiColor_ = { 1.0f,1.0f ,1.0f ,0.0f };
 	bool isfade_ = false;
+private:
+	Vector2 gameStartPosition_ = { 1150, 120 };
+	Vector2 gameStartUiSize_ = { 256,64 };
 private:
 	Vector2 numPosition_ = { 640, 360 };
 	Vector2 numUiSize_ = { 150,300 };

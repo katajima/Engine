@@ -1,6 +1,6 @@
 #include "MediumMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -40,6 +40,9 @@ namespace Character {
 			});
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<MediumMeleeEnemyDieState>(p);
+			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<MediumMeleeEnemyDamageState>(p);
 			});
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}

@@ -6,7 +6,7 @@
 /// </summary>
 struct JumpData {
 	// ジャンプ力
-	float power = 400.0f;
+	float power = 350.0f;
 	// 上昇時の重力係数
 	float upGravity = 15.0f;
 	// 落下時の重力係数

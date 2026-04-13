@@ -1,5 +1,5 @@
 #include "BulletWeaponManager.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 void BulletWeaponManager::Initialize(BulletManager* bulletManager, InputSystem* inputSystem, Engine::EntityManager* entityManager,
 Engine::GlobalVariables* globalVariables) {

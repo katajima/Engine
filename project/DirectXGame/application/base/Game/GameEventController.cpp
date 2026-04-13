@@ -31,13 +31,13 @@ namespace Game {
 
 		Game::GameEventData data;
 		data.eventType_ = GameEventType::kStart;
-		data.time_.max = 5.0f;
+		data.time_.max = 2.5f;
 		data.isMove = false;
 		CreateGameEvent("start", data);
 
 		data.isMove = true;
 		data.eventType_ = GameEventType::kBreakTime;
-		data.time_.max = 3.0f;
+		data.time_.max = 1.5f;
 		CreateGameEvent("breakTime", data);
 
 		Vector3 popPos = { 0,1,100 };
@@ -55,9 +55,9 @@ namespace Game {
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos2, size, 4.0f);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, popPos, size, 0.75f);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, popPos4, size, 0.75f);
-		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
-		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
-		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -65,12 +65,12 @@ namespace Game {
 
 		CreateGameEvent("battle01", data);
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
-
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
+		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
+		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
+		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
+		//
+		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
+		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
 
 
 		data.eventType_ = GameEventType::kBattle;

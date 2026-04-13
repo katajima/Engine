@@ -9,7 +9,7 @@ namespace HitBox {
 	void HitBoxColl::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetHitBoxSystem();
 	};
 
 	// ImGui更新
@@ -105,7 +105,7 @@ namespace HitBox {
 	void HitBoxEditor::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetHitBoxSystem();
 	}
 
 	void HitBoxEditor::ImGuiUpdate(float dt) {

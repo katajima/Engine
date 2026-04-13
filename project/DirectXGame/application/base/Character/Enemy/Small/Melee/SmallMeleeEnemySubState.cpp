@@ -46,7 +46,7 @@ namespace Character {
         data_.name = "NormalEnemy_SwingHitBox";
         data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
 
-        enemy->GetAttackController()->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy, { data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, &enemy->GetWorldTransform());
+        enemy->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy, enemy,{ data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, true,&enemy->GetWorldTransform());
     }
 
     void SmallMeleeAttackSwingSubState::Update(float deltaTime) {

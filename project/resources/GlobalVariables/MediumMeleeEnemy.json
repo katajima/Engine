@@ -38,7 +38,7 @@
         },
         "後退開始範囲": {
             "type": "float",
-            "value": 3.0
+            "value": 5.0
         },
         "攻撃猶予時間": {
             "type": "float",

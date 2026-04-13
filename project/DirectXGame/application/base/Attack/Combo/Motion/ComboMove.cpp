@@ -15,7 +15,7 @@ namespace Combo {
 		attackMoveSystem = owner->GetMoveComponent()->GetAttackMoveSystem();
 		camera = owner->GetCameraManager()->GetCamera();
 		// ターゲット指定
-		lockOnSystem->GetData() = data_.lockOnData_;
+		lockOnSystem->GetData() = data_.lockOnData;
 		traget = lockOnSystem->SoftLockOn();
 		stickDirection_ = ctx.worldStickDirection;
 		// 方向指定
@@ -29,7 +29,7 @@ namespace Combo {
 		// ゲームパッドの左スティックを動かしているか
 		bool isMoveStick = ctx.worldStickDirection.Length() != 0;
 		// 強制的に移動
-		if (data_.isCompulsionMove_) {
+		if (data_.isCompulsionMove) {
 			isMove_ = true;
 		}
 		else {
@@ -55,33 +55,33 @@ namespace Combo {
 	}
 
 	void ComboMove::MoveTypeProcess(float timer, float dt) {
-		bool isStart = data_.moveWindowStart_ <= timer;		// 受付開始時間を過ぎたら
-		bool isEnd = data_.moveWindowEnd_ >= timer;			// 受付終了時間より前なら
+		bool isStart = data_.moveWindowStart <= timer;		// 受付開始時間を過ぎたら
+		bool isEnd = data_.moveWindowEnd >= timer;			// 受付終了時間より前なら
 
-		float t = timer / data_.moveWindowEnd_ - data_.moveWindowStart_;
+		float t = timer / data_.moveWindowEnd - data_.moveWindowStart;
 
 		if (isMove_ && isStart && isEnd) {
 			MoveRequest request;
 			switch (data_.moveType)
 			{
 			case MoveType::kNone:
-				request.velocity = Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed_;
+				request.velocity = Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed;
 				break;
 			case MoveType::kForward:
-				request.velocity = Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed;
 				break;
 			case MoveType::kTraget:
 				if (traget) {
-					if (data_.moveTargetRadius_ <= targetPos_.Distance(worldTransform->translate_)) {
-						request.velocity = Multiply(direction_, dt) * data_.speed_;
+					if (data_.moveTargetRadius <= targetPos_.Distance(worldTransform->translate_)) {
+						request.velocity = Multiply(direction_, dt) * data_.speed;
 					}
 				}
 				else {
-					request.velocity = Multiply(direction_, dt) * data_.speed_;
+					request.velocity = Multiply(direction_, dt) * data_.speed;
 				}
 				break;
 			case MoveType::kLockAt: // カメラ方向
-				request.velocity = Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed;
 
 				break;
 			default:
@@ -96,10 +96,10 @@ namespace Combo {
 
 	void ComboMove::GravityProcess() {
 		// 重力の設定
-		if (!data_.isGravity_) {
+		if (!data_.isGravity) {
 			rigidBodyComponent->Velocity().y = 0;
 		}
-		rigidBodyComponent->SetIsGravity(data_.isGravity_);
+		rigidBodyComponent->SetIsGravity(data_.isGravity);
 	}
 
 	void ComboMove::MoveTypeDirectionProcess() {

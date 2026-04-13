@@ -4,7 +4,6 @@
 #include "DirectXGame/application/base/Attack/AttackController.h"
 
 void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {
-	this->owner = owner;	// 所有者
 	this->input = input;	// 入力データ
 	this->worldTransform = &owner->GetObjectComponent()->GetWorldTransform();	// ワールドトランスフォーム
 	this->rigidBody = owner->GetObjectComponent()->GetRigidBodyComponent();		// リジットボディー
@@ -12,11 +11,12 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
-	this->comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
 }
 
-Character::CharacterContext Character::CharacterContextSystem::CreateContext(float dt) {
+Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
+	
 	CharacterContext ctx{};
+	if (!owner) return ctx;
 	// 時間
 	ctx.dt = dt;
 	// 入力データ
@@ -67,6 +67,9 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(flo
 			ctx.isJumpAttacking = true;
 		}
 	}
+	if(ctx.state == CharacterMainState::Special) {
+		ctx.isSpecialAttacking = true;
+	}
 	if (ctx.state == CharacterMainState::Jump) {
 		ctx.isJumping = true;
 	}
@@ -77,8 +80,9 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(flo
 		ctx.isCanJump = true;
 	}
 	// 攻撃時の重力
+	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
 	if (comboStateMachine->GetCurrentState()) {
-		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale_;
+		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
 	}
 	// 上昇時の重力
 	ctx.upGravity = jumpSystem->GetData().upGravity;

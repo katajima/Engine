@@ -38,11 +38,12 @@ void FollowCamera::Update()
         // 回転速度
         const float kRotateSpeed = 0.03f;
         const float kRotateSpeedX = 0.02f;
+        Vector3 targetPos = target_->GetWorldPosition();
 
         // ロックオンするか
         if (lockOnObject) {
             // ロックオン時の処理
-            Vector3 targetPos = target_->worldMat_.GetWorldPosition();
+           
             Vector3 lockOnPos = lockOnObject->GetWorldTransform().worldMat_.GetWorldPosition();
 
             // カメラ方向をロックオンターゲットに向ける
@@ -76,7 +77,6 @@ void FollowCamera::Update()
         Matrix4x4 rotateMatrix = rotX * rotY;
         Vector3 offset = TransformNormal(baseOffset, rotateMatrix);
 
-        Vector3 targetPos = target_->worldMat_.GetWorldPosition();
         Vector3 desiredCameraPos = Add(targetPos, offset);
 
         // 地面への沈み補正

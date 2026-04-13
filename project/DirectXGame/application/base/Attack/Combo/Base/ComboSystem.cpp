@@ -76,12 +76,9 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
-
-
-
 		globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
 		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
-
+		globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 		// リアクション
 		globalVariables->AddItem(name, "ダメージ", data.reaction.damage);
 		globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
@@ -140,6 +137,7 @@ namespace Combo {
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
 		data.hitBox.hitBoxWindowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 		data.hitBox.hitBoxLifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+		data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
 
 		// リアクション
 		data.reaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
@@ -245,6 +243,8 @@ namespace Combo {
 		globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
 		globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
 		globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+		globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+
 
 		globalVariables->SetEnumValue(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
@@ -272,6 +272,7 @@ namespace Combo {
 		data.GetComboHitBox().GetData().spawnType = gData.hitBox.spawnType;
 		data.GetComboHitBox().GetData().lifetimeType = gData.hitBox.lifetimeType;
 		data.GetComboHitBox().GetData().hitEffectType = gData.hitBox.hitEffectType;
+		data.GetComboHitBox().GetData().useContactRecord = gData.hitBox.useContactRecord;
 		///
 		/// 受付
 		/// 
@@ -293,7 +294,7 @@ namespace Combo {
 
 		
 		// コンボボタン設定
-		ComboButton bo = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
+		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		// 押し続ける
 		std::vector<ComboButton> button;
 		button.push_back(bo);
@@ -308,13 +309,13 @@ namespace Combo {
 		/// 
 
 		// 重力
-		data.GetComboMotion().GetComboMove().GetData().isGravity_ = gData.move.isGravity;
-		data.GetComboMotion().GetComboMove().GetData().gravityScale_ = gData.move.gravityScale;
+		data.GetComboMotion().GetComboMove().GetData().isGravity = gData.move.isGravity;
+		data.GetComboMotion().GetComboMove().GetData().gravityScale = gData.move.gravityScale;
 		// 移動
-		data.GetComboMotion().GetComboMove().GetData().speed_ = gData.move.moveSpeed;
-		data.GetComboMotion().GetComboMove().GetData().moveWindowStart_ = gData.move.moveWindowStart;
-		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd_ = gData.move.moveWindowEnd;
-		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove_ = gData.move.isCompulsionMove;
+		data.GetComboMotion().GetComboMove().GetData().speed = gData.move.moveSpeed;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowStart = gData.move.moveWindowStart;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd = gData.move.moveWindowEnd;
+		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove = gData.move.isCompulsionMove;
 		data.GetComboMotion().GetComboMove().GetData().moveType = gData.move.moveType;
 
 		// アニメーションスピード
@@ -334,12 +335,11 @@ namespace Combo {
 
 		
 		// ロックオン
-		data.GetComboMotion().GetComboMove().GetData().lockOnData_.type = gData.lockOn.lockOnType;
-		data.GetComboMotion().GetComboMove().GetData().lockOnData_.radius = gData.lockOn.lockOnRadius;
+		data.GetComboMotion().GetComboMove().GetData().lockOnData.type = gData.lockOn.lockOnType;
+		data.GetComboMotion().GetComboMove().GetData().lockOnData.radius = gData.lockOn.lockOnRadius;
 	}
 
-	void System::CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxDatas,
-		GamePadButton button) {
+	void System::CreateCombo(const std::string& comboNodeName, const std::vector<HitBox::CollData>& addHitBoxDatas) {
 		// コンボデータ
 		ComboData data{};
 		// グローバルデータ作成
@@ -347,14 +347,14 @@ namespace Combo {
 		// データ設定
 		SetData(data, comboGlobalDatas_[comboNodeName]);
 		// ヒットボックス追加
-		for (AddHitBoxData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddCollider(addHitBoxData.hitBoxData, comboGlobalDatas_[comboNodeName]);
+		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
+			data.GetComboHitBox().AddCollider(addHitBoxData, comboGlobalDatas_[comboNodeName]);
 		}
 		// 使うヒットボックスクリア
 		data.GetComboHitBox().ClearUseHitBox();
 		// 使うヒットボックス追加
-		for (AddHitBoxData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddUseHitBox(addHitBoxData.hitBoxData.name);
+		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
+			data.GetComboHitBox().AddUseHitBox(addHitBoxData.name);
 		}
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName_, data);

@@ -101,6 +101,10 @@
             "type": "float",
             "value": 0.10000000149011612
         },
+        "ヒットボックスヒット記録を使用": {
+            "type": "bool",
+            "value": true
+        },
         "ヒットボックス依存先タイプ": {
             "enumType": "HitBoxParentType",
             "type": "enum",

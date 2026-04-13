@@ -14,10 +14,10 @@ void Engine::RigidBodyComponent::Integrate(float deltaTime, WorldTransform& tran
 	transform.Update();
 }
 
-void Engine::RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransform& transform)
+void Engine::RigidBodyComponent::ProcessTranslation(float dt, WorldTransform& transform)
 {
 	// 加速度計算
-	acceleration_ = force * inverseMass;
+	acceleration_ += force * inverseMass;
 
 	// 重力適用
 	if (useGravity) {
@@ -25,21 +25,22 @@ void Engine::RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransf
 		acceleration_.y += -gravity * gravityScale;
 	}
 	// 速度更新
-	velocity_ += acceleration_ * deltaTime;
+	velocity_ += acceleration_ * dt;
+	
 	// 位置更新
-	transform.translate_ += velocity_ * deltaTime;
+	transform.translate_ += velocity_ * dt;
 
 	// 力のリセット
 	force = { 0, 0, 0 };
 }
 
-void Engine::RigidBodyComponent::ProcessRotation(float deltaTime, WorldTransform& transform)
+void Engine::RigidBodyComponent::ProcessRotation(float dt, WorldTransform& transform)
 {
 	// トルクによる回転（簡略化）
 	Vector3 angularAcceleration = torque * inverseMass; // 実際は慣性モーメントが必要
-	angularVelocity += angularAcceleration * deltaTime;
+	angularVelocity += angularAcceleration * dt;
 	// 回転適用
-	transform.rotate_ += angularVelocity * deltaTime;
+	transform.rotate_ += angularVelocity * dt;
 
 	// 力のリセット
 	torque = { 0, 0, 0 };

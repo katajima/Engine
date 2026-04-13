@@ -7,8 +7,10 @@
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
 namespace Character {
-	void SmallRangeEnemyMoveState::Update(const CharacterContext& ctx)
-	{
+
+#pragma region Move
+
+	void SmallRangeEnemyMoveState::Update(const CharacterContext& ctx){
 		// 時間更新
 		timer_ += ctx.dt;
 
@@ -24,17 +26,15 @@ namespace Character {
 		}
 	}
 
-	void SmallRangeEnemyMoveState::Exit()
-	{
-	}
+	void SmallRangeEnemyMoveState::Exit(){}
 
-	void SmallRangeEnemyMoveState::Enter()
-	{
-	}
+	void SmallRangeEnemyMoveState::Enter(){}
 
+#pragma endregion
 
-	void SmallRangeEnemyAttackState::Update(const CharacterContext& ctx)
-	{
+#pragma region Attack
+
+	void SmallRangeEnemyAttackState::Update(const CharacterContext& ctx){
 		SmallRangeWeapon* weapon = static_cast<SmallRangeWeapon*>(character->GetWeapon());
 
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(character);
@@ -48,17 +48,15 @@ namespace Character {
 		character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 	}
 
-	void SmallRangeEnemyAttackState::Exit()
-	{
-	}
+	void SmallRangeEnemyAttackState::Exit(){}
 
-	void SmallRangeEnemyAttackState::Enter()
-	{
-	}
+	void SmallRangeEnemyAttackState::Enter(){}
 
+#pragma endregion
 
-	void SmallRangeEnemyDieState::Update(const CharacterContext& ctx)
-	{
+#pragma region Die
+
+	void SmallRangeEnemyDieState::Update(const CharacterContext& ctx){
 		// 時間更新
 		timer_ -= ctx.dt;
 		if (timer_ <= 0.0f) {
@@ -82,13 +80,29 @@ namespace Character {
 		}
 	}
 
-	void SmallRangeEnemyDieState::Exit()
-	{
-	}
+	void SmallRangeEnemyDieState::Exit(){}
 
-	void SmallRangeEnemyDieState::Enter()
-	{
+	void SmallRangeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
+
+#pragma endregion
+
+	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
+		// 時間更新
+		timer_ -= ctx.dt;
+		if (timer_ <= 0.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
+	}
+
+	void SmallRangeEnemyDamageState::Exit(){
+		timer_ = damageTime_;
+	}
+
+	void SmallRangeEnemyDamageState::Enter(){
+		timer_ = damageTime_;
+	}
+
 }

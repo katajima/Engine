@@ -1,7 +1,4 @@
-#include "playerWeapon.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "PlayerWeapon.h"
 
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)

@@ -91,6 +91,10 @@ namespace Character {
 			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
 			if (!otherComponent) return;
 
+			if (other->tag ==  CollisionTag::Enemy) {
+				isStopping_ = true;
+			}
+
 			//  敵同士の衝突応答
 			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
 
@@ -99,8 +103,6 @@ namespace Character {
 
 			// 影響
 			//responseSystem_->GetHitResponse()->HitEffect(self, other);
-
-
 			};
 
 
@@ -139,7 +141,7 @@ namespace Character {
 		if (objectComponent_ == nullptr) { return; }
 		assert(this);
 
-		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
+		CharacterContext ctx = contextSystem_->CreateContext(this,GetTime());
 
 		// 保存項目更新(キャラクター全体)
 		UpdateBaseGetValue();

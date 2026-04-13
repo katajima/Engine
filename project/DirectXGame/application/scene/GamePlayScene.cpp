@@ -38,9 +38,9 @@ void GamePlayScene::Initialize()
 		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
 		std::make_unique<Character::AttackCommand>());
 
-	inputHander_->Bind(
+	/*inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
+		std::make_unique<Character::HeavyAttackCommand>());*/
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
 		std::make_unique<Character::SkillAttackCommand>());
@@ -81,6 +81,9 @@ void GamePlayScene::Initialize()
 
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
+	// ヒットボックスシステム初期化
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
+	hitBoxSystem_->Initialize(GetEntityManager());
 
 	// 弾管理クラス
 	bulletManager_ = std::make_unique<BulletManager>();
@@ -94,7 +97,7 @@ void GamePlayScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -221,12 +224,12 @@ void GamePlayScene::Update()
 	characterManager_->Update(gameFlowController_->IsMove());
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());
-	// カメラ管理の更新
-	cameraManager_->Update();
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
 	stage_->Update(GetTime());
+	// ヒットボックスシステム更新
+	hitBoxSystem_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
@@ -243,7 +246,8 @@ void GamePlayScene::Update()
 	
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
-
+	// カメラ管理の更新
+	cameraManager_->Update();
 }
 
 #pragma endregion //更新関係
@@ -282,16 +286,15 @@ void GamePlayScene::CheckAllCollisions()
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}
-		auto& lifeTimehit = caracter->GetAttackController()->GetHitBoxSystem()->GetLifeTimeHitBoxData();
-		for (auto& caracterHitBox : lifeTimehit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
-		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetHitBoxData();
-		for (auto& caracterHitBox : hit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
 	}
 
+	// ヒットボックス
+	for(auto & hitBoxData : hitBoxSystem_->GetHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
 
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {

@@ -9,11 +9,8 @@ void JumpSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 	InputHoldProcess(ctx.dt);
 	// ジャンプホールド処理
 	JumpHoldProcess(ctx.dt,rigid);
-
-	int j = jumpCount_;
-
 	// 着地
-	if (ctx.onGround) {
+	if (ctx.onGround && !isInputHeld_) {
 		jumpCount_ = data_.maxJumpCount;	// ジャンプ回数リセット
 	}
 }
@@ -28,8 +25,7 @@ void JumpSystem::StartJump(Engine::RigidBodyComponent& rigid)
 	isInputHeld_ = true;	// 入力ホールド
 	isInputPressed_ = true;	// 入力プレス
 	holdTimer_ = 0.0f;		// ホールドタイマーリセット
-
-	rigid.AddForce({ 0,data_.power,0 }); // 上方向に力を加える
+	rigid.Velocity().y = data_.power;
 }
 
 
@@ -58,7 +54,7 @@ void JumpSystem::JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid)
 
 	// ホールド中の処理
 	if (isInputHeld_) {
-		rigid.AddForce({ 0,data_.power,0 }); // 上方向に力を加える
+		//rigid.AddForce({ 0,data_.power,0 }); // 上方向に力を加える
 	}
 }
 

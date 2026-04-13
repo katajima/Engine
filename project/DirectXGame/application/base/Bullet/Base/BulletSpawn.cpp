@@ -9,19 +9,21 @@
 
 
 void BulletSpawn::Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect) {
+	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect, BulletManager* bulletManager) {
 	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	this->camera = camera;
 	this->effect = effect;
 	this->owner = owner;
-	this->bulletManager = owner->GetBulletManager();
+	if (owner)
+		this->bulletManager = owner->GetBulletManager();
+	if (bulletManager)
+		this->bulletManager = bulletManager;
 }
 
 
 
-void BulletSpawn::GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad)
-{
+void BulletSpawn::GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad) {
 	std::unique_ptr<BaseBullet> bullet;
 	bullet = std::make_unique<PlayerRangeBombingBullet>();
 	bullet->SetTargetRange(targetPos, rad);	// 範囲とターゲット設定
@@ -52,4 +54,13 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 		bullet->Initialize(entityManager, globalVariables, info.position, camera); // 弾の初期化
 	}
 	bulletManager->AddBullet(std::move(bullet));
+}
+
+void BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+	const Projectile::ProjectileParam& param, Character::BaseCharacter* target) {
+	std::unique_ptr<Projectile::BaseProjectile> projectile = std::make_unique<Projectile::BaseProjectile>();
+	// 初期化
+	projectile->Initialize(entityManager, globalVariables, spawnInfo, param); // 初期化
+	// 追加
+	bulletManager->AddProjectile(std::move(projectile));
 }

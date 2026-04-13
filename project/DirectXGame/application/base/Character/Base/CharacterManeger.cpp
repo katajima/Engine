@@ -5,12 +5,13 @@
 
 
 namespace Character {
-	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+	void CharacterManager::Initialize(InputSystem* inputSystem, HitBox::System* hitBoxSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
 		this->inputSystem = inputSystem;		// インプット
 		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables; // 保存項目
 		this->camera = camera;					// カメラ
+		this->hitBoxSystem = hitBoxSystem;		// ヒットボックスシステム
 	}
 
 	void CharacterManager::Update(bool isMove) {
@@ -68,8 +69,7 @@ namespace Character {
 		}
 	}
 
-	void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
-	{
+	void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
 		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
 		// EnemyTypeから生成関数
@@ -88,7 +88,7 @@ namespace Character {
 
 		std::unique_ptr<BaseEnemy> enemy = it->second();
 
-
+		enemy->SetHitBoxSystem(hitBoxSystem);
 		enemy->SetTagNumber(characterCount_);
 		enemy->SetID(characterCount_);					// ID設定
 		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
@@ -105,11 +105,11 @@ namespace Character {
 		characterCount_++;
 	}
 
-	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
-	{
+	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform){
 		std::unique_ptr<BasePlayer> player;
 
 		player = std::make_unique<NormalPlayer>();
+		player->SetHitBoxSystem(hitBoxSystem);
 		player->SetTagNumber(characterCount_);
 		player->SetFollowCamera(followCamera);		// フォローカメラ設定
 		player->SetCameraManager(cameraManager);	// カメラ管理クラス設定

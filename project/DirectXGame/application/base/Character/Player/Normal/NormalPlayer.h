@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
@@ -78,6 +78,8 @@ namespace Character {
 
 		// ジャンプ可能か
 		bool isCanJump = false;
+		//必殺技中か
+		bool isSpecial = false;
 	};
 
 }

@@ -6,11 +6,11 @@ namespace HitBox {
 
 #pragma region HitBox
 	// 初期化
-	void HitBoxInstance::Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type) {
+	void HitBoxInstance::Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type, bool useContactRecord) {
 		this->character = character;
 		this->entityManager = entityManager;
 		type_ = type;
-
+		this->useContactRecord = useContactRecord;
 		// ワールド変換初期化
 		worldTransform_.Initialize();
 
@@ -26,14 +26,16 @@ namespace HitBox {
 
 		// ヒットボックス応答クラス生成
 		hitBoxFunction_ = std::make_unique<HitBoxFunction>();
-		hitBoxFunction_->Initialize(colliderComponent_.get(), character, type);
+		hitBoxFunction_->Initialize(colliderComponent_.get(), character, type_);
 
 		// 当たり判定コールバック設定
 		colliderComponent_->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 			// 開始
-			if (!hitBoxFunction_->Begin(self, other)) {
-				return;
-			};
+			if (this->useContactRecord) {
+				if (!hitBoxFunction_->Begin(self, other)) {
+					return;
+				}
+			}
 
 			// 当たったコライダーによって相手に送るデータを決め転送
 			for (auto& data : colliders_) {
@@ -54,8 +56,6 @@ namespace HitBox {
 	void HitBoxInstance::Update(float dt) {
 		// ワールド変換更新
 		worldTransform_.Update();
-		// 当たり判定コンポーネント更新
-
 		// 各コライダーのワールド変換更新と当たり判定コンポーネントへの反映
 		for (auto& colliderData : colliders_) {
 			colliderData.second.worldTransform.Update();
@@ -89,15 +89,17 @@ namespace HitBox {
 	};
 
 	// 有効化
-	void HitBoxInstance::Enable() {
+	void HitBoxInstance::Enable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Enable();
+			colliderData.second.collider->lineColor = color;
 		}
 	};
 	// 無効化
-	void HitBoxInstance::Disable() {
+	void HitBoxInstance::Disable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Disable();
+			colliderData.second.collider->lineColor = color;
 		}
 	};
 

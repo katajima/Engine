@@ -24,23 +24,25 @@ namespace Combo {
 	class ComboMove {
 	public:
 		// データ構造体
-		struct Data
-		{
-			float moveWindowStart_ = 0.1f;			// 移動受付スタート
-			float moveWindowEnd_ = 0.5f;			// 移動受付エンド
-			float speed_ = 0.0f;					// 移動速度
+		struct Data {
+			// 移動受付スタート
+			float moveWindowStart = 0.1f;		
+			// 移動受付エンド
+			float moveWindowEnd = 0.5f;			
+			// 移動速度
+			float speed = 0.0f;					
 			// 強制的に移動
-			bool isCompulsionMove_ = true;			
+			bool isCompulsionMove = true;			
 			// 空中でのコンボで重力はあるか？
-			bool isGravity_ = true;					
+			bool isGravity = true;					
 			// 重力スケール
-			float gravityScale_ = 1.0f;				
+			float gravityScale = 1.0f;				
 			// ターゲットの距離でどこまで近づくか
-			float moveTargetRadius_ = 1.0f;
+			float moveTargetRadius = 1.0f;
 			// 移動タイプ
 			MoveType moveType = MoveType::kTraget;	
 			// ロックオンデータ
-			LockOnData lockOnData_;
+			LockOnData lockOnData;
 		};
 
 		// 開始
@@ -57,8 +59,8 @@ namespace Combo {
 		bool IsMove() const { return isMove_; }
 		// 移動可能時間設定
 		void MoveStartEnd(float start, float end) {
-			data_.moveWindowStart_ = start;
-			data_.moveWindowEnd_ = end;
+			data_.moveWindowStart = start;
+			data_.moveWindowEnd = end;
 		};
 		// データ構造体取得
 		Data& GetData() { return data_; }

@@ -14,10 +14,6 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 	comboSystem_ = std::make_unique<Combo::System>();
 	comboSystem_->Initialize(owner, entityManager->Get3DLineCommon(), globalVariables);
 
-	// ヒットボックスシステム初期化
-	hitBoxSystem_ = std::make_unique<HitBox::System>();
-	hitBoxSystem_->Initialize(owner, entityManager);
-
 	// ロックオンシステム初期化
 	lockOnSystem_ = std::make_unique<LockOnSystem>();
 	lockOnSystem_->Initialize(owner);
@@ -26,15 +22,11 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 
 
 void AttackController::Update(const Character::CharacterContext& ctx) {
-
-
 	// ヒットカウンターの更新
 	if (!isStopHitTimer_) {
 		hitCounter_.Update(ctx.dt);
 	}
 
-	// ヒットボックスシステムの更新
-	hitBoxSystem_->Update(ctx.dt);
 	if (IsAttack() || isDebugEditor_) {
 		// コンボシステムの更新
 		comboSystem_->Update(ctx);

@@ -22,7 +22,7 @@
         },
         "jampPower": {
             "type": "float",
-            "value": 30.0
+            "value": 1000.0
         },
         "speed": {
             "type": "float",

@@ -7,8 +7,7 @@
 namespace Character {
 #pragma region Move
 
-	void SmallMeleeEnemyMoveState::Update(const CharacterContext& ctx)
-	{
+	void SmallMeleeEnemyMoveState::Update(const CharacterContext& ctx){
 		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character);
 
 		// 時間更新
@@ -27,12 +26,9 @@ namespace Character {
 		}
 	}
 
-	void SmallMeleeEnemyMoveState::Exit()
-	{
-	}
+	void SmallMeleeEnemyMoveState::Exit(){}
 
-	void SmallMeleeEnemyMoveState::Enter()
-	{
+	void SmallMeleeEnemyMoveState::Enter(){
 		timer_ = 0.0f;
 		character->GetMoveComponent()->GetMoveSystem()->Data().maxSpeed = 3.0f;
 	}
@@ -81,8 +77,7 @@ namespace Character {
 
 #pragma region Die
 
-	void SmallMeleeEnemyDieState::Update(const CharacterContext& ctx)
-	{
+	void SmallMeleeEnemyDieState::Update(const CharacterContext& ctx){
 		// 時間更新
 		timer_ -= ctx.dt;
 		if (timer_ <= 0.0f) {
@@ -106,15 +101,35 @@ namespace Character {
 		}
 	}
 
-	void SmallMeleeEnemyDieState::Exit()
-	{
-	}
+	void SmallMeleeEnemyDieState::Exit(){}
 
-	void SmallMeleeEnemyDieState::Enter()
-	{
+	void SmallMeleeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
 
 #pragma endregion
+	
+#pragma region Damage
+	
+	void SmallMeleeEnemyDamageState::Update(const CharacterContext& ctx) {
+		// 時間更新
+		timer_ -= ctx.dt;
+		if (timer_ <= 0.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
+	}
+
+	void SmallMeleeEnemyDamageState::Exit(){
+		timer_ = damageTime_;
+	}
+
+	void SmallMeleeEnemyDamageState::Enter(){
+		timer_ = damageTime_;
+	}
+
+
+
+#pragma endregion
+
 }

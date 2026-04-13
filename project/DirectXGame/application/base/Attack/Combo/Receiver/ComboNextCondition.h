@@ -10,7 +10,7 @@ namespace Combo {
 		struct Data {
 			float stateTime = 0.45f;				// 移行時間
 			EndConditionType type = EndConditionType::kOnTimer;	// 終了条件タイプ
-			ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
+			ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
 		};
 
 		// 開始

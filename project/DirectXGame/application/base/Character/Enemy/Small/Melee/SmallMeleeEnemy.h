@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallMeleeEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
@@ -39,5 +39,7 @@ namespace Character {
 		float attackTimer_ = 0.0f;
 		//
 		float moveSpeed_ = 1.0f;
+		//
+		bool isStopping_ = false;
 	};
 }

@@ -34,7 +34,10 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 		return;
 	}
 
-	if (world.translate_.y <= 0.02f) {
+	float currentY = world.GetWorldPosition().y;
+	float velocityY = rigid.GetVelocity().y * cxt.dt;
+
+	if (currentY + velocityY <= groundHeight_) {
 		isLinding_ = true;
 	}
 	else {
@@ -42,8 +45,9 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 	}
 	
 	if (isLinding_) {
-		world.translate_.y = -0.01f;
-		rigid.Velocity().y = 0.0f;			// y速度を0に
+		world.translate_.y = groundHeight_;
+		rigid.ResetAcceleration();			// 加速度リセット
+		rigid.ResetVelocity();				// 速度リセット
 		rigid.SetIsGravity(false);			// 重力をオフ
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
 	} 

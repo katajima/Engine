@@ -8,8 +8,7 @@
 namespace Character {
 #pragma region Move
 
-	void MediumMeleeEnemyMoveState::Update(const CharacterContext& ctx)
-	{
+	void MediumMeleeEnemyMoveState::Update(const CharacterContext& ctx)	{
 		// 時間更新
 		timer_ += ctx.dt;
 
@@ -107,11 +106,31 @@ namespace Character {
 
 	}
 
-	void MediumMeleeEnemyDieState::Enter()
-	{
+	void MediumMeleeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
 
-#pragma endregion // 死亡
+#pragma endregion 
+
+#pragma region Damage
+
+	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
+		// 時間更新
+		timer_ -= ctx.dt;
+		if (timer_ <= 0.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
+	}
+
+	void MediumMeleeEnemyDamageState::Exit(){
+		timer_ = damageTime_;
+	}
+
+	void MediumMeleeEnemyDamageState::Enter(){
+		timer_ = damageTime_;
+	}
+
+
+#pragma endregion
 }

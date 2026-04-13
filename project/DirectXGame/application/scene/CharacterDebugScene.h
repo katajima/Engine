@@ -96,6 +96,17 @@ private:
 	std::unique_ptr<MainStage> stage_;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
+	// ヒットボックスシステム
+	std::unique_ptr<HitBox::System> hitBoxSystem_;
+
+
+	// 弾スポーン
+	std::unique_ptr<BulletSpawn> bulletSpawn_ = nullptr;
+	// 
+	float interval_ = 0.0f;
+	float intervalMax_ = 1.0f;
+	Projectile::ProjectileParam param{};
+	Projectile::ProjectileSpawnInfo spawnInfo{};
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
@@ -105,6 +116,4 @@ private:
 private:
 	// コンボエディター
 	std::unique_ptr<Combo::Editor> comboEditor_;
-	// コンボエディターがアクティブか
-	bool isComboEditorActive_ = true;
 };

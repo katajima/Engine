@@ -1,7 +1,7 @@
 #include "EnemyBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 
 #include "DirectXGame/engine/math/random.h"

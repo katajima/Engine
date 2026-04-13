@@ -23,7 +23,9 @@ namespace Engine {
 		ColliderComponent* owner = nullptr; // 通知先ポインタ
 		bool enabled = true;
 		bool isStatic = false;  // 動かさない
-		bool isDebugLine = false;// ライン描画するか	
+		bool isDebugLine = false;// ライン描画するか
+		Vector4 lineColor = { 1,1,1,1 };	// ライン色
+
 		Vector3 centerWorld = { 0,0,0 };
 		CollisionLayer layer = CollisionLayer::Default;
 		CollisionTag tag = CollisionTag::None; // タグ
@@ -137,7 +139,7 @@ namespace Engine {
 	{
 	public:
 		Capsule capsule{ Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,-1.0f,0.0f},{1.0f} };
-		Capsule capWorld_;
+		Capsule capWorld_{ Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,-1.0f,0.0f},{1.0f} };
 
 
 		// 更新

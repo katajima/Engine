@@ -82,6 +82,28 @@ void CharacterDebugScene::Initialize()
 	bulletManager_->Initialize(GetEntityManager(),GetGlobalVariables(), nullptr);
 	bulletManager_->SetEffect(effect_.get());
 
+	// 弾スポーン
+	bulletSpawn_ = std::make_unique<BulletSpawn>();
+	bulletSpawn_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), nullptr, effect_.get(), bulletManager_.get());
+
+	param.name = "test";
+	param.modelName = "AnimatedCube.gltf";
+	param.maxLifeTime = 5.0f;
+	param.speed = 10.0f;
+	param.gravityScale = 0.1f;
+	param.moveType = Projectile::ProjectileMoveType::Homing;
+	param.enableHoming = true;
+	param.homingRange = 50.0f;
+	param.homingStrength = 5.0f;
+
+	spawnInfo.position = { 10,2,-40 };
+	spawnInfo.direction = { -1,0,0 };
+	spawnInfo.scale = { 0.5f,0.5f,0.5f };
+
+	// ヒットボックスシステム初期化
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
+	hitBoxSystem_->Initialize(GetEntityManager());
+
 	// スペシャルポイント管理クラス
 	specalPointManager_ = std::make_unique<SpecalPointManager>();
 	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
@@ -89,7 +111,7 @@ void CharacterDebugScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -103,6 +125,9 @@ void CharacterDebugScene::Initialize()
 	else {
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
+
+	spawnInfo.target = characterManager_->GetPlayer();
+
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
@@ -136,10 +161,8 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	//characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
-	// デバッグモード設定
-	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(isComboEditorActive_);
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
 	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
@@ -158,11 +181,13 @@ void CharacterDebugScene::Update()
 
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+		GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
 	}
 	if (input_->IsTriggerKey(DIK_T)) {
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
+	// デバッグモード設定
+	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
 
 	// コンボエディター更新
 	comboEditor_->Update(GetTime());
@@ -174,6 +199,12 @@ void CharacterDebugScene::Update()
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
 		iCommand_->Exec(*characterManager_->GetPlayer());
+	}
+
+	interval_ += GetTime();
+	if (interval_ >= intervalMax_) {
+		interval_ = 0.0f;
+		bulletSpawn_->GenerateProjectile(spawnInfo, param);
 	}
 
 
@@ -198,6 +229,8 @@ void CharacterDebugScene::Update()
 	bulletManager_->Update();
 	// ステージ
 	stage_->Update(GetTime());
+	// ヒットボックスシステム更新
+	hitBoxSystem_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
@@ -239,7 +272,20 @@ void CharacterDebugScene::UpdateImGui() {
 		cameraManager_->SetUseCamera("followCamera", 0.3f);
 	}
 
+	
+	ImGui::DragFloat("BulletGravityScale", &param.gravityScale,0.01f);
+	ImGui::DragFloat("BulletMaxLifeTime", &param.maxLifeTime, 0.1f);
+	ImGui::DragFloat("BulletSpeed", &param.speed, 0.1f);
+	ImGui::DragFloat("BulletRadius", &param.radius, 0.1f);
+	ImGui::DragFloat("BulletIntervalMax", &intervalMax_, 0.1f);
 
+	ImGui::DragFloat3("BulletSpawnPosition", &spawnInfo.position.x, 0.1f);
+	ImGui::DragFloat3("BulletSpawnDirection", &spawnInfo.direction.x, 0.1f);
+	spawnInfo.direction = Normalize(spawnInfo.direction);
+	ImGui::Checkbox("Homing", &param.enableHoming);
+	ImGui::DragFloat("homingRange", &param.homingRange, 0.1f);
+	ImGui::DragFloat("homingStrength", &param.homingStrength, 0.1f);
+	ImGui::DragFloat("BulletDamage", &param.damage, 0.1f);
 	ImGui::End();
 
 
@@ -266,19 +312,21 @@ void CharacterDebugScene::CheckAllCollisions() {
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}
-		auto& lifeTimehit = caracter->GetAttackController()->GetHitBoxSystem()->GetLifeTimeHitBoxData();
-		for (auto& caracterHitBox : lifeTimehit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
-		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetHitBoxData();
-		for (auto& caracterHitBox : hit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
 	}
-
-
+	// ヒットボックス
+	for (auto& hitBoxData : hitBoxSystem_->GetHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
+		if (bullet->GetColliderComponent()) {
+			collisionManager_->Register(bullet->GetColliderComponent());
+		}
+	}
+	for (const auto& bullet : bulletManager_->GetProjectiles()) {
 		if (bullet->GetColliderComponent()) {
 			collisionManager_->Register(bullet->GetColliderComponent());
 		}

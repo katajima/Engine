@@ -1,5 +1,6 @@
 #pragma once
 #include"DirectXGame/application/base/Bullet/Base/BaseBullet.h"
+#include "DirectXGame/application/base/Bullet/Base/BaseProjectile.h"
 
 /// <summary>
 /// 弾の出現処理を扱うクラス
@@ -10,7 +11,7 @@ public:
 
 	// 初期化＋持ち主設定
 	void Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect);
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect, BulletManager* bulletManager = nullptr);
 
 	void Generate();
 
@@ -19,6 +20,11 @@ public:
 
 	// 弾を生成
 	void GenerateBullet(BulletType type, const BulletInfo& info, Character::BaseCharacter* target = nullptr);
+
+	// 発射物を生成
+	void GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+		const Projectile::ProjectileParam& param, Character::BaseCharacter* target = nullptr);
+
 private:
 	Character::BaseCharacter* owner = nullptr;
 	BulletManager* bulletManager = nullptr;

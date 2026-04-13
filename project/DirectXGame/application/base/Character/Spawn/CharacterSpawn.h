@@ -2,7 +2,7 @@
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
-#include <DirectXGame/application/base/Character/Base/Enemy/EnemyData.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/EnemyData.h>
 
 namespace Engine {
 	class LineCommon;

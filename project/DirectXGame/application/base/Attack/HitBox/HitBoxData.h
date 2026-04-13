@@ -42,6 +42,12 @@ namespace HitBox {
 
 		kLockOnArea,		// ターゲット位置
 	};
+	// ヒットボックスヒット制限タイプ
+	enum class HitContactRecord {
+
+	};
+
+
 
 	// 保存項目用データ
 	struct GlobalData {

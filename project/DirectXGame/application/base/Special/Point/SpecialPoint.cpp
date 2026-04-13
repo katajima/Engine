@@ -3,7 +3,7 @@
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-#include <DirectXGame/application/base/Character/Base/Player/BasePlayer.h>
+#include <DirectXGame/application/base/Character/Player/Base/BasePlayer.h>
 
 #pragma region Manager
 

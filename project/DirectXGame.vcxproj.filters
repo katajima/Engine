@@ -345,7 +345,7 @@
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\State\BaseMainState.cpp">
@@ -982,6 +982,18 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\CustomScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1806,10 +1818,10 @@
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacter.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Player\BasePlayer.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h">
@@ -2127,7 +2139,7 @@
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\EnemyData.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h">
@@ -2236,6 +2248,21 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\CustomScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

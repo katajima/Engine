@@ -59,6 +59,8 @@ namespace Character {
 		bool isJumping = false;
 		// ジャンプ攻撃中か
 		bool isJumpAttacking = false;
+		// 必殺技中か
+		bool isSpecialAttacking = false;
 		// 移動可能か
 		bool isCanMove = true;
 		// ジャンプ可能か
@@ -89,11 +91,9 @@ namespace Character {
 		// 初期化
 		void Initialize(BaseCharacter* owner,const InputSystem* input);
 
-		CharacterContext CreateContext(float dt);
+		CharacterContext CreateContext(BaseCharacter* owner,float dt);
 
 	private:
-		// キャラクター（所有者）
-		const BaseCharacter* owner = nullptr;
 		// 入力データ
 		const InputSystem* input = nullptr;
 		// ワールドトランスフォーム

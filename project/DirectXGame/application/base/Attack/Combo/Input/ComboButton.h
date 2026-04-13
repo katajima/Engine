@@ -18,27 +18,48 @@ namespace Combo {
 		kTriggerReleased,		// 押した瞬間or離した瞬間
 	};
 
+
+	enum class ComboGamePadButton {
+		GAMEPAD_Up = 0,			// 十字(上)
+		GAMEPAD_Down = 1,		// 十字(下)
+		GAMEPAD_Left = 2,		// 十字(左)
+		GAMEPAD_Right = 3,		// 十字(右)
+		GAMEPAD_A = 4,			// A
+		GAMEPAD_B = 5,			// B
+		GAMEPAD_X = 6,			// X
+		GAMEPAD_Y = 7,			// Y
+		GAMEPAD_LB = 8,			// LB
+		GAMEPAD_RB = 9,			// RB
+		GAMEPAD_LS = 10,			// 左スティック押し込み
+		GAMEPAD_RS = 11,			// 右スティック押し込み
+		GAMEPAD_Start = 12,			// Start
+		GAMEPAD_Back = 13,				// Back
+		GAMEPAD_Max       // 最大ボタン数
+	};
+
+	GamePadButton ConvertGamePadButton(ComboGamePadButton button);
+
 	/// <summary>
 	/// コンボボタン1つ分
 	/// </summary>
 	class ComboButton {
 	public:
 		// コンストラクタ
-		ComboButton(GamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
+		ComboButton(ComboGamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
 
 		// 押したら
 		bool IsPressed(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kPressed,button_);
+			return inputSystem.GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
 		}
 
 		// 押した瞬間
 		bool IsTriggered(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kTriggered, button_);
+			return inputSystem.GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
 		}
 
 		// 離した瞬間
 		bool IsReleased(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kReleased, button_);
+			return inputSystem.GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
 		}
 
 
@@ -75,10 +96,10 @@ namespace Combo {
 		}
 
 		// どのボタンに反応するか
-		void SetGamePadButton(GamePadButton button) { button_ = button; };
+		void SetGamePadButton(ComboGamePadButton button) { button_ = button; };
 
 	private:
-		GamePadButton button_;
+		ComboGamePadButton button_;
 		ComboButtonInputType type_ = ComboButtonInputType::kPressed;
 	};
 
@@ -105,5 +126,9 @@ namespace Combo {
 		std::vector<ComboButton> comboButtons_;
 		size_t currentIndex_ = 0;
 	};
+
+
+
+	
 
 }

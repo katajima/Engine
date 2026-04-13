@@ -24,6 +24,7 @@ namespace HitBox {
 
 		struct Data {
 			std::unique_ptr<HitBoxInstance> hitBox = nullptr;
+			int32_t id = 0;
 			float lifeTime = 0.0f;
 			float timer = 0.0f;
 			// 生存時間を過ぎたら削除
@@ -32,18 +33,18 @@ namespace HitBox {
 
 
 		// 初期化
-		void Initialize(Character::BaseCharacter* character, Engine::EntityManager* entityManager);
+		void Initialize(Engine::EntityManager* entityManager);
 		// 更新
 		void Update(float dt);
 
 
 		// ヒットボックス追加（期限付き）
-		void AddLifeTimeHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent = nullptr);
+		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
+			, float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
 
 		// ヒットボックス追加（無期限）
-		void AddHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent = nullptr);
+		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
+			, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
 
 
 		// ヒットボックスコライダーデータ作成
@@ -53,7 +54,8 @@ namespace HitBox {
 		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
 		// 全体データ取得(無期限ヒットボックス)
 		std::vector<Data>& GetHitBoxData() { return hitBoxDatas_; }
-
+		// ヒットボックスインスタンス取得
+		HitBoxInstance* GetHitBoxInstance(int32_t id);
 
 		// 名前からヒットボックスコライダーデータ取得
 		CollData GetHitBoxCollData(const std::string& name) {
@@ -82,11 +84,11 @@ namespace HitBox {
 		std::vector<Data> lifeTimeHitBoxDatas_;
 		// 無期限ヒットボックスデータ
 		std::vector<Data> hitBoxDatas_;
+		// 無期限ヒットボックス用カウント
 
 		// ヒットボックスコライダーデータ群
 		std::map<std::string, CollData> hitBoxCollDatas_;
 	private:
-		Character::BaseCharacter* character = nullptr;
 		Engine::EntityManager* entityManager = nullptr;
 	};
 

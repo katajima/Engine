@@ -1,7 +1,7 @@
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/MyGame/MyGame.h>
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 
 namespace HitBox {
@@ -37,25 +37,21 @@ namespace HitBox {
 	}
 
 	void HitBoxFunction::UpdateTypePlayer() {
-
 		if (otherColl->tag != CollisionTag::Enemy) return;
-
+		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
-
+		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
-
-
 		// ノックバック方向
 		data_.GetKnockbackData().SetNormal(player->GetMoveComponent()->GetDirection());
-
 		// リアクションデータ
 		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
-
-		enemy->Emit();	//	エフェクト出現
-		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Move); // 敵ステート設定
-		
+		//	エフェクト出現
+		enemy->Emit();	
+		// 敵ステート設定
+		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		player->GetAttackController()->GeyLockOnSysutem()->SetHitTag(enemy->GetTagNumber());
 		// ヒットカウンターにヒットを通知
@@ -64,20 +60,23 @@ namespace HitBox {
 
 	void HitBoxFunction::UpdateTypeEnemy() {
 		if (otherColl->tag != CollisionTag::Player) return;
-
+		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;
-
+		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(other->GetHitReceiver());
 		if (!player) return;
-		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // 敵ステート設定
-
-
+		if(player->GetCurrentMainState() == Character::CharacterMainState::Special){
+			return; // プレイヤーが必殺技中は無効
+		}
+		// プレイヤーステート設定
+		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// ノックバック方向
 		data_.GetKnockbackData().SetNormal(enemy->GetMoveComponent()->GetDirection());
-
 		// リアクションデータ
-		player->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		// プレイヤーのロックオンシステムに相手タグを設定
+		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}
 
 	void HitBoxFunction::UpdateTypeOther() {

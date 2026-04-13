@@ -33,8 +33,6 @@ public:
 	CombatStat* GetCombatStat() { return combatStat_.get(); }
 	// コンボシステムクラス取得
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
-	// ヒットボックスシステム取得
-	HitBox::System* GetHitBoxSystem() { return hitBoxSystem_.get(); };
 	// ロックオンシステム更新
 	LockOnSystem* GeyLockOnSysutem() { return lockOnSystem_.get(); }
 
@@ -57,8 +55,6 @@ private:
 	std::unique_ptr<CombatStat> combatStat_;	
 	// コンボシステム
 	std::unique_ptr<Combo::System> comboSystem_;
-	// ヒットボックスシステム
-	std::unique_ptr<HitBox::System> hitBoxSystem_;
 	// ロックオンシステム
 	std::unique_ptr<LockOnSystem> lockOnSystem_;
 private:

@@ -1,6 +1,6 @@
 #include "SmallRangeWeapon.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include"DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include<DirectXGame/application/base/Bullet/Base/BulletManager.h>
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>

@@ -4,8 +4,7 @@
 
 namespace Character {
 	// 移動
-	class MediumMeleeEnemyMoveState : public MoveState
-	{
+	class MediumMeleeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
 		MediumMeleeEnemyMoveState(BaseCharacter* enemy)
@@ -29,8 +28,7 @@ namespace Character {
 	/// <summary>
 	/// 攻撃
 	/// </summary>
-	class MediumMeleeEnemyAttackState :public AttackState
-	{
+	class MediumMeleeEnemyAttackState :public AttackState {
 	public:
 		MediumMeleeEnemyAttackState(BaseCharacter* enemy)
 			: AttackState(enemy) {
@@ -49,8 +47,7 @@ namespace Character {
 	/// <summary>
 	/// 死亡状態
 	/// </summary>
-	class MediumMeleeEnemyDieState :public DieState
-	{
+	class MediumMeleeEnemyDieState :public DieState {
 	public:
 		MediumMeleeEnemyDieState(BaseCharacter* enemy)
 			: DieState(enemy) {
@@ -67,5 +64,26 @@ namespace Character {
 	private:
 		float dieTimer_ = 2.0f;
 		float timer_ = 0.0f;
+	};
+
+	/// <summary>
+	/// 被弾状態
+	/// </summary>
+	class MediumMeleeEnemyDamageState : public DamageState {
+	public:
+		MediumMeleeEnemyDamageState(BaseCharacter* enemy)
+			: DamageState(enemy) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+		// 初期化
+		void Enter() override;
+	private:
+		float timer_ = 0.0f;
+		float damageTime_ = 0.5f;
 	};
 }

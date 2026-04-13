@@ -1,8 +1,7 @@
 #include "HitBoxSystem.h"
 
 namespace HitBox {
-	void System::Initialize(Character::BaseCharacter* character, Engine::EntityManager* entityManager) {
-		this->character = character;
+	void System::Initialize(Engine::EntityManager* entityManager) {
 		this->entityManager = entityManager;
 	};
 
@@ -31,11 +30,11 @@ namespace HitBox {
 	}
 
 	// ヒットボックス追加
-	void System::AddLifeTimeHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
-		float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
+	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+		float lifeTime, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type);
+		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
 		CreateParent(d, dependenceType,offset,parent);
@@ -47,11 +46,19 @@ namespace HitBox {
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
 	}
 
-	void System::AddHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
+	void System::AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+		ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
+		
+		// IDがあるなら早期リターン
+		if (id != -1) return;
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type);
+		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
+
+		// Id設定;
+		d.id = static_cast<int32_t>(hitBoxDatas_.size());
+		id = d.id;
 
 		// 依存先設定
 		CreateParent(d, dependenceType, offset, parent);
@@ -101,6 +108,14 @@ namespace HitBox {
 			break;
 		}
 		hitBoxCollDatas_[name] = data;
+	}
+
+	HitBoxInstance* System::GetHitBoxInstance(int32_t id) {
+		for (auto& hit : hitBoxDatas_) {
+			if (hit.id == id)
+			return hit.hitBox.get();
+		}
+		return nullptr;
 	}
 
 

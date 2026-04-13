@@ -22,7 +22,7 @@ namespace HitBox {
 		}
 
 		// 初期化
-		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type);
+		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type, bool useContactRecord);
 
 		// 更新
 		void Update(float dt);
@@ -32,9 +32,9 @@ namespace HitBox {
 		// コライダー追加
 		void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const AttackReactionData& reaction);
 		// 有効化
-		void Enable();
+		void Enable(Vector4 color = {1,1,1,1});
 		// 無効化
-		void Disable();
+		void Disable(Vector4 color = { 1,1,1,1 });
 		// 履歴削除
 		void ClearContactRecord() { GetContactRecord().Clear(); }
 	public:
@@ -55,6 +55,9 @@ namespace HitBox {
 		Engine::WorldTransform worldTransform_;
 		// 使用者タイプ
 		UseType type_;
+		// ヒット記録を使用するか（使用した場合連続ヒットしない）
+		bool useContactRecord = true;
+
 
 		// コライダーデータ構造体
 		struct ColliderData {

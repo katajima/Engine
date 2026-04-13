@@ -97,7 +97,7 @@ namespace Engine {
 		/// </summary>
 		/// <param name="corner"></param>
 		/// <param name="pos"></param>
-		void AddLineCorner(const CornerSegment& corner, const WorldTransform& pos);
+		void AddLineCorner(const CornerSegment& corner, const WorldTransform& pos, const Vector4& color = { 1,1,1,1 });
 
 		/// <summary>
 		/// カプセル状にライン加算
@@ -128,7 +128,7 @@ namespace Engine {
 		/// </summary>
 		/// <param name="triangle"></param>
 		/// <param name="pos"></param>
-		void AddLineTriangle(const Triangle& triangle, const WorldTransform& pos);
+		void AddLineTriangle(const Triangle& triangle, const WorldTransform& pos,const Vector4& color = { 1,1,1,1 });
 
 		/// <summary>
 		/// オクツリー状にライン加算
