@@ -100,7 +100,7 @@ namespace Projectile {
 		// 爆発の半径
 		float explosionRadius = 0.0f;
 		// 爆発のダメージ
-		float knockBackPower = 0.0f;
+		float explosionDamage = 0.0f;
 	};
 
 
