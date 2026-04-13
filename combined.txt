@@ -46,6 +46,9 @@
     └── └── └── └── └── └── ├── ComboMotion.h
     └── └── └── └── └── └── ├── ComboMove.cpp
     └── └── └── └── └── └── └── ComboMove.h
+    └── └── └── └── └── ├── Range/
+    └── └── └── └── └── └── ├── ComboRange.cpp
+    └── └── └── └── └── └── └── ComboRange.h
     └── └── └── └── └── └── Receiver/
     └── └── └── └── └──     ├── ComboCancelReceiver.cpp
     └── └── └── └── └──     ├── ComboCancelReceiver.h
@@ -92,12 +95,17 @@
     └── └── └── └── ├── Base/
     └── └── └── └── └── ├── BaseBullet.cpp
     └── └── └── └── └── ├── BaseBullet.h
+    └── └── └── └── └── ├── BaseProjectile.cpp
+    └── └── └── └── └── ├── BaseProjectile.h
     └── └── └── └── └── ├── BulletData.cpp
     └── └── └── └── └── ├── BulletData.h
     └── └── └── └── └── ├── BulletManager.cpp
     └── └── └── └── └── ├── BulletManager.h
     └── └── └── └── └── ├── BulletSpawn.cpp
-    └── └── └── └── └── └── BulletSpawn.h
+    └── └── └── └── └── ├── BulletSpawn.h
+    └── └── └── └── └── ├── ProjectileData.h
+    └── └── └── └── └── ├── ProjectileFunction.cpp
+    └── └── └── └── └── └── ProjectileFunction.h
     └── └── └── └── ├── EnemyBullet.cpp
     └── └── └── └── ├── EnemyBullet.h
     └── └── └── └── ├── PlayerBullet.cpp
@@ -151,17 +159,15 @@
     └── └── └── └── └── ├── CharacterGlobalData.h
     └── └── └── └── └── ├── CharacterManeger.cpp
     └── └── └── └── └── ├── CharacterManeger.h
-    └── └── └── └── └── ├── Characters.h
-    └── └── └── └── └── ├── Enemy/
-    └── └── └── └── └── └── ├── BaseEnemy.cpp
-    └── └── └── └── └── └── ├── BaseEnemy.h
-    └── └── └── └── └── └── └── EnemyData.h
-    └── └── └── └── └── └── Player/
-    └── └── └── └── └──     └── BasePlayer.h
+    └── └── └── └── └── └── Characters.h
     └── └── └── └── ├── Crowd/
     └── └── └── └── └── ├── CrowdManager.cpp
     └── └── └── └── └── └── CrowdManager.h
     └── └── └── └── ├── Enemy/
+    └── └── └── └── └── ├── Base/
+    └── └── └── └── └── └── ├── BaseEnemy.cpp
+    └── └── └── └── └── └── ├── BaseEnemy.h
+    └── └── └── └── └── └── └── EnemyData.h
     └── └── └── └── └── ├── Dummy/
     └── └── └── └── └── └── ├── DummyEnemy.cpp
     └── └── └── └── └── └── ├── DummyEnemy.h
@@ -201,6 +207,8 @@
     └── └── └── └── └──         ├── SmallRangeEnemyState.cpp
     └── └── └── └── └──         └── SmallRangeEnemyState.h
     └── └── └── └── ├── Player/
+    └── └── └── └── └── ├── Base/
+    └── └── └── └── └── └── └── BasePlayer.h
     └── └── └── └── └── └── Normal/
     └── └── └── └── └──     ├── NormalPlayer.cpp
     └── └── └── └── └──     ├── NormalPlayer.h
@@ -369,6 +377,8 @@
     └── └── └── scene/
     └── └──     ├── CharacterDebugScene.cpp
     └── └──     ├── CharacterDebugScene.h
+    └── └──     ├── CustomScene.cpp
+    └── └──     ├── CustomScene.h
     └── └──     ├── EffectScene.h
     └── └──     ├── GamePlayScene.cpp
     └── └──     ├── GamePlayScene.h
@@ -1620,10 +1630,6 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 	comboSystem_ = std::make_unique<Combo::System>();
 	comboSystem_->Initialize(owner, entityManager->Get3DLineCommon(), globalVariables);
 
-	// ヒットボックスシステム初期化
-	hitBoxSystem_ = std::make_unique<HitBox::System>();
-	hitBoxSystem_->Initialize(owner, entityManager);
-
 	// ロックオンシステム初期化
 	lockOnSystem_ = std::make_unique<LockOnSystem>();
 	lockOnSystem_->Initialize(owner);
@@ -1632,15 +1638,11 @@ void AttackController::Initialize(Engine::EntityManager* entityManager, Engine::
 
 
 void AttackController::Update(const Character::CharacterContext& ctx) {
-
-
 	// ヒットカウンターの更新
 	if (!isStopHitTimer_) {
 		hitCounter_.Update(ctx.dt);
 	}
 
-	// ヒットボックスシステムの更新
-	hitBoxSystem_->Update(ctx.dt);
 	if (IsAttack() || isDebugEditor_) {
 		// コンボシステムの更新
 		comboSystem_->Update(ctx);
@@ -1686,8 +1688,6 @@ public:
 	CombatStat* GetCombatStat() { return combatStat_.get(); }
 	// コンボシステムクラス取得
 	Combo::System* GetComboSystem() { return comboSystem_.get(); }
-	// ヒットボックスシステム取得
-	HitBox::System* GetHitBoxSystem() { return hitBoxSystem_.get(); };
 	// ロックオンシステム更新
 	LockOnSystem* GeyLockOnSysutem() { return lockOnSystem_.get(); }
 
@@ -1710,8 +1710,6 @@ private:
 	std::unique_ptr<CombatStat> combatStat_;	
 	// コンボシステム
 	std::unique_ptr<Combo::System> comboSystem_;
-	// ヒットボックスシステム
-	std::unique_ptr<HitBox::System> hitBoxSystem_;
 	// ロックオンシステム
 	std::unique_ptr<LockOnSystem> lockOnSystem_;
 private:
@@ -2408,8 +2406,11 @@ namespace Combo {
 		// コンボ用条件クラス開始
 		comboCondition.Enter(owner);
 		// コンボ用ヒットボックスクラス開始
-		hitBox.Enter(owner,type);
-		
+		hitBox.Enter(owner, type);
+		if (type == Type::kRange || type == Type::kMix) {
+			// コンボ用遠距離クラス開始
+			range.Enter(owner, ctx);
+		}
 		// コンボ用カメラクラス開始
 		camera.Enter();
 		// コンボ用エフェクトクラス開始
@@ -2419,7 +2420,9 @@ namespace Combo {
 	// 更新
 	void ComboData::Update(const Character::CharacterContext& ctx) {
 		// 時間更新
-		timer_ += ctx.dt;
+		if (!isDebug) {
+			timer_ += ctx.dt;
+		}
 		// コンボ用条件クラス更新
 		comboCondition.Update(ctx, timer_);
 		// コンボ用モーションクラス更新
@@ -2427,7 +2430,10 @@ namespace Combo {
 		// コンボ用ヒットボックスクラス更新
 		hitBox.SetDirection(motion.GetComboMove().GetDirection());
 		hitBox.Update(ctx, timer_);
-		
+		if (type == Type::kRange || type == Type::kMix) {
+			// コンボ用遠距離クラス更新
+			range.Update(ctx, timer_);
+		}
 		// コンボ用カメラクラス更新
 		camera.Update(timer_, ctx.dt);
 		// コンボ用エフェクトクラス更新
@@ -2444,6 +2450,10 @@ namespace Combo {
 		motion.Exit(owner);
 		// コンボ用ヒットボックスクラス終了
 		hitBox.Exit();
+		if (type == Type::kRange || type == Type::kMix) {
+			// コンボ用遠距離クラス開始
+			range.Exit(owner);
+		}
 		// コンボ用カメラクラス終了
 		camera.Exit();
 		// コンボ用エフェクトクラス終了
@@ -2463,6 +2473,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.h
 #include "DirectXGame/application/base/Attack/Combo/Motion/ComboMotion.h"
 #include "DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.h"
 #include "DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h"
+#include "DirectXGame/application/base/Attack/Combo/Range/ComboRange.h"
 #include "ComboSequencer.h"
 
 
@@ -2490,6 +2501,8 @@ namespace Combo {
 		ComboHitBox& GetComboHitBox() { return hitBox; }
 		// コンボエフェクトクラス取得
 		ComboEffect& GetComboEffect() { return effect; }
+		// コンボ遠距離クラス取得
+		ComboRange& GetComboRange() { return range; }
 		// コンボタイプ取得
 		Type GetType() const { return type; }
 	public:	// 時間
@@ -2499,6 +2512,8 @@ namespace Combo {
 		void ResetTimer() { timer_ = 0.0f; }
 		// 経過時間設定
 		void SetTimer(float time) { timer_ = time; } 
+		// デバック中か
+		void SetIsDebug(bool is) { isDebug = is; }
 		// 攻撃タイプ設定
 		void SetType(Type type) { this->type = type; }
 	private:
@@ -2507,7 +2522,9 @@ namespace Combo {
 		ComboCamera camera{};					// コンボ用カメラクラス
 		ComboHitBox hitBox{};					// コンボ用ヒットボックスクラス
 		ComboEffect effect{};					// コンボ用エフェクト
+		ComboRange range{};						// コンボ用遠距離クラス（弾など）
 		float timer_ = 0.0f;					// 時間
+		bool isDebug = false;					// エディターを使用したデバック中か
 		Type type = Type::kMelle;// 攻撃タイプ
 	};
 };
@@ -2543,7 +2560,7 @@ namespace Combo {
 
 
 			// ロックオン半径
-			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData_.radius }, { 0,1,0,1 }, 8, 8);
+			lineCommon->GetLineMeshData().AddLineSphere(Sphere{ ownerPos,data.GetComboMotion().GetComboMove().GetData().lockOnData.radius }, { 0,1,0,1 }, 8, 8);
 
 
 			// 方向
@@ -2598,16 +2615,16 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboEditor.cp
 #include "ComboEditor.h"
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,const std::string& stateName, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;	// 保存項目
 		this->lineCommon = lineCommon;
-		this->state = state;						// ステート
+		this->stateName = stateName;						// ステート
 		this->owner = owner;						// オーナー
 		this->comboSystem = comboSystem;			// コンボシステム
 
@@ -2618,18 +2635,19 @@ namespace Combo {
 		sequence_.SetFrameMax(maxFrame);
 
 		// コンボ名設定
-		comboName_ = "Combo_" + state->GetName();
+		comboName_ = "Combo_" + stateName;
 
 		// シーケンサーにコンボデータを適用させる
 		SequencerApplyToState();
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->Data();
+		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
 		// ステートの時間設定
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 	}
 
 	void EditorBlock::UpdateImGui(float dt) {
 
+		auto state = comboSystem->GetComboNodeState(stateName);
 		// 選択中でなければ処理しない
 		if (!nowChoice_) return;
 		if (currentFrame == 0 && isPlaying) {
@@ -2672,6 +2690,7 @@ namespace Combo {
 		ComboData& comboData = state->Data();
 		// ステートの時間設定
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+		comboData.SetIsDebug(true);
 		ImGui::End();
 
 #endif // _DEBUG
@@ -2717,6 +2736,8 @@ namespace Combo {
 			};
 			ComboImGui::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
+			// ヒット記録を使用
+			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
 			// オフセット
 			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset.x, 0.1f);
 		}
@@ -2778,13 +2799,14 @@ namespace Combo {
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
-		ComboData& comboData = state->Data();
+		ComboData& comboData = comboSystem->GetComboNodeState(stateName)->Data();
 
+		
 
-		data_.move.moveSpeed = comboData.GetComboMotion().GetComboMove().GetData().speed_;						// 移動速度
-		data_.move.isCompulsionMove = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove_;	// 強制移動
-		data_.move.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity_;					// 重力
-		data_.move.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale_;				// 重力スケール
+		data_.move.moveSpeed = comboData.GetComboMotion().GetComboMove().GetData().speed;						// 移動速度
+		data_.move.isCompulsionMove = comboData.GetComboMotion().GetComboMove().GetData().isCompulsionMove;		// 強制移動
+		data_.move.isGravity = comboData.GetComboMotion().GetComboMove().GetData().isGravity;					// 重力
+		data_.move.gravityScale = comboData.GetComboMotion().GetComboMove().GetData().gravityScale;				// 重力スケール
 		data_.move.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
 
 
@@ -2809,13 +2831,13 @@ namespace Combo {
 		data_.hitBox.dependenceType = comboData.GetComboHitBox().GetData().dependenceType;
 		data_.hitBox.hitEffectType = comboData.GetComboHitBox().GetData().hitEffectType;
 		data_.hitBox.lifetimeType = comboData.GetComboHitBox().GetData().lifetimeType;
-
+		data_.hitBox.useContactRecord = comboData.GetComboHitBox().GetData().useContactRecord;
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
 
 		// ロックオン
-		data_.lockOn.lockOnRadius = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.radius;
-		data_.lockOn.lockOnType = comboData.GetComboMotion().GetComboMove().GetData().lockOnData_.type;
+		data_.lockOn.lockOnRadius = comboData.GetComboMotion().GetComboMove().GetData().lockOnData.radius;
+		data_.lockOn.lockOnType = comboData.GetComboMotion().GetComboMove().GetData().lockOnData.type;
 
 		// シーケンサー適応
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
@@ -2866,6 +2888,7 @@ namespace Combo {
 		if (isComboEditorActive_)
 			UpdateImGui(dt);
 
+
 		ImGui::End();
 #endif // _DEBUG
 	};
@@ -2904,7 +2927,7 @@ namespace Combo {
 
 		// コンボシステムからコンボノードステートを取得してコンボエディターブロックを作成
 		for (auto& comboState : comboSystem->GetComboNodeStates()) {
-			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.second, owner);
+			CreateComboEditorBlock(comboState.second->GetName(), comboSystem, comboState.first, owner);
 		}
 
 		// コンボ再構築後、選択が消えてたら補正
@@ -2978,7 +3001,7 @@ namespace Combo {
 		comboSystem->SetGlobalComboDatas();
 	}
 
-	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner) {
+	void Editor::CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner) {
 
 		// 既に存在する場合は追加しない
 		if (comboEditorBlocks_.find(comboName) != comboEditorBlocks_.end()) {
@@ -2987,7 +3010,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(lineCommon, globalVariables, comboSystem, state, owner);
+		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);
@@ -3024,7 +3047,7 @@ namespace Combo {
 	class EditorBlock {
 	public:
 		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
 		// 更新
 		void UpdateImGui(float dt);
 	public:
@@ -3070,7 +3093,7 @@ namespace Combo {
 		std::vector<std::string> conectComboNames_;
 	private:
 		// ノードステート
-		std::shared_ptr<NodeState> state = nullptr;
+		std::string stateName = "";
 		// シーケンサー
 		AttackSequence sequence_;
 	private:
@@ -3107,6 +3130,10 @@ namespace Combo {
 		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
 		// 更新 
 		void Update(float dt);
+
+		// コンボエディターがアクティブか取得
+		bool IsActive() const { return isComboEditorActive_; }
+
 	private:
 		// 更新
 		void UpdateImGui(float dt);
@@ -3116,7 +3143,7 @@ namespace Combo {
 		void SetGlobalData();
 	private:
 		// コンボエディターブロック作成
-		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, std::shared_ptr<NodeState> state, Character::BaseCharacter* owner);
+		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
 	private: // もらいもの
 		// コンボシステム
 		Combo::System* comboSystem = nullptr;
@@ -3202,7 +3229,9 @@ namespace Combo {
 		// ヒットボックスの生成タイミング時間
 		float hitBoxWindowStart = 0.0f;	
 		// ヒットボックスの生存時間
-		float hitBoxLifeTime = 0.5f;		
+		float hitBoxLifeTime = 0.5f;
+		// ヒット記録を使用するか（使用した場合連続ヒットしない）
+		bool useContactRecord = true;
 		// コライダー位置
 		Vector3 offsetPos = {};			
 		// コライダーサイズ
@@ -3414,8 +3443,8 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
 
 	// 移動時間
-	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart_;
-	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd_;
+	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart;
+	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd;
 
 	// トレイルエフェクト
 	float trailStart = comboData.GetComboEffect().GetData().startTmer;
@@ -4024,12 +4053,9 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
-
-
-
 		globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
 		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
-
+		globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 		// リアクション
 		globalVariables->AddItem(name, "ダメージ", data.reaction.damage);
 		globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
@@ -4088,6 +4114,7 @@ namespace Combo {
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
 		data.hitBox.hitBoxWindowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 		data.hitBox.hitBoxLifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+		data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
 
 		// リアクション
 		data.reaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
@@ -4193,6 +4220,8 @@ namespace Combo {
 		globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
 		globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
 		globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+		globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+
 
 		globalVariables->SetEnumValue(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
@@ -4220,6 +4249,7 @@ namespace Combo {
 		data.GetComboHitBox().GetData().spawnType = gData.hitBox.spawnType;
 		data.GetComboHitBox().GetData().lifetimeType = gData.hitBox.lifetimeType;
 		data.GetComboHitBox().GetData().hitEffectType = gData.hitBox.hitEffectType;
+		data.GetComboHitBox().GetData().useContactRecord = gData.hitBox.useContactRecord;
 		///
 		/// 受付
 		/// 
@@ -4241,7 +4271,7 @@ namespace Combo {
 
 		
 		// コンボボタン設定
-		ComboButton bo = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
+		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		// 押し続ける
 		std::vector<ComboButton> button;
 		button.push_back(bo);
@@ -4256,13 +4286,13 @@ namespace Combo {
 		/// 
 
 		// 重力
-		data.GetComboMotion().GetComboMove().GetData().isGravity_ = gData.move.isGravity;
-		data.GetComboMotion().GetComboMove().GetData().gravityScale_ = gData.move.gravityScale;
+		data.GetComboMotion().GetComboMove().GetData().isGravity = gData.move.isGravity;
+		data.GetComboMotion().GetComboMove().GetData().gravityScale = gData.move.gravityScale;
 		// 移動
-		data.GetComboMotion().GetComboMove().GetData().speed_ = gData.move.moveSpeed;
-		data.GetComboMotion().GetComboMove().GetData().moveWindowStart_ = gData.move.moveWindowStart;
-		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd_ = gData.move.moveWindowEnd;
-		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove_ = gData.move.isCompulsionMove;
+		data.GetComboMotion().GetComboMove().GetData().speed = gData.move.moveSpeed;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowStart = gData.move.moveWindowStart;
+		data.GetComboMotion().GetComboMove().GetData().moveWindowEnd = gData.move.moveWindowEnd;
+		data.GetComboMotion().GetComboMove().GetData().isCompulsionMove = gData.move.isCompulsionMove;
 		data.GetComboMotion().GetComboMove().GetData().moveType = gData.move.moveType;
 
 		// アニメーションスピード
@@ -4282,12 +4312,11 @@ namespace Combo {
 
 		
 		// ロックオン
-		data.GetComboMotion().GetComboMove().GetData().lockOnData_.type = gData.lockOn.lockOnType;
-		data.GetComboMotion().GetComboMove().GetData().lockOnData_.radius = gData.lockOn.lockOnRadius;
+		data.GetComboMotion().GetComboMove().GetData().lockOnData.type = gData.lockOn.lockOnType;
+		data.GetComboMotion().GetComboMove().GetData().lockOnData.radius = gData.lockOn.lockOnRadius;
 	}
 
-	void System::CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxDatas,
-		GamePadButton button) {
+	void System::CreateCombo(const std::string& comboNodeName, const std::vector<HitBox::CollData>& addHitBoxDatas) {
 		// コンボデータ
 		ComboData data{};
 		// グローバルデータ作成
@@ -4295,14 +4324,14 @@ namespace Combo {
 		// データ設定
 		SetData(data, comboGlobalDatas_[comboNodeName]);
 		// ヒットボックス追加
-		for (AddHitBoxData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddCollider(addHitBoxData.hitBoxData, comboGlobalDatas_[comboNodeName]);
+		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
+			data.GetComboHitBox().AddCollider(addHitBoxData, comboGlobalDatas_[comboNodeName]);
 		}
 		// 使うヒットボックスクリア
 		data.GetComboHitBox().ClearUseHitBox();
 		// 使うヒットボックス追加
-		for (AddHitBoxData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddUseHitBox(addHitBoxData.hitBoxData.name);
+		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
+			data.GetComboHitBox().AddUseHitBox(addHitBoxData.name);
 		}
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName_, data);
@@ -4436,19 +4465,13 @@ namespace Combo {
 			return it->second;
 		}
 	public:
-		// 追加ヒットボックスデータ
-		struct AddHitBoxData {
-			HitBox::CollData hitBoxData;
-		};
-
 		// コンボ条件データ
 		struct ComboConditionData {
 			Combo::EndConditionType type = Combo::EndConditionType::kOnTimer;
 		};
 
 		// コンボ作成
-		void CreateCombo(const std::string& comboNodeName, const std::vector<AddHitBoxData>& addHitBoxData,
-			GamePadButton button = GamePadButton::GAMEPAD_B);
+		void CreateCombo(const std::string& comboNodeName, const std::vector< HitBox::CollData>& addHitBoxData);
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
@@ -4625,14 +4648,18 @@ namespace Combo {
 	// 開始
 	void ComboHitBox::Enter(Character::BaseCharacter* owner, Type type) {
 		this->type = type;
+		this->owner = owner;
 		// ヒットボックスシステムを渡す
-		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetHitBoxSystem();
 		// 移動システムを渡す
 		movementComponent = owner->GetMoveComponent();
 
 		// 常時なら
 		if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
-			hitBoxSystem->AddHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.dependenceType, data_.offset, perent);
+			hitBoxSystem->AddHitBox(id,data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.dependenceType, data_.offset,data_.useContactRecord, perent);
+			hitBox = hitBoxSystem->GetHitBoxInstance(id);
+			hitBox->Disable(Vector4{ 1,1,1,0.0f });
+			hitBox->ClearContactRecord();
 		}
 	}
 
@@ -4652,13 +4679,13 @@ namespace Combo {
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
 					if (timer >= data_.hitBpxWindowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.lifeTime, data_.dependenceType, data_.offset, perent);
+						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, collData_, useHitBox_, data_.lifeTime, data_.dependenceType, data_.offset, perent);
+						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
@@ -4672,7 +4699,13 @@ namespace Combo {
 			}
 			// 常時なら
 			else if(data_.lifetimeType == HitBox::LifetimeType::kInfinite){
-				if (timer >= data_.hitBpxWindowStart) {
+				if (hitBox) {
+					if (timer >= data_.hitBpxWindowStart && timer <= data_.hitBpxWindowStart + data_.lifeTime) {
+						hitBox->Enable();
+					}
+					else {
+						hitBox->Disable(Vector4{1,1,1,0.0f});
+					}
 				}
 			}
 		}
@@ -4682,6 +4715,10 @@ namespace Combo {
 	void ComboHitBox::Exit() {
 		isPopHitBox_ = false;
 		hitBoxSystem->Clear();
+		if (hitBox) {
+			hitBox->Disable();
+			hitBox->ClearContactRecord();
+		}
 	}
 
 	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& combo) {
@@ -4720,14 +4757,14 @@ namespace Combo {
 	public:
 		~ComboHitBox() { 
 			collData_.clear();
-			useHitBox_.clear();
+			useHitBoxName_.clear();
 		}
 		// ヒットボックスデータ
 		struct Data {
 			float hitBpxWindowStart = 1.0f;		// ヒットボックス生成スタート
 			float lifeTime = 1.0f;					// ヒットボックス生存時間
 			// ヒットボックス使用者タイプ
-			HitBox::UseType hitBoxUseType;
+			HitBox::UseType hitBoxUseType = HitBox::UseType::kPlayer;
 			// ヒットボックスの発生条件タイプ
 			HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
 			// ヒットボックス依存先タイプ
@@ -4736,7 +4773,8 @@ namespace Combo {
 			HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
 			// ヒットボックス影響タイプ
 			HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
-
+			// ヒット記録を使用するか（使用した場合連続ヒットしない）
+			bool useContactRecord = true;				
 			// オフセット
 			Vector3 offset{};
 			// 親子名
@@ -4760,9 +4798,9 @@ namespace Combo {
 		// コライダーデータ追加
 		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& reaction);
 		// 使うヒットボックス名設定
-		void AddUseHitBox(const std::string& name) { useHitBox_.push_back(name); };
+		void AddUseHitBox(const std::string& name) { useHitBoxName_.push_back(name); };
 		// 使うヒットボックス名クリーン
-		void ClearUseHitBox() { useHitBox_.clear(); }
+		void ClearUseHitBox() { useHitBoxName_.clear(); }
 		// 親子設定
 		void SetPerent(Engine::WorldTransform* perent) { this->perent = perent; };
 		//
@@ -4770,6 +4808,8 @@ namespace Combo {
 	private: // 貰いもの
 		// ヒットボックスシステム
 		HitBox::System* hitBoxSystem = nullptr;
+		// ヒットボックス
+		HitBox::HitBoxInstance* hitBox = nullptr;
 		// 移動システム
 		MovementComponent* movementComponent = nullptr;
 		// 親子
@@ -4778,17 +4818,21 @@ namespace Combo {
 		Vector3 direction = {};
 		// コンボタイプ
 		Type type;
+		//
+		int32_t id = -1;
 	private:
 		// ヒットボックスデータ
 		Data data_;
 		// コライダーデータ
 		std::vector<HitBox::CollData> collData_;
 		// 使うヒットボックス名
-		std::vector<std::string> useHitBox_;
+		std::vector<std::string> useHitBoxName_;
 
 	private:
 		// ヒットボックス出現
 		bool isPopHitBox_ = false;
+		//
+		Character::BaseCharacter* owner = nullptr;
 	};
 };
 
@@ -4835,6 +4879,60 @@ bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 
 #pragma endregion // コンボボタン
 
+GamePadButton Combo::ConvertGamePadButton(ComboGamePadButton button)
+{
+	switch (button)
+	{
+	case Combo::ComboGamePadButton::GAMEPAD_Up:
+		return GamePadButton::GAMEPAD_Up;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_Down:
+		return GamePadButton::GAMEPAD_Down;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_Left:
+		return GamePadButton::GAMEPAD_Left;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_Right:
+		return GamePadButton::GAMEPAD_Right;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_A:
+		return GamePadButton::GAMEPAD_A;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_B:
+		return GamePadButton::GAMEPAD_B;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_X:
+		return GamePadButton::GAMEPAD_X;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_Y:
+		return GamePadButton::GAMEPAD_Y;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_LB:
+		return GamePadButton::GAMEPAD_LB;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_RB:
+		return GamePadButton::GAMEPAD_RB;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_LS:
+		return GamePadButton::GAMEPAD_LS;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_RS:
+		return GamePadButton::GAMEPAD_RS;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_Start:
+		return GamePadButton::GAMEPAD_Start;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_Back:
+		return GamePadButton::GAMEPAD_Back;
+		break;
+	case Combo::ComboGamePadButton::GAMEPAD_Max:
+		return GamePadButton::GAMEPAD_Max;
+		break;
+	default:
+		return GamePadButton::GAMEPAD_Max;
+		break;
+	}
+}
 
 
 ============================================================
@@ -4860,27 +4958,48 @@ namespace Combo {
 		kTriggerReleased,		// 押した瞬間or離した瞬間
 	};
 
+
+	enum class ComboGamePadButton {
+		GAMEPAD_Up = 0,			// 十字(上)
+		GAMEPAD_Down = 1,		// 十字(下)
+		GAMEPAD_Left = 2,		// 十字(左)
+		GAMEPAD_Right = 3,		// 十字(右)
+		GAMEPAD_A = 4,			// A
+		GAMEPAD_B = 5,			// B
+		GAMEPAD_X = 6,			// X
+		GAMEPAD_Y = 7,			// Y
+		GAMEPAD_LB = 8,			// LB
+		GAMEPAD_RB = 9,			// RB
+		GAMEPAD_LS = 10,			// 左スティック押し込み
+		GAMEPAD_RS = 11,			// 右スティック押し込み
+		GAMEPAD_Start = 12,			// Start
+		GAMEPAD_Back = 13,				// Back
+		GAMEPAD_Max       // 最大ボタン数
+	};
+
+	GamePadButton ConvertGamePadButton(ComboGamePadButton button);
+
 	/// <summary>
 	/// コンボボタン1つ分
 	/// </summary>
 	class ComboButton {
 	public:
 		// コンストラクタ
-		ComboButton(GamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
+		ComboButton(ComboGamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
 
 		// 押したら
 		bool IsPressed(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kPressed,button_);
+			return inputSystem.GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
 		}
 
 		// 押した瞬間
 		bool IsTriggered(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kTriggered, button_);
+			return inputSystem.GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
 		}
 
 		// 離した瞬間
 		bool IsReleased(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kReleased, button_);
+			return inputSystem.GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
 		}
 
 
@@ -4917,10 +5036,10 @@ namespace Combo {
 		}
 
 		// どのボタンに反応するか
-		void SetGamePadButton(GamePadButton button) { button_ = button; };
+		void SetGamePadButton(ComboGamePadButton button) { button_ = button; };
 
 	private:
-		GamePadButton button_;
+		ComboGamePadButton button_;
 		ComboButtonInputType type_ = ComboButtonInputType::kPressed;
 	};
 
@@ -4947,6 +5066,10 @@ namespace Combo {
 		std::vector<ComboButton> comboButtons_;
 		size_t currentIndex_ = 0;
 	};
+
+
+
+	
 
 }
 
@@ -5145,7 +5268,7 @@ namespace Combo {
 		attackMoveSystem = owner->GetMoveComponent()->GetAttackMoveSystem();
 		camera = owner->GetCameraManager()->GetCamera();
 		// ターゲット指定
-		lockOnSystem->GetData() = data_.lockOnData_;
+		lockOnSystem->GetData() = data_.lockOnData;
 		traget = lockOnSystem->SoftLockOn();
 		stickDirection_ = ctx.worldStickDirection;
 		// 方向指定
@@ -5159,7 +5282,7 @@ namespace Combo {
 		// ゲームパッドの左スティックを動かしているか
 		bool isMoveStick = ctx.worldStickDirection.Length() != 0;
 		// 強制的に移動
-		if (data_.isCompulsionMove_) {
+		if (data_.isCompulsionMove) {
 			isMove_ = true;
 		}
 		else {
@@ -5185,33 +5308,33 @@ namespace Combo {
 	}
 
 	void ComboMove::MoveTypeProcess(float timer, float dt) {
-		bool isStart = data_.moveWindowStart_ <= timer;		// 受付開始時間を過ぎたら
-		bool isEnd = data_.moveWindowEnd_ >= timer;			// 受付終了時間より前なら
+		bool isStart = data_.moveWindowStart <= timer;		// 受付開始時間を過ぎたら
+		bool isEnd = data_.moveWindowEnd >= timer;			// 受付終了時間より前なら
 
-		float t = timer / data_.moveWindowEnd_ - data_.moveWindowStart_;
+		float t = timer / data_.moveWindowEnd - data_.moveWindowStart;
 
 		if (isMove_ && isStart && isEnd) {
 			MoveRequest request;
 			switch (data_.moveType)
 			{
 			case MoveType::kNone:
-				request.velocity = Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed_;
+				request.velocity = Multiply(Vector3{ stickDirection_.x,0,stickDirection_.y }, dt) * data_.speed;
 				break;
 			case MoveType::kForward:
-				request.velocity = Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed;
 				break;
 			case MoveType::kTraget:
 				if (traget) {
-					if (data_.moveTargetRadius_ <= targetPos_.Distance(worldTransform->translate_)) {
-						request.velocity = Multiply(direction_, dt) * data_.speed_;
+					if (data_.moveTargetRadius <= targetPos_.Distance(worldTransform->translate_)) {
+						request.velocity = Multiply(direction_, dt) * data_.speed;
 					}
 				}
 				else {
-					request.velocity = Multiply(direction_, dt) * data_.speed_;
+					request.velocity = Multiply(direction_, dt) * data_.speed;
 				}
 				break;
 			case MoveType::kLockAt: // カメラ方向
-				request.velocity = Multiply(direction_, dt) * data_.speed_;
+				request.velocity = Multiply(direction_, dt) * data_.speed;
 
 				break;
 			default:
@@ -5226,10 +5349,10 @@ namespace Combo {
 
 	void ComboMove::GravityProcess() {
 		// 重力の設定
-		if (!data_.isGravity_) {
+		if (!data_.isGravity) {
 			rigidBodyComponent->Velocity().y = 0;
 		}
-		rigidBodyComponent->SetIsGravity(data_.isGravity_);
+		rigidBodyComponent->SetIsGravity(data_.isGravity);
 	}
 
 	void ComboMove::MoveTypeDirectionProcess() {
@@ -5297,23 +5420,25 @@ namespace Combo {
 	class ComboMove {
 	public:
 		// データ構造体
-		struct Data
-		{
-			float moveWindowStart_ = 0.1f;			// 移動受付スタート
-			float moveWindowEnd_ = 0.5f;			// 移動受付エンド
-			float speed_ = 0.0f;					// 移動速度
+		struct Data {
+			// 移動受付スタート
+			float moveWindowStart = 0.1f;		
+			// 移動受付エンド
+			float moveWindowEnd = 0.5f;			
+			// 移動速度
+			float speed = 0.0f;					
 			// 強制的に移動
-			bool isCompulsionMove_ = true;			
+			bool isCompulsionMove = true;			
 			// 空中でのコンボで重力はあるか？
-			bool isGravity_ = true;					
+			bool isGravity = true;					
 			// 重力スケール
-			float gravityScale_ = 1.0f;				
+			float gravityScale = 1.0f;				
 			// ターゲットの距離でどこまで近づくか
-			float moveTargetRadius_ = 1.0f;
+			float moveTargetRadius = 1.0f;
 			// 移動タイプ
 			MoveType moveType = MoveType::kTraget;	
 			// ロックオンデータ
-			LockOnData lockOnData_;
+			LockOnData lockOnData;
 		};
 
 		// 開始
@@ -5330,8 +5455,8 @@ namespace Combo {
 		bool IsMove() const { return isMove_; }
 		// 移動可能時間設定
 		void MoveStartEnd(float start, float end) {
-			data_.moveWindowStart_ = start;
-			data_.moveWindowEnd_ = end;
+			data_.moveWindowStart = start;
+			data_.moveWindowEnd = end;
 		};
 		// データ構造体取得
 		Data& GetData() { return data_; }
@@ -5376,6 +5501,87 @@ namespace Combo {
 		// スティック方向
 		Vector2 stickDirection_ = {};
 	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboRange.cpp
+============================================================
+#include "ComboRange.h"
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+
+// 開始
+void Combo::ComboRange::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
+	bulletSpawn = owner->GetBulletSpawn();
+	bulletCount = 0;
+}
+// 更新
+void Combo::ComboRange::Update(const Character::CharacterContext& ctx, float timer) {
+
+	if (data_.count < bulletCount) {
+		bulletCount++;
+	}
+
+
+}
+// 終了
+void Combo::ComboRange::Exit(Character::BaseCharacter* owner) {
+	bulletCount = 0;
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Attack/Combo/Range/ComboRange.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
+#include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
+
+// 前方宣言
+namespace Character {
+	class BaseCharacter;		// キャラクター
+}
+// 弾出現
+class BulletSpawn;
+
+namespace Combo {
+
+	/// <summary>
+	/// 遠距離用コンボクラス
+	/// </summary>
+	class ComboRange {
+	public:
+		// データ
+		struct Data {
+			// 発射スタート
+			float rangeWindowStart = 0.1f;		
+			// 発射エンド
+			float rangeWindowEnd = 0.5f;			
+			// 弾速
+			float speed = 1.0f;
+			// 弾の発射間隔
+			float intarval = 0.5f;
+			// 発射する弾の数
+			int count = 1;
+			//　ダメージ
+			float damage = 1.0f;
+		};
+		// 開始
+		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
+		// 更新
+		void Update(const Character::CharacterContext& ctx, float timer);
+		// 終了
+		void Exit(Character::BaseCharacter* owner);
+		// データ構造体取得
+		Data& GetData() { return data_; }
+	private:
+		// 弾の出現処理クラス
+		BulletSpawn* bulletSpawn = nullptr;	
+		// データ
+		Data data_;
+		// 発射した弾の数
+		int bulletCount = 0;	
+	};
+
 }
 
 
@@ -5715,7 +5921,7 @@ namespace Combo {
 		struct Data {
 			float stateTime = 0.5f;				// 終了時間
 			EndConditionType type = EndConditionType::kOnTimer;	// 終了条件タイプ
-			ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
+			ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
 		};
 
 
@@ -5778,7 +5984,7 @@ namespace Combo {
 		struct Data {
 			float stateTime = 0.45f;				// 移行時間
 			EndConditionType type = EndConditionType::kOnTimer;	// 終了条件タイプ
-			ComboButton button_ = ComboButton(GamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
+			ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
 		};
 
 		// 開始
@@ -6483,7 +6689,7 @@ namespace HitBox {
 		}
 
 		// 初期化
-		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type);
+		void Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type, bool useContactRecord);
 
 		// 更新
 		void Update(float dt);
@@ -6493,9 +6699,9 @@ namespace HitBox {
 		// コライダー追加
 		void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const AttackReactionData& reaction);
 		// 有効化
-		void Enable();
+		void Enable(Vector4 color = {1,1,1,1});
 		// 無効化
-		void Disable();
+		void Disable(Vector4 color = { 1,1,1,1 });
 		// 履歴削除
 		void ClearContactRecord() { GetContactRecord().Clear(); }
 	public:
@@ -6516,6 +6722,9 @@ namespace HitBox {
 		Engine::WorldTransform worldTransform_;
 		// 使用者タイプ
 		UseType type_;
+		// ヒット記録を使用するか（使用した場合連続ヒットしない）
+		bool useContactRecord = true;
+
 
 		// コライダーデータ構造体
 		struct ColliderData {
@@ -6585,6 +6794,12 @@ namespace HitBox {
 
 		kLockOnArea,		// ターゲット位置
 	};
+	// ヒットボックスヒット制限タイプ
+	enum class HitContactRecord {
+
+	};
+
+
 
 	// 保存項目用データ
 	struct GlobalData {
@@ -6643,7 +6858,7 @@ namespace HitBox {
 	void HitBoxColl::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetHitBoxSystem();
 	};
 
 	// ImGui更新
@@ -6739,7 +6954,7 @@ namespace HitBox {
 	void HitBoxEditor::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-		hitBoxSystem = owner->GetAttackController()->GetHitBoxSystem();
+		hitBoxSystem = owner->GetHitBoxSystem();
 	}
 
 	void HitBoxEditor::ImGuiUpdate(float dt) {
@@ -6884,8 +7099,8 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxFunction.cpp
 ============================================================
 #include "HitBoxFunction.h"
 #include <DirectXGame/engine/MyGame/MyGame.h>
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 
 namespace HitBox {
@@ -6921,25 +7136,21 @@ namespace HitBox {
 	}
 
 	void HitBoxFunction::UpdateTypePlayer() {
-
 		if (otherColl->tag != CollisionTag::Enemy) return;
-
+		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(other->GetHitReceiver());
 		if (!enemy) return;
-
+		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
-
-
 		// ノックバック方向
 		data_.GetKnockbackData().SetNormal(player->GetMoveComponent()->GetDirection());
-
 		// リアクションデータ
 		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
-
-		enemy->Emit();	//	エフェクト出現
-		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Move); // 敵ステート設定
-		
+		//	エフェクト出現
+		enemy->Emit();	
+		// 敵ステート設定
+		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		player->GetAttackController()->GeyLockOnSysutem()->SetHitTag(enemy->GetTagNumber());
 		// ヒットカウンターにヒットを通知
@@ -6948,20 +7159,23 @@ namespace HitBox {
 
 	void HitBoxFunction::UpdateTypeEnemy() {
 		if (otherColl->tag != CollisionTag::Player) return;
-
+		// 敵
 		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(character);
 		if (!enemy) return;
-
+		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(other->GetHitReceiver());
 		if (!player) return;
-		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // 敵ステート設定
-
-
+		if(player->GetCurrentMainState() == Character::CharacterMainState::Special){
+			return; // プレイヤーが必殺技中は無効
+		}
+		// プレイヤーステート設定
+		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// ノックバック方向
 		data_.GetKnockbackData().SetNormal(enemy->GetMoveComponent()->GetDirection());
-
 		// リアクションデータ
-		player->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		// プレイヤーのロックオンシステムに相手タグを設定
+		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}
 
 	void HitBoxFunction::UpdateTypeOther() {
@@ -7028,8 +7242,7 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxSystem.cpp
 #include "HitBoxSystem.h"
 
 namespace HitBox {
-	void System::Initialize(Character::BaseCharacter* character, Engine::EntityManager* entityManager) {
-		this->character = character;
+	void System::Initialize(Engine::EntityManager* entityManager) {
 		this->entityManager = entityManager;
 	};
 
@@ -7058,11 +7271,11 @@ namespace HitBox {
 	}
 
 	// ヒットボックス追加
-	void System::AddLifeTimeHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
-		float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
+	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+		float lifeTime, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type);
+		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
 		CreateParent(d, dependenceType,offset,parent);
@@ -7074,11 +7287,19 @@ namespace HitBox {
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
 	}
 
-	void System::AddHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
+	void System::AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+		ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
+		
+		// IDがあるなら早期リターン
+		if (id != -1) return;
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type);
+		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
+
+		// Id設定;
+		d.id = static_cast<int32_t>(hitBoxDatas_.size());
+		id = d.id;
 
 		// 依存先設定
 		CreateParent(d, dependenceType, offset, parent);
@@ -7128,6 +7349,14 @@ namespace HitBox {
 			break;
 		}
 		hitBoxCollDatas_[name] = data;
+	}
+
+	HitBoxInstance* System::GetHitBoxInstance(int32_t id) {
+		for (auto& hit : hitBoxDatas_) {
+			if (hit.id == id)
+			return hit.hitBox.get();
+		}
+		return nullptr;
 	}
 
 
@@ -7250,6 +7479,7 @@ namespace HitBox {
 
 		struct Data {
 			std::unique_ptr<HitBoxInstance> hitBox = nullptr;
+			int32_t id = 0;
 			float lifeTime = 0.0f;
 			float timer = 0.0f;
 			// 生存時間を過ぎたら削除
@@ -7258,18 +7488,18 @@ namespace HitBox {
 
 
 		// 初期化
-		void Initialize(Character::BaseCharacter* character, Engine::EntityManager* entityManager);
+		void Initialize(Engine::EntityManager* entityManager);
 		// 更新
 		void Update(float dt);
 
 
 		// ヒットボックス追加（期限付き）
-		void AddLifeTimeHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, float lifeTime, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent = nullptr);
+		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
+			, float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
 
 		// ヒットボックス追加（無期限）
-		void AddHitBox(UseType type, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent = nullptr);
+		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
+			, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
 
 
 		// ヒットボックスコライダーデータ作成
@@ -7279,7 +7509,8 @@ namespace HitBox {
 		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
 		// 全体データ取得(無期限ヒットボックス)
 		std::vector<Data>& GetHitBoxData() { return hitBoxDatas_; }
-
+		// ヒットボックスインスタンス取得
+		HitBoxInstance* GetHitBoxInstance(int32_t id);
 
 		// 名前からヒットボックスコライダーデータ取得
 		CollData GetHitBoxCollData(const std::string& name) {
@@ -7308,11 +7539,11 @@ namespace HitBox {
 		std::vector<Data> lifeTimeHitBoxDatas_;
 		// 無期限ヒットボックスデータ
 		std::vector<Data> hitBoxDatas_;
+		// 無期限ヒットボックス用カウント
 
 		// ヒットボックスコライダーデータ群
 		std::map<std::string, CollData> hitBoxCollDatas_;
 	private:
-		Character::BaseCharacter* character = nullptr;
 		Engine::EntityManager* entityManager = nullptr;
 	};
 
@@ -7353,11 +7584,11 @@ namespace HitBox {
 
 #pragma region HitBox
 	// 初期化
-	void HitBoxInstance::Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type) {
+	void HitBoxInstance::Initialize(Engine::EntityManager* entityManager, Character::BaseCharacter* character, UseType type, bool useContactRecord) {
 		this->character = character;
 		this->entityManager = entityManager;
 		type_ = type;
-
+		this->useContactRecord = useContactRecord;
 		// ワールド変換初期化
 		worldTransform_.Initialize();
 
@@ -7373,14 +7604,16 @@ namespace HitBox {
 
 		// ヒットボックス応答クラス生成
 		hitBoxFunction_ = std::make_unique<HitBoxFunction>();
-		hitBoxFunction_->Initialize(colliderComponent_.get(), character, type);
+		hitBoxFunction_->Initialize(colliderComponent_.get(), character, type_);
 
 		// 当たり判定コールバック設定
 		colliderComponent_->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
 			// 開始
-			if (!hitBoxFunction_->Begin(self, other)) {
-				return;
-			};
+			if (this->useContactRecord) {
+				if (!hitBoxFunction_->Begin(self, other)) {
+					return;
+				}
+			}
 
 			// 当たったコライダーによって相手に送るデータを決め転送
 			for (auto& data : colliders_) {
@@ -7401,8 +7634,6 @@ namespace HitBox {
 	void HitBoxInstance::Update(float dt) {
 		// ワールド変換更新
 		worldTransform_.Update();
-		// 当たり判定コンポーネント更新
-
 		// 各コライダーのワールド変換更新と当たり判定コンポーネントへの反映
 		for (auto& colliderData : colliders_) {
 			colliderData.second.worldTransform.Update();
@@ -7436,15 +7667,17 @@ namespace HitBox {
 	};
 
 	// 有効化
-	void HitBoxInstance::Enable() {
+	void HitBoxInstance::Enable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Enable();
+			colliderData.second.collider->lineColor = color;
 		}
 	};
 	// 無効化
-	void HitBoxInstance::Disable() {
+	void HitBoxInstance::Disable(Vector4 color) {
 		for (auto& colliderData : colliders_) {
 			colliderData.second.collider->Disable();
+			colliderData.second.collider->lineColor = color;
 		}
 	};
 
@@ -7853,8 +8086,6 @@ void HitResponse::HitEffect(Engine::Collider* self, Engine::Collider* other) {
 	}
 }
 
-
-
 #pragma endregion	// 衝突応答
 
 
@@ -7999,8 +8230,8 @@ File Path: project/DirectXGame/application/base/Bullet/Base/BaseBullet.cpp
 ============================================================
 #include "BaseBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
-#include "DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 BaseBullet::~BaseBullet() {
 	// オブジェクトを削除
@@ -8173,6 +8404,313 @@ protected:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/BaseProjectile.cpp
+============================================================
+#include "BaseProjectile.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+
+#pragma region Base
+// 初期化
+void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManager,
+	Engine::GlobalVariables* globalVariables, const ProjectileSpawnInfo& spawnInfo, const ProjectileParam& param) {
+	// パラメータ保存
+	param_ = param;
+	// 発射情報保存
+	spawnInfo_ = spawnInfo;
+	// 所有者保存
+	owner = spawnInfo.owner;
+	// ターゲット保存
+	target = spawnInfo.target;
+	// 方向
+	direction = spawnInfo.direction.Normalize();
+	// 速度計算
+	velocity = direction * param.speed;
+	// 基礎初期化
+	objectComponent_ = std::make_unique<ObjectComponent>();
+	objectComponent_->InitializeInstancing(entity3DManager, globalVariables, param.name, param.modelName, param.textureName,
+		true, true, this, Engine::Object3dInstansManager::TransparencyType::kNo, false);
+	objectComponent_->SetInstancingSRT(spawnInfo_.scale, Math::DirectionToRotate(direction, Dire::Z), spawnInfo_.position);
+	objectComponent_->GetWorldTransform().Update();
+	objectComponent_->GetRigidBodyComponent()->Velocity() = velocity; // 重力加算
+
+	// コライダー生成
+	CreateCollision();
+
+
+	objectComponent_->GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
+		auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+		if (isAlive_ == false) return;
+		// ID取得
+		uint32_t otherId = otherComponent->GetUniqueId();
+		float nowTime = Engine::MyGame::NowTime(); // ← 時間取得関数（例）
+		if (objectComponent_->GetColliderComponent()->contactRecord_.CheckHistory(otherId)) {
+			return; // クールタイム中のため無視
+		}
+
+		// 衝突履歴追加
+		objectComponent_->GetColliderComponent()->contactRecord_.AddHistory(otherId, nowTime);
+
+		// コライダー処理
+		CollisionProcess(otherComponent, self, other);
+		// 衝突処理
+		ProjectileHit();
+
+		};
+
+
+
+}
+// 更新
+void Projectile::BaseProjectile::Update() {
+	if (!isAlive_) return;	// 生存していないなら更新しない 
+	// 生存時間更新
+	lifeTime += objectComponent_->GetTime();
+	if (lifeTime >= param_.maxLifeTime) {
+		isAlive_ = false;	// 生存フラグを下げる
+		objectComponent_->Delete();
+		objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+	}
+	// 移動処理
+	UpdateMovement(objectComponent_->GetTime());
+
+	objectComponent_->Update();
+}
+// 描画
+void Projectile::BaseProjectile::Draw() {}
+// 描画エフェクト
+void Projectile::BaseProjectile::DrawEffect() {}
+// 描画2D
+void Projectile::BaseProjectile::Draw2D() {}
+#pragma endregion // 基礎
+
+#pragma region Collision
+
+// コライダー生成
+void Projectile::BaseProjectile::CreateCollision() {
+	// コライダ設定(球)
+	if (param_.type == Type::Laser) {
+		// レーザーの場合は細長いカプセルコライダなども考えられるが、ここでは簡略化して球で設定
+		auto capsule = std::make_unique<Engine::CapsuleCollider>();
+		capsule->tag = param_.collisionTag;				// タグ設定
+		capsule->layer = param_.collisionLayer;			// レイヤー設定
+		capsule->collisionMask = param_.collisionMask;	// マスク設定
+		capsule->capsule.radius = param_.radius;			// 半径を適宜設定
+		capsule->Enable();								// 判定有効
+		objectComponent_->GetColliderComponent()->AddCollider(std::move(capsule));	// コライダーコンポーネントにコライダ追加
+	}
+	else {
+		auto sphere = std::make_unique<Engine::SphereCollider>();
+		sphere->tag = param_.collisionTag;				// タグ設定
+		sphere->layer = param_.collisionLayer;			// レイヤー設定
+		sphere->collisionMask = param_.collisionMask;	// マスク設定
+		sphere->radius = param_.radius;					// 半径を適宜設定
+		sphere->Enable();								// 判定有効
+		objectComponent_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加
+	}
+}
+
+// コライダー処理
+void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* otherComponent, Engine::Collider* self, Engine::Collider* other) {
+	if (param_.hitType == ProjectileHitType::Explode) {
+		HitBox::CollData data_;
+		data_.isEneble = true;
+		data_.isLine = true;
+		data_.tag = param_.collisionTag;
+		data_.layer = param_.collisionLayer;
+		data_.size = { 1.0f,2.0f,1.0f };
+		data_.name = param_.name;
+		data_.reactionData.GetDamageData().GetOne().damage = param_.damage;
+		data_.radius = param_.explosionRadius;
+		// 使用者タイプ設定
+		HitBox::UseType useType = HitBox::UseType::kOther;
+		if (CollisionTag::Player == self->tag) {
+			useType = HitBox::UseType::kPlayer;
+		}
+		else if (CollisionTag::Enemy == self->tag) {
+			useType = HitBox::UseType::kEnemy;
+		}
+		auto* selfComponent = static_cast<Engine::ColliderComponent*>(self->owner);
+		Character::BaseCharacter* owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
+		// 爆発ヒットボックス生成
+		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, { data_ }, {}, 
+			param_.explosionLifeTime, HitBox::ParentType::kParentIndependent, {}, 
+			true, &objectComponent_->GetWorldTransform());
+	}
+
+	switch (other->tag) {
+	case CollisionTag::Player:
+	{
+		// プレイヤー
+		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(otherComponent->GetHitReceiver());
+		player->AddDamage(param_.damage);	// ダメージを与える
+		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // ダメージ状態に遷移
+	}
+	break;
+	case CollisionTag::Enemy:
+	{
+		// 敵
+		Character::BaseEnemy* enemy = static_cast<Character::BaseEnemy*>(otherComponent->GetHitReceiver());
+		enemy->AddDamage(param_.damage);	// ダメージを与える
+		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage); // ダメージ状態に遷移
+	}
+	break;
+	case CollisionTag::PlayerAttack:
+	{
+
+	}
+	break;
+	case CollisionTag::EnemyAttack:
+	{
+
+	}
+	break;
+	case CollisionTag::Wall:
+	{
+
+	}
+	break;
+	default:
+		break;
+	}
+}
+
+// 衝突処理
+void Projectile::BaseProjectile::ProjectileHit() {
+	switch (param_.hitType)
+	{
+	case ProjectileHitType::Destroy:	// 破壊
+		isAlive_ = false;	// 生存フラグを下げる
+		objectComponent_->Delete();	// オブジェクト削除
+		objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+		break;
+	case ProjectileHitType::Penetrate:	// 貫通
+		// 貫通数が上限を超えたら消える
+		if (param_.maxPierceCount >= pierceCount) {
+			isAlive_ = false;	// 生存フラグを下げる
+			objectComponent_->Delete();	// オブジェクト削除
+			objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+		}
+		pierceCount++;	// 貫通カウント増加
+		break;
+	case ProjectileHitType::Explode:	// 爆破
+		isAlive_ = false;	// 生存フラグを下げる
+		objectComponent_->Delete();	// オブジェクト削除
+		objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+		break;
+	case ProjectileHitType::Bounce:	// 跳ね返る
+		isAlive_ = false;	// 生存フラグを下げる
+		objectComponent_->Delete();	// オブジェクト削除
+		break;
+	default:
+		break;
+	}
+}
+
+#pragma endregion
+
+void Projectile::BaseProjectile::UpdateMovement(float dt) {
+
+	switch (param_.moveType)
+	{
+	case ProjectileMoveType::Straight: // 直線
+		Straight(dt, GetWorldTransform(), direction, param_.speed);
+		break;
+	case ProjectileMoveType::Homing: // ホーミング
+		Homing(dt, GetWorldTransform(), target->GetWorldPosition() + Vector3{ 0,0.5f,0 }, param_.speed, param_.enableHoming, param_.homingStrength, param_.homingRange);
+		break;
+	case ProjectileMoveType::Parabola: // 放物線
+		Parabola(dt, GetWorldTransform(), objectComponent_->GetRigidBodyComponent(), direction, velocity, param_.speed, param_.gravityScale);
+		break;
+	case ProjectileMoveType::Stay: // 維持
+		Stay(dt, GetWorldTransform());
+		break;
+	default:
+		break;
+	}
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/BaseProjectile.h
+============================================================
+#pragma once
+#include "ProjectileData.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+
+namespace Character {
+	class BaseCharacter;
+	class BaseEnemy;
+	class BasePlayer;
+}
+
+namespace Projectile {
+
+	// 発射物の基底クラス
+	class BaseProjectile : public IHitReceiver{
+	public:
+
+		// 初期化
+		void Initialize(Engine::EntityManager* entity3DManager,
+			Engine::GlobalVariables* globalVariables,const ProjectileSpawnInfo& spawnInfo,
+			const ProjectileParam& param);
+
+		// 更新
+		void Update();
+		// 描画
+		void Draw();
+		// 描画エフェクト
+		void DrawEffect();
+		// 描画2D
+		void Draw2D();
+	public:
+		// 生きているか
+		bool GetIsAlive() const { return isAlive_; }
+		// コライダーコンポーネント取得
+		Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); }
+	private:
+		// コライダの作成
+		void CreateCollision();
+		// コライダー処理
+		void CollisionProcess(Engine::ColliderComponent* otherComponent,Engine::Collider* self, Engine::Collider* other);
+		// 衝突処理
+		void ProjectileHit();
+		// 更新
+		void UpdateMovement(float deltaTime);
+		//
+		void A();
+	private:
+		// ワールドトランスフォーム取得
+		Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+	private:
+		// 基盤の初期化
+		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
+		// 貫通カウント
+		int pierceCount = 0;
+		// 生存時間
+		float lifeTime = 0.0f;
+		// 生成フラグ
+		bool isAlive_ = true;
+		// 速度
+		Vector3 velocity{};
+		// 方向
+		Vector3 direction{};
+	private:
+		// 発射物のパラメータ
+		ProjectileParam param_{};
+		// 発射情報
+		ProjectileSpawnInfo spawnInfo_{};
+	private:
+		// 所有者(攻撃者)
+		Character::BaseCharacter* owner = nullptr;
+		// ターゲット
+	 	const Character::BaseCharacter* target = nullptr;
+	};
+
+}
+
+============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BulletData.cpp
 ============================================================
 #include "BulletData.h"
@@ -8295,29 +8833,55 @@ void BulletManager::Update()
 	}
 	return false;
 		});
+
+	// 各発射物更新
+	for(auto& projectile : projectiles_) {
+		projectile->Update();
+	}
+
+	projectiles_.remove_if([](const std::unique_ptr<Projectile::BaseProjectile>& projectile) {
+		if (!projectile->GetIsAlive()) {
+			return true;
+		}
+		return false;
+		});
+
 }
 
-void BulletManager::Draw()
-{
+void BulletManager::Draw() {
 	// 描画
 	for (auto& bullet : bullets_) {
 		bullet->Draw();
 	}
+
+
+	for (auto& projectile : projectiles_) {
+		projectile->Draw();
+	}
+
 }
 
-void BulletManager::DrawEffect()
-{
+void BulletManager::DrawEffect() {
 	// エフェクト描画
 	for (auto& bullet : bullets_) {
 		bullet->DrawP();
 	}
+
+	for (auto& projectile : projectiles_) {
+		projectile->DrawEffect();
+	}
+
 }
 
-void BulletManager::Draw2D()
-{
+void BulletManager::Draw2D() {
 	// スプライト描画
 	for (auto& bullet : bullets_) {
 		bullet->Draw2D();
+	}
+
+
+	for (auto& projectile : projectiles_) {
+		projectile->Draw2D();
 	}
 }
 
@@ -8326,14 +8890,19 @@ void BulletManager::AddBullet(std::unique_ptr<BaseBullet> bullet){
 	bullets_.push_back(std::move(bullet));
 }
 
+void BulletManager::AddProjectile(std::unique_ptr<Projectile::BaseProjectile> projectile) {
+	// 格納
+	projectiles_.push_back(std::move(projectile));
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BulletManager.h
 ============================================================
 #pragma once
 // 
-#include"DirectXGame/application/base/Bullet/Base/BaseBullet.h"
-
+#include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
+#include "DirectXGame/application/base/Bullet/Base/BaseProjectile.h"
 
 // 前方宣言
 namespace Character {
@@ -8373,10 +8942,16 @@ public:
 	// 弾の追加
 	void AddBullet(std::unique_ptr<BaseBullet> bullet);
 
+	// 発射物の追加
+	void AddProjectile(std::unique_ptr<Projectile::BaseProjectile> projectile);
+
 public: // 取得or設定
 	// 弾リストを取得
 	const std::list<std::unique_ptr<BaseBullet>>& GetBullets() const { return bullets_; }
 		
+	// 発射物リストを取得
+	const std::list<std::unique_ptr<Projectile::BaseProjectile>>& GetProjectiles() const { return projectiles_; }
+
 	// エフェクトの設定
 	void SetEffect(EffectSystem* effect) { this->effect = effect; }
 private:
@@ -8384,6 +8959,8 @@ private:
 	// 弾
 	std::list<std::unique_ptr<BaseBullet>> bullets_;
 
+	// 発射物
+	std::list<std::unique_ptr<Projectile::BaseProjectile>> projectiles_;
 
 private:
 	EffectSystem* effect;								// 演出
@@ -8407,19 +8984,21 @@ File Path: project/DirectXGame/application/base/Bullet/Base/BulletSpawn.cpp
 
 
 void BulletSpawn::Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect) {
+	Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect, BulletManager* bulletManager) {
 	this->entityManager = entityManager;
 	this->globalVariables = globalVariables;
 	this->camera = camera;
 	this->effect = effect;
 	this->owner = owner;
-	this->bulletManager = owner->GetBulletManager();
+	if (owner)
+		this->bulletManager = owner->GetBulletManager();
+	if (bulletManager)
+		this->bulletManager = bulletManager;
 }
 
 
 
-void BulletSpawn::GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad)
-{
+void BulletSpawn::GenerateBulletRange(BulletType type, Vector3 position, Vector3 targetPos, float rad) {
 	std::unique_ptr<BaseBullet> bullet;
 	bullet = std::make_unique<PlayerRangeBombingBullet>();
 	bullet->SetTargetRange(targetPos, rad);	// 範囲とターゲット設定
@@ -8452,12 +9031,22 @@ void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Charac
 	bulletManager->AddBullet(std::move(bullet));
 }
 
+void BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+	const Projectile::ProjectileParam& param, Character::BaseCharacter* target) {
+	std::unique_ptr<Projectile::BaseProjectile> projectile = std::make_unique<Projectile::BaseProjectile>();
+	// 初期化
+	projectile->Initialize(entityManager, globalVariables, spawnInfo, param); // 初期化
+	// 追加
+	bulletManager->AddProjectile(std::move(projectile));
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Bullet/Base/BulletSpawn.h
 ============================================================
 #pragma once
 #include"DirectXGame/application/base/Bullet/Base/BaseBullet.h"
+#include "DirectXGame/application/base/Bullet/Base/BaseProjectile.h"
 
 /// <summary>
 /// 弾の出現処理を扱うクラス
@@ -8468,7 +9057,7 @@ public:
 
 	// 初期化＋持ち主設定
 	void Initialize(Character::BaseCharacter* owner, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect);
+		Engine::GlobalVariables* globalVariables, Engine::Camera* camera, EffectSystem* effect, BulletManager* bulletManager = nullptr);
 
 	void Generate();
 
@@ -8477,6 +9066,11 @@ public:
 
 	// 弾を生成
 	void GenerateBullet(BulletType type, const BulletInfo& info, Character::BaseCharacter* target = nullptr);
+
+	// 発射物を生成
+	void GenerateProjectile(const Projectile::ProjectileSpawnInfo& spawnInfo,
+		const Projectile::ProjectileParam& param, Character::BaseCharacter* target = nullptr);
+
 private:
 	Character::BaseCharacter* owner = nullptr;
 	BulletManager* bulletManager = nullptr;
@@ -8490,12 +9084,246 @@ private:
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/ProjectileData.h
+============================================================
+#pragma once
+#include "ProjectileFunction.h"
+#include "DirectXGame/engine/Collider/3d/ColliderComponent.h"
+// 前方宣言
+namespace Character {
+	class BaseCharacter;
+}
+// 発射物関連のデータや関数をまとめる名前空間
+namespace Projectile {
+
+	struct ProjectileSpawnInfo
+	{
+		Vector3 position{};
+		Vector3 direction{};   // 正規化済み推奨
+		Vector3 scale = { 1.0f,1.0f,1.0f };
+		Character::BaseCharacter* owner = nullptr;
+		Character::BaseCharacter* target = nullptr;
+
+		float powerScale = 1.0f;
+	};
+
+	// 発射物の種類
+	enum class Type {
+		Normal,     // 通常弾
+		Homing,     // ホーミング弾
+		Laser,      // レーザー
+		Shotgun,    // ショットガン
+		Rapid,      // 連射弾
+		Penetration,// 貫通弾 
+	};
+
+	// 発射物の移動タイプ
+	enum class ProjectileMoveType {
+		Straight,   // 直線
+		Homing,     // ホーミング
+		Parabola,   // 放物線
+		Stay,       // 維持
+	};
+
+	// 衝突タイプ
+	enum class ProjectileHitType {
+		Destroy,    // 破壊
+		Penetrate,  // 貫通
+		Explode,    //爆発
+		Bounce,     //跳ね返り
+	};
+
+	struct ProjectileParam
+	{
+		// 発射物の名前（識別用）
+		std::string name = "";
+		// モデル名
+		std::string modelName = "";
+		// テクスチャ名
+		std::string textureName = "";
+
+
+		// 移動速度
+		float speed = 0.0f;
+		// 生存時間
+		float maxLifeTime = 0.0f;
+		// コライダの半径
+		float radius = 0.5f;
+		// ダメージ量
+		float damage = 0.0f;
+		// タイプ
+		Type type = Type::Normal;
+		// 移動タイプ
+		ProjectileMoveType moveType = ProjectileMoveType::Straight;
+		// 衝突タイプ
+		ProjectileHitType hitType = ProjectileHitType::Destroy;
+		// 衝突タグ
+		CollisionTag collisionTag = CollisionTag::None;
+		// 衝突レイヤー
+		CollisionLayer collisionLayer = CollisionLayer::Default;
+		// 衝突マスク
+		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
+
+		// 貫通するか
+		bool isPierce = false;
+		// 貫通する場合の最大貫通数
+		int maxPierceCount = 0;
+		// 跳ね返り回数
+		bool enableGravity = false;
+		// 重力の強さ
+		float gravityScale = 1.0f;
+		// ホーミングの有効化
+		bool enableHoming = false;
+		// ホーミングの強さ
+		float homingStrength = 0.0f;
+		// ホーミングの追尾範囲
+		float homingRange = 0.0f;
+		// トレイルエフェクトを生成するか
+		bool generateTrailEffect = false;
+		// トレイルエフェクトの持続時間
+		float trailEffectLifeTime = 0.0f;
+		
+		// 爆発の持続時間
+		float explosionLifeTime = 0.0f;
+		// 爆発の半径
+		float explosionRadius = 0.0f;
+		// 爆発のダメージ
+		float knockBackPower = 0.0f;
+	};
+
+
+}
+
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/ProjectileFunction.cpp
+============================================================
+#include "ProjectileFunction.h"
+
+// ホーミング
+void Projectile::Homing(float dt,Engine::WorldTransform& world,const Vector3& targetPos,float speed, bool enable, float strength, float range) {
+
+	// =========================
+	// 現在の前方向を rotation から算出
+	// 座標系 : X=Right, Y=Up, Z=Forward
+	// rotation_.x = Pitch
+	// rotation_.y = Yaw
+	// =========================
+	const float pitch = world.rotate_.x;
+	const float yaw = world.rotate_.y;
+
+	Vector3 forward = {
+		std::sin(yaw) * std::cos(pitch),
+		-std::sin(pitch),
+		std::cos(yaw) * std::cos(pitch)
+	};
+	forward = Normalize(forward);
+
+	// デフォルトは直進
+	Vector3 moveDir = forward;
+
+	// =========================
+	// ホーミング判定
+	// =========================
+	Vector3 toTarget = {
+		targetPos.x - world.translate_.x,
+		targetPos.y - world.translate_.y,
+		targetPos.z - world.translate_.z
+	};
+
+	const float distSq = toTarget.LengthSq();
+	const float rangeSq = range * range;
+
+	// enable が true かつ、range <= 0 なら常時ホーミング、
+	// range > 0 なら範囲内のみホーミング
+	const bool canHoming =
+		enable &&
+		(distSq > 0.00001f) &&
+		(range <= 0.0f || distSq <= rangeSq);
+
+	if (canHoming) {
+		Vector3 targetDir = Normalize(toTarget);
+
+		// strength は「1秒あたりどれくらい向きを寄せるか」のイメージ
+		float t = Math::Clamp(strength * dt, 0.0f, 1.0f);
+
+		// 現在の向きからターゲット方向へ徐々に曲げる
+		moveDir = Normalize(Lerp(forward, targetDir, t));
+
+		// 向きを移動方向へ合わせる
+		world.rotate_.y = std::atan2(moveDir.x, moveDir.z);
+
+		const float horizontalLen = std::sqrt(moveDir.x * moveDir.x + moveDir.z * moveDir.z);
+		world.rotate_.x = std::atan2(-moveDir.y, horizontalLen);
+	}
+
+	// =========================
+	// 移動
+	// =========================
+	world.translate_.x += moveDir.x * speed * dt;
+	world.translate_.y += moveDir.y * speed * dt;
+	world.translate_.z += moveDir.z * speed * dt;
+
+
+}
+
+// 放物線
+void Projectile::Parabola(float dt,Engine::WorldTransform& world, Engine::RigidBodyComponent* rigid, Vector3& dire, const Vector3& velo, float speed, float gravityScale) {
+	Vector3 velocity = velo;
+	Vector3 direction = Normalize(velocity);
+	
+
+	rigid->SetGravityScale(gravityScale);
+	rigid->Integrate(dt, world);
+
+	direction = Normalize(rigid->GetVelocity());
+	
+	world.rotate_ = Math::DirectionToRotate(direction,Dire::Z);
+	world.Update();
+}
+
+// 直線
+void Projectile::Straight(float dt,Engine::WorldTransform& world, Vector3& dire, float speed) {
+	world.translate_ += dire * speed * dt;
+}
+
+// 維持
+void Projectile::Stay(float dt,Engine::WorldTransform& world) {
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Bullet/Base/ProjectileFunction.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Math/MathFunctions.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
+
+namespace Projectile {
+
+	// ホーミング
+	void Homing(float dt,Engine::WorldTransform& world, const Vector3& targetPos, float speed, bool enable, float strength, float range);
+
+	// 放物線
+	void Parabola(float dt,Engine::WorldTransform& world,Engine::RigidBodyComponent* rigid, Vector3& dire,const Vector3& velo, float speed, float gravityScale);
+
+	// 直線
+	void Straight(float dt,Engine::WorldTransform& world,Vector3& dire, float speed);
+
+	// 維持
+	void Stay(float dt,Engine::WorldTransform& world);
+
+}
+
+============================================================
 File Path: project/DirectXGame/application/base/Bullet/EnemyBullet.cpp
 ============================================================
 #include "EnemyBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 
 #include "DirectXGame/engine/math/random.h"
@@ -8670,7 +9498,7 @@ File Path: project/DirectXGame/application/base/Bullet/PlayerBullet.cpp
 #include "PlayerBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 
 #include "DirectXGame/engine/math/random.h"
@@ -8851,7 +9679,7 @@ File Path: project/DirectXGame/application/base/Bullet/PlayerRangeBombingBullet.
 #include "PlayerRangeBombingBullet.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 
 #include "DirectXGame/engine/math/random.h"
@@ -10198,11 +11026,12 @@ void FollowCamera::Update()
         // 回転速度
         const float kRotateSpeed = 0.03f;
         const float kRotateSpeedX = 0.02f;
+        Vector3 targetPos = target_->GetWorldPosition();
 
         // ロックオンするか
         if (lockOnObject) {
             // ロックオン時の処理
-            Vector3 targetPos = target_->worldMat_.GetWorldPosition();
+           
             Vector3 lockOnPos = lockOnObject->GetWorldTransform().worldMat_.GetWorldPosition();
 
             // カメラ方向をロックオンターゲットに向ける
@@ -10236,7 +11065,6 @@ void FollowCamera::Update()
         Matrix4x4 rotateMatrix = rotX * rotY;
         Vector3 offset = TransformNormal(baseOffset, rotateMatrix);
 
-        Vector3 targetPos = target_->worldMat_.GetWorldPosition();
         Vector3 desiredCameraPos = Add(targetPos, offset);
 
         // 地面への沈み補正
@@ -11234,7 +12062,7 @@ namespace Character {
 		// キャラクター取得
 		Type GetCharacterType() const { return parameterComponent_->characterType_; }
 		// キャラクターの生存状態を取得
-		bool GetAlive() const { return stateMachine_->GetCurrentMainState() !=  CharacterMainState::Die; }
+		bool GetAlive() const { return stateMachine_->GetCurrentMainState() != CharacterMainState::Die; }
 		// キャラクターの生存状態を取得
 		void SetAlive(bool is) { objectComponent_->GetObjectStateFlags().isAlive = is; }
 		// HP取得
@@ -11292,6 +12120,8 @@ namespace Character {
 		BulletManager* GetBulletManager() { return this->bulletManager; }
 		// カメラ管理クラス取得
 		CameraManager* GetCameraManager() { return this->cameraManager; }
+		// ヒットボックス管理取得
+		HitBox::System* GetHitBoxSystem() { return this->hitBoxSystem; }
 		// スペシャルポイント管理クラス取得
 		SpecalPointManager* GetSpecalPointManager() { return this->specalPointManager; }
 		// 入力システム取得
@@ -11302,6 +12132,8 @@ namespace Character {
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
 		// 弾マネージャーの設定
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; };
+		// ヒットボックス管理の設定
+		void SetHitBoxSystem(HitBox::System* hitBoxSystem) { this->hitBoxSystem = hitBoxSystem; }
 		// カメラ管理クラスの設定
 		void SetCameraManager(CameraManager* cameraManager) { this->cameraManager = cameraManager; };
 		// スペシャルポイント管理クラス設定
@@ -11370,6 +12202,8 @@ namespace Character {
 		EffectSystem* effect = nullptr;
 		// 弾管理
 		BulletManager* bulletManager = nullptr;
+		// ヒットボックス管理
+		HitBox::System* hitBoxSystem = nullptr;
 		// カメラ管理クラス
 		CameraManager* cameraManager = nullptr;
 		// 必殺技ポイント管理クラス
@@ -11397,7 +12231,6 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterContext.
 #include "DirectXGame/application/base/Attack/AttackController.h"
 
 void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {
-	this->owner = owner;	// 所有者
 	this->input = input;	// 入力データ
 	this->worldTransform = &owner->GetObjectComponent()->GetWorldTransform();	// ワールドトランスフォーム
 	this->rigidBody = owner->GetObjectComponent()->GetRigidBodyComponent();		// リジットボディー
@@ -11405,11 +12238,12 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
-	this->comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
 }
 
-Character::CharacterContext Character::CharacterContextSystem::CreateContext(float dt) {
+Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
+	
 	CharacterContext ctx{};
+	if (!owner) return ctx;
 	// 時間
 	ctx.dt = dt;
 	// 入力データ
@@ -11460,6 +12294,9 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(flo
 			ctx.isJumpAttacking = true;
 		}
 	}
+	if(ctx.state == CharacterMainState::Special) {
+		ctx.isSpecialAttacking = true;
+	}
 	if (ctx.state == CharacterMainState::Jump) {
 		ctx.isJumping = true;
 	}
@@ -11470,8 +12307,9 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(flo
 		ctx.isCanJump = true;
 	}
 	// 攻撃時の重力
+	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
 	if (comboStateMachine->GetCurrentState()) {
-		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale_;
+		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
 	}
 	// 上昇時の重力
 	ctx.upGravity = jumpSystem->GetData().upGravity;
@@ -11550,6 +12388,8 @@ namespace Character {
 		bool isJumping = false;
 		// ジャンプ攻撃中か
 		bool isJumpAttacking = false;
+		// 必殺技中か
+		bool isSpecialAttacking = false;
 		// 移動可能か
 		bool isCanMove = true;
 		// ジャンプ可能か
@@ -11580,11 +12420,9 @@ namespace Character {
 		// 初期化
 		void Initialize(BaseCharacter* owner,const InputSystem* input);
 
-		CharacterContext CreateContext(float dt);
+		CharacterContext CreateContext(BaseCharacter* owner,float dt);
 
 	private:
-		// キャラクター（所有者）
-		const BaseCharacter* owner = nullptr;
 		// 入力データ
 		const InputSystem* input = nullptr;
 		// ワールドトランスフォーム
@@ -11875,12 +12713,13 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 
 
 namespace Character {
-	void CharacterManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+	void CharacterManager::Initialize(InputSystem* inputSystem, HitBox::System* hitBoxSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Engine::Camera* camera) {
 		this->inputSystem = inputSystem;		// インプット
 		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables; // 保存項目
 		this->camera = camera;					// カメラ
+		this->hitBoxSystem = hitBoxSystem;		// ヒットボックスシステム
 	}
 
 	void CharacterManager::Update(bool isMove) {
@@ -11938,8 +12777,7 @@ namespace Character {
 		}
 	}
 
-	void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform)
-	{
+	void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
 		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
 		// EnemyTypeから生成関数
@@ -11958,7 +12796,7 @@ namespace Character {
 
 		std::unique_ptr<BaseEnemy> enemy = it->second();
 
-
+		enemy->SetHitBoxSystem(hitBoxSystem);
 		enemy->SetTagNumber(characterCount_);
 		enemy->SetID(characterCount_);					// ID設定
 		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
@@ -11975,11 +12813,11 @@ namespace Character {
 		characterCount_++;
 	}
 
-	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform)
-	{
+	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform){
 		std::unique_ptr<BasePlayer> player;
 
 		player = std::make_unique<NormalPlayer>();
+		player->SetHitBoxSystem(hitBoxSystem);
 		player->SetTagNumber(characterCount_);
 		player->SetFollowCamera(followCamera);		// フォローカメラ設定
 		player->SetCameraManager(cameraManager);	// カメラ管理クラス設定
@@ -12028,10 +12866,10 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 // ベースキャラクター
 #include"BaseCharacter.h"
 // アプリケーション(敵)
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 // アプリケーション(プレイヤー)
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 
 #include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include "CharacterGlobalData.h"
@@ -12055,7 +12893,7 @@ namespace Character {
 	{
 	public:
 		// 初期化
-		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
+		void Initialize(InputSystem* inputSystem,HitBox::System* hitBoxSystem,Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 		// 更新
@@ -12147,6 +12985,7 @@ namespace Character {
 		CameraManager* cameraManager = nullptr;	// カメラ管理
 		EffectSystem* effect = nullptr;
 		SpecalPointManager* specalPointManager = nullptr;
+		HitBox::System* hitBoxSystem = nullptr;		// ヒットボックスシステム
 	};
 }
 
@@ -12176,440 +13015,12 @@ File Path: project/DirectXGame/application/base/Character/Base/Characters.h
 #include"DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemy.h"
 
 ============================================================
-File Path: project/DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.cpp
-============================================================
-#include "BaseEnemy.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
-#include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-
-namespace Character {
-
-	Vector3 BaseEnemy::GetTargetPos()
-	{
-		// ターゲット位置
-		return GetTarget()->GetWorldPosition();
-	}
-
-	float BaseEnemy::GetTargetDistance()
-	{
-		// ターゲットとの距離
-		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(GetTarget()->GetWorldPosition());
-	}
-
-	Vector3 BaseEnemy::TargetDirection()
-	{
-		// ターゲットの方向
-		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-	}
-
-#pragma region
-
-	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName)
-	{
-		// オブジェクトコンポーネント追加
-		objectComponentShadow_ = std::make_unique<ObjectComponent>();
-		// オブジェクトインスタンシング初期化
-		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
-			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
-		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
-		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
-		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
-		objectComponentShadow_->Update();
-	}
-
-	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-		const std::string& modelName, const std::string& charaName, float colliderRadius) {
-
-		this->entityManager = entityManager;	// エンティティ3d
-		this->globalVariables = globalVariables;	// 保存項目
-
-		// オブジェクトコンポーネント追加
-		objectComponent_ = std::make_unique<ObjectComponent>();
-		// オブジェクトインスタンシング初期化
-		objectComponent_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
-			, Engine::Object3dInstansManager::TransparencyType::kNo,false);
-		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
-		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
-
-
-		// コライダ位置用トランスフォーム初期化
-		worldCollider_.Initialize();
-		worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
-		worldCollider_.translate_.y = colliderRadius / 2.0f;
-
-		// キャラクターのパラメータコンポーネントを生成
-		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
-		parameterComponent_->Initialize();
-		
-		// 移動コンポーネント初期化
-		moveComponent_ = std::make_unique<MovementComponent>();
-		moveComponent_->UseGlobal(false);
-		moveComponent_->Initialize(this,nullptr,globalVariables, MovementComponent::ControlType::Manual, "_" + charaName);
-		moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
-		moveComponent_->GetMoveSystem()->Data().minSpeed = -100;
-		// 保存項目追加
-		CreateGroup(charaName);
-
-		// 保存項目初期化(キャラクター全体)
-		InitializeBaseAddItem();
-		// 保存項目初期化(敵全体)
-		InitializeBaseEnemyAddItem();
-
-		// SphereColliderを追加
-		auto sphere = std::make_unique<Engine::SphereCollider>();
-		sphere->Enable();					// コライダ有効
-		sphere->tag = CollisionTag::Enemy;	// タグ設定
-		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
-		sphere->radius = colliderRadius; // 半径を適宜設定
-		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
-
-		// コールバック登録（例：プレイヤーと衝突したらダメージ）
-		GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
-			// プレイヤーかチェック
-			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
-			if (!otherComponent) return;
-
-			//  敵同士の衝突応答
-			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
-
-			// 壁との衝突応答
-			//responseSystem_->GetHitResponse()->HitWall(self, other);
-
-			// 影響
-			//responseSystem_->GetHitResponse()->HitEffect(self, other);
-
-
-			};
-
-
-		// 視野
-		visionComponent_ = std::make_unique<VisionComponent>();
-		visionComponent_->SetAlertView(120.0f, 100.0f);
-		visionComponent_->SetCombatView(90.0f, 100.0f);
-		visionComponent_->SetLineCommon(entityManager->Get3DLineCommon());
-		visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
-
-
-		// 攻撃応答システムクラス初期化
-		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
-		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
-		// オブジェクト状態生存
-		objectComponent_->GetObjectStateFlags().isAlive = true;
-
-		// 戦闘
-		attackController_ = std::make_unique<AttackController>();
-		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
-
-		// コンテキストシステム
-		contextSystem_ = std::make_unique<CharacterContextSystem>();
-		contextSystem_->Initialize(this, inputSystem);
-
-		// 丸影用オブジェクトコンポーネント初期化
-		InitShadowObjectComponent(charaName);
-
-		// ステートマシーン初期化
-		InitStateMachine();
-	}
-
-	void BaseEnemy::BaseUpdate() {
-
-		if (objectComponent_ == nullptr) { return; }
-		assert(this);
-
-		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
-
-		// 保存項目更新(キャラクター全体)
-		UpdateBaseGetValue();
-		// 保存項目更新(敵全体)
-		UpdateBaseEnemyGetValue();
-
-		
-		// HPが0以下なら
-		if (GetHP() <= 0) {
-			objectComponentShadow_->GetWorldTransform().scale_ = {};
-		}
-		else {
-			//　攻撃更新
-			attackController_->Update(ctx);
-			// 応答システム
-			responseSystem_->Update(ctx.dt);
-			// キャラクターパラメーター更新
-			parameterComponent_->Update();
-			// 移動コンポーネント更新
-			moveComponent_->Update(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent(),ctx);
-			
-			// コライダのワールドトランスフォーム更新
-			worldCollider_.Update();
-			// コライダーコンポーネント更新
-			objectComponent_->GetColliderComponent()->UpdateAll(worldCollider_);
-
-			objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
-			objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
-			objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
-		}
-	
-		// ステート
-		stateMachine_->Update(ctx);
-
-
-		objectComponentShadow_->Update();
-	}
-	
-#pragma endregion 
-
-
-	const BaseCharacter* BaseEnemy::GetTarget() {
-		return GetAttackController()->GeyLockOnSysutem()->GetTarget();
-	}
-
-	void BaseEnemy::SetTargetCharacters(BaseCharacter* target) {
-		GetAttackController()->GeyLockOnSysutem()->SetTargets({target});
-	}
-	
-}
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h
-============================================================
-#pragma once
-#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
-#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-#include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
-#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
-#include "EnemyData.h"
-
-namespace Character {
-	class BasePlayer;
-
-	/// <summary>
-	/// 敵クラス
-	/// </summary>
-	class BaseEnemy : public BaseCharacter {
-	public:
-		// 初期化
-		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
-			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
-
-		// 基盤となる初期化
-		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
-			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f);
-		// 毎フレーム更新
-		virtual void Update() = 0;
-		// 基盤の更新
-		void BaseUpdate();
-		// 描画エフェクト
-		virtual void DrawEffect() = 0;
-		// 描画2d
-		virtual void Draw2D() = 0;
-		// 移動
-		virtual void Move() = 0;
-		// ジャンプ
-		virtual void Jump() = 0;
-		// 攻撃
-		virtual void Attack() = 0;
-		// ターゲット取得
-		const BaseCharacter* GetTarget();
-
-		void SetTargetCharacters(BaseCharacter* target);
-
-
-	public:
-		// パーティクル発生
-		virtual void Emit() = 0;
-		// ID設定
-		void SetID(uint32_t id) { id_ = id; }
-		// 敵タイプ取得
-		EnemyType GetType() const { return type_; };
-		// 敵タイプ設定
-		void SetType(EnemyType type) { type_ = type; };
-
-		// 対象の位置(プレイヤー)
-		Vector3 GetTargetPos();
-		// 対象との距離(プレイヤー)
-		float GetTargetDistance();
-		// ターゲット方向取得
-		Vector3 TargetDirection();
-	private:
-
-		void InitializeBaseEnemyAddItem() {
-			AddItem("後退スピード", globalData_.retreatSpeed);
-			AddItem("攻撃猶予時間", globalData_.attackTimer);
-			AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
-			AddItem("後退開始範囲", globalData_.startRetreatingRadius);
-
-
-
-			globalData_.retreatSpeed = GetValue<float>("後退スピード");
-			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
-			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
-			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
-
-		}
-		// 更新保存項目
-		void UpdateBaseEnemyGetValue() {
-			globalData_.retreatSpeed = GetValue<float>("後退スピード");
-			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
-			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
-			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
-		}
-
-		//
-		void InitShadowObjectComponent(const std::string& charaName);
-
-	protected:
-		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
-		uint32_t id_ = 0; // ID
-	protected:
-		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
-		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
-		
-		// グローバルデータ
-		EnemyGlobalData globalData_;
-	protected:
-		Engine::WorldTransform worldEffect_;
-	};
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Base/Enemy/EnemyData.h
-============================================================
-#pragma once
-
-namespace Character {
-	// 敵キャラクターの種類を定義する列挙型
-	enum class EnemyType
-	{
-		kSmallMelee,	// 小型近接
-		kSmallRanged,	// 小型遠距離
-
-		kMediumMelee,	// 中型近接
-
-
-		kDummy,			// ダミー
-	};
-
-
-	struct Enemy{
-
-	};
-
-
-
-	// 敵保存項目
-	struct EnemyGlobalData {
-		// 攻撃猶予時間
-		float attackTimer = 3.0f;
-		// 攻撃開始範囲
-		float attackStartRadius = 10.0f;
-		// 後退開始範囲
-		float startRetreatingRadius = 3.0f;
-		// 後退スピード
-		float retreatSpeed = 1.0f;
-	};
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Base/Player/BasePlayer.h
-============================================================
-#pragma once
-#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-
-
-
-#include "DirectXGame/application/base/UI/PlayerUI.h"
-#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-#include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
-
-// 前方宣言
-
-namespace Combo {
-	class Editor;
-}
-
-
-
-
-//前方宣言
-class FollowCamera;
-
-
-namespace Character {
-
-	class BaseEnemy;
-
-	/// <summary>
-	/// プレイヤクラス
-	/// </summary>
-	class BasePlayer : public BaseCharacter
-	{
-	public:
-		// 初期化
-		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
-			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
-
-		// 毎フレーム更新
-		virtual void Update() = 0;
-		// 描画エフェクト
-		virtual void DrawEffect() = 0;
-		// 描画2d
-		virtual void Draw2D() = 0;
-		// 移動
-		virtual void Move() = 0;
-		// ジャンプ
-		virtual void Jump() = 0;
-		// 攻撃(弱攻撃)
-		virtual void Attack() = 0;
-		// 攻撃(強攻撃)
-		virtual void HeavyAttack() {};
-		/// 攻撃(スキル攻撃)
-		virtual void SkillAttack() {};
-
-
-
-		// ターゲットキャラクターを設定
-		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
-
-		// リロード
-		virtual void Reload() {};
-		// コンボデータをシーケンサー適応
-		virtual void ApplyComboData(Combo::Editor* comboEditor) {};
-
-
-	public:
-		// フォローカメラの設定
-		void SetFollowCamera(FollowCamera* followCamera) { this->followCamera = followCamera; }
-
-		// プレイヤUI取得
-		virtual PlayerUI* GetPlayerUI() = 0;
-
-		// SPゲージ加算
-		void AddSpGauge(int d) { special_->AddGauge(d); };
-		// SP発動可能？
-		bool GetIsSpecial() const { return special_->GetIsSpecial(); }
-	protected:
-		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
-		FollowCamera* followCamera = nullptr;					// フォローカメラ
-		bool isCreativeMode = false;							// クリエイティブモードかどうか
-		// サブ武器
-		std::unique_ptr<BaseWeapon> subWeapon_ = nullptr;
-
-	};
-}
-
-
-============================================================
 File Path: project/DirectXGame/application/base/Character/Crowd/CrowdManager.cpp
 ============================================================
 #include "CrowdManager.h"
 #include <DirectXGame/engine/Math/Random.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 namespace Character {
 
@@ -13272,11 +13683,353 @@ namespace Character {
 }
 
 ============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.cpp
+============================================================
+#include "BaseEnemy.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
+#include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
+#include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+
+namespace Character {
+
+	Vector3 BaseEnemy::GetTargetPos()
+	{
+		// ターゲット位置
+		return GetTarget()->GetWorldPosition();
+	}
+
+	float BaseEnemy::GetTargetDistance()
+	{
+		// ターゲットとの距離
+		return GetObjectComponent()->GetWorldTransform().GetWorldPosition().DistanceXZ(GetTarget()->GetWorldPosition());
+	}
+
+	Vector3 BaseEnemy::TargetDirection()
+	{
+		// ターゲットの方向
+		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+	}
+
+#pragma region
+
+	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName)
+	{
+		// オブジェクトコンポーネント追加
+		objectComponentShadow_ = std::make_unique<ObjectComponent>();
+		// オブジェクトインスタンシング初期化
+		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
+			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
+		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
+		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
+		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
+		objectComponentShadow_->Update();
+	}
+
+	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
+		const std::string& modelName, const std::string& charaName, float colliderRadius) {
+
+		this->entityManager = entityManager;	// エンティティ3d
+		this->globalVariables = globalVariables;	// 保存項目
+
+		// オブジェクトコンポーネント追加
+		objectComponent_ = std::make_unique<ObjectComponent>();
+		// オブジェクトインスタンシング初期化
+		objectComponent_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
+			, Engine::Object3dInstansManager::TransparencyType::kNo,false);
+		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
+		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
+
+
+		// コライダ位置用トランスフォーム初期化
+		worldCollider_.Initialize();
+		worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
+		worldCollider_.translate_.y = colliderRadius / 2.0f;
+
+		// キャラクターのパラメータコンポーネントを生成
+		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
+		parameterComponent_->Initialize();
+		
+		// 移動コンポーネント初期化
+		moveComponent_ = std::make_unique<MovementComponent>();
+		moveComponent_->UseGlobal(false);
+		moveComponent_->Initialize(this,nullptr,globalVariables, MovementComponent::ControlType::Manual, "_" + charaName);
+		moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
+		moveComponent_->GetMoveSystem()->Data().minSpeed = -100;
+		// 保存項目追加
+		CreateGroup(charaName);
+
+		// 保存項目初期化(キャラクター全体)
+		InitializeBaseAddItem();
+		// 保存項目初期化(敵全体)
+		InitializeBaseEnemyAddItem();
+
+		// SphereColliderを追加
+		auto sphere = std::make_unique<Engine::SphereCollider>();
+		sphere->Enable();					// コライダ有効
+		sphere->tag = CollisionTag::Enemy;	// タグ設定
+		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
+		sphere->radius = colliderRadius; // 半径を適宜設定
+		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
+
+		// コールバック登録（例：プレイヤーと衝突したらダメージ）
+		GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
+			// プレイヤーかチェック
+			auto* otherComponent = static_cast<Engine::ColliderComponent*>(other->owner);
+			if (!otherComponent) return;
+
+			if (other->tag ==  CollisionTag::Enemy) {
+				isStopping_ = true;
+			}
+
+			//  敵同士の衝突応答
+			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
+
+			// 壁との衝突応答
+			//responseSystem_->GetHitResponse()->HitWall(self, other);
+
+			// 影響
+			//responseSystem_->GetHitResponse()->HitEffect(self, other);
+			};
+
+
+		// 視野
+		visionComponent_ = std::make_unique<VisionComponent>();
+		visionComponent_->SetAlertView(120.0f, 100.0f);
+		visionComponent_->SetCombatView(90.0f, 100.0f);
+		visionComponent_->SetLineCommon(entityManager->Get3DLineCommon());
+		visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
+
+
+		// 攻撃応答システムクラス初期化
+		responseSystem_ = std::make_unique<ResponseSystem>();
+		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
+		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
+		// オブジェクト状態生存
+		objectComponent_->GetObjectStateFlags().isAlive = true;
+
+		// 戦闘
+		attackController_ = std::make_unique<AttackController>();
+		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
+
+		// コンテキストシステム
+		contextSystem_ = std::make_unique<CharacterContextSystem>();
+		contextSystem_->Initialize(this, inputSystem);
+
+		// 丸影用オブジェクトコンポーネント初期化
+		InitShadowObjectComponent(charaName);
+
+		// ステートマシーン初期化
+		InitStateMachine();
+	}
+
+	void BaseEnemy::BaseUpdate() {
+
+		if (objectComponent_ == nullptr) { return; }
+		assert(this);
+
+		CharacterContext ctx = contextSystem_->CreateContext(this,GetTime());
+
+		// 保存項目更新(キャラクター全体)
+		UpdateBaseGetValue();
+		// 保存項目更新(敵全体)
+		UpdateBaseEnemyGetValue();
+
+		
+		// HPが0以下なら
+		if (GetHP() <= 0) {
+			objectComponentShadow_->GetWorldTransform().scale_ = {};
+		}
+		else {
+			//　攻撃更新
+			attackController_->Update(ctx);
+			// 応答システム
+			responseSystem_->Update(ctx.dt);
+			// キャラクターパラメーター更新
+			parameterComponent_->Update();
+			// 移動コンポーネント更新
+			moveComponent_->Update(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent(),ctx);
+			
+			// コライダのワールドトランスフォーム更新
+			worldCollider_.Update();
+			// コライダーコンポーネント更新
+			objectComponent_->GetColliderComponent()->UpdateAll(worldCollider_);
+
+			objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
+			objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
+			objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
+		}
+	
+		// ステート
+		stateMachine_->Update(ctx);
+
+
+		objectComponentShadow_->Update();
+	}
+	
+#pragma endregion 
+
+
+	const BaseCharacter* BaseEnemy::GetTarget() {
+		return GetAttackController()->GeyLockOnSysutem()->GetTarget();
+	}
+
+	void BaseEnemy::SetTargetCharacters(BaseCharacter* target) {
+		GetAttackController()->GeyLockOnSysutem()->SetTargets({target});
+	}
+	
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
+#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+#include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
+#include "EnemyData.h"
+
+namespace Character {
+	class BasePlayer;
+
+	/// <summary>
+	/// 敵クラス
+	/// </summary>
+	class BaseEnemy : public BaseCharacter {
+	public:
+		// 初期化
+		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
+			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
+
+		// 基盤となる初期化
+		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
+			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
+			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f);
+		// 毎フレーム更新
+		virtual void Update() = 0;
+		// 基盤の更新
+		void BaseUpdate();
+		// 描画エフェクト
+		virtual void DrawEffect() = 0;
+		// 描画2d
+		virtual void Draw2D() = 0;
+		// 移動
+		virtual void Move() = 0;
+		// ジャンプ
+		virtual void Jump() = 0;
+		// 攻撃
+		virtual void Attack() = 0;
+		// ターゲット取得
+		const BaseCharacter* GetTarget();
+
+		void SetTargetCharacters(BaseCharacter* target);
+
+
+	public:
+		// パーティクル発生
+		virtual void Emit() = 0;
+		// ID設定
+		void SetID(uint32_t id) { id_ = id; }
+		// 敵タイプ取得
+		EnemyType GetType() const { return type_; };
+		// 敵タイプ設定
+		void SetType(EnemyType type) { type_ = type; };
+
+		// 対象の位置(プレイヤー)
+		Vector3 GetTargetPos();
+		// 対象との距離(プレイヤー)
+		float GetTargetDistance();
+		// ターゲット方向取得
+		Vector3 TargetDirection();
+	private:
+
+		void InitializeBaseEnemyAddItem() {
+			AddItem("後退スピード", globalData_.retreatSpeed);
+			AddItem("攻撃猶予時間", globalData_.attackTimer);
+			AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
+			AddItem("後退開始範囲", globalData_.startRetreatingRadius);
+
+
+
+			globalData_.retreatSpeed = GetValue<float>("後退スピード");
+			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
+			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
+			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+
+		}
+		// 更新保存項目
+		void UpdateBaseEnemyGetValue() {
+			globalData_.retreatSpeed = GetValue<float>("後退スピード");
+			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
+			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
+			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+		}
+
+		//
+		void InitShadowObjectComponent(const std::string& charaName);
+
+	protected:
+		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
+		uint32_t id_ = 0; // ID
+	protected:
+		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
+		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
+		//
+		bool isStopping_ = false;
+		// グローバルデータ
+		EnemyGlobalData globalData_;
+	protected:
+		Engine::WorldTransform worldEffect_;
+	};
+}
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/EnemyData.h
+============================================================
+#pragma once
+
+namespace Character {
+	// 敵キャラクターの種類を定義する列挙型
+	enum class EnemyType
+	{
+		kSmallMelee,	// 小型近接
+		kSmallRanged,	// 小型遠距離
+
+		kMediumMelee,	// 中型近接
+
+
+		kDummy,			// ダミー
+	};
+
+
+	struct Enemy{
+
+	};
+
+
+
+	// 敵保存項目
+	struct EnemyGlobalData {
+		// 攻撃猶予時間
+		float attackTimer = 3.0f;
+		// 攻撃開始範囲
+		float attackStartRadius = 10.0f;
+		// 後退開始範囲
+		float startRetreatingRadius = 3.0f;
+		// 後退スピード
+		float retreatSpeed = 1.0f;
+	};
+}
+
+============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.cpp
 ============================================================
 #include "DummyEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -13342,7 +14095,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.h
 ============================================================
 #pragma once
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DummyEnemyState.h"
 
 namespace Character {
@@ -13454,7 +14207,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Large/Melee/Larg
 ============================================================
 #include "LargeMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -13496,7 +14249,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Large/Melee/LargeMeleeEnemy.h
 ============================================================
 #pragma once
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
 namespace Character {
@@ -13552,7 +14305,7 @@ void Character::LargeRangeEnemy::hththt()
 File Path: project/DirectXGame/application/base/Character/Enemy/Large/Range/LargeRangeEnemy.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 namespace Character {
 
@@ -13576,7 +14329,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 ============================================================
 #include "MediumMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -13616,6 +14369,9 @@ namespace Character {
 			});
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<MediumMeleeEnemyDieState>(p);
+			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<MediumMeleeEnemyDamageState>(p);
 			});
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
@@ -13680,7 +14436,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/MediumMeleeEnemy.h
 ============================================================
 #pragma once
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "MediumMeleeEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
@@ -13741,8 +14497,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 namespace Character {
 #pragma region Move
 
-	void MediumMeleeEnemyMoveState::Update(const CharacterContext& ctx)
-	{
+	void MediumMeleeEnemyMoveState::Update(const CharacterContext& ctx)	{
 		// 時間更新
 		timer_ += ctx.dt;
 
@@ -13840,13 +14595,33 @@ namespace Character {
 
 	}
 
-	void MediumMeleeEnemyDieState::Enter()
-	{
+	void MediumMeleeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
 
-#pragma endregion // 死亡
+#pragma endregion 
+
+#pragma region Damage
+
+	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
+		// 時間更新
+		timer_ -= ctx.dt;
+		if (timer_ <= 0.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
+	}
+
+	void MediumMeleeEnemyDamageState::Exit(){
+		timer_ = damageTime_;
+	}
+
+	void MediumMeleeEnemyDamageState::Enter(){
+		timer_ = damageTime_;
+	}
+
+
+#pragma endregion
 }
 
 
@@ -13859,8 +14634,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 
 namespace Character {
 	// 移動
-	class MediumMeleeEnemyMoveState : public MoveState
-	{
+	class MediumMeleeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
 		MediumMeleeEnemyMoveState(BaseCharacter* enemy)
@@ -13884,8 +14658,7 @@ namespace Character {
 	/// <summary>
 	/// 攻撃
 	/// </summary>
-	class MediumMeleeEnemyAttackState :public AttackState
-	{
+	class MediumMeleeEnemyAttackState :public AttackState {
 	public:
 		MediumMeleeEnemyAttackState(BaseCharacter* enemy)
 			: AttackState(enemy) {
@@ -13904,8 +14677,7 @@ namespace Character {
 	/// <summary>
 	/// 死亡状態
 	/// </summary>
-	class MediumMeleeEnemyDieState :public DieState
-	{
+	class MediumMeleeEnemyDieState :public DieState {
 	public:
 		MediumMeleeEnemyDieState(BaseCharacter* enemy)
 			: DieState(enemy) {
@@ -13922,6 +14694,27 @@ namespace Character {
 	private:
 		float dieTimer_ = 2.0f;
 		float timer_ = 0.0f;
+	};
+
+	/// <summary>
+	/// 被弾状態
+	/// </summary>
+	class MediumMeleeEnemyDamageState : public DamageState {
+	public:
+		MediumMeleeEnemyDamageState(BaseCharacter* enemy)
+			: DamageState(enemy) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+		// 初期化
+		void Enter() override;
+	private:
+		float timer_ = 0.0f;
+		float damageTime_ = 0.5f;
 	};
 }
 
@@ -13985,7 +14778,7 @@ namespace Character {
         data_.name = "NormalEnemy_SwingHitBox";
         data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
 
-        enemy->GetAttackController()->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy, { data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, &enemy->GetWorldTransform());
+        enemy->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy,enemy,{ data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, &enemy->GetWorldTransform());
     }
 
     void MediumMeleeEnemyAttackSwingSubState::Update(float deltaTime) {
@@ -14136,7 +14929,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/Small
 ============================================================
 #include "SmallCartEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -14224,7 +15017,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemy.h
 ============================================================
 #pragma once
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallCartEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
@@ -14410,7 +15203,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/Smal
 ============================================================
 #include "SmallMeleeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -14419,20 +15212,11 @@ namespace Character {
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, 
 			"enemyBodySG01.obj", "smallMeleeEnemy",0.75f);
-		
-		
-		
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-
-
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
-
-		
 		moveSpeed_ = moveComponent_->GetMoveSystem()->Data().maxSpeed;
-
-
 		// 武器
 		weapon_ = std::make_unique<SmallMeleeWeapon>();
 		weapon_->SetCharacter(this);
@@ -14450,14 +15234,14 @@ namespace Character {
 	}
 
 	void SmallMeleeEnemy::Update() {
+		isStopping_ = false;
 		// 基盤の更新
 		BaseUpdate();
 		//
 		weapon_->Update(); // 武器更新
 	}
 
-	void SmallMeleeEnemy::Draw2D() {
-	}
+	void SmallMeleeEnemy::Draw2D() {}
 
 	void SmallMeleeEnemy::Emit() {
 		// エフェクト座標更新
@@ -14471,6 +15255,7 @@ namespace Character {
 	}
 
 	void SmallMeleeEnemy::Move() {
+		if (isStopping_) return;
 		// 距離設定
 		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 		dire.y = 0.0f;
@@ -14509,6 +15294,10 @@ namespace Character {
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<SmallMeleeEnemyDieState>(p);
 			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<SmallMeleeEnemyDamageState>(p);
+			});
+
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
 }
@@ -14517,7 +15306,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemy.h
 ============================================================
 #pragma once
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallMeleeEnemyState.h"
 #include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
@@ -14557,6 +15346,8 @@ namespace Character {
 		float attackTimer_ = 0.0f;
 		//
 		float moveSpeed_ = 1.0f;
+		//
+		bool isStopping_ = false;
 	};
 }
 
@@ -14572,8 +15363,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/Smal
 namespace Character {
 #pragma region Move
 
-	void SmallMeleeEnemyMoveState::Update(const CharacterContext& ctx)
-	{
+	void SmallMeleeEnemyMoveState::Update(const CharacterContext& ctx){
 		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character);
 
 		// 時間更新
@@ -14592,12 +15382,9 @@ namespace Character {
 		}
 	}
 
-	void SmallMeleeEnemyMoveState::Exit()
-	{
-	}
+	void SmallMeleeEnemyMoveState::Exit(){}
 
-	void SmallMeleeEnemyMoveState::Enter()
-	{
+	void SmallMeleeEnemyMoveState::Enter(){
 		timer_ = 0.0f;
 		character->GetMoveComponent()->GetMoveSystem()->Data().maxSpeed = 3.0f;
 	}
@@ -14646,8 +15433,7 @@ namespace Character {
 
 #pragma region Die
 
-	void SmallMeleeEnemyDieState::Update(const CharacterContext& ctx)
-	{
+	void SmallMeleeEnemyDieState::Update(const CharacterContext& ctx){
 		// 時間更新
 		timer_ -= ctx.dt;
 		if (timer_ <= 0.0f) {
@@ -14671,17 +15457,37 @@ namespace Character {
 		}
 	}
 
-	void SmallMeleeEnemyDieState::Exit()
-	{
-	}
+	void SmallMeleeEnemyDieState::Exit(){}
 
-	void SmallMeleeEnemyDieState::Enter()
-	{
+	void SmallMeleeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
 
 #pragma endregion
+	
+#pragma region Damage
+	
+	void SmallMeleeEnemyDamageState::Update(const CharacterContext& ctx) {
+		// 時間更新
+		timer_ -= ctx.dt;
+		if (timer_ <= 0.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
+	}
+
+	void SmallMeleeEnemyDamageState::Exit(){
+		timer_ = damageTime_;
+	}
+
+	void SmallMeleeEnemyDamageState::Enter(){
+		timer_ = damageTime_;
+	}
+
+
+
+#pragma endregion
+
 }
 
 
@@ -14696,8 +15502,7 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
-	class SmallMeleeEnemyMoveState : public MoveState
-	{
+	class SmallMeleeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
 		SmallMeleeEnemyMoveState(BaseCharacter* enemy)
@@ -14721,8 +15526,7 @@ namespace Character {
 	/// <summary>
 	/// 攻撃
 	/// </summary>
-	class SmallMeleeEnemyAttackState :public AttackState
-	{
+	class SmallMeleeEnemyAttackState :public AttackState {
 	public:
 		SmallMeleeEnemyAttackState(BaseCharacter* enemy)
 			: AttackState(enemy) {
@@ -14742,8 +15546,7 @@ namespace Character {
 	/// <summary>
 	/// 死亡状態
 	/// </summary>
-	class SmallMeleeEnemyDieState :public DieState
-	{
+	class SmallMeleeEnemyDieState :public DieState {
 	public:
 		SmallMeleeEnemyDieState(BaseCharacter* enemy)
 			: DieState(enemy) {
@@ -14761,6 +15564,28 @@ namespace Character {
 		float dieTimer_ = 2.0f;
 		float timer_ = 0.0f;
 	};
+
+	/// <summary>
+	/// 被弾状態
+	/// </summary>
+	class SmallMeleeEnemyDamageState : public DamageState {
+	public:
+		SmallMeleeEnemyDamageState(BaseCharacter* enemy)
+			: DamageState(enemy) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+		// 初期化
+		void Enter() override;
+	private:
+		float timer_ = 0.0f;
+		float damageTime_ = 0.5f;
+	};
+
 }
 
 
@@ -14815,7 +15640,7 @@ namespace Character {
         data_.name = "NormalEnemy_SwingHitBox";
         data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
 
-        enemy->GetAttackController()->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy, { data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, &enemy->GetWorldTransform());
+        enemy->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy, enemy,{ data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, true,&enemy->GetWorldTransform());
     }
 
     void SmallMeleeAttackSwingSubState::Update(float deltaTime) {
@@ -14971,7 +15796,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/Smal
 ============================================================
 #include "SmallRangeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 
 namespace Character {
@@ -15093,6 +15918,9 @@ namespace Character {
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<SmallRangeEnemyDieState>(p);
 			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<SmallRangeEnemyDamageState>(p);
+			});
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
 }
@@ -15101,7 +15929,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/SmallRangeEnemy.h
 ============================================================
 #pragma once
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "SmallRangeEnemyState.h"
 #include <DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.h>
 
@@ -15156,8 +15984,10 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/Smal
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 
 namespace Character {
-	void SmallRangeEnemyMoveState::Update(const CharacterContext& ctx)
-	{
+
+#pragma region Move
+
+	void SmallRangeEnemyMoveState::Update(const CharacterContext& ctx){
 		// 時間更新
 		timer_ += ctx.dt;
 
@@ -15173,17 +16003,15 @@ namespace Character {
 		}
 	}
 
-	void SmallRangeEnemyMoveState::Exit()
-	{
-	}
+	void SmallRangeEnemyMoveState::Exit(){}
 
-	void SmallRangeEnemyMoveState::Enter()
-	{
-	}
+	void SmallRangeEnemyMoveState::Enter(){}
 
+#pragma endregion
 
-	void SmallRangeEnemyAttackState::Update(const CharacterContext& ctx)
-	{
+#pragma region Attack
+
+	void SmallRangeEnemyAttackState::Update(const CharacterContext& ctx){
 		SmallRangeWeapon* weapon = static_cast<SmallRangeWeapon*>(character->GetWeapon());
 
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(character);
@@ -15197,17 +16025,15 @@ namespace Character {
 		character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 	}
 
-	void SmallRangeEnemyAttackState::Exit()
-	{
-	}
+	void SmallRangeEnemyAttackState::Exit(){}
 
-	void SmallRangeEnemyAttackState::Enter()
-	{
-	}
+	void SmallRangeEnemyAttackState::Enter(){}
 
+#pragma endregion
 
-	void SmallRangeEnemyDieState::Update(const CharacterContext& ctx)
-	{
+#pragma region Die
+
+	void SmallRangeEnemyDieState::Update(const CharacterContext& ctx){
 		// 時間更新
 		timer_ -= ctx.dt;
 		if (timer_ <= 0.0f) {
@@ -15231,15 +16057,31 @@ namespace Character {
 		}
 	}
 
-	void SmallRangeEnemyDieState::Exit()
-	{
-	}
+	void SmallRangeEnemyDieState::Exit(){}
 
-	void SmallRangeEnemyDieState::Enter()
-	{
+	void SmallRangeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
+
+#pragma endregion
+
+	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
+		// 時間更新
+		timer_ -= ctx.dt;
+		if (timer_ <= 0.0f) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
+	}
+
+	void SmallRangeEnemyDamageState::Exit(){
+		timer_ = damageTime_;
+	}
+
+	void SmallRangeEnemyDamageState::Enter(){
+		timer_ = damageTime_;
+	}
+
 }
 
 ============================================================
@@ -15253,8 +16095,7 @@ namespace Character {
 	class BaseCharacter;
 
 	// 移動
-	class SmallRangeEnemyMoveState : public MoveState
-	{
+	class SmallRangeEnemyMoveState : public MoveState {
 	public:
 		// コンストラクタ
 		SmallRangeEnemyMoveState(BaseCharacter* enemy)
@@ -15278,8 +16119,7 @@ namespace Character {
 	/// <summary>
 	/// 攻撃
 	/// </summary>
-	class SmallRangeEnemyAttackState :public AttackState
-	{
+	class SmallRangeEnemyAttackState :public AttackState	{
 	public:
 		SmallRangeEnemyAttackState(BaseCharacter* enemy)
 			: AttackState(enemy) {
@@ -15298,8 +16138,7 @@ namespace Character {
 	/// <summary>
 	/// 死亡状態
 	/// </summary>
-	class SmallRangeEnemyDieState :public DieState
-	{
+	class SmallRangeEnemyDieState :public DieState {
 	public:
 		SmallRangeEnemyDieState(BaseCharacter* enemy)
 			: DieState(enemy) {
@@ -15317,9 +16156,121 @@ namespace Character {
 		float dieTimer_ = 2.0f;
 		float timer_ = 0.0f;
 	};
+
+	/// <summary>
+	/// 被弾状態
+	/// </summary>
+	class SmallRangeEnemyDamageState : public DamageState {
+	public:
+		SmallRangeEnemyDamageState(BaseCharacter* enemy)
+			: DamageState(enemy) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override;
+		// 初期化
+		void Enter() override;
+	private:
+		float timer_ = 0.0f;
+		float damageTime_ = 0.5f;
+	};
+
+
 }
 
 
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Player/Base/BasePlayer.h
+============================================================
+#pragma once
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+
+
+
+#include "DirectXGame/application/base/UI/PlayerUI.h"
+#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+#include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+
+// 前方宣言
+
+namespace Combo {
+	class Editor;
+}
+
+
+
+
+//前方宣言
+class FollowCamera;
+
+
+namespace Character {
+
+	class BaseEnemy;
+
+	/// <summary>
+	/// プレイヤクラス
+	/// </summary>
+	class BasePlayer : public BaseCharacter
+	{
+	public:
+		// 初期化
+		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
+
+		// 毎フレーム更新
+		virtual void Update() = 0;
+		// 描画エフェクト
+		virtual void DrawEffect() = 0;
+		// 描画2d
+		virtual void Draw2D() = 0;
+		// 移動
+		virtual void Move() = 0;
+		// ジャンプ
+		virtual void Jump() = 0;
+		// 攻撃(弱攻撃)
+		virtual void Attack() = 0;
+		// 攻撃(強攻撃)
+		virtual void HeavyAttack() {};
+		/// 攻撃(スキル攻撃)
+		virtual void SkillAttack() {};
+
+
+
+		// ターゲットキャラクターを設定
+		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
+
+		// リロード
+		virtual void Reload() {};
+		// コンボデータをシーケンサー適応
+		virtual void ApplyComboData(Combo::Editor* comboEditor) {};
+
+
+	public:
+		// フォローカメラの設定
+		void SetFollowCamera(FollowCamera* followCamera) { this->followCamera = followCamera; }
+
+		// プレイヤUI取得
+		virtual PlayerUI* GetPlayerUI() = 0;
+
+		// SPゲージ加算
+		void AddSpGauge(int d) { special_->AddGauge(d); };
+		// SP発動可能？
+		bool GetIsSpecial() const { return special_->GetIsSpecial(); }
+	protected:
+		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
+		FollowCamera* followCamera = nullptr;					// フォローカメラ
+		bool isCreativeMode = false;							// クリエイティブモードかどうか
+		// サブ武器
+		std::unique_ptr<BaseWeapon> subWeapon_ = nullptr;
+
+	};
+}
 
 
 ============================================================
@@ -15331,14 +16282,14 @@ File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPl
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include "assert.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboEditor.h"
 
 namespace Character {
 
-	void NormalPlayer::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+	void NormalPlayer::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		this->entityManager = entityManager;	// エンティティ
@@ -15348,13 +16299,13 @@ namespace Character {
 		// オブジェクトコンポーネント追加
 		objectComponent_ = std::make_unique<ObjectComponent>();
 		objectComponent_->Initialize(entityManager, globalVariables,
-			"PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning,false);
+			"PlayerBase", "testCharacter.gltf", true, true, this, Engine::ObjectModelType::kSkinning, false);
 		// 保存項目追加
 		CreateGroup("Player");
 
-		objectComponent_->SetSRT({1,1,1}, {}, position);					//　SRT設定
+		objectComponent_->SetSRT({ 1,1,1 }, {}, position);					//　SRT設定
 		objectComponent_->GetObject3D()->InitAnimationComponent();				// アニメーションコンポーネント初期化
-		objectComponent_->SetIsUpdateColliderComponent(false);		
+		objectComponent_->SetIsUpdateColliderComponent(false);
 
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
@@ -15363,12 +16314,12 @@ namespace Character {
 		// HP設定
 		parameterComponent_->parameters->HP.Initiaize(200, 0, 200, 0);
 		// スタミナ設定
-		parameterComponent_->parameters->stamina.Initiaize(100, 0, 100, 5);
-		
+		parameterComponent_->parameters->stamina.Initiaize(100, 0, 100, 10);
+
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
-		moveComponent_->Initialize(this,inputSystem,globalVariables, MovementComponent::ControlType::Manual, "");
+		moveComponent_->Initialize(this, inputSystem, globalVariables, MovementComponent::ControlType::Manual, "");
 		moveComponent_->SetMoveType(MoveType::ACCELERATE);
 		moveComponent_->SetIsStickToSpeed(true);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Manual);
@@ -15451,7 +16402,7 @@ namespace Character {
 		// オブジェクトインスタンシング初期化
 		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.dds",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
-		
+
 		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 
@@ -15480,8 +16431,9 @@ namespace Character {
 		ReloadComboData();
 	}
 
-	void NormalPlayer::RequestAttack(AttackInput input)
-	{
+	void NormalPlayer::RequestAttack(AttackInput input) {
+		if (isSpecial) return;
+
 		const auto s = stateMachine_->GetCurrentMainState();
 		const bool canStart = (s == CharacterMainState::Move) ||
 			(s == CharacterMainState::Idle) ||
@@ -15498,29 +16450,27 @@ namespace Character {
 		auto* ac = GetAttackController();
 		ac->SetIsAttack(true);
 
-		if (isAttack){
+		if (isAttack) {
 			ac->GetComboSystem()->InputCombo(input);
 			return;
 		}
 
-		if (canStart){
+		if (canStart) {
 			stateMachine_->ChangeState(CharacterMainState::Attack);
-
-			// 開始コンボ名の決定を「入力種類×状況」でまとめる
-			if (!moveComponent_->GetIsLanding()){
-				ac->GetComboSystem()->StartCombo("JumpAttack");
-			}
-			else		{
-				// ここをテーブル化するとスキル追加が楽
-				switch (input){
-				case AttackInput::Light: ac->GetComboSystem()->StartCombo("Attack1"); break;
-				case AttackInput::Heavy: ac->GetComboSystem()->StartCombo("HeavyAttack01"); break;
-				case AttackInput::Skill:
-					ac->GetComboSystem()->StartCombo("SkillAttack01"); 
-					parameterComponent_->Stamina().Add(-30);
-					break;
-				default: break;
+			switch (input) {
+			case AttackInput::Light:
+				if (!moveComponent_->GetIsLanding()) {
+					ac->GetComboSystem()->StartCombo("JumpAttack");
 				}
+				else {
+					ac->GetComboSystem()->StartCombo("Attack1");
+				}
+				break;
+			case AttackInput::Skill:
+				ac->GetComboSystem()->StartCombo("SkillAttack01");
+				parameterComponent_->Stamina().Add(-30);
+				break;
+			default: break;
 			}
 		}
 	}
@@ -15564,8 +16514,9 @@ namespace Character {
 		ApplyGlobalVariables();
 
 		// コンテキストシステム
-		CharacterContext ctx = contextSystem_->CreateContext(GetTime());
+		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
 		isCanJump = ctx.isCanJump;
+		isSpecial = ctx.isSpecialAttacking;
 #ifdef _DEBUG
 		ImGui::Begin("Debug");
 		if (ImGui::Button("SP")) {
@@ -15613,7 +16564,7 @@ namespace Character {
 		// コライダのワールドトランスフォーム更新
 		worldCollider_.Update();
 		// コライダーコンポーネント更新
-		GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);		
+		GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
 		//武器更新
 		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
@@ -15621,12 +16572,12 @@ namespace Character {
 		// サブ武器更新
 		subWeapon_->Update();
 
-		
+
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
 		objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
 		objectComponentShadow_->Update();
-	
+
 		// UI更新
 		ui_->SetImageLeftTopPosAndRatio(entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageleftTopPos(),
 			entityManager->GetObject3dCommon()->GetDxCommon()->GetPostEffectManager()->GetImageRatio());
@@ -15636,9 +16587,9 @@ namespace Character {
 
 #pragma region Draw
 
-	void NormalPlayer::DrawEffect(){}
+	void NormalPlayer::DrawEffect() {}
 
-	void NormalPlayer::Draw2D(){
+	void NormalPlayer::Draw2D() {
 		// UI表示
 		ui_->SetIsTextmax(special_->GetIsSpecial());
 
@@ -15656,6 +16607,7 @@ namespace Character {
 #pragma region Move
 
 	void NormalPlayer::Jump() {
+		if (isSpecial) return;
 		// 生きていてステートの状態が移動状態ならジャンプステートへ移動
 		if (GetAlive() && isCanJump &&
 			moveComponent_->GetIsJump() && moveComponent_->GetIsLanding()) {
@@ -15681,8 +16633,8 @@ namespace Character {
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
 
-		HitBox::System* hitBoxSystem = GetAttackController()->GetHitBoxSystem();
-		
+		HitBox::System* hitBoxSystem = GetHitBoxSystem();
+
 		// ヒットボックスデータ作成
 		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
 		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},6.0f };
@@ -15696,33 +16648,33 @@ namespace Character {
 		hitBoxSystem->CreateHitBoxCollData("obbColl1_3", HitBox::ShapeType::kOBB, HitBox::UseType::kPlayer, hitBoxdata7);
 
 		// コンボ１のデータ送る
-		comboSystem->CreateCombo("Attack1", { {hitBoxSystem->GetHitBoxCollData("attackObb")} });
+		comboSystem->CreateCombo("Attack1", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2", {{hitBoxSystem->GetHitBoxCollData("attackObb") } });
+		comboSystem->CreateCombo("Attack2", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 		// コンボ３のデータ送る
-		comboSystem->CreateCombo("Attack3", { {hitBoxSystem->GetHitBoxCollData("attackObb") } });
+		comboSystem->CreateCombo("Attack3", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 		// ジャンプコンボのデータ送る
-		comboSystem->CreateCombo("JumpAttack", { { hitBoxSystem->GetHitBoxCollData("attackSphere") } });
+		comboSystem->CreateCombo("JumpAttack", { hitBoxSystem->GetHitBoxCollData("attackSphere") });
 		// コンボ4のデータ送る
-		comboSystem->CreateCombo("Attack4", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
+		comboSystem->CreateCombo("Attack4", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 		// コンボ5のデータ送る
-		comboSystem->CreateCombo("Attack5", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
+		comboSystem->CreateCombo("Attack5", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 		// コンボ6のデータ送る
-		comboSystem->CreateCombo("Attack6", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
+		comboSystem->CreateCombo("Attack6", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 		// コンボ7のデータ送る
-		comboSystem->CreateCombo("Attack7", { { hitBoxSystem->GetHitBoxCollData("attackObb") } });
+		comboSystem->CreateCombo("Attack7", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 
 
 
 		// コンボ8のデータ送る
-		comboSystem->CreateCombo("HeavyAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_2")  } }, GamePadButton::GAMEPAD_X);
+		//comboSystem->CreateCombo("HeavyAttack01", {  hitBoxSystem->GetHitBoxCollData("obbColl1_2")  });
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("HeavyAttack02", { { hitBoxSystem->GetHitBoxCollData("attackObb")  } }, GamePadButton::GAMEPAD_X);
+		//comboSystem->CreateCombo("HeavyAttack02", {  hitBoxSystem->GetHitBoxCollData("attackObb")  });
 		// コンボ8のデータ送る
-		comboSystem->CreateCombo("HeavyAttack03", { { hitBoxSystem->GetHitBoxCollData("attackObb") } }, GamePadButton::GAMEPAD_X);
-		
+		//comboSystem->CreateCombo("HeavyAttack03", {  hitBoxSystem->GetHitBoxCollData("attackObb")  });
+
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("SkillAttack01", { { hitBoxSystem->GetHitBoxCollData("obbColl1_3") } }, GamePadButton::GAMEPAD_Y);
+		comboSystem->CreateCombo("SkillAttack01", { hitBoxSystem->GetHitBoxCollData("obbColl1_3") });
 
 
 
@@ -15738,17 +16690,17 @@ namespace Character {
 		comboSystem->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
 
 
-		comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Heavy, "HeavyAttack02"); // コンボ連結	
-		comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Light, "Attack7"); // コンボ連結	
+		//comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Heavy, "HeavyAttack02"); // コンボ連結	
+		//comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Light, "Attack7"); // コンボ連結	
 
-		comboSystem->ConnectCombo("HeavyAttack02", AttackInput::Heavy, "HeavyAttack03"); // コンボ連結	
+		//comboSystem->ConnectCombo("HeavyAttack02", AttackInput::Heavy, "HeavyAttack03"); // コンボ連結	
 
 		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Skill, "SkillAttack01"); // コンボ連結
 		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Light, "Attack6"); // コンボ連結
 
 	}
 
-	void NormalPlayer::Reload() { ReloadComboData();}
+	void NormalPlayer::Reload() { ReloadComboData(); }
 
 
 #pragma endregion // そのほか
@@ -15758,7 +16710,7 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
@@ -15837,6 +16789,8 @@ namespace Character {
 
 		// ジャンプ可能か
 		bool isCanJump = false;
+		//必殺技中か
+		bool isSpecial = false;
 	};
 
 }
@@ -16390,7 +17344,7 @@ File Path: project/DirectXGame/application/base/Character/Spawn/CharacterSpawn.h
 #include "DirectXGame/engine/struct/Structs3D.h"
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
-#include <DirectXGame/application/base/Character/Base/Enemy/EnemyData.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/EnemyData.h>
 
 namespace Engine {
 	class LineCommon;
@@ -18317,13 +19271,13 @@ namespace Game {
 
 		Game::GameEventData data;
 		data.eventType_ = GameEventType::kStart;
-		data.time_.max = 5.0f;
+		data.time_.max = 2.5f;
 		data.isMove = false;
 		CreateGameEvent("start", data);
 
 		data.isMove = true;
 		data.eventType_ = GameEventType::kBreakTime;
-		data.time_.max = 3.0f;
+		data.time_.max = 1.5f;
 		CreateGameEvent("breakTime", data);
 
 		Vector3 popPos = { 0,1,100 };
@@ -18341,9 +19295,9 @@ namespace Game {
 		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos2, size, 4.0f);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, popPos, size, 0.75f);
 		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, popPos4, size, 0.75f);
-		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
-		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
-		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -18351,12 +19305,12 @@ namespace Game {
 
 		CreateGameEvent("battle01", data);
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
-
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
+		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
+		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
+		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
+		//
+		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
+		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
 
 
 		data.eventType_ = GameEventType::kBattle;
@@ -20433,7 +21387,10 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 		return;
 	}
 
-	if (world.translate_.y <= 0.02f) {
+	float currentY = world.GetWorldPosition().y;
+	float velocityY = rigid.GetVelocity().y * cxt.dt;
+
+	if (currentY + velocityY <= groundHeight_) {
 		isLinding_ = true;
 	}
 	else {
@@ -20441,8 +21398,9 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 	}
 	
 	if (isLinding_) {
-		world.translate_.y = -0.01f;
-		rigid.Velocity().y = 0.0f;			// y速度を0に
+		world.translate_.y = groundHeight_;
+		rigid.ResetAcceleration();			// 加速度リセット
+		rigid.ResetVelocity();				// 速度リセット
 		rigid.SetIsGravity(false);			// 重力をオフ
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
 	} 
@@ -20622,7 +21580,7 @@ File Path: project/DirectXGame/application/base/Move/Jump/JumpData.h
 /// </summary>
 struct JumpData {
 	// ジャンプ力
-	float power = 400.0f;
+	float power = 350.0f;
 	// 上昇時の重力係数
 	float upGravity = 15.0f;
 	// 落下時の重力係数
@@ -20647,11 +21605,8 @@ void JumpSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 	InputHoldProcess(ctx.dt);
 	// ジャンプホールド処理
 	JumpHoldProcess(ctx.dt,rigid);
-
-	int j = jumpCount_;
-
 	// 着地
-	if (ctx.onGround) {
+	if (ctx.onGround && !isInputHeld_) {
 		jumpCount_ = data_.maxJumpCount;	// ジャンプ回数リセット
 	}
 }
@@ -20666,8 +21621,7 @@ void JumpSystem::StartJump(Engine::RigidBodyComponent& rigid)
 	isInputHeld_ = true;	// 入力ホールド
 	isInputPressed_ = true;	// 入力プレス
 	holdTimer_ = 0.0f;		// ホールドタイマーリセット
-
-	rigid.AddForce({ 0,data_.power,0 }); // 上方向に力を加える
+	rigid.Velocity().y = data_.power;
 }
 
 
@@ -20696,7 +21650,7 @@ void JumpSystem::JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid)
 
 	// ホールド中の処理
 	if (isInputHeld_) {
-		rigid.AddForce({ 0,data_.power,0 }); // 上方向に力を加える
+		//rigid.AddForce({ 0,data_.power,0 }); // 上方向に力を加える
 	}
 }
 
@@ -21786,7 +22740,7 @@ File Path: project/DirectXGame/application/base/Special/Point/SpecialPoint.cpp
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-#include <DirectXGame/application/base/Character/Base/Player/BasePlayer.h>
+#include <DirectXGame/application/base/Character/Player/Base/BasePlayer.h>
 
 #pragma region Manager
 
@@ -23906,6 +24860,15 @@ void GameStartUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	fade_->SetSize(uiSize_);
 	fade_->SetColor(uiColor_);
 
+	// ゲーム準備前UI
+	gameStartPreparationUI_ = std::make_unique<Engine::Sprite>();
+	gameStartPreparationUI_->Initialize(entityManager->GetSpriteCommon(), "resources/Texture/text/gameStartPreparation.dds");
+	gameStartPreparationUI_->SetPosition(gameStartPosition_);
+	gameStartPreparationUI_->SetAnchorPoint(uiAnchorPoint_);
+	gameStartPreparationUI_->SetTextureSize(gameStartUiSize_);
+	gameStartPreparationUI_->SetSize(gameStartUiSize_);
+	gameStartPreparationUI_->SetColor(numUiColor_);
+	
 	// カウントUI
 	InitUICount("numCount", numPosition_, 1, false);
 	Engine::UICount* hitCount = GetUICount("numCount");
@@ -23938,7 +24901,7 @@ void GameStartUI::Update(float dt) {
 	fade_->SetColor(uiColor_);
 	fade_->Update();
 
-	
+	gameStartPreparationUI_->Update();
 }
 
 void GameStartUI::Draw() {
@@ -23946,6 +24909,9 @@ void GameStartUI::Draw() {
 	if (isNum) {
 	//	hitCount->Draw();
 	}
+
+	gameStartPreparationUI_->Draw();
+
 	fade_->Draw();
 }
 
@@ -23987,7 +24953,10 @@ public:
 	void IsNum(bool is) { isNum = is; }
 private:
 	// フェード
-	std::unique_ptr<Engine::Sprite> fade_;
+	std::unique_ptr<Engine::Sprite> fade_ = nullptr;
+	// ゲーム開始準備UI
+	std::unique_ptr<Engine::Sprite> gameStartPreparationUI_ = nullptr;
+
 private:
 	// 位置
 	Vector2 position_ = { 640, 360 };
@@ -23995,6 +24964,9 @@ private:
 	Vector2 uiAnchorPoint_ = { 0.5f,0.5f };
 	Color uiColor_ = { 1.0f,1.0f ,1.0f ,0.0f };
 	bool isfade_ = false;
+private:
+	Vector2 gameStartPosition_ = { 1150, 120 };
+	Vector2 gameStartUiSize_ = { 256,64 };
 private:
 	Vector2 numPosition_ = { 640, 360 };
 	Vector2 numUiSize_ = { 150,300 };
@@ -24181,7 +25153,7 @@ private:
 
 	
 	struct HitTextData {
-		Vector2 pos_ = { 950,100 };
+		Vector2 pos_ = { 1000,180 };
 		int instance = 3;
 		Vector2 size = { 64 * 2 / 3, 96 * 2 / 3 };
 		Vector2 nameSize = { 100 * 1.5f,33 * 1.5f };
@@ -24298,17 +25270,17 @@ void PlayerUI::InitializeOperationUI() {
 	normalAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
 	normalAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
-	// 通常攻撃UI初期化
-	InitUIPair("havyAttack", attackTextData.pos2);
-	Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
-	havyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
-	havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
-	havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
-	havyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
-	havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
-	havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
-	havyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
+	//// 通常攻撃UI初期化
+	//InitUIPair("havyAttack", attackTextData.pos2);
+	//Engine::UIPair* havyAttackPair = GetUIPair("havyAttack");
+	//havyAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
+	//havyAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
+	//havyAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
+	//havyAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
+	//havyAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
+	//havyAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
+	//havyAttackPair->GetSecondSprite()->SetAnchorPoint(attackTextData.anchorPoint2); // アンカーポイント設定
+	//havyAttackPair->GetSecondSprite()->SetSize(attackTextData.size2);			// サイズ設定
 
 	// 必殺技UI初期化
 	InitUIPair("special", spTextData.pos + Vector2{0,50});
@@ -24326,7 +25298,7 @@ void PlayerUI::InitializeOperationUI() {
 
 
 
-	// 必殺技UI初期化
+	// ジャンプUI初期化
 	InitUIPair("jump", jumpTextData.pos + Vector2{ 0,100 });
 	Engine::UIPair* jumpPair = GetUIPair("jump");
 	jumpPair->SetOffset(jumpTextData.offset);
@@ -25150,8 +26122,8 @@ struct RangedWeaponData
 File Path: project/DirectXGame/application/base/Weapon/Bullet/BulletPlayerWeapon.cpp
 ============================================================
 #include "BulletPlayerWeapon.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include"DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include<DirectXGame/application/base/Bullet/Base/BulletManager.h>
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
@@ -25459,7 +26431,7 @@ private: // 一旦
 File Path: project/DirectXGame/application/base/Weapon/Bullet/BulletWeaponManager.cpp
 ============================================================
 #include "BulletWeaponManager.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 
 void BulletWeaponManager::Initialize(BulletManager* bulletManager, InputSystem* inputSystem, Engine::EntityManager* entityManager,
 Engine::GlobalVariables* globalVariables) {
@@ -25734,8 +26706,8 @@ private:
 File Path: project/DirectXGame/application/base/Weapon/Enemy/SmallRangeWeapon.cpp
 ============================================================
 #include "SmallRangeWeapon.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include"DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include"DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include<DirectXGame/application/base/Bullet/Base/BulletManager.h>
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletSpawn.h>
@@ -25933,10 +26905,7 @@ private:
 ============================================================
 File Path: project/DirectXGame/application/base/Weapon/Player/PlayerWeapon.cpp
 ============================================================
-#include "playerWeapon.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-#include"DirectXGame/application/base/Character/Base/Enemy/BaseEnemy.h"
-#include "DirectXGame/application/base/Character/Base/Player/BasePlayer.h"
+#include "PlayerWeapon.h"
 
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
@@ -26112,6 +27081,28 @@ void CharacterDebugScene::Initialize()
 	bulletManager_->Initialize(GetEntityManager(),GetGlobalVariables(), nullptr);
 	bulletManager_->SetEffect(effect_.get());
 
+	// 弾スポーン
+	bulletSpawn_ = std::make_unique<BulletSpawn>();
+	bulletSpawn_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables(), nullptr, effect_.get(), bulletManager_.get());
+
+	param.name = "test";
+	param.modelName = "AnimatedCube.gltf";
+	param.maxLifeTime = 5.0f;
+	param.speed = 10.0f;
+	param.gravityScale = 0.1f;
+	param.moveType = Projectile::ProjectileMoveType::Homing;
+	param.enableHoming = true;
+	param.homingRange = 50.0f;
+	param.homingStrength = 5.0f;
+
+	spawnInfo.position = { 10,2,-40 };
+	spawnInfo.direction = { -1,0,0 };
+	spawnInfo.scale = { 0.5f,0.5f,0.5f };
+
+	// ヒットボックスシステム初期化
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
+	hitBoxSystem_->Initialize(GetEntityManager());
+
 	// スペシャルポイント管理クラス
 	specalPointManager_ = std::make_unique<SpecalPointManager>();
 	specalPointManager_->Initialize(GetEntityManager(), GetGlobalVariables());
@@ -26119,7 +27110,7 @@ void CharacterDebugScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -26133,6 +27124,9 @@ void CharacterDebugScene::Initialize()
 	else {
 		characterManager_->CreateCharacter(Character::PlayerType::kBullet, "", { 0,2,-40 });
 	}
+
+	spawnInfo.target = characterManager_->GetPlayer();
+
 	// 追従カメラtarget設定
 	followCamera_->SetTarget(&characterManager_->GetPlayer()->GetObjectComponent()->GetWorldTransform());
 
@@ -26166,10 +27160,8 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	//characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
-	// デバッグモード設定
-	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(isComboEditorActive_);
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
 	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
@@ -26188,11 +27180,13 @@ void CharacterDebugScene::Update()
 
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);
+		GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
 	}
 	if (input_->IsTriggerKey(DIK_T)) {
 		GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
+	// デバッグモード設定
+	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
 
 	// コンボエディター更新
 	comboEditor_->Update(GetTime());
@@ -26204,6 +27198,12 @@ void CharacterDebugScene::Update()
 	iCommand_ = inputHander_->HandleInput();
 	if (this->iCommand_) {
 		iCommand_->Exec(*characterManager_->GetPlayer());
+	}
+
+	interval_ += GetTime();
+	if (interval_ >= intervalMax_) {
+		interval_ = 0.0f;
+		bulletSpawn_->GenerateProjectile(spawnInfo, param);
 	}
 
 
@@ -26228,6 +27228,8 @@ void CharacterDebugScene::Update()
 	bulletManager_->Update();
 	// ステージ
 	stage_->Update(GetTime());
+	// ヒットボックスシステム更新
+	hitBoxSystem_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
@@ -26269,7 +27271,20 @@ void CharacterDebugScene::UpdateImGui() {
 		cameraManager_->SetUseCamera("followCamera", 0.3f);
 	}
 
+	
+	ImGui::DragFloat("BulletGravityScale", &param.gravityScale,0.01f);
+	ImGui::DragFloat("BulletMaxLifeTime", &param.maxLifeTime, 0.1f);
+	ImGui::DragFloat("BulletSpeed", &param.speed, 0.1f);
+	ImGui::DragFloat("BulletRadius", &param.radius, 0.1f);
+	ImGui::DragFloat("BulletIntervalMax", &intervalMax_, 0.1f);
 
+	ImGui::DragFloat3("BulletSpawnPosition", &spawnInfo.position.x, 0.1f);
+	ImGui::DragFloat3("BulletSpawnDirection", &spawnInfo.direction.x, 0.1f);
+	spawnInfo.direction = Normalize(spawnInfo.direction);
+	ImGui::Checkbox("Homing", &param.enableHoming);
+	ImGui::DragFloat("homingRange", &param.homingRange, 0.1f);
+	ImGui::DragFloat("homingStrength", &param.homingStrength, 0.1f);
+	ImGui::DragFloat("BulletDamage", &param.damage, 0.1f);
 	ImGui::End();
 
 
@@ -26296,19 +27311,21 @@ void CharacterDebugScene::CheckAllCollisions() {
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}
-		auto& lifeTimehit = caracter->GetAttackController()->GetHitBoxSystem()->GetLifeTimeHitBoxData();
-		for (auto& caracterHitBox : lifeTimehit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
-		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetHitBoxData();
-		for (auto& caracterHitBox : hit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
 	}
-
-
+	// ヒットボックス
+	for (auto& hitBoxData : hitBoxSystem_->GetHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
+		if (bullet->GetColliderComponent()) {
+			collisionManager_->Register(bullet->GetColliderComponent());
+		}
+	}
+	for (const auto& bullet : bulletManager_->GetProjectiles()) {
 		if (bullet->GetColliderComponent()) {
 			collisionManager_->Register(bullet->GetColliderComponent());
 		}
@@ -26429,6 +27446,17 @@ private:
 	std::unique_ptr<MainStage> stage_;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_;
+	// ヒットボックスシステム
+	std::unique_ptr<HitBox::System> hitBoxSystem_;
+
+
+	// 弾スポーン
+	std::unique_ptr<BulletSpawn> bulletSpawn_ = nullptr;
+	// 
+	float interval_ = 0.0f;
+	float intervalMax_ = 1.0f;
+	Projectile::ProjectileParam param{};
+	Projectile::ProjectileSpawnInfo spawnInfo{};
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
@@ -26438,8 +27466,112 @@ private:
 private:
 	// コンボエディター
 	std::unique_ptr<Combo::Editor> comboEditor_;
-	// コンボエディターがアクティブか
-	bool isComboEditorActive_ = true;
+};
+
+
+============================================================
+File Path: project/DirectXGame/application/scene/CustomScene.cpp
+============================================================
+#include "CustomScene.h"
+
+void CustomScene::Initialize() {
+	input = GetInput();
+	// 入力システム初期化
+	inputSystem_ = std::make_unique<InputSystem>();
+	inputSystem_->Initialize(GetInput());
+
+	// カメラ管理クラス初期化
+	cameraManager_ = std::make_unique<CameraManager>();
+	cameraManager_->Initialize(nullptr, GetEntityManager(), GetGlobalVariables());
+	
+	GetEntityManager()->GetObject3dCommon()->SetDefaltCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetEffectManager()->GetGpuParticleManager()->SetCamera(cameraManager_->GetCamera());
+	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
+	SetCamera(cameraManager_->GetCamera());
+
+
+	// エフェクト
+	effect_ = std::make_unique<EffectSystem>();
+	effect_->Initialize(GetEntityManager(), GetGlobalVariables());
+
+
+}
+
+void CustomScene::Finalize() {}
+
+void CustomScene::Update() {
+	// 入力システム更新
+	inputSystem_->Update(GetTime());
+	// カメラ更新
+	cameraManager_->Update();
+}
+
+void CustomScene::Draw3D() {
+}
+
+void CustomScene::Draw2D() {
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/scene/CustomScene.h
+============================================================
+#pragma once
+// engine
+#include"DirectXGame/engine/scene/SceneManager.h"
+#include"DirectXGame/engine/collider/3d/CollisionManager.h"
+#include"DirectXGame/engine/Utility/TimerUtility.h"
+#include"DirectXGame/engine/base/Load/LoadLevelData.h"
+
+// application
+#include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include"DirectXGame/application/GlobalVariables/GlobalVariables.h"
+#include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
+#include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+
+#include"DirectXGame/application/base/Stage/MainStage.h"
+#include"DirectXGame/application/base/UI/GameUI.h"
+#include"DirectXGame/application/base/Bullet/Base/BulletManager.h"
+#include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
+
+#include "DirectXGame/application/base/Input/InputHander.h"
+#include "DirectXGame/application/base/Stage/SelectStage.h"
+#include "DirectXGame/application/base/UI/SelectUI.h"
+#include "DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Game/Select/SelectSystem.h"
+
+/// <summary>
+/// セレクトシーン
+/// </summary>
+class CustomScene : public Engine::BaseScene
+{
+public:
+	// 初期化
+	void Initialize() override;
+
+	// 終了
+	void Finalize() override;
+
+	// 毎フレーム更新
+	void Update()   override;
+
+	// 描画3d
+	void Draw3D()   override;
+	// 描画2d
+	void Draw2D()   override;
+
+private:
+	Engine::Input* input = nullptr;
+private:
+	// カメラ管理
+	std::unique_ptr<CameraManager> cameraManager_ = nullptr;
+	// エフェクト
+	std::unique_ptr<EffectSystem> effect_ = nullptr;
+	// インプットシステム
+	std::unique_ptr<InputSystem> inputSystem_ = nullptr;
 };
 
 
@@ -26492,9 +27624,9 @@ void GamePlayScene::Initialize()
 		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
 		std::make_unique<Character::AttackCommand>());
 
-	inputHander_->Bind(
+	/*inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());
+		std::make_unique<Character::HeavyAttackCommand>());*/
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
 		std::make_unique<Character::SkillAttackCommand>());
@@ -26535,6 +27667,9 @@ void GamePlayScene::Initialize()
 
 	GetEntityManager()->GetObject3dInstansManager()->SetCamera(cameraManager_->GetCamera());
 
+	// ヒットボックスシステム初期化
+	hitBoxSystem_ = std::make_unique<HitBox::System>();
+	hitBoxSystem_->Initialize(GetEntityManager());
 
 	// 弾管理クラス
 	bulletManager_ = std::make_unique<BulletManager>();
@@ -26548,7 +27683,7 @@ void GamePlayScene::Initialize()
 
 	// キャラクター管理 
 	characterManager_ = std::make_unique<Character::CharacterManager>();
-	characterManager_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
+	characterManager_->Initialize(inputSystem_.get(), hitBoxSystem_.get(), GetEntityManager(), GetGlobalVariables(), cameraManager_->GetCamera());
 	characterManager_->SetEffect(effect_.get());
 	characterManager_->SetFollowCamera(followCamera_.get());
 	characterManager_->SetBulletManager(bulletManager_.get());
@@ -26675,12 +27810,12 @@ void GamePlayScene::Update()
 	characterManager_->Update(gameFlowController_->IsMove());
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());
-	// カメラ管理の更新
-	cameraManager_->Update();
 	// 弾マネージャ
 	bulletManager_->Update();
 	// ステージ
 	stage_->Update(GetTime());
+	// ヒットボックスシステム更新
+	hitBoxSystem_->Update(GetTime());
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
@@ -26697,7 +27832,8 @@ void GamePlayScene::Update()
 	
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
-
+	// カメラ管理の更新
+	cameraManager_->Update();
 }
 
 #pragma endregion //更新関係
@@ -26736,16 +27872,15 @@ void GamePlayScene::CheckAllCollisions()
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}
-		auto& lifeTimehit = caracter->GetAttackController()->GetHitBoxSystem()->GetLifeTimeHitBoxData();
-		for (auto& caracterHitBox : lifeTimehit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
-		auto& hit = caracter->GetAttackController()->GetHitBoxSystem()->GetHitBoxData();
-		for (auto& caracterHitBox : hit) {
-			collisionManager_->Register(caracterHitBox.hitBox.get()->GetColliderComponent());
-		}
 	}
 
+	// ヒットボックス
+	for(auto & hitBoxData : hitBoxSystem_->GetHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
+	for (auto& hitBoxData : hitBoxSystem_->GetLifeTimeHitBoxData()) {
+		collisionManager_->Register(hitBoxData.hitBox.get()->GetColliderComponent());
+	}
 
 	// 弾のコライダー追加
 	for (const auto& bullet : bulletManager_->GetBullets()) {
@@ -26878,6 +28013,9 @@ private:
 	std::unique_ptr<MainStage> stage_ = nullptr;
 	// 弾
 	std::unique_ptr<BulletManager> bulletManager_ = nullptr;
+	// ヒットボックスシステム
+	std::unique_ptr<HitBox::System> hitBoxSystem_ = nullptr;
+
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_ = nullptr;
@@ -38362,11 +39500,11 @@ void Engine::SphereCollider::Update(const WorldTransform& worldTransform, LineCo
 		if (isDebugLine) {
 			if (enabled) {
 				// 球の中心位置と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, { 1,1,1,1 }, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, { 0.5f,0.5f,0.5f,1.0f }, 8, 8);
+				lineCommon->GetDebugLineMeshData().AddLineSphere({ centerWorld ,radius }, lineColor, 8, 8);
 			}
 		}
 	}
@@ -38581,11 +39719,11 @@ void Engine::AABBCollider::Update(const WorldTransform& worldTransform, LineComm
 		if (isDebugLine) {
 			if (enabled) {
 				// AABBの最小・最大座標を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, { 0.5f,0.5f,0.5f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineAABB(aabb, centerWorld, lineColor);
 			}
 		}
 	}
@@ -38729,11 +39867,11 @@ void Engine::CapsuleCollider::Update(const WorldTransform& worldTransform, LineC
 		if (isDebugLine) {
 			if (enabled) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, { 0.5f,0.5f,0.5f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineCapsule(capWorld_, lineColor);
 			}
 		}
 	}
@@ -38809,11 +39947,11 @@ void Engine::OBBCollider::Update(const WorldTransform& worldTransform, LineCommo
 			lineCommon->GetDebugLineMeshData().AddLine(obb.center, obb.center + obb.orientations[2], { 0,0,1,1 }); // Z軸: 青
 			if (obb.size.x > 0 && obb.size.y > 0 && obb.size.z > 0) {
 				// OBBのサイズを使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, { 1,1,1,1 });
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, { 0.0f,0.0f,0.0f,1.0f });
+				lineCommon->GetDebugLineMeshData().AddLineOBB(obb, lineColor);
 			}
 		}
 	}
@@ -38988,11 +40126,11 @@ void Engine::TriangleCollider::Update(const WorldTransform& worldTransform, Line
 		if (isDebugLine) {
 			if (enabled) {
 				// カプセルの線分と半径を使ってラインを描画
-				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform);
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({triangle01,triangle02 ,triangle03}, worldTransform, lineColor);
 			}
 			else {
 				// 無効な場合は透明にする
-				
+				lineCommon->GetDebugLineMeshData().AddLineTriangle({ triangle01,triangle02 ,triangle03 }, worldTransform, lineColor);
 			}
 		}
 	}
@@ -39171,7 +40309,9 @@ namespace Engine {
 		ColliderComponent* owner = nullptr; // 通知先ポインタ
 		bool enabled = true;
 		bool isStatic = false;  // 動かさない
-		bool isDebugLine = false;// ライン描画するか	
+		bool isDebugLine = false;// ライン描画するか
+		Vector4 lineColor = { 1,1,1,1 };	// ライン色
+
 		Vector3 centerWorld = { 0,0,0 };
 		CollisionLayer layer = CollisionLayer::Default;
 		CollisionTag tag = CollisionTag::None; // タグ
@@ -39285,7 +40425,7 @@ namespace Engine {
 	{
 	public:
 		Capsule capsule{ Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,-1.0f,0.0f},{1.0f} };
-		Capsule capWorld_;
+		Capsule capWorld_{ Vector3{0.0f,1.0f,0.0f},Vector3{0.0f,-1.0f,0.0f},{1.0f} };
 
 
 		// 更新
@@ -53726,7 +54866,7 @@ void Engine::LineMeshData::AddLineSphere(const Sphere& sphere, const Vector4& co
 /// </summary>
 /// <param name="corner"></param>
 /// <param name="pos"></param>
-void Engine::LineMeshData::AddLineCorner(const CornerSegment& corner, const WorldTransform& pos)
+void Engine::LineMeshData::AddLineCorner(const CornerSegment& corner, const WorldTransform& pos, const Vector4& color)
 {
 	std::vector<Vector3> vertices;
 	float angleStep = DirectX::XM_2PI / corner.segment; // 360° を segment 分割
@@ -53753,8 +54893,6 @@ void Engine::LineMeshData::AddLineCorner(const CornerSegment& corner, const Worl
 		vertices.push_back(worldVertex);
 	}
 
-	// 各辺をラインで描画
-	Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色のライン
 	for (int i = 0; i < corner.segment; ++i)
 	{
 		Vector3 start = vertices[i];
@@ -53888,16 +55026,16 @@ void Engine::LineMeshData::AddSpline(const std::vector<Vector3>& controlPoints, 
 /// </summary>
 /// <param name="triangle"></param>
 /// <param name="pos"></param>
-void Engine::LineMeshData::AddLineTriangle(const Triangle& triangle, const WorldTransform& pos)
+void Engine::LineMeshData::AddLineTriangle(const Triangle& triangle, const WorldTransform& pos, const Vector4& color)
 {
 	// 三角形の3つの頂点
 	Vector3 p0 = triangle.vertices[0] + pos.worldMat_.GetWorldPosition();
 	Vector3 p1 = triangle.vertices[1] + pos.worldMat_.GetWorldPosition();
 	Vector3 p2 = triangle.vertices[2] + pos.worldMat_.GetWorldPosition();
 
-	AddLine(p0, p1, Vector4{ 1,1,1,1 });
-	AddLine(p1, p2, Vector4{ 1,1,1,1 });
-	AddLine(p2, p0, Vector4{ 1,1,1,1 });
+	AddLine(p0, p1, color);
+	AddLine(p1, p2, color);
+	AddLine(p2, p0, color);
 }
 
 /// <summary>
@@ -54068,7 +55206,7 @@ namespace Engine {
 		/// </summary>
 		/// <param name="corner"></param>
 		/// <param name="pos"></param>
-		void AddLineCorner(const CornerSegment& corner, const WorldTransform& pos);
+		void AddLineCorner(const CornerSegment& corner, const WorldTransform& pos, const Vector4& color = { 1,1,1,1 });
 
 		/// <summary>
 		/// カプセル状にライン加算
@@ -54099,7 +55237,7 @@ namespace Engine {
 		/// </summary>
 		/// <param name="triangle"></param>
 		/// <param name="pos"></param>
-		void AddLineTriangle(const Triangle& triangle, const WorldTransform& pos);
+		void AddLineTriangle(const Triangle& triangle, const WorldTransform& pos,const Vector4& color = { 1,1,1,1 });
 
 		/// <summary>
 		/// オクツリー状にライン加算
@@ -54352,7 +55490,7 @@ File Path: project/DirectXGame/engine/Line/LineCommon.h
 #include <string>  
 #include <wrl.h>  
 #include "DirectXGame/engine/PSO/PSOManager.h"  
-#include "CreateLine.h"  
+#include "CreateLine.h" 
 /// <summary>  
 /// ライン共通クラス  
 /// </summary>  
@@ -58456,10 +59594,10 @@ void Engine::RigidBodyComponent::Integrate(float deltaTime, WorldTransform& tran
 	transform.Update();
 }
 
-void Engine::RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransform& transform)
+void Engine::RigidBodyComponent::ProcessTranslation(float dt, WorldTransform& transform)
 {
 	// 加速度計算
-	acceleration_ = force * inverseMass;
+	acceleration_ += force * inverseMass;
 
 	// 重力適用
 	if (useGravity) {
@@ -58467,21 +59605,22 @@ void Engine::RigidBodyComponent::ProcessTranslation(float deltaTime, WorldTransf
 		acceleration_.y += -gravity * gravityScale;
 	}
 	// 速度更新
-	velocity_ += acceleration_ * deltaTime;
+	velocity_ += acceleration_ * dt;
+	
 	// 位置更新
-	transform.translate_ += velocity_ * deltaTime;
+	transform.translate_ += velocity_ * dt;
 
 	// 力のリセット
 	force = { 0, 0, 0 };
 }
 
-void Engine::RigidBodyComponent::ProcessRotation(float deltaTime, WorldTransform& transform)
+void Engine::RigidBodyComponent::ProcessRotation(float dt, WorldTransform& transform)
 {
 	// トルクによる回転（簡略化）
 	Vector3 angularAcceleration = torque * inverseMass; // 実際は慣性モーメントが必要
-	angularVelocity += angularAcceleration * deltaTime;
+	angularVelocity += angularAcceleration * dt;
 	// 回転適用
-	transform.rotate_ += angularVelocity * deltaTime;
+	transform.rotate_ += angularVelocity * dt;
 
 	// 力のリセット
 	torque = { 0, 0, 0 };
@@ -58746,9 +59885,9 @@ void Engine::MyGame::Initialize()
 	sceneManager_->Init();
 
 #ifdef _DEBUG
-	//sceneManager_->ChangeScene("CHARACTER");
+	sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
@@ -58879,6 +60018,7 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/text/selectTitle.dds");
 	textureManager->LoadTexture("resources/Texture/text/stamina.dds");
 	textureManager->LoadTexture("resources/Texture/text/over.dds");
+	textureManager->LoadTexture("resources/Texture/text/gameStartPreparation.dds");
 
 
 
@@ -69412,6 +70552,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.cpp" />
@@ -69435,8 +70576,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\LockOn\LockOnSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Response\Response.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletData.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\EnemyBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp" />
@@ -69454,7 +70597,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.cpp" />
@@ -69514,6 +70657,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Weapon\Enemy\SmallRangeWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\scene\CharacterDebugScene.cpp" />
+    <ClCompile Include="DirectXGame\application\scene\CustomScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TutorialScene.cpp" />
@@ -70101,6 +71245,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Input\ComboButton.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboAnimation.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Motion\ComboMove.h" />
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCancelReceiver.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Effect\ComboEffect.h" />
@@ -70130,8 +71275,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\LockOn\LockOnSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Response\Response.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Response\ResponseData.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletData.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletSpawn.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileData.h" />
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
@@ -70147,7 +71295,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\EnemyData.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />
@@ -70230,6 +71378,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Weapon\Enemy\SmallRangeWeapon.h" />
     <ClInclude Include="DirectXGame\application\base\Weapon\Player\PlayerSubWeapon.h" />
     <ClInclude Include="DirectXGame\application\scene\CharacterDebugScene.h" />
+    <ClInclude Include="DirectXGame\application\scene\CustomScene.h" />
     <ClInclude Include="DirectXGame\application\scene\ModelScene.h" />
     <ClInclude Include="DirectXGame\application\scene\ResultScene.h" />
     <ClInclude Include="DirectXGame\application\scene\SampleScene.h" />
@@ -70266,11 +71415,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraManeger.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\FixedCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemyState.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Player\BasePlayer.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h" />
     <ClInclude Include="DirectXGame\application\base\Special\Base\BaseSpecial.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletManager.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
@@ -70800,7 +71949,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\State\BaseMainState.cpp">
@@ -71437,6 +72586,18 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\scene\CustomScene.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72261,10 +73422,10 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Base\BaseCharacter.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\BaseEnemy.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Player\BasePlayer.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterData.h">
@@ -72582,7 +73743,7 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Base\Enemy\EnemyData.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h">
@@ -72691,6 +73852,21 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboImGui.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\scene\CustomScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Attack\Combo\Range\ComboRange.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseProjectile.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Bullet\Base\ProjectileFunction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
