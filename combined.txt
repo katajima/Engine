@@ -8522,7 +8522,7 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		data_.layer = param_.collisionLayer;
 		data_.size = { 1.0f,2.0f,1.0f };
 		data_.name = param_.name;
-		data_.reactionData.GetDamageData().GetOne().damage = param_.damage;
+		data_.reactionData.GetDamageData().GetOne().damage = param_.explosionDamage;
 		data_.radius = param_.explosionRadius;
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
@@ -9188,7 +9188,7 @@ namespace Projectile {
 		// 爆発の半径
 		float explosionRadius = 0.0f;
 		// 爆発のダメージ
-		float knockBackPower = 0.0f;
+		float explosionDamage = 0.0f;
 	};
 
 
