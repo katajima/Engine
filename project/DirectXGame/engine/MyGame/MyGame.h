@@ -78,5 +78,8 @@ namespace Engine {
 	private:
 		// ゲーム終了フラグ
 		bool endRequst_ = false;
+		//
+		std::vector<std::string> scenenames_;
+
 	};
 }

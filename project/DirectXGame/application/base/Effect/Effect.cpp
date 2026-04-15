@@ -9,6 +9,11 @@ void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 	// エフェクトコンポーネント初期化
 	effectComponent_ = std::make_unique<Engine::EffectComponent>();
 	effectComponent_->Init(entityManager, globalVariables);
+	// エフェクトエディタ初期化
+	effectEditor_ = std::make_unique<EffectEditor>();
+	effectEditor_->Initialize(effectComponent_.get(), globalVariables);
+
+
 	// パーティクル初期化
 	InitParticle();
 	// 範囲弾パーティクル初期化 
@@ -17,13 +22,19 @@ void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 	InitBullet();
 	// スクラップ初期化
 	InitScrap();
+
+	for (auto& [name, data] : effectEditor_->GetEffectGlobalDatas()) {
+		CreateEffect(name, data.shapeType, data);
+	}
 }
 
 
-void EffectSystem::InitParticle(){
+void EffectSystem::InitParticle() {
 
-	effectComponent_->AddEmitter("starEmit","hitStar",EmitterShapeType::POINT);
+	effectComponent_->AddEmitter("starEmit", "hitStar", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("starEmit");
+
+
 	starEmit->GetFrequency() = 0.0f;
 	starEmit->SetCount(1, 0);
 	starEmit->SetPos({ 0,0.0f,0.0f });
@@ -34,7 +45,7 @@ void EffectSystem::InitParticle(){
 	starEmit->SetUsebillboard(false);
 	starEmit->SetSize(Vector3{ 1.7f,1.7f,1.7f }, { 0.1f,0.1f,0.1f });
 	starEmit->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
-	
+
 
 	effectComponent_->AddEmitter("traiEmit", "hitEffect", EmitterShapeType::AABB);
 	Engine::AABBParticleEmitter* traiEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("traiEmit");
@@ -82,7 +93,7 @@ void EffectSystem::InitParticle(){
 	effectEmit->SetSize({ 8,8,8 }, {});
 	effectEmit->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
 	effectEmit->SetAlphaClipping(0.15f);
-	
+
 	effectComponent_->AddEmitter("ringHit", "ringHit", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* hitRingEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("ringHit");
 
@@ -99,7 +110,7 @@ void EffectSystem::InitParticle(){
 	hitRingEmit->SetSize({ 8,8,8 }, {});
 	hitRingEmit->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
 	hitRingEmit->SetAlphaClipping(0.15f);
-	
+
 	// 
 	effectComponent_->AddEmitter("dust3", "dust3", EmitterShapeType::AABB);
 	Engine::AABBParticleEmitter* dust2Emit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("dust3");
@@ -157,9 +168,9 @@ void EffectSystem::InitRangeBombingBullet()
 	missileHitCylinder->SetSizeAmount({ 0.15f,0.15f ,0.0f }, {});
 	missileHitCylinder->SetSize({ 1,1,1 }, {});
 	missileHitCylinder->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
-	
-	
-	
+
+
+
 	effectComponent_->AddEmitter("stratSmoke01", "smokePlane01", EmitterShapeType::POINT);
 	effectComponent_->AddEmitter("stratSmoke02", "smokePlane05", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* stratSmoke01_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("stratSmoke01");
@@ -308,8 +319,8 @@ void EffectSystem::InitBullet()
 	starEmit->SetPos({ 0,0.0f,0.0f });
 	starEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	starEmit->SetAlphaClipping(0.10f);
-	Vector3 velo = {2,2,2};
-	
+	Vector3 velo = { 2,2,2 };
+
 	starEmit->SetVelocity({}, velo);
 	starEmit->SetLifeTime(1.25f, 0);
 	starEmit->SetIsAlpha(true);
@@ -326,9 +337,9 @@ void EffectSystem::InitBullet()
 	cartridgeEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
 	cartridgeEmit->SetAlphaClipping(0.10f);
 	cartridgeEmit->SetUsebillboard(false);
-	velo = {1,1,1};
-	
-	cartridgeEmit->SetVelocity({0,5,0}, velo);
+	velo = { 1,1,1 };
+
+	cartridgeEmit->SetVelocity({ 0,5,0 }, velo);
 	cartridgeEmit->SetLifeTime(2.0f, 0);
 	cartridgeEmit->SetIsAlpha(true);
 	cartridgeEmit->SetIsGravity(true);
@@ -342,92 +353,21 @@ void EffectSystem::InitBullet()
 }
 
 void EffectSystem::InitScrap() {
-
-	effectComponent_->AddEmitter("scrapTire", "scrapTire", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* scrapTireEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapTire");
-
 	// タイヤエミッター
-	scrapTireEmit->GetFrequency() = 0.0f;
-	scrapTireEmit->SetCount(1, 0);
-	scrapTireEmit->SetPos(scrapPos_);
-	scrapTireEmit->SetRotate({}, scrapRotateRange_);
-	scrapTireEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
-	scrapTireEmit->SetLifeTime(scrapLifeTime_, 0.0f);
-	scrapTireEmit->SetIsAlpha(true);
-	scrapTireEmit->SetUsebillboard(false);
-	scrapTireEmit->SetSize(scrapSize_, {});
-	scrapTireEmit->SetColorMinMax(scrapColor_, scrapColor_);
-	scrapTireEmit->SetAlphaClipping(0.0f);
-	scrapTireEmit->SetRange(-scrapRange_, scrapRange_);
-
+	effectEditor_->AddEffectGlobalData("EmitterScrapTire", "scrapTire");
 	// ねじエミッター
-	effectComponent_->AddEmitter("scrapScrew", "scrapScrew", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* scrapScrewEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapScrew");
-	scrapScrewEmit->GetFrequency() = 0.0f;
-	scrapScrewEmit->SetCount(1, 0);
-	scrapScrewEmit->SetPos(scrapPos_);
-	scrapScrewEmit->SetRotate({}, scrapRotateRange_);
-	scrapScrewEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
-	scrapScrewEmit->SetLifeTime(scrapLifeTime_, 0.0f);
-	scrapScrewEmit->SetIsAlpha(true);
-	scrapScrewEmit->SetUsebillboard(false);
-	scrapScrewEmit->SetSize(scrapSize_, {});
-	scrapScrewEmit->SetColorMinMax(scrapColor_, scrapColor_);
-	scrapScrewEmit->SetAlphaClipping(0.0f);
-	scrapScrewEmit->SetRange(-scrapRange_, scrapRange_);
-
+	effectEditor_->AddEffectGlobalData("EmitterScrapScrew", "scrapScrew");
 	// 鉄の棒エミッター
-	effectComponent_->AddEmitter("scrapIronRod", "scrapIronRod", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* scrapIronRodEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapIronRod");
-	scrapIronRodEmit->GetFrequency() = 0.0f;
-	scrapIronRodEmit->SetCount(1, 0);
-	scrapIronRodEmit->SetPos(scrapPos_);
-	scrapIronRodEmit->SetRotate({}, scrapRotateRange_);
-	scrapIronRodEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
-	scrapIronRodEmit->SetLifeTime(scrapLifeTime_, 0.0f);
-	scrapIronRodEmit->SetIsAlpha(true);
-	scrapIronRodEmit->SetUsebillboard(false);
-	scrapIronRodEmit->SetSize(scrapSize_, {});
-	scrapIronRodEmit->SetColorMinMax(scrapColor_, scrapColor_);
-	scrapIronRodEmit->SetAlphaClipping(0.0f);
-	scrapIronRodEmit->SetRange(-scrapRange_, scrapRange_);
-
+	effectEditor_->AddEffectGlobalData("EmitterScrapIronRod", "scrapIronRod");
 	// 歯車エミッター
-	effectComponent_->AddEmitter("scrapGear", "scrapGear", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* scrapGearEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapGear");
-	scrapGearEmit->GetFrequency() = 0.0f;
-	scrapGearEmit->SetCount(1, 0);
-	scrapGearEmit->SetPos(scrapPos_);
-	scrapGearEmit->SetRotate({}, scrapRotateRange_);
-	scrapGearEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
-	scrapGearEmit->SetLifeTime(scrapLifeTime_, 0.0f);
-	scrapGearEmit->SetIsAlpha(true);
-	scrapGearEmit->SetUsebillboard(false);
-	scrapGearEmit->SetSize(scrapSize_, {});
-	scrapGearEmit->SetColorMinMax(scrapColor_, scrapColor_);
-	scrapGearEmit->SetAlphaClipping(0.0f);
-	scrapGearEmit->SetRange(-scrapRange_, scrapRange_);
-
-
-	effectComponent_->AddEmitter("scrapBasis", "scrapBasis", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* scrapBasisEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("scrapBasis");
-	// タイヤエミッター
-	scrapBasisEmit->GetFrequency() = 0.0f;
-	scrapBasisEmit->SetCount(1, 0);
-	scrapBasisEmit->SetPos(scrapPos_);
-	scrapBasisEmit->SetRotate({}, scrapRotateRange_);
-	scrapBasisEmit->SetVelocity(scrapVelocity_, scrapVelocityRange_);
-	scrapBasisEmit->SetLifeTime(scrapLifeTime_, 0.0f);
-	scrapBasisEmit->SetIsAlpha(true);
-	scrapBasisEmit->SetUsebillboard(false);
-	scrapBasisEmit->SetSize(scrapSize_, {});
-	scrapBasisEmit->SetColorMinMax(scrapColor_, scrapColor_);
-	scrapBasisEmit->SetAlphaClipping(0.0f);
-	scrapBasisEmit->SetRange(-scrapRange_, scrapRange_);
-
+	effectEditor_->AddEffectGlobalData("EmitterScrapGear", "scrapGear");
+	// 基盤エミッター
+	effectEditor_->AddEffectGlobalData("EmitterScrapBasis", "scrapBasis");
 }
 
 void EffectSystem::Update() {
+	// エフェクトエディタ更新
+	effectEditor_->Update();
 	// 更新
 	effectComponent_->Update();
 }
@@ -437,7 +377,7 @@ void EffectSystem::Update() {
 void EffectSystem::Emit(const std::string& name, const Vector3& pos)
 {
 	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
-	
+	if (emit == nullptr) return;	// エミッターが存在しない場合は終了
 	// 出現
 	emit->SetPos(pos);		// 位置
 	emit->SetIsEmit(false); // 出さない
@@ -449,7 +389,7 @@ void EffectSystem::Emit(const std::string& name, const Vector3& pos)
 
 void EffectSystem::Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range) {
 	Engine::BaseParticleEmitter* emit = effectComponent_->GetBaseEmitter(name);
-	assert(emit != nullptr);
+	if (emit == nullptr) return;	// エミッターが存在しない場合は終了
 	// 出現
 	emit->SetPos(pos);		// 位置
 	emit->SetVelocity(dir, range);	// 速度
@@ -461,3 +401,8 @@ void EffectSystem::Emit(const std::string& name, const Vector3& pos, const Vecto
 }
 
 #pragma endregion // 出現
+
+void EffectSystem::CreateEffect(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data) {
+	effectComponent_->AddEmitter(name, data.particleName, shapeType);
+	effectEditor_->SetEffectGlobalData(name, shapeType, data);
+}

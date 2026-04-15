@@ -40,6 +40,8 @@ namespace Engine {
 		void DrawEffect();
 		// GPUパーティクルマネージャー取得
 		GpuParticleManager* GetGpuParticleManager() { return gpuParticleManager; }
+		// パーティクルマネージャー取得
+		ParticleManager* GetParticleManager() { return particleManager; }
 
 	public: // パーティクルエミッター(CPU)
 

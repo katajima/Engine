@@ -41,7 +41,7 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, std:
 		ImGui::SliderFloat("アニメーションブレンド時間", &animationBlendTime, 0.1f, 10.0f, "%.2f");
 
 		// BeginComboでの選択
-		ComboImGui::Select("Selected Combo",animationName, animations);
+		Engine::ImGuiManager::Select("Selected Combo",animationName, animations);
 	}
 
 	// ループ再生

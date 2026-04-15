@@ -3,11 +3,14 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
 
 #pragma region Base
 // 初期化
-void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManager,
-	Engine::GlobalVariables* globalVariables, const ProjectileSpawnInfo& spawnInfo, const ProjectileParam& param) {
+void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManager, Engine::GlobalVariables* globalVariables,
+	EffectSystem* effectSystem, const ProjectileSpawnInfo& spawnInfo, const ProjectileParam& param) {
+	// エフェクトシステム設定
+	this->effectSystem = effectSystem;
 	// パラメータ保存
 	param_ = param;
 	// 発射情報保存
@@ -27,6 +30,9 @@ void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManag
 	objectComponent_->SetInstancingSRT(spawnInfo_.scale, Math::DirectionToRotate(direction, Dire::Z), spawnInfo_.position);
 	objectComponent_->GetWorldTransform().Update();
 	objectComponent_->GetRigidBodyComponent()->Velocity() = velocity; // 重力加算
+
+
+
 
 	// コライダー生成
 	CreateCollision();
@@ -57,18 +63,20 @@ void Projectile::BaseProjectile::Initialize(Engine::EntityManager* entity3DManag
 }
 // 更新
 void Projectile::BaseProjectile::Update() {
-	if (!isAlive_) return;	// 生存していないなら更新しない 
+	if (!isAlive_) return;	// 生存していないなら更新しない
+	// デルタタイム取得
+	float deltaTime = objectComponent_->GetTime();
 	// 生存時間更新
-	lifeTime += objectComponent_->GetTime();
+	lifeTime += deltaTime;
 	if (lifeTime >= param_.maxLifeTime) {
-		isAlive_ = false;	// 生存フラグを下げる
-		objectComponent_->Delete();
-		objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+		DeleteProcess();
+		return;
 	}
 	// 移動処理
-	UpdateMovement(objectComponent_->GetTime());
-
+	UpdateMovement(deltaTime);
 	objectComponent_->Update();
+	// エフェクト処理
+	UpdateEffect(deltaTime);
 }
 // 描画
 void Projectile::BaseProjectile::Draw() {}
@@ -125,10 +133,13 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 			useType = HitBox::UseType::kEnemy;
 		}
 		auto* selfComponent = static_cast<Engine::ColliderComponent*>(self->owner);
-		Character::BaseCharacter* owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
+		Character::BaseCharacter* owner = nullptr;
+		if (self->tag == CollisionTag::Player || self->tag == CollisionTag::Enemy) {
+			owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
+		}
 		// 爆発ヒットボックス生成
-		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, { data_ }, {}, 
-			param_.explosionLifeTime, HitBox::ParentType::kParentIndependent, {}, 
+		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, { data_ }, {},
+			param_.explosionLifeTime, HitBox::ParentType::kParentIndependent, {},
 			true, &objectComponent_->GetWorldTransform());
 	}
 
@@ -171,34 +182,36 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 
 // 衝突処理
 void Projectile::BaseProjectile::ProjectileHit() {
+	Vector3 worldPos = objectComponent_->GetWorldPosition(); // 衝突位置取得
+
 	switch (param_.hitType)
 	{
 	case ProjectileHitType::Destroy:	// 破壊
-		isAlive_ = false;	// 生存フラグを下げる
-		objectComponent_->Delete();	// オブジェクト削除
-		objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+		DeleteProcess();
 		break;
 	case ProjectileHitType::Penetrate:	// 貫通
 		// 貫通数が上限を超えたら消える
 		if (param_.maxPierceCount >= pierceCount) {
-			isAlive_ = false;	// 生存フラグを下げる
-			objectComponent_->Delete();	// オブジェクト削除
-			objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+			DeleteProcess();
 		}
 		pierceCount++;	// 貫通カウント増加
 		break;
 	case ProjectileHitType::Explode:	// 爆破
-		isAlive_ = false;	// 生存フラグを下げる
-		objectComponent_->Delete();	// オブジェクト削除
-		objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
+		DeleteProcess();
+		// 爆発エフェクト出現
+		effectSystem->Emit(param_.explosionEffectName, worldPos);
 		break;
 	case ProjectileHitType::Bounce:	// 跳ね返る
-		isAlive_ = false;	// 生存フラグを下げる
-		objectComponent_->Delete();	// オブジェクト削除
+		if(param_.maxBounceCount <= bounceCount) {
+			DeleteProcess();
+		}
+		bounceCount++;	// 跳ね返りカウント増加
 		break;
 	default:
 		break;
 	}
+	// 衝突エフェクト出現
+	effectSystem->Emit(param_.hitEffectName, worldPos);
 }
 
 #pragma endregion
@@ -211,7 +224,7 @@ void Projectile::BaseProjectile::UpdateMovement(float dt) {
 		Straight(dt, GetWorldTransform(), direction, param_.speed);
 		break;
 	case ProjectileMoveType::Homing: // ホーミング
-		Homing(dt, GetWorldTransform(), target->GetWorldPosition() + Vector3{ 0,0.5f,0 }, param_.speed, param_.enableHoming, param_.homingStrength, param_.homingRange);
+		Homing(dt, GetWorldTransform(), target->GetWorldPosition() + Vector3{ 0,0.5f,0 }, direction, param_.speed, param_.enableHoming, param_.homingStrength, param_.homingRange);
 		break;
 	case ProjectileMoveType::Parabola: // 放物線
 		Parabola(dt, GetWorldTransform(), objectComponent_->GetRigidBodyComponent(), direction, velocity, param_.speed, param_.gravityScale);
@@ -222,4 +235,15 @@ void Projectile::BaseProjectile::UpdateMovement(float dt) {
 	default:
 		break;
 	}
+}
+
+void Projectile::BaseProjectile::UpdateEffect(float dt) {
+	// 移動エフェクト出現
+	effectSystem->Emit(param_.moveEffectName, objectComponent_->GetWorldPosition(), direction, direction * param_.moveEffectSpreadScale);
+}
+
+void Projectile::BaseProjectile::DeleteProcess() {
+	isAlive_ = false;	// 生存フラグを下げる
+	objectComponent_->Delete();	// オブジェクト削除
+	objectComponent_->GetWorldTransform().scale_ = { 0,0,0 }; // スケールを0
 }

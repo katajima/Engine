@@ -71,6 +71,8 @@ void ResultScene::Update() {
 
 	overUI_->Update();
 
+	effect_->Update();
+
 	// カメラ更新
 	cameraManager_->Update();
 };

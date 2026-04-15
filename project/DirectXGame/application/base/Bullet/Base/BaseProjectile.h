@@ -7,6 +7,7 @@ namespace Character {
 	class BaseEnemy;
 	class BasePlayer;
 }
+class EffectSystem;
 
 namespace Projectile {
 
@@ -16,7 +17,7 @@ namespace Projectile {
 
 		// 初期化
 		void Initialize(Engine::EntityManager* entity3DManager,
-			Engine::GlobalVariables* globalVariables,const ProjectileSpawnInfo& spawnInfo,
+			Engine::GlobalVariables* globalVariables, EffectSystem* effectSystem, const ProjectileSpawnInfo& spawnInfo,
 			const ProjectileParam& param);
 
 		// 更新
@@ -39,10 +40,12 @@ namespace Projectile {
 		void CollisionProcess(Engine::ColliderComponent* otherComponent,Engine::Collider* self, Engine::Collider* other);
 		// 衝突処理
 		void ProjectileHit();
-		// 更新
-		void UpdateMovement(float deltaTime);
-		//
-		void A();
+		// 移動処理更新
+		void UpdateMovement(float dt);
+		// エフェクト処理更新
+		void UpdateEffect(float dt);
+		// 削除(終了)処理
+		void DeleteProcess();
 	private:
 		// ワールドトランスフォーム取得
 		Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
@@ -51,6 +54,8 @@ namespace Projectile {
 		std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
 		// 貫通カウント
 		int pierceCount = 0;
+		// 跳ね返りカウント
+		int bounceCount = 0;
 		// 生存時間
 		float lifeTime = 0.0f;
 		// 生成フラグ
@@ -69,6 +74,8 @@ namespace Projectile {
 		Character::BaseCharacter* owner = nullptr;
 		// ターゲット
 	 	const Character::BaseCharacter* target = nullptr;
+		// エフェクトシステム
+		EffectSystem* effectSystem = nullptr;
 	};
 
 }

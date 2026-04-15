@@ -17,7 +17,7 @@ void Engine::EffectComponent::AddEmitter(const std::string& name, const std::str
 
 	// 既に同じ名前のEmitterが存在する場合は追加しない
 	if (emitters_.find(name) != emitters_.end()) {
-		throw std::runtime_error("Emitter with name '" + name + "' already exists.");
+		return; // 既に存在する場合は追加しない
 	}
 
 

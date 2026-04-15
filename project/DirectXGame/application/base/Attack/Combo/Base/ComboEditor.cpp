@@ -87,7 +87,7 @@ namespace Combo {
 	void EditorBlock::ImGuiApplyHitBox() {
 		if (ImGui::CollapsingHeader("ヒットボックス")) {
 			// ペアレント設定
-			ComboImGui::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
+			Engine::ImGuiManager::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
 
 			// ヒットボックス出現条件
 			static const char* HitBoxSpawnTypeLabels[] = {
@@ -96,7 +96,7 @@ namespace Combo {
 				"空中",
 				"ボタンを離したら",
 			};
-			ComboImGui::Select("ヒットボックス出現条件", HitBoxSpawnTypeLabels, data_.hitBox.spawnType);
+			Engine::ImGuiManager::Select("ヒットボックス出現条件", HitBoxSpawnTypeLabels, data_.hitBox.spawnType);
 
 			// 依存先タイプ
 			static const char* HitBoxParentTypeLabels[] = {
@@ -105,7 +105,7 @@ namespace Combo {
 				"追従先からの孤立",
 				"ターゲットの位置",
 			};
-			ComboImGui::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
+			Engine::ImGuiManager::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
 			
 			// 影響タイプ
 			static const char* HitBoxHitEffectTypeLabels[] = {
@@ -113,14 +113,14 @@ namespace Combo {
 				"力の影響のみ",
 				"ダメージと力の影響",
 			};
-			ComboImGui::Select("ヒットボックス影響", HitBoxHitEffectTypeLabels, data_.hitBox.hitEffectType);
+			Engine::ImGuiManager::Select("ヒットボックス影響", HitBoxHitEffectTypeLabels, data_.hitBox.hitEffectType);
 
 			// 生存タイプ
 			static const char* HitBoxLifetimeTypeLabels[] = {
 				"無期限",
 				"期限付き",
 			};
-			ComboImGui::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
+			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
 			// ヒット記録を使用
 			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
@@ -139,7 +139,7 @@ namespace Combo {
 			"当たったら",
 			"特殊ケース",
 			};
-			ComboImGui::Select("終了条件タイプ", EndConditionTypeLabels, data_.endConditionType);
+			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.endConditionType);
 		}
 	}
 
@@ -151,7 +151,7 @@ namespace Combo {
 			"前方",
 			"カメラ方向",
 			};
-			ComboImGui::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
+			Engine::ImGuiManager::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
 
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
 			ImGui::SliderFloat("移動速度", &data_.move.moveSpeed, 0.0f, 100.0f, "%.2f");
@@ -166,7 +166,7 @@ namespace Combo {
 			"当てた相手",
 			"近い相手",
 			};
-			ComboImGui::Select("ロックオンタイプ", LockOnTypeLabels, data_.lockOn.lockOnType);
+			Engine::ImGuiManager::Select("ロックオンタイプ", LockOnTypeLabels, data_.lockOn.lockOnType);
 			ImGui::SliderFloat("ソフトロックオン範囲", &data_.lockOn.lockOnRadius, 0.0f, 100.0f);
 		}
 	}
@@ -286,7 +286,7 @@ namespace Combo {
 		if (comboEditorBlocks_.empty()) return;
 		
 		// 
-		ComboImGui::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
+		Engine::ImGuiManager::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
 
 		ImGui::Separator();
 		ImGui::Text("Editing: %s", selectedComboEditorBlockName_.c_str());

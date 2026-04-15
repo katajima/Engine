@@ -67,10 +67,15 @@ namespace Engine {
 		void SetIsDirectionRotate(const bool& is) { emitData_.isDirectionRotate = is; }
 
 	public:
+		// パーティクル名前設定
+		void SetParticleName(std::string name) { particleName_ = name; }
 		// ライティングするか設定
 		void SetEnableLighting(int lighting) { enableLighting_ = lighting; }
 		// 出現させるか設定
 		void SetIsEmit(bool is) { isEmit = is; }
+
+		// フラグ設定
+		void SetIsFlag(const EmitData::IsFlag& is) { isFlag = is; }
 		// 線形補間設定
 		void SetIsLineInterpolation(bool is) { isFlag.isLineInterpolation = is; }
 		// 重力設定

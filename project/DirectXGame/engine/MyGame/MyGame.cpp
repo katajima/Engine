@@ -28,10 +28,19 @@ void Engine::MyGame::Initialize()
 	sceneManager_->SetEntityManager(entityManager_.get());
 	sceneManager_->Init();
 
+	scenenames_.push_back("TEST");
+	scenenames_.push_back("TITLE");
+	scenenames_.push_back("GAMEPLAY");
+	scenenames_.push_back("SELECT");
+	scenenames_.push_back("SAMPLE");
+	scenenames_.push_back("RESULT");
+	scenenames_.push_back("TUTORIAL");
+	scenenames_.push_back("CHARACTER");
+
 #ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	//sceneManager_->ChangeScene("TITLE");
+	sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
@@ -96,11 +105,10 @@ void Engine::MyGame::Update()
 	}
 
 	if (ImGui::BeginMenu("Scene")) {
-		if (ImGui::Button("TestScene")) {
-			sceneManager_->ChangeScene("CHARACTER");
-		}
-		if (ImGui::Button("TitleScene")) {
-			sceneManager_->ChangeScene("TITLE");
+		for(auto & name : scenenames_){
+			if (ImGui::Button(name.c_str())) {
+				sceneManager_->ChangeScene(name);
+			}
 		}
 		ImGui::EndMenu();
 	}

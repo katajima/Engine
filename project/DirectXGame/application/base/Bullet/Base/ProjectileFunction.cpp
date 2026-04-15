@@ -1,7 +1,7 @@
 #include "ProjectileFunction.h"
 
 // ホーミング
-void Projectile::Homing(float dt,Engine::WorldTransform& world,const Vector3& targetPos,float speed, bool enable, float strength, float range) {
+void Projectile::Homing(float dt,Engine::WorldTransform& world,const Vector3& targetPos, Vector3& dire,float speed, bool enable, float strength, float range) {
 
 	// =========================
 	// 現在の前方向を rotation から算出
@@ -21,7 +21,7 @@ void Projectile::Homing(float dt,Engine::WorldTransform& world,const Vector3& ta
 
 	// デフォルトは直進
 	Vector3 moveDir = forward;
-
+	dire = moveDir;
 	// =========================
 	// ホーミング判定
 	// =========================
@@ -68,7 +68,7 @@ void Projectile::Homing(float dt,Engine::WorldTransform& world,const Vector3& ta
 }
 
 // 放物線
-void Projectile::Parabola(float dt,Engine::WorldTransform& world, Engine::RigidBodyComponent* rigid, Vector3& dire, const Vector3& velo, float speed, float gravityScale) {
+void Projectile::Parabola(float dt,Engine::WorldTransform& world, Engine::RigidBodyComponent* rigid, Vector3& dire,const Vector3& velo, float speed, float gravityScale) {
 	Vector3 velocity = velo;
 	Vector3 direction = Normalize(velocity);
 	
@@ -77,13 +77,14 @@ void Projectile::Parabola(float dt,Engine::WorldTransform& world, Engine::RigidB
 	rigid->Integrate(dt, world);
 
 	direction = Normalize(rigid->GetVelocity());
-	
+	dire = direction;
+
 	world.rotate_ = Math::DirectionToRotate(direction,Dire::Z);
 	world.Update();
 }
 
 // 直線
-void Projectile::Straight(float dt,Engine::WorldTransform& world, Vector3& dire, float speed) {
+void Projectile::Straight(float dt,Engine::WorldTransform& world,const Vector3& dire, float speed) {
 	world.translate_ += dire * speed * dt;
 }
 

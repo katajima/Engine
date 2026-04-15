@@ -175,6 +175,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Effect\EffectEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Base\GameEvent.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Game\Select\SelectSystem.cpp" />
@@ -874,6 +875,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\State\MainState.h" />
+    <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
+    <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Result\ResultSystem.h" />

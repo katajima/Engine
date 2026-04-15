@@ -6,13 +6,13 @@
 namespace Projectile {
 
 	// ホーミング
-	void Homing(float dt,Engine::WorldTransform& world, const Vector3& targetPos, float speed, bool enable, float strength, float range);
+	void Homing(float dt,Engine::WorldTransform& world, const Vector3& targetPos, Vector3& dire, float speed, bool enable, float strength, float range);
 
 	// 放物線
 	void Parabola(float dt,Engine::WorldTransform& world,Engine::RigidBodyComponent* rigid, Vector3& dire,const Vector3& velo, float speed, float gravityScale);
 
 	// 直線
-	void Straight(float dt,Engine::WorldTransform& world,Vector3& dire, float speed);
+	void Straight(float dt,Engine::WorldTransform& world,const Vector3& dire, float speed);
 
 	// 維持
 	void Stay(float dt,Engine::WorldTransform& world);

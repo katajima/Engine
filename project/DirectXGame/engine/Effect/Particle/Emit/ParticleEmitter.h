@@ -79,7 +79,7 @@ namespace Engine {
 		// 半径設定
 		void SetRadius(float radius) { corner.radius = radius; }
 		// セグメント設定
-		void SetRadius(int segment) { corner.segment = segment; }
+		void SetSegment(int segment) { corner.segment = segment; }
 	private:
 		CornerSegment corner;
 	};
@@ -148,7 +148,8 @@ namespace Engine {
 		// グローバルバリアブル適応
 		void ApplyGlobalVariablesUniqe() override;
 	public:
-
+		// 頂点設定
+		void SetTriangle(Triangle triangle) { triangle_ = triangle; }
 	private:
 		Triangle triangle_;
 	};

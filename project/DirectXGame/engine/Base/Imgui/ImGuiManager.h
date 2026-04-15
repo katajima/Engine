@@ -21,7 +21,7 @@
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/engine/input/Input.h"
 
-
+#include "DirectXGame/engine/Utility/MapUtility.h"
 
 #define ICON_MD_HOME u8"\uE88A"
 
@@ -71,6 +71,20 @@ namespace Engine {
 		void SetInput(Input* input) { this->input = input; }
 
 	public:
+		// BeginComboを使用した選択ImGui
+		template<typename Type, size_t N>
+		static void Select(const std::string& name, const char* const (&label)[N], Type& type);
+
+		// BeginComboでの選択(map<string,Type>)
+		template<typename Type>
+		static void Select(const std::string& name, std::string& animationName, const std::map<std::string, Type>& map);
+		// BeginComboでの選択(unordered_map<string,Type>)
+		template<typename Type>
+		static void Select(const std::string& name, std::string& animationName, const std::unordered_map<std::string, Type>& map);
+		// BeginComboでの選択(unordered_map<string,Type>)
+		template<typename Type>
+		static void Select(const std::string& name, std::string& animationName, const UnorderedMapContainer<std::string, Type>& map);
+
 
 	private:
 		// ImGuiスタイル
@@ -108,6 +122,113 @@ namespace Engine {
 			ImGui::End();
 		}
 	};
+
+
+	// BeginComboを使用した選択ImGui
+	template<typename Type, size_t N>
+	inline void ImGuiManager::Select(const std::string& name, const char* const (&label)[N], Type& type) {
+		int current = static_cast<int>(type);
+
+		// 範囲外アクセス防止
+		if (current < 0 || current >= static_cast<int>(N)) {
+			current = 0;
+			type = static_cast<Type>(0);
+		}
+
+		if (ImGui::BeginCombo(name.c_str(), label[current])) {
+			for (int i = 0; i < static_cast<int>(N); ++i) {
+				const bool isSelected = (current == i);
+
+				if (ImGui::Selectable(label[i], isSelected)) {
+					type = static_cast<Type>(i);
+					current = i;
+				}
+
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+	}
+
+	// BeginComboでの選択(map<string,Type>)
+	template<typename Type>
+	inline void ImGuiManager::Select(const std::string& beginComboName, std::string& animationName, const std::map<std::string, Type>& map) {
+
+		// 初回：未選択なら先頭を選択
+		if (animationName.empty()) {
+			animationName = map.begin()->first;
+		}
+		// --- 選択UI（コンボボックス） ---
+		const char* preview = animationName.c_str();
+		if (ImGui::BeginCombo(beginComboName.c_str(), preview)) {
+
+			for (auto& it : map) {
+				const std::string& name = it.first;
+
+				const bool isSelected = (name == animationName);
+				if (ImGui::Selectable(name.c_str(), isSelected)) {
+					animationName = name;
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+	}
+	template<typename Type>
+	inline void ImGuiManager::Select(const std::string& beginComboName, std::string& animationName, const std::unordered_map<std::string, Type>& map){
+		// 初回：未選択なら先頭を選択
+		if (animationName.empty()) {
+			animationName = map.begin()->first;
+		}
+		// --- 選択UI（コンボボックス） ---
+		const char* preview = animationName.c_str();
+		if (ImGui::BeginCombo(beginComboName.c_str(), preview)) {
+
+			for (auto& it : map) {
+				const std::string& name = it.first;
+
+				const bool isSelected = (name == animationName);
+				if (ImGui::Selectable(name.c_str(), isSelected)) {
+					animationName = name;
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+	}
+	template<typename Type>
+	inline void ImGuiManager::Select(const std::string& beginComboName, std::string& animationName, const UnorderedMapContainer<std::string, Type>& map) {
+		// 初回：未選択なら先頭を選択
+		if (animationName.empty()) {
+			animationName = map.begin()->first;
+		}
+		// --- 選択UI（コンボボックス） ---
+		const char* preview = animationName.c_str();
+		if (ImGui::BeginCombo(beginComboName.c_str(), preview)) {
+
+			for (auto& it : map) {
+				const std::string& name = it.first;
+
+				const bool isSelected = (name == animationName);
+				if (ImGui::Selectable(name.c_str(), isSelected)) {
+					animationName = name;
+				}
+				if (isSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+	}
 }
 
 

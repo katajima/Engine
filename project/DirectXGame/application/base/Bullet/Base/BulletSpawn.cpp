@@ -34,8 +34,7 @@ void BulletSpawn::GenerateBulletRange(BulletType type, Vector3 position, Vector3
 	bulletManager->AddBullet(std::move(bullet));
 }
 
-void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Character::BaseCharacter* target)
-{
+void BulletSpawn::GenerateBullet(BulletType type, const BulletInfo& info, Character::BaseCharacter* target) {
 	std::unique_ptr<BaseBullet> bullet;
 	if (type == BulletType::kEnemyBullet) {
 		bullet = std::make_unique<EnemyBullet>();
@@ -60,7 +59,7 @@ void BulletSpawn::GenerateProjectile(const Projectile::ProjectileSpawnInfo& spaw
 	const Projectile::ProjectileParam& param, Character::BaseCharacter* target) {
 	std::unique_ptr<Projectile::BaseProjectile> projectile = std::make_unique<Projectile::BaseProjectile>();
 	// 初期化
-	projectile->Initialize(entityManager, globalVariables, spawnInfo, param); // 初期化
+	projectile->Initialize(entityManager, globalVariables, effect, spawnInfo, param); // 初期化
 	// 追加
 	bulletManager->AddProjectile(std::move(projectile));
 }

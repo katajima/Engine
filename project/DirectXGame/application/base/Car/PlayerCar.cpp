@@ -161,9 +161,9 @@ void PlayerCar::Emit(const Vector3& pos, const Vector3& dir, const Vector3& rang
 }
 
 void PlayerCar::EmitScrapBox(const Vector3& pos, const Vector3& dir, const Vector3& range){
-	effect->Emit("scrapBasis", pos, dir, range);
-	effect->Emit("scrapGear", pos, dir, range);
-	effect->Emit("scrapIronRod", pos, dir, range);
-	effect->Emit("scrapScrew", pos, dir, range);
-	effect->Emit("scrapTire", pos, dir, range);
+	effect->Emit("EmitterScrapBasis", pos, dir, range);
+	effect->Emit("EmitterScrapGear", pos, dir, range);
+	effect->Emit("EmitterScrapIronRod", pos, dir, range);
+	effect->Emit("EmitterScrapScrew", pos, dir, range);
+	effect->Emit("EmitterScrapTire", pos, dir, range);
 }

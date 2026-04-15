@@ -53,7 +53,20 @@ namespace Projectile {
 		std::string modelName = "";
 		// テクスチャ名
 		std::string textureName = "";
+		// 発射時のサウンド名
+		std::string spawnSoundName = "";
+		// 衝突時のサウンド名
+		std::string hitSoundName = "";
 
+		// 移動時のエフェクト名
+		std::string moveEffectName = "";
+		// 移動エフェクトの拡散拡縮
+		float moveEffectSpreadScale = 1.0f;
+		// 衝突時のエフェクト名
+		std::string hitEffectName = "";
+		// 爆発エフェクト名
+		std::string explosionEffectName = "";
+		
 
 		// 移動速度
 		float speed = 0.0f;
@@ -80,27 +93,36 @@ namespace Projectile {
 		bool isPierce = false;
 		// 貫通する場合の最大貫通数
 		int maxPierceCount = 0;
+		
 		// 跳ね返り回数
+		int maxBounceCount = 0;
+		
+		// 重力の有効化
 		bool enableGravity = false;
 		// 重力の強さ
 		float gravityScale = 1.0f;
+
 		// ホーミングの有効化
 		bool enableHoming = false;
 		// ホーミングの強さ
 		float homingStrength = 0.0f;
 		// ホーミングの追尾範囲
 		float homingRange = 0.0f;
-		// トレイルエフェクトを生成するか
-		bool generateTrailEffect = false;
-		// トレイルエフェクトの持続時間
-		float trailEffectLifeTime = 0.0f;
-		
+
 		// 爆発の持続時間
 		float explosionLifeTime = 0.0f;
 		// 爆発の半径
 		float explosionRadius = 0.0f;
 		// 爆発のダメージ
 		float explosionDamage = 0.0f;
+
+		// トレイルエフェクトを生成するか
+		bool generateTrailEffect = false;
+		// トレイルエフェクトの持続時間
+		float trailEffectLifeTime = 0.0f;
+
+		
+
 	};
 
 
