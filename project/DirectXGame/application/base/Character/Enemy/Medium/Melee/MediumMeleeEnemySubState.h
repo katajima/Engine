@@ -17,9 +17,7 @@ namespace Character {
         }
 
         // 開始
-        void Enter() override {
-            timer_ = 0.0f;
-        }
+        void Enter() override;
         // 更新
         void Update(float deltaTime) override;
 
@@ -29,7 +27,7 @@ namespace Character {
     private:
         float timer_ = 0.0f;
         const float readyTime_ = 4.75f;
-        Vector3 dire = {};
+        Vector3 dire_ = {};
     };
 
     // 攻撃本体
@@ -74,6 +72,8 @@ namespace Character {
     private:
         Vector3 rotate_{};
         float targetRotateY_ = 0;
+        float startRotateY_ = 0.0f;
+        float rotateDiffY_ = 0.0f;
         float timer_ = 0.0f;
         const float endTime_ = 0.5f;
     };

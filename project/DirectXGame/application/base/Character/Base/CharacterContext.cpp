@@ -11,6 +11,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
+	this->responseSystem = owner->GetResponseSystem();							// レスポンスシステム
 }
 
 Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
@@ -68,22 +69,26 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		}
 	}
 	if(ctx.state == CharacterMainState::Special) {
-		ctx.isSpecialAttacking = true;
+		ctx.isSpecialAttacking = true;	// 必殺技中
 	}
 	if (ctx.state == CharacterMainState::Jump) {
-		ctx.isJumping = true;
+		ctx.isJumping = true;	// ジャンプ中にする
 	}
 	if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Die || ctx.state == CharacterMainState::Fainting) {
-		ctx.isCanMove = false;
+		ctx.isCanMove = false;	// 動けないようにする
+		if(ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Fainting)
+		ctx.isDamage = true;	// ダメージを受けている
 	}
 	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
-		ctx.isCanJump = true;
+		ctx.isCanJump = true;	// ジャンプ可能にする
 	}
 	// 攻撃時の重力
 	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
 	if (comboStateMachine->GetCurrentState()) {
 		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
 	}
+	// ダメージ中の重力
+	//ctx.damageGravity = responseSystem->GetAttackResponse()->GetHitMotionSystem();
 	// 上昇時の重力
 	ctx.upGravity = jumpSystem->GetData().upGravity;
 	// 落下時の重力

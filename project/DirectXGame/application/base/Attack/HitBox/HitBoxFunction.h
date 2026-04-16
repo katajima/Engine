@@ -23,7 +23,7 @@ namespace HitBox {
 		void Update();
 
 
-		void SetData(AttackReactionData data) { data_ = data; };
+		void SetData(HitReactionData data) { data_ = data; };
 
 	private:
 		// 使用者がプレイヤーの場合の更新処理
@@ -42,6 +42,6 @@ namespace HitBox {
 		UseType type_;							// 使用者
 
 		Engine::Collider* otherColl = nullptr;
-		AttackReactionData data_;
+		HitReactionData data_;
 	};
 };

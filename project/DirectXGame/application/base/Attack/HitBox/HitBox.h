@@ -30,7 +30,7 @@ namespace HitBox {
 	public:
 
 		// コライダー追加
-		void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const AttackReactionData& reaction);
+		void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const HitReactionData& reaction);
 		// 有効化
 		void Enable(Vector4 color = {1,1,1,1});
 		// 無効化
@@ -65,7 +65,7 @@ namespace HitBox {
 			Engine::Collider* collider = nullptr;
 
 			float damage = 0.0f;
-			AttackReactionData reactionData;
+			HitReactionData reactionData;
 
 			int colliderID = -1;
 		};

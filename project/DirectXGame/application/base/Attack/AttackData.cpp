@@ -10,30 +10,30 @@ Vector3 KnockbackData::DirectionPower() const
 	if (data_.type == Type::kDirection) {	// 方向
 		reslut = data_.normal.Normalize();
 		// y座標同士の高さが同じでもy方向に飛ばしたい場合は
-		if (data_.isVerticalBoost_) {
+		if (data_.isVerticalBoost) {
 			// yを1に
 			reslut.y = 1.0f;
 		}
 		// それぞれかける
-		reslut.x *= data_.power_;
-		reslut.y *= data_.verticalBoost_;
-		reslut.z *= data_.power_;
+		reslut.x *= data_.power;
+		reslut.y *= data_.verticalBoost;
+		reslut.z *= data_.power;
 	}
 	else if (data_.type == Type::kRandom) {	// ランダム
 		reslut = Vector3{
-			Random::RandomFloat(-data_.power_,data_.power_),
-			Random::RandomFloat(-data_.power_,data_.power_),
-			Random::RandomFloat(-data_.power_,data_.power_)
+			Random::RandomFloat(-data_.power,data_.power),
+			Random::RandomFloat(-data_.power,data_.power),
+			Random::RandomFloat(-data_.power,data_.power)
 		};
 	}
 
 
-	float t = std::clamp(timer_ / data_.duration_, 0.0f, 1.0f);
+	float t = std::clamp(timer_ / data_.duration, 0.0f, 1.0f);
 
 	// 減衰係数
 	// damping_=0 → 1.0（減衰なし）
 	// damping_=1 → (1-t)（終了で完全停止）
-	float dampFactor = 1.0f - (t * data_.damping_);
+	float dampFactor = 1.0f - (t * data_.damping);
 
 	reslut *= dampFactor;
 
@@ -50,19 +50,19 @@ void AirStickData::Update(float dt) {
 	timer_ += dt;
 	
 	// 終了しているなら処理しない
-	if (timer_ > data_.duration_) {
+	if (timer_ > data_.duration) {
 		return;
 	}
 	Vector3 targetPos{};
 
-	if (data_.useWorldSpace_) {
+	if (data_.useWorldSpace) {
 		// すでに targetOffset_ がワールド座標基準の場合
-		targetPos = data_.targetOffset_;
+		targetPos = data_.targetOffset;
 	}
 	else {
 		// 攻撃者の位置を origin としてオフセットを計算する場合
 		// attackerPos_ が攻撃者の現在位置（外部からセットされる前提）
-		targetPos = world_->GetWorldPosition() + data_.targetOffset_;
+		targetPos = world_->GetWorldPosition() + data_.targetOffset;
 	}
 
 	//-----------------------------------------
@@ -80,10 +80,10 @@ void AirStickData::Update(float dt) {
 	//-----------------------------------------
 	// followSpeed_: 1フレームあたりの吸着スピード
 	// stickStrength_: 吸着補正の強さ
-	float moveStep = data_.followSpeed_ * dt;
+	float moveStep = data_.followSpeed * dt;
 
 	// 補間（LERP のような計算）
-	Vector3 move = dir * (moveStep * data_.stickStrength_);
+	Vector3 move = dir * (moveStep * data_.stickStrength);
 
 	//-----------------------------------------
 	// 4. 移動を適用
@@ -99,7 +99,7 @@ void AirStickData::Update(float dt) {
 	//-----------------------------------------
 	// 5. 向き補正（攻撃者の方向へ向かせる）
 	//-----------------------------------------
-	if (data_.keepFacingAttacker_) {
+	if (data_.keepFacingAttacker) {
 		Vector3 lookDir = world_->GetWorldPosition();// -data_.currentPos_;
 		if (lookDir.Length() > 0.0001f) {
 			lookDir.Normalize();
@@ -111,7 +111,7 @@ void AirStickData::Update(float dt) {
 	//-----------------------------------------
 	// 6. 重力の ON/OFF
 	//-----------------------------------------
-	if (data_.gravityEnabled_) {
+	if (data_.gravityEnabled) {
 		//data_.gravityEnabled_ = false;
 	}
 }
@@ -291,7 +291,7 @@ float DamageData::Continuous::GetDamage() const
 
 #pragma region 
 
-void AttackReactionData::Update(float dt) {
+void HitReactionData::Update(float dt) {
 	airStickData.Update(dt);// 空中・地上固定データ更新
 	hitStopData.Update(dt);	// ヒットストップデータ更新
 	knockback.Update(dt);	// ノックバックデータ更新

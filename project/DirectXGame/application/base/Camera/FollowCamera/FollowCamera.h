@@ -33,7 +33,7 @@ private: // 一旦
 		float bloomIndensity = 10.0f;
 
 		float rotateMinX = Math::DegreesToRadians(-10);
-		float rotateMaxX = Math::DegreesToRadians(10);
+		float rotateMaxX = Math::DegreesToRadians(15);
 
 
 		float maxZOffset = 30.0f;

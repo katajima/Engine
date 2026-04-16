@@ -26,27 +26,32 @@ public:
 		/// <summary>
 		/// 力・強さ
 		/// </summary>
-		float power_ = 0.0f;				// ノックバックの力
-		float verticalBoost_ = 0.0f;		// ノックバック垂直方向(敵をどれだけ上に吹き飛ばすか)
-		bool isVerticalBoost_ = false;		// Y方向にノックバックを与えるかどうか
+		float power = 0.0f;				// ノックバックの力
+		float verticalBoost = 0.0f;		// ノックバック垂直方向(敵をどれだけ上に吹き飛ばすか)
+		bool isVerticalBoost = false;		// Y方向にノックバックを与えるかどうか
 
 
 		/// <summary>
 		/// 時間
 		/// </summary>
-		float duration_ = 0.5f;				// ノックバック継続時間
-		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
+		float duration = 0.5f;				// ノックバック継続時間
+		float damping = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
 
 		/// <summary>
 		/// 制御
 		/// </summary>
-		bool gravityEnabled_ = false;		// ノックバック中に重力の影響を受けるか
+		bool gravityEnabled = false;		// ノックバック中に重力の影響を受けるか
 
 		/// <summary>
 		/// 衝突
 		/// </summary>
-		bool stopOnCollision_ = false;		// 当たって止まるか
-		float slideFloor_ = 0.0f;			// 床で滑る量
+		bool stopOnCollision = false;		// 当たって止まるか
+		float slideFloor = 0.0f;			// 床で滑る量
+
+		/// <summary>
+		/// 重力
+		/// </summary>
+		float gravityScale = 1.0f;
 	};
 
 	// 方向とパワーを合算した値(Vector3)
@@ -59,13 +64,13 @@ public:
 	/// ノックバック終了か
 	/// </summary>
 	/// <returns></returns>
-	bool IsFinish() const { return data_.duration_ < timer_; }
+	bool IsFinish() const { return data_.duration < timer_; }
 
 
 	// 重力影響受けるか
 	bool IsGravityEnabled() const {
 		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled_;
+		return data_.gravityEnabled;
 	}
 
 public:
@@ -74,8 +79,8 @@ public:
 
 	// ノックバックパワー設定
 	void SetPower(float power, float verticalBoost) {
-		data_.power_ = power;		// パワー
-		data_.verticalBoost_ = verticalBoost;	// パワーY方向
+		data_.power = power;		// パワー
+		data_.verticalBoost = verticalBoost;	// パワーY方向
 	}
 
 	// 方向設定
@@ -92,15 +97,16 @@ public:
 	// データ構造体
 	struct Data
 	{
-		Vector3 targetOffset_ = { 0,0,0 };	// 吸いつく位置
-		float duration_ = 0.5f;				// 吸いつく時間
-		bool useWorldSpace_ = false;		// ターゲット位置をワールド座標で扱うか
-		float followSpeed_ = 0.1f;			// ターゲット位置へ向かう追従スピード
-		float stickStrength_ = 1.0f;		// ターゲット位置へ貼りつく強さ(0.0f~1.0f)値が大きいほど貼りつく
+		Vector3 targetOffset = { 0,0,0 };	// 吸いつく位置
+		float duration = 0.5f;				// 吸いつく時間
+		bool useWorldSpace = false;		// ターゲット位置をワールド座標で扱うか
+		float followSpeed = 0.1f;			// ターゲット位置へ向かう追従スピード
+		float stickStrength = 1.0f;		// ターゲット位置へ貼りつく強さ(0.0f~1.0f)値が大きいほど貼りつく
 
-		bool endOnHit_ = true;				// 次の攻撃が当たった瞬間にターゲット位置に貼りつきを解除するか
-		bool gravityEnabled_ = true;		// 吸着時だけ重力を
-		bool keepFacingAttacker_ = true;	// 被撃者の向きを攻撃者へ自動回転させるか。
+		bool endOnHit = true;				// 次の攻撃が当たった瞬間にターゲット位置に貼りつきを解除するか
+		bool gravityEnabled = true;		// 吸着時だけ重力を
+		bool keepFacingAttacker = true;	// 被撃者の向きを攻撃者へ自動回転させるか。
+		float gravityScale = 1.0f;			// 重力強度
 	};
 
 
@@ -122,11 +128,11 @@ public:
 	// 重力影響受けるか
 	bool IsGravityEnabled() const { 
 		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled_;
+		return data_.gravityEnabled;
 	}
 
 	// 終了したか
-	bool IsFinish() const { return data_.duration_ < timer_; }
+	bool IsFinish() const { return data_.duration < timer_; }
 
 private:
 	Data data_;
@@ -141,7 +147,8 @@ public:
 		float duration_ = 0.5f;				// 揺れ継続時間
 		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
 		bool isGroundVibrationY = false;	// 地面に着地しているときにY方向を揺らすか
-		bool gravityEnabled_ = false;		// ヒットストップ中に重力の影響を受けるか
+		bool gravityEnabled = false;		// ヒットストップ中に重力の影響を受けるか
+		float gravityScale = 1.0f;			// 重力強度
 		Vector3 vibration = Vector3::Set(0.1f);	// 揺れ幅設定
 
 
@@ -167,7 +174,7 @@ public:
 	// 重力影響受けるか
 	bool IsGravityEnabled() const {
 		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled_;
+		return data_.gravityEnabled;
 	}
 
 	// データ構造体取得
@@ -307,7 +314,7 @@ private:
 };
 
 /// 攻撃リアクションデータ
-class AttackReactionData {
+class HitReactionData {
 public:
 
 	/// <summary>
@@ -341,5 +348,9 @@ private:
 	HitStopData hitStopData;	// ヒットストップデータ
 	AirStickData airStickData;	// 空中・地上固定データ
 	DamageData damageData;		// ダメージデータ
+
+	float hitStunTime;
+	float downTime;
+	float launchFloatTime;
 };
 

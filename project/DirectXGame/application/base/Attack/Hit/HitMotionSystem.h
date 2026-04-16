@@ -7,12 +7,15 @@
 
 class ObjectComponent;	// 前方宣言
 namespace Character {
+	class BaseCharacter;
 	class ParameterComponent;
 }
+class ReactionMoveSystem;
+
 /// <summary>
 /// ヒットコンポーネント
 /// </summary>
-class HitMotionSystem 
+class HitMotionSystem
 {
 public:
 	enum class HitMotionState
@@ -23,15 +26,19 @@ public:
 		AirStick,	// 吸い付き
 	};
 
+	// 初期化
+	void Initialize(Character::BaseCharacter* owner);
 
 	// 更新
-	void Update(float deltaTime, ObjectComponent* object, Character::ParameterComponent* parameter);
+	void Update(float dt);
 
 	// リアクションデータ
-	void SetReactionData(const AttackReactionData& data);
+	void SetReactionData(const HitReactionData& data);
 
 	// ヒットモーション中か
 	bool IsHitMotion();
+	//
+	float GetGravity() { return 1.0f; }
 	// 重力があるか設定
 	void UseGravity(ObjectComponent* object);
 
@@ -43,15 +50,18 @@ private:
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;
 	// ヒットストップモーション
-	HitStopMotion hitStopMotion_;
+	std::unique_ptr<HitStopMotion> hitStopMotion_;
 	// ノックバックモーション
-	KnockbackMotion knockbackMotion_;
+	std::unique_ptr <KnockbackMotion> knockbackMotion_;
 	// 吸い付きモーション
-	AirStickMotion airStickMotion_;
-	
+	std::unique_ptr <AirStickMotion> airStickMotion_;
+
 	// ダメージモーション
 	std::list<DamageMotion> damageMotions_;
 
-
-
+private:
+	// 所有者
+	Character::BaseCharacter* owner = nullptr;
+	// リアクション移動システム
+	ReactionMoveSystem* reactionMoveSystem = nullptr;
 };

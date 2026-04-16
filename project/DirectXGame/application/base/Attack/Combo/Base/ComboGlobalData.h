@@ -14,6 +14,14 @@ namespace Combo {
 		kManual,			// 特殊ケース
 	};
 
+	// リアクション
+	enum class HitReactionType {
+		Knockback,
+		BlowAway,
+		Launch,
+		WallBounce
+	};
+
 	// 移動方法
 	enum class MoveType {
 		kNone,		// 特になし
@@ -74,6 +82,8 @@ namespace Combo {
 		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
 		// ヒットボックス影響タイプ
 		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
+		// ヒットリアクションタイプ
+		HitReactionType hitReactionType = HitReactionType::Knockback;
 	};
 
 	// 保存項目リアクション

@@ -65,6 +65,7 @@ namespace Character {
 			AddItem("攻撃猶予時間", globalData_.attackTimer);
 			AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
 			AddItem("後退開始範囲", globalData_.startRetreatingRadius);
+			AddItem("回転速度", globalData_.turnSpeed);
 
 
 
@@ -72,6 +73,7 @@ namespace Character {
 			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
 			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
 			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+			globalData_.turnSpeed = GetValue<float>("回転速度");
 
 		}
 		// 更新保存項目
@@ -80,6 +82,7 @@ namespace Character {
 			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
 			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
 			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+			globalData_.turnSpeed = GetValue<float>("回転速度");
 		}
 
 		//

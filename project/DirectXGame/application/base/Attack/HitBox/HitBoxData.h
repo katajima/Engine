@@ -83,7 +83,7 @@ namespace HitBox {
 		// 球用サイズ
 		float radius = 1.0f;
 		// リアクションデータ
-		AttackReactionData reactionData;
+		HitReactionData reactionData;
 	};
 
 

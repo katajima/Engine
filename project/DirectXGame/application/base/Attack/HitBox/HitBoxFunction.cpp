@@ -44,8 +44,6 @@ namespace HitBox {
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
-		// ノックバック方向
-		data_.GetKnockbackData().SetNormal(player->GetMoveComponent()->GetDirection());
 		// リアクションデータ
 		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
 		//	エフェクト出現
@@ -79,7 +77,6 @@ namespace HitBox {
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}
 
-	void HitBoxFunction::UpdateTypeOther() {
-	}
+	void HitBoxFunction::UpdateTypeOther() {}
 
 }

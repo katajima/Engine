@@ -1,32 +1,42 @@
 #include "HitMotionSystem.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner){
+	this->owner = owner;
+	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
+	hitStopMotion_ = std::make_unique<HitStopMotion>();
+	knockbackMotion_ = std::make_unique<KnockbackMotion>();
+	airStickMotion_ = std::make_unique<AirStickMotion>();
 
-void HitMotionSystem::Update(float dt, ObjectComponent* object, Character::ParameterComponent* parameter)
+};
+
+
+
+void HitMotionSystem::Update(float dt)
 {
 	// ダメージモーション
-	DamageProcess(dt, parameter);
+	DamageProcess(dt, owner->GetCharacterParameterComponent());
 
 	// 各ヒットモーションが再生中なら更新する
 	if (IsHitMotion()) {
 
-		hitStopMotion_.Update(dt);			// ヒットストップモーション更新
-		knockbackMotion_.Update(dt, object);// ノックバックモーション更新
-		airStickMotion_.Update(dt, object);	// エアスティックモーション更新
+		hitStopMotion_->Update(dt);			// ヒットストップモーション更新
+		knockbackMotion_->Update(dt, owner->GetObjectComponent());// ノックバックモーション更新
+		airStickMotion_->Update(dt, owner->GetObjectComponent());	// エアスティックモーション更新
 
 		// 重力を設定 
-		UseGravity(object);
-	}
-	else {	// 何もヒットモーションが発生していない場合は重力をオンにする
-		object->GetRigidBodyComponent()->SetIsGravity(true);
+		UseGravity(owner->GetObjectComponent());
+	
+		//reactionMoveSystem->SetRequest();
 	}
 }
 
-void HitMotionSystem::SetReactionData(const AttackReactionData& data)
+void HitMotionSystem::SetReactionData(const HitReactionData& data)
 {
 	//hitStopMotion_.SetData(data.GetHitStopData());
 	//airStickMotion_.SetData(data.GetAirStickData());
-	knockbackMotion_.SetData(data.GetKnockbackData());
+	knockbackMotion_->SetData(data.GetKnockbackData());
 
 	DamageMotion dama;
 	dama.SetData(data.GetDamageData());
@@ -35,16 +45,16 @@ void HitMotionSystem::SetReactionData(const AttackReactionData& data)
 
 bool HitMotionSystem::IsHitMotion()
 {
-	return hitStopMotion_.IsPlaying()
-		|| knockbackMotion_.IsPlaying()
-		|| airStickMotion_.IsPlaying();
+	return hitStopMotion_->IsPlaying()
+		|| knockbackMotion_->IsPlaying()
+		|| airStickMotion_->IsPlaying();
 }
 
 void HitMotionSystem::UseGravity(ObjectComponent* object)
 {
-	bool hitStopGravity = hitStopMotion_.GetData().GetData().gravityEnabled_;
-	bool knockbackGravity = knockbackMotion_.GetData().GetData().gravityEnabled_;
-	bool airStickGravity = airStickMotion_.GetData().GetData().gravityEnabled_;
+	bool hitStopGravity = hitStopMotion_->GetData().GetData().gravityEnabled;
+	bool knockbackGravity = knockbackMotion_->GetData().GetData().gravityEnabled;
+	bool airStickGravity = airStickMotion_->GetData().GetData().gravityEnabled;
 
 	bool isGravity = hitStopGravity && knockbackGravity && airStickGravity;
 

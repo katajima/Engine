@@ -30,5 +30,7 @@ namespace Character {
 		float startRetreatingRadius = 3.0f;
 		// 後退スピード
 		float retreatSpeed = 1.0f;
+		// 回転スピード
+		float turnSpeed = 0.25f;
 	};
 }

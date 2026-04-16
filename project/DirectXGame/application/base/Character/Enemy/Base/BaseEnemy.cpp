@@ -116,7 +116,7 @@ namespace Character {
 
 		// 攻撃応答システムクラス初期化
 		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
+		responseSystem_->Initialize(this);
 		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;

@@ -36,21 +36,56 @@ namespace Character {
 
 	void SmallRangeEnemyAttackState::Update(const CharacterContext& ctx){
 		SmallRangeWeapon* weapon = static_cast<SmallRangeWeapon*>(character->GetWeapon());
-
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(character);
 
+		if (!weapon || !enemy) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+			return;
+		}
+
+		timer_ += ctx.dt;
 
 		weapon->SetCharacter(character);
 		weapon->SetParent(enemy);
 		weapon->SetTarget(enemy->GetTarget());
-		weapon->Shot();
 
-		character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		// プレイヤー方向を向く
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		if (toTarget.Length() > 0.001f) {
+			toTarget = toTarget.Normalize();
+
+			float targetRotY = std::atan2(toTarget.x, toTarget.z);
+			float& currentRotY = enemy->GetWorldTransform().rotate_.y;
+
+			float diff = targetRotY - currentRotY;
+			diff = std::atan2(std::sin(diff), std::cos(diff));
+
+			float maxTurn = turnSpeed_ * ctx.dt;
+			diff = std::clamp(diff, -maxTurn, maxTurn);
+
+			currentRotY += diff;
+		}
+
+		// 狙い時間が経過したら1回だけ撃つ
+		if (!hasShot_ && timer_ >= shotTime_) {
+			weapon->Shot();
+			hasShot_ = true;
+		}
+
+		// 発射後の硬直が終わったら移動へ戻る
+		if (timer_ >= endTime_) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
 	}
 
 	void SmallRangeEnemyAttackState::Exit(){}
 
-	void SmallRangeEnemyAttackState::Enter(){}
+	void SmallRangeEnemyAttackState::Enter(){
+		timer_ = 0.0f;
+		hasShot_ = false;
+	}
 
 #pragma endregion
 

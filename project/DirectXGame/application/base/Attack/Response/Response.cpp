@@ -7,15 +7,15 @@
 #pragma region ResponseSystem
 
 
-void ResponseSystem::Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object) {
-
+void ResponseSystem::Initialize(Character::BaseCharacter* owner) {
+	this->owner = owner;
 	// 攻撃衝突応答クラス初期化
 	attackResponse_ = std::make_unique<AttackResponse>();
-	attackResponse_->Initialize(paremeter, object);
+	attackResponse_->Initialize(owner);
 
 	// 接触衝突応答クラス
 	hitResponse_ = std::make_unique<HitResponse>();
-	hitResponse_->SetOwner(&object->GetWorldTransform());
+	hitResponse_->SetOwner(&owner->GetWorldTransform());
 
 }
 
@@ -28,19 +28,16 @@ void ResponseSystem::Update(float dt) {
 
 #pragma region AttackResponse
 
-void AttackResponse::Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object) {
-	assert(paremeter && object);
-	this->paremeter = paremeter;
-	this->object = object;
-
+void AttackResponse::Initialize(Character::BaseCharacter* owner) {
+	
 	// 攻撃衝突モーションクラス初期化
 	hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-
+	hitMotionSystem_->Initialize(owner);
 }
 
 void AttackResponse::Update(float dt) {
 	// 被撃モーション更新
-	hitMotionSystem_->Update(dt, object, paremeter);
+	hitMotionSystem_->Update(dt);
 }
 
 #pragma endregion // 攻撃を受けたとき

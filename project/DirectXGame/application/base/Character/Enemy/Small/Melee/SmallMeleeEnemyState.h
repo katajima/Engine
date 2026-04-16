@@ -87,7 +87,7 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;
-		float damageTime_ = 0.5f;
+		float damageTime_ = 0.25f;
 	};
 
 }

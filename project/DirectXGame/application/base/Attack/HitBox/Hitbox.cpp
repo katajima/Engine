@@ -66,7 +66,7 @@ namespace HitBox {
 
 #pragma region MyRegion
 	// コライダー追加
-	void HitBoxInstance::AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const AttackReactionData& reaction) {
+	void HitBoxInstance::AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const HitReactionData& reaction) {
 		// 当たり判定コンポーネントにコライダー追加
 		ColliderData data;
 		data.colliderID = colliderComponent_->AddCollider(std::move(collider));

@@ -13,8 +13,12 @@ namespace Character {
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 
 
+		moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
+
+
 		objectComponentShadow_->GetWorldTransform().scale_ = { 5.0f,5.0f ,5.0f };
 
+		
 		// パラメーター初期化
 		Parameters()->HP.Initiaize(hp, 0, hp, 0);
 		Parameters()->strength = 10.0f;

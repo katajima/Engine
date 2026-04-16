@@ -83,29 +83,54 @@ namespace Character {
 
 	void SmallRangeEnemy::Move()
 	{
-		// 距離設定
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		auto& moveData = moveComponent_->GetMoveSystem()->Data();
+
+		// ターゲットへの水平ベクトル
+		Vector3 toTarget = Subtract(GetTargetPos(), GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		float distance = toTarget.Length();
+		if (distance <= 0.001f) {
+			moveData.maxSpeed = 0.0f;
+			return;
+		}
+
+		Vector3 dire = toTarget.Normalize();
+
 		// 回転設定
 		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
 
-		if (GetTargetDistance() <= globalData_.attackStartRadius) {
+		// Y軸周り角度を補間
+		float currentY = GetWorldTransform().rotate_.y;
+		float targetY = rotate.y;
+		float diff = targetY - currentY;
+		diff = std::atan2(std::sin(diff), std::cos(diff));
+
+		float maxTurn = globalData_.turnSpeed * GetTime();
+		diff = std::clamp(diff, -maxTurn, maxTurn);
+
+		GetWorldTransform().rotate_.y = currentY + diff;
+
+		if (distance <= globalData_.startRetreatingRadius) {
+			// 近すぎるので後退
+			attackTimer_ = 0.0f;
+			moveData.maxSpeed = -globalData_.retreatSpeed;
+		}
+		else if (distance <= globalData_.attackStartRadius) {
+			// 攻撃可能距離
 			attackTimer_ += GetTime();
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
+			moveData.maxSpeed = 0.0f;
+
 			if (attackTimer_ >= globalData_.attackTimer) {
 				attackTimer_ = 0.0f;
-				// 攻撃ステートへ
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				return;
 			}
-			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
-			}
 		}
 		else {
+			// 射程外なので接近
 			attackTimer_ = 0.0f;
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
+			moveData.maxSpeed = moveSpeed_;
 		}
 	}
 

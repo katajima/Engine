@@ -9,6 +9,7 @@ class MovementComponent;
 class JumpSystem;
 class MoveSystem;
 class LockOnSystem;
+class ResponseSystem;
 
 namespace Combo {
 	class StateMachine;
@@ -65,6 +66,8 @@ namespace Character {
 		bool isCanMove = true;
 		// ジャンプ可能か
 		bool isCanJump = false;
+		// 被弾中か
+		bool isDamage = false;
 
 		// 高さ
 		float skyHeight = 1.5f;
@@ -75,6 +78,8 @@ namespace Character {
 		float fallGravity = 30.0f;
 		// 攻撃中の重力係数
 		float attackingGravity = 20.0f;
+		// 被弾中の重力係数
+		float damageGravity = 1.0f;
 
 		// 移動スピード
 		float moveSpeed = 1.0f;
@@ -108,6 +113,8 @@ namespace Character {
 		const MoveSystem* moveSystem = nullptr;
 		// ロックオンシステム
 	 	const LockOnSystem* lockOnSystem = nullptr;
+		// レスポンスシステム
+		ResponseSystem* responseSystem = nullptr;
 		// コンボステートマシン
 		const Combo::StateMachine* comboStateMachine = nullptr;
 	};

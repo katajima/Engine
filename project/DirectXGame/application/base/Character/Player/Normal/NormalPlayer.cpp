@@ -87,7 +87,7 @@ namespace Character {
 
 		// 応答システム初期化
 		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
+		responseSystem_->Initialize(this);
 		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
 
 

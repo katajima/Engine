@@ -44,6 +44,11 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;
+		bool hasShot_ = false;
+
+		float shotTime_ = 0.4f;   // 狙ってから撃つまで
+		float endTime_ = 0.8f;   // 攻撃全体時間
+		float turnSpeed_ = 6.0f;  // 回転速度
 	};
 
 	/// <summary>
@@ -86,7 +91,7 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;
-		float damageTime_ = 0.5f;
+		float damageTime_ = 0.25f;
 	};
 
 

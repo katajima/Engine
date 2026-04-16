@@ -85,10 +85,10 @@ namespace Combo {
 
 		// リアクションデータ
 		data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
-		data.reactionData.GetKnockbackData().GetData().power_ = combo.reaction.knockbackPower;
-		data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.reaction.knockbackPowerY;
-		data.reactionData.GetKnockbackData().GetData().duration_ = combo.reaction.knockbackDuration;
-		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.reaction.isVerticalBoost;
+		data.reactionData.GetKnockbackData().GetData().power = combo.reaction.knockbackPower;
+		data.reactionData.GetKnockbackData().GetData().verticalBoost = combo.reaction.knockbackPowerY;
+		data.reactionData.GetKnockbackData().GetData().duration = combo.reaction.knockbackDuration;
+		data.reactionData.GetKnockbackData().GetData().isVerticalBoost = combo.reaction.isVerticalBoost;
 
 		collData_.push_back(data);
 	};

@@ -66,30 +66,74 @@ namespace Character {
 	}
 
 	void MediumMeleeEnemy::Move(){
-		// 距離設定
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-		dire.y = 0.0f;
-		// 回転設定
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
+		if (isStopping_) return;
 
-		if (GetTargetDistance() <= globalData_.attackStartRadius) {
+		// 位置差分
+		Vector3 toTarget = Subtract(GetTargetPos(), GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		float distance = toTarget.Length();
+		if (distance <= 0.001f) {
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
+			return;
+		}
+
+		// 水平向き
+		Vector3 dire = toTarget.Normalize();
+
+		// 回転設定（即値代入ではなく補間推奨）
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+
+		// Y軸だけゆっくり向く
+		float currentY = GetWorldTransform().rotate_.y;
+		float targetY = rotate.y;
+
+		// 必要なら AngleDiff のような角度差補正関数を使う
+		float diff = targetY - currentY;
+
+		// -π～πへ補正
+		while (diff > std::numbers::pi_v<float>) {
+			diff -= std::numbers::pi_v<float> *2.0f;
+		}
+		while (diff < -std::numbers::pi_v<float>) {
+			diff += std::numbers::pi_v<float> *2.0f;
+		}
+
+		// 回転速度
+		float turnSpeed = globalData_.turnSpeed * GetTime();
+		diff = std::clamp(diff, -turnSpeed, turnSpeed);
+
+		GetWorldTransform().rotate_.y = currentY + diff;
+
+		// 基本速度
+		float targetSpeed = 0.0f;
+
+		// 距離ごとの行動分岐
+		if (distance <= globalData_.startRetreatingRadius) {
+			// 近すぎるので少し下がる
+			attackTimer_ = 0.0f;
+			targetSpeed = -globalData_.retreatSpeed;
+		}
+		else if (distance <= globalData_.attackStartRadius) {
+			// 攻撃準備距離
 			attackTimer_ += GetTime();
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
+
+			// 完全停止だと不自然なら微速前進か停止
+			targetSpeed = 0.0f;
+
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
-			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
-			}
 		}
 		else {
+			// 接近
 			attackTimer_ = 0.0f;
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
+			targetSpeed = moveSpeed_;
 		}
+
+		moveComponent_->GetMoveSystem()->Data().maxSpeed = targetSpeed;
 	}
 
 	void MediumMeleeEnemy::InitParticle(){
