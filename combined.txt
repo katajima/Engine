@@ -1746,30 +1746,30 @@ Vector3 KnockbackData::DirectionPower() const
 	if (data_.type == Type::kDirection) {	// 方向
 		reslut = data_.normal.Normalize();
 		// y座標同士の高さが同じでもy方向に飛ばしたい場合は
-		if (data_.isVerticalBoost_) {
+		if (data_.isVerticalBoost) {
 			// yを1に
 			reslut.y = 1.0f;
 		}
 		// それぞれかける
-		reslut.x *= data_.power_;
-		reslut.y *= data_.verticalBoost_;
-		reslut.z *= data_.power_;
+		reslut.x *= data_.power;
+		reslut.y *= data_.verticalBoost;
+		reslut.z *= data_.power;
 	}
 	else if (data_.type == Type::kRandom) {	// ランダム
 		reslut = Vector3{
-			Random::RandomFloat(-data_.power_,data_.power_),
-			Random::RandomFloat(-data_.power_,data_.power_),
-			Random::RandomFloat(-data_.power_,data_.power_)
+			Random::RandomFloat(-data_.power,data_.power),
+			Random::RandomFloat(-data_.power,data_.power),
+			Random::RandomFloat(-data_.power,data_.power)
 		};
 	}
 
 
-	float t = std::clamp(timer_ / data_.duration_, 0.0f, 1.0f);
+	float t = std::clamp(timer_ / data_.duration, 0.0f, 1.0f);
 
 	// 減衰係数
 	// damping_=0 → 1.0（減衰なし）
 	// damping_=1 → (1-t)（終了で完全停止）
-	float dampFactor = 1.0f - (t * data_.damping_);
+	float dampFactor = 1.0f - (t * data_.damping);
 
 	reslut *= dampFactor;
 
@@ -1786,19 +1786,19 @@ void AirStickData::Update(float dt) {
 	timer_ += dt;
 	
 	// 終了しているなら処理しない
-	if (timer_ > data_.duration_) {
+	if (timer_ > data_.duration) {
 		return;
 	}
 	Vector3 targetPos{};
 
-	if (data_.useWorldSpace_) {
+	if (data_.useWorldSpace) {
 		// すでに targetOffset_ がワールド座標基準の場合
-		targetPos = data_.targetOffset_;
+		targetPos = data_.targetOffset;
 	}
 	else {
 		// 攻撃者の位置を origin としてオフセットを計算する場合
 		// attackerPos_ が攻撃者の現在位置（外部からセットされる前提）
-		targetPos = world_->GetWorldPosition() + data_.targetOffset_;
+		targetPos = world_->GetWorldPosition() + data_.targetOffset;
 	}
 
 	//-----------------------------------------
@@ -1816,10 +1816,10 @@ void AirStickData::Update(float dt) {
 	//-----------------------------------------
 	// followSpeed_: 1フレームあたりの吸着スピード
 	// stickStrength_: 吸着補正の強さ
-	float moveStep = data_.followSpeed_ * dt;
+	float moveStep = data_.followSpeed * dt;
 
 	// 補間（LERP のような計算）
-	Vector3 move = dir * (moveStep * data_.stickStrength_);
+	Vector3 move = dir * (moveStep * data_.stickStrength);
 
 	//-----------------------------------------
 	// 4. 移動を適用
@@ -1835,7 +1835,7 @@ void AirStickData::Update(float dt) {
 	//-----------------------------------------
 	// 5. 向き補正（攻撃者の方向へ向かせる）
 	//-----------------------------------------
-	if (data_.keepFacingAttacker_) {
+	if (data_.keepFacingAttacker) {
 		Vector3 lookDir = world_->GetWorldPosition();// -data_.currentPos_;
 		if (lookDir.Length() > 0.0001f) {
 			lookDir.Normalize();
@@ -1847,7 +1847,7 @@ void AirStickData::Update(float dt) {
 	//-----------------------------------------
 	// 6. 重力の ON/OFF
 	//-----------------------------------------
-	if (data_.gravityEnabled_) {
+	if (data_.gravityEnabled) {
 		//data_.gravityEnabled_ = false;
 	}
 }
@@ -2027,7 +2027,7 @@ float DamageData::Continuous::GetDamage() const
 
 #pragma region 
 
-void AttackReactionData::Update(float dt) {
+void HitReactionData::Update(float dt) {
 	airStickData.Update(dt);// 空中・地上固定データ更新
 	hitStopData.Update(dt);	// ヒットストップデータ更新
 	knockback.Update(dt);	// ノックバックデータ更新
@@ -2071,27 +2071,32 @@ public:
 		/// <summary>
 		/// 力・強さ
 		/// </summary>
-		float power_ = 0.0f;				// ノックバックの力
-		float verticalBoost_ = 0.0f;		// ノックバック垂直方向(敵をどれだけ上に吹き飛ばすか)
-		bool isVerticalBoost_ = false;		// Y方向にノックバックを与えるかどうか
+		float power = 0.0f;				// ノックバックの力
+		float verticalBoost = 0.0f;		// ノックバック垂直方向(敵をどれだけ上に吹き飛ばすか)
+		bool isVerticalBoost = false;		// Y方向にノックバックを与えるかどうか
 
 
 		/// <summary>
 		/// 時間
 		/// </summary>
-		float duration_ = 0.5f;				// ノックバック継続時間
-		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
+		float duration = 0.5f;				// ノックバック継続時間
+		float damping = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
 
 		/// <summary>
 		/// 制御
 		/// </summary>
-		bool gravityEnabled_ = false;		// ノックバック中に重力の影響を受けるか
+		bool gravityEnabled = false;		// ノックバック中に重力の影響を受けるか
 
 		/// <summary>
 		/// 衝突
 		/// </summary>
-		bool stopOnCollision_ = false;		// 当たって止まるか
-		float slideFloor_ = 0.0f;			// 床で滑る量
+		bool stopOnCollision = false;		// 当たって止まるか
+		float slideFloor = 0.0f;			// 床で滑る量
+
+		/// <summary>
+		/// 重力
+		/// </summary>
+		float gravityScale = 1.0f;
 	};
 
 	// 方向とパワーを合算した値(Vector3)
@@ -2104,13 +2109,13 @@ public:
 	/// ノックバック終了か
 	/// </summary>
 	/// <returns></returns>
-	bool IsFinish() const { return data_.duration_ < timer_; }
+	bool IsFinish() const { return data_.duration < timer_; }
 
 
 	// 重力影響受けるか
 	bool IsGravityEnabled() const {
 		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled_;
+		return data_.gravityEnabled;
 	}
 
 public:
@@ -2119,8 +2124,8 @@ public:
 
 	// ノックバックパワー設定
 	void SetPower(float power, float verticalBoost) {
-		data_.power_ = power;		// パワー
-		data_.verticalBoost_ = verticalBoost;	// パワーY方向
+		data_.power = power;		// パワー
+		data_.verticalBoost = verticalBoost;	// パワーY方向
 	}
 
 	// 方向設定
@@ -2137,15 +2142,16 @@ public:
 	// データ構造体
 	struct Data
 	{
-		Vector3 targetOffset_ = { 0,0,0 };	// 吸いつく位置
-		float duration_ = 0.5f;				// 吸いつく時間
-		bool useWorldSpace_ = false;		// ターゲット位置をワールド座標で扱うか
-		float followSpeed_ = 0.1f;			// ターゲット位置へ向かう追従スピード
-		float stickStrength_ = 1.0f;		// ターゲット位置へ貼りつく強さ(0.0f~1.0f)値が大きいほど貼りつく
+		Vector3 targetOffset = { 0,0,0 };	// 吸いつく位置
+		float duration = 0.5f;				// 吸いつく時間
+		bool useWorldSpace = false;		// ターゲット位置をワールド座標で扱うか
+		float followSpeed = 0.1f;			// ターゲット位置へ向かう追従スピード
+		float stickStrength = 1.0f;		// ターゲット位置へ貼りつく強さ(0.0f~1.0f)値が大きいほど貼りつく
 
-		bool endOnHit_ = true;				// 次の攻撃が当たった瞬間にターゲット位置に貼りつきを解除するか
-		bool gravityEnabled_ = true;		// 吸着時だけ重力を
-		bool keepFacingAttacker_ = true;	// 被撃者の向きを攻撃者へ自動回転させるか。
+		bool endOnHit = true;				// 次の攻撃が当たった瞬間にターゲット位置に貼りつきを解除するか
+		bool gravityEnabled = true;		// 吸着時だけ重力を
+		bool keepFacingAttacker = true;	// 被撃者の向きを攻撃者へ自動回転させるか。
+		float gravityScale = 1.0f;			// 重力強度
 	};
 
 
@@ -2167,11 +2173,11 @@ public:
 	// 重力影響受けるか
 	bool IsGravityEnabled() const { 
 		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled_;
+		return data_.gravityEnabled;
 	}
 
 	// 終了したか
-	bool IsFinish() const { return data_.duration_ < timer_; }
+	bool IsFinish() const { return data_.duration < timer_; }
 
 private:
 	Data data_;
@@ -2186,7 +2192,8 @@ public:
 		float duration_ = 0.5f;				// 揺れ継続時間
 		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
 		bool isGroundVibrationY = false;	// 地面に着地しているときにY方向を揺らすか
-		bool gravityEnabled_ = false;		// ヒットストップ中に重力の影響を受けるか
+		bool gravityEnabled = false;		// ヒットストップ中に重力の影響を受けるか
+		float gravityScale = 1.0f;			// 重力強度
 		Vector3 vibration = Vector3::Set(0.1f);	// 揺れ幅設定
 
 
@@ -2212,7 +2219,7 @@ public:
 	// 重力影響受けるか
 	bool IsGravityEnabled() const {
 		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled_;
+		return data_.gravityEnabled;
 	}
 
 	// データ構造体取得
@@ -2352,7 +2359,7 @@ private:
 };
 
 /// 攻撃リアクションデータ
-class AttackReactionData {
+class HitReactionData {
 public:
 
 	/// <summary>
@@ -2386,6 +2393,10 @@ private:
 	HitStopData hitStopData;	// ヒットストップデータ
 	AirStickData airStickData;	// 空中・地上固定データ
 	DamageData damageData;		// ダメージデータ
+
+	float hitStunTime;
+	float downTime;
+	float launchFloatTime;
 };
 
 
@@ -2814,10 +2825,10 @@ namespace Combo {
 
 
 		// リアクション
-		data_.reaction.knockbackDuration = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration_;	// ノックバック持続時間
-		data_.reaction.knockbackPower = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().power_;			// ノックバックパワー
-		data_.reaction.knockbackPowerY = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().verticalBoost_;		// ノックバックY方向パワー
-		data_.reaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost_;	// Y方向にノックバック
+		data_.reaction.knockbackDuration = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration;	// ノックバック持続時間
+		data_.reaction.knockbackPower = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().power;		// ノックバックパワー
+		data_.reaction.knockbackPowerY = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().verticalBoost;		// ノックバックY方向パワー
+		data_.reaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost;	// Y方向にノックバック
 		data_.reaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.GetDamageData().GetOne().damage;						// ダメージ
 
 		// アニメーションスピード
@@ -3190,6 +3201,14 @@ namespace Combo {
 		kManual,			// 特殊ケース
 	};
 
+	// リアクション
+	enum class HitReactionType {
+		Knockback,
+		BlowAway,
+		Launch,
+		WallBounce
+	};
+
 	// 移動方法
 	enum class MoveType {
 		kNone,		// 特になし
@@ -3250,6 +3269,8 @@ namespace Combo {
 		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
 		// ヒットボックス影響タイプ
 		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
+		// ヒットリアクションタイプ
+		HitReactionType hitReactionType = HitReactionType::Knockback;
 	};
 
 	// 保存項目リアクション
@@ -4662,10 +4683,10 @@ namespace Combo {
 
 		// リアクションデータ
 		data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
-		data.reactionData.GetKnockbackData().GetData().power_ = combo.reaction.knockbackPower;
-		data.reactionData.GetKnockbackData().GetData().verticalBoost_ = combo.reaction.knockbackPowerY;
-		data.reactionData.GetKnockbackData().GetData().duration_ = combo.reaction.knockbackDuration;
-		data.reactionData.GetKnockbackData().GetData().isVerticalBoost_ = combo.reaction.isVerticalBoost;
+		data.reactionData.GetKnockbackData().GetData().power = combo.reaction.knockbackPower;
+		data.reactionData.GetKnockbackData().GetData().verticalBoost = combo.reaction.knockbackPowerY;
+		data.reactionData.GetKnockbackData().GetData().duration = combo.reaction.knockbackDuration;
+		data.reactionData.GetKnockbackData().GetData().isVerticalBoost = combo.reaction.isVerticalBoost;
 
 		collData_.push_back(data);
 	};
@@ -6467,32 +6488,42 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 #include "HitMotionSystem.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
+#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner){
+	this->owner = owner;
+	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
+	hitStopMotion_ = std::make_unique<HitStopMotion>();
+	knockbackMotion_ = std::make_unique<KnockbackMotion>();
+	airStickMotion_ = std::make_unique<AirStickMotion>();
 
-void HitMotionSystem::Update(float dt, ObjectComponent* object, Character::ParameterComponent* parameter)
+};
+
+
+
+void HitMotionSystem::Update(float dt)
 {
 	// ダメージモーション
-	DamageProcess(dt, parameter);
+	DamageProcess(dt, owner->GetCharacterParameterComponent());
 
 	// 各ヒットモーションが再生中なら更新する
 	if (IsHitMotion()) {
 
-		hitStopMotion_.Update(dt);			// ヒットストップモーション更新
-		knockbackMotion_.Update(dt, object);// ノックバックモーション更新
-		airStickMotion_.Update(dt, object);	// エアスティックモーション更新
+		hitStopMotion_->Update(dt);			// ヒットストップモーション更新
+		knockbackMotion_->Update(dt, owner->GetObjectComponent());// ノックバックモーション更新
+		airStickMotion_->Update(dt, owner->GetObjectComponent());	// エアスティックモーション更新
 
 		// 重力を設定 
-		UseGravity(object);
-	}
-	else {	// 何もヒットモーションが発生していない場合は重力をオンにする
-		object->GetRigidBodyComponent()->SetIsGravity(true);
+		UseGravity(owner->GetObjectComponent());
+	
+		//reactionMoveSystem->SetRequest();
 	}
 }
 
-void HitMotionSystem::SetReactionData(const AttackReactionData& data)
+void HitMotionSystem::SetReactionData(const HitReactionData& data)
 {
 	//hitStopMotion_.SetData(data.GetHitStopData());
 	//airStickMotion_.SetData(data.GetAirStickData());
-	knockbackMotion_.SetData(data.GetKnockbackData());
+	knockbackMotion_->SetData(data.GetKnockbackData());
 
 	DamageMotion dama;
 	dama.SetData(data.GetDamageData());
@@ -6501,16 +6532,16 @@ void HitMotionSystem::SetReactionData(const AttackReactionData& data)
 
 bool HitMotionSystem::IsHitMotion()
 {
-	return hitStopMotion_.IsPlaying()
-		|| knockbackMotion_.IsPlaying()
-		|| airStickMotion_.IsPlaying();
+	return hitStopMotion_->IsPlaying()
+		|| knockbackMotion_->IsPlaying()
+		|| airStickMotion_->IsPlaying();
 }
 
 void HitMotionSystem::UseGravity(ObjectComponent* object)
 {
-	bool hitStopGravity = hitStopMotion_.GetData().GetData().gravityEnabled_;
-	bool knockbackGravity = knockbackMotion_.GetData().GetData().gravityEnabled_;
-	bool airStickGravity = airStickMotion_.GetData().GetData().gravityEnabled_;
+	bool hitStopGravity = hitStopMotion_->GetData().GetData().gravityEnabled;
+	bool knockbackGravity = knockbackMotion_->GetData().GetData().gravityEnabled;
+	bool airStickGravity = airStickMotion_->GetData().GetData().gravityEnabled;
 
 	bool isGravity = hitStopGravity && knockbackGravity && airStickGravity;
 
@@ -6548,12 +6579,15 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
 
 class ObjectComponent;	// 前方宣言
 namespace Character {
+	class BaseCharacter;
 	class ParameterComponent;
 }
+class ReactionMoveSystem;
+
 /// <summary>
 /// ヒットコンポーネント
 /// </summary>
-class HitMotionSystem 
+class HitMotionSystem
 {
 public:
 	enum class HitMotionState
@@ -6564,15 +6598,19 @@ public:
 		AirStick,	// 吸い付き
 	};
 
+	// 初期化
+	void Initialize(Character::BaseCharacter* owner);
 
 	// 更新
-	void Update(float deltaTime, ObjectComponent* object, Character::ParameterComponent* parameter);
+	void Update(float dt);
 
 	// リアクションデータ
-	void SetReactionData(const AttackReactionData& data);
+	void SetReactionData(const HitReactionData& data);
 
 	// ヒットモーション中か
 	bool IsHitMotion();
+	//
+	float GetGravity() { return 1.0f; }
 	// 重力があるか設定
 	void UseGravity(ObjectComponent* object);
 
@@ -6584,17 +6622,20 @@ private:
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;
 	// ヒットストップモーション
-	HitStopMotion hitStopMotion_;
+	std::unique_ptr<HitStopMotion> hitStopMotion_;
 	// ノックバックモーション
-	KnockbackMotion knockbackMotion_;
+	std::unique_ptr <KnockbackMotion> knockbackMotion_;
 	// 吸い付きモーション
-	AirStickMotion airStickMotion_;
-	
+	std::unique_ptr <AirStickMotion> airStickMotion_;
+
 	// ダメージモーション
 	std::list<DamageMotion> damageMotions_;
 
-
-
+private:
+	// 所有者
+	Character::BaseCharacter* owner = nullptr;
+	// リアクション移動システム
+	ReactionMoveSystem* reactionMoveSystem = nullptr;
 };
 
 
@@ -6633,7 +6674,7 @@ namespace HitBox {
 	public:
 
 		// コライダー追加
-		void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const AttackReactionData& reaction);
+		void AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const HitReactionData& reaction);
 		// 有効化
 		void Enable(Vector4 color = {1,1,1,1});
 		// 無効化
@@ -6668,7 +6709,7 @@ namespace HitBox {
 			Engine::Collider* collider = nullptr;
 
 			float damage = 0.0f;
-			AttackReactionData reactionData;
+			HitReactionData reactionData;
 
 			int colliderID = -1;
 		};
@@ -6771,7 +6812,7 @@ namespace HitBox {
 		// 球用サイズ
 		float radius = 1.0f;
 		// リアクションデータ
-		AttackReactionData reactionData;
+		HitReactionData reactionData;
 	};
 
 
@@ -7079,8 +7120,6 @@ namespace HitBox {
 		// プレイヤー
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
-		// ノックバック方向
-		data_.GetKnockbackData().SetNormal(player->GetMoveComponent()->GetDirection());
 		// リアクションデータ
 		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
 		//	エフェクト出現
@@ -7114,8 +7153,7 @@ namespace HitBox {
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}
 
-	void HitBoxFunction::UpdateTypeOther() {
-	}
+	void HitBoxFunction::UpdateTypeOther() {}
 
 }
 
@@ -7148,7 +7186,7 @@ namespace HitBox {
 		void Update();
 
 
-		void SetData(AttackReactionData data) { data_ = data; };
+		void SetData(HitReactionData data) { data_ = data; };
 
 	private:
 		// 使用者がプレイヤーの場合の更新処理
@@ -7167,7 +7205,7 @@ namespace HitBox {
 		UseType type_;							// 使用者
 
 		Engine::Collider* otherColl = nullptr;
-		AttackReactionData data_;
+		HitReactionData data_;
 	};
 };
 
@@ -7580,7 +7618,7 @@ namespace HitBox {
 
 #pragma region MyRegion
 	// コライダー追加
-	void HitBoxInstance::AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const AttackReactionData& reaction) {
+	void HitBoxInstance::AddCollider(std::unique_ptr<Engine::Collider> collider, const Vector3& offset, const HitReactionData& reaction) {
 		// 当たり判定コンポーネントにコライダー追加
 		ColliderData data;
 		data.colliderID = colliderComponent_->AddCollider(std::move(collider));
@@ -7904,15 +7942,15 @@ File Path: project/DirectXGame/application/base/Attack/Response/Response.cpp
 #pragma region ResponseSystem
 
 
-void ResponseSystem::Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object) {
-
+void ResponseSystem::Initialize(Character::BaseCharacter* owner) {
+	this->owner = owner;
 	// 攻撃衝突応答クラス初期化
 	attackResponse_ = std::make_unique<AttackResponse>();
-	attackResponse_->Initialize(paremeter, object);
+	attackResponse_->Initialize(owner);
 
 	// 接触衝突応答クラス
 	hitResponse_ = std::make_unique<HitResponse>();
-	hitResponse_->SetOwner(&object->GetWorldTransform());
+	hitResponse_->SetOwner(&owner->GetWorldTransform());
 
 }
 
@@ -7925,19 +7963,16 @@ void ResponseSystem::Update(float dt) {
 
 #pragma region AttackResponse
 
-void AttackResponse::Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object) {
-	assert(paremeter && object);
-	this->paremeter = paremeter;
-	this->object = object;
-
+void AttackResponse::Initialize(Character::BaseCharacter* owner) {
+	
 	// 攻撃衝突モーションクラス初期化
 	hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-
+	hitMotionSystem_->Initialize(owner);
 }
 
 void AttackResponse::Update(float dt) {
 	// 被撃モーション更新
-	hitMotionSystem_->Update(dt, object, paremeter);
+	hitMotionSystem_->Update(dt);
 }
 
 #pragma endregion // 攻撃を受けたとき
@@ -8035,9 +8070,6 @@ File Path: project/DirectXGame/application/base/Attack/Response/Response.h
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 // 前方宣言
-namespace Character {
-	class ParameterComponent;	// キャラクターパラメータ設定
-}
 class ObjectComponent;				// オブジェクト
 class WorldTransform;				// オブジェクト位置
 class Collider;						// コライダー
@@ -8053,7 +8085,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object);
+	void Initialize(Character::BaseCharacter* owner);
 
 	/// <summary>
 	/// 更新
@@ -8071,10 +8103,8 @@ private:
 	// ヒットモーション
 	std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
 private:// 貰いもの
-	// キャラクターパラメータ
-	Character::ParameterComponent* paremeter = nullptr;
-	// オブジェクト
-	ObjectComponent* object = nullptr;
+	// 所有者
+	Character::BaseCharacter* owner = nullptr;
 };
 
 
@@ -8115,7 +8145,7 @@ public:
 	/// </summary>
 	/// <param name="paremeter">kキャラクターパラメータクラス</param>
 	/// <param name="object">オブジェクトクラス</param>
-	void Initialize(Character::ParameterComponent* paremeter, ObjectComponent* object);
+	void Initialize(Character::BaseCharacter* owner);
 
 
 	/// <summary>
@@ -8147,6 +8177,8 @@ private:
 	std::unique_ptr<AttackResponse> attackResponse_ = nullptr;
 	// 衝突応答クラス(押し戻しなど)
 	std::unique_ptr<HitResponse> hitResponse_ = nullptr;	
+	// 所有者
+	Character::BaseCharacter* owner = nullptr;
 };
 
 
@@ -11122,7 +11154,7 @@ private: // 一旦
 		float bloomIndensity = 10.0f;
 
 		float rotateMinX = Math::DegreesToRadians(-10);
-		float rotateMaxX = Math::DegreesToRadians(10);
+		float rotateMaxX = Math::DegreesToRadians(15);
 
 
 		float maxZOffset = 30.0f;
@@ -12228,6 +12260,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
+	this->responseSystem = owner->GetResponseSystem();							// レスポンスシステム
 }
 
 Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
@@ -12285,22 +12318,26 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		}
 	}
 	if(ctx.state == CharacterMainState::Special) {
-		ctx.isSpecialAttacking = true;
+		ctx.isSpecialAttacking = true;	// 必殺技中
 	}
 	if (ctx.state == CharacterMainState::Jump) {
-		ctx.isJumping = true;
+		ctx.isJumping = true;	// ジャンプ中にする
 	}
 	if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Die || ctx.state == CharacterMainState::Fainting) {
-		ctx.isCanMove = false;
+		ctx.isCanMove = false;	// 動けないようにする
+		if(ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Fainting)
+		ctx.isDamage = true;	// ダメージを受けている
 	}
 	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
-		ctx.isCanJump = true;
+		ctx.isCanJump = true;	// ジャンプ可能にする
 	}
 	// 攻撃時の重力
 	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
 	if (comboStateMachine->GetCurrentState()) {
 		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
 	}
+	// ダメージ中の重力
+	//ctx.damageGravity = responseSystem->GetAttackResponse()->GetHitMotionSystem();
 	// 上昇時の重力
 	ctx.upGravity = jumpSystem->GetData().upGravity;
 	// 落下時の重力
@@ -12328,6 +12365,7 @@ class MovementComponent;
 class JumpSystem;
 class MoveSystem;
 class LockOnSystem;
+class ResponseSystem;
 
 namespace Combo {
 	class StateMachine;
@@ -12384,6 +12422,8 @@ namespace Character {
 		bool isCanMove = true;
 		// ジャンプ可能か
 		bool isCanJump = false;
+		// 被弾中か
+		bool isDamage = false;
 
 		// 高さ
 		float skyHeight = 1.5f;
@@ -12394,6 +12434,8 @@ namespace Character {
 		float fallGravity = 30.0f;
 		// 攻撃中の重力係数
 		float attackingGravity = 20.0f;
+		// 被弾中の重力係数
+		float damageGravity = 1.0f;
 
 		// 移動スピード
 		float moveSpeed = 1.0f;
@@ -12427,6 +12469,8 @@ namespace Character {
 		const MoveSystem* moveSystem = nullptr;
 		// ロックオンシステム
 	 	const LockOnSystem* lockOnSystem = nullptr;
+		// レスポンスシステム
+		ResponseSystem* responseSystem = nullptr;
 		// コンボステートマシン
 		const Combo::StateMachine* comboStateMachine = nullptr;
 	};
@@ -13793,7 +13837,7 @@ namespace Character {
 
 		// 攻撃応答システムクラス初期化
 		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
+		responseSystem_->Initialize(this);
 		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;
@@ -13941,6 +13985,7 @@ namespace Character {
 			AddItem("攻撃猶予時間", globalData_.attackTimer);
 			AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
 			AddItem("後退開始範囲", globalData_.startRetreatingRadius);
+			AddItem("回転速度", globalData_.turnSpeed);
 
 
 
@@ -13948,6 +13993,7 @@ namespace Character {
 			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
 			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
 			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+			globalData_.turnSpeed = GetValue<float>("回転速度");
 
 		}
 		// 更新保存項目
@@ -13956,6 +14002,7 @@ namespace Character {
 			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
 			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
 			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+			globalData_.turnSpeed = GetValue<float>("回転速度");
 		}
 
 		//
@@ -14011,6 +14058,8 @@ namespace Character {
 		float startRetreatingRadius = 3.0f;
 		// 後退スピード
 		float retreatSpeed = 1.0f;
+		// 回転スピード
+		float turnSpeed = 0.25f;
 	};
 }
 
@@ -14032,8 +14081,12 @@ namespace Character {
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
 
 
+		moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
+
+
 		objectComponentShadow_->GetWorldTransform().scale_ = { 5.0f,5.0f ,5.0f };
 
+		
 		// パラメーター初期化
 		Parameters()->HP.Initiaize(hp, 0, hp, 0);
 		Parameters()->strength = 10.0f;
@@ -14385,30 +14438,74 @@ namespace Character {
 	}
 
 	void MediumMeleeEnemy::Move(){
-		// 距離設定
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-		dire.y = 0.0f;
-		// 回転設定
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
+		if (isStopping_) return;
 
-		if (GetTargetDistance() <= globalData_.attackStartRadius) {
+		// 位置差分
+		Vector3 toTarget = Subtract(GetTargetPos(), GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		float distance = toTarget.Length();
+		if (distance <= 0.001f) {
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
+			return;
+		}
+
+		// 水平向き
+		Vector3 dire = toTarget.Normalize();
+
+		// 回転設定（即値代入ではなく補間推奨）
+		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+
+		// Y軸だけゆっくり向く
+		float currentY = GetWorldTransform().rotate_.y;
+		float targetY = rotate.y;
+
+		// 必要なら AngleDiff のような角度差補正関数を使う
+		float diff = targetY - currentY;
+
+		// -π～πへ補正
+		while (diff > std::numbers::pi_v<float>) {
+			diff -= std::numbers::pi_v<float> *2.0f;
+		}
+		while (diff < -std::numbers::pi_v<float>) {
+			diff += std::numbers::pi_v<float> *2.0f;
+		}
+
+		// 回転速度
+		float turnSpeed = globalData_.turnSpeed * GetTime();
+		diff = std::clamp(diff, -turnSpeed, turnSpeed);
+
+		GetWorldTransform().rotate_.y = currentY + diff;
+
+		// 基本速度
+		float targetSpeed = 0.0f;
+
+		// 距離ごとの行動分岐
+		if (distance <= globalData_.startRetreatingRadius) {
+			// 近すぎるので少し下がる
+			attackTimer_ = 0.0f;
+			targetSpeed = -globalData_.retreatSpeed;
+		}
+		else if (distance <= globalData_.attackStartRadius) {
+			// 攻撃準備距離
 			attackTimer_ += GetTime();
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
+
+			// 完全停止だと不自然なら微速前進か停止
+			targetSpeed = 0.0f;
+
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
-			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
-			}
 		}
 		else {
+			// 接近
 			attackTimer_ = 0.0f;
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
+			targetSpeed = moveSpeed_;
 		}
+
+		moveComponent_->GetMoveSystem()->Data().maxSpeed = targetSpeed;
 	}
 
 	void MediumMeleeEnemy::InitParticle(){
@@ -14719,32 +14816,73 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 namespace Character {
-    void MediumMeleeEnemyAttackReadySubState::Update(float deltaTime) {
-        timer_ += deltaTime;
+    void MediumMeleeEnemyAttackReadySubState::Enter() {
+        timer_ = 0.0f;
+
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        // 後ろに後退
-        // 距離設定
-        Vector3 dire = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_).Normalize();
-        // 回転設定
-        Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+        if (!enemy) {
+            return;
+        }
 
-        // Y軸周り角度
-        enemy->GetWorldTransform().rotate_.y = rotate.y;
+        // Ready開始時の方向を一旦初期化
+        Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+        toTarget.y = 0.0f;
 
-        MoveRequest request;
-        if (enemy->GetTargetDistance() <= 10.0f) {
-            request.velocity = dire * -5.0f * deltaTime;
+        if (toTarget.Length() > 0.001f) {
+            dire_ = toTarget.Normalize();
         }
         else {
-            request.velocity = dire * 3.0f * deltaTime;
+            dire_ = enemy->TargetDirection();
+            dire_.y = 0.0f;
+            if (dire_.Length() > 0.001f) {
+                dire_ = dire_.Normalize();
+            }
         }
-        request.direction = dire;
+    }
+    void MediumMeleeEnemyAttackReadySubState::Update(float deltaTime) {
+        timer_ += deltaTime;
+
+        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+        if (!enemy) {
+            return;
+        }
+
+        // 毎フレームターゲット方向を取得
+        Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+        toTarget.y = 0.0f;
+
+        if (toTarget.Length() > 0.001f) {
+            Vector3 targetDire = toTarget.Normalize();
+
+            // ここは即向きでもいいが、本当は角度補間推奨
+            enemy->GetWorldTransform().rotate_.y = std::atan2(targetDire.x, targetDire.z);
+
+            // Swingで使う方向は Ready の最後まで更新しておく
+            dire_ = targetDire;
+        }
+
+        MoveRequest request{};
         request.priority = 1;
+        request.direction = dire_;
+
+        const float distance = enemy->GetTargetDistance();
+
+        // 近すぎるときだけ軽く引く
+        if (distance <= 5.5f) {
+            request.velocity = dire_ * -4.0f * deltaTime;
+        }
+        // 攻撃準備距離なら基本停止
+        else if (distance <= 8.0f) {
+            request.velocity = Vector3(0.0f, 0.0f, 0.0f);
+        }
+        // 遠すぎるなら少しだけ詰める
+        else {
+            request.velocity = dire_ * 2.0f * deltaTime;
+        }
+
         enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
-
-        if (timer_ > readyTime_) {
-            // 攻撃へ遷移
+        if (timer_ >= readyTime_) {
             fsm_->ChangeState(AttackSubState::Swing);
         }
     }
@@ -14752,37 +14890,69 @@ namespace Character {
 
     void MediumMeleeEnemyAttackSwingSubState::Enter() {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+        if (!enemy) {
+            return;
+        }
+
         timer_ = 0.0f;
-        enemy->GetMoveComponent()->GetMoveSystem()->Data().maxSpeed = 40.0f;
-       // enemy->DirectionMoveVelocity(40.0f);
-        dire_ = enemy->TargetDirection();
 
+        // Readyで最終的に合わせた方向を使う
+        Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+        toTarget.y = 0.0f;
 
-        HitBox::CollData data_;
-        data_.isEneble = true;
-        data_.isLine = true;
-        data_.tag = CollisionTag::Enemy;
-        data_.layer = CollisionLayer::Enemy;
-        data_.mask = CollisionLayer::Player;
-        data_.size = { 2.0f,4.0f,2.0f };
-        data_.name = "NormalEnemy_SwingHitBox";
-        data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
+        if (toTarget.Length() > 0.001f) {
+            dire_ = toTarget.Normalize();
+        }
+        else {
+            dire_ = enemy->TargetDirection();
+            dire_.y = 0.0f;
+            if (dire_.Length() > 0.001f) {
+                dire_ = dire_.Normalize();
+            }
+        }
 
-        enemy->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy,enemy,{ data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, &enemy->GetWorldTransform());
+        // 向きを固定
+        enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
+
+        HitBox::CollData data{};
+        data.isEneble = true;
+        data.isLine = true;
+        data.tag = CollisionTag::Enemy;
+        data.layer = CollisionLayer::Enemy;
+        data.mask = CollisionLayer::Player;
+        data.size = { 1.0f, 2.0f, 1.0f };
+        data.name = "NormalEnemy_SwingHitBox";
+        data.reactionData.GetDamageData().GetOne().damage = 10.0f;
+
+        // ヒットボックス寿命は swingTime_ と揃える
+        enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
+            HitBox::UseType::kEnemy,
+            enemy,
+            { data },
+            {},
+            swingTime_,
+            HitBox::ParentType::kParent,
+            {},
+            true,
+            &enemy->GetWorldTransform()
+        );
     }
 
     void MediumMeleeEnemyAttackSwingSubState::Update(float deltaTime) {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+        if (!enemy) {
+            return;
+        }
+
         timer_ += deltaTime;
 
-        // 前進
-        MoveRequest request;
-        request.velocity = dire_ * 40.0f * deltaTime;
-        request.direction = dire_;
+        MoveRequest request{};
         request.priority = 1;
+        request.direction = dire_;
+        request.velocity = dire_ * 20.0f * deltaTime;
         enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
-        if (timer_ > swingTime_) {
+        if (timer_ >= swingTime_) {
             fsm_->ChangeState(AttackSubState::End);
         }
     }
@@ -14793,38 +14963,47 @@ namespace Character {
 
     void MediumMeleeEnemyAttackEndSubState::Enter() {
         timer_ = 0.0f;
-        rotate_ = character_->GetObjectComponent()->GetWorldTransform().rotate_;
 
-        // プレイヤー方向を向くための目標角度を計算
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        Vector3 playerPos = enemy->GetTargetPos();
-        Vector3 toPlayer = Subtract(playerPos, enemy->GetWorldTransform().translate_);
-        toPlayer.y = 0.0f; // 水平面のみ考慮
+        if (!enemy) {
+            return;
+        }
 
-        // atan2(x, z) でY軸周り角度
-        targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
+        startRotateY_ = enemy->GetWorldTransform().rotate_.y;
+
+        Vector3 toPlayer = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+        toPlayer.y = 0.0f;
+
+        if (toPlayer.Length() > 0.001f) {
+            toPlayer = toPlayer.Normalize();
+            targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
+        }
+        else {
+            targetRotateY_ = startRotateY_;
+        }
+
+        // 最短差分を保存
+        rotateDiffY_ = targetRotateY_ - startRotateY_;
+        rotateDiffY_ = std::atan2(std::sin(rotateDiffY_), std::cos(rotateDiffY_));
     }
 
     void MediumMeleeEnemyAttackEndSubState::Update(float deltaTime) {
         BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        Vector3 playerPos = enemy->GetTargetPos();
+        if (!enemy) {
+            return;
+        }
 
         timer_ += deltaTime;
 
-        // 角度補間
-        float t = std::min(timer_ / endTime_, 1.0f); // 0～1 の範囲
-        float currentY = character_->GetObjectComponent()->GetWorldTransform().rotate_.y;
+        float t = std::clamp(timer_ / endTime_, 0.0f, 1.0f);
 
-        // 角度の最短差分を考慮（0～π方向への補間）
-        float diff = targetRotateY_ - currentY;
-        diff = std::atan2(std::sin(diff), std::cos(diff)); // -π ～ π に正規化
+        // 必要なら ease をかける
+        float easedT = t * t * (3.0f - 2.0f * t);
 
-        float newY = currentY + diff * t * 0.2f; // 0.2f は回転速度係数（好みで調整）
+        float newY = startRotateY_ + rotateDiffY_ * easedT;
+        enemy->GetWorldTransform().rotate_.y = newY;
 
-        character_->GetObjectComponent()->GetWorldTransform().rotate_.y = newY;
-
-        // 終了判定
-        if (timer_ > endTime_) {
+        if (timer_ >= endTime_) {
             fsm_->SetFinished(true);
         }
     }
@@ -14852,9 +15031,7 @@ namespace Character {
         }
 
         // 開始
-        void Enter() override {
-            timer_ = 0.0f;
-        }
+        void Enter() override;
         // 更新
         void Update(float deltaTime) override;
 
@@ -14864,7 +15041,7 @@ namespace Character {
     private:
         float timer_ = 0.0f;
         const float readyTime_ = 4.75f;
-        Vector3 dire = {};
+        Vector3 dire_ = {};
     };
 
     // 攻撃本体
@@ -14909,6 +15086,8 @@ namespace Character {
     private:
         Vector3 rotate_{};
         float targetRotateY_ = 0;
+        float startRotateY_ = 0.0f;
+        float rotateDiffY_ = 0.0f;
         float timer_ = 0.0f;
         const float endTime_ = 0.5f;
     };
@@ -15246,29 +15425,73 @@ namespace Character {
 
 	void SmallMeleeEnemy::Move() {
 		if (isStopping_) return;
-		// 距離設定
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
-		dire.y = 0.0f;
-		// 回転設定
+
+		// 位置差分
+		Vector3 toTarget = Subtract(GetTargetPos(), GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		float distance = toTarget.Length();
+		if (distance <= 0.001f) {
+			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
+			return;
+		}
+
+		// 水平向き
+		Vector3 dire = toTarget.Normalize();
+
+		// 回転設定（即値代入ではなく補間推奨）
 		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
-		if (GetTargetDistance() <= globalData_.attackStartRadius) {
+
+		// Y軸だけゆっくり向く
+		float currentY = GetWorldTransform().rotate_.y;
+		float targetY = rotate.y;
+
+		// 必要なら AngleDiff のような角度差補正関数を使う
+		float diff = targetY - currentY;
+
+		// -π～πへ補正
+		while (diff > std::numbers::pi_v<float>) {
+			diff -= std::numbers::pi_v<float> *2.0f;
+		}
+		while (diff < -std::numbers::pi_v<float>) {
+			diff += std::numbers::pi_v<float> *2.0f;
+		}
+
+		// 回転速度
+		float turnSpeed = globalData_.turnSpeed * GetTime();
+		diff = std::clamp(diff, -turnSpeed, turnSpeed);
+
+		GetWorldTransform().rotate_.y = currentY + diff;
+
+		// 基本速度
+		float targetSpeed = 0.0f;
+
+		// 距離ごとの行動分岐
+		if (distance <= globalData_.startRetreatingRadius) {
+			// 近すぎるので少し下がる
+			attackTimer_ = 0.0f;
+			targetSpeed = -globalData_.retreatSpeed;
+		}
+		else if (distance <= globalData_.attackStartRadius) {
+			// 攻撃準備距離
 			attackTimer_ += GetTime();
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
+
+			// 完全停止だと不自然なら微速前進か停止
+			targetSpeed = 0.0f;
+
 			if (attackTimer_ >= globalData_.attackTimer) {
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				attackTimer_ = 0.0f;
 				return;
 			}
-			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
-			}
 		}
 		else {
+			// 接近
 			attackTimer_ = 0.0f;
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
+			targetSpeed = moveSpeed_;
 		}
+
+		moveComponent_->GetMoveSystem()->Data().maxSpeed = targetSpeed;
 	}
 
 	void SmallMeleeEnemy::InitStateMachine()
@@ -15573,7 +15796,7 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;
-		float damageTime_ = 0.5f;
+		float damageTime_ = 0.25f;
 	};
 
 }
@@ -15589,111 +15812,199 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/Smal
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 namespace Character {
-    void SmallMeleeAttackReadySubState::Update(float deltaTime) {
-        timer_ += deltaTime;
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+	void SmallMeleeAttackReadySubState::Enter() {
+		timer_ = 0.0f;
 
-        MoveRequest request;
-        if (enemy->GetTargetDistance() <= 7.0f) {
-            request.velocity = dire * -5.0f * deltaTime;
-        }
-        else {
-            request.velocity = dire * 3.0f * deltaTime;
-        }
-        request.direction = dire;
-        request.priority = 1;
-        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
 
-        if (timer_ > readyTime_) {
-            // 攻撃へ遷移
-            fsm_->ChangeState(AttackSubState::Swing);
-        }
-    }
+		// Ready開始時の方向を一旦初期化
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		if (toTarget.Length() > 0.001f) {
+			dire_ = toTarget.Normalize();
+		}
+		else {
+			dire_ = enemy->TargetDirection();
+			dire_.y = 0.0f;
+			if (dire_.Length() > 0.001f) {
+				dire_ = dire_.Normalize();
+			}
+		}
+	}
+
+	void SmallMeleeAttackReadySubState::Update(float deltaTime) {
+		timer_ += deltaTime;
+
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
+
+		// 毎フレームターゲット方向を取得
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		if (toTarget.Length() > 0.001f) {
+			Vector3 targetDire = toTarget.Normalize();
+
+			// ここは即向きでもいいが、本当は角度補間推奨
+			enemy->GetWorldTransform().rotate_.y = std::atan2(targetDire.x, targetDire.z);
+
+			// Swingで使う方向は Ready の最後まで更新しておく
+			dire_ = targetDire;
+		}
+
+		MoveRequest request{};
+		request.priority = 1;
+		request.direction = dire_;
+
+		const float distance = enemy->GetTargetDistance();
+
+		// 近すぎるときだけ軽く引く
+		if (distance <= 5.5f) {
+			request.velocity = dire_ * -4.0f * deltaTime;
+		}
+		// 攻撃準備距離なら基本停止
+		else if (distance <= 8.0f) {
+			request.velocity = Vector3(0.0f, 0.0f, 0.0f);
+		}
+		// 遠すぎるなら少しだけ詰める
+		else {
+			request.velocity = dire_ * 2.0f * deltaTime;
+		}
+
+		enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
+
+		if (timer_ >= readyTime_) {
+			fsm_->ChangeState(AttackSubState::Swing);
+		}
+	}
+
+	void SmallMeleeAttackSwingSubState::Enter() {
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
+
+		timer_ = 0.0f;
+
+		// Readyで最終的に合わせた方向を使う
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		if (toTarget.Length() > 0.001f) {
+			dire_ = toTarget.Normalize();
+		}
+		else {
+			dire_ = enemy->TargetDirection();
+			dire_.y = 0.0f;
+			if (dire_.Length() > 0.001f) {
+				dire_ = dire_.Normalize();
+			}
+		}
+
+		// 向きを固定
+		enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
+
+		HitBox::CollData data{};
+		data.isEneble = true;
+		data.isLine = true;
+		data.tag = CollisionTag::Enemy;
+		data.layer = CollisionLayer::Enemy;
+		data.mask = CollisionLayer::Player;
+		data.size = { 1.0f, 2.0f, 1.0f };
+		data.name = "NormalEnemy_SwingHitBox";
+		data.reactionData.GetDamageData().GetOne().damage = 10.0f;
+		// ヒットボックス寿命は swingTime_ と揃える
+		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
+			HitBox::UseType::kEnemy,
+			enemy,
+			{ data },
+			{},
+			swingTime_,
+			HitBox::ParentType::kParent,
+			{},
+			true,
+			&enemy->GetWorldTransform()
+		);
+	}
+
+	void SmallMeleeAttackSwingSubState::Update(float deltaTime) {
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
+
+		timer_ += deltaTime;
+
+		MoveRequest request{};
+		request.priority = 1;
+		request.direction = dire_;
+		request.velocity = dire_ * 20.0f * deltaTime;
+		enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
+
+		if (timer_ >= swingTime_) {
+			fsm_->ChangeState(AttackSubState::End);
+		}
+	}
+
+	void SmallMeleeAttackSwingSubState::Exit() {
+	}
 
 
 
-    void SmallMeleeAttackSwingSubState::Enter() {
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        timer_ = 0.0f;
-        enemy->GetMoveComponent()->GetMoveSystem()->Data().maxSpeed = 40.0f;
-        //enemy->DirectionMoveVelocity(40.0f);
-        dire_ = enemy->TargetDirection();
 
+	void SmallMeleeAttackEndSubState::Enter() {
+		timer_ = 0.0f;
 
-        HitBox::CollData data_;
-        data_.isEneble = true;
-        data_.isLine = true;
-        data_.tag = CollisionTag::Enemy;
-        data_.layer = CollisionLayer::Enemy;
-        data_.mask = CollisionLayer::Player;
-        data_.size = { 1.0f,2.0f,1.0f };
-        data_.name = "NormalEnemy_SwingHitBox";
-        data_.reactionData.GetDamageData().GetOne().damage = 10.0f;
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
 
-        enemy->GetHitBoxSystem()->AddLifeTimeHitBox(HitBox::UseType::kEnemy, enemy,{ data_ }, {}, 2.0f, HitBox::ParentType::kParent, {}, true,&enemy->GetWorldTransform());
-    }
+		startRotateY_ = enemy->GetWorldTransform().rotate_.y;
 
-    void SmallMeleeAttackSwingSubState::Update(float deltaTime) {
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        timer_ += deltaTime;
+		Vector3 toPlayer = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toPlayer.y = 0.0f;
 
-        // 前進
+		if (toPlayer.Length() > 0.001f) {
+			toPlayer = toPlayer.Normalize();
+			targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
+		}
+		else {
+			targetRotateY_ = startRotateY_;
+		}
 
-        MoveRequest request;
-        request.velocity = dire_ * 20.0f * deltaTime;
-        request.direction = dire_;
-        request.priority = 1;
-        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
+		// 最短差分を保存
+		rotateDiffY_ = targetRotateY_ - startRotateY_;
+		rotateDiffY_ = std::atan2(std::sin(rotateDiffY_), std::cos(rotateDiffY_));
+	}
 
+	void SmallMeleeAttackEndSubState::Update(float deltaTime) {
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
 
-        if (timer_ > swingTime_) {
-            fsm_->ChangeState(AttackSubState::End);
-        }
-    }
+		timer_ += deltaTime;
 
-    void SmallMeleeAttackSwingSubState::Exit() {
-    }
+		float t = std::clamp(timer_ / endTime_, 0.0f, 1.0f);
 
+		// 必要なら ease をかける
+		float easedT = t * t * (3.0f - 2.0f * t);
 
+		float newY = startRotateY_ + rotateDiffY_ * easedT;
+		enemy->GetWorldTransform().rotate_.y = newY;
 
+		if (timer_ >= endTime_) {
+			fsm_->SetFinished(true);
+		}
+	}
 
-    void SmallMeleeAttackEndSubState::Enter() {
-        timer_ = 0.0f;
-        rotate_ = character_->GetObjectComponent()->GetWorldTransform().rotate_;
-
-        // プレイヤー方向を向くための目標角度を計算
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        Vector3 playerPos = enemy->GetTargetPos();
-        Vector3 toPlayer = Subtract(playerPos, enemy->GetWorldTransform().translate_);
-        toPlayer.y = 0.0f; // 水平面のみ考慮
-
-        // atan2(x, z) でY軸周り角度
-        targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
-    }
-
-    void SmallMeleeAttackEndSubState::Update(float deltaTime) {
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        Vector3 playerPos = enemy->GetTargetPos();
-
-        timer_ += deltaTime;
-
-        // 角度補間
-        float t = std::min(timer_ / endTime_, 1.0f); // 0～1 の範囲
-        float currentY = character_->GetObjectComponent()->GetWorldTransform().rotate_.y;
-
-        // 角度の最短差分を考慮（0～π方向への補間）
-        float diff = targetRotateY_ - currentY;
-        diff = std::atan2(std::sin(diff), std::cos(diff)); // -π ～ π に正規化
-
-        float newY = currentY + diff * t * 0.2f; // 0.2f は回転速度係数（好みで調整）
-
-        character_->GetObjectComponent()->GetWorldTransform().rotate_.y = newY;
-
-        // 終了判定
-        if (timer_ > endTime_) {
-            fsm_->SetFinished(true);
-        }
-    }
 }
 
 
@@ -15719,9 +16030,7 @@ namespace Character {
         }
 
         // 開始
-        void Enter() override {
-            timer_ = 0.0f;
-        }
+        void Enter() override;
         // 更新
         void Update(float deltaTime) override;
 
@@ -15731,7 +16040,7 @@ namespace Character {
     private:
         float timer_ = 0.0f;
         const float readyTime_ = 4.75f;
-        Vector3 dire = {};
+        Vector3 dire_ = {};
     };
 
     // 攻撃本体
@@ -15776,6 +16085,8 @@ namespace Character {
     private:
         Vector3 rotate_{};
         float targetRotateY_ = 0;
+        float startRotateY_ = 0.0f;
+        float rotateDiffY_ = 0.0f;
         float timer_ = 0.0f;
         const float endTime_ = 0.5f;
     };
@@ -15869,29 +16180,54 @@ namespace Character {
 
 	void SmallRangeEnemy::Move()
 	{
-		// 距離設定
-		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
+		auto& moveData = moveComponent_->GetMoveSystem()->Data();
+
+		// ターゲットへの水平ベクトル
+		Vector3 toTarget = Subtract(GetTargetPos(), GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		float distance = toTarget.Length();
+		if (distance <= 0.001f) {
+			moveData.maxSpeed = 0.0f;
+			return;
+		}
+
+		Vector3 dire = toTarget.Normalize();
+
 		// 回転設定
 		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-		// Y軸周り角度
-		GetWorldTransform().rotate_.y = rotate.y;
 
-		if (GetTargetDistance() <= globalData_.attackStartRadius) {
+		// Y軸周り角度を補間
+		float currentY = GetWorldTransform().rotate_.y;
+		float targetY = rotate.y;
+		float diff = targetY - currentY;
+		diff = std::atan2(std::sin(diff), std::cos(diff));
+
+		float maxTurn = globalData_.turnSpeed * GetTime();
+		diff = std::clamp(diff, -maxTurn, maxTurn);
+
+		GetWorldTransform().rotate_.y = currentY + diff;
+
+		if (distance <= globalData_.startRetreatingRadius) {
+			// 近すぎるので後退
+			attackTimer_ = 0.0f;
+			moveData.maxSpeed = -globalData_.retreatSpeed;
+		}
+		else if (distance <= globalData_.attackStartRadius) {
+			// 攻撃可能距離
 			attackTimer_ += GetTime();
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0;
+			moveData.maxSpeed = 0.0f;
+
 			if (attackTimer_ >= globalData_.attackTimer) {
 				attackTimer_ = 0.0f;
-				// 攻撃ステートへ
 				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
 				return;
 			}
-			if (GetTargetDistance() <= globalData_.startRetreatingRadius) {
-				moveComponent_->GetMoveSystem()->Data().maxSpeed = -globalData_.retreatSpeed;
-			}
 		}
 		else {
+			// 射程外なので接近
 			attackTimer_ = 0.0f;
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = moveSpeed_;
+			moveData.maxSpeed = moveSpeed_;
 		}
 	}
 
@@ -16003,21 +16339,56 @@ namespace Character {
 
 	void SmallRangeEnemyAttackState::Update(const CharacterContext& ctx){
 		SmallRangeWeapon* weapon = static_cast<SmallRangeWeapon*>(character->GetWeapon());
-
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(character);
 
+		if (!weapon || !enemy) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+			return;
+		}
+
+		timer_ += ctx.dt;
 
 		weapon->SetCharacter(character);
 		weapon->SetParent(enemy);
 		weapon->SetTarget(enemy->GetTarget());
-		weapon->Shot();
 
-		character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		// プレイヤー方向を向く
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
+
+		if (toTarget.Length() > 0.001f) {
+			toTarget = toTarget.Normalize();
+
+			float targetRotY = std::atan2(toTarget.x, toTarget.z);
+			float& currentRotY = enemy->GetWorldTransform().rotate_.y;
+
+			float diff = targetRotY - currentRotY;
+			diff = std::atan2(std::sin(diff), std::cos(diff));
+
+			float maxTurn = turnSpeed_ * ctx.dt;
+			diff = std::clamp(diff, -maxTurn, maxTurn);
+
+			currentRotY += diff;
+		}
+
+		// 狙い時間が経過したら1回だけ撃つ
+		if (!hasShot_ && timer_ >= shotTime_) {
+			weapon->Shot();
+			hasShot_ = true;
+		}
+
+		// 発射後の硬直が終わったら移動へ戻る
+		if (timer_ >= endTime_) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+		}
 	}
 
 	void SmallRangeEnemyAttackState::Exit(){}
 
-	void SmallRangeEnemyAttackState::Enter(){}
+	void SmallRangeEnemyAttackState::Enter(){
+		timer_ = 0.0f;
+		hasShot_ = false;
+	}
 
 #pragma endregion
 
@@ -16123,6 +16494,11 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;
+		bool hasShot_ = false;
+
+		float shotTime_ = 0.4f;   // 狙ってから撃つまで
+		float endTime_ = 0.8f;   // 攻撃全体時間
+		float turnSpeed_ = 6.0f;  // 回転速度
 	};
 
 	/// <summary>
@@ -16165,7 +16541,7 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer_ = 0.0f;
-		float damageTime_ = 0.5f;
+		float damageTime_ = 0.25f;
 	};
 
 
@@ -16355,7 +16731,7 @@ namespace Character {
 
 		// 応答システム初期化
 		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(GetCharacterParameterComponent(), objectComponent_.get());
+		responseSystem_->Initialize(this);
 		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
 
 
@@ -19743,12 +20119,12 @@ namespace Game {
 
 		CreateGameEvent("battle01", data);
 
-		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
-		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
-		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
-		//
-		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
-		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
+		
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
 
 
 		data.eventType_ = GameEventType::kBattle;
@@ -21843,16 +22219,23 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
 	} 
 	else {
+		// 重力スケールセット
 		if (!cxt.isAttacking) {
-			if (rigid.GetVelocity().y < 0.0f) {
-				rigid.SetGravityScale(cxt.fallGravity);		// 重力スケールセット
+			if (cxt.isDamage) {
+				rigid.SetGravityScale(cxt.damageGravity);
+				//rigid.SetIsGravity();
 			}
 			else {
-				rigid.SetGravityScale(cxt.upGravity);		// 重力スケールセット
+				if (rigid.GetVelocity().y < 0.0f) {
+					rigid.SetGravityScale(cxt.fallGravity);		
+				}
+				else {
+					rigid.SetGravityScale(cxt.upGravity);		
+				}
 			}
 		}
 		else {
-			rigid.SetGravityScale(cxt.attackingGravity);	// 重力スケールセット
+			rigid.SetGravityScale(cxt.attackingGravity);
 		}
 	}
 
@@ -27598,7 +27981,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	//characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
