@@ -7121,7 +7121,7 @@ namespace HitBox {
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
 		// リアクションデータ
-		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		//	エフェクト出現
 		enemy->Emit();	
 		// 敵ステート設定
@@ -7148,7 +7148,7 @@ namespace HitBox {
 		// ノックバック方向
 		data_.GetKnockbackData().SetNormal(enemy->GetMoveComponent()->GetDirection());
 		// リアクションデータ
-		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}
@@ -7938,46 +7938,6 @@ File Path: project/DirectXGame/application/base/Attack/Response/Response.cpp
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
 
-
-#pragma region ResponseSystem
-
-
-void ResponseSystem::Initialize(Character::BaseCharacter* owner) {
-	this->owner = owner;
-	// 攻撃衝突応答クラス初期化
-	attackResponse_ = std::make_unique<AttackResponse>();
-	attackResponse_->Initialize(owner);
-
-	// 接触衝突応答クラス
-	hitResponse_ = std::make_unique<HitResponse>();
-	hitResponse_->SetOwner(&owner->GetWorldTransform());
-
-}
-
-void ResponseSystem::Update(float dt) {
-	attackResponse_->Update(dt);
-}
-
-#pragma endregion // 応答システム
-
-
-#pragma region AttackResponse
-
-void AttackResponse::Initialize(Character::BaseCharacter* owner) {
-	
-	// 攻撃衝突モーションクラス初期化
-	hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-	hitMotionSystem_->Initialize(owner);
-}
-
-void AttackResponse::Update(float dt) {
-	// 被撃モーション更新
-	hitMotionSystem_->Update(dt);
-}
-
-#pragma endregion // 攻撃を受けたとき
-
-
 #pragma region HitResponse
 
 void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other)
@@ -8075,42 +8035,8 @@ class WorldTransform;				// オブジェクト位置
 class Collider;						// コライダー
 class ResponseMoveSystem;			// 応答移動システム
 
-
 /// <summary>
-/// 攻撃を食らったときの応答クラス
-/// </summary>
-class AttackResponse {
-public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize(Character::BaseCharacter* owner);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt">ゲーム内時間もしくはキャラクターの時間など</param>
-	void Update(float dt);
-
-	/// <summary>
-	/// ヒットモーションクラス取得
-	/// </summary>
-	/// <returns></returns>
-	HitMotionSystem* GetHitMotionSystem() { return hitMotionSystem_.get(); }
-
-private:
-	// ヒットモーション
-	std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
-private:// 貰いもの
-	// 所有者
-	Character::BaseCharacter* owner = nullptr;
-};
-
-
-
-/// <summary>
-/// 衝突応答
+/// 衝突応答クラス（オブジェクトとの接触時の押し戻し処理など）
 /// </summary>
 class HitResponse {
 public:
@@ -8133,53 +8059,6 @@ private:
 
 };
 
-
-/// <summary>
-/// 攻撃もしくは接触衝突時のシステムクラス
-/// </summary>
-class ResponseSystem {
-public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	/// <param name="paremeter">kキャラクターパラメータクラス</param>
-	/// <param name="object">オブジェクトクラス</param>
-	void Initialize(Character::BaseCharacter* owner);
-
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-	/// <summary>
-	/// 攻撃衝突応答クラス取得
-	/// </summary>
-	/// <returns></returns>
-	AttackResponse* GetAttackResponse() { return attackResponse_.get(); }
-
-	/// <summary>
-	/// 接触衝突応答クラス取得
-	/// </summary>
-	/// <returns></returns>
-	HitResponse* GetHitResponse() { return hitResponse_.get(); };
-
-
-	/// <summary>
-	/// ヒットモーションクラス取得
-	/// </summary>
-	HitMotionSystem* GetHitMotionSystem() { return attackResponse_->GetHitMotionSystem(); }
-
-private:
-	// 攻撃衝突応答クラス
-	std::unique_ptr<AttackResponse> attackResponse_ = nullptr;
-	// 衝突応答クラス(押し戻しなど)
-	std::unique_ptr<HitResponse> hitResponse_ = nullptr;	
-	// 所有者
-	Character::BaseCharacter* owner = nullptr;
-};
 
 
 
@@ -12011,6 +11890,7 @@ File Path: project/DirectXGame/application/base/Character/Base/BaseCharacter.h
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include "CharacterContext.h"
@@ -12165,8 +12045,8 @@ namespace Character {
 		MovementComponent* GetMoveComponent() { return moveComponent_.get(); }
 		// キャラクターパラメータコンポーネント取得
 		ParameterComponent* GetCharacterParameterComponent() { return parameterComponent_.get(); }
-		// 攻撃応答システム取得
-		ResponseSystem* GetResponseSystem() { return responseSystem_.get(); }
+		// ヒットリアクションシステム取得
+		HitMotionSystem* GetHitMotionSystem() { return hitMotionSystem_.get(); }
 		// 攻撃コントローラー取得
 		AttackController* GetAttackController() { return attackController_.get(); }
 	protected: // 保存機能
@@ -12204,8 +12084,11 @@ namespace Character {
 		std::unique_ptr<MovementComponent> moveComponent_ = nullptr;
 		// 攻撃制御クラス
 		std::unique_ptr<AttackController> attackController_ = nullptr;
-		// 攻撃応答システムクラス
-		std::unique_ptr<ResponseSystem> responseSystem_ = nullptr;
+		// ヒットリアクションシステムクラス
+		std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
+		// HitResponse
+		std::unique_ptr<HitResponse> hitResponse_ = nullptr;
+
 		// 弾出現
 		std::unique_ptr<BulletSpawn> bulletSpawn_ = nullptr;
 	protected:
@@ -12260,7 +12143,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
-	this->responseSystem = owner->GetResponseSystem();							// レスポンスシステム
+	this->hitMotionSystem = owner->GetHitMotionSystem();							// レスポンスシステム
 }
 
 Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
@@ -12365,7 +12248,7 @@ class MovementComponent;
 class JumpSystem;
 class MoveSystem;
 class LockOnSystem;
-class ResponseSystem;
+class HitMotionSystem;
 
 namespace Combo {
 	class StateMachine;
@@ -12469,8 +12352,8 @@ namespace Character {
 		const MoveSystem* moveSystem = nullptr;
 		// ロックオンシステム
 	 	const LockOnSystem* lockOnSystem = nullptr;
-		// レスポンスシステム
-		ResponseSystem* responseSystem = nullptr;
+		// ヒットリアクションシステム
+		HitMotionSystem* hitMotionSystem = nullptr;
 		// コンボステートマシン
 		const Combo::StateMachine* comboStateMachine = nullptr;
 	};
@@ -13817,7 +13700,7 @@ namespace Character {
 			}
 
 			//  敵同士の衝突応答
-			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
+			hitResponse_->Hit(CollisionTag::Enemy, self, other);
 
 			// 壁との衝突応答
 			//responseSystem_->GetHitResponse()->HitWall(self, other);
@@ -13834,11 +13717,14 @@ namespace Character {
 		visionComponent_->SetLineCommon(entityManager->Get3DLineCommon());
 		visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
 
+		// 衝突応答処理初期化
+		hitResponse_ = std::make_unique<HitResponse>();
+		hitResponse_->SetOwner(moveComponent_->GetResponseMoveSystem());
 
-		// 攻撃応答システムクラス初期化
-		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(this);
-		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
+		// ヒットリアクションシステム初期化
+		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
+		hitMotionSystem_->Initialize(this);
+		
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;
 
@@ -13878,7 +13764,7 @@ namespace Character {
 			//　攻撃更新
 			attackController_->Update(ctx);
 			// 応答システム
-			responseSystem_->Update(ctx.dt);
+			hitMotionSystem_->Update(ctx.dt);
 			// キャラクターパラメーター更新
 			parameterComponent_->Update();
 			// 移動コンポーネント更新
@@ -16722,18 +16608,19 @@ namespace Character {
 			uint32_t otherId = otherComponent->GetUniqueId();
 
 			// 敵との衝突応答
-			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
+			hitResponse_->Hit(CollisionTag::Enemy, self, other);
 
 			// 壁との衝突応答
-			//responseSystem_->GetHitResponse()->HitWall(self, other);
+			//hitResponse_->HitWall(self, other);
 			};
 
+		// 衝突応答処理初期化
+		hitResponse_ = std::make_unique<HitResponse>();
+		hitResponse_->SetOwner(moveComponent_->GetResponseMoveSystem());
 
-		// 応答システム初期化
-		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(this);
-		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
-
+		// ヒットリアクションシステム初期化
+		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
+		hitMotionSystem_->Initialize(this);
 
 		// 弾出現
 		bulletSpawn_ = std::make_unique<BulletSpawn>();
@@ -16906,8 +16793,8 @@ namespace Character {
 		// 攻撃制御更新
 		attackController_->Update(ctx);
 		// 応答システム
-		responseSystem_->Update(ctx.dt);
-
+		hitMotionSystem_->Update(ctx.dt);
+		
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 
@@ -22184,17 +22071,17 @@ void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCo
 	//isLinding_ = cmd.isLanding;
 	groundHeight_ = cmd.groundHeight;
 	// 回転処理
-	RotateProcess(cxt,world);
-	
+	RotateProcess(cxt, world);
+
 	world.Update();
 	// 重力処理
-	GravityProess(cxt,world,rigid);
+	GravityProess(cxt, world, rigid);
 
 	world.Update();
 }
 
 
-void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid){
+void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 
 	if (!useGravity) {
 		rigid.SetIsGravity(!useGravity);
@@ -22210,28 +22097,24 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 	else {
 		isLinding_ = false;
 	}
-	
+
 	if (isLinding_) {
 		world.translate_.y = groundHeight_;
 		rigid.ResetAcceleration();			// 加速度リセット
 		rigid.ResetVelocity();				// 速度リセット
 		rigid.SetIsGravity(false);			// 重力をオフ
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
-	} 
+	}
 	else {
+		rigid.SetIsGravity(true);			// 重力をオフ
 		// 重力スケールセット
 		if (!cxt.isAttacking) {
-			if (cxt.isDamage) {
-				rigid.SetGravityScale(cxt.damageGravity);
-				//rigid.SetIsGravity();
+
+			if (rigid.GetVelocity().y < 0.0f) {
+				rigid.SetGravityScale(cxt.fallGravity);
 			}
 			else {
-				if (rigid.GetVelocity().y < 0.0f) {
-					rigid.SetGravityScale(cxt.fallGravity);		
-				}
-				else {
-					rigid.SetGravityScale(cxt.upGravity);		
-				}
+				rigid.SetGravityScale(cxt.upGravity);
 			}
 		}
 		else {
