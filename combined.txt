@@ -1737,123 +1737,6 @@ File Path: project/DirectXGame/application/base/Attack/AttackData.cpp
 #include "AttackData.h"
 #include <DirectXGame/engine/Math/Random.h>
 
-#pragma region KnockbackData
-
-Vector3 KnockbackData::DirectionPower() const
-{
-	Vector3 reslut{};
-	
-	if (data_.type == Type::kDirection) {	// 方向
-		reslut = data_.normal.Normalize();
-		// y座標同士の高さが同じでもy方向に飛ばしたい場合は
-		if (data_.isVerticalBoost) {
-			// yを1に
-			reslut.y = 1.0f;
-		}
-		// それぞれかける
-		reslut.x *= data_.power;
-		reslut.y *= data_.verticalBoost;
-		reslut.z *= data_.power;
-	}
-	else if (data_.type == Type::kRandom) {	// ランダム
-		reslut = Vector3{
-			Random::RandomFloat(-data_.power,data_.power),
-			Random::RandomFloat(-data_.power,data_.power),
-			Random::RandomFloat(-data_.power,data_.power)
-		};
-	}
-
-
-	float t = std::clamp(timer_ / data_.duration, 0.0f, 1.0f);
-
-	// 減衰係数
-	// damping_=0 → 1.0（減衰なし）
-	// damping_=1 → (1-t)（終了で完全停止）
-	float dampFactor = 1.0f - (t * data_.damping);
-
-	reslut *= dampFactor;
-
-	return reslut;
-}
-
-#pragma endregion // ノックバックデータ
-
-#pragma region AirStickData
-
-void AirStickData::Update(float dt) {
-	if (world_ == nullptr) return;
-	
-	timer_ += dt;
-	
-	// 終了しているなら処理しない
-	if (timer_ > data_.duration) {
-		return;
-	}
-	Vector3 targetPos{};
-
-	if (data_.useWorldSpace) {
-		// すでに targetOffset_ がワールド座標基準の場合
-		targetPos = data_.targetOffset;
-	}
-	else {
-		// 攻撃者の位置を origin としてオフセットを計算する場合
-		// attackerPos_ が攻撃者の現在位置（外部からセットされる前提）
-		targetPos = world_->GetWorldPosition() + data_.targetOffset;
-	}
-
-	//-----------------------------------------
-	// 2. 現在位置からターゲット位置への補正
-	//-----------------------------------------
-	Vector3 dir = targetPos;// -data_.currentPos_;   // 現在 → ターゲット
-	float dist = dir.Length();
-
-	if (dist > 0.0f) {
-		dir.Normalize();
-	}
-
-	//-----------------------------------------
-	// 3. 追従速度に応じて移動量を計算
-	//-----------------------------------------
-	// followSpeed_: 1フレームあたりの吸着スピード
-	// stickStrength_: 吸着補正の強さ
-	float moveStep = data_.followSpeed * dt;
-
-	// 補間（LERP のような計算）
-	Vector3 move = dir * (moveStep * data_.stickStrength);
-
-	//-----------------------------------------
-	// 4. 移動を適用
-	//-----------------------------------------
-	// 終端誤差を防ぐためのクランプ
-	if (move.Length() > dist) {
-		//data_.currentPos_ = targetPos;
-	}
-	else {
-		//data_.currentPos_ += move;
-	}
-
-	//-----------------------------------------
-	// 5. 向き補正（攻撃者の方向へ向かせる）
-	//-----------------------------------------
-	if (data_.keepFacingAttacker) {
-		Vector3 lookDir = world_->GetWorldPosition();// -data_.currentPos_;
-		if (lookDir.Length() > 0.0001f) {
-			lookDir.Normalize();
-			// Y-Up, Z-Forward の座標系なので Z を正面方向とする
-			//data_.currentRot_.y = std::atan2(lookDir.x, lookDir.z);
-		}
-	}
-
-	//-----------------------------------------
-	// 6. 重力の ON/OFF
-	//-----------------------------------------
-	if (data_.gravityEnabled) {
-		//data_.gravityEnabled_ = false;
-	}
-}
-
-#pragma endregion // エアスティックデータ
-
 #pragma region DamageData
 // 更新
 void DamageData::Update(float dt) {
@@ -1875,7 +1758,7 @@ void DamageData::Update(float dt) {
 // ダメージ取得
 float DamageData::GetDamage() {
 	float damage = 0;
-	
+
 	switch (type)
 	{
 	case DamageData::kOne:
@@ -1942,7 +1825,7 @@ void DamageData::One::Update(float dt) {
 }
 // ダメージ取得
 float DamageData::One::GetDamage() const {
-	return damage; 
+	return damage;
 }
 
 #pragma endregion // 一回ダメージ
@@ -1952,7 +1835,7 @@ float DamageData::One::GetDamage() const {
 void DamageData::Duration::Update(float dt) {
 
 	// カウント内なら時間を加算
-	if (count < num  && !isDamage) {
+	if (count < num && !isDamage) {
 		timer += dt;
 	}
 	else {	// カウントが回数以上になったら攻撃判定なし
@@ -2025,19 +1908,7 @@ float DamageData::Continuous::GetDamage() const
 }
 #pragma endregion // 連撃ダメージ
 
-#pragma region 
 
-void HitReactionData::Update(float dt) {
-	airStickData.Update(dt);// 空中・地上固定データ更新
-	hitStopData.Update(dt);	// ヒットストップデータ更新
-	knockback.Update(dt);	// ノックバックデータ更新
-	damageData.Update(dt);	// ダメージデータ更新
-}
-
-
-
-
-#pragma endregion // 攻撃データ
 
 
 ============================================================
@@ -2048,187 +1919,6 @@ File Path: project/DirectXGame/application/base/Attack/AttackData.h
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 #include "DirectXGame//application/base/Input/InputSystem.h"
-
-// ノックバックデータクラス
-class KnockbackData{
-public:
-	// ノックバックタイプ
-	enum Type {
-		kDirection,				// 攻撃者→被撃者方向
-		kRandom,				// ランダム方向
-		kDirectionAndRandom,	// (攻撃者→被撃者)+ランダム
-	};
-
-	// データ構造体
-	struct Data {
-		/// <summary>
-		/// 方向 
-		/// </summary>
-		Vector3 normal{};					// 飛ぶ方向
-		Type type = Type::kDirection;		// ノックバックのタイプ
-
-
-		/// <summary>
-		/// 力・強さ
-		/// </summary>
-		float power = 0.0f;				// ノックバックの力
-		float verticalBoost = 0.0f;		// ノックバック垂直方向(敵をどれだけ上に吹き飛ばすか)
-		bool isVerticalBoost = false;		// Y方向にノックバックを与えるかどうか
-
-
-		/// <summary>
-		/// 時間
-		/// </summary>
-		float duration = 0.5f;				// ノックバック継続時間
-		float damping = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
-
-		/// <summary>
-		/// 制御
-		/// </summary>
-		bool gravityEnabled = false;		// ノックバック中に重力の影響を受けるか
-
-		/// <summary>
-		/// 衝突
-		/// </summary>
-		bool stopOnCollision = false;		// 当たって止まるか
-		float slideFloor = 0.0f;			// 床で滑る量
-
-		/// <summary>
-		/// 重力
-		/// </summary>
-		float gravityScale = 1.0f;
-	};
-
-	// 方向とパワーを合算した値(Vector3)
-	Vector3 DirectionPower() const;
-
-	// 更新
-	void Update(float dt) { timer_ += dt; }
-
-	/// <summary>
-	/// ノックバック終了か
-	/// </summary>
-	/// <returns></returns>
-	bool IsFinish() const { return data_.duration < timer_; }
-
-
-	// 重力影響受けるか
-	bool IsGravityEnabled() const {
-		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled;
-	}
-
-public:
-	// データ構造体
-	Data& GetData() { return data_; }
-
-	// ノックバックパワー設定
-	void SetPower(float power, float verticalBoost) {
-		data_.power = power;		// パワー
-		data_.verticalBoost = verticalBoost;	// パワーY方向
-	}
-
-	// 方向設定
-	void SetNormal(const Vector3 normal) { data_.normal = normal; }
-
-private:
-	float timer_ = 0.0f;					// 時間
-	Data data_;
-};
-
-// 空中・地上固定データクラス
-class AirStickData {
-public:
-	// データ構造体
-	struct Data
-	{
-		Vector3 targetOffset = { 0,0,0 };	// 吸いつく位置
-		float duration = 0.5f;				// 吸いつく時間
-		bool useWorldSpace = false;		// ターゲット位置をワールド座標で扱うか
-		float followSpeed = 0.1f;			// ターゲット位置へ向かう追従スピード
-		float stickStrength = 1.0f;		// ターゲット位置へ貼りつく強さ(0.0f~1.0f)値が大きいほど貼りつく
-
-		bool endOnHit = true;				// 次の攻撃が当たった瞬間にターゲット位置に貼りつきを解除するか
-		bool gravityEnabled = true;		// 吸着時だけ重力を
-		bool keepFacingAttacker = true;	// 被撃者の向きを攻撃者へ自動回転させるか。
-		float gravityScale = 1.0f;			// 重力強度
-	};
-
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-	/// <summary>
-	/// 攻撃者位置設定
-	/// </summary>
-	/// <param name="world"></param>
-	void SetAttackerWorldTransform(Engine::WorldTransform* world) { world_ = world; };
-
-	// データ構造体取得
-	Data& GetData() { return data_; }
-	
-	// 重力影響受けるか
-	bool IsGravityEnabled() const { 
-		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled;
-	}
-
-	// 終了したか
-	bool IsFinish() const { return data_.duration < timer_; }
-
-private:
-	Data data_;
-	Engine::WorldTransform* world_ = nullptr;
-	float timer_ = 0.0f;	// 時間
-};
-
-// ヒットストップデータクラス
-class HitStopData {
-public:
-	struct Data {
-		float duration_ = 0.5f;				// 揺れ継続時間
-		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
-		bool isGroundVibrationY = false;	// 地面に着地しているときにY方向を揺らすか
-		bool gravityEnabled = false;		// ヒットストップ中に重力の影響を受けるか
-		float gravityScale = 1.0f;			// 重力強度
-		Vector3 vibration = Vector3::Set(0.1f);	// 揺れ幅設定
-
-
-
-		// 揺れ幅取得
-		Vector3 Vibration(bool isGround) const {
-			Vector3 r{};
-			r = vibration;
-			// Y方向に揺らさない場合
-			if (!isGroundVibrationY && isGround) {
-				r = 0.0f;
-			}
-			return r;
-		};
-	};
-
-	// 更新
-	void Update(float dt) { timer_ += dt; }
-
-	// 終了したか
-	bool IsFinish() const { return data_.duration_ < timer_; }
-
-	// 重力影響受けるか
-	bool IsGravityEnabled() const {
-		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled;
-	}
-
-	// データ構造体取得
-	Data GetData() const { return data_; }
-
-private:
-	float timer_ = 0.0f;					// 時間
-	Data data_;
-};
 
 /// ダメージデータ
 class DamageData {
@@ -2357,49 +2047,52 @@ private:
 	One one{};					// 一回ダメージデータ
 	float damage = 0;			// ダメージ
 };
-
-/// 攻撃リアクションデータ
-class HitReactionData {
-public:
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-public: // 読み取り
-	// ノックバックデータ取得
-	const KnockbackData& GetKnockbackData() const { return knockback; }
-	// ヒットストップデータ取得
-	const HitStopData& GetHitStopData() const { return hitStopData; }
-	// 空中・地上固定データ取得
-	const AirStickData& GetAirStickData() const { return airStickData; }
-	// ダメージデータ取得
-	const DamageData& GetDamageData() const { return damageData; }
-
-public: // 書き換え
-	// ノックバックデータ取得
-	KnockbackData& GetKnockbackData() { return knockback; }
-	// ヒットストップデータ取得
-	HitStopData& GetHitStopData() { return hitStopData; }
-	// 空中・地上固定データ取得
-	AirStickData& GetAirStickData() { return airStickData; }
-	// ダメージデータ取得
-	DamageData& GetDamageData() { return damageData; }
-
-private:
-	KnockbackData knockback;	// ノックバックデータ
-	HitStopData hitStopData;	// ヒットストップデータ
-	AirStickData airStickData;	// 空中・地上固定データ
-	DamageData damageData;		// ダメージデータ
-
-	float hitStunTime;
-	float downTime;
-	float launchFloatTime;
+// リアクション
+enum class HitReactionType {
+	Knockback,
+	BlowAway,
+	Launch,
+	WallBounce
 };
 
+/// 攻撃リアクションデータ
+struct HitReactionData {
+	// リアクションタイプ
+	HitReactionType type = HitReactionType::Knockback;
 
+	// 飛ぶ基準方向
+	Vector3 normal{};
+
+	// 水平方向の強さ
+	float power = 0.0f;
+
+	// 垂直方向の強さ
+	float verticalBoost = 0.0f;
+
+	// 上方向を強制するか
+	bool isVerticalBoost = false;
+
+	// リアクション移動の有効時間
+	float duration = 0.25f;
+
+	// 行動不能時間
+	float hitStunTime = 0.1f;
+
+	// ダウン時間
+	float downTime = 0.0f;
+
+	// 打ち上げ時に重力を弱める/止める時間
+	float launchFloatTime = 0.0f;
+
+	// 重力を適用するか
+	bool gravityEnabled = false;
+
+	// 重力倍率
+	float gravityScale = 1.0f;
+
+	// ダメージデータ
+	DamageData damageData{};
+};
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.cpp
@@ -2801,11 +2494,27 @@ namespace Combo {
 
 	void EditorBlock::ImGuiReaction() {
 		if (ImGui::CollapsingHeader("リアクション")) {
-			ImGui::SliderFloat("ノックバック持続時間", &data_.reaction.knockbackDuration, 0.0f, 5.0f, "%.2f");
-			ImGui::SliderFloat("ノックバックパワー", &data_.reaction.knockbackPower, 0.0f, 999.0f, "%.2f");
-			ImGui::SliderFloat("ノックバックY方向パワー", &data_.reaction.knockbackPowerY, 0.0f, 999.0f, "%.2f");
-			ImGui::Checkbox("Y方向にノックバック", &data_.reaction.isVerticalBoost);
-			ImGui::SliderFloat("ダメージ", &data_.reaction.damage, 0.0f, 1000.0f, "%.2f");
+			// リアクション
+			enum class HitReactionType {
+				Knockback,
+				BlowAway,
+				Launch,
+				WallBounce
+			};
+
+			static const char* HitReactionTypeLabels[] = {
+				"ノックバック",
+				"吹っ飛び"
+				"打ち上げ",
+				"壁バウンド"
+			};
+			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.hitReactionType);
+
+			ImGui::SliderFloat("持続時間", &data_.hitReaction.duration, 0.0f, 5.0f, "%.2f");
+			ImGui::SliderFloat("パワー", &data_.hitReaction.power, 0.0f, 999.0f, "%.2f");
+			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
+			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
+			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damage, 0.0f, 1000.0f, "%.2f");
 		}
 	}
 
@@ -2825,11 +2534,12 @@ namespace Combo {
 
 
 		// リアクション
-		data_.reaction.knockbackDuration = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration;	// ノックバック持続時間
-		data_.reaction.knockbackPower = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().power;		// ノックバックパワー
-		data_.reaction.knockbackPowerY = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().verticalBoost;		// ノックバックY方向パワー
-		data_.reaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost;	// Y方向にノックバック
-		data_.reaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.GetDamageData().GetOne().damage;						// ダメージ
+		data_.hitReaction.duration = comboData.GetComboHitBox().GetCollData(0).reactionData.duration;	// ノックバック持続時間
+		data_.hitReaction.power = comboData.GetComboHitBox().GetCollData(0).reactionData.power;		// ノックバックパワー
+		data_.hitReaction.verticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.verticalBoost;		// ノックバックY方向パワー
+		data_.hitReaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.isVerticalBoost;	// Y方向にノックバック
+		data_.hitReaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.damageData.GetDamage();			// ダメージ
+		data_.hitReaction.hitReactionType = comboData.GetComboHitBox().GetCollData(0).reactionData.type;			// リアクションタイプ
 
 		// アニメーションスピード
 		data_.animation.animationSpeed = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
@@ -2983,7 +2693,7 @@ namespace Combo {
 
 			
 			// リアクション
-			data.reaction = comboEditorBlocks_[it.first].GetData().reaction;
+			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
 			
 			// ヒットボックス生成時間
 			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
@@ -3188,6 +2898,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalDat
 #pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
+#include "DirectXGame/application/base/Attack/AttackData.h"
 
 namespace Combo {
 
@@ -3199,14 +2910,6 @@ namespace Combo {
 		kOnTimer,			// 時間が過ぎたら
 		kOnHit,				// 何かに当たったら
 		kManual,			// 特殊ケース
-	};
-
-	// リアクション
-	enum class HitReactionType {
-		Knockback,
-		BlowAway,
-		Launch,
-		WallBounce
 	};
 
 	// 移動方法
@@ -3269,20 +2972,28 @@ namespace Combo {
 		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
 		// ヒットボックス影響タイプ
 		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
-		// ヒットリアクションタイプ
-		HitReactionType hitReactionType = HitReactionType::Knockback;
 	};
 
 	// 保存項目リアクション
-	struct GlobalReaction {
-		// ノックバック持続時間
-		float knockbackDuration = 0.1f;	
-		// ノックバックパワー
-		float knockbackPower = 30.0f;		
-		// ノックバックY方向パワー
-		float knockbackPowerY = 30.0f;		
-		// Y方向にノックバックするか
-		bool isVerticalBoost = false;		
+	struct GlobalHitReaction {
+		// ヒットリアクションタイプ
+		HitReactionType hitReactionType = HitReactionType::Knockback;
+		// 水平方向の強さ
+		float power = 0.0f;
+		// 垂直方向の強さ
+		float verticalBoost = 0.0f;
+		// 上方向を強制するか
+		bool isVerticalBoost = false;
+		// リアクション移動の有効時間
+		float duration = 0.25f;
+		// 行動不能時間
+		float hitStunTime = 0.1f;
+		// ダウン時間
+		float downTime = 0.0f;
+		// 打ち上げ時に重力を弱める/止める時間
+		float launchFloatTime = 0.0f;
+		// 重力を適用するか
+		bool gravityEnabled = false;		
 		// ダメージ
 		float damage = 0;					
 	};
@@ -3314,7 +3025,7 @@ namespace Combo {
 		Type type = Type::kMelle;	// 攻撃タイプ
 
 		// 敵に送るリアクションデータ
-		GlobalReaction reaction{};
+		GlobalHitReaction hitReaction{};
 		// 移動関係
 		GlobalMove move{};
 		// ヒットボックス関係
@@ -4014,11 +3725,12 @@ namespace Combo {
 		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
 		globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 		// リアクション
-		globalVariables->AddItem(name, "ダメージ", data.reaction.damage);
-		globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
-		globalVariables->AddItem(name, "ノックバック力", data.reaction.knockbackPower);
-		globalVariables->AddItem(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->AddItem(name, "ノックバック持続時間", data.reaction.knockbackDuration);
+		globalVariables->AddItem(name, "ダメージ", data.hitReaction.damage);
+		globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+		globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
+		globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+		globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
+		globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -4063,7 +3775,6 @@ namespace Combo {
 		globalVariables->AddItem(name, "ロックオン半径", data.lockOn.lockOnRadius);
 		globalVariables->AddEnumItem(name, "ロックオンタイプ", data.lockOn.lockOnType, "LockOnType");
 
-
 		// 保存項目の適応
 		GetGlobalComboData(name, data);
 	};
@@ -4074,11 +3785,12 @@ namespace Combo {
 		data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
 
 		// リアクション
-		data.reaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
-		data.reaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
-		data.reaction.knockbackPower = globalVariables->GetValue<float>(name, "ノックバック力");
-		data.reaction.knockbackPowerY = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
-		data.reaction.knockbackDuration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+		data.hitReaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
+		data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+		data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
+		data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
+		data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+		data.hitReaction.hitReactionType = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
 
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
@@ -4164,11 +3876,12 @@ namespace Combo {
 		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
-		globalVariables->SetValue(name, "ノックバック持続時間", data.reaction.knockbackDuration);
-		globalVariables->SetValue(name, "ノックバック力", data.reaction.knockbackPower);
-		globalVariables->SetValue(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->SetValue(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
-		globalVariables->SetValue(name, "ダメージ", data.reaction.damage);
+		globalVariables->SetValue(name, "ノックバック持続時間", data.hitReaction.duration);
+		globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
+		globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+		globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+		globalVariables->SetValue(name, "ダメージ", data.hitReaction.damage);
+		globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
 
 
 		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
@@ -4624,7 +4337,7 @@ namespace Combo {
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
 		// ノックバック方向
 		for (auto& coll : collData_) {
-			coll.reactionData.GetKnockbackData().SetNormal(direction);
+			coll.reactionData.normal = direction;
 		}
 
 		// 近距離か複合なら
@@ -4682,12 +4395,12 @@ namespace Combo {
 		HitBox::CollData data = hitBoxData;
 
 		// リアクションデータ
-		data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
-		data.reactionData.GetKnockbackData().GetData().power = combo.reaction.knockbackPower;
-		data.reactionData.GetKnockbackData().GetData().verticalBoost = combo.reaction.knockbackPowerY;
-		data.reactionData.GetKnockbackData().GetData().duration = combo.reaction.knockbackDuration;
-		data.reactionData.GetKnockbackData().GetData().isVerticalBoost = combo.reaction.isVerticalBoost;
-
+		data.reactionData.damageData.GetOne().damage = combo.hitReaction.damage;
+		data.reactionData.power = combo.hitReaction.power;
+		data.reactionData.verticalBoost = combo.hitReaction.verticalBoost;
+		data.reactionData.duration = combo.hitReaction.duration;
+		data.reactionData.isVerticalBoost = combo.hitReaction.isVerticalBoost;
+		data.reactionData.type = combo.hitReaction.hitReactionType;
 		collData_.push_back(data);
 	};
 
@@ -6301,53 +6014,6 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotion.cpp
 #include "HitMotion.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 
-#pragma region HitStopMotion
-
-void HitStopMotion::Update(float dt) {
-	
-	// ヒットストップ時間の更新
-	hitStopData_.Update(dt);
-
-	// ヒットストップ終了判定
-	if (hitStopData_.IsFinish()) isPlaying_ = false;
-}
-
-#pragma endregion // ヒットストップ
-
-#pragma region KnockbackMotion
-
-// 更新
-void KnockbackMotion::Update(float dt, ObjectComponent* object) {
-
-	// ノックバック時間の更新
-	knockbackData_.Update(dt);
-
-	// ノックバック終了判定
-	if(knockbackData_.IsFinish()) isPlaying_ = false;
-	else {
-		// ノックバック方向にキャラクターを飛ばす
-		object->GetWorldTransform().translate_ += knockbackData_.DirectionPower() * dt;
-	}
-}
-
-#pragma endregion // ノックバックモーション
-
-#pragma region AirStickMotion
-
-// 更新
-void AirStickMotion::Update(float dt, ObjectComponent* object) {
-	// エアスティック時間の更新
-	airStickData_.Update(dt);
-	// エアスティック終了判定
-	if (airStickData_.IsFinish()) isPlaying_ = false;
-	else {
-		// エアスティック方向にキャラクターを飛ばす
-		//object->GetWorldTransform().translate_ += airStickData_.DirectionPower() * dt;
-	}
-};
-
-#pragma endregion // エアスティックモーション
-
 #pragma region DamageData
 
 
@@ -6372,90 +6038,6 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotion.h
 #include <DirectXGame/application/base/Attack/AttackData.h>
 
 class ObjectComponent; // 前方宣言
-
-// ヒットストップのモーション
-class HitStopMotion{
-public:
-
-	
-	// 更新
-	void Update(float dt);
-
-	// 地面に着地しているか設定
-	void SetIsGround(bool is) { isGround_ = is; };
-
-	// ヒットストップデータ取得
-	HitStopData GetData() const { return hitStopData_; }
-
-	// ヒットストップデータ設定
-	void SetData(const HitStopData& data) { 
-		hitStopData_ = data; 
-		isPlaying_ = true;
-	}
-
-	// 揺れ幅取得
-	Vector3 Vibration() const {
-		return hitStopData_.GetData().Vibration(isGround_);
-	};
-
-	// 再生中か取得
-	bool IsPlaying() const { return isPlaying_; }
-
-private:
-	bool isHit_ = false;	// 衝突したか
-	bool isGround_ = true;	// 地面についているか
-
-	bool isPlaying_ = false;
-	HitStopData hitStopData_;	// ヒットストップデータ
-};
-
-// ノックバックのモーション
-class KnockbackMotion {
-public:
-
-	// 更新
-	void Update(float dt, ObjectComponent* object);
-
-	// ノックバックデータ設定
-	void SetData(const KnockbackData& data) { 
-		knockbackData_ = data; 
-		isPlaying_ = true;
-	}
-
-	// ノックバックデータ取得
-	KnockbackData GetData() const { return knockbackData_; }
-
-	// 再生中か取得
-	bool IsPlaying() const { return isPlaying_; }
-
-private:
-	bool isPlaying_ = false;
-	KnockbackData knockbackData_;	// ノックバックデータ
-};
-
-/// <summary>
-/// 吸い付きモーション
-/// </summary>
-class AirStickMotion {
-public:
-
-	// 更新
-	void Update(float dt, ObjectComponent* object);
-	// エアスティックデータ設定
-	void SetData(const AirStickData& data) { 
-		airStickData_ = data; 
-		isPlaying_ = true;
-	}
-	// エアスティックデータ取得
-	AirStickData GetData() const { return airStickData_; }
-
-	// 再生中か取得
-	bool IsPlaying() const { return isPlaying_; }
-
-private:
-	bool isPlaying_ = false;
-	AirStickData airStickData_;	// エアスティックデータ
-};
 
 /// <summary>
 /// ダメージモーション
@@ -6489,65 +6071,227 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner){
-	this->owner = owner;
-	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
-	hitStopMotion_ = std::make_unique<HitStopMotion>();
-	knockbackMotion_ = std::make_unique<KnockbackMotion>();
-	airStickMotion_ = std::make_unique<AirStickMotion>();
 
-};
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner)
+{
+	owner_ = owner;
+	reactionMoveSystem_ = owner_->GetMoveComponent()->GetReactionMoveSystem();
 
-
+	timer_ = 0.0f;
+	hitStunTimer_ = 0.0f;
+	downTimer_ = 0.0f;
+	isAction_ = false;
+	hitMotionState_ = HitMotionState::None;
+}
 
 void HitMotionSystem::Update(float dt)
 {
-	// ダメージモーション
-	DamageProcess(dt, owner->GetCharacterParameterComponent());
+	DamageProcess(dt, owner_->GetCharacterParameterComponent());
 
-	// 各ヒットモーションが再生中なら更新する
-	if (IsHitMotion()) {
+	if (!isAction_) {
+		return;
+	}
 
-		hitStopMotion_->Update(dt);			// ヒットストップモーション更新
-		knockbackMotion_->Update(dt, owner->GetObjectComponent());// ノックバックモーション更新
-		airStickMotion_->Update(dt, owner->GetObjectComponent());	// エアスティックモーション更新
+	timer_ += dt;
 
-		// 重力を設定 
-		UseGravity(owner->GetObjectComponent());
-	
-		//reactionMoveSystem->SetRequest();
+	if (hitStunTimer_ > 0.0f) {
+		hitStunTimer_ -= dt;
+		if (hitStunTimer_ < 0.0f) {
+			hitStunTimer_ = 0.0f;
+		}
+	}
+
+	if (downTimer_ > 0.0f) {
+		downTimer_ -= dt;
+		if (downTimer_ < 0.0f) {
+			downTimer_ = 0.0f;
+		}
+	}
+
+	// リアクション移動の有効時間中だけ毎フレームリクエストを送る
+	if (timer_ < data_.duration) {
+		Vector3 velocity = BuildMoveVelocity();
+		SendReactionMoveRequest(velocity * dt);
+	}
+
+	// Down 状態への遷移
+	if (timer_ >= data_.duration) {
+		if (data_.downTime > 0.0f) {
+			hitMotionState_ = HitMotionState::Down;
+		}
+	}
+
+	// 全終了判定
+	if (timer_ >= data_.duration &&
+		hitStunTimer_ <= 0.0f &&
+		downTimer_ <= 0.0f) {
+		FinishReaction();
 	}
 }
 
 void HitMotionSystem::SetReactionData(const HitReactionData& data)
 {
-	//hitStopMotion_.SetData(data.GetHitStopData());
-	//airStickMotion_.SetData(data.GetAirStickData());
-	knockbackMotion_->SetData(data.GetKnockbackData());
+	data_ = data;
 
-	DamageMotion dama;
-	dama.SetData(data.GetDamageData());
-	damageMotions_.push_back(dama);
+	timer_ = 0.0f;
+	hitStunTimer_ = data_.hitStunTime;
+	downTimer_ = data_.downTime;
+	isAction_ = true;
+
+	switch (data_.type) {
+	case HitReactionType::Knockback:
+		hitMotionState_ = HitMotionState::Knockback;
+		break;
+
+	case HitReactionType::BlowAway:
+		hitMotionState_ = HitMotionState::BlowAway;
+		break;
+
+	case HitReactionType::Launch:
+		hitMotionState_ = HitMotionState::Launch;
+		break;
+
+	case HitReactionType::WallBounce:
+		hitMotionState_ = HitMotionState::WallBounce;
+		break;
+
+	default:
+		hitMotionState_ = HitMotionState::None;
+		break;
+	}
+
+	DamageMotion damageMotion;
+	damageMotion.SetData(data_.damageData);
+	damageMotions_.push_back(damageMotion);
 }
 
-bool HitMotionSystem::IsHitMotion()
+bool HitMotionSystem::IsFinished() const {
+	return !isAction_ &&
+		hitStunTimer_ <= 0.0f &&
+		downTimer_ <= 0.0f;
+}
+
+bool HitMotionSystem::IsHitMotion() const
 {
-	return hitStopMotion_->IsPlaying()
-		|| knockbackMotion_->IsPlaying()
-		|| airStickMotion_->IsPlaying();
+	return isAction_;
 }
 
-void HitMotionSystem::UseGravity(ObjectComponent* object)
+bool HitMotionSystem::IsHitStun() const
 {
-	bool hitStopGravity = hitStopMotion_->GetData().GetData().gravityEnabled;
-	bool knockbackGravity = knockbackMotion_->GetData().GetData().gravityEnabled;
-	bool airStickGravity = airStickMotion_->GetData().GetData().gravityEnabled;
-
-	bool isGravity = hitStopGravity && knockbackGravity && airStickGravity;
-
-	object->GetRigidBodyComponent()->SetIsGravity(isGravity);
+	return hitStunTimer_ > 0.0f;
 }
 
+bool HitMotionSystem::IsDown() const
+{
+	return hitMotionState_ == HitMotionState::Down;
+}
+
+bool HitMotionSystem::IsGravityEnabled() const {
+	return data_.gravityEnabled;
+}
+
+float HitMotionSystem::GetGravityScale() const {
+	return data_.gravityScale;
+}
+
+Vector3 HitMotionSystem::BuildMoveVelocity() const
+{
+	Vector3 dir = NormalizeSafe(data_.normal);
+
+	// 基本は地面に沿う方向で使う
+	Vector3 horizontalDir = dir;
+	horizontalDir.y = 0.0f;
+	horizontalDir = NormalizeSafe(horizontalDir);
+
+	Vector3 velocity{};
+
+	switch (data_.type) {
+	case HitReactionType::Knockback:
+	{
+		// 軽く後方へ押す
+		velocity = horizontalDir * data_.power;
+		break;
+	}
+
+	case HitReactionType::BlowAway:
+	{
+		// 前方＋上方向
+		velocity = horizontalDir * data_.power;
+		if (data_.isVerticalBoost) {
+			velocity.y = data_.verticalBoost;
+		}
+		break;
+	}
+
+	case HitReactionType::Launch:
+	{
+		// 打ち上げは上方向主体
+		velocity = horizontalDir * (data_.power * 0.25f);
+
+		// launchFloatTime の間は上方向を強める
+		if (timer_ < data_.launchFloatTime) {
+			velocity.y = data_.verticalBoost;
+		}
+		else {
+			// その後は上方向を切る
+			velocity.y = 0.0f;
+		}
+		break;
+	}
+
+	case HitReactionType::WallBounce:
+	{
+		// 壁バウンド自体の反射はここではなく衝突側で処理する想定
+		velocity = horizontalDir * data_.power;
+		if (data_.isVerticalBoost) {
+			velocity.y = data_.verticalBoost;
+		}
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	return velocity;
+}
+
+Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
+{
+	const float lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
+	if (lenSq <= 0.000001f) {
+		return Vector3{ 0.0f, 0.0f, 1.0f };
+	}
+	return v.Normalize();
+}
+
+void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
+{
+	if (!reactionMoveSystem_) {
+		return;
+	}
+
+	MoveRequest request{};
+	request.layer = MoveLayer::kBase;
+	request.speedMultiplier = 1.0f;
+	request.velocity = velocity;
+	request.direction = NormalizeSafe(data_.normal);
+	request.priority = 100;
+	request.invincible = false;
+	request.isLanding = false;
+	request.groundHeight = 0.0f;
+
+	reactionMoveSystem_->SetRequest(request);
+}
+
+void HitMotionSystem::FinishReaction()
+{
+	isAction_ = false;
+	timer_ = 0.0f;
+	hitStunTimer_ = 0.0f;
+	downTimer_ = 0.0f;
+	hitMotionState_ = HitMotionState::None;
+}
 void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* parameter) {
 
 	for (auto& damage : damageMotions_) {
@@ -6592,52 +6336,59 @@ class HitMotionSystem
 public:
 	enum class HitMotionState
 	{
-		None,		// 無し
-		HitStop,	// ヒットストップ
-		Knockback,	// ノックバック
-		AirStick,	// 吸い付き
+		None,
+		HitStop,
+		Knockback,
+		BlowAway,
+		Launch,
+		WallBounce,
+		Down,
 	};
 
-	// 初期化
+public:
 	void Initialize(Character::BaseCharacter* owner);
-
-	// 更新
 	void Update(float dt);
 
-	// リアクションデータ
 	void SetReactionData(const HitReactionData& data);
 
-	// ヒットモーション中か
-	bool IsHitMotion();
-	//
-	float GetGravity() { return 1.0f; }
-	// 重力があるか設定
-	void UseGravity(ObjectComponent* object);
+	bool IsHitMotion() const;
+	bool IsHitStun() const;
+	bool IsDown() const;
+
+	bool IsGravityEnabled() const;
+
+	float GetGravityScale() const;
+
+	float GetHitStunTimer() const { return hitStunTimer_; }
+	float GetDownTimer() const { return downTimer_; }
+
+	bool IsFinished() const;
 
 private:
-
-
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
+
+	Vector3 BuildMoveVelocity() const;
+	Vector3 NormalizeSafe(const Vector3& v) const;
+	void SendReactionMoveRequest(const Vector3& velocity);
+	void FinishReaction();
 
 private:
 	HitMotionState hitMotionState_ = HitMotionState::None;
-	// ヒットストップモーション
-	std::unique_ptr<HitStopMotion> hitStopMotion_;
-	// ノックバックモーション
-	std::unique_ptr <KnockbackMotion> knockbackMotion_;
-	// 吸い付きモーション
-	std::unique_ptr <AirStickMotion> airStickMotion_;
 
-	// ダメージモーション
+	HitReactionData data_{};
+
 	std::list<DamageMotion> damageMotions_;
 
-private:
-	// 所有者
-	Character::BaseCharacter* owner = nullptr;
-	// リアクション移動システム
-	ReactionMoveSystem* reactionMoveSystem = nullptr;
-};
+	float timer_ = 0.0f;
+	float hitStunTimer_ = 0.0f;
+	float downTimer_ = 0.0f;
 
+	bool isAction_ = false;
+
+private:
+	Character::BaseCharacter* owner_ = nullptr;
+	ReactionMoveSystem* reactionMoveSystem_ = nullptr;
+};
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
@@ -7145,8 +6896,6 @@ namespace HitBox {
 		}
 		// プレイヤーステート設定
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
-		// ノックバック方向
-		data_.GetKnockbackData().SetNormal(enemy->GetMoveComponent()->GetDirection());
 		// リアクションデータ
 		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーのロックオンシステムに相手タグを設定
@@ -8377,7 +8126,7 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		data_.layer = param_.collisionLayer;
 		data_.size = { 1.0f,2.0f,1.0f };
 		data_.name = param_.name;
-		data_.reactionData.GetDamageData().GetOne().damage = param_.explosionDamage;
+		data_.reactionData.damageData.GetOne().damage = param_.explosionDamage;
 		data_.radius = param_.explosionRadius;
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
@@ -12210,6 +11959,7 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		ctx.isCanMove = false;	// 動けないようにする
 		if(ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Fainting)
 		ctx.isDamage = true;	// ダメージを受けている
+		ctx.isGravity = hitMotionSystem->IsGravityEnabled();
 	}
 	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
 		ctx.isCanJump = true;	// ジャンプ可能にする
@@ -12220,7 +11970,7 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
 	}
 	// ダメージ中の重力
-	//ctx.damageGravity = responseSystem->GetAttackResponse()->GetHitMotionSystem();
+	ctx.damageGravity = hitMotionSystem->GetGravityScale();
 	// 上昇時の重力
 	ctx.upGravity = jumpSystem->GetData().upGravity;
 	// 落下時の重力
@@ -12312,9 +12062,9 @@ namespace Character {
 		float skyHeight = 1.5f;
 
 		// 上昇時の重力係数
-		float upGravity = 15.0f;
+		float upGravity = 1.0f;
 		// 落下時の重力係数
-		float fallGravity = 30.0f;
+		float fallGravity = 2.0f;
 		// 攻撃中の重力係数
 		float attackingGravity = 20.0f;
 		// 被弾中の重力係数
@@ -14578,21 +14328,10 @@ namespace Character {
 #pragma region Damage
 
 	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
-		// 時間更新
-		timer_ -= ctx.dt;
-		if (timer_ <= 0.0f) {
+		if (!character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
-
-	void MediumMeleeEnemyDamageState::Exit(){
-		timer_ = damageTime_;
-	}
-
-	void MediumMeleeEnemyDamageState::Enter(){
-		timer_ = damageTime_;
-	}
-
 
 #pragma endregion
 }
@@ -14682,9 +14421,9 @@ namespace Character {
 		void Update(const CharacterContext& ctx) override;
 
 		// 終了
-		void Exit() override;
+		void Exit() override {};
 		// 初期化
-		void Enter() override;
+		void Enter() override {};
 	private:
 		float timer_ = 0.0f;
 		float damageTime_ = 0.5f;
@@ -14808,7 +14547,7 @@ namespace Character {
         data.mask = CollisionLayer::Player;
         data.size = { 1.0f, 2.0f, 1.0f };
         data.name = "NormalEnemy_SwingHitBox";
-        data.reactionData.GetDamageData().GetOne().damage = 10.0f;
+        data.reactionData.damageData.GetOne().damage = 10.0f;
 
         // ヒットボックス寿命は swingTime_ と揃える
         enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
@@ -15568,22 +15307,11 @@ namespace Character {
 #pragma region Damage
 	
 	void SmallMeleeEnemyDamageState::Update(const CharacterContext& ctx) {
-		// 時間更新
-		timer_ -= ctx.dt;
-		if (timer_ <= 0.0f) {
+		
+		if (!character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
-
-	void SmallMeleeEnemyDamageState::Exit(){
-		timer_ = damageTime_;
-	}
-
-	void SmallMeleeEnemyDamageState::Enter(){
-		timer_ = damageTime_;
-	}
-
-
 
 #pragma endregion
 
@@ -15677,9 +15405,9 @@ namespace Character {
 		void Update(const CharacterContext& ctx) override;
 
 		// 終了
-		void Exit() override;
+		void Exit() override {};
 		// 初期化
-		void Enter() override;
+		void Enter() override {};
 	private:
 		float timer_ = 0.0f;
 		float damageTime_ = 0.25f;
@@ -15804,7 +15532,7 @@ namespace Character {
 		data.mask = CollisionLayer::Player;
 		data.size = { 1.0f, 2.0f, 1.0f };
 		data.name = "NormalEnemy_SwingHitBox";
-		data.reactionData.GetDamageData().GetOne().damage = 10.0f;
+		data.reactionData.damageData.GetOne().damage = 10.0f;
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
 			HitBox::UseType::kEnemy,
@@ -16314,21 +16042,10 @@ namespace Character {
 #pragma endregion
 
 	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
-		// 時間更新
-		timer_ -= ctx.dt;
-		if (timer_ <= 0.0f) {
+		if (!character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
-
-	void SmallRangeEnemyDamageState::Exit(){
-		timer_ = damageTime_;
-	}
-
-	void SmallRangeEnemyDamageState::Enter(){
-		timer_ = damageTime_;
-	}
-
 }
 
 ============================================================
@@ -16422,9 +16139,9 @@ namespace Character {
 		void Update(const CharacterContext& ctx) override;
 
 		// 終了
-		void Exit() override;
+		void Exit() override {};
 		// 初期化
-		void Enter() override;
+		void Enter() override {};
 	private:
 		float timer_ = 0.0f;
 		float damageTime_ = 0.25f;
@@ -22106,15 +21823,19 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
 	}
 	else {
-		rigid.SetIsGravity(true);			// 重力をオフ
+		rigid.SetIsGravity(cxt.isGravity);
 		// 重力スケールセット
 		if (!cxt.isAttacking) {
-
-			if (rigid.GetVelocity().y < 0.0f) {
-				rigid.SetGravityScale(cxt.fallGravity);
+			if (cxt.isDamage) {
+				rigid.SetGravityScale(cxt.damageGravity);
 			}
 			else {
-				rigid.SetGravityScale(cxt.upGravity);
+				if (rigid.GetVelocity().y < 0.0f) {
+					rigid.SetGravityScale(cxt.fallGravity);
+				}
+				else {
+					rigid.SetGravityScale(cxt.upGravity);
+				}
 			}
 		}
 		else {
@@ -22286,9 +22007,9 @@ struct JumpData {
 	// ジャンプ力
 	float power = 350.0f;
 	// 上昇時の重力係数
-	float upGravity = 15.0f;
+	float upGravity = 2.0f;
 	// 落下時の重力係数
-	float fallGravity = 30.0f;
+	float fallGravity = 2.0f;
 	// 入力受付時間
 	float inputDelay = 0.1f;
 	// 最大ジャンプ回数
