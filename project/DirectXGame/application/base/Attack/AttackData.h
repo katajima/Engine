@@ -4,187 +4,6 @@
 
 #include "DirectXGame//application/base/Input/InputSystem.h"
 
-// ノックバックデータクラス
-class KnockbackData{
-public:
-	// ノックバックタイプ
-	enum Type {
-		kDirection,				// 攻撃者→被撃者方向
-		kRandom,				// ランダム方向
-		kDirectionAndRandom,	// (攻撃者→被撃者)+ランダム
-	};
-
-	// データ構造体
-	struct Data {
-		/// <summary>
-		/// 方向 
-		/// </summary>
-		Vector3 normal{};					// 飛ぶ方向
-		Type type = Type::kDirection;		// ノックバックのタイプ
-
-
-		/// <summary>
-		/// 力・強さ
-		/// </summary>
-		float power = 0.0f;				// ノックバックの力
-		float verticalBoost = 0.0f;		// ノックバック垂直方向(敵をどれだけ上に吹き飛ばすか)
-		bool isVerticalBoost = false;		// Y方向にノックバックを与えるかどうか
-
-
-		/// <summary>
-		/// 時間
-		/// </summary>
-		float duration = 0.5f;				// ノックバック継続時間
-		float damping = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
-
-		/// <summary>
-		/// 制御
-		/// </summary>
-		bool gravityEnabled = false;		// ノックバック中に重力の影響を受けるか
-
-		/// <summary>
-		/// 衝突
-		/// </summary>
-		bool stopOnCollision = false;		// 当たって止まるか
-		float slideFloor = 0.0f;			// 床で滑る量
-
-		/// <summary>
-		/// 重力
-		/// </summary>
-		float gravityScale = 1.0f;
-	};
-
-	// 方向とパワーを合算した値(Vector3)
-	Vector3 DirectionPower() const;
-
-	// 更新
-	void Update(float dt) { timer_ += dt; }
-
-	/// <summary>
-	/// ノックバック終了か
-	/// </summary>
-	/// <returns></returns>
-	bool IsFinish() const { return data_.duration < timer_; }
-
-
-	// 重力影響受けるか
-	bool IsGravityEnabled() const {
-		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled;
-	}
-
-public:
-	// データ構造体
-	Data& GetData() { return data_; }
-
-	// ノックバックパワー設定
-	void SetPower(float power, float verticalBoost) {
-		data_.power = power;		// パワー
-		data_.verticalBoost = verticalBoost;	// パワーY方向
-	}
-
-	// 方向設定
-	void SetNormal(const Vector3 normal) { data_.normal = normal; }
-
-private:
-	float timer_ = 0.0f;					// 時間
-	Data data_;
-};
-
-// 空中・地上固定データクラス
-class AirStickData {
-public:
-	// データ構造体
-	struct Data
-	{
-		Vector3 targetOffset = { 0,0,0 };	// 吸いつく位置
-		float duration = 0.5f;				// 吸いつく時間
-		bool useWorldSpace = false;		// ターゲット位置をワールド座標で扱うか
-		float followSpeed = 0.1f;			// ターゲット位置へ向かう追従スピード
-		float stickStrength = 1.0f;		// ターゲット位置へ貼りつく強さ(0.0f~1.0f)値が大きいほど貼りつく
-
-		bool endOnHit = true;				// 次の攻撃が当たった瞬間にターゲット位置に貼りつきを解除するか
-		bool gravityEnabled = true;		// 吸着時だけ重力を
-		bool keepFacingAttacker = true;	// 被撃者の向きを攻撃者へ自動回転させるか。
-		float gravityScale = 1.0f;			// 重力強度
-	};
-
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-	/// <summary>
-	/// 攻撃者位置設定
-	/// </summary>
-	/// <param name="world"></param>
-	void SetAttackerWorldTransform(Engine::WorldTransform* world) { world_ = world; };
-
-	// データ構造体取得
-	Data& GetData() { return data_; }
-	
-	// 重力影響受けるか
-	bool IsGravityEnabled() const { 
-		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled;
-	}
-
-	// 終了したか
-	bool IsFinish() const { return data_.duration < timer_; }
-
-private:
-	Data data_;
-	Engine::WorldTransform* world_ = nullptr;
-	float timer_ = 0.0f;	// 時間
-};
-
-// ヒットストップデータクラス
-class HitStopData {
-public:
-	struct Data {
-		float duration_ = 0.5f;				// 揺れ継続時間
-		float damping_ = 0.0f;				// 減衰率(0なら定速、0.1ならすぐ減速)
-		bool isGroundVibrationY = false;	// 地面に着地しているときにY方向を揺らすか
-		bool gravityEnabled = false;		// ヒットストップ中に重力の影響を受けるか
-		float gravityScale = 1.0f;			// 重力強度
-		Vector3 vibration = Vector3::Set(0.1f);	// 揺れ幅設定
-
-
-
-		// 揺れ幅取得
-		Vector3 Vibration(bool isGround) const {
-			Vector3 r{};
-			r = vibration;
-			// Y方向に揺らさない場合
-			if (!isGroundVibrationY && isGround) {
-				r = 0.0f;
-			}
-			return r;
-		};
-	};
-
-	// 更新
-	void Update(float dt) { timer_ += dt; }
-
-	// 終了したか
-	bool IsFinish() const { return data_.duration_ < timer_; }
-
-	// 重力影響受けるか
-	bool IsGravityEnabled() const {
-		if (IsFinish()) return true; // 終了したら重力影響を受ける
-		return data_.gravityEnabled;
-	}
-
-	// データ構造体取得
-	Data GetData() const { return data_; }
-
-private:
-	float timer_ = 0.0f;					// 時間
-	Data data_;
-};
-
 /// ダメージデータ
 class DamageData {
 public:
@@ -312,45 +131,49 @@ private:
 	One one{};					// 一回ダメージデータ
 	float damage = 0;			// ダメージ
 };
-
-/// 攻撃リアクションデータ
-class HitReactionData {
-public:
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-public: // 読み取り
-	// ノックバックデータ取得
-	const KnockbackData& GetKnockbackData() const { return knockback; }
-	// ヒットストップデータ取得
-	const HitStopData& GetHitStopData() const { return hitStopData; }
-	// 空中・地上固定データ取得
-	const AirStickData& GetAirStickData() const { return airStickData; }
-	// ダメージデータ取得
-	const DamageData& GetDamageData() const { return damageData; }
-
-public: // 書き換え
-	// ノックバックデータ取得
-	KnockbackData& GetKnockbackData() { return knockback; }
-	// ヒットストップデータ取得
-	HitStopData& GetHitStopData() { return hitStopData; }
-	// 空中・地上固定データ取得
-	AirStickData& GetAirStickData() { return airStickData; }
-	// ダメージデータ取得
-	DamageData& GetDamageData() { return damageData; }
-
-private:
-	KnockbackData knockback;	// ノックバックデータ
-	HitStopData hitStopData;	// ヒットストップデータ
-	AirStickData airStickData;	// 空中・地上固定データ
-	DamageData damageData;		// ダメージデータ
-
-	float hitStunTime;
-	float downTime;
-	float launchFloatTime;
+// リアクション
+enum class HitReactionType {
+	Knockback,
+	BlowAway,
+	Launch,
+	WallBounce
 };
 
+/// 攻撃リアクションデータ
+struct HitReactionData {
+	// リアクションタイプ
+	HitReactionType type = HitReactionType::Knockback;
+
+	// 飛ぶ基準方向
+	Vector3 normal{};
+
+	// 水平方向の強さ
+	float power = 0.0f;
+
+	// 垂直方向の強さ
+	float verticalBoost = 0.0f;
+
+	// 上方向を強制するか
+	bool isVerticalBoost = false;
+
+	// リアクション移動の有効時間
+	float duration = 0.25f;
+
+	// 行動不能時間
+	float hitStunTime = 0.1f;
+
+	// ダウン時間
+	float downTime = 0.0f;
+
+	// 打ち上げ時に重力を弱める/止める時間
+	float launchFloatTime = 0.0f;
+
+	// 重力を適用するか
+	bool gravityEnabled = false;
+
+	// 重力倍率
+	float gravityScale = 1.0f;
+
+	// ダメージデータ
+	DamageData damageData{};
+};

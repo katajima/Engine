@@ -73,9 +73,9 @@ namespace Character {
 		float skyHeight = 1.5f;
 
 		// 上昇時の重力係数
-		float upGravity = 15.0f;
+		float upGravity = 1.0f;
 		// 落下時の重力係数
-		float fallGravity = 30.0f;
+		float fallGravity = 2.0f;
 		// 攻撃中の重力係数
 		float attackingGravity = 20.0f;
 		// 被弾中の重力係数

@@ -125,19 +125,8 @@ namespace Character {
 #pragma endregion
 
 	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
-		// 時間更新
-		timer_ -= ctx.dt;
-		if (timer_ <= 0.0f) {
+		if (!character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
-
-	void SmallRangeEnemyDamageState::Exit(){
-		timer_ = damageTime_;
-	}
-
-	void SmallRangeEnemyDamageState::Enter(){
-		timer_ = damageTime_;
-	}
-
 }

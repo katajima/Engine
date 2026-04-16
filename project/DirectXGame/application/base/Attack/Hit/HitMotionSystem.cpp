@@ -2,65 +2,227 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner){
-	this->owner = owner;
-	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
-	hitStopMotion_ = std::make_unique<HitStopMotion>();
-	knockbackMotion_ = std::make_unique<KnockbackMotion>();
-	airStickMotion_ = std::make_unique<AirStickMotion>();
 
-};
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner)
+{
+	owner_ = owner;
+	reactionMoveSystem_ = owner_->GetMoveComponent()->GetReactionMoveSystem();
 
-
+	timer_ = 0.0f;
+	hitStunTimer_ = 0.0f;
+	downTimer_ = 0.0f;
+	isAction_ = false;
+	hitMotionState_ = HitMotionState::None;
+}
 
 void HitMotionSystem::Update(float dt)
 {
-	// ダメージモーション
-	DamageProcess(dt, owner->GetCharacterParameterComponent());
+	DamageProcess(dt, owner_->GetCharacterParameterComponent());
 
-	// 各ヒットモーションが再生中なら更新する
-	if (IsHitMotion()) {
+	if (!isAction_) {
+		return;
+	}
 
-		hitStopMotion_->Update(dt);			// ヒットストップモーション更新
-		knockbackMotion_->Update(dt, owner->GetObjectComponent());// ノックバックモーション更新
-		airStickMotion_->Update(dt, owner->GetObjectComponent());	// エアスティックモーション更新
+	timer_ += dt;
 
-		// 重力を設定 
-		UseGravity(owner->GetObjectComponent());
-	
-		//reactionMoveSystem->SetRequest();
+	if (hitStunTimer_ > 0.0f) {
+		hitStunTimer_ -= dt;
+		if (hitStunTimer_ < 0.0f) {
+			hitStunTimer_ = 0.0f;
+		}
+	}
+
+	if (downTimer_ > 0.0f) {
+		downTimer_ -= dt;
+		if (downTimer_ < 0.0f) {
+			downTimer_ = 0.0f;
+		}
+	}
+
+	// リアクション移動の有効時間中だけ毎フレームリクエストを送る
+	if (timer_ < data_.duration) {
+		Vector3 velocity = BuildMoveVelocity();
+		SendReactionMoveRequest(velocity * dt);
+	}
+
+	// Down 状態への遷移
+	if (timer_ >= data_.duration) {
+		if (data_.downTime > 0.0f) {
+			hitMotionState_ = HitMotionState::Down;
+		}
+	}
+
+	// 全終了判定
+	if (timer_ >= data_.duration &&
+		hitStunTimer_ <= 0.0f &&
+		downTimer_ <= 0.0f) {
+		FinishReaction();
 	}
 }
 
 void HitMotionSystem::SetReactionData(const HitReactionData& data)
 {
-	//hitStopMotion_.SetData(data.GetHitStopData());
-	//airStickMotion_.SetData(data.GetAirStickData());
-	knockbackMotion_->SetData(data.GetKnockbackData());
+	data_ = data;
 
-	DamageMotion dama;
-	dama.SetData(data.GetDamageData());
-	damageMotions_.push_back(dama);
+	timer_ = 0.0f;
+	hitStunTimer_ = data_.hitStunTime;
+	downTimer_ = data_.downTime;
+	isAction_ = true;
+
+	switch (data_.type) {
+	case HitReactionType::Knockback:
+		hitMotionState_ = HitMotionState::Knockback;
+		break;
+
+	case HitReactionType::BlowAway:
+		hitMotionState_ = HitMotionState::BlowAway;
+		break;
+
+	case HitReactionType::Launch:
+		hitMotionState_ = HitMotionState::Launch;
+		break;
+
+	case HitReactionType::WallBounce:
+		hitMotionState_ = HitMotionState::WallBounce;
+		break;
+
+	default:
+		hitMotionState_ = HitMotionState::None;
+		break;
+	}
+
+	DamageMotion damageMotion;
+	damageMotion.SetData(data_.damageData);
+	damageMotions_.push_back(damageMotion);
 }
 
-bool HitMotionSystem::IsHitMotion()
+bool HitMotionSystem::IsFinished() const {
+	return !isAction_ &&
+		hitStunTimer_ <= 0.0f &&
+		downTimer_ <= 0.0f;
+}
+
+bool HitMotionSystem::IsHitMotion() const
 {
-	return hitStopMotion_->IsPlaying()
-		|| knockbackMotion_->IsPlaying()
-		|| airStickMotion_->IsPlaying();
+	return isAction_;
 }
 
-void HitMotionSystem::UseGravity(ObjectComponent* object)
+bool HitMotionSystem::IsHitStun() const
 {
-	bool hitStopGravity = hitStopMotion_->GetData().GetData().gravityEnabled;
-	bool knockbackGravity = knockbackMotion_->GetData().GetData().gravityEnabled;
-	bool airStickGravity = airStickMotion_->GetData().GetData().gravityEnabled;
-
-	bool isGravity = hitStopGravity && knockbackGravity && airStickGravity;
-
-	object->GetRigidBodyComponent()->SetIsGravity(isGravity);
+	return hitStunTimer_ > 0.0f;
 }
 
+bool HitMotionSystem::IsDown() const
+{
+	return hitMotionState_ == HitMotionState::Down;
+}
+
+bool HitMotionSystem::IsGravityEnabled() const {
+	return data_.gravityEnabled;
+}
+
+float HitMotionSystem::GetGravityScale() const {
+	return data_.gravityScale;
+}
+
+Vector3 HitMotionSystem::BuildMoveVelocity() const
+{
+	Vector3 dir = NormalizeSafe(data_.normal);
+
+	// 基本は地面に沿う方向で使う
+	Vector3 horizontalDir = dir;
+	horizontalDir.y = 0.0f;
+	horizontalDir = NormalizeSafe(horizontalDir);
+
+	Vector3 velocity{};
+
+	switch (data_.type) {
+	case HitReactionType::Knockback:
+	{
+		// 軽く後方へ押す
+		velocity = horizontalDir * data_.power;
+		break;
+	}
+
+	case HitReactionType::BlowAway:
+	{
+		// 前方＋上方向
+		velocity = horizontalDir * data_.power;
+		if (data_.isVerticalBoost) {
+			velocity.y = data_.verticalBoost;
+		}
+		break;
+	}
+
+	case HitReactionType::Launch:
+	{
+		// 打ち上げは上方向主体
+		velocity = horizontalDir * (data_.power * 0.25f);
+
+		// launchFloatTime の間は上方向を強める
+		if (timer_ < data_.launchFloatTime) {
+			velocity.y = data_.verticalBoost;
+		}
+		else {
+			// その後は上方向を切る
+			velocity.y = 0.0f;
+		}
+		break;
+	}
+
+	case HitReactionType::WallBounce:
+	{
+		// 壁バウンド自体の反射はここではなく衝突側で処理する想定
+		velocity = horizontalDir * data_.power;
+		if (data_.isVerticalBoost) {
+			velocity.y = data_.verticalBoost;
+		}
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	return velocity;
+}
+
+Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
+{
+	const float lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
+	if (lenSq <= 0.000001f) {
+		return Vector3{ 0.0f, 0.0f, 1.0f };
+	}
+	return v.Normalize();
+}
+
+void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
+{
+	if (!reactionMoveSystem_) {
+		return;
+	}
+
+	MoveRequest request{};
+	request.layer = MoveLayer::kBase;
+	request.speedMultiplier = 1.0f;
+	request.velocity = velocity;
+	request.direction = NormalizeSafe(data_.normal);
+	request.priority = 100;
+	request.invincible = false;
+	request.isLanding = false;
+	request.groundHeight = 0.0f;
+
+	reactionMoveSystem_->SetRequest(request);
+}
+
+void HitMotionSystem::FinishReaction()
+{
+	isAction_ = false;
+	timer_ = 0.0f;
+	hitStunTimer_ = 0.0f;
+	downTimer_ = 0.0f;
+	hitMotionState_ = HitMotionState::None;
+}
 void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* parameter) {
 
 	for (auto& damage : damageMotions_) {

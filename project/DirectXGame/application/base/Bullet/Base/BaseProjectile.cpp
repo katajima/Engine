@@ -122,7 +122,7 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		data_.layer = param_.collisionLayer;
 		data_.size = { 1.0f,2.0f,1.0f };
 		data_.name = param_.name;
-		data_.reactionData.GetDamageData().GetOne().damage = param_.explosionDamage;
+		data_.reactionData.damageData.GetOne().damage = param_.explosionDamage;
 		data_.radius = param_.explosionRadius;
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;

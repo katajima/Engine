@@ -69,8 +69,6 @@ namespace HitBox {
 		}
 		// プレイヤーステート設定
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
-		// ノックバック方向
-		data_.GetKnockbackData().SetNormal(enemy->GetMoveComponent()->GetDirection());
 		// リアクションデータ
 		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーのロックオンシステムに相手タグを設定

@@ -80,11 +80,12 @@ namespace Combo {
 		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
 		globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 		// リアクション
-		globalVariables->AddItem(name, "ダメージ", data.reaction.damage);
-		globalVariables->AddItem(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
-		globalVariables->AddItem(name, "ノックバック力", data.reaction.knockbackPower);
-		globalVariables->AddItem(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->AddItem(name, "ノックバック持続時間", data.reaction.knockbackDuration);
+		globalVariables->AddItem(name, "ダメージ", data.hitReaction.damage);
+		globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+		globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
+		globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+		globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
+		globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -129,7 +130,6 @@ namespace Combo {
 		globalVariables->AddItem(name, "ロックオン半径", data.lockOn.lockOnRadius);
 		globalVariables->AddEnumItem(name, "ロックオンタイプ", data.lockOn.lockOnType, "LockOnType");
 
-
 		// 保存項目の適応
 		GetGlobalComboData(name, data);
 	};
@@ -140,11 +140,12 @@ namespace Combo {
 		data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
 
 		// リアクション
-		data.reaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
-		data.reaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
-		data.reaction.knockbackPower = globalVariables->GetValue<float>(name, "ノックバック力");
-		data.reaction.knockbackPowerY = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
-		data.reaction.knockbackDuration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+		data.hitReaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
+		data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+		data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
+		data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
+		data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+		data.hitReaction.hitReactionType = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
 
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
@@ -230,11 +231,12 @@ namespace Combo {
 		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
-		globalVariables->SetValue(name, "ノックバック持続時間", data.reaction.knockbackDuration);
-		globalVariables->SetValue(name, "ノックバック力", data.reaction.knockbackPower);
-		globalVariables->SetValue(name, "Y方向ノックバック力", data.reaction.knockbackPowerY);
-		globalVariables->SetValue(name, "Y方向ノックバック", data.reaction.isVerticalBoost);
-		globalVariables->SetValue(name, "ダメージ", data.reaction.damage);
+		globalVariables->SetValue(name, "ノックバック持続時間", data.hitReaction.duration);
+		globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
+		globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+		globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+		globalVariables->SetValue(name, "ダメージ", data.hitReaction.damage);
+		globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
 
 
 		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);

@@ -52,15 +52,19 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
 	}
 	else {
-		rigid.SetIsGravity(true);			// 重力をオフ
+		rigid.SetIsGravity(cxt.isGravity);
 		// 重力スケールセット
 		if (!cxt.isAttacking) {
-
-			if (rigid.GetVelocity().y < 0.0f) {
-				rigid.SetGravityScale(cxt.fallGravity);
+			if (cxt.isDamage) {
+				rigid.SetGravityScale(cxt.damageGravity);
 			}
 			else {
-				rigid.SetGravityScale(cxt.upGravity);
+				if (rigid.GetVelocity().y < 0.0f) {
+					rigid.SetGravityScale(cxt.fallGravity);
+				}
+				else {
+					rigid.SetGravityScale(cxt.upGravity);
+				}
 			}
 		}
 		else {

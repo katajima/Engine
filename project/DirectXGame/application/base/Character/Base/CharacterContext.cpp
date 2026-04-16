@@ -78,6 +78,7 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		ctx.isCanMove = false;	// 動けないようにする
 		if(ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Fainting)
 		ctx.isDamage = true;	// ダメージを受けている
+		ctx.isGravity = hitMotionSystem->IsGravityEnabled();
 	}
 	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
 		ctx.isCanJump = true;	// ジャンプ可能にする
@@ -88,7 +89,7 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
 	}
 	// ダメージ中の重力
-	//ctx.damageGravity = responseSystem->GetAttackResponse()->GetHitMotionSystem();
+	ctx.damageGravity = hitMotionSystem->GetGravityScale();
 	// 上昇時の重力
 	ctx.upGravity = jumpSystem->GetData().upGravity;
 	// 落下時の重力

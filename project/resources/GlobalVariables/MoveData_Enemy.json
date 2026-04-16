@@ -2,11 +2,11 @@
     "MoveData_Enemy": {
         "ジャンプ上昇時の重力": {
             "type": "float",
-            "value": 15.0
+            "value": 1.0
         },
         "ジャンプ下降時の重力": {
             "type": "float",
-            "value": 30.0
+            "value": 2.0
         },
         "ジャンプ力": {
             "type": "float",

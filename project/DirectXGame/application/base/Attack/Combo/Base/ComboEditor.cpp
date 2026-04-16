@@ -173,11 +173,27 @@ namespace Combo {
 
 	void EditorBlock::ImGuiReaction() {
 		if (ImGui::CollapsingHeader("リアクション")) {
-			ImGui::SliderFloat("ノックバック持続時間", &data_.reaction.knockbackDuration, 0.0f, 5.0f, "%.2f");
-			ImGui::SliderFloat("ノックバックパワー", &data_.reaction.knockbackPower, 0.0f, 999.0f, "%.2f");
-			ImGui::SliderFloat("ノックバックY方向パワー", &data_.reaction.knockbackPowerY, 0.0f, 999.0f, "%.2f");
-			ImGui::Checkbox("Y方向にノックバック", &data_.reaction.isVerticalBoost);
-			ImGui::SliderFloat("ダメージ", &data_.reaction.damage, 0.0f, 1000.0f, "%.2f");
+			// リアクション
+			enum class HitReactionType {
+				Knockback,
+				BlowAway,
+				Launch,
+				WallBounce
+			};
+
+			static const char* HitReactionTypeLabels[] = {
+				"ノックバック",
+				"吹っ飛び"
+				"打ち上げ",
+				"壁バウンド"
+			};
+			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.hitReactionType);
+
+			ImGui::SliderFloat("持続時間", &data_.hitReaction.duration, 0.0f, 5.0f, "%.2f");
+			ImGui::SliderFloat("パワー", &data_.hitReaction.power, 0.0f, 999.0f, "%.2f");
+			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
+			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
+			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damage, 0.0f, 1000.0f, "%.2f");
 		}
 	}
 
@@ -197,11 +213,12 @@ namespace Combo {
 
 
 		// リアクション
-		data_.reaction.knockbackDuration = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().duration;	// ノックバック持続時間
-		data_.reaction.knockbackPower = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().power;		// ノックバックパワー
-		data_.reaction.knockbackPowerY = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().verticalBoost;		// ノックバックY方向パワー
-		data_.reaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.GetKnockbackData().GetData().isVerticalBoost;	// Y方向にノックバック
-		data_.reaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.GetDamageData().GetOne().damage;						// ダメージ
+		data_.hitReaction.duration = comboData.GetComboHitBox().GetCollData(0).reactionData.duration;	// ノックバック持続時間
+		data_.hitReaction.power = comboData.GetComboHitBox().GetCollData(0).reactionData.power;		// ノックバックパワー
+		data_.hitReaction.verticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.verticalBoost;		// ノックバックY方向パワー
+		data_.hitReaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.isVerticalBoost;	// Y方向にノックバック
+		data_.hitReaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.damageData.GetDamage();			// ダメージ
+		data_.hitReaction.hitReactionType = comboData.GetComboHitBox().GetCollData(0).reactionData.type;			// リアクションタイプ
 
 		// アニメーションスピード
 		data_.animation.animationSpeed = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
@@ -355,7 +372,7 @@ namespace Combo {
 
 			
 			// リアクション
-			data.reaction = comboEditorBlocks_[it.first].GetData().reaction;
+			data.hitReaction = comboEditorBlocks_[it.first].GetData().hitReaction;
 			
 			// ヒットボックス生成時間
 			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);

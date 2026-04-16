@@ -82,9 +82,9 @@ namespace Character {
 		void Update(const CharacterContext& ctx) override;
 
 		// 終了
-		void Exit() override;
+		void Exit() override {};
 		// 初期化
-		void Enter() override;
+		void Enter() override {};
 	private:
 		float timer_ = 0.0f;
 		float damageTime_ = 0.25f;

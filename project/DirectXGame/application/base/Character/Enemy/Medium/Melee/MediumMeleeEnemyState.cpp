@@ -116,21 +116,10 @@ namespace Character {
 #pragma region Damage
 
 	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
-		// 時間更新
-		timer_ -= ctx.dt;
-		if (timer_ <= 0.0f) {
+		if (!character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
-
-	void MediumMeleeEnemyDamageState::Exit(){
-		timer_ = damageTime_;
-	}
-
-	void MediumMeleeEnemyDamageState::Enter(){
-		timer_ = damageTime_;
-	}
-
 
 #pragma endregion
 }

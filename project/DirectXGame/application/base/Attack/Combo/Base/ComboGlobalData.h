@@ -1,6 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
+#include "DirectXGame/application/base/Attack/AttackData.h"
 
 namespace Combo {
 
@@ -12,14 +13,6 @@ namespace Combo {
 		kOnTimer,			// 時間が過ぎたら
 		kOnHit,				// 何かに当たったら
 		kManual,			// 特殊ケース
-	};
-
-	// リアクション
-	enum class HitReactionType {
-		Knockback,
-		BlowAway,
-		Launch,
-		WallBounce
 	};
 
 	// 移動方法
@@ -82,20 +75,28 @@ namespace Combo {
 		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
 		// ヒットボックス影響タイプ
 		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
-		// ヒットリアクションタイプ
-		HitReactionType hitReactionType = HitReactionType::Knockback;
 	};
 
 	// 保存項目リアクション
-	struct GlobalReaction {
-		// ノックバック持続時間
-		float knockbackDuration = 0.1f;	
-		// ノックバックパワー
-		float knockbackPower = 30.0f;		
-		// ノックバックY方向パワー
-		float knockbackPowerY = 30.0f;		
-		// Y方向にノックバックするか
-		bool isVerticalBoost = false;		
+	struct GlobalHitReaction {
+		// ヒットリアクションタイプ
+		HitReactionType hitReactionType = HitReactionType::Knockback;
+		// 水平方向の強さ
+		float power = 0.0f;
+		// 垂直方向の強さ
+		float verticalBoost = 0.0f;
+		// 上方向を強制するか
+		bool isVerticalBoost = false;
+		// リアクション移動の有効時間
+		float duration = 0.25f;
+		// 行動不能時間
+		float hitStunTime = 0.1f;
+		// ダウン時間
+		float downTime = 0.0f;
+		// 打ち上げ時に重力を弱める/止める時間
+		float launchFloatTime = 0.0f;
+		// 重力を適用するか
+		bool gravityEnabled = false;		
 		// ダメージ
 		float damage = 0;					
 	};
@@ -127,7 +128,7 @@ namespace Combo {
 		Type type = Type::kMelle;	// 攻撃タイプ
 
 		// 敵に送るリアクションデータ
-		GlobalReaction reaction{};
+		GlobalHitReaction hitReaction{};
 		// 移動関係
 		GlobalMove move{};
 		// ヒットボックス関係

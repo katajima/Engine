@@ -26,7 +26,7 @@ namespace Combo {
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
 		// ノックバック方向
 		for (auto& coll : collData_) {
-			coll.reactionData.GetKnockbackData().SetNormal(direction);
+			coll.reactionData.normal = direction;
 		}
 
 		// 近距離か複合なら
@@ -84,12 +84,12 @@ namespace Combo {
 		HitBox::CollData data = hitBoxData;
 
 		// リアクションデータ
-		data.reactionData.GetDamageData().GetOne().damage = combo.reaction.damage;
-		data.reactionData.GetKnockbackData().GetData().power = combo.reaction.knockbackPower;
-		data.reactionData.GetKnockbackData().GetData().verticalBoost = combo.reaction.knockbackPowerY;
-		data.reactionData.GetKnockbackData().GetData().duration = combo.reaction.knockbackDuration;
-		data.reactionData.GetKnockbackData().GetData().isVerticalBoost = combo.reaction.isVerticalBoost;
-
+		data.reactionData.damageData.GetOne().damage = combo.hitReaction.damage;
+		data.reactionData.power = combo.hitReaction.power;
+		data.reactionData.verticalBoost = combo.hitReaction.verticalBoost;
+		data.reactionData.duration = combo.hitReaction.duration;
+		data.reactionData.isVerticalBoost = combo.hitReaction.isVerticalBoost;
+		data.reactionData.type = combo.hitReaction.hitReactionType;
 		collData_.push_back(data);
 	};
 
