@@ -96,7 +96,7 @@ namespace Character {
 			}
 
 			//  敵同士の衝突応答
-			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
+			hitResponse_->Hit(CollisionTag::Enemy, self, other);
 
 			// 壁との衝突応答
 			//responseSystem_->GetHitResponse()->HitWall(self, other);
@@ -113,11 +113,14 @@ namespace Character {
 		visionComponent_->SetLineCommon(entityManager->Get3DLineCommon());
 		visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
 
+		// 衝突応答処理初期化
+		hitResponse_ = std::make_unique<HitResponse>();
+		hitResponse_->SetOwner(moveComponent_->GetResponseMoveSystem());
 
-		// 攻撃応答システムクラス初期化
-		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(this);
-		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
+		// ヒットリアクションシステム初期化
+		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
+		hitMotionSystem_->Initialize(this);
+		
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;
 
@@ -157,7 +160,7 @@ namespace Character {
 			//　攻撃更新
 			attackController_->Update(ctx);
 			// 応答システム
-			responseSystem_->Update(ctx.dt);
+			hitMotionSystem_->Update(ctx.dt);
 			// キャラクターパラメーター更新
 			parameterComponent_->Update();
 			// 移動コンポーネント更新

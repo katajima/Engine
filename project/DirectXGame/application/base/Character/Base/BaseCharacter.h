@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include "CharacterContext.h"
@@ -158,8 +159,8 @@ namespace Character {
 		MovementComponent* GetMoveComponent() { return moveComponent_.get(); }
 		// キャラクターパラメータコンポーネント取得
 		ParameterComponent* GetCharacterParameterComponent() { return parameterComponent_.get(); }
-		// 攻撃応答システム取得
-		ResponseSystem* GetResponseSystem() { return responseSystem_.get(); }
+		// ヒットリアクションシステム取得
+		HitMotionSystem* GetHitMotionSystem() { return hitMotionSystem_.get(); }
 		// 攻撃コントローラー取得
 		AttackController* GetAttackController() { return attackController_.get(); }
 	protected: // 保存機能
@@ -197,8 +198,11 @@ namespace Character {
 		std::unique_ptr<MovementComponent> moveComponent_ = nullptr;
 		// 攻撃制御クラス
 		std::unique_ptr<AttackController> attackController_ = nullptr;
-		// 攻撃応答システムクラス
-		std::unique_ptr<ResponseSystem> responseSystem_ = nullptr;
+		// ヒットリアクションシステムクラス
+		std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
+		// HitResponse
+		std::unique_ptr<HitResponse> hitResponse_ = nullptr;
+
 		// 弾出現
 		std::unique_ptr<BulletSpawn> bulletSpawn_ = nullptr;
 	protected:

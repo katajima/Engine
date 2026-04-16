@@ -9,42 +9,8 @@ class WorldTransform;				// オブジェクト位置
 class Collider;						// コライダー
 class ResponseMoveSystem;			// 応答移動システム
 
-
 /// <summary>
-/// 攻撃を食らったときの応答クラス
-/// </summary>
-class AttackResponse {
-public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize(Character::BaseCharacter* owner);
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt">ゲーム内時間もしくはキャラクターの時間など</param>
-	void Update(float dt);
-
-	/// <summary>
-	/// ヒットモーションクラス取得
-	/// </summary>
-	/// <returns></returns>
-	HitMotionSystem* GetHitMotionSystem() { return hitMotionSystem_.get(); }
-
-private:
-	// ヒットモーション
-	std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
-private:// 貰いもの
-	// 所有者
-	Character::BaseCharacter* owner = nullptr;
-};
-
-
-
-/// <summary>
-/// 衝突応答
+/// 衝突応答クラス（オブジェクトとの接触時の押し戻し処理など）
 /// </summary>
 class HitResponse {
 public:
@@ -67,51 +33,4 @@ private:
 
 };
 
-
-/// <summary>
-/// 攻撃もしくは接触衝突時のシステムクラス
-/// </summary>
-class ResponseSystem {
-public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	/// <param name="paremeter">kキャラクターパラメータクラス</param>
-	/// <param name="object">オブジェクトクラス</param>
-	void Initialize(Character::BaseCharacter* owner);
-
-
-	/// <summary>
-	/// 更新
-	/// </summary>
-	/// <param name="dt"></param>
-	void Update(float dt);
-
-	/// <summary>
-	/// 攻撃衝突応答クラス取得
-	/// </summary>
-	/// <returns></returns>
-	AttackResponse* GetAttackResponse() { return attackResponse_.get(); }
-
-	/// <summary>
-	/// 接触衝突応答クラス取得
-	/// </summary>
-	/// <returns></returns>
-	HitResponse* GetHitResponse() { return hitResponse_.get(); };
-
-
-	/// <summary>
-	/// ヒットモーションクラス取得
-	/// </summary>
-	HitMotionSystem* GetHitMotionSystem() { return attackResponse_->GetHitMotionSystem(); }
-
-private:
-	// 攻撃衝突応答クラス
-	std::unique_ptr<AttackResponse> attackResponse_ = nullptr;
-	// 衝突応答クラス(押し戻しなど)
-	std::unique_ptr<HitResponse> hitResponse_ = nullptr;	
-	// 所有者
-	Character::BaseCharacter* owner = nullptr;
-};
 

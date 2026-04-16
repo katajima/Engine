@@ -17,17 +17,17 @@ void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCo
 	//isLinding_ = cmd.isLanding;
 	groundHeight_ = cmd.groundHeight;
 	// 回転処理
-	RotateProcess(cxt,world);
-	
+	RotateProcess(cxt, world);
+
 	world.Update();
 	// 重力処理
-	GravityProess(cxt,world,rigid);
+	GravityProess(cxt, world, rigid);
 
 	world.Update();
 }
 
 
-void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid){
+void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 
 	if (!useGravity) {
 		rigid.SetIsGravity(!useGravity);
@@ -43,28 +43,24 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt,Engine
 	else {
 		isLinding_ = false;
 	}
-	
+
 	if (isLinding_) {
 		world.translate_.y = groundHeight_;
 		rigid.ResetAcceleration();			// 加速度リセット
 		rigid.ResetVelocity();				// 速度リセット
 		rigid.SetIsGravity(false);			// 重力をオフ
 		rigid.SetGravityScale(1.0f);		// 重力スケールリセット
-	} 
+	}
 	else {
+		rigid.SetIsGravity(true);			// 重力をオフ
 		// 重力スケールセット
 		if (!cxt.isAttacking) {
-			if (cxt.isDamage) {
-				rigid.SetGravityScale(cxt.damageGravity);
-				//rigid.SetIsGravity();
+
+			if (rigid.GetVelocity().y < 0.0f) {
+				rigid.SetGravityScale(cxt.fallGravity);
 			}
 			else {
-				if (rigid.GetVelocity().y < 0.0f) {
-					rigid.SetGravityScale(cxt.fallGravity);		
-				}
-				else {
-					rigid.SetGravityScale(cxt.upGravity);		
-				}
+				rigid.SetGravityScale(cxt.upGravity);
 			}
 		}
 		else {

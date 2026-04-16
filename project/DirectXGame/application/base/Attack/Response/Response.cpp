@@ -3,46 +3,6 @@
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
 
-
-#pragma region ResponseSystem
-
-
-void ResponseSystem::Initialize(Character::BaseCharacter* owner) {
-	this->owner = owner;
-	// 攻撃衝突応答クラス初期化
-	attackResponse_ = std::make_unique<AttackResponse>();
-	attackResponse_->Initialize(owner);
-
-	// 接触衝突応答クラス
-	hitResponse_ = std::make_unique<HitResponse>();
-	hitResponse_->SetOwner(&owner->GetWorldTransform());
-
-}
-
-void ResponseSystem::Update(float dt) {
-	attackResponse_->Update(dt);
-}
-
-#pragma endregion // 応答システム
-
-
-#pragma region AttackResponse
-
-void AttackResponse::Initialize(Character::BaseCharacter* owner) {
-	
-	// 攻撃衝突モーションクラス初期化
-	hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-	hitMotionSystem_->Initialize(owner);
-}
-
-void AttackResponse::Update(float dt) {
-	// 被撃モーション更新
-	hitMotionSystem_->Update(dt);
-}
-
-#pragma endregion // 攻撃を受けたとき
-
-
 #pragma region HitResponse
 
 void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider* other)

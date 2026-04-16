@@ -45,7 +45,7 @@ namespace HitBox {
 		Character::BasePlayer* player = static_cast<Character::BasePlayer*>(character);
 		if (!player) return;
 		// リアクションデータ
-		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		//	エフェクト出現
 		enemy->Emit();	
 		// 敵ステート設定
@@ -72,7 +72,7 @@ namespace HitBox {
 		// ノックバック方向
 		data_.GetKnockbackData().SetNormal(enemy->GetMoveComponent()->GetDirection());
 		// リアクションデータ
-		enemy->GetResponseSystem()->GetHitMotionSystem()->SetReactionData(data_);
+		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}

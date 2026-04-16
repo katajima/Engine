@@ -78,18 +78,19 @@ namespace Character {
 			uint32_t otherId = otherComponent->GetUniqueId();
 
 			// 敵との衝突応答
-			responseSystem_->GetHitResponse()->Hit(CollisionTag::Enemy, self, other);
+			hitResponse_->Hit(CollisionTag::Enemy, self, other);
 
 			// 壁との衝突応答
-			//responseSystem_->GetHitResponse()->HitWall(self, other);
+			//hitResponse_->HitWall(self, other);
 			};
 
+		// 衝突応答処理初期化
+		hitResponse_ = std::make_unique<HitResponse>();
+		hitResponse_->SetOwner(moveComponent_->GetResponseMoveSystem());
 
-		// 応答システム初期化
-		responseSystem_ = std::make_unique<ResponseSystem>();
-		responseSystem_->Initialize(this);
-		responseSystem_->GetHitResponse()->SetOwner(moveComponent_->GetResponseMoveSystem());
-
+		// ヒットリアクションシステム初期化
+		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
+		hitMotionSystem_->Initialize(this);
 
 		// 弾出現
 		bulletSpawn_ = std::make_unique<BulletSpawn>();
@@ -262,8 +263,8 @@ namespace Character {
 		// 攻撃制御更新
 		attackController_->Update(ctx);
 		// 応答システム
-		responseSystem_->Update(ctx.dt);
-
+		hitMotionSystem_->Update(ctx.dt);
+		
 		// キャラクターパラメーター更新
 		parameterComponent_->Update();
 

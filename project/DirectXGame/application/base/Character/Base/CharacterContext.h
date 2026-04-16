@@ -9,7 +9,7 @@ class MovementComponent;
 class JumpSystem;
 class MoveSystem;
 class LockOnSystem;
-class ResponseSystem;
+class HitMotionSystem;
 
 namespace Combo {
 	class StateMachine;
@@ -113,8 +113,8 @@ namespace Character {
 		const MoveSystem* moveSystem = nullptr;
 		// ロックオンシステム
 	 	const LockOnSystem* lockOnSystem = nullptr;
-		// レスポンスシステム
-		ResponseSystem* responseSystem = nullptr;
+		// ヒットリアクションシステム
+		HitMotionSystem* hitMotionSystem = nullptr;
 		// コンボステートマシン
 		const Combo::StateMachine* comboStateMachine = nullptr;
 	};

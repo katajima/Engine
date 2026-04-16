@@ -11,7 +11,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
-	this->responseSystem = owner->GetResponseSystem();							// レスポンスシステム
+	this->hitMotionSystem = owner->GetHitMotionSystem();							// レスポンスシステム
 }
 
 Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
