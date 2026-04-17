@@ -2504,7 +2504,7 @@ namespace Combo {
 
 			static const char* HitReactionTypeLabels[] = {
 				"ノックバック",
-				"吹っ飛び"
+				"吹っ飛び",
 				"打ち上げ",
 				"壁バウンド"
 			};
@@ -4439,6 +4439,12 @@ namespace Combo {
 		data.reactionData.duration = combo.hitReaction.duration;
 		data.reactionData.isVerticalBoost = combo.hitReaction.isVerticalBoost;
 		data.reactionData.type = combo.hitReaction.hitReactionType;
+		data.reactionData.downTime = combo.hitReaction.downTime;
+		data.reactionData.launchFloatTime = combo.hitReaction.launchFloatTime;
+		data.reactionData.hitStunTime = combo.hitReaction.hitStunTime;
+		data.reactionData.gravityEnabled = combo.hitReaction.gravityEnabled;
+		data.reactionData.gravityScale = combo.hitReaction.gravityScale;
+
 		collData_.push_back(data);
 	};
 
@@ -13806,6 +13812,9 @@ namespace Character {
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<DummyEnemyDieState>(p);
 			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<DummyEnemyDamageState>(p);
+			});
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
 }
@@ -13858,7 +13867,16 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemyState.cpp
 ============================================================
 #include "DummyEnemyState.h"
+#include "DummyEnemy.h"
+#include "DirectXGame/engine/MyGame/MyGame.h"
 
+#include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+#include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
+void Character::DummyEnemyDamageState::Update(const CharacterContext& ctx) {
+	if (character->GetHitMotionSystem()->IsFinished()) {
+		character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
+	}
+}
 
 
 ============================================================
@@ -13917,6 +13935,27 @@ namespace Character {
 	private:
 		float dieTimer_ = 2.0f;
 		float timer_ = 0.0f;
+	};
+
+	/// <summary>
+/// 被弾状態
+/// </summary>
+	class DummyEnemyDamageState : public DamageState {
+	public:
+		DummyEnemyDamageState(BaseCharacter* enemy)
+			: DamageState(enemy) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override {};
+		// 初期化
+		void Enter() override {};
+	private:
+		float timer_ = 0.0f;
+		float damageTime_ = 0.5f;
 	};
 }
 
@@ -14368,7 +14407,7 @@ namespace Character {
 #pragma region Damage
 
 	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
-		if (!character->GetHitMotionSystem()->IsFinished()) {
+		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
@@ -15348,7 +15387,7 @@ namespace Character {
 	
 	void SmallMeleeEnemyDamageState::Update(const CharacterContext& ctx) {
 		
-		if (!character->GetHitMotionSystem()->IsFinished()) {
+		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
@@ -16085,7 +16124,7 @@ namespace Character {
 #pragma endregion
 
 	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
-		if (!character->GetHitMotionSystem()->IsFinished()) {
+		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}
@@ -21885,6 +21924,11 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 	}
 	else {
 		rigid.SetIsGravity(cxt.isGravity);
+		if (!cxt.isGravity) {
+			rigid.ResetAcceleration();			// 加速度リセット
+			rigid.ResetVelocity();				// 速度リセット
+		}
+
 		// 重力スケールセット
 		if (!cxt.isAttacking) {
 			if (cxt.isDamage) {
@@ -27733,7 +27777,7 @@ void CharacterDebugScene::Update()
 	interval_ += GetTime();
 	if (interval_ >= intervalMax_) {
 		interval_ = 0.0f;
-		bulletSpawn_->GenerateProjectile(spawnInfo, param);
+		//bulletSpawn_->GenerateProjectile(spawnInfo, param);
 	}
 
 
