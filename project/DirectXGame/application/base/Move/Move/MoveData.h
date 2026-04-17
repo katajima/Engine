@@ -44,4 +44,9 @@ struct MoveData
 
 	// 走りと歩きで同じアニメーションか
 	bool isSameAnimation = true;
+
+	//	空中制御用
+	float skyHeight = 1.0f;
+	// 重力を使用するか
+	bool useGravity = true;
 };

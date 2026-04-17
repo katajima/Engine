@@ -67,10 +67,10 @@ namespace HitBox {
 		if(player->GetCurrentMainState() == Character::CharacterMainState::Special){
 			return; // プレイヤーが必殺技中は無効
 		}
+		// リアクションデータ
+		player->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーステート設定
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
-		// リアクションデータ
-		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}

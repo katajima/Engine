@@ -16,6 +16,7 @@ namespace Combo {
 
 		comboData.GetComboMotion().GetComboMove().SetDirection(direction_);
 		// コンボデータ開始
+		comboData.SetIsDebug(isDebug);
 		comboData.Enter(owner, ctx);
 	}
 

@@ -115,6 +115,8 @@ namespace Character {
 		CharacterStateMachine* GetCharacterStateMachine() { return stateMachine_.get(); }
 		// 現在の状態取得
 		CharacterMainState GetCurrentMainState() const { return stateMachine_->GetCurrentMainState(); }
+		// 過去のステート
+		CharacterMainState GetPrevState() const { return stateMachine_->GetPrevState();}
 		// 必殺技取得
 		BaseSpecial* GetSpecial() { return special_.get(); }
 		// 武器取得

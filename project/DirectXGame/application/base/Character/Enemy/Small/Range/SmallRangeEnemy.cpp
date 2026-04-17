@@ -14,8 +14,7 @@ namespace Character {
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-		objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
-
+		
 		objectComponentPropeller_ = std::make_unique<ObjectComponent>();
 		objectComponentPropeller_->InitializeInstancing(entityManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
@@ -37,10 +36,14 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
+		worldCollider_.translate_.y = 0;
+
 
 		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		moveComponent_->GetMovementSystem()->SetUseGravity(false);
-		
+		moveComponent_->GetMoveSystem()->Data().useGravity = false;
+		skyHeight_ = 3.0f;
+		moveComponent_->GetMoveSystem()->Data().skyHeight = skyHeight_;
 
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();

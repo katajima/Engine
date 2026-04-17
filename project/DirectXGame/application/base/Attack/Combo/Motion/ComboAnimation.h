@@ -35,7 +35,7 @@ namespace Combo {
 		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
-		void Update(float timer, float dt);
+		void Update(float timer, float dt, bool isDebug);
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);

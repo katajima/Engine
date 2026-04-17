@@ -387,6 +387,12 @@ namespace Character {
 		// コンボ7のデータ送る
 		comboSystem->CreateCombo("Attack7", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 
+		// コンボ8のデータ送る
+		comboSystem->CreateCombo("Attack8", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		// コンボ9のデータ送る
+		comboSystem->CreateCombo("Attack9", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		// コンボ10のデータ送る
+		comboSystem->CreateCombo("Attack10", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 
 
 		// コンボ8のデータ送る

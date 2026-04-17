@@ -56,9 +56,6 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 	
 	ctx.isStop = !owner->GetIsMove();
 
-	// 重力
-	ctx.isGravity = rigidBody->IsGravity();
-
 	// 着地状態か
 	ctx.onGround = movementComponent->GetIsLanding();
 	// 攻撃中なら
@@ -98,6 +95,8 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 	ctx.target = lockOnSystem->GetTarget();
 	// 移動速度
 	ctx.moveSpeed = moveSystem->GetData().maxSpeed;
-	
+	//
+	ctx.skyHeight = moveSystem->GetData().skyHeight;
+
 	return ctx;
 }

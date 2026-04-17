@@ -253,7 +253,7 @@ void TestScene::InitializeObject2D()
 	{
 		auto sprite = std::make_unique<Engine::Sprite>();
 
-		sprite->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png", false);
+		sprite->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/uvChecker.dds", false);
 		sprite->SetTextureSize({ 64,64 });
 		sprite->SetSize({ 128,128 });
 		sprite->SetAnimeSize({ 64,64 });

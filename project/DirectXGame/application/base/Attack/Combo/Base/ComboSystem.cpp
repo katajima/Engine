@@ -17,6 +17,7 @@ namespace Combo {
 	}
 
 	void System::Update(const Character::CharacterContext& ctx) {
+		comboStateMachine_->SetIsDebug(isDebug);
 		comboStateMachine_->Update(ctx);
 		comboDebug_->Update(ctx.dt);
 	}
@@ -86,6 +87,12 @@ namespace Combo {
 		globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
 		globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
 		globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
+		globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+		globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
+		globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime); 
+		globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled); 
+		globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale); 
+
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -146,6 +153,11 @@ namespace Combo {
 		data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
 		data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
 		data.hitReaction.hitReactionType = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
+		data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
+		data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
+		data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
+		data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
+		data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
 
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
@@ -237,6 +249,11 @@ namespace Combo {
 		globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
 		globalVariables->SetValue(name, "ダメージ", data.hitReaction.damage);
 		globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
+		globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+		globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
+		globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+		globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
+		globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
 
 		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);

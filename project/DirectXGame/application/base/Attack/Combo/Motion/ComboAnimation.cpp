@@ -18,18 +18,17 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboAnimation::Update(float timer, float dt) {
+	void ComboAnimation::Update(float timer, float dt, bool isDebug) {
 		// アニメーションスピード設定
 		animationComponent->SetAnimationSpeed(data_.animationSpeed_);
-		// アニメーション時間設定
-		animationComponent->SetAnimationTime(timer * data_.animationSpeed_);
+		if (isDebug) {
+			// アニメーション時間設定
+			animationComponent->SetAnimationTime(timer * data_.animationSpeed_);
+		}
 	}
 
 	// 終了
 	void ComboAnimation::Exit(Character::BaseCharacter* owner) {
-		animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
-		animationComponent->SetIsLoop(data_.animationLoop_);	// ループ再生
 		animationComponent->SetAnimationSpeed(1.0f);			// アニメーションスピード設定
-		animationComponent->SetIsPlaying(true);					// アニメーション再生
 	}
 }

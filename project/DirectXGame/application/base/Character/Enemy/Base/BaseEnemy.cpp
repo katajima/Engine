@@ -83,6 +83,7 @@ namespace Character {
 		sphere->tag = CollisionTag::Enemy;	// タグ設定
 		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
 		sphere->radius = colliderRadius; // 半径を適宜設定
+		//sphere->isDebugLine = true;
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 		// コールバック登録（例：プレイヤーと衝突したらダメージ）

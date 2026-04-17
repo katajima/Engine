@@ -14,7 +14,7 @@
         },
         "アニメーション速度": {
             "type": "float",
-            "value": 3.0
+            "value": 4.170000076293945
         },
         "アニメーション遷移時間": {
             "type": "float",
@@ -132,6 +132,11 @@
             "enumType": "HitBoxSpawnType",
             "type": "enum",
             "value": 1
+        },
+        "ヒットリアクションタイプ": {
+            "enumType": "HitReactionType",
+            "type": "enum",
+            "value": 0
         },
         "ロックオンタイプ": {
             "enumType": "LockOnType",

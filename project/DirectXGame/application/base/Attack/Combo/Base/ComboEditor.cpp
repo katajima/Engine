@@ -194,6 +194,12 @@ namespace Combo {
 			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
 			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
 			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damage, 0.0f, 1000.0f, "%.2f");
+			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
+			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
+			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
+
 		}
 	}
 
@@ -219,6 +225,12 @@ namespace Combo {
 		data_.hitReaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.isVerticalBoost;	// Y方向にノックバック
 		data_.hitReaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.damageData.GetDamage();			// ダメージ
 		data_.hitReaction.hitReactionType = comboData.GetComboHitBox().GetCollData(0).reactionData.type;			// リアクションタイプ
+		data_.hitReaction.hitStunTime = comboData.GetComboHitBox().GetCollData(0).reactionData.hitStunTime;
+		data_.hitReaction.downTime = comboData.GetComboHitBox().GetCollData(0).reactionData.downTime;
+		data_.hitReaction.launchFloatTime = comboData.GetComboHitBox().GetCollData(0).reactionData.launchFloatTime;
+		data_.hitReaction.gravityEnabled = comboData.GetComboHitBox().GetCollData(0).reactionData.gravityEnabled;
+		data_.hitReaction.gravityScale = comboData.GetComboHitBox().GetCollData(0).reactionData.gravityScale;
+
 
 		// アニメーションスピード
 		data_.animation.animationSpeed = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
@@ -268,7 +280,7 @@ namespace Combo {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
-
+		comboSystem->SertIsDebug(isComboEditorActive_);
 		// リロード
 		if (ImGui::Button("Relord")) {
 			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);

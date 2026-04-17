@@ -96,7 +96,7 @@ namespace Combo {
 		bool IsComboFinished() const {
 			return comboStateMachine_->IsComboFinished();
 		}
-
+		void SertIsDebug(bool is) { isDebug = is; }
 	public:
 		// データ設定
 		void SetData(ComboData& data, const GlobalData& gData);
@@ -130,6 +130,9 @@ namespace Combo {
 		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
+
+		bool isDebug = false;
+
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Character::BaseCharacter* owner = nullptr;

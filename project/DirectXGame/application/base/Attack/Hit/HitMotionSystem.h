@@ -66,7 +66,7 @@ private:
 	float timer_ = 0.0f;
 	float hitStunTimer_ = 0.0f;
 	float downTimer_ = 0.0f;
-
+	float launchFloatTime_ = 0.0f;
 	bool isAction_ = false;
 
 private:

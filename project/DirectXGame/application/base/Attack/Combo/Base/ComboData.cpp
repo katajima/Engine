@@ -34,7 +34,7 @@ namespace Combo {
 		// コンボ用条件クラス更新
 		comboCondition.Update(ctx, timer_);
 		// コンボ用モーションクラス更新
-		motion.Update(ctx, timer_);
+		motion.Update(ctx, timer_,isDebug);
 		// コンボ用ヒットボックスクラス更新
 		hitBox.SetDirection(motion.GetComboMove().GetDirection());
 		hitBox.Update(ctx, timer_);

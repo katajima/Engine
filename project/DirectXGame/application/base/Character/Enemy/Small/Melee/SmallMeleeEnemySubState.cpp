@@ -106,8 +106,8 @@ namespace Character {
 		HitBox::CollData data{};
 		data.isEneble = true;
 		data.isLine = true;
-		data.tag = CollisionTag::Enemy;
-		data.layer = CollisionLayer::Enemy;
+		data.tag = CollisionTag::EnemyAttack;
+		data.layer = CollisionLayer::EnemyAttack;
 		data.mask = CollisionLayer::Player;
 		data.size = { 1.0f, 2.0f, 1.0f };
 		data.name = "NormalEnemy_SwingHitBox";

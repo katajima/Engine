@@ -39,6 +39,7 @@ namespace Combo {
 
 
     protected:
+        bool isDebug = false;
         float timeInState = 0.0f;           // 時間
         Vector3 direction_{ 0,0,1 };
     };
@@ -163,7 +164,8 @@ namespace Combo {
                 return nullptr;
             }
         }
-
+        // デバッグか設定
+        void SetIsDebug(bool is) { isDebug = is; }
     private:
         Character::BaseCharacter* owner;                       // 使用者
     private:
@@ -171,5 +173,6 @@ namespace Combo {
         std::shared_ptr<State> rootState;      // 初期ステート
 
         std::optional<AttackInput> bufferedInput;   // 入力バッファ
+        bool isDebug = false;
     };
 }

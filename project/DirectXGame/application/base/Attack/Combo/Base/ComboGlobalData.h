@@ -96,7 +96,9 @@ namespace Combo {
 		// 打ち上げ時に重力を弱める/止める時間
 		float launchFloatTime = 0.0f;
 		// 重力を適用するか
-		bool gravityEnabled = false;		
+		bool gravityEnabled = false;	
+		// 重力倍率
+		float gravityScale = 1.0f;
 		// ダメージ
 		float damage = 0;					
 	};

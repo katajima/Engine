@@ -49,30 +49,69 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 }
 
 void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
-	// 攻撃中は通常の移動処理しない
-	if (ctx.isAttacking) return;
-	MoveRequest request{};
-	// 距離設定
-	Vector3 dire = Subtract(ctx.target->GetWorldPosition(), ctx.position).Normalize();
-	dire.y = 0;
-	// 回転設定
-	Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+	// 攻撃中は通常移動しない
+	if (ctx.isAttacking) {
+		return;
+	}
 
-	if (!ctx.isGravity) {
-		if (ctx.position.y < ctx.skyHeight) {
-			dire.y = 1.2f; // Y軸速度上昇
-		}
-		else if (ctx.position.y > ctx.skyHeight) {
-			dire.y = -1.2f; // Y軸速度降下
+	MoveRequest request{};
+
+	// =========================
+	// 水平移動ベクトルを作る
+	// =========================
+	Vector3 toTarget = Subtract(ctx.target->GetWorldPosition(), ctx.position);
+	toTarget.y = 0.0f;
+
+	Vector3 horizontalDire{};
+	float horizontalLength = toTarget.Length();
+	if (horizontalLength > 0.001f) {
+		horizontalDire = toTarget / horizontalLength;
+	}
+
+	// =========================
+	// 垂直移動量を作る
+	// =========================
+	float verticalSpeed = 0.0f;
+
+	// 重力を使わない空中敵だけ高度維持
+	if (!data_.useGravity) {
+		float heightError = ctx.skyHeight - ctx.position.y;
+		const float hoverDeadZone = 0.05f;
+		const float hoverGain = 3.0f;
+		const float maxHoverSpeed = 1.2f;
+
+		if (std::abs(heightError) > hoverDeadZone) {
+			verticalSpeed = std::clamp(heightError * hoverGain, -maxHoverSpeed, maxHoverSpeed);
 		}
 		else {
-			dire.y = 0.0f; // Y軸速度リセット
+			verticalSpeed = 0.0f;
 		}
 	}
 
+	// =========================
+	// 合成
+	// =========================
+	Vector3 velocity{};
+
+	// 水平移動は moveSpeed を使う
+	velocity.x = horizontalDire.x * ctx.moveSpeed * ctx.dt;
+	velocity.z = horizontalDire.z * ctx.moveSpeed * ctx.dt;
+
+	// 垂直移動は専用速度を使う
+	velocity.y = verticalSpeed * ctx.dt;
+
+	// 向きは基本的に水平追尾方向
+	Vector3 moveDirection = horizontalDire;
+
+	// 水平移動がない場合でも、浮遊だけしているなら上方向を向きに入れてもよい
+	// ただし見た目の向きは水平だけで十分なら horizontalDire のままでOK
+	if (horizontalLength <= 0.001f && std::abs(verticalSpeed) > 0.0f) {
+		moveDirection = Vector3{ 0.0f, (verticalSpeed > 0.0f ? 1.0f : -1.0f), 0.0f };
+	}
+
 	if (ctx.isCanMove) {
-		request.velocity = dire * ctx.dt * ctx.moveSpeed;
-		request.direction = dire;
+		request.velocity = velocity;
+		request.direction = moveDirection;
 		request.priority = 1;
 		coordinator.Request(request);
 	}

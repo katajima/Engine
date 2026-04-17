@@ -67,6 +67,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data)
 	timer_ = 0.0f;
 	hitStunTimer_ = data_.hitStunTime;
 	downTimer_ = data_.downTime;
+	launchFloatTime_ = data_.launchFloatTime;
 	isAction_ = true;
 
 	switch (data_.type) {

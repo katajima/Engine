@@ -23,6 +23,7 @@ namespace Character {
         void ChangeState(const CharacterMainState& name) {
             auto it = stateFactoryMap_.find(name);
             if (it != stateFactoryMap_.end()) {
+                prevState_ = nowState_;
                 nowState_ = name;
                 ChangeState(it->second(character));
             }
@@ -36,8 +37,9 @@ namespace Character {
 
         // 現在のステート取得
         CharacterMainState GetCurrentMainState() const {
-            return state_ ? state_->GetCharacterMainState() : CharacterMainState::Move;
+            return nowState_;
         }
+        CharacterMainState GetPrevState() const { return prevState_; }
 
         // 登録
         void RegisterState(const CharacterMainState& name, CharacterMainStateFactory factory) {
@@ -63,6 +65,8 @@ namespace Character {
         std::unordered_map<CharacterMainState, CharacterMainStateFactory> stateFactoryMap_;
         //
         CharacterMainState nowState_;
+        // 
+        CharacterMainState prevState_;
         // 操作状態
         BaseCharacter* character = nullptr;
         // ステート変更が1フレーム中に何度も起らないようにするフラグ
