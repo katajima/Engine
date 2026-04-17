@@ -2133,7 +2133,7 @@ namespace Combo {
 		// コンボ用条件クラス更新
 		comboCondition.Update(ctx, timer_);
 		// コンボ用モーションクラス更新
-		motion.Update(ctx, timer_);
+		motion.Update(ctx, timer_,isDebug);
 		// コンボ用ヒットボックスクラス更新
 		hitBox.SetDirection(motion.GetComboMove().GetDirection());
 		hitBox.Update(ctx, timer_);
@@ -2515,6 +2515,12 @@ namespace Combo {
 			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
 			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
 			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damage, 0.0f, 1000.0f, "%.2f");
+			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
+			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
+			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
+
 		}
 	}
 
@@ -2540,6 +2546,12 @@ namespace Combo {
 		data_.hitReaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.isVerticalBoost;	// Y方向にノックバック
 		data_.hitReaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.damageData.GetDamage();			// ダメージ
 		data_.hitReaction.hitReactionType = comboData.GetComboHitBox().GetCollData(0).reactionData.type;			// リアクションタイプ
+		data_.hitReaction.hitStunTime = comboData.GetComboHitBox().GetCollData(0).reactionData.hitStunTime;
+		data_.hitReaction.downTime = comboData.GetComboHitBox().GetCollData(0).reactionData.downTime;
+		data_.hitReaction.launchFloatTime = comboData.GetComboHitBox().GetCollData(0).reactionData.launchFloatTime;
+		data_.hitReaction.gravityEnabled = comboData.GetComboHitBox().GetCollData(0).reactionData.gravityEnabled;
+		data_.hitReaction.gravityScale = comboData.GetComboHitBox().GetCollData(0).reactionData.gravityScale;
+
 
 		// アニメーションスピード
 		data_.animation.animationSpeed = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
@@ -2589,7 +2601,7 @@ namespace Combo {
 #ifdef _DEBUG
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
-
+		comboSystem->SertIsDebug(isComboEditorActive_);
 		// リロード
 		if (ImGui::Button("Relord")) {
 			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
@@ -2993,7 +3005,9 @@ namespace Combo {
 		// 打ち上げ時に重力を弱める/止める時間
 		float launchFloatTime = 0.0f;
 		// 重力を適用するか
-		bool gravityEnabled = false;		
+		bool gravityEnabled = false;	
+		// 重力倍率
+		float gravityScale = 1.0f;
 		// ダメージ
 		float damage = 0;					
 	};
@@ -3369,6 +3383,7 @@ namespace Combo {
 
 		comboData.GetComboMotion().GetComboMove().SetDirection(direction_);
 		// コンボデータ開始
+		comboData.SetIsDebug(isDebug);
 		comboData.Enter(owner, ctx);
 	}
 
@@ -3504,6 +3519,7 @@ namespace Combo {
 
 
     protected:
+        bool isDebug = false;
         float timeInState = 0.0f;           // 時間
         Vector3 direction_{ 0,0,1 };
     };
@@ -3628,7 +3644,8 @@ namespace Combo {
                 return nullptr;
             }
         }
-
+        // デバッグか設定
+        void SetIsDebug(bool is) { isDebug = is; }
     private:
         Character::BaseCharacter* owner;                       // 使用者
     private:
@@ -3636,6 +3653,7 @@ namespace Combo {
         std::shared_ptr<State> rootState;      // 初期ステート
 
         std::optional<AttackInput> bufferedInput;   // 入力バッファ
+        bool isDebug = false;
     };
 }
 
@@ -3662,6 +3680,7 @@ namespace Combo {
 	}
 
 	void System::Update(const Character::CharacterContext& ctx) {
+		comboStateMachine_->SetIsDebug(isDebug);
 		comboStateMachine_->Update(ctx);
 		comboDebug_->Update(ctx.dt);
 	}
@@ -3731,6 +3750,12 @@ namespace Combo {
 		globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
 		globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
 		globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
+		globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+		globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
+		globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime); 
+		globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled); 
+		globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale); 
+
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -3791,6 +3816,11 @@ namespace Combo {
 		data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
 		data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
 		data.hitReaction.hitReactionType = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
+		data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
+		data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
+		data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
+		data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
+		data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
 
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
@@ -3882,6 +3912,11 @@ namespace Combo {
 		globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
 		globalVariables->SetValue(name, "ダメージ", data.hitReaction.damage);
 		globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
+		globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+		globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
+		globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+		globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
+		globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
 
 		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
@@ -4123,7 +4158,7 @@ namespace Combo {
 		bool IsComboFinished() const {
 			return comboStateMachine_->IsComboFinished();
 		}
-
+		void SertIsDebug(bool is) { isDebug = is; }
 	public:
 		// データ設定
 		void SetData(ComboData& data, const GlobalData& gData);
@@ -4157,6 +4192,9 @@ namespace Combo {
 		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ
 		std::map<std::string, Engine::WorldTransform*> parentTransforms_;
+
+		bool isDebug = false;
+
 	private:
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Character::BaseCharacter* owner = nullptr;
@@ -4766,19 +4804,18 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboAnimation::Update(float timer, float dt) {
+	void ComboAnimation::Update(float timer, float dt, bool isDebug) {
 		// アニメーションスピード設定
 		animationComponent->SetAnimationSpeed(data_.animationSpeed_);
-		// アニメーション時間設定
-		animationComponent->SetAnimationTime(timer * data_.animationSpeed_);
+		if (isDebug) {
+			// アニメーション時間設定
+			animationComponent->SetAnimationTime(timer * data_.animationSpeed_);
+		}
 	}
 
 	// 終了
 	void ComboAnimation::Exit(Character::BaseCharacter* owner) {
-		animationComponent->SetStratAnimeTime();				// アニメーション時間初期化
-		animationComponent->SetIsLoop(data_.animationLoop_);	// ループ再生
 		animationComponent->SetAnimationSpeed(1.0f);			// アニメーションスピード設定
-		animationComponent->SetIsPlaying(true);					// アニメーション再生
 	}
 }
 
@@ -4823,7 +4860,7 @@ namespace Combo {
 		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
-		void Update(float timer, float dt);
+		void Update(float timer, float dt, bool isDebug);
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
@@ -4864,9 +4901,9 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboMotion::Update(const Character::CharacterContext& ctx, float timer) {
+	void ComboMotion::Update(const Character::CharacterContext& ctx, float timer,bool isDebug) {
 		// コンボ用アニメーションクラス更新
-		comboAnimation_.Update(timer, ctx.dt);
+		comboAnimation_.Update(timer, ctx.dt,isDebug);
 		// コンボ用移動クラス更新
 		comboMove_.Update(ctx, timer);
 	}
@@ -4901,7 +4938,7 @@ namespace Combo {
 		// 開始
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 		// 更新
-		void Update(const Character::CharacterContext& ctx,float timer);
+		void Update(const Character::CharacterContext& ctx,float timer, bool isDebug);
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
 	public:
@@ -6136,6 +6173,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data)
 	timer_ = 0.0f;
 	hitStunTimer_ = data_.hitStunTime;
 	downTimer_ = data_.downTime;
+	launchFloatTime_ = data_.launchFloatTime;
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -6382,7 +6420,7 @@ private:
 	float timer_ = 0.0f;
 	float hitStunTimer_ = 0.0f;
 	float downTimer_ = 0.0f;
-
+	float launchFloatTime_ = 0.0f;
 	bool isAction_ = false;
 
 private:
@@ -6894,10 +6932,10 @@ namespace HitBox {
 		if(player->GetCurrentMainState() == Character::CharacterMainState::Special){
 			return; // プレイヤーが必殺技中は無効
 		}
+		// リアクションデータ
+		player->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーステート設定
 		player->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
-		// リアクションデータ
-		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーのロックオンシステムに相手タグを設定
 		enemy->GetAttackController()->GeyLockOnSysutem()->SetHitTag(player->GetTagNumber());
 	}
@@ -11750,6 +11788,8 @@ namespace Character {
 		CharacterStateMachine* GetCharacterStateMachine() { return stateMachine_.get(); }
 		// 現在の状態取得
 		CharacterMainState GetCurrentMainState() const { return stateMachine_->GetCurrentMainState(); }
+		// 過去のステート
+		CharacterMainState GetPrevState() const { return stateMachine_->GetPrevState();}
 		// 必殺技取得
 		BaseSpecial* GetSpecial() { return special_.get(); }
 		// 武器取得
@@ -11937,9 +11977,6 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 	
 	ctx.isStop = !owner->GetIsMove();
 
-	// 重力
-	ctx.isGravity = rigidBody->IsGravity();
-
 	// 着地状態か
 	ctx.onGround = movementComponent->GetIsLanding();
 	// 攻撃中なら
@@ -11979,7 +12016,9 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 	ctx.target = lockOnSystem->GetTarget();
 	// 移動速度
 	ctx.moveSpeed = moveSystem->GetData().maxSpeed;
-	
+	//
+	ctx.skyHeight = moveSystem->GetData().skyHeight;
+
 	return ctx;
 }
 
@@ -13437,6 +13476,7 @@ namespace Character {
 		sphere->tag = CollisionTag::Enemy;	// タグ設定
 		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
 		sphere->radius = colliderRadius; // 半径を適宜設定
+		//sphere->isDebugLine = true;
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
 
 		// コールバック登録（例：プレイヤーと衝突したらダメージ）
@@ -15527,8 +15567,8 @@ namespace Character {
 		HitBox::CollData data{};
 		data.isEneble = true;
 		data.isLine = true;
-		data.tag = CollisionTag::Enemy;
-		data.layer = CollisionLayer::Enemy;
+		data.tag = CollisionTag::EnemyAttack;
+		data.layer = CollisionLayer::EnemyAttack;
 		data.mask = CollisionLayer::Player;
 		data.size = { 1.0f, 2.0f, 1.0f };
 		data.name = "NormalEnemy_SwingHitBox";
@@ -15725,8 +15765,7 @@ namespace Character {
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-		objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
-
+		
 		objectComponentPropeller_ = std::make_unique<ObjectComponent>();
 		objectComponentPropeller_->InitializeInstancing(entityManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
 			false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
@@ -15748,10 +15787,14 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
+		worldCollider_.translate_.y = 0;
+
 
 		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		moveComponent_->GetMovementSystem()->SetUseGravity(false);
-		
+		moveComponent_->GetMoveSystem()->Data().useGravity = false;
+		skyHeight_ = 3.0f;
+		moveComponent_->GetMoveSystem()->Data().skyHeight = skyHeight_;
 
 		// エフェクト用のトランスフォーム初期化
 		worldEffect_.Initialize();
@@ -16634,6 +16677,12 @@ namespace Character {
 		// コンボ7のデータ送る
 		comboSystem->CreateCombo("Attack7", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 
+		// コンボ8のデータ送る
+		comboSystem->CreateCombo("Attack8", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		// コンボ9のデータ送る
+		comboSystem->CreateCombo("Attack9", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		// コンボ10のデータ送る
+		comboSystem->CreateCombo("Attack10", { hitBoxSystem->GetHitBoxCollData("attackObb") });
 
 
 		// コンボ8のデータ送る
@@ -16812,7 +16861,15 @@ namespace Character {
 		anima->SetIsLoop(true);			// ループさせる
 		anima->SetIsPlaying(true);		// アニメーション再生
 		anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
-		anima->SetAnimation("SwordIdle01", 0.5f);	// 流すアニメーション設定
+
+		float blendTime = 0.1f;
+
+		// 攻撃から戻ったときだけ即切り替え
+		if (character->GetPrevState() == CharacterMainState::Attack) {
+		//	blendTime = 0.0f;
+		}
+
+		anima->SetAnimation("SwordIdle01", blendTime);
 	};
 
 #pragma endregion // 待機
@@ -17950,6 +18007,7 @@ namespace Character {
         void ChangeState(const CharacterMainState& name) {
             auto it = stateFactoryMap_.find(name);
             if (it != stateFactoryMap_.end()) {
+                prevState_ = nowState_;
                 nowState_ = name;
                 ChangeState(it->second(character));
             }
@@ -17963,8 +18021,9 @@ namespace Character {
 
         // 現在のステート取得
         CharacterMainState GetCurrentMainState() const {
-            return state_ ? state_->GetCharacterMainState() : CharacterMainState::Move;
+            return nowState_;
         }
+        CharacterMainState GetPrevState() const { return prevState_; }
 
         // 登録
         void RegisterState(const CharacterMainState& name, CharacterMainStateFactory factory) {
@@ -17990,6 +18049,8 @@ namespace Character {
         std::unordered_map<CharacterMainState, CharacterMainStateFactory> stateFactoryMap_;
         //
         CharacterMainState nowState_;
+        // 
+        CharacterMainState prevState_;
         // 操作状態
         BaseCharacter* character = nullptr;
         // ステート変更が1フレーム中に何度も起らないようにするフラグ
@@ -22194,6 +22255,11 @@ struct MoveData
 
 	// 走りと歩きで同じアニメーションか
 	bool isSameAnimation = true;
+
+	//	空中制御用
+	float skyHeight = 1.0f;
+	// 重力を使用するか
+	bool useGravity = true;
 };
 
 ============================================================
@@ -22250,30 +22316,69 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 }
 
 void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator) {
-	// 攻撃中は通常の移動処理しない
-	if (ctx.isAttacking) return;
-	MoveRequest request{};
-	// 距離設定
-	Vector3 dire = Subtract(ctx.target->GetWorldPosition(), ctx.position).Normalize();
-	dire.y = 0;
-	// 回転設定
-	Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
+	// 攻撃中は通常移動しない
+	if (ctx.isAttacking) {
+		return;
+	}
 
-	if (!ctx.isGravity) {
-		if (ctx.position.y < ctx.skyHeight) {
-			dire.y = 1.2f; // Y軸速度上昇
-		}
-		else if (ctx.position.y > ctx.skyHeight) {
-			dire.y = -1.2f; // Y軸速度降下
+	MoveRequest request{};
+
+	// =========================
+	// 水平移動ベクトルを作る
+	// =========================
+	Vector3 toTarget = Subtract(ctx.target->GetWorldPosition(), ctx.position);
+	toTarget.y = 0.0f;
+
+	Vector3 horizontalDire{};
+	float horizontalLength = toTarget.Length();
+	if (horizontalLength > 0.001f) {
+		horizontalDire = toTarget / horizontalLength;
+	}
+
+	// =========================
+	// 垂直移動量を作る
+	// =========================
+	float verticalSpeed = 0.0f;
+
+	// 重力を使わない空中敵だけ高度維持
+	if (!data_.useGravity) {
+		float heightError = ctx.skyHeight - ctx.position.y;
+		const float hoverDeadZone = 0.05f;
+		const float hoverGain = 3.0f;
+		const float maxHoverSpeed = 1.2f;
+
+		if (std::abs(heightError) > hoverDeadZone) {
+			verticalSpeed = std::clamp(heightError * hoverGain, -maxHoverSpeed, maxHoverSpeed);
 		}
 		else {
-			dire.y = 0.0f; // Y軸速度リセット
+			verticalSpeed = 0.0f;
 		}
 	}
 
+	// =========================
+	// 合成
+	// =========================
+	Vector3 velocity{};
+
+	// 水平移動は moveSpeed を使う
+	velocity.x = horizontalDire.x * ctx.moveSpeed * ctx.dt;
+	velocity.z = horizontalDire.z * ctx.moveSpeed * ctx.dt;
+
+	// 垂直移動は専用速度を使う
+	velocity.y = verticalSpeed * ctx.dt;
+
+	// 向きは基本的に水平追尾方向
+	Vector3 moveDirection = horizontalDire;
+
+	// 水平移動がない場合でも、浮遊だけしているなら上方向を向きに入れてもよい
+	// ただし見た目の向きは水平だけで十分なら horizontalDire のままでOK
+	if (horizontalLength <= 0.001f && std::abs(verticalSpeed) > 0.0f) {
+		moveDirection = Vector3{ 0.0f, (verticalSpeed > 0.0f ? 1.0f : -1.0f), 0.0f };
+	}
+
 	if (ctx.isCanMove) {
-		request.velocity = dire * ctx.dt * ctx.moveSpeed;
-		request.direction = dire;
+		request.velocity = velocity;
+		request.direction = moveDirection;
 		request.priority = 1;
 		coordinator.Request(request);
 	}
@@ -29460,7 +29565,7 @@ void TestScene::InitializeObject2D()
 	{
 		auto sprite = std::make_unique<Engine::Sprite>();
 
-		sprite->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/uvChecker.png", false);
+		sprite->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/uvChecker.dds", false);
 		sprite->SetTextureSize({ 64,64 });
 		sprite->SetSize({ 128,128 });
 		sprite->SetAnimeSize({ 64,64 });
@@ -60489,7 +60594,7 @@ void Engine::MyGame::Initialize()
 	scenenames_.push_back("CHARACTER");
 
 #ifdef _DEBUG
-	sceneManager_->ChangeScene("CHARACTER");
+	//sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
 	sceneManager_->ChangeScene("TITLE");
 	//sceneManager_->ChangeScene("GAMEPLAY");
