@@ -89,6 +89,10 @@
             "type": "float",
             "value": 0.9833333492279053
         },
+        "ダウン持続時間": {
+            "type": "float",
+            "value": 0.0
+        },
         "ダメージ": {
             "type": "float",
             "value": 24.8700008392334
@@ -98,6 +102,10 @@
             "value": 19.68000030517578
         },
         "ノックバック持続時間": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "ヒットスタン持続時間": {
             "type": "float",
             "value": 0.10000000149011612
         },
@@ -133,6 +141,19 @@
             "type": "enum",
             "value": 0
         },
+        "ヒットリアクションタイプ": {
+            "enumType": "HitReactionType",
+            "type": "enum",
+            "value": 0
+        },
+        "ヒット重力": {
+            "type": "bool",
+            "value": false
+        },
+        "ヒット重力倍率": {
+            "type": "float",
+            "value": 1.0
+        },
         "ロックオンタイプ": {
             "enumType": "LockOnType",
             "type": "enum",
@@ -141,6 +162,10 @@
         "ロックオン半径": {
             "type": "float",
             "value": 10.600000381469727
+        },
+        "打ち上げ持続時間": {
+            "type": "float",
+            "value": 0.0
         },
         "終了条件タイプ": {
             "enumType": "EndConditionType",

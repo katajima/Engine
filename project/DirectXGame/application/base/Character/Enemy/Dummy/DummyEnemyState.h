@@ -52,4 +52,25 @@ namespace Character {
 		float dieTimer_ = 2.0f;
 		float timer_ = 0.0f;
 	};
+
+	/// <summary>
+/// 被弾状態
+/// </summary>
+	class DummyEnemyDamageState : public DamageState {
+	public:
+		DummyEnemyDamageState(BaseCharacter* enemy)
+			: DamageState(enemy) {
+		}
+
+		// 更新
+		void Update(const CharacterContext& ctx) override;
+
+		// 終了
+		void Exit() override {};
+		// 初期化
+		void Enter() override {};
+	private:
+		float timer_ = 0.0f;
+		float damageTime_ = 0.5f;
+	};
 }

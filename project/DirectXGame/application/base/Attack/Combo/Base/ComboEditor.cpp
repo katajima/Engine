@@ -183,7 +183,7 @@ namespace Combo {
 
 			static const char* HitReactionTypeLabels[] = {
 				"ノックバック",
-				"吹っ飛び"
+				"吹っ飛び",
 				"打ち上げ",
 				"壁バウンド"
 			};

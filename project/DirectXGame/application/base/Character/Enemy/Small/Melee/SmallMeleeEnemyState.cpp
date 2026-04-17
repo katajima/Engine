@@ -114,7 +114,7 @@ namespace Character {
 	
 	void SmallMeleeEnemyDamageState::Update(const CharacterContext& ctx) {
 		
-		if (!character->GetHitMotionSystem()->IsFinished()) {
+		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}

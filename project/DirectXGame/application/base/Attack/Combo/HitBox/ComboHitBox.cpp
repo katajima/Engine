@@ -90,6 +90,12 @@ namespace Combo {
 		data.reactionData.duration = combo.hitReaction.duration;
 		data.reactionData.isVerticalBoost = combo.hitReaction.isVerticalBoost;
 		data.reactionData.type = combo.hitReaction.hitReactionType;
+		data.reactionData.downTime = combo.hitReaction.downTime;
+		data.reactionData.launchFloatTime = combo.hitReaction.launchFloatTime;
+		data.reactionData.hitStunTime = combo.hitReaction.hitStunTime;
+		data.reactionData.gravityEnabled = combo.hitReaction.gravityEnabled;
+		data.reactionData.gravityScale = combo.hitReaction.gravityScale;
+
 		collData_.push_back(data);
 	};
 

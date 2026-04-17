@@ -53,6 +53,11 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 	}
 	else {
 		rigid.SetIsGravity(cxt.isGravity);
+		if (!cxt.isGravity) {
+			rigid.ResetAcceleration();			// 加速度リセット
+			rigid.ResetVelocity();				// 速度リセット
+		}
+
 		// 重力スケールセット
 		if (!cxt.isAttacking) {
 			if (cxt.isDamage) {

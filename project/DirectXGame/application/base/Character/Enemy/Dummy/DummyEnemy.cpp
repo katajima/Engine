@@ -62,6 +62,9 @@ namespace Character {
 		stateMachine_->RegisterState(CharacterMainState::Die, [](BaseCharacter* p) {
 			return std::make_unique<DummyEnemyDieState>(p);
 			});
+		stateMachine_->RegisterState(CharacterMainState::Damage, [](BaseCharacter* p) {
+			return std::make_unique<DummyEnemyDamageState>(p);
+			});
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
 }

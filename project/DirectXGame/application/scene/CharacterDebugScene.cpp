@@ -204,7 +204,7 @@ void CharacterDebugScene::Update()
 	interval_ += GetTime();
 	if (interval_ >= intervalMax_) {
 		interval_ = 0.0f;
-		bulletSpawn_->GenerateProjectile(spawnInfo, param);
+		//bulletSpawn_->GenerateProjectile(spawnInfo, param);
 	}
 
 
