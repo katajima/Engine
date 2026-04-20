@@ -30,25 +30,25 @@ namespace HitBox {
 	}
 
 	// ヒットボックス追加
-	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const CollData& datas,
 		float lifeTime, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
-		CreateParent(d, dependenceType,offset,parent);
+		CreateParent(d, dependenceType, offset, parent);
 		// コライダー生成
-		CreateHitBoxCollider(d, datas, useHitBoxName);
+		CreateHitBoxCollider(d, datas);
 		d.lifeTime = lifeTime;							// 生存時間
 		d.timer = 0.0f;									// 時間
 		// ヒットボックス(期限付き)データに挿入
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
 	}
 
-	void System::AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+	void System::AddHitBox(int32_t& id, UseType type, Character::BaseCharacter* character, const CollData& datas,
 		ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
-		
+
 		// IDがあるなら早期リターン
 		if (id != -1) return;
 		Data d;
@@ -63,67 +63,22 @@ namespace HitBox {
 		// 依存先設定
 		CreateParent(d, dependenceType, offset, parent);
 		// コライダー生成
-		CreateHitBoxCollider(d, datas, useHitBoxName);
+		CreateHitBoxCollider(d, datas);
 		// ヒットボックス(無期限)データに挿入
 		hitBoxDatas_.push_back(std::move(d));
 	}
-
-	// コライダーデータ生成
-	void System::CreateHitBoxCollData(const std::string& name, HitBox::ShapeType shape, UseType useType,
-		const GlobalData& hitBoxData) {
-
-
-		if (hitBoxCollDatas_.contains(name)) {
-			return; // すでに存在する場合は何もしない
-		}
-
-
-		CollData data;
-		data.isEneble = true;	// 有効化
-		data.isLine = true;		// ライン表示
-		data.shape = shape;		// 形状選択
-		data.name = name;		// 名前
-
-		// コライダーの位置と大きさの設定
-		data.offset = hitBoxData.offset;
-		data.radius = hitBoxData.radius;
-		data.size = hitBoxData.size;
-
-		// 使用者
-		switch (useType)
-		{
-		case UseType::kPlayer:
-			data.layer = CollisionLayer::PlayerAttack;
-			data.tag = CollisionTag::PlayerAttack;
-			data.mask = CollisionLayer::Enemy;
-			break;
-		case UseType::kEnemy:
-			data.layer = CollisionLayer::EnemyAttack;
-			data.tag = CollisionTag::EnemyAttack;
-			data.mask = CollisionLayer::Player;
-			break;
-		case UseType::kOther:
-			break;
-		default:
-			break;
-		}
-		hitBoxCollDatas_[name] = data;
-	}
-
+	//
 	HitBoxInstance* System::GetHitBoxInstance(int32_t id) {
 		for (auto& hit : hitBoxDatas_) {
 			if (hit.id == id)
-			return hit.hitBox.get();
+				return hit.hitBox.get();
 		}
 		return nullptr;
 	}
-
-
-	
 	// 親子付け生成
 	void System::CreateParent(Data& d, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 		// 依存先設定
-		switch (dependenceType){
+		switch (dependenceType) {
 		case ParentType::kParent: // 親子付け 
 			d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
 			break;
@@ -149,54 +104,38 @@ namespace HitBox {
 		}
 	}
 	// コライダー生成
-	void System::CreateHitBoxCollider(Data& d, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName) {
-		for (auto& data : datas) {
+	void System::CreateHitBoxCollider(Data& d, const CollData& data) {
 
-			// ここで "名前が使われるコライダーかどうか" を判定する
-			if (!useHitBoxName.empty()) {
-				bool use = false;
-				for (const auto& name : useHitBoxName) {
-					if (data.name == name) {
-						use = true;
-						break;
-					}
-				}
-				// 対象外ならスキップ
-				if (!use) continue;
-			}
-
-			// 形状によっての設定項目
-			switch (data.shape){
-			case ShapeType::kOBB:
-			{
-				std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
-				collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collObb->obb.size = data.size;
-				d.hitBox->AddCollider(std::move(collObb), data.offset, data.reactionData);
-				break;
-			}
-			case ShapeType::kAABB:
-			{
-				std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
-				collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collAABB->aabb.min = -data.size / 2;
-				collAABB->aabb.max = data.size / 2;
-				d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
-				break;
-			}
-			case ShapeType::kSphere:
-			{
-				std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
-				collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collSphere->radius = data.radius;
-				d.hitBox->AddCollider(std::move(collSphere), data.offset, data.reactionData);
-				break;
-			}
-			default:
-				break;
-			}
+		// 形状によっての設定項目
+		switch (data.hitBoxData.shapeType) {
+		case ShapeType::kOBB:
+		{
+			std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
+			collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collObb->obb.size = data.hitBoxData.colliderSize;
+			d.hitBox->AddCollider(std::move(collObb), data.hitBoxData.parentOffset, data.reactionData);
+			break;
 		}
-
+		case ShapeType::kAABB:
+		{
+			std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
+			collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collAABB->aabb.min = -data.hitBoxData.colliderSize / 2;
+			collAABB->aabb.max = data.hitBoxData.colliderSize / 2;
+			d.hitBox->AddCollider(std::move(collAABB), data.hitBoxData.parentOffset, data.reactionData);
+			break;
+		}
+		case ShapeType::kSphere:
+		{
+			std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
+			collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collSphere->radius = data.hitBoxData.radius;
+			d.hitBox->AddCollider(std::move(collSphere), data.hitBoxData.parentOffset, data.reactionData);
+			break;
+		}
+		default:
+			break;
+		}
 	}
 	// クリア
 	void System::Clear() {

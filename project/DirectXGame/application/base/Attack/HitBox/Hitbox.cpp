@@ -71,7 +71,7 @@ namespace HitBox {
 		ColliderData data;
 		data.colliderID = colliderComponent_->AddCollider(std::move(collider));
 		data.collider = colliderComponent_->FindColliderById(data.colliderID);
-
+		data.collider->isDebugLine = true;
 
 		worldTransform_.Update();
 

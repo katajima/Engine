@@ -356,57 +356,31 @@ namespace Character {
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
 
-		HitBox::System* hitBoxSystem = GetHitBoxSystem();
-
-		// ヒットボックスデータ作成
-		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
-		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},6.0f };
-		HitBox::GlobalData hitBoxdata6 = { {0,0,2} ,  {2,2,2} };
-		HitBox::GlobalData hitBoxdata7 = { {0,0,0} ,  {4,4,2} };
-
-
-		hitBoxSystem->CreateHitBoxCollData("attackObb", HitBox::ShapeType::kOBB, HitBox::UseType::kPlayer, hitBoxdata3);
-		hitBoxSystem->CreateHitBoxCollData("attackSphere", HitBox::ShapeType::kSphere, HitBox::UseType::kPlayer, hitBoxdata4);
-		hitBoxSystem->CreateHitBoxCollData("obbColl1_2", HitBox::ShapeType::kOBB, HitBox::UseType::kPlayer, hitBoxdata6);
-		hitBoxSystem->CreateHitBoxCollData("obbColl1_3", HitBox::ShapeType::kOBB, HitBox::UseType::kPlayer, hitBoxdata7);
-
 		// コンボ１のデータ送る
-		comboSystem->CreateCombo("Attack1", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack1");
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack2");
 		// コンボ３のデータ送る
-		comboSystem->CreateCombo("Attack3", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack3");
 		// ジャンプコンボのデータ送る
-		comboSystem->CreateCombo("JumpAttack", { hitBoxSystem->GetHitBoxCollData("attackSphere") });
+		comboSystem->CreateCombo("JumpAttack");
 		// コンボ4のデータ送る
-		comboSystem->CreateCombo("Attack4", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack4");
 		// コンボ5のデータ送る
-		comboSystem->CreateCombo("Attack5", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack5");
 		// コンボ6のデータ送る
-		comboSystem->CreateCombo("Attack6", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack6");
 		// コンボ7のデータ送る
-		comboSystem->CreateCombo("Attack7", { hitBoxSystem->GetHitBoxCollData("attackObb") });
-
+		comboSystem->CreateCombo("Attack7");
 		// コンボ8のデータ送る
-		comboSystem->CreateCombo("Attack8", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack8");
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("Attack9", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack9");
 		// コンボ10のデータ送る
-		comboSystem->CreateCombo("Attack10", { hitBoxSystem->GetHitBoxCollData("attackObb") });
-
-
-		// コンボ8のデータ送る
-		//comboSystem->CreateCombo("HeavyAttack01", {  hitBoxSystem->GetHitBoxCollData("obbColl1_2")  });
-		// コンボ9のデータ送る
-		//comboSystem->CreateCombo("HeavyAttack02", {  hitBoxSystem->GetHitBoxCollData("attackObb")  });
-		// コンボ8のデータ送る
-		//comboSystem->CreateCombo("HeavyAttack03", {  hitBoxSystem->GetHitBoxCollData("attackObb")  });
+		comboSystem->CreateCombo("Attack10");
 
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("SkillAttack01", { hitBoxSystem->GetHitBoxCollData("obbColl1_3") });
-
-
-
+		comboSystem->CreateCombo("SkillAttack01");
 
 		// コンボ連結設定
 		comboSystem->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
@@ -418,15 +392,8 @@ namespace Character {
 		comboSystem->ConnectCombo("Attack5", AttackInput::Light, "Attack6"); // コンボ連結
 		comboSystem->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
 
-
-		//comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Heavy, "HeavyAttack02"); // コンボ連結	
-		//comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Light, "Attack7"); // コンボ連結	
-
-		//comboSystem->ConnectCombo("HeavyAttack02", AttackInput::Heavy, "HeavyAttack03"); // コンボ連結	
-
 		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Skill, "SkillAttack01"); // コンボ連結
 		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Light, "Attack6"); // コンボ連結
-
 	}
 
 	void NormalPlayer::Reload() { ReloadComboData(); }

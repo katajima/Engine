@@ -66,7 +66,7 @@ namespace HitBox {
 
 	private:
 		// ヒットボックスエディターブロック作成
-		void CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalData& data);
+		void CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalHitBox& data);
 
 	private:
 		std::map<std::string, HitBoxColl> hitBoxColls_;

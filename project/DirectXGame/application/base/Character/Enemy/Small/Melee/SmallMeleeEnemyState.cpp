@@ -113,7 +113,10 @@ namespace Character {
 #pragma region Damage
 	
 	void SmallMeleeEnemyDamageState::Update(const CharacterContext& ctx) {
-		
+		if (character->GetHP() <= 0) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+			return;
+		}
 		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}

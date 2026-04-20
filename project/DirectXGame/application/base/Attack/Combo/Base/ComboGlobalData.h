@@ -41,7 +41,7 @@ namespace Combo {
 		// 移動終了
 		float moveWindowEnd = 1.0f;		
 		// 強制移動
-		bool  isCompulsionMove = true;		
+		bool isCompulsionMove = true;		
 		
 		// 重力はあるか？
 		bool isGravity = true;				
@@ -49,58 +49,6 @@ namespace Combo {
 		float gravityScale = 1.0f;			
 		// 移動方向条件
 		MoveType moveType = MoveType::kForward;
-
-	};
-
-	// 保存項目ヒットボックス
-	struct GlobalHitBox {
-		// ヒットボックスの生成タイミング時間
-		float hitBoxWindowStart = 0.0f;	
-		// ヒットボックスの生存時間
-		float hitBoxLifeTime = 0.5f;
-		// ヒット記録を使用するか（使用した場合連続ヒットしない）
-		bool useContactRecord = true;
-		// コライダー位置
-		Vector3 offsetPos = {};			
-		// コライダーサイズ
-		Vector3 colliderSize = { 1.0f,1.0f,1.0f };	
-		/// 親子付け設定  ///　 
-		std::string parentName = "なし";
-		Vector3 parentOffset = { 0.0f,0.0f,0.0f };
-		// ヒットボックスの発生条件タイプ
-		HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
-		// ヒットボックス依存先タイプ
-		HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
-		// ヒットボックス生存タイプ
-		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
-		// ヒットボックス影響タイプ
-		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
-	};
-
-	// 保存項目リアクション
-	struct GlobalHitReaction {
-		// ヒットリアクションタイプ
-		HitReactionType hitReactionType = HitReactionType::Knockback;
-		// 水平方向の強さ
-		float power = 0.0f;
-		// 垂直方向の強さ
-		float verticalBoost = 0.0f;
-		// 上方向を強制するか
-		bool isVerticalBoost = false;
-		// リアクション移動の有効時間
-		float duration = 0.25f;
-		// 行動不能時間
-		float hitStunTime = 0.1f;
-		// ダウン時間
-		float downTime = 0.0f;
-		// 打ち上げ時に重力を弱める/止める時間
-		float launchFloatTime = 0.0f;
-		// 重力を適用するか
-		bool gravityEnabled = false;	
-		// 重力倍率
-		float gravityScale = 1.0f;
-		// ダメージ
-		float damage = 0;					
 	};
 
 	// 保存項目ロックオン
@@ -126,15 +74,14 @@ namespace Combo {
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
-
-		Type type = Type::kMelle;	// 攻撃タイプ
-
+		// 攻撃タイプ
+		Type type = Type::kMelle;	
 		// 敵に送るリアクションデータ
-		GlobalHitReaction hitReaction{};
+		HitReactionData hitReaction{};
+		// ヒットボックス関係
+		HitBox::GlobalHitBox hitBox{};
 		// 移動関係
 		GlobalMove move{};
-		// ヒットボックス関係
-		GlobalHitBox hitBox{};
 		// ロックオン
 		GlobalLockOn lockOn{};
 		// アニメーション

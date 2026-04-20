@@ -15,7 +15,7 @@ namespace Combo {
 
 		// 常時なら
 		if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
-			hitBoxSystem->AddHitBox(id,data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.dependenceType, data_.offset,data_.useContactRecord, perent);
+			hitBoxSystem->AddHitBox(id, data_.useType, owner, collData_, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
 			hitBox = hitBoxSystem->GetHitBoxInstance(id);
 			hitBox->Disable(Vector4{ 1,1,1,0.0f });
 			hitBox->ClearContactRecord();
@@ -25,9 +25,7 @@ namespace Combo {
 	// 更新
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
 		// ノックバック方向
-		for (auto& coll : collData_) {
-			coll.reactionData.normal = direction;
-		}
+		collData_.reactionData.normal = direction;
 
 		// 近距離か複合なら
 		if (Type::kMelle == type || Type::kMix == type) {
@@ -37,14 +35,14 @@ namespace Combo {
 				switch (data_.spawnType)
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
-					if (timer >= data_.hitBpxWindowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
+					if (timer >= data_.windowStart) {
+						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_,  data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
+						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_, data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
@@ -57,13 +55,13 @@ namespace Combo {
 				}
 			}
 			// 常時なら
-			else if(data_.lifetimeType == HitBox::LifetimeType::kInfinite){
+			else if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
 				if (hitBox) {
-					if (timer >= data_.hitBpxWindowStart && timer <= data_.hitBpxWindowStart + data_.lifeTime) {
+					if (timer >= data_.windowStart && timer <= data_.lifeTime + data_.lifeTime) {
 						hitBox->Enable();
 					}
 					else {
-						hitBox->Disable(Vector4{1,1,1,0.0f});
+						hitBox->Disable(Vector4{ 1,1,1,0.0f });
 					}
 				}
 			}
@@ -82,21 +80,10 @@ namespace Combo {
 
 	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& combo) {
 		HitBox::CollData data = hitBoxData;
-
 		// リアクションデータ
-		data.reactionData.damageData.GetOne().damage = combo.hitReaction.damage;
-		data.reactionData.power = combo.hitReaction.power;
-		data.reactionData.verticalBoost = combo.hitReaction.verticalBoost;
-		data.reactionData.duration = combo.hitReaction.duration;
-		data.reactionData.isVerticalBoost = combo.hitReaction.isVerticalBoost;
-		data.reactionData.type = combo.hitReaction.hitReactionType;
-		data.reactionData.downTime = combo.hitReaction.downTime;
-		data.reactionData.launchFloatTime = combo.hitReaction.launchFloatTime;
-		data.reactionData.hitStunTime = combo.hitReaction.hitStunTime;
-		data.reactionData.gravityEnabled = combo.hitReaction.gravityEnabled;
-		data.reactionData.gravityScale = combo.hitReaction.gravityScale;
-
-		collData_.push_back(data);
+		data.reactionData = combo.hitReaction;
+		data.hitBoxData = combo.hitBox;
+		collData_ = data;
 	};
 
 #pragma endregion // コンボヒットボックス

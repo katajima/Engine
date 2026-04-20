@@ -109,7 +109,7 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	float endComboTime = comboData.GetComboCondition().GetEndCondition().GetData().stateTime;
 
 	// ヒットボックス生成時間
-	float hitBoxStart = comboData.GetComboHitBox().GetData().hitBpxWindowStart;
+	float hitBoxStart = comboData.GetComboHitBox().GetData().windowStart;
 	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetData().lifeTime;
 
 	// コンボ終了時間

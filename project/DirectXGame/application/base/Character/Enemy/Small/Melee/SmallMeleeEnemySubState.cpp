@@ -109,15 +109,13 @@ namespace Character {
 		data.tag = CollisionTag::EnemyAttack;
 		data.layer = CollisionLayer::EnemyAttack;
 		data.mask = CollisionLayer::Player;
-		data.size = { 1.0f, 2.0f, 1.0f };
-		data.name = "NormalEnemy_SwingHitBox";
+		data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
 		data.reactionData.damageData.GetOne().damage = 10.0f;
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
 			HitBox::UseType::kEnemy,
 			enemy,
-			{ data },
-			{},
+			data,
 			swingTime_,
 			HitBox::ParentType::kParent,
 			{},

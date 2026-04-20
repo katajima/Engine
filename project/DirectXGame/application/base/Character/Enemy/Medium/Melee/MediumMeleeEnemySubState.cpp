@@ -109,7 +109,7 @@ namespace Character {
         data.tag = CollisionTag::Enemy;
         data.layer = CollisionLayer::Enemy;
         data.mask = CollisionLayer::Player;
-        data.size = { 1.0f, 2.0f, 1.0f };
+        data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
         data.name = "NormalEnemy_SwingHitBox";
         data.reactionData.damageData.GetOne().damage = 10.0f;
 
@@ -117,8 +117,7 @@ namespace Character {
         enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
             HitBox::UseType::kEnemy,
             enemy,
-            { data },
-            {},
+            data,
             swingTime_,
             HitBox::ParentType::kParent,
             {},

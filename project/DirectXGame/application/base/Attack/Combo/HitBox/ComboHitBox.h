@@ -12,32 +12,7 @@ namespace Combo {
 	/// </summary>
 	class ComboHitBox {
 	public:
-		~ComboHitBox() { 
-			collData_.clear();
-			useHitBoxName_.clear();
-		}
-		// ヒットボックスデータ
-		struct Data {
-			float hitBpxWindowStart = 1.0f;		// ヒットボックス生成スタート
-			float lifeTime = 1.0f;					// ヒットボックス生存時間
-			// ヒットボックス使用者タイプ
-			HitBox::UseType hitBoxUseType = HitBox::UseType::kPlayer;
-			// ヒットボックスの発生条件タイプ
-			HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
-			// ヒットボックス依存先タイプ
-			HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
-			// ヒットボックス生存タイプ
-			HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
-			// ヒットボックス影響タイプ
-			HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
-			// ヒット記録を使用するか（使用した場合連続ヒットしない）
-			bool useContactRecord = true;				
-			// オフセット
-			Vector3 offset{};
-			// 親子名
-			std::string	parentName = "";
-		};
-
+		~ComboHitBox() {}
 		// 開始
 		void Enter(Character::BaseCharacter* owner , Type type);
 
@@ -46,12 +21,11 @@ namespace Combo {
 
 		// 終了
 		void Exit();
-
-
 	public:
-		HitBox::CollData& GetCollData(int index) { return collData_[index]; }
 		// データ取得
-		Data& GetData() { return data_; }
+		HitBox::GlobalHitBox& GetData() { return data_; }
+		// CollData
+		HitBox::CollData& GetCollData() { return collData_;}
 		// コライダーデータ追加
 		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& reaction);
 		// 使うヒットボックス名設定
@@ -79,9 +53,9 @@ namespace Combo {
 		int32_t id = -1;
 	private:
 		// ヒットボックスデータ
-		Data data_;
+		HitBox::GlobalHitBox data_;
 		// コライダーデータ
-		std::vector<HitBox::CollData> collData_;
+		HitBox::CollData collData_;
 		// 使うヒットボックス名
 		std::vector<std::string> useHitBoxName_;
 

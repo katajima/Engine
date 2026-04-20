@@ -120,10 +120,10 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		data_.isLine = true;
 		data_.tag = param_.collisionTag;
 		data_.layer = param_.collisionLayer;
-		data_.size = { 1.0f,2.0f,1.0f };
+		data_.hitBoxData.colliderSize = { 1.0f,2.0f,1.0f };
 		data_.name = param_.name;
 		data_.reactionData.damageData.GetOne().damage = param_.explosionDamage;
-		data_.radius = param_.explosionRadius;
+		data_.hitBoxData.radius = param_.explosionRadius;
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
 		if (CollisionTag::Player == self->tag) {
@@ -138,7 +138,7 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 			owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
 		}
 		// 爆発ヒットボックス生成
-		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, { data_ }, {},
+		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, data_,
 			param_.explosionLifeTime, HitBox::ParentType::kParentIndependent, {},
 			true, &objectComponent_->GetWorldTransform());
 	}

@@ -77,22 +77,20 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
-		globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
-		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
-		globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 		// リアクション
-		globalVariables->AddItem(name, "ダメージ", data.hitReaction.damage);
-		globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
-		globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
-		globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
-		globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
-		globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
-		globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
-		globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
-		globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime); 
-		globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled); 
-		globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale); 
-
+		{
+			globalVariables->AddItem(name, "ダメージ", data.hitReaction.damageData.GetOne().damage);
+			globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+			globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
+			globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+			globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
+			globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
+			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
+			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		}
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -123,13 +121,23 @@ namespace Combo {
 		globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
 
-		globalVariables->AddItem(name, "親オブジェクト名前", data.hitBox.parentName);
+		// ヒットボックス
+		{
+			globalVariables->AddItem(name, "親オブジェクト名前", data.hitBox.parentName);
+			globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.windowStart);
+			globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
+			globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->AddItem(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
+			globalVariables->AddItem(name, "ヒットボックスオフセット位置", data.hitBox.parentOffset);		// new
+			globalVariables->AddItem(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
 
-		globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
-		globalVariables->AddEnumItem(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
-		globalVariables->AddEnumItem(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType,"HitBoxHitEffectType");
-		globalVariables->AddEnumItem(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
-
+			globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
+			globalVariables->AddEnumItem(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
+			globalVariables->AddEnumItem(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
+			globalVariables->AddEnumItem(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+			globalVariables->AddEnumItem(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
+			globalVariables->AddEnumItem(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
+		}
 		
 		globalVariables->AddEnumItem(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
@@ -142,23 +150,20 @@ namespace Combo {
 	};
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
-		data.hitBox.hitBoxWindowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
-		data.hitBox.hitBoxLifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
-		data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
-
 		// リアクション
-		data.hitReaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
-		data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
-		data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
-		data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
-		data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
-		data.hitReaction.hitReactionType = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
-		data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
-		data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
-		data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
-		data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
-		data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
-
+		{
+			data.hitReaction.damageData.GetOne().damage = globalVariables->GetValue<float>(name, "ダメージ");
+			data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+			data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
+			data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
+			data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+			data.hitReaction.type = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
+			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
+			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
+			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
+			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
+			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
+		}
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
 		data.stateInputEndTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
@@ -190,14 +195,23 @@ namespace Combo {
 		data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 		data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 
+		// ヒットボックス
+		{
+			data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
+			data.hitBox.windowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
+			data.hitBox.lifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+			data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
+			data.hitBox.colliderSize = globalVariables->GetValue<float>(name, "ヒットボックスコライダーサイズ");
+			data.hitBox.parentOffset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
+			data.hitBox.radius = globalVariables->GetValue<float>(name, "ヒットボックスコライダー半径");
 
-		data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
-
-		data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
-		data.hitBox.dependenceType = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
-		data.hitBox.hitEffectType= globalVariables->GetEnumValue<HitBox::HitEffectType>(name,"ヒットボックス影響タイプ");
-		data.hitBox.lifetimeType = globalVariables->GetEnumValue<HitBox::LifetimeType>(name, "ヒットボックス生存タイプ");
-
+			data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
+			data.hitBox.dependenceType = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
+			data.hitBox.hitEffectType = globalVariables->GetEnumValue<HitBox::HitEffectType>(name, "ヒットボックス影響タイプ");
+			data.hitBox.lifetimeType = globalVariables->GetEnumValue<HitBox::LifetimeType>(name, "ヒットボックス生存タイプ");
+			data.hitBox.shapeType = globalVariables->GetEnumValue<HitBox::ShapeType>(name, "ヒットボックス形状タイプ");
+			data.hitBox.useType = globalVariables->GetEnumValue<HitBox::UseType>(name, "ヒットボックス使用者タイプ");
+		}
 
 
 		data.endConditionType = globalVariables->GetEnumValue<Combo::EndConditionType>(name, "終了条件タイプ");
@@ -213,9 +227,7 @@ namespace Combo {
 		globalVariables->SetValue(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->SetValue(name, "コンボ入力受付終了時間", data.stateInputEndTime);
 
-		globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
-		globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
-
+		
 		globalVariables->SetValue(name, "コンボ終了時間", data.stateEndTime);
 		globalVariables->SetValue(name, "コンボ移行時間", data.stateNextTime);
 
@@ -243,27 +255,39 @@ namespace Combo {
 		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
-		globalVariables->SetValue(name, "ノックバック持続時間", data.hitReaction.duration);
-		globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
-		globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
-		globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
-		globalVariables->SetValue(name, "ダメージ", data.hitReaction.damage);
-		globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
-		globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
-		globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
-		globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
-		globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
-		globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
+		// リアクション
+		{
+			globalVariables->SetValue(name, "ノックバック持続時間", data.hitReaction.duration);
+			globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
+			globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+			globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+			globalVariables->SetValue(name, "ダメージ", data.hitReaction.damageData.GetOne().damage);
+			globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
+			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
+			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		}
 
-		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
+		// ヒットボックス
+		{
+			globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBox.windowStart);
+			globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
+			globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
+			globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->SetValue(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
+			globalVariables->SetValue(name, "ヒットボックスオフセット位置", data.hitBox.parentOffset);		// new
+			globalVariables->SetValue(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
 
-		globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
-		globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
-		globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
-		globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
-		globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
-
+			globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
+			globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
+			globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
+			globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+			globalVariables->SetEnumValue(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
+			globalVariables->SetEnumValue(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
+		}
 
 		globalVariables->SetEnumValue(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
@@ -280,18 +304,10 @@ namespace Combo {
 	void System::SetData(ComboData& data, const GlobalData& gData)
 	{
 		///
-		/// ヒットボックス
+		/// ヒットボックスとリアクションデータ
 		/// 
-		data.GetComboHitBox().GetData().hitBpxWindowStart = gData.hitBox.hitBoxWindowStart;	// 発生時間
-		data.GetComboHitBox().GetData().lifeTime = gData.hitBox.hitBoxLifeTime;				// 生成時間
-		data.GetComboHitBox().GetData().parentName = gData.hitBox.parentName;
+		data.GetComboHitBox().GetData() = gData.hitBox;
 		data.GetComboHitBox().SetPerent(GetParentTransform(gData.hitBox.parentName));
-		data.GetComboHitBox().GetData().offset = gData.hitBox.parentOffset;
-		data.GetComboHitBox().GetData().dependenceType = gData.hitBox.dependenceType;
-		data.GetComboHitBox().GetData().spawnType = gData.hitBox.spawnType;
-		data.GetComboHitBox().GetData().lifetimeType = gData.hitBox.lifetimeType;
-		data.GetComboHitBox().GetData().hitEffectType = gData.hitBox.hitEffectType;
-		data.GetComboHitBox().GetData().useContactRecord = gData.hitBox.useContactRecord;
 		///
 		/// 受付
 		/// 
@@ -358,23 +374,15 @@ namespace Combo {
 		data.GetComboMotion().GetComboMove().GetData().lockOnData.radius = gData.lockOn.lockOnRadius;
 	}
 
-	void System::CreateCombo(const std::string& comboNodeName, const std::vector<HitBox::CollData>& addHitBoxDatas) {
+	void System::CreateCombo(const std::string& comboNodeName) {
 		// コンボデータ
 		ComboData data{};
 		// グローバルデータ作成
 		CreateGlobalData(comboNodeName);
 		// データ設定
 		SetData(data, comboGlobalDatas_[comboNodeName]);
-		// ヒットボックス追加
-		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddCollider(addHitBoxData, comboGlobalDatas_[comboNodeName]);
-		}
 		// 使うヒットボックスクリア
 		data.GetComboHitBox().ClearUseHitBox();
-		// 使うヒットボックス追加
-		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddUseHitBox(addHitBoxData.name);
-		}
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName_, data);
 	}

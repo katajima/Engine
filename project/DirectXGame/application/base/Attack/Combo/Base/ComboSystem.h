@@ -114,7 +114,7 @@ namespace Combo {
 		};
 
 		// コンボ作成
-		void CreateCombo(const std::string& comboNodeName, const std::vector< HitBox::CollData>& addHitBoxData);
+		void CreateCombo(const std::string& comboNodeName);
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);

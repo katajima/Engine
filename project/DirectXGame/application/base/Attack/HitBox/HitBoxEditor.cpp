@@ -143,7 +143,7 @@ namespace HitBox {
 		ImGui::End();
 	}
 
-	void HitBoxEditor::CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalData& data) {
+	void HitBoxEditor::CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalHitBox& data) {
 		// 既に存在する場合は追加しない
 		if (hitBoxColls_.find(hitBoxName) != hitBoxColls_.end()) {
 			return;

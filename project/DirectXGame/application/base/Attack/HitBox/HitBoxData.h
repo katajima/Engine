@@ -47,12 +47,34 @@ namespace HitBox {
 
 	};
 
+	// 保存項目ヒットボックス
+	struct GlobalHitBox {
+		// ヒットボックスの生成タイミング時間
+		float windowStart = 0.0f;
+		// ヒットボックスの生存時間
+		float lifeTime = 0.5f;
+		// ヒット記録を使用するか（使用した場合連続ヒットしない）
+		bool useContactRecord = true;
+		/// 親子付け設定  ///　 
+		std::string parentName = "なし";
+		// オフセット
+		Vector3 parentOffset = { 0.0f,0.0f,0.0f };
 
-
-	// 保存項目用データ
-	struct GlobalData {
-		Vector3 offset{};
-		Vector3 size = { 1.0f,1.0f,1.0f };
+		// ヒットボックス使用者タイプ
+		HitBox::UseType useType = HitBox::UseType::kPlayer;
+		// ヒットボックスの発生条件タイプ
+		HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
+		// ヒットボックス依存先タイプ
+		HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
+		// ヒットボックス生存タイプ
+		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
+		// ヒットボックス影響タイプ
+		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
+		// ヒットボックス形状
+		HitBox::ShapeType shapeType = HitBox::ShapeType::kOBB;
+		// コライダーサイズ
+		Vector3 colliderSize = { 1.0f,1.0f,1.0f };
+		// 球半径
 		float radius = 1.0f;
 	};
 
@@ -61,33 +83,22 @@ namespace HitBox {
 		// 名前
 		std::string name = "";
 		// タグ
-		CollisionTag tag;
+		CollisionTag tag = CollisionTag::None;
 		// レイヤー
-		CollisionLayer layer;
+		CollisionLayer layer = CollisionLayer::Default;
 		// マスク
 		CollisionLayer mask;
 		// 有効か？
 		bool isEneble = true;
 		// デバック用ライン描画をするか
 		bool isLine = false;
-		// 親子付け対象名前
-		std::string parentName = "";	
-		// コライダー形状
-		ShapeType shape = ShapeType::kOBB;
-		// コライダーの内容
-		HitEffectType hitEffectType = HitEffectType::kDamageAndForce;
-		// オフセット
-		Vector3 offset{};
-		// AABBやOBB用サイズ 
-		Vector3 size = { 1.0f,1.0f,1.0f };
-		// 球用サイズ
-		float radius = 1.0f;
+		GlobalHitBox hitBoxData;
 		// リアクションデータ
 		HitReactionData reactionData;
 	};
 
 
-
+	
 
 
 };

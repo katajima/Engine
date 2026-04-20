@@ -19,7 +19,6 @@ namespace HitBox {
 	public:
 		~System() {
 			lifeTimeHitBoxDatas_.clear();
-			hitBoxCollDatas_.clear();
 		}
 
 		struct Data {
@@ -39,35 +38,19 @@ namespace HitBox {
 
 
 		// ヒットボックス追加（期限付き）
-		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
+		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character,const CollData& datas,
+			float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
 
 		// ヒットボックス追加（無期限）
-		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
-
-
-		// ヒットボックスコライダーデータ作成
-		void CreateHitBoxCollData(const std::string& name, ShapeType shape, UseType useType, const GlobalData& hitBoxData);
-
+		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character,const CollData& datas,
+			ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
 		// 全体データ取得(期限付きヒットボックス)
 		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
 		// 全体データ取得(無期限ヒットボックス)
 		std::vector<Data>& GetHitBoxData() { return hitBoxDatas_; }
 		// ヒットボックスインスタンス取得
 		HitBoxInstance* GetHitBoxInstance(int32_t id);
-
-		// 名前からヒットボックスコライダーデータ取得
-		CollData GetHitBoxCollData(const std::string& name) {
-			if (hitBoxCollDatas_.find(name) != hitBoxCollDatas_.end()) {
-				return hitBoxCollDatas_[name];
-			}
-			else {
-				// 見つからなかった場合、空のデータを返す
-				return CollData{};
-			}
-		}
-
+		// クリア
 		void Clear();
 
 	private:
@@ -75,7 +58,7 @@ namespace HitBox {
 		void CreateParent(Data& d, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent);
 
 		// コライダーの生成処理
-		void CreateHitBoxCollider(Data& d, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName);
+		void CreateHitBoxCollider(Data& d,const CollData& datas);
 		// コライダー生成
 		template <typename T>
 		static std::unique_ptr<T> CreateCollider(CollisionTag tag, CollisionLayer layer, CollisionLayer mask, bool isEneble = true, bool isLine = false);
@@ -84,10 +67,6 @@ namespace HitBox {
 		std::vector<Data> lifeTimeHitBoxDatas_;
 		// 無期限ヒットボックスデータ
 		std::vector<Data> hitBoxDatas_;
-		// 無期限ヒットボックス用カウント
-
-		// ヒットボックスコライダーデータ群
-		std::map<std::string, CollData> hitBoxCollDatas_;
 	private:
 		Engine::EntityManager* entityManager = nullptr;
 	};
