@@ -2407,9 +2407,28 @@ namespace Combo {
 
 	void EditorBlock::ImGuiApplyHitBox() {
 		if (ImGui::CollapsingHeader("ヒットボックス")) {
+
+			// 形状タイプ
+			static const char* HitBoxShapeTypeLabels[] = {
+				"OBB",
+				"AABB",
+				"Sphere"
+			};
+			Engine::ImGuiManager::Select("形状", HitBoxShapeTypeLabels, data_.hitBox.shapeType);
+
+
+			// 使用者タイプ
+			static const char* HitBoxUseTypeLabels[] = {
+				"プレイヤー",
+				"敵",
+				"その他",
+			};
+			Engine::ImGuiManager::Select("使用者", HitBoxUseTypeLabels, data_.hitBox.useType);
+
+			
 			// ペアレント設定
 			Engine::ImGuiManager::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
-
+			
 			// ヒットボックス出現条件
 			static const char* HitBoxSpawnTypeLabels[] = {
 				"時間経過",
@@ -2443,10 +2462,20 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
+
+
 			// ヒット記録を使用
 			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
 			// オフセット
 			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset.x, 0.1f);
+			// サイズ
+			if(data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
+				data_.hitBox.shapeType == HitBox::ShapeType::kOBB)
+			ImGui::DragFloat3("コライダーサイズ", &data_.hitBox.colliderSize.x, 0.1f);
+			// 半径
+			if (data_.hitBox.shapeType == HitBox::ShapeType::kSphere)
+			ImGui::DragFloat("コライダー半径", &data_.hitBox.radius, 0.1f);
+
 		}
 	}
 
@@ -2494,27 +2523,19 @@ namespace Combo {
 
 	void EditorBlock::ImGuiReaction() {
 		if (ImGui::CollapsingHeader("リアクション")) {
-			// リアクション
-			enum class HitReactionType {
-				Knockback,
-				BlowAway,
-				Launch,
-				WallBounce
-			};
-
 			static const char* HitReactionTypeLabels[] = {
 				"ノックバック",
 				"吹っ飛び",
 				"打ち上げ",
 				"壁バウンド"
 			};
-			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.hitReactionType);
+			Engine::ImGuiManager::Select("ヒットリアクションタイプ", HitReactionTypeLabels, data_.hitReaction.type);
 
 			ImGui::SliderFloat("持続時間", &data_.hitReaction.duration, 0.0f, 5.0f, "%.2f");
 			ImGui::SliderFloat("パワー", &data_.hitReaction.power, 0.0f, 999.0f, "%.2f");
 			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
 			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
-			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damage, 0.0f, 1000.0f, "%.2f");
+			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damageData.GetOne().damage, 0.0f, 1000.0f, "%.2f");
 			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
@@ -2524,7 +2545,6 @@ namespace Combo {
 		}
 	}
 
-	
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
@@ -2540,18 +2560,8 @@ namespace Combo {
 
 
 		// リアクション
-		data_.hitReaction.duration = comboData.GetComboHitBox().GetCollData(0).reactionData.duration;	// ノックバック持続時間
-		data_.hitReaction.power = comboData.GetComboHitBox().GetCollData(0).reactionData.power;		// ノックバックパワー
-		data_.hitReaction.verticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.verticalBoost;		// ノックバックY方向パワー
-		data_.hitReaction.isVerticalBoost = comboData.GetComboHitBox().GetCollData(0).reactionData.isVerticalBoost;	// Y方向にノックバック
-		data_.hitReaction.damage = comboData.GetComboHitBox().GetCollData(0).reactionData.damageData.GetDamage();			// ダメージ
-		data_.hitReaction.hitReactionType = comboData.GetComboHitBox().GetCollData(0).reactionData.type;			// リアクションタイプ
-		data_.hitReaction.hitStunTime = comboData.GetComboHitBox().GetCollData(0).reactionData.hitStunTime;
-		data_.hitReaction.downTime = comboData.GetComboHitBox().GetCollData(0).reactionData.downTime;
-		data_.hitReaction.launchFloatTime = comboData.GetComboHitBox().GetCollData(0).reactionData.launchFloatTime;
-		data_.hitReaction.gravityEnabled = comboData.GetComboHitBox().GetCollData(0).reactionData.gravityEnabled;
-		data_.hitReaction.gravityScale = comboData.GetComboHitBox().GetCollData(0).reactionData.gravityScale;
-
+		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
+		
 
 		// アニメーションスピード
 		data_.animation.animationSpeed = comboData.GetComboMotion().GetComboAnimation().GetData().animationSpeed_;
@@ -2561,13 +2571,7 @@ namespace Combo {
 
 
 		// 親
-		data_.hitBox.parentName = comboData.GetComboHitBox().GetData().parentName;
-		data_.hitBox.parentOffset = comboData.GetComboHitBox().GetData().offset;
-		data_.hitBox.spawnType = comboData.GetComboHitBox().GetData().spawnType;
-		data_.hitBox.dependenceType = comboData.GetComboHitBox().GetData().dependenceType;
-		data_.hitBox.hitEffectType = comboData.GetComboHitBox().GetData().hitEffectType;
-		data_.hitBox.lifetimeType = comboData.GetComboHitBox().GetData().lifetimeType;
-		data_.hitBox.useContactRecord = comboData.GetComboHitBox().GetData().useContactRecord;
+		data_.hitBox = comboData.GetComboHitBox().GetData();
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
 
@@ -2710,8 +2714,8 @@ namespace Combo {
 			// ヒットボックス生成時間
 			float hitBoxStart = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").startFrame);
 			data.hitBox = comboEditorBlocks_[it.first].GetData().hitBox;
-			data.hitBox.hitBoxWindowStart = hitBoxStart;
-			data.hitBox.hitBoxLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
+			data.hitBox.windowStart = hitBoxStart;
+			data.hitBox.lifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("ヒットボックス生成時間").endFrame) - hitBoxStart;
 
 			// 移動時間
 			data.move = comboEditorBlocks_[it.first].GetData().move;
@@ -2950,7 +2954,7 @@ namespace Combo {
 		// 移動終了
 		float moveWindowEnd = 1.0f;		
 		// 強制移動
-		bool  isCompulsionMove = true;		
+		bool isCompulsionMove = true;		
 		
 		// 重力はあるか？
 		bool isGravity = true;				
@@ -2958,58 +2962,6 @@ namespace Combo {
 		float gravityScale = 1.0f;			
 		// 移動方向条件
 		MoveType moveType = MoveType::kForward;
-
-	};
-
-	// 保存項目ヒットボックス
-	struct GlobalHitBox {
-		// ヒットボックスの生成タイミング時間
-		float hitBoxWindowStart = 0.0f;	
-		// ヒットボックスの生存時間
-		float hitBoxLifeTime = 0.5f;
-		// ヒット記録を使用するか（使用した場合連続ヒットしない）
-		bool useContactRecord = true;
-		// コライダー位置
-		Vector3 offsetPos = {};			
-		// コライダーサイズ
-		Vector3 colliderSize = { 1.0f,1.0f,1.0f };	
-		/// 親子付け設定  ///　 
-		std::string parentName = "なし";
-		Vector3 parentOffset = { 0.0f,0.0f,0.0f };
-		// ヒットボックスの発生条件タイプ
-		HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
-		// ヒットボックス依存先タイプ
-		HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
-		// ヒットボックス生存タイプ
-		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
-		// ヒットボックス影響タイプ
-		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
-	};
-
-	// 保存項目リアクション
-	struct GlobalHitReaction {
-		// ヒットリアクションタイプ
-		HitReactionType hitReactionType = HitReactionType::Knockback;
-		// 水平方向の強さ
-		float power = 0.0f;
-		// 垂直方向の強さ
-		float verticalBoost = 0.0f;
-		// 上方向を強制するか
-		bool isVerticalBoost = false;
-		// リアクション移動の有効時間
-		float duration = 0.25f;
-		// 行動不能時間
-		float hitStunTime = 0.1f;
-		// ダウン時間
-		float downTime = 0.0f;
-		// 打ち上げ時に重力を弱める/止める時間
-		float launchFloatTime = 0.0f;
-		// 重力を適用するか
-		bool gravityEnabled = false;	
-		// 重力倍率
-		float gravityScale = 1.0f;
-		// ダメージ
-		float damage = 0;					
 	};
 
 	// 保存項目ロックオン
@@ -3035,15 +2987,14 @@ namespace Combo {
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
-
-		Type type = Type::kMelle;	// 攻撃タイプ
-
+		// 攻撃タイプ
+		Type type = Type::kMelle;	
 		// 敵に送るリアクションデータ
-		GlobalHitReaction hitReaction{};
+		HitReactionData hitReaction{};
+		// ヒットボックス関係
+		HitBox::GlobalHitBox hitBox{};
 		// 移動関係
 		GlobalMove move{};
-		// ヒットボックス関係
-		GlobalHitBox hitBox{};
 		// ロックオン
 		GlobalLockOn lockOn{};
 		// アニメーション
@@ -3185,7 +3136,7 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	float endComboTime = comboData.GetComboCondition().GetEndCondition().GetData().stateTime;
 
 	// ヒットボックス生成時間
-	float hitBoxStart = comboData.GetComboHitBox().GetData().hitBpxWindowStart;
+	float hitBoxStart = comboData.GetComboHitBox().GetData().windowStart;
 	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetData().lifeTime;
 
 	// コンボ終了時間
@@ -3740,22 +3691,20 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
-		globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
-		globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
-		globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 		// リアクション
-		globalVariables->AddItem(name, "ダメージ", data.hitReaction.damage);
-		globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
-		globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
-		globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
-		globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
-		globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
-		globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
-		globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
-		globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime); 
-		globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled); 
-		globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale); 
-
+		{
+			globalVariables->AddItem(name, "ダメージ", data.hitReaction.damageData.GetOne().damage);
+			globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+			globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
+			globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+			globalVariables->AddItem(name, "ノックバック持続時間", data.hitReaction.duration);
+			globalVariables->AddEnumItem(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->AddItem(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+			globalVariables->AddItem(name, "ダウン持続時間", data.hitReaction.downTime);
+			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
+			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		}
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->AddItem(name, "コンボ入力受付終了時間", data.stateInputEndTime);
@@ -3786,13 +3735,23 @@ namespace Combo {
 		globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
 
-		globalVariables->AddItem(name, "親オブジェクト名前", data.hitBox.parentName);
+		// ヒットボックス
+		{
+			globalVariables->AddItem(name, "親オブジェクト名前", data.hitBox.parentName);
+			globalVariables->AddItem(name, "ヒットボックス発生時間", data.hitBox.windowStart);
+			globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
+			globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->AddItem(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
+			globalVariables->AddItem(name, "ヒットボックスオフセット位置", data.hitBox.parentOffset);		// new
+			globalVariables->AddItem(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
 
-		globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
-		globalVariables->AddEnumItem(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
-		globalVariables->AddEnumItem(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType,"HitBoxHitEffectType");
-		globalVariables->AddEnumItem(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
-
+			globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
+			globalVariables->AddEnumItem(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
+			globalVariables->AddEnumItem(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
+			globalVariables->AddEnumItem(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+			globalVariables->AddEnumItem(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
+			globalVariables->AddEnumItem(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
+		}
 		
 		globalVariables->AddEnumItem(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
@@ -3805,23 +3764,20 @@ namespace Combo {
 	};
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
-		data.hitBox.hitBoxWindowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
-		data.hitBox.hitBoxLifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
-		data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
-
 		// リアクション
-		data.hitReaction.damage = globalVariables->GetValue<float>(name, "ダメージ");
-		data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
-		data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
-		data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
-		data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
-		data.hitReaction.hitReactionType = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
-		data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
-		data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
-		data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
-		data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
-		data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
-
+		{
+			data.hitReaction.damageData.GetOne().damage = globalVariables->GetValue<float>(name, "ダメージ");
+			data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+			data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
+			data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
+			data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+			data.hitReaction.type = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
+			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
+			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
+			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
+			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
+			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
+		}
 
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
 		data.stateInputEndTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
@@ -3853,14 +3809,23 @@ namespace Combo {
 		data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 		data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 
+		// ヒットボックス
+		{
+			data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
+			data.hitBox.windowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
+			data.hitBox.lifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
+			data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
+			data.hitBox.colliderSize = globalVariables->GetValue<float>(name, "ヒットボックスコライダーサイズ");
+			data.hitBox.parentOffset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
+			data.hitBox.radius = globalVariables->GetValue<float>(name, "ヒットボックスコライダー半径");
 
-		data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
-
-		data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
-		data.hitBox.dependenceType = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
-		data.hitBox.hitEffectType= globalVariables->GetEnumValue<HitBox::HitEffectType>(name,"ヒットボックス影響タイプ");
-		data.hitBox.lifetimeType = globalVariables->GetEnumValue<HitBox::LifetimeType>(name, "ヒットボックス生存タイプ");
-
+			data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
+			data.hitBox.dependenceType = globalVariables->GetEnumValue<HitBox::ParentType>(name, "ヒットボックス依存先タイプ");
+			data.hitBox.hitEffectType = globalVariables->GetEnumValue<HitBox::HitEffectType>(name, "ヒットボックス影響タイプ");
+			data.hitBox.lifetimeType = globalVariables->GetEnumValue<HitBox::LifetimeType>(name, "ヒットボックス生存タイプ");
+			data.hitBox.shapeType = globalVariables->GetEnumValue<HitBox::ShapeType>(name, "ヒットボックス形状タイプ");
+			data.hitBox.useType = globalVariables->GetEnumValue<HitBox::UseType>(name, "ヒットボックス使用者タイプ");
+		}
 
 
 		data.endConditionType = globalVariables->GetEnumValue<Combo::EndConditionType>(name, "終了条件タイプ");
@@ -3876,9 +3841,7 @@ namespace Combo {
 		globalVariables->SetValue(name, "コンボ入力受付開始時間", data.stateInputStartTime);
 		globalVariables->SetValue(name, "コンボ入力受付終了時間", data.stateInputEndTime);
 
-		globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBox.hitBoxWindowStart);
-		globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.hitBoxLifeTime);
-
+		
 		globalVariables->SetValue(name, "コンボ終了時間", data.stateEndTime);
 		globalVariables->SetValue(name, "コンボ移行時間", data.stateNextTime);
 
@@ -3906,27 +3869,39 @@ namespace Combo {
 		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
 		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
 
-		globalVariables->SetValue(name, "ノックバック持続時間", data.hitReaction.duration);
-		globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
-		globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
-		globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
-		globalVariables->SetValue(name, "ダメージ", data.hitReaction.damage);
-		globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.hitReactionType, "HitReactionType");
-		globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
-		globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
-		globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
-		globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
-		globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
+		// リアクション
+		{
+			globalVariables->SetValue(name, "ノックバック持続時間", data.hitReaction.duration);
+			globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
+			globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
+			globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
+			globalVariables->SetValue(name, "ダメージ", data.hitReaction.damageData.GetOne().damage);
+			globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
+			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
+			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
+			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
+			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
+			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		}
 
-		globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
+		// ヒットボックス
+		{
+			globalVariables->SetValue(name, "ヒットボックス発生時間", data.hitBox.windowStart);
+			globalVariables->SetValue(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
+			globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
+			globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
+			globalVariables->SetValue(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
+			globalVariables->SetValue(name, "ヒットボックスオフセット位置", data.hitBox.parentOffset);		// new
+			globalVariables->SetValue(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
 
-		globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
-		globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
-		globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
-		globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
-		globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
-
+			globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
+			globalVariables->SetEnumValue(name, "ヒットボックス依存先タイプ", data.hitBox.dependenceType, "HitBoxParentType");
+			globalVariables->SetEnumValue(name, "ヒットボックス影響タイプ", data.hitBox.hitEffectType, "HitBoxHitEffectType");
+			globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
+			globalVariables->SetEnumValue(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
+			globalVariables->SetEnumValue(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
+		}
 
 		globalVariables->SetEnumValue(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
 
@@ -3943,18 +3918,10 @@ namespace Combo {
 	void System::SetData(ComboData& data, const GlobalData& gData)
 	{
 		///
-		/// ヒットボックス
+		/// ヒットボックスとリアクションデータ
 		/// 
-		data.GetComboHitBox().GetData().hitBpxWindowStart = gData.hitBox.hitBoxWindowStart;	// 発生時間
-		data.GetComboHitBox().GetData().lifeTime = gData.hitBox.hitBoxLifeTime;				// 生成時間
-		data.GetComboHitBox().GetData().parentName = gData.hitBox.parentName;
+		data.GetComboHitBox().GetData() = gData.hitBox;
 		data.GetComboHitBox().SetPerent(GetParentTransform(gData.hitBox.parentName));
-		data.GetComboHitBox().GetData().offset = gData.hitBox.parentOffset;
-		data.GetComboHitBox().GetData().dependenceType = gData.hitBox.dependenceType;
-		data.GetComboHitBox().GetData().spawnType = gData.hitBox.spawnType;
-		data.GetComboHitBox().GetData().lifetimeType = gData.hitBox.lifetimeType;
-		data.GetComboHitBox().GetData().hitEffectType = gData.hitBox.hitEffectType;
-		data.GetComboHitBox().GetData().useContactRecord = gData.hitBox.useContactRecord;
 		///
 		/// 受付
 		/// 
@@ -4021,23 +3988,15 @@ namespace Combo {
 		data.GetComboMotion().GetComboMove().GetData().lockOnData.radius = gData.lockOn.lockOnRadius;
 	}
 
-	void System::CreateCombo(const std::string& comboNodeName, const std::vector<HitBox::CollData>& addHitBoxDatas) {
+	void System::CreateCombo(const std::string& comboNodeName) {
 		// コンボデータ
 		ComboData data{};
 		// グローバルデータ作成
 		CreateGlobalData(comboNodeName);
 		// データ設定
 		SetData(data, comboGlobalDatas_[comboNodeName]);
-		// ヒットボックス追加
-		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddCollider(addHitBoxData, comboGlobalDatas_[comboNodeName]);
-		}
 		// 使うヒットボックスクリア
 		data.GetComboHitBox().ClearUseHitBox();
-		// 使うヒットボックス追加
-		for (HitBox::CollData addHitBoxData : addHitBoxDatas) {
-			data.GetComboHitBox().AddUseHitBox(addHitBoxData.name);
-		}
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName_, data);
 	}
@@ -4176,7 +4135,7 @@ namespace Combo {
 		};
 
 		// コンボ作成
-		void CreateCombo(const std::string& comboNodeName, const std::vector< HitBox::CollData>& addHitBoxData);
+		void CreateCombo(const std::string& comboNodeName);
 	private:
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
@@ -4364,7 +4323,7 @@ namespace Combo {
 
 		// 常時なら
 		if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
-			hitBoxSystem->AddHitBox(id,data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.dependenceType, data_.offset,data_.useContactRecord, perent);
+			hitBoxSystem->AddHitBox(id, data_.useType, owner, collData_, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
 			hitBox = hitBoxSystem->GetHitBoxInstance(id);
 			hitBox->Disable(Vector4{ 1,1,1,0.0f });
 			hitBox->ClearContactRecord();
@@ -4374,9 +4333,7 @@ namespace Combo {
 	// 更新
 	void ComboHitBox::Update(const Character::CharacterContext& ctx, float timer) {
 		// ノックバック方向
-		for (auto& coll : collData_) {
-			coll.reactionData.normal = direction;
-		}
+		collData_.reactionData.normal = direction;
 
 		// 近距離か複合なら
 		if (Type::kMelle == type || Type::kMix == type) {
@@ -4386,14 +4343,14 @@ namespace Combo {
 				switch (data_.spawnType)
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
-					if (timer >= data_.hitBpxWindowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
+					if (timer >= data_.windowStart) {
+						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_,  data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.hitBoxUseType, owner, collData_, useHitBoxName_, data_.lifeTime, data_.dependenceType, data_.offset, data_.useContactRecord, perent);
+						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_, data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
 						isPopHitBox_ = true;
 					}
 					break;
@@ -4406,13 +4363,13 @@ namespace Combo {
 				}
 			}
 			// 常時なら
-			else if(data_.lifetimeType == HitBox::LifetimeType::kInfinite){
+			else if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
 				if (hitBox) {
-					if (timer >= data_.hitBpxWindowStart && timer <= data_.hitBpxWindowStart + data_.lifeTime) {
+					if (timer >= data_.windowStart && timer <= data_.lifeTime + data_.lifeTime) {
 						hitBox->Enable();
 					}
 					else {
-						hitBox->Disable(Vector4{1,1,1,0.0f});
+						hitBox->Disable(Vector4{ 1,1,1,0.0f });
 					}
 				}
 			}
@@ -4431,21 +4388,10 @@ namespace Combo {
 
 	void ComboHitBox::AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& combo) {
 		HitBox::CollData data = hitBoxData;
-
 		// リアクションデータ
-		data.reactionData.damageData.GetOne().damage = combo.hitReaction.damage;
-		data.reactionData.power = combo.hitReaction.power;
-		data.reactionData.verticalBoost = combo.hitReaction.verticalBoost;
-		data.reactionData.duration = combo.hitReaction.duration;
-		data.reactionData.isVerticalBoost = combo.hitReaction.isVerticalBoost;
-		data.reactionData.type = combo.hitReaction.hitReactionType;
-		data.reactionData.downTime = combo.hitReaction.downTime;
-		data.reactionData.launchFloatTime = combo.hitReaction.launchFloatTime;
-		data.reactionData.hitStunTime = combo.hitReaction.hitStunTime;
-		data.reactionData.gravityEnabled = combo.hitReaction.gravityEnabled;
-		data.reactionData.gravityScale = combo.hitReaction.gravityScale;
-
-		collData_.push_back(data);
+		data.reactionData = combo.hitReaction;
+		data.hitBoxData = combo.hitBox;
+		collData_ = data;
 	};
 
 #pragma endregion // コンボヒットボックス
@@ -4469,32 +4415,7 @@ namespace Combo {
 	/// </summary>
 	class ComboHitBox {
 	public:
-		~ComboHitBox() { 
-			collData_.clear();
-			useHitBoxName_.clear();
-		}
-		// ヒットボックスデータ
-		struct Data {
-			float hitBpxWindowStart = 1.0f;		// ヒットボックス生成スタート
-			float lifeTime = 1.0f;					// ヒットボックス生存時間
-			// ヒットボックス使用者タイプ
-			HitBox::UseType hitBoxUseType = HitBox::UseType::kPlayer;
-			// ヒットボックスの発生条件タイプ
-			HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
-			// ヒットボックス依存先タイプ
-			HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
-			// ヒットボックス生存タイプ
-			HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
-			// ヒットボックス影響タイプ
-			HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
-			// ヒット記録を使用するか（使用した場合連続ヒットしない）
-			bool useContactRecord = true;				
-			// オフセット
-			Vector3 offset{};
-			// 親子名
-			std::string	parentName = "";
-		};
-
+		~ComboHitBox() {}
 		// 開始
 		void Enter(Character::BaseCharacter* owner , Type type);
 
@@ -4503,12 +4424,11 @@ namespace Combo {
 
 		// 終了
 		void Exit();
-
-
 	public:
-		HitBox::CollData& GetCollData(int index) { return collData_[index]; }
 		// データ取得
-		Data& GetData() { return data_; }
+		HitBox::GlobalHitBox& GetData() { return data_; }
+		// CollData
+		HitBox::CollData& GetCollData() { return collData_;}
 		// コライダーデータ追加
 		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& reaction);
 		// 使うヒットボックス名設定
@@ -4536,9 +4456,9 @@ namespace Combo {
 		int32_t id = -1;
 	private:
 		// ヒットボックスデータ
-		Data data_;
+		HitBox::GlobalHitBox data_;
 		// コライダーデータ
-		std::vector<HitBox::CollData> collData_;
+		HitBox::CollData collData_;
 		// 使うヒットボックス名
 		std::vector<std::string> useHitBoxName_;
 
@@ -6571,12 +6491,34 @@ namespace HitBox {
 
 	};
 
+	// 保存項目ヒットボックス
+	struct GlobalHitBox {
+		// ヒットボックスの生成タイミング時間
+		float windowStart = 0.0f;
+		// ヒットボックスの生存時間
+		float lifeTime = 0.5f;
+		// ヒット記録を使用するか（使用した場合連続ヒットしない）
+		bool useContactRecord = true;
+		/// 親子付け設定  ///　 
+		std::string parentName = "なし";
+		// オフセット
+		Vector3 parentOffset = { 0.0f,0.0f,0.0f };
 
-
-	// 保存項目用データ
-	struct GlobalData {
-		Vector3 offset{};
-		Vector3 size = { 1.0f,1.0f,1.0f };
+		// ヒットボックス使用者タイプ
+		HitBox::UseType useType = HitBox::UseType::kPlayer;
+		// ヒットボックスの発生条件タイプ
+		HitBox::SpawnType spawnType = HitBox::SpawnType::kOnTime;
+		// ヒットボックス依存先タイプ
+		HitBox::ParentType dependenceType = HitBox::ParentType::kParent;
+		// ヒットボックス生存タイプ
+		HitBox::LifetimeType lifetimeType = HitBox::LifetimeType::kTimed;
+		// ヒットボックス影響タイプ
+		HitBox::HitEffectType hitEffectType = HitBox::HitEffectType::kDamageAndForce;
+		// ヒットボックス形状
+		HitBox::ShapeType shapeType = HitBox::ShapeType::kOBB;
+		// コライダーサイズ
+		Vector3 colliderSize = { 1.0f,1.0f,1.0f };
+		// 球半径
 		float radius = 1.0f;
 	};
 
@@ -6585,33 +6527,22 @@ namespace HitBox {
 		// 名前
 		std::string name = "";
 		// タグ
-		CollisionTag tag;
+		CollisionTag tag = CollisionTag::None;
 		// レイヤー
-		CollisionLayer layer;
+		CollisionLayer layer = CollisionLayer::Default;
 		// マスク
 		CollisionLayer mask;
 		// 有効か？
 		bool isEneble = true;
 		// デバック用ライン描画をするか
 		bool isLine = false;
-		// 親子付け対象名前
-		std::string parentName = "";	
-		// コライダー形状
-		ShapeType shape = ShapeType::kOBB;
-		// コライダーの内容
-		HitEffectType hitEffectType = HitEffectType::kDamageAndForce;
-		// オフセット
-		Vector3 offset{};
-		// AABBやOBB用サイズ 
-		Vector3 size = { 1.0f,1.0f,1.0f };
-		// 球用サイズ
-		float radius = 1.0f;
+		GlobalHitBox hitBoxData;
 		// リアクションデータ
 		HitReactionData reactionData;
 	};
 
 
-
+	
 
 
 };
@@ -6764,7 +6695,7 @@ namespace HitBox {
 		ImGui::End();
 	}
 
-	void HitBoxEditor::CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalData& data) {
+	void HitBoxEditor::CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalHitBox& data) {
 		// 既に存在する場合は追加しない
 		if (hitBoxColls_.find(hitBoxName) != hitBoxColls_.end()) {
 			return;
@@ -6854,7 +6785,7 @@ namespace HitBox {
 
 	private:
 		// ヒットボックスエディターブロック作成
-		void CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalData& data);
+		void CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalHitBox& data);
 
 	private:
 		std::map<std::string, HitBoxColl> hitBoxColls_;
@@ -7038,25 +6969,25 @@ namespace HitBox {
 	}
 
 	// ヒットボックス追加
-	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const CollData& datas,
 		float lifeTime, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
 		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
-		CreateParent(d, dependenceType,offset,parent);
+		CreateParent(d, dependenceType, offset, parent);
 		// コライダー生成
-		CreateHitBoxCollider(d, datas, useHitBoxName);
+		CreateHitBoxCollider(d, datas);
 		d.lifeTime = lifeTime;							// 生存時間
 		d.timer = 0.0f;									// 時間
 		// ヒットボックス(期限付き)データに挿入
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
 	}
 
-	void System::AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName,
+	void System::AddHitBox(int32_t& id, UseType type, Character::BaseCharacter* character, const CollData& datas,
 		ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
-		
+
 		// IDがあるなら早期リターン
 		if (id != -1) return;
 		Data d;
@@ -7071,67 +7002,22 @@ namespace HitBox {
 		// 依存先設定
 		CreateParent(d, dependenceType, offset, parent);
 		// コライダー生成
-		CreateHitBoxCollider(d, datas, useHitBoxName);
+		CreateHitBoxCollider(d, datas);
 		// ヒットボックス(無期限)データに挿入
 		hitBoxDatas_.push_back(std::move(d));
 	}
-
-	// コライダーデータ生成
-	void System::CreateHitBoxCollData(const std::string& name, HitBox::ShapeType shape, UseType useType,
-		const GlobalData& hitBoxData) {
-
-
-		if (hitBoxCollDatas_.contains(name)) {
-			return; // すでに存在する場合は何もしない
-		}
-
-
-		CollData data;
-		data.isEneble = true;	// 有効化
-		data.isLine = true;		// ライン表示
-		data.shape = shape;		// 形状選択
-		data.name = name;		// 名前
-
-		// コライダーの位置と大きさの設定
-		data.offset = hitBoxData.offset;
-		data.radius = hitBoxData.radius;
-		data.size = hitBoxData.size;
-
-		// 使用者
-		switch (useType)
-		{
-		case UseType::kPlayer:
-			data.layer = CollisionLayer::PlayerAttack;
-			data.tag = CollisionTag::PlayerAttack;
-			data.mask = CollisionLayer::Enemy;
-			break;
-		case UseType::kEnemy:
-			data.layer = CollisionLayer::EnemyAttack;
-			data.tag = CollisionTag::EnemyAttack;
-			data.mask = CollisionLayer::Player;
-			break;
-		case UseType::kOther:
-			break;
-		default:
-			break;
-		}
-		hitBoxCollDatas_[name] = data;
-	}
-
+	//
 	HitBoxInstance* System::GetHitBoxInstance(int32_t id) {
 		for (auto& hit : hitBoxDatas_) {
 			if (hit.id == id)
-			return hit.hitBox.get();
+				return hit.hitBox.get();
 		}
 		return nullptr;
 	}
-
-
-	
 	// 親子付け生成
 	void System::CreateParent(Data& d, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent) {
 		// 依存先設定
-		switch (dependenceType){
+		switch (dependenceType) {
 		case ParentType::kParent: // 親子付け 
 			d.hitBox->GetWorldTransform().parent_ = parent; // 親子設定
 			break;
@@ -7157,54 +7043,38 @@ namespace HitBox {
 		}
 	}
 	// コライダー生成
-	void System::CreateHitBoxCollider(Data& d, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName) {
-		for (auto& data : datas) {
+	void System::CreateHitBoxCollider(Data& d, const CollData& data) {
 
-			// ここで "名前が使われるコライダーかどうか" を判定する
-			if (!useHitBoxName.empty()) {
-				bool use = false;
-				for (const auto& name : useHitBoxName) {
-					if (data.name == name) {
-						use = true;
-						break;
-					}
-				}
-				// 対象外ならスキップ
-				if (!use) continue;
-			}
-
-			// 形状によっての設定項目
-			switch (data.shape){
-			case ShapeType::kOBB:
-			{
-				std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
-				collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collObb->obb.size = data.size;
-				d.hitBox->AddCollider(std::move(collObb), data.offset, data.reactionData);
-				break;
-			}
-			case ShapeType::kAABB:
-			{
-				std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
-				collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collAABB->aabb.min = -data.size / 2;
-				collAABB->aabb.max = data.size / 2;
-				d.hitBox->AddCollider(std::move(collAABB), data.offset, data.reactionData);
-				break;
-			}
-			case ShapeType::kSphere:
-			{
-				std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
-				collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
-				collSphere->radius = data.radius;
-				d.hitBox->AddCollider(std::move(collSphere), data.offset, data.reactionData);
-				break;
-			}
-			default:
-				break;
-			}
+		// 形状によっての設定項目
+		switch (data.hitBoxData.shapeType) {
+		case ShapeType::kOBB:
+		{
+			std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
+			collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collObb->obb.size = data.hitBoxData.colliderSize;
+			d.hitBox->AddCollider(std::move(collObb), data.hitBoxData.parentOffset, data.reactionData);
+			break;
 		}
-
+		case ShapeType::kAABB:
+		{
+			std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
+			collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collAABB->aabb.min = -data.hitBoxData.colliderSize / 2;
+			collAABB->aabb.max = data.hitBoxData.colliderSize / 2;
+			d.hitBox->AddCollider(std::move(collAABB), data.hitBoxData.parentOffset, data.reactionData);
+			break;
+		}
+		case ShapeType::kSphere:
+		{
+			std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
+			collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collSphere->radius = data.hitBoxData.radius;
+			d.hitBox->AddCollider(std::move(collSphere), data.hitBoxData.parentOffset, data.reactionData);
+			break;
+		}
+		default:
+			break;
+		}
 	}
 	// クリア
 	void System::Clear() {
@@ -7241,7 +7111,6 @@ namespace HitBox {
 	public:
 		~System() {
 			lifeTimeHitBoxDatas_.clear();
-			hitBoxCollDatas_.clear();
 		}
 
 		struct Data {
@@ -7261,35 +7130,19 @@ namespace HitBox {
 
 
 		// ヒットボックス追加（期限付き）
-		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
+		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character,const CollData& datas,
+			float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
 
 		// ヒットボックス追加（無期限）
-		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName
-			, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
-
-
-		// ヒットボックスコライダーデータ作成
-		void CreateHitBoxCollData(const std::string& name, ShapeType shape, UseType useType, const GlobalData& hitBoxData);
-
+		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character,const CollData& datas,
+			ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
 		// 全体データ取得(期限付きヒットボックス)
 		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
 		// 全体データ取得(無期限ヒットボックス)
 		std::vector<Data>& GetHitBoxData() { return hitBoxDatas_; }
 		// ヒットボックスインスタンス取得
 		HitBoxInstance* GetHitBoxInstance(int32_t id);
-
-		// 名前からヒットボックスコライダーデータ取得
-		CollData GetHitBoxCollData(const std::string& name) {
-			if (hitBoxCollDatas_.find(name) != hitBoxCollDatas_.end()) {
-				return hitBoxCollDatas_[name];
-			}
-			else {
-				// 見つからなかった場合、空のデータを返す
-				return CollData{};
-			}
-		}
-
+		// クリア
 		void Clear();
 
 	private:
@@ -7297,7 +7150,7 @@ namespace HitBox {
 		void CreateParent(Data& d, ParentType dependenceType, const Vector3& offset, Engine::WorldTransform* parent);
 
 		// コライダーの生成処理
-		void CreateHitBoxCollider(Data& d, const std::vector<CollData>& datas, const std::vector<std::string>& useHitBoxName);
+		void CreateHitBoxCollider(Data& d,const CollData& datas);
 		// コライダー生成
 		template <typename T>
 		static std::unique_ptr<T> CreateCollider(CollisionTag tag, CollisionLayer layer, CollisionLayer mask, bool isEneble = true, bool isLine = false);
@@ -7306,10 +7159,6 @@ namespace HitBox {
 		std::vector<Data> lifeTimeHitBoxDatas_;
 		// 無期限ヒットボックスデータ
 		std::vector<Data> hitBoxDatas_;
-		// 無期限ヒットボックス用カウント
-
-		// ヒットボックスコライダーデータ群
-		std::map<std::string, CollData> hitBoxCollDatas_;
 	private:
 		Engine::EntityManager* entityManager = nullptr;
 	};
@@ -7416,7 +7265,7 @@ namespace HitBox {
 		ColliderData data;
 		data.colliderID = colliderComponent_->AddCollider(std::move(collider));
 		data.collider = colliderComponent_->FindColliderById(data.colliderID);
-
+		data.collider->isDebugLine = true;
 
 		worldTransform_.Update();
 
@@ -8168,10 +8017,10 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		data_.isLine = true;
 		data_.tag = param_.collisionTag;
 		data_.layer = param_.collisionLayer;
-		data_.size = { 1.0f,2.0f,1.0f };
+		data_.hitBoxData.colliderSize = { 1.0f,2.0f,1.0f };
 		data_.name = param_.name;
 		data_.reactionData.damageData.GetOne().damage = param_.explosionDamage;
-		data_.radius = param_.explosionRadius;
+		data_.hitBoxData.radius = param_.explosionRadius;
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
 		if (CollisionTag::Player == self->tag) {
@@ -8186,7 +8035,7 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 			owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
 		}
 		// 爆発ヒットボックス生成
-		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, { data_ }, {},
+		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, data_,
 			param_.explosionLifeTime, HitBox::ParentType::kParentIndependent, {},
 			true, &objectComponent_->GetWorldTransform());
 	}
@@ -13873,6 +13722,9 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 void Character::DummyEnemyDamageState::Update(const CharacterContext& ctx) {
+	if (character->GetHP() <= 0) {
+		//character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+	}
 	if (character->GetHitMotionSystem()->IsFinished()) {
 		character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 	}
@@ -14407,6 +14259,12 @@ namespace Character {
 #pragma region Damage
 
 	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
+		if (character->GetHP() <= 0) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+			return;
+		}
+
+
 		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
@@ -14624,7 +14482,7 @@ namespace Character {
         data.tag = CollisionTag::Enemy;
         data.layer = CollisionLayer::Enemy;
         data.mask = CollisionLayer::Player;
-        data.size = { 1.0f, 2.0f, 1.0f };
+        data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
         data.name = "NormalEnemy_SwingHitBox";
         data.reactionData.damageData.GetOne().damage = 10.0f;
 
@@ -14632,8 +14490,7 @@ namespace Character {
         enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
             HitBox::UseType::kEnemy,
             enemy,
-            { data },
-            {},
+            data,
             swingTime_,
             HitBox::ParentType::kParent,
             {},
@@ -15386,7 +15243,10 @@ namespace Character {
 #pragma region Damage
 	
 	void SmallMeleeEnemyDamageState::Update(const CharacterContext& ctx) {
-		
+		if (character->GetHP() <= 0) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+			return;
+		}
 		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
@@ -15609,15 +15469,13 @@ namespace Character {
 		data.tag = CollisionTag::EnemyAttack;
 		data.layer = CollisionLayer::EnemyAttack;
 		data.mask = CollisionLayer::Player;
-		data.size = { 1.0f, 2.0f, 1.0f };
-		data.name = "NormalEnemy_SwingHitBox";
+		data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
 		data.reactionData.damageData.GetOne().damage = 10.0f;
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
 			HitBox::UseType::kEnemy,
 			enemy,
-			{ data },
-			{},
+			data,
 			swingTime_,
 			HitBox::ParentType::kParent,
 			{},
@@ -16124,6 +15982,10 @@ namespace Character {
 #pragma endregion
 
 	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
+		if (character->GetHP() <= 0) {
+			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+			return;
+		}
 		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
@@ -16685,57 +16547,31 @@ namespace Character {
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
 
-		HitBox::System* hitBoxSystem = GetHitBoxSystem();
-
-		// ヒットボックスデータ作成
-		HitBox::GlobalData hitBoxdata3 = { { 0,0,3 } ,{ 3,3,3 } };
-		HitBox::GlobalData hitBoxdata4 = { { 0,0,0 },{},6.0f };
-		HitBox::GlobalData hitBoxdata6 = { {0,0,2} ,  {2,2,2} };
-		HitBox::GlobalData hitBoxdata7 = { {0,0,0} ,  {4,4,2} };
-
-
-		hitBoxSystem->CreateHitBoxCollData("attackObb", HitBox::ShapeType::kOBB, HitBox::UseType::kPlayer, hitBoxdata3);
-		hitBoxSystem->CreateHitBoxCollData("attackSphere", HitBox::ShapeType::kSphere, HitBox::UseType::kPlayer, hitBoxdata4);
-		hitBoxSystem->CreateHitBoxCollData("obbColl1_2", HitBox::ShapeType::kOBB, HitBox::UseType::kPlayer, hitBoxdata6);
-		hitBoxSystem->CreateHitBoxCollData("obbColl1_3", HitBox::ShapeType::kOBB, HitBox::UseType::kPlayer, hitBoxdata7);
-
 		// コンボ１のデータ送る
-		comboSystem->CreateCombo("Attack1", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack1");
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack2");
 		// コンボ３のデータ送る
-		comboSystem->CreateCombo("Attack3", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack3");
 		// ジャンプコンボのデータ送る
-		comboSystem->CreateCombo("JumpAttack", { hitBoxSystem->GetHitBoxCollData("attackSphere") });
+		comboSystem->CreateCombo("JumpAttack");
 		// コンボ4のデータ送る
-		comboSystem->CreateCombo("Attack4", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack4");
 		// コンボ5のデータ送る
-		comboSystem->CreateCombo("Attack5", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack5");
 		// コンボ6のデータ送る
-		comboSystem->CreateCombo("Attack6", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack6");
 		// コンボ7のデータ送る
-		comboSystem->CreateCombo("Attack7", { hitBoxSystem->GetHitBoxCollData("attackObb") });
-
+		comboSystem->CreateCombo("Attack7");
 		// コンボ8のデータ送る
-		comboSystem->CreateCombo("Attack8", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack8");
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("Attack9", { hitBoxSystem->GetHitBoxCollData("attackObb") });
+		comboSystem->CreateCombo("Attack9");
 		// コンボ10のデータ送る
-		comboSystem->CreateCombo("Attack10", { hitBoxSystem->GetHitBoxCollData("attackObb") });
-
-
-		// コンボ8のデータ送る
-		//comboSystem->CreateCombo("HeavyAttack01", {  hitBoxSystem->GetHitBoxCollData("obbColl1_2")  });
-		// コンボ9のデータ送る
-		//comboSystem->CreateCombo("HeavyAttack02", {  hitBoxSystem->GetHitBoxCollData("attackObb")  });
-		// コンボ8のデータ送る
-		//comboSystem->CreateCombo("HeavyAttack03", {  hitBoxSystem->GetHitBoxCollData("attackObb")  });
+		comboSystem->CreateCombo("Attack10");
 
 		// コンボ9のデータ送る
-		comboSystem->CreateCombo("SkillAttack01", { hitBoxSystem->GetHitBoxCollData("obbColl1_3") });
-
-
-
+		comboSystem->CreateCombo("SkillAttack01");
 
 		// コンボ連結設定
 		comboSystem->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
@@ -16747,15 +16583,8 @@ namespace Character {
 		comboSystem->ConnectCombo("Attack5", AttackInput::Light, "Attack6"); // コンボ連結
 		comboSystem->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
 
-
-		//comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Heavy, "HeavyAttack02"); // コンボ連結	
-		//comboSystem->ConnectCombo("HeavyAttack01", AttackInput::Light, "Attack7"); // コンボ連結	
-
-		//comboSystem->ConnectCombo("HeavyAttack02", AttackInput::Heavy, "HeavyAttack03"); // コンボ連結	
-
 		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Skill, "SkillAttack01"); // コンボ連結
 		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Light, "Attack6"); // コンボ連結
-
 	}
 
 	void NormalPlayer::Reload() { ReloadComboData(); }
@@ -38724,7 +38553,7 @@ void Engine::WinApp::Initialize()
 	hwnd = CreateWindow(
 
 		wc.lpszClassName,      // 利用するクラス
-		L"LE3A_10_カタジマロウノシン",	// タイトルバーの文字 (何でもいい)
+		L"LE4A_11_カタジマロウノシン",	// タイトルバーの文字 (何でもいい)
 		WS_OVERLAPPEDWINDOW,   // よく見るウィンドウスタイル
 		CW_USEDEFAULT,		   // 表示X座標 (windousに任せる)
 		CW_USEDEFAULT,		   // 表示Y座標 (WindowsOSに任せる)
