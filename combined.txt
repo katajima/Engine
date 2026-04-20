@@ -1950,9 +1950,8 @@ public:
 		// ダメージ設定
 		void SetDamage(float damage) { this->damage = damage; };
 
-	public:
-		float damage = 0;			// ダメージ(変化がない場合)
 	private:
+		float damage = 0;			// ダメージ(変化がない場合)
 		float timer = 0.0f;		// 時間
 		bool isDamage = true;	// ダメージを入れるか
 		bool isFinish = false;	// 攻撃として終了したか
@@ -1973,7 +1972,7 @@ public:
 		float GetDamage() const;
 		// 一つ一つのダメージの変化タイプ取得
 		OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
-	public:
+	private:
 		OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 一つ一つのダメージの変化タイプ
 		float interval = 0.1f;		// 連撃のダメージ入りる間隔
 		int num = 2;				// 連撃のダメージの回数
@@ -2002,7 +2001,7 @@ public:
 		float GetDamage() const;
 		// ダメージ設定
 		void SetDamage(float damage) { this->damage = damage; };
-	public:
+	private:
 		float interval = 0.1f;	// 持続ダメージの入る間隔	
 		int num = 2;			// 持続ダメージの回数
 		float damage = 0;		// ダメージ
@@ -2462,12 +2461,39 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
+			
+			// タグタイプ
+			static const char* HitBoxTagTypeLabels[] = {
+				"何もなし",
+				"プレイヤー",
+				"敵",
+				"プレイヤー攻撃",
+				"敵攻撃",
+				"障害物(壁や床)",
+				"アイテム",
+				"プレイヤーによる影響",
+				"敵による影響"
+			};
+			Engine::ImGuiManager::Select("コライダー(タグ)", HitBoxTagTypeLabels, data_.hitBox.tag);
+			
+			// レイヤタイプ
+			static const char* HitBoxLayerTypeLabels[] = {
+				"デフォルト",
+				"プレイヤー",
+				"敵",
+				"プレイヤー攻撃",
+				"敵攻撃",
+				"環境",
+				"全て",
+			};
+			Engine::ImGuiManager::Select("コライダー(レイヤー)", HitBoxLayerTypeLabels, data_.hitBox.layer);
+			Engine::ImGuiManager::Select("コライダー(マスク)", HitBoxLayerTypeLabels, data_.hitBox.mask);
 
 
 			// ヒット記録を使用
 			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
 			// オフセット
-			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset.x, 0.1f);
+			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
 			// サイズ
 			if(data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
 				data_.hitBox.shapeType == HitBox::ShapeType::kOBB)
@@ -2535,7 +2561,9 @@ namespace Combo {
 			ImGui::SliderFloat("パワー", &data_.hitReaction.power, 0.0f, 999.0f, "%.2f");
 			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
 			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
-			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damageData.GetOne().damage, 0.0f, 1000.0f, "%.2f");
+			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
+			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
+			data_.hitReaction.damageData.GetOne().SetDamage(damage);
 			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
@@ -2559,8 +2587,6 @@ namespace Combo {
 		data_.move.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
 
 
-		// リアクション
-		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
 		
 
 		// アニメーションスピード
@@ -2570,8 +2596,12 @@ namespace Combo {
 		data_.animation.animationName = comboData.GetComboMotion().GetComboAnimation().GetData().animationName_;
 
 
-		// 親
-		data_.hitBox = comboData.GetComboHitBox().GetData();
+		// ヒットボックスデータ
+		data_.hitBox = comboData.GetComboHitBox().GetCollData().hitBoxData;
+		// リアクションデータ
+		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
+
+
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
 
@@ -3136,8 +3166,8 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	float endComboTime = comboData.GetComboCondition().GetEndCondition().GetData().stateTime;
 
 	// ヒットボックス生成時間
-	float hitBoxStart = comboData.GetComboHitBox().GetData().windowStart;
-	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetData().lifeTime;
+	float hitBoxStart = comboData.GetComboHitBox().GetCollData().hitBoxData.windowStart;
+	float hitBoxEnd = hitBoxStart + comboData.GetComboHitBox().GetCollData().hitBoxData.lifeTime;
 
 	// コンボ終了時間
 	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
@@ -3693,7 +3723,7 @@ namespace Combo {
 
 		// リアクション
 		{
-			globalVariables->AddItem(name, "ダメージ", data.hitReaction.damageData.GetOne().damage);
+			globalVariables->AddItem(name, "ダメージ", data.hitReaction.damageData.GetOne().GetDamage());
 			globalVariables->AddItem(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
 			globalVariables->AddItem(name, "ノックバック力", data.hitReaction.power);
 			globalVariables->AddItem(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
@@ -3742,7 +3772,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "ヒットボックス生存時間", data.hitBox.lifeTime);
 			globalVariables->AddItem(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 			globalVariables->AddItem(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
-			globalVariables->AddItem(name, "ヒットボックスオフセット位置", data.hitBox.parentOffset);		// new
+			globalVariables->AddItem(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
 			globalVariables->AddItem(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
 
 			globalVariables->AddEnumItem(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
@@ -3751,6 +3781,9 @@ namespace Combo {
 			globalVariables->AddEnumItem(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
 			globalVariables->AddEnumItem(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
 			globalVariables->AddEnumItem(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
+			globalVariables->AddEnumItem(name, "コライダー(タグ)", data.hitBox.tag, "CollisionTag");
+			globalVariables->AddEnumItem(name, "コライダー(レイヤー)", data.hitBox.layer, "CollisionLayer");
+			globalVariables->AddEnumItem(name, "コライダー(マスク)", data.hitBox.mask, "CollisionMask");
 		}
 		
 		globalVariables->AddEnumItem(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
@@ -3764,21 +3797,6 @@ namespace Combo {
 	};
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
-		// リアクション
-		{
-			data.hitReaction.damageData.GetOne().damage = globalVariables->GetValue<float>(name, "ダメージ");
-			data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
-			data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
-			data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
-			data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
-			data.hitReaction.type = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
-			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
-			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
-			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
-			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
-			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
-		}
-
 		data.stateInputStartTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
 		data.stateInputEndTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
 		data.stateEndTime = globalVariables->GetValue<float>(name, "コンボ終了時間");
@@ -3809,14 +3827,29 @@ namespace Combo {
 		data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
 		data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
 
+
+		// リアクション
+		{
+			data.hitReaction.damageData.GetOne().SetDamage(globalVariables->GetValue<float>(name, "ダメージ"));
+			data.hitReaction.isVerticalBoost = globalVariables->GetValue<bool>(name, "Y方向ノックバック");
+			data.hitReaction.power = globalVariables->GetValue<float>(name, "ノックバック力");
+			data.hitReaction.verticalBoost = globalVariables->GetValue<float>(name, "Y方向ノックバック力");
+			data.hitReaction.duration = globalVariables->GetValue<float>(name, "ノックバック持続時間");
+			data.hitReaction.type = globalVariables->GetEnumValue<HitReactionType>(name, "ヒットリアクションタイプ");
+			data.hitReaction.hitStunTime = globalVariables->GetValue<float>(name, "ヒットスタン持続時間");
+			data.hitReaction.downTime = globalVariables->GetValue<float>(name, "ダウン持続時間");
+			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
+			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
+			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
+		}
 		// ヒットボックス
 		{
 			data.hitBox.parentName = globalVariables->GetValue<std::string>(name, "親オブジェクト名前");
 			data.hitBox.windowStart = globalVariables->GetValue<float>(name, "ヒットボックス発生時間");
 			data.hitBox.lifeTime = globalVariables->GetValue<float>(name, "ヒットボックス生存時間");
 			data.hitBox.useContactRecord = globalVariables->GetValue<bool>(name, "ヒットボックスヒット記録を使用");
-			data.hitBox.colliderSize = globalVariables->GetValue<float>(name, "ヒットボックスコライダーサイズ");
-			data.hitBox.parentOffset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
+			data.hitBox.colliderSize = globalVariables->GetValue<Vector3>(name, "ヒットボックスコライダーサイズ");
+			data.hitBox.offset = globalVariables->GetValue<Vector3>(name, "ヒットボックスオフセット位置");
 			data.hitBox.radius = globalVariables->GetValue<float>(name, "ヒットボックスコライダー半径");
 
 			data.hitBox.spawnType = globalVariables->GetEnumValue<HitBox::SpawnType>(name, "ヒットボックス発生条件タイプ");
@@ -3825,6 +3858,11 @@ namespace Combo {
 			data.hitBox.lifetimeType = globalVariables->GetEnumValue<HitBox::LifetimeType>(name, "ヒットボックス生存タイプ");
 			data.hitBox.shapeType = globalVariables->GetEnumValue<HitBox::ShapeType>(name, "ヒットボックス形状タイプ");
 			data.hitBox.useType = globalVariables->GetEnumValue<HitBox::UseType>(name, "ヒットボックス使用者タイプ");
+		
+			
+			data.hitBox.tag = globalVariables->GetEnumValue<CollisionTag>(name, "コライダー(タグ)");
+			data.hitBox.layer = globalVariables->GetEnumValue<CollisionLayer>(name, "コライダー(レイヤー)");
+			data.hitBox.mask = globalVariables->GetEnumValue<CollisionLayer>(name, "コライダー(マスク)");
 		}
 
 
@@ -3876,7 +3914,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "ノックバック力", data.hitReaction.power);
 			globalVariables->SetValue(name, "Y方向ノックバック力", data.hitReaction.verticalBoost);
 			globalVariables->SetValue(name, "Y方向ノックバック", data.hitReaction.isVerticalBoost);
-			globalVariables->SetValue(name, "ダメージ", data.hitReaction.damageData.GetOne().damage);
+			globalVariables->SetValue(name, "ダメージ", data.hitReaction.damageData.GetOne().GetDamage());
 			globalVariables->SetEnumValue(name, "ヒットリアクションタイプ", data.hitReaction.type, "HitReactionType");
 			globalVariables->SetValue(name, "ヒットスタン持続時間", data.hitReaction.hitStunTime);
 			globalVariables->SetValue(name, "ダウン持続時間", data.hitReaction.downTime);
@@ -3892,7 +3930,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "親オブジェクト名前", data.hitBox.parentName);
 			globalVariables->SetValue(name, "ヒットボックスヒット記録を使用", data.hitBox.useContactRecord);
 			globalVariables->SetValue(name, "ヒットボックスコライダーサイズ", data.hitBox.colliderSize);		// new
-			globalVariables->SetValue(name, "ヒットボックスオフセット位置", data.hitBox.parentOffset);		// new
+			globalVariables->SetValue(name, "ヒットボックスオフセット位置", data.hitBox.offset);		// new
 			globalVariables->SetValue(name, "ヒットボックスコライダー半径", data.hitBox.radius);				// new
 
 			globalVariables->SetEnumValue(name, "ヒットボックス発生条件タイプ", data.hitBox.spawnType, "HitBoxSpawnType");
@@ -3901,6 +3939,12 @@ namespace Combo {
 			globalVariables->SetEnumValue(name, "ヒットボックス生存タイプ", data.hitBox.lifetimeType, "HitBoxLifetimeType");
 			globalVariables->SetEnumValue(name, "ヒットボックス形状タイプ", data.hitBox.shapeType, "HitBoxShapeType");
 			globalVariables->SetEnumValue(name, "ヒットボックス使用者タイプ", data.hitBox.useType, "HitBoxUseType");
+		
+			globalVariables->SetEnumValue(name, "コライダー(タグ)", data.hitBox.tag, "CollisionTag");
+			globalVariables->SetEnumValue(name, "コライダー(レイヤー)", data.hitBox.layer, "CollisionLayer");
+			globalVariables->SetEnumValue(name, "コライダー(マスク)", data.hitBox.mask, "CollisionMask");
+
+		
 		}
 
 		globalVariables->SetEnumValue(name, "終了条件タイプ", data.endConditionType, "EndConditionType");
@@ -3920,7 +3964,7 @@ namespace Combo {
 		///
 		/// ヒットボックスとリアクションデータ
 		/// 
-		data.GetComboHitBox().GetData() = gData.hitBox;
+		data.GetComboHitBox().GetCollData() = HitBox::CollData{"",gData.hitBox ,gData .hitReaction};
 		data.GetComboHitBox().SetPerent(GetParentTransform(gData.hitBox.parentName));
 		///
 		/// 受付
@@ -4322,8 +4366,8 @@ namespace Combo {
 		movementComponent = owner->GetMoveComponent();
 
 		// 常時なら
-		if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
-			hitBoxSystem->AddHitBox(id, data_.useType, owner, collData_, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
+		if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kInfinite) {
+			hitBoxSystem->AddHitBox(id, owner, collData_, perent);
 			hitBox = hitBoxSystem->GetHitBoxInstance(id);
 			hitBox->Disable(Vector4{ 1,1,1,0.0f });
 			hitBox->ClearContactRecord();
@@ -4338,19 +4382,19 @@ namespace Combo {
 		// 近距離か複合なら
 		if (Type::kMelle == type || Type::kMix == type) {
 			// 一時的なコライダーなら
-			if (data_.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
+			if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
 				// 出現方法によっての処理
-				switch (data_.spawnType)
+				switch (collData_.hitBoxData.spawnType)
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
-					if (timer >= data_.windowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_,  data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
+					if (timer >= collData_.hitBoxData.windowStart) {
+						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_, data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
+						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
 						isPopHitBox_ = true;
 					}
 					break;
@@ -4363,9 +4407,9 @@ namespace Combo {
 				}
 			}
 			// 常時なら
-			else if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
+			else if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kInfinite) {
 				if (hitBox) {
-					if (timer >= data_.windowStart && timer <= data_.lifeTime + data_.lifeTime) {
+					if (timer >= collData_.hitBoxData.windowStart && timer <= collData_.hitBoxData.windowStart + collData_.hitBoxData.lifeTime) {
 						hitBox->Enable();
 					}
 					else {
@@ -4425,8 +4469,6 @@ namespace Combo {
 		// 終了
 		void Exit();
 	public:
-		// データ取得
-		HitBox::GlobalHitBox& GetData() { return data_; }
 		// CollData
 		HitBox::CollData& GetCollData() { return collData_;}
 		// コライダーデータ追加
@@ -4455,8 +4497,6 @@ namespace Combo {
 		//
 		int32_t id = -1;
 	private:
-		// ヒットボックスデータ
-		HitBox::GlobalHitBox data_;
 		// コライダーデータ
 		HitBox::CollData collData_;
 		// 使うヒットボックス名
@@ -6502,7 +6542,7 @@ namespace HitBox {
 		/// 親子付け設定  ///　 
 		std::string parentName = "なし";
 		// オフセット
-		Vector3 parentOffset = { 0.0f,0.0f,0.0f };
+		Vector3 offset = { 0.0f,0.0f,0.0f };
 
 		// ヒットボックス使用者タイプ
 		HitBox::UseType useType = HitBox::UseType::kPlayer;
@@ -6520,31 +6560,28 @@ namespace HitBox {
 		Vector3 colliderSize = { 1.0f,1.0f,1.0f };
 		// 球半径
 		float radius = 1.0f;
+
+		// タグ
+		CollisionTag tag = CollisionTag::None;
+		// レイヤー
+		CollisionLayer layer = CollisionLayer::ALL;
+		// マスク
+		CollisionLayer mask = CollisionLayer::ALL;
+		// 有効か？
+		bool isEneble = true;
+		// デバック用ライン描画をするか
+		bool isLine = false;
 	};
 
 	// コライダーデータ
 	struct CollData	{
 		// 名前
 		std::string name = "";
-		// タグ
-		CollisionTag tag = CollisionTag::None;
-		// レイヤー
-		CollisionLayer layer = CollisionLayer::Default;
-		// マスク
-		CollisionLayer mask;
-		// 有効か？
-		bool isEneble = true;
-		// デバック用ライン描画をするか
-		bool isLine = false;
+		// ヒットボックスデータ
 		GlobalHitBox hitBoxData;
 		// リアクションデータ
 		HitReactionData reactionData;
 	};
-
-
-	
-
-
 };
 
 ============================================================
@@ -6969,30 +7006,30 @@ namespace HitBox {
 	}
 
 	// ヒットボックス追加
-	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const CollData& datas,
-		float lifeTime, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
+	void System::AddLifeTimeHitBox(Character::BaseCharacter* character, const CollData& datas,
+		Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
+		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
-		CreateParent(d, dependenceType, offset, parent);
+		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
-		d.lifeTime = lifeTime;							// 生存時間
+		d.lifeTime = datas.hitBoxData.lifeTime;							// 生存時間
 		d.timer = 0.0f;									// 時間
 		// ヒットボックス(期限付き)データに挿入
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
 	}
 
-	void System::AddHitBox(int32_t& id, UseType type, Character::BaseCharacter* character, const CollData& datas,
-		ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
+	void System::AddHitBox(int32_t& id, Character::BaseCharacter* character, const CollData& datas,
+		 Engine::WorldTransform* parent) {
 
 		// IDがあるなら早期リターン
 		if (id != -1) return;
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
+		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 
 		// Id設定;
@@ -7000,7 +7037,7 @@ namespace HitBox {
 		id = d.id;
 
 		// 依存先設定
-		CreateParent(d, dependenceType, offset, parent);
+		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
 		// ヒットボックス(無期限)データに挿入
@@ -7044,32 +7081,37 @@ namespace HitBox {
 	}
 	// コライダー生成
 	void System::CreateHitBoxCollider(Data& d, const CollData& data) {
+		CollisionTag tag = data.hitBoxData.tag;
+		CollisionLayer layer = data.hitBoxData.layer;
+		CollisionLayer mask = data.hitBoxData.mask;
+		bool isEneble = data.hitBoxData.isEneble;
+		bool isLine = data.hitBoxData.isLine;
 
 		// 形状によっての設定項目
 		switch (data.hitBoxData.shapeType) {
 		case ShapeType::kOBB:
 		{
 			std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
-			collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collObb = CreateCollider<Engine::OBBCollider>(tag, layer, mask, isEneble, isLine);
 			collObb->obb.size = data.hitBoxData.colliderSize;
-			d.hitBox->AddCollider(std::move(collObb), data.hitBoxData.parentOffset, data.reactionData);
+			d.hitBox->AddCollider(std::move(collObb), data.hitBoxData.offset, data.reactionData);
 			break;
 		}
 		case ShapeType::kAABB:
 		{
 			std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
-			collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collAABB = CreateCollider<Engine::AABBCollider>(tag, layer, mask, isEneble, isLine);
 			collAABB->aabb.min = -data.hitBoxData.colliderSize / 2;
 			collAABB->aabb.max = data.hitBoxData.colliderSize / 2;
-			d.hitBox->AddCollider(std::move(collAABB), data.hitBoxData.parentOffset, data.reactionData);
+			d.hitBox->AddCollider(std::move(collAABB), data.hitBoxData.offset, data.reactionData);
 			break;
 		}
 		case ShapeType::kSphere:
 		{
 			std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
-			collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collSphere = CreateCollider<Engine::SphereCollider>(tag, layer, mask, isEneble, isLine);
 			collSphere->radius = data.hitBoxData.radius;
-			d.hitBox->AddCollider(std::move(collSphere), data.hitBoxData.parentOffset, data.reactionData);
+			d.hitBox->AddCollider(std::move(collSphere), data.hitBoxData.offset, data.reactionData);
 			break;
 		}
 		default:
@@ -7130,12 +7172,12 @@ namespace HitBox {
 
 
 		// ヒットボックス追加（期限付き）
-		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character,const CollData& datas,
-			float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
+		void AddLifeTimeHitBox(Character::BaseCharacter* character,const CollData& datas,
+			Engine::WorldTransform* parent = nullptr);
 
 		// ヒットボックス追加（無期限）
-		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character,const CollData& datas,
-			ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
+		void AddHitBox(int32_t& id,Character::BaseCharacter* character,const CollData& datas,
+			Engine::WorldTransform* parent = nullptr);
 		// 全体データ取得(期限付きヒットボックス)
 		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
 		// 全体データ取得(無期限ヒットボックス)
@@ -7845,8 +7887,6 @@ public:
 protected:
 	// 当たり判定をするか
 	void SetIsCollision(bool is) { isCollision = is; }
-public:
-	
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
 
@@ -8013,14 +8053,18 @@ void Projectile::BaseProjectile::CreateCollision() {
 void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* otherComponent, Engine::Collider* self, Engine::Collider* other) {
 	if (param_.hitType == ProjectileHitType::Explode) {
 		HitBox::CollData data_;
-		data_.isEneble = true;
-		data_.isLine = true;
-		data_.tag = param_.collisionTag;
-		data_.layer = param_.collisionLayer;
+		data_.hitBoxData.isEneble = true;
+		data_.hitBoxData.isLine = true;
+		data_.hitBoxData.tag = param_.collisionTag;
+		data_.hitBoxData.layer = param_.collisionLayer;
 		data_.hitBoxData.colliderSize = { 1.0f,2.0f,1.0f };
 		data_.name = param_.name;
-		data_.reactionData.damageData.GetOne().damage = param_.explosionDamage;
+		data_.reactionData.damageData.GetOne().SetDamage(param_.explosionDamage);
 		data_.hitBoxData.radius = param_.explosionRadius;
+		data_.hitBoxData.lifeTime = param_.explosionLifeTime;
+		data_.hitBoxData.dependenceType = HitBox::ParentType::kParentIndependent;
+		data_.hitBoxData.useContactRecord = true;
+		data_.hitBoxData.offset = {};
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
 		if (CollisionTag::Player == self->tag) {
@@ -8029,15 +8073,15 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		else if (CollisionTag::Enemy == self->tag) {
 			useType = HitBox::UseType::kEnemy;
 		}
+		data_.hitBoxData.useType = useType;
+
 		auto* selfComponent = static_cast<Engine::ColliderComponent*>(self->owner);
 		Character::BaseCharacter* owner = nullptr;
 		if (self->tag == CollisionTag::Player || self->tag == CollisionTag::Enemy) {
 			owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
 		}
 		// 爆発ヒットボックス生成
-		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, data_,
-			param_.explosionLifeTime, HitBox::ParentType::kParentIndependent, {},
-			true, &objectComponent_->GetWorldTransform());
+		owner->GetHitBoxSystem()->AddLifeTimeHitBox(owner, data_,&objectComponent_->GetWorldTransform());
 	}
 
 	switch (other->tag) {
@@ -8693,7 +8737,7 @@ namespace Projectile {
 		// 衝突タグ
 		CollisionTag collisionTag = CollisionTag::None;
 		// 衝突レイヤー
-		CollisionLayer collisionLayer = CollisionLayer::Default;
+		CollisionLayer collisionLayer = CollisionLayer::ALL;
 		// 衝突マスク
 		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
 
@@ -9841,11 +9885,13 @@ public:
 	void SetName(const std::string& name) { name_ = name; };
 	// 名前取得
 	std::string GetName() const { return name_; }
-
-public:
+	// カメラ使用フラグ
+	bool GetUseCamera() const { return useCamera; }
+	// カメラ使用フラグ設定
+	void SetUseCamera(bool is) { useCamera = is; }
+protected:
 	bool useCamera = false;
 
-protected:
 	std::unique_ptr<Engine::Camera> uniqueCamera_;	// 固有カメラ
 	
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
@@ -10017,7 +10063,7 @@ void CameraManager::Update()
 		else {
 			// 使っているカメラを更新
 			for (auto& cam : cameras) {
-				if (cam.second->useCamera) {
+				if (cam.second->GetUseCamera()) {
 					camera->transform_ = cam.second->GetUniqueCamera()->GetTransform();
 					camera->UpdateMatrix();
 				}
@@ -10038,7 +10084,7 @@ void CameraManager::AddCamera(CameraInfo camera, std::string name)
 {
 	// カメラ管理クラスを渡す
 	camera.camera->SetCameraManeger(this);
-	camera.camera->useCamera = camera.useCamera;	// 使っているか
+	camera.camera->SetUseCamera(camera.useCamera);	// 使っているか
 	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
 }
 
@@ -10050,10 +10096,10 @@ void CameraManager::SetUseCamera(std::string name, float time)
 
 		// 全てのカメラを使用していないことに
 		for (auto& cam : cameras) {
-			cam.second->useCamera = false;	
+			cam.second->SetUseCamera(false);
 		}
 		// カメラ使用
-		it->second->useCamera = true;
+		it->second->SetUseCamera(true);
 		
 
 		if (time <= 0.0f) {
@@ -13297,7 +13343,8 @@ namespace Character {
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->Enable();					// コライダ有効
 		sphere->tag = CollisionTag::Enemy;	// タグ設定
-		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
+		sphere->layer = CollisionLayer::ALL;// レイヤー設定
+		sphere->collisionMask = 0xFFFFFFFF;		
 		sphere->radius = colliderRadius; // 半径を適宜設定
 		//sphere->isDebugLine = true;
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加
@@ -14346,196 +14393,196 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Medium/Melee/Med
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 
 namespace Character {
-    void MediumMeleeEnemyAttackReadySubState::Enter() {
-        timer_ = 0.0f;
+	void MediumMeleeEnemyAttackReadySubState::Enter() {
+		timer_ = 0.0f;
 
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        if (!enemy) {
-            return;
-        }
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
 
-        // Ready開始時の方向を一旦初期化
-        Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
-        toTarget.y = 0.0f;
+		// Ready開始時の方向を一旦初期化
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
 
-        if (toTarget.Length() > 0.001f) {
-            dire_ = toTarget.Normalize();
-        }
-        else {
-            dire_ = enemy->TargetDirection();
-            dire_.y = 0.0f;
-            if (dire_.Length() > 0.001f) {
-                dire_ = dire_.Normalize();
-            }
-        }
-    }
-    void MediumMeleeEnemyAttackReadySubState::Update(float deltaTime) {
-        timer_ += deltaTime;
+		if (toTarget.Length() > 0.001f) {
+			dire_ = toTarget.Normalize();
+		}
+		else {
+			dire_ = enemy->TargetDirection();
+			dire_.y = 0.0f;
+			if (dire_.Length() > 0.001f) {
+				dire_ = dire_.Normalize();
+			}
+		}
+	}
+	void MediumMeleeEnemyAttackReadySubState::Update(float deltaTime) {
+		timer_ += deltaTime;
 
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        if (!enemy) {
-            return;
-        }
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
 
-        // 毎フレームターゲット方向を取得
-        Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
-        toTarget.y = 0.0f;
+		// 毎フレームターゲット方向を取得
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
 
-        if (toTarget.Length() > 0.001f) {
-            Vector3 targetDire = toTarget.Normalize();
+		if (toTarget.Length() > 0.001f) {
+			Vector3 targetDire = toTarget.Normalize();
 
-            // ここは即向きでもいいが、本当は角度補間推奨
-            enemy->GetWorldTransform().rotate_.y = std::atan2(targetDire.x, targetDire.z);
+			// ここは即向きでもいいが、本当は角度補間推奨
+			enemy->GetWorldTransform().rotate_.y = std::atan2(targetDire.x, targetDire.z);
 
-            // Swingで使う方向は Ready の最後まで更新しておく
-            dire_ = targetDire;
-        }
+			// Swingで使う方向は Ready の最後まで更新しておく
+			dire_ = targetDire;
+		}
 
-        MoveRequest request{};
-        request.priority = 1;
-        request.direction = dire_;
+		MoveRequest request{};
+		request.priority = 1;
+		request.direction = dire_;
 
-        const float distance = enemy->GetTargetDistance();
+		const float distance = enemy->GetTargetDistance();
 
-        // 近すぎるときだけ軽く引く
-        if (distance <= 5.5f) {
-            request.velocity = dire_ * -4.0f * deltaTime;
-        }
-        // 攻撃準備距離なら基本停止
-        else if (distance <= 8.0f) {
-            request.velocity = Vector3(0.0f, 0.0f, 0.0f);
-        }
-        // 遠すぎるなら少しだけ詰める
-        else {
-            request.velocity = dire_ * 2.0f * deltaTime;
-        }
+		// 近すぎるときだけ軽く引く
+		if (distance <= 5.5f) {
+			request.velocity = dire_ * -4.0f * deltaTime;
+		}
+		// 攻撃準備距離なら基本停止
+		else if (distance <= 8.0f) {
+			request.velocity = Vector3(0.0f, 0.0f, 0.0f);
+		}
+		// 遠すぎるなら少しだけ詰める
+		else {
+			request.velocity = dire_ * 2.0f * deltaTime;
+		}
 
-        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
+		enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
-        if (timer_ >= readyTime_) {
-            fsm_->ChangeState(AttackSubState::Swing);
-        }
-    }
-
-
-    void MediumMeleeEnemyAttackSwingSubState::Enter() {
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        if (!enemy) {
-            return;
-        }
-
-        timer_ = 0.0f;
-
-        // Readyで最終的に合わせた方向を使う
-        Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
-        toTarget.y = 0.0f;
-
-        if (toTarget.Length() > 0.001f) {
-            dire_ = toTarget.Normalize();
-        }
-        else {
-            dire_ = enemy->TargetDirection();
-            dire_.y = 0.0f;
-            if (dire_.Length() > 0.001f) {
-                dire_ = dire_.Normalize();
-            }
-        }
-
-        // 向きを固定
-        enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
-
-        HitBox::CollData data{};
-        data.isEneble = true;
-        data.isLine = true;
-        data.tag = CollisionTag::Enemy;
-        data.layer = CollisionLayer::Enemy;
-        data.mask = CollisionLayer::Player;
-        data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
-        data.name = "NormalEnemy_SwingHitBox";
-        data.reactionData.damageData.GetOne().damage = 10.0f;
-
-        // ヒットボックス寿命は swingTime_ と揃える
-        enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
-            HitBox::UseType::kEnemy,
-            enemy,
-            data,
-            swingTime_,
-            HitBox::ParentType::kParent,
-            {},
-            true,
-            &enemy->GetWorldTransform()
-        );
-    }
-
-    void MediumMeleeEnemyAttackSwingSubState::Update(float deltaTime) {
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        if (!enemy) {
-            return;
-        }
-
-        timer_ += deltaTime;
-
-        MoveRequest request{};
-        request.priority = 1;
-        request.direction = dire_;
-        request.velocity = dire_ * 20.0f * deltaTime;
-        enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
-
-        if (timer_ >= swingTime_) {
-            fsm_->ChangeState(AttackSubState::End);
-        }
-    }
-
-    void MediumMeleeEnemyAttackSwingSubState::Exit() {
-    }
+		if (timer_ >= readyTime_) {
+			fsm_->ChangeState(AttackSubState::Swing);
+		}
+	}
 
 
-    void MediumMeleeEnemyAttackEndSubState::Enter() {
-        timer_ = 0.0f;
+	void MediumMeleeEnemyAttackSwingSubState::Enter() {
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
 
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        if (!enemy) {
-            return;
-        }
+		timer_ = 0.0f;
 
-        startRotateY_ = enemy->GetWorldTransform().rotate_.y;
+		// Readyで最終的に合わせた方向を使う
+		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toTarget.y = 0.0f;
 
-        Vector3 toPlayer = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
-        toPlayer.y = 0.0f;
+		if (toTarget.Length() > 0.001f) {
+			dire_ = toTarget.Normalize();
+		}
+		else {
+			dire_ = enemy->TargetDirection();
+			dire_.y = 0.0f;
+			if (dire_.Length() > 0.001f) {
+				dire_ = dire_.Normalize();
+			}
+		}
 
-        if (toPlayer.Length() > 0.001f) {
-            toPlayer = toPlayer.Normalize();
-            targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
-        }
-        else {
-            targetRotateY_ = startRotateY_;
-        }
+		// 向きを固定
+		enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
 
-        // 最短差分を保存
-        rotateDiffY_ = targetRotateY_ - startRotateY_;
-        rotateDiffY_ = std::atan2(std::sin(rotateDiffY_), std::cos(rotateDiffY_));
-    }
+		HitBox::CollData data{};
+		data.hitBoxData.isEneble = true;
+		data.hitBoxData.isLine = true;
+		data.hitBoxData.tag = CollisionTag::Enemy;
+		data.hitBoxData.layer = CollisionLayer::Enemy;
+		data.hitBoxData.mask = CollisionLayer::Player;
+		data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
+		data.name = "NormalEnemy_SwingHitBox";
+		data.reactionData.damageData.GetOne().SetDamage(10.0f);
 
-    void MediumMeleeEnemyAttackEndSubState::Update(float deltaTime) {
-        BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
-        if (!enemy) {
-            return;
-        }
+		data.hitBoxData.useType = HitBox::UseType::kEnemy;
+		data.hitBoxData.lifeTime = swingTime_;
+		data.hitBoxData.dependenceType = HitBox::ParentType::kParent;
+		data.hitBoxData.offset = {  };
+		data.hitBoxData.useContactRecord = true;
+		// ヒットボックス寿命は swingTime_ と揃える
+		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
+			enemy,
+			data,
+			&enemy->GetWorldTransform()
+		);
+	}
 
-        timer_ += deltaTime;
+	void MediumMeleeEnemyAttackSwingSubState::Update(float deltaTime) {
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
 
-        float t = std::clamp(timer_ / endTime_, 0.0f, 1.0f);
+		timer_ += deltaTime;
 
-        // 必要なら ease をかける
-        float easedT = t * t * (3.0f - 2.0f * t);
+		MoveRequest request{};
+		request.priority = 1;
+		request.direction = dire_;
+		request.velocity = dire_ * 20.0f * deltaTime;
+		enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
 
-        float newY = startRotateY_ + rotateDiffY_ * easedT;
-        enemy->GetWorldTransform().rotate_.y = newY;
+		if (timer_ >= swingTime_) {
+			fsm_->ChangeState(AttackSubState::End);
+		}
+	}
 
-        if (timer_ >= endTime_) {
-            fsm_->SetFinished(true);
-        }
-    }
+	void MediumMeleeEnemyAttackSwingSubState::Exit() {
+	}
+
+
+	void MediumMeleeEnemyAttackEndSubState::Enter() {
+		timer_ = 0.0f;
+
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
+
+		startRotateY_ = enemy->GetWorldTransform().rotate_.y;
+
+		Vector3 toPlayer = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
+		toPlayer.y = 0.0f;
+
+		if (toPlayer.Length() > 0.001f) {
+			toPlayer = toPlayer.Normalize();
+			targetRotateY_ = std::atan2(toPlayer.x, toPlayer.z);
+		}
+		else {
+			targetRotateY_ = startRotateY_;
+		}
+
+		// 最短差分を保存
+		rotateDiffY_ = targetRotateY_ - startRotateY_;
+		rotateDiffY_ = std::atan2(std::sin(rotateDiffY_), std::cos(rotateDiffY_));
+	}
+
+	void MediumMeleeEnemyAttackEndSubState::Update(float deltaTime) {
+		BaseEnemy* enemy = dynamic_cast<BaseEnemy*>(character_);
+		if (!enemy) {
+			return;
+		}
+
+		timer_ += deltaTime;
+
+		float t = std::clamp(timer_ / endTime_, 0.0f, 1.0f);
+
+		// 必要なら ease をかける
+		float easedT = t * t * (3.0f - 2.0f * t);
+
+		float newY = startRotateY_ + rotateDiffY_ * easedT;
+		enemy->GetWorldTransform().rotate_.y = newY;
+
+		if (timer_ >= endTime_) {
+			fsm_->SetFinished(true);
+		}
+	}
 }
 
 ============================================================
@@ -15432,22 +15479,24 @@ namespace Character {
 		enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
 
 		HitBox::CollData data{};
-		data.isEneble = true;
-		data.isLine = true;
-		data.tag = CollisionTag::EnemyAttack;
-		data.layer = CollisionLayer::EnemyAttack;
-		data.mask = CollisionLayer::Player;
+		data.hitBoxData.isEneble = true;
+		data.hitBoxData.isLine = true;
+		data.hitBoxData.tag = CollisionTag::EnemyAttack;
+		data.hitBoxData.layer = CollisionLayer::EnemyAttack;
+		data.hitBoxData.mask = CollisionLayer::Player;
 		data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
-		data.reactionData.damageData.GetOne().damage = 10.0f;
+		data.reactionData.damageData.GetOne().SetDamage(10.0f);
+
+		data.hitBoxData.useType = HitBox::UseType::kEnemy;
+		data.hitBoxData.lifeTime = swingTime_;
+		data.hitBoxData.dependenceType = HitBox::ParentType::kParent;
+		data.hitBoxData.offset = {  };
+		data.hitBoxData.useContactRecord = true;
+
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
-			HitBox::UseType::kEnemy,
 			enemy,
 			data,
-			swingTime_,
-			HitBox::ParentType::kParent,
-			{},
-			true,
 			&enemy->GetWorldTransform()
 		);
 	}
@@ -24542,7 +24591,7 @@ void StageColliderSystem::CreateCollider() {
 
 	for (auto& obj : objects) {
 		for (auto& mesh : obj->GetModel()->GetModelData().mesh) {
-			for (auto& triangle : mesh->triangle) {
+			for (auto& triangle : mesh->GetTriangles()) {
 				auto triangleColl = std::make_unique<Engine::TriangleCollider>();
 				triangleColl->triangle01 = triangle.vertices[0];
 				triangleColl->triangle02 = triangle.vertices[1];
@@ -27511,8 +27560,8 @@ void CharacterDebugScene::Initialize()
 	Vector3 sizeAABB = { 1000,1000,1000 };
 	collisionManager_ = std::make_unique<Engine::CollisionManager>();
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
-	collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
-	collisionManager_->BuildStaticSceneOctree();
+	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
+	//collisionManager_->BuildStaticSceneOctree();
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -30233,7 +30282,7 @@ void Engine::Primitive2D::Draw()
 
 	mesh->GetCommandList();
 
-	spriteCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+	spriteCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 }
 
 #pragma region Create
@@ -30242,7 +30291,7 @@ void Engine::Primitive2D::CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
-	mesh->indices.clear();
+	mesh->ClearIndices();
 
 	// 法線を +Z 方向に変更
 	mesh->vertices.push_back({ .position = {p0.x, p0.y, 0.0f, 1.0f}, .texcoord = {0.5f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 上
@@ -30250,16 +30299,16 @@ void Engine::Primitive2D::CreateTriangle(Vector2 p0, Vector2 p1, Vector2 p2)
 	mesh->vertices.push_back({ .position = {p2.x, p2.y, 0.0f, 1.0f}, .texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
 
 	// **反時計回り (CCW) に変更**
-	mesh->indices.push_back(0);
-	mesh->indices.push_back(2);
-	mesh->indices.push_back(1);
+	mesh->SetIndice(0);
+	mesh->SetIndice(2);
+	mesh->SetIndice(1);
 }
 
 void Engine::Primitive2D::CreateCircle(float radius, int segments)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
-	mesh->indices.clear();
+	mesh->ClearIndices();
 
 	// 中心の頂点
 	mesh->vertices.push_back({
@@ -30283,14 +30332,14 @@ void Engine::Primitive2D::CreateCircle(float radius, int segments)
 
 	// インデックスの設定 (CW: 時計回り)
 	for (int i = 1; i < segments; ++i) {
-		mesh->indices.push_back(0);       // 中心点
-		mesh->indices.push_back(i);       // 現在の頂点
-		mesh->indices.push_back(i + 1);   // 次の頂点
+		mesh->SetIndice(0);       // 中心点
+		mesh->SetIndice(i);       // 現在の頂点
+		mesh->SetIndice(i + 1);   // 次の頂点
 	}
 	// 最後の三角形 (円の閉じる部分)
-	mesh->indices.push_back(0);
-	mesh->indices.push_back(segments);
-	mesh->indices.push_back(1); // 最初の円周頂点とつなげる
+	mesh->SetIndice(0);
+	mesh->SetIndice(segments);
+	mesh->SetIndice(1); // 最初の円周頂点とつなげる
 }
 
 void Engine::Primitive2D::CreateRing(float innerRadius, float outerRadius, int segments)
@@ -30301,7 +30350,7 @@ void Engine::Primitive2D::CreateRing(float innerRadius, float outerRadius, int s
 
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
-	mesh->indices.clear();
+	mesh->ClearIndices();
 
 	// 頂点生成
 	for (int i = 0; i <= segments; ++i) {
@@ -30332,14 +30381,14 @@ void Engine::Primitive2D::CreateRing(float innerRadius, float outerRadius, int s
 		int inner2 = inner1 + 2;
 
 		// 一つ目の三角形 (CCWに修正)
-		mesh->indices.push_back(outer1);
-		mesh->indices.push_back(outer2);
-		mesh->indices.push_back(inner1);
+		mesh->SetIndice(outer1);
+		mesh->SetIndice(outer2);
+		mesh->SetIndice(inner1);
 
 		// 二つ目の三角形 (CCWに修正)
-		mesh->indices.push_back(inner1);
-		mesh->indices.push_back(outer2);
-		mesh->indices.push_back(inner2);
+		mesh->SetIndice(inner1);
+		mesh->SetIndice(outer2);
+		mesh->SetIndice(inner2);
 	}
 
 }
@@ -30352,7 +30401,7 @@ void Engine::Primitive2D::CreateStar(float innerRadius, float outerRadius, int s
 
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
-	mesh->indices.clear();
+	mesh->ClearIndices();
 
 	// 中心の頂点を追加
 	mesh->vertices.push_back({
@@ -30380,9 +30429,9 @@ void Engine::Primitive2D::CreateStar(float innerRadius, float outerRadius, int s
 
 	// インデックス生成 (CCW: 反時計回り)
 	for (int i = 1; i <= segments * 2; ++i) {
-		mesh->indices.push_back(0); // 中心点
-		mesh->indices.push_back(i); // 現在の頂点
-		mesh->indices.push_back((i % (segments * 2)) + 1); // 次の頂点（ループ処理）
+		mesh->SetIndice(0); // 中心点
+		mesh->SetIndice(i); // 現在の頂点
+		mesh->SetIndice((i % (segments * 2)) + 1); // 次の頂点（ループ処理）
 	}
 }
 
@@ -30390,7 +30439,7 @@ void Engine::Primitive2D::CreateCube(Vector2 size)
 {
 	// 既存の頂点とインデックスをクリア
 	mesh->vertices.clear();
-	mesh->indices.clear();
+	mesh->ClearIndices();
 
 	Vector2 halfSize = size * 0.5f;
 
@@ -30401,12 +30450,12 @@ void Engine::Primitive2D::CreateCube(Vector2 size)
 	mesh->vertices.push_back({ .position = { halfSize.x, -halfSize.y, 0.0f, 1.0f}, .texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, -1.0f} }); // 右下
 
 	// **時計回り (CW) に修正**
-	mesh->indices.push_back(0);
-	mesh->indices.push_back(2);
-	mesh->indices.push_back(1);
-	mesh->indices.push_back(2);
-	mesh->indices.push_back(3);
-	mesh->indices.push_back(1);
+	mesh->SetIndice(0);
+	mesh->SetIndice(2);
+	mesh->SetIndice(1);
+	mesh->SetIndice(2);
+	mesh->SetIndice(3);
+	mesh->SetIndice(1);
 }
 
 
@@ -31268,7 +31317,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 	modelData = LoadOdjFileAssimpAmime(dire, filename);
 
 	// メッシュ状にライン生成
-	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->indices);
+	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->GetIndices());
 
 
 
@@ -31318,7 +31367,7 @@ void Engine::Model::DrawSkinning(std::vector<MaterialInstance> matetials, std::v
 		mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 
 
 		// 初期状態を UAV 用に遷移させる
@@ -31534,7 +31583,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 		assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
 		std::unique_ptr<ModelMesh> pMesh = std::make_unique<ModelMesh>();
 		pMesh->name = mesh->mName.C_Str();
-		pMesh->meshIndex = meshIndex;
+		pMesh->SetMeshIndex(meshIndex);
 
 		Vector3 min = { 10000,10000,10000 };
 		Vector3 max = { -10000,-10000,-10000 };
@@ -31601,11 +31650,11 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 			Vector3 vert[3];
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
-				pMesh->indices.push_back(vertexIndex);
+				pMesh->SetIndice(vertexIndex);
 
 				vert[element] = pMesh->vertices[vertexIndex].position.xyz();
 			}
-			pMesh->triangle.push_back(Triangle{ vert[0],vert[1],vert[2] });
+			pMesh->SetTriangle(Triangle{ vert[0],vert[1],vert[2] });
 
 		}
 
@@ -32468,7 +32517,7 @@ void Engine::RenderComponent::Draw()
 
 				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 				entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
-					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 			}
 
 			for (auto& mesh : tra) {
@@ -32490,7 +32539,7 @@ void Engine::RenderComponent::Draw()
 
 				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 				entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
-					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 			}
 		}
 		break;
@@ -33776,7 +33825,7 @@ void Engine::Object3dInstansManager::Draw() {
 		uint32_t instanceCount = (std::min)(group.instanceCount,
 			kNumMaxInstance);
 		commandList->DrawIndexedInstanced(
-			static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0,
+			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0,
 			0);
 	}
 }
@@ -33815,7 +33864,7 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 		uint32_t instanceCount = (std::min)(group.instanceCount,
 			kNumMaxInstance);
 		commandList->DrawIndexedInstanced(
-			static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0,
+			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0,
 			0);
 	}
 }
@@ -39444,7 +39493,7 @@ namespace Engine {
 		bool enabled = true;
 		bool isStatic = false;  // 動かさない
 		Vector2 centerWorld;
-		CollisionLayer layer = CollisionLayer::Default;
+		CollisionLayer layer = CollisionLayer::ALL;
 		CollisionTag tag = CollisionTag::None; // タグ
 		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
 		uint32_t id = 0; // コライダーID（ユニーク）
@@ -40806,7 +40855,7 @@ namespace Engine {
 		Vector4 lineColor = { 1,1,1,1 };	// ライン色
 
 		Vector3 centerWorld = { 0,0,0 };
-		CollisionLayer layer = CollisionLayer::Default;
+		CollisionLayer layer = CollisionLayer::ALL;
 		CollisionTag tag = CollisionTag::None; // タグ
 		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
 		uint32_t id = 0; // コライダーID（ユニーク）
@@ -42519,6 +42568,16 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 	}
 }
 
+bool Engine::CollisionManager::CheckMask(Collider* a, Collider* b) const {
+	uint32_t aLayer = static_cast<uint32_t>(a->layer);
+	uint32_t bLayer = static_cast<uint32_t>(b->layer);
+
+	bool is = (bLayer & a->collisionMask) != 0;
+	bool is2 = (aLayer & b->collisionMask) != 0;
+
+	return is && is2;
+}
+
 void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const {
 	if (!self || !other) {
 		return;
@@ -42624,10 +42683,7 @@ namespace Engine {
 		void CheckDynamicVsStaticMT();
 	private:
 		// マスク処理
-		bool CheckMask(Collider* a, Collider* b) const {
-			return ((1 << static_cast<uint32_t>(b->layer)) & a->collisionMask) &&
-				((1 << static_cast<uint32_t>(a->layer)) & b->collisionMask);
-		}
+		bool CheckMask(Collider* a, Collider* b) const;
 		// 処理応答
 		void NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const;
 
@@ -42694,13 +42750,15 @@ enum class CollisionTag {
 };
 
 // レイヤー
-enum class CollisionLayer : uint8_t {
-	Default,
-	Player,
-	Enemy,
-	PlayerAttack,
-	EnemyAttack,
-	Environment,
+enum class CollisionLayer : uint32_t {
+	None = 0,
+	Player = 1 << 0,
+	Enemy = 1 << 1,
+	PlayerAttack = 1 << 2,
+	EnemyAttack = 1 << 3,
+	Environment = 1 << 4,
+
+	ALL = 0xFFFFFFFF
 };
 
 // コライダタイプ
@@ -46248,13 +46306,13 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 reng
 	mesh_->vertices.push_back({ .position = {renge_.renge.x, 0.0f, -renge_.renge.y, 1.0f} ,.texcoord = {0.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
 	mesh_->vertices.push_back({ .position = {-renge_.renge.x, 0.0f, -renge_.renge.y, 1.0f} ,.texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右下
 	
-	mesh_->indices.push_back(0);
-	mesh_->indices.push_back(1);
-	mesh_->indices.push_back(2);
+	mesh_->SetIndice(0);
+	mesh_->SetIndice(1);
+	mesh_->SetIndice(2);
 
-	mesh_->indices.push_back(1);
-	mesh_->indices.push_back(3);
-	mesh_->indices.push_back(2);
+	mesh_->SetIndice(1);
+	mesh_->SetIndice(3);
+	mesh_->SetIndice(2);
 
 	mesh_->Initialize(dxCommon);
 
@@ -47044,7 +47102,7 @@ void Engine::ParticleManager2d::Draw() {
 
 		// インスタンシング描画
 		uint32_t instanceCount = (std::min)(group.instanceCount, kNumMaxInstance);
-		commandList->DrawIndexedInstanced(static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0, 0);
+		commandList->DrawIndexedInstanced(static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0, 0);
 	}
 }
 
@@ -48304,7 +48362,7 @@ void Engine::ParticleManager::Draw()
 
 		// インスタンシング描画
 		uint32_t instanceCount = (std::min)(group.instanceCount, kNumMaxInstance);
-		commandList->DrawIndexedInstanced(static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0, 0);
+		commandList->DrawIndexedInstanced(static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0, 0);
 	}
 }
 
@@ -49969,7 +50027,7 @@ void Engine::MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
 // デバック線描画
 void Engine::MeshParticleEmitter::DrawEmitterLine() {
 
-	for (auto& tri : modelMesh_->triangle) {
+	for (auto& tri : modelMesh_->GetTriangles()) {
 		lineCommon->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
 	}
 }
@@ -49979,10 +50037,9 @@ void Engine::MeshParticleEmitter::EmitUniqe() {
 
 	auto& rng = particleManager->GetRandomEngine();
 
-	int index = static_cast<int>(Random::RandomSize_t(0, modelMesh_->triangle.size() - 1));
+	int index = static_cast<int>(Random::RandomSize_t(0, modelMesh_->GetTriangles().size() - 1));
 
-	Triangle tri = modelMesh_->triangle[index];
-
+	Triangle tri = modelMesh_->GetTriangle(index);
 	// 三角形の頂点 (ローカル空間想定)
 	Vector3 A = tri.vertices[0];
 	Vector3 B = tri.vertices[1];
@@ -51867,7 +51924,7 @@ void Engine::GpuParticleGroup::Draw() {
 		mesh->GetCommandList();
 
 		// インスタンシング描画
-		dxCommon->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
+		dxCommon->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh->GetIndices().size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
 	}
 }
 
@@ -52286,7 +52343,7 @@ void Engine::BasePrimitive::Draw()
 		mesh->GetCommandList();
 
 		// Draw
-		primitiveCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		primitiveCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 	}
 };
 
@@ -53119,12 +53176,12 @@ void Engine::ShapeParameter::ShapePlane::Create(ModelMesh* mesh, bool isInv)
 	mesh->vertices.push_back({ .position = {width,-height,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,normal } });	// 左下
 	mesh->vertices.push_back({ .position = {-width,-height,0.0f,1.0f},.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,normal } });	// 右下
 
-	mesh->indices.push_back(0);
-	mesh->indices.push_back(1);
-	mesh->indices.push_back(2);
-	mesh->indices.push_back(2);
-	mesh->indices.push_back(1);
-	mesh->indices.push_back(3);
+	mesh->SetIndice(0);
+	mesh->SetIndice(1);
+	mesh->SetIndice(2);
+	mesh->SetIndice(2);
+	mesh->SetIndice(1);
+	mesh->SetIndice(3);
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();
@@ -53154,24 +53211,24 @@ void Engine::ShapeParameter::ShapeCross::Create(ModelMesh* mesh)
 
 	// インデックスデータの生成
 	// 上のアーム
-	mesh->indices.push_back(0); mesh->indices.push_back(1); mesh->indices.push_back(2);
-	mesh->indices.push_back(0); mesh->indices.push_back(2); mesh->indices.push_back(11);
+	mesh->SetIndice(0); mesh->SetIndice(1); mesh->SetIndice(2);
+	mesh->SetIndice(0); mesh->SetIndice(2); mesh->SetIndice(11);
 
 	// 右のアーム
-	mesh->indices.push_back(2); mesh->indices.push_back(3); mesh->indices.push_back(4);
-	mesh->indices.push_back(2); mesh->indices.push_back(4); mesh->indices.push_back(5);
+	mesh->SetIndice(2); mesh->SetIndice(3); mesh->SetIndice(4);
+	mesh->SetIndice(2); mesh->SetIndice(4); mesh->SetIndice(5);
 
 	// 下のアーム
-	mesh->indices.push_back(5); mesh->indices.push_back(7); mesh->indices.push_back(8);
-	mesh->indices.push_back(5); mesh->indices.push_back(6); mesh->indices.push_back(7);
+	mesh->SetIndice(5); mesh->SetIndice(7); mesh->SetIndice(8);
+	mesh->SetIndice(5); mesh->SetIndice(6); mesh->SetIndice(7);
 
 	// 左のアーム
-	mesh->indices.push_back(8); mesh->indices.push_back(9); mesh->indices.push_back(10);
-	mesh->indices.push_back(8); mesh->indices.push_back(10); mesh->indices.push_back(11);
+	mesh->SetIndice(8); mesh->SetIndice(9); mesh->SetIndice(10);
+	mesh->SetIndice(8); mesh->SetIndice(10); mesh->SetIndice(11);
 
 	// 中央の四角形
-	mesh->indices.push_back(2); mesh->indices.push_back(5); mesh->indices.push_back(8);
-	mesh->indices.push_back(2); mesh->indices.push_back(8); mesh->indices.push_back(11);
+	mesh->SetIndice(2); mesh->SetIndice(5); mesh->SetIndice(8);
+	mesh->SetIndice(2); mesh->SetIndice(8); mesh->SetIndice(11);
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();
@@ -53185,9 +53242,9 @@ void Engine::ShapeParameter::ShapeTriangle::Create(ModelMesh* mesh)
 	mesh->vertices.push_back({ .position = {rightPos.x,rightPos.y,0.0f,1.0f} ,.texcoord = {0.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 右下
 	mesh->vertices.push_back({ .position = {leftPos.x,leftPos.y,0.0f,1.0f} ,.texcoord = {1.0f,1.0f},.normal = {0.0f,0.0f,1.0f } });	// 左下
 
-	mesh->indices.push_back(0);
-	mesh->indices.push_back(2);
-	mesh->indices.push_back(1);
+	mesh->SetIndice(0);
+	mesh->SetIndice(2);
+	mesh->SetIndice(1);
 
 	mesh->UpdateVertexBuffer();
 	mesh->UpdateIndexBuffer();
@@ -53223,9 +53280,9 @@ void Engine::ShapeParameter::Circle::Create(ModelMesh* mesh)
 
 	// インデックスの設定
 	for (int i = 1; i <= segments; ++i) {
-		mesh->indices.push_back(0);       // 中心点
-		mesh->indices.push_back(i + 1);   // 次の頂点
-		mesh->indices.push_back(i);       // 現在の頂点
+		mesh->SetIndice(0);       // 中心点
+		mesh->SetIndice(i + 1);   // 次の頂点
+		mesh->SetIndice(i);       // 現在の頂点
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -53270,9 +53327,9 @@ void Engine::ShapeParameter::Star::Create(ModelMesh* mesh)
 
 	// インデックス生成（面の向きを反転）
 	for (int i = 1; i <= segments * 2; ++i) {
-		mesh->indices.push_back(0);                                   // 中心点
-		mesh->indices.push_back(i);                                   // 現在の頂点
-		mesh->indices.push_back((i % (segments * 2)) + 1);            // 次の頂点（ループ処理）
+		mesh->SetIndice(0);                                   // 中心点
+		mesh->SetIndice(i);                                   // 現在の頂点
+		mesh->SetIndice((i % (segments * 2)) + 1);            // 次の頂点（ループ処理）
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -53331,13 +53388,13 @@ void Engine::ShapeParameter::Crescent::Create(ModelMesh* mesh)
 		int next = (i + 1) % (segments + 1);
 
 		// 外側の円の三角形（反転）
-		mesh->indices.push_back(innerOffset + i);
-		mesh->indices.push_back(outerOffset + next);
-		mesh->indices.push_back(outerOffset + i);
+		mesh->SetIndice(innerOffset + i);
+		mesh->SetIndice(outerOffset + next);
+		mesh->SetIndice(outerOffset + i);
 
-		mesh->indices.push_back(innerOffset + i);
-		mesh->indices.push_back(innerOffset + next);
-		mesh->indices.push_back(outerOffset + next);
+		mesh->SetIndice(innerOffset + i);
+		mesh->SetIndice(innerOffset + next);
+		mesh->SetIndice(outerOffset + next);
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -53382,14 +53439,14 @@ void Engine::ShapeParameter::Ring::Create(ModelMesh* mesh)
 		int baseIndex = index * 4;
 
 		// 三角形1: 外側現在点 (①)、外側次点 (②)、内側現在点 (③)
-		mesh->indices.push_back(baseIndex);
-		mesh->indices.push_back(baseIndex + 1);
-		mesh->indices.push_back(baseIndex + 2);
+		mesh->SetIndice(baseIndex);
+		mesh->SetIndice(baseIndex + 1);
+		mesh->SetIndice(baseIndex + 2);
 
 		// 三角形2: 外側次点 (②)、内側次点 (④)、内側現在点 (③)
-		mesh->indices.push_back(baseIndex + 1);
-		mesh->indices.push_back(baseIndex + 3);
-		mesh->indices.push_back(baseIndex + 2);
+		mesh->SetIndice(baseIndex + 1);
+		mesh->SetIndice(baseIndex + 3);
+		mesh->SetIndice(baseIndex + 2);
 	}
 
 	mesh->UpdateVertexBuffer();
@@ -53449,14 +53506,14 @@ void Engine::ShapeParameter::ShapeSphere::Create(ModelMesh* mesh)
 			int second = first + longitudeSegments + 1;
 
 			// 三角形1（インデックス順序を反転）
-			mesh->indices.push_back(first + 1);
-			mesh->indices.push_back(second);
-			mesh->indices.push_back(first);
+			mesh->SetIndice(first + 1);
+			mesh->SetIndice(second);
+			mesh->SetIndice(first);
 
 			// 三角形2（インデックス順序を反転）
-			mesh->indices.push_back(first + 1);
-			mesh->indices.push_back(second + 1);
-			mesh->indices.push_back(second);
+			mesh->SetIndice(first + 1);
+			mesh->SetIndice(second + 1);
+			mesh->SetIndice(second);
 
 		}
 	}
@@ -53507,13 +53564,13 @@ void Engine::ShapeParameter::ShapeArrow::Create(ModelMesh* mesh)
 		int bottom2 = (i + 1) * 2 + 1;
 
 		// 三角形を生成
-		mesh->indices.push_back(top2);
-		mesh->indices.push_back(bottom1);
-		mesh->indices.push_back(top1);
+		mesh->SetIndice(top2);
+		mesh->SetIndice(bottom1);
+		mesh->SetIndice(top1);
 
-		mesh->indices.push_back(bottom2);
-		mesh->indices.push_back(bottom1);
-		mesh->indices.push_back(top2);
+		mesh->SetIndice(bottom2);
+		mesh->SetIndice(bottom1);
+		mesh->SetIndice(top2);
 	}
 
 	// 矢の頭の生成（円錐）
@@ -53548,9 +53605,9 @@ void Engine::ShapeParameter::ShapeArrow::Create(ModelMesh* mesh)
 
 		// 頭の三角形を生成
 
-		mesh->indices.push_back(base2);
-		mesh->indices.push_back(base1);
-		mesh->indices.push_back(headTipIndex);
+		mesh->SetIndice(base2);
+		mesh->SetIndice(base1);
+		mesh->SetIndice(headTipIndex);
 
 	}
 
@@ -53610,13 +53667,13 @@ void Engine::ShapeParameter::ShapeCube::Create(ModelMesh* mesh)
 		}
 
 		// インデックスデータを追加 (2つの三角形)
-		mesh->indices.push_back(vertexOffset + 0);
-		mesh->indices.push_back(vertexOffset + 1);
-		mesh->indices.push_back(vertexOffset + 2);
+		mesh->SetIndice(vertexOffset + 0);
+		mesh->SetIndice(vertexOffset + 1);
+		mesh->SetIndice(vertexOffset + 2);
 
-		mesh->indices.push_back(vertexOffset + 2);
-		mesh->indices.push_back(vertexOffset + 1);
-		mesh->indices.push_back(vertexOffset + 3);
+		mesh->SetIndice(vertexOffset + 2);
+		mesh->SetIndice(vertexOffset + 1);
+		mesh->SetIndice(vertexOffset + 3);
 
 		vertexOffset += 4; // 次の面に移動
 	}
@@ -53657,13 +53714,13 @@ void Engine::ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 		mesh->vertices.push_back({ Vector4{ sinNext * outerRadius, cosNext * outerRadius, halfHeight, 1.0f }, Vector2{ uNext, 1.0f }, Vector3{ sinNext, cosNext, 0.0f } });
 
 		int baseIndex = index * 4;
-		mesh->indices.push_back(baseIndex + 0);
-		mesh->indices.push_back(baseIndex + 2);
-		mesh->indices.push_back(baseIndex + 1);
+		mesh->SetIndice(baseIndex + 0);
+		mesh->SetIndice(baseIndex + 2);
+		mesh->SetIndice(baseIndex + 1);
 
-		mesh->indices.push_back(baseIndex + 1);
-		mesh->indices.push_back(baseIndex + 2);
-		mesh->indices.push_back(baseIndex + 3);
+		mesh->SetIndice(baseIndex + 1);
+		mesh->SetIndice(baseIndex + 2);
+		mesh->SetIndice(baseIndex + 3);
 	}
 
 	if (isCover) {
@@ -53680,9 +53737,9 @@ void Engine::ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 			mesh->vertices.push_back({ Vector4{ sinNext * outerRadius, cosNext * outerRadius, halfHeight, 1.0f }, Vector2{ sinNext * 0.5f + 0.5f, cosNext * 0.5f + 0.5f }, Vector3{ 0.0f, 0.0f, 1.0f } });
 
 			int topBaseIndex = segments * 4 + index * 3;
-			mesh->indices.push_back(topBaseIndex + 0); // 中央点
-			mesh->indices.push_back(topBaseIndex + 2);
-			mesh->indices.push_back(topBaseIndex + 1);
+			mesh->SetIndice(topBaseIndex + 0); // 中央点
+			mesh->SetIndice(topBaseIndex + 2);
+			mesh->SetIndice(topBaseIndex + 1);
 		}
 
 		// 底面の生成 (反時計回りに反転)
@@ -53698,9 +53755,9 @@ void Engine::ShapeParameter::Cylinder::Create(ModelMesh* mesh)
 			mesh->vertices.push_back({ Vector4{ sinNext * innerRadius, cosNext * innerRadius, -halfHeight, 1.0f }, Vector2{ sinNext * 0.5f + 0.5f, cosNext * 0.5f + 0.5f }, Vector3{ 0.0f, 0.0f, -1.0f } });
 
 			int bottomBaseIndex = segments * 4 + segments * 3 + index * 3;
-			mesh->indices.push_back(bottomBaseIndex + 0); // 中央点
-			mesh->indices.push_back(bottomBaseIndex + 1);
-			mesh->indices.push_back(bottomBaseIndex + 2);
+			mesh->SetIndice(bottomBaseIndex + 0); // 中央点
+			mesh->SetIndice(bottomBaseIndex + 1);
+			mesh->SetIndice(bottomBaseIndex + 2);
 		}
 	}
 
@@ -53771,39 +53828,39 @@ void Engine::ShapeParameter::Tube::Create(ModelMesh* mesh)
 		int bottomInner2 = (i + 1) * 4 + 3; // 内側下の次の頂点
 
 		// 外側の三角形（反転）
-		mesh->indices.push_back(topOuter2);
-		mesh->indices.push_back(bottomOuter1);
-		mesh->indices.push_back(topOuter1);
+		mesh->SetIndice(topOuter2);
+		mesh->SetIndice(bottomOuter1);
+		mesh->SetIndice(topOuter1);
 
-		mesh->indices.push_back(topOuter2);
-		mesh->indices.push_back(bottomOuter2);
-		mesh->indices.push_back(bottomOuter1);
+		mesh->SetIndice(topOuter2);
+		mesh->SetIndice(bottomOuter2);
+		mesh->SetIndice(bottomOuter1);
 
 		// 内側の三角形（反転）
-		mesh->indices.push_back(bottomInner1);
-		mesh->indices.push_back(topInner2);
-		mesh->indices.push_back(topInner1);
+		mesh->SetIndice(bottomInner1);
+		mesh->SetIndice(topInner2);
+		mesh->SetIndice(topInner1);
 
-		mesh->indices.push_back(bottomInner2);
-		mesh->indices.push_back(topInner2);
-		mesh->indices.push_back(bottomInner1);
+		mesh->SetIndice(bottomInner2);
+		mesh->SetIndice(topInner2);
+		mesh->SetIndice(bottomInner1);
 
 		// 外側と内側の三角形（反転）
-		mesh->indices.push_back(topInner1);
-		mesh->indices.push_back(topOuter2);
-		mesh->indices.push_back(topOuter1);
+		mesh->SetIndice(topInner1);
+		mesh->SetIndice(topOuter2);
+		mesh->SetIndice(topOuter1);
 
-		mesh->indices.push_back(topInner2);
-		mesh->indices.push_back(topOuter2);
-		mesh->indices.push_back(topInner1);
+		mesh->SetIndice(topInner2);
+		mesh->SetIndice(topOuter2);
+		mesh->SetIndice(topInner1);
 
-		mesh->indices.push_back(bottomOuter2);
-		mesh->indices.push_back(bottomInner1);
-		mesh->indices.push_back(bottomOuter1);
+		mesh->SetIndice(bottomOuter2);
+		mesh->SetIndice(bottomInner1);
+		mesh->SetIndice(bottomOuter1);
 
-		mesh->indices.push_back(bottomInner2);
-		mesh->indices.push_back(bottomInner1);
-		mesh->indices.push_back(bottomOuter2);
+		mesh->SetIndice(bottomInner2);
+		mesh->SetIndice(bottomInner1);
+		mesh->SetIndice(bottomOuter2);
 	}
 
 	// バッファの更新
@@ -53852,14 +53909,14 @@ void Engine::ShapeParameter::Pyramid::Create(ModelMesh* mesh)
 		int next = (i % segments) + 1;
 
 		// 側面の三角形（反転）
-		mesh->indices.push_back(0);   // 頂点（上）
-		mesh->indices.push_back(next); // 底面の次の頂点
-		mesh->indices.push_back(i);   // 底面の現在の頂点
+		mesh->SetIndice(0);   // 頂点（上）
+		mesh->SetIndice(next); // 底面の次の頂点
+		mesh->SetIndice(i);   // 底面の現在の頂点
 
 		// 底面の三角形（反転）
-		mesh->indices.push_back(next); // 次の頂点
-		mesh->indices.push_back(i);    // 現在の頂点
-		mesh->indices.push_back(0);    // 中心点（ここでは利用しない）
+		mesh->SetIndice(next); // 次の頂点
+		mesh->SetIndice(i);    // 現在の頂点
+		mesh->SetIndice(0);    // 中心点（ここでは利用しない）
 	}
 
 	// バッファの更新
@@ -53911,13 +53968,13 @@ void Engine::ShapeParameter::Torus::Create(ModelMesh* mesh)
 			int first = (i * (segments + 1)) + j;
 			int second = first + segments + 1;
 
-			mesh->indices.push_back(first);
-			mesh->indices.push_back(second);
-			mesh->indices.push_back(first + 1);
+			mesh->SetIndice(first);
+			mesh->SetIndice(second);
+			mesh->SetIndice(first + 1);
 
-			mesh->indices.push_back(second);
-			mesh->indices.push_back(second + 1);
-			mesh->indices.push_back(first + 1);
+			mesh->SetIndice(second);
+			mesh->SetIndice(second + 1);
+			mesh->SetIndice(first + 1);
 		}
 	}
 
@@ -54282,11 +54339,11 @@ void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::st
 	// メッシュ生成
 	mesh = std::make_unique<ModelMesh>();
 	mesh->vertices.push_back({ 0,0,0 });
-	mesh->indices.push_back(1);
+	mesh->SetIndice(1);
 	mesh->Initialize(effectManager->GetDxCommon());
-	mesh->indices.clear();
+	mesh->ClearIndices();
 	mesh->vertices.clear();
-	mesh->maxTime = maxtime;
+	mesh->SetMaxTime(maxtime);
 
 	// 生存時間設定
 	timer = maxtime;
@@ -54336,21 +54393,21 @@ void Engine::TrailEffect::Update()
 
 		// タイマーの初期化
 		for (int i = 0; i < 6; ++i) {
-			mesh->verticesTimer.push_back({ 0.0f });
+			mesh->SetVerticesTimer({ 0.0f });
 		}
 	}
 
 
 	// タイマーの更新
-	for (size_t i = 0; i < mesh->verticesTimer.size(); ++i) {
-		mesh->verticesTimer[i] += MyGame::GameTime(); // 例としてフレーム時間を加算 (60FPSの想定)
+	for (size_t i = 0; i < mesh->GetVerticesTimer().size(); ++i) {
+		mesh->AddVerticeTimer(static_cast<int>(i), MyGame::GameTime()); // 例としてフレーム時間を加算 (60FPSの想定)
 	}
 
 
 	// 時間が経過した頂点を削除
-	while (!mesh->verticesTimer.empty() && mesh->verticesTimer.front() >= mesh->maxTime) {
+	while (!mesh->GetVerticesTimer().empty() && mesh->GetVerticesTimer().front() >= mesh->GetMaxTime()) {
 		mesh->vertices.erase(mesh->vertices.begin());
-		mesh->verticesTimer.erase(mesh->verticesTimer.begin());
+		mesh->EraseVerticeTimer();
 	}
 
 
@@ -55062,13 +55119,13 @@ void Engine::LineMeshData::Initialize(DirectXCommon* dxCommon) {
 	mesh_ = std::make_unique<LineMesh>();
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->verticesline.push_back({ 0,0,0,0 });
-	mesh_->indices.push_back({ 0 });
-	mesh_->indices.push_back({ 1 });
+	mesh_->SetIndice({ 0 });
+	mesh_->SetIndice({ 1 });
 
 	mesh_->Initialize(dxCommon);
 
 	mesh_->verticesline.clear();
-	mesh_->indices.clear();
+	mesh_->ClearIndices();
 };
 
 
@@ -55637,8 +55694,8 @@ void Engine::CreateLine::Line(LineMeshData& meshData, const LineData& lineData) 
 	meshData.GetMesh()->verticesline.push_back({{lineData.start_.x, lineData.start_.y, lineData.start_.z, 1.0f}, lineData.color_});
 	meshData.GetMesh()->verticesline.push_back({{lineData.end_.x, lineData.end_.y, lineData.end_.z, 1.0f}, lineData.color_});
 
-	meshData.GetMesh()->indices.push_back(meshData.GetCount());
-	meshData.GetMesh()->indices.push_back(meshData.GetCount() + 1);
+	meshData.GetMesh()->SetIndice(meshData.GetCount());
+	meshData.GetMesh()->SetIndice(meshData.GetCount() + 1);
 
 	// ライン使用量加算
 	meshData.AddCount(2);
@@ -56534,7 +56591,7 @@ void Engine::EntityManager::UpdateImgui()
 					nameMesh = "Mesh" + mesh->name;
 					if (ImGui::CollapsingHeader(nameMesh.c_str())) {
 						int verticesCount = static_cast<int>(mesh->vertices.size());
-						int indexCount = static_cast<int>(mesh->indices.size());
+						int indexCount = static_cast<int>(mesh->GetIndices().size());
 						ImGui::InputInt("vertices", &verticesCount);
 						ImGui::InputInt("index", &indexCount);
 						ImGui::InputFloat3("position", &mesh->position.x);
@@ -59724,17 +59781,46 @@ namespace Engine {
 
 		// 最大位置設定
 		void SetMax(const Vector3& max) { max_ = max; }
-
-
-
+		// 三角面たち取得
+		const std::vector<Triangle>& GetTriangles() { return triangles; }
+		// 三角面取得
+		const Triangle& GetTriangle(int num) { return triangles[num]; }
+		// インデックス取得
+		const std::vector<uint32_t>& GetIndices() { return indices; }
+		// 頂点時間取得
+		const std::vector<float>& GetVerticesTimer() { return verticesTimer; }
+		// インデックス時間取得
+		const std::vector<float>& GetIndicesTimer() { return indicesTimer; }
+		// 三角面追加
+		void SetTriangle(const Triangle& triangle) { triangles.push_back(triangle); }
+		// インデックス追加
+		void SetIndice(uint32_t indice) { indices.push_back(indice); }
+		// インデックスクリア
+		void ClearIndices() { indices.clear(); }
+		// 頂点時間設定
+		void SetVerticesTimer(float time) { verticesTimer.push_back(time); };
+		// 時間を進める
+		void AddVerticeTimer(int num, float time) { verticesTimer[num] += time; }
+		// 頂点時間削除
+		void EraseVerticeTimer() { verticesTimer.erase(verticesTimer.begin()); };
+		// インデックス時間設定 
+		void SetIndicesTimer(float time) { indicesTimer.push_back(time); }
+		// メッシュインデックス取得
+		uint32_t GetMeshIndex() const { return meshIndex; }
+		// メッシュインデックス設定
+		void SetMeshIndex(uint32_t index) { meshIndex = index; }
+		// 最大時間設定
+		void SetMaxTime(float time) { maxTime = time; }
+		// 最大時間取得
+		float GetMaxTime() const { return maxTime; }
 	protected:
 		DirectXCommon* dxCommon = nullptr;
 
 
 		Vector3 min_;
 		Vector3 max_;
-	public:
-		std::vector<Triangle> triangle;
+	protected:
+		std::vector<Triangle> triangles;
 		std::vector<uint32_t> indices;
 		std::vector<float> verticesTimer;
 		std::vector<float> indicesTimer;
@@ -59975,6 +60061,7 @@ namespace Engine {
 
 		// メッシュごとのスキンクラスタ
 		std::unique_ptr<SkinCluster> skinCluster;
+	public:
 
 	public:
 		std::vector<VertexData> vertices;
@@ -60433,11 +60520,8 @@ void Engine::MyGame::Initialize()
 	scenenames_.push_back("TUTORIAL");
 	scenenames_.push_back("CHARACTER");
 
-#ifdef _DEBUG
-	//sceneManager_->ChangeScene("CHARACTER");
-#endif // _DEBUG
-	sceneManager_->ChangeScene("TITLE");
-	//sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("CHARACTER");
+	//sceneManager_->ChangeScene("TITLE");
 
 	// リソース初期化
 	InitializeResource();
@@ -60927,13 +61011,14 @@ namespace Engine {
 		// モデル読み込み
 		void LoadModel();
 
-	public:
-		static float const kDeltaTime_;
-		static float kTimeSpeed_;
 		// ゲーム内時間取得
 		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
 		// 現在の時間
 		static float NowTime() { return nowTime; };
+
+	private:
+		static float const kDeltaTime_;
+		static float kTimeSpeed_;
 		static float nowTime;
 	private:
 		std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
@@ -63790,13 +63875,13 @@ void Engine::SkyBox::Initialize(EntityManager* entityManager, std::string txtueN
 		}
 
 		// インデックスデータを追加 (2つの三角形)
-		mesh_->indices.push_back(vertexOffset + 0);
-		mesh_->indices.push_back(vertexOffset + 2);
-		mesh_->indices.push_back(vertexOffset + 1);
+		mesh_->SetIndice(vertexOffset + 0);
+		mesh_->SetIndice(vertexOffset + 2);
+		mesh_->SetIndice(vertexOffset + 1);
 
-		mesh_->indices.push_back(vertexOffset + 2);
-		mesh_->indices.push_back(vertexOffset + 3);
-		mesh_->indices.push_back(vertexOffset + 1);
+		mesh_->SetIndice(vertexOffset + 2);
+		mesh_->SetIndice(vertexOffset + 3);
+		mesh_->SetIndice(vertexOffset + 1);
 
 		vertexOffset += 4; // 次の面に移動
 	}
@@ -63818,7 +63903,7 @@ void Engine::SkyBox::Draw()
 	material->GetCommandListTexture(2, 7, 8);
 
 	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-	entityManager->GetSkyBoxCommon()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
+	entityManager->GetSkyBoxCommon()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->GetIndices().size()), 1, 0, 0, 0);
 }
 
 
