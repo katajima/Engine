@@ -17,7 +17,7 @@ namespace Engine {
 		bool enabled = true;
 		bool isStatic = false;  // 動かさない
 		Vector2 centerWorld;
-		CollisionLayer layer = CollisionLayer::Default;
+		CollisionLayer layer = CollisionLayer::ALL;
 		CollisionTag tag = CollisionTag::None; // タグ
 		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
 		uint32_t id = 0; // コライダーID（ユニーク）

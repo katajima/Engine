@@ -53,7 +53,7 @@ void CameraManager::Update()
 		else {
 			// 使っているカメラを更新
 			for (auto& cam : cameras) {
-				if (cam.second->useCamera) {
+				if (cam.second->GetUseCamera()) {
 					camera->transform_ = cam.second->GetUniqueCamera()->GetTransform();
 					camera->UpdateMatrix();
 				}
@@ -74,7 +74,7 @@ void CameraManager::AddCamera(CameraInfo camera, std::string name)
 {
 	// カメラ管理クラスを渡す
 	camera.camera->SetCameraManeger(this);
-	camera.camera->useCamera = camera.useCamera;	// 使っているか
+	camera.camera->SetUseCamera(camera.useCamera);	// 使っているか
 	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
 }
 
@@ -86,10 +86,10 @@ void CameraManager::SetUseCamera(std::string name, float time)
 
 		// 全てのカメラを使用していないことに
 		for (auto& cam : cameras) {
-			cam.second->useCamera = false;	
+			cam.second->SetUseCamera(false);
 		}
 		// カメラ使用
-		it->second->useCamera = true;
+		it->second->SetUseCamera(true);
 		
 
 		if (time <= 0.0f) {

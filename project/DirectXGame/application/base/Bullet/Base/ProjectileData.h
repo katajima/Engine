@@ -85,7 +85,7 @@ namespace Projectile {
 		// 衝突タグ
 		CollisionTag collisionTag = CollisionTag::None;
 		// 衝突レイヤー
-		CollisionLayer collisionLayer = CollisionLayer::Default;
+		CollisionLayer collisionLayer = CollisionLayer::ALL;
 		// 衝突マスク
 		uint32_t collisionMask = 0xFFFFFFFF; // ビットで衝突対象を指定（全部と当たる）
 

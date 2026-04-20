@@ -28,6 +28,21 @@
             "type": "float",
             "value": 0.36666667461395264
         },
+        "コライダー(タグ)": {
+            "enumType": "CollisionTag",
+            "type": "enum",
+            "value": 7
+        },
+        "コライダー(マスク)": {
+            "enumType": "CollisionMask",
+            "type": "enum",
+            "value": 6
+        },
+        "コライダー(レイヤー)": {
+            "enumType": "CollisionLayer",
+            "type": "enum",
+            "value": 6
+        },
         "コンボキャンセル受付終了時間": {
             "type": "float",
             "value": 0.38333332538604736
@@ -109,12 +124,42 @@
             "type": "float",
             "value": 0.10000000149011612
         },
+        "ヒットボックスオフセット位置": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                1.0,
+                2.0
+            ]
+        },
+        "ヒットボックスコライダーサイズ": {
+            "type": "Vector3",
+            "value": [
+                2.0,
+                2.0,
+                2.0
+            ]
+        },
+        "ヒットボックスコライダー半径": {
+            "type": "float",
+            "value": 1.0
+        },
         "ヒットボックスヒット記録を使用": {
             "type": "bool",
             "value": true
         },
+        "ヒットボックス使用者タイプ": {
+            "enumType": "HitBoxUseType",
+            "type": "enum",
+            "value": 0
+        },
         "ヒットボックス依存先タイプ": {
             "enumType": "HitBoxParentType",
+            "type": "enum",
+            "value": 0
+        },
+        "ヒットボックス形状タイプ": {
+            "enumType": "HitBoxShapeType",
             "type": "enum",
             "value": 0
         },

@@ -110,7 +110,7 @@ void Engine::RenderComponent::Draw()
 
 				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 				entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
-					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 			}
 
 			for (auto& mesh : tra) {
@@ -132,7 +132,7 @@ void Engine::RenderComponent::Draw()
 
 				// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
 				entityManager->GetObject3dCommon()->GetDxCommon()->GetModelManager()->
-					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+					GetModelCommon()->GetCommand()->GetList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 			}
 		}
 		break;

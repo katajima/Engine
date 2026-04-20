@@ -141,12 +141,39 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
+			
+			// タグタイプ
+			static const char* HitBoxTagTypeLabels[] = {
+				"何もなし",
+				"プレイヤー",
+				"敵",
+				"プレイヤー攻撃",
+				"敵攻撃",
+				"障害物(壁や床)",
+				"アイテム",
+				"プレイヤーによる影響",
+				"敵による影響"
+			};
+			Engine::ImGuiManager::Select("コライダー(タグ)", HitBoxTagTypeLabels, data_.hitBox.tag);
+			
+			// レイヤタイプ
+			static const char* HitBoxLayerTypeLabels[] = {
+				"デフォルト",
+				"プレイヤー",
+				"敵",
+				"プレイヤー攻撃",
+				"敵攻撃",
+				"環境",
+				"全て",
+			};
+			Engine::ImGuiManager::Select("コライダー(レイヤー)", HitBoxLayerTypeLabels, data_.hitBox.layer);
+			Engine::ImGuiManager::Select("コライダー(マスク)", HitBoxLayerTypeLabels, data_.hitBox.mask);
 
 
 			// ヒット記録を使用
 			ImGui::Checkbox("ヒット記録を使用", &data_.hitBox.useContactRecord);
 			// オフセット
-			ImGui::DragFloat3("オフセット", &data_.hitBox.parentOffset.x, 0.1f);
+			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
 			// サイズ
 			if(data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
 				data_.hitBox.shapeType == HitBox::ShapeType::kOBB)
@@ -214,7 +241,9 @@ namespace Combo {
 			ImGui::SliderFloat("パワー", &data_.hitReaction.power, 0.0f, 999.0f, "%.2f");
 			ImGui::SliderFloat("縦方向パワー", &data_.hitReaction.verticalBoost, 0.0f, 999.0f, "%.2f");
 			ImGui::Checkbox("縦方向移動", &data_.hitReaction.isVerticalBoost);
-			ImGui::SliderFloat("ダメージ", &data_.hitReaction.damageData.GetOne().damage, 0.0f, 1000.0f, "%.2f");
+			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
+			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
+			data_.hitReaction.damageData.GetOne().SetDamage(damage);
 			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
@@ -238,8 +267,6 @@ namespace Combo {
 		data_.move.moveType = comboData.GetComboMotion().GetComboMove().GetData().moveType;						// 移動タイプ
 
 
-		// リアクション
-		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
 		
 
 		// アニメーションスピード
@@ -249,8 +276,12 @@ namespace Combo {
 		data_.animation.animationName = comboData.GetComboMotion().GetComboAnimation().GetData().animationName_;
 
 
-		// 親
-		data_.hitBox = comboData.GetComboHitBox().GetData();
+		// ヒットボックスデータ
+		data_.hitBox = comboData.GetComboHitBox().GetCollData().hitBoxData;
+		// リアクションデータ
+		data_.hitReaction = comboData.GetComboHitBox().GetCollData().reactionData;
+
+
 		// 終了条件
 		data_.endConditionType = comboData.GetComboCondition().GetEndCondition().GetData().type;
 

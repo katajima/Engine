@@ -43,17 +43,46 @@ namespace Engine {
 
 		// 最大位置設定
 		void SetMax(const Vector3& max) { max_ = max; }
-
-
-
+		// 三角面たち取得
+		const std::vector<Triangle>& GetTriangles() { return triangles; }
+		// 三角面取得
+		const Triangle& GetTriangle(int num) { return triangles[num]; }
+		// インデックス取得
+		const std::vector<uint32_t>& GetIndices() { return indices; }
+		// 頂点時間取得
+		const std::vector<float>& GetVerticesTimer() { return verticesTimer; }
+		// インデックス時間取得
+		const std::vector<float>& GetIndicesTimer() { return indicesTimer; }
+		// 三角面追加
+		void SetTriangle(const Triangle& triangle) { triangles.push_back(triangle); }
+		// インデックス追加
+		void SetIndice(uint32_t indice) { indices.push_back(indice); }
+		// インデックスクリア
+		void ClearIndices() { indices.clear(); }
+		// 頂点時間設定
+		void SetVerticesTimer(float time) { verticesTimer.push_back(time); };
+		// 時間を進める
+		void AddVerticeTimer(int num, float time) { verticesTimer[num] += time; }
+		// 頂点時間削除
+		void EraseVerticeTimer() { verticesTimer.erase(verticesTimer.begin()); };
+		// インデックス時間設定 
+		void SetIndicesTimer(float time) { indicesTimer.push_back(time); }
+		// メッシュインデックス取得
+		uint32_t GetMeshIndex() const { return meshIndex; }
+		// メッシュインデックス設定
+		void SetMeshIndex(uint32_t index) { meshIndex = index; }
+		// 最大時間設定
+		void SetMaxTime(float time) { maxTime = time; }
+		// 最大時間取得
+		float GetMaxTime() const { return maxTime; }
 	protected:
 		DirectXCommon* dxCommon = nullptr;
 
 
 		Vector3 min_;
 		Vector3 max_;
-	public:
-		std::vector<Triangle> triangle;
+	protected:
+		std::vector<Triangle> triangles;
 		std::vector<uint32_t> indices;
 		std::vector<float> verticesTimer;
 		std::vector<float> indicesTimer;

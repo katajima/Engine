@@ -95,8 +95,6 @@ public:
 protected:
 	// 当たり判定をするか
 	void SetIsCollision(bool is) { isCollision = is; }
-public:
-	
 protected:
 	std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;
 

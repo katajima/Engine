@@ -13,7 +13,7 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 		assert(mesh->HasNormals()); // 法線がないMeshは今回は非対応
 		std::unique_ptr<ModelMesh> pMesh = std::make_unique<ModelMesh>();
 		pMesh->name = mesh->mName.C_Str();
-		pMesh->meshIndex = meshIndex;
+		pMesh->SetMeshIndex(meshIndex);
 
 		Vector3 min = { 10000,10000,10000 };
 		Vector3 max = { -10000,-10000,-10000 };
@@ -80,11 +80,11 @@ void Engine::LoadModel::LoadMesh(const aiScene* scene, ModelData& modelData, Dir
 			Vector3 vert[3];
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
-				pMesh->indices.push_back(vertexIndex);
+				pMesh->SetIndice(vertexIndex);
 
 				vert[element] = pMesh->vertices[vertexIndex].position.xyz();
 			}
-			pMesh->triangle.push_back(Triangle{ vert[0],vert[1],vert[2] });
+			pMesh->SetTriangle(Triangle{ vert[0],vert[1],vert[2] });
 
 		}
 

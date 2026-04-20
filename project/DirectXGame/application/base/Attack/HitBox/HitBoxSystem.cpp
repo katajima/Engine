@@ -30,30 +30,30 @@ namespace HitBox {
 	}
 
 	// ヒットボックス追加
-	void System::AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character, const CollData& datas,
-		float lifeTime, ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
+	void System::AddLifeTimeHitBox(Character::BaseCharacter* character, const CollData& datas,
+		Engine::WorldTransform* parent) {
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
+		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 		// 依存先設定
-		CreateParent(d, dependenceType, offset, parent);
+		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
-		d.lifeTime = lifeTime;							// 生存時間
+		d.lifeTime = datas.hitBoxData.lifeTime;							// 生存時間
 		d.timer = 0.0f;									// 時間
 		// ヒットボックス(期限付き)データに挿入
 		lifeTimeHitBoxDatas_.push_back(std::move(d));
 	}
 
-	void System::AddHitBox(int32_t& id, UseType type, Character::BaseCharacter* character, const CollData& datas,
-		ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent) {
+	void System::AddHitBox(int32_t& id, Character::BaseCharacter* character, const CollData& datas,
+		 Engine::WorldTransform* parent) {
 
 		// IDがあるなら早期リターン
 		if (id != -1) return;
 		Data d;
 		d.hitBox = std::make_unique<HitBoxInstance>();
-		d.hitBox->Initialize(entityManager, character, type, useContactRecord);
+		d.hitBox->Initialize(entityManager, character, datas.hitBoxData.useType, datas.hitBoxData.useContactRecord);
 		d.hitBox->GetWorldTransform().Update();
 
 		// Id設定;
@@ -61,7 +61,7 @@ namespace HitBox {
 		id = d.id;
 
 		// 依存先設定
-		CreateParent(d, dependenceType, offset, parent);
+		CreateParent(d, datas.hitBoxData.dependenceType, datas.hitBoxData.offset, parent);
 		// コライダー生成
 		CreateHitBoxCollider(d, datas);
 		// ヒットボックス(無期限)データに挿入
@@ -105,32 +105,37 @@ namespace HitBox {
 	}
 	// コライダー生成
 	void System::CreateHitBoxCollider(Data& d, const CollData& data) {
+		CollisionTag tag = data.hitBoxData.tag;
+		CollisionLayer layer = data.hitBoxData.layer;
+		CollisionLayer mask = data.hitBoxData.mask;
+		bool isEneble = data.hitBoxData.isEneble;
+		bool isLine = data.hitBoxData.isLine;
 
 		// 形状によっての設定項目
 		switch (data.hitBoxData.shapeType) {
 		case ShapeType::kOBB:
 		{
 			std::unique_ptr<Engine::OBBCollider> collObb = nullptr;
-			collObb = CreateCollider<Engine::OBBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collObb = CreateCollider<Engine::OBBCollider>(tag, layer, mask, isEneble, isLine);
 			collObb->obb.size = data.hitBoxData.colliderSize;
-			d.hitBox->AddCollider(std::move(collObb), data.hitBoxData.parentOffset, data.reactionData);
+			d.hitBox->AddCollider(std::move(collObb), data.hitBoxData.offset, data.reactionData);
 			break;
 		}
 		case ShapeType::kAABB:
 		{
 			std::unique_ptr<Engine::AABBCollider> collAABB = nullptr;
-			collAABB = CreateCollider<Engine::AABBCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collAABB = CreateCollider<Engine::AABBCollider>(tag, layer, mask, isEneble, isLine);
 			collAABB->aabb.min = -data.hitBoxData.colliderSize / 2;
 			collAABB->aabb.max = data.hitBoxData.colliderSize / 2;
-			d.hitBox->AddCollider(std::move(collAABB), data.hitBoxData.parentOffset, data.reactionData);
+			d.hitBox->AddCollider(std::move(collAABB), data.hitBoxData.offset, data.reactionData);
 			break;
 		}
 		case ShapeType::kSphere:
 		{
 			std::unique_ptr<Engine::SphereCollider> collSphere = nullptr;
-			collSphere = CreateCollider<Engine::SphereCollider>(data.tag, data.layer, data.mask, data.isEneble, data.isLine);
+			collSphere = CreateCollider<Engine::SphereCollider>(tag, layer, mask, isEneble, isLine);
 			collSphere->radius = data.hitBoxData.radius;
-			d.hitBox->AddCollider(std::move(collSphere), data.hitBoxData.parentOffset, data.reactionData);
+			d.hitBox->AddCollider(std::move(collSphere), data.hitBoxData.offset, data.reactionData);
 			break;
 		}
 		default:

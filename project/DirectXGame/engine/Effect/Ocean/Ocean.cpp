@@ -23,13 +23,13 @@ void Engine::Ocean::Initialize(Engine::EntityManager* entityManager,Vector2 reng
 	mesh_->vertices.push_back({ .position = {renge_.renge.x, 0.0f, -renge_.renge.y, 1.0f} ,.texcoord = {0.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 左下
 	mesh_->vertices.push_back({ .position = {-renge_.renge.x, 0.0f, -renge_.renge.y, 1.0f} ,.texcoord = {1.0f, 1.0f}, .normal = {0.0f, 0.0f, 1.0f} }); // 右下
 	
-	mesh_->indices.push_back(0);
-	mesh_->indices.push_back(1);
-	mesh_->indices.push_back(2);
+	mesh_->SetIndice(0);
+	mesh_->SetIndice(1);
+	mesh_->SetIndice(2);
 
-	mesh_->indices.push_back(1);
-	mesh_->indices.push_back(3);
-	mesh_->indices.push_back(2);
+	mesh_->SetIndice(1);
+	mesh_->SetIndice(3);
+	mesh_->SetIndice(2);
 
 	mesh_->Initialize(dxCommon);
 

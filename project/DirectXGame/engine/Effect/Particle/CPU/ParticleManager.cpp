@@ -179,7 +179,7 @@ void Engine::ParticleManager::Draw()
 
 		// インスタンシング描画
 		uint32_t instanceCount = (std::min)(group.instanceCount, kNumMaxInstance);
-		commandList->DrawIndexedInstanced(static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0, 0);
+		commandList->DrawIndexedInstanced(static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0, 0);
 	}
 }
 

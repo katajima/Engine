@@ -116,14 +116,18 @@ void Projectile::BaseProjectile::CreateCollision() {
 void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* otherComponent, Engine::Collider* self, Engine::Collider* other) {
 	if (param_.hitType == ProjectileHitType::Explode) {
 		HitBox::CollData data_;
-		data_.isEneble = true;
-		data_.isLine = true;
-		data_.tag = param_.collisionTag;
-		data_.layer = param_.collisionLayer;
+		data_.hitBoxData.isEneble = true;
+		data_.hitBoxData.isLine = true;
+		data_.hitBoxData.tag = param_.collisionTag;
+		data_.hitBoxData.layer = param_.collisionLayer;
 		data_.hitBoxData.colliderSize = { 1.0f,2.0f,1.0f };
 		data_.name = param_.name;
-		data_.reactionData.damageData.GetOne().damage = param_.explosionDamage;
+		data_.reactionData.damageData.GetOne().SetDamage(param_.explosionDamage);
 		data_.hitBoxData.radius = param_.explosionRadius;
+		data_.hitBoxData.lifeTime = param_.explosionLifeTime;
+		data_.hitBoxData.dependenceType = HitBox::ParentType::kParentIndependent;
+		data_.hitBoxData.useContactRecord = true;
+		data_.hitBoxData.offset = {};
 		// 使用者タイプ設定
 		HitBox::UseType useType = HitBox::UseType::kOther;
 		if (CollisionTag::Player == self->tag) {
@@ -132,15 +136,15 @@ void Projectile::BaseProjectile::CollisionProcess(Engine::ColliderComponent* oth
 		else if (CollisionTag::Enemy == self->tag) {
 			useType = HitBox::UseType::kEnemy;
 		}
+		data_.hitBoxData.useType = useType;
+
 		auto* selfComponent = static_cast<Engine::ColliderComponent*>(self->owner);
 		Character::BaseCharacter* owner = nullptr;
 		if (self->tag == CollisionTag::Player || self->tag == CollisionTag::Enemy) {
 			owner = static_cast<Character::BaseCharacter*>(selfComponent->GetHitReceiver());
 		}
 		// 爆発ヒットボックス生成
-		owner->GetHitBoxSystem()->AddLifeTimeHitBox(useType, owner, data_,
-			param_.explosionLifeTime, HitBox::ParentType::kParentIndependent, {},
-			true, &objectComponent_->GetWorldTransform());
+		owner->GetHitBoxSystem()->AddLifeTimeHitBox(owner, data_,&objectComponent_->GetWorldTransform());
 	}
 
 	switch (other->tag) {

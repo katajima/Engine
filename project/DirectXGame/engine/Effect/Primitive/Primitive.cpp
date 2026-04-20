@@ -103,7 +103,7 @@ void Engine::BasePrimitive::Draw()
 		mesh->GetCommandList();
 
 		// Draw
-		primitiveCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		primitiveCommon->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 	}
 };
 

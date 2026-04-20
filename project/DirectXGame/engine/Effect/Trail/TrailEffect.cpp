@@ -11,11 +11,11 @@ void Engine::TrailEffect::Initialize(EffectManager* effectManager ,const std::st
 	// メッシュ生成
 	mesh = std::make_unique<ModelMesh>();
 	mesh->vertices.push_back({ 0,0,0 });
-	mesh->indices.push_back(1);
+	mesh->SetIndice(1);
 	mesh->Initialize(effectManager->GetDxCommon());
-	mesh->indices.clear();
+	mesh->ClearIndices();
 	mesh->vertices.clear();
-	mesh->maxTime = maxtime;
+	mesh->SetMaxTime(maxtime);
 
 	// 生存時間設定
 	timer = maxtime;
@@ -65,21 +65,21 @@ void Engine::TrailEffect::Update()
 
 		// タイマーの初期化
 		for (int i = 0; i < 6; ++i) {
-			mesh->verticesTimer.push_back({ 0.0f });
+			mesh->SetVerticesTimer({ 0.0f });
 		}
 	}
 
 
 	// タイマーの更新
-	for (size_t i = 0; i < mesh->verticesTimer.size(); ++i) {
-		mesh->verticesTimer[i] += MyGame::GameTime(); // 例としてフレーム時間を加算 (60FPSの想定)
+	for (size_t i = 0; i < mesh->GetVerticesTimer().size(); ++i) {
+		mesh->AddVerticeTimer(static_cast<int>(i), MyGame::GameTime()); // 例としてフレーム時間を加算 (60FPSの想定)
 	}
 
 
 	// 時間が経過した頂点を削除
-	while (!mesh->verticesTimer.empty() && mesh->verticesTimer.front() >= mesh->maxTime) {
+	while (!mesh->GetVerticesTimer().empty() && mesh->GetVerticesTimer().front() >= mesh->GetMaxTime()) {
 		mesh->vertices.erase(mesh->vertices.begin());
-		mesh->verticesTimer.erase(mesh->verticesTimer.begin());
+		mesh->EraseVerticeTimer();
 	}
 
 

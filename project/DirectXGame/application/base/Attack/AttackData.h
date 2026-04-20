@@ -34,9 +34,8 @@ public:
 		// ダメージ設定
 		void SetDamage(float damage) { this->damage = damage; };
 
-	public:
-		float damage = 0;			// ダメージ(変化がない場合)
 	private:
+		float damage = 0;			// ダメージ(変化がない場合)
 		float timer = 0.0f;		// 時間
 		bool isDamage = true;	// ダメージを入れるか
 		bool isFinish = false;	// 攻撃として終了したか
@@ -57,7 +56,7 @@ public:
 		float GetDamage() const;
 		// 一つ一つのダメージの変化タイプ取得
 		OneHitDamegeType GetOneHitDamegeType() const { return oneHitDamegeType; }
-	public:
+	private:
 		OneHitDamegeType oneHitDamegeType = OneHitDamegeType::kConstant;	// 一つ一つのダメージの変化タイプ
 		float interval = 0.1f;		// 連撃のダメージ入りる間隔
 		int num = 2;				// 連撃のダメージの回数
@@ -86,7 +85,7 @@ public:
 		float GetDamage() const;
 		// ダメージ設定
 		void SetDamage(float damage) { this->damage = damage; };
-	public:
+	private:
 		float interval = 0.1f;	// 持続ダメージの入る間隔	
 		int num = 2;			// 持続ダメージの回数
 		float damage = 0;		// ダメージ

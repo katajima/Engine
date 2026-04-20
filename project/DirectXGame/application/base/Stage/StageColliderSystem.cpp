@@ -13,7 +13,7 @@ void StageColliderSystem::CreateCollider() {
 
 	for (auto& obj : objects) {
 		for (auto& mesh : obj->GetModel()->GetModelData().mesh) {
-			for (auto& triangle : mesh->triangle) {
+			for (auto& triangle : mesh->GetTriangles()) {
 				auto triangleColl = std::make_unique<Engine::TriangleCollider>();
 				triangleColl->triangle01 = triangle.vertices[0];
 				triangleColl->triangle02 = triangle.vertices[1];

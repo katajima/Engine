@@ -156,7 +156,7 @@ void Engine::Object3dInstansManager::Draw() {
 		uint32_t instanceCount = (std::min)(group.instanceCount,
 			kNumMaxInstance);
 		commandList->DrawIndexedInstanced(
-			static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0,
+			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0,
 			0);
 	}
 }
@@ -195,7 +195,7 @@ void Engine::Object3dInstansManager::DrawTransparency(){
 		uint32_t instanceCount = (std::min)(group.instanceCount,
 			kNumMaxInstance);
 		commandList->DrawIndexedInstanced(
-			static_cast<UINT>(group.mesh->indices.size()), instanceCount, 0, 0,
+			static_cast<UINT>(group.mesh->GetIndices().size()), instanceCount, 0, 0,
 			0);
 	}
 }

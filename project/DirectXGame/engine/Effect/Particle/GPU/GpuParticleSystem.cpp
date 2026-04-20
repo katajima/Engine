@@ -179,7 +179,7 @@ void Engine::GpuParticleGroup::Draw() {
 		mesh->GetCommandList();
 
 		// インスタンシング描画
-		dxCommon->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh->indices.size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
+		dxCommon->GetCommandList()->DrawIndexedInstanced(static_cast<UINT>(mesh->GetIndices().size()), cbMaxInstance_.Data()->maxInstance, 0, 0, 0);
 	}
 }
 

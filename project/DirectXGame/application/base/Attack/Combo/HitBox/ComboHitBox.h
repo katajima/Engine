@@ -22,8 +22,6 @@ namespace Combo {
 		// 終了
 		void Exit();
 	public:
-		// データ取得
-		HitBox::GlobalHitBox& GetData() { return data_; }
 		// CollData
 		HitBox::CollData& GetCollData() { return collData_;}
 		// コライダーデータ追加
@@ -52,8 +50,6 @@ namespace Combo {
 		//
 		int32_t id = -1;
 	private:
-		// ヒットボックスデータ
-		HitBox::GlobalHitBox data_;
 		// コライダーデータ
 		HitBox::CollData collData_;
 		// 使うヒットボックス名

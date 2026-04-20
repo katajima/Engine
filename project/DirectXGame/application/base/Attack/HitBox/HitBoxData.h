@@ -58,7 +58,7 @@ namespace HitBox {
 		/// 親子付け設定  ///　 
 		std::string parentName = "なし";
 		// オフセット
-		Vector3 parentOffset = { 0.0f,0.0f,0.0f };
+		Vector3 offset = { 0.0f,0.0f,0.0f };
 
 		// ヒットボックス使用者タイプ
 		HitBox::UseType useType = HitBox::UseType::kPlayer;
@@ -76,29 +76,26 @@ namespace HitBox {
 		Vector3 colliderSize = { 1.0f,1.0f,1.0f };
 		// 球半径
 		float radius = 1.0f;
+
+		// タグ
+		CollisionTag tag = CollisionTag::None;
+		// レイヤー
+		CollisionLayer layer = CollisionLayer::ALL;
+		// マスク
+		CollisionLayer mask = CollisionLayer::ALL;
+		// 有効か？
+		bool isEneble = true;
+		// デバック用ライン描画をするか
+		bool isLine = false;
 	};
 
 	// コライダーデータ
 	struct CollData	{
 		// 名前
 		std::string name = "";
-		// タグ
-		CollisionTag tag = CollisionTag::None;
-		// レイヤー
-		CollisionLayer layer = CollisionLayer::Default;
-		// マスク
-		CollisionLayer mask;
-		// 有効か？
-		bool isEneble = true;
-		// デバック用ライン描画をするか
-		bool isLine = false;
+		// ヒットボックスデータ
 		GlobalHitBox hitBoxData;
 		// リアクションデータ
 		HitReactionData reactionData;
 	};
-
-
-	
-
-
 };

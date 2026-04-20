@@ -104,22 +104,24 @@ namespace Character {
 		enemy->GetWorldTransform().rotate_.y = std::atan2(dire_.x, dire_.z);
 
 		HitBox::CollData data{};
-		data.isEneble = true;
-		data.isLine = true;
-		data.tag = CollisionTag::EnemyAttack;
-		data.layer = CollisionLayer::EnemyAttack;
-		data.mask = CollisionLayer::Player;
+		data.hitBoxData.isEneble = true;
+		data.hitBoxData.isLine = true;
+		data.hitBoxData.tag = CollisionTag::EnemyAttack;
+		data.hitBoxData.layer = CollisionLayer::EnemyAttack;
+		data.hitBoxData.mask = CollisionLayer::Player;
 		data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
-		data.reactionData.damageData.GetOne().damage = 10.0f;
+		data.reactionData.damageData.GetOne().SetDamage(10.0f);
+
+		data.hitBoxData.useType = HitBox::UseType::kEnemy;
+		data.hitBoxData.lifeTime = swingTime_;
+		data.hitBoxData.dependenceType = HitBox::ParentType::kParent;
+		data.hitBoxData.offset = {  };
+		data.hitBoxData.useContactRecord = true;
+
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(
-			HitBox::UseType::kEnemy,
 			enemy,
 			data,
-			swingTime_,
-			HitBox::ParentType::kParent,
-			{},
-			true,
 			&enemy->GetWorldTransform()
 		);
 	}

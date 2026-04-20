@@ -81,7 +81,8 @@ namespace Character {
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->Enable();					// コライダ有効
 		sphere->tag = CollisionTag::Enemy;	// タグ設定
-		sphere->layer = CollisionLayer::Enemy;// レイヤー設定
+		sphere->layer = CollisionLayer::ALL;// レイヤー設定
+		sphere->collisionMask = 0xFFFFFFFF;		
 		sphere->radius = colliderRadius; // 半径を適宜設定
 		//sphere->isDebugLine = true;
 		GetColliderComponent()->AddCollider(std::move(sphere));	// コライダ追加

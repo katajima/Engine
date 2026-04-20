@@ -160,7 +160,7 @@ void Engine::EntityManager::UpdateImgui()
 					nameMesh = "Mesh" + mesh->name;
 					if (ImGui::CollapsingHeader(nameMesh.c_str())) {
 						int verticesCount = static_cast<int>(mesh->vertices.size());
-						int indexCount = static_cast<int>(mesh->indices.size());
+						int indexCount = static_cast<int>(mesh->GetIndices().size());
 						ImGui::InputInt("vertices", &verticesCount);
 						ImGui::InputInt("index", &indexCount);
 						ImGui::InputFloat3("position", &mesh->position.x);

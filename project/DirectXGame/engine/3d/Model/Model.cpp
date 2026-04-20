@@ -29,7 +29,7 @@ void Engine::Model::Initialize(DirectXCommon* dxCommon, ModelCommon* modelCommon
 	modelData = LoadOdjFileAssimpAmime(dire, filename);
 
 	// メッシュ状にライン生成
-	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->indices);
+	CreateModel::CreateMeshLine(modelData, modelData.mesh[0]->GetIndices());
 
 
 
@@ -79,7 +79,7 @@ void Engine::Model::DrawSkinning(std::vector<MaterialInstance> matetials, std::v
 		mesh->GetCommandList(mesh->skinCluster->outputBufferView, mesh->GetVertexBufferView());
 
 		// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-		commandList->DrawIndexedInstanced(UINT(mesh->indices.size()), 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(UINT(mesh->GetIndices().size()), 1, 0, 0, 0);
 
 
 		// 初期状態を UAV 用に遷移させる

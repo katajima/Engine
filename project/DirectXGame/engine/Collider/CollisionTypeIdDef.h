@@ -16,13 +16,15 @@ enum class CollisionTag {
 };
 
 // レイヤー
-enum class CollisionLayer : uint8_t {
-	Default,
-	Player,
-	Enemy,
-	PlayerAttack,
-	EnemyAttack,
-	Environment,
+enum class CollisionLayer : uint32_t {
+	None = 0,
+	Player = 1 << 0,
+	Enemy = 1 << 1,
+	PlayerAttack = 1 << 2,
+	EnemyAttack = 1 << 3,
+	Environment = 1 << 4,
+
+	ALL = 0xFFFFFFFF
 };
 
 // コライダタイプ

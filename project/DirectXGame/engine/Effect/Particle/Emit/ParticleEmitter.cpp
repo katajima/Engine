@@ -506,7 +506,7 @@ void Engine::MeshParticleEmitter::ApplyGlobalVariablesUniqe() {
 // デバック線描画
 void Engine::MeshParticleEmitter::DrawEmitterLine() {
 
-	for (auto& tri : modelMesh_->triangle) {
+	for (auto& tri : modelMesh_->GetTriangles()) {
 		lineCommon->GetDebugLineMeshData().AddLineTriangle(tri, transform_);
 	}
 }
@@ -516,10 +516,9 @@ void Engine::MeshParticleEmitter::EmitUniqe() {
 
 	auto& rng = particleManager->GetRandomEngine();
 
-	int index = static_cast<int>(Random::RandomSize_t(0, modelMesh_->triangle.size() - 1));
+	int index = static_cast<int>(Random::RandomSize_t(0, modelMesh_->GetTriangles().size() - 1));
 
-	Triangle tri = modelMesh_->triangle[index];
-
+	Triangle tri = modelMesh_->GetTriangle(index);
 	// 三角形の頂点 (ローカル空間想定)
 	Vector3 A = tri.vertices[0];
 	Vector3 B = tri.vertices[1];

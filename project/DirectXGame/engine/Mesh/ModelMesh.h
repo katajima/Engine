@@ -40,6 +40,7 @@ namespace Engine {
 
 		// メッシュごとのスキンクラスタ
 		std::unique_ptr<SkinCluster> skinCluster;
+	public:
 
 	public:
 		std::vector<VertexData> vertices;

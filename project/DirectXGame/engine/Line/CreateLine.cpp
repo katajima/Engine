@@ -13,13 +13,13 @@ void Engine::LineMeshData::Initialize(DirectXCommon* dxCommon) {
 	mesh_ = std::make_unique<LineMesh>();
 	mesh_->verticesline.push_back({ 0,0,0,0 });
 	mesh_->verticesline.push_back({ 0,0,0,0 });
-	mesh_->indices.push_back({ 0 });
-	mesh_->indices.push_back({ 1 });
+	mesh_->SetIndice({ 0 });
+	mesh_->SetIndice({ 1 });
 
 	mesh_->Initialize(dxCommon);
 
 	mesh_->verticesline.clear();
-	mesh_->indices.clear();
+	mesh_->ClearIndices();
 };
 
 
@@ -588,8 +588,8 @@ void Engine::CreateLine::Line(LineMeshData& meshData, const LineData& lineData) 
 	meshData.GetMesh()->verticesline.push_back({{lineData.start_.x, lineData.start_.y, lineData.start_.z, 1.0f}, lineData.color_});
 	meshData.GetMesh()->verticesline.push_back({{lineData.end_.x, lineData.end_.y, lineData.end_.z, 1.0f}, lineData.color_});
 
-	meshData.GetMesh()->indices.push_back(meshData.GetCount());
-	meshData.GetMesh()->indices.push_back(meshData.GetCount() + 1);
+	meshData.GetMesh()->SetIndice(meshData.GetCount());
+	meshData.GetMesh()->SetIndice(meshData.GetCount() + 1);
 
 	// ライン使用量加算
 	meshData.AddCount(2);

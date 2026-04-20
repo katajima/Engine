@@ -63,11 +63,13 @@ public:
 	void SetName(const std::string& name) { name_ = name; };
 	// 名前取得
 	std::string GetName() const { return name_; }
-
-public:
+	// カメラ使用フラグ
+	bool GetUseCamera() const { return useCamera; }
+	// カメラ使用フラグ設定
+	void SetUseCamera(bool is) { useCamera = is; }
+protected:
 	bool useCamera = false;
 
-protected:
 	std::unique_ptr<Engine::Camera> uniqueCamera_;	// 固有カメラ
 	
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)

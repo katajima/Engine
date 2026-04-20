@@ -38,12 +38,12 @@ namespace HitBox {
 
 
 		// ヒットボックス追加（期限付き）
-		void AddLifeTimeHitBox(UseType type, Character::BaseCharacter* character,const CollData& datas,
-			float lifeTime, ParentType dependenceType, const Vector3& offset,bool useContactRecord,Engine::WorldTransform* parent = nullptr);
+		void AddLifeTimeHitBox(Character::BaseCharacter* character,const CollData& datas,
+			Engine::WorldTransform* parent = nullptr);
 
 		// ヒットボックス追加（無期限）
-		void AddHitBox(int32_t& id,UseType type, Character::BaseCharacter* character,const CollData& datas,
-			ParentType dependenceType, const Vector3& offset, bool useContactRecord, Engine::WorldTransform* parent = nullptr);
+		void AddHitBox(int32_t& id,Character::BaseCharacter* character,const CollData& datas,
+			Engine::WorldTransform* parent = nullptr);
 		// 全体データ取得(期限付きヒットボックス)
 		std::vector<Data>& GetLifeTimeHitBoxData() { return lifeTimeHitBoxDatas_; }
 		// 全体データ取得(無期限ヒットボックス)

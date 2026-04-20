@@ -52,13 +52,14 @@ namespace Engine {
 		// モデル読み込み
 		void LoadModel();
 
-	public:
-		static float const kDeltaTime_;
-		static float kTimeSpeed_;
 		// ゲーム内時間取得
 		static float GameTime() { return kDeltaTime_ * kTimeSpeed_; };
 		// 現在の時間
 		static float NowTime() { return nowTime; };
+
+	private:
+		static float const kDeltaTime_;
+		static float kTimeSpeed_;
 		static float nowTime;
 	private:
 		std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();

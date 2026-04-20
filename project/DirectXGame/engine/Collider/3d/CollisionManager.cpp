@@ -327,6 +327,16 @@ void Engine::CollisionManager::CheckDynamicVsStaticMT()
 	}
 }
 
+bool Engine::CollisionManager::CheckMask(Collider* a, Collider* b) const {
+	uint32_t aLayer = static_cast<uint32_t>(a->layer);
+	uint32_t bLayer = static_cast<uint32_t>(b->layer);
+
+	bool is = (bLayer & a->collisionMask) != 0;
+	bool is2 = (aLayer & b->collisionMask) != 0;
+
+	return is && is2;
+}
+
 void Engine::CollisionManager::NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const {
 	if (!self || !other) {
 		return;

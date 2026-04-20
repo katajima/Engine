@@ -48,13 +48,13 @@ void Engine::SkyBox::Initialize(EntityManager* entityManager, std::string txtueN
 		}
 
 		// インデックスデータを追加 (2つの三角形)
-		mesh_->indices.push_back(vertexOffset + 0);
-		mesh_->indices.push_back(vertexOffset + 2);
-		mesh_->indices.push_back(vertexOffset + 1);
+		mesh_->SetIndice(vertexOffset + 0);
+		mesh_->SetIndice(vertexOffset + 2);
+		mesh_->SetIndice(vertexOffset + 1);
 
-		mesh_->indices.push_back(vertexOffset + 2);
-		mesh_->indices.push_back(vertexOffset + 3);
-		mesh_->indices.push_back(vertexOffset + 1);
+		mesh_->SetIndice(vertexOffset + 2);
+		mesh_->SetIndice(vertexOffset + 3);
+		mesh_->SetIndice(vertexOffset + 1);
 
 		vertexOffset += 4; // 次の面に移動
 	}
@@ -76,5 +76,5 @@ void Engine::SkyBox::Draw()
 	material->GetCommandListTexture(2, 7, 8);
 
 	// 描画コマンドの修正：インスタンス数の代わりにインデックス数を使用
-	entityManager->GetSkyBoxCommon()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->indices.size()), 1, 0, 0, 0);
+	entityManager->GetSkyBoxCommon()->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(UINT(mesh_->GetIndices().size()), 1, 0, 0, 0);
 }

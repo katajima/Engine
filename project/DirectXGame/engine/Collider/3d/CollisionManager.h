@@ -76,10 +76,7 @@ namespace Engine {
 		void CheckDynamicVsStaticMT();
 	private:
 		// マスク処理
-		bool CheckMask(Collider* a, Collider* b) const {
-			return ((1 << static_cast<uint32_t>(b->layer)) & a->collisionMask) &&
-				((1 << static_cast<uint32_t>(a->layer)) & b->collisionMask);
-		}
+		bool CheckMask(Collider* a, Collider* b) const;
 		// 処理応答
 		void NotifyHit(ColliderComponent* ownerComp, Collider* self, Collider* other) const;
 

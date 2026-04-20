@@ -14,8 +14,8 @@ namespace Combo {
 		movementComponent = owner->GetMoveComponent();
 
 		// 常時なら
-		if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
-			hitBoxSystem->AddHitBox(id, data_.useType, owner, collData_, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
+		if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kInfinite) {
+			hitBoxSystem->AddHitBox(id, owner, collData_, perent);
 			hitBox = hitBoxSystem->GetHitBoxInstance(id);
 			hitBox->Disable(Vector4{ 1,1,1,0.0f });
 			hitBox->ClearContactRecord();
@@ -30,19 +30,19 @@ namespace Combo {
 		// 近距離か複合なら
 		if (Type::kMelle == type || Type::kMix == type) {
 			// 一時的なコライダーなら
-			if (data_.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
+			if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kTimed && !isPopHitBox_) {
 				// 出現方法によっての処理
-				switch (data_.spawnType)
+				switch (collData_.hitBoxData.spawnType)
 				{
 				case HitBox::SpawnType::kOnTime: // 時間経過で
-					if (timer >= data_.windowStart) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_,  data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
+					if (timer >= collData_.hitBoxData.windowStart) {
+						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
 						isPopHitBox_ = true;
 					}
 					break;
 				case HitBox::SpawnType::kOnGround: // 着地したら
 					if (movementComponent->GetIsLanding()) {
-						hitBoxSystem->AddLifeTimeHitBox(data_.useType, owner, collData_, data_.lifeTime, data_.dependenceType, data_.parentOffset, data_.useContactRecord, perent);
+						hitBoxSystem->AddLifeTimeHitBox(owner, collData_, perent);
 						isPopHitBox_ = true;
 					}
 					break;
@@ -55,9 +55,9 @@ namespace Combo {
 				}
 			}
 			// 常時なら
-			else if (data_.lifetimeType == HitBox::LifetimeType::kInfinite) {
+			else if (collData_.hitBoxData.lifetimeType == HitBox::LifetimeType::kInfinite) {
 				if (hitBox) {
-					if (timer >= data_.windowStart && timer <= data_.lifeTime + data_.lifeTime) {
+					if (timer >= collData_.hitBoxData.windowStart && timer <= collData_.hitBoxData.windowStart + collData_.hitBoxData.lifeTime) {
 						hitBox->Enable();
 					}
 					else {
