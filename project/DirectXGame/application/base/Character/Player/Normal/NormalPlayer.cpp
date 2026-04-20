@@ -355,7 +355,6 @@ namespace Character {
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
-
 		// コンボ１のデータ送る
 		comboSystem->CreateCombo("Attack1");
 		// コンボ２のデータ送る

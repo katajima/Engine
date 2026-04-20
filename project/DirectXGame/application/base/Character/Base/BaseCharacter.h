@@ -18,58 +18,26 @@ namespace Character {
 	{
 	public:
 		~BaseCharacter() = default;
-
-
-		///< summary>
 		/// 初期化
-		///</summary>
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
-
-		///< summary>
 		/// 更新
-		///</summary>
 		virtual void Update() = 0;
-
-		/// <summary>
 		/// エフェクトの描画
-		/// </summary>
 		virtual void DrawEffect() = 0;
-
-		/// <summary>
 		/// 2d描画
-		/// </summary>
 		virtual void Draw2D() = 0;
-
-		/// <summary>
 		/// 移動
-		/// </summary>
 		virtual void Move() = 0;
-
-		/// <summary>
 		/// ジャンプ
-		/// </summary>
 		virtual void Jump() = 0;
-
-		/// <summary>
 		/// 攻撃(弱攻撃)
-		/// </summary>
 		virtual void Attack() = 0;
-
-		/// <summary>
 		/// 攻撃(強攻撃)
-		/// </summary>
 		virtual void HeavyAttack() {};
-
-		/// <summary>
 		/// 攻撃(スキル攻撃)
-		/// </summary>
 		virtual void SkillAttack() {};
-
-
-		/// <summary>
 		/// ステートマシーン初期化
-		/// </summary>
 		virtual void InitStateMachine() {};
 
 	public:
