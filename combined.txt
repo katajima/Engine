@@ -1919,6 +1919,8 @@ File Path: project/DirectXGame/application/base/Attack/AttackData.h
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 #include "DirectXGame//application/base/Input/InputSystem.h"
+#include "vector"
+#include "string"
 
 /// ダメージデータ
 class DamageData {
@@ -2054,43 +2056,39 @@ enum class HitReactionType {
 	WallBounce
 };
 
+struct HitEffectEntry {
+	std::string slotName;
+	std::string effectName;
+};
+
 /// 攻撃リアクションデータ
 struct HitReactionData {
 	// リアクションタイプ
 	HitReactionType type = HitReactionType::Knockback;
-
 	// 飛ぶ基準方向
 	Vector3 normal{};
-
 	// 水平方向の強さ
 	float power = 0.0f;
-
 	// 垂直方向の強さ
 	float verticalBoost = 0.0f;
-
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
-
 	// リアクション移動の有効時間
 	float duration = 0.25f;
-
 	// 行動不能時間
 	float hitStunTime = 0.1f;
-
 	// ダウン時間
 	float downTime = 0.0f;
-
 	// 打ち上げ時に重力を弱める/止める時間
 	float launchFloatTime = 0.0f;
-
 	// 重力を適用するか
 	bool gravityEnabled = false;
-
 	// 重力倍率
 	float gravityScale = 1.0f;
-
 	// ダメージデータ
 	DamageData damageData{};
+	// エフェクト
+	std::vector<HitEffectEntry> hitEffectNames;
 };
 
 ============================================================
@@ -2322,17 +2320,22 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboEditor.cp
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
 
 namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,const std::string& stateName, Character::BaseCharacter* owner) {
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, 
+		Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,
+		const std::string& stateName, Character::BaseCharacter* owner,
+		EffectSystem* effectSystem) {
 		this->globalVariables = globalVariables;	// 保存項目
 		this->lineCommon = lineCommon;
 		this->stateName = stateName;						// ステート
 		this->owner = owner;						// オーナー
 		this->comboSystem = comboSystem;			// コンボシステム
+		this->effectSystem = effectSystem;
 
 		// シーケンサー初期化
 		sequence_.ClearEvents();
@@ -2570,6 +2573,7 @@ namespace Combo {
 			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
 			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
 
+			DrawHitEffectEditor(data_.hitReaction, effectSystem->GetEffectGlobalDatas());
 		}
 	}
 
@@ -2613,6 +2617,63 @@ namespace Combo {
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
 
+	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction, 
+		const std::map<std::string, EffectGlobalData>& effectDatas){
+		ImGui::SeparatorText("ヒットエフェクト");
+		ImGui::Text("※エディタでリロードしてから保存してください");
+
+		int removeIndex = -1;
+
+		for (int i = 0; i < static_cast<int>(reaction.hitEffectNames.size()); ++i) {
+			ImGui::PushID(i);
+
+			HitEffectEntry& entry = reaction.hitEffectNames[i];
+
+			char slotBuffer[128]{};
+			char effectBuffer[128]{};
+
+			strncpy_s(slotBuffer, entry.slotName.c_str(), _TRUNCATE);
+			strncpy_s(effectBuffer, entry.effectName.c_str(), _TRUNCATE);
+
+			ImGui::InputText("スロット名", slotBuffer, sizeof(slotBuffer));
+			ImGui::InputText("エフェクト名", effectBuffer, sizeof(effectBuffer));
+
+			entry.slotName = slotBuffer;
+			entry.effectName = effectBuffer;
+
+			if (ImGui::BeginCombo("エフェクト一覧", entry.effectName.c_str())) {
+				for (const auto& effectPair : effectDatas) {
+					const bool isSelected = (entry.effectName == effectPair.first);
+					if (ImGui::Selectable(effectPair.first.c_str(), isSelected)) {
+						entry.effectName = effectPair.first;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("削除")) {
+				removeIndex = i;
+			}
+
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+
+		if (removeIndex >= 0 && removeIndex < static_cast<int>(reaction.hitEffectNames.size())) {
+			reaction.hitEffectNames.erase(reaction.hitEffectNames.begin() + removeIndex);
+		}
+
+		if (ImGui::Button("ヒットエフェクト追加")) {
+			reaction.hitEffectNames.push_back(HitEffectEntry{
+				.slotName = "NewEffect",
+				.effectName = ""
+				});
+		}
+	}
+
 #pragma endregion // ImGui管理
 
 #pragma endregion // コンボ単位管理
@@ -2620,12 +2681,14 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Engine::LineCommon* lineCommon, Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
+	void Editor::Initialize(Engine::LineCommon* lineCommon, 
+		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, 
+		Character::BaseCharacter* owner, EffectSystem* effectSystem) {
 		this->comboSystem = comboSystem;
 		this->lineCommon = lineCommon;
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-
+		this->effectSystem = effectSystem;
 
 		// コンボシステムからコンボエディターブロックを作成
 		ApplyComboEditorToSystem();
@@ -2780,7 +2843,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner);
+		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner,effectSystem);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);
@@ -2800,8 +2863,8 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboEditor.h
 ============================================================
 #pragma once
 #include  "ComboImGui.h"
-
-
+#include "map"
+#include "DirectXGame/engine/Effect/EffectGlovalData.h"
 namespace Engine {
 	class GlobalVariables;
 	class LineCommon;
@@ -2811,13 +2874,15 @@ namespace Character {
 	class BaseCharacter;
 	class BasePlayer;
 }
-
+class EffectSystem;
 
 namespace Combo {
 	class EditorBlock {
 	public:
 		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables,
+			Combo::System* comboSystem, const std::string& stateName, 
+			Character::BaseCharacter* owner, EffectSystem* effectSystem);
 		// 更新
 		void UpdateImGui(float dt);
 	public:
@@ -2851,9 +2916,13 @@ namespace Combo {
 		// シーケンサーの状態をステートに適応
 		void SequencerApplyToState();
 
+		void DrawHitEffectEditor(HitReactionData& reaction, 
+			const std::map<std::string, EffectGlobalData>& effectDatas);
+
 	private: // 貰いもの
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::LineCommon* lineCommon = nullptr;
+		EffectSystem* effectSystem = nullptr;
 	private: // もらいもの
 		// 所有者
 		Character::BaseCharacter* owner = nullptr;
@@ -2897,7 +2966,9 @@ namespace Combo {
 	public:
 
 		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem,
+			Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner,
+			EffectSystem* effectSystem);
 		// 更新 
 		void Update(float dt);
 
@@ -2920,7 +2991,7 @@ namespace Combo {
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::LineCommon* lineCommon = nullptr;
 		Character::BaseCharacter* owner = nullptr;
-
+		EffectSystem* effectSystem = nullptr;
 	private:
 		// コンボエディターブロックマップ
 		std::map<std::string, EditorBlock> comboEditorBlocks_;
@@ -3734,6 +3805,13 @@ namespace Combo {
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
 			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		
+			globalVariables->AddItem(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
+
+			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
+				globalVariables->AddItem(name, MakeHitEffectSlotKey(i), data.hitReaction.hitEffectNames[i].slotName);
+				globalVariables->AddItem(name, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
+			}
 		}
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
@@ -3841,6 +3919,17 @@ namespace Combo {
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
 			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
 			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
+		
+			data.hitReaction.hitEffectNames.clear();
+
+			const int effectCount = globalVariables->GetValue<int>(name, kHitEffectCountKey);
+			for (int i = 0; i < effectCount; ++i) {
+				HitEffectEntry entry{};
+				entry.slotName = globalVariables->GetValue<std::string>(name, MakeHitEffectSlotKey(i));
+				entry.effectName = globalVariables->GetValue<std::string>(name, MakeHitEffectNameKey(i));
+
+				data.hitReaction.hitEffectNames.push_back(entry);
+			}
 		}
 		// ヒットボックス
 		{
@@ -3921,6 +4010,14 @@ namespace Combo {
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
 			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		
+		
+			globalVariables->SetValue(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
+
+			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
+				globalVariables->SetValue(name, MakeHitEffectSlotKey(i), data.hitReaction.hitEffectNames[i].slotName);
+				globalVariables->SetValue(name, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
+			}
 		}
 
 		// ヒットボックス
@@ -4071,6 +4168,18 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboSystem.h
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
+
+	const std::string kHitEffectCountKey = "ヒットエフェクト数";
+
+	static std::string MakeHitEffectSlotKey(int index) {
+		return "ヒットエフェクトスロット" + std::to_string(index);
+	}
+
+	static std::string MakeHitEffectNameKey(int index) {
+		return "ヒットエフェクト名前" + std::to_string(index);
+	}
+
+
 	/// <summary>
 	/// コンボシステム
 	/// </summary>
@@ -4128,7 +4237,7 @@ namespace Combo {
 		//	トランスフォーム取得
 		std::map<std::string, Engine::WorldTransform*> GetParentTransforms() { return parentTransforms_; };
 
-		
+
 	public:
 		// コンボステートマシーン取得
 		StateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }
@@ -6074,22 +6183,30 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
 
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner)
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem)
 {
-	owner_ = owner;
-	reactionMoveSystem_ = owner_->GetMoveComponent()->GetReactionMoveSystem();
+	this->owner = owner;
+	this->effectSystem = effectSystem;
+	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
 
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
 	isAction_ = false;
 	hitMotionState_ = HitMotionState::None;
+
+	// エフェクト座標初期化
+	worldEffect_.Initialize();
+	worldEffect_.parent_ = &owner->GetWorldTransform();
+	worldEffect_.translate_ = { 0,1,0 };
+
 }
 
 void HitMotionSystem::Update(float dt)
 {
-	DamageProcess(dt, owner_->GetCharacterParameterComponent());
+	DamageProcess(dt, owner->GetCharacterParameterComponent());
 
 	if (!isAction_) {
 		return;
@@ -6129,6 +6246,18 @@ void HitMotionSystem::Update(float dt)
 		hitStunTimer_ <= 0.0f &&
 		downTimer_ <= 0.0f) {
 		FinishReaction();
+	}
+}
+
+void HitMotionSystem::EmitHitEffect() {
+	// エフェクト座標更新
+	worldEffect_.Update();
+	Vector3 pos = worldEffect_.worldMat_.GetWorldPosition();
+
+	for (auto& effect : data_.hitEffectNames) {
+		if (!effect.effectName.empty()) {
+			effectSystem->Emit(effect.effectName, pos);
+		}
 	}
 }
 
@@ -6271,7 +6400,7 @@ Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
 
 void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
 {
-	if (!reactionMoveSystem_) {
+	if (!reactionMoveSystem) {
 		return;
 	}
 
@@ -6285,7 +6414,7 @@ void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
 	request.isLanding = false;
 	request.groundHeight = 0.0f;
 
-	reactionMoveSystem_->SetRequest(request);
+	reactionMoveSystem->SetRequest(request);
 }
 
 void HitMotionSystem::FinishReaction()
@@ -6331,6 +6460,7 @@ namespace Character {
 	class ParameterComponent;
 }
 class ReactionMoveSystem;
+class EffectSystem;
 
 /// <summary>
 /// ヒットコンポーネント
@@ -6350,48 +6480,73 @@ public:
 	};
 
 public:
-	void Initialize(Character::BaseCharacter* owner);
+
+	// 初期化
+	void Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem);
+	// 更新
 	void Update(float dt);
 
+	// ヒットエフェクト
+	void EmitHitEffect();
+	
+	// リアクションデータ設定
 	void SetReactionData(const HitReactionData& data);
-
+	// ヒットモーション中か
 	bool IsHitMotion() const;
+	// スタン中か
 	bool IsHitStun() const;
+	// ダウン中か
 	bool IsDown() const;
-
+	// 重力は有効か
 	bool IsGravityEnabled() const;
-
+	// 重力倍率取得
 	float GetGravityScale() const;
-
+	// スタン時間
 	float GetHitStunTimer() const { return hitStunTimer_; }
+	// ダウン時間
 	float GetDownTimer() const { return downTimer_; }
-
+	// 終了処理
 	bool IsFinished() const;
 
 private:
+	// ダメージ処理
 	void DamageProcess(float dt, Character::ParameterComponent* parameter);
-
+	// 移動速度算出
 	Vector3 BuildMoveVelocity() const;
+	// 方向指定
 	Vector3 NormalizeSafe(const Vector3& v) const;
+	// 移動システムにリクエストする
 	void SendReactionMoveRequest(const Vector3& velocity);
+	// リアクション終了
 	void FinishReaction();
 
 private:
+	// モーションステート
 	HitMotionState hitMotionState_ = HitMotionState::None;
-
+	// リアクションデータ
 	HitReactionData data_{};
-
+	// ダメージモーションリスト
 	std::list<DamageMotion> damageMotions_;
-
+	// 時間
 	float timer_ = 0.0f;
+	// スタン時間
 	float hitStunTimer_ = 0.0f;
+	// ダウン時間
 	float downTimer_ = 0.0f;
+	// 打ち上げ時間
 	float launchFloatTime_ = 0.0f;
+	// アクション中か
 	bool isAction_ = false;
 
+	// エフェクト発生位置
+	Engine::WorldTransform worldEffect_;
 private:
-	Character::BaseCharacter* owner_ = nullptr;
-	ReactionMoveSystem* reactionMoveSystem_ = nullptr;
+	// 所有者
+	Character::BaseCharacter* owner = nullptr;
+	// リアクション移動システム
+	ReactionMoveSystem* reactionMoveSystem = nullptr;
+	// エフェクト
+	EffectSystem* effectSystem = nullptr;
 };
 
 ============================================================
@@ -6886,7 +7041,7 @@ namespace HitBox {
 		// リアクションデータ
 		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		//	エフェクト出現
-		enemy->Emit();	
+		enemy->GetHitMotionSystem()->EmitHitEffect();
 		// 敵ステート設定
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定
@@ -9150,7 +9305,7 @@ void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager,
 		enemy->AddDamage(parameter_.damage);
 
 		if (enemy->GetCharacterParameterComponent()->GetHP() > 0) {
-			enemy->Emit();	// エフェクト出現
+			enemy->GetHitMotionSystem()->EmitHitEffect();	// エフェクト出現
 		}
 		// 弾が当たったら消えるか
 		if (info_.type == ProjectileType::NORMAL) {
@@ -9337,7 +9492,7 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 		this->owner->GetAttackController()->GetHitCounter().Hit();
 		
 		// エフェクト出現
-		enemy->Emit();
+		enemy->GetHitMotionSystem()->EmitHitEffect();
 		};
 
 
@@ -9402,17 +9557,20 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 }
 
 // 更新
-void PlayerRangeBombingBullet::Update()
-{
+void PlayerRangeBombingBullet::Update() {
+	// 弾のワールド座標
+	Vector3 worldPos = object_->GetWorldPosition();
+	Vector3& translate = object_->GetWorldTransform().translate_;
+	Vector3 norm{};
 	// 当たったら死ぬ
 	if (Hit) {
-		effect->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+		effect->Emit("missileHit", worldPos);
 		isAlive_ = false;
 	}
 	
 	// 生きているなら
 	if (isAlive_) {
-		Vector3 norm;
+		
 		switch (phase_)	// フェーズ(移動)
 		{
 		case 0:
@@ -9421,7 +9579,7 @@ void PlayerRangeBombingBullet::Update()
 			}
 			else {
 				// 煙出す
-				effect->Emit("stratSmoke01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 10.0f,-5.0f,0.0f });
+				effect->Emit("stratSmoke01", worldPos + Vector3{ 10.0f,-5.0f,0.0f });
 			}
 			// 時間更新
 			phase0Timer_ += GetTimer();
@@ -9429,7 +9587,7 @@ void PlayerRangeBombingBullet::Update()
 			float t = phase0Timer_ / phase0EndTime_;
 
 			// 位置を線形補間
-			object_->GetWorldTransform().translate_ = Lerp(str, randPosSky, t);
+			translate = Lerp(str, randPosSky, t);
 
 			// 移動方向の設定
 			norm = randPosSky - str;
@@ -9451,25 +9609,23 @@ void PlayerRangeBombingBullet::Update()
 			if (phase1Timer_ >= phase1EndTime_)
 			{
 				// 敵の位置に向かって落ちる
-				Vector3 pos = enemyPos_ - object_->GetWorldPosition();
+				Vector3 pos = enemyPos_ - worldPos;
 				float posLength = Length(pos);
-
-				
 				// 方向指定
 				Vector3 pos2 = pos;
 				velocity_ = pos2.Normalize() * provisionalData_.speedPhase1;
 				velocity_.y = 0; // 垂直落下
 
 				// オブジェクトの位置更新
-				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();
+				translate += velocity_ * GetTimer();
 
 				// 敵の範囲内に入ったら
-				if (provisionalData_.distanceToEnemy >= DistanceXZ(object_->GetWorldPosition(), enemyPos_)) {
+				if (provisionalData_.distanceToEnemy >= DistanceXZ(worldPos, enemyPos_)) {
 					phase_++; // フェーズ移行
 					posGround = enemyPos_; // 落ちる位置決定
 
 					// 
-					targetPos = posGround - object_->GetWorldPosition();
+					targetPos = posGround - worldPos;
 					// ヒットオブジェクト描画
 					hitObject2_->SetIsDraw(true);
 				}
@@ -9480,21 +9636,19 @@ void PlayerRangeBombingBullet::Update()
 			phase2Timer_ += GetTimer();
 			
 			// リングエフェクトの位置を設定
-			effect->Emit("ringEmit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+			effect->Emit("ringEmit", worldPos);
 
 			// カウントが最大値を達したら
 			if (phase2Timer_ >= phase2EndTime_)
 			{
 				velocity_ = targetPos * provisionalData_.speedPhase2;	// 速度設定
-				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();	// 位置更新
+				translate += velocity_ * GetTimer();	// 位置更新
 			}
 
 			// 0.0f以下になったら
 			if (-0.0f >= object_->GetWorldPosition().y) {
-
 				// 位置を固定
-				object_->GetWorldTransform().translate_.y = 0.5f;
-				
+				translate.y = 0.5f;
 				// 死亡
 				isAlive_ = false;
 				phase_ = 0;	// フェーズ初期化
@@ -9508,19 +9662,16 @@ void PlayerRangeBombingBullet::Update()
 
 
 				// それぞれのパーティクル出現
-				effect->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect->Emit("missileHitCylinder", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.hitCylinderY,0 });
-				effect->Emit("smokePlaneExpSmoke", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect->Emit("AnimatedCube", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect->Emit("expPlane01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.expPlaneY,0 });
-				effect->Emit("expSpark", object_->GetWorldTransform().worldMat_.GetWorldPosition() );
+				effect->Emit("missileHitCylinder", worldPos);
+				effect->Emit("missileHit", worldPos + Vector3{ 0,provisionalData_.hitCylinderY,0 });
+				effect->Emit("smokePlaneExpSmoke", worldPos);
+				effect->Emit("animatedCube", worldPos);
+				effect->Emit("expPlane01", worldPos + Vector3{ 0,provisionalData_.expPlaneY,0 });
+				effect->Emit("expSpark", worldPos);
 			}
-
 			break;
 		}
-		// ミサイル方向
-		Vector3 velo = velocity_.Normalize();
-
+		
 		
 
 		// Y軸周り角度(θy)
@@ -11003,11 +11154,11 @@ void PlayerCar::SpotLightUpdate(float dt){
 }
 
 void PlayerCar::Emit(const Vector3& pos) {
-	effect->Emit("dust2", pos);
+	effect->Emit("EmitterTireDust", pos);
 }
 
 void PlayerCar::Emit(const Vector3& pos, const Vector3& dir, const Vector3& range) {
-	effect->Emit("dust2", pos, dir, range);
+	effect->Emit("EmitterTireDust", pos, dir, range);
 }
 
 void PlayerCar::EmitScrapBox(const Vector3& pos, const Vector3& dir, const Vector3& range){
@@ -13383,7 +13534,7 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this);
+		hitMotionSystem_->Initialize(this,effect);
 		
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;
@@ -13509,8 +13660,6 @@ namespace Character {
 
 
 	public:
-		// パーティクル発生
-		virtual void Emit() = 0;
 		// ID設定
 		void SetID(uint32_t id) { id_ = id; }
 		// 敵タイプ取得
@@ -13656,17 +13805,6 @@ namespace Character {
 	}
 
 
-	void DummyEnemy::Emit() {
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
-	}
-
 	void DummyEnemy::InitStateMachine() {
 		// ステートマシーン初期化
 		stateMachine_ = std::make_unique<CharacterStateMachine>();
@@ -13710,8 +13848,6 @@ namespace Character {
 		void DrawEffect() override {};
 		// 描画2d
 		void Draw2D() override {};
-		// エミッター出現
-		void Emit() override;
 		// 移動
 		void Move() override {};
 		// ジャンプ
@@ -13861,8 +13997,6 @@ namespace Character {
 
 	void LargeMeleeEnemy::Draw2D() {}
 
-	void LargeMeleeEnemy::Emit() {}
-
 	void LargeMeleeEnemy::Move() {}
 
 	void LargeMeleeEnemy::InitStateMachine() {}
@@ -13894,8 +14028,6 @@ namespace Character {
 		void DrawEffect() override {};
 		// 描画2d
 		void Draw2D() override;
-		// エミッター出現
-		void Emit() override;
 		// 移動
 		void Move() override;
 		// ジャンプ
@@ -14008,17 +14140,6 @@ namespace Character {
 
 	void MediumMeleeEnemy::Draw2D(){}
 
-	void MediumMeleeEnemy::Emit(){
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
-	}
-
 	void MediumMeleeEnemy::Move(){
 		if (isStopping_) return;
 
@@ -14129,8 +14250,6 @@ namespace Character {
 		void DrawEffect() override {};
 		// 描画2d
 		void Draw2D() override;
-		// エミッター出現
-		void Emit() override;
 		// 移動
 		void Move() override;
 		// ジャンプ
@@ -14710,17 +14829,6 @@ namespace Character {
 
 	void SmallCartEnemy::Draw2D() {}
 
-	void SmallCartEnemy::Emit() {
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
-	}
-
 	void SmallCartEnemy::Move() {
 		// 距離設定
 		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
@@ -14786,8 +14894,6 @@ namespace Character {
 		void DrawEffect() override {};
 		// 描画2d
 		void Draw2D() override;
-		// エミッター出現
-		void Emit() override;
 		// 移動
 		void Move() override;
 		// ジャンプ
@@ -14988,17 +15094,6 @@ namespace Character {
 
 	void SmallMeleeEnemy::Draw2D() {}
 
-	void SmallMeleeEnemy::Emit() {
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
-	}
-
 	void SmallMeleeEnemy::Move() {
 		if (isStopping_) return;
 
@@ -15118,8 +15213,6 @@ namespace Character {
 		void DrawEffect() override {};
 		// 描画2d
 		void Draw2D() override;
-		// エミッター出現
-		void Emit() override;
 		// 移動
 		void Move() override;
 		// ジャンプ
@@ -15733,20 +15826,7 @@ namespace Character {
 		objectComponentPropeller_->Update();
 	}
 
-	void SmallRangeEnemy::Draw2D()
-	{
-	}
-
-	void SmallRangeEnemy::Emit()
-	{
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
+	void SmallRangeEnemy::Draw2D(){
 	}
 
 	void SmallRangeEnemy::Move()
@@ -15847,8 +15927,6 @@ namespace Character {
 		void DrawEffect() override {};
 		// 描画2d
 		void Draw2D() override;
-		// エミッター出現
-		void Emit() override;
 		// 移動
 		void Move() override;
 		// ジャンプ
@@ -16298,7 +16376,7 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this);
+		hitMotionSystem_->Initialize(this,effect);
 
 		// 弾出現
 		bulletSpawn_ = std::make_unique<BulletSpawn>();
@@ -18210,9 +18288,7 @@ void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 	InitRangeBombingBullet();
 	// 通常弾初期化
 	InitBullet();
-	// スクラップ初期化
-	InitScrap();
-
+	
 	for (auto& [name, data] : effectEditor_->GetEffectGlobalDatas()) {
 		CreateEffect(name, data.shapeType, data);
 	}
@@ -18220,176 +18296,73 @@ void EffectSystem::Initialize(Engine::EntityManager* entityManager, Engine::Glob
 
 
 void EffectSystem::InitParticle() {
-
-	effectComponent_->AddEmitter("starEmit", "hitStar", EmitterShapeType::POINT);
-	Engine::PointParticleEmitter* starEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("starEmit");
-
-
-	starEmit->GetFrequency() = 0.0f;
-	starEmit->SetCount(1, 0);
-	starEmit->SetPos({ 0,0.0f,0.0f });
-	starEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
-	starEmit->SetVelocity({}, {});
-	starEmit->SetLifeTime(0.2f, 0);
-	starEmit->SetIsAlpha(true);
-	starEmit->SetUsebillboard(false);
-	starEmit->SetSize(Vector3{ 1.7f,1.7f,1.7f }, { 0.1f,0.1f,0.1f });
-	starEmit->SetColorMinMax({ 0.424f, 0.404f, 0.431f }, { 0.424f, 0.404f, 0.431f });
-
-
-	effectComponent_->AddEmitter("traiEmit", "hitEffect", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* traiEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("traiEmit");
-	traiEmit->GetFrequency() = 0.0f;
-	traiEmit->SetCount(5, 0);
-	traiEmit->SetPos({ 0,0.0f,0.0f });
-	traiEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
-	traiEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
-	traiEmit->SetLifeTime(0.2f, 0);
-	traiEmit->SetIsAlpha(true);
-	traiEmit->SetUsebillboard(false);
-	traiEmit->SetSize(Vector3{ 2.6f,2.6f,2.6f }, { 0.1f,0.1f,0.1f });
-	traiEmit->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
-	traiEmit->SetRange(Vector3{ -5,-5,-5 }, Vector3{ 5,5,5 });
-	traiEmit->SetAlphaClipping(0.15f);
-
-
-	effectComponent_->AddEmitter("hitEmit", "hit", EmitterShapeType::POINT);
-	Engine::PointParticleEmitter* hitEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("hitEmit");
-
-	hitEmit->GetFrequency() = 0.0f;
-	hitEmit->SetCount(10, 0);
-	hitEmit->SetPos({ 0,0.0f,0.0f });
-	hitEmit->SetVelocity({}, { 15,15,15 });
-	hitEmit->SetLifeTime(0.5f, 0.1f);
-	hitEmit->SetIsAlpha(true);
-	hitEmit->SetUsebillboard(true);
-	hitEmit->SetUsebillboardRotZ(true);
-	hitEmit->SetSize(Vector3{ 2.0f,1.0f,1.0f }, { 0.1f,0.1f,0.0f });
-	hitEmit->SetColorMinMax({ 1, 1,  1 }, { 1, 1, 1 });
-	hitEmit->SetIsDirectionRotate(true);
-
-
-	effectComponent_->AddEmitter("hitEffect2", "hitEffect2", EmitterShapeType::POINT);
-	Engine::PointParticleEmitter* effectEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("hitEffect2");
-
-	effectEmit->GetFrequency() = 0.0f;
-	effectEmit->SetCount(1, 0);
-	effectEmit->SetPos({ 0,0.0f,0.0f });
-	effectEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
-	effectEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
-	effectEmit->SetLifeTime(0.2f, 0.1f);
-	effectEmit->SetIsAlpha(true);
-	effectEmit->SetUsebillboard(true);
-	effectEmit->SetSize({ 8,8,8 }, {});
-	effectEmit->SetColorMinMax({ 1, 0, 0 }, { 1, 1, 0 });
-	effectEmit->SetAlphaClipping(0.15f);
-
-	effectComponent_->AddEmitter("ringHit", "ringHit", EmitterShapeType::POINT);
-	Engine::PointParticleEmitter* hitRingEmit = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("ringHit");
-
-	hitRingEmit->GetFrequency() = 0.0f;
-	hitRingEmit->SetCount(1, 0);
-	hitRingEmit->SetPos({ 0,0.0f,0.0f });
-	hitRingEmit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
-	hitRingEmit->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
-	hitRingEmit->SetLifeTime(0.3f, 0.05f);
-	hitRingEmit->SetIsAlpha(true);
-	hitRingEmit->SetUsebillboard(true);
-	hitRingEmit->SetIsLifeTimeScale(true);
-	hitRingEmit->SetLifeTimeScaleTopBottom(EmitData::TopBottom::kTop);
-	hitRingEmit->SetSize({ 8,8,8 }, {});
-	hitRingEmit->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
-	hitRingEmit->SetAlphaClipping(0.15f);
-
-	// 
-	effectComponent_->AddEmitter("dust3", "dust3", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* dust2Emit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("dust3");
-
-	dust2Emit->GetFrequency() = 0.0f;
-	dust2Emit->SetCount(10, 0);
-	dust2Emit->SetPos({ 0,0.0f,0.0f });
-	dust2Emit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
-	dust2Emit->SetVelocity({ 200,0,0 }, { 50, 0, 0 });
-	dust2Emit->SetLifeTime(3.0f, 0.0f);
-	dust2Emit->SetIsAlpha(true);
-	dust2Emit->SetUsebillboard(true);
-	dust2Emit->SetSize({ 5,5,1 }, {});
-	dust2Emit->SetColorMinMax({ 1, 0.843f, 0 }, { 1, 0.843f, 0 });
-	dust2Emit->SetAlphaClipping(0.0f);
-	dust2Emit->SetRange(Vector3{ -2000,-200,-2000 }, Vector3{ 2000,200,2000 });
-
-
-
-	effectComponent_->AddEmitter("dust2", "dust3", EmitterShapeType::AABB);
-	Engine::AABBParticleEmitter* dust3Emit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("dust2");
-
-	dust3Emit->GetFrequency() = 0.0f;
-	dust3Emit->SetCount(5, 0);
-	dust3Emit->SetPos({ 0,0.0f,0.0f });
-	dust3Emit->SetRotate({}, Math::DegreesToRadians({ 180,180,180 }));
-	dust3Emit->SetVelocity({ -10,0,0 }, { 3, 0, 0 });
-	dust3Emit->SetLifeTime(0.5f, 0.0f);
-	dust3Emit->SetIsAlpha(true);
-	dust3Emit->SetUsebillboard(true);
-	dust3Emit->SetSize({ 0.1f,0.1f,1 }, {});
-	dust3Emit->SetColorMinMax({ 1, 0.843f, 0 }, { 1, 0.843f, 0 });
-	dust3Emit->SetAlphaClipping(0.0f);
-	dust3Emit->SetRange(Vector3{ -0.15f,-0.15f,-0.15f }, Vector3{ 0.15f,0.15f,0.15f });
-
-
+	// ヒットエミッター(形状:★)
+	effectEditor_->AddEffectGlobalData("EmitterStarEmit", "hitStar");
+	// ヒットエミッター(形状:Plane)
+	effectEditor_->AddEffectGlobalData("EmitterHitEmit", "hit");
+	// ヒットエミッター(形状:Plane)
+	effectEditor_->AddEffectGlobalData("EmitterHitEffect", "hitEffect2");
+	// ヒットエミッター(形状:Ring)
+	effectEditor_->AddEffectGlobalData("EmitterRingHit", "ringHit");
+	// タイトル用砂パーティクル
+	effectEditor_->AddEffectGlobalData("EmitterDust", "dust3");
+	// タイヤ砂埃パーティクル
+	effectEditor_->AddEffectGlobalData("EmitterTireDust", "dust3");
+	
+	// タイヤエミッター
+	effectEditor_->AddEffectGlobalData("EmitterScrapTire", "scrapTire");
+	// ねじエミッター
+	effectEditor_->AddEffectGlobalData("EmitterScrapScrew", "scrapScrew");
+	// 鉄の棒エミッター
+	effectEditor_->AddEffectGlobalData("EmitterScrapIronRod", "scrapIronRod");
+	// 歯車エミッター
+	effectEditor_->AddEffectGlobalData("EmitterScrapGear", "scrapGear");
+	// 基盤エミッター
+	effectEditor_->AddEffectGlobalData("EmitterScrapBasis", "scrapBasis");
 }
 
-void EffectSystem::InitRangeBombingBullet()
-{
-
-	effectComponent_->AddEmitter("missileHitCylinder", "missileHitCylinder", EmitterShapeType::POINT);
-	Engine::PointParticleEmitter* missileHitCylinder = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("missileHitCylinder");
-	missileHitCylinder->GetFrequency() = 0.0f;
-	missileHitCylinder->SetCount(1, 0);
-	missileHitCylinder->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
-	missileHitCylinder->SetPos({ 0,12.0f,0.0f });
-	missileHitCylinder->SetLifeTime(0.5f, 0.0f);
-	missileHitCylinder->SetRotate({ -Math::DegreesToRadians(90),Math::DegreesToRadians(0) ,0 }, {});
-	missileHitCylinder->SetIsAlpha(true);
-	missileHitCylinder->SetUsebillboard(false);
+void EffectSystem::InitRangeBombingBullet() {
+	// ミサイルヒットシリンダエミッター
+	effectEditor_->AddEffectGlobalData("EmitterMissileHitCylinder", "missileHitCylinder");
+	// 初期煙エミッター
+	effectEditor_->AddEffectGlobalData("EmitterStratSmoke01", "smokePlane01");
 
 
-	missileHitCylinder->SetIsScaling(true);
-	missileHitCylinder->SetSizeAmount({ 0.15f,0.15f ,0.0f }, {});
-	missileHitCylinder->SetSize({ 1,1,1 }, {});
-	missileHitCylinder->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
+	{
+		effectComponent_->AddEmitter("missileHitCylinder", "missileHitCylinder", EmitterShapeType::POINT);
+		Engine::PointParticleEmitter* missileHitCylinder = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("missileHitCylinder");
+		missileHitCylinder->GetFrequency() = 0.0f;
+		missileHitCylinder->SetCount(1, 0);
+		missileHitCylinder->SetVelocity({ 0,0,0 }, { 0, 0, 0 });
+		missileHitCylinder->SetPos({ 0,12.0f,0.0f });
+		missileHitCylinder->SetLifeTime(0.5f, 0.0f);
+		missileHitCylinder->SetRotate({ -Math::DegreesToRadians(90),Math::DegreesToRadians(0) ,0 }, {});
+		missileHitCylinder->SetIsAlpha(true);
+		missileHitCylinder->SetUsebillboard(false);
+		missileHitCylinder->SetIsScaling(true);
+		missileHitCylinder->SetSizeAmount({ 0.15f,0.15f ,0.0f }, {});
+		missileHitCylinder->SetSize({ 1,1,1 }, {});
+		missileHitCylinder->SetColorMinMax({ 1, 1, 1 }, { 1, 1, 1 });
+	}
 
-
-
-	effectComponent_->AddEmitter("stratSmoke01", "smokePlane01", EmitterShapeType::POINT);
-	effectComponent_->AddEmitter("stratSmoke02", "smokePlane05", EmitterShapeType::POINT);
-	Engine::PointParticleEmitter* stratSmoke01_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("stratSmoke01");
-	Engine::PointParticleEmitter* stratSmoke02_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("stratSmoke02");
-
-
-	stratSmoke01_->SetFrequency(0);
-	stratSmoke01_->SetIsAlpha(true);
-	stratSmoke01_->SetAlphaClipping(0.1f);
-	stratSmoke01_->SetIsLifeTimeScale(true);
-	stratSmoke01_->SetUsebillboard(true);
-	stratSmoke01_->SetUsebillboardRotZ(true);
-	stratSmoke01_->SetEnableLighting(false);
-	stratSmoke01_->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
-	stratSmoke01_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
-	stratSmoke01_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
-	stratSmoke01_->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
-
-	stratSmoke02_->SetIsAlpha(true);
-	stratSmoke02_->SetAlphaClipping(0.1f);
-	stratSmoke02_->SetIsLifeTimeScale(true);
-	stratSmoke02_->SetUsebillboard(true);
-	stratSmoke02_->SetUsebillboardRotZ(true);
-	stratSmoke02_->SetEnableLighting(false);
-	stratSmoke02_->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
-	stratSmoke02_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
-	stratSmoke02_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
-	stratSmoke02_->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
-
+	{
+		effectComponent_->AddEmitter("stratSmoke01", "smokePlane01", EmitterShapeType::POINT);
+		Engine::PointParticleEmitter* stratSmoke01_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("stratSmoke01");
+		stratSmoke01_->SetFrequency(0);
+		stratSmoke01_->SetIsAlpha(true);
+		stratSmoke01_->SetAlphaClipping(0.1f);
+		stratSmoke01_->SetIsLifeTimeScale(true);
+		stratSmoke01_->SetUsebillboard(true);
+		stratSmoke01_->SetUsebillboardRotZ(true);
+		stratSmoke01_->SetEnableLighting(false);
+		stratSmoke01_->SetColorMinMax({ 1,1,1,0.5f }, { 1,1,1,0.5f });
+		stratSmoke01_->SetSize(Vector3{ 55.8f,55.8f,55.8f }, {});
+		stratSmoke01_->SetVelocity({ 0,25,0 }, { 160, 35, 160 });
+		stratSmoke01_->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
+	}
+	
+	// 初期煙エミッター
+	effectEditor_->AddEffectGlobalData("EmitterSmokePlaneExpSmoke", "smokePlane05");
 
 
 	effectComponent_->AddEmitter("smokePlaneExpSmoke", "smokePlane05", EmitterShapeType::POINT);
@@ -18409,6 +18382,9 @@ void EffectSystem::InitRangeBombingBullet()
 	smokePlaneExpSmoke->SetVelocity(Vector3{ 00,50,00 }, { 40,50,40 });
 	smokePlaneExpSmoke->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
+	// 初期煙エミッター
+	effectEditor_->AddEffectGlobalData("EmitterExpPlane01", "expPlane01");
+
 
 	effectComponent_->AddEmitter("expPlane01", "expPlane01", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* expPlane = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("expPlane01");
@@ -18427,6 +18403,10 @@ void EffectSystem::InitRangeBombingBullet()
 	expPlane->SetSize(Vector3{ 8.8f,8.8f,8.8f }, {});
 	expPlane->SetVelocity({ 0,5,0 }, { 3, 10, 3 });
 	expPlane->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
+
+	// 初期煙エミッター
+	effectEditor_->AddEffectGlobalData("EmitterAnimatedCube", "AnimatedCube");
+
 
 	effectComponent_->AddEmitter("AnimatedCube", "AnimatedCube", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* animatedCube = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("AnimatedCube");
@@ -18451,6 +18431,10 @@ void EffectSystem::InitRangeBombingBullet()
 	animatedCube->SetRotate({}, Math::DegreesToRadians(Vector3{ 180,180,180 }));
 
 
+	// エミッター
+	effectEditor_->AddEffectGlobalData("EmitterRingEmit", "ringEmit");
+
+
 	effectComponent_->AddEmitter("ringEmit", "ringEmit", EmitterShapeType::AABB);
 	Engine::AABBParticleEmitter* ringEmit = effectComponent_->GetEmitterAs<Engine::AABBParticleEmitter>("ringEmit");
 
@@ -18469,6 +18453,10 @@ void EffectSystem::InitRangeBombingBullet()
 	ringEmit->SetVelocity(Vector3{ 0,0,0 }, { 0,0,0 });
 	ringEmit->SetRotate(Math::DegreesToRadians(Vector3{ 90,0,0 }), Math::DegreesToRadians(Vector3{ 90,0,0 }));
 
+	// エミッター
+	effectEditor_->AddEffectGlobalData("EmitterExpSpark", "expSpark");
+
+
 	effectComponent_->AddEmitter("expSpark", "expSpark", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* expSpark = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("expSpark");
 
@@ -18482,6 +18470,10 @@ void EffectSystem::InitRangeBombingBullet()
 	expSpark->SetSize(Vector3{ 15.8f,15.8f,15.8f }, {});
 	expSpark->SetVelocity(Vector3{ 0,0,0 }, { 0,0,0 });
 	expSpark->SetRotate(Math::DegreesToRadians(Vector3{ 90,0,0 }), Math::DegreesToRadians(Vector3{ 90,0,0 }));
+
+
+	// 初期煙エミッター
+	effectEditor_->AddEffectGlobalData("EmitterMissileHit", "missileHit");
 
 	effectComponent_->AddEmitter("missileHit", "missileHit", EmitterShapeType::POINT);
 	Engine::PointParticleEmitter* hitEmitter_ = effectComponent_->GetEmitterAs<Engine::PointParticleEmitter>("missileHit");
@@ -18536,28 +18528,12 @@ void EffectSystem::InitBullet()
 	cartridgeEmit->SetIsBounce(true);
 	cartridgeEmit->SetSize(Vector3{ 0.8f,0.8f,0.8f }, {});
 	cartridgeEmit->SetColorMinMax({ 1,1, 0 }, { 1,1, 0 });
-
-	// 
-
-
 }
 
-void EffectSystem::InitScrap() {
-	// タイヤエミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapTire", "scrapTire");
-	// ねじエミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapScrew", "scrapScrew");
-	// 鉄の棒エミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapIronRod", "scrapIronRod");
-	// 歯車エミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapGear", "scrapGear");
-	// 基盤エミッター
-	effectEditor_->AddEffectGlobalData("EmitterScrapBasis", "scrapBasis");
-}
 
-void EffectSystem::Update() {
+void EffectSystem::Update(float dt) {
 	// エフェクトエディタ更新
-	effectEditor_->Update();
+	effectEditor_->Update(dt);
 	// 更新
 	effectComponent_->Update();
 }
@@ -18615,11 +18591,14 @@ public:
 	// 初期化
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
 	// 更新
-	void Update();
+	void Update(float dt);
 	// 出現
 	void Emit(const std::string& name, const Vector3& pos);
 	// 出現(方向付き)
 	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
+
+public:
+	std::map<std::string, EffectGlobalData> GetEffectGlobalDatas() const { return effectEditor_->GetEffectGlobalDatas(); };
 private:
 	// エフェクトの作成
 	void CreateEffect(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
@@ -18630,8 +18609,6 @@ private:
 	void InitRangeBombingBullet();
 	// パーティクル初期化(弾)
 	void InitBullet();
-	// パーティクル初期化(スクラップ)
-	void InitScrap();
 private:
 	// エフェクトコンポーネント
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;	
@@ -18642,16 +18619,7 @@ private:
 	Engine::EntityManager* entityManager = nullptr;	
 	// グローバル変数保存
 	Engine::GlobalVariables* globalVariables = nullptr;	
-private: // 一旦
-
-	struct ProvisionalData {
-		Vector3 translate = { 0, 107, 0 };
-		Vector3 rotate = { 0.341f, 0.0f, 0.0f };
-		float farClip_ = 15000.0f;
-	};
-	ProvisionalData provisionalData_;
-
-private:
+private: // デバッグ用
 
 };
 
@@ -18671,7 +18639,7 @@ void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
 }
 
 // 更新
-void EffectEditor::Update() {
+void EffectEditor::Update(float dt) {
 	if (effectGlobalDatas_.empty()) return;
 #ifdef _DEBUG
 	ImGui::Begin("Effect");
@@ -18680,6 +18648,18 @@ void EffectEditor::Update() {
 	Engine::ImGuiManager::Select("Selected Effect", selectedBlockName_, effectGlobalDatas_);
 	ImGui::Separator();
 	ImGui::Text("Editing: %s", selectedBlockName_.c_str());
+	ImGui::Checkbox("出現", &isSpawnEmit);
+	ImGui::DragFloat3("位置", &spawnEmitPos.x, 0.1f);
+	ImGui::DragFloat("頻度", &frequency, 0.01f);
+
+	if (isSpawnEmit) {
+		timer += dt;
+		if (frequency < timer) {
+			Emit(selectedBlockName_, spawnEmitPos);
+			timer = 0.0f;
+		}
+	}
+	
 
 	// --- 選択されているブロックだけ表示 ---
 	for (auto& combo : effectGlobalDatas_) {
@@ -18694,11 +18674,6 @@ void EffectEditor::Update() {
 		AAAA(name,combo.second);
 		// データの保存
 		SetValue(name, combo.second);
-	}
-
-	// リロード
-	if (ImGui::Button("Relord")) {
-		
 	}
 
 	// セーブ
@@ -19111,6 +19086,18 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 	ImGui::End();
 }
 
+void EffectEditor::Emit(const std::string& name, const Vector3& pos) {
+	Engine::BaseParticleEmitter* emit = effectComponent->GetBaseEmitter(name);
+	if (emit == nullptr) return;	// エミッターが存在しない場合は終了
+	// 出現
+	emit->SetPos(pos);		// 位置
+	emit->SetIsEmit(false); // 出さない
+	emit->Update();			// 更新
+	emit->SetIsEmit(true);	// 出す
+	emit->Emit();			// エフェクト出現
+	emit->SetIsEmit(false); // 出さない
+};
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Effect/EffectEditor.h
@@ -19129,12 +19116,13 @@ public:
 	void Initialize(Engine::EffectComponent* effectComponent, Engine::GlobalVariables* globalVariables);
 
 	// 更新
-	void Update();
+	void Update(float dt);
 	//
 	void AddEffectGlobalData(const std::string& name, const std::string& particleName);
 	//
 	void SetEffectGlobalData(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
 
+	
 
 	std::map<std::string, EffectGlobalData> GetEffectGlobalDatas() const { return effectGlobalDatas_; };
 private:
@@ -19149,12 +19137,20 @@ private:
 
 	void AAAA(const std::string& name,EffectGlobalData& data);
 
-
+	void Emit(const std::string& name, const Vector3& pos);
 private:// エフェクトのグローバルデータ
 	std::map<std::string, EffectGlobalData> effectGlobalDatas_;
 	// 選択中のエフェクトエディターブロック名
 	std::string selectedBlockName_;
-
+private:
+	// 出現させるか
+	bool isSpawnEmit = false;
+	// デバッグエミッター位置
+	Vector3 spawnEmitPos{};
+	// 頻度
+	float frequency = 0.2f;
+	// 時間
+	float timer = 0.0f;
 private:
 	// エフェクトコンポーネント
 	Engine::EffectComponent* effectComponent = nullptr;
@@ -24683,7 +24679,7 @@ File Path: project/DirectXGame/application/base/Stage/TitleStage.cpp
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 
-void TitleStage::InitializeStone(){
+void TitleStage::InitializeStone() {
 	stone1_ = entityManager->CreateObject3D("Stone1", Engine::ObjectModelType::kNormal, {}, camera);
 	stone1_->SetModel("Stone.obj");
 	stone1_->GetWorldTransform().scale_ = { 1,1,1 };
@@ -24728,7 +24724,7 @@ void TitleStage::Initialize(Engine::EntityManager* entityManager, CameraManager*
 
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,Math::DegreesToRadians(-90),0});
+	playerCar_->Initialize(entityManager, {}, playerCarPos_, { 0,Math::DegreesToRadians(-90),0 });
 	playerCar_->SetGroungHeight(0.1f);
 
 }
@@ -24737,8 +24733,8 @@ void TitleStage::Update(float dt) {
 	BaseUpdate(dt);
 
 	// エフェクト
-	effect->Emit("dust3", {-50,10,100});
-	effect->Emit("dust3", { -50,10,100 });
+	effect->Emit("EmitterDust", { -50,10,100 });
+	effect->Emit("EmitterDust", { -50,10,100 });
 
 
 	playerCar_->Update(dt);
@@ -27583,7 +27579,9 @@ void CharacterDebugScene::Initialize()
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
-	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
+	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), 
+		characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), 
+		GetGlobalVariables(), characterManager_->GetPlayer(),effect_.get());
 }
 
 void CharacterDebugScene::Finalize(){
@@ -27652,7 +27650,7 @@ void CharacterDebugScene::Update()
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
-	effect_->Update();
+	effect_->Update(GetTime());
 }
 
 void CharacterDebugScene::Draw3D(){
@@ -28238,7 +28236,7 @@ void GamePlayScene::Update()
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
-	effect_->Update();
+	effect_->Update(GetTime());
 	// ゲーム進行マネージャー更新
 	gameFlowController_->Update(GetTime());
 
@@ -28529,7 +28527,7 @@ void ResultScene::Update() {
 
 	overUI_->Update();
 
-	effect_->Update();
+	effect_->Update(GetTime());
 
 	// カメラ更新
 	cameraManager_->Update();
@@ -29111,6 +29109,8 @@ void SelectScene::Update() {
 	// UI更新
 	selectUI_->SetSelectedIndex(selectSystem_->GetSelectedIndex());
 	selectUI_->Update(GetTime());
+	// エフェクト
+	effect_->Update(GetTime());
 	// カメラ更新
 	cameraManager_->Update();
 }
@@ -30015,7 +30015,7 @@ void TitleScene::Update()
 	// ステージ更新
 	titleStage_->Update(GetTime());
 	// エフェクト
-	effect_->Update();
+	effect_->Update(GetTime());
 	// UI更新
 	titleUI_->Update(GetTime());
 	// カメラ管理更新
