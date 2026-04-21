@@ -90,7 +90,7 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this);
+		hitMotionSystem_->Initialize(this,effect);
 
 		// 弾出現
 		bulletSpawn_ = std::make_unique<BulletSpawn>();

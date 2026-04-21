@@ -90,6 +90,13 @@ namespace Combo {
 			globalVariables->AddItem(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
 			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		
+			globalVariables->AddItem(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
+
+			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
+				globalVariables->AddItem(name, MakeHitEffectSlotKey(i), data.hitReaction.hitEffectNames[i].slotName);
+				globalVariables->AddItem(name, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
+			}
 		}
 
 		globalVariables->AddItem(name, "コンボ入力受付開始時間", data.stateInputStartTime);
@@ -197,6 +204,17 @@ namespace Combo {
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
 			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
 			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
+		
+			data.hitReaction.hitEffectNames.clear();
+
+			const int effectCount = globalVariables->GetValue<int>(name, kHitEffectCountKey);
+			for (int i = 0; i < effectCount; ++i) {
+				HitEffectEntry entry{};
+				entry.slotName = globalVariables->GetValue<std::string>(name, MakeHitEffectSlotKey(i));
+				entry.effectName = globalVariables->GetValue<std::string>(name, MakeHitEffectNameKey(i));
+
+				data.hitReaction.hitEffectNames.push_back(entry);
+			}
 		}
 		// ヒットボックス
 		{
@@ -277,6 +295,14 @@ namespace Combo {
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
 			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+		
+		
+			globalVariables->SetValue(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
+
+			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
+				globalVariables->SetValue(name, MakeHitEffectSlotKey(i), data.hitReaction.hitEffectNames[i].slotName);
+				globalVariables->SetValue(name, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
+			}
 		}
 
 		// ヒットボックス

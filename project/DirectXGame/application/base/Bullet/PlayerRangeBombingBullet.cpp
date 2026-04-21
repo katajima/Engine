@@ -72,7 +72,7 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 		this->owner->GetAttackController()->GetHitCounter().Hit();
 		
 		// エフェクト出現
-		enemy->Emit();
+		enemy->GetHitMotionSystem()->EmitHitEffect();
 		};
 
 
@@ -137,17 +137,20 @@ void PlayerRangeBombingBullet::Initialize(Engine::EntityManager* entityManager,
 }
 
 // 更新
-void PlayerRangeBombingBullet::Update()
-{
+void PlayerRangeBombingBullet::Update() {
+	// 弾のワールド座標
+	Vector3 worldPos = object_->GetWorldPosition();
+	Vector3& translate = object_->GetWorldTransform().translate_;
+	Vector3 norm{};
 	// 当たったら死ぬ
 	if (Hit) {
-		effect->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+		effect->Emit("missileHit", worldPos);
 		isAlive_ = false;
 	}
 	
 	// 生きているなら
 	if (isAlive_) {
-		Vector3 norm;
+		
 		switch (phase_)	// フェーズ(移動)
 		{
 		case 0:
@@ -156,7 +159,7 @@ void PlayerRangeBombingBullet::Update()
 			}
 			else {
 				// 煙出す
-				effect->Emit("stratSmoke01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 10.0f,-5.0f,0.0f });
+				effect->Emit("stratSmoke01", worldPos + Vector3{ 10.0f,-5.0f,0.0f });
 			}
 			// 時間更新
 			phase0Timer_ += GetTimer();
@@ -164,7 +167,7 @@ void PlayerRangeBombingBullet::Update()
 			float t = phase0Timer_ / phase0EndTime_;
 
 			// 位置を線形補間
-			object_->GetWorldTransform().translate_ = Lerp(str, randPosSky, t);
+			translate = Lerp(str, randPosSky, t);
 
 			// 移動方向の設定
 			norm = randPosSky - str;
@@ -186,25 +189,23 @@ void PlayerRangeBombingBullet::Update()
 			if (phase1Timer_ >= phase1EndTime_)
 			{
 				// 敵の位置に向かって落ちる
-				Vector3 pos = enemyPos_ - object_->GetWorldPosition();
+				Vector3 pos = enemyPos_ - worldPos;
 				float posLength = Length(pos);
-
-				
 				// 方向指定
 				Vector3 pos2 = pos;
 				velocity_ = pos2.Normalize() * provisionalData_.speedPhase1;
 				velocity_.y = 0; // 垂直落下
 
 				// オブジェクトの位置更新
-				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();
+				translate += velocity_ * GetTimer();
 
 				// 敵の範囲内に入ったら
-				if (provisionalData_.distanceToEnemy >= DistanceXZ(object_->GetWorldPosition(), enemyPos_)) {
+				if (provisionalData_.distanceToEnemy >= DistanceXZ(worldPos, enemyPos_)) {
 					phase_++; // フェーズ移行
 					posGround = enemyPos_; // 落ちる位置決定
 
 					// 
-					targetPos = posGround - object_->GetWorldPosition();
+					targetPos = posGround - worldPos;
 					// ヒットオブジェクト描画
 					hitObject2_->SetIsDraw(true);
 				}
@@ -215,21 +216,19 @@ void PlayerRangeBombingBullet::Update()
 			phase2Timer_ += GetTimer();
 			
 			// リングエフェクトの位置を設定
-			effect->Emit("ringEmit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
+			effect->Emit("ringEmit", worldPos);
 
 			// カウントが最大値を達したら
 			if (phase2Timer_ >= phase2EndTime_)
 			{
 				velocity_ = targetPos * provisionalData_.speedPhase2;	// 速度設定
-				object_->GetWorldTransform().translate_ += velocity_ * GetTimer();	// 位置更新
+				translate += velocity_ * GetTimer();	// 位置更新
 			}
 
 			// 0.0f以下になったら
 			if (-0.0f >= object_->GetWorldPosition().y) {
-
 				// 位置を固定
-				object_->GetWorldTransform().translate_.y = 0.5f;
-				
+				translate.y = 0.5f;
 				// 死亡
 				isAlive_ = false;
 				phase_ = 0;	// フェーズ初期化
@@ -243,19 +242,16 @@ void PlayerRangeBombingBullet::Update()
 
 
 				// それぞれのパーティクル出現
-				effect->Emit("missileHit", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect->Emit("missileHitCylinder", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.hitCylinderY,0 });
-				effect->Emit("smokePlaneExpSmoke", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect->Emit("AnimatedCube", object_->GetWorldTransform().worldMat_.GetWorldPosition());
-				effect->Emit("expPlane01", object_->GetWorldTransform().worldMat_.GetWorldPosition() + Vector3{ 0,provisionalData_.expPlaneY,0 });
-				effect->Emit("expSpark", object_->GetWorldTransform().worldMat_.GetWorldPosition() );
+				effect->Emit("missileHitCylinder", worldPos);
+				effect->Emit("missileHit", worldPos + Vector3{ 0,provisionalData_.hitCylinderY,0 });
+				effect->Emit("smokePlaneExpSmoke", worldPos);
+				effect->Emit("animatedCube", worldPos);
+				effect->Emit("expPlane01", worldPos + Vector3{ 0,provisionalData_.expPlaneY,0 });
+				effect->Emit("expSpark", worldPos);
 			}
-
 			break;
 		}
-		// ミサイル方向
-		Vector3 velo = velocity_.Normalize();
-
+		
 		
 
 		// Y軸周り角度(θy)

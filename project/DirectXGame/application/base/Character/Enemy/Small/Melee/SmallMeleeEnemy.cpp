@@ -40,17 +40,6 @@ namespace Character {
 
 	void SmallMeleeEnemy::Draw2D() {}
 
-	void SmallMeleeEnemy::Emit() {
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
-	}
-
 	void SmallMeleeEnemy::Move() {
 		if (isStopping_) return;
 

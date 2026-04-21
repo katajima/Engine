@@ -71,7 +71,7 @@ void ResultScene::Update() {
 
 	overUI_->Update();
 
-	effect_->Update();
+	effect_->Update(GetTime());
 
 	// カメラ更新
 	cameraManager_->Update();

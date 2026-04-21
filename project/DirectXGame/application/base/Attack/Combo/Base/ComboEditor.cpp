@@ -2,17 +2,22 @@
 
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
 
 namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,const std::string& stateName, Character::BaseCharacter* owner) {
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, 
+		Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,
+		const std::string& stateName, Character::BaseCharacter* owner,
+		EffectSystem* effectSystem) {
 		this->globalVariables = globalVariables;	// 保存項目
 		this->lineCommon = lineCommon;
 		this->stateName = stateName;						// ステート
 		this->owner = owner;						// オーナー
 		this->comboSystem = comboSystem;			// コンボシステム
+		this->effectSystem = effectSystem;
 
 		// シーケンサー初期化
 		sequence_.ClearEvents();
@@ -250,6 +255,7 @@ namespace Combo {
 			ImGui::Checkbox("ヒット重力", &data_.hitReaction.gravityEnabled);
 			ImGui::SliderFloat("重力倍率", &data_.hitReaction.gravityScale, 0.0f, 100.0f, "%.2f");
 
+			DrawHitEffectEditor(data_.hitReaction, effectSystem->GetEffectGlobalDatas());
 		}
 	}
 
@@ -293,6 +299,63 @@ namespace Combo {
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
 
+	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction, 
+		const std::map<std::string, EffectGlobalData>& effectDatas){
+		ImGui::SeparatorText("ヒットエフェクト");
+		ImGui::Text("※エディタでリロードしてから保存してください");
+
+		int removeIndex = -1;
+
+		for (int i = 0; i < static_cast<int>(reaction.hitEffectNames.size()); ++i) {
+			ImGui::PushID(i);
+
+			HitEffectEntry& entry = reaction.hitEffectNames[i];
+
+			char slotBuffer[128]{};
+			char effectBuffer[128]{};
+
+			strncpy_s(slotBuffer, entry.slotName.c_str(), _TRUNCATE);
+			strncpy_s(effectBuffer, entry.effectName.c_str(), _TRUNCATE);
+
+			ImGui::InputText("スロット名", slotBuffer, sizeof(slotBuffer));
+			ImGui::InputText("エフェクト名", effectBuffer, sizeof(effectBuffer));
+
+			entry.slotName = slotBuffer;
+			entry.effectName = effectBuffer;
+
+			if (ImGui::BeginCombo("エフェクト一覧", entry.effectName.c_str())) {
+				for (const auto& effectPair : effectDatas) {
+					const bool isSelected = (entry.effectName == effectPair.first);
+					if (ImGui::Selectable(effectPair.first.c_str(), isSelected)) {
+						entry.effectName = effectPair.first;
+					}
+					if (isSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			if (ImGui::Button("削除")) {
+				removeIndex = i;
+			}
+
+			ImGui::Separator();
+			ImGui::PopID();
+		}
+
+		if (removeIndex >= 0 && removeIndex < static_cast<int>(reaction.hitEffectNames.size())) {
+			reaction.hitEffectNames.erase(reaction.hitEffectNames.begin() + removeIndex);
+		}
+
+		if (ImGui::Button("ヒットエフェクト追加")) {
+			reaction.hitEffectNames.push_back(HitEffectEntry{
+				.slotName = "NewEffect",
+				.effectName = ""
+				});
+		}
+	}
+
 #pragma endregion // ImGui管理
 
 #pragma endregion // コンボ単位管理
@@ -300,12 +363,14 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Engine::LineCommon* lineCommon, Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
+	void Editor::Initialize(Engine::LineCommon* lineCommon, 
+		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, 
+		Character::BaseCharacter* owner, EffectSystem* effectSystem) {
 		this->comboSystem = comboSystem;
 		this->lineCommon = lineCommon;
 		this->globalVariables = globalVariables;
 		this->owner = owner;
-
+		this->effectSystem = effectSystem;
 
 		// コンボシステムからコンボエディターブロックを作成
 		ApplyComboEditorToSystem();
@@ -460,7 +525,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner);
+		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner,effectSystem);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);

@@ -22,8 +22,6 @@ namespace Character {
 		void DrawEffect() override {};
 		// 描画2d
 		void Draw2D() override;
-		// エミッター出現
-		void Emit() override;
 		// 移動
 		void Move() override;
 		// ジャンプ

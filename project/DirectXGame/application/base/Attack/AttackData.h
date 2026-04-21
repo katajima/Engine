@@ -3,6 +3,8 @@
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 
 #include "DirectXGame//application/base/Input/InputSystem.h"
+#include "vector"
+#include "string"
 
 /// ダメージデータ
 class DamageData {
@@ -138,41 +140,37 @@ enum class HitReactionType {
 	WallBounce
 };
 
+struct HitEffectEntry {
+	std::string slotName;
+	std::string effectName;
+};
+
 /// 攻撃リアクションデータ
 struct HitReactionData {
 	// リアクションタイプ
 	HitReactionType type = HitReactionType::Knockback;
-
 	// 飛ぶ基準方向
 	Vector3 normal{};
-
 	// 水平方向の強さ
 	float power = 0.0f;
-
 	// 垂直方向の強さ
 	float verticalBoost = 0.0f;
-
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
-
 	// リアクション移動の有効時間
 	float duration = 0.25f;
-
 	// 行動不能時間
 	float hitStunTime = 0.1f;
-
 	// ダウン時間
 	float downTime = 0.0f;
-
 	// 打ち上げ時に重力を弱める/止める時間
 	float launchFloatTime = 0.0f;
-
 	// 重力を適用するか
 	bool gravityEnabled = false;
-
 	// 重力倍率
 	float gravityScale = 1.0f;
-
 	// ダメージデータ
 	DamageData damageData{};
+	// エフェクト
+	std::vector<HitEffectEntry> hitEffectNames;
 };

@@ -1,0 +1,252 @@
+{
+    "EmitterStarEmit": {
+        "emitData.acceleration.median": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.acceleration.range": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.alphaClipping": {
+            "type": "float",
+            "value": 0.5
+        },
+        "emitData.colorRange.max": {
+            "type": "Vector4",
+            "value": [
+                0.47058823704719543,
+                0.47058823704719543,
+                0.47058823704719543,
+                1.0
+            ]
+        },
+        "emitData.colorRange.min": {
+            "type": "Vector4",
+            "value": [
+                0.47058823704719543,
+                0.47058823704719543,
+                0.47058823704719543,
+                1.0
+            ]
+        },
+        "emitData.count.median": {
+            "type": "int32_t",
+            "value": 1
+        },
+        "emitData.count.range": {
+            "type": "int32_t",
+            "value": 0
+        },
+        "emitData.enableLighting": {
+            "type": "int32_t",
+            "value": 0
+        },
+        "emitData.isFlag.billboardRotZ": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isAcceleration": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isAlpha": {
+            "type": "bool",
+            "value": true
+        },
+        "emitData.isFlag.isBounce": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isGravity": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isLifeTimeScale": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isLifeTimeVelocity": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isLine": {
+            "type": "bool",
+            "value": true
+        },
+        "emitData.isFlag.isLineInterpolation": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isRotateVelocity": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.isScaling": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.usebillboard": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.isFlag.usebillboardY": {
+            "type": "bool",
+            "value": false
+        },
+        "emitData.lifeTime.median": {
+            "type": "float",
+            "value": 0.20000000298023224
+        },
+        "emitData.lifeTime.range": {
+            "type": "float",
+            "value": 0.0
+        },
+        "emitData.lineEnd": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.lineStart": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.radius": {
+            "type": "float",
+            "value": 0.0
+        },
+        "emitData.rangeMax": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.rangeMin": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.rotate.median": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.rotate.range": {
+            "type": "Vector3",
+            "value": [
+                180.0,
+                180.0,
+                180.0
+            ]
+        },
+        "emitData.rotateVelocity.median": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.rotateVelocity.range": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.segment": {
+            "type": "int32_t",
+            "value": 3
+        },
+        "emitData.shapeType": {
+            "enumType": "EmitterShapeType",
+            "type": "enum",
+            "value": 3
+        },
+        "emitData.size.median": {
+            "type": "Vector3",
+            "value": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "emitData.size.range": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.sizeAmount.median": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.sizeAmount.range": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.topBottom": {
+            "enumType": "TopBottom",
+            "type": "enum",
+            "value": -858993460
+        },
+        "emitData.velocity.median": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "emitData.velocity.range": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "frequency": {
+            "type": "float",
+            "value": 0.10000000149011612
+        },
+        "particleName": {
+            "type": "string",
+            "value": "hitStar"
+        }
+    }
+}

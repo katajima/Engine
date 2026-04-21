@@ -66,7 +66,7 @@ void PlayerBullet::Initialize(Engine::EntityManager* entity3DManager,
 		enemy->AddDamage(parameter_.damage);
 
 		if (enemy->GetCharacterParameterComponent()->GetHP() > 0) {
-			enemy->Emit();	// エフェクト出現
+			enemy->GetHitMotionSystem()->EmitHitEffect();	// エフェクト出現
 		}
 		// 弾が当たったら消えるか
 		if (info_.type == ProjectileType::NORMAL) {

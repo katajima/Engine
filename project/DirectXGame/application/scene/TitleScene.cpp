@@ -98,7 +98,7 @@ void TitleScene::Update()
 	// ステージ更新
 	titleStage_->Update(GetTime());
 	// エフェクト
-	effect_->Update();
+	effect_->Update(GetTime());
 	// UI更新
 	titleUI_->Update(GetTime());
 	// カメラ管理更新

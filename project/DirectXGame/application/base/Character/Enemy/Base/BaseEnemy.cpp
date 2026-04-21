@@ -121,7 +121,7 @@ namespace Character {
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();
-		hitMotionSystem_->Initialize(this);
+		hitMotionSystem_->Initialize(this,effect);
 		
 		// オブジェクト状態生存
 		objectComponent_->GetObjectStateFlags().isAlive = true;

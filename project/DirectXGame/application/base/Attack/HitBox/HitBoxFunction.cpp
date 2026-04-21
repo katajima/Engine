@@ -47,7 +47,7 @@ namespace HitBox {
 		// リアクションデータ
 		enemy->GetHitMotionSystem()->SetReactionData(data_);
 		//	エフェクト出現
-		enemy->Emit();	
+		enemy->GetHitMotionSystem()->EmitHitEffect();
 		// 敵ステート設定
 		enemy->GetCharacterStateMachine()->ChangeState(Character::CharacterMainState::Damage);
 		// プレイヤーのロックオンシステムに相手タグを設定

@@ -6,6 +6,18 @@
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Combo {
+
+	const std::string kHitEffectCountKey = "ヒットエフェクト数";
+
+	static std::string MakeHitEffectSlotKey(int index) {
+		return "ヒットエフェクトスロット" + std::to_string(index);
+	}
+
+	static std::string MakeHitEffectNameKey(int index) {
+		return "ヒットエフェクト名前" + std::to_string(index);
+	}
+
+
 	/// <summary>
 	/// コンボシステム
 	/// </summary>
@@ -63,7 +75,7 @@ namespace Combo {
 		//	トランスフォーム取得
 		std::map<std::string, Engine::WorldTransform*> GetParentTransforms() { return parentTransforms_; };
 
-		
+
 	public:
 		// コンボステートマシーン取得
 		StateMachine* GetComboStateMachine() { return comboStateMachine_.get(); }

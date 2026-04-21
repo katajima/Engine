@@ -120,6 +120,42 @@
             "type": "float",
             "value": 0.10000000149011612
         },
+        "ヒットエフェクトスロット0": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクトスロット1": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクトスロット2": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクトスロット3": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクト名前0": {
+            "type": "string",
+            "value": "EmitterHitEffect"
+        },
+        "ヒットエフェクト名前1": {
+            "type": "string",
+            "value": "EmitterHitEmit"
+        },
+        "ヒットエフェクト名前2": {
+            "type": "string",
+            "value": "EmitterRingHit"
+        },
+        "ヒットエフェクト名前3": {
+            "type": "string",
+            "value": "EmitterStarEmit"
+        },
+        "ヒットエフェクト数": {
+            "type": "int32_t",
+            "value": 4
+        },
         "ヒットスタン持続時間": {
             "type": "float",
             "value": 0.10000000149011612

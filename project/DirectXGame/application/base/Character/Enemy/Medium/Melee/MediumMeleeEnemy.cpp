@@ -54,17 +54,6 @@ namespace Character {
 
 	void MediumMeleeEnemy::Draw2D(){}
 
-	void MediumMeleeEnemy::Emit(){
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
-	}
-
 	void MediumMeleeEnemy::Move(){
 		if (isStopping_) return;
 

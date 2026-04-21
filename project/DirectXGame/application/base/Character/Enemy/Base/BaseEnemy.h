@@ -43,8 +43,6 @@ namespace Character {
 
 
 	public:
-		// パーティクル発生
-		virtual void Emit() = 0;
 		// ID設定
 		void SetID(uint32_t id) { id_ = id; }
 		// 敵タイプ取得

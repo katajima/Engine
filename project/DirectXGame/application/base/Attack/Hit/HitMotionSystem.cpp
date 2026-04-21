@@ -2,22 +2,30 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
+#include "DirectXGame/application/base/Effect/Effect.h"
 
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner)
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem)
 {
-	owner_ = owner;
-	reactionMoveSystem_ = owner_->GetMoveComponent()->GetReactionMoveSystem();
+	this->owner = owner;
+	this->effectSystem = effectSystem;
+	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
 
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
 	isAction_ = false;
 	hitMotionState_ = HitMotionState::None;
+
+	// エフェクト座標初期化
+	worldEffect_.Initialize();
+	worldEffect_.parent_ = &owner->GetWorldTransform();
+	worldEffect_.translate_ = { 0,1,0 };
+
 }
 
 void HitMotionSystem::Update(float dt)
 {
-	DamageProcess(dt, owner_->GetCharacterParameterComponent());
+	DamageProcess(dt, owner->GetCharacterParameterComponent());
 
 	if (!isAction_) {
 		return;
@@ -57,6 +65,18 @@ void HitMotionSystem::Update(float dt)
 		hitStunTimer_ <= 0.0f &&
 		downTimer_ <= 0.0f) {
 		FinishReaction();
+	}
+}
+
+void HitMotionSystem::EmitHitEffect() {
+	// エフェクト座標更新
+	worldEffect_.Update();
+	Vector3 pos = worldEffect_.worldMat_.GetWorldPosition();
+
+	for (auto& effect : data_.hitEffectNames) {
+		if (!effect.effectName.empty()) {
+			effectSystem->Emit(effect.effectName, pos);
+		}
 	}
 }
 
@@ -199,7 +219,7 @@ Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
 
 void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
 {
-	if (!reactionMoveSystem_) {
+	if (!reactionMoveSystem) {
 		return;
 	}
 
@@ -213,7 +233,7 @@ void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
 	request.isLanding = false;
 	request.groundHeight = 0.0f;
 
-	reactionMoveSystem_->SetRequest(request);
+	reactionMoveSystem->SetRequest(request);
 }
 
 void HitMotionSystem::FinishReaction()

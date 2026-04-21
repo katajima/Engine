@@ -233,7 +233,7 @@ void GamePlayScene::Update()
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
-	effect_->Update();
+	effect_->Update(GetTime());
 	// ゲーム進行マネージャー更新
 	gameFlowController_->Update(GetTime());
 

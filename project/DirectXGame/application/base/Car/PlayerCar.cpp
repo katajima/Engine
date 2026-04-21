@@ -153,11 +153,11 @@ void PlayerCar::SpotLightUpdate(float dt){
 }
 
 void PlayerCar::Emit(const Vector3& pos) {
-	effect->Emit("dust2", pos);
+	effect->Emit("EmitterTireDust", pos);
 }
 
 void PlayerCar::Emit(const Vector3& pos, const Vector3& dir, const Vector3& range) {
-	effect->Emit("dust2", pos, dir, range);
+	effect->Emit("EmitterTireDust", pos, dir, range);
 }
 
 void PlayerCar::EmitScrapBox(const Vector3& pos, const Vector3& dir, const Vector3& range){

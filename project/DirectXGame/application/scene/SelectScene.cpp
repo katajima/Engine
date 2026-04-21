@@ -60,6 +60,8 @@ void SelectScene::Update() {
 	// UI更新
 	selectUI_->SetSelectedIndex(selectSystem_->GetSelectedIndex());
 	selectUI_->Update(GetTime());
+	// エフェクト
+	effect_->Update(GetTime());
 	// カメラ更新
 	cameraManager_->Update();
 }

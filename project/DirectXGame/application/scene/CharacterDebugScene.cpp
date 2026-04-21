@@ -165,7 +165,9 @@ void CharacterDebugScene::Initialize()
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
-	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), GetGlobalVariables(), characterManager_->GetPlayer());
+	comboEditor_->Initialize(GetEntityManager()->Get3DLineCommon(), 
+		characterManager_->GetPlayer()->GetAttackController()->GetComboSystem(), 
+		GetGlobalVariables(), characterManager_->GetPlayer(),effect_.get());
 }
 
 void CharacterDebugScene::Finalize(){
@@ -234,7 +236,7 @@ void CharacterDebugScene::Update()
 	// 当たり判定
 	CheckAllCollisions();
 	// Effect更新
-	effect_->Update();
+	effect_->Update(GetTime());
 }
 
 void CharacterDebugScene::Draw3D(){

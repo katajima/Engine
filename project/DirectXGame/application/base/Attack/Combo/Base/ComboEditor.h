@@ -1,7 +1,7 @@
 #pragma once
 #include  "ComboImGui.h"
-
-
+#include "map"
+#include "DirectXGame/engine/Effect/EffectGlovalData.h"
 namespace Engine {
 	class GlobalVariables;
 	class LineCommon;
@@ -11,13 +11,15 @@ namespace Character {
 	class BaseCharacter;
 	class BasePlayer;
 }
-
+class EffectSystem;
 
 namespace Combo {
 	class EditorBlock {
 	public:
 		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Engine::GlobalVariables* globalVariables,
+			Combo::System* comboSystem, const std::string& stateName, 
+			Character::BaseCharacter* owner, EffectSystem* effectSystem);
 		// 更新
 		void UpdateImGui(float dt);
 	public:
@@ -51,9 +53,13 @@ namespace Combo {
 		// シーケンサーの状態をステートに適応
 		void SequencerApplyToState();
 
+		void DrawHitEffectEditor(HitReactionData& reaction, 
+			const std::map<std::string, EffectGlobalData>& effectDatas);
+
 	private: // 貰いもの
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::LineCommon* lineCommon = nullptr;
+		EffectSystem* effectSystem = nullptr;
 	private: // もらいもの
 		// 所有者
 		Character::BaseCharacter* owner = nullptr;
@@ -97,7 +103,9 @@ namespace Combo {
 	public:
 
 		// 初期化
-		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
+		void Initialize(Engine::LineCommon* lineCommon,Combo::System* comboSystem,
+			Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner,
+			EffectSystem* effectSystem);
 		// 更新 
 		void Update(float dt);
 
@@ -120,7 +128,7 @@ namespace Combo {
 		Engine::GlobalVariables* globalVariables = nullptr;
 		Engine::LineCommon* lineCommon = nullptr;
 		Character::BaseCharacter* owner = nullptr;
-
+		EffectSystem* effectSystem = nullptr;
 	private:
 		// コンボエディターブロックマップ
 		std::map<std::string, EditorBlock> comboEditorBlocks_;

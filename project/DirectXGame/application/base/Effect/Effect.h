@@ -12,11 +12,14 @@ public:
 	// 初期化
 	void Initialize(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables);
 	// 更新
-	void Update();
+	void Update(float dt);
 	// 出現
 	void Emit(const std::string& name, const Vector3& pos);
 	// 出現(方向付き)
 	void Emit(const std::string& name, const Vector3& pos, const Vector3& dir, const Vector3& range);
+
+public:
+	std::map<std::string, EffectGlobalData> GetEffectGlobalDatas() const { return effectEditor_->GetEffectGlobalDatas(); };
 private:
 	// エフェクトの作成
 	void CreateEffect(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
@@ -27,8 +30,6 @@ private:
 	void InitRangeBombingBullet();
 	// パーティクル初期化(弾)
 	void InitBullet();
-	// パーティクル初期化(スクラップ)
-	void InitScrap();
 private:
 	// エフェクトコンポーネント
 	std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;	
@@ -39,15 +40,6 @@ private:
 	Engine::EntityManager* entityManager = nullptr;	
 	// グローバル変数保存
 	Engine::GlobalVariables* globalVariables = nullptr;	
-private: // 一旦
-
-	struct ProvisionalData {
-		Vector3 translate = { 0, 107, 0 };
-		Vector3 rotate = { 0.341f, 0.0f, 0.0f };
-		float farClip_ = 15000.0f;
-	};
-	ProvisionalData provisionalData_;
-
-private:
+private: // デバッグ用
 
 };

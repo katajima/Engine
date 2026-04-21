@@ -36,17 +36,6 @@ namespace Character {
 
 	void SmallCartEnemy::Draw2D() {}
 
-	void SmallCartEnemy::Emit() {
-		// エフェクト座標更新
-		worldEffect_.Update();
-
-		// 各エフェクト出現
-		effect->Emit("starEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEmit", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("hitEffect2", worldEffect_.worldMat_.GetWorldPosition());
-		effect->Emit("ringHit", worldEffect_.worldMat_.GetWorldPosition());
-	}
-
 	void SmallCartEnemy::Move() {
 		// 距離設定
 		Vector3 dire = Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();

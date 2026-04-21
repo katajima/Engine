@@ -29,8 +29,6 @@ namespace Character {
 
 	void LargeMeleeEnemy::Draw2D() {}
 
-	void LargeMeleeEnemy::Emit() {}
-
 	void LargeMeleeEnemy::Move() {}
 
 	void LargeMeleeEnemy::InitStateMachine() {}

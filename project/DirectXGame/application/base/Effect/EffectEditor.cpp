@@ -10,7 +10,7 @@ void EffectEditor::Initialize(Engine::EffectComponent* effectComponent,
 }
 
 // 更新
-void EffectEditor::Update() {
+void EffectEditor::Update(float dt) {
 	if (effectGlobalDatas_.empty()) return;
 #ifdef _DEBUG
 	ImGui::Begin("Effect");
@@ -19,6 +19,18 @@ void EffectEditor::Update() {
 	Engine::ImGuiManager::Select("Selected Effect", selectedBlockName_, effectGlobalDatas_);
 	ImGui::Separator();
 	ImGui::Text("Editing: %s", selectedBlockName_.c_str());
+	ImGui::Checkbox("出現", &isSpawnEmit);
+	ImGui::DragFloat3("位置", &spawnEmitPos.x, 0.1f);
+	ImGui::DragFloat("頻度", &frequency, 0.01f);
+
+	if (isSpawnEmit) {
+		timer += dt;
+		if (frequency < timer) {
+			Emit(selectedBlockName_, spawnEmitPos);
+			timer = 0.0f;
+		}
+	}
+	
 
 	// --- 選択されているブロックだけ表示 ---
 	for (auto& combo : effectGlobalDatas_) {
@@ -33,11 +45,6 @@ void EffectEditor::Update() {
 		AAAA(name,combo.second);
 		// データの保存
 		SetValue(name, combo.second);
-	}
-
-	// リロード
-	if (ImGui::Button("Relord")) {
-		
 	}
 
 	// セーブ
@@ -449,3 +456,15 @@ void EffectEditor::AAAA(const std::string& name,EffectGlobalData& data) {
 	}
 	ImGui::End();
 }
+
+void EffectEditor::Emit(const std::string& name, const Vector3& pos) {
+	Engine::BaseParticleEmitter* emit = effectComponent->GetBaseEmitter(name);
+	if (emit == nullptr) return;	// エミッターが存在しない場合は終了
+	// 出現
+	emit->SetPos(pos);		// 位置
+	emit->SetIsEmit(false); // 出さない
+	emit->Update();			// 更新
+	emit->SetIsEmit(true);	// 出す
+	emit->Emit();			// エフェクト出現
+	emit->SetIsEmit(false); // 出さない
+};

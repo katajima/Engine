@@ -12,12 +12,13 @@ public:
 	void Initialize(Engine::EffectComponent* effectComponent, Engine::GlobalVariables* globalVariables);
 
 	// 更新
-	void Update();
+	void Update(float dt);
 	//
 	void AddEffectGlobalData(const std::string& name, const std::string& particleName);
 	//
 	void SetEffectGlobalData(const std::string& name, EmitterShapeType shapeType, const EffectGlobalData& data);
 
+	
 
 	std::map<std::string, EffectGlobalData> GetEffectGlobalDatas() const { return effectGlobalDatas_; };
 private:
@@ -32,12 +33,20 @@ private:
 
 	void AAAA(const std::string& name,EffectGlobalData& data);
 
-
+	void Emit(const std::string& name, const Vector3& pos);
 private:// エフェクトのグローバルデータ
 	std::map<std::string, EffectGlobalData> effectGlobalDatas_;
 	// 選択中のエフェクトエディターブロック名
 	std::string selectedBlockName_;
-
+private:
+	// 出現させるか
+	bool isSpawnEmit = false;
+	// デバッグエミッター位置
+	Vector3 spawnEmitPos{};
+	// 頻度
+	float frequency = 0.2f;
+	// 時間
+	float timer = 0.0f;
 private:
 	// エフェクトコンポーネント
 	Engine::EffectComponent* effectComponent = nullptr;

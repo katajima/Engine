@@ -3,7 +3,7 @@
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 
-void TitleStage::InitializeStone(){
+void TitleStage::InitializeStone() {
 	stone1_ = entityManager->CreateObject3D("Stone1", Engine::ObjectModelType::kNormal, {}, camera);
 	stone1_->SetModel("Stone.obj");
 	stone1_->GetWorldTransform().scale_ = { 1,1,1 };
@@ -48,7 +48,7 @@ void TitleStage::Initialize(Engine::EntityManager* entityManager, CameraManager*
 
 	// 車
 	playerCar_ = std::make_unique<PlayerCar>();
-	playerCar_->Initialize(entityManager, {}, playerCarPos_, {0,Math::DegreesToRadians(-90),0});
+	playerCar_->Initialize(entityManager, {}, playerCarPos_, { 0,Math::DegreesToRadians(-90),0 });
 	playerCar_->SetGroungHeight(0.1f);
 
 }
@@ -57,8 +57,8 @@ void TitleStage::Update(float dt) {
 	BaseUpdate(dt);
 
 	// エフェクト
-	effect->Emit("dust3", {-50,10,100});
-	effect->Emit("dust3", { -50,10,100 });
+	effect->Emit("EmitterDust", { -50,10,100 });
+	effect->Emit("EmitterDust", { -50,10,100 });
 
 
 	playerCar_->Update(dt);
