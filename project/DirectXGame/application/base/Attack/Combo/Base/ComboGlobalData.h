@@ -17,10 +17,10 @@ namespace Combo {
 
 	// 移動方法
 	enum class MoveType {
-		kNone,		// 特になし
-		kTraget,	// ターゲットに向かって
-		kForward,	// 前方
-		kLockAt,	// カメラ方向
+		kInput,		// 入力方向基準
+		kTraget,	// ターゲット方向基準
+		kForward,	// 自キャラ前方基準
+		kLockAt,	// カメラ方向基準
 	};
 
 	// コンボタイプ
@@ -34,31 +34,55 @@ namespace Combo {
 
 	// 保存項目移動データ
 	struct GlobalMove {
-		// 移動速度
-		float moveSpeed = 1.0;			
-		// 移動開始
-		float moveWindowStart = 0.0f;	
-		// 移動終了
-		float moveWindowEnd = 1.0f;		
-		// 強制移動
-		bool isCompulsionMove = true;		
-		
-		// 重力はあるか？
-		bool isGravity = true;				
+		// 移動受付スタート
+		float moveWindowStart = 0.1f;
+		// 移動受付エンド
+		float moveWindowEnd = 0.5f;
+		// 移動速度（軸ごと）
+		// X=Right Y=Up Z=Forward
+		Vector3 moveSpeed = { 0.0f, 0.0f, 0.0f };
+		// 強制的に移動
+		bool isCompulsionMove = true;
+		// 空中でのコンボで重力はあるか？
+		bool isGravity = true;
 		// 重力スケール
-		float gravityScale = 1.0f;			
-		// 移動方向条件
-		MoveType moveType = MoveType::kForward;
-	};
+		float gravityScale = 1.0f;
+		// 開始時に重力速度をリセットするか
+		bool isResetGravity = false;
+		// ターゲットの距離でどこまで近づくか
+		float moveTargetRadius = 1.0f;
 
-	// 保存項目ロックオン
-	struct GlobalLockOn {
+		// ローカル移動ベクトル
+		// X=Right, Y=Up, Z=Forward
+		// 例:
+		// { 0, 0, 1 }  : 前進
+		// { 0, 0,-1 }  : 後退
+		// { 1, 0, 0 }  : 右移動
+		// { 0, 1, 0 }  : 上昇
+		// { 0, 1, 1 }  : 前上方向
+		Vector3 localMoveVector = { 0.0f, 0.0f, 1.0f };
+
+		// localMoveVector を正規化してから使うか
+		bool isNormalizeLocalMove = true;
+
+		// 移動中も毎フレーム方向を更新するか
+		// ターゲット追尾や入力追従系で有効
+		bool isUpdateDirectionEachFrame = true;
+
+		// ターゲット方向を使うとき、基準前方を水平化するか
+		// trueなら従来通り地面基準に近い挙動
+		bool isFlattenTargetDirection = true;
+
+		// 移動方向とキャラクターの向く方向を一致させるか？
+		bool alignCharacterToMovement = true;
+
+		// 移動タイプ
+		MoveType moveType = MoveType::kTraget;
+		
+
+
 		// ロックオンタイプ
-		LockOnType lockOnType = LockOnType::kHit;
-		// ロックオン半径
-		float lockOnRadius = 7.0f;
-		// ターゲットにどこまで近づくか半径
-		float moveTragetRadius = 1.0f;
+		LockOnData lockOnData{};
 	};
 
 	// 保存項目アニメーション
@@ -69,7 +93,43 @@ namespace Combo {
 		float animationSpeed = 1.0f;		
 		// アニメーションブレンド時間
 		float animationBlendTime = 0.1f;	
+		// アニメーションループ
+		bool animationLoop = false;	
+		// アニメーションを一定の場所で止めるか？
+		bool animationStop = false;
+		// アニメーションの止めるタイミング
+		float animationStopTime = 1.0f;
+	};
 
+	// 時間
+	struct StateTime {
+		// 入力受付時間
+		float startTime = 0.1f;	
+		// 入力終了時間
+		float endTime = 0.5f;		
+	};
+
+	// 条件クラス
+	struct GlobalCondition {
+		// 入力受付
+		StateTime stateInput{};
+		// キャンセル受付
+		StateTime stateCancel{};
+		// 移動キャンセル受付
+		StateTime stateMoveCancel{};
+		// キャンセル可能か
+		bool isCancel = true;		
+		// キャンセル可能かどうか(スティック移動での)
+		bool isMoveCancel = true;
+
+		// ステート終了時間
+		float stateEndTime = 0.5f;			
+		// ステート移行時間
+		float stateNextTime = 0.45f;		
+		// 強制的に次のコンボに移行するか 
+		bool isCompulsionNext = false;		
+		///	終了条件 ///
+		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};
 
 	// 保存項目用コンボデータ
@@ -82,28 +142,13 @@ namespace Combo {
 		HitBox::GlobalHitBox hitBox{};
 		// 移動関係
 		GlobalMove move{};
-		// ロックオン
-		GlobalLockOn lockOn{};
 		// アニメーション
 		GlobalAnimation animation{};
-	
-		float stateInputStartTime = 0.1f;	// 入力受付時間
-		float stateInputEndTime = 0.5f;		// 入力終了時間
-
-		float stateCancelStartTime = 0.3f;	// キャンセル開始時間
-		float stateCancelEndTime = 0.5f;	// キャンセル終了時間
-
-		float stateMoveCancelStartTime = 0.3f;	// キャンセル開始時間(移動)
-		float stateMoveCancelEndTime = 0.5f;	// キャンセル終了時間(移動)
-
-		float stateEndTime = 0.5f;			// ステート終了時間
-		float stateNextTime = 0.45f;		// ステート移行時間
+		// 条件
+		GlobalCondition condition{};
+		
 
 		float trailEffectStartTime = 0.1f;	// トレイル発生時間
 		float trailEffectLifeTime = 1.0;	// トレイル生存時間
-
-	
-		///	終了条件 ///
-		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};
 };

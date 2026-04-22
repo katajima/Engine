@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
-
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 // 前方宣言
 namespace Engine {
 	class AnimationComponent;	// アニメーション
@@ -22,15 +22,6 @@ namespace Combo {
 	/// </summary>
 	class ComboAnimation {
 	public:
-		struct Data {
-			// アニメーション
-			std::string animationName_ = "no";		// アニメーション名前
-			bool animationLoop_ = false;			// アニメーションループ
-			float animationSpeed_ = 1.0f;			// アニメーションスピード
-			float animationBlendTime_ = 0.1f;		// アニメーションブレンド時間
-		};
-
-
 		// 開始
 		void Enter(Character::BaseCharacter* owner);
 
@@ -42,12 +33,20 @@ namespace Combo {
 
 	public:
 		// データ構造体取得
-		Data& GetData() { return data_; }
+		GlobalAnimation& GetData() { return data_; }
+		// 終了条件設定
+		void SetEndConditionType(EndConditionType type) { endType = type; }
 	private:
-		Data data_;
+		GlobalAnimation data_;
 	private:
 		// アニメーション
 		Engine::AnimationComponent* animationComponent = nullptr;
+		// 移動コンポーネント
+		const MovementComponent* movementComponent = nullptr;
+		// 終了条件
+		EndConditionType endType = EndConditionType::kOnTimer;
+		//
+		bool onGlound = true;
 	};
 
 

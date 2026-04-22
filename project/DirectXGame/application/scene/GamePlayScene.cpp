@@ -38,9 +38,9 @@ void GamePlayScene::Initialize()
 		[this] { return inputManager_->Triggered(InputManager::Action::LightAttack); },
 		std::make_unique<Character::AttackCommand>());
 
-	/*inputHander_->Bind(
+	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::HeavyAttack); },
-		std::make_unique<Character::HeavyAttackCommand>());*/
+		std::make_unique<Character::HeavyAttackCommand>());
 	inputHander_->Bind(
 		[this] { return inputManager_->Triggered(InputManager::Action::Skill); },
 		std::make_unique<Character::SkillAttackCommand>());

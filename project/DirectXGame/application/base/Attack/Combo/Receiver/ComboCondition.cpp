@@ -8,16 +8,16 @@ void Combo::ComboCondition::Update(const Character::CharacterContext& ctx, float
 
 	// キャンセル受付クラス更新
 	if (!nextRecever_.GetIsNext()) {
-		cancelReceiver_.Update(ctx, timer);
+		cancelReceiver_.Update(ctx,data_, timer);
 	}
 	// コンボ入力受付クラス更新
 	if (!cancelReceiver_.GetIsCancel()) {
-		nextRecever_.Update(ctx, timer);
+		nextRecever_.Update(ctx, data_, timer);
 	}
 	// 終了条件
-	endCondition_.Update(ctx, timer);
+	endCondition_.Update(ctx, data_, timer);
 	// 移行条件
-	nextCondition_.Update(ctx, timer);
+	nextCondition_.Update(ctx, data_, timer);
 }
 
 void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {
@@ -26,9 +26,9 @@ void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {
 	// 移行受付クラス
 	nextRecever_.Enter();
 	// 終了条件クラス
-	endCondition_.Enter();
+	endCondition_.Enter(data_);
 	// 移行条件クラス
-	nextCondition_.Enter();
+	nextCondition_.Enter(data_);
 };
 
 void Combo::ComboCondition::Exit() {

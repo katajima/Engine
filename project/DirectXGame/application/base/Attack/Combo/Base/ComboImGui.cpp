@@ -32,16 +32,19 @@ void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, b
 }
 
 
-void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, std::string& animationName, int currentFrame,
-	float& animationSpeed, float& animationBlendTime, const std::map<std::string, Engine::Animation>& animations,
+void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
+	int& currentFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
 	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
 
 	if (ImGui::CollapsingHeader(imGuiName.c_str())) {
-		ImGui::SliderFloat("アニメーションスピード", &animationSpeed, 0.1f, 10.0f, "%.2f");
-		ImGui::SliderFloat("アニメーションブレンド時間", &animationBlendTime, 0.1f, 10.0f, "%.2f");
+		ImGui::SliderFloat("アニメーションスピード", &animationData.animationSpeed, 0.1f, 10.0f, "%.2f");
+		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.1f, 10.0f, "%.2f");
+		ImGui::Checkbox("アニメーションループ", &animationData.animationLoop);
+		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.1f, 10.0f, "%.2f");
+		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
 
 		// BeginComboでの選択
-		Engine::ImGuiManager::Select("Selected Combo",animationName, animations);
+		Engine::ImGuiManager::Select("Selected Combo", animationData.animationName, animations);
 	}
 
 	// ループ再生
@@ -49,7 +52,7 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, std:
 	// アニメーション設定
 	animation->SetAnimation(nowAnimationName, 0);
 	// ステートのアニメーション時間設定
-	float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationSpeed;
+	float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
 	animation->SetAnimationTime(animationTime);
 }
 
@@ -92,21 +95,21 @@ void Combo::ComboImGui::SequenceSettings(AttackSequence& sequence, int& currentF
 void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData& comboData, int& maxFrame) {
 
 	// コンボ入力可能時間
-	float inputStart = comboData.GetComboCondition().GetNextReceiver().GetInputStart();
-	float inputEnd = comboData.GetComboCondition().GetNextReceiver().GetInputEnd();
+	float inputStart = comboData.GetComboCondition().GetNextInputStart();
+	float inputEnd = comboData.GetComboCondition().GetNextInputEnd();
 
 	// コンボキャンセル時間
-	float cancelStart = comboData.GetComboCondition().GetCancelReceiver().GetInputStart();
-	float cancelEnd = comboData.GetComboCondition().GetCancelReceiver().GetInputEnd();
+	float cancelStart = comboData.GetComboCondition().GetCancelInputStart();
+	float cancelEnd = comboData.GetComboCondition().GetCancelInputEnd();
 	// コンボキャンセル時間
-	float cancelMoveStart = comboData.GetComboCondition().GetCancelReceiver().GetInputMoveStart();
-	float cancelMoveEnd = comboData.GetComboCondition().GetCancelReceiver().GetInputMoveEnd();
+	float cancelMoveStart = comboData.GetComboCondition().GetMoveCancelInputStart();
+	float cancelMoveEnd = comboData.GetComboCondition().GetMoveCancelInputEnd();
 
 
 
 	// コンボ移行時間
-	float nextComboTime = comboData.GetComboCondition().GetNextCondition().GetData().stateTime;
-	float endComboTime = comboData.GetComboCondition().GetEndCondition().GetData().stateTime;
+	float nextComboTime = comboData.GetComboCondition().GetData().stateNextTime;
+	float endComboTime = comboData.GetComboCondition().GetData().stateEndTime;
 
 	// ヒットボックス生成時間
 	float hitBoxStart = comboData.GetComboHitBox().GetCollData().hitBoxData.windowStart;

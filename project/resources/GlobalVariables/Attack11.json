@@ -1,16 +1,16 @@
 {
-    "JumpAttack": {
+    "Attack11": {
         "Y方向ノックバック": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "Y方向ノックバック力": {
             "type": "float",
-            "value": 30.0
+            "value": 0.0
         },
         "アニメーションを一定時間で止めるか": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "アニメーションループ": {
             "type": "bool",
@@ -18,15 +18,15 @@
         },
         "アニメーション停止時間": {
             "type": "float",
-            "value": 2.0999999046325684
+            "value": 1.0
         },
         "アニメーション名前": {
             "type": "string",
-            "value": "Attack09"
+            "value": "Attack02"
         },
         "アニメーション速度": {
             "type": "float",
-            "value": 5.070000171661377
+            "value": 2.9000000953674316
         },
         "アニメーション遷移時間": {
             "type": "float",
@@ -34,11 +34,11 @@
         },
         "エフェクト(トレイル)生存時間": {
             "type": "float",
-            "value": 0.21666663885116577
+            "value": 0.25
         },
         "エフェクト(トレイル)発生時間": {
             "type": "float",
-            "value": 0.5333333611488342
+            "value": 0.25
         },
         "コライダー(タグ)": {
             "enumType": "CollisionTag",
@@ -57,24 +57,20 @@
         },
         "コンボキャンセル受付終了時間": {
             "type": "float",
-            "value": 0.5
+            "value": 0.15000000596046448
         },
         "コンボキャンセル受付開始時間": {
             "type": "float",
-            "value": 0.10000000149011612
+            "value": 0.0
         },
         "コンボキャンセル可能": {
             "type": "bool",
             "value": true
         },
-        "コンボ中の移動スピード": {
-            "type": "float",
-            "value": 35.0099983215332
-        },
         "コンボ中の移動タイプ": {
             "enumType": "MoveType",
             "type": "enum",
-            "value": 2
+            "value": 1
         },
         "コンボ中の移動基準前方を水平化": {
             "type": "bool",
@@ -88,7 +84,7 @@
             "type": "Vector3",
             "value": [
                 0.0,
-                1.0,
+                0.0,
                 1.0
             ]
         },
@@ -102,7 +98,7 @@
         },
         "コンボ中の移動終了時間": {
             "type": "float",
-            "value": 0.15000000596046448
+            "value": 0.11666666716337204
         },
         "コンボ中の移動開始時間": {
             "type": "float",
@@ -114,15 +110,15 @@
         },
         "コンボ中の重力強度": {
             "type": "float",
-            "value": 1.059999942779541
+            "value": 1.0
         },
         "コンボ入力受付終了時間": {
             "type": "float",
-            "value": 1.1833332777023315
+            "value": 0.8999999761581421
         },
         "コンボ入力受付開始時間": {
             "type": "float",
-            "value": 0.3333333432674408
+            "value": 0.2666666805744171
         },
         "コンボ強制移行": {
             "type": "bool",
@@ -130,39 +126,39 @@
         },
         "コンボ移動キャンセル受付終了時間": {
             "type": "float",
-            "value": 1.2000000476837158
+            "value": 0.8999999761581421
         },
         "コンボ移動キャンセル受付開始時間": {
             "type": "float",
-            "value": 0.9833333492279053
+            "value": 0.6666666865348816
         },
         "コンボ移行時間": {
             "type": "float",
-            "value": 0.4166666567325592
+            "value": 0.5833333134651184
         },
         "コンボ終了時間": {
             "type": "float",
-            "value": 1.1833332777023315
+            "value": 0.8999999761581421
         },
         "コンボ開始時に重力速度リセット": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "ダウン持続時間": {
             "type": "float",
-            "value": 0.3199999928474426
+            "value": 0.0
         },
         "ダメージ": {
             "type": "float",
-            "value": 30.200000762939453
+            "value": 21.049999237060547
         },
         "ノックバック力": {
             "type": "float",
-            "value": 88.55999755859375
+            "value": 17.8799991607666
         },
         "ノックバック持続時間": {
             "type": "float",
-            "value": 0.1599999964237213
+            "value": 0.10999999940395355
         },
         "ヒットエフェクトスロット0": {
             "type": "string",
@@ -190,11 +186,11 @@
         },
         "ヒットエフェクト名前2": {
             "type": "string",
-            "value": "EmitterStarEmit"
+            "value": "EmitterRingHit"
         },
         "ヒットエフェクト名前3": {
             "type": "string",
-            "value": "EmitterRingHit"
+            "value": "EmitterStarEmit"
         },
         "ヒットエフェクト数": {
             "type": "int32_t",
@@ -202,27 +198,27 @@
         },
         "ヒットスタン持続時間": {
             "type": "float",
-            "value": 0.20999999344348907
+            "value": 0.10000000149011612
         },
         "ヒットボックスオフセット位置": {
             "type": "Vector3",
             "value": [
                 0.0,
-                0.0,
-                0.0
+                2.0,
+                1.0
             ]
         },
         "ヒットボックスコライダーサイズ": {
             "type": "Vector3",
             "value": [
-                1.0,
-                1.0,
-                1.0
+                2.0,
+                2.0,
+                2.0
             ]
         },
         "ヒットボックスコライダー半径": {
             "type": "float",
-            "value": 4.0
+            "value": 1.0
         },
         "ヒットボックスヒット記録を使用": {
             "type": "bool",
@@ -236,12 +232,12 @@
         "ヒットボックス依存先タイプ": {
             "enumType": "HitBoxParentType",
             "type": "enum",
-            "value": 2
+            "value": 0
         },
         "ヒットボックス形状タイプ": {
             "enumType": "HitBoxShapeType",
             "type": "enum",
-            "value": 2
+            "value": 0
         },
         "ヒットボックス影響タイプ": {
             "enumType": "HitBoxHitEffectType",
@@ -255,25 +251,25 @@
         },
         "ヒットボックス生存時間": {
             "type": "float",
-            "value": 0.1666666865348816
+            "value": 0.25
         },
         "ヒットボックス発生時間": {
             "type": "float",
-            "value": 0.75
+            "value": 0.25
         },
         "ヒットボックス発生条件タイプ": {
             "enumType": "HitBoxSpawnType",
             "type": "enum",
-            "value": 1
+            "value": 0
         },
         "ヒットリアクションタイプ": {
             "enumType": "HitReactionType",
             "type": "enum",
-            "value": 1
+            "value": 0
         },
         "ヒット重力": {
             "type": "bool",
-            "value": true
+            "value": false
         },
         "ヒット重力倍率": {
             "type": "float",
@@ -282,7 +278,7 @@
         "ロックオンタイプ": {
             "enumType": "LockOnType",
             "type": "enum",
-            "value": 0
+            "value": 1
         },
         "ロックオン半径": {
             "type": "float",
@@ -290,14 +286,14 @@
         },
         "打ち上げ持続時間": {
             "type": "float",
-            "value": 0.5299999713897705
+            "value": 0.0
         },
         "移動スピード": {
             "type": "Vector3",
             "value": [
                 0.0,
-                30.690000534057617,
-                4.28000020980835
+                0.0,
+                0.0
             ]
         },
         "移動方向とキャラクターの向く方向を一致させるか": {
@@ -307,11 +303,11 @@
         "終了条件タイプ": {
             "enumType": "EndConditionType",
             "type": "enum",
-            "value": 0
+            "value": 3
         },
         "親オブジェクト名前": {
             "type": "string",
-            "value": "Weapon"
+            "value": "Player"
         }
     }
 }

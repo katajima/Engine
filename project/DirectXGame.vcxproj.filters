@@ -261,9 +261,6 @@
     <ClCompile Include="DirectXGame\engine\Math\AStarAlgorithm.cpp">
       <Filter>ソース ファイル\engine\math</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp">
-      <Filter>ソース ファイル\engine\math</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\engine\Audio\Audio.cpp">
       <Filter>ソース ファイル\engine\audio</Filter>
     </ClCompile>
@@ -997,6 +994,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Effect\EffectEditor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

@@ -107,6 +107,8 @@ private:
 	float intervalMax_ = 1.0f;
 	Projectile::ProjectileParam param{};
 	Projectile::ProjectileSpawnInfo spawnInfo{};
+	Character::EnemyType enemyType = Character::EnemyType::kSmallMelee;
+	Vector3 enemyPos{};
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;

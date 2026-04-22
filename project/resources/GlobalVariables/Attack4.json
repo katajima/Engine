@@ -8,6 +8,18 @@
             "type": "float",
             "value": 30.0
         },
+        "アニメーションを一定時間で止めるか": {
+            "type": "bool",
+            "value": false
+        },
+        "アニメーションループ": {
+            "type": "bool",
+            "value": false
+        },
+        "アニメーション停止時間": {
+            "type": "float",
+            "value": 1.0
+        },
         "アニメーション名前": {
             "type": "string",
             "value": "Attack04"
@@ -51,6 +63,10 @@
             "type": "float",
             "value": 0.949999988079071
         },
+        "コンボキャンセル可能": {
+            "type": "bool",
+            "value": true
+        },
         "コンボ中の移動スピード": {
             "type": "float",
             "value": 25.850000381469727
@@ -60,7 +76,27 @@
             "type": "enum",
             "value": 1
         },
+        "コンボ中の移動基準前方を水平化": {
+            "type": "bool",
+            "value": true
+        },
         "コンボ中の移動強制": {
+            "type": "bool",
+            "value": true
+        },
+        "コンボ中の移動方向": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "コンボ中の移動方向を正規化してから使うか": {
+            "type": "bool",
+            "value": true
+        },
+        "コンボ中の移動毎フレーム方向を更新": {
             "type": "bool",
             "value": true
         },
@@ -88,6 +124,10 @@
             "type": "float",
             "value": 0.10000000149011612
         },
+        "コンボ強制移行": {
+            "type": "bool",
+            "value": false
+        },
         "コンボ移動キャンセル受付終了時間": {
             "type": "float",
             "value": 1.6166666746139526
@@ -103,6 +143,10 @@
         "コンボ終了時間": {
             "type": "float",
             "value": 1.1666666269302368
+        },
+        "コンボ開始時に重力速度リセット": {
+            "type": "bool",
+            "value": false
         },
         "ダウン持続時間": {
             "type": "float",
@@ -120,9 +164,41 @@
             "type": "float",
             "value": 0.10000000149011612
         },
+        "ヒットエフェクトスロット0": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクトスロット1": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクトスロット2": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクトスロット3": {
+            "type": "string",
+            "value": "NewEffect"
+        },
+        "ヒットエフェクト名前0": {
+            "type": "string",
+            "value": "EmitterHitEffect"
+        },
+        "ヒットエフェクト名前1": {
+            "type": "string",
+            "value": "EmitterHitEmit"
+        },
+        "ヒットエフェクト名前2": {
+            "type": "string",
+            "value": "EmitterRingHit"
+        },
+        "ヒットエフェクト名前3": {
+            "type": "string",
+            "value": "EmitterStarEmit"
+        },
         "ヒットエフェクト数": {
             "type": "int32_t",
-            "value": 0
+            "value": 4
         },
         "ヒットスタン持続時間": {
             "type": "float",
@@ -215,6 +291,18 @@
         "打ち上げ持続時間": {
             "type": "float",
             "value": 0.0
+        },
+        "移動スピード": {
+            "type": "Vector3",
+            "value": [
+                0.0,
+                0.0,
+                28.950000762939453
+            ]
+        },
+        "移動方向とキャラクターの向く方向を一致させるか": {
+            "type": "bool",
+            "value": true
         },
         "終了条件タイプ": {
             "enumType": "EndConditionType",

@@ -11,7 +11,7 @@ namespace Combo {
 		// 時間初期化 
 		timeInState = 0.0f;
 		// アニメーションの設定
-		comboData.GetComboMotion().GetComboAnimation().GetData().animationName_ = animation;
+		comboData.GetComboMotion().GetComboAnimation().GetData().animationName = animation;
 
 
 		comboData.GetComboMotion().GetComboMove().SetDirection(direction_);
@@ -87,11 +87,27 @@ namespace Combo {
 			// コンボ移行時間に達して次のステートへ移行するなら
 			if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
 				auto next = currentState->HandleInput(owner, *bufferedInput);
+				if (currentState->GetIsCompulsionNext()) {
+					next = currentState->HandleInput(owner, ActionInput::LightAttack);
+				}
+
 				// もし次のステートがあれば、遷移
 				if (next) {
 					SetState(next, ctx);
 				}
 				bufferedInput.reset();
+			}
+		}
+		else {// コンボ移行時間に達して次のステートへ移行するなら
+			if (currentState->GetNextStateTime() && currentState->GetIsNextState()) {
+				if (currentState->GetIsCompulsionNext()) {
+					auto next = currentState->HandleInput(owner, ActionInput::LightAttack);
+
+					// もし次のステートがあれば、遷移
+					if (next) {
+						SetState(next, ctx);
+					}
+				}
 			}
 		}
 	}

@@ -153,51 +153,6 @@ namespace Character {
 		// 
 		ReloadComboData();
 	}
-
-	void NormalPlayer::RequestAttack(AttackInput input) {
-		if (isSpecial) return;
-
-		const auto s = stateMachine_->GetCurrentMainState();
-		const bool canStart = (s == CharacterMainState::Move) ||
-			(s == CharacterMainState::Idle) ||
-			(s == CharacterMainState::Jump);
-		const bool isAttack = (s == CharacterMainState::Attack);
-
-		if (input == AttackInput::Skill) {
-			if (parameterComponent_->GetStamina() < 30) {
-				return;
-			}
-		}
-
-
-		auto* ac = GetAttackController();
-		ac->SetIsAttack(true);
-
-		if (isAttack) {
-			ac->GetComboSystem()->InputCombo(input);
-			return;
-		}
-
-		if (canStart) {
-			stateMachine_->ChangeState(CharacterMainState::Attack);
-			switch (input) {
-			case AttackInput::Light:
-				if (!moveComponent_->GetIsLanding()) {
-					ac->GetComboSystem()->StartCombo("JumpAttack");
-				}
-				else {
-					ac->GetComboSystem()->StartCombo("Attack1");
-				}
-				break;
-			case AttackInput::Skill:
-				ac->GetComboSystem()->StartCombo("SkillAttack01");
-				parameterComponent_->Stamina().Add(-30);
-				break;
-			default: break;
-			}
-		}
-	}
-
 	// ステート初期化and追加
 	void NormalPlayer::InitStateMachine() {
 		// ステートマシーン初期化
@@ -229,7 +184,6 @@ namespace Character {
 
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
-
 	// 更新
 	void NormalPlayer::Update()
 	{
@@ -308,10 +262,6 @@ namespace Character {
 
 	}
 
-#pragma region Draw
-
-	void NormalPlayer::DrawEffect() {}
-
 	void NormalPlayer::Draw2D() {
 		// UI表示
 		ui_->SetIsTextmax(special_->GetIsSpecial());
@@ -323,9 +273,6 @@ namespace Character {
 
 		ui_->Draw();
 	}
-
-
-#pragma endregion //描画関係
 
 #pragma region Move
 
@@ -344,7 +291,38 @@ namespace Character {
 
 #pragma region MyRegion
 
-	void NormalPlayer::ApplyGlobalVariables() {}
+	void NormalPlayer::RequestAttack(ActionInput input) {
+		AttackContext ctx{};
+		ctx.mainState = stateMachine_->GetCurrentMainState();
+		ctx.isLanding = moveComponent_->GetIsLanding();
+		ctx.isSpecial = isSpecial;
+		ctx.stamina = static_cast<int>(parameterComponent_->GetStamina());
+
+		const AttackDecision decision = AttackBranchResolver::Resolve(ctx, input);
+		if (!decision.accepted) {
+			return;
+		}
+
+		auto* ac = GetAttackController();
+		if (!ac) {
+			return;
+		}
+
+		if (decision.isComboInput) {
+			ac->GetComboSystem()->InputCombo(decision.comboInput);
+			return;
+		}
+
+		if (decision.shouldChangeToAttackState) {
+			ac->SetIsAttack(true);
+			stateMachine_->ChangeState(CharacterMainState::Attack);
+			ac->GetComboSystem()->StartCombo(decision.startComboName);
+
+			if (decision.staminaCost > 0) {
+				parameterComponent_->Stamina().Add(-decision.staminaCost);
+			}
+		}
+	}
 
 	void NormalPlayer::ReloadComboData() {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
@@ -375,24 +353,34 @@ namespace Character {
 		comboSystem->CreateCombo("Attack8");
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("Attack9");
+		
+		
 		// コンボ10のデータ送る
 		comboSystem->CreateCombo("Attack10");
+		// コンボ11のデータ送る
+		comboSystem->CreateCombo("Attack11");
+
 
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("SkillAttack01");
 
 		// コンボ連結設定
-		comboSystem->ConnectCombo("Attack1", AttackInput::Light, "Attack2"); // コンボ連結
-		comboSystem->ConnectCombo("Attack2", AttackInput::Light, "Attack3"); // コンボ連結
-		comboSystem->ConnectCombo("JumpAttack", AttackInput::Light, "Attack2"); // コンボ連結	
+		comboSystem->ConnectCombo("Attack1", ActionInput::LightAttack, "Attack2"); // コンボ連結
+		comboSystem->ConnectCombo("Attack2", ActionInput::LightAttack, "Attack3"); // コンボ連結
+		comboSystem->ConnectCombo("JumpAttack", ActionInput::LightAttack, "Attack2"); // コンボ連結	
 
-		comboSystem->ConnectCombo("Attack3", AttackInput::Light, "Attack4"); // コンボ連結
-		comboSystem->ConnectCombo("Attack4", AttackInput::Light, "Attack5"); // コンボ連結
-		comboSystem->ConnectCombo("Attack5", AttackInput::Light, "Attack6"); // コンボ連結
-		comboSystem->ConnectCombo("Attack6", AttackInput::Light, "Attack7"); // コンボ連結
+		comboSystem->ConnectCombo("Attack3", ActionInput::LightAttack, "Attack4"); // コンボ連結
+		comboSystem->ConnectCombo("Attack4", ActionInput::LightAttack, "Attack5"); // コンボ連結
+		comboSystem->ConnectCombo("Attack5", ActionInput::LightAttack, "Attack6"); // コンボ連結
+		comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // コンボ連結
 
-		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Skill, "SkillAttack01"); // コンボ連結
-		comboSystem->ConnectCombo("SkillAttack01", AttackInput::Light, "Attack6"); // コンボ連結
+		comboSystem->ConnectCombo("SkillAttack01", ActionInput::Skill, "SkillAttack01"); // コンボ連結
+		comboSystem->ConnectCombo("SkillAttack01", ActionInput::LightAttack, "Attack6"); // コンボ連結
+	
+	
+		comboSystem->ConnectCombo("Attack2", ActionInput::HeavyAttack, "Attack10"); // コンボ連結
+		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11"); // コンボ連結
+
 	}
 
 	void NormalPlayer::Reload() { ReloadComboData(); }

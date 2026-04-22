@@ -97,11 +97,11 @@ namespace Combo {
 		// ノード追加(データから生成)
 		void AddComboNode(const std::string& nodeName, const std::string& animationName, const ComboData& data);
 		// コンボ接続
-		void ConnectCombo(const std::string& from, AttackInput input, const std::string& to);
+		void ConnectCombo(const std::string& from, ActionInput input, const std::string& to);
 		// 最初のコンボ
 		void StartCombo(const std::string& name);
 		// インプット
-		void InputCombo(AttackInput input) {
+		void InputCombo(ActionInput input) {
 			comboStateMachine_->HandleInput(input);
 		}
 		// コンボが終了したか

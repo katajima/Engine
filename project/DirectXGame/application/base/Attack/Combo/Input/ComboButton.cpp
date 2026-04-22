@@ -17,21 +17,12 @@ void Combo::ComboSequence::RegisterCombo(const std::vector<ComboButton>& buttons
 /// </summary>
 bool Combo::ComboSequence::Update(const Character::CharacterContext& ctx) {
 	if (comboButtons_.empty()) return false;
-
-
-	// 次に押すべきボタン
-	const ComboButton& target = comboButtons_[currentIndex_];
-
 	// 入力判定
-	if (target.IsInput(*ctx.input)) {
-		currentIndex_++;
-		// 全て成功
-		if (currentIndex_ >= comboButtons_.size()) {
-			currentIndex_ = 0;
+	for (auto& bu : comboButtons_) {
+		if (bu.IsInput(*ctx.input)) {
 			return true;
 		}
 	}
-	currentIndex_ = 0;
 	return false;
 }
 

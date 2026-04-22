@@ -24,7 +24,7 @@ void EnemyBullet::Initialize(Engine::EntityManager* entityManager, Engine::Globa
 	auto sphere = std::make_unique<Engine::SphereCollider>();
 	sphere->tag = CollisionTag::EnemyAttack;		// タグ設定
 	sphere->layer = CollisionLayer::EnemyAttack;	// レイヤー設定
-	sphere->collisionMask = (1 << static_cast<uint32_t>(CollisionLayer::Player));// マスク設定
+	sphere->collisionMask = static_cast<uint32_t>(CollisionLayer::Player);// マスク設定
 	sphere->radius = provisionalData_.collRadius; // 半径を適宜設定
 	sphere->Enable();	// 判定有効
 	object_->GetColliderComponent()->AddCollider(std::move(sphere));	// コライダーコンポーネントにコライダ追加

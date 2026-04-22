@@ -19,7 +19,7 @@ namespace Combo {
 
     public:
         // 次のステートに遷移するかを判断する
-        virtual std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, AttackInput input) = 0;
+        virtual std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) = 0;
         // 入力受付時間の範囲チェック
         virtual bool IsInputAcceptable() = 0;
         // 次のステートえ移行受付する時間
@@ -28,6 +28,8 @@ namespace Combo {
         virtual bool GetEndStateTime() = 0;
         // 次のステートへ移行可能か
         virtual bool GetIsNextState() = 0;
+        // 次のステートへ強制移行するか
+        virtual bool GetIsCompulsionNext() = 0;
     public:
         // 時間
         float GetTimeInState() const { return timeInState; }
@@ -66,7 +68,7 @@ namespace Combo {
     public:
 
         // 入力があったら
-        std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, AttackInput input) override {
+        std::shared_ptr<State> HandleInput(Character::BaseCharacter* owner, ActionInput input) override {
             auto it = nextStates.find(input);
 
             if (it != nextStates.end()) {
@@ -77,7 +79,7 @@ namespace Combo {
         }
 
         // 次のステート
-        void SetNextState(AttackInput input, std::shared_ptr<NodeState> next) {
+        void SetNextState(ActionInput input, std::shared_ptr<NodeState> next) {
             nextStates[input] = next;
         }
 
@@ -101,10 +103,17 @@ namespace Combo {
         bool GetIsNextState() override {
             return comboData.GetComboCondition().GetNextReceiver().GetIsNext();
         };
+        // 次のステートへ強制移行するか
+        bool GetIsCompulsionNext() override {
+            return comboData.GetComboCondition().GetData().isCompulsionNext;
+        };
+
         // キャンセルするか
         bool GetIsCansel() {
             return comboData.GetComboCondition().GetCancelReceiver().GetIsCancel();
         }
+
+
         // コンボ名取得
         std::string GetName() const { return name; }
         // アニメーション名取得
@@ -125,7 +134,7 @@ namespace Combo {
         // コンボデータ
         ComboData comboData;
         // 次のステートマップ
-        std::map<AttackInput, std::weak_ptr<NodeState>> nextStates;
+        std::map<ActionInput, std::weak_ptr<NodeState>> nextStates;
     };
 
     /// <summary>
@@ -141,7 +150,7 @@ namespace Combo {
         void Update(const Character::CharacterContext& ctx);
 
         // 入力はバッファに保存のみ
-        void HandleInput(AttackInput input) {
+        void HandleInput(ActionInput input) {
             bufferedInput = input;
         }
         // リセット
@@ -172,7 +181,7 @@ namespace Combo {
         std::shared_ptr<State> currentState;   // 現在のステート
         std::shared_ptr<State> rootState;      // 初期ステート
 
-        std::optional<AttackInput> bufferedInput;   // 入力バッファ
+        std::optional<ActionInput> bufferedInput;   // 入力バッファ
         bool isDebug = false;
     };
 }

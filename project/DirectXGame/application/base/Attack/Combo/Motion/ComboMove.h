@@ -23,28 +23,6 @@ namespace Combo {
 
 	class ComboMove {
 	public:
-		// データ構造体
-		struct Data {
-			// 移動受付スタート
-			float moveWindowStart = 0.1f;		
-			// 移動受付エンド
-			float moveWindowEnd = 0.5f;			
-			// 移動速度
-			float speed = 0.0f;					
-			// 強制的に移動
-			bool isCompulsionMove = true;			
-			// 空中でのコンボで重力はあるか？
-			bool isGravity = true;					
-			// 重力スケール
-			float gravityScale = 1.0f;				
-			// ターゲットの距離でどこまで近づくか
-			float moveTargetRadius = 1.0f;
-			// 移動タイプ
-			MoveType moveType = MoveType::kTraget;	
-			// ロックオンデータ
-			LockOnData lockOnData;
-		};
-
 		// 開始
 		void Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx);
 
@@ -63,7 +41,7 @@ namespace Combo {
 			data_.moveWindowEnd = end;
 		};
 		// データ構造体取得
-		Data& GetData() { return data_; }
+		GlobalMove& GetData() { return data_; }
 		// 方向取得
 		Vector3 GetDirection() const { return direction_; }
 		// 方向指定
@@ -77,6 +55,8 @@ namespace Combo {
 		void GravityProcess();
 		// 移動タイプによる方向指定処理
 		void MoveTypeDirectionProcess();
+		// ローカル移動ベクトルを基準方向へ変換した最終方向を作る
+		Vector3 BuildMoveDirection() const;
 	private:
 		// 移動
 		MovementComponent* moveComponent = nullptr;
@@ -94,9 +74,11 @@ namespace Combo {
 		const Engine::Camera* camera = nullptr;
 	private:
 		// データ
-		Data data_;
+		GlobalMove data_;
 		// 方向
 		Vector3 direction_ = {};
+		// 最終移動方向
+		Vector3 moveDirection_ = {};
 		// 移動出来るか
 		bool isMove_ = true;
 	private:

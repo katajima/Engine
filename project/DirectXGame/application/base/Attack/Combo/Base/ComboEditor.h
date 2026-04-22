@@ -45,8 +45,6 @@ namespace Combo {
 		void ImGuiEndConditionType();
 		// 移動関係設定
 		void ImGuiMove();
-		// ロックオン関係
-		void ImGuiLockOn();
 		// リアクション設定
 		void ImGuiReaction();
 	private:

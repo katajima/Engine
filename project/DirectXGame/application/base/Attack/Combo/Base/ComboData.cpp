@@ -10,6 +10,7 @@ namespace Combo {
 		// 時間初期化
 		timer_ = 0.0f;
 		// コンボ用モーションクラス開始
+		motion.SetEndConditionType(comboCondition.GetData().endConditionType);
 		motion.Enter(owner, ctx);
 		// コンボ用条件クラス開始
 		comboCondition.Enter(owner);

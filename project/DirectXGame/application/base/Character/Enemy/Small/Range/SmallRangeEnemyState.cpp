@@ -101,6 +101,7 @@ namespace Character {
 			if (!character->GetAlive()) {
 				character->Delete();	// キャラクター削除
 				character->GetObjectComponent()->IsDelete();	// オブジェクトコンポーネント削除
+				character->GetObjectComponentShadow()->IsDelete();
 			}
 		}
 		else if (timer_ <= dieTimer_ / 2.0f) {
@@ -109,8 +110,10 @@ namespace Character {
 		else {
 			character->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);		// 重力無し
 			character->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character->GetTime(); // サイズを縮小
+		
 			if (character->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
 				character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
+				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = {};
 			}
 		}
 	}
@@ -125,10 +128,6 @@ namespace Character {
 #pragma endregion
 
 	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
-		if (character->GetHP() <= 0) {
-			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
-			return;
-		}
 		if (character->GetHitMotionSystem()->IsFinished()) {
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}

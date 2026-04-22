@@ -23,7 +23,10 @@ namespace Character {
 	{
 		character.HeavyAttack();
 	}
-
+	void SkillAttackCommand::Exec(Character::BaseCharacter& character)
+	{
+		character.SkillAttack();
+	}
 
 	ICommand* InputHander::HandleInput()
 	{
@@ -39,10 +42,5 @@ namespace Character {
 				return b.cmd.get();
 		}
 		return nullptr;
-	}
-
-	void SkillAttackCommand::Exec(Character::BaseCharacter& character)
-	{
-		character.SkillAttack();
 	}
 }

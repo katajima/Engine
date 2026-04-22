@@ -45,6 +45,8 @@ namespace Engine {
 		void SetStratAnimeTime() { animationTime = 0.0f; }
 		// アニメーション時間設定
 		void SetAnimationTime(float time) { animationTime = time; }
+		// アニメーション時間取得
+		float GetAnimationTime() const { return animationTime; }
 		// 終了時間に合わせる
 		void SetEndAnimeTime();
 		// 終了時間取得

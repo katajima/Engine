@@ -81,7 +81,6 @@ namespace Character {
 		float speed = character->GetMoveComponent()->GetMoveSystem()->GetAnimationSpeed();
 
 		anima->SetAnimationSpeed(speed);
-		//}
 	}
 
 	void PlayerStateMove::Exit()
@@ -175,15 +174,12 @@ namespace Character {
 
 #pragma region Attack
 
-	void PlayerStateAttack::Update(const CharacterContext& ctx) {
-	
-	}
+	void PlayerStateAttack::Update(const CharacterContext& ctx) {}
 
 	void PlayerStateAttack::Exit()
 	{
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		// 武器
-		character->GetAttackController()->GetComboSystem()->GetComboStateMachine()->HandleInput(AttackInput::Light); // 弱攻撃
 		character->GetWeapon()->GetObject3D()->SetIsDraw(false);// 武器描画しない
 
 		// アニメーション

@@ -265,17 +265,24 @@ void CharacterDebugScene::UpdateImGui() {
 	ImGui::Begin("Debug");
 	ImGui::InputInt("playerID", &GetSceneData().playerID);
 
-	Vector2 inputPos = input_->GetGamePadLeftStick();
-	ImGui::InputFloat2("Input", &inputPos.x);
-	if (ImGui::Button("lockOn")) {
-		cameraManager_->SetUseCamera("fixedCamera", 0.3f);
-	}
-	if (ImGui::Button("noLockOn")) {
-		cameraManager_->SetUseCamera("followCamera", 0.3f);
+	static const char* EnemyTypeLabels[] = {
+				"小型近距離",
+				"小型遠距離",
+				"中型近距離",
+				"ダミー"
+	};
+	Engine::ImGuiManager::Select("敵種類", EnemyTypeLabels, enemyType);
+	ImGui::DragFloat3("敵出現位置",&enemyPos.x,0.1f);
+	if (ImGui::Button("敵出現")) {
+		characterManager_->CreateCharacter(enemyType, "enemy", 0, { {1,1,1},{},enemyPos });
 	}
 
+	Vector2 inputPos = input_->GetGamePadLeftStick();
+	ImGui::InputFloat2("Input", &inputPos.x);
 	
-	ImGui::DragFloat("BulletGravityScale", &param.gravityScale,0.01f);
+
+	
+	/*ImGui::DragFloat("BulletGravityScale", &param.gravityScale,0.01f);
 	ImGui::DragFloat("BulletMaxLifeTime", &param.maxLifeTime, 0.1f);
 	ImGui::DragFloat("BulletSpeed", &param.speed, 0.1f);
 	ImGui::DragFloat("BulletRadius", &param.radius, 0.1f);
@@ -287,7 +294,7 @@ void CharacterDebugScene::UpdateImGui() {
 	ImGui::Checkbox("Homing", &param.enableHoming);
 	ImGui::DragFloat("homingRange", &param.homingRange, 0.1f);
 	ImGui::DragFloat("homingStrength", &param.homingStrength, 0.1f);
-	ImGui::DragFloat("BulletDamage", &param.damage, 0.1f);
+	ImGui::DragFloat("BulletDamage", &param.damage, 0.1f);*/
 	ImGui::End();
 
 

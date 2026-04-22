@@ -5,27 +5,17 @@ namespace Combo {
 
 	class EndCondition {
 	public:
-		// 終了条件データ
-		struct Data {
-			float stateTime = 0.5f;				// 終了時間
-			EndConditionType type = EndConditionType::kOnTimer;	// 終了条件タイプ
-			ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
-		};
-
-
 		// 開始
-		void Enter();
+		void Enter(const GlobalCondition& data);
 		//　終了
 		void Exit();
 		// 更新
-		void Update(const Character::CharacterContext& ctx,float time);
+		void Update(const Character::CharacterContext& ctx, const GlobalCondition& data,float time);
 	public:
-		//
-		Data& GetData() { return data_; }
 		//
 		float GetComboEndTime() const { return endTime_; }
 	private:
-		Data data_;
+		ComboButton button_ = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);			// コンボボタン
 
 		float endTime_ = 0.0f;				// コンボ終了時間
 		bool isPress_ = false;

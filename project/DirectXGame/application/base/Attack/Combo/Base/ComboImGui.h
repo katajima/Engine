@@ -12,8 +12,7 @@ namespace Combo {
 			int& currentFrame, int& firstFrame, int& maxFrame);
 
 		// アニメーション設定と表示
-		static void ApplyAnimationToState(const std::string& name, std::string& animationName,int currentFrame,
-			float& animationSpeed,float& animationBlendTime,const std::map<std::string, Engine::Animation>& animations,
+		static void ApplyAnimationToState(const std::string& name, int& currentFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
 			Engine::AnimationComponent* animation,const std::string& nowAnimationName);
 	public: // シーケンサー
 		// シーケンサー設定と表示

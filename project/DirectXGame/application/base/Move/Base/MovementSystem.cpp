@@ -27,6 +27,10 @@ void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCo
 }
 
 
+void MovementSystem::ResetGravityVelocity()
+{
+}
+
 void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 
 	if (!useGravity) {

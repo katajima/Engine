@@ -26,6 +26,8 @@ public:
 	Vector3 GetDirection() const { return direction_;}
 	// ジャンプの処理を使うか設定
 	void SetUseGravity(bool isUse) { useGravity = isUse; }
+	// 重力速度リセット
+	void ResetGravityVelocity();
 private:
 	// 重力処理
 	void GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);

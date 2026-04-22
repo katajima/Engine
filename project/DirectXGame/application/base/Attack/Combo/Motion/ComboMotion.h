@@ -16,6 +16,9 @@ namespace Combo {
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
 	public:
+		// 終了条件設定
+		void SetEndConditionType(EndConditionType type) { endType = type; }
+
 		// コンボ用アニメーションクラス取得
 		ComboAnimation& GetComboAnimation() { return comboAnimation_; }
 		// コンボ用移動クラス取得
@@ -25,5 +28,7 @@ namespace Combo {
 		ComboAnimation comboAnimation_;
 		// コンボ用移動クラス
 		ComboMove comboMove_;
+		// 終了条件
+		EndConditionType endType = EndConditionType::kOnTimer;
 	};
 }

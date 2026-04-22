@@ -29,7 +29,7 @@ namespace Character {
 		/// <summary>
 		/// エフェクトの描画
 		/// </summary>
-		void DrawEffect() override;
+		void DrawEffect() override {};
 
 		/// <summary>
 		/// 描画2d
@@ -43,13 +43,13 @@ namespace Character {
 		void Jump() override;
 
 		// 攻撃(弱攻撃)
-		void Attack() override { RequestAttack(AttackInput::Light); };
+		void Attack() override { RequestAttack(ActionInput::LightAttack); };
 
 		/// 攻撃(強攻撃)
-		void HeavyAttack() override { RequestAttack(AttackInput::Heavy); };
+		void HeavyAttack() override { RequestAttack(ActionInput::HeavyAttack); };
 
 		// 攻撃(スキル)
-		void SkillAttack() override { RequestAttack(AttackInput::Skill); };
+		void SkillAttack() override { RequestAttack(ActionInput::Skill); };
 
 		// リロード
 		void Reload() override;
@@ -63,14 +63,14 @@ namespace Character {
 		void InitAttack();
 
 		// 攻撃要求
-		void RequestAttack(AttackInput input);
+		void RequestAttack(ActionInput input);
 
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
 
 		// 調整項目の適用
-		void ApplyGlobalVariables();
+		void ApplyGlobalVariables() {};
 	private:
 		std::unique_ptr<PlayerUI> ui_;			// プレイヤー用UI
 

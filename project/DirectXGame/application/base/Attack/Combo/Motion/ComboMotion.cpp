@@ -10,6 +10,7 @@ namespace Combo {
 	// 開始
 	void ComboMotion::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		// コンボ用アニメーションクラス
+		comboAnimation_.SetEndConditionType(endType);
 		comboAnimation_.Enter(owner);
 		// 移動クラス
 		comboMove_.Enter(owner, ctx);
