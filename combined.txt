@@ -122,8 +122,17 @@
     └── └── └── └── └── ├── BaseFixedCamera.h
     └── └── └── └── └── ├── BaseFollowCamera.h
     └── └── └── └── └── ├── BaseRailCamera.h
+    └── └── └── └── └── ├── CameraController.cpp
+    └── └── └── └── └── ├── CameraController.h
+    └── └── └── └── └── ├── CameraFollow.cpp
+    └── └── └── └── └── ├── CameraFollow.h
+    └── └── └── └── └── ├── CameraLag.h
+    └── └── └── └── └── ├── CameraLockOn.h
     └── └── └── └── └── ├── CameraManeger.cpp
-    └── └── └── └── └── └── CameraManeger.h
+    └── └── └── └── └── ├── CameraManeger.h
+    └── └── └── └── └── ├── CameraRotation.cpp
+    └── └── └── └── └── ├── CameraRotation.h
+    └── └── └── └── └── └── CameraShake.h
     └── └── └── └── ├── FixedCamera/
     └── └── └── └── └── ├── FixedCamera.cpp
     └── └── └── └── └── ├── FixedCamera.h
@@ -467,6 +476,7 @@
     └──     └── ├── Camera.h
     └──     └── ├── CameraCommon.cpp
     └──     └── ├── CameraCommon.h
+    └──     └── ├── CameraData.h
     └──     └── ├── DebugCamera.cpp
     └──     └── └── DebugCamera.h
     └──     ├── Collider/
@@ -2518,11 +2528,12 @@ namespace Combo {
 			"特殊ケース",
 			};
 			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
+
+
+			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
+			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
+			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
 		}
-
-		ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
-		ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
-
 	}
 
 	void EditorBlock::ImGuiMove() {
@@ -2819,16 +2830,16 @@ namespace Combo {
 
 			// 移動時間
 			data.move = comboEditorBlocks_[it.first].GetData().move;
-			data.move.moveWindowStart = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
-			data.move.moveWindowEnd = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
+			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
 		
 			
 			// アニメーションスピード
 			data.animation = comboEditorBlocks_[it.first].GetData().animation;
 		
 			// エフェクト
-			data.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
-			data.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.trailEffectStartTime;
+			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
+			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 
 		
 			
@@ -3039,20 +3050,24 @@ namespace Combo {
 	};
 
 	// コンボタイプ
-	enum class Type{
+	enum class Type {
 		kNone,		// なし
 		kMelle,		// 近距離
 		kRange,		// 遠距離
 		kMix,		// 合わせ
 	};
-
+	// 時間
+	struct StateTime {
+		// 入力受付時間
+		float startTime = 0.1f;
+		// 入力終了時間
+		float endTime = 0.5f;
+	};
 
 	// 保存項目移動データ
 	struct GlobalMove {
-		// 移動受付スタート
-		float moveWindowStart = 0.1f;
-		// 移動受付エンド
-		float moveWindowEnd = 0.5f;
+		// 受付時間
+		StateTime moveWindow{};
 		// 移動速度（軸ごと）
 		// X=Right Y=Up Z=Forward
 		Vector3 moveSpeed = { 0.0f, 0.0f, 0.0f };
@@ -3091,11 +3106,11 @@ namespace Combo {
 		// 移動方向とキャラクターの向く方向を一致させるか？
 		bool alignCharacterToMovement = true;
 
+		// ターゲット方向を向くか
+		bool isTargetDirection = false;
+
 		// 移動タイプ
 		MoveType moveType = MoveType::kTraget;
-		
-
-
 		// ロックオンタイプ
 		LockOnData lockOnData{};
 	};
@@ -3103,28 +3118,20 @@ namespace Combo {
 	// 保存項目アニメーション
 	struct GlobalAnimation {
 		// アニメーション名
-		std::string animationName = "";	
+		std::string animationName = "";
 		// アニメーションスピード
-		float animationSpeed = 1.0f;		
+		float animationSpeed = 1.0f;
 		// アニメーションブレンド時間
-		float animationBlendTime = 0.1f;	
+		float animationBlendTime = 0.1f;
 		// アニメーションループ
-		bool animationLoop = false;	
+		bool animationLoop = false;
 		// アニメーションを一定の場所で止めるか？
 		bool animationStop = false;
 		// アニメーションの止めるタイミング
 		float animationStopTime = 1.0f;
 	};
 
-	// 時間
-	struct StateTime {
-		// 入力受付時間
-		float startTime = 0.1f;	
-		// 入力終了時間
-		float endTime = 0.5f;		
-	};
-
-	// 条件クラス
+	// 保存項目条件データ
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
@@ -3133,24 +3140,49 @@ namespace Combo {
 		// 移動キャンセル受付
 		StateTime stateMoveCancel{};
 		// キャンセル可能か
-		bool isCancel = true;		
+		bool isCancel = true;
 		// キャンセル可能かどうか(スティック移動での)
 		bool isMoveCancel = true;
-
 		// ステート終了時間
-		float stateEndTime = 0.5f;			
+		float stateEndTime = 0.5f;
 		// ステート移行時間
-		float stateNextTime = 0.45f;		
+		float stateNextTime = 0.45f;
 		// 強制的に次のコンボに移行するか 
-		bool isCompulsionNext = false;		
+		bool isCompulsionNext = false;
 		///	終了条件 ///
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
+	};
+
+	// 保存項目用カメラデータ
+	struct GlobalCamera {
+		// 使用カメラ
+		std::string cameraName = "no";
+		// 元のキャラクターに使用しているカメラ名
+		std::string baseCameraName = "no";
+		// カメラを変更するか
+		bool isChangeCamera = false;
+		// 移動補間
+		float interpolation = 0.0f;
+		// 
+		float shakeCameraPower;
+		//
+		float shakeCameraTime;
+		// 
+		float zoomCameraAmount;
+	};
+
+	// 保存項目エフェクトデータ
+	struct GloblEffectData {
+		// トレイル発生時間
+		float trailEffectStartTime = 0.1f;
+		// トレイル生存時間
+		float trailEffectLifeTime = 1.0;
 	};
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
 		// 攻撃タイプ
-		Type type = Type::kMelle;	
+		Type type = Type::kMelle;
 		// 敵に送るリアクションデータ
 		HitReactionData hitReaction{};
 		// ヒットボックス関係
@@ -3161,10 +3193,8 @@ namespace Combo {
 		GlobalAnimation animation{};
 		// 条件
 		GlobalCondition condition{};
-		
-
-		float trailEffectStartTime = 0.1f;	// トレイル発生時間
-		float trailEffectLifeTime = 1.0;	// トレイル生存時間
+		// エフェクト
+		GloblEffectData effect{};
 	};
 };
 
@@ -3293,12 +3323,12 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
 
 	// 移動時間
-	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart;
-	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd;
+	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.startTime;
+	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.endTime;
 
 	// トレイルエフェクト
-	float trailStart = comboData.GetComboEffect().GetData().startTmer;
-	float trailEnd = trailStart + comboData.GetComboEffect().GetData().lifeTime;
+	float trailStart = comboData.GetComboEffect().GetData().trailEffectStartTime;
+	float trailEnd = trailStart + comboData.GetComboEffect().GetData().trailEffectLifeTime;
 
 	AddSequencerEvent(sequence,inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
 	AddSequencerEvent(sequence,cancelStart, cancelEnd, 0xFFFFFF00, "キャンセル可能時間");
@@ -3865,27 +3895,25 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
-		globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
-		globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
-
+		// エフェクト
+		{
+			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
+			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+		}
 		// 条件
 		{
 			globalVariables->AddItem(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
 			globalVariables->AddItem(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
 			globalVariables->AddItem(name, "コンボ終了時間", data.condition.stateEndTime);
 			globalVariables->AddItem(name, "コンボ移行時間", data.condition.stateNextTime);
-
-
 			globalVariables->AddItem(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
 			globalVariables->AddItem(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
 			globalVariables->AddItem(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
 			globalVariables->AddItem(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);
-
-
-
 			globalVariables->AddEnumItem(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
 			globalVariables->AddItem(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->AddItem(name, "コンボキャンセル可能", data.condition.isCancel);
+			globalVariables->AddItem(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
 		}
 		// アニメーション
 		{
@@ -3903,8 +3931,8 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->AddItem(name, "移動スピード", data.move.moveSpeed);
-			globalVariables->AddItem(name, "コンボ中の移動開始時間", data.move.moveWindowStart);
-			globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindowEnd);
+			globalVariables->AddItem(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
+			globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
 			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.radius);
@@ -3968,32 +3996,26 @@ namespace Combo {
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
 		
+		// エフェクト
+		{
+			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
+			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
+		}
 		// 条件
 		{
 			data.condition.stateInput.startTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
 			data.condition.stateInput.endTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
 			data.condition.stateEndTime = globalVariables->GetValue<float>(name, "コンボ終了時間");
 			data.condition.stateNextTime = globalVariables->GetValue<float>(name, "コンボ移行時間");
-
-
-
 			data.condition.stateCancel.startTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付開始時間");
 			data.condition.stateCancel.endTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付終了時間");
-
 			data.condition.stateMoveCancel.startTime = globalVariables->GetValue<float>(name, "コンボ移動キャンセル受付開始時間");
 			data.condition.stateMoveCancel.endTime = globalVariables->GetValue<float>(name, "コンボ移動キャンセル受付終了時間");
-
 			data.condition.endConditionType = globalVariables->GetEnumValue<Combo::EndConditionType>(name, "終了条件タイプ");
 			data.condition.isCompulsionNext = globalVariables->GetValue<bool>(name, "コンボ強制移行");
 			data.condition.isCancel = globalVariables->GetValue<bool>(name, "コンボキャンセル可能");
+			data.condition.isMoveCancel = globalVariables->GetValue<bool>(name, "コンボ移動キャンセル可能");
 		}
-
-
-		data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
-		data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
-
-
-
 		// アニメーション
 		{
 			data.animation.animationName = globalVariables->GetValue<std::string>(name, "アニメーション名前");
@@ -4010,8 +4032,8 @@ namespace Combo {
 			data.move.isResetGravity = globalVariables->GetValue<bool>(name, "コンボ開始時に重力速度リセット");
 
 			data.move.moveSpeed = globalVariables->GetValue<Vector3>(name, "移動スピード");
-			data.move.moveWindowStart = globalVariables->GetValue<float>(name, "コンボ中の移動開始時間");
-			data.move.moveWindowEnd = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
+			data.move.moveWindow.startTime = globalVariables->GetValue<float>(name, "コンボ中の移動開始時間");
+			data.move.moveWindow.endTime = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
 			data.move.isCompulsionMove = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
 			data.move.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
 			data.move.lockOnData.radius = globalVariables->GetValue<float>(name, "ロックオン半径");
@@ -4074,27 +4096,27 @@ namespace Combo {
 	}
 
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
-		globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
-		globalVariables->SetValue(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
-
-
-		globalVariables->SetValue(name, "コンボ終了時間", data.condition.stateEndTime);
-		globalVariables->SetValue(name, "コンボ移行時間", data.condition.stateNextTime);
-
-		globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
-		globalVariables->SetValue(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
-		globalVariables->SetValue(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
-		globalVariables->SetValue(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);
-
-
-		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
-		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
-
-		globalVariables->SetEnumValue(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
-		globalVariables->SetValue(name, "コンボ強制移行", data.condition.isCompulsionNext);
-		globalVariables->SetValue(name, "コンボキャンセル可能", data.condition.isCancel);
-
-
+		
+		// エフェクト
+		{
+			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
+			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+		}
+		// 条件
+		{
+			globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
+			globalVariables->SetValue(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
+			globalVariables->SetValue(name, "コンボ終了時間", data.condition.stateEndTime);
+			globalVariables->SetValue(name, "コンボ移行時間", data.condition.stateNextTime);
+			globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
+			globalVariables->SetValue(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
+			globalVariables->SetValue(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
+			globalVariables->SetValue(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);	
+			globalVariables->SetEnumValue(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
+			globalVariables->SetValue(name, "コンボ強制移行", data.condition.isCompulsionNext);
+			globalVariables->SetValue(name, "コンボキャンセル可能", data.condition.isCancel);
+			globalVariables->SetValue(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
+		}
 		// アニメーション
 		{
 			globalVariables->SetValue(name, "アニメーション名前", data.animation.animationName);
@@ -4108,8 +4130,8 @@ namespace Combo {
 		}
 		// 移動
 		{
-			globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindowStart);
-			globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindowEnd);
+			globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
+			globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->SetValue(name, "移動スピード", data.move.moveSpeed);
 			globalVariables->SetValue(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->SetValue(name, "コンボ中の重力", data.move.isGravity);
@@ -4192,6 +4214,10 @@ namespace Combo {
 		data.GetComboMotion().GetComboAnimation().GetData() = gData.animation;
 		// 条件
 		data.GetComboCondition().GetData() = gData.condition;
+		// エフェクト
+		data.GetComboEffect().GetData() = gData.effect;
+
+
 		// コンボボタン設定
 		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		ComboButton bo2 = ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed);
@@ -4200,11 +4226,6 @@ namespace Combo {
 		button.push_back(bo);
 		button.push_back(bo2);
 		data.GetComboCondition().GetNextReceiver().SetButton(button);
-
-
-		// トレイルエフェクト
-		data.GetComboEffect().GetData().startTmer = gData.trailEffectStartTime;
-		data.GetComboEffect().GetData().lifeTime = gData.trailEffectLifeTime;
 	}
 
 	void System::CreateCombo(const std::string& comboNodeName) {
@@ -4452,7 +4473,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
-
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 
 class CameraManager;		// カメラ
 namespace Character {
@@ -4500,14 +4521,6 @@ namespace Combo {
 	/// </summary>
 	class ComboEffect {
 	public:
-		struct Data {
-			// 開始時間
-			float startTmer = 0.1f;
-			// 生存時間
-			float lifeTime = 0.5f;
-		};
-
-
 		// 開始
 		void Enter(Character::BaseCharacter* owner);
 
@@ -4519,15 +4532,12 @@ namespace Combo {
 
 		// トレイルするか
 		bool IsEffectTrail(float timer) const {
-			return data_.startTmer <= timer && timer <= (data_.lifeTime + data_.startTmer);
+			return data_.trailEffectStartTime <= timer && 
+				timer <= (data_.trailEffectLifeTime + data_.trailEffectStartTime);
 		}
-
-
-		// データ取得
-		Data& GetData() { return data_; }
-
+		GloblEffectData& GetData() { return data_; }
 	private:
-		Data data_;
+		GloblEffectData data_;
 
 
 		BaseWeapon* weapon = nullptr;
@@ -5230,8 +5240,8 @@ namespace Combo {
 	}
 
 	void ComboMove::MoveTypeProcess(float timer, float dt) {
-		bool isStart = data_.moveWindowStart <= timer;		// 受付開始時間を過ぎたら
-		bool isEnd = data_.moveWindowEnd >= timer;			// 受付終了時間より前なら
+		bool isStart = data_.moveWindow.startTime <= timer;		// 受付開始時間を過ぎたら
+		bool isEnd = data_.moveWindow.endTime >= timer;			// 受付終了時間より前なら
 
 		if (isMove_ && isStart && isEnd) {
 			MoveRequest request{};
@@ -5414,11 +5424,6 @@ namespace Combo {
 	public:
 		// 移動できるか
 		bool IsMove() const { return isMove_; }
-		// 移動可能時間設定
-		void MoveStartEnd(float start, float end) {
-			data_.moveWindowStart = start;
-			data_.moveWindowEnd = end;
-		};
 		// データ構造体取得
 		GlobalMove& GetData() { return data_; }
 		// 方向取得
@@ -5744,13 +5749,13 @@ namespace Combo {
 		// データ取得
 		GlobalCondition& GetData() { return data_; }
 		// コンボ移行受付クラス取得
-		NextReceiver& GetNextReceiver() { return nextRecever_; }
+		NextReceiver GetNextReceiver() const { return nextRecever_; }
 		// コンボキャンセル受付クラス取得
-		CancelReceiver& GetCancelReceiver() { return cancelReceiver_;}
+		CancelReceiver GetCancelReceiver() const { return cancelReceiver_;}
 		// コンボ終了条件クラス取得
-		EndCondition& GetEndCondition() { return endCondition_; }
+		EndCondition GetEndCondition() const { return endCondition_; }
 		// コンボ移行条件クラス取得
-		NextCondition& GetNextCondition() { return nextCondition_; }
+		NextCondition GetNextCondition() const { return nextCondition_; }
 	private:
 		GlobalCondition data_{};
 
@@ -10160,16 +10165,7 @@ File Path: project/DirectXGame/application/base/Camera/Base/BaseCamera.h
 ============================================================
 #pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
-
-
-// カメラの各速度
-struct CameraSRTSpeed
-{
-	float scale = 0.0f;
-	Vector3 rotate = {};
-	float translate = 0.0f;
-};
-
+#include "CameraController.h"
 
 // 前方宣言
 class CameraManager;
@@ -10234,8 +10230,7 @@ protected:
 	
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	std::string name_;
-
-	CameraSRTSpeed srtSpeed_;				// SRTスピード
+protected:
 	Engine::Object3d* lockOnObject = nullptr;		// ロックオン対象
 	CameraManager* cameraManeger = nullptr;	// カメラ管理
 protected:
@@ -10344,6 +10339,144 @@ protected:
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraController.cpp
+============================================================
+#include "CameraController.h"
+
+void CameraController::Initialize(Engine::Camera* camera, const InputSystem* input) {
+	this->camera = camera;
+	this->input = input;
+
+	// 追従
+	follow = std::make_unique<CameraFollow>();
+	// 回転
+	rotation = std::make_unique<CameraRotation>();
+	// ロックオン
+	lockOn = std::make_unique<CameraLockOn>();
+	// 
+
+}
+
+
+void CameraController::Update(float dt) {
+	Transform transform = camera->GetTransform();
+
+
+	follow->Update(dt);
+
+
+
+	camera->SetTransform(transform);
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraController.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/Camera/Base/CameraFollow.h"
+#include "DirectXGame/application/base/Camera/Base/CameraLag.h"
+#include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"
+#include "DirectXGame/application/base/Camera/Base/CameraRotation.h"
+#include "DirectXGame/application/base/Camera/Base/CameraShake.h"
+
+
+// カメラ統括クラス
+class CameraController {
+public:
+
+	// 初期化
+	void Initialize(Engine::Camera* camera,const InputSystem* input);
+
+	// 更新
+	void Update(float dt);
+
+	// ロックオンターゲット設定
+	void SetLockOnTraget(const Engine::WorldTransform* target) { this->lockOnTarget = target; };
+	// ターゲット設定
+	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+
+
+private:
+	// 追従
+	std::unique_ptr<CameraFollow> follow = nullptr;
+	// 回転
+	std::unique_ptr<CameraRotation> rotation = nullptr;
+	// ロックオン
+	std::unique_ptr<CameraLockOn> lockOn = nullptr;
+private:
+	const InputSystem* input = nullptr;
+	Engine::Camera* camera = nullptr;
+	const Engine::WorldTransform* target = nullptr;
+	const Engine::WorldTransform* lockOnTarget = nullptr;
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.cpp
+============================================================
+#include "CameraFollow.h"
+
+Vector3 CameraFollow::Update(float dt) {
+	Vector3 result{};
+
+
+	return result;
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+// カメラ追従
+class CameraFollow {
+public:
+
+	// 更新
+	Vector3 Update(float dt);
+
+private:
+	// データ
+	CameraFollowData data;
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraLag.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+
+class CameraLag {
+public:
+
+	Vector3 Update(float dt);
+
+private:
+	CameraLagData data;
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraLockOn.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+
+// ロックオン
+class CameraLockOn {
+public:
+	// 更新
+	Vector3 Update(float dt);
+
+private:
+	CameraLockOnData data;
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraManeger.cpp
 ============================================================
 #include "CameraManeger.h"
@@ -10359,8 +10492,8 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	// カメラ初期化
 	camera = std::make_unique <Engine::Camera>();
 	camera->Initialize(entityManager->GetCameraCommon());
-	camera->transform_.rotate = { 0.36f,0,0 };			// 回転指定
-	camera->transform_.translate = { 5,32.5f,-59.2f };	// 位置指定
+	camera->SetRotate({ 0.36f,0,0 });			// 回転指定
+	camera->SetTranslate({ 5,32.5f,-59.2f });	// 位置指定
 	camera->SetFarClip(10000.0f);						// farZを10000に
 	isGameCamera = true;								// ゲームに使用する
 
@@ -10390,8 +10523,8 @@ void CameraManager::Update()
 			float t = std::clamp(currentTime / interpolationTime, 0.0f, 1.0f);
 
 			// 位置と回転を補間
-			camera->transform_.translate = Lerp(startTransform.translate, targetTransform.translate, t);
-			camera->transform_.rotate = QuaternionToEuler(Slerp(startTransform.rotate, targetTransform.rotate, t));
+			camera->SetTranslate(Lerp(startTransform.translate, targetTransform.translate, t));
+			camera->SetRotate(QuaternionToEuler(Slerp(startTransform.rotate, targetTransform.rotate, t)));
 			camera->UpdateMatrix();
 
 			if (t >= 1.0f) {
@@ -10402,7 +10535,7 @@ void CameraManager::Update()
 			// 使っているカメラを更新
 			for (auto& cam : cameras) {
 				if (cam.second->GetUseCamera()) {
-					camera->transform_ = cam.second->GetUniqueCamera()->GetTransform();
+					camera->SetTransform(cam.second->GetUniqueCamera()->GetTransform());
 					camera->UpdateMatrix();
 				}
 			}
@@ -10418,16 +10551,14 @@ void CameraManager::Update()
 	camera->UpdateMatrix();
 }
 
-void CameraManager::AddCamera(CameraInfo camera, std::string name)
-{
+void CameraManager::AddCamera(CameraInfo camera, std::string name) {
 	// カメラ管理クラスを渡す
 	camera.camera->SetCameraManeger(this);
 	camera.camera->SetUseCamera(camera.useCamera);	// 使っているか
 	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
 }
 
-void CameraManager::SetUseCamera(std::string name, float time)
-{
+void CameraManager::SetUseCamera(std::string name, float time) {
 
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
@@ -10443,7 +10574,7 @@ void CameraManager::SetUseCamera(std::string name, float time)
 		if (time <= 0.0f) {
 			// 即時切り替え
 			isInterpolating = false;
-			camera->transform_ = it->second->GetUniqueCamera()->GetTransform();
+			camera->SetTransform(it->second->GetUniqueCamera()->GetTransform());
 			camera->UpdateMatrix();
 		}
 		else {
@@ -10453,49 +10584,32 @@ void CameraManager::SetUseCamera(std::string name, float time)
 			interpolationTime = time;
 
 			// 初期トランスフォーム計算
-			startTransform.translate = camera->transform_.translate;
-			startTransform.rotate = MakeQuaternionFromEuler(camera->transform_.rotate);
-			startTransform.translate = camera->transform_.translate;
-
+			startTransform.translate = camera->GetTranslate();
+			startTransform.rotate = MakeQuaternionFromEuler(camera->GetRotate());
+			
 			// ターゲットトランスフォーム計算
 			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
 			targetTransform.rotate = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
-			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
-
+			
 		}
 	}
 }
 
-void CameraManager::UpadateImGui()
-{
+void CameraManager::UpadateImGui() {
 
 #ifdef _DEBUG
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("CameraManeger")) {
-		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);	// 位置
-		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);		// 回転
+		Vector3 translate = camera->GetTranslate();
+		ImGui::DragFloat3("Translate", &translate.x, 0.1f);	// 位置
+		camera->SetTranslate(translate);
+		Vector3 rotate = camera->GetRotate();
+		ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);		// 回転
+		camera->SetRotate(rotate);
 		ImGui::Checkbox("isGameCamera", &isGameCamera);							// カメラを使用するか
 		bool isPro = camera->GetIsProjection();									// プロジェクション設定
 		ImGui::Checkbox("isProjection", &isPro);
 		camera->SetIsProjection(isPro);
-		if (ImGui::Button("cameraPos")) {	// 位置回転
-			camera->transform_.translate = { 0,20,-175 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos2")) {	// 位置回転
-			camera->transform_.translate = { -30,10,-140 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos3")) {	// 位置回転
-			camera->transform_.translate = { 0,500,0 };
-			camera->transform_.rotate = { Math::DegreesToRadians(90),0,0 };
-		}
-		if (ImGui::Button("cameraPos4")) {	// 位置回転
-			camera->transform_.translate = { 0,60,-220 };
-			camera->transform_.rotate = { Math::DegreesToRadians(10),0,0 };
-		}
-
-
 	}
 	ImGui::End();
 
@@ -10508,9 +10622,13 @@ void CameraManager::UpadateImGui()
 		// 各カメラのSRT設定
 		for (auto& cameraData : cameras) {
 			if (ImGui::TreeNode(cameraData.first.c_str())) {
-				ImGui::DragFloat3("Translate", &cameraData.second->GetUniqueCamera()->transform_.translate.x, 0.1f);
-				ImGui::DragFloat3("Rotate", &cameraData.second->GetUniqueCamera()->transform_.rotate.x, 0.01f);
-				ImGui::DragFloat3("Scale", &cameraData.second->GetUniqueCamera()->transform_.scale.x, 0.01f);
+				Vector3 translate = cameraData.second->GetUniqueCamera()->GetTranslate();
+				Vector3 rotate = cameraData.second->GetUniqueCamera()->GetRotate();
+				Vector3 scale = cameraData.second->GetUniqueCamera()->GetScale();
+				ImGui::DragFloat3("Translate", &translate.x, 0.1f);
+				ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &scale.x, 0.01f);
+				cameraData.second->GetUniqueCamera()->SetTransform({scale,rotate,translate});
 
 				// 使う
 				if (ImGui::Button("use")) {
@@ -10606,6 +10724,92 @@ private:
 
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraRotation.cpp
+============================================================
+#include "CameraRotation.h"
+
+void CameraRotation::Initialize() {
+    // 初期角度をリセット（必要なら外部から設定してもOK）
+    data_.yaw = 0.0f;
+    data_.pitch = 0.0f;
+};
+
+
+Vector3 CameraRotation::Update(const InputSystem* input, float dt) {
+    if (!input) {
+        return Vector3(0.0f, 0.0f, 1.0f);
+    }
+    // =========================
+    // 入力取得（例：マウスや右スティック）
+    // =========================
+    float inputX = input->GetPlayerInputData().lookStick.y;
+    float inputY = input->GetPlayerInputData().lookStick.x; 
+
+
+    // =========================
+   // 回転更新
+   // =========================
+    data_.yaw += inputX * data_.sensitivity;
+    data_.pitch += inputY * data_.sensitivity;
+
+    // =========================
+    // ピッチ制限
+    // =========================
+    data_.pitch = std::clamp(data_.pitch, data_.minPitch, data_.maxPitch);
+
+    // =========================
+   // 方向ベクトル計算（Y-Up / Z-Forward）
+   // =========================
+    Vector3 forward{};
+
+    forward.x = cosf(data_.pitch) * sinf(data_.yaw);
+    forward.y = sinf(data_.pitch);
+    forward.z = cosf(data_.pitch) * cosf(data_.yaw);
+
+    forward = Normalize(forward);
+
+    return forward;
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraRotation.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+
+// 回転制御
+class CameraRotation {
+public:
+
+	// 初期化
+	void Initialize();
+
+	// 更新
+	Vector3 Update(const InputSystem* input,float dt);
+
+private:
+	CameraRotationData data_;
+};
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraShake.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+class CameraShake {
+public:
+
+	// 更新
+	Vector3 Update(float dt);
+
+private:
+	CameraShakeData data;
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/FixedCamera/FixedCamera.cpp
 ============================================================
 #include "FixedCamera.h"
@@ -10618,12 +10822,12 @@ void FixedCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = provisionalData_.farClip_;
+	uniqueCamera_->SetFarClip(provisionalData_.farClip_);
 
 	// カメラ位置と回転設定
-	uniqueCamera_->transform_.translate = provisionalData_.translate;
-	uniqueCamera_->transform_.rotate = provisionalData_.rotate;
-
+	uniqueCamera_->SetTranslate(provisionalData_.translate);
+	uniqueCamera_->SetRotate(provisionalData_.rotate);
+	
 
 	// ポストエフェクト追加
 	uniqueCamera_->AddEffectBlock("out", Engine::PostEffectBlockType::kOitline, true);
@@ -10696,15 +10900,14 @@ File Path: project/DirectXGame/application/base/Camera/FixedCamera/ResultCamera.
 void ResultCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position){
 	this->entityManager = entityManager;	// エンティティ
-
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = 10000.0f;
+	uniqueCamera_->SetFarClip(10000.0f);
 
 	// カメラ位置と回転設定
-	uniqueCamera_->transform_.translate = position;
-	uniqueCamera_->transform_.rotate = { Math::DegreesToRadians(7),0,0 };
+	uniqueCamera_->SetTranslate(position);
+	uniqueCamera_->SetRotate({ Math::DegreesToRadians(7),0,0 });
 }
 
 void ResultCamera::Update() {
@@ -10752,11 +10955,11 @@ void SelectCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = 10000.0f;
+	uniqueCamera_->SetFarClip(10000.0f);
 
 	// カメラ位置と回転設定
-	uniqueCamera_->transform_.translate = position;
-	uniqueCamera_->transform_.rotate = { -0.128f,-0.460f,0 };
+	uniqueCamera_->SetTranslate(position);
+	uniqueCamera_->SetRotate({ -0.128f,-0.460f,0 });
 
 };
 
@@ -10803,12 +11006,11 @@ void StageCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = 10000.0f;
+	uniqueCamera_->SetFarClip(10000.0f);
 
 	// カメラ位置と回転設定
-	uniqueCamera_->transform_.translate = position;
-	uniqueCamera_->transform_.rotate = { Math::DegreesToRadians(60),0,0 };
-
+	uniqueCamera_->SetTranslate(position);
+	uniqueCamera_->SetRotate({ Math::DegreesToRadians(60),0,0 });
 
 	offsetPos = { 0,0,-2000 };
 }
@@ -10816,20 +11018,22 @@ void StageCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 void StageCamera::Update() {
 	const float kRotateSpeedX = 0.002f;
 
-	uniqueCamera_->transform_.rotate.y -= kRotateSpeedX;
+	Transform transform = uniqueCamera_->GetTransform();
+
+	transform.rotate.y -= kRotateSpeedX;
 
 
 	// 回転適用 → カメラ位置を計算
-	Matrix4x4 rotY = MakeRotateYMatrix(uniqueCamera_->transform_.rotate.y);
-	Matrix4x4 rotX = MakeRotateXMatrix(uniqueCamera_->transform_.rotate.x);
+	Matrix4x4 rotY = MakeRotateYMatrix(uniqueCamera_->GetRotate().y);
+	Matrix4x4 rotX = MakeRotateXMatrix(uniqueCamera_->GetRotate().x);
 	Matrix4x4 rotateMatrix = rotX * rotY;
 	Vector3 offset = TransformNormal(offsetPos, rotateMatrix);
 
 	Vector3 targetPos = anchorPoint;
 	Vector3 desiredCameraPos = Add(targetPos, offset);
 
-	uniqueCamera_->transform_.translate = desiredCameraPos;
-
+	transform.translate = desiredCameraPos;
+	uniqueCamera_->SetTransform(transform);
 	uniqueCamera_->UpdateMatrix();
 }
 
@@ -10868,17 +11072,14 @@ File Path: project/DirectXGame/application/base/Camera/FixedCamera/TitleCamera.c
 void TitleCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position){
 	this->entityManager = entityManager;	// エンティティ3d
-
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = 10000.0f;
+	uniqueCamera_->SetFarClip(10000.0f);
 
 	// カメラ位置と回転設定
-	uniqueCamera_->transform_.translate = position;
-	uniqueCamera_->transform_.rotate = {Math::DegreesToRadians(7),0,0};
-
-
+	uniqueCamera_->SetTranslate(position);
+	uniqueCamera_->SetRotate({ Math::DegreesToRadians(7),0,0 });
 }
 
 void TitleCamera::Update(){
@@ -10925,31 +11126,40 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
     // インプット
    this->inputSystem = inputSystem;
 
-    // カメラ初期化
-    uniqueCamera_ = std::make_unique<Engine::Camera>();
-    uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-    uniqueCamera_->farClip_ = provisionalData_.farClip_;
-    uniqueCamera_->transform_.rotate.x = provisionalData_.rotate.x;
+   // カメラ初期化
+   uniqueCamera_ = std::make_unique<Engine::Camera>();
+   uniqueCamera_->Initialize(entityManager->GetCameraCommon());
+   uniqueCamera_->SetFarClip(provisionalData_.farClip_);
 
-   
+   // カメラ回転設定
+   uniqueCamera_->SetRotate(provisionalData_.rotate);
+
+  
+
     uniqueCamera_->AddEffectBlock("bloom", Engine::PostEffectBlockType::kBloom);
 
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = provisionalData_.bloomIndensity;
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
     uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
 
+    // 操作
+    controller = std::make_unique<CameraController>();
+    controller->Initialize(uniqueCamera_.get(), inputSystem);
+
+
     baseOffset.z = -22.5;
 }
 
-void FollowCamera::Update()
-{
+void FollowCamera::Update() {
+    Transform transform = uniqueCamera_->GetTransform();
+
     // カメラを使っているなら
     if (useCamera) {
         uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
     }
     // ターゲットがあるなら
     if (target_) {
-
+        controller->SetTraget(target_);
         // 回転速度
         const float kRotateSpeed = 0.03f;
         const float kRotateSpeedX = 0.02f;
@@ -10973,22 +11183,22 @@ void FollowCamera::Update()
             float targetPitch = std::atan2(direction.y, distanceXZ);
 
             // スムーズに補間（必要なら）
-            uniqueCamera_->transform_.rotate.y = targetYaw;
-            uniqueCamera_->transform_.rotate.x = std::clamp(targetPitch,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
+            transform.rotate.y = targetYaw;
+            transform.rotate.x = std::clamp(targetPitch,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
         }
         else {
             // 通常の自由操作
             if (inputSystem->GetPlayerInputData().isControllerConnected) {
-                uniqueCamera_->transform_.rotate.y += inputSystem->GetPlayerInputData().lookStick.x * kRotateSpeed;
-                uniqueCamera_->transform_.rotate.x -= inputSystem->GetPlayerInputData().lookStick.y * kRotateSpeedX;
+                transform.rotate.y += inputSystem->GetPlayerInputData().lookStick.x * kRotateSpeed;
+                transform.rotate.x -= inputSystem->GetPlayerInputData().lookStick.y * kRotateSpeedX;
 
-                uniqueCamera_->transform_.rotate.x = std::clamp(uniqueCamera_->transform_.rotate.x,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
+                transform.rotate.x = std::clamp(transform.rotate.x,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
             }
         }
 
         // 回転適用 → カメラ位置を計算
-        Matrix4x4 rotY = MakeRotateYMatrix(uniqueCamera_->transform_.rotate.y);
-        Matrix4x4 rotX = MakeRotateXMatrix(uniqueCamera_->transform_.rotate.x);
+        Matrix4x4 rotY = MakeRotateYMatrix(transform.rotate.y);
+        Matrix4x4 rotX = MakeRotateXMatrix(transform.rotate.x);
         Matrix4x4 rotateMatrix = rotX * rotY;
         Vector3 offset = TransformNormal(baseOffset, rotateMatrix);
 
@@ -11008,15 +11218,12 @@ void FollowCamera::Update()
         }
 
         // 位置設定
-        uniqueCamera_->transform_.translate = desiredCameraPos;
+        transform.translate = desiredCameraPos;
     }
 
-    // 揺れ処理
-    if (Engine::Camera::isShake_) {
-        uniqueCamera_->SetShake(provisionalData_.shackTime, provisionalData_.shackWidth);
-    }
-
+    
     // カメラ更新
+    uniqueCamera_->SetTransform(transform);
     uniqueCamera_->UpdateMatrix();
 }
 
@@ -11045,7 +11252,8 @@ public:
 	void Update() override;
 
 private:
-
+	// 統括
+	std::unique_ptr<CameraController> controller = nullptr;
 
 private: // 一旦
 
@@ -11086,16 +11294,15 @@ File Path: project/DirectXGame/application/base/Camera/UniverseCamera/UniverseCa
 
 
 void UniverseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
-	Engine::GlobalVariables* globalVariables, Vector3 position)
-{
+	Engine::GlobalVariables* globalVariables, Vector3 position){
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = provisionalData_.farClip_;
-	
-	// カメラ位置回転設定
-	uniqueCamera_->transform_.translate = provisionalData_.translate;
-	uniqueCamera_->transform_.rotate = provisionalData_.rotate;
+	uniqueCamera_->SetFarClip(provisionalData_.farClip_);
+
+	// カメラ位置と回転設定
+	uniqueCamera_->SetTranslate(provisionalData_.translate);
+	uniqueCamera_->SetRotate(provisionalData_.rotate);
 
 	// 起動時間
 	timer_.maxT = provisionalData_.maxT;
@@ -11105,12 +11312,7 @@ void UniverseCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager*
 }
 
 void UniverseCamera::Update() {
-#ifdef _DEBUG
-	ImGui::Begin("Debug");
-	ImGui::DragFloat3("translate", &uniqueCamera_->transform_.translate.x, 0.1f);	// 位置
-	ImGui::DragFloat3("rotate", &uniqueCamera_->transform_.rotate.x, 0.01f);		// 回転
-	ImGui::End();
-#endif // _DEBUG
+	Transform transform = uniqueCamera_->GetTransform();
 
 	// カメラを使っているなら
 	if (useCamera) {
@@ -11118,7 +11320,7 @@ void UniverseCamera::Update() {
 		scaleLerp_.Update(GetTime());	// スケール補間更新
 
 		// カメラスケールZを設定
-		uniqueCamera_->transform_.scale.z = scaleLerp_.LerpData();
+		transform.scale.z = scaleLerp_.LerpData();
 
 
 		// 時間オーバーしたら
@@ -11128,10 +11330,9 @@ void UniverseCamera::Update() {
 			cameraManeger->SetUseCamera("followCamera", 0.0f);	// フォローカメラに移行
 		}
 	}
-	else {
-
-	}
+	
 	// カメラ更新
+	uniqueCamera_->SetTransform(transform);
 	uniqueCamera_->UpdateMatrix();
 }
 
@@ -27752,10 +27953,8 @@ void CharacterDebugScene::Finalize(){
 	collisionManager_->Clear();
 }
 
-void CharacterDebugScene::Update()
-{
-	Engine::Camera::isShake_ = false;
-
+void CharacterDebugScene::Update(){
+	
 	inputSystem_->Update(GetTime());
 
 	// リトライ
@@ -28369,8 +28568,6 @@ void GamePlayScene::Update()
 {
 	// 入力システム更新
 	inputSystem_->Update(GetTime());
-
-	Engine::Camera::isShake_ = false;
 
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
@@ -38126,10 +38323,9 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 	for (auto& cameraData : levelData->cameras) {
 		std::unique_ptr<BaseCamera> camera = std::make_unique<FixedCamera>();
 		camera->Initialize(nullptr, entityManager, nullptr, {});
-		camera->GetUniqueCamera()->transform_.translate = cameraData.position;
-		camera->GetUniqueCamera()->transform_.rotate = DegreesToRadians(cameraData.rotation);
-		camera->GetUniqueCamera()->transform_.scale = cameraData.scale;
-
+		camera->GetUniqueCamera()->SetTransform({ cameraData.scale,
+			DegreesToRadians(cameraData.rotation),cameraData.position });
+		
 		camera->SetName(cameraData.fileName);
 
 		cameras_.push_back(std::move(camera));
@@ -39014,10 +39210,6 @@ File Path: project/DirectXGame/engine/Camera/Camera.cpp
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 
-
-bool Engine::Camera::isShake_ = false;
-
-
 Engine::Camera::Camera()
 
 	:transform_({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
@@ -39036,12 +39228,10 @@ Engine::Camera::Camera()
 
 }
 
-void Engine::Camera::Initialize(CameraCommon* cameraCommon)
-{
+void Engine::Camera::Initialize(CameraCommon* cameraCommon) {
 	dxCommon = cameraCommon->GetDxCommon();				// DX共通クラス
 	postEffectManager = dxCommon->GetPostEffectManager();	// ポストエフェクト管理クラス
-
-	input_ = cameraCommon->GetInput();		// インプット
+	input = cameraCommon->GetInput();		// インプット
 
 	// リソース生成
 	resource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
@@ -39053,57 +39243,29 @@ void Engine::Camera::Initialize(CameraCommon* cameraCommon)
 	isProjection_ = true;
 }
 
-void Engine::Camera::GetCommandList(int index)
-{
+void Engine::Camera::GetCommandList(int index) {
 	// Cameraのバインド
 	dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource->GetGPUVirtualAddress());
 }
 
+
+#pragma region Update
+
 void Engine::Camera::UpdateMatrix() {
 	float winWidth = static_cast<float>(WinApp::GetClientWidth(false));
 	float winHeight = static_cast<float>(WinApp::GetClientHeight(false));
-
-
 #ifndef _DEBUG
 	winWidth = static_cast<float>(WinApp::GetClientWidth());
 	winHeight = static_cast<float>(WinApp::GetClientHeight());
 #endif // _DEBUG
-
 	aspect_ = winWidth / winHeight;
 
 	UpdateImGui();
 
-	if (shakeTime_ > 0) {
-		// Reduce shake time
-		shakeTime_ -= MyGame::GameTime();
-
-		// Generate random shake offset within the direction range
-		float xOffset = static_cast<float>(rand()) / RAND_MAX * shakeDirectionRange_.x;
-		float yOffset = static_cast<float>(rand()) / RAND_MAX * shakeDirectionRange_.y;
-		float zOffset = static_cast<float>(rand()) / RAND_MAX * shakeDirectionRange_.z;
-
-		// Create shake offset vector
-		Vector3 shakeOffset(xOffset, yOffset, zOffset);
-
-		Matrix4x4 cameraWorldMatrix = Inverse(viewMatrix_);
-
-		// カメラの向きに基づいて移動方向をワールド座標系に変換
-		Vector3 worldDirection = {
-	   shakeOffset.x * cameraWorldMatrix.m[0][0] + shakeOffset.y * cameraWorldMatrix.m[1][0] + shakeOffset.z * cameraWorldMatrix.m[2][0],
-	   shakeOffset.x * cameraWorldMatrix.m[0][1] + shakeOffset.y * cameraWorldMatrix.m[1][1] + shakeOffset.z * cameraWorldMatrix.m[2][1],
-	   shakeOffset.x * cameraWorldMatrix.m[0][2] + shakeOffset.y * cameraWorldMatrix.m[1][2] + shakeOffset.z * cameraWorldMatrix.m[2][2]
-		};
-
-		// Apply shake offset to the camera's position
-		transform_.translate += worldDirection;
-	}
-
 	// カメラのワールド行列を計算
 	worldMatrix_ = MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-
 	// ビュー行列をカメラのワールド行列の逆行列として計算
 	viewMatrix_ = Inverse(worldMatrix_);
-
 	// 射影行列を計算
 	if (isProjection_) {
 		projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspect_, nearClip_, farClip_);
@@ -39118,16 +39280,13 @@ void Engine::Camera::UpdateMatrix() {
 	}
 	// ビュー・プロジェクション行列を更新
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
-
-
 	// カメラデータの更新
 	Vector3 cameraFront(viewMatrix_.m[0][2], viewMatrix_.m[1][2], viewMatrix_.m[2][2]);
 	data->normal = Normalize(cameraFront); // 必要なら正規化
 	data->worldPosition = worldMatrix_.GetWorldPosition();
 }
 
-void Engine::Camera::UpdateMatrix(const Vector3& targetPosition)
-{
+void Engine::Camera::UpdateMatrix(const Vector3& targetPosition) {
 	// カメラとターゲットの距離を設定
 	float distanceFromTarget = 2.0f; // 適切な距離に調整
 	Vector3 directionToTarget = Normalize(Subtract(targetPosition, transform_.translate));
@@ -39147,57 +39306,9 @@ void Engine::Camera::UpdateMatrix(const Vector3& targetPosition)
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
 
-void Engine::Camera::UpdateImGui()
-{
-	 #ifdef _DEBUG
-	 	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
-	 		speed = 10.0f;
-	 	}
-	 	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
-	 		speed = 0.1f;
-	 	}
-	 	else {
-	 		speed = 1.0f;
-	 	}
-	
-	 	float sp = move * speed;
-	
-	 	if (input_->IsPushKey(DIK_A)) {
-	 		transform_.translate.x -= sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_D)) {
-	 		transform_.translate.x += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_W)) {
-	 		transform_.translate.z += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_S)) {
-	 		transform_.translate.z -= sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_UP)) {
-	 		transform_.translate.y += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_DOWN)) {
-	 		transform_.translate.y -= sp;
-	 	}
-	 	sp = 0.01f;
-	 	if (input_->IsPushKey(DIK_I)) {
-	 		transform_.rotate.x += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_K)) {
-	 		transform_.rotate.x -= sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_L)) {
-	 		transform_.rotate.y += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_J)) {
-	 		transform_.rotate.y -= sp;
-	 	}
-	 #endif // _DEBUG
-}
+void Engine::Camera::UpdateImGui(){}
 
-void Engine::Camera::TransferMatrix()
-{
+void Engine::Camera::TransferMatrix() {
 	// ビュー行列の逆行列を計算してカメラの位置を抽出
 	Matrix4x4 iView = Inverse(worldMatrix_);
 	transform_.translate = { iView.m[3][0], iView.m[3][1], iView.m[3][2] };
@@ -39205,7 +39316,6 @@ void Engine::Camera::TransferMatrix()
 	// ビュー・プロジェクション行列を計算
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
-
 
 void Engine::Camera::LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector) {
 	Vector3 forward = Normalize(Subtract(targetPosition, cameraPosition)); // 前方向ベクトル
@@ -39225,11 +39335,22 @@ void Engine::Camera::LookAt(const Vector3& cameraPosition, const Vector3& target
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
 
-void Engine::Camera::SetShake(float time, Vector3 directionRange) {
-	shakeTime_ = time;
-	shakeDirectionRange_ = directionRange;
+#pragma endregion // 更新
+
+Vector3 Engine::Camera::GetForward() const {
+	float cp = std::cos(transform_.rotate.x);
+	float sp = std::sin(transform_.rotate.x);
+	float cy = std::cos(transform_.rotate.y);
+	float sy = std::sin(transform_.rotate.y);
+
+	return Vector3(
+		sy * cp, // X
+		sp,      // Y
+		cy * cp  // Z
+	);
 }
 
+#pragma region MyRegion
 
 void Engine::Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
 {
@@ -39252,18 +39373,7 @@ std::vector<Engine::PostEffectBlock*> Engine::Camera::GetPostEffectBlocks()
 	return rawPtrs;
 }
 
-Vector3 Engine::Camera::GetForward() const {
-	float cp = std::cos(transform_.rotate.x);
-	float sp = std::sin(transform_.rotate.x);
-	float cy = std::cos(transform_.rotate.y);
-	float sy = std::sin(transform_.rotate.y);
-
-	return Vector3(
-		sy * cp, // X
-		sp,      // Y
-		cy * cp  // Z
-	);
-}
+#pragma endregion // ポストエフェクト
 
 
 
@@ -39292,10 +39402,7 @@ namespace Engine {
 	class Input;
 	class CameraCommon;
 	// カメラ
-	class Camera
-	{
-	private:
-
+	class Camera {
 	public: // メンバ関数
 		// コンストラクタ
 		Camera();
@@ -39310,13 +39417,14 @@ namespace Engine {
 		void UpdateMatrix();
 		// 更新
 		void UpdateMatrix(const Vector3& targetPosition);
-		// ImGui更新
-		void UpdateImGui();
 		// トランスファー更新
 		void TransferMatrix();
 
 		// 向いている方向
 		void LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector);
+		
+		
+	public: // 取得　設定
 		// Fov設定
 		void SetFovY(const float fovY) { fovY_ = fovY; }
 		// アスペクト比設定
@@ -39338,59 +39446,61 @@ namespace Engine {
 		const Vector3& GetRotate() const { return transform_.rotate; }
 		// 位置取得
 		const Vector3& GetTranslate() const { return transform_.translate; }
+		// 位置取得
+		const Vector3& GetScale() const { return transform_.scale; }
 		// トランスフォーム取得
 		const Transform& GetTransform() const { return transform_; }
+		// トランスフォーム設定
+		void SetTransform(const Transform& transform) { transform_ = transform; }
+		// 位置設定
+		void SetTranslate(const Vector3& translate) { transform_.translate = translate; }
+		// 回転設定
+		void SetRotate(const Vector3& rotate) { transform_.rotate = rotate; }
+		// スケール設定
+		void SetScale(const Vector3& scale) { transform_.scale = scale; }
 		// Nearクリップ取得
 		const float& GetNearZ() const { return nearClip_; }
 		// Farクリップ取得
 		const float& GetFarZ() const { return farClip_; }
-		//
+		// FovY取得
+		const float& GetFovY() const { return fovY_; }
+		// aspect取得
+		const float& GetAspect() const { return aspect_; }
+
+
+		// 向いている方向取得
 		Vector3 GetForward() const;
-		// ポストエフェクトマネージャー取得
-		PostEffectManager* GetPostEffectManager() { return postEffectManager; }
-
-		// カメラシェイクさせる
-		void SetShake(float time, Vector3 diectionRange);
-
 		// プロジェクションしているか取得
 		bool GetIsProjection() const { return isProjection_; }
-
 		// プロジェクション設定
 		void SetIsProjection(bool isProjection) { isProjection_ = isProjection; }
-
+	public: // ポストエフェクト
 		// レンダーテクスチャ追加
 		void AddEffectBlock(const std::string name, PostEffectBlockType type, bool use = true);
-
-		// ポストエフェクトのブロック取得
-		std::vector<Engine::PostEffectBlock*> GetPostEffectBlocks();
-
 		// ポストエフェクトをクリア
 		void Clear() { effectBlocks_.clear(); }
-
+		// ポストエフェクトのブロック取得
+		std::vector<Engine::PostEffectBlock*> GetPostEffectBlocks();
+		// ポストエフェクトマネージャー取得
+		PostEffectManager* GetPostEffectManager() { return postEffectManager; }
+	private: // デバッグ
+		// ImGui更新
+		void UpdateImGui();
 	private:
-		float shakeTime_ = 0;
-		Vector3 shakeDirectionRange_{};
-#ifdef _DEBUG
-		float debugShakeTime_ = 0.1f;
-		Vector3 debugShakeDirectionRange_ = { 0.1f,0.1f,0.1f };
-#endif // _DEBUG
-
-
-	public:
-		static bool isShake_;
 		bool isProjection_ = true;
-
 		float fovY_ = 0.45f;
-		float aspect_ = float(1280) / float(720);
 		float nearClip_ = 0.1f;
 		float farClip_ = 10000.0f;
-	public:
+		float aspect_ = float(1280) / float(720);
 		Transform transform_;
+	private:
 		Matrix4x4 worldMatrix_;
 		Matrix4x4 viewMatrix_;
 		Matrix4x4 projectionMatrix_;
 		Matrix4x4 viewProjectionMatrix_;
-
+	private:// ポストエフェクト
+		std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
+	private: // GPU
 		// GPUデータ
 		struct DataGPU {
 			Vector3 worldPosition;
@@ -39398,18 +39508,17 @@ namespace Engine {
 			Vector3 normal;
 			float padding2[1];
 		};
+		// GPUに送るデータ
 		DataGPU* data;
-	private:
-		DirectXCommon* dxCommon = nullptr;
-		PostEffectManager* postEffectManager = nullptr;
-		std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
-		Input* input_;
-
+		// リソース
 		Microsoft::WRL::ComPtr < ID3D12Resource> resource;
-
-
-		float move = 0.3f;		// 移動量
-		float speed = 1.0f;		// 速度
+	private: // 貰いもの
+		// ダイレクトX共通クラス
+		DirectXCommon* dxCommon = nullptr;
+		// ポストエフェクト管理
+		PostEffectManager* postEffectManager = nullptr;
+		// 入力
+		Input* input = nullptr;
 	};
 }
 
@@ -39462,6 +39571,90 @@ namespace Engine {
 }
 
 ============================================================
+File Path: project/DirectXGame/engine/Camera/CameraData.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/struct/Structs3D.h"
+#include"DirectXGame/engine/math/MathFunctions.h"
+#include "DirectXGame/engine/Collider/CollisionTypeIdDef.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+// 追従カメラデータ
+struct CameraFollowData {
+	// プレイヤーからの相対位置
+	Vector3 offset{};
+	// 追従補間速度
+	float followSpeed = 0.0f;
+	// スムーズ追従
+	bool useSmooth = false;
+};
+
+// カメラ回転制御データ
+struct CameraRotationData {
+	// 左右回転角度
+	float yaw = 0.0f;
+	// 上下回転角度
+	float pitch = 0.0f;
+	// 入力感度
+	float sensitivity = 0.1f;
+	// 最小ピッチ
+	float minPitch = -0.8f;
+	// 最大ピッチ
+	float maxPitch = 0.8f;
+};
+
+// カメラロックオンデータ
+struct CameraLockOnData {
+	// ターゲット位置
+	const Engine::WorldTransform* target = nullptr;
+	// ロックオン時の回転補間速度
+	float rotateSpeed = 0.1f;
+	// ロックオンしているか
+	bool isLockOn = false;
+};
+
+// カメラシェイクデータ
+struct CameraShakeData {
+	// 揺れの強さ
+	float power = 0.0f;
+	// 揺れの継続時間
+	float duration = 0.0f;
+	// 時間
+	float timer = 0.0f;
+	// 揺れオフセット
+	Vector3 offset{};
+};
+
+// カメラズームデータ
+struct CameraZoomData {
+	// 目標距離
+	float targetDistance;
+	// 現在距離
+	float currentDistance;
+	// 距離補間速度
+	float zoomSpeed;
+};
+
+// 障害物回避データ
+struct CameraCollisionData {
+	// カメラ衝突判定半径
+	float radius = 1.0f;
+	// 衝突対象レイヤー
+	CollisionLayer collisionMask;
+};
+
+// カメラ遅延
+struct CameraLagData {
+	// 遅延を有効にするか
+	bool enable = false;
+	// 位置遅延の補間速度
+	float positionLagSpeed = 10.0f;
+	// 回転遅延の補間速度
+	float rotationLagSpeed = 10.0f;
+};
+
+
+
+============================================================
 File Path: project/DirectXGame/engine/Camera/DebugCamera.cpp
 ============================================================
 #include "DebugCamera.h"
@@ -39472,14 +39665,14 @@ void Engine::DebugCamera::Initialize(CameraCommon* cameraCommon)
 {
     // カメラ
 	camera_.Initialize(cameraCommon);
-	camera_.farClip_ = 5000.0f;
+	camera_.SetFarClip(5000.0f);
 	
     // インプット
     input = cameraCommon->GetInput();
 }
 
-void Engine::DebugCamera::Update()
-{
+void Engine::DebugCamera::Update() {
+    Transform transform = camera_.GetTransform();
     
 
     // マウスの移動量を取得
@@ -39491,11 +39684,11 @@ void Engine::DebugCamera::Update()
     // 右クリックでカメラ回転
     if (input->IsMousePressed(1)) {
         float rotationSpeed = 0.005f;
-        camera_.transform_.rotate.y -= delta.x * rotationSpeed;
-        camera_.transform_.rotate.x -= delta.y * rotationSpeed;
+        transform.rotate.y -= delta.x * rotationSpeed;
+        transform.rotate.x -= delta.y * rotationSpeed;
 
         // ピッチ（上下）の制限
-        camera_.transform_.rotate.x = std::clamp(camera_.transform_.rotate.x, -1.5f, 1.5f);
+        transform.rotate.x = std::clamp(transform.rotate.x, -1.5f, 1.5f);
     }
 
     // 中クリックまたは Shift + 右クリックで平行移動
@@ -39504,17 +39697,17 @@ void Engine::DebugCamera::Update()
         Vector3 forward = TransformNormal({ 0, 0, 1 }, camera_.GetViewMatrix());
         Vector3 right = TransformNormal({ 1, 0, 0 }, camera_.GetViewMatrix());
 
-        camera_.transform_.translate -= right * delta.x * moveSpeed;
-        camera_.transform_.translate += forward * delta.y * moveSpeed;
+        transform.translate -= right * delta.x * moveSpeed;
+        transform.translate += forward * delta.y * moveSpeed;
     }
 
     // マウスホイールでズーム
     float zoomSpeed = 0.1f;
     if (input->IsMousePressed(VK_MBUTTON)) {
-        camera_.transform_.translate.z += zoomSpeed;
+        transform.translate.z += zoomSpeed;
      }
 
-    
+    camera_.SetTransform(transform);
 	camera_.UpdateMatrix();
 }
 
@@ -52053,12 +52246,11 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 
 }
 
-void Engine::GpuParticleGroup::Update()
-{
+void Engine::GpuParticleGroup::Update() {
 
-	cbCameraPos_.Data()->x = camera->transform_.translate.x;
-	cbCameraPos_.Data()->y = camera->transform_.translate.y;
-	cbCameraPos_.Data()->z = camera->transform_.translate.z;
+	cbCameraPos_.Data()->x = camera->GetTranslate().x;
+	cbCameraPos_.Data()->y = camera->GetTranslate().y;
+	cbCameraPos_.Data()->z = camera->GetTranslate().z;
 
 
 	const uint32_t threadsPerGroup = 256;
@@ -55344,13 +55536,13 @@ void Engine::LineMeshData::AddLine(const Vector3& start, const Vector3& end, con
 void Engine::LineMeshData::AddCameraLine(const Camera& camera, const Vector4& color)
 {
 	// --- カメラのパラメータ取得 ---
-	float fovY = camera.fovY_;
-	float aspect = camera.aspect_;
-	float nearZ = camera.nearClip_;
-	float farZ = camera.farClip_;
+	float fovY = camera.GetFovY();
+	float aspect = camera.GetAspect();
+	float nearZ = camera.GetNearZ();
+	float farZ = camera.GetFarZ();
 
 	// --- カメラのワールド行列と位置・向き取得 ---
-	Matrix4x4 worldMatrix = camera.transform_.GetWorldMatrix(); // または camera->worldMatrix_
+	Matrix4x4 worldMatrix = camera.GetWorldMatrix(); 
 	Vector3 camPos = Vector3(worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2]);
 
 	Vector3 right = Vector3(worldMatrix.m[0][0], worldMatrix.m[0][1], worldMatrix.m[0][2]);
@@ -56115,7 +56307,7 @@ void Engine::LineCommon::Update()
 
 
 	if (camera && cameraWVP) {
-		*cameraWVP = camera->viewProjectionMatrix_;  // データをコピー
+		*cameraWVP = camera->GetViewProjectionMatrix();  // データをコピー
 	}
 }
 
@@ -71394,7 +71586,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.cpp" />
@@ -72094,6 +72289,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraRotation.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraShake.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.h" />
@@ -72124,6 +72324,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\State\MainState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
+    <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h" />
@@ -73416,6 +73618,15 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Attack\Input\AttackInputHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -74689,6 +74900,27 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\Camera\CameraData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraShake.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraRotation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
