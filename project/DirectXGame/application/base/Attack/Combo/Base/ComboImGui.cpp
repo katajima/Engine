@@ -119,12 +119,12 @@ void Combo::ComboImGui::SequencerApplyToState(AttackSequence& sequence,ComboData
 	maxFrame = ConvertUtility::SecondsToFrames(endComboTime, 60.0f);
 
 	// 移動時間
-	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindowStart;
-	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindowEnd;
+	float moveStart = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.startTime;
+	float moveEnd = comboData.GetComboMotion().GetComboMove().GetData().moveWindow.endTime;
 
 	// トレイルエフェクト
-	float trailStart = comboData.GetComboEffect().GetData().startTmer;
-	float trailEnd = trailStart + comboData.GetComboEffect().GetData().lifeTime;
+	float trailStart = comboData.GetComboEffect().GetData().trailEffectStartTime;
+	float trailEnd = trailStart + comboData.GetComboEffect().GetData().trailEffectLifeTime;
 
 	AddSequencerEvent(sequence,inputStart, inputEnd, 0xFF00FF00, "入力の可能時間");
 	AddSequencerEvent(sequence,cancelStart, cancelEnd, 0xFFFFFF00, "キャンセル可能時間");

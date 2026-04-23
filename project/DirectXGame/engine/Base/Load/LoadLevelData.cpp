@@ -161,10 +161,9 @@ void LoadLevelData::CreateCamera(LevelData* levelData)
 	for (auto& cameraData : levelData->cameras) {
 		std::unique_ptr<BaseCamera> camera = std::make_unique<FixedCamera>();
 		camera->Initialize(nullptr, entityManager, nullptr, {});
-		camera->GetUniqueCamera()->transform_.translate = cameraData.position;
-		camera->GetUniqueCamera()->transform_.rotate = DegreesToRadians(cameraData.rotation);
-		camera->GetUniqueCamera()->transform_.scale = cameraData.scale;
-
+		camera->GetUniqueCamera()->SetTransform({ cameraData.scale,
+			DegreesToRadians(cameraData.rotation),cameraData.position });
+		
 		camera->SetName(cameraData.fileName);
 
 		cameras_.push_back(std::move(camera));

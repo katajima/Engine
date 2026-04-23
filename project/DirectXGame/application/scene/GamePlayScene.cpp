@@ -195,8 +195,6 @@ void GamePlayScene::Update()
 	// 入力システム更新
 	inputSystem_->Update(GetTime());
 
-	Engine::Camera::isShake_ = false;
-
 	// リトライ
 	if (input->IsTriggerKey(DIK_R)) {
 		GetSceneManager()->ChangeScene("GAMEPLAY", 0.5f);

@@ -49,7 +49,7 @@ void Engine::LineCommon::Update()
 
 
 	if (camera && cameraWVP) {
-		*cameraWVP = camera->viewProjectionMatrix_;  // データをコピー
+		*cameraWVP = camera->GetViewProjectionMatrix();  // データをコピー
 	}
 }
 

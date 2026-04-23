@@ -35,11 +35,6 @@ namespace Combo {
 	public:
 		// 移動できるか
 		bool IsMove() const { return isMove_; }
-		// 移動可能時間設定
-		void MoveStartEnd(float start, float end) {
-			data_.moveWindowStart = start;
-			data_.moveWindowEnd = end;
-		};
 		// データ構造体取得
 		GlobalMove& GetData() { return data_; }
 		// 方向取得

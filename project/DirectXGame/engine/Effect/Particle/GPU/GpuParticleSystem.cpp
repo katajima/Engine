@@ -134,12 +134,11 @@ void Engine::GpuParticleGroup::Create(GpuParticleManager* gpuParticleManager, Di
 
 }
 
-void Engine::GpuParticleGroup::Update()
-{
+void Engine::GpuParticleGroup::Update() {
 
-	cbCameraPos_.Data()->x = camera->transform_.translate.x;
-	cbCameraPos_.Data()->y = camera->transform_.translate.y;
-	cbCameraPos_.Data()->z = camera->transform_.translate.z;
+	cbCameraPos_.Data()->x = camera->GetTranslate().x;
+	cbCameraPos_.Data()->y = camera->GetTranslate().y;
+	cbCameraPos_.Data()->z = camera->GetTranslate().z;
 
 
 	const uint32_t threadsPerGroup = 256;

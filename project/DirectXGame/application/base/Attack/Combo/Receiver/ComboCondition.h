@@ -51,13 +51,13 @@ namespace Combo {
 		// データ取得
 		GlobalCondition& GetData() { return data_; }
 		// コンボ移行受付クラス取得
-		NextReceiver& GetNextReceiver() { return nextRecever_; }
+		NextReceiver GetNextReceiver() const { return nextRecever_; }
 		// コンボキャンセル受付クラス取得
-		CancelReceiver& GetCancelReceiver() { return cancelReceiver_;}
+		CancelReceiver GetCancelReceiver() const { return cancelReceiver_;}
 		// コンボ終了条件クラス取得
-		EndCondition& GetEndCondition() { return endCondition_; }
+		EndCondition GetEndCondition() const { return endCondition_; }
 		// コンボ移行条件クラス取得
-		NextCondition& GetNextCondition() { return nextCondition_; }
+		NextCondition GetNextCondition() const { return nextCondition_; }
 	private:
 		GlobalCondition data_{};
 

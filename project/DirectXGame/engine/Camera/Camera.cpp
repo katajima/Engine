@@ -8,10 +8,6 @@
 #include "DirectXGame/engine/Offscreen/PostEffectBlock.h"
 #include "DirectXGame/engine/Offscreen/PostEffect.h"
 
-
-bool Engine::Camera::isShake_ = false;
-
-
 Engine::Camera::Camera()
 
 	:transform_({ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} })
@@ -30,12 +26,10 @@ Engine::Camera::Camera()
 
 }
 
-void Engine::Camera::Initialize(CameraCommon* cameraCommon)
-{
+void Engine::Camera::Initialize(CameraCommon* cameraCommon) {
 	dxCommon = cameraCommon->GetDxCommon();				// DX共通クラス
 	postEffectManager = dxCommon->GetPostEffectManager();	// ポストエフェクト管理クラス
-
-	input_ = cameraCommon->GetInput();		// インプット
+	input = cameraCommon->GetInput();		// インプット
 
 	// リソース生成
 	resource = dxCommon->GetDXGIDevice()->CreateBufferResource(sizeof(DataGPU));
@@ -47,57 +41,29 @@ void Engine::Camera::Initialize(CameraCommon* cameraCommon)
 	isProjection_ = true;
 }
 
-void Engine::Camera::GetCommandList(int index)
-{
+void Engine::Camera::GetCommandList(int index) {
 	// Cameraのバインド
 	dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(index, resource->GetGPUVirtualAddress());
 }
 
+
+#pragma region Update
+
 void Engine::Camera::UpdateMatrix() {
 	float winWidth = static_cast<float>(WinApp::GetClientWidth(false));
 	float winHeight = static_cast<float>(WinApp::GetClientHeight(false));
-
-
 #ifndef _DEBUG
 	winWidth = static_cast<float>(WinApp::GetClientWidth());
 	winHeight = static_cast<float>(WinApp::GetClientHeight());
 #endif // _DEBUG
-
 	aspect_ = winWidth / winHeight;
 
 	UpdateImGui();
 
-	if (shakeTime_ > 0) {
-		// Reduce shake time
-		shakeTime_ -= MyGame::GameTime();
-
-		// Generate random shake offset within the direction range
-		float xOffset = static_cast<float>(rand()) / RAND_MAX * shakeDirectionRange_.x;
-		float yOffset = static_cast<float>(rand()) / RAND_MAX * shakeDirectionRange_.y;
-		float zOffset = static_cast<float>(rand()) / RAND_MAX * shakeDirectionRange_.z;
-
-		// Create shake offset vector
-		Vector3 shakeOffset(xOffset, yOffset, zOffset);
-
-		Matrix4x4 cameraWorldMatrix = Inverse(viewMatrix_);
-
-		// カメラの向きに基づいて移動方向をワールド座標系に変換
-		Vector3 worldDirection = {
-	   shakeOffset.x * cameraWorldMatrix.m[0][0] + shakeOffset.y * cameraWorldMatrix.m[1][0] + shakeOffset.z * cameraWorldMatrix.m[2][0],
-	   shakeOffset.x * cameraWorldMatrix.m[0][1] + shakeOffset.y * cameraWorldMatrix.m[1][1] + shakeOffset.z * cameraWorldMatrix.m[2][1],
-	   shakeOffset.x * cameraWorldMatrix.m[0][2] + shakeOffset.y * cameraWorldMatrix.m[1][2] + shakeOffset.z * cameraWorldMatrix.m[2][2]
-		};
-
-		// Apply shake offset to the camera's position
-		transform_.translate += worldDirection;
-	}
-
 	// カメラのワールド行列を計算
 	worldMatrix_ = MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-
 	// ビュー行列をカメラのワールド行列の逆行列として計算
 	viewMatrix_ = Inverse(worldMatrix_);
-
 	// 射影行列を計算
 	if (isProjection_) {
 		projectionMatrix_ = MakePerspectiveFovMatrix(fovY_, aspect_, nearClip_, farClip_);
@@ -112,16 +78,13 @@ void Engine::Camera::UpdateMatrix() {
 	}
 	// ビュー・プロジェクション行列を更新
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
-
-
 	// カメラデータの更新
 	Vector3 cameraFront(viewMatrix_.m[0][2], viewMatrix_.m[1][2], viewMatrix_.m[2][2]);
 	data->normal = Normalize(cameraFront); // 必要なら正規化
 	data->worldPosition = worldMatrix_.GetWorldPosition();
 }
 
-void Engine::Camera::UpdateMatrix(const Vector3& targetPosition)
-{
+void Engine::Camera::UpdateMatrix(const Vector3& targetPosition) {
 	// カメラとターゲットの距離を設定
 	float distanceFromTarget = 2.0f; // 適切な距離に調整
 	Vector3 directionToTarget = Normalize(Subtract(targetPosition, transform_.translate));
@@ -141,57 +104,9 @@ void Engine::Camera::UpdateMatrix(const Vector3& targetPosition)
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
 
-void Engine::Camera::UpdateImGui()
-{
-	 #ifdef _DEBUG
-	 	if (input_->IsPushKey(DIK_LSHIFT) || input_->IsPushKey(DIK_RSHIFT)) {
-	 		speed = 10.0f;
-	 	}
-	 	else if (input_->IsPushKey(DIK_LALT) || input_->IsPushKey(DIK_RALT)) {
-	 		speed = 0.1f;
-	 	}
-	 	else {
-	 		speed = 1.0f;
-	 	}
-	
-	 	float sp = move * speed;
-	
-	 	if (input_->IsPushKey(DIK_A)) {
-	 		transform_.translate.x -= sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_D)) {
-	 		transform_.translate.x += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_W)) {
-	 		transform_.translate.z += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_S)) {
-	 		transform_.translate.z -= sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_UP)) {
-	 		transform_.translate.y += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_DOWN)) {
-	 		transform_.translate.y -= sp;
-	 	}
-	 	sp = 0.01f;
-	 	if (input_->IsPushKey(DIK_I)) {
-	 		transform_.rotate.x += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_K)) {
-	 		transform_.rotate.x -= sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_L)) {
-	 		transform_.rotate.y += sp;
-	 	}
-	 	if (input_->IsPushKey(DIK_J)) {
-	 		transform_.rotate.y -= sp;
-	 	}
-	 #endif // _DEBUG
-}
+void Engine::Camera::UpdateImGui(){}
 
-void Engine::Camera::TransferMatrix()
-{
+void Engine::Camera::TransferMatrix() {
 	// ビュー行列の逆行列を計算してカメラの位置を抽出
 	Matrix4x4 iView = Inverse(worldMatrix_);
 	transform_.translate = { iView.m[3][0], iView.m[3][1], iView.m[3][2] };
@@ -199,7 +114,6 @@ void Engine::Camera::TransferMatrix()
 	// ビュー・プロジェクション行列を計算
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
-
 
 void Engine::Camera::LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector) {
 	Vector3 forward = Normalize(Subtract(targetPosition, cameraPosition)); // 前方向ベクトル
@@ -219,11 +133,22 @@ void Engine::Camera::LookAt(const Vector3& cameraPosition, const Vector3& target
 	viewProjectionMatrix_ = Multiply(viewMatrix_, projectionMatrix_);
 }
 
-void Engine::Camera::SetShake(float time, Vector3 directionRange) {
-	shakeTime_ = time;
-	shakeDirectionRange_ = directionRange;
+#pragma endregion // 更新
+
+Vector3 Engine::Camera::GetForward() const {
+	float cp = std::cos(transform_.rotate.x);
+	float sp = std::sin(transform_.rotate.x);
+	float cy = std::cos(transform_.rotate.y);
+	float sy = std::sin(transform_.rotate.y);
+
+	return Vector3(
+		sy * cp, // X
+		sp,      // Y
+		cy * cp  // Z
+	);
 }
 
+#pragma region MyRegion
 
 void Engine::Camera::AddEffectBlock(const std::string name, PostEffectBlockType type, bool use)
 {
@@ -246,16 +171,5 @@ std::vector<Engine::PostEffectBlock*> Engine::Camera::GetPostEffectBlocks()
 	return rawPtrs;
 }
 
-Vector3 Engine::Camera::GetForward() const {
-	float cp = std::cos(transform_.rotate.x);
-	float sp = std::sin(transform_.rotate.x);
-	float cy = std::cos(transform_.rotate.y);
-	float sy = std::sin(transform_.rotate.y);
-
-	return Vector3(
-		sy * cp, // X
-		sp,      // Y
-		cy * cp  // Z
-	);
-}
+#pragma endregion // ポストエフェクト
 

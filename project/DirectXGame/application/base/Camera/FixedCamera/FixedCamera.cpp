@@ -8,12 +8,12 @@ void FixedCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* en
 	// カメラ初期化
 	uniqueCamera_ = std::make_unique<Engine::Camera>();
 	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-	uniqueCamera_->farClip_ = provisionalData_.farClip_;
+	uniqueCamera_->SetFarClip(provisionalData_.farClip_);
 
 	// カメラ位置と回転設定
-	uniqueCamera_->transform_.translate = provisionalData_.translate;
-	uniqueCamera_->transform_.rotate = provisionalData_.rotate;
-
+	uniqueCamera_->SetTranslate(provisionalData_.translate);
+	uniqueCamera_->SetRotate(provisionalData_.rotate);
+	
 
 	// ポストエフェクト追加
 	uniqueCamera_->AddEffectBlock("out", Engine::PostEffectBlockType::kOitline, true);

@@ -11,8 +11,8 @@ void CameraManager::Initialize(InputSystem* inputSystem, Engine::EntityManager* 
 	// カメラ初期化
 	camera = std::make_unique <Engine::Camera>();
 	camera->Initialize(entityManager->GetCameraCommon());
-	camera->transform_.rotate = { 0.36f,0,0 };			// 回転指定
-	camera->transform_.translate = { 5,32.5f,-59.2f };	// 位置指定
+	camera->SetRotate({ 0.36f,0,0 });			// 回転指定
+	camera->SetTranslate({ 5,32.5f,-59.2f });	// 位置指定
 	camera->SetFarClip(10000.0f);						// farZを10000に
 	isGameCamera = true;								// ゲームに使用する
 
@@ -42,8 +42,8 @@ void CameraManager::Update()
 			float t = std::clamp(currentTime / interpolationTime, 0.0f, 1.0f);
 
 			// 位置と回転を補間
-			camera->transform_.translate = Lerp(startTransform.translate, targetTransform.translate, t);
-			camera->transform_.rotate = QuaternionToEuler(Slerp(startTransform.rotate, targetTransform.rotate, t));
+			camera->SetTranslate(Lerp(startTransform.translate, targetTransform.translate, t));
+			camera->SetRotate(QuaternionToEuler(Slerp(startTransform.rotate, targetTransform.rotate, t)));
 			camera->UpdateMatrix();
 
 			if (t >= 1.0f) {
@@ -54,7 +54,7 @@ void CameraManager::Update()
 			// 使っているカメラを更新
 			for (auto& cam : cameras) {
 				if (cam.second->GetUseCamera()) {
-					camera->transform_ = cam.second->GetUniqueCamera()->GetTransform();
+					camera->SetTransform(cam.second->GetUniqueCamera()->GetTransform());
 					camera->UpdateMatrix();
 				}
 			}
@@ -70,16 +70,14 @@ void CameraManager::Update()
 	camera->UpdateMatrix();
 }
 
-void CameraManager::AddCamera(CameraInfo camera, std::string name)
-{
+void CameraManager::AddCamera(CameraInfo camera, std::string name) {
 	// カメラ管理クラスを渡す
 	camera.camera->SetCameraManeger(this);
 	camera.camera->SetUseCamera(camera.useCamera);	// 使っているか
 	cameras.insert(std::make_pair(name, camera.camera));	// カメラ追加
 }
 
-void CameraManager::SetUseCamera(std::string name, float time)
-{
+void CameraManager::SetUseCamera(std::string name, float time) {
 
 	auto it = cameras.find(name);
 	if (it != cameras.end()) {
@@ -95,7 +93,7 @@ void CameraManager::SetUseCamera(std::string name, float time)
 		if (time <= 0.0f) {
 			// 即時切り替え
 			isInterpolating = false;
-			camera->transform_ = it->second->GetUniqueCamera()->GetTransform();
+			camera->SetTransform(it->second->GetUniqueCamera()->GetTransform());
 			camera->UpdateMatrix();
 		}
 		else {
@@ -105,49 +103,32 @@ void CameraManager::SetUseCamera(std::string name, float time)
 			interpolationTime = time;
 
 			// 初期トランスフォーム計算
-			startTransform.translate = camera->transform_.translate;
-			startTransform.rotate = MakeQuaternionFromEuler(camera->transform_.rotate);
-			startTransform.translate = camera->transform_.translate;
-
+			startTransform.translate = camera->GetTranslate();
+			startTransform.rotate = MakeQuaternionFromEuler(camera->GetRotate());
+			
 			// ターゲットトランスフォーム計算
 			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
 			targetTransform.rotate = MakeQuaternionFromEuler(it->second->GetUniqueCamera()->GetTransform().rotate);
-			targetTransform.translate = it->second->GetUniqueCamera()->GetTransform().translate;
-
+			
 		}
 	}
 }
 
-void CameraManager::UpadateImGui()
-{
+void CameraManager::UpadateImGui() {
 
 #ifdef _DEBUG
 	ImGui::Begin("engine");
 	if (ImGui::CollapsingHeader("CameraManeger")) {
-		ImGui::DragFloat3("Translate", &camera->transform_.translate.x, 0.1f);	// 位置
-		ImGui::DragFloat3("Rotate", &camera->transform_.rotate.x, 0.01f);		// 回転
+		Vector3 translate = camera->GetTranslate();
+		ImGui::DragFloat3("Translate", &translate.x, 0.1f);	// 位置
+		camera->SetTranslate(translate);
+		Vector3 rotate = camera->GetRotate();
+		ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);		// 回転
+		camera->SetRotate(rotate);
 		ImGui::Checkbox("isGameCamera", &isGameCamera);							// カメラを使用するか
 		bool isPro = camera->GetIsProjection();									// プロジェクション設定
 		ImGui::Checkbox("isProjection", &isPro);
 		camera->SetIsProjection(isPro);
-		if (ImGui::Button("cameraPos")) {	// 位置回転
-			camera->transform_.translate = { 0,20,-175 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos2")) {	// 位置回転
-			camera->transform_.translate = { -30,10,-140 };
-			camera->transform_.rotate = { 0,0,0 };
-		}
-		if (ImGui::Button("cameraPos3")) {	// 位置回転
-			camera->transform_.translate = { 0,500,0 };
-			camera->transform_.rotate = { Math::DegreesToRadians(90),0,0 };
-		}
-		if (ImGui::Button("cameraPos4")) {	// 位置回転
-			camera->transform_.translate = { 0,60,-220 };
-			camera->transform_.rotate = { Math::DegreesToRadians(10),0,0 };
-		}
-
-
 	}
 	ImGui::End();
 
@@ -160,9 +141,13 @@ void CameraManager::UpadateImGui()
 		// 各カメラのSRT設定
 		for (auto& cameraData : cameras) {
 			if (ImGui::TreeNode(cameraData.first.c_str())) {
-				ImGui::DragFloat3("Translate", &cameraData.second->GetUniqueCamera()->transform_.translate.x, 0.1f);
-				ImGui::DragFloat3("Rotate", &cameraData.second->GetUniqueCamera()->transform_.rotate.x, 0.01f);
-				ImGui::DragFloat3("Scale", &cameraData.second->GetUniqueCamera()->transform_.scale.x, 0.01f);
+				Vector3 translate = cameraData.second->GetUniqueCamera()->GetTranslate();
+				Vector3 rotate = cameraData.second->GetUniqueCamera()->GetRotate();
+				Vector3 scale = cameraData.second->GetUniqueCamera()->GetScale();
+				ImGui::DragFloat3("Translate", &translate.x, 0.1f);
+				ImGui::DragFloat3("Rotate", &rotate.x, 0.01f);
+				ImGui::DragFloat3("Scale", &scale.x, 0.01f);
+				cameraData.second->GetUniqueCamera()->SetTransform({scale,rotate,translate});
 
 				// 使う
 				if (ImGui::Button("use")) {

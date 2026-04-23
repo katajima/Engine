@@ -19,7 +19,8 @@ public:
 	void Update() override;
 
 private:
-
+	// 統括
+	std::unique_ptr<CameraController> controller = nullptr;
 
 private: // 一旦
 

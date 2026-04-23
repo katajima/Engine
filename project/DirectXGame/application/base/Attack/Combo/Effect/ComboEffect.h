@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXGame/engine/struct/Vector3.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
-
+#include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 
 class CameraManager;		// カメラ
 namespace Character {
@@ -49,14 +49,6 @@ namespace Combo {
 	/// </summary>
 	class ComboEffect {
 	public:
-		struct Data {
-			// 開始時間
-			float startTmer = 0.1f;
-			// 生存時間
-			float lifeTime = 0.5f;
-		};
-
-
 		// 開始
 		void Enter(Character::BaseCharacter* owner);
 
@@ -68,15 +60,12 @@ namespace Combo {
 
 		// トレイルするか
 		bool IsEffectTrail(float timer) const {
-			return data_.startTmer <= timer && timer <= (data_.lifeTime + data_.startTmer);
+			return data_.trailEffectStartTime <= timer && 
+				timer <= (data_.trailEffectLifeTime + data_.trailEffectStartTime);
 		}
-
-
-		// データ取得
-		Data& GetData() { return data_; }
-
+		GloblEffectData& GetData() { return data_; }
 	private:
-		Data data_;
+		GloblEffectData data_;
 
 
 		BaseWeapon* weapon = nullptr;

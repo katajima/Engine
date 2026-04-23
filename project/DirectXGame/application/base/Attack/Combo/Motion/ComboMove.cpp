@@ -98,8 +98,8 @@ namespace Combo {
 	}
 
 	void ComboMove::MoveTypeProcess(float timer, float dt) {
-		bool isStart = data_.moveWindowStart <= timer;		// 受付開始時間を過ぎたら
-		bool isEnd = data_.moveWindowEnd >= timer;			// 受付終了時間より前なら
+		bool isStart = data_.moveWindow.startTime <= timer;		// 受付開始時間を過ぎたら
+		bool isEnd = data_.moveWindow.endTime >= timer;			// 受付終了時間より前なら
 
 		if (isMove_ && isStart && isEnd) {
 			MoveRequest request{};

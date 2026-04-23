@@ -64,13 +64,13 @@ void Engine::LineMeshData::AddLine(const Vector3& start, const Vector3& end, con
 void Engine::LineMeshData::AddCameraLine(const Camera& camera, const Vector4& color)
 {
 	// --- カメラのパラメータ取得 ---
-	float fovY = camera.fovY_;
-	float aspect = camera.aspect_;
-	float nearZ = camera.nearClip_;
-	float farZ = camera.farClip_;
+	float fovY = camera.GetFovY();
+	float aspect = camera.GetAspect();
+	float nearZ = camera.GetNearZ();
+	float farZ = camera.GetFarZ();
 
 	// --- カメラのワールド行列と位置・向き取得 ---
-	Matrix4x4 worldMatrix = camera.transform_.GetWorldMatrix(); // または camera->worldMatrix_
+	Matrix4x4 worldMatrix = camera.GetWorldMatrix(); 
 	Vector3 camPos = Vector3(worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2]);
 
 	Vector3 right = Vector3(worldMatrix.m[0][0], worldMatrix.m[0][1], worldMatrix.m[0][2]);

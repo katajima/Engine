@@ -77,27 +77,25 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
-		globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
-		globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
-
+		// エフェクト
+		{
+			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
+			globalVariables->AddItem(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+		}
 		// 条件
 		{
 			globalVariables->AddItem(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
 			globalVariables->AddItem(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
 			globalVariables->AddItem(name, "コンボ終了時間", data.condition.stateEndTime);
 			globalVariables->AddItem(name, "コンボ移行時間", data.condition.stateNextTime);
-
-
 			globalVariables->AddItem(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
 			globalVariables->AddItem(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
 			globalVariables->AddItem(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
 			globalVariables->AddItem(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);
-
-
-
 			globalVariables->AddEnumItem(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
 			globalVariables->AddItem(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->AddItem(name, "コンボキャンセル可能", data.condition.isCancel);
+			globalVariables->AddItem(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
 		}
 		// アニメーション
 		{
@@ -115,8 +113,8 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ開始時に重力速度リセット", data.move.isResetGravity);
 
 			globalVariables->AddItem(name, "移動スピード", data.move.moveSpeed);
-			globalVariables->AddItem(name, "コンボ中の移動開始時間", data.move.moveWindowStart);
-			globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindowEnd);
+			globalVariables->AddItem(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
+			globalVariables->AddItem(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
 			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.radius);
@@ -180,32 +178,26 @@ namespace Combo {
 
 	void Combo::System::GetGlobalComboData(const std::string& name, GlobalData& data) {
 		
+		// エフェクト
+		{
+			data.effect.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
+			data.effect.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
+		}
 		// 条件
 		{
 			data.condition.stateInput.startTime = globalVariables->GetValue<float>(name, "コンボ入力受付開始時間");
 			data.condition.stateInput.endTime = globalVariables->GetValue<float>(name, "コンボ入力受付終了時間");
 			data.condition.stateEndTime = globalVariables->GetValue<float>(name, "コンボ終了時間");
 			data.condition.stateNextTime = globalVariables->GetValue<float>(name, "コンボ移行時間");
-
-
-
 			data.condition.stateCancel.startTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付開始時間");
 			data.condition.stateCancel.endTime = globalVariables->GetValue<float>(name, "コンボキャンセル受付終了時間");
-
 			data.condition.stateMoveCancel.startTime = globalVariables->GetValue<float>(name, "コンボ移動キャンセル受付開始時間");
 			data.condition.stateMoveCancel.endTime = globalVariables->GetValue<float>(name, "コンボ移動キャンセル受付終了時間");
-
 			data.condition.endConditionType = globalVariables->GetEnumValue<Combo::EndConditionType>(name, "終了条件タイプ");
 			data.condition.isCompulsionNext = globalVariables->GetValue<bool>(name, "コンボ強制移行");
 			data.condition.isCancel = globalVariables->GetValue<bool>(name, "コンボキャンセル可能");
+			data.condition.isMoveCancel = globalVariables->GetValue<bool>(name, "コンボ移動キャンセル可能");
 		}
-
-
-		data.trailEffectStartTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)発生時間");
-		data.trailEffectLifeTime = globalVariables->GetValue<float>(name, "エフェクト(トレイル)生存時間");
-
-
-
 		// アニメーション
 		{
 			data.animation.animationName = globalVariables->GetValue<std::string>(name, "アニメーション名前");
@@ -222,8 +214,8 @@ namespace Combo {
 			data.move.isResetGravity = globalVariables->GetValue<bool>(name, "コンボ開始時に重力速度リセット");
 
 			data.move.moveSpeed = globalVariables->GetValue<Vector3>(name, "移動スピード");
-			data.move.moveWindowStart = globalVariables->GetValue<float>(name, "コンボ中の移動開始時間");
-			data.move.moveWindowEnd = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
+			data.move.moveWindow.startTime = globalVariables->GetValue<float>(name, "コンボ中の移動開始時間");
+			data.move.moveWindow.endTime = globalVariables->GetValue<float>(name, "コンボ中の移動終了時間");
 			data.move.isCompulsionMove = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
 			data.move.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
 			data.move.lockOnData.radius = globalVariables->GetValue<float>(name, "ロックオン半径");
@@ -286,27 +278,27 @@ namespace Combo {
 	}
 
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
-		globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
-		globalVariables->SetValue(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
-
-
-		globalVariables->SetValue(name, "コンボ終了時間", data.condition.stateEndTime);
-		globalVariables->SetValue(name, "コンボ移行時間", data.condition.stateNextTime);
-
-		globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
-		globalVariables->SetValue(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
-		globalVariables->SetValue(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
-		globalVariables->SetValue(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);
-
-
-		globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.trailEffectStartTime);
-		globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.trailEffectLifeTime);
-
-		globalVariables->SetEnumValue(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
-		globalVariables->SetValue(name, "コンボ強制移行", data.condition.isCompulsionNext);
-		globalVariables->SetValue(name, "コンボキャンセル可能", data.condition.isCancel);
-
-
+		
+		// エフェクト
+		{
+			globalVariables->SetValue(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
+			globalVariables->SetValue(name, "エフェクト(トレイル)生存時間", data.effect.trailEffectLifeTime);
+		}
+		// 条件
+		{
+			globalVariables->SetValue(name, "コンボ入力受付開始時間", data.condition.stateInput.startTime);
+			globalVariables->SetValue(name, "コンボ入力受付終了時間", data.condition.stateInput.endTime);
+			globalVariables->SetValue(name, "コンボ終了時間", data.condition.stateEndTime);
+			globalVariables->SetValue(name, "コンボ移行時間", data.condition.stateNextTime);
+			globalVariables->SetValue(name, "コンボキャンセル受付開始時間", data.condition.stateCancel.startTime);
+			globalVariables->SetValue(name, "コンボキャンセル受付終了時間", data.condition.stateCancel.endTime);
+			globalVariables->SetValue(name, "コンボ移動キャンセル受付開始時間", data.condition.stateMoveCancel.startTime);
+			globalVariables->SetValue(name, "コンボ移動キャンセル受付終了時間", data.condition.stateMoveCancel.endTime);	
+			globalVariables->SetEnumValue(name, "終了条件タイプ", data.condition.endConditionType, "EndConditionType");
+			globalVariables->SetValue(name, "コンボ強制移行", data.condition.isCompulsionNext);
+			globalVariables->SetValue(name, "コンボキャンセル可能", data.condition.isCancel);
+			globalVariables->SetValue(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
+		}
 		// アニメーション
 		{
 			globalVariables->SetValue(name, "アニメーション名前", data.animation.animationName);
@@ -320,8 +312,8 @@ namespace Combo {
 		}
 		// 移動
 		{
-			globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindowStart);
-			globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindowEnd);
+			globalVariables->SetValue(name, "コンボ中の移動開始時間", data.move.moveWindow.startTime);
+			globalVariables->SetValue(name, "コンボ中の移動終了時間", data.move.moveWindow.endTime);
 			globalVariables->SetValue(name, "移動スピード", data.move.moveSpeed);
 			globalVariables->SetValue(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->SetValue(name, "コンボ中の重力", data.move.isGravity);
@@ -404,6 +396,10 @@ namespace Combo {
 		data.GetComboMotion().GetComboAnimation().GetData() = gData.animation;
 		// 条件
 		data.GetComboCondition().GetData() = gData.condition;
+		// エフェクト
+		data.GetComboEffect().GetData() = gData.effect;
+
+
 		// コンボボタン設定
 		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		ComboButton bo2 = ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed);
@@ -412,11 +408,6 @@ namespace Combo {
 		button.push_back(bo);
 		button.push_back(bo2);
 		data.GetComboCondition().GetNextReceiver().SetButton(button);
-
-
-		// トレイルエフェクト
-		data.GetComboEffect().GetData().startTmer = gData.trailEffectStartTime;
-		data.GetComboEffect().GetData().lifeTime = gData.trailEffectLifeTime;
 	}
 
 	void System::CreateCombo(const std::string& comboNodeName) {

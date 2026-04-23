@@ -24,20 +24,24 @@ namespace Combo {
 	};
 
 	// コンボタイプ
-	enum class Type{
+	enum class Type {
 		kNone,		// なし
 		kMelle,		// 近距離
 		kRange,		// 遠距離
 		kMix,		// 合わせ
 	};
-
+	// 時間
+	struct StateTime {
+		// 入力受付時間
+		float startTime = 0.1f;
+		// 入力終了時間
+		float endTime = 0.5f;
+	};
 
 	// 保存項目移動データ
 	struct GlobalMove {
-		// 移動受付スタート
-		float moveWindowStart = 0.1f;
-		// 移動受付エンド
-		float moveWindowEnd = 0.5f;
+		// 受付時間
+		StateTime moveWindow{};
 		// 移動速度（軸ごと）
 		// X=Right Y=Up Z=Forward
 		Vector3 moveSpeed = { 0.0f, 0.0f, 0.0f };
@@ -76,11 +80,11 @@ namespace Combo {
 		// 移動方向とキャラクターの向く方向を一致させるか？
 		bool alignCharacterToMovement = true;
 
+		// ターゲット方向を向くか
+		bool isTargetDirection = false;
+
 		// 移動タイプ
 		MoveType moveType = MoveType::kTraget;
-		
-
-
 		// ロックオンタイプ
 		LockOnData lockOnData{};
 	};
@@ -88,28 +92,20 @@ namespace Combo {
 	// 保存項目アニメーション
 	struct GlobalAnimation {
 		// アニメーション名
-		std::string animationName = "";	
+		std::string animationName = "";
 		// アニメーションスピード
-		float animationSpeed = 1.0f;		
+		float animationSpeed = 1.0f;
 		// アニメーションブレンド時間
-		float animationBlendTime = 0.1f;	
+		float animationBlendTime = 0.1f;
 		// アニメーションループ
-		bool animationLoop = false;	
+		bool animationLoop = false;
 		// アニメーションを一定の場所で止めるか？
 		bool animationStop = false;
 		// アニメーションの止めるタイミング
 		float animationStopTime = 1.0f;
 	};
 
-	// 時間
-	struct StateTime {
-		// 入力受付時間
-		float startTime = 0.1f;	
-		// 入力終了時間
-		float endTime = 0.5f;		
-	};
-
-	// 条件クラス
+	// 保存項目条件データ
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
@@ -118,24 +114,49 @@ namespace Combo {
 		// 移動キャンセル受付
 		StateTime stateMoveCancel{};
 		// キャンセル可能か
-		bool isCancel = true;		
+		bool isCancel = true;
 		// キャンセル可能かどうか(スティック移動での)
 		bool isMoveCancel = true;
-
 		// ステート終了時間
-		float stateEndTime = 0.5f;			
+		float stateEndTime = 0.5f;
 		// ステート移行時間
-		float stateNextTime = 0.45f;		
+		float stateNextTime = 0.45f;
 		// 強制的に次のコンボに移行するか 
-		bool isCompulsionNext = false;		
+		bool isCompulsionNext = false;
 		///	終了条件 ///
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
+	};
+
+	// 保存項目用カメラデータ
+	struct GlobalCamera {
+		// 使用カメラ
+		std::string cameraName = "no";
+		// 元のキャラクターに使用しているカメラ名
+		std::string baseCameraName = "no";
+		// カメラを変更するか
+		bool isChangeCamera = false;
+		// 移動補間
+		float interpolation = 0.0f;
+		// 
+		float shakeCameraPower;
+		//
+		float shakeCameraTime;
+		// 
+		float zoomCameraAmount;
+	};
+
+	// 保存項目エフェクトデータ
+	struct GloblEffectData {
+		// トレイル発生時間
+		float trailEffectStartTime = 0.1f;
+		// トレイル生存時間
+		float trailEffectLifeTime = 1.0;
 	};
 
 	// 保存項目用コンボデータ
 	struct GlobalData {
 		// 攻撃タイプ
-		Type type = Type::kMelle;	
+		Type type = Type::kMelle;
 		// 敵に送るリアクションデータ
 		HitReactionData hitReaction{};
 		// ヒットボックス関係
@@ -146,9 +167,7 @@ namespace Combo {
 		GlobalAnimation animation{};
 		// 条件
 		GlobalCondition condition{};
-		
-
-		float trailEffectStartTime = 0.1f;	// トレイル発生時間
-		float trailEffectLifeTime = 1.0;	// トレイル生存時間
+		// エフェクト
+		GloblEffectData effect{};
 	};
 };

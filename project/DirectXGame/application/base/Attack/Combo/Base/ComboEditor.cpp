@@ -199,11 +199,12 @@ namespace Combo {
 			"特殊ケース",
 			};
 			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
+
+
+			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
+			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
+			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
 		}
-
-		ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
-		ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
-
 	}
 
 	void EditorBlock::ImGuiMove() {
@@ -500,16 +501,16 @@ namespace Combo {
 
 			// 移動時間
 			data.move = comboEditorBlocks_[it.first].GetData().move;
-			data.move.moveWindowStart = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
-			data.move.moveWindowEnd = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
+			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
+			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
 		
 			
 			// アニメーションスピード
 			data.animation = comboEditorBlocks_[it.first].GetData().animation;
 		
 			// エフェクト
-			data.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
-			data.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.trailEffectStartTime;
+			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
+			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 
 		
 			

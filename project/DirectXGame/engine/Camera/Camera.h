@@ -20,10 +20,7 @@ namespace Engine {
 	class Input;
 	class CameraCommon;
 	// カメラ
-	class Camera
-	{
-	private:
-
+	class Camera {
 	public: // メンバ関数
 		// コンストラクタ
 		Camera();
@@ -38,13 +35,14 @@ namespace Engine {
 		void UpdateMatrix();
 		// 更新
 		void UpdateMatrix(const Vector3& targetPosition);
-		// ImGui更新
-		void UpdateImGui();
 		// トランスファー更新
 		void TransferMatrix();
 
 		// 向いている方向
 		void LookAt(const Vector3& cameraPosition, const Vector3& targetPosition, const Vector3& upVector);
+		
+		
+	public: // 取得　設定
 		// Fov設定
 		void SetFovY(const float fovY) { fovY_ = fovY; }
 		// アスペクト比設定
@@ -66,59 +64,61 @@ namespace Engine {
 		const Vector3& GetRotate() const { return transform_.rotate; }
 		// 位置取得
 		const Vector3& GetTranslate() const { return transform_.translate; }
+		// 位置取得
+		const Vector3& GetScale() const { return transform_.scale; }
 		// トランスフォーム取得
 		const Transform& GetTransform() const { return transform_; }
+		// トランスフォーム設定
+		void SetTransform(const Transform& transform) { transform_ = transform; }
+		// 位置設定
+		void SetTranslate(const Vector3& translate) { transform_.translate = translate; }
+		// 回転設定
+		void SetRotate(const Vector3& rotate) { transform_.rotate = rotate; }
+		// スケール設定
+		void SetScale(const Vector3& scale) { transform_.scale = scale; }
 		// Nearクリップ取得
 		const float& GetNearZ() const { return nearClip_; }
 		// Farクリップ取得
 		const float& GetFarZ() const { return farClip_; }
-		//
+		// FovY取得
+		const float& GetFovY() const { return fovY_; }
+		// aspect取得
+		const float& GetAspect() const { return aspect_; }
+
+
+		// 向いている方向取得
 		Vector3 GetForward() const;
-		// ポストエフェクトマネージャー取得
-		PostEffectManager* GetPostEffectManager() { return postEffectManager; }
-
-		// カメラシェイクさせる
-		void SetShake(float time, Vector3 diectionRange);
-
 		// プロジェクションしているか取得
 		bool GetIsProjection() const { return isProjection_; }
-
 		// プロジェクション設定
 		void SetIsProjection(bool isProjection) { isProjection_ = isProjection; }
-
+	public: // ポストエフェクト
 		// レンダーテクスチャ追加
 		void AddEffectBlock(const std::string name, PostEffectBlockType type, bool use = true);
-
-		// ポストエフェクトのブロック取得
-		std::vector<Engine::PostEffectBlock*> GetPostEffectBlocks();
-
 		// ポストエフェクトをクリア
 		void Clear() { effectBlocks_.clear(); }
-
+		// ポストエフェクトのブロック取得
+		std::vector<Engine::PostEffectBlock*> GetPostEffectBlocks();
+		// ポストエフェクトマネージャー取得
+		PostEffectManager* GetPostEffectManager() { return postEffectManager; }
+	private: // デバッグ
+		// ImGui更新
+		void UpdateImGui();
 	private:
-		float shakeTime_ = 0;
-		Vector3 shakeDirectionRange_{};
-#ifdef _DEBUG
-		float debugShakeTime_ = 0.1f;
-		Vector3 debugShakeDirectionRange_ = { 0.1f,0.1f,0.1f };
-#endif // _DEBUG
-
-
-	public:
-		static bool isShake_;
 		bool isProjection_ = true;
-
 		float fovY_ = 0.45f;
-		float aspect_ = float(1280) / float(720);
 		float nearClip_ = 0.1f;
 		float farClip_ = 10000.0f;
-	public:
+		float aspect_ = float(1280) / float(720);
 		Transform transform_;
+	private:
 		Matrix4x4 worldMatrix_;
 		Matrix4x4 viewMatrix_;
 		Matrix4x4 projectionMatrix_;
 		Matrix4x4 viewProjectionMatrix_;
-
+	private:// ポストエフェクト
+		std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
+	private: // GPU
 		// GPUデータ
 		struct DataGPU {
 			Vector3 worldPosition;
@@ -126,18 +126,17 @@ namespace Engine {
 			Vector3 normal;
 			float padding2[1];
 		};
+		// GPUに送るデータ
 		DataGPU* data;
-	private:
-		DirectXCommon* dxCommon = nullptr;
-		PostEffectManager* postEffectManager = nullptr;
-		std::vector<std::unique_ptr<PostEffectBlock>> effectBlocks_;
-		Input* input_;
-
+		// リソース
 		Microsoft::WRL::ComPtr < ID3D12Resource> resource;
-
-
-		float move = 0.3f;		// 移動量
-		float speed = 1.0f;		// 速度
+	private: // 貰いもの
+		// ダイレクトX共通クラス
+		DirectXCommon* dxCommon = nullptr;
+		// ポストエフェクト管理
+		PostEffectManager* postEffectManager = nullptr;
+		// 入力
+		Input* input = nullptr;
 	};
 }
 

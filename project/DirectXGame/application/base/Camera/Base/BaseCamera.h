@@ -1,15 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
-
-
-// カメラの各速度
-struct CameraSRTSpeed
-{
-	float scale = 0.0f;
-	Vector3 rotate = {};
-	float translate = 0.0f;
-};
-
+#include "CameraController.h"
 
 // 前方宣言
 class CameraManager;
@@ -74,8 +65,7 @@ protected:
 	
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	std::string name_;
-
-	CameraSRTSpeed srtSpeed_;				// SRTスピード
+protected:
 	Engine::Object3d* lockOnObject = nullptr;		// ロックオン対象
 	CameraManager* cameraManeger = nullptr;	// カメラ管理
 protected:

@@ -175,10 +175,8 @@ void CharacterDebugScene::Finalize(){
 	collisionManager_->Clear();
 }
 
-void CharacterDebugScene::Update()
-{
-	Engine::Camera::isShake_ = false;
-
+void CharacterDebugScene::Update(){
+	
 	inputSystem_->Update(GetTime());
 
 	// リトライ
