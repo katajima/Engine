@@ -168,6 +168,7 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/text/stamina.dds");
 	textureManager->LoadTexture("resources/Texture/text/over.dds");
 	textureManager->LoadTexture("resources/Texture/text/gameStartPreparation.dds");
+	textureManager->LoadTexture("resources/Texture/text/textScore.dds");
 
 
 

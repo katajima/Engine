@@ -17,6 +17,8 @@
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
 #include "DirectXGame/application/base/UI/ResultUI.h"
+#include "DirectXGame/application/base/UI/ResultScoreUI.h"
+
 #include "DirectXGame/application/base/Stage/ResultStage.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
@@ -55,6 +57,8 @@ private:
 	std::unique_ptr<ResultStage> resultStage_;
 	// リザルトUI
 	std::unique_ptr<ResultUI> resultUI_;
+	// リザルトスコアUI
+	std::unique_ptr<ResultScoreUI> resultScoreUI_;
 	// リザルトシステム
 	std::unique_ptr<ResultSystem> resultSystem_;
 	//

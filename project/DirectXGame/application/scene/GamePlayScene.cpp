@@ -13,8 +13,8 @@
 
 #pragma region Initialize
 // 初期化
-void GamePlayScene::Initialize()
-{
+void GamePlayScene::Initialize() {
+	GetSceneData().score = 0;
 	// Input
 	input = GetInput();
 
@@ -133,7 +133,7 @@ void GamePlayScene::Initialize()
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	// 静的Octreeコライダー
-	collisionManager_->BuildStaticSceneOctree();
+	//collisionManager_->BuildStaticSceneOctree();
 
 
 	// UI
@@ -241,7 +241,7 @@ void GamePlayScene::Update()
 	else {
 		GetSceneData().playerDie = true;
 	}
-	
+	GetSceneData().score = characterManager_->GetScore();
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
 	// カメラ管理の更新
@@ -275,8 +275,7 @@ void GamePlayScene::Draw2D(){
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables() {}
 
-void GamePlayScene::CheckAllCollisions()
-{
+void GamePlayScene::CheckAllCollisions() {
 	// キャラクターセット
 	for (auto caracter : characterManager_->GetCharacters()) {
 		if (caracter->GetColliderComponent()) {

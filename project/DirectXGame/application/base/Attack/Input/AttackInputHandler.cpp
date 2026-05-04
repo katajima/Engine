@@ -44,13 +44,13 @@ AttackDecision AttackBranchResolver::Resolve(const AttackContext& ctx,
         break;
 
     case ActionInput::Skill:
-        if (ctx.stamina < 30) {
+        if (ctx.stamina < 25) {
             return result;
         }
         result.accepted = true;
         result.shouldChangeToAttackState = true;
-        result.startComboName = "SkillAttack01";
-        result.staminaCost = 30;
+        result.startComboName = ctx.isLanding ? "SkillAttack01" :"JumpSkillAttack01";
+        result.staminaCost = 25;
         break;
 
     default:

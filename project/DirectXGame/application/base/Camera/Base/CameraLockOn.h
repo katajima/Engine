@@ -8,6 +8,9 @@ public:
 	// 更新
 	Vector3 Update(float dt);
 
+	CameraLockOnData& GetData() { return data; }
+
+	
 private:
 	CameraLockOnData data;
 };

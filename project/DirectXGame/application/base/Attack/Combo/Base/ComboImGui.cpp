@@ -33,14 +33,17 @@ void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, b
 
 
 void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
-	int& currentFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
+	int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
 	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
 
 	if (ImGui::CollapsingHeader(imGuiName.c_str())) {
 		ImGui::SliderFloat("アニメーションスピード", &animationData.animationSpeed, 0.1f, 10.0f, "%.2f");
-		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.1f, 10.0f, "%.2f");
+		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.0f, 10.0f, "%.2f");
 		ImGui::Checkbox("アニメーションループ", &animationData.animationLoop);
-		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.1f, 10.0f, "%.2f");
+
+		float endTime = static_cast<float>(maxFrame) /60.0f;
+
+		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
 		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
 
 		// BeginComboでの選択

@@ -23,7 +23,7 @@ namespace Combo {
 		// 次のコンボに移行するか
 		bool GetIsNext() const { return isNext_; }
 		// ボタン設定
-		void SetButton(const std::vector<ComboButton>& button) { comboSequence_.RegisterCombo(button); }
+		void SetButton(const std::vector<ComboButton>& button);
 	private:
 		ComboSequence comboSequence_;			// ボタン条件
 		// 受付可能か

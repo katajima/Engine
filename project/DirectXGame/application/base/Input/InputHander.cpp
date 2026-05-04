@@ -7,24 +7,19 @@ namespace Character {
 	{
 	}
 
-	void MoveCommand::Exec(Character::BaseCharacter& character)
-	{
+	void MoveCommand::Exec(Character::BaseCharacter& character){
 		character.Move();
 	}
-	void JampCommand::Exec(Character::BaseCharacter& character)
-	{
+	void JampCommand::Exec(Character::BaseCharacter& character){
 		character.Jump();
 	}
-	void AttackCommand::Exec(Character::BaseCharacter& character)
-	{
+	void AttackCommand::Exec(Character::BaseCharacter& character){
 		character.Attack();
 	}
-	void HeavyAttackCommand::Exec(Character::BaseCharacter& character)
-	{
+	void HeavyAttackCommand::Exec(Character::BaseCharacter& character){
 		character.HeavyAttack();
 	}
-	void SkillAttackCommand::Exec(Character::BaseCharacter& character)
-	{
+	void SkillAttackCommand::Exec(Character::BaseCharacter& character){
 		character.SkillAttack();
 	}
 

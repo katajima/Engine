@@ -39,7 +39,7 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	playerInputData_.lockOnHeld = rt > triggerDeadZone;
 
 	// スキル入力押した瞬間
-	playerInputData_.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+	playerInputData_.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 
 	// 必殺技入力押した瞬間
 	playerInputData_.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);

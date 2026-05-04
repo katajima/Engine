@@ -35,6 +35,10 @@ void ResultScene::Initialize() {
 	resultUI_ = std::make_unique<ResultUI>();
 	resultUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 
+	// リザルトスコアUI初期化
+	resultScoreUI_ = std::make_unique<ResultScoreUI>();
+	resultScoreUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
 	overUI_ = std::make_unique<Engine::Sprite>();
 	overUI_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/text/over.dds");
 	overUI_->SetPosition({640,200});
@@ -69,6 +73,10 @@ void ResultScene::Update() {
 	resultUI_->SetSelectedIndex(resultSystem_->GetSelectedIndex());
 	resultUI_->Update(GetTime());
 
+	// UI更新
+	resultScoreUI_->SetScore(GetSceneData().score);
+	resultScoreUI_->Update(GetTime());
+
 	overUI_->Update();
 
 	effect_->Update(GetTime());
@@ -85,6 +93,7 @@ void ResultScene::Draw3D() {
 void ResultScene::Draw2D() {
 	resultUI_->Draw();
 
+	resultScoreUI_->Draw();
 
 	if (GetSceneData().playerDie) {
 		overUI_->Draw();

@@ -25,9 +25,6 @@ class InputSystem;
 
 class ResultSystem {
 public:
-
-	void fhfhfh();
-
 	/// <summary>
 	/// 初期化
 	/// </summary>

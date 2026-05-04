@@ -26,10 +26,6 @@ namespace Combo {
 		HitBox::CollData& GetCollData() { return collData_;}
 		// コライダーデータ追加
 		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& reaction);
-		// 使うヒットボックス名設定
-		void AddUseHitBox(const std::string& name) { useHitBoxName_.push_back(name); };
-		// 使うヒットボックス名クリーン
-		void ClearUseHitBox() { useHitBoxName_.clear(); }
 		// 親子設定
 		void SetPerent(Engine::WorldTransform* perent) { this->perent = perent; };
 		//
@@ -52,9 +48,6 @@ namespace Combo {
 	private:
 		// コライダーデータ
 		HitBox::CollData collData_;
-		// 使うヒットボックス名
-		std::vector<std::string> useHitBoxName_;
-
 	private:
 		// ヒットボックス出現
 		bool isPopHitBox_ = false;

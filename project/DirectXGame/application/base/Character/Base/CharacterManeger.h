@@ -30,8 +30,7 @@ namespace Character {
 	/// <summary>
 	/// キャラクターマネージャークラス
 	/// </summary>
-	class CharacterManager
-	{
+	class CharacterManager {
 	public:
 		// 初期化
 		void Initialize(InputSystem* inputSystem,HitBox::System* hitBoxSystem,Engine::EntityManager* entity3DManager,
@@ -104,6 +103,8 @@ namespace Character {
 		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb);
 	public:
 		void Clear(Type type);
+
+		float GetScore() { return score; }
 	private:
 		std::vector<std::unique_ptr<BaseCharacter>> character_;	// キャラクター
 
@@ -112,6 +113,8 @@ namespace Character {
 		uint32_t enemyCount_ = 0;	// 敵カウンター
 
 		std::unique_ptr<CrowdManager> crowdManager_;	// 群衆AI
+
+		float score = 0.0f;
 
 		// キャラクター用保存項目データ
 		std::map<std::string, GlobalData> globalDatas_;

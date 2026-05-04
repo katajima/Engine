@@ -41,6 +41,7 @@ namespace Character {
 
 		void SetTargetCharacters(BaseCharacter* target);
 
+		void aa();
 
 	public:
 		// ID設定
@@ -96,6 +97,7 @@ namespace Character {
 		bool isStopping_ = false;
 		// グローバルデータ
 		EnemyGlobalData globalData_;
+		float dieScore = 100.0f;
 	protected:
 		Engine::WorldTransform worldEffect_;
 	};

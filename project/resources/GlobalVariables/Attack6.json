@@ -136,6 +136,10 @@
             "type": "float",
             "value": 1.25
         },
+        "コンボ移動キャンセル可能": {
+            "type": "bool",
+            "value": true
+        },
         "コンボ移行時間": {
             "type": "float",
             "value": 0.8333333134651184

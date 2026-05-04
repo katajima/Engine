@@ -31,6 +31,7 @@ struct AttackDecision {
 	float staminaCost = 0;
 };
 
+// 判定で攻撃を選別するクラス
 class AttackBranchResolver {
 public:
 	static AttackDecision Resolve(const AttackContext& ctx, ActionInput input);

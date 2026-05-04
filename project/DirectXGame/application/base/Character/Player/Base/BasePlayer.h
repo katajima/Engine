@@ -56,6 +56,9 @@ namespace Character {
 		// ターゲットキャラクターを設定
 		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
 
+		void SetTargetCharacter(const BaseCharacter* targetCharacters) { this->targetCharacters.push_back(targetCharacters); }
+
+
 		// リロード
 		virtual void Reload() {};
 		// コンボデータをシーケンサー適応

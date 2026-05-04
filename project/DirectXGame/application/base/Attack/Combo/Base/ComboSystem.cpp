@@ -403,10 +403,13 @@ namespace Combo {
 		// コンボボタン設定
 		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		ComboButton bo2 = ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed);
+		ComboButton bo3 = ComboButton(ComboGamePadButton::GAMEPAD_Y, ComboButtonInputType::kPressed);
+
 		// 押し続ける
 		std::vector<ComboButton> button;
 		button.push_back(bo);
 		button.push_back(bo2);
+		button.push_back(bo3);
 		data.GetComboCondition().GetNextReceiver().SetButton(button);
 	}
 
@@ -417,8 +420,6 @@ namespace Combo {
 		CreateGlobalData(comboNodeName);
 		// データ設定
 		SetData(data, comboGlobalDatas_[comboNodeName]);
-		// 使うヒットボックスクリア
-		data.GetComboHitBox().ClearUseHitBox();
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName, data);
 	}

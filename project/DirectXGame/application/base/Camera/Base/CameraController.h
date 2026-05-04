@@ -6,7 +6,7 @@
 #include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"
 #include "DirectXGame/application/base/Camera/Base/CameraRotation.h"
 #include "DirectXGame/application/base/Camera/Base/CameraShake.h"
-
+#include "DirectXGame/application/base/Camera/Base/CameraCollision.h"
 
 // カメラ統括クラス
 class CameraController {
@@ -21,7 +21,7 @@ public:
 	// ロックオンターゲット設定
 	void SetLockOnTraget(const Engine::WorldTransform* target) { this->lockOnTarget = target; };
 	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+	void SetTraget(const Engine::WorldTransform* target);
 
 
 private:
@@ -31,6 +31,8 @@ private:
 	std::unique_ptr<CameraRotation> rotation = nullptr;
 	// ロックオン
 	std::unique_ptr<CameraLockOn> lockOn = nullptr;
+	// 
+	std::unique_ptr<CameraCollision> collision = nullptr;
 private:
 	const InputSystem* input = nullptr;
 	Engine::Camera* camera = nullptr;

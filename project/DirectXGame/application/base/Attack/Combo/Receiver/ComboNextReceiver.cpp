@@ -30,5 +30,10 @@ namespace Combo {
 			}
 		}
 	};
+
+	void NextReceiver::SetButton(const std::vector<ComboButton>& button) { 
+		comboSequence_.RegisterCombo(button); 
+	}
+
 	
 }

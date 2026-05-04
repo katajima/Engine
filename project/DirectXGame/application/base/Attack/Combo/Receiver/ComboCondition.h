@@ -51,7 +51,7 @@ namespace Combo {
 		// データ取得
 		GlobalCondition& GetData() { return data_; }
 		// コンボ移行受付クラス取得
-		NextReceiver GetNextReceiver() const { return nextRecever_; }
+		NextReceiver& GetNextReceiver() { return nextRecever_; }
 		// コンボキャンセル受付クラス取得
 		CancelReceiver GetCancelReceiver() const { return cancelReceiver_;}
 		// コンボ終了条件クラス取得

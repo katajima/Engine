@@ -4,8 +4,9 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem)
-{
+#pragma region HitMotion
+
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem) {
 	this->owner = owner;
 	this->effectSystem = effectSystem;
 	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
@@ -23,8 +24,7 @@ void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* 
 
 }
 
-void HitMotionSystem::Update(float dt)
-{
+void HitMotionSystem::Update(float dt) {
 	DamageProcess(dt, owner->GetCharacterParameterComponent());
 
 	if (!isAction_) {
@@ -68,6 +68,7 @@ void HitMotionSystem::Update(float dt)
 	}
 }
 
+// ヒットエミッター（パーティクル）
 void HitMotionSystem::EmitHitEffect() {
 	// エフェクト座標更新
 	worldEffect_.Update();
@@ -80,6 +81,7 @@ void HitMotionSystem::EmitHitEffect() {
 	}
 }
 
+// ヒットモーション設定
 void HitMotionSystem::SetReactionData(const HitReactionData& data)
 {
 	data_ = data;
@@ -117,35 +119,39 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data)
 	damageMotions_.push_back(damageMotion);
 }
 
+// 終了したか
 bool HitMotionSystem::IsFinished() const {
 	return !isAction_ &&
 		hitStunTimer_ <= 0.0f &&
 		downTimer_ <= 0.0f;
 }
 
-bool HitMotionSystem::IsHitMotion() const
-{
+// ヒットモーション中か
+bool HitMotionSystem::IsHitMotion() const {
 	return isAction_;
 }
 
-bool HitMotionSystem::IsHitStun() const
-{
+// スタン中か
+bool HitMotionSystem::IsHitStun() const {
 	return hitStunTimer_ > 0.0f;
 }
 
-bool HitMotionSystem::IsDown() const
-{
+// ダウン中か
+bool HitMotionSystem::IsDown() const {
 	return hitMotionState_ == HitMotionState::Down;
 }
 
+// 重力は有効化
 bool HitMotionSystem::IsGravityEnabled() const {
 	return data_.gravityEnabled;
 }
 
+// 重力強度
 float HitMotionSystem::GetGravityScale() const {
 	return data_.gravityScale;
 }
 
+// 速度
 Vector3 HitMotionSystem::BuildMoveVelocity() const
 {
 	Vector3 dir = NormalizeSafe(data_.normal);
@@ -174,7 +180,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 		}
 		break;
 	}
-
 	case HitReactionType::Launch:
 	{
 		// 打ち上げは上方向主体
@@ -190,7 +195,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 		}
 		break;
 	}
-
 	case HitReactionType::WallBounce:
 	{
 		// 壁バウンド自体の反射はここではなく衝突側で処理する想定
@@ -200,7 +204,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 		}
 		break;
 	}
-
 	default:
 		break;
 	}
@@ -208,6 +211,7 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 	return velocity;
 }
 
+// 
 Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
 {
 	const float lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
@@ -217,8 +221,8 @@ Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
 	return v.Normalize();
 }
 
-void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
-{
+// 移動リクエスト
+void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
 	if (!reactionMoveSystem) {
 		return;
 	}
@@ -236,14 +240,19 @@ void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
 	reactionMoveSystem->SetRequest(request);
 }
 
-void HitMotionSystem::FinishReaction()
-{
+// 終了
+void HitMotionSystem::FinishReaction() {
 	isAction_ = false;
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
 	hitMotionState_ = HitMotionState::None;
 }
+
+#pragma endregion // ヒットモーション
+
+#pragma region MyRegion
+// ダメージ
 void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* parameter) {
 
 	for (auto& damage : damageMotions_) {
@@ -262,3 +271,4 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 	return false;
 		});
 }
+#pragma endregion

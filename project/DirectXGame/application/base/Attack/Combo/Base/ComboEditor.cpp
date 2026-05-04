@@ -60,7 +60,7 @@ namespace Combo {
 		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
 
 		// アニメーション
-		ComboImGui::ApplyAnimationToState("アニメーション", currentFrame, data_.animation,
+		ComboImGui::ApplyAnimationToState("アニメーション", currentFrame, maxFrame, data_.animation,
 			owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
 			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
 
@@ -218,7 +218,7 @@ namespace Combo {
 			Engine::ImGuiManager::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
 
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
-			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
 			
 			ImGui::DragFloat3("ローカル移動ベクトル", &data_.move.localMoveVector.x, 0.01f);
 			if (data_.move.localMoveVector.x >= 1.0f) {

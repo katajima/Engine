@@ -1,28 +1,27 @@
 #pragma once
 #include "DirectXGame/engine/Camera/CameraData.h"
 
-// カメラ追従
-class CameraFollow {
+// 
+class CameraCollision {
 public:
 
+	// 初期化
 	void Initialize();
 
 	// 更新
-	void Update(Transform& transform,float dt);
-
+	void Update(Transform& transform, float dt);
 	// ターゲット設定
 	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
 
-	// データ取得
-	CameraFollowData& GetData() { return data_; }
-	const CameraFollowData& GetData() const { return data_; }
 private:
-	// データ
-	CameraFollowData data_;
+	CameraCollisionData data_;
+	bool isCollision = true;
 	// 現在のカメラ位置
 	Vector3 currentPos_{};
-	// 初回位置合わせ済みか
-	bool isInitializedPosition_ = false;
+
+	float maxZOffset_ = 30.0f;
+	float depthScale_ = 2.0f;
+private:
 	// ターゲット
 	const Engine::WorldTransform* target = nullptr;
 };

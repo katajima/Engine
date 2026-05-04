@@ -10,7 +10,7 @@ public:
 	void Initialize();
 
 	// 更新
-	Vector3 Update(const InputSystem* input,float dt);
+	void Update(Transform& transform ,const InputSystem* input,float dt);
 
 private:
 	CameraRotationData data_;

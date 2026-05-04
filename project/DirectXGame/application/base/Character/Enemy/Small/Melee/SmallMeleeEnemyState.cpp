@@ -107,7 +107,8 @@ namespace Character {
 
 	void SmallMeleeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
-		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		character->GetSpecalPointManager()->AddPoint(
+			character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
 
 #pragma endregion

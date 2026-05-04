@@ -57,25 +57,25 @@ void InputManager::BuildGameplayActions(){
     // ---- Look（RightStick だけ例）----
     value2_[Idx(Action::Look)] = input_->GetGamePadRightStick();
 
-    // ---- Attack（Pad B）----
-    triggered_[Idx(Action::LightAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-
-    pressed_[Idx(Action::LightAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B);
-
-    released_[Idx(Action::LightAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B);
-
     // ---- Attack（Pad X）----
-    triggered_[Idx(Action::HeavyAttack)] =
+    triggered_[Idx(Action::LightAttack)] =
         input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
 
-    pressed_[Idx(Action::HeavyAttack)] =
+    pressed_[Idx(Action::LightAttack)] =
         input_->IsGamePadPressed(GamePadButton::GAMEPAD_X);
 
-    released_[Idx(Action::HeavyAttack)] =
+    released_[Idx(Action::LightAttack)] =
         input_->IsGamePadReleased(GamePadButton::GAMEPAD_X);
+
+    // ---- Attack（Pad Y）----
+    triggered_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+
+    pressed_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+
+    released_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
 
     // ---- Attack（Pad A）----
     triggered_[Idx(Action::Jump)] =
@@ -97,18 +97,15 @@ void InputManager::BuildGameplayActions(){
     released_[Idx(Action::Special)] =
         input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB);
 
-    // ---- Attack（Pad RB）----
+    // ---- Attack（Pad B）----
     triggered_[Idx(Action::Skill)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 
     pressed_[Idx(Action::Skill)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B);
 
     released_[Idx(Action::Skill)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
-
-
-   
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B);
 
     // ---- Dash（LT 押した瞬間）----
     triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f);

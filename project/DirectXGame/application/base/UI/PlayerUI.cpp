@@ -46,7 +46,7 @@ void PlayerUI::InitializeOperationUI() {
 	Engine::UIPair* normalAttackPair = GetUIPair("normalAttack");
 	normalAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
 	normalAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.dds"); // 
+	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
 	normalAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
 	normalAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
 	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
@@ -101,7 +101,7 @@ void PlayerUI::InitializeOperationUI() {
 	Engine::UIPair* skillPair = GetUIPair("skill");
 	skillPair->SetOffset(skillTextData.offset);
 	skillPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	skillPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds");
+	skillPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.dds");
 	skillPair->GetFirstSprite()->SetAnchorPoint(skillTextData.anchorPoint);			// アンカーポイント設定
 	skillPair->GetFirstSprite()->SetSize(skillTextData.size);				// サイズ設定
 	skillPair->GetFirstSprite()->SetColor(skillTextData.color);	// 色設定

@@ -63,6 +63,8 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 		targetCharacters.end(),
 		[&](const Character::BaseCharacter* a, const Character::BaseCharacter* b)
 		{
+			if (!a || !b) return false;
+
 			bool is = a->GetAlive() && a->GetCurrentMainState() != Character::CharacterMainState::Die;
 			bool is2 = b->GetAlive() && b->GetCurrentMainState() != Character::CharacterMainState::Die;
 			if (is && is2) {

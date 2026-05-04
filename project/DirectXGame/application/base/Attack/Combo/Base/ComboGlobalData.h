@@ -23,6 +23,13 @@ namespace Combo {
 		kLockAt,	// カメラ方向基準
 	};
 
+	// ターゲットまでの移動タイプ
+	enum class TargetMoveType {
+		kNone,		// なし
+		kMove,		// 移動
+		kTeleport,	// 瞬間移動
+	};
+
 	// コンボタイプ
 	enum class Type {
 		kNone,		// なし
@@ -55,6 +62,8 @@ namespace Combo {
 		bool isResetGravity = false;
 		// ターゲットの距離でどこまで近づくか
 		float moveTargetRadius = 1.0f;
+		// ターゲットまで移動するときの移動タイプ
+		TargetMoveType targetMoveType = TargetMoveType::kMove;
 
 		// ローカル移動ベクトル
 		// X=Right, Y=Up, Z=Forward
@@ -109,6 +118,8 @@ namespace Combo {
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
+		// 入力受付から次のステートに移行するまでの時間(複数入力猶予に使う)
+		float stateInputToNextTime = 0.0f;
 		// キャンセル受付
 		StateTime stateCancel{};
 		// 移動キャンセル受付

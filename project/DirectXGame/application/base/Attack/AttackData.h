@@ -125,6 +125,7 @@ public:
 	// 持続
 	Duration& GetDuration() { return duration; }
 
+	
 private:
 	Type type = Type::kOne;		// ダメージの与え方;
 	Continuous continuous{};	// 連撃ダメージデータ
@@ -161,6 +162,8 @@ struct HitReactionData {
 	float duration = 0.25f;
 	// 行動不能時間
 	float hitStunTime = 0.1f;
+	// ヒットストップ
+	float hitStopTime = 1.0f / 20.0f;
 	// ダウン時間
 	float downTime = 0.0f;
 	// 打ち上げ時に重力を弱める/止める時間
