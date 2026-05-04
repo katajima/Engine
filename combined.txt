@@ -122,11 +122,14 @@
     └── └── └── └── └── ├── BaseFixedCamera.h
     └── └── └── └── └── ├── BaseFollowCamera.h
     └── └── └── └── └── ├── BaseRailCamera.h
+    └── └── └── └── └── ├── CameraCollision.cpp
+    └── └── └── └── └── ├── CameraCollision.h
     └── └── └── └── └── ├── CameraController.cpp
     └── └── └── └── └── ├── CameraController.h
     └── └── └── └── └── ├── CameraFollow.cpp
     └── └── └── └── └── ├── CameraFollow.h
     └── └── └── └── └── ├── CameraLag.h
+    └── └── └── └── └── ├── CameraLockOn.cpp
     └── └── └── └── └── ├── CameraLockOn.h
     └── └── └── └── └── ├── CameraManeger.cpp
     └── └── └── └── └── ├── CameraManeger.h
@@ -176,6 +179,7 @@
     └── └── └── └── └── ├── Base/
     └── └── └── └── └── └── ├── BaseEnemy.cpp
     └── └── └── └── └── └── ├── BaseEnemy.h
+    └── └── └── └── └── └── ├── EnemyAttackSystem.h
     └── └── └── └── └── └── └── EnemyData.h
     └── └── └── └── └── ├── Dummy/
     └── └── └── └── └── └── ├── DummyEnemy.cpp
@@ -359,6 +363,8 @@
     └── └── └── └── ├── GameUI.h
     └── └── └── └── ├── PlayerUI.cpp
     └── └── └── └── ├── PlayerUI.h
+    └── └── └── └── ├── ResultScoreUI.cpp
+    └── └── └── └── ├── ResultScoreUI.h
     └── └── └── └── ├── ResultUI.cpp
     └── └── └── └── ├── ResultUI.h
     └── └── └── └── ├── SelectUI.cpp
@@ -2051,6 +2057,7 @@ public:
 	// 持続
 	Duration& GetDuration() { return duration; }
 
+	
 private:
 	Type type = Type::kOne;		// ダメージの与え方;
 	Continuous continuous{};	// 連撃ダメージデータ
@@ -2087,6 +2094,8 @@ struct HitReactionData {
 	float duration = 0.25f;
 	// 行動不能時間
 	float hitStunTime = 0.1f;
+	// ヒットストップ
+	float hitStopTime = 1.0f / 20.0f;
 	// ダウン時間
 	float downTime = 0.0f;
 	// 打ち上げ時に重力を弱める/止める時間
@@ -2389,7 +2398,7 @@ namespace Combo {
 		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
 
 		// アニメーション
-		ComboImGui::ApplyAnimationToState("アニメーション", currentFrame, data_.animation,
+		ComboImGui::ApplyAnimationToState("アニメーション", currentFrame, maxFrame, data_.animation,
 			owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
 			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
 
@@ -2547,7 +2556,7 @@ namespace Combo {
 			Engine::ImGuiManager::Select("移動タイプ", MoveTypeLabels, data_.move.moveType);
 
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
-			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 100.0f, "%.2f");
+			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
 			
 			ImGui::DragFloat3("ローカル移動ベクトル", &data_.move.localMoveVector.x, 0.01f);
 			if (data_.move.localMoveVector.x >= 1.0f) {
@@ -3049,6 +3058,13 @@ namespace Combo {
 		kLockAt,	// カメラ方向基準
 	};
 
+	// ターゲットまでの移動タイプ
+	enum class TargetMoveType {
+		kNone,		// なし
+		kMove,		// 移動
+		kTeleport,	// 瞬間移動
+	};
+
 	// コンボタイプ
 	enum class Type {
 		kNone,		// なし
@@ -3081,6 +3097,8 @@ namespace Combo {
 		bool isResetGravity = false;
 		// ターゲットの距離でどこまで近づくか
 		float moveTargetRadius = 1.0f;
+		// ターゲットまで移動するときの移動タイプ
+		TargetMoveType targetMoveType = TargetMoveType::kMove;
 
 		// ローカル移動ベクトル
 		// X=Right, Y=Up, Z=Forward
@@ -3135,6 +3153,8 @@ namespace Combo {
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
+		// 入力受付から次のステートに移行するまでの時間(複数入力猶予に使う)
+		float stateInputToNextTime = 0.0f;
 		// キャンセル受付
 		StateTime stateCancel{};
 		// 移動キャンセル受付
@@ -3237,14 +3257,17 @@ void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, b
 
 
 void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
-	int& currentFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
+	int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
 	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
 
 	if (ImGui::CollapsingHeader(imGuiName.c_str())) {
 		ImGui::SliderFloat("アニメーションスピード", &animationData.animationSpeed, 0.1f, 10.0f, "%.2f");
-		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.1f, 10.0f, "%.2f");
+		ImGui::SliderFloat("アニメーションブレンド時間", &animationData.animationBlendTime, 0.0f, 10.0f, "%.2f");
 		ImGui::Checkbox("アニメーションループ", &animationData.animationLoop);
-		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.1f, 10.0f, "%.2f");
+
+		float endTime = static_cast<float>(maxFrame) /60.0f;
+
+		ImGui::SliderFloat("アニメーション停止タイミング", &animationData.animationStopTime, 0.0f, endTime, "%.2f");
 		ImGui::Checkbox("アニメーションを一定時間で止めるか", &animationData.animationStop);
 
 		// BeginComboでの選択
@@ -3365,7 +3388,7 @@ namespace Combo {
 			int& currentFrame, int& firstFrame, int& maxFrame);
 
 		// アニメーション設定と表示
-		static void ApplyAnimationToState(const std::string& name, int& currentFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
+		static void ApplyAnimationToState(const std::string& name, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
 			Engine::AnimationComponent* animation,const std::string& nowAnimationName);
 	public: // シーケンサー
 		// シーケンサー設定と表示
@@ -4221,10 +4244,13 @@ namespace Combo {
 		// コンボボタン設定
 		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		ComboButton bo2 = ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed);
+		ComboButton bo3 = ComboButton(ComboGamePadButton::GAMEPAD_Y, ComboButtonInputType::kPressed);
+
 		// 押し続ける
 		std::vector<ComboButton> button;
 		button.push_back(bo);
 		button.push_back(bo2);
+		button.push_back(bo3);
 		data.GetComboCondition().GetNextReceiver().SetButton(button);
 	}
 
@@ -4235,8 +4261,6 @@ namespace Combo {
 		CreateGlobalData(comboNodeName);
 		// データ設定
 		SetData(data, comboGlobalDatas_[comboNodeName]);
-		// 使うヒットボックスクリア
-		data.GetComboHitBox().ClearUseHitBox();
 		// コンボノード追加
 		AddComboNode(comboNodeName, data.GetComboMotion().GetComboAnimation().GetData().animationName, data);
 	}
@@ -4670,10 +4694,6 @@ namespace Combo {
 		HitBox::CollData& GetCollData() { return collData_;}
 		// コライダーデータ追加
 		void AddCollider(const HitBox::CollData& hitBoxData, const Combo::GlobalData& reaction);
-		// 使うヒットボックス名設定
-		void AddUseHitBox(const std::string& name) { useHitBoxName_.push_back(name); };
-		// 使うヒットボックス名クリーン
-		void ClearUseHitBox() { useHitBoxName_.clear(); }
 		// 親子設定
 		void SetPerent(Engine::WorldTransform* perent) { this->perent = perent; };
 		//
@@ -4696,9 +4716,6 @@ namespace Combo {
 	private:
 		// コライダーデータ
 		HitBox::CollData collData_;
-		// 使うヒットボックス名
-		std::vector<std::string> useHitBoxName_;
-
 	private:
 		// ヒットボックス出現
 		bool isPopHitBox_ = false;
@@ -5749,7 +5766,7 @@ namespace Combo {
 		// データ取得
 		GlobalCondition& GetData() { return data_; }
 		// コンボ移行受付クラス取得
-		NextReceiver GetNextReceiver() const { return nextRecever_; }
+		NextReceiver& GetNextReceiver() { return nextRecever_; }
 		// コンボキャンセル受付クラス取得
 		CancelReceiver GetCancelReceiver() const { return cancelReceiver_;}
 		// コンボ終了条件クラス取得
@@ -5977,6 +5994,11 @@ namespace Combo {
 			}
 		}
 	};
+
+	void NextReceiver::SetButton(const std::vector<ComboButton>& button) { 
+		comboSequence_.RegisterCombo(button); 
+	}
+
 	
 }
 
@@ -6009,7 +6031,7 @@ namespace Combo {
 		// 次のコンボに移行するか
 		bool GetIsNext() const { return isNext_; }
 		// ボタン設定
-		void SetButton(const std::vector<ComboButton>& button) { comboSequence_.RegisterCombo(button); }
+		void SetButton(const std::vector<ComboButton>& button);
 	private:
 		ComboSequence comboSequence_;			// ボタン条件
 		// 受付可能か
@@ -6303,8 +6325,9 @@ File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.cpp
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 
-void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem)
-{
+#pragma region HitMotion
+
+void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem) {
 	this->owner = owner;
 	this->effectSystem = effectSystem;
 	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
@@ -6322,8 +6345,7 @@ void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* 
 
 }
 
-void HitMotionSystem::Update(float dt)
-{
+void HitMotionSystem::Update(float dt) {
 	DamageProcess(dt, owner->GetCharacterParameterComponent());
 
 	if (!isAction_) {
@@ -6367,6 +6389,7 @@ void HitMotionSystem::Update(float dt)
 	}
 }
 
+// ヒットエミッター（パーティクル）
 void HitMotionSystem::EmitHitEffect() {
 	// エフェクト座標更新
 	worldEffect_.Update();
@@ -6379,6 +6402,7 @@ void HitMotionSystem::EmitHitEffect() {
 	}
 }
 
+// ヒットモーション設定
 void HitMotionSystem::SetReactionData(const HitReactionData& data)
 {
 	data_ = data;
@@ -6416,35 +6440,39 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data)
 	damageMotions_.push_back(damageMotion);
 }
 
+// 終了したか
 bool HitMotionSystem::IsFinished() const {
 	return !isAction_ &&
 		hitStunTimer_ <= 0.0f &&
 		downTimer_ <= 0.0f;
 }
 
-bool HitMotionSystem::IsHitMotion() const
-{
+// ヒットモーション中か
+bool HitMotionSystem::IsHitMotion() const {
 	return isAction_;
 }
 
-bool HitMotionSystem::IsHitStun() const
-{
+// スタン中か
+bool HitMotionSystem::IsHitStun() const {
 	return hitStunTimer_ > 0.0f;
 }
 
-bool HitMotionSystem::IsDown() const
-{
+// ダウン中か
+bool HitMotionSystem::IsDown() const {
 	return hitMotionState_ == HitMotionState::Down;
 }
 
+// 重力は有効化
 bool HitMotionSystem::IsGravityEnabled() const {
 	return data_.gravityEnabled;
 }
 
+// 重力強度
 float HitMotionSystem::GetGravityScale() const {
 	return data_.gravityScale;
 }
 
+// 速度
 Vector3 HitMotionSystem::BuildMoveVelocity() const
 {
 	Vector3 dir = NormalizeSafe(data_.normal);
@@ -6473,7 +6501,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 		}
 		break;
 	}
-
 	case HitReactionType::Launch:
 	{
 		// 打ち上げは上方向主体
@@ -6489,7 +6516,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 		}
 		break;
 	}
-
 	case HitReactionType::WallBounce:
 	{
 		// 壁バウンド自体の反射はここではなく衝突側で処理する想定
@@ -6499,7 +6525,6 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 		}
 		break;
 	}
-
 	default:
 		break;
 	}
@@ -6507,6 +6532,7 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 	return velocity;
 }
 
+// 
 Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
 {
 	const float lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
@@ -6516,8 +6542,8 @@ Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
 	return v.Normalize();
 }
 
-void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
-{
+// 移動リクエスト
+void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
 	if (!reactionMoveSystem) {
 		return;
 	}
@@ -6535,14 +6561,19 @@ void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity)
 	reactionMoveSystem->SetRequest(request);
 }
 
-void HitMotionSystem::FinishReaction()
-{
+// 終了
+void HitMotionSystem::FinishReaction() {
 	isAction_ = false;
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
 	hitMotionState_ = HitMotionState::None;
 }
+
+#pragma endregion // ヒットモーション
+
+#pragma region MyRegion
+// ダメージ
 void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* parameter) {
 
 	for (auto& damage : damageMotions_) {
@@ -6561,6 +6592,7 @@ void HitMotionSystem::DamageProcess(float dt, Character::ParameterComponent* par
 	return false;
 		});
 }
+#pragma endregion
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Hit/HitMotionSystem.h
@@ -7665,13 +7697,13 @@ AttackDecision AttackBranchResolver::Resolve(const AttackContext& ctx,
         break;
 
     case ActionInput::Skill:
-        if (ctx.stamina < 30) {
+        if (ctx.stamina < 25) {
             return result;
         }
         result.accepted = true;
         result.shouldChangeToAttackState = true;
-        result.startComboName = "SkillAttack01";
-        result.staminaCost = 30;
+        result.startComboName = ctx.isLanding ? "SkillAttack01" :"JumpSkillAttack01";
+        result.staminaCost = 25;
         break;
 
     default:
@@ -7718,6 +7750,7 @@ struct AttackDecision {
 	float staminaCost = 0;
 };
 
+// 判定で攻撃を選別するクラス
 class AttackBranchResolver {
 public:
 	static AttackDecision Resolve(const AttackContext& ctx, ActionInput input);
@@ -7820,6 +7853,8 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 		targetCharacters.end(),
 		[&](const Character::BaseCharacter* a, const Character::BaseCharacter* b)
 		{
+			if (!a || !b) return false;
+
 			bool is = a->GetAlive() && a->GetCurrentMainState() != Character::CharacterMainState::Die;
 			bool is2 = b->GetAlive() && b->GetCurrentMainState() != Character::CharacterMainState::Die;
 			if (is && is2) {
@@ -10339,6 +10374,74 @@ protected:
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraCollision.cpp
+============================================================
+#include "CameraCollision.h"
+
+// 初期化
+void CameraCollision::Initialize() {
+
+}
+
+// 更新
+void CameraCollision::Update(Transform& transform, float dt) {
+	if (!isCollision) return;
+	
+	currentPos_ = transform.translate;
+	Vector3 targetPos{};
+	if (target) {
+		targetPos = target->GetWorldPosition();
+	}
+	// 地面への沈み補正
+	if (currentPos_.y < 0.2f) {
+		float depth = -currentPos_.y;
+
+		float zAdjust = std::clamp(depth * depthScale_, 0.0f, maxZOffset_);
+
+		Vector3 direction = Normalize(Subtract(targetPos, currentPos_));
+		Vector3 zOffset = Multiply(direction, zAdjust);
+
+		currentPos_ = Add(currentPos_, zOffset);
+		currentPos_.y = 0.0f;
+	}
+
+	// 位置設定
+	transform.translate = currentPos_;
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraCollision.h
+============================================================
+#pragma once
+#include "DirectXGame/engine/Camera/CameraData.h"
+
+// 
+class CameraCollision {
+public:
+
+	// 初期化
+	void Initialize();
+
+	// 更新
+	void Update(Transform& transform, float dt);
+	// ターゲット設定
+	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+
+private:
+	CameraCollisionData data_;
+	bool isCollision = true;
+	// 現在のカメラ位置
+	Vector3 currentPos_{};
+
+	float maxZOffset_ = 30.0f;
+	float depthScale_ = 2.0f;
+private:
+	// ターゲット
+	const Engine::WorldTransform* target = nullptr;
+};
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraController.cpp
 ============================================================
 #include "CameraController.h"
@@ -10349,25 +10452,42 @@ void CameraController::Initialize(Engine::Camera* camera, const InputSystem* inp
 
 	// 追従
 	follow = std::make_unique<CameraFollow>();
+	follow->Initialize();
 	// 回転
 	rotation = std::make_unique<CameraRotation>();
+	rotation->Initialize();
 	// ロックオン
 	lockOn = std::make_unique<CameraLockOn>();
 	// 
+	collision = std::make_unique<CameraCollision>();
+
 
 }
 
 
 void CameraController::Update(float dt) {
 	Transform transform = camera->GetTransform();
+	
+	if (lockOn->GetData().isLockOn) {
+		transform.rotate = lockOn->Update(dt);
+	}
+	else {
+		rotation->Update(transform,input,dt);
+	}
 
+	follow->Update(transform,dt);
 
-	follow->Update(dt);
-
-
+	collision->Update(transform, dt);
 
 	camera->SetTransform(transform);
 };
+
+void CameraController::SetTraget(const Engine::WorldTransform* target) { 
+	this->target = target;
+	follow->SetTraget(target);
+	collision->SetTraget(target);
+};
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraController.h
@@ -10380,7 +10500,7 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraController.h
 #include "DirectXGame/application/base/Camera/Base/CameraLockOn.h"
 #include "DirectXGame/application/base/Camera/Base/CameraRotation.h"
 #include "DirectXGame/application/base/Camera/Base/CameraShake.h"
-
+#include "DirectXGame/application/base/Camera/Base/CameraCollision.h"
 
 // カメラ統括クラス
 class CameraController {
@@ -10395,7 +10515,7 @@ public:
 	// ロックオンターゲット設定
 	void SetLockOnTraget(const Engine::WorldTransform* target) { this->lockOnTarget = target; };
 	// ターゲット設定
-	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+	void SetTraget(const Engine::WorldTransform* target);
 
 
 private:
@@ -10405,6 +10525,8 @@ private:
 	std::unique_ptr<CameraRotation> rotation = nullptr;
 	// ロックオン
 	std::unique_ptr<CameraLockOn> lockOn = nullptr;
+	// 
+	std::unique_ptr<CameraCollision> collision = nullptr;
 private:
 	const InputSystem* input = nullptr;
 	Engine::Camera* camera = nullptr;
@@ -10416,13 +10538,55 @@ private:
 File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.cpp
 ============================================================
 #include "CameraFollow.h"
+#include <algorithm>
+#include "CameraCollision.h"
 
-Vector3 CameraFollow::Update(float dt) {
-	Vector3 result{};
+void CameraFollow::Initialize() {
+	data_.followSpeed = 40.0f;
+	data_.useSmooth = true;
+	data_.offset.z =  -20.5;
 
-
-	return result;
+	currentPos_ = {};
+	isInitializedPosition_ = false;
 }
+
+
+void CameraFollow::Update(Transform& transform,float dt) {
+	// 追従対象がいなければ何もしない
+	if (!target) {
+		return;
+	}
+	// 回転適用 → ローカルオフセットをワールド空間へ
+	// カメラ回転に応じて後方・上方オフセットを回す
+	Matrix4x4 rotY = MakeRotateYMatrix(transform.rotate.y);
+	Matrix4x4 rotX = MakeRotateXMatrix(transform.rotate.x);
+
+	// Yaw → Pitch の順で適用
+	Matrix4x4 rotateMatrix = rotX * rotY;
+
+	Vector3 rotatedOffset = TransformNormal(data_.offset, rotateMatrix);
+
+	// 目標カメラ位置
+	Vector3 desiredCameraPos = Add(target->GetWorldPosition(), rotatedOffset);
+
+
+	// 初回は補間せず即座に合わせる
+	if (!isInitializedPosition_) {
+		currentPos_ = desiredCameraPos;
+		isInitializedPosition_ = true;
+	}
+	else if (data_.useSmooth) {
+		const float t = std::clamp(data_.followSpeed * dt, 0.0f, 1.0f);
+		currentPos_ = Lerp(currentPos_, desiredCameraPos, t);
+	}
+	else {
+		currentPos_ = desiredCameraPos;
+	}
+
+	// 最終結果を transform に反映
+	transform.translate = currentPos_;
+}
+
 
 
 ============================================================
@@ -10435,12 +10599,26 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraFollow.h
 class CameraFollow {
 public:
 
-	// 更新
-	Vector3 Update(float dt);
+	void Initialize();
 
+	// 更新
+	void Update(Transform& transform,float dt);
+
+	// ターゲット設定
+	void SetTraget(const Engine::WorldTransform* target) { this->target = target; };
+
+	// データ取得
+	CameraFollowData& GetData() { return data_; }
+	const CameraFollowData& GetData() const { return data_; }
 private:
 	// データ
-	CameraFollowData data;
+	CameraFollowData data_;
+	// 現在のカメラ位置
+	Vector3 currentPos_{};
+	// 初回位置合わせ済みか
+	bool isInitializedPosition_ = false;
+	// ターゲット
+	const Engine::WorldTransform* target = nullptr;
 };
 
 ============================================================
@@ -10460,6 +10638,18 @@ private:
 };
 
 ============================================================
+File Path: project/DirectXGame/application/base/Camera/Base/CameraLockOn.cpp
+============================================================
+#include "CameraLockOn.h"
+
+Vector3 CameraLockOn::Update(float dt) {
+
+
+	return Vector3();
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Camera/Base/CameraLockOn.h
 ============================================================
 #pragma once
@@ -10472,6 +10662,9 @@ public:
 	// 更新
 	Vector3 Update(float dt);
 
+	CameraLockOnData& GetData() { return data; }
+
+	
 private:
 	CameraLockOnData data;
 };
@@ -10731,44 +10924,39 @@ File Path: project/DirectXGame/application/base/Camera/Base/CameraRotation.cpp
 void CameraRotation::Initialize() {
     // 初期角度をリセット（必要なら外部から設定してもOK）
     data_.yaw = 0.0f;
-    data_.pitch = 0.0f;
+    data_.pitch = Math::DegreesToRadians(20);
+    data_.maxPitch = Math::DegreesToRadians(20);
+    data_.minPitch = Math::DegreesToRadians(-10);
+
 };
 
 
-Vector3 CameraRotation::Update(const InputSystem* input, float dt) {
+void CameraRotation::Update(Transform& transform,const InputSystem* input, float dt) {
     if (!input) {
-        return Vector3(0.0f, 0.0f, 1.0f);
+        return;
     }
     // =========================
     // 入力取得（例：マウスや右スティック）
     // =========================
-    float inputX = input->GetPlayerInputData().lookStick.y;
-    float inputY = input->GetPlayerInputData().lookStick.x; 
+    float inputX = input->GetPlayerInputData().lookStick.x;
+    float inputY = input->GetPlayerInputData().lookStick.y; 
 
 
     // =========================
    // 回転更新
    // =========================
     data_.yaw += inputX * data_.sensitivity;
-    data_.pitch += inputY * data_.sensitivity;
+    data_.pitch -= inputY * data_.sensitivity;
 
     // =========================
     // ピッチ制限
     // =========================
     data_.pitch = std::clamp(data_.pitch, data_.minPitch, data_.maxPitch);
 
-    // =========================
-   // 方向ベクトル計算（Y-Up / Z-Forward）
-   // =========================
-    Vector3 forward{};
+    transform.rotate.x = data_.pitch;
+    transform.rotate.y = data_.yaw;
+    transform.rotate.z = {};
 
-    forward.x = cosf(data_.pitch) * sinf(data_.yaw);
-    forward.y = sinf(data_.pitch);
-    forward.z = cosf(data_.pitch) * cosf(data_.yaw);
-
-    forward = Normalize(forward);
-
-    return forward;
 }
 
 
@@ -10787,7 +10975,7 @@ public:
 	void Initialize();
 
 	// 更新
-	Vector3 Update(const InputSystem* input,float dt);
+	void Update(Transform& transform ,const InputSystem* input,float dt);
 
 private:
 	CameraRotationData data_;
@@ -11120,111 +11308,41 @@ File Path: project/DirectXGame/application/base/Camera/FollowCamera/FollowCamera
 #include "DirectXGame/engine/Camera/CameraCommon.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 
-void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
-    Engine::GlobalVariables* globalVariables, Vector3 position)
+void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+	Engine::GlobalVariables* globalVariables, Vector3 position)
 {
-    // インプット
-   this->inputSystem = inputSystem;
+	// インプット
+	this->inputSystem = inputSystem;
 
-   // カメラ初期化
-   uniqueCamera_ = std::make_unique<Engine::Camera>();
-   uniqueCamera_->Initialize(entityManager->GetCameraCommon());
-   uniqueCamera_->SetFarClip(provisionalData_.farClip_);
+	// カメラ初期化
+	uniqueCamera_ = std::make_unique<Engine::Camera>();
+	uniqueCamera_->Initialize(entityManager->GetCameraCommon());
+	uniqueCamera_->SetFarClip(provisionalData_.farClip_);
 
-   // カメラ回転設定
-   uniqueCamera_->SetRotate(provisionalData_.rotate);
+	// カメラ回転設定
+	uniqueCamera_->SetRotate(provisionalData_.rotate);
+	uniqueCamera_->AddEffectBlock("bloom", Engine::PostEffectBlockType::kBloom);
+	uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = provisionalData_.bloomIndensity;
+	uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
+	uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
 
-  
-
-    uniqueCamera_->AddEffectBlock("bloom", Engine::PostEffectBlockType::kBloom);
-
-    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(0)->GetPostEffectData()->GetBloom()->Data()->intensity = provisionalData_.bloomIndensity;
-    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->num = provisionalData_.gaussianNum;
-    uniqueCamera_->GetPostEffectBlocks()[0]->GetRenderTextures(1)->GetPostEffectData()->GetGaussian()->Data()->sigma = provisionalData_.gaussianSigma;
-
-    // 操作
-    controller = std::make_unique<CameraController>();
-    controller->Initialize(uniqueCamera_.get(), inputSystem);
+	// 操作
+	controller = std::make_unique<CameraController>();
+	controller->Initialize(uniqueCamera_.get(), inputSystem);
 
 
-    baseOffset.z = -22.5;
+	baseOffset.z = -22.5;
 }
 
 void FollowCamera::Update() {
-    Transform transform = uniqueCamera_->GetTransform();
-
-    // カメラを使っているなら
-    if (useCamera) {
-        uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
-    }
-    // ターゲットがあるなら
-    if (target_) {
-        controller->SetTraget(target_);
-        // 回転速度
-        const float kRotateSpeed = 0.03f;
-        const float kRotateSpeedX = 0.02f;
-        Vector3 targetPos = target_->GetWorldPosition();
-
-        // ロックオンするか
-        if (lockOnObject) {
-            // ロックオン時の処理
-           
-            Vector3 lockOnPos = lockOnObject->GetWorldTransform().worldMat_.GetWorldPosition();
-
-            // カメラ方向をロックオンターゲットに向ける
-            Vector3 direction = Subtract(lockOnPos, targetPos);
-            direction = Normalize(direction);
-
-            // Y軸角度
-            float targetYaw = std::atan2(direction.x, direction.z); // Z前方、X右
-
-            // X軸（仰角）：水平→目標への角度
-            float distanceXZ = std::sqrt(direction.x * direction.x + direction.z * direction.z);
-            float targetPitch = std::atan2(direction.y, distanceXZ);
-
-            // スムーズに補間（必要なら）
-            transform.rotate.y = targetYaw;
-            transform.rotate.x = std::clamp(targetPitch,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
-        }
-        else {
-            // 通常の自由操作
-            if (inputSystem->GetPlayerInputData().isControllerConnected) {
-                transform.rotate.y += inputSystem->GetPlayerInputData().lookStick.x * kRotateSpeed;
-                transform.rotate.x -= inputSystem->GetPlayerInputData().lookStick.y * kRotateSpeedX;
-
-                transform.rotate.x = std::clamp(transform.rotate.x,provisionalData_.rotateMinX, provisionalData_.rotateMaxX);
-            }
-        }
-
-        // 回転適用 → カメラ位置を計算
-        Matrix4x4 rotY = MakeRotateYMatrix(transform.rotate.y);
-        Matrix4x4 rotX = MakeRotateXMatrix(transform.rotate.x);
-        Matrix4x4 rotateMatrix = rotX * rotY;
-        Vector3 offset = TransformNormal(baseOffset, rotateMatrix);
-
-        Vector3 desiredCameraPos = Add(targetPos, offset);
-
-        // 地面への沈み補正
-        if (desiredCameraPos.y < 0.0f) {
-            float depth = -desiredCameraPos.y;
-           
-            float zAdjust = std::clamp(depth * provisionalData_.depthScale, 0.0f, provisionalData_.maxZOffset);
-
-            Vector3 direction = Normalize(Subtract(targetPos, desiredCameraPos));
-            Vector3 zOffset = Multiply(direction, zAdjust);
-
-            desiredCameraPos = Add(desiredCameraPos, zOffset);
-            desiredCameraPos.y = 0.0f;
-        }
-
-        // 位置設定
-        transform.translate = desiredCameraPos;
-    }
-
-    
-    // カメラ更新
-    uniqueCamera_->SetTransform(transform);
-    uniqueCamera_->UpdateMatrix();
+	controller->SetTraget(target_);
+	// カメラを使っているなら
+	if (useCamera) {
+		uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());
+	}
+	controller->Update(Engine::MyGame::GameTime());
+	// カメラ更新
+	uniqueCamera_->UpdateMatrix();
 }
 
 
@@ -13003,8 +13121,7 @@ namespace Character {
 	/// <summary>
 	/// キャラクターマネージャークラス
 	/// </summary>
-	class CharacterManager
-	{
+	class CharacterManager {
 	public:
 		// 初期化
 		void Initialize(InputSystem* inputSystem,HitBox::System* hitBoxSystem,Engine::EntityManager* entity3DManager,
@@ -13077,6 +13194,8 @@ namespace Character {
 		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb);
 	public:
 		void Clear(Type type);
+
+		float GetScore() { return score; }
 	private:
 		std::vector<std::unique_ptr<BaseCharacter>> character_;	// キャラクター
 
@@ -13085,6 +13204,8 @@ namespace Character {
 		uint32_t enemyCount_ = 0;	// 敵カウンター
 
 		std::unique_ptr<CrowdManager> crowdManager_;	// 群衆AI
+
+		float score = 0.0f;
 
 		// キャラクター用保存項目データ
 		std::map<std::string, GlobalData> globalDatas_;
@@ -14041,6 +14162,7 @@ namespace Character {
 
 		void SetTargetCharacters(BaseCharacter* target);
 
+		void aa();
 
 	public:
 		// ID設定
@@ -14096,10 +14218,23 @@ namespace Character {
 		bool isStopping_ = false;
 		// グローバルデータ
 		EnemyGlobalData globalData_;
+		float dieScore = 100.0f;
 	protected:
 		Engine::WorldTransform worldEffect_;
 	};
 }
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/EnemyAttackSystem.h
+============================================================
+#pragma once
+
+class EnemyAttackSystem {
+public:
+
+
+private:
+};
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/EnemyData.h
@@ -15724,7 +15859,8 @@ namespace Character {
 
 	void SmallMeleeEnemyDieState::Enter(){
 		timer_ = dieTimer_;
-		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		character->GetSpecalPointManager()->AddPoint(
+			character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
 
 #pragma endregion
@@ -16629,6 +16765,9 @@ namespace Character {
 		// ターゲットキャラクターを設定
 		void SetTargetCharacters(const std::vector<const BaseCharacter*>& targetCharacters) { this->targetCharacters = targetCharacters; }
 
+		void SetTargetCharacter(const BaseCharacter* targetCharacters) { this->targetCharacters.push_back(targetCharacters); }
+
+
 		// リロード
 		virtual void Reload() {};
 		// コンボデータをシーケンサー適応
@@ -17025,6 +17164,8 @@ namespace Character {
 
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("SkillAttack01");
+		// コンボ9のデータ送る
+		comboSystem->CreateCombo("JumpSkillAttack01");
 
 		// コンボ連結設定
 		comboSystem->ConnectCombo("Attack1", ActionInput::LightAttack, "Attack2"); // コンボ連結
@@ -17042,6 +17183,9 @@ namespace Character {
 	
 		comboSystem->ConnectCombo("Attack2", ActionInput::HeavyAttack, "Attack10"); // コンボ連結
 		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11"); // コンボ連結
+
+
+		comboSystem->ConnectCombo("JumpSkillAttack01", ActionInput::LightAttack, "JumpAttack"); // コンボ連結
 
 	}
 
@@ -20481,9 +20625,6 @@ class InputSystem;
 
 class ResultSystem {
 public:
-
-	void fhfhfh();
-
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -20699,24 +20840,19 @@ namespace Character {
 	{
 	}
 
-	void MoveCommand::Exec(Character::BaseCharacter& character)
-	{
+	void MoveCommand::Exec(Character::BaseCharacter& character){
 		character.Move();
 	}
-	void JampCommand::Exec(Character::BaseCharacter& character)
-	{
+	void JampCommand::Exec(Character::BaseCharacter& character){
 		character.Jump();
 	}
-	void AttackCommand::Exec(Character::BaseCharacter& character)
-	{
+	void AttackCommand::Exec(Character::BaseCharacter& character){
 		character.Attack();
 	}
-	void HeavyAttackCommand::Exec(Character::BaseCharacter& character)
-	{
+	void HeavyAttackCommand::Exec(Character::BaseCharacter& character){
 		character.HeavyAttack();
 	}
-	void SkillAttackCommand::Exec(Character::BaseCharacter& character)
-	{
+	void SkillAttackCommand::Exec(Character::BaseCharacter& character){
 		character.SkillAttack();
 	}
 
@@ -20891,25 +21027,25 @@ void InputManager::BuildGameplayActions(){
     // ---- Look（RightStick だけ例）----
     value2_[Idx(Action::Look)] = input_->GetGamePadRightStick();
 
-    // ---- Attack（Pad B）----
-    triggered_[Idx(Action::LightAttack)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
-
-    pressed_[Idx(Action::LightAttack)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B);
-
-    released_[Idx(Action::LightAttack)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B);
-
     // ---- Attack（Pad X）----
-    triggered_[Idx(Action::HeavyAttack)] =
+    triggered_[Idx(Action::LightAttack)] =
         input_->IsGamePadTriggered(GamePadButton::GAMEPAD_X);
 
-    pressed_[Idx(Action::HeavyAttack)] =
+    pressed_[Idx(Action::LightAttack)] =
         input_->IsGamePadPressed(GamePadButton::GAMEPAD_X);
 
-    released_[Idx(Action::HeavyAttack)] =
+    released_[Idx(Action::LightAttack)] =
         input_->IsGamePadReleased(GamePadButton::GAMEPAD_X);
+
+    // ---- Attack（Pad Y）----
+    triggered_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+
+    pressed_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+
+    released_[Idx(Action::HeavyAttack)] =
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
 
     // ---- Attack（Pad A）----
     triggered_[Idx(Action::Jump)] =
@@ -20931,18 +21067,15 @@ void InputManager::BuildGameplayActions(){
     released_[Idx(Action::Special)] =
         input_->IsGamePadReleased(GamePadButton::GAMEPAD_RB);
 
-    // ---- Attack（Pad RB）----
+    // ---- Attack（Pad B）----
     triggered_[Idx(Action::Skill)] =
-        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 
     pressed_[Idx(Action::Skill)] =
-        input_->IsGamePadPressed(GamePadButton::GAMEPAD_Y);
+        input_->IsGamePadPressed(GamePadButton::GAMEPAD_B);
 
     released_[Idx(Action::Skill)] =
-        input_->IsGamePadReleased(GamePadButton::GAMEPAD_Y);
-
-
-   
+        input_->IsGamePadReleased(GamePadButton::GAMEPAD_B);
 
     // ---- Dash（LT 押した瞬間）----
     triggered_[Idx(Action::Dash)] = input_->IsLeftTriggerTriggered(0.5f);
@@ -21239,7 +21372,7 @@ void InputSystem::PlayerInputUpdate(float dt) {
 	playerInputData_.lockOnHeld = rt > triggerDeadZone;
 
 	// スキル入力押した瞬間
-	playerInputData_.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_Y);
+	playerInputData_.skillTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_B);
 
 	// 必殺技入力押した瞬間
 	playerInputData_.specialTrigger = input->IsGamePadTriggered(GamePadButton::GAMEPAD_RB);
@@ -26042,7 +26175,7 @@ void PlayerUI::InitializeOperationUI() {
 	Engine::UIPair* normalAttackPair = GetUIPair("normalAttack");
 	normalAttackPair->SetOffset(attackTextData.offset);	// 間隔設定
 	normalAttackPair->SetUIPairDrectionType(UIPairDrectionType::Right);	// 右方向
-	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.dds"); // 
+	normalAttackPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_x.dds"); // 
 	normalAttackPair->GetFirstSprite()->SetAnchorPoint(attackTextData.anchorPoint);	// アンカーポイント設定
 	normalAttackPair->GetFirstSprite()->SetSize(attackTextData.size);		// サイズ設定
 	normalAttackPair->GetSecondSprite()->SetTextureName("resources/Texture/icon/Attack.dds");
@@ -26097,7 +26230,7 @@ void PlayerUI::InitializeOperationUI() {
 	Engine::UIPair* skillPair = GetUIPair("skill");
 	skillPair->SetOffset(skillTextData.offset);
 	skillPair->SetUIPairDrectionType(UIPairDrectionType::Right);			// 右方向
-	skillPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_y.dds");
+	skillPair->GetFirstSprite()->SetTextureName("resources/Texture/XBOX/xbox_button_color_b.dds");
 	skillPair->GetFirstSprite()->SetAnchorPoint(skillTextData.anchorPoint);			// アンカーポイント設定
 	skillPair->GetFirstSprite()->SetSize(skillTextData.size);				// サイズ設定
 	skillPair->GetFirstSprite()->SetColor(skillTextData.color);	// 色設定
@@ -26289,6 +26422,92 @@ private:
 };
 
 
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/ResultScoreUI.cpp
+============================================================
+#include "ResultScoreUI.h"
+#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include <DirectXGame/engine/Utility/ConvertUtility.h>
+
+void ResultScoreUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
+	Engine::GlobalVariables* globalVariables) {
+	this->entityManager = entityManager;
+	this->globalVariables = globalVariables;
+	this->inputSystem = inputSystem;
+
+	// スコア
+	InitUICount("scoreUI", uiPos,4,true);
+	Engine::UICount* scoreUI = GetUICount("scoreUI");
+	scoreUI->SetMaxSize(uiSize_, offset);	// 最大サイズ
+	
+	scoreUI->SetTextuerSize(uiSize_);		// テクスチャサイズ
+	scoreUI->SetCountMax(99999);							// カウント最大数
+	scoreUI->SetCountColor(uiColor_);	// 色指定
+	scoreUI->GetNameSprite()->SetTextureName("resources/Texture/text/textScore.dds");
+	scoreUI->GetNameSprite()->SetSize(uiNameSize);	// サイズ指定
+	scoreUI->GetNameSprite()->SetColor(uiColor_);	// 色指定
+
+}
+
+void ResultScoreUI::Update(float dt) {
+	Engine::UICount* scoreUI = GetUICount("scoreUI");
+	scoreUI->SetCount(score);
+
+	// 更新
+	UpdateUIElement(dt);
+}
+
+void ResultScoreUI::Draw() {
+	// 描画
+	DrawUIElement();
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/UI/ResultScoreUI.h
+============================================================
+#pragma once
+#pragma once
+#include "DirectXGame/application/base/UI/Base/BaseUI.h"
+
+// 前方宣言
+namespace Character {
+	class ParameterComponent;
+}
+
+/// <summary>
+/// リザルトUIクラス
+/// </summary>
+class ResultScoreUI : public BaseUI {
+public:
+	// 初期化
+	void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
+		Engine::GlobalVariables* globalVariables) override;
+
+	// 更新
+	void Update(float dt) override;
+
+	// 描画
+	void Draw() override;
+
+	// スコア設定
+	void SetScore(float score) { this->score = score; };
+
+private:
+
+private:
+	Vector2 uiPos = { 600,300 };
+	Vector2 uiSize_ = { 64,96 };
+	Vector2 offset = { 20,0.0f };
+	Vector2 uiAnchorPoint_ = { 0.5f,0.5f };
+	Color uiColor_ = { 0.5f,0.5f ,0.5f ,1.0f };
+	Vector2 uiNameSize = { 256,64 };
+
+private:
+	float score = 0.0f;
+
+};
 
 ============================================================
 File Path: project/DirectXGame/application/base/UI/ResultUI.cpp
@@ -28387,8 +28606,8 @@ File Path: project/DirectXGame/application/scene/GamePlayScene.cpp
 
 #pragma region Initialize
 // 初期化
-void GamePlayScene::Initialize()
-{
+void GamePlayScene::Initialize() {
+	GetSceneData().score = 0;
 	// Input
 	input = GetInput();
 
@@ -28507,7 +28726,7 @@ void GamePlayScene::Initialize()
 	collisionManager_->Initialize(GetGlobalVariables(), AABB(-sizeAABB, sizeAABB));
 	//collisionManager_->RegisterStatic(stage_->GetStageColliderSystem()->GetColliderComponent());
 	// 静的Octreeコライダー
-	collisionManager_->BuildStaticSceneOctree();
+	//collisionManager_->BuildStaticSceneOctree();
 
 
 	// UI
@@ -28615,7 +28834,7 @@ void GamePlayScene::Update()
 	else {
 		GetSceneData().playerDie = true;
 	}
-	
+	GetSceneData().score = characterManager_->GetScore();
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
 	// カメラ管理の更新
@@ -28649,8 +28868,7 @@ void GamePlayScene::Draw2D(){
 // 調整項目
 void GamePlayScene::ApplyGlobalVariables() {}
 
-void GamePlayScene::CheckAllCollisions()
-{
+void GamePlayScene::CheckAllCollisions() {
 	// キャラクターセット
 	for (auto caracter : characterManager_->GetCharacters()) {
 		if (caracter->GetColliderComponent()) {
@@ -28860,6 +29078,10 @@ void ResultScene::Initialize() {
 	resultUI_ = std::make_unique<ResultUI>();
 	resultUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
 
+	// リザルトスコアUI初期化
+	resultScoreUI_ = std::make_unique<ResultScoreUI>();
+	resultScoreUI_->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
+
 	overUI_ = std::make_unique<Engine::Sprite>();
 	overUI_->Initialize(GetEntityManager()->GetSpriteCommon(), "resources/Texture/text/over.dds");
 	overUI_->SetPosition({640,200});
@@ -28894,6 +29116,10 @@ void ResultScene::Update() {
 	resultUI_->SetSelectedIndex(resultSystem_->GetSelectedIndex());
 	resultUI_->Update(GetTime());
 
+	// UI更新
+	resultScoreUI_->SetScore(GetSceneData().score);
+	resultScoreUI_->Update(GetTime());
+
 	overUI_->Update();
 
 	effect_->Update(GetTime());
@@ -28910,6 +29136,7 @@ void ResultScene::Draw3D() {
 void ResultScene::Draw2D() {
 	resultUI_->Draw();
 
+	resultScoreUI_->Draw();
 
 	if (GetSceneData().playerDie) {
 		overUI_->Draw();
@@ -28938,6 +29165,8 @@ File Path: project/DirectXGame/application/scene/ResultScene.h
 #include "DirectXGame/engine/base/Load/LoadLevelData.h"
 
 #include "DirectXGame/application/base/UI/ResultUI.h"
+#include "DirectXGame/application/base/UI/ResultScoreUI.h"
+
 #include "DirectXGame/application/base/Stage/ResultStage.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
@@ -28976,6 +29205,8 @@ private:
 	std::unique_ptr<ResultStage> resultStage_;
 	// リザルトUI
 	std::unique_ptr<ResultUI> resultUI_;
+	// リザルトスコアUI
+	std::unique_ptr<ResultScoreUI> resultScoreUI_;
 	// リザルトシステム
 	std::unique_ptr<ResultSystem> resultSystem_;
 	//
@@ -29342,6 +29573,7 @@ struct SceneData {
 	int playerID = 0;	// プレイヤーのID(選ばれたキャラを選別するため)
 	int stageID = 0;	// ステージのID(選ばれたステージを選別するため)
 	bool playerDie = false;
+	float score = 0.0f;
 };
 
 ============================================================
@@ -39595,7 +39827,7 @@ struct CameraRotationData {
 	// 上下回転角度
 	float pitch = 0.0f;
 	// 入力感度
-	float sensitivity = 0.1f;
+	float sensitivity = 0.02f;
 	// 最小ピッチ
 	float minPitch = -0.8f;
 	// 最大ピッチ
@@ -61017,6 +61249,7 @@ void Engine::MyGame::InitializeResource()
 	textureManager->LoadTexture("resources/Texture/text/stamina.dds");
 	textureManager->LoadTexture("resources/Texture/text/over.dds");
 	textureManager->LoadTexture("resources/Texture/text/gameStartPreparation.dds");
+	textureManager->LoadTexture("resources/Texture/text/textScore.dds");
 
 
 
@@ -71586,8 +71819,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\State\BulletState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\BaseCamera.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraCollision.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraController.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraFollow.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.cpp" />
@@ -71652,6 +71887,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\State\CharacterStateMachine.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Medium\Melee\MediumMeleeEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Effect\Effect.cpp" />
+    <ClCompile Include="DirectXGame\application\base\UI\ResultScoreUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\FpsUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\ResultUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
@@ -72289,6 +72525,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\EnemyBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h" />
@@ -72306,6 +72543,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
@@ -72325,6 +72563,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\State\MainState.h" />
     <ClInclude Include="DirectXGame\application\base\Effect\EffectEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
+    <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />
@@ -73627,6 +73866,15 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraCollision.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\UI\ResultScoreUI.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -74921,6 +75169,15 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
