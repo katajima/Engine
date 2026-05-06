@@ -56,6 +56,7 @@ namespace Combo {
 		ComboRange range{};						// コンボ用遠距離クラス（弾など）
 		float timer_ = 0.0f;					// 時間
 		bool isDebug = false;					// エディターを使用したデバック中か
+		bool isHitStop = false;					// ヒットストップ中か
 		Type type = Type::kMelle;// 攻撃タイプ
 	};
 };

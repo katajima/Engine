@@ -23,7 +23,10 @@ namespace HitBox {
 		void Update();
 
 
-		void SetData(HitReactionData data) { data_ = data; };
+		void SetData(HitReactionData data) {
+			data_ = data; 
+			isHitStop = true;
+		};
 
 	private:
 		// 使用者がプレイヤーの場合の更新処理
@@ -43,5 +46,7 @@ namespace HitBox {
 
 		Engine::Collider* otherColl = nullptr;
 		HitReactionData data_;
+
+		bool isHitStop = false;	// 使用者がヒットストップするか
 	};
 };

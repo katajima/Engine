@@ -133,6 +133,7 @@ private:
 	One one{};					// 一回ダメージデータ
 	float damage = 0;			// ダメージ
 };
+
 // リアクション
 enum class HitReactionType {
 	Knockback,
@@ -158,12 +159,17 @@ struct HitReactionData {
 	float verticalBoost = 0.0f;
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
+	// ヒットストップ（相手）
+	float targetHitStopTime = 5.0f / 20.0f;
+	// ヒットストップ（自分）
+	float selfHitStopTime = 2.0f / 60.0f;
+	// 一回しかヒットストップしない(自分)
+	bool isSingleHitStop = true;
+
 	// リアクション移動の有効時間
 	float duration = 0.25f;
 	// 行動不能時間
 	float hitStunTime = 0.1f;
-	// ヒットストップ
-	float hitStopTime = 1.0f / 20.0f;
 	// ダウン時間
 	float downTime = 0.0f;
 	// 打ち上げ時に重力を弱める/止める時間

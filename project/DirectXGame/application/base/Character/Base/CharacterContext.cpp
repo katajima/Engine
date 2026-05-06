@@ -56,6 +56,9 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 	
 	ctx.isStop = !owner->GetIsMove();
 
+	// ヒットストップ中か
+	ctx.isHitStop = hitMotionSystem->IsHitStop();
+	ctx.isSelfHitStop = hitMotionSystem->IsSelfHitStop();
 	// 着地状態か
 	ctx.onGround = movementComponent->GetIsLanding();
 	// 攻撃中なら

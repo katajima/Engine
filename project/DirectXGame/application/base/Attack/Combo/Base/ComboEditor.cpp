@@ -8,7 +8,7 @@ namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, 
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon,
 		Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,
 		const std::string& stateName, Character::BaseCharacter* owner,
 		EffectSystem* effectSystem) {
@@ -36,14 +36,15 @@ namespace Combo {
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 	}
 
-	void EditorBlock::UpdateImGui(float dt) {
+	void EditorBlock::UpdateImGui(float dt, bool isActive) {
 
 		auto state = comboSystem->GetComboNodeState(stateName);
 		// 選択中でなければ処理しない
 		if (!nowChoice_) return;
-		if (currentFrame == 0 && isPlaying) {
+		if (currentFrame == 0 && isPlaying && isActive) {
 			comboSystem->GetComboStateMachine()->SetRoot(state);
 		}
+		if(isActive)
 		state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 
 #ifdef _DEBUG
@@ -54,13 +55,13 @@ namespace Combo {
 		ImGui::Separator();
 
 		// 現在の時間
-		ComboImGui::CurrentFrame(dt, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
+		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
 
 		// シーケンサーの設定と表示
 		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
 
 		// アニメーション
-		ComboImGui::ApplyAnimationToState("アニメーション", currentFrame, maxFrame, data_.animation,
+		ComboImGui::ApplyAnimationToState("アニメーション", isActive, currentFrame, maxFrame, data_.animation,
 			owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
 			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
 
@@ -107,10 +108,10 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("使用者", HitBoxUseTypeLabels, data_.hitBox.useType);
 
-			
+
 			// ペアレント設定
 			Engine::ImGuiManager::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
-			
+
 			// ヒットボックス出現条件
 			static const char* HitBoxSpawnTypeLabels[] = {
 				"時間経過",
@@ -128,7 +129,7 @@ namespace Combo {
 				"ターゲットの位置",
 			};
 			Engine::ImGuiManager::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
-			
+
 			// 影響タイプ
 			static const char* HitBoxHitEffectTypeLabels[] = {
 				"ダメージのみ",
@@ -144,7 +145,7 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
-			
+
 			// タグタイプ
 			static const char* HitBoxTagTypeLabels[] = {
 				"何もなし",
@@ -158,7 +159,7 @@ namespace Combo {
 				"敵による影響"
 			};
 			Engine::ImGuiManager::Select("コライダー(タグ)", HitBoxTagTypeLabels, data_.hitBox.tag);
-			
+
 			// レイヤタイプ
 			static const char* HitBoxLayerTypeLabels[] = {
 				"デフォルト",
@@ -178,12 +179,12 @@ namespace Combo {
 			// オフセット
 			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
 			// サイズ
-			if(data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
+			if (data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
 				data_.hitBox.shapeType == HitBox::ShapeType::kOBB)
-			ImGui::DragFloat3("コライダーサイズ", &data_.hitBox.colliderSize.x, 0.1f);
+				ImGui::DragFloat3("コライダーサイズ", &data_.hitBox.colliderSize.x, 0.1f);
 			// 半径
 			if (data_.hitBox.shapeType == HitBox::ShapeType::kSphere)
-			ImGui::DragFloat("コライダー半径", &data_.hitBox.radius, 0.1f);
+				ImGui::DragFloat("コライダー半径", &data_.hitBox.radius, 0.1f);
 
 		}
 	}
@@ -219,7 +220,7 @@ namespace Combo {
 
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
 			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
-			
+
 			ImGui::DragFloat3("ローカル移動ベクトル", &data_.move.localMoveVector.x, 0.01f);
 			if (data_.move.localMoveVector.x >= 1.0f) {
 				data_.move.localMoveVector.x = 1.0f;
@@ -243,7 +244,7 @@ namespace Combo {
 			ImGui::Checkbox("移動中も毎フレーム方向を更新するか", &data_.move.isUpdateDirectionEachFrame);
 			ImGui::Checkbox("ターゲット方向を使うとき、基準前方を水平化するか", &data_.move.isFlattenTargetDirection);
 			ImGui::Checkbox("移動方向とキャラクターの向く方向を一致させるか", &data_.move.alignCharacterToMovement);
-			
+
 			ImGui::Checkbox("重力", &data_.move.isGravity);
 			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
 			ImGui::Checkbox("開始重力速度をリセット", &data_.move.isResetGravity);
@@ -277,6 +278,11 @@ namespace Combo {
 			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
 			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
 			data_.hitReaction.damageData.GetOne().SetDamage(damage);
+			ImGui::Checkbox("一回しかヒットストップしない", &data_.hitReaction.isSingleHitStop);
+
+			ImGui::SliderFloat("ヒットストップ時間(相手)", &data_.hitReaction.targetHitStopTime, 0.0f, 10.0f, "%.2f");
+			ImGui::SliderFloat("ヒットストップ時間(自分)", &data_.hitReaction.selfHitStopTime, 0.0f, 10.0f, "%.2f");
+
 			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
@@ -307,8 +313,8 @@ namespace Combo {
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
 
-	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction, 
-		const std::map<std::string, EffectGlobalData>& effectDatas){
+	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction,
+		const std::map<std::string, EffectGlobalData>& effectDatas) {
 		ImGui::SeparatorText("ヒットエフェクト");
 		ImGui::Text("※エディタでリロードしてから保存してください");
 
@@ -371,8 +377,8 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Engine::LineCommon* lineCommon, 
-		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, 
+	void Editor::Initialize(Engine::LineCommon* lineCommon,
+		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables,
 		Character::BaseCharacter* owner, EffectSystem* effectSystem) {
 		this->comboSystem = comboSystem;
 		this->lineCommon = lineCommon;
@@ -409,7 +415,7 @@ namespace Combo {
 
 
 		if (isComboEditorActive_)
-			UpdateImGui(dt);
+		UpdateImGui(dt);
 
 
 		ImGui::End();
@@ -421,7 +427,7 @@ namespace Combo {
 
 		// 何もなければ何もしない
 		if (comboEditorBlocks_.empty()) return;
-		
+
 		// 
 		Engine::ImGuiManager::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
 
@@ -438,7 +444,7 @@ namespace Combo {
 			combo.second.SetNowChoice(nowChoice);
 
 			// 選択中の1つだけ UpdateImGui 内部で描画される
-			combo.second.UpdateImGui(dt);
+			combo.second.UpdateImGui(dt,isComboEditorActive_);
 		}
 #endif // _DEBUG
 	}
@@ -503,17 +509,17 @@ namespace Combo {
 			data.move = comboEditorBlocks_[it.first].GetData().move;
 			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
 			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
-		
-			
+
+
 			// アニメーションスピード
 			data.animation = comboEditorBlocks_[it.first].GetData().animation;
-		
+
 			// エフェクト
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 
-		
-			
+
+
 		}
 
 		comboSystem->SetGlobalComboDatas();
@@ -528,7 +534,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner,effectSystem);
+		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner, effectSystem);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);

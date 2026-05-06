@@ -8,11 +8,11 @@ namespace Combo {
 	class ComboImGui {
 	public:
 		// 現在の時間
-		static void CurrentFrame(float dt, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
+		static void CurrentFrame(float dt,bool isActive ,const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
 			int& currentFrame, int& firstFrame, int& maxFrame);
 
 		// アニメーション設定と表示
-		static void ApplyAnimationToState(const std::string& name, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
+		static void ApplyAnimationToState(const std::string& name, bool isActive, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
 			Engine::AnimationComponent* animation,const std::string& nowAnimationName);
 	public: // シーケンサー
 		// シーケンサー設定と表示

@@ -46,6 +46,11 @@ namespace HitBox {
 		if (!player) return;
 		// リアクションデータ
 		enemy->GetHitMotionSystem()->SetReactionData(data_);
+
+		if (data_.isSingleHitStop) {
+			isHitStop = false; // 一回しかヒットストップしない場合は無効化
+			player->GetHitMotionSystem()->SetSelfHitStopTime(data_.selfHitStopTime);
+		}
 		//	エフェクト出現
 		enemy->GetHitMotionSystem()->EmitHitEffect();
 		// 敵ステート設定
@@ -67,6 +72,12 @@ namespace HitBox {
 		if(player->GetCurrentMainState() == Character::CharacterMainState::Special){
 			return; // プレイヤーが必殺技中は無効
 		}
+
+		if (data_.isSingleHitStop) {
+			isHitStop = false; // 一回しかヒットストップしない場合は無効化
+			enemy->GetHitMotionSystem()->SetSelfHitStopTime(data_.selfHitStopTime);
+		}
+
 		// リアクションデータ
 		player->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーステート設定

@@ -52,6 +52,10 @@ namespace Character {
 		bool isAttacking = false;
 		// スタン状態か
 		bool isHitStun = false;
+		// ヒットストップ状態か(相手が攻撃を当てたとき)
+		bool isHitStop = false;
+		// ヒットストップ状態か(自分が攻撃を当てたとき)
+		bool isSelfHitStop = false;
 		// 重力有効か
 		bool isGravity = true;
 		// 停止するか

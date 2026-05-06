@@ -1,12 +1,14 @@
 #include "ComboImGui.h"
 
-void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
+void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
 	int& currentFrame, int& firstFrame, int& maxFrame) {
 	// 現在のフレーム表示
-	ImGui::Checkbox("再生するか", &isPlaying);
-	ImGui::Checkbox("ループ再生", &loopPlay);
-	ImGui::Separator();
-	ImGui::Text("Current Frame: %d", currentFrame);
+	if (isActive) {
+		ImGui::Checkbox("再生するか", &isPlaying);
+		ImGui::Checkbox("ループ再生", &loopPlay);
+		ImGui::Separator();
+		ImGui::Text("Current Frame: %d", currentFrame);
+	}
 	ImGui::DragInt("最大フレーム", &maxFrame);
 	ImGui::SliderInt("Current Frame", &currentFrame, 0, maxFrame);
 	// 最初フレーム設定
@@ -18,7 +20,7 @@ void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, b
 	}
 	ImGui::Separator();
 
-	if (isPlaying) {
+	if (isPlaying && isActive) {
 		currentFrame += static_cast<int>(dt * 60.0f); // 60FPS換算
 	}
 
@@ -33,7 +35,7 @@ void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, b
 
 
 void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
-	int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
+	bool isActive, int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
 	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
 
 	if (ImGui::CollapsingHeader(imGuiName.c_str())) {
@@ -50,13 +52,15 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 		Engine::ImGuiManager::Select("Selected Combo", animationData.animationName, animations);
 	}
 
-	// ループ再生
-	animation->SetIsLoop(false);
-	// アニメーション設定
-	animation->SetAnimation(nowAnimationName, 0);
-	// ステートのアニメーション時間設定
-	float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
-	animation->SetAnimationTime(animationTime);
+	if (isActive) {
+		// ループ再生
+		animation->SetIsLoop(false);
+		// アニメーション設定
+		animation->SetAnimation(nowAnimationName, 0);
+		// ステートのアニメーション時間設定
+		float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
+		animation->SetAnimationTime(animationTime);
+	}
 }
 
 

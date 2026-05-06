@@ -1,11 +1,11 @@
 #include "MovementSystem.h"
 
-void MovementSystem::Initialize()
-{
+void MovementSystem::Initialize(){
 }
 
 void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
-
+	// ヒットストップ中は移動処理を行わない
+	if (cxt.isHitStop || cxt.isSelfHitStop) return;
 
 	world.translate_ += cmd.finalVelocity;
 	if (cmd.finalDirection.Length() != 0.0f) {

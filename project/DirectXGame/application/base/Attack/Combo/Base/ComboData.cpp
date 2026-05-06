@@ -29,9 +29,13 @@ namespace Combo {
 	// 更新
 	void ComboData::Update(const Character::CharacterContext& ctx) {
 		// 時間更新
-		if (!isDebug) {
+		if (!isDebug && !ctx.isSelfHitStop) {
 			timer_ += ctx.dt;
 		}
+		else {
+			timer_  = timer_;
+		}
+
 		// コンボ用条件クラス更新
 		comboCondition.Update(ctx, timer_);
 		// コンボ用モーションクラス更新

@@ -21,7 +21,7 @@ namespace Combo {
 			Combo::System* comboSystem, const std::string& stateName, 
 			Character::BaseCharacter* owner, EffectSystem* effectSystem);
 		// 更新
-		void UpdateImGui(float dt);
+		void UpdateImGui(float dt, bool isActive);
 	public:
 		// エディタ上で選択中か取得
 		void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
@@ -89,6 +89,8 @@ namespace Combo {
 		std::string comboName_ = "Combo1";
 		// 今選択中か
 		bool nowChoice_ = false;
+		// コンボエディターがアクティブか
+		bool isComboEditorActive_ = true;
 	private:
 		// データ
 		GlobalData data_;

@@ -19,7 +19,7 @@ namespace Combo {
 	// 更新
 	void ComboMotion::Update(const Character::CharacterContext& ctx, float timer,bool isDebug) {
 		// コンボ用アニメーションクラス更新
-		comboAnimation_.Update(timer, ctx.dt,isDebug);
+		comboAnimation_.Update(ctx,timer,isDebug);
 		// コンボ用移動クラス更新
 		comboMove_.Update(ctx, timer);
 	}

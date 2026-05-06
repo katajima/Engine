@@ -42,12 +42,18 @@ public:
 	
 	// リアクションデータ設定
 	void SetReactionData(const HitReactionData& data);
+	// ヒットストップ時間設定(自分)
+	void SetSelfHitStopTime(float time) { selfHitStopTime_ = time; }
 	// ヒットモーション中か
 	bool IsHitMotion() const;
 	// スタン中か
 	bool IsHitStun() const;
 	// ダウン中か
 	bool IsDown() const;
+	// ヒットストップ中か
+	bool IsHitStop() const;
+	// セルフヒットストップ中か
+	bool IsSelfHitStop() const;
 	// 重力は有効か
 	bool IsGravityEnabled() const;
 	// 重力倍率取得
@@ -56,6 +62,10 @@ public:
 	float GetHitStunTimer() const { return hitStunTimer_; }
 	// ダウン時間
 	float GetDownTimer() const { return downTimer_; }
+	// セルフヒットストップ時間
+	float GetSelfHitStopTimer() const { return selfHitStopTime_; }
+
+
 	// 終了処理
 	bool IsFinished() const;
 
@@ -70,6 +80,9 @@ private:
 	void SendReactionMoveRequest(const Vector3& velocity);
 	// リアクション終了
 	void FinishReaction();
+
+	// 時間内か
+	bool GetIsTime(float dt, float& time);
 
 private:
 	// モーションステート
@@ -86,6 +99,11 @@ private:
 	float downTimer_ = 0.0f;
 	// 打ち上げ時間
 	float launchFloatTime_ = 0.0f;
+	// ヒットストップ時間
+	float hitStopTime_ = 0.0f;
+	// セルフヒットストップ時間
+	float selfHitStopTime_ = 0.0f;
+
 	// アクション中か
 	bool isAction_ = false;
 

@@ -19,7 +19,7 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboAnimation::Update(float timer, float dt, bool isDebug) {
+	void ComboAnimation::Update(const Character::CharacterContext& ctx,float timer, bool isDebug) {
 		// 着地状態か 
 		onGlound = movementComponent->GetIsLanding();
 		
@@ -34,7 +34,12 @@ namespace Combo {
 				animationComponent->SetIsPlaying(false);
 				animationComponent->SetAnimationTime(stopT);
 			}else{
-				animationComponent->SetIsPlaying(true);
+				if (ctx.isSelfHitStop) {
+					animationComponent->SetIsPlaying(false);
+				}
+				else {
+					animationComponent->SetIsPlaying(true);
+				}
 			}
 		}
 		else {
@@ -44,9 +49,14 @@ namespace Combo {
 				// アニメーション時間設定
 				animationComponent->SetAnimationTime(timer * data_.animationSpeed);
 			}
-		}
 
-		
+			if (ctx.isSelfHitStop) {
+				animationComponent->SetIsPlaying(false);
+			}
+			else {
+				animationComponent->SetIsPlaying(true);
+			}
+		}	
 	}
 
 	// 終了

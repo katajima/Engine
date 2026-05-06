@@ -161,6 +161,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
+			globalVariables->AddItem(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
+			globalVariables->AddItem(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
+			globalVariables->AddItem(name, "ヒットストップ(一回のみ)", data.hitReaction.isSingleHitStop);
+
+
 			globalVariables->AddItem(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
 
 			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
@@ -241,6 +246,12 @@ namespace Combo {
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
 			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
 			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
+
+
+			data.hitReaction.targetHitStopTime = globalVariables->GetValue<float>(name, "ヒットストップ(相手)");
+			data.hitReaction.selfHitStopTime =  globalVariables->GetValue<float>(name, "ヒットストップ(自分)");
+			data.hitReaction.isSingleHitStop = globalVariables->GetValue<bool>(name, "ヒットストップ(一回のみ)");
+
 
 			data.hitReaction.hitEffectNames.clear();
 
@@ -344,6 +355,11 @@ namespace Combo {
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
 			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+
+
+			globalVariables->SetValue(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
+			globalVariables->SetValue(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
+			globalVariables->SetValue(name, "ヒットストップ(一回のみ)", data.hitReaction.isSingleHitStop);
 
 
 			globalVariables->SetValue(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
