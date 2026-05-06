@@ -120,7 +120,7 @@ namespace Combo {
 			case MoveType::kTraget:
 				if (traget) {
 					// 半径以内なら近づき停止
-					if (data_.moveTargetRadius > targetPos_.Distance(worldTransform->translate_)) {
+					if (data_.lockOnData.moveTargetRadius > targetPos_.Distance(worldTransform->translate_)) {
 						canMove = false;
 					}
 				}

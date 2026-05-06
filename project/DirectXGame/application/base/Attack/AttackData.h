@@ -160,9 +160,9 @@ struct HitReactionData {
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
 	// ヒットストップ（相手）
-	float targetHitStopTime = 5.0f / 60.0f;
+	float targetHitStopTime = 3.0f / 60.0f;
 	// ヒットストップ（自分）
-	float selfHitStopTime = 5.0f / 60.0f;
+	float selfHitStopTime = 3.0f / 60.0f;
 	// 一回しかヒットストップしない(自分)
 	bool isSingleHitStop = true;
 

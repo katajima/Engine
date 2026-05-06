@@ -256,7 +256,16 @@ namespace Combo {
 				"近い相手",
 				};
 				Engine::ImGuiManager::Select("ロックオンタイプ", LockOnTypeLabels, data_.move.lockOnData.type);
-				ImGui::SliderFloat("ソフトロックオン範囲", &data_.move.lockOnData.radius, 0.0f, 100.0f);
+				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.radius, 0.0f, 100.0f);
+				static const char* TargetMoveTypeLabels[] = {
+				"なし",
+				"移動",
+				"瞬間移動",
+				"補間移動"
+				};
+				Engine::ImGuiManager::Select("ターゲット移動タイプ", TargetMoveTypeLabels, data_.move.lockOnData.targetMoveType);
+				ImGui::SliderFloat("ターゲット接近距離半径", &data_.move.lockOnData.moveTargetRadius, 0.0f, 100.0f);
+
 			}
 		}
 	}

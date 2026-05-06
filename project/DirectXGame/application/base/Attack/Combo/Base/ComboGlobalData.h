@@ -23,12 +23,6 @@ namespace Combo {
 		kLockAt,	// カメラ方向基準
 	};
 
-	// ターゲットまでの移動タイプ
-	enum class TargetMoveType {
-		kNone,		// なし
-		kMove,		// 移動
-		kTeleport,	// 瞬間移動
-	};
 
 	// コンボタイプ
 	enum class Type {
@@ -60,11 +54,7 @@ namespace Combo {
 		float gravityScale = 1.0f;
 		// 開始時に重力速度をリセットするか
 		bool isResetGravity = false;
-		// ターゲットの距離でどこまで近づくか
-		float moveTargetRadius = 1.0f;
-		// ターゲットまで移動するときの移動タイプ
-		TargetMoveType targetMoveType = TargetMoveType::kMove;
-
+		
 		// ローカル移動ベクトル
 		// X=Right, Y=Up, Z=Forward
 		// 例:

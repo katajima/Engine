@@ -119,7 +119,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
 			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->AddItem(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
+
 			globalVariables->AddEnumItem(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
+			globalVariables->AddEnumItem(name, "ターゲット移動タイプ", data.move.lockOnData.targetMoveType, "TargetMoveType");
+
 
 			globalVariables->AddItem(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->AddItem(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
@@ -226,7 +230,10 @@ namespace Combo {
 			data.move.isCompulsionMove = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
 			data.move.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
 			data.move.lockOnData.radius = globalVariables->GetValue<float>(name, "ロックオン半径");
+			data.move.lockOnData.moveTargetRadius = globalVariables->GetValue<float>(name, "ロックオンターゲット接近半径");
 			data.move.lockOnData.type = globalVariables->GetEnumValue<LockOnType>(name, "ロックオンタイプ");
+			data.move.lockOnData.targetMoveType = globalVariables->GetEnumValue<TargetMoveType>(name, "ターゲット移動タイプ");
+			
 
 			data.move.localMoveVector = globalVariables->GetValue<Vector3>(name, "コンボ中の移動方向");
 			data.move.isUpdateDirectionEachFrame = globalVariables->GetValue<bool>(name, "コンボ中の移動毎フレーム方向を更新");
@@ -336,7 +343,11 @@ namespace Combo {
 
 			globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
 			globalVariables->SetValue(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->SetValue(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
+
 			globalVariables->SetEnumValue(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
+			globalVariables->SetEnumValue(name, "ターゲット移動タイプ", data.move.lockOnData.targetMoveType, "TargetMoveType");
+
 
 			globalVariables->SetValue(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->SetValue(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
