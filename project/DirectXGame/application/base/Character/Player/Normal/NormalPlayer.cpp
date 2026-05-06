@@ -37,7 +37,7 @@ namespace Character {
 		parameterComponent_->parameters->HP.Initiaize(200, 0, 200, 0);
 		// スタミナ設定
 		parameterComponent_->parameters->stamina.Initiaize(100, 0, 100, 10);
-
+		parameterComponent_->parameters->stamina.useRate = false; // スタミナの変化率を使用しない
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();

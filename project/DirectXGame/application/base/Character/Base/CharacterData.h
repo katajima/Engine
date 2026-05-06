@@ -87,7 +87,6 @@ namespace Character {
 
 		// 更新
 		void Update() {
-			parameters->stamina.useRate = true;	// スタミナ変化
 			parameters->HP.Update(deltaTime_);	// HP更新
 			parameters->MP.Update(deltaTime_);	// MP更新
 			parameters->stamina.Update(deltaTime_);	// スタミナ更新

@@ -12,6 +12,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
 	this->hitMotionSystem = owner->GetHitMotionSystem();							// レスポンスシステム
+	this->parameters = owner->GetCharacterParameterComponent();								// パラメータ
 }
 
 Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
@@ -46,6 +47,15 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		ctx.worldStickDirection = worldDirection;
 	}
 
+	if(ctx.inputData.dashHeld && parameters->GetStamina() > 1.0f) {
+		parameters->Stamina().value -= 10.0f * dt;	// スタミナを減らす
+		parameters->Stamina().useRate = false;	// スタミナ回復を止める
+		ctx.isDashing = true;
+	}
+	else {
+		parameters->Stamina().useRate = true;	// スタミナ回復
+	}
+	
 
 	// 方向
 	ctx.direction = worldTransform->GetForward();

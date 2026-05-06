@@ -26,7 +26,12 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 		// スピード処理
 		SpeedProcess(ctx);
 		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-		moveVelo = Multiply(worldDirection, speed_);
+		float fainalSpeed = speed_;
+		if (ctx.isDashing) {
+			fainalSpeed *= data_.dashSpeedRate;
+		}
+
+		moveVelo = Multiply(worldDirection, fainalSpeed);
 	}
 
 	// 移動速度をセット
@@ -180,7 +185,7 @@ void MoveSystem::AnimationSpeedProcess()
 		animationSpeed_ = Lerp(data_.animetionSpeedMinWalk, data_.animetionSpeedMaxWalk, t);
 	}
 	else {
-		if (state_ == State::kWalk) {	// 走り
+		if (state_ == State::kWalk) {	// 歩き
 			animationSpeed_ = Lerp(data_.animetionSpeedMinWalk, data_.animetionSpeedMaxWalk, t);
 		}
 		else if (state_ == State::kRun) { // 走り

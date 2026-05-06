@@ -72,6 +72,8 @@ namespace Character {
 		bool isCanJump = false;
 		// 被弾中か
 		bool isDamage = false;
+		// ダッシュ中か
+		bool isDashing = false;
 
 		// 高さ
 		float skyHeight = 1.5f;
@@ -121,6 +123,8 @@ namespace Character {
 		HitMotionSystem* hitMotionSystem = nullptr;
 		// コンボステートマシン
 		const Combo::StateMachine* comboStateMachine = nullptr;
+		// パラメータ
+		Character::ParameterComponent* parameters = nullptr;
 	};
 
 

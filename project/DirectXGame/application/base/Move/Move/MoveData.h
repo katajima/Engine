@@ -49,4 +49,7 @@ struct MoveData
 	float skyHeight = 1.0f;
 	// 重力を使用するか
 	bool useGravity = true;
+
+	// ダッシュ時の速度倍率
+	float dashSpeedRate = 2.0f;	// ダッシュ時の速度倍率
 };
