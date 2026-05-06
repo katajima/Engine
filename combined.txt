@@ -4772,7 +4772,7 @@ namespace Combo {
 		// 方向
 		Vector3 direction = {};
 		// コンボタイプ
-		Type type;
+		Type type{};
 		//
 		int32_t id = -1;
 	private:
@@ -5259,8 +5259,6 @@ namespace Combo {
 
 	// 開始
 	void ComboMove::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
-		isMove_ = false;
-		stickDirection_ = {};
 		moveComponent = owner->GetMoveComponent();
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
@@ -5281,7 +5279,8 @@ namespace Combo {
 			owner->GetObjectComponent()->GetRigidBodyComponent()->ResetAcceleration();
 			owner->GetObjectComponent()->GetRigidBodyComponent()->ResetVelocity();
 		}
-
+		isMove_ = false;
+		stickDirection_ = {};
 		// 座標更新
 		owner->GetWorldTransform().Update();
 	}
@@ -5328,6 +5327,7 @@ namespace Combo {
 		moveDirection_ = {};
 	}
 
+	// 移動処理
 	void ComboMove::MoveTypeProcess(float timer, float dt) {
 		bool isStart = data_.moveWindow.startTime <= timer;		// 受付開始時間を過ぎたら
 		bool isEnd = data_.moveWindow.endTime >= timer;			// 受付終了時間より前なら
@@ -13120,14 +13120,18 @@ namespace Character {
 		this->globalVariables = globalVariables; // 保存項目
 		this->camera = camera;					// カメラ
 		this->hitBoxSystem = hitBoxSystem;		// ヒットボックスシステム
+		score = 0;
 	}
 
 	void CharacterManager::Update(bool isMove) {
 		// 死亡したキャラクターを削除
 		character_.erase(
 			std::remove_if(character_.begin(), character_.end(),
-				[](const std::unique_ptr<BaseCharacter>& character) {
-					if (!character) { return false; } // 敵じゃない
+				[this](const std::unique_ptr<BaseCharacter>& character) {
+					if (!character) { return false; } 
+					if (!character->GetAlive() && character->GetDelete()) {
+						score++;
+					}
 					return !character->GetAlive() && character->GetDelete();
 				}),
 			character_.end());
@@ -13903,8 +13907,8 @@ namespace Character {
 		Vector3 position_ = {};					// 位置
 		Vector3 velocity_ = {};					// 速度
 		float attackCooldown_ = 0.0f;			// 攻撃クールタイム
-		uint32_t id;							// 個人ID
-		uint32_t groupId;                       // 部隊ID
+		uint32_t id = 0;							// 個人ID
+		uint32_t groupId = 0;                       // 部隊ID
 
 
 		float speed = 300.0f;					// m/s
@@ -13925,7 +13929,7 @@ namespace Character {
 
 		// 表示用：インスタンスバッファに書き込むデータ
 		uint32_t animIndex = 0;
-		Vector3 slotTarget_;
+		Vector3 slotTarget_{};
 	private:
 
 		CrowdManager* manager_ = nullptr;
@@ -13978,11 +13982,11 @@ namespace Character {
 
 		// 部隊人数
 		uint32_t number_ = 0;
-		uint32_t id;
+		uint32_t id = 0;
 		std::vector<int> memberIndices; // CrowdManager側のエージェント配列へのインデックス
 		Vector3 centerPos = { 0,0,0 };
 		Vector3 anchorCenter = { 0,0,0 };
-		GroupCommand command;
+		GroupCommand command{};
 		// simple formation: grid parameters
 		int formationCols = 8;
 		float formationSpacing = 1.2f;
@@ -14056,7 +14060,7 @@ namespace Character {
 	/// </summary>
 	class CrowdManager {
 	public:
-		UniformGrid grid;
+		UniformGrid grid{};
 		/// <summary>
 		/// 部隊コンテナ
 		/// </summary>
@@ -18693,13 +18697,13 @@ namespace Character {
         }
 
     private:
-        std::unique_ptr<BaseCharacterState> state_;// ステート
+        std::unique_ptr<BaseCharacterState> state_ = nullptr;// ステート
         // 状態管理用Map
         std::unordered_map<CharacterMainState, CharacterMainStateFactory> stateFactoryMap_;
         //
-        CharacterMainState nowState_;
+        CharacterMainState nowState_{};
         // 
-        CharacterMainState prevState_;
+        CharacterMainState prevState_{};
         // 操作状態
         BaseCharacter* character = nullptr;
         // ステート変更が1フレーム中に何度も起らないようにするフラグ
@@ -20975,7 +20979,7 @@ struct PlayerInputData {
 	// 移動スティック(左スティック)
 	Vector2 moveShick;
 	// 視点スティック(右スティック)
-	Vector2 lookStick;
+	Vector2 lookStick{};
 
 	// 押した瞬間
 	// ジャンプ
@@ -21004,7 +21008,7 @@ struct PlayerInputData {
 /// </summary>
 struct GameInputData {
 	// 移動スティック(左スティック)
-	Vector2 moveShick;
+	Vector2 moveShick{};
 	// 決定
 	bool decisionTrigger = false;
 	// ポーズ
@@ -41611,9 +41615,9 @@ namespace Engine {
 
 	// SRTリザルト
 	struct SATResult {
-		bool hit;
+		bool hit = false;
 		float minOverlap = FLT_MAX; // 初期化は最大値
-		Vector3 pushDir; // 押し出し軸（world space）
+		Vector3 pushDir{}; // 押し出し軸（world space）
 	};
 	// コライダー基底クラス
 	class Collider
@@ -45786,10 +45790,10 @@ namespace Engine {
 	private:
 		DirectXCommon* dxCommon = nullptr;
 
-		Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
-		Type* data_;
+		Microsoft::WRL::ComPtr < ID3D12Resource> resource_ = nullptr;
+		Type* data_ = nullptr;
 
-		D3D12_INDEX_BUFFER_VIEW bufferView;
+		D3D12_INDEX_BUFFER_VIEW bufferView{};
 
 	};
 }
@@ -46006,28 +46010,28 @@ namespace Engine {
 
 		std::unique_ptr<Barrier> barrier_ = nullptr;	// バリア
 
-		Microsoft::WRL::ComPtr < ID3D12Resource> resource_; // リソース
+		Microsoft::WRL::ComPtr < ID3D12Resource> resource_{}; // リソース
 
 		//
 		bool useUav_ = false;					// UAVを使用するかどうか
 		int num_ = 1;
 
 		// SRVハンドル
-		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_;			// SRVハンドルGPU
-		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_;			// SRVハンドルCPU
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_{};			// SRVハンドルGPU
+		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_{};			// SRVハンドルCPU
 		uint32_t srvIndex_ = 0;							// インデックス
 
 
 
 		// UAVハンドル
-		D3D12_GPU_DESCRIPTOR_HANDLE uavHandleGPU_;			// UAVハンドルGPU
-		D3D12_CPU_DESCRIPTOR_HANDLE uavHandleCPU_;			// UAVハンドルCPU
+		D3D12_GPU_DESCRIPTOR_HANDLE uavHandleGPU_{};			// UAVハンドルGPU
+		D3D12_CPU_DESCRIPTOR_HANDLE uavHandleCPU_{};			// UAVハンドルCPU
 		uint32_t uavIndex_ = 0;							// インデックス
 
 
 
 
-		Type* data_;										// データ
+		Type* data_ = nullptr;										// データ
 	};
 }
 
@@ -46158,9 +46162,9 @@ namespace Engine {
 		DirectXCommon* dxCommon = nullptr;
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
-		Type* data_;
+		Type* data_ = nullptr;
 
-		D3D12_VERTEX_BUFFER_VIEW bufferView;
+		D3D12_VERTEX_BUFFER_VIEW bufferView{};
 
 	};
 }
@@ -48475,14 +48479,14 @@ namespace Engine {
 
 
 		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_;					// パーティクルリソース(sBuffer)
-		uint32_t instanceCount;													// インスタンス数
-		ModelMesh* mesh;														// メッシュ
+		uint32_t instanceCount = 0;													// インスタンス数
+		ModelMesh* mesh = nullptr;														// メッシュ
 		//Emiter emiter;															// エミッター
 		EmitData::IsFlag isFlag;											// 各フラグ
 		EmitData::EmitType emitType = EmitData::EmitType::kRandom;		// エミッターでの出方
 		EmitData::TopBottom topBottom = EmitData::TopBottom::kBottom;	// 
-		EmitData::RasterizerType rasteType;									// ラスタライザタイプ
-		EmitData::BlendType blendType;										// ブレンドタイプ
+		EmitData::RasterizerType rasteType{};									// ラスタライザタイプ
+		EmitData::BlendType blendType{};										// ブレンドタイプ
 		Transform uvTransformVeloctiy_{ {},{},{0,0,0} };						// uvトランスフォーム
 		float kGravitationalAcceleration = 9.8f;								// 重力
 		bool isUVClamp = false;												// UVを
@@ -48497,10 +48501,10 @@ namespace Engine {
 		std::list<Particle> particle;											// パーティクル
 
 
-		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_;					// パーティクルリソース(sBuffer)
-		uint32_t instanceCount;													// インスタンス数
-		Sprite* sprite;															// スプライト
-		ModelMesh* mesh;
+		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_{};					// パーティクルリソース(sBuffer)
+		uint32_t instanceCount = 0;													// インスタンス数
+		Sprite* sprite = nullptr;															// スプライト
+		ModelMesh* mesh = nullptr;
 		float kGravitationalAcceleration = 9.8f;								// 重力
 		bool isAlpha_ = true;
 		bool isGravity_ = false;
@@ -65342,16 +65346,16 @@ namespace Engine {
 		Vector3 translate_ = { 0,0,0 }; // 位置
 
 		// マトリックス(現在)
-		Matrix4x4 worldMat_;
+		Matrix4x4 worldMat_{};
 		// マトリックス(過去)
-		Matrix4x4 worldPreMat_;
+		Matrix4x4 worldPreMat_{};
 
 		// 親となるワールド変換へのポインタ
 		WorldTransform* parent_ = nullptr;
 
 	private:
 		bool isParent = false;
-		Matrix4x4 parentMatrix_;
+		Matrix4x4 parentMatrix_{};
 	};
 }
 
@@ -65438,15 +65442,15 @@ namespace Engine {
 		Vector2 translate_ = { 0,0 };	// 位置
 
 		// マトリックス(現在)
-		Matrix3x3 worldMat_;
+		Matrix3x3 worldMat_{};
 		// マトリックス(過去)
-		Matrix3x3 worldPreMat_;
+		Matrix3x3 worldPreMat_{};
 
 		// 親となるワールド変換へのポインタ
 		WorldTransform2d* parent_ = nullptr;
 	private:
 		bool isPearent = false;
-		Matrix3x3 parentMatrix_;
+		Matrix3x3 parentMatrix_{};
 	};
 }
 
@@ -70266,10 +70270,10 @@ struct Box {
 
 // OBB
 struct BoxOBB {
-	Vector2 center_;		//!< 中心座標
-	Vector2 halfSize_;		//!< 幅/2, 高さ/2
-	float rotation_;		//!< ラジアンでの回転角（時計回り）
-	Vector2 corners_[4];	// コーナー情報
+	Vector2 center_{};		//!< 中心座標
+	Vector2 halfSize_{};		//!< 幅/2, 高さ/2
+	float rotation_{} ;		//!< ラジアンでの回転角（時計回り）
+	Vector2 corners_[4]{};	// コーナー情報
 	BoxOBB(Vector2 center = {}, Vector2 halfSize = {}, float rotation = 0.0f)
 		: center_(center), halfSize_(halfSize), rotation_(rotation) {
 	}
@@ -70612,9 +70616,9 @@ struct Transform {
 /// </summary>
 struct QuaternionTransform
 {
-	Vector3 scale;
-	Quaternion rotate;
-	Vector3 translate;
+	Vector3 scale = { 1.0f, 1.0f, 1.0f };
+	Quaternion rotate = {0.0f, 0.0f, 0.0f, 1.0f};
+	Vector3 translate = { 0.0f, 0.0f, 0.0f };
 
 	// ワールド行列生成
 	Matrix4x4 GetWorldMatrix() const {
@@ -71891,14 +71895,14 @@ File Path: project/DirectXGame.vcxproj
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)\externals\imgui;$(SolutionDir)\externals\nlohmann;$(IncludePath)</IncludePath>
+    <OutDir>$(ProjectDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)\externals\imgui;$(SolutionDir)\externals\nlohmann;$(IncludePath)</IncludePath>
+    <OutDir>$(ProjectDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
