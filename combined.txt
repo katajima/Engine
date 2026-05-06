@@ -2092,9 +2092,9 @@ struct HitReactionData {
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
 	// ヒットストップ（相手）
-	float targetHitStopTime = 5.0f / 60.0f;
+	float targetHitStopTime = 3.0f / 60.0f;
 	// ヒットストップ（自分）
-	float selfHitStopTime = 5.0f / 60.0f;
+	float selfHitStopTime = 3.0f / 60.0f;
 	// 一回しかヒットストップしない(自分)
 	bool isSingleHitStop = true;
 
@@ -2605,7 +2605,16 @@ namespace Combo {
 				"近い相手",
 				};
 				Engine::ImGuiManager::Select("ロックオンタイプ", LockOnTypeLabels, data_.move.lockOnData.type);
-				ImGui::SliderFloat("ソフトロックオン範囲", &data_.move.lockOnData.radius, 0.0f, 100.0f);
+				ImGui::SliderFloat("ソフトロックオン半径", &data_.move.lockOnData.radius, 0.0f, 100.0f);
+				static const char* TargetMoveTypeLabels[] = {
+				"なし",
+				"移動",
+				"瞬間移動",
+				"補間移動"
+				};
+				Engine::ImGuiManager::Select("ターゲット移動タイプ", TargetMoveTypeLabels, data_.move.lockOnData.targetMoveType);
+				ImGui::SliderFloat("ターゲット接近距離半径", &data_.move.lockOnData.moveTargetRadius, 0.0f, 100.0f);
+
 			}
 		}
 	}
@@ -3087,12 +3096,6 @@ namespace Combo {
 		kLockAt,	// カメラ方向基準
 	};
 
-	// ターゲットまでの移動タイプ
-	enum class TargetMoveType {
-		kNone,		// なし
-		kMove,		// 移動
-		kTeleport,	// 瞬間移動
-	};
 
 	// コンボタイプ
 	enum class Type {
@@ -3124,11 +3127,7 @@ namespace Combo {
 		float gravityScale = 1.0f;
 		// 開始時に重力速度をリセットするか
 		bool isResetGravity = false;
-		// ターゲットの距離でどこまで近づくか
-		float moveTargetRadius = 1.0f;
-		// ターゲットまで移動するときの移動タイプ
-		TargetMoveType targetMoveType = TargetMoveType::kMove;
-
+		
 		// ローカル移動ベクトル
 		// X=Right, Y=Up, Z=Forward
 		// 例:
@@ -3993,7 +3992,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ中の移動強制", data.move.isCompulsionMove);
 			globalVariables->AddEnumItem(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
 			globalVariables->AddItem(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->AddItem(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
+
 			globalVariables->AddEnumItem(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
+			globalVariables->AddEnumItem(name, "ターゲット移動タイプ", data.move.lockOnData.targetMoveType, "TargetMoveType");
+
 
 			globalVariables->AddItem(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->AddItem(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
@@ -4100,7 +4103,10 @@ namespace Combo {
 			data.move.isCompulsionMove = globalVariables->GetValue<bool>(name, "コンボ中の移動強制");
 			data.move.moveType = globalVariables->GetEnumValue<Combo::MoveType>(name, "コンボ中の移動タイプ");
 			data.move.lockOnData.radius = globalVariables->GetValue<float>(name, "ロックオン半径");
+			data.move.lockOnData.moveTargetRadius = globalVariables->GetValue<float>(name, "ロックオンターゲット接近半径");
 			data.move.lockOnData.type = globalVariables->GetEnumValue<LockOnType>(name, "ロックオンタイプ");
+			data.move.lockOnData.targetMoveType = globalVariables->GetEnumValue<TargetMoveType>(name, "ターゲット移動タイプ");
+			
 
 			data.move.localMoveVector = globalVariables->GetValue<Vector3>(name, "コンボ中の移動方向");
 			data.move.isUpdateDirectionEachFrame = globalVariables->GetValue<bool>(name, "コンボ中の移動毎フレーム方向を更新");
@@ -4210,7 +4216,11 @@ namespace Combo {
 
 			globalVariables->SetEnumValue(name, "コンボ中の移動タイプ", data.move.moveType, "MoveType");
 			globalVariables->SetValue(name, "ロックオン半径", data.move.lockOnData.radius);
+			globalVariables->SetValue(name, "ロックオンターゲット接近半径", data.move.lockOnData.moveTargetRadius);
+
 			globalVariables->SetEnumValue(name, "ロックオンタイプ", data.move.lockOnData.type, "LockOnType");
+			globalVariables->SetEnumValue(name, "ターゲット移動タイプ", data.move.lockOnData.targetMoveType, "TargetMoveType");
+
 
 			globalVariables->SetValue(name, "コンボ中の移動方向", data.move.localMoveVector);
 			globalVariables->SetValue(name, "コンボ中の移動毎フレーム方向を更新", data.move.isUpdateDirectionEachFrame);
@@ -5341,7 +5351,7 @@ namespace Combo {
 			case MoveType::kTraget:
 				if (traget) {
 					// 半径以内なら近づき停止
-					if (data_.moveTargetRadius > targetPos_.Distance(worldTransform->translate_)) {
+					if (data_.lockOnData.moveTargetRadius > targetPos_.Distance(worldTransform->translate_)) {
 						canMove = false;
 					}
 				}
@@ -7914,13 +7924,25 @@ enum class LockOnType {
 	kNear,	// 近い
 };
 
+// ターゲットまでの移動タイプ
+enum class TargetMoveType {
+	kNone,		// なし
+	kMove,		// 移動
+	kTeleport,	// 瞬間移動
+	kInterpolation	// 補間移動
+};
 
 // ロックオンデータ
 struct LockOnData {
-	// 半径
+	// 半径察知
 	float radius = 7.0f;
-	//
+	// ロックオン	
 	LockOnType type = LockOnType::kNear;
+	// ターゲットの距離でどこまで近づくか
+	float moveTargetRadius = 1.0f;
+	// ターゲットまで移動するときの移動タイプ
+	TargetMoveType targetMoveType = TargetMoveType::kMove;
+
 };
 
 
@@ -61268,8 +61290,10 @@ void Engine::MyGame::Initialize()
 	scenenames_.push_back("TUTORIAL");
 	scenenames_.push_back("CHARACTER");
 
+#ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");
-	//sceneManager_->ChangeScene("TITLE");
+#endif // _DEBUG
+	sceneManager_->ChangeScene("TITLE");
 
 	// リソース初期化
 	InitializeResource();
