@@ -2092,9 +2092,9 @@ struct HitReactionData {
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
 	// ヒットストップ（相手）
-	float targetHitStopTime = 5.0f / 20.0f;
+	float targetHitStopTime = 5.0f / 60.0f;
 	// ヒットストップ（自分）
-	float selfHitStopTime = 2.0f / 60.0f;
+	float selfHitStopTime = 5.0f / 60.0f;
 	// 一回しかヒットストップしない(自分)
 	bool isSingleHitStop = true;
 
@@ -2539,7 +2539,7 @@ namespace Combo {
 	}
 
 	void EditorBlock::ImGuiEndConditionType() {
-		if (ImGui::CollapsingHeader("終了条件")) {
+		if (ImGui::CollapsingHeader("条件")) {
 			static const char* EndConditionTypeLabels[] = {
 			"着地したら",
 			"離したら",
@@ -2550,7 +2550,7 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
 
-
+			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");	
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
@@ -2755,9 +2755,16 @@ namespace Combo {
 			ApplyComboEditorToSystem();
 		}
 
+		// 全てセーブ
+		if (ImGui::Button("AllSave")) {
+			for (auto& it : comboSystem->GetComboNodeStates()) {
+				globalVariables->SaveFile(it.first);
+			}
+		}
 		// セーブ
 		if (ImGui::Button("Save")) {
 			for (auto& it : comboSystem->GetComboNodeStates()) {
+				if (it.first == selectedComboEditorBlockName_)
 				globalVariables->SaveFile(it.first);
 			}
 		}
@@ -2766,6 +2773,7 @@ namespace Combo {
 		if (isComboEditorActive_)
 		UpdateImGui(dt);
 
+		
 
 		ImGui::End();
 #endif // _DEBUG
@@ -2926,8 +2934,10 @@ namespace Combo {
 		// 更新
 		void UpdateImGui(float dt, bool isActive);
 	public:
-		// エディタ上で選択中か取得
+		// エディタ上で選択中か設定
 		void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
+		// コエディタ上で選択中か取得
+		bool GetNowChoice() const { return nowChoice_; }
 
 		// 接続可能なコンボ名リスト設定
 		void SetConectComboNames(const std::vector<std::string>& names) { conectComboNames_ = names; }
@@ -3172,8 +3182,8 @@ namespace Combo {
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
-		// 入力受付から次のステートに移行するまでの時間(複数入力猶予に使う)
-		float stateInputToNextTime = 0.0f;
+		// 入力受付から次のステートに移行するまでの時間
+		float inputDelay = 0.0f;
 		// キャンセル受付
 		StateTime stateCancel{};
 		// 移動キャンセル受付
@@ -3960,6 +3970,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->AddItem(name, "コンボキャンセル可能", data.condition.isCancel);
 			globalVariables->AddItem(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
+		globalVariables->AddItem(name, "コンボ入力遅延", data.condition.inputDelay);
 		}
 		// アニメーション
 		{
@@ -4066,6 +4077,7 @@ namespace Combo {
 			data.condition.isCompulsionNext = globalVariables->GetValue<bool>(name, "コンボ強制移行");
 			data.condition.isCancel = globalVariables->GetValue<bool>(name, "コンボキャンセル可能");
 			data.condition.isMoveCancel = globalVariables->GetValue<bool>(name, "コンボ移動キャンセル可能");
+			data.condition.inputDelay = globalVariables->GetValue<float>(name, "コンボ入力遅延");
 		}
 		// アニメーション
 		{
@@ -4173,6 +4185,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->SetValue(name, "コンボキャンセル可能", data.condition.isCancel);
 			globalVariables->SetValue(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
+			globalVariables->SetValue(name, "コンボ入力遅延", data.condition.inputDelay);
 		}
 		// アニメーション
 		{
@@ -5739,7 +5752,7 @@ void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {
 	// キャンセル受付クラス
 	cancelReceiver_.Enter();
 	// 移行受付クラス
-	nextRecever_.Enter();
+	nextRecever_.Enter(data_);
 	// 終了条件クラス
 	endCondition_.Enter(data_);
 	// 移行条件クラス
@@ -6017,14 +6030,18 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboNextR
 namespace Combo {
 
 	// 開始
-	void NextReceiver::Enter() {
+	void NextReceiver::Enter(const GlobalCondition& data) {
 		// 移行フラグをfalse
 		isNext_ = false;
+		isInput_ = false;
+		// 受付可能に
+		stateInputToNextTime_ = data.inputDelay;
 	};
 	//　終了
 	void NextReceiver::Exit() {
 		// 移行フラグをfalse
 		isNext_ = false;
+		isInput_ = false;
 	};
 	// 更新
 	void NextReceiver::Update(const Character::CharacterContext& ctx, const GlobalCondition& data,float timer) {
@@ -6035,7 +6052,15 @@ namespace Combo {
 		if (isInputStart && isInputEnd) {
 			// まだ移行フラグがONではなくボタン条件を満たしているなら移行させるフラグをONに
 			if (!isNext_) {
-				isNext_ = comboSequence_.Update(ctx);
+				if (!isInput_) {
+					isInput_ =	comboSequence_.Update(ctx);
+				}
+				else {
+					stateInputToNextTime_ -= ctx.dt;
+					if(stateInputToNextTime_ <= 0.0f) {
+						isNext_ = true;
+					}
+				}
 			}
 			// 強制的にコンボに移行フラグNOに
 			if (data.isCompulsionNext) {
@@ -6068,7 +6093,7 @@ namespace Combo {
 	class NextReceiver {
 	public:
 		// 開始
-		void Enter();
+		void Enter(const GlobalCondition& data);
 		//　終了
 		void Exit();
 		// 更新
@@ -6087,6 +6112,10 @@ namespace Combo {
 		bool isActive_ = false;
 		// 次のコンボに移行するか
 		bool isNext_ = false;
+		// 受付開始から次のコンボに移行するまでの時間
+		float stateInputToNextTime_ = 0.0f;
+		// 入力されたか
+		bool isInput_ = false;
 	};
 }
 
@@ -7776,6 +7805,13 @@ AttackDecision AttackBranchResolver::Resolve(const AttackContext& ctx,
 
     // 攻撃中なら
     if (isAttack) {
+       
+        if (input == ActionInput::Skill) {
+            if (ctx.stamina < 25) {
+                return result;
+            }
+			result.staminaCost = 25;
+        }
         result.accepted = true;
         result.isComboInput = true;
         result.comboInput = input;
@@ -13119,7 +13155,7 @@ namespace Character {
 		}
 	}
 
-	void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
+	int CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
 		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
 		// EnemyTypeから生成関数
@@ -13153,6 +13189,7 @@ namespace Character {
 		enemy->GetObjectComponentShadow()->Update();	// ワールド行列更新
 		character_.push_back(std::move(enemy));
 		characterCount_++;
+		return characterCount_ - 1; // 生成した敵のタグ番号を返す
 	}
 
 	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform){
@@ -13287,7 +13324,15 @@ namespace Character {
 			}
 			return nullptr;
 		}
-
+		// 敵取得
+		BaseEnemy* GetEnemy(uint32_t tagNumber) {
+			for (auto& character : character_) {
+				if (character->GetCharacterType() == Type::Enemy && character->GetTagNumber() == tagNumber) {
+					return static_cast<BaseEnemy*>(character.get());
+				}
+			}
+			return nullptr;
+		}
 
 		/// <summary>
 		/// 群衆AI取得
@@ -13297,7 +13342,7 @@ namespace Character {
 
 	public: // 生成系
 		// キャラクター生成(敵)
-		void CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
+		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
 		// キャラクター生成(プレイヤー)
 		void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
@@ -17221,6 +17266,11 @@ namespace Character {
 
 		if (decision.isComboInput) {
 			ac->GetComboSystem()->InputCombo(decision.comboInput);
+
+
+			if (decision.staminaCost > 0) {
+				parameterComponent_->Stamina().Add(-decision.staminaCost);
+			}
 			return;
 		}
 
@@ -17244,6 +17294,7 @@ namespace Character {
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
+		
 		// コンボ１のデータ送る
 		comboSystem->CreateCombo("Attack1");
 		// コンボ２のデータ送る
@@ -28268,7 +28319,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
@@ -28377,29 +28428,17 @@ void CharacterDebugScene::UpdateImGui() {
 				"ダミー"
 	};
 	Engine::ImGuiManager::Select("敵種類", EnemyTypeLabels, enemyType);
-	ImGui::DragFloat3("敵出現位置",&enemyPos.x,0.1f);
+	ImGui::DragFloat3("敵出現位置", &enemyPos.x, 0.1f);
 	if (ImGui::Button("敵出現")) {
 		characterManager_->CreateCharacter(enemyType, "enemy", 0, { {1,1,1},{},enemyPos });
 	}
-
+	if (ImGui::Button("ダミー位置リセット")) {
+		characterManager_->GetEnemy(tagNumber)->GetObjectComponent()->GetWorldTransform().translate_ = {};
+	}
 	Vector2 inputPos = input_->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	
 
-	
-	/*ImGui::DragFloat("BulletGravityScale", &param.gravityScale,0.01f);
-	ImGui::DragFloat("BulletMaxLifeTime", &param.maxLifeTime, 0.1f);
-	ImGui::DragFloat("BulletSpeed", &param.speed, 0.1f);
-	ImGui::DragFloat("BulletRadius", &param.radius, 0.1f);
-	ImGui::DragFloat("BulletIntervalMax", &intervalMax_, 0.1f);
-
-	ImGui::DragFloat3("BulletSpawnPosition", &spawnInfo.position.x, 0.1f);
-	ImGui::DragFloat3("BulletSpawnDirection", &spawnInfo.direction.x, 0.1f);
-	spawnInfo.direction = Normalize(spawnInfo.direction);
-	ImGui::Checkbox("Homing", &param.enableHoming);
-	ImGui::DragFloat("homingRange", &param.homingRange, 0.1f);
-	ImGui::DragFloat("homingStrength", &param.homingStrength, 0.1f);
-	ImGui::DragFloat("BulletDamage", &param.damage, 0.1f);*/
 	ImGui::End();
 
 
@@ -28574,6 +28613,7 @@ private:
 	Projectile::ProjectileSpawnInfo spawnInfo{};
 	Character::EnemyType enemyType = Character::EnemyType::kSmallMelee;
 	Vector3 enemyPos{};
+	uint32_t tagNumber = 0;
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;
