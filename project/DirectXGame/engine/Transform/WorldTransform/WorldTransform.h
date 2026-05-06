@@ -46,15 +46,15 @@ namespace Engine {
 		Vector3 translate_ = { 0,0,0 }; // 位置
 
 		// マトリックス(現在)
-		Matrix4x4 worldMat_;
+		Matrix4x4 worldMat_{};
 		// マトリックス(過去)
-		Matrix4x4 worldPreMat_;
+		Matrix4x4 worldPreMat_{};
 
 		// 親となるワールド変換へのポインタ
 		WorldTransform* parent_ = nullptr;
 
 	private:
 		bool isParent = false;
-		Matrix4x4 parentMatrix_;
+		Matrix4x4 parentMatrix_{};
 	};
 }

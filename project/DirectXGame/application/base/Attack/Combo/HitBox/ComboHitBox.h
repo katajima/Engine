@@ -42,7 +42,7 @@ namespace Combo {
 		// 方向
 		Vector3 direction = {};
 		// コンボタイプ
-		Type type;
+		Type type{};
 		//
 		int32_t id = -1;
 	private:

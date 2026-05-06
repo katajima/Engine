@@ -118,9 +118,9 @@ namespace Engine {
 		DirectXCommon* dxCommon = nullptr;
 
 		Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
-		Type* data_;
+		Type* data_ = nullptr;
 
-		D3D12_VERTEX_BUFFER_VIEW bufferView;
+		D3D12_VERTEX_BUFFER_VIEW bufferView{};
 
 	};
 }

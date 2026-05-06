@@ -5,7 +5,7 @@ struct PlayerInputData {
 	// 移動スティック(左スティック)
 	Vector2 moveShick;
 	// 視点スティック(右スティック)
-	Vector2 lookStick;
+	Vector2 lookStick{};
 
 	// 押した瞬間
 	// ジャンプ
@@ -34,7 +34,7 @@ struct PlayerInputData {
 /// </summary>
 struct GameInputData {
 	// 移動スティック(左スティック)
-	Vector2 moveShick;
+	Vector2 moveShick{};
 	// 決定
 	bool decisionTrigger = false;
 	// ポーズ

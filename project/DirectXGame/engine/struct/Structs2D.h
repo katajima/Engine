@@ -35,10 +35,10 @@ struct Box {
 
 // OBB
 struct BoxOBB {
-	Vector2 center_;		//!< 中心座標
-	Vector2 halfSize_;		//!< 幅/2, 高さ/2
-	float rotation_;		//!< ラジアンでの回転角（時計回り）
-	Vector2 corners_[4];	// コーナー情報
+	Vector2 center_{};		//!< 中心座標
+	Vector2 halfSize_{};		//!< 幅/2, 高さ/2
+	float rotation_{} ;		//!< ラジアンでの回転角（時計回り）
+	Vector2 corners_[4]{};	// コーナー情報
 	BoxOBB(Vector2 center = {}, Vector2 halfSize = {}, float rotation = 0.0f)
 		: center_(center), halfSize_(halfSize), rotation_(rotation) {
 	}

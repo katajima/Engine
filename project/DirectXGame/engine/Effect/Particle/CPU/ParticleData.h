@@ -56,14 +56,14 @@ namespace Engine {
 
 
 		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_;					// パーティクルリソース(sBuffer)
-		uint32_t instanceCount;													// インスタンス数
-		ModelMesh* mesh;														// メッシュ
+		uint32_t instanceCount = 0;													// インスタンス数
+		ModelMesh* mesh = nullptr;														// メッシュ
 		//Emiter emiter;															// エミッター
 		EmitData::IsFlag isFlag;											// 各フラグ
 		EmitData::EmitType emitType = EmitData::EmitType::kRandom;		// エミッターでの出方
 		EmitData::TopBottom topBottom = EmitData::TopBottom::kBottom;	// 
-		EmitData::RasterizerType rasteType;									// ラスタライザタイプ
-		EmitData::BlendType blendType;										// ブレンドタイプ
+		EmitData::RasterizerType rasteType{};									// ラスタライザタイプ
+		EmitData::BlendType blendType{};										// ブレンドタイプ
 		Transform uvTransformVeloctiy_{ {},{},{0,0,0} };						// uvトランスフォーム
 		float kGravitationalAcceleration = 9.8f;								// 重力
 		bool isUVClamp = false;												// UVを
@@ -78,10 +78,10 @@ namespace Engine {
 		std::list<Particle> particle;											// パーティクル
 
 
-		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_;					// パーティクルリソース(sBuffer)
-		uint32_t instanceCount;													// インスタンス数
-		Sprite* sprite;															// スプライト
-		ModelMesh* mesh;
+		Engine::StructuredBuffer<ParticleForGPU> sbParticleResource_{};					// パーティクルリソース(sBuffer)
+		uint32_t instanceCount = 0;													// インスタンス数
+		Sprite* sprite = nullptr;															// スプライト
+		ModelMesh* mesh = nullptr;
 		float kGravitationalAcceleration = 9.8f;								// 重力
 		bool isAlpha_ = true;
 		bool isGravity_ = false;

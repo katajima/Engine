@@ -207,28 +207,28 @@ namespace Engine {
 
 		std::unique_ptr<Barrier> barrier_ = nullptr;	// バリア
 
-		Microsoft::WRL::ComPtr < ID3D12Resource> resource_; // リソース
+		Microsoft::WRL::ComPtr < ID3D12Resource> resource_{}; // リソース
 
 		//
 		bool useUav_ = false;					// UAVを使用するかどうか
 		int num_ = 1;
 
 		// SRVハンドル
-		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_;			// SRVハンドルGPU
-		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_;			// SRVハンドルCPU
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_{};			// SRVハンドルGPU
+		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_{};			// SRVハンドルCPU
 		uint32_t srvIndex_ = 0;							// インデックス
 
 
 
 		// UAVハンドル
-		D3D12_GPU_DESCRIPTOR_HANDLE uavHandleGPU_;			// UAVハンドルGPU
-		D3D12_CPU_DESCRIPTOR_HANDLE uavHandleCPU_;			// UAVハンドルCPU
+		D3D12_GPU_DESCRIPTOR_HANDLE uavHandleGPU_{};			// UAVハンドルGPU
+		D3D12_CPU_DESCRIPTOR_HANDLE uavHandleCPU_{};			// UAVハンドルCPU
 		uint32_t uavIndex_ = 0;							// インデックス
 
 
 
 
-		Type* data_;										// データ
+		Type* data_ = nullptr;										// データ
 	};
 }
 

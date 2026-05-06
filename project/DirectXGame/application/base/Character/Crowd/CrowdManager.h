@@ -68,8 +68,8 @@ namespace Character {
 		Vector3 position_ = {};					// 位置
 		Vector3 velocity_ = {};					// 速度
 		float attackCooldown_ = 0.0f;			// 攻撃クールタイム
-		uint32_t id;							// 個人ID
-		uint32_t groupId;                       // 部隊ID
+		uint32_t id = 0;							// 個人ID
+		uint32_t groupId = 0;                       // 部隊ID
 
 
 		float speed = 300.0f;					// m/s
@@ -90,7 +90,7 @@ namespace Character {
 
 		// 表示用：インスタンスバッファに書き込むデータ
 		uint32_t animIndex = 0;
-		Vector3 slotTarget_;
+		Vector3 slotTarget_{};
 	private:
 
 		CrowdManager* manager_ = nullptr;
@@ -143,11 +143,11 @@ namespace Character {
 
 		// 部隊人数
 		uint32_t number_ = 0;
-		uint32_t id;
+		uint32_t id = 0;
 		std::vector<int> memberIndices; // CrowdManager側のエージェント配列へのインデックス
 		Vector3 centerPos = { 0,0,0 };
 		Vector3 anchorCenter = { 0,0,0 };
-		GroupCommand command;
+		GroupCommand command{};
 		// simple formation: grid parameters
 		int formationCols = 8;
 		float formationSpacing = 1.2f;
@@ -221,7 +221,7 @@ namespace Character {
 	/// </summary>
 	class CrowdManager {
 	public:
-		UniformGrid grid;
+		UniformGrid grid{};
 		/// <summary>
 		/// 部隊コンテナ
 		/// </summary>

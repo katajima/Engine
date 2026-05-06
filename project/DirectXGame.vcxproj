@@ -44,14 +44,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)\externals\imgui;$(SolutionDir)\externals\nlohmann;$(IncludePath)</IncludePath>
+    <OutDir>$(ProjectDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)\externals\imgui;$(SolutionDir)\externals\nlohmann;$(IncludePath)</IncludePath>
+    <OutDir>$(ProjectDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(ProjectDir)externals\imgui;$(ProjectDir)externals\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

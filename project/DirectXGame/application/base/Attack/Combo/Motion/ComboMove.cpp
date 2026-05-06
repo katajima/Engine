@@ -28,8 +28,6 @@ namespace Combo {
 
 	// 開始
 	void ComboMove::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
-		isMove_ = false;
-		stickDirection_ = {};
 		moveComponent = owner->GetMoveComponent();
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
@@ -50,7 +48,8 @@ namespace Combo {
 			owner->GetObjectComponent()->GetRigidBodyComponent()->ResetAcceleration();
 			owner->GetObjectComponent()->GetRigidBodyComponent()->ResetVelocity();
 		}
-
+		isMove_ = false;
+		stickDirection_ = {};
 		// 座標更新
 		owner->GetWorldTransform().Update();
 	}
@@ -97,6 +96,7 @@ namespace Combo {
 		moveDirection_ = {};
 	}
 
+	// 移動処理
 	void ComboMove::MoveTypeProcess(float timer, float dt) {
 		bool isStart = data_.moveWindow.startTime <= timer;		// 受付開始時間を過ぎたら
 		bool isEnd = data_.moveWindow.endTime >= timer;			// 受付終了時間より前なら

@@ -41,14 +41,14 @@ namespace Engine {
 		Vector2 translate_ = { 0,0 };	// 位置
 
 		// マトリックス(現在)
-		Matrix3x3 worldMat_;
+		Matrix3x3 worldMat_{};
 		// マトリックス(過去)
-		Matrix3x3 worldPreMat_;
+		Matrix3x3 worldPreMat_{};
 
 		// 親となるワールド変換へのポインタ
 		WorldTransform2d* parent_ = nullptr;
 	private:
 		bool isPearent = false;
-		Matrix3x3 parentMatrix_;
+		Matrix3x3 parentMatrix_{};
 	};
 }

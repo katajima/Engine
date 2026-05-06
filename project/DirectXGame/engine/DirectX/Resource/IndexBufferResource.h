@@ -87,10 +87,10 @@ namespace Engine {
 	private:
 		DirectXCommon* dxCommon = nullptr;
 
-		Microsoft::WRL::ComPtr < ID3D12Resource> resource_;
-		Type* data_;
+		Microsoft::WRL::ComPtr < ID3D12Resource> resource_ = nullptr;
+		Type* data_ = nullptr;
 
-		D3D12_INDEX_BUFFER_VIEW bufferView;
+		D3D12_INDEX_BUFFER_VIEW bufferView{};
 
 	};
 }

@@ -12,9 +12,9 @@ namespace Engine {
 
 	// SRTリザルト
 	struct SATResult {
-		bool hit;
+		bool hit = false;
 		float minOverlap = FLT_MAX; // 初期化は最大値
-		Vector3 pushDir; // 押し出し軸（world space）
+		Vector3 pushDir{}; // 押し出し軸（world space）
 	};
 	// コライダー基底クラス
 	class Collider

@@ -60,13 +60,13 @@ namespace Character {
         }
 
     private:
-        std::unique_ptr<BaseCharacterState> state_;// ステート
+        std::unique_ptr<BaseCharacterState> state_ = nullptr;// ステート
         // 状態管理用Map
         std::unordered_map<CharacterMainState, CharacterMainStateFactory> stateFactoryMap_;
         //
-        CharacterMainState nowState_;
+        CharacterMainState nowState_{};
         // 
-        CharacterMainState prevState_;
+        CharacterMainState prevState_{};
         // 操作状態
         BaseCharacter* character = nullptr;
         // ステート変更が1フレーム中に何度も起らないようにするフラグ

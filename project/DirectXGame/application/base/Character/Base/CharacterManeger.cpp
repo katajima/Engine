@@ -12,14 +12,18 @@ namespace Character {
 		this->globalVariables = globalVariables; // 保存項目
 		this->camera = camera;					// カメラ
 		this->hitBoxSystem = hitBoxSystem;		// ヒットボックスシステム
+		score = 0;
 	}
 
 	void CharacterManager::Update(bool isMove) {
 		// 死亡したキャラクターを削除
 		character_.erase(
 			std::remove_if(character_.begin(), character_.end(),
-				[](const std::unique_ptr<BaseCharacter>& character) {
-					if (!character) { return false; } // 敵じゃない
+				[this](const std::unique_ptr<BaseCharacter>& character) {
+					if (!character) { return false; } 
+					if (!character->GetAlive() && character->GetDelete()) {
+						score++;
+					}
 					return !character->GetAlive() && character->GetDelete();
 				}),
 			character_.end());
