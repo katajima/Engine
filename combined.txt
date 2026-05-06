@@ -12620,6 +12620,7 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
 	this->hitMotionSystem = owner->GetHitMotionSystem();							// レスポンスシステム
+	this->parameters = owner->GetCharacterParameterComponent();								// パラメータ
 }
 
 Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
@@ -12654,6 +12655,15 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		ctx.worldStickDirection = worldDirection;
 	}
 
+	if(ctx.inputData.dashHeld && parameters->GetStamina() > 1.0f) {
+		parameters->Stamina().value -= 10.0f * dt;	// スタミナを減らす
+		parameters->Stamina().useRate = false;	// スタミナ回復を止める
+		ctx.isDashing = true;
+	}
+	else {
+		parameters->Stamina().useRate = true;	// スタミナ回復
+	}
+	
 
 	// 方向
 	ctx.direction = worldTransform->GetForward();
@@ -12790,6 +12800,8 @@ namespace Character {
 		bool isCanJump = false;
 		// 被弾中か
 		bool isDamage = false;
+		// ダッシュ中か
+		bool isDashing = false;
 
 		// 高さ
 		float skyHeight = 1.5f;
@@ -12839,6 +12851,8 @@ namespace Character {
 		HitMotionSystem* hitMotionSystem = nullptr;
 		// コンボステートマシン
 		const Combo::StateMachine* comboStateMachine = nullptr;
+		// パラメータ
+		Character::ParameterComponent* parameters = nullptr;
 	};
 
 
@@ -12936,7 +12950,6 @@ namespace Character {
 
 		// 更新
 		void Update() {
-			parameters->stamina.useRate = true;	// スタミナ変化
 			parameters->HP.Update(deltaTime_);	// HP更新
 			parameters->MP.Update(deltaTime_);	// MP更新
 			parameters->stamina.Update(deltaTime_);	// スタミナ更新
@@ -17019,7 +17032,7 @@ namespace Character {
 		parameterComponent_->parameters->HP.Initiaize(200, 0, 200, 0);
 		// スタミナ設定
 		parameterComponent_->parameters->stamina.Initiaize(100, 0, 100, 10);
-
+		parameterComponent_->parameters->stamina.useRate = false; // スタミナの変化率を使用しない
 
 		// 移動コンポーネント初期化
 		moveComponent_ = std::make_unique<MovementComponent>();
@@ -22829,6 +22842,9 @@ struct MoveData
 	float skyHeight = 1.0f;
 	// 重力を使用するか
 	bool useGravity = true;
+
+	// ダッシュ時の速度倍率
+	float dashSpeedRate = 2.0f;	// ダッシュ時の速度倍率
 };
 
 ============================================================
@@ -22862,7 +22878,12 @@ void MoveSystem::Update(const Character::CharacterContext& ctx, LocomotionCoordi
 		// スピード処理
 		SpeedProcess(ctx);
 		// カメラのビュー行列の逆行列（カメラのワールド変換行列）を取得
-		moveVelo = Multiply(worldDirection, speed_);
+		float fainalSpeed = speed_;
+		if (ctx.isDashing) {
+			fainalSpeed *= data_.dashSpeedRate;
+		}
+
+		moveVelo = Multiply(worldDirection, fainalSpeed);
 	}
 
 	// 移動速度をセット
@@ -23016,7 +23037,7 @@ void MoveSystem::AnimationSpeedProcess()
 		animationSpeed_ = Lerp(data_.animetionSpeedMinWalk, data_.animetionSpeedMaxWalk, t);
 	}
 	else {
-		if (state_ == State::kWalk) {	// 走り
+		if (state_ == State::kWalk) {	// 歩き
 			animationSpeed_ = Lerp(data_.animetionSpeedMinWalk, data_.animetionSpeedMaxWalk, t);
 		}
 		else if (state_ == State::kRun) { // 走り
