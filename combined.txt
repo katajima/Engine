@@ -2065,6 +2065,7 @@ private:
 	One one{};					// 一回ダメージデータ
 	float damage = 0;			// ダメージ
 };
+
 // リアクション
 enum class HitReactionType {
 	Knockback,
@@ -2090,12 +2091,17 @@ struct HitReactionData {
 	float verticalBoost = 0.0f;
 	// 上方向を強制するか
 	bool isVerticalBoost = false;
+	// ヒットストップ（相手）
+	float targetHitStopTime = 5.0f / 20.0f;
+	// ヒットストップ（自分）
+	float selfHitStopTime = 2.0f / 60.0f;
+	// 一回しかヒットストップしない(自分)
+	bool isSingleHitStop = true;
+
 	// リアクション移動の有効時間
 	float duration = 0.25f;
 	// 行動不能時間
 	float hitStunTime = 0.1f;
-	// ヒットストップ
-	float hitStopTime = 1.0f / 20.0f;
 	// ダウン時間
 	float downTime = 0.0f;
 	// 打ち上げ時に重力を弱める/止める時間
@@ -2144,9 +2150,13 @@ namespace Combo {
 	// 更新
 	void ComboData::Update(const Character::CharacterContext& ctx) {
 		// 時間更新
-		if (!isDebug) {
+		if (!isDebug && !ctx.isSelfHitStop) {
 			timer_ += ctx.dt;
 		}
+		else {
+			timer_  = timer_;
+		}
+
 		// コンボ用条件クラス更新
 		comboCondition.Update(ctx, timer_);
 		// コンボ用モーションクラス更新
@@ -2249,6 +2259,7 @@ namespace Combo {
 		ComboRange range{};						// コンボ用遠距離クラス（弾など）
 		float timer_ = 0.0f;					// 時間
 		bool isDebug = false;					// エディターを使用したデバック中か
+		bool isHitStop = false;					// ヒットストップ中か
 		Type type = Type::kMelle;// 攻撃タイプ
 	};
 };
@@ -2346,7 +2357,7 @@ namespace Combo {
 
 #pragma region ComboEditorBlock
 
-	void EditorBlock::Initialize(Engine::LineCommon* lineCommon, 
+	void EditorBlock::Initialize(Engine::LineCommon* lineCommon,
 		Engine::GlobalVariables* globalVariables, Combo::System* comboSystem,
 		const std::string& stateName, Character::BaseCharacter* owner,
 		EffectSystem* effectSystem) {
@@ -2374,14 +2385,15 @@ namespace Combo {
 		comboData.SetTimer(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 	}
 
-	void EditorBlock::UpdateImGui(float dt) {
+	void EditorBlock::UpdateImGui(float dt, bool isActive) {
 
 		auto state = comboSystem->GetComboNodeState(stateName);
 		// 選択中でなければ処理しない
 		if (!nowChoice_) return;
-		if (currentFrame == 0 && isPlaying) {
+		if (currentFrame == 0 && isPlaying && isActive) {
 			comboSystem->GetComboStateMachine()->SetRoot(state);
 		}
+		if(isActive)
 		state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 
 #ifdef _DEBUG
@@ -2392,13 +2404,13 @@ namespace Combo {
 		ImGui::Separator();
 
 		// 現在の時間
-		ComboImGui::CurrentFrame(dt, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
+		ComboImGui::CurrentFrame(dt, isActive, sequence_, isPlaying, loopPlay, currentFrame, firstFrame, maxFrame);
 
 		// シーケンサーの設定と表示
 		ComboImGui::SequenceSettings(sequence_, currentFrame, firstFrame, maxFrame, expanded, selected);
 
 		// アニメーション
-		ComboImGui::ApplyAnimationToState("アニメーション", currentFrame, maxFrame, data_.animation,
+		ComboImGui::ApplyAnimationToState("アニメーション", isActive, currentFrame, maxFrame, data_.animation,
 			owner->GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().animations,
 			owner->GetObjectComponent()->GetObject3D()->GetAnimationComponent(), state->GetAnimationName());
 
@@ -2445,10 +2457,10 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("使用者", HitBoxUseTypeLabels, data_.hitBox.useType);
 
-			
+
 			// ペアレント設定
 			Engine::ImGuiManager::Select("依存先", data_.hitBox.parentName, comboSystem->GetParentTransforms());
-			
+
 			// ヒットボックス出現条件
 			static const char* HitBoxSpawnTypeLabels[] = {
 				"時間経過",
@@ -2466,7 +2478,7 @@ namespace Combo {
 				"ターゲットの位置",
 			};
 			Engine::ImGuiManager::Select("ヒットボックス依存先", HitBoxParentTypeLabels, data_.hitBox.dependenceType);
-			
+
 			// 影響タイプ
 			static const char* HitBoxHitEffectTypeLabels[] = {
 				"ダメージのみ",
@@ -2482,7 +2494,7 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("ヒットボックス生存", HitBoxLifetimeTypeLabels, data_.hitBox.lifetimeType);
 
-			
+
 			// タグタイプ
 			static const char* HitBoxTagTypeLabels[] = {
 				"何もなし",
@@ -2496,7 +2508,7 @@ namespace Combo {
 				"敵による影響"
 			};
 			Engine::ImGuiManager::Select("コライダー(タグ)", HitBoxTagTypeLabels, data_.hitBox.tag);
-			
+
 			// レイヤタイプ
 			static const char* HitBoxLayerTypeLabels[] = {
 				"デフォルト",
@@ -2516,12 +2528,12 @@ namespace Combo {
 			// オフセット
 			ImGui::DragFloat3("オフセット", &data_.hitBox.offset.x, 0.1f);
 			// サイズ
-			if(data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
+			if (data_.hitBox.shapeType == HitBox::ShapeType::kAABB ||
 				data_.hitBox.shapeType == HitBox::ShapeType::kOBB)
-			ImGui::DragFloat3("コライダーサイズ", &data_.hitBox.colliderSize.x, 0.1f);
+				ImGui::DragFloat3("コライダーサイズ", &data_.hitBox.colliderSize.x, 0.1f);
 			// 半径
 			if (data_.hitBox.shapeType == HitBox::ShapeType::kSphere)
-			ImGui::DragFloat("コライダー半径", &data_.hitBox.radius, 0.1f);
+				ImGui::DragFloat("コライダー半径", &data_.hitBox.radius, 0.1f);
 
 		}
 	}
@@ -2557,7 +2569,7 @@ namespace Combo {
 
 			ImGui::Checkbox("強制移動", &data_.move.isCompulsionMove);
 			ImGui::SliderFloat3("移動速度", &data_.move.moveSpeed.x, 0.0f, 1000.0f, "%.2f");
-			
+
 			ImGui::DragFloat3("ローカル移動ベクトル", &data_.move.localMoveVector.x, 0.01f);
 			if (data_.move.localMoveVector.x >= 1.0f) {
 				data_.move.localMoveVector.x = 1.0f;
@@ -2581,7 +2593,7 @@ namespace Combo {
 			ImGui::Checkbox("移動中も毎フレーム方向を更新するか", &data_.move.isUpdateDirectionEachFrame);
 			ImGui::Checkbox("ターゲット方向を使うとき、基準前方を水平化するか", &data_.move.isFlattenTargetDirection);
 			ImGui::Checkbox("移動方向とキャラクターの向く方向を一致させるか", &data_.move.alignCharacterToMovement);
-			
+
 			ImGui::Checkbox("重力", &data_.move.isGravity);
 			ImGui::SliderFloat("重力倍率", &data_.move.gravityScale, 0.0f, 100.0f, "%.2f");
 			ImGui::Checkbox("開始重力速度をリセット", &data_.move.isResetGravity);
@@ -2615,6 +2627,11 @@ namespace Combo {
 			float damage = data_.hitReaction.damageData.GetOne().GetDamage();
 			ImGui::SliderFloat("ダメージ", &damage, 0.0f, 1000.0f, "%.2f");
 			data_.hitReaction.damageData.GetOne().SetDamage(damage);
+			ImGui::Checkbox("一回しかヒットストップしない", &data_.hitReaction.isSingleHitStop);
+
+			ImGui::SliderFloat("ヒットストップ時間(相手)", &data_.hitReaction.targetHitStopTime, 0.0f, 10.0f, "%.2f");
+			ImGui::SliderFloat("ヒットストップ時間(自分)", &data_.hitReaction.selfHitStopTime, 0.0f, 10.0f, "%.2f");
+
 			ImGui::SliderFloat("ヒットスタン持続時間", &data_.hitReaction.hitStunTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("ダウン持続時間", &data_.hitReaction.downTime, 0.0f, 100.0f, "%.2f");
 			ImGui::SliderFloat("打ち上げ持続時間", &data_.hitReaction.launchFloatTime, 0.0f, 100.0f, "%.2f");
@@ -2645,8 +2662,8 @@ namespace Combo {
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
 
-	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction, 
-		const std::map<std::string, EffectGlobalData>& effectDatas){
+	void EditorBlock::DrawHitEffectEditor(HitReactionData& reaction,
+		const std::map<std::string, EffectGlobalData>& effectDatas) {
 		ImGui::SeparatorText("ヒットエフェクト");
 		ImGui::Text("※エディタでリロードしてから保存してください");
 
@@ -2709,8 +2726,8 @@ namespace Combo {
 
 #pragma region コンボエディター
 
-	void Editor::Initialize(Engine::LineCommon* lineCommon, 
-		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables, 
+	void Editor::Initialize(Engine::LineCommon* lineCommon,
+		Combo::System* comboSystem, Engine::GlobalVariables* globalVariables,
 		Character::BaseCharacter* owner, EffectSystem* effectSystem) {
 		this->comboSystem = comboSystem;
 		this->lineCommon = lineCommon;
@@ -2747,7 +2764,7 @@ namespace Combo {
 
 
 		if (isComboEditorActive_)
-			UpdateImGui(dt);
+		UpdateImGui(dt);
 
 
 		ImGui::End();
@@ -2759,7 +2776,7 @@ namespace Combo {
 
 		// 何もなければ何もしない
 		if (comboEditorBlocks_.empty()) return;
-		
+
 		// 
 		Engine::ImGuiManager::Select("Selected Combo", selectedComboEditorBlockName_, comboEditorBlocks_);
 
@@ -2776,7 +2793,7 @@ namespace Combo {
 			combo.second.SetNowChoice(nowChoice);
 
 			// 選択中の1つだけ UpdateImGui 内部で描画される
-			combo.second.UpdateImGui(dt);
+			combo.second.UpdateImGui(dt,isComboEditorActive_);
 		}
 #endif // _DEBUG
 	}
@@ -2841,17 +2858,17 @@ namespace Combo {
 			data.move = comboEditorBlocks_[it.first].GetData().move;
 			data.move.moveWindow.startTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").startFrame);
 			data.move.moveWindow.endTime = ConvertUtility::FramesToSeconds(combo.GetEvent("移動時間").endFrame);
-		
-			
+
+
 			// アニメーションスピード
 			data.animation = comboEditorBlocks_[it.first].GetData().animation;
-		
+
 			// エフェクト
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;
 
-		
-			
+
+
 		}
 
 		comboSystem->SetGlobalComboDatas();
@@ -2866,7 +2883,7 @@ namespace Combo {
 
 		// コンボエディターブロック作成
 		EditorBlock block;
-		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner,effectSystem);
+		block.Initialize(lineCommon, globalVariables, comboSystem, stateName, owner, effectSystem);
 
 		// 名前リストに追加
 		comboEditorBlockNames_.push_back(comboName);
@@ -2907,7 +2924,7 @@ namespace Combo {
 			Combo::System* comboSystem, const std::string& stateName, 
 			Character::BaseCharacter* owner, EffectSystem* effectSystem);
 		// 更新
-		void UpdateImGui(float dt);
+		void UpdateImGui(float dt, bool isActive);
 	public:
 		// エディタ上で選択中か取得
 		void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
@@ -2975,6 +2992,8 @@ namespace Combo {
 		std::string comboName_ = "Combo1";
 		// 今選択中か
 		bool nowChoice_ = false;
+		// コンボエディターがアクティブか
+		bool isComboEditorActive_ = true;
 	private:
 		// データ
 		GlobalData data_;
@@ -3224,13 +3243,15 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboImGui.cpp
 ============================================================
 #include "ComboImGui.h"
 
-void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
+void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
 	int& currentFrame, int& firstFrame, int& maxFrame) {
 	// 現在のフレーム表示
-	ImGui::Checkbox("再生するか", &isPlaying);
-	ImGui::Checkbox("ループ再生", &loopPlay);
-	ImGui::Separator();
-	ImGui::Text("Current Frame: %d", currentFrame);
+	if (isActive) {
+		ImGui::Checkbox("再生するか", &isPlaying);
+		ImGui::Checkbox("ループ再生", &loopPlay);
+		ImGui::Separator();
+		ImGui::Text("Current Frame: %d", currentFrame);
+	}
 	ImGui::DragInt("最大フレーム", &maxFrame);
 	ImGui::SliderInt("Current Frame", &currentFrame, 0, maxFrame);
 	// 最初フレーム設定
@@ -3242,7 +3263,7 @@ void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, b
 	}
 	ImGui::Separator();
 
-	if (isPlaying) {
+	if (isPlaying && isActive) {
 		currentFrame += static_cast<int>(dt * 60.0f); // 60FPS換算
 	}
 
@@ -3257,7 +3278,7 @@ void Combo::ComboImGui::CurrentFrame(float dt, const AttackSequence& sequence, b
 
 
 void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName, 
-	int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
+	bool isActive, int& currentFrame, int maxFrame,GlobalAnimation& animationData, const std::map<std::string, Engine::Animation>& animations,
 	Engine::AnimationComponent* animation, const std::string& nowAnimationName) {
 
 	if (ImGui::CollapsingHeader(imGuiName.c_str())) {
@@ -3274,13 +3295,15 @@ void Combo::ComboImGui::ApplyAnimationToState(const std::string& imGuiName,
 		Engine::ImGuiManager::Select("Selected Combo", animationData.animationName, animations);
 	}
 
-	// ループ再生
-	animation->SetIsLoop(false);
-	// アニメーション設定
-	animation->SetAnimation(nowAnimationName, 0);
-	// ステートのアニメーション時間設定
-	float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
-	animation->SetAnimationTime(animationTime);
+	if (isActive) {
+		// ループ再生
+		animation->SetIsLoop(false);
+		// アニメーション設定
+		animation->SetAnimation(nowAnimationName, 0);
+		// ステートのアニメーション時間設定
+		float animationTime = ConvertUtility::FramesToSeconds(currentFrame) * animationData.animationSpeed;
+		animation->SetAnimationTime(animationTime);
+	}
 }
 
 
@@ -3384,11 +3407,11 @@ namespace Combo {
 	class ComboImGui {
 	public:
 		// 現在の時間
-		static void CurrentFrame(float dt, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
+		static void CurrentFrame(float dt,bool isActive ,const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
 			int& currentFrame, int& firstFrame, int& maxFrame);
 
 		// アニメーション設定と表示
-		static void ApplyAnimationToState(const std::string& name, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
+		static void ApplyAnimationToState(const std::string& name, bool isActive, int& currentFrame, int maxFrame, GlobalAnimation& animationData,const std::map<std::string, Engine::Animation>& animations,
 			Engine::AnimationComponent* animation,const std::string& nowAnimationName);
 	public: // シーケンサー
 		// シーケンサー設定と表示
@@ -4002,6 +4025,11 @@ namespace Combo {
 			globalVariables->AddItem(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->AddItem(name, "ヒット重力倍率", data.hitReaction.gravityScale);
 
+			globalVariables->AddItem(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
+			globalVariables->AddItem(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
+			globalVariables->AddItem(name, "ヒットストップ(一回のみ)", data.hitReaction.isSingleHitStop);
+
+
 			globalVariables->AddItem(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
 
 			for (int i = 0; i < static_cast<int>(data.hitReaction.hitEffectNames.size()); ++i) {
@@ -4082,6 +4110,12 @@ namespace Combo {
 			data.hitReaction.launchFloatTime = globalVariables->GetValue<float>(name, "打ち上げ持続時間");
 			data.hitReaction.gravityEnabled = globalVariables->GetValue<bool>(name, "ヒット重力");
 			data.hitReaction.gravityScale = globalVariables->GetValue<float>(name, "ヒット重力倍率");
+
+
+			data.hitReaction.targetHitStopTime = globalVariables->GetValue<float>(name, "ヒットストップ(相手)");
+			data.hitReaction.selfHitStopTime =  globalVariables->GetValue<float>(name, "ヒットストップ(自分)");
+			data.hitReaction.isSingleHitStop = globalVariables->GetValue<bool>(name, "ヒットストップ(一回のみ)");
+
 
 			data.hitReaction.hitEffectNames.clear();
 
@@ -4185,6 +4219,11 @@ namespace Combo {
 			globalVariables->SetValue(name, "打ち上げ持続時間", data.hitReaction.launchFloatTime);
 			globalVariables->SetValue(name, "ヒット重力", data.hitReaction.gravityEnabled);
 			globalVariables->SetValue(name, "ヒット重力倍率", data.hitReaction.gravityScale);
+
+
+			globalVariables->SetValue(name, "ヒットストップ(相手)", data.hitReaction.targetHitStopTime);
+			globalVariables->SetValue(name, "ヒットストップ(自分)", data.hitReaction.selfHitStopTime);
+			globalVariables->SetValue(name, "ヒットストップ(一回のみ)", data.hitReaction.isSingleHitStop);
 
 
 			globalVariables->SetValue(name, kHitEffectCountKey, static_cast<int>(data.hitReaction.hitEffectNames.size()));
@@ -4976,7 +5015,7 @@ namespace Combo {
 	}
 
 	// 更新
-	void ComboAnimation::Update(float timer, float dt, bool isDebug) {
+	void ComboAnimation::Update(const Character::CharacterContext& ctx,float timer, bool isDebug) {
 		// 着地状態か 
 		onGlound = movementComponent->GetIsLanding();
 		
@@ -4991,7 +5030,12 @@ namespace Combo {
 				animationComponent->SetIsPlaying(false);
 				animationComponent->SetAnimationTime(stopT);
 			}else{
-				animationComponent->SetIsPlaying(true);
+				if (ctx.isSelfHitStop) {
+					animationComponent->SetIsPlaying(false);
+				}
+				else {
+					animationComponent->SetIsPlaying(true);
+				}
 			}
 		}
 		else {
@@ -5001,9 +5045,14 @@ namespace Combo {
 				// アニメーション時間設定
 				animationComponent->SetAnimationTime(timer * data_.animationSpeed);
 			}
-		}
 
-		
+			if (ctx.isSelfHitStop) {
+				animationComponent->SetIsPlaying(false);
+			}
+			else {
+				animationComponent->SetIsPlaying(true);
+			}
+		}	
 	}
 
 	// 終了
@@ -5045,7 +5094,7 @@ namespace Combo {
 		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
-		void Update(float timer, float dt, bool isDebug);
+		void Update(const Character::CharacterContext& ctx,float timer, bool isDebug);
 
 		// 終了
 		void Exit(Character::BaseCharacter* owner);
@@ -5097,7 +5146,7 @@ namespace Combo {
 	// 更新
 	void ComboMotion::Update(const Character::CharacterContext& ctx, float timer,bool isDebug) {
 		// コンボ用アニメーションクラス更新
-		comboAnimation_.Update(timer, ctx.dt,isDebug);
+		comboAnimation_.Update(ctx,timer,isDebug);
 		// コンボ用移動クラス更新
 		comboMove_.Update(ctx, timer);
 	}
@@ -6348,25 +6397,25 @@ void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* 
 void HitMotionSystem::Update(float dt) {
 	DamageProcess(dt, owner->GetCharacterParameterComponent());
 
+	// セルフヒットストップ時間カウントダウン
+	GetIsTime(dt, selfHitStopTime_);
+
 	if (!isAction_) {
 		return;
 	}
 
+
+	// ヒットストップ中は何もしない
+	if(GetIsTime(dt , hitStopTime_)) return;
+
 	timer_ += dt;
 
-	if (hitStunTimer_ > 0.0f) {
-		hitStunTimer_ -= dt;
-		if (hitStunTimer_ < 0.0f) {
-			hitStunTimer_ = 0.0f;
-		}
-	}
+	// ヒットスタン時間カウントダウン
+	GetIsTime(dt, hitStunTimer_);
+	
+	// ダウン時間カウントダウン
+	GetIsTime(dt, downTimer_);
 
-	if (downTimer_ > 0.0f) {
-		downTimer_ -= dt;
-		if (downTimer_ < 0.0f) {
-			downTimer_ = 0.0f;
-		}
-	}
 
 	// リアクション移動の有効時間中だけ毎フレームリクエストを送る
 	if (timer_ < data_.duration) {
@@ -6403,14 +6452,14 @@ void HitMotionSystem::EmitHitEffect() {
 }
 
 // ヒットモーション設定
-void HitMotionSystem::SetReactionData(const HitReactionData& data)
-{
+void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	data_ = data;
 
 	timer_ = 0.0f;
-	hitStunTimer_ = data_.hitStunTime;
-	downTimer_ = data_.downTime;
-	launchFloatTime_ = data_.launchFloatTime;
+	hitStunTimer_ = data_.hitStunTime;	// ヒットスタン時間
+	downTimer_ = data_.downTime;		// ダウン時間
+	launchFloatTime_ = data_.launchFloatTime;	// 打ち上げ時間　
+	hitStopTime_ = data_.targetHitStopTime;			// ヒットストップ時間
 	isAction_ = true;
 
 	switch (data_.type) {
@@ -6462,6 +6511,15 @@ bool HitMotionSystem::IsDown() const {
 	return hitMotionState_ == HitMotionState::Down;
 }
 
+// ヒットストップ中か
+bool HitMotionSystem::IsHitStop() const {
+	return hitStopTime_ > 0.0f;
+}
+
+bool HitMotionSystem::IsSelfHitStop() const {
+	return selfHitStopTime_ > 0.0f;
+}
+
 // 重力は有効化
 bool HitMotionSystem::IsGravityEnabled() const {
 	return data_.gravityEnabled;
@@ -6473,8 +6531,7 @@ float HitMotionSystem::GetGravityScale() const {
 }
 
 // 速度
-Vector3 HitMotionSystem::BuildMoveVelocity() const
-{
+Vector3 HitMotionSystem::BuildMoveVelocity() const {
 	Vector3 dir = NormalizeSafe(data_.normal);
 
 	// 基本は地面に沿う方向で使う
@@ -6533,8 +6590,7 @@ Vector3 HitMotionSystem::BuildMoveVelocity() const
 }
 
 // 
-Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const
-{
+Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const {
 	const float lenSq = v.x * v.x + v.y * v.y + v.z * v.z;
 	if (lenSq <= 0.000001f) {
 		return Vector3{ 0.0f, 0.0f, 1.0f };
@@ -6568,6 +6624,19 @@ void HitMotionSystem::FinishReaction() {
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
 	hitMotionState_ = HitMotionState::None;
+}
+
+bool HitMotionSystem::GetIsTime(float dt, float& time) {
+
+	if (time > 0.0f) {
+		time -= dt;
+		if (time < 0.0f) {
+			time = 0.0f;
+		}
+		return true;
+	}
+
+	return false;
 }
 
 #pragma endregion // ヒットモーション
@@ -6641,12 +6710,18 @@ public:
 	
 	// リアクションデータ設定
 	void SetReactionData(const HitReactionData& data);
+	// ヒットストップ時間設定(自分)
+	void SetSelfHitStopTime(float time) { selfHitStopTime_ = time; }
 	// ヒットモーション中か
 	bool IsHitMotion() const;
 	// スタン中か
 	bool IsHitStun() const;
 	// ダウン中か
 	bool IsDown() const;
+	// ヒットストップ中か
+	bool IsHitStop() const;
+	// セルフヒットストップ中か
+	bool IsSelfHitStop() const;
 	// 重力は有効か
 	bool IsGravityEnabled() const;
 	// 重力倍率取得
@@ -6655,6 +6730,10 @@ public:
 	float GetHitStunTimer() const { return hitStunTimer_; }
 	// ダウン時間
 	float GetDownTimer() const { return downTimer_; }
+	// セルフヒットストップ時間
+	float GetSelfHitStopTimer() const { return selfHitStopTime_; }
+
+
 	// 終了処理
 	bool IsFinished() const;
 
@@ -6669,6 +6748,9 @@ private:
 	void SendReactionMoveRequest(const Vector3& velocity);
 	// リアクション終了
 	void FinishReaction();
+
+	// 時間内か
+	bool GetIsTime(float dt, float& time);
 
 private:
 	// モーションステート
@@ -6685,6 +6767,11 @@ private:
 	float downTimer_ = 0.0f;
 	// 打ち上げ時間
 	float launchFloatTime_ = 0.0f;
+	// ヒットストップ時間
+	float hitStopTime_ = 0.0f;
+	// セルフヒットストップ時間
+	float selfHitStopTime_ = 0.0f;
+
 	// アクション中か
 	bool isAction_ = false;
 
@@ -7190,6 +7277,11 @@ namespace HitBox {
 		if (!player) return;
 		// リアクションデータ
 		enemy->GetHitMotionSystem()->SetReactionData(data_);
+
+		if (data_.isSingleHitStop) {
+			isHitStop = false; // 一回しかヒットストップしない場合は無効化
+			player->GetHitMotionSystem()->SetSelfHitStopTime(data_.selfHitStopTime);
+		}
 		//	エフェクト出現
 		enemy->GetHitMotionSystem()->EmitHitEffect();
 		// 敵ステート設定
@@ -7211,6 +7303,12 @@ namespace HitBox {
 		if(player->GetCurrentMainState() == Character::CharacterMainState::Special){
 			return; // プレイヤーが必殺技中は無効
 		}
+
+		if (data_.isSingleHitStop) {
+			isHitStop = false; // 一回しかヒットストップしない場合は無効化
+			enemy->GetHitMotionSystem()->SetSelfHitStopTime(data_.selfHitStopTime);
+		}
+
 		// リアクションデータ
 		player->GetHitMotionSystem()->SetReactionData(data_);
 		// プレイヤーステート設定
@@ -7252,7 +7350,10 @@ namespace HitBox {
 		void Update();
 
 
-		void SetData(HitReactionData data) { data_ = data; };
+		void SetData(HitReactionData data) {
+			data_ = data; 
+			isHitStop = true;
+		};
 
 	private:
 		// 使用者がプレイヤーの場合の更新処理
@@ -7272,6 +7373,8 @@ namespace HitBox {
 
 		Engine::Collider* otherColl = nullptr;
 		HitReactionData data_;
+
+		bool isHitStop = false;	// 使用者がヒットストップするか
 	};
 };
 
@@ -12503,6 +12606,9 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 	
 	ctx.isStop = !owner->GetIsMove();
 
+	// ヒットストップ中か
+	ctx.isHitStop = hitMotionSystem->IsHitStop();
+	ctx.isSelfHitStop = hitMotionSystem->IsSelfHitStop();
 	// 着地状態か
 	ctx.onGround = movementComponent->GetIsLanding();
 	// 攻撃中なら
@@ -12606,6 +12712,10 @@ namespace Character {
 		bool isAttacking = false;
 		// スタン状態か
 		bool isHitStun = false;
+		// ヒットストップ状態か(相手が攻撃を当てたとき)
+		bool isHitStop = false;
+		// ヒットストップ状態か(自分が攻撃を当てたとき)
+		bool isSelfHitStop = false;
 		// 重力有効か
 		bool isGravity = true;
 		// 停止するか
@@ -22203,12 +22313,12 @@ File Path: project/DirectXGame/application/base/Move/Base/MovementSystem.cpp
 ============================================================
 #include "MovementSystem.h"
 
-void MovementSystem::Initialize()
-{
+void MovementSystem::Initialize(){
 }
 
 void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
-
+	// ヒットストップ中は移動処理を行わない
+	if (cxt.isHitStop || cxt.isSelfHitStop) return;
 
 	world.translate_ += cmd.finalVelocity;
 	if (cmd.finalDirection.Length() != 0.0f) {
