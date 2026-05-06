@@ -4,14 +4,18 @@
 namespace Combo {
 
 	// 開始
-	void NextReceiver::Enter() {
+	void NextReceiver::Enter(const GlobalCondition& data) {
 		// 移行フラグをfalse
 		isNext_ = false;
+		isInput_ = false;
+		// 受付可能に
+		stateInputToNextTime_ = data.inputDelay;
 	};
 	//　終了
 	void NextReceiver::Exit() {
 		// 移行フラグをfalse
 		isNext_ = false;
+		isInput_ = false;
 	};
 	// 更新
 	void NextReceiver::Update(const Character::CharacterContext& ctx, const GlobalCondition& data,float timer) {
@@ -22,7 +26,15 @@ namespace Combo {
 		if (isInputStart && isInputEnd) {
 			// まだ移行フラグがONではなくボタン条件を満たしているなら移行させるフラグをONに
 			if (!isNext_) {
-				isNext_ = comboSequence_.Update(ctx);
+				if (!isInput_) {
+					isInput_ =	comboSequence_.Update(ctx);
+				}
+				else {
+					stateInputToNextTime_ -= ctx.dt;
+					if(stateInputToNextTime_ <= 0.0f) {
+						isNext_ = true;
+					}
+				}
 			}
 			// 強制的にコンボに移行フラグNOに
 			if (data.isCompulsionNext) {

@@ -23,8 +23,10 @@ namespace Combo {
 		// 更新
 		void UpdateImGui(float dt, bool isActive);
 	public:
-		// エディタ上で選択中か取得
+		// エディタ上で選択中か設定
 		void SetNowChoice(bool nowChoice) { nowChoice_ = nowChoice; }
+		// コエディタ上で選択中か取得
+		bool GetNowChoice() const { return nowChoice_; }
 
 		// 接続可能なコンボ名リスト設定
 		void SetConectComboNames(const std::vector<std::string>& names) { conectComboNames_ = names; }

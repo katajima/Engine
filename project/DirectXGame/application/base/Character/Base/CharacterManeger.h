@@ -86,7 +86,15 @@ namespace Character {
 			}
 			return nullptr;
 		}
-
+		// 敵取得
+		BaseEnemy* GetEnemy(uint32_t tagNumber) {
+			for (auto& character : character_) {
+				if (character->GetCharacterType() == Type::Enemy && character->GetTagNumber() == tagNumber) {
+					return static_cast<BaseEnemy*>(character.get());
+				}
+			}
+			return nullptr;
+		}
 
 		/// <summary>
 		/// 群衆AI取得
@@ -96,7 +104,7 @@ namespace Character {
 
 	public: // 生成系
 		// キャラクター生成(敵)
-		void CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
+		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
 		// キャラクター生成(プレイヤー)
 		void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 

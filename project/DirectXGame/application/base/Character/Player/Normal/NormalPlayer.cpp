@@ -310,6 +310,11 @@ namespace Character {
 
 		if (decision.isComboInput) {
 			ac->GetComboSystem()->InputCombo(decision.comboInput);
+
+
+			if (decision.staminaCost > 0) {
+				parameterComponent_->Stamina().Add(-decision.staminaCost);
+			}
 			return;
 		}
 
@@ -333,6 +338,7 @@ namespace Character {
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
+		
 		// コンボ１のデータ送る
 		comboSystem->CreateCombo("Attack1");
 		// コンボ２のデータ送る

@@ -69,7 +69,7 @@ namespace Character {
 		}
 	}
 
-	void CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
+	int CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
 		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
 		// EnemyTypeから生成関数
@@ -103,6 +103,7 @@ namespace Character {
 		enemy->GetObjectComponentShadow()->Update();	// ワールド行列更新
 		character_.push_back(std::move(enemy));
 		characterCount_++;
+		return characterCount_ - 1; // 生成した敵のタグ番号を返す
 	}
 
 	void CharacterManager::CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform){

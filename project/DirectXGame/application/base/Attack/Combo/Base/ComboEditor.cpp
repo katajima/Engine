@@ -190,7 +190,7 @@ namespace Combo {
 	}
 
 	void EditorBlock::ImGuiEndConditionType() {
-		if (ImGui::CollapsingHeader("終了条件")) {
+		if (ImGui::CollapsingHeader("条件")) {
 			static const char* EndConditionTypeLabels[] = {
 			"着地したら",
 			"離したら",
@@ -201,7 +201,7 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
 
-
+			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");	
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
@@ -406,9 +406,16 @@ namespace Combo {
 			ApplyComboEditorToSystem();
 		}
 
+		// 全てセーブ
+		if (ImGui::Button("AllSave")) {
+			for (auto& it : comboSystem->GetComboNodeStates()) {
+				globalVariables->SaveFile(it.first);
+			}
+		}
 		// セーブ
 		if (ImGui::Button("Save")) {
 			for (auto& it : comboSystem->GetComboNodeStates()) {
+				if (it.first == selectedComboEditorBlockName_)
 				globalVariables->SaveFile(it.first);
 			}
 		}
@@ -417,6 +424,7 @@ namespace Combo {
 		if (isComboEditorActive_)
 		UpdateImGui(dt);
 
+		
 
 		ImGui::End();
 #endif // _DEBUG

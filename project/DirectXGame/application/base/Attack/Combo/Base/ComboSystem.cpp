@@ -96,6 +96,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->AddItem(name, "コンボキャンセル可能", data.condition.isCancel);
 			globalVariables->AddItem(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
+		globalVariables->AddItem(name, "コンボ入力遅延", data.condition.inputDelay);
 		}
 		// アニメーション
 		{
@@ -202,6 +203,7 @@ namespace Combo {
 			data.condition.isCompulsionNext = globalVariables->GetValue<bool>(name, "コンボ強制移行");
 			data.condition.isCancel = globalVariables->GetValue<bool>(name, "コンボキャンセル可能");
 			data.condition.isMoveCancel = globalVariables->GetValue<bool>(name, "コンボ移動キャンセル可能");
+			data.condition.inputDelay = globalVariables->GetValue<float>(name, "コンボ入力遅延");
 		}
 		// アニメーション
 		{
@@ -309,6 +311,7 @@ namespace Combo {
 			globalVariables->SetValue(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->SetValue(name, "コンボキャンセル可能", data.condition.isCancel);
 			globalVariables->SetValue(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
+			globalVariables->SetValue(name, "コンボ入力遅延", data.condition.inputDelay);
 		}
 		// アニメーション
 		{

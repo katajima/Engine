@@ -24,7 +24,7 @@ void Combo::ComboCondition::Enter(Character::BaseCharacter* owner) {
 	// キャンセル受付クラス
 	cancelReceiver_.Enter();
 	// 移行受付クラス
-	nextRecever_.Enter();
+	nextRecever_.Enter(data_);
 	// 終了条件クラス
 	endCondition_.Enter(data_);
 	// 移行条件クラス

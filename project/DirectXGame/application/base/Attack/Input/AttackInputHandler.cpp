@@ -20,6 +20,13 @@ AttackDecision AttackBranchResolver::Resolve(const AttackContext& ctx,
 
     // 攻撃中なら
     if (isAttack) {
+       
+        if (input == ActionInput::Skill) {
+            if (ctx.stamina < 25) {
+                return result;
+            }
+			result.staminaCost = 25;
+        }
         result.accepted = true;
         result.isComboInput = true;
         result.comboInput = input;

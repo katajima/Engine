@@ -11,7 +11,7 @@ namespace Combo {
 	class NextReceiver {
 	public:
 		// 開始
-		void Enter();
+		void Enter(const GlobalCondition& data);
 		//　終了
 		void Exit();
 		// 更新
@@ -30,5 +30,9 @@ namespace Combo {
 		bool isActive_ = false;
 		// 次のコンボに移行するか
 		bool isNext_ = false;
+		// 受付開始から次のコンボに移行するまでの時間
+		float stateInputToNextTime_ = 0.0f;
+		// 入力されたか
+		bool isInput_ = false;
 	};
 }

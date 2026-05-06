@@ -161,7 +161,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
@@ -270,29 +270,17 @@ void CharacterDebugScene::UpdateImGui() {
 				"ダミー"
 	};
 	Engine::ImGuiManager::Select("敵種類", EnemyTypeLabels, enemyType);
-	ImGui::DragFloat3("敵出現位置",&enemyPos.x,0.1f);
+	ImGui::DragFloat3("敵出現位置", &enemyPos.x, 0.1f);
 	if (ImGui::Button("敵出現")) {
 		characterManager_->CreateCharacter(enemyType, "enemy", 0, { {1,1,1},{},enemyPos });
 	}
-
+	if (ImGui::Button("ダミー位置リセット")) {
+		characterManager_->GetEnemy(tagNumber)->GetObjectComponent()->GetWorldTransform().translate_ = {};
+	}
 	Vector2 inputPos = input_->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	
 
-	
-	/*ImGui::DragFloat("BulletGravityScale", &param.gravityScale,0.01f);
-	ImGui::DragFloat("BulletMaxLifeTime", &param.maxLifeTime, 0.1f);
-	ImGui::DragFloat("BulletSpeed", &param.speed, 0.1f);
-	ImGui::DragFloat("BulletRadius", &param.radius, 0.1f);
-	ImGui::DragFloat("BulletIntervalMax", &intervalMax_, 0.1f);
-
-	ImGui::DragFloat3("BulletSpawnPosition", &spawnInfo.position.x, 0.1f);
-	ImGui::DragFloat3("BulletSpawnDirection", &spawnInfo.direction.x, 0.1f);
-	spawnInfo.direction = Normalize(spawnInfo.direction);
-	ImGui::Checkbox("Homing", &param.enableHoming);
-	ImGui::DragFloat("homingRange", &param.homingRange, 0.1f);
-	ImGui::DragFloat("homingStrength", &param.homingStrength, 0.1f);
-	ImGui::DragFloat("BulletDamage", &param.damage, 0.1f);*/
 	ImGui::End();
 
 

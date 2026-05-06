@@ -118,8 +118,8 @@ namespace Combo {
 	struct GlobalCondition {
 		// 入力受付
 		StateTime stateInput{};
-		// 入力受付から次のステートに移行するまでの時間(複数入力猶予に使う)
-		float stateInputToNextTime = 0.0f;
+		// 入力受付から次のステートに移行するまでの時間
+		float inputDelay = 0.0f;
 		// キャンセル受付
 		StateTime stateCancel{};
 		// 移動キャンセル受付
