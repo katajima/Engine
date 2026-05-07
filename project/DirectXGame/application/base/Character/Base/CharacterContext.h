@@ -103,6 +103,19 @@ namespace Character {
 		void Initialize(BaseCharacter* owner,const InputSystem* input);
 
 		CharacterContext CreateContext(BaseCharacter* owner,float dt);
+	private:
+
+		// キャラクターの状態コンテキストを作成
+		void CreateContextState(BaseCharacter* owner, CharacterContext& ctx);
+
+		// キャラクターの重力コンテキストを作成
+		void CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx);
+
+		// キャラクターの移動コンテキストを作成
+		void CreateContextMovement(BaseCharacter* owner, CharacterContext& ctx);
+
+		// キャラクターの入力コンテキストを作成
+		void CreateContextInput(BaseCharacter* owner, CharacterContext& ctx);
 
 	private:
 		// 入力データ
