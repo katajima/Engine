@@ -73,8 +73,6 @@
     └── └── └── └── ├── HitBox/
     └── └── └── └── └── ├── HitBox.h
     └── └── └── └── └── ├── HitBoxData.h
-    └── └── └── └── └── ├── HitBoxEditor.cpp
-    └── └── └── └── └── ├── HitBoxEditor.h
     └── └── └── └── └── ├── HitBoxFunction.cpp
     └── └── └── └── └── ├── HitBoxFunction.h
     └── └── └── └── └── ├── HitBoxSystem.cpp
@@ -1354,6 +1352,8 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void LoadFile(const std::string& groupName);
 
+		// データ取得
+		GvData::Group GetGroupData(const std::string& name) { return datas_[name]; }
 
 	public:
 		/// <summary>
@@ -1931,10 +1931,10 @@ float DamageData::Continuous::GetDamage() const
 File Path: project/DirectXGame/application/base/Attack/AttackData.h
 ============================================================
 #pragma once
+#include "DirectXGame/engine/struct/Vector2.h"
 #include "DirectXGame/engine/struct/Vector3.h"
-#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+#include "DirectXGame/engine/struct/Vector4.h"
 
-#include "DirectXGame//application/base/Input/InputSystem.h"
 #include "vector"
 #include "string"
 
@@ -2120,7 +2120,7 @@ struct HitReactionData {
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.cpp
 ============================================================
 #include "ComboData.h"
-
+#include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
 namespace Combo {
 
@@ -2202,13 +2202,11 @@ namespace Combo {
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboData.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/application/base/Attack/Combo/Receiver/ComboCondition.h"
 #include "DirectXGame/application/base/Attack/Combo/Motion/ComboMotion.h"
 #include "DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.h"
 #include "DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h"
 #include "DirectXGame/application/base/Attack/Combo/Range/ComboRange.h"
-#include "ComboSequencer.h"
 
 
 namespace Combo {
@@ -2393,8 +2391,8 @@ namespace Combo {
 		if (currentFrame == 0 && isPlaying && isActive) {
 			comboSystem->GetComboStateMachine()->SetRoot(state);
 		}
-		if(isActive)
-		state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
+		if (isActive)
+			state->SetTimeInState(ConvertUtility::FramesToSeconds(currentFrame, 60.0f));
 
 #ifdef _DEBUG
 
@@ -2550,7 +2548,7 @@ namespace Combo {
 			};
 			Engine::ImGuiManager::Select("終了条件タイプ", EndConditionTypeLabels, data_.condition.endConditionType);
 
-			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");	
+			ImGui::SliderFloat("入力遅延", &data_.condition.inputDelay, 0.0f, 1.0f, "%.2f");
 			ImGui::Checkbox("強制的に移行", &data_.condition.isCompulsionNext);
 			ImGui::Checkbox("キャンセル可能", &data_.condition.isCancel);
 			ImGui::Checkbox("移動キャンセル可能", &data_.condition.isMoveCancel);
@@ -2764,6 +2762,13 @@ namespace Combo {
 			ApplyComboEditorToSystem();
 		}
 
+		ImGui::Separator();
+		if (ImGui::Button("SaveComboName")) {
+			globalVariables->SaveFile(comboSystem->GetName());
+		}
+		ImGui::Separator();
+
+
 		// 全てセーブ
 		if (ImGui::Button("AllSave")) {
 			for (auto& it : comboSystem->GetComboNodeStates()) {
@@ -2774,15 +2779,15 @@ namespace Combo {
 		if (ImGui::Button("Save")) {
 			for (auto& it : comboSystem->GetComboNodeStates()) {
 				if (it.first == selectedComboEditorBlockName_)
-				globalVariables->SaveFile(it.first);
+					globalVariables->SaveFile(it.first);
 			}
 		}
 
 
 		if (isComboEditorActive_)
-		UpdateImGui(dt);
+			UpdateImGui(dt);
 
-		
+
 
 		ImGui::End();
 #endif // _DEBUG
@@ -2810,7 +2815,7 @@ namespace Combo {
 			combo.second.SetNowChoice(nowChoice);
 
 			// 選択中の1つだけ UpdateImGui 内部で描画される
-			combo.second.UpdateImGui(dt,isComboEditorActive_);
+			combo.second.UpdateImGui(dt, isComboEditorActive_);
 		}
 #endif // _DEBUG
 	}
@@ -3075,6 +3080,11 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalDat
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
+
+namespace Character {
+	struct CharacterContext;
+	class BaseCharacter;
+}
 
 namespace Combo {
 
@@ -3950,6 +3960,15 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
+		// 既に存在する場合は追加しない
+		if (comboNodenames_.find(name) == comboNodenames_.end()) {
+			comboNodenames_[name] = name;
+			globalVariables->AddItem(this->name, name.c_str(), name);
+		}
+		
+
+		
+
 		// エフェクト
 		{
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
@@ -3969,7 +3988,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->AddItem(name, "コンボキャンセル可能", data.condition.isCancel);
 			globalVariables->AddItem(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
-		globalVariables->AddItem(name, "コンボ入力遅延", data.condition.inputDelay);
+			globalVariables->AddItem(name, "コンボ入力遅延", data.condition.inputDelay);
 		}
 		// アニメーション
 		{
@@ -4337,6 +4356,17 @@ namespace Combo {
 		GetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ取得
 	}
 
+	void System::Create(const std::string name) {
+		this->name = name;
+		globalVariables->CreateGroup(name);
+
+
+		for (auto& data : globalVariables->GetGroupData(name)) {
+			CreateCombo(globalVariables->GetValue<std::string>(name, data.first));
+		}
+
+	}
+
 #pragma endregion // 保存　適応
 
 };
@@ -4383,7 +4413,8 @@ namespace Combo {
 		void Update(const Character::CharacterContext& ctx);
 		// クリア
 		void ClearNode();
-
+		// 名前設定
+		void Create(const std::string name);
 	public: // 保存や適応に関しての関数
 
 		// 保存項目の追加
@@ -4429,7 +4460,10 @@ namespace Combo {
 
 		// コンボノードステートマップ取得
 		std::map<std::string, std::shared_ptr<NodeState>>  GetComboNodeStates() { return comboNodes_; };
-
+		// コンボノード名前マップ取得
+		std::map<std::string, std::string> GetComboNodeNames() { return comboNodenames_; }
+		// 名前取得
+		std::string GetName() const { return name; }
 		// コンボノードステート取得
 		std::shared_ptr<NodeState> GetComboNodeState(const std::string& name) {
 			auto it = comboNodes_.find(name);
@@ -4478,6 +4512,7 @@ namespace Combo {
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
 
+		
 	private:
 		// コンボステートマシーン
 		std::unique_ptr<StateMachine> comboStateMachine_ = nullptr;
@@ -4485,6 +4520,11 @@ namespace Combo {
 		std::unique_ptr<ComboDebug> comboDebug_ = nullptr;
 		// コンボノードステートマップ
 		std::map<std::string, std::shared_ptr<NodeState>> comboNodes_;
+		// コンボノード名マップ(保存用)
+		std::map<std::string, std::string> comboNodenames_;
+		//
+		std::string name = "";
+
 		// 保存データマップ 
 		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ
@@ -4557,8 +4597,6 @@ namespace Combo {
 File Path: project/DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/struct/Vector3.h"
-#include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 
 class CameraManager;		// カメラ
@@ -4730,7 +4768,6 @@ File Path: project/DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.
 ============================================================
 #pragma once
 #include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
-#include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 
 
@@ -4791,6 +4828,57 @@ namespace Combo {
 File Path: project/DirectXGame/application/base/Attack/Combo/Input/ComboButton.cpp
 ============================================================
 #include "ComboButton.h"
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+#include "DirectXGame//application/base/Input/InputSystem.h"
+
+
+// 押したら
+bool Combo::ComboButton::IsPressed(const InputSystem& inputSystem) const {
+	return inputSystem.GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
+}
+
+// 押した瞬間
+bool Combo::ComboButton::IsTriggered(const InputSystem& inputSystem) const {
+	return inputSystem.GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
+}
+
+// 離した瞬間
+bool Combo::ComboButton::IsReleased(const InputSystem& inputSystem) const {
+	return inputSystem.GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
+}
+
+
+// 押して反応する条件
+bool Combo::ComboButton::IsInput(const InputSystem& inputSystem) const {
+
+	switch (type_)
+	{
+	case ComboButtonInputType::kPressed: // 押したら
+		return IsPressed(inputSystem);
+		break;
+	case ComboButtonInputType::kTriggered: // 押した瞬間
+		return IsTriggered(inputSystem);
+		break;
+	case ComboButtonInputType::kReleased: // 離した瞬間
+		return IsReleased(inputSystem);
+		break;
+	case ComboButtonInputType::kPressTriggerReleased: // 押す、押した瞬間、離した瞬間
+		return IsPressed(inputSystem) || IsTriggered(inputSystem) || IsReleased(inputSystem);
+		break;
+	case ComboButtonInputType::kPressTriggered:
+		return IsPressed(inputSystem) || IsTriggered(inputSystem); // 押す、押した瞬間
+		break;
+	case ComboButtonInputType::kPressReleased:
+		return IsPressed(inputSystem) || IsReleased(inputSystem); // 押す、離した瞬間
+		break;
+	case ComboButtonInputType::kTriggerReleased:
+		return IsTriggered(inputSystem) || IsReleased(inputSystem); // 押した瞬間、離した瞬間
+		break;
+	default:	// 指定されたtypeでないのなら
+		return false;
+		break;
+	}
+}
 
 #pragma region ComboSequence
 
@@ -4880,9 +4968,16 @@ GamePadButton Combo::ConvertGamePadButton(ComboGamePadButton button)
 File Path: project/DirectXGame/application/base/Attack/Combo/Input/ComboButton.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/struct/Vector3.h"
-#include "DirectXGame/application/base/Attack/AttackData.h"
-#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+#include <DirectXGame/engine/input/Input.h>
+
+#include "vector"
+
+
+class InputSystem;
+namespace Character {
+	struct CharacterContext;
+	class BaseCharacter;
+}
 
 namespace Combo {
 
@@ -4929,52 +5024,17 @@ namespace Combo {
 		ComboButton(ComboGamePadButton button, ComboButtonInputType type) : button_(button), type_(type) {}
 
 		// 押したら
-		bool IsPressed(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
-		}
+		bool IsPressed(const InputSystem& inputSystem) const;
 
 		// 押した瞬間
-		bool IsTriggered(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
-		}
+		bool IsTriggered(const InputSystem& inputSystem) const;
 
 		// 離した瞬間
-		bool IsReleased(const InputSystem& inputSystem) const {
-			return inputSystem.GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
-		}
+		bool IsReleased(const InputSystem& inputSystem) const;
 
 
-		// 押して反応する条件
-		bool IsInput(const InputSystem& inputSystem) const {
-
-			switch (type_)
-			{
-			case ComboButtonInputType::kPressed: // 押したら
-				return IsPressed(inputSystem);
-				break;
-			case ComboButtonInputType::kTriggered: // 押した瞬間
-				return IsTriggered(inputSystem);
-				break;
-			case ComboButtonInputType::kReleased: // 離した瞬間
-				return IsReleased(inputSystem);
-				break;
-			case ComboButtonInputType::kPressTriggerReleased: // 押す、押した瞬間、離した瞬間
-				return IsPressed(inputSystem) || IsTriggered(inputSystem) || IsReleased(inputSystem);
-				break;
-			case ComboButtonInputType::kPressTriggered:
-				return IsPressed(inputSystem) || IsTriggered(inputSystem); // 押す、押した瞬間
-				break;
-			case ComboButtonInputType::kPressReleased:
-				return IsPressed(inputSystem) || IsReleased(inputSystem); // 押す、離した瞬間
-				break;
-			case ComboButtonInputType::kTriggerReleased:
-				return IsTriggered(inputSystem) || IsReleased(inputSystem); // 押した瞬間、離した瞬間
-				break;
-			default:	// 指定されたtypeでないのなら
-				return false;
-				break;
-			}
-		}
+			// 押して反応する条件
+			bool IsInput(const InputSystem& inputSystem) const;
 
 		// どのボタンに反応するか
 		void SetGamePadButton(ComboGamePadButton button) { button_ = button; };
@@ -5233,6 +5293,9 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.cp
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/engine/struct/Vector3.h>
+
 namespace {
 
 	Vector3 NormalizeSafe(const Vector3& v, const Vector3& fallback = Vector3{ 0.0f,0.0f,1.0f }) {
@@ -5477,14 +5540,16 @@ namespace Combo {
 File Path: project/DirectXGame/application/base/Attack/Combo/Motion/ComboMove.h
 ============================================================
 #pragma once
-#include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
-#include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
+#include <DirectXGame/engine/struct/Vector3.h>
+
 
 // 前方宣言
 namespace Engine {
 	class AnimationComponent;	// アニメーション
 	class RigidBodyComponent;	// リジットボディー
+	class Camera;
+	class WorldTransform;
 }
 
 class MovementComponent;	// 移動関係
@@ -5648,6 +5713,7 @@ namespace Combo {
 File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboCancelReceiver.cpp
 ============================================================
 #include "ComboCancelReceiver.h"
+#include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
 namespace Combo {
 
@@ -6035,7 +6101,7 @@ namespace Combo {
 File Path: project/DirectXGame/application/base/Attack/Combo/Receiver/ComboNextReceiver.cpp
 ============================================================
 #include "ComboNextReceiver.h"
-
+#include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
 namespace Combo {
 
@@ -6830,6 +6896,9 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBox.h
 ============================================================
 #pragma once
 #include "HitBoxFunction.h"
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
+#include <map>
 
 
 
@@ -6915,7 +6984,8 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxData.h
 ============================================================
 #pragma once
 #include <DirectXGame/application/base/Attack/AttackData.h>
-#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
+#include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
+
 
 namespace HitBox {
 
@@ -6956,10 +7026,6 @@ namespace HitBox {
 		kParentIndependent,	// 追従位置での独立(武器の中間位置で発生してその後独立)
 
 		kLockOnArea,		// ターゲット位置
-	};
-	// ヒットボックスヒット制限タイプ
-	enum class HitContactRecord {
-
 	};
 
 	// 保存項目ヒットボックス
@@ -7012,256 +7078,6 @@ namespace HitBox {
 		GlobalHitBox hitBoxData;
 		// リアクションデータ
 		HitReactionData reactionData;
-	};
-};
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxEditor.cpp
-============================================================
-#include "HitBoxEditor.h"
-#include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-
-namespace HitBox {
-
-#pragma region HItBoxColl
-
-	// 初期化
-	void HitBoxColl::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
-		this->globalVariables = globalVariables;
-		this->owner = owner;
-		hitBoxSystem = owner->GetHitBoxSystem();
-	};
-
-	// ImGui更新
-	void HitBoxColl::ImGuiUpdate(float dt) {
-#ifdef _DEBUG
-		// ヒットボックス名前
-		ImGuiHitBoxName();
-		// ヒットボックス使用タイプ
-		ImGuiHitBoxUseType();
-		// ヒットボックス形状
-		ImGuiHitBoxShape();
-		// ヒットボックスオフセット
-		ImGuiHitBoxOffset();
-		// ヒットボックスサイズ
-		ImGuiHitBoxSize();
-#endif // _DEBUG
-	}
-	void HitBoxColl::ImGuiHitBoxName() {
-#ifdef _DEBUG
-		ImGui::Separator();
-		ImGui::Text("HitBox : % s", hitBoxName.c_str());
-		ImGui::Separator();
-#endif // _DEBUG
-	}
-	void HitBoxColl::ImGuiHitBoxUseType() {
-#ifdef _DEBUG
-		// enum -> コンボ表示
-		static const char* kUseTypeLabels[] = {
-			"Player",
-			"Enemy",
-			"Other",
-		};
-
-		int current = static_cast<int>(useType);
-		if (ImGui::Combo("UseType", &current, kUseTypeLabels, IM_ARRAYSIZE(kUseTypeLabels))) {
-			// 範囲安全（念のため）
-			if (0 <= current && current < static_cast<int>(IM_ARRAYSIZE(kUseTypeLabels))) {
-				useType = static_cast<UseType>(current);
-			}
-		}
-#endif // _DEBUG
-	}
-	void HitBoxColl::ImGuiHitBoxShape() {
-#ifdef _DEBUG
-		static const char* kShapeLabels[] = {
-		"OBB",
-		"AABB",
-		"Sphere",
-		};
-
-		int current = static_cast<int>(shape);
-		if (ImGui::Combo("Shape", &current, kShapeLabels, IM_ARRAYSIZE(kShapeLabels))) {
-			if (0 <= current && current < static_cast<int>(IM_ARRAYSIZE(kShapeLabels))) {
-				shape = static_cast<ShapeType>(current);
-			}
-		}
-#endif // _DEBUG
-	}
-	void HitBoxColl::ImGuiHitBoxOffset() {
-#ifdef _DEBUG
-		// X=Right, Y=Up, Z=Forward 前提でそのまま表示
-		float v[3] = { offset.x, offset.y, offset.z };
-		if (ImGui::DragFloat3("Offset (X,Y,Z)", v, 0.01f)) {
-			offset.x = v[0];
-			offset.y = v[1];
-			offset.z = v[2];
-		}
-#endif // _DEBUG
-	}
-	void HitBoxColl::ImGuiHitBoxSize() {
-#ifdef _DEBUG
-		// Sphere のときは Radius、それ以外は Size を出す
-		if (shape == ShapeType::kSphere) {
-			ImGui::DragFloat("Radius", &radius, 0.01f, 0.0f, 10000.0f);
-			if (radius < 0.0f) { radius = 0.0f; }
-		}
-		else {
-			float v[3] = { size.x, size.y, size.z };
-			if (ImGui::DragFloat3("Size (X,Y,Z)", v, 0.01f, 0.0f, 10000.0f)) {
-				size.x = (v[0] < 0.0f) ? 0.0f : v[0];
-				size.y = (v[1] < 0.0f) ? 0.0f : v[1];
-				size.z = (v[2] < 0.0f) ? 0.0f : v[2];
-			}
-		}
-#endif // _DEBUG
-	}
-
-
-#pragma endregion // ヒットボックスコライダーブロック
-
-#pragma region HitBoxEditor
-
-	void HitBoxEditor::Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner) {
-		this->globalVariables = globalVariables;
-		this->owner = owner;
-		hitBoxSystem = owner->GetHitBoxSystem();
-	}
-
-	void HitBoxEditor::ImGuiUpdate(float dt) {
-		ImGui::Begin("Combo Editor");
-
-		// 初回：未選択なら先頭を選択
-		if (hitBoxColls_.empty()) {
-			selectedHitBoxCollName_ = hitBoxColls_.begin()->first;
-		}
-
-		// --- 選択UI（コンボボックス） ---
-		{
-			const char* preview = selectedHitBoxCollName_.c_str();
-			if (ImGui::BeginCombo("Selected Combo", preview)) {
-
-				for (auto& it : hitBoxColls_) {
-					const std::string& name = it.first;
-
-					const bool isSelected = (name == selectedHitBoxCollName_);
-					if (ImGui::Selectable(name.c_str(), isSelected)) {
-						selectedHitBoxCollName_ = name;
-					}
-					if (isSelected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-		}
-
-		ImGui::Separator();
-		ImGui::Text("Editing: %s", selectedHitBoxCollName_.c_str());
-
-		ImGui::End();
-	}
-
-	void HitBoxEditor::CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalHitBox& data) {
-		// 既に存在する場合は追加しない
-		if (hitBoxColls_.find(hitBoxName) != hitBoxColls_.end()) {
-			return;
-		}
-
-		// コンボエディターブロック作成
-		HitBoxColl block;
-		block.Initialize(globalVariables, owner);
-
-		// マップに追加
-		hitBoxColls_[hitBoxName] = block;
-	}
-
-#pragma endregion // ヒットボックスエディター
-
-};
-
-
-============================================================
-File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxEditor.h
-============================================================
-#pragma once
-#include "HitBox.h"
-#include "DirectXGame/engine/Utility/ConvertUtility.h"
-
-namespace Engine {
-	class GlobalVariables;
-}
-// 前方宣言
-namespace Character {
-	class BaseCharacter;
-}
-
-namespace HitBox {
-
-	class System;
-
-	/// ヒットボックスコリジョンエディター
-	class HitBoxColl {
-	public:
-
-		// 初期化
-		void Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
-
-		// ImGui更新
-		void ImGuiUpdate(float dt);
-	private:
-		// 名前
-		void ImGuiHitBoxName();
-		// ヒットボックス使用タイプImGui設定
-		void ImGuiHitBoxUseType();
-		// ヒットボックス形状ImGui設定
-		void ImGuiHitBoxShape();
-		// ヒットボックスオフセットImGui設定
-		void ImGuiHitBoxOffset();
-		// ヒットボックスサイズImGui設定
-		void ImGuiHitBoxSize();
-
-	private:
-		std::string hitBoxName = "HitBox";
-		UseType useType =UseType::kPlayer;
-		ShapeType shape = ShapeType::kOBB;
-		Vector3 offset{};
-		Vector3 size = { 1.0f,1.0f,1.0f };
-		float radius = 1.0f;
-
-
-	private:
-		Engine::GlobalVariables* globalVariables = nullptr;
-		Character::BaseCharacter* owner = nullptr;
-		HitBox::System* hitBoxSystem = nullptr;
-	};
-
-
-
-
-	// ヒットボックスエディター
-	class HitBoxEditor {
-	public:
-
-		// 初期化
-		void Initialize(Engine::GlobalVariables* globalVariables, Character::BaseCharacter* owner);
-
-		// ImGui更新
-		void ImGuiUpdate(float dt);
-
-
-	private:
-		// ヒットボックスエディターブロック作成
-		void CreateHitBoxEditorBlock(const std::string& hitBoxName, const GlobalHitBox& data);
-
-	private:
-		std::map<std::string, HitBoxColl> hitBoxColls_;
-		std::string selectedHitBoxCollName_ = "";
-	private: // もらいもの
-		Engine::GlobalVariables* globalVariables = nullptr;
-		Character::BaseCharacter* owner = nullptr;
-		System* hitBoxSystem = nullptr;
 	};
 };
 
@@ -7366,6 +7182,7 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxFunction.h
 ============================================================
 #pragma once
 #include "HitBoxData.h"
+#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 
 namespace Character {
 	class BaseCharacter;
@@ -7581,17 +7398,14 @@ File Path: project/DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h
 ============================================================
 #pragma once
 #include "HitBox.h"
-#include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
-#include "HitBoxEditor.h"
 
 namespace Engine {
 	class EntityManager; // 前方宣言
 	class GlobalVariables;
+	class WorldTransform;
 }
-namespace Character {
-	class BaseCharacter;
-}
+
 namespace HitBox {
 	/// <summary>
 	/// 当たり判定を管理するシステム
@@ -7873,12 +7687,9 @@ File Path: project/DirectXGame/application/base/Attack/Input/AttackInputHandler.
 
 // 動作種類
 enum class ActionInput {
-	LightAttack,          // 弱攻撃
-	HeavyAttack,          // 強攻撃
-	Skill,          // スキル攻撃
-	Special,        // 必殺技など特殊攻撃
-	Cancel,         // コンボキャンセル（ステップや回避などに移行）
-	Parry,          // 敵の攻撃に対するカウンター
+	LightAttack,        // 弱攻撃
+	HeavyAttack,        // 強攻撃
+	Skill,				// スキル攻撃
 };
 
 // 攻撃コンテキスト
@@ -7915,9 +7726,6 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Attack/LockOn/LockOnData.h
 ============================================================
 #pragma once
-#include "DirectXGame/engine/Math/MathFunctions.h"
-
-
 // ロックオンタイプ
 enum class LockOnType {
 	kHit,	// 当てた相手
@@ -7942,7 +7750,6 @@ struct LockOnData {
 	float moveTargetRadius = 1.0f;
 	// ターゲットまで移動するときの移動タイプ
 	TargetMoveType targetMoveType = TargetMoveType::kMove;
-
 };
 
 
@@ -8092,6 +7899,7 @@ File Path: project/DirectXGame/application/base/Attack/LockOn/LockOnSystem.h
 #pragma once
 #include "vector"
 #include "LockOnData.h"
+#include <DirectXGame/engine/struct/Vector3.h>
 
 
 // 前方宣言
@@ -8280,7 +8088,7 @@ public:
 	void SetOwner(ResponseMoveSystem* owner) { this->responseMoveSystem = owner; };
 
 private:
-	Engine::WorldTransform* transform;	//　衝突応答用
+	Engine::WorldTransform* transform = nullptr;	//　衝突応答用
 	ResponseMoveSystem* responseMoveSystem = nullptr;	// 衝突応答
 	float halfSize = 0.5f;		// 半分のサイズ
 
@@ -9071,10 +8879,10 @@ private:
 	std::list<std::unique_ptr<Projectile::BaseProjectile>> projectiles_;
 
 private:
-	EffectSystem* effect;								// 演出
-	Engine::Camera* camera;								// カメラ
+	EffectSystem* effect = nullptr;								// 演出
+	Engine::Camera* camera = nullptr;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
-	Engine::EntityManager* entityManager;	// 3dオブジェクト管理
+	Engine::EntityManager* entityManager = nullptr;	// 3dオブジェクト管理
 };
 
 
@@ -12624,18 +12432,108 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 }
 
 Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
-	
 	CharacterContext ctx{};
 	if (!owner) return ctx;
 	// 時間
 	ctx.dt = dt;
+	// パラメータ;
+	ctx.parameters = owner->GetBasicParameters();
+
+	// キャラクターの入力コンテキストを作成
+	CreateContextInput(owner, ctx);
+	// キャラクターの状態コンテキストを作成
+	CreateContextState(owner, ctx);
+	// キャラクターの重力コンテキストを作成
+	CreateContextGravity(owner, ctx);
+	// キャラクターの移動コンテキストを作成
+	CreateContextMovement(owner, ctx);
+
+	return ctx;
+}
+
+void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner, CharacterContext& ctx){
+	// 現在のステート
+	ctx.state = owner->GetCurrentMainState();
+
+	// ダッシュ状態か
+	if (ctx.inputData.dashHeld && parameters->GetStamina() > 1.0f) {
+		parameters->Stamina().value -= 10.0f * ctx.dt;	// スタミナを減らす
+		parameters->Stamina().useRate = false;	// スタミナ回復を止める
+		ctx.isDashing = true;
+	}
+	else {
+		parameters->Stamina().useRate = true;	// スタミナ回復
+	}
+
+	// ヒットストップ中か
+	ctx.isHitStop = hitMotionSystem->IsHitStop();
+	ctx.isSelfHitStop = hitMotionSystem->IsSelfHitStop();
+	// 着地状態か
+	ctx.onGround = movementComponent->GetIsLanding();
+	// 攻撃中なら
+	if (ctx.state == CharacterMainState::Attack) {
+		ctx.isAttacking = true;
+		if (!ctx.onGround) {
+			ctx.isJumpAttacking = true;
+		}
+	}
+	// 必殺技中
+	if (ctx.state == CharacterMainState::Special) {
+		ctx.isSpecialAttacking = true;	
+	}
+	// ジャンプ中
+	if (ctx.state == CharacterMainState::Jump) {
+		ctx.isJumping = true;	
+	}
+	// ダメージ状態なら
+	if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Die || ctx.state == CharacterMainState::Fainting) {
+		ctx.isCanMove = false;	// 動けないようにする
+		if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Fainting)
+			ctx.isDamage = true;	// ダメージを受けている
+		ctx.isGravity = hitMotionSystem->IsGravityEnabled();
+	}
+	// ジャンプ可能か
+	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
+		ctx.isCanJump = true;	// ジャンプ可能にする
+	}
+}
+
+void Character::CharacterContextSystem::CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx){
+	// 攻撃時の重力
+	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
+	if (comboStateMachine->GetCurrentState()) {
+		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
+	}
+	// ダメージ中の重力
+	ctx.damageGravity = hitMotionSystem->GetGravityScale();
+	// 上昇時の重力
+	ctx.upGravity = jumpSystem->GetData().upGravity;
+	// 落下時の重力
+	ctx.fallGravity = jumpSystem->GetData().fallGravity;
+}
+
+void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* owner, CharacterContext& ctx){
+	// 方向
+	ctx.direction = worldTransform->GetForward();
+	// 位置
+	ctx.position = worldTransform->GetWorldPosition();
+	//　止まるか
+	ctx.isStop = !owner->GetIsMove();
+	// ターゲット取得
+	ctx.target = lockOnSystem->GetTarget();
+	// 移動速度
+	ctx.moveSpeed = moveSystem->GetData().maxSpeed;
+	// 高さ
+	ctx.skyHeight = moveSystem->GetData().skyHeight;
+}
+
+void Character::CharacterContextSystem::CreateContextInput(BaseCharacter* owner, CharacterContext& ctx){
+
 	// 入力データ
 	if (input) {
 		ctx.input = input;
 		ctx.inputData = input->GetPlayerInputData();
 	}
-	// パラメータ;
-	ctx.parameters = owner->GetBasicParameters();
 	// カメラ
 	if (owner->GetCamera() && input) {
 		ctx.camera = owner->GetCamera();
@@ -12654,72 +12552,6 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 		// スティック入力方向をワールド座標系で
 		ctx.worldStickDirection = worldDirection;
 	}
-
-	if(ctx.inputData.dashHeld && parameters->GetStamina() > 1.0f) {
-		parameters->Stamina().value -= 10.0f * dt;	// スタミナを減らす
-		parameters->Stamina().useRate = false;	// スタミナ回復を止める
-		ctx.isDashing = true;
-	}
-	else {
-		parameters->Stamina().useRate = true;	// スタミナ回復
-	}
-	
-
-	// 方向
-	ctx.direction = worldTransform->GetForward();
-	// 位置
-	ctx.position = worldTransform->GetWorldPosition();
-	// 現在のステート
-	ctx.state = owner->GetCurrentMainState();
-	
-	ctx.isStop = !owner->GetIsMove();
-
-	// ヒットストップ中か
-	ctx.isHitStop = hitMotionSystem->IsHitStop();
-	ctx.isSelfHitStop = hitMotionSystem->IsSelfHitStop();
-	// 着地状態か
-	ctx.onGround = movementComponent->GetIsLanding();
-	// 攻撃中なら
-	if (ctx.state == CharacterMainState::Attack) {
-		ctx.isAttacking = true;
-		if (!ctx.onGround) {
-			ctx.isJumpAttacking = true;
-		}
-	}
-	if(ctx.state == CharacterMainState::Special) {
-		ctx.isSpecialAttacking = true;	// 必殺技中
-	}
-	if (ctx.state == CharacterMainState::Jump) {
-		ctx.isJumping = true;	// ジャンプ中にする
-	}
-	if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Die || ctx.state == CharacterMainState::Fainting) {
-		ctx.isCanMove = false;	// 動けないようにする
-		if(ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Fainting)
-		ctx.isDamage = true;	// ダメージを受けている
-		ctx.isGravity = hitMotionSystem->IsGravityEnabled();
-	}
-	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
-		ctx.isCanJump = true;	// ジャンプ可能にする
-	}
-	// 攻撃時の重力
-	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
-	if (comboStateMachine->GetCurrentState()) {
-		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
-	}
-	// ダメージ中の重力
-	ctx.damageGravity = hitMotionSystem->GetGravityScale();
-	// 上昇時の重力
-	ctx.upGravity = jumpSystem->GetData().upGravity;
-	// 落下時の重力
-	ctx.fallGravity = jumpSystem->GetData().fallGravity;
-	// ターゲット取得
-	ctx.target = lockOnSystem->GetTarget();
-	// 移動速度
-	ctx.moveSpeed = moveSystem->GetData().maxSpeed;
-	//
-	ctx.skyHeight = moveSystem->GetData().skyHeight;
-
-	return ctx;
 }
 
 
@@ -12831,6 +12663,19 @@ namespace Character {
 		void Initialize(BaseCharacter* owner,const InputSystem* input);
 
 		CharacterContext CreateContext(BaseCharacter* owner,float dt);
+	private:
+
+		// キャラクターの状態コンテキストを作成
+		void CreateContextState(BaseCharacter* owner, CharacterContext& ctx);
+
+		// キャラクターの重力コンテキストを作成
+		void CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx);
+
+		// キャラクターの移動コンテキストを作成
+		void CreateContextMovement(BaseCharacter* owner, CharacterContext& ctx);
+
+		// キャラクターの入力コンテキストを作成
+		void CreateContextInput(BaseCharacter* owner, CharacterContext& ctx);
 
 	private:
 		// 入力データ
@@ -13404,7 +13249,7 @@ namespace Character {
 		// キャラクター用保存項目データ
 		std::map<std::string, GlobalData> globalDatas_;
 	private: // 貰いもの
-		Engine::Camera* camera;
+		Engine::Camera* camera = nullptr;
 		// 入力システム
 		InputSystem* inputSystem = nullptr;
 		Engine::EntityManager* entityManager = nullptr;
@@ -17326,7 +17171,7 @@ namespace Character {
 
 	void NormalPlayer::ReloadComboData() {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
-
+		comboSystem->Create("ComboPlayer");
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
@@ -20990,7 +20835,7 @@ File Path: project/DirectXGame/application/base/Input/InputData.h
 
 struct PlayerInputData {
 	// 移動スティック(左スティック)
-	Vector2 moveShick;
+	Vector2 moveShick{};
 	// 視点スティック(右スティック)
 	Vector2 lookStick{};
 
@@ -41623,7 +41468,6 @@ bool Engine::TriangleCollider::ResolveCollision(const Collider& other, Vector3& 
 File Path: project/DirectXGame/engine/Collider/3d/Collider.h
 ============================================================
 #pragma once
-#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 #include "ColliderFunction3D.h"
@@ -42015,7 +41859,7 @@ File Path: project/DirectXGame/engine/Collider/3d/ColliderComponent.h
 #include "DirectXGame/engine/collider/ContactRecord.h"
 #include "DirectXGame/engine/line/lineCommon.h"
 #include "DirectXGame/engine/Collider/ColliderData.h"
-#include "DirectXGame/engine/Utility/VectorUtility.h"
+
 
 /// <summary>
 /// コライダコンポーネント
@@ -42917,18 +42761,16 @@ bool Engine::Collision::Response::ReflectVelocity(const Sphere& s1, const Sphere
 File Path: project/DirectXGame/engine/Collider/3d/ColliderFunction3D.h
 ============================================================
 #pragma once
-
 // c++
-#include<cmath>
 #include <algorithm>
 #include<vector>
 #define _USE_MATH_DEFINES
-#include <math.h>
+
 
 // engine
 #include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/math/LineCurveMath.h"
-#include "DirectXGame/engine/collider/Octree/Octree.h"
+
 
 #pragma region IsCollision
 
@@ -56564,9 +56406,6 @@ namespace Engine {
 		/// </summary>
 		/// <param name="data">追加するスポットライトのデータ。</param>
 		void AddLightLine(const SpotLightData& data);
-
-		void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat);
-		void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
 
 		/// <summary>
 		/// AABB状にライン加算
@@ -71870,7 +71709,7 @@ struct VertexHash {
 ============================================================
 File Path: project/DirectXGame.vcxproj
 ============================================================
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -71937,6 +71776,7 @@ File Path: project/DirectXGame.vcxproj
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -71964,6 +71804,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -72000,7 +71841,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboEndCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.cpp" />
@@ -72329,352 +72169,61 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\CopyImage.PS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Line\Line.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Line\Line.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.DS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Domain</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Domain</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.HS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Hull</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Hull</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Gaussian.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\GrayScale.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Outline.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Sepia.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Smoothing.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Vignette.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.PS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.VS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\Skinning.CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Thunder\Thunder.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Thunder\Thunder.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Trail\Trail.PS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Trail\Trail.VS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
+    <None Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
+    <None Include="resources\shaders\Line\Line.PS.hlsl" />
+    <None Include="resources\shaders\Line\Line.VS.hlsl" />
+    <None Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
+    <None Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
+    <None Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl" />
+    <None Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.DS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.HS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.PS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.VS.hlsl" />
+    <None Include="resources\shaders\Octagrams\Octagrams.PS.hlsl" />
+    <None Include="resources\shaders\Octagrams\Octagrams.VS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Gaussian.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\GrayScale.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Outline.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Random.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Sepia.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Smoothing.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Vignette.PS.hlsl" />
+    <None Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl" />
+    <None Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\Particle.PS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\Particle.VS.hlsl" />
+    <None Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
+    <None Include="resources\shaders\Skining\Skinning.CS.hlsl" />
+    <None Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl" />
+    <None Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl" />
+    <None Include="resources\shaders\SkyBox\SkyBox.PS.hlsl" />
+    <None Include="resources\shaders\SkyBox\SkyBox.VS.hlsl" />
+    <None Include="resources\shaders\Thunder\Thunder.PS.hlsl" />
+    <None Include="resources\shaders\Thunder\Thunder.VS.hlsl" />
+    <None Include="resources\shaders\Trail\Trail.PS.hlsl" />
+    <None Include="resources\shaders\Trail\Trail.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
@@ -72700,7 +72249,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextCondition.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxData.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboState.h" />
@@ -73906,9 +73454,6 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Special\Base\SpecialEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -74136,173 +73681,61 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>シェーダーファイル</Filter>
     </None>
     <None Include="resources\shaders\Object3D\LightInstans.hlsli" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\CopyImage.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Gaussian.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\GrayScale.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Line\Line.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Line\Line.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.DS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.HS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Outline.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Sepia.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\Skinning.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Smoothing.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Thunder\Thunder.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Thunder\Thunder.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Trail\Trail.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Trail\Trail.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Vignette.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
+    <None Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
+    <None Include="resources\shaders\Line\Line.PS.hlsl" />
+    <None Include="resources\shaders\Line\Line.VS.hlsl" />
+    <None Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
+    <None Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
+    <None Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl" />
+    <None Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.DS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.HS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.PS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.VS.hlsl" />
+    <None Include="resources\shaders\Octagrams\Octagrams.PS.hlsl" />
+    <None Include="resources\shaders\Octagrams\Octagrams.VS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Gaussian.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\GrayScale.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Outline.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Random.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Sepia.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Smoothing.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Vignette.PS.hlsl" />
+    <None Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl" />
+    <None Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\Particle.PS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\Particle.VS.hlsl" />
+    <None Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
+    <None Include="resources\shaders\Skining\Skinning.CS.hlsl" />
+    <None Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl" />
+    <None Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl" />
+    <None Include="resources\shaders\SkyBox\SkyBox.PS.hlsl" />
+    <None Include="resources\shaders\SkyBox\SkyBox.VS.hlsl" />
+    <None Include="resources\shaders\Thunder\Thunder.PS.hlsl" />
+    <None Include="resources\shaders\Thunder\Thunder.VS.hlsl" />
+    <None Include="resources\shaders\Trail\Trail.PS.hlsl" />
+    <None Include="resources\shaders\Trail\Trail.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -75155,9 +74588,6 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialEditor.h">
