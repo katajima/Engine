@@ -88,6 +88,8 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void LoadFile(const std::string& groupName);
 
+		// データ取得
+		GvData::Group GetGroupData(const std::string& name) { return datas_[name]; }
 
 	public:
 		/// <summary>

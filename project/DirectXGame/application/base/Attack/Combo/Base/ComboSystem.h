@@ -36,7 +36,8 @@ namespace Combo {
 		void Update(const Character::CharacterContext& ctx);
 		// クリア
 		void ClearNode();
-
+		// 名前設定
+		void Create(const std::string name);
 	public: // 保存や適応に関しての関数
 
 		// 保存項目の追加
@@ -82,7 +83,10 @@ namespace Combo {
 
 		// コンボノードステートマップ取得
 		std::map<std::string, std::shared_ptr<NodeState>>  GetComboNodeStates() { return comboNodes_; };
-
+		// コンボノード名前マップ取得
+		std::map<std::string, std::string> GetComboNodeNames() { return comboNodenames_; }
+		// 名前取得
+		std::string GetName() const { return name; }
 		// コンボノードステート取得
 		std::shared_ptr<NodeState> GetComboNodeState(const std::string& name) {
 			auto it = comboNodes_.find(name);
@@ -131,6 +135,7 @@ namespace Combo {
 		// グローバルデータ作成
 		void CreateGlobalData(const std::string& comboNodeName);
 
+		
 	private:
 		// コンボステートマシーン
 		std::unique_ptr<StateMachine> comboStateMachine_ = nullptr;
@@ -138,6 +143,11 @@ namespace Combo {
 		std::unique_ptr<ComboDebug> comboDebug_ = nullptr;
 		// コンボノードステートマップ
 		std::map<std::string, std::shared_ptr<NodeState>> comboNodes_;
+		// コンボノード名マップ(保存用)
+		std::map<std::string, std::string> comboNodenames_;
+		//
+		std::string name = "";
+
 		// 保存データマップ 
 		std::map<std::string, GlobalData> comboGlobalDatas_;
 		// 親ワールド変換マップ

@@ -27,7 +27,7 @@ public:
 	void SetOwner(ResponseMoveSystem* owner) { this->responseMoveSystem = owner; };
 
 private:
-	Engine::WorldTransform* transform;	//　衝突応答用
+	Engine::WorldTransform* transform = nullptr;	//　衝突応答用
 	ResponseMoveSystem* responseMoveSystem = nullptr;	// 衝突応答
 	float halfSize = 0.5f;		// 半分のサイズ
 

@@ -1,5 +1,4 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFunctions.h"
 #include"DirectXGame/engine/Line/LineCommon.h"
 #include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 #include "ColliderFunction3D.h"

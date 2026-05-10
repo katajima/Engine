@@ -1,16 +1,14 @@
 #pragma once
-
 // c++
-#include<cmath>
 #include <algorithm>
 #include<vector>
 #define _USE_MATH_DEFINES
-#include <math.h>
+
 
 // engine
 #include "DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/math/LineCurveMath.h"
-#include "DirectXGame/engine/collider/Octree/Octree.h"
+
 
 #pragma region IsCollision
 

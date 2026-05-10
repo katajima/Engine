@@ -1,4 +1,55 @@
 #include "ComboButton.h"
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+#include "DirectXGame//application/base/Input/InputSystem.h"
+
+
+// 押したら
+bool Combo::ComboButton::IsPressed(const InputSystem& inputSystem) const {
+	return inputSystem.GetButtom(InputButton::kPressed, ConvertGamePadButton(button_));
+}
+
+// 押した瞬間
+bool Combo::ComboButton::IsTriggered(const InputSystem& inputSystem) const {
+	return inputSystem.GetButtom(InputButton::kTriggered, ConvertGamePadButton(button_));
+}
+
+// 離した瞬間
+bool Combo::ComboButton::IsReleased(const InputSystem& inputSystem) const {
+	return inputSystem.GetButtom(InputButton::kReleased, ConvertGamePadButton(button_));
+}
+
+
+// 押して反応する条件
+bool Combo::ComboButton::IsInput(const InputSystem& inputSystem) const {
+
+	switch (type_)
+	{
+	case ComboButtonInputType::kPressed: // 押したら
+		return IsPressed(inputSystem);
+		break;
+	case ComboButtonInputType::kTriggered: // 押した瞬間
+		return IsTriggered(inputSystem);
+		break;
+	case ComboButtonInputType::kReleased: // 離した瞬間
+		return IsReleased(inputSystem);
+		break;
+	case ComboButtonInputType::kPressTriggerReleased: // 押す、押した瞬間、離した瞬間
+		return IsPressed(inputSystem) || IsTriggered(inputSystem) || IsReleased(inputSystem);
+		break;
+	case ComboButtonInputType::kPressTriggered:
+		return IsPressed(inputSystem) || IsTriggered(inputSystem); // 押す、押した瞬間
+		break;
+	case ComboButtonInputType::kPressReleased:
+		return IsPressed(inputSystem) || IsReleased(inputSystem); // 押す、離した瞬間
+		break;
+	case ComboButtonInputType::kTriggerReleased:
+		return IsTriggered(inputSystem) || IsReleased(inputSystem); // 押した瞬間、離した瞬間
+		break;
+	default:	// 指定されたtypeでないのなら
+		return false;
+		break;
+	}
+}
 
 #pragma region ComboSequence
 

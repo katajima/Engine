@@ -1,12 +1,14 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/Combo/Input/ComboButton.h"
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
-#include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
+#include <DirectXGame/engine/struct/Vector3.h>
+
 
 // 前方宣言
 namespace Engine {
 	class AnimationComponent;	// アニメーション
 	class RigidBodyComponent;	// リジットボディー
+	class Camera;
+	class WorldTransform;
 }
 
 class MovementComponent;	// 移動関係

@@ -5,7 +5,7 @@
 #include "DirectXGame/engine/collider/ContactRecord.h"
 #include "DirectXGame/engine/line/lineCommon.h"
 #include "DirectXGame/engine/Collider/ColliderData.h"
-#include "DirectXGame/engine/Utility/VectorUtility.h"
+
 
 /// <summary>
 /// コライダコンポーネント

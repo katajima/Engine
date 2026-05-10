@@ -331,7 +331,7 @@ namespace Character {
 
 	void NormalPlayer::ReloadComboData() {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
-
+		comboSystem->Create("ComboPlayer");
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());

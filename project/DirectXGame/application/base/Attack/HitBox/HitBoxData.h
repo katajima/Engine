@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXGame/application/base/Attack/AttackData.h>
-#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
+#include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
+
 
 namespace HitBox {
 
@@ -41,10 +42,6 @@ namespace HitBox {
 		kParentIndependent,	// 追従位置での独立(武器の中間位置で発生してその後独立)
 
 		kLockOnArea,		// ターゲット位置
-	};
-	// ヒットボックスヒット制限タイプ
-	enum class HitContactRecord {
-
 	};
 
 	// 保存項目ヒットボックス

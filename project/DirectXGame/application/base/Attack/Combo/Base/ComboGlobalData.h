@@ -3,6 +3,11 @@
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
 
+namespace Character {
+	struct CharacterContext;
+	class BaseCharacter;
+}
+
 namespace Combo {
 
 	// 終了条件タイプ

@@ -1,11 +1,9 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/AttackData.h"
 #include "DirectXGame/application/base/Attack/Combo/Receiver/ComboCondition.h"
 #include "DirectXGame/application/base/Attack/Combo/Motion/ComboMotion.h"
 #include "DirectXGame/application/base/Attack/Combo/HitBox/ComboHitBox.h"
 #include "DirectXGame/application/base/Attack/Combo/Effect/ComboEffect.h"
 #include "DirectXGame/application/base/Attack/Combo/Range/ComboRange.h"
-#include "ComboSequencer.h"
 
 
 namespace Combo {

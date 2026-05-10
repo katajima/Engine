@@ -1,5 +1,8 @@
 #pragma once
 #include "HitBoxFunction.h"
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
+#include <map>
 
 
 

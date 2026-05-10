@@ -1,16 +1,13 @@
 #pragma once
 #include "HitBox.h"
-#include <DirectXGame/application/base/Attack/AttackData.h>
 #include <DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h>
-#include "HitBoxEditor.h"
 
 namespace Engine {
 	class EntityManager; // 前方宣言
 	class GlobalVariables;
+	class WorldTransform;
 }
-namespace Character {
-	class BaseCharacter;
-}
+
 namespace HitBox {
 	/// <summary>
 	/// 当たり判定を管理するシステム

@@ -3,7 +3,7 @@
 
 struct PlayerInputData {
 	// 移動スティック(左スティック)
-	Vector2 moveShick;
+	Vector2 moveShick{};
 	// 視点スティック(右スティック)
 	Vector2 lookStick{};
 

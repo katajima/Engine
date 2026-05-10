@@ -5,12 +5,9 @@
 
 // 動作種類
 enum class ActionInput {
-	LightAttack,          // 弱攻撃
-	HeavyAttack,          // 強攻撃
-	Skill,          // スキル攻撃
-	Special,        // 必殺技など特殊攻撃
-	Cancel,         // コンボキャンセル（ステップや回避などに移行）
-	Parry,          // 敵の攻撃に対するカウンター
+	LightAttack,        // 弱攻撃
+	HeavyAttack,        // 強攻撃
+	Skill,				// スキル攻撃
 };
 
 // 攻撃コンテキスト

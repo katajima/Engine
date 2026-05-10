@@ -64,9 +64,6 @@ namespace Engine {
 		/// <param name="data">追加するスポットライトのデータ。</param>
 		void AddLightLine(const SpotLightData& data);
 
-		void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat);
-		void AddLineMesh(LineMesh* mesh, const Matrix4x4& worldMat, std::vector<uint32_t> cachedLineIndices);
-
 		/// <summary>
 		/// AABB状にライン加算
 		/// </summary>

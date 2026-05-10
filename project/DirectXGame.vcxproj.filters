@@ -849,9 +849,6 @@
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Special\Base\SpecialEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -1079,173 +1076,61 @@
       <Filter>シェーダーファイル</Filter>
     </None>
     <None Include="resources\shaders\Object3D\LightInstans.hlsli" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\CopyImage.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Dissovle.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Gaussian.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\GrayScale.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Line\Line.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Line\Line.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\NewSkinning.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object2D\Object2D.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object2D\Object2D.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.DS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.HS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Ocean\Ocean.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Octagrams\Octagrams.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Outline.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\CPU\Particle.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Random.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Sepia.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\Skinning.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\SkyBox\SkyBox.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Smoothing.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Thunder\Thunder.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Thunder\Thunder.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Trail\Trail.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Trail\Trail.VS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="resources\shaders\Offscreen\Vignette.PS.hlsl">
-      <Filter>シェーダーファイル</Filter>
-    </FxCompile>
+    <None Include="resources\shaders\Offscreen\BloomCombine.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\BloomExtract.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\CopyImage.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Dissovle.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Fullscreen.VS.hlsl" />
+    <None Include="resources\shaders\Line\Line.PS.hlsl" />
+    <None Include="resources\shaders\Line\Line.VS.hlsl" />
+    <None Include="resources\shaders\Object2D\Object2D.PS.hlsl" />
+    <None Include="resources\shaders\Object2D\Object2D.VS.hlsl" />
+    <None Include="resources\shaders\Object3D\Object3dInstans.PS.hlsl" />
+    <None Include="resources\shaders\Object3D\Object3dInstans.VS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.CS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.DS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.HS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.PS.hlsl" />
+    <None Include="resources\shaders\Ocean\Ocean.VS.hlsl" />
+    <None Include="resources\shaders\Octagrams\Octagrams.PS.hlsl" />
+    <None Include="resources\shaders\Octagrams\Octagrams.VS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Gaussian.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\GrayScale.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Outline.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\RadialBlur.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Random.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Sepia.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Smoothing.PS.hlsl" />
+    <None Include="resources\shaders\Offscreen\Vignette.PS.hlsl" />
+    <None Include="resources\shaders\Particle\2d\Particle2d.PS.hlsl" />
+    <None Include="resources\shaders\Particle\2d\Particle2d.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\AllEmitParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticleAABB.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticlePoint.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitParticleSphere.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\EmitTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.PS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticle.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\UpdateTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticleTrail.PS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\GpuParticleTrail.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\InitializeTrail.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\ParticleField.CS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\UpdateParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\NewParticle.VS.hlsl" />
+    <None Include="resources\shaders\Particle\GPU\InitializeParticle.CS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\Particle.PS.hlsl" />
+    <None Include="resources\shaders\Particle\CPU\Particle.VS.hlsl" />
+    <None Include="resources\shaders\Skining\NewSkinning.VS.hlsl" />
+    <None Include="resources\shaders\Skining\Skinning.CS.hlsl" />
+    <None Include="resources\shaders\Skining\SkinningObject3d.PS.hlsl" />
+    <None Include="resources\shaders\Skining\SkinningObject3d.VS.hlsl" />
+    <None Include="resources\shaders\SkyBox\SkyBox.PS.hlsl" />
+    <None Include="resources\shaders\SkyBox\SkyBox.VS.hlsl" />
+    <None Include="resources\shaders\Thunder\Thunder.PS.hlsl" />
+    <None Include="resources\shaders\Thunder\Thunder.VS.hlsl" />
+    <None Include="resources\shaders\Trail\Trail.PS.hlsl" />
+    <None Include="resources\shaders\Trail\Trail.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imgui.h">
@@ -2098,9 +1983,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Special\Base\SpecialEditor.h">

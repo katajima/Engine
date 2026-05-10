@@ -62,8 +62,8 @@ private:
 	std::list<std::unique_ptr<Projectile::BaseProjectile>> projectiles_;
 
 private:
-	EffectSystem* effect;								// 演出
-	Engine::Camera* camera;								// カメラ
+	EffectSystem* effect = nullptr;								// 演出
+	Engine::Camera* camera = nullptr;								// カメラ
 	Engine::GlobalVariables* globalVariables = nullptr;	// 保存項目
-	Engine::EntityManager* entityManager;	// 3dオブジェクト管理
+	Engine::EntityManager* entityManager = nullptr;	// 3dオブジェクト管理
 };

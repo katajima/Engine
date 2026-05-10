@@ -77,6 +77,15 @@ namespace Combo {
 	void Combo::System::ApplyGlobalComboData(const std::string& name, GlobalData& data) {
 		globalVariables->CreateGroup(name);
 
+		// 既に存在する場合は追加しない
+		if (comboNodenames_.find(name) == comboNodenames_.end()) {
+			comboNodenames_[name] = name;
+			globalVariables->AddItem(this->name, name.c_str(), name);
+		}
+		
+
+		
+
 		// エフェクト
 		{
 			globalVariables->AddItem(name, "エフェクト(トレイル)発生時間", data.effect.trailEffectStartTime);
@@ -96,7 +105,7 @@ namespace Combo {
 			globalVariables->AddItem(name, "コンボ強制移行", data.condition.isCompulsionNext);
 			globalVariables->AddItem(name, "コンボキャンセル可能", data.condition.isCancel);
 			globalVariables->AddItem(name, "コンボ移動キャンセル可能", data.condition.isMoveCancel);
-		globalVariables->AddItem(name, "コンボ入力遅延", data.condition.inputDelay);
+			globalVariables->AddItem(name, "コンボ入力遅延", data.condition.inputDelay);
 		}
 		// アニメーション
 		{
@@ -462,6 +471,17 @@ namespace Combo {
 		comboGlobalDatas_[comboNodeName] = GlobalData(); // グローバルデータ追加
 		ApplyGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ適応
 		GetGlobalComboData(comboNodeName, comboGlobalDatas_[comboNodeName]); // グローバルデータ取得
+	}
+
+	void System::Create(const std::string name) {
+		this->name = name;
+		globalVariables->CreateGroup(name);
+
+
+		for (auto& data : globalVariables->GetGroupData(name)) {
+			CreateCombo(globalVariables->GetValue<std::string>(name, data.first));
+		}
+
 	}
 
 #pragma endregion // 保存　適応

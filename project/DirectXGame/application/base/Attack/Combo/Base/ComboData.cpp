@@ -1,5 +1,5 @@
 #include "ComboData.h"
-
+#include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
 namespace Combo {
 

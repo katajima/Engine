@@ -1,7 +1,4 @@
 #pragma once
-#include "DirectXGame/engine/Math/MathFunctions.h"
-
-
 // ロックオンタイプ
 enum class LockOnType {
 	kHit,	// 当てた相手
@@ -26,5 +23,4 @@ struct LockOnData {
 	float moveTargetRadius = 1.0f;
 	// ターゲットまで移動するときの移動タイプ
 	TargetMoveType targetMoveType = TargetMoveType::kMove;
-
 };

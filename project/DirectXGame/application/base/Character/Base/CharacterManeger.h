@@ -127,7 +127,7 @@ namespace Character {
 		// キャラクター用保存項目データ
 		std::map<std::string, GlobalData> globalDatas_;
 	private: // 貰いもの
-		Engine::Camera* camera;
+		Engine::Camera* camera = nullptr;
 		// 入力システム
 		InputSystem* inputSystem = nullptr;
 		Engine::EntityManager* entityManager = nullptr;

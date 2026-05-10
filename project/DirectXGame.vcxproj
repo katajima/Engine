@@ -65,6 +65,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -92,6 +93,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)engine\2d;$(ProjectDir)engine\3d;$(ProjectDir)engine\audio;$(ProjectDir)engine\base;$(ProjectDir)engine\io;$(ProjectDir)engine\math;$(ProjectDir)engine\scene;$(ProjectDir)engine\input;$(ProjectDir)engine\struct;$(ProjectDir)engine\MyGame;$(ProjectDir)application\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\SkyBox;$(ProjectDir)engine\Manager\SRV;$(ProjectDir)engine\Manager\UAV;$(ProjectDir)engine\collider\3d;$(ProjectDir)engine\Manager\RTV;$(ProjectDir)engine\DirectX\ScissorRect</AdditionalIncludeDirectories>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,7 +130,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboEndCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextCondition.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\Hitbox.cpp" />
     <ClCompile Include="DirectXGame\application\base\Attack\HitBox\HitBoxFunction.cpp" />
@@ -537,7 +538,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextCondition.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboNextReceiver.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxData.h" />
-    <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxEditor.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\HitBox\HitBoxSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboData.h" />
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboState.h" />

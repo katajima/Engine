@@ -1,5 +1,6 @@
 #pragma once
 #include "HitBoxData.h"
+#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 
 namespace Character {
 	class BaseCharacter;

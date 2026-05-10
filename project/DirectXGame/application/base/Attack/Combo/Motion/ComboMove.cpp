@@ -2,6 +2,9 @@
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
+#include <DirectXGame/engine/struct/Vector3.h>
+
 namespace {
 
 	Vector3 NormalizeSafe(const Vector3& v, const Vector3& fallback = Vector3{ 0.0f,0.0f,1.0f }) {

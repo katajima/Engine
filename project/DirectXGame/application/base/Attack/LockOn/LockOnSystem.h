@@ -1,6 +1,7 @@
 #pragma once
 #include "vector"
 #include "LockOnData.h"
+#include <DirectXGame/engine/struct/Vector3.h>
 
 
 // 前方宣言
