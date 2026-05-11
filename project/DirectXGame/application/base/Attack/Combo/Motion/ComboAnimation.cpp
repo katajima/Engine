@@ -1,5 +1,6 @@
 #include "ComboAnimation.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include <DirectXGame/engine/Animation/AnimationComponent.h>
 
 namespace Combo {
 

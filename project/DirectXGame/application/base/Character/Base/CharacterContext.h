@@ -1,7 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
 #include "CharacterData.h"									// キャラクターのパラメータ
-#include "DirectXGame/application/base/Object/ObjectComponent.h"	// オブジェクト
 #include "DirectXGame/application/base/Character/State/MainState.h"
 
 // 前方宣言
@@ -10,17 +9,23 @@ class JumpSystem;
 class MoveSystem;
 class LockOnSystem;
 class HitMotionSystem;
-
+class ObjectComponent;
+class InputSystem;
 namespace Combo {
 	class StateMachine;
 }
-
+namespace Engine {
+	class Camera;
+	class RigidBodyComponent;
+	class WorldTransform;
+	class AnimationComponent;
+}
 
 namespace Character {
 
 	// 前方宣言
 	class BaseCharacter;
-	
+
 	/// <summary>
 	/// キャラクターコンテキスト
 	/// </summary>
@@ -100,9 +105,9 @@ namespace Character {
 	public:
 
 		// 初期化
-		void Initialize(BaseCharacter* owner,const InputSystem* input);
+		void Initialize(BaseCharacter* owner, const InputSystem* input);
 
-		CharacterContext CreateContext(BaseCharacter* owner,float dt);
+		CharacterContext CreateContext(BaseCharacter* owner, float dt);
 	private:
 
 		// キャラクターの状態コンテキストを作成
@@ -131,7 +136,7 @@ namespace Character {
 		// 移動システム
 		const MoveSystem* moveSystem = nullptr;
 		// ロックオンシステム
-	 	const LockOnSystem* lockOnSystem = nullptr;
+		const LockOnSystem* lockOnSystem = nullptr;
 		// ヒットリアクションシステム
 		HitMotionSystem* hitMotionSystem = nullptr;
 		// コンボステートマシン

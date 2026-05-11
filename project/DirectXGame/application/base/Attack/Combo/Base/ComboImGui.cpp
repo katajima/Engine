@@ -1,4 +1,5 @@
 #include "ComboImGui.h"
+#include <DirectXGame/engine/Animation/AnimationComponent.h>
 
 void Combo::ComboImGui::CurrentFrame(float dt, bool isActive, const AttackSequence& sequence, bool& isPlaying, bool& loopPlay,
 	int& currentFrame, int& firstFrame, int& maxFrame) {

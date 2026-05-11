@@ -165,6 +165,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Base\CharacterManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BaseBullet.cpp" />
     <ClCompile Include="DirectXGame\application\base\Bullet\Base\BulletManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Death\DeathSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
@@ -579,6 +580,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Base\Characters.h" />
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Death\DeathData.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Death\DeathSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />

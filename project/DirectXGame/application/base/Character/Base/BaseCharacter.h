@@ -7,6 +7,7 @@
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include "CharacterContext.h"
 
 namespace Character {
@@ -116,6 +117,8 @@ namespace Character {
 		Engine::Camera* GetCamera() const { return camera; }
 		//エフェクト設定
 		void SetEffect(EffectSystem* effect) { this->effect = effect; }
+		//
+		EffectSystem* GetEffect() { return this->effect; }
 		// 弾マネージャーの設定
 		void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; };
 		// ヒットボックス管理の設定
@@ -172,7 +175,8 @@ namespace Character {
 		std::unique_ptr<HitMotionSystem> hitMotionSystem_ = nullptr;
 		// HitResponse
 		std::unique_ptr<HitResponse> hitResponse_ = nullptr;
-
+		// 死亡システム
+		std::unique_ptr<DeathSystem> deathSystem_ = nullptr;
 		// 弾出現
 		std::unique_ptr<BulletSpawn> bulletSpawn_ = nullptr;
 	protected:
