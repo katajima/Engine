@@ -1,18 +1,21 @@
 #pragma once
 // engine
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/2d/Sprite.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/input/Input.h"
-#include"DirectXGame/engine/effect/Ocean/Ocean.h"
 #include<DirectXGame/engine/Effect/EffectComponent.h>
 #include "DirectXGame/application/base/Light/BaseLights.h"
 #include "DirectXGame/application/base/Car/PlayerCar.h"
 #include "DirectXGame/engine/Base/Load/LoadLevelData.h"
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"
 #include "DirectXGame/engine/Math/Random.h"
+
+
+namespace Engine {
+	class EntityManager;
+	class Object3d;
+	class SkyBox;
+	class Ocean;
+	class Camera;
+}
+
 /// <summary>
 /// ステージ基礎クラス
 /// </summary>

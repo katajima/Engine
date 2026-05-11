@@ -17,7 +17,7 @@
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
-
+#include "DirectXGame/engine/Audio/Audio.h"
 
 /// <summary>
 /// サンプルシーン

@@ -9,6 +9,8 @@
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
 #include "DirectXgame/application/base/Stage/MainStage.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
 
 void RangeBombingSpecial::Initialize(Engine::EntityManager* entityManager, Engine::Camera* camera)
 {
@@ -149,3 +151,9 @@ void RangeBombingSpecial::InAction()
 		break;
 	}
 }
+
+// レティクル親子付け
+void RangeBombingSpecial::SetReticleParent(Engine::WorldTransform* parent) { objectReticle_->GetWorldTransform().parent_ = parent; };
+
+// 描画するか
+void RangeBombingSpecial::SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };

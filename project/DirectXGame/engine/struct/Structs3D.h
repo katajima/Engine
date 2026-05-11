@@ -1,5 +1,8 @@
 #pragma once
 #include "LineStruct.h"
+#include "DirectXGame/engine/struct/Matrix4x4.h"
+#include "DirectXGame/engine/struct/Matrix3x3.h"
+#include "DirectXGame/engine/struct/Quaternion.h"
 #include "array"
 #include "Structs.h"
 

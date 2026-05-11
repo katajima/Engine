@@ -1,6 +1,6 @@
 #pragma once
 #include"CharacterData.h"
-#include"DirectXGame/application/base/Move/Base/MoveComponent.h"
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Attack/Response/Response.h>
@@ -9,6 +9,11 @@
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include "CharacterContext.h"
+
+
+namespace  Engine {
+	class Audio;
+}
 
 namespace Character {
 

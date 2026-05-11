@@ -86,7 +86,7 @@ namespace Character {
 
 		// 衝突応答処理初期化
 		hitResponse_ = std::make_unique<HitResponse>();
-		hitResponse_->SetOwner(moveComponent_->GetResponseMoveSystem());
+		hitResponse_->SetOwner(moveComponent_->GetMoveRequestSystem());
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();

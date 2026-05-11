@@ -1,8 +1,7 @@
 #pragma once
-#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "MoveData.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
-#include "DirectXGame/application/base/Move/Base/LocomotionCoordinator.h"
+#include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
 
 
 /// <summary>

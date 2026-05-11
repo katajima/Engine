@@ -98,12 +98,6 @@ namespace Character {
 
 			//  敵同士の衝突応答
 			hitResponse_->Hit(CollisionTag::Enemy, self, other);
-
-			// 壁との衝突応答
-			//responseSystem_->GetHitResponse()->HitWall(self, other);
-
-			// 影響
-			//responseSystem_->GetHitResponse()->HitEffect(self, other);
 			};
 
 
@@ -116,7 +110,7 @@ namespace Character {
 
 		// 衝突応答処理初期化
 		hitResponse_ = std::make_unique<HitResponse>();
-		hitResponse_->SetOwner(moveComponent_->GetResponseMoveSystem());
+		hitResponse_->SetOwner(moveComponent_->GetMoveRequestSystem());
 
 		// ヒットリアクションシステム初期化
 		hitMotionSystem_ = std::make_unique<HitMotionSystem>();

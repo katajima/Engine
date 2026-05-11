@@ -1,9 +1,9 @@
 #pragma once
-#include "DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/Collider/3d/ColliderComponent.h"
 
 namespace Engine {
 	class LineCommon;
+	class Object3d;
 }
 
 /// <summary>

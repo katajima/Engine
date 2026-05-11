@@ -70,7 +70,7 @@ namespace Character {
 			request.velocity = dire_ * 2.0f * deltaTime;
 		}
 
-		enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
+		enemy->GetMoveComponent()->GetMoveRequestSystem()->SetRequest(request);
 
 		if (timer_ >= readyTime_) {
 			fsm_->ChangeState(AttackSubState::Swing);
@@ -138,7 +138,7 @@ namespace Character {
 		request.priority = 1;
 		request.direction = dire_;
 		request.velocity = dire_ * 20.0f * deltaTime;
-		enemy->GetMoveComponent()->GetAttackMoveSystem()->SetRequest(request);
+		enemy->GetMoveComponent()->GetMoveRequestSystem()->SetRequest(request);
 
 		if (timer_ >= swingTime_) {
 			fsm_->ChangeState(AttackSubState::End);

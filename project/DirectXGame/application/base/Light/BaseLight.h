@@ -1,6 +1,6 @@
 #pragma once
 #include"DirectXGame/engine/math/MathFunctions.h"
-
+#include <DirectXGame/engine/Light/Lights.h>
 
 /// <summary>
 /// ライト基底クラス

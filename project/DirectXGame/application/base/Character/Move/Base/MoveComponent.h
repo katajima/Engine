@@ -1,13 +1,10 @@
 #pragma once
 #include "MovementRestrictions.h"
 #include "MovementSystem.h"
-#include "DirectXGame/application/base/Move/Base/LocomotionCoordinator.h"
-#include "DirectXGame/application/base/Move/Move/MoveSystem.h"
-#include "DirectXGame/application/base/Move/Jump/JumpSystem.h"
-#include "DirectXGame/application/base/Move/Dash/DashSystem.h"
-#include "DirectXGame/application/base/Move/Attack/AttackMoveSystem.h"
-#include "DirectXGame/application/base/Move/Reaction/ReactionMoveSystem.h"
-#include "DirectXGame/application/base/Move/Reaction/ResponseMoveSystem.h"
+#include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
+#include "DirectXGame/application/base/Character/Move/Move/MoveSystem.h"
+#include "DirectXGame/application/base/Character/Move/Jump/JumpSystem.h"
+#include "MoveRequestSystem.h"
 // 前方宣言
 namespace Engine {
 	class GlobalVariables;
@@ -77,16 +74,10 @@ public:
 	MoveSystem* GetMoveSystem() { return moveSystem_.get(); }
 	// ジャンプシステム取得
 	JumpSystem* GetJumpSystem() { return jumpSystem_.get(); }
-	// ダッシュシステム取得
-	DashSystem* GetDashSystem() { return dashSystem_.get(); }
 	// 攻撃移動システム取得
-	AttackMoveSystem* GetAttackMoveSystem() { return attackMoveSystem_.get(); }
+	MoveRequestSystem* GetMoveRequestSystem() { return moveRequestSystem_.get(); }
 	// 移動システム取得
 	MovementSystem* GetMovementSystem() { return movementSystem_.get(); }
-	// リアクション移動システム取得
-	ReactionMoveSystem* GetReactionMoveSystem() { return reactionMoveSystem_.get(); }
-	// 応答移動システム取得
-	ResponseMoveSystem* GetResponseMoveSystem() { return responseMoveSystem_.get(); }
 public:
 	// カメラ設定
 	void SetCamera(Engine::Camera* camera) { this->camera = camera; }
@@ -95,14 +86,8 @@ private:
 	std::unique_ptr<MoveSystem> moveSystem_ = nullptr;
 	// ジャンプシステム
 	std::unique_ptr<JumpSystem> jumpSystem_ = nullptr;
-	// ダッシュシステム
-	std::unique_ptr<DashSystem> dashSystem_ = nullptr; 
-	// 攻撃移動システム
-	std::unique_ptr<AttackMoveSystem> attackMoveSystem_ = nullptr;
-	// リアクション移動システム
-	std::unique_ptr<ReactionMoveSystem> reactionMoveSystem_ = nullptr;
-	// 応答移動システム
-	std::unique_ptr<ResponseMoveSystem> responseMoveSystem_ = nullptr;
+	// 移動リクエストシステム
+	std::unique_ptr<MoveRequestSystem> moveRequestSystem_ = nullptr;
 private:
 	// 移動制限システム
 	std::unique_ptr<MovementRestrictions> movementRestrictions_ = nullptr; 

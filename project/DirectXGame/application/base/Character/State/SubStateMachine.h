@@ -2,7 +2,6 @@
 #include "BaseSubState.h"
 #include <unordered_map>
 #include <functional>
-#include <memory>
 #include <cassert>
 
 namespace Character {

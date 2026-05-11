@@ -2,6 +2,7 @@
 #include "DirectXGame/application/base/Input/InputData.h"	// 入力データ
 #include "CharacterData.h"									// キャラクターのパラメータ
 #include "DirectXGame/application/base/Character/State/MainState.h"
+#include "DirectXGame/engine/struct/Vector3.h"				// Vector3
 
 // 前方宣言
 class MovementComponent;

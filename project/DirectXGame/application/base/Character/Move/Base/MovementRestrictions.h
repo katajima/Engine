@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 
 // 移動制限クラス
 class MovementRestrictions {

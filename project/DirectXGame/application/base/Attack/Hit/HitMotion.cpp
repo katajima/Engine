@@ -1,5 +1,4 @@
 #include "HitMotion.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 #pragma region DamageData
 

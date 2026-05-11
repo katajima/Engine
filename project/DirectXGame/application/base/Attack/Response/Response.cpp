@@ -13,7 +13,7 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 			pushVec.y = 0; // Y軸方向の押し戻しは無効化（地面に沿った動きにするため）
 
 			// リアクション移動システムがあるなら
-			if (responseMoveSystem) {
+			if (moveRequestSystem) {
 				MoveRequest request;
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
@@ -26,7 +26,7 @@ void HitResponse::Hit(CollisionTag tag, Engine::Collider* self, Engine::Collider
 					// 双方が動く → 半分ずつ押し戻す（応用例）
 					request.velocity = pushVec * halfSize;
 				}
-				responseMoveSystem->SetRequest(request);
+				moveRequestSystem->SetRequest(request);
 				return;
 			}
 		}
@@ -38,7 +38,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 		Vector3 pushVec{};
 		if (self->ResolveCollision(*other, pushVec)) {
 			// リアクション移動システムがあるなら
-			if (responseMoveSystem) {
+			if (moveRequestSystem) {
 				MoveRequest request;
 				if (other->isStatic) {
 					// 相手が動かないなら自分だけ押し戻す
@@ -58,7 +58,7 @@ void HitResponse::HitWall(Engine::Collider* self, Engine::Collider* other) {
 				}
 
 				request.groundHeight = request.velocity.y + other->centerWorld.y;
-				responseMoveSystem->SetRequest(request);
+				moveRequestSystem->SetRequest(request);
 				return;
 			}
 		}
@@ -73,10 +73,10 @@ void HitResponse::HitEffect(Engine::Collider* self, Engine::Collider* other) {
 		Vector3 dire = Normalize(otherPos - selfPos);
 
 		// リアクション移動システムがあるなら
-		if (responseMoveSystem) {
+		if (moveRequestSystem) {
 			MoveRequest request;
 			request.velocity = dire * 20.0f;
-			responseMoveSystem->SetRequest(request);
+			moveRequestSystem->SetRequest(request);
 			return;
 		}
 	}

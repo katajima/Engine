@@ -1,8 +1,7 @@
 #pragma once
 #include "CharacterData.h"
-#include "DirectXGame/application/base/Move/Dash/DashData.h"
-#include "DirectXGame/application/base/Move/Jump/JumpData.h"
-#include "DirectXGame/application/base/Move/Move/MoveData.h"
+#include "DirectXGame/application/base/Character/Move/Jump/JumpData.h"
+#include "DirectXGame/application/base/Character/Move/Move/MoveData.h"
 
 
 namespace Character {
@@ -32,13 +31,5 @@ namespace Character {
 		MoveData moveData;
 		// ジャンプデータ
 		JumpData jumpData;
-		// ダッシュデータ
-		DashData dashData;
 	};
-
-
-
-
-
-
 }

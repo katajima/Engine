@@ -1,16 +1,12 @@
 #pragma once
-#include"DirectXGame/engine/3d/Object/Object3d.h"
-#include "DirectXGame/engine/math/random.h"
-#include "DirectXGame/application/base/Attack/AttackData.h"
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include "HitMotion.h"
-
-
-class ObjectComponent;	// 前方宣言
+#include <list>
 namespace Character {
 	class BaseCharacter;
 	class ParameterComponent;
 }
-class ReactionMoveSystem;
+class MoveRequestSystem;
 class EffectSystem;
 
 /// <summary>
@@ -113,7 +109,7 @@ private:
 	// 所有者
 	Character::BaseCharacter* owner = nullptr;
 	// リアクション移動システム
-	ReactionMoveSystem* reactionMoveSystem = nullptr;
+	MoveRequestSystem* moveRequestSystem = nullptr;
 	// エフェクト
 	EffectSystem* effectSystem = nullptr;
 };

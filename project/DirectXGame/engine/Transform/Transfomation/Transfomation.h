@@ -5,14 +5,6 @@
 #include"DirectXGame/engine/3d/Model/Model.h"
 #include "DirectXGame/engine/DirectX/Resource/ConstantBuffer.h"
 
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<cstdint>
-#include<wrl.h>
-#include<string>
-#include<vector>
-#include<format>
-
 
 namespace Engine {
 	// 前方宣言

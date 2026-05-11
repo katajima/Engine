@@ -1,7 +1,6 @@
 #pragma once
-#include "DirectXGame/engine/input/Input.h"
 #include "InputData.h"
-
+#include "DirectXGame/engine/input/Input.h"
 
 enum class InputButton {
 	kPressed,

@@ -1,10 +1,5 @@
 #pragma once
-#include "DirectXGame/engine/struct/Vector4.h"
 #include "DirectXGame/engine/struct/Vector3.h"
-#include "DirectXGame/engine/struct/Vector2.h"
-#include "DirectXGame/engine/struct/Quaternion.h"
-#include "DirectXGame/engine/struct/Matrix4x4.h"
-#include "DirectXGame/engine/struct/Matrix3x3.h"
 
 //線分
 struct Segment

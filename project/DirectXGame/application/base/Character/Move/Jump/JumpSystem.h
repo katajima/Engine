@@ -1,7 +1,10 @@
 #pragma once
-#include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "JumpData.h"
-#include "DirectXGame/application/base/Move/Base/LocomotionCoordinator.h"
+#include "DirectXGame/application/base/Character/Move/Base/LocomotionCoordinator.h"
+
+namespace Engine {
+	class RigidBodyComponent;
+}
 
 /// <summary>
 /// ジャンプシステムクラス

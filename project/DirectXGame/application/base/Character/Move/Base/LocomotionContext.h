@@ -1,13 +1,5 @@
 #pragma once
-#include "DirectXGame/application/base/Input/InputSystem.h"
-#include "DirectXGame/application/base/Character/State/BaseMainState.h"
-
-#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
-
-namespace Engine {
-    class Camera;
-}
-
+#include "DirectXGame/engine/struct/Vector3.h"
 /// <summary>
 /// 移動コマンド
 /// </summary>

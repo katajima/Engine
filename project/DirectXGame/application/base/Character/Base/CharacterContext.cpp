@@ -1,6 +1,6 @@
 #include "CharacterContext.h"
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Attack/AttackController.h"
 
 void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {

@@ -55,7 +55,6 @@ protected:
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
 	Engine::Camera* camera = nullptr;						// カメラ
 	InputSystem* inputSystem = nullptr;					// 入力(使わないならnullptr)
-	Engine::Audio* audio = nullptr;
 };
 
 // 近距離の武器クラス

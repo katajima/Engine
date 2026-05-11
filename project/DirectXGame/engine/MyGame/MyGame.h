@@ -1,26 +1,4 @@
 #pragma once
-#include<cstdint>
-#include<string>
-#include<format>
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<cassert>
-#include<dxgidebug.h>
-#include<dxcapi.h>
-#include<fstream>
-#include<sstream>
-#include<wrl.h>
-#include<vector>
-
-
-#pragma comment(lib,"d3d12.lib")
-#pragma comment(lib,"dxgi.lib")
-#pragma comment(lib,"dxguid.lib")
-#pragma comment(lib,"dxcompiler.lib")
-
-
-#include"externals/imgui/imgui.h"
-
 #include"Framework.h"
 
 namespace Engine {

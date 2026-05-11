@@ -1,8 +1,7 @@
 #pragma once
-#include <vector>
 #include "LocomotionContext.h"
-#include "DirectXGame/application/base/Input/InputSystem.h"
-
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+#include <vector>
 
 /// <summary>
 /// 移動関連の調停役クラス

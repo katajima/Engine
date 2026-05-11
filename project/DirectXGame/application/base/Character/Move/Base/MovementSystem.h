@@ -1,6 +1,9 @@
 #pragma once
-#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
 #include "LocomotionContext.h"
+#include "DirectXGame/application/base/Character/Base/CharacterContext.h"
+
 /// <summary>
 /// 移動リクエストを元に最終的な移動速度→トランスフォーム更新をこなうクラス
 /// </summary>

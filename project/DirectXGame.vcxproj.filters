@@ -306,9 +306,6 @@
     <ClCompile Include="DirectXGame\engine\Color\ColorComponent.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\engine\Camera\DebugCamera.cpp">
-      <Filter>ソース ファイル\engine\camera</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\engine\Effect\EffectComponent.cpp">
       <Filter>ソース ファイル\engine\effect</Filter>
     </ClCompile>
@@ -711,7 +708,7 @@
     <ClCompile Include="DirectXGame\engine\Move\RigidBodyComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Base\MoveComponent.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MoveComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderComponent.cpp">
@@ -729,16 +726,13 @@
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitMotionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Jump\JumpSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Move\Jump\JumpSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Move\MoveSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Move\Move\MoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Base\MovementRestrictions.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Dash\DashSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Hit\HitCounter.cpp">
@@ -894,10 +888,10 @@
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Move\Base\LocomotionCoordinator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Base\MovementSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MovementSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Stage\TitleStage.cpp">
@@ -910,9 +904,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Car\PlayerCar.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Attack\AttackMoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Stage\SelectStage.cpp">
@@ -943,12 +934,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Game\Result\ResultSystem.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Reaction\ReactionMoveSystem.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Move\Reaction\ResponseMoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Stage\StageColliderSystem.cpp">
@@ -1015,6 +1000,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Death\DeathSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1331,9 +1319,6 @@
     <ClInclude Include="DirectXGame\engine\PSO\CSPSOManager.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\engine\Camera\DebugCamera.h">
-      <Filter>ヘッダー ファイル\engine\camera</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\DirectX\DXGIDevice\DXGIDevice.h">
       <Filter>ヘッダー ファイル\engine\base\dx</Filter>
     </ClInclude>
@@ -1475,7 +1460,7 @@
     <ClInclude Include="DirectXGame\engine\Mesh\ModelMesh.h">
       <Filter>ヘッダー ファイル\engine\3d\model</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Base\MoveComponent.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveComponent.h">
       <Filter>ヘッダー ファイル\application\base</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\MyGame\MyGame.h">
@@ -1847,16 +1832,13 @@
     <ClInclude Include="DirectXGame\application\base\Attack\Hit\HitMotion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Move\MoveSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Jump\JumpSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementRestrictions.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementRestrictions.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboSystem.h">
@@ -2033,13 +2015,10 @@
     <ClInclude Include="DirectXGame\application\base\Character\Base\CharacterGlobalData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Jump\JumpData.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Jump\JumpData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Dash\DashData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Move\MoveData.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Move\MoveData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameEvent.h">
@@ -2054,10 +2033,10 @@
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionCoordinator.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\LocomotionCoordinator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Base\MoveInput.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Input\InputSystem.h">
@@ -2066,13 +2045,13 @@
     <ClInclude Include="DirectXGame\application\base\Input\InputData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Base\MovementData.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MovementData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Base\LocomotionContext.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\LocomotionContext.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\TitleStage.h">
@@ -2085,9 +2064,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Car\PlayerCar.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Attack\AttackMoveSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\SelectStage.h">
@@ -2121,12 +2097,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Game\Result\ResultSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Reaction\ReactionMoveSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Move\Reaction\ResponseMoveSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Stage\StageColliderSystem.h">
@@ -2211,6 +2181,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\input\GamePad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

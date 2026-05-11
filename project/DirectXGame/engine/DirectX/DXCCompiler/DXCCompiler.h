@@ -2,6 +2,8 @@
 #include<d3d12.h>
 #include<dxgi1_6.h>
 #include<dxcapi.h>
+#pragma comment(lib, "dxcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #include <wrl.h>
 using namespace Microsoft::WRL;

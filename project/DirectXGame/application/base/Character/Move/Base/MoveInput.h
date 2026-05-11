@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXGame/engine/struct/Structs3D.h"
+#include "DirectXGame/engine/struct/Vector3.h"
 
 struct PlayerInputData {
 	// 移動スティック(左スティック)

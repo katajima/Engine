@@ -12,19 +12,8 @@ void MovementComponent::Initialize(Character::BaseCharacter* owner, InputSystem*
 	// ジャンプシステムの生成
 	jumpSystem_ = std::make_unique<JumpSystem>();
 	jumpSystem_->Initialize();
-	// ダッシュシステムの生成
-	dashSystem_ = std::make_unique<DashSystem>();
-	dashSystem_->Initialize();
-	// 攻撃移動システムの生成
-	attackMoveSystem_ = std::make_unique<AttackMoveSystem>();
-	attackMoveSystem_->Initialize();
-	// リアクション移動システムの生成
-	reactionMoveSystem_ = std::make_unique<ReactionMoveSystem>();
-	reactionMoveSystem_->Initialize();
-	// 応答移動システムの生成
-	responseMoveSystem_ = std::make_unique<ResponseMoveSystem>();
-	responseMoveSystem_->Initialize();
-
+	// 移動リクエストシステムの生成
+	moveRequestSystem_ = std::make_unique<MoveRequestSystem>();
 	// 移動制限の生成
 	movementRestrictions_ = std::make_unique<MovementRestrictions>();
 	movementRestrictions_->Initialize({ Vector3::Set(-100.0f) }, { Vector3::Set(100.0f) });
@@ -50,14 +39,9 @@ void MovementComponent::Update(Engine::WorldTransform& object, Engine::RigidBody
 	// リクエスト集約選択クラス開始
 	locomotionCoordinator_->BeginFrame(ctx);
 
-	// ダッシュシステムの更新
-	dashSystem_->Update(ctx, *locomotionCoordinator_.get());
-
 	// ジャンプシステムの更新
 	jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), rigid);
 
-	// 攻撃移動システム更新
-	attackMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
 	if (controlType_ == ControlType::Manual) {	// 手動操作なら入力を渡す
 		// 移動システム更新
 		moveSystem_->Update(ctx, *locomotionCoordinator_.get());
@@ -66,12 +50,8 @@ void MovementComponent::Update(Engine::WorldTransform& object, Engine::RigidBody
 		// 移動システム更新(非操作)
 		moveSystem_->UpdateEnemy(ctx, *locomotionCoordinator_.get());
 	}
-	// リアクション移動システム更新
-	reactionMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
-
-	// 応答移動システム更新
-	responseMoveSystem_->Update(ctx, *locomotionCoordinator_.get());
-
+	// 移動リクエストシステム更新
+	moveRequestSystem_->Update(ctx, *locomotionCoordinator_.get());	
 	// リクエスト集約選択クラスで移動コマンド生成
 	MoveCommand cmd = locomotionCoordinator_->BuildCommand();
 
@@ -103,13 +83,7 @@ void MovementComponent::ApplyGlobalData(const std::string& name) {
 	globalVariables->AddItem(name, "空中での移動量変化", moveSystem_->Data().isLimitAirSpeed);
 	globalVariables->AddItem(name, "空中移動量変化率", moveSystem_->Data().airSpeedRate);
 
-	// ダッシュ
-	globalVariables->AddItem(name, "ダッシュ時間", dashSystem_->GetData().maxTime);
-	globalVariables->AddItem(name, "ダッシュ加速度", dashSystem_->GetData().acceleration);
-	globalVariables->AddItem(name, "ダッシュ減速度", dashSystem_->GetData().friction);
-	globalVariables->AddItem(name, "ダッシュ初速度", dashSystem_->GetData().startSpeed);
-	globalVariables->AddItem(name, "ダッシュ中の重力", dashSystem_->GetData().isDashGravity);
-
+	
 
 	SetGlobalData(name);
 }
@@ -129,14 +103,6 @@ void MovementComponent::SetGlobalData(const std::string& name)
 	moveSystem_->Data().isStickToSpeed = globalVariables->GetValue<bool>(name, "スティック移動量変化");
 	moveSystem_->Data().isLimitAirSpeed = globalVariables->GetValue<bool>(name, "空中での移動量変化");
 	moveSystem_->Data().airSpeedRate = globalVariables->GetValue<float>(name, "空中移動量変化率");
-
-	// ダッシュ
-	dashSystem_->GetData().maxTime = globalVariables->GetValue<float>(name, "ダッシュ時間");
-	dashSystem_->GetData().acceleration = globalVariables->GetValue<float>(name, "ダッシュ加速度");
-	dashSystem_->GetData().friction = globalVariables->GetValue<float>(name, "ダッシュ減速度");
-	dashSystem_->GetData().startSpeed = globalVariables->GetValue<float>(name, "ダッシュ初速度");
-	dashSystem_->GetData().isDashGravity = globalVariables->GetValue<bool>(name, "ダッシュ中の重力");
-
 }
 
 

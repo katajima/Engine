@@ -35,7 +35,7 @@ namespace Combo {
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
 		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
-		attackMoveSystem = owner->GetMoveComponent()->GetAttackMoveSystem();
+		moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
 		camera = owner->GetCameraManager()->GetCamera();
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData;
@@ -143,7 +143,7 @@ namespace Combo {
 				if (data_.alignCharacterToMovement) {
 					request.direction = moveDirection_.Normalize();
 				}
-				attackMoveSystem->SetRequest(request);
+				moveRequestSystem->SetRequest(request);
 			}
 		}
 	}

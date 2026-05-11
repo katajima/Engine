@@ -2,7 +2,7 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
-
+#include"DirectXGame/engine/3d/Object/Object3d.h"
 
 void ResultStage::Initialize(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
 	this->entityManager = entityManager;	// エンティティ3d

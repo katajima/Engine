@@ -1,5 +1,5 @@
 #include "HitMotionSystem.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
@@ -9,7 +9,7 @@
 void HitMotionSystem::Initialize(Character::BaseCharacter* owner, EffectSystem* effectSystem) {
 	this->owner = owner;
 	this->effectSystem = effectSystem;
-	reactionMoveSystem = owner->GetMoveComponent()->GetReactionMoveSystem();
+	moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
 
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
@@ -230,7 +230,7 @@ Vector3 HitMotionSystem::NormalizeSafe(const Vector3& v) const {
 
 // 移動リクエスト
 void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
-	if (!reactionMoveSystem) {
+	if (!moveRequestSystem) {
 		return;
 	}
 
@@ -244,7 +244,7 @@ void HitMotionSystem::SendReactionMoveRequest(const Vector3& velocity) {
 	request.isLanding = false;
 	request.groundHeight = 0.0f;
 
-	reactionMoveSystem->SetRequest(request);
+	moveRequestSystem->SetRequest(request);
 }
 
 // 終了

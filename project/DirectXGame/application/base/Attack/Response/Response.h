@@ -4,10 +4,12 @@
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 // 前方宣言
-class ObjectComponent;				// オブジェクト
-class WorldTransform;				// オブジェクト位置
-class Collider;						// コライダー
-class ResponseMoveSystem;			// 応答移動システム
+class ObjectComponent;		// オブジェクト
+namespace Engine {
+	class WorldTransform;	// オブジェクト位置
+	class Collider;			// コライダー
+}
+class MoveRequestSystem;	// 移動リクエストシステム
 
 /// <summary>
 /// 衝突応答クラス（オブジェクトとの接触時の押し戻し処理など）
@@ -24,11 +26,11 @@ public:
 	// 使っているもののワールドトランスフォームを設定
 	void SetOwner(Engine::WorldTransform* owner) { transform = owner; };
 
-	void SetOwner(ResponseMoveSystem* owner) { this->responseMoveSystem = owner; };
+	void SetOwner(MoveRequestSystem* owner) { this->moveRequestSystem = owner; };
 
 private:
 	Engine::WorldTransform* transform = nullptr;	//　衝突応答用
-	ResponseMoveSystem* responseMoveSystem = nullptr;	// 衝突応答
+	MoveRequestSystem* moveRequestSystem = nullptr;	// 衝突応答
 	float halfSize = 0.5f;		// 半分のサイズ
 
 };

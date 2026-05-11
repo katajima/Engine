@@ -1,8 +1,10 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include "optional"
+// C++
+#include <optional>
+#include <memory>
+
+// 自作
 #include <DirectXGame/engine/struct/Structs.h>
-#include <DirectXGame/engine/Math/Random.h>
 
 // 前方宣言
 class EffectSystem;

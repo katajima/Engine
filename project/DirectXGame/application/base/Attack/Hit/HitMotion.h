@@ -1,5 +1,4 @@
 #pragma once
-#include "DirectXGame/engine/struct/Vector3.h"
 #include <DirectXGame/application/base/Attack/AttackData.h>
 
 class ObjectComponent; // 前方宣言

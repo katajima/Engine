@@ -2,13 +2,17 @@
 #include"LevelData.h"
 #include<json.hpp>
 #include<memory>
-#include "DirectXGame/engine/3d/Object/Object3d.h"
+
 
 
 class CameraManager;
 class BaseCamera;
 namespace Engine {
 	class EntityManager;
+	class Object3d;
+	class ModelManager;
+	class Camera;
+	class Lights;
 }
 
 /// <summary>

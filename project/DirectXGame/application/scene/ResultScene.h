@@ -3,7 +3,6 @@
 #include"DirectXGame/engine/scene/SceneManager.h"
 #include "DirectXGame/engine/input/Input.h"
 #include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/Camera/DebugCamera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
 #include "DirectXGame/engine/base/Texture/TextureManager.h"
 #include "DirectXGame/engine/audio/Audio.h"

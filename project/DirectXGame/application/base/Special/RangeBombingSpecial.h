@@ -4,7 +4,11 @@
 
 // 前方宣言
 class MainStage;
-
+namespace Engine {
+	class EntityManager;
+	class Object3d;
+	class CylinderPrimitive;
+}
 /// <summary>
 /// 範囲攻撃必殺技
 /// </summary>
@@ -33,13 +37,13 @@ public:
 	void InAction();
 
 	// レティクル親子付け
-	void SetReticleParent(Engine::WorldTransform* parent) { objectReticle_->GetWorldTransform().parent_ = parent; };
+	void SetReticleParent(Engine::WorldTransform* parent);
 
 public:
 	
 
 	// 描画するか
-	void SetIsDraw(bool is) { objectReticle_->GetRenderComponent()->SetIsDraw(is); };
+	void SetIsDraw(bool is);
 	// ステージ設定
 	void SetStage(MainStage* stage) { this->stage = stage;};
 

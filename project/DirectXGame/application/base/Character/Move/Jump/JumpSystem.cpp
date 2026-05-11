@@ -1,5 +1,5 @@
 #include "JumpSystem.h"
-
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
 
 void JumpSystem::Initialize(){}
 

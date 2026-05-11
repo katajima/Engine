@@ -1,14 +1,13 @@
 #pragma once
 #include "SpecialData.h"
-
-#include"DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3d.h"
+#include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
 #include "DirectXGame/application/base/Input/InputSystem.h"
 
 // 前方宣言
 namespace Engine {
 	class Input;
 	class EntityManager;
+	class Camera;
 }
 //
 namespace Character {

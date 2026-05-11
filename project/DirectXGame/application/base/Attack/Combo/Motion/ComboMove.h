@@ -18,7 +18,7 @@ namespace Character {
 
 class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
-class AttackMoveSystem;		// 攻撃移動システム
+class MoveRequestSystem;	// 移動リクエストシステム
 class LockOnSystem;			// ロックオンシステム
 
 namespace Combo {
@@ -66,7 +66,7 @@ namespace Combo {
 		// ターゲット
 		const Character::BaseCharacter* traget = nullptr;
 		// 攻撃移動システム
-		AttackMoveSystem* attackMoveSystem = nullptr;
+		MoveRequestSystem* moveRequestSystem = nullptr;
 		//
 		const Engine::Camera* camera = nullptr;
 	private:

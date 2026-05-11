@@ -1,4 +1,5 @@
 #include "StageColliderSystem.h"
+#include"DirectXGame/engine/3d/Object/Object3d.h"
 
 void StageColliderSystem::Initialize(Engine::LineCommon* lineCommon) {
 	colliderComponent_ = std::make_unique<Engine::ColliderComponent>();
