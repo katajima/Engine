@@ -2,8 +2,22 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
+#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+#include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include <DirectXGame/application/base/Attack/Response/Response.h>
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
+#include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include <DirectXGame/application/base/Character/Death/DeathSystem.h>
+#include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
 
 namespace Character {
+	BaseEnemy::~BaseEnemy() = default;
+
 
 	Vector3 BaseEnemy::GetTargetPos()
 	{
@@ -31,12 +45,13 @@ namespace Character {
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
 		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
-			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
+			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
 		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
 		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 		objectComponentShadow_->Update();
 	}
+
 
 	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
@@ -49,15 +64,16 @@ namespace Character {
 		objectComponent_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
 		objectComponent_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), modelName, "", true, true, this
-			, Engine::Object3dInstansManager::TransparencyType::kNo, false);
+			, Engine::ObjectInstans::TransparencyType::kNo, false);
 		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
 
 
 		// コライダ位置用トランスフォーム初期化
-		worldCollider_.Initialize();
-		worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
-		worldCollider_.translate_.y = colliderRadius / 2.0f;
+		worldCollider_ = std::make_unique<Engine::WorldTransform>();
+		worldCollider_->Initialize();
+		worldCollider_->parent_ = &GetObjectComponent()->GetWorldTransform();
+		worldCollider_->translate_.y = colliderRadius / 2.0f;
 
 		// キャラクターのパラメータコンポーネントを生成
 		parameterComponent_ = std::make_unique<Character::ParameterComponent>();
@@ -101,13 +117,7 @@ namespace Character {
 			};
 
 
-		// 視野
-		visionComponent_ = std::make_unique<VisionComponent>();
-		visionComponent_->SetAlertView(120.0f, 100.0f);
-		visionComponent_->SetCombatView(90.0f, 100.0f);
-		visionComponent_->SetLineCommon(entityManager->Get3DLineCommon());
-		visionComponent_->raycastFunc = [this](Vector3 origin, Vector3 dir, float maxDist)-> bool {return false; };
-
+		
 		// 衝突応答処理初期化
 		hitResponse_ = std::make_unique<HitResponse>();
 		hitResponse_->SetOwner(moveComponent_->GetMoveRequestSystem());
@@ -158,9 +168,9 @@ namespace Character {
 		moveComponent_->Update(objectComponent_->GetWorldTransform(), *objectComponent_->GetRigidBodyComponent(), ctx);
 
 		// コライダのワールドトランスフォーム更新
-		worldCollider_.Update();
+		worldCollider_->Update();
 		// コライダーコンポーネント更新
-		objectComponent_->GetColliderComponent()->UpdateAll(worldCollider_);
+		objectComponent_->GetColliderComponent()->UpdateAll(*worldCollider_.get());
 
 		objectComponentShadow_->GetWorldTransform().translate_.x = GetWorldTransform().translate_.x;
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
@@ -172,6 +182,31 @@ namespace Character {
 
 
 		objectComponentShadow_->Update();
+	}
+
+	void BaseEnemy::InitializeBaseEnemyAddItem() {
+		AddItem("後退スピード", globalData_.retreatSpeed);
+		AddItem("攻撃猶予時間", globalData_.attackTimer);
+		AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
+		AddItem("後退開始範囲", globalData_.startRetreatingRadius);
+		AddItem("回転速度", globalData_.turnSpeed);
+
+
+
+		globalData_.retreatSpeed = GetValue<float>("後退スピード");
+		globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
+		globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
+		globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+		globalData_.turnSpeed = GetValue<float>("回転速度");
+
+	}
+	// 更新保存項目
+	void BaseEnemy::UpdateBaseEnemyGetValue() {
+		globalData_.retreatSpeed = GetValue<float>("後退スピード");
+		globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
+		globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
+		globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
+		globalData_.turnSpeed = GetValue<float>("回転速度");
 	}
 
 #pragma endregion 

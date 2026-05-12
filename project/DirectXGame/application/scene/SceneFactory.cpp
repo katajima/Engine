@@ -1,6 +1,13 @@
 #include "SceneFactory.h"
 #include <DirectXGame/engine/Base/pch.h>
-
+#include"TitleScene.h"
+#include"GamePlayScene.h"
+#include"TestScene.h"
+#include "SelectScene.h"
+#include "SampleScene.h"
+#include "ResultScene.h"
+#include "TutorialScene.h"
+#include "CharacterDebugScene.h"
 
 std::unique_ptr<Engine::BaseScene> SceneFactory::CreateScene(const std::string& sceneName)
 {

@@ -1,6 +1,7 @@
 #include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
-
+#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
+#include <DirectXGame/engine/3d/Object/Object3d.h>
 
 namespace Combo {
 

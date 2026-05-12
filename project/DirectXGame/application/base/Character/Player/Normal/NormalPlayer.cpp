@@ -1,13 +1,17 @@
 #include "NormalPlayer.h"
-
-#include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
-#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
-#include "assert.h"
-#include "DirectXGame/application/base/Attack/Combo/Base/ComboEditor.h"
+
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <DirectXGame/application/base/Attack/Response/Response.h>
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
+#include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include <DirectXGame/application/base/Special/Base/BaseSpecial.h>
 
 namespace Character {
 
@@ -66,9 +70,10 @@ namespace Character {
 		GetColliderComponent()->SetHitReceiver(this);
 
 		// コライダ位置用トランスフォーム初期化
-		worldCollider_.Initialize();
-		worldCollider_.parent_ = &GetObjectComponent()->GetWorldTransform();
-		worldCollider_.translate_.y = 1.0f;
+		worldCollider_ = std::make_unique<Engine::WorldTransform>();
+		worldCollider_->Initialize();
+		worldCollider_->parent_ = &GetObjectComponent()->GetWorldTransform();
+		worldCollider_->translate_.y = 1.0f;
 
 		// 衝突時のコールバック登録
 		GetColliderComponent()->onHitCallback = [this](Engine::Collider* self, Engine::Collider* other) {
@@ -124,7 +129,7 @@ namespace Character {
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
 		// オブジェクトインスタンシング初期化
 		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase", "plane.obj", "resources/Texture/smoke/no4.dds",
-			false, false, this, Engine::Object3dInstansManager::TransparencyType::kYes);
+			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
 
 		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
@@ -239,9 +244,9 @@ namespace Character {
 #endif // _DEBUG
 
 		// コライダのワールドトランスフォーム更新
-		worldCollider_.Update();
+		worldCollider_->Update();
 		// コライダーコンポーネント更新
-		GetObjectComponent()->GetColliderComponent()->UpdateAll(worldCollider_);
+		GetObjectComponent()->GetColliderComponent()->UpdateAll(*worldCollider_.get());
 		//武器更新
 		weapon_->GetObject3D()->GetWorldTransform().SetParent(Engine::AnimationFunction::GetWorldMatrixOfJoint(GetObjectComponent()->GetObject3D()->GetModel()->GetModelData().skeleton, "DEF-hand.R", GetObjectComponent()->GetWorldTransform().worldMat_));
 		weapon_->Update();
@@ -290,6 +295,15 @@ namespace Character {
 #pragma endregion //移動関係
 
 #pragma region MyRegion
+
+	// 攻撃(弱攻撃)
+	void NormalPlayer::Attack() { RequestAttack(ActionInput::LightAttack); };
+
+	/// 攻撃(強攻撃)
+	void NormalPlayer::HeavyAttack() { RequestAttack(ActionInput::HeavyAttack); };
+
+	// 攻撃(スキル)
+	void NormalPlayer::SkillAttack() { RequestAttack(ActionInput::Skill); };
 
 	void NormalPlayer::RequestAttack(ActionInput input) {
 		AttackContext ctx{};

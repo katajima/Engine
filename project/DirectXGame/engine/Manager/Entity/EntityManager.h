@@ -18,8 +18,12 @@
 #include "DirectXGame/engine/Manager/Effect/EffectManager.h"
 
 
-#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
+#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
+#include <DirectXGame/engine/Effect/Primitive/Primitive.h>
 #include "DirectXGame/engine/3d/Object/Object3d.h"
+
+
 #include"DirectXGame/engine/collider/3d/CollisionManager.h"
 
 // そーと用構造体

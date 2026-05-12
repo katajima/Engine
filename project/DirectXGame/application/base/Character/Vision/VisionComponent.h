@@ -1,5 +1,5 @@
 #pragma once
-#include"DirectXGame/engine/math/MathFunctions.h"
+#include "DirectXGame/engine/struct/Vector3.h"
 
 #include"functional"
 
@@ -12,26 +12,7 @@ inline bool IsObjectVisible(
     float viewRadius,
     float viewAngleDegree, // 例: 90°
     std::function<bool(Vector3 origin, Vector3 dir, float maxDist)> raycastFunc // 障害物チェック
-)
-{
-    // プレイヤーとの距離
-    Vector3 toPlayer = playerPos - enemyPos;
-    float distance = Length(toPlayer);
-    if (distance > viewRadius) return false;
-
-    // プレイヤーの方向
-    Vector3 toPlayerDir = Normalize(toPlayer);
-    float dot = Dot(enemyDir, toPlayerDir);
-    float angleCos = cosf(Math::DegreesToRadians(viewAngleDegree * 0.5f));
-    if (dot < angleCos) return false;
-
-    // 視界内 → Raycastで壁をチェック
-    if (raycastFunc(enemyPos, toPlayerDir, distance)) {
-        return false; // 壁で遮られている
-    }
-
-    return true;
-}
+);
 
 // 外部から利用できるよう公開
 enum class VisionMode {

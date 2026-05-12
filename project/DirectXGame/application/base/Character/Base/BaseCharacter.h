@@ -1,21 +1,35 @@
 #pragma once
-#include"CharacterData.h"
-#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
-#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
-#include <DirectXGame/application/base/Attack/Response/Response.h>
-#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
-#include <DirectXGame/application/base/Attack/AttackController.h>
-#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
-#include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include "CharacterContext.h"
+#include <DirectXGame/engine/Collider/ColliderData.h>
+#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 
+
+class HitResponse;
+class HitMotionSystem;
+class AttackController;
+class BulletSpawn;
+class DeathSystem;
+class MoveComponent;
+class ParameterComponent;
+class InputSystem;
+
+class BaseSpecial;
+class BaseWeapon;
+
+namespace HitBox {
+	class System;
+}
 
 namespace  Engine {
 	class Audio;
+	class EntityManager;
+	class ColliderComponent;
+	class WorldTransform;
 }
 
 namespace Character {
+
+	class CharacterStateMachine;
 
 	/// <summary>
 	/// キャラクター基底クラス
@@ -23,7 +37,8 @@ namespace Character {
 	class BaseCharacter : public IHitReceiver
 	{
 	public:
-		~BaseCharacter() = default;
+		BaseCharacter();
+		virtual ~BaseCharacter(); // = default をヘッダーに書かない
 		/// 初期化
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
@@ -48,65 +63,61 @@ namespace Character {
 
 	public:
 		// キャラクタータイプ設定
-		void SetCharacterType(Type type) { parameterComponent_->characterType_ = type; }
+		void SetCharacterType(Type type);
 		// キャラクター取得
-		Type GetCharacterType() const { return parameterComponent_->characterType_; }
+		Type GetCharacterType() const;
 		// キャラクターの生存状態を取得
-		bool GetAlive() const { return stateMachine_->GetCurrentMainState() != CharacterMainState::Die; }
+		bool GetAlive() const;
 		// キャラクターの生存状態を取得
-		void SetAlive(bool is) { objectComponent_->GetObjectStateFlags().isAlive = is; }
+		void SetAlive(bool is);
 		// HP取得
-		float GetHP() const { return parameterComponent_->parameters->HP.value; }
+		float GetHP() const;
 		// ダメージ
-		void AddDamage(float damage) {
-			parameterComponent_->HP().Add(-damage);		// HPをダメージ分減算
-			if (GetHP() <= 0) {
-				parameterComponent_->HP().value = 0.0f;
-				objectComponent_->GetObjectStateFlags().isAlive = false; // 死亡
-			}
-		}
+		void AddDamage(float damage);
 		// 削除フラグ
-		bool  GetDelete() const { return objectComponent_->GetObjectStateFlags().isDeleted; };
+		bool  GetDelete() const;
 		// 削除する
-		void Delete() { objectComponent_->GetObjectStateFlags().isDeleted = true; };
+		void Delete();
 		// 時間
-		float GetTime() { return objectComponent_->GetTime(); }
+		float GetTime();
 		// 移動出来るか設定
-		void IsMove(bool is) { isMove = is; }
+		void IsMove(bool is);
 		// 移動可能か
-		bool GetIsMove() const { return isMove; }
+		bool GetIsMove() const;
 		// パラメータ取得
-		BasicParameters* GetBasicParameters() const { return parameterComponent_->parameters.get(); }
+		BasicParameters* GetBasicParameters() const;
 		// 基本パラメータ
-		BasicParameters* Parameters() { return parameterComponent_->parameters.get(); }
+		BasicParameters* Parameters();
 	public:
 		// タグ番号取得
 		uint32_t GetTagNumber() const { return tagNumber_; }
 		// タグ番号設定
 		void SetTagNumber(uint32_t tag) { tagNumber_ = tag; };
+		// 名前取得
+		std::string GetName() const;
 	public: // 取得系関数
 		// キャラクターステートマシーン取得
-		CharacterStateMachine* GetCharacterStateMachine() { return stateMachine_.get(); }
+		CharacterStateMachine* GetCharacterStateMachine();
 		// 現在の状態取得
-		CharacterMainState GetCurrentMainState() const { return stateMachine_->GetCurrentMainState(); }
+		CharacterMainState GetCurrentMainState() const;
 		// 過去のステート
-		CharacterMainState GetPrevState() const { return stateMachine_->GetPrevState();}
+		CharacterMainState GetPrevState() const;
 		// 必殺技取得
-		BaseSpecial* GetSpecial() { return special_.get(); }
+		BaseSpecial* GetSpecial();
 		// 武器取得
-		BaseWeapon* GetWeapon() { return weapon_.get(); }
+		BaseWeapon* GetWeapon();
 		// 弾の出現
-		BulletSpawn* GetBulletSpawn() { return bulletSpawn_.get(); };
+		BulletSpawn* GetBulletSpawn();
 		// コライダーコンポーネント
-		Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
+		Engine::ColliderComponent* GetColliderComponent();
 		// オブジェクト3d取得
-		ObjectComponent* GetObjectComponent() { return objectComponent_.get(); }
+		ObjectComponent* GetObjectComponent();
 		// オブジェクト3d取得
-		ObjectComponent* GetObjectComponentShadow() { return objectComponentShadow_.get(); }
+		ObjectComponent* GetObjectComponentShadow();
 		// ワールド変換取得
-		Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+		Engine::WorldTransform& GetWorldTransform();
 		// ワールド座標取得
-		Vector3 GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
+		Vector3 GetWorldPosition() const;
 	public: // 貰いもの
 		// 弾マネージャ取得
 		BulletManager* GetBulletManager() { return this->bulletManager; }
@@ -143,20 +154,18 @@ namespace Character {
 		AttackController* GetAttackController() { return attackController_.get(); }
 	protected: // 保存機能
 		// 保存生成
-		void CreateGroup(const std::string name) {
-			objectComponent_->SetName(name);
-			globalVariables->CreateGroup(name);
-		}
+		void CreateGroup(const std::string name);
 		// 保存するもの追加
 		template<typename T>
 		void AddItem(const std::string itemName, T& item) {
-			globalVariables->AddItem(objectComponent_->GetName(), itemName, item);
+			globalVariables->AddItem(GetName(), itemName, item);
 		}
 		// 値取得
 		template<typename T>
 		T GetValue(const std::string itemName) {
-			return globalVariables->GetValue<T>(objectComponent_->GetName(), itemName);
+			return globalVariables->GetValue<T>(GetName(), itemName);
 		}
+
 		// ベースの保存項目を追加
 		void InitializeBaseAddItem();
 		// 更新保存項目
@@ -194,7 +203,7 @@ namespace Character {
 		//
 		bool isMove = true;
 
-		Engine::WorldTransform worldCollider_;
+		std::unique_ptr < Engine::WorldTransform> worldCollider_= nullptr;
 	protected: // 貰いもの(アプリケーション層)
 		// エフェクト
 		EffectSystem* effect = nullptr;

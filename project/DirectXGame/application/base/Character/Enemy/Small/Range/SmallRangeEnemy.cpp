@@ -1,7 +1,9 @@
 #include "SmallRangeEnemy.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
-#include"DirectXGame/application/base/Effect/Effect.h"
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 
 namespace Character {
 	void SmallRangeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
@@ -17,7 +19,7 @@ namespace Character {
 		
 		objectComponentPropeller_ = std::make_unique<ObjectComponent>();
 		objectComponentPropeller_->InitializeInstancing(entityManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
-			false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
+			false, false, this, Engine::ObjectInstans::TransparencyType::kNo);
 		objectComponentPropeller_->SetInstancingSRT({ 1,1,1 }, {}, {});
 		objectComponentPropeller_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 
@@ -36,7 +38,7 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
-		worldCollider_.translate_.y = 0;
+		worldCollider_->translate_.y = 0;
 
 
 		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
@@ -46,9 +48,10 @@ namespace Character {
 		moveComponent_->GetMoveSystem()->Data().skyHeight = skyHeight_;
 
 		// エフェクト用のトランスフォーム初期化
-		worldEffect_.Initialize();
-		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
-		worldEffect_.translate_ = { 0,1,0 };
+		worldEffect_ = std::make_unique<Engine::WorldTransform>();
+		worldEffect_->Initialize();
+		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
+		worldEffect_->translate_ = { 0,1,0 };
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}

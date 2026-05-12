@@ -3,6 +3,7 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 namespace Combo {
 

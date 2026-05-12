@@ -9,6 +9,8 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/engine/3d/Model/ModelData.h"
 
+Engine::RenderComponent::~RenderComponent() = default;
+Engine::RenderComponent::RenderComponent() = default;
 
 void Engine::RenderComponent::Init(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType)
 {
@@ -310,7 +312,7 @@ void Engine::RenderComponent::DrawSettingOcean()
 
 #pragma region MyRegion
 
-void Engine::RenderComponent::SetModel(Model* model) { 
+void Engine::RenderComponent::SetModel(Engine::Model* model) {
 	this->model = model; 
 
 	materialInstances_.clear();
@@ -329,6 +331,21 @@ void Engine::RenderComponent::SetModel(Model* model) {
 	}
 }
 
+// スカイボックス設定
+void Engine::RenderComponent::SetSkyBox(Engine::SkyBox* skyBox) { this->skyBox = skyBox; }
+// 波セット設定
+void Engine::RenderComponent::SetOcean(Engine::Ocean* ocean) { this->ocean = ocean; }
+// プリミティブ設定
+void Engine::RenderComponent::SetPrimitive(std::unique_ptr<Engine::BasePrimitive> primitive) { this->primitive = std::move(primitive); }
+
+// モデル取得
+Engine::Model* Engine::RenderComponent::GetModel() const { return model; }
+// 波取得
+Engine::Ocean* Engine::RenderComponent::GetOcean() { return ocean; }
+// スカイボックス取得
+Engine::SkyBox* Engine::RenderComponent::GetSkyBox() { return skyBox; }
+// プリミティブ形状取得
+Engine::BasePrimitive* Engine::RenderComponent::GetPrimitive() { return primitive.get(); }
 
 #pragma endregion
 

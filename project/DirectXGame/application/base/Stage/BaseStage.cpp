@@ -2,6 +2,8 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
+
+
 void BaseStage::InitializeOcean(Engine::EntityManager* entityManager, CameraManager* cameraManager) {
 	// 海初期化
 	ocean_ = std::make_unique<Engine::Ocean>();

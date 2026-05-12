@@ -2,7 +2,9 @@
 #include <DirectXGame/engine/MyGame/MyGame.h>
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
-
+#include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 
 namespace HitBox {
 

@@ -2,6 +2,8 @@
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Attack/AttackController.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {
 	this->input = input;	// 入力データ

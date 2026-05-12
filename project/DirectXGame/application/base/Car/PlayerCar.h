@@ -1,6 +1,9 @@
 #pragma once
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "PlayerCarStateMachine.h"
+#include <DirectXGame/engine/Move/RigidBodyComponent.h>
+#include <DirectXGame/engine/Light/Lights.h>
+
 class EffectSystem;
 /// <summary>
 /// プレイヤー車

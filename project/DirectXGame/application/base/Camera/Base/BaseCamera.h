@@ -1,9 +1,15 @@
 #pragma once
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "CameraController.h"
-
+#include <DirectXGame/engine/Camera/Camera.h>
+#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 // 前方宣言
 class CameraManager;
+class InputSystem;
+
+namespace Engine {
+	class EntityManager;
+	class GlobalVariables;
+}
 
 /// <summary>
 /// カメラ基底クラス
@@ -35,7 +41,7 @@ public:
 	/// ロックオン対象を設定
 	/// </summary>
 	/// <param name="object"></param>
-	void LockOn(Engine::Object3d* object) { lockOnObject = object; };
+	void LockOn(Engine::WorldTransform* object) { target = object; };
 
 	/// <summary>
 	/// カメラ管理を設定
@@ -66,7 +72,7 @@ protected:
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	std::string name_;
 protected:
-	Engine::Object3d* lockOnObject = nullptr;		// ロックオン対象
+	Engine::WorldTransform* target = nullptr;		// ロックオン対象
 	CameraManager* cameraManeger = nullptr;	// カメラ管理
 protected:
 	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー

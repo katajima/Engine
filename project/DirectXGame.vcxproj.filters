@@ -816,9 +816,6 @@
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemyState.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Melee\LargeMeleeEnemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Receiver\ComboCondition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -880,9 +877,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Input\InputSystem.cpp">
@@ -1003,6 +997,21 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Weapon\Base\BaseWeapon.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\engine\3d\Object\ObjectInstans.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAiSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1931,9 +1940,6 @@
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemyState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Melee\LargeMeleeEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Item\Scrap\ScrapData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -2028,9 +2034,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Attack\Combo\Base\ComboDebug.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\LocomotionCoordinator.h">
@@ -2187,6 +2190,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\input\GamePad.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackRequest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAiSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

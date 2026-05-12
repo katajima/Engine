@@ -7,10 +7,6 @@
 // ダミー
 #include"DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.h"
 
-// 大
-#include"DirectXGame/application/base/Character/Enemy/Large/Melee/LargeMeleeEnemy.h"
-#include"DirectXGame/application/base/Character/Enemy/Large/Range/LargeRangeEnemy.h"
-
 // 中
 #include"DirectXGame/application/base/Character/Enemy/Medium/Melee/MediumMeleeEnemy.h"
 

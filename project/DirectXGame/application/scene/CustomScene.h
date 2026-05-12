@@ -23,6 +23,7 @@
 #include "DirectXGame/application/base/Camera/FixedCamera/SelectCamera.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Game/Select/SelectSystem.h"
+#include <DirectXGame/application/base/Input/InputSystem.h>
 
 /// <summary>
 /// セレクトシーン

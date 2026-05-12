@@ -1,33 +1,23 @@
 #pragma once
-#include <windows.h>
-#include<cstdint>
-#include<string>
-#include<fstream>
-#include<sstream>
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 #include<wrl.h>
-#include<d3d12.h>
-#include<dxgi1_6.h>
-#include<dxcapi.h>
-#include<memory>
-#include<deque> 
 using namespace Microsoft::WRL;
-#include<vector>
-#include"externals/DirectXTex/DirectXTex.h"
-#include"externals/DirectXTex/d3dx12.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
+#include"DirectXGame/engine/PSO/PSOManager.h"
+#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+#include "DirectXGame/engine/Material/Material.h"
+
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/struct/Material.h"
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
 
-#include"DirectXGame/engine/Manager/SRV/SrvManager.h"
+#include "ObjectInstans.h"
 
-#include "DirectXGame/engine/Camera/Camera.h"
-#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
-#include"DirectXGame/engine/Line/LineCommon.h"
-#include "DirectXGame/engine/Material/Material.h"
-#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
-#include"DirectXGame/engine/PSO/PSOManager.h"
-
+#include<fstream>
+#include<sstream>
+#include<vector>
+#include<string>
+#include<memory>
+#include<deque> 
+#include<memory>
 #include <thread>
 #include <mutex>
 
@@ -46,59 +36,6 @@ struct MapId {
 
 
 namespace Engine {
-	// 前方宣言
-	class RigidBodyComponent;
-	class ColliderComponent;
-	class ContactRecord;
-	class Model;
-
-	// オブジェクトのインスタスクラス
-	class ObjectInstans
-	{
-	public:
-		// 初期化
-		void Initialize(EntityManager* entity3DManager, bool useCollider = false, bool rigidUpdate = true,  Transform transform = { {1,1,1},{},{} });
-		// 更新
-		void Update();
-
-		// Object3d内でコライダーコンポーネントを更新するか
-		void SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
-
-		// コライダーコンポーネントを取得
-		ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
-		// コライダーコンポーネントの接触情報を取得
-		ContactRecord& GetContactRecord();
-		// リジットボディー取得
-		RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
-
-
-		// 削除する
-		void IsDelete() { isDelete_ = true; }
-
-		// 削除されているか取得
-		bool GetIsDelete() const { return isDelete_; }
-	private:
-		// コライダーコンポーネント
-		std::unique_ptr<ColliderComponent> colliderComponent_;
-		// コライダーコンポーネントをObject3d内で更新するかのフラグ
-		bool isColliderComponenyUpdate_ = false;
-		bool useCollider_ = false;
-		bool rigidUpdate_ = true;
-	private:
-		std::unique_ptr<RigidBodyComponent> rigidBodyComponent_ = nullptr;
-		bool isDelete_ = false;
-	public:
-		WorldTransform transform{};
-		Vector4 color = { 1,1,1,1 };
-		bool is_ = false;
-		bool isDraw_ = true;
-		uint32_t texIndex;
-		int id = -1;   // ← 固有ID（負なら未使用）
-	};
-
-	// 前方宣言
-	class EntityManager;
-
 	// オブジェクトインスタンシングクラス(大量描画用)
 	class Object3dInstansManager
 	{
@@ -125,22 +62,8 @@ namespace Engine {
 			kPrimitiv,
 			kModel,
 		};
-		// 透明度タイプ
-		enum class TransparencyType
-		{
-			kYes,
-			kNo,
-		};
 
-		// オブジェクト構造体
-		struct Object
-		{
-			WorldTransform transform;
-			Vector4 color;
-			bool is;
-			uint32_t texIndex;
 
-		};
 		// オブジェクトグループ
 		struct ObjectGroup
 		{
@@ -161,8 +84,8 @@ namespace Engine {
 		};
 
 	public:
-		Object3dInstansManager() = default;
-		~Object3dInstansManager() = default;
+		Object3dInstansManager();
+		~Object3dInstansManager();
 		Object3dInstansManager(Object3dInstansManager&) = delete;
 		Object3dInstansManager& operator=(Object3dInstansManager&) = delete;
 
@@ -185,15 +108,15 @@ namespace Engine {
 
 		// オブジェクトグループ作り(モデル)
 		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, Model* model,
-			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, TransparencyType transparencyType = TransparencyType::kNo);
+			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, ObjectInstans::TransparencyType transparencyType = ObjectInstans::TransparencyType::kNo);
 		// オブジェクトグループ作り(モデル)
 		void CreateObject3dGroup(const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
-			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, TransparencyType transparencyType = TransparencyType::kNo);
+			RasterizerType rasteType = RasterizerType::MODE_SOLID_BACK, BlendType blendType = BlendType::MODE_ADD, ObjectInstans::TransparencyType transparencyType = ObjectInstans::TransparencyType::kNo);
 
 		// カメラセット
 		void SetCamera(Camera* camera) { this->camera_ = camera; }
 		// オブジェクトの追加
-		void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object, int& id, MeshType type = MeshType::kModel, TransparencyType transparencyType = TransparencyType::kNo);
+		void AddObject(const std::string& name, const std::string& texName, ObjectInstans&& object, int& id, MeshType type = MeshType::kModel, ObjectInstans::TransparencyType transparencyType = ObjectInstans::TransparencyType::kNo);
 		// オブジェクトのグループ数取得
 		int GetSize() { return static_cast<int>(objectGroups.size()); };
 		// オブジェクトグループ名前でオブジェクトクリーン
@@ -218,15 +141,15 @@ namespace Engine {
 
 	public: //取得
 		// オブジェクトインスタンスをIDで取得
-		ObjectInstans* GetObjectById(const std::string& groupName, int id, TransparencyType transparencyType);
+		ObjectInstans* GetObjectById(const std::string& groupName, int id, ObjectInstans::TransparencyType transparencyType);
 		// 全てのオブジェクトインスタンス取得
-		std::deque<ObjectInstans>& GetObjects(const std::string& groupName, TransparencyType transparencyType);
+		std::deque<ObjectInstans>& GetObjects(const std::string& groupName, ObjectInstans::TransparencyType transparencyType);
 		// オブジェクトグループ取得
-		ObjectGroup& GetObjectGroup(const std::string& groupName, TransparencyType transparencyType);
+		ObjectGroup& GetObjectGroup(const std::string& groupName, ObjectInstans::TransparencyType transparencyType);
 
 	private:
 
-		ObjectGroup& GroupContains(const std::string& groupName, TransparencyType transparencyType, bool& isReturn);
+		ObjectGroup& GroupContains(const std::string& groupName, ObjectInstans::TransparencyType transparencyType, bool& isReturn);
 
 	private:
 		// ルートシグネチャの作成

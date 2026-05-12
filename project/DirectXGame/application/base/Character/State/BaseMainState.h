@@ -2,9 +2,7 @@
 #include<string>
 #include <memory>
 #include <functional>
-#include"DirectXGame/engine/math/MathFunctions.h"
 #include "SubStateMachine.h"
-#include "MainState.h"
 #include "DirectXGame/application/base/Character/Base/CharacterContext.h"
 
 namespace Character {

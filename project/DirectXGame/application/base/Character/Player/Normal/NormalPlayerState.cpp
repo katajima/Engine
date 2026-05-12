@@ -2,6 +2,9 @@
 #include "NormalPlayer.h"
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include <DirectXGame/application/base/Bullet/Base/BulletManager.h>
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include <DirectXGame/engine/Animation/AnimationComponent.h>
 
 namespace Character {
 #pragma region Idle

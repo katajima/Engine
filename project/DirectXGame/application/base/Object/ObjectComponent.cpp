@@ -1,6 +1,9 @@
 #include "ObjectComponent.h"  
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include <DirectXGame/engine/3d/Object/Object3dInstansManager.h>
+#include"DirectXGame/engine/Camera/Camera.h"
+#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
+#include"DirectXGame/engine/collider/3d/ColliderComponent.h"
 
 /// <summary>
 /// オブジェクトの時間取得
@@ -181,7 +184,7 @@ void ObjectComponent::Initialize(Engine::EntityManager* entityManager, Engine::G
 
 void ObjectComponent::InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
     const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider, bool useRigidBody,
-    IHitReceiver* iHitReceiver, Engine::Object3dInstansManager::TransparencyType transparencyType, bool rigidUpdate)
+    IHitReceiver* iHitReceiver, Engine::ObjectInstans::TransparencyType transparencyType, bool rigidUpdate)
 {
     this->entityManager = entityManager;   // エンティティ3d
     this->globalVariables = globalVariables;   // 保存項目

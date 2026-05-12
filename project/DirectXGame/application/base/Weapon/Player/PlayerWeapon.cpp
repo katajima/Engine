@@ -1,4 +1,5 @@
 #include "PlayerWeapon.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 void PlayerWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)

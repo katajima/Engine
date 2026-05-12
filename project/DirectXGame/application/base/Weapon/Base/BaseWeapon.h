@@ -1,12 +1,15 @@
 #pragma once
 #include "WeaponData.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
-#include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
+#include <DirectXGame/engine/Collider/ColliderData.h>
+#include <DirectXGame/engine/struct/Vector3.h>
+#include"DirectXGame/engine/collider/CollisionTypeIdDef.h"
 
-
+#include <memory>
 // 前方宣言
 class EffectSystem;
 class BulletManager;
+class ObjectComponent;
+class InputSystem;
 namespace Character {
 	class BasePlayer;
 	class BaseEnemy;
@@ -14,12 +17,23 @@ namespace Character {
 }
 namespace Engine {
 	class EntityManager;
+	class GlobalVariables;
+	class Object3d;
+	class WorldTransform;
+	class Camera;
+	class ColliderComponent;
+}
+namespace HitBox {
+	class HitBoxInstance;
 }
 
 // 武器のベースクラス
 class BaseWeapon : public IHitReceiver
 {
 public:
+	BaseWeapon();
+	virtual ~BaseWeapon();
+
 	// 初期化
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
@@ -31,25 +45,25 @@ public:
 	virtual void Draw2D() = 0;
 public:
 	// 使っているキャラクター設定
-	void SetCharacter(Character::BaseCharacter* character) {this->character = character;}
+	void SetCharacter(Character::BaseCharacter* character);
 	// タグによるコライダーの有効・無効を設定
-	void SetIsCollider(CollisionTag tag ,bool is) { GetObject3D()->GetColliderComponent()->SetEnableByTag(tag, is); };
+	void SetIsCollider(CollisionTag tag, bool is);
 	// コライダーコンポーネント
-	Engine::ColliderComponent* GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
+	Engine::ColliderComponent* GetColliderComponent();
 	// オブジェクト3d取得
-	Engine::Object3d* GetObject3D() { return objectComponent_->GetObject3D(); }
+	Engine::Object3d* GetObject3D();
 	// ワールド変換取得
-	Engine::WorldTransform& GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+	Engine::WorldTransform& GetWorldTransform();
 	// 弾管理クラス設定
-	void SetBulletManager(BulletManager* bulletManager) { this->bulletManager = bulletManager; }
+	void SetBulletManager(BulletManager* bulletManager);
 protected:
 	Character::BaseCharacter* character = nullptr;		// 使っているキャラクター
 	const Character::BaseCharacter* target = nullptr;			// ターゲット
 
 	BulletManager* bulletManager = nullptr;	// 弾管理クラス
 protected:
-	std::unique_ptr<ObjectComponent> objectComponent_;	// オブジェクトコンポーネント
-	std::unique_ptr<HitBox::HitBoxInstance> hitBox_;
+	std::unique_ptr<ObjectComponent> objectComponent_ = nullptr;	// オブジェクトコンポーネント
+	std::unique_ptr<HitBox::HitBoxInstance> hitBox_ = nullptr;
 protected:
 	Engine::EntityManager* entityManager = nullptr;	// 3Dエンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数
@@ -61,6 +75,7 @@ protected:
 class MeleeWeapon : public BaseWeapon
 {
 public:
+	virtual ~MeleeWeapon();
 	/// 初期化
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
@@ -83,6 +98,7 @@ protected:
 class RangedWeapon : public BaseWeapon
 {
 public:
+	virtual ~RangedWeapon();
 	/// 初期化
 	virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;

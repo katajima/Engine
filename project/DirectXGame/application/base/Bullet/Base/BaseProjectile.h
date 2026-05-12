@@ -1,13 +1,13 @@
 #pragma once
 #include "ProjectileData.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
-
+#include "DirectXGame/application/base/Effect/Effect.h"
 namespace Character {
 	class BaseCharacter;
 	class BaseEnemy;
 	class BasePlayer;
 }
-class EffectSystem;
+
 
 namespace Projectile {
 

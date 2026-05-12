@@ -1,12 +1,7 @@
 #pragma once
-#include<string>
+#include <string>
 #include <memory>
 #include <functional>
-#include"DirectXGame/engine/math/MathFunctions.h"
-
-
-
-
 
 namespace Character {
     // 攻撃用サブステート

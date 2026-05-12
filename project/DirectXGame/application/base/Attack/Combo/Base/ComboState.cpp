@@ -1,6 +1,9 @@
 #include "ComboState.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 namespace Combo {
 

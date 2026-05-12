@@ -1,13 +1,16 @@
 #pragma once
 #include "DirectXGame/engine/scene/AbstractSceneFactory.h"
-#include"TitleScene.h"
-#include"GamePlayScene.h"
-#include"TestScene.h"
-#include "SelectScene.h"
-#include "SampleScene.h"
-#include "ResultScene.h"
-#include "TutorialScene.h"
-#include "CharacterDebugScene.h"
+
+
+class TitleScene;
+class GamePlayScene;
+class TestScene;
+class SelectScene;
+class SampleScene;
+class ResultScene;
+class TutorialScene;
+class CharacterDebugScene;
+class BaseScene;
 
 // このゲーム用のシーン工場
 class SceneFactory : public Engine::AbstractSceneFactory

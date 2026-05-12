@@ -8,17 +8,20 @@
 #include<vector>
 #include<format>
 #include<variant>
+
+#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
+
 #include"DirectXGame/engine/struct/Structs3D.h"
 #include"DirectXGame/engine/math/MathFunctions.h"
-#include"DirectXGame/engine/DirectX/Common/DirectXCommon.h"
-#include"DirectXGame/engine/Camera/Camera.h"
+
 
 #include"DirectXGame/engine/Mesh/ModelMesh.h"
 #include"DirectXGame/engine/Material/Material.h"
 #include "DirectXGame/engine/Transform/Transfomation/Transfomation.h"
 #include "DirectXGame/engine/Animation/UV/UVAnimationComponent.h"
 
-#include "DirectXGame/engine/collider/3d/Collider.h"
+
+
 #include "ShapeParameter.h"
 
 
@@ -26,7 +29,7 @@
 namespace Engine {
 	// 前方宣言
 	class PrimitiveCommon;
-
+	class Camera;
 	/// <summary>
 	/// プリミティブ基底クラス
 	/// </summary>

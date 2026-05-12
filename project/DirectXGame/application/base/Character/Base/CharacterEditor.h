@@ -1,6 +1,11 @@
 #pragma once
-#include "CharacterGlobalData.h"
 #include "map"
+#include "vector"
+#include <string>
+
+
+#include "CharacterGlobalData.h"
+
 
 namespace Engine {
 	class GlobalVariables;

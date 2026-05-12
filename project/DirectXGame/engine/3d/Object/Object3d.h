@@ -1,18 +1,8 @@
 #pragma once
 #include"DirectXGame/engine/struct/Light.h"
-
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
-#include "DirectXGame/engine/SkyBox/SkyBox.h"
-#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
-#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
-#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
-using namespace Microsoft::WRL;
-
-#include "DirectXGame/engine/Animation/AnimationComponent.h"
-#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
-#include "DirectXGame/engine/Transform/TransformComponent.h"
-#include "DirectXGame/engine/Move/RigidBodyComponent.h"
 #include "DirectXGame/engine/3d/Model/RenderComponent.h"
+#include <DirectXGame/engine/Collider/ColliderData.h>
 #include <future>
 
 // 前方宣言
@@ -22,16 +12,32 @@ namespace Engine {
 	class Object3dCommon;
 	class SkinningConmmon;
 	class ImGuiManager;
-	class SkyBox;
 	class SkyBoxCommon;
 	class OceanManager;
-	
+	class RigidBodyComponent;
+	class AnimationComponent;
+	class ColliderComponent;
+	class ContactRecord;
+	class PrimitiveCommon;
+	class EffectManager;
+	class TransformComponent;
+	class RenderComponent;
+
+	class TrailEffect;
+	class Camera;
+	class Ocean;
+	class SkyBox;
+	class BasePrimitive;
+
 	/// <summary>
 	/// オブジェクトクラス
 	/// </summary>
 	class Object3d
 	{
 	public:
+		Object3d();
+		~Object3d();
+
 		// 初期化
 		void Initialize(EntityManager* entity3DManager, ObjectModelType objectType = ObjectModelType::kNormal, PSOType rasterizerType = PSOType::NoUvInterpolation_MODE_SOLID_BACK);
 		// 更新
@@ -65,48 +71,48 @@ namespace Engine {
 		// モデル設定(モデル名での)
 		void SetModel(const std::string& filePath);
 		// カメラ設定
-		void SetCamera(Camera* camera) { this->individualCamera = camera; }
+		void SetCamera(Camera* camera);
 		// 名前設定
-		void SetName(const std::string& name) { this->name = name; }
+		void SetName(const std::string& name);
 		// タグ設定
-		void SetNameTag(const std::string& name) { nameTag = name; }
+		void SetNameTag(const std::string& name);
 		// プリミティブ形状
-		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive){renderComponent_->SetPrimitive(std::move(primitive));};
+		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive);
 		// スカイボックス
-		void SetSkyBox(SkyBox* skyBox) {renderComponent_->SetSkyBox(skyBox);}
+		void SetSkyBox(SkyBox* skyBox);
 		// 波セット
-		void SetOcean(Ocean* ocean) {renderComponent_->SetOcean(ocean);}
+		void SetOcean(Ocean* ocean);
 		// オブジェクト固有に映すカメラを使用するか設定
-		void SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera; }
+		void SetIsIndividualCamera(bool isIndividualCamera);
 		// メッシュ取得
-		ModelMesh* GetMesh(int index) { return renderComponent_->GetModel()->GetModelData().mesh[index].get(); }
+		ModelMesh* GetMesh(int index);
 		// マテリアル取得
-		Material* GetMaterial(int index) { return renderComponent_->GetModel()->GetModelData().mesh[index]->material.get(); }
+		Material* GetMaterial(int index);
 		// モデル取得
-		Model* GetModel() const { return renderComponent_->GetModel(); }
+		Model* GetModel() const;
 		// プリミティブ取得
-		BasePrimitive* GetPrimitive() const { return renderComponent_->GetPrimitive(); };
+		BasePrimitive* GetPrimitive() const;
 		// 波取得
-		Ocean* GetOcean() const { return renderComponent_->GetOcean(); }
+		Ocean* GetOcean() const;
 		// スカイボックス取得
-		SkyBox* GetSkyBox() const { return renderComponent_->GetSkyBox(); }
+		SkyBox* GetSkyBox() const;
 		// マテリアルインスタンス取得
-		std::vector<MaterialInstance>& GetMaterialInstance() { return renderComponent_->GetMaterialInstance(); }
+		std::vector<MaterialInstance>& GetMaterialInstance();
 
 		// タグ取得
-		std::string GetNameTag() const { return nameTag; }
+		std::string GetNameTag() const;
 		// 描画するか設定
-		void SetIsDraw(bool is) { renderComponent_->SetIsDraw(is); }
+		void SetIsDraw(bool is);
 		// モデルのデバッグ用ImGui
 		void DebugImguiModel();
 		// スキンモデルのデバッグ用
 		void DebugImguiSkin();
 		// 削除する
-		void IsDelete() { isDelete = true; }
+		void IsDelete();
 		// 削除されているか取得
-		bool GetIsDelete() const { return isDelete; }
+		bool GetIsDelete() const;
 		// オブジェクトに使われているモデルの透明度取得
-		float GetAlpha() { return renderComponent_->GetAlpha(); };
+		float GetAlpha();
 
 	private:
 		// カメラ
@@ -164,28 +170,24 @@ namespace Engine {
 		// コライダーコンポーネントを初期化
 		void InitColliderComponent();
 		// Object3d内でコライダーコンポーネントを更新するか
-		void SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
+		void SetIsUpdateColliderComponent(bool is);
 		// コライダーコンポーネントを取得
-		ColliderComponent* GetColliderComponent() { return colliderComponent_.get(); };
+		ColliderComponent* GetColliderComponent();
 		// コライダーコンポーネントの接触情報を取得
-		ContactRecord& GetContactRecord() { return colliderComponent_->contactRecord_; };
-
-		/// <summary>
-		///  トランスフォーム
-		/// </summary>
+		ContactRecord& GetContactRecord();
 
 		// トランスフォームコンポーネント
-		TransformComponent* GetTransformComponent() { return transformComponent_.get(); }
+		TransformComponent* GetTransformComponent();
 		// ワールド座標
-		Vector3 GetWorldPosition() const { return transformComponent_->GetWorldPosition(); };
+		Vector3 GetWorldPosition() const;
 		// １フレーム前のワールド座標
-		Vector3 GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition(); };
+		Vector3 GetPreWorldPosition() const;
 		// ワールド座標
-		WorldTransform& GetWorldTransform() { return transformComponent_->GetWorldTransform(); }
+		WorldTransform& GetWorldTransform();
 		// 座標更新
-		void UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
+		void UpdateWorldTransform();
 		// 向いている方向
-		Vector3 ObjectDirection() const { return direction_; }
+		Vector3 ObjectDirection() const;
 		// スクリーン位置取得
 		Vector2 GetScreenPosition();
 
@@ -194,13 +196,11 @@ namespace Engine {
 		/// </summary>
 
 		// 初期化
-		void InitRigidBodyComponent() {
-			rigidBodyComponent_ = std::make_unique<RigidBodyComponent>();
-		}
+		void InitRigidBodyComponent();
 		// 物理取得
-		RigidBodyComponent* GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
+		RigidBodyComponent* GetRigidBodyComponent();
 		//
-		void SetIsRigidUpdate(bool isRigidUpdate) { isRigidUpdate_ = isRigidUpdate; };
+		void SetIsRigidUpdate(bool isRigidUpdate);
 
 		/// <summary>
 		/// アニメーション
@@ -208,20 +208,16 @@ namespace Engine {
 
 		// アニメーションコンポーネント初期化
 
-		void InitAnimationComponent() {
-			animationComponent_ = std::make_unique<AnimationComponent>();
-			animationComponent_->Init(lineCommon);
-			animationComponent_->SetModel(renderComponent_->GetModel());
-		}
+		void InitAnimationComponent();
 		// アニメーションコンポーネント取得
-		AnimationComponent* GetAnimationComponent() { return animationComponent_.get(); }
+		AnimationComponent* GetAnimationComponent();
 
 		/// <summary>
 		/// 描画
 		/// </summary>
 		/// <returns></returns>
 		// レンダーコンポーネント取得
-		RenderComponent* GetRenderComponent() { return renderComponent_.get(); }
+		RenderComponent* GetRenderComponent();
 
 	public:
 		//
@@ -245,7 +241,7 @@ namespace Engine {
 		Object3dCommon*		object3dCommon = nullptr;
 		SkinningConmmon*	skinningConmmon = nullptr;
 		ImGuiManager*		imGuiManager = nullptr;
-		EntityManager*	entityManager	= nullptr;
+		EntityManager*		entityManager = nullptr;
 		LineCommon*			lineCommon = nullptr;
 		SkyBoxCommon*		skyBoxCommon = nullptr;
 		OceanManager *		oceanManager = nullptr;

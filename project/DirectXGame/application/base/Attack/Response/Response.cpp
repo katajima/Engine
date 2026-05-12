@@ -1,7 +1,8 @@
 #include "Response.h"
 #include <DirectXGame/application/base/Object/ObjectComponent.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
-
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
 
 #pragma region HitResponse
 

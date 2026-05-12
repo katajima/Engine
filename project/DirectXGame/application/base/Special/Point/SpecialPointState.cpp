@@ -1,6 +1,6 @@
 #include "SpecialPointState.h"
-
 #include "SpecialPoint.h"
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
 
 #pragma region Pop
 

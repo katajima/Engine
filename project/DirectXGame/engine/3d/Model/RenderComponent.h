@@ -36,6 +36,8 @@ namespace Engine {
 	class RenderComponent
 	{
 	public:
+		~RenderComponent();
+		RenderComponent();
 
 		/// <summary>
 		/// 初期化
@@ -59,23 +61,23 @@ namespace Engine {
 		// モデル設定
 		void SetModel(Model* model);
 		// スカイボックス設定
-		void SetSkyBox(SkyBox* skyBox) { this->skyBox = skyBox; }
+		void SetSkyBox(SkyBox* skyBox);
 		// 波セット設定
-		void SetOcean(Ocean* ocean) { this->ocean = ocean; }
+		void SetOcean(Ocean* ocean);
 		// プリミティブ設定
-		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive) { this->primitive = std::move(primitive); }
+		void SetPrimitive(std::unique_ptr<BasePrimitive> primitive);
 
 		
 
 	public:
 		// モデル取得
-		Model* GetModel() const { return model; }
+		Model* GetModel() const;
 		// 波取得
-		Ocean* GetOcean() { return ocean; }
+		Ocean* GetOcean();
 		// スカイボックス取得
-		SkyBox* GetSkyBox() { return skyBox; }
+		SkyBox* GetSkyBox();
 		// プリミティブ形状取得
-		BasePrimitive* GetPrimitive() { return primitive.get(); }
+		BasePrimitive* GetPrimitive();
 	public:
 		// 何かしらの見た目があるか
 		bool GetIsSkin() const { return isSkin_; }

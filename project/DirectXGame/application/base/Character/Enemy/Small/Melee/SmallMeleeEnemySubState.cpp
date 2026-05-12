@@ -1,9 +1,10 @@
 #include "SmallMeleeEnemySubState.h"
 #include "SmallMeleeEnemy.h"
-#include "DirectXGame/engine/MyGame/MyGame.h"
-
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-
+#include <DirectXGame/application/base/Attack/HitBox/HitBoxSystem.h>
 namespace Character {
 	void SmallMeleeAttackReadySubState::Enter() {
 		timer_ = 0.0f;

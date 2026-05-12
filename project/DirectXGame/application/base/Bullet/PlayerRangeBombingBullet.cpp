@@ -7,6 +7,9 @@
 #include "DirectXGame/engine/math/random.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include <DirectXGame/application/base/Attack/AttackController.h>
+#include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 
 PlayerRangeBombingBullet::~PlayerRangeBombingBullet()
 {

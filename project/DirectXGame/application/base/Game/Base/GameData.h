@@ -1,6 +1,4 @@
 #pragma once
-#include <DirectXGame/engine/struct/Structs3D.h>
-
 
 namespace Game {
 	// プレイヤーのデータ

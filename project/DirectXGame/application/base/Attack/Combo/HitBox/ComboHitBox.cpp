@@ -1,5 +1,6 @@
 #include "ComboHitBox.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 
 namespace Combo {
 #pragma region ComboHitBox

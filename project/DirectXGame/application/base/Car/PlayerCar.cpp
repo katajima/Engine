@@ -48,7 +48,7 @@ void PlayerCar::Initialize(Engine::EntityManager* entityManager, Engine::GlobalV
 	objectComponentShadow_ = std::make_unique<ObjectComponent>();
 	// オブジェクトインスタンシング初期化
 	objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, "PlayerBase2", "plane.obj", "resources/Texture/smoke/no4.dds",
-		false, false, nullptr, Engine::Object3dInstansManager::TransparencyType::kYes);
+		false, false, nullptr, Engine::ObjectInstans::TransparencyType::kYes);
 
 	objectComponentShadow_->SetInstancingSRT({ 5.0f,5.0f,5.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.1f,0.0f });
 	objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効

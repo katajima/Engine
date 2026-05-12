@@ -4,7 +4,8 @@
 #include "DirectXGame/application/base/Weapon/Player/PlayerSubWeapon.h"
 #include "DirectXGame/application/base/Special/RangeBombingSpecial.h"
 #include "NormalPlayerState.h"
-
+#include <DirectXGame/application/base/Attack/Input/AttackInputHandler.h>
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 
 namespace Character {
 
@@ -43,13 +44,13 @@ namespace Character {
 		void Jump() override;
 
 		// 攻撃(弱攻撃)
-		void Attack() override { RequestAttack(ActionInput::LightAttack); };
+		void Attack() override;
 
 		/// 攻撃(強攻撃)
-		void HeavyAttack() override { RequestAttack(ActionInput::HeavyAttack); };
+		void HeavyAttack() override;
 
 		// 攻撃(スキル)
-		void SkillAttack() override { RequestAttack(ActionInput::Skill); };
+		void SkillAttack() override;
 
 		// リロード
 		void Reload() override;

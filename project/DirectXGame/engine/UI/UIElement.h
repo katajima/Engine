@@ -1,7 +1,8 @@
 #pragma once
 #include "BaseSprite.h"
 #include "UIData.h"
-#include "DirectXGame/application/base/Input/InputSystem.h"
+
+class InputSystem;
 
 namespace Engine {
 	// 前方宣言

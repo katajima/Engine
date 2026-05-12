@@ -1,4 +1,6 @@
 #include "SmallMeleeWeapon.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
 
 void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
@@ -9,7 +11,7 @@ void SmallMeleeWeapon::Initialize(InputSystem* inputSystem, Engine::EntityManage
 	// オブジェクトコンポーネント追加
 	objectComponent_ = std::make_unique<ObjectComponent>();
 	objectComponent_->InitializeInstancing(entityManager, globalVariables, "enemyWeaponSG01", "enemyWeaponSG01.obj", "", 
-		false, false, this, Engine::Object3dInstansManager::TransparencyType::kNo);
+		false, false, this, Engine::ObjectInstans::TransparencyType::kNo);
 	objectComponent_->SetInstancingSRT({1,1,1}, {}, position);	// SRT設定
 	objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 

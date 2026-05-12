@@ -10,6 +10,13 @@
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/TitleCamera.h"
 #include "DirectXGame/application/base/Weapon/Player/PlayerWeapon.h"
+
+
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
+#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
+
 /// <summary>
 /// タイトルシーン
 /// </summary>

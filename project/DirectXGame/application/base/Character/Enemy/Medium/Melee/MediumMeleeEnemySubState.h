@@ -1,6 +1,6 @@
 #pragma once
 #include <DirectXGame/application/base/Character/State/SubStateMachine.h>
-
+#include <DirectXGame/engine/struct/Vector3.h>
 
 namespace Character {
     template<class SubStateEnum, class BaseSubStateType>

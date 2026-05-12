@@ -1,12 +1,19 @@
 #include "Object3dInstansManager.h"
-
-#include"DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include <DirectXGame/engine/Collider/3d/ColliderComponent.h>
-#include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include "DirectXGame/engine/Camera/Camera.h"
 #include "DirectXGame/engine/3d/Model/Model.h"
+#include"DirectXGame/engine/3d/Object/Object3dCommon.h"
+#include"DirectXGame/engine/Line/LineCommon.h"
+
+#include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+
 
 #pragma region Object3dInstansManager
+
+Engine::Object3dInstansManager::Object3dInstansManager() = default;
+Engine::Object3dInstansManager::~Object3dInstansManager() = default;
+
 
 void Engine::Object3dInstansManager::Initialize(DirectXCommon* dxCommon) {
 	this->dxCommon = dxCommon;						// DX共通クラス
@@ -267,7 +274,7 @@ void Engine::Object3dInstansManager::Clear(const std::string& name) {
 
 void Engine::Object3dInstansManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, Model* model,
-	RasterizerType    rasteType, BlendType    blendType, TransparencyType transparencyType) {
+	RasterizerType    rasteType, BlendType    blendType, ObjectInstans::TransparencyType transparencyType) {
 
 	bool isReturn = false;
 
@@ -320,7 +327,7 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 
 void Engine::Object3dInstansManager::CreateObject3dGroup(
 	const std::string& name, const std::string& textureFilePath, ModelMesh* mesh,
-	RasterizerType    rasteType, BlendType    blendType, TransparencyType transparencyType) {
+	RasterizerType    rasteType, BlendType    blendType, ObjectInstans::TransparencyType transparencyType) {
 	
 
 	bool isReturn = false;
@@ -374,7 +381,7 @@ void Engine::Object3dInstansManager::CreateObject3dGroup(
 
 void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	const std::string& texName,
-	ObjectInstans&& object, int& id, MeshType type, TransparencyType transparencyType) {
+	ObjectInstans&& object, int& id, MeshType type, ObjectInstans::TransparencyType transparencyType) {
 
 	if (MeshType::kModel == type) {
 		CreateObject3dGroup(name, texName, modelManager->FindModel(name),RasterizerType::MODE_SOLID_BACK,BlendType::MODE_ADD, transparencyType);
@@ -385,7 +392,7 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	object.isDraw_ = true;
 
 	if (texName.empty()) {
-		if (transparencyType == TransparencyType::kNo) {
+		if (transparencyType == ObjectInstans::TransparencyType::kNo) {
 			object.texIndex = objectGroups[name].model->GetModelData().mesh[0]->material->tex_.diffuseIndex;
 		}
 		else {
@@ -400,7 +407,7 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	int objectId = object.id;
 
 	// ✅ 完全に右辺値としてムーブされる
-	if (transparencyType == TransparencyType::kNo) {
+	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
 		objectGroups[name].object.emplace_back(std::move(object));
 	}
 	else {
@@ -408,7 +415,7 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 	}
 
 
-	if (transparencyType == TransparencyType::kNo) {
+	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
 		// 追加した要素のインデックスを取得
 		size_t index = objectGroups[name].object.size() - 1;
 		// ID → インデックスで登録
@@ -437,8 +444,8 @@ void Engine::Object3dInstansManager::AddObject(const std::string& name,
 
 
 Engine::ObjectInstans* Engine::Object3dInstansManager::GetObjectById(
-	const std::string& groupName, int id, TransparencyType transparencyType) {
-	if (transparencyType == TransparencyType::kNo) {
+	const std::string& groupName, int id, ObjectInstans::TransparencyType transparencyType) {
+	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
 		auto itGroup = objectGroups.find(groupName);
 		if (itGroup == objectGroups.end()) {
 			std::terminate(); // 即座にプログラム停止
@@ -484,9 +491,9 @@ Engine::ObjectInstans* Engine::Object3dInstansManager::GetObjectById(
 	}
 }
 
-std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(const std::string& groupName, TransparencyType transparencyType)
+std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(const std::string& groupName, ObjectInstans::TransparencyType transparencyType)
 {
-	if (transparencyType == TransparencyType::kNo) {
+	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
 		auto itGroup = objectGroups.find(groupName);
 		if (itGroup == objectGroups.end()) {
 			static std::deque<ObjectInstans> empty; // 空のベクタを static で用意
@@ -504,9 +511,9 @@ std::deque<Engine::ObjectInstans>& Engine::Object3dInstansManager::GetObjects(co
 	}
 }
 
-Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GetObjectGroup(const std::string& groupName, TransparencyType transparencyType)
+Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GetObjectGroup(const std::string& groupName, ObjectInstans::TransparencyType transparencyType)
 {
-	if (transparencyType == TransparencyType::kNo) {
+	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
 		auto itGroup = objectGroups.find(groupName);
 		if (itGroup == objectGroups.end()){
 			throw std::runtime_error("Object group not found: " + groupName);
@@ -523,9 +530,9 @@ Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::Get
 }
 
 
-Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GroupContains(const std::string& groupName, TransparencyType transparencyType, bool& isReturn)
+Engine::Object3dInstansManager::ObjectGroup& Engine::Object3dInstansManager::GroupContains(const std::string& groupName, ObjectInstans::TransparencyType transparencyType, bool& isReturn)
 {
-	if (transparencyType == TransparencyType::kNo) {
+	if (transparencyType == ObjectInstans::TransparencyType::kNo) {
 		if (objectGroups.contains(groupName)) {
 			isReturn = true;
 			return objectGroups[groupName];
@@ -707,56 +714,3 @@ void Engine::Object3dInstansManager::BlendMuliply() {
 #pragma endregion // ブレンド
 
 #pragma endregion // パイプライン関係
-
-
-#pragma region ObjectInstans
-
-void Engine::ObjectInstans::Initialize(EntityManager* entity3DManager, bool useCollider, bool rigidUpdate, Transform transfor) {
-	transform.Initialize();
-	transform.translate_ = transfor.translate;
-	transform.rotate_ = transfor.rotate;
-	transform.scale_ = transfor.scale;
-	color = { 1,1,1,1 };
-	useCollider_ = useCollider;
-	rigidUpdate_ = rigidUpdate;
-	isDelete_ = false;
-	is_ = false;
-
-	if (useCollider_) {
-		colliderComponent_ = std::make_unique<ColliderComponent>();
-		colliderComponent_->SetOwner(colliderComponent_.get());
-		// ラインコモンをセット
-		colliderComponent_->SetLineCommon(entity3DManager->Get3DLineCommon());
-		// 登録（IDを取得したければ変数で受ける）
-		colliderComponent_->SetUniqueId(UniqueIdGenerator::Generate());
-		isColliderComponenyUpdate_ = true;
-	}
-
-	rigidBodyComponent_ = std::make_unique<RigidBodyComponent>();
-
-}
-
-void Engine::ObjectInstans::Update() {
-	if (isDelete_) return;
-	transform.Update();
-	// コライダー
-	if (GetColliderComponent()) {
-		if (isColliderComponenyUpdate_) {
-			colliderComponent_->UpdateAll(transform);
-		}
-	}
-
-	// 物理
-	if (GetRigidBodyComponent() && rigidUpdate_) {
-		rigidBodyComponent_->Integrate(MyGame::GameTime(), transform);
-	}
-}
-
-
-Engine::ContactRecord& Engine::ObjectInstans::GetContactRecord() { return colliderComponent_->contactRecord_; };
-
-
-
-#pragma endregion
-
-

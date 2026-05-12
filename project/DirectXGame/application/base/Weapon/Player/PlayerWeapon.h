@@ -1,6 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-
+#include <DirectXGame/engine/Color/Color.h>
 /// <summary>
 ///  プレイヤー武器クラス
 /// </summary>

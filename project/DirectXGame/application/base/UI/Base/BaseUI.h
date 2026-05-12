@@ -1,9 +1,10 @@
 #pragma once
 #include "DirectXGame/engine/UI/UIBoard.h"
 
-#include "DirectXGame/application/base/Input/InputSystem.h"
+
 
 // 前方宣言
+class InputSystem;
 namespace Engine {
 	class EntityManager;
 	class GlobalVariables;

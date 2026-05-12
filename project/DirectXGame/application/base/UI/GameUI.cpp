@@ -4,6 +4,7 @@
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include <DirectXGame/application/base/Attack/AttackController.h>
 
 void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables)
 {

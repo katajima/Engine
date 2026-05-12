@@ -1,11 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-
-
-
 #include "DirectXGame/application/base/UI/PlayerUI.h"
-#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-#include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
+
 
 // 前方宣言
 
@@ -13,12 +9,8 @@ namespace Combo {
 	class Editor;
 }
 
-
-
-
 //前方宣言
 class FollowCamera;
-
 
 namespace Character {
 
@@ -27,9 +19,10 @@ namespace Character {
 	/// <summary>
 	/// プレイヤクラス
 	/// </summary>
-	class BasePlayer : public BaseCharacter
-	{
+	class BasePlayer : public BaseCharacter {
 	public:
+		virtual ~BasePlayer();
+
 		// 初期化
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
@@ -73,9 +66,9 @@ namespace Character {
 		virtual PlayerUI* GetPlayerUI() = 0;
 
 		// SPゲージ加算
-		void AddSpGauge(int d) { special_->AddGauge(d); };
+		void AddSpGauge(int d);
 		// SP発動可能？
-		bool GetIsSpecial() const { return special_->GetIsSpecial(); }
+		bool GetIsSpecial() const;
 	protected:
 		std::vector<const BaseCharacter*> targetCharacters;			// 攻撃対象キャラクターリスト
 		FollowCamera* followCamera = nullptr;					// フォローカメラ

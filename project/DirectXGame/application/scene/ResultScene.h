@@ -23,7 +23,7 @@
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 #include "DirectXGame/application/base/Camera/FixedCamera/ResultCamera.h"
 #include "DirectXGame/application/base/Game/Result/ResultSystem.h"
-
+#include <DirectXGame/application/base/Input/InputSystem.h>
 class ResultScene : public Engine::BaseScene {
 public:
 

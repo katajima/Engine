@@ -7,12 +7,13 @@
 #include "DirectXGame/application/base/Stage/StageColliderSystem.h"
 #include "DirectXGame/engine/Math/Random.h"
 
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
+#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
+#include <DirectXGame/engine/Effect/Primitive/Primitive.h>
 
 namespace Engine {
 	class EntityManager;
 	class Object3d;
-	class SkyBox;
-	class Ocean;
 	class Camera;
 }
 

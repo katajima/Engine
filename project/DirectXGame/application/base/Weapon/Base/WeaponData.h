@@ -1,5 +1,4 @@
 #pragma once
-#include "DirectXGame/application/base/Attack/AttackData.h"
 
 enum class WeaonType
 {

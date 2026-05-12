@@ -1,4 +1,5 @@
 #include "CameraRotation.h"
+#include <DirectXGame/application/base/Input/InputSystem.h>
 
 void CameraRotation::Initialize() {
     // 初期角度をリセット（必要なら外部から設定してもOK）

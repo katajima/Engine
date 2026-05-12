@@ -3,6 +3,7 @@
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 
 #pragma region HitMotion
 

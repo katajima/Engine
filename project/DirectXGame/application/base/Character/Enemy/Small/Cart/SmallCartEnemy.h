@@ -1,7 +1,6 @@
 #pragma once
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include"SmallCartEnemyState.h"
-#include "DirectXGame/application/base/Weapon/Enemy/SmallMeleeWeapon.h"
 
 namespace Character {
 

@@ -2,7 +2,8 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Base/Characters.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
-
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
+#include <DirectXGame/engine/Math/Random.h>
 
 namespace Character {
 	void CharacterManager::Initialize(InputSystem* inputSystem, HitBox::System* hitBoxSystem, Engine::EntityManager* entityManager,

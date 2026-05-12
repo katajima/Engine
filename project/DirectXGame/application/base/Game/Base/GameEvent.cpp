@@ -1,6 +1,7 @@
 #include "GameEvent.h"
 #include <DirectXGame/application/base/Character/Spawn/CharacterSpawnManager.h>
 #include <DirectXGame/application/base/Character/Base/CharacterManeger.h>
+#include <DirectXGame/application/base/Input/InputSystem.h>
 
 #pragma region GameEventState
 

@@ -2,7 +2,8 @@
 #include "DirectXGame/engine/MyGame/MyGame.h"
 #include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
-
+#include <DirectXGame/engine/Manager/Entity/EntityManager.h>
+#include "DirectXGame/engine/3d/Model/RenderComponent.h"
 BaseBullet::~BaseBullet() {
 	// オブジェクトを削除
 }

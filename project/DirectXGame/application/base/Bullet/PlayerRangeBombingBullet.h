@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXGame/application/base/Bullet/Base/BaseBullet.h"
+#include <DirectXGame/engine/Effect/EffectComponent.h>
 
 /// <summary>
 /// 範囲攻撃用弾クラス

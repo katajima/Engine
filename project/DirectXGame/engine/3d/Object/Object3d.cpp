@@ -10,12 +10,21 @@
 #include"DirectXGame/engine/Animation/Animation.h"
 #include"DirectXGame/engine/Light/LightCommon.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
+#include "DirectXGame/engine/Move/RigidBodyComponent.h"
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
+#include "DirectXGame/engine/collider/3d/ColliderComponent.h"
+#include "DirectXGame/engine/Transform/TransformComponent.h"
+
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
 #include "DirectXGame/engine/Effect/Ocean/Ocean.h"
-
-
-
+#include "DirectXGame/engine/Effect/Trail/TrailEffect.h"
 
 #pragma region Init
+
+Engine::Object3d::Object3d() = default;
+
+Engine::Object3d::~Object3d() = default;
 
 void Engine::Object3d::Initialize(EntityManager* entityManager, ObjectModelType objectType, PSOType rasterizerType)
 {
@@ -79,6 +88,17 @@ void Engine::Object3d::UseTrailEffect(const std::string tex, float maxTime, Colo
 	trailEffect_->Initialize(entityManager->GetEffectManager(), tex, maxTime, color);
 	trailEffect_->SetCamera(defaltCamera);
 	trailEffect_->SetOffset(offsetStr, offsetEnd, transformComponent_->GetWorldTransform());
+}
+
+void Engine::Object3d::InitAnimationComponent() {
+	animationComponent_ = std::make_unique<AnimationComponent>();
+	animationComponent_->Init(lineCommon);
+	animationComponent_->SetModel(renderComponent_->GetModel());
+}
+
+// 初期化
+void  Engine::Object3d::InitRigidBodyComponent() {
+	rigidBodyComponent_ = std::make_unique<RigidBodyComponent>();
 }
 
 #pragma endregion // 初期化系
@@ -219,6 +239,80 @@ void Engine::Object3d::DebugImguiSkin()
 #pragma endregion // 描画系
 
 #pragma region Other
+
+// アニメーションコンポーネント取得
+Engine::AnimationComponent* Engine::Object3d::GetAnimationComponent() { return animationComponent_.get(); }
+
+/// <summary>
+/// 描画
+/// </summary>
+/// <returns></returns>
+// レンダーコンポーネント取得
+Engine::RenderComponent* Engine::Object3d::GetRenderComponent() { return renderComponent_.get(); }
+
+// 物理取得
+Engine::RigidBodyComponent* Engine::Object3d::GetRigidBodyComponent() { return rigidBodyComponent_.get(); };
+//
+void  Engine::Object3d::SetIsRigidUpdate(bool isRigidUpdate) { isRigidUpdate_ = isRigidUpdate; };
+
+// カメラ設定
+void  Engine::Object3d::SetCamera(Camera* camera) { this->individualCamera = camera; }
+// 名前設定
+void  Engine::Object3d::SetName(const std::string& name) { this->name = name; }
+// タグ設定
+void  Engine::Object3d::SetNameTag(const std::string& name) { nameTag = name; }
+// プリミティブ形状
+void  Engine::Object3d::SetPrimitive(std::unique_ptr< Engine::BasePrimitive> primitive) { renderComponent_->SetPrimitive(std::move(primitive)); };
+// スカイボックス
+void  Engine::Object3d::SetSkyBox(Engine::SkyBox* skyBox) { renderComponent_->SetSkyBox(skyBox); }
+// 波セット
+void  Engine::Object3d::SetOcean(Engine::Ocean* ocean) { renderComponent_->SetOcean(ocean); }
+// オブジェクト固有に映すカメラを使用するか設定
+void  Engine::Object3d::SetIsIndividualCamera(bool isIndividualCamera) { isIndividualCamera_ = isIndividualCamera; }
+// メッシュ取得
+Engine::ModelMesh* Engine::Object3d::GetMesh(int index) { return renderComponent_->GetModel()->GetModelData().mesh[index].get(); }
+// マテリアル取得
+Engine::Material* Engine::Object3d::GetMaterial(int index) { return renderComponent_->GetModel()->GetModelData().mesh[index]->material.get(); }
+// モデル取得
+Engine::Model* Engine::Object3d::GetModel() const { return renderComponent_->GetModel(); }
+// プリミティブ取得
+Engine::BasePrimitive* Engine::Object3d::GetPrimitive() const { return renderComponent_->GetPrimitive(); };
+// 波取得
+Engine::Ocean* Engine::Object3d::GetOcean() const { return renderComponent_->GetOcean(); }
+// スカイボックス取得
+Engine::SkyBox* Engine::Object3d::GetSkyBox() const { return renderComponent_->GetSkyBox(); }
+// マテリアルインスタンス取得
+std::vector<MaterialInstance>& Engine::Object3d::GetMaterialInstance() { return renderComponent_->GetMaterialInstance(); }
+// タグ取得
+std::string  Engine::Object3d::GetNameTag() const { return nameTag; }
+// 描画するか設定
+void  Engine::Object3d::SetIsDraw(bool is) { renderComponent_->SetIsDraw(is); }
+// 削除する
+void Engine::Object3d::IsDelete() { isDelete = true; }
+// 削除されているか取得
+bool Engine::Object3d::GetIsDelete() const { return isDelete; }
+// オブジェクトに使われているモデルの透明度取得
+float Engine::Object3d::GetAlpha() { return renderComponent_->GetAlpha(); };
+
+// Object3d内でコライダーコンポーネントを更新するか
+void Engine::Object3d::SetIsUpdateColliderComponent(bool is) { isColliderComponenyUpdate_ = is; };
+// コライダーコンポーネントを取得
+Engine::ColliderComponent* Engine::Object3d::GetColliderComponent() { return colliderComponent_.get(); };
+// コライダーコンポーネントの接触情報を取得
+Engine::ContactRecord& Engine::Object3d::GetContactRecord() { return colliderComponent_->contactRecord_; };
+
+// トランスフォームコンポーネント
+Engine::TransformComponent* Engine::Object3d::GetTransformComponent() { return transformComponent_.get(); }
+// ワールド座標
+Vector3 Engine::Object3d::GetWorldPosition() const { return transformComponent_->GetWorldPosition(); };
+// １フレーム前のワールド座標
+Vector3 Engine::Object3d::GetPreWorldPosition() const { return transformComponent_->GetPreWorldPosition(); };
+// ワールド座標
+Engine::WorldTransform& Engine::Object3d::GetWorldTransform() { return transformComponent_->GetWorldTransform(); }
+// 座標更新
+void Engine::Object3d::UpdateWorldTransform() { transformComponent_->GetWorldTransform().Update(); }
+// 向いている方向
+Vector3 Engine::Object3d::ObjectDirection() const { return direction_; }
 
 Vector2 Engine::Object3d::GetScreenPosition()
 {

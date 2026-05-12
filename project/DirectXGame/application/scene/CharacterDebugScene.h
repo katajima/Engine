@@ -11,6 +11,8 @@
 #include"DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/UniverseCamera/UniverseCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
+#include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
+#include <DirectXGame/application/base/Attack/AttackController.h>
 
 #include"DirectXGame/application/base/Stage/MainStage.h"
 #include"DirectXGame/application/base/UI/GameUI.h"

@@ -168,10 +168,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Death\DeathSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAiSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Melee\LargeMeleeEnemy.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemyState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Melee\SmallMeleeEnemy.cpp" />
@@ -179,6 +179,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Melee\SmallMeleeEnemySubState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Small\Range\SmallRangeEnemyState.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnDirector.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Spawn\CharacterSpawnManager.cpp" />
@@ -219,6 +220,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\UI\SelectUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\TitleUI.cpp" />
     <ClCompile Include="DirectXGame\application\base\UI\GameStartUI.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Weapon\Base\BaseWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletPlayerWeapon.cpp" />
     <ClCompile Include="DirectXGame\application\base\Weapon\Bullet\BulletWeaponManager.cpp" />
     <ClCompile Include="DIRECTXGAME\APPLICATION\BASE\WEAPON\ENEMY\SmallMeleeWeapon.cpp" />
@@ -229,6 +231,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\scene\ResultScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\SampleScene.cpp" />
     <ClCompile Include="DirectXGame\application\scene\TutorialScene.cpp" />
+    <ClCompile Include="DirectXGame\engine\3d\Object\ObjectInstans.cpp" />
     <ClCompile Include="DirectXGame\engine\Animation\UV\UVAnimationComponent.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\2d\Collider2D.cpp" />
     <ClCompile Include="DirectXGame\engine\Collider\3d\ColliderComponent.cpp" />
@@ -578,13 +581,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\BaseClass\Event\BeseEvent.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAiSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackRequest.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Melee\LargeMeleeEnemy.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Large\Range\LargeRangeEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Melee\SmallMeleeEnemy.h" />
@@ -600,6 +603,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraController.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h" />
+    <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h" />
     <ClInclude Include="DirectXGame\engine\Camera\CameraData.h" />
     <ClInclude Include="DirectXGame\engine\Effect\EffectGlovalData.h" />
     <ClInclude Include="DirectXGame\application\base\Game\Base\GameData.h" />

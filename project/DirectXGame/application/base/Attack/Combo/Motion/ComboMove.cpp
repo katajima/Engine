@@ -2,8 +2,9 @@
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
 #include "DirectXGame/application/base/Camera/Base/CameraManeger.h"
 
-#include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
-#include <DirectXGame/engine/struct/Vector3.h>
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <DirectXGame/application/base/Attack/AttackController.h>
 
 namespace {
 

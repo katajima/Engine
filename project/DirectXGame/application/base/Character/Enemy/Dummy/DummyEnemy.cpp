@@ -1,7 +1,8 @@
 #include "DummyEnemy.h"
-#include "DirectXGame/engine/Manager/Entity/EntityManager.h"
-#include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include"DirectXGame/application/base/Effect/Effect.h"
+#include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 
 namespace Character {
 	void DummyEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
@@ -24,9 +25,10 @@ namespace Character {
 		Parameters()->strength = 10.0f;
 
 		// エフェクト用のトランスフォーム初期化
-		worldEffect_.Initialize();
-		worldEffect_.parent_ = &objectComponent_->GetWorldTransform();
-		worldEffect_.translate_ = { 0,1,0 };
+		worldEffect_ = std::make_unique<Engine::WorldTransform>();
+		worldEffect_->Initialize();
+		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
+		worldEffect_->translate_ = { 0,1,0 };
 
 		// 保存項目初期化
 		InitializeBaseAddItem();

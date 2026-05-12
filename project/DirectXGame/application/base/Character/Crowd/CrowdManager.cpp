@@ -2,6 +2,8 @@
 #include <DirectXGame/engine/Math/Random.h>
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 
 namespace Character {
 

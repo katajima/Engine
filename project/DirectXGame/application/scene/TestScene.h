@@ -37,7 +37,8 @@
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Camera/FixedCamera/FixedCamera.h"
 #include"DirectXGame/application/base/Camera/Base/CameraManeger.h"
-
+#include <DirectXGame/application/base/Input/InputSystem.h>
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 
 /// <summary>
 /// テストシーン

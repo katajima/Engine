@@ -18,7 +18,13 @@
 #include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
 
 #include "DirectXGame/engine/Audio/Audio.h"
+#include <DirectXGame/application/base/Input/InputSystem.h>
+#include <DirectXGame/engine/Effect/EffectComponent.h>
 
+#include "DirectXGame/engine/Effect/Primitive/Primitive.h"
+#include "DirectXGame/engine/SkyBox/SkyBox.h"
+#include "DirectXGame/engine/Effect/Ocean/Ocean.h"
+#include "DirectXGame/engine/Animation/AnimationComponent.h"
 /// <summary>
 /// サンプルシーン
 /// </summary>

@@ -1,14 +1,10 @@
 #pragma once
-#include"DirectXGame/engine/Camera/Camera.h"
 #include"DirectXGame/engine/3d/Object/Object3d.h"
-#include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
-#include"DirectXGame/engine/base/Imgui/ImGuiManager.h"
-#include"DirectXGame/engine/math/MathFunctions.h"
-#include<DirectXGame/engine/Effect/EffectComponent.h>
+#include"DirectXGame/engine/3d/Object/ObjectInstans.h"
+#include "DirectXGame/engine/3d/Model/RenderComponent.h"
 #include"DirectXGame/engine/Animation/AnimationData.h"
-#include"DirectXGame/engine/collider/3d/ColliderComponent.h"
 
-#include "DirectXGame/application/base/Input/InputSystem.h"
+#include <DirectXGame/application/GlobalVariables/GlobalVariables.h>
 
 //オブジェクトタイプ
 enum class ObjectType
@@ -41,8 +37,10 @@ struct ObjectStateFlags
 // 前方宣言
 namespace Engine {
 	class EntityManager;
-	class ObjectInstans;
+	class Object3dInstansManager;
 	class Camera;
+	class ColliderComponent;
+	class RigidBodyComponent;
 }
 /// <summary>
 /// オブジェクトコンポーネントくクラス
@@ -63,7 +61,7 @@ public:
 	void InitializeInstancing(Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables,
 		const std::string& objectName, const std::string& modelName, const std::string& texName, bool useCollider,
 		bool useRigidBody, IHitReceiver* iHitReceiver,
-		Engine::Object3dInstansManager::TransparencyType transparencyType, bool rigidUpdate = true);
+		Engine::ObjectInstans::TransparencyType transparencyType, bool rigidUpdate = true);
 
 	/// <summary>
 	/// 更新

@@ -1,6 +1,7 @@
 #include "ResultUI.h"
 #include "DirectXGame/engine/Manager/Entity/EntityManager.h"
 #include <DirectXGame/engine/Utility/ConvertUtility.h>
+#include "DirectXGame/application/base/Input/InputSystem.h"
 
 void ResultUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 	Engine::GlobalVariables* globalVariables) {

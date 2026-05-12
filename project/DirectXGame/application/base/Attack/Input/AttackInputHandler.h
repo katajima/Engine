@@ -1,7 +1,8 @@
 #pragma once
 #include<memory>
+#include<string>
 #include "DirectXGame/application/base/Character/State/MainState.h"
-#include "DirectXGame/engine/Math/MathFunctions.h"
+
 
 // 動作種類
 enum class ActionInput {

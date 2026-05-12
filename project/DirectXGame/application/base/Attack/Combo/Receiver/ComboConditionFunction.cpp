@@ -1,5 +1,5 @@
 #include "ComboConditionFunction.h"
-#include"DirectXGame/application/base/Move/Base/MoveComponent.h"
+#include <DirectXGame/application/base/Character/Base/CharacterContext.h>
 
 void Combo::ConditionFunction::ConditionTypeUpdate(const Character::CharacterContext& ctx,EndConditionType type, ComboButton button, float timer, float endTime, bool isPress){
 	// 終了タイプ

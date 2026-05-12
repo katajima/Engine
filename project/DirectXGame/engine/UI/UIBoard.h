@@ -1,6 +1,4 @@
 #pragma once
-#include "UIData.h"
-#include "BaseSprite.h"
 #include"DirectXGame/engine/UI/UIElement.h"
 
 // UIエレメントやウィンチェスターウィジットを収めるクラス

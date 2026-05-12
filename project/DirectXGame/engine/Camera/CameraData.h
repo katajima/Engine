@@ -3,6 +3,10 @@
 #include"DirectXGame/engine/math/MathFunctions.h"
 #include "DirectXGame/engine/Collider/CollisionTypeIdDef.h"
 #include "DirectXGame/engine/Transform/WorldTransform/WorldTransform.h"
+
+// 前方宣言
+class InputSystem;
+
 // 追従カメラデータ
 struct CameraFollowData {
 	// プレイヤーからの相対位置

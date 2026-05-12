@@ -8,6 +8,8 @@
 #include "DirectXGame/application/base/Camera/Base/CameraShake.h"
 #include "DirectXGame/application/base/Camera/Base/CameraCollision.h"
 
+class InputSystem;
+
 // カメラ統括クラス
 class CameraController {
 public:

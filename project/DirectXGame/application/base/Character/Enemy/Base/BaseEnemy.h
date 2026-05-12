@@ -1,10 +1,7 @@
 #pragma once
 #include "DirectXGame/application/base/Character/Base/BaseCharacter.h"
-#include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
-#include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
-#include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
-#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include "EnemyData.h"
+#include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
 
 namespace Character {
 	class BasePlayer;
@@ -14,6 +11,7 @@ namespace Character {
 	/// </summary>
 	class BaseEnemy : public BaseCharacter {
 	public:
+		virtual ~BaseEnemy();
 		// 初期化
 		virtual void Initialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) = 0;
@@ -41,8 +39,6 @@ namespace Character {
 
 		void SetTargetCharacters(BaseCharacter* target);
 
-		void aa();
-
 	public:
 		// ID設定
 		void SetID(uint32_t id) { id_ = id; }
@@ -59,31 +55,9 @@ namespace Character {
 		Vector3 TargetDirection();
 	private:
 
-		void InitializeBaseEnemyAddItem() {
-			AddItem("後退スピード", globalData_.retreatSpeed);
-			AddItem("攻撃猶予時間", globalData_.attackTimer);
-			AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
-			AddItem("後退開始範囲", globalData_.startRetreatingRadius);
-			AddItem("回転速度", globalData_.turnSpeed);
-
-
-
-			globalData_.retreatSpeed = GetValue<float>("後退スピード");
-			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
-			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
-			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
-			globalData_.turnSpeed = GetValue<float>("回転速度");
-
-		}
+		void InitializeBaseEnemyAddItem();
 		// 更新保存項目
-		void UpdateBaseEnemyGetValue() {
-			globalData_.retreatSpeed = GetValue<float>("後退スピード");
-			globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
-			globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
-			globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
-			globalData_.turnSpeed = GetValue<float>("回転速度");
-		}
-
+		void UpdateBaseEnemyGetValue();
 		//
 		void InitShadowObjectComponent(const std::string& charaName);
 
@@ -91,14 +65,12 @@ namespace Character {
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
 	protected:
-		std::unique_ptr <VisionComponent> visionComponent_;			// 視界
-		std::unique_ptr<Engine::EffectComponent> effectComponent_ = nullptr;
 		//
 		bool isStopping_ = false;
 		// グローバルデータ
 		EnemyGlobalData globalData_;
 		float dieScore = 100.0f;
 	protected:
-		Engine::WorldTransform worldEffect_;
+		std::unique_ptr <Engine::WorldTransform> worldEffect_ = nullptr;
 	};
 }
