@@ -41,7 +41,7 @@ AttackDecision AttackBranchResolver::Resolve(const AttackContext& ctx,
     case ActionInput::LightAttack:
         result.accepted = true;
         result.shouldChangeToAttackState = true;
-        result.startComboName = ctx.isLanding ? "Attack1" : "JumpAttack";
+        result.startComboName = ctx.isLanding ? "MeleeAttack1" : "JumpAttack";
         break;
 
     case ActionInput::HeavyAttack:

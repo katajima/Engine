@@ -358,17 +358,18 @@ namespace Character {
 		comboSystem->SetParentTransform("NoParent", nullptr);
 		
 		// コンボ１のデータ送る
-		comboSystem->CreateCombo("Attack1");
+		comboSystem->CreateCombo("MeleeAttack1");
 		// コンボ２のデータ送る
-		comboSystem->CreateCombo("Attack2");
+		comboSystem->CreateCombo("MeleeAttack2");
 		// コンボ３のデータ送る
-		comboSystem->CreateCombo("Attack3");
+		comboSystem->CreateCombo("MeleeCombo1");
+		// コンボ4のデータ送る
+		comboSystem->CreateCombo("MeleeCombo2");
+		// コンボ5のデータ送る
+		comboSystem->CreateCombo("MeleeCombo3");
+
 		// ジャンプコンボのデータ送る
 		comboSystem->CreateCombo("JumpAttack");
-		// コンボ4のデータ送る
-		comboSystem->CreateCombo("Attack4");
-		// コンボ5のデータ送る
-		comboSystem->CreateCombo("Attack5");
 		// コンボ6のデータ送る
 		comboSystem->CreateCombo("Attack6");
 		// コンボ7のデータ送る
@@ -391,23 +392,16 @@ namespace Character {
 		comboSystem->CreateCombo("JumpSkillAttack01");
 
 		// コンボ連結設定
-		comboSystem->ConnectCombo("Attack1", ActionInput::LightAttack, "Attack2"); // コンボ連結
-		comboSystem->ConnectCombo("Attack2", ActionInput::LightAttack, "Attack3"); // コンボ連結
-		comboSystem->ConnectCombo("JumpAttack", ActionInput::LightAttack, "Attack2"); // コンボ連結	
-
-		comboSystem->ConnectCombo("Attack3", ActionInput::LightAttack, "Attack4"); // コンボ連結
-		comboSystem->ConnectCombo("Attack4", ActionInput::LightAttack, "Attack5"); // コンボ連結
-		comboSystem->ConnectCombo("Attack5", ActionInput::LightAttack, "Attack6"); // コンボ連結
-		//comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // コンボ連結
-
+		comboSystem->ConnectCombo("MeleeAttack1", ActionInput::LightAttack, "MeleeAttack2"); // コンボ連結
+		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::LightAttack, "MeleeCombo1"); // コンボ連結
+		
+		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::LightAttack, "MeleeCombo2"); // コンボ連結
+		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::LightAttack, "MeleeCombo3"); // コンボ連結
+		
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::Skill, "SkillAttack01"); // コンボ連結
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::LightAttack, "Attack6"); // コンボ連結
 	
 	
-		comboSystem->ConnectCombo("Attack2", ActionInput::HeavyAttack, "Attack10"); // コンボ連結
-		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11"); // コンボ連結
-
-
 		comboSystem->ConnectCombo("JumpSkillAttack01", ActionInput::LightAttack, "JumpAttack"); // コンボ連結
 
 	}

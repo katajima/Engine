@@ -24,7 +24,7 @@ struct CameraRotationData {
 	// 上下回転角度
 	float pitch = 0.0f;
 	// 入力感度
-	float sensitivity = 0.04f;
+	float sensitivity = 0.03f;
 	// 最小ピッチ
 	float minPitch = -0.8f;
 	// 最大ピッチ

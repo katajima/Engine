@@ -47,6 +47,9 @@ void HitMotionSystem::Update(float dt) {
 	// ダウン時間カウントダウン
 	GetIsTime(dt, downTimer_);
 
+	// 打ち上げ時間カウントダウン
+	GetIsTime(dt, launchFloatTime_);
+
 
 	// リアクション移動の有効時間中だけ毎フレームリクエストを送る
 	if (timer_ < data_.duration) {
@@ -64,7 +67,8 @@ void HitMotionSystem::Update(float dt) {
 	// 全終了判定
 	if (timer_ >= data_.duration &&
 		hitStunTimer_ <= 0.0f &&
-		downTimer_ <= 0.0f) {
+		downTimer_ <= 0.0f && 
+		launchFloatTime_ <= 0.0f) {
 		FinishReaction();
 	}
 }
@@ -87,6 +91,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 	data_ = data;
 
 	timer_ = 0.0f;
+	data_.duration;
 	hitStunTimer_ = data_.hitStunTime;	// ヒットスタン時間
 	downTimer_ = data_.downTime;		// ダウン時間
 	launchFloatTime_ = data_.launchFloatTime;	// 打ち上げ時間　
@@ -124,7 +129,8 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 bool HitMotionSystem::IsFinished() const {
 	return !isAction_ &&
 		hitStunTimer_ <= 0.0f &&
-		downTimer_ <= 0.0f;
+		downTimer_ <= 0.0f && 
+		launchFloatTime_ <= 0.0f;
 }
 
 // ヒットモーション中か
@@ -258,6 +264,7 @@ void HitMotionSystem::FinishReaction() {
 	timer_ = 0.0f;
 	hitStunTimer_ = 0.0f;
 	downTimer_ = 0.0f;
+	launchFloatTime_ = 0.0f;
 	hitMotionState_ = HitMotionState::None;
 }
 

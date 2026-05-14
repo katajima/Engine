@@ -103,11 +103,11 @@ namespace Character {
 
 	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
 		if (character->GetHitMotionSystem()->IsFinished()) {
-			// HPが0以下なら死亡
-			if (character->GetHP() <= 0) {
-				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
-				return;
-			}
+			//// HPが0以下なら死亡
+			//if (character->GetHP() <= 0) {
+			//	character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+			//	return;
+			//}
 
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
