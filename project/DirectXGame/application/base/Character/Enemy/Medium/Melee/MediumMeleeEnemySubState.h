@@ -26,7 +26,7 @@ namespace Character {
 
     private:
         float timer_ = 0.0f;
-        const float readyTime_ = 4.75f;
+        const float readyTime_ = 2.75f;
         Vector3 dire_ = {};
     };
 

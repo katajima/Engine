@@ -34,6 +34,10 @@ public:
 private:
 	// 重力処理
 	void GravityProess(const Character::CharacterContext& cxt,Engine::WorldTransform& world,Engine::RigidBodyComponent& rigid);
+
+	// ステートによっての重力処理
+	void StateGravityProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid);
+	
 	// 回転処理
 	void RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world);
 private:

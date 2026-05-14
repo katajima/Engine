@@ -219,7 +219,7 @@ void GamePlayScene::Update()
 	// ImGuiの更新
 	UpdateImGui();
 	// キャラクターマネージャー更新
-	characterManager_->Update(gameFlowController_->IsMove());
+	characterManager_->Update(GetTime(),gameFlowController_->IsMove());
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());
 	// 弾マネージャ

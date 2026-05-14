@@ -4,6 +4,7 @@
 #include "DirectXGame/application/base/Attack/AttackController.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
+#include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 
 void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {
 	this->input = input;	// 入力データ
@@ -12,12 +13,13 @@ void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const I
 	this->movementComponent = owner->GetMoveComponent();						// 移動
 	this->jumpSystem = owner->GetMoveComponent()->GetJumpSystem();				// ジャンプシステム
 	this->moveSystem = owner->GetMoveComponent()->GetMoveSystem();				// 移動システム
+	this->deathSystem = owner->GetDeathSystem();								// 死亡システム
 	this->lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();		// ロックオンシステム
-	this->hitMotionSystem = owner->GetHitMotionSystem();							// レスポンスシステム
-	this->parameters = owner->GetCharacterParameterComponent();								// パラメータ
+	this->hitMotionSystem = owner->GetHitMotionSystem();						// レスポンスシステム
+	this->parameters = owner->GetCharacterParameterComponent();					// パラメータ
 }
 
-Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner,float dt) {
+Character::CharacterContext Character::CharacterContextSystem::CreateContext(BaseCharacter* owner, float dt) {
 	CharacterContext ctx{};
 	if (!owner) return ctx;
 	// 時間
@@ -37,10 +39,7 @@ Character::CharacterContext Character::CharacterContextSystem::CreateContext(Bas
 	return ctx;
 }
 
-void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner, CharacterContext& ctx){
-	// 現在のステート
-	ctx.state = owner->GetCurrentMainState();
-
+void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner, CharacterContext& ctx) {
 	// ダッシュ状態か
 	if (ctx.inputData.dashHeld && parameters->GetStamina() > 1.0f) {
 		parameters->Stamina().value -= 10.0f * ctx.dt;	// スタミナを減らす
@@ -56,37 +55,63 @@ void Character::CharacterContextSystem::CreateContextState(BaseCharacter* owner,
 	ctx.isSelfHitStop = hitMotionSystem->IsSelfHitStop();
 	// 着地状態か
 	ctx.onGround = movementComponent->GetIsLanding();
-	// 攻撃中なら
-	if (ctx.state == CharacterMainState::Attack) {
+
+	// 現在のステート
+	ctx.state = owner->GetCurrentMainState();
+
+
+
+	// 攻撃時の重力
+	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
+	
+
+	// 状態に応じたフラグ設定
+	switch (ctx.state)
+	{
+	case CharacterMainState::Idle: // 待機中
+	case CharacterMainState::Move: // 移動中
+		ctx.isCanJump = true;	// ジャンプ可能にする
+		break;
+	case CharacterMainState::Jump: // ジャンプ中
+		ctx.isJumping = true;
+		break;
+	case CharacterMainState::Avoidance: // 回避中
+		break;
+	case CharacterMainState::Defense: // 防御中
+		break;
+	case CharacterMainState::Attack: // 攻撃中
 		ctx.isAttacking = true;
 		if (!ctx.onGround) {
 			ctx.isJumpAttacking = true;
 		}
-	}
-	// 必殺技中
-	if (ctx.state == CharacterMainState::Special) {
-		ctx.isSpecialAttacking = true;	
-	}
-	// ジャンプ中
-	if (ctx.state == CharacterMainState::Jump) {
-		ctx.isJumping = true;	
-	}
-	// ダメージ状態なら
-	if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Die || ctx.state == CharacterMainState::Fainting) {
-		ctx.isCanMove = false;	// 動けないようにする
-		if (ctx.state == CharacterMainState::Damage || ctx.state == CharacterMainState::Fainting)
-			ctx.isDamage = true;	// ダメージを受けている
-		ctx.isGravity = hitMotionSystem->IsGravityEnabled();
-	}
-	// ジャンプ可能か
-	if (ctx.state == CharacterMainState::Idle || ctx.state == CharacterMainState::Move) {
-		ctx.isCanJump = true;	// ジャンプ可能にする
+
+		// 重力
+		if(comboStateMachine->GetCurrentState())
+		ctx.isGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().isGravity;
+		break;
+	case CharacterMainState::Special: // 必殺技中
+		ctx.isSpecialAttacking = true;
+		break;
+	case CharacterMainState::Die: // 死亡中
+		// 動けないようにする
+		ctx.isCanMove = false;	
+		// 死亡中の重力
+		ctx.isGravity = deathSystem->GetData().isGravity;	
+		break;
+	case CharacterMainState::Fainting: // 気絶中
+	case CharacterMainState::Damage: // 被弾中
+		// 動けないようにする
+		ctx.isCanMove = false;
+		// ダメージを受けている
+		ctx.isDamage = true;	
+		break;	
+	default:
+		break;
 	}
 }
 
-void Character::CharacterContextSystem::CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx){
-	// 攻撃時の重力
-	comboStateMachine = owner->GetAttackController()->GetComboSystem()->GetComboStateMachine();	// コンボステートマシン
+// 重力処理
+void Character::CharacterContextSystem::CreateContextGravity(BaseCharacter* owner, CharacterContext& ctx) {
 	if (comboStateMachine->GetCurrentState()) {
 		ctx.attackingGravity = comboStateMachine->GetCurrentState()->GetData().GetComboMotion().GetComboMove().GetData().gravityScale;
 	}
@@ -96,9 +121,11 @@ void Character::CharacterContextSystem::CreateContextGravity(BaseCharacter* owne
 	ctx.upGravity = jumpSystem->GetData().upGravity;
 	// 落下時の重力
 	ctx.fallGravity = jumpSystem->GetData().fallGravity;
+	// 死亡中の重力
+	ctx.dieGravity = deathSystem->GetData().gravityScale;
 }
 
-void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* owner, CharacterContext& ctx){
+void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* owner, CharacterContext& ctx) {
 	// 方向
 	ctx.direction = worldTransform->GetForward();
 	// 位置
@@ -113,7 +140,7 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 	ctx.skyHeight = moveSystem->GetData().skyHeight;
 }
 
-void Character::CharacterContextSystem::CreateContextInput(BaseCharacter* owner, CharacterContext& ctx){
+void Character::CharacterContextSystem::CreateContextInput(BaseCharacter* owner, CharacterContext& ctx) {
 
 	// 入力データ
 	if (input) {

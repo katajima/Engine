@@ -46,12 +46,6 @@ namespace Character {
 		anima->SetAnimationSpeed(1.0f);	//　アニメーションスピード設定
 
 		float blendTime = 0.1f;
-
-		// 攻撃から戻ったときだけ即切り替え
-		if (character->GetPrevState() == CharacterMainState::Attack) {
-		//	blendTime = 0.0f;
-		}
-
 		anima->SetAnimation("SwordIdle01", blendTime);
 	};
 

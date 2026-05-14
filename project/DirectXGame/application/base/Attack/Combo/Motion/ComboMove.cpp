@@ -34,24 +34,21 @@ namespace Combo {
 	void ComboMove::Enter(Character::BaseCharacter* owner, const Character::CharacterContext& ctx) {
 		moveComponent = owner->GetMoveComponent();
 		worldTransform = &owner->GetObjectComponent()->GetWorldTransform();
-		rigidBodyComponent = owner->GetObjectComponent()->GetRigidBodyComponent();
 		lockOnSystem = owner->GetAttackController()->GeyLockOnSysutem();
 		moveRequestSystem = owner->GetMoveComponent()->GetMoveRequestSystem();
 		camera = owner->GetCameraManager()->GetCamera();
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData;
 		traget = lockOnSystem->SoftLockOn();
+		if (traget) {
+			targetPos_ = traget->GetWorldPosition();
+		}
+
 		stickDirection_ = ctx.worldStickDirection;
 		// 基準方向指定
 		MoveTypeDirectionProcess();
 		// 最終移動方向作成
 		moveDirection_ = BuildMoveDirection();
-
-		// 重力速度リセット
-		if (data_.isResetGravity) {
-			owner->GetObjectComponent()->GetRigidBodyComponent()->ResetAcceleration();
-			owner->GetObjectComponent()->GetRigidBodyComponent()->ResetVelocity();
-		}
 		isMove_ = false;
 		stickDirection_ = {};
 		// 座標更新
@@ -87,9 +84,6 @@ namespace Combo {
 
 		// 移動処理
 		MoveTypeProcess(timer, ctx.dt);
-
-		// 重力処理
-		GravityProcess();
 	}
 
 	// 終了
@@ -149,14 +143,6 @@ namespace Combo {
 		}
 	}
 
-	void ComboMove::GravityProcess() {
-		// 重力の設定
-		if (!data_.isGravity) {
-			rigidBodyComponent->Velocity().y = 0;
-		}
-		rigidBodyComponent->SetIsGravity(data_.isGravity);
-	}
-
 	void ComboMove::MoveTypeDirectionProcess() {
 		switch (data_.moveType)
 		{
@@ -180,7 +166,6 @@ namespace Combo {
 		case MoveType::kTraget: // ターゲット方向
 		{
 			if (traget) {
-				targetPos_ = traget->GetWorldPosition();
 				direction_ = Subtract(targetPos_, worldTransform->translate_);
 
 				if (data_.isFlattenTargetDirection) {

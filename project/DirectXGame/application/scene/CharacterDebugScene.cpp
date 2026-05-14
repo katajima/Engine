@@ -161,7 +161,7 @@ void CharacterDebugScene::Initialize()
 
 
 	// ダミー敵生成
-	tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
+	//tagNumber = characterManager_->CreateCharacter(Character::EnemyType::kDummy, "dummy", 0, { {1,1,1},{},{} });
 
 	// コンボエディター初期化
 	comboEditor_ = std::make_unique<Combo::Editor>();
@@ -216,7 +216,7 @@ void CharacterDebugScene::Update(){
 
 
 	// キャラクターマネージャー更新
-	characterManager_->Update(true);
+	characterManager_->Update(GetTime(),true);
 
 	// 必殺技ポイント管理クラス
 	specalPointManager_->Update(GetTime());

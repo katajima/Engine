@@ -14,14 +14,19 @@ namespace Character {
 		this->camera = camera;					// カメラ
 		this->hitBoxSystem = hitBoxSystem;		// ヒットボックスシステム
 		score = 0;
+
+		// 敵AIシステムの初期化
+		enemyAiSystem_ = std::make_unique<EnemyAiSystem>();
+		enemyAiSystem_->Initialize();
 	}
 
-	void CharacterManager::Update(bool isMove) {
+	void CharacterManager::Update(float dt,bool isMove) {
 		// 死亡したキャラクターを削除
 		character_.erase(
 			std::remove_if(character_.begin(), character_.end(),
 				[this](const std::unique_ptr<BaseCharacter>& character) {
 					if (!character) { return false; } 
+					
 					if (!character->GetAlive() && character->GetDelete()) {
 						score++;
 					}
@@ -37,18 +42,42 @@ namespace Character {
 		}
 
 		// キャラクター更新(敵)
+		std::vector<BaseEnemy*> enemies;
 		std::vector<const BaseCharacter*> target;
+
+		// 先に敵一覧だけ作る
 		for (auto& character : character_) {
-			if (character) {
-				if (character->GetCharacterType() == Type::Enemy) {
-					character->IsMove(isMove);
-					character->Update();
-					if (character->GetAlive()) {
-						target.push_back(character.get());
-					}
+			if (!character) {
+				continue;
+			}
+
+			if (character->GetCharacterType() == Type::Enemy) {
+				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+
+				if (enemy->GetAlive()) {
+					target.push_back(enemy);
+					enemies.push_back(enemy);
 				}
 			}
 		}
+
+		// 敵一覧が入った後にスロット更新
+		if (GetPlayer()) {
+			enemyAiSystem_->UpdateSlot(
+				enemies,
+				GetPlayer()->GetWorldPosition(),
+				GetPlayer()->GetObjectComponent()->GetWorldTransform().rotate_.y
+			);
+		}
+
+		// その後に敵更新
+		for (BaseEnemy* enemy : enemies) {
+			enemy->IsMove(isMove);
+			enemy->Update();
+		}
+
+		// 攻撃要求許可
+		enemyAiSystem_->UpdateRequest(enemies, dt);
 
 		// キャラクター更新(プレイヤー)
 		if (GetPlayer()) {
@@ -99,6 +128,7 @@ namespace Character {
 		enemy->SetBulletManager(bulletManager);		// 弾管理クラス設定
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		enemy->SetEffect(effect);						// エフェクト設定
+		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
 		enemy->Initialize(nullptr, entityManager, globalVariables, transform.translate, camera); // 初期化
 		enemy->SetTargetCharacters(GetPlayer());					// ターゲット指定
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定

@@ -40,7 +40,7 @@ void MovementComponent::Update(Engine::WorldTransform& object, Engine::RigidBody
 	locomotionCoordinator_->BeginFrame(ctx);
 
 	// ジャンプシステムの更新
-	jumpSystem_->Update(ctx, *locomotionCoordinator_.get(), rigid);
+	jumpSystem_->Update(ctx, *locomotionCoordinator_.get());
 
 	if (controlType_ == ControlType::Manual) {	// 手動操作なら入力を渡す
 		// 移動システム更新

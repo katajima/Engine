@@ -14,9 +14,7 @@ public:
 	// 初期化
 	void Initialize();
 	// 更新
-	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator, Engine::RigidBodyComponent& rigid);
-
-	void Update();
+	void Update(const Character::CharacterContext& ctx, LocomotionCoordinator& coordinator);
 public:	// ジャンプ開始
 	void StartJump(Engine::RigidBodyComponent& rigid);
 	// ジャンプ回数現象
@@ -37,11 +35,6 @@ public:
 	// 入力中か設定
 	void SetInputPressed(bool isPressed) { isInputPressed_ = isPressed; }
 private:
-	// 入力処理
-	void InputHoldProcess(float dt);
-	// ジャンプホールド処理
-	void JumpHoldProcess(float dt, Engine::RigidBodyComponent& rigid);
-private:
 	// ジャンプデータ
 	JumpData data_{};
 	// ジャンプ回数
@@ -51,8 +44,6 @@ private: // フラグ系統
 	bool isLanding_ = false;
 	// ジャンプ中かどうか
 	bool isJumping_ = false;
-	// 入力ホールド中かどうか
-	bool isInputHeld_ = false;
 	// 入力が押されているかどうか
 	bool isInputPressed_ = false;
 private:

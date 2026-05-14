@@ -8,7 +8,7 @@ namespace Character {
 	void SmallCartEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, 
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
-		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySG01.obj", "enemy");
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySG01.obj", "SmallCartEnemy");
 		// サイズ
 		Vector3 size = { 1.0f,1.0f,1.0f, };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定

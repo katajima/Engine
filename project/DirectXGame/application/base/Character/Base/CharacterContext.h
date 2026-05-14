@@ -8,6 +8,7 @@
 class MovementComponent;
 class JumpSystem;
 class MoveSystem;
+class DeathSystem;
 class LockOnSystem;
 class HitMotionSystem;
 class ObjectComponent;
@@ -92,6 +93,8 @@ namespace Character {
 		float attackingGravity = 20.0f;
 		// 被弾中の重力係数
 		float damageGravity = 1.0f;
+		// 死亡中の重力係数
+		float dieGravity = 1.0f;
 
 		// 移動スピード
 		float moveSpeed = 1.0f;
@@ -136,6 +139,8 @@ namespace Character {
 		const JumpSystem* jumpSystem = nullptr;
 		// 移動システム
 		const MoveSystem* moveSystem = nullptr;
+		// 死亡システム
+		const DeathSystem* deathSystem = nullptr;
 		// ロックオンシステム
 		const LockOnSystem* lockOnSystem = nullptr;
 		// ヒットリアクションシステム

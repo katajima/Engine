@@ -108,6 +108,8 @@ namespace Character {
 		BaseWeapon* GetWeapon();
 		// 弾の出現
 		BulletSpawn* GetBulletSpawn();
+		// 死亡システム
+		DeathSystem* GetDeathSystem();
 		// コライダーコンポーネント
 		Engine::ColliderComponent* GetColliderComponent();
 		// オブジェクト3d取得

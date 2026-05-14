@@ -1,5 +1,6 @@
 #include "DeathSystem.h"
 #include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
 
 void DeathSystem::Update(float dt){
 	if (!isActive) return;
@@ -13,7 +14,16 @@ void DeathSystem::Update(float dt){
 		isActive = false;
 		dieTimer = 0.0f;
 
-		
+		// 死亡判定に
+		owner->SetAlive(false);
+		if (!owner->GetAlive()) {
+			owner->Delete();	// キャラクター削除
+			owner->GetObjectComponent()->IsDelete();	// オブジェクトコンポーネント削除
+			owner->GetObjectComponentShadow()->IsDelete();
+			owner->GetObjectComponent()->GetObjectStateFlags().isAlive = false;
+			owner->GetObjectComponent()->SetIsDraw(false);	// 描画しない	
+			owner->GetObjectComponentShadow()->SetIsDraw(false);	// 描画しない	
+		}
 	}
 
 }

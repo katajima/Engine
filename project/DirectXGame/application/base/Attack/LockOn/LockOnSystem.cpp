@@ -86,9 +86,9 @@ const Character::BaseCharacter* LockOnSystem::GetNearLockOn() const {
 
 	const Character::BaseCharacter* bestTarget = *it;
 	if (bestTarget && data_.radius >= bestTarget->GetWorldPosition().Distance(ownerPos)) {
-		return bestTarget;
+		if (bestTarget->GetAlive() && !bestTarget->GetDelete())
+			return bestTarget;
 	}
-
 	return nullptr;
 }
 
@@ -99,7 +99,7 @@ const Character::BaseCharacter* LockOnSystem::GetHitLockOn()const {
 	}
 	Vector3 ownerPos = GetOwnerPos();
 	for (auto& target : targetCharacters) {
-		if (target->GetTagNumber() == hitTag && target->GetAlive() &&
+		if (target->GetTagNumber() == hitTag && target->GetAlive() && !target->GetDelete() &&
 			target->GetCurrentMainState() != Character::CharacterMainState::Die) {
 			if (data_.radius >= target->GetWorldPosition().Distance(ownerPos)) {
 				return target;

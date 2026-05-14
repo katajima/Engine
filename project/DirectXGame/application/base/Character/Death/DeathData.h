@@ -15,6 +15,10 @@ enum class DeathType {
 struct DeathData {
 	// 死亡までの時間
 	float dieTimer = 0.0f;
+	// 重力の有無
+	float isGravity = 0.0f;
+	// 重力の強さ
+	float gravityScale = 1.0f;
 	// 死亡エフェクトの名前
 	std::vector<std::string> deathEffectNames;	
 	

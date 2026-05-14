@@ -9,7 +9,7 @@ namespace Character {
 	void SmallRangeEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager, Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
 	{
 		// 基盤初期化
-		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySS01.obj", "smallRangeEnemy",1.5f);
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySS01.obj", "SmallRangeEnemy",1.5f);
 		
 		
 		
@@ -58,6 +58,7 @@ namespace Character {
 
 	void SmallRangeEnemy::Update()
 	{
+		isStopping_ = false;
 		// 基盤の更新
 		BaseUpdate();
 
@@ -76,55 +77,26 @@ namespace Character {
 
 	void SmallRangeEnemy::Move()
 	{
-		auto& moveData = moveComponent_->GetMoveSystem()->Data();
+		if (isStopping_) return;
 
-		// ターゲットへの水平ベクトル
-		Vector3 toTarget = Subtract(GetTargetPos(), GetWorldTransform().translate_);
-		toTarget.y = 0.0f;
+		// 攻撃システム更新
+		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
 
-		float distance = toTarget.Length();
-		if (distance <= 0.001f) {
-			moveData.maxSpeed = 0.0f;
-			return;
+		Vector3 slotPos = GetTargetPos();
+
+		if (slot) {
+			slotPos = slot->position;
 		}
 
-		Vector3 dire = toTarget.Normalize();
-
-		// 回転設定
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-
-		// Y軸周り角度を補間
-		float currentY = GetWorldTransform().rotate_.y;
-		float targetY = rotate.y;
-		float diff = targetY - currentY;
-		diff = std::atan2(std::sin(diff), std::cos(diff));
-
-		float maxTurn = globalData_.turnSpeed * GetTime();
-		diff = std::clamp(diff, -maxTurn, maxTurn);
-
-		GetWorldTransform().rotate_.y = currentY + diff;
-
-		if (distance <= globalData_.startRetreatingRadius) {
-			// 近すぎるので後退
-			attackTimer_ = 0.0f;
-			moveData.maxSpeed = -globalData_.retreatSpeed;
-		}
-		else if (distance <= globalData_.attackStartRadius) {
-			// 攻撃可能距離
-			attackTimer_ += GetTime();
-			moveData.maxSpeed = 0.0f;
-
-			if (attackTimer_ >= globalData_.attackTimer) {
-				attackTimer_ = 0.0f;
-				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
-				return;
-			}
-		}
-		else {
-			// 射程外なので接近
-			attackTimer_ = 0.0f;
-			moveData.maxSpeed = moveSpeed_;
-		}
+		attackSystem_->Update(
+			GetTime(),
+			GetWorldPosition(),
+			GetTargetPos(),
+			slotPos,
+			moveComponent_->GetMoveSystem()->Data().maxSpeed,
+			GetWorldTransform().rotate_.y,
+			globalData_,
+			moveSpeed_);
 	}
 
 	void SmallRangeEnemy::InitStateMachine()

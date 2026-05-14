@@ -46,6 +46,8 @@ public:
 	bool IsHitStun() const;
 	// ダウン中か
 	bool IsDown() const;
+	// 打ち上げ中か
+	bool IsLaunch() const;
 	// ヒットストップ中か
 	bool IsHitStop() const;
 	// セルフヒットストップ中か

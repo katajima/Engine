@@ -8,9 +8,10 @@
 #include"BaseCharacter.h"
 // アプリケーション(敵)
 #include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
-
 // アプリケーション(プレイヤー)
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
+
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
 
 #include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include "CharacterGlobalData.h"
@@ -37,7 +38,7 @@ namespace Character {
 			Engine::GlobalVariables* globalVariables, Engine::Camera* camera);
 
 		// 更新
-		void Update(bool isMove);
+		void Update(float dt,bool isMove);
 		// 描画2d
 		void Draw2D();
 	public:
@@ -114,13 +115,16 @@ namespace Character {
 
 		float GetScore() { return score; }
 	private:
-		std::vector<std::unique_ptr<BaseCharacter>> character_;	// キャラクター
-
-		uint32_t characterCount_ = 0;	// キャラクターの数
-
-		uint32_t enemyCount_ = 0;	// 敵カウンター
-
-		std::unique_ptr<CrowdManager> crowdManager_;	// 群衆AI
+		// キャラクター
+		std::vector<std::unique_ptr<BaseCharacter>> character_;	
+		// キャラクターの数
+		uint32_t characterCount_ = 0;	
+		// 敵カウンター
+		uint32_t enemyCount_ = 0;	
+		// 群衆AI
+		std::unique_ptr<CrowdManager> crowdManager_;	
+		// 敵AIシステム
+		std::unique_ptr<EnemyAiSystem> enemyAiSystem_;	
 
 		float score = 0.0f;
 

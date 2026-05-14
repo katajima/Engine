@@ -12,12 +12,12 @@
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Base/BaseSpecial.h>
+#include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 
 namespace Character {
 
 	void NormalPlayer::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
-		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera)
-	{
+		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		this->entityManager = entityManager;	// エンティティ
 		this->globalVariables = globalVariables;	// 保存項目
 		this->camera = camera;					// カメラ
@@ -111,6 +111,10 @@ namespace Character {
 		rengeSp->SetRadius(50);
 		rengeSp->SetReticleParent(&GetObjectComponent()->GetWorldTransform());
 		rengeSp->Set(followCamera, bulletSpawn_.get());
+
+		deathSystem_ = std::make_unique<DeathSystem>();
+		deathSystem_->SetOwner(this);
+
 
 		// 攻撃系初期化
 		InitAttack();
@@ -394,7 +398,7 @@ namespace Character {
 		comboSystem->ConnectCombo("Attack3", ActionInput::LightAttack, "Attack4"); // コンボ連結
 		comboSystem->ConnectCombo("Attack4", ActionInput::LightAttack, "Attack5"); // コンボ連結
 		comboSystem->ConnectCombo("Attack5", ActionInput::LightAttack, "Attack6"); // コンボ連結
-		comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // コンボ連結
+		//comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // コンボ連結
 
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::Skill, "SkillAttack01"); // コンボ連結
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::LightAttack, "Attack6"); // コンボ連結

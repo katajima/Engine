@@ -999,7 +999,7 @@
     <ClCompile Include="DirectXGame\application\base\Character\Move\Base\MoveRequestSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.cpp">
@@ -1011,7 +1011,16 @@
     <ClCompile Include="DirectXGame\engine\3d\Object\ObjectInstans.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAiSystem.cpp">
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2177,7 +2186,7 @@
     <ClInclude Include="DirectXGame\application\base\UI\ResultScoreUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathSystem.h">
@@ -2192,13 +2201,19 @@
     <ClInclude Include="DirectXGame\engine\input\GamePad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAttackRequest.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\engine\3d\Object\ObjectInstans.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyAiSystem.h">
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

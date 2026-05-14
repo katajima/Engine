@@ -133,15 +133,24 @@ namespace Character {
 		attackController_ = std::make_unique<AttackController>();
 		attackController_->Initialize(entityManager, globalVariables, GetCharacterParameterComponent(), this);
 
+		//死亡システム
+		deathSystem_ = std::make_unique<DeathSystem>();
+		deathSystem_->SetOwner(this);
+
 		// コンテキストシステム
 		contextSystem_ = std::make_unique<CharacterContextSystem>();
 		contextSystem_->Initialize(this, inputSystem);
 
-		// 丸影用オブジェクトコンポーネント初期化
-		InitShadowObjectComponent(charaName);
-
 		// ステートマシーン初期化
 		InitStateMachine();
+
+		// 敵AIシステム
+		attackSystem_ = std::make_unique<EnemyAttackSystem>();
+		attackSystem_->Initialize(stateMachine_.get());
+
+
+		// 丸影用オブジェクトコンポーネント初期化
+		InitShadowObjectComponent(charaName);
 	}
 
 	void BaseEnemy::BaseUpdate() {
@@ -155,7 +164,6 @@ namespace Character {
 		UpdateBaseGetValue();
 		// 保存項目更新(敵全体)
 		UpdateBaseEnemyGetValue();
-
 
 
 		//　攻撃更新
@@ -176,7 +184,8 @@ namespace Character {
 		objectComponentShadow_->GetWorldTransform().translate_.z = GetWorldTransform().translate_.z;
 		objectComponentShadow_->GetWorldTransform().translate_.y = 0.02f;
 
-
+		// 死亡システム更新
+		deathSystem_->Update(ctx.dt);
 		// ステート
 		stateMachine_->Update(ctx);
 
@@ -187,16 +196,12 @@ namespace Character {
 	void BaseEnemy::InitializeBaseEnemyAddItem() {
 		AddItem("後退スピード", globalData_.retreatSpeed);
 		AddItem("攻撃猶予時間", globalData_.attackTimer);
-		AddItem("攻撃猶予範囲", globalData_.attackStartRadius);
-		AddItem("後退開始範囲", globalData_.startRetreatingRadius);
 		AddItem("回転速度", globalData_.turnSpeed);
 
 
 
 		globalData_.retreatSpeed = GetValue<float>("後退スピード");
 		globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
-		globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
-		globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
 		globalData_.turnSpeed = GetValue<float>("回転速度");
 
 	}
@@ -204,13 +209,14 @@ namespace Character {
 	void BaseEnemy::UpdateBaseEnemyGetValue() {
 		globalData_.retreatSpeed = GetValue<float>("後退スピード");
 		globalData_.attackTimer = GetValue<float>("攻撃猶予時間");
-		globalData_.attackStartRadius = GetValue<float>("攻撃猶予範囲");
-		globalData_.startRetreatingRadius = GetValue<float>("後退開始範囲");
 		globalData_.turnSpeed = GetValue<float>("回転速度");
 	}
 
 #pragma endregion 
 
+	EnemyAttackSystem* BaseEnemy::GetEnemyAttackSystem() const {
+		return attackSystem_.get();
+	}
 
 	const BaseCharacter* BaseEnemy::GetTarget() {
 		return GetAttackController()->GeyLockOnSysutem()->GetTarget();

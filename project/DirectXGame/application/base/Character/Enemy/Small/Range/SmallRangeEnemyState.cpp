@@ -5,6 +5,7 @@
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
+#include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 
 namespace Character {
 
@@ -92,36 +93,17 @@ namespace Character {
 #pragma region Die
 
 	void SmallRangeEnemyDieState::Update(const CharacterContext& ctx){
-		// 時間更新
-		timer_ -= ctx.dt;
-		if (timer_ <= 0.0f) {
-			// 死亡判定に
-			character->SetAlive(false);
-			timer_ = 0.0f;
-			if (!character->GetAlive()) {
-				character->Delete();	// キャラクター削除
-				character->GetObjectComponent()->IsDelete();	// オブジェクトコンポーネント削除
-				character->GetObjectComponentShadow()->IsDelete();
-			}
-		}
-		else if (timer_ <= dieTimer_ / 2.0f) {
-			character->GetObjectComponent()->SetIsDraw(false);	// 描画しない	
-		}
-		else {
-			character->GetObjectComponent()->GetRigidBodyComponent()->SetIsGravity(false);		// 重力無し
-			character->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character->GetTime(); // サイズを縮小
-		
-			if (character->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
-				character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
-				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = {};
-			}
+		character->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character->GetTime(); // サイズを縮小
+		if (character->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
+			character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
+			character->GetObjectComponentShadow()->GetWorldTransform().scale_ = {};
 		}
 	}
 
 	void SmallRangeEnemyDieState::Exit(){}
 
 	void SmallRangeEnemyDieState::Enter(){
-		timer_ = dieTimer_;
+		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
 	}
 
@@ -129,6 +111,12 @@ namespace Character {
 
 	void SmallRangeEnemyDamageState::Update(const CharacterContext& ctx){
 		if (character->GetHitMotionSystem()->IsFinished()) {
+			// HPが0以下なら死亡
+			if (character->GetHP() <= 0) {
+				character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
+				return;
+			}
+
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}

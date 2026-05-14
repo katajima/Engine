@@ -32,8 +32,6 @@ namespace Character {
 
 	private:
 		float skyHeight_ = 1.5f;
-		//
-		float attackTimer_ = 0.0f;
 		std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
 		//
 		float moveSpeed_ = 1.0f;

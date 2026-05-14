@@ -37,9 +37,6 @@ namespace Character {
 		void InitParticle();
 
 	private:
-		float cooldownTime_ = 5.0f;
-		//
-		float attackTimer_ = 0.0f;
 		//
 		float moveSpeed_ = 1.0f;
 	};

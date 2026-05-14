@@ -1,7 +1,6 @@
 #include "MovementSystem.h"
 
-void MovementSystem::Initialize(){
-}
+void MovementSystem::Initialize() {}
 
 void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCommand& cmd, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 	// ヒットストップ中は移動処理を行わない
@@ -28,8 +27,7 @@ void MovementSystem::Update(const Character::CharacterContext& cxt, const MoveCo
 
 
 void MovementSystem::ResetGravityVelocity()
-{
-}
+{}
 
 void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engine::WorldTransform& world, Engine::RigidBodyComponent& rigid) {
 
@@ -57,32 +55,49 @@ void MovementSystem::GravityProess(const Character::CharacterContext& cxt, Engin
 	}
 	else {
 		rigid.SetIsGravity(cxt.isGravity);
+
 		if (!cxt.isGravity) {
 			rigid.ResetAcceleration();			// 加速度リセット
 			rigid.ResetVelocity();				// 速度リセット
 		}
-
-		// 重力スケールセット
-		if (!cxt.isAttacking) {
-			if (cxt.isDamage) {
-				rigid.SetGravityScale(cxt.damageGravity);
-			}
-			else {
-				if (rigid.GetVelocity().y < 0.0f) {
-					rigid.SetGravityScale(cxt.fallGravity);
-				}
-				else {
-					rigid.SetGravityScale(cxt.upGravity);
-				}
-			}
-		}
 		else {
-			rigid.SetGravityScale(cxt.attackingGravity);
+			// ステートによっての重力処理
+			StateGravityProcess(cxt, world, rigid);
 		}
 	}
 
 	// 重力
 	rigid.Integrate(cxt.dt, world);
+}
+
+void MovementSystem::StateGravityProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world,
+	Engine::RigidBodyComponent& rigid) {
+	switch (cxt.state)
+	{
+	case Character::CharacterMainState::Idle:
+	case Character::CharacterMainState::Move:
+	case Character::CharacterMainState::Dash:
+	case Character::CharacterMainState::Jump:
+		if (rigid.GetVelocity().y < 0.0f) {
+			rigid.SetGravityScale(cxt.fallGravity);
+		}
+		else {
+			rigid.SetGravityScale(cxt.upGravity);
+		}
+		break;
+	case Character::CharacterMainState::Attack:
+		rigid.SetGravityScale(cxt.attackingGravity);
+		break;
+	case Character::CharacterMainState::Damage:
+	case Character::CharacterMainState::Fainting:
+		rigid.SetGravityScale(cxt.damageGravity);
+		break;
+	case Character::CharacterMainState::Die:
+		rigid.SetGravityScale(cxt.dieGravity);
+		break;
+	default:
+		break;
+	}
 }
 
 void MovementSystem::RotateProcess(const Character::CharacterContext& cxt, Engine::WorldTransform& world) {

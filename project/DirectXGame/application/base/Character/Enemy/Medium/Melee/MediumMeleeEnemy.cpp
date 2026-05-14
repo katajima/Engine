@@ -9,7 +9,7 @@ namespace Character {
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera,
-			"enemy.gltf", "MediumMeleeEnemy", 1.5f);
+			"enemy.gltf", "MediumMeleeEnemy", 3.0f);
 
 		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
 
@@ -20,10 +20,8 @@ namespace Character {
 
 
 		// パラメーター初期化
-		parameterComponent_->parameters->HP.Initiaize(50, 0, 50, 0);
-		parameterComponent_->parameters->strength = 10.0f;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 
-		moveSpeed_ = moveComponent_->GetMoveSystem()->Data().maxSpeed;
 		// パーティクル初期化
 		InitParticle();
 		// トランスフォーム更新
@@ -49,6 +47,7 @@ namespace Character {
 	}
 
 	void MediumMeleeEnemy::Update() {
+		isStopping_ = false;
 		// 基盤の更新
 		BaseUpdate();
 	}
@@ -58,72 +57,24 @@ namespace Character {
 	void MediumMeleeEnemy::Move(){
 		if (isStopping_) return;
 
-		// 位置差分
-		Vector3 toTarget = Subtract(GetTargetPos(), GetWorldTransform().translate_);
-		toTarget.y = 0.0f;
+		// 攻撃システム更新
+		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
 
-		float distance = toTarget.Length();
-		if (distance <= 0.001f) {
-			moveComponent_->GetMoveSystem()->Data().maxSpeed = 0.0f;
-			return;
+		Vector3 slotPos = GetTargetPos();
+
+		if (slot) {
+			slotPos = slot->position;
 		}
 
-		// 水平向き
-		Vector3 dire = toTarget.Normalize();
-
-		// 回転設定（即値代入ではなく補間推奨）
-		Vector3 rotate = Math::DirectionToRotate(dire, Dire::Z);
-
-		// Y軸だけゆっくり向く
-		float currentY = GetWorldTransform().rotate_.y;
-		float targetY = rotate.y;
-
-		// 必要なら AngleDiff のような角度差補正関数を使う
-		float diff = targetY - currentY;
-
-		// -π～πへ補正
-		while (diff > std::numbers::pi_v<float>) {
-			diff -= std::numbers::pi_v<float> *2.0f;
-		}
-		while (diff < -std::numbers::pi_v<float>) {
-			diff += std::numbers::pi_v<float> *2.0f;
-		}
-
-		// 回転速度
-		float turnSpeed = globalData_.turnSpeed * GetTime();
-		diff = std::clamp(diff, -turnSpeed, turnSpeed);
-
-		GetWorldTransform().rotate_.y = currentY + diff;
-
-		// 基本速度
-		float targetSpeed = 0.0f;
-
-		// 距離ごとの行動分岐
-		if (distance <= globalData_.startRetreatingRadius) {
-			// 近すぎるので少し下がる
-			attackTimer_ = 0.0f;
-			targetSpeed = -globalData_.retreatSpeed;
-		}
-		else if (distance <= globalData_.attackStartRadius) {
-			// 攻撃準備距離
-			attackTimer_ += GetTime();
-
-			// 完全停止だと不自然なら微速前進か停止
-			targetSpeed = 0.0f;
-
-			if (attackTimer_ >= globalData_.attackTimer) {
-				GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
-				attackTimer_ = 0.0f;
-				return;
-			}
-		}
-		else {
-			// 接近
-			attackTimer_ = 0.0f;
-			targetSpeed = moveSpeed_;
-		}
-
-		moveComponent_->GetMoveSystem()->Data().maxSpeed = targetSpeed;
+		attackSystem_->Update(
+			GetTime(),
+			GetWorldPosition(),
+			GetTargetPos(),
+			slotPos,
+			moveComponent_->GetMoveSystem()->Data().maxSpeed,
+			GetWorldTransform().rotate_.y,
+			globalData_,
+			moveSpeed_);
 	}
 
 	void MediumMeleeEnemy::InitParticle(){

@@ -3,6 +3,10 @@
 #include "EnemyData.h"
 #include "DirectXGame/application/base/Character/Vision/VisionComponent.h"
 
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
+
+
 namespace Character {
 	class BasePlayer;
 
@@ -39,6 +43,10 @@ namespace Character {
 
 		void SetTargetCharacters(BaseCharacter* target);
 
+		EnemyAttackSystem* GetEnemyAttackSystem() const;
+
+		void SetEnemyAiSystem(EnemyAiSystem* aiSystem) { enemAi = aiSystem; }
+
 	public:
 		// ID設定
 		void SetID(uint32_t id) { id_ = id; }
@@ -53,6 +61,7 @@ namespace Character {
 		float GetTargetDistance();
 		// ターゲット方向取得
 		Vector3 TargetDirection();
+
 	private:
 
 		void InitializeBaseEnemyAddItem();
@@ -72,5 +81,9 @@ namespace Character {
 		float dieScore = 100.0f;
 	protected:
 		std::unique_ptr <Engine::WorldTransform> worldEffect_ = nullptr;
+		// 攻撃システム
+		std::unique_ptr<EnemyAttackSystem> attackSystem_ = nullptr;	
+
+		EnemyAiSystem* enemAi = nullptr;	// AIシステム
 	};
 }

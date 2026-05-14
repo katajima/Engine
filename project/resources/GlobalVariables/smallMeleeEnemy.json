@@ -1,8 +1,8 @@
 {
-    "smallMeleeEnemy": {
+    "SmallMeleeEnemy": {
         "HP": {
             "type": "float",
-            "value": 25.0
+            "value": 40.0
         },
         "MP": {
             "type": "float",
@@ -10,7 +10,7 @@
         },
         "MaxHP": {
             "type": "float",
-            "value": 25.0
+            "value": 40.0
         },
         "MaxMP": {
             "type": "float",
@@ -20,17 +20,13 @@
             "type": "float",
             "value": 0.0
         },
-        "jampPower": {
-            "type": "float",
-            "value": 180.0
-        },
-        "speed": {
-            "type": "float",
-            "value": 5.639999866485596
-        },
         "stamina": {
             "type": "float",
             "value": 0.0
+        },
+        "回転速度": {
+            "type": "float",
+            "value": 0.25
         },
         "後退スピード": {
             "type": "float",
@@ -38,7 +34,7 @@
         },
         "後退開始範囲": {
             "type": "float",
-            "value": 3.0
+            "value": 5.0
         },
         "攻撃猶予時間": {
             "type": "float",
@@ -46,7 +42,7 @@
         },
         "攻撃猶予範囲": {
             "type": "float",
-            "value": 8.6899995803833
+            "value": 10.0
         }
     }
 }

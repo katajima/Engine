@@ -27,8 +27,8 @@ public:
 	// 死亡中か
 	bool IsActive() const { return isActive; }
 
-
-
+	// 死亡データ取得
+	DeathData GetData() const { return data; }
 private:
 	// 死亡タイプ
 	DeathType type = DeathType::Normal;

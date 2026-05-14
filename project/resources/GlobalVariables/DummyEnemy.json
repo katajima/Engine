@@ -1,8 +1,8 @@
 {
-    "MediumMeleeEnemy": {
+    "DummyEnemy": {
         "HP": {
             "type": "float",
-            "value": 200.0
+            "value": 100000.0
         },
         "MP": {
             "type": "float",
@@ -10,7 +10,7 @@
         },
         "MaxHP": {
             "type": "float",
-            "value": 200.0
+            "value": 0.0
         },
         "MaxMP": {
             "type": "float",
@@ -34,7 +34,7 @@
         },
         "後退開始範囲": {
             "type": "float",
-            "value": 5.0
+            "value": 10.0
         },
         "攻撃猶予時間": {
             "type": "float",
@@ -42,7 +42,7 @@
         },
         "攻撃猶予範囲": {
             "type": "float",
-            "value": 10.0
+            "value": 3.0
         }
     }
 }

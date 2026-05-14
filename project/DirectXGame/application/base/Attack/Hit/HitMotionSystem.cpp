@@ -142,6 +142,10 @@ bool HitMotionSystem::IsDown() const {
 	return hitMotionState_ == HitMotionState::Down;
 }
 
+bool HitMotionSystem::IsLaunch() const {
+	return launchFloatTime_ > 0.0f;
+}
+
 // ヒットストップ中か
 bool HitMotionSystem::IsHitStop() const {
 	return hitStopTime_ > 0.0f;

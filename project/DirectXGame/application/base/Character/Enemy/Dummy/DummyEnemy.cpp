@@ -8,7 +8,7 @@ namespace Character {
 	void DummyEnemy::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
-		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySG01.obj", "enemy");
+		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySG01.obj", "DummyEnemy");
 		// サイズ
 		Vector3 size = { 0.9f,0.9f,0.9f };
 		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定

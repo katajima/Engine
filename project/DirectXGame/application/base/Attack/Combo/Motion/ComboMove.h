@@ -48,8 +48,6 @@ namespace Combo {
 	private:
 		// 移動タイプによる処理
 		void MoveTypeProcess(float timer, float dt);
-		// 重力処理
-		void GravityProcess();
 		// 移動タイプによる方向指定処理
 		void MoveTypeDirectionProcess();
 		// ローカル移動ベクトルを基準方向へ変換した最終方向を作る
@@ -59,8 +57,6 @@ namespace Combo {
 		MovementComponent* moveComponent = nullptr;
 		// ワールドトランスフォーム
 		Engine::WorldTransform* worldTransform = nullptr;
-		// リジットボディー
-		Engine::RigidBodyComponent* rigidBodyComponent = nullptr;
 		// ロックオンシステム
 		LockOnSystem* lockOnSystem = nullptr;
 		// ターゲット

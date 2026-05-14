@@ -124,6 +124,10 @@
             "type": "float",
             "value": 0.3333333432674408
         },
+        "コンボ入力遅延": {
+            "type": "float",
+            "value": 0.0
+        },
         "コンボ強制移行": {
             "type": "bool",
             "value": false
@@ -151,6 +155,11 @@
         "コンボ開始時に重力速度リセット": {
             "type": "bool",
             "value": true
+        },
+        "ターゲット移動タイプ": {
+            "enumType": "TargetMoveType",
+            "type": "enum",
+            "value": 1
         },
         "ダウン持続時間": {
             "type": "float",
@@ -207,6 +216,18 @@
         "ヒットスタン持続時間": {
             "type": "float",
             "value": 0.20999999344348907
+        },
+        "ヒットストップ(一回のみ)": {
+            "type": "bool",
+            "value": true
+        },
+        "ヒットストップ(相手)": {
+            "type": "float",
+            "value": 0.05000000074505806
+        },
+        "ヒットストップ(自分)": {
+            "type": "float",
+            "value": 0.05000000074505806
         },
         "ヒットボックスオフセット位置": {
             "type": "Vector3",
@@ -287,6 +308,10 @@
             "enumType": "LockOnType",
             "type": "enum",
             "value": 0
+        },
+        "ロックオンターゲット接近半径": {
+            "type": "float",
+            "value": 1.0
         },
         "ロックオン半径": {
             "type": "float",

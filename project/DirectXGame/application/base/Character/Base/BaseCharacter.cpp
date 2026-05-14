@@ -42,7 +42,7 @@ namespace Character {
 	// キャラクター取得
 	Type BaseCharacter::GetCharacterType() const { return parameterComponent_->characterType_; }
 	// キャラクターの生存状態を取得
-	bool BaseCharacter::GetAlive() const { return stateMachine_->GetCurrentMainState() != CharacterMainState::Die; }
+	bool BaseCharacter::GetAlive() const { return objectComponent_->GetObjectStateFlags().isAlive; }
 	// キャラクターの生存状態を取得
 	void BaseCharacter::SetAlive(bool is) { objectComponent_->GetObjectStateFlags().isAlive = is; }
 	// HP取得
@@ -52,7 +52,6 @@ namespace Character {
 		parameterComponent_->HP().Add(-damage);		// HPをダメージ分減算
 		if (GetHP() <= 0) {
 			parameterComponent_->HP().value = 0.0f;
-			objectComponent_->GetObjectStateFlags().isAlive = false; // 死亡
 		}
 	}
 	// 削除フラグ
@@ -88,7 +87,11 @@ namespace Character {
 	// 武器取得
 	BaseWeapon* BaseCharacter::GetWeapon() { return weapon_.get(); }
 	// 弾の出現
-	BulletSpawn* BaseCharacter::GetBulletSpawn() { return bulletSpawn_.get(); };
+	BulletSpawn* BaseCharacter::GetBulletSpawn() { return bulletSpawn_.get(); }
+	// 死亡システム取得
+	DeathSystem* BaseCharacter::GetDeathSystem() {
+		return deathSystem_.get();
+	};
 	// コライダーコンポーネント
 	Engine::ColliderComponent* BaseCharacter::GetColliderComponent() { return objectComponent_->GetColliderComponent(); };
 	// オブジェクト3d取得

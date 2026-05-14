@@ -34,10 +34,6 @@ namespace Character {
 
 	private:
 		//
-		float attackTimer_ = 0.0f;
-		//
 		float moveSpeed_ = 1.0f;
-		//
-		bool isStopping_ = false;
 	};
 }
