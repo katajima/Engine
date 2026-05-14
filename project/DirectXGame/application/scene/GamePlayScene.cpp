@@ -279,7 +279,7 @@ void GamePlayScene::CheckAllCollisions() {
 	// キャラクターセット
 	for (auto caracter : characterManager_->GetCharacters()) {
 		if (caracter->GetColliderComponent()) {
-			if (caracter->GetHP() <= 0) continue;
+			if (caracter->GetAlive());
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}

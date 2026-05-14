@@ -391,6 +391,10 @@ namespace Character {
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("JumpSkillAttack01");
 
+
+		comboSystem->CreateCombo("testAttack");
+
+
 		// コンボ連結設定
 		comboSystem->ConnectCombo("MeleeAttack1", ActionInput::LightAttack, "MeleeAttack2"); // コンボ連結
 		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::LightAttack, "MeleeCombo1"); // コンボ連結

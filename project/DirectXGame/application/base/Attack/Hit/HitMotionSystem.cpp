@@ -127,10 +127,7 @@ void HitMotionSystem::SetReactionData(const HitReactionData& data) {
 
 // 終了したか
 bool HitMotionSystem::IsFinished() const {
-	return !isAction_ &&
-		hitStunTimer_ <= 0.0f &&
-		downTimer_ <= 0.0f && 
-		launchFloatTime_ <= 0.0f;
+	return !IsHitMotion();
 }
 
 // ヒットモーション中か
