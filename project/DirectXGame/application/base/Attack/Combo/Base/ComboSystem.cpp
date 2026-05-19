@@ -191,6 +191,16 @@ namespace Combo {
 		{
 			globalVariables->AddItem(name, "カメラロックオン", data.camera.isLockOn);
 			globalVariables->AddItem(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
+			globalVariables->AddItem(name, "カメラロックオン回転引き継ぎ", data.camera.isLockOnRotate);
+			
+			globalVariables->AddItem(name, "カメラズーム", data.camera.isZoom);
+			globalVariables->AddItem(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
+			globalVariables->AddItem(name, "カメラズーム速度", data.camera.zoomSpeed);
+			globalVariables->AddItem(name, "カメラズーム時間", data.camera.zoomDuration);
+			globalVariables->AddItem(name, "カメラズーム開始時間", data.camera.zoomStartTime);
+			globalVariables->AddItem(name, "カメラズーム量", data.camera.zoomTargetDistance);
+
+
 		}
 
 
@@ -312,6 +322,15 @@ namespace Combo {
 		{
 			data.camera.isLockOn = globalVariables->GetValue<bool>(name, "カメラロックオン");
 			data.camera.lockOnInterpolation = globalVariables->GetValue<float>(name, "カメラロックオン補間速度");
+			data.camera.isLockOnRotate = globalVariables->GetValue<bool>(name, "カメラロックオン回転引き継ぎ");
+
+			data.camera.isZoom = globalVariables->GetValue<bool>(name, "カメラズーム");
+			data.camera.isLockOnZoom = globalVariables->GetValue<bool>(name, "カメラロックオンズーム");
+			data.camera.zoomSpeed = globalVariables->GetValue<float>(name, "カメラズーム速度");
+			data.camera.zoomDuration = globalVariables->GetValue<float>(name, "カメラズーム時間");
+			data.camera.zoomStartTime = globalVariables->GetValue<float>(name, "カメラズーム開始時間");
+			data.camera.zoomTargetDistance = globalVariables->GetValue<float>(name, "カメラズーム量");
+			
 		}
 	}
 
@@ -428,6 +447,15 @@ namespace Combo {
 		{
 			globalVariables->SetValue(name, "カメラロックオン", data.camera.isLockOn);
 			globalVariables->SetValue(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
+			globalVariables->SetValue(name, "カメラロックオン回転引き継ぎ",data.camera.isLockOnRotate);
+
+			globalVariables->SetValue(name, "カメラズーム", data.camera.isZoom);
+			globalVariables->SetValue(name, "カメラロックオンズーム", data.camera.isLockOnZoom);
+			globalVariables->SetValue(name, "カメラズーム速度", data.camera.zoomSpeed);
+			globalVariables->SetValue(name, "カメラズーム時間", data.camera.zoomDuration);
+			globalVariables->SetValue(name, "カメラズーム開始時間", data.camera.zoomStartTime);
+			globalVariables->SetValue(name, "カメラズーム量", data.camera.zoomTargetDistance);
+
 		}
 	}
 

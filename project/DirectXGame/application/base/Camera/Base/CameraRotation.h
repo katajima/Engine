@@ -12,6 +12,9 @@ public:
 	// 更新
 	void Update(Transform& transform ,const InputSystem* input,float dt);
 
+	// データ取得
+	CameraRotationData& GetData() { return data_; }
+
 private:
 	CameraRotationData data_;
 };

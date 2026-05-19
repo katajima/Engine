@@ -21,9 +21,23 @@ namespace Combo {
 
 	// 更新
 	void ComboCamera::Update(float timer, float dt) {
+		
+		// ロックオン処理
 		if (data_.lockOnInterpolation <= timer && data_.isLockOn) {
 			cameraManager->GetBaseCamera()->LockOn(nullptr);
+
 		}
+
+		bool isZoom =  data_.isZoom;
+		if (data_.isLockOnZoom) {
+			isZoom = data_.isLockOn && target;
+		}
+
+		// ズーム処理
+		if (data_.zoomStartTime <= timer && isZoom)
+			
+			cameraManager->GetBaseCamera()->GetCameraController()->GetZoom()->
+			Request({ data_.zoomTargetDistance,data_.zoomSpeed,data_.zoomDuration });
 	}
 
 	// 終了

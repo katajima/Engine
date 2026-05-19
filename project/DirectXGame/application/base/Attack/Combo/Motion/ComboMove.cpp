@@ -5,6 +5,8 @@
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include <DirectXGame/application/base/Attack/AttackController.h>
+#include <algorithm>
+#include <cmath>
 
 namespace {
 
@@ -52,6 +54,7 @@ namespace Combo {
 		// 最終移動方向作成
 		moveDirection_ = BuildMoveDirection();
 		isMove_ = false;
+		isTargetTeleported_ = false;
 		stickDirection_ = {};
 		// 座標更新
 		owner->GetWorldTransform().Update();
@@ -91,6 +94,7 @@ namespace Combo {
 	// 終了
 	void ComboMove::Exit(Character::BaseCharacter* owner) {
 		isMove_ = false;
+		isTargetTeleported_ = false;
 		lockOnSystem->ClearTag();
 		stickDirection_ = {};
 		moveDirection_ = {};
@@ -118,12 +122,11 @@ namespace Combo {
 				break;
 
 			case MoveType::kTraget:
-				if (traget) {
-					// 半径以内なら近づき停止
-					if (data_.lockOnData.moveTargetRadius > targetPos_.Distance(worldTransform->translate_)) {
-						canMove = false;
-					}
+				if (!traget) {
+					canMove = false;
+					break;
 				}
+				canMove = ApplyTargetMove(request, dt);
 				break;
 
 			case MoveType::kLockAt:
@@ -135,7 +138,9 @@ namespace Combo {
 			}
 
 			if (canMove) {
-				request.velocity = Multiply(moveDirection_, dt);
+				if (data_.moveType != MoveType::kTraget) {
+					request.velocity = Multiply(moveDirection_, dt);
+				}
 				request.priority = 0;
 				if (data_.alignCharacterToMovement) {
 					request.direction = moveDirection_.Normalize();
@@ -230,6 +235,78 @@ namespace Combo {
 			(baseForward * (local.z * data_.moveSpeed.z));
 
 		return result;
+	}
+
+	Vector3 ComboMove::BuildTargetMoveGoal() const {
+		Vector3 currentPos = worldTransform->translate_;
+		Vector3 targetPos = targetPos_;
+
+		Vector3 toTarget = targetPos - currentPos;
+		if (data_.isFlattenTargetDirection) {
+			toTarget.y = 0.0f;
+		}
+
+		Vector3 toTargetDir = NormalizeSafe(toTarget, NormalizeSafe(moveComponent->GetDirection()));
+		return targetPos - toTargetDir * data_.lockOnData.moveTargetRadius;
+	}
+
+	bool ComboMove::ApplyTargetMove(MoveRequest& request, float dt) {
+		if (!traget) {
+			return false;
+		}
+
+		targetPos_ = traget->GetWorldPosition();
+
+		const Vector3 currentPos = worldTransform->translate_;
+		const Vector3 goalPos = BuildTargetMoveGoal();
+		Vector3 toGoal = goalPos - currentPos;
+
+		if (data_.isFlattenTargetDirection) {
+			toGoal.y = 0.0f;
+		}
+
+		if (toGoal.Length() <= 0.0001f) {
+			return false;
+		}
+
+		switch (data_.lockOnData.targetMoveType)
+		{
+		case TargetMoveType::kNone:
+			return false;
+
+		case TargetMoveType::kMove:
+		{
+			Vector3 velocity = Multiply(moveDirection_, dt);
+			if (velocity.LengthSq() >= toGoal.LengthSq()) {
+				velocity = toGoal;
+			}
+			request.velocity = velocity;
+			break;
+		}
+
+		case TargetMoveType::kTeleport:
+			if (isTargetTeleported_) {
+				return false;
+			}
+			worldTransform->translate_ = goalPos;
+			worldTransform->Update();
+			isTargetTeleported_ = true;
+			request.velocity = {};
+			break;
+
+		case TargetMoveType::kInterpolation:
+		{
+			const float speed = (std::max)((std::max)(std::abs(data_.moveSpeed.x), std::abs(data_.moveSpeed.y)), std::abs(data_.moveSpeed.z));
+			const float t = std::clamp(speed * dt, 0.0f, 1.0f);
+			request.velocity = Lerp(currentPos, goalPos, t) - currentPos;
+			break;
+		}
+
+		default:
+			return false;
+		}
+
+		return data_.lockOnData.targetMoveType == TargetMoveType::kTeleport || request.velocity.Length() > 0.0001f;
 	}
 
 	const Engine::WorldTransform* ComboMove::GetTarget() {

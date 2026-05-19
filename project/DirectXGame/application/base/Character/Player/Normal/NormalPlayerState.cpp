@@ -6,6 +6,8 @@
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
+#include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
+
 namespace Character {
 #pragma region Idle
 
@@ -178,6 +180,8 @@ namespace Character {
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		// 武器
 		character->GetWeapon()->GetObject3D()->SetIsDraw(false);// 武器描画しない
+
+		character->GetCameraManager()->GetBaseCamera()->LockOn(nullptr);
 
 		// アニメーション
 		anima->SetIsLoop(true);		   // ループ再生

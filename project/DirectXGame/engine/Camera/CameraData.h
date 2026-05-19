@@ -39,6 +39,8 @@ struct CameraLockOnData {
 	float rotateSpeed = 0.5f;
 	// ロックオンしているか
 	bool isLockOn = false;
+	// ロックオン後の回転を解除されても引き継ぐか
+	bool isLockOnRotate = true;
 };
 
 // カメラシェイクデータ

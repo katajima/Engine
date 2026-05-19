@@ -20,6 +20,7 @@ class BaseWeapon;			// 武器
 class JumpSystem;			// ジャンプシステム
 class MoveRequestSystem;	// 移動リクエストシステム
 class LockOnSystem;			// ロックオンシステム
+struct MoveRequest;			// 移動リクエスト
 
 namespace Combo {
 
@@ -54,6 +55,10 @@ namespace Combo {
 		void MoveTypeDirectionProcess();
 		// ローカル移動ベクトルを基準方向へ変換した最終方向を作る
 		Vector3 BuildMoveDirection() const;
+		// ターゲット接近時の停止位置を作る
+		Vector3 BuildTargetMoveGoal() const;
+		// ターゲット移動タイプによる移動処理
+		bool ApplyTargetMove(MoveRequest& request, float dt);
 	private:
 		// 移動
 		MovementComponent* moveComponent = nullptr;
@@ -80,6 +85,8 @@ namespace Combo {
 		Vector3 moveDirection_ = {};
 		// 移動出来るか
 		bool isMove_ = true;
+		// ターゲット瞬間移動を実行したか
+		bool isTargetTeleported_ = false;
 	private:
 		// ターゲット位置
 		Vector3 targetPos_ = {};

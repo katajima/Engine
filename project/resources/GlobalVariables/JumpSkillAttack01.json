@@ -44,6 +44,10 @@
             "type": "bool",
             "value": false
         },
+        "カメラロックオン回転引き継ぎ": {
+            "type": "bool",
+            "value": true
+        },
         "カメラロックオン補間速度": {
             "type": "float",
             "value": 0.5
@@ -78,7 +82,7 @@
         "コンボ中の移動タイプ": {
             "enumType": "MoveType",
             "type": "enum",
-            "value": 1
+            "value": 2
         },
         "コンボ中の移動基準前方を水平化": {
             "type": "bool",
@@ -335,7 +339,7 @@
         },
         "移動方向とキャラクターの向く方向を一致させるか": {
             "type": "bool",
-            "value": false
+            "value": true
         },
         "終了条件タイプ": {
             "enumType": "EndConditionType",

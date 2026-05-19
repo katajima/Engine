@@ -31,6 +31,10 @@ void CameraController::Update(float dt) {
 	// ロックオンしているなら
 	if (lockOn->GetData().isLockOn) {
 		transform.rotate = lockOn->Update(transform, dt);
+		if (lockOn->GetData().isLockOnRotate) {
+			rotation->GetData().pitch = transform.rotate.x;
+			rotation->GetData().yaw = transform.rotate.y;
+		}
 	}
 	else { // していないなら回転処理を優先
 		// 回転処理

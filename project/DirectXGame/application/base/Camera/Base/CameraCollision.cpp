@@ -15,7 +15,7 @@ void CameraCollision::Update(Transform& transform, float dt) {
 		targetPos = target->GetWorldPosition();
 	}
 	// 地面への沈み補正
-	if (currentPos_.y < 0.2f) {
+	if (currentPos_.y < 1.0f) {
 		float depth = -currentPos_.y;
 
 		float zAdjust = std::clamp(depth * depthScale_, 0.0f, maxZOffset_);
@@ -24,7 +24,7 @@ void CameraCollision::Update(Transform& transform, float dt) {
 		Vector3 zOffset = Multiply(direction, zAdjust);
 
 		currentPos_ = Add(currentPos_, zOffset);
-		currentPos_.y = 0.0f;
+		currentPos_.y = 1.0f;
 	}
 
 	// 位置設定

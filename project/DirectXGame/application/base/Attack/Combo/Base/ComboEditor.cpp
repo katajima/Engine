@@ -308,10 +308,16 @@ namespace Combo {
 	void  EditorBlock::ImGuiCamera() {
 		if (ImGui::CollapsingHeader("カメラ関係")) {
 			ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
-			ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation);
-			if (data_.camera.lockOnInterpolation < 0.0f) {
-				data_.camera.lockOnInterpolation = 0.0f;
-			}
+			ImGui::Checkbox("カメラロックオンの回転引き継ぎ", &data_.camera.isLockOnRotate);
+			ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation,0.01f, 0.0f, 10.0f);
+			
+			ImGui::Checkbox("カメラをズームするか", &data_.camera.isZoom);
+			ImGui::Checkbox("カメラがロックオンしたときだけズームするか", &data_.camera.isLockOnZoom);
+			ImGui::SliderFloat("カメラズーム速度", &data_.camera.zoomSpeed, 0.01f, 100.0f, "%.2f");
+			ImGui::DragFloat("カメラズーム時間", &data_.camera.zoomDuration,0.01f ,0.0f, 60.0f);
+			ImGui::DragFloat("カメラズーム開始時間", &data_.camera.zoomStartTime, 0.01f, 0.0f, 60.0f);
+			ImGui::DragFloat("カメラズーム補間量", &data_.camera.zoomTargetDistance, 0.01f, 0.01f, 10.0f);
+
 		}
 	};
 

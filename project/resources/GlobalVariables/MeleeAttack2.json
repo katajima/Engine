@@ -46,7 +46,7 @@
         },
         "カメラロックオン補間速度": {
             "type": "float",
-            "value": 0.5
+            "value": 0.25
         },
         "コライダー(タグ)": {
             "enumType": "CollisionTag",

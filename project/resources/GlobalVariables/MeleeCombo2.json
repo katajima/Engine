@@ -44,6 +44,10 @@
             "type": "bool",
             "value": false
         },
+        "カメラロックオン回転引き継ぎ": {
+            "type": "bool",
+            "value": true
+        },
         "カメラロックオン補間速度": {
             "type": "float",
             "value": 0.5
@@ -167,7 +171,7 @@
         "ターゲット移動タイプ": {
             "enumType": "TargetMoveType",
             "type": "enum",
-            "value": 1
+            "value": 3
         },
         "ダウン持続時間": {
             "type": "float",
