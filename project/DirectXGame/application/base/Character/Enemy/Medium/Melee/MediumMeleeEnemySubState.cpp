@@ -72,6 +72,24 @@ namespace Character {
 
 		enemy->GetMoveComponent()->GetMoveRequestSystem()->SetRequest(request);
 
+		if (clock == -1) {
+			size += deltaTime * 1.5f;
+			if (size >= 1.25f) {
+				clock *= -1;
+			}
+
+		}
+		else {
+			size -= deltaTime * 1.5f;
+			if (size <= 1.0f) {
+				clock *= -1;
+			}
+		}
+
+
+		enemy->GetWorldTransform().scale_ = size;
+
+
 		if (timer_ >= readyTime_) {
 			fsm_->ChangeState(AttackSubState::Swing);
 		}
@@ -85,7 +103,7 @@ namespace Character {
 		}
 
 		timer_ = 0.0f;
-
+		enemy->GetWorldTransform().scale_ = { 1,1,1 };
 		// Readyで最終的に合わせた方向を使う
 		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
 		toTarget.y = 0.0f;
@@ -107,17 +125,16 @@ namespace Character {
 		HitBox::CollData data{};
 		data.hitBoxData.isEneble = true;
 		data.hitBoxData.isLine = true;
-		data.hitBoxData.tag = CollisionTag::Enemy;
-		data.hitBoxData.layer = CollisionLayer::Enemy;
-		data.hitBoxData.mask = CollisionLayer::Player;
-		data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
+		data.hitBoxData.tag = CollisionTag::EnemyAttack;
+		data.hitBoxData.layer = CollisionLayer::ALL;
+		data.hitBoxData.mask = CollisionLayer::ALL;
+		data.hitBoxData.colliderSize = { 2.0f, 2.0f, 3.0f };
 		data.name = "NormalEnemy_SwingHitBox";
 		data.reactionData.damageData.GetOne().SetDamage(10.0f);
-
 		data.hitBoxData.useType = HitBox::UseType::kEnemy;
 		data.hitBoxData.lifeTime = swingTime_;
 		data.hitBoxData.dependenceType = HitBox::ParentType::kParent;
-		data.hitBoxData.offset = {  };
+		data.hitBoxData.offset = { };
 		data.hitBoxData.useContactRecord = true;
 		// ヒットボックス寿命は swingTime_ と揃える
 		enemy->GetHitBoxSystem()->AddLifeTimeHitBox(

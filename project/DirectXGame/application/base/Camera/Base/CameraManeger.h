@@ -29,6 +29,8 @@ public:
 	void UpadateImGui();
 	// カメラ取得
 	Engine::Camera* GetCamera() { return camera.get(); }
+	// カメラ取得
+	BaseCamera* GetBaseCamera();
 	// カメラを管理対象から削除
 	void DeleteCamera(std::string name);
 	// カメラクリア

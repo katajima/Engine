@@ -59,7 +59,7 @@ namespace Character {
 		// SphereColliderを追加
 		auto sphere = std::make_unique<Engine::SphereCollider>();
 		sphere->tag = CollisionTag::Player;
-		sphere->layer = CollisionLayer::Player;
+		sphere->layer = CollisionLayer::ALL;
 		sphere->collisionMask = 0xFFFFFFFF;
 		sphere->radius = 1.0f; // 半径を適宜設定
 		sphere->isDebugLine = true;
@@ -84,9 +84,6 @@ namespace Character {
 
 			// 敵との衝突応答
 			hitResponse_->Hit(CollisionTag::Enemy, self, other);
-
-			// 壁との衝突応答
-			//hitResponse_->HitWall(self, other);
 			};
 
 		// 衝突応答処理初期化
@@ -241,6 +238,8 @@ namespace Character {
 		// 移動コンポーネント更新
 		moveComponent_->Update(GetObjectComponent()->GetWorldTransform(),
 			*GetObjectComponent()->GetRigidBodyComponent(), ctx);
+		
+		deathSystem_->Update(ctx.dt);
 
 #ifdef _DEBUG
 		entityManager->Get3DLineCommon()->GetLineMeshData().AddLine(ctx.position, ctx.position

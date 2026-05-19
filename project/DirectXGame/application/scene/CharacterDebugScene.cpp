@@ -280,6 +280,18 @@ void CharacterDebugScene::UpdateImGui() {
 	Vector2 inputPos = input_->GetGamePadLeftStick();
 	ImGui::InputFloat2("Input", &inputPos.x);
 	
+	ImGui::DragFloat3("shakeData.offset", &shakeData.offset.x, 0.01f);
+	ImGui::DragFloat("shakeData.duration", &shakeData.duration, 0.01f);
+	if (ImGui::Button("シェイク")) {
+		
+		cameraManager_->GetBaseCamera()->GetCameraController()->GetShake()->Request(shakeData);
+	}
+	ImGui::DragFloat("zoomData.targetDistance", &zoomData.targetDistance, 0.01f);
+	ImGui::DragFloat("zoomData.duration", &zoomData.duration, 0.01f);
+	ImGui::DragFloat("zoomData.zoomSpeed", &zoomData.zoomSpeed, 0.01f);
+	if (ImGui::Button("ズーム")) {
+		cameraManager_->GetBaseCamera()->GetCameraController()->GetZoom()->Request(zoomData);
+	}
 
 	ImGui::End();
 
@@ -303,7 +315,7 @@ void CharacterDebugScene::CheckAllCollisions() {
 	// キャラクターセット
 	for (auto caracter : characterManager_->GetCharacters()) {
 		if (caracter->GetColliderComponent()) {
-			if (caracter->GetAlive());
+			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}

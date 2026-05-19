@@ -149,6 +149,7 @@ namespace Character {
 		void Enter() override;
 	private:
 		float timer = 0.0f;
+		Vector3 hitEffectPos = { 0,0.75f,0 };
 
 	};
 

@@ -112,6 +112,11 @@ private:
 	Character::EnemyType enemyType = Character::EnemyType::kSmallMelee;
 	Vector3 enemyPos{};
 	uint32_t tagNumber = 0;
+
+	// シェイク
+	CameraShakeData shakeData{};
+	// ズーム
+	CameraZoomData zoomData{};
 private:
 	// 衝突マネージャ
 	std::unique_ptr<Engine::CollisionManager> collisionManager_;

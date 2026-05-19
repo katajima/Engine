@@ -2,6 +2,7 @@
 #include "DirectXGame/application/base/Attack/HitBox/HitBoxData.h"
 #include "DirectXGame/application/base/Attack/LockOn/LockOnData.h"
 #include "DirectXGame/application/base/Attack/AttackData.h"
+#include "DirectXGame/application/base/Camera/Base/CameraData.h"
 
 namespace Character {
 	struct CharacterContext;
@@ -133,24 +134,6 @@ namespace Combo {
 		EndConditionType endConditionType = EndConditionType::kOnTimer;
 	};
 
-	// 保存項目用カメラデータ
-	struct GlobalCamera {
-		// 使用カメラ
-		std::string cameraName = "no";
-		// 元のキャラクターに使用しているカメラ名
-		std::string baseCameraName = "no";
-		// カメラを変更するか
-		bool isChangeCamera = false;
-		// 移動補間
-		float interpolation = 0.0f;
-		// 
-		float shakeCameraPower;
-		//
-		float shakeCameraTime;
-		// 
-		float zoomCameraAmount;
-	};
-
 	// 保存項目エフェクトデータ
 	struct GloblEffectData {
 		// トレイル発生時間
@@ -175,5 +158,7 @@ namespace Combo {
 		GlobalCondition condition{};
 		// エフェクト
 		GloblEffectData effect{};
+		// カメラ 
+		GlobalCameraData camera{};
 	};
 };

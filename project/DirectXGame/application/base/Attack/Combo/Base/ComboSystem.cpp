@@ -187,7 +187,11 @@ namespace Combo {
 				globalVariables->AddItem(name, MakeHitEffectNameKey(i), data.hitReaction.hitEffectNames[i].effectName);
 			}
 		}
-
+		// カメラ
+		{
+			globalVariables->AddItem(name, "カメラロックオン", data.camera.isLockOn);
+			globalVariables->AddItem(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
+		}
 
 
 
@@ -304,6 +308,11 @@ namespace Combo {
 			data.hitBox.layer = globalVariables->GetEnumValue<CollisionLayer>(name, "コライダー(レイヤー)");
 			data.hitBox.mask = globalVariables->GetEnumValue<CollisionLayer>(name, "コライダー(マスク)");
 		}
+		// カメラ
+		{
+			data.camera.isLockOn = globalVariables->GetValue<bool>(name, "カメラロックオン");
+			data.camera.lockOnInterpolation = globalVariables->GetValue<float>(name, "カメラロックオン補間速度");
+		}
 	}
 
 	void System::SetGlobalComboData(const std::string& name, GlobalData& data) {
@@ -415,8 +424,11 @@ namespace Combo {
 
 
 		}
-
-
+		// カメラ
+		{
+			globalVariables->SetValue(name, "カメラロックオン", data.camera.isLockOn);
+			globalVariables->SetValue(name, "カメラロックオン補間速度", data.camera.lockOnInterpolation);
+		}
 	}
 
 	void System::SetGlobalComboDatas() {
@@ -437,8 +449,8 @@ namespace Combo {
 		data.GetComboCondition().GetData() = gData.condition;
 		// エフェクト
 		data.GetComboEffect().GetData() = gData.effect;
-
-
+		// カメラ
+		data.GetComboCamera().GetData() = gData.camera;
 		// コンボボタン設定
 		ComboButton bo = ComboButton(ComboGamePadButton::GAMEPAD_B, ComboButtonInputType::kPressed);
 		ComboButton bo2 = ComboButton(ComboGamePadButton::GAMEPAD_X, ComboButtonInputType::kPressed);

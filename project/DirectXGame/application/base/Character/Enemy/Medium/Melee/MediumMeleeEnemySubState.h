@@ -28,6 +28,8 @@ namespace Character {
         float timer_ = 0.0f;
         const float readyTime_ = 2.75f;
         Vector3 dire_ = {};
+        float size = 1.0f;
+        int clock = 1;
     };
 
     // 攻撃本体

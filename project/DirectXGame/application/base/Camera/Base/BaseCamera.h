@@ -36,12 +36,17 @@ public:
 	/// <returns></returns>
 	Engine::Camera* GetUniqueCamera() { return uniqueCamera_.get(); }
 
+	/// <summary>
+	///	カメラ統括クラス取得
+	/// </summary>
+	/// <returns></returns>
+	CameraController* GetCameraController() { return controller.get(); }
 
 	/// <summary>
 	/// ロックオン対象を設定
 	/// </summary>
 	/// <param name="object"></param>
-	void LockOn(Engine::WorldTransform* object) { target = object; };
+	void LockOn(const Engine::WorldTransform* object) { target = object; };
 
 	/// <summary>
 	/// カメラ管理を設定
@@ -69,11 +74,15 @@ protected:
 
 	std::unique_ptr<Engine::Camera> uniqueCamera_;	// 固有カメラ
 	
+	// 統括
+	std::unique_ptr<CameraController> controller = nullptr;
+
+
 	float timeSpeed_ = 1.0f;	// 時間の進む速さ(1.0fが通常、0.0fで停止、2.0fで2倍速など)
 	std::string name_;
 protected:
-	Engine::WorldTransform* target = nullptr;		// ロックオン対象
-	CameraManager* cameraManeger = nullptr;	// カメラ管理
+	const Engine::WorldTransform* target = nullptr;		// ロックオン対象
+	CameraManager* cameraManeger = nullptr;			// カメラ管理
 protected:
 	Engine::EntityManager* entityManager = nullptr;	// エンティティマネージャー
 	Engine::GlobalVariables* globalVariables = nullptr;	// グローバル変数

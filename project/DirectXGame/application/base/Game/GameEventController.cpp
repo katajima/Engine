@@ -185,7 +185,15 @@ namespace Game {
 
 
 		
-		bool isCharaPlayerDed = !characterManager->GetPlayer()->GetAlive();
+		bool isCharaPlayerDed = false;
+		if (characterManager->GetPlayer()) {
+			isCharaPlayerDed = !characterManager->GetPlayer()->GetAlive();
+		}
+		else {
+			isCharaPlayerDed = true;
+		}
+
+
 		bool isCharaEnemyDed = characterManager->GetCharacterCount(Character::Type::Enemy) <= 0;
 
 		bool isEndState = eventStateMachine_->IsEventFinished();

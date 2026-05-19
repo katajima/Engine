@@ -6,8 +6,11 @@ void CameraFollow::Initialize() {
 	data_.followSpeed = 40.0f;
 	data_.useSmooth = true;
 	data_.offset.z =  -20.5;
-
+	// デフォルト位置設定
+	defultOffst = data_.offset;
+	// 現在位置設定
 	currentPos_ = {};
+	//
 	isInitializedPosition_ = false;
 }
 

@@ -55,6 +55,7 @@ namespace Combo {
 		float timer_ = 0.0f;					// 時間
 		bool isDebug = false;					// エディターを使用したデバック中か
 		bool isHitStop = false;					// ヒットストップ中か
+		bool useCamera = false;					// カメラを使用するか
 		Type type = Type::kMelle;// 攻撃タイプ
 	};
 };

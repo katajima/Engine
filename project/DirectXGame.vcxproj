@@ -153,6 +153,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraLockOn.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraManeger.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraRotation.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraShake.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.cpp" />
     <ClCompile Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.cpp" />
@@ -565,11 +567,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\State\BulletState.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraCollision.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraData.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraFollow.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLag.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraLockOn.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraRotation.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraShake.h" />
+    <ClInclude Include="DirectXGame\application\base\Camera\Base\CameraZoom.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\ResultCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\SelectCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FixedCamera\StageCamera.h" />

@@ -1,7 +1,13 @@
 #pragma once
 #include "DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h"
 
-class CameraManager;		// カメラ
+namespace Engine {
+	class WorldTransform;
+}
+
+
+class CameraManager;		// カメラ管理
+class BaseCamera;			// カメラ
 namespace Character {
 	class BaseCharacter;		// キャラクター
 }
@@ -13,17 +19,8 @@ namespace Combo {
 	/// </summary>
 	class ComboCamera {
 	public:
-		// データ構造体
-		struct Data
-		{
-			std::string cameraName_ = "no";			// カメラ名
-			std::string baseCameraName_ = "no";		// 元のカメラ名
-			bool isChangeCamera_ = false;			// カメラを変更するか
-			float interpolation_ = 0.0f;			// 補間
-		};
-
 		// 開始
-		void Enter();
+		void Enter(Character::BaseCharacter* owner);
 
 		// 更新
 		void Update(float timer, float dt);
@@ -31,15 +28,17 @@ namespace Combo {
 		// 終了
 		void Exit();
 
-		// カメラ管理設定
-		void SetCameraManager(CameraManager* camera) { cameraManager = camera; }
+		void SetTarget(const Engine::WorldTransform* target) { this->target = target; }
 
 		// データ構造体取得
-		Data& GetData();
-
+		GlobalCameraData& GetData() { return data_; }
 	private:
-		Data data_;
+		const Engine::WorldTransform* target;	
+
+		BaseCamera* camera = nullptr;
 		CameraManager* cameraManager = nullptr;	// カメラ管理
+		// カメラデータ
+		GlobalCameraData data_;
 	};
 
 	/// <summary>

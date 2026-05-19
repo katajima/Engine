@@ -1,5 +1,7 @@
 #include "ComboEffect.h"
 #include"DirectXGame/application/base/Character/Base/CharacterManeger.h"
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
+#include <DirectXGame/application/base/Camera/Base/CameraManeger.h>
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include <DirectXGame/engine/3d/Object/Object3d.h>
 
@@ -8,15 +10,26 @@ namespace Combo {
 #pragma region ComboCamera
 
 	// 開始
-	void ComboCamera::Enter() {}
+	void ComboCamera::Enter(Character::BaseCharacter* owner) {
+		cameraManager = owner->GetCameraManager();
+		if (data_.isLockOn) {
+			cameraManager->GetBaseCamera()->GetCameraController()->
+				GetCameraLockOn()->GetData() = CameraLockOnData{nullptr,data_ .lockOnInterpolation,data_.isLockOn };
+			cameraManager->GetBaseCamera()->LockOn(target);
+		}
+	}
 
 	// 更新
 	void ComboCamera::Update(float timer, float dt) {
-
+		if (data_.lockOnInterpolation <= timer && data_.isLockOn) {
+			cameraManager->GetBaseCamera()->LockOn(nullptr);
+		}
 	}
 
 	// 終了
-	void ComboCamera::Exit() {}
+	void ComboCamera::Exit() {
+		cameraManager->GetBaseCamera()->LockOn(nullptr);
+	}
 
 #pragma endregion // コンボカメラ
 

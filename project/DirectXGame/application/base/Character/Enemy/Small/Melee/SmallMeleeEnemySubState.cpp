@@ -73,6 +73,24 @@ namespace Character {
 
 		enemy->GetMoveComponent()->GetMoveRequestSystem()->SetRequest(request);
 
+		if (clock == -1) {
+			size += deltaTime * 1.5f;
+			if (size >= 1.25f) {
+				clock *= -1;
+			}
+
+		}
+		else {
+			size -= deltaTime * 1.5f;
+			if (size <= 1.0f) {
+				clock *= -1;
+			}
+		}
+		
+
+		enemy->GetWorldTransform().scale_ = size;
+		
+
 		if (timer_ >= readyTime_) {
 			fsm_->ChangeState(AttackSubState::Swing);
 		}
@@ -85,7 +103,7 @@ namespace Character {
 		}
 
 		timer_ = 0.0f;
-
+		enemy->GetWorldTransform().scale_ = { 1,1,1 };
 		// Readyで最終的に合わせた方向を使う
 		Vector3 toTarget = Subtract(enemy->GetTargetPos(), enemy->GetWorldTransform().translate_);
 		toTarget.y = 0.0f;
@@ -108,8 +126,8 @@ namespace Character {
 		data.hitBoxData.isEneble = true;
 		data.hitBoxData.isLine = true;
 		data.hitBoxData.tag = CollisionTag::EnemyAttack;
-		data.hitBoxData.layer = CollisionLayer::EnemyAttack;
-		data.hitBoxData.mask = CollisionLayer::Player;
+		data.hitBoxData.layer = CollisionLayer::ALL;
+		data.hitBoxData.mask = CollisionLayer::ALL;
 		data.hitBoxData.colliderSize = { 1.0f, 2.0f, 1.0f };
 		data.reactionData.damageData.GetOne().SetDamage(10.0f);
 

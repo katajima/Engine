@@ -5,7 +5,7 @@
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include <DirectXGame/engine/Animation/AnimationComponent.h>
-
+#include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 namespace Character {
 #pragma region Idle
 
@@ -270,18 +270,21 @@ namespace Character {
 #pragma region Die
 
 	void PlayerStateDie::Update(const CharacterContext& ctx) {
+	
 	}
 
 	void PlayerStateDie::Exit() {
 	}
 	
 	void PlayerStateDie::Enter() {
+		character->GetDeathSystem()->StartDeath(DeathType::Normal, { 1.0f ,false,1.0f,{} });
 		Engine::AnimationComponent* anima = character->GetObjectComponent()->GetObject3D()->GetAnimationComponent();
 		anima->SetIsPlaying(true);		// アニメーション再生
 		anima->SetIsLoop(false);			// アニメーションをループさせるか
 		anima->SetStratAnimeTime();		// アニメーション時間を初期化
 		anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
 		anima->SetAnimation("Rig|Death01", 0.1f);	// 流すアニメーション設定
+
 	}
 
 #pragma endregion // 死亡
@@ -305,6 +308,10 @@ namespace Character {
 		anima->SetStratAnimeTime();		// アニメーション時間を初期化
 		anima->SetAnimationSpeed(1.0f); // アニメーションスピード設定
 		anima->SetAnimation("Rig|Hit_Chest", 0.1f);	// 流すアニメーション設定
+
+		character->GetEffect()->Emit("EmitterPlayerHitDamageEffect", character->GetWorldPosition() + hitEffectPos);
+		character->GetEffect()->Emit("EmitterRingHit", character->GetWorldPosition() + hitEffectPos);
+
 	}
 
 }

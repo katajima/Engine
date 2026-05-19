@@ -100,6 +100,9 @@ namespace Character {
 	ObjectComponent* BaseCharacter::GetObjectComponentShadow() { return objectComponentShadow_.get(); }
 	// ワールド変換取得
 	Engine::WorldTransform& BaseCharacter::GetWorldTransform() { return objectComponent_->GetWorldTransform(); }
+	//
+	// ワールド変換取得
+	const Engine::WorldTransform* BaseCharacter::GetConstWorldTransform() const { return &objectComponent_->GetWorldTransform(); };
 	// ワールド座標取得
 	Vector3 BaseCharacter::GetWorldPosition() const { return objectComponent_->GetWorldTransform().GetWorldPosition(); }
 }

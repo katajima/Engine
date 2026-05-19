@@ -163,6 +163,16 @@ void CameraManager::UpadateImGui() {
 #endif
 }
 
+BaseCamera* CameraManager::GetBaseCamera() {
+	// 使っているカメラを更新
+	for (auto& cam : cameras) {
+		if (cam.second->GetUseCamera()) {
+			return cam.second;
+		}
+	}
+	return nullptr;
+}
+
 void CameraManager::DeleteCamera(std::string name)
 {
 	auto it = cameras.find(name);

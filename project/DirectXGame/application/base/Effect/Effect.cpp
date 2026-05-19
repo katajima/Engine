@@ -51,6 +51,23 @@ void EffectSystem::InitParticle() {
 	effectEditor_->AddEffectGlobalData("EmitterScrapGear", "scrapGear");
 	// 基盤エミッター
 	effectEditor_->AddEffectGlobalData("EmitterScrapBasis", "scrapBasis");
+
+	// 死んだとき
+
+	// ねじエミッター
+	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyScrapScrew", "scrapScrew");
+	// 鉄の棒エミッター
+	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyScrapIronRod", "scrapIronRod");
+	// 歯車エミッター
+	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyScrapGear", "scrapGear");
+	// 煙エミッター
+	effectEditor_->AddEffectGlobalData("EmitterDeathEnemySmoke", "smokePlane05");
+	// 爆破エミッター
+	effectEditor_->AddEffectGlobalData("EmitterDeathEnemyExp", "expPlane01");
+
+	// プレイヤー食らいエフェクト
+	effectEditor_->AddEffectGlobalData("EmitterPlayerHitDamageEffect", "hit");
+
 }
 
 void EffectSystem::InitRangeBombingBullet() {

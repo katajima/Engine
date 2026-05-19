@@ -75,8 +75,8 @@ namespace Combo {
 		ImGuiReaction();
 		// ヒットボックス設定
 		ImGuiApplyHitBox();
-
-
+		// カメラ設定
+		ImGuiCamera();
 		// ステートのコンボデータ取得	
 		ComboData& comboData = state->Data();
 		// ステートの時間設定
@@ -271,6 +271,7 @@ namespace Combo {
 		}
 	}
 
+	// リアクション設定
 	void EditorBlock::ImGuiReaction() {
 		if (ImGui::CollapsingHeader("リアクション")) {
 			static const char* HitReactionTypeLabels[] = {
@@ -303,6 +304,17 @@ namespace Combo {
 		}
 	}
 
+	// カメラ設定
+	void  EditorBlock::ImGuiCamera() {
+		if (ImGui::CollapsingHeader("カメラ関係")) {
+			ImGui::Checkbox("カメラを対象にロックオンするか", &data_.camera.isLockOn);
+			ImGui::DragFloat("ロックオン補間速度", &data_.camera.lockOnInterpolation);
+			if (data_.camera.lockOnInterpolation < 0.0f) {
+				data_.camera.lockOnInterpolation = 0.0f;
+			}
+		}
+	};
+
 	void EditorBlock::SequencerApplyToState() {
 
 		// ステートのコンボデータ取得	
@@ -318,7 +330,10 @@ namespace Combo {
 		data_.animation = comboData.GetComboMotion().GetComboAnimation().GetData();
 		// 条件
 		data_.condition = comboData.GetComboCondition().GetData();
-
+		// カメラ
+		data_.camera = comboData.GetComboCamera().GetData();
+		// エフェクト
+		data_.effect = comboData.GetComboEffect().GetData();
 		// シーケンサー適応
 		ComboImGui::SequencerApplyToState(sequence_, comboData, maxFrame);
 	}
@@ -539,6 +554,8 @@ namespace Combo {
 			// アニメーションスピード
 			data.animation = comboEditorBlocks_[it.first].GetData().animation;
 
+			// カメラ
+			data.camera = comboEditorBlocks_[it.first].GetData().camera;
 			// エフェクト
 			data.effect.trailEffectStartTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").startFrame);
 			data.effect.trailEffectLifeTime = ConvertUtility::FramesToSeconds(combo.GetEvent("トレイルエフェクト時間").endFrame) - data.effect.trailEffectStartTime;

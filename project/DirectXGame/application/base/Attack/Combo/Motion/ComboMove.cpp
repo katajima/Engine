@@ -40,7 +40,9 @@ namespace Combo {
 		// ターゲット指定
 		lockOnSystem->GetData() = data_.lockOnData;
 		traget = lockOnSystem->SoftLockOn();
+		targetWorldTransform = nullptr;
 		if (traget) {
+			targetWorldTransform = traget->GetConstWorldTransform();
 			targetPos_ = traget->GetWorldPosition();
 		}
 
@@ -229,4 +231,9 @@ namespace Combo {
 
 		return result;
 	}
+
+	const Engine::WorldTransform* ComboMove::GetTarget() {
+		return targetWorldTransform;
+	};
+
 };

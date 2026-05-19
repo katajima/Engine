@@ -7,6 +7,7 @@
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
+#include <DirectXGame/application/base/Effect/Effect.h>
 
 namespace Character {
 #pragma region Move
@@ -81,11 +82,6 @@ namespace Character {
 #pragma region Die
 
 	void MediumMeleeEnemyDieState::Update(const CharacterContext& ctx) {
-		character->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character->GetTime(); // サイズを縮小
-		if (character->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
-			character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
-			character->GetObjectComponentShadow()->GetWorldTransform().scale_ = {};
-		}
 	}
 
 	void MediumMeleeEnemyDieState::Exit() {
@@ -95,6 +91,13 @@ namespace Character {
 	void MediumMeleeEnemyDieState::Enter(){
 		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+	
+		character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
+		character->GetEffect()->Emit("EmitterDeathEnemyScrapScrew", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemyScrapIronRod", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemyScrapGear", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemySmoke", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemyExp", character->GetWorldTransform().GetWorldPosition());
 	}
 
 #pragma endregion 
@@ -103,12 +106,6 @@ namespace Character {
 
 	void MediumMeleeEnemyDamageState::Update(const CharacterContext& ctx){
 		if (character->GetHitMotionSystem()->IsFinished()) {
-			//// HPが0以下なら死亡
-			//if (character->GetHP() <= 0) {
-			//	character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Die);
-			//	return;
-			//}
-
 			character->GetCharacterStateMachine()->ChangeState(CharacterMainState::Move);
 		}
 	}

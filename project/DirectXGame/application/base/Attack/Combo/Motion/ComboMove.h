@@ -45,6 +45,8 @@ namespace Combo {
 		void SetDirection(const Vector3& dire) { direction_ = dire; }
 		// ターゲット位置取得
 		Vector3 GetTargetPosition() const { return targetPos_; }
+		// ターゲット
+		const Engine::WorldTransform* GetTarget();
 	private:
 		// 移動タイプによる処理
 		void MoveTypeProcess(float timer, float dt);
@@ -57,6 +59,10 @@ namespace Combo {
 		MovementComponent* moveComponent = nullptr;
 		// ワールドトランスフォーム
 		Engine::WorldTransform* worldTransform = nullptr;
+		// ワールドトランスフォーム（ターゲット）
+		const Engine::WorldTransform* targetWorldTransform = nullptr;
+
+
 		// ロックオンシステム
 		LockOnSystem* lockOnSystem = nullptr;
 		// ターゲット

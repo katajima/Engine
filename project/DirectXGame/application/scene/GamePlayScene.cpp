@@ -235,8 +235,10 @@ void GamePlayScene::Update()
 	// ゲーム進行マネージャー更新
 	gameFlowController_->Update(GetTime());
 
-	if (characterManager_->GetPlayer()->GetAlive()) {
-		GetSceneData().playerDie = false;
+	if (characterManager_->GetPlayer()) {
+		if (characterManager_->GetPlayer()->GetAlive()) {
+			GetSceneData().playerDie = false;
+		}
 	}
 	else {
 		GetSceneData().playerDie = true;
@@ -279,7 +281,7 @@ void GamePlayScene::CheckAllCollisions() {
 	// キャラクターセット
 	for (auto caracter : characterManager_->GetCharacters()) {
 		if (caracter->GetColliderComponent()) {
-			if (caracter->GetAlive());
+			if (caracter->GetAlive() && caracter->GetCurrentMainState() != Character::CharacterMainState::Die)
 			collisionManager_->Register(caracter->GetColliderComponent());
 
 		}

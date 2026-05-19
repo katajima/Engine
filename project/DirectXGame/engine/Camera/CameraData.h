@@ -36,19 +36,15 @@ struct CameraLockOnData {
 	// ターゲット位置
 	const Engine::WorldTransform* target = nullptr;
 	// ロックオン時の回転補間速度
-	float rotateSpeed = 0.1f;
+	float rotateSpeed = 0.5f;
 	// ロックオンしているか
 	bool isLockOn = false;
 };
 
 // カメラシェイクデータ
 struct CameraShakeData {
-	// 揺れの強さ
-	float power = 0.0f;
 	// 揺れの継続時間
 	float duration = 0.0f;
-	// 時間
-	float timer = 0.0f;
 	// 揺れオフセット
 	Vector3 offset{};
 };
@@ -56,11 +52,11 @@ struct CameraShakeData {
 // カメラズームデータ
 struct CameraZoomData {
 	// 目標距離
-	float targetDistance;
-	// 現在距離
-	float currentDistance;
+	float targetDistance = 0.0f;
 	// 距離補間速度
-	float zoomSpeed;
+	float zoomSpeed = 0.0f;
+	// 持続時間
+	float duration = 0.0f;
 };
 
 // 障害物回避データ

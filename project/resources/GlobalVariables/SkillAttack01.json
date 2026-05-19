@@ -40,6 +40,14 @@
             "type": "float",
             "value": 0.28333333134651184
         },
+        "カメラロックオン": {
+            "type": "bool",
+            "value": false
+        },
+        "カメラロックオン補間速度": {
+            "type": "float",
+            "value": 0.5
+        },
         "コライダー(タグ)": {
             "enumType": "CollisionTag",
             "type": "enum",

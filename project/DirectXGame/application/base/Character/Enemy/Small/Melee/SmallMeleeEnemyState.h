@@ -82,7 +82,7 @@ namespace Character {
 		void Update(const CharacterContext& ctx) override;
 
 		// 終了
-		void Exit() override {};
+		void Exit() override;
 		// 初期化
 		void Enter() override {};
 	private:

@@ -32,6 +32,7 @@ void FollowCamera::Initialize(InputSystem* inputSystem, Engine::EntityManager* e
 
 void FollowCamera::Update() {
 	controller->SetTraget(target_);
+	controller->SetLockOnTarget(target);
 	// カメラを使っているなら
 	if (useCamera) {
 		uniqueCamera_->GetPostEffectManager()->AddEffectBlocks(uniqueCamera_->GetPostEffectBlocks());

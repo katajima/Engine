@@ -1,5 +1,6 @@
 #include "ComboData.h"
 #include <DirectXGame/application/base/Character/Base/CharacterContext.h>
+#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
 
 namespace Combo {
 
@@ -21,7 +22,11 @@ namespace Combo {
 			range.Enter(owner, ctx);
 		}
 		// コンボ用カメラクラス開始
-		camera.Enter();
+		if (owner->GetCharacterParameterComponent()->GetCharacterType() == Character::Type::Player) {
+			useCamera = true;
+			camera.SetTarget(motion.GetComboMove().GetTarget());
+			camera.Enter(owner);
+		}
 		// コンボ用エフェクトクラス開始
 		effect.Enter(owner);
 	}
@@ -48,6 +53,7 @@ namespace Combo {
 			range.Update(ctx, timer_);
 		}
 		// コンボ用カメラクラス更新
+		if(useCamera)
 		camera.Update(timer_, ctx.dt);
 		// コンボ用エフェクトクラス更新
 		effect.Update(timer_, ctx.dt);
@@ -68,6 +74,7 @@ namespace Combo {
 			range.Exit(owner);
 		}
 		// コンボ用カメラクラス終了
+		if(useCamera)
 		camera.Exit();
 		// コンボ用エフェクトクラス終了
 		effect.Exit(owner);

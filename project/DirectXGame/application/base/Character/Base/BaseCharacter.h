@@ -118,6 +118,8 @@ namespace Character {
 		ObjectComponent* GetObjectComponentShadow();
 		// ワールド変換取得
 		Engine::WorldTransform& GetWorldTransform();
+		// ワールド変換取得
+		const Engine::WorldTransform* GetConstWorldTransform() const;
 		// ワールド座標取得
 		Vector3 GetWorldPosition() const;
 	public: // 貰いもの

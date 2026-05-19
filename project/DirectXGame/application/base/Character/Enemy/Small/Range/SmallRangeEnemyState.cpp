@@ -6,7 +6,7 @@
 #include <DirectXGame/application/base/Special/Point/SpecialPoint.h>
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
-
+#include <DirectXGame/application/base/Effect/Effect.h>
 namespace Character {
 
 #pragma region Move
@@ -93,11 +93,7 @@ namespace Character {
 #pragma region Die
 
 	void SmallRangeEnemyDieState::Update(const CharacterContext& ctx){
-		character->GetObjectComponent()->GetWorldTransform().scale_ -= Vector3(1.1f, 1.1f, 1.1f) * character->GetTime(); // サイズを縮小
-		if (character->GetObjectComponent()->GetWorldTransform().scale_.x <= 0) {
-			character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
-			character->GetObjectComponentShadow()->GetWorldTransform().scale_ = {};
-		}
+		
 	}
 
 	void SmallRangeEnemyDieState::Exit(){}
@@ -105,6 +101,12 @@ namespace Character {
 	void SmallRangeEnemyDieState::Enter(){
 		character->GetDeathSystem()->StartDeath(DeathType::Explode, { dieTimer_ ,false,1.0f,{} });
 		character->GetSpecalPointManager()->AddPoint(character->GetWorldTransform().GetWorldPosition() + Vector3{ 0,4.0f,0 }, 1);
+		character->GetObjectComponent()->GetWorldTransform().scale_ = Vector3{ 0,0,0 };	// 0に
+		character->GetEffect()->Emit("EmitterDeathEnemyScrapScrew", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemyScrapIronRod", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemyScrapGear", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemySmoke", character->GetWorldTransform().GetWorldPosition());
+		character->GetEffect()->Emit("EmitterDeathEnemyExp", character->GetWorldTransform().GetWorldPosition());
 	}
 
 #pragma endregion
