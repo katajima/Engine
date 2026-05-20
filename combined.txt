@@ -174,9 +174,6 @@
     └── └── └── └── └── ├── CharacterManeger.cpp
     └── └── └── └── └── ├── CharacterManeger.h
     └── └── └── └── └── └── Characters.h
-    └── └── └── └── ├── Crowd/
-    └── └── └── └── └── ├── CrowdManager.cpp
-    └── └── └── └── └── └── CrowdManager.h
     └── └── └── └── ├── Death/
     └── └── └── └── └── ├── DeathData.h
     └── └── └── └── └── ├── DeathSystem.cpp
@@ -193,7 +190,9 @@
     └── └── └── └── └── └── └── ├── EnemyAttackSlotSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyAttackSlotSystem.h
     └── └── └── └── └── └── └── ├── EnemyAttackSystem.cpp
-    └── └── └── └── └── └── └── └── EnemyAttackSystem.h
+    └── └── └── └── └── └── └── ├── EnemyAttackSystem.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdSystem.cpp
+    └── └── └── └── └── └── └── └── EnemyCrowdSystem.h
     └── └── └── └── └── └── ├── BaseEnemy.cpp
     └── └── └── └── └── └── ├── BaseEnemy.h
     └── └── └── └── └── └── └── EnemyData.h
@@ -13003,6 +13002,8 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterContext.
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
 
 void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {
 	this->input = input;	// 入力データ
@@ -13132,6 +13133,27 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 	ctx.isStop = !owner->GetIsMove();
 	// ターゲット取得
 	ctx.target = lockOnSystem->GetTarget();
+	if (owner->GetCharacterType() == Type::Enemy) {
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(owner);
+		if (enemy->GetEnemyAiSystem()) {
+			// 攻撃役は攻撃スロットへ、それ以外は群衆隊形スロットへ向かわせる
+			const bool isAttackRing =
+				enemy->GetEnemyAttackSystem() &&
+				enemy->GetEnemyAttackSystem()->GetAttackRequest() &&
+				enemy->GetEnemyAttackSystem()->GetAttackRequest()->GetRing() == EnemyAttackRing::Attack;
+
+			if (isAttackRing) {
+				if (const AttackSlot* attackSlot = enemy->GetEnemyAiSystem()->GetAttackSlotSystem()->FindSlot(enemy)) {
+					ctx.moveTarget = attackSlot->position;
+					ctx.hasMoveTarget = true;
+				}
+			}
+			else if (const CrowdSlot* crowdSlot = enemy->GetEnemyAiSystem()->GetCrowdSystem()->FindSlot(enemy)) {
+				ctx.moveTarget = crowdSlot->position;
+				ctx.hasMoveTarget = true;
+			}
+		}
+	}
 	// 移動速度
 	ctx.moveSpeed = moveSystem->GetData().maxSpeed;
 	// 高さ
@@ -13271,6 +13293,10 @@ namespace Character {
 		float moveSpeed = 1.0f;
 		// ターゲット指定
 		const BaseCharacter* target = nullptr;
+		// AIなどが通常ターゲット以外へ移動させたい時の目標座標
+		Vector3 moveTarget{};
+		// moveTargetを使うか
+		bool hasMoveTarget = false;
 	};
 
 	/// <summary>
@@ -13324,6 +13350,7 @@ namespace Character {
 
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Base/CharacterData.h
@@ -13715,6 +13742,8 @@ namespace Character {
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		enemy->SetEffect(effect);						// エフェクト設定
 		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
+		enemy->SetCrowdGroupId(groupId);					// 群衆グループ設定
+		enemy->SetCrowdMemberIndex(enemyCount_++);			// 群衆内番号設定
 		enemy->Initialize(nullptr, entityManager, globalVariables, transform.translate, camera); // 初期化
 		enemy->SetTargetCharacters(GetPlayer());					// ターゲット指定
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
@@ -13749,7 +13778,7 @@ namespace Character {
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
 			pos.y = 0.0f;
-			CreateCharacter(enemyType, "enemy", {}, Transform{ {1,1,1}, {},pos });
+			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos });
 		}
 	}
 
@@ -13786,7 +13815,6 @@ File Path: project/DirectXGame/application/base/Character/Base/CharacterManeger.
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
 
-#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include "CharacterGlobalData.h"
 
 //前方宣言
@@ -13870,12 +13898,6 @@ namespace Character {
 			return nullptr;
 		}
 
-		/// <summary>
-		/// 群衆AI取得
-		/// </summary>
-		/// <returns></returns>
-		CrowdManager* GetCrowdManager() { return crowdManager_.get(); }
-
 	public: // 生成系
 		// キャラクター生成(敵)
 		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
@@ -13894,8 +13916,6 @@ namespace Character {
 		uint32_t characterCount_ = 0;	
 		// 敵カウンター
 		uint32_t enemyCount_ = 0;	
-		// 群衆AI
-		std::unique_ptr<CrowdManager> crowdManager_;	
 		// 敵AIシステム
 		std::unique_ptr<EnemyAiSystem> enemyAiSystem_;	
 
@@ -13938,676 +13958,6 @@ File Path: project/DirectXGame/application/base/Character/Base/Characters.h
 #include"DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemy.h"
 #include"DirectXGame/application/base/Character/Enemy/Small/Range/SmallRangeEnemy.h"
 #include"DirectXGame/application/base/Character/Enemy/Small/Cart/SmallCartEnemy.h"
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Crowd/CrowdManager.cpp
-============================================================
-#include "CrowdManager.h"
-#include <DirectXGame/engine/Math/Random.h>
-#include <DirectXGame/application/base/Character/Base/BaseCharacter.h>
-#include"DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
-#include "DirectXGame/application/base/Object/ObjectComponent.h"
-#include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
-
-namespace Character {
-
-#pragma region CrowdAgent
-
-
-	void CrowdAgent::Initialize(uint32_t _id, uint32_t _group, const Vector3& pos)
-	{
-		id = _id;
-		groupId = _group;     // 個人Idとグループid設定
-		position_ = pos;      // 位置設定
-		velocity_ = { 0,0,0 }; // 速度
-
-		// Idle 廃止 → 最初から接近
-		state_ = AgentState::Approach;
-	}
-
-
-	void CrowdAgent::Update(float dt, const Vector3& groupTarget,
-		const std::vector<int>& neighborIndices,
-		const std::vector<CrowdAgent>* allAgents)
-	{
-		if (isDed) return;
-
-		position_ = owner->GetObjectComponent()->GetWorldPosition();
-
-		Vector3 toTarget = groupTarget - position_;
-		float distToTarget = Length(toTarget);
-		if (distToTarget < 0.001f) return;
-
-		if (attackDelayTimer_ > 0.0f) {
-			attackDelayTimer_ -= dt;
-		}
-
-		// ===============================
-		//       ステート遷移制御
-		// ===============================
-		switch (state_)
-		{
-			// ----------- Idle 完全削除 -----------
-
-		case AgentState::Approach:
-		{
-			// 一定距離に入ったら攻撃準備
-			if (distToTarget < preparationAttack_) {
-				state_ = AgentState::PreparationAttack;
-				attackDelayTimer_ = Random::RandomFloat(2.0f, 4.0f);
-			}
-			break;
-		}
-
-		case AgentState::PreparationAttack:
-		{
-			if (attackDelayTimer_ <= 0.0f) {
-				state_ = AgentState::Attack;
-				owner->GetCharacterStateMachine()->ChangeState(CharacterMainState::Attack);
-				attackCooldown_ = 1.0f + Random::RandomFloat(3.0f, 0.5f);
-				animIndex = 1;
-			}
-			else if (distToTarget > preparationAttack_) {
-				// 離れたら戻って接近し直す
-				state_ = AgentState::Approach;
-			}
-			break;
-		}
-
-		case AgentState::Attack:
-		{
-			// プレイヤーに近すぎたら離脱
-			if (distToTarget < returnEnterDistance_) {
-				state_ = AgentState::Return;
-				break;
-			}
-
-			if (owner->GetCharacterStateMachine()->GetCurrentMainState()
-				== CharacterMainState::Move) {
-				state_ = AgentState::Return;
-			}
-			break;
-		}
-
-		case AgentState::Return:
-		{
-			// プレイヤーからの距離を計測
-			float distFromPlayer = distToTarget;
-
-			// 一定距離離れたら再び接近
-			if (distFromPlayer >= returnLeaveDistance_) {
-				state_ = AgentState::Approach;
-			}
-			break;
-		}
-
-		default:
-			break;
-		}
-
-
-		// ===============================
-		//       ステアリング制御
-		// ===============================
-		Vector3 desired = Normalize(toTarget);
-		Vector3 sep = { 0,0,0 };
-		Vector3 cohesion = { 0,0,0 };
-
-		// Idle を削除したので Idle の条件を除去
-		if (state_ == AgentState::Approach || state_ == AgentState::Return) {
-			for (int idx : neighborIndices) {
-				if (idx < 0) continue;
-
-				const CrowdAgent& other = (*allAgents)[idx];
-				if (other.id == id) continue;
-				if (other.isDed) continue;
-
-				Vector3 toOther = position_ - other.position_;
-				float d = Length(toOther);
-				if (d < radius * 2.0f)
-					sep += Normalize(toOther) * ((radius * 2.0f - d) / radius);
-			}
-		}
-
-		const CrowdGroupAgent& group = manager_->GetGroup(groupId);
-		Vector3 toCenter = group.anchorCenter - position_;
-		if (Length(toCenter) > 5.0f) {
-			float strength = (state_ == AgentState::Return) ? 1.5f : 0.5f;
-			cohesion = Normalize(toCenter) * strength;
-		}
-
-		if (state_ == AgentState::PreparationAttack) {
-			float idealDist = attackRange_ * 1.5f;
-			if (distToTarget < idealDist * 0.9f)
-				desired = Normalize(-toTarget);
-			else if (distToTarget > idealDist * 1.1f)
-				desired = Normalize(toTarget);
-			else
-				desired = { 0,0,0 };
-		}
-
-		if (state_ == AgentState::Return) {
-			// プレイヤーから離れる方向へ
-			desired = Normalize(position_ - groupTarget);
-		}
-
-		Vector3 steer = Normalize(desired + sep * 0.5f + cohesion * 0.8f);
-		float targetSpeed = speed;
-
-		switch (state_) {
-		case AgentState::PreparationAttack:
-			velocity_ = 0.0f;
-			targetSpeed = 0.0f;
-			break;
-		case AgentState::Attack:            targetSpeed *= 0.1f; break;
-		case AgentState::Return:            targetSpeed *= 0.8f; break;
-		default: break; // Approach はそのまま
-		}
-
-		velocity_ = Lerp(velocity_, steer * targetSpeed, dt * 5.0f);
-		velocity_.y = 0;
-		//owner->Velocity() = velocity_;
-	}
-
-#pragma endregion // 個
-
-#pragma region CrowdGroupAgent
-
-	void CrowdGroupAgent::UpdateCenter(const std::vector<CrowdAgent>& agents)
-	{
-		if (memberIndices.empty()) return;
-		Vector3 sum = { 0,0,0 };
-		for (int idx : memberIndices)
-		{
-			sum = sum + agents[idx].position_;
-		}
-		centerPos = sum * (1.0f / (float)memberIndices.size());
-
-		// --- 理想中心(anchorCenter)を補正 ---
-		Vector3 offset = centerPos - anchorCenter;
-		float dist = Length(offset);
-		if (dist > 10.0f) { // グループがバラけすぎた
-			// 緩やかにanchorCenterを現在位置に寄せる（重心を動かす）
-			anchorCenter += Normalize(offset) * (dist - 10.0f) * 0.1f;
-		}
-	}
-
-	Vector3 CrowdGroupAgent::CalcSlotTarget(int localIndex)
-	{
-		int cols = 5; // 横並び数
-		float spacing = 2.0f;
-
-		int row = localIndex / cols;
-		int col = localIndex % cols;
-
-		// 中央揃え
-		float offsetX = (col - (cols / 2)) * spacing;
-		float offsetZ = (row)*spacing;
-
-		// 前方方向をグループの進行方向に合わせる
-		Vector3 forward = Normalize(command.targetPos - centerPos);
-		Vector3 right = Normalize(Cross(Vector3{ 0,1,0 }, forward));
-
-		Vector3 worldOffset = right * offsetX + forward * offsetZ;
-
-		// グループ中心からの絶対座標
-		return centerPos + worldOffset;
-	}
-
-
-	void CrowdGroupAgent::UpdateCommandLogic(const Vector3& playerPos)
-	{
-		float d = Length(playerPos - centerPos);
-
-		// --- 距離しきい値 ---
-		constexpr float engageRange = 30.0f;   // 交戦開始距離
-		constexpr float chaseRange = 60.0f;   // 追跡を続ける最大距離
-		constexpr float giveUpRange = 100.0f;  // 完全に見失う距離
-
-		// --- 以前の行動を考慮して状態遷移を管理 ---
-		switch (command.action)
-		{
-		case GroupAction::Idle:
-		{
-			// Idle状態からプレイヤー発見（一定距離内に入ったらAdvance）
-			if (d < engageRange) {
-				command.action = GroupAction::Advance;
-				command.targetPos = playerPos;
-				command.moveSpeed = 2.2f;
-			}
-			break;
-		}
-
-		case GroupAction::Advance:
-		{
-			// 攻撃可能距離に入ったらAttack
-			if (d < 12.0f) {
-				command.action = GroupAction::Attack;
-				command.moveSpeed = 3.0f;
-			}
-			// プレイヤーが遠くに離れた場合は、Idleに戻さず追跡を継続
-			else if (d > chaseRange) {
-				command.action = GroupAction::Retreat; // 後退または追跡解除
-				command.moveSpeed = 1.0f;
-			}
-			command.targetPos = playerPos; // 毎フレームプレイヤー座標を追従
-			break;
-		}
-
-		case GroupAction::Attack:
-		{
-			// 攻撃レンジを維持
-			command.targetPos = playerPos;
-
-			// プレイヤーがかなり離れたら追跡に戻る
-			if (d > 20.0f) {
-				command.action = GroupAction::Advance;
-				command.moveSpeed = 2.5f;
-			}
-			break;
-		}
-
-		case GroupAction::Retreat:
-		{
-			// 追跡解除 → 一定距離離れたらIdleに戻る
-			if (d > giveUpRange) {
-				command.action = GroupAction::Idle;
-				command.moveSpeed = 0.0f;
-			}
-			else if (d < chaseRange) {
-				// 再び追撃開始
-				command.action = GroupAction::Advance;
-				command.moveSpeed = 2.2f;
-			}
-			command.targetPos = playerPos;
-			break;
-		}
-
-		default:
-			break;
-		}
-	}
-
-	void CrowdGroupAgent::DistributeTargets(std::vector<CrowdAgent>& agents)
-	{
-		for (size_t i = 0; i < memberIndices.size(); ++i)
-		{
-			int idx = memberIndices[i];
-			if (idx < 0) continue;
-
-			Vector3 slot = CalcSlotTarget((int)i);
-
-			// ★前方方向（Z=Forward）
-			Vector3 dirToCmd = Normalize(command.targetPos - centerPos);
-
-			// ★スロットを部隊の進行方向に少しだけ前へ押す
-			Vector3 finalTarget = slot + dirToCmd * 0.5f;
-
-			// ★修正：エージェントにスロット目標を渡す（今まで欠落していた）
-			agents[idx].slotTarget_ = finalTarget;
-		}
-	}
-
-
-#pragma endregion // グループ
-
-
-#pragma region CrowdManager
-
-	int CrowdManager::CreateAgent(int groupId, BaseEnemy* ene, const Vector3 pos)
-	{
-		CrowdAgent a;
-		a.owner = ene;
-		a.radius = 10.0f;
-		a.speed = 20.0f;
-		a.Initialize((uint32_t)agents.size(), (uint32_t)groupId, pos);
-		a.SetCrowdManager(this);
-		int idx = (int)agents.size();
-		agents.push_back(std::move(a));
-		groups[groupId].memberIndices.push_back(idx);
-		return idx;
-	}
-
-	void CrowdManager::Update(float dt) {
-		// グリッド更新
-		grid.Clear();
-		for (size_t i = 0; i < agents.size(); ++i)
-		{
-			grid.Insert((int)i, agents[i].position_);
-		}
-
-
-		// Groupごとの中心/コマンド更新
-		for (auto& g : groups)
-		{
-			g.UpdateCenter(agents);
-			g.UpdateCommandLogic(playerPos);
-		}
-
-
-		// 部隊ごとにメンバーの目標を配布
-		for (auto& g : groups)
-		{
-			g.DistributeTargets(agents);
-		}
-
-
-		// Agent更新：近傍検索 -> Update
-		std::vector<int> neighbors;
-		for (size_t i = 0; i < agents.size(); ++i)
-		{
-			CrowdAgent& a = agents[i];
-
-			float d = Length(a.position_ - playerPos);
-			float lodFactor = (d < 15.0f) ? 1.0f : ((d < 40.0f) ? 0.5f : 0.25f);
-			if (Random::RandomFloat(0.0f, 1.0f) > lodFactor) continue;
-
-			grid.QueryNeighbors(a.position_, neighbors);
-
-			CrowdGroupAgent& grp = groups[a.groupId];
-
-			Vector3 finalTarget;
-
-			// ★★★ 修正：Return 以外はプレイヤーへ向かわせる ★★★
-			if (a.state_ == AgentState::Return)
-			{
-				finalTarget = playerPos; // Return でも playerPos を渡す（方向反転は Agent 側）
-			}
-			else
-			{
-				finalTarget = playerPos;
-			}
-			// それ以外はプレイヤーを追わせる
-			finalTarget = playerPos;
-
-			a.Update(dt, finalTarget, grp.memberIndices, &agents);
-		}
-	}
-
-	void CrowdManager::BindAgentsToEnemies(std::vector<BaseEnemy*>& enemies)
-	{
-		for (size_t i = 0; i < agents.size() && i < enemies.size(); ++i) {
-			agents[i].owner = enemies[i];
-		}
-	}
-
-	void CrowdManager::UpdateAgentsToInstancing()
-	{
-		for (auto& agent : agents) {
-			if (agent.owner && !agent.isDed) {
-				if (agent.owner->GetHP() <= 0) {
-					agent.isDed = true;
-				}
-			}
-		}
-	}
-
-#pragma endregion // 管理
-}
-
-============================================================
-File Path: project/DirectXGame/application/base/Character/Crowd/CrowdManager.h
-============================================================
-#pragma once
-#include <map>
-#include"DirectXGame/engine/3d/Object/Object3dInstansManager.h"
-
-
-namespace Character {
-	// 前方宣言
-	class BaseCharacter;
-
-
-	/// <summary>
-	/// エージェントの状態
-	/// </summary>
-	enum class AgentState {
-		Approach,			// 接近 ->Attack
-		PreparationAttack,	// 攻撃準備
-		Attack,				// 攻撃 ->Evade or Idle
-		Return,				// 戻る ->
-	};
-
-
-	// 前方宣言
-	class CrowdGroupAgent;
-	class BaseEnemy;
-	class CrowdManager;
-
-	/// <summary>
-	/// 個々のキャラクター
-	/// </summary>
-	class CrowdAgent {
-	public:
-
-		/// <summary>
-		/// 初期化
-		/// </summary>
-		void Initialize(uint32_t _id, uint32_t _group, const Vector3& pos);
-
-		/// <summary>
-		/// GroupCommandから受け取ったターゲットへ向かう処理（分散 + 衝突回避を含む）
-		/// </summary>
-		void Update(float dt, const Vector3& groupTarget, const std::vector<int>& neighborIndices, const std::vector<CrowdAgent>* allAgents);
-
-		/// <summary>
-		/// 所属している部隊登録
-		/// </summary>
-		void SetGroupAgent(CrowdGroupAgent* group) { group_ = group; }
-
-		/// <summary>
-		/// 管理クラス設定
-		/// </summary>
-		/// <param name="manager"></param>
-		void SetCrowdManager(CrowdManager* manager) { manager_ = manager; }
-
-
-		Vector3 ComputeSteering(const Vector3& target) const
-		{
-			Vector3 pos = position_;
-			Vector3 tgt = target;
-			Vector3 dir = Normalize(tgt - pos);
-			return dir;
-		}
-
-		// 敵
-		BaseEnemy* owner = nullptr;
-
-
-		AgentState state_ = AgentState::Approach;	// 状態
-		Vector3 position_ = {};					// 位置
-		Vector3 velocity_ = {};					// 速度
-		float attackCooldown_ = 0.0f;			// 攻撃クールタイム
-		uint32_t id = 0;							// 個人ID
-		uint32_t groupId = 0;                       // 部隊ID
-
-
-		float speed = 300.0f;					// m/s
-		float radius = 0.5f;					// 衝突半径
-
-		Vector3 targetPos_ = {};				// ターゲット位置
-
-		bool isDed = false;						// 死んでいるか
-
-		float attackDelayTimer_ = 0.0f;			// 攻撃前の準備タイマー
-		float engageDistance_ = 200.0f;			// 攻撃を検討し始める距離
-
-		float preparationAttack_ = 15.0f;		// 攻撃準備に入る距離
-		float attackRange_ = 3.5f;				// 実際に攻撃できる距離
-
-		float returnLeaveDistance_ = 10.0f; // プレイヤーから離れたい距離
-		float returnEnterDistance_ = 6.0f;  // これ以下なら Return に入る
-
-		// 表示用：インスタンスバッファに書き込むデータ
-		uint32_t animIndex = 0;
-		Vector3 slotTarget_{};
-	private:
-
-		CrowdManager* manager_ = nullptr;
-		CrowdGroupAgent* group_ = nullptr;
-	};
-
-
-	enum class GroupAction : uint8_t {
-		Idle,
-		Advance,
-		Attack,
-		Retreat
-	};
-
-
-	struct GroupCommand
-	{
-		GroupAction action = GroupAction::Idle;
-		Vector3 targetPos = { 0,0,0 };
-		float moveSpeed = 2.5f;
-	};
-
-	/// <summary>
-	/// 部隊
-	/// </summary>
-	class CrowdGroupAgent {
-	public:
-
-
-		void Initialize(const Vector3& startPos)
-		{
-			centerPos = startPos;
-			anchorCenter = startPos; // 理想中心
-		}
-
-		// グループの中心位置
-		void UpdateCenter(const std::vector<CrowdAgent>& agents);
-
-		// 各個体のフォーメーション上の目標位置を計算して返す
-		Vector3 CalcSlotTarget(int localIndex);
-
-		// 部隊のコマンドに応じて内部ロジックでtargetPosを調整
-		void UpdateCommandLogic(const Vector3& playerPos);
-
-		// メンバーに与える目標（部隊目標 + 各スロット）を作る
-		void DistributeTargets(std::vector<CrowdAgent>& agents);
-
-
-
-
-		// 部隊人数
-		uint32_t number_ = 0;
-		uint32_t id = 0;
-		std::vector<int> memberIndices; // CrowdManager側のエージェント配列へのインデックス
-		Vector3 centerPos = { 0,0,0 };
-		Vector3 anchorCenter = { 0,0,0 };
-		GroupCommand command{};
-		// simple formation: grid parameters
-		int formationCols = 8;
-		float formationSpacing = 1.2f;
-
-	private:
-		// ターゲットのキャラクター
-		BaseCharacter* character_ = nullptr;
-	};
-
-
-
-	/// <summary>
-	/// 空間分割
-	/// </summary>
-	struct UniformGrid
-	{
-		float cellSize = 4.0f;
-		int cols = 64;
-		int rows = 64;
-		float originX = -128.0f;
-		float originZ = -128.0f;
-		std::vector<std::vector<int>> cells; // 各セルのagentインデックス
-
-
-		UniformGrid(int c = 64, int r = 64, float cs = 4.0f) : cellSize(cs), cols(c), rows(r)
-		{
-			cells.resize(cols * rows);
-		}
-
-
-		void Clear() { for (auto& v : cells) v.clear(); }
-
-
-		int PosToCellIndex(const Vector3& p) const
-		{
-			int cx = (int)floorf((p.x - originX) / cellSize);
-			int cz = (int)floorf((p.z - originZ) / cellSize);
-			if (cx < 0 || cz < 0 || cx >= cols || cz >= rows) return -1;
-			return cz * cols + cx;
-		}
-
-
-		void Insert(int agentIndex, const Vector3& pos)
-		{
-			int idx = PosToCellIndex(pos);
-			if (idx >= 0) cells[idx].push_back(agentIndex);
-		}
-
-
-		// 簡易近傍取得：同セルと周辺8セルを走査して、結果インデックスを返す
-		void QueryNeighbors(const Vector3& pos, std::vector<int>& out)
-		{
-			out.clear();
-			int cx = (int)floorf((pos.x - originX) / cellSize);
-			int cz = (int)floorf((pos.z - originZ) / cellSize);
-			for (int dz = -1; dz <= 1; ++dz) for (int dx = -1; dx <= 1; ++dx)
-			{
-				int nx = cx + dx; int nz = cz + dz;
-				if (nx < 0 || nz < 0 || nx >= cols || nz >= rows) continue;
-				int idx = nz * cols + nx;
-				auto& cell = cells[idx];
-				out.insert(out.end(), cell.begin(), cell.end());
-			}
-		}
-	};
-
-
-
-	/// <summary>
-	/// 群衆AI管理
-	/// </summary>
-	class CrowdManager {
-	public:
-		UniformGrid grid{};
-		/// <summary>
-		/// 部隊コンテナ
-		/// </summary>
-		std::vector<CrowdAgent> agents;
-		std::vector<CrowdGroupAgent> groups;
-
-		Vector3 playerPos = { 0,0,0 };
-
-
-		CrowdManager(int maxAgents = 1024, int maxGroups = 32) : grid(64, 64, 4.0f)
-		{
-			agents.reserve(maxAgents);
-			groups.reserve(maxGroups);
-		}
-
-
-		int CreateGroup()
-		{
-			CrowdGroupAgent g; g.id = (uint32_t)groups.size();
-			groups.push_back(std::move(g));
-			return (int)groups.size() - 1;
-		}
-
-		CrowdGroupAgent& GetGroup(uint32_t id) { return groups[id]; }
-
-		int CreateAgent(int groupId, BaseEnemy* ene, const Vector3 pos);
-
-		// LODコントロールの簡易実装: 距離に応じてAI更新の頻度や詳細度を落とす
-		void Update(float dt);
-
-
-		void BindAgentsToEnemies(std::vector<BaseEnemy*>& enemies);
-
-		void UpdateAgentsToInstancing();
-	};
-}
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Death/DeathData.h
@@ -14752,6 +14102,9 @@ namespace Character {
 
 		attackSlotSystem_ = std::make_unique<EnemyAttackSlotSystem>();
 		attackSlotSystem_->Initialize();
+
+		crowdSystem_ = std::make_unique<EnemyCrowdSystem>();
+		crowdSystem_->Initialize();
 	}
 
 	void EnemyAiSystem::UpdateSlot(
@@ -14759,6 +14112,7 @@ namespace Character {
 		const Vector3& targetPos,
 		float targetRotateY
 	) {
+		crowdSystem_->Update(enemies, targetPos, targetRotateY);
 		attackSlotSystem_->Update(enemies, targetPos, targetRotateY);
 	}
 
@@ -14774,6 +14128,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiS
 #pragma once
 #include "EnemyAttackRequestSystem.h"
 #include "EnemyAttackSlotSystem.h"
+#include "EnemyCrowdSystem.h"
 #include <memory>
 
 namespace Character {
@@ -14795,12 +14150,15 @@ namespace Character {
 		void UpdateRequest(const std::vector<BaseEnemy*>& enemies, float dt);
 
 		EnemyAttackSlotSystem* GetAttackSlotSystem() const { return attackSlotSystem_.get(); }
+		EnemyCrowdSystem* GetCrowdSystem() const { return crowdSystem_.get(); }
 
 	private:
 		std::unique_ptr<EnemyAttackRequestSystem> attackRequestSystem_ = nullptr;
 		std::unique_ptr<EnemyAttackSlotSystem> attackSlotSystem_ = nullptr;
+		std::unique_ptr<EnemyCrowdSystem> crowdSystem_ = nullptr;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackRequest.cpp
@@ -14953,11 +14311,6 @@ namespace Character {
 				continue;
 			}
 
-			// 攻撃リング内の敵だけ許可対象
-			if (request->GetRing() != EnemyAttackRing::Attack) {
-				continue;
-			}
-
 			if (request->GetNumber() == 0) {
 				request->SetNumber(requestCounter_++);
 			}
@@ -14989,21 +14342,30 @@ namespace Character {
 				return a->GetNumber() < b->GetNumber();
 			});
 
-		uint32_t grantCount = 0;
+		uint32_t attackRingCount = 0;
+		uint32_t approachRingCount = 0;
 
 		for (EnemyAttackRequest* request : activeRequests) {
-			if (grantCount >= maxAttackCount_) {
-				break;
+			if (attackRingCount < maxAttackCount_) {
+				request->SetRing(EnemyAttackRing::Attack);
+				request->Grant();
+				attackRingCount++;
+				continue;
 			}
 
-			request->Grant();
+			if (approachRingCount < approachRingCount_) {
+				request->SetRing(EnemyAttackRing::Approach);
+				approachRingCount++;
+				continue;
+			}
 
-			grantCount++;
+			request->SetRing(EnemyAttackRing::Standby);
 		}
 
 		intervalTimer_ = attackInterval_;
 	}
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackRequestSystem.h
@@ -15029,8 +14391,11 @@ namespace Character {
 		// 同時に攻撃できる敵数
 		uint32_t maxAttackCount_ = 1;
 
+		// 攻撃待ちの中でも前に詰める敵数
+		uint32_t approachRingCount_ = 3;
+
 		// 攻撃許可の間隔
-		float attackInterval_ = 0.5f;
+		float attackInterval_ = 0.1f;
 		float intervalTimer_ = 0.0f;
 
 		// 攻撃後、同じ敵が再攻撃できない時間
@@ -15040,6 +14405,7 @@ namespace Character {
 		float sameDistanceRange_ = 1.0f;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSlotSystem.cpp
@@ -15185,8 +14551,29 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAtt
 #include "EnemyAttackSystem.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/engine/Math/MathFunctions.h>
+#include <algorithm>
 
 namespace Character {
+	namespace {
+		struct RingRange {
+			float min;
+			float max;
+		};
+
+		RingRange GetRingRange(EnemyAttackRing ring) {
+			switch (ring) {
+			case EnemyAttackRing::Attack:
+				return { 5.0f, 7.0f };
+			case EnemyAttackRing::Approach:
+				return { 7.0f, 11.0f };
+			case EnemyAttackRing::Standby:
+				return { 11.0f, 15.0f };
+			default:
+				return { 5.0f, 7.0f };
+			}
+		}
+
+	}
 
 	void EnemyAttackSystem::Initialize(CharacterStateMachine* characterStateMachine) {
 		this->characterStateMachine = characterStateMachine;
@@ -15230,31 +14617,44 @@ namespace Character {
 		}
 
 
-		Vector3 toSlot = Subtract(slotPos, ownerPos);
-		toSlot.y = 0.0f;
+		Vector3 toMoveSlot = Subtract(slotPos, ownerPos);
+		toMoveSlot.y = 0.0f;
+		float slotDistance = toMoveSlot.Length();
 
-		float slotDistance = toSlot.Length();
+		toTarget = Subtract(targetPos, ownerPos);
+		toTarget.y = 0.0f;
+		float targetDistance = toTarget.Length();
 
-		const float slotArrivalRange = 10.0f;
+		attackRequest_->Activate();
 
-		if (slotDistance > slotArrivalRange) {
-			if (slotDistance > 0.001f) {
-				Vector3 moveDir = toSlot.Normalize();
-				Vector3 rotate = Math::DirectionToRotate(moveDir, Dire::Z);
+		EnemyAttackRing currentRing = attackRequest_->GetRing();
+		if (currentRing == EnemyAttackRing::None || currentRing == EnemyAttackRing::TooClose) {
+			currentRing = EnemyAttackRing::Approach;
+			attackRequest_->SetRing(currentRing);
+		}
 
-				rotateY = rotate.y;
-			}
+		RingRange ringRange = GetRingRange(currentRing);
+		const float ringMargin = 0.25f;
 
+		if (targetDistance < ringRange.min - ringMargin) {
 			timer_ = 0.0f;
-			attackRequest_->Deactivate();
-			attackRequest_->SetRing(EnemyAttackRing::Approach);
+			attackRequest_->SetRing(EnemyAttackRing::TooClose);
+			speed = -std::max(data.retreatSpeed, moveSpeed * 0.5f);
+			return;
+		}
 
+		if (targetDistance > ringRange.max + ringMargin) {
+			timer_ = 0.0f;
 			speed = moveSpeed;
 			return;
 		}
 
-		toTarget = Subtract(targetPos, ownerPos);
-		toTarget.y = 0.0f;
+		const float slotArrivalRange = 1.0f;
+		if (slotDistance > slotArrivalRange) {
+			timer_ = 0.0f;
+			speed = moveSpeed;
+			return;
+		}
 
 		if (toTarget.Length() > 0.001f) {
 			Vector3 lookDir = toTarget.Normalize();
@@ -15262,9 +14662,13 @@ namespace Character {
 			rotateY = rotate.y;
 		}
 
-		// スロット到着後、攻撃リング内として扱う
+		if (currentRing != EnemyAttackRing::Attack) {
+			timer_ = 0.0f;
+			speed = 0.0f;
+			return;
+		}
+
 		speed = 0.0f;
-		attackRequest_->SetRing(EnemyAttackRing::Attack);
 
 		if (attackRequest_->IsCooldown()) {
 			timer_ = 0.0f;
@@ -15340,6 +14744,176 @@ namespace Character {
 }
 
 ============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSystem.cpp
+============================================================
+#include "EnemyCrowdSystem.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+
+#include <algorithm>
+#include <cmath>
+#include <map>
+
+namespace Character {
+
+	void EnemyCrowdSystem::Initialize() {
+		slots_.clear();
+	}
+
+	void EnemyCrowdSystem::Update(
+		const std::vector<BaseEnemy*>& enemies,
+		const Vector3& targetPos,
+		float targetRotateY
+	) {
+		slots_.clear();
+
+		// グループIDごとに敵を分け、グループ単位で隊形を組む
+		std::map<int, std::vector<BaseEnemy*>> groups;
+		for (BaseEnemy* enemy : enemies) {
+			if (!enemy) {
+				continue;
+			}
+
+			groups[enemy->GetCrowdGroupId()].push_back(enemy);
+		}
+
+		// プレイヤーの向きを基準に、隊形の前後方向と左右方向を決める
+		Vector3 forward{};
+		forward.x = std::sin(targetRotateY);
+		forward.y = 0.0f;
+		forward.z = std::cos(targetRotateY);
+
+		Vector3 right{};
+		right.x = std::cos(targetRotateY);
+		right.y = 0.0f;
+		right.z = -std::sin(targetRotateY);
+
+		uint32_t groupOrder = 0;
+		for (auto& group : groups) {
+			std::vector<BaseEnemy*>& groupEnemies = group.second;
+			// 生成順を使って、毎フレーム同じ敵が同じ並び順になるようにする
+			std::sort(groupEnemies.begin(), groupEnemies.end(),
+				[](const BaseEnemy* a, const BaseEnemy* b) {
+					return a->GetCrowdMemberIndex() < b->GetCrowdMemberIndex();
+				});
+
+			AssignGroupSlots(groupEnemies, group.first, targetPos, forward, right, groupOrder);
+			groupOrder++;
+		}
+	}
+
+	const CrowdSlot* EnemyCrowdSystem::FindSlot(BaseEnemy* enemy) const {
+		for (const CrowdSlot& slot : slots_) {
+			if (slot.owner == enemy) {
+				return &slot;
+			}
+		}
+
+		return nullptr;
+	}
+
+	void EnemyCrowdSystem::AssignGroupSlots(
+		const std::vector<BaseEnemy*>& groupEnemies,
+		int groupId,
+		const Vector3& targetPos,
+		const Vector3& forward,
+		const Vector3& right,
+		uint32_t groupOrder
+	) {
+		if (groupEnemies.empty()) {
+			return;
+		}
+
+		// 複数グループが同じ位置に重ならないよう、グループごとに少しずらす
+		const float groupSideOffset = (static_cast<float>(groupOrder % 3) - 1.0f) * columnSpacing_ * 1.5f;
+		const float groupBackOffset = static_cast<float>(groupOrder / 3) * rowSpacing_ * 1.5f;
+
+		for (uint32_t i = 0; i < groupEnemies.size(); ++i) {
+			BaseEnemy* enemy = groupEnemies[i];
+			if (!enemy) {
+				continue;
+			}
+
+			uint32_t row = i / columnCount_;
+			uint32_t column = i % columnCount_;
+			float centeredColumn = static_cast<float>(column) - (static_cast<float>(columnCount_ - 1) * 0.5f);
+
+			// ターゲット後方に、横3列を基準とした隊形位置を作る
+			Vector3 slotPos = targetPos;
+			slotPos -= forward * (frontDistance_ + rowSpacing_ * static_cast<float>(row) + groupBackOffset);
+			slotPos += right * (centeredColumn * columnSpacing_ + groupSideOffset);
+			slotPos.y = enemy->GetWorldPosition().y;
+
+			CrowdSlot slot{};
+			slot.position = slotPos;
+			slot.owner = enemy;
+			slot.groupId = groupId;
+			slot.memberIndex = enemy->GetCrowdMemberIndex();
+			slots_.push_back(slot);
+		}
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSystem.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/struct/Vector3.h>
+#include <cstdint>
+#include <vector>
+
+namespace Character {
+	class BaseEnemy;
+
+	// 群衆隊形で敵が目指す位置
+	struct CrowdSlot {
+		Vector3 position{};				// 隊形上の目標位置
+		BaseEnemy* owner = nullptr;		// この位置を担当する敵
+		int groupId = 0;					// 群衆グループID
+		uint32_t memberIndex = 0;		// グループ内での並び順
+	};
+
+	/// <summary>
+	/// 敵の群衆隊形を管理するシステム
+	/// </summary>
+	class EnemyCrowdSystem {
+	public:
+		// 初期化
+		void Initialize();
+
+		// 敵一覧からグループごとの隊形スロットを作成する
+		void Update(
+			const std::vector<BaseEnemy*>& enemies,
+			const Vector3& targetPos,
+			float targetRotateY
+		);
+
+		// 指定した敵に割り当てられた隊形スロットを取得
+		const CrowdSlot* FindSlot(BaseEnemy* enemy) const;
+
+	private:
+		// 1グループ分の隊形スロットを割り当てる
+		void AssignGroupSlots(
+			const std::vector<BaseEnemy*>& groupEnemies,
+			int groupId,
+			const Vector3& targetPos,
+			const Vector3& forward,
+			const Vector3& right,
+			uint32_t groupOrder
+		);
+
+	private:
+		std::vector<CrowdSlot> slots_;
+
+		float frontDistance_ = 8.0f;		// ターゲットから隊形先頭までの距離
+		float rowSpacing_ = 3.0f;			// 前後の間隔
+		float columnSpacing_ = 2.6f;		// 左右の間隔
+		uint32_t columnCount_ = 3;			// 1列に並ぶ敵数
+	};
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.cpp
 ============================================================
 #include "BaseEnemy.h"
@@ -15348,7 +14922,6 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.c
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
-#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
@@ -15390,6 +14963,7 @@ namespace Character {
 		// オブジェクトインスタンシング初期化
 		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
 			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
+		objectComponentShadow_->SetIsDraw(false);
 		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
 		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
@@ -15500,6 +15074,7 @@ namespace Character {
 	void BaseEnemy::BaseUpdate() {
 
 		if (objectComponent_ == nullptr) { return; }
+		objectComponentShadow_->SetIsDraw(true);
 		assert(this);
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());
@@ -15622,6 +15197,7 @@ namespace Character {
 		void SetTargetCharacters(BaseCharacter* target);
 
 		EnemyAttackSystem* GetEnemyAttackSystem() const;
+		EnemyAiSystem* GetEnemyAiSystem() const { return enemAi; }
 
 		void SetEnemyAiSystem(EnemyAiSystem* aiSystem) { enemAi = aiSystem; }
 
@@ -15632,6 +15208,14 @@ namespace Character {
 		EnemyType GetType() const { return type_; };
 		// 敵タイプ設定
 		void SetType(EnemyType type) { type_ = type; };
+		// 群衆グループ設定
+		void SetCrowdGroupId(int groupId) { crowdGroupId_ = groupId; }
+		// 群衆グループ取得
+		int GetCrowdGroupId() const { return crowdGroupId_; }
+		// 群衆内番号設定
+		void SetCrowdMemberIndex(uint32_t memberIndex) { crowdMemberIndex_ = memberIndex; }
+		// 群衆内番号取得
+		uint32_t GetCrowdMemberIndex() const { return crowdMemberIndex_; }
 
 		// 対象の位置(プレイヤー)
 		Vector3 GetTargetPos();
@@ -15651,6 +15235,8 @@ namespace Character {
 	protected:
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
+		int crowdGroupId_ = 0; // 群衆グループID
+		uint32_t crowdMemberIndex_ = 0; // 群衆内番号
 	protected:
 		//
 		bool isStopping_ = false;
@@ -15665,6 +15251,7 @@ namespace Character {
 		EnemyAiSystem* enemAi = nullptr;	// AIシステム
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/EnemyData.h
@@ -15685,16 +15272,10 @@ namespace Character {
 	};
 
 
-	struct Enemy{
-
-	};
-
-
-
 	// 敵保存項目
 	struct EnemyGlobalData {
 		// 攻撃猶予時間
-		float attackTimer = 3.0f;
+		float attackTimer = 2.0f;
 		// 後退スピード
 		float retreatSpeed = 1.0f;
 		// 回転スピード
@@ -18827,7 +18408,17 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 	// =========================
 	// 水平移動ベクトルを作る
 	// =========================
-	Vector3 toTarget = Subtract(ctx.target->GetWorldPosition(), ctx.position);
+	if (!ctx.target) {
+		return;
+	}
+
+	Vector3 moveTarget = ctx.target->GetWorldPosition();
+	if (ctx.hasMoveTarget) {
+		// 群衆隊形や攻撃スロットが指定されている場合は、その位置を優先する
+		moveTarget = ctx.moveTarget;
+	}
+
+	Vector3 toTarget = Subtract(moveTarget, ctx.position);
 	toTarget.y = 0.0f;
 
 	Vector3 horizontalDire{};
@@ -72985,8 +72576,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
@@ -73407,8 +72998,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemy.h" />
@@ -73710,6 +73301,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
+
 
 ============================================================
 File Path: project/DirectXGame.vcxproj.filters
@@ -74415,9 +74007,6 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClCompile Include="DirectXGame\application\base\Bullet\PlayerBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Attack\AttackData.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -74737,6 +74326,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp">
@@ -75548,9 +75140,6 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXGame\engine\Base\Editor\Editor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -75911,6 +75500,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -75951,6 +75543,7 @@ File Path: project/DirectXGame.vcxproj.filters
     </Text>
   </ItemGroup>
 </Project>
+
 
 ============================================================
 File Path: project/main.cpp
