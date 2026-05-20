@@ -64,7 +64,17 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 	// =========================
 	// 水平移動ベクトルを作る
 	// =========================
-	Vector3 toTarget = Subtract(ctx.target->GetWorldPosition(), ctx.position);
+	if (!ctx.target) {
+		return;
+	}
+
+	Vector3 moveTarget = ctx.target->GetWorldPosition();
+	if (ctx.hasMoveTarget) {
+		// 群衆隊形や攻撃スロットが指定されている場合は、その位置を優先する
+		moveTarget = ctx.moveTarget;
+	}
+
+	Vector3 toTarget = Subtract(moveTarget, ctx.position);
 	toTarget.y = 0.0f;
 
 	Vector3 horizontalDire{};
