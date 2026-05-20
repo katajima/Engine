@@ -44,6 +44,7 @@ namespace Character {
 		void SetTargetCharacters(BaseCharacter* target);
 
 		EnemyAttackSystem* GetEnemyAttackSystem() const;
+		EnemyAiSystem* GetEnemyAiSystem() const { return enemAi; }
 
 		void SetEnemyAiSystem(EnemyAiSystem* aiSystem) { enemAi = aiSystem; }
 
@@ -54,6 +55,14 @@ namespace Character {
 		EnemyType GetType() const { return type_; };
 		// 敵タイプ設定
 		void SetType(EnemyType type) { type_ = type; };
+		// 群衆グループ設定
+		void SetCrowdGroupId(int groupId) { crowdGroupId_ = groupId; }
+		// 群衆グループ取得
+		int GetCrowdGroupId() const { return crowdGroupId_; }
+		// 群衆内番号設定
+		void SetCrowdMemberIndex(uint32_t memberIndex) { crowdMemberIndex_ = memberIndex; }
+		// 群衆内番号取得
+		uint32_t GetCrowdMemberIndex() const { return crowdMemberIndex_; }
 
 		// 対象の位置(プレイヤー)
 		Vector3 GetTargetPos();
@@ -73,6 +82,8 @@ namespace Character {
 	protected:
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
+		int crowdGroupId_ = 0; // 群衆グループID
+		uint32_t crowdMemberIndex_ = 0; // 群衆内番号
 	protected:
 		//
 		bool isStopping_ = false;

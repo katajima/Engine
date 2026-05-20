@@ -13,7 +13,6 @@
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
 
-#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include "CharacterGlobalData.h"
 
 //前方宣言
@@ -97,12 +96,6 @@ namespace Character {
 			return nullptr;
 		}
 
-		/// <summary>
-		/// 群衆AI取得
-		/// </summary>
-		/// <returns></returns>
-		CrowdManager* GetCrowdManager() { return crowdManager_.get(); }
-
 	public: // 生成系
 		// キャラクター生成(敵)
 		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
@@ -121,8 +114,6 @@ namespace Character {
 		uint32_t characterCount_ = 0;	
 		// 敵カウンター
 		uint32_t enemyCount_ = 0;	
-		// 群衆AI
-		std::unique_ptr<CrowdManager> crowdManager_;	
 		// 敵AIシステム
 		std::unique_ptr<EnemyAiSystem> enemyAiSystem_;	
 

@@ -49,11 +49,6 @@ namespace Character {
 				continue;
 			}
 
-			// 攻撃リング内の敵だけ許可対象
-			if (request->GetRing() != EnemyAttackRing::Attack) {
-				continue;
-			}
-
 			if (request->GetNumber() == 0) {
 				request->SetNumber(requestCounter_++);
 			}
@@ -85,16 +80,24 @@ namespace Character {
 				return a->GetNumber() < b->GetNumber();
 			});
 
-		uint32_t grantCount = 0;
+		uint32_t attackRingCount = 0;
+		uint32_t approachRingCount = 0;
 
 		for (EnemyAttackRequest* request : activeRequests) {
-			if (grantCount >= maxAttackCount_) {
-				break;
+			if (attackRingCount < maxAttackCount_) {
+				request->SetRing(EnemyAttackRing::Attack);
+				request->Grant();
+				attackRingCount++;
+				continue;
 			}
 
-			request->Grant();
+			if (approachRingCount < approachRingCount_) {
+				request->SetRing(EnemyAttackRing::Approach);
+				approachRingCount++;
+				continue;
+			}
 
-			grantCount++;
+			request->SetRing(EnemyAttackRing::Standby);
 		}
 
 		intervalTimer_ = attackInterval_;

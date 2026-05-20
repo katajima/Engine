@@ -19,8 +19,11 @@ namespace Character {
 		// 同時に攻撃できる敵数
 		uint32_t maxAttackCount_ = 1;
 
+		// 攻撃待ちの中でも前に詰める敵数
+		uint32_t approachRingCount_ = 3;
+
 		// 攻撃許可の間隔
-		float attackInterval_ = 0.5f;
+		float attackInterval_ = 0.1f;
 		float intervalTimer_ = 0.0f;
 
 		// 攻撃後、同じ敵が再攻撃できない時間

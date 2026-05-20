@@ -129,6 +129,8 @@ namespace Character {
 		enemy->SetSpecalPointManager(specalPointManager);	// スペシャルポイント管理クラス設定
 		enemy->SetEffect(effect);						// エフェクト設定
 		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
+		enemy->SetCrowdGroupId(groupId);					// 群衆グループ設定
+		enemy->SetCrowdMemberIndex(enemyCount_++);			// 群衆内番号設定
 		enemy->Initialize(nullptr, entityManager, globalVariables, transform.translate, camera); // 初期化
 		enemy->SetTargetCharacters(GetPlayer());					// ターゲット指定
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
@@ -163,7 +165,7 @@ namespace Character {
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
 			pos.y = 0.0f;
-			CreateCharacter(enemyType, "enemy", {}, Transform{ {1,1,1}, {},pos });
+			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos });
 		}
 	}
 

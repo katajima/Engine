@@ -100,6 +100,10 @@ namespace Character {
 		float moveSpeed = 1.0f;
 		// ターゲット指定
 		const BaseCharacter* target = nullptr;
+		// AIなどが通常ターゲット以外へ移動させたい時の目標座標
+		Vector3 moveTarget{};
+		// moveTargetを使うか
+		bool hasMoveTarget = false;
 	};
 
 	/// <summary>

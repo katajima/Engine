@@ -5,6 +5,8 @@
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Attack/Hit/HitMotionSystem.h"
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
 
 void Character::CharacterContextSystem::Initialize(BaseCharacter* owner, const InputSystem* input) {
 	this->input = input;	// 入力データ
@@ -134,6 +136,27 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 	ctx.isStop = !owner->GetIsMove();
 	// ターゲット取得
 	ctx.target = lockOnSystem->GetTarget();
+	if (owner->GetCharacterType() == Type::Enemy) {
+		BaseEnemy* enemy = static_cast<BaseEnemy*>(owner);
+		if (enemy->GetEnemyAiSystem()) {
+			// 攻撃役は攻撃スロットへ、それ以外は群衆隊形スロットへ向かわせる
+			const bool isAttackRing =
+				enemy->GetEnemyAttackSystem() &&
+				enemy->GetEnemyAttackSystem()->GetAttackRequest() &&
+				enemy->GetEnemyAttackSystem()->GetAttackRequest()->GetRing() == EnemyAttackRing::Attack;
+
+			if (isAttackRing) {
+				if (const AttackSlot* attackSlot = enemy->GetEnemyAiSystem()->GetAttackSlotSystem()->FindSlot(enemy)) {
+					ctx.moveTarget = attackSlot->position;
+					ctx.hasMoveTarget = true;
+				}
+			}
+			else if (const CrowdSlot* crowdSlot = enemy->GetEnemyAiSystem()->GetCrowdSystem()->FindSlot(enemy)) {
+				ctx.moveTarget = crowdSlot->position;
+				ctx.hasMoveTarget = true;
+			}
+		}
+	}
 	// 移動速度
 	ctx.moveSpeed = moveSystem->GetData().maxSpeed;
 	// 高さ

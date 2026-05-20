@@ -14,16 +14,10 @@ namespace Character {
 	};
 
 
-	struct Enemy{
-
-	};
-
-
-
 	// 敵保存項目
 	struct EnemyGlobalData {
 		// 攻撃猶予時間
-		float attackTimer = 3.0f;
+		float attackTimer = 2.0f;
 		// 後退スピード
 		float retreatSpeed = 1.0f;
 		// 回転スピード

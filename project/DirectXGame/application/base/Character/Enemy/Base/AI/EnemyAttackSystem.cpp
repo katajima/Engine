@@ -1,8 +1,29 @@
 #include "EnemyAttackSystem.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
 #include <DirectXGame/engine/Math/MathFunctions.h>
+#include <algorithm>
 
 namespace Character {
+	namespace {
+		struct RingRange {
+			float min;
+			float max;
+		};
+
+		RingRange GetRingRange(EnemyAttackRing ring) {
+			switch (ring) {
+			case EnemyAttackRing::Attack:
+				return { 5.0f, 7.0f };
+			case EnemyAttackRing::Approach:
+				return { 7.0f, 11.0f };
+			case EnemyAttackRing::Standby:
+				return { 11.0f, 15.0f };
+			default:
+				return { 5.0f, 7.0f };
+			}
+		}
+
+	}
 
 	void EnemyAttackSystem::Initialize(CharacterStateMachine* characterStateMachine) {
 		this->characterStateMachine = characterStateMachine;
@@ -46,31 +67,44 @@ namespace Character {
 		}
 
 
-		Vector3 toSlot = Subtract(slotPos, ownerPos);
-		toSlot.y = 0.0f;
+		Vector3 toMoveSlot = Subtract(slotPos, ownerPos);
+		toMoveSlot.y = 0.0f;
+		float slotDistance = toMoveSlot.Length();
 
-		float slotDistance = toSlot.Length();
+		toTarget = Subtract(targetPos, ownerPos);
+		toTarget.y = 0.0f;
+		float targetDistance = toTarget.Length();
 
-		const float slotArrivalRange = 10.0f;
+		attackRequest_->Activate();
 
-		if (slotDistance > slotArrivalRange) {
-			if (slotDistance > 0.001f) {
-				Vector3 moveDir = toSlot.Normalize();
-				Vector3 rotate = Math::DirectionToRotate(moveDir, Dire::Z);
+		EnemyAttackRing currentRing = attackRequest_->GetRing();
+		if (currentRing == EnemyAttackRing::None || currentRing == EnemyAttackRing::TooClose) {
+			currentRing = EnemyAttackRing::Approach;
+			attackRequest_->SetRing(currentRing);
+		}
 
-				rotateY = rotate.y;
-			}
+		RingRange ringRange = GetRingRange(currentRing);
+		const float ringMargin = 0.25f;
 
+		if (targetDistance < ringRange.min - ringMargin) {
 			timer_ = 0.0f;
-			attackRequest_->Deactivate();
-			attackRequest_->SetRing(EnemyAttackRing::Approach);
+			attackRequest_->SetRing(EnemyAttackRing::TooClose);
+			speed = -std::max(data.retreatSpeed, moveSpeed * 0.5f);
+			return;
+		}
 
+		if (targetDistance > ringRange.max + ringMargin) {
+			timer_ = 0.0f;
 			speed = moveSpeed;
 			return;
 		}
 
-		toTarget = Subtract(targetPos, ownerPos);
-		toTarget.y = 0.0f;
+		const float slotArrivalRange = 1.0f;
+		if (slotDistance > slotArrivalRange) {
+			timer_ = 0.0f;
+			speed = moveSpeed;
+			return;
+		}
 
 		if (toTarget.Length() > 0.001f) {
 			Vector3 lookDir = toTarget.Normalize();
@@ -78,9 +112,13 @@ namespace Character {
 			rotateY = rotate.y;
 		}
 
-		// スロット到着後、攻撃リング内として扱う
+		if (currentRing != EnemyAttackRing::Attack) {
+			timer_ = 0.0f;
+			speed = 0.0f;
+			return;
+		}
+
 		speed = 0.0f;
-		attackRequest_->SetRing(EnemyAttackRing::Attack);
 
 		if (attackRequest_->IsCooldown()) {
 			timer_ = 0.0f;

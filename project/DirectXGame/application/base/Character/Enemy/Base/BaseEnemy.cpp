@@ -4,7 +4,6 @@
 #include "DirectXGame/application/base/Camera/FollowCamera/FollowCamera.h"
 #include"DirectXGame/application/base/Weapon/Base/BaseWeapon.h"
 #include"DirectXGame/application/base/Special/Base/BaseSpecial.h"
-#include "DirectXGame/application/base/Character/Crowd/CrowdManager.h"
 #include"DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
 #include "DirectXGame/application/base/Character/State/CharacterStateMachine.h"
@@ -46,6 +45,7 @@ namespace Character {
 		// オブジェクトインスタンシング初期化
 		objectComponentShadow_->InitializeInstancing(entityManager, globalVariables, charaName + std::to_string(id_), "plane.obj", "resources/Texture/smoke/no4.dds",
 			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
+		objectComponentShadow_->SetIsDraw(false);
 		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
 		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
@@ -156,6 +156,7 @@ namespace Character {
 	void BaseEnemy::BaseUpdate() {
 
 		if (objectComponent_ == nullptr) { return; }
+		objectComponentShadow_->SetIsDraw(true);
 		assert(this);
 
 		CharacterContext ctx = contextSystem_->CreateContext(this, GetTime());

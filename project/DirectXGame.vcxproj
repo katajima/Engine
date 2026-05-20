@@ -171,8 +171,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequest.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
-    <ClCompile Include="DirectXGame\application\base\Character\Crowd\CrowdManager.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
@@ -593,8 +593,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
-    <ClInclude Include="DirectXGame\application\base\Character\Crowd\CrowdManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Small\Cart\SmallCartEnemy.h" />
