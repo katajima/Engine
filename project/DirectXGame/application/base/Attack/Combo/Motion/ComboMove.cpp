@@ -255,7 +255,6 @@ namespace Combo {
 			return false;
 		}
 
-		targetPos_ = traget->GetWorldPosition();
 
 		const Vector3 currentPos = worldTransform->translate_;
 		const Vector3 goalPos = BuildTargetMoveGoal();

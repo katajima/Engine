@@ -36,9 +36,27 @@ namespace Character {
 		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 	}
 
+	
 #pragma region
 
-	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName)
+	void BaseEnemy::InitializeEffect(const Vector3& pos) {
+		// エフェクト用のトランスフォーム初期化
+		worldEffect_ = std::make_unique<Engine::WorldTransform>();
+		worldEffect_->Initialize();
+		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
+		worldEffect_->translate_ = pos;
+	}
+
+	void BaseEnemy::InitializeBaseWeapon(const Vector3& pos) {
+		weapon_->SetCharacter(this);
+		weapon_->SetBulletManager(bulletManager);
+		weapon_->Initialize(inputSystem, entityManager, globalVariables, {}, nullptr);
+		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
+		weapon_->GetWorldTransform().translate_ = pos;
+	}
+
+
+	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName, float shadowSize)
 	{
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
@@ -47,7 +65,7 @@ namespace Character {
 			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
 		objectComponentShadow_->SetIsDraw(false);
 		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
-		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
+		objectComponentShadow_->SetInstancingSRT({ shadowSize,shadowSize,shadowSize }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 		objectComponentShadow_->Update();
 	}
@@ -55,7 +73,7 @@ namespace Character {
 
 	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-		const std::string& modelName, const std::string& charaName, float colliderRadius) {
+		const std::string& modelName, const std::string& charaName, float colliderRadius, float shadowSize) {
 
 		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables;	// 保存項目
@@ -67,6 +85,7 @@ namespace Character {
 			, Engine::ObjectInstans::TransparencyType::kNo, false);
 		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
+		objectComponent_->SetInstancingSRT({1,1,1}, {}, position);	// SRT設定
 
 
 		// コライダ位置用トランスフォーム初期化
@@ -85,6 +104,7 @@ namespace Character {
 		moveComponent_->Initialize(this, nullptr, globalVariables, MovementComponent::ControlType::Manual, "_" + charaName);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 		moveComponent_->GetMoveSystem()->Data().minSpeed = -100;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		// 保存項目追加
 		CreateGroup(charaName);
 
@@ -109,7 +129,7 @@ namespace Character {
 			if (!otherComponent) return;
 
 			if (other->tag == CollisionTag::Enemy) {
-				isStopping_ = true;
+				//isStopping_ = true;
 			}
 
 			//  敵同士の衝突応答
@@ -150,8 +170,14 @@ namespace Character {
 
 
 		// 丸影用オブジェクトコンポーネント初期化
-		InitShadowObjectComponent(charaName);
+		InitShadowObjectComponent(charaName, shadowSize);
 	}
+
+	void BaseEnemy::Update() {
+		isStopping_ = false;
+		// 基盤の更新
+		BaseUpdate();
+	};
 
 	void BaseEnemy::BaseUpdate() {
 
@@ -190,7 +216,11 @@ namespace Character {
 		// ステート
 		stateMachine_->Update(ctx);
 
+		// 武器更新
+		if(weapon_)
+		weapon_->Update();
 
+		// 影更新
 		objectComponentShadow_->Update();
 	}
 
@@ -214,6 +244,33 @@ namespace Character {
 	}
 
 #pragma endregion 
+
+	void BaseEnemy::Move() {
+		if (isStopping_) return;
+
+		// 攻撃システム更新
+		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
+
+		Vector3 slotPos = GetTargetPos();
+
+		if (slot) {
+			slotPos = slot->position;
+		}
+		/*if (const CrowdSlot* crowdSlot = enemAi->GetCrowdSystem()->FindSlot(this);
+			attackSystem_->GetAttackRequest()->GetRing() != EnemyAttackRing::Attack && crowdSlot) {
+			slotPos = crowdSlot->position;
+		}*/
+
+		attackSystem_->Update(
+			GetTime(),
+			GetWorldPosition(),
+			GetTargetPos(),
+			slotPos,
+			moveComponent_->GetMoveSystem()->Data().maxSpeed,
+			GetWorldTransform().rotate_.y,
+			globalData_,
+			moveSpeed_);
+	};
 
 	EnemyAttackSystem* BaseEnemy::GetEnemyAttackSystem() const {
 		return attackSystem_.get();

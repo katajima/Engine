@@ -34,6 +34,6 @@ namespace Character {
 
 		std::array<AttackSlot, kSlotCount> slots_{};
 
-		float slotRadius_ = 6.0f;
+		float slotRadius_ = 8.0f;
 	};
 }

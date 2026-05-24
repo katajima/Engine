@@ -15,7 +15,7 @@ struct MoveData
 	// 加速度
 	float speedAcceleration = 0.1f;
 	// 最大速度
-	float maxSpeed = 1.0f;
+	float maxSpeed = 2.5f;
 	// 最小速度
 	float minSpeed = 0.0f;
 	// 移動タイプ

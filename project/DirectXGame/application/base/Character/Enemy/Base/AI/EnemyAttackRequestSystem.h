@@ -17,10 +17,10 @@ namespace Character {
 		uint32_t requestCounter_ = 1;
 
 		// 同時に攻撃できる敵数
-		uint32_t maxAttackCount_ = 1;
+		uint32_t maxAttackCount_ = 2;
 
 		// 攻撃待ちの中でも前に詰める敵数
-		uint32_t approachRingCount_ = 3;
+		uint32_t approachRingCount_ = 2;
 
 		// 攻撃許可の間隔
 		float attackInterval_ = 0.1f;

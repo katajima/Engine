@@ -13,13 +13,13 @@ namespace Character {
 		RingRange GetRingRange(EnemyAttackRing ring) {
 			switch (ring) {
 			case EnemyAttackRing::Attack:
-				return { 5.0f, 7.0f };
+				return { 7.0f, 10.0f };
 			case EnemyAttackRing::Approach:
-				return { 7.0f, 11.0f };
+				return { 10.0f, 15.0f };
 			case EnemyAttackRing::Standby:
-				return { 11.0f, 15.0f };
+				return { 15.0f, 20.0f };
 			default:
-				return { 5.0f, 7.0f };
+				return { 7.0f, 10.0f };
 			}
 		}
 
@@ -99,7 +99,7 @@ namespace Character {
 			return;
 		}
 
-		const float slotArrivalRange = 1.0f;
+		const float slotArrivalRange = 3.0f;
 		if (slotDistance > slotArrivalRange) {
 			timer_ = 0.0f;
 			speed = moveSpeed;
@@ -127,7 +127,7 @@ namespace Character {
 
 		timer_ += dt;
 
-		if (timer_ >= data.attackTimer) {
+		//if (timer_ >= data.attackTimer) {
 			attackRequest_->Activate();
 
 			if (attackRequest_->GetIsGranted()) {
@@ -139,7 +139,7 @@ namespace Character {
 				timer_ = 0.0f;
 				return;
 			}
-		}
+		//}
 	}
 
 	EnemyAttackRequest* EnemyAttackSystem::GetAttackRequest() const {

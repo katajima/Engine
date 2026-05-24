@@ -23,4 +23,4 @@ namespace Character {
 		// 回転スピード
 		float turnSpeed = 0.25f;
 	};
-}
+} 

@@ -16,24 +16,11 @@ namespace Character {
 		// 毎フレーム更新
 		void Update() override;
 
-		// エフェクト描画
-		void DrawEffect() override {};
-		// 描画2d
-		void Draw2D() override;
-		// 移動
-		void Move() override;
-		// ジャンプ
-		void Jump() override {};
-		// 攻撃
-		void Attack() override {};
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
 
 	private:
-		float skyHeight_ = 1.5f;
 		std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
-		//
-		float moveSpeed_ = 1.0f;
 	};
 }

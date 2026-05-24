@@ -10,25 +10,23 @@ namespace Character {
 	{
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySS01.obj", "SmallRangeEnemy",1.5f);
-		
-		
-		
-		// サイズ
-		Vector3 size = { 1.0f,1.0f,1.0f };
-		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-		
+		// エフェクト初期化
+		InitializeEffect({ 0,1,0 });
+		//
+		InitializeWeapon<SmallRangeWeapon>({ 0.0f,-0.5f,0.25f });
+
+		bulletSpawn_ = std::make_unique<BulletSpawn>();
+		bulletSpawn_->Initialize(this, entityManager, globalVariables, nullptr, effect);
+
+
 		objectComponentPropeller_ = std::make_unique<ObjectComponent>();
 		objectComponentPropeller_->InitializeInstancing(entityManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
 			false, false, this, Engine::ObjectInstans::TransparencyType::kNo);
 		objectComponentPropeller_->SetInstancingSRT({ 1,1,1 }, {}, {});
 		objectComponentPropeller_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
-
-
 		objectComponentPropeller_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 
-		bulletSpawn_ = std::make_unique<BulletSpawn>();
-		bulletSpawn_->Initialize(this, entityManager,globalVariables, nullptr, effect);
-
+		
 
 		// 武器
 		weapon_ = std::make_unique<SmallRangeWeapon>();
@@ -38,31 +36,23 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
+
+
 		worldCollider_->translate_.y = 0;
 
-
-		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		moveComponent_->GetMovementSystem()->SetUseGravity(false);
 		moveComponent_->GetMoveSystem()->Data().useGravity = false;
 		skyHeight_ = 3.0f;
 		moveComponent_->GetMoveSystem()->Data().skyHeight = skyHeight_;
 
-		// エフェクト用のトランスフォーム初期化
-		worldEffect_ = std::make_unique<Engine::WorldTransform>();
-		worldEffect_->Initialize();
-		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
-		worldEffect_->translate_ = { 0,1,0 };
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
 
-	void SmallRangeEnemy::Update()
-	{
+	void SmallRangeEnemy::Update() {
 		isStopping_ = false;
 		// 基盤の更新
 		BaseUpdate();
-
-		weapon_->Update(); // 武器更新
 
 		objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 
@@ -70,33 +60,6 @@ namespace Character {
 		objectComponentPropeller_->GetWorldTransform().rotate_.y += 20.0f * GetTime();
 
 		objectComponentPropeller_->Update();
-	}
-
-	void SmallRangeEnemy::Draw2D(){
-	}
-
-	void SmallRangeEnemy::Move()
-	{
-		if (isStopping_) return;
-
-		// 攻撃システム更新
-		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
-
-		Vector3 slotPos = GetTargetPos();
-
-		if (slot) {
-			slotPos = slot->position;
-		}
-
-		attackSystem_->Update(
-			GetTime(),
-			GetWorldPosition(),
-			GetTargetPos(),
-			slotPos,
-			moveComponent_->GetMoveSystem()->Data().maxSpeed,
-			GetWorldTransform().rotate_.y,
-			globalData_,
-			moveSpeed_);
 	}
 
 	void SmallRangeEnemy::InitStateMachine()

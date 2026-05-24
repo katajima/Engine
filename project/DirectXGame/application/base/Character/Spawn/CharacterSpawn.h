@@ -31,10 +31,11 @@ namespace Character {
 			float spawnTimer_ = 0.0f;           // 出現タイミングタイマー(フェーズが始まってから)
 			int maxEnemyCount_ = 30;			// 最大敵出現量
 			float startDelay_ = 0.0f;           // フェーズ開始からの遅延時間
+			int groupId_ = 0;					// グループID
 		};
 
 		// 初期化
-		void Initialize(const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f) {
+		void Initialize(const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f, int groupId = 0) {
 			data_.name_ = name;						// 名前
 			data_.spawnMaxCount_ = spawnMaxCount;	// 出現回数
 			data_.spawnAmount_ = spawnAmount;		// 出現量
@@ -42,6 +43,7 @@ namespace Character {
 			data_.translate_ = translate;			// 位置
 			data_.spawnInterval_ = interval;		// インターバル
 			data_.startDelay_ = startDelay;			// 開始遅延時間
+			data_.groupId_ = groupId;				// グループID
 		}
 
 

@@ -52,7 +52,7 @@ namespace Character {
 		spawnAABBArea_.max = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
 
 		// グループ生成
-		characterManager->CreateEnemyGroup(spawnInfo_.GetData().type_, 0, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
+		characterManager->CreateEnemyGroup(spawnInfo_.GetData().type_, spawnInfo_.GetData().groupId_, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
 
 		// 出現した
 		spawnInfo_.Spawned();

@@ -49,15 +49,20 @@ namespace Game {
 		Vector3 popPos7 = { -100,1,0 };
 
 		Vector3 size = {50,1,50};
+		float interval = 1.0f;
+		float startDelay = 0.0f;
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 1, popPos, size, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos2, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, popPos, size, 0.75f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, popPos4, size, 0.75f);
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 1, popPos, size, 10.0f, startDelay, 0);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 2, popPos, size, 4.0f, startDelay, 0);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos, size, 0.75f, startDelay, 0);
+		
+
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal2", 1, 1, popPos2, size, 10.0f, startDelay, 1);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 2, popPos2, size, 4.0f, startDelay, 1);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos2, size, 0.75f, startDelay, 1);
+		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
+		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
+		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -103,11 +108,11 @@ namespace Game {
 	}
 
 
-	void GameEventController::CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval, float startDelay) {
+	void GameEventController::CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval, float startDelay, int groupId) {
 		Character::SpawnInfo data;
 		data.GetData().type_ = type;
 
-		data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval);
+		data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval, startDelay, groupId);
 		spawnInfos_.push_back(data);
 	}
 

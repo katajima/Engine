@@ -23,21 +23,21 @@ namespace Character {
 		// 基盤となる初期化
 		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f);
+			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f,float shadowSize = 1.0f);
 		// 毎フレーム更新
-		virtual void Update() = 0;
+		virtual void Update();
 		// 基盤の更新
 		void BaseUpdate();
 		// 描画エフェクト
-		virtual void DrawEffect() = 0;
+		virtual void DrawEffect(){};
 		// 描画2d
-		virtual void Draw2D() = 0;
+		virtual void Draw2D(){};
 		// 移動
-		virtual void Move() = 0;
+		virtual void Move();
 		// ジャンプ
-		virtual void Jump() = 0;
+		virtual void Jump(){};
 		// 攻撃
-		virtual void Attack() = 0;
+		virtual void Attack(){};
 		// ターゲット取得
 		const BaseCharacter* GetTarget();
 
@@ -71,13 +71,25 @@ namespace Character {
 		// ターゲット方向取得
 		Vector3 TargetDirection();
 
+	protected:
+		// エフェクト初期化
+		void InitializeEffect(const Vector3& pos);
+		// 武器初期化
+		template<typename T>
+		void InitializeWeapon(const Vector3& pos) {
+			// 武器
+			weapon_ = std::make_unique<T>();
+			InitializeBaseWeapon(pos);
+		};
+	private:
+		void InitializeBaseWeapon(const Vector3& pos);
 	private:
 
 		void InitializeBaseEnemyAddItem();
 		// 更新保存項目
 		void UpdateBaseEnemyGetValue();
 		//
-		void InitShadowObjectComponent(const std::string& charaName);
+		void InitShadowObjectComponent(const std::string& charaName, float shadowSize = 1.0f);
 
 	protected:
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
@@ -85,11 +97,16 @@ namespace Character {
 		int crowdGroupId_ = 0; // 群衆グループID
 		uint32_t crowdMemberIndex_ = 0; // 群衆内番号
 	protected:
-		//
+		// 高さ
+		float skyHeight_ = 1.5f;
+		// 止まるか
 		bool isStopping_ = false;
 		// グローバルデータ
 		EnemyGlobalData globalData_;
+		// 
 		float dieScore = 100.0f;
+		// 移動速度
+		float moveSpeed_ = 3.0f;
 	protected:
 		std::unique_ptr <Engine::WorldTransform> worldEffect_ = nullptr;
 		// 攻撃システム
