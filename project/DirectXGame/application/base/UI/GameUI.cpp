@@ -68,7 +68,10 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 }
 
 void GameUI::Update(float dt){
+	if (player == nullptr) return;
+	
 	Engine::UICount* hitCount = GetUICount("hitCount");
+	
 	hitCount->SetCount(ConvertUtility::ToFloat(player->GetAttackController()->GetHitCounter().GetHitCount()));
 	
 	

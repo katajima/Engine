@@ -41,17 +41,18 @@ namespace Game {
 		CreateGameEvent("breakTime", data);
 
 		// スポーン地点はプレイヤーを中心に四方向へ用意し、ウェーブの攻め方に合わせて使い分ける
-		const Vector3 frontSpawn = { 0, 1, 100 };
-		const Vector3 backSpawn = { 0, 1, -100 };
-		const Vector3 rightSpawn = { 100, 1, 0 };
-		const Vector3 leftSpawn = { -100, 1, 0 };
+		const Vector3 frontSpawn = { 0, 1, 50 };
+		const Vector3 backSpawn = { 0, 1, -50 };
+		const Vector3 rightSpawn = { 50, 1, 0 };
+		const Vector3 leftSpawn = { -50, 1, 0 };
 		const Vector3 wideSpawnSize = { 24, 1, 24 };
 		const Vector3 narrowSpawnSize = { 14, 1, 14 };
 
 		data.eventType_ = GameEventType::kBattle;
 		data.changeType_ = GameEventChangeType::kTime;
-		// 各ウェーブを独立した群衆戦として見せるため、切り替え時に残存敵を整理する
-		data.enemyDelete = true;
+		// 各バトルの後に退場フェーズを挟み、残存敵は自然に消してから次の群衆を出す
+		data.enemyDelete = false;
+		data.enemyWaveExit = false;
 
 		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
 		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
@@ -61,6 +62,12 @@ namespace Game {
 		data.battleWaveIndex_ = 1;
 		data.time_.max = 24.0f;
 		CreateGameEvent("battle01", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit01", data);
+		data.eventType_ = GameEventType::kBattle;
+		data.enemyWaveExit = false;
 
 		// WAVE 2: 左右から寄せ、片側にはあえて逃げ道を残す（2群衆 / 合計13体）
 		const Character::CrowdBehaviorSettings wave2Encircle = Character::CrowdBehaviorSettings::Encircle(12.0f);
@@ -70,6 +77,12 @@ namespace Game {
 		data.battleWaveIndex_ = 2;
 		data.time_.max = 28.0f;
 		CreateGameEvent("battle02", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit02", data);
+		data.eventType_ = GameEventType::kBattle;
+		data.enemyWaveExit = false;
 
 		// WAVE 3: 前後から列が入れ替わって攻める波状攻撃（2群衆 / 合計17体）
 		const Character::CrowdBehaviorSettings wave3Assault = Character::CrowdBehaviorSettings::WaveAssault(2.2f, 3);
@@ -79,6 +92,12 @@ namespace Game {
 		data.battleWaveIndex_ = 3;
 		data.time_.max = 32.0f;
 		CreateGameEvent("battle03", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit03", data);
+		data.eventType_ = GameEventType::kBattle;
+		data.enemyWaveExit = false;
 
 		// WAVE 4: 流動する外周と役割分担する追跡隊で移動を強制する（2群衆 / 合計20体）
 		const Character::CrowdBehaviorSettings wave4Flow = Character::CrowdBehaviorSettings::FlowCrowd(13.0f);
@@ -89,6 +108,12 @@ namespace Game {
 		data.battleWaveIndex_ = 4;
 		data.time_.max = 36.0f;
 		CreateGameEvent("battle04", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit04", data);
+		data.eventType_ = GameEventType::kBattle;
+		data.enemyWaveExit = false;
 
 		// WAVE 5: 圧迫群衆、人数適応群衆、V字の中型敵を同時投入する最終戦（3群衆 / 合計28体）
 		const Character::CrowdBehaviorSettings wave5Pressure = Character::CrowdBehaviorSettings::PressureCrowd();
@@ -100,11 +125,16 @@ namespace Game {
 		data.battleWaveIndex_ = 5;
 		data.time_.max = 45.0f;
 		CreateGameEvent("battle05", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit05", data);
 
 		data.changeType_ = GameEventChangeType::kTime;
 		data.eventType_ = GameEventType::kEnd;
 		data.time_.max = 3.0f;
 		data.enemyDelete = true;
+		data.enemyWaveExit = false;
 
 		CreateGameEvent("result", data);
 
@@ -117,11 +147,16 @@ namespace Game {
 
 		ConnectNode("start", "", "breakTime");
 		ConnectNode("breakTime", "", "battle01");
-		ConnectNode("battle01", "", "battle02");
-		ConnectNode("battle02", "", "battle03");
-		ConnectNode("battle03", "", "battle04");
-		ConnectNode("battle04", "", "battle05");
-		ConnectNode("battle05", "", "result");
+		ConnectNode("battle01", "", "waveExit01");
+		ConnectNode("waveExit01", "", "battle02");
+		ConnectNode("battle02", "", "waveExit02");
+		ConnectNode("waveExit02", "", "battle03");
+		ConnectNode("battle03", "", "waveExit03");
+		ConnectNode("waveExit03", "", "battle04");
+		ConnectNode("battle04", "", "waveExit04");
+		ConnectNode("waveExit04", "", "battle05");
+		ConnectNode("battle05", "", "waveExit05");
+		ConnectNode("waveExit05", "", "result");
 		//ConnectNode("result", "", "end");
 
 		eventStateMachine_->SetRoot(GetNodeState("start"));

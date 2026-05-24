@@ -19,6 +19,11 @@ void Game::GameEventState::Enter(Character::CharacterManager* characterManager, 
 	if (data_.enemyDelete) {
 		this->characterManager->Clear(Character::Type::Enemy);
 	}
+
+	// ウェーブ区切りでは即削除せず、敵自身の退場ステートへ移行させる
+	if (data_.enemyWaveExit) {
+		this->characterManager->BeginEnemyWaveExit(data_.time_.max);
+	}
 }
 // 終了
 void Game::GameEventState::Exit() {

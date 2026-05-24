@@ -342,6 +342,9 @@
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyWaveExitState.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\State\BaseMainState.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
@@ -1752,6 +1755,9 @@
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyWaveExitState.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h">

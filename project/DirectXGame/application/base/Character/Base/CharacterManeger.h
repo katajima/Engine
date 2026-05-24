@@ -107,6 +107,8 @@ namespace Character {
 			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 	public:
 		void Clear(Type type);
+		// ウェーブ切り替え用に、敵を即削除せず退場演出へ移行させる
+		void BeginEnemyWaveExit(float duration = 1.2f);
 
 		float GetScore() { return score; }
 	private:

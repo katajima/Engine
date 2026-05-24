@@ -13,6 +13,7 @@
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
+#include "EnemyWaveExitState.h"
 
 namespace Character {
 	BaseEnemy::~BaseEnemy() = default;
@@ -168,6 +169,8 @@ namespace Character {
 		attackSystem_ = std::make_unique<EnemyAttackSystem>();
 		attackSystem_->Initialize(stateMachine_.get());
 
+		// ウェーブ終了時の退場演出ステート
+		waveExitState_ = std::make_unique<EnemyWaveExitState>();
 
 		// 丸影用オブジェクトコンポーネント初期化
 		InitShadowObjectComponent(charaName, shadowSize);
@@ -182,6 +185,12 @@ namespace Character {
 	void BaseEnemy::BaseUpdate() {
 
 		if (objectComponent_ == nullptr) { return; }
+		if (IsWaveExiting()) {
+			// 派生敵も必ず通る基盤更新で退場を処理し、AIや攻撃は実行しない
+			waveExitState_->Update(this, GetTime());
+			return;
+		}
+
 		objectComponentShadow_->SetIsDraw(true);
 		assert(this);
 
@@ -280,6 +289,20 @@ namespace Character {
 
 	EnemyAttackSystem* BaseEnemy::GetEnemyAttackSystem() const {
 		return attackSystem_.get();
+	}
+
+	void BaseEnemy::BeginWaveExit(float duration) {
+		if (waveExitState_) {
+			waveExitState_->Enter(this, duration);
+		}
+	}
+
+	bool BaseEnemy::IsWaveExiting() const {
+		return waveExitState_ && waveExitState_->IsActive();
+	}
+
+	bool BaseEnemy::IsWaveExitRemoval() const {
+		return waveExitState_ && waveExitState_->HasStarted();
 	}
 
 	const BaseCharacter* BaseEnemy::GetTarget() {

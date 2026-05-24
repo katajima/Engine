@@ -27,7 +27,9 @@ namespace Character {
 				[this](const std::unique_ptr<BaseCharacter>& character) {
 					if (!character) { return false; } 
 					
-					if (!character->GetAlive() && character->GetDelete()) {
+					const bool isWaveExitEnemy = character->GetCharacterType() == Type::Enemy &&
+						static_cast<BaseEnemy*>(character.get())->IsWaveExitRemoval();
+					if (!character->GetAlive() && character->GetDelete() && !isWaveExitEnemy) {
 						score++;
 					}
 					return !character->GetAlive() && character->GetDelete();
@@ -36,9 +38,17 @@ namespace Character {
 
 
 
+		// プレイヤー削除後は敵が保持していた追跡ポインタを参照させない。
+		// 死亡ステート中も追跡を止め、残った敵はゲーム終了まで待機させる。
+		BasePlayer* player = GetPlayer();
+		const bool hasEnemyTarget =
+			player &&
+			player->GetAlive() &&
+			player->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die;
+
 		// プレイヤー座標をセット
-		if (GetPlayer()) {
-			specalPointManager->SetTarget(GetPlayer());
+		if (player) {
+			specalPointManager->SetTarget(player);
 		}
 
 		// キャラクター更新(敵)
@@ -54,7 +64,9 @@ namespace Character {
 			if (character->GetCharacterType() == Type::Enemy) {
 				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
 
-				if (enemy->GetAlive()) {
+				if (enemy->GetAlive() && !enemy->IsWaveExiting() && hasEnemyTarget) {
+					// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
+					enemy->SetTargetCharacters(player);
 					target.push_back(enemy);
 					enemies.push_back(enemy);
 				}
@@ -62,11 +74,11 @@ namespace Character {
 		}
 
 		// 敵一覧が入った後にスロット更新
-		if (GetPlayer()) {
+		if (hasEnemyTarget) {
 			enemyAiSystem_->UpdateSlot(
 				enemies,
-				GetPlayer()->GetWorldPosition(),
-				GetPlayer()->GetObjectComponent()->GetWorldTransform().rotate_.y,
+				player->GetWorldPosition(),
+				player->GetObjectComponent()->GetWorldTransform().rotate_.y,
 				dt
 			);
 		}
@@ -77,15 +89,25 @@ namespace Character {
 			enemy->Update();
 		}
 
+		// 退場中の敵はAI一覧から除外したうえで、退場演出のみ更新する
+		for (auto& character : character_) {
+			if (character && character->GetCharacterType() == Type::Enemy) {
+				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+				if (enemy->GetAlive() && enemy->IsWaveExiting()) {
+					enemy->Update();
+				}
+			}
+		}
+
 		// 攻撃要求許可
 		enemyAiSystem_->UpdateRequest(enemies, dt);
 
 		// キャラクター更新(プレイヤー)
-		if (GetPlayer()) {
+		if (player) {
 			// ターゲット設定
-			GetPlayer()->IsMove(isMove);
-			GetPlayer()->SetTargetCharacters(target);
-			GetPlayer()->Update();
+			player->IsMove(isMove);
+			player->SetTargetCharacters(target);
+			player->Update();
 		}
 	}
 
@@ -180,6 +202,18 @@ namespace Character {
 				character->Delete();
 				character->GetObjectComponent()->GetWorldTransform().scale_ = 0.0f;
 				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = 0.0f;;
+			}
+		}
+	}
+
+	void CharacterManager::BeginEnemyWaveExit(float duration) {
+		for (auto& character : character_) {
+			if (character && character->GetCharacterType() == Type::Enemy && character->GetAlive()) {
+				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+				// すでに撃破演出へ入った敵は通常の得点と爆発演出を最後まで維持する
+				if (enemy->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
+					enemy->BeginWaveExit(duration);
+				}
 			}
 		}
 	}

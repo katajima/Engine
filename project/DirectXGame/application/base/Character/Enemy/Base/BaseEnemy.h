@@ -6,6 +6,7 @@
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h>
+#include "EnemyWaveExitState.h"
 
 
 namespace Character {
@@ -48,6 +49,12 @@ namespace Character {
 		EnemyAiSystem* GetEnemyAiSystem() const { return enemAi; }
 
 		void SetEnemyAiSystem(EnemyAiSystem* aiSystem) { enemAi = aiSystem; }
+		// ウェーブ終了による自然退場を開始する
+		void BeginWaveExit(float duration = 1.2f);
+		// 退場中の敵は攻撃・ロックオン・撃破得点の対象から外す
+		bool IsWaveExiting() const;
+		// 退場完了後に削除されても撃破と判定しないための識別
+		bool IsWaveExitRemoval() const;
 
 	public:
 		// ID設定
@@ -116,6 +123,8 @@ namespace Character {
 		std::unique_ptr <Engine::WorldTransform> worldEffect_ = nullptr;
 		// 攻撃システム
 		std::unique_ptr<EnemyAttackSystem> attackSystem_ = nullptr;	
+		// ウェーブ終了専用の退場ステート
+		std::unique_ptr<EnemyWaveExitState> waveExitState_ = nullptr;
 
 		EnemyAiSystem* enemAi = nullptr;	// AIシステム
 	};

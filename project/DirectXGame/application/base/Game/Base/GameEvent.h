@@ -27,6 +27,7 @@ namespace Game {
 		kNone,		// 無し
 		kBattle,	// 戦い
 		kBreakTime,	// 休憩時間
+		kWaveExit,	// ウェーブ終了時の敵退場
 		kStart,		// スタート
 		kEnd,		// 終了
 	};
@@ -87,6 +88,8 @@ namespace Game {
 		GamePadButton buttom = GamePadButton::GAMEPAD_B;
 		// 敵削除
 		bool enemyDelete = false;
+		// 敵を自然退場ステートへ移行する
+		bool enemyWaveExit = false;
 		// 移動可能か
 		bool isMove = true;
 	};

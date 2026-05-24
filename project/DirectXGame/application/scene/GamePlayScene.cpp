@@ -139,7 +139,7 @@ void GamePlayScene::Initialize() {
 	// UI
 	gameUI = std::make_unique<GameUI>();
 	gameUI->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
-	gameUI->SetPlayer(characterManager_->GetPlayer());
+	
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -244,6 +244,7 @@ void GamePlayScene::Update()
 		GetSceneData().playerDie = true;
 	}
 	GetSceneData().score = characterManager_->GetScore();
+	gameUI->SetPlayer(characterManager_->GetPlayer());
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
 	// カメラ管理の更新
