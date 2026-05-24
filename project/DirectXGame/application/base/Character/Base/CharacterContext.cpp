@@ -139,7 +139,7 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 	if (owner->GetCharacterType() == Type::Enemy) {
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(owner);
 		if (enemy->GetEnemyAiSystem()) {
-			// 攻撃役は攻撃スロットへ、それ以外は群衆隊形スロットへ向かわせる
+			// 攻撃役は攻撃スロットへ、それ以外は群れ行動で計算された位置へ向かわせる
 			const bool isAttackRing =
 				enemy->GetEnemyAttackSystem() &&
 				enemy->GetEnemyAttackSystem()->GetAttackRequest() &&
@@ -150,6 +150,10 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 					ctx.moveTarget = attackSlot->position;
 					ctx.hasMoveTarget = true;
 				}
+			}
+			else if (const EnemyFlockingSteering* steering = enemy->GetEnemyAiSystem()->GetCrowdSystem()->FindSteering(enemy)) {
+				ctx.moveTarget = steering->moveTarget;
+				ctx.hasMoveTarget = true;
 			}
 			else if (const CrowdSlot* crowdSlot = enemy->GetEnemyAiSystem()->GetCrowdSystem()->FindSlot(enemy)) {
 				ctx.moveTarget = crowdSlot->position;

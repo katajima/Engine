@@ -9,14 +9,19 @@ namespace Character {
 
 	void EnemyCrowdSystem::Initialize() {
 		slots_.clear();
+		steerings_.clear();
+		patternSystem_.Initialize();
 	}
 
 	void EnemyCrowdSystem::Update(
 		const std::vector<BaseEnemy*>& enemies,
 		const Vector3& targetPos,
-		float targetRotateY
+		float targetRotateY,
+		float dt
 	) {
 		slots_.clear();
+		steerings_.clear();
+		patternSystem_.Update(dt);
 
 		// グループIDごとに敵を分け、グループ単位で隊形を組む
 		std::map<int, std::vector<BaseEnemy*>> groups;
@@ -51,12 +56,25 @@ namespace Character {
 			AssignGroupSlots(groupEnemies, group.first, targetPos, forward, right, groupOrder);
 			groupOrder++;
 		}
+
+		// 隊形を基準に、各敵が今フレーム進むべき位置を計算する
+		BuildFlockingSteering(enemies, targetPos);
 	}
 
 	const CrowdSlot* EnemyCrowdSystem::FindSlot(BaseEnemy* enemy) const {
 		for (const CrowdSlot& slot : slots_) {
 			if (slot.owner == enemy) {
 				return &slot;
+			}
+		}
+
+		return nullptr;
+	}
+
+	const EnemyFlockingSteering* EnemyCrowdSystem::FindSteering(BaseEnemy* enemy) const {
+		for (const EnemyFlockingSteering& steering : steerings_) {
+			if (steering.owner == enemy) {
+				return &steering;
 			}
 		}
 
@@ -95,12 +113,46 @@ namespace Character {
 			slotPos += right * (centeredColumn * columnSpacing_ + groupSideOffset);
 			slotPos.y = enemy->GetWorldPosition().y;
 
+			// グループの設定に従い、従来の隊形位置を各戦術の位置へ置き換える
+			slotPos = patternSystem_.CalculateTarget(
+				enemy->GetCrowdBehavior(),
+				groupEnemies,
+				i,
+				targetPos,
+				forward,
+				right,
+				slotPos
+			);
+
 			CrowdSlot slot{};
 			slot.position = slotPos;
 			slot.owner = enemy;
 			slot.groupId = groupId;
 			slot.memberIndex = enemy->GetCrowdMemberIndex();
 			slots_.push_back(slot);
+		}
+	}
+
+	void EnemyCrowdSystem::BuildFlockingSteering(
+		const std::vector<BaseEnemy*>& enemies,
+		const Vector3& targetPos
+	) {
+		for (BaseEnemy* enemy : enemies) {
+			if (!enemy) {
+				continue;
+			}
+
+			Vector3 baseTarget = targetPos;
+			if (const CrowdSlot* slot = FindSlot(enemy)) {
+				baseTarget = slot->position;
+			}
+
+			// 役割に応じた移動制約と群れ行動を、個別のシステムで順に合成する
+			EnemyCrowdLayer layer = layerSystem_.ResolveLayer(enemy, slots_, targetPos);
+			Vector3 flowDirection = flowFieldSystem_.CalculateDirection(enemy, baseTarget);
+			steerings_.push_back(
+				flockingSystem_.BuildSteering(enemy, enemies, targetPos, baseTarget, flowDirection, layer)
+			);
 		}
 	}
 }

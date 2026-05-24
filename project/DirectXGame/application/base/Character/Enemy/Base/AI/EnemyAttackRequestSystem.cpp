@@ -44,6 +44,12 @@ namespace Character {
 				continue;
 			}
 
+			// 近すぎて離脱中の敵は、十分に距離を取るまで攻撃役へ戻さない
+			// ここでAttackに再割当てすると、攻撃スロットと後退の間を往復して震える
+			if (request->GetRing() == EnemyAttackRing::TooClose) {
+				continue;
+			}
+
 			// クールダウン中は攻撃候補に入れない
 			if (request->IsCooldown()) {
 				continue;

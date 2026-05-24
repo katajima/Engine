@@ -41,28 +41,44 @@ namespace Game {
 		CreateGameEvent("breakTime", data);
 
 		Vector3 popPos = { 0,1,100 };
-		Vector3 popPos2 = { 100,1,100 };
+		Vector3 popPos2 = { 0,1,-100 };
+
+
 		Vector3 popPos3 = { 0,1,100 };
+
+
 		Vector3 popPos4 = { -100,1,100 };
 		Vector3 popPos5 = { 0,1,-100 };
 		Vector3 popPos6 = { 100,1,0 };
 		Vector3 popPos7 = { -100,1,0 };
 
-		Vector3 size = {50,1,50};
+		Vector3 size = {20,1,20};
 		float interval = 1.0f;
 		float startDelay = 0.0f;
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 1, popPos, size, 10.0f, startDelay, 0);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 2, popPos, size, 4.0f, startDelay, 0);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos, size, 0.75f, startDelay, 0);
+		int spawnCount = 10;
+		int groupId = 0;
+
+		//// 同じgroupIdへ同じ設定を渡すことで、一群を包囲型として動かせる
+		//const Character::CrowdBehaviorSettings encircleGroup = Character::CrowdBehaviorSettings::Encircle(12.0f);
+		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 1, popPos, size, 10.0f, startDelay, 0, encircleGroup);
+		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 10, 10, popPos, size, 4.0f, startDelay, 0, encircleGroup);
+		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 20, 20, popPos, size, 0.75f, startDelay, 0, encircleGroup);
+		//
+
+		groupId = 1;
+		const Character::CrowdBehaviorSettings rushGroup = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::Circle);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal2", 1, 1, popPos2, size, 10.0f, startDelay, groupId, rushGroup);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", spawnCount, spawnCount, popPos2, size, 4.0f, startDelay, groupId, rushGroup);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", spawnCount, spawnCount, popPos2, size, 0.75f, startDelay, groupId, rushGroup);
 		
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal2", 1, 1, popPos2, size, 10.0f, startDelay, 1);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 2, popPos2, size, 4.0f, startDelay, 1);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos2, size, 0.75f, startDelay, 1);
-		//CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
-		//CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
-		//CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
+		groupId = 2;
+		const Character::CrowdBehaviorSettings rushGroup2 = Character::CrowdBehaviorSettings::WaveAssault();
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal3", 1, 1, popPos3, size, 10.0f, startDelay, groupId, rushGroup2);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged3", spawnCount, spawnCount, popPos3, size, 4.0f, startDelay, groupId, rushGroup2);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee3", spawnCount, spawnCount, popPos3, size, 0.75f, startDelay, groupId	, rushGroup2);
+
 
 		data.eventType_ = GameEventType::kBattle;
 		data.battleWaveIndex_ = 1;
@@ -70,12 +86,14 @@ namespace Game {
 
 		CreateGameEvent("battle01", data);
 
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
+		const Character::CrowdBehaviorSettings waveGroup = Character::CrowdBehaviorSettings::WaveAssault(2.0f, 3);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f, 0.0f, 2, waveGroup);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f, 0.0f, 2, waveGroup);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f, 0.0f, 2, waveGroup);
 		
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
+		const Character::CrowdBehaviorSettings huntingGroup = Character::CrowdBehaviorSettings::Hunting();
+		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f, 0.0f, 3, huntingGroup);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f, 0.0f, 3, huntingGroup);
 
 
 		data.eventType_ = GameEventType::kBattle;
@@ -108,11 +126,13 @@ namespace Game {
 	}
 
 
-	void GameEventController::CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval, float startDelay, int groupId) {
+	void GameEventController::CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount,
+		Vector3 translate, Vector3 size, float interval, float startDelay, int groupId,
+		const Character::CrowdBehaviorSettings& crowdBehavior) {
 		Character::SpawnInfo data;
 		data.GetData().type_ = type;
 
-		data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval, startDelay, groupId);
+		data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval, startDelay, groupId, crowdBehavior);
 		spawnInfos_.push_back(data);
 	}
 

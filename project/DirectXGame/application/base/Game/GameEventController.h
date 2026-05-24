@@ -53,7 +53,8 @@ namespace Game {
 		float GetCurrentWaveTime() const { return time_; }
 		// スポーン生成
 		void CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount,
-			Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f, int groupId = 0);
+			Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f, int groupId = 0,
+			const Character::CrowdBehaviorSettings& crowdBehavior = Character::CrowdBehaviorSettings::Flocking());
 	public: // イベント系
 
 		// ノード追加(データから生成)

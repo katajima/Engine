@@ -69,10 +69,10 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 	}
 
 	Vector3 moveTarget = ctx.target->GetWorldPosition();
-	//if (ctx.hasMoveTarget) {
-	//	// 群衆隊形や攻撃スロットが指定されている場合は、その位置を優先する
-	//	moveTarget = ctx.moveTarget;
-	//}
+	if (ctx.hasMoveTarget) {
+		// 群衆隊形、攻撃スロット、フロッキングの移動先を優先する
+		moveTarget = ctx.moveTarget;
+	}
 
 	Vector3 toTarget = Subtract(moveTarget, ctx.position);
 	toTarget.y = 0.0f;
@@ -115,8 +115,12 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 	// 垂直移動は専用速度を使う
 	velocity.y = verticalSpeed * ctx.dt;
 
-	// 向きは基本的に水平追尾方向
-	Vector3 moveDirection = horizontalDire;
+	// 実際に水平移動する時だけ、移動システムが向きも制御する。
+	// 停止中の敵は攻撃システムがプレイヤーを向くため、回転要求を重ねない。
+	Vector3 moveDirection{};
+	if (std::abs(ctx.moveSpeed) > 0.001f) {
+		moveDirection = horizontalDire;
+	}
 
 	// 水平移動がない場合でも、浮遊だけしているなら上方向を向きに入れてもよい
 	// ただし見た目の向きは水平だけで十分なら horizontalDire のままでOK

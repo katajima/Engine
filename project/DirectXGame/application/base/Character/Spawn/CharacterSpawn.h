@@ -3,6 +3,7 @@
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/EnemyData.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h>
 
 namespace Engine {
 	class LineCommon;
@@ -32,10 +33,13 @@ namespace Character {
 			int maxEnemyCount_ = 30;			// 最大敵出現量
 			float startDelay_ = 0.0f;           // フェーズ開始からの遅延時間
 			int groupId_ = 0;					// グループID
+			CrowdBehaviorSettings crowdBehavior_{};	// この群衆が使用する行動パターン
 		};
 
 		// 初期化
-		void Initialize(const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f, int groupId = 0) {
+		void Initialize(const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate,
+			Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f, int groupId = 0,
+			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking()) {
 			data_.name_ = name;						// 名前
 			data_.spawnMaxCount_ = spawnMaxCount;	// 出現回数
 			data_.spawnAmount_ = spawnAmount;		// 出現量
@@ -44,6 +48,7 @@ namespace Character {
 			data_.spawnInterval_ = interval;		// インターバル
 			data_.startDelay_ = startDelay;			// 開始遅延時間
 			data_.groupId_ = groupId;				// グループID
+			data_.crowdBehavior_ = crowdBehavior;	// 行動パターン
 		}
 
 

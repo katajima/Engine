@@ -5,6 +5,7 @@
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h>
 
 
 namespace Character {
@@ -63,6 +64,9 @@ namespace Character {
 		void SetCrowdMemberIndex(uint32_t memberIndex) { crowdMemberIndex_ = memberIndex; }
 		// 群衆内番号取得
 		uint32_t GetCrowdMemberIndex() const { return crowdMemberIndex_; }
+		// この敵が所属する群衆グループの行動設定
+		void SetCrowdBehavior(const CrowdBehaviorSettings& behavior) { crowdBehavior_ = behavior; }
+		const CrowdBehaviorSettings& GetCrowdBehavior() const { return crowdBehavior_; }
 
 		// 対象の位置(プレイヤー)
 		Vector3 GetTargetPos();
@@ -96,6 +100,7 @@ namespace Character {
 		uint32_t id_ = 0; // ID
 		int crowdGroupId_ = 0; // 群衆グループID
 		uint32_t crowdMemberIndex_ = 0; // 群衆内番号
+		CrowdBehaviorSettings crowdBehavior_{}; // 群衆の行動パターン設定
 	protected:
 		// 高さ
 		float skyHeight_ = 1.5f;

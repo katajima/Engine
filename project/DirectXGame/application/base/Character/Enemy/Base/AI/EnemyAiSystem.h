@@ -17,7 +17,8 @@ namespace Character {
 		void UpdateSlot(
 			const std::vector<BaseEnemy*>& enemies,
 			const Vector3& targetPos,
-			float targetRotateY
+			float targetRotateY,
+			float dt
 		);
 
 		void UpdateRequest(const std::vector<BaseEnemy*>& enemies, float dt);

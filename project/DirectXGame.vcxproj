@@ -172,6 +172,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdDensitySystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdLayerSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdPatternSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlockingSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.cpp" />
@@ -593,7 +598,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdBehaviorData.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdData.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdDensitySystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdLayerSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdPatternSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlockingSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />

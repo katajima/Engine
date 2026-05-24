@@ -51,8 +51,15 @@ namespace Character {
 		spawnAABBArea_.min = spawnTransform_.GetWorldPosition() - (spawnInfo_.GetData().size_ / 2.0f);
 		spawnAABBArea_.max = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
 
-		// グループ生成
-		characterManager->CreateEnemyGroup(spawnInfo_.GetData().type_, spawnInfo_.GetData().groupId_, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
+		// グループ生成。設定された群衆パターンは生成される全メンバーへ渡す
+		characterManager->CreateEnemyGroup(
+			spawnInfo_.GetData().type_,
+			spawnInfo_.GetData().groupId_,
+			spawnInfo_.GetData().spawnAmount_,
+			spawnTransform_.GetWorldPosition(),
+			spawnAABBArea_,
+			spawnInfo_.GetData().crowdBehavior_
+		);
 
 		// 出現した
 		spawnInfo_.Spawned();

@@ -16,9 +16,10 @@ namespace Character {
 	void EnemyAiSystem::UpdateSlot(
 		const std::vector<BaseEnemy*>& enemies,
 		const Vector3& targetPos,
-		float targetRotateY
+		float targetRotateY,
+		float dt
 	) {
-		crowdSystem_->Update(enemies, targetPos, targetRotateY);
+		crowdSystem_->Update(enemies, targetPos, targetRotateY, dt);
 		attackSlotSystem_->Update(enemies, targetPos, targetRotateY);
 	}
 

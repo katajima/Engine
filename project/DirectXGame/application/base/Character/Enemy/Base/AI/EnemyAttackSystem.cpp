@@ -23,6 +23,34 @@ namespace Character {
 			}
 		}
 
+		// 停止している敵だけが利用する、プレイヤー方向への滑らかな旋回処理
+		void RotateTowardTarget(
+			const Vector3& ownerPos,
+			const Vector3& targetPos,
+			float dt,
+			float turnSpeed,
+			float& rotateY
+		) {
+			Vector3 toTarget = Subtract(targetPos, ownerPos);
+			toTarget.y = 0.0f;
+			if (toTarget.Length() <= 0.001f) {
+				return;
+			}
+
+			Vector3 rotate = Math::DirectionToRotate(toTarget.Normalize(), Dire::Z);
+			float diff = rotate.y - rotateY;
+
+			while (diff > std::numbers::pi_v<float>) {
+				diff -= std::numbers::pi_v<float> * 2.0f;
+			}
+			while (diff < -std::numbers::pi_v<float>) {
+				diff += std::numbers::pi_v<float> * 2.0f;
+			}
+
+			float maxTurn = turnSpeed * dt;
+			rotateY += std::clamp(diff, -maxTurn, maxTurn);
+		}
+
 	}
 
 	void EnemyAttackSystem::Initialize(CharacterStateMachine* characterStateMachine) {
@@ -42,36 +70,11 @@ namespace Character {
 		const EnemyGlobalData& data,
 		float moveSpeed
 	) {
-		Vector3 toTarget = Subtract(targetPos, ownerPos);
-		toTarget.y = 0.0f;
-
-		if (toTarget.Length() > 0.001f) {
-			Vector3 lookDir = toTarget.Normalize();
-			Vector3 rotate = Math::DirectionToRotate(lookDir, Dire::Z);
-
-			float currentY = rotateY;
-			float targetY = rotate.y;
-			float diff = targetY - currentY;
-
-			while (diff > std::numbers::pi_v<float>) {
-				diff -= std::numbers::pi_v<float> *2.0f;
-			}
-			while (diff < -std::numbers::pi_v<float>) {
-				diff += std::numbers::pi_v<float> *2.0f;
-			}
-
-			float turnSpeed = data.turnSpeed * dt;
-			diff = std::clamp(diff, -turnSpeed, turnSpeed);
-
-			rotateY = currentY + diff;
-		}
-
-
 		Vector3 toMoveSlot = Subtract(slotPos, ownerPos);
 		toMoveSlot.y = 0.0f;
 		float slotDistance = toMoveSlot.Length();
 
-		toTarget = Subtract(targetPos, ownerPos);
+		Vector3 toTarget = Subtract(targetPos, ownerPos);
 		toTarget.y = 0.0f;
 		float targetDistance = toTarget.Length();
 
@@ -89,7 +92,9 @@ namespace Character {
 		if (targetDistance < ringRange.min - ringMargin) {
 			timer_ = 0.0f;
 			attackRequest_->SetRing(EnemyAttackRing::TooClose);
-			speed = -std::max(data.retreatSpeed, moveSpeed * 0.5f);
+			// 群衆AIが後退側の移動目標を作るため、速度は正方向で進ませる
+			// 負の速度にすると後退目標と二重反転し、プレイヤー付近で振動する
+			speed = std::max(data.retreatSpeed, moveSpeed * 0.5f);
 			return;
 		}
 
@@ -106,11 +111,9 @@ namespace Character {
 			return;
 		}
 
-		if (toTarget.Length() > 0.001f) {
-			Vector3 lookDir = toTarget.Normalize();
-			Vector3 rotate = Math::DirectionToRotate(lookDir, Dire::Z);
-			rotateY = rotate.y;
-		}
+		// スロットへ到着して停止した後だけ、攻撃対象へ向きを合わせる。
+		// 移動中までここで回すと、移動方向を向く処理と競合して回転が震える。
+		RotateTowardTarget(ownerPos, targetPos, dt, data.turnSpeed, rotateY);
 
 		if (currentRing != EnemyAttackRing::Attack) {
 			timer_ = 0.0f;

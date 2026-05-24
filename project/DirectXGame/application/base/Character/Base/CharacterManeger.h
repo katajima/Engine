@@ -98,11 +98,13 @@ namespace Character {
 
 	public: // 生成系
 		// キャラクター生成(敵)
-		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
+		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
+			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 		// キャラクター生成(プレイヤー)
 		void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
-		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb);
+		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb,
+			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 	public:
 		void Clear(Type type);
 

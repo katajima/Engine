@@ -66,7 +66,8 @@ namespace Character {
 			enemyAiSystem_->UpdateSlot(
 				enemies,
 				GetPlayer()->GetWorldPosition(),
-				GetPlayer()->GetObjectComponent()->GetWorldTransform().rotate_.y
+				GetPlayer()->GetObjectComponent()->GetWorldTransform().rotate_.y,
+				dt
 			);
 		}
 
@@ -103,7 +104,8 @@ namespace Character {
 		}
 	}
 
-	int CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
+	int CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
+		const CrowdBehaviorSettings& crowdBehavior) {
 		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
 		// EnemyTypeから生成関数
@@ -131,6 +133,7 @@ namespace Character {
 		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
 		enemy->SetCrowdGroupId(groupId);					// 群衆グループ設定
 		enemy->SetCrowdMemberIndex(enemyCount_++);			// 群衆内番号設定
+		enemy->SetCrowdBehavior(crowdBehavior);				// 群衆の行動パターン設定
 		enemy->Initialize(nullptr, entityManager, globalVariables, transform.translate, camera); // 初期化
 		enemy->SetTargetCharacters(GetPlayer());					// ターゲット指定
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
@@ -160,12 +163,13 @@ namespace Character {
 		characterCount_++;
 	}
 
-	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb) {
+	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb,
+		const CrowdBehaviorSettings& crowdBehavior) {
 		// 敵を出現させる
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
 			pos.y = 0.0f;
-			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos });
+			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos }, crowdBehavior);
 		}
 	}
 

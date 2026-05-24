@@ -248,18 +248,24 @@ namespace Character {
 	void BaseEnemy::Move() {
 		if (isStopping_) return;
 
-		// 攻撃システム更新
+		// 攻撃役は専用スロットへ移動し、その他の敵は群れ行動の目標を使う
 		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
 
 		Vector3 slotPos = GetTargetPos();
 
-		if (slot) {
+		const bool isAttackRing =
+			attackSystem_->GetAttackRequest() &&
+			attackSystem_->GetAttackRequest()->GetRing() == EnemyAttackRing::Attack;
+
+		if (isAttackRing && slot) {
 			slotPos = slot->position;
 		}
-		/*if (const CrowdSlot* crowdSlot = enemAi->GetCrowdSystem()->FindSlot(this);
-			attackSystem_->GetAttackRequest()->GetRing() != EnemyAttackRing::Attack && crowdSlot) {
+		else if (const EnemyFlockingSteering* steering = enemAi->GetCrowdSystem()->FindSteering(this)) {
+			slotPos = steering->moveTarget;
+		}
+		else if (const CrowdSlot* crowdSlot = enemAi->GetCrowdSystem()->FindSlot(this)) {
 			slotPos = crowdSlot->position;
-		}*/
+		}
 
 		attackSystem_->Update(
 			GetTime(),
