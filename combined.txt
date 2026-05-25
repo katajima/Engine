@@ -191,11 +191,25 @@
     └── └── └── └── └── └── └── ├── EnemyAttackSlotSystem.h
     └── └── └── └── └── └── └── ├── EnemyAttackSystem.cpp
     └── └── └── └── └── └── └── ├── EnemyAttackSystem.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdBehaviorData.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdData.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdDensitySystem.cpp
+    └── └── └── └── └── └── └── ├── EnemyCrowdDensitySystem.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdLayerSystem.cpp
+    └── └── └── └── └── └── └── ├── EnemyCrowdLayerSystem.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdPatternSystem.cpp
+    └── └── └── └── └── └── └── ├── EnemyCrowdPatternSystem.h
     └── └── └── └── └── └── └── ├── EnemyCrowdSystem.cpp
-    └── └── └── └── └── └── └── └── EnemyCrowdSystem.h
+    └── └── └── └── └── └── └── ├── EnemyCrowdSystem.h
+    └── └── └── └── └── └── └── ├── EnemyFlockingSystem.cpp
+    └── └── └── └── └── └── └── ├── EnemyFlockingSystem.h
+    └── └── └── └── └── └── └── ├── EnemyFlowFieldSystem.cpp
+    └── └── └── └── └── └── └── └── EnemyFlowFieldSystem.h
     └── └── └── └── └── └── ├── BaseEnemy.cpp
     └── └── └── └── └── └── ├── BaseEnemy.h
-    └── └── └── └── └── └── └── EnemyData.h
+    └── └── └── └── └── └── ├── EnemyData.h
+    └── └── └── └── └── └── ├── EnemyWaveExitState.cpp
+    └── └── └── └── └── └── └── EnemyWaveExitState.h
     └── └── └── └── └── ├── Dummy/
     └── └── └── └── └── └── ├── DummyEnemy.cpp
     └── └── └── └── └── └── ├── DummyEnemy.h
@@ -1002,6 +1016,13 @@ void Engine::GlobalVariables::SaveFile(const std::string& groupName) {
 	ofs.close();
 }
 
+bool Engine::GlobalVariables::RemoveSavedFile(const std::string& groupName) {
+	const std::filesystem::path filePath = std::filesystem::path(kDirectoryPath) / (groupName + ".json");
+	std::error_code error;
+	const bool removed = std::filesystem::remove(filePath, error);
+	return removed && !error;
+}
+
 /// <summary>
 /// 全ロード
 /// </summary>
@@ -1344,6 +1365,9 @@ namespace Engine {
 		/// <param name="groupName"></param>
 		void SaveFile(const std::string& groupName);
 
+		// 保存ファイル削除
+		bool RemoveSavedFile(const std::string& groupName);
+
 		/// <summary>
 		/// ディレクトリの全ファイル読み込み
 		/// </summary>
@@ -1481,6 +1505,7 @@ namespace Engine {
 	}
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/GlobalVariables/GlobalVariablesFanction.cpp
@@ -2361,6 +2386,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboEditor.cp
 #include "DirectXGame/application/base/Character/Player/Base/BasePlayer.h"
 #include "DirectXGame/application/base/Effect/Effect.h"
 #include "DirectXGame/application/base/Object/ObjectComponent.h"
+#include <cctype>
 
 namespace Combo {
 
@@ -2783,6 +2809,7 @@ namespace Combo {
 		ImGui::Begin("Comdo");
 		ImGui::Checkbox("isCreativeMode", &isComboEditorActive_);
 		comboSystem->SertIsDebug(isComboEditorActive_);
+		DrawNodeManagement();
 		// リロード
 		if (ImGui::Button("Relord")) {
 			Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
@@ -2824,6 +2851,98 @@ namespace Combo {
 		ImGui::End();
 #endif // _DEBUG
 	};
+
+	void Editor::DrawNodeManagement() {
+#ifdef _DEBUG
+		ImGui::SeparatorText("Combo Nodes");
+		ImGui::InputText("New Combo Name", newComboNameBuffer_.data(), newComboNameBuffer_.size());
+		ImGui::SameLine();
+		if (ImGui::Button("Add Combo")) {
+			AddComboNode();
+		}
+
+		if (!selectedComboEditorBlockName_.empty()) {
+			ImGui::Text("Selected: %s", selectedComboEditorBlockName_.c_str());
+			if (ImGui::Button("Delete Selected Combo")) {
+				pendingDeleteComboName_ = selectedComboEditorBlockName_;
+				ImGui::OpenPopup("Confirm Combo Delete");
+			}
+		}
+
+		if (!nodeManagementMessage_.empty()) {
+			ImGui::TextWrapped("%s", nodeManagementMessage_.c_str());
+		}
+
+		if (ImGui::BeginPopupModal("Confirm Combo Delete", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Delete combo '%s'?", pendingDeleteComboName_.c_str());
+			ImGui::TextWrapped("This removes it from the combo list and deletes its saved JSON data.");
+			ImGui::Separator();
+			if (ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+				pendingDeleteComboName_.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Delete Permanently", ImVec2(160.0f, 0.0f))) {
+				DeleteComboNode(pendingDeleteComboName_);
+				pendingDeleteComboName_.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::Separator();
+#endif
+	}
+
+	void Editor::AddComboNode() {
+		std::string comboName = newComboNameBuffer_.data();
+		if (comboName.empty()) {
+			nodeManagementMessage_ = "Combo name is required.";
+			return;
+		}
+		for (const unsigned char c : comboName) {
+			if (!std::isalnum(c) && c != '_') {
+				nodeManagementMessage_ = "Use only letters, numbers, and underscores in combo names.";
+				return;
+			}
+		}
+		if (globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "A combo with that name already exists.";
+			return;
+		}
+		if (globalVariables->HasGroup(comboName)) {
+			nodeManagementMessage_ = "Saved data with that name already exists. Choose another name.";
+			return;
+		}
+
+		comboSystem->CreateCombo(comboName);
+		globalVariables->SaveFile(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		ApplyComboEditorToSystem();
+		selectedComboEditorBlockName_ = comboName;
+		newComboNameBuffer_.fill('\0');
+		nodeManagementMessage_ = "Added and saved combo: " + comboName;
+	}
+
+	void Editor::DeleteComboNode(const std::string& comboName) {
+		if (comboName.empty() || !globalVariables->HasKey(comboSystem->GetName(), comboName)) {
+			nodeManagementMessage_ = "The selected combo no longer exists.";
+			return;
+		}
+
+		globalVariables->RemoveItem(comboSystem->GetName(), comboName);
+		globalVariables->RemoveGroup(comboName);
+		globalVariables->SaveFile(comboSystem->GetName());
+		const bool removedFile = globalVariables->RemoveSavedFile(comboName);
+
+		Character::BasePlayer* player = dynamic_cast<Character::BasePlayer*>(owner);
+		if (player) {
+			player->Reload();
+		}
+		ApplyComboEditorToSystem();
+		nodeManagementMessage_ = removedFile
+			? "Deleted combo: " + comboName
+			: "Removed combo from the list, but its JSON file could not be deleted: " + comboName;
+	}
 
 	void Editor::UpdateImGui(float dt) {
 #ifdef _DEBUG
@@ -2959,6 +3078,7 @@ File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboEditor.h
 ============================================================
 #pragma once
 #include  "ComboImGui.h"
+#include <array>
 #include "map"
 #include "DirectXGame/engine/Effect/EffectGlovalData.h"
 namespace Engine {
@@ -3082,6 +3202,10 @@ namespace Combo {
 		void ApplyComboEditorToSystem();
 		// グローバルデータ設定
 		void SetGlobalData();
+		// コンボノードの管理
+		void DrawNodeManagement();
+		void AddComboNode();
+		void DeleteComboNode(const std::string& comboName);
 	private:
 		// コンボエディターブロック作成
 		void CreateComboEditorBlock(const std::string& comboName, Combo::System* comboSystem, const std::string& stateName, Character::BaseCharacter* owner);
@@ -3101,6 +3225,9 @@ namespace Combo {
 
 		// 選択中のコンボエディターブロック名
 		std::string selectedComboEditorBlockName_;
+		std::array<char, 128> newComboNameBuffer_{};
+		std::string pendingDeleteComboName_;
+		std::string nodeManagementMessage_;
 
 		GlobalData data;
 
@@ -3108,6 +3235,7 @@ namespace Combo {
 		bool isComboEditorActive_ = true;
 	};
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Attack/Combo/Base/ComboGlobalData.h
@@ -3940,6 +4068,7 @@ namespace Combo {
 
 		comboNodes_.clear();
 		comboGlobalDatas_.clear();
+		comboNodenames_.clear();
 		parentTransforms_.clear();
 	}
 
@@ -5641,7 +5770,6 @@ namespace Combo {
 			return false;
 		}
 
-		targetPos_ = traget->GetWorldPosition();
 
 		const Vector3 currentPos = worldTransform->translate_;
 		const Vector3 goalPos = BuildTargetMoveGoal();
@@ -13136,7 +13264,7 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 	if (owner->GetCharacterType() == Type::Enemy) {
 		BaseEnemy* enemy = static_cast<BaseEnemy*>(owner);
 		if (enemy->GetEnemyAiSystem()) {
-			// 攻撃役は攻撃スロットへ、それ以外は群衆隊形スロットへ向かわせる
+			// 攻撃役は攻撃スロットへ、それ以外は群れ行動で計算された位置へ向かわせる
 			const bool isAttackRing =
 				enemy->GetEnemyAttackSystem() &&
 				enemy->GetEnemyAttackSystem()->GetAttackRequest() &&
@@ -13147,6 +13275,10 @@ void Character::CharacterContextSystem::CreateContextMovement(BaseCharacter* own
 					ctx.moveTarget = attackSlot->position;
 					ctx.hasMoveTarget = true;
 				}
+			}
+			else if (const EnemyFlockingSteering* steering = enemy->GetEnemyAiSystem()->GetCrowdSystem()->FindSteering(enemy)) {
+				ctx.moveTarget = steering->moveTarget;
+				ctx.hasMoveTarget = true;
 			}
 			else if (const CrowdSlot* crowdSlot = enemy->GetEnemyAiSystem()->GetCrowdSystem()->FindSlot(enemy)) {
 				ctx.moveTarget = crowdSlot->position;
@@ -13640,7 +13772,9 @@ namespace Character {
 				[this](const std::unique_ptr<BaseCharacter>& character) {
 					if (!character) { return false; } 
 					
-					if (!character->GetAlive() && character->GetDelete()) {
+					const bool isWaveExitEnemy = character->GetCharacterType() == Type::Enemy &&
+						static_cast<BaseEnemy*>(character.get())->IsWaveExitRemoval();
+					if (!character->GetAlive() && character->GetDelete() && !isWaveExitEnemy) {
 						score++;
 					}
 					return !character->GetAlive() && character->GetDelete();
@@ -13649,9 +13783,17 @@ namespace Character {
 
 
 
+		// プレイヤー削除後は敵が保持していた追跡ポインタを参照させない。
+		// 死亡ステート中も追跡を止め、残った敵はゲーム終了まで待機させる。
+		BasePlayer* player = GetPlayer();
+		const bool hasEnemyTarget =
+			player &&
+			player->GetAlive() &&
+			player->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die;
+
 		// プレイヤー座標をセット
-		if (GetPlayer()) {
-			specalPointManager->SetTarget(GetPlayer());
+		if (player) {
+			specalPointManager->SetTarget(player);
 		}
 
 		// キャラクター更新(敵)
@@ -13667,7 +13809,9 @@ namespace Character {
 			if (character->GetCharacterType() == Type::Enemy) {
 				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
 
-				if (enemy->GetAlive()) {
+				if (enemy->GetAlive() && !enemy->IsWaveExiting() && hasEnemyTarget) {
+					// 有効なプレイヤーだけをロックオンへ再設定し、古い参照を使わせない
+					enemy->SetTargetCharacters(player);
 					target.push_back(enemy);
 					enemies.push_back(enemy);
 				}
@@ -13675,11 +13819,12 @@ namespace Character {
 		}
 
 		// 敵一覧が入った後にスロット更新
-		if (GetPlayer()) {
+		if (hasEnemyTarget) {
 			enemyAiSystem_->UpdateSlot(
 				enemies,
-				GetPlayer()->GetWorldPosition(),
-				GetPlayer()->GetObjectComponent()->GetWorldTransform().rotate_.y
+				player->GetWorldPosition(),
+				player->GetObjectComponent()->GetWorldTransform().rotate_.y,
+				dt
 			);
 		}
 
@@ -13689,15 +13834,25 @@ namespace Character {
 			enemy->Update();
 		}
 
+		// 退場中の敵はAI一覧から除外したうえで、退場演出のみ更新する
+		for (auto& character : character_) {
+			if (character && character->GetCharacterType() == Type::Enemy) {
+				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+				if (enemy->GetAlive() && enemy->IsWaveExiting()) {
+					enemy->Update();
+				}
+			}
+		}
+
 		// 攻撃要求許可
 		enemyAiSystem_->UpdateRequest(enemies, dt);
 
 		// キャラクター更新(プレイヤー)
-		if (GetPlayer()) {
+		if (player) {
 			// ターゲット設定
-			GetPlayer()->IsMove(isMove);
-			GetPlayer()->SetTargetCharacters(target);
-			GetPlayer()->Update();
+			player->IsMove(isMove);
+			player->SetTargetCharacters(target);
+			player->Update();
 		}
 	}
 
@@ -13716,7 +13871,8 @@ namespace Character {
 		}
 	}
 
-	int CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform){
+	int CharacterManager::CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
+		const CrowdBehaviorSettings& crowdBehavior) {
 		using EnemyFactory = std::function<std::unique_ptr<BaseEnemy>()>;
 
 		// EnemyTypeから生成関数
@@ -13744,6 +13900,7 @@ namespace Character {
 		enemy->SetEnemyAiSystem(enemyAiSystem_.get());	// 敵AIシステム設定
 		enemy->SetCrowdGroupId(groupId);					// 群衆グループ設定
 		enemy->SetCrowdMemberIndex(enemyCount_++);			// 群衆内番号設定
+		enemy->SetCrowdBehavior(crowdBehavior);				// 群衆の行動パターン設定
 		enemy->Initialize(nullptr, entityManager, globalVariables, transform.translate, camera); // 初期化
 		enemy->SetTargetCharacters(GetPlayer());					// ターゲット指定
 		enemy->SetCharacterType(Type::Enemy);	// キャラクタータイプを敵に設定
@@ -13773,12 +13930,13 @@ namespace Character {
 		characterCount_++;
 	}
 
-	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb) {
+	void CharacterManager::CreateEnemyGroup(EnemyType enemyType, int groupIds, int perGroup, Vector3 origin, AABB aabb,
+		const CrowdBehaviorSettings& crowdBehavior) {
 		// 敵を出現させる
 		for (int i = 0; i < perGroup; ++i) {
 			Vector3 pos = Random::RandomVector3(aabb.min, aabb.max);
 			pos.y = 0.0f;
-			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos });
+			CreateCharacter(enemyType, "enemy", groupIds, Transform{ {1,1,1}, {},pos }, crowdBehavior);
 		}
 	}
 
@@ -13789,6 +13947,18 @@ namespace Character {
 				character->Delete();
 				character->GetObjectComponent()->GetWorldTransform().scale_ = 0.0f;
 				character->GetObjectComponentShadow()->GetWorldTransform().scale_ = 0.0f;;
+			}
+		}
+	}
+
+	void CharacterManager::BeginEnemyWaveExit(float duration) {
+		for (auto& character : character_) {
+			if (character && character->GetCharacterType() == Type::Enemy && character->GetAlive()) {
+				BaseEnemy* enemy = static_cast<BaseEnemy*>(character.get());
+				// すでに撃破演出へ入った敵は通常の得点と爆発演出を最後まで維持する
+				if (enemy->GetCharacterStateMachine()->GetCurrentMainState() != CharacterMainState::Die) {
+					enemy->BeginWaveExit(duration);
+				}
 			}
 		}
 	}
@@ -13900,13 +14070,17 @@ namespace Character {
 
 	public: // 生成系
 		// キャラクター生成(敵)
-		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform);
+		int CreateCharacter(EnemyType enemyType, const std::string& characterName, int groupId, Transform transform,
+			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 		// キャラクター生成(プレイヤー)
 		void CreateCharacter(PlayerType playerType, const std::string& characterName, Transform transform);
 
-		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb);
+		void CreateEnemyGroup(EnemyType enemyType, int groupCount, int perGroup, Vector3 origin, AABB aabb,
+			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking());
 	public:
 		void Clear(Type type);
+		// ウェーブ切り替え用に、敵を即削除せず退場演出へ移行させる
+		void BeginEnemyWaveExit(float duration = 1.2f);
 
 		float GetScore() { return score; }
 	private:
@@ -14110,9 +14284,10 @@ namespace Character {
 	void EnemyAiSystem::UpdateSlot(
 		const std::vector<BaseEnemy*>& enemies,
 		const Vector3& targetPos,
-		float targetRotateY
+		float targetRotateY,
+		float dt
 	) {
-		crowdSystem_->Update(enemies, targetPos, targetRotateY);
+		crowdSystem_->Update(enemies, targetPos, targetRotateY, dt);
 		attackSlotSystem_->Update(enemies, targetPos, targetRotateY);
 	}
 
@@ -14144,7 +14319,8 @@ namespace Character {
 		void UpdateSlot(
 			const std::vector<BaseEnemy*>& enemies,
 			const Vector3& targetPos,
-			float targetRotateY
+			float targetRotateY,
+			float dt
 		);
 
 		void UpdateRequest(const std::vector<BaseEnemy*>& enemies, float dt);
@@ -14306,6 +14482,12 @@ namespace Character {
 				continue;
 			}
 
+			// 近すぎて離脱中の敵は、十分に距離を取るまで攻撃役へ戻さない
+			// ここでAttackに再割当てすると、攻撃スロットと後退の間を往復して震える
+			if (request->GetRing() == EnemyAttackRing::TooClose) {
+				continue;
+			}
+
 			// クールダウン中は攻撃候補に入れない
 			if (request->IsCooldown()) {
 				continue;
@@ -14389,10 +14571,10 @@ namespace Character {
 		uint32_t requestCounter_ = 1;
 
 		// 同時に攻撃できる敵数
-		uint32_t maxAttackCount_ = 1;
+		uint32_t maxAttackCount_ = 2;
 
 		// 攻撃待ちの中でも前に詰める敵数
-		uint32_t approachRingCount_ = 3;
+		uint32_t approachRingCount_ = 2;
 
 		// 攻撃許可の間隔
 		float attackInterval_ = 0.1f;
@@ -14540,7 +14722,7 @@ namespace Character {
 
 		std::array<AttackSlot, kSlotCount> slots_{};
 
-		float slotRadius_ = 6.0f;
+		float slotRadius_ = 8.0f;
 	};
 }
 
@@ -14563,14 +14745,42 @@ namespace Character {
 		RingRange GetRingRange(EnemyAttackRing ring) {
 			switch (ring) {
 			case EnemyAttackRing::Attack:
-				return { 5.0f, 7.0f };
+				return { 7.0f, 10.0f };
 			case EnemyAttackRing::Approach:
-				return { 7.0f, 11.0f };
+				return { 10.0f, 15.0f };
 			case EnemyAttackRing::Standby:
-				return { 11.0f, 15.0f };
+				return { 15.0f, 20.0f };
 			default:
-				return { 5.0f, 7.0f };
+				return { 7.0f, 10.0f };
 			}
+		}
+
+		// 停止している敵だけが利用する、プレイヤー方向への滑らかな旋回処理
+		void RotateTowardTarget(
+			const Vector3& ownerPos,
+			const Vector3& targetPos,
+			float dt,
+			float turnSpeed,
+			float& rotateY
+		) {
+			Vector3 toTarget = Subtract(targetPos, ownerPos);
+			toTarget.y = 0.0f;
+			if (toTarget.Length() <= 0.001f) {
+				return;
+			}
+
+			Vector3 rotate = Math::DirectionToRotate(toTarget.Normalize(), Dire::Z);
+			float diff = rotate.y - rotateY;
+
+			while (diff > std::numbers::pi_v<float>) {
+				diff -= std::numbers::pi_v<float> * 2.0f;
+			}
+			while (diff < -std::numbers::pi_v<float>) {
+				diff += std::numbers::pi_v<float> * 2.0f;
+			}
+
+			float maxTurn = turnSpeed * dt;
+			rotateY += std::clamp(diff, -maxTurn, maxTurn);
 		}
 
 	}
@@ -14592,36 +14802,11 @@ namespace Character {
 		const EnemyGlobalData& data,
 		float moveSpeed
 	) {
-		Vector3 toTarget = Subtract(targetPos, ownerPos);
-		toTarget.y = 0.0f;
-
-		if (toTarget.Length() > 0.001f) {
-			Vector3 lookDir = toTarget.Normalize();
-			Vector3 rotate = Math::DirectionToRotate(lookDir, Dire::Z);
-
-			float currentY = rotateY;
-			float targetY = rotate.y;
-			float diff = targetY - currentY;
-
-			while (diff > std::numbers::pi_v<float>) {
-				diff -= std::numbers::pi_v<float> *2.0f;
-			}
-			while (diff < -std::numbers::pi_v<float>) {
-				diff += std::numbers::pi_v<float> *2.0f;
-			}
-
-			float turnSpeed = data.turnSpeed * dt;
-			diff = std::clamp(diff, -turnSpeed, turnSpeed);
-
-			rotateY = currentY + diff;
-		}
-
-
 		Vector3 toMoveSlot = Subtract(slotPos, ownerPos);
 		toMoveSlot.y = 0.0f;
 		float slotDistance = toMoveSlot.Length();
 
-		toTarget = Subtract(targetPos, ownerPos);
+		Vector3 toTarget = Subtract(targetPos, ownerPos);
 		toTarget.y = 0.0f;
 		float targetDistance = toTarget.Length();
 
@@ -14639,7 +14824,9 @@ namespace Character {
 		if (targetDistance < ringRange.min - ringMargin) {
 			timer_ = 0.0f;
 			attackRequest_->SetRing(EnemyAttackRing::TooClose);
-			speed = -std::max(data.retreatSpeed, moveSpeed * 0.5f);
+			// 群衆AIが後退側の移動目標を作るため、速度は正方向で進ませる
+			// 負の速度にすると後退目標と二重反転し、プレイヤー付近で振動する
+			speed = std::max(data.retreatSpeed, moveSpeed * 0.5f);
 			return;
 		}
 
@@ -14649,18 +14836,16 @@ namespace Character {
 			return;
 		}
 
-		const float slotArrivalRange = 1.0f;
+		const float slotArrivalRange = 3.0f;
 		if (slotDistance > slotArrivalRange) {
 			timer_ = 0.0f;
 			speed = moveSpeed;
 			return;
 		}
 
-		if (toTarget.Length() > 0.001f) {
-			Vector3 lookDir = toTarget.Normalize();
-			Vector3 rotate = Math::DirectionToRotate(lookDir, Dire::Z);
-			rotateY = rotate.y;
-		}
+		// スロットへ到着して停止した後だけ、攻撃対象へ向きを合わせる。
+		// 移動中までここで回すと、移動方向を向く処理と競合して回転が震える。
+		RotateTowardTarget(ownerPos, targetPos, dt, data.turnSpeed, rotateY);
 
 		if (currentRing != EnemyAttackRing::Attack) {
 			timer_ = 0.0f;
@@ -14677,7 +14862,7 @@ namespace Character {
 
 		timer_ += dt;
 
-		if (timer_ >= data.attackTimer) {
+		//if (timer_ >= data.attackTimer) {
 			attackRequest_->Activate();
 
 			if (attackRequest_->GetIsGranted()) {
@@ -14689,7 +14874,7 @@ namespace Character {
 				timer_ = 0.0f;
 				return;
 			}
-		}
+		//}
 	}
 
 	EnemyAttackRequest* EnemyAttackSystem::GetAttackRequest() const {
@@ -14744,6 +14929,621 @@ namespace Character {
 }
 
 ============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h
+============================================================
+#pragma once
+#include <cstdint>
+
+namespace Character {
+	// 群衆全体が採用する戦術パターン
+	enum class EnemyCrowdBehaviorType {
+		Rush,					// 直進型: プレイヤーへ一気に押し寄せる
+		Encircle,				// 包囲型: プレイヤーの周囲を囲む
+		WaveAssault,			// 波状型: 攻め込む列を時間で交代する
+		Flocking,				// 群れ型: 既存の群れ移動を中心に使う
+		Formation,				// 隊列型: 指定された陣形を維持する
+		FlowCrowd,				// 流動型: 周囲を流れながら前へ入る
+		PressureCrowd,			// 圧迫型: 密度を高めて狭く押す
+		DistributedEncircle,	// 分散型: 逃げ道を残して広く包囲する
+		DensityAdaptive,		// 密度制御型: 人数に応じて戦術を変える
+		Spiral,					// スパイラル型: 回転しながら距離を詰める
+		Hunting,				// ハンティング型: 役割分担で追い込む
+	};
+
+	// 隊列型で利用する陣形
+	enum class EnemyFormationShape {
+		Line,		// 横列
+		Circle,		// 円形
+		VShape,		// V字
+		Square,		// 方陣
+	};
+
+	// ハンティング型でメンバーに順番に割り当てる役割
+	enum class EnemyHuntingRole {
+		Chaser,		// 追い込み
+		Flanker,	// 横取り
+		Ambusher,	// 待ち伏せ
+		Blocker,	// 圧迫
+	};
+
+	/// <summary>
+	/// 群衆グループの行動設定。スポーン時にプリセットを渡すだけで戦術を変更できる。
+	/// </summary>
+	struct CrowdBehaviorSettings {
+		EnemyCrowdBehaviorType type = EnemyCrowdBehaviorType::Flocking;
+		EnemyFormationShape formation = EnemyFormationShape::Line;
+		float radius = 11.0f;			// 包囲・回転配置の基準半径
+		float spacing = 3.0f;			// 隊列のメンバー間隔
+		float angularSpeed = 0.7f;		// 流動・スパイラルの回転速度
+		float waveInterval = 2.0f;		// 波状型で前列が交代する秒数
+		uint32_t waveCount = 3;			// 波状型の列数
+
+		/// <summary>
+		/// 直進型
+		/// </summary>
+		/// <returns></returns>
+		static CrowdBehaviorSettings Rush() {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::Rush;
+			return data;
+		}
+
+		/// <summary>
+		///  包囲型
+		/// </summary>
+		/// <param name="radius"></param>
+		/// <returns></returns>
+		static CrowdBehaviorSettings Encircle(float radius = 11.0f) {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::Encircle;
+			data.radius = radius;
+			return data;
+		}
+
+		/// <summary>
+		/// 波状型
+		/// </summary>
+		/// <param name="interval"></param>
+		/// <param name="waves"></param>
+		/// <returns></returns>
+		static CrowdBehaviorSettings WaveAssault(float interval = 2.0f, uint32_t waves = 3) {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::WaveAssault;
+			data.waveInterval = interval;
+			data.waveCount = waves;
+			return data;
+		}
+
+		/// <summary>
+		///  群れ型
+		/// </summary>
+		/// <returns></returns>
+		static CrowdBehaviorSettings Flocking() {
+			return {};
+		}
+
+		/// <summary>
+		/// 隊列型
+		/// </summary>
+		/// <param name="shape"></param>
+		/// Line, 横列
+		/// Circle, 円形
+		///	VShape,	V字
+		///	Square,	方陣
+		/// <returns></returns>
+		static CrowdBehaviorSettings Formation(EnemyFormationShape shape) {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::Formation;
+			data.formation = shape;
+			return data;
+		}
+
+		/// <summary>
+		/// 流動型
+		/// </summary>
+		/// <param name="radius"></param>
+		/// <returns></returns>
+		static CrowdBehaviorSettings FlowCrowd(float radius = 12.0f) {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::FlowCrowd;
+			data.radius = radius;
+			return data;
+		}
+
+		/// <summary>
+		///  圧迫型
+		/// </summary>
+		/// <returns></returns>
+		static CrowdBehaviorSettings PressureCrowd() {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::PressureCrowd;
+			data.radius = 8.0f;
+			return data;
+		}
+
+		/// <summary>
+		///  分散包囲型
+		/// </summary>
+		/// <param name="radius"></param>
+		/// <returns></returns>
+		static CrowdBehaviorSettings DistributedEncircle(float radius = 14.0f) {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::DistributedEncircle;
+			data.radius = radius;
+			return data;
+		}
+
+		/// <summary>
+		/// 人数適応型
+		/// </summary>
+		/// <returns></returns>
+		static CrowdBehaviorSettings DensityAdaptive() {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::DensityAdaptive;
+			return data;
+		}
+
+		/// <summary>
+		///  スパイラル型
+		/// </summary>
+		/// <param name="radius"></param>
+		/// <returns></returns>
+		static CrowdBehaviorSettings Spiral(float radius = 15.0f) {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::Spiral;
+			data.radius = radius;
+			return data;
+		}
+
+		/// <summary>
+		/// ハンティング型
+		/// </summary>
+		/// <returns></returns>
+		static CrowdBehaviorSettings Hunting() {
+			CrowdBehaviorSettings data{};
+			data.type = EnemyCrowdBehaviorType::Hunting;
+			return data;
+		}
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdData.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/struct/Vector3.h>
+#include <cstdint>
+
+namespace Character {
+	class BaseEnemy;
+
+	// 群衆隊形で敵が目指す位置
+	struct CrowdSlot {
+		Vector3 position{};				// 隊形上の目標位置
+		BaseEnemy* owner = nullptr;		// この位置を担当する敵
+		int groupId = 0;					// 群衆グループID
+		uint32_t memberIndex = 0;		// グループ内での並び順
+	};
+
+	// プレイヤー周囲での役割ごとの移動レイヤー
+	enum class EnemyCrowdLayer {
+		Attack,		// 攻撃スロットへ向かう
+		Approach,	// 前列へ詰める
+		Standby,	// 密度を下げるため後方待機
+	};
+
+	// Separation / Alignment / Cohesion / FlowFieldを合成した移動目標
+	struct EnemyFlockingSteering {
+		Vector3 moveTarget{};								// 今フレーム目指す位置
+		Vector3 flowDirection{};							// 合成後に進む方向
+		EnemyCrowdLayer layer = EnemyCrowdLayer::Approach;	// 現在の役割
+		BaseEnemy* owner = nullptr;							// この結果を使う敵
+		bool isDensityLimited = false;						// 密集回避で待機中か
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdDensitySystem.cpp
+============================================================
+#include "EnemyCrowdDensitySystem.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+
+#include <cmath>
+
+namespace Character {
+	bool EnemyCrowdDensitySystem::ShouldStandby(
+		BaseEnemy* enemy,
+		const std::vector<CrowdSlot>& slots,
+		const Vector3& targetPos
+	) const {
+		if (!enemy) {
+			return false;
+		}
+
+		const float ownerDistance = DistanceXZ(enemy->GetWorldPosition(), targetPos);
+		uint32_t closerCount = 0;
+
+		// 自分よりプレイヤーに近い敵だけを数え、後ろ側から待機へ送る
+		for (const CrowdSlot& slot : slots) {
+			if (!slot.owner) {
+				continue;
+			}
+
+			float distance = DistanceXZ(slot.owner->GetWorldPosition(), targetPos);
+			if (distance > densityRadius_) {
+				continue;
+			}
+
+			if (distance < ownerDistance ||
+				(std::abs(distance - ownerDistance) <= 0.001f &&
+					slot.owner->GetCrowdMemberIndex() < enemy->GetCrowdMemberIndex())) {
+				closerCount++;
+			}
+		}
+
+		// 密集範囲の外にいる敵には、通常どおり接近を許可する
+		return ownerDistance <= densityRadius_ && closerCount >= densityLimit_;
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdDensitySystem.h
+============================================================
+#pragma once
+#include "EnemyCrowdData.h"
+#include <vector>
+
+namespace Character {
+	class BaseEnemy;
+
+	/// <summary>
+	/// プレイヤー周囲に集まりすぎた敵を後方待機へ回すための密度判定
+	/// </summary>
+	class EnemyCrowdDensitySystem {
+	public:
+		// 前方に許容数以上の敵がいる場合、対象の敵を待機対象とする
+		bool ShouldStandby(
+			BaseEnemy* enemy,
+			const std::vector<CrowdSlot>& slots,
+			const Vector3& targetPos
+		) const;
+
+	private:
+		float densityRadius_ = 12.0f;	// 密集として数えるプレイヤーからの半径
+		uint32_t densityLimit_ = 6;		// 半径内で前に配置できる敵数
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdLayerSystem.cpp
+============================================================
+#include "EnemyCrowdLayerSystem.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h"
+
+namespace Character {
+	EnemyCrowdLayer EnemyCrowdLayerSystem::ResolveLayer(
+		BaseEnemy* enemy,
+		const std::vector<CrowdSlot>& slots,
+		const Vector3& targetPos
+	) const {
+		if (!enemy) {
+			return EnemyCrowdLayer::Approach;
+		}
+
+		// Token Systemで選ばれた敵は、密度より優先して攻撃役にする
+		EnemyAttackSystem* attackSystem = enemy->GetEnemyAttackSystem();
+		if (attackSystem && attackSystem->GetAttackRequest()) {
+			EnemyAttackRing ring = attackSystem->GetAttackRequest()->GetRing();
+			if (ring == EnemyAttackRing::Attack) {
+				return EnemyCrowdLayer::Attack;
+			}
+			if (ring == EnemyAttackRing::Standby || ring == EnemyAttackRing::TooClose) {
+				return EnemyCrowdLayer::Standby;
+			}
+		}
+
+		// 攻撃役でない敵は、密集時に後方待機へ振り分ける
+		if (densitySystem_.ShouldStandby(enemy, slots, targetPos)) {
+			return EnemyCrowdLayer::Standby;
+		}
+
+		return EnemyCrowdLayer::Approach;
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdLayerSystem.h
+============================================================
+#pragma once
+#include "EnemyCrowdData.h"
+#include "EnemyCrowdDensitySystem.h"
+#include <vector>
+
+namespace Character {
+	class BaseEnemy;
+
+	/// <summary>
+	/// 攻撃許可と密度判定から、各敵の移動役割を決定するシステム
+	/// </summary>
+	class EnemyCrowdLayerSystem {
+	public:
+		// Attack / Approach / Standby のうち現在使うレイヤーを返す
+		EnemyCrowdLayer ResolveLayer(
+			BaseEnemy* enemy,
+			const std::vector<CrowdSlot>& slots,
+			const Vector3& targetPos
+		) const;
+
+	private:
+		EnemyCrowdDensitySystem densitySystem_;
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdPatternSystem.cpp
+============================================================
+#include "EnemyCrowdPatternSystem.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+
+#include <algorithm>
+#include <cmath>
+#include <numbers>
+
+namespace Character {
+	void EnemyCrowdPatternSystem::Initialize() {
+		elapsedTime_ = 0.0f;
+	}
+
+	void EnemyCrowdPatternSystem::Update(float dt) {
+		elapsedTime_ += dt;
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateTarget(
+		const CrowdBehaviorSettings& behavior,
+		const std::vector<BaseEnemy*>& groupEnemies,
+		uint32_t memberIndex,
+		const Vector3& targetPos,
+		const Vector3& forward,
+		const Vector3& right,
+		const Vector3& fallbackPos
+	) const {
+		const uint32_t memberCount = static_cast<uint32_t>(groupEnemies.size());
+		Vector3 result = fallbackPos;
+
+		switch (behavior.type) {
+		case EnemyCrowdBehaviorType::Rush:
+			result = CalculateRushTarget(behavior, memberIndex, targetPos, right);
+			break;
+		case EnemyCrowdBehaviorType::Encircle:
+			result = CalculateEncircleTarget(behavior, memberIndex, memberCount, targetPos);
+			break;
+		case EnemyCrowdBehaviorType::WaveAssault:
+			result = CalculateWaveTarget(behavior, memberIndex, targetPos, forward, right);
+			break;
+		case EnemyCrowdBehaviorType::Formation:
+			result = CalculateFormationTarget(behavior, memberIndex, memberCount, targetPos, forward, right);
+			break;
+		case EnemyCrowdBehaviorType::FlowCrowd:
+			result = CalculateFlowTarget(behavior, memberIndex, memberCount, targetPos);
+			break;
+		case EnemyCrowdBehaviorType::PressureCrowd:
+			result = CalculatePressureTarget(behavior, memberIndex, memberCount, targetPos);
+			break;
+		case EnemyCrowdBehaviorType::DistributedEncircle:
+			result = CalculateDistributedTarget(behavior, memberIndex, memberCount, targetPos, forward);
+			break;
+		case EnemyCrowdBehaviorType::DensityAdaptive:
+			// 少人数は突撃、中人数は包囲、大人数は密度を上げて圧迫する
+			if (memberCount <= 4) {
+				result = CalculateRushTarget(behavior, memberIndex, targetPos, right);
+			}
+			else if (memberCount <= 10) {
+				result = CalculateEncircleTarget(behavior, memberIndex, memberCount, targetPos);
+			}
+			else {
+				result = CalculatePressureTarget(behavior, memberIndex, memberCount, targetPos);
+			}
+			break;
+		case EnemyCrowdBehaviorType::Spiral:
+			result = CalculateSpiralTarget(behavior, memberIndex, memberCount, targetPos);
+			break;
+		case EnemyCrowdBehaviorType::Hunting:
+			result = CalculateHuntingTarget(memberIndex, targetPos, forward, right);
+			break;
+		case EnemyCrowdBehaviorType::Flocking:
+		default:
+			// 群れ型は従来の隊形目標を使い、Flocking Systemで自然に補正する
+			break;
+		}
+
+		if (memberIndex < groupEnemies.size() && groupEnemies[memberIndex]) {
+			result.y = groupEnemies[memberIndex]->GetWorldPosition().y;
+		}
+		return result;
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateRushTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, const Vector3& targetPos, const Vector3& right
+	) const {
+		// 完全な一点集中を避けるため、わずかな横幅だけを残して突撃させる
+		float lane = (static_cast<float>(memberIndex % 3) - 1.0f) * behavior.spacing * 0.5f;
+		return targetPos + right * lane;
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateEncircleTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, uint32_t memberCount, const Vector3& targetPos
+	) const {
+		float step = std::numbers::pi_v<float> * 2.0f / static_cast<float>(std::max(memberCount, 1u));
+		return CalculateRingPosition(targetPos, behavior.radius, step * static_cast<float>(memberIndex));
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateWaveTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, const Vector3& targetPos,
+		const Vector3& forward, const Vector3& right
+	) const {
+		uint32_t waves = std::max(behavior.waveCount, 1u);
+		uint32_t row = memberIndex % waves;
+		uint32_t activeRow = static_cast<uint32_t>(elapsedTime_ / std::max(behavior.waveInterval, 0.1f)) % waves;
+		float distance = row == activeRow ? behavior.radius * 0.65f : behavior.radius + 6.0f;
+		float side = (static_cast<float>(memberIndex / waves) - 1.0f) * behavior.spacing;
+		return targetPos - forward * distance + right * side;
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateFormationTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, uint32_t memberCount,
+		const Vector3& targetPos, const Vector3& forward, const Vector3& right
+	) const {
+		float center = (static_cast<float>(memberCount) - 1.0f) * 0.5f;
+		switch (behavior.formation) {
+		case EnemyFormationShape::Circle:
+			return CalculateEncircleTarget(behavior, memberIndex, memberCount, targetPos);
+		case EnemyFormationShape::VShape: {
+			uint32_t rank = (memberIndex + 1) / 2;
+			float sign = memberIndex == 0 ? 0.0f : (memberIndex % 2 == 1 ? -1.0f : 1.0f);
+			return targetPos - forward * (behavior.radius + rank * behavior.spacing) +
+				right * (sign * rank * behavior.spacing);
+		}
+		case EnemyFormationShape::Square: {
+			uint32_t columns = static_cast<uint32_t>(std::ceil(std::sqrt(static_cast<float>(std::max(memberCount, 1u)))));
+			uint32_t row = memberIndex / columns;
+			uint32_t column = memberIndex % columns;
+			float side = (static_cast<float>(column) - (static_cast<float>(columns) - 1.0f) * 0.5f) * behavior.spacing;
+			return targetPos - forward * (behavior.radius + row * behavior.spacing) + right * side;
+		}
+		case EnemyFormationShape::Line:
+		default:
+			return targetPos - forward * behavior.radius + right * ((static_cast<float>(memberIndex) - center) * behavior.spacing);
+		}
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateFlowTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, uint32_t memberCount, const Vector3& targetPos
+	) const {
+		float step = std::numbers::pi_v<float> * 2.0f / static_cast<float>(std::max(memberCount, 1u));
+		float angle = step * static_cast<float>(memberIndex) + elapsedTime_ * behavior.angularSpeed;
+		return CalculateRingPosition(targetPos, behavior.radius, angle);
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculatePressureTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, uint32_t memberCount, const Vector3& targetPos
+	) const {
+		// 人数が増えても狭い輪を保ち、外周からプレイヤーへ圧をかける
+		float ring = behavior.radius + static_cast<float>(memberIndex / 8) * 2.0f;
+		float step = std::numbers::pi_v<float> * 2.0f / static_cast<float>(std::min(std::max(memberCount, 1u), 8u));
+		return CalculateRingPosition(targetPos, ring, step * static_cast<float>(memberIndex % 8));
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateDistributedTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, uint32_t memberCount,
+		const Vector3& targetPos, const Vector3& forward
+	) const {
+		// 前方側に開口部を残す270度の弧へ配置し、逃げ道を意図的に作る
+		float baseAngle = std::atan2(forward.x, forward.z);
+		float arc = std::numbers::pi_v<float> * 1.5f;
+		float t = memberCount <= 1 ? 0.5f : static_cast<float>(memberIndex) / static_cast<float>(memberCount - 1);
+		float angle = baseAngle + std::numbers::pi_v<float> * 0.25f + arc * t;
+		return CalculateRingPosition(targetPos, behavior.radius, angle);
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateSpiralTarget(
+		const CrowdBehaviorSettings& behavior, uint32_t memberIndex, uint32_t memberCount, const Vector3& targetPos
+	) const {
+		float step = std::numbers::pi_v<float> * 2.0f / static_cast<float>(std::max(memberCount, 1u));
+		float angle = step * static_cast<float>(memberIndex) + elapsedTime_ * behavior.angularSpeed;
+		float pulse = (std::sin(elapsedTime_ * 1.5f + static_cast<float>(memberIndex)) + 1.0f) * 2.0f;
+		return CalculateRingPosition(targetPos, behavior.radius - pulse, angle);
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateHuntingTarget(
+		uint32_t memberIndex, const Vector3& targetPos, const Vector3& forward, const Vector3& right
+	) const {
+		EnemyHuntingRole role = static_cast<EnemyHuntingRole>(memberIndex % 4);
+		switch (role) {
+		case EnemyHuntingRole::Chaser:
+			return targetPos - forward * 7.0f;
+		case EnemyHuntingRole::Flanker:
+			return targetPos + right * (memberIndex % 8 < 4 ? -10.0f : 10.0f);
+		case EnemyHuntingRole::Ambusher:
+			return targetPos + forward * 11.0f;
+		case EnemyHuntingRole::Blocker:
+		default:
+			return targetPos - forward * 5.0f + right * (memberIndex % 8 < 4 ? -6.0f : 6.0f);
+		}
+	}
+
+	Vector3 EnemyCrowdPatternSystem::CalculateRingPosition(const Vector3& center, float radius, float angle) const {
+		Vector3 position = center;
+		position.x += std::sin(angle) * radius;
+		position.z += std::cos(angle) * radius;
+		return position;
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdPatternSystem.h
+============================================================
+#pragma once
+#include "EnemyCrowdBehaviorData.h"
+#include <DirectXGame/engine/struct/Vector3.h>
+#include <vector>
+
+namespace Character {
+	class BaseEnemy;
+
+	/// <summary>
+	/// 群衆タイプに応じて、各メンバーが目指す戦術上の位置を計算するシステム
+	/// </summary>
+	class EnemyCrowdPatternSystem {
+	public:
+		void Initialize();
+		void Update(float dt);
+
+		Vector3 CalculateTarget(
+			const CrowdBehaviorSettings& behavior,
+			const std::vector<BaseEnemy*>& groupEnemies,
+			uint32_t memberIndex,
+			const Vector3& targetPos,
+			const Vector3& forward,
+			const Vector3& right,
+			const Vector3& fallbackPos
+		) const;
+
+	private:
+		Vector3 CalculateRushTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			const Vector3& targetPos, const Vector3& right) const;
+		Vector3 CalculateEncircleTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			uint32_t memberCount, const Vector3& targetPos) const;
+		Vector3 CalculateWaveTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			const Vector3& targetPos, const Vector3& forward, const Vector3& right) const;
+		Vector3 CalculateFormationTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			uint32_t memberCount, const Vector3& targetPos, const Vector3& forward, const Vector3& right) const;
+		Vector3 CalculateFlowTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			uint32_t memberCount, const Vector3& targetPos) const;
+		Vector3 CalculatePressureTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			uint32_t memberCount, const Vector3& targetPos) const;
+		Vector3 CalculateDistributedTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			uint32_t memberCount, const Vector3& targetPos, const Vector3& forward) const;
+		Vector3 CalculateSpiralTarget(const CrowdBehaviorSettings& behavior, uint32_t memberIndex,
+			uint32_t memberCount, const Vector3& targetPos) const;
+		Vector3 CalculateHuntingTarget(uint32_t memberIndex, const Vector3& targetPos,
+			const Vector3& forward, const Vector3& right) const;
+		Vector3 CalculateRingPosition(const Vector3& center, float radius, float angle) const;
+
+	private:
+		float elapsedTime_ = 0.0f;	// 動き続けるパターンで共通利用する経過時間
+	};
+}
+
+
+============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSystem.cpp
 ============================================================
 #include "EnemyCrowdSystem.h"
@@ -14757,14 +15557,19 @@ namespace Character {
 
 	void EnemyCrowdSystem::Initialize() {
 		slots_.clear();
+		steerings_.clear();
+		patternSystem_.Initialize();
 	}
 
 	void EnemyCrowdSystem::Update(
 		const std::vector<BaseEnemy*>& enemies,
 		const Vector3& targetPos,
-		float targetRotateY
+		float targetRotateY,
+		float dt
 	) {
 		slots_.clear();
+		steerings_.clear();
+		patternSystem_.Update(dt);
 
 		// グループIDごとに敵を分け、グループ単位で隊形を組む
 		std::map<int, std::vector<BaseEnemy*>> groups;
@@ -14799,12 +15604,25 @@ namespace Character {
 			AssignGroupSlots(groupEnemies, group.first, targetPos, forward, right, groupOrder);
 			groupOrder++;
 		}
+
+		// 隊形を基準に、各敵が今フレーム進むべき位置を計算する
+		BuildFlockingSteering(enemies, targetPos);
 	}
 
 	const CrowdSlot* EnemyCrowdSystem::FindSlot(BaseEnemy* enemy) const {
 		for (const CrowdSlot& slot : slots_) {
 			if (slot.owner == enemy) {
 				return &slot;
+			}
+		}
+
+		return nullptr;
+	}
+
+	const EnemyFlockingSteering* EnemyCrowdSystem::FindSteering(BaseEnemy* enemy) const {
+		for (const EnemyFlockingSteering& steering : steerings_) {
+			if (steering.owner == enemy) {
+				return &steering;
 			}
 		}
 
@@ -14843,12 +15661,46 @@ namespace Character {
 			slotPos += right * (centeredColumn * columnSpacing_ + groupSideOffset);
 			slotPos.y = enemy->GetWorldPosition().y;
 
+			// グループの設定に従い、従来の隊形位置を各戦術の位置へ置き換える
+			slotPos = patternSystem_.CalculateTarget(
+				enemy->GetCrowdBehavior(),
+				groupEnemies,
+				i,
+				targetPos,
+				forward,
+				right,
+				slotPos
+			);
+
 			CrowdSlot slot{};
 			slot.position = slotPos;
 			slot.owner = enemy;
 			slot.groupId = groupId;
 			slot.memberIndex = enemy->GetCrowdMemberIndex();
 			slots_.push_back(slot);
+		}
+	}
+
+	void EnemyCrowdSystem::BuildFlockingSteering(
+		const std::vector<BaseEnemy*>& enemies,
+		const Vector3& targetPos
+	) {
+		for (BaseEnemy* enemy : enemies) {
+			if (!enemy) {
+				continue;
+			}
+
+			Vector3 baseTarget = targetPos;
+			if (const CrowdSlot* slot = FindSlot(enemy)) {
+				baseTarget = slot->position;
+			}
+
+			// 役割に応じた移動制約と群れ行動を、個別のシステムで順に合成する
+			EnemyCrowdLayer layer = layerSystem_.ResolveLayer(enemy, slots_, targetPos);
+			Vector3 flowDirection = flowFieldSystem_.CalculateDirection(enemy, baseTarget);
+			steerings_.push_back(
+				flockingSystem_.BuildSteering(enemy, enemies, targetPos, baseTarget, flowDirection, layer)
+			);
 		}
 	}
 }
@@ -14858,23 +15710,19 @@ namespace Character {
 File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdSystem.h
 ============================================================
 #pragma once
-#include <DirectXGame/engine/struct/Vector3.h>
+#include "EnemyCrowdData.h"
+#include "EnemyCrowdLayerSystem.h"
+#include "EnemyFlockingSystem.h"
+#include "EnemyFlowFieldSystem.h"
+#include "EnemyCrowdPatternSystem.h"
 #include <cstdint>
 #include <vector>
 
 namespace Character {
 	class BaseEnemy;
 
-	// 群衆隊形で敵が目指す位置
-	struct CrowdSlot {
-		Vector3 position{};				// 隊形上の目標位置
-		BaseEnemy* owner = nullptr;		// この位置を担当する敵
-		int groupId = 0;					// 群衆グループID
-		uint32_t memberIndex = 0;		// グループ内での並び順
-	};
-
 	/// <summary>
-	/// 敵の群衆隊形を管理するシステム
+	/// 敵の隊形生成と、分割された群衆AI機能の実行順を管理するシステム
 	/// </summary>
 	class EnemyCrowdSystem {
 	public:
@@ -14885,11 +15733,14 @@ namespace Character {
 		void Update(
 			const std::vector<BaseEnemy*>& enemies,
 			const Vector3& targetPos,
-			float targetRotateY
+			float targetRotateY,
+			float dt
 		);
 
 		// 指定した敵に割り当てられた隊形スロットを取得
 		const CrowdSlot* FindSlot(BaseEnemy* enemy) const;
+		// 指定した敵のフロッキング計算済み移動目標を取得
+		const EnemyFlockingSteering* FindSteering(BaseEnemy* enemy) const;
 
 	private:
 		// 1グループ分の隊形スロットを割り当てる
@@ -14902,13 +15753,305 @@ namespace Character {
 			uint32_t groupOrder
 		);
 
+		// レイヤー、流れ方向、フロッキングを順に計算して移動結果を作る
+		void BuildFlockingSteering(
+			const std::vector<BaseEnemy*>& enemies,
+			const Vector3& targetPos
+		);
+
 	private:
 		std::vector<CrowdSlot> slots_;
+		std::vector<EnemyFlockingSteering> steerings_;
 
 		float frontDistance_ = 8.0f;		// ターゲットから隊形先頭までの距離
 		float rowSpacing_ = 3.0f;			// 前後の間隔
 		float columnSpacing_ = 2.6f;		// 左右の間隔
 		uint32_t columnCount_ = 3;			// 1列に並ぶ敵数
+
+		EnemyCrowdLayerSystem layerSystem_;		// 攻撃・接近・待機の役割決定
+		EnemyFlowFieldSystem flowFieldSystem_;	// 隊形目標への基本進行方向
+		EnemyFlockingSystem flockingSystem_;	// 群れ行動を反映した最終移動目標
+		EnemyCrowdPatternSystem patternSystem_;	// 群衆タイプ別の隊形目標生成
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyFlockingSystem.cpp
+============================================================
+#include "EnemyFlockingSystem.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+#include "DirectXGame/application/base/Character/Move/Base/MoveComponent.h"
+
+namespace Character {
+	EnemyFlockingSteering EnemyFlockingSystem::BuildSteering(
+		BaseEnemy* enemy,
+		const std::vector<BaseEnemy*>& enemies,
+		const Vector3& targetPos,
+		const Vector3& baseTarget,
+		const Vector3& flowDirection,
+		EnemyCrowdLayer layer
+	) const {
+		EnemyFlockingSteering steering{};
+		steering.owner = enemy;
+		steering.layer = layer;
+		steering.isDensityLimited = layer == EnemyCrowdLayer::Standby;
+
+		if (!enemy) {
+			return steering;
+		}
+
+		// 隊形上の目的地へ直接進む場合の基準方向を用意する
+		Vector3 toTarget = baseTarget - enemy->GetWorldPosition();
+		toTarget.y = 0.0f;
+		Vector3 baseDirection = NormalizeXZ(toTarget);
+
+		// 群れ行動の3要素へ、全体の進行方向であるFlow Fieldを合成する
+		Vector3 combined =
+			CalculateSeparation(enemy, enemies) * separationWeight_ +
+			CalculateAlignment(enemy, enemies) * alignmentWeight_ +
+			CalculateCohesion(enemy, enemies) * cohesionWeight_ +
+			flowDirection * flowWeight_;
+
+		if (combined.Length() <= 0.001f) {
+			combined = baseDirection;
+		}
+
+		Vector3 direction = NormalizeXZ(combined);
+		if (direction.Length() <= 0.001f) {
+			direction = baseDirection;
+		}
+
+		if (layer == EnemyCrowdLayer::Attack) {
+			// 攻撃役は回避によって攻撃位置から外れないよう、スロットを優先する
+			direction = baseDirection;
+			steering.moveTarget = baseTarget;
+		}
+		else {
+			// 移動の揺れを抑えるため、進行方向上の近い地点を毎フレーム目標とする
+			steering.moveTarget = enemy->GetWorldPosition() + direction * steeringLookAhead_;
+			steering.moveTarget.y = baseTarget.y;
+
+			if (layer == EnemyCrowdLayer::Standby) {
+				// 待機役はプレイヤーから離れる側に位置をずらし、前列を空ける
+				Vector3 awayFromTarget = NormalizeXZ(enemy->GetWorldPosition() - targetPos);
+				if (awayFromTarget.Length() > 0.001f) {
+					steering.moveTarget = baseTarget + awayFromTarget * standbyBackDistance_;
+					steering.moveTarget.y = baseTarget.y;
+				}
+			}
+		}
+
+		steering.flowDirection = direction;
+		return steering;
+	}
+
+	Vector3 EnemyFlockingSystem::CalculateSeparation(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const {
+		Vector3 result{};
+		if (!owner) {
+			return result;
+		}
+
+		Vector3 ownerPos = owner->GetWorldPosition();
+		// 近い敵ほど強く押し離し、敵同士の重なりを軽減する
+		for (BaseEnemy* other : enemies) {
+			if (!other || other == owner) {
+				continue;
+			}
+
+			Vector3 diff = ownerPos - other->GetWorldPosition();
+			diff.y = 0.0f;
+			float distance = diff.Length();
+			if (distance <= 0.001f || distance > separationRadius_) {
+				continue;
+			}
+
+			result += diff.Normalize() * ((separationRadius_ - distance) / separationRadius_);
+		}
+
+		return NormalizeXZ(result);
+	}
+
+	Vector3 EnemyFlockingSystem::CalculateAlignment(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const {
+		Vector3 average{};
+		uint32_t count = 0;
+		if (!owner) {
+			return average;
+		}
+
+		Vector3 ownerPos = owner->GetWorldPosition();
+		// 周辺の仲間が既に進んでいる方向を平均し、移動方向をそろえる
+		for (BaseEnemy* other : enemies) {
+			if (!other || other == owner || !other->GetMoveComponent()) {
+				continue;
+			}
+
+			if (DistanceXZ(ownerPos, other->GetWorldPosition()) > alignmentRadius_) {
+				continue;
+			}
+
+			Vector3 direction = other->GetMoveComponent()->GetDirection();
+			direction.y = 0.0f;
+			if (direction.Length() <= 0.001f) {
+				continue;
+			}
+
+			average += direction.Normalize();
+			count++;
+		}
+
+		if (count == 0) {
+			return {};
+		}
+
+		return NormalizeXZ(average / static_cast<float>(count));
+	}
+
+	Vector3 EnemyFlockingSystem::CalculateCohesion(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const {
+		Vector3 center{};
+		uint32_t count = 0;
+		if (!owner) {
+			return center;
+		}
+
+		Vector3 ownerPos = owner->GetWorldPosition();
+		// 別グループを混ぜず、同じ群れだけの中心を求める
+		for (BaseEnemy* other : enemies) {
+			if (!other || other == owner || other->GetCrowdGroupId() != owner->GetCrowdGroupId()) {
+				continue;
+			}
+
+			if (DistanceXZ(ownerPos, other->GetWorldPosition()) > cohesionRadius_) {
+				continue;
+			}
+
+			center += other->GetWorldPosition();
+			count++;
+		}
+
+		if (count == 0) {
+			return {};
+		}
+
+		center /= static_cast<float>(count);
+		Vector3 toCenter = center - ownerPos;
+		toCenter.y = 0.0f;
+		return NormalizeXZ(toCenter);
+	}
+
+	Vector3 EnemyFlockingSystem::NormalizeXZ(const Vector3& value) const {
+		Vector3 result = value;
+		result.y = 0.0f;
+		float length = result.Length();
+		if (length <= 0.001f) {
+			return {};
+		}
+
+		return result / length;
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyFlockingSystem.h
+============================================================
+#pragma once
+#include "EnemyCrowdData.h"
+#include <vector>
+
+namespace Character {
+	class BaseEnemy;
+
+	/// <summary>
+	/// Separation / Alignment / Cohesion を合成して群れの移動目標を作るシステム
+	/// </summary>
+	class EnemyFlockingSystem {
+	public:
+		// 流れ方向と群れ行動を合わせ、敵が実際に目指す位置を返す
+		EnemyFlockingSteering BuildSteering(
+			BaseEnemy* enemy,
+			const std::vector<BaseEnemy*>& enemies,
+			const Vector3& targetPos,
+			const Vector3& baseTarget,
+			const Vector3& flowDirection,
+			EnemyCrowdLayer layer
+		) const;
+
+	private:
+		// 近すぎる仲間から離れる方向を求める
+		Vector3 CalculateSeparation(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const;
+		// 周囲の仲間の進行方向に合わせる方向を求める
+		Vector3 CalculateAlignment(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const;
+		// 同じ群れの中心へ寄る方向を求める
+		Vector3 CalculateCohesion(BaseEnemy* owner, const std::vector<BaseEnemy*>& enemies) const;
+		Vector3 NormalizeXZ(const Vector3& value) const;
+
+	private:
+		float separationRadius_ = 2.4f;	// 分離を適用する距離
+		float alignmentRadius_ = 7.0f;		// 整列の参照範囲
+		float cohesionRadius_ = 9.0f;		// 結合の参照範囲
+
+		float separationWeight_ = 3.2f;	// 重なり回避を強く優先する
+		float alignmentWeight_ = 0.8f;
+		float cohesionWeight_ = 0.9f;
+		float flowWeight_ = 1.6f;			// 隊形の目標方向へ進む強さ
+		float steeringLookAhead_ = 5.0f;	// 進行方向上に置く仮の目標距離
+		float standbyBackDistance_ = 8.0f;	// 密集時に後ろへ下げる距離
+	};
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyFlowFieldSystem.cpp
+============================================================
+#include "EnemyFlowFieldSystem.h"
+#include "DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h"
+
+namespace Character {
+	Vector3 EnemyFlowFieldSystem::CalculateDirection(BaseEnemy* owner, const Vector3& targetPos) const {
+		if (!owner) {
+			return {};
+		}
+
+		// 地上での群衆移動なので、上下差は流れ方向へ含めない
+		Vector3 flow = targetPos - owner->GetWorldPosition();
+		flow.y = 0.0f;
+		return NormalizeXZ(flow);
+	}
+
+	Vector3 EnemyFlowFieldSystem::NormalizeXZ(const Vector3& value) const {
+		Vector3 result = value;
+		result.y = 0.0f;
+		float length = result.Length();
+		if (length <= 0.001f) {
+			return {};
+		}
+
+		return result / length;
+	}
+}
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/AI/EnemyFlowFieldSystem.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/struct/Vector3.h>
+
+namespace Character {
+	class BaseEnemy;
+
+	/// <summary>
+	/// 個別の追跡処理に渡す、移動先へ向かう基本方向を求めるシステム
+	/// </summary>
+	class EnemyFlowFieldSystem {
+	public:
+		// 敵の現在位置から指定された移動先への水平移動方向を返す
+		Vector3 CalculateDirection(BaseEnemy* owner, const Vector3& targetPos) const;
+
+	private:
+		// 高さを除外して移動に使用するXZ方向だけを正規化する
+		Vector3 NormalizeXZ(const Vector3& value) const;
 	};
 }
 
@@ -14931,6 +16074,7 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.c
 #include "DirectXGame/application/base/Bullet/base/BulletSpawn.h" 
 #include <DirectXGame/application/base/Character/Death/DeathSystem.h>
 #include <DirectXGame/application/base/Attack/HitBox/HitBox.h>
+#include "EnemyWaveExitState.h"
 
 namespace Character {
 	BaseEnemy::~BaseEnemy() = default;
@@ -14954,9 +16098,27 @@ namespace Character {
 		return Subtract(GetTargetPos(), GetWorldTransform().translate_).Normalize();
 	}
 
+	
 #pragma region
 
-	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName)
+	void BaseEnemy::InitializeEffect(const Vector3& pos) {
+		// エフェクト用のトランスフォーム初期化
+		worldEffect_ = std::make_unique<Engine::WorldTransform>();
+		worldEffect_->Initialize();
+		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
+		worldEffect_->translate_ = pos;
+	}
+
+	void BaseEnemy::InitializeBaseWeapon(const Vector3& pos) {
+		weapon_->SetCharacter(this);
+		weapon_->SetBulletManager(bulletManager);
+		weapon_->Initialize(inputSystem, entityManager, globalVariables, {}, nullptr);
+		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
+		weapon_->GetWorldTransform().translate_ = pos;
+	}
+
+
+	void BaseEnemy::InitShadowObjectComponent(const std::string& charaName, float shadowSize)
 	{
 		// オブジェクトコンポーネント追加
 		objectComponentShadow_ = std::make_unique<ObjectComponent>();
@@ -14965,7 +16127,7 @@ namespace Character {
 			false, false, this, Engine::ObjectInstans::TransparencyType::kYes);
 		objectComponentShadow_->SetIsDraw(false);
 		objectComponentShadow_->SetColor({ 0,0,0,1.0f });
-		objectComponentShadow_->SetInstancingSRT({ 1.0f,1.0f,1.0f }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
+		objectComponentShadow_->SetInstancingSRT({ shadowSize,shadowSize,shadowSize }, { Math::DegreesToRadians(-90),0.0f,0.0f }, { 0.0f,0.2f,0.0f });
 		objectComponentShadow_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効
 		objectComponentShadow_->Update();
 	}
@@ -14973,7 +16135,7 @@ namespace Character {
 
 	void BaseEnemy::BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-		const std::string& modelName, const std::string& charaName, float colliderRadius) {
+		const std::string& modelName, const std::string& charaName, float colliderRadius, float shadowSize) {
 
 		this->entityManager = entityManager;	// エンティティ3d
 		this->globalVariables = globalVariables;	// 保存項目
@@ -14985,6 +16147,7 @@ namespace Character {
 			, Engine::ObjectInstans::TransparencyType::kNo, false);
 		objectComponent_->GetColliderComponent()->SetHitReceiver(this);	// インターフェース設定	
 		objectComponent_->SetIsUpdateColliderComponent(false);		// コライダーコンポーネント内で更新するか
+		objectComponent_->SetInstancingSRT({1,1,1}, {}, position);	// SRT設定
 
 
 		// コライダ位置用トランスフォーム初期化
@@ -15003,6 +16166,7 @@ namespace Character {
 		moveComponent_->Initialize(this, nullptr, globalVariables, MovementComponent::ControlType::Manual, "_" + charaName);
 		moveComponent_->SetControlType(MovementComponent::ControlType::Auto);
 		moveComponent_->GetMoveSystem()->Data().minSpeed = -100;
+		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		// 保存項目追加
 		CreateGroup(charaName);
 
@@ -15027,7 +16191,7 @@ namespace Character {
 			if (!otherComponent) return;
 
 			if (other->tag == CollisionTag::Enemy) {
-				isStopping_ = true;
+				//isStopping_ = true;
 			}
 
 			//  敵同士の衝突応答
@@ -15066,14 +16230,28 @@ namespace Character {
 		attackSystem_ = std::make_unique<EnemyAttackSystem>();
 		attackSystem_->Initialize(stateMachine_.get());
 
+		// ウェーブ終了時の退場演出ステート
+		waveExitState_ = std::make_unique<EnemyWaveExitState>();
 
 		// 丸影用オブジェクトコンポーネント初期化
-		InitShadowObjectComponent(charaName);
+		InitShadowObjectComponent(charaName, shadowSize);
 	}
+
+	void BaseEnemy::Update() {
+		isStopping_ = false;
+		// 基盤の更新
+		BaseUpdate();
+	};
 
 	void BaseEnemy::BaseUpdate() {
 
 		if (objectComponent_ == nullptr) { return; }
+		if (IsWaveExiting()) {
+			// 派生敵も必ず通る基盤更新で退場を処理し、AIや攻撃は実行しない
+			waveExitState_->Update(this, GetTime());
+			return;
+		}
+
 		objectComponentShadow_->SetIsDraw(true);
 		assert(this);
 
@@ -15108,7 +16286,11 @@ namespace Character {
 		// ステート
 		stateMachine_->Update(ctx);
 
+		// 武器更新
+		if(weapon_)
+		weapon_->Update();
 
+		// 影更新
 		objectComponentShadow_->Update();
 	}
 
@@ -15133,8 +16315,55 @@ namespace Character {
 
 #pragma endregion 
 
+	void BaseEnemy::Move() {
+		if (isStopping_) return;
+
+		// 攻撃役は専用スロットへ移動し、その他の敵は群れ行動の目標を使う
+		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
+
+		Vector3 slotPos = GetTargetPos();
+
+		const bool isAttackRing =
+			attackSystem_->GetAttackRequest() &&
+			attackSystem_->GetAttackRequest()->GetRing() == EnemyAttackRing::Attack;
+
+		if (isAttackRing && slot) {
+			slotPos = slot->position;
+		}
+		else if (const EnemyFlockingSteering* steering = enemAi->GetCrowdSystem()->FindSteering(this)) {
+			slotPos = steering->moveTarget;
+		}
+		else if (const CrowdSlot* crowdSlot = enemAi->GetCrowdSystem()->FindSlot(this)) {
+			slotPos = crowdSlot->position;
+		}
+
+		attackSystem_->Update(
+			GetTime(),
+			GetWorldPosition(),
+			GetTargetPos(),
+			slotPos,
+			moveComponent_->GetMoveSystem()->Data().maxSpeed,
+			GetWorldTransform().rotate_.y,
+			globalData_,
+			moveSpeed_);
+	};
+
 	EnemyAttackSystem* BaseEnemy::GetEnemyAttackSystem() const {
 		return attackSystem_.get();
+	}
+
+	void BaseEnemy::BeginWaveExit(float duration) {
+		if (waveExitState_) {
+			waveExitState_->Enter(this, duration);
+		}
+	}
+
+	bool BaseEnemy::IsWaveExiting() const {
+		return waveExitState_ && waveExitState_->IsActive();
+	}
+
+	bool BaseEnemy::IsWaveExitRemoval() const {
+		return waveExitState_ && waveExitState_->HasStarted();
 	}
 
 	const BaseCharacter* BaseEnemy::GetTarget() {
@@ -15158,6 +16387,8 @@ File Path: project/DirectXGame/application/base/Character/Enemy/Base/BaseEnemy.h
 
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAttackSystem.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyAiSystem.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h>
+#include "EnemyWaveExitState.h"
 
 
 namespace Character {
@@ -15176,21 +16407,21 @@ namespace Character {
 		// 基盤となる初期化
 		void BaseInitialize(InputSystem* inputSystem, Engine::EntityManager* entity3DManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera,
-			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f);
+			const std::string& modelName, const std::string& charaName, float colliderRadius = 1.0f,float shadowSize = 1.0f);
 		// 毎フレーム更新
-		virtual void Update() = 0;
+		virtual void Update();
 		// 基盤の更新
 		void BaseUpdate();
 		// 描画エフェクト
-		virtual void DrawEffect() = 0;
+		virtual void DrawEffect(){};
 		// 描画2d
-		virtual void Draw2D() = 0;
+		virtual void Draw2D(){};
 		// 移動
-		virtual void Move() = 0;
+		virtual void Move();
 		// ジャンプ
-		virtual void Jump() = 0;
+		virtual void Jump(){};
 		// 攻撃
-		virtual void Attack() = 0;
+		virtual void Attack(){};
 		// ターゲット取得
 		const BaseCharacter* GetTarget();
 
@@ -15200,6 +16431,12 @@ namespace Character {
 		EnemyAiSystem* GetEnemyAiSystem() const { return enemAi; }
 
 		void SetEnemyAiSystem(EnemyAiSystem* aiSystem) { enemAi = aiSystem; }
+		// ウェーブ終了による自然退場を開始する
+		void BeginWaveExit(float duration = 1.2f);
+		// 退場中の敵は攻撃・ロックオン・撃破得点の対象から外す
+		bool IsWaveExiting() const;
+		// 退場完了後に削除されても撃破と判定しないための識別
+		bool IsWaveExitRemoval() const;
 
 	public:
 		// ID設定
@@ -15216,6 +16453,9 @@ namespace Character {
 		void SetCrowdMemberIndex(uint32_t memberIndex) { crowdMemberIndex_ = memberIndex; }
 		// 群衆内番号取得
 		uint32_t GetCrowdMemberIndex() const { return crowdMemberIndex_; }
+		// この敵が所属する群衆グループの行動設定
+		void SetCrowdBehavior(const CrowdBehaviorSettings& behavior) { crowdBehavior_ = behavior; }
+		const CrowdBehaviorSettings& GetCrowdBehavior() const { return crowdBehavior_; }
 
 		// 対象の位置(プレイヤー)
 		Vector3 GetTargetPos();
@@ -15224,29 +16464,49 @@ namespace Character {
 		// ターゲット方向取得
 		Vector3 TargetDirection();
 
+	protected:
+		// エフェクト初期化
+		void InitializeEffect(const Vector3& pos);
+		// 武器初期化
+		template<typename T>
+		void InitializeWeapon(const Vector3& pos) {
+			// 武器
+			weapon_ = std::make_unique<T>();
+			InitializeBaseWeapon(pos);
+		};
+	private:
+		void InitializeBaseWeapon(const Vector3& pos);
 	private:
 
 		void InitializeBaseEnemyAddItem();
 		// 更新保存項目
 		void UpdateBaseEnemyGetValue();
 		//
-		void InitShadowObjectComponent(const std::string& charaName);
+		void InitShadowObjectComponent(const std::string& charaName, float shadowSize = 1.0f);
 
 	protected:
 		EnemyType type_ = EnemyType::kMediumMelee; // 敵の種類
 		uint32_t id_ = 0; // ID
 		int crowdGroupId_ = 0; // 群衆グループID
 		uint32_t crowdMemberIndex_ = 0; // 群衆内番号
+		CrowdBehaviorSettings crowdBehavior_{}; // 群衆の行動パターン設定
 	protected:
-		//
+		// 高さ
+		float skyHeight_ = 1.5f;
+		// 止まるか
 		bool isStopping_ = false;
 		// グローバルデータ
 		EnemyGlobalData globalData_;
+		// 
 		float dieScore = 100.0f;
+		// 移動速度
+		float moveSpeed_ = 3.0f;
 	protected:
 		std::unique_ptr <Engine::WorldTransform> worldEffect_ = nullptr;
 		// 攻撃システム
 		std::unique_ptr<EnemyAttackSystem> attackSystem_ = nullptr;	
+		// ウェーブ終了専用の退場ステート
+		std::unique_ptr<EnemyWaveExitState> waveExitState_ = nullptr;
 
 		EnemyAiSystem* enemAi = nullptr;	// AIシステム
 	};
@@ -15281,7 +16541,104 @@ namespace Character {
 		// 回転スピード
 		float turnSpeed = 0.25f;
 	};
+} 
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/EnemyWaveExitState.cpp
+============================================================
+#include "EnemyWaveExitState.h"
+#include "BaseEnemy.h"
+#include "DirectXGame/application/base/Object/ObjectComponent.h"
+
+#include <algorithm>
+
+namespace Character {
+	void EnemyWaveExitState::Enter(BaseEnemy* enemy, float duration) {
+		if (!enemy || isActive_ || !enemy->GetAlive()) {
+			return;
+		}
+
+		isActive_ = true;
+		hasStarted_ = true;
+		elapsedTime_ = 0.0f;
+		duration_ = (std::max)(duration, 0.1f);
+		startScale_ = enemy->GetObjectComponent()->GetWorldTransform().scale_;
+		startShadowScale_ = enemy->GetObjectComponentShadow()->GetWorldTransform().scale_;
+		startHeight_ = enemy->GetObjectComponent()->GetWorldTransform().translate_.y;
+	}
+
+	void EnemyWaveExitState::Update(BaseEnemy* enemy, float dt) {
+		if (!isActive_ || !enemy) {
+			return;
+		}
+
+		elapsedTime_ += dt;
+		const float progress = std::clamp(elapsedTime_ / duration_, 0.0f, 1.0f);
+		// 始点と終点で速度が急変しない補間にし、退場の開始と終了を柔らかく見せる
+		const float eased = progress * progress * (3.0f - 2.0f * progress);
+		const float remain = 1.0f - eased;
+
+		Engine::WorldTransform& world = enemy->GetObjectComponent()->GetWorldTransform();
+		world.scale_ = startScale_ * remain;
+		world.translate_.y = startHeight_ - eased * 1.5f;
+		enemy->GetObjectComponent()->SetColor({ 1.0f, 1.0f, 1.0f, remain });
+		enemy->GetObjectComponent()->Update();
+
+		// 本体より少し早く影を小さくし、地面へ吸い込まれる印象を支える
+		Engine::WorldTransform& shadow = enemy->GetObjectComponentShadow()->GetWorldTransform();
+		shadow.scale_ = startShadowScale_ * remain;
+		enemy->GetObjectComponentShadow()->SetColor({ 0.0f, 0.0f, 0.0f, remain });
+		enemy->GetObjectComponentShadow()->Update();
+
+		if (progress < 1.0f) {
+			return;
+		}
+
+		isActive_ = false;
+		enemy->SetAlive(false);
+		enemy->Delete();
+		enemy->GetObjectComponent()->IsDelete();
+		enemy->GetObjectComponentShadow()->IsDelete();
+		enemy->GetObjectComponent()->SetIsDraw(false);
+		enemy->GetObjectComponentShadow()->SetIsDraw(false);
+	}
 }
+
+
+============================================================
+File Path: project/DirectXGame/application/base/Character/Enemy/Base/EnemyWaveExitState.h
+============================================================
+#pragma once
+#include <DirectXGame/engine/struct/Structs3D.h>
+
+namespace Character {
+	class BaseEnemy;
+
+	/// <summary>
+	/// ウェーブ終了時の敵退場ステート。
+	/// 撃破演出とは分離し、静かに縮小・沈下して次のウェーブへ場を譲る。
+	/// </summary>
+	class EnemyWaveExitState {
+	public:
+		// 退場開始時の姿勢を保存する
+		void Enter(BaseEnemy* enemy, float duration = 1.2f);
+		// 退場演出を進め、完了時に敵を削除可能な状態へする
+		void Update(BaseEnemy* enemy, float dt);
+
+		bool IsActive() const { return isActive_; }
+		bool HasStarted() const { return hasStarted_; }
+
+	private:
+		bool isActive_ = false;				// 退場演出中か
+		bool hasStarted_ = false;				// 撃破ではなく退場で削除されたかの判定用
+		float elapsedTime_ = 0.0f;			// 退場開始からの時間
+		float duration_ = 1.2f;				// 退場に要する時間
+		Vector3 startScale_{ 1.0f, 1.0f, 1.0f };	// 開始時のモデルサイズ
+		Vector3 startShadowScale_{ 1.0f, 1.0f, 1.0f };	// 開始時の影サイズ
+		float startHeight_ = 0.0f;			// 開始時の高さ
+	};
+}
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Dummy/DummyEnemy.cpp
@@ -15502,21 +16859,9 @@ namespace Character {
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera,
-			"enemy.gltf", "MediumMeleeEnemy", 3.0f);
-
-		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
-
-
-		// サイズ
-		Vector3 size = { 1.0f,1.0f,1.0f };
-		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-
-
-		// パラメーター初期化
-		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
-
-		// パーティクル初期化
-		InitParticle();
+			"enemy.gltf", "MediumMeleeEnemy", 3.0f,2.0f);
+		// エフェクト初期化
+		InitializeEffect({ 0,1,0 });
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
@@ -15539,46 +16884,6 @@ namespace Character {
 		stateMachine_->Init(this, CharacterMainState::Move);
 	}
 
-	void MediumMeleeEnemy::Update() {
-		isStopping_ = false;
-		// 基盤の更新
-		BaseUpdate();
-	}
-
-	void MediumMeleeEnemy::Draw2D(){}
-
-	void MediumMeleeEnemy::Move(){
-		if (isStopping_) return;
-
-		// 攻撃システム更新
-		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
-
-		Vector3 slotPos = GetTargetPos();
-
-		if (slot) {
-			slotPos = slot->position;
-		}
-
-		attackSystem_->Update(
-			GetTime(),
-			GetWorldPosition(),
-			GetTargetPos(),
-			slotPos,
-			moveComponent_->GetMoveSystem()->Data().maxSpeed,
-			GetWorldTransform().rotate_.y,
-			globalData_,
-			moveSpeed_);
-	}
-
-	void MediumMeleeEnemy::InitParticle(){
-		Engine::ParticleManager* particleManager = entityManager->GetEffectManager()->GetParticleManager();
-
-		// エフェクト用のトランスフォーム初期化
-		worldEffect_ = std::make_unique<Engine::WorldTransform>();
-		worldEffect_->Initialize();
-		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
-		worldEffect_->translate_ = { 0,1,0 };
-	}
 }
 
 
@@ -15603,29 +16908,9 @@ namespace Character {
 		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-		// 毎フレーム更新
-		void Update() override;
-
-		// エフェクト描画
-		void DrawEffect() override {};
-		// 描画2d
-		void Draw2D() override;
-		// 移動
-		void Move() override;
-		// ジャンプ
-		void Jump() override {};
-		// 攻撃
-		void Attack() override {};
-
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
-		// パーティクル初期化
-		void InitParticle();
-
-	private:
-		//
-		float moveSpeed_ = 1.0f;
 	};
 }
 
@@ -16426,12 +17711,9 @@ namespace Character {
 		Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) {
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, 
-			"enemyBodySG01.obj", "SmallMeleeEnemy",0.75f);
-		// サイズ
-		Vector3 size = { 1.0f,1.0f,1.0f };
-		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-		objectComponentShadow_->GetWorldTransform().scale_ = { 2.0f,2.0f ,2.0f };
-		moveSpeed_ = moveComponent_->GetMoveSystem()->Data().maxSpeed;
+			"enemyBodySG01.obj", "SmallMeleeEnemy",0.75f,2.0f);
+		// エフェクト初期化
+		InitializeEffect({ 0,1,0 });
 		// 武器
 		weapon_ = std::make_unique<SmallMeleeWeapon>();
 		weapon_->SetCharacter(this);
@@ -16439,47 +17721,8 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,0.0f,1.0f };
 
-
-		// エフェクト用のトランスフォーム初期化
-		worldEffect_ = std::make_unique<Engine::WorldTransform>();
-		worldEffect_->Initialize();
-		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
-		worldEffect_->translate_ = { 0,1,0 };
 		// トランスフォーム更新
 		GetWorldTransform().Update();
-	}
-
-	void SmallMeleeEnemy::Update() {
-		isStopping_ = false;
-		// 基盤の更新
-		BaseUpdate();
-		//
-		weapon_->Update(); // 武器更新
-	}
-
-	void SmallMeleeEnemy::Draw2D() {}
-
-	void SmallMeleeEnemy::Move() {
-		if (isStopping_) return;
-
-		// 攻撃システム更新
-		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
-
-		Vector3 slotPos = GetTargetPos();
-
-		if (slot) {
-			slotPos = slot->position;
-		}
-
-		attackSystem_->Update(
-			GetTime(),
-			GetWorldPosition(),
-			GetTargetPos(),
-			slotPos,
-			moveComponent_->GetMoveSystem()->Data().maxSpeed,
-			GetWorldTransform().rotate_.y,
-			globalData_,
-			moveSpeed_);
 	}
 
 	void SmallMeleeEnemy::InitStateMachine()
@@ -16503,6 +17746,7 @@ namespace Character {
 	}
 }
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Melee/SmallMeleeEnemy.h
 ============================================================
@@ -16515,34 +17759,15 @@ namespace Character {
 	class SmallMeleeEnemy : public BaseEnemy {
 	public:
 		// コンストラクタ
-		SmallMeleeEnemy() {
-
-		}
+		SmallMeleeEnemy() {}
 
 		// 初期化
 		void Initialize(InputSystem* inputSystem, Engine::EntityManager* entityManager,
 			Engine::GlobalVariables* globalVariables, Vector3 position, Engine::Camera* camera) override;
 
-		// 毎フレーム更新
-		void Update() override;
-
-		// エフェクト描画
-		void DrawEffect() override {};
-		// 描画2d
-		void Draw2D() override;
-		// 移動
-		void Move() override;
-		// ジャンプ
-		void Jump() override {};
-		// 攻撃
-		void Attack() override {};
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
-
-	private:
-		//
-		float moveSpeed_ = 1.0f;
 	};
 }
 
@@ -17108,25 +18333,23 @@ namespace Character {
 	{
 		// 基盤初期化
 		BaseInitialize(inputSystem, entityManager, globalVariables, position, camera, "enemyBodySS01.obj", "SmallRangeEnemy",1.5f);
-		
-		
-		
-		// サイズ
-		Vector3 size = { 1.0f,1.0f,1.0f };
-		objectComponent_->SetInstancingSRT(size, {}, position);	// SRT設定
-		
+		// エフェクト初期化
+		InitializeEffect({ 0,1,0 });
+		//
+		InitializeWeapon<SmallRangeWeapon>({ 0.0f,-0.5f,0.25f });
+
+		bulletSpawn_ = std::make_unique<BulletSpawn>();
+		bulletSpawn_->Initialize(this, entityManager, globalVariables, nullptr, effect);
+
+
 		objectComponentPropeller_ = std::make_unique<ObjectComponent>();
 		objectComponentPropeller_->InitializeInstancing(entityManager, globalVariables, "propeller", "enemyPropellerSS01.obj", "",
 			false, false, this, Engine::ObjectInstans::TransparencyType::kNo);
 		objectComponentPropeller_->SetInstancingSRT({ 1,1,1 }, {}, {});
 		objectComponentPropeller_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
-
-
 		objectComponentPropeller_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 
-		bulletSpawn_ = std::make_unique<BulletSpawn>();
-		bulletSpawn_->Initialize(this, entityManager,globalVariables, nullptr, effect);
-
+		
 
 		// 武器
 		weapon_ = std::make_unique<SmallRangeWeapon>();
@@ -17136,31 +18359,23 @@ namespace Character {
 		weapon_->GetWorldTransform().parent_ = &objectComponent_->GetWorldTransform();
 		weapon_->GetWorldTransform().translate_ = { 0.0f,-0.5f,0.25f };
 
+
+
 		worldCollider_->translate_.y = 0;
 
-
-		moveSpeed_ = moveComponent_->GetMoveSystem()->GetData().maxSpeed;
 		moveComponent_->GetMovementSystem()->SetUseGravity(false);
 		moveComponent_->GetMoveSystem()->Data().useGravity = false;
 		skyHeight_ = 3.0f;
 		moveComponent_->GetMoveSystem()->Data().skyHeight = skyHeight_;
 
-		// エフェクト用のトランスフォーム初期化
-		worldEffect_ = std::make_unique<Engine::WorldTransform>();
-		worldEffect_->Initialize();
-		worldEffect_->parent_ = &objectComponent_->GetWorldTransform();
-		worldEffect_->translate_ = { 0,1,0 };
 		// トランスフォーム更新
 		GetWorldTransform().Update();
 	}
 
-	void SmallRangeEnemy::Update()
-	{
+	void SmallRangeEnemy::Update() {
 		isStopping_ = false;
 		// 基盤の更新
 		BaseUpdate();
-
-		weapon_->Update(); // 武器更新
 
 		objectComponent_->GetRigidBodyComponent()->SetIsGravity(false); // 重力無効化
 
@@ -17168,33 +18383,6 @@ namespace Character {
 		objectComponentPropeller_->GetWorldTransform().rotate_.y += 20.0f * GetTime();
 
 		objectComponentPropeller_->Update();
-	}
-
-	void SmallRangeEnemy::Draw2D(){
-	}
-
-	void SmallRangeEnemy::Move()
-	{
-		if (isStopping_) return;
-
-		// 攻撃システム更新
-		const AttackSlot* slot = enemAi->GetAttackSlotSystem()->FindSlot(this);
-
-		Vector3 slotPos = GetTargetPos();
-
-		if (slot) {
-			slotPos = slot->position;
-		}
-
-		attackSystem_->Update(
-			GetTime(),
-			GetWorldPosition(),
-			GetTargetPos(),
-			slotPos,
-			moveComponent_->GetMoveSystem()->Data().maxSpeed,
-			GetWorldTransform().rotate_.y,
-			globalData_,
-			moveSpeed_);
 	}
 
 	void SmallRangeEnemy::InitStateMachine()
@@ -17217,6 +18405,7 @@ namespace Character {
 	}
 }
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Enemy/Small/Range/SmallRangeEnemy.h
 ============================================================
@@ -17238,25 +18427,12 @@ namespace Character {
 		// 毎フレーム更新
 		void Update() override;
 
-		// エフェクト描画
-		void DrawEffect() override {};
-		// 描画2d
-		void Draw2D() override;
-		// 移動
-		void Move() override;
-		// ジャンプ
-		void Jump() override {};
-		// 攻撃
-		void Attack() override {};
 	private:
 		// ステートマシーン初期化
 		void InitStateMachine() override;
 
 	private:
-		float skyHeight_ = 1.5f;
 		std::unique_ptr<ObjectComponent> objectComponentPropeller_ = nullptr;
-		//
-		float moveSpeed_ = 1.0f;
 	};
 }
 
@@ -18300,7 +19476,7 @@ struct MoveData
 	// 加速度
 	float speedAcceleration = 0.1f;
 	// 最大速度
-	float maxSpeed = 1.0f;
+	float maxSpeed = 4.5f;
 	// 最小速度
 	float minSpeed = 0.0f;
 	// 移動タイプ
@@ -18414,7 +19590,7 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 
 	Vector3 moveTarget = ctx.target->GetWorldPosition();
 	if (ctx.hasMoveTarget) {
-		// 群衆隊形や攻撃スロットが指定されている場合は、その位置を優先する
+		// 群衆隊形、攻撃スロット、フロッキングの移動先を優先する
 		moveTarget = ctx.moveTarget;
 	}
 
@@ -18459,8 +19635,12 @@ void MoveSystem::UpdateEnemy(const Character::CharacterContext& ctx, LocomotionC
 	// 垂直移動は専用速度を使う
 	velocity.y = verticalSpeed * ctx.dt;
 
-	// 向きは基本的に水平追尾方向
-	Vector3 moveDirection = horizontalDire;
+	// 実際に水平移動する時だけ、移動システムが向きも制御する。
+	// 停止中の敵は攻撃システムがプレイヤーを向くため、回転要求を重ねない。
+	Vector3 moveDirection{};
+	if (std::abs(ctx.moveSpeed) > 0.001f) {
+		moveDirection = horizontalDire;
+	}
 
 	// 水平移動がない場合でも、浮遊だけしているなら上方向を向きに入れてもよい
 	// ただし見た目の向きは水平だけで十分なら horizontalDire のままでOK
@@ -19077,51 +20257,16 @@ namespace Character {
 
 	void NormalPlayer::ReloadComboData() {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
-		comboSystem->Create("ComboPlayer");
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
+		// ComboPlayer に登録されたノードを読み込むことで、攻撃データの追加をコード変更なしで反映する。
+		comboSystem->Create("ComboPlayer");
+
 		
-		// コンボ１のデータ送る
-		comboSystem->CreateCombo("MeleeAttack1");
-		// コンボ２のデータ送る
-		comboSystem->CreateCombo("MeleeAttack2");
-		// コンボ３のデータ送る
-		comboSystem->CreateCombo("MeleeCombo1");
-		// コンボ4のデータ送る
-		comboSystem->CreateCombo("MeleeCombo2");
-		// コンボ5のデータ送る
-		comboSystem->CreateCombo("MeleeCombo3");
-
-		// ジャンプコンボのデータ送る
-		comboSystem->CreateCombo("JumpAttack");
-		// コンボ6のデータ送る
-		comboSystem->CreateCombo("Attack6");
-		// コンボ7のデータ送る
-		comboSystem->CreateCombo("Attack7");
-		// コンボ8のデータ送る
-		comboSystem->CreateCombo("Attack8");
-		// コンボ9のデータ送る
-		comboSystem->CreateCombo("Attack9");
-		
-		
-		// コンボ10のデータ送る
-		comboSystem->CreateCombo("Attack10");
-		// コンボ11のデータ送る
-		comboSystem->CreateCombo("Attack11");
-
-
-		// コンボ9のデータ送る
-		comboSystem->CreateCombo("SkillAttack01");
-		// コンボ9のデータ送る
-		comboSystem->CreateCombo("JumpSkillAttack01");
-
-
-		comboSystem->CreateCombo("testAttack");
-
 
 		// コンボ連結設定
 		comboSystem->ConnectCombo("MeleeAttack1", ActionInput::LightAttack, "MeleeAttack2"); // コンボ連結
@@ -19129,11 +20274,24 @@ namespace Character {
 		
 		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::LightAttack, "MeleeCombo2"); // コンボ連結
 		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::LightAttack, "MeleeCombo3"); // コンボ連結
-		
+		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::LightAttack, "MeleeCombo4"); // コンボ連結
+		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::LightAttack, "MeleeCombo5"); // コンボ連結
+		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::LightAttack, "MeleeCombo6"); // コンボ連結
+
+		// 弱攻撃の途中から強攻撃フィニッシュへ派生可能にする。
+		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo3", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo4", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo5", ActionInput::HeavyAttack, "Attack10");
+		// 強攻撃専用の追撃。
+		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11");
+
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::Skill, "SkillAttack01"); // コンボ連結
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::LightAttack, "Attack6"); // コンボ連結
-	
-	
+		comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // スキル後の追撃
+
 		comboSystem->ConnectCombo("JumpSkillAttack01", ActionInput::LightAttack, "JumpAttack"); // コンボ連結
 
 	}
@@ -19143,6 +20301,7 @@ namespace Character {
 
 #pragma endregion // そのほか
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Character/Player/Normal/NormalPlayer.h
@@ -19780,8 +20939,15 @@ namespace Character {
 		spawnAABBArea_.min = spawnTransform_.GetWorldPosition() - (spawnInfo_.GetData().size_ / 2.0f);
 		spawnAABBArea_.max = spawnTransform_.GetWorldPosition() + (spawnInfo_.GetData().size_ / 2.0f);
 
-		// グループ生成
-		characterManager->CreateEnemyGroup(spawnInfo_.GetData().type_, 0, spawnInfo_.GetData().spawnAmount_, spawnTransform_.GetWorldPosition(), spawnAABBArea_);
+		// グループ生成。設定された群衆パターンは生成される全メンバーへ渡す
+		characterManager->CreateEnemyGroup(
+			spawnInfo_.GetData().type_,
+			spawnInfo_.GetData().groupId_,
+			spawnInfo_.GetData().spawnAmount_,
+			spawnTransform_.GetWorldPosition(),
+			spawnAABBArea_,
+			spawnInfo_.GetData().crowdBehavior_
+		);
 
 		// 出現した
 		spawnInfo_.Spawned();
@@ -19797,6 +20963,7 @@ File Path: project/DirectXGame/application/base/Character/Spawn/CharacterSpawn.h
 #include <DirectXGame/engine/Transform/WorldTransform/WorldTransform.h>
 #include <DirectXGame/application/base/Character/Base/CharacterData.h>
 #include <DirectXGame/application/base/Character/Enemy/Base/EnemyData.h>
+#include <DirectXGame/application/base/Character/Enemy/Base/AI/EnemyCrowdBehaviorData.h>
 
 namespace Engine {
 	class LineCommon;
@@ -19825,10 +20992,14 @@ namespace Character {
 			float spawnTimer_ = 0.0f;           // 出現タイミングタイマー(フェーズが始まってから)
 			int maxEnemyCount_ = 30;			// 最大敵出現量
 			float startDelay_ = 0.0f;           // フェーズ開始からの遅延時間
+			int groupId_ = 0;					// グループID
+			CrowdBehaviorSettings crowdBehavior_{};	// この群衆が使用する行動パターン
 		};
 
 		// 初期化
-		void Initialize(const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f) {
+		void Initialize(const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate,
+			Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f, int groupId = 0,
+			const CrowdBehaviorSettings& crowdBehavior = CrowdBehaviorSettings::Flocking()) {
 			data_.name_ = name;						// 名前
 			data_.spawnMaxCount_ = spawnMaxCount;	// 出現回数
 			data_.spawnAmount_ = spawnAmount;		// 出現量
@@ -19836,6 +21007,8 @@ namespace Character {
 			data_.translate_ = translate;			// 位置
 			data_.spawnInterval_ = interval;		// インターバル
 			data_.startDelay_ = startDelay;			// 開始遅延時間
+			data_.groupId_ = groupId;				// グループID
+			data_.crowdBehavior_ = crowdBehavior;	// 行動パターン
 		}
 
 
@@ -21715,6 +22888,11 @@ void Game::GameEventState::Enter(Character::CharacterManager* characterManager, 
 	if (data_.enemyDelete) {
 		this->characterManager->Clear(Character::Type::Enemy);
 	}
+
+	// ウェーブ区切りでは即削除せず、敵自身の退場ステートへ移行させる
+	if (data_.enemyWaveExit) {
+		this->characterManager->BeginEnemyWaveExit(data_.time_.max);
+	}
 }
 // 終了
 void Game::GameEventState::Exit() {
@@ -21877,6 +23055,7 @@ namespace Game {
 		kNone,		// 無し
 		kBattle,	// 戦い
 		kBreakTime,	// 休憩時間
+		kWaveExit,	// ウェーブ終了時の敵退場
 		kStart,		// スタート
 		kEnd,		// 終了
 	};
@@ -21937,6 +23116,8 @@ namespace Game {
 		GamePadButton buttom = GamePadButton::GAMEPAD_B;
 		// 敵削除
 		bool enemyDelete = false;
+		// 敵を自然退場ステートへ移行する
+		bool enemyWaveExit = false;
 		// 移動可能か
 		bool isMove = true;
 	};
@@ -22075,6 +23256,7 @@ namespace Game {
 
 }
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Game/GameEventController.cpp
 ============================================================
@@ -22120,49 +23302,101 @@ namespace Game {
 		data.time_.max = 1.5f;
 		CreateGameEvent("breakTime", data);
 
-		Vector3 popPos = { 0,1,100 };
-		Vector3 popPos2 = { 100,1,100 };
-		Vector3 popPos3 = { 0,1,100 };
-		Vector3 popPos4 = { -100,1,100 };
-		Vector3 popPos5 = { 0,1,-100 };
-		Vector3 popPos6 = { 100,1,0 };
-		Vector3 popPos7 = { -100,1,0 };
-
-		Vector3 size = {50,1,50};
-
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 1, popPos, size, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos2, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 4, popPos, size, 0.75f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 4, popPos4, size, 0.75f);
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 3, { 0,1,500 }, { 10,1,10 }, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 1, 3, { 0,1,-500 }, { 10,1,10 }, 0.75f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 1, 1, { 500,1,500 }, { 10,1,10 }, 4.0f);
+		// スポーン地点はプレイヤーを中心に四方向へ用意し、ウェーブの攻め方に合わせて使い分ける
+		const Vector3 frontSpawn = { 0, 1, 50 };
+		const Vector3 backSpawn = { 0, 1, -50 };
+		const Vector3 rightSpawn = { 50, 1, 0 };
+		const Vector3 leftSpawn = { -50, 1, 0 };
+		const Vector3 wideSpawnSize = { 24, 1, 24 };
+		const Vector3 narrowSpawnSize = { 14, 1, 14 };
 
 		data.eventType_ = GameEventType::kBattle;
+		data.changeType_ = GameEventChangeType::kTime;
+		// 各バトルの後に退場フェーズを挟み、残存敵は自然に消してから次の群衆を出す
+		data.enemyDelete = false;
+		data.enemyWaveExit = false;
+
+		// WAVE 1: 正面から来る小規模群衆。直進と群れ移動を覚える導入（2群衆 / 合計8体）
+		const Character::CrowdBehaviorSettings wave1Rush = Character::CrowdBehaviorSettings::Rush();
+		const Character::CrowdBehaviorSettings wave1Flock = Character::CrowdBehaviorSettings::Flocking();
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave1Rush", 1, 5, frontSpawn, narrowSpawnSize, 1.0f, 0.0f, 10, wave1Rush);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave1Flock", 1, 3, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 11, wave1Flock);
 		data.battleWaveIndex_ = 1;
-		data.time_.max = 30.0f;
-
+		data.time_.max = 24.0f;
 		CreateGameEvent("battle01", data);
-
-		CreateSpawn(Character::EnemyType::kMediumMelee, "normal", 1, 2, popPos, size, 10.0f);
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged", 100, 1, popPos5, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee", 100, 5, popPos5, size, 0.75f);
-		
-		CreateSpawn(Character::EnemyType::kSmallRanged, "smallRanged2", 100, 1, popPos6, size, 4.0f);
-		CreateSpawn(Character::EnemyType::kSmallMelee, "smallMelee2", 100, 5, popPos7, size, 0.75f);
-
-
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit01", data);
 		data.eventType_ = GameEventType::kBattle;
-		data.battleWaveIndex_ = 2;
-		data.time_.max = 40.0f;
+		data.enemyWaveExit = false;
 
+		// WAVE 2: 左右から寄せ、片側にはあえて逃げ道を残す（2群衆 / 合計13体）
+		const Character::CrowdBehaviorSettings wave2Encircle = Character::CrowdBehaviorSettings::Encircle(12.0f);
+		const Character::CrowdBehaviorSettings wave2Distributed = Character::CrowdBehaviorSettings::DistributedEncircle(15.0f);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave2Encircle", 1, 8, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 20, wave2Encircle);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave2Distributed", 1, 5, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 21, wave2Distributed);
+		data.battleWaveIndex_ = 2;
+		data.time_.max = 28.0f;
 		CreateGameEvent("battle02", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit02", data);
+		data.eventType_ = GameEventType::kBattle;
+		data.enemyWaveExit = false;
+
+		// WAVE 3: 前後から列が入れ替わって攻める波状攻撃（2群衆 / 合計17体）
+		const Character::CrowdBehaviorSettings wave3Assault = Character::CrowdBehaviorSettings::WaveAssault(2.2f, 3);
+		const Character::CrowdBehaviorSettings wave3Line = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::Line);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave3Assault", 1, 12, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 30, wave3Assault);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave3Line", 1, 5, backSpawn, narrowSpawnSize, 1.0f, 0.0f, 31, wave3Line);
+		data.battleWaveIndex_ = 3;
+		data.time_.max = 32.0f;
+		CreateGameEvent("battle03", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit03", data);
+		data.eventType_ = GameEventType::kBattle;
+		data.enemyWaveExit = false;
+
+		// WAVE 4: 流動する外周と役割分担する追跡隊で移動を強制する（2群衆 / 合計20体）
+		const Character::CrowdBehaviorSettings wave4Flow = Character::CrowdBehaviorSettings::FlowCrowd(13.0f);
+		const Character::CrowdBehaviorSettings wave4Hunting = Character::CrowdBehaviorSettings::Hunting();
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Flow", 1, 12, leftSpawn, wideSpawnSize, 1.0f, 0.0f, 40, wave4Flow);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave4Hunters", 1, 6, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave4Support", 1, 2, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 41, wave4Hunting);
+		data.battleWaveIndex_ = 4;
+		data.time_.max = 36.0f;
+		CreateGameEvent("battle04", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit04", data);
+		data.eventType_ = GameEventType::kBattle;
+		data.enemyWaveExit = false;
+
+		// WAVE 5: 圧迫群衆、人数適応群衆、V字の中型敵を同時投入する最終戦（3群衆 / 合計28体）
+		const Character::CrowdBehaviorSettings wave5Pressure = Character::CrowdBehaviorSettings::PressureCrowd();
+		const Character::CrowdBehaviorSettings wave5Adaptive = Character::CrowdBehaviorSettings::DensityAdaptive();
+		const Character::CrowdBehaviorSettings wave5Vanguard = Character::CrowdBehaviorSettings::Formation(Character::EnemyFormationShape::VShape);
+		CreateSpawn(Character::EnemyType::kSmallMelee, "wave5Pressure", 1, 14, frontSpawn, wideSpawnSize, 1.0f, 0.0f, 50, wave5Pressure);
+		CreateSpawn(Character::EnemyType::kSmallRanged, "wave5Adaptive", 1, 8, backSpawn, wideSpawnSize, 1.0f, 0.0f, 51, wave5Adaptive);
+		CreateSpawn(Character::EnemyType::kMediumMelee, "wave5Vanguard", 1, 6, rightSpawn, narrowSpawnSize, 1.0f, 0.0f, 52, wave5Vanguard);
+		data.battleWaveIndex_ = 5;
+		data.time_.max = 45.0f;
+		CreateGameEvent("battle05", data);
+		data.eventType_ = GameEventType::kWaveExit;
+		data.enemyWaveExit = true;
+		data.time_.max = 1.2f;
+		CreateGameEvent("waveExit05", data);
 
 		data.changeType_ = GameEventChangeType::kTime;
 		data.eventType_ = GameEventType::kEnd;
 		data.time_.max = 3.0f;
 		data.enemyDelete = true;
+		data.enemyWaveExit = false;
 
 		CreateGameEvent("result", data);
 
@@ -22175,19 +23409,29 @@ namespace Game {
 
 		ConnectNode("start", "", "breakTime");
 		ConnectNode("breakTime", "", "battle01");
-		ConnectNode("battle01", "", "battle02");
-		ConnectNode("battle02", "", "result");
+		ConnectNode("battle01", "", "waveExit01");
+		ConnectNode("waveExit01", "", "battle02");
+		ConnectNode("battle02", "", "waveExit02");
+		ConnectNode("waveExit02", "", "battle03");
+		ConnectNode("battle03", "", "waveExit03");
+		ConnectNode("waveExit03", "", "battle04");
+		ConnectNode("battle04", "", "waveExit04");
+		ConnectNode("waveExit04", "", "battle05");
+		ConnectNode("battle05", "", "waveExit05");
+		ConnectNode("waveExit05", "", "result");
 		//ConnectNode("result", "", "end");
 
 		eventStateMachine_->SetRoot(GetNodeState("start"));
 	}
 
 
-	void GameEventController::CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount, Vector3 translate, Vector3 size, float interval, float startDelay) {
+	void GameEventController::CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount,
+		Vector3 translate, Vector3 size, float interval, float startDelay, int groupId,
+		const Character::CrowdBehaviorSettings& crowdBehavior) {
 		Character::SpawnInfo data;
 		data.GetData().type_ = type;
 
-		data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval);
+		data.Initialize(name, spawnMaxCount, spawnAmount, translate, size, interval, startDelay, groupId, crowdBehavior);
 		spawnInfos_.push_back(data);
 	}
 
@@ -22304,6 +23548,7 @@ namespace Game {
 
 }
 
+
 ============================================================
 File Path: project/DirectXGame/application/base/Game/GameEventController.h
 ============================================================
@@ -22362,7 +23607,8 @@ namespace Game {
 		float GetCurrentWaveTime() const { return time_; }
 		// スポーン生成
 		void CreateSpawn(Character::EnemyType type, const std::string& name, int spawnMaxCount, int spawnAmount,
-			Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f);
+			Vector3 translate, Vector3 size = { 10,1,10 }, float interval = 1.0f, float startDelay = 0.0f, int groupId = 0,
+			const Character::CrowdBehaviorSettings& crowdBehavior = Character::CrowdBehaviorSettings::Flocking());
 	public: // イベント系
 
 		// ノード追加(データから生成)
@@ -22415,6 +23661,7 @@ namespace Game {
 	};
 
 }
+
 
 ============================================================
 File Path: project/DirectXGame/application/base/Game/GameFlowController.cpp
@@ -26595,7 +27842,10 @@ void GameUI::Initialize(InputSystem* inputSystem, Engine::EntityManager* entityM
 }
 
 void GameUI::Update(float dt){
+	if (player == nullptr) return;
+	
 	Engine::UICount* hitCount = GetUICount("hitCount");
+	
 	hitCount->SetCount(ConvertUtility::ToFloat(player->GetAttackController()->GetHitCounter().GetHitCount()));
 	
 	
@@ -28860,10 +30110,10 @@ void CharacterDebugScene::Update(){
 
 	// リトライ
 	if (input_->IsTriggerKey(DIK_R)) {
-		GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
+	//	GetSceneManager()->ChangeScene("CHARACTER", 0.5f);
 	}
 	if (input_->IsTriggerKey(DIK_T)) {
-		GetSceneManager()->ChangeScene("TITLE", 0.25f);
+	//	GetSceneManager()->ChangeScene("TITLE", 0.25f);
 	}
 	// デバッグモード設定
 	characterManager_->GetPlayer()->GetAttackController()->SetIsDebug(comboEditor_->IsActive());
@@ -29423,7 +30673,7 @@ void GamePlayScene::Initialize() {
 	// UI
 	gameUI = std::make_unique<GameUI>();
 	gameUI->Initialize(inputSystem_.get(), GetEntityManager(), GetGlobalVariables());
-	gameUI->SetPlayer(characterManager_->GetPlayer());
+	
 
 	// カメラ設定
 	SetCamera(cameraManager_->GetCamera());
@@ -29528,6 +30778,7 @@ void GamePlayScene::Update()
 		GetSceneData().playerDie = true;
 	}
 	GetSceneData().score = characterManager_->GetScore();
+	gameUI->SetPlayer(characterManager_->GetPlayer());
 	gameUI->SetGamePlayData(gameFlowController_->GetGamePlayData());
 	gameUI->Update(GetTime());
 	// カメラ管理の更新
@@ -61887,8 +63138,8 @@ void Engine::MyGame::Initialize()
 #ifdef _DEBUG
 	sceneManager_->ChangeScene("CHARACTER");
 #endif // _DEBUG
-	//sceneManager_->ChangeScene("TITLE");
-	sceneManager_->ChangeScene("GAMEPLAY");
+	sceneManager_->ChangeScene("TITLE");
+	//sceneManager_->ChangeScene("GAMEPLAY");
 
 	// リソース初期化
 	InitializeResource();
@@ -72577,7 +73828,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdDensitySystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdLayerSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdPatternSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlockingSystem.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp" />
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyWaveExitState.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAiSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.cpp" />
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.cpp" />
@@ -72998,7 +74255,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackRequestSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSlotSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyAttackSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdBehaviorData.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdData.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdDensitySystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdLayerSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdPatternSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlockingSystem.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyData.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemy.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Dummy\DummyEnemyState.h" />
@@ -73124,6 +74388,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BaseBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\Base\BulletManager.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.h" />
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyWaveExitState.h" />
     <ClInclude Include="DirectXGame\application\base\Camera\FollowCamera\FollowCamera.h" />
     <ClInclude Include="DirectXGame\application\base\Bullet\PlayerRangeBombingBullet.h" />
     <ClInclude Include="DirectXGame\application\base\Character\Player\Normal\NormalPlayerState.h" />
@@ -73648,6 +74913,9 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.cpp">
+      <Filter>ソース ファイル\application\base</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\EnemyWaveExitState.cpp">
       <Filter>ソース ファイル\application\base</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\State\BaseMainState.cpp">
@@ -74329,6 +75597,21 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdDensitySystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdLayerSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdPatternSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlockingSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="DirectXGame\application\base\Camera\Base\CameraZoom.cpp">
@@ -75047,6 +76330,9 @@ File Path: project/DirectXGame.vcxproj.filters
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\BaseEnemy.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\EnemyWaveExitState.h">
+      <Filter>ヘッダー ファイル\application\base\character</Filter>
+    </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Player\Base\BasePlayer.h">
       <Filter>ヘッダー ファイル\application\base\character</Filter>
     </ClInclude>
@@ -75501,6 +76787,27 @@ File Path: project/DirectXGame.vcxproj.filters
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdBehaviorData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdDensitySystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdLayerSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyCrowdPatternSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlockingSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXGame\application\base\Character\Enemy\Base\AI\EnemyFlowFieldSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="DirectXGame\application\base\Character\Death\DeathSystem.h">
