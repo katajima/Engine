@@ -348,27 +348,36 @@ namespace Character {
 
 	void NormalPlayer::ReloadComboData() {
 		Combo::System* comboSystem = GetAttackController()->GetComboSystem();
-		comboSystem->Create("ComboPlayer");
 		// コンボノードクリア
 		comboSystem->ClearNode();
 		comboSystem->SetParentTransform("Player", &objectComponent_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("Weapon", &weapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("SubWeapon", &subWeapon_->GetObject3D()->GetWorldTransform());
 		comboSystem->SetParentTransform("NoParent", nullptr);
-		
-		// コンボ１のデータ送る
+		// ComboPlayer に登録されたノードを読み込むことで、攻撃データの追加をコード変更なしで反映する。
+		comboSystem->Create("ComboPlayer");
+
+		// 近接小攻撃1のデータ送る
 		comboSystem->CreateCombo("MeleeAttack1");
-		// コンボ２のデータ送る
+		// 近接小攻撃2のデータ送る
 		comboSystem->CreateCombo("MeleeAttack2");
-		// コンボ３のデータ送る
+		// 近接小連撃1のデータ送る
 		comboSystem->CreateCombo("MeleeCombo1");
-		// コンボ4のデータ送る
+		// 近接小連撃2のデータ送る
 		comboSystem->CreateCombo("MeleeCombo2");
-		// コンボ5のデータ送る
+		// 近接小連撃3のデータ送る
 		comboSystem->CreateCombo("MeleeCombo3");
 
-		// ジャンプコンボのデータ送る
+		// ジャンプ攻撃のデータ送る
 		comboSystem->CreateCombo("JumpAttack");
+		
+		
+		// スキル攻撃のデータ送る
+		comboSystem->CreateCombo("SkillAttack01");
+		// ジャンプスキル攻撃のデータ送る
+		comboSystem->CreateCombo("JumpSkillAttack01");
+
+
 		// コンボ6のデータ送る
 		comboSystem->CreateCombo("Attack6");
 		// コンボ7のデータ送る
@@ -377,22 +386,12 @@ namespace Character {
 		comboSystem->CreateCombo("Attack8");
 		// コンボ9のデータ送る
 		comboSystem->CreateCombo("Attack9");
-		
-		
 		// コンボ10のデータ送る
 		comboSystem->CreateCombo("Attack10");
 		// コンボ11のデータ送る
 		comboSystem->CreateCombo("Attack11");
-
-
-		// コンボ9のデータ送る
-		comboSystem->CreateCombo("SkillAttack01");
-		// コンボ9のデータ送る
-		comboSystem->CreateCombo("JumpSkillAttack01");
-
-
+		// テスト用
 		comboSystem->CreateCombo("testAttack");
-
 
 		// コンボ連結設定
 		comboSystem->ConnectCombo("MeleeAttack1", ActionInput::LightAttack, "MeleeAttack2"); // コンボ連結
@@ -400,11 +399,18 @@ namespace Character {
 		
 		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::LightAttack, "MeleeCombo2"); // コンボ連結
 		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::LightAttack, "MeleeCombo3"); // コンボ連結
-		
+
+		// 弱攻撃の途中から強攻撃フィニッシュへ派生可能にする。
+		comboSystem->ConnectCombo("MeleeAttack2", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo1", ActionInput::HeavyAttack, "Attack10");
+		comboSystem->ConnectCombo("MeleeCombo2", ActionInput::HeavyAttack, "Attack10");
+		// 強攻撃専用の追撃。
+		comboSystem->ConnectCombo("Attack10", ActionInput::HeavyAttack, "Attack11");
+
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::Skill, "SkillAttack01"); // コンボ連結
 		comboSystem->ConnectCombo("SkillAttack01", ActionInput::LightAttack, "Attack6"); // コンボ連結
-	
-	
+		comboSystem->ConnectCombo("Attack6", ActionInput::LightAttack, "Attack7"); // スキル後の追撃
+
 		comboSystem->ConnectCombo("JumpSkillAttack01", ActionInput::LightAttack, "JumpAttack"); // コンボ連結
 
 	}
