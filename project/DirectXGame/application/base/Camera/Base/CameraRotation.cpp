@@ -4,7 +4,7 @@
 void CameraRotation::Initialize() {
     // 初期角度をリセット（必要なら外部から設定してもOK）
     data_.yaw = 0.0f;
-    data_.pitch = Math::DegreesToRadians(20);
+    data_.pitch = Math::DegreesToRadians(0);
     data_.maxPitch = Math::DegreesToRadians(20);
     data_.minPitch = Math::DegreesToRadians(-10);
 
